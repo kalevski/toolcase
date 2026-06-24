@@ -1,0 +1,182 @@
+// Dungeon › tc-matchmaking-screen — gilded queue panel. Token swap carries the
+// dark ground + gold borders; structural rules add the panel bevel, the bezelled
+// state ring with per-state glows (gold spin/found, blood failed), display-caps
+// title + meta keys, mono meta values, and bronze gilded action buttons.
+// Corner notches, eyebrow caps, gold-rule divider, accept emphasis, and bezel
+// spin added per the dungeon polish pass.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-matchmaking-screen {
+        // Panel — radial wood ground + gold border.
+        --bs-matchmaking-screen-bg: radial-gradient(120% 90% at 50% 0%, #1f180e 0%, #0a0604 80%);
+        --bs-matchmaking-screen-border: var(--fg-gold-deep);
+
+        // Ring — gold default, state colours below.
+        --bs-matchmaking-screen-ring-border: var(--fg-gold-deep);
+        --bs-matchmaking-screen-ring-color: var(--fg-gold-bright);
+        --bs-matchmaking-screen-ring-spin-color: var(--fg-gold);
+        --bs-matchmaking-screen-ring-found-border: var(--fg-gold-bright);
+        --bs-matchmaking-screen-ring-found-color: var(--fg-gold-bright);
+        --bs-matchmaking-screen-ring-failed-border: var(--fg-blood);
+        --bs-matchmaking-screen-ring-failed-color: var(--fg-blood-bright);
+
+        --bs-matchmaking-screen-eyebrow-color: var(--fg-parch-dim);
+        --bs-matchmaking-screen-title-color: var(--fg-gold-bright);
+
+        // Meta strip — dark gradient under a gold edge.
+        --bs-matchmaking-screen-meta-bg: linear-gradient(180deg, #1a1308 0%, #0e0905 100%);
+        --bs-matchmaking-screen-meta-border: var(--fg-gold-deep);
+        --bs-matchmaking-screen-meta-key-color: var(--fg-parch-dim);
+        --bs-matchmaking-screen-meta-val-color: var(--fg-gold-bright);
+
+        // Buttons — bronze keycap recipe token; accept = brighter bronze.
+        --bs-matchmaking-screen-btn-color: var(--fg-gold-bright);
+        --bs-matchmaking-screen-btn-bg: var(--fg-button-bg);
+        --bs-matchmaking-screen-btn-border: var(--fg-gold-deep);
+        --bs-matchmaking-screen-btn-hover-bg: var(--fg-button-bg);
+        --bs-matchmaking-screen-btn-accept-bg: linear-gradient(180deg, #5a3a18, #2a1a0a);
+        --bs-matchmaking-screen-btn-accept-color: var(--fg-gold-bright);
+    }
+
+    // Panel — bevel stack + corner notch anchoring.
+    .tc-matchmaking-screen {
+        position: relative;
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // Corner notches — top-left and top-right glyph cuts.
+    .tc-matchmaking-screen::before,
+    .tc-matchmaking-screen::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        width: 12px;
+        height: 12px;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+        pointer-events: none;
+        z-index: 1;
+    }
+    .tc-matchmaking-screen::before {
+        left: 0;
+    }
+    .tc-matchmaking-screen::after {
+        right: 0;
+        transform: scaleX(-1);
+    }
+
+    // Ring — bezelled medallion (sanctioned circle), radial fill + inset darks.
+    .tc-matchmaking-screen-ring {
+        background: radial-gradient(70% 70% at 50% 30%, #2a1f14, #0e0905);
+        border-width: 2px;
+        color: var(--fg-gold-bright);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+            inset 0 0 12px rgba(0, 0, 0, 0.6),
+            0 4px 10px rgba(0, 0, 0, 0.6);
+    }
+
+    // Spin state — rotate the gilded bezel, counter-rotate the icon so it stays upright.
+    .tc-matchmaking-screen-ring--spin {
+        animation: tc-dungeon-ring-spin 1.4s linear infinite;
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+            inset 0 0 12px rgba(0, 0, 0, 0.6),
+            0 0 18px rgba(201, 169, 97, 0.3);
+    }
+    .tc-matchmaking-screen-ring--spin .tc-matchmaking-screen-icon {
+        animation: tc-dungeon-ring-counter-spin 1.4s linear infinite;
+    }
+
+    .tc-matchmaking-screen-ring--found {
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+            inset 0 0 14px rgba(201, 169, 97, 0.4),
+            0 0 22px rgba(201, 169, 97, 0.5);
+    }
+    .tc-matchmaking-screen-ring--failed {
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+            inset 0 0 14px rgba(168, 48, 42, 0.4),
+            0 0 22px rgba(168, 48, 42, 0.5);
+    }
+
+    // Bezel spin + counter-spin keyframes (dungeon-namespaced to avoid collisions).
+    @keyframes tc-dungeon-ring-spin {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+    }
+    @keyframes tc-dungeon-ring-counter-spin {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(-360deg); }
+    }
+
+    // Eyebrow — display caps with wide tracking (matches meta-key treatment).
+    .tc-matchmaking-screen-eyebrow {
+        font-family: var(--fg-display);
+        letter-spacing: 0.18em;
+        color: var(--fg-parch-dim);
+    }
+
+    // Header — gold-rule hairline divider below the header block.
+    .tc-matchmaking-screen-header {
+        border-bottom: 1px solid transparent;
+        border-image: var(--fg-rule) 1;
+        padding-bottom: 0.5rem;
+    }
+
+    // Title — gilded display caps with a glow.
+    .tc-matchmaking-screen-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        text-shadow: 0 1px 0 #000, 0 0 18px rgba(201, 169, 97, 0.35);
+    }
+
+    // Meta strip — bevel; keys are display caps, values mono gold.
+    .tc-matchmaking-screen-meta {
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 1px 0 rgba(201, 169, 97, 0.12);
+    }
+    .tc-matchmaking-screen-meta-key {
+        font-family: var(--fg-display);
+        letter-spacing: 0.18em;
+    }
+    .tc-matchmaking-screen-meta-val {
+        font-family: var(--fg-mono);
+    }
+
+    // Buttons — gilded keycap bevel + display caps.
+    .tc-matchmaking-screen-btn {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-weight: 600;
+        box-shadow:
+            inset 0 1px 0 var(--fg-bevel-top),
+            inset 0 -8px 12px rgba(0, 0, 0, 0.4),
+            0 2px 0 rgba(0, 0, 0, 0.6);
+
+        // Accept — brighter bevel-top + gold text glow to rank above CANCEL/DECLINE.
+        &.tc-matchmaking-screen-btn--accept {
+            border-color: var(--fg-gold);
+            box-shadow:
+                inset 0 1px 0 var(--fg-bevel-top),
+                inset 0 -8px 12px rgba(0, 0, 0, 0.4),
+                0 2px 0 rgba(0, 0, 0, 0.6);
+            text-shadow: 0 0 10px rgba(232, 200, 120, 0.4);
+        }
+    }
+
+    // Reduced motion — pause dungeon bezel animations.
+    @media (prefers-reduced-motion: reduce) {
+        .tc-matchmaking-screen-ring--spin {
+            animation: none;
+        }
+        .tc-matchmaking-screen-ring--spin .tc-matchmaking-screen-icon {
+            animation: none;
+        }
+    }
+}

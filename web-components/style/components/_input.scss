@@ -1,0 +1,133 @@
+// tc-input — .form-control / .form-label / .form-text plus the shared
+// validation feedback rules used by every form control.
+
+.form-label {
+    display: inline-block;
+    margin-bottom: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #334155;
+}
+
+.form-text {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+    color: var(--tc-text-muted);
+}
+
+.form-control {
+    --bs-form-control-color: var(--tc-text);
+    --bs-form-control-bg: var(--tc-surface);
+    --bs-form-control-border-color: var(--tc-border-strong);
+    --bs-form-control-placeholder-color: var(--tc-text-faint);
+    --bs-form-control-disabled-color: var(--tc-text-muted);
+    --bs-form-control-disabled-bg: var(--tc-surface-muted);
+    --bs-form-control-disabled-border-color: var(--tc-border);
+
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-family: var(--tc-font-sans);
+    font-size: 0.925rem;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--bs-form-control-color);
+    appearance: none;
+    background-color: var(--bs-form-control-bg);
+    background-clip: padding-box;
+    border: var(--bs-border-width) solid var(--bs-form-control-border-color);
+    border-radius: 0;
+    transition:
+        border-color var(--tc-transition-fast),
+        box-shadow var(--tc-transition-fast);
+
+    &::placeholder {
+        color: var(--bs-form-control-placeholder-color);
+        opacity: 1;
+    }
+
+    &:focus {
+        color: var(--bs-form-control-color);
+        background-color: var(--bs-form-control-bg);
+        border-color: rgba(30, 41, 59, 0.5);
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
+    }
+
+    &:disabled {
+        color: var(--bs-form-control-disabled-color);
+        background-color: var(--bs-form-control-disabled-bg);
+        border-color: var(--bs-form-control-disabled-border-color);
+        opacity: 1;
+    }
+}
+
+.form-control-sm {
+    padding: 0.3rem 0.55rem;
+    font-size: 0.8125rem;
+}
+
+.form-control-lg {
+    padding: 0.7rem 1rem;
+    font-size: 1.04rem;
+}
+
+// ── Validation states (shared by .form-control / .form-select / .form-check-input) ──
+
+.valid-feedback,
+.invalid-feedback {
+    display: none;
+    width: 100%;
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+}
+
+.valid-feedback {
+    color: var(--bs-form-valid-color, var(--tc-success));
+}
+
+.invalid-feedback {
+    color: var(--bs-form-invalid-color, var(--tc-danger));
+}
+
+.form-control,
+.form-select,
+.form-check-input {
+    &.is-valid {
+        border-color: var(--bs-form-valid-border-color, var(--tc-success));
+
+        &:focus {
+            border-color: var(--bs-form-valid-border-color, var(--tc-success));
+            box-shadow: 0 0 0 var(--bs-focus-ring-width) rgba(var(--bs-success-rgb), 0.15);
+        }
+    }
+
+    &.is-invalid {
+        border-color: var(--bs-form-invalid-border-color, var(--tc-danger));
+
+        &:focus {
+            border-color: var(--bs-form-invalid-border-color, var(--tc-danger));
+            box-shadow: 0 0 0 var(--bs-focus-ring-width) rgba(var(--bs-danger-rgb), 0.15);
+        }
+    }
+}
+
+.is-valid ~ .valid-feedback,
+.is-invalid ~ .invalid-feedback,
+.was-validated :valid ~ .valid-feedback,
+.was-validated :invalid ~ .invalid-feedback {
+    display: block;
+}
+
+.was-validated .form-control:invalid,
+.was-validated .form-select:invalid,
+.was-validated .form-check-input:invalid {
+    border-color: var(--bs-form-invalid-border-color, var(--tc-danger));
+}
+
+.was-validated .form-control:valid,
+.was-validated .form-select:valid,
+.was-validated .form-check-input:valid {
+    border-color: var(--bs-form-valid-border-color, var(--tc-success));
+}

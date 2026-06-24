@@ -1,0 +1,175 @@
+// tc-community-links — responsive grid of community platform link cards.
+// Each card is a full-anchor with an icon, label, optional description, and optional count.
+// Sharp corners, hairline separators as 1px gap between white surfaces.
+// Hover: 1px lift (translateY(-1px)) with faint shadow. Honour prefers-reduced-motion.
+// Cyan focus ring (--tc-app-accent). 44px coarse touch targets.
+
+@use '../foundation/tokens' as *;
+
+tc-community-links {
+    // Public theming contract via --bs-community-links-* backed by --tc-* tokens.
+    --bs-community-links-bg: var(--tc-surface);
+    --bs-community-links-border: var(--tc-border);
+    --bs-community-links-gap: 1px;
+    --bs-community-links-color: var(--tc-text);
+    --bs-community-links-muted: var(--tc-text-muted);
+    --bs-community-links-icon-size: 1.375rem;
+    --bs-community-links-icon-color: var(--tc-text-muted);
+    --bs-community-links-hover-bg: var(--tc-surface-muted);
+    --bs-community-links-hover-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+    --bs-community-links-hover-translate: -1px;
+    --bs-community-links-title-color: var(--tc-text);
+    --bs-community-links-count-color: var(--tc-text-muted);
+    --bs-community-links-count-size: 0.6875rem;
+    --bs-community-links-count-spacing: 0.08em;
+    --bs-community-links-card-padding-y: 0.875rem;
+    --bs-community-links-card-padding-x: 1rem;
+    --bs-community-links-columns: 2;
+}
+
+.tc-community-links {
+    display: block;
+}
+
+// Optional heading above the grid
+.tc-community-links__header {
+    margin-bottom: 0.75rem;
+}
+
+.tc-community-links__title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--bs-community-links-title-color);
+    margin: 0;
+}
+
+// Grid of cards — 1px gap creates hairline separators between white surfaces.
+.tc-community-links-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--bs-community-links-columns), 1fr);
+    gap: var(--bs-community-links-gap);
+    background-color: var(--bs-community-links-border); // gap color = hairline color
+    border: 1px solid var(--bs-community-links-border);
+    border-radius: 0;
+
+    @include media-up(md) {
+        --bs-community-links-columns: 3;
+    }
+
+    @include media-up(lg) {
+        --bs-community-links-columns: 4;
+    }
+}
+
+// Individual card link
+.tc-community-links-item {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: var(--bs-community-links-card-padding-y) var(--bs-community-links-card-padding-x);
+    background: var(--bs-community-links-bg);
+    color: var(--bs-community-links-color);
+    text-decoration: none;
+    border-radius: 0;
+    transition:
+        background-color var(--tc-transition-fast),
+        box-shadow var(--tc-transition-fast),
+        transform var(--tc-transition-fast);
+    min-height: 44px; // 44px touch target baseline
+
+    &:hover,
+    &:focus {
+        background: var(--bs-community-links-hover-bg);
+        box-shadow: var(--bs-community-links-hover-shadow);
+        transform: translateY(var(--bs-community-links-hover-translate));
+        text-decoration: none;
+        color: var(--bs-community-links-color);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: -2px;
+        z-index: 1;
+    }
+
+    &:focus:not(:focus-visible) {
+        outline: none;
+    }
+}
+
+// Platform icon slot
+.tc-community-links-item__icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bs-community-links-icon-color);
+}
+
+.tc-community-links-item__icon-svg {
+    width: var(--bs-community-links-icon-size);
+    height: var(--bs-community-links-icon-size);
+    flex-shrink: 0;
+    stroke: currentColor;
+    fill: none;
+}
+
+// Body: label + optional description stacked
+.tc-community-links-item__body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+}
+
+.tc-community-links-item__label {
+    font-family: var(--bs-body-font-family);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--bs-community-links-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tc-community-links-item__desc {
+    font-family: var(--bs-body-font-family);
+    font-size: 0.75rem;
+    color: var(--bs-community-links-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+// Count micro-label: monospace, uppercase, letter-spaced
+.tc-community-links-item__count {
+    flex-shrink: 0;
+    font-family: var(--bs-font-monospace);
+    font-size: var(--bs-community-links-count-size);
+    font-weight: 600;
+    letter-spacing: var(--bs-community-links-count-spacing);
+    text-transform: uppercase;
+    color: var(--bs-community-links-count-color);
+}
+
+// 44px coarse touch targets — card height is already min-height: 44px on the link itself
+@media (pointer: coarse) {
+    .tc-community-links-item {
+        min-height: 44px;
+    }
+}
+
+// Honour prefers-reduced-motion: freeze the 1px lift; keep bg/color transitions
+@media (prefers-reduced-motion: reduce) {
+    .tc-community-links-item {
+        transition:
+            background-color var(--tc-transition-fast),
+            box-shadow var(--tc-transition-fast);
+
+        &:hover,
+        &:focus {
+            transform: none;
+        }
+    }
+}

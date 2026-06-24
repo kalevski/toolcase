@@ -12,6 +12,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -52,6 +53,12 @@ func New(domain string, src config.Source, dataDir string, log *slog.Logger) *Sy
 			CheckRedirect: func(req *http.Request, via []*http.Request) error {
 				if len(via) >= maxRedirects {
 					return fmt.Errorf("stopped after %d redirects", maxRedirects)
+				}
+				if len(via) > 0 && req.URL.Host != via[0].URL.Host {
+					req.Header.Del("Authorization")
+					if src.Auth.MethodOrNone() == config.AuthHeader && src.Auth.Name != "" {
+						req.Header.Del(src.Auth.Name)
+					}
 				}
 				return nil
 			},
@@ -137,18 +144,18 @@ func (s *Syncer) Sync(ctx context.Context, st *state.SiteState, stagingDir strin
 	}, nil
 }
 
-// download streams the body to <data_dir>/tmp/<domain>.zip.partial,
+// download streams the body to a unique temp file under <data_dir>/tmp/,
 // enforcing max_archive_size and computing SHA-256 on the fly.
 func (s *Syncer) download(body io.Reader) (path string, hash string, size int64, err error) {
 	tmpDir := filepath.Join(s.dataDir, "tmp")
 	if err := os.MkdirAll(tmpDir, 0o750); err != nil {
 		return "", "", 0, err
 	}
-	path = filepath.Join(tmpDir, s.domain+".zip.partial")
-	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o640)
+	f, err := os.CreateTemp(tmpDir, s.domain+"-*.zip.partial")
 	if err != nil {
 		return "", "", 0, err
 	}
+	path = f.Name()
 
 	maxSize := int64(s.limits.MaxArchiveSize)
 	hasher := sha256.New()
@@ -176,8 +183,12 @@ func (s *Syncer) verifyChecksum(ctx context.Context, bodyHash string) error {
 	if err != nil {
 		return err
 	}
-	if err := s.applyAuth(req); err != nil {
-		return err
+	// Only forward auth when the checksum host matches the artifact host to
+	// prevent leaking credentials to a different server.
+	if sameHost(s.url, s.checksumURL) {
+		if err := s.applyAuth(req); err != nil {
+			return err
+		}
 	}
 	resp, err := s.client.Do(req)
 	if err != nil {
@@ -203,6 +214,19 @@ func (s *Syncer) verifyChecksum(ctx context.Context, bodyHash string) error {
 		return fmt.Errorf("checksum mismatch: expected %s, got %s", expected, bodyHash)
 	}
 	return nil
+}
+
+// sameHost reports whether two raw URLs share the same host (scheme+host+port).
+func sameHost(a, b string) bool {
+	ua, err := url.Parse(a)
+	if err != nil {
+		return false
+	}
+	ub, err := url.Parse(b)
+	if err != nil {
+		return false
+	}
+	return ua.Host == ub.Host
 }
 
 func (s *Syncer) applyAuth(req *http.Request) error {

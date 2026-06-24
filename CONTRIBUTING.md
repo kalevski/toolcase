@@ -1,6 +1,6 @@
 # Contributing to toolcase
 
-Thanks for taking the time to contribute! This monorepo hosts several focused packages — `@toolcase/base`, `@toolcase/logging`, `@toolcase/serializer`, `@toolcase/node`, `@toolcase/react-components`, `@toolcase/game-components`, `@toolcase/phaser-plus`, and the `examples/` site.
+Thanks for taking the time to contribute! This monorepo hosts several focused packages — `@toolcase/base`, `@toolcase/logging`, `@toolcase/serializer`, `@toolcase/node`, `@toolcase/web-components`, `@toolcase/phaser-plus`, and the `examples/` site.
 
 ## Prerequisites
 
@@ -31,7 +31,7 @@ Per-package work uses workspace flags (or `cd` into the package):
 
 ```bash
 npm -w @toolcase/base run dev                    # tsup --watch
-npm -w @toolcase/react-components run build:css  # rebuild only the SCSS bundle
+npm -w @toolcase/web-components run build:css    # rebuild only the SCSS bundle
 npm -w @toolcase/phaser-plus run typecheck       # tsc --noEmit
 npm -w @toolcase/examples run dev                # vite dev server (examples site)
 ```
@@ -47,24 +47,20 @@ npx vitest path/to/file.test.ts   # watch mode
 
 - **4-space indentation**, enforced via Prettier.
 - ESLint allows `any` and ignores unused vars prefixed with `_`.
-- `sideEffects: false` on every package except `react-components` (CSS) and `game-components` (CSS + custom-element registration files).
+- `sideEffects: false` on every package except `web-components` (CSS + custom-element registration files).
 - All packages target **Node ≥ 18**.
 
-### `react-components` design rules
+### `web-components` design rules
 
-`.github/agents/components.agent.md` is authoritative. Hard rules to remember:
+`web-components/styleguide.md` is authoritative. Hard rules to remember:
 
-- **No `border-radius`** anywhere except intentionally circular shapes.
-- BEM classnames: root carries `component component-{name}`; children are `component-{name}__{part}`; modifiers `--{state}`.
-- Mobile-first SCSS only (`min-width` queries). Touch targets ≥ 44px under `@media (pointer: coarse)`.
-- Z-index layers are fixed (Tooltip 1070 > Dropdown 1060 > Modal content 1055 > Modal backdrop 1050). Don't add new ones.
-- Adding a component requires touching: `src/<Name>.tsx`, `style/components/_<name>.scss`, `style/components/index.scss`, `src/index.ts`, a demo under `examples/src/react-components/<Name>Demo.tsx` (registered in `examples/src/react-components/index.tsx`), and an entry in `examples/public/react-components/SKILL.md`.
-
-### `game-components` design rules
-
-- Vanilla HTML5 + Shadow DOM, no external libraries.
-- Every component that registers an observer or listener in `connectedCallback` must clean up in `disconnectedCallback` (typically via an `AbortController`).
-- New components must be added to `examples/public/game-components/SKILL.md`.
+- **No `border-radius`** anywhere except genuinely circular/pill shapes (radio dots, spinner rings, switch tracks, avatars, the brand dot). Sharp corners are a mandate, not a preference.
+- **Light DOM, global stylesheet** — `tc-*` elements render Bootstrap-compatible classnames into their light DOM; `style.css` paints them. No shadow roots.
+- All cosmetics flow through `--bs-<component>-*` custom properties (the public theming contract); design-system tokens are `--tc-*`. Don't invent new prefixes.
+- Z-index layers are fixed (Tooltip 1070 > Dropdown 1060 > Modal 1055 > Backdrop 1050 > Sticky 1020), exposed as `--tc-z-*`. Don't add layers.
+- Icons are inline SVG via `src/icons.ts` (lucide-static, `stroke="currentColor"`) — never `background-image` glyphs. No emoji.
+- Touch targets ≥ 44px under `@media (pointer: coarse)`; focus always visible; honour `prefers-reduced-motion`.
+- Adding a component requires four touchpoints: `src/<Name>.ts` + registration in `src/register.ts`, `style/components/_<name>.scss` + `style/components/_index.scss` forward, a demo under `examples/src/web-components/<Name>Demo.tsx`, and an entry in `examples/public/web-components/SKILL.md`.
 
 ## Pull request flow
 
@@ -72,7 +68,7 @@ npx vitest path/to/file.test.ts   # watch mode
 2. Make your change. Keep PRs focused — one logical change per PR.
 3. Run `npm run lint && npm test && npm run build` locally before pushing.
 4. Open a PR against `main`. CI runs lint, build, tests, and `lint:exports`.
-5. PR titles should describe the change concretely (e.g. `react-components: add DateRangePicker`).
+5. PR titles should describe the change concretely (e.g. `web-components: add tc-date-range-picker`).
 
 ## Releases
 

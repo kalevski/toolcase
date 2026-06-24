@@ -1,0 +1,31 @@
+// Dungeon › tc-platform-icon — platform badge. Token swap recolours; structural
+// rules turn the label into display caps and repoint each platform's glyph colour
+// to the fantasy palette (matching the game reference per-platform mapping).
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-platform-icon {
+        --bs-platform-icon-glyph-color: var(--fg-parch);
+        --bs-platform-icon-label-color: var(--fg-parch-3);
+        --bs-platform-icon-label-font-family: var(--fg-display);
+        // Tighter inscription scale: base uses 13px; fantasy ref uses 11px caps.
+        --bs-platform-icon-label-font-size: 0.6875rem;
+    }
+
+    // Label reads as display caps (base hardcodes mono + 0.03em).
+    .tc-platform-icon__label {
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        // Match dungeon display-caps recipe weight for inscription text.
+        font-weight: 600;
+    }
+
+    // Per-platform glyph colours from the fantasy palette.
+    tc-platform-icon[platform='playstation'] { --bs-platform-icon-glyph-color: var(--fg-mana-bright); }
+    tc-platform-icon[platform='xbox'] { --bs-platform-icon-glyph-color: var(--fg-stamina-bright); }
+    tc-platform-icon[platform='nintendo'] { --bs-platform-icon-glyph-color: var(--fg-blood-bright); }
+    tc-platform-icon[platform='steam'] { --bs-platform-icon-glyph-color: var(--fg-silver); }
+    tc-platform-icon[platform='mobile'] { --bs-platform-icon-glyph-color: var(--fg-parch); }
+    tc-platform-icon[platform='web'] { --bs-platform-icon-glyph-color: var(--fg-frost); }
+    tc-platform-icon[platform='pc'] { --bs-platform-icon-glyph-color: var(--fg-gold-bright); }
+}

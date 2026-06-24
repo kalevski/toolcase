@@ -5,8 +5,6 @@ const opts = (overrides = {}) => ({
     maxWidth: 64,
     maxHeight: 64,
     allowRotation: false,
-    padding: 0,
-    extrude: 0,
     pot: 'none' as const,
     ...overrides
 })
@@ -39,5 +37,15 @@ describe('BinaryTree', () => {
         t.insert({ width: 32, height: 32 })
         t.reset()
         expect(t.occupancy()).toBe(0)
+    })
+
+    it('handles many small sprites without stack overflow', () => {
+        const t = new BinaryTree(opts({ maxWidth: 1024, maxHeight: 1024 }))
+        t.reset()
+        let placed = 0
+        for (let i = 0; i < 4096; i++) {
+            if (t.insert({ width: 4, height: 4 }) !== null) placed++
+        }
+        expect(placed).toBeGreaterThan(0)
     })
 })

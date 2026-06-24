@@ -1,0 +1,43 @@
+// Dungeon › tc-divider — gold gradient rule with a centered diamond ornament.
+// The flanking lines are pseudo-elements; the label span carries the diamond.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    .tc-divider {
+        --bs-divider-border-color: var(--fg-gold-deep);
+        --bs-divider-label-color: var(--fg-gold);
+        --bs-divider-label-bg: transparent;
+        --bs-divider-label-font-size: 0.6875rem;
+    }
+
+    // Flanking hairlines → gold gradient rule.
+    .tc-divider.tc-divider--horizontal::before,
+    .tc-divider.tc-divider--horizontal::after {
+        height: 1px;
+        background: var(--fg-rule);
+    }
+    .tc-divider.tc-divider--vertical::before,
+    .tc-divider.tc-divider--vertical::after {
+        width: 1px;
+        // --fg-rule is a horizontal sweep gradient; rotate to 180deg so short
+        // vertical rails still catch the bright gold core at their midpoint.
+        background: linear-gradient(180deg, transparent, var(--fg-gold) 50%, transparent);
+    }
+
+    .tc-divider__label {
+        font-family: var(--fg-mono);
+        text-shadow: 0 0 6px rgba(232, 200, 120, 0.4);
+    }
+
+    // When the divider has no label, mark the join with a gold diamond.
+    .tc-divider.tc-divider--horizontal .tc-divider__label:empty {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        padding: 0;
+        margin: 0 6px;
+        background: var(--fg-gold-edge);
+        transform: rotate(45deg);
+        box-shadow: 0 0 6px rgba(232, 200, 120, 0.4);
+    }
+}

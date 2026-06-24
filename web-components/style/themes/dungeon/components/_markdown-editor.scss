@@ -1,0 +1,92 @@
+// Dungeon › tc-markdown-editor — scribe's tome / lore editor.
+// Token swap repoints border, hairline, surface, tab/toolbar colours, textarea
+// focus-border, and code/quote surfaces. Structural rules layer serif preview
+// prose (EB Garamond), display-caps label (Cinzel), and the gilded shell bevel.
+// The tab underline + toolbar active are already gold via --tc-app-accent.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Host element token-swap ────────────────────────────────────────────────
+
+    tc-markdown-editor {
+        // Shell
+        --bs-markdown-editor-border: 1px solid var(--fg-gold-deep);
+        --bs-markdown-editor-surface: var(--fg-panel-bg);
+        --bs-markdown-editor-hairline: 1px solid rgba(201, 169, 97, 0.15);
+
+        // Label
+        --bs-markdown-editor-label-color: var(--fg-parch);
+
+        // Tabs
+        --bs-markdown-editor-tab-color: var(--fg-parch-dim);
+        --bs-markdown-editor-tab-color-hover: var(--fg-gold-bright);
+        --bs-markdown-editor-tab-color-active: var(--fg-gold-bright);
+
+        // Toolbar buttons
+        --bs-markdown-editor-toolbar-btn-color: var(--fg-parch-dim);
+        --bs-markdown-editor-toolbar-btn-hover-bg: var(--fg-leather-2);
+        --bs-markdown-editor-toolbar-btn-hover-color: var(--fg-parch);
+        --bs-markdown-editor-toolbar-btn-active-color: var(--fg-ink);
+
+        // Body / textarea
+        --bs-markdown-editor-body-color: var(--fg-parch);
+        --bs-markdown-editor-textarea-focus-border: rgba(201, 169, 97, 0.6);
+
+        // Preview code surfaces
+        --bs-markdown-editor-code-bg: var(--fg-slot-bg);
+        --bs-markdown-editor-code-color: var(--fg-parch);
+        --bs-markdown-editor-codeblock-bg: var(--fg-ink);
+        --bs-markdown-editor-codeblock-color: var(--fg-parch);
+
+        // Blockquote
+        --bs-markdown-editor-quote-border: 3px solid var(--fg-gold-deep);
+        --bs-markdown-editor-quote-color: var(--fg-parch-dim);
+    }
+
+    // ── Shell — gilded bevel ───────────────────────────────────────────────────
+
+    .tc-markdown-editor-shell {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── Label — display-caps (Cinzel) ──────────────────────────────────────────
+
+    .tc-markdown-editor-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 600;
+    }
+
+    // ── Tabs — keep underline motif, apply display font ────────────────────────
+
+    .tc-markdown-editor-tab {
+        font-family: var(--fg-display);
+        letter-spacing: 0.08em;
+    }
+
+    // ── Textarea — explicit mono for stability ─────────────────────────────────
+
+    .tc-markdown-editor-textarea {
+        font-family: var(--fg-mono);
+    }
+
+    // ── Preview prose — serif body + display headings ──────────────────────────
+
+    .tc-markdown-editor-preview {
+        font-family: var(--fg-body);
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--fg-display);
+            letter-spacing: 0.04em;
+        }
+
+        // Gold rule hairline for <hr> in rendered prose
+        hr {
+            border: none;
+            height: 1px;
+            background: var(--fg-rule);
+        }
+    }
+}

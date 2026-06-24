@@ -1,0 +1,229 @@
+// tc-testimonial-carousel — one testimonial shown at a time on a white card with
+// prev/next arrow controls and a row of dot indicators. Sharp corners on the
+// card (border-radius: 0); the avatar is a sanctioned circle and the active dot
+// the one sanctioned pill. Filled stars carry the warm status accent
+// (--tc-warning). All cosmetics flow through --bs-testimonial-carousel-* tokens.
+
+@use '../foundation/tokens' as *;
+
+@keyframes tc-testimonial-carousel-enter {
+    from {
+        opacity: 0;
+        transform: translateX(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+tc-testimonial-carousel {
+    --bs-testimonial-carousel-surface: var(--tc-surface);
+    --bs-testimonial-carousel-border: var(--tc-border);
+    --bs-testimonial-carousel-shadow: var(--tc-shadow-sm);
+    --bs-testimonial-carousel-quote-color: var(--tc-text);
+    --bs-testimonial-carousel-author-color: var(--tc-text);
+    --bs-testimonial-carousel-muted-color: var(--tc-text-muted);
+    --bs-testimonial-carousel-control-color: var(--tc-text);
+    --bs-testimonial-carousel-control-hover-bg: var(--tc-surface-muted);
+    --bs-testimonial-carousel-dot-color: var(--tc-border-strong);
+    --bs-testimonial-carousel-dot-active-color: var(--tc-app-accent);
+    --bs-testimonial-carousel-star-color: var(--tc-warning);
+    --bs-testimonial-carousel-star-empty-color: var(--tc-border-strong);
+    --bs-testimonial-carousel-avatar-size: 2.5rem;
+    --bs-testimonial-carousel-gap: 1rem;
+}
+
+.tc-testimonial-carousel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-testimonial-carousel-gap);
+    border-radius: 0;
+}
+
+// ── Top row: prev | slide | next ─────────────────────────────────────────────
+
+.tc-testimonial-carousel-track {
+    display: flex;
+    align-items: stretch;
+    gap: 0.5rem;
+}
+
+// ── Slide card ───────────────────────────────────────────────────────────────
+
+.tc-testimonial-carousel-slide {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    padding: 1.5rem 1.25rem;
+    background: var(--bs-testimonial-carousel-surface);
+    border: 1px solid var(--bs-testimonial-carousel-border);
+    border-radius: 0;
+    box-shadow: var(--bs-testimonial-carousel-shadow);
+    animation: tc-testimonial-carousel-enter var(--tc-transition-base);
+}
+
+.tc-testimonial-carousel-quote {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--bs-testimonial-carousel-quote-color);
+}
+
+.tc-testimonial-carousel-author {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.tc-testimonial-carousel-avatar {
+    flex: 0 0 auto;
+    width: var(--bs-testimonial-carousel-avatar-size);
+    height: var(--bs-testimonial-carousel-avatar-size);
+    border-radius: 50%; // sanctioned circle
+    object-fit: cover;
+}
+
+.tc-testimonial-carousel-meta {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.tc-testimonial-carousel-name {
+    font-weight: 500;
+    color: var(--bs-testimonial-carousel-author-color);
+}
+
+.tc-testimonial-carousel-role {
+    font-size: 0.8125rem;
+    color: var(--bs-testimonial-carousel-muted-color);
+}
+
+// ── Star rating ──────────────────────────────────────────────────────────────
+
+.tc-testimonial-carousel-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.125rem;
+    line-height: 1;
+}
+
+.tc-testimonial-carousel-star {
+    display: inline-flex;
+    color: var(--bs-testimonial-carousel-star-empty-color);
+
+    svg {
+        width: 1rem;
+        height: 1rem;
+        display: block;
+    }
+}
+
+.tc-testimonial-carousel-star--filled {
+    color: var(--bs-testimonial-carousel-star-color);
+
+    svg {
+        fill: currentColor; // outline glyph fills to the warm accent
+    }
+}
+
+// ── Prev / next controls (icon-button ladder) ────────────────────────────────
+
+.tc-testimonial-carousel-prev,
+.tc-testimonial-carousel-next {
+    flex: 0 0 auto;
+    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    background: none;
+    border: 1px solid var(--bs-testimonial-carousel-border);
+    border-radius: 0;
+    color: var(--bs-testimonial-carousel-control-color);
+    cursor: pointer;
+    transition: background-color var(--tc-transition-fast), color var(--tc-transition-fast);
+
+    svg {
+        width: 1.125rem;
+        height: 1.125rem;
+        display: block;
+    }
+
+    &:hover {
+        background: var(--bs-testimonial-carousel-control-hover-bg);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+}
+
+// ── Dot indicators ───────────────────────────────────────────────────────────
+
+.tc-testimonial-carousel-dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.tc-testimonial-carousel-dot {
+    position: relative;
+    width: 6px;
+    height: 6px;
+    padding: 0;
+    border: 1px solid var(--bs-testimonial-carousel-dot-color);
+    border-radius: 0;
+    background: none;
+    cursor: pointer;
+    transition: background-color var(--tc-transition-fast), border-color var(--tc-transition-fast),
+        width var(--tc-transition-fast);
+
+    // Extend the hit area to a 44px touch target without growing the visual dot.
+    &::after {
+        content: '';
+        position: absolute;
+        inset: -19px;
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+}
+
+// Active dot — the one sanctioned pill, filled with ink.
+.tc-testimonial-carousel-dot--active {
+    width: 18px;
+    border-radius: 3px;
+    border-color: var(--bs-testimonial-carousel-dot-active-color);
+    background: var(--bs-testimonial-carousel-dot-active-color);
+}
+
+// ── Reduced motion ───────────────────────────────────────────────────────────
+// Freeze the decorative slide-in; keep the state-conveying control transitions.
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-testimonial-carousel-slide {
+        animation: none;
+    }
+}
+
+// ── Coarse-pointer hit targets ───────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-testimonial-carousel-prev,
+    .tc-testimonial-carousel-next {
+        width: 44px;
+        height: 44px;
+    }
+}

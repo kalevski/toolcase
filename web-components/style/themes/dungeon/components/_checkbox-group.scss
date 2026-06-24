@@ -1,0 +1,19 @@
+// Dungeon › tc-checkbox-group — gilded group label caps over a plain fieldset.
+// No bevel or notches — a fieldset is not a framed panel. The boxes themselves
+// are reskinned in tc-check; focus rings turn gold via the foundation.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // 1. Token swap: group label reads gilded instead of text-muted parchment.
+    .tc-checkbox-group {
+        --bs-checkbox-group-label-color: var(--fg-gold);
+    }
+
+    // 2. Structure (display caps): legend text becomes a proper in-game heading.
+    .tc-checkbox-group-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+    }
+}

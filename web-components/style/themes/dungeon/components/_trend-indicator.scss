@@ -1,0 +1,22 @@
+// Dungeon › tc-trend-indicator — chrome-free inline directional badge.
+// No surface to gild, notch, or bevel — this is icon + mono numeral only.
+// Override: brighten up/down to the element ramp for a more vivid HUD read,
+// and route the hardcoded font stack through --fg-mono for token cleanliness.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // Route hardcoded literal font stack through the dungeon mono token.
+    // Resolves to the same face (JetBrains Mono) but keeps theming consistent.
+    .tc-trend-indicator {
+        font-family: var(--fg-mono);
+    }
+
+    // Brighten semantic up/down colors to the element ramp for leaderboard HUD clarity.
+    .tc-trend-indicator--up {
+        --bs-trend-indicator-color: var(--fg-stamina-bright);
+    }
+
+    .tc-trend-indicator--down {
+        --bs-trend-indicator-color: var(--fg-blood-bright);
+    }
+}

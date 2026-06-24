@@ -1,0 +1,113 @@
+// tc-toggle — standalone atomic on/off switch (pill track + sliding knob).
+// The host element IS the switch — it carries role="switch", aria-checked,
+// and the click/keyboard affordance. The only sanctioned curves are the pill
+// track (999px) and the circular knob (50%); everything else is sharp.
+// All cosmetics flow through --bs-toggle-* custom properties backed by --tc-* tokens.
+
+tc-toggle {
+    --bs-toggle-track-width: 40px;
+    --bs-toggle-track-height: 22px;
+    --bs-toggle-track-bg: var(--tc-border-strong);
+    --bs-toggle-track-hover-bg: var(--tc-text-faint);
+    --bs-toggle-track-checked-bg: var(--tc-app-accent);
+    --bs-toggle-track-checked-gradient: var(--tc-app-accent-gradient);
+    --bs-toggle-track-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
+    --bs-toggle-knob-size: 18px;
+    --bs-toggle-knob-inset: 2px;
+    --bs-toggle-knob-bg: #ffffff;
+    --bs-toggle-knob-shadow: 0 0 0 0.5px rgba(15, 23, 42, 0.08);
+    --bs-toggle-focus-ring: rgba(30, 41, 59, 0.12);
+    --bs-toggle-disabled-opacity: 0.55;
+}
+
+.tc-toggle {
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+
+    // Coarse-pointer touch target: expand the host without enlarging the track.
+    @media (pointer: coarse) {
+        min-width: 44px;
+        min-height: 44px;
+        align-items: center;
+        justify-content: center;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &.tc-toggle--disabled {
+        opacity: var(--bs-toggle-disabled-opacity);
+        pointer-events: none;
+        cursor: default;
+    }
+}
+
+// Hover lifts the off-track to the stronger slate well.
+.tc-toggle:not(.tc-toggle--disabled):hover .tc-toggle-track {
+    background-color: var(--bs-toggle-track-hover-bg);
+}
+
+.tc-toggle-track {
+    position: relative;
+    flex-shrink: 0;
+    width: var(--bs-toggle-track-width);
+    height: var(--bs-toggle-track-height);
+    background-color: var(--bs-toggle-track-bg);
+    border: 0;
+    border-radius: 999px;
+    box-shadow: var(--bs-toggle-track-shadow);
+    transition:
+        background-color var(--tc-transition-base),
+        box-shadow var(--tc-transition-base);
+}
+
+.tc-toggle-knob {
+    // Pure circle — the one sanctioned curve. Centred vertically; slides
+    // from the inset-left rest position to the right edge when checked.
+    position: absolute;
+    top: 50%;
+    left: var(--bs-toggle-knob-inset);
+    width: var(--bs-toggle-knob-size);
+    height: var(--bs-toggle-knob-size);
+    background: var(--bs-toggle-knob-bg);
+    border-radius: 50%;
+    box-shadow: var(--bs-toggle-knob-shadow);
+    transform: translateY(-50%);
+    transition: left var(--tc-transition-base);
+}
+
+// Checked state: ink gradient track + knob slides right.
+.tc-toggle--on {
+    .tc-toggle-track {
+        background-color: var(--bs-toggle-track-checked-bg);
+        background-image: var(--bs-toggle-track-checked-gradient);
+        box-shadow: none;
+    }
+
+    .tc-toggle-knob {
+        left: calc(
+            var(--bs-toggle-track-width) - var(--bs-toggle-knob-size) - var(--bs-toggle-knob-inset)
+        );
+    }
+}
+
+// Focus ring for form-control semantics (in addition to outline above).
+.tc-toggle:focus-visible .tc-toggle-track {
+    box-shadow: 0 0 0 0.2rem var(--bs-toggle-focus-ring);
+}
+
+.tc-toggle--on:focus-visible .tc-toggle-track {
+    // Suppress the ring shadow on the checked track — outline alone is enough.
+    box-shadow: none;
+}
+
+// Freeze the knob slide under reduced-motion; keep the state-conveying colour
+// transition so on/off remains visually distinct without animation.
+@media (prefers-reduced-motion: reduce) {
+    .tc-toggle-knob {
+        transition: none;
+    }
+}

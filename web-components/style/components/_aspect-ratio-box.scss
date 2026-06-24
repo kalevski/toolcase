@@ -1,0 +1,39 @@
+// AspectRatioBox — a layout primitive that holds an intrinsic aspect ratio for
+// its content. Pure structure: no chrome of its own; the slate hairline is
+// optional and only shows through when the content does not fill the frame.
+// Every cosmetic value flows through the `--bs-aspect-ratio-box-*` contract.
+
+.tc-aspect-ratio-box {
+    --bs-aspect-ratio-box-ratio: 16 / 9;
+    --bs-aspect-ratio-box-fallback: 56.25%;
+    --bs-aspect-ratio-box-bg: transparent;
+    --bs-aspect-ratio-box-border: 0;
+
+    display: block;
+    position: relative;
+    width: 100%;
+    aspect-ratio: var(--bs-aspect-ratio-box-ratio);
+    background: var(--bs-aspect-ratio-box-bg);
+    border: var(--bs-aspect-ratio-box-border);
+    border-radius: 0;
+    overflow: hidden;
+}
+
+.tc-aspect-ratio-box__content {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+// Padding-bottom fallback for engines without `aspect-ratio` support.
+@supports not (aspect-ratio: 1 / 1) {
+    .tc-aspect-ratio-box {
+        height: 0;
+        padding-bottom: var(--bs-aspect-ratio-box-fallback);
+    }
+
+    .tc-aspect-ratio-box__content {
+        position: absolute;
+        inset: 0;
+    }
+}

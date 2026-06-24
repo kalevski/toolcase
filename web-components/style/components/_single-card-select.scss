@@ -1,0 +1,152 @@
+// tc-single-card-select — single-select card grid (radiogroup pattern).
+// All cosmetics flow through --bs-single-card-select-* custom properties backed by --tc-* tokens.
+// Sharp corners (border-radius: 0); white surfaces with a hairline border at rest;
+// slate well on hover; a 2px --tc-app-accent frame + ink check on the selected card.
+
+tc-single-card-select {
+    --bs-single-card-select-border-color: var(--tc-border);
+    --bs-single-card-select-bg: var(--tc-surface);
+    --bs-single-card-select-hover-bg: var(--tc-surface-muted);
+    --bs-single-card-select-selected-accent: var(--tc-app-accent);
+    --bs-single-card-select-title-color: var(--tc-text);
+    --bs-single-card-select-title-size: 0.9375rem;
+    --bs-single-card-select-desc-color: var(--tc-text-muted);
+    --bs-single-card-select-desc-size: 0.8125rem;
+    --bs-single-card-select-check-size: 1rem;
+    --bs-single-card-select-card-padding-y: 1rem;
+    --bs-single-card-select-card-padding-x: 1rem;
+    --bs-single-card-select-gap: 0.5rem;
+    --bs-single-card-select-min-col: 200px;
+    --bs-single-card-select-skeleton-bg: var(--tc-surface-muted);
+}
+
+// Host IS the grid. When `columns` is set, JS writes --bs-single-card-select-grid-cols
+// to `repeat(N, 1fr)`; otherwise the auto-fill fallback applies (matches the React default).
+.tc-single-card-select {
+    display: grid;
+    grid-template-columns: var(
+        --bs-single-card-select-grid-cols,
+        repeat(auto-fill, minmax(var(--bs-single-card-select-min-col), 1fr))
+    );
+    gap: var(--bs-single-card-select-gap);
+    border-radius: 0;
+}
+
+.tc-single-card-select-option {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    padding: var(--bs-single-card-select-card-padding-y) var(--bs-single-card-select-card-padding-x);
+    min-height: 44px;
+    background: var(--bs-single-card-select-bg);
+    border: 1px solid var(--bs-single-card-select-border-color);
+    border-radius: 0;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    position: relative;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+
+    @media (pointer: coarse) {
+        min-height: 56px;
+    }
+
+    &:hover:not(.is-selected) {
+        background: var(--bs-single-card-select-hover-bg);
+        border-color: var(--bs-single-card-select-desc-color);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--bs-single-card-select-selected-accent);
+        outline-offset: 2px;
+        z-index: 1;
+    }
+
+    // Selected: 2px accent frame + ink check indicator (revealed below).
+    &.is-selected {
+        border-color: var(--bs-single-card-select-selected-accent);
+        box-shadow: inset 0 0 0 1px var(--bs-single-card-select-selected-accent);
+        z-index: 1;
+
+        .tc-single-card-select-check {
+            opacity: 1;
+        }
+    }
+
+    // Skeleton shimmer placeholder.
+    &--skeleton {
+        background: linear-gradient(
+            90deg,
+            var(--bs-single-card-select-skeleton-bg) 0%,
+            var(--tc-surface) 50%,
+            var(--bs-single-card-select-skeleton-bg) 100%
+        );
+        background-size: 200% 100%;
+        animation: tc-scs-shimmer 1.4s infinite ease-in-out;
+        border-color: var(--bs-single-card-select-border-color);
+        cursor: default;
+        min-height: 72px;
+        pointer-events: none;
+    }
+}
+
+@keyframes tc-scs-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.tc-single-card-select-title {
+    display: block;
+    font-size: var(--bs-single-card-select-title-size);
+    font-weight: 600;
+    color: var(--bs-single-card-select-title-color);
+    line-height: 1.3;
+}
+
+.tc-single-card-select-desc {
+    display: block;
+    font-size: var(--bs-single-card-select-desc-size);
+    color: var(--bs-single-card-select-desc-color);
+    line-height: 1.4;
+}
+
+// Absolutely positioned check — hidden by default, revealed on the selected card.
+// aria-hidden so screen readers rely on aria-checked, not the icon, for state.
+.tc-single-card-select-check {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-single-card-select-check-size);
+    height: var(--bs-single-card-select-check-size);
+    color: var(--bs-single-card-select-selected-accent);
+    border-radius: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+
+    svg {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-single-card-select-option {
+        transition: none;
+    }
+
+    .tc-single-card-select-check {
+        transition: none;
+    }
+
+    .tc-single-card-select-option--skeleton {
+        animation: none;
+        background: var(--bs-single-card-select-skeleton-bg);
+    }
+}

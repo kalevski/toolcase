@@ -1,0 +1,58 @@
+// Dungeon › tc-github-stars-card — guild ledger plate with gilded panel bevel.
+// Foundation flips bg/border/text/danger tokens for free via --tc-* remaps.
+// This override fixes: CTA slate gradient + Inter sans + #fff text; lifts stat
+// labels from mono to display caps; adds the panel bevel + drop shadow.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Token swap on host ────────────────────────────────────────────────────
+    // Kills the hardcoded #2b3a51 slate stop in --bs-github-stars-card-cta-bg
+    // and the rgba(30,41,59,.3) slate-tinted hover shadow.
+
+    tc-github-stars-card {
+        --bs-github-stars-card-cta-bg: var(--fg-button-bg);
+        --bs-github-stars-card-cta-color: var(--fg-ink);
+        --bs-github-stars-card-cta-hover-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+        --bs-github-stars-card-skeleton-shimmer: rgba(232, 200, 120, 0.35);
+    }
+
+    // ── Card wrapper — gilded bevel + drop shadow ─────────────────────────────
+    // Base ships only --tc-shadow-sm (no inset bevel); the panel shadow adds the
+    // inset gold highlight stack + a heavier drop that reads as a framed ledger plate.
+
+    .tc-github-stars-card {
+        position: relative;
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── CTA — override hardcoded Inter font + #fff color ─────────────────────
+    // The base hardcodes font-family:'Inter' and color:#fff as literals on this
+    // class so a var swap alone cannot reach them — the class rule must win.
+
+    .tc-github-stars-card-cta {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+        color: var(--fg-ink);
+        border-top: 1px solid var(--fg-gold-deep);
+
+        &:hover {
+            color: var(--fg-ink);
+        }
+
+        &:focus-visible {
+            color: var(--fg-ink);
+        }
+    }
+
+    // ── Stat labels — display caps (base hardcodes mono) ─────────────────────
+    // Base sets font-family:'JetBrains Mono' as a literal on .tc-github-stars-card-stat-label.
+    // Override to Cinzel so labels read as engraved ledger headings rather than raw mono.
+
+    .tc-github-stars-card-stat-label {
+        font-family: var(--fg-display);
+        letter-spacing: 0.16em;
+    }
+}

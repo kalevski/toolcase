@@ -13,6 +13,7 @@ import { NOTIFY_EVENTS } from '@/server/domain/types'
 /** Fully-resolved settings for one project (override → env fallback). */
 export interface EffectiveSettings {
     defaultModel: string
+    defaultAccount: string
     commitAfter: boolean
     commitMessageMode: CommitMessageMode
     commitModel: string
@@ -47,6 +48,20 @@ export function saveProjectSettings(project: string, settings: ProjectSettings):
             throw new InvalidSettingsError(`model not in catalog: ${settings.defaultModel}`)
         }
     }
+    if (settings.defaultAccount !== undefined && settings.defaultAccount !== null && settings.defaultAccount !== '') {
+        // Guard the registry import: settings must still save when the accounts
+        // foundation isn't present (module/table absent). When it is, the alias
+        // must name a known account.
+        let accounts: typeof import('@/server/services/accounts') | undefined
+        try {
+            accounts = require('@/server/services/accounts')
+        } catch {
+            accounts = undefined
+        }
+        if (accounts && !accounts.getAccount(settings.defaultAccount)) {
+            throw new InvalidSettingsError(`unknown account alias: ${settings.defaultAccount}`)
+        }
+    }
     if (settings.commitMessageMode !== undefined && settings.commitMessageMode !== null) {
         if (settings.commitMessageMode !== 'taskname' && settings.commitMessageMode !== 'ai') {
             throw new InvalidSettingsError('commitMessageMode must be taskname|ai')
@@ -72,6 +87,7 @@ export function effectiveSettings(project: string): EffectiveSettings {
     const s = getProjectSettings(project)
     return {
         defaultModel: s.defaultModel ?? config.defaultModel,
+        defaultAccount: s.defaultAccount ?? config.defaultAccount,
         commitAfter: s.commitAfter ?? config.commitAfterTask,
         commitMessageMode: s.commitMessageMode ?? config.commitMessageMode,
         commitModel: s.commitModel ?? config.commitModel,

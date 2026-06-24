@@ -1,0 +1,291 @@
+// tc-command-reference — searchable reference guide for CLI commands with usage,
+// descriptions, flags, and aliases. Port of @toolcase/react-components CommandReference.
+// All cosmetics flow through --bs-command-reference-* custom properties backed by --tc-* tokens.
+// Design: sharp corners (border-radius: 0), 1px --tc-border outer frame,
+// slate-100 hairline separators between items (fainter than outer frame).
+// Mono text (JetBrains Mono) for names/usage/flags/aliases; Inter prose for descriptions.
+// Cyan reserved for focus ring only — no other accent colors.
+
+@use '../foundation/tokens' as *;
+
+tc-command-reference {
+    // ── Outer frame ────────────────────────────────────────────────────────────
+    --bs-command-reference-border-color: var(--tc-border);
+    --bs-command-reference-border: 1px solid var(--bs-command-reference-border-color);
+    --bs-command-reference-bg: var(--tc-surface);
+    --bs-command-reference-border-radius: 0;
+
+    // ── Title header cap ───────────────────────────────────────────────────────
+    --bs-command-reference-title-bg: var(--tc-surface-muted);
+    --bs-command-reference-title-color: var(--tc-text);
+    --bs-command-reference-title-font-size: 0.9375rem;
+    --bs-command-reference-title-font-weight: 600;
+    --bs-command-reference-title-padding-y: 0.75rem;
+    --bs-command-reference-title-padding-x: 1rem;
+    --bs-command-reference-title-border: 1px solid var(--bs-command-reference-border-color);
+
+    // ── Search input ───────────────────────────────────────────────────────────
+    --bs-command-reference-search-bg: var(--tc-surface);
+    --bs-command-reference-search-border: 1px solid var(--bs-command-reference-border-color);
+    --bs-command-reference-search-padding-y: 0.625rem;
+    --bs-command-reference-search-padding-x: 0.875rem;
+    --bs-command-reference-search-icon-color: var(--tc-text-muted);
+    --bs-command-reference-search-icon-size: 0.9rem;
+    --bs-command-reference-input-color: var(--tc-text);
+    --bs-command-reference-input-placeholder-color: var(--tc-text-faint);
+    --bs-command-reference-input-border: 1px solid var(--tc-border-strong);
+    --bs-command-reference-input-bg: var(--tc-surface);
+    --bs-command-reference-input-padding-y: 0.4375rem;
+    --bs-command-reference-input-padding-x: 0.75rem;
+    --bs-command-reference-input-font-size: 0.875rem;
+    --bs-command-reference-input-focus-ring: 0 0 0 2px var(--tc-focus-ring);
+
+    // ── Item rows ──────────────────────────────────────────────────────────────
+    --bs-command-reference-item-border: 1px solid var(--tc-slate-100);
+    --bs-command-reference-item-bg: var(--tc-surface);
+    --bs-command-reference-item-padding-y: 0.875rem;
+    --bs-command-reference-item-padding-x: 1rem;
+
+    // ── Command name / usage ───────────────────────────────────────────────────
+    --bs-command-reference-name-color: var(--tc-text);
+    --bs-command-reference-name-font-size: 0.875rem;
+    --bs-command-reference-name-font-weight: 600;
+    --bs-command-reference-usage-color: var(--tc-text-muted);
+    --bs-command-reference-usage-font-size: 0.875rem;
+
+    // ── Description ────────────────────────────────────────────────────────────
+    --bs-command-reference-desc-color: var(--tc-text);
+    --bs-command-reference-desc-font-size: 0.875rem;
+
+    // ── Aliases ────────────────────────────────────────────────────────────────
+    --bs-command-reference-aliases-label-color: var(--tc-text-muted);
+    --bs-command-reference-aliases-label-font-size: 0.6875rem;
+    --bs-command-reference-aliases-label-letter-spacing: 0.08em;
+    --bs-command-reference-alias-color: var(--tc-text-muted);
+    --bs-command-reference-alias-bg: var(--tc-surface-muted);
+    --bs-command-reference-alias-border: 1px solid var(--tc-slate-100);
+    --bs-command-reference-alias-font-size: 0.75rem;
+
+    // ── Flags ──────────────────────────────────────────────────────────────────
+    --bs-command-reference-flag-name-color: var(--tc-text);
+    --bs-command-reference-flag-name-font-size: 0.8125rem;
+    --bs-command-reference-flag-desc-color: var(--tc-text-muted);
+    --bs-command-reference-flag-desc-font-size: 0.8125rem;
+    --bs-command-reference-flags-border-top: 1px solid var(--tc-slate-100);
+
+    // ── Empty state ────────────────────────────────────────────────────────────
+    --bs-command-reference-empty-color: var(--tc-text-faint);
+    --bs-command-reference-empty-font-size: 0.875rem;
+    --bs-command-reference-empty-padding-y: 1.5rem;
+    --bs-command-reference-empty-padding-x: 1rem;
+}
+
+// ── Outer wrapper ─────────────────────────────────────────────────────────────
+
+.tc-command-reference {
+    border: var(--bs-command-reference-border);
+    border-radius: var(--bs-command-reference-border-radius);
+    background: var(--bs-command-reference-bg);
+    overflow: hidden;
+}
+
+// ── Title header cap ──────────────────────────────────────────────────────────
+
+.tc-command-reference-title {
+    padding: var(--bs-command-reference-title-padding-y) var(--bs-command-reference-title-padding-x);
+    background: var(--bs-command-reference-title-bg);
+    border-bottom: var(--bs-command-reference-title-border);
+    font-size: var(--bs-command-reference-title-font-size);
+    font-weight: var(--bs-command-reference-title-font-weight);
+    color: var(--bs-command-reference-title-color);
+    line-height: 1.4;
+
+    &:empty {
+        display: none;
+    }
+}
+
+// ── Search bar ────────────────────────────────────────────────────────────────
+
+.tc-command-reference-search {
+    padding: var(--bs-command-reference-search-padding-y) var(--bs-command-reference-search-padding-x);
+    background: var(--bs-command-reference-search-bg);
+    border-bottom: var(--bs-command-reference-search-border);
+}
+
+.tc-command-reference-search-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: var(--bs-command-reference-input-border);
+    border-radius: 0;
+    background: var(--bs-command-reference-input-bg);
+    padding: var(--bs-command-reference-input-padding-y) var(--bs-command-reference-input-padding-x);
+
+    &:focus-within {
+        box-shadow: var(--bs-command-reference-input-focus-ring);
+        border-color: var(--tc-focus-ring);
+        outline: none;
+    }
+}
+
+.tc-command-reference-search-icon {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    color: var(--bs-command-reference-search-icon-color);
+
+    svg {
+        width: var(--bs-command-reference-search-icon-size);
+        height: var(--bs-command-reference-search-icon-size);
+        stroke: currentColor;
+        fill: none;
+    }
+}
+
+.tc-command-reference-input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: var(--tc-font-sans);
+    font-size: var(--bs-command-reference-input-font-size);
+    color: var(--bs-command-reference-input-color);
+    line-height: 1.5;
+
+    &::placeholder {
+        color: var(--bs-command-reference-input-placeholder-color);
+    }
+}
+
+// ── Results list ──────────────────────────────────────────────────────────────
+
+.tc-command-reference-list {
+    overflow-y: auto;
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-focus-ring);
+        outline-offset: -2px;
+    }
+}
+
+// ── Command item ──────────────────────────────────────────────────────────────
+
+.tc-command-reference-item {
+    padding: var(--bs-command-reference-item-padding-y) var(--bs-command-reference-item-padding-x);
+    background: var(--bs-command-reference-item-bg);
+
+    & + & {
+        border-top: var(--bs-command-reference-item-border);
+    }
+}
+
+.tc-command-reference-item-header {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.tc-command-reference-name {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-command-reference-name-font-size);
+    font-weight: var(--bs-command-reference-name-font-weight);
+    color: var(--bs-command-reference-name-color);
+    white-space: nowrap;
+}
+
+.tc-command-reference-usage {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-command-reference-usage-font-size);
+    color: var(--bs-command-reference-usage-color);
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.tc-command-reference-desc {
+    margin: 0.25rem 0 0;
+    font-family: var(--tc-font-sans);
+    font-size: var(--bs-command-reference-desc-font-size);
+    color: var(--bs-command-reference-desc-color);
+    line-height: 1.55;
+}
+
+// ── Aliases ───────────────────────────────────────────────────────────────────
+
+.tc-command-reference-aliases {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin-top: 0.5rem;
+}
+
+.tc-command-reference-aliases-label {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-command-reference-aliases-label-font-size);
+    font-weight: 600;
+    letter-spacing: var(--bs-command-reference-aliases-label-letter-spacing);
+    text-transform: uppercase;
+    color: var(--bs-command-reference-aliases-label-color);
+    flex-shrink: 0;
+}
+
+.tc-command-reference-alias {
+    display: inline-block;
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-command-reference-alias-font-size);
+    color: var(--bs-command-reference-alias-color);
+    background: var(--bs-command-reference-alias-bg);
+    border: var(--bs-command-reference-alias-border);
+    border-radius: 0;
+    padding: 0.0625rem 0.375rem;
+    line-height: 1.5;
+}
+
+// ── Flags ─────────────────────────────────────────────────────────────────────
+
+.tc-command-reference-flags {
+    list-style: none;
+    margin: 0.5rem 0 0;
+    padding: 0;
+    border-top: var(--bs-command-reference-flags-border-top);
+    padding-top: 0.375rem;
+}
+
+.tc-command-reference-flag {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding: 0.25rem 0;
+}
+
+.tc-command-reference-flag-name {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-command-reference-flag-name-font-size);
+    font-weight: 500;
+    color: var(--bs-command-reference-flag-name-color);
+    background: transparent;
+    padding: 0;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.tc-command-reference-flag-desc {
+    font-family: var(--tc-font-sans);
+    font-size: var(--bs-command-reference-flag-desc-font-size);
+    color: var(--bs-command-reference-flag-desc-color);
+    line-height: 1.5;
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+
+.tc-command-reference-empty {
+    padding: var(--bs-command-reference-empty-padding-y) var(--bs-command-reference-empty-padding-x);
+    font-family: var(--tc-font-sans);
+    font-size: var(--bs-command-reference-empty-font-size);
+    color: var(--bs-command-reference-empty-color);
+    text-align: center;
+}

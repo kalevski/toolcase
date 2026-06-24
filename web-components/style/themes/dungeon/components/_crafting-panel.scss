@@ -1,0 +1,152 @@
+// Dungeon › tc-crafting-panel — gilded crafting frame: radial wood fill, triple
+// inset gold bevel, display-caps recipe rows + output/ingredient names, mono
+// quantities, gold selected-rail, blood-red insufficient ingredients, and the
+// metal-button gradient on the craft action. Token swap carries colours; the
+// .tc-* rules add the bevel, gradients, display caps and mono numerals.
+//
+// Design source:  game-components/style/components/_crafting-panel.scss
+// Target classes: web-components/style/components/_crafting-panel.scss
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-crafting-panel {
+        --bs-crafting-panel-list-bg: transparent;
+        --bs-crafting-panel-list-border-color: var(--fg-gold-deep);
+        --bs-crafting-panel-row-separator-color: rgba(201, 169, 97, 0.15);
+        --bs-crafting-panel-row-hover-bg: rgba(201, 169, 97, 0.08);
+        --bs-crafting-panel-selected-accent: var(--fg-gold);
+        --bs-crafting-panel-row-name-color: var(--fg-parch);
+
+        --bs-crafting-panel-icon-bg: rgba(0, 0, 0, 0.35);
+        --bs-crafting-panel-icon-color: var(--fg-gold-bright);
+
+        --bs-crafting-panel-detail-bg: transparent;
+        --bs-crafting-panel-detail-border-color: transparent;
+        --bs-crafting-panel-eyebrow-color: var(--fg-parch-dim);
+        --bs-crafting-panel-output-name-color: var(--fg-gold-bright);
+
+        --bs-crafting-panel-ingredient-border-color: rgba(201, 169, 97, 0.2);
+        --bs-crafting-panel-ingredient-name-color: var(--fg-parch);
+        --bs-crafting-panel-ingredient-qty-color: var(--fg-parch);
+        --bs-crafting-panel-insufficient-color: var(--fg-blood-bright);
+
+        --bs-crafting-panel-gap: 0;
+
+        --bs-crafting-panel-craft-bg: linear-gradient(180deg, #5a3a18, #2a1a0a);
+        --bs-crafting-panel-craft-color: var(--fg-gold-bright);
+    }
+
+    // Unified frame: list + detail share one gilded panel with an internal gold divider.
+    .tc-crafting-panel-detail {
+        border-left: 1px solid rgba(201, 169, 97, 0.25);
+    }
+
+    // Gilded outer frame — radial wood fill + triple inset gold bevel.
+    .tc-crafting-panel-list {
+        background:
+            linear-gradient(180deg, rgba(232, 220, 196, 0.04), rgba(0, 0, 0, 0.18)),
+            radial-gradient(120% 80% at 50% 0%, #2e2418 0%, #1a130c 70%);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 0 0 2px var(--fg-gold-deep),
+            inset 0 2px 0 rgba(255, 220, 150, 0.08),
+            0 8px 24px rgba(0, 0, 0, 0.6);
+    }
+
+    // Selected row = gold left-rail + soft gradient wash (no solid ink fill).
+    .tc-crafting-panel-row.is-selected {
+        background: linear-gradient(90deg, rgba(201, 169, 97, 0.18), transparent);
+        box-shadow: inset 3px 0 0 var(--fg-gold);
+
+        .tc-crafting-panel-row-name {
+            color: var(--fg-gold-bright);
+        }
+        .tc-crafting-panel-row-icon {
+            background: rgba(0, 0, 0, 0.35);
+            color: var(--fg-gold-bright);
+        }
+    }
+
+    // Recipe row names read as display caps.
+    .tc-crafting-panel-row-name {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 600;
+    }
+
+    // Output = gilded inset card with display-caps name + mono qty.
+    .tc-crafting-panel-output {
+        padding: 10px 12px;
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid var(--fg-gold);
+        box-shadow: inset 0 1px 0 rgba(232, 200, 120, 0.2);
+    }
+    .tc-crafting-panel-output-name {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 600;
+        text-shadow: 0 1px 2px #000;
+    }
+    .tc-crafting-panel-output-qty {
+        font-family: var(--fg-mono);
+    }
+
+    // Section eyebrows in display caps.
+    .tc-crafting-panel-eyebrow {
+        font-family: var(--fg-display);
+        letter-spacing: 0.16em;
+    }
+
+    // Ingredient rows = framed wells; insufficient turns blood-red.
+    .tc-crafting-panel-ingredients {
+        border-top: 0;
+        gap: 4px;
+    }
+    .tc-crafting-panel-ingredient {
+        padding: 6px 10px;
+        border: 1px solid rgba(201, 169, 97, 0.2);
+        background: rgba(0, 0, 0, 0.25);
+    }
+    .tc-crafting-panel-ingredient.is-insufficient {
+        border-color: var(--fg-blood);
+        background: rgba(168, 48, 42, 0.12);
+    }
+    .tc-crafting-panel-ingredient-name {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-size: 0.6875rem;
+    }
+    .tc-crafting-panel-ingredient-qty {
+        font-family: var(--fg-mono);
+    }
+
+    // Craft action = metal-button motif: gradient fill, gold edge, bevel stack.
+    // Right-aligned to match gc (gc uses align-self: flex-end).
+    .tc-crafting-panel-craft {
+        align-self: flex-end;
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-weight: 600;
+        border: 1px solid var(--fg-gold);
+        box-shadow:
+            inset 0 1px 0 rgba(232, 200, 120, 0.25),
+            inset 0 -8px 12px rgba(0, 0, 0, 0.4),
+            0 2px 0 rgba(0, 0, 0, 0.6);
+
+        &:hover:not(:disabled) {
+            filter: brightness(1.15);
+            box-shadow:
+                inset 0 1px 0 rgba(232, 200, 120, 0.25),
+                inset 0 -8px 12px rgba(0, 0, 0, 0.4),
+                0 2px 0 rgba(0, 0, 0, 0.6);
+        }
+        &:active:not(:disabled) {
+            filter: brightness(0.9);
+            transform: translateY(1px);
+        }
+    }
+}

@@ -1,0 +1,43 @@
+// Dungeon › tc-scroll-text — aged-vellum reading panel.
+// Token swap recolours the frame; structural additions a flat swap can't carry:
+// the dark translucent fill, the italic EB-Garamond body voice (base hardcodes a
+// non-italic system body), and the gold mono header (already mono in base — only
+// the colour/tracking need pointing). Sharp gold hairline frame, no notch.
+// Gold-bright eyebrow label and a --fg-rule gradient hairline divider replace the
+// flat rgba border-bottom for a more gilded-manuscript reading.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-scroll-text {
+        --bs-scroll-text-bg: rgba(10, 6, 4, 0.6);
+        --bs-scroll-text-border-color: rgba(201, 169, 97, 0.25);
+        // Brighter eyebrow label so the section title out-glows the parch body.
+        --bs-scroll-text-header-color: var(--fg-gold-bright);
+        --bs-scroll-text-header-letter-spacing: 0.2em;
+        // Suppress the flat border-bottom; replaced below with a --fg-rule bar.
+        --bs-scroll-text-header-border-color: transparent;
+        --bs-scroll-text-body-color: var(--fg-parch-3);
+        --bs-scroll-text-scrollbar-color: var(--fg-gold-deep);
+    }
+
+    // Body reads as the italic scriptorium hand.
+    .tc-scroll-text__body {
+        font-family: var(--fg-body);
+        font-style: italic;
+    }
+
+    // Replace the flat header underline with the gilded gradient hairline.
+    .tc-scroll-text__header {
+        position: relative;
+
+        &::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 1px;
+            background: var(--fg-rule);
+        }
+    }
+}

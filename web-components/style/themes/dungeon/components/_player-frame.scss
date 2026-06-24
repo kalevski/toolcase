@@ -1,0 +1,94 @@
+// Dungeon › tc-player-frame — gilded HUD nameplate. Token swap recolours the
+// shell, portrait well, bars and level badge to the fantasy palette; structural
+// rules add the wood-gradient shell + gilded inset bevel, display-caps name and
+// class label, and mono level badge. Resource bars repoint to element colours.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-player-frame {
+        --bs-player-frame-bg: linear-gradient(180deg, #1a1308 0%, #0e0905 100%);
+        --bs-player-frame-border: var(--fg-gold-deep);
+
+        --bs-player-frame-portrait-bg: radial-gradient(80% 80% at 50% 30%, #2a1f14, #0e0905);
+        --bs-player-frame-portrait-border: var(--fg-gold-deep);
+        --bs-player-frame-glyph-color: var(--fg-gold-bright);
+
+        --bs-player-frame-level-bg: rgba(0, 0, 0, 0.5);
+        --bs-player-frame-level-border: var(--fg-gold-deep);
+        --bs-player-frame-level-color: var(--fg-gold-bright);
+
+        --bs-player-frame-name-color: var(--fg-gold-bright);
+        --bs-player-frame-class-color: var(--fg-parch-dim);
+
+        --bs-player-frame-hp-track-bg: rgba(0, 0, 0, 0.5);
+        --bs-player-frame-hp-fill: var(--fg-blood-bright);
+        --bs-player-frame-mp-track-bg: rgba(0, 0, 0, 0.5);
+        --bs-player-frame-mp-fill: var(--fg-mana-bright);
+        --bs-player-frame-stamina-track-bg: rgba(0, 0, 0, 0.5);
+        --bs-player-frame-stamina-fill: var(--fg-stamina-bright);
+    }
+
+    // Shell: gilded inset bevel over the wood gradient (base ships flat).
+    .tc-player-frame {
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 1px 0 rgba(232, 200, 120, 0.12);
+        color: var(--fg-parch);
+    }
+
+    // Portrait well: inset gold ring + depth shadow to match standalone tc-portrait.
+    .tc-player-frame__portrait {
+        box-shadow:
+            inset 0 0 0 1px var(--fg-gold-bright),
+            inset 0 0 12px rgba(0, 0, 0, 0.6);
+    }
+
+    // Portrait glyph reads as gilded display caps.
+    .tc-player-frame__glyph {
+        font-family: var(--fg-display);
+        text-shadow: 0 1px 2px #000;
+    }
+
+    .tc-player-frame__level {
+        font-family: var(--fg-mono);
+    }
+
+    // Name + class: display caps.
+    .tc-player-frame__name {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+    }
+
+    .tc-player-frame__class {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+    }
+
+    // Header separator: faint gold underline divides identity from resources.
+    .tc-player-frame__header {
+        border-bottom: 1px solid rgba(201, 169, 97, 0.15);
+        padding-bottom: 0.25rem;
+    }
+
+    // Bar tracks: recessed gilded wells instead of plain dark slots.
+    .tc-player-frame__bar {
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+        border: 1px solid rgba(201, 169, 97, 0.15);
+    }
+
+    // Bar fills: gradient sheen instead of flat colour, keyed per resource kind.
+    .tc-player-frame__bar-fill {
+        background: linear-gradient(180deg, var(--fg-blood-bright), var(--fg-blood));
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+
+    .tc-player-frame__bar[data-kind="mp"] .tc-player-frame__bar-fill {
+        background: linear-gradient(180deg, var(--fg-mana-bright), var(--fg-mana));
+    }
+
+    .tc-player-frame__bar[data-kind="stamina"] .tc-player-frame__bar-fill {
+        background: linear-gradient(180deg, var(--fg-stamina-bright), var(--fg-stamina));
+    }
+}

@@ -1,0 +1,44 @@
+// Dungeon › tc-hit-marker — blood-tinted hit reticle. Token swap recolours the
+// ticks; structural rules add the fantasy drop-shadow glows per variant (parch
+// hairline default, bright-blood crit, deep-blood kill) plus a display-caps
+// glowing kill glyph. Sharp corners preserved (the ticks are square-capped).
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-hit-marker {
+        --bs-hit-marker-color: var(--fg-parch);
+        --bs-hit-marker-crit-color: var(--fg-blood-bright);
+        --bs-hit-marker-kill-color: var(--fg-blood);
+    }
+
+    // Default ticks: parch hairline with a soft drop shadow + faint warm gold
+    // ambient so the reticle reads as gilded-ink rather than plain off-white.
+    .tc-hit-marker-line {
+        filter: drop-shadow(0 1px 2px #000) drop-shadow(0 0 2px rgba(201, 169, 97, 0.4));
+    }
+
+    // Crit: bright-blood, heavier stroke, warm glow — colour driven from token.
+    .tc-hit-marker[data-variant='crit'] .tc-hit-marker-line {
+        stroke-width: 2.5;
+        filter: drop-shadow(0 0 4px var(--fg-blood-bright));
+    }
+
+    // Kill: deep-blood, heavier stroke, strong glow — colour driven from token.
+    .tc-hit-marker[data-variant='kill'] .tc-hit-marker-line {
+        stroke-width: 2.5;
+        filter: drop-shadow(0 0 6px var(--fg-blood));
+    }
+
+    // Kill glyph — text-shadow fallback for the emoji path.
+    .tc-hit-marker-glyph {
+        font-family: var(--fg-display);
+        color: var(--fg-blood-bright);
+        text-shadow: 0 0 6px var(--fg-blood-bright), 0 1px 2px #000;
+    }
+
+    // Kill glyph — filter glow so the SVG Skull (stroke: currentColor) also glows.
+    .tc-hit-marker[data-variant='kill'] .tc-hit-marker-glyph {
+        color: var(--fg-blood-bright);
+        filter: drop-shadow(0 0 6px var(--fg-blood-bright)) drop-shadow(0 1px 2px #000);
+    }
+}

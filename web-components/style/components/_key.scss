@@ -1,0 +1,79 @@
+// tc-key — single keyboard key glyph. Sharp square cap, JetBrains Mono.
+// Size variants (sm/md/lg) and an active state for interaction hints.
+// All cosmetics via --bs-key-* custom properties.
+
+tc-key {
+    --bs-key-font-family: var(--bs-font-monospace);
+    --bs-key-font-size: 0.71875rem;       // ~11.5px — micro label tier
+    --bs-key-font-size-sm: 0.625rem;      // ~10px
+    --bs-key-font-size-lg: 0.875rem;      // ~14px
+    --bs-key-font-weight: 500;
+    --bs-key-color: var(--tc-text);
+    --bs-key-bg: var(--tc-surface-muted);
+    --bs-key-border-color: var(--tc-border-strong);
+    --bs-key-border-width: 1px;
+    --bs-key-padding-x: 0.4em;
+    --bs-key-padding-y: 0.2em;
+    --bs-key-padding-x-sm: 0.3em;
+    --bs-key-padding-y-sm: 0.15em;
+    --bs-key-padding-x-lg: 0.55em;
+    --bs-key-padding-y-lg: 0.28em;
+    --bs-key-active-color: var(--tc-app-accent);
+    --bs-key-active-bg: color-mix(in oklch, var(--tc-app-accent) 8%, var(--tc-surface));
+    --bs-key-active-border-color: var(--tc-app-accent);
+    --bs-key-min-width: 1.75em;
+    --bs-key-min-width-sm: 1.5em;
+    --bs-key-min-width-lg: 2em;
+
+    vertical-align: baseline;
+}
+
+.tc-key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--bs-key-font-family);
+    font-size: var(--bs-key-font-size);
+    font-weight: var(--bs-key-font-weight);
+    line-height: 1;
+    color: var(--bs-key-color);
+    background-color: var(--bs-key-bg);
+    border: var(--bs-key-border-width) solid var(--bs-key-border-color);
+    // Faint bottom border suggests key depth without adding elevation
+    border-bottom-width: 2px;
+    border-radius: 0; // sharp by mandate
+    padding: var(--bs-key-padding-y) var(--bs-key-padding-x);
+    min-width: var(--bs-key-min-width);
+    white-space: nowrap;
+    user-select: none;
+    text-align: center;
+    background-image: none;
+    box-shadow: none;
+}
+
+.tc-key--sm {
+    font-size: var(--bs-key-font-size-sm);
+    padding: var(--bs-key-padding-y-sm) var(--bs-key-padding-x-sm);
+    min-width: var(--bs-key-min-width-sm);
+}
+
+.tc-key--lg {
+    font-size: var(--bs-key-font-size-lg);
+    padding: var(--bs-key-padding-y-lg) var(--bs-key-padding-x-lg);
+    min-width: var(--bs-key-min-width-lg);
+}
+
+.tc-key--active {
+    color: var(--bs-key-active-color);
+    background-color: var(--bs-key-active-bg);
+    border-color: var(--bs-key-active-border-color);
+}
+
+// 44px coarse touch target wrapper
+@media (pointer: coarse) {
+    tc-key {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+    }
+}

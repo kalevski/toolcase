@@ -1,0 +1,228 @@
+// tc-guild-panel — guild / clan panel with a header (eyebrow, name + tag, motto),
+// a stats strip (level, members, online), and a member roster (status pip, name,
+// rank chip, contribution). Restyled from the game-components `gc-guild-panel`
+// to the toolcase design system: slate neutrals, hairline borders, sharp corners
+// (the status pip is the only sanctioned `border-radius`), status as the only
+// color, and JetBrains Mono for the eyebrows / stat values / rank chips.
+// All cosmetics flow through --bs-guild-panel-* custom properties backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+tc-guild-panel {
+    --bs-guild-panel-bg: var(--tc-surface);
+    --bs-guild-panel-border: var(--tc-border);
+    --bs-guild-panel-separator: var(--tc-slate-100, #f1f5f9);
+    --bs-guild-panel-padding: 1rem;
+
+    // Header
+    --bs-guild-panel-eyebrow-color: var(--tc-text-faint, var(--tc-text-muted));
+    --bs-guild-panel-name-color: var(--tc-text);
+    --bs-guild-panel-name-size: 1.0625rem;
+    --bs-guild-panel-tag-color: var(--tc-text-muted);
+    --bs-guild-panel-motto-color: var(--tc-text-muted);
+
+    // Stats strip
+    --bs-guild-panel-stats-bg: var(--tc-surface-muted);
+    --bs-guild-panel-stat-label-color: var(--tc-text-faint, var(--tc-text-muted));
+    --bs-guild-panel-stat-value-color: var(--tc-text);
+
+    // Roster
+    --bs-guild-panel-row-hover-bg: var(--tc-surface-hover, var(--tc-surface-muted));
+    --bs-guild-panel-member-name-color: var(--tc-text);
+    --bs-guild-panel-member-rank-bg: var(--tc-surface-muted);
+    --bs-guild-panel-member-rank-color: var(--tc-text-muted);
+    --bs-guild-panel-member-contribution-color: var(--tc-text-muted);
+
+    // Status pip (the only sanctioned border-radius)
+    --bs-guild-panel-pip-size: 8px;
+    --bs-guild-panel-pip-online: var(--tc-success);
+    --bs-guild-panel-pip-offline: var(--tc-text-faint, var(--tc-text-muted));
+}
+
+.tc-guild-panel {
+    background: var(--bs-guild-panel-bg);
+    border: 1px solid var(--bs-guild-panel-border);
+    border-radius: 0;
+    overflow: hidden;
+}
+
+// ── Header ───────────────────────────────────────────────────────────────────
+
+.tc-guild-panel-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    padding: var(--bs-guild-panel-padding);
+    border-bottom: 1px solid var(--bs-guild-panel-separator);
+}
+
+// Shared mono micro-label (eyebrows + stat labels).
+.tc-guild-panel-eyebrow,
+.tc-guild-panel-stat-label {
+    font-family: var(--bs-font-monospace, 'JetBrains Mono', monospace);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1.2;
+    color: var(--bs-guild-panel-eyebrow-color);
+}
+
+.tc-guild-panel-name {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.tc-guild-panel-name-text {
+    font-size: var(--bs-guild-panel-name-size);
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--bs-guild-panel-name-color);
+}
+
+.tc-guild-panel-tag {
+    font-family: var(--bs-font-monospace, 'JetBrains Mono', monospace);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--bs-guild-panel-tag-color);
+}
+
+.tc-guild-panel-motto {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-style: italic;
+    line-height: 1.4;
+    color: var(--bs-guild-panel-motto-color);
+}
+
+// ── Stats strip ──────────────────────────────────────────────────────────────
+
+.tc-guild-panel-stats {
+    display: flex;
+    gap: 1px;
+    padding: 0;
+    background: var(--bs-guild-panel-separator);
+    border-bottom: 1px solid var(--bs-guild-panel-separator);
+}
+
+.tc-guild-panel-stat {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    padding: 0.625rem var(--bs-guild-panel-padding);
+    background: var(--bs-guild-panel-stats-bg);
+}
+
+.tc-guild-panel-stat-value {
+    font-family: var(--bs-font-monospace, 'JetBrains Mono', monospace);
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.1;
+    color: var(--bs-guild-panel-stat-value-color);
+}
+
+// ── Roster ───────────────────────────────────────────────────────────────────
+
+.tc-guild-panel-roster {
+    padding: var(--bs-guild-panel-padding);
+}
+
+.tc-guild-panel-roster .tc-guild-panel-eyebrow {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.tc-guild-panel-members {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.tc-guild-panel-member {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4375rem 0.5rem;
+    border-bottom: 1px solid var(--bs-guild-panel-separator);
+    transition: background-color var(--tc-transition-fast, 0.15s ease);
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    &:hover {
+        background: var(--bs-guild-panel-row-hover-bg);
+    }
+
+    // Offline rows read as deprioritised, not disabled.
+    &--offline {
+        opacity: 0.65;
+    }
+}
+
+// Status pip — the only sanctioned circle in the component.
+.tc-guild-panel-member-pip {
+    flex-shrink: 0;
+    width: var(--bs-guild-panel-pip-size);
+    height: var(--bs-guild-panel-pip-size);
+    border-radius: 50%;
+    background: var(--bs-guild-panel-pip-offline);
+
+    .tc-guild-panel-member--online & {
+        background: var(--bs-guild-panel-pip-online);
+    }
+}
+
+.tc-guild-panel-member-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--bs-guild-panel-member-name-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tc-guild-panel-member-rank {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.4375rem;
+    font-family: var(--bs-font-monospace, 'JetBrains Mono', monospace);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.025em;
+    line-height: 1.4;
+    background: var(--bs-guild-panel-member-rank-bg);
+    color: var(--bs-guild-panel-member-rank-color);
+    border-radius: 0;
+    white-space: nowrap;
+}
+
+.tc-guild-panel-member-contribution {
+    flex-shrink: 0;
+    font-family: var(--bs-font-monospace, 'JetBrains Mono', monospace);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--bs-guild-panel-member-contribution-color);
+    font-variant-numeric: tabular-nums;
+}
+
+.tc-guild-panel-empty {
+    padding: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--tc-text-muted);
+}
+
+// ── Reduced motion ───────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-guild-panel-member {
+        transition: none;
+    }
+}

@@ -1,0 +1,75 @@
+// tc-placeholder — flat slate-200 skeleton bars; glow pulses opacity, wave is
+// the 400px slate-200/slate-100 shimmer gradient.
+
+tc-placeholder {
+    display: block;
+
+    .tc-placeholder-content {
+        display: block;
+    }
+}
+
+.placeholder {
+    --bs-placeholder-opacity: 1;
+
+    display: inline-block;
+    min-height: 1em;
+    vertical-align: middle;
+    cursor: wait;
+    background-color: var(--tc-slate-200);
+    opacity: var(--bs-placeholder-opacity);
+
+    &.btn::before {
+        display: inline-block;
+        content: '';
+    }
+}
+
+.placeholder-xs {
+    min-height: 0.6em;
+}
+
+.placeholder-sm {
+    min-height: 0.8em;
+}
+
+.placeholder-lg {
+    min-height: 1.2em;
+}
+
+.placeholder-glow .placeholder {
+    animation: placeholder-glow 2s ease-in-out infinite;
+}
+
+.placeholder-wave .placeholder {
+    background: linear-gradient(
+        90deg,
+        var(--tc-slate-200) 25%,
+        var(--tc-slate-100) 37%,
+        var(--tc-slate-200) 63%
+    );
+    background-size: 400px 100%;
+    animation: placeholder-wave 1.4s infinite linear;
+}
+
+@keyframes placeholder-glow {
+    50% {
+        opacity: 0.2;
+    }
+}
+
+@keyframes placeholder-wave {
+    0% {
+        background-position: -200px 0;
+    }
+    100% {
+        background-position: 200px 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .placeholder-glow .placeholder,
+    .placeholder-wave .placeholder {
+        animation: none;
+    }
+}

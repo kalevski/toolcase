@@ -1,0 +1,29 @@
+// Dungeon › tc-hero-stats-bar — horizontal tally strip.
+// Foundation token remap already covers colors + mono numerals for free.
+// This override lifts labels to display caps (engraved stat names) and
+// upgrades the flat hairline dividers to ornamental gold-rule gradients.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // Gilded value tally — lift value color from parchment to gold-bright
+    // so each figure reads as a treasure count.
+    tc-hero-stats-bar {
+        --bs-hero-stats-bar-value-color: var(--fg-gold-bright);
+    }
+
+    // Labels: base hardcodes mono — override to display caps for engraved
+    // stat-name reading (font-family cannot be swapped via a token var alone).
+    .tc-hero-stats-bar-label {
+        font-family: var(--fg-display);
+        letter-spacing: 0.16em;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    // Ornamental gold-rule divider — replace flat 1px solid with the
+    // --fg-rule gradient hairline for a more gilded strip between cells.
+    .tc-hero-stats-bar-item + .tc-hero-stats-bar-item {
+        border-left: 1px solid transparent;
+        border-image: var(--fg-rule) 1;
+    }
+}

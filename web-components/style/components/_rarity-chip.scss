@@ -1,0 +1,82 @@
+// tc-rarity-chip — item-rarity label chip: Common … Mythic.
+// Port of game-components `gc-rarity-chip`, restyled to the design system:
+// sharp corners, mono uppercase label, 1px hairline border, rarity-tinted text
+// and border. All cosmetics flow through --bs-rarity-chip-* custom properties.
+// Fantasy chrome (gilded frames, glows, metal textures) is not reproduced.
+
+@use 'sass:map';
+@use '../foundation/tokens' as *;
+
+.tc-rarity-chip {
+    --bs-rarity-chip-padding-x: 0.5rem;
+    --bs-rarity-chip-padding-y: 0.1875rem;
+    --bs-rarity-chip-font-size: 0.6875rem;
+    --bs-rarity-chip-font-weight: 600;
+    --bs-rarity-chip-letter-spacing: 0.08em;
+    --bs-rarity-chip-bg: var(--tc-surface-muted);
+    --bs-rarity-chip-color: var(--tc-text-muted);
+    --bs-rarity-chip-border-color: var(--tc-border);
+    --bs-rarity-chip-border-width: 1px;
+
+    display: inline-flex;
+    align-items: center;
+    padding: var(--bs-rarity-chip-padding-y) var(--bs-rarity-chip-padding-x);
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-rarity-chip-font-size);
+    font-weight: var(--bs-rarity-chip-font-weight);
+    letter-spacing: var(--bs-rarity-chip-letter-spacing);
+    text-transform: uppercase;
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--bs-rarity-chip-color);
+    background-color: var(--bs-rarity-chip-bg);
+    border: var(--bs-rarity-chip-border-width) solid var(--bs-rarity-chip-border-color);
+    border-radius: 0;
+    user-select: none;
+    vertical-align: middle;
+}
+
+// Per-rarity color variants following the sanctioned token ramp.
+// `common` keeps the muted neutral defaults; higher tiers override.
+.tc-rarity-chip--uncommon {
+    --bs-rarity-chip-color: var(--tc-success);
+    --bs-rarity-chip-border-color: var(--tc-success);
+    --bs-rarity-chip-bg: #{map.get($theme-colors-soft, 'success')};
+}
+
+.tc-rarity-chip--rare {
+    --bs-rarity-chip-color: var(--tc-info);
+    --bs-rarity-chip-border-color: var(--tc-info);
+    --bs-rarity-chip-bg: #{map.get($theme-colors-soft, 'info')};
+}
+
+.tc-rarity-chip--epic {
+    --bs-rarity-chip-color: var(--tc-app-accent);
+    --bs-rarity-chip-border-color: var(--tc-app-accent);
+    --bs-rarity-chip-bg: #{map.get($theme-colors-soft, 'primary')};
+}
+
+.tc-rarity-chip--legendary {
+    --bs-rarity-chip-color: var(--tc-warning);
+    --bs-rarity-chip-border-color: var(--tc-warning);
+    --bs-rarity-chip-bg: #{map.get($theme-colors-soft, 'warning')};
+}
+
+.tc-rarity-chip--mythic {
+    --bs-rarity-chip-color: var(--tc-danger);
+    --bs-rarity-chip-border-color: var(--tc-danger);
+    --bs-rarity-chip-bg: #{map.get($theme-colors-soft, 'danger')};
+}
+
+// 44 px minimum touch target under coarse pointers.
+@media (pointer: coarse) {
+    .tc-rarity-chip {
+        min-height: 2.75rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-rarity-chip {
+        transition: none;
+    }
+}

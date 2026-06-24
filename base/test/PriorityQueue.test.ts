@@ -26,9 +26,11 @@ describe('PriorityQueue', () => {
         expect(pq.length).toBe(1)
     })
 
-    it('dequeue returns null when empty', () => {
+    it('dequeue returns null when empty and leaves no stray -1 key', () => {
         const pq = new PriorityQueue(n => n)
         expect(pq.dequeue()).toBeNull()
+        expect((pq as any).values['-1']).toBeUndefined()
+        expect(Object.prototype.hasOwnProperty.call((pq as any).values, '-1')).toBe(false)
     })
 
     it('pop removes last element', () => {
@@ -47,6 +49,18 @@ describe('PriorityQueue', () => {
         pq.enqueue({ id: 'b', priority: 2 })
         expect(pq.has({ id: 'a' })).toBe(true)
         expect(pq.has({ id: 'c' })).toBe(false)
+    })
+
+    it('has() remains true after dequeuing one of two duplicate-key items', () => {
+        const pq = new PriorityQueue<{ id: string; priority: number }>(n => n.priority, n => n.id)
+        const a1 = { id: 'dup', priority: 1 }
+        const a2 = { id: 'dup', priority: 2 }
+        pq.enqueue(a1)
+        pq.enqueue(a2)
+        pq.dequeue()
+        expect(pq.has({ id: 'dup', priority: 0 })).toBe(true)
+        pq.dequeue()
+        expect(pq.has({ id: 'dup', priority: 0 })).toBe(false)
     })
 
     it('has() returns null without uniqueFn', () => {

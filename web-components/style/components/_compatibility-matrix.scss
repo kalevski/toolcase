@@ -1,0 +1,255 @@
+// tc-compatibility-matrix — version × platform support matrix with icons and legend.
+// All cosmetics flow through --bs-compatibility-matrix-* custom properties backed by --tc-* tokens.
+// Design rails: sharp corners (border-radius: 0), slate hairlines, status color on icons only. No shadows.
+
+@use '../foundation/tokens' as *;
+
+tc-compatibility-matrix {
+    // ── Frame ────────────────────────────────────────────────────────────────
+    --bs-compatibility-matrix-border: 1px solid var(--tc-border);
+    --bs-compatibility-matrix-inner-border: 1px solid var(--tc-slate-100);
+    --bs-compatibility-matrix-bg: var(--tc-surface);
+
+    // ── Header (optional title) ──────────────────────────────────────────────
+    --bs-compatibility-matrix-header-bg: var(--tc-surface-muted);
+    --bs-compatibility-matrix-header-padding-y: 0.875rem;
+    --bs-compatibility-matrix-header-padding-x: 1.25rem;
+    --bs-compatibility-matrix-title-font-size: 1rem;
+    --bs-compatibility-matrix-title-font-weight: 600;
+    --bs-compatibility-matrix-title-color: var(--tc-text);
+
+    // ── Platform header row ──────────────────────────────────────────────────
+    --bs-compatibility-matrix-head-bg: var(--tc-surface-muted);
+    --bs-compatibility-matrix-head-padding-y: 0.625rem;
+    --bs-compatibility-matrix-head-padding-x: 1rem;
+    --bs-compatibility-matrix-platform-label-font-size: 0.6875rem;
+    --bs-compatibility-matrix-platform-label-color: var(--tc-text-muted);
+    --bs-compatibility-matrix-platform-label-letter-spacing: 0.08em;
+
+    // ── Version column (sticky first column) ────────────────────────────────
+    --bs-compatibility-matrix-version-bg: var(--tc-surface-muted);
+    --bs-compatibility-matrix-version-padding-y: 0.625rem;
+    --bs-compatibility-matrix-version-padding-x: 1rem;
+    --bs-compatibility-matrix-version-label-font-size: 0.6875rem;
+    --bs-compatibility-matrix-version-label-color: var(--tc-text-muted);
+    --bs-compatibility-matrix-version-label-letter-spacing: 0.06em;
+    --bs-compatibility-matrix-version-min-width: 7rem;
+
+    // ── Status cells ─────────────────────────────────────────────────────────
+    --bs-compatibility-matrix-cell-padding-y: 0.625rem;
+    --bs-compatibility-matrix-cell-padding-x: 1rem;
+    --bs-compatibility-matrix-indicator-size: 1rem;
+
+    // ── Status colors (icons only) ───────────────────────────────────────────
+    --bs-compatibility-matrix-yes-color: var(--tc-success);
+    --bs-compatibility-matrix-no-color: var(--tc-danger);
+    --bs-compatibility-matrix-partial-color: var(--tc-warning);
+    --bs-compatibility-matrix-unknown-color: var(--tc-text-faint);
+
+    // ── Legend ───────────────────────────────────────────────────────────────
+    --bs-compatibility-matrix-legend-bg: var(--tc-surface-muted);
+    --bs-compatibility-matrix-legend-border: 1px solid var(--tc-border);
+    --bs-compatibility-matrix-legend-padding-y: 0.625rem;
+    --bs-compatibility-matrix-legend-padding-x: 1.25rem;
+    --bs-compatibility-matrix-legend-label-font-size: 0.75rem;
+    --bs-compatibility-matrix-legend-label-color: var(--tc-text-muted);
+    --bs-compatibility-matrix-legend-gap: 1.25rem;
+    --bs-compatibility-matrix-legend-item-gap: 0.375rem;
+}
+
+// ── Outer frame ───────────────────────────────────────────────────────────────
+
+.tc-compatibility-matrix {
+    border: var(--bs-compatibility-matrix-border);
+    border-radius: 0;
+    background: var(--bs-compatibility-matrix-bg);
+    overflow: hidden;
+}
+
+// ── Optional header ───────────────────────────────────────────────────────────
+
+.tc-compatibility-matrix__header {
+    padding: var(--bs-compatibility-matrix-header-padding-y) var(--bs-compatibility-matrix-header-padding-x);
+    background: var(--bs-compatibility-matrix-header-bg);
+    border-bottom: var(--bs-compatibility-matrix-border);
+}
+
+.tc-compatibility-matrix__title {
+    margin: 0;
+    font-size: var(--bs-compatibility-matrix-title-font-size);
+    font-weight: var(--bs-compatibility-matrix-title-font-weight);
+    color: var(--bs-compatibility-matrix-title-color);
+    line-height: 1.35;
+}
+
+// ── Table wrapper (horizontal scroll) ────────────────────────────────────────
+
+.tc-compatibility-matrix-table {
+    overflow-x: auto;
+}
+
+.tc-compatibility-matrix__table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+}
+
+// ── Shared cell base ──────────────────────────────────────────────────────────
+
+.tc-compatibility-matrix__cell {
+    padding: var(--bs-compatibility-matrix-cell-padding-y) var(--bs-compatibility-matrix-cell-padding-x);
+    vertical-align: middle;
+    border-bottom: var(--bs-compatibility-matrix-inner-border);
+}
+
+// ── Platform header row ───────────────────────────────────────────────────────
+
+.tc-compatibility-matrix__head-row {
+    background: var(--bs-compatibility-matrix-head-bg);
+    border-bottom: var(--bs-compatibility-matrix-border);
+
+    .tc-compatibility-matrix__cell {
+        padding: var(--bs-compatibility-matrix-head-padding-y) var(--bs-compatibility-matrix-head-padding-x);
+        border-bottom: none;
+    }
+}
+
+.tc-compatibility-matrix__corner {
+    // Top-left corner cell — no label, background matches header.
+}
+
+.tc-compatibility-matrix__platform-head {
+    text-align: center;
+}
+
+.tc-compatibility-matrix__platform-label {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-compatibility-matrix-platform-label-font-size);
+    color: var(--bs-compatibility-matrix-platform-label-color);
+    letter-spacing: var(--bs-compatibility-matrix-platform-label-letter-spacing);
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+// ── Version column (sticky) ───────────────────────────────────────────────────
+
+.tc-compatibility-matrix__version-cell {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    min-width: var(--bs-compatibility-matrix-version-min-width);
+    background: var(--bs-compatibility-matrix-version-bg);
+    border-right: var(--bs-compatibility-matrix-border);
+    padding: var(--bs-compatibility-matrix-version-padding-y) var(--bs-compatibility-matrix-version-padding-x);
+    text-align: left;
+}
+
+.tc-compatibility-matrix__version-label {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-compatibility-matrix-version-label-font-size);
+    color: var(--bs-compatibility-matrix-version-label-color);
+    letter-spacing: var(--bs-compatibility-matrix-version-label-letter-spacing);
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+// ── Status cells ──────────────────────────────────────────────────────────────
+
+.tc-compatibility-matrix__status-cell {
+    text-align: center;
+}
+
+// ── Status indicators ─────────────────────────────────────────────────────────
+
+.tc-compatibility-matrix__indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+        width: var(--bs-compatibility-matrix-indicator-size);
+        height: var(--bs-compatibility-matrix-indicator-size);
+    }
+}
+
+.tc-compatibility-matrix__indicator--yes {
+    color: var(--bs-compatibility-matrix-yes-color);
+}
+
+.tc-compatibility-matrix__indicator--no {
+    color: var(--bs-compatibility-matrix-no-color);
+}
+
+.tc-compatibility-matrix__indicator--partial {
+    color: var(--bs-compatibility-matrix-partial-color);
+}
+
+.tc-compatibility-matrix__indicator--unknown {
+    color: var(--bs-compatibility-matrix-unknown-color);
+}
+
+// ── Legend ─────────────────────────────────────────────────────────────────────
+
+.tc-compatibility-matrix__legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--bs-compatibility-matrix-legend-gap);
+    padding: var(--bs-compatibility-matrix-legend-padding-y) var(--bs-compatibility-matrix-legend-padding-x);
+    background: var(--bs-compatibility-matrix-legend-bg);
+    border-top: var(--bs-compatibility-matrix-legend-border);
+}
+
+.tc-compatibility-matrix__legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-compatibility-matrix-legend-item-gap);
+
+    svg {
+        width: var(--bs-compatibility-matrix-indicator-size);
+        height: var(--bs-compatibility-matrix-indicator-size);
+    }
+
+    &.tc-compatibility-matrix__legend-item--yes {
+        color: var(--bs-compatibility-matrix-yes-color);
+    }
+
+    &.tc-compatibility-matrix__legend-item--no {
+        color: var(--bs-compatibility-matrix-no-color);
+    }
+
+    &.tc-compatibility-matrix__legend-item--partial {
+        color: var(--bs-compatibility-matrix-partial-color);
+    }
+
+    &.tc-compatibility-matrix__legend-item--unknown {
+        color: var(--bs-compatibility-matrix-unknown-color);
+    }
+}
+
+.tc-compatibility-matrix__legend-label {
+    font-size: var(--bs-compatibility-matrix-legend-label-font-size);
+    color: var(--bs-compatibility-matrix-legend-label-color);
+    line-height: 1;
+}
+
+// ── Screen-reader helper (scoped) ─────────────────────────────────────────────
+
+.tc-compatibility-matrix .tc-compatibility-matrix__sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+// ── Reduced motion ─────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    // No animations in this component currently.
+    // Placeholder for any future transition overrides.
+}

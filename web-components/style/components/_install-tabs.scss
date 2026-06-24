@@ -1,0 +1,183 @@
+// tc-install-tabs — tabbed install command picker with copy button.
+// Sharp corners, ink code surface, 2px app-accent underline on active tab.
+// All cosmetics flow through --bs-install-tabs-* backed by --tc-* tokens.
+
+tc-install-tabs {
+    // Tab row
+    --bs-install-tabs-tab-row-border: 1px solid var(--tc-border);
+    --bs-install-tabs-tab-padding: 0.375rem 0.75rem;
+    --bs-install-tabs-tab-font-size: 0.8rem;
+    --bs-install-tabs-tab-color: var(--tc-text-muted);
+    --bs-install-tabs-tab-color-active: var(--tc-text);
+    --bs-install-tabs-tab-active-underline: 2px solid var(--tc-app-accent);
+
+    // Code panel (ink surface — matches CodeSnippet)
+    --bs-install-tabs-panel-bg: var(--tc-ink);
+    --bs-install-tabs-panel-border: 1px solid var(--tc-border);
+    --bs-install-tabs-panel-padding: 0.75rem 1rem;
+    --bs-install-tabs-code-color: var(--tc-text-inverse);
+    --bs-install-tabs-code-font-size: 0.875rem;
+
+    // Copy button (ghost icon on ink surface)
+    --bs-install-tabs-copy-color: var(--tc-text-muted);
+    --bs-install-tabs-copy-hover-bg: rgba(255, 255, 255, 0.08);
+    --bs-install-tabs-copy-copied-color: #99cc88;
+    --bs-install-tabs-copy-icon-size: 1rem;
+}
+
+.tc-install-tabs {
+    border-radius: 0;
+}
+
+// ── Tab row ────────────────────────────────────────────────────────────────────
+
+.tc-install-tabs-tablist {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    border-bottom: var(--bs-install-tabs-tab-row-border);
+}
+
+.tc-install-tabs-tab {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--bs-install-tabs-tab-padding);
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-install-tabs-tab-font-size);
+    font-weight: 400;
+    color: var(--bs-install-tabs-tab-color);
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px; // sit flush on the row hairline
+    cursor: pointer;
+    transition: color var(--tc-transition-fast, 0.15s ease);
+    white-space: nowrap;
+
+    &:hover {
+        color: var(--bs-install-tabs-tab-color-active);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &--active {
+        color: var(--bs-install-tabs-tab-color-active);
+        border-bottom: var(--bs-install-tabs-tab-active-underline);
+        font-weight: 500;
+    }
+}
+
+// 44 px coarse touch target
+@media (pointer: coarse) {
+    .tc-install-tabs-tab {
+        min-height: 44px;
+    }
+}
+
+// ── Code panel ─────────────────────────────────────────────────────────────────
+
+.tc-install-tabs-panel {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: var(--bs-install-tabs-panel-bg);
+    border: var(--bs-install-tabs-panel-border);
+    border-top: none;
+    border-radius: 0;
+    padding: var(--bs-install-tabs-panel-padding);
+    overflow: hidden;
+}
+
+.tc-install-tabs-pre {
+    flex: 1;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
+    overflow-x: auto;
+}
+
+.tc-install-tabs-code {
+    display: block;
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-install-tabs-code-font-size);
+    color: var(--bs-install-tabs-code-color);
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    white-space: pre;
+    user-select: text;
+}
+
+// ── Copy button ────────────────────────────────────────────────────────────────
+
+.tc-install-tabs-copy {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0.25rem;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    color: var(--bs-install-tabs-copy-color);
+    line-height: 1;
+    transition: background-color var(--tc-transition-fast, 0.15s ease), color var(--tc-transition-fast, 0.15s ease);
+
+    svg {
+        width: var(--bs-install-tabs-copy-icon-size);
+        height: var(--bs-install-tabs-copy-icon-size);
+        flex-shrink: 0;
+        stroke: currentColor;
+        stroke-width: 2;
+    }
+
+    &:hover {
+        background-color: var(--bs-install-tabs-copy-hover-bg);
+        color: var(--tc-text-inverse);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &--copied {
+        color: var(--bs-install-tabs-copy-copied-color);
+    }
+}
+
+@media (pointer: coarse) {
+    .tc-install-tabs-copy {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+// ── Accessible status region (visually hidden) ─────────────────────────────────
+
+.tc-install-tabs-status {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+// ── Reduced motion ─────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-install-tabs-tab,
+    .tc-install-tabs-copy {
+        transition: none;
+    }
+}

@@ -1,0 +1,115 @@
+// tc-ammo-counter — compact magazine / reserve readout for a game HUD.
+// All cosmetics flow through --bs-ammo-counter-* custom properties backed by --tc-* tokens.
+// Sharp corners; slate neutrals; white surface; 1px hairline; JetBrains Mono machine-facing
+// readout. Game-components fantasy chrome (gilded frame, glows, parchment fills) is dropped —
+// state is conveyed through the slate ladder, danger ink for low ammo, and the ink accent.
+
+@use '../foundation/tokens' as *;
+
+tc-ammo-counter {
+    --bs-ammo-counter-bg: var(--tc-surface);
+    --bs-ammo-counter-border-color: var(--tc-border-strong);
+    --bs-ammo-counter-shadow: var(--tc-shadow-sm);
+    --bs-ammo-counter-padding-y: 0.625rem;
+    --bs-ammo-counter-padding-x: 0.875rem;
+    --bs-ammo-counter-min-width: 8.75rem;
+
+    --bs-ammo-counter-weapon-color: var(--tc-text-muted);
+    --bs-ammo-counter-weapon-font-size: 0.6875rem;
+    --bs-ammo-counter-weapon-letter-spacing: 0.12em;
+
+    --bs-ammo-counter-mag-color: var(--tc-text);
+    --bs-ammo-counter-mag-font-size: 1.75rem;
+    --bs-ammo-counter-mag-font-weight: 600;
+
+    --bs-ammo-counter-sep-color: var(--tc-text-faint, var(--tc-text-muted));
+    --bs-ammo-counter-max-color: var(--tc-text-muted);
+    --bs-ammo-counter-secondary-font-size: 1rem;
+
+    --bs-ammo-counter-reserve-color: var(--tc-text-muted);
+    --bs-ammo-counter-reserve-font-size: 0.8125rem;
+
+    // State accents — danger ink for a low magazine, ink accent for the reloading label.
+    --bs-ammo-counter-low-color: var(--tc-danger);
+    --bs-ammo-counter-state-color: var(--tc-app-accent);
+    --bs-ammo-counter-state-font-size: 0.625rem;
+    --bs-ammo-counter-state-letter-spacing: 0.12em;
+}
+
+.tc-ammo-counter {
+    box-sizing: border-box;
+    min-width: var(--bs-ammo-counter-min-width);
+    padding: var(--bs-ammo-counter-padding-y) var(--bs-ammo-counter-padding-x);
+    background: var(--bs-ammo-counter-bg);
+    border: 1px solid var(--bs-ammo-counter-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-ammo-counter-shadow);
+}
+
+// Weapon name — uppercase JetBrains Mono micro-label in muted slate.
+.tc-ammo-counter-weapon {
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-ammo-counter-weapon-font-size);
+    font-weight: 500;
+    line-height: 1.4;
+    text-transform: uppercase;
+    letter-spacing: var(--bs-ammo-counter-weapon-letter-spacing);
+    color: var(--bs-ammo-counter-weapon-color);
+    margin-bottom: 0.25rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// Readout row — mag / max +reserve, baseline-aligned, all mono.
+.tc-ammo-counter-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+}
+
+.tc-ammo-counter-mag {
+    font-size: var(--bs-ammo-counter-mag-font-size);
+    font-weight: var(--bs-ammo-counter-mag-font-weight);
+    line-height: 1.1;
+    color: var(--bs-ammo-counter-mag-color);
+}
+
+.tc-ammo-counter-sep {
+    font-size: var(--bs-ammo-counter-secondary-font-size);
+    color: var(--bs-ammo-counter-sep-color);
+}
+
+.tc-ammo-counter-max {
+    font-size: var(--bs-ammo-counter-secondary-font-size);
+    color: var(--bs-ammo-counter-max-color);
+}
+
+.tc-ammo-counter-reserve {
+    margin-left: 0.5rem;
+    font-size: var(--bs-ammo-counter-reserve-font-size);
+    letter-spacing: 0.04em;
+    color: var(--bs-ammo-counter-reserve-color);
+}
+
+// Reloading label — uppercase mono micro-label in the ink accent.
+.tc-ammo-counter-state {
+    margin-top: 0.25rem;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-ammo-counter-state-font-size);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: var(--bs-ammo-counter-state-letter-spacing);
+    color: var(--bs-ammo-counter-state-color);
+}
+
+// Low magazine — danger ink on the current count (state is information, not decoration).
+tc-ammo-counter[data-state='low'] .tc-ammo-counter-mag {
+    color: var(--bs-ammo-counter-low-color);
+}
+
+// Reloading — dim the count so the reloading label carries the emphasis.
+tc-ammo-counter[data-state='reloading'] .tc-ammo-counter-mag {
+    color: var(--bs-ammo-counter-max-color);
+}

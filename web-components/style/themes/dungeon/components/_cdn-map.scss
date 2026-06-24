@@ -1,0 +1,26 @@
+// Dungeon › tc-cdn-map — dark ink minimap with bronze gridlines and warm gold node glows.
+// Token swap: surface → --fg-ink-2 (dark ink map field).
+// Structural: warm gold radial-gradient glow rings replace the hardcoded slate/cyan literals
+//   that a var swap cannot reach. Gilded bevel frame via box-shadow. Dots stay round (sanctioned).
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // --- 1. Token swap on the host element ---
+    tc-cdn-map {
+        --bs-cdn-map-surface: var(--fg-ink-2);
+
+        box-shadow: var(--fg-panel-shadow);
+        position: relative;
+    }
+
+    // --- 2. Warm glow rings: override the hardcoded slate/cyan radial-gradient literals ---
+    // Primary node glow: slate rgba(30,41,59,.14) → warm gold rgba(201,169,97,.18)
+    .tc-cdn-map .is-primary .tc-cdn-map__node-dot::before {
+        background: radial-gradient(circle, rgba(201, 169, 97, 0.18) 0%, transparent 70%);
+    }
+
+    // Accent node glow: cyan rgba(6,182,212,.24) → bright gold rgba(240,210,122,.3) — pulse kept
+    .tc-cdn-map .is-accent .tc-cdn-map__node-dot::before {
+        background: radial-gradient(circle, rgba(240, 210, 122, 0.3) 0%, transparent 70%);
+    }
+}

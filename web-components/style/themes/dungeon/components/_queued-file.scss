@@ -1,0 +1,23 @@
+// Dungeon › tc-queued-file — leather inventory-row slot with stamped format sigil.
+// Token swap remaps row bg to leather fill and format badge to ink slot well.
+// Structural rule adds a light bevel-top catch so the row reads as a beveled strip
+// (lighter than a full panel shadow — appropriate for a list item, not a panel).
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-queued-file {
+        --bs-queued-file-bg: var(--fg-leather);
+        --bs-queued-file-format-bg: var(--fg-slot-bg);
+        --bs-queued-file-format-color: var(--fg-gold);
+    }
+
+    // Light top-edge highlight so the row reads as a beveled leather strip.
+    .tc-queued-file {
+        box-shadow: var(--fg-bevel-top), var(--tc-shadow-sm);
+    }
+
+    // Format badge reads as a stamped sigil — display caps over the ink well.
+    .tc-queued-file-format {
+        font-family: var(--fg-display);
+    }
+}

@@ -1,0 +1,77 @@
+// tc-circular-progress — ring / circular progress indicator with a value label.
+// The disc is one of the sanctioned circular shapes (the styleguide allows
+// curves only on genuinely circular/pill forms), so the SVG stroke owns the
+// roundness while everything cosmetic flows through --bs-circular-progress-*.
+//
+// Neutrals carry it: the track is a slate hairline tone, the fill is ink
+// (--tc-app-accent, the design "accent") for the primary/active arc. The
+// numeric label is JetBrains Mono — machine-facing text. Override the fill via
+// the `color` attribute and the track via `background` (status only — color is
+// information, not decoration).
+
+tc-circular-progress {
+    // Default geometry + palette; the host inline style (set from the `size`,
+    // `color`, `background` attributes) wins by specificity when provided.
+    --bs-circular-progress-size: 64px;
+    --bs-circular-progress-track: var(--tc-border);
+    --bs-circular-progress-fill: var(--tc-app-accent);
+    --bs-circular-progress-text-color: var(--tc-text);
+    --bs-circular-progress-text-size: 0.8125rem;
+
+    // Host display is registered in foundation/_reset.scss (inline-block list).
+    vertical-align: middle;
+}
+
+.tc-circular-progress {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-circular-progress-size);
+    height: var(--bs-circular-progress-size);
+}
+
+.tc-circular-progress__svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    // Start the arc at 12 o'clock and sweep clockwise.
+    transform: rotate(-90deg);
+}
+
+// `reverse` mirrors the sweep to counter-clockwise.
+.tc-circular-progress--reverse .tc-circular-progress__svg {
+    transform: rotate(-90deg) scaleX(-1);
+}
+
+.tc-circular-progress__track {
+    stroke: var(--bs-circular-progress-track);
+}
+
+.tc-circular-progress__fill {
+    stroke: var(--bs-circular-progress-fill);
+    stroke-linecap: round;
+    // State change easing — the arc grows as `value` updates.
+    transition: stroke-dashoffset var(--tc-transition-base);
+}
+
+.tc-circular-progress__text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--bs-font-monospace);
+    font-size: var(--bs-circular-progress-text-size);
+    font-weight: 500;
+    line-height: 1;
+    color: var(--bs-circular-progress-text-color);
+    font-variant-numeric: tabular-nums;
+}
+
+// The fill arc grow is decorative motion — freeze it; the static arc still
+// conveys the value.
+@media (prefers-reduced-motion: reduce) {
+    .tc-circular-progress__fill {
+        transition: none;
+    }
+}

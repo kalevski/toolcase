@@ -1,0 +1,32 @@
+// Dungeon › tc-community-links — gilded link grid.
+// Foundation already handles: wood card surface, gold-deep hairline gaps,
+// parchment text, leather hover bg, mono count label, zero border-radius.
+// Overrides here: gild platform icons + heading, deepen hover shadow,
+// add gold inner ring on hover/focus for card distinction on dark surface.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-community-links {
+        // Gild platform icons (base defaults to text-muted/parchment-dim).
+        --bs-community-links-icon-color: var(--fg-gold);
+        // Deepen the hardcoded faint shadow — it vanishes on dark wood surface.
+        --bs-community-links-hover-shadow: var(--tc-shadow-md);
+        // Gild the optional section heading (base defaults to tc-text/parchment).
+        --bs-community-links-title-color: var(--fg-gold-bright);
+    }
+
+    // Gilded hover edge — gold inner ring + deeper shadow so the active card
+    // reads clearly against the dark wood grid surface.
+    .tc-community-links-item:hover,
+    .tc-community-links-item:focus {
+        box-shadow: inset 0 0 0 1px var(--fg-gold), var(--tc-shadow-md);
+    }
+
+    // Display-caps heading — base hardcodes font-family on the element itself,
+    // so a var swap alone won't carry the Cinzel face.
+    .tc-community-links__title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+    }
+}

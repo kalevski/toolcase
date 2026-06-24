@@ -1,0 +1,34 @@
+// Dungeon › tc-tooltip — lore-hint / examine label: a small gilded ink plaque.
+// Foundation already flips --bs-tooltip-bg to --fg-ink via --tc-ink and
+// --tc-shadow-md to the dark dungeon shadow.  One white-text literal (#fff)
+// escapes the remap and needs an explicit override here; the body also needs
+// the gold-deep hairline frame + top bevel to read as a gilded placard.
+//
+// PORTALED: the Tooltip plugin appends the tip to <body>, outside any theme
+// wrapper, then copies the active theme onto the tip via `data-tc-theme` (see
+// internal/Tooltip.ts _applyThemeContext). The foundation token remap then
+// applies because its `[data-tc-theme='dungeon']` selector matches the tip
+// itself; these chrome rules match the tip both in-scope and self-attributed.
+
+// Token swap: fix the one white-text literal the foundation misses,
+// and re-assert the ink background for clarity.
+tc-theme[name='dungeon'] .tooltip,
+[data-tc-theme='dungeon'] .tooltip,
+.tooltip[data-tc-theme='dungeon'] {
+    --bs-tooltip-color: var(--fg-parch);
+    --bs-tooltip-bg: var(--fg-ink);
+
+    // Body text uses the fantasy serif body face (base hardcodes --tc-font-sans).
+    font-family: var(--fg-body);
+}
+
+// Structure: gilded hairline frame + top bevel on the inner panel.
+// A border is added only on the inner chrome (not the outer .tooltip wrapper)
+// so the CSS-triangle arrow — which tracks --bs-tooltip-bg — stays a clean
+// solid ink triangle with no seam at the border join.
+tc-theme[name='dungeon'] .tooltip-inner,
+[data-tc-theme='dungeon'] .tooltip-inner,
+.tooltip[data-tc-theme='dungeon'] .tooltip-inner {
+    border: 1px solid var(--fg-gold-deep);
+    box-shadow: var(--fg-bevel-top), var(--tc-shadow-md);
+}

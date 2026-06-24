@@ -68,12 +68,16 @@ class BinaryTree extends Algorithm {
     }
 
     private find(node: BTNode, w: number, h: number): BTNode | null {
-        if (node.used) {
-            const r = node.right !== null ? this.find(node.right, w, h) : null
-            if (r !== null) return r
-            return node.down !== null ? this.find(node.down, w, h) : null
+        const stack: BTNode[] = [node]
+        while (stack.length > 0) {
+            const current = stack.pop()!
+            if (current.used) {
+                if (current.down !== null) stack.push(current.down)
+                if (current.right !== null) stack.push(current.right)
+                continue
+            }
+            if (w <= current.rect.width && h <= current.rect.height) return current
         }
-        if (w <= node.rect.width && h <= node.rect.height) return node
         return null
     }
 

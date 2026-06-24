@@ -1,0 +1,84 @@
+// tc-subtitle — subtitle / secondary heading text line.
+// Port of gc-subtitle; drops game-components fantasy chrome (gilded frames,
+// glows, fantasy fills) in favour of the web-components design system:
+// sharp corners, 1px hairline border (boxed variant), slate neutral ramp,
+// JetBrains Mono for the machine-facing speaker label.
+// All cosmetics flow through --bs-subtitle-* custom properties.
+
+@use '../foundation/tokens' as *;
+
+tc-subtitle {
+    --bs-subtitle-color:                  var(--tc-text);
+    --bs-subtitle-font-size:              0.925rem;
+    --bs-subtitle-font-weight:            400;
+    --bs-subtitle-line-height:            1.6;
+    --bs-subtitle-max-width:              none;
+
+    --bs-subtitle-speaker-color:          var(--tc-text-muted);
+    --bs-subtitle-speaker-font-size:      0.6875rem;
+    --bs-subtitle-speaker-letter-spacing: 0.08em;
+    --bs-subtitle-speaker-margin-bottom:  0.25rem;
+
+    // Boxed variant
+    --bs-subtitle-bg:                     var(--tc-surface);
+    --bs-subtitle-border-color:           var(--tc-border);
+    --bs-subtitle-padding-y:              0.625rem;
+    --bs-subtitle-padding-x:              1rem;
+}
+
+.tc-subtitle {
+    box-sizing:  border-box;
+    max-width:   var(--bs-subtitle-max-width, none);
+    border-radius: 0;
+}
+
+// Alignment — driven by data-align on the host.
+tc-subtitle[data-align='center'] {
+    text-align:   center;
+    margin-left:  auto;
+    margin-right: auto;
+}
+
+tc-subtitle[data-align='right'] {
+    text-align: right;
+}
+
+tc-subtitle[data-align='left'] {
+    text-align: left;
+}
+
+// Boxed variant — adds a hairline border and surface background.
+.tc-subtitle--boxed {
+    padding:    var(--bs-subtitle-padding-y) var(--bs-subtitle-padding-x);
+    background: var(--bs-subtitle-bg);
+    border:     1px solid var(--bs-subtitle-border-color);
+}
+
+// Speaker — mono uppercase micro-label above the text.
+.tc-subtitle__speaker {
+    display:         block;
+    font-family:     'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size:       var(--bs-subtitle-speaker-font-size);
+    font-weight:     500;
+    letter-spacing:  var(--bs-subtitle-speaker-letter-spacing);
+    text-transform:  uppercase;
+    color:           var(--bs-subtitle-speaker-color);
+    margin-bottom:   var(--bs-subtitle-speaker-margin-bottom);
+    user-select:     none;
+}
+
+// Main text line.
+.tc-subtitle__text {
+    display:     block;
+    font-size:   var(--bs-subtitle-font-size);
+    font-weight: var(--bs-subtitle-font-weight);
+    line-height: var(--bs-subtitle-line-height);
+    color:       var(--bs-subtitle-color);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-subtitle__text,
+    .tc-subtitle__speaker {
+        transition: none;
+    }
+}

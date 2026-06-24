@@ -21,7 +21,7 @@ export default class TimeEventProcessor extends FlowProcessor {
         for (const timer of this.timers.values()) {
             if (timer.paused) continue
             timer.current += dt
-            while (timer.current > timer.interval) {
+            while (timer.current >= timer.interval) {
                 timer.current -= timer.interval
                 timer.counter++
                 timer.event.onFire(timer.counter)

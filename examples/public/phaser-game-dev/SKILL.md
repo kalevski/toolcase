@@ -1,6 +1,6 @@
 ---
 name: phaser-game-dev
-description: Use when scaffolding or extending a Phaser 4 game built on top of `@toolcase/phaser-plus`, with `@toolcase/game-components` as the canonical UI toolkit (HUDs, menus, inventories, dialogs, screens). Defines workspace layout (scenes/ + features/ + ui/ + prefabs/), layering rules (Scene → Feature/HTMLFeature → Prefab GameObject), boot sequence with `installEffects` + `register()` + `style.css`, lifecycle contracts (`onInit/onLoad/onCreate/onUpdate/onDestroy` for scenes, `onCreate/onUpdate/onDestroy` for features, `onCreate/onAdd/onUpdate/onRemove/onDestroy` for game objects), the FeatureRegistry pub-sub bus, GameObjectPool registration/obtain (and ObjectLayer.add for positioned pool-backed spawning), the `dom: { createContainer: true }` HTMLFeature requirement, and the rule that HTMLFeatures compose 137 `gc-*` Web Components instead of hand-rolled markup. Apply when adding a scene, feature, UI overlay, prefab, or scaffolding a new Phaser game workspace.
+description: Use when scaffolding or extending a Phaser 4 game built on top of `@toolcase/phaser-plus`, with `@toolcase/web-components` as the canonical UI toolkit (HUDs, menus, inventories, dialogs, screens). Defines workspace layout (scenes/ + features/ + ui/ + prefabs/), layering rules (Scene → Feature/HTMLFeature → Prefab GameObject), boot sequence with `installEffects` + `register()` + `style.css`, lifecycle contracts (`onInit/onLoad/onCreate/onUpdate/onDestroy` for scenes, `onCreate/onUpdate/onDestroy` for features, `onCreate/onAdd/onUpdate/onRemove/onDestroy` for game objects), the FeatureRegistry pub-sub bus, GameObjectPool registration/obtain (and ObjectLayer.add for positioned pool-backed spawning), the `dom: { createContainer: true }` HTMLFeature requirement, and the rule that HTMLFeatures compose `tc-*` Web Components instead of hand-rolled markup. Apply when adding a scene, feature, UI overlay, prefab, or scaffolding a new Phaser game workspace.
 ---
 
 # phaser-game-dev — Architecture Reference
@@ -10,22 +10,22 @@ Opinionated blueprint for Phaser 4 games. Layered, registry-driven, ESM. Every s
 Stack baseline:
 
 - Phaser 4 (`phaser ^4.x`).
-- `@toolcase/phaser-plus` ^3.x — **required** runtime layer. Top-level exports: `Engine`, `Scene`, `GameObject`, `Feature`, `FeatureRegistry`, `ServiceRegistry`, `GameObjectPool`, `Layer`, `ObjectLayer`, `HTMLFeature`, `SplitScreen`, `LogLevel`, plus `Events`, `Flow`, `Structs` namespaces. Re-exports from `effects/` (`installEffects`, shader effects), `perspective2d/` (`Scene2D`, `World`, `GameObject2D`, `Grid`), `cinema/`, `input/`, `ai/`, `flow/`, `debugger/`.
-- `@toolcase/game-components` ^3.x — **required** UI toolkit. 137 framework-free `gc-*` Web Components (Shadow DOM) for HUDs, menus, inventories, dialogs, settings, screens, minimaps. Every `HTMLFeature` composes these instead of hand-rolling markup.
-- `@toolcase/base` ^3.x — peer of `phaser-plus` and `game-components`. Helpers and data structures (`Broadcast`, `ObjectPool`, etc.).
-- `@toolcase/logging` ^3.x — peer of `phaser-plus`. Scoped loggers wired through `Engine`.
+- `@toolcase/phaser-plus` ^4.x — **required** runtime layer. Top-level exports: `Engine`, `Scene`, `GameObject`, `Feature`, `FeatureRegistry`, `ServiceRegistry`, `GameObjectPool`, `Layer`, `ObjectLayer`, `HTMLFeature`, `SplitScreen`, `LogLevel`, plus `Events`, `Flow`, `Structs` namespaces. Re-exports from `effects/` (`installEffects`, shader effects), `perspective2d/` (`Scene2D`, `World`, `GameObject2D`, `Grid`), `cinema/`, `input/`, `ai/`, `flow/`, `debugger/`.
+- `@toolcase/web-components` ^4.x — **required** UI toolkit. Framework-free `tc-*` Web Components for HUDs, menus, inventories, dialogs, settings, screens, minimaps. Every `HTMLFeature` composes these instead of hand-rolling markup.
+- `@toolcase/base` ^4.x — peer of `phaser-plus` and `web-components`. Helpers and data structures (`Broadcast`, `ObjectPool`, etc.).
+- `@toolcase/logging` ^4.x — peer of `phaser-plus`. Scoped loggers wired through `Engine`.
 - TypeScript `strict`, ESM (`"type": "module"`), Node 18+.
 - Vite for dev/build (the canonical tooling — Webpack works but is out of scope here).
 
 Required install before anything else:
 
 ```bash
-npm install phaser @toolcase/phaser-plus @toolcase/game-components @toolcase/base @toolcase/logging
+npm install phaser @toolcase/phaser-plus @toolcase/web-components @toolcase/base @toolcase/logging
 ```
 
 If you want shader effects on `GameObject` instances, import and call `installEffects(game)` immediately after `new Game(config)` (see Boot below). This is the recommended pre-registration step — it registers every effect's RenderNode up front. It is not strictly required: `gameObject.effects.add(...)` lazily registers the effect it needs as a fallback (so a forgotten `installEffects` still works), but pre-registering at boot is cleaner and avoids first-use registration cost.
 
-`@toolcase/game-components` requires a one-time `register()` call at boot to define all 137 custom elements globally, plus the bundled stylesheet (`@toolcase/game-components/style.css`). After that, any `HTMLFeature` can author UI with `gc-*` tags directly inside `this.node.innerHTML`.
+`@toolcase/web-components` requires a one-time `register()` call at boot to define all custom elements globally, plus the bundled stylesheet (`@toolcase/web-components/style.css`). After that, any `HTMLFeature` can author UI with `tc-*` tags directly inside `this.node.innerHTML`.
 
 ---
 
@@ -113,13 +113,13 @@ Forbidden:
 import 'phaser'
 import { Game, AUTO, Scale } from 'phaser'
 import { installEffects } from '@toolcase/phaser-plus'
-import { register as registerGameComponents } from '@toolcase/game-components'
-import '@toolcase/game-components/style.css'
+import { register as registerWebComponents } from '@toolcase/web-components'
+import '@toolcase/web-components/style.css'
 import { BootScene } from './scenes/BootScene'
 import { MainScene } from './scenes/MainScene'
 import { GameOverScene } from './scenes/GameOverScene'
 
-registerGameComponents()        // REQUIRED before any HTMLFeature mounts gc-* elements
+registerWebComponents()         // REQUIRED before any HTMLFeature mounts tc-* elements
 
 const config: Phaser.Types.Core.GameConfig = {
     type: AUTO,
@@ -151,8 +151,8 @@ Hard rules:
 
 - `dom.createContainer: true` is **mandatory** if any `HTMLFeature` exists. Without it, `HTMLFeature` constructor throws.
 - `installEffects(game)` runs **once, after `new Game(config)`**, never inside a scene. It is recommended pre-registration, not strictly required — `gameObject.effects.add(...)` lazy-registers the effect it needs as a fallback if `installEffects` was skipped.
-- `register()` from `@toolcase/game-components` runs **exactly once at module top-level**, before `new Game(config)`. It is **not** idempotent — it calls `customElements.define(...)` directly with no guard, so calling it twice throws `NotSupportedError` ("the name has already been used"). Call it exactly once; registering inside a scene also risks racing the first `HTMLFeature.onCreate`.
-- The bundled stylesheet `@toolcase/game-components/style.css` must be imported once (boot.ts is the canonical place). Without it, `gc-*` elements render unstyled.
+- `register()` from `@toolcase/web-components` runs **once at module top-level**, before `new Game(config)`. It is **idempotent** — the first thing it does is check whether `tc-button` is already defined and return early if so, so an accidental second call is a safe no-op (no `NotSupportedError`). Still call it at boot; registering inside a scene risks racing the first `HTMLFeature.onCreate`.
+- The bundled stylesheet `@toolcase/web-components/style.css` must be imported once (boot.ts is the canonical place). Without it, `tc-*` elements render unstyled.
 - Scenes are listed in boot order. The first scene auto-starts.
 - Never construct `new Phaser.Scene(...)` directly — register the class on `config.scene`.
 
@@ -351,45 +351,45 @@ Hard rules:
 
 `HTMLFeature` extends `Feature` and gives you a single `<div>` overlay (`this.node`) on top of the canvas. Use it for HUDs, menus, dialog boxes, settings panels, debug consoles. **Requires** `dom.createContainer: true` in the game config.
 
-**UI markup is built from `@toolcase/game-components` `gc-*` Web Components.** Hand-rolled `<div>` markup is reserved for layout glue that `gc-*` doesn't already cover. Compose `gc-anchor`, `gc-stack`, `gc-grid` for layout; `gc-health-bar`, `gc-mana-bar`, `gc-buff-bar`, `gc-hotbar`, `gc-minimap`, `gc-objective-marker`, etc. for HUD pieces; `gc-pause-menu`, `gc-confirm-dialog`, `gc-dialogue-box`, `gc-game-over-screen`, `gc-victory-screen` for menus and screens. See `game-components/SKILL.md` for the full catalog.
+**UI markup is built from `@toolcase/web-components` `tc-*` Web Components.** Hand-rolled `<div>` markup is reserved for layout glue that `tc-*` doesn't already cover. Compose `tc-anchor`, `tc-stack`, `tc-grid` for layout; `tc-health-bar`, `tc-mana-bar`, `tc-buff-bar`, `tc-hotbar`, `tc-minimap`, `tc-objective-marker`, etc. for HUD pieces; `tc-pause-menu`, `tc-confirm-dialog`, `tc-dialogue-box`, `tc-game-over-screen`, `tc-victory-screen` for menus and screens. See `web-components/SKILL.md` for the full catalog.
 
 ```ts
 import { HTMLFeature } from '@toolcase/phaser-plus'
-import type { HealthBar, ManaBar, MenuItem } from '@toolcase/game-components'
+import type { ResourceBar, MenuItem } from '@toolcase/web-components'
 import { DAY_NIGHT_TICK, type DayNightPhase } from '../features/DayNightCycleFeature'
 
 export class HUDFeature extends HTMLFeature {
 
-    private hpEl!: HealthBar
-    private mpEl!: ManaBar
+    private hpEl!: ResourceBar
+    private mpEl!: ResourceBar
     private scoreEl!: HTMLElement
     private phaseEl!: HTMLElement
 
     onCreate() {
         this.node.innerHTML = `
-            <gc-anchor position="top-left" inset="12px">
-                <gc-stack direction="vertical" gap="6px">
-                    <gc-health-bar id="hp" value="100" max="100" segments="4" show-text label="HP"></gc-health-bar>
-                    <gc-mana-bar   id="mp" value="50"  max="50"  segments="3" show-text label="MP"></gc-mana-bar>
-                </gc-stack>
-            </gc-anchor>
-            <gc-anchor position="top-right" inset="12px">
-                <gc-stack direction="horizontal" gap="8px">
-                    <gc-eyebrow>SCORE</gc-eyebrow>
-                    <gc-title id="score" size="24">0</gc-title>
-                    <gc-eyebrow id="phase">day</gc-eyebrow>
-                </gc-stack>
-            </gc-anchor>
-            <gc-anchor position="bottom-right" inset="12px">
-                <gc-menu-item id="pauseBtn" label="Pause" hotkey="P"></gc-menu-item>
-            </gc-anchor>
+            <tc-anchor position="top-left" inset="12px">
+                <tc-stack direction="vertical" gap="6px">
+                    <tc-health-bar id="hp" value="100" max="100" segments="4" show-text label="HP"></tc-health-bar>
+                    <tc-mana-bar   id="mp" value="50"  max="50"  segments="3" show-text label="MP"></tc-mana-bar>
+                </tc-stack>
+            </tc-anchor>
+            <tc-anchor position="top-right" inset="12px">
+                <tc-stack direction="horizontal" gap="8px">
+                    <tc-eyebrow>SCORE</tc-eyebrow>
+                    <tc-title id="score" size="24">0</tc-title>
+                    <tc-eyebrow id="phase">day</tc-eyebrow>
+                </tc-stack>
+            </tc-anchor>
+            <tc-anchor position="bottom-right" inset="12px">
+                <tc-menu-item id="pauseBtn" label="Pause" hotkey="P"></tc-menu-item>
+            </tc-anchor>
         `
-        this.hpEl    = this.node.querySelector<HealthBar>('#hp')!
-        this.mpEl    = this.node.querySelector<ManaBar>('#mp')!
+        this.hpEl    = this.node.querySelector<ResourceBar>('#hp')!
+        this.mpEl    = this.node.querySelector<ResourceBar>('#mp')!
         this.scoreEl = this.node.querySelector('#score')!
         this.phaseEl = this.node.querySelector('#phase')!
 
-        this.node.querySelector<MenuItem>('#pauseBtn')!.addEventListener('select', () => {
+        this.node.querySelector<MenuItem>('#pauseBtn')!.addEventListener('tc-select', () => {
             this.scene.features.emit('ui:pause-requested')
         })
 
@@ -415,10 +415,10 @@ export class HUDFeature extends HTMLFeature {
 
 Key things to note in the example:
 
-- `gc-anchor` pins itself to one corner via the `position` attribute (single `<slot>`, no named slots). Use one anchor per corner. `gc-stack` lays out its children inside.
+- `tc-anchor` pins itself to one corner via the `position` attribute (single `<slot>`, no named slots). Use one anchor per corner. `tc-stack` lays out its children inside.
 - Resource bars expose `.value` / `.max` as JS properties — set them, no re-render dance.
-- `gc-menu-item` emits a `select` `CustomEvent` (click + Enter + Space + hotkey). The HTMLFeature translates that into a game event on the bus.
-- `MenuItem` / `HealthBar` / `ManaBar` types come from `@toolcase/game-components` — `querySelector<HealthBar>` is fully typed via `HTMLElementTagNameMap`.
+- `tc-menu-item` emits a `tc-select` `CustomEvent` (click + Enter + Space + hotkey). The HTMLFeature translates that into a game event on the bus.
+- `MenuItem` / `ResourceBar` types come from `@toolcase/web-components` — `querySelector<ResourceBar>('tc-health-bar')` is fully typed via `HTMLElementTagNameMap` (`tc-health-bar` / `tc-mana-bar` / `tc-stamina-bar` all map to `ResourceBar`).
 
 Available in addition to `Feature` API:
 
@@ -431,39 +431,39 @@ Available in addition to `Feature` API:
 Hard rules:
 
 - **One overlay per HTMLFeature.** Need two? Register two HTMLFeatures (`hud`, `pauseMenu`).
-- **`gc-*` first, custom markup last.** If `@toolcase/game-components` ships a component for what you need (HUD bars, menus, dialogs, inventory grids, screens, minimap), use it. Project-specific glue goes around it.
+- **`tc-*` first, custom markup last.** If `@toolcase/web-components` ships a component for what you need (HUD bars, menus, dialogs, inventory grids, screens, minimap), use it. Project-specific glue goes around it.
 - **Set complex props in JS, not attributes.** Arrays/objects (`hotbar.slots = [...]`, `lootPopup.items = [...]`, `partyPanel.members = [...]`) must be assigned via JS properties — attributes only carry strings/numbers/booleans.
 - **No game state inside UI.** UI reads via events, writes via events. Never mutate prefabs or other features' fields directly.
-- **Theme via `--fg-*` / `--gc-*` CSS custom properties** — set them on `:root`, on the `dom.createContainer` div, or scoped to a feature wrapper. Don't fork component SCSS.
-- **Don't reskin gc components with `!important` cascades.** Override the documented CSS variables (`--gc-*`, `--fg-*`) instead.
+- **Theme via `--tc-*` / `--bs-*` CSS custom properties** — set them on `:root`, on the `dom.createContainer` div, or scoped to a feature wrapper. Don't fork component SCSS.
+- **Don't reskin tc components with `!important` cascades.** Override the documented CSS variables (`--tc-*`, `--bs-*`) instead.
 - **Listeners attached to `this.node` children are auto-cleaned** when the node is removed. Listeners attached elsewhere (e.g. `window.addEventListener`) must be removed in `onDestroy`.
 
 ---
 
-## UI building blocks — `@toolcase/game-components`
+## UI building blocks — `@toolcase/web-components`
 
-Canonical mapping from common Phaser-game UI needs to `gc-*` components. Each row below assumes `register()` ran in `boot.ts` and the stylesheet is imported.
+Canonical mapping from common Phaser-game UI needs to `tc-*` components. Each row below assumes `register()` ran in `boot.ts` and the stylesheet is imported.
 
 | Need                       | Components                                                                             |
 | -------------------------- | -------------------------------------------------------------------------------------- |
-| HUD layout / corners       | `gc-anchor`, `gc-stack`, `gc-grid`, `gc-safe-area`, `gc-aspect-ratio-box`              |
-| Resource bars              | `gc-health-bar`, `gc-mana-bar`, `gc-stamina-bar`, `gc-ammo-counter`, `gc-boss-bar`     |
-| Buffs / cooldowns          | `gc-buff-bar`, `gc-buff-icon`, `gc-cooldown-badge`, `gc-circular-progress`             |
-| Hotbar / abilities         | `gc-hotbar`, `gc-skill-bar`, `gc-ability-card`, `gc-radial-wheel`                      |
-| Inventory                  | `gc-inventory-grid`, `gc-item-slot`, `gc-item-tooltip`, `gc-equipment-doll`            |
-| Combat feedback            | `gc-crosshair`, `gc-hit-marker`, `gc-damage-number`, `gc-combo-counter`, `gc-screen-flash` |
-| Currency / chips           | `gc-currency-chip`, `gc-currency-display`, `gc-rarity-chip`, `gc-icon-badge`           |
-| Menus / pause              | `gc-pause-menu`, `gc-main-menu`, `gc-menu-item`, `gc-tab-bar`, `gc-press-any-key`      |
-| Dialogs                    | `gc-confirm-dialog`, `gc-dialogue-box`, `gc-loot-popup`, `gc-report-player-dialog`     |
-| Settings rows              | `gc-toggle-row`, `gc-select-row`, `gc-fov-slider`, `gc-volume-slider`, `gc-fps-cap-select`, `gc-graphics-preset-picker`, `gc-key-binder`, `gc-controls-rebind-list` |
-| Map / nav                  | `gc-minimap`, `gc-objective-marker`, `gc-waypoint-marker`, `gc-compass-bar`, `gc-compass-rose` |
-| Overlays                   | `gc-vignette-overlay`, `gc-blur-overlay`, `gc-loading-overlay`, `gc-letterbox-bars`, `gc-transition-wipe` |
-| Full screens               | `gc-title-screen`, `gc-loading-screen`, `gc-pause-screen`, `gc-game-over-screen`, `gc-victory-screen`, `gc-result-screen`, `gc-stats-screen` |
-| Social / multiplayer       | `gc-chat-window`, `gc-kill-feed`, `gc-lobby`, `gc-party-panel`, `gc-friends-list`, `gc-invite-toast` |
-| Player / character         | `gc-character-create`, `gc-character-select`, `gc-player-card`, `gc-portrait`, `gc-level-header` |
-| Progression / economy      | `gc-quest-tracker`, `gc-journal`, `gc-codex`, `gc-shop-panel`, `gc-crafting-panel`, `gc-battle-pass` |
+| HUD layout / corners       | `tc-anchor`, `tc-stack`, `tc-grid`, `tc-safe-area`, `tc-aspect-ratio-box`              |
+| Resource bars              | `tc-health-bar`, `tc-mana-bar`, `tc-stamina-bar`, `tc-ammo-counter`, `tc-boss-bar`     |
+| Buffs / cooldowns          | `tc-buff-bar`, `tc-buff-icon`, `tc-cooldown-badge`, `tc-circular-progress`             |
+| Hotbar / abilities         | `tc-hotbar`, `tc-skill-bar`, `tc-ability-card`, `tc-radial-wheel`                      |
+| Inventory                  | `tc-inventory-grid`, `tc-item-slot`, `tc-item-tooltip`, `tc-equipment-doll`            |
+| Combat feedback            | `tc-crosshair`, `tc-hit-marker`, `tc-damage-number`, `tc-combo-counter`, `tc-screen-flash` |
+| Currency / chips           | `tc-currency-chip`, `tc-currency-display`, `tc-rarity-chip`, `tc-icon-badge`           |
+| Menus / pause              | `tc-pause-menu`, `tc-main-menu`, `tc-menu-item`, `tc-tab-bar`, `tc-press-any-key`      |
+| Dialogs                    | `tc-confirm-dialog`, `tc-dialogue-box`, `tc-loot-popup`, `tc-report-dialog`            |
+| Settings rows              | `tc-toggle-row`, `tc-select-row`, `tc-fov-slider`, `tc-volume-slider`, `tc-fps-cap-select`, `tc-graphics-preset-picker`, `tc-key-binder`, `tc-controls-rebind-list` |
+| Map / nav                  | `tc-minimap`, `tc-objective-marker`, `tc-waypoint-marker`, `tc-compass-bar`, `tc-compass-rose` |
+| Overlays                   | `tc-vignette-overlay`, `tc-blur-overlay`, `tc-loading-overlay`, `tc-letterbox-bars`, `tc-transition-wipe` |
+| Full screens               | `tc-title-screen`, `tc-loading-screen`, `tc-pause-screen`, `tc-game-over-screen`, `tc-victory-screen`, `tc-result-screen`, `tc-stats-screen` |
+| Social / multiplayer       | `tc-chat-window`, `tc-kill-feed`, `tc-lobby`, `tc-party-panel`, `tc-invite-toast`      |
+| Player / character         | `tc-character-create`, `tc-character-select`, `tc-player-card`, `tc-portrait`, `tc-level-header` |
+| Progression / economy      | `tc-quest-tracker`, `tc-journal`, `tc-codex`, `tc-shop-panel`, `tc-crafting-panel`, `tc-battle-pass` |
 
-For the full catalog (137 components, attributes, events, types), read `game-components/SKILL.md`.
+For the full catalog (attributes, events, types), read `web-components/SKILL.md`.
 
 ### Pattern: HUD scaffold
 
@@ -471,30 +471,30 @@ For the full catalog (137 components, attributes, events, types), read `game-com
 // ui/HUDFeature.ts — see UI contract example above
 ```
 
-Layout uses `gc-anchor` for corner pinning and `gc-stack` for inner row/column flow. Bars set their `.value` / `.max` as JS properties. Subscribe to gameplay events; do not poll.
+Layout uses `tc-anchor` for corner pinning and `tc-stack` for inner row/column flow. Bars set their `.value` / `.max` as JS properties. Subscribe to gameplay events; do not poll.
 
 ### Pattern: pause menu
 
 ```ts
 // ui/PauseMenuFeature.ts
 import { HTMLFeature } from '@toolcase/phaser-plus'
-import type { MenuItem } from '@toolcase/game-components'
+import type { MenuItem } from '@toolcase/web-components'
 
 export class PauseMenuFeature extends HTMLFeature {
 
     onCreate() {
         this.node.innerHTML = `
-            <gc-blur-overlay>
-                <gc-pause-menu>
-                    <gc-menu-item label="Resume"   hotkey="R" data-action="resume" selected></gc-menu-item>
-                    <gc-menu-item label="Settings" hotkey="S" data-action="settings"></gc-menu-item>
-                    <gc-menu-item label="Quit"     hotkey="Q" data-action="quit"></gc-menu-item>
-                </gc-pause-menu>
-            </gc-blur-overlay>
+            <tc-blur-overlay>
+                <tc-pause-menu>
+                    <tc-menu-item label="Resume"   hotkey="R" data-action="resume" selected></tc-menu-item>
+                    <tc-menu-item label="Settings" hotkey="S" data-action="settings"></tc-menu-item>
+                    <tc-menu-item label="Quit"     hotkey="Q" data-action="quit"></tc-menu-item>
+                </tc-pause-menu>
+            </tc-blur-overlay>
         `
         this.node.style.display = 'none'
-        this.node.querySelectorAll<MenuItem>('gc-menu-item').forEach(item => {
-            item.addEventListener('select', () => {
+        this.node.querySelectorAll<MenuItem>('tc-menu-item').forEach(item => {
+            item.addEventListener('tc-select', () => {
                 const action = item.getAttribute('data-action')!
                 this.scene.features.emit(`ui:menu-${action}`)
             })
@@ -519,7 +519,7 @@ export class PauseMenuFeature extends HTMLFeature {
 ```ts
 // ui/DialogueFeature.ts
 import { HTMLFeature } from '@toolcase/phaser-plus'
-import type { DialogueBox, MenuItem } from '@toolcase/game-components'
+import type { DialogueBox, MenuItem } from '@toolcase/web-components'
 
 export interface DialogueLine {
     speaker: string
@@ -533,12 +533,12 @@ export class DialogueFeature extends HTMLFeature {
 
     onCreate() {
         this.node.innerHTML = `
-            <gc-anchor position="bottom" inset="24px">
-                <gc-stack direction="vertical" gap="8px">
-                    <gc-dialogue-box id="line" typing-speed="40"></gc-dialogue-box>
-                    <gc-stack id="choices" direction="vertical" gap="4px"></gc-stack>
-                </gc-stack>
-            </gc-anchor>
+            <tc-anchor position="bottom" inset="24px">
+                <tc-stack direction="vertical" gap="8px">
+                    <tc-dialogue-box id="line" typing-speed="40"></tc-dialogue-box>
+                    <tc-stack id="choices" direction="vertical" gap="4px"></tc-stack>
+                </tc-stack>
+            </tc-anchor>
         `
         this.box = this.node.querySelector<DialogueBox>('#line')!
         this.scene.features.on('dialogue:show',  this.show,  this)
@@ -556,10 +556,10 @@ export class DialogueFeature extends HTMLFeature {
         const choices = this.node.querySelector('#choices')!
         choices.innerHTML = ''
         line.choices?.forEach((c, i) => {
-            const item = document.createElement('gc-menu-item') as MenuItem
+            const item = document.createElement('tc-menu-item') as MenuItem
             item.setAttribute('label', c.label)
             item.setAttribute('hotkey', String(i + 1))
-            item.addEventListener('select', () => {
+            item.addEventListener('tc-select', () => {
                 this.scene.features.emit('dialogue:choice', { id: c.id })
             })
             choices.appendChild(item)
@@ -578,7 +578,7 @@ export class DialogueFeature extends HTMLFeature {
 ```ts
 // ui/InventoryFeature.ts
 import { HTMLFeature } from '@toolcase/phaser-plus'
-import type { InventoryGrid, ItemTooltip, InventoryItem } from '@toolcase/game-components'
+import type { InventoryGrid, ItemTooltip, InventoryItem } from '@toolcase/web-components'
 
 export class InventoryFeature extends HTMLFeature {
 
@@ -587,16 +587,16 @@ export class InventoryFeature extends HTMLFeature {
 
     onCreate() {
         this.node.innerHTML = `
-            <gc-panel bordered>
-                <gc-panel-header>Inventory</gc-panel-header>
-                <gc-inventory-grid id="bag" columns="8" slot-size="48"></gc-inventory-grid>
-            </gc-panel>
-            <gc-item-tooltip id="tip" hidden></gc-item-tooltip>
+            <tc-panel bordered>
+                <tc-panel-header>Inventory</tc-panel-header>
+                <tc-inventory-grid id="bag" columns="8" slot-size="48"></tc-inventory-grid>
+            </tc-panel>
+            <tc-item-tooltip id="tip" hidden></tc-item-tooltip>
         `
         this.grid = this.node.querySelector<InventoryGrid>('#bag')!
         this.tip  = this.node.querySelector<ItemTooltip>('#tip')!
 
-        this.grid.addEventListener('select', (e) => {
+        this.grid.addEventListener('tc-select', (e) => {
             const detail = (e as CustomEvent).detail as { item: InventoryItem | null, index: number }
             if (detail.item) {
                 this.tip.item = detail.item
@@ -625,7 +625,7 @@ export class InventoryFeature extends HTMLFeature {
 ```ts
 // ui/HotbarFeature.ts
 import { HTMLFeature } from '@toolcase/phaser-plus'
-import type { Hotbar, InventoryItem } from '@toolcase/game-components'
+import type { Hotbar, InventoryItem } from '@toolcase/web-components'
 
 export class HotbarFeature extends HTMLFeature {
 
@@ -633,12 +633,12 @@ export class HotbarFeature extends HTMLFeature {
 
     onCreate() {
         this.node.innerHTML = `
-            <gc-anchor position="bottom" inset="16px">
-                <gc-hotbar id="bar" slot-size="64"></gc-hotbar>
-            </gc-anchor>
+            <tc-anchor position="bottom" inset="16px">
+                <tc-hotbar id="bar" slot-size="64"></tc-hotbar>
+            </tc-anchor>
         `
         this.bar = this.node.querySelector<Hotbar>('#bar')!
-        this.bar.addEventListener('select', (e) => {
+        this.bar.addEventListener('tc-select', (e) => {
             const { item, index } = (e as CustomEvent).detail as { item: InventoryItem | null; index: number }
             this.scene.features.emit('hotbar:use', { item, index })
         })
@@ -666,13 +666,13 @@ export class GameOverFeature extends HTMLFeature {
     onCreate() {
         const { score = 0, time = '00:00', kills = 0 } = this.scene.payload as Record<string, any>
         this.node.innerHTML = `
-            <gc-game-over-screen id="screen">
-                <gc-stat-row label="Score" value="${score}"></gc-stat-row>
-                <gc-stat-row label="Time"  value="${time}"></gc-stat-row>
-                <gc-stat-row label="Kills" value="${kills}"></gc-stat-row>
-            </gc-game-over-screen>
+            <tc-game-over-screen id="screen">
+                <tc-stat-row label="Score" value="${score}"></tc-stat-row>
+                <tc-stat-row label="Time"  value="${time}"></tc-stat-row>
+                <tc-stat-row label="Kills" value="${kills}"></tc-stat-row>
+            </tc-game-over-screen>
         `
-        this.node.querySelector('#screen')!.addEventListener('action', (e) => {
+        this.node.querySelector('#screen')!.addEventListener('tc-action', (e) => {
             const { id } = (e as CustomEvent).detail as { id: string }
             if (id === 'continue' || id === 'retry') this.scene.goTo('main')
         })
@@ -690,30 +690,30 @@ export class SettingsFeature extends HTMLFeature {
 
     onCreate() {
         this.node.innerHTML = `
-            <gc-panel bordered>
-                <gc-panel-header>Settings</gc-panel-header>
-                <gc-tab-bar id="tabs">
-                    <gc-stack data-tab="graphics" direction="vertical" gap="6px">
-                        <gc-graphics-preset-picker value="high"></gc-graphics-preset-picker>
-                        <gc-fps-cap-select value="60"></gc-fps-cap-select>
-                        <gc-fov-slider value="90" min="60" max="120"></gc-fov-slider>
-                        <gc-vsync-toggle checked></gc-vsync-toggle>
-                    </gc-stack>
-                    <gc-stack data-tab="audio" direction="vertical" gap="6px">
-                        <gc-volume-slider row-label="Master" value="80"></gc-volume-slider>
-                        <gc-volume-slider row-label="SFX"    value="100"></gc-volume-slider>
-                        <gc-volume-slider row-label="Music"  value="60"></gc-volume-slider>
-                    </gc-stack>
-                    <gc-stack data-tab="controls" direction="vertical" gap="6px">
-                        <gc-mouse-sensitivity value="40"></gc-mouse-sensitivity>
-                        <gc-invert-axis-toggle></gc-invert-axis-toggle>
-                        <gc-controls-rebind-list></gc-controls-rebind-list>
-                    </gc-stack>
-                </gc-tab-bar>
-                <gc-reset-to-defaults></gc-reset-to-defaults>
-            </gc-panel>
+            <tc-panel bordered>
+                <tc-panel-header>Settings</tc-panel-header>
+                <tc-tab-bar id="tabs">
+                    <tc-stack data-tab="graphics" direction="vertical" gap="6px">
+                        <tc-graphics-preset-picker value="high"></tc-graphics-preset-picker>
+                        <tc-fps-cap-select value="60"></tc-fps-cap-select>
+                        <tc-fov-slider value="90" min="60" max="120"></tc-fov-slider>
+                        <tc-toggle-row row-label="V-Sync" checked></tc-toggle-row>
+                    </tc-stack>
+                    <tc-stack data-tab="audio" direction="vertical" gap="6px">
+                        <tc-volume-slider row-label="Master" value="80"></tc-volume-slider>
+                        <tc-volume-slider row-label="SFX"    value="100"></tc-volume-slider>
+                        <tc-volume-slider row-label="Music"  value="60"></tc-volume-slider>
+                    </tc-stack>
+                    <tc-stack data-tab="controls" direction="vertical" gap="6px">
+                        <tc-mouse-sensitivity value="40"></tc-mouse-sensitivity>
+                        <tc-toggle-row row-label="Invert Axis"></tc-toggle-row>
+                        <tc-controls-rebind-list></tc-controls-rebind-list>
+                    </tc-stack>
+                </tc-tab-bar>
+                <tc-reset-to-defaults></tc-reset-to-defaults>
+            </tc-panel>
         `
-        this.node.addEventListener('change', (e) => {
+        this.node.addEventListener('tc-change', (e) => {
             const target = e.target as HTMLElement
             const detail = (e as CustomEvent).detail
             this.scene.features.emit('settings:change', { tag: target.tagName.toLowerCase(), detail })
@@ -727,7 +727,7 @@ export class SettingsFeature extends HTMLFeature {
 ```ts
 // ui/MinimapFeature.ts
 import { HTMLFeature } from '@toolcase/phaser-plus'
-import type { Minimap } from '@toolcase/game-components'
+import type { Minimap } from '@toolcase/web-components'
 
 export class MinimapFeature extends HTMLFeature {
 
@@ -737,9 +737,9 @@ export class MinimapFeature extends HTMLFeature {
 
     onCreate() {
         this.node.innerHTML = `
-            <gc-anchor position="top-right" inset="12px">
-                <gc-minimap id="map" world-x="0" world-y="0" world-width="2048" world-height="2048" size="180"></gc-minimap>
-            </gc-anchor>
+            <tc-anchor position="top-right" inset="12px">
+                <tc-minimap id="map" world-x="0" world-y="0" world-width="2048" world-height="2048" size="180"></tc-minimap>
+            </tc-anchor>
         `
         this.map = this.node.querySelector<Minimap>('#map')!
         this.scene.features.on('player:moved',     this.onMove,     this)
@@ -766,21 +766,21 @@ export class MinimapFeature extends HTMLFeature {
 
 ### Theming inside the game
 
-Override `--fg-*` palette tokens (global reskin) or `--gc-*` per-component knobs. Two natural places to scope them in a Phaser project:
+Override `--tc-*` palette tokens (global reskin) or `--bs-<component>-*` per-component knobs. Two natural places to scope them in a Phaser project:
 
 ```css
 /* index.css — global game theme */
 :root {
-    --fg-leather:   #14202b;   /* sci-fi panel */
-    --fg-parch:     #cfe6ff;
-    --fg-gold:      #00ffd1;
-    --fg-blood:     #ff3366;
-    --fg-display:   'Orbitron', sans-serif;
+    --tc-surface:    #14202b;   /* sci-fi panel */
+    --tc-text:       #cfe6ff;
+    --tc-accent:     #00ffd1;
+    --tc-danger:     #ff3366;
+    --tc-font-sans:  'Orbitron', sans-serif;
 }
 
 /* scope to a single feature overlay (HTMLFeature root carries .feature-{key}) */
-.feature-pauseMenu gc-blur-overlay {
-    --gc-blur-amount: 12px;
+.feature-pauseMenu tc-blur-overlay {
+    --bs-blur-overlay-blur: 12px;
 }
 ```
 
@@ -1032,15 +1032,15 @@ save.save(0, { score: this.score })
 
 ### Add a new HTMLFeature (UI overlay)
 
-1. Confirm `dom.createContainer: true` in `boot.ts` config and that `register()` from `@toolcase/game-components` runs at boot.
-2. Pick the `gc-*` components that cover the need (consult `game-components/SKILL.md`). Only fall back to raw `<div>` for layout glue not provided by `gc-anchor` / `gc-stack` / `gc-grid`.
+1. Confirm `dom.createContainer: true` in `boot.ts` config and that `register()` from `@toolcase/web-components` runs at boot.
+2. Pick the `tc-*` components that cover the need (consult `web-components/SKILL.md`). Only fall back to raw `<div>` for layout glue not provided by `tc-anchor` / `tc-stack` / `tc-grid`.
 3. Create `src/ui/<Name>Feature.ts` extending `HTMLFeature`.
-4. Set `this.node.innerHTML` in `onCreate` using `gc-*` markup. Cache typed references via `querySelector<HealthBar>(...)` etc.
+4. Set `this.node.innerHTML` in `onCreate` using `tc-*` markup. Cache typed references via `querySelector<ResourceBar>('tc-health-bar')` etc.
 5. Set complex props (arrays/objects) as JS properties (`bar.slots = [...]`); set primitives as attributes.
-6. Listen to `gc-*` `CustomEvent`s (`select`, `change`, `confirm`, `take`, `action`, `choice`, `advance`, ...) and re-emit user-intent events on `this.scene.features` (never mutate game state directly).
+6. Listen to `tc-*` `CustomEvent`s (`tc-select`, `tc-change`, `tc-confirm`, `tc-action`, `tc-choice`, `tc-advance`, ...) and re-emit user-intent events on `this.scene.features` (never mutate game state directly).
 7. Subscribe to game events in `onCreate`. Unsubscribe in `onDestroy`.
 8. Register in Scene's `onCreate`: `this.features.register('<key>', <Name>Feature)`.
-9. Theme via `--fg-*` / `--gc-*` overrides scoped on `:root` or `.feature-<key>` in your project stylesheet — do not fork component SCSS.
+9. Theme via `--tc-*` / `--bs-<component>-*` overrides scoped on `:root` or `.feature-<key>` in your project stylesheet — do not fork component SCSS.
 
 ### Add a new prefab
 
@@ -1078,15 +1078,15 @@ save.save(0, { score: this.score })
 
 ❌ **Manipulating the DOM from a Feature.** That's an HTMLFeature.
 
-❌ **Hand-rolling HUD bars / menus / dialogs / inventory grids when `@toolcase/game-components` already ships them.** Reach for `gc-health-bar`, `gc-pause-menu`, `gc-confirm-dialog`, `gc-inventory-grid`, etc. before authoring `<div class="hp-bar">` markup.
+❌ **Hand-rolling HUD bars / menus / dialogs / inventory grids when `@toolcase/web-components` already ships them.** Reach for `tc-health-bar`, `tc-pause-menu`, `tc-confirm-dialog`, `tc-inventory-grid`, etc. before authoring `<div class="hp-bar">` markup.
 
-❌ **Forgetting `register()` from `@toolcase/game-components` at boot.** Without it, `gc-*` tags render as inert `HTMLUnknownElement` and the HUD stays blank.
+❌ **Forgetting `register()` from `@toolcase/web-components` at boot.** Without it, `tc-*` tags render as inert `HTMLUnknownElement` and the HUD stays blank.
 
-❌ **Importing `@toolcase/game-components/style.css` per-scene or per-HTMLFeature.** Import it once in `boot.ts`. Repeat imports duplicate styles.
+❌ **Importing `@toolcase/web-components/style.css` per-scene or per-HTMLFeature.** Import it once in `boot.ts`. Repeat imports duplicate styles.
 
-❌ **Setting array/object props via attributes** (`<gc-hotbar slots="...">`). Attributes are strings. Use `el.slots = [...]` JS property assignment.
+❌ **Setting array/object props via attributes** (`<tc-hotbar slots="...">`). Attributes are strings. Use `el.slots = [...]` JS property assignment.
 
-❌ **Forking component SCSS to reskin.** Override `--fg-*` (palette) or `--gc-*` (per-component) custom properties on `:root` or a scoped wrapper.
+❌ **Forking component SCSS to reskin.** Override `--tc-*` (palette) or `--bs-<component>-*` (per-component) custom properties on `:root` or a scoped wrapper.
 
 ❌ **Calling `scene.features.get('other')` from a prefab.** Prefabs don't know features. If you need it, drive the prefab from a feature instead.
 

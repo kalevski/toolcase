@@ -4,7 +4,8 @@
 // MarkdownEditor, save rebuilds the index). The app-owned index stays read-only.
 
 import React, { useEffect, useState } from 'react'
-import { Drawer, Spinner, Badge, Button, MarkdownEditor, HelperText, toast } from '@toolcase/react-components'
+import { toast } from '@/lib/toast'
+import { useTc, useTcEvents, detailValue } from '@/lib/tc'
 import { useProject } from '../ProjectContext'
 import { helpTexts } from '../helpTexts'
 
@@ -20,6 +21,12 @@ export function KnowledgeDrawer({ project, docId, onClose }: { project: string; 
     const loading = docId !== null && content === null
     const editDraft = editing?.id === docId ? editing.draft : null
     const isIndex = docId?.toLowerCase() === 'index.md'
+
+    // Drive the drawer open state via property; route its close affordances back.
+    const drawerRef = useTc<HTMLElement>({ open: docId !== null }, { 'tc-close': () => onClose() })
+    const editorRef = useTcEvents<HTMLElement>({
+        'tc-change': (e) => docId && setEditing({ id: docId, draft: detailValue<string>(e) }),
+    })
 
     useEffect(() => {
         if (!docId) return
@@ -65,42 +72,42 @@ export function KnowledgeDrawer({ project, docId, onClose }: { project: string; 
     }
 
     return (
-        <Drawer open={docId !== null} onClose={onClose} side="right" size="large" title={docId ?? ''}>
+        <tc-drawer ref={drawerRef} side="right" size="large" title={docId ?? ''}>
             <div style={{ padding: '1.25rem' }}>
-                <div className="tf-actions" style={{ marginBottom: '0.75rem' }}>
-                    <Badge variant="secondary">knowledge/{docId}</Badge>
+                <tc-stack direction="horizontal" gap="0.75rem" wrap align="center" style={{ marginBottom: '0.75rem' }}>
+                    <tc-badge variant="secondary">knowledge/{docId}</tc-badge>
                     {docId && !isIndex && editDraft === null && (
-                        <Button
-                            size="small"
+                        <tc-button
+                            size="sm"
                             variant="secondary"
                             outline
                             style={{ marginLeft: 'auto' }}
-                            disabled={busy || content === null}
+                            disabled={busy || content === null || undefined}
                             title={helpTexts.knowledge.edit}
                             onClick={() => content !== null && setEditing({ id: docId, draft: content })}
                         >
-                            ✎ Edit
-                        </Button>
+                            <tc-icon name="Pencil" /> Edit
+                        </tc-button>
                     )}
-                </div>
+                </tc-stack>
                 {loading && (
                     <div style={{ padding: '2rem', textAlign: 'center' }}>
-                        <Spinner />
+                        <tc-spinner />
                     </div>
                 )}
                 {editDraft !== null && docId ? (
-                    <div className="tf-stack-sm">
-                        <HelperText text={helpTexts.knowledge.edit} />
-                        <MarkdownEditor value={editDraft} onChange={(v) => setEditing({ id: docId, draft: v })} height={440} />
-                        <div className="tf-actions">
-                            <Button variant="primary" loading={saving} disabled={saving} onClick={() => void onSave()}>
+                    <tc-stack gap="0.75rem">
+                        <tc-helper-text text={helpTexts.knowledge.edit} />
+                        <tc-markdown-editor ref={editorRef} value={editDraft} height="440" />
+                        <tc-stack direction="horizontal" gap="0.75rem" wrap align="center">
+                            <tc-button variant="primary" loading={saving || undefined} disabled={saving || undefined} onClick={() => void onSave()}>
                                 Save
-                            </Button>
-                            <Button variant="secondary" outline onClick={() => setEditing(null)}>
+                            </tc-button>
+                            <tc-button variant="secondary" outline onClick={() => setEditing(null)}>
                                 Cancel
-                            </Button>
-                        </div>
-                    </div>
+                            </tc-button>
+                        </tc-stack>
+                    </tc-stack>
                 ) : (
                     content !== null && (
                         <pre
@@ -117,6 +124,6 @@ export function KnowledgeDrawer({ project, docId, onClose }: { project: string; 
                     )
                 )}
             </div>
-        </Drawer>
+        </tc-drawer>
     )
 }

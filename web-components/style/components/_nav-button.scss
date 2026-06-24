@@ -1,0 +1,97 @@
+// tc-nav-button — back / close navigation button.
+// Port of gc-nav-button (game-components), restyled to the toolcase design system:
+// slate neutrals, sharp corners (border-radius: 0), no game-specific chrome.
+// Defaults to a 2 rem square ghost icon button; the `size` attribute overrides
+// --bs-nav-button-size inline so the CSS default is always the fallback.
+// All cosmetics flow through --bs-nav-button-* custom properties.
+
+@use '../foundation/tokens' as *;
+
+// ── Host defaults ─────────────────────────────────────────────────────────────
+
+tc-nav-button {
+    --bs-nav-button-size: 2rem;
+    --bs-nav-button-color: var(--tc-text-muted);
+    --bs-nav-button-bg: transparent;
+    --bs-nav-button-border-color: transparent;
+    --bs-nav-button-hover-color: var(--tc-text);
+    --bs-nav-button-hover-bg: var(--tc-surface-muted);
+    --bs-nav-button-hover-border-color: transparent;
+    --bs-nav-button-active-color: var(--tc-text);
+    --bs-nav-button-active-bg: var(--tc-surface-muted);
+    --bs-nav-button-active-border-color: transparent;
+    --bs-nav-button-focus-ring-color: rgba(30, 41, 59, 0.25);
+    --bs-nav-button-disabled-opacity: 0.65;
+    --bs-nav-button-border-radius: 0;
+    --bs-nav-button-icon-size: 1rem;
+}
+
+// ── Inner button ─────────────────────────────────────────────────────────────
+
+.tc-nav-button__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-nav-button-size);
+    height: var(--bs-nav-button-size);
+    padding: 0;
+    color: var(--bs-nav-button-color);
+    background: var(--bs-nav-button-bg);
+    border: 1px solid var(--bs-nav-button-border-color);
+    border-radius: var(--bs-nav-button-border-radius);
+    cursor: pointer;
+    user-select: none;
+    transition:
+        color var(--tc-transition-fast, 0.15s ease),
+        background var(--tc-transition-fast, 0.15s ease),
+        border-color var(--tc-transition-fast, 0.15s ease),
+        transform var(--tc-transition-fast, 0.15s ease),
+        box-shadow var(--tc-transition-fast, 0.15s ease);
+
+    svg {
+        width: var(--bs-nav-button-icon-size);
+        height: var(--bs-nav-button-icon-size);
+        flex-shrink: 0;
+    }
+
+    &:hover {
+        color: var(--bs-nav-button-hover-color);
+        background: var(--bs-nav-button-hover-bg);
+        border-color: var(--bs-nav-button-hover-border-color);
+        transform: translateY(-1px);
+    }
+
+    &:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 0.25rem var(--bs-nav-button-focus-ring-color);
+    }
+
+    &:active {
+        color: var(--bs-nav-button-active-color);
+        background: var(--bs-nav-button-active-bg);
+        border-color: var(--bs-nav-button-active-border-color);
+        transform: translateY(0);
+    }
+
+    &:disabled {
+        opacity: var(--bs-nav-button-disabled-opacity);
+        pointer-events: none;
+        transform: none;
+    }
+}
+
+// ── Touch target — 44 px minimum per WCAG 2.5.5 ──────────────────────────────
+
+@media (pointer: coarse) {
+    tc-nav-button {
+        --bs-nav-button-size: 44px;
+    }
+}
+
+// ── Reduced motion ────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-nav-button__btn {
+        transition: none;
+    }
+}

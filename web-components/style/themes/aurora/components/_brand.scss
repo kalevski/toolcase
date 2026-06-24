@@ -1,0 +1,18 @@
+// Aurora › tc-brand — wordmark with a mint gradient underline.
+// The primary wordmark reads in the emphasis off-white; the accent underline bar
+// becomes the mint→emerald gradient sweep. --bs-brand-underline-color is a solid
+// colour slot, so the gradient is applied as a background on .tc-brand__underline.
+
+tc-theme[name='aurora'],
+[data-tc-theme='aurora'] {
+    tc-brand {
+        --bs-brand-primary-color: var(--ah-emphasis);
+        --bs-brand-primary-font: var(--ah-display);
+        --bs-brand-label-bg: var(--ah-accent-soft);
+        --bs-brand-label-color: var(--ah-accent-bright);
+    }
+
+    .tc-brand__underline {
+        background: var(--ah-accent-grad);
+    }
+}

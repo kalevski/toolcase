@@ -1,0 +1,27 @@
+// Aurora › tc-link — mint inline anchor.
+// The default link is already mint via the --tc-app-accent remap; only the
+// status variants are repointed onto the brighter aurora element tones so they
+// stay legible on the dark surface.
+
+tc-theme[name='aurora'],
+[data-tc-theme='aurora'] {
+    .tc-link-success {
+        --bs-link-color: var(--ah-success);
+        --bs-link-hover-color: var(--ah-success);
+    }
+
+    .tc-link-danger {
+        --bs-link-color: var(--ah-danger);
+        --bs-link-hover-color: var(--ah-danger);
+    }
+
+    .tc-link-info {
+        --bs-link-color: var(--ah-info);
+        --bs-link-hover-color: var(--ah-info);
+    }
+
+    .tc-link-warning {
+        --bs-link-color: var(--ah-warn);
+        --bs-link-hover-color: var(--ah-warn);
+    }
+}

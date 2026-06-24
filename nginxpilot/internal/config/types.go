@@ -5,6 +5,7 @@ package config
 
 import (
 	"fmt"
+	"math"
 	"regexp"
 	"strconv"
 	"strings"
@@ -21,12 +22,13 @@ const (
 
 // Auth methods.
 const (
-	AuthNone       = "none"
-	AuthSSHKey     = "ssh-key"
-	AuthHTTPSToken = "https-token"
-	AuthBearer     = "bearer"
-	AuthBasic      = "basic"
-	AuthHeader     = "header"
+	AuthNone        = "none"
+	AuthSSHKey      = "ssh-key"
+	AuthHTTPSToken  = "https-token"
+	AuthGitHubToken = "github-token"
+	AuthBearer      = "bearer"
+	AuthBasic       = "basic"
+	AuthHeader      = "header"
 )
 
 // Config is the merged result of the main file and all included fragments.
@@ -46,8 +48,9 @@ type Config struct {
 type Admin struct {
 	// Listen is the address for the admin endpoint. nil means the default
 	// (127.0.0.1:9090); an explicit empty string disables the endpoint.
-	Listen   *string `yaml:"listen"`
-	TokenEnv string  `yaml:"token_env"`
+	Listen    *string `yaml:"listen"`
+	TokenEnv  string  `yaml:"token_env"`
+	TokenFile string  `yaml:"token_file"`
 }
 
 // ListenAddr resolves the effective admin listen address ("" = disabled).
@@ -57,6 +60,10 @@ func (a Admin) ListenAddr() string {
 	}
 	return *a.Listen
 }
+
+// defaultKeepReleases is the built-in fallback when neither the site nor
+// defaults specify keep_releases.
+const defaultKeepReleases = 5
 
 // Defaults holds global per-site fallbacks.
 type Defaults struct {
@@ -86,12 +93,25 @@ func (s Site) Interval(d Defaults) time.Duration {
 	return 5 * time.Minute
 }
 
+// KeepReleases returns the effective keep_releases for the site: per-site
+// value wins, then defaults, then the built-in constant.
+func (s Site) KeepReleases(d Defaults) int {
+	if s.Source.KeepReleases != nil && *s.Source.KeepReleases > 0 {
+		return *s.Source.KeepReleases
+	}
+	if d.KeepReleases > 0 {
+		return d.KeepReleases
+	}
+	return defaultKeepReleases
+}
+
 // Source describes where a site's content comes from.
 type Source struct {
-	Type     string   `yaml:"type"`
-	URL      string   `yaml:"url"`
-	Interval Duration `yaml:"interval"`
-	Auth     Auth     `yaml:"auth"`
+	Type         string   `yaml:"type"`
+	URL          string   `yaml:"url"`
+	Interval     Duration `yaml:"interval"`
+	KeepReleases *int     `yaml:"keep_releases"`
+	Auth         Auth     `yaml:"auth"`
 
 	// git only
 	Branch string `yaml:"branch"`
@@ -129,8 +149,12 @@ func stripOrMinusOne(p *int) int {
 type Auth struct {
 	Method string `yaml:"method"`
 
-	// ssh-key
+	// ssh-key: supply the private key either by path (key_file) or by
+	// reference to an env var holding the key material (key_env). Exactly
+	// one is required. key_env materializes the key into a daemon-owned
+	// 0600 temp file at sync time — no on-host staging/ownership dance.
 	KeyFile    string `yaml:"key_file"`
+	KeyEnv     string `yaml:"key_env"`
 	KnownHosts string `yaml:"known_hosts"`
 
 	// https-token / basic
@@ -154,6 +178,7 @@ type Auth struct {
 	Token    string `yaml:"token"`
 	Password string `yaml:"password"`
 	Value    string `yaml:"value"`
+	Key      string `yaml:"key"`
 }
 
 // MethodOrNone returns the effective auth method.
@@ -272,7 +297,11 @@ func ParseByteSize(s string) (ByteSize, error) {
 	case "TIB":
 		mult = 1 << 40
 	}
-	return ByteSize(n * mult), nil
+	prod := n * mult
+	if prod < 0 || prod > float64(math.MaxInt64) {
+		return 0, fmt.Errorf("size %q is too large", s)
+	}
+	return ByteSize(prod), nil
 }
 
 // String implements fmt.Stringer.

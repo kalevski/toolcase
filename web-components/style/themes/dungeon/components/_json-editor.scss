@@ -1,0 +1,25 @@
+// Dungeon › tc-json-editor — schema-driven form editor.
+// Foundation handles the full --bs-json-editor-* token remap (wood bg, gold
+// border, leather header, parchment text, blood error, mono font, square
+// corners, gold focus rings). One structural gap remains: --bs-json-editor-
+// row-border defaults to var(--tc-slate-100, #f1f5f9), a bright-white hairline
+// that has no dungeon-foundation mapping. Override it here to a faint gold
+// across all row types (leaf rows, groups, array items/rows, skeleton rows).
+// Also add a top bevel highlight to the editor frame.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // Critical fix: kill the slate-100 / #f1f5f9 white row-border fallback.
+    // rgba(201,169,97,0.18) — faint gold; full --fg-gold-deep is too heavy for
+    // a dense data-editor grid (would look caged with 8+ hairlines visible).
+    tc-json-editor {
+        --bs-json-editor-row-border: rgba(201, 169, 97, 0.18);
+    }
+
+    // Gilded top-edge bevel on the outer editor frame. The gold-deep border is
+    // already provided by the token remap; --fg-bevel-top adds the inset
+    // highlight band that reads as a lit top edge on the dark wood surface.
+    .tc-json-editor {
+        box-shadow: var(--fg-bevel-top);
+    }
+}

@@ -1,0 +1,19 @@
+// Dungeon › tc-editable-text — inline editable label.
+// Foundation-only component: all colour/font/radius cosmetics are already
+// wired through --bs-editable-text-* vars mapped to --tc-* tokens, which the
+// foundation repoints to parchment text, leather hover, gold border + ring.
+// The two overrides below merely strengthen the gold edge on focus and pin
+// the hover wash to a slightly richer leather shade.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-editable-text {
+        // Brighter gold edge when the field is active (base maps to --fg-gold via
+        // --tc-border-strong; pin to --fg-gold-bright for a crisper active state).
+        --bs-editable-text-focus-border: var(--fg-gold-bright);
+
+        // Slightly richer leather wash on hover (base maps to --tc-surface-muted;
+        // pin to --fg-leather-2 for more visible affordance against dark surfaces).
+        --bs-editable-text-hover-bg: var(--fg-leather-2);
+    }
+}

@@ -1,5 +1,8 @@
 import { Root, Type, Field, MapField, Enum, Writer, Namespace, Message } from 'protobufjs/light'
 
+// eslint-disable-next-line no-var
+declare var require: ((id: string) => any) | undefined
+
 type EnumMarker = { __kind: 'enum', values: string[] | Record<string, number> }
 type MapMarker = { __kind: 'map', keyType: string, valueType: string }
 type PackedMarker = { __kind: 'packed', type: string }
@@ -10,6 +13,20 @@ interface FieldType {
     type: FieldTypeRef
     rule: 'optional' | 'required' | 'repeated'
     default?: any
+    /**
+     * Explicit protobuf field tag (field number). When omitted the tag is
+     * derived from the field's array position (`index + 1`).
+     *
+     * WARNING — positional tags are fragile: inserting, removing, or
+     * reordering a field shifts every subsequent tag and silently
+     * corrupts existing buffers. When omitting explicit tags, fields
+     * must be **append-only** — never insert or remove in the middle.
+     *
+     * NOTE — protobuf reserves tags 19000–19999 for internal use;
+     * `protobufjs` will reject them. Schemas with ≥ 18999 positional
+     * fields will hit this range automatically.
+     */
+    tag?: number
 }
 
 interface SafeResult<T> {
@@ -30,11 +47,30 @@ interface VersionedFrame<T = Record<string, any>> {
 
 type MigrationFn = (message: any) => Record<string, any>
 
+const getRandomBytes = (n: number): Uint8Array => {
+    const g = globalThis as any
+    if (g.crypto?.getRandomValues) return g.crypto.getRandomValues(new Uint8Array(n))
+    try { return require?.('node:crypto').randomBytes(n) } catch { /* fall through */ }
+    const b = new Uint8Array(n)
+    for (let i = 0; i < n; i++) b[i] = Math.floor(Math.random() * 256)
+    return b
+}
+
+const getRandomUint32 = (): number => {
+    const b = getRandomBytes(4)
+    return ((b[0] << 24) | (b[1] << 16) | (b[2] << 8) | b[3]) >>> 0
+}
+
 const generateId = (length: number = 16): string => {
-    const bytes = new Uint8Array(Math.ceil(length / 2))
-    globalThis.crypto.getRandomValues(bytes)
+    const bytes = getRandomBytes(Math.ceil(length / 2))
     return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('').slice(0, length)
 }
+
+// Wire-format constants — a breaking change from the pre-magic-byte layout.
+// Any buffer produced by an older build will be rejected by decodeVersioned /
+// reassemble rather than silently misinterpreted.
+const MAGIC_VERSIONED = 0xB5
+const MAGIC_FRAGMENT  = 0xF5
 
 const isEnumMarker = (value: any): value is EnumMarker =>
     value !== null && typeof value === 'object' && value.__kind === 'enum'
@@ -58,8 +94,6 @@ const buildEnumValues = (values: string[] | Record<string, number>): Record<stri
 
 class Serializer {
 
-    private writer: Writer = new Writer()
-
     private root: Root
 
     private namespace: Namespace
@@ -67,6 +101,8 @@ class Serializer {
     private currentVersion: Version = { major: 1, minor: 0 }
 
     private migrations: Map<string, MigrationFn> = new Map()
+
+    private versionedTypes: Map<string, Type> = new Map()
 
     constructor(id: string | null = null) {
         if (id === null) {
@@ -76,21 +112,19 @@ class Serializer {
         this.namespace = this.root.define(id)
     }
 
-    define(key: string, fields: FieldType[] = []): void {
+    private buildTypeInNamespace(namespace: Namespace, key: string, fields: FieldType[]): Type {
         const type = new Type(key)
         for (const [index, field] of fields.entries()) {
-            const tag = index + 1
-            const defaultValue = typeof field.default === 'undefined' ? null : field.default
+            const tag = typeof field.tag === 'number' ? field.tag : index + 1
+            const defaultOpts = typeof field.default !== 'undefined' ? { default: field.default } : {}
             const fieldRef = field.type
 
             if (isEnumMarker(fieldRef)) {
                 const enumName = `${key}_${field.key}_E`
-                if (this.namespace.get(enumName) === null) {
-                    this.namespace.add(new Enum(enumName, buildEnumValues(fieldRef.values)))
+                if (namespace.get(enumName) === null) {
+                    namespace.add(new Enum(enumName, buildEnumValues(fieldRef.values)))
                 }
-                type.add(new Field(field.key, tag, enumName, field.rule, undefined, {
-                    default: defaultValue
-                }))
+                type.add(new Field(field.key, tag, enumName, field.rule, undefined, { ...defaultOpts }))
                 continue
             }
 
@@ -101,17 +135,40 @@ class Serializer {
 
             if (isPackedMarker(fieldRef)) {
                 type.add(new Field(field.key, tag, fieldRef.type, 'repeated', undefined, {
-                    default: defaultValue,
+                    ...defaultOpts,
                     packed: true
                 }))
                 continue
             }
 
-            type.add(new Field(field.key, tag, fieldRef as string, field.rule, undefined, {
-                default: defaultValue
-            }))
+            type.add(new Field(field.key, tag, fieldRef as string, field.rule, undefined, { ...defaultOpts }))
         }
+        return type
+    }
+
+    define(key: string, fields: FieldType[] = []): void {
+        if (this.namespace.get(key) !== null) {
+            throw new Error(`Serializer: type key=${key} already defined`)
+        }
+        const type = this.buildTypeInNamespace(this.namespace, key, fields)
         this.namespace.add(type)
+    }
+
+    /**
+     * Register the schema that was active for `key` at `forMajor`. When
+     * `decodeVersioned` encounters a frame with that major version it decodes
+     * the body with this schema before running migrations, allowing genuinely
+     * breaking changes (field reorder, retype, removal) to be handled safely.
+     */
+    defineVersion(key: string, forMajor: number, fields: FieldType[]): void {
+        if (!Number.isInteger(forMajor) || forMajor < 0 || forMajor > 255) {
+            throw new Error(`Serializer.defineVersion: forMajor must be an integer in [0,255], got ${forMajor}`)
+        }
+        const vRoot = new Root()
+        const vNamespace = vRoot.define(`__v${forMajor}_${key}`)
+        const type = this.buildTypeInNamespace(vNamespace, key, fields)
+        vNamespace.add(type)
+        this.versionedTypes.set(`${key}:${forMajor}`, type)
     }
 
     enum(name: string, values: string[] | Record<string, number>): void {
@@ -127,13 +184,13 @@ class Serializer {
     }
 
     encode(key: string, message: Record<string, any>): Uint8Array {
-        this.writer.reset()
+        const writer = Writer.create()
         const type = this.getType(key)
         try {
-            return type.encode(message, this.writer).finish()
+            return type.encode(message, writer).finish()
         } catch (error: any) {
             const validationError = type.verify(message)
-            const reason = validationError ?? error.message
+            const reason = validationError ?? (error?.message ?? String(error))
             throw new Error(`Serializer.encode[${key}] failed: ${reason}`)
         }
     }
@@ -191,25 +248,37 @@ class Serializer {
 
     encodeVersioned(key: string, message: Record<string, any>): Uint8Array {
         const body = this.encode(key, message)
-        const out = new Uint8Array(body.byteLength + 2)
-        out[0] = this.currentVersion.major
-        out[1] = this.currentVersion.minor
-        out.set(body, 2)
+        const out = new Uint8Array(body.byteLength + 3)
+        out[0] = MAGIC_VERSIONED
+        out[1] = this.currentVersion.major
+        out[2] = this.currentVersion.minor
+        out.set(body, 3)
         return out
     }
 
     decodeVersioned(key: string, buffer: Uint8Array): VersionedFrame {
-        if (!buffer || buffer.byteLength < 2) {
+        if (!buffer || buffer.byteLength < 3) {
             const size = buffer?.byteLength ?? '?'
             throw new Error(`Serializer.decodeVersioned[${key}] failed: buffer too small for version header (bytes=${size})`)
         }
-        const major = buffer[0]
-        const minor = buffer[1]
+        if (buffer[0] !== MAGIC_VERSIONED) {
+            throw new Error(`Serializer.decodeVersioned[${key}] failed: missing versioned magic byte`)
+        }
+        const major = buffer[1]
+        const minor = buffer[2]
         if (major > this.currentVersion.major) {
             throw new Error(`Serializer.decodeVersioned[${key}] failed: frame v${major}.${minor} is newer than current v${this.currentVersion.major}.${this.currentVersion.minor}`)
         }
-        const body = buffer.subarray(2)
-        let message: any = this.decode(key, body)
+        const body = buffer.subarray(3)
+        const decodeType = this.versionedTypes.get(`${key}:${major}`) ?? this.getType(key)
+        let message: any
+        try {
+            message = decodeType.toObject(decodeType.decode(body))
+        } catch (error: any) {
+            const offset = typeof error?.offset === 'number' ? `, offset=${error.offset}` : ''
+            const size = body?.byteLength ?? '?'
+            throw new Error(`Serializer.decodeVersioned[${key}] failed: ${error.message} (bytes=${size}${offset})`)
+        }
         let v = major
         while (v < this.currentVersion.major) {
             const handler = this.migrations.get(`${key}:${v}`)
@@ -218,6 +287,10 @@ class Serializer {
             }
             message = handler(message)
             v++
+        }
+        const invalid = this.getType(key).verify(message)
+        if (invalid) {
+            throw new Error(`Serializer.decodeVersioned[${key}] failed: migrated message invalid: ${invalid}`)
         }
         return { version: { major, minor }, message }
     }
@@ -233,12 +306,38 @@ class Serializer {
     fields(key: string): FieldType[] {
         const type = this.getType(key)
         return type.fieldsArray.map(f => {
-            const isMap = f instanceof MapField
+            if (f instanceof MapField) {
+                return {
+                    key: f.name,
+                    type: Serializer.FieldType.MAP(f.keyType, f.type),
+                    rule: 'optional' as FieldType['rule'],
+                    tag: f.id
+                }
+            }
+            const enumDef = this.namespace.get(f.type)
+            if (enumDef instanceof Enum) {
+                return {
+                    key: f.name,
+                    type: Serializer.FieldType.ENUM(enumDef.values as Record<string, number>),
+                    rule: (f.repeated ? 'repeated' : f.required ? 'required' : 'optional') as FieldType['rule'],
+                    default: f.options?.default,
+                    tag: f.id
+                }
+            }
+            if (f.repeated && f.options?.packed === true) {
+                return {
+                    key: f.name,
+                    type: Serializer.FieldType.PACKED_ARRAY(f.type),
+                    rule: 'repeated' as FieldType['rule'],
+                    tag: f.id
+                }
+            }
             return {
                 key: f.name,
                 type: f.type,
-                rule: (isMap ? 'optional' : f.repeated ? 'repeated' : f.required ? 'required' : 'optional') as FieldType['rule'],
-                default: f.options?.default
+                rule: (f.repeated ? 'repeated' : f.required ? 'required' : 'optional') as FieldType['rule'],
+                default: f.options?.default,
+                tag: f.id
             }
         })
     }
@@ -252,22 +351,23 @@ class Serializer {
         if (total > 0xffff) {
             throw new Error(`Serializer.fragment: ${total} chunks exceeds the 65535 limit; raise maxChunkSize`)
         }
-        const frameId = Math.floor(Math.random() * 0xffffffff) >>> 0
+        const frameId = (getRandomUint32() | 1) >>> 0
         const out: Uint8Array[] = []
         for (let i = 0; i < total; i++) {
             const start = i * maxChunkSize
             const end = Math.min(start + maxChunkSize, length)
             const slice = buffer.subarray(start, end)
-            const chunk = new Uint8Array(8 + slice.byteLength)
-            chunk[0] = (frameId >>> 24) & 0xff
-            chunk[1] = (frameId >>> 16) & 0xff
-            chunk[2] = (frameId >>> 8) & 0xff
-            chunk[3] = frameId & 0xff
-            chunk[4] = (i >>> 8) & 0xff
-            chunk[5] = i & 0xff
-            chunk[6] = (total >>> 8) & 0xff
-            chunk[7] = total & 0xff
-            chunk.set(slice, 8)
+            const chunk = new Uint8Array(9 + slice.byteLength)
+            chunk[0] = MAGIC_FRAGMENT
+            chunk[1] = (frameId >>> 24) & 0xff
+            chunk[2] = (frameId >>> 16) & 0xff
+            chunk[3] = (frameId >>> 8) & 0xff
+            chunk[4] = frameId & 0xff
+            chunk[5] = (i >>> 8) & 0xff
+            chunk[6] = i & 0xff
+            chunk[7] = (total >>> 8) & 0xff
+            chunk[8] = total & 0xff
+            chunk.set(slice, 9)
             out.push(chunk)
         }
         return out
@@ -278,26 +378,32 @@ class Serializer {
             throw new Error('Serializer.reassemble: chunks must be a non-empty array')
         }
         const first = chunks[0]
-        if (!first || first.byteLength < 8) {
-            throw new Error('Serializer.reassemble: chunk header truncated (need 8 bytes)')
+        if (!first || first.byteLength < 9) {
+            throw new Error('Serializer.reassemble: chunk header truncated (need 9 bytes)')
         }
-        const frameId = (((first[0] << 24) | (first[1] << 16) | (first[2] << 8) | first[3]) >>> 0)
-        const total = (first[6] << 8) | first[7]
+        if (first[0] !== MAGIC_FRAGMENT) {
+            throw new Error('Serializer.reassemble: missing fragment magic byte')
+        }
+        const frameId = (((first[1] << 24) | (first[2] << 16) | (first[3] << 8) | first[4]) >>> 0)
+        const total = (first[7] << 8) | first[8]
         if (chunks.length !== total) {
             throw new Error(`Serializer.reassemble: chunk count mismatch — got ${chunks.length}, header says ${total}`)
         }
         const ordered: Uint8Array[] = new Array(total)
         let payloadBytes = 0
         for (const chunk of chunks) {
-            if (!chunk || chunk.byteLength < 8) {
-                throw new Error('Serializer.reassemble: chunk header truncated (need 8 bytes)')
+            if (!chunk || chunk.byteLength < 9) {
+                throw new Error('Serializer.reassemble: chunk header truncated (need 9 bytes)')
             }
-            const fid = (((chunk[0] << 24) | (chunk[1] << 16) | (chunk[2] << 8) | chunk[3]) >>> 0)
+            if (chunk[0] !== MAGIC_FRAGMENT) {
+                throw new Error('Serializer.reassemble: missing fragment magic byte')
+            }
+            const fid = (((chunk[1] << 24) | (chunk[2] << 16) | (chunk[3] << 8) | chunk[4]) >>> 0)
             if (fid !== frameId) {
                 throw new Error(`Serializer.reassemble: frameId mismatch — chunks belong to different frames`)
             }
-            const index = (chunk[4] << 8) | chunk[5]
-            const t = (chunk[6] << 8) | chunk[7]
+            const index = (chunk[5] << 8) | chunk[6]
+            const t = (chunk[7] << 8) | chunk[8]
             if (t !== total) {
                 throw new Error(`Serializer.reassemble: total mismatch — chunk says ${t}, expected ${total}`)
             }
@@ -307,7 +413,7 @@ class Serializer {
             if (ordered[index] !== undefined) {
                 throw new Error(`Serializer.reassemble: duplicate chunk at index ${index}`)
             }
-            const payload = chunk.subarray(8)
+            const payload = chunk.subarray(9)
             ordered[index] = payload
             payloadBytes += payload.byteLength
         }

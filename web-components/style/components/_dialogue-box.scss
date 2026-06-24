@@ -1,0 +1,207 @@
+// tc-dialogue-box — NPC dialogue box: optional speaker name, typewriter body text,
+// an advance caret, and an optional list of choice buttons.
+// Ported from game-components `gc-dialogue-box` but rebuilt to the design system —
+// the gilded frame, glow, and fantasy fills are dropped in favour of a flat slate
+// surface, 1px hairline border, sharp corners, and an overlay-tier shadow.
+// All cosmetics flow through --bs-dialogue-box-* custom properties.
+
+tc-dialogue-box {
+    --bs-dialogue-box-bg: var(--tc-surface);
+    --bs-dialogue-box-border: 1px solid var(--tc-border);
+    --bs-dialogue-box-shadow: var(--tc-shadow-lg);
+    --bs-dialogue-box-padding-y: 1rem;
+    --bs-dialogue-box-padding-x: 1.25rem;
+    --bs-dialogue-box-gap: 0.75rem;
+
+    --bs-dialogue-box-speaker-color: var(--tc-text);
+    --bs-dialogue-box-speaker-font-size: 0.8125rem;
+    --bs-dialogue-box-speaker-font-weight: 600;
+    --bs-dialogue-box-speaker-letter-spacing: 0.02em;
+    --bs-dialogue-box-speaker-border: 1px solid var(--tc-border);
+    --bs-dialogue-box-speaker-pad: 0.5rem;
+
+    --bs-dialogue-box-text-color: var(--tc-text);
+    --bs-dialogue-box-text-font-size: 0.925rem;
+    --bs-dialogue-box-text-line-height: 1.6;
+    // Reserve a couple of lines so the panel doesn't reflow as the text types in.
+    --bs-dialogue-box-text-min-height: 3.2em;
+
+    --bs-dialogue-box-indicator-color: var(--tc-text-faint);
+    --bs-dialogue-box-indicator-size: 1rem;
+
+    --bs-dialogue-box-choices-gap: 0.375rem;
+    --bs-dialogue-box-choice-bg: var(--tc-surface);
+    --bs-dialogue-box-choice-color: var(--tc-text);
+    --bs-dialogue-box-choice-border: 1px solid var(--tc-border);
+    --bs-dialogue-box-choice-padding-y: 0.5rem;
+    --bs-dialogue-box-choice-padding-x: 0.75rem;
+    --bs-dialogue-box-choice-font-size: 0.875rem;
+    --bs-dialogue-box-choice-hover-bg: var(--tc-surface-muted);
+    --bs-dialogue-box-choice-marker-color: var(--tc-text-faint);
+    --bs-dialogue-box-choice-marker-hover-color: var(--tc-app-accent);
+    --bs-dialogue-box-choice-disabled-opacity: 0.5;
+
+    --bs-dialogue-box-transition: var(--tc-transition-fast);
+
+    display: block;
+    padding: var(--bs-dialogue-box-padding-y) var(--bs-dialogue-box-padding-x);
+    background: var(--bs-dialogue-box-bg);
+    border: var(--bs-dialogue-box-border);
+    border-radius: 0;
+    box-shadow: var(--bs-dialogue-box-shadow);
+    // Box advances on click when no choices are present.
+    cursor: pointer;
+}
+
+// Suppress the advance affordance when the box is awaiting a choice.
+tc-dialogue-box:has(.tc-dialogue-box-choices) {
+    cursor: default;
+}
+
+.tc-dialogue-box-speaker {
+    margin-bottom: var(--bs-dialogue-box-gap);
+    padding-bottom: var(--bs-dialogue-box-speaker-pad);
+    border-bottom: var(--bs-dialogue-box-speaker-border);
+}
+
+.tc-dialogue-box-speaker-name {
+    color: var(--bs-dialogue-box-speaker-color);
+    font-size: var(--bs-dialogue-box-speaker-font-size);
+    font-weight: var(--bs-dialogue-box-speaker-font-weight);
+    letter-spacing: var(--bs-dialogue-box-speaker-letter-spacing);
+}
+
+.tc-dialogue-box-body {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+    min-height: var(--bs-dialogue-box-text-min-height);
+}
+
+.tc-dialogue-box-text {
+    flex: 1 1 auto;
+    color: var(--bs-dialogue-box-text-color);
+    font-size: var(--bs-dialogue-box-text-font-size);
+    line-height: var(--bs-dialogue-box-text-line-height);
+    white-space: pre-wrap;
+}
+
+.tc-dialogue-box-indicator {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-dialogue-box-indicator-size);
+    height: var(--bs-dialogue-box-indicator-size);
+    color: var(--bs-dialogue-box-indicator-color);
+    // Hidden until the line has finished typing (and only when there are no choices).
+    opacity: 0;
+    transition: opacity var(--bs-dialogue-box-transition);
+
+    svg {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+.tc-dialogue-box-indicator.is-visible {
+    opacity: 1;
+    animation: tc-dialogue-box-bob 1.2s ease-in-out infinite;
+}
+
+@keyframes tc-dialogue-box-bob {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(3px);
+    }
+}
+
+.tc-dialogue-box-choices {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-dialogue-box-choices-gap);
+    margin-top: var(--bs-dialogue-box-gap);
+    // Reveal once typing completes; visibility:hidden keeps the layout reserved.
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--bs-dialogue-box-transition);
+}
+
+.tc-dialogue-box-choices.is-visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.tc-dialogue-box-choice {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: var(--bs-dialogue-box-choice-padding-y) var(--bs-dialogue-box-choice-padding-x);
+    color: var(--bs-dialogue-box-choice-color);
+    font-size: var(--bs-dialogue-box-choice-font-size);
+    text-align: left;
+    background: var(--bs-dialogue-box-choice-bg);
+    border: var(--bs-dialogue-box-choice-border);
+    border-radius: 0;
+    cursor: pointer;
+    transition:
+        background-color var(--bs-dialogue-box-transition),
+        border-color var(--bs-dialogue-box-transition);
+}
+
+.tc-dialogue-box-choice:hover {
+    background: var(--bs-dialogue-box-choice-hover-bg);
+}
+
+.tc-dialogue-box-choice:hover .tc-dialogue-box-choice-marker {
+    color: var(--bs-dialogue-box-choice-marker-hover-color);
+}
+
+.tc-dialogue-box-choice:focus-visible {
+    outline: 2px solid var(--tc-app-accent);
+    outline-offset: 2px;
+}
+
+.tc-dialogue-box-choice.is-disabled,
+.tc-dialogue-box-choice:disabled {
+    opacity: var(--bs-dialogue-box-choice-disabled-opacity);
+    pointer-events: none;
+}
+
+.tc-dialogue-box-choice-marker {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 0.875rem;
+    height: 0.875rem;
+    color: var(--bs-dialogue-box-choice-marker-color);
+    transition: color var(--bs-dialogue-box-transition);
+
+    svg {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+.tc-dialogue-box-choice-label {
+    flex: 1 1 auto;
+}
+
+// 44px minimum hit area for the advanceable box and the choices on coarse pointers.
+@media (pointer: coarse) {
+    .tc-dialogue-box-choice {
+        min-height: 44px;
+    }
+}
+
+// Decorative motion only — keep the static caret visible but freeze the bob.
+@media (prefers-reduced-motion: reduce) {
+    .tc-dialogue-box-indicator.is-visible {
+        animation: none;
+    }
+}

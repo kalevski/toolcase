@@ -1,0 +1,331 @@
+// tc-hero — large hero section with eyebrow, title, description, primary/secondary
+// action buttons, optional background pattern/scattered icons, stat cards, and metrics.
+// All cosmetics flow through --bs-hero-* custom properties backed by --tc-* tokens.
+// Sharp corners (radius: 0), slate neutrals, ink-gradient primary button, no cyan accent.
+
+@use '../foundation/tokens' as *;
+
+tc-hero {
+    --bs-hero-bg: var(--tc-surface);
+    --bs-hero-border-color: var(--tc-border);
+    // Main region padding mirrors the react Hero's clamp() vertical rhythm.
+    --bs-hero-padding-x: clamp(1.5rem, 6vw, 7rem);
+    --bs-hero-padding-y: clamp(2.5rem, 5vw, 5rem);
+    // Outer grid cap (react: 960px) and inner text-column cap (react: 640px).
+    --bs-hero-grid-max-width: 60rem;
+    --bs-hero-body-max-width: 40rem;
+    --bs-hero-grid-gap: clamp(1.25rem, 4vw, 1.75rem);
+
+    --bs-hero-eyebrow-color: var(--tc-text-muted);
+    --bs-hero-eyebrow-font-size: 0.6875rem;
+    --bs-hero-eyebrow-letter-spacing: 0.12em;
+
+    --bs-hero-title-color: var(--tc-text);
+    --bs-hero-title-font-size: clamp(2rem, 4vw, 3.5rem);
+    --bs-hero-title-font-weight: 600;
+
+    --bs-hero-description-color: var(--tc-text-muted);
+    --bs-hero-description-font-size: 1.0625rem;
+
+    --bs-hero-actions-gap: 0.75rem;
+
+    --bs-hero-stat-card-bg: var(--tc-surface-muted);
+    --bs-hero-stat-card-border: var(--tc-border);
+    --bs-hero-stat-card-padding-x: 1.25rem;
+    --bs-hero-stat-card-padding-y: 1rem;
+    --bs-hero-stat-value-color: var(--tc-text);
+    --bs-hero-stat-value-font-size: 1.5rem;
+    --bs-hero-stat-value-font-weight: 600;
+    --bs-hero-stat-label-color: var(--tc-text-muted);
+    --bs-hero-stat-label-font-size: 0.6875rem;
+    --bs-hero-stat-label-letter-spacing: 0.08em;
+
+    --bs-hero-metric-gap: 2rem;
+    --bs-hero-metric-value-color: var(--tc-text);
+    --bs-hero-metric-value-font-size: 1.25rem;
+    --bs-hero-metric-value-font-weight: 600;
+    --bs-hero-metric-label-color: var(--tc-text-muted);
+    --bs-hero-metric-label-font-size: 0.6875rem;
+    --bs-hero-metric-label-letter-spacing: 0.08em;
+
+    --bs-hero-bg-icon-color: var(--tc-text-muted);
+    --bs-hero-bg-icon-size: 2.5rem;
+    --bs-hero-bg-icon-opacity: 0.06;
+}
+
+// ── Section shell ─────────────────────────────────────────────────────────────
+
+.tc-hero {
+    position: relative;
+    overflow: hidden;
+    background: var(--bs-hero-bg);
+    border-bottom: 1px solid var(--bs-hero-border-color);
+}
+
+// ── Background layer ──────────────────────────────────────────────────────────
+
+.tc-hero-bg {
+    position: absolute;
+    inset: 0;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.tc-hero-bg-icon-wrap {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bs-hero-bg-icon-color);
+    opacity: var(--bs-hero-bg-icon-opacity);
+    pointer-events: none;
+}
+
+.tc-hero-bg-icon {
+    display: block;
+    width: var(--bs-hero-bg-icon-size);
+    height: var(--bs-hero-bg-icon-size);
+    stroke: currentColor;
+    fill: none;
+}
+
+// ── Foreground main region ────────────────────────────────────────────────────
+// Centered, vertically padded region (react: .component-hero__main) that holds
+// the single-column grid. Everything in the hero text column is centered.
+
+.tc-hero-main {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--bs-hero-padding-y) var(--bs-hero-padding-x);
+    text-align: center;
+}
+
+.tc-hero-grid {
+    width: 100%;
+    max-width: var(--bs-hero-grid-max-width);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: var(--bs-hero-grid-gap);
+}
+
+.tc-hero-body {
+    max-width: var(--bs-hero-body-max-width);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1.25rem;
+}
+
+// ── Eyebrow ───────────────────────────────────────────────────────────────────
+
+.tc-hero-eyebrow {
+    display: block;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-hero-eyebrow-font-size);
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: var(--bs-hero-eyebrow-letter-spacing);
+    text-transform: uppercase;
+    color: var(--bs-hero-eyebrow-color);
+}
+
+// ── Title ─────────────────────────────────────────────────────────────────────
+
+.tc-hero-title {
+    margin: 0;
+    font-size: var(--bs-hero-title-font-size);
+    font-weight: var(--bs-hero-title-font-weight);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--bs-hero-title-color);
+    text-align: center;
+}
+
+// ── Description ───────────────────────────────────────────────────────────────
+
+.tc-hero-description {
+    margin: 0 auto;
+    font-size: var(--bs-hero-description-font-size);
+    line-height: 1.7;
+    color: var(--bs-hero-description-color);
+    max-width: var(--bs-hero-body-max-width);
+    text-align: center;
+}
+
+// ── Actions row ───────────────────────────────────────────────────────────────
+// Mobile: stacked, full-width buttons. ≥576px: centered row (react parity).
+
+.tc-hero-actions {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    gap: var(--bs-hero-actions-gap);
+    align-items: stretch;
+    justify-content: center;
+    width: 100%;
+    max-width: 22rem;
+}
+
+// Action buttons inherit .btn styles from _button.scss.
+// Primary: ink gradient with 1px lift on hover (defined in .btn-primary).
+// Secondary: outline button with muted-surface hover wash (defined in .btn-outline-primary).
+
+// ── Stat cards row ────────────────────────────────────────────────────────────
+// Centered, wrapping row sitting under the actions inside the text column.
+
+.tc-hero-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.tc-hero-stat-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.25rem;
+    padding: var(--bs-hero-stat-card-padding-y) var(--bs-hero-stat-card-padding-x);
+    background: var(--bs-hero-stat-card-bg);
+    border: 1px solid var(--bs-hero-stat-card-border);
+    border-radius: 0;
+    min-width: 8rem;
+}
+
+.tc-hero-stat-value {
+    display: block;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-hero-stat-value-font-size);
+    font-weight: var(--bs-hero-stat-value-font-weight);
+    line-height: 1.1;
+    color: var(--bs-hero-stat-value-color);
+}
+
+.tc-hero-stat-label {
+    display: block;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-hero-stat-label-font-size);
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: var(--bs-hero-stat-label-letter-spacing);
+    text-transform: uppercase;
+    color: var(--bs-hero-stat-label-color);
+}
+
+// ── Metrics band ──────────────────────────────────────────────────────────────
+// Metrics drop into a separate band below a hairline separator (react:
+// __separator + __bottom + __bottom-inner), centered in a responsive grid.
+
+.tc-hero-separator {
+    position: relative;
+    z-index: 1;
+    height: 1px;
+    margin: 0 auto;
+    max-width: var(--bs-hero-grid-max-width);
+    background: var(--bs-hero-border-color);
+}
+
+.tc-hero-bottom {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    padding: clamp(2rem, 5vw, 3.25rem) var(--bs-hero-padding-x);
+}
+
+.tc-hero-bottom-inner {
+    width: 100%;
+    max-width: var(--bs-hero-grid-max-width);
+}
+
+.tc-hero-metrics {
+    display: grid;
+    // Mobile: single column. ≥576px: responsive auto-fit (react parity).
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    text-align: center;
+    gap: var(--bs-hero-metric-gap);
+    margin: 0;
+    padding: 0;
+}
+
+.tc-hero-metric {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.375rem;
+}
+
+// 3px accent bar above each metric — the react Hero's __metric::before motif,
+// recoloured to the slate ink accent to stay on the product voice.
+.tc-hero-metric::before {
+    content: '';
+    width: 2.5rem;
+    height: 2px;
+    background: var(--tc-app-accent);
+    opacity: 0.6;
+}
+
+.tc-hero-metric-value {
+    display: block;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-hero-metric-value-font-size);
+    font-weight: var(--bs-hero-metric-value-font-weight);
+    line-height: 1.2;
+    color: var(--bs-hero-metric-value-color);
+}
+
+.tc-hero-metric-label {
+    display: block;
+    font-size: var(--bs-hero-metric-label-font-size);
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: var(--bs-hero-metric-label-letter-spacing);
+    text-transform: uppercase;
+    color: var(--bs-hero-metric-label-color);
+}
+
+// ── Responsive (mobile-first min-width queries) ────────────────────────────────
+// ≥576px: actions become a centered auto-width row; metrics fan into a
+// responsive multi-column grid — matching the react Hero breakpoints.
+
+@media (min-width: 576px) {
+    .tc-hero-actions {
+        flex-direction: row;
+        align-items: center;
+        width: auto;
+        max-width: none;
+    }
+
+    .tc-hero-metrics {
+        grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    }
+}
+
+// ── Reduced motion ────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-hero-btn-primary,
+    .tc-hero-btn-secondary {
+        transition: none;
+        transform: none;
+    }
+
+    .tc-hero-btn-primary:hover,
+    .tc-hero-btn-secondary:hover {
+        transform: none;
+        box-shadow: none;
+    }
+}

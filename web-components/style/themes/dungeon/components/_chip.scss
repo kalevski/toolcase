@@ -1,0 +1,67 @@
+// Dungeon › tc-chip / tc-tag — gilded filter token / status tag.
+// Step 1: token-swap count badge to ink bg + gold text (resting/hover/selected
+//         already correct via the foundation remap).
+// Step 2: gilded bevel on the chip body; pressed shadow when selected.
+// Step 3: element-ramp re-declarations for the colored variants whose hex is
+//         baked from Sass maps at build time and cannot be reached by --tc-* vars.
+// Step 4: mono count so the number reads as an inset rune.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── 1. Token swap on the host (vars declared on tc-chip / tc-tag) ─────────
+    tc-chip,
+    tc-tag {
+        --bs-chip-count-bg: var(--fg-ink);
+        --bs-chip-count-color: var(--fg-gold);
+    }
+
+    // ── 2. Structure: gilded bevel on chip body ────────────────────────────────
+    .tc-chip {
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    .tc-chip.is-selected {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── 3. Element-ramp colored variant overrides ──────────────────────────────
+    // The base generates these via Sass maps ($theme-colors-soft / -emphasis) at
+    // compile time, producing baked product hex that --tc-* vars cannot reach.
+    // Re-declare each variant here to use the --fg-* element/rarity palette.
+
+    .tc-chip--danger:not(.is-selected) {
+        --bs-chip-bg: rgba(168, 48, 42, 0.2);
+        --bs-chip-color: var(--fg-blood-bright);
+        --bs-chip-border-color: var(--fg-blood);
+    }
+
+    .tc-chip--success:not(.is-selected) {
+        --bs-chip-bg: rgba(50, 110, 50, 0.2);
+        --bs-chip-color: var(--fg-stamina-bright);
+        --bs-chip-border-color: var(--fg-stamina);
+    }
+
+    .tc-chip--info:not(.is-selected) {
+        --bs-chip-bg: rgba(40, 70, 160, 0.2);
+        --bs-chip-color: var(--fg-mana-bright);
+        --bs-chip-border-color: var(--fg-mana);
+    }
+
+    .tc-chip--warning:not(.is-selected) {
+        --bs-chip-bg: rgba(180, 120, 20, 0.2);
+        --bs-chip-color: var(--fg-legendary);
+        --bs-chip-border-color: var(--fg-legendary);
+    }
+
+    .tc-chip--primary:not(.is-selected) {
+        --bs-chip-bg: rgba(138, 111, 58, 0.2);
+        --bs-chip-color: var(--fg-gold-bright);
+        --bs-chip-border-color: var(--fg-gold);
+    }
+
+    // ── 4. Mono count — reads as an inset rune glyph ──────────────────────────
+    .tc-chip-count {
+        font-family: var(--fg-mono);
+    }
+}

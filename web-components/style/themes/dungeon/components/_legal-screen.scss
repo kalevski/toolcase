@@ -1,0 +1,131 @@
+// Dungeon › tc-legal-screen — gilded EULA tome. Host gets the layered gold inset
+// frame + parchment-on-leather radial; nav items become display-caps rows with a
+// gold left marker + gradient wash on active; eyebrows go parchment-dim, section
+// body switches to the serif body face. Accept footer button reframed as gilded
+// metal. Token swap can't carry the inset bevel stack or the caps/serif recasts.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-legal-screen {
+        --bs-legal-screen-bg: transparent;
+        --bs-legal-screen-border-color: var(--fg-gold-deep);
+        --bs-legal-screen-header-border: rgba(201, 169, 97, 0.25);
+
+        --bs-legal-screen-eyebrow-color: var(--fg-parch-dim);
+        --bs-legal-screen-title-color: var(--fg-gold-bright);
+
+        --bs-legal-screen-nav-bg: rgba(0, 0, 0, 0.22);
+        --bs-legal-screen-nav-border: var(--fg-gold-deep);
+        --bs-legal-screen-nav-item-color: var(--fg-parch);
+        --bs-legal-screen-nav-item-hover-bg: rgba(201, 169, 97, 0.08);
+        --bs-legal-screen-nav-active-bg: transparent;
+        --bs-legal-screen-nav-active-color: var(--fg-gold-bright);
+
+        --bs-legal-screen-body-bg: transparent;
+        --bs-legal-screen-section-eye-color: var(--fg-parch-dim);
+        --bs-legal-screen-section-title-color: var(--fg-gold-bright);
+        --bs-legal-screen-section-body-color: var(--fg-parch);
+
+        --bs-legal-screen-footer-bg: transparent;
+        --bs-legal-screen-footer-border: rgba(201, 169, 97, 0.25);
+    }
+
+    // Layered gilded inset frame + parchment-on-leather radial (base ships flat).
+    .tc-legal-screen {
+        color: var(--fg-parch);
+        background:
+            linear-gradient(180deg, rgba(232, 220, 196, 0.04), rgba(0, 0, 0, 0.18)),
+            radial-gradient(120% 80% at 50% 0%, #2e2418 0%, #1a130c 70%);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 0 0 2px var(--fg-gold-deep),
+            inset 0 0 0 3px var(--fg-gold-shadow),
+            inset 0 2px 0 rgba(255, 220, 150, 0.08),
+            0 8px 24px rgba(0, 0, 0, 0.6);
+        position: relative;
+    }
+
+    // Top-left corner notch ornament (host has overflow: hidden so it stays framed).
+    .tc-legal-screen::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 18px;
+        height: 18px;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    // Title reads as gilded display caps.
+    .tc-legal-screen__title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+    }
+
+    // Nav items: display caps + gold left marker, gradient wash on active.
+    .tc-legal-screen__nav-item {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        border-left: 2px solid transparent;
+
+        &:hover {
+            color: var(--fg-gold-bright);
+        }
+
+        &--active {
+            border-left-color: var(--fg-gold-bright);
+            background: linear-gradient(90deg, rgba(201, 169, 97, 0.28), transparent 70%);
+
+            &:hover {
+                background: linear-gradient(90deg, rgba(201, 169, 97, 0.28), transparent 70%);
+            }
+        }
+    }
+
+    // Section title display caps; body + empty switch to the serif body face.
+    .tc-legal-screen__section-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+    }
+
+    .tc-legal-screen__section-body,
+    .tc-legal-screen__empty {
+        font-family: var(--fg-body);
+    }
+
+    // Close button: glyph in parchment-3, gold-bright on hover — matches the gilded voice.
+    .tc-legal-screen__close {
+        color: var(--fg-parch-3);
+
+        &:hover {
+            color: var(--fg-gold-bright);
+        }
+    }
+
+    // Accept reframed as gilded metal.
+    .tc-legal-screen__accept {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: var(--fg-gold-bright);
+        background: var(--fg-button-bg);
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow:
+            inset 0 1px 0 rgba(232, 200, 120, 0.2),
+            0 1px 0 rgba(0, 0, 0, 0.6);
+
+        // Replace off-palette slate-blue hover glow with a gilded one.
+        &:hover {
+            box-shadow:
+                inset 0 1px 0 rgba(232, 200, 120, 0.3),
+                0 4px 14px rgba(0, 0, 0, 0.5);
+            transform: translateY(-1px);
+        }
+    }
+}

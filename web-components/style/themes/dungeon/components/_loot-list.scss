@@ -1,0 +1,134 @@
+// Dungeon › tc-loot-list — gilded loot ledger. Token swap carries the wood
+// gradient + gold hairlines; structural rules add the panel bevel, display-caps
+// item names tinted by rarity, mono quantities, and the bronze gradient button.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-loot-list {
+        // Panel — radial wood ground + gold border.
+        --bs-loot-list-bg: var(--fg-panel-bg);
+        --bs-loot-list-border: 1px solid var(--fg-gold-deep);
+
+        // Header — translucent black under a gold hairline.
+        --bs-loot-list-header-bg: rgba(0, 0, 0, 0.3);
+        --bs-loot-list-header-border: 1px solid rgba(201, 169, 97, 0.25);
+        --bs-loot-list-title-color: var(--fg-gold-bright);
+
+        // Rows — faint gold hairline divider.
+        --bs-loot-list-row-border: 1px solid rgba(201, 169, 97, 0.15);
+
+        // Item parts.
+        --bs-loot-list-icon-color: var(--fg-gold-bright);
+        --bs-loot-list-name-color: var(--fg-parch);
+
+        // Rarity ramp — drives the per-row name tint below.
+        --bs-loot-list-rarity-common: var(--fg-common);
+        --bs-loot-list-rarity-uncommon: var(--fg-uncommon);
+        --bs-loot-list-rarity-rare: var(--fg-rare);
+        --bs-loot-list-rarity-epic: var(--fg-epic);
+        --bs-loot-list-rarity-legendary: var(--fg-legendary);
+        --bs-loot-list-rarity-mythic: var(--fg-mythic);
+
+        // Buttons — bronze keycap gradient.
+        --bs-loot-list-btn-bg: linear-gradient(180deg, #3a2a1a, #1f1610);
+        --bs-loot-list-btn-color: var(--fg-gold-bright);
+        --bs-loot-list-btn-border: 1px solid var(--fg-gold-deep);
+        --bs-loot-list-btn-hover-bg: linear-gradient(180deg, #3a2a1a, #1f1610);
+        --bs-loot-list-btn-hover-color: var(--fg-gold-bright);
+
+        // Rows — stronger gold wash on hover (improvement 4).
+        --bs-loot-list-row-hover-bg: rgba(201, 169, 97, 0.14);
+
+        // Quantities — gilded mono counts (improvement 5).
+        --bs-loot-list-qty-color: var(--fg-gold);
+
+        --bs-loot-list-empty-color: var(--fg-parch-dim);
+    }
+
+    // Panel bevel stack — base ships none.
+    .tc-loot-list {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // Title + item names read as display caps; rarity tints the name (info).
+    .tc-loot-list-title {
+        font-family: var(--fg-display);
+    }
+
+    .tc-loot-list-name {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+    }
+
+    .tc-loot-list-icon {
+        font-family: var(--fg-display);
+        text-shadow: 0 1px 2px #000;
+    }
+
+    .tc-loot-list-qty {
+        font-family: var(--fg-mono);
+    }
+
+    .tc-loot-list-row--common .tc-loot-list-name { color: var(--fg-common); }
+    .tc-loot-list-row--uncommon .tc-loot-list-name { color: var(--fg-uncommon); }
+    .tc-loot-list-row--rare .tc-loot-list-name { color: var(--fg-rare); }
+    .tc-loot-list-row--epic .tc-loot-list-name { color: var(--fg-epic); }
+    .tc-loot-list-row--legendary .tc-loot-list-name { color: var(--fg-legendary); }
+    .tc-loot-list-row--mythic .tc-loot-list-name { color: var(--fg-mythic); }
+
+    // Header gold-rule divider — replaces the faint rgba hairline (improvement 3).
+    .tc-loot-list-header {
+        position: relative;
+
+        &::after {
+            content: '';
+            position: absolute;
+            inset-inline: 0;
+            bottom: 0;
+            height: 1px;
+            background: var(--fg-rule);
+        }
+    }
+
+    // Row hover — gold left-marker + stronger wash (improvement 4).
+    .tc-loot-list-row:hover {
+        box-shadow: inset 2px 0 0 var(--fg-gold-deep);
+    }
+
+    // Button — gilded keycap bevel + display caps.
+    .tc-loot-list-btn {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        box-shadow:
+            inset 0 1px 0 rgba(232, 200, 120, 0.25),
+            inset 0 -8px 12px rgba(0, 0, 0, 0.4),
+            0 2px 0 rgba(0, 0, 0, 0.6);
+
+        // Real hover/active feedback (improvement 2).
+        &:hover:not(:disabled) {
+            filter: brightness(1.15);
+        }
+
+        &:active:not(:disabled) {
+            filter: brightness(0.9);
+        }
+    }
+
+    // Take All — primary action; brighter gradient + full gold border (improvement 1).
+    .tc-loot-list-take-all {
+        background: linear-gradient(180deg, #5a3a18, #2a1a0a);
+        border-color: var(--fg-gold);
+    }
+
+    // Quantity — gilded mono counts with legibility shadow (improvement 5).
+    .tc-loot-list-qty {
+        text-shadow: 0 1px 1px #000;
+    }
+
+    // Item name — text-shadow lifts rarity color off dark wood (improvement 6).
+    .tc-loot-list-name {
+        text-shadow: 0 1px 0 #000;
+    }
+}

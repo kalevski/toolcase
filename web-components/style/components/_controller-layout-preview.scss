@@ -1,0 +1,108 @@
+// tc-controller-layout-preview — a gamepad diagram with labeled face-button
+// bindings. Ported from the game-components gc-controller-layout-preview but
+// re-skinned to the toolcase design system: a flat slate body, 1px hairline
+// strokes, mono glyph labels, and a mono uppercase platform micro-label. The
+// fantasy gilding, glows, and per-button colour fills are dropped — neutrals
+// carry the diagram; the button bindings are information, not decoration.
+//
+// The controller shell, thumbsticks, and face buttons are genuinely circular
+// shapes, so their SVG curves are sanctioned. The d-pad cross stays sharp.
+//
+// Every cosmetic value flows through --bs-controller-layout-preview-* custom
+// properties — the public theming contract.
+
+tc-controller-layout-preview {
+    --bs-controller-layout-preview-width: 260px;
+    --bs-controller-layout-preview-gap: var(--tc-space-2, 0.5rem);
+
+    --bs-controller-layout-preview-shell-bg: var(--tc-surface-muted);
+    --bs-controller-layout-preview-shell-border: var(--tc-border-strong);
+    --bs-controller-layout-preview-shell-border-width: 1.5;
+
+    --bs-controller-layout-preview-detail-bg: var(--tc-text-faint);
+
+    --bs-controller-layout-preview-stick-bg: var(--tc-surface);
+    --bs-controller-layout-preview-stick-border: var(--tc-border-strong);
+    --bs-controller-layout-preview-stick-border-width: 1.5;
+    --bs-controller-layout-preview-stick-hub-color: var(--tc-text-faint);
+
+    --bs-controller-layout-preview-button-bg: var(--tc-surface);
+    --bs-controller-layout-preview-button-border: var(--tc-app-accent);
+    --bs-controller-layout-preview-button-border-width: 1.5;
+    --bs-controller-layout-preview-glyph-color: var(--tc-text);
+    --bs-controller-layout-preview-glyph-size: 13px;
+
+    --bs-controller-layout-preview-label-color: var(--tc-text-muted);
+    --bs-controller-layout-preview-label-size: 11px;
+    --bs-controller-layout-preview-label-spacing: 0.1em;
+}
+
+.tc-controller-layout-preview {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--bs-controller-layout-preview-gap);
+    width: var(--bs-controller-layout-preview-width);
+}
+
+.tc-controller-layout-preview__body {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+// The controller shell — a flat slate surface framed by a single hairline.
+.tc-controller-layout-preview__shell {
+    fill: var(--bs-controller-layout-preview-shell-bg);
+    stroke: var(--bs-controller-layout-preview-shell-border);
+    stroke-width: var(--bs-controller-layout-preview-shell-border-width);
+    stroke-linejoin: round;
+}
+
+// D-pad cross — solid muted fill, no stroke. Rectangular, so it stays sharp.
+.tc-controller-layout-preview__detail {
+    fill: var(--bs-controller-layout-preview-detail-bg);
+}
+
+.tc-controller-layout-preview__stick {
+    fill: var(--bs-controller-layout-preview-stick-bg);
+    stroke: var(--bs-controller-layout-preview-stick-border);
+    stroke-width: var(--bs-controller-layout-preview-stick-border-width);
+}
+
+.tc-controller-layout-preview__stick-hub {
+    fill: var(--bs-controller-layout-preview-stick-hub-color);
+}
+
+// Face buttons — hairline circle wells outlined in the slate ink accent so the
+// binding cluster reads as the focal element of the diagram.
+.tc-controller-layout-preview__button {
+    fill: var(--bs-controller-layout-preview-button-bg);
+    stroke: var(--bs-controller-layout-preview-button-border);
+    stroke-width: var(--bs-controller-layout-preview-button-border-width);
+}
+
+// The button name (letter or shape symbol) — machine-facing text, set in mono.
+.tc-controller-layout-preview__glyph {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-controller-layout-preview-glyph-size);
+    font-weight: 600;
+    fill: var(--bs-controller-layout-preview-glyph-color);
+}
+
+// Platform name — a mono uppercase micro-label beneath the diagram.
+.tc-controller-layout-preview__label {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-controller-layout-preview-label-size);
+    letter-spacing: var(--bs-controller-layout-preview-label-spacing);
+    text-transform: uppercase;
+    color: var(--bs-controller-layout-preview-label-color);
+}
+
+// Slightly larger default diagram under coarse pointers for touch legibility.
+@media (pointer: coarse) {
+    tc-controller-layout-preview {
+        --bs-controller-layout-preview-width: 300px;
+    }
+}

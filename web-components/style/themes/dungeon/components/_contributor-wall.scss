@@ -1,0 +1,49 @@
+// Dungeon › tc-contributor-wall — gilded roster of medallion avatars.
+// Foundation already handles: leather avatar-bg, parchment text, gold hover-ring
+// (via --tc-app-accent), parchment-dim more-color, and mono initials/+N font.
+// This override adds: gold-deep medallion ring on every avatar, inset-slot "+N"
+// chip, drop shadow depth, and display-caps heading.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // 1. Token swap — repoint vars the foundation leaves at semantic defaults.
+    tc-contributor-wall {
+        --bs-contributor-wall-avatar-ring-color: var(--fg-gold-deep);
+        --bs-contributor-wall-more-bg: var(--fg-slot-bg);
+        --bs-contributor-wall-more-color: var(--fg-gold);
+        --bs-contributor-wall-title-color: var(--fg-gold-bright);
+    }
+
+    // 2. Medallion depth — gold ring + drop shadow so each tile reads as a struck coin.
+    //    The base draws the ring as a single box-shadow; we extend it with a drop shadow.
+    .tc-contributor-wall-item {
+        box-shadow:
+            0 0 0 var(--bs-contributor-wall-avatar-ring-size) var(--fg-gold-deep),
+            0 2px 6px rgba(0, 0, 0, 0.5);
+
+        // Hover ring remains gold-bright (free via --tc-app-accent); add depth.
+        &:hover,
+        &:focus {
+            box-shadow:
+                0 0 0 2px var(--bs-contributor-wall-hover-ring-color),
+                0 4px 10px rgba(0, 0, 0, 0.6);
+        }
+    }
+
+    // Overflow chip — same coin depth treatment.
+    .tc-contributor-wall-more {
+        box-shadow:
+            0 0 0 var(--bs-contributor-wall-avatar-ring-size) var(--fg-gold-deep),
+            0 2px 6px rgba(0, 0, 0, 0.5);
+    }
+
+    // 3. Display-caps heading — gilded title reads as an in-game roster label.
+    .tc-contributor-wall__title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+    }
+
+    // NOTE: border-radius: 50% on .tc-contributor-wall-item, .tc-contributor-wall-item__img,
+    // and .tc-contributor-wall-more is intentionally preserved — sanctioned circles.
+}

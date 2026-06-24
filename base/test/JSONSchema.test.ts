@@ -329,7 +329,13 @@ describe('JSONSchema', () => {
         expect(schema.validate('f47ac10b-58cc-4372-a567-0e02b2c3d479')).toBe(true)
         expect(schema.validate('not-a-uuid')).toBe(false)
         expect(schema.getLatestError()?.issues[0].message).toMatch(/must be a valid UUID/)
-        expect(schema.validate('550e8400-e29b-61d4-a716-446655440000')).toBe(false)
+        expect(schema.validate('550e8400-e29b-41d4-a716-4466554400zz')).toBe(false)
+    })
+
+    it('UUIDv7 now validates (widened regex)', () => {
+        const schema = new JSONSchema({ type: 'uuid' })
+        expect(schema.validate('018fb2d0-58ce-7c93-9de1-a9b7d98b4e7b')).toBe(true)
+        expect(schema.validate('00000000-0000-0000-0000-000000000000')).toBe(true)
     })
 
     it('validates date type (YYYY-MM-DD)', () => {
@@ -415,4 +421,371 @@ describe('JSONSchema', () => {
         expect(schema.validate('')).toBe(false)
         expect(schema.getLatestError()?.issues[0].message).toMatch(/must be a valid base64/)
     })
+
+    it('password with ^&* specials now validates (widened regex)', () => {
+        const schema = new JSONSchema({ type: 'password' })
+        expect(schema.validate('Secret^1ab')).toBe(true)
+        expect(schema.validate('Pass&word1')).toBe(true)
+        expect(schema.validate('Abc*1defgh')).toBe(true)
+        expect(schema.validate('weakpassword')).toBe(false)
+    })
+
+    it('minLength constraint on string', () => {
+        const schema = new JSONSchema({ type: 'string', minLength: 5 })
+        expect(schema.validate('hello')).toBe(true)
+        expect(schema.validate('hi')).toBe(false)
+        expect(schema.getLatestError()?.issues[0].message).toMatch(/at least 5 characters/)
+    })
+
+    it('maxLength constraint on string', () => {
+        const schema = new JSONSchema({ type: 'string', maxLength: 5 })
+        expect(schema.validate('hello')).toBe(true)
+        expect(schema.validate('toolong')).toBe(false)
+        expect(schema.getLatestError()?.issues[0].message).toMatch(/at most 5 characters/)
+    })
+
+    it('pattern constraint on string', () => {
+        const schema = new JSONSchema({ type: 'string', pattern: '^[0-9]+$' })
+        expect(schema.validate('12345')).toBe(true)
+        expect(schema.validate('abc')).toBe(false)
+        expect(schema.getLatestError()?.issues[0].message).toMatch(/must match pattern/)
+    })
+
+    it('enum constraint on string', () => {
+        const schema = new JSONSchema({ type: 'string', enum: ['a', 'b', 'c'] })
+        expect(schema.validate('b')).toBe(true)
+        expect(schema.validate('d')).toBe(false)
+        expect(schema.getLatestError()?.issues[0].message).toMatch(/must be one of/)
+    })
+
+    it('min constraint on number', () => {
+        const schema = new JSONSchema({ type: 'number', min: 10 })
+        expect(schema.validate(10)).toBe(true)
+        expect(schema.validate(9.9)).toBe(false)
+        expect(schema.getLatestError()?.issues[0].message).toMatch(/>= 10/)
+    })
+
+    it('max constraint on number', () => {
+        const schema = new JSONSchema({ type: 'number', max: 100 })
+        expect(schema.validate(100)).toBe(true)
+        expect(schema.validate(100.1)).toBe(false)
+        expect(schema.getLatestError()?.issues[0].message).toMatch(/<= 100/)
+    })
+
+    it('min/max constraints on integer', () => {
+        const schema = new JSONSchema({ type: 'integer', min: 1, max: 10 })
+        expect(schema.validate(5)).toBe(true)
+        expect(schema.validate(0)).toBe(false)
+        expect(schema.validate(11)).toBe(false)
+    })
+
+    it('enum constraint on number', () => {
+        const schema = new JSONSchema({ type: 'number', enum: [1, 2, 3] })
+        expect(schema.validate(2)).toBe(true)
+        expect(schema.validate(4)).toBe(false)
+        expect(schema.getLatestError()?.issues[0].message).toMatch(/must be one of/)
+    })
+
+    it('minItems constraint on array', () => {
+        const schema = new JSONSchema({ type: 'array', minItems: 2 })
+        expect(schema.validate([1, 2])).toBe(true)
+        expect(schema.validate([1])).toBe(false)
+        expect(schema.getLatestError()?.issues[0].message).toMatch(/at least 2 items/)
+    })
+
+    it('maxItems constraint on array', () => {
+        const schema = new JSONSchema({ type: 'array', maxItems: 3 })
+        expect(schema.validate([1, 2, 3])).toBe(true)
+        expect(schema.validate([1, 2, 3, 4])).toBe(false)
+        expect(schema.getLatestError()?.issues[0].message).toMatch(/at most 3 items/)
+    })
+})
+
+describe('JSONSchema — $ref resolution', () => {
+
+    it('resolves $ref in an object property to a $defs entry', () => {
+        const schema = new JSONSchema({
+            type: 'object',
+            $defs: {
+                Email: { type: 'email' }
+            },
+            properties: {
+                contact: { $ref: '#/$defs/Email' }
+            }
+        })
+        expect(schema.validate({ contact: 'user@example.com' })).toBe(true)
+        expect(schema.validate({ contact: 'not-an-email' })).toBe(false)
+        expect(schema.getLatestError()?.issues[0].path).toBe('contact')
+    })
+
+    it('resolves $ref in array items', () => {
+        const schema = new JSONSchema({
+            type: 'array',
+            $defs: {
+                Tag: { type: 'string', minLength: 1 }
+            },
+            items: { $ref: '#/$defs/Tag' }
+        })
+        expect(schema.validate(['foo', 'bar'])).toBe(true)
+        expect(schema.validate(['foo', ''])).toBe(false)
+        expect(schema.getLatestError()?.issues[0].path).toBe('[1]')
+    })
+
+    it('required on the $ref schema itself is honoured', () => {
+        const schema = new JSONSchema({
+            type: 'object',
+            $defs: {
+                Name: { type: 'string' }
+            },
+            properties: {
+                name: { $ref: '#/$defs/Name', required: true }
+            }
+        })
+        expect(schema.validate({})).toBe(false)
+        const issue = schema.getLatestError()?.issues[0]
+        expect(issue?.path).toBe('name')
+        expect(issue?.message).toMatch(/is required/)
+        expect(schema.validate({ name: 'Alice' })).toBe(true)
+    })
+
+    it('resolves $ref with object definition', () => {
+        const schema = new JSONSchema({
+            type: 'object',
+            $defs: {
+                Address: {
+                    type: 'object',
+                    properties: {
+                        street: { type: 'string', required: true },
+                        city: { type: 'string', required: true }
+                    }
+                }
+            },
+            properties: {
+                address: { $ref: '#/$defs/Address' }
+            }
+        })
+        expect(schema.validate({ address: { street: '1 Main St', city: 'Townville' } })).toBe(true)
+        expect(schema.validate({ address: { street: '1 Main St' } })).toBe(false)
+        expect(schema.getLatestError()?.issues[0].path).toBe('address.city')
+    })
+
+    it('supports #/definitions/ ref format as well as #/$defs/', () => {
+        const schema = new JSONSchema({
+            type: 'object',
+            $defs: {
+                Score: { type: 'integer', min: 0, max: 100 }
+            },
+            properties: {
+                score: { $ref: '#/definitions/Score' }
+            }
+        } as any)
+        expect(schema.validate({ score: 50 })).toBe(true)
+        expect(schema.validate({ score: 150 })).toBe(false)
+    })
+
+    it('resolves transitive $ref (A → B → concrete schema)', () => {
+        const schema = new JSONSchema({
+            type: 'object',
+            $defs: {
+                Alias: { $ref: '#/$defs/Base' },
+                Base: { type: 'string', minLength: 3 }
+            },
+            properties: {
+                title: { $ref: '#/$defs/Alias' }
+            }
+        })
+        expect(schema.validate({ title: 'hello' })).toBe(true)
+        expect(schema.validate({ title: 'hi' })).toBe(false)
+        expect(schema.getLatestError()?.issues[0].message).toMatch(/at least 3 characters/)
+    })
+
+    it('throws at validate time when $ref target is absent', () => {
+        const schema = new JSONSchema({
+            type: 'object',
+            properties: {
+                name: { $ref: '#/$defs/Missing' }
+            }
+        })
+        expect(() => schema.validate({ name: 'Alice' })).toThrow(/Missing/)
+    })
+
+    it('handles bare ref name (no JSON Pointer prefix)', () => {
+        const schema = new JSONSchema({
+            type: 'object',
+            $defs: {
+                Num: { type: 'number' }
+            },
+            properties: {
+                value: { $ref: 'Num' }
+            }
+        })
+        expect(schema.validate({ value: 3.14 })).toBe(true)
+        expect(schema.validate({ value: 'nope' })).toBe(false)
+    })
+
+    it('$ref schema is defensively cloned with the root schema', () => {
+        const raw: any = {
+            type: 'object',
+            $defs: { Name: { type: 'string' } },
+            properties: { n: { $ref: '#/$defs/Name' } }
+        }
+        const schema = new JSONSchema(raw)
+        raw.$defs.Name.type = 'number'
+        expect(schema.validate({ n: 'still-a-string' })).toBe(true)
+    })
+
+    it('collects issues from nested $ref object', () => {
+        const schema = new JSONSchema({
+            type: 'object',
+            $defs: {
+                Point: {
+                    type: 'object',
+                    properties: {
+                        x: { type: 'number', required: true },
+                        y: { type: 'number', required: true }
+                    }
+                }
+            },
+            properties: {
+                origin: { $ref: '#/$defs/Point' }
+            }
+        })
+        expect(schema.validate({ origin: { x: 1 } })).toBe(false)
+        expect(schema.getLatestError()?.issues[0].path).toBe('origin.y')
+    })
+
+})
+
+describe('JSONSchema — coerce()', () => {
+
+    it('coerces string to number', () => {
+        const schema = new JSONSchema({ type: 'number' })
+        const result = schema.coerce('3.14')
+        expect(result).toBe(3.14)
+        expect(schema.getLatestError()).toBeNull()
+    })
+
+    it('coerces string to integer (truncates toward zero)', () => {
+        const schema = new JSONSchema({ type: 'integer' })
+        expect(schema.coerce('7')).toBe(7)
+        expect(schema.coerce('3.9')).toBe(3)
+        expect(schema.coerce('-3.9')).toBe(-3)
+        expect(schema.getLatestError()).toBeNull()
+    })
+
+    it('coerces string to boolean', () => {
+        const schema = new JSONSchema({ type: 'boolean' })
+        expect(schema.coerce('true')).toBe(true)
+        expect(schema.coerce('false')).toBe(false)
+        expect(schema.coerce('1')).toBe(true)
+        expect(schema.coerce('0')).toBe(false)
+        expect(schema.getLatestError()).toBeNull()
+    })
+
+    it('coerces number to string', () => {
+        const schema = new JSONSchema({ type: 'string' })
+        expect(schema.coerce(42)).toBe('42')
+        expect(schema.getLatestError()).toBeNull()
+    })
+
+    it('coerces boolean to string', () => {
+        const schema = new JSONSchema({ type: 'string' })
+        expect(schema.coerce(true)).toBe('true')
+        expect(schema.coerce(false)).toBe('false')
+        expect(schema.getLatestError()).toBeNull()
+    })
+
+    it('coerces nested object properties', () => {
+        const schema = new JSONSchema({
+            type: 'object',
+            properties: {
+                age: { type: 'integer' },
+                score: { type: 'number' },
+                active: { type: 'boolean' }
+            }
+        })
+        const result = schema.coerce({ age: '25', score: '9.5', active: 'true' }) as any
+        expect(result.age).toBe(25)
+        expect(result.score).toBe(9.5)
+        expect(result.active).toBe(true)
+        expect(schema.getLatestError()).toBeNull()
+    })
+
+    it('coerces array items', () => {
+        const schema = new JSONSchema({ type: 'array', items: { type: 'number' } })
+        const result = schema.coerce(['1', '2.5', '3']) as number[]
+        expect(result).toEqual([1, 2.5, 3])
+        expect(schema.getLatestError()).toBeNull()
+    })
+
+    it('returns original value when coercion is not applicable', () => {
+        const schema = new JSONSchema({ type: 'number' })
+        const result = schema.coerce(42)
+        expect(result).toBe(42)
+        expect(schema.getLatestError()).toBeNull()
+    })
+
+    it('returns unconverted value and sets error when string cannot coerce to number', () => {
+        const schema = new JSONSchema({ type: 'number' })
+        const result = schema.coerce('not-a-number')
+        expect(result).toBe('not-a-number')
+        expect(schema.getLatestError()).not.toBeNull()
+        expect(schema.getLatestError()?.issues[0].message).toContain('must be a number')
+    })
+
+    it('returns unconverted value and sets error when string cannot coerce to boolean', () => {
+        const schema = new JSONSchema({ type: 'boolean' })
+        const result = schema.coerce('yes')
+        expect(result).toBe('yes')
+        expect(schema.getLatestError()).not.toBeNull()
+    })
+
+    it('coerces the properties it can; reports errors for others', () => {
+        const schema = new JSONSchema({
+            type: 'object',
+            properties: {
+                age: { type: 'integer' },
+                name: { type: 'string', required: true }
+            }
+        })
+        const result = schema.coerce({ age: '25' }) as any
+        expect(result.age).toBe(25)
+        expect(schema.getLatestError()).not.toBeNull()
+        expect(schema.getLatestError()?.issues[0].path).toBe('name')
+    })
+
+    it('clears latestError after a successful coerce', () => {
+        const schema = new JSONSchema({ type: 'boolean' })
+        schema.coerce('yes')
+        expect(schema.getLatestError()).not.toBeNull()
+        schema.coerce('true')
+        expect(schema.getLatestError()).toBeNull()
+    })
+
+    it('does not mutate the original data', () => {
+        const schema = new JSONSchema({
+            type: 'object',
+            properties: { n: { type: 'number' } }
+        })
+        const original = { n: '5' }
+        const coerced = schema.coerce(original) as any
+        expect(original.n).toBe('5')
+        expect(coerced.n).toBe(5)
+    })
+
+    it('coerces $ref property via definitions', () => {
+        const schema = new JSONSchema({
+            type: 'object',
+            $defs: {
+                Count: { type: 'integer', min: 0 }
+            },
+            properties: {
+                count: { $ref: '#/$defs/Count' }
+            }
+        })
+        const result = schema.coerce({ count: '7' }) as any
+        expect(result.count).toBe(7)
+        expect(schema.getLatestError()).toBeNull()
+    })
+
 })

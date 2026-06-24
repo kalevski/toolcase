@@ -1,0 +1,10 @@
+// Dungeon › tc-vignette-overlay — keep the edge vignette ink-black, matching
+// the game's cinematic low-health darkening. Pure colour FX: the radial
+// gradient structure and intensity contract are already correct in the base.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-vignette-overlay {
+        --bs-vignette-overlay-color: #0a0604;
+    }
+}

@@ -1,0 +1,57 @@
+// tc-empty-state — centered placeholder shown when data is unavailable.
+// All cosmetics flow through --bs-empty-state-* custom properties backed by
+// --tc-* tokens. Sharp tile icon bubble; neutral muted text; no border by default.
+
+tc-empty-state {
+    --bs-empty-state-padding-y: 3rem;
+    --bs-empty-state-padding-x: 1.5rem;
+    --bs-empty-state-gap: 1rem;
+    --bs-empty-state-color: var(--tc-text-muted);
+    --bs-empty-state-icon-size: 1.25rem;
+    --bs-empty-state-icon-color: var(--tc-text-faint);
+    --bs-empty-state-icon-bg: var(--tc-surface-muted);
+    --bs-empty-state-icon-padding: 0.75rem;
+}
+
+.tc-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--bs-empty-state-padding-y) var(--bs-empty-state-padding-x);
+    gap: var(--bs-empty-state-gap);
+    color: var(--bs-empty-state-color);
+    border-radius: 0;
+}
+
+.tc-empty-state__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--bs-empty-state-icon-padding);
+    background-color: var(--bs-empty-state-icon-bg);
+    border-radius: 0;
+    color: var(--bs-empty-state-icon-color);
+    flex-shrink: 0;
+
+    svg {
+        width: var(--bs-empty-state-icon-size);
+        height: var(--bs-empty-state-icon-size);
+        display: block;
+    }
+}
+
+.tc-empty-state__body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-empty-state,
+    .tc-empty-state__icon {
+        transition: none;
+    }
+}

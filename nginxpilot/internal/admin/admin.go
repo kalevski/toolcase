@@ -28,7 +28,10 @@ type Server struct {
 	log   *slog.Logger
 }
 
-// New builds the admin server. token may be empty (no auth).
+// New builds the admin server. token may be empty only when no auth is
+// configured (admin.token_env is unset). Callers must not pass an empty token
+// when a token was expected — use resolveAdminToken in cmd/nginxpilot/run.go
+// to enforce that invariant before constructing the server.
 func New(mgr *manager.Manager, token string, log *slog.Logger) *Server {
 	return &Server{mgr: mgr, token: token, log: log}
 }

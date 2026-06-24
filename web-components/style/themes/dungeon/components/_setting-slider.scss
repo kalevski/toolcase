@@ -1,0 +1,108 @@
+// Dungeon › tc-setting-slider — gold focus rings, carved-groove track, gilded
+// thumb glow, keycap mute button.
+//
+// Foundation remaps handle: track-color (gold-deep), fill-color (gold via
+// app-accent), thumb-bg/border (surface/accent), value readout font (--fg-mono),
+// mute button states (border/hover/active via --tc-border/--tc-app-accent).
+//
+// This file fixes what the foundation cannot:
+//   • Two hardcoded slate focus-ring vars on host elements.
+//   • Track needs an ink well (dark groove) so the gold thumb pops.
+//   • WebKit track-fill: no native `::-webkit-slider-runnable-track` progress
+//     pseudo exists; this is a Firefox-only gold fill via ::-moz-range-progress.
+//     We document, not fake it — WebKit gets the dark ink groove + gold thumb.
+//   • Thumb: gilded border + slot-bg fill + gold glow (sanctioned border-radius:50%).
+//   • Mute button: keycap surface + bevel top, square corners (already border-radius:0).
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // -------------------------------------------------------------------------
+    // 1. Token swap — host element var overrides (hardcoded slate → gold).
+    // -------------------------------------------------------------------------
+    tc-setting-slider,
+    tc-volume-slider,
+    tc-deadzone-slider,
+    tc-fov-slider {
+        --bs-setting-slider-focus-ring: 0 0 0 0.2rem rgba(240, 210, 122, 0.35);
+        --bs-setting-slider-mute-focus-ring: 0 0 0 0.2rem rgba(240, 210, 122, 0.35);
+
+        // Repoint track to a dark ink well so the gold thumb reads against depth.
+        --bs-setting-slider-track-color: var(--fg-ink);
+
+        // Brighten the Firefox fill-to-thumb for extra pop on the dark groove.
+        --bs-setting-slider-fill-color: var(--fg-gold-bright);
+    }
+
+    // -------------------------------------------------------------------------
+    // 2. Carved-groove track — inset bevel on both WebKit and Moz track pseudos.
+    // -------------------------------------------------------------------------
+    .tc-setting-slider__input {
+        &::-webkit-slider-runnable-track {
+            background-color: var(--fg-ink);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8), inset 0 0 1px var(--fg-gold-shadow);
+            border-radius: 0;
+        }
+
+        &::-moz-range-track {
+            background-color: var(--fg-ink);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8), inset 0 0 1px var(--fg-gold-shadow);
+            border-radius: 0;
+        }
+
+        // Firefox gold fill — the only browser that exposes a progress pseudo.
+        &::-moz-range-progress {
+            background-color: var(--fg-gold-bright);
+        }
+
+        // ---------------------------------------------------------------------
+        // 3. Gilded thumb — slot-bg fill, bright gold border, warm glow.
+        //    border-radius: 50% kept — explicitly sanctioned circle.
+        // ---------------------------------------------------------------------
+        &::-webkit-slider-thumb {
+            background: var(--fg-slot-bg);
+            border-color: var(--fg-gold);
+            box-shadow: 0 0 4px rgba(240, 210, 122, 0.4), var(--tc-shadow-sm);
+            border-radius: 50%;
+
+            &:active {
+                border-color: var(--fg-gold-bright);
+                box-shadow: 0 0 6px rgba(240, 210, 122, 0.65), var(--tc-shadow-sm);
+            }
+        }
+
+        &::-moz-range-thumb {
+            background: var(--fg-slot-bg);
+            border-color: var(--fg-gold);
+            box-shadow: 0 0 4px rgba(240, 210, 122, 0.4), var(--tc-shadow-sm);
+            border-radius: 50%;
+
+            &:active {
+                border-color: var(--fg-gold-bright);
+                box-shadow: 0 0 6px rgba(240, 210, 122, 0.65), var(--tc-shadow-sm);
+            }
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // 4. Mute button as a gilded keycap. Square corners (already 0 in base).
+    // -------------------------------------------------------------------------
+    .tc-setting-slider__mute-btn {
+        background: var(--fg-button-bg);
+        box-shadow: var(--fg-bevel-top);
+        border-color: var(--fg-gold-deep);
+        border-radius: 0;
+
+        &:hover:not([disabled]) {
+            background: var(--fg-leather-2);
+            border-color: var(--fg-gold);
+        }
+
+        // Pressed/muted: gold fill from --bs-setting-slider-mute-active-bg
+        // (already --tc-app-accent → --fg-gold) — no extra override needed.
+        // Shadow flattens on press to simulate key depression.
+        &[aria-pressed='true'] {
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+        }
+    }
+}

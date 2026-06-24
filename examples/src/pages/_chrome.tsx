@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react'
+import { ReactNode, useEffect, useRef, useState } from 'react'
 import { Link as RouterLink, useNavigate } from 'react-router'
 
 export type PackageMeta = {
@@ -22,59 +22,55 @@ export const Breadcrumbs = ({ current }: { current: string }) => (
     </div>
 )
 
+// Small React wrapper around <tc-metric-grid>: the component takes its rows as
+// a JS property (`items`), so we assign it through a ref after mount.
+type Metric = { label: string; value: string; unit?: string; hint?: string; icon?: string }
+
+const MetricGrid = ({ items, columns }: { items: Metric[]; columns?: number }) => {
+    const ref = useRef<any>(null)
+    useEffect(() => {
+        if (ref.current) ref.current.items = items
+    }, [items])
+    // @ts-ignore custom element registered by @toolcase/web-components
+    return <tc-metric-grid ref={ref} columns={columns ? String(columns) : undefined} />
+}
+
 export const PackageIntro = ({ meta }: { meta: PackageMeta }) => (
-    <section className="page-intro">
-        <div>
-            <div className="eyebrow">{meta.eyebrow}</div>
-            <h1 className="page-title mono">
-                <span className="scope">@toolcase/</span>{meta.pkg.replace('@toolcase/', '')}
-            </h1>
-            <p className="page-lead">{meta.tagline}</p>
-            {meta.chips && meta.chips.length > 0 && (
-                <div className="chip-row">
-                    {meta.chips.map((chip) => <span key={chip} className="tag">{chip}</span>)}
-                </div>
-            )}
+    <section className="page-intro-wc">
+        {/* @ts-ignore */}
+        <tc-rich-page-header title-text={meta.pkg} sub={meta.eyebrow} description={meta.tagline}>
+            {meta.chips?.map((chip) => (
+                // @ts-ignore
+                <tc-badge key={chip} slot="chips" variant="secondary">
+                    {chip}
+                </tc-badge>
+            ))}
+            {/* @ts-ignore */}
+        </tc-rich-page-header>
+        <div className="mt-3">
+            <MetricGrid
+                columns={4}
+                items={[
+                    { label: 'Latest version', value: meta.version },
+                    { label: 'Examples', value: String(meta.examples) },
+                    { label: 'Dependencies', value: meta.deps ?? '0' },
+                    { label: 'License', value: meta.license ?? 'MIT' },
+                ]}
+            />
         </div>
-        <dl className="page-meta">
-            <div>
-                <dt>Latest version</dt>
-                <dd className="mono">{meta.version}</dd>
-            </div>
-            <div>
-                <dt>Examples</dt>
-                <dd>{meta.examples}</dd>
-            </div>
-            <div>
-                <dt>Dependencies</dt>
-                <dd>{meta.deps ?? '0'}</dd>
-            </div>
-            <div>
-                <dt>License</dt>
-                <dd>{meta.license ?? 'MIT'}</dd>
-            </div>
-        </dl>
     </section>
 )
 
-export const InstallBlock = ({ pkg, label }: { pkg: string; label?: string }) => {
-    const managers = [
-        { mgr: 'npm', cmd: `npm i ${pkg}` },
-        { mgr: 'pnpm', cmd: `pnpm add ${pkg}` },
-        { mgr: 'yarn', cmd: `yarn add ${pkg}` },
-    ]
-    return (
-        <>
-            <div className="section-head">
-                <h2>{label ?? 'Install'}</h2>
-                <span className="count">node ≥ 18</span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 520 }}>
-                {managers.map((m) => <CopyLine key={m.mgr} cmd={m.cmd} />)}
-            </div>
-        </>
-    )
-}
+export const InstallBlock = ({ pkg, label }: { pkg: string; label?: string }) => (
+    <>
+        <div className="section-head">
+            <h2>{label ?? 'Install'}</h2>
+            <span className="count">node ≥ 18</span>
+        </div>
+        {/* @ts-ignore */}
+        <tc-install-tabs package={pkg} style={{ display: 'block', maxWidth: 560 }} />
+    </>
+)
 
 export const CopyLine = ({ cmd }: { cmd: string }) => {
     const [copied, setCopied] = useState(false)
@@ -91,27 +87,10 @@ export const CopyLine = ({ cmd }: { cmd: string }) => {
     )
 }
 
-export const CodeBlock = ({ file, code }: { file?: string; code: string }) => {
-    const [copied, setCopied] = useState(false)
-    const onCopy = () => {
-        navigator.clipboard?.writeText(code)
-        setCopied(true)
-        setTimeout(() => setCopied(false), 1200)
-    }
-    return (
-        <div className="code-block">
-            {file && (
-                <div className="code-head">
-                    <span className="file">{file}</span>
-                    <button className="copy" onClick={onCopy} type="button">{copied ? 'copied' : 'copy'}</button>
-                </div>
-            )}
-            <div className="code-body">
-                <pre><code>{code}</code></pre>
-            </div>
-        </div>
-    )
-}
+export const CodeBlock = ({ file, code, language }: { file?: string; code: string; language?: string }) => (
+    // @ts-ignore custom element registered by @toolcase/web-components
+    <tc-code-snippet title={file} code={code} language={language ?? 'bash'} style={{ display: 'block' }} />
+)
 
 export const SkillInstall = ({ slug, pkg }: { slug: string; pkg: string }) => {
     const url = `https://toolcase.kalevski.dev/${slug}/SKILL.md`
@@ -131,11 +110,13 @@ export const SkillInstall = ({ slug, pkg }: { slug: string; pkg: string }) => {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
                 <div>
                     <div className="eyebrow" style={{ marginBottom: 10 }}>Project-level</div>
-                    <CopyLine cmd={projectCmd} />
+                    {/* @ts-ignore */}
+                    <tc-code-snippet code={projectCmd} language="bash" style={{ display: 'block' }} />
                 </div>
                 <div>
                     <div className="eyebrow" style={{ marginBottom: 10 }}>User-level</div>
-                    <CopyLine cmd={userCmd} />
+                    {/* @ts-ignore */}
+                    <tc-code-snippet code={userCmd} language="bash" style={{ display: 'block' }} />
                 </div>
             </div>
         </>
@@ -186,19 +167,18 @@ export const ExampleGrid = ({
 export const CategorySection = ({
     title,
     count,
+    subtitle,
     children,
 }: {
     title: string
     count?: number
+    subtitle?: string
     children: ReactNode
 }) => (
-    <>
-        <div className="section-head">
-            <h2>{title}</h2>
-            {count !== undefined && (
-                <span className="count">{String(count).padStart(2, '0')} / {String(count).padStart(2, '0')}</span>
-            )}
-        </div>
+    // @ts-ignore custom element registered by @toolcase/web-components
+    <tc-section-card title={count !== undefined ? `${title} · ${String(count).padStart(2, '0')} components` : title}>
+        {subtitle && <p className="section-subtitle">{subtitle}</p>}
         {children}
-    </>
+        {/* @ts-ignore */}
+    </tc-section-card>
 )

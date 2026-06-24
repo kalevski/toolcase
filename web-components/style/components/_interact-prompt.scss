@@ -1,0 +1,124 @@
+// tc-interact-prompt — contextual "press X to interact" prompt.
+// Ported from game-components gc-interact-prompt, restyled to the web-components
+// design system: a flat surface chip with a 1px hairline border and overlay-tier
+// shadow (it floats over content), a keycap mirroring the tc-kbd motif, a mono
+// uppercase machine-facing label, and an optional hold-to-interact progress bar
+// whose fill uses the ink accent. Visibility is driven by the `show` attribute.
+// All cosmetics flow through --bs-interact-prompt-* custom properties.
+
+tc-interact-prompt {
+    --bs-interact-prompt-bg: var(--tc-surface);
+    --bs-interact-prompt-color: var(--tc-text);
+    --bs-interact-prompt-border-color: var(--tc-border);
+    --bs-interact-prompt-border-width: 1px;
+    --bs-interact-prompt-padding-y: 0.5rem;
+    --bs-interact-prompt-padding-x: 0.75rem;
+    --bs-interact-prompt-gap: 0.625rem;
+    --bs-interact-prompt-row-gap: 0.625rem;
+    --bs-interact-prompt-min-width: 160px;
+    --bs-interact-prompt-shadow: var(--tc-shadow-md);
+
+    --bs-interact-prompt-text-font: var(--bs-font-monospace);
+    --bs-interact-prompt-text-size: 0.78125rem; // ~12.5px — dense machine label
+    --bs-interact-prompt-text-weight: 500;
+    --bs-interact-prompt-text-spacing: 0.08em;
+    --bs-interact-prompt-text-color: var(--tc-text-muted);
+
+    // Keycap — mirrors the tc-kbd cap motif (sharp, mono, faint bottom edge).
+    --bs-interact-prompt-key-font: var(--bs-font-monospace);
+    --bs-interact-prompt-key-size: 0.71875rem; // ~11.5px micro tier
+    --bs-interact-prompt-key-weight: 500;
+    --bs-interact-prompt-key-color: var(--tc-text);
+    --bs-interact-prompt-key-bg: var(--tc-surface-muted);
+    --bs-interact-prompt-key-border-color: var(--tc-border-strong);
+    --bs-interact-prompt-key-padding-x: 0.4em;
+    --bs-interact-prompt-key-padding-y: 0.2em;
+    --bs-interact-prompt-key-min-width: 1.5em;
+
+    // Hold-to-interact progress bar — slate track, ink-accent fill.
+    --bs-interact-prompt-hold-height: 3px;
+    --bs-interact-prompt-hold-track-bg: var(--tc-surface-muted);
+    --bs-interact-prompt-hold-track-border-color: var(--tc-border);
+    --bs-interact-prompt-hold-fill-bg: linear-gradient(90deg, var(--tc-app-accent), #2b3a51);
+    --bs-interact-prompt-hold-transition: width 0.08s linear;
+
+    box-sizing: border-box;
+    flex-direction: column;
+    gap: var(--bs-interact-prompt-gap);
+    min-width: var(--bs-interact-prompt-min-width);
+    padding: var(--bs-interact-prompt-padding-y) var(--bs-interact-prompt-padding-x);
+    color: var(--bs-interact-prompt-color);
+    background: var(--bs-interact-prompt-bg);
+    border: var(--bs-interact-prompt-border-width) solid var(--bs-interact-prompt-border-color);
+    border-radius: 0; // sharp by mandate
+    box-shadow: var(--bs-interact-prompt-shadow);
+}
+
+// Visibility contract: hidden unless the `show` attribute is present. The base
+// `display: inline-flex` is registered in foundation/_reset.scss; this override
+// loads later and wins by the attribute-selector specificity.
+tc-interact-prompt:not([show]) {
+    display: none;
+}
+
+.tc-interact-prompt-row {
+    display: flex;
+    align-items: center;
+    gap: var(--bs-interact-prompt-row-gap);
+}
+
+.tc-interact-prompt-key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--bs-interact-prompt-key-min-width);
+    padding: var(--bs-interact-prompt-key-padding-y) var(--bs-interact-prompt-key-padding-x);
+    font-family: var(--bs-interact-prompt-key-font);
+    font-size: var(--bs-interact-prompt-key-size);
+    font-weight: var(--bs-interact-prompt-key-weight);
+    line-height: 1;
+    color: var(--bs-interact-prompt-key-color);
+    background-color: var(--bs-interact-prompt-key-bg);
+    border: 1px solid var(--bs-interact-prompt-key-border-color);
+    // Faint heavier bottom edge suggests a physical key cap without elevation.
+    border-bottom-width: 2px;
+    border-radius: 0; // sharp caps by mandate
+    background-image: none;
+    box-shadow: none;
+    white-space: nowrap;
+    user-select: none;
+    flex-shrink: 0;
+}
+
+.tc-interact-prompt-text {
+    font-family: var(--bs-interact-prompt-text-font);
+    font-size: var(--bs-interact-prompt-text-size);
+    font-weight: var(--bs-interact-prompt-text-weight);
+    letter-spacing: var(--bs-interact-prompt-text-spacing);
+    text-transform: uppercase;
+    line-height: 1.2;
+    color: var(--bs-interact-prompt-text-color);
+}
+
+.tc-interact-prompt-hold {
+    position: relative;
+    height: var(--bs-interact-prompt-hold-height);
+    background: var(--bs-interact-prompt-hold-track-bg);
+    border: 1px solid var(--bs-interact-prompt-hold-track-border-color);
+    border-radius: 0;
+    overflow: hidden;
+}
+
+.tc-interact-prompt-hold-fill {
+    height: 100%;
+    background: var(--bs-interact-prompt-hold-fill-bg);
+    transition: var(--bs-interact-prompt-hold-transition);
+}
+
+// The fill width animates continuously while holding — freeze under reduced
+// motion (the width value still reflects progress; only the tween is dropped).
+@media (prefers-reduced-motion: reduce) {
+    .tc-interact-prompt-hold-fill {
+        transition: none;
+    }
+}

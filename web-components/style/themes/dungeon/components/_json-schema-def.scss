@@ -1,0 +1,53 @@
+// Dungeon › tc-json-schema-def — gilded ledger frame for the schema editor.
+// The foundation reskin already handles: surface/border/text/mono/danger remap,
+// focus rings → gold, border-radius: 0. This override adds:
+//   1. Token swaps on the host for the slate row-border bypass + explicit gold/leather
+//   2. Gilded bevel (box-shadow) on the outer frame
+//   3. Display-caps name label (already uppercase + letter-spacing in base; add Cinzel)
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-json-schema-def {
+        // Surface / frame
+        --bs-json-schema-def-bg: var(--fg-panel-bg);
+        --bs-json-schema-def-border-color: var(--fg-gold-deep);
+
+        // Header band — leather/ink tone
+        --bs-json-schema-def-header-bg: var(--fg-leather);
+
+        // Row hairlines — override the --tc-slate-100/#f1f5f9 fallback
+        --bs-json-schema-def-row-border: rgba(201, 169, 97, 0.15);
+
+        // Row hover — faint gold wash
+        --bs-json-schema-def-row-hover-bg: rgba(201, 169, 97, 0.1);
+
+        // Text / key colours — parchment tones
+        --bs-json-schema-def-label-color: var(--fg-parch);
+        --bs-json-schema-def-key-color: var(--fg-parch);
+        --bs-json-schema-def-name-label-color: var(--fg-gold);
+        --bs-json-schema-def-muted-color: var(--fg-parch-dim);
+
+        // Icon buttons — gold on hover
+        --bs-json-schema-def-icon-color: var(--fg-parch-dim);
+        --bs-json-schema-def-icon-hover-bg: rgba(201, 169, 97, 0.12);
+        --bs-json-schema-def-icon-hover-color: var(--fg-gold-bright);
+
+        // Error — explicit blood-bright for sharper red over dark surface
+        --bs-json-schema-def-error-color: var(--fg-blood-bright);
+
+        // Mono — explicit; base already reads this var, no literal to fight
+        --bs-json-schema-def-mono: var(--fg-mono);
+    }
+
+    // Gilded bevel — the signature "framed ledger" treatment
+    .tc-json-schema-def {
+        box-shadow: var(--fg-panel-shadow);
+        color: var(--fg-parch);
+    }
+
+    // Display-caps name label — Cinzel over the already-uppercase base rule
+    .tc-json-schema-def-name-label {
+        font-family: var(--fg-display);
+        letter-spacing: 0.14em;
+    }
+}

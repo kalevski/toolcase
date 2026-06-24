@@ -1,0 +1,37 @@
+// Dungeon › tc-action-row-list — gilded ledger frame with quest-board titles.
+// Key fix: --bs-action-row-list-separator-color was hardcoded to the Sass
+// $slate-100 literal in the base; it never flowed through the foundation remap.
+// This override replaces it with a faint gold-shadow hairline so row separators
+// read as ruled ledger lines against the wood gradient surface.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token swap on the class (vars default here in the base) ──────────────
+
+    .tc-action-row-list {
+        --bs-action-row-list-bg: var(--fg-panel-bg);
+        // Fix the $slate-100 Sass literal — must be overridden at the CSS level.
+        --bs-action-row-list-separator-color: var(--fg-gold-shadow);
+        // Gilded outer frame bevel (structure a token swap can't carry alone).
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── Quest-board title — display caps (Cinzel) ────────────────────────────
+    // The base hardcodes font-family: var(--tc-font-sans) on this class;
+    // overriding the var alone is not enough — the class rule must be replaced.
+
+    .tc-action-row-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+    }
+
+    // ── Description — body serif (EB Garamond) ───────────────────────────────
+    // Color already flows through --bs-action-row-list-desc-color → parch-3;
+    // only the font-family needs to be wired explicitly.
+
+    .tc-action-row-desc {
+        font-family: var(--fg-body);
+    }
+}

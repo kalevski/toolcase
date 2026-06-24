@@ -59,6 +59,10 @@ export default class GameObjectPool {
         key: string,
         gameObjectClass: GameObjectClass<T>,
         instanceFn: InstanceFn<T> | null = null,
+        /**
+         * Called on every reuse (not on first creation). Use this to clear per-instance
+         * state that should not carry over between lives — tint, scale, alpha, velocity, etc.
+         */
         resetFn: ResetFn<T> | null = null
     ): this {
         if (this.map.has(key)) {
@@ -70,7 +74,11 @@ export default class GameObjectPool {
         const pool = new (ObjectPool as any)(
             gameObjectClass,
             resetFn,
-            (cls: GameObjectClass<T>) => factory(key, cls, this.scene)
+            (cls: GameObjectClass<T>) => {
+                const obj = factory(key, cls, this.scene)
+                ;(obj as any).__poolKey = key
+                return obj
+            }
         )
         this.map.set(key, pool)
         this.dirty = true
@@ -85,6 +93,8 @@ export default class GameObjectPool {
         }
         const object = pool.obtain() as T & Poolable
         this.onObjectCreate(object)
+        ;(object as any).__freed = false
+        object.setActive(true).setVisible(true)
         return object as T
     }
 
@@ -93,12 +103,34 @@ export default class GameObjectPool {
             this.logger.warning('cannot be released, the object was not created by the pool', object)
             return this
         }
+        const key = (object as any).__poolKey
+        if (!key || !this.map.has(key)) {
+            this.logger.warning('object does not belong to this pool', object)
+            return this
+        }
+        if ((object as any).__freed === true) {
+            this.logger.warning('object already released', object)
+            return this
+        }
+        ;(object as any).__freed = true
+        ;(object.parentContainer ?? this.scene.children).remove(object as any)
+        object.setActive(false).setVisible(false)
         object.release()
         return this
     }
 
     dispose(): void {
-        this.map.forEach(pool => { (pool as any).dispose() })
+        this.map.forEach(pool => {
+            // Destroy every free (not currently live) instance so their GL/texture refs are
+            // released immediately. Live objects that were obtained but not yet released are
+            // still held in the scene's display list and will be destroyed by Phaser's own
+            // scene teardown.
+            const free: any[] = (pool as any).pool ?? []
+            for (const obj of free) {
+                if (typeof obj?.destroy === 'function') obj.destroy()
+            }
+            ;(pool as any).dispose()
+        })
         this.map.clear()
         this.dirty = true
     }
@@ -110,7 +142,9 @@ export default class GameObjectPool {
     private onObjectCreate(object: Poolable): void {
         if (typeof object.poolable === 'boolean') return
         object.poolable = true
-        if (typeof object.onCreate === 'function') {
+        if (typeof (object as any).doCreate === 'function') {
+            ;(object as any).doCreate()
+        } else if (typeof object.onCreate === 'function') {
             object.onCreate()
         }
     }

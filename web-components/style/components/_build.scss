@@ -1,0 +1,372 @@
+// tc-build — build status card showing name, date, size, duration, status icon,
+// optional badge, and an action-menu (kebab). All cosmetics flow through
+// --bs-build-* custom properties backed by --tc-* tokens.
+// Sharp corners everywhere; slate neutrals; hairline border; low resting shadow.
+// Status color is sanctioned only on the status icon and the badge.
+
+@use '../foundation/tokens' as *;
+
+tc-build {
+    --bs-build-bg: var(--tc-surface);
+    --bs-build-border-color: var(--tc-border);
+    --bs-build-shadow: var(--tc-shadow-sm);
+    --bs-build-shadow-hover: var(--tc-shadow-hover);
+    --bs-build-padding-y: 0.875rem;
+    --bs-build-padding-x: 1rem;
+    --bs-build-gap: 0.75rem;
+    --bs-build-name-color: var(--tc-text);
+    --bs-build-meta-color: var(--tc-text-muted);
+    --bs-build-status-icon-size: 1.25rem;
+    --bs-build-status-icon-pass-color: var(--tc-success);
+    --bs-build-status-icon-fail-color: var(--tc-danger);
+    --bs-build-status-icon-running-color: var(--tc-info);
+    --bs-build-status-icon-queued-color: var(--tc-text-faint);
+    --bs-build-menu-trigger-color: var(--tc-text-muted);
+    --bs-build-menu-trigger-hover-color: var(--tc-text);
+    --bs-build-skeleton-bg: var(--tc-surface-muted);
+    --bs-build-skeleton-shimmer: rgba(255, 255, 255, 0.6);
+}
+
+// ── Card shell ────────────────────────────────────────────────────────────────
+
+.tc-build {
+    display: flex;
+    align-items: center;
+    gap: var(--bs-build-gap);
+    padding: var(--bs-build-padding-y) var(--bs-build-padding-x);
+    background: var(--bs-build-bg);
+    border: 1px solid var(--bs-build-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-build-shadow);
+    cursor: default;
+    transition:
+        box-shadow var(--tc-transition-base),
+        transform var(--tc-transition-base);
+
+    &--clickable {
+        cursor: pointer;
+
+        &:hover {
+            box-shadow: var(--bs-build-shadow-hover);
+            transform: translateY(-1px);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--tc-app-accent);
+            outline-offset: 2px;
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-build--clickable {
+        transition: box-shadow var(--tc-transition-base);
+
+        &:hover {
+            transform: none;
+        }
+    }
+}
+
+// ── Status icon ───────────────────────────────────────────────────────────────
+
+.tc-build-status-icon-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: var(--bs-build-status-icon-size);
+    height: var(--bs-build-status-icon-size);
+}
+
+.tc-build-status-icon {
+    width: var(--bs-build-status-icon-size);
+    height: var(--bs-build-status-icon-size);
+    stroke: currentColor;
+    fill: none;
+    flex-shrink: 0;
+
+    &--pass {
+        color: var(--bs-build-status-icon-pass-color);
+    }
+
+    &--fail {
+        color: var(--bs-build-status-icon-fail-color);
+    }
+
+    &--running {
+        color: var(--bs-build-status-icon-running-color);
+        animation: tc-build-spin 1s linear infinite;
+    }
+
+    &--queued {
+        color: var(--bs-build-status-icon-queued-color);
+    }
+}
+
+@keyframes tc-build-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-build-status-icon--running {
+        animation: none;
+    }
+}
+
+// ── Body ─────────────────────────────────────────────────────────────────────
+
+.tc-build-body {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.tc-build-name {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--bs-build-name-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// ── Meta row ─────────────────────────────────────────────────────────────────
+
+.tc-build-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.375rem;
+}
+
+.tc-build-meta-item {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--bs-build-meta-color);
+    white-space: nowrap;
+}
+
+.tc-build-meta-sep {
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--bs-build-meta-color);
+    opacity: 0.5;
+    user-select: none;
+}
+
+// ── Badge ─────────────────────────────────────────────────────────────────────
+
+.tc-build-badge {
+    align-self: flex-start;
+    border-radius: 0;
+}
+
+// ── Action menu ───────────────────────────────────────────────────────────────
+
+.tc-build-menu-wrapper {
+    position: relative;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.tc-build-menu-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    color: var(--bs-build-menu-trigger-color);
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    cursor: pointer;
+    transition:
+        color var(--tc-transition-fast),
+        background-color var(--tc-transition-fast);
+
+    &:hover {
+        color: var(--bs-build-menu-trigger-hover-color);
+        background-color: var(--tc-surface-muted);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+}
+
+.tc-build-menu-icon {
+    width: 1rem;
+    height: 1rem;
+    stroke: currentColor;
+    fill: none;
+    flex-shrink: 0;
+}
+
+// ── Dropdown overlay ──────────────────────────────────────────────────────────
+
+.tc-build-menu {
+    --bs-build-menu-min-width: 160px;
+    --bs-build-menu-padding: 0.25rem;
+    --bs-build-menu-bg: var(--tc-surface);
+    --bs-build-menu-border-color: var(--tc-border);
+    --bs-build-menu-shadow: var(--tc-shadow-lg);
+    --bs-build-menu-z-index: var(--tc-z-dropdown);
+    --bs-build-menu-item-padding-x: 0.625rem;
+    --bs-build-menu-item-padding-y: 0.4375rem;
+    --bs-build-menu-item-font-size: 0.8125rem;
+    --bs-build-menu-item-color: #{$slate-700};
+    --bs-build-menu-item-hover-color: var(--tc-text);
+    --bs-build-menu-item-hover-bg: var(--tc-surface-muted);
+    --bs-build-menu-item-active-color: var(--tc-app-accent-contrast);
+    --bs-build-menu-item-active-bg: var(--tc-app-accent);
+    --bs-build-menu-item-disabled-color: var(--tc-text-faint);
+    --bs-build-menu-danger-color: var(--tc-danger);
+
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: var(--bs-build-menu-z-index);
+    display: none;
+    min-width: var(--bs-build-menu-min-width);
+    padding: var(--bs-build-menu-padding);
+    margin-top: 2px;
+    background-color: var(--bs-build-menu-bg);
+    border: 1px solid var(--bs-build-menu-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-build-menu-shadow);
+
+    &.show {
+        display: block;
+    }
+
+    .tc-build-menu-divider {
+        height: 0;
+        margin: 0.25rem 0;
+        border: 0;
+        border-top: 1px solid var(--tc-border);
+    }
+}
+
+// ── Menu items ────────────────────────────────────────────────────────────────
+
+.tc-build-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: var(--bs-build-menu-item-padding-y) var(--bs-build-menu-item-padding-x);
+    font-family: inherit;
+    font-size: var(--bs-build-menu-item-font-size);
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--bs-build-menu-item-color);
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    transition:
+        background-color var(--tc-transition-fast),
+        color var(--tc-transition-fast);
+
+    &:hover,
+    &:focus-visible {
+        color: var(--bs-build-menu-item-hover-color);
+        background-color: var(--bs-build-menu-item-hover-bg);
+        text-decoration: none;
+    }
+
+    &:active {
+        color: var(--bs-build-menu-item-active-color);
+        background-color: var(--bs-build-menu-item-active-bg);
+    }
+
+    &[disabled],
+    &:disabled {
+        color: var(--bs-build-menu-item-disabled-color);
+        opacity: 0.5;
+        pointer-events: none;
+        cursor: default;
+    }
+
+    &--danger {
+        color: var(--bs-build-menu-danger-color);
+
+        &:hover,
+        &:focus-visible {
+            color: var(--bs-build-menu-danger-color);
+            background-color: var(--bs-build-menu-item-hover-bg);
+        }
+    }
+}
+
+// ── Loading skeleton ──────────────────────────────────────────────────────────
+
+@keyframes tc-build-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+%tc-build-shimmer {
+    background: linear-gradient(
+        90deg,
+        var(--bs-build-skeleton-bg) 25%,
+        var(--bs-build-skeleton-shimmer) 50%,
+        var(--bs-build-skeleton-bg) 75%
+    );
+    background-size: 200% 100%;
+    animation: tc-build-shimmer 1.5s infinite linear;
+    border-radius: 0;
+}
+
+.tc-build-skeleton {
+    display: block;
+
+    @extend %tc-build-shimmer;
+
+    &--icon {
+        width: var(--bs-build-status-icon-size);
+        height: var(--bs-build-status-icon-size);
+        flex-shrink: 0;
+    }
+
+    &--name {
+        height: 0.875rem;
+        max-width: 50%;
+        margin-bottom: 0.25rem;
+    }
+
+    &--meta {
+        height: 0.75rem;
+        max-width: 70%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-build-skeleton {
+        animation: none;
+        background: var(--bs-build-skeleton-bg);
+    }
+}
+
+// ── Touch targets (WCAG 2.5.5) ────────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-build-menu-trigger {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    .tc-build-menu-item {
+        min-height: 44px;
+    }
+}

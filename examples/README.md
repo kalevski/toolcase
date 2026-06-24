@@ -27,15 +27,17 @@ npm -w @toolcase/examples run build  # outputs examples/dist
 
 ## Source aliases (Vite)
 
-`examples/vite.config.ts` deliberately bypasses the published `lib/` for two packages so HMR picks up source changes without a rebuild:
+`examples/vite.config.ts` deliberately bypasses the published `lib/` for a few packages so HMR picks up source changes without a rebuild:
 
 | Package | Resolves to |
 |---------|-------------|
-| `@toolcase/game-components` | `../game-components/src/index.ts` |
-| `@toolcase/game-components/style.css` | `../game-components/lib/index.css` |
+| `@toolcase/web-components` | `../web-components/src/index.ts` |
+| `@toolcase/web-components/react` | `../web-components/src/react.ts` |
+| `@toolcase/web-components/style.css` | `../web-components/lib/index.css` |
 | `@toolcase/phaser-plus` | `../phaser-plus/src/index.ts` |
+| `@toolcase/node` | `../node/src/main.iso.ts` |
 
-The other packages (`base`, `logging`, `serializer`, `react-components`) resolve through their `lib/` builds via npm workspaces — **you must `npm -w <pkg> run build`** for changes to those to show up here.
+The other packages (`base`, `logging`, `serializer`) resolve through their `lib/` builds via npm workspaces — **you must `npm -w <pkg> run build`** for changes to those to show up here. The `web-components` *stylesheet* still resolves to its built `lib/index.css`, so after editing SCSS run `npm -w @toolcase/web-components run build:css`.
 
 ## Routes
 
@@ -45,10 +47,10 @@ The other packages (`base`, `logging`, `serializer`, `react-components`) resolve
 | `/base` | `@toolcase/base` showcase — `AdjacencyMatrix`, `State`, `Cache`, `retry`, `JSONSchema`, `env`, packing helpers, etc. |
 | `/logging` | `@toolcase/logging` levels, scoped loggers, custom reporters. |
 | `/serializer` | `@toolcase/serializer` schema definition + encode/decode playground. |
-| `/react-components` | All `@toolcase/react-components` exports, with one demo per component. |
-| `/react-components/:key` | Per-component deep-dive page. |
-| `/game-components` | `@toolcase/game-components` Web Components grid. |
+| `/web-components` | All `@toolcase/web-components` `tc-*` elements, grouped by complexity, one demo each. |
+| `/web-components/:key` | Per-component deep-dive page. |
 | `/phaser-plus` | `@toolcase/phaser-plus` API + live Phaser scenes. |
+| `/node` | `@toolcase/node` backend-helper walkthroughs. |
 
 ## SKILL.md publishing
 

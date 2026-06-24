@@ -1,0 +1,51 @@
+// Dungeon › tc-portrait — gilded medallion. Radial bronze fill, 2px gold border,
+// inset gold-bright ring + drop shadow, display-caps initials. Circle variant kept.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-portrait {
+        --bs-portrait-bg: radial-gradient(70% 70% at 50% 30%, #6a4a2a, #2a1a0a 80%);
+        --bs-portrait-border-color: var(--fg-gold-deep);
+        --bs-portrait-glyph-color: var(--fg-gold-bright);
+        --bs-portrait-level-bg: linear-gradient(180deg, #3a2a1c, #1a120a);
+        --bs-portrait-level-color: var(--fg-gold-bright);
+        --bs-portrait-level-border: 1px solid var(--fg-gold-deep);
+    }
+
+    .tc-portrait {
+        border-width: 2px;
+        box-shadow:
+            inset 0 0 0 1px var(--fg-gold-bright),
+            inset 0 2px 3px rgba(232, 200, 120, 0.12),
+            inset 0 0 12px rgba(0, 0, 0, 0.6),
+            0 0 0 1px #000,
+            0 4px 10px rgba(0, 0, 0, 0.6);
+
+        // Overlay that paints the inner gold ring above the __img so photo
+        // portraits keep the gilt ring that glyph portraits have.
+        &::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            box-shadow: inset 0 0 0 1px var(--fg-gold-bright);
+            pointer-events: none;
+            z-index: 1;
+        }
+    }
+
+    // Circle variant: overflow:hidden on the host already clips the bottom strip;
+    // additionally round the level strip so it doesn't break the circular silhouette.
+    .tc-portrait--circle .tc-portrait__level {
+        border-radius: 11px;
+    }
+
+    .tc-portrait__glyph {
+        font-family: var(--fg-display);
+        font-weight: 700;
+        text-shadow: 0 1px 2px #000;
+    }
+
+    .tc-portrait__level {
+        font-family: var(--fg-mono);
+    }
+}

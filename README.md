@@ -16,8 +16,7 @@ Every package is **TypeScript-first**, ships **dual ESM + CJS** (where applicabl
 | 🏷 [`@toolcase/logging`](./logging) | [![v](https://img.shields.io/npm/v/@toolcase/logging?label=&color=teal)](https://www.npmjs.com/package/@toolcase/logging) | Tiny isomorphic logger with scoped loggers, log levels, and pluggable reporters. |
 | 📦 [`@toolcase/serializer`](./serializer) | [![v](https://img.shields.io/npm/v/@toolcase/serializer?label=&color=teal)](https://www.npmjs.com/package/@toolcase/serializer) | Runtime protobuf-based binary serializer — define schemas in code, encode/decode `Uint8Array`. |
 | 🖥 [`@toolcase/node`](./node) | [![v](https://img.shields.io/npm/v/@toolcase/node?label=&color=teal)](https://www.npmjs.com/package/@toolcase/node) | Node.js backend helpers — Fastify routing, Kysely repositories, Redis KV service, typed env, sanitize + pagination + filters + sorts, image processing, OAuth2/OIDC. |
-| 🧩 [`@toolcase/react-components`](./react-components) | [![v](https://img.shields.io/npm/v/@toolcase/react-components?label=&color=teal)](https://www.npmjs.com/package/@toolcase/react-components) | Production React 18+ component library — layout, forms, data display, modals, file upload, advanced editors. |
-| 🎮 [`@toolcase/game-components`](./game-components) | [![v](https://img.shields.io/npm/v/@toolcase/game-components?label=&color=teal)](https://www.npmjs.com/package/@toolcase/game-components) | Framework-free Web Components for game UIs (HUDs, dialogs, inventories) — vanilla HTML5 + Shadow DOM. |
+| 🧩 [`@toolcase/web-components`](./web-components) | [![v](https://img.shields.io/npm/v/@toolcase/web-components?label=&color=teal)](https://www.npmjs.com/package/@toolcase/web-components) | Framework-free HTML5 Web Components (`tc-*`) with from-scratch toolcase styling and a Bootstrap-compatible class/grid API — drop into any stack without React, Vue, or Angular. |
 | 🕹 [`@toolcase/phaser-plus`](./phaser-plus) | [![v](https://img.shields.io/npm/v/@toolcase/phaser-plus?label=&color=teal)](https://www.npmjs.com/package/@toolcase/phaser-plus) | Opinionated runtime for Phaser 4 — scene lifecycle, feature registry, object pool, flow events, isometric, shader effects, A*, Tweakpane debugger. |
 
 ## Pick a package
@@ -26,8 +25,7 @@ Every package is **TypeScript-first**, ships **dual ESM + CJS** (where applicabl
 - **Need logs?** → `@toolcase/logging` (browser console + custom reporters).
 - **Sending binary data over the wire?** → `@toolcase/serializer` (protobuf, no `.proto` files).
 - **Building a Node.js backend?** → `@toolcase/node` (Fastify, Kysely, Redis, OAuth2/OIDC, image processing).
-- **Building a React app?** → `@toolcase/react-components` (Bootstrap 5 base, BEM theming).
-- **Building a game UI without a framework?** → `@toolcase/game-components` (drop-in Web Components).
+- **Building a UI in any (or no) framework?** → `@toolcase/web-components` (drop-in `tc-*` custom elements, Bootstrap-compatible classes).
 - **Building a Phaser 4 game?** → `@toolcase/phaser-plus` (runtime layer with batteries included).
 
 ## Install
@@ -39,8 +37,7 @@ npm install @toolcase/base
 npm install @toolcase/logging
 npm install @toolcase/serializer
 npm install @toolcase/node
-npm install @toolcase/react-components
-npm install @toolcase/game-components
+npm install @toolcase/web-components
 npm install @toolcase/phaser-plus phaser
 ```
 
@@ -71,7 +68,7 @@ Each package publishes a [Claude Code](https://claude.com/claude-code) skill at 
 ```bash
 claude /skill-install https://toolcase.kalevski.dev/base/SKILL.md
 claude /skill-install https://toolcase.kalevski.dev/node/SKILL.md
-claude /skill-install https://toolcase.kalevski.dev/react-components/SKILL.md
+claude /skill-install https://toolcase.kalevski.dev/web-components/SKILL.md
 # … etc
 ```
 
@@ -92,7 +89,7 @@ Per-package commands:
 
 ```bash
 npm -w @toolcase/base run dev               # tsup --watch
-npm -w @toolcase/react-components run build # JS + SCSS bundle
+npm -w @toolcase/web-components run build    # JS + SCSS bundle
 npm -w @toolcase/phaser-plus run typecheck  # tsc --noEmit
 npm -w @toolcase/examples run dev           # demo site (Vite)
 ```
@@ -110,8 +107,7 @@ base/               @toolcase/base
 logging/            @toolcase/logging
 serializer/         @toolcase/serializer
 node/               @toolcase/node
-react-components/   @toolcase/react-components
-game-components/    @toolcase/game-components
+web-components/      @toolcase/web-components
 phaser-plus/        @toolcase/phaser-plus
 examples/           Vite + React demo site (deployed to GH Pages)
 ```

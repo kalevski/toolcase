@@ -1,0 +1,229 @@
+// tc-level-select — level / stage selection grid.
+// Port of gc-level-select; drops fantasy chrome in favour of flat slate design:
+// sharp corners, 1px hairline borders, ink accent for selected state, mono labels.
+// All cosmetics flow through --bs-level-select-* custom properties.
+
+@use '../foundation/tokens' as *;
+
+tc-level-select {
+    // Canvas / container
+    --bs-level-select-bg:                    var(--tc-surface);
+    --bs-level-select-border-color:          var(--tc-border);
+    --bs-level-select-padding:               1rem;
+
+    // Edge (SVG line)
+    --bs-level-select-edge-color:            var(--tc-border-strong);
+    --bs-level-select-edge-completed-color:  var(--tc-app-accent);
+    --bs-level-select-edge-width:            1.5;
+
+    // Node (base)
+    --bs-level-select-node-size:             4rem;
+    --bs-level-select-node-gap:              0.3125rem;
+    --bs-level-select-node-bg:               var(--tc-surface);
+    --bs-level-select-node-border-color:     var(--tc-border-strong);
+    --bs-level-select-node-color:            var(--tc-text);
+    --bs-level-select-node-transition:       background var(--tc-transition-fast), border-color var(--tc-transition-fast), color var(--tc-transition-fast);
+
+    // Node — hover (unlocked, non-selected)
+    --bs-level-select-node-hover-bg:         var(--tc-surface-muted);
+    --bs-level-select-node-hover-border:     var(--tc-app-accent);
+
+    // Node — selected
+    --bs-level-select-node-selected-bg:      var(--tc-app-accent);
+    --bs-level-select-node-selected-color: var(--tc-app-accent-contrast);
+    --bs-level-select-node-selected-border:  var(--tc-app-accent);
+
+    // Node — completed (not selected)
+    --bs-level-select-node-completed-bg:     var(--tc-surface);
+    --bs-level-select-node-completed-color:  var(--tc-success);
+    --bs-level-select-node-completed-border: var(--tc-success);
+
+    // Node — locked
+    --bs-level-select-node-locked-bg:        var(--tc-surface);
+    --bs-level-select-node-locked-color:     var(--tc-text-faint);
+    --bs-level-select-node-locked-border:    var(--tc-border);
+    --bs-level-select-node-locked-opacity:   0.55;
+
+    // Glyph (icon / dot inside the node square)
+    --bs-level-select-glyph-size:            1.125rem;
+    --bs-level-select-glyph-dot-size:        0.5rem;
+
+    // Label below the node
+    --bs-level-select-label-font-size:       0.6875rem;
+    --bs-level-select-label-color:           var(--tc-text-muted);
+    --bs-level-select-label-max-width:       6rem;
+
+    // Stars row
+    --bs-level-select-star-size:             0.625rem;
+    --bs-level-select-star-gap:              0.0625rem;
+    --bs-level-select-star-color:            var(--tc-border-strong);
+    --bs-level-select-star-filled-color:     var(--tc-app-accent);
+}
+
+// The host is the listbox container; the canvas div sizes to width/height attrs.
+.tc-level-select__canvas {
+    position: relative;
+    overflow: hidden;
+    background: var(--bs-level-select-bg);
+    border: 1px solid var(--bs-level-select-border-color);
+    border-radius: 0;
+    box-sizing: border-box;
+}
+
+// SVG edge layer fills the canvas.
+.tc-level-select__edges {
+    display: block;
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.tc-level-select__edge {
+    stroke: var(--bs-level-select-edge-color);
+    stroke-width: var(--bs-level-select-edge-width);
+    stroke-linecap: square;
+    fill: none;
+    transition: stroke var(--tc-transition-fast);
+}
+
+.tc-level-select__edge--completed {
+    stroke: var(--bs-level-select-edge-completed-color);
+}
+
+// Node cells — absolutely positioned, centered at their (x, y) coordinate.
+.tc-level-select__node {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--bs-level-select-node-gap);
+    width: var(--bs-level-select-node-size);
+    min-height: var(--bs-level-select-node-size);
+    padding: 0.5rem 0.375rem 0.4375rem;
+    background: var(--bs-level-select-node-bg);
+    border: 1px solid var(--bs-level-select-node-border-color);
+    border-radius: 0;
+    color: var(--bs-level-select-node-color);
+    cursor: pointer;
+    box-sizing: border-box;
+    text-align: center;
+    user-select: none;
+    transition: var(--bs-level-select-node-transition);
+
+    &:hover:not(.tc-level-select__node--locked):not(.tc-level-select__node--selected) {
+        background: var(--bs-level-select-node-hover-bg);
+        border-color: var(--bs-level-select-node-hover-border);
+        transform: translate(-50%, -50%) translateY(-1px);
+    }
+}
+
+.tc-level-select__node--selected {
+    background: var(--bs-level-select-node-selected-bg);
+    border-color: var(--bs-level-select-node-selected-border);
+    color: var(--bs-level-select-node-selected-color);
+}
+
+.tc-level-select__node--completed:not(.tc-level-select__node--selected) {
+    background: var(--bs-level-select-node-completed-bg);
+    border-color: var(--bs-level-select-node-completed-border);
+    color: var(--bs-level-select-node-completed-color);
+}
+
+.tc-level-select__node--locked {
+    background: var(--bs-level-select-node-locked-bg);
+    border-color: var(--bs-level-select-node-locked-border);
+    color: var(--bs-level-select-node-locked-color);
+    opacity: var(--bs-level-select-node-locked-opacity);
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+// Glyph container — icons/dot centred in the node.
+.tc-level-select__glyph {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.tc-level-select__glyph-icon {
+    width: var(--bs-level-select-glyph-size);
+    height: var(--bs-level-select-glyph-size);
+    flex-shrink: 0;
+}
+
+// Default state dot for levels with no icon and not completed.
+.tc-level-select__glyph-dot {
+    display: block;
+    width: var(--bs-level-select-glyph-dot-size);
+    height: var(--bs-level-select-glyph-dot-size);
+    background: currentcolor;
+    border-radius: 0;
+}
+
+.tc-level-select__glyph-text {
+    font-size: var(--bs-level-select-glyph-size);
+    line-height: 1;
+}
+
+// Label below the glyph.
+.tc-level-select__label {
+    display: block;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-level-select-label-font-size);
+    color: var(--bs-level-select-label-color);
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: var(--bs-level-select-label-max-width);
+
+    .tc-level-select__node--selected & {
+        color: inherit;
+    }
+}
+
+// Stars row — mono character stars (★ filled / empty colored via class).
+.tc-level-select__stars {
+    display: flex;
+    align-items: center;
+    gap: var(--bs-level-select-star-gap);
+    line-height: 1;
+}
+
+.tc-level-select__star {
+    font-size: var(--bs-level-select-star-size);
+    color: var(--bs-level-select-star-color);
+    line-height: 1;
+}
+
+.tc-level-select__star--filled {
+    color: var(--bs-level-select-star-filled-color);
+
+    .tc-level-select__node--selected & {
+        color: rgba(255, 255, 255, 0.9);
+    }
+}
+
+// Coarse-pointer touch target expansion (44px minimum).
+@media (pointer: coarse) {
+    .tc-level-select__node {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-level-select__node {
+        transition: none;
+
+        &:hover:not(.tc-level-select__node--locked):not(.tc-level-select__node--selected) {
+            transform: translate(-50%, -50%);
+        }
+    }
+
+    .tc-level-select__edge {
+        transition: none;
+    }
+}

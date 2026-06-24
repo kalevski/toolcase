@@ -6,7 +6,12 @@ html,
 body {
     margin: 0;
     padding: 0;
-    min-height: 100vh;
+    /* Give the layout a real height to resolve against. tc-dashboard-layout is
+       height:100% and scrolls its <main> internally (keeping the sidebar pinned);
+       that only works if every ancestor up to the viewport has a resolved height.
+       min-height:100vh does NOT satisfy a child's height:100% — it leaves body
+       auto-height, the chain collapses, and the whole page scrolls instead. */
+    height: 100%;
 }
 
 body {
@@ -46,15 +51,11 @@ body {
     margin-left: auto;
 }
 
-/* ── IconButton fix ────────────────────────────────────────────────────────
-   The published @toolcase/react-components@^3 ships an UNSCOPED CommandPalette
-   rule (`.component-icon-button { color: var(--cp-muted); border: none; … }`)
-   that leaks onto every IconButton. `--cp-muted` is undefined outside a command
-   palette, so the icon color collapses to an inherited/near-white value and the
-   icon box loses its border — making icons invisible on the light surface.
-   globals.css loads after style.css, so re-asserting the token-driven chrome at
-   matching specificity restores the intended look. (Source SCSS is already
-   correctly scoped; this guards the stale published build.) */
+/* ── IconButton chrome ──────────────────────────────────────────────────────
+   Re-assert the token-driven IconButton chrome here at matching specificity.
+   The local components/ui kit defines the base rules in components/ui/styles.css;
+   globals.css loads afterwards, so these declarations win and keep the token
+   fallbacks (--ib-*, --tc-*) consistent for the dashboard surface. */
 .component.component-icon-button {
     display: inline-flex;
     color: var(--ib-color, var(--tc-text-muted));
@@ -72,88 +73,14 @@ body {
     border-color: var(--ib-color, var(--tc-text-muted));
 }
 
-/* ── repo header (shared across sub-pages) ──────────────────────────────── */
-
-.tf-repo-header {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin-bottom: 1.25rem;
-}
-
-.tf-repo-header__bar {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
-.tf-repo-header__title {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    flex-wrap: wrap;
-}
-
-.tf-repo-header__title h1 {
-    margin: 0;
-}
-
-.tf-repo-header__status {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-}
-
-.tf-repo-header__actions {
-    margin-left: auto;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-/* ── content utilities ───────────────────────────────────────────────────── */
-
-.tf-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-}
-
-.tf-stack-sm {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
+/* ── content utilities ───────────────────────────────────────────────────────
+   Layout primitives (stack / grid / form-row / actions / inline) and the repo
+   header are now driven by tc-stack / tc-grid / tc-rich-page-header web
+   components — their hand-rolled utilities have been removed. Only the
+   key/value row and card-body padding remain bespoke. */
 
 .tf-card-body {
     padding: 1rem;
-}
-
-.tf-grid-2 {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.25rem;
-}
-
-@media (min-width: 768px) {
-    .tf-grid-2 {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
-.tf-form-row {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    align-items: flex-end;
-}
-
-.tf-actions {
-    display: flex;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-    align-items: center;
 }
 
 .tf-kv {
@@ -168,10 +95,13 @@ body {
     opacity: 0.6;
 }
 
-.tf-inline {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
+/* Long values (file paths, config strings) must wrap inside their card instead
+   of overflowing the right edge — a flex child needs min-width:0 to shrink. */
+.tf-kv > code {
+    min-width: 0;
+    text-align: right;
+    word-break: break-all;
+    overflow-wrap: anywhere;
 }
 
 /* ── git page ────────────────────────────────────────────────────────────── */
@@ -478,4 +408,57 @@ body {
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+}
+
+/* ── data tables ─────────────────────────────────────────────────────────────
+   Every data table is now a `tc-table` / `tc-advanced-table` web component
+   except the Tasks table (its header carries a React select-all `tc-check` and
+   its columns switch between select/reorder modes — neither expressible via
+   tc-advanced-table's string-label header), which stays a raw
+   `<table class="table table-hover">`. @toolcase/web-components ships no base
+   `.table` rule, so this minimal token-driven skin keeps that one table's
+   header aligned with its column data. */
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.table th,
+.table td {
+    text-align: left;
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid var(--tc-border, #e7eaee);
+    vertical-align: middle;
+}
+
+.table thead th {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--tc-text-muted, #6b7280);
+    border-bottom-width: 2px;
+}
+
+.table-hover tbody tr:hover {
+    background: var(--tc-surface-hover, #f6f7f9);
+}
+
+/* ── dead-control suppression ─────────────────────────────────────────────────
+   tc-user-panel always renders a built-in settings gear that emits
+   `tc-icon-click`. TaskForge has no global settings surface and wires no
+   handler, so the gear is a no-op — hide it rather than ship a dead control. */
+
+.tc-user-panel-icon {
+    display: none;
+}
+
+/* ── project header ───────────────────────────────────────────────────────────
+   tc-rich-page-header ships with horizontal padding 0 (full-bleed). Inset it so
+   its title/chips/actions line up with the rest of the page content. */
+
+tc-rich-page-header {
+    --bs-rich-page-header-padding-x: 1.25rem;
 }

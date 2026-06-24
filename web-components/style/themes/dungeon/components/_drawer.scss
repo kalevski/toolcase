@@ -1,0 +1,101 @@
+// Dungeon › tc-drawer — sliding codex/inventory panel.
+// Token swap replaces the hardcoded slate backdrop with ink-black and wires the
+// panel surface to the wood gradient. Structural rules add the gilded anchored-
+// edge seam, the inset bevel, display-caps header, and top corner notches.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Token swap — host element carries all --bs-drawer-* defaults ──────────
+
+    tc-drawer {
+        --bs-drawer-bg:              var(--fg-panel-bg);
+        --bs-drawer-border-color:    var(--fg-gold-deep);
+        // Replace the hardcoded slate-900 scrim with dungeon ink-black.
+        --bs-drawer-backdrop-bg:     var(--fg-ink);
+        --bs-drawer-backdrop-opacity: 0.65;
+    }
+
+    // ── Panel surface — bevel stack + gilded anchored-edge seam ──────────────
+
+    .tc-drawer__panel {
+        position: relative;
+        box-shadow: var(--fg-panel-shadow), var(--bs-drawer-shadow);
+        border-radius: 0;
+
+        // Gilded seam: bump the anchored border to 2px solid gold.
+        &.tc-drawer__panel--right {
+            border-left: 2px solid var(--fg-gold);
+        }
+
+        &.tc-drawer__panel--left {
+            border-right: 2px solid var(--fg-gold);
+        }
+
+        &.tc-drawer__panel--top {
+            border-bottom: 2px solid var(--fg-gold);
+        }
+
+        &.tc-drawer__panel--bottom {
+            border-top: 2px solid var(--fg-gold);
+        }
+    }
+
+    // Top corner notches — signature gilded ornament (panel pattern).
+    .tc-drawer__panel::before,
+    .tc-drawer__panel::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        z-index: 1;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+    }
+
+    .tc-drawer__panel::before {
+        left: 0;
+    }
+
+    .tc-drawer__panel::after {
+        right: 0;
+        transform: scaleX(-1);
+    }
+
+    // ── Header — gold-rule divider ────────────────────────────────────────────
+
+    .tc-drawer__header {
+        // Gold gradient hairline — applied as border-image since --fg-rule is a gradient.
+        border-bottom: 1px solid transparent;
+        border-image: var(--fg-rule) 1;
+    }
+
+    // ── Title — display caps ──────────────────────────────────────────────────
+
+    .tc-drawer__title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+        color: var(--fg-gold-bright);
+    }
+
+    // ── Close button — ensure square, inherit gold hover ─────────────────────
+
+    .tc-drawer__close {
+        border-radius: 0;
+
+        &:hover {
+            background: var(--fg-leather-2);
+            color: var(--fg-gold);
+        }
+    }
+
+    // ── Body — parchment-dim text on wood ────────────────────────────────────
+
+    .tc-drawer__body {
+        color: var(--fg-parch-2);
+    }
+}

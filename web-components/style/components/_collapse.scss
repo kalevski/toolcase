@@ -1,0 +1,18 @@
+// tc-collapse — the .collapse/.collapsing protocol used by the internal
+// Collapse plugin (accordion, navbar and standalone tc-collapse).
+
+.collapse:not(.show) {
+    display: none;
+}
+
+.collapsing {
+    height: 0;
+    overflow: hidden;
+    transition: height var(--tc-transition-base);
+
+    &.collapse-horizontal {
+        width: 0;
+        height: auto;
+        transition: width var(--tc-transition-base);
+    }
+}

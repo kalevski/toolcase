@@ -18,21 +18,19 @@ const Level: Record<string, LoggerLevel> = {
     VERBOSE: 'verbose'
 }
 
-const getLevelOrder = (level: LoggerLevel): number => {
-    const order = LevelOrder[level] ?? null
-    if (typeof order !== 'number') {
-        return -1
-    }
-    return order
-}
+const OrderToLevel = Object.fromEntries(
+    Object.entries(LevelOrder).map(([k, v]) => [v, k])
+) as Record<number, LoggerLevel>
 
-const getLevel = (levelOrder: number): LoggerLevel => {
-    const level = Object.keys(LevelOrder).find(key => LevelOrder[key as LoggerLevel] === levelOrder) || null
-    if (level === null) {
-        return 'silent'
-    }
-    return level as LoggerLevel
-}
+const getLevelOrder = (level: LoggerLevel): number =>
+    LevelOrder[level] ?? Number.POSITIVE_INFINITY
+
+const getLevel = (order: number): LoggerLevel => OrderToLevel[order] ?? 'silent'
+
+const KNOWN_LEVELS = Object.keys(LevelOrder) as LoggerLevel[]
+
+const isKnownLevel = (level: string): level is LoggerLevel =>
+    Object.prototype.hasOwnProperty.call(LevelOrder, level)
 
 export default Level
-export { getLevelOrder, getLevel }
+export { getLevelOrder, getLevel, isKnownLevel, KNOWN_LEVELS }

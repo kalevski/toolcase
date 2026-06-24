@@ -1,0 +1,8 @@
+// Dungeon › tc-anchor — purely structural layout primitive. It only absolutely
+// positions slotted content; it has no surface, border, or text of its own, so
+// the fantasy reskin has nothing to attach to. No override needed — the empty
+// block compiles to nothing.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+}

@@ -1,0 +1,11 @@
+// Dungeon › tc-letterbox-bars — pure cinematic ink bars. By mandate these stay
+// flat black/ink bars; the only fantasy touch is forcing the bar colour to pure
+// ink-black so the cutscene framing reads as deep theatre black on the parchment
+// world behind it. No bevel, no notches — sharp slabs.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-letterbox-bars {
+        --bs-letterbox-bars-color: #000000;
+    }
+}

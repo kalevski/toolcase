@@ -1,0 +1,62 @@
+// Dungeon › tc-dropdown — gilded context-menu surface.
+// Token swap fixes the raw --tc-slate-700 resting link color → parchment, and
+// maps the menu surface to the wood-panel fill + gold border. Structural rules
+// add the inset bevel shadow and the gold-rule divider gradient that a flat var
+// swap can't carry. The header is promoted to display-caps.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // -------------------------------------------------------------------------
+    // 1. Token swap — all defaults live on .dropdown-menu (class, not host).
+    // -------------------------------------------------------------------------
+    .dropdown-menu {
+        --bs-dropdown-bg: var(--fg-panel-bg);
+        --bs-dropdown-border-color: var(--fg-gold-deep);
+        --bs-dropdown-divider-bg: var(--fg-gold-deep);
+        --bs-dropdown-link-color: var(--fg-parch);
+        --bs-dropdown-link-hover-bg: var(--fg-leather-2);
+        --bs-dropdown-link-active-bg: var(--fg-gold);
+        --bs-dropdown-link-active-color: var(--fg-ink);
+
+        // 2. Gilded bevel — the panel shadow stack over the base box-shadow.
+        box-shadow: var(--fg-panel-shadow);
+
+        // Frosted fill — the base applies --bs-dropdown-bg via background-color,
+        //    which silently drops the --fg-panel-bg gradient and leaves the menu
+        //    transparent. Paint a translucent fill on background-image instead and
+        //    blur what shows through, so the menu reads as gilded smoked glass.
+        background-image: var(--fg-overlay-bg);
+        backdrop-filter: var(--fg-overlay-blur);
+        -webkit-backdrop-filter: var(--fg-overlay-blur);
+    }
+
+    // -------------------------------------------------------------------------
+    // 3. Gold-rule divider — replace the flat 1px border-top with the gradient
+    //    hairline. Height/margin stay; border-top is zeroed and background does
+    //    the painting (fg-rule is a gradient, not a colour).
+    // -------------------------------------------------------------------------
+    .dropdown-divider {
+        border-top: 0;
+        height: 1px;
+        background: var(--fg-rule);
+    }
+
+    // -------------------------------------------------------------------------
+    // 4. Display-caps section header.
+    // -------------------------------------------------------------------------
+    .dropdown-header {
+        font-family: var(--fg-display);
+        color: var(--fg-gold);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 600;
+    }
+
+    // -------------------------------------------------------------------------
+    // 5. Active-row kbd ghost: white-on-gold is off-aesthetic; ink reads better.
+    // -------------------------------------------------------------------------
+    .dropdown-item.active kbd,
+    .dropdown-item:active kbd {
+        color: rgba(26, 20, 13, 0.7);
+    }
+}

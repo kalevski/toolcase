@@ -1,0 +1,193 @@
+// tc-stats-screen — end-of-match statistics display panel.
+// Ported from gc-stats-screen (game-components) but restyled to the toolcase
+// design system: slate surface, sharp corners, hairline borders, JetBrains Mono
+// for machine-facing stat values, ink/muted palette for labels. Game chrome
+// (gilded frames, glows, fantasy textures, diamond dividers) is replaced with
+// the slate neutral ramp. All cosmetics flow through --bs-stats-screen-* vars.
+
+@use '../foundation/tokens' as *;
+
+// ── Component defaults ───────────────────────────────────────────────────────
+
+tc-stats-screen {
+    --bs-stats-screen-bg:                var(--tc-surface);
+    --bs-stats-screen-border:            var(--tc-border);
+    --bs-stats-screen-max-width:         480px;
+    --bs-stats-screen-padding-x:         1.5rem;
+    --bs-stats-screen-padding-y:         1.75rem;
+    --bs-stats-screen-gap:               1.25rem;
+
+    // Header
+    --bs-stats-screen-header-bg:         var(--tc-surface-muted);
+    --bs-stats-screen-header-border:     var(--tc-border);
+    --bs-stats-screen-header-padding-y:  1.25rem;
+    --bs-stats-screen-eyebrow-color:     var(--tc-text-muted);
+    --bs-stats-screen-eyebrow-size:      10.5px;
+    --bs-stats-screen-title-color:       var(--tc-text);
+    --bs-stats-screen-title-size:        1.125rem;
+    --bs-stats-screen-title-weight:      600;
+    --bs-stats-screen-summary-color:     var(--tc-text-muted);
+    --bs-stats-screen-separator-color:   var(--tc-border);
+
+    // Sections
+    --bs-stats-screen-section-gap:       0;
+    --bs-stats-screen-section-border:    var(--tc-border);
+    --bs-stats-screen-section-title-color:  var(--tc-text-faint);
+    --bs-stats-screen-section-title-size:   10.5px;
+
+    // Stats
+    --bs-stats-screen-stat-border:       var(--tc-border);
+    --bs-stats-screen-stat-label-color:  var(--tc-text-muted);
+    --bs-stats-screen-stat-value-color:  var(--tc-text);
+    --bs-stats-screen-stat-value-size:   0.9375rem;
+    --bs-stats-screen-stat-value-weight: 600;
+}
+
+// ── Host ─────────────────────────────────────────────────────────────────────
+
+tc-stats-screen {
+    display: block;
+}
+
+// ── Root panel ───────────────────────────────────────────────────────────────
+
+.tc-stats-screen {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    background: var(--bs-stats-screen-bg);
+    border: 1px solid var(--bs-stats-screen-border);
+    border-radius: 0;
+    width: 100%;
+    max-width: var(--bs-stats-screen-max-width);
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+// ── Header ───────────────────────────────────────────────────────────────────
+// Centered block: mono eyebrow → title → hairline separator → optional summary.
+
+.tc-stats-screen-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.375rem;
+    padding: var(--bs-stats-screen-header-padding-y) var(--bs-stats-screen-padding-x);
+    background: var(--bs-stats-screen-header-bg);
+    border-bottom: 1px solid var(--bs-stats-screen-header-border);
+}
+
+// Eyebrow — mono micro-label, uppercase, muted; identifies the panel context
+.tc-stats-screen-eyebrow {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-stats-screen-eyebrow-size);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--bs-stats-screen-eyebrow-color);
+    line-height: 1.4;
+}
+
+// Title — the match/session label
+.tc-stats-screen-title {
+    font-size: var(--bs-stats-screen-title-size);
+    font-weight: var(--bs-stats-screen-title-weight);
+    color: var(--bs-stats-screen-title-color);
+    line-height: 1.3;
+}
+
+// Separator — a plain 1px hairline; replaces the game-components diamond divider
+.tc-stats-screen-separator {
+    width: 100%;
+    max-width: 3rem;
+    height: 1px;
+    background: var(--bs-stats-screen-separator-color);
+    margin: 0.25rem 0;
+    flex-shrink: 0;
+}
+
+// Summary — optional prose note beneath the title
+.tc-stats-screen-summary {
+    font-size: 0.8125rem;
+    color: var(--bs-stats-screen-summary-color);
+    margin: 0;
+    line-height: 1.5;
+}
+
+// ── Sections ─────────────────────────────────────────────────────────────────
+// Stacked list of stat sections, each with a mono uppercase title and a
+// two-column key/value grid.
+
+.tc-stats-screen-sections {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-stats-screen-section-gap);
+}
+
+.tc-stats-screen-section {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid var(--bs-stats-screen-section-border);
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+// Section title — mono micro-label flush to the grid rows beneath it
+.tc-stats-screen-section-title {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-stats-screen-section-title-size);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--bs-stats-screen-section-title-color);
+    padding: 0.5rem var(--bs-stats-screen-padding-x) 0.25rem;
+}
+
+// Stats grid — label on the left, value on the right; 1px hairline rows
+.tc-stats-screen-section-stats {
+    display: flex;
+    flex-direction: column;
+}
+
+.tc-stats-screen-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4375rem var(--bs-stats-screen-padding-x);
+    border-top: 1px solid var(--bs-stats-screen-stat-border);
+    gap: 1rem;
+}
+
+// Label — left side, prose muted text
+.tc-stats-screen-stat-label {
+    font-size: 0.8125rem;
+    color: var(--bs-stats-screen-stat-label-color);
+    line-height: 1.4;
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+// Value — right side, mono tabular-nums; machine-facing datum
+.tc-stats-screen-stat-value {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-stats-screen-stat-value-size);
+    font-weight: var(--bs-stats-screen-stat-value-weight);
+    color: var(--bs-stats-screen-stat-value-color);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+// ── Reduced motion ───────────────────────────────────────────────────────────
+// No animations in this component; block is here to satisfy the design rule
+// requiring every component partial to declare its reduced-motion stance.
+
+@media (prefers-reduced-motion: reduce) {
+    // nothing to freeze — this component has no animations
+}

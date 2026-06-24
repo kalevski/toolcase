@@ -1,0 +1,209 @@
+// tc-group — collapsible group container with label, optional badge, and action button.
+// Sharp corners throughout. All cosmetic values flow through --bs-group-* / --tc-*.
+
+@use '../foundation/tokens' as *;
+
+tc-group {
+    --bs-group-bg: var(--tc-surface);
+    --bs-group-border-color: var(--tc-border);
+    --bs-group-header-bg: var(--tc-surface);
+    --bs-group-header-hover-bg: var(--tc-surface-muted);
+    --bs-group-header-color: var(--tc-text);
+    --bs-group-header-padding-y: 0.5rem;
+    --bs-group-header-padding-x: 0.75rem;
+    --bs-group-body-bg: var(--tc-surface);
+    --bs-group-toggle-color: var(--tc-text);
+    --bs-group-badge-bg: var(--tc-surface-muted);
+    --bs-group-badge-color: var(--tc-text);
+    --bs-group-badge-font-size: 0.6875rem;
+    --bs-group-action-color: var(--tc-text-muted);
+    --bs-group-action-hover-bg: var(--tc-surface-muted);
+    --bs-group-action-active-color: var(--tc-text);
+    --bs-group-chevron-size: 0.9rem;
+    --bs-group-icon-size: 1rem;
+}
+
+.tc-group {
+    background: var(--bs-group-bg);
+    border: 1px solid var(--bs-group-border-color);
+    border-radius: 0;
+}
+
+// ── Header ─────────────────────────────────────────────────────────────────────
+
+.tc-group-header {
+    display: flex;
+    align-items: center;
+    background: var(--bs-group-header-bg);
+    border-bottom: 1px solid var(--bs-group-border-color);
+    border-radius: 0;
+    padding: 0;
+
+    // Remove bottom border when body is expanded (border lives on body otherwise)
+    // Handled by toggling [hidden] on the body; the hairline always shows.
+}
+
+// ── Toggle button ──────────────────────────────────────────────────────────────
+
+.tc-group-toggle {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: var(--bs-group-header-padding-y) var(--bs-group-header-padding-x);
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    color: var(--bs-group-toggle-color);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    min-width: 0;
+    transition: background var(--tc-transition-base, 150ms ease);
+
+    &:hover {
+        background: var(--bs-group-header-hover-bg);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: -2px;
+    }
+
+    svg {
+        width: var(--bs-group-chevron-size);
+        height: var(--bs-group-chevron-size);
+        flex-shrink: 0;
+        color: var(--tc-text-muted);
+    }
+}
+
+// ── Chevron rotation ───────────────────────────────────────────────────────────
+// chevron-down SVG is used as the base. When collapsed, it is rotated -90deg
+// so it points right. When expanded (.tc-group-chevron--open) it rotates to 0deg
+// (pointing down). The transition provides the animated rotation.
+
+.tc-group-chevron {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    transform: rotate(-90deg);
+    transition: transform var(--tc-transition-base, 150ms ease);
+
+    svg {
+        display: block;
+    }
+}
+
+.tc-group-chevron--open {
+    transform: rotate(0deg);
+}
+
+// ── Label ──────────────────────────────────────────────────────────────────────
+
+.tc-group-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+// ── Badge ──────────────────────────────────────────────────────────────────────
+
+.tc-group-badge {
+    display: inline-block;
+    flex-shrink: 0;
+    padding: 0.1em 0.45em;
+    background: var(--bs-group-badge-bg);
+    color: var(--bs-group-badge-color);
+    font-size: var(--bs-group-badge-font-size);
+    font-family: var(--bs-font-monospace, monospace);
+    font-weight: 500;
+    border-radius: 0;
+    line-height: 1.5;
+}
+
+// ── Action button ──────────────────────────────────────────────────────────────
+
+.tc-group-action {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 0;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    color: var(--bs-group-action-color);
+    cursor: pointer;
+    transition: background var(--tc-transition-base, 150ms ease),
+        color var(--tc-transition-base, 150ms ease);
+
+    svg {
+        width: var(--bs-group-icon-size);
+        height: var(--bs-group-icon-size);
+        flex-shrink: 0;
+        pointer-events: none;
+    }
+
+    &:hover {
+        background: var(--bs-group-action-hover-bg);
+        color: var(--bs-group-action-active-color);
+    }
+
+    &:active {
+        background: var(--tc-border);
+        color: var(--tc-text);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: -2px;
+    }
+}
+
+.tc-group-action-label {
+    font-size: 0.8125rem;
+    white-space: nowrap;
+    padding-right: 0.375rem;
+}
+
+// When action has a label, expand hit area slightly
+.tc-group-action:has(.tc-group-action-label) {
+    width: auto;
+    padding: 0 0.5rem;
+}
+
+// ── Body ───────────────────────────────────────────────────────────────────────
+
+.tc-group-body {
+    background: var(--bs-group-body-bg);
+}
+
+// ── Touch targets — WCAG 2.5.5 ────────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-group-toggle {
+        min-height: 44px;
+    }
+
+    .tc-group-action {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+// ── Reduced motion ─────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-group-toggle,
+    .tc-group-chevron,
+    .tc-group-action {
+        transition: none;
+    }
+}

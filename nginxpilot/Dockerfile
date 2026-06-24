@@ -17,10 +17,15 @@ RUN CGO_ENABLED=0 go build -trimpath \
 # nginx base image: one container runs nginx AND the sync daemon, sharing
 # /var/lib/nginxpilot directly. git + openssh-client are required
 # for git sources (the daemon shells out to the system git binary);
-# su-exec runs the daemon with group `nginx` so deployed files (0750/0640)
-# stay readable by the nginx workers.
+# su-exec runs the daemon as the unprivileged `nginxpilot` user (group `nginx`)
+# so deployed files (0750/0640) stay readable by the nginx workers.
 FROM nginx:1.27-alpine
 RUN apk add --no-cache git openssh-client ca-certificates tzdata su-exec
+
+RUN addgroup -S nginxpilot 2>/dev/null; \
+    adduser -S -D -H -G nginx nginxpilot && \
+    mkdir -p /var/lib/nginxpilot && \
+    chown -R nginxpilot:nginx /var/lib/nginxpilot
 
 COPY --from=build /out/nginxpilot /usr/local/bin/nginxpilot
 COPY docker/entrypoint.sh /usr/local/bin/nginxpilot-entrypoint.sh
@@ -34,6 +39,11 @@ VOLUME /var/lib/nginxpilot
 # 80 = nginx, 9090 = daemon admin endpoint (set admin.listen: 0.0.0.0:9090
 # in config to expose it beyond the container's loopback).
 EXPOSE 80 9090
+
+# Requires admin.listen to be non-empty (default: 127.0.0.1:9090).
+# Disabling the admin endpoint (admin.listen: "") also disables this healthcheck.
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+    CMD wget -qO- http://127.0.0.1:9090/healthz >/dev/null 2>&1 || exit 1
 
 # No arguments → supervise daemon + nginx. With arguments → run the CLI:
 #   docker run --rm ... <image> validate

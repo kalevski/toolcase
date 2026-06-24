@@ -1,0 +1,10 @@
+// Dungeon › tc-transition-wipe — recolour the wipe fill to the deep ink the
+// game uses (#0a0604) so scene cuts read as a fade into dungeon black.
+// Pure colour FX: structure/animation is already correct in the base.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-transition-wipe {
+        --bs-transition-wipe-color: #0a0604;
+    }
+}

@@ -1,0 +1,5 @@
+**/lib/
+**/dist/
+**/node_modules/
+# Generated — see web-components/scripts/gen-react-types.mjs
+web-components/src/react.ts

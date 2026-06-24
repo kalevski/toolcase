@@ -1,0 +1,48 @@
+// Dungeon › tc-list-row — gold hairline rows, gradient highlight + gilded marker
+// on the selected row, mono meta values, warm hover wash.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-list-row {
+        --bs-list-row-bg: transparent;
+        --bs-list-row-border-color: rgba(201, 169, 97, 0.22);
+        --bs-list-row-accent: var(--fg-gold);
+        --bs-list-row-label-color: var(--fg-parch);
+        --bs-list-row-meta-color: var(--fg-parch-3);
+        --bs-list-row-meta-font-family: var(--fg-mono);
+        --bs-list-row-selected-bg: linear-gradient(90deg, rgba(201, 169, 97, 0.18), transparent);
+        // Improvement 1: warm gold hover instead of inherited cool-white wash
+        --tc-surface-hover: rgba(201, 169, 97, 0.08);
+        // Improvement 6: gold-bright focus ring
+        --bs-list-row-focus-outline: 2px solid var(--fg-gold-bright);
+        // Improvement 5: engraved ledger-line feel via top highlight
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // Improvement 3: add tracking to labels for a more deliberate codex voice
+    tc-list-row .tc-list-row-label {
+        font-family: var(--fg-body);
+        letter-spacing: 0.02em;
+    }
+
+    // Improvement 2: gild the selected marker — replace flat border-left with
+    // an inset box-shadow so the edge reads as a gilded handle with glow
+    tc-list-row.tc-list-row--selected {
+        border-left-color: transparent;
+        box-shadow:
+            inset 3px 0 0 var(--fg-gold),
+            inset 4px 0 6px -2px rgba(232, 200, 120, 0.4),
+            var(--fg-bevel-top);
+    }
+
+    tc-list-row.tc-list-row--selected .tc-list-row-label {
+        color: var(--fg-gold-bright);
+        font-weight: 600;
+    }
+
+    // Improvement 4: echo the row's semantic accent color on the trailing meta
+    // value so online/failed/warning readouts share the row's tint
+    tc-list-row[accent] .tc-list-row-meta {
+        color: var(--bs-list-row-accent);
+    }
+}

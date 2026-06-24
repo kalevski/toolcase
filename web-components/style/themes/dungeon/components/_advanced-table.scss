@@ -1,0 +1,38 @@
+// Dungeon › tc-advanced-table — gilded ledger / leaderboard chrome.
+// Corrects two hard leaks: the slate-ramp row hairline and the white loading
+// scrim. Adds a panel-shadow bevel to the body wrap. Everything else (wood bg,
+// leather head cap, gold border, mono uppercase headers, radius-0) resolves
+// through the foundation token remaps.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token swap on host ────────────────────────────────────────────────────
+
+    tc-advanced-table {
+        // Wood gradient surface (replaces plain --tc-surface).
+        --bs-advanced-table-bg:             var(--fg-panel-bg);
+
+        // Ledger-line hairlines: faint gold-shadow instead of pale slate.
+        --bs-advanced-table-row-hairline:   1px solid var(--fg-gold-shadow);
+
+        // Dark ink veil instead of the bright white scrim.
+        --bs-advanced-table-overlay-scrim:  rgba(13, 10, 6, 0.6);
+
+        // Gold spinner stays legible against the now-dark scrim.
+        --bs-advanced-table-spinner-color:  var(--fg-gold);
+    }
+
+    // ── Body wrap: gilded ledger frame ────────────────────────────────────────
+
+    .tc-advanced-table-body-wrap {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── Column headers: carved-gold labels ───────────────────────────────────
+    // The base already applies mono uppercase; repoint the colour to gold so
+    // headers read as engraved ledger labels rather than muted slate text.
+
+    .tc-advanced-table-th {
+        color: var(--fg-gold);
+    }
+}

@@ -1,0 +1,79 @@
+// tc-metric-grid — CSS-grid container for tc-metric-tile-style metric cards.
+// Tiles are separated by 1px hairlines (grid background shows through the gap).
+// No individual tile shadows or box decoration — the grid provides the structure.
+// Sharp corners throughout. Slate neutrals. Responsive column collapse.
+// Honour prefers-reduced-motion (no animation involved).
+
+@use '../foundation/tokens' as *;
+
+tc-metric-grid {
+    --bs-metric-grid-border-color: var(--tc-border);
+    --bs-metric-grid-bg: var(--tc-surface);
+    --bs-metric-grid-outer-border: 1px solid var(--bs-metric-grid-border-color);
+}
+
+// Grid wrapper — background acts as the hairline separator between tiles.
+.tc-metric-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1px;
+    background: var(--bs-metric-grid-border-color);
+    border: var(--bs-metric-grid-outer-border);
+
+    // Expand to 2 columns from sm upward (all column variants).
+    @include media-up(sm) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+// 2-column variant — stays at 2 columns above sm.
+.tc-metric-grid--cols-2 {
+    @include media-up(sm) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+// 3-column variant — 2 cols at sm, 3 cols at md.
+.tc-metric-grid--cols-3 {
+    @include media-up(sm) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    @include media-up(md) {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+// 4-column variant — 2 cols at sm, 4 cols at lg.
+.tc-metric-grid--cols-4 {
+    @include media-up(sm) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    @include media-up(lg) {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+// Tiles inside the grid — remove individual border/shadow; grid background provides hairlines.
+// Override --bs-metric-tile-* vars scoped to this context.
+.tc-metric-grid > .tc-metric-tile,
+.tc-metric-grid > [class~='tc-metric-tile'] {
+    border: none;
+    box-shadow: none;
+    background: var(--bs-metric-grid-bg);
+    border-radius: 0;
+    // Pin every cell's content to the top so labels share a baseline across the
+    // row and the grid stretch (default) keeps the cells equal-height and uniform.
+    align-self: stretch;
+    align-items: flex-start;
+}
+
+// Mixed icon / no-icon grids misaligned the label/value column: an icon-less
+// tile started flush-left while its neighbours were indented by the icon chip.
+// When the grid carries any icon, reserve the same leading gutter on the bodies
+// of the icon-less tiles so every label and value lines up on one left edge.
+// Fully icon-less grids are left untouched (no phantom gutter).
+.tc-metric-grid:has(.tc-metric-tile-icon)
+    > .tc-metric-tile:not(:has(.tc-metric-tile-icon))
+    .tc-metric-tile-body {
+    margin-left: calc(var(--bs-metric-tile-icon-size, 1.25rem) + var(--bs-metric-tile-gap, 0.75rem));
+}

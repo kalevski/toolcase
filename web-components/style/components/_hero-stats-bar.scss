@@ -1,0 +1,81 @@
+// tc-hero-stats-bar — horizontal bar of key-value statistics with optional units.
+// Slate neutrals, JetBrains Mono throughout, 1px hairline dividers between items.
+// All cosmetic values flow through --bs-hero-stats-bar-* / --tc-* custom properties.
+
+@use '../foundation/tokens' as *;
+
+tc-hero-stats-bar {
+    --bs-hero-stats-bar-item-padding-x: 1.25rem;
+    --bs-hero-stats-bar-item-padding-y: 0.875rem;
+    --bs-hero-stats-bar-value-font-size: 1.5rem;
+    --bs-hero-stats-bar-value-font-weight: 600;
+    --bs-hero-stats-bar-value-color: var(--tc-text);
+    --bs-hero-stats-bar-unit-font-size: 0.875rem;
+    --bs-hero-stats-bar-unit-color: var(--tc-text-muted);
+    --bs-hero-stats-bar-label-font-size: 0.6875rem;
+    --bs-hero-stats-bar-label-color: var(--tc-text-muted);
+    --bs-hero-stats-bar-divider-color: var(--tc-border);
+    --bs-hero-stats-bar-zero-color: var(--tc-text-faint);
+}
+
+.tc-hero-stats-bar {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    border-radius: 0;
+}
+
+.tc-hero-stats-bar-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3125rem;
+    padding: var(--bs-hero-stats-bar-item-padding-y) var(--bs-hero-stats-bar-item-padding-x);
+    flex: 1 1 0;
+    min-width: 0;
+
+    & + & {
+        border-left: 1px solid var(--bs-hero-stats-bar-divider-color);
+    }
+}
+
+.tc-hero-stats-bar-value {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+    font-family: var(--bs-font-monospace);
+    font-size: var(--bs-hero-stats-bar-value-font-size);
+    font-weight: var(--bs-hero-stats-bar-value-font-weight);
+    color: var(--bs-hero-stats-bar-value-color);
+    line-height: 1;
+    border-radius: 0;
+}
+
+.tc-hero-stats-bar-unit {
+    font-family: var(--bs-font-monospace);
+    font-size: var(--bs-hero-stats-bar-unit-font-size);
+    font-weight: 400;
+    color: var(--bs-hero-stats-bar-unit-color);
+    line-height: 1;
+}
+
+.tc-hero-stats-bar-label {
+    font-family: var(--bs-font-monospace);
+    font-size: var(--bs-hero-stats-bar-label-font-size);
+    font-weight: 500;
+    color: var(--bs-hero-stats-bar-label-color);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-radius: 0;
+}
+
+.tc-hero-stats-bar-item--zero {
+    .tc-hero-stats-bar-value {
+        color: var(--bs-hero-stats-bar-zero-color);
+    }
+}

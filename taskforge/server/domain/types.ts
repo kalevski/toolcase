@@ -63,6 +63,8 @@ export interface TaskInfo {
     project?: string
     /** Pinned model for this task (`**Model:**` facet) — overrides the run model. */
     model?: string
+    /** `**Account:**` facet — pins the Claude identity for this task. */
+    account?: string
     /** Task ids/number prefixes this task depends on (`**Depends:**` facet, A4). */
     depends?: string[]
     /** Last recorded attempt outcome from telemetry, if any. */
@@ -166,6 +168,70 @@ export interface AgentPromptRecord {
     prompt: string
     model: string
     usedAt: string
+}
+
+// ── Claude account registry (multi-account) ──────────────────────────────────
+
+/**
+ * One Claude identity in the account registry — registry **metadata only**,
+ * never secrets. `dir` is the isolated `CLAUDE_CONFIG_DIR` (one config dir = one
+ * logged-in identity). For `apikey` accounts the key is referenced by env-var
+ * **name** (`apiKeyEnv`) and resolved at spawn time; the key value is never
+ * stored. `lastUsedAt`/`coolingUntil` are mutable runtime fields used later by
+ * the dispatcher for round-robin + cool-down on quota errors.
+ */
+export interface Account {
+    /** Short kebab-case handle; primary key + config-dir folder name. */
+    alias: string
+    /** Isolated config dir on disk (`${accountsDir}/<alias>`). */
+    dir: string
+    auth: 'oauth' | 'apikey'
+    label?: string
+    /** Name of the env var holding the API key (apikey auth only). */
+    apiKeyEnv?: string
+    lastUsedAt?: string
+    coolingUntil?: string
+}
+
+/**
+ * Result of a live `verifyAccount` token-health check — a cheap one-shot run
+ * under the account's config dir confirming the identity is usable before a
+ * batch is dispatched. `detail` is a short human-readable reason on failure.
+ */
+export interface AccountHealth {
+    ok: boolean
+    detail: string
+}
+
+/**
+ * Cached, non-live account summary for the health surface: the alias, its auth
+ * method, and the last time the identity was successfully used/verified
+ * (`lastUsedAt`). Health polling reports this without re-running a verify.
+ */
+export interface AccountHealthSummary {
+    alias: string
+    auth: 'oauth' | 'apikey'
+    label?: string
+    lastUsedAt?: string
+}
+
+/**
+ * Non-secret registry view for the management surface (`GET /api/accounts`):
+ * every account's metadata (alias, config dir, auth method, label, the API-key
+ * env-var *name*) plus its cached runtime state — `lastUsedAt` as the last
+ * known-good health stamp, `coolingUntil`, and a derived `cooling` flag (true
+ * while a quota cool-down is still in effect). Holds no secrets: the API key
+ * value is never stored, only the env-var name that references it.
+ */
+export interface AccountSummary {
+    alias: string
+    dir: string
+    auth: 'oauth' | 'apikey'
+    label?: string
+    apiKeyEnv?: string
+    lastUsedAt?: string
+    coolingUntil?: string
+    cooling: boolean
 }
 
 // ── Git ──────────────────────────────────────────────────────────────────────
@@ -285,6 +351,8 @@ export interface SearchHit {
 /** Persisted per-project overrides; absent keys fall back to env config. */
 export interface ProjectSettings {
     defaultModel?: string
+    /** Fallback Claude account alias for tasks that don't name one. */
+    defaultAccount?: string
     commitAfter?: boolean
     commitMessageMode?: CommitMessageMode
     commitModel?: string
@@ -334,6 +402,8 @@ export interface HealthDetails {
     db: { path: string; sizeBytes: number; migrationVersion: number }
     engines: { project: string; state: EngineState }[]
     searchAvailable: boolean
+    /** Registered Claude accounts with their auth method + cached last-verified time. */
+    accounts: AccountHealthSummary[]
     config: Record<string, string | number | boolean>
 }
 

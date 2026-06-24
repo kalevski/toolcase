@@ -1,0 +1,64 @@
+// Dungeon › tc-confirm-dialog — gilded modal. Token swap recolours surface /
+// backdrop / eyebrow vars; structural rules add the dark gradient panel with the
+// stacked inset gold bevel, the blurred ink backdrop, and the display-caps
+// title/eyebrow with a body-serif message.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-confirm-dialog {
+        --bs-confirm-dialog-bg: linear-gradient(180deg, rgba(20, 12, 8, 0.96), rgba(10, 6, 4, 0.96));
+        --bs-confirm-dialog-color: var(--fg-parch);
+        --bs-confirm-dialog-border-color: var(--fg-gold-deep);
+        --bs-confirm-dialog-eyebrow-color: var(--fg-parch-dim);
+
+        --bs-confirm-dialog-backdrop-bg: #000;
+        --bs-confirm-dialog-backdrop-opacity: 0.65;
+    }
+
+    tc-confirm-dialog[danger] {
+        --bs-confirm-dialog-eyebrow-color: var(--fg-blood-bright);
+    }
+
+    // Blurred ink backdrop.
+    .tc-confirm-dialog__backdrop {
+        backdrop-filter: blur(2px);
+    }
+
+    // Gilded panel: stacked inset gold bevel + deep drop shadow, centered content.
+    .tc-confirm-dialog__panel {
+        text-align: center;
+        box-shadow:
+            inset 0 0 0 1px var(--fg-gold-shadow),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18),
+            0 20px 50px rgba(0, 0, 0, 0.8);
+    }
+
+    // Gold rule divider after title — synthesised via ::after since tc has no
+    // __divider node. Recreates the gc diamond-divider gold hairline.
+    .tc-confirm-dialog__title::after {
+        content: '';
+        display: block;
+        height: 1px;
+        background: var(--fg-rule);
+        margin: 0.75rem auto 0;
+        width: 80%;
+    }
+
+    // Title + eyebrow read as gilded display caps.
+    .tc-confirm-dialog__eyebrow,
+    .tc-confirm-dialog__title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+    }
+
+    .tc-confirm-dialog__title {
+        color: var(--fg-gold-bright);
+    }
+
+    // Message in the body serif.
+    .tc-confirm-dialog__message {
+        font-family: var(--fg-body);
+        color: var(--fg-parch);
+    }
+}

@@ -1,0 +1,15 @@
+// Dungeon › tc-video-embed — gilded scrying-mirror frame.
+// The foundation already repoints backdrop bg (--fg-ink), border (--fg-gold-deep),
+// radius (0), and loading bg (leather) via --tc-* → --fg-* token chain.
+// The single structural upgrade here is promoting the flat `none` shadow to the
+// gilded inset bevel stack via --fg-panel-shadow.
+// Corner notches are skipped: .tc-video-embed has overflow:hidden which would
+// clip any outward ::before/::after ornament, and inset notches would obscure
+// the media — the plan explicitly permits omitting them in this case.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-video-embed {
+        --bs-video-embed-shadow: var(--fg-panel-shadow);
+    }
+}

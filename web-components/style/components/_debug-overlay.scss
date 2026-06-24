@@ -1,0 +1,84 @@
+// tc-debug-overlay — dev/perf overlay rendering fps + key/value stat lines.
+// Machine-facing panel on the ink (dark) surface: JetBrains Mono throughout,
+// sharp corners, 1px hairline border, overlay-tier shadow. Drops the
+// game-components fantasy chrome (gilded frame, parchment fills, inset glows).
+// All cosmetics flow through --bs-debug-overlay-* vars backed by --tc-* tokens.
+// FPS status colours are the only colour spent — brightened status hues so they
+// stay legible on the dark surface. Honours prefers-reduced-motion (no motion
+// here, but the state colours are retained regardless).
+
+tc-debug-overlay {
+    // Panel surface
+    --bs-debug-overlay-bg: var(--tc-ink);
+    --bs-debug-overlay-border: 1px solid var(--tc-border);
+    --bs-debug-overlay-shadow: var(--tc-shadow-lg);
+    --bs-debug-overlay-min-width: 140px;
+    --bs-debug-overlay-padding-y: 0.5rem;
+    --bs-debug-overlay-padding-x: 0.625rem;
+    --bs-debug-overlay-row-gap: 0.125rem;
+    --bs-debug-overlay-col-gap: 0.75rem;
+    --bs-debug-overlay-z: var(--tc-z-tooltip);
+
+    // Text — mono, on dark
+    --bs-debug-overlay-font-size: 0.6875rem;
+    --bs-debug-overlay-label-font-size: 0.625rem;
+    --bs-debug-overlay-label-color: var(--tc-text-faint);
+    --bs-debug-overlay-value-color: var(--tc-text-inverse);
+
+    // FPS status colours — brightened for the dark surface
+    --bs-debug-overlay-fps-good-color: oklch(0.8 0.17 150); // bright green
+    --bs-debug-overlay-fps-warning-color: oklch(0.83 0.15 80); // bright amber
+    --bs-debug-overlay-fps-danger-color: oklch(0.72 0.18 25); // bright red
+
+    z-index: var(--bs-debug-overlay-z);
+}
+
+.tc-debug-overlay-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-debug-overlay-row-gap);
+    box-sizing: border-box;
+    min-width: var(--bs-debug-overlay-min-width);
+    padding: var(--bs-debug-overlay-padding-y) var(--bs-debug-overlay-padding-x);
+    background: var(--bs-debug-overlay-bg);
+    border: var(--bs-debug-overlay-border);
+    border-radius: 0; // sharp by mandate
+    box-shadow: var(--bs-debug-overlay-shadow);
+}
+
+.tc-debug-overlay-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--bs-debug-overlay-col-gap);
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-debug-overlay-font-size);
+    line-height: 1.5;
+}
+
+.tc-debug-overlay-label {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: var(--bs-debug-overlay-label-font-size);
+    color: var(--bs-debug-overlay-label-color);
+}
+
+.tc-debug-overlay-value {
+    text-align: right;
+    color: var(--bs-debug-overlay-value-color);
+    font-variant-numeric: tabular-nums;
+}
+
+// ── FPS status — the only colour the overlay spends ──────────────────────────
+
+.tc-debug-overlay-fps--good .tc-debug-overlay-value {
+    color: var(--bs-debug-overlay-fps-good-color);
+}
+
+.tc-debug-overlay-fps--warning .tc-debug-overlay-value {
+    color: var(--bs-debug-overlay-fps-warning-color);
+}
+
+.tc-debug-overlay-fps--danger .tc-debug-overlay-value {
+    color: var(--bs-debug-overlay-fps-danger-color);
+}

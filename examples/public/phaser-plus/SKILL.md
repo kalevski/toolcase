@@ -1,6 +1,6 @@
 ---
 name: phaser-plus
-description: Use when building Phaser 4 games with @toolcase/phaser-plus — scene lifecycle, feature registry, object pooling, flow events/timers/jobs, layer + camera management, perspective2d (isometric/grid), GLSL shader effects, A* pathfinding (NavMesh), and the Tweakpane in-game debugger.
+description: Use when building Phaser 4 games with @toolcase/phaser-plus — scene lifecycle, feature registry, object pooling, flow events/timers/jobs, layer + camera management, perspective2d (isometric/grid), GLSL shader effects, particle VFX (ParticleFeature), A* pathfinding (NavMesh), and the Tweakpane in-game debugger.
 ---
 
 # phaser-plus — API Reference
@@ -9,16 +9,16 @@ Unified runtime layer on top of Phaser 4. Adds opinionated scene lifecycle, regi
 
 ```ts
 import {
-    Engine, Scene, GameObject, Events,
+    Engine, Scene, GameObject, GameObjectComponent, Events,
     Feature, FeatureRegistry, ServiceRegistry,
     Layer, ObjectLayer, HTMLFeature, SplitScreen,
     GameObjectPool,
-    Flow,    // { Event, TimeEvent, CollisionEvent, Job, FlowEngine, StateMachine, BehaviorTreeProcessor, ReplayRecorder, Timer, Parallel, throttle, debounce, BT: {...} }
-    Structs, // { Matrix2 }
+    Flow,    // { Event, TimeEvent, CollisionEvent, Job, FlowEngine, StateMachine, BehaviorTreeProcessor, ReplayRecorder, Timer, Tween, Timeline, TweenProcessor, EASE, resolveEase, Parallel, throttle, debounce, BT: {...} }
+    Structs, // { Matrix2, SpatialHash, Quadtree }
     LogLevel,
     // Debugger
     Debugger, Panel,
-    PerformancePanel, MemoryPanel, TimelinePanel, InputPanel, AudioPanel, NetPanel,
+    PerformancePanel, MemoryPanel, TimelinePanel, InputPanel, AudioPanel, NetPanel, SaveStatePanel,
     ConsoleCommands, HotReload, RemoteDebugger,
     // Perspective2D
     Scene2D, World, GameObject2D, Grid,
@@ -26,6 +26,7 @@ import {
     Effect, EffectManager, installEffects, EFFECT_REGISTRY,
     // AI
     NavMesh, PathFinder, Path, PATH_FOUND, PATH_FAILED,
+    TilemapNavMesh, TilemapFeature,
     // Cinema
     CameraDirector, EASE_LINEAR, EASE_IN_OUT, EASE_OUT, SHOT_DONE,
     ScreenShake, CameraFlash, DialogCameraCue, ParallaxLayer, LetterboxFeature,
@@ -39,8 +40,19 @@ import {
     // Flow extras (also reachable via `Flow.*`)
     STATE_ENTER, STATE_EXIT, STATE_TRANSITION,
     SUCCESS, FAILURE, RUNNING,
-    REPLAY_FRAME, REPLAY_END
+    REPLAY_FRAME, REPLAY_END,
+    // Audio
+    AudioFeature, AUDIO_MUSIC_START, AUDIO_MUSIC_END, AUDIO_BUS_CHANGE,
+    // Persistence
+    SaveService, PersistenceFeature, SAVE_DONE, LOAD_DONE, SAVE_DELETED,
+    LocalStorageBackend, IndexedDBBackend, MemoryBackend,
+    // Particles
+    ParticleFeature, PARTICLE_BURST, PARTICLE_STREAM_START, PARTICLE_STREAM_STOP,
+    // Net
+    NetFeature, LoopbackTransport, WebSocketTransport,
+    NET_CONNECTED, NET_DISCONNECTED, NET_RTT_UPDATE, NET_ENTITY_STATE
 } from '@toolcase/phaser-plus'
+import type { Transport } from '@toolcase/phaser-plus'
 ```
 
 
@@ -68,6 +80,7 @@ Peers: `phaser@4.x`, `@toolcase/base@3.x`, `@toolcase/logging@3.x`. Optional pee
   - [TimeEvent](#timeevent)
   - [Job](#job)
   - [CollisionEvent](#collisionevent)
+  - [Tween & Timeline](#tween--timeline)
 - [Debugger](#debugger)
 - [Perspective2D](#perspective2d)
   - [Scene2D](#scene2d)
@@ -75,6 +88,8 @@ Peers: `phaser@4.x`, `@toolcase/base@3.x`, `@toolcase/logging@3.x`. Optional pee
   - [GameObject2D](#gameobject2d)
   - [Grid](#grid)
   - [Matrix2](#matrix2)
+  - [SpatialHash](#spatialhash)
+  - [Quadtree](#quadtree)
 - [Effects](#effects)
 - [AI / Pathfinding](#ai--pathfinding)
 - [Events constants](#events-constants)
@@ -95,6 +110,9 @@ Peers: `phaser@4.x`, `@toolcase/base@3.x`, `@toolcase/logging@3.x`. Optional pee
   - [GamepadFeature](#gamepadfeature)
   - [GestureRecognizer](#gesturerecognizer)
   - [VirtualJoystick](#virtualjoystick)
+- [Audio — bus mixer, music, SFX pool, spatial, ducking](#audio--bus-mixer-music-sfx-pool-spatial-ducking)
+- [Particles — ParticleFeature (VFX registry + pool)](#particles--particlefeature-vfx-registry--pool)
+- [Net — NetFeature, Transport, entity sync](#net--netfeature-transport-entity-sync)
 - [Worked examples](#worked-examples)
 - [Cross-library integration](#cross-library-integration)
 - [Theming / styling surfaces](#theming--styling-surfaces)
@@ -194,7 +212,7 @@ this.pause(); this.resume()
 
 ## GameObject
 
-Phaser `Container` with stable `id`, lifecycle hooks, lazy `EffectManager`, and absolute-position helper.
+Phaser `Container` with stable `id`, lifecycle hooks, lazy `EffectManager`, absolute-position helper, and an opt-in **component bag**.
 
 ```ts
 class Bullet extends GameObject {
@@ -218,9 +236,57 @@ class Bullet extends GameObject {
 | `add(child \| children)` | Adds children, calls `onAdd(parent)` if defined |
 | `remove(child, destroy?)` | Removes; optional destroy |
 | `removeAll(destroy?)` | |
+| `addComponent<T>(cls)` | Attach a `GameObjectComponent` subclass (idempotent) |
+| `getComponent<T>(cls)` | Return the component, or `null` |
+| `removeComponent(cls)` | Call `onDestroy()` and detach |
 | `onCreate / onAdd / onUpdate / onRemove / onDestroy` | Override hooks |
 
 `onUpdate` only ticks when the GameObject is a direct child of the scene. Nested children must be ticked manually.
+
+### GameObjectComponent
+
+Reusable, composable behaviors attached to `GameObject` without inheritance. Each component is a zero-arg class; `owner` is injected before the first lifecycle call.
+
+```ts
+import { GameObjectComponent, GameObject } from '@toolcase/phaser-plus'
+
+class HealthComponent extends GameObjectComponent {
+    hp = 100
+    maxHp = 100
+
+    onCreate() {
+        this.hp = this.maxHp
+    }
+
+    onUpdate(_time: number, _delta: number) {
+        if (this.hp <= 0) this.owner.destroy()
+    }
+}
+
+class MoverComponent extends GameObjectComponent {
+    speed = 200
+
+    onUpdate(_time: number, delta: number) {
+        this.owner.x += this.speed * (delta / 1000)
+    }
+}
+
+class Enemy extends GameObject {
+    onCreate() {
+        const health = this.addComponent(HealthComponent)
+        health.maxHp = 200
+        this.addComponent(MoverComponent)
+    }
+}
+```
+
+Components participate in the owner's lifecycle:
+
+| Hook | When |
+|---|---|
+| `onCreate()` | After `GameObject.onCreate()` (at pool obtain, or immediately when `addComponent()` is called on a live object) |
+| `onUpdate(time, delta)` | Every frame (via `doUpdate`) |
+| `onDestroy()` | On `removeComponent()`, or when the owner is destroyed |
 
 ---
 
@@ -477,6 +543,118 @@ const onSearch = Flow.debounce(query, 300, { leading: false })
 
 Returned handles share `cancel()` / `pause()` / `resume()` (when applicable). `Parallel.run(N, tasks, onAll)` caps concurrency at `N` (use `Infinity`-style `0` to run all at once); each task takes a `done` callback.
 
+### Tween & Timeline
+
+Property interpolation driven by the same `flow.doUpdate` clock as events, timers, and jobs.
+
+**`Flow.Tween`** — static helper for one-shot tweens.
+
+```ts
+import { Flow } from '@toolcase/phaser-plus'
+
+const handle = Flow.Tween.to(scene, box, { x: 400, alpha: 0.5 }, {
+    ms: 600,
+    ease: 'easeOutCubic',  // string key or (t: number) => number
+    delay: 200,
+    loop: true,            // true = infinite, number = count
+    yoyo: true,
+    onComplete: () => console.log('done'),
+    onUpdate: (progress, target) => {}
+})
+
+handle.pause()
+handle.resume()
+handle.cancel()
+handle.progress    // 0..1
+handle.completed   // boolean
+handle.paused      // boolean
+```
+
+Or access the processor directly: `scene.flow.tween(target, to, opts)` returns the same `TweenHandle`.
+
+**`Flow.Timeline`** — fluent builder for sequenced + parallel tweens.
+
+```ts
+const tl = new Flow.Timeline(scene)          // or scene.flow.timeline()
+
+tl.to(box, { x: 400 }, { ms: 500, ease: 'easeOutCubic' })
+  .wait(200)
+  .parallel(sub => {
+      sub.to(box, { alpha: 0 }, { ms: 300, ease: 'easeIn' })
+         .to(icon, { scaleX: 0 }, { ms: 300, ease: 'easeIn' })
+  })
+  .stagger([a, b, c], { scaleY: 1 }, { ms: 400, ease: 'easeOutBack' }, 100)
+  .call(() => sfx.play('whoosh'))
+
+const handle = tl.play(() => console.log('sequence done'))
+```
+
+`TimelineHandle` API:
+
+```ts
+handle.seek(ms)     // scrub to any position (re-applies all tween values)
+handle.restart()    // reset elapsed to 0, clear fired flags — reset target values yourself first
+handle.pause()
+handle.resume()
+handle.cancel()
+handle.elapsed      // ms since play()
+handle.total        // total duration in ms
+handle.progress     // 0..1
+handle.completed    // boolean
+handle.paused       // boolean
+```
+
+**Easing** — all built-in easing functions available as `Flow.EASE` record and string keys:
+
+| Key | Shape |
+|---|---|
+| `linear` | constant |
+| `easeIn` / `easeOut` / `easeInOut` | quadratic |
+| `easeInCubic` / `easeOutCubic` / `easeInOutCubic` | cubic |
+| `easeInBack` / `easeOutBack` / `easeInOutBack` | overshoot |
+| `bounce` / `bounceIn` / `bounceOut` | bounce |
+| `elastic` | elastic snap |
+
+```ts
+import { Flow } from '@toolcase/phaser-plus'
+
+Flow.EASE.easeOutBack(0.8)         // call directly
+Flow.resolveEase('easeOutBack')    // string → EaseFn; undefined → linear
+```
+
+**`TweenProcessor`** — the `FlowProcessor` backing tweens and timelines. Accessible as `scene.flow.tweens`.
+
+```ts
+scene.flow.tweens.cancelAll()    // cancel every active tween + timeline
+scene.flow.tweens.pauseAll()
+scene.flow.tweens.resumeAll()
+scene.flow.tweens.onLog = (time, type, name) => {}  // hook for TimelinePanel
+```
+
+**`TimelinePanel.bindTimeline(handle)`** — attach a scrub UI to a `TimelineHandle` inside an existing `TimelinePanel`.
+
+```ts
+const dbg = this.features.register('debugger', Debugger).setExpanded()
+const panel = dbg.addPanel('timeline', TimelinePanel, 'My Timeline')
+
+const handle = tl.play()
+panel.bindTimeline(handle)   // adds TL Scrub slider, TL Progress readout, Replay TL + Pause TL buttons
+```
+
+Demo: `tween-timeline` — `TweenTimelineDemo.js`.
+
+**`TimelinePanel.bindReplay(recorder)`** — wire a `ReplayRecorder` to this panel. Adds RP State / RP Frame readouts, a scrub slider (seeks the frame cursor during playback via `recorder.seekTo`), and Record / Stop / Replay buttons. Each `REPLAY_FRAME` event is also appended to the history log so it appears in the Window readout.
+
+```ts
+const dbg = this.features.register('debugger', Debugger).setExpanded()
+const panel = dbg.addPanel('timeline', TimelinePanel, 'Replay Timeline')
+
+const recorder = this.features.register('replay', Flow.ReplayRecorder)
+panel.bindReplay(recorder)   // adds RP State, RP Frame, RP Scrub, RP Record/Stop/Replay
+```
+
+Demo: `replay-recorder-timeline` — `ReplayRecorderTimelineDemo.js`.
+
 ---
 
 ## Debugger
@@ -494,7 +672,7 @@ dbg.removePanel('memory')
 dbg.getPanel<MemoryPanel>('memory')
 ```
 
-Built-in panels (always present, cannot be removed): `inspector`, `overview`, `flow`, `layer`, `gameObject`. Extra registered panels available for `addPanel`: `PerformancePanel`, `MemoryPanel`, `TimelinePanel`, `InputPanel`, `AudioPanel`, `NetPanel`.
+Built-in panels (always present, cannot be removed): `inspector`, `overview`, `flow`, `layer`, `gameObject`. Extra registered panels available for `addPanel`: `PerformancePanel`, `MemoryPanel`, `TimelinePanel`, `InputPanel`, `AudioPanel`, `NetPanel`, `SaveStatePanel`.
 
 Built-in tools (also `Panel` subclasses): `ConsoleCommands`, `HotReload`, `RemoteDebugger`.
 
@@ -593,6 +771,56 @@ iso.determinant
 iso.setValues(v00, v01, v10, v11)
 ```
 
+### SpatialHash
+
+Uniform-grid broad-phase spatial hash. O(1) amortised insert/remove; query cost scales with cells touched. Best for objects of roughly uniform size (`cellSize ≈ 2× average object diameter`). Backed by `Spatial.SpatialHash` from `@toolcase/base`.
+
+```ts
+import type { SpatialPoint, SpatialRect } from '@toolcase/phaser-plus'
+
+const hash = new Structs.SpatialHash<Enemy>(64)   // cellSize = 64 px
+
+// insert / move / remove
+hash.insert(enemy, { x: enemy.x, y: enemy.y, width: 32, height: 32 })
+hash.update(enemy, { x: enemy.x, y: enemy.y, width: 32, height: 32 })
+hash.remove(enemy)
+
+// range query — returns all items whose bounds overlap the rect
+const nearby = hash.query({ x: px - 200, y: py - 200, width: 400, height: 400 })
+
+// nearest-neighbour — distance measured point-to-nearest-edge (0 if inside)
+const closest = hash.nearest({ x: px, y: py }, /* maxDist */ 300)
+
+hash.size   // current item count
+hash.clear()
+```
+
+### Quadtree
+
+Recursive quad-partition tree. O(log n) insert; query prunes by bounding box; nearest uses branch-and-bound. Best for non-uniform object density. Backed by `Spatial.Quadtree` from `@toolcase/base`.
+
+```ts
+const qt = new Structs.Quadtree<Enemy>(
+    { x: 0, y: 0, width: 4096, height: 4096 },  // world bounds
+    /* capacity */ 8,                              // max items per node before split (default 8)
+    /* maxDepth */ 8                               // maximum subdivision depth (default 8)
+)
+
+qt.insert(enemy, { x: enemy.x, y: enemy.y, width: 32, height: 32 })  // returns false if out-of-bounds or duplicate
+qt.update(enemy, { x: enemy.x, y: enemy.y, width: 32, height: 32 })
+qt.remove(enemy)
+
+const nearby  = qt.query({ x: px - 200, y: py - 200, width: 400, height: 400 })
+const closest = qt.nearest({ x: px, y: py }, /* maxDist */ 300)
+
+qt.size   // current item count
+qt.clear()
+```
+
+**Choosing between the two:**
+- `SpatialHash` — uniform object sizes, high throughput, frequent moves.
+- `Quadtree` — varying object sizes or sparse density; culling and AI perception over irregular distributions.
+
 ---
 
 ## Effects
@@ -654,6 +882,10 @@ Mask: `CircleFadeEffect`, `ClippingEffect`, `EnergyBarEffect`, `GhostEffect`, `F
 
 Lighting: `OutlineEffect`, `PatternEffect`, `PatternAdditiveEffect`, `EdgeColorEffect`, `BlurEffect`, `SharpenEffect`, `GrassFXEffect`, `GrassMultiFXEffect`, `HologramEffect`, `Hologram2Effect`, `Hologram3Effect`, `ShinyReflectEffect`, `SkyCloudEffect`, `WaterAndBackgroundEffect`, `WaterAndBackgroundDeluxeEffect`, `WaterfallEffect`.
 
+### Effects Gallery demo (`effects-gallery`)
+
+A searchable 4-column grid with a live shader thumbnail per `EFFECT_REGISTRY` key, a family filter bar (Color / Procedural / Distortion / Dissolve / Mask / Lighting), a DOM search input, and a right-side preview panel with per-uniform `−` / `+` tweak controls. All 73 built-in effects are browsable in one place without touching the keyboard.
+
 ---
 
 ## AI / Pathfinding
@@ -688,6 +920,119 @@ path.on(PATH_FAILED, (reason: string) => {
 ```
 
 Each `findPath` mints a fresh `Path` backed by an `@toolcase/base` `AStar` stepped cooperatively — `budgetMs` caps the per-frame slice. Heuristic is octile (8-connectivity, diagonal squeeze through two blocked orthogonals is rejected).
+
+### TilemapFeature — tilemap loader + NavMesh bridge
+
+`Feature` that loads Tiled (`.tmj`) or LDtk (`.ldtk`) maps, renders tile layers, wires arcade-physics colliders, and auto-generates a `TilemapNavMesh` from walkable tile IDs.
+
+```ts
+import { TilemapFeature, TilemapNavMesh, PathFinder, PATH_FOUND } from '@toolcase/phaser-plus'
+
+class GameScene extends Scene {
+
+    onLoad() {
+        // queue a Tiled JSON map load (call loadTiled before the load phase ends)
+        const tilemap = this.features.register('tilemap', TilemapFeature)
+        tilemap.loadTiled('level1', 'assets/level1.tmj')
+        this.load.image('tileset', 'assets/tileset.png')
+    }
+
+    onCreate() {
+        const tilemap = this.features.get('tilemap')
+
+        // create the Phaser Tilemap from cache
+        tilemap.create('level1')
+
+        // register the tileset image
+        tilemap.addTileset('tileset', 'tileset')
+
+        // render a tile layer
+        tilemap.createLayer('Ground', 'tileset')
+
+        // render a collision layer (sets collision by `collides: true` tile property)
+        tilemap.buildColliders('Walls', 'tileset')
+
+        // generate a NavMesh — tile IDs 1 & 2 are walkable
+        const navMesh = tilemap.buildNavMesh({ walkable: [1, 2], layer: 'Ground' })
+
+        const pf = this.features.register('finder', PathFinder)
+        pf.setMesh(navMesh)
+
+        const path = pf.findPath(0, 0, 20, 12)
+        path.on(PATH_FOUND, (waypoints) => moveAgent(waypoints))
+    }
+}
+```
+
+#### From inline 2D array (no file load needed)
+
+```ts
+const MAP = [
+    [1,1,1,1],
+    [1,0,0,1],
+    [1,0,0,1],
+    [1,1,1,1],
+]
+
+tilemap.createFromData(MAP, 32, 32)
+const navMesh = tilemap.buildNavMesh({ walkable: [0], layer: 0 })
+```
+
+#### LDtk support
+
+```ts
+tilemap.loadLDtk('world', 'assets/world.ldtk')
+// parse the cached JSON in onCreate:
+const raw = this.cache.json.get('world')
+```
+
+#### Tiled object layer → pooled ObjectLayer
+
+Pre-register the pool key in `onInit`, then let `toObjectLayer` spawn every Tiled object entity:
+
+```ts
+// onInit
+this.pool.register('chest', ChestObject)
+
+// onCreate
+const objectLayer = tilemap.toObjectLayer('entities', 'Pickups', 'chest')
+```
+
+#### Retrieve raw Tiled objects
+
+```ts
+const objects = tilemap.getObjects('Enemies')
+// → TilemapObject[] with { name, type, x, y, width, height, properties }
+```
+
+#### TilemapFeature API
+
+| Method | Returns | Description |
+|---|---|---|
+| `loadTiled(key, url)` | `this` | Queue a Tiled JSON map load (call before load phase ends) |
+| `loadLDtk(key, url)` | `this` | Queue an LDtk JSON load |
+| `create(key)` | `this` | Build tilemap from Phaser cache (call in `onCreate`) |
+| `createFromData(data, tw, th)` | `this` | Build tilemap from inline 2D number array |
+| `addTileset(name, textureKey)` | `Tileset` | Register a tileset image against the map |
+| `createLayer(layerName, tilesetName?)` | `TilemapLayer` | Render a tile layer |
+| `buildColliders(layerName, tilesetName?)` | `TilemapLayer` | Render + enable collision by `collides: true` property |
+| `buildNavMesh(options)` | `TilemapNavMesh` | Generate NavMesh from walkable tile IDs |
+| `toObjectLayer(featureKey, objectLayerName, poolKey)` | `ObjectLayer` | Spawn a pooled ObjectLayer from a Tiled object layer |
+| `getObjects(objectLayerName)` | `TilemapObject[]` | Return raw Tiled object definitions |
+| `tilemap` | `Tilemap \| null` | Direct access to the underlying Phaser Tilemap |
+
+`BuildNavMeshOptions`: `{ walkable: number[], layer?: number | string }`.
+
+#### TilemapNavMesh
+
+`NavMesh` subclass constructed automatically by `TilemapFeature.buildNavMesh`, or manually:
+
+```ts
+import { TilemapNavMesh } from '@toolcase/phaser-plus'
+const navMesh = new TilemapNavMesh(map, [1, 2], 'Ground')
+```
+
+`isBlocked(x, y)` returns `true` when the tile is absent, empty (`index === -1`), or its index is not in the `walkable` set. `cost(x, y)` reads the tile's `cost` custom property (defaults to `1`).
 
 ---
 
@@ -802,6 +1147,12 @@ replay.on(REPLAY_END, session => log.info('replay finished', session))
 ```
 
 During playback read the active frame's inputs with `replay.readInput(key)`. `replay.state` is `'idle' | 'recording' | 'playing'`; `replay.tick` is the current frame index.
+
+`replay.seekTo(frameIndex)` — jump the playback cursor to the given frame during `'playing'` state. No-op otherwise. Used by `TimelinePanel.bindReplay` for the RP Scrub slider.
+
+See `replay-recorder-timeline` (`ReplayRecorderTimelineDemo.js`) for a full example wiring `bindReplay`.
+
+**Landing demo:** `flow-landing` (`FlowLandingDemo.js`) — one scene covering the complete Flow surface: `Flow.Event` (delayed trigger), `Flow.TimeEvent` (recurring interval), `Flow.Job` (cooperative countdown), `Flow.Timer` sugar, `Flow.Tween` (yoyo), `Flow.Timeline` (sequence + parallel), and a `StateMachine` FSM with three states and signal transitions. Use the right-side panel buttons to exercise each system interactively.
 
 ---
 
@@ -939,6 +1290,8 @@ letterbox.setBarDepth(1000)
 
 `setAspect(ratio)` is the toggle: passing a value matching the viewport hides the bars. `setBarColor(0xRRGGBB)` retints, `setBarDepth(depth)` re-layers.
 
+**Landing demo:** `cinema-landing` (`CinemaLandingDemo.js`) — one scene covering the full Cinema surface: `CameraDirector` (pan / zoom / fit-bounds / follow / spline shots), `ScreenShake` (impact / rumble / sine), `CameraFlash` (white hit, red damage), `ParallaxLayer` (three depth layers using generated graphics), `LetterboxFeature` (21:9 toggle), and `DialogCameraCue` (focus + vignette). All triggered from an HTML panel; no texture assets needed.
+
 ---
 
 ## Input — actions, buffer, gamepad, gestures, joystick
@@ -1046,9 +1399,49 @@ scene.events.on('update', () => {
 
 Buttons set virtual booleans (`input.setVirtual(id, …)`); pair with an `{ type: 'virtual', id }` binding on `InputFeature.bind('jump', [...])`.
 
+**Landing demo:** `input-landing` (`InputLandingDemo.js`) — one scene covering the full Input surface: `InputFeature` action map (WASD + Space, `ACTION_PRESS` / `ACTION_RELEASE` / hold timer), `InputBuffer` (ring buffer for leniency-window combo detection), `GestureRecognizer` (tap, double-tap, long-press, swipe, pinch), `GamepadFeature` (connect/disconnect, per-button events). Move the square with WASD/arrows; press Space three times within 600 ms for the triple-jump combo. Live readouts in the right-side HTML panel.
+
 ---
 
 ## Worked examples
+
+### Searchable effects gallery (all 73 shaders)
+
+```ts
+import { Scene, EFFECT_REGISTRY, EffectManager, HTMLFeature } from '@toolcase/phaser-plus'
+
+// Family ranges match the EFFECT_REGISTRY order
+const FAMILIES = [
+    { name: 'Color',      start: 0,  count: 16, color: 0x3b82f6 },
+    { name: 'Procedural', start: 16, count: 13, color: 0xf59e0b },
+    { name: 'Distortion', start: 29, count: 13, color: 0x10b981 },
+    { name: 'Dissolve',   start: 42, count: 7,  color: 0xef4444 },
+    { name: 'Mask',       start: 49, count: 8,  color: 0x8b5cf6 },
+    { name: 'Lighting',   start: 57, count: 16, color: 0xf472b6 },
+]
+
+// DOM text input via HTMLFeature (requires dom: { createContainer: true })
+class SearchFeature extends HTMLFeature {
+    onInput = null
+    onCreate() {
+        this.node.innerHTML = `<input type="text" placeholder="search…" data-q style="position:absolute;top:9px;left:480px;">`
+        this.node.querySelector('[data-q]').addEventListener('input', e => this.onInput?.(e.target.value))
+    }
+}
+
+// Plain sprite + manual EffectManager — no GameObject subclass needed
+const sprite = scene.add.sprite(cx, cy, 'objects', 'turtle_left')
+const mgr    = new EffectManager(sprite)
+
+// Apply effect, adjust a uniform, then clear
+const fx = mgr.add(EFFECT_REGISTRY[0])   // GrayScaleEffect
+fx.amount = 0.5                           // tweak uniform live
+mgr.clear()                              // remove all effects
+```
+
+See `examples/src/phaser-plus/scenes/EffectsGalleryDemo.js` for the full paginated grid implementation with family filter chips, mouse-wheel scrolling, and per-uniform `−/+` controls.
+
+---
 
 ### Side-scroller mini scene (Layer + Pool + Flow + Effects)
 
@@ -1211,18 +1604,18 @@ class NetFeature extends Feature {
 }
 ```
 
-### `@toolcase/game-components` HUD overlay
+### `@toolcase/web-components` HUD overlay
 
 `HTMLFeature` hosts the HUD; bind values per-frame.
 
 ```ts
 import { HTMLFeature } from '@toolcase/phaser-plus'
-import { register } from '@toolcase/game-components'
+import { register } from '@toolcase/web-components'
 register()
 
 class Hud extends HTMLFeature {
     onCreate() {
-        this.node.innerHTML = '<gc-health-bar id="hp" value="100" max="100"></gc-health-bar>'
+        this.node.innerHTML = '<tc-health-bar id="hp" value="100" max="100"></tc-health-bar>'
     }
     onUpdate() {
         ;(this.node.querySelector('#hp') as any).value = this.scene.player.hp
@@ -1253,10 +1646,934 @@ world.on('state.score', s => log.info('score', s))
 | Phaser GameObjects | Use Phaser's native API: `setTint(0xRRGGBB)`, `setAlpha`, `setBlendMode`, custom shaders via `Effect`. |
 | `Effect` shaders | The 73 built-in effects accept numeric `color` parameters in `0xRRGGBB` form — pass game-themed palette values (e.g. from `@toolcase/base` `Color`, where keys resolve as `Color.RED` / `Color.BLUE` etc., or `Color.toNumber('blue')` for the `0xRRGGBB` number) to keep visuals consistent across scenes. |
 | `Cinema` overlays | `CameraFlash.flash(color, ...)`, `LetterboxFeature.setBarColor`, `DialogCameraCue.setDimColor` — all accept `0xRRGGBB`. |
-| `HTMLFeature` content | Plain DOM inside `this.node`. Style with regular CSS / SCSS or by mounting `@toolcase/game-components` (`gc-*` web components) — they expose a full `--fg-*` / `--gc-*` variable layer documented in their SKILL.md. |
+| `HTMLFeature` content | Plain DOM inside `this.node`. Style with regular CSS / SCSS or by mounting `@toolcase/web-components` (`tc-*` web components) — they expose a full `--tc-*` / `--bs-*` variable layer documented in their SKILL.md. |
 | `Debugger` panels | Tweakpane folders; restyle with Tweakpane's own CSS variables on the panel container. |
 
 Color discipline tip: the `0xRRGGBB` literals used by `setTint` / shader effects / cinema overlays are easy to scatter. Consolidate them into a constants module (or the `Color` palette from `@toolcase/base` — `Color.toNumber('blue')` yields the `0xRRGGBB` number) and pass references — that way one change retones every scene.
+
+---
+
+---
+
+## Audio — bus mixer, music, SFX pool, spatial, ducking
+
+`AudioFeature` is a scene-lifetime `Feature` that owns a master bus plus four default named buses (`music`, `sfx`, `ui`, `ambience`), each with independent volume / mute / pan. It handles music playback with crossfade, pooled fire-and-forget SFX with polyphony limits, spatial pan+attenuation by world position, and per-bus ducking. It wires directly into `AudioPanel` via `bindDebugger`.
+
+### AudioFeature
+
+```ts
+import { AudioFeature, AUDIO_MUSIC_START, AUDIO_MUSIC_END, AUDIO_BUS_CHANGE } from '@toolcase/phaser-plus'
+
+const audio = scene.features.register('audio', AudioFeature)
+```
+
+Default buses created automatically: `'music'`, `'sfx'`, `'ui'`, `'ambience'`. Add custom buses with `addBus(name)`.
+
+#### Master
+
+```ts
+audio.setMasterVolume(0.8)     // 0–1
+audio.setMasterMute(true)
+audio.getMasterVolume()        // → number
+audio.isMasterMute()           // → boolean
+```
+
+#### Per-bus controls
+
+```ts
+audio.setVolume('music', 0.6)   // 0–1; multiplied with master
+audio.setMute('sfx', true)
+audio.setPan('ui', -0.3)        // –1..1
+
+const bus = audio.getBus('music')  // → Readonly<{name,volume,mute,pan}> | null
+```
+
+#### Music (one track per bus, with crossfade)
+
+```ts
+audio.play('music', 'theme', /* loop */ true)             // immediate start
+audio.crossfadeTo('music', 'boss_theme', 1200)            // fade over 1200ms
+audio.stopMusic('music', /* fade ms */ 600)               // optional fade-out
+```
+
+#### SFX (pooled fire-and-forget, polyphony limit)
+
+Register SFX keys once (pre-allocates `maxVoices` sound instances for voice stealing):
+
+```ts
+audio.registerSfx('jump', 4)          // up to 4 concurrent voices
+audio.registerSfx('explosion', 6)
+
+audio.playSfx('sfx', 'jump')          // next voice in the pool; steals oldest if all busy
+```
+
+#### Spatial audio (world-space pan + attenuation)
+
+```ts
+audio.setListener(camera.scrollX + width / 2, camera.scrollY + height / 2)
+
+// Plays sfx_ping at (worldX, worldY); pan and volume attenuate with distance.
+// range: distance at which volume reaches 0 (default 400).
+audio.playSpatial('sfx', 'sfx_ping', worldX, worldY, /* range */ 300)
+```
+
+`playSpatial` uses the pool registered with `registerSfx`. Requires `registerSfx` before calling.
+
+#### Ducking
+
+Temporarily lower a bus (e.g. duck music while a VO plays):
+
+```ts
+// duck music to 15% volume, hold 1200ms, then restore over 600ms
+audio.duck('music', 0.15, 1200, 600)
+```
+
+Multiple `duck` calls on the same bus restart the hold/restore cycle.
+
+#### Debugger panel binding
+
+Binds every bus to `AudioPanel` sliders so the in-game debugger reflects live bus state:
+
+```ts
+const dbg = scene.features.register('debugger', Debugger)
+dbg.addPanel('audio', AudioPanel, 'Audio')
+
+const audio = scene.features.register('audio', AudioFeature)
+audio.bindDebugger(dbg)   // call after AudioPanel is added
+```
+
+#### Event constants
+
+| Constant | Payload | Meaning |
+|---|---|---|
+| `AUDIO_MUSIC_START` | `(busName, key)` | A track started on a bus |
+| `AUDIO_MUSIC_END` | `(busName)` | A track stopped on a bus |
+| `AUDIO_BUS_CHANGE` | `(busName, bus)` | Bus sliders changed via panel |
+
+```ts
+import { AUDIO_MUSIC_START } from '@toolcase/phaser-plus'
+scene.features.on(AUDIO_MUSIC_START, (bus, key) => hud.showNowPlaying(key))
+```
+
+#### Full wiring example
+
+```ts
+import { Scene, Debugger, AudioPanel, AudioFeature, AUDIO_MUSIC_START } from '@toolcase/phaser-plus'
+
+class GameScene extends Scene {
+    onInit() {
+        this.pool.register('bullet', Bullet)
+    }
+
+    onLoad() {
+        this.load.audio('music_main', 'assets/music_main.ogg')
+        this.load.audio('music_battle', 'assets/music_battle.ogg')
+        this.load.audio('sfx_shot', 'assets/sfx_shot.wav')
+    }
+
+    onCreate() {
+        const dbg = this.features.register('debugger', Debugger)
+        dbg.addPanel('audio', AudioPanel, 'Audio')
+
+        const audio = this.features.register('audio', AudioFeature)
+        audio.registerSfx('sfx_shot', 6)
+        audio.setListener(this.cameras.main.midPoint.x, this.cameras.main.midPoint.y)
+        audio.bindDebugger(dbg)
+        audio.play('music', 'music_main', true)
+
+        this.features.on(AUDIO_MUSIC_START, (bus, key) => console.log('now playing', key))
+
+        this.input.on('pointerdown', p => {
+            audio.playSpatial('sfx', 'sfx_shot', p.worldX, p.worldY, 600)
+        })
+    }
+
+    onUpdate() {
+        const audio = this.features.get('audio')
+        const mid = this.cameras.main.midPoint
+        audio.setListener(mid.x, mid.y)
+    }
+}
+```
+
+#### Custom buses
+
+Add extra buses beyond the four defaults:
+
+```ts
+audio.addBus('voice')          // volume/mute/pan default 1/false/0
+audio.play('voice', 'npc_bark', false)
+audio.duck('music', 0.2, 3000, 500)   // duck music while voice plays
+```
+
+Remove when done:
+
+```ts
+audio.removeBus('voice')       // stops and destroys current track on the bus
+```
+
+---
+
+## Persistence — SaveService, PersistenceFeature, backends
+
+Durable save-slot system backed by a pluggable `SaveBackend`. Stores versioned JSON envelopes and applies a migration chain when loading older saves.
+
+### SaveService (ServiceRegistry singleton)
+
+```ts
+import { SaveService, LocalStorageBackend, MemoryBackend, IndexedDBBackend } from '@toolcase/phaser-plus'
+import type { SaveSchema, SaveConfig } from '@toolcase/phaser-plus'
+```
+
+Construct via `engine.services.bind`:
+
+```ts
+scene.services.bind(SaveService, () => new SaveService({
+    backend: new LocalStorageBackend('my-app'),   // default backend
+    namespace: 'game',                            // namespaces keys within the backend
+    schema: {
+        version: 2,
+        migrations: {
+            1: (data) => ({ ...data, playerName: 'Hero' })  // v1 → v2
+        }
+    }
+}))
+```
+
+`new SaveService()` (zero-arg) defaults to `LocalStorageBackend('phaser-plus')`, namespace `'save'`, schema version 1.
+
+| Method | Returns | Description |
+|---|---|---|
+| `save(slotId, data)` | `Promise<void>` | Serialize `data` as a versioned envelope |
+| `load<T>(slotId)` | `Promise<T \| null>` | Load + run migrations; `null` when slot missing |
+| `delete(slotId)` | `Promise<void>` | Remove a slot |
+| `list()` | `Promise<SaveEntry[]>` | All saved entries in this namespace |
+| `has(slotId)` | `Promise<boolean>` | Check if a slot exists |
+| `setSchema(schema)` | `this` | Replace schema at runtime |
+| `dispose()` | `void` | Calls `backend.dispose()`; invoked automatically by `ServiceRegistry` |
+
+`SaveEntry`: `{ id: string, version: number, savedAt: number }`.
+
+### SaveBackend interface
+
+```ts
+interface SaveBackend {
+    save(key: string, value: string): Promise<void>
+    load(key: string): Promise<string | null>
+    delete(key: string): Promise<void>
+    keys(): Promise<string[]>
+    dispose(): void
+}
+```
+
+Three built-in backends:
+
+| Class | Storage | Use for |
+|---|---|---|
+| `LocalStorageBackend(appPrefix?)` | `localStorage` | Default; up to ~5 MB |
+| `IndexedDBBackend(dbName?)` | IndexedDB | Large saves, binary blobs |
+| `MemoryBackend()` | `Map<string, string>` | Tests; volatile |
+
+### PersistenceFeature
+
+Scene-lifetime `Feature` that resolves `SaveService` from `engine.services` and forwards calls onto it with feature-bus events.
+
+```ts
+import { PersistenceFeature, SAVE_DONE, LOAD_DONE, SAVE_DELETED } from '@toolcase/phaser-plus'
+
+// onInit: bind SaveService first
+this.services.bind(SaveService, () => new SaveService({ namespace: 'game', schema }))
+
+// onCreate: register the feature
+const persistence = this.features.register('persistence', PersistenceFeature)
+
+await persistence.save('slot-1', gameState)
+const data = await persistence.load<GameState>('slot-1')
+await persistence.delete('slot-1')
+const entries = await persistence.list()
+
+// listen for async completions on the feature bus
+this.features.on(SAVE_DONE,    (slotId, data) => hud.refresh())
+this.features.on(LOAD_DONE,    (slotId, data) => applyState(data))
+this.features.on(SAVE_DELETED, (slotId)       => hud.refresh())
+```
+
+`persistence.service` exposes the raw `SaveService` for direct access.
+
+### Migration chain (v1 → v2 → v3)
+
+Each key in `migrations` is the source version to migrate FROM. The chain runs iteratively until `data._version === schema.version`:
+
+```ts
+const schema: SaveSchema = {
+    version: 3,
+    migrations: {
+        1: (d) => ({ ...d, playerName: 'Hero' }),  // v1 → v2
+        2: (d) => ({ ...d, highScore: 0 })          // v2 → v3
+    }
+}
+```
+
+A save made with version 1 passes through both migrators in order. Saves already at version 3 are returned unchanged.
+
+### SaveStatePanel — debugger panel for save slots
+
+`SaveStatePanel` is a `Panel` subclass that lists all slots from a bound `SaveService`, shows per-slot metadata, previews serialized data content, and lets you force-load or delete any slot from the in-game debugger.
+
+```ts
+import { Debugger, SaveStatePanel, SaveService, PersistenceFeature } from '@toolcase/phaser-plus'
+
+// onInit — bind SaveService and register the panel before PersistenceFeature resolves it
+this.services.bind(SaveService, () => new SaveService({ namespace: 'game', schema }))
+const dbg = this.features.register('debugger', Debugger).setExpanded()
+const savePanel = dbg.addPanel('save', SaveStatePanel, 'Save State')
+
+// onCreate — connect the panel to the service
+const persistence = this.features.register('persistence', PersistenceFeature)
+savePanel.bind(persistence.service)
+```
+
+Panel controls:
+- **Slots** (readonly) — comma-separated IDs of all saved slots in the namespace
+- **Slot ID** (editable) — type a slot ID to target; auto-filled with the first slot on `bind`
+- **Version / Saved** (readonly) — schema version and ISO timestamp of the targeted slot
+- **Data** (readonly) — up to 120 chars of `JSON.stringify` of the slot's data content
+- **Refresh** — re-query `service.list()` and update slot list + metadata
+- **Inspect** — load the targeted slot's data and populate the Data preview
+- **Force Load** — load the targeted slot and emit `load` on the panel
+- **Delete Slot** — delete the targeted slot and auto-refresh the list
+
+Listening to panel events:
+
+```ts
+// Force Load was clicked — apply the loaded state
+savePanel.on('load', (slotId, data) => {
+    scene.applyState(data)
+})
+
+// Delete was clicked — slot ID is passed for reference
+savePanel.on('delete', (slotId) => {
+    console.log('deleted', slotId)
+})
+```
+
+Keep the panel in sync when saves happen outside it:
+
+```ts
+import { SAVE_DONE, SAVE_DELETED } from '@toolcase/phaser-plus'
+
+scene.features.on(SAVE_DONE,    () => savePanel.refresh())
+scene.features.on(SAVE_DELETED, () => savePanel.refresh())
+```
+
+Demo: `save-state-panel` example scene (`SaveStatePanelDemo.js`).
+
+### Worked example — save/load with tc-save-slot-list
+
+```ts
+import {
+    Scene, HTMLFeature, SaveService, PersistenceFeature, LocalStorageBackend,
+    LOAD_DONE, SAVE_DONE, SAVE_DELETED
+} from '@toolcase/phaser-plus'
+
+const SCHEMA: SaveSchema = {
+    version: 2,
+    migrations: { 1: (d) => ({ ...d, playerName: 'Hero' }) }
+}
+
+class HUD extends HTMLFeature {
+    onCreate() {
+        this.node.innerHTML = '<tc-save-slot-list id="slots" mode="load"></tc-save-slot-list>'
+        const list = this.node.querySelector('#slots')
+        list.onLoad = id => this.scene.features.get('p')?.load(id)
+        list.onSave = id => this.scene.features.get('p')?.save(id, this.scene.state)
+        list.onDelete = id => this.scene.features.get('p')?.delete(id)
+    }
+}
+
+class GameScene extends Scene {
+    onInit() {
+        this.services.bind(SaveService, () => new SaveService({
+            backend: new LocalStorageBackend('my-game'),
+            namespace: 'game',
+            schema: SCHEMA
+        }))
+    }
+    onCreate() {
+        const p = this.features.register('p', PersistenceFeature)
+        this.features.register('hud', HUD)
+        this.features.on(LOAD_DONE, (id, data) => applyState(data))
+        this.features.on(SAVE_DONE, () => refreshSlots())
+    }
+}
+```
+
+---
+
+## Assets — AssetFeature (declarative manifest loader)
+
+`AssetFeature` is a scene-lifetime `Feature` that wraps Phaser's loader with a declarative `AssetManifest`, per-bundle lazy loading, aggregated progress events, exponential-backoff retry (via `@toolcase/base` `retry`), and a preload-then-swap path for hot asset reloads.
+
+### AssetFeature
+
+```ts
+import {
+    AssetFeature,
+    ASSET_PROGRESS,
+    ASSET_LOAD_COMPLETE,
+    ASSET_LOAD_ERROR
+} from '@toolcase/phaser-plus'
+import type { AssetManifest } from '@toolcase/phaser-plus'
+
+const assets = scene.features.register('assets', AssetFeature)
+```
+
+#### Manifest definition
+
+```ts
+const MANIFEST: AssetManifest = {
+    bundles: {
+        ui: {
+            images: [
+                { key: 'logo', url: 'assets/logo.png' }
+            ],
+            atlases: [
+                { key: 'icons', textureUrl: 'assets/icons.png', atlasUrl: 'assets/icons.json' }
+            ]
+        },
+        game: {
+            images: [
+                { key: 'tileset', url: 'assets/tileset.png' }
+            ],
+            audio: [
+                { key: 'bgm', url: ['assets/bgm.ogg', 'assets/bgm.mp3'] }
+            ],
+            fonts: [
+                { key: 'hud-font', textureUrl: 'assets/hud-font.png', fontDataUrl: 'assets/hud-font.xml' }
+            ]
+        }
+    }
+}
+
+assets.define(MANIFEST)
+```
+
+#### Loading bundles
+
+```ts
+// Load one or more bundles by name
+await assets.load('ui')
+await assets.load('ui', 'game')
+
+// Load all bundles in the manifest (no args)
+await assets.load()
+```
+
+`load()` skips keys that are already loaded — safe to call repeatedly. Throws if `define()` has not been called or if a previous `load()` is still in progress.
+
+#### Aggregated progress
+
+`ASSET_PROGRESS` fires with a number `0..1` representing how many files from the current `load()` call have completed (successful files only; denominator is the number of pending files at the start of the call).
+
+```ts
+scene.features.on(ASSET_PROGRESS, (progress: number) => {
+    loadingScreen.progress = progress
+})
+
+scene.features.on(ASSET_LOAD_COMPLETE, (bundleNames: string[]) => {
+    loadingScreen.remove()
+})
+
+scene.features.on(ASSET_LOAD_ERROR, (error: Error) => {
+    console.error('asset load failed', error.message)
+})
+```
+
+#### Retry
+
+`assets.retries` (default `3`) controls how many retry attempts are made when any file in a batch fails. Retry uses exponential backoff starting at 500 ms (`factor: 2`). On each retry only the files that have not yet successfully loaded are re-queued.
+
+```ts
+assets.retries = 2   // fail after 2 retries (3 total attempts)
+```
+
+#### `has(key)`
+
+Returns `true` if the asset was successfully loaded in any previous `load()` call.
+
+```ts
+if (assets.has('bgm')) {
+    audio.play('music', 'bgm', true)
+}
+```
+
+#### Hot-reload (preload-then-swap)
+
+`reload(key)` re-fetches a single asset from its original URL under a temporary key, then swaps it into the live texture / audio / bitmap-font cache without restarting the scene. Supported types: `image`, `atlas`, `font`, `audio`.
+
+```ts
+await assets.reload('icons')   // re-fetches icons.png+json, swaps atlas in-place
+```
+
+Any `Phaser.GameObjects.Image` already referencing the key picks up the new texture automatically on next render.
+
+#### API summary
+
+| Member | Description |
+|---|---|
+| `define(manifest)` | Set the active `AssetManifest`; returns `this` |
+| `load(...bundles)` | `Promise<void>` — lazy-load named bundles (all if no args) |
+| `has(key)` | `boolean` — whether the key was successfully loaded |
+| `reload(key)` | `Promise<void>` — preload-then-swap one asset in-place |
+| `retries` | `number` (default `3`) — retry attempts on batch failure |
+
+#### Event constants
+
+| Constant | Payload | Fired when |
+|---|---|---|
+| `ASSET_PROGRESS` | `(progress: number)` | File completed; `progress` is `0..1` over the current batch |
+| `ASSET_LOAD_COMPLETE` | `(bundleNames: string[])` | All bundles in the `load()` call finished |
+| `ASSET_LOAD_ERROR` | `(error: Error)` | Retries exhausted; `load()` also throws |
+
+#### Full wiring example
+
+```ts
+import {
+    Scene, HTMLFeature, AssetFeature,
+    ASSET_PROGRESS, ASSET_LOAD_COMPLETE, ASSET_LOAD_ERROR
+} from '@toolcase/phaser-plus'
+import type { AssetManifest } from '@toolcase/phaser-plus'
+
+const MANIFEST: AssetManifest = {
+    bundles: {
+        ui:   { atlases: [{ key: 'icons', textureUrl: 'icons.png', atlasUrl: 'icons.json' }] },
+        game: { images:  [{ key: 'tileset', url: 'tileset.png' }] }
+    }
+}
+
+class LoadingHUD extends HTMLFeature {
+    onCreate() {
+        this.node.innerHTML = `<tc-loading-screen id="ls" eyebrow="Loading" title-text="Preparing"></tc-loading-screen>`
+    }
+    setProgress(v: number) {
+        const el = this.node.querySelector('#ls') as any
+        if (el) el.progress = v
+    }
+    hide() { this.node.querySelector('#ls')?.remove() }
+}
+
+class GameScene extends Scene {
+    onCreate() {
+        const hud = this.features.register('hud', LoadingHUD)
+
+        const assets = this.features.register('assets', AssetFeature)
+        assets.retries = 3
+        assets.define(MANIFEST)
+
+        this.features.on(ASSET_PROGRESS,      (p) => hud.setProgress(p))
+        this.features.on(ASSET_LOAD_COMPLETE,  () => { hud.hide(); this.startGame() })
+        this.features.on(ASSET_LOAD_ERROR, (err) => console.error(err))
+
+        assets.load('ui', 'game')
+    }
+
+    startGame() {
+        const assets = this.features.get<AssetFeature>('assets')!
+        if (assets.has('icons')) this.add.image(100, 100, 'icons', 'play')
+    }
+}
+```
+
+---
+
+## Particles — ParticleFeature (VFX registry + pool)
+
+`ParticleFeature` is a scene-lifetime `Feature` that wraps Phaser's particle emitter factory as a named-preset registry with pooled emitters. Presets compose with `EffectManager` — a preset can carry an `effect` class that fires on the registered effect target for `effectDuration` ms.
+
+### ParticleFeature
+
+```ts
+import { ParticleFeature, PARTICLE_BURST, PARTICLE_STREAM_START, PARTICLE_STREAM_STOP } from '@toolcase/phaser-plus'
+import type { ParticlePreset, StreamHandle } from '@toolcase/phaser-plus'
+
+const particles = scene.features.register('vfx', ParticleFeature)
+```
+
+#### Defining presets
+
+```ts
+import { HeatEffect } from '@toolcase/phaser-plus'
+
+particles.define('sparkle', {
+    texture: 'vfx-dot',
+    lifespan: 600,
+    quantity: 25,
+    speed: { min: 40, max: 130 },
+    scale: { start: 0.45, end: 0 },
+    alpha: { start: 1, end: 0 },
+    tint: [0xffd700, 0xffffff, 0x00e5ff],
+    angle: { min: 0, max: 360 }
+})
+
+particles.define('explosion', {
+    texture: 'vfx-dot',
+    lifespan: 900,
+    quantity: 60,
+    speed: { min: 100, max: 300 },
+    scale: { start: 0.8, end: 0 },
+    alpha: { start: 1, end: 0 },
+    tint: [0xffa500, 0xff4400, 0xffdd00],
+    angle: { min: 0, max: 360 },
+    effect: HeatEffect,         // applied to the effect target on each burst
+    effectDuration: 1400        // ms; defaults to lifespan × 1.5
+})
+```
+
+Full `ParticlePreset` shape:
+
+| Field | Type | Default | Notes |
+|---|---|---|---|
+| `texture` | `string` | — | **Required.** Phaser texture key |
+| `frame` | `string \| number` | — | Optional atlas frame |
+| `lifespan` | `number` | `800` | Particle lifetime ms |
+| `quantity` | `number` | `20` | Particles fired per burst |
+| `speed` | `{min,max} \| number` | — | Pixel/sec |
+| `scale` | `{start,end} \| number` | — | Size over lifetime |
+| `alpha` | `{start,end} \| number` | — | Opacity over lifetime |
+| `tint` | `number \| number[]` | — | Color(s) applied to particles |
+| `angle` | `{min,max}` | — | Emission direction in degrees |
+| `gravityX` / `gravityY` | `number` | — | Gravity force |
+| `blendMode` | `number` | — | Phaser blend mode constant |
+| `effect` | `EffectClass` | — | Effect applied to effect target on burst/stream |
+| `effectDuration` | `number` | `lifespan × 1.5` | How long the effect stays active (ms) |
+
+#### Effect target
+
+Set which game object receives the `effect` from presets:
+
+```ts
+const bgImage = scene.add.image(cx, cy, 'my-bg')
+particles.setEffectTarget(bgImage)
+```
+
+When a burst or stream fires for a preset with `effect`, `EffectManager.add(EffectClass)` is called on this target and auto-removed after `effectDuration` ms.
+
+#### Burst (pooled one-shot)
+
+```ts
+particles.burst('sparkle', x, y)        // fires preset at world position
+particles.burst('explosion', cx, cy)    // explosion burst + HeatEffect on target
+```
+
+Emitters are recycled back to the pool `lifespan + 200 ms` after each burst. Multiple concurrent bursts from the same preset each get their own pooled emitter.
+
+#### Stream (following)
+
+```ts
+const handle: StreamHandle = particles.stream('sparkle', playerSprite)
+// emitter continuously follows playerSprite.x / playerSprite.y
+handle.stop()   // detach and return emitter to pool
+handle.active   // boolean
+```
+
+#### Events
+
+| Constant | Payload | Fired when |
+|---|---|---|
+| `PARTICLE_BURST` | `(name, x, y)` | `burst()` fires |
+| `PARTICLE_STREAM_START` | `(name)` | `stream()` starts |
+| `PARTICLE_STREAM_STOP` | `(name)` | stream `handle.stop()` called |
+
+```ts
+import { PARTICLE_BURST, PARTICLE_STREAM_START, PARTICLE_STREAM_STOP } from '@toolcase/phaser-plus'
+
+scene.features.on(PARTICLE_BURST, (name, x, y) => hud.showLabel(name, x, y))
+```
+
+#### Full wiring example
+
+```ts
+import { Scene, ParticleFeature, HeatEffect, PARTICLE_BURST } from '@toolcase/phaser-plus'
+
+class GameScene extends Scene {
+    onLoad() {
+        // generate or load a particle texture
+        this.load.image('spark', 'assets/spark.png')
+    }
+
+    onCreate() {
+        const { width, height } = this.game.config
+
+        const bgSprite = this.add.image(width / 2, height / 2, 'my-bg')
+
+        const particles = this.features.register('vfx', ParticleFeature)
+        particles.setEffectTarget(bgSprite)
+
+        particles.define('sparkle', {
+            texture: 'spark',
+            lifespan: 600,
+            quantity: 20,
+            speed: { min: 60, max: 180 },
+            scale: { start: 0.5, end: 0 },
+            alpha: { start: 1, end: 0 },
+            angle: { min: 0, max: 360 }
+        })
+
+        particles.define('shockwave', {
+            texture: 'spark',
+            lifespan: 800,
+            quantity: 50,
+            speed: { min: 150, max: 350 },
+            scale: { start: 0.7, end: 0 },
+            alpha: { start: 1, end: 0 },
+            tint: [0xffa500, 0xff4400],
+            angle: { min: 0, max: 360 },
+            effect: HeatEffect,
+            effectDuration: 1200
+        })
+
+        this.features.on(PARTICLE_BURST, (name) => console.log('burst', name))
+
+        this.input.on('pointerdown', (p) => {
+            particles.burst('sparkle', p.x, p.y)
+        })
+
+        // stream sparkles behind a moving ship
+        const stream = particles.stream('sparkle', ship)
+        // later:
+        stream.stop()
+    }
+}
+```
+
+---
+
+## Net — NetFeature, Transport, entity sync
+
+`NetFeature` is a scene-lifetime `Feature` that drives any `Transport` implementation and provides:
+- **Ping / pong RTT measurement**, reported into `NetPanel`.
+- **Entity state sync** with snapshot + delta encoding (`syncEntity`).
+- **Interpolation buffer** for smooth remote entity movement (`interpolateEntity`).
+- **Client-side prediction** (`predict` / `getPredicted`).
+- **`bindDebugger`** to wire RTT / loss / sent / recv into `NetPanel`.
+
+Wire format: `[1 byte type][JSON UTF-8 payload]`. Swap for binary by replacing the internal `_sendMessage` / `_onMessage` with a `@toolcase/serializer`-based codec — the rest of the class is transport-agnostic.
+
+### Transport interface
+
+```ts
+interface Transport {
+    readonly connected: boolean
+    connect(): void
+    disconnect(): void
+    send(data: Uint8Array): void
+    onMessage: ((data: Uint8Array) => void) | null
+    onConnect: (() => void) | null
+    onDisconnect: (() => void) | null
+}
+```
+
+Two built-in implementations:
+
+| Class | Use for |
+|---|---|
+| `LoopbackTransport` | In-process loopback for tests and demos |
+| `WebSocketTransport` | Native browser WebSocket |
+
+#### LoopbackTransport
+
+```ts
+import { LoopbackTransport } from '@toolcase/phaser-plus'
+
+// Create a matched pair with configurable latency + jitter
+const [clientT, serverT] = LoopbackTransport.pair(
+    /* latencyMs */ 50,
+    /* jitterMs  */ 10
+)
+
+// Optional seeded RNG for deterministic jitter in tests
+import { Structs } from '@toolcase/phaser-plus'
+const rng = new Structs.Random(42)
+const [a, b] = LoopbackTransport.pair(50, 10, () => rng.next())
+```
+
+`LoopbackTransport.pair(latencyMs, jitterMs, rng?)` creates two linked endpoints. Messages sent on one side are queued and delivered to the other via `setTimeout` after `latencyMs ± jitterMs` ms. Calling `connect()` on either side brings both up simultaneously.
+
+#### WebSocketTransport
+
+```ts
+import { WebSocketTransport } from '@toolcase/phaser-plus'
+
+const transport = new WebSocketTransport('wss://game.example.com/ws')
+```
+
+### NetFeature
+
+```ts
+import { NetFeature, NetPanel, NET_ENTITY_STATE } from '@toolcase/phaser-plus'
+
+// onInit — register Debugger and add NetPanel first
+const dbg = this.features.register('debugger', Debugger).setExpanded()
+dbg.addPanel('net', NetPanel, 'Network')
+
+const [clientT, serverT] = LoopbackTransport.pair(50, 10)
+
+const netClient = this.features.register('net-client', NetFeature)
+netClient.setTransport(clientT)
+netClient.bindDebugger(dbg)          // wire into NetPanel
+
+const netServer = this.features.register('net-server', NetFeature)
+netServer.setTransport(serverT)
+
+// onCreate — connect
+netClient.connect()                  // brings up both sides of the loopback
+
+// Listen for state updates on the server side
+this.features.on(NET_ENTITY_STATE, (id, state) => {
+    if (id === 'player') applyToSprite(state)
+})
+```
+
+#### Configuration
+
+| Property | Default | Description |
+|---|---|---|
+| `pingIntervalMs` | `500` | How often to send a ping (ms) |
+| `pingTimeoutMs` | `5000` | Unanswered ping age before counting as lost |
+| `interpolationDelay` | `100` | Render-delay window for `interpolateEntity` (ms) |
+| `maxStateBuffer` | `10` | Max buffered received states per remote entity |
+
+#### Entity sync
+
+```ts
+// Send local entity state every frame — first call sends full snapshot,
+// subsequent calls send only changed fields (delta encoding).
+netClient.syncEntity('player', { x: sprite.x, y: sprite.y, hp: hero.hp })
+
+// Read the latest received state on the other side
+const state = netServer.getEntityState<{ x: number; y: number; hp: number }>('player')
+// → { x, y, hp } or null
+
+// Interpolated state smoothed over the buffer (100 ms behind by default)
+const smooth = netClient.interpolateEntity<{ x: number; y: number }>('enemy', 80)
+if (smooth) { enemySprite.x = smooth.x; enemySprite.y = smooth.y }
+```
+
+`syncEntity` is idempotent when state hasn't changed — safe to call every frame.
+
+#### Client-side prediction
+
+```ts
+// Apply a predicted state immediately (responsive local display)
+netClient.predict('player', { x: sprite.x + dx, y: sprite.y + dy })
+
+// Retrieve the prediction for local rendering
+const pred = netClient.getPredicted<{ x: number; y: number }>('player')
+if (pred) { sprite.x = pred.x; sprite.y = pred.y }
+
+// Reconcile: when the authoritative server state arrives, snap if diverged
+this.features.on(NET_ENTITY_STATE, (id, serverState) => {
+    if (id !== 'player') return
+    const pred = netClient.getPredicted('player')
+    const dx = Math.abs(serverState.x - pred.x)
+    const dy = Math.abs(serverState.y - pred.y)
+    if (dx > 2 || dy > 2) {
+        sprite.x = serverState.x   // snap to authoritative state
+        sprite.y = serverState.y
+    }
+})
+```
+
+#### Telemetry
+
+```ts
+netClient.rtt          // → number (ms, last measured RTT)
+netClient.loss         // → number (0–100, % unanswered pings)
+netClient.isConnected  // → boolean
+```
+
+#### Event constants
+
+| Constant | Payload | Fired when |
+|---|---|---|
+| `NET_CONNECTED` | — | Transport connected |
+| `NET_DISCONNECTED` | — | Transport disconnected |
+| `NET_RTT_UPDATE` | `(rttMs: number)` | A pong arrived; RTT updated |
+| `NET_ENTITY_STATE` | `(id: string, state: Record<string, unknown>)` | SYNC received and merged |
+
+```ts
+import { NET_CONNECTED, NET_RTT_UPDATE, NET_ENTITY_STATE } from '@toolcase/phaser-plus'
+
+this.features.on(NET_CONNECTED,    ()           => hud.showConnected())
+this.features.on(NET_RTT_UPDATE,   (rtt)        => hud.updatePing(rtt))
+this.features.on(NET_ENTITY_STATE, (id, state)  => applyRemoteState(id, state))
+```
+
+#### Loopback demo
+
+```ts
+import { Scene, Debugger, NetPanel, NetFeature, LoopbackTransport, NET_ENTITY_STATE } from '@toolcase/phaser-plus'
+
+class NetLoopbackDemo extends Scene {
+    onInit() {
+        const dbg = this.features.register('debugger', Debugger).setExpanded()
+        dbg.addPanel('net', NetPanel, 'Network')
+
+        const [clientT, serverT] = LoopbackTransport.pair(50, 10)
+
+        this.netClient = this.features.register('net-client', NetFeature)
+        this.netClient.setTransport(clientT).bindDebugger(dbg)
+
+        this.netServer = this.features.register('net-server', NetFeature)
+        this.netServer.setTransport(serverT)
+    }
+
+    onCreate() {
+        this.local  = this.add.rectangle(400, 300, 44, 44, 0x4fc3f7)  // blue
+        this.remote = this.add.rectangle(460, 300, 44, 44, 0x81c784)  // green
+        this.cursors = this.input.keyboard.createCursorKeys()
+
+        this.netClient.connect()
+
+        this.features.on(NET_ENTITY_STATE, (id, state) => {
+            if (id === 'player') { this.remote.x = state.x; this.remote.y = state.y }
+        })
+    }
+
+    onUpdate() {
+        const speed = 3
+        if (this.cursors.left.isDown)  this.local.x -= speed
+        if (this.cursors.right.isDown) this.local.x += speed
+        if (this.cursors.up.isDown)    this.local.y -= speed
+        if (this.cursors.down.isDown)  this.local.y += speed
+
+        this.netClient.syncEntity('player', { x: this.local.x, y: this.local.y })
+    }
+}
+```
+
+Demo: `net-panel` example scene (`NetPanelDemo.js`).
+
+#### Binary wire format via `@toolcase/serializer`
+
+The default transport codec uses `JSON.stringify / JSON.parse`. For a binary framing,
+swap the encoding in a `NetFeature` subclass:
+
+```ts
+import Serializer from '@toolcase/serializer'
+
+const wire = new Serializer('game.v1')
+wire.define('SyncMsg', [
+    { key: 'id',  type: 'string',  rule: 'required' },
+    { key: 'seq', type: 'uint32',  rule: 'required' },
+    { key: 'x',   type: 'float',   rule: 'optional' },
+    { key: 'y',   type: 'float',   rule: 'optional' },
+])
+
+// Encode before send; decode in onMessage handler
+const payload = wire.encode('SyncMsg', { id, seq, x, y })
+transport.send(payload)
+```
 
 ---
 
@@ -1290,5 +2607,56 @@ Color discipline tip: the `0xRRGGBB` literals used by `setTint` / shader effects
 | Shader on object | `obj.effects.add(GrayScaleEffect, { ... })` |
 | Isometric world | Extend `Scene2D`, set `world.projection = Matrix2.createISO(...)` |
 | A* path | Extend `NavMesh` → register `PathFinder` → `findPath(...)` and listen `PATH_FOUND` |
+| Tilemap navmesh | `features.register('tilemap', TilemapFeature)` → `loadTiled(key, url)` → `create(key)` → `buildNavMesh({ walkable })` |
+| Tilemap from inline data | `tilemap.createFromData(data2d, tileWidth, tileHeight)` → `buildNavMesh({ walkable: [0] })` |
+| Tilemap collision layer | `tilemap.buildColliders('Walls', 'tileset')` (uses `collides: true` tile property) |
+| Spawn Tiled objects into pool | `tilemap.toObjectLayer('entities', 'Pickups', 'poolKey')` |
 | In-game UI | Register `Debugger` feature; add panels via `dbg.addPanel(key, PanelCls)` |
 | Game-wide singleton | `engine.services.bind(Cls, factory)` then `engine.services.resolve(Cls)` |
+| Audio bus mixer | `features.register('audio', AudioFeature)` → `play/crossfadeTo/playSfx/playSpatial/duck` |
+| Music crossfade | `audio.crossfadeTo('music', 'boss_theme', 1200)` |
+| SFX polyphony pool | `audio.registerSfx('shot', 6)` → `audio.playSfx('sfx', 'shot')` |
+| Spatial SFX | `audio.setListener(x, y)` → `audio.playSpatial('sfx', 'shot', worldX, worldY, range)` |
+| Duck a bus | `audio.duck('music', 0.15, holdMs, restoreMs)` |
+| Bind panel | `audio.bindDebugger(dbg)` (after `dbg.addPanel('audio', AudioPanel)`) |
+| Save slots | `services.bind(SaveService, () => new SaveService({...}))` → `features.register('p', PersistenceFeature)` |
+| Inspect save slots | `dbg.addPanel('save', SaveStatePanel)` → `panel.bind(persistence.service)` |
+| Save data | `persistence.save('slot-1', state)` |
+| Load with migration | `persistence.load('slot-1')` (auto-migrates via schema.migrations) |
+| Delete slot | `persistence.delete('slot-1')` |
+| List slots | `persistence.list()` → `SaveEntry[]` |
+| localStorage backend | `new LocalStorageBackend('app-prefix')` |
+| IndexedDB backend | `new IndexedDBBackend('db-name')` |
+| Test backend | `new MemoryBackend()` |
+| Declarative asset loading | `features.register('assets', AssetFeature)` → `define(manifest)` → `load('bundle')` |
+| Check asset loaded | `assets.has('key')` |
+| Retry failed assets | set `assets.retries = N` before `load()` |
+| Hot-reload texture | `await assets.reload('key')` |
+| VFX burst | `features.register('vfx', ParticleFeature)` → `define(name, preset)` → `burst(name, x, y)` |
+| VFX stream | `particles.stream(name, gameObject)` → `handle.stop()` |
+| Screen effect on burst | add `effect: HeatEffect` to preset, call `particles.setEffectTarget(sprite)` |
+| Netplay (loopback) | `LoopbackTransport.pair(50, 10)` → register two `NetFeature`, `setTransport`, `bindDebugger`, `connect` |
+| Sync entity state | `net.syncEntity('player', { x, y })` (delta on subsequent calls) |
+| Read remote state | `net.getEntityState<T>('player')` |
+| Interpolate remote entity | `net.interpolateEntity<T>('player', renderDelayMs)` |
+| Client-side prediction | `net.predict('player', state)` → render `net.getPredicted('player')` |
+| Live RTT / loss | `net.rtt`, `net.loss` (or read from `NetPanel` via `bindDebugger`) |
+| WebSocket transport | `new WebSocketTransport('wss://...')` → `net.setTransport(t)` |
+
+---
+
+## Demo site — category index
+
+The example site groups demos by subsystem. Categories added in task 689:
+
+| Category | Canonical demo(s) | Scene file(s) |
+|---|---|---|
+| `Flow` | `flow-landing` | `FlowLandingDemo.js` |
+| `Cinema` | `cinema-landing` | `CinemaLandingDemo.js` |
+| `Input` | `input-landing` | `InputLandingDemo.js` |
+| `Audio` | `audio-panel` | `AudioPanelDemo.js` |
+| `Net` | `net-panel` | `NetPanelDemo.js` |
+| `Persistence` | `save-service`, `save-state-panel` | `SaveServiceDemo.js`, `SaveStatePanelDemo.js` |
+| `Assets` | `asset-feature` | `AssetFeatureDemo.js` (cross-package: `tc-loading-screen` + `AssetFeature`) |
+
+The `asset-feature` demo is the canonical **cross-package** integration example: it binds `@toolcase/web-components`' `<tc-loading-screen>` to `AssetFeature`'s `ASSET_PROGRESS` events, demonstrating how to connect the two libraries at runtime.

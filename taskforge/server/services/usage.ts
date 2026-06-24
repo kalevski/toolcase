@@ -9,6 +9,7 @@ import 'server-only'
 import { config } from '@/server/config'
 import { runAgentOnce } from '@/server/infrastructure/agent'
 import { saveSnapshot, latest as latestSnapshot } from '@/server/data/repositories/usage-repo'
+import { resolveAccount } from '@/server/services/accounts'
 import { ensureImported } from '@/server/services/migrate-fs'
 import type { UsageEntry, UsageSnapshot } from '@/server/domain/types'
 
@@ -39,19 +40,35 @@ export function parseUsage(raw: string, fetchedAt: string): UsageSnapshot {
     return { fetchedAt, note, entries, raw: raw.trim() }
 }
 
-/** Read the most recent cached snapshot from SQLite, or null if none exists. */
-export async function readUsageCache(): Promise<UsageSnapshot | null> {
+/**
+ * Read the most recent cached snapshot from SQLite, or null if none exists.
+ * `account` selects which Claude identity's cache to read (null = the ambient
+ * host login).
+ */
+export async function readUsageCache(account: string | null = null): Promise<UsageSnapshot | null> {
     await ensureImported()
-    return latestSnapshot()
+    return latestSnapshot(account)
 }
 
 export class UsageError extends Error {}
 
 /**
  * Run `/usage` through the agent, parse it, persist the snapshot, and return it.
- * Throws `UsageError` on timeout or unparseable output.
+ * When `account` is given, `/usage` runs under that registry identity's env
+ * (CLAUDE_CONFIG_DIR / API key) and the snapshot is cached against that alias;
+ * null = the ambient host login. Throws `UsageError` on timeout, an
+ * unresolvable account, or unparseable output.
  */
-export async function refreshUsage(now: number): Promise<UsageSnapshot> {
+export async function refreshUsage(now: number, account: string | null = null): Promise<UsageSnapshot> {
+    let accountEnv: Record<string, string> | undefined
+    if (account) {
+        try {
+            accountEnv = resolveAccount(account).env
+        } catch (err) {
+            throw new UsageError(`account "${account}" could not be resolved: ${(err as Error)?.message ?? err}`)
+        }
+    }
+
     const res = await runAgentOnce({
         cwd: config.workspaceDir,
         model: config.defaultModel,
@@ -59,6 +76,7 @@ export async function refreshUsage(now: number): Promise<UsageSnapshot> {
         timeoutMs: config.generateTimeoutMs,
         // Local slash command → plain text, no streaming/edit flags.
         extraArgs: '--print --output-format=text',
+        accountEnv,
     })
 
     if (res.timedOut) {
@@ -71,6 +89,6 @@ export async function refreshUsage(now: number): Promise<UsageSnapshot> {
         throw new UsageError(detail ? `No usage data in /usage output: ${detail}` : 'No usage data in /usage output')
     }
 
-    saveSnapshot(snapshot)
+    saveSnapshot(snapshot, account)
     return snapshot
 }

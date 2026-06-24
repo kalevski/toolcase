@@ -1,0 +1,54 @@
+// tc-video-embed — responsive embedded video player for YouTube, Vimeo, Loom,
+// and native sources. A padding-top ratio box (driven by --bs-video-embed-aspect)
+// holds the media; the iframe/video fills it absolutely.
+// Sharp corners everywhere, a hairline frame, ink/muted backdrop while loading.
+// No status color, no shadow beyond the optional small token.
+
+tc-video-embed {
+    // Public theming knobs — override via CSS custom properties.
+    --bs-video-embed-aspect:     1.7777777778; // 16 / 9
+    --bs-video-embed-bg:         var(--tc-ink);
+    --bs-video-embed-loading-bg: var(--tc-surface-muted);
+    --bs-video-embed-border:     var(--tc-border);
+    --bs-video-embed-radius:     0;
+    --bs-video-embed-shadow:     none;
+}
+
+.tc-video-embed {
+    position: relative;
+    width: 100%;
+    background: var(--bs-video-embed-bg);
+    border: 1px solid var(--bs-video-embed-border);
+    border-radius: var(--bs-video-embed-radius);
+    box-shadow: var(--bs-video-embed-shadow);
+    overflow: hidden;
+}
+
+// Aspect-ratio frame — the padding-top spacer reserves the height; the media
+// is absolutely positioned to fill it.
+.tc-video-embed-frame {
+    position: relative;
+    width: 100%;
+    background: var(--bs-video-embed-loading-bg);
+
+    &::before {
+        content: '';
+        display: block;
+        padding-top: calc(100% / var(--bs-video-embed-aspect));
+    }
+}
+
+.tc-video-embed-media {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    border: 0;
+    border-radius: 0;
+    background: var(--bs-video-embed-bg);
+}
+
+.tc-video-embed-video {
+    object-fit: contain;
+}

@@ -56,6 +56,16 @@ describe('ObjectPool', () => {
         expect(() => pool.obtain()).toThrow(/already has release function/)
     })
 
+    it('double-release does not cause double-checkout', () => {
+        const pool = new ObjectPool(Particle)
+        const a = pool.obtain()
+        pool.release(a)
+        pool.release(a) // second release must be a no-op
+        const b = pool.obtain()
+        const c = pool.obtain()
+        expect(b).not.toBe(c)
+    })
+
     it('dispose empties the pool', () => {
         const pool = new ObjectPool(Particle)
         const p = pool.obtain()

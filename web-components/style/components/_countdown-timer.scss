@@ -1,0 +1,124 @@
+// tc-countdown-timer — countdown display with configurable unit cells.
+// Slate surfaces, 1px hairlines, sharp corners, JetBrains Mono values.
+// No decorative color — neutrals carry the design; color = information only.
+// All cosmetics flow through --bs-countdown-timer-* backed by --tc-* tokens.
+
+tc-countdown-timer {
+    --bs-countdown-timer-gap: 0.5rem;
+    --bs-countdown-timer-label-color: var(--tc-text-muted);
+    --bs-countdown-timer-label-font-size: 0.6875rem;
+    --bs-countdown-timer-label-letter-spacing: 0.08em;
+    --bs-countdown-timer-unit-bg: var(--tc-surface);
+    --bs-countdown-timer-unit-border: var(--tc-border);
+    --bs-countdown-timer-unit-padding-x: 0.875rem;
+    --bs-countdown-timer-unit-padding-y: 0.75rem;
+    --bs-countdown-timer-unit-min-width: 3.5rem;
+    --bs-countdown-timer-value-color: var(--tc-text);
+    --bs-countdown-timer-value-font-size: 2rem;
+    --bs-countdown-timer-value-font-weight: 600;
+    --bs-countdown-timer-unit-label-color: var(--tc-text-muted);
+    --bs-countdown-timer-unit-label-font-size: 0.625rem;
+    --bs-countdown-timer-unit-label-letter-spacing: 0.1em;
+    --bs-countdown-timer-sub-color: var(--tc-text-muted);
+    --bs-countdown-timer-sub-font-size: 0.75rem;
+    --bs-countdown-timer-compact-value-font-size: 1.25rem;
+    --bs-countdown-timer-sep-color: var(--tc-text-muted);
+}
+
+.tc-countdown {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.tc-countdown-label {
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-countdown-timer-label-font-size);
+    font-weight: 500;
+    line-height: 1.4;
+    text-transform: uppercase;
+    letter-spacing: var(--bs-countdown-timer-label-letter-spacing);
+    color: var(--bs-countdown-timer-label-color);
+}
+
+.tc-countdown-units {
+    display: flex;
+    align-items: stretch;
+    gap: var(--bs-countdown-timer-gap);
+}
+
+// Normal-mode unit cell: slate surface, 1px hairline, sharp corners.
+.tc-countdown-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: var(--bs-countdown-timer-unit-padding-y) var(--bs-countdown-timer-unit-padding-x);
+    background: var(--bs-countdown-timer-unit-bg);
+    border: 1px solid var(--bs-countdown-timer-unit-border);
+    border-radius: 0;
+    min-width: var(--bs-countdown-timer-unit-min-width);
+}
+
+// Mono headline figure — tabular numerals for stable width.
+.tc-countdown-value {
+    display: block;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-countdown-timer-value-font-size);
+    font-weight: var(--bs-countdown-timer-value-font-weight);
+    line-height: 1.1;
+    color: var(--bs-countdown-timer-value-color);
+    white-space: nowrap;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+// Uppercase micro-label beneath each digit cell.
+.tc-countdown-unit-label {
+    display: block;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-countdown-timer-unit-label-font-size);
+    font-weight: 500;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: var(--bs-countdown-timer-unit-label-letter-spacing);
+    color: var(--bs-countdown-timer-unit-label-color);
+    text-align: center;
+}
+
+.tc-countdown-sub {
+    font-size: var(--bs-countdown-timer-sub-font-size);
+    line-height: 1.4;
+    color: var(--bs-countdown-timer-sub-color);
+}
+
+// Compact mode — inline values separated by colons, no per-unit tiles.
+.tc-countdown--compact {
+    .tc-countdown-units {
+        align-items: baseline;
+        gap: 0;
+    }
+
+    .tc-countdown-value {
+        font-size: var(--bs-countdown-timer-compact-value-font-size);
+    }
+
+    .tc-countdown-sep {
+        display: inline-block;
+        padding: 0 0.2em;
+        font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+        font-size: var(--bs-countdown-timer-compact-value-font-size);
+        font-weight: var(--bs-countdown-timer-value-font-weight);
+        line-height: 1.1;
+        color: var(--bs-countdown-timer-sep-color);
+        font-variant-numeric: tabular-nums;
+    }
+}
+
+// Honour prefers-reduced-motion: no tick-flash transitions.
+@media (prefers-reduced-motion: reduce) {
+    .tc-countdown-value {
+        transition: none;
+    }
+}

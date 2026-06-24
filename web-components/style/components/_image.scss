@@ -1,0 +1,105 @@
+// tc-image — image wrapper with loading shimmer, error fallback, and aspect-ratio / object-fit support.
+// State classes: tc-image--loading (skeleton), tc-image--loaded (img fades in), tc-image--error (fallback).
+// Shimmer sweeps a slate gradient; prefers-reduced-motion freezes it to a static fill.
+// No border-radius, no status color, no cyan — slate neutrals only.
+
+@keyframes image-shimmer {
+    0%   { background-position: 200% center; }
+    100% { background-position: -200% center; }
+}
+
+tc-image {
+    // Public theming knobs — override via CSS custom properties.
+    --bs-image-bg:                  var(--tc-surface-muted);
+    --bs-image-shimmer-base:        var(--tc-surface-muted);
+    --bs-image-shimmer-shine:       var(--tc-surface-hover);
+    --bs-image-shimmer-shade:       var(--tc-border);
+    --bs-image-shimmer-duration:    1.5s;
+    --bs-image-fallback-color:      var(--tc-text-faint);
+    --bs-image-fallback-icon-size:  2rem;
+    --bs-image-transition-duration: var(--tc-transition-base, 200ms);
+    --bs-image-min-height:          80px;
+}
+
+.tc-image {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--bs-image-bg);
+    width: 100%;
+    min-height: var(--bs-image-min-height);
+    border-radius: 0;
+}
+
+// Loading shimmer — fills the wrapper absolutely.
+.tc-image-skeleton {
+    position: absolute;
+    inset: 0;
+    background-color: var(--bs-image-shimmer-base);
+    background-image: linear-gradient(
+        90deg,
+        var(--bs-image-shimmer-base)  0%,
+        var(--bs-image-shimmer-shine) 35%,
+        var(--bs-image-shimmer-shade) 55%,
+        var(--bs-image-shimmer-base)  100%
+    );
+    background-size: 400% 100%;
+    animation: image-shimmer var(--bs-image-shimmer-duration) linear infinite;
+}
+
+// Image — fills the wrapper; opacity transitions from 0 → 1 on load.
+.tc-image-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    border-radius: 0;
+    border: 0;
+    opacity: 0;
+    transition: opacity var(--bs-image-transition-duration);
+}
+
+// Fallback — centered content on a muted surface; hidden by default, shown on error.
+.tc-image-fallback {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bs-image-bg);
+    color: var(--bs-image-fallback-color);
+}
+
+// Default broken-image icon sizing.
+.tc-image-fallback-icon {
+    width: var(--bs-image-fallback-icon-size);
+    height: var(--bs-image-fallback-icon-size);
+}
+
+// --- State modifier classes ---
+
+.tc-image--loading {
+    .tc-image-skeleton { display: block; }
+    .tc-image-img      { opacity: 0; }
+    .tc-image-fallback { display: none; }
+}
+
+.tc-image--loaded {
+    .tc-image-skeleton { display: none; }
+    .tc-image-img      { opacity: 1; }
+    .tc-image-fallback { display: none; }
+}
+
+.tc-image--error {
+    .tc-image-skeleton { display: none; }
+    .tc-image-img      { display: none; }
+    .tc-image-fallback { display: flex; }
+}
+
+// Honour prefers-reduced-motion: freeze shimmer to static fill rather than hiding it.
+@media (prefers-reduced-motion: reduce) {
+    .tc-image-skeleton {
+        animation: none;
+        background-image: none;
+    }
+}

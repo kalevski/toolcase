@@ -1,0 +1,28 @@
+// Dungeon › tc-action-items — gilded context/action menu overlay.
+// Must-fix: --bs-action-items-item-color defaults to --tc-slate-700, a raw
+// palette ramp not remapped by the foundation; without this override menu text
+// reads slate-blue on the wood-grain surface.
+// Structural: gilded bevel stack and gold-gradient dividers the token swap can't carry.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Menu overlay — wood gradient fill + gilded bevel ───────────────────
+
+    .tc-action-items-menu {
+        --bs-action-items-bg: var(--fg-panel-bg);
+        --bs-action-items-item-color: var(--fg-parch);
+        --bs-action-items-item-active-color: var(--fg-ink);
+
+        // Gilded bevel stack replaces the flat slate card shadow.
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── Dividers — gold gradient hairline ──────────────────────────────────
+
+    .tc-action-items-menu .dropdown-divider {
+        // The base draws border-top; replace with a gradient background strip.
+        border-top: 0;
+        height: 1px;
+        background: var(--fg-rule);
+    }
+}

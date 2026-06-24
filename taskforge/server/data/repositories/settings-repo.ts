@@ -7,6 +7,7 @@ import type { ProjectSettings } from '@/server/domain/types'
 
 const KNOWN_KEYS: (keyof ProjectSettings)[] = [
     'defaultModel',
+    'defaultAccount',
     'commitAfter',
     'commitMessageMode',
     'commitModel',

@@ -19,6 +19,15 @@ type PrimitiveTypeName =
 
 interface BaseSchema {
     required?: boolean
+    enum?: unknown[]
+    minLength?: number
+    maxLength?: number
+    pattern?: string
+    min?: number
+    max?: number
+    minItems?: number
+    maxItems?: number
+    $defs?: Record<string, Schema>
 }
 
 interface PrimitiveSchema extends BaseSchema {
@@ -43,18 +52,39 @@ interface CustomSchema extends BaseSchema {
     items?: Schema
 }
 
+export interface RefSchema {
+    $ref: string
+    required?: boolean
+    $defs?: Record<string, Schema>
+}
+
 export type Schema =
     | PrimitiveSchema
     | ObjectSchema
     | ArraySchema
     | CustomSchema
+    | RefSchema
+
+export interface JSONSchemaOptions {
+    coerce?: boolean
+}
 
 interface RawSchema {
-    type: string
+    type?: string
+    $ref?: string
+    $defs?: Record<string, RawSchema>
     required?: boolean
     flexible?: boolean
     properties?: Record<string, RawSchema>
     items?: RawSchema
+    enum?: unknown[]
+    minLength?: number
+    maxLength?: number
+    pattern?: string
+    min?: number
+    max?: number
+    minItems?: number
+    maxItems?: number
 }
 
 export interface ValidationIssue {
@@ -74,10 +104,10 @@ export type ValidationFn = (
 ) => void
 
 const USERNAME_REGEX = /^[A-Za-z][A-Za-z0-9_-]{2,22}$/
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\-={}\[\]|:;"'<>,.?\/~`]).{8,24}$/
 const EMAIL_REGEX = /^(?:(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\]))$/
 const URL_REGEX = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/
-const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/
+const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
 const DATE_REGEX = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/
 const DATETIME_REGEX = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])T([01]\d|2[0-3]):[0-5]\d:[0-5]\d(\.\d+)?(Z|[+-]([01]\d|2[0-3]):[0-5]\d)$/
 const IPV4_REGEX = /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/
@@ -124,11 +154,13 @@ class JSONSchema<const S extends Schema = Schema> {
 
     private schema: S
 
+    private defs: Map<string, RawSchema> = new Map()
+
     private isSchemaValidated: boolean = false
 
     private latestError: ValidationError | null = null
 
-    constructor(schema: S, customValidators?: Record<string, ValidationFn>) {
+    constructor(schema: S, customValidators?: Record<string, ValidationFn>, _options?: JSONSchemaOptions) {
         this.register('string', this.validateString)
         this.register('boolean', this.validateBoolean)
         this.register('number', this.validateNumber)
@@ -161,6 +193,15 @@ class JSONSchema<const S extends Schema = Schema> {
         }
 
         this.schema = cloneSchema(schema)
+
+        // Extract $defs from the root schema (only root-level definitions are supported)
+        const rawRoot = this.schema as any
+        const rawDefs = rawRoot.$defs ?? rawRoot.definitions
+        if (rawDefs !== null && rawDefs !== undefined && typeof rawDefs === 'object') {
+            for (const key of Object.keys(rawDefs)) {
+                this.defs.set(key, rawDefs[key] as RawSchema)
+            }
+        }
     }
 
     register(type: string, validationFn: ValidationFn): void {
@@ -184,21 +225,25 @@ class JSONSchema<const S extends Schema = Schema> {
     validate(data: any): boolean {
         if (!this.isSchemaValidated) {
             this.validateSchema(this.schema as RawSchema)
+            for (const defSchema of this.defs.values()) {
+                this.validateSchema(defSchema)
+            }
             this.isSchemaValidated = true
         }
 
         const issues: ValidationIssue[] = []
+        const resolvedSchema = this.resolveRef(this.schema as RawSchema)
 
         if (typeof data === 'undefined') {
-            if (this.schema.required === true) {
+            if (resolvedSchema.required === true) {
                 issues.push({ path: '@', message: 'property=@ is required' })
             }
         } else {
-            const validator = this.validators.get(this.schema.type) ?? null
+            const validator = this.validators.get(resolvedSchema.type!) ?? null
             if (validator === null) {
-                issues.push({ path: '@', message: `validator for type=${this.schema.type} is not registered` })
+                issues.push({ path: '@', message: `validator for type=${resolvedSchema.type} is not registered` })
             } else {
-                this.runValidator(validator, null, this.schema as RawSchema, data, issues)
+                this.runValidator(validator, null, resolvedSchema, data, issues)
             }
         }
 
@@ -211,9 +256,107 @@ class JSONSchema<const S extends Schema = Schema> {
         return false
     }
 
+    /**
+     * Coerce `data` toward the schema's expected types then validate.
+     *
+     * Supported coercions:
+     * - string → number / integer (when the string is a valid number)
+     * - string "true"/"false"/"1"/"0" → boolean
+     * - number or boolean → string
+     * - nested object properties and array items are coerced recursively
+     *
+     * Returns the (possibly coerced) value. On failure `getLatestError()` is
+     * populated with the validation issues.
+     */
+    coerce(data: unknown): unknown {
+        const coerced = this.applyCoercion(this.schema as RawSchema, data)
+        this.validate(coerced)
+        return coerced
+    }
+
     getLatestError(): ValidationError | null {
         return this.latestError
     }
+
+    // ── $ref helpers ──────────────────────────────────────────────────────────
+
+    private parseRefName(ref: string): string {
+        const m = ref.match(/^#\/(?:\$defs|definitions)\/(.+)$/)
+        return m ? m[1] : ref
+    }
+
+    private resolveRef(schema: RawSchema, depth = 0): RawSchema {
+        if (!schema.$ref) return schema
+        if (depth > 16) throw new Error(`$ref cycle detected (depth limit): "${schema.$ref}"`)
+        const name = this.parseRefName(schema.$ref)
+        const target = this.defs.get(name)
+        if (!target) throw new Error(`$ref "${schema.$ref}" not found in $defs`)
+        return this.resolveRef(target, depth + 1)
+    }
+
+    // ── coercion ─────────────────────────────────────────────────────────────
+
+    private applyCoercion(schema: RawSchema, data: unknown): unknown {
+        let resolved: RawSchema
+        try {
+            resolved = this.resolveRef(schema)
+        } catch {
+            return data
+        }
+
+        switch (resolved.type) {
+            case 'number': {
+                if (typeof data === 'string') {
+                    const n = Number(data)
+                    if (!Number.isNaN(n) && Number.isFinite(n)) return n
+                }
+                return data
+            }
+            case 'integer': {
+                if (typeof data === 'string') {
+                    const n = Number(data)
+                    if (!Number.isNaN(n) && Number.isFinite(n)) return Math.trunc(n)
+                }
+                return data
+            }
+            case 'boolean': {
+                if (data === 'true' || data === '1') return true
+                if (data === 'false' || data === '0') return false
+                return data
+            }
+            case 'string': {
+                if (typeof data === 'number' || typeof data === 'boolean') return String(data)
+                return data
+            }
+            case 'object': {
+                if (data !== null && typeof data === 'object' && !Array.isArray(data)) {
+                    const record = data as Record<string, unknown>
+                    const result: Record<string, unknown> = {}
+                    for (const key of Object.keys(record)) {
+                        result[key] = record[key]
+                    }
+                    const props = resolved.properties ?? {}
+                    for (const key of Object.keys(props)) {
+                        if (key in record) {
+                            result[key] = this.applyCoercion(props[key], record[key])
+                        }
+                    }
+                    return result
+                }
+                return data
+            }
+            case 'array': {
+                if (Array.isArray(data) && resolved.items !== undefined) {
+                    return data.map((item: unknown) => this.applyCoercion(resolved.items!, item))
+                }
+                return data
+            }
+            default:
+                return data
+        }
+    }
+
+    // ── internal validation ───────────────────────────────────────────────────
 
     private runValidator(
         validator: ValidationFn,
@@ -234,6 +377,18 @@ class JSONSchema<const S extends Schema = Schema> {
 
         if (schema === null || typeof schema !== 'object') {
             throw new Error(`schema must be an object, "${schema}" provided`)
+        }
+
+        // $ref schema: just verify the target exists; the target will be validated separately
+        if (schema.$ref !== undefined) {
+            if (typeof schema.$ref !== 'string') {
+                throw new Error(`schema $ref must be a string`)
+            }
+            const name = this.parseRefName(schema.$ref)
+            if (!this.defs.has(name)) {
+                throw new Error(`$ref "${schema.$ref}" not found in $defs`)
+            }
+            return
         }
 
         if (typeof schema.type !== 'string') {
@@ -267,39 +422,80 @@ class JSONSchema<const S extends Schema = Schema> {
         }
     }
 
-    private validateString: ValidationFn = (propertyName, _schema, data, issues) => {
+    private validateString: ValidationFn = (propertyName, schema, data, issues) => {
+        const here = pathOf(propertyName)
         if (typeof data !== 'string') {
             issues.push({
-                path: pathOf(propertyName),
-                message: `property=${pathOf(propertyName)} must be a string, value=${data} type=${typeof data} provided`
+                path: here,
+                message: `property=${here} must be a string, value=${data} type=${typeof data} provided`
             })
+            return
+        }
+        if (schema.minLength !== undefined && data.length < schema.minLength) {
+            issues.push({ path: here, message: `property=${here} must be at least ${schema.minLength} characters long` })
+        }
+        if (schema.maxLength !== undefined && data.length > schema.maxLength) {
+            issues.push({ path: here, message: `property=${here} must be at most ${schema.maxLength} characters long` })
+        }
+        if (schema.pattern !== undefined && !new RegExp(schema.pattern).test(data)) {
+            issues.push({ path: here, message: `property=${here} must match pattern ${schema.pattern}` })
+        }
+        if (schema.enum !== undefined && !schema.enum.includes(data)) {
+            issues.push({ path: here, message: `property=${here} must be one of [${schema.enum.join(', ')}]` })
         }
     }
 
-    private validateBoolean: ValidationFn = (propertyName, _schema, data, issues) => {
+    private validateBoolean: ValidationFn = (propertyName, schema, data, issues) => {
+        const here = pathOf(propertyName)
         if (typeof data !== 'boolean') {
             issues.push({
-                path: pathOf(propertyName),
-                message: `property=${pathOf(propertyName)} can be "true" or "false", value=${data} type=${typeof data} provided`
+                path: here,
+                message: `property=${here} can be "true" or "false", value=${data} type=${typeof data} provided`
             })
+            return
+        }
+        if (schema.enum !== undefined && !schema.enum.includes(data)) {
+            issues.push({ path: here, message: `property=${here} must be one of [${schema.enum.join(', ')}]` })
         }
     }
 
-    private validateNumber: ValidationFn = (propertyName, _schema, data, issues) => {
+    private validateNumber: ValidationFn = (propertyName, schema, data, issues) => {
+        const here = pathOf(propertyName)
         if (typeof data !== 'number') {
             issues.push({
-                path: pathOf(propertyName),
-                message: `property=${pathOf(propertyName)} must be a number, value=${data} type=${typeof data} provided`
+                path: here,
+                message: `property=${here} must be a number, value=${data} type=${typeof data} provided`
             })
+            return
+        }
+        if (schema.min !== undefined && data < schema.min) {
+            issues.push({ path: here, message: `property=${here} must be >= ${schema.min}` })
+        }
+        if (schema.max !== undefined && data > schema.max) {
+            issues.push({ path: here, message: `property=${here} must be <= ${schema.max}` })
+        }
+        if (schema.enum !== undefined && !schema.enum.includes(data)) {
+            issues.push({ path: here, message: `property=${here} must be one of [${schema.enum.join(', ')}]` })
         }
     }
 
-    private validateInteger: ValidationFn = (propertyName, _schema, data, issues) => {
+    private validateInteger: ValidationFn = (propertyName, schema, data, issues) => {
+        const here = pathOf(propertyName)
         if (typeof data !== 'number' || !Number.isInteger(data)) {
             issues.push({
-                path: pathOf(propertyName),
-                message: `property=${pathOf(propertyName)} must be an integer, value=${data} type=${typeof data} provided`
+                path: here,
+                message: `property=${here} must be an integer, value=${data} type=${typeof data} provided`
             })
+            return
+        }
+        if (schema.min !== undefined && data < schema.min) {
+            issues.push({ path: here, message: `property=${here} must be >= ${schema.min}` })
+        }
+        if (schema.max !== undefined && data > schema.max) {
+            issues.push({ path: here, message: `property=${here} must be <= ${schema.max}` })
+        }
+        if (schema.enum !== undefined && !schema.enum.includes(data)) {
+            issues.push({ path: here, message: `property=${here} must be one of [${schema.enum.join(', ')}]` })
         }
     }
 
@@ -327,19 +523,33 @@ class JSONSchema<const S extends Schema = Schema> {
 
             const childPath = here === '@' ? propName : `${here}.${propName}`
             const rawProp = schemaProperties[propName]
-            const propSchema = (rawProp !== null && typeof rawProp === 'object') ? rawProp : null
+            const propSchemaObj = (rawProp !== null && rawProp !== undefined && typeof rawProp === 'object')
+                ? rawProp as RawSchema
+                : null
 
-            if (propSchema === null && isStrict) {
+            if (propSchemaObj === null && isStrict) {
                 issues.push({
                     path: childPath,
                     message: `property=${childPath} is not expected`
                 })
                 continue
-            } else if (propSchema === null) {
+            } else if (propSchemaObj === null) {
                 continue
             }
 
-            const required = propSchema.required === true
+            // Resolve $ref if present
+            let propSchema = propSchemaObj
+            if (propSchemaObj.$ref !== undefined) {
+                try {
+                    propSchema = this.resolveRef(propSchemaObj)
+                } catch (e) {
+                    issues.push({ path: childPath, message: (e as Error).message })
+                    continue
+                }
+            }
+
+            // required is on the declaring schema, not the resolved target
+            const required = propSchemaObj.required === true
             const isMissing = typeof dataRecord[propName] === 'undefined'
 
             if (isMissing) {
@@ -352,7 +562,7 @@ class JSONSchema<const S extends Schema = Schema> {
                 continue
             }
 
-            const validator = this.validators.get(propSchema.type) ?? null
+            const validator = this.validators.get(propSchema.type!) ?? null
             if (validator === null) {
                 issues.push({
                     path: childPath,
@@ -376,12 +586,29 @@ class JSONSchema<const S extends Schema = Schema> {
             return
         }
 
+        if (schema.minItems !== undefined && data.length < schema.minItems) {
+            issues.push({ path: here, message: `property=${here} must have at least ${schema.minItems} items` })
+        }
+        if (schema.maxItems !== undefined && data.length > schema.maxItems) {
+            issues.push({ path: here, message: `property=${here} must have at most ${schema.maxItems} items` })
+        }
+
         if (schema.items === null || typeof schema.items !== 'object') {
             return
         }
 
-        const itemSchema = schema.items
-        const validator = this.validators.get(itemSchema.type) ?? null
+        // Resolve $ref on the items schema
+        let itemSchema = schema.items
+        if (itemSchema.$ref !== undefined) {
+            try {
+                itemSchema = this.resolveRef(itemSchema)
+            } catch (e) {
+                issues.push({ path: here, message: (e as Error).message })
+                return
+            }
+        }
+
+        const validator = this.validators.get(itemSchema.type!) ?? null
         if (validator === null) {
             issues.push({
                 path: here,

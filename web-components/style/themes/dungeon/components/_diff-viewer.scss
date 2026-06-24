@@ -1,0 +1,31 @@
+// Dungeon › tc-diff-viewer — ink/leather code surface with dark-compatible diff tints.
+// Token swap covers the main surface colors; defect fixes replace three hardcoded
+// light-theme literals (two pastel gutter tints + the near-invisible black row separator)
+// that clash badly on a dark dungeon palette. No panel ornament — pure code chrome.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-diff-viewer {
+        // ── Surface token swaps ────────────────────────────────────────────────
+        --bs-diff-viewer-bg: var(--fg-ink);
+        --bs-diff-viewer-header-bg: var(--fg-leather-2);
+        --bs-diff-viewer-gutter-bg: var(--fg-leather);
+
+        // ── Defect fix: pastel gutter tints → dark-compatible tints ───────────
+        // Base hardcodes #bbf7d0 / #fecaca — light-theme pastels that invert badly
+        // on a dark surface. Replace with alpha-transparent stamina / blood tints.
+        --bs-diff-viewer-added-gutter-bg: rgba(111, 159, 58, 0.28);
+        --bs-diff-viewer-removed-gutter-bg: rgba(168, 48, 42, 0.30);
+
+        // ── Defect fix: row separator → faint gold hairline ───────────────────
+        // Base hardcodes rgba(0,0,0,0.04) — invisible on dark rows.
+        --bs-diff-viewer-row-separator: 1px solid rgba(201, 169, 97, 0.12);
+    }
+
+    // ── Filename reads as a gilded mono label ──────────────────────────────────
+    // Base hardcodes font-weight: 500 on the class element; override to 600 + gold.
+    .tc-diff-viewer__filename {
+        font-weight: 600;
+        color: var(--fg-gold-bright);
+    }
+}

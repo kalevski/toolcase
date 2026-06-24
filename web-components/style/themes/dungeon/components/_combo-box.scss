@@ -1,0 +1,99 @@
+// Dungeon › tc-combo-box — gilded select. The trigger reads as a beveled metal
+// button with display caps; token swap recolours trigger / popover / option
+// vars, and structural rules add the metal bevel + brightness hover, the gold
+// gradient-marker selected option, and the mono search input + caret.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-combo-box {
+        --bs-combo-box-trigger-bg: linear-gradient(180deg, #3a2a1a, #1f1610);
+        --bs-combo-box-trigger-color: var(--fg-gold-bright);
+        --bs-combo-box-trigger-border: 1px solid var(--fg-gold-deep);
+        --bs-combo-box-trigger-placeholder-color: var(--fg-parch-3);
+        --bs-combo-box-caret-color: var(--fg-gold);
+
+        --bs-combo-box-popover-bg: linear-gradient(180deg, #1a1308 0%, #0e0905 100%);
+        --bs-combo-box-popover-border: 1px solid var(--fg-gold-deep);
+
+        --bs-combo-box-search-bg: var(--fg-ink-2);
+        --bs-combo-box-search-color: var(--fg-parch);
+        --bs-combo-box-search-border: 1px solid var(--fg-gold-deep);
+
+        --bs-combo-box-option-color: var(--fg-parch);
+        --bs-combo-box-option-hover-bg: rgba(201, 169, 97, 0.1);
+        --bs-combo-box-option-selected-bg: linear-gradient(
+            90deg,
+            rgba(201, 169, 97, 0.18),
+            transparent
+        );
+        --bs-combo-box-option-selected-color: var(--fg-gold-bright);
+        --bs-combo-box-empty-color: var(--fg-parch-3);
+    }
+
+    // Trigger reads as a beveled metal button with gilded display caps.
+    .tc-combo-box__trigger {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        // --bs-combo-box-trigger-bg rides background-color, which drops the
+        // gradient and leaves the button transparent. Repaint the intended metal
+        // gradient on background-image (opaque — a trigger is a button, not glass).
+        background-image: linear-gradient(180deg, #3a2a1a, #1f1610);
+        box-shadow:
+            inset 0 1px 0 rgba(232, 200, 120, 0.25),
+            inset 0 -8px 12px rgba(0, 0, 0, 0.4),
+            0 2px 0 rgba(0, 0, 0, 0.6);
+
+        &:hover:not(:disabled) {
+            filter: brightness(1.15);
+        }
+
+        &:disabled {
+            filter: grayscale(0.4) brightness(0.8);
+        }
+    }
+
+    // Placeholder text is italic to distinguish it from a real selection at a glance.
+    .tc-combo-box__trigger--placeholder {
+        font-style: italic;
+    }
+
+    .tc-combo-box__caret {
+        font-family: var(--fg-mono);
+    }
+
+    // Caret brightens to gold-bright on trigger hover to echo the brightness(1.15) effect.
+    .tc-combo-box__trigger:hover:not(:disabled) .tc-combo-box__caret {
+        color: var(--fg-gold-bright);
+    }
+
+    // Gradient popover gains the stacked inset gold edge.
+    // --bs-combo-box-popover-bg rides background-color, which drops the gradient
+    // and leaves the popover transparent. Paint a translucent frosted fill via
+    // background-image + blur so the option list reads as gilded smoked glass.
+    .tc-combo-box__popover {
+        background-image: var(--fg-overlay-bg);
+        backdrop-filter: var(--fg-overlay-blur);
+        -webkit-backdrop-filter: var(--fg-overlay-blur);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 1px 0 rgba(232, 200, 120, 0.12),
+            0 8px 24px rgba(0, 0, 0, 0.6);
+    }
+
+    // Mono query text with a recessed inset.
+    .tc-combo-box__search-input {
+        font-family: var(--fg-mono);
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+    }
+
+    // Selected option: gold marker stripe over the gradient highlight.
+    .tc-combo-box__option--selected {
+        box-shadow: inset 3px 0 0 var(--fg-gold);
+    }
+
+    // Hover brightens the option text to gold.
+    .tc-combo-box__option:hover:not(.tc-combo-box__option--selected) {
+        color: var(--fg-gold-bright);
+    }
+}

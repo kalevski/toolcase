@@ -1,6 +1,12 @@
 import { ValidationError } from '../errors'
 import { Sort } from './sort'
 
+const MAX_MSG_LEN = 100
+
+function safeStr(raw: unknown): string {
+	return String(raw).replace(/[\x00-\x1f\x7f]/g, '').slice(0, MAX_MSG_LEN)
+}
+
 export interface ParseSortOptions<T extends object> {
 	allowedFields?: ReadonlyArray<keyof T & string>
 }
@@ -9,12 +15,15 @@ export function parseSort<T extends object = Record<string, unknown>>(
 	query: Record<string, unknown>,
 	options: ParseSortOptions<T> = {},
 ): Sort<T>[] | undefined {
+	if (options.allowedFields === undefined) {
+		throw new Error('parseSort: pass allowedFields; [] to allow none')
+	}
 	const raw = query.sort
 	if (raw === undefined || raw === null || raw === '') return undefined
 	if (typeof raw !== 'string') {
-		throw new ValidationError(`Invalid sort: ${String(raw)}`)
+		throw new ValidationError(`Invalid sort: ${safeStr(raw)}`)
 	}
-	const allowed = options.allowedFields ? new Set<string>(options.allowedFields) : null
+	const allowed = new Set<string>(options.allowedFields)
 	const out: Sort<T>[] = []
 	for (const tokenRaw of raw.split(',')) {
 		const token = tokenRaw.trim()
@@ -28,10 +37,10 @@ export function parseSort<T extends object = Record<string, unknown>>(
 			column = token.slice(1).trim()
 		}
 		if (column === '') {
-			throw new ValidationError(`Invalid sort token: ${tokenRaw}`)
+			throw new ValidationError(`Invalid sort token: ${safeStr(tokenRaw)}`)
 		}
-		if (allowed && !allowed.has(column)) {
-			throw new ValidationError(`Unknown sort field: ${column}`)
+		if (!allowed.has(column)) {
+			throw new ValidationError(`Unknown sort field: ${safeStr(column)}`)
 		}
 		out.push({ field: column as keyof T & string, direction })
 	}

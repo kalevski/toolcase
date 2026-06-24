@@ -1,0 +1,49 @@
+// tc-lore-text — flavor / lore body-copy block.
+// Port of gc-lore-text; drops the game-components fantasy chrome in favour of
+// the web-components design system: sharp corners, 1px hairline borders, slate
+// neutral ramp, italic Inter prose.
+// All cosmetics flow through --bs-lore-text-* custom properties.
+
+@use '../foundation/tokens' as *;
+
+tc-lore-text {
+    --bs-lore-text-bg:               transparent;
+    --bs-lore-text-border-color:     var(--tc-border);
+    --bs-lore-text-border-width:     2px;
+    --bs-lore-text-padding-y:        0.75rem;
+    --bs-lore-text-padding-x:        1rem;
+
+    --bs-lore-text-color:            var(--tc-text-muted);
+    --bs-lore-text-font-size:        0.925rem;
+    --bs-lore-text-font-weight:      400;
+    --bs-lore-text-font-style:       italic;
+    --bs-lore-text-line-height:      1.7;
+}
+
+.tc-lore-text {
+    box-sizing:   border-box;
+    padding:      var(--bs-lore-text-padding-y) var(--bs-lore-text-padding-x);
+    padding-left: calc(var(--bs-lore-text-padding-x) + var(--bs-lore-text-border-width));
+    background:   var(--bs-lore-text-bg);
+    border-left:  var(--bs-lore-text-border-width) solid var(--bs-lore-text-border-color);
+    border-radius: 0;
+}
+
+.tc-lore-text__content {
+    margin: 0;
+    padding: 0;
+    color:       var(--bs-lore-text-color);
+    font-size:   var(--bs-lore-text-font-size);
+    font-weight: var(--bs-lore-text-font-weight);
+    font-style:  var(--bs-lore-text-font-style);
+    line-height: var(--bs-lore-text-line-height);
+
+    // Let multi-paragraph slot content retain spacing.
+    p {
+        margin: 0 0 0.5em;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+}

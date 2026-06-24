@@ -18,8 +18,14 @@ const Status = {
     /** The request has been received but not yet acted upon. It is noncommittal, since there is no way in HTTP to later send an asynchronous response indicating the outcome of the request. It is intended for cases where another process or server handles the request, or for batch processing. */
     ACCEPTED: 202,
     
-    /** This response code means the returned metadata is not exactly the same as is available from the origin server, but is collected from a local or a third-party copy. This is mostly used for mirrors or backups of another resource. Except for that specific case, the 200 OK response is preferred to this status. */
+    /**
+     * This response code means the returned metadata is not exactly the same as is available from the origin server, but is collected from a local or a third-party copy. This is mostly used for mirrors or backups of another resource. Except for that specific case, the 200 OK response is preferred to this status.
+     * @deprecated Use `NON_AUTHORITATIVE_INFORMATION` instead.
+     */
     NONAUTHORITATIVE_INFORMATION: 203,
+
+    /** This response code means the returned metadata is not exactly the same as is available from the origin server, but is collected from a local or a third-party copy. This is mostly used for mirrors or backups of another resource. Except for that specific case, the 200 OK response is preferred to this status. */
+    NON_AUTHORITATIVE_INFORMATION: 203,
     
     /** There is no content to send for this request, but the headers may be useful. The user agent may update its cached headers for this resource with the new ones. */
     NO_CONTENT: 204,
@@ -27,8 +33,14 @@ const Status = {
     /** Tells the user agent to reset the document which sent this request. */
     RESET_CONTENT: 205,
     
-    /** This response code is used when the Range header is sent from the client to request only part of a resource. */
+    /**
+     * This response code is used when the Range header is sent from the client to request only part of a resource.
+     * @deprecated Use `PARTIAL_CONTENT` instead.
+     */
     PARCIAL_CONTENT: 206,
+
+    /** This response code is used when the Range header is sent from the client to request only part of a resource. */
+    PARTIAL_CONTENT: 206,
 
     /** The request has more than one possible response. The user agent or user should choose one of them. (There is no standardized way of choosing one of the responses, but HTML links to the possibilities are recommended so the user can pick.) */
     MULTIPLE_CHOICES: 300,

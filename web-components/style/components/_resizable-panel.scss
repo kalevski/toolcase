@@ -1,0 +1,170 @@
+// tc-resizable-panel — two-pane layout with a draggable divider.
+// Sharp corners (border-radius: 0) throughout; no shadows (not an overlay).
+// Neutrals carry it: panes on --tc-surface, a 1px --tc-border hairline divider
+// with a wider invisible grab area. All cosmetic values flow through
+// --bs-resizable-panel-* backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+// ── Component defaults ─────────────────────────────────────────────────────────
+
+tc-resizable-panel {
+    --bs-resizable-panel-pane-bg: var(--tc-surface);
+    --bs-resizable-panel-divider-size: 1px;
+    --bs-resizable-panel-divider-bg: var(--tc-border);
+    --bs-resizable-panel-divider-hover-bg: var(--tc-app-accent);
+    --bs-resizable-panel-divider-active-bg: var(--tc-app-accent);
+    --bs-resizable-panel-divider-well-bg: var(--tc-surface-hover);
+    --bs-resizable-panel-grip-color: var(--tc-border-strong);
+    --bs-resizable-panel-grip-hover-color: var(--tc-app-accent-contrast);
+    --bs-resizable-panel-min-height: 240px;
+}
+
+// ── Container ───────────────────────────────────────────────────────────────────
+
+.tc-resizable-panel {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    min-height: var(--bs-resizable-panel-min-height);
+    border-radius: 0;
+    overflow: hidden;
+}
+
+.tc-resizable-panel--horizontal {
+    flex-direction: row;
+}
+
+.tc-resizable-panel--vertical {
+    flex-direction: column;
+}
+
+// ── Panes ───────────────────────────────────────────────────────────────────────
+
+.tc-resizable-panel-pane {
+    flex-grow: 0;
+    flex-shrink: 1;
+    min-width: 0;
+    min-height: 0;
+    overflow: auto;
+    background: var(--bs-resizable-panel-pane-bg);
+    border-radius: 0;
+    transition: flex-basis var(--tc-transition-base);
+}
+
+// No transition while dragging — the pointer drives flex-basis directly.
+.tc-resizable-panel--dragging .tc-resizable-panel-pane {
+    transition: none;
+}
+
+// ── Divider (drag handle) ───────────────────────────────────────────────────────
+
+.tc-resizable-panel-divider {
+    position: relative;
+    flex: 0 0 var(--bs-resizable-panel-divider-size);
+    align-self: stretch;
+    background: var(--bs-resizable-panel-divider-bg);
+    border-radius: 0;
+    touch-action: none;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color var(--tc-transition-fast);
+
+    // Wider invisible grab area so the 1px hairline is easy to seize.
+    &::before {
+        content: '';
+        position: absolute;
+        z-index: 1;
+    }
+
+    &:hover {
+        background: var(--bs-resizable-panel-divider-hover-bg);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: -1px;
+        z-index: 2;
+    }
+
+    &:active {
+        background: var(--bs-resizable-panel-divider-active-bg);
+    }
+}
+
+// Strengthen the divider while a drag is in progress.
+.tc-resizable-panel--dragging .tc-resizable-panel-divider {
+    background: var(--bs-resizable-panel-divider-active-bg);
+}
+
+// Horizontal layout → vertical divider → col-resize, grab area spans width.
+.tc-resizable-panel--horizontal > .tc-resizable-panel-divider {
+    cursor: col-resize;
+
+    &::before {
+        inset: 0 -3px;
+    }
+}
+
+// Vertical layout → horizontal divider → row-resize, grab area spans height.
+.tc-resizable-panel--vertical > .tc-resizable-panel-divider {
+    cursor: row-resize;
+
+    &::before {
+        inset: -3px 0;
+    }
+}
+
+// ── Grip affordance (dots) ──────────────────────────────────────────────────────
+
+.tc-resizable-panel-grip {
+    position: relative;
+    z-index: 1;
+    display: block;
+    background-image: radial-gradient(currentColor 40%, transparent 45%);
+    color: var(--bs-resizable-panel-grip-color);
+    opacity: 0.9;
+    pointer-events: none;
+    transition: color var(--tc-transition-fast);
+}
+
+.tc-resizable-panel--horizontal .tc-resizable-panel-grip {
+    width: 3px;
+    height: 22px;
+    background-size: 3px 5px;
+    background-repeat: repeat-y;
+}
+
+.tc-resizable-panel--vertical .tc-resizable-panel-grip {
+    width: 22px;
+    height: 3px;
+    background-size: 5px 3px;
+    background-repeat: repeat-x;
+}
+
+.tc-resizable-panel-divider:hover .tc-resizable-panel-grip,
+.tc-resizable-panel--dragging .tc-resizable-panel-grip {
+    color: var(--bs-resizable-panel-grip-hover-color);
+}
+
+// ── Coarse-pointer grab area (44px) ─────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-resizable-panel--horizontal > .tc-resizable-panel-divider::before {
+        inset: 0 -22px;
+    }
+
+    .tc-resizable-panel--vertical > .tc-resizable-panel-divider::before {
+        inset: -22px 0;
+    }
+}
+
+// ── Reduced motion ──────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-resizable-panel-pane {
+        transition: none;
+    }
+}

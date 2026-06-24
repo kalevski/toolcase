@@ -1,0 +1,29 @@
+// Dungeon › tc-version-label — parchment mono stamp, gold branch qualifier,
+// gold-deep separator dots. Game draws no frame, so drop the box border/bg.
+// Mono numerals are already in place from the base.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-version-label {
+        --bs-version-label-color: var(--fg-parch-3);
+        --bs-version-label-version-color: var(--fg-parch);
+        --bs-version-label-build-color: var(--fg-parch-3);
+        --bs-version-label-branch-color: var(--fg-gold);
+        --bs-version-label-sep-color: var(--fg-gold-deep);
+        --bs-version-label-bg: transparent;
+        --bs-version-label-border-color: transparent;
+        --bs-version-label-letter-spacing: 0.16em;
+        --bs-version-label-font-size: 10px;
+    }
+
+    // Game stamp is borderless — keep the frame off and uppercase the text.
+    .tc-version-label {
+        border: 0;
+        text-transform: uppercase;
+    }
+
+    // Match fantasy dot spacing: 6px breathing room on each side of the separator.
+    .tc-version-label-sep {
+        margin: 0 6px;
+    }
+}

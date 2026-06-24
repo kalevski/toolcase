@@ -1,0 +1,71 @@
+// Dungeon › tc-gantt-chart — PM timeline recast as a rune-marked battle ledger.
+// Four --tc-slate-* references (bar-bg, row-separator, hover-outline, scrollbar)
+// are NOT remapped by the foundation and persist as slate-blue on the wood card.
+// This file repoints them to leather/gold-deep, adds display caps to the title,
+// applies the gilded panel-shadow bevel to the frame, and seats bar wells with a
+// bevel-top highlight. Everything else (progress gold, tick mono, tooltip ink,
+// focus ring) already flips correctly through --tc-app-accent / --tc-ink.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // -------------------------------------------------------------------------
+    // Token swap on the host element — fix the four slate-token traps
+    // -------------------------------------------------------------------------
+    tc-gantt-chart {
+        // Replace --tc-slate-200 bar well → leather slot
+        --bs-gantt-chart-bar-bg: var(--fg-leather);
+
+        // Replace --tc-slate-100 row separator → gold-shadow hairline
+        --bs-gantt-chart-row-separator: var(--fg-gold-shadow);
+
+        // Replace --tc-slate-400 hover outline → gold
+        --bs-gantt-chart-bar-hover-outline: var(--fg-gold);
+
+        // Optional: pull frame bg into the wood panel gradient
+        --bs-gantt-chart-bg: var(--fg-panel-bg);
+    }
+
+    // -------------------------------------------------------------------------
+    // Frame — gilded bevel stack (the shadow var the base uses is --tc-shadow-sm
+    // via --bs-gantt-chart-shadow; we layer the fg-panel-shadow on top of it)
+    // -------------------------------------------------------------------------
+    .tc-gantt-chart {
+        box-shadow: var(--fg-panel-shadow);
+        color: var(--fg-parch);
+    }
+
+    // -------------------------------------------------------------------------
+    // Title — display caps (base hardcodes no font-family on this class)
+    // -------------------------------------------------------------------------
+    .tc-gantt-chart-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: 600;
+        color: var(--fg-gold-bright);
+    }
+
+    // -------------------------------------------------------------------------
+    // Scrollbar — fix the hardcoded --tc-slate-300 thumb
+    // -------------------------------------------------------------------------
+    .tc-gantt-chart-scroll {
+        scrollbar-color: var(--fg-gold-deep) transparent;
+    }
+
+    .tc-gantt-chart-scroll::-webkit-scrollbar-thumb {
+        background: var(--fg-gold-deep);
+    }
+
+    // -------------------------------------------------------------------------
+    // Bar wells — seat them with a bevel-top highlight so they read as inset
+    // -------------------------------------------------------------------------
+    .tc-gantt-chart-bar {
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // Preserve hover outline atop the bevel-top; stack the inset ring
+    .tc-gantt-chart-bar:hover {
+        box-shadow: var(--fg-bevel-top), inset 0 0 0 1px var(--bs-gantt-chart-bar-hover-outline);
+    }
+}

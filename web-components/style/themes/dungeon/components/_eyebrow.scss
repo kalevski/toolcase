@@ -1,0 +1,14 @@
+// Dungeon › tc-eyebrow — signature display-caps micro-label, wide tracking.
+// NOTE: tc-eyebrow sets its --bs-* defaults on the .tc-eyebrow CLASS, so the
+// override targets the class (not the element) to win the cascade.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    .tc-eyebrow {
+        --bs-eyebrow-font-family: var(--fg-display);
+        --bs-eyebrow-font-size: 0.72rem;
+        --bs-eyebrow-font-weight: 500;
+        --bs-eyebrow-letter-spacing: 0.32em;
+        --bs-eyebrow-color: var(--fg-parch-dim);
+    }
+}

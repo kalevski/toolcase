@@ -73,15 +73,16 @@ npm run typecheck
 npm run build        # produces .next/standalone
 ```
 
-The app depends only on the published `@toolcase/react-components` (+ its
-`@toolcase/base` peer) for UI. It expects `claude` and `git` on `PATH`
-(the Docker image installs both).
+The UI is built on a small, locally vendored component kit under
+`components/ui/` (plain React + CSS, SSR-safe), plus `@toolcase/base`. It expects
+`claude` and `git` on `PATH` (the Docker image installs both).
 
 ## Layout
 
 ```
 app/            Next.js App Router — pages + api/** route handlers
-components/     client compositions over @toolcase/react-components
+components/     client compositions over the local components/ui kit
+components/ui/  vendored React UI kit (Button, Modal, Table, charts, …) + styles.css
 skills/         bundled read-only app skills (task-creator, commit-message)
 middleware.ts   thin edge auth gate (full verify happens in the Node layer)
 server/         server-only code, n-layer architecture (deps point downward):
@@ -128,3 +129,75 @@ tuning, commit + push credentials, log retention, Slack webhook, …).
 `git push` requires a container-level credential — either `GIT_REMOTE_TOKEN`
 (HTTPS, GitHub scope `repo`) or a mounted SSH deploy key (set
 `GIT_SSH_CONFIGURED=1`). It is **not** derived from the OAuth login.
+
+## Multiple Claude accounts
+
+TaskForge can drive several Claude Code identities — separate Claude.ai
+subscription seats and/or API credentials — and pick one per task by **alias**.
+This spreads usage limits, isolates billing per project/client, and lets agents
+run in parallel without one account throttling the rest. With no accounts
+registered, TaskForge uses the single inherited `claude` identity as before.
+
+### One config dir per alias
+
+Each alias is one isolated Claude Code config directory — Claude Code keeps an
+identity's credentials and `settings.json` under the dir named by
+`CLAUDE_CONFIG_DIR`, so "switch account" just means "point `claude` at a
+different dir." The dirs live under the workspace:
+
+```
+${WORKSPACE_DIR}/.claude-accounts/
+├── alpha/        # CLAUDE_CONFIG_DIR for alias "alpha" (OAuth seat)
+│   └── .credentials.json
+├── beta/         # another OAuth seat
+│   └── .credentials.json
+└── ci-bot/       # API-key alias — no creds file
+```
+
+A registry maps each alias to its dir and auth method. **API keys never live in
+the registry** — an api-key alias references its key by the *name* of an env var
+(e.g. `TASKFORGE_CIBOT_KEY`), and you supply the value as that env var (see
+`.env.example`). OAuth aliases need no env var; their token lives in the dir.
+Lock the `.claude-accounts/` tree down (`chmod 700`) and keep it out of git —
+the `.credentials.json` tokens are secrets.
+
+### Authorizing an account
+
+**OAuth (personal / subscription) alias** — one-time, interactive, run on the
+host (a browser must open):
+
+```bash
+CLAUDE_CONFIG_DIR=${WORKSPACE_DIR}/.claude-accounts/alpha claude /login
+```
+
+Log in with the account for that alias; the token lands in
+`alpha/.credentials.json` and refreshes automatically thereafter. Repeat with a
+different folder per personal alias.
+
+**API-key alias** — no browser. Register the alias against an env-var name and
+define that var (in `.env` or a secret manager); TaskForge injects it as
+`ANTHROPIC_API_KEY` for that alias's runs.
+
+### Selecting an account per task
+
+- **Per task** — add an `**Account:**` facet to the task file; the dispatcher
+  resolves it to that alias's config dir (and API key, if any) for the run.
+- **Per project** — a project may set a default alias used by tasks that name
+  none.
+- **Global fallback** — `DEFAULT_ACCOUNT` (see `.env.example`) is the last
+  resort when neither the task nor the project specifies one. Empty =
+  single-account behavior.
+
+### Round-robin and failover
+
+Across OAuth aliases, TaskForge can round-robin / least-recently-used to spread
+subscription limits, and on a `429`/quota error it marks the offending alias as
+cooling-down and fails over to the next available one. Distinct config dirs mean
+no credential-file races, so aliases are safe to run concurrently.
+
+### Terms-of-service caveat
+
+API keys are the clean path for heavy headless/batch load. Before automating
+personal **subscription** seats, confirm Anthropic's terms permit programmatic
+use of those seats for automated work — use personal OAuth for interactive/dev
+and API keys for unattended throughput.

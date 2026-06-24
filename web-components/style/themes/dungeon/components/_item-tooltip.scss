@@ -1,0 +1,113 @@
+// Dungeon › tc-item-tooltip — gilded item hover card. Token swap recolours
+// labels/separators; structural rules give the host the dark gradient fill +
+// gilded bevel with a rarity-tinted inner glow, a rarity-coloured display-caps
+// item NAME, mono stat figures, and the full --fg rarity ramp on the accent.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-item-tooltip {
+        --fg-tooltip-glow: rgba(156, 148, 137, 0.18);
+
+        --bs-item-tooltip-border-color: var(--fg-gold-deep);
+        --bs-item-tooltip-separator-color: rgba(201, 169, 97, 0.2);
+
+        // The item name takes the rarity colour (base points it at --tc-text).
+        --bs-item-tooltip-rarity-color: var(--fg-common);
+        --bs-item-tooltip-name-color: var(--bs-item-tooltip-rarity-color);
+
+        --bs-item-tooltip-stat-label-color: var(--fg-parch-3);
+        --bs-item-tooltip-stat-value-color: var(--fg-parch);
+        --bs-item-tooltip-req-label-color: var(--fg-parch-dim);
+        --bs-item-tooltip-req-value-color: var(--fg-parch-3);
+        --bs-item-tooltip-req-met-color: var(--fg-stamina-bright);
+        --bs-item-tooltip-req-unmet-color: var(--fg-blood-bright);
+        --bs-item-tooltip-flavor-color: var(--fg-parch-3);
+
+        // Radial wood fill — matches the warm slot tiles (improvement 1).
+        background: radial-gradient(120% 80% at 50% 0%, #2e2418 0%, #1a130c 70%);
+
+        // Double gold-ring bevel + rarity glow (improvement 2).
+        box-shadow:
+            inset 0 0 0 2px var(--fg-gold-deep),
+            inset 0 0 0 3px var(--fg-gold-shadow),
+            inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18),
+            inset 0 0 18px var(--fg-tooltip-glow),
+            0 8px 24px rgba(0, 0, 0, 0.7);
+
+        // Relative positioning so the corner-notch ::before can be placed (improvement 5).
+        position: relative;
+    }
+
+    // Corner-notch ornament — top-left (improvement 5).
+    tc-item-tooltip::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 12px;
+        height: 12px;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+        pointer-events: none;
+    }
+
+    // Rarity ramp — colour + glow scale together, mirroring tc-item-slot.
+    tc-item-tooltip[data-rarity='uncommon'] {
+        --bs-item-tooltip-rarity-color: var(--fg-uncommon);
+        --fg-tooltip-glow: rgba(95, 168, 74, 0.22);
+    }
+    tc-item-tooltip[data-rarity='rare'] {
+        --bs-item-tooltip-rarity-color: var(--fg-rare);
+        --fg-tooltip-glow: rgba(74, 127, 207, 0.25);
+    }
+    tc-item-tooltip[data-rarity='epic'] {
+        --bs-item-tooltip-rarity-color: var(--fg-epic);
+        --fg-tooltip-glow: rgba(164, 77, 208, 0.28);
+    }
+    tc-item-tooltip[data-rarity='legendary'] {
+        --bs-item-tooltip-rarity-color: var(--fg-legendary);
+        --fg-tooltip-glow: rgba(232, 162, 58, 0.34);
+    }
+    tc-item-tooltip[data-rarity='mythic'] {
+        --bs-item-tooltip-rarity-color: var(--fg-mythic);
+        --fg-tooltip-glow: rgba(224, 77, 106, 0.38);
+    }
+
+    // Header separated by a hairline gold rule.
+    .tc-item-tooltip__header {
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(201, 169, 97, 0.2);
+    }
+
+    // Item name reads as rarity-tinted display caps with an ink shadow.
+    .tc-item-tooltip__name {
+        font-family: var(--fg-display);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        text-shadow: 0 1px 2px #000;
+    }
+
+    // Mono machine-facing figures + labels.
+    .tc-item-tooltip__rarity,
+    .tc-item-tooltip__stat-label,
+    .tc-item-tooltip__stat-value,
+    .tc-item-tooltip__req-label,
+    .tc-item-tooltip__req-value {
+        font-family: var(--fg-mono);
+    }
+
+    // Type eyebrow — struck gold label instead of fading parch-dim (improvement 3).
+    .tc-item-tooltip__type {
+        font-family: var(--fg-mono);
+        letter-spacing: 0.16em;
+        color: var(--fg-gold-deep);
+        text-transform: uppercase;
+    }
+
+    // Rarity chip — faint tinted fill so it reads as a struck plate (improvement 4).
+    .tc-item-tooltip__rarity {
+        background: color-mix(in srgb, var(--bs-item-tooltip-rarity-color) 14%, transparent);
+    }
+}

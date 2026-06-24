@@ -1,0 +1,126 @@
+// tc-metric-tile — compact presentational card showing a single metric.
+// All cosmetics flow through --bs-metric-tile-* custom properties backed by --tc-* tokens.
+// Sharp corners; slate neutrals; white surface; 1px hairline; resting shadow; no hover lift.
+
+@use '../foundation/tokens' as *;
+
+// Declared on the class too: tc-metric-grid renders its tiles as plain
+// `<div class="tc-metric-tile">` (not <tc-metric-tile> elements), so a token
+// block scoped to the element alone never reaches grid tiles — collapsing the
+// icon (width: var(--…icon-size) → 0) and unstyling the value/padding.
+tc-metric-tile,
+.tc-metric-tile {
+    --bs-metric-tile-bg: var(--tc-surface);
+    --bs-metric-tile-border-color: var(--tc-border);
+    --bs-metric-tile-shadow: var(--tc-shadow-sm);
+    --bs-metric-tile-padding-y: 1rem;
+    --bs-metric-tile-padding-x: 1.25rem;
+    --bs-metric-tile-gap: 0.75rem;
+    --bs-metric-tile-icon-size: 1.25rem;
+    --bs-metric-tile-icon-color: var(--tc-text-muted);
+    --bs-metric-tile-label-color: var(--tc-text-muted);
+    --bs-metric-tile-label-font-size: 0.6875rem;
+    --bs-metric-tile-label-letter-spacing: 0.08em;
+    --bs-metric-tile-value-color: var(--tc-text);
+    --bs-metric-tile-value-font-size: 1.5rem;
+    --bs-metric-tile-value-font-weight: 600;
+    --bs-metric-tile-unit-color: var(--tc-text-muted);
+    --bs-metric-tile-unit-font-size: 0.875rem;
+    --bs-metric-tile-hint-color: var(--tc-text-faint, var(--tc-text-muted));
+    --bs-metric-tile-hint-font-size: 0.75rem;
+}
+
+.tc-metric-tile {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--bs-metric-tile-gap);
+    padding: var(--bs-metric-tile-padding-y) var(--bs-metric-tile-padding-x);
+    background: var(--bs-metric-tile-bg);
+    border: 1px solid var(--bs-metric-tile-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-metric-tile-shadow);
+}
+
+// Leading icon — slate muted, aligned to the top of the tile body.
+.tc-metric-tile-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--bs-metric-tile-icon-color);
+    padding-top: 0.1875rem; // optical alignment with the label baseline
+}
+
+.tc-metric-tile-icon-svg {
+    width: var(--bs-metric-tile-icon-size);
+    height: var(--bs-metric-tile-icon-size);
+    stroke: currentColor;
+    fill: none;
+}
+
+// Body — stacked column of label, value row, and optional hint.
+.tc-metric-tile-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+    flex: 1;
+}
+
+// Label — uppercase JetBrains Mono micro-label in muted slate.
+.tc-metric-tile-label {
+    display: block;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-metric-tile-label-font-size);
+    font-weight: 500;
+    line-height: 1.4;
+    text-transform: uppercase;
+    letter-spacing: var(--bs-metric-tile-label-letter-spacing);
+    color: var(--bs-metric-tile-label-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// Value row — flex baseline so the unit aligns to the value's baseline.
+.tc-metric-tile-value-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+    min-width: 0;
+}
+
+// Value figure — prominent mono display, weight ≤600.
+.tc-metric-tile-value {
+    display: block;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-metric-tile-value-font-size);
+    font-weight: var(--bs-metric-tile-value-font-weight);
+    line-height: 1.2;
+    color: var(--bs-metric-tile-value-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// Unit suffix — smaller, muted, no wrapping.
+.tc-metric-tile-unit {
+    display: inline-block;
+    font-size: var(--bs-metric-tile-unit-font-size);
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--bs-metric-tile-unit-color);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+// Hint line — faint sub-text beneath the value.
+.tc-metric-tile-hint {
+    display: block;
+    font-size: var(--bs-metric-tile-hint-font-size);
+    line-height: 1.4;
+    color: var(--bs-metric-tile-hint-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

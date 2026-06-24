@@ -1,0 +1,31 @@
+// Dungeon › tc-physics-editor — warm tool-chrome override.
+// Foundation already routes surface/border/text/accent tokens to leather/gold;
+// this file fixes the three cold literal misses the foundation cannot reach:
+//   1. --bs-physics-editor-tool-active-color: #fff   → ink (gold fill wants dark glyph)
+//   2. --bs-physics-editor-checker fallback #e2e8f0  → warm-dark leather tone
+//   3. rgba shape/selected fills (slate)             → translucent gold
+// Also adds a top-highlight bevel on the outer frame for gilded chrome feel.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-physics-editor {
+        // Active tool icon: the accent fill is now gold; dark ink reads on gold.
+        --bs-physics-editor-tool-active-color: var(--fg-ink);
+
+        // Checkerboard: --tc-slate-200 is undefined in the dungeon foundation so
+        // the base var falls through to the hardcoded cold #e2e8f0 literal.
+        // Override directly to a dark leather swatch so transparency reads warm.
+        --bs-physics-editor-checker: var(--fg-leather-2);
+
+        // Canvas-drawn shape fills (consumed by JS via getComputedStyle).
+        // Must stay as custom-property values — JS reads them, not CSS paint.
+        --bs-physics-editor-shape-fill: rgba(201, 169, 97, 0.16);
+        --bs-physics-editor-selected-fill: rgba(240, 210, 122, 0.18);
+    }
+
+    // Outer frame: top bevel highlight gives the panel a gilded edge.
+    // Restrained — this is a tool surface, not a HUD frame.
+    .tc-physics-editor {
+        box-shadow: var(--fg-bevel-top);
+    }
+}

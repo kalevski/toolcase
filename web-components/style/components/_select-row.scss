@@ -1,0 +1,44 @@
+// tc-select-row — generic labeled dropdown setting row on the shared setting-row
+// scaffold (`_setting-row.scss`). The control is a native <select> rendered with
+// the design-system `.form-select` chrome (flat hairline box, inline chevron,
+// sharp corners) constrained to a configurable width. All cosmetics flow through
+// `--bs-select-row-*`; the fantasy chrome of the gc-* original is dropped.
+
+tc-select-row {
+    --bs-select-row-width: 11rem;
+    --bs-select-row-font: var(--tc-font-sans);
+    --bs-select-row-font-size: 0.8125rem;
+    --bs-select-row-letter-spacing: 0.01em;
+    --bs-select-row-color: var(--tc-text);
+    --bs-select-row-bg: var(--tc-surface);
+    --bs-select-row-border-color: var(--tc-border-strong);
+    --bs-select-row-focus-border-color: rgba(30, 41, 59, 0.5);
+    --bs-select-row-focus-ring: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
+    --bs-select-row-disabled-color: var(--tc-text-muted);
+    --bs-select-row-disabled-bg: var(--tc-surface-muted);
+}
+
+.tc-select-row__select {
+    // Re-skin the shared .form-select via the component's own contract so themes
+    // can re-paint this picker without touching every select on the page.
+    --bs-form-select-border-color: var(--bs-select-row-border-color);
+    --bs-form-select-focus-border-color: var(--bs-select-row-focus-border-color);
+    --bs-form-select-focus-box-shadow: var(--bs-select-row-focus-ring);
+
+    width: var(--bs-select-row-width);
+    font-family: var(--bs-select-row-font);
+    font-size: var(--bs-select-row-font-size);
+    letter-spacing: var(--bs-select-row-letter-spacing);
+    color: var(--bs-select-row-color);
+    background-color: var(--bs-select-row-bg);
+
+    // Coarse pointers get a 44px hit area without resizing the visual control.
+    @media (pointer: coarse) {
+        min-height: 44px;
+    }
+
+    &:disabled {
+        color: var(--bs-select-row-disabled-color);
+        background-color: var(--bs-select-row-disabled-bg);
+    }
+}

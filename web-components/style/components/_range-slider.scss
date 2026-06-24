@@ -1,0 +1,169 @@
+// tc-range-slider — dual-handle range slider with fill, ticks, and tooltips.
+// Sharp corners on track (border-radius: 0); sanctioned circles (50%) on handles.
+// All cosmetic values flow through --bs-range-slider-* backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+// ── Component defaults ─────────────────────────────────────────────────────────
+
+tc-range-slider {
+    --bs-range-slider-track-height: 4px;
+    --bs-range-slider-track-bg: var(--tc-border);
+    --bs-range-slider-fill-bg: var(--tc-app-accent);
+    --bs-range-slider-handle-size: 16px;
+    --bs-range-slider-handle-bg: var(--tc-surface);
+    --bs-range-slider-handle-border: 1.5px solid var(--tc-border-strong);
+    --bs-range-slider-handle-shadow: var(--tc-shadow-sm);
+    --bs-range-slider-handle-active-border-color: var(--tc-app-accent);
+    --bs-range-slider-tooltip-bg: var(--tc-ink);
+    --bs-range-slider-tooltip-color: #fff;
+    --bs-range-slider-tooltip-shadow: var(--tc-shadow-md);
+    --bs-range-slider-tick-color: var(--tc-border-strong);
+    --bs-range-slider-disabled-opacity: 0.45;
+
+    position: relative;
+    user-select: none;
+}
+
+// ── Disabled ──────────────────────────────────────────────────────────────────
+
+tc-range-slider[disabled] {
+    opacity: var(--bs-range-slider-disabled-opacity);
+    pointer-events: none;
+}
+
+// ── Label ─────────────────────────────────────────────────────────────────────
+
+.tc-range-slider-label {
+    display: block;
+    margin-bottom: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--tc-text);
+}
+
+// ── Track ─────────────────────────────────────────────────────────────────────
+
+.tc-range-slider-track {
+    position: relative;
+    height: var(--bs-range-slider-track-height);
+    background: var(--bs-range-slider-track-bg);
+    border-radius: 0;
+    margin-block: 20px;
+    cursor: pointer;
+}
+
+// ── Fill ──────────────────────────────────────────────────────────────────────
+
+.tc-range-slider-fill {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    background: var(--bs-range-slider-fill-bg);
+    border-radius: 0;
+    pointer-events: none;
+}
+
+// ── Handle ────────────────────────────────────────────────────────────────────
+
+.tc-range-slider-handle {
+    position: absolute;
+    top: 50%;
+    width: var(--bs-range-slider-handle-size);
+    height: var(--bs-range-slider-handle-size);
+    transform: translate(-50%, -50%);
+    background: var(--bs-range-slider-handle-bg);
+    border: var(--bs-range-slider-handle-border);
+    border-radius: 50%;
+    box-shadow: var(--bs-range-slider-handle-shadow);
+    cursor: grab;
+    touch-action: none;
+    transition:
+        box-shadow var(--tc-transition-fast),
+        border-color var(--tc-transition-fast),
+        transform var(--tc-transition-fast);
+
+    &:hover {
+        transform: translate(-50%, -50%) scale(1.18);
+        box-shadow: var(--tc-shadow-md);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &.tc-range-slider-handle--dragging,
+    &:active {
+        cursor: grabbing;
+        border-color: var(--bs-range-slider-handle-active-border-color);
+        border-width: 2px;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    // 44px coarse-pointer hit area
+    &::after {
+        content: '';
+        position: absolute;
+        inset: -14px;
+        border-radius: 50%;
+    }
+}
+
+// ── Tooltip ───────────────────────────────────────────────────────────────────
+
+.tc-range-slider-tooltip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 2px 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.4;
+    white-space: nowrap;
+    color: var(--bs-range-slider-tooltip-color);
+    background: var(--bs-range-slider-tooltip-bg);
+    box-shadow: var(--bs-range-slider-tooltip-shadow);
+    border-radius: 0;
+    pointer-events: none;
+}
+
+// ── Ticks ─────────────────────────────────────────────────────────────────────
+
+.tc-range-slider-ticks {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    height: 6px;
+    pointer-events: none;
+}
+
+.tc-range-slider-tick {
+    position: absolute;
+    width: 1px;
+    height: 6px;
+    background: var(--bs-range-slider-tick-color);
+    transform: translateX(-50%);
+}
+
+// ── Reduced motion ────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-range-slider-handle {
+        // Keep state transitions (border-color), remove decorative transforms.
+        transition:
+            box-shadow var(--tc-transition-fast),
+            border-color var(--tc-transition-fast);
+
+        &:hover {
+            transform: translate(-50%, -50%);
+        }
+
+        &.tc-range-slider-handle--dragging,
+        &:active {
+            transform: translate(-50%, -50%);
+        }
+    }
+}

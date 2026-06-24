@@ -1,0 +1,91 @@
+// Dungeon › tc-entity-cell — party roster / entity row.
+// Token swap handles most cosmetics via --tc-* remap; this override fixes:
+//   1. The baked Sass-literal tile fills ($slate-100/$slate-700 and raw hex
+//      color variants) — none respond to runtime --tc-* tokens.
+//   2. .tc-entity-cell__name hardcodes --tc-font-sans; we promote it to
+//      --fg-display Cinzel caps for a fantasy roster feel.
+//   3. Optionally pins the row background to the wood-grain recipe token.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // --- 1. Host-element token swap ----------------------------------------
+    tc-entity-cell {
+        --bs-entity-cell-bg: var(--fg-panel-bg);
+    }
+
+    // --- 2. Default initials tile: gilded ink slot -------------------------
+    // Overrides baked $slate-100 bg / $slate-700 text from the base file.
+    .tc-entity-cell__tile {
+        background: var(--fg-slot-bg);
+        color: var(--fg-gold-bright);
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // --- 3. Color-variant tiles → rarity / element ramp -------------------
+    // Each must be overridden directly; the Sass map bakes values at compile
+    // time so they are invisible to the runtime --tc-* remap.
+
+    // slate (default identity) → common grey
+    .tc-entity-cell__tile--slate {
+        background: var(--fg-ink-2);
+        color: var(--fg-common);
+        border-color: var(--fg-common);
+    }
+
+    // blue (info) → rare blue
+    .tc-entity-cell__tile--blue {
+        background: var(--fg-ink-2);
+        color: var(--fg-rare);
+        border-color: var(--fg-rare);
+    }
+
+    // green (success) → uncommon green
+    .tc-entity-cell__tile--green {
+        background: var(--fg-ink-2);
+        color: var(--fg-uncommon);
+        border-color: var(--fg-uncommon);
+    }
+
+    // red (danger) → blood/danger
+    .tc-entity-cell__tile--red {
+        background: var(--fg-ink-2);
+        color: var(--fg-blood);
+        border-color: var(--fg-blood);
+    }
+
+    // yellow (warning) → legendary gold
+    .tc-entity-cell__tile--yellow {
+        background: var(--fg-ink-2);
+        color: var(--fg-legendary);
+        border-color: var(--fg-legendary);
+    }
+
+    // purple (#f3e8ff / #6b21a8 raw hex) → epic purple
+    .tc-entity-cell__tile--purple {
+        background: var(--fg-ink-2);
+        color: var(--fg-epic);
+        border-color: var(--fg-epic);
+    }
+
+    // orange (#ffedd5 / #9a3412 raw hex) → fire orange
+    .tc-entity-cell__tile--orange {
+        background: var(--fg-ink-2);
+        color: var(--fg-fire);
+        border-color: var(--fg-fire);
+    }
+
+    // --- 4. Name in display caps (Cinzel) ----------------------------------
+    // Base hardcodes font-family: var(--tc-font-sans); must override the class.
+    .tc-entity-cell__name {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 600;
+    }
+
+    // --- 5. Interactive active state ---------------------------------------
+    // Base forces color:#fff on active which is legible on the gold fill;
+    // no change needed. Focus ring is already remapped to gold by the
+    // foundation (--tc-app-accent → --fg-gold). No override required.
+}

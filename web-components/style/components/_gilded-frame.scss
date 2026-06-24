@@ -1,0 +1,73 @@
+// tc-gilded-frame — a hairline-framed surface that wraps its slotted content.
+// Web-components port of game-components `gc-gilded-frame`: the gilded edges,
+// glows and leather/metal textures are dropped in favour of the toolcase voice
+// — sharp corners, slate neutrals, 1px hairline borders, no decorative shadow
+// (framed surfaces are not the overlay tier). The three source tones map onto
+// the neutral ramp: dark = ink fill, leather = muted slate, transparent =
+// borderless-fill-free passthrough. Every cosmetic flows through the public
+// `--bs-gilded-frame-*` contract.
+
+tc-gilded-frame {
+    // Base contract — defaults to the `dark` tone so the host reads sensibly
+    // even before a tone modifier class is applied.
+    --bs-gilded-frame-bg: var(--tc-ink);
+    --bs-gilded-frame-color: rgba(248, 250, 252, 0.92);
+    --bs-gilded-frame-border-color: rgba(255, 255, 255, 0.1);
+    --bs-gilded-frame-border-width: 1px;
+    --bs-gilded-frame-padding: 1rem;
+}
+
+.tc-gilded-frame {
+    display: block;
+    padding: var(--bs-gilded-frame-padding);
+    color: var(--bs-gilded-frame-color);
+    background: var(--bs-gilded-frame-bg);
+    border: var(--bs-gilded-frame-border-width) solid var(--bs-gilded-frame-border-color);
+    border-radius: 0;
+}
+
+.tc-gilded-frame-content {
+    display: block;
+}
+
+// ── Tones ──────────────────────────────────────────────────────────────────
+
+.tc-gilded-frame--tone-dark {
+    --bs-gilded-frame-bg: var(--tc-ink);
+    --bs-gilded-frame-color: rgba(248, 250, 252, 0.92);
+    --bs-gilded-frame-border-color: rgba(255, 255, 255, 0.1);
+}
+
+.tc-gilded-frame--tone-leather {
+    --bs-gilded-frame-bg: var(--tc-surface-muted);
+    --bs-gilded-frame-color: var(--tc-text);
+    --bs-gilded-frame-border-color: var(--tc-border);
+}
+
+.tc-gilded-frame--tone-transparent {
+    --bs-gilded-frame-bg: transparent;
+    --bs-gilded-frame-color: inherit;
+    --bs-gilded-frame-border-color: var(--tc-border);
+}
+
+// ── Padding scale ────────────────────────────────────────────────────────────
+
+.tc-gilded-frame--pad-none {
+    --bs-gilded-frame-padding: 0;
+}
+
+.tc-gilded-frame--pad-sm {
+    --bs-gilded-frame-padding: 0.5rem;
+}
+
+.tc-gilded-frame--pad-md {
+    --bs-gilded-frame-padding: 1rem;
+}
+
+.tc-gilded-frame--pad-lg {
+    --bs-gilded-frame-padding: 1.5rem;
+}
+
+.tc-gilded-frame--pad-xl {
+    --bs-gilded-frame-padding: 2rem;
+}

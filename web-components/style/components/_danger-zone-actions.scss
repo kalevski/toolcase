@@ -1,0 +1,109 @@
+// tc-danger-zone-actions — destructive action list with a danger left-border
+// frame and btn-outline-danger buttons. All cosmetic values flow through
+// --bs-danger-zone-actions-* custom properties backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+tc-danger-zone-actions {
+    // ── Component tokens ──────────────────────────────────────────────────
+    --bs-danger-zone-actions-border-color: var(--tc-danger);
+    --bs-danger-zone-actions-bg: var(--tc-danger-bg);
+    // Inner separators share the container's danger red so consecutive rows
+    // read as one cohesive danger-zone frame, not a neutral list.
+    --bs-danger-zone-actions-separator-color: var(--tc-danger);
+    --bs-danger-zone-actions-title-color: var(--tc-text);
+    --bs-danger-zone-actions-desc-color: var(--tc-text-muted);
+    --bs-danger-zone-actions-padding-x: 1rem;
+    --bs-danger-zone-actions-padding-y: 0.875rem;
+    --bs-danger-zone-actions-gap: 0.75rem;
+    --bs-danger-zone-actions-title-font-size: 0.925rem;
+    --bs-danger-zone-actions-desc-font-size: 0.8125rem;
+    --bs-danger-zone-actions-btn-min-height: 2rem;
+}
+
+// ── Panel wrapper ──────────────────────────────────────────────────────────
+
+.tc-danger-zone {
+    border: 1px solid var(--bs-danger-zone-actions-border-color);
+    border-left: 4px solid var(--bs-danger-zone-actions-border-color);
+    border-radius: 0;
+    background: var(--bs-danger-zone-actions-bg);
+}
+
+// ── Row ────────────────────────────────────────────────────────────────────
+
+.tc-danger-zone-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--bs-danger-zone-actions-gap);
+    padding: var(--bs-danger-zone-actions-padding-y) var(--bs-danger-zone-actions-padding-x);
+    border-bottom: 1px solid var(--bs-danger-zone-actions-separator-color);
+
+    &:last-child {
+        border-bottom: 0;
+    }
+}
+
+// ── Text block ─────────────────────────────────────────────────────────────
+
+.tc-danger-zone-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.tc-danger-zone-title {
+    display: block;
+    font-size: var(--bs-danger-zone-actions-title-font-size);
+    font-weight: 500;
+    color: var(--bs-danger-zone-actions-title-color);
+    line-height: 1.5;
+}
+
+.tc-danger-zone-desc {
+    display: block;
+    font-size: var(--bs-danger-zone-actions-desc-font-size);
+    color: var(--bs-danger-zone-actions-desc-color);
+    line-height: 1.4;
+}
+
+// ── Danger button ──────────────────────────────────────────────────────────
+
+.tc-danger-zone-btn {
+    flex-shrink: 0;
+    border-radius: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: var(--bs-danger-zone-actions-btn-min-height);
+
+    // Disabled: opacity-only, not color-only (WCAG 1.4.1).
+    &:disabled,
+    &[disabled] {
+        opacity: 0.45;
+    }
+}
+
+// ── Inline icon ────────────────────────────────────────────────────────────
+
+.tc-danger-zone-icon {
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.125em;
+    flex-shrink: 0;
+}
+
+// ── Touch targets (WCAG 2.5.5) ────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-danger-zone-btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+// ── Reduced motion ─────────────────────────────────────────────────────────
+// Inherited from _reset.scss global rule; no per-component overrides needed.

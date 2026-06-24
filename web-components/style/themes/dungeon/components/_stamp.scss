@@ -1,0 +1,49 @@
+// Dungeon › tc-stamp — gilded wax-seal / engraved approval mark.
+// Foundation already remaps the default color to --fg-gold and bg to --fg-leather.
+// This file: (1) switches to display caps for the engraved-seal look,
+// (2) adds a pressed-wax drop shadow, and (3) fixes the color variants whose
+// Sass-map baked literals are NOT live vars and need explicit --fg-* overrides.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // 1. Engraved display caps + pressed-wax depth.
+    .tc-stamp {
+        font-family: var(--fg-display);
+        letter-spacing: 0.14em;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+    }
+
+    // 2. Color variant recolors — baked Sass map values don't respond to foundation
+    //    token remaps, so each variant gets explicit --fg-* assignments here.
+
+    .tc-stamp-primary {
+        --bs-stamp-color: var(--fg-gold-bright);
+        --bs-stamp-bg: rgba(201, 169, 97, 0.18);
+    }
+
+    .tc-stamp-secondary {
+        --bs-stamp-color: var(--fg-copper);
+        --bs-stamp-bg: rgba(160, 106, 58, 0.18);
+    }
+
+    .tc-stamp-success {
+        --bs-stamp-color: var(--fg-stamina-bright);
+        --bs-stamp-bg: rgba(111, 159, 58, 0.18);
+    }
+
+    .tc-stamp-danger {
+        --bs-stamp-color: var(--fg-blood-bright);
+        --bs-stamp-bg: rgba(168, 48, 42, 0.2);
+    }
+
+    .tc-stamp-warning {
+        --bs-stamp-color: var(--fg-legendary);
+        --bs-stamp-bg: rgba(232, 162, 58, 0.18);
+    }
+
+    .tc-stamp-info {
+        --bs-stamp-color: var(--fg-mana-bright);
+        --bs-stamp-bg: rgba(58, 108, 201, 0.18);
+    }
+}

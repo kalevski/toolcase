@@ -1,0 +1,82 @@
+// tc-press-any-key — "press any key to continue" prompt.
+// Port of gc-press-any-key; game chrome dropped in favour of the slate design
+// system: mono uppercase text with a pulsing opacity animation to draw attention.
+// The host element carries role="button" and tabindex="0" so it participates in
+// keyboard navigation — pressing any non-modifier key on the document fires the
+// tc-continue event.
+// All cosmetics flow through --bs-press-any-key-* custom properties.
+
+@use '../foundation/tokens' as *;
+
+tc-press-any-key {
+    --bs-press-any-key-color:           var(--tc-text-muted);
+    --bs-press-any-key-color-hover:     var(--tc-text);
+    --bs-press-any-key-font-size:       0.8125rem;   // 13px — mono micro-label tier
+    --bs-press-any-key-font-weight:     500;
+    --bs-press-any-key-letter-spacing:  0.08em;
+    --bs-press-any-key-padding-y:       0.375rem;
+    --bs-press-any-key-padding-x:       0.75rem;
+    --bs-press-any-key-pulse-duration:  1.8s;
+    --bs-press-any-key-cursor:          pointer;
+}
+
+// ── Host ────────────────────────────────────────────────────────────────────
+
+.tc-press-any-key {
+    display:        block;
+    text-align:     center;
+    cursor:         var(--bs-press-any-key-cursor);
+    user-select:    none;
+    -webkit-user-select: none;
+}
+
+// ── Text span ────────────────────────────────────────────────────────────────
+
+.tc-press-any-key__text {
+    display:         inline-block;
+    padding:         var(--bs-press-any-key-padding-y) var(--bs-press-any-key-padding-x);
+    font-family:     'JetBrains Mono', monospace;
+    font-size:       var(--bs-press-any-key-font-size);
+    font-weight:     var(--bs-press-any-key-font-weight);
+    letter-spacing:  var(--bs-press-any-key-letter-spacing);
+    text-transform:  uppercase;
+    color:           var(--bs-press-any-key-color);
+    border-radius:   0;
+    animation:       tc-press-any-key-pulse var(--bs-press-any-key-pulse-duration) ease-in-out infinite;
+}
+
+@keyframes tc-press-any-key-pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.3; }
+}
+
+// ── States ───────────────────────────────────────────────────────────────────
+
+tc-press-any-key:hover:not([disabled]) .tc-press-any-key__text {
+    color: var(--bs-press-any-key-color-hover);
+}
+
+// The global :focus-visible rule in _reset.scss handles the outline; no override
+// needed unless a component-specific focus appearance is required.
+
+tc-press-any-key[disabled] {
+    opacity:        0.4;
+    pointer-events: none;
+    cursor:         default;
+}
+
+// Freeze the pulse when the element is disabled so it reads as inactive.
+tc-press-any-key[disabled] .tc-press-any-key__text {
+    animation: none;
+}
+
+// ── Touch target ─────────────────────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-press-any-key__text {
+        min-height:      44px;
+        display:         inline-flex;
+        align-items:     center;
+        justify-content: center;
+    }
+}

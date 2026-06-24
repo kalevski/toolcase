@@ -1,0 +1,155 @@
+// Dungeon › tc-pause-menu — fantasy pause overlay. Token swap recolours the
+// panel + items; structural rules add the wood-gradient panel with gilded bevel
+// stack, display-caps menu rows with gold left-marker + highlight wash, mono
+// gilded badge, and a heavier ink scrim. tc-pause-screen preset follows suit.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-pause-menu,
+    tc-pause-screen {
+        --bs-pause-menu-bg: linear-gradient(180deg, rgba(20, 12, 8, 0.96), rgba(10, 6, 4, 0.96));
+        --bs-pause-menu-border-color: var(--fg-gold-deep);
+        --bs-pause-menu-backdrop-bg: #000;
+        --bs-pause-menu-backdrop-opacity: 0.65;
+
+        --bs-pause-menu-eyebrow-color: var(--fg-parch-dim);
+        --bs-pause-menu-title-color: var(--fg-gold-bright);
+
+        --bs-pause-menu-item-color: var(--fg-parch);
+        --bs-pause-menu-item-border: rgba(201, 169, 97, 0.15);
+        --bs-pause-menu-item-hover-bg: rgba(201, 169, 97, 0.08);
+        --bs-pause-menu-item-disabled-color: var(--fg-parch-dim);
+
+        --bs-pause-menu-badge-bg: rgba(0, 0, 0, 0.4);
+        --bs-pause-menu-badge-color: var(--fg-gold-bright);
+
+        --bs-pause-menu-resume-bg: var(--fg-button-bg);
+        --bs-pause-menu-resume-color: var(--fg-gold-bright);
+        --bs-pause-menu-resume-hover-bg: var(--fg-leather-3);
+        --bs-pause-menu-resume-hover-color: var(--fg-gold-bright);
+    }
+
+    // Panel: gilded bevel stack + corner notches (base ships only a flat shadow).
+    .tc-pause-menu__panel {
+        position: relative;
+        box-shadow:
+            inset 0 0 0 1px var(--fg-gold-shadow),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18),
+            0 20px 50px rgba(0, 0, 0, 0.8);
+        color: var(--fg-parch);
+
+        &::before,
+        &::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--fg-notch-fill);
+            clip-path: var(--fg-notch-clip);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        &::before {
+            top: 0;
+            left: 0;
+        }
+
+        &::after {
+            bottom: 0;
+            right: 0;
+        }
+    }
+
+    // Header: transparent fill + gold-rule divider with center diamond ornament.
+    .tc-pause-menu__header {
+        background: transparent;
+        position: relative;
+
+        &::after {
+            content: '';
+            display: block;
+            height: 1px;
+            margin-top: 0.5rem;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                var(--fg-gold-deep) 30%,
+                var(--fg-gold) 50%,
+                var(--fg-gold-deep) 70%,
+                transparent
+            );
+        }
+    }
+
+    // Center diamond ornament on the header rule.
+    .tc-pause-menu__header-diamond {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background: linear-gradient(135deg, var(--fg-gold-bright), var(--fg-gold-deep));
+        transform: rotate(45deg);
+        box-shadow: 0 0 6px rgba(232, 200, 120, 0.4);
+    }
+
+    .tc-pause-menu__eyebrow {
+        font-family: var(--fg-mono);
+    }
+
+    .tc-pause-menu__title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        text-shadow: 0 2px 0 #000, 0 0 22px rgba(232, 200, 120, 0.35);
+    }
+
+    // Menu rows: display caps + gold left marker.
+    .tc-pause-menu__item {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        border-left: 2px solid transparent;
+    }
+
+    .tc-pause-menu__item-label {
+        font-weight: 600;
+        font-size: 13px;
+    }
+
+    .tc-pause-menu__item:hover:not(.tc-pause-menu__item--disabled),
+    .tc-pause-menu__item:focus-visible:not(.tc-pause-menu__item--disabled) {
+        background: linear-gradient(90deg, rgba(201, 169, 97, 0.16), transparent 70%);
+        border-left-color: var(--fg-gold-bright);
+        color: var(--fg-gold-bright);
+    }
+
+    // Mono gilded badge.
+    .tc-pause-menu__item-badge {
+        font-family: var(--fg-mono);
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        border: 1px solid var(--fg-gold-deep);
+    }
+
+    // Footer: soften top border to fantasy hairline instead of gold-deep.
+    .tc-pause-menu__footer {
+        border-top-color: rgba(201, 169, 97, 0.18);
+    }
+
+    // Resume button: gilded leather, display caps + pressed bronze-plate bevel.
+    .tc-pause-menu__resume {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow:
+            inset 0 1px 0 rgba(232, 200, 120, 0.15),
+            inset 0 -8px 12px rgba(0, 0, 0, 0.4),
+            0 2px 0 rgba(0, 0, 0, 0.6);
+    }
+
+    tc-pause-screen {
+        --bs-pause-menu-backdrop-opacity: 0.7;
+        --bs-pause-menu-eyebrow-color: var(--fg-parch-dim);
+    }
+}

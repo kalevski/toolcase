@@ -1,0 +1,109 @@
+// Dungeon › tc-rich-page-header — realm/section banner header.
+// Token swap remaps the bg to wood panel fill and default icon tile to gold-
+// framed sigil slot. Structural overrides add display caps on the title, a
+// gilded bevel on the icon tile, and remap all eight pastel icon variants
+// to fantasy element/metal colours (the base hardcodes pastel hex that
+// clashes on dark wood and bypasses the semantic remap entirely).
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // 1. Token swap — host element carries all --bs-rich-page-header-* defaults.
+    tc-rich-page-header {
+        --bs-rich-page-header-bg: var(--fg-panel-bg);
+        --bs-rich-page-header-icon-bg: var(--fg-slot-bg);
+        --bs-rich-page-header-icon-color: var(--fg-gold);
+        --bs-rich-page-header-icon-border-color: var(--fg-gold-deep);
+    }
+
+    // 2. Title — display caps, wide tracking, realm-banner treatment.
+    .tc-rich-page-header-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 600;
+    }
+
+    // 3. Icon tile — gilded sigil plate with inset bevel.
+    .tc-rich-page-header-icon {
+        box-shadow: var(--fg-bevel-top), inset 0 0 0 1px var(--fg-gold-shadow);
+    }
+
+    // 4. Bottom rule — gold-gradient hairline (replaces the flat border-color).
+    //    Applied via ::after so it sits on top of any background bleed.
+    .tc-rich-page-header {
+        position: relative;
+        border-bottom: none;
+
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--fg-rule);
+            pointer-events: none;
+        }
+    }
+
+    // 5. Icon colour variants — remap the eight pastel hex literals to fantasy
+    //    element/metal tokens. Each keeps --bs-rich-page-header-icon-border-color
+    //    pointing to --fg-gold-deep so the gold frame is consistent.
+
+    // violet → arcane
+    .tc-rich-page-header-icon--violet {
+        --bs-rich-page-header-icon-color: var(--fg-arcane);
+        --bs-rich-page-header-icon-bg: rgba(164, 77, 208, 0.16);
+        --bs-rich-page-header-icon-border-color: var(--fg-gold-deep);
+    }
+
+    // cyan → frost
+    .tc-rich-page-header-icon--cyan {
+        --bs-rich-page-header-icon-color: var(--fg-frost);
+        --bs-rich-page-header-icon-bg: rgba(100, 180, 220, 0.16);
+        --bs-rich-page-header-icon-border-color: var(--fg-gold-deep);
+    }
+
+    // emerald → stamina
+    .tc-rich-page-header-icon--emerald {
+        --bs-rich-page-header-icon-color: var(--fg-stamina);
+        --bs-rich-page-header-icon-bg: rgba(80, 180, 100, 0.16);
+        --bs-rich-page-header-icon-border-color: var(--fg-gold-deep);
+    }
+
+    // amber → legendary
+    .tc-rich-page-header-icon--amber {
+        --bs-rich-page-header-icon-color: var(--fg-legendary);
+        --bs-rich-page-header-icon-bg: rgba(232, 162, 58, 0.16);
+        --bs-rich-page-header-icon-border-color: var(--fg-gold-deep);
+    }
+
+    // pink → mythic
+    .tc-rich-page-header-icon--pink {
+        --bs-rich-page-header-icon-color: var(--fg-mythic);
+        --bs-rich-page-header-icon-bg: rgba(224, 77, 106, 0.16);
+        --bs-rich-page-header-icon-border-color: var(--fg-gold-deep);
+    }
+
+    // blue → mana
+    .tc-rich-page-header-icon--blue {
+        --bs-rich-page-header-icon-color: var(--fg-mana);
+        --bs-rich-page-header-icon-bg: rgba(74, 127, 207, 0.16);
+        --bs-rich-page-header-icon-border-color: var(--fg-gold-deep);
+    }
+
+    // slate → silver (neutral metal, keep gold frame)
+    .tc-rich-page-header-icon--slate {
+        --bs-rich-page-header-icon-color: var(--fg-silver);
+        --bs-rich-page-header-icon-bg: rgba(197, 207, 214, 0.12);
+        --bs-rich-page-header-icon-border-color: var(--fg-gold-deep);
+    }
+
+    // rose → mythic (same ramp as pink, rose variant)
+    .tc-rich-page-header-icon--rose {
+        --bs-rich-page-header-icon-color: var(--fg-mythic);
+        --bs-rich-page-header-icon-bg: rgba(224, 77, 106, 0.16);
+        --bs-rich-page-header-icon-border-color: var(--fg-gold-deep);
+    }
+}

@@ -26,6 +26,19 @@ describe('hexToBuffer', () => {
     it('handles single byte', () => {
         expect(hexToBuffer('ff')).toEqual(new Uint8Array([255]))
     })
+
+    it('returns empty Uint8Array for empty string', () => {
+        expect(hexToBuffer('')).toEqual(new Uint8Array(0))
+    })
+
+    it('throws on odd-length input', () => {
+        expect(() => hexToBuffer('abc')).toThrow('hex string must have even length')
+    })
+
+    it('throws on non-hex characters', () => {
+        expect(() => hexToBuffer('zz')).toThrow('hex string contains non-hex characters')
+        expect(() => hexToBuffer('0g')).toThrow('hex string contains non-hex characters')
+    })
 })
 
 describe('bufferToHex <-> hexToBuffer roundtrip', () => {

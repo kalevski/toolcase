@@ -1,0 +1,319 @@
+// tc-json-schema-def — visual editor for defining JSON schema properties with
+// type selection, reference selectors, reordering, and duplicate-name
+// validation. Sharp corners throughout; slate neutrals carry the design. Status
+// colour is reserved for the duplicate-name error only. All cosmetic values flow
+// through --bs-json-schema-def-* backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+tc-json-schema-def {
+    --bs-json-schema-def-bg: var(--tc-surface);
+    --bs-json-schema-def-border-color: var(--tc-border);
+    --bs-json-schema-def-row-border: var(--tc-slate-100, #f1f5f9);
+    // Dense editor sizing: tight rows + compact form controls.
+    --bs-json-schema-def-row-padding-y: 0.25rem;
+    --bs-json-schema-def-row-padding-x: 0.75rem;
+    --bs-json-schema-def-row-min-height: 30px;
+    --bs-json-schema-def-input-padding-y: 0.1875rem;
+    --bs-json-schema-def-input-padding-x: 0.5rem;
+    --bs-json-schema-def-input-font-size: 13px;
+    --bs-json-schema-def-input-line-height: 1.4;
+    --bs-json-schema-def-row-hover-bg: var(--tc-surface-hover);
+    --bs-json-schema-def-header-bg: var(--tc-surface-muted);
+    --bs-json-schema-def-label-color: var(--tc-text);
+    --bs-json-schema-def-name-label-color: var(--tc-text-muted);
+    --bs-json-schema-def-name-label-size: 0.6875rem;
+    --bs-json-schema-def-key-color: var(--tc-text);
+    --bs-json-schema-def-key-size: 13px;
+    --bs-json-schema-def-icon-color: var(--tc-text-muted);
+    --bs-json-schema-def-icon-hover-bg: var(--tc-surface-muted);
+    --bs-json-schema-def-icon-hover-color: var(--tc-text);
+    --bs-json-schema-def-icon-size: 0.9rem;
+    --bs-json-schema-def-muted-color: var(--tc-text-muted);
+    --bs-json-schema-def-error-color: var(--tc-danger);
+    --bs-json-schema-def-mono: var(--bs-font-monospace, ui-monospace, monospace);
+}
+
+.tc-json-schema-def {
+    background: var(--bs-json-schema-def-bg);
+    border: 1px solid var(--bs-json-schema-def-border-color);
+    border-radius: 0;
+}
+
+// ── Disabled ─────────────────────────────────────────────────────────────────
+
+tc-json-schema-def[disabled] .tc-json-schema-def,
+.tc-json-schema-def--disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+// ── Header (schema name) ─────────────────────────────────────────────────────
+
+.tc-json-schema-def-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: var(--bs-json-schema-def-row-padding-y) var(--bs-json-schema-def-row-padding-x);
+    background: var(--bs-json-schema-def-header-bg);
+    border-bottom: 1px solid var(--bs-json-schema-def-border-color);
+}
+
+.tc-json-schema-def-name-label {
+    margin: 0;
+    font-size: var(--bs-json-schema-def-name-label-size);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bs-json-schema-def-name-label-color);
+}
+
+.tc-json-schema-def-label {
+    width: 100%;
+    padding: var(--bs-json-schema-def-input-padding-y) var(--bs-json-schema-def-input-padding-x);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: var(--bs-json-schema-def-input-line-height);
+    color: var(--bs-json-schema-def-label-color);
+}
+
+// ── Property rows ────────────────────────────────────────────────────────────
+
+.tc-json-schema-def-row {
+    border-bottom: 1px solid var(--bs-json-schema-def-row-border);
+    transition: background var(--tc-transition-fast, 0.15s ease);
+
+    &:last-child {
+        border-bottom: 0;
+    }
+
+    &:hover {
+        background: var(--bs-json-schema-def-row-hover-bg);
+    }
+}
+
+.tc-json-schema-def-row-main {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: var(--bs-json-schema-def-row-min-height);
+    padding: var(--bs-json-schema-def-row-padding-y) var(--bs-json-schema-def-row-padding-x);
+}
+
+// Compact form-control sizing — override the roomy default padding/line-height
+// so the row reads as a dense ~30px grid of cells.
+.tc-json-schema-def-key,
+.tc-json-schema-def-type,
+.tc-json-schema-def-ref,
+.tc-json-schema-def-default {
+    padding: var(--bs-json-schema-def-input-padding-y) var(--bs-json-schema-def-input-padding-x);
+    font-size: var(--bs-json-schema-def-input-font-size);
+    line-height: var(--bs-json-schema-def-input-line-height);
+}
+
+// Property-name keys are machine-facing — render mono.
+.tc-json-schema-def-key {
+    flex: 1 1 30%;
+    min-width: 0;
+    font-family: var(--bs-json-schema-def-mono);
+    font-size: var(--bs-json-schema-def-key-size);
+    color: var(--bs-json-schema-def-key-color);
+}
+
+.tc-json-schema-def-type {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 7rem;
+}
+
+.tc-json-schema-def-ref {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+// Default-value column — free-text, shares the flex space with the key.
+.tc-json-schema-def-default {
+    flex: 1 1 25%;
+    min-width: 0;
+}
+
+// ── Row action buttons — ghost icon, hover-well ladder ───────────────────────
+
+.tc-json-schema-def-row-actions {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.125rem;
+}
+
+.tc-json-schema-def-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    color: var(--bs-json-schema-def-icon-color);
+    cursor: pointer;
+    transition: background var(--tc-transition-fast, 0.15s ease),
+        color var(--tc-transition-fast, 0.15s ease);
+
+    svg {
+        width: var(--bs-json-schema-def-icon-size);
+        height: var(--bs-json-schema-def-icon-size);
+        pointer-events: none;
+    }
+
+    &:hover {
+        background: var(--bs-json-schema-def-icon-hover-bg);
+        color: var(--bs-json-schema-def-icon-hover-color);
+    }
+
+    &:active {
+        background: var(--tc-border);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: -2px;
+    }
+
+    &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+}
+
+// ── Duplicate / blank key validation — the only status colour ────────────────
+
+.tc-json-schema-def-key-error {
+    padding: 0 var(--bs-json-schema-def-row-padding-x) var(--bs-json-schema-def-row-padding-y);
+    font-size: 0.75rem;
+    color: var(--bs-json-schema-def-error-color);
+}
+
+// ── Add button ───────────────────────────────────────────────────────────────
+
+.tc-json-schema-def-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin: 0.5rem;
+    padding: 0.35rem 0.6rem;
+    background: transparent;
+    border: 1px solid var(--bs-json-schema-def-border-color);
+    border-radius: 0;
+    color: var(--bs-json-schema-def-key-color);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background var(--tc-transition-fast, 0.15s ease),
+        color var(--tc-transition-fast, 0.15s ease);
+
+    svg {
+        width: var(--bs-json-schema-def-icon-size);
+        height: var(--bs-json-schema-def-icon-size);
+        pointer-events: none;
+    }
+
+    &:hover {
+        background: var(--bs-json-schema-def-icon-hover-bg);
+        color: var(--bs-json-schema-def-icon-hover-color);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+// ── Empty state ──────────────────────────────────────────────────────────────
+
+.tc-json-schema-def-empty {
+    padding: var(--bs-json-schema-def-row-padding-y) var(--bs-json-schema-def-row-padding-x);
+    font-family: var(--bs-json-schema-def-mono);
+    font-size: 0.75rem;
+    color: var(--bs-json-schema-def-muted-color);
+}
+
+// ── Loading skeleton ─────────────────────────────────────────────────────────
+
+.tc-json-schema-def-skeleton-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: var(--bs-json-schema-def-row-padding-y) var(--bs-json-schema-def-row-padding-x);
+    border-bottom: 1px solid var(--bs-json-schema-def-row-border);
+
+    &:last-child {
+        border-bottom: 0;
+    }
+}
+
+.tc-json-schema-def-skeleton-key,
+.tc-json-schema-def-skeleton-field,
+.tc-json-schema-def-skeleton-actions {
+    height: 1.5rem;
+    border-radius: 0;
+    background: linear-gradient(
+        90deg,
+        var(--tc-surface-muted) 25%,
+        var(--tc-surface-hover) 37%,
+        var(--tc-surface-muted) 63%
+    );
+    background-size: 200% 100%;
+    animation: tc-json-schema-def-shimmer 1.4s ease infinite;
+}
+
+.tc-json-schema-def-skeleton-key {
+    flex: 1 1 30%;
+}
+
+.tc-json-schema-def-skeleton-field {
+    flex: 1 1 auto;
+}
+
+.tc-json-schema-def-skeleton-actions {
+    flex: 0 0 5rem;
+}
+
+@keyframes tc-json-schema-def-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+// ── Touch targets — WCAG 2.5.5 ───────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-json-schema-def-icon-btn {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+// ── Reduced motion ───────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-json-schema-def-row {
+        transition: none;
+    }
+
+    .tc-json-schema-def-skeleton-key,
+    .tc-json-schema-def-skeleton-field,
+    .tc-json-schema-def-skeleton-actions {
+        animation: none;
+        background: var(--tc-surface-muted);
+    }
+}

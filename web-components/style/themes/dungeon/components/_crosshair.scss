@@ -1,0 +1,21 @@
+// Dungeon › tc-crosshair — parchment-toned reticle with a dark drop-glow on each
+// shape so it reads against any backdrop, matching gc-crosshair. The host var
+// sets the parchment tint; the .tc-* rules add the glow box-shadow the base omits.
+//
+// Design source:  game-components/style/components/_crosshair.scss
+// Target classes: web-components/style/components/_crosshair.scss
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-crosshair {
+        --bs-crosshair-color: var(--fg-parch);
+    }
+
+    // Dark glow lifts the reticle off the scene (base ships none).
+    .tc-crosshair-arm,
+    .tc-crosshair-dot,
+    .tc-crosshair-ring,
+    .tc-crosshair-diamond {
+        box-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+    }
+}

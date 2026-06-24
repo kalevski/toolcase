@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto'
 import {
 	verifyIdToken, fetchOIDCDiscovery, clearJwksCache, clearDiscoveryCache, oidcProvider
 } from '../../src/oauth2/oidc'
-import { OIDCVerificationError } from '../../src/errors'
+import { OIDCVerificationError, OAuth2ProtocolError } from '../../src/errors'
 
 const ISSUER = 'https://idp.test'
 const AUDIENCE = 'cid'
@@ -88,6 +88,22 @@ describe('verifyIdToken', () => {
 		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, allowedAlgorithms: ['ES256'] })).rejects.toBeInstanceOf(OIDCVerificationError)
 	})
 
+	it('rejects symmetric algorithm HS256 before any verification', async () => {
+		const token = await signToken({})
+		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, allowedAlgorithms: ['HS256'] })).rejects.toThrow('symmetric/none algorithms are not allowed for ID tokens')
+	})
+
+	it('rejects none algorithm before any verification', async () => {
+		const token = await signToken({})
+		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, allowedAlgorithms: ['none'] })).rejects.toThrow('symmetric/none algorithms are not allowed for ID tokens')
+	})
+
+	it('accepts RS256 in allowedAlgorithms', async () => {
+		const token = await signToken({})
+		const verified = await verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks, allowedAlgorithms: ['RS256'] })
+		expect(verified.payload.iss).toBe(ISSUER)
+	})
+
 	it('matches nonce', async () => {
 		const token = await signToken({ nonce: 'n1' })
 		const verified = await verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { nonce: 'n1' })
@@ -113,6 +129,52 @@ describe('verifyIdToken', () => {
 		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { accessToken: 'at-test' })).rejects.toBeInstanceOf(OIDCVerificationError)
 	})
 
+	it('rejects when accessToken provided but at_hash absent', async () => {
+		const token = await signToken({})
+		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { accessToken: 'at-test' })).rejects.toThrow('at_hash required but absent')
+	})
+
+	it('checks c_hash', async () => {
+		const authorizationCode = 'code-test'
+		const digest = createHash('sha256').update(authorizationCode).digest()
+		const c_hash = digest.subarray(0, 16).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+		const token = await signToken({ c_hash })
+		const verified = await verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { authorizationCode })
+		expect(verified.payload.c_hash).toBe(c_hash)
+	})
+
+	it('rejects bad c_hash', async () => {
+		const token = await signToken({ c_hash: 'wrong' })
+		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { authorizationCode: 'code-test' })).rejects.toBeInstanceOf(OIDCVerificationError)
+	})
+
+	it('rejects when authorizationCode provided but c_hash absent', async () => {
+		const token = await signToken({})
+		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { authorizationCode: 'code-test' })).rejects.toThrow('c_hash required but absent')
+	})
+
+	it('rejects at_hash that has the correct length but wrong value (timing-safe comparison)', async () => {
+		// Build the correct at_hash for 'at-test', then flip one character to produce a
+		// same-length string that must be rejected — exercises the timingSafeEqual path.
+		const accessToken = 'at-test'
+		const digest = createHash('sha256').update(accessToken).digest()
+		const correctHash = digest.subarray(0, 16).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+		// Produce a same-length but different value by corrupting the first char
+		const wrongChar = correctHash[0] === 'A' ? 'B' : 'A'
+		const wrongHash = wrongChar + correctHash.slice(1)
+		expect(wrongHash.length).toBe(correctHash.length)
+		const token = await signToken({ at_hash: wrongHash })
+		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { accessToken })).rejects.toThrow('at_hash mismatch')
+	})
+
+	it('rejects nonce with same length but different value (timing-safe comparison)', async () => {
+		const nonce = 'aaaaaaaaaaaaaaaa'
+		const wrongNonce = 'aaaaaaaaaaaaaaab'
+		expect(nonce.length).toBe(wrongNonce.length)
+		const token = await signToken({ nonce })
+		await expect(verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { nonce: wrongNonce })).rejects.toThrow('nonce mismatch')
+	})
+
 	it('enforces requiredAmr', async () => {
 		const token = await signToken({ amr: ['pwd', 'mfa'] })
 		const verified = await verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { requiredAmr: ['mfa'] })
@@ -125,9 +187,69 @@ describe('verifyIdToken', () => {
 		const oldToken = await signToken({ auth_time: Math.floor(Date.now() / 1000) - 3600 })
 		await expect(verifyIdToken(oldToken, { issuer: ISSUER, audience: AUDIENCE, jwks: localJwks }, { maxAgeSeconds: 60 })).rejects.toBeInstanceOf(OIDCVerificationError)
 	})
+
+	it('invokes custom fetchImpl from http options when jwksUri is used', async () => {
+		const jwks = { keys: [publicJwk] }
+		const customFetch = mockJwksFetch(jwks)
+		const token = await signToken({})
+		clearJwksCache()
+		const result = await verifyIdToken(token, {
+			issuer: ISSUER,
+			audience: AUDIENCE,
+			jwksUri: `${ISSUER}/jwks`,
+			http: { fetchImpl: customFetch }
+		})
+		expect(customFetch).toHaveBeenCalled()
+		expect(result.payload.iss).toBe(ISSUER)
+	})
+
+	it('uses its own fetchImpl and does not share the global cache with other callers', async () => {
+		const jwks = { keys: [publicJwk] }
+		const customFetch1 = mockJwksFetch(jwks)
+		const customFetch2 = mockJwksFetch(jwks)
+		const token = await signToken({})
+		clearJwksCache()
+		await Promise.all([
+			verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwksUri: `${ISSUER}/jwks`, http: { fetchImpl: customFetch1 } }),
+			verifyIdToken(token, { issuer: ISSUER, audience: AUDIENCE, jwksUri: `${ISSUER}/jwks`, http: { fetchImpl: customFetch2 } })
+		])
+		expect(customFetch1).toHaveBeenCalled()
+		expect(customFetch2).toHaveBeenCalled()
+	})
+
+	it('enforces timeoutMs: aborts JWKS fetch that exceeds the timeout', async () => {
+		const slowFetch = vi.fn((_url: string, init: RequestInit) => {
+			return new Promise<Response>((_resolve, reject) => {
+				if (init.signal) {
+					init.signal.addEventListener('abort', () => reject(new DOMException('aborted', 'AbortError')))
+				}
+			})
+		}) as any
+		const token = await signToken({})
+		clearJwksCache()
+		await expect(
+			verifyIdToken(token, {
+				issuer: ISSUER,
+				audience: AUDIENCE,
+				jwksUri: `${ISSUER}/jwks`,
+				http: { fetchImpl: slowFetch, timeoutMs: 50 }
+			})
+		).rejects.toThrow()
+		expect(slowFetch).toHaveBeenCalled()
+	})
 })
 
 describe('fetchOIDCDiscovery', () => {
+
+	const makeDiscoveryDoc = (issuer: string = ISSUER) => ({
+		issuer,
+		authorization_endpoint: `${issuer}/auth`,
+		token_endpoint: `${issuer}/token`,
+		jwks_uri: `${issuer}/jwks`,
+		response_types_supported: ['code'],
+		subject_types_supported: ['public'],
+		id_token_signing_alg_values_supported: ['RS256']
+	})
 
 	const fetchDiscovery = (doc: any) => vi.fn(async () => new Response(JSON.stringify(doc), {
 		status: 200,
@@ -135,19 +257,61 @@ describe('fetchOIDCDiscovery', () => {
 	})) as any
 
 	it('fetches and parses discovery document', async () => {
-		const doc = {
-			issuer: ISSUER,
-			authorization_endpoint: `${ISSUER}/auth`,
-			token_endpoint: `${ISSUER}/token`,
-			jwks_uri: `${ISSUER}/jwks`,
-			response_types_supported: ['code'],
-			subject_types_supported: ['public'],
-			id_token_signing_alg_values_supported: ['RS256']
-		}
+		const doc = makeDiscoveryDoc()
 		const fetchImpl = fetchDiscovery(doc)
 		const result = await fetchOIDCDiscovery(ISSUER, { fetchImpl, cacheTtlMs: 0 })
 		expect(result.issuer).toBe(ISSUER)
 		expect(fetchImpl.mock.calls[0][0]).toBe(`${ISSUER}/.well-known/openid-configuration`)
+	})
+
+	it('rejects when discovery issuer does not match requested issuer', async () => {
+		const doc = makeDiscoveryDoc('https://evil.test')
+		const fetchImpl = fetchDiscovery(doc)
+		await expect(fetchOIDCDiscovery(ISSUER, { fetchImpl, cacheTtlMs: 0 })).rejects.toBeInstanceOf(OAuth2ProtocolError)
+	})
+
+	it('accepts matching issuer without trailing slash', async () => {
+		const doc = makeDiscoveryDoc()
+		const fetchImpl = fetchDiscovery(doc)
+		const result = await fetchOIDCDiscovery(`${ISSUER}/`, { fetchImpl, cacheTtlMs: 0 })
+		expect(result.issuer).toBe(ISSUER)
+	})
+
+	it('concurrent callers with different fetchImpl each use their own implementation', async () => {
+		const doc = makeDiscoveryDoc()
+		const fetchImpl1 = fetchDiscovery(doc)
+		const fetchImpl2 = fetchDiscovery(doc)
+		const [r1, r2] = await Promise.all([
+			fetchOIDCDiscovery(ISSUER, { fetchImpl: fetchImpl1 }),
+			fetchOIDCDiscovery(ISSUER, { fetchImpl: fetchImpl2 })
+		])
+		expect(fetchImpl1).toHaveBeenCalledOnce()
+		expect(fetchImpl2).toHaveBeenCalledOnce()
+		expect(r1.issuer).toBe(ISSUER)
+		expect(r2.issuer).toBe(ISSUER)
+	})
+
+	it('caller with custom fetchImpl is not served a cached result', async () => {
+		// Populate the shared cache (no fetchImpl = cached path, uses global fetch mock)
+		const doc = makeDiscoveryDoc()
+		vi.stubGlobal('fetch', fetchDiscovery(doc))
+		await fetchOIDCDiscovery(ISSUER)
+
+		// A subsequent call with a custom fetchImpl must bypass the cache and hit its own impl
+		const fetchImpl2 = fetchDiscovery(doc)
+		await fetchOIDCDiscovery(ISSUER, { fetchImpl: fetchImpl2 })
+		expect(fetchImpl2).toHaveBeenCalledOnce()
+	})
+
+	it('caller with custom headers is not served a cached result', async () => {
+		const doc = makeDiscoveryDoc()
+		vi.stubGlobal('fetch', fetchDiscovery(doc))
+		await fetchOIDCDiscovery(ISSUER)
+
+		const fetchImpl2 = fetchDiscovery(doc)
+		vi.stubGlobal('fetch', fetchImpl2)
+		await fetchOIDCDiscovery(ISSUER, { headers: { Authorization: 'Bearer tenant-token' } })
+		expect(fetchImpl2).toHaveBeenCalledOnce()
 	})
 })
 

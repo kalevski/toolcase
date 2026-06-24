@@ -1,0 +1,42 @@
+// Dungeon › tc-color-picker — gilded trigger plate + wood-panel overlay.
+// Token swap: trigger gets button gradient, panel gets wood fill + bevel stack.
+// Label reads as display caps. All swatches stay square (base is already radius:0).
+// rgba(0,0,0,*) swatch outlines and #fff/difference check overlay are
+// intentional contrast hacks against arbitrary user colors — left untouched.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Trigger ────────────────────────────────────────────────────────────────
+
+    .tc-color-picker-trigger {
+        --bs-color-picker-trigger-bg: var(--fg-button-bg);
+        --bs-color-picker-trigger-border: var(--fg-gold);
+    }
+
+    // ── Overlay panel ──────────────────────────────────────────────────────────
+
+    .tc-color-picker-panel {
+        --bs-color-picker-panel-bg: var(--fg-panel-bg);
+
+        // Replace the flat tc-shadow-lg with the gilded inset bevel stack.
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── Label — display caps ───────────────────────────────────────────────────
+
+    .tc-color-picker-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+        color: var(--fg-parch);
+    }
+
+    // ── Hex text — mono numerals (already via --bs-font-monospace remap) ───────
+    // No-op: the foundation already points --bs-font-monospace → --fg-mono.
+    // Explicit override kept for clarity and resilience if the remap ever changes.
+    .tc-color-picker-hex-text {
+        font-family: var(--fg-mono);
+        color: var(--fg-parch-dim);
+    }
+}

@@ -1,0 +1,26 @@
+// Dungeon › tc-buff-bar — warmth the cooldown mask toward dungeon ink and
+// turn the stack badge into a gilded count chip. Layout and cooldown angle
+// logic are left untouched; only the overlay colour and badge chrome change.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-buff-bar {
+        // Swap the hardcoded slate-ink cooldown mask for a warmer dungeon-ink dimmer.
+        --bs-buff-bar-cooldown-overlay: rgba(10, 7, 4, 0.6);
+        // Explicitly gold badge background (would arrive via --tc-app-accent → gold,
+        // but pin it here so it's robust if the accent mapping shifts).
+        --bs-buff-bar-stack-bg: var(--fg-gold);
+        // Crisp dark numerals on the gold chip — more readable than the default
+        // light surface colour.
+        --bs-buff-bar-stack-color: var(--fg-ink);
+    }
+
+    // Gilded stamp chip: gold-edged border + top-highlight bevel + bold mono weight.
+    // font-family is on the element (not just a var) so we override the class directly.
+    .tc-buff-bar__stack {
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow: var(--fg-bevel-top);
+        font-family: var(--fg-mono);
+        font-weight: 700;
+    }
+}

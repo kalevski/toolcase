@@ -1,0 +1,330 @@
+// tc-pie-chart — inline-SVG pie / donut chart with a percentage distribution, an
+// interactive (hoverable + toggleable) legend, and an optional donut centre
+// label. Slate neutrals carry it: the chart frame sits on --tc-surface behind a
+// 1px hairline. Default slice fills come from a small slate-leaning ramp (neutrals
+// first, exposed as --bs-pie-chart-slice-N); an explicit per-slice `color` from
+// the data is the one sanctioned override. The pie/donut disc is a sanctioned
+// circular shape; everything else (wrapper, legend swatches) is sharp. Hover
+// highlights via opacity + a subtle slice-pull (frozen under reduced motion) — never
+// a new hue. The tooltip is overlay tier — ink surface, white text, elevation
+// shadow, a 3px colored left stripe per the toast/tooltip motif. Legend entries are
+// real buttons following the state ladder (active = ink, dimmed when toggled off)
+// with a visible focus outline. The centre label uses Inter weight 600 with a mono
+// sub-value. Every cosmetic value flows through a --bs-pie-chart-* custom property.
+
+tc-pie-chart {
+    // slice fill ramp — neutrals first, then a few restrained data hues
+    --bs-pie-chart-slice-1: var(--tc-app-accent);
+    --bs-pie-chart-slice-2: var(--tc-slate-500);
+    --bs-pie-chart-slice-3: var(--tc-info);
+    --bs-pie-chart-slice-4: var(--tc-slate-700);
+    --bs-pie-chart-slice-5: var(--tc-success);
+    --bs-pie-chart-slice-6: var(--tc-slate-400);
+    --bs-pie-chart-slice-7: var(--tc-warning);
+    --bs-pie-chart-slice-8: var(--tc-slate-600);
+
+    --bs-pie-chart-bg: var(--tc-surface);
+    --bs-pie-chart-border: 1px solid var(--tc-border);
+    --bs-pie-chart-title-color: var(--tc-text);
+    --bs-pie-chart-subtitle-color: var(--tc-text-muted);
+
+    // gap between slices (the surface shows through)
+    --bs-pie-chart-slice-stroke: var(--tc-surface);
+    --bs-pie-chart-slice-stroke-width: 2;
+    --bs-pie-chart-dim-opacity: 0.5;
+
+    // donut hole + centre label
+    --bs-pie-chart-hole-fill: var(--tc-surface);
+    --bs-pie-chart-center-label-color: var(--tc-text-muted);
+    --bs-pie-chart-center-value-color: var(--tc-text);
+
+    // tooltip (overlay tier)
+    --bs-pie-chart-tooltip-bg: var(--tc-ink);
+    --bs-pie-chart-tooltip-color: #fff;
+    --bs-pie-chart-tooltip-stripe-width: 3px;
+    --bs-pie-chart-tooltip-shadow: var(--tc-shadow-md);
+
+    // legend
+    --bs-pie-chart-legend-color: var(--tc-text);
+    --bs-pie-chart-legend-pct-color: var(--tc-text-muted);
+    --bs-pie-chart-legend-off-opacity: 0.45;
+
+    --bs-pie-chart-skeleton-bg: var(--tc-surface-muted);
+
+    display: block;
+}
+
+.tc-pie-chart-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    padding: 0.875rem 1rem;
+    background: var(--bs-pie-chart-bg);
+    border: var(--bs-pie-chart-border);
+    border-radius: 0;
+}
+
+// --- header ---
+.tc-pie-chart-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.tc-pie-chart-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--bs-pie-chart-title-color);
+}
+
+.tc-pie-chart-subtitle {
+    font-size: 0.8125rem;
+    line-height: 1.3;
+    color: var(--bs-pie-chart-subtitle-color);
+}
+
+// --- body: chart + legend side by side ---
+.tc-pie-chart-body {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.5rem;
+}
+
+.tc-pie-chart-plot {
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.tc-pie-chart-svg {
+    display: block;
+    overflow: visible;
+    touch-action: none;
+    max-width: 100%;
+    height: auto;
+}
+
+// --- slices ---
+.tc-pie-chart-slice {
+    stroke: var(--bs-pie-chart-slice-stroke);
+    stroke-width: var(--bs-pie-chart-slice-stroke-width);
+    stroke-linejoin: round;
+    fill: var(--tc-pie-color, var(--bs-pie-chart-slice-1));
+    cursor: pointer;
+    transition: transform 0.15s ease, opacity var(--tc-transition-fast, 0.15s ease);
+}
+
+// when one slice is active, the rest recede (highlight via opacity, not a new hue)
+.tc-pie-chart-slices--has-active .tc-pie-chart-slice {
+    opacity: var(--bs-pie-chart-dim-opacity);
+}
+
+.tc-pie-chart-slice--active {
+    opacity: 1;
+}
+
+// --- donut hole + centre label ---
+.tc-pie-chart-hole {
+    fill: var(--bs-pie-chart-hole-fill);
+}
+
+.tc-pie-chart-center-label {
+    fill: var(--bs-pie-chart-center-label-color);
+    font-family: var(--tc-font-sans, 'Inter', sans-serif);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.tc-pie-chart-center-value {
+    fill: var(--bs-pie-chart-center-value-color);
+    font-family: var(--tc-font-mono);
+    font-size: 1.25rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+// --- empty ---
+.tc-pie-chart-empty {
+    padding: 1.5rem 0;
+    font-size: 0.8125rem;
+    color: var(--tc-text-muted);
+    text-align: center;
+}
+
+// --- tooltip (overlay tier) ---
+.tc-pie-chart-tooltip {
+    position: absolute;
+    z-index: var(--tc-z-tooltip, 1070);
+    transform: translate(-50%, calc(-100% - 8px));
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+    padding: 0.3125rem 0.5rem;
+    background: var(--bs-pie-chart-tooltip-bg);
+    color: var(--bs-pie-chart-tooltip-color);
+    border-radius: 0;
+    border-left: var(--bs-pie-chart-tooltip-stripe-width) solid var(--tc-pie-color, var(--tc-accent));
+    box-shadow: var(--bs-pie-chart-tooltip-shadow);
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.tc-pie-chart-tooltip[hidden] {
+    display: none;
+}
+
+.tc-pie-chart-tooltip-label {
+    font-size: 0.75rem;
+    opacity: 0.85;
+}
+
+.tc-pie-chart-tooltip-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.tc-pie-chart-tooltip-value {
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.tc-pie-chart-tooltip-pct {
+    margin-left: auto;
+    font-family: var(--tc-font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.04em;
+    opacity: 0.75;
+}
+
+// --- legend (toggle buttons) ---
+.tc-pie-chart-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    min-width: 0;
+}
+
+.tc-pie-chart-legend-row {
+    margin: 0;
+}
+
+.tc-pie-chart-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.1875rem 0.375rem;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    color: var(--bs-pie-chart-legend-color);
+    font-size: 0.8125rem;
+    line-height: 1.2;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color var(--tc-transition-fast, 0.15s ease),
+        opacity var(--tc-transition-fast, 0.15s ease);
+}
+
+// hover / hovered-slice mirror → slate well (state ladder)
+.tc-pie-chart-legend-item:hover,
+.tc-pie-chart-legend-item--active {
+    background: var(--tc-surface-muted);
+}
+
+// dimmed (toggled off)
+.tc-pie-chart-legend-item--off {
+    opacity: var(--bs-pie-chart-legend-off-opacity);
+}
+
+.tc-pie-chart-legend-item--off .tc-pie-chart-legend-label {
+    text-decoration: line-through;
+}
+
+.tc-pie-chart-legend-item:focus-visible {
+    outline: 2px solid var(--tc-app-accent);
+    outline-offset: 2px;
+}
+
+// small square swatch (sharp)
+.tc-pie-chart-legend-swatch {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 0;
+    background: var(--tc-pie-color, var(--bs-pie-chart-slice-1));
+    flex: 0 0 auto;
+}
+
+.tc-pie-chart-legend-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tc-pie-chart-legend-pct {
+    flex: 0 0 auto;
+    margin-left: auto;
+    font-family: var(--tc-font-mono);
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--bs-pie-chart-legend-pct-color);
+}
+
+// --- loading skeleton (slate neutrals only) ---
+.tc-pie-chart-skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--bs-pie-chart-skeleton-bg) 25%,
+        var(--tc-surface-hover) 37%,
+        var(--bs-pie-chart-skeleton-bg) 63%
+    );
+    background-size: 200% 100%;
+    animation: tc-pie-chart-shimmer 1.4s ease infinite;
+}
+
+.tc-pie-chart-skeleton--title {
+    width: 40%;
+    height: 0.95rem;
+}
+
+// the resting pie disc is circular — the skeleton mirrors that one sanctioned curve
+.tc-pie-chart-skeleton--disc {
+    flex: 0 0 auto;
+    border-radius: 50%;
+}
+
+.tc-pie-chart-skeleton--legend {
+    width: 8rem;
+    height: 0.85rem;
+}
+
+@keyframes tc-pie-chart-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-pie-chart-skeleton {
+        animation: none;
+        background: var(--bs-pie-chart-skeleton-bg);
+    }
+
+    // freeze the decorative slice-pull transform; keep the opacity state change
+    .tc-pie-chart-slice {
+        transition: opacity var(--tc-transition-fast, 0.15s ease);
+    }
+
+    .tc-pie-chart-legend-item {
+        transition: none;
+    }
+}

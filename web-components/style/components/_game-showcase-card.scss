@@ -1,0 +1,292 @@
+// tc-game-showcase-card — game showcase card with artwork, title, pitch, tags, compliance, and stamps.
+// All cosmetics flow through --bs-game-showcase-card-* custom properties backed by --tc-* tokens.
+// Sharp corners (border-radius: 0); status color only on compliance indicators and stamp tones.
+
+@use '../foundation/tokens' as *;
+
+tc-game-showcase-card {
+    --bs-game-showcase-card-bg: var(--tc-surface);
+    --bs-game-showcase-card-border: 1px solid var(--tc-border);
+    --bs-game-showcase-card-shadow: var(--tc-shadow-sm);
+    --bs-game-showcase-card-shadow-hover: var(--tc-shadow-hover);
+    --bs-game-showcase-card-transition: transform 150ms ease, box-shadow 150ms ease;
+
+    // Art region
+    --bs-game-showcase-card-art-height: 10rem;
+    --bs-game-showcase-card-art-bg: var(--tc-surface-muted);
+
+    // Stamp overlay
+    --bs-game-showcase-card-stamp-bg: var(--tc-ink);
+    --bs-game-showcase-card-stamp-color: #fff;
+    --bs-game-showcase-card-stamp-font-size: 0.6875rem;
+    --bs-game-showcase-card-stamp-padding: 0.1875rem 0.375rem;
+    --bs-game-showcase-card-stamp-gap: 0.25rem;
+
+    // Meta row
+    --bs-game-showcase-card-meta-font-size: 0.6875rem;
+    --bs-game-showcase-card-meta-color: var(--tc-text-faint);
+    --bs-game-showcase-card-meta-padding: 0.625rem 0.875rem 0;
+
+    // Body padding
+    --bs-game-showcase-card-body-padding: 0.75rem 0.875rem;
+
+    // Title
+    --bs-game-showcase-card-title-color: var(--tc-text);
+    --bs-game-showcase-card-title-font-size: 1rem;
+    --bs-game-showcase-card-title-weight: 600;
+
+    // Pitch
+    --bs-game-showcase-card-pitch-color: var(--tc-text-muted);
+    --bs-game-showcase-card-pitch-font-size: 0.8125rem;
+
+    // Tags
+    --bs-game-showcase-card-tag-bg: var(--tc-surface-muted);
+    --bs-game-showcase-card-tag-color: var(--tc-text-muted);
+    --bs-game-showcase-card-tag-border: 1px solid var(--tc-border);
+    --bs-game-showcase-card-tag-font-size: 0.6875rem;
+    --bs-game-showcase-card-tag-padding: 0.125rem 0.4375rem;
+
+    // Compliance
+    --bs-game-showcase-card-compliance-font-size: 0.6875rem;
+    --bs-game-showcase-card-compliance-padding: 0.625rem 0.875rem;
+    --bs-game-showcase-card-compliance-gap: 0.75rem;
+    --bs-game-showcase-card-compliance-icon-size: 0.875rem;
+
+    // Status colors (compliance only)
+    --bs-game-showcase-card-pass-color: var(--tc-success);
+    --bs-game-showcase-card-warn-color: var(--tc-warning);
+    --bs-game-showcase-card-fail-color: var(--tc-danger);
+
+    // Stamp tone colors (sparingly)
+    --bs-game-showcase-card-stamp-success-bg: var(--tc-success);
+    --bs-game-showcase-card-stamp-warning-bg: var(--tc-warning);
+    --bs-game-showcase-card-stamp-danger-bg: var(--tc-danger);
+    --bs-game-showcase-card-stamp-info-bg: var(--tc-info);
+}
+
+// ── Outer card wrapper ─────────────────────────────────────────────────────────
+
+.tc-game-showcase-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--bs-game-showcase-card-bg);
+    border: var(--bs-game-showcase-card-border);
+    box-shadow: var(--bs-game-showcase-card-shadow);
+    border-radius: 0;
+    overflow: hidden;
+    transition: var(--bs-game-showcase-card-transition);
+    height: 100%;
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: var(--bs-game-showcase-card-shadow-hover);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: none;
+
+        &:hover {
+            transform: none;
+        }
+    }
+}
+
+// Clickable host: pointer cursor; global :focus-visible in _reset.scss handles the outline ring
+tc-game-showcase-card[role='button'] {
+    cursor: pointer;
+}
+
+// ── Art region ─────────────────────────────────────────────────────────────────
+
+.tc-game-showcase-card-art {
+    position: relative;
+    width: 100%;
+    height: var(--bs-game-showcase-card-art-height);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.tc-game-showcase-card-art-main {
+    width: 100%;
+    height: 100%;
+
+    > * {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+}
+
+.tc-game-showcase-card-art-placeholder {
+    position: absolute;
+    inset: 0;
+    background: var(--bs-game-showcase-card-art-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+// When art is present, cover placeholder with the main layer
+.tc-game-showcase-card--has-art {
+    .tc-game-showcase-card-art-main {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+    }
+}
+
+// ── Stamps overlay ─────────────────────────────────────────────────────────────
+
+.tc-game-showcase-card-stamps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--bs-game-showcase-card-stamp-gap);
+    padding: 0.5rem 0.875rem;
+    border-bottom: var(--bs-game-showcase-card-border);
+}
+
+.tc-game-showcase-card-stamp {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: var(--bs-game-showcase-card-stamp-bg);
+    color: var(--bs-game-showcase-card-stamp-color);
+    font-size: var(--bs-game-showcase-card-stamp-font-size);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: var(--bs-game-showcase-card-stamp-padding);
+    border-radius: 0;
+
+    // Tone modifiers
+    &--success { background: var(--bs-game-showcase-card-stamp-success-bg); }
+    &--warning { background: var(--bs-game-showcase-card-stamp-warning-bg); color: var(--tc-ink); }
+    &--danger  { background: var(--bs-game-showcase-card-stamp-danger-bg); }
+    &--info    { background: var(--bs-game-showcase-card-stamp-info-bg); }
+}
+
+.tc-game-showcase-card-stamp-icon {
+    display: inline-flex;
+    width: 0.75rem;
+    height: 0.75rem;
+    flex-shrink: 0;
+
+    svg {
+        width: 100%;
+        height: 100%;
+        stroke: currentColor;
+        fill: none;
+    }
+}
+
+// ── Meta row ───────────────────────────────────────────────────────────────────
+
+.tc-game-showcase-card-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--bs-game-showcase-card-meta-padding);
+    gap: 0.5rem;
+    font-size: var(--bs-game-showcase-card-meta-font-size);
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--bs-game-showcase-card-meta-color);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.tc-game-showcase-card-meta-left,
+.tc-game-showcase-card-meta-right {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-width: 0;
+}
+
+// ── Title ─────────────────────────────────────────────────────────────────────
+
+.tc-game-showcase-card-title {
+    padding: 0.5rem 0.875rem 0.25rem;
+    font-size: var(--bs-game-showcase-card-title-font-size);
+    font-weight: var(--bs-game-showcase-card-title-weight);
+    color: var(--bs-game-showcase-card-title-color);
+    line-height: 1.3;
+    font-family: 'Inter', var(--bs-body-font-family);
+}
+
+// ── Pitch ─────────────────────────────────────────────────────────────────────
+
+.tc-game-showcase-card-pitch {
+    padding: 0 0.875rem 0.625rem;
+    font-size: var(--bs-game-showcase-card-pitch-font-size);
+    color: var(--bs-game-showcase-card-pitch-color);
+    line-height: 1.5;
+    flex: 1;
+}
+
+// ── Tags ──────────────────────────────────────────────────────────────────────
+
+.tc-game-showcase-card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    padding: 0 0.875rem 0.625rem;
+}
+
+.tc-game-showcase-card-tag {
+    display: inline-flex;
+    align-items: center;
+    background: var(--bs-game-showcase-card-tag-bg);
+    color: var(--bs-game-showcase-card-tag-color);
+    border: var(--bs-game-showcase-card-tag-border);
+    font-size: var(--bs-game-showcase-card-tag-font-size);
+    font-family: 'JetBrains Mono', monospace;
+    padding: var(--bs-game-showcase-card-tag-padding);
+    border-radius: 0;
+}
+
+// ── Compliance row ─────────────────────────────────────────────────────────────
+
+.tc-game-showcase-card-compliance {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--bs-game-showcase-card-compliance-gap);
+    padding: var(--bs-game-showcase-card-compliance-padding);
+    border-top: var(--bs-game-showcase-card-border);
+}
+
+.tc-game-showcase-card-compliance-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: var(--bs-game-showcase-card-compliance-font-size);
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--tc-text-muted);
+
+    // Status-specific icon tint (the ONLY place status color appears in this component)
+    &--pass { color: var(--bs-game-showcase-card-pass-color); }
+    &--warn { color: var(--bs-game-showcase-card-warn-color); }
+    &--fail { color: var(--bs-game-showcase-card-fail-color); }
+}
+
+.tc-game-showcase-card-compliance-icon {
+    display: inline-flex;
+    width: var(--bs-game-showcase-card-compliance-icon-size);
+    height: var(--bs-game-showcase-card-compliance-icon-size);
+    flex-shrink: 0;
+
+    svg {
+        width: 100%;
+        height: 100%;
+        stroke: currentColor;
+        fill: none;
+    }
+}
+
+.tc-game-showcase-card-compliance-label {
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-weight: 500;
+}

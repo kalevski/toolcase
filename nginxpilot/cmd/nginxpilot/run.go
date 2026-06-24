@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 
 	"github.com/kalevski/toolcase/nginxpilot/internal/admin"
@@ -40,6 +41,12 @@ func cmdRun(args []string) int {
 		return 1
 	}
 
+	tmpDir := filepath.Join(cfg.DataDir, "tmp")
+	if err := os.RemoveAll(tmpDir); err != nil {
+		log.Warn("could not clear tmp dir on startup", "dir", tmpDir, "error", err)
+	}
+	_ = os.MkdirAll(tmpDir, 0o750)
+
 	store, err := state.NewStore(cfg.DataDir)
 	if err != nil {
 		log.Error("state store init failed", "error", err)
@@ -58,9 +65,10 @@ func cmdRun(args []string) int {
 	defer stop()
 
 	// Admin endpoint (loopback by default; empty listen disables).
-	token := ""
-	if cfg.Admin.TokenEnv != "" {
-		token = os.Getenv(cfg.Admin.TokenEnv)
+	token, err := resolveAdminToken(cfg.Admin.TokenEnv, cfg.Admin.TokenFile)
+	if err != nil {
+		log.Error("admin token misconfiguration; refusing to start", "error", err)
+		return 1
 	}
 	adminSrv := admin.New(mgr, token, log)
 	go func() {
@@ -97,6 +105,24 @@ func cmdRun(args []string) int {
 	sdNotify("STOPPING=1")
 	log.Info("shutdown complete")
 	return 0
+}
+
+// resolveAdminToken resolves the bearer token from an env var or a secret file.
+// When both refs are empty, no auth is configured and ("", nil) is returned.
+// If a ref is configured but resolves to an empty value, an error is returned
+// so the caller refuses to start rather than expose an unauthenticated endpoint.
+func resolveAdminToken(tokenEnv, tokenFile string) (string, error) {
+	if tokenEnv == "" && tokenFile == "" {
+		return "", nil
+	}
+	token, err := config.ResolveSecret(tokenEnv, tokenFile)
+	if err != nil {
+		return "", err
+	}
+	if token == "" {
+		return "", fmt.Errorf("admin token is empty")
+	}
+	return token, nil
 }
 
 // sdNotify implements the systemd Type=notify readiness protocol with no

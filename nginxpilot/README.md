@@ -70,8 +70,8 @@ sites:
       branch: main
       interval: 2m                # min 30s; default from defaults.interval
       auth:
-        method: ssh-key           # ssh-key | https-token | none
-        key_file: /etc/nginxpilot/keys/example_ed25519
+        method: ssh-key           # ssh-key | https-token | github-token | none
+        key_file: /etc/nginxpilot/keys/example_ed25519   # or key_env: SSH_KEY (key material in an env var)
         # known_hosts: /etc/nginxpilot/known_hosts   # strict; default accept-new (TOFU)
       subdir: dist/               # serve only this subtree
       require_file: [index.html]  # opt-in post-fetch gate
@@ -79,6 +79,64 @@ sites:
 ```
 
 Clones are shallow + single-branch through the system `git` binary; the bare cache under `data_dir/cache/git/` is disposable.
+
+**git auth methods** (all over an `https://` URL except `ssh-key`):
+
+| `auth.method` | Needs | Use when |
+|---|---|---|
+| `ssh-key` | `key_file` **or** `key_env` (+ optional `known_hosts`) | `git@`/`ssh://` URL, deploy key |
+| `https-token` | `username` + `token_env`/`token_file` | classic user:token HTTPS |
+| `github-token` | `token_env`/`token_file` (no username) | a GitHub token from a social/web login |
+| `none` | — | public repo |
+
+#### github-token — token-only GitHub auth
+
+For a private GitHub repo where you only have a token (no SSH key, no separate username) — e.g. one minted from a web/social login. The token alone authenticates:
+
+```yaml
+sites:
+  - domain: app.example.com
+    source:
+      type: git
+      url: https://github.com/acme/private-site.git   # https:// (not git@)
+      branch: main
+      auth:
+        method: github-token
+        token_env: GITHUB_TOKEN        # or token_file: /run/secrets/gh_token
+```
+
+Get the token however you log in to GitHub:
+
+```bash
+gh auth login            # browser/social login flow
+export GITHUB_TOKEN=$(gh auth token)
+nginxpilot sync app.example.com
+```
+
+A fine-grained or classic **Personal Access Token** (Contents: read) and OAuth/GitHub-App installation tokens all work the same way. The token is sent as `Authorization: Basic base64("x-access-token:<token>")` (GitHub's convention for OAuth/app tokens), injected via `GIT_CONFIG_*` so it never appears in `argv`, process listings, or on disk. Unlike `https-token`, no `auth.username` is set (supplying one is a validation error).
+
+#### ssh-key via `key_env` — supply the key with config (no staging)
+
+`ssh-key` takes the private key either by path (`key_file`) or by reference to an env var holding the **key material** (`key_env`) — exactly one. `key_env` suits containers: a `key_file` mounted from the host carries the host uid and `0600`, so the unprivileged daemon can't read it (and `validate` rejects a key not owned by the daemon user). With `key_env` the daemon writes the key to a `0600` temp file it owns under `data_dir/tmp` at sync time and deletes it afterward — no host-side `chown`/staging.
+
+```yaml
+source:
+  type: git
+  url: git@github.com:acme/private.git
+  branch: main
+  auth:
+    method: ssh-key
+    key_env: SSH_KEY          # env var holds the PEM, not a path
+```
+```bash
+docker run -d \
+  -e SSH_KEY="$(cat ~/.ssh/id_ed25519)" \
+  -v /etc/nginxpilot:/etc/nginxpilot:ro \
+  -v nginxpilot-sites:/var/lib/nginxpilot \
+  ghcr.io/kalevski/toolcase/nginxpilot:latest
+```
+
+Inline key material in the config (`auth.key: |`) is a parse-time error, same as other inline secrets — use `key_env` (or `key_file`).
 
 ### http-zip source
 
@@ -155,7 +213,7 @@ docker run -d \
 ```
 
 - Mount your vhosts into `/etc/nginx/conf.d/`, each `root` pointing at `…/sites/<domain>/current` (generate a starting snippet with `print-vhost`, below).
-- The daemon runs with group `nginx` so its `0750`/`0640` content stays readable by the workers; nginx is PID-managed by the official entrypoint, content swaps need no reload.
+- The daemon runs as the unprivileged `nginxpilot` user (member of group `nginx`) so its `0750`/`0640` content stays readable by the workers; nginx is PID-managed by the official entrypoint, content swaps need no reload.
 - Port 9090 is the admin endpoint — set `admin.listen: 0.0.0.0:9090` in the config and publish the port if you want `/status` from outside.
 - Any argument bypasses the supervisor and runs the CLI directly:
 

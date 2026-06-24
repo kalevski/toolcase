@@ -1,0 +1,8 @@
+// tc-fullscreen-toggle — fullscreen on/off preset control on the shared
+// setting-row scaffold (`_setting-row.scss`). The control itself is a plain
+// `tc-switch` (see `_switch.scss`); this partial only needs to seat that switch
+// in the row. The fantasy chrome of the gc-* original is dropped.
+
+.tc-fullscreen-toggle__switch {
+    flex-shrink: 0;
+}

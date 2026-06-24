@@ -1,20 +1,19 @@
 {
-    "name": "taskforge",
-    "version": "0.1.0",
+    "name": "@toolcase/taskforge",
+    "version": "5.0.0",
     "private": true,
     "description": "TaskForge — self-hosted web control panel that drives the Claude Code CLI over local git repositories.",
     "scripts": {
-        "dev": "next dev -p 4001",
+        "dev": "next dev -p 4000",
         "build": "next build",
         "start": "next start",
         "lint": "next lint",
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {
-        "@toolcase/base": "^3",
-        "@toolcase/react-components": "^3",
-        "bootstrap-icons": "^1.13.1",
-        "next": "^14.2.5",
+        "@toolcase/base": "file:../base",
+        "@toolcase/web-components": "file:../web-components",
+        "next": "^16.2.9",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
         "server-only": "^0.0.1"

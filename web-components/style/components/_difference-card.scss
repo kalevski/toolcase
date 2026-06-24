@@ -1,0 +1,193 @@
+// tc-difference-card — dashboard metric card with a percentage delta chip.
+// Slate card motif; delta chip is the sanctioned place for status color.
+// All cosmetics flow through --bs-difference-card-* custom properties backed by --tc-* tokens.
+
+@use 'sass:map';
+@use '../foundation/tokens' as *;
+
+tc-difference-card {
+    --bs-difference-card-bg: var(--tc-surface);
+    --bs-difference-card-border-color: var(--tc-border);
+    --bs-difference-card-shadow: var(--tc-shadow-sm);
+    --bs-difference-card-padding-y: 1rem;
+    --bs-difference-card-padding-x: 1.25rem;
+    --bs-difference-card-title-color: var(--tc-text-muted);
+    --bs-difference-card-value-color: var(--tc-text);
+    --bs-difference-card-value-font-size: 1.5rem;
+    --bs-difference-card-period-color: var(--tc-text-muted);
+    --bs-difference-card-delta-gap: 0.25rem;
+    --bs-difference-card-delta-icon-size: 0.875rem;
+    --bs-difference-card-delta-font-size: 0.75rem;
+    --bs-difference-card-skeleton-bg: var(--tc-surface-muted);
+    --bs-difference-card-skeleton-shimmer: rgba(255, 255, 255, 0.6);
+}
+
+// Wire Bootstrap card tokens so .card inherits our component tokens correctly.
+.tc-difference-card {
+    --bs-card-bg: var(--bs-difference-card-bg);
+    --bs-card-border-color: var(--bs-difference-card-border-color);
+    --bs-card-box-shadow: var(--bs-difference-card-shadow);
+    --bs-card-border-radius: 0;
+    --bs-card-spacer-y: var(--bs-difference-card-padding-y);
+    --bs-card-spacer-x: var(--bs-difference-card-padding-x);
+}
+
+.tc-difference-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+// Metric name — small muted uppercase label above the value.
+.tc-difference-card-title {
+    display: block;
+    font-family: 'Inter', var(--bs-body-font-family);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--bs-difference-card-title-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// Value + delta chip on the same row.
+.tc-difference-card-metric {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    min-width: 0;
+}
+
+// Prominent numeric value — Inter heavy.
+.tc-difference-card-value {
+    font-family: 'Inter', var(--bs-body-font-family);
+    font-size: var(--bs-difference-card-value-font-size);
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--bs-difference-card-value-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// Delta chip — the sanctioned place for status color.
+// JetBrains Mono for the percentage (machine-facing); sharp corners by mandate.
+.tc-difference-card-delta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-difference-card-delta-gap);
+    padding: 0.1875rem 0.4375rem;
+    font-family: 'JetBrains Mono', 'JetBrainsMono NF', monospace;
+    font-size: var(--bs-difference-card-delta-font-size);
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    border-radius: 0;
+    border: 1px solid transparent;
+
+    // Default: neutral slate
+    background-color: var(--tc-surface-muted);
+    color: var(--tc-text-muted);
+    border-color: var(--tc-border);
+}
+
+// Positive delta — success soft tint + dark emphasis text.
+.tc-difference-card-delta--up {
+    background-color: #{map.get($theme-colors-soft, 'success')};
+    color: #{map.get($theme-colors-emphasis, 'success')};
+    border-color: transparent;
+}
+
+// Negative delta — danger soft tint + dark emphasis text.
+.tc-difference-card-delta--down {
+    background-color: #{map.get($theme-colors-soft, 'danger')};
+    color: #{map.get($theme-colors-emphasis, 'danger')};
+    border-color: transparent;
+}
+
+// Neutral — no change or no baseline; slate surface.
+.tc-difference-card-delta--neutral {
+    background-color: var(--tc-surface-muted);
+    color: var(--tc-text-muted);
+    border-color: var(--tc-border);
+}
+
+// Directional icon inside the chip — sized by CSS token, aria-hidden via icon() helper.
+.tc-difference-card-delta-icon {
+    width: var(--bs-difference-card-delta-icon-size);
+    height: var(--bs-difference-card-delta-icon-size);
+    flex-shrink: 0;
+    stroke: currentColor;
+    fill: none;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.tc-difference-card-delta-text {
+    line-height: 1;
+}
+
+// Period caption — mono micro-text below the metric row.
+.tc-difference-card-period {
+    display: block;
+    font-family: 'JetBrains Mono', 'JetBrainsMono NF', monospace;
+    font-size: 0.6875rem;
+    line-height: 1.4;
+    color: var(--bs-difference-card-period-color);
+    letter-spacing: 0.03em;
+}
+
+// ── Loading skeleton ──────────────────────────────────────────────────────────
+
+@keyframes tc-difference-card-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+%tc-difference-card-shimmer {
+    background: linear-gradient(
+        90deg,
+        var(--bs-difference-card-skeleton-bg) 25%,
+        var(--bs-difference-card-skeleton-shimmer) 50%,
+        var(--bs-difference-card-skeleton-bg) 75%
+    );
+    background-size: 200% 100%;
+    animation: tc-difference-card-shimmer 1.5s infinite linear;
+    border-radius: 0;
+}
+
+.tc-difference-card-skeleton {
+    display: block;
+    height: 0.75rem;
+    border-radius: 0;
+    @extend %tc-difference-card-shimmer;
+
+    &--title {
+        width: 45%;
+        margin-bottom: 0.125rem;
+    }
+
+    &--value {
+        width: 55%;
+        height: 1.5rem;
+    }
+
+    &--delta {
+        width: 25%;
+        height: 1.25rem;
+    }
+
+    &--period {
+        width: 60%;
+    }
+}
+
+// Honour prefers-reduced-motion: freeze shimmer to a static fill.
+@media (prefers-reduced-motion: reduce) {
+    .tc-difference-card-skeleton {
+        animation: none;
+        background: var(--bs-difference-card-skeleton-bg);
+    }
+}

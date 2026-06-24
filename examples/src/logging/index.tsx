@@ -3,6 +3,14 @@ import BasicLoggingDemo from './BasicLoggingDemo'
 import LogLevelsDemo from './LogLevelsDemo'
 import MultipleScopesDemo from './MultipleScopesDemo'
 import CustomReporterDemo from './CustomReporterDemo'
+import ScopePatternDemo from './ScopePatternDemo'
+import RingBufferReporterDemo from './RingBufferReporterDemo'
+import ComposableReportersDemo from './ComposableReportersDemo'
+import HTTPReporterDemo from './HTTPReporterDemo'
+import OTLPReporterDemo from './OTLPReporterDemo'
+import BeaconReporterDemo from './BeaconReporterDemo'
+import IndexedDBReporterDemo from './IndexedDBReporterDemo'
+import MemoryReporterDemo from './MemoryReporterDemo'
 
 export type LoggingExampleDef = {
     key: string
@@ -15,4 +23,12 @@ export const loggingExamples: LoggingExampleDef[] = [
     { key: 'levels', label: 'Log Levels', element: <LogLevelsDemo /> },
     { key: 'scopes', label: 'Multiple Scopes', element: <MultipleScopesDemo /> },
     { key: 'reporter', label: 'Custom Reporter', element: <CustomReporterDemo /> },
+    { key: 'scope-pattern', label: 'Scope-pattern Levels', element: <ScopePatternDemo /> },
+    { key: 'ring-buffer', label: 'RingBufferReporter', element: <RingBufferReporterDemo /> },
+    { key: 'composable-reporters', label: 'Composable Reporters', element: <ComposableReportersDemo /> },
+    { key: 'http-reporter', label: 'HTTPReporter', element: <HTTPReporterDemo /> },
+    { key: 'otlp-reporter', label: 'OTLPReporter', element: <OTLPReporterDemo /> },
+    { key: 'beacon-reporter', label: 'BeaconReporter', element: <BeaconReporterDemo /> },
+    { key: 'indexed-db-reporter', label: 'IndexedDBReporter', element: <IndexedDBReporterDemo /> },
+    { key: 'memory-reporter', label: 'MemoryReporter', element: <MemoryReporterDemo /> },
 ]

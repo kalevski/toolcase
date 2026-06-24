@@ -18,7 +18,10 @@ export default class JobProcessor extends FlowProcessor {
     }
 
     onUpdate(time: number): void {
-        let budget = this.maxJobsPerFrame
+        // Cap at the queue length at the start of the frame so re-queued
+        // long-running jobs cannot consume a second budget slot in the same
+        // frame. Each unique job is advanced at most once per frame.
+        let budget = Math.min(this.maxJobsPerFrame, this.queue.length)
         while (budget-- > 0 && this.queue.length > 0) {
             const job = this.queue.shift()!
             let signal: boolean | void

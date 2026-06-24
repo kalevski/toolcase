@@ -59,7 +59,14 @@ export class Versioned {
 				ttlSeconds ? String(ttlSeconds) : '',
 			],
 		})) as [number, number]
-		return { ok: Number(reply[0]) === 1, version: Number(reply[1]) }
+		const ok = Number(reply[0])
+		const ver = Number(reply[1])
+		if (ok === 0 && ver === -1) {
+			throw new KVServiceError(
+				`versionedSet: key '${key}' already exists as a foreign hash (missing __vset marker)`,
+			)
+		}
+		return { ok: ok === 1, version: ver }
 	}
 
 	async setValue(

@@ -2,10 +2,36 @@
 
 // D3 — admin audit-log table with filters.
 
-import React, { useCallback, useEffect, useState } from 'react'
-import { Table, Badge, Button, Input, Select, Text, HelperText, type TableColumn } from '@toolcase/react-components'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useTcEvents, useTcProps, escapeHtml } from '@/lib/tc'
 import type { AuditRecord } from '@/server/domain/types'
 import { helpTexts } from './helpTexts'
+
+// Read-only table → tc-table. Cells are emitted as HTML strings (the tc-table
+// `render` contract); all record-derived text is escaped to avoid injection.
+const COLUMNS = [
+    {
+        key: 'at',
+        header: 'When',
+        width: '12rem',
+        render: (e: AuditRecord) => `<tc-text variant="muted">${escapeHtml(new Date(e.at).toLocaleString())}</tc-text>`,
+    },
+    { key: 'login', header: 'Who', width: '9rem', render: (e: AuditRecord) => `<code>${escapeHtml(e.login ?? '—')}</code>` },
+    {
+        key: 'action',
+        header: 'Action',
+        width: '11rem',
+        render: (e: AuditRecord) => `<tc-badge variant="secondary">${escapeHtml(e.action)}</tc-badge>`,
+    },
+    {
+        key: 'project',
+        header: 'Project',
+        width: '10rem',
+        render: (e: AuditRecord) =>
+            e.project ? `<code>${escapeHtml(e.project)}</code>` : `<span style="opacity:0.4">—</span>`,
+    },
+    { key: 'detail', header: 'Detail', render: (e: AuditRecord) => `<tc-text variant="muted">${escapeHtml(e.detail ?? '')}</tc-text>` },
+]
 
 export function AuditClient() {
     const [entries, setEntries] = useState<AuditRecord[]>([])
@@ -15,6 +41,10 @@ export function AuditClient() {
     const [login, setLogin] = useState('')
     const [action, setAction] = useState('')
     const [loading, setLoading] = useState(false)
+
+    const projectRef = useTcEvents<HTMLElement>({ input: (e) => setProject((e.target as HTMLInputElement).value) })
+    const loginRef = useTcEvents<HTMLElement>({ input: (e) => setLogin((e.target as HTMLInputElement).value) })
+    const actionRef = useTcEvents<HTMLElement>({ change: (e) => setAction((e.target as HTMLSelectElement).value) })
 
     const load = useCallback(
         async (beforeId?: number) => {
@@ -38,51 +68,52 @@ export function AuditClient() {
         [project, login, action],
     )
 
+    // Debounce so typing in the Project/User filters fires one request after the
+    // user pauses, not one per keystroke (which also raced response ordering).
     useEffect(() => {
-        void load()
+        const t = setTimeout(() => void load(), 250)
+        return () => clearTimeout(t)
     }, [load])
-
-    const columns: TableColumn<AuditRecord>[] = [
-        {
-            key: 'at',
-            header: 'When',
-            width: '12rem',
-            render: (e) => <Text variant="muted">{new Date(e.at).toLocaleString()}</Text>,
-        },
-        { key: 'login', header: 'Who', width: '9rem', render: (e) => <code>{e.login ?? '—'}</code> },
-        { key: 'action', header: 'Action', width: '11rem', render: (e) => <Badge variant="secondary">{e.action}</Badge> },
-        { key: 'project', header: 'Project', width: '10rem', render: (e) => (e.project ? <code>{e.project}</code> : <span style={{ opacity: 0.4 }}>—</span>) },
-        { key: 'detail', header: 'Detail', render: (e) => <Text variant="muted">{e.detail ?? ''}</Text> },
-    ]
 
     const oldest = entries.length ? entries[entries.length - 1].id : undefined
 
+    const tableRef = useTcProps<HTMLElement>(
+        useMemo(() => ({ columns: COLUMNS, data: entries }), [entries]),
+    )
+
     return (
-        <div className="tf-stack">
-            <HelperText text={helpTexts.audit.intro} />
-            <div className="tf-form-row">
-                <Input label="Project" placeholder="filter…" value={project} onChange={(e) => setProject(e.target.value)} />
-                <Input label="User" placeholder="login" value={login} onChange={(e) => setLogin(e.target.value)} />
+        <tc-stack gap="1.25rem">
+            <tc-helper-text text={helpTexts.audit.intro} />
+            <tc-stack direction="horizontal" gap="1rem" wrap align="flex-end">
+                <tc-input ref={projectRef} label="Project" placeholder="filter…" value={project} />
+                <tc-input ref={loginRef} label="User" placeholder="login" value={login} />
                 <div style={{ minWidth: 220 }}>
-                    <Select
-                        label="Action"
-                        options={[{ value: '', label: 'All actions' }, ...actions.map((a) => ({ value: a, label: a }))]}
-                        value={action}
-                        onChange={(e) => setAction(e.target.value)}
-                    />
+                    <tc-select ref={actionRef} label="Action" value={action}>
+                        <tc-option value="">All actions</tc-option>
+                        {actions.map((a) => (
+                            <tc-option key={a} value={a}>
+                                {a}
+                            </tc-option>
+                        ))}
+                    </tc-select>
                 </div>
-            </div>
-            <Table columns={columns} data={entries} rowKey={(e) => String(e.id)} emptyMessage="No audit entries match." />
-            <div className="tf-actions">
-                <Text variant="muted">
+            </tc-stack>
+            <tc-table
+                ref={tableRef}
+                hoverable
+                empty-message="No audit entries match."
+                loading={loading && entries.length === 0 ? true : undefined}
+            />
+            <tc-stack direction="horizontal" gap="0.75rem" wrap align="center">
+                <tc-text variant="muted">
                     {entries.length} of {total} entries
-                </Text>
+                </tc-text>
                 {entries.length < total && oldest && (
-                    <Button size="small" variant="secondary" outline disabled={loading} onClick={() => void load(oldest)}>
+                    <tc-button size="sm" variant="secondary" outline disabled={loading || undefined} onClick={() => void load(oldest)}>
                         Load older
-                    </Button>
+                    </tc-button>
                 )}
-            </div>
-        </div>
+            </tc-stack>
+        </tc-stack>
     )
 }

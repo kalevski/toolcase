@@ -1,0 +1,35 @@
+// Dungeon › tc-buff-icon — gilded slot treatment for the buff/debuff HUD tile.
+// The base port stripped the fantasy chrome; we restore the recessed wood slot,
+// inset bevel, brightened accent stripes, and a gilded glyph glow.
+// Vars sit on the tc-buff-icon host element (confirmed in the base file).
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // 1. Token swap on host — recessed slot fill + deep-gold frame.
+    tc-buff-icon {
+        --bs-buff-icon-bg: var(--fg-slot-bg);
+        --bs-buff-icon-border-color: var(--fg-gold-deep);
+        --bs-buff-icon-glyph-color: var(--fg-gold-bright);
+    }
+
+    // Brighten kind accents from base stamina/blood to their -bright variants.
+    tc-buff-icon[data-kind='buff'] {
+        --bs-buff-icon-accent: var(--fg-stamina-bright);
+    }
+
+    tc-buff-icon[data-kind='debuff'] {
+        --bs-buff-icon-accent: var(--fg-blood-bright);
+    }
+
+    // 2. Structure — inset bevel gives the recessed gilded-slot depth.
+    // ::before is already consumed by the accent stripe, so we layer
+    // the bevel purely through box-shadow on the host.
+    tc-buff-icon {
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .6), var(--fg-bevel-top);
+    }
+
+    // 3. Structure — glyph glow so the icon catches gold light.
+    .tc-buff-icon__glyph svg {
+        filter: drop-shadow(0 0 2px rgba(240, 210, 122, .4));
+    }
+}

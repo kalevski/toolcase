@@ -1,0 +1,230 @@
+// tc-loading-screen — full-viewport loading screen with eyebrow/title header,
+// progress bar (determinate or indeterminate), and a cycling tip section.
+// Ported from gc-loading-screen; game chrome replaced with the slate design
+// system: sharp corners, hairline separators, no glows or textures.
+// All cosmetics flow through --bs-loading-screen-* custom properties.
+
+@use '../foundation/tokens' as *;
+
+// ── Component defaults ───────────────────────────────────────────────────────
+
+tc-loading-screen {
+    // Background of the full-screen surface
+    --bs-loading-screen-bg:              var(--tc-surface);
+
+    // Fade-in animation duration
+    --bs-loading-screen-fade:            var(--tc-transition-base);
+
+    // Z-index — sits at the modal tier to cover page content
+    --bs-loading-screen-z:               var(--tc-z-modal);
+
+    // Panel
+    --bs-loading-screen-panel-max-width: 480px;
+    --bs-loading-screen-panel-gap:       1.5rem;
+    --bs-loading-screen-panel-padding-x: 2rem;
+    --bs-loading-screen-panel-padding-y: 2.5rem;
+
+    // Eyebrow (mono micro-label above the title)
+    --bs-loading-screen-eyebrow-color:   var(--tc-text-muted);
+    --bs-loading-screen-eyebrow-size:    10.5px;
+
+    // Title
+    --bs-loading-screen-title-color:     var(--tc-text);
+    --bs-loading-screen-title-size:      1.1875rem;
+    --bs-loading-screen-title-weight:    600;
+
+    // Label + percentage
+    --bs-loading-screen-label-color:     var(--tc-text);
+    --bs-loading-screen-label-size:      0.925rem;
+    --bs-loading-screen-pct-color:       var(--tc-text-muted);
+    --bs-loading-screen-pct-size:        0.8125rem;
+
+    // Progress bar track + fill
+    --bs-loading-screen-bar-bg:          var(--tc-border);
+    --bs-loading-screen-bar-fill:        var(--tc-app-accent);
+    --bs-loading-screen-bar-height:      3px;
+
+    // Tip section
+    --bs-loading-screen-tip-label-color: var(--tc-text-faint);
+    --bs-loading-screen-tip-label-size:  10.5px;
+    --bs-loading-screen-tip-body-color:  var(--tc-text-muted);
+    --bs-loading-screen-tip-body-size:   0.8125rem;
+}
+
+// ── Host: fixed full-viewport shell ─────────────────────────────────────────
+// The host covers the entire viewport, centres the panel, and fades in.
+// The display: block from _reset.scss is overridden here; no [open] attribute
+// is needed — the consumer adds/removes the element or sets [hidden].
+
+tc-loading-screen {
+    position: fixed;
+    inset: 0;
+    z-index: var(--bs-loading-screen-z);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--bs-loading-screen-bg);
+    border-radius: 0;
+    animation: tc-loading-screen-fade-in var(--bs-loading-screen-fade) both;
+}
+
+@keyframes tc-loading-screen-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+// ── Panel: centred content column ───────────────────────────────────────────
+// No card chrome — the loading screen IS the page, not a floating card.
+
+.tc-loading-screen-panel {
+    width: 100%;
+    max-width: var(--bs-loading-screen-panel-max-width);
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-loading-screen-panel-gap);
+    padding: var(--bs-loading-screen-panel-padding-y) var(--bs-loading-screen-panel-padding-x);
+}
+
+// ── Header: eyebrow + title ──────────────────────────────────────────────────
+
+.tc-loading-screen-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+// Eyebrow — mono micro-label, uppercase, per design system convention
+.tc-loading-screen-eyebrow {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-loading-screen-eyebrow-size);
+    color: var(--bs-loading-screen-eyebrow-color);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    line-height: 1.4;
+}
+
+// Title — human-readable heading (Inter)
+.tc-loading-screen-title {
+    font-size: var(--bs-loading-screen-title-size);
+    font-weight: var(--bs-loading-screen-title-weight);
+    color: var(--bs-loading-screen-title-color);
+    line-height: 1.3;
+}
+
+// ── Label row: description + mono percentage ──────────────────────────────────
+
+.tc-loading-screen-label-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.tc-loading-screen-label {
+    font-size: var(--bs-loading-screen-label-size);
+    color: var(--bs-loading-screen-label-color);
+    font-weight: 500;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// Percentage is machine-facing — JetBrains Mono, tabular figures
+.tc-loading-screen-pct {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-loading-screen-pct-size);
+    color: var(--bs-loading-screen-pct-color);
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+// ── Progress bar ──────────────────────────────────────────────────────────────
+// Thin hairline track (sharp per mandate); fill slides to width when
+// determinate. Indeterminate variant slides a 40% fill across the track.
+
+.tc-loading-screen-bar {
+    width: 100%;
+    height: var(--bs-loading-screen-bar-height);
+    background: var(--bs-loading-screen-bar-bg);
+    border-radius: 0; // sharp by mandate
+    overflow: hidden;
+    position: relative;
+}
+
+.tc-loading-screen-bar-fill {
+    height: 100%;
+    background: var(--bs-loading-screen-bar-fill);
+    border-radius: 0;
+    transition: width var(--tc-transition-base);
+}
+
+.tc-loading-screen-bar--indeterminate .tc-loading-screen-bar-fill {
+    width: 40%;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    animation: tc-loading-screen-bar-slide 1.5s ease-in-out infinite;
+}
+
+@keyframes tc-loading-screen-bar-slide {
+    0%   { left: -50%; }
+    100% { left: 110%; }
+}
+
+// ── Tip section ───────────────────────────────────────────────────────────────
+// Mono label + rotating tip body; separated from the bar by a hairline.
+
+.tc-loading-screen-tip {
+    padding-top: var(--bs-loading-screen-panel-gap);
+    border-top: 1px solid var(--tc-border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.tc-loading-screen-tip-label {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-loading-screen-tip-label-size);
+    color: var(--bs-loading-screen-tip-label-color);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.tc-loading-screen-tip-body {
+    font-size: var(--bs-loading-screen-tip-body-size);
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    color: var(--bs-loading-screen-tip-body-color);
+    letter-spacing: 0.02em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// ── Coarse pointer ────────────────────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-loading-screen-panel {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+
+// ── Reduced motion ────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    tc-loading-screen {
+        animation: none;
+    }
+
+    .tc-loading-screen-bar-fill {
+        transition: none;
+    }
+
+    .tc-loading-screen-bar--indeterminate .tc-loading-screen-bar-fill {
+        animation: none;
+        left: 30%;
+    }
+}

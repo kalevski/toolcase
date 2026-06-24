@@ -1,0 +1,17 @@
+// Dungeon › tc-breadcrumb — mono trail polish.
+// The foundation already remaps divider color → gold and link hover → gold-bright.
+// This file adds the gilded-active crumb, the fantasy › glyph divider, and a
+// subtle letter-spacing on the active crumb to suit the mono-path register.
+// No frame or bevel — breadcrumbs are navigation chrome, not panels.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    .breadcrumb {
+        --bs-breadcrumb-divider: '\203A';
+        --bs-breadcrumb-item-active-color: var(--fg-gold-bright);
+    }
+
+    .breadcrumb-item.active {
+        letter-spacing: 0.04em;
+    }
+}

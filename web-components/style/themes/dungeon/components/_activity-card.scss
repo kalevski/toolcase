@@ -1,0 +1,41 @@
+// Dungeon › tc-activity-card — gilded event-log frame.
+// Patches three hardcoded leaks the foundation token-swap cannot reach:
+//   1. Cool-slate header gradient (hardcoded rgba(30,41,59)) → warm gold cap.
+//   2. 'Inter' title font (hardcoded on .tc-activity-card-title) → Cinzel display caps.
+//   3. Bright-white skeleton shimmer (rgba(255,255,255,0.6)) → warm gold shimmer.
+// Adds the gilded bevel to .tc-activity-card-inner and slot look to icon chips.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Host token overrides ───────────────────────────────────────────────────
+
+    tc-activity-card {
+        --bs-activity-card-bg: var(--fg-panel-bg);
+        // Patch 1: replace the hardcoded cool-slate gradient with a warm gold cap.
+        --bs-activity-card-header-bg: linear-gradient(180deg, rgba(201, 169, 97, 0.06), transparent);
+        // Patch 3: replace the bright-white shimmer with a warm low-alpha gold.
+        --bs-activity-card-skeleton-shimmer: rgba(240, 210, 122, 0.18);
+    }
+
+    // ── Inner card wrapper — gilded bevel over flat shadow-sm ─────────────────
+
+    .tc-activity-card-inner {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── Title — override hardcoded 'Inter' with Cinzel display caps ────────────
+
+    .tc-activity-card-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+    }
+
+    // ── Icon chips — gilded slot look ─────────────────────────────────────────
+
+    .tc-activity-icon-chip {
+        background: var(--fg-slot-bg);
+        box-shadow: var(--fg-bevel-top);
+    }
+}

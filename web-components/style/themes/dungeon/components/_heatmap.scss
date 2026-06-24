@@ -1,0 +1,38 @@
+// Dungeon › tc-heatmap — activity/data grid with gilded frame.
+// Critical fix: --bs-heatmap-gap-color was slate-100 (renders bright on wood);
+// repoint to --fg-ink so gridlines read as dark rules on the leather surface.
+// Tooltip text was hardcoded #fff; swap to parch + add gold hairline border.
+// Title elevated to display caps. Grid frame gilded with bevel-top highlight.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Token swap on host ──────────────────────────────────────────────────
+    // Gap color is the structural fix: slate-100 gaps over wood look wrong;
+    // dark ink rules make the grid read cleanly.
+    tc-heatmap {
+        --bs-heatmap-gap-color: var(--fg-ink);
+        --bs-heatmap-tooltip-color: var(--fg-parch);
+    }
+
+    // ── Title — engraved display caps ───────────────────────────────────────
+    .tc-heatmap-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+    }
+
+    // ── Grid — gilded top-bevel highlight on the frame ──────────────────────
+    .tc-heatmap-grid,
+    .tc-heatmap-skeleton-grid {
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // ── Tooltip — ink surface with gold hairline border ─────────────────────
+    // Background is already --tc-ink (maps to --fg-ink via foundation);
+    // the border is structural and can't come from a token swap alone.
+    .tc-heatmap-tooltip {
+        border: 1px solid var(--fg-gold-deep);
+    }
+}

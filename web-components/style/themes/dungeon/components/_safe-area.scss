@@ -1,0 +1,12 @@
+// Dungeon › tc-safe-area — NO override needed.
+//
+// tc-safe-area is a purely structural layout primitive: it insets its content by
+// env(safe-area-inset-*) plus an optional uniform `extra` padding. It carries no
+// background, border, text, or any cosmetic surface — nothing for a fantasy reskin
+// to repaint. The foundation token remap is irrelevant here because the component
+// references none of those tokens. Intentionally left empty.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // No visual override — layout/inset primitive only.
+}

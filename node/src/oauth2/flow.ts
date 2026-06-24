@@ -1,7 +1,7 @@
 import { OAuth2TokenError, OAuth2ProtocolError } from '../errors'
 import { fetchWithOptions, type HttpOptions } from '../http/options'
 import type { OAuth2ProviderConfig, OAuth2Tokens } from './types'
-import { postForm, parseTokens } from './wire'
+import { postForm, parseTokens, safeUpstream } from './wire'
 
 export interface BuildAuthorizeURLInput {
 	state: string
@@ -76,7 +76,7 @@ export async function exchangeCode(provider: OAuth2ProviderConfig, input: Exchan
 	if (input.codeVerifier) body.set('code_verifier', input.codeVerifier)
 	const { status, body: parsed } = await postForm({ endpoint: provider.tokenEndpoint, body, provider }, opts)
 	if (status < 200 || status >= 300) {
-		throw new OAuth2TokenError(status, describeError(parsed) || `token exchange failed (${status})`, parsed)
+		throw new OAuth2TokenError(status, describeError(parsed) || `token exchange failed (${status})`, safeUpstream(parsed))
 	}
 	return parseTokens(parsed)
 }
@@ -88,7 +88,7 @@ export async function refreshToken(provider: OAuth2ProviderConfig, input: Refres
 	if (input.scope && input.scope.length > 0) body.set('scope', input.scope.join(' '))
 	const { status, body: parsed } = await postForm({ endpoint: provider.tokenEndpoint, body, provider }, opts)
 	if (status < 200 || status >= 300) {
-		throw new OAuth2TokenError(status, describeError(parsed) || `refresh failed (${status})`, parsed)
+		throw new OAuth2TokenError(status, describeError(parsed) || `refresh failed (${status})`, safeUpstream(parsed))
 	}
 	return parseTokens(parsed)
 }
@@ -102,7 +102,7 @@ export async function revokeToken(provider: OAuth2ProviderConfig, token: string,
 	if (hint) body.set('token_type_hint', hint)
 	const { status, body: parsed } = await postForm({ endpoint: provider.revocationEndpoint, body, provider }, opts)
 	if (status < 200 || status >= 300) {
-		throw new OAuth2TokenError(status, describeError(parsed) || `revoke failed (${status})`, parsed)
+		throw new OAuth2TokenError(status, describeError(parsed) || `revoke failed (${status})`, safeUpstream(parsed))
 	}
 }
 
@@ -127,7 +127,7 @@ export async function fetchUserinfo(provider: OAuth2ProviderConfig, accessToken:
 		throw new OAuth2ProtocolError('userinfo response is not valid JSON')
 	}
 	if (response.status < 200 || response.status >= 300) {
-		throw new OAuth2TokenError(response.status, describeError(parsed) || `userinfo failed (${response.status})`, parsed)
+		throw new OAuth2TokenError(response.status, describeError(parsed) || `userinfo failed (${response.status})`, safeUpstream(parsed))
 	}
 	if (parsed === null || typeof parsed !== 'object') {
 		throw new OAuth2ProtocolError('userinfo response is not a JSON object')

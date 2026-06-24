@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useCallback, useRef, useState } from 'react'
-import { Modal, Button, Heading, Text, Input } from '@toolcase/react-components'
+import { Modal } from '@/lib/modal'
+import { useTcEvents } from '@/lib/tc'
 
 export interface ConfirmInput {
     title: string
@@ -22,16 +23,15 @@ export function ConfirmModal() {
 
     return (
         <Modal.Window size="small" title={input.title}>
-            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <Heading as="h3">{input.title}</Heading>
-                {input.body && <Text>{input.body}</Text>}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {input.body && <tc-text>{input.body}</tc-text>}
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-                    <Button variant="secondary" outline onClick={() => close(false)}>
+                    <tc-button variant="secondary" outline onClick={() => close(false)}>
                         {input.cancelLabel ?? 'Cancel'}
-                    </Button>
-                    <Button variant={input.confirmVariant ?? 'primary'} onClick={() => close(true)}>
+                    </tc-button>
+                    <tc-button variant={input.confirmVariant ?? 'primary'} onClick={() => close(true)}>
                         {input.confirmLabel ?? 'Confirm'}
-                    </Button>
+                    </tc-button>
                 </div>
             </div>
         </Modal.Window>
@@ -78,32 +78,28 @@ export function PromptModal() {
     const setValue = (v: string) => {
         if (input) setEdited({ for: input, value: v })
     }
+    const submit = () => close(value.trim() ? value.trim() : null)
+
+    const fieldRef = useTcEvents<HTMLElement>({
+        input: (e) => setValue((e.target as HTMLInputElement).value),
+        keydown: (e) => {
+            if ((e as KeyboardEvent).key === 'Enter') submit()
+        },
+    })
 
     if (!input) return null
 
-    const submit = () => close(value.trim() ? value.trim() : null)
-
     return (
         <Modal.Window size="small" title={input.title}>
-            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <Heading as="h3">{input.title}</Heading>
-                <Input
-                    label={input.label}
-                    placeholder={input.placeholder}
-                    value={value}
-                    autoFocus
-                    onChange={(e) => setValue(e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter') submit()
-                    }}
-                />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <tc-input ref={fieldRef} label={input.label} placeholder={input.placeholder} value={value} />
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-                    <Button variant="secondary" outline onClick={() => close(null)}>
+                    <tc-button variant="secondary" outline onClick={() => close(null)}>
                         Cancel
-                    </Button>
-                    <Button variant="primary" onClick={submit}>
+                    </tc-button>
+                    <tc-button variant="primary" onClick={submit}>
                         {input.confirmLabel ?? 'OK'}
-                    </Button>
+                    </tc-button>
                 </div>
             </div>
         </Modal.Window>

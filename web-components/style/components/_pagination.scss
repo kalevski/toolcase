@@ -1,0 +1,112 @@
+// tc-pagination — joined 1px-bordered pager, mono numerals (data register),
+// solid ink active page.
+
+.pagination {
+    --bs-pagination-padding-x: 0.75rem;
+    --bs-pagination-padding-y: 0.375rem;
+    --bs-pagination-font-size: 0.78125rem;
+    --bs-pagination-color: var(--tc-slate-600);
+    --bs-pagination-bg: var(--tc-surface);
+    --bs-pagination-border-width: var(--bs-border-width);
+    --bs-pagination-border-color: var(--tc-border-strong);
+    --bs-pagination-border-radius: 0;
+    --bs-pagination-hover-color: var(--tc-text);
+    --bs-pagination-hover-bg: var(--tc-surface-muted);
+    --bs-pagination-hover-border-color: var(--tc-border-strong);
+    --bs-pagination-focus-color: var(--tc-text);
+    --bs-pagination-focus-bg: var(--tc-surface-muted);
+    --bs-pagination-focus-box-shadow: var(--tc-focus-ring);
+    --bs-pagination-active-color: var(--tc-app-accent-contrast);
+    --bs-pagination-active-bg: var(--tc-app-accent);
+    --bs-pagination-active-border-color: var(--tc-border-strong);
+    --bs-pagination-disabled-color: var(--tc-text-faint);
+    --bs-pagination-disabled-bg: var(--tc-surface);
+    --bs-pagination-disabled-border-color: var(--tc-border-strong);
+
+    display: inline-flex;
+    padding-left: 0;
+    margin: 0;
+    list-style: none;
+    font-family: var(--tc-font-mono);
+    border: var(--bs-pagination-border-width) solid var(--bs-pagination-border-color);
+}
+
+.page-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.125rem;
+    min-height: 2.125rem;
+    padding: var(--bs-pagination-padding-y) var(--bs-pagination-padding-x);
+    font-size: var(--bs-pagination-font-size);
+    color: var(--bs-pagination-color);
+    text-decoration: none;
+    cursor: pointer;
+    background-color: var(--bs-pagination-bg);
+    border: 0;
+    border-right: var(--bs-pagination-border-width) solid var(--bs-pagination-border-color);
+    transition:
+        color var(--tc-transition-fast),
+        background-color var(--tc-transition-fast);
+
+    &:hover {
+        z-index: 2;
+        color: var(--bs-pagination-hover-color);
+        background-color: var(--bs-pagination-hover-bg);
+        border-color: var(--bs-pagination-hover-border-color);
+        text-decoration: none;
+    }
+
+    &:focus-visible {
+        z-index: 3;
+        color: var(--bs-pagination-focus-color);
+        background-color: var(--bs-pagination-focus-bg);
+        outline: 0;
+        box-shadow: var(--bs-pagination-focus-box-shadow);
+    }
+}
+
+.page-item {
+    &:last-child .page-link {
+        border-right: 0;
+    }
+
+    &.active .page-link {
+        z-index: 3;
+        color: var(--bs-pagination-active-color);
+        background-color: var(--bs-pagination-active-bg);
+        border-color: var(--bs-pagination-active-border-color);
+    }
+
+    &.disabled .page-link {
+        color: var(--bs-pagination-disabled-color);
+        pointer-events: none;
+        background-color: var(--bs-pagination-disabled-bg);
+        border-color: var(--bs-pagination-disabled-border-color);
+    }
+}
+
+.pagination-sm {
+    --bs-pagination-padding-x: 0.5rem;
+    --bs-pagination-padding-y: 0.25rem;
+    --bs-pagination-font-size: 0.75rem;
+
+    .page-link {
+        min-width: 1.75rem;
+        min-height: 1.75rem;
+    }
+}
+
+.pagination-lg {
+    --bs-pagination-padding-x: 1.1rem;
+    --bs-pagination-padding-y: 0.6rem;
+    --bs-pagination-font-size: 1rem;
+}
+
+@media (pointer: coarse) {
+    .page-link {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}

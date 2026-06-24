@@ -369,6 +369,153 @@ describe('Serializer versioning', () => {
         s.define('Z', [{ key: 'a', type: F.STRING, rule: 'required' }])
         expect(() => s.decodeVersioned('Z', new Uint8Array([1]))).toThrow(/buffer too small/)
     })
+
+    it('defineVersion: decodes breaking field-reorder with version-appropriate schema (regression SER-3)', () => {
+        // v1 schema: id at tag 1, value at tag 2
+        const v1 = new Serializer()
+        v1.version(1, 0)
+        v1.define('Item', [
+            { key: 'id', type: F.UINT32, rule: 'required' },
+            { key: 'value', type: F.STRING, rule: 'required' }
+        ])
+        const frame = v1.encodeVersioned('Item', { id: 42, value: 'hello' })
+
+        // v2 schema: fields reordered — value now at tag 1, id at tag 2 (breaking change)
+        // Without defineVersion, decoding v1 bytes with v2 schema corrupts both fields.
+        const v2 = new Serializer()
+        v2.version(2, 0)
+        v2.define('Item', [
+            { key: 'value', type: F.STRING, rule: 'required' },
+            { key: 'id', type: F.UINT32, rule: 'required' }
+        ])
+        // Register the v1 field layout so old bytes are decoded correctly before migration
+        v2.defineVersion('Item', 1, [
+            { key: 'id', type: F.UINT32, rule: 'required' },
+            { key: 'value', type: F.STRING, rule: 'required' }
+        ])
+        v2.migrate('Item', 1, msg => ({ value: msg.value, id: msg.id }))
+
+        const out = v2.decodeVersioned('Item', frame)
+        expect(out.version).toEqual({ major: 1, minor: 0 })
+        expect((out.message as any).id).toBe(42)
+        expect((out.message as any).value).toBe('hello')
+    })
+
+    it('defineVersion: rejects forMajor out of range', () => {
+        const s = new Serializer()
+        expect(() => s.defineVersion('X', -1, [])).toThrow(/forMajor must be an integer/)
+        expect(() => s.defineVersion('X', 256, [])).toThrow(/forMajor must be an integer/)
+    })
+})
+
+describe('Serializer.decodeVersioned return shape (regression)', () => {
+    it('no-migration path returns a plain object, not a Message instance', () => {
+        const s = new Serializer()
+        s.version(2, 0)
+        s.define('Item', [{ key: 'name', type: F.STRING, rule: 'required' }])
+        const frame = s.encodeVersioned('Item', { name: 'test' })
+        const out = s.decodeVersioned('Item', frame)
+        expect(Object.getPrototypeOf(out.message)).toBe(Object.prototype)
+        expect((out.message as any).name).toBe('test')
+    })
+
+    it('migration path returns a plain object with the same shape', () => {
+        const v1 = new Serializer()
+        v1.version(1, 0)
+        v1.define('Item', [{ key: 'name', type: F.STRING, rule: 'required' }])
+        const frame = v1.encodeVersioned('Item', { name: 'test' })
+
+        const v2 = new Serializer()
+        v2.version(2, 0)
+        v2.define('Item', [
+            { key: 'name', type: F.STRING, rule: 'required' },
+            { key: 'score', type: F.INT32, rule: 'optional', default: 0 }
+        ])
+        v2.migrate('Item', 1, msg => ({ name: msg.name, score: 42 }))
+        const out = v2.decodeVersioned('Item', frame)
+        expect(Object.getPrototypeOf(out.message)).toBe(Object.prototype)
+        expect((out.message as any).name).toBe('test')
+        expect((out.message as any).score).toBe(42)
+    })
+
+    it('throws when a migration produces a message that fails schema verify', () => {
+        const v1 = new Serializer()
+        v1.version(1, 0)
+        v1.define('Item', [{ key: 'name', type: F.STRING, rule: 'required' }])
+        const frame = v1.encodeVersioned('Item', { name: 'test' })
+
+        const v2 = new Serializer()
+        v2.version(2, 0)
+        v2.define('Item', [{ key: 'name', type: F.STRING, rule: 'required' }])
+        v2.migrate('Item', 1, _msg => ({ name: 123 } as any))
+        expect(() => v2.decodeVersioned('Item', frame)).toThrow(/migrated message invalid/)
+    })
+})
+
+describe('Serializer explicit field tags', () => {
+    it('roundtrips a message encoded with explicit non-sequential tags', () => {
+        const s = new Serializer()
+        s.define('Config', [
+            { key: 'name', type: F.STRING, rule: 'required', tag: 10 },
+            { key: 'value', type: F.INT32, rule: 'optional', tag: 20 },
+            { key: 'active', type: F.BOOL, rule: 'optional', tag: 30 }
+        ])
+        const buf = s.encode('Config', { name: 'alpha', value: 42, active: true })
+        const out = s.decode('Config', buf) as any
+        expect(out.name).toBe('alpha')
+        expect(out.value).toBe(42)
+        expect(out.active).toBe(true)
+    })
+
+    it('decodes correctly when schema field ORDER differs but explicit tags match (wire compatibility)', () => {
+        // Encoder defines fields in one order with explicit tags
+        const encoder = new Serializer()
+        encoder.define('Packet', [
+            { key: 'id', type: F.UINT32, rule: 'required', tag: 1 },
+            { key: 'payload', type: F.STRING, rule: 'required', tag: 5 },
+            { key: 'flags', type: F.INT32, rule: 'optional', tag: 9 }
+        ])
+        const buf = encoder.encode('Packet', { id: 7, payload: 'hello', flags: 3 })
+
+        // Decoder defines the same fields in a DIFFERENT order but same explicit tags
+        const decoder = new Serializer()
+        decoder.define('Packet', [
+            { key: 'flags', type: F.INT32, rule: 'optional', tag: 9 },
+            { key: 'payload', type: F.STRING, rule: 'required', tag: 5 },
+            { key: 'id', type: F.UINT32, rule: 'required', tag: 1 }
+        ])
+        const out = decoder.decode('Packet', buf) as any
+        expect(out.id).toBe(7)
+        expect(out.payload).toBe('hello')
+        expect(out.flags).toBe(3)
+    })
+
+    it('fields() introspection includes the assigned tag number', () => {
+        const s = new Serializer()
+        s.define('Tagged', [
+            { key: 'x', type: F.INT32, rule: 'optional', tag: 100 },
+            { key: 'y', type: F.INT32, rule: 'optional' }
+        ])
+        const fields = s.fields('Tagged')
+        const byKey = Object.fromEntries(fields.map(f => [f.key, f]))
+        expect(byKey.x.tag).toBe(100)
+        expect(byKey.y.tag).toBe(2) // positional fallback: index 1 → tag 2
+    })
+})
+
+describe('Serializer default constructor — Node 18 crypto compatibility', () => {
+    it('constructs and produces a non-empty id when globalThis.crypto is absent', () => {
+        const savedCrypto = (globalThis as any).crypto
+        try {
+            (globalThis as any).crypto = undefined
+            const s = new Serializer()
+            const id: string = (s as any).namespace.name
+            expect(id).toBeTruthy()
+            expect(id.length).toBeGreaterThan(0)
+        } finally {
+            (globalThis as any).crypto = savedCrypto
+        }
+    })
 })
 
 describe('Serializer fragment / reassemble', () => {
@@ -431,5 +578,200 @@ describe('Serializer fragment / reassemble', () => {
     it('fragment validates maxChunkSize', () => {
         const s = new Serializer()
         expect(() => s.fragment(new Uint8Array(10), 0)).toThrow(/positive integer/)
+    })
+
+    it('fragment never produces frameId === 0 (regression SER-453)', () => {
+        const s = new Serializer()
+        for (let i = 0; i < 100; i++) {
+            const chunks = s.fragment(new Uint8Array([1, 2, 3]))
+            // byte 0 is MAGIC_FRAGMENT; frame ID occupies bytes 1-4
+            const frameId = (((chunks[0][1] << 24) | (chunks[0][2] << 16) | (chunks[0][3] << 8) | chunks[0][4]) >>> 0)
+            expect(frameId).not.toBe(0)
+        }
+    })
+})
+
+describe('Serializer.fields() faithful round-trip (map / enum / packed)', () => {
+    it('fields() returns a MAP marker for a map field', () => {
+        const s = new Serializer()
+        s.define('Stats', [
+            { key: 'counts', type: F.MAP(F.STRING, F.INT32), rule: 'optional' }
+        ])
+        const fields = s.fields('Stats')
+        const counts = fields.find(f => f.key === 'counts')!
+        expect((counts.type as any).__kind).toBe('map')
+        expect((counts.type as any).keyType).toBe('string')
+        expect((counts.type as any).valueType).toBe('int32')
+    })
+
+    it('fields() returns an ENUM marker for an inline enum field', () => {
+        const s = new Serializer()
+        s.define('Person', [
+            { key: 'role', type: F.ENUM(['admin', 'user', 'guest']), rule: 'optional' }
+        ])
+        const fields = s.fields('Person')
+        const role = fields.find(f => f.key === 'role')!
+        expect((role.type as any).__kind).toBe('enum')
+        expect((role.type as any).values).toMatchObject({ admin: 0, user: 1, guest: 2 })
+    })
+
+    it('fields() returns a PACKED_ARRAY marker for a packed repeated field', () => {
+        const s = new Serializer()
+        s.define('Frame', [
+            { key: 'ticks', type: F.PACKED_ARRAY(F.UINT32), rule: 'repeated' }
+        ])
+        const fields = s.fields('Frame')
+        const ticks = fields.find(f => f.key === 'ticks')!
+        expect((ticks.type as any).__kind).toBe('packed')
+        expect((ticks.type as any).type).toBe('uint32')
+    })
+
+    it('define(k2, s.fields(k1)) reproduces a map field faithfully', () => {
+        const s = new Serializer()
+        s.define('Source', [
+            { key: 'scores', type: F.MAP(F.STRING, F.INT32), rule: 'optional' }
+        ])
+        s.define('Copy', s.fields('Source'))
+        const buf = s.encode('Copy', { scores: { alice: 10, bob: 20 } })
+        const out = s.decode('Copy', buf) as any
+        expect(out.scores).toEqual({ alice: 10, bob: 20 })
+    })
+
+    it('define(k2, s.fields(k1)) reproduces an enum field faithfully', () => {
+        const s = new Serializer()
+        s.define('Source', [
+            { key: 'role', type: F.ENUM(['admin', 'user', 'guest']), rule: 'optional', default: 1 }
+        ])
+        s.define('Copy', s.fields('Source'))
+        const buf = s.encode('Copy', { role: 2 })
+        const out = s.decode('Copy', buf) as any
+        expect(out.role).toBe(2)
+    })
+
+    it('define(k2, s.fields(k1)) reproduces a packed array field faithfully', () => {
+        const s = new Serializer()
+        s.define('Source', [
+            { key: 'ticks', type: F.PACKED_ARRAY(F.UINT32), rule: 'repeated' }
+        ])
+        s.define('Copy', s.fields('Source'))
+        const buf = s.encode('Copy', { ticks: [1, 2, 3, 4, 5] })
+        const out = s.decode('Copy', buf) as any
+        expect(Array.from(out.ticks)).toEqual([1, 2, 3, 4, 5])
+    })
+
+    it('define(k2, s.fields(k1)) preserves field tags in round-trip', () => {
+        const s = new Serializer()
+        s.define('Source', [
+            { key: 'counts', type: F.MAP(F.STRING, F.INT32), rule: 'optional', tag: 5 },
+            { key: 'ticks', type: F.PACKED_ARRAY(F.UINT32), rule: 'repeated', tag: 10 }
+        ])
+        s.define('Copy', s.fields('Source'))
+        const copyFields = s.fields('Copy')
+        const byKey = Object.fromEntries(copyFields.map(f => [f.key, f]))
+        expect(byKey.counts.tag).toBe(5)
+        expect(byKey.ticks.tag).toBe(10)
+    })
+})
+
+describe('Serializer.define duplicate-type guard', () => {
+    it('throws a friendly already-defined error on duplicate key', () => {
+        const s = new Serializer()
+        s.define('Item', [{ key: 'name', type: F.STRING, rule: 'required' }])
+        expect(() => s.define('Item', [{ key: 'value', type: F.INT32, rule: 'optional' }]))
+            .toThrow(/type key=Item already defined/)
+    })
+
+    it('leaves no orphan inline enum in the namespace when define() fails for a duplicate key', () => {
+        const s = new Serializer()
+        s.define('Item', [
+            { key: 'role', type: F.ENUM(['a', 'b']), rule: 'optional' }
+        ])
+        // Without the guard, buildTypeInNamespace would register Item_status_E
+        // before namespace.add(type) threw — the guard must prevent that orphan.
+        expect(() => s.define('Item', [
+            { key: 'status', type: F.ENUM(['x', 'y']), rule: 'optional' }
+        ])).toThrow(/already defined/)
+
+        const ns: any = (s as any).namespace
+        expect(ns.get('Item_status_E')).toBeNull()
+    })
+})
+
+describe('Serializer magic-byte header (SER-454)', () => {
+    it('decodeVersioned rejects a buffer without the versioned magic byte', () => {
+        const s = new Serializer()
+        s.define('X', [{ key: 'k', type: F.STRING, rule: 'required' }])
+        // byte 0 = 0x01 (not MAGIC_VERSIONED = 0xB5); 3 bytes so it passes the size check
+        const bare = new Uint8Array([0x01, 0x00, 0x00])
+        expect(() => s.decodeVersioned('X', bare)).toThrow(/missing versioned magic byte/)
+    })
+
+    it('reassemble rejects chunks without the fragment magic byte', () => {
+        const s = new Serializer()
+        // 9-byte chunk with byte 0 = 0x00 (not MAGIC_FRAGMENT = 0xF5)
+        const fakeChunk = new Uint8Array(9)  // all zeros
+        expect(() => s.reassemble([fakeChunk])).toThrow(/missing fragment magic byte/)
+    })
+
+    it('encodeVersioned / decodeVersioned round-trips with the new 3-byte header', () => {
+        const s = new Serializer()
+        s.version(2, 3)
+        s.define('Msg', [{ key: 'text', type: F.STRING, rule: 'required' }])
+        const frame = s.encodeVersioned('Msg', { text: 'hello' })
+        expect(frame.byteLength).toBeGreaterThan(3)
+        const out = s.decodeVersioned('Msg', frame)
+        expect(out.version).toEqual({ major: 2, minor: 3 })
+        expect((out.message as any).text).toBe('hello')
+    })
+
+    it('fragment / reassemble round-trips with the new 9-byte chunk header', () => {
+        const s = new Serializer()
+        const payload = new Uint8Array([10, 20, 30, 40, 50])
+        const chunks = s.fragment(payload, 3)
+        expect(chunks.length).toBeGreaterThan(1)
+        // first byte of every chunk must be the magic marker
+        for (const chunk of chunks) {
+            expect(chunk[0]).toBe(0xF5)
+        }
+        const out = s.reassemble(chunks)
+        expect(Array.from(out)).toEqual([10, 20, 30, 40, 50])
+    })
+})
+
+describe('Serializer robustness fixes (SER-453)', () => {
+    it('encode surfaces a string reason when a non-Error is thrown', () => {
+        const s = new Serializer()
+        s.define('Msg', [{ key: 'x', type: F.STRING, rule: 'required' }])
+        // Trigger the encode catch path by passing a value that protobufjs throws a string on.
+        // We do this by monkey-patching the type's encode to throw a raw string.
+        const type = (s as any).namespace.lookupType('Msg')
+        const orig = type.encode.bind(type)
+        type.encode = () => { throw 'raw string error' }
+        try {
+            expect(() => s.encode('Msg', { x: 'hi' })).toThrow(/raw string error/)
+        } finally {
+            type.encode = orig
+        }
+    })
+
+    it('re-entrant encode does not corrupt the outer buffer (regression SER-453)', () => {
+        const s = new Serializer()
+        s.define('Inner', [{ key: 'n', type: F.INT32, rule: 'required' }])
+        s.define('Outer', [{ key: 'label', type: F.STRING, rule: 'required' }])
+
+        // Simulate re-entrancy: the first encode call triggers a second encode mid-flight
+        // by monkey-patching the type's encode to call s.encode('Inner', ...) before finishing.
+        const outerType = (s as any).namespace.lookupType('Outer')
+        const origEncode = outerType.encode.bind(outerType)
+        outerType.encode = (msg: any, writer: any) => {
+            // This re-entrant encode must NOT corrupt the outer writer.
+            const innerBuf = s.encode('Inner', { n: 42 })
+            expect(innerBuf.byteLength).toBeGreaterThan(0)
+            return origEncode(msg, writer)
+        }
+
+        const buf = s.encode('Outer', { label: 'test' })
+        const out = s.decode('Outer', buf) as any
+        expect(out.label).toBe('test')
     })
 })

@@ -6,9 +6,9 @@ const nextConfig = {
         // instrumentation.ts boots the B3 schedule ticker at server start.
         instrumentationHook: true,
     },
-    // @toolcase/react-components ships ESM + CJS; let Next transpile it so the
-    // SSR build resolves its named exports cleanly.
-    transpilePackages: ['@toolcase/react-components', '@toolcase/base'],
+    // @toolcase/base ships ESM + CJS; let Next transpile it so the SSR build
+    // resolves its named exports cleanly.
+    transpilePackages: ['@toolcase/base'],
     eslint: {
         ignoreDuringBuilds: true,
     },

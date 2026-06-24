@@ -1,0 +1,154 @@
+// tc-feature-card — card highlighting a feature with optional icon, eyebrow,
+// title, description, and visual area. Supports default/wide/full sizes and
+// an inline (horizontal) layout variant.
+// All cosmetics flow through --bs-feature-card-* custom properties backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+tc-feature-card {
+    --bs-feature-card-bg: var(--tc-surface);
+    --bs-feature-card-border-color: var(--tc-border);
+    --bs-feature-card-shadow: var(--tc-shadow-sm);
+    --bs-feature-card-shadow-hover: var(--tc-shadow-hover);
+    --bs-feature-card-padding-y: 1.5rem;
+    --bs-feature-card-padding-x: 1.5rem;
+    --bs-feature-card-gap: 1rem;
+    --bs-feature-card-head-gap: 0.75rem;
+    --bs-feature-card-copy-gap: 0.375rem;
+    --bs-feature-card-title-color: var(--tc-text);
+    --bs-feature-card-title-weight: 600;
+    --bs-feature-card-desc-color: var(--tc-text-muted);
+    --bs-feature-card-eyebrow-color: var(--tc-text-faint);
+    --bs-feature-card-icon-bg: var(--tc-surface-muted);
+    --bs-feature-card-icon-color: var(--tc-text);
+    --bs-feature-card-icon-size: 1.125rem;
+    --bs-feature-card-icon-tile-size: 2.5rem;
+}
+
+.tc-feature-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-feature-card-gap);
+    padding: var(--bs-feature-card-padding-y) var(--bs-feature-card-padding-x);
+    background: var(--bs-feature-card-bg);
+    border: 1px solid var(--bs-feature-card-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-feature-card-shadow);
+    transition:
+        box-shadow var(--tc-transition-fast),
+        transform var(--tc-transition-fast);
+
+    &:hover {
+        box-shadow: var(--bs-feature-card-shadow-hover);
+        transform: translateY(-1px);
+    }
+
+    // Width modifiers
+    &--wide {
+        max-width: 720px;
+    }
+
+    &--full {
+        width: 100%;
+        max-width: none;
+    }
+
+    // Inline: head switches to row — icon beside copy
+    &--inline .tc-feature-card-head {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+}
+
+// Head groups icon + copy; column by default, row when --inline
+.tc-feature-card-head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-feature-card-head-gap);
+}
+
+// Icon chip — slate muted square, sharp corners
+.tc-feature-card-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-feature-card-icon-tile-size);
+    height: var(--bs-feature-card-icon-tile-size);
+    background: var(--bs-feature-card-icon-bg);
+    border-radius: 0;
+    color: var(--bs-feature-card-icon-color);
+    flex-shrink: 0;
+
+    &:empty {
+        display: none;
+    }
+
+    svg {
+        width: var(--bs-feature-card-icon-size);
+        height: var(--bs-feature-card-icon-size);
+    }
+}
+
+// Copy column: eyebrow + title + description
+.tc-feature-card-copy {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-feature-card-copy-gap);
+    min-width: 0;
+}
+
+// Eyebrow — JetBrains Mono micro-label, uppercase, faint
+.tc-feature-card-eyebrow {
+    font-family: var(--bs-font-monospace);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--bs-feature-card-eyebrow-color);
+    line-height: 1.4;
+
+    &:empty {
+        display: none;
+    }
+}
+
+// Title — weight 600, slate ink
+.tc-feature-card-title {
+    font-size: 0.9375rem;
+    font-weight: var(--bs-feature-card-title-weight);
+    color: var(--bs-feature-card-title-color);
+    line-height: 1.35;
+
+    &:empty {
+        display: none;
+    }
+}
+
+// Description — muted body text
+.tc-feature-card-description {
+    font-size: 0.875rem;
+    color: var(--bs-feature-card-desc-color);
+    line-height: 1.55;
+
+    &:empty {
+        display: none;
+    }
+}
+
+// Visual region — holds rich slotted content (image, diagram, etc.)
+.tc-feature-card-visual {
+    &:empty {
+        display: none;
+    }
+}
+
+// Honour prefers-reduced-motion: freeze the lift, keep shadow transition
+@media (prefers-reduced-motion: reduce) {
+    .tc-feature-card {
+        transition: box-shadow var(--tc-transition-fast);
+
+        &:hover {
+            transform: none;
+        }
+    }
+}

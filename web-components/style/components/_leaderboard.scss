@@ -1,0 +1,228 @@
+// tc-leaderboard — table-based leaderboard with avatar, tier, sprints, trend, and points columns.
+// White surface, 1px --tc-border outer frame, slate-50 row hover, slate-100 inner hairlines.
+// Header row: uppercase mono micro-labels (letter-spacing: 0.05em, --tc-text-muted).
+// Sharp corners everywhere; only the avatar circle uses border-radius: 50%.
+// Rank 1–3 get gold/silver/bronze left-accent stripe — the one sanctioned accent use.
+// Points column: JetBrains Mono, right-aligned. Interactive rows: focusable, ≥44px coarse target.
+
+tc-leaderboard {
+    --bs-leaderboard-bg:              var(--tc-surface);
+    --bs-leaderboard-border:          1px solid var(--tc-border);
+    --bs-leaderboard-row-hairline:    1px solid var(--tc-slate-100, #f1f5f9);
+    --bs-leaderboard-th-font-size:    0.6875rem;
+    --bs-leaderboard-th-color:        var(--tc-text-muted);
+    --bs-leaderboard-td-color:        var(--tc-text);
+    --bs-leaderboard-row-hover-bg:    var(--tc-surface-hover);
+    --bs-leaderboard-row-active-bg:   var(--tc-surface-muted);
+    --bs-leaderboard-avatar-size:     2rem;
+    --bs-leaderboard-avatar-font-size: 0.6875rem;
+    --bs-leaderboard-points-font-size: 0.875rem;
+    --bs-leaderboard-gold:            #d97706;
+    --bs-leaderboard-silver:          #94a3b8;
+    --bs-leaderboard-bronze:          #b45309;
+    --bs-leaderboard-stripe-width:    3px;
+    --bs-leaderboard-row-min-height:  44px;
+}
+
+.tc-leaderboard {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bs-leaderboard-bg);
+    border: var(--bs-leaderboard-border);
+    border-radius: 0;
+    font-size: 0.875rem;
+    color: var(--bs-leaderboard-td-color);
+    table-layout: auto;
+}
+
+// ── Header ──────────────────────────────────────────────────────────────────
+
+.tc-leaderboard-thead-row {
+    background: var(--bs-leaderboard-bg);
+}
+
+.tc-leaderboard-th {
+    padding: 0.5rem 0.75rem;
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-leaderboard-th-font-size);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--bs-leaderboard-th-color);
+    text-align: left;
+    border-bottom: var(--bs-leaderboard-border);
+    white-space: nowrap;
+    border-radius: 0;
+}
+
+.tc-leaderboard-th-points {
+    text-align: right;
+}
+
+// ── Rows ────────────────────────────────────────────────────────────────────
+
+.tc-leaderboard-row {
+    transition: background-color var(--tc-transition-fast, 0.15s ease);
+
+    &:hover {
+        background-color: var(--bs-leaderboard-row-hover-bg);
+    }
+
+    &:active {
+        background-color: var(--bs-leaderboard-row-active-bg);
+    }
+}
+
+.tc-leaderboard-row--interactive {
+    cursor: pointer;
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: -2px;
+    }
+}
+
+// ── Cells ───────────────────────────────────────────────────────────────────
+
+.tc-leaderboard-td {
+    padding: 0.625rem 0.75rem;
+    border-bottom: var(--bs-leaderboard-row-hairline);
+    vertical-align: middle;
+}
+
+.tc-leaderboard-row:last-child > .tc-leaderboard-td {
+    border-bottom: none;
+}
+
+// ── Rank cell ───────────────────────────────────────────────────────────────
+
+.tc-leaderboard-td-rank {
+    border-left: var(--bs-leaderboard-stripe-width) solid transparent;
+    padding-left: calc(0.75rem - var(--bs-leaderboard-stripe-width));
+    white-space: nowrap;
+}
+
+.tc-leaderboard-row--gold > .tc-leaderboard-td-rank {
+    border-left-color: var(--bs-leaderboard-gold);
+}
+
+.tc-leaderboard-row--silver > .tc-leaderboard-td-rank {
+    border-left-color: var(--bs-leaderboard-silver);
+}
+
+.tc-leaderboard-row--bronze > .tc-leaderboard-td-rank {
+    border-left-color: var(--bs-leaderboard-bronze);
+}
+
+.tc-leaderboard-rank {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--tc-font-mono);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    color: var(--tc-text-muted);
+}
+
+.tc-leaderboard-rank--gold   { color: var(--bs-leaderboard-gold); }
+.tc-leaderboard-rank--silver { color: var(--bs-leaderboard-silver); }
+.tc-leaderboard-rank--bronze { color: var(--bs-leaderboard-bronze); }
+.tc-leaderboard-rank--default { color: var(--tc-text-muted); }
+
+// ── Developer cell ──────────────────────────────────────────────────────────
+
+.tc-leaderboard-td-dev {
+    white-space: nowrap;
+}
+
+.tc-leaderboard-dev {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+}
+
+.tc-leaderboard-name {
+    font-weight: 500;
+    color: var(--tc-text);
+    white-space: nowrap;
+}
+
+.tc-leaderboard-avatar {
+    flex-shrink: 0;
+    width: var(--bs-leaderboard-avatar-size);
+    height: var(--bs-leaderboard-avatar-size);
+    border-radius: 50%;
+    object-fit: cover;
+    display: inline-block;
+    vertical-align: middle;
+    background: var(--tc-surface-muted);
+}
+
+.tc-leaderboard-avatar--initials {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-leaderboard-avatar-font-size);
+    font-weight: 600;
+    line-height: 1;
+    color: var(--tc-text-muted);
+    background: var(--tc-surface-muted);
+    border: 1px solid var(--tc-border);
+}
+
+// ── Tier cell ───────────────────────────────────────────────────────────────
+
+.tc-leaderboard-tier {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--tc-text-muted);
+    white-space: nowrap;
+    border-radius: 0;
+}
+
+// ── Sprints cell ─────────────────────────────────────────────────────────────
+
+.tc-leaderboard-td-sprints {
+    color: var(--tc-text-muted);
+    white-space: nowrap;
+}
+
+// ── Trend cell ──────────────────────────────────────────────────────────────
+
+.tc-leaderboard-td-trend {
+    white-space: nowrap;
+}
+
+// ── Points cell ─────────────────────────────────────────────────────────────
+
+.tc-leaderboard-td-points {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.tc-leaderboard-points {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-leaderboard-points-font-size);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--tc-text);
+}
+
+// ── Coarse pointer: ensure ≥44px touch target ────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-leaderboard-row--interactive > .tc-leaderboard-td {
+        min-height: var(--bs-leaderboard-row-min-height);
+    }
+}
+
+// ── Reduced motion ──────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-leaderboard-row {
+        transition: none;
+    }
+}

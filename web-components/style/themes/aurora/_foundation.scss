@@ -1,0 +1,224 @@
+// Aurora theme — foundation token layer.
+//
+// An OPT-IN dark "production-AI / automation" skin for @toolcase/web-components,
+// ported from the AIHub reference design: a deep near-black slate canvas lit by a
+// single mint / emerald accent, ambient radial glow, gradient accents and crisp
+// monospace micro-labels. It applies only inside a theme root — either the custom
+// element `<tc-theme name="aurora"> … </tc-theme>` or any element carrying
+// `[data-tc-theme="aurora"]` (a plain wrapper div, which the examples site uses).
+// Everything outside the root keeps the default toolcase (light / product) voice.
+//
+// HOW IT WORKS — read this before authoring a component override:
+//   Every tc-* component drives its cosmetics through --bs-<component>-* custom
+//   properties whose DEFAULTS resolve to --tc-* design tokens (e.g.
+//   `--bs-panel-bg: var(--tc-surface)`). Re-pointing the --tc-* tokens here, at
+//   the theme root, re-skins the colours / borders / type of ALL components in
+//   one shot. The per-component partials in ./components/ only add the AIHub
+//   STRUCTURE a flat token swap can't carry: the mint gradient + glow on primary
+//   actions, hover-lift on cards, the ambient glow field, gradient display text,
+//   and the mono dot eyebrow.
+//
+// AESTHETIC: deep slate (#07090d → #18212e), one mint/emerald accent (#2fe6ad),
+// thin translucent-white hairlines, soft layered surfaces, ambient mint glow.
+// SHARP corners are kept (border-radius: 0; circles only) — consistent with the
+// toolcase mandate and the dungeon theme; aurora's identity is the palette +
+// glow, not rounded corners.
+//
+// FONTS: 'Space Grotesk' (display) and 'Manrope' (body) are NOT bundled — load
+// them on the host page (e.g. Google Fonts) for the full look; both degrade to
+// system-ui sans-serif. 'JetBrains Mono' is shared with the default theme.
+
+@use '../../foundation/tokens' as *;
+
+tc-theme[name='aurora'],
+[data-tc-theme='aurora'] {
+    color-scheme: dark;
+
+    // `tc-theme` is display:contents (no box), so `background` would not paint —
+    // for the aurora canvas, wrap content in `tc-artboard-backdrop` or set the
+    // glow field on your own container. `color` / `font-family` / the custom
+    // properties below all inherit through the contents box to descendants.
+    color: var(--ah-text);
+    font-family: var(--ah-body);
+
+    // ── Aurora palette (--ah-*) — the theme's design tokens ──────────────────
+    // Backdrop — deepest near-black slate up through layered surfaces.
+    --ah-bg: #07090d;
+    --ah-bg-2: #0a0e14;
+    --ah-surface: #0e131b;
+    --ah-surface-2: #131a24;
+    --ah-surface-3: #18212e;
+
+    // Hairlines — translucent white so they read on any surface depth.
+    --ah-border-faint: rgba(255, 255, 255, 0.04);
+    --ah-border: rgba(255, 255, 255, 0.08);
+    --ah-border-strong: rgba(255, 255, 255, 0.14);
+
+    // Text ramp — cool off-white down to muted slate-grey.
+    --ah-text: #e9eef4;
+    --ah-text-2: #aab4c1;
+    // Muted ramp end — lifted from #6c7888 (sat ~4.1:1 on --ah-surface, just
+    // under AA) to clear 4.5:1 for body-sized faint text / descriptions.
+    --ah-muted: #828e9e;
+    --ah-emphasis: #f5f9ff;
+
+    // Mint / emerald accent — the single signature hue.
+    --ah-accent: #2fe6ad;
+    --ah-accent-2: #14c79a;
+    --ah-accent-bright: #7af3cf;
+    --ah-accent-ink: #04231b;
+    --ah-accent-soft: rgba(47, 230, 173, 0.13);
+    --ah-accent-line: rgba(47, 230, 173, 0.32);
+    --ah-accent-glow: rgba(47, 230, 173, 0.1);
+    --ah-accent-shadow: rgba(47, 230, 173, 0.5);
+
+    // Semantic element colours — kept distinct from the mint accent.
+    --ah-success: #35d07f;
+    --ah-info: #5b9dff;
+    --ah-warn: #f0b35e;
+    --ah-danger: #ff6b6b;
+
+    // Typography families.
+    --ah-display: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --ah-body: 'Manrope', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --ah-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+    --ah-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+    // ── Reusable signature recipes (referenced by component partials) ────────
+    // The mint→emerald gradient — primary actions, brand chip, bar fills.
+    --ah-accent-grad: linear-gradient(135deg, var(--ah-accent), var(--ah-accent-2));
+    // Gradient for clipped display text (headings / hero / brand wordmark).
+    --ah-accent-grad-text: linear-gradient(120deg, var(--ah-accent), var(--ah-accent-bright));
+    // Soft top-down surface gradient for cards / panels.
+    --ah-surface-grad: linear-gradient(180deg, var(--ah-surface-2), var(--ah-surface));
+    // Mint glow drop-shadow for raised primary elements.
+    --ah-glow: 0 8px 26px -8px var(--ah-accent-shadow);
+    --ah-glow-strong: 0 14px 34px -8px var(--ah-accent-shadow);
+    // Hairline top highlight — "light catches the top edge".
+    --ah-bevel-top: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    // Ambient radial glow field for full-bleed backdrops.
+    --ah-glow-field:
+        radial-gradient(820px 520px at 78% -8%, var(--ah-accent-glow), transparent 60%),
+        radial-gradient(700px 600px at 8% 12%, rgba(36, 90, 120, 0.14), transparent 62%),
+        radial-gradient(900px 700px at 50% 120%, var(--ah-accent-glow), transparent 55%);
+    // Frosted dark glass for floating menus / popovers / overlay panels.
+    --ah-overlay-bg: linear-gradient(180deg, rgba(19, 26, 36, 0.92), rgba(10, 14, 20, 0.95));
+    --ah-overlay-blur: blur(14px) saturate(125%);
+
+    // ── Remap toolcase tokens (--tc-*) onto the aurora palette ───────────────
+    // This block alone flips every component's colours / borders / type, because
+    // the --bs-<component>-* defaults all resolve through these tokens.
+    --tc-font-sans: var(--ah-body);
+    --tc-font-mono: var(--ah-mono);
+
+    --tc-white: #ffffff;
+    --tc-black: #000000;
+
+    --tc-surface: var(--ah-surface);
+    --tc-surface-muted: var(--ah-surface-2);
+    --tc-surface-hover: var(--ah-surface-3);
+    --tc-surface-dark: var(--ah-bg);
+    --tc-border: var(--ah-border);
+    --tc-border-faint: var(--ah-border-faint);
+    --tc-border-strong: var(--ah-border-strong);
+    --tc-text: var(--ah-text);
+    --tc-text-muted: var(--ah-text-2);
+    --tc-text-faint: var(--ah-muted);
+    // text-inverse means "readable text on a dark/ink surface" everywhere it is
+    // used (code blocks, dark nav, dark backdrops, the welcome-guide aside) —
+    // NOT on the accent. The accent's on-fill ink is --tc-app-accent-contrast.
+    // Keep this LIGHT; pointing it at the dark accent-ink turned a dozen
+    // dark-on-dark code blocks invisible (~1.2:1).
+    --tc-text-inverse: var(--ah-emphasis);
+    --tc-emphasis: var(--ah-emphasis);
+
+    // Ink — the darkest surface (toasts, tooltips, code blocks, footers).
+    --tc-ink: #05070a;
+    --tc-ink-2: var(--ah-bg-2);
+
+    // App accent — primary buttons / links read mint with dark-ink contrast text.
+    --tc-app-accent: var(--ah-accent);
+    --tc-app-accent-hover: var(--ah-accent-2);
+    --tc-app-accent-contrast: var(--ah-accent-ink);
+    // Primary-action gradient → full mint→emerald (no slate stop), so dark-ink
+    // on-fill text stays legible across the whole sweep. Mirrors the .btn-primary
+    // override; pointing the shared token here fixes every CTA that used the base
+    // `var(--tc-app-accent), #2b3a51` gradient (it became mint→slate under aurora).
+    --tc-app-accent-gradient: var(--ah-accent-grad);
+
+    // Accent — signature highlights / focus / brand dot. accent-fg leans bright
+    // so accent-coloured TEXT stays legible on the dark surfaces.
+    --tc-accent: var(--ah-accent);
+    --tc-accent-fg: var(--ah-accent-bright);
+    --tc-accent-soft: var(--ah-accent-soft);
+    --tc-accent-hex: #2fe6ad;
+    --tc-cyan: #4fd0e0;
+
+    --tc-success: var(--ah-success);
+    --tc-success-bg: rgba(53, 208, 127, 0.16);
+    --tc-info: var(--ah-info);
+    --tc-info-bg: rgba(91, 157, 255, 0.16);
+    --tc-warning: var(--ah-warn);
+    --tc-warning-bg: rgba(240, 179, 94, 0.16);
+    --tc-danger: var(--ah-danger);
+    --tc-danger-bg: rgba(255, 107, 107, 0.16);
+
+    // Shadows lean dark + deep; surfaces lean on thin hairlines + glow accents.
+    --tc-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --tc-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
+    --tc-shadow-lg: 0 24px 60px -28px rgba(0, 0, 0, 0.8);
+    --tc-shadow-hover: 0 14px 34px -12px rgba(0, 0, 0, 0.65);
+
+    --tc-transition-fast: 0.18s var(--ah-ease);
+    --tc-transition-base: 0.25s var(--ah-ease);
+
+    // Focus ring — a soft mint halo.
+    --tc-focus-ring: 0 0 0 3px var(--ah-accent-soft);
+
+    // ── Bootstrap-compatible contract (--bs-*) ───────────────────────────────
+    --bs-primary: var(--ah-accent);
+    --bs-primary-rgb: 47, 230, 173;
+    --bs-secondary: var(--ah-text-2);
+    --bs-secondary-rgb: 170, 180, 193;
+    --bs-success: var(--ah-success);
+    --bs-success-rgb: 53, 208, 127;
+    --bs-danger: var(--ah-danger);
+    --bs-danger-rgb: 255, 107, 107;
+    --bs-warning: var(--ah-warn);
+    --bs-warning-rgb: 240, 179, 94;
+    --bs-info: var(--ah-info);
+    --bs-info-rgb: 91, 157, 255;
+    --bs-light: var(--ah-text);
+    --bs-light-rgb: 233, 238, 244;
+    --bs-dark: var(--ah-bg);
+    --bs-dark-rgb: 7, 9, 13;
+
+    --bs-font-sans-serif: var(--ah-body);
+    --bs-font-monospace: var(--ah-mono);
+    --bs-body-font-family: var(--ah-body);
+    --bs-body-bg: var(--ah-bg);
+    --bs-body-bg-rgb: 7, 9, 13;
+    --bs-body-color: var(--ah-text);
+    --bs-body-color-rgb: 233, 238, 244;
+    --bs-emphasis-color: var(--ah-emphasis);
+    --bs-emphasis-color-rgb: 245, 249, 255;
+
+    --bs-secondary-color: var(--ah-text-2);
+    --bs-secondary-bg: var(--ah-surface-2);
+    --bs-tertiary-color: var(--ah-muted);
+    --bs-tertiary-bg: var(--ah-surface-3);
+
+    --bs-border-color: var(--ah-border);
+    --bs-border-color-translucent: rgba(255, 255, 255, 0.1);
+    --bs-border-radius: 0;
+
+    --bs-link-color: var(--ah-accent);
+    --bs-link-hover-color: var(--ah-accent-bright);
+
+    --bs-box-shadow-sm: var(--tc-shadow-sm);
+    --bs-box-shadow: var(--tc-shadow-md);
+    --bs-box-shadow-lg: var(--tc-shadow-lg);
+
+    --bs-focus-ring-color: var(--ah-accent-soft);
+}

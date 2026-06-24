@@ -1,7 +1,14 @@
 lib
 node_modules
 .parcel-cache
+.DS_Store
 examples/dist
 !examples/dist/CNAME
 tasks/*.md
 tasks/logs/*.log
+
+# TaskForge multi-account registry — per-alias Claude config dirs hold
+# `.credentials.json` OAuth tokens (real secrets); never commit them.
+.claude-accounts/
+taskforge.db
+taskforge.db-*

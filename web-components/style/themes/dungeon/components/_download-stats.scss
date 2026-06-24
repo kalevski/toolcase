@@ -1,0 +1,41 @@
+// Dungeon › tc-download-stats — gilded stat panel for package download metrics.
+// Token swap repoints bg/border/number/package/sparkline to gold palette and
+// fixes the --tc-slate-100 inner-separator defect (invisible on dark wood).
+// Box-shadow adds the bevel stack; period labels get display-caps treatment.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token swap on host element ─────────────────────────────────────────────
+
+    tc-download-stats {
+        --bs-download-stats-bg: var(--fg-panel-bg);
+        --bs-download-stats-border-color: var(--fg-gold-deep);
+        --bs-download-stats-number-color: var(--fg-gold-bright);
+        --bs-download-stats-package-color: var(--fg-gold);
+        --bs-download-stats-sparkline-color: var(--fg-gold);
+        // Fix: inner cell separators + sparkline top border use --tc-slate-100 which
+        // vanishes on the dark wood surface — replace with a faint gold hairline.
+        --bs-download-stats-cell-separator-color: rgba(201, 169, 97, 0.18);
+    }
+
+    // ── Structure: gilded bevel (box-shadow the base omits) ───────────────────
+
+    .tc-download-stats {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── Period labels: display-caps instead of mono ────────────────────────────
+    // Base hardcodes font-family on the element so a var-only swap won't reach it.
+
+    .tc-download-stats__period {
+        font-family: var(--fg-display);
+        letter-spacing: 0.14em;
+    }
+
+    // ── Number: mono numerals for tabular alignment ────────────────────────────
+    // Base uses --tc-font-sans; override to mono for a register/HUD feel.
+
+    .tc-download-stats__number {
+        font-family: var(--fg-mono);
+    }
+}

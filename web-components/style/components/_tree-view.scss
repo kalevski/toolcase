@@ -1,0 +1,240 @@
+// tc-tree-view — hierarchical tree navigation with expand/collapse, optional
+// multi-select checkboxes, and async lazy-loaded branches. All cosmetics flow
+// through --bs-tree-view-* custom properties backed by --tc-* tokens.
+//
+// Voice: pure slate neutrals carry it. Rows rest on --tc-surface; HOVER = slate
+// well; SELECTED = ink active fill with white text (single-select) OR an ink
+// left-marker (checkbox mode). Indentation guides are faint slate hairlines. The
+// only curves are the grandfathered form-check checkbox glyph and the spinner
+// ring; every rectangle is border-radius: 0. The chevron is a lucide inline SVG
+// that rotates on expand. No status colour — cyan accent appears only on focus.
+
+@use '../foundation/tokens' as *;
+
+tc-tree-view {
+    --bs-tree-view-font-size: 0.8125rem;
+    --bs-tree-view-color: var(--tc-text);
+    --bs-tree-view-surface: var(--tc-surface);
+
+    --bs-tree-view-row-padding-x: 0.5rem;
+    --bs-tree-view-row-padding-y: 0.25rem;
+    --bs-tree-view-row-min-height: 32px;
+    --bs-tree-view-row-gap: 0.375rem;
+    --bs-tree-view-indent: 1.25rem;
+
+    --bs-tree-view-hover-bg: var(--tc-surface-hover);
+    --bs-tree-view-selected-bg: var(--tc-app-accent);
+    --bs-tree-view-selected-color: var(--tc-app-accent-contrast, #fff);
+    --bs-tree-view-marker-color: var(--tc-app-accent);
+    --bs-tree-view-marker-width: 2px;
+
+    --bs-tree-view-guide-color: var(--tc-border);
+
+    --bs-tree-view-toggle-color: var(--tc-text-muted);
+    --bs-tree-view-toggle-size: 1rem;
+
+    --bs-tree-view-icon-color: var(--tc-text-faint);
+    --bs-tree-view-icon-size: 1rem;
+
+    --bs-tree-view-spinner-color: var(--tc-text-muted);
+
+    // Cyan accent is spent only here, on keyboard focus.
+    --bs-tree-view-focus-color: var(--tc-accent);
+}
+
+.tc-tree-view {
+    font-size: var(--bs-tree-view-font-size);
+    color: var(--bs-tree-view-color);
+    background: var(--bs-tree-view-surface);
+}
+
+.tc-tree-view-group {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+// Nested groups carry a faint slate indentation guide hairline, aligned with the
+// parent row's chevron column (--tc-tree-guide = parent depth, set in render()).
+.tc-tree-view-group[role='group'] {
+    position: relative;
+
+    &::before {
+        content: '';
+        position: absolute;
+        left: calc(
+            var(--bs-tree-view-row-padding-x) +
+            var(--bs-tree-view-indent) * var(--tc-tree-guide, 0) +
+            var(--bs-tree-view-toggle-size) / 2
+        );
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        background: var(--bs-tree-view-guide-color);
+    }
+}
+
+.tc-tree-view-node {
+    position: relative;
+}
+
+// ── Row — the treeitem ────────────────────────────────────────────────────────────
+
+.tc-tree-view-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--bs-tree-view-row-gap);
+    min-height: var(--bs-tree-view-row-min-height);
+    // Indent scales with depth via the per-row --tc-tree-level custom property.
+    padding: var(--bs-tree-view-row-padding-y) var(--bs-tree-view-row-padding-x);
+    padding-left: calc(
+        var(--bs-tree-view-row-padding-x) + var(--bs-tree-view-indent) * var(--tc-tree-level, 0)
+    );
+    border-radius: 0;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color var(--tc-transition-fast, 0.15s ease), color var(--tc-transition-fast, 0.15s ease);
+
+    // Ink left-marker (used as the selected affordance in checkbox mode).
+    &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: var(--bs-tree-view-marker-width);
+        background: var(--bs-tree-view-marker-color);
+        opacity: 0;
+    }
+
+    &:hover {
+        background: var(--bs-tree-view-hover-bg);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--bs-tree-view-focus-color);
+        outline-offset: -2px;
+    }
+
+    // SELECTED — single-select: solid ink fill, white text.
+    &--selected {
+        background: var(--bs-tree-view-selected-bg);
+        color: var(--bs-tree-view-selected-color);
+
+        .tc-tree-view-toggle,
+        .tc-tree-view-icon {
+            color: var(--bs-tree-view-selected-color);
+        }
+    }
+
+    @media (pointer: coarse) {
+        min-height: 44px;
+    }
+}
+
+// Disabled nodes: opacity + inert, never colour-only.
+.tc-tree-view-row[aria-disabled='true'] {
+    opacity: 0.45;
+    pointer-events: none;
+    cursor: default;
+}
+
+// ── Checkbox mode — selected row uses the ink left-marker, not a fill box ──────────
+
+.tc-tree-view--checkbox .tc-tree-view-row--selected {
+    background: transparent;
+    color: inherit;
+
+    .tc-tree-view-toggle,
+    .tc-tree-view-icon {
+        color: var(--bs-tree-view-toggle-color);
+    }
+
+    &::before {
+        opacity: 1;
+    }
+}
+
+.tc-tree-view--checkbox .tc-tree-view-row--selected .tc-tree-view-icon {
+    color: var(--bs-tree-view-icon-color);
+}
+
+// ── Disclosure toggle — rotating chevron / leaf spacer / spinner ───────────────────
+
+.tc-tree-view-toggle {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-tree-view-toggle-size);
+    height: var(--bs-tree-view-toggle-size);
+    color: var(--bs-tree-view-toggle-color);
+    transition: transform var(--tc-transition-base, 0.2s cubic-bezier(0.4, 0, 0.2, 1)), color var(--tc-transition-fast, 0.15s ease);
+
+    svg {
+        width: 0.875rem;
+        height: 0.875rem;
+        stroke: currentColor;
+        fill: none;
+    }
+
+    &:hover {
+        color: var(--bs-tree-view-color);
+    }
+
+    // Chevron points right at rest, rotates down (90°) when the node is expanded.
+    &--expanded {
+        transform: rotate(90deg);
+    }
+
+    // Leaves keep the column width for alignment but show nothing.
+    &--leaf {
+        visibility: hidden;
+        cursor: default;
+    }
+}
+
+.tc-tree-view-spinner {
+    color: var(--bs-tree-view-spinner-color);
+}
+
+// ── Checkbox — grandfathered form-check glyph ──────────────────────────────────────
+
+.tc-tree-view-checkbox.form-check-input {
+    flex-shrink: 0;
+    width: 0.95rem;
+    height: 0.95rem;
+    margin: 0;
+}
+
+// ── Leading icon + label ───────────────────────────────────────────────────────────
+
+.tc-tree-view-icon {
+    flex-shrink: 0;
+    width: var(--bs-tree-view-icon-size);
+    height: var(--bs-tree-view-icon-size);
+    stroke: currentColor;
+    fill: none;
+    color: var(--bs-tree-view-icon-color);
+}
+
+.tc-tree-view-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// ── Reduced motion — freeze the chevron rotation + spinner, keep state colours ──────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-tree-view-row {
+        transition: background-color 0s, color 0s;
+    }
+
+    .tc-tree-view-toggle {
+        transition: color 0s;
+    }
+}

@@ -1,0 +1,35 @@
+// Dungeon › tc-badge — sigil chips.
+// Most color utilities flip for free via the foundation token remap
+// (primary→gold, danger→blood, success→stamina, warning→legendary, info→mana).
+// The only required fix is .text-bg-secondary, which hardcodes --tc-slate-500
+// with !important and must be beaten with an equally specific !important.
+// Display caps are applied to short-label chips (not pill counters).
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // Replace the slate-ramp secondary fill with on-palette copper metal.
+    // Text set to --fg-ink for contrast on the warm copper surface.
+    .badge.text-bg-secondary {
+        background-color: var(--fg-copper) !important;
+        color: var(--fg-ink) !important;
+    }
+
+    // Carved-sigil display caps for label badges.
+    // Pill counter badges are excluded so numerals remain legible.
+    .badge:not(.rounded-pill) {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 600;
+    }
+
+    // Sanctioned pill exception — keep the rounded counter shape.
+    .badge.rounded-pill {
+        border-radius: 999px;
+        font-family: var(--fg-mono);
+        text-transform: none;
+        letter-spacing: 0;
+        font-weight: 500;
+    }
+}

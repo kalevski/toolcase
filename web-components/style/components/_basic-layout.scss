@@ -1,0 +1,30 @@
+// tc-basic-layout — two-section page layout: optional brand header + main content area.
+// Flat structural surface: no shadows, no border-radius, slate neutrals only.
+// Drive every cosmetic value through --bs-basic-layout-* custom properties.
+
+tc-basic-layout {
+    --bs-basic-layout-brand-bg: var(--tc-surface);
+    --bs-basic-layout-brand-color: var(--tc-text);
+    --bs-basic-layout-brand-border: var(--tc-border);
+    --bs-basic-layout-main-bg: transparent;
+    --bs-basic-layout-main-color: var(--tc-text);
+}
+
+.tc-basic-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+}
+
+.tc-basic-layout-brand {
+    background: var(--bs-basic-layout-brand-bg);
+    color: var(--bs-basic-layout-brand-color);
+    border-bottom: 1px solid var(--bs-basic-layout-brand-border);
+    border-radius: 0;
+}
+
+.tc-basic-layout-main {
+    flex: 1 1 auto;
+    background: var(--bs-basic-layout-main-bg);
+    color: var(--bs-basic-layout-main-color);
+}

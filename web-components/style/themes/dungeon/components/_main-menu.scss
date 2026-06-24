@@ -1,0 +1,112 @@
+// Dungeon › tc-main-menu — gilded menu frame composing display-caps rows.
+// Token swap carries the wood ground + gold border; structural rules add the
+// panel bevel, display-caps title + items, the gold left-marker + gradient wash
+// on the selected row, mono eyebrow/badge.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-main-menu {
+        --bs-main-menu-bg: var(--fg-panel-bg);
+        --bs-main-menu-border: var(--fg-gold-deep);
+        --bs-main-menu-header-bg: rgba(0, 0, 0, 0.3);
+        --bs-main-menu-header-border: rgba(201, 169, 97, 0.25);
+        --bs-main-menu-eyebrow-color: var(--fg-parch-dim);
+        --bs-main-menu-title-color: var(--fg-gold-bright);
+        --bs-main-menu-subtitle-color: var(--fg-parch-3);
+        --bs-main-menu-item-color: var(--fg-parch);
+        --bs-main-menu-item-border: rgba(201, 169, 97, 0.15);
+        --bs-main-menu-item-hover-bg: rgba(201, 169, 97, 0.08);
+        // Selected reads as a gradient wash, not a solid ink fill.
+        --bs-main-menu-item-selected-bg: transparent;
+        --bs-main-menu-item-selected-color: var(--fg-gold-bright);
+        --bs-main-menu-item-disabled-color: var(--fg-parch-dim);
+        --bs-main-menu-badge-bg: rgba(0, 0, 0, 0.4);
+        --bs-main-menu-badge-color: var(--fg-gold-bright);
+        --bs-main-menu-badge-selected-bg: rgba(0, 0, 0, 0.4);
+        --bs-main-menu-badge-selected-color: var(--fg-gold-bright);
+    }
+
+    // Panel bevel + drop shadow.
+    .tc-main-menu {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // Header title reads as gilded display caps.
+    .tc-main-menu-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+    }
+
+    .tc-main-menu-subtitle {
+        font-family: var(--fg-body);
+        font-style: italic;
+    }
+
+    // Header divider — replace the flat rgba hairline with the gold gradient rule.
+    .tc-main-menu-header {
+        border-bottom: none;
+        position: relative;
+
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--fg-rule);
+        }
+    }
+
+    // Each item carries the left marker rail + display caps.
+    .tc-main-menu-item {
+        border-left: 2px solid transparent;
+    }
+
+    .tc-main-menu-item-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-weight: 600;
+        // Lift parchment caps cleanly off the wood ground.
+        text-shadow: 0 1px 0 #000;
+    }
+
+    // Selected: gold left marker + gradient highlight wash + caret.
+    .tc-main-menu-item.tc-main-menu-item--selected {
+        background: linear-gradient(90deg, rgba(201, 169, 97, 0.22), transparent 70%);
+        border-left-color: var(--fg-gold-bright);
+    }
+
+    // Hover: deep-gold left marker (two-tier rail: deep = highlighted, bright = selected).
+    .tc-main-menu-item:hover:not(.tc-main-menu-item--disabled):not(.tc-main-menu-item--selected) {
+        border-left-color: var(--fg-gold-deep);
+    }
+
+    // Hover tint — gild the label on hover like the fantasy reference.
+    .tc-main-menu-item:hover:not(.tc-main-menu-item--disabled):not(.tc-main-menu-item--selected) .tc-main-menu-item-label {
+        color: var(--fg-gold-bright);
+    }
+
+    // Caret on selected row — echoes the fantasy gc-main-menu-caret pointer.
+    .tc-main-menu-item--selected .tc-main-menu-item-label::before {
+        content: '▸';
+        font-family: var(--fg-display);
+        color: var(--fg-gold-bright);
+        margin-right: 0.375em;
+    }
+
+    // Selected label glow — makes the chosen row the brightest element.
+    .tc-main-menu-item--selected .tc-main-menu-item-label {
+        text-shadow: 0 0 12px rgba(232, 200, 120, 0.35);
+    }
+
+    // Badge — mono caps gold pill on translucent black.
+    .tc-main-menu-badge {
+        font-family: var(--fg-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        border: 1px solid var(--fg-gold-deep);
+    }
+}

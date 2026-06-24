@@ -1,0 +1,86 @@
+// tc-marquee — horizontally scrolling content banner.
+// Items scroll at a configured speed and direction. All cosmetics flow through
+// --bs-marquee-* backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+@keyframes tc-marquee-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
+
+.tc-marquee {
+    // Defaults — overridden inline by JS after measuring content width
+    --bs-marquee-duration: 10s;
+    --bs-marquee-direction-value: normal;
+
+    // Theming knobs
+    --bs-marquee-item-color: var(--tc-text);
+    --bs-marquee-sep-color: var(--tc-text-muted);
+    --bs-marquee-sep-gap: 0.625rem;
+    --bs-marquee-padding-y: 0.5rem;
+
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    width: 100%;
+    border-radius: 0;
+}
+
+.tc-marquee-track {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+    white-space: nowrap;
+    will-change: transform;
+    animation: tc-marquee-scroll var(--bs-marquee-duration) linear infinite;
+    animation-direction: var(--bs-marquee-direction-value);
+}
+
+.tc-marquee-copy-1,
+.tc-marquee-copy-2 {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+    padding-block: var(--bs-marquee-padding-y);
+}
+
+.tc-marquee-item {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    color: var(--bs-marquee-item-color);
+}
+
+.tc-marquee-sep {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    padding-inline: var(--bs-marquee-sep-gap);
+    color: var(--bs-marquee-sep-color);
+    user-select: none;
+}
+
+// Pause animation on hover when the attribute is present
+tc-marquee[pause-on-hover]:hover .tc-marquee-track {
+    animation-play-state: paused;
+}
+
+// Reduced motion: static scrollable row — no auto-motion
+@media (prefers-reduced-motion: reduce) {
+    .tc-marquee {
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+
+    .tc-marquee-track {
+        animation: none !important;
+    }
+
+    // Hide the duplicate copy — only needed for seamless looping
+    .tc-marquee-copy-2 {
+        display: none;
+    }
+}

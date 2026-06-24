@@ -5,6 +5,9 @@ import EventProcessor from './EventProcessor'
 import TimeEventProcessor from './TimeEventProcessor'
 import CollisionEventProcessor from './CollisionEventProcessor'
 import JobProcessor from './JobProcessor'
+import TweenProcessor from './TweenProcessor'
+import Timeline from './Timeline'
+import type { TweenOptions, TweenHandle, TimelineHandle } from './TweenProcessor'
 
 type ProcessorClass<T extends FlowProcessor> = new (scene: Scene, eventType: string) => T
 
@@ -28,6 +31,8 @@ export default class FlowEngine {
 
     readonly physics: CollisionEventProcessor | null
 
+    readonly tweens: TweenProcessor
+
     constructor(scene: Scene) {
         this.scene = scene
         this.logger = scene.engine.getLogger('flow')
@@ -37,6 +42,15 @@ export default class FlowEngine {
         this.physics = (scene as any).matter !== undefined
             ? this.addProcessor('collision_event', CollisionEventProcessor)
             : null
+        this.tweens = this.addProcessor(TweenProcessor.EVENT_TYPE, TweenProcessor)
+    }
+
+    tween(target: object, to: Record<string, number>, opts: TweenOptions): TweenHandle {
+        return this.tweens.tween(target, to, opts)
+    }
+
+    timeline(): Timeline {
+        return new Timeline(this.scene)
     }
 
     addProcessor<T extends FlowProcessor>(eventType: string, processorClass: ProcessorClass<T>): T {

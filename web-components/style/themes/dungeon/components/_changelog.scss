@@ -1,0 +1,67 @@
+// Dungeon › tc-changelog — quest journal timeline.
+// Foundation already remaps rail color, dot color, date/title/desc/tag colors,
+// and focus → gold via --tc-* remap. This file handles:
+//   1. Parch skeleton shimmer (white bypass in the base).
+//   2. Display-caps entry titles (font-family hardcoded in the class).
+//   3. Diamond node dots (sanctioned shape — rotate 45°, square, gold-edge).
+//   4. Gilded bevel on tag chips.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── 1. Token swap on the host ─────────────────────────────────────────────
+    // Skeleton shimmer: white glare doesn't read on dark wood — replace with a
+    // subtle parch-warm sheen.
+    tc-changelog {
+        --bs-changelog-skeleton-shimmer: rgba(232, 220, 196, 0.25);
+
+        // Optionally punch the dot color up to bright gold (rivet highlight).
+        --bs-changelog-dot-color: var(--fg-gold-bright);
+    }
+
+    // ── 2. Display-caps titles ────────────────────────────────────────────────
+    // Base hardcodes no font-family here; we promote it to the Cinzel display
+    // face so each entry reads as an engraved log heading.
+    .tc-changelog-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--fg-parch);
+    }
+
+    // ── 3. Diamond node dot ───────────────────────────────────────────────────
+    // The plan sanctions converting the round rivet to a rotated square diamond.
+    // border-radius: 0 removes the sanctioned 50% circle; rotating 45° creates
+    // the diamond. This is explicitly listed as a sanctioned shape.
+    .tc-changelog-dot {
+        border-radius: 0;
+        transform: rotate(45deg);
+        background: var(--fg-gold-edge);
+    }
+
+    // Skeleton dot stays flat (no gold gradient on a placeholder).
+    .tc-changelog-dot--skeleton {
+        background: var(--fg-leather-2);
+        transform: rotate(45deg);
+    }
+
+    // ── 4. Gilded tag chips ───────────────────────────────────────────────────
+    // A stamped-marker inset bevel gives the mono tags a physical, engraved
+    // quality. Border color is already gold-deep via foundation remap.
+    .tc-changelog-tag {
+        box-shadow: var(--fg-bevel-top);
+        border-color: var(--fg-gold-deep);
+    }
+
+    // ── Date — parch-3 ledger stamp ───────────────────────────────────────────
+    // Foundation maps --tc-text-muted → parch-dim; force parch-3 for legibility
+    // against wood surfaces.
+    .tc-changelog-date {
+        color: var(--fg-parch-3);
+    }
+
+    // ── Description — quiet parch ─────────────────────────────────────────────
+    .tc-changelog-desc {
+        color: var(--fg-parch-3);
+    }
+}

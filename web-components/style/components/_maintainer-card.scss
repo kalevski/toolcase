@@ -1,0 +1,236 @@
+// tc-maintainer-card — profile card of a maintainer with avatar, social links, and sponsor button.
+// Outer frame: toolcase Card motif (.card) — white bg, 1px --tc-border hairline, --tc-shadow-sm.
+// Avatar: sanctioned circle (border-radius: 50%). Sharp corners (border-radius: 0) everywhere else.
+// Hover: 1px lift (translateY(-1px)) + --tc-shadow-hover. Honour prefers-reduced-motion.
+// Social links: bare icon buttons (hover well --tc-surface-muted, sharp corners).
+// Sponsor button: --tc-danger accent + heart icon, follows primary button motif.
+// Focus visible on all links/buttons. ≥44px coarse touch targets.
+
+@use '../foundation/tokens' as *;
+
+tc-maintainer-card {
+    // Public theming contract — all cosmetics flow through these vars.
+    --bs-maintainer-card-bg: var(--tc-surface);
+    --bs-maintainer-card-border: var(--tc-border);
+    --bs-maintainer-card-shadow: var(--tc-shadow-sm);
+    --bs-maintainer-card-shadow-hover: var(--tc-shadow-hover);
+    --bs-maintainer-card-padding: 1.5rem;
+    --bs-maintainer-card-avatar-size: 5rem;
+    --bs-maintainer-card-name-color: var(--tc-text);
+    --bs-maintainer-card-name-size: 1.0625rem;
+    --bs-maintainer-card-role-color: var(--tc-text-muted);
+    --bs-maintainer-card-role-size: 0.8125rem;
+    --bs-maintainer-card-location-color: var(--tc-text-muted);
+    --bs-maintainer-card-location-size: 0.8125rem;
+    --bs-maintainer-card-bio-color: var(--tc-text-muted);
+    --bs-maintainer-card-bio-size: 0.875rem;
+    --bs-maintainer-card-link-color: var(--tc-text-muted);
+    --bs-maintainer-card-link-hover-bg: var(--tc-surface-muted);
+    --bs-maintainer-card-link-hover-color: var(--tc-text);
+    --bs-maintainer-card-link-icon-size: 1.125rem;
+    --bs-maintainer-card-sponsor-bg: var(--tc-danger);
+    --bs-maintainer-card-sponsor-color: var(--tc-app-accent-contrast);
+    --bs-maintainer-card-sponsor-hover-bg: #b91c1c;
+}
+
+// .tc-maintainer-card is the inner <div class="card tc-maintainer-card"> — .card supplies
+// the white surface, 1px border, and base shadow; this class adds hover lift.
+.tc-maintainer-card {
+    border-radius: 0;
+    transition:
+        box-shadow var(--tc-transition-base),
+        transform var(--tc-transition-base);
+
+    &:hover {
+        box-shadow: var(--bs-maintainer-card-shadow-hover);
+        transform: translateY(-1px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-maintainer-card {
+        transition: box-shadow var(--tc-transition-base);
+
+        &:hover {
+            transform: none;
+        }
+    }
+}
+
+.tc-maintainer-card__body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.375rem;
+    text-align: center;
+    padding: var(--bs-maintainer-card-padding);
+}
+
+.tc-maintainer-card__avatar-wrap {
+    margin-bottom: 0.5rem;
+}
+
+// Sanctioned circle — the only border-radius:50% in this component.
+.tc-maintainer-card__avatar {
+    width: var(--bs-maintainer-card-avatar-size);
+    height: var(--bs-maintainer-card-avatar-size);
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    border: 1px solid var(--bs-maintainer-card-border);
+}
+
+.tc-maintainer-card__name {
+    font-size: var(--bs-maintainer-card-name-size);
+    font-weight: 600;
+    color: var(--bs-maintainer-card-name-color);
+    margin: 0;
+    line-height: 1.3;
+}
+
+.tc-maintainer-card__role {
+    font-size: var(--bs-maintainer-card-role-size);
+    color: var(--bs-maintainer-card-role-color);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.tc-maintainer-card__location {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: var(--bs-maintainer-card-location-size);
+    color: var(--bs-maintainer-card-location-color);
+    margin: 0;
+
+    svg {
+        width: 0.8125rem;
+        height: 0.8125rem;
+        flex-shrink: 0;
+    }
+}
+
+.tc-maintainer-card__bio {
+    font-size: var(--bs-maintainer-card-bio-size);
+    color: var(--bs-maintainer-card-bio-color);
+    margin: 0.125rem 0 0;
+    line-height: 1.55;
+    max-width: 28ch;
+}
+
+.tc-maintainer-card__links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-top: 0.25rem;
+}
+
+// Social link icon button — bare, hover well, sharp corners.
+.tc-maintainer-card__link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0;
+    color: var(--bs-maintainer-card-link-color);
+    text-decoration: none;
+    transition:
+        background-color var(--tc-transition-fast),
+        color var(--tc-transition-fast);
+
+    svg {
+        width: var(--bs-maintainer-card-link-icon-size);
+        height: var(--bs-maintainer-card-link-icon-size);
+        flex-shrink: 0;
+    }
+
+    &:hover,
+    &:focus {
+        background: var(--bs-maintainer-card-link-hover-bg);
+        color: var(--bs-maintainer-card-link-hover-color);
+        text-decoration: none;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &:focus:not(:focus-visible) {
+        outline: none;
+    }
+}
+
+@media (pointer: coarse) {
+    .tc-maintainer-card__link {
+        min-width: 2.75rem;
+        min-height: 2.75rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-maintainer-card__link {
+        transition: background-color var(--tc-transition-fast);
+    }
+}
+
+// Sponsor CTA — filled danger-accent block, sharp corners, heart icon + label.
+.tc-maintainer-card__sponsor {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin-top: 0.75rem;
+    padding: 0.4375rem 1rem;
+    background: var(--bs-maintainer-card-sponsor-bg);
+    color: var(--bs-maintainer-card-sponsor-color);
+    border: none;
+    border-radius: 0;
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        background-color var(--tc-transition-fast),
+        color var(--tc-transition-fast);
+
+    svg {
+        width: 1rem;
+        height: 1rem;
+        flex-shrink: 0;
+    }
+
+    &:hover,
+    &:focus {
+        background: var(--bs-maintainer-card-sponsor-hover-bg);
+        color: var(--bs-maintainer-card-sponsor-color);
+        text-decoration: none;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &:focus:not(:focus-visible) {
+        outline: none;
+    }
+}
+
+@media (pointer: coarse) {
+    .tc-maintainer-card__sponsor {
+        min-height: 2.75rem;
+        padding-top: 0.625rem;
+        padding-bottom: 0.625rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-maintainer-card__sponsor {
+        transition: background-color var(--tc-transition-fast);
+    }
+}

@@ -1,0 +1,36 @@
+// Dungeon › tc-stat-row — display-caps label, gold-bright mono value, gold
+// hairline separator, stamina/blood trend colours. Token swap can't override
+// the hardcoded label mono font, so the label is repointed to display caps here.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-stat-row {
+        --bs-stat-row-border-color: rgba(201, 169, 97, 0.2);
+        --bs-stat-row-label-color: var(--fg-parch-3);
+        --bs-stat-row-label-letter-spacing: 0.2em;
+        --bs-stat-row-value-color: var(--fg-gold-bright);
+        --bs-stat-row-trend-up-color: var(--fg-stamina-bright);
+        --bs-stat-row-trend-down-color: var(--fg-blood-bright);
+    }
+
+    // Baseline-align label + value so small caps and tall mono share a visual anchor.
+    .tc-stat-row {
+        align-items: baseline;
+    }
+
+    // Label reads as gilded display caps (base hardcodes mono — must override).
+    .tc-stat-row-label {
+        font-family: var(--fg-display);
+    }
+
+    // Value: mono numerals with an ink drop shadow for that struck-metal look.
+    .tc-stat-row-value {
+        font-family: var(--fg-mono);
+        text-shadow: 0 1px 2px #000;
+    }
+
+    .tc-stat-row-trend {
+        font-family: var(--fg-mono);
+        letter-spacing: 0.08em;
+    }
+}

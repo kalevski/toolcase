@@ -1,0 +1,34 @@
+// Dungeon › tc-cycle-wheel — gilded compass-dial / phase medallion.
+// Token swap: accent/value → gold-bright, border → gold, track → gold-deep, pill → stamina chip.
+// Structure: gilded bevel + glow on the sanctioned circle core; display caps on core-label;
+// gilded square chip replaces the rounded pill (optional sharp aesthetic).
+// SANCTIONED CIRCLES: ring tracks, core, pointer dot — DO NOT square these.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-cycle-wheel {
+        --bs-cycle-wheel-accent: var(--fg-gold-bright);
+        --bs-cycle-wheel-value: var(--fg-gold-bright);
+        --bs-cycle-wheel-border: var(--fg-gold);
+        --bs-cycle-wheel-track: var(--fg-gold-deep);
+        --bs-cycle-wheel-pill-color: var(--fg-stamina-bright);
+    }
+
+    // Centre medallion: gilded bevel stack + faint gold glow.
+    // border-radius: 50% is a sanctioned circle — not touched.
+    .tc-cycle-wheel__core {
+        box-shadow: var(--fg-panel-shadow), 0 0 16px rgba(240, 210, 122, 0.15);
+    }
+
+    // Core label: switch from hardcoded sans-serif to display caps.
+    .tc-cycle-wheel__core-label {
+        font-family: var(--fg-display);
+        letter-spacing: 0.16em;
+    }
+
+    // Status chip: square the pill to a sharp gilded chip.
+    .tc-cycle-wheel__core-pill {
+        border-radius: 0;
+        border: 1px solid var(--fg-gold-deep);
+    }
+}

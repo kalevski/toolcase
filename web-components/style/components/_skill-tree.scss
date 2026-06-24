@@ -1,0 +1,263 @@
+// tc-skill-tree — node-graph skill tree with prerequisite edges.
+// Port of gc-skill-tree; drops fantasy chrome (gilded frames, glows, textures)
+// in favour of flat slate aesthetics: sharp corners, 1px hairline borders,
+// ink accent for the selected/unlocked states, mono rank labels.
+// All cosmetics flow through --bs-skill-tree-* custom properties.
+
+@use '../foundation/tokens' as *;
+
+tc-skill-tree {
+    // Canvas
+    --bs-skill-tree-bg:                      var(--tc-surface);
+    --bs-skill-tree-border-color:            var(--tc-border);
+
+    // Edge (SVG line)
+    --bs-skill-tree-edge-color:              var(--tc-border-strong);
+    --bs-skill-tree-edge-unlocked-color:     var(--tc-app-accent);
+    --bs-skill-tree-edge-width:              1.5;
+
+    // Node (base / available)
+    --bs-skill-tree-node-size:               4rem;
+    --bs-skill-tree-node-bg:                 var(--tc-surface);
+    --bs-skill-tree-node-border-color:       var(--tc-border-strong);
+    --bs-skill-tree-node-color:              var(--tc-text);
+    --bs-skill-tree-node-gap:                0.3125rem;
+    --bs-skill-tree-node-transition:         background var(--tc-transition-fast), border-color var(--tc-transition-fast), color var(--tc-transition-fast);
+
+    // Node — hover
+    --bs-skill-tree-node-hover-bg:           var(--tc-surface-muted);
+    --bs-skill-tree-node-hover-border:       var(--tc-app-accent);
+
+    // Node — selected
+    --bs-skill-tree-node-selected-bg:        var(--tc-app-accent);
+    --bs-skill-tree-node-selected-color: var(--tc-app-accent-contrast);
+    --bs-skill-tree-node-selected-border:    var(--tc-app-accent);
+
+    // Node — unlocked (not selected)
+    --bs-skill-tree-node-unlocked-bg:        var(--tc-surface);
+    --bs-skill-tree-node-unlocked-color:     var(--tc-success);
+    --bs-skill-tree-node-unlocked-border:    var(--tc-success);
+
+    // Node — locked
+    --bs-skill-tree-node-locked-bg:          var(--tc-surface);
+    --bs-skill-tree-node-locked-color:       var(--tc-text-faint);
+    --bs-skill-tree-node-locked-border:      var(--tc-border);
+    --bs-skill-tree-node-locked-opacity:     0.5;
+
+    // Glyph
+    --bs-skill-tree-glyph-size:              1.125rem;
+    --bs-skill-tree-glyph-dot-size:          0.5rem;
+
+    // Label
+    --bs-skill-tree-label-font-size:         0.6875rem;
+    --bs-skill-tree-label-color:             var(--tc-text-muted);
+    --bs-skill-tree-label-max-width:         6rem;
+
+    // Rank counter
+    --bs-skill-tree-rank-font-size:          0.625rem;
+    --bs-skill-tree-rank-color:              var(--tc-text-faint);
+
+    // Points strip
+    --bs-skill-tree-points-bg:               var(--tc-surface-muted);
+    --bs-skill-tree-points-border-color:     var(--tc-border);
+    --bs-skill-tree-points-label-color:      var(--tc-text-muted);
+    --bs-skill-tree-points-value-color:      var(--tc-app-accent);
+}
+
+// Canvas — sized to the width/height attributes; nodes are absolutely positioned inside.
+.tc-skill-tree__canvas {
+    position: relative;
+    overflow: hidden;
+    background: var(--bs-skill-tree-bg);
+    border: 1px solid var(--bs-skill-tree-border-color);
+    border-radius: 0;
+    box-sizing: border-box;
+}
+
+// SVG edge layer — fills the canvas, sits behind nodes.
+.tc-skill-tree__edges {
+    display: block;
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.tc-skill-tree__edge {
+    stroke: var(--bs-skill-tree-edge-color);
+    stroke-width: var(--bs-skill-tree-edge-width);
+    stroke-linecap: square;
+    fill: none;
+    transition: stroke var(--tc-transition-fast);
+}
+
+.tc-skill-tree__edge--unlocked {
+    stroke: var(--bs-skill-tree-edge-unlocked-color);
+}
+
+// Node cells — absolutely positioned, centered at their (x, y) coordinate.
+.tc-skill-tree__node {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--bs-skill-tree-node-gap);
+    width: var(--bs-skill-tree-node-size);
+    min-height: var(--bs-skill-tree-node-size);
+    padding: 0.5rem 0.375rem 0.4375rem;
+    background: var(--bs-skill-tree-node-bg);
+    border: 1px solid var(--bs-skill-tree-node-border-color);
+    border-radius: 0;
+    color: var(--bs-skill-tree-node-color);
+    cursor: pointer;
+    box-sizing: border-box;
+    text-align: center;
+    user-select: none;
+    transition: var(--bs-skill-tree-node-transition);
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-accent);
+        outline-offset: 2px;
+    }
+
+    &:hover:not(.tc-skill-tree__node--locked):not(.tc-skill-tree__node--selected) {
+        background: var(--bs-skill-tree-node-hover-bg);
+        border-color: var(--bs-skill-tree-node-hover-border);
+        transform: translate(-50%, -50%) translateY(-1px);
+    }
+}
+
+.tc-skill-tree__node--selected {
+    background: var(--bs-skill-tree-node-selected-bg);
+    border-color: var(--bs-skill-tree-node-selected-border);
+    color: var(--bs-skill-tree-node-selected-color);
+}
+
+.tc-skill-tree__node--unlocked:not(.tc-skill-tree__node--selected) {
+    background: var(--bs-skill-tree-node-unlocked-bg);
+    border-color: var(--bs-skill-tree-node-unlocked-border);
+    color: var(--bs-skill-tree-node-unlocked-color);
+}
+
+.tc-skill-tree__node--locked {
+    background: var(--bs-skill-tree-node-locked-bg);
+    border-color: var(--bs-skill-tree-node-locked-border);
+    color: var(--bs-skill-tree-node-locked-color);
+    opacity: var(--bs-skill-tree-node-locked-opacity);
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+// Glyph container — icon centered in the node.
+.tc-skill-tree__glyph {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.tc-skill-tree__glyph-icon {
+    width: var(--bs-skill-tree-glyph-size);
+    height: var(--bs-skill-tree-glyph-size);
+    flex-shrink: 0;
+}
+
+// Default state dot for nodes with no icon.
+.tc-skill-tree__glyph-dot {
+    display: block;
+    width: var(--bs-skill-tree-glyph-dot-size);
+    height: var(--bs-skill-tree-glyph-dot-size);
+    background: currentcolor;
+    border-radius: 0;
+}
+
+.tc-skill-tree__glyph-text {
+    font-size: var(--bs-skill-tree-glyph-size);
+    line-height: 1;
+}
+
+// Label below the glyph.
+.tc-skill-tree__label {
+    display: block;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-skill-tree-label-font-size);
+    color: var(--bs-skill-tree-label-color);
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: var(--bs-skill-tree-label-max-width);
+
+    .tc-skill-tree__node--selected & {
+        color: inherit;
+    }
+
+    .tc-skill-tree__node--unlocked:not(.tc-skill-tree__node--selected) & {
+        color: inherit;
+    }
+}
+
+// Rank counter (rank/maxRank).
+.tc-skill-tree__rank {
+    display: block;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-skill-tree-rank-font-size);
+    color: var(--bs-skill-tree-rank-color);
+    line-height: 1;
+    letter-spacing: 0.04em;
+
+    .tc-skill-tree__node--selected & {
+        color: rgba(255, 255, 255, 0.75);
+    }
+}
+
+// Points strip above the canvas.
+.tc-skill-tree__points {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3125rem 0.625rem;
+    margin-bottom: 0.5rem;
+    background: var(--bs-skill-tree-points-bg);
+    border: 1px solid var(--bs-skill-tree-points-border-color);
+    border-radius: 0;
+    line-height: 1;
+}
+
+.tc-skill-tree__points-label {
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--bs-skill-tree-points-label-color);
+}
+
+.tc-skill-tree__points-value {
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--bs-skill-tree-points-value-color);
+}
+
+// Coarse-pointer touch targets (44px minimum).
+@media (pointer: coarse) {
+    .tc-skill-tree__node {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-skill-tree__node {
+        transition: none;
+
+        &:hover:not(.tc-skill-tree__node--locked):not(.tc-skill-tree__node--selected) {
+            transform: translate(-50%, -50%);
+        }
+    }
+
+    .tc-skill-tree__edge {
+        transition: none;
+    }
+}

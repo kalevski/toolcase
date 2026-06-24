@@ -1,0 +1,72 @@
+// Dungeon › tc-key-binder — gilded mono key-cap tile. Token swap recolours the
+// frame; structural rules add the metal gradient fill + beveled top highlight on
+// the host, recast the label as mono caps, and give the capturing state a gold
+// glow. Empty stays dashed/italic, sharp corners throughout.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-key-binder {
+        --bs-key-binder-bg: linear-gradient(180deg, #3a2a1c, #1a120a);
+        --bs-key-binder-border-color: var(--fg-gold-deep);
+        --bs-key-binder-color: var(--fg-parch);
+
+        --bs-key-binder-hover-bg: linear-gradient(180deg, #3a2a1c, #1a120a);
+        --bs-key-binder-hover-border-color: var(--fg-gold);
+
+        --bs-key-binder-capturing-bg: linear-gradient(180deg, #2a1a08, #4a2a0e);
+        --bs-key-binder-capturing-border-color: var(--fg-gold-bright);
+        --bs-key-binder-capturing-color: var(--fg-gold-bright);
+
+        --bs-key-binder-empty-color: var(--fg-parch-dim);
+        --bs-key-binder-empty-border-color: var(--fg-gold-deep);
+
+        --bs-key-binder-disabled-border-color: var(--fg-gold-deep);
+        --bs-key-binder-disabled-color: var(--fg-parch-dim);
+
+        // Beveled metal cap (host is the visible tile).
+        box-shadow:
+            inset 0 1px 0 rgba(232, 200, 120, 0.2),
+            inset 0 -2px 4px rgba(0, 0, 0, 0.5),
+            0 1px 0 rgba(0, 0, 0, 0.6);
+        // Warmer top-edge reads as a lit bevel highlight; body stays gold-deep.
+        border-top-color: var(--fg-gold);
+        transition:
+            filter 0.12s ease,
+            color 0.12s ease;
+    }
+
+    tc-key-binder:hover:not([disabled]):not(.tc-key-binder--capturing) {
+        filter: brightness(1.15);
+    }
+
+    // Capturing: gold glow replaces the bevel; amber fill shifted warmer for
+    // a clearer "armed" read vs the muddy #2a1a08→#4a2a0e original.
+    tc-key-binder.tc-key-binder--capturing {
+        --bs-key-binder-capturing-bg: linear-gradient(180deg, #3a2410, #5a3410);
+        box-shadow:
+            inset 0 1px 0 rgba(232, 200, 120, 0.3),
+            0 0 12px rgba(232, 200, 120, 0.4);
+    }
+
+    // Armed glyph glows gold so the label itself reads as "awaiting input".
+    tc-key-binder.tc-key-binder--capturing .tc-key-binder__label {
+        text-shadow: 0 0 6px rgba(240, 210, 122, 0.5);
+    }
+
+    // Disabled: desaturating overlay feel instead of pure opacity fade, so the
+    // cap reads as deliberately inert metal rather than just faint.
+    tc-key-binder.tc-key-binder--disabled {
+        filter: grayscale(0.4) brightness(0.8);
+    }
+
+    tc-key-binder.tc-key-binder--empty:not(.tc-key-binder--capturing) {
+        font-style: italic;
+    }
+
+    // Label reads as mono caps.
+    .tc-key-binder__label {
+        font-family: var(--fg-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+    }
+}

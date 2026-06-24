@@ -1,0 +1,107 @@
+// tc-icon-button — square icon-only button.
+// Appearance is built on .btn + .btn-{variant} from _button.scss.
+// This partial overrides padding → fixed square size, tunes secondary
+// to a ghost style, and adds the size ladder.
+// All cosmetic knobs flow through --bs-icon-button-* custom properties.
+
+@use '../foundation/tokens' as *;
+
+// ── Host — pointer-events off when disabled ───────────────────────────────────
+
+tc-icon-button[disabled] {
+    pointer-events: none;
+}
+
+// ── Base — square, zero padding, icon centred ─────────────────────────────────
+
+.tc-icon-button {
+    --bs-icon-button-size: 36px;
+    --bs-icon-button-icon-size: 1rem;
+
+    // Override .btn's text padding; the fixed size drives the hit area.
+    --bs-btn-padding-x: 0;
+    --bs-btn-padding-y: 0;
+
+    width: var(--bs-icon-button-size);
+    height: var(--bs-icon-button-size);
+    flex-shrink: 0;
+    border-radius: 0;
+
+    svg {
+        width: var(--bs-icon-button-icon-size);
+        height: var(--bs-icon-button-icon-size);
+        flex-shrink: 0;
+        pointer-events: none;
+    }
+}
+
+// ── Sizes ─────────────────────────────────────────────────────────────────────
+
+.tc-icon-button--small {
+    --bs-icon-button-size: 28px;
+    --bs-icon-button-icon-size: 0.875rem;
+}
+
+.tc-icon-button--default {
+    --bs-icon-button-size: 36px;
+    --bs-icon-button-icon-size: 1rem;
+}
+
+.tc-icon-button--large {
+    --bs-icon-button-size: 44px;
+    --bs-icon-button-icon-size: 1.125rem;
+}
+
+// ── Secondary — ghost style (subtle default for icon toolbars) ────────────────
+// The solid btn-secondary fill is too heavy for an icon-only control.
+// Ghost: transparent bg, muted icon, hover to slate well.
+
+.btn-secondary.tc-icon-button {
+    --bs-btn-color: var(--tc-text-muted);
+    --bs-btn-bg: transparent;
+    --bs-btn-border-color: transparent;
+    --bs-btn-hover-color: var(--tc-text);
+    --bs-btn-hover-bg: var(--tc-surface-muted);
+    --bs-btn-hover-border-color: transparent;
+    --bs-btn-active-color: var(--tc-text);
+    --bs-btn-active-bg: var(--tc-surface-muted);
+    --bs-btn-active-border-color: transparent;
+    --bs-btn-disabled-color: var(--tc-text-faint);
+    --bs-btn-disabled-bg: transparent;
+    --bs-btn-disabled-border-color: transparent;
+}
+
+// ── Focus ─────────────────────────────────────────────────────────────────────
+
+.tc-icon-button:focus-visible {
+    outline: 2px solid var(--tc-app-accent);
+    outline-offset: 2px;
+    box-shadow: none;
+}
+
+// ── Touch target — WCAG 2.5.5 ────────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-icon-button {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+// ── Reduced motion ────────────────────────────────────────────────────────────
+// Global reset freezes all transitions. Re-opt-in to state transitions
+// (color/background/border) while keeping the transform lift frozen.
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-icon-button {
+        transition:
+            background var(--tc-transition-fast),
+            color var(--tc-transition-fast),
+            border-color var(--tc-transition-fast);
+
+        &:hover {
+            transform: none;
+            box-shadow: none;
+        }
+    }
+}

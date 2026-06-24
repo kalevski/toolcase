@@ -1,0 +1,125 @@
+// tc-form-input — universal form-input dispatcher. Composes the shared form
+// controls (.form-control / .form-select / .form-check / .form-range) and adds
+// the field-level chrome: a label with a required asterisk, a muted helper
+// line, and a danger-toned error line shown when the control is invalid.
+// Every cosmetic value flows through --bs-form-input-* backed by --tc-* tokens.
+
+.tc-form-input {
+    --bs-form-input-gap: 0.25rem;
+    --bs-form-input-label-color: var(--tc-text);
+    --bs-form-input-label-size: 13px;
+    --bs-form-input-label-weight: 500;
+    --bs-form-input-help-color: var(--tc-text-muted);
+    --bs-form-input-help-size: 12.5px;
+    --bs-form-input-error-color: var(--tc-danger);
+    --bs-form-input-error-size: 12.5px;
+    --bs-form-input-required-color: var(--tc-danger);
+    --bs-form-input-disabled-opacity: 0.6;
+
+    display: block;
+}
+
+.tc-form-input-label {
+    display: inline-block;
+    margin-bottom: 0.4rem;
+    font-size: var(--bs-form-input-label-size);
+    font-weight: var(--bs-form-input-label-weight);
+    line-height: 1.4;
+    color: var(--bs-form-input-label-color);
+}
+
+.tc-form-input-required {
+    margin-left: 0.15rem;
+    color: var(--bs-form-input-required-color);
+}
+
+.tc-form-input-help {
+    margin-top: 0.35rem;
+    font-size: var(--bs-form-input-help-size);
+    line-height: 1.45;
+    color: var(--bs-form-input-help-color);
+}
+
+.tc-form-input-error {
+    display: none;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.35rem;
+    font-size: var(--bs-form-input-error-size);
+    line-height: 1.4;
+    color: var(--bs-form-input-error-color);
+
+    // Only show when the JS layer has injected a message.
+    &:not(:empty) {
+        display: flex;
+    }
+}
+
+.tc-form-input-error-icon {
+    flex: none;
+    width: 0.9em;
+    height: 0.9em;
+}
+
+// Radio-group rows generated for `type="radio"` with options.
+.tc-form-input-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+// Inline checkbox / switch: keep the form-check default left-aligned row.
+.tc-form-input--checkbox .form-check,
+.tc-form-input--switch .form-check {
+    margin-bottom: 0;
+}
+
+// Native color swatch — sharp square, hairline border, no inner padding.
+.tc-form-input-color {
+    width: 3rem;
+    height: 2.25rem;
+    padding: 0.15rem;
+    cursor: pointer;
+
+    &::-webkit-color-swatch-wrapper {
+        padding: 0;
+    }
+
+    &::-webkit-color-swatch {
+        border: 0;
+        border-radius: 0;
+    }
+
+    &::-moz-color-swatch {
+        border: 0;
+        border-radius: 0;
+    }
+}
+
+// Loading placeholder — spinner + a sharp muted bar standing in for the control.
+.tc-form-input-loading {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--tc-text-muted);
+}
+
+.tc-form-input-loading-bar {
+    flex: 1 1 auto;
+    height: 2.25rem;
+    background-color: var(--tc-surface-muted);
+    border: var(--bs-border-width) solid var(--tc-border);
+    border-radius: 0;
+}
+
+// Disabled field: dim and lock the whole control region.
+.tc-form-input[disabled] {
+    opacity: var(--bs-form-input-disabled-opacity);
+    pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-form-input .spinner-border {
+        animation-duration: 1.5s;
+    }
+}

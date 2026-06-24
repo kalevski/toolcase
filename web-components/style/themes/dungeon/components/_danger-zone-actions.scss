@@ -1,0 +1,41 @@
+// Dungeon › tc-danger-zone-actions — blood-bordered sealed warning placard.
+// Token-swap repoints danger colors to the blood ramp; bevel adds placard
+// depth; display-caps titles mark each action as a named forbidden act.
+// Buttons are btn-outline-danger and are already reskinned by the foundation's
+// --bs-danger remap — do NOT re-style them here.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token swap (on the host, matching the base file) ──────────────────
+
+    tc-danger-zone-actions {
+        --bs-danger-zone-actions-border-color: var(--fg-blood);
+        --bs-danger-zone-actions-separator-color: var(--fg-blood);
+        --bs-danger-zone-actions-title-color: var(--fg-parch);
+        --bs-danger-zone-actions-desc-color: var(--fg-parch-3);
+    }
+
+    // ── Panel wrapper — sealed warning placard depth ───────────────────────
+
+    .tc-danger-zone {
+        // Lighter bevel stack: bevel-top highlight + medium shadow.
+        // Full fg-panel-shadow is gold-tinted; here we keep it subtle since
+        // the frame accent is blood, not gold — this reads as a war-seal placard.
+        box-shadow: var(--fg-bevel-top), var(--tc-shadow-md);
+    }
+
+    // ── Action title — display caps for the named forbidden act ───────────
+
+    .tc-danger-zone-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 600;
+    }
+
+    // ── Description — body serif for readable lore-text ───────────────────
+
+    .tc-danger-zone-desc {
+        font-family: var(--fg-body);
+    }
+}

@@ -55,31 +55,36 @@ class VectorClock {
     }
 
     static isAfter(vectorClock1: VectorClock, vectorClock2: VectorClock): boolean {
-        let isAfter = true
+        let strictlyGreater = false
         for (const nodeId of VectorClock.getNodeIds(vectorClock1, vectorClock2)) {
-            if (vectorClock1.getVersion(nodeId) < vectorClock2.getVersion(nodeId)) {
-                isAfter = false
-            }
+            const a = vectorClock1.getVersion(nodeId)
+            const b = vectorClock2.getVersion(nodeId)
+            if (a < b) return false
+            if (a > b) strictlyGreater = true
         }
-        return isAfter
+        return strictlyGreater
+    }
+
+    static isEqual(vectorClock1: VectorClock, vectorClock2: VectorClock): boolean {
+        return VectorClock.getNodeIds(vectorClock1, vectorClock2)
+            .every(id => vectorClock1.getVersion(id) === vectorClock2.getVersion(id))
     }
 
     static isConcurrent(vectorClock1: VectorClock, vectorClock2: VectorClock): boolean {
-        return !(VectorClock.isAfter(vectorClock1, vectorClock2) || VectorClock.isAfter(vectorClock2, vectorClock1))
+        return !VectorClock.isEqual(vectorClock1, vectorClock2)
+            && !VectorClock.isAfter(vectorClock1, vectorClock2)
+            && !VectorClock.isAfter(vectorClock2, vectorClock1)
     }
 
     static isBefore(vectorClock1: VectorClock, vectorClock2: VectorClock): boolean {
-        return !VectorClock.isAfter(vectorClock1, vectorClock2) && !VectorClock.isConcurrent(vectorClock1, vectorClock2)
+        return VectorClock.isAfter(vectorClock2, vectorClock1)
     }
 
     static compare(vectorClock1: VectorClock, vectorClock2: VectorClock): number {
-        if (VectorClock.isAfter(vectorClock1, vectorClock2)) {
-            return 1
-        } else if (VectorClock.isConcurrent(vectorClock1, vectorClock2)) {
-            return 0
-        } else {
-            return -1
-        }
+        if (VectorClock.isEqual(vectorClock1, vectorClock2)) return 0
+        if (VectorClock.isAfter(vectorClock1, vectorClock2)) return 1
+        if (VectorClock.isAfter(vectorClock2, vectorClock1)) return -1
+        return 0 // concurrent
     }
 }
 

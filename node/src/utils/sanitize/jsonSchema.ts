@@ -12,6 +12,8 @@ export interface JSONSchemaObject {
 	maxLength?: number
 	minimum?: number
 	maximum?: number
+	minItems?: number
+	maxItems?: number
 	enum?: readonly (string | number | boolean | null)[]
 }
 
@@ -29,7 +31,7 @@ function ruleType(rule: FieldRule): string | undefined {
 	return rule.type
 }
 
-function ruleToJsonSchema(rule: FieldRule): JSONSchemaObject {
+function ruleToJsonSchema(rule: FieldRule, strict: boolean): JSONSchemaObject {
 	const out: JSONSchemaObject = {}
 	const type = ruleType(rule)
 	if (type) out.type = type
@@ -40,13 +42,24 @@ function ruleToJsonSchema(rule: FieldRule): JSONSchemaObject {
 	if (rule.min !== undefined) {
 		if (type === 'string') out.minLength = rule.min
 		else if (type && NUMERIC_TYPES.has(type)) out.minimum = rule.min
+		else if (type === 'array') out.minItems = rule.min
 	}
 	if (rule.max !== undefined) {
 		if (type === 'string') out.maxLength = rule.max
 		else if (type && NUMERIC_TYPES.has(type)) out.maximum = rule.max
+		else if (type === 'array') out.maxItems = rule.max
 	}
 	if (rule.type === 'array' && rule.items) {
-		out.items = ruleToJsonSchema(rule.items)
+		out.items = ruleToJsonSchema(rule.items, strict)
+	}
+	if (rule.type === 'object' && rule.fields) {
+		const properties: Record<string, JSONSchemaObject> = {}
+		for (const [k, fieldRule] of Object.entries(rule.fields)) {
+			if (!fieldRule) continue
+			properties[k] = ruleToJsonSchema(fieldRule, strict)
+		}
+		out.properties = properties
+		if (strict) out.additionalProperties = false
 	}
 	return out
 }
@@ -71,7 +84,7 @@ function buildDerivedSchema<T extends object>(
 		if (rule.private) continue
 		if (mode === 'create' && rule.readonly) continue
 		if (mode === 'update' && rule.readonly) continue
-		properties[key] = ruleToJsonSchema(rule)
+		properties[key] = ruleToJsonSchema(rule, strict)
 		if (mode === 'create' && rule.required) required.push(key)
 	}
 	const out: JSONSchemaObject = {

@@ -1,0 +1,42 @@
+// Dungeon › tc-extended-select — gilded control slot with seated-bevel trigger
+// and gilded floating menu panel.
+//
+// Foundation remap covers most cosmetics (wood surface, gold border, parchment
+// text, gold focus ring, leather hover, gold selected fill). Three gaps remain:
+//   1. Selected-option text is a literal #ffffff — flip to --fg-ink (engraved).
+//   2. Trigger needs a seated-slot bevel (box-shadow) — not expressible as a var.
+//   3. Menu needs --fg-panel-shadow bevel to read as a gilded floating panel.
+//   4. Caret tinted gold explicitly (base defaults to --tc-text-muted).
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token swaps on the host element ─────────────────────────────────────
+    tc-extended-select {
+        --bs-extended-select-option-selected-color: var(--fg-ink);
+        --bs-extended-select-caret-color: var(--fg-gold);
+        --bs-extended-select-trigger-bg: var(--fg-panel-bg);
+    }
+
+    // ── Trigger — seated gilded slot bevel ───────────────────────────────────
+    // --bs-extended-select-trigger-bg rides background-color, which drops the
+    // --fg-panel-bg gradient and leaves the trigger transparent. Repaint the
+    // panel gradient on background-image (opaque — the menu itself stays the
+    // floating surface; the trigger is a seated control slot, not glass).
+    .tc-extended-select__trigger {
+        background-image: var(--fg-panel-bg);
+        box-shadow:
+            var(--fg-bevel-top),
+            inset 0 0 0 1px rgba(0, 0, 0, 0.4);
+    }
+
+    // ── Menu — gilded floating panel shadow ──────────────────────────────────
+    .tc-extended-select__menu {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── Selected option desc — engraved ink on gold fill ─────────────────────
+    // Base hardcodes rgba(255,255,255,0.75); override to ink-tinted equivalent.
+    .tc-extended-select__option--selected .tc-extended-select__option-desc {
+        color: rgba(26, 20, 13, 0.7); // --fg-ink at 70% opacity
+    }
+}

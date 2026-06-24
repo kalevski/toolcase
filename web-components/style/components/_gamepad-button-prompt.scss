@@ -1,0 +1,62 @@
+// tc-gamepad-button-prompt — gamepad button glyph prompt (A / B / X / Y or generic).
+// Ported from gc-gamepad-button-prompt but rebuilt to the toolcase design system:
+// a sharp slate key-cap (no gilded frame, no glow, no fantasy fill) holding the
+// glyph in JetBrains Mono, with an optional caption label in Inter. All cosmetics
+// flow through --bs-gamepad-button-prompt-* custom properties. The `size` attribute
+// writes --bs-gamepad-button-prompt-size / -glyph-size as inline host styles.
+
+tc-gamepad-button-prompt {
+    // Defaults; overridden by host inline style when the `size` attribute is set.
+    --bs-gamepad-button-prompt-size: 1.75rem; // ~28px cap
+    --bs-gamepad-button-prompt-glyph-size: 0.8125rem; // ~13px glyph
+}
+
+.tc-gamepad-button-prompt {
+    --bs-gamepad-button-prompt-gap: 0.5rem;
+    --bs-gamepad-button-prompt-cap-bg: var(--tc-surface-muted);
+    --bs-gamepad-button-prompt-cap-color: var(--tc-text);
+    --bs-gamepad-button-prompt-cap-border-color: var(--tc-border-strong);
+    --bs-gamepad-button-prompt-cap-border-width: 1px;
+    --bs-gamepad-button-prompt-glyph-weight: 600;
+    --bs-gamepad-button-prompt-label-size: 0.8125rem; // 13px dense UI text
+    --bs-gamepad-button-prompt-label-color: var(--tc-text-muted);
+
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-gamepad-button-prompt-gap);
+    line-height: 1;
+    vertical-align: middle;
+}
+
+.tc-gamepad-button-prompt__glyph {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    min-width: var(--bs-gamepad-button-prompt-size);
+    height: var(--bs-gamepad-button-prompt-size);
+    padding: 0 0.25em;
+
+    font-family: var(--bs-font-monospace);
+    font-size: var(--bs-gamepad-button-prompt-glyph-size);
+    font-weight: var(--bs-gamepad-button-prompt-glyph-weight);
+    line-height: 1;
+    color: var(--bs-gamepad-button-prompt-cap-color);
+
+    background-color: var(--bs-gamepad-button-prompt-cap-bg);
+    border: var(--bs-gamepad-button-prompt-cap-border-width) solid var(--bs-gamepad-button-prompt-cap-border-color);
+    // Faint heavier bottom edge suggests a key-cap without adding elevation (mirrors tc-kbd).
+    border-bottom-width: 2px;
+    border-radius: 0; // sharp by mandate
+    background-image: none;
+    box-shadow: none;
+    user-select: none;
+}
+
+.tc-gamepad-button-prompt__label {
+    font-family: var(--bs-body-font-family);
+    font-size: var(--bs-gamepad-button-prompt-label-size);
+    color: var(--bs-gamepad-button-prompt-label-color);
+    line-height: 1;
+}

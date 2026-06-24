@@ -1,0 +1,43 @@
+// Dungeon › tc-combo-counter — glowing combo HUD. Token swap recolours the
+// value to gold-bright, the eyebrow/bar to fantasy tones; structural rules add
+// the gold value glow, the display-caps eyebrow, and the gold-gradient bar fill
+// over a dark inset track with a gold-deep frame.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-combo-counter {
+        --bs-combo-counter-bg: transparent;
+        --bs-combo-counter-border-color: transparent;
+        --bs-combo-counter-shadow: none;
+        --bs-combo-counter-padding-y: 0;
+        --bs-combo-counter-padding-x: 0;
+
+        --bs-combo-counter-eyebrow-color: var(--fg-parch-dim);
+        --bs-combo-counter-value-color: var(--fg-gold-bright);
+        --bs-combo-counter-value-weight: 700;
+
+        --bs-combo-counter-bar-track: rgba(0, 0, 0, 0.7);
+        --bs-combo-counter-bar-border: var(--fg-gold-deep);
+        --bs-combo-counter-bar-fill: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold-deep));
+    }
+
+    // Eyebrow reads as a wide-tracked display-caps micro-label.
+    .tc-combo-counter-eyebrow {
+        font-family: var(--fg-display);
+        letter-spacing: 0.32em;
+    }
+
+    // Mono value with the signature gold glow.
+    .tc-combo-counter-value {
+        font-family: var(--fg-mono);
+        letter-spacing: 0.04em;
+        text-shadow: 0 1px 2px #000, 0 0 12px rgba(232, 200, 120, 0.4);
+    }
+
+    // Dark inset track frame; min-width matches gc-combo-counter reference so
+    // the gauge reads as a consistent-width bar under short multipliers (e.g. "x8").
+    .tc-combo-counter-bar {
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
+        min-width: 80px;
+    }
+}

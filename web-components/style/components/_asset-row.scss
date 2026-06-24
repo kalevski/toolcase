@@ -1,0 +1,95 @@
+// tc-asset-row — single row displaying an asset with icon, name, optional tags, and size.
+// Sharp corners; slate neutrals; 1px --tc-border bottom hairline for row separation.
+// All cosmetics flow through --bs-asset-row-* custom properties backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+tc-asset-row {
+    --bs-asset-row-padding-x: 0.8125rem;
+    --bs-asset-row-padding-y: 0.625rem;
+    --bs-asset-row-name-color: var(--tc-text);
+    --bs-asset-row-size-color: var(--tc-text-muted);
+    --bs-asset-row-tag-bg: var(--tc-surface-muted);
+    --bs-asset-row-tag-color: var(--tc-text);
+    --bs-asset-row-tag-border-color: var(--tc-border);
+    --bs-asset-row-tag-font-size: 0.72rem;
+    --bs-asset-row-separator-color: var(--tc-border);
+    --bs-asset-row-hover-bg: var(--tc-surface-hover);
+    --bs-asset-row-icon-size: 1rem;
+    --bs-asset-row-gap: 0.625rem;
+
+    padding: var(--bs-asset-row-padding-y) var(--bs-asset-row-padding-x);
+    gap: var(--bs-asset-row-gap);
+    border-bottom: 1px solid var(--bs-asset-row-separator-color);
+    transition: background-color var(--tc-transition-fast);
+
+    &:last-child {
+        border-bottom: 0;
+    }
+
+    &:hover {
+        background-color: var(--bs-asset-row-hover-bg);
+    }
+}
+
+.tc-asset-row-icon {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    color: var(--tc-text-muted);
+
+    svg {
+        width: var(--bs-asset-row-icon-size);
+        height: var(--bs-asset-row-icon-size);
+        display: block;
+    }
+}
+
+.tc-asset-row-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-family: var(--tc-font-sans);
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--bs-asset-row-name-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tc-asset-row-tags {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    flex-shrink: 0;
+}
+
+.tc-asset-row-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.15rem 0.4rem;
+    font-family: var(--bs-font-monospace);
+    font-size: var(--bs-asset-row-tag-font-size);
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--bs-asset-row-tag-color);
+    background-color: var(--bs-asset-row-tag-bg);
+    border: 1px solid var(--bs-asset-row-tag-border-color);
+    border-radius: 0;
+}
+
+.tc-asset-row-size {
+    flex-shrink: 0;
+    font-family: var(--bs-font-monospace);
+    font-size: 0.8125rem;
+    color: var(--bs-asset-row-size-color);
+    white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    tc-asset-row {
+        transition: none;
+    }
+}

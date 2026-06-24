@@ -47,6 +47,7 @@ export default class SplitScreen extends Feature {
 
     private mode: Mode = 'SINGLE'
     private angleHash: number = Number.NaN
+    private _originalMainCameraName: string = ''
 
     private splitEnter: number = 1.0
     private splitExitSq: number = 0.85 * 0.85
@@ -83,6 +84,7 @@ export default class SplitScreen extends Feature {
         this.gfxA = new GameObjects.Graphics(this.scene)
         this.gfxB = new GameObjects.Graphics(this.scene)
 
+        this._originalMainCameraName = this.scene.cameras.main.name
         this.cameras.ui = this.scene.cameras.main.setName('ui')
         this.cameras.B = this.scene.cameras.add(0, 0, width, height, false, 'gameplay B')
         this.cameras.A = this.scene.cameras.add(0, 0, width, height, false, 'gameplay A')
@@ -130,8 +132,12 @@ export default class SplitScreen extends Feature {
         const camsScene = this.scene.cameras
         this.detachMask(this.cameras.A, this.maskA)
         this.detachMask(this.cameras.B, this.maskB)
+        // Reverse cameras back to original order before removing A and B so main ends up at index 0.
+        camsScene.cameras.reverse()
         if (this.cameras.A !== null) camsScene.remove(this.cameras.A)
         if (this.cameras.B !== null) camsScene.remove(this.cameras.B)
+        // Restore the original name of cameras.main (was renamed to 'ui' in onCreate).
+        camsScene.main.setName(this._originalMainCameraName)
         this.gfxA?.destroy()
         this.gfxB?.destroy()
         this.maskA = null

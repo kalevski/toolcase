@@ -1,0 +1,21 @@
+@use '../foundation/tokens' as *;
+
+tc-particle-emitter {
+    --bs-particle-emitter-bg: transparent;
+    --bs-particle-emitter-border-color: var(--tc-border);
+    --bs-particle-emitter-border-width: 1px;
+    // Expose particle color slots so themes can override the JS-property defaults
+    // without imperative code. These are documentation anchors; actual color values
+    // are set via the `colors` JS property.
+    --bs-particle-emitter-color-1: #0f172a; // slate-900
+    --bs-particle-emitter-color-2: #475569; // slate-600
+    --bs-particle-emitter-color-3: #22d3ee; // cyan accent
+    --bs-particle-emitter-color-4: #cbd5e1; // slate-300
+}
+
+.tc-particle-emitter__canvas {
+    display: block;
+    background: var(--bs-particle-emitter-bg);
+    border: var(--bs-particle-emitter-border-width) solid var(--bs-particle-emitter-border-color);
+    border-radius: 0;
+}

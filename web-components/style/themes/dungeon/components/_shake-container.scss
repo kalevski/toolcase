@@ -1,0 +1,12 @@
+// Dungeon › tc-shake-container — NO override needed.
+//
+// tc-shake-container is a behaviour primitive: a transparent block wrapper whose
+// inner div JS translates per-frame to produce a camera shake. Its defaults are
+// deliberately transparent/zero-border so the shake reads against surrounding
+// content; it has no surface, label, or numeric part for a fantasy reskin to
+// repaint. Intentionally left empty.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // No visual override — animation wrapper only.
+}

@@ -1,0 +1,173 @@
+// tc-cycle-wheel — animated circular wheel with a rotating ring of phase labels
+// around a fixed centre stack.
+// SANCTIONED CIRCLES: the ring tracks, the centre core, and the pointer dot are
+// genuinely circular shapes — an explicit exception to the sharp-corner rule.
+// SANCTIONED PILL: the centre pill is the one rounded-pill in this component.
+// The continuous spin is the one allowed decorative loop — it MUST stop under
+// prefers-reduced-motion (the static, oriented ring is shown instead).
+// All cosmetics flow through --bs-cycle-wheel-* custom properties backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+tc-cycle-wheel {
+    --bs-cycle-wheel-accent: var(--tc-accent);
+    --bs-cycle-wheel-value: var(--tc-text);
+    --bs-cycle-wheel-bg: var(--tc-surface);
+    --bs-cycle-wheel-muted: var(--tc-text-muted);
+    --bs-cycle-wheel-border: var(--tc-border);
+    --bs-cycle-wheel-track: var(--tc-border);
+    --bs-cycle-wheel-tick: var(--tc-text-faint);
+    --bs-cycle-wheel-pill-bg: var(--tc-success-bg);
+    --bs-cycle-wheel-pill-color: var(--tc-success);
+    --bs-cycle-wheel-label-font-size: 11px;
+    --bs-cycle-wheel-label-letter-spacing: 0.12em;
+    --bs-cycle-wheel-value-font-size: 3rem;
+    --bs-cycle-wheel-max-size: 480px;
+    --bs-cycle-wheel-spin-duration: 20s;
+
+    display: grid;
+    place-items: center;
+    width: 100%;
+}
+
+.tc-cycle-wheel {
+    &__inner {
+        position: relative;
+        aspect-ratio: 1 / 1;
+        width: 100%;
+        max-width: var(--bs-cycle-wheel-max-size);
+    }
+
+    &__ring,
+    &__pointer {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    // The rotating ring — the one sanctioned decorative loop.
+    &__ring {
+        animation: tc-cycle-wheel-spin linear infinite;
+        animation-duration: var(--bs-cycle-wheel-spin-duration);
+        will-change: transform;
+        transform-origin: 50% 50%;
+    }
+
+    &__track {
+        stroke: var(--bs-cycle-wheel-track);
+        stroke-width: 1; // 1px hairline track
+    }
+
+    &__track--outer {
+        opacity: 0.5;
+    }
+
+    &__track--inner {
+        opacity: 0.2;
+    }
+
+    // Phase labels — mono micro-labels (uppercase, letter-spaced), muted slate.
+    &__label {
+        font-family: var(--bs-font-monospace, monospace);
+        font-size: var(--bs-cycle-wheel-label-font-size);
+        font-weight: 500;
+        letter-spacing: var(--bs-cycle-wheel-label-letter-spacing);
+        fill: var(--bs-cycle-wheel-muted);
+    }
+
+    // The active phase is the only place the ink/cyan accent appears.
+    &__label--active {
+        fill: var(--bs-cycle-wheel-accent);
+        font-weight: 700;
+    }
+
+    // Static pointer: per-slot ticks (hairline) + accent arrow toward the active phase.
+    &__ticks line {
+        stroke: var(--bs-cycle-wheel-tick);
+        stroke-width: 1;
+    }
+
+    &__arrow {
+        line {
+            stroke: var(--bs-cycle-wheel-accent);
+            stroke-width: 3;
+        }
+
+        circle {
+            fill: var(--bs-cycle-wheel-accent);
+        }
+    }
+
+    // Centre stack — a sanctioned circle housing the prominent value.
+    &__core {
+        position: absolute;
+        inset: 22%;
+        border: 1px solid var(--bs-cycle-wheel-border);
+        border-radius: 50%;
+        background: var(--bs-cycle-wheel-bg);
+        display: grid;
+        place-items: center;
+        text-align: center;
+        padding: 1rem;
+    }
+
+    &__core-label {
+        font-family: var(--bs-font-sans-serif, sans-serif);
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--bs-cycle-wheel-muted);
+    }
+
+    &__core-value {
+        font-family: var(--bs-font-monospace, monospace);
+        font-size: var(--bs-cycle-wheel-value-font-size);
+        font-weight: 700;
+        color: var(--bs-cycle-wheel-value);
+        margin: 0.75rem 0 0.5rem;
+        line-height: 1;
+        letter-spacing: -0.02em;
+    }
+
+    // The one sanctioned rounded-pill in this component.
+    &__core-pill {
+        font-family: var(--bs-font-sans-serif, sans-serif);
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--bs-cycle-wheel-pill-color);
+        background: var(--bs-cycle-wheel-pill-bg);
+        padding: 0.25rem 0.75rem;
+        display: inline-block;
+        border-radius: 50rem; // rounded-pill
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    &__core-sub {
+        font-family: var(--bs-font-sans-serif, sans-serif);
+        font-size: 0.875rem;
+        color: var(--bs-cycle-wheel-muted);
+        margin-top: 0.75rem;
+    }
+}
+
+// paused stops the spin via animation-play-state.
+.tc-cycle-wheel--paused .tc-cycle-wheel__ring {
+    animation-play-state: paused;
+}
+
+@keyframes tc-cycle-wheel-spin {
+    from { transform: rotate(0); }
+    to   { transform: rotate(360deg); }
+}
+
+// The decorative loop must stop entirely under reduced motion. The ring rests at
+// rotation 0 (labels at their home slots) and the static pointer keeps the wheel
+// oriented to the active phase.
+@media (prefers-reduced-motion: reduce) {
+    .tc-cycle-wheel__ring {
+        animation: none;
+    }
+}

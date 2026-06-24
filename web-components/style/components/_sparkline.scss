@@ -1,0 +1,32 @@
+// tc-sparkline — compact inline SVG micro-chart (line or bar) for trend display.
+// Color defaults to --tc-app-accent; override via the `color` attribute, which
+// writes --bs-sparkline-color as an inline style on the host element.
+
+tc-sparkline {
+    --bs-sparkline-color: var(--tc-app-accent);
+
+    background: none;
+    border: none;
+}
+
+.tc-sparkline {
+    display: inline-block;
+    vertical-align: middle;
+    overflow: visible;
+}
+
+.tc-sparkline-line {
+    fill: none;
+    stroke: var(--bs-sparkline-color);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.tc-sparkline-dot {
+    fill: var(--bs-sparkline-color);
+}
+
+.tc-sparkline-bar {
+    fill: var(--bs-sparkline-color);
+}

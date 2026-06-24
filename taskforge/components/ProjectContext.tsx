@@ -1,7 +1,8 @@
 'use client'
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
-import { toast, type TerminalLine } from '@toolcase/react-components'
+import { toast } from '@/lib/toast'
+import type { TerminalLine } from '@/lib/terminal'
 import type {
     AgentKind,
     AgentPromptRecord,
@@ -480,6 +481,14 @@ export function ProjectProvider({
         // changes, never on a bare parent re-render.
     }, [project, appendLine, appendAgentLine, refresh, refreshKnowledge, refreshNotes, refreshGit])
 
+    // Open-PR only applies when both branch-per-run and push-after are on (and
+    // startRun gates it the same way). Disarm it when either toggles off, so
+    // re-enabling them later doesn't silently re-arm PR creation the user can no
+    // longer see the toggle for.
+    useEffect(() => {
+        if ((!branchPerRun || !pushAfter) && openPr) setOpenPr(false)
+    }, [branchPerRun, pushAfter, openPr])
+
     // ── actions ────────────────────────────────────────────────────────────────
 
     // Shared run launcher: POSTs run-options, maps the well-known error codes to
@@ -683,7 +692,7 @@ export function ProjectProvider({
             setGit(await res.json())
             toast.success(`Switched to ${name}`)
         } else {
-            toast.error((await res.json()).error ?? 'Branch failed')
+            toast.error((await res.json().catch(() => ({}))).error ?? 'Branch failed')
         }
     }, [project, prompt])
 
@@ -694,7 +703,7 @@ export function ProjectProvider({
             toast.success('Pushed to origin')
             void loadCommits()
         } else {
-            toast.error((await res.json()).error ?? 'Push failed')
+            toast.error((await res.json().catch(() => ({}))).error ?? 'Push failed')
         }
     }, [project, loadCommits])
 
@@ -731,7 +740,7 @@ export function ProjectProvider({
                 toast.success(label)
                 void loadCommits()
             } else {
-                toast.error((await res.json()).error ?? `git ${op} failed`)
+                toast.error((await res.json().catch(() => ({}))).error ?? `git ${op} failed`)
             }
         },
         [project, confirm, loadCommits],

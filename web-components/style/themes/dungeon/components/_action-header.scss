@@ -1,0 +1,33 @@
+// Dungeon › tc-action-header — gilded section banner.
+// Foundation token-swap handles border colour, text colour, and button ghost
+// state ladder. Two structural overrides carry the rest:
+//   1. Bottom hairline upgraded to the --fg-rule gold gradient via ::after.
+//   2. Title content promoted to Cinzel display caps.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // Replace the flat 1px gold-deep hairline with the gold gradient rule.
+    .tc-action-header {
+        position: relative;
+        border-bottom: 0;
+
+        &::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 2px;
+            background: var(--fg-rule);
+        }
+    }
+
+    // Promote the title/content area to gilded display caps.
+    .tc-action-header-content {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 600;
+        color: var(--fg-gold-bright);
+    }
+}

@@ -1,0 +1,153 @@
+// tc-boss-bar — wide top-of-screen boss health bar for a game HUD.
+// All cosmetics flow through --bs-boss-bar-* custom properties backed by --tc-* tokens.
+// Sharp corners; slate neutrals; white surface; 1px hairline; JetBrains Mono machine-facing
+// readout; ink accent for the health fill. Game-components fantasy chrome (gilded frame,
+// glows, scanlines, fantasy fills) is dropped — the bar reads as a flat slate HUD panel.
+// The track / fill / tick markup is produced by the shared internal/resourceBar helper, so
+// the .tc-boss-bar__track family is styled here against that contract.
+
+@use '../foundation/tokens' as *;
+
+tc-boss-bar {
+    --bs-boss-bar-bg: var(--tc-surface);
+    --bs-boss-bar-border-color: var(--tc-border);
+    --bs-boss-bar-shadow: none;
+    --bs-boss-bar-padding-y: 0.625rem;
+    --bs-boss-bar-padding-x: 0.875rem;
+    --bs-boss-bar-gap: 0.5rem;
+
+    --bs-boss-bar-name-color: var(--tc-text);
+    --bs-boss-bar-name-font-size: 0.95rem;
+    --bs-boss-bar-name-font-weight: 600;
+
+    --bs-boss-bar-epithet-color: var(--tc-text-muted);
+    --bs-boss-bar-epithet-font-size: 0.8125rem;
+
+    --bs-boss-bar-phase-color: var(--tc-text-muted);
+    --bs-boss-bar-phase-font-size: 0.6875rem;
+    --bs-boss-bar-phase-letter-spacing: 0.12em;
+
+    --bs-boss-bar-track-bg: var(--tc-slate-200);
+    --bs-boss-bar-track-height: 0.625rem;
+    --bs-boss-bar-fill-bg: var(--tc-app-accent);
+    --bs-boss-bar-fill-transition: width var(--tc-transition-base);
+    --bs-boss-bar-ghost-bg: var(--tc-slate-400);
+    --bs-boss-bar-tick-color: var(--tc-surface);
+
+    --bs-boss-bar-numeric-color: var(--tc-text-muted);
+    --bs-boss-bar-numeric-font-size: 0.75rem;
+}
+
+.tc-boss-bar {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-boss-bar-gap);
+    width: 100%;
+    padding: var(--bs-boss-bar-padding-y) var(--bs-boss-bar-padding-x);
+    background: var(--bs-boss-bar-bg);
+    border: 1px solid var(--bs-boss-bar-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-boss-bar-shadow);
+}
+
+// Header row — boss name (left), optional epithet, phase tag pushed to the right.
+.tc-boss-bar__header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.tc-boss-bar__name {
+    min-width: 0;
+    font-size: var(--bs-boss-bar-name-font-size);
+    font-weight: var(--bs-boss-bar-name-font-weight);
+    line-height: 1.3;
+    color: var(--bs-boss-bar-name-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tc-boss-bar__epithet {
+    flex-shrink: 0;
+    font-size: var(--bs-boss-bar-epithet-font-size);
+    line-height: 1.3;
+    color: var(--bs-boss-bar-epithet-color);
+}
+
+// Phase indicator — uppercase JetBrains Mono micro-label in muted slate.
+.tc-boss-bar__phase {
+    margin-left: auto;
+    flex-shrink: 0;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-boss-bar-phase-font-size);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: var(--bs-boss-bar-phase-letter-spacing);
+    color: var(--bs-boss-bar-phase-color);
+    white-space: nowrap;
+}
+
+// Track — flat slate well; the ink fill, ghost band, and phase ticks all stack
+// absolutely inside it (the shared resourceBar helper paints these elements).
+.tc-boss-bar__track {
+    position: relative;
+    width: 100%;
+    height: var(--bs-boss-bar-track-height);
+    background: var(--bs-boss-bar-track-bg);
+    border-radius: 0;
+    overflow: hidden;
+}
+
+.tc-boss-bar__ghost {
+    position: absolute;
+    inset: 0 auto 0 0;
+    height: 100%;
+    background: var(--bs-boss-bar-ghost-bg);
+}
+
+.tc-boss-bar__fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    height: 100%;
+    background: var(--bs-boss-bar-fill-bg);
+    transition: var(--bs-boss-bar-fill-transition);
+}
+
+// Phase ticks — thin vertical dividers marking phase boundaries on the track.
+.tc-boss-bar__tick {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    transform: translateX(-1px);
+    background: var(--bs-boss-bar-tick-color);
+}
+
+.tc-boss-bar__inline-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: 0.625rem;
+    color: var(--bs-boss-bar-numeric-color);
+}
+
+// Numeric readout — mono hp / hp-max, muted, aligned to the trailing edge.
+.tc-boss-bar__numeric {
+    align-self: flex-end;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-boss-bar-numeric-font-size);
+    letter-spacing: 0.04em;
+    color: var(--bs-boss-bar-numeric-color);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-boss-bar__fill {
+        transition: none;
+    }
+}

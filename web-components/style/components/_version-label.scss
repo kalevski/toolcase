@@ -1,0 +1,71 @@
+// tc-version-label — corner build / version stamp.
+// All cosmetics flow through --bs-version-label-* custom properties backed by --tc-* tokens.
+// Sharp corners; slate neutrals; JetBrains Mono machine-facing text.
+// Game-component fantasy chrome (gilded frames, glows) is dropped.
+
+@use '../foundation/tokens' as *;
+
+tc-version-label {
+    --bs-version-label-color: var(--tc-text-muted);
+    --bs-version-label-font-size: 0.6875rem;
+    --bs-version-label-font-weight: 500;
+    --bs-version-label-letter-spacing: 0.04em;
+    --bs-version-label-bg: transparent;
+    --bs-version-label-border-color: var(--tc-border);
+    --bs-version-label-padding-y: 0.1875rem;
+    --bs-version-label-padding-x: 0.5rem;
+    --bs-version-label-sep-color: var(--tc-border-strong);
+    --bs-version-label-version-color: var(--tc-text);
+    --bs-version-label-build-color: var(--tc-text-muted);
+    --bs-version-label-branch-color: var(--tc-app-accent);
+    --bs-version-label-gap: 0.25rem;
+}
+
+.tc-version-label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-version-label-gap);
+    padding: var(--bs-version-label-padding-y) var(--bs-version-label-padding-x);
+    background: var(--bs-version-label-bg);
+    border: 1px solid var(--bs-version-label-border-color);
+    border-radius: 0;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-version-label-font-size);
+    font-weight: var(--bs-version-label-font-weight);
+    letter-spacing: var(--bs-version-label-letter-spacing);
+    line-height: 1.4;
+    color: var(--bs-version-label-color);
+    white-space: nowrap;
+    box-sizing: border-box;
+
+    &:empty {
+        display: none;
+    }
+}
+
+// Version segment — primary value, slightly brighter than the baseline.
+.tc-version-label-version {
+    color: var(--bs-version-label-version-color);
+}
+
+// Build segment — hash / commit id in muted slate.
+.tc-version-label-build {
+    color: var(--bs-version-label-build-color);
+}
+
+// Branch segment — ink accent so it reads as a live qualifier.
+.tc-version-label-branch {
+    color: var(--bs-version-label-branch-color);
+}
+
+// Separator dot — purely decorative, suppressed from accessibility tree.
+.tc-version-label-sep {
+    color: var(--bs-version-label-sep-color);
+    user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-version-label {
+        transition: none;
+    }
+}

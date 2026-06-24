@@ -250,6 +250,33 @@ const MIGRATIONS: string[] = [
     CREATE INDEX IF NOT EXISTS idx_telemetry_project_created ON telemetry(project, created_at);
     CREATE INDEX IF NOT EXISTS idx_audit_project ON audit(project, id DESC);
     `,
+    // v6 — Claude account registry (multi-account foundation). Maps a short
+    // alias to an isolated config dir + auth method. Registry metadata only —
+    // the API key for `apikey` accounts is referenced by env-var name
+    // (api_key_env) and resolved at spawn time; the key value is never stored.
+    `
+    CREATE TABLE account (
+        alias         TEXT PRIMARY KEY,
+        dir           TEXT NOT NULL,
+        auth          TEXT NOT NULL,
+        label         TEXT,
+        api_key_env   TEXT,
+        last_used_at  TEXT,
+        cooling_until TEXT
+    );
+    `,
+    // v7 — per-task Claude identity (mirrors the task file's **Account:** facet).
+    // Pins which account in the registry a task runs under; not wired into
+    // execution yet (parse/store only — see 611-task-account-facet.md).
+    `
+    ALTER TABLE task ADD COLUMN account TEXT;
+    `,
+    // v8 — per-account /usage snapshots. Tags each cached snapshot with the
+    // Claude identity it was fetched under (NULL = the ambient host login) so the
+    // dashboard can present usage across multiple accounts.
+    `
+    ALTER TABLE usage_snapshot ADD COLUMN account TEXT;
+    `,
 ]
 
 function migrate(db: DatabaseSync): void {

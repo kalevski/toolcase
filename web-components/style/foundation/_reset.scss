@@ -1,0 +1,623 @@
+// Base layer — element defaults wired to the tokens. Replaces Bootstrap's
+// reboot with the slice the tc-* components actually need.
+
+@use 'tokens' as *;
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: var(--bs-body-font-family);
+    font-size: var(--bs-body-font-size);
+    font-weight: var(--bs-body-font-weight);
+    line-height: var(--bs-body-line-height);
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin: 0 0 0.75rem;
+    font-weight: 600; // toolcase headings cap at semibold
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    color: var(--bs-emphasis-color);
+}
+
+h1 {
+    font-size: 2.25rem;
+}
+h2 {
+    font-size: 1.75rem;
+}
+h3 {
+    font-size: 1.4rem;
+}
+h4 {
+    font-size: 1.2rem;
+}
+h5 {
+    font-size: 1.05rem;
+}
+h6 {
+    font-size: 0.925rem;
+}
+
+p {
+    margin: 0 0 1rem;
+}
+
+a {
+    color: var(--bs-link-color);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--bs-link-hover-color);
+    text-decoration: underline;
+}
+
+code,
+pre,
+kbd,
+samp {
+    font-family: var(--bs-font-monospace);
+    font-size: 0.92em;
+}
+
+hr {
+    margin: 1rem 0;
+    border: 0;
+    border-top: var(--bs-border-width) solid var(--bs-border-color);
+    opacity: 1;
+}
+
+img,
+svg {
+    vertical-align: middle;
+}
+
+button,
+input,
+optgroup,
+select,
+textarea {
+    margin: 0;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+button {
+    text-transform: none;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+:focus-visible {
+    outline: 2px solid var(--tc-app-accent);
+    outline-offset: 2px;
+}
+
+// Custom-element hosts that lay out their own light-DOM children must be
+// block-level; unregistered/unstyled custom elements default to inline.
+tc-announcement-bar,
+tc-aspect-ratio-box,
+tc-artboard-backdrop,
+tc-dialogue-box,
+tc-data-list,
+tc-battle-pass,
+tc-asset-row,
+tc-asset-bundle,
+tc-build,
+tc-badge-row,
+tc-area-chart,
+tc-bar-chart,
+tc-benchmark-chart,
+tc-bitmap-font-generator,
+tc-normal-map-generator,
+tc-physics-editor,
+tc-basic-layout,
+tc-heading,
+tc-helper-text,
+tc-action-header,
+tc-action-row-list,
+tc-divider,
+tc-date-picker,
+tc-time-picker,
+tc-input,
+tc-markdown-editor,
+tc-textarea,
+tc-select,
+tc-range,
+tc-form,
+tc-form-input,
+tc-check,
+tc-checkbox-group,
+tc-radio,
+tc-radio-group,
+tc-switch,
+tc-input-group,
+tc-floating-label,
+tc-progress,
+tc-progress-bar,
+tc-list-group,
+tc-nav,
+tc-pagination,
+tc-breadcrumb,
+tc-placeholder,
+tc-accordion,
+tc-scrollspy,
+tc-collapse,
+tc-dropdown-item,
+tc-spacer,
+tc-anchor,
+tc-section-flag,
+tc-skeleton,
+tc-ammo-counter,
+tc-combo-counter,
+tc-asset-row-list,
+tc-brief-card,
+tc-bundle-bar,
+tc-boss-bar,
+tc-buff-bar,
+tc-resource-bar,
+tc-health-bar,
+tc-mana-bar,
+tc-stamina-bar,
+tc-brightness-calibration,
+tc-callout-quote,
+tc-character-create,
+tc-character-select,
+tc-game-over-screen,
+tc-result-screen,
+tc-victory-screen,
+tc-chart-container,
+tc-code-with-output,
+tc-community-links,
+tc-config-preview,
+tc-contributor-wall,
+tc-cookbook-grid,
+tc-activity-card,
+tc-basic-card,
+tc-colored-card,
+tc-difference-card,
+tc-list-card,
+tc-status-card,
+tc-dashboard-content,
+tc-download-stats,
+tc-empty-state,
+tc-entity-cell,
+tc-feature-card,
+tc-ability-card,
+tc-good-first-issues,
+tc-hero-stats-bar,
+tc-linked-providers-card,
+tc-logo-cloud,
+tc-maintainer-card,
+tc-metric-tile,
+tc-metric-grid,
+tc-migration-guide,
+tc-quick-start,
+tc-page-footer,
+tc-phase-grid,
+tc-pinned-feature-showcase,
+tc-pipeline,
+tc-plugin-grid,
+tc-pricing-card,
+tc-queued-file,
+tc-rich-page-header,
+tc-scoring-rules,
+tc-section-card,
+tc-sponsor-wall,
+tc-sprint-chain,
+tc-stat-card,
+tc-state-machine,
+tc-stepper,
+tc-tier-ladder,
+tc-timeline,
+tc-usage-summary-panel,
+tc-welcome-guide,
+tc-api-reference-table,
+tc-banner,
+tc-card-options,
+tc-cdn-map,
+tc-changelog,
+tc-chip-group,
+tc-code-snippet,
+tc-codex,
+tc-command-palette,
+tc-command-reference,
+tc-comparator,
+tc-compass-rose,
+tc-controller-layout-preview,
+tc-controls-rebind-list,
+tc-crafting-panel,
+tc-compatibility-matrix,
+tc-context-menu,
+tc-cool-nav,
+tc-countdown-timer,
+tc-credits-scroll,
+tc-cycle-wheel,
+tc-danger-zone-actions,
+tc-setting-slider,
+tc-volume-slider,
+tc-deadzone-slider,
+tc-fov-slider,
+tc-mouse-sensitivity,
+tc-fps-cap-select,
+tc-select-row,
+tc-reset-to-defaults,
+tc-fullscreen-toggle,
+tc-toggle-row,
+tc-graphics-preset-picker,
+tc-metric-card,
+tc-slices-card,
+tc-dashboard-sidebar,
+tc-dashboard-layout,
+tc-diff-viewer,
+tc-early-signup-form,
+tc-ecosystem-map,
+tc-entity-profile-card,
+tc-equipment-doll,
+tc-extended-select,
+tc-faq-list,
+tc-feature-matrix,
+tc-file,
+tc-file-dropzone,
+tc-file-tags,
+tc-form-wizard,
+tc-funnel-chart,
+tc-gantt-chart,
+tc-game-showcase-card,
+tc-github-stars-card,
+tc-group,
+tc-heatmap,
+tc-hero,
+tc-image,
+tc-image-crop,
+tc-json-editor,
+tc-json-schema-def,
+tc-infinite-scroll,
+tc-install-tabs,
+tc-leaderboard,
+tc-line-chart,
+tc-pie-chart,
+tc-kill-feed,
+tc-list,
+tc-list-row,
+tc-live-feed,
+tc-chat-window,
+tc-login,
+tc-marquee,
+tc-testimonial-carousel,
+tc-multi-card-select,
+tc-newsletter-signup,
+tc-node-editor,
+tc-number-input,
+tc-otp-input,
+tc-phone-input,
+tc-range-slider,
+tc-slider,
+tc-resizable-panel,
+tc-scroll-area,
+tc-side-nav,
+tc-single-card-select,
+tc-tab-sections,
+tc-table,
+tc-advanced-table,
+tc-audio-mixer,
+tc-tag-input,
+tc-terminal-window,
+tc-toggle-card,
+tc-tree-view,
+tc-user-panel,
+tc-vertical-item-list,
+tc-video-embed,
+tc-virtual-list,
+tc-eyebrow,
+tc-item-compare,
+tc-item-tooltip,
+tc-gilded-frame,
+tc-guild-panel,
+tc-legal-screen,
+tc-level-header,
+tc-level-select,
+tc-lobby,
+tc-party-panel,
+tc-main-menu,
+tc-panel,
+tc-panel-header,
+tc-menu-item,
+tc-journal,
+tc-loot-list,
+tc-lore-text,
+tc-minimap,
+tc-player-card,
+tc-player-frame,
+tc-particle-emitter,
+tc-perk-picker,
+tc-portrait,
+tc-press-any-key,
+tc-quest-tracker,
+tc-roadmap,
+tc-settings-category-list,
+tc-score-display,
+tc-stat-row,
+tc-scroll-text,
+tc-shop-panel,
+tc-skill-bar,
+tc-skill-tree,
+tc-subtitle,
+tc-title {
+    display: block;
+}
+
+// tc-tab-bar is a flex-row tablist; the host IS the tablist container.
+tc-tab-bar {
+    display: flex;
+}
+
+// tc-compass-bar lays out as a vertical flex column (track above the heading
+// readout); the partial owns the flex details but the host must not default
+// to inline.
+tc-compass-bar {
+    display: flex;
+}
+
+// tc-grid is a CSS-grid layout primitive; the partial owns the track/gap
+// details but the host must lay out as a grid, not default to inline.
+tc-grid {
+    display: grid;
+}
+
+tc-drawer {
+    display: block;
+}
+
+// Fixed full-surface overlay; the SCSS partial centres the panel over a scrim,
+// but the host must not default to inline.
+tc-confirm-dialog {
+    display: block;
+}
+
+// Modal loot overlay; the SCSS partial positions the backdrop and centred panel,
+// but the host must not default to inline.
+tc-loot-popup {
+    display: block;
+}
+
+// Player-report modal overlay; the SCSS partial positions the backdrop and
+// centred panel, but the host must not default to inline.
+tc-report-dialog {
+    display: block;
+}
+
+// In-game pause overlay; the SCSS partial positions the backdrop and centred
+// panel, but the host must not default to inline.
+tc-pause-menu {
+    display: block;
+}
+
+// Full-screen pause overlay; the SCSS partial positions the backdrop and
+// centred panel, but the host must not default to inline.
+tc-pause-screen {
+    display: block;
+}
+
+// Radial pie/ability selector overlay; the SCSS partial switches the host to
+// position:fixed when [open] and hides it otherwise, but it must not default
+// to inline.
+tc-radial-wheel {
+    display: block;
+}
+
+// Fixed full-surface scrim; the SCSS partial flips it to a centred flex
+// container, but it must not default to inline.
+tc-blur-overlay {
+    display: block;
+}
+
+// Fixed-position invite toast; the SCSS partial hides it until [open] and pins
+// it to a screen corner, but the host must not default to inline.
+tc-invite-toast {
+    display: block;
+}
+
+tc-lightbox {
+    display: block;
+}
+
+// Absolutely-positioned cinematic overlay; the SCSS partial fills the parent
+// positioned container and slides two ink bars in/out, but the host must not
+// default to inline.
+tc-letterbox-bars {
+    display: block;
+}
+
+// Absolutely-positioned decorative corner accent; the SCSS partial sizes and
+// clips the host, but the element must not default to inline.
+tc-rune-corner {
+    display: block;
+}
+
+// Layout wrapper that insets content by env(safe-area-inset-*); the SCSS
+// partial applies the padding calc, but the host must be block so it spans
+// its container.
+tc-safe-area {
+    display: block;
+}
+
+// Fixed full-surface loading overlay; the SCSS partial hides it until [open]
+// and positions it on the modal tier, but the host must not default to inline.
+tc-loading-overlay {
+    display: block;
+}
+
+// Full-viewport loading screen; the SCSS partial overrides display to flex and
+// positions it fixed, but the host must not default to inline.
+tc-loading-screen {
+    display: block;
+}
+
+// Full-viewport game title / start screen; the SCSS partial overrides display
+// to a centred flex container and positions it fixed, but the host must not
+// default to inline.
+tc-title-screen {
+    display: block;
+}
+
+// Matchmaking status panel; the SCSS partial owns the inner flex layout,
+// but the host must not default to inline.
+tc-matchmaking-screen {
+    display: block;
+}
+
+// End-of-match statistics panel; the SCSS partial owns the inner flex layout,
+// but the host must not default to inline.
+tc-stats-screen {
+    display: block;
+}
+
+// Fixed full-viewport flash overlay; the SCSS partial positions it fixed and
+// keeps it transparent until JS triggers a flash, but the host must not
+// default to inline.
+tc-screen-flash {
+    display: block;
+}
+
+// Fixed full-viewport scene-wipe transition; the SCSS partial positions it
+// fixed and drives direction-based transitions, but the host must not default
+// to inline.
+tc-transition-wipe {
+    display: block;
+}
+
+// Camera-shake wrapper; the SCSS partial owns the inner transform animation,
+// but the host must not default to inline so it can act as a block container.
+tc-shake-container {
+    display: block;
+}
+
+// Edge vignette overlay wrapper; the SCSS partial positions the ::after
+// gradient on top of slotted content, but the host must not default to inline.
+tc-vignette-overlay {
+    display: block;
+}
+
+tc-editable-text,
+tc-chip,
+tc-rarity-chip,
+tc-button,
+tc-cool-button,
+tc-metal-button,
+tc-nav-button,
+tc-badge,
+tc-brand,
+tc-avatar,
+tc-label,
+tc-link,
+tc-spinner,
+tc-close-button,
+tc-button-group,
+tc-dropdown,
+tc-action-items,
+tc-tooltip,
+tc-popover,
+tc-input-group-text,
+tc-pulse-indicator,
+tc-crosshair,
+tc-circular-progress,
+tc-cooldown-badge,
+tc-currency-chip,
+tc-currency-display,
+tc-stamp,
+tc-tag,
+tc-sparkline,
+tc-trend-indicator,
+tc-code-label-cell,
+tc-leaderboard-trend,
+tc-rank-cell,
+tc-simple-file,
+tc-color-picker,
+tc-combo-box,
+tc-version-picker,
+tc-debug-overlay,
+tc-hotbar,
+tc-inventory-grid,
+tc-item-slot,
+tc-icon-picker,
+tc-version-label {
+    display: inline-block;
+}
+
+// tc-text uses display: inline so it works as a transparent wrapper for both
+// inline (span, small) and block (p, div) inner elements. Block layout is
+// handled by the inner element class rules in _text.scss.
+tc-text {
+    display: inline;
+}
+
+// tc-visually-hidden uses display: contents so the host adds no layout box.
+// The inner <span>/<div> (with .visually-hidden) is absolutely positioned and
+// invisible to sighted users but remains in the accessibility tree.
+tc-visually-hidden {
+    display: contents;
+}
+
+tc-toggle,
+tc-icon,
+tc-icon-badge,
+tc-icon-button,
+tc-kbd,
+tc-key,
+tc-key-binder,
+tc-network-status-icon,
+tc-ping-display,
+tc-objective-marker,
+tc-waypoint-marker,
+tc-page-indicator,
+tc-rating,
+tc-social-links,
+tc-status-dot,
+tc-damage-number,
+tc-hit-marker,
+tc-buff-icon,
+tc-gamepad-button-prompt,
+tc-interact-prompt,
+tc-platform-icon {
+    display: inline-flex;
+}
+
+// tc-stack is a flexbox layout primitive; display varies by the [inline] attribute
+// (handled in _stack.scss). Register the flex default here so layout is correct
+// before JS runs.
+tc-stack {
+    display: flex;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
+}

@@ -38,6 +38,7 @@ import PathFinderDemo from './scenes/PathFinderDemo.js'
 import StateMachineDemo from './scenes/StateMachineDemo.js'
 import BehaviorTreeDemo from './scenes/BehaviorTreeDemo.js'
 import ReplayRecorderDemo from './scenes/ReplayRecorderDemo.js'
+import ReplayRecorderTimelineDemo from './scenes/ReplayRecorderTimelineDemo.js'
 import CameraDirectorDemo from './scenes/CameraDirectorDemo.js'
 import ScreenShakeDemo from './scenes/ScreenShakeDemo.js'
 import ParallaxLayerDemo from './scenes/ParallaxLayerDemo.js'
@@ -47,6 +48,16 @@ import VirtualJoystickDemo from './scenes/VirtualJoystickDemo.js'
 import GestureRecognizerDemo from './scenes/GestureRecognizerDemo.js'
 import GamepadDemo from './scenes/GamepadDemo.js'
 import InputBufferDemo from './scenes/InputBufferDemo.js'
+import SaveServiceDemo from './scenes/SaveServiceDemo.js'
+import SaveStatePanelDemo from './scenes/SaveStatePanelDemo.js'
+import AssetFeatureDemo from './scenes/AssetFeatureDemo.js'
+import TilemapNavMeshDemo from './scenes/TilemapNavMeshDemo.js'
+import ParticleFeatureDemo from './scenes/ParticleFeatureDemo.js'
+import TweenTimelineDemo from './scenes/TweenTimelineDemo.js'
+import EffectsGalleryDemo from './scenes/EffectsGalleryDemo.js'
+import FlowLandingDemo from './scenes/FlowLandingDemo.js'
+import InputLandingDemo from './scenes/InputLandingDemo.js'
+import CinemaLandingDemo from './scenes/CinemaLandingDemo.js'
 
 export type PhaserCategory =
     | 'Core'
@@ -59,6 +70,11 @@ export type PhaserCategory =
     | 'AI'
     | 'Cinema'
     | 'Input'
+    | 'Particles'
+    | 'Audio'
+    | 'Net'
+    | 'Persistence'
+    | 'Assets'
 
 export type PhaserExampleDef = {
     key: string
@@ -73,13 +89,18 @@ export const phaserCategories: PhaserCategory[] = [
     'Core',
     'Layers',
     'Features',
-    'Debugging',
     'Flow',
-    'Perspective2D',
-    'Effects',
-    'AI',
     'Cinema',
-    'Input'
+    'Input',
+    'Audio',
+    'Net',
+    'Effects',
+    'Particles',
+    'Assets',
+    'Persistence',
+    'AI',
+    'Perspective2D',
+    'Debugging'
 ]
 
 export const phaserExamples: PhaserExampleDef[] = [
@@ -241,17 +262,17 @@ export const phaserExamples: PhaserExampleDef[] = [
     },
     {
         key: 'audio-panel',
-        title: 'Audio Panel',
-        category: 'Debugging',
-        description: 'Master vol/mute + per-bus sliders; lists playing tracks.',
+        title: 'Audio Mixer',
+        category: 'Audio',
+        description: 'AudioFeature: music/sfx/ui/ambience buses, 1.2s crossfade, spatial ping emitter, duck button. Bound to AudioPanel in the debugger.',
         sceneFile: 'AudioPanelDemo.js',
         element: <PhaserCanvas sceneClass={AudioPanelDemo} />
     },
     {
         key: 'net-panel',
-        title: 'Net Panel',
-        category: 'Debugging',
-        description: 'RTT graph, loss%, sent/recv rate, message log.',
+        title: 'NetFeature Loopback',
+        category: 'Net',
+        description: 'NetFeature: LoopbackTransport pair (50 ms latency), entity sync with delta encoding, real RTT/throughput in NetPanel.',
         sceneFile: 'NetPanelDemo.js',
         element: <PhaserCanvas sceneClass={NetPanelDemo} />
     },
@@ -354,6 +375,14 @@ export const phaserExamples: PhaserExampleDef[] = [
         sceneFile: 'Effects.js',
         element: <PhaserCanvas sceneClass={Effects} />
     },
+    {
+        key: 'effects-gallery',
+        title: 'Effects Gallery',
+        category: 'Effects',
+        description: 'Searchable grid of all 73 built-in shaders with live thumbnails, family filter, click-to-apply, and per-uniform ±tweak controls.',
+        sceneFile: 'EffectsGalleryDemo.js',
+        element: <PhaserCanvas sceneClass={EffectsGalleryDemo} />
+    },
 
     {
         key: 'pathfinder',
@@ -362,6 +391,14 @@ export const phaserExamples: PhaserExampleDef[] = [
         description: 'Time-sliced incremental A* over a grid NavMesh: click to walk, right-click to toggle walls.',
         sceneFile: 'PathFinderDemo.js',
         element: <PhaserCanvas sceneClass={PathFinderDemo} />
+    },
+    {
+        key: 'tilemap-navmesh',
+        title: 'Tilemap NavMesh',
+        category: 'AI',
+        description: 'TilemapFeature.buildNavMesh auto-generates a NavMesh from walkable tiles; agent path-finds around walls.',
+        sceneFile: 'TilemapNavMeshDemo.js',
+        element: <PhaserCanvas sceneClass={TilemapNavMeshDemo} />
     },
 
     {
@@ -387,6 +424,14 @@ export const phaserExamples: PhaserExampleDef[] = [
         description: 'Record arrow-key inputs at fixed step then play them back deterministically.',
         sceneFile: 'ReplayRecorderDemo.js',
         element: <PhaserCanvas sceneClass={ReplayRecorderDemo} />
+    },
+    {
+        key: 'replay-recorder-timeline',
+        title: 'Replay + Timeline Panel',
+        category: 'Flow',
+        description: 'ReplayRecorder wired to TimelinePanel via bindReplay — frame log, scrub slider, Record/Stop/Replay buttons in the debugger.',
+        sceneFile: 'ReplayRecorderTimelineDemo.js',
+        element: <PhaserCanvas sceneClass={ReplayRecorderTimelineDemo} />
     },
 
     {
@@ -461,5 +506,72 @@ export const phaserExamples: PhaserExampleDef[] = [
         description: 'Ring buffer of recent inputs; consumeMatch detects fighting-game combos.',
         sceneFile: 'InputBufferDemo.js',
         element: <PhaserCanvas sceneClass={InputBufferDemo} />
+    },
+    {
+        key: 'save-service',
+        title: 'Save Service',
+        category: 'Persistence',
+        description: 'SaveService + PersistenceFeature: 3 slots via tc-save-slot-list, LocalStorage backend, visible v1→v2 migration on load.',
+        sceneFile: 'SaveServiceDemo.js',
+        element: <PhaserCanvas sceneClass={SaveServiceDemo} />
+    },
+    {
+        key: 'save-state-panel',
+        title: 'Save State Panel',
+        category: 'Persistence',
+        description: 'SaveStatePanel: inspect slot list, view metadata, preview data content, force-load or delete any slot from the debugger.',
+        sceneFile: 'SaveStatePanelDemo.js',
+        element: <PhaserCanvas sceneClass={SaveStatePanelDemo} />
+    },
+    {
+        key: 'asset-feature',
+        title: 'Asset Feature',
+        category: 'Assets',
+        description: 'AssetFeature: declarative manifest, bundle-based lazy loading, aggregated progress, retry on failure, hot-reload swap. Cross-package: tc-loading-screen bound to ASSET_PROGRESS events.',
+        sceneFile: 'AssetFeatureDemo.js',
+        element: <PhaserCanvas sceneClass={AssetFeatureDemo} />
+    },
+
+    {
+        key: 'particle-feature',
+        title: 'VFX Gallery',
+        category: 'Particles',
+        description: 'ParticleFeature: define named presets, click-to-burst, cursor-following stream, and Explosion preset chained to a screen HeatEffect.',
+        sceneFile: 'ParticleFeatureDemo.js',
+        element: <PhaserCanvas sceneClass={ParticleFeatureDemo} />
+    },
+    {
+        key: 'tween-timeline',
+        title: 'Tween & Timeline',
+        category: 'Flow',
+        description: 'Flow.Tween + Flow.Timeline: sequence, parallel, stagger across five easing functions; scrub and replay via TimelinePanel.',
+        sceneFile: 'TweenTimelineDemo.js',
+        element: <PhaserCanvas sceneClass={TweenTimelineDemo} />
+    },
+
+    // ── Subsystem landing demos ────────────────────────────────────────────────
+    {
+        key: 'flow-landing',
+        title: 'Flow Subsystem',
+        category: 'Flow',
+        description: 'Landing demo: whole Flow surface — Event, TimeEvent, Job, Tween, Timeline, and StateMachine FSM in one interactive panel.',
+        sceneFile: 'FlowLandingDemo.js',
+        element: <PhaserCanvas sceneClass={FlowLandingDemo} />
+    },
+    {
+        key: 'input-landing',
+        title: 'Input Subsystem',
+        category: 'Input',
+        description: 'Landing demo: whole Input surface — InputFeature action map, InputBuffer combo detection, GestureRecognizer (tap/swipe/pinch), GamepadFeature.',
+        sceneFile: 'InputLandingDemo.js',
+        element: <PhaserCanvas sceneClass={InputLandingDemo} />
+    },
+    {
+        key: 'cinema-landing',
+        title: 'Cinema Subsystem',
+        category: 'Cinema',
+        description: 'Landing demo: whole Cinema surface — CameraDirector shots, ScreenShake (impact/rumble/sine), CameraFlash, ParallaxLayer, LetterboxFeature, DialogCameraCue.',
+        sceneFile: 'CinemaLandingDemo.js',
+        element: <PhaserCanvas sceneClass={CinemaLandingDemo} />
     }
 ]

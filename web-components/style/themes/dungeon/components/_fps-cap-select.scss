@@ -1,0 +1,38 @@
+// Dungeon › tc-fps-cap-select — FPS-cap preset picker.
+// The foundation remap already covers color/bg/border/disabled via --tc-* tokens.
+// The sole structural trap: --bs-fps-cap-select-focus-border-color and
+// --bs-fps-cap-select-focus-ring are hardcoded slate-blue literals in the base
+// (rgba(30,41,59,…)) — they must be repointed to gold or the focus glow stays
+// off-palette on the wood surface.
+// A seated-slot bevel is also added to read as an embedded control plate.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token swap ─────────────────────────────────────────────────────────────
+    // Vars live on the host element (tc-fps-cap-select), matching the base file.
+    tc-fps-cap-select {
+        // Replace hardcoded slate-900 focus literals with gold.
+        --bs-fps-cap-select-focus-border-color: var(--fg-gold);
+        --bs-fps-cap-select-focus-ring: var(--tc-focus-ring);
+
+        // Optional: swap flat surface bg for the wood-gradient panel fill.
+        --bs-fps-cap-select-bg: var(--fg-panel-bg);
+    }
+
+    // ── Structural: seated-slot bevel ──────────────────────────────────────────
+    // Compose the inset bevel highlight with the focus ring so neither overwrites
+    // the other. The bevel uses a box-shadow layer beneath the focus ring layer.
+    .tc-fps-cap-select__select {
+        box-shadow: var(--fg-bevel-top), inset 0 0 0 1px rgba(0, 0, 0, 0.4);
+        border-radius: 0;
+
+        &:focus,
+        &:focus-visible {
+            // Keep the seated bevel layers, add the gold focus ring on top.
+            box-shadow:
+                var(--bs-fps-cap-select-focus-ring),
+                var(--fg-bevel-top),
+                inset 0 0 0 1px rgba(0, 0, 0, 0.4);
+        }
+    }
+}

@@ -1,6 +1,10 @@
 import type { Sharp } from 'sharp'
+import { promises as fs } from 'node:fs'
 import { ImageProcessorError } from './errors'
 import { loadSharp } from './internal/lazySharp'
+
+/** Maximum allowed value for resize width or height. */
+export const MAX_DIMENSION = 65535
 
 export type ImageFormat = 'png' | 'jpeg' | 'webp' | 'avif'
 
@@ -38,6 +42,11 @@ export interface OptimizeOptions {
 	stripMetadata?: boolean
 }
 
+export interface ImageProcessorOptions {
+	/** Maximum allowed input pixels (width × height). Defaults to 50 000 000. */
+	maxInputPixels?: number
+}
+
 export interface ImageMetadata {
 	format: string
 	width: number
@@ -58,28 +67,35 @@ export class ImageProcessor {
 	private readonly source: ImageSource
 	private readonly ops: ReadonlyArray<PipelineOp>
 	private readonly sourcePath: string | null
+	private readonly maxInputPixels: number | undefined
 
-	private constructor(source: ImageSource, ops: ReadonlyArray<PipelineOp>, sourcePath: string | null) {
+	private constructor(source: ImageSource, ops: ReadonlyArray<PipelineOp>, sourcePath: string | null, maxInputPixels: number | undefined) {
 		this.source = source
 		this.ops = ops
 		this.sourcePath = sourcePath
+		this.maxInputPixels = maxInputPixels
 	}
 
-	static fromBuffer(buffer: Buffer): ImageProcessor {
+	static fromBuffer(buffer: Buffer, options?: ImageProcessorOptions): ImageProcessor {
 		if (!Buffer.isBuffer(buffer)) {
 			throw new ImageProcessorError('invalid-buffer', 'fromBuffer requires a Buffer')
 		}
-		return new ImageProcessor({ kind: 'buffer', data: buffer }, [], null)
+		return new ImageProcessor({ kind: 'buffer', data: buffer }, [], null, options?.maxInputPixels)
 	}
 
-	static fromPath(path: string): ImageProcessor {
+	static fromPath(path: string, options?: ImageProcessorOptions): ImageProcessor {
 		if (typeof path !== 'string' || path.length === 0) {
 			throw new ImageProcessorError('invalid-path', 'fromPath requires a non-empty string')
 		}
-		return new ImageProcessor({ kind: 'path', path }, [], path)
+		return new ImageProcessor({ kind: 'path', path }, [], path, options?.maxInputPixels)
 	}
 
 	resize(options: ResizeOptions): ImageProcessor {
+		for (const dim of [options.width, options.height]) {
+			if (dim !== undefined && (!Number.isInteger(dim) || dim <= 0 || dim > MAX_DIMENSION)) {
+				throw new ImageProcessorError('resize-invalid', 'resize width/height must be positive integers within bounds', this.sourcePath ?? undefined)
+			}
+		}
 		return this.append(pipeline => pipeline.resize({
 			width: options.width,
 			height: options.height,
@@ -133,10 +149,7 @@ export class ImageProcessor {
 					pipeline.avif({ quality, effort })
 					break
 				case undefined:
-					pipeline.jpeg({ mozjpeg: true, quality, progressive: true })
-					pipeline.png({ palette, compressionLevel: 9, quality })
-					pipeline.webp({ quality, effort })
-					pipeline.avif({ quality, effort })
+					// No encoder — sharp will use the input format unchanged.
 					break
 			}
 			if (!stripMetadata) {
@@ -176,31 +189,34 @@ export class ImageProcessor {
 		if (typeof path !== 'string' || path.length === 0) {
 			throw new ImageProcessorError('invalid-path', 'toFile requires a non-empty string')
 		}
+		const tmp = `${path}.${process.pid}.tmp`
 		try {
 			const pipeline = await this.materialize()
-			const info = await pipeline.toFile(path)
+			const info = await pipeline.toFile(tmp)
+			await fs.rename(tmp, path)
 			return {
 				format: info.format ?? 'unknown',
 				width: info.width,
 				height: info.height,
 				channels: info.channels,
-				hasAlpha: info.premultiplied ?? false,
+				hasAlpha: info.channels === 4 || info.channels === 2,
 				size: info.size
 			}
 		} catch (error) {
+			await fs.unlink(tmp).catch(() => undefined)
 			throw ImageProcessor.wrapError(error, 'write-failed', path)
 		}
 	}
 
 	private append(op: PipelineOp): ImageProcessor {
 		const next = this.ops.length === 0 ? [op] : [...this.ops, op]
-		return new ImageProcessor(this.source, next, this.sourcePath)
+		return new ImageProcessor(this.source, next, this.sourcePath, this.maxInputPixels)
 	}
 
 	private async materialize(): Promise<Sharp> {
 		const sharp = await loadSharp()
 		const input = this.source.kind === 'buffer' ? this.source.data : this.source.path
-		let pipeline: Sharp = sharp(input)
+		let pipeline: Sharp = sharp(input, { limitInputPixels: this.maxInputPixels ?? 50_000_000, failOn: 'error' })
 		for (const op of this.ops) {
 			pipeline = op(pipeline)
 		}

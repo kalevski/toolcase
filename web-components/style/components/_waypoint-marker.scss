@@ -1,0 +1,76 @@
+// tc-waypoint-marker — absolutely-positioned world-space waypoint marker with
+// a configurable Lucide icon glyph, optional label chip, and formatted distance
+// readout (metres / kilometres). Port of gc-waypoint-marker restyled to the
+// toolcase design system: sharp corners, slate neutrals, 1px hairlines.
+// All cosmetics flow through --bs-waypoint-marker-* backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+tc-waypoint-marker {
+    --bs-waypoint-marker-size: 18px;
+    --bs-waypoint-marker-color: var(--tc-app-accent);
+    --bs-waypoint-marker-bg: var(--tc-surface);
+    --bs-waypoint-marker-border-color: var(--tc-border);
+    --bs-waypoint-marker-text-color: var(--tc-text);
+    --bs-waypoint-marker-distance-color: var(--tc-text-muted);
+    --bs-waypoint-marker-label-size: 11px;
+    --bs-waypoint-marker-distance-size: 10px;
+
+    position: absolute;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    pointer-events: none;
+    transform: translate(-50%, -100%);
+    color: var(--bs-waypoint-marker-color);
+}
+
+.tc-waypoint-marker {
+    // Glyph container — size driven by --bs-waypoint-marker-size.
+    &__glyph {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--bs-waypoint-marker-color);
+
+        svg {
+            width: var(--bs-waypoint-marker-size);
+            height: var(--bs-waypoint-marker-size);
+            stroke: currentColor;
+        }
+    }
+
+    // Label + distance chip — 1px hairline, slate surface, sharp corners.
+    &__text {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1px;
+        background: var(--bs-waypoint-marker-bg);
+        border: 1px solid var(--bs-waypoint-marker-border-color);
+        padding: 2px 8px;
+        border-radius: 0;
+        white-space: nowrap;
+    }
+
+    // Uppercase micro-label in JetBrains Mono.
+    &__label {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: var(--bs-waypoint-marker-label-size);
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--bs-waypoint-marker-text-color);
+        line-height: 1.3;
+    }
+
+    // Distance readout in JetBrains Mono — muted, tabular.
+    &__distance {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: var(--bs-waypoint-marker-distance-size);
+        letter-spacing: 0.06em;
+        color: var(--bs-waypoint-marker-distance-color);
+        line-height: 1.3;
+    }
+}

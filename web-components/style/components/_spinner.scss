@@ -1,0 +1,225 @@
+// tc-spinner — ring, grow, dots, bars, pulse and orbit spinners. The ring is a
+// slate-200 track with a currentcolor top arc (text-* utilities drive the
+// variant hue). Circles are the sanctioned use of border-radius: 50%; the bars
+// stay sharp rectangles.
+
+.spinner-border,
+.spinner-grow {
+    --bs-spinner-width: 26px;
+    --bs-spinner-height: 26px;
+    --bs-spinner-vertical-align: -0.125em;
+    --bs-spinner-animation-speed: 0.7s;
+
+    display: inline-block;
+    width: var(--bs-spinner-width);
+    height: var(--bs-spinner-height);
+    vertical-align: var(--bs-spinner-vertical-align);
+    border-radius: 50%;
+}
+
+.spinner-border {
+    --bs-spinner-border-width: 2.5px;
+
+    border: var(--bs-spinner-border-width) solid var(--tc-slate-200);
+    border-top-color: currentcolor;
+    animation: spinner-border var(--bs-spinner-animation-speed) linear infinite;
+}
+
+.spinner-border-sm {
+    --bs-spinner-width: 1rem;
+    --bs-spinner-height: 1rem;
+    --bs-spinner-border-width: 2px;
+}
+
+.spinner-grow {
+    --bs-spinner-animation-speed: 0.9s;
+
+    background-color: currentcolor;
+    animation: spinner-grow var(--bs-spinner-animation-speed) ease-in-out infinite;
+}
+
+.spinner-grow-sm {
+    --bs-spinner-width: 1rem;
+    --bs-spinner-height: 1rem;
+}
+
+// Bouncing dot trio — the grow pulse, three at a time with a stagger.
+.spinner-dots {
+    --bs-spinner-width: 8px;
+    --bs-spinner-height: 8px;
+    --bs-spinner-animation-speed: 0.9s;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    vertical-align: -0.125em;
+}
+
+.spinner-dots > span:not(.visually-hidden) {
+    width: var(--bs-spinner-width);
+    height: var(--bs-spinner-height);
+    border-radius: 50%;
+    background-color: currentcolor;
+    animation: spinner-grow var(--bs-spinner-animation-speed) ease-in-out infinite;
+}
+
+.spinner-dots > span:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.spinner-dots > span:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.spinner-dots-sm {
+    --bs-spinner-width: 5px;
+    --bs-spinner-height: 5px;
+
+    gap: 3px;
+}
+
+// Audio-mixer bars — sharp rectangles scaling Y in a staggered equalizer loop.
+.spinner-bars {
+    --bs-spinner-width: 3px;
+    --bs-spinner-height: 18px;
+    --bs-spinner-animation-speed: 1s;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    vertical-align: -0.125em;
+}
+
+.spinner-bars > span:not(.visually-hidden) {
+    width: var(--bs-spinner-width);
+    height: var(--bs-spinner-height);
+    background-color: currentcolor;
+    animation: spinner-bars var(--bs-spinner-animation-speed) ease-in-out infinite;
+}
+
+.spinner-bars > span:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.spinner-bars > span:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.spinner-bars-sm {
+    --bs-spinner-width: 2px;
+    --bs-spinner-height: 12px;
+
+    gap: 2px;
+}
+
+// Sonar ping — a circle outline expanding while it fades out.
+.spinner-pulse {
+    --bs-spinner-width: 26px;
+    --bs-spinner-height: 26px;
+    --bs-spinner-border-width: 2px;
+    --bs-spinner-animation-speed: 1.2s;
+
+    display: inline-block;
+    width: var(--bs-spinner-width);
+    height: var(--bs-spinner-height);
+    vertical-align: -0.125em;
+    border: var(--bs-spinner-border-width) solid currentcolor;
+    border-radius: 50%;
+    animation: spinner-pulse var(--bs-spinner-animation-speed) ease-out infinite;
+}
+
+.spinner-pulse-sm {
+    --bs-spinner-width: 1rem;
+    --bs-spinner-height: 1rem;
+}
+
+// Dashed orbit ring — the cycle-wheel motif with a satellite dot on the rim.
+.spinner-orbit {
+    --bs-spinner-width: 26px;
+    --bs-spinner-height: 26px;
+    --bs-spinner-border-width: 1.5px;
+    --bs-spinner-dot-size: 5px;
+    --bs-spinner-animation-speed: 1.6s;
+
+    position: relative;
+    display: inline-block;
+    width: var(--bs-spinner-width);
+    height: var(--bs-spinner-height);
+    vertical-align: -0.125em;
+    border: var(--bs-spinner-border-width) dashed currentcolor;
+    border-radius: 50%;
+    animation: spinner-border var(--bs-spinner-animation-speed) linear infinite;
+}
+
+.spinner-orbit::before {
+    content: '';
+    position: absolute;
+    top: calc(var(--bs-spinner-dot-size) / -2);
+    left: 50%;
+    width: var(--bs-spinner-dot-size);
+    height: var(--bs-spinner-dot-size);
+    border-radius: 50%;
+    background-color: currentcolor;
+    transform: translateX(-50%);
+}
+
+.spinner-orbit-sm {
+    --bs-spinner-width: 1rem;
+    --bs-spinner-height: 1rem;
+    --bs-spinner-dot-size: 3px;
+}
+
+@keyframes spinner-border {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes spinner-grow {
+    0%,
+    80%,
+    100% {
+        transform: scale(0.4);
+        opacity: 0.5;
+    }
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes spinner-bars {
+    0%,
+    100% {
+        transform: scaleY(0.4);
+    }
+    50% {
+        transform: scaleY(1);
+    }
+}
+
+@keyframes spinner-pulse {
+    0% {
+        transform: scale(0.5);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .spinner-border,
+    .spinner-grow,
+    .spinner-pulse,
+    .spinner-dots > span,
+    .spinner-bars > span {
+        animation-duration: 1.5s;
+    }
+
+    // 1.5s would speed the orbit up — slow it down instead.
+    .spinner-orbit {
+        animation-duration: 3.2s;
+    }
+}

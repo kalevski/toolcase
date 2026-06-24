@@ -1,7 +1,9 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
-import { Badge, Button, StatusDot, TerminalWindow, Text, toast } from '@toolcase/react-components'
+import React, { useEffect, useMemo, useState } from 'react'
+import { toast } from '@/lib/toast'
+import { useTcProps } from '@/lib/tc'
+import { toTcLines } from '@/lib/terminal'
 import type { AgentKind } from '@/server/domain/types'
 import { useProject, AGENT_LABELS } from '../ProjectContext'
 import { PromptComposer } from './PromptComposer'
@@ -32,14 +34,22 @@ export function AgentPanel({
     beforeComposer?: React.ReactNode
     submitOptions?: () => { targetNote?: string }
 }) {
-    const { project, config, agentSessions, agentLines, drafts, setDraft, lastPrompts, busy, modelOptions, onStartAgent, onStopAgent, clearAgentLines } =
+    const { project, config, agentSessions, agentLines, drafts, setDraft, lastPrompts, running: executorRunning, modelOptions, onStartAgent, onStopAgent, clearAgentLines } =
         useProject()
 
     // Custom kinds (C4) may not have a seeded record yet — degrade to idle/empty.
     const session = agentSessions[kind] ?? { status: 'idle' as const, startedAt: null, model: null }
-    const lines = agentLines[kind] ?? []
+    // Stable identity so the terminal memo below only changes when this kind's
+    // lines change (not on the 1s elapsed-ticker re-render).
+    const lines = useMemo(() => agentLines[kind] ?? [], [agentLines, kind])
     const draft = drafts[kind] ?? { prompt: '', model: config.defaultModel }
     const running = session.status === 'running'
+
+    // What locks THIS composer: another agent session (one agent at a time), or —
+    // for the task-creator only — an executing run (it writes tasks/ the executor
+    // is iterating). Knowledge/notes/custom composers stay usable during a run.
+    const otherAgentRunning = Object.entries(agentSessions).some(([k, s]) => k !== kind && s.status === 'running')
+    const lockedByOther = otherAgentRunning || (executorRunning && kind === 'task-creator')
     const label = AGENT_LABELS[kind] ?? config.agentKinds.find((k) => k.kind === kind)?.label ?? kind
 
     // 1s ticker for the elapsed label while this agent streams.
@@ -49,6 +59,20 @@ export function AgentPanel({
         const timer = setInterval(() => setNow(Date.now()), 1000)
         return () => clearInterval(timer)
     }, [running])
+
+    // tc-terminal-window takes its lines as a JS property (array, not attribute),
+    // in its own {type,text} shape. Memoize: toTcLines() returns a fresh array
+    // every call, and the 1s elapsed ticker re-renders this panel each second —
+    // without memoization the terminal would rebuild + reset scroll every tick.
+    const tcLines = useMemo(() => toTcLines(lines), [lines])
+    const termRef = useTcProps<HTMLElement>({ lines: tcLines })
+
+    // Pin the streaming output to the bottom as new lines arrive.
+    useEffect(() => {
+        const body = termRef.current?.querySelector('.tc-terminal-window-body')
+        if (body) body.scrollTop = body.scrollHeight
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [tcLines])
 
     const logText = () => lines.map((l) => l.text).join('\n')
 
@@ -72,7 +96,7 @@ export function AgentPanel({
     }
 
     return (
-        <div className="tf-stack-sm">
+        <tc-stack gap="0.75rem">
             {beforeComposer}
             <PromptComposer
                 project={project}
@@ -83,7 +107,7 @@ export function AgentPanel({
                 onModelChange={(v) => setDraft(kind, { model: v })}
                 modelOptions={modelOptions}
                 lastPrompt={lastPrompts[kind] ?? null}
-                busy={busy}
+                lockedByOther={lockedByOther}
                 running={running}
                 onSubmit={() => void onStartAgent(kind, submitOptions?.())}
                 onStop={() => void onStopAgent(kind)}
@@ -91,36 +115,35 @@ export function AgentPanel({
                 submitLabel={submitLabel}
             />
 
-            <div className="tf-actions">
-                <span className="tf-inline">
-                    <StatusDot status={running ? 'busy' : 'offline'} pulse={running} />
-                    <Badge variant={running ? 'info' : 'secondary'}>
+            <tc-stack direction="horizontal" gap="0.75rem" wrap align="center">
+                <tc-stack inline direction="horizontal" gap="0.4rem" align="center">
+                    <tc-status-dot status={running ? 'busy' : 'offline'} pulse={running || undefined} />
+                    <tc-badge variant={running ? 'info' : 'secondary'}>
                         {running ? `running · ${elapsedLabel(session.startedAt, now)}` : 'idle'}
-                    </Badge>
-                    {session.model && <Badge variant="secondary">{session.model}</Badge>}
-                </span>
-                <Text variant="muted" style={{ marginLeft: 'auto' }}>
+                    </tc-badge>
+                    {session.model && <tc-badge variant="secondary">{session.model}</tc-badge>}
+                </tc-stack>
+                <tc-text variant="muted" style={{ marginLeft: 'auto' }}>
                     {lines.length} line(s)
-                </Text>
-                <Button size="small" variant="secondary" outline disabled={!lines.length} onClick={onCopyLog} startIcon={<span>⧉</span>}>
-                    Copy
-                </Button>
-                <Button size="small" variant="secondary" outline disabled={!lines.length} onClick={onDownloadLog} startIcon={<span>↓</span>}>
-                    Download
-                </Button>
-                <Button
-                    size="small"
+                </tc-text>
+                <tc-button size="sm" variant="secondary" outline disabled={!lines.length || undefined} onClick={onCopyLog}>
+                    <tc-icon name="Copy" /> Copy
+                </tc-button>
+                <tc-button size="sm" variant="secondary" outline disabled={!lines.length || undefined} onClick={onDownloadLog}>
+                    <tc-icon name="Download" /> Download
+                </tc-button>
+                <tc-button
+                    size="sm"
                     variant="secondary"
                     outline
-                    disabled={!lines.length || running}
+                    disabled={!lines.length || running || undefined}
                     onClick={() => clearAgentLines(kind)}
-                    startIcon={<span>✕</span>}
                 >
-                    Clear
-                </Button>
-            </div>
+                    <tc-icon name="X" /> Clear
+                </tc-button>
+            </tc-stack>
 
-            <TerminalWindow title={`${label.toLowerCase()} — ${project}`} lines={lines} />
-        </div>
+            <tc-terminal-window ref={termRef} title={`${label.toLowerCase()} — ${project}`} />
+        </tc-stack>
     )
 }

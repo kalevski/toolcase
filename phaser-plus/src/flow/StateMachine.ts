@@ -60,6 +60,17 @@ export default class StateMachine<C = unknown> extends Feature {
         return this
     }
 
+    /**
+     * Register a transition rule. Priority is first-registered-wins: transitions
+     * added earlier take precedence over later ones when multiple rules match the
+     * same (from, signal) pair. Keep high-priority transitions at the top of your
+     * setup sequence to make priority explicit.
+     *
+     * Guardless automatic transitions (on=null) are evaluated every frame from
+     * onUpdate. Avoid unconditional auto-transitions (guard=null) between two
+     * states unless you intend them to fire exactly once — the self-transition
+     * short-circuit prevents infinite ping-pong, but a mutual pair still cycles.
+     */
     addTransition(from: string | null, to: string, on: string | null = null, guard: Guard<C> | null = null): this {
         if (!this.states.has(to)) {
             throw new Error(`transition target=${to} not defined as state`)
@@ -139,6 +150,10 @@ export default class StateMachine<C = unknown> extends Feature {
     private transition(target: string): boolean {
         const next = this.states.get(target)
         if (!next) return false
+        // Self-transitions are silently suppressed: onExit/onEnter do not fire
+        // and no events are emitted. Use an explicit guard or a dedicated signal
+        // if re-entry behaviour is required.
+        if (target === this.currentState) return false
         const previous = this.currentState
         if (previous !== null) {
             const prev = this.states.get(previous)

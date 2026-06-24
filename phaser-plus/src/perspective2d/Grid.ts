@@ -40,7 +40,11 @@ export default class Grid extends GameObject {
         this.canvas.lineStyle(1, this.STYLE.LINES, 0.3)
     }
 
-    override onDestroy(): void {}
+    override onDestroy(): void {
+        if (this.TEXTURE_KEY !== '' && this.scene.textures.exists(this.TEXTURE_KEY)) {
+            this.scene.textures.remove(this.TEXTURE_KEY)
+        }
+    }
 
     setProjection(matrix: Matrix2): void {
         this.canvas = this.scene.add.graphics()
@@ -80,10 +84,10 @@ export default class Grid extends GameObject {
         this.canvas.fillRect(0, 0, tile.x, tile.y)
         for (let x = -polygons; x < polygons; x++) {
             for (let y = -polygons; y < polygons; y++) {
-                matrix.translate(x, y, pointA)
-                matrix.translate(x, y + 1, pointB)
-                matrix.translate(x + 1, y, pointC)
-                matrix.translate(x + 1, y + 1, pointD)
+                matrix.transformPoint(x, y, pointA)
+                matrix.transformPoint(x, y + 1, pointB)
+                matrix.transformPoint(x + 1, y, pointC)
+                matrix.transformPoint(x + 1, y + 1, pointD)
                 this.canvas.beginPath()
                 this.canvas.moveTo(pointA.x, pointA.y)
                 this.canvas.lineTo(pointB.x, pointB.y)
@@ -97,18 +101,18 @@ export default class Grid extends GameObject {
 
     private drawLinearTiles(matrix: Matrix2): void {
         const crop = new M.Vector2(0, 0)
-        matrix.translate(2, 2, crop)
+        matrix.transformPoint(2, 2, crop)
 
         this.canvas.fillRect(0, 0, crop.x, crop.y)
         this.canvas.lineStyle(1, 0xffffff, 0.2)
 
         this.canvas.strokePoints([
-            matrix.translate(0.8, 1),
-            matrix.translate(1.2, 1)
+            matrix.transformPoint(0.8, 1),
+            matrix.transformPoint(1.2, 1)
         ])
         this.canvas.strokePoints([
-            matrix.translate(1, 0.8),
-            matrix.translate(1, 1.2)
+            matrix.transformPoint(1, 0.8),
+            matrix.transformPoint(1, 1.2)
         ])
         this.canvas.generateTexture(this.TEXTURE_KEY, crop.x, crop.y)
     }
@@ -121,7 +125,7 @@ export default class Grid extends GameObject {
     }
 
     private getProjectionTileSize(matrix: Matrix2): M.Vector2 {
-        const refPoint = new M.Vector2(matrix.translate(1, 0).x, matrix.translate(0, 1).y)
+        const refPoint = new M.Vector2(matrix.transformPoint(1, 0).x, matrix.transformPoint(0, 1).y)
         refPoint.x = Math.abs(refPoint.x)
         refPoint.y = Math.abs(refPoint.y)
 
@@ -133,7 +137,7 @@ export default class Grid extends GameObject {
         while (shiftX < this.TILE_PRECISION) {
             x += refPoint.x
             shiftX++
-            matrix.inverse.translate(x, 0, tempPoint)
+            matrix.inverse.transformPoint(x, 0, tempPoint)
             tempPoint.x = Math.round(tempPoint.x * 10) / 10
             tempPoint.y = Math.round(tempPoint.y * 10) / 10
             if (tempPoint.y % 1 === 0) {
@@ -147,7 +151,7 @@ export default class Grid extends GameObject {
         while (shiftY < this.TILE_PRECISION) {
             y += refPoint.y
             shiftY++
-            matrix.inverse.translate(0, y, tempPoint)
+            matrix.inverse.transformPoint(0, y, tempPoint)
             tempPoint.x = Math.round(tempPoint.x * 10) / 10
             tempPoint.y = Math.round(tempPoint.y * 10) / 10
             if (tempPoint.x % 1 === 0 && tempPoint.y % 1 === 0) {

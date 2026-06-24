@@ -1,0 +1,56 @@
+// tc-kbd — keyboard key cap(s) with optional separator. Sharp square caps,
+// JetBrains Mono, micro size. All cosmetics via --bs-kbd-* custom properties.
+
+.tc-kbd {
+    --bs-kbd-font-family: var(--bs-font-monospace);
+    --bs-kbd-font-size: 0.71875rem; // ~11.5px — micro label tier
+    --bs-kbd-font-weight: 500;
+    --bs-kbd-color: var(--tc-text);
+    --bs-kbd-bg: var(--tc-surface-muted);
+    --bs-kbd-border-color: var(--tc-border-strong);
+    --bs-kbd-border-width: 1px;
+    --bs-kbd-padding-x: 0.35em;
+    --bs-kbd-padding-y: 0.18em;
+    --bs-kbd-sep-color: var(--tc-text-faint);
+    --bs-kbd-sep-margin: 0.25em;
+
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0;
+    line-height: 1;
+    vertical-align: baseline;
+}
+
+.tc-kbd-key {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--bs-kbd-font-family);
+    font-size: var(--bs-kbd-font-size);
+    font-weight: var(--bs-kbd-font-weight);
+    line-height: 1;
+    color: var(--bs-kbd-color);
+    background-color: var(--bs-kbd-bg);
+    border: var(--bs-kbd-border-width) solid var(--bs-kbd-border-color);
+    // Faint bottom border makes the key edge suggestion without adding elevation
+    border-bottom-width: 2px;
+    border-radius: 0; // sharp caps by mandate
+    padding: var(--bs-kbd-padding-y) var(--bs-kbd-padding-x);
+    white-space: nowrap;
+    user-select: none;
+    // Zero out any browser or foreign-sheet kbd defaults
+    background-image: none;
+    box-shadow: none;
+}
+
+.tc-kbd-sep {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--bs-kbd-font-family);
+    font-size: var(--bs-kbd-font-size);
+    font-weight: 400;
+    color: var(--bs-kbd-sep-color);
+    margin: 0 var(--bs-kbd-sep-margin);
+    line-height: 1;
+    user-select: none;
+}

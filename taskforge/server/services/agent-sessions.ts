@@ -215,9 +215,13 @@ class AgentSessionManager extends EventEmitter {
         if (!(AGENT_KINDS as string[]).includes(agent) && !customDef) {
             throw new UnknownAgentError(`unknown agent: ${agent}`)
         }
-        // §mutual exclusion — one Claude process per project across
-        // {executor, every agent kind}.
-        if (engine.isLocked(project)) throw new AgentBusyError('A run is in progress for this project')
+        // §mutual exclusion — `task-creator` writes tasks/, which the executor is
+        // iterating during a run, so it stays exclusive with an active run. Other
+        // agents (knowledge, notes, custom) may run alongside an executing run.
+        if (agent === 'task-creator' && engine.isLocked(project)) {
+            throw new AgentBusyError('Creating tasks is blocked while a run is in progress')
+        }
+        // Still one agent session at a time (across all kinds).
         if (this.isBusy(project)) throw new AgentBusyError('Another agent session is running for this project')
 
         // Claim the session SYNCHRONOUSLY (before any await) so two concurrent

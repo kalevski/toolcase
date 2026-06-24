@@ -4,8 +4,7 @@
 import { version as baseVersion } from '../../base/package.json'
 import { version as loggingVersion } from '../../logging/package.json'
 import { version as serializerVersion } from '../../serializer/package.json'
-import { version as reactComponentsVersion } from '../../react-components/package.json'
-import { version as gameComponentsVersion } from '../../game-components/package.json'
+import { version as webComponentsVersion } from '../../web-components/package.json'
 import { version as phaserPlusVersion } from '../../phaser-plus/package.json'
 import { version as nodeVersion } from '../../node/package.json'
 
@@ -13,8 +12,7 @@ export const versions = {
     base: baseVersion,
     logging: loggingVersion,
     serializer: serializerVersion,
-    'react-components': reactComponentsVersion,
-    'game-components': gameComponentsVersion,
+    'web-components': webComponentsVersion,
     'phaser-plus': phaserPlusVersion,
     node: nodeVersion,
 } as const

@@ -1,0 +1,95 @@
+// Dungeon › tc-network-status-icon — gilded signal bars. Token swap repoints the
+// tier accents to the fantasy palette and inactive bars to gold-shadow; rules add
+// the per-tier glow on active bars, a gold-shadow inked outline, mono-caps
+// tier-tinted label, a recessed slot frame, and a gold-rule hairline divider.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-network-status-icon {
+        --bs-network-status-icon-inactive-color: var(--fg-gold-shadow);
+        // Label color is now driven per-tier below; clear the global fallback
+        // so it doesn't override the tier-specific rules.
+        --bs-network-status-icon-label-color: var(--fg-parch-dim);
+        // Tier accents — fantasy palette.
+        --bs-network-status-icon-color-offline: var(--fg-gold-shadow);
+        --bs-network-status-icon-color-bad: var(--fg-blood-bright);
+        --bs-network-status-icon-color-warning: var(--fg-legendary);
+        --bs-network-status-icon-color-ok: var(--fg-gold-bright);
+        --bs-network-status-icon-color-good: var(--fg-stamina-bright);
+    }
+
+    // Bar cluster sits in a recessed gilded slot.
+    .tc-network-status-icon-bars {
+        background: var(--fg-slot-bg);
+        box-shadow: var(--fg-panel-shadow);
+        padding: 3px 4px;
+        box-sizing: border-box;
+    }
+
+    // Inactive bars — raised opacity and gold-shadow edge for legibility at 16px.
+    .tc-network-status-icon-bar {
+        opacity: 0.7;
+        border: 1px solid var(--fg-gold-shadow);
+        box-sizing: border-box;
+    }
+
+    // Active bars glow in their tier colour.
+    tc-network-status-icon[data-tier='offline'] .tc-network-status-icon-bar.is-active {
+        opacity: 1;
+        box-shadow: 0 0 4px var(--fg-gold-shadow);
+    }
+    tc-network-status-icon[data-tier='bad'] .tc-network-status-icon-bar.is-active {
+        opacity: 1;
+        box-shadow: 0 0 4px var(--fg-blood-bright);
+    }
+    tc-network-status-icon[data-tier='warning'] .tc-network-status-icon-bar.is-active {
+        opacity: 1;
+        box-shadow: 0 0 4px var(--fg-legendary);
+    }
+    tc-network-status-icon[data-tier='ok'] .tc-network-status-icon-bar.is-active {
+        opacity: 1;
+        box-shadow: 0 0 4px var(--fg-gold-bright);
+    }
+    tc-network-status-icon[data-tier='good'] .tc-network-status-icon-bar.is-active {
+        opacity: 1;
+        box-shadow: 0 0 4px var(--fg-stamina-bright);
+    }
+
+    // Label — mono caps, inked shadow, gold-rule hairline divider before text.
+    .tc-network-status-icon-label {
+        font-family: var(--fg-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        text-shadow: 0 1px 2px #000;
+        position: relative;
+        padding-left: 0.6em;
+
+        &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 10%;
+            width: 1px;
+            height: 80%;
+            background: var(--fg-rule);
+        }
+    }
+
+    // Per-tier label tint — restores the at-a-glance danger cue lost when the
+    // label was always pinned to gold-bright.
+    tc-network-status-icon[data-tier='offline'] .tc-network-status-icon-label {
+        color: var(--fg-gold-shadow);
+    }
+    tc-network-status-icon[data-tier='bad'] .tc-network-status-icon-label {
+        color: var(--fg-blood-bright);
+    }
+    tc-network-status-icon[data-tier='warning'] .tc-network-status-icon-label {
+        color: var(--fg-legendary);
+    }
+    tc-network-status-icon[data-tier='ok'] .tc-network-status-icon-label {
+        color: var(--fg-gold-bright);
+    }
+    tc-network-status-icon[data-tier='good'] .tc-network-status-icon-label {
+        color: var(--fg-stamina-bright);
+    }
+}

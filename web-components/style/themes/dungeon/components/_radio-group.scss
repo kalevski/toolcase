@@ -1,0 +1,23 @@
+// Dungeon › tc-radio-group — display-caps cluster heading.
+// The individual radio options are fully handled by _check.scss (gold dot,
+// ink well, gold focus ring). The only dungeon-specific work here is turning
+// the group label into a gilded display-caps section heading.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // Sharpen the label colour from parch-muted (free via foundation) to gold-deep
+    // so it reads as a dungeon section heading.
+    .tc-radio-group {
+        --bs-radio-group-label-color: var(--fg-gold-deep);
+    }
+
+    // Display-caps override: font-family/transform can't be carried by a var swap
+    // since the base hardcodes no font-family on this element — we must override
+    // the class directly.
+    .tc-radio-group-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+    }
+}

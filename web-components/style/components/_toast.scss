@@ -1,0 +1,112 @@
+// tc-toast — compact ink panel, white text, overlay shadow; header carries a
+// mono-leaning strong title. Status variants paint a 3px left stripe, never a
+// colored fill. Class protocol (.showing/.show/.hide) driven by the internal
+// Toast plugin.
+
+.toast {
+    --bs-toast-zindex: 1090;
+    --bs-toast-padding-x: 0.875rem;
+    --bs-toast-padding-y: 0.6875rem;
+    --bs-toast-spacing: 1.5rem;
+    --bs-toast-max-width: 350px;
+    --bs-toast-font-size: 0.8125rem;
+    --bs-toast-color: #fff;
+    --bs-toast-bg: var(--tc-ink);
+    --bs-toast-border-width: 0;
+    --bs-toast-border-color: transparent;
+    --bs-toast-border-radius: 0;
+    --bs-toast-box-shadow: var(--tc-shadow-lg);
+    --bs-toast-header-color: #fff;
+    --bs-toast-header-bg: transparent;
+    --bs-toast-header-border-color: rgba(255, 255, 255, 0.12);
+
+    display: block;
+    width: max-content;
+    min-width: 230px;
+    max-width: min(var(--bs-toast-max-width), 100%);
+    font-size: var(--bs-toast-font-size);
+    color: var(--bs-toast-color);
+    pointer-events: auto;
+    background-color: var(--bs-toast-bg);
+    background-clip: padding-box;
+    border: var(--bs-toast-border-width) solid var(--bs-toast-border-color);
+    border-radius: var(--bs-toast-border-radius);
+    box-shadow: var(--bs-toast-box-shadow);
+
+    &.showing {
+        opacity: 0;
+    }
+
+    &:not(.show) {
+        display: none;
+    }
+}
+
+.toast-header {
+    display: flex;
+    align-items: center;
+    padding: var(--bs-toast-padding-y) var(--bs-toast-padding-x);
+    font-weight: 600;
+    color: var(--bs-toast-header-color);
+    background-color: var(--bs-toast-header-bg);
+    background-clip: padding-box;
+    border-bottom: 1px solid var(--bs-toast-header-border-color);
+
+    // Small meta text (timestamps etc.) — mono ghost on the ink.
+    small {
+        font-family: var(--tc-font-mono);
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .btn-close {
+        // White glyph on the ink surface.
+        --bs-btn-close-color: rgba(255, 255, 255, 0.7);
+
+        margin: -0.25rem calc(-0.25 * var(--bs-toast-padding-x)) -0.25rem 0.5rem;
+
+        &:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+    }
+}
+
+.toast-body {
+    padding: var(--bs-toast-padding-y) var(--bs-toast-padding-x);
+    word-wrap: break-word;
+}
+
+// Variant toasts (text-bg-*) — stay on the ink; status is a 3px left stripe,
+// NOT a colored fill. Outranks the !important utility fill by specificity.
+.toast[class*='text-bg-'] {
+    --bs-toast-bg: var(--tc-ink);
+    --bs-toast-color: #fff;
+    --bs-toast-header-color: #fff;
+    --bs-toast-header-bg: transparent;
+    --bs-toast-header-border-color: rgba(255, 255, 255, 0.12);
+    --bs-toast-border-color: transparent;
+
+    color: var(--bs-toast-color) !important;
+    background-color: var(--bs-toast-bg) !important;
+    border-left: 3px solid var(--tc-ink-2);
+}
+
+.toast.text-bg-success {
+    border-left-color: var(--tc-success);
+}
+
+.toast.text-bg-danger {
+    border-left-color: var(--tc-danger);
+}
+
+.toast.text-bg-warning {
+    border-left-color: var(--tc-warning);
+}
+
+.toast.text-bg-info {
+    border-left-color: var(--tc-info);
+}
+
+.toast.text-bg-primary {
+    border-left-color: var(--tc-accent);
+}

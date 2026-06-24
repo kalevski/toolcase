@@ -1,0 +1,159 @@
+// tc-basic-card — small dashboard card with optional icon chip and two-line text block.
+// All cosmetics flow through --bs-basic-card-* custom properties backed by --tc-* tokens.
+// Sharp corners; slate neutrals; 1px hairline; low resting shadow.
+
+@use '../foundation/tokens' as *;
+
+tc-basic-card,
+tc-colored-card {
+    // Accent (tc-colored-card / `color` attr): default falls back to slate-muted.
+    --bs-basic-card-accent: var(--tc-text-muted);
+    --bs-basic-card-bg: var(--tc-surface);
+    --bs-basic-card-border-color: var(--tc-border);
+    --bs-basic-card-shadow: var(--tc-shadow-sm);
+    --bs-basic-card-padding-y: 1rem;
+    --bs-basic-card-padding-x: 1.25rem;
+    --bs-basic-card-gap: 0.875rem;
+    --bs-basic-card-icon-size: 2.5rem;
+    --bs-basic-card-icon-bg: var(--tc-surface-muted);
+    --bs-basic-card-icon-color: var(--tc-text-muted);
+    --bs-basic-card-icon-svg-size: 1.125rem;
+    --bs-basic-card-primary-color: var(--tc-text);
+    --bs-basic-card-primary-font-size: 1.0625rem;
+    --bs-basic-card-secondary-color: var(--tc-text-muted);
+    --bs-basic-card-secondary-font-size: 0.8125rem;
+    --bs-basic-card-skeleton-bg: var(--tc-surface-muted);
+    --bs-basic-card-skeleton-shimmer: rgba(255, 255, 255, 0.6);
+}
+
+// Wire Bootstrap card tokens to our component tokens so .card inherits correctly.
+.tc-basic-card {
+    --bs-card-bg: var(--bs-basic-card-bg);
+    --bs-card-border-color: var(--bs-basic-card-border-color);
+    --bs-card-box-shadow: var(--bs-basic-card-shadow);
+    --bs-card-border-radius: 0;
+    // Override card's spacer so .card-body padding follows our token.
+    --bs-card-spacer-y: var(--bs-basic-card-padding-y);
+    --bs-card-spacer-x: var(--bs-basic-card-padding-x);
+}
+
+.tc-basic-card-body {
+    // .card-body is a plain block here; opt into flex so the icon chip and the
+    // text block sit on one row and stay vertically centred against each other.
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--bs-basic-card-gap);
+}
+
+// Icon chip — slate muted surface, 1px hairline, square.
+.tc-basic-card-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-basic-card-icon-size);
+    height: var(--bs-basic-card-icon-size);
+    background: var(--bs-basic-card-icon-bg);
+    border: 1px solid var(--bs-basic-card-border-color);
+    border-radius: 0;
+    color: var(--bs-basic-card-icon-color);
+    flex-shrink: 0;
+}
+
+.tc-basic-card-icon-svg {
+    width: var(--bs-basic-card-icon-svg-size);
+    height: var(--bs-basic-card-icon-svg-size);
+    stroke: currentColor;
+    fill: none;
+}
+
+// Accent treatment (tc-colored-card / `color` attr): the icon chip carries a 12%
+// soft tint of --bs-basic-card-accent behind the full-accent glyph. This is not
+// decoration — the color categorises the metric. color-mix() gives the tint
+// without needing an alpha channel on the accent.
+.tc-basic-card--accent .tc-basic-card-icon {
+    background: color-mix(in srgb, var(--bs-basic-card-accent) 12%, var(--bs-basic-card-bg));
+    color: var(--bs-basic-card-accent);
+    border-color: transparent;
+}
+
+// Text block — flex column, primary above secondary.
+.tc-basic-card-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+}
+
+.tc-basic-card-primary {
+    display: block;
+    font-family: 'Inter', var(--bs-body-font-family);
+    font-size: var(--bs-basic-card-primary-font-size);
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--bs-basic-card-primary-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tc-basic-card-secondary {
+    display: block;
+    font-size: var(--bs-basic-card-secondary-font-size);
+    line-height: 1.4;
+    color: var(--bs-basic-card-secondary-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// ── Loading skeleton ──────────────────────────────────────────────────────────
+
+@keyframes tc-basic-card-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+%tc-basic-card-shimmer {
+    background: linear-gradient(
+        90deg,
+        var(--bs-basic-card-skeleton-bg) 25%,
+        var(--bs-basic-card-skeleton-shimmer) 50%,
+        var(--bs-basic-card-skeleton-bg) 75%
+    );
+    background-size: 200% 100%;
+    animation: tc-basic-card-shimmer 1.5s infinite linear;
+    border-radius: 0;
+}
+
+.tc-basic-card-icon--skeleton {
+    @extend %tc-basic-card-shimmer;
+    border-color: transparent;
+}
+
+.tc-basic-card-skeleton {
+    display: block;
+    height: 0.8125rem;
+    border-radius: 0;
+    @extend %tc-basic-card-shimmer;
+
+    // The skeleton bars live inside .tc-basic-card-text, which already spaces its
+    // children with `gap`; rely on that gap instead of an extra margin so the
+    // loading rhythm matches the rendered two-line text exactly.
+    &--primary {
+        width: 55%;
+    }
+
+    &--secondary {
+        width: 35%;
+    }
+}
+
+// Honour prefers-reduced-motion: freeze shimmer, keep static fill.
+@media (prefers-reduced-motion: reduce) {
+    .tc-basic-card-icon--skeleton,
+    .tc-basic-card-skeleton {
+        animation: none;
+        background: var(--bs-basic-card-skeleton-bg);
+    }
+}

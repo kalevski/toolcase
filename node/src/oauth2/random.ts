@@ -12,6 +12,9 @@ export function generatePKCE(method: 'S256' | 'plain' = 'S256'): PKCEPair {
 	if (method !== 'S256' && method !== 'plain') {
 		throw new Error(`unknown PKCE method: ${method}`)
 	}
+	if (method === 'plain') {
+		console.warn('generatePKCE: "plain" PKCE method is insecure — code_challenge equals code_verifier, providing no protection if the challenge is intercepted; use "S256" instead')
+	}
 	const codeVerifier = base64url(randomBytes(64))
 	if (method === 'plain') {
 		return { codeVerifier, codeChallenge: codeVerifier, method }

@@ -1,0 +1,74 @@
+// Dungeon › tc-pricing-card — gilded tier plaque / shop card.
+// Token-swaps the slate-blue literals (badge-color #fff, highlight-cap gradient,
+// highlight-shadow) that the foundation remap can't reach, then adds the panel
+// bevel + corner notches and display-caps on the tier name and badge.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Token swap on the host element (vars declared on tc-pricing-card) ──────
+    tc-pricing-card {
+        --bs-pricing-card-bg:                  var(--fg-panel-bg);
+        --bs-pricing-card-badge-bg:            var(--fg-gold);
+        // Override the hardcoded #fff literal — ink text on gold badge
+        --bs-pricing-card-badge-color:         var(--fg-ink);
+        // Replace the slate-blue gradient literal with a gold gradient
+        --bs-pricing-card-highlight-cap-bg:    var(--fg-gold-edge);
+        // Replace the slate rgba(30,41,59,...) glow with the dark panel shadow
+        --bs-pricing-card-highlight-shadow:    var(--fg-panel-shadow);
+        --bs-pricing-card-shadow:              var(--fg-panel-shadow);
+    }
+
+    // ── Structural: gilded bevel + corner notches on the card surface ─────────
+    .tc-pricing-card {
+        position: relative;
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // Top corner notches — signature gilded ornament (mirrors _panel.scss recipe)
+    .tc-pricing-card::before,
+    .tc-pricing-card::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+        z-index: 1;
+    }
+
+    .tc-pricing-card::before {
+        left: -1px;
+    }
+
+    .tc-pricing-card::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+
+    // The highlight variant's top-cap ::before sits above the notches layer;
+    // give it a higher z-index so the gold rule renders on top.
+    .tc-pricing-card--highlight::before {
+        // Override notch content for the cap rule on the highlighted card.
+        // The highlight cap is rendered by the modifier's ::before in the base
+        // styles — that element has no z-index so we just ensure stacking is
+        // correct by leaving z-index at auto (inherited).
+        z-index: 2;
+    }
+
+    // ── Display caps: tier name reads as a Cinzel inscription ────────────────
+    .tc-pricing-card-name {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 600;
+    }
+
+    // Badge already uppercases + tracks in the base; switch to display font
+    // so it reads as a stamped label rather than mono code.
+    .tc-pricing-card-badge {
+        font-family: var(--fg-display);
+    }
+}

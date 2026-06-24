@@ -1,0 +1,12 @@
+// Dungeon › tc-textarea — no-op.
+// The base _textarea.scss only sets min-height (geometry) and resize: vertical
+// (behaviour) — zero colour/border/font declarations exist to repoint.
+// All visual chrome (wood surface, gold border, parch text, gold focus ring,
+// square corners) flows through .form-control via --bs-* / --tc-* tokens that
+// the foundation already remaps. No tc-textarea-specific override is needed.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // Foundation + shared .form-control reskin cover the entire look.
+    // No textarea-specific structural rule is required.
+}

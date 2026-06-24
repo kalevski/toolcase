@@ -1,0 +1,142 @@
+// tc-action-row-list — vertical list of action rows, each with a title,
+// optional description, and a CTA button on the right. Cosmetics flow through
+// --bs-action-row-list-* custom properties so themes re-skin via vars alone.
+//
+// Structure: .tc-action-row-list (outer hairline frame, from .list-group) →
+// .tc-action-row items (fainter slate-100 inner separators) → left
+// .tc-action-row-info / right .tc-action-row-cta (btn-sm + trailing icon).
+
+@use '../foundation/tokens' as *;
+
+.tc-action-row-list {
+    // ── Component tokens ──────────────────────────────────────────────────
+    --bs-action-row-list-border-color: var(--tc-border);
+    --bs-action-row-list-bg: var(--tc-surface);
+    --bs-action-row-list-separator-color: #{$slate-100};
+    --bs-action-row-list-hover-bg: var(--tc-surface-hover);
+    --bs-action-row-list-title-color: var(--tc-text);
+    --bs-action-row-list-desc-color: var(--tc-text-muted);
+    --bs-action-row-list-desc-font-size: 12.5px;
+    --bs-action-row-list-padding-x: 0.8125rem;
+    --bs-action-row-list-padding-y: 0.75rem;
+
+    // Pull the Bootstrap list-group vars to match, so _list-group.scss paint
+    // reads from our tokens rather than its own defaults.
+    --bs-list-group-border-color: var(--bs-action-row-list-border-color);
+    --bs-list-group-bg: var(--bs-action-row-list-bg);
+    --bs-list-group-border-radius: 0;
+
+    display: flex;
+    flex-direction: column;
+    padding-left: 0;
+    margin: 0;
+    // Outer frame: the stronger --tc-border hairline.
+    border: 1px solid var(--bs-action-row-list-border-color);
+    border-radius: 0;
+    background-color: var(--bs-action-row-list-bg);
+}
+
+// ── Row ────────────────────────────────────────────────────────────────────
+
+.tc-action-row {
+    // Full reset of .list-group-item paint — we own all styling here.
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: var(--bs-action-row-list-padding-y) var(--bs-action-row-list-padding-x);
+    background-color: var(--bs-action-row-list-bg);
+    color: var(--bs-action-row-list-title-color);
+    border: 0;
+    // Inner separators are fainter than the outer frame (slate-100 vs --tc-border).
+    border-bottom: 1px solid var(--bs-action-row-list-separator-color);
+    border-radius: 0;
+    transition: background-color var(--tc-transition-fast);
+
+    &:last-child {
+        border-bottom: 0;
+    }
+
+    &:hover {
+        background-color: var(--bs-action-row-list-hover-bg);
+    }
+
+    // Disabled row: opacity + pointer-events, never color-only.
+    &[data-disabled='true'] {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+}
+
+// ── Left: title + description ──────────────────────────────────────────────
+
+.tc-action-row-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.tc-action-row-title {
+    font-family: var(--tc-font-sans);
+    font-size: 0.925rem;
+    font-weight: 500;
+    color: var(--bs-action-row-list-title-color);
+    line-height: 1.5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tc-action-row-desc {
+    font-size: var(--bs-action-row-list-desc-font-size);
+    color: var(--bs-action-row-list-desc-color);
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+// ── Right: CTA button ──────────────────────────────────────────────────────
+
+.tc-action-row-cta {
+    flex-shrink: 0;
+    // Pin border-radius: foreign Bootstrap sheets cannot override it.
+    border-radius: 0;
+
+    // Solid variants: hover = 1px lift only (inherited from .btn in _button.scss).
+    // Outline variants: hover washes in the soft -bg tint, never flips solid
+    // (also inherited — see _button.scss btn-outline-* overrides).
+    // No overrides needed here; the state ladder is carried by .btn / .btn-outline-*.
+}
+
+// Leading action icon (action.icon).
+.tc-action-row-icon {
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.125em;
+    flex-shrink: 0;
+}
+
+// Trailing icon (chevron or custom lucide).
+.tc-action-row-trailing-icon {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+
+    svg {
+        width: 0.875em;
+        height: 0.875em;
+    }
+}
+
+// ── Touch targets ──────────────────────────────────────────────────────────
+
+// WCAG 2.5.5 — 44px minimum tappable area on coarse-pointer (touch) devices.
+@media (pointer: coarse) {
+    .tc-action-row-cta {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}

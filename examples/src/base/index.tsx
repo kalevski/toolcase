@@ -14,14 +14,37 @@ import ColorDemo from './ColorDemo'
 import UtilitiesDemo from './UtilitiesDemo'
 import PackingDemo from './PackingDemo'
 import WeightedRandomDemo from './WeightedRandomDemo'
+import RandomDemo from './RandomDemo'
 import DijkstraDemo from './DijkstraDemo'
 import AStarDemo from './AStarDemo'
+import AsyncDemo from './AsyncDemo'
+import RingBufferDemo from './RingBufferDemo'
+import UlidDemo from './UlidDemo'
+import StackDemo from './StackDemo'
+import DequeDemo from './DequeDemo'
+import DisjointSetDemo from './DisjointSetDemo'
+import TrieDemo from './TrieDemo'
+import SpatialDemo from './SpatialDemo'
+import BiMapDemo from './BiMapDemo'
+import MultiMapDemo from './MultiMapDemo'
+import Vec2Demo from './Vec2Demo'
+import MathDemo from './MathDemo'
+import EasingDemo from './EasingDemo'
+import FormattingDemo from './FormattingDemo'
+import StringHelpersDemo from './StringHelpersDemo'
+import ResultOptionDemo from './ResultOptionDemo'
+import BloomFilterDemo from './BloomFilterDemo'
+import TokenBucketDemo from './TokenBucketDemo'
+import StopwatchDemo from './StopwatchDemo'
+import TickerDemo from './TickerDemo'
+import DiffPatchDemo from './DiffPatchDemo'
 
 export type BaseCategory =
     | 'Events & State'
     | 'Data Structures'
     | 'Generation & Validation'
     | 'Utilities & Colors'
+    | 'Async'
 
 export type BaseExampleDef = {
     key: string
@@ -35,6 +58,7 @@ export const baseCategories: BaseCategory[] = [
     'Data Structures',
     'Generation & Validation',
     'Utilities & Colors',
+    'Async',
 ]
 
 export const baseExamples: BaseExampleDef[] = [
@@ -47,7 +71,18 @@ export const baseExamples: BaseExampleDef[] = [
     { key: 'vector-clock', label: 'VectorClock', category: 'Data Structures', element: <VectorClockDemo /> },
     { key: 'adjacency-matrix', label: 'AdjacencyMatrix', category: 'Data Structures', element: <AdjacencyMatrixDemo /> },
     { key: 'object-pool', label: 'ObjectPool', category: 'Data Structures', element: <ObjectPoolDemo /> },
+    { key: 'ring-buffer', label: 'RingBuffer', category: 'Data Structures', element: <RingBufferDemo /> },
+    { key: 'stack', label: 'Stack', category: 'Data Structures', element: <StackDemo /> },
+    { key: 'deque', label: 'Deque', category: 'Data Structures', element: <DequeDemo /> },
+    { key: 'disjoint-set', label: 'DisjointSet', category: 'Data Structures', element: <DisjointSetDemo /> },
+    { key: 'trie', label: 'Trie', category: 'Data Structures', element: <TrieDemo /> },
+    { key: 'bimap', label: 'BiMap', category: 'Data Structures', element: <BiMapDemo /> },
+    { key: 'bloom-filter', label: 'BloomFilter', category: 'Data Structures', element: <BloomFilterDemo /> },
+    { key: 'multimap', label: 'MultiMap', category: 'Data Structures', element: <MultiMapDemo /> },
+    { key: 'vec2', label: 'Vec2', category: 'Data Structures', element: <Vec2Demo /> },
+    { key: 'spatial', label: 'Spatial', category: 'Data Structures', element: <SpatialDemo /> },
     { key: 'weighted-random', label: 'WeightedRandom', category: 'Data Structures', element: <WeightedRandomDemo /> },
+    { key: 'random', label: 'Random', category: 'Data Structures', element: <RandomDemo /> },
     { key: 'dijkstra', label: 'Dijkstra', category: 'Data Structures', element: <DijkstraDemo /> },
     { key: 'astar', label: 'AStar', category: 'Data Structures', element: <AStarDemo /> },
 
@@ -56,6 +91,19 @@ export const baseExamples: BaseExampleDef[] = [
     { key: 'retry', label: 'retry', category: 'Generation & Validation', element: <RetryDemo /> },
     { key: 'packing', label: 'Packing', category: 'Generation & Validation', element: <PackingDemo /> },
 
+    { key: 'ulid', label: 'ulid', category: 'Utilities & Colors', element: <UlidDemo /> },
     { key: 'utilities', label: 'Utility Functions', category: 'Utilities & Colors', element: <UtilitiesDemo /> },
+    { key: 'formatting', label: 'Formatting Helpers', category: 'Utilities & Colors', element: <FormattingDemo /> },
+    { key: 'string-helpers', label: 'String Helpers', category: 'Utilities & Colors', element: <StringHelpersDemo /> },
+    { key: 'math', label: 'Math Utilities', category: 'Utilities & Colors', element: <MathDemo /> },
+    { key: 'easing', label: 'Easing Functions', category: 'Utilities & Colors', element: <EasingDemo /> },
     { key: 'color', label: 'Color', category: 'Utilities & Colors', element: <ColorDemo /> },
+
+    { key: 'async', label: 'Async', category: 'Async', element: <AsyncDemo /> },
+
+    { key: 'result-option', label: 'Result / Option', category: 'Utilities & Colors', element: <ResultOptionDemo /> },
+    { key: 'token-bucket', label: 'TokenBucket', category: 'Utilities & Colors', element: <TokenBucketDemo /> },
+    { key: 'stopwatch', label: 'Stopwatch', category: 'Utilities & Colors', element: <StopwatchDemo /> },
+    { key: 'ticker', label: 'Ticker', category: 'Utilities & Colors', element: <TickerDemo /> },
+    { key: 'diff-patch', label: 'diff / patch', category: 'Utilities & Colors', element: <DiffPatchDemo /> },
 ]

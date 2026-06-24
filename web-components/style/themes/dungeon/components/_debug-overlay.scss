@@ -1,0 +1,55 @@
+// Dungeon › tc-debug-overlay — gilded mono stat panel: dark ink gradient fill,
+// gold border, inset bevel, display-caps labels, mono values, fantasy FPS status
+// hues. Token swap recolours text; the panel rule adds the gradient + bevel the
+// base draws flat, and the FPS vars repoint to the fantasy element colours.
+//
+// Design source:  game-components/style/components/_debug-overlay.scss
+// Target classes: web-components/style/components/_debug-overlay.scss
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-debug-overlay {
+        --bs-debug-overlay-bg: transparent;
+        --bs-debug-overlay-border: 1px solid var(--fg-gold-deep);
+        --bs-debug-overlay-label-color: var(--fg-parch-dim);
+        --bs-debug-overlay-value-color: var(--fg-parch);
+
+        // Fantasy FPS status hues (game uses stamina / gold / blood).
+        --bs-debug-overlay-fps-good-color: var(--fg-stamina-bright);
+        --bs-debug-overlay-fps-warning-color: var(--fg-gold-bright);
+        --bs-debug-overlay-fps-danger-color: var(--fg-blood-bright);
+    }
+
+    // Panel = dark ink gradient + gold border + double-ring inset bevel stack.
+    // Improvement 1: second inset ring uses --fg-gold-shadow for a quiet gilded
+    // double-bevel, consistent with the kit's other framed dungeon surfaces.
+    .tc-debug-overlay-panel {
+        background: linear-gradient(180deg, rgba(20, 12, 8, 0.92), rgba(10, 6, 4, 0.92));
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 0 0 2px var(--fg-gold-shadow),
+            inset 0 1px 0 rgba(232, 200, 120, 0.12),
+            0 4px 12px rgba(0, 0, 0, 0.6);
+    }
+
+    // Improvement 3: hairline separator under the first (FPS) row echoes --fg-rule
+    // voice used elsewhere in the kit without requiring a full gold-gradient rule.
+    .tc-debug-overlay-row:first-child {
+        border-bottom: 1px solid rgba(201, 169, 97, 0.2);
+        padding-bottom: 2px;
+        margin-bottom: 2px;
+    }
+
+    // Labels = display caps; values + rows stay mono.
+    // Improvement 4: bump label colour from --fg-parch-dim to --fg-parch-3 for
+    // better legibility at small sizes (e.g. "MEM 257 MB" row on dark gradient).
+    .tc-debug-overlay-label {
+        font-family: var(--fg-display);
+        letter-spacing: 0.16em;
+        color: var(--fg-parch-3);
+    }
+    .tc-debug-overlay-row,
+    .tc-debug-overlay-value {
+        font-family: var(--fg-mono);
+    }
+}

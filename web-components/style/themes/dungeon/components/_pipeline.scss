@@ -1,0 +1,39 @@
+// Dungeon › tc-pipeline — quest-step / objective tracker.
+// Foundation already remaps connector → gold-deep, default marker border/color →
+// gold/parch, and state accents via --tc-success / --tc-app-accent.
+// This override sharpens the live accent, applies display caps to step titles,
+// mono numerals to markers, and replaces the flat #fff-on-accent marker fill
+// with a gold-gradient bevel so active/complete steps read as gilded medallions.
+// Circular markers and the live pulse ring are SANCTIONED — do NOT square them.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // 1. Token swap — sharpen the live accent to bright gold.
+    tc-pipeline {
+        --bs-pipeline-live-color: var(--fg-gold-bright);
+        --bs-pipeline-complete-color: var(--fg-stamina);
+    }
+
+    // 2. Display caps on step titles — quest-objective label treatment.
+    .tc-pipeline-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+    }
+
+    // 3. Mono numerals inside the circular marker.
+    .tc-pipeline-marker-num {
+        font-family: var(--fg-mono);
+    }
+
+    // 4. Gold-gradient bevel on complete and live markers.
+    //    Overrides the flat background + the hardcoded color: #fff with ink-on-gold.
+    .tc-pipeline-step--complete .tc-pipeline-marker,
+    .tc-pipeline-step--live .tc-pipeline-marker {
+        background: var(--fg-gold-edge);
+        color: var(--fg-ink);
+        box-shadow: var(--fg-bevel-top);
+    }
+}

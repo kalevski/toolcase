@@ -1,0 +1,11 @@
+// Dungeon › tc-select-row — labeled dropdown setting row.
+// Foundation + tc-* remap already handles bg/text/border; only the two
+// hardcoded slate focus vars need repointing here.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-select-row {
+        --bs-select-row-focus-border-color: var(--fg-gold);
+        --bs-select-row-focus-ring: 0 0 0 0.2rem rgba(240, 210, 122, 0.35);
+    }
+}

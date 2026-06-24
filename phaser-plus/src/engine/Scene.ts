@@ -13,6 +13,12 @@ export default class Scene extends PhaserScene {
 
     engine!: Engine
 
+    /**
+     * Game-global service registry. Its lifetime matches the `Game` instance,
+     * not the Scene — services are shared across all scenes and persist through
+     * scene restarts. Call `services.disposeAll()` only when tearing down the
+     * entire game, not on scene shutdown.
+     */
     services!: ServiceRegistry
 
     features!: FeatureRegistry
@@ -24,6 +30,8 @@ export default class Scene extends PhaserScene {
     protected logger!: Logger
 
     private layerSortFlag: boolean = false
+
+    private destroyed: boolean = false
 
     /** @protected */
     onInit(): void {}
@@ -73,7 +81,9 @@ export default class Scene extends PhaserScene {
     protected beforeInit(): void {}
 
     init(): void {
+        this.destroyed = false
         this.engine = this.initializeEngine()
+        this.events.once(Scenes.Events.SHUTDOWN, this.doDestroy, this)
         this.events.once(Scenes.Events.DESTROY, this.doDestroy, this)
         this.logger = this.engine.getLogger(`scene=${this.scene.key}`)
         this.services = this.engine.services
@@ -122,6 +132,10 @@ export default class Scene extends PhaserScene {
     }
 
     private doDestroy(): void {
+        if (this.destroyed) return
+        this.destroyed = true
+        this.events.off(Scenes.Events.SHUTDOWN, this.doDestroy, this)
+        this.events.off(Scenes.Events.DESTROY, this.doDestroy, this)
         this.features.off(LAYER_DEPTH_UPDATE, this.onLayerDepthUpdate, this)
         this.onDestroy()
         this.features.destroyAll()

@@ -1,0 +1,120 @@
+// tc-offcanvas — sliding panel on a 1px edge. Class protocol
+// (.showing/.show/.hiding + .offcanvas-backdrop) driven by the internal plugin.
+
+.offcanvas {
+    --bs-offcanvas-zindex: 1045;
+    --bs-offcanvas-width: 400px;
+    --bs-offcanvas-height: 30vh;
+    --bs-offcanvas-padding-x: 1rem;
+    --bs-offcanvas-padding-y: 1rem;
+    --bs-offcanvas-color: var(--bs-body-color);
+    --bs-offcanvas-bg: var(--tc-surface);
+    --bs-offcanvas-border-width: var(--bs-border-width);
+    --bs-offcanvas-border-color: var(--tc-border);
+    --bs-offcanvas-box-shadow: var(--tc-shadow-lg);
+    --bs-offcanvas-transition: transform 0.3s ease-in-out;
+    --bs-offcanvas-title-line-height: 1.4;
+    --bs-offcanvas-header-bg: transparent;
+
+    position: fixed;
+    bottom: 0;
+    z-index: var(--bs-offcanvas-zindex);
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+    color: var(--bs-offcanvas-color);
+    visibility: hidden;
+    background-color: var(--bs-offcanvas-bg);
+    background-clip: padding-box;
+    outline: 0;
+    box-shadow: var(--bs-offcanvas-box-shadow);
+    transition: var(--bs-offcanvas-transition);
+
+    &.showing,
+    &.hiding,
+    &.show {
+        visibility: visible;
+    }
+
+    &.showing,
+    &.show:not(.hiding) {
+        transform: none;
+    }
+}
+
+.offcanvas-start {
+    top: 0;
+    left: 0;
+    width: var(--bs-offcanvas-width);
+    border-right: var(--bs-offcanvas-border-width) solid var(--bs-offcanvas-border-color);
+    transform: translateX(-100%);
+}
+
+.offcanvas-end {
+    top: 0;
+    right: 0;
+    width: var(--bs-offcanvas-width);
+    border-left: var(--bs-offcanvas-border-width) solid var(--bs-offcanvas-border-color);
+    transform: translateX(100%);
+}
+
+.offcanvas-top {
+    top: 0;
+    right: 0;
+    left: 0;
+    height: var(--bs-offcanvas-height);
+    border-bottom: var(--bs-offcanvas-border-width) solid var(--bs-offcanvas-border-color);
+    transform: translateY(-100%);
+}
+
+.offcanvas-bottom {
+    right: 0;
+    left: 0;
+    height: var(--bs-offcanvas-height);
+    border-top: var(--bs-offcanvas-border-width) solid var(--bs-offcanvas-border-color);
+    transform: translateY(100%);
+}
+
+.offcanvas-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8125rem var(--bs-offcanvas-padding-x);
+    background: var(--bs-offcanvas-header-bg);
+    border-bottom: var(--bs-border-width) solid var(--tc-border);
+}
+
+.offcanvas-title {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: var(--bs-offcanvas-title-line-height);
+}
+
+.offcanvas-body {
+    flex-grow: 1;
+    padding: var(--bs-offcanvas-padding-y) var(--bs-offcanvas-padding-x);
+    overflow-y: auto;
+}
+
+.offcanvas-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: calc(var(--bs-offcanvas-zindex) - 5);
+    width: 100vw;
+    height: 100vh;
+    background-color: #0f172a;
+
+    &.fade {
+        transition: opacity 0.15s linear;
+    }
+
+    &:not(.show) {
+        opacity: 0;
+    }
+
+    &.show {
+        opacity: 0.5;
+    }
+}

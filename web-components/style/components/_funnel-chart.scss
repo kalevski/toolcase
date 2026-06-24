@@ -1,0 +1,232 @@
+// tc-funnel-chart — SVG funnel chart visualising a conversion flow: a vertical
+// stack of trapezoids that taper from the widest first step down, each labelled
+// with its stage name (Inter) and its percentage of the first step (JetBrains
+// Mono). Slate neutrals carry it: the chart frame sits on --tc-surface behind a
+// 1px hairline; segment fills default to a graduated slate ramp (kept in the
+// darker half so the white in-segment labels stay legible). A per-step `color`
+// from data is the one sanctioned override (status/data encoding). Hover is a
+// subtle highlight (opacity + a hairline outline), never a new hue; focus is a
+// visible 2px accent outline. The tooltip is overlay tier — ink surface, white
+// text, elevation shadow, a 3px colored left stripe per the toast/tooltip motif.
+// Sharp corners (radius 0) everywhere; trapezoids are geometric, not rounded.
+// Every cosmetic value flows through a --bs-funnel-chart-* custom property.
+
+tc-funnel-chart {
+    // segment ramp — graduated slate ink tones, all dark enough for white labels
+    --bs-funnel-chart-series-1: var(--tc-app-accent);
+    --bs-funnel-chart-series-2: var(--tc-slate-700);
+    --bs-funnel-chart-series-3: var(--tc-slate-600);
+    --bs-funnel-chart-series-4: var(--tc-slate-500);
+    --bs-funnel-chart-series-5: var(--tc-slate-700);
+    --bs-funnel-chart-series-6: var(--tc-slate-600);
+
+    --bs-funnel-chart-bg: var(--tc-surface);
+    --bs-funnel-chart-border: 1px solid var(--tc-border);
+    --bs-funnel-chart-title-color: var(--tc-text);
+    --bs-funnel-chart-subtitle-color: var(--tc-text-muted);
+
+    // in-segment labels — white on the dark slate fills
+    --bs-funnel-chart-label-color: #fff;
+    --bs-funnel-chart-label-size: 0.8125rem;
+    --bs-funnel-chart-percent-color: rgba(255, 255, 255, 0.85);
+    --bs-funnel-chart-percent-size: 0.6875rem;
+
+    // segment state ladder
+    --bs-funnel-chart-segment-opacity: 1;
+    --bs-funnel-chart-segment-hover-opacity: 0.85;
+    --bs-funnel-chart-hover-outline: rgba(255, 255, 255, 0.6);
+    --bs-funnel-chart-focus-ring: var(--tc-app-accent);
+
+    --bs-funnel-chart-tooltip-bg: var(--tc-ink);
+    --bs-funnel-chart-tooltip-color: #fff;
+    --bs-funnel-chart-tooltip-stripe-width: 3px;
+    --bs-funnel-chart-tooltip-shadow: var(--tc-shadow-md);
+
+    --bs-funnel-chart-skeleton-bg: var(--tc-surface-muted);
+
+    display: block;
+}
+
+.tc-funnel-chart__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    padding: 0.875rem 1rem;
+    background: var(--bs-funnel-chart-bg);
+    border: var(--bs-funnel-chart-border);
+    border-radius: 0;
+}
+
+// --- header ---
+.tc-funnel-chart__header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.tc-funnel-chart__title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--bs-funnel-chart-title-color);
+}
+
+.tc-funnel-chart__subtitle {
+    font-size: 0.8125rem;
+    line-height: 1.3;
+    color: var(--bs-funnel-chart-subtitle-color);
+}
+
+// --- plot ---
+.tc-funnel-chart__plot {
+    position: relative;
+}
+
+.tc-funnel-chart__svg {
+    display: block;
+    width: 100%;
+    overflow: visible;
+    touch-action: none;
+}
+
+// --- segments + state ladder ---
+.tc-funnel-chart__segment {
+    cursor: pointer;
+    outline: none;
+}
+
+.tc-funnel-chart__hit {
+    fill: transparent;
+}
+
+.tc-funnel-chart__shape {
+    fill: var(--tc-funnel-color, var(--bs-funnel-chart-series-1));
+    fill-opacity: var(--bs-funnel-chart-segment-opacity);
+    transition: fill-opacity 0.12s ease;
+}
+
+// hover = a subtle brighten + a hairline outline over the trapezoid (no new hue)
+.tc-funnel-chart__segment:hover .tc-funnel-chart__shape {
+    fill-opacity: var(--bs-funnel-chart-segment-hover-opacity);
+    stroke: var(--bs-funnel-chart-hover-outline);
+    stroke-width: 1;
+    paint-order: stroke;
+}
+
+// in-segment text labels
+.tc-funnel-chart__label {
+    fill: var(--bs-funnel-chart-label-color);
+    font-family: var(--tc-font-sans, 'Inter', sans-serif);
+    font-size: var(--bs-funnel-chart-label-size);
+    font-weight: 500;
+    pointer-events: none;
+}
+
+.tc-funnel-chart__percent {
+    fill: var(--bs-funnel-chart-percent-color);
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-funnel-chart-percent-size);
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+}
+
+// clickable segments show a visible focus ring on keyboard focus. SVG `outline`
+// renders inconsistently, so paint the ring as a stroke on the shape plus an
+// outline fallback on the hit rect for UAs that honour it.
+.tc-funnel-chart__segment:focus-visible {
+    outline: none;
+}
+
+.tc-funnel-chart__segment:focus-visible .tc-funnel-chart__shape {
+    stroke: var(--bs-funnel-chart-focus-ring);
+    stroke-width: 2;
+    paint-order: stroke;
+}
+
+.tc-funnel-chart__segment:focus-visible .tc-funnel-chart__hit {
+    outline: 2px solid var(--bs-funnel-chart-focus-ring);
+    outline-offset: -1px;
+}
+
+// --- empty ---
+.tc-funnel-chart__empty {
+    padding: 1.5rem 0;
+    font-size: 0.8125rem;
+    color: var(--tc-text-muted);
+    text-align: center;
+}
+
+// --- tooltip (overlay tier) ---
+.tc-funnel-chart__tooltip {
+    position: absolute;
+    z-index: var(--tc-z-tooltip, 1070);
+    transform: translate(-50%, calc(-100% - 10px));
+    display: flex;
+    flex-direction: column;
+    gap: 0.0625rem;
+    min-width: 0;
+    padding: 0.3125rem 0.5rem;
+    background: var(--bs-funnel-chart-tooltip-bg);
+    color: var(--bs-funnel-chart-tooltip-color);
+    border-radius: 0;
+    border-left: var(--bs-funnel-chart-tooltip-stripe-width) solid var(--tc-funnel-color, var(--tc-accent));
+    box-shadow: var(--bs-funnel-chart-tooltip-shadow);
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.tc-funnel-chart__tooltip[hidden] {
+    display: none;
+}
+
+.tc-funnel-chart__tooltip-name {
+    font-family: var(--tc-font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.75;
+}
+
+.tc-funnel-chart__tooltip-value {
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+// --- loading skeleton (slate neutrals only) ---
+.tc-funnel-chart__skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--bs-funnel-chart-skeleton-bg) 25%,
+        var(--tc-surface-hover) 37%,
+        var(--bs-funnel-chart-skeleton-bg) 63%
+    );
+    background-size: 200% 100%;
+    animation: tc-funnel-chart-shimmer 1.4s ease infinite;
+}
+
+.tc-funnel-chart__skeleton--title {
+    width: 40%;
+    height: 0.95rem;
+}
+
+.tc-funnel-chart__skeleton--plot {
+    width: 100%;
+}
+
+@keyframes tc-funnel-chart-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-funnel-chart__skeleton {
+        animation: none;
+        background: var(--bs-funnel-chart-skeleton-bg);
+    }
+
+    .tc-funnel-chart__shape,
+    .tc-funnel-chart__tooltip {
+        transition: none;
+    }
+}

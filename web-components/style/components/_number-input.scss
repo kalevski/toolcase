@@ -1,0 +1,200 @@
+// tc-number-input — grouped numeric field with prefix/suffix addons and
+// stacked chevron steppers. All cosmetic values flow through --bs-number-input-*
+// custom properties backed by --tc-* tokens.
+
+tc-number-input {
+    // Override defaults
+    --bs-number-input-border-color: var(--tc-border-strong);
+    --bs-number-input-bg: var(--tc-surface);
+    --bs-number-input-color: var(--tc-text);
+    --bs-number-input-addon-bg: var(--tc-surface-muted);
+    --bs-number-input-addon-color: var(--tc-text-muted);
+    --bs-number-input-stepper-bg: var(--tc-surface);
+    --bs-number-input-stepper-hover-bg: var(--tc-surface-muted);
+    --bs-number-input-stepper-disabled-opacity: 0.38;
+    --bs-number-input-error-color: var(--tc-danger);
+    --bs-number-input-error-border-color: var(--tc-danger);
+    --bs-number-input-focus-ring: var(--tc-focus-ring);
+}
+
+// ── Label ──────────────────────────────────────────────────────────────────
+
+.tc-number-input__label {
+    display: inline-block;
+    margin-bottom: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--tc-text);
+}
+
+// ── Group row ──────────────────────────────────────────────────────────────
+// One outer frame (--bs-number-input-border-color) with 1 px internal
+// separators between adjacent parts. No double borders.
+
+.tc-number-input__group {
+    position: relative;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    width: 100%;
+    // Outer frame
+    border: 1px solid var(--bs-number-input-border-color);
+    border-radius: 0;
+
+    // Error state overrides the outer frame color
+    &.tc-number-input__group--error {
+        border-color: var(--bs-number-input-error-border-color);
+
+        .tc-number-input__input:focus {
+            box-shadow: 0 0 0 0.2rem rgba(239, 68, 68, 0.15);
+        }
+    }
+
+    // Internal separators — 1 px between every sibling
+    > * + * {
+        border-left: 1px solid var(--bs-number-input-border-color);
+    }
+
+    // Remove the outer frame from child elements since the group owns it
+    .tc-number-input__addon,
+    .tc-number-input__input,
+    .tc-number-input__stepper {
+        border: 0;
+    }
+}
+
+// ── Addons (prefix / suffix) ────────────────────────────────────────────────
+
+.tc-number-input__addon {
+    display: flex;
+    align-items: center;
+    padding: 0 0.75rem;
+    font-family: var(--tc-font-mono);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--bs-number-input-addon-color);
+    white-space: nowrap;
+    background-color: var(--bs-number-input-addon-bg);
+    flex-shrink: 0;
+}
+
+// ── Input ──────────────────────────────────────────────────────────────────
+
+.tc-number-input__input {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 0.5rem 0.75rem;
+    font-family: var(--tc-font-mono);
+    font-size: 0.925rem;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--bs-number-input-color);
+    background-color: var(--bs-number-input-bg);
+    border-radius: 0;
+    appearance: none;
+    border: 0;
+    outline: 0;
+    width: 100%;
+
+    // No spinner in browsers
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+        appearance: none;
+        margin: 0;
+    }
+
+    &:focus {
+        z-index: 3;
+        box-shadow: var(--bs-number-input-focus-ring);
+        outline: 0;
+    }
+
+    &[aria-invalid='true'] {
+        color: var(--bs-number-input-error-color);
+    }
+
+    &::placeholder {
+        color: var(--tc-text-faint);
+        opacity: 1;
+    }
+}
+
+// ── Stepper (stacked up/down) ───────────────────────────────────────────────
+
+.tc-number-input__stepper {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    width: 2rem;
+
+    // Internal hairline between the two stacked buttons
+    .tc-number-input__step-btn + .tc-number-input__step-btn {
+        border-top: 1px solid var(--bs-number-input-border-color);
+    }
+}
+
+.tc-number-input__step-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 50%;
+    padding: 0;
+    background-color: var(--bs-number-input-stepper-bg);
+    border: 0;
+    border-radius: 0;
+    cursor: pointer;
+    color: var(--tc-text-muted);
+    // Minimum 44 px coarse target on the whole stepper column
+    min-height: 0;
+
+    svg {
+        width: 0.875rem;
+        height: 0.875rem;
+        pointer-events: none;
+    }
+
+    &:hover:not([disabled]) {
+        background-color: var(--bs-number-input-stepper-hover-bg);
+        color: var(--tc-text);
+
+        @media (prefers-reduced-motion: no-preference) {
+            transition: background-color var(--tc-transition-fast), color var(--tc-transition-fast);
+        }
+    }
+
+    &[disabled],
+    &[aria-disabled='true'] {
+        opacity: var(--bs-number-input-stepper-disabled-opacity);
+        pointer-events: none;
+        cursor: not-allowed;
+    }
+}
+
+// 44 px coarse touch targets
+@media (pointer: coarse) {
+    .tc-number-input__group {
+        min-height: 2.75rem;
+    }
+
+    .tc-number-input__stepper {
+        min-width: 2.75rem;
+    }
+}
+
+// ── Error message ───────────────────────────────────────────────────────────
+
+.tc-number-input__error {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+    color: var(--bs-number-input-error-color);
+}
+
+// ── Reduced motion ──────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-number-input__step-btn {
+        transition: none;
+    }
+}

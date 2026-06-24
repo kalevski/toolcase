@@ -1,0 +1,243 @@
+// tc-plugin-grid — responsive grid of plugin cards.
+// Cards sit on --tc-surface with a 1px --tc-border frame and --tc-shadow-sm at rest.
+// Hover lifts 1px (translateY(-1px)) to --tc-shadow-hover (standard card motif).
+// Sharp corners (border-radius: 0) everywhere. Slate neutrals throughout.
+// Install commands in JetBrains Mono on --tc-surface-muted. No decorative color.
+// Responsive: 1 column → 2 columns (sm) → target column count (md/lg).
+// Honour prefers-reduced-motion.
+
+@use '../foundation/tokens' as *;
+
+tc-plugin-grid {
+    --bs-plugin-grid-gap: 1rem;
+    --bs-plugin-grid-card-bg: var(--tc-surface);
+    --bs-plugin-grid-card-border: 1px solid var(--tc-border);
+    --bs-plugin-grid-card-shadow: var(--tc-shadow-sm);
+    --bs-plugin-grid-card-shadow-hover: var(--tc-shadow-hover);
+    --bs-plugin-grid-card-padding: 1.25rem;
+    --bs-plugin-grid-header-color: var(--tc-text);
+    --bs-plugin-grid-name-color: var(--tc-text);
+    --bs-plugin-grid-name-font-size: 0.9375rem;
+    --bs-plugin-grid-name-font-weight: 600;
+    --bs-plugin-grid-desc-color: var(--tc-text-muted);
+    --bs-plugin-grid-desc-font-size: 0.8125rem;
+    --bs-plugin-grid-install-bg: var(--tc-surface-muted);
+    --bs-plugin-grid-install-color: var(--tc-text);
+    --bs-plugin-grid-install-font-size: 0.75rem;
+    --bs-plugin-grid-downloads-color: var(--tc-text-faint);
+    --bs-plugin-grid-downloads-font-size: 0.75rem;
+    --bs-plugin-grid-logo-size: 2rem;
+    --bs-plugin-grid-hover-translate: -1px;
+    --bs-plugin-grid-copy-color: var(--tc-text-muted);
+}
+
+// Optional section heading
+.tc-plugin-grid-header {
+    margin-bottom: 1rem;
+}
+
+.tc-plugin-grid-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--bs-plugin-grid-header-color);
+    margin: 0;
+}
+
+// Grid wrapper — 1 column mobile-first; column count via data-columns
+.tc-plugin-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--bs-plugin-grid-gap);
+
+    @include media-up(sm) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    // 2-column: stays at 2 above sm
+    &[data-columns='2'] {
+        @include media-up(sm) {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    // 3-column: 2 at sm, 3 at md
+    &[data-columns='3'] {
+        @include media-up(sm) {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        @include media-up(md) {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    // 4-column: 2 at sm, 4 at lg
+    &[data-columns='4'] {
+        @include media-up(sm) {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        @include media-up(lg) {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+}
+
+// Individual plugin card
+.tc-plugin-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: var(--bs-plugin-grid-card-padding);
+    background: var(--bs-plugin-grid-card-bg);
+    border: var(--bs-plugin-grid-card-border);
+    border-radius: 0;
+    box-shadow: var(--bs-plugin-grid-card-shadow);
+    transition:
+        box-shadow var(--tc-transition-fast),
+        transform var(--tc-transition-fast);
+
+    &:hover {
+        box-shadow: var(--bs-plugin-grid-card-shadow-hover);
+        transform: translateY(var(--bs-plugin-grid-hover-translate));
+    }
+}
+
+// Logo area — image or inline svg icon
+.tc-plugin-card-logo {
+    display: flex;
+    align-items: center;
+    width: var(--bs-plugin-grid-logo-size);
+    height: var(--bs-plugin-grid-logo-size);
+    flex-shrink: 0;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 0;
+    }
+
+    svg {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+// Plugin name
+.tc-plugin-card-name {
+    font-size: var(--bs-plugin-grid-name-font-size);
+    font-weight: var(--bs-plugin-grid-name-font-weight);
+    color: var(--bs-plugin-grid-name-color);
+    margin: 0;
+    line-height: 1.3;
+}
+
+// Plugin description
+.tc-plugin-card-desc {
+    font-size: var(--bs-plugin-grid-desc-font-size);
+    color: var(--bs-plugin-grid-desc-color);
+    margin: 0;
+    line-height: 1.5;
+    flex: 1 1 auto;
+}
+
+// Footer — install command + download count
+.tc-plugin-card-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: auto;
+}
+
+// Install command row — code chip + copy button
+.tc-plugin-card-install-row {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+// Install command — monospace chip on muted surface
+.tc-plugin-card-install {
+    display: block;
+    flex: 1 1 auto;
+    padding: 0.3rem 0.5rem;
+    font-family: var(--bs-font-monospace);
+    font-size: var(--bs-plugin-grid-install-font-size);
+    color: var(--bs-plugin-grid-install-color);
+    background: var(--bs-plugin-grid-install-bg);
+    border-radius: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+// Copy button — icon-only, no border, inherits sizing from icon
+.tc-plugin-card-copy {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    color: var(--bs-plugin-grid-copy-color);
+    line-height: 1;
+
+    svg {
+        width: 0.875rem;
+        height: 0.875rem;
+        stroke: currentColor;
+    }
+
+    &:hover {
+        color: var(--tc-text);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &:focus:not(:focus-visible) {
+        outline: none;
+    }
+}
+
+// Download count — faint, with inline icon
+.tc-plugin-card-downloads {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: var(--bs-plugin-grid-downloads-font-size);
+    color: var(--bs-plugin-grid-downloads-color);
+
+    svg {
+        width: 0.75rem;
+        height: 0.75rem;
+        flex-shrink: 0;
+        stroke: currentColor;
+    }
+}
+
+// 44px coarse touch targets on cards
+@media (pointer: coarse) {
+    .tc-plugin-card {
+        min-height: 2.75rem;
+    }
+}
+
+// Honour prefers-reduced-motion: disable hover lift
+@media (prefers-reduced-motion: reduce) {
+    .tc-plugin-card {
+        transition: box-shadow var(--tc-transition-fast);
+
+        &:hover {
+            transform: none;
+        }
+    }
+}

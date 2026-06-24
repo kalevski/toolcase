@@ -1,0 +1,43 @@
+// Dungeon › tc-quick-start — numbered questline walkthrough.
+// Token swap repoints marker bg to a gilded bead and code/output to ink-well
+// slots; structural rules add display caps on headings and inset bevel on
+// code/output blocks. Marker circle is sanctioned — kept as-is.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Token swap (host element carries all --bs-quick-start-* defaults) ────
+
+    tc-quick-start {
+        // Gold bead marker with ink numeral.
+        --bs-quick-start-marker-bg: var(--fg-gold-edge);
+        --bs-quick-start-marker-color: var(--fg-ink);
+
+        // Code block: deep ink-well slot.
+        --bs-quick-start-code-bg: var(--fg-slot-bg);
+    }
+
+    // ── Display caps — title and step headings read as quest/objective labels ──
+
+    .tc-quick-start-title,
+    .tc-quick-start-step-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 600;
+    }
+
+    // ── Recessed rune-panel well on code and output blocks ───────────────────
+
+    .tc-quick-start-code,
+    .tc-quick-start-output {
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.7);
+    }
+
+    // ── Beveled objective bead on the numbered marker ────────────────────────
+    // Marker border-radius: 50% is a sanctioned circle — do NOT override it.
+
+    .tc-quick-start-marker {
+        box-shadow: var(--fg-bevel-top), 0 1px 2px rgba(0, 0, 0, 0.6);
+    }
+}

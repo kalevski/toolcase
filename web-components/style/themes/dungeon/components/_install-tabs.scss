@@ -1,0 +1,45 @@
+// Dungeon › tc-install-tabs — ink code panel with parchment text + gold accents.
+// Critical fix: --tc-text-inverse remaps to --fg-ink (dark), making code unreadable
+// on the --tc-ink panel (dark-on-dark). Repoint to --fg-parch here.
+// Copy hover color shares the same ink-on-dark trap — fixed via class override.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token swaps on the host element ────────────────────────────────────────
+
+    tc-install-tabs {
+        // Critical: parchment code text on the ink panel (replaces dark-on-dark).
+        --bs-install-tabs-code-color: var(--fg-parch);
+
+        // Gold tint hover wash instead of the default white wash.
+        --bs-install-tabs-copy-hover-bg: rgba(201, 169, 97, 0.12);
+
+        // Stamina green "copied" tick replaces the hardcoded #99cc88.
+        --bs-install-tabs-copy-copied-color: var(--fg-stamina);
+    }
+
+    // ── Code panel — gilded top bevel ──────────────────────────────────────────
+
+    .tc-install-tabs-panel {
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // ── Tab labels — engraved display caps ─────────────────────────────────────
+
+    .tc-install-tabs-tab {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 600;
+    }
+
+    // ── Copy button hover — fix ink-on-dark color bug ─────────────────────────
+    // The base hardcodes color: var(--tc-text-inverse) on :hover; the foundation
+    // remaps --tc-text-inverse → --fg-ink, which is invisible on the dark panel.
+
+    .tc-install-tabs-copy {
+        &:hover {
+            color: var(--fg-gold-bright);
+        }
+    }
+}

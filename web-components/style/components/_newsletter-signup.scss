@@ -1,0 +1,286 @@
+// tc-newsletter-signup — email subscription form with status management and
+// optional privacy-policy link. Idle → submitting → success (or error).
+// All cosmetics flow through --bs-newsletter-signup-* backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+// ── Host-level custom property declarations ───────────────────────────────────
+
+tc-newsletter-signup {
+    --bs-newsletter-signup-bg: var(--tc-surface);
+    --bs-newsletter-signup-border: 1px solid var(--tc-border);
+    --bs-newsletter-signup-color: var(--tc-text);
+    --bs-newsletter-signup-muted-color: var(--tc-text-muted);
+    --bs-newsletter-signup-title-size: 1.25rem;
+    --bs-newsletter-signup-title-weight: 600;
+    --bs-newsletter-signup-input-bg: var(--tc-surface);
+    --bs-newsletter-signup-input-color: var(--tc-text);
+    --bs-newsletter-signup-input-border: var(--tc-border-strong);
+    --bs-newsletter-signup-input-focus-ring: var(--tc-focus-ring);
+    --bs-newsletter-signup-input-placeholder-color: var(--tc-text-faint);
+    --bs-newsletter-signup-submit-bg: var(--tc-app-accent-gradient);
+    --bs-newsletter-signup-submit-color: var(--tc-app-accent-contrast);
+    --bs-newsletter-signup-submit-border: var(--tc-app-accent);
+    --bs-newsletter-signup-error-color: var(--tc-danger);
+    --bs-newsletter-signup-error-bg: var(--tc-danger-bg, rgba(220, 38, 38, 0.07));
+    --bs-newsletter-signup-success-color: var(--tc-success);
+    --bs-newsletter-signup-success-bg: var(--tc-success-bg, rgba(22, 163, 74, 0.07));
+    --bs-newsletter-signup-success-border: var(--tc-success);
+    --bs-newsletter-signup-privacy-color: var(--tc-text-faint);
+    --bs-newsletter-signup-privacy-hover-color: var(--tc-text-muted);
+    --bs-newsletter-signup-padding: 1.5rem;
+    --bs-newsletter-signup-gap: 1rem;
+}
+
+// ── Outer panel ───────────────────────────────────────────────────────────────
+
+.tc-newsletter-signup {
+    background: var(--bs-newsletter-signup-bg);
+    border: var(--bs-newsletter-signup-border);
+    border-radius: 0;
+    color: var(--bs-newsletter-signup-color);
+}
+
+// ── Inner layout ──────────────────────────────────────────────────────────────
+
+.tc-newsletter-signup-inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-newsletter-signup-gap);
+    padding: var(--bs-newsletter-signup-padding);
+}
+
+// ── Title — Inter, weight ≤600 ────────────────────────────────────────────────
+
+.tc-newsletter-signup-title {
+    margin: 0;
+    font-family: var(--bs-font-sans-serif);
+    font-size: var(--bs-newsletter-signup-title-size);
+    font-weight: var(--bs-newsletter-signup-title-weight);
+    line-height: 1.3;
+    color: var(--bs-newsletter-signup-color);
+}
+
+// ── Description ───────────────────────────────────────────────────────────────
+
+.tc-newsletter-signup-description {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--bs-newsletter-signup-muted-color);
+}
+
+// ── Form layout ───────────────────────────────────────────────────────────────
+
+.tc-newsletter-signup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+}
+
+// ── Email input ───────────────────────────────────────────────────────────────
+
+.tc-newsletter-signup-input {
+    display: block;
+    width: 100%;
+    padding: 0.5625rem 0.875rem;
+    font-family: inherit;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--bs-newsletter-signup-input-color);
+    background-color: var(--bs-newsletter-signup-input-bg);
+    border: 1px solid var(--bs-newsletter-signup-input-border);
+    border-radius: 0;
+    outline: none;
+    transition: border-color var(--tc-transition-fast), box-shadow var(--tc-transition-fast);
+    -webkit-appearance: none;
+    appearance: none;
+
+    &::placeholder {
+        color: var(--bs-newsletter-signup-input-placeholder-color);
+    }
+
+    &:focus {
+        border-color: var(--tc-app-accent);
+        box-shadow: var(--bs-newsletter-signup-input-focus-ring);
+    }
+
+    &[aria-invalid='true'] {
+        border-color: var(--bs-newsletter-signup-error-color);
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    // 44px coarse touch target
+    @media (pointer: coarse) {
+        min-height: 44px;
+    }
+}
+
+// ── Submit button — primary ink-gradient, 1px hover lift ──────────────────────
+
+.tc-newsletter-signup-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.5rem 1.25rem;
+    font-family: inherit;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1.6;
+    color: var(--bs-newsletter-signup-submit-color);
+    background: var(--bs-newsletter-signup-submit-bg);
+    border: 1px solid var(--bs-newsletter-signup-submit-border);
+    border-radius: 0;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+        transform var(--tc-transition-fast),
+        box-shadow var(--tc-transition-fast);
+
+    &:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &:focus:not(:focus-visible) {
+        outline: none;
+    }
+
+    &:disabled {
+        opacity: 0.65;
+        pointer-events: none;
+        transform: none;
+    }
+
+    // 44px coarse touch target
+    @media (pointer: coarse) {
+        min-height: 44px;
+    }
+}
+
+// ── Spinner inside submit button ──────────────────────────────────────────────
+
+.tc-newsletter-signup-spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: tc-newsletter-signup-spin 0.7s linear infinite;
+
+    @media (prefers-reduced-motion: reduce) {
+        animation-duration: 2s;
+    }
+}
+
+@keyframes tc-newsletter-signup-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+// ── Validation error — danger status color only ───────────────────────────────
+
+.tc-newsletter-signup-error {
+    margin: 0;
+    padding: 0;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--bs-newsletter-signup-error-color);
+
+    &:empty {
+        display: none;
+    }
+}
+
+// ── Error state — left accent + soft tint ─────────────────────────────────────
+
+.tc-newsletter-signup-form:has(.tc-newsletter-signup-input[aria-invalid='true']) {
+    .tc-newsletter-signup-input {
+        background-color: var(--bs-newsletter-signup-error-bg);
+    }
+}
+
+// ── Privacy link ──────────────────────────────────────────────────────────────
+
+.tc-newsletter-signup-privacy {
+    display: inline;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: var(--bs-newsletter-signup-privacy-color);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+    transition: color var(--tc-transition-fast);
+
+    &:hover {
+        color: var(--bs-newsletter-signup-privacy-hover-color);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+}
+
+// ── Success state — check icon + soft success tint + left accent ──────────────
+
+.tc-newsletter-signup-success {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    padding: 0.875rem 1rem;
+    background: var(--bs-newsletter-signup-success-bg);
+    border-left: 3px solid var(--bs-newsletter-signup-success-border);
+    border-radius: 0;
+    outline: none;
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.tc-newsletter-signup-success-icon {
+    display: block;
+    color: var(--bs-newsletter-signup-success-color);
+
+    svg {
+        width: 1.5rem;
+        height: 1.5rem;
+        display: block;
+    }
+}
+
+.tc-newsletter-signup-success-message {
+    display: block;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--bs-newsletter-signup-success-color);
+}
+
+// ── Reduced motion ────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-newsletter-signup-input,
+    .tc-newsletter-signup-submit,
+    .tc-newsletter-signup-privacy {
+        transition: none;
+    }
+
+    .tc-newsletter-signup-submit:hover:not(:disabled) {
+        transform: none;
+        box-shadow: none;
+    }
+}

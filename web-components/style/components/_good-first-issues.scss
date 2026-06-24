@@ -1,0 +1,190 @@
+// tc-good-first-issues — bordered list-group of GitHub good-first-issue items.
+// All cosmetics flow through --bs-good-first-issues-* custom properties backed
+// by --tc-* tokens.
+
+tc-good-first-issues {
+    --bs-good-first-issues-border: var(--tc-border);
+    --bs-good-first-issues-bg: var(--tc-surface);
+    --bs-good-first-issues-separator: var(--tc-slate-100, #f1f5f9);
+    --bs-good-first-issues-row-bg: var(--tc-surface);
+    --bs-good-first-issues-row-hover-bg: var(--tc-surface-hover);
+    --bs-good-first-issues-header-color: var(--tc-text);
+    --bs-good-first-issues-link-color: var(--tc-text);
+    --bs-good-first-issues-link-hover-color: var(--tc-accent);
+    --bs-good-first-issues-repo-color: var(--tc-text-muted);
+    --bs-good-first-issues-meta-color: var(--tc-text-faint);
+    --bs-good-first-issues-chip-bg: var(--tc-surface-muted);
+    --bs-good-first-issues-chip-border: var(--tc-border);
+    --bs-good-first-issues-chip-color: var(--tc-text-muted);
+    --bs-good-first-issues-icon-size: 0.8125rem;
+}
+
+.tc-good-first-issues {
+    border: 1px solid var(--bs-good-first-issues-border);
+    border-radius: 0;
+    background: var(--bs-good-first-issues-bg);
+    overflow: hidden;
+}
+
+// ── Header ──────────────────────────────────────────────────────────────────
+
+.tc-good-first-issues-header {
+    padding: 0.625rem 0.875rem;
+    border-bottom: 1px solid var(--bs-good-first-issues-separator);
+}
+
+.tc-good-first-issues-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--bs-good-first-issues-header-color);
+}
+
+// ── List ────────────────────────────────────────────────────────────────────
+
+.tc-good-first-issues-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.tc-good-first-issues-item {
+    padding: 0.75rem 0.875rem;
+    background: var(--bs-good-first-issues-row-bg);
+    border-bottom: 1px solid var(--bs-good-first-issues-separator);
+    transition: background-color var(--tc-transition-fast, 0.15s ease);
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    &:hover {
+        background: var(--bs-good-first-issues-row-hover-bg);
+    }
+}
+
+// Row head: title link + repo slug
+
+.tc-good-first-issues-item-head {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.375rem 0.5rem;
+    margin-bottom: 0.375rem;
+}
+
+.tc-good-first-issues-item-link {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--bs-good-first-issues-link-color);
+    text-decoration: none;
+    transition:
+        color var(--tc-transition-fast, 0.15s ease),
+        text-decoration-color var(--tc-transition-fast, 0.15s ease);
+
+    &:hover {
+        color: var(--bs-good-first-issues-link-hover-color);
+        text-decoration: underline;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+        border-radius: 0;
+    }
+}
+
+.tc-good-first-issues-item-repo {
+    font-family: var(--bs-font-monospace, 'JetBrains Mono', monospace);
+    font-size: 0.6875rem;
+    color: var(--bs-good-first-issues-repo-color);
+    background: transparent;
+    border: none;
+    padding: 0;
+    white-space: nowrap;
+}
+
+// ── Label chips ─────────────────────────────────────────────────────────────
+
+.tc-good-first-issues-item-labels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-bottom: 0.375rem;
+
+    &:empty {
+        display: none;
+        margin-bottom: 0;
+    }
+}
+
+.tc-good-first-issues-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3125rem;
+    padding: 0.125rem 0.4375rem;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    line-height: 1.4;
+    background: var(--bs-good-first-issues-chip-bg);
+    border: 1px solid var(--bs-good-first-issues-chip-border);
+    border-radius: 0;
+    color: var(--bs-good-first-issues-chip-color);
+    white-space: nowrap;
+}
+
+.tc-good-first-issues-label-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    // Sanctioned circle: status/identity color indicator
+    border-radius: 50%;
+    background-color: var(--bs-good-first-issues-label-dot-color, var(--tc-text-faint));
+    flex-shrink: 0;
+}
+
+// ── Meta line ───────────────────────────────────────────────────────────────
+
+.tc-good-first-issues-item-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+    color: var(--bs-good-first-issues-meta-color);
+    font-family: var(--bs-font-monospace, 'JetBrains Mono', monospace);
+    font-size: 0.6875rem;
+}
+
+.tc-good-first-issues-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.tc-good-first-issues-meta-icon {
+    width: var(--bs-good-first-issues-icon-size);
+    height: var(--bs-good-first-issues-icon-size);
+    flex-shrink: 0;
+}
+
+// ── Empty state ─────────────────────────────────────────────────────────────
+
+.tc-good-first-issues-empty {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--tc-text-muted);
+}
+
+.tc-good-first-issues-empty-text {
+    font-size: 0.875rem;
+}
+
+// ── Reduced motion ──────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-good-first-issues-item {
+        transition: none;
+    }
+
+    .tc-good-first-issues-item-link {
+        transition: color var(--tc-transition-fast, 0.15s ease);
+    }
+}

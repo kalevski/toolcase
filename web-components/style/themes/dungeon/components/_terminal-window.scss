@@ -1,0 +1,69 @@
+// Dungeon › tc-terminal-window — arcane console / spell-log scroll.
+// Critical fix: --tc-text-inverse maps to --fg-ink (near-black) under the
+// foundation, making body text invisible on the dark ink surface. Override to
+// --fg-parch. Also replaces oklch() literal dot/comment colours and the raw
+// --tc-slate-400 title token, none of which the foundation remap reaches.
+// Structure: gilded bevel frame, scanline body overlay, display-caps title.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Token swap ───────────────────────────────────────────────────────────
+    // Declared on the host element (same selector the base uses).
+
+    tc-terminal-window {
+        // MANDATORY: body text would be --fg-ink (near-black) on the dark ink
+        // surface without this — completely invisible.
+        --bs-terminal-window-text-color: var(--fg-parch);
+
+        // Title — raw --tc-slate-400 literal; repoint to parchment-dim.
+        --bs-terminal-window-title-color: var(--fg-parch-dim);
+
+        // Comment lines — cold-blue oklch() literal; repoint to parchment-dim.
+        --bs-terminal-window-comment-color: var(--fg-parch-dim);
+
+        // Traffic-light dots — oklch() literals; repoint to element ramp.
+        // Shapes stay border-radius:50% (sanctioned circles — keep as-is).
+        --bs-terminal-window-dot-red: var(--fg-blood-bright);
+        --bs-terminal-window-dot-amber: var(--fg-legendary);
+        --bs-terminal-window-dot-green: var(--fg-stamina-bright);
+    }
+
+    // ── Structure: gilded bevel frame ────────────────────────────────────────
+    // Replaces the flat --tc-shadow-sm with the inset bevel + drop-shadow stack
+    // that a token swap alone cannot carry.
+
+    .tc-terminal-window {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── Structure: arcane-CRT scanline overlay on the body ───────────────────
+    // Faint scanline texture gives the arcane-console feel without touching
+    // the actual content. pointer-events:none keeps it inert.
+
+    .tc-terminal-window-body {
+        position: relative;
+
+        &::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--fg-scanlines);
+            pointer-events: none;
+            z-index: 1;
+        }
+    }
+
+    // ── Structure: display-caps title ────────────────────────────────────────
+    // The base hardcodes font-family:var(--tc-font-mono) on the class element
+    // directly — a token swap cannot override it, so we override the class.
+    // Using --fg-display (Cinzel serif caps) for "scroll title" treatment.
+    // letter-spacing kept tighter than panel headers (terminal convention).
+
+    .tc-terminal-window-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: 600;
+    }
+}

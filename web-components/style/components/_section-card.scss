@@ -1,0 +1,150 @@
+// tc-section-card — titled card with optional icon chip, action slot, and body.
+// All cosmetics flow through --bs-section-card-* custom properties backed by --tc-* tokens.
+// Sharp corners; slate neutrals; 1px hairline; low resting shadow; ink-gradient header cap.
+
+@use 'sass:map';
+@use '../foundation/tokens' as *;
+
+tc-section-card {
+    --bs-section-card-bg: var(--tc-surface);
+    --bs-section-card-border-color: var(--tc-border);
+    --bs-section-card-shadow: var(--tc-shadow-sm);
+    --bs-section-card-header-bg: linear-gradient(135deg, rgba(30, 41, 59, 0.03), rgba(30, 41, 59, 0.01));
+    --bs-section-card-header-border-color: var(--tc-border);
+    --bs-section-card-header-padding-y: 0.75rem;
+    --bs-section-card-header-padding-x: 1.25rem;
+    --bs-section-card-body-padding: 1.25rem;
+    --bs-section-card-title-color: var(--tc-text);
+    --bs-section-card-title-font-size: 0.9375rem;
+    --bs-section-card-icon-color: var(--tc-text-muted);
+    --bs-section-card-icon-size: 1rem;
+    --bs-section-card-icon-chip-size: 1.75rem;
+    --bs-section-card-icon-chip-bg: var(--tc-surface-hover);
+    --bs-section-card-icon-chip-border-color: var(--tc-border);
+    // Danger variant tokens
+    --bs-section-card-danger-border-color: var(--tc-danger);
+    --bs-section-card-danger-header-bg: linear-gradient(
+        135deg,
+        rgba(220, 38, 38, 0.06),
+        rgba(220, 38, 38, 0.02)
+    );
+    --bs-section-card-danger-header-border-color: rgba(220, 38, 38, 0.25);
+    --bs-section-card-danger-title-color: #{map.get($theme-colors-emphasis, 'danger')};
+    --bs-section-card-danger-icon-color: var(--tc-danger);
+    --bs-section-card-danger-icon-chip-bg: #{map.get($theme-colors-soft, 'danger')};
+    --bs-section-card-danger-icon-chip-border-color: rgba(220, 38, 38, 0.25);
+}
+
+// ── Card shell ────────────────────────────────────────────────────────────────
+
+.tc-section-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--bs-section-card-bg);
+    border: 1px solid var(--bs-section-card-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-section-card-shadow);
+}
+
+// ── Danger variant — 4px left accent, tinted header, dark-red title ───────────
+
+.tc-section-card--danger {
+    border-left: 4px solid var(--bs-section-card-danger-border-color);
+
+    .tc-section-card-header {
+        background: var(--bs-section-card-danger-header-bg);
+        border-bottom-color: var(--bs-section-card-danger-header-border-color);
+    }
+
+    .tc-section-card-icon {
+        background: var(--bs-section-card-danger-icon-chip-bg);
+        border-color: var(--bs-section-card-danger-icon-chip-border-color);
+        color: var(--bs-section-card-danger-icon-color);
+    }
+
+    .tc-section-card-title {
+        color: var(--bs-section-card-danger-title-color);
+    }
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+
+.tc-section-card-header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.625rem;
+    padding: var(--bs-section-card-header-padding-y) var(--bs-section-card-header-padding-x);
+    background: var(--bs-section-card-header-bg);
+    border-bottom: 1px solid var(--bs-section-card-header-border-color);
+}
+
+@media (min-width: 576px) {
+    .tc-section-card-header {
+        flex-direction: row;
+        align-items: center;
+    }
+}
+
+// ── Icon chip ────────────────────────────────────────────────────────────────
+
+.tc-section-card-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: var(--bs-section-card-icon-chip-size);
+    height: var(--bs-section-card-icon-chip-size);
+    background: var(--bs-section-card-icon-chip-bg);
+    border: 1px solid var(--bs-section-card-icon-chip-border-color);
+    border-radius: 0;
+    color: var(--bs-section-card-icon-color);
+    transition: background var(--tc-transition-fast, 0.15s ease),
+        border-color var(--tc-transition-fast, 0.15s ease),
+        color var(--tc-transition-fast, 0.15s ease);
+}
+
+.tc-section-card-icon-svg {
+    width: var(--bs-section-card-icon-size);
+    height: var(--bs-section-card-icon-size);
+    stroke: currentColor;
+    fill: none;
+}
+
+// ── Title ─────────────────────────────────────────────────────────────────────
+
+.tc-section-card-title {
+    flex: 1 1 auto;
+    margin: 0;
+    font-family: 'Inter', var(--bs-body-font-family);
+    font-size: var(--bs-section-card-title-font-size);
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--bs-section-card-title-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+// ── Action slot ───────────────────────────────────────────────────────────────
+
+.tc-section-card-action {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+// ── Body ──────────────────────────────────────────────────────────────────────
+
+.tc-section-card-body {
+    padding: var(--bs-section-card-body-padding);
+}
+
+// Honour prefers-reduced-motion: freeze icon chip transition.
+@media (prefers-reduced-motion: reduce) {
+    .tc-section-card-icon {
+        transition: none;
+    }
+}

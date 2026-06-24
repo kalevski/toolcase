@@ -1,0 +1,217 @@
+// tc-activity-card — dashboard card with a vertical activity timeline.
+// All cosmetics flow through --bs-activity-card-* custom properties backed by --tc-* tokens.
+// Sharp corners everywhere; slate neutrals; hairline border; low resting shadow.
+
+@use '../foundation/tokens' as *;
+
+tc-activity-card {
+    --bs-activity-card-bg: var(--tc-surface);
+    --bs-activity-card-border-color: var(--tc-border);
+    --bs-activity-card-shadow: var(--tc-shadow-sm);
+    --bs-activity-card-header-bg: linear-gradient(135deg, rgba(30, 41, 59, 0.03), rgba(30, 41, 59, 0.01));
+    --bs-activity-card-header-border-color: var(--tc-border);
+    --bs-activity-card-header-padding-y: 0.75rem;
+    --bs-activity-card-header-padding-x: 1.25rem;
+    --bs-activity-card-body-padding-y: 1rem;
+    --bs-activity-card-body-padding-x: 1.25rem;
+    --bs-activity-card-title-color: var(--tc-text);
+    --bs-activity-card-icon-chip-size: 1.75rem;
+    --bs-activity-card-icon-chip-bg: var(--tc-surface-muted);
+    --bs-activity-card-icon-chip-color: var(--tc-text-muted);
+    --bs-activity-card-rail-color: var(--tc-border);
+    --bs-activity-card-item-title-color: var(--tc-text);
+    --bs-activity-card-item-desc-color: var(--tc-text-muted);
+    --bs-activity-card-item-gap: 0.625rem;
+    --bs-activity-card-time-color: var(--tc-text-muted);
+    --bs-activity-card-skeleton-bg: var(--tc-surface-muted);
+    --bs-activity-card-skeleton-shimmer: rgba(255, 255, 255, 0.6);
+}
+
+// Inner card wrapper — card motif: white, 1px hairline, low shadow.
+.tc-activity-card-inner {
+    display: flex;
+    flex-direction: column;
+    background: var(--bs-activity-card-bg);
+    border: 1px solid var(--bs-activity-card-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-activity-card-shadow);
+}
+
+// Header: faint ink-gradient cap, 1px bottom hairline.
+.tc-activity-card-header {
+    padding: var(--bs-activity-card-header-padding-y) var(--bs-activity-card-header-padding-x);
+    background: var(--bs-activity-card-header-bg);
+    border-bottom: 1px solid var(--bs-activity-card-header-border-color);
+}
+
+.tc-activity-card-title {
+    margin: 0;
+    font-family: 'Inter', var(--bs-body-font-family);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--bs-activity-card-title-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+// Card body — padding around the timeline list.
+.tc-activity-card-body {
+    padding: var(--bs-activity-card-body-padding-y) var(--bs-activity-card-body-padding-x);
+}
+
+// ── Timeline list ─────────────────────────────────────────────────────────────
+
+.tc-activity-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.tc-activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--bs-activity-card-item-gap);
+
+    & + & {
+        margin-top: 0.75rem;
+    }
+}
+
+// ── Icon column ───────────────────────────────────────────────────────────────
+
+.tc-activity-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    // stretch so the column fills the body height, giving the rail room to grow
+    align-self: stretch;
+    flex-shrink: 0;
+    width: var(--bs-activity-card-icon-chip-size);
+}
+
+.tc-activity-icon--has-rail::after {
+    content: '';
+    display: block;
+    width: 1px;
+    flex: 1 0 0.5rem;
+    background: var(--bs-activity-card-rail-color);
+    margin-top: 0.25rem;
+}
+
+// Icon chip — the small slate circle holding the glyph.
+.tc-activity-icon-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-activity-card-icon-chip-size);
+    height: var(--bs-activity-card-icon-chip-size);
+    background: var(--bs-activity-card-icon-chip-bg);
+    border: 1px solid var(--bs-activity-card-border-color);
+    border-radius: 0;
+    color: var(--bs-activity-card-icon-chip-color);
+    flex-shrink: 0;
+}
+
+// Inline SVG icon inside the chip.
+.tc-activity-icon-svg {
+    width: 0.875rem;
+    height: 0.875rem;
+    stroke: currentColor;
+    fill: none;
+}
+
+// ── Activity body ─────────────────────────────────────────────────────────────
+
+.tc-activity-body {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-top: 0.1875rem; // align text baseline with icon chip center
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+// Header row: title (left) + timestamp (right).
+.tc-activity-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.tc-activity-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--bs-activity-card-item-title-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tc-activity-time {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.6875rem; // 11px micro
+    line-height: 1.4;
+    white-space: nowrap;
+    color: var(--bs-activity-card-time-color);
+    flex-shrink: 0;
+}
+
+.tc-activity-desc {
+    font-size: 0.8125rem; // 13px
+    line-height: 1.45;
+    color: var(--bs-activity-card-item-desc-color);
+}
+
+// ── Loading skeleton ──────────────────────────────────────────────────────────
+
+@keyframes tc-activity-card-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+%shimmer {
+    background: linear-gradient(
+        90deg,
+        var(--bs-activity-card-skeleton-bg) 25%,
+        var(--bs-activity-card-skeleton-shimmer) 50%,
+        var(--bs-activity-card-skeleton-bg) 75%
+    );
+    background-size: 200% 100%;
+    animation: tc-activity-card-shimmer 1.5s infinite linear;
+    border-radius: 0;
+}
+
+.tc-activity-icon-chip--skeleton {
+    @extend %shimmer;
+    border-color: transparent;
+}
+
+.tc-activity-skeleton {
+    display: block;
+    height: 0.75rem;
+    border-radius: 0;
+    @extend %shimmer;
+
+    &--title {
+        width: 60%;
+        margin-bottom: 0.125rem;
+    }
+
+    &--desc {
+        width: 40%;
+    }
+}
+
+// Honour prefers-reduced-motion: freeze shimmer, keep static fill.
+@media (prefers-reduced-motion: reduce) {
+    .tc-activity-icon-chip--skeleton,
+    .tc-activity-skeleton {
+        animation: none;
+        background: var(--bs-activity-card-skeleton-bg);
+    }
+}

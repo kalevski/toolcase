@@ -1,0 +1,261 @@
+// tc-lightbox — modal image gallery, overlay tier. Fully custom (no Bootstrap
+// plugin). All cosmetics flow through --bs-lightbox-* vars backed by --tc-* tokens.
+// Backdrop is a dark scrim; the stage sits on the --tc-ink overlay surface with
+// white controls. Sharp corners throughout; the active thumbnail gets a genuine
+// --tc-accent (cyan) highlight.
+
+tc-lightbox {
+    // Z-index band — backdrop below the dialog, both in the modal tier.
+    --bs-lightbox-z-backdrop: var(--tc-z-modal-backdrop);
+    --bs-lightbox-z-dialog:   var(--tc-z-modal);
+
+    // Backdrop scrim.
+    --bs-lightbox-backdrop-bg:      #0f172a;
+    --bs-lightbox-backdrop-opacity: 0.82;
+
+    // Overlay surface + chrome.
+    --bs-lightbox-stage-bg:      var(--tc-ink);
+    --bs-lightbox-shadow:        var(--tc-shadow-lg);
+    --bs-lightbox-control-color: #ffffff;
+    --bs-lightbox-control-wash:  rgba(255, 255, 255, 0.14);
+    --bs-lightbox-caption-color: rgba(255, 255, 255, 0.7);
+
+    // Thumbnails.
+    --bs-lightbox-thumb-size:          64px;
+    --bs-lightbox-thumb-border:        rgba(255, 255, 255, 0.15);
+    --bs-lightbox-thumb-active-border: var(--tc-accent);
+    --bs-lightbox-thumb-opacity:       0.55;
+
+    // Transition.
+    --bs-lightbox-transition: opacity var(--tc-transition-base);
+}
+
+// ── Backdrop ──────────────────────────────────────────────────────────────────
+
+.tc-lightbox__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--bs-lightbox-z-backdrop);
+    background: var(--bs-lightbox-backdrop-bg);
+    opacity: 0;
+    transition: var(--bs-lightbox-transition);
+
+    tc-lightbox.tc-lightbox--open & {
+        opacity: var(--bs-lightbox-backdrop-opacity);
+    }
+}
+
+// ── Dialog ────────────────────────────────────────────────────────────────────
+
+.tc-lightbox__dialog {
+    position: fixed;
+    inset: 0;
+    z-index: var(--bs-lightbox-z-dialog);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: clamp(0.75rem, 3vw, 2.5rem);
+    outline: 0;
+    opacity: 0;
+    transition: var(--bs-lightbox-transition);
+
+    tc-lightbox.tc-lightbox--open & {
+        opacity: 1;
+    }
+}
+
+// ── Close button ──────────────────────────────────────────────────────────────
+
+.tc-lightbox__close {
+    position: absolute;
+    top: clamp(0.5rem, 2vw, 1rem);
+    right: clamp(0.5rem, 2vw, 1rem);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    border-radius: 0;
+    color: var(--bs-lightbox-control-color);
+    cursor: pointer;
+    transition: background-color var(--tc-transition-fast);
+
+    svg {
+        width: 1.5rem;
+        height: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    &:hover {
+        background: var(--bs-lightbox-control-wash);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-accent);
+        outline-offset: 2px;
+    }
+
+    @media (pointer: coarse) {
+        width: 2.75rem;
+        height: 2.75rem;
+    }
+}
+
+// ── Counter ───────────────────────────────────────────────────────────────────
+
+.tc-lightbox__counter {
+    flex-shrink: 0;
+    font-family: var(--tc-font-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 0.04em;
+    color: var(--bs-lightbox-control-color);
+}
+
+// ── Stage ─────────────────────────────────────────────────────────────────────
+
+.tc-lightbox__stage {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-width: 100%;
+}
+
+.tc-lightbox__figure {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    min-height: 0;
+}
+
+.tc-lightbox__image {
+    display: block;
+    max-width: min(88vw, 1200px);
+    max-height: 70vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    background: var(--bs-lightbox-stage-bg);
+    box-shadow: var(--bs-lightbox-shadow);
+    border-radius: 0;
+}
+
+.tc-lightbox__caption {
+    margin: 0;
+    max-width: min(88vw, 1200px);
+    text-align: center;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--bs-lightbox-caption-color);
+}
+
+// ── Arrows ────────────────────────────────────────────────────────────────────
+
+.tc-lightbox__arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    border-radius: 0;
+    color: var(--bs-lightbox-control-color);
+    cursor: pointer;
+    transition: background-color var(--tc-transition-fast);
+
+    svg {
+        width: 1.75rem;
+        height: 1.75rem;
+        flex-shrink: 0;
+    }
+
+    &:hover {
+        background: var(--bs-lightbox-control-wash);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-accent);
+        outline-offset: 2px;
+    }
+
+    @media (pointer: coarse) {
+        width: 3rem;
+        height: 3rem;
+    }
+}
+
+// ── Thumbnails ────────────────────────────────────────────────────────────────
+
+.tc-lightbox__thumbnails {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+    gap: 0.375rem;
+    max-width: 100%;
+    padding: 0.25rem;
+    overflow-x: auto;
+}
+
+.tc-lightbox__thumbnail {
+    display: block;
+    flex-shrink: 0;
+    width: var(--bs-lightbox-thumb-size);
+    height: var(--bs-lightbox-thumb-size);
+    padding: 0;
+    border: 2px solid var(--bs-lightbox-thumb-border);
+    background: var(--bs-lightbox-stage-bg);
+    border-radius: 0;
+    cursor: pointer;
+    opacity: var(--bs-lightbox-thumb-opacity);
+    transition: opacity var(--tc-transition-fast), border-color var(--tc-transition-fast);
+
+    img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    &:hover {
+        opacity: 1;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-accent);
+        outline-offset: 2px;
+    }
+
+    &.tc-lightbox__thumbnail--active {
+        border-color: var(--bs-lightbox-thumb-active-border);
+        opacity: 1;
+    }
+
+    // 44px coarse target — bump the floor without disturbing the desktop size.
+    @media (pointer: coarse) {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+// ── Reduced motion — no fade, instant show/hide ─────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-lightbox__backdrop,
+    .tc-lightbox__dialog {
+        transition: none;
+    }
+}

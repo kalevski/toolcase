@@ -176,6 +176,8 @@ export default class InputFeature extends Feature {
     override onDestroy(): void {
         this.actions.clear()
         this.virtualState.clear()
+        const keyboard = this.scene.input.keyboard
+        for (const code of this.keys.keys()) keyboard?.removeKey(code, true, true)
         this.keys.clear()
     }
 

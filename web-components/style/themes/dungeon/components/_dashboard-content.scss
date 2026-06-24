@@ -1,0 +1,12 @@
+// Dungeon › tc-dashboard-content — scrollable main content area.
+// Foundation-only component: --bs-dashboard-content-bg and --bs-dashboard-content-color
+// are already remapped via --tc-surface / --tc-text in _foundation.scss.
+// The single override here pins the content rail to --fg-ink so it reads darker
+// than the leather sidebar, giving depth to the layout shell.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-dashboard-content {
+        --bs-dashboard-content-bg: var(--fg-ink);
+    }
+}

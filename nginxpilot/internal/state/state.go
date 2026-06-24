@@ -79,18 +79,36 @@ func (s *Store) Load(domain string) (*SiteState, error) {
 	return &st, nil
 }
 
-// Save writes the state atomically (temp file + rename).
+// Save writes the state crash-durably: fsync the temp file before rename,
+// then fsync the directory so the new directory entry survives a power loss.
 func (s *Store) Save(st *SiteState) error {
 	raw, err := json.MarshalIndent(st, "", "  ")
 	if err != nil {
 		return err
 	}
 	tmp := s.path(st.Domain) + ".tmp"
-	if err := os.WriteFile(tmp, raw, 0o640); err != nil {
+	f, err := os.OpenFile(tmp, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o640)
+	if err != nil {
 		return fmt.Errorf("write state for %s: %w", st.Domain, err)
+	}
+	if _, err := f.Write(raw); err != nil {
+		f.Close()
+		return fmt.Errorf("write state for %s: %w", st.Domain, err)
+	}
+	if err := f.Sync(); err != nil {
+		f.Close()
+		return err
+	}
+	if err := f.Close(); err != nil {
+		return err
 	}
 	if err := os.Rename(tmp, s.path(st.Domain)); err != nil {
 		return fmt.Errorf("commit state for %s: %w", st.Domain, err)
+	}
+	d, err := os.Open(s.dir)
+	if err == nil {
+		_ = d.Sync()
+		_ = d.Close()
 	}
 	return nil
 }

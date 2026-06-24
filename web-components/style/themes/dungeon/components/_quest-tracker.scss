@@ -1,0 +1,122 @@
+// Dungeon › tc-quest-tracker — gilded objective tracker. Token swap recolours the
+// panel, checks, counts and bars; structural rules add the ink panel with gilded
+// bevel, display-caps quest names + title, italic-body optional objectives, mono
+// counts, and the gold-gradient progress fill in a bevelled track.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-quest-tracker {
+        --bs-quest-tracker-bg: rgba(10, 6, 4, 0.6);
+        --bs-quest-tracker-border: 1px solid var(--fg-gold-deep);
+
+        --bs-quest-tracker-header-bg: transparent;
+        --bs-quest-tracker-header-border: 1px solid transparent;
+        --bs-quest-tracker-title-color: var(--fg-parch-dim);
+
+        --bs-quest-tracker-quest-border: 1px solid rgba(201, 169, 97, 0.25);
+        --bs-quest-tracker-quest-name-color: var(--fg-gold-bright);
+
+        --bs-quest-tracker-objective-label-color: var(--fg-parch);
+        --bs-quest-tracker-objective-completed-color: var(--fg-stamina-bright);
+        --bs-quest-tracker-objective-optional-color: var(--fg-parch-3);
+
+        --bs-quest-tracker-check-color: var(--fg-gold-deep);
+        --bs-quest-tracker-check-done-color: var(--fg-gold-bright);
+
+        --bs-quest-tracker-count-color: var(--fg-gold-bright);
+
+        --bs-quest-tracker-bar-height: 4px;
+        --bs-quest-tracker-bar-bg: linear-gradient(180deg, #0e0905, #1a120a);
+        --bs-quest-tracker-bar-fill: linear-gradient(180deg, #f0d27a, #c9a961 60%, #5a4422);
+
+        --bs-quest-tracker-empty-color: var(--fg-parch-dim);
+    }
+
+    // Panel: gilded inset bevel + drop shadow + corner-notch frame.
+    .tc-quest-tracker {
+        position: relative;
+        box-shadow:
+            inset 0 1px 0 rgba(232, 200, 120, 0.18),
+            0 2px 6px rgba(0, 0, 0, 0.5);
+        color: var(--fg-parch);
+
+        // Top-left corner notch
+        &::before {
+            content: '';
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 10px;
+            height: 10px;
+            background: var(--fg-notch-fill);
+            clip-path: var(--fg-notch-clip);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        // Bottom-right corner notch (rotated 180°)
+        &::after {
+            content: '';
+            display: block;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 10px;
+            height: 10px;
+            background: var(--fg-notch-fill);
+            clip-path: var(--fg-notch-clip);
+            transform: rotate(180deg);
+            pointer-events: none;
+            z-index: 1;
+        }
+    }
+
+    // Header: gold-rule gradient divider replaces the faint hairline.
+    .tc-quest-tracker-header {
+        border-bottom: 1px solid transparent;
+        border-image: var(--fg-rule) 1;
+    }
+
+    // Header title + quest names: display caps.
+    .tc-quest-tracker-title {
+        font-family: var(--fg-display);
+        letter-spacing: 0.18em;
+    }
+
+    .tc-quest-tracker-quest-name {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        text-shadow: 0 1px 2px #000;
+    }
+
+    // Optional objective reads as italic body serif.
+    .tc-quest-tracker-objective--optional .tc-quest-tracker-objective-label {
+        font-family: var(--fg-body);
+        font-style: italic;
+    }
+
+    // Check indicator: gilded bevel on unchecked and done states.
+    .tc-quest-tracker-objective-check {
+        box-shadow: inset 0 1px 0 rgba(232, 200, 120, 0.18);
+
+        &--done {
+            box-shadow:
+                inset 0 1px 0 rgba(232, 200, 120, 0.35),
+                inset 0 -1px 0 rgba(90, 68, 34, 0.5);
+        }
+    }
+
+    // Mono counts: add tracking to match fantasy reference spacing.
+    .tc-quest-tracker-objective-count {
+        font-family: var(--fg-mono);
+        letter-spacing: 0.1em;
+    }
+
+    // Progress track: bevelled gold-gradient fill.
+    .tc-quest-tracker-objective-bar {
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.7);
+    }
+}

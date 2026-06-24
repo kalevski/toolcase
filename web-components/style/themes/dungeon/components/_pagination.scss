@@ -1,0 +1,31 @@
+// Dungeon › tc-pagination — gilded joined pager, mono numeral data register.
+// Foundation handles most of the reskin (gold border, leather bg, gold active,
+// parch-dim disabled, gold focus ring). This override patches the ONE genuine
+// token leak — --bs-pagination-color is pinned to --tc-slate-600, a raw
+// product-palette token that the dungeon foundation does NOT remap, so idle
+// page numerals show product slate-blue (#475569) on the dark dungeon frame.
+// It also deepens idle cells to recessed slots and adds the keycap active-page
+// treatment (gold gradient + bevel highlight) to complete the fantasy voice.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // Required fix: repoint the un-remapped product-palette literal to parch.
+    // Optional deepening: idle cells read as recessed wood slots.
+    .pagination {
+        --bs-pagination-color: var(--fg-parch-3);
+        --bs-pagination-bg: var(--fg-slot-bg);
+    }
+
+    // Hover glint: lift idle numeral to bright gold on pointer-over.
+    .page-link:hover {
+        color: var(--fg-gold-bright);
+    }
+
+    // Keycap active page: pressed gold key — gradient fill + bevel highlight.
+    .page-item.active .page-link {
+        background: var(--fg-button-bg);
+        box-shadow: var(--fg-bevel-top);
+        color: var(--fg-gold-bright);
+    }
+}

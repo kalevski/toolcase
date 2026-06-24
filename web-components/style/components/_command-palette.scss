@@ -1,0 +1,325 @@
+// tc-command-palette — modal command-search overlay. Fully custom (no Bootstrap
+// plugin). All cosmetics flow through --bs-command-palette-* vars backed by
+// --tc-* tokens. Sharp corners everywhere; the active row uses the ink ladder.
+
+tc-command-palette {
+    // Surface + chrome.
+    --bs-command-palette-bg:           var(--tc-surface);
+    --bs-command-palette-border-color: var(--tc-border);
+    --bs-command-palette-shadow:       var(--tc-shadow-lg);
+    --bs-command-palette-width:        min(640px, calc(100vw - 2rem));
+    --bs-command-palette-max-height:   60vh;
+    --bs-command-palette-top:          12vh;
+
+    // Backdrop scrim — translucent ink.
+    --bs-command-palette-backdrop-bg: rgba(15, 23, 42, 0.5);
+
+    // Z-index band — backdrop below dialog, both in overlay tier.
+    --bs-command-palette-z-backdrop: var(--tc-z-modal-backdrop);
+    --bs-command-palette-z-dialog:   var(--tc-z-modal);
+
+    // Search header.
+    --bs-command-palette-input-color:       var(--tc-text);
+    --bs-command-palette-placeholder-color: var(--tc-text-faint);
+    --bs-command-palette-icon-color:        var(--tc-text-muted);
+
+    // Rows.
+    --bs-command-palette-item-color:        var(--tc-text);
+    --bs-command-palette-item-hover-bg:     var(--tc-surface-muted);
+    --bs-command-palette-item-active-bg:    var(--tc-app-accent);
+    --bs-command-palette-item-active-color: var(--tc-app-accent-contrast);
+
+    // Muted machine-facing text (group headings, shortcuts, footer).
+    --bs-command-palette-muted-color: var(--tc-text-muted);
+
+    // Motion.
+    --bs-command-palette-transition: var(--tc-transition-base);
+}
+
+// ── Backdrop ──────────────────────────────────────────────────────────────────
+
+.tc-command-palette-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--bs-command-palette-z-backdrop);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: var(--bs-command-palette-top) 1rem 1rem;
+    background: var(--bs-command-palette-backdrop-bg);
+    animation: tc-command-palette-fade var(--bs-command-palette-transition);
+}
+
+// ── Dialog ──────────────────────────────────────────────────────────────────────
+
+.tc-command-palette {
+    position: relative;
+    z-index: var(--bs-command-palette-z-dialog);
+    display: flex;
+    flex-direction: column;
+    width: var(--bs-command-palette-width);
+    max-height: var(--bs-command-palette-max-height);
+    background: var(--bs-command-palette-bg);
+    border: 1px solid var(--bs-command-palette-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-command-palette-shadow);
+    overflow: hidden;
+    animation: tc-command-palette-pop var(--bs-command-palette-transition);
+}
+
+// ── Search header ─────────────────────────────────────────────────────────────
+
+.tc-command-palette-search {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    flex-shrink: 0;
+    padding: 0.75rem 1rem;
+    // Hairline separating the borderless input from the results list.
+    border-bottom: 1px solid var(--bs-command-palette-border-color);
+}
+
+.tc-command-palette-search-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--bs-command-palette-icon-color);
+
+    svg {
+        width: 1.125rem;
+        height: 1.125rem;
+    }
+}
+
+.tc-command-palette-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    outline: 0;
+    font-family: var(--tc-font-sans);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--bs-command-palette-input-color);
+
+    &::placeholder {
+        color: var(--bs-command-palette-placeholder-color);
+    }
+}
+
+// ── Results list ──────────────────────────────────────────────────────────────
+
+.tc-command-palette-list {
+    flex: 1 1 auto;
+    margin: 0;
+    padding: 0.375rem 0;
+    list-style: none;
+    overflow-y: auto;
+}
+
+// Group heading — mono uppercase micro-label.
+.tc-command-palette-group {
+    padding: 0.5rem 1rem 0.25rem;
+    font-family: var(--tc-font-mono);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--bs-command-palette-muted-color);
+}
+
+.tc-command-palette-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 2.25rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0;
+    font-size: 0.875rem;
+    color: var(--bs-command-palette-item-color);
+    cursor: pointer;
+    transition: background-color var(--tc-transition-fast), color var(--tc-transition-fast);
+
+    // 44px coarse-pointer touch target.
+    @media (pointer: coarse) {
+        min-height: 2.75rem;
+    }
+}
+
+// Hover-only (non-highlighted) row — slate well.
+.tc-command-palette-item:hover:not(.tc-command-palette-item--active) {
+    background: var(--bs-command-palette-item-hover-bg);
+}
+
+// Highlighted row — solid ink fill, white text (active = ink).
+.tc-command-palette-item--active {
+    background: var(--bs-command-palette-item-active-bg);
+    color: var(--bs-command-palette-item-active-color);
+}
+
+.tc-command-palette-item-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--bs-command-palette-icon-color);
+
+    .tc-command-palette-item--active & {
+        color: var(--bs-command-palette-item-active-color);
+    }
+
+    svg {
+        width: 1rem;
+        height: 1rem;
+    }
+}
+
+.tc-command-palette-item-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tc-command-palette-item-shortcut {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+// ── kbd chips (shortcuts + footer hints) ───────────────────────────────────────
+
+.tc-command-palette-key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    padding: 0.0625rem 0.375rem;
+    border: 1px solid var(--bs-command-palette-border-color);
+    border-radius: 0;
+    background: var(--tc-surface);
+    font-family: var(--tc-font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--bs-command-palette-muted-color);
+
+    // On the active row, chips invert to read against the ink fill.
+    .tc-command-palette-item--active & {
+        border-color: rgba(255, 255, 255, 0.4);
+        background: transparent;
+        color: var(--bs-command-palette-item-active-color);
+    }
+}
+
+// ── Empty / loading states ──────────────────────────────────────────────────────
+
+.tc-command-palette-empty {
+    padding: 1.5rem 1rem;
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--bs-command-palette-muted-color);
+}
+
+.tc-command-palette-skeleton {
+    padding: 0.5rem 1rem;
+}
+
+.tc-command-palette-skeleton-bar {
+    display: block;
+    height: 0.75rem;
+    border-radius: 0;
+    background: linear-gradient(
+        90deg,
+        var(--tc-surface-muted) 25%,
+        var(--tc-surface-hover) 37%,
+        var(--tc-surface-muted) 63%
+    );
+    background-size: 200% 100%;
+    animation: tc-command-palette-shimmer 1.4s ease-in-out infinite;
+
+    .tc-command-palette-skeleton:nth-child(2) & {
+        width: 80%;
+    }
+    .tc-command-palette-skeleton:nth-child(3) & {
+        width: 65%;
+    }
+    .tc-command-palette-skeleton:nth-child(4) & {
+        width: 72%;
+    }
+    .tc-command-palette-skeleton:nth-child(5) & {
+        width: 55%;
+    }
+}
+
+// ── Footer hint bar ─────────────────────────────────────────────────────────────
+
+.tc-command-palette-footer {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0;
+    padding: 0.5rem 1rem;
+    border-top: 1px solid var(--bs-command-palette-border-color);
+    font-family: var(--tc-font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.05em;
+    color: var(--bs-command-palette-muted-color);
+
+    span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+}
+
+// ── Keyframes ────────────────────────────────────────────────────────────────────
+
+@keyframes tc-command-palette-fade {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes tc-command-palette-pop {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes tc-command-palette-shimmer {
+    from {
+        background-position: 200% 0;
+    }
+    to {
+        background-position: -200% 0;
+    }
+}
+
+// ── Reduced motion — no slide/scale/shimmer, keep static visuals ────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-command-palette-backdrop,
+    .tc-command-palette {
+        animation: none;
+    }
+
+    .tc-command-palette-skeleton-bar {
+        animation: none;
+        background: var(--tc-surface-muted);
+    }
+}

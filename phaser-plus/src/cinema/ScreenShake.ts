@@ -27,13 +27,22 @@ export default class ScreenShake extends Feature {
 
     private exponent: number = 2
 
-    private appliedX: number = 0
+    private _appliedX: number = 0
 
-    private appliedY: number = 0
+    private _appliedY: number = 0
 
-    private appliedRotation: number = 0
+    private _appliedRotation: number = 0
 
     private bound: boolean = false
+
+    /** Current shake offset on the X axis (world pixels). Read by CameraDirector to cooperate on the same camera. */
+    get offsetX(): number { return this._appliedX }
+
+    /** Current shake offset on the Y axis (world pixels). Read by CameraDirector to cooperate on the same camera. */
+    get offsetY(): number { return this._appliedY }
+
+    /** Current shake rotation offset (radians). Read by CameraDirector to cooperate on the same camera. */
+    get offsetRotation(): number { return this._appliedRotation }
 
     constructor(scene: Scene, key: string) {
         super(scene, key)
@@ -107,9 +116,9 @@ export default class ScreenShake extends Feature {
         if (camera === null) return
         const dt = delta / 1000
 
-        camera.scrollX -= this.appliedX
-        camera.scrollY -= this.appliedY
-        camera.rotation -= this.appliedRotation
+        camera.scrollX -= this._appliedX
+        camera.scrollY -= this._appliedY
+        camera.rotation -= this._appliedRotation
 
         const survivors: ShakeSource[] = []
         let randomTotal = 0
@@ -134,9 +143,9 @@ export default class ScreenShake extends Feature {
         this.sources = survivors
 
         if (survivors.length === 0) {
-            this.appliedX = 0
-            this.appliedY = 0
-            this.appliedRotation = 0
+            this._appliedX = 0
+            this._appliedY = 0
+            this._appliedRotation = 0
             return
         }
 
@@ -151,21 +160,21 @@ export default class ScreenShake extends Feature {
             randomRot = (Math.random() * 2 - 1) * this.maxAngle * shake
         }
 
-        this.appliedX = randomX + sineX
-        this.appliedY = randomY + sineY
-        this.appliedRotation = randomRot + sineRot
+        this._appliedX = randomX + sineX
+        this._appliedY = randomY + sineY
+        this._appliedRotation = randomRot + sineRot
 
-        camera.scrollX += this.appliedX
-        camera.scrollY += this.appliedY
-        camera.rotation += this.appliedRotation
+        camera.scrollX += this._appliedX
+        camera.scrollY += this._appliedY
+        camera.rotation += this._appliedRotation
     }
 
     override onDestroy(): void {
         this.sources = []
         if (this.camera !== null) {
-            this.camera.scrollX -= this.appliedX
-            this.camera.scrollY -= this.appliedY
-            this.camera.rotation -= this.appliedRotation
+            this.camera.scrollX -= this._appliedX
+            this.camera.scrollY -= this._appliedY
+            this.camera.rotation -= this._appliedRotation
         }
         this.camera = null
     }

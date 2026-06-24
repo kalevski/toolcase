@@ -15,8 +15,9 @@ class RESTResponse<T = any> {
     }
 
     toJSON() {
-        const result: { status: string, count?: number, data: T } = {
-            status: 'OK',
+        const result: { status: string, code: number, count?: number, data: T } = {
+            status: this.status >= 400 ? 'rejected' : 'OK',
+            code: this.status,
             data: this.data,
         }
         if (this.count !== undefined) {

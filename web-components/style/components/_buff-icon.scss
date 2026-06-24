@@ -1,0 +1,91 @@
+// tc-buff-icon — a single buff / debuff status icon: a square slate tile with a
+// centred lucide glyph and an optional mono duration caption pinned to the
+// bottom edge. Ported from the game-components gc-buff-icon, but stripped of the
+// fantasy chrome (gilded frame, glow, parchment fill) — flat surface, hairline
+// border, sharp corners, mono machine-text. Buff vs debuff is conveyed by a
+// single status-coloured accent stripe (information, not decoration).
+// All cosmetics flow through --bs-buff-icon-* custom properties backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+tc-buff-icon {
+    --bs-buff-icon-size: 36px;
+    --bs-buff-icon-bg: var(--tc-surface);
+    --bs-buff-icon-border-color: var(--tc-border-strong);
+    --bs-buff-icon-glyph-color: var(--tc-text);
+    --bs-buff-icon-glyph-scale: 0.5;
+    --bs-buff-icon-accent: var(--tc-text-faint);
+
+    --bs-buff-icon-time-bg: var(--tc-ink);
+    --bs-buff-icon-time-color: var(--tc-surface);
+    --bs-buff-icon-time-font-size: 0.5625rem;
+
+    // inline-flex set in _reset.scss so the glyph centres; here we size the tile.
+    position: relative;
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-buff-icon-size);
+    height: var(--bs-buff-icon-size);
+    flex: 0 0 auto;
+    overflow: hidden;
+    background: var(--bs-buff-icon-bg);
+    border: 1px solid var(--bs-buff-icon-border-color);
+    border-radius: 0;
+    color: var(--bs-buff-icon-glyph-color);
+    vertical-align: middle;
+}
+
+// 2px status accent across the top — buff vs debuff information.
+tc-buff-icon::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--bs-buff-icon-accent);
+}
+
+tc-buff-icon[data-kind='buff'] {
+    --bs-buff-icon-accent: var(--tc-success);
+}
+
+tc-buff-icon[data-kind='debuff'] {
+    --bs-buff-icon-accent: var(--tc-danger);
+}
+
+.tc-buff-icon__glyph {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    // Text fallback (unknown glyph name) reads as a compact mono cap.
+    font-family: var(--bs-font-monospace);
+    font-size: calc(var(--bs-buff-icon-size) * 0.4);
+    font-weight: 600;
+    color: var(--bs-buff-icon-glyph-color);
+
+    svg {
+        width: calc(var(--bs-buff-icon-size) * var(--bs-buff-icon-glyph-scale));
+        height: calc(var(--bs-buff-icon-size) * var(--bs-buff-icon-glyph-scale));
+    }
+}
+
+// Duration caption — mono, on the ink strip at the bottom edge of the tile.
+.tc-buff-icon__time {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 1px 2px;
+    background: var(--bs-buff-icon-time-bg);
+    color: var(--bs-buff-icon-time-color);
+    font-family: var(--bs-font-monospace);
+    font-size: var(--bs-buff-icon-time-font-size);
+    font-weight: 500;
+    line-height: 1.25;
+    letter-spacing: 0.02em;
+    text-align: center;
+    white-space: nowrap;
+}

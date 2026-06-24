@@ -1,0 +1,108 @@
+// tc-check — .form-check base shared by checkbox / radio / switch. Sharp
+// square checkbox with an ink fill when checked.
+
+.form-check {
+    --bs-form-check-bg: var(--tc-surface);
+    --bs-form-check-border-color: var(--tc-border-strong);
+    --bs-form-check-bg-image: none;
+    --bs-form-check-checked-bg: var(--tc-app-accent);
+    --bs-form-check-checked-border-color: var(--tc-app-accent);
+
+    display: block;
+    min-height: 1.5rem;
+    padding-left: 1.6em;
+    margin-bottom: 0.35rem;
+
+    .form-check-input {
+        float: left;
+        margin-left: -1.6em;
+    }
+}
+
+.form-check-input {
+    width: 17px;
+    height: 17px;
+    margin-top: 0.25em;
+    vertical-align: top;
+    cursor: pointer;
+    appearance: none;
+    background-color: var(--bs-form-check-bg);
+    background-image: var(--bs-form-check-bg-image);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    border: 1.5px solid var(--bs-form-check-border-color);
+    print-color-adjust: exact;
+    transition:
+        background-color var(--tc-transition-fast),
+        border-color var(--tc-transition-fast);
+
+    &[type='checkbox'] {
+        border-radius: 0;
+    }
+
+    &[type='radio'] {
+        border-radius: 50%;
+    }
+
+    &:focus-visible {
+        outline: 0;
+        border-color: rgba(30, 41, 59, 0.5);
+        box-shadow: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
+    }
+
+    &:checked {
+        background-color: var(--bs-form-check-checked-bg, var(--tc-app-accent));
+        border-color: var(--bs-form-check-checked-border-color, var(--tc-app-accent));
+
+        &[type='checkbox'] {
+            --bs-form-check-bg-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+        }
+
+        // Radios keep the surface well — accent ring + accent dot.
+        &[type='radio'] {
+            background-color: var(--bs-form-check-bg);
+            --bs-form-check-bg-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3ccircle r='5' cx='8' cy='8' fill='%231e293b'/%3e%3c/svg%3e");
+        }
+    }
+
+    &[type='checkbox']:indeterminate {
+        background-color: var(--bs-form-check-checked-bg, var(--tc-app-accent));
+        border-color: var(--bs-form-check-checked-border-color, var(--tc-app-accent));
+        --bs-form-check-bg-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10h8'/%3e%3c/svg%3e");
+    }
+
+    &:disabled {
+        pointer-events: none;
+        filter: none;
+        opacity: 0.5;
+
+        ~ .form-check-label {
+            cursor: default;
+            opacity: 0.5;
+        }
+    }
+}
+
+.form-check-label {
+    font-size: 0.8125rem;
+    color: #334155;
+    cursor: pointer;
+}
+
+.form-check-inline {
+    display: inline-block;
+    margin-right: 1rem;
+}
+
+.form-check-reverse {
+    padding-right: 1.6em;
+    padding-left: 0;
+    text-align: right;
+
+    .form-check-input {
+        float: right;
+        margin-right: -1.6em;
+        margin-left: 0;
+    }
+}

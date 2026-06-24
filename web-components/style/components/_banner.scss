@@ -1,0 +1,174 @@
+// tc-banner — status banner with leading icon, body, optional action slot / CTA
+// link, and optional dismissal. Alert-family motif: 4 px left border in the
+// variant's status token, 135° soft gradient fill, dark emphasis text. All
+// cosmetics flow through --bs-banner-* backed by --tc-* tokens. The
+// tc-announcement-bar preset renders the same `.tc-banner-*` markup with a
+// tighter, vertically-centred layout (see the tag override below).
+
+@use 'sass:map';
+@use '../foundation/tokens' as *;
+
+// tc-announcement-bar preset — tighter padding, a thinner border, and a
+// vertically-centred single-line layout. Selector carries `.tc-banner` so it
+// out-specifies the base `.tc-banner` direct properties.
+tc-announcement-bar.tc-banner {
+    --bs-banner-padding-y: 0.65rem;
+    --bs-banner-gap: 0.625rem;
+    --bs-banner-border-width: 3px;
+
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+.tc-banner {
+    // Theming contract — defaults to info; variant modifiers override these.
+    --bs-banner-padding-x: 1rem;
+    --bs-banner-padding-y: 0.85rem;
+    --bs-banner-font-size: 0.9rem;
+    --bs-banner-gap: 0.75rem;
+    --bs-banner-border-width: 4px;
+    --bs-banner-border-radius: 0;
+    --bs-banner-border-color: var(--tc-info);
+    --bs-banner-bg: linear-gradient(135deg, rgba(var(--bs-info-rgb), 0.1), rgba(var(--bs-info-rgb), 0.04));
+    --bs-banner-color: #{map.get($theme-colors-emphasis, 'info')};
+    --bs-banner-icon-size: 1rem;
+    --bs-banner-close-size: 28px;
+
+    display: flex;
+    align-items: flex-start;
+    gap: var(--bs-banner-gap);
+    padding: var(--bs-banner-padding-y) var(--bs-banner-padding-x);
+    font-size: var(--bs-banner-font-size);
+    color: var(--bs-banner-color);
+    background: var(--bs-banner-bg);
+    border: 0;
+    border-left: var(--bs-banner-border-width) solid var(--bs-banner-border-color);
+    border-radius: var(--bs-banner-border-radius);
+}
+
+.tc-banner-icon {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    padding-top: 0.1em;
+    color: var(--bs-banner-border-color);
+
+    svg {
+        width: var(--bs-banner-icon-size);
+        height: var(--bs-banner-icon-size);
+    }
+}
+
+.tc-banner-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.tc-banner-action {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 0.5rem;
+}
+
+// CTA link (announcement preset / cta-label + cta-href passthrough).
+.tc-banner-cta {
+    flex-shrink: 0;
+    color: var(--bs-banner-cta-color, var(--bs-banner-border-color));
+    text-decoration: none;
+    font-weight: 500;
+    white-space: nowrap;
+
+    &:hover {
+        text-decoration: underline;
+        color: var(--bs-banner-cta-color, var(--bs-banner-border-color));
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+        border-radius: 2px;
+    }
+}
+
+.tc-banner-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: var(--bs-banner-close-size);
+    height: var(--bs-banner-close-size);
+    margin-left: auto;
+    padding: 0;
+    color: var(--tc-text-muted);
+    background: none;
+    border: 0;
+    border-radius: 0;
+    cursor: pointer;
+    transition:
+        color var(--tc-transition-fast),
+        background-color var(--tc-transition-fast);
+
+    svg {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    &:hover {
+        color: var(--tc-text);
+        background-color: var(--tc-surface-muted);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+        border-radius: 2px;
+    }
+
+    // 44 px coarse touch target
+    @media (pointer: coarse) {
+        width: 44px;
+        height: 44px;
+    }
+}
+
+// ── Variant modifiers ─────────────────────────────────────────────────────────
+
+.tc-banner-info {
+    --bs-banner-border-color: var(--tc-info);
+    --bs-banner-bg: linear-gradient(135deg, rgba(var(--bs-info-rgb), 0.1), rgba(var(--bs-info-rgb), 0.04));
+    --bs-banner-color: #{map.get($theme-colors-emphasis, 'info')};
+}
+
+.tc-banner-warning {
+    --bs-banner-border-color: var(--tc-warning);
+    --bs-banner-bg: linear-gradient(135deg, rgba(var(--bs-warning-rgb), 0.1), rgba(var(--bs-warning-rgb), 0.04));
+    --bs-banner-color: #{map.get($theme-colors-emphasis, 'warning')};
+}
+
+.tc-banner-success {
+    --bs-banner-border-color: var(--tc-success);
+    --bs-banner-bg: linear-gradient(135deg, rgba(var(--bs-success-rgb), 0.1), rgba(var(--bs-success-rgb), 0.04));
+    --bs-banner-color: #{map.get($theme-colors-emphasis, 'success')};
+}
+
+.tc-banner-error {
+    --bs-banner-border-color: var(--tc-danger);
+    --bs-banner-bg: linear-gradient(135deg, rgba(var(--bs-danger-rgb), 0.1), rgba(var(--bs-danger-rgb), 0.04));
+    --bs-banner-color: #{map.get($theme-colors-emphasis, 'danger')};
+}
+
+// announce: cyan --tc-accent highlight (the one place status colour is allowed
+// to convey a genuine brand-announcement tone). Used by tc-announcement-bar.
+.tc-banner-announce {
+    --bs-banner-border-color: var(--tc-accent-hex);
+    --bs-banner-bg: linear-gradient(135deg, var(--tc-accent-soft), rgba(16, 152, 200, 0.04));
+    --bs-banner-color: var(--tc-accent-fg);
+    --bs-banner-cta-color: var(--tc-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-banner-close {
+        transition: none;
+    }
+}

@@ -1,0 +1,76 @@
+// tc-progress — flat 8px slate-200 track, ink fill. Striped + animated
+// variants keep the Bootstrap class protocol.
+
+.progress,
+.progress-stacked {
+    --bs-progress-height: 0.5rem;
+    --bs-progress-font-size: 0.65rem;
+    --bs-progress-bg: var(--tc-slate-200);
+    --bs-progress-border-radius: 0;
+    --bs-progress-box-shadow: none;
+    --bs-progress-bar-color: var(--tc-app-accent-contrast);
+    --bs-progress-bar-bg: var(--tc-app-accent);
+    --bs-progress-bar-transition: width 0.6s ease;
+
+    display: flex;
+    height: var(--bs-progress-height);
+    overflow: hidden;
+    font-size: var(--bs-progress-font-size);
+    background-color: var(--bs-progress-bg);
+    border-radius: var(--bs-progress-border-radius);
+    box-shadow: var(--bs-progress-box-shadow);
+}
+
+// A labelled bar needs room for its text — thicken the track and switch the
+// label into the mono register (machine-facing metadata voice).
+.progress:has(.progress-bar:not(:empty)) {
+    height: 1.25rem;
+    font-family: var(--tc-font-mono);
+    font-size: 0.6875rem;
+}
+
+.progress-bar {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+    color: var(--bs-progress-bar-color);
+    text-align: center;
+    white-space: nowrap;
+    background-color: var(--bs-progress-bar-bg);
+    transition: var(--bs-progress-bar-transition);
+}
+
+.progress-bar-striped {
+    background-image: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.15) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.15) 50%,
+        rgba(255, 255, 255, 0.15) 75%,
+        transparent 75%,
+        transparent
+    );
+    background-size: 1rem 1rem;
+}
+
+.progress-bar-animated {
+    animation: progress-bar-stripes 1s linear infinite;
+}
+
+.progress-stacked > .progress {
+    overflow: visible;
+}
+
+@keyframes progress-bar-stripes {
+    0% {
+        background-position-x: 1rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .progress-bar-animated {
+        animation: none;
+    }
+}

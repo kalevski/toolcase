@@ -1,0 +1,63 @@
+// Dungeon › tc-feature-card — ability/perk plate with gilded panel + slot icon + display-caps title.
+// Token swap flips background and icon tile to wood/slot fills; structural rules add the
+// inset bevel stack, corner notches, and Cinzel caps that a flat token swap can't carry.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-feature-card {
+        // Wood gradient fill replaces the flat surface.
+        --bs-feature-card-bg: var(--fg-panel-bg);
+        // Icon tile becomes a radial wood slot with a gold glyph.
+        --bs-feature-card-icon-bg: var(--fg-slot-bg);
+        --bs-feature-card-icon-color: var(--fg-gold);
+    }
+
+    // Gilded panel: bevel stack overrides the resting tc-shadow-sm.
+    // position:relative anchors the corner-notch pseudo-elements.
+    .tc-feature-card {
+        position: relative;
+        box-shadow: var(--fg-panel-shadow);
+
+        &:hover {
+            // Preserve the lift shadow alongside the bevel on hover.
+            box-shadow: var(--fg-panel-shadow), var(--tc-shadow-hover);
+        }
+    }
+
+    // Top corner notches — the signature gilded ornament.
+    .tc-feature-card::before,
+    .tc-feature-card::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+    }
+
+    .tc-feature-card::before {
+        left: -1px;
+    }
+
+    .tc-feature-card::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+
+    // Icon tile: gold-deep hairline border + top bevel so it reads as a seated slot.
+    .tc-feature-card-icon {
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // Title in Cinzel display caps — the base hardcodes no font-family so
+    // we must override the class directly (a var swap won't reach it).
+    .tc-feature-card-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: 600;
+    }
+}

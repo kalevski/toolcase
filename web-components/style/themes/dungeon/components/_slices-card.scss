@@ -1,0 +1,46 @@
+// Dungeon › tc-slices-card — dashboard donut-chart card with a gilded title.
+// Light touch: foundation already recolors the surface, border, text, and skeleton
+// background through --tc-* rewires. Only the white shimmer literal, the title
+// font family (hardcoded in the base), and an optional plate bevel need explicit
+// rules here.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Host-level token repoints ─────────────────────────────────────────────
+    // Set on tc-slices-card (the host) where the base defines the var defaults.
+
+    tc-slices-card {
+        // Kill the bright white shimmer sweep — use a warm parchment tint instead.
+        --bs-slices-card-skeleton-shimmer: rgba(232, 220, 196, 0.18);
+
+        // Lift the title to gilded gold (base wires this to --tc-text-muted).
+        --bs-slices-card-title-color: var(--fg-gold);
+
+        // Pull the card surface into the wood-panel look.
+        --bs-slices-card-bg: var(--fg-panel-bg);
+        --bs-slices-card-header-bg: var(--fg-panel-bg);
+    }
+
+    // ── Class-level structural overrides ─────────────────────────────────────
+    // .tc-slices-card carries the Bootstrap card shell tokens.
+
+    .tc-slices-card {
+        // Gilded inset bevel + drop shadow — matches the panel plate treatment.
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // Gold hairline rule under the header (base carries no divider).
+    .tc-slices-card-header {
+        border-bottom: 1px solid var(--fg-gold-deep);
+    }
+
+    // Title: override the hardcoded 'JetBrains Mono' with the display serif.
+    // Already uppercase in the base; add a slightly wider tracking for the caps.
+    .tc-slices-card-title {
+        font-family: var(--fg-display);
+        letter-spacing: 0.14em;
+        font-weight: 600;
+        color: var(--fg-gold);
+    }
+}

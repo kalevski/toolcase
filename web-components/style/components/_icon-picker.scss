@@ -1,0 +1,268 @@
+// tc-icon-picker — searchable icon-grid dropdown.
+// Sharp corners throughout (border-radius: 0). Ink accent for selected cell.
+// All cosmetic values flow through --bs-icon-picker-* backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+// ── Host ──────────────────────────────────────────────────────────────────────
+
+tc-icon-picker {
+    position: relative;
+}
+
+// ── Label ─────────────────────────────────────────────────────────────────────
+
+.tc-icon-picker-label {
+    display: block;
+    margin-bottom: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--tc-text);
+    cursor: default;
+}
+
+// ── Trigger button ────────────────────────────────────────────────────────────
+
+.tc-icon-picker-trigger {
+    --bs-icon-picker-trigger-bg: var(--tc-surface);
+    --bs-icon-picker-trigger-border: var(--tc-border-strong);
+    --bs-icon-picker-trigger-color: var(--tc-text);
+
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.5rem;
+    font-family: inherit;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--bs-icon-picker-trigger-color);
+    cursor: pointer;
+    background: var(--bs-icon-picker-trigger-bg);
+    border: 1px solid var(--bs-icon-picker-trigger-border);
+    border-radius: 0;
+    transition:
+        border-color var(--tc-transition-fast),
+        box-shadow var(--tc-transition-fast);
+
+    &:focus-visible {
+        outline: none;
+        box-shadow: var(--tc-focus-ring);
+    }
+
+    &[disabled],
+    &:disabled {
+        opacity: 0.5;
+        pointer-events: none;
+        cursor: default;
+    }
+}
+
+// Icon inside the trigger
+.tc-icon-picker-trigger-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    color: var(--tc-text);
+
+    svg {
+        width: 1rem;
+        height: 1rem;
+    }
+}
+
+// Chevron trailing icon
+.tc-icon-picker-trigger-chevron {
+    display: inline-flex;
+    align-items: center;
+    color: var(--tc-text-muted);
+
+    svg {
+        width: 0.875rem;
+        height: 0.875rem;
+    }
+}
+
+// ── Overlay popup ─────────────────────────────────────────────────────────────
+
+.tc-icon-picker-popup {
+    --bs-icon-picker-popup-bg: var(--tc-surface);
+    --bs-icon-picker-popup-border: var(--tc-border);
+    --bs-icon-picker-popup-shadow: var(--tc-shadow-lg);
+    --bs-icon-picker-popup-z: var(--tc-z-dropdown);
+    --bs-icon-picker-popup-padding: 0.5rem;
+    --bs-icon-picker-popup-min-width: 200px;
+
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    z-index: var(--bs-icon-picker-popup-z);
+    display: none;
+    width: max-content;
+    min-width: var(--bs-icon-picker-popup-min-width);
+    padding: var(--bs-icon-picker-popup-padding);
+    background: var(--bs-icon-picker-popup-bg);
+    border: 1px solid var(--bs-icon-picker-popup-border);
+    border-radius: 0;
+    box-shadow: var(--bs-icon-picker-popup-shadow);
+
+    &.show {
+        display: block;
+    }
+}
+
+// ── Search input ──────────────────────────────────────────────────────────────
+
+.tc-icon-picker-search {
+    display: block;
+    width: 100%;
+    margin-bottom: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--tc-text);
+    background: var(--tc-surface);
+    border: 1px solid var(--tc-border-strong);
+    border-radius: 0;
+    box-sizing: border-box;
+    outline: none;
+    transition: box-shadow var(--tc-transition-fast);
+
+    &:focus {
+        box-shadow: var(--tc-focus-ring);
+    }
+
+    // Remove the native search cancel button (WebKit)
+    &::-webkit-search-cancel-button {
+        -webkit-appearance: none;
+    }
+}
+
+// ── Options container ─────────────────────────────────────────────────────────
+
+.tc-icon-picker-options {
+    // scrollable when the grid is large
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+// ── Icon grid ─────────────────────────────────────────────────────────────────
+
+.tc-icon-picker-grid {
+    display: grid;
+    gap: 2px;
+}
+
+// ── Icon option cell ──────────────────────────────────────────────────────────
+
+.tc-icon-picker-option {
+    --bs-icon-picker-option-size: 2rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-icon-picker-option-size);
+    height: var(--bs-icon-picker-option-size);
+    padding: 0;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 0;
+    color: var(--tc-text);
+    transition:
+        background var(--tc-transition-fast),
+        color var(--tc-transition-fast);
+
+    svg {
+        width: 1rem;
+        height: 1rem;
+        pointer-events: none;
+    }
+
+    &:hover {
+        background: var(--tc-surface-muted);
+    }
+
+    &:focus-visible {
+        outline: none;
+        box-shadow: var(--tc-focus-ring);
+    }
+
+    // Highlighted cell (keyboard roving focus)
+    &--highlighted {
+        background: var(--tc-surface-muted);
+        border-color: var(--tc-border-strong);
+    }
+
+    // Selected cell — accent fill, contrast-ink icon
+    &--selected {
+        background: var(--tc-app-accent);
+        border-color: var(--tc-app-accent);
+        color: var(--tc-app-accent-contrast);
+
+        &:hover {
+            background: var(--tc-app-accent);
+        }
+    }
+
+    // Selected + highlighted
+    &--selected#{&}--highlighted {
+        background: var(--tc-app-accent);
+        border-color: var(--tc-border-strong);
+    }
+}
+
+// ── Empty message ─────────────────────────────────────────────────────────────
+
+.tc-icon-picker-empty {
+    margin: 0;
+    padding: 0.5rem 0.25rem;
+    font-size: 0.8125rem;
+    color: var(--tc-text-muted);
+    text-align: center;
+}
+
+// ── Loading skeleton grid ─────────────────────────────────────────────────────
+
+.tc-icon-picker-skeleton-cell {
+    --bs-icon-picker-option-size: 2rem;
+    --bs-icon-picker-skeleton-bg: var(--tc-surface-muted);
+
+    width: var(--bs-icon-picker-option-size);
+    height: var(--bs-icon-picker-option-size);
+    background: var(--bs-icon-picker-skeleton-bg);
+    animation: tc-ip-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes tc-ip-pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.35; }
+}
+
+// ── Touch targets (WCAG 2.5.5 — 44px minimum on coarse pointer) ──────────────
+
+@media (pointer: coarse) {
+    .tc-icon-picker-trigger {
+        min-height: 44px;
+    }
+
+    .tc-icon-picker-option {
+        --bs-icon-picker-option-size: 44px;
+    }
+
+    .tc-icon-picker-skeleton-cell {
+        --bs-icon-picker-option-size: 44px;
+    }
+}
+
+// ── Reduced motion ────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-icon-picker-skeleton-cell {
+        animation: none;
+        opacity: 0.5;
+    }
+}

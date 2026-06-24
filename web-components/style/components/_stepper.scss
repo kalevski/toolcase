@@ -1,0 +1,257 @@
+// tc-stepper — multi-step progress indicator with completion icons and optional
+// clickable navigation. Sharp corners throughout; the marker is the ONE sanctioned
+// circle (border-radius: 50%). State ladder: pending = hairline border + faint text;
+// active = ink fill + white number; complete = success fill + check icon.
+// Connector lines reflect the preceding step's state.
+
+tc-stepper {
+    // ── Marker geometry ────────────────────────────────────────────────────────
+    --bs-stepper-marker-size: 2rem;
+    --bs-stepper-marker-font-size: 0.8125rem;
+    --bs-stepper-marker-font-weight: 600;
+
+    // ── Connector ─────────────────────────────────────────────────────────────
+    --bs-stepper-connector-thickness: 1px;
+    --bs-stepper-connector-color: var(--tc-border);
+    --bs-stepper-connector-complete-color: var(--tc-success);
+    --bs-stepper-connector-active-color: var(--tc-app-accent);
+    --bs-stepper-connector-min-cross: 1.5rem;
+
+    // ── Pending marker (hairline ring + faint text) ────────────────────────────
+    --bs-stepper-pending-bg: transparent;
+    --bs-stepper-pending-border: var(--tc-border);
+    --bs-stepper-pending-color: var(--tc-text-faint);
+
+    // ── Active marker (ink fill + white number) ────────────────────────────────
+    --bs-stepper-active-bg: var(--tc-app-accent);
+    --bs-stepper-active-border: var(--tc-app-accent);
+    --bs-stepper-active-color: var(--tc-app-accent-contrast);
+
+    // ── Complete marker (success fill + check icon) ────────────────────────────
+    --bs-stepper-complete-bg: var(--tc-success);
+    --bs-stepper-complete-border: var(--tc-success);
+    --bs-stepper-complete-color: var(--tc-app-accent-contrast);
+
+    // ── Check icon ─────────────────────────────────────────────────────────────
+    --bs-stepper-check-icon-size: 1rem;
+
+    // ── Label / description ────────────────────────────────────────────────────
+    --bs-stepper-label-font-size: 0.875rem;
+    --bs-stepper-label-font-weight: 400;
+    --bs-stepper-label-color: var(--tc-text-muted);
+    --bs-stepper-active-label-font-weight: 600;
+    --bs-stepper-active-label-color: var(--tc-text);
+    --bs-stepper-complete-label-color: var(--tc-text);
+    --bs-stepper-description-font-size: 0.8125rem;
+    --bs-stepper-description-color: var(--tc-text-faint);
+    --bs-stepper-optional-font-size: 0.75rem;
+    --bs-stepper-optional-color: var(--tc-text-faint);
+
+    // ── Spacing ────────────────────────────────────────────────────────────────
+    --bs-stepper-step-gap: 0.4rem;
+    --bs-stepper-body-gap: 0.75rem;
+}
+
+// ── Shared inner elements ──────────────────────────────────────────────────────
+
+// Marker — the ONE sanctioned circle
+.tc-stepper-marker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-stepper-marker-size);
+    height: var(--bs-stepper-marker-size);
+    border-radius: 50%;
+    border: 1.5px solid var(--bs-stepper-pending-border);
+    background: var(--bs-stepper-pending-bg);
+    color: var(--bs-stepper-pending-color);
+    font-size: var(--bs-stepper-marker-font-size);
+    font-weight: var(--bs-stepper-marker-font-weight);
+    flex-shrink: 0;
+    transition: background var(--tc-transition-fast), border-color var(--tc-transition-fast), color var(--tc-transition-fast);
+}
+
+// Check icon inside the complete marker
+.tc-stepper-check-icon {
+    display: block;
+    width: var(--bs-stepper-check-icon-size);
+    height: var(--bs-stepper-check-icon-size);
+    stroke: currentColor;
+}
+
+.tc-stepper-num {
+    display: block;
+    line-height: 1;
+}
+
+// Body wraps label + description + optional hint
+.tc-stepper-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.tc-stepper-label {
+    font-size: var(--bs-stepper-label-font-size);
+    font-weight: var(--bs-stepper-label-font-weight);
+    color: var(--bs-stepper-label-color);
+    line-height: 1.3;
+    border-radius: 0;
+    transition: color var(--tc-transition-fast);
+}
+
+.tc-stepper-description {
+    font-size: var(--bs-stepper-description-font-size);
+    color: var(--bs-stepper-description-color);
+    line-height: 1.35;
+    border-radius: 0;
+}
+
+.tc-stepper-optional {
+    font-size: var(--bs-stepper-optional-font-size);
+    color: var(--bs-stepper-optional-color);
+    font-style: italic;
+}
+
+// ── Connector ──────────────────────────────────────────────────────────────────
+.tc-stepper-connector {
+    background: var(--bs-stepper-connector-color);
+    border-radius: 0;
+    transition: background var(--tc-transition-fast);
+}
+
+.tc-stepper-connector-complete {
+    background: var(--bs-stepper-connector-complete-color);
+}
+
+.tc-stepper-connector-active {
+    background: var(--bs-stepper-connector-active-color);
+}
+
+// ── Step base ──────────────────────────────────────────────────────────────────
+.tc-stepper-step {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+    cursor: default;
+    border-radius: 0;
+    text-align: inherit;
+}
+
+// ── State: active ──────────────────────────────────────────────────────────────
+.tc-stepper-step-active {
+    .tc-stepper-marker {
+        background: var(--bs-stepper-active-bg);
+        border-color: var(--bs-stepper-active-border);
+        color: var(--bs-stepper-active-color);
+    }
+
+    .tc-stepper-label {
+        color: var(--bs-stepper-active-label-color);
+        font-weight: var(--bs-stepper-active-label-font-weight);
+    }
+}
+
+// ── State: complete ────────────────────────────────────────────────────────────
+.tc-stepper-step-complete {
+    .tc-stepper-marker {
+        background: var(--bs-stepper-complete-bg);
+        border-color: var(--bs-stepper-complete-border);
+        color: var(--bs-stepper-complete-color);
+    }
+
+    .tc-stepper-label {
+        color: var(--bs-stepper-complete-label-color);
+    }
+}
+
+// ── Horizontal layout ──────────────────────────────────────────────────────────
+.tc-stepper-horizontal {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    margin: 0;
+    padding: 0;
+
+    .tc-stepper-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--bs-stepper-step-gap);
+        flex-shrink: 0;
+        text-align: center;
+    }
+
+    .tc-stepper-body {
+        align-items: center;
+    }
+
+    // Connector: horizontal hairline centered on the marker row
+    .tc-stepper-connector {
+        flex: 1;
+        min-width: 1rem;
+        height: var(--bs-stepper-connector-thickness);
+        // Position the connector at the vertical center of the markers
+        margin-top: calc(var(--bs-stepper-marker-size) / 2);
+        align-self: flex-start;
+    }
+}
+
+// ── Vertical layout ────────────────────────────────────────────────────────────
+.tc-stepper-vertical {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+
+    .tc-stepper-step {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        gap: var(--bs-stepper-body-gap);
+        text-align: left;
+    }
+
+    // Connector: vertical hairline aligned with marker center
+    .tc-stepper-connector {
+        width: var(--bs-stepper-connector-thickness);
+        min-height: var(--bs-stepper-connector-min-cross);
+        // Offset to center on the marker column
+        margin-left: calc((var(--bs-stepper-marker-size) - var(--bs-stepper-connector-thickness)) / 2);
+    }
+}
+
+// ── Clickable step interactive ladder ─────────────────────────────────────────
+.tc-stepper-step:is(button) {
+    cursor: pointer;
+
+    &:hover {
+        background: var(--tc-surface-muted);
+        border-radius: 0;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+}
+
+// 44px coarse touch targets on clickable steps
+@media (pointer: coarse) {
+    .tc-stepper-step:is(button) {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+// ── Reduced motion ─────────────────────────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+    .tc-stepper-marker,
+    .tc-stepper-connector,
+    .tc-stepper-label {
+        transition: none;
+    }
+}

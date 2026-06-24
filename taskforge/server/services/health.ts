@@ -8,6 +8,7 @@ import { promises as fs } from 'node:fs'
 import { config } from '@/server/config'
 import { getRow } from '@/server/data/db'
 import * as searchRepo from '@/server/data/repositories/search-repo'
+import { listAccounts } from '@/server/services/accounts'
 import { engine } from '@/server/services/execution-manager'
 import type { HealthDetails } from '@/server/domain/types'
 
@@ -81,6 +82,15 @@ export async function healthDetails(): Promise<HealthDetails> {
         db: { path: config.dbPath, sizeBytes: dbSize, migrationVersion },
         engines: engine.states(),
         searchAvailable: searchRepo.searchAvailable(),
+        // Cached, non-live: each account's auth method + last successful
+        // use/verify (`lastUsedAt`). A live `verifyAccount` is deliberately NOT
+        // run here — diagnostics must stay cheap and side-effect-free.
+        accounts: listAccounts().map((a) => ({
+            alias: a.alias,
+            auth: a.auth,
+            label: a.label,
+            lastUsedAt: a.lastUsedAt,
+        })),
         // Secrets redacted: only operational, non-sensitive values are surfaced.
         config: {
             workspaceDir: config.workspaceDir,

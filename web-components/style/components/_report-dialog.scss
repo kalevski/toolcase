@@ -1,0 +1,452 @@
+// tc-report-dialog — player-report moderation modal.
+// Overlay tier: full-screen backdrop + centred panel; sharp corners; 1px hairline;
+// single hard shadow. Game chrome (gilded frames, glows, fantasy fills) dropped.
+// All cosmetics flow through --bs-report-dialog-* custom properties.
+
+tc-report-dialog {
+    // Surface
+    --bs-report-dialog-bg:           var(--tc-surface);
+    --bs-report-dialog-border-color: var(--tc-border);
+    --bs-report-dialog-shadow:       var(--tc-shadow-lg);
+    --bs-report-dialog-width:        460px;
+    --bs-report-dialog-max-width:    calc(100vw - 2rem);
+    --bs-report-dialog-max-height:   calc(100vh - 4rem);
+    --bs-report-dialog-padding:      1.25rem;
+    --bs-report-dialog-gap:          0.75rem;
+
+    // Header
+    --bs-report-dialog-eyebrow-color: var(--tc-text-muted);
+    --bs-report-dialog-eyebrow-size:  0.6875rem;
+    --bs-report-dialog-title-color:   var(--tc-text);
+    --bs-report-dialog-title-size:    1rem;
+
+    // Z-index band — backdrop below panel, both in the overlay tier.
+    --bs-report-dialog-z-backdrop: var(--tc-z-modal-backdrop);
+    --bs-report-dialog-z-panel:    var(--tc-z-modal);
+
+    // Transition
+    --bs-report-dialog-transition: transform var(--tc-transition-base), opacity var(--tc-transition-base);
+
+    // Backdrop scrim
+    --bs-report-dialog-backdrop-bg:      #0f172a;
+    --bs-report-dialog-backdrop-opacity: 0.5;
+
+    // Message
+    --bs-report-dialog-message-color: var(--tc-text-muted);
+    --bs-report-dialog-message-size:  0.8125rem;
+
+    // Reason rows
+    --bs-report-dialog-reason-color:         var(--tc-text);
+    --bs-report-dialog-reason-size:           0.8125rem;
+    --bs-report-dialog-reason-hover-bg:       var(--tc-surface-muted);
+    --bs-report-dialog-reason-checked-bg:     var(--tc-surface-hover);
+    --bs-report-dialog-reason-checked-color:  var(--tc-app-accent);
+
+    // Radio indicator — sanctioned circle per design spec
+    --bs-report-dialog-radio-size:           1rem;
+    --bs-report-dialog-radio-border:         1px solid var(--tc-border-strong);
+    --bs-report-dialog-radio-checked-bg:     var(--tc-app-accent);
+    --bs-report-dialog-radio-checked-border: var(--tc-app-accent);
+
+    // Textarea
+    --bs-report-dialog-textarea-bg:          var(--tc-surface-muted);
+    --bs-report-dialog-textarea-border:      1px solid var(--tc-border-strong);
+    --bs-report-dialog-textarea-color:       var(--tc-text);
+    --bs-report-dialog-textarea-size:        0.8125rem;
+    --bs-report-dialog-textarea-min-height:  5rem;
+
+    // Action buttons
+    --bs-report-dialog-btn-font-size:            0.8125rem;
+    --bs-report-dialog-btn-min-height:           2.25rem;
+    --bs-report-dialog-btn-bg:                   var(--tc-surface);
+    --bs-report-dialog-btn-color:                var(--tc-text);
+    --bs-report-dialog-btn-border:               1px solid var(--tc-border-strong);
+    --bs-report-dialog-btn-hover-bg:             var(--tc-surface-muted);
+    --bs-report-dialog-btn-hover-color:          var(--tc-text);
+    --bs-report-dialog-btn-submit-bg:            var(--tc-danger, #dc2626);
+    --bs-report-dialog-btn-submit-color: var(--tc-app-accent-contrast);
+    // Themed darken (was the fixed #b91c1c, which stayed dark in dark themes and
+    // killed the on-fill ink) so the submit-color reads on hover in every theme.
+    --bs-report-dialog-btn-submit-hover-bg:      color-mix(in srgb, var(--tc-danger) 85%, #000);
+    --bs-report-dialog-btn-submit-hover-color: var(--tc-app-accent-contrast);
+
+    // Close button
+    --bs-report-dialog-close-color:       var(--tc-text-muted);
+    --bs-report-dialog-close-hover-color: var(--tc-text);
+    --bs-report-dialog-close-hover-bg:    var(--tc-surface-muted);
+}
+
+// ── Backdrop ──────────────────────────────────────────────────────────────────
+
+.tc-report-dialog__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--bs-report-dialog-z-backdrop);
+    background: var(--bs-report-dialog-backdrop-bg);
+    opacity: 0;
+    transition: opacity var(--tc-transition-base);
+
+    tc-report-dialog.tc-report-dialog--open & {
+        opacity: var(--bs-report-dialog-backdrop-opacity);
+    }
+}
+
+// ── Panel ─────────────────────────────────────────────────────────────────────
+
+.tc-report-dialog__panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: var(--bs-report-dialog-z-panel);
+    display: flex;
+    flex-direction: column;
+    width: var(--bs-report-dialog-width);
+    max-width: var(--bs-report-dialog-max-width);
+    max-height: var(--bs-report-dialog-max-height);
+    background: var(--bs-report-dialog-bg);
+    border: 1px solid var(--bs-report-dialog-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-report-dialog-shadow);
+    outline: 0;
+    overflow: hidden;
+    transition: var(--bs-report-dialog-transition);
+
+    // Closed: shifted up, scaled down, hidden.
+    opacity: 0;
+    transform: translateY(-20px) translateX(-50%) scale(0.97);
+
+    // Open: centered, full size.
+    tc-report-dialog.tc-report-dialog--open & {
+        opacity: 1;
+        transform: translateY(-50%) translateX(-50%);
+    }
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+
+.tc-report-dialog__header {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    padding: var(--bs-report-dialog-padding);
+    padding-bottom: 0;
+    gap: 0.25rem;
+    border-bottom: 1px solid var(--bs-report-dialog-border-color);
+    position: relative;
+}
+
+.tc-report-dialog__eyebrow {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-report-dialog-eyebrow-size);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bs-report-dialog-eyebrow-color);
+    line-height: 1.4;
+}
+
+.tc-report-dialog__title {
+    font-size: var(--bs-report-dialog-title-size);
+    font-weight: 700;
+    color: var(--bs-report-dialog-title-color);
+    margin: 0 0 var(--bs-report-dialog-padding);
+    line-height: 1.3;
+    padding-right: 2.5rem; // avoid overlap with close button
+}
+
+// ── Close button ──────────────────────────────────────────────────────────────
+
+.tc-report-dialog__close {
+    position: absolute;
+    top: var(--bs-report-dialog-padding);
+    right: var(--bs-report-dialog-padding);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--bs-report-dialog-close-color);
+    cursor: pointer;
+    border-radius: 0;
+    transition: background-color var(--tc-transition-fast), color var(--tc-transition-fast);
+
+    svg {
+        width: 1rem;
+        height: 1rem;
+        flex-shrink: 0;
+    }
+
+    &:hover {
+        background: var(--bs-report-dialog-close-hover-bg);
+        color: var(--bs-report-dialog-close-hover-color);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    @media (pointer: coarse) {
+        width: 2.75rem;
+        height: 2.75rem;
+    }
+}
+
+// ── Body ──────────────────────────────────────────────────────────────────────
+
+.tc-report-dialog__body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    padding: var(--bs-report-dialog-padding);
+    gap: var(--bs-report-dialog-gap);
+}
+
+.tc-report-dialog__message {
+    margin: 0;
+    font-size: var(--bs-report-dialog-message-size);
+    color: var(--bs-report-dialog-message-color);
+    line-height: 1.5;
+}
+
+// ── Reason radio group ────────────────────────────────────────────────────────
+
+.tc-report-dialog__reasons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.tc-report-dialog__reason {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.5rem 0.625rem;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 0;
+    color: var(--bs-report-dialog-reason-color);
+    font-size: var(--bs-report-dialog-reason-size);
+    line-height: 1.4;
+    transition:
+        background var(--tc-transition-fast),
+        border-color var(--tc-transition-fast);
+    user-select: none;
+
+    // Visually hide the native radio input but keep it accessible.
+    input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+        pointer-events: none;
+    }
+
+    &:hover {
+        background: var(--bs-report-dialog-reason-hover-bg);
+    }
+
+    &--checked {
+        background: var(--bs-report-dialog-reason-checked-bg);
+        border-color: var(--bs-report-dialog-border-color);
+
+        .tc-report-dialog__reason-label {
+            color: var(--bs-report-dialog-reason-checked-color);
+            font-weight: 500;
+        }
+
+        .tc-report-dialog__radio {
+            background: var(--bs-report-dialog-radio-checked-bg);
+            border-color: var(--bs-report-dialog-radio-checked-border);
+
+            &::after {
+                opacity: 1;
+            }
+        }
+    }
+
+    // Focus ring on the custom radio when the hidden input is focused.
+    input:focus-visible + .tc-report-dialog__radio {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    @media (pointer: coarse) {
+        min-height: 44px;
+    }
+}
+
+// Custom radio indicator — sanctioned circle shape per design spec.
+.tc-report-dialog__radio {
+    flex-shrink: 0;
+    width: var(--bs-report-dialog-radio-size);
+    height: var(--bs-report-dialog-radio-size);
+    border: var(--bs-report-dialog-radio-border);
+    border-radius: 50%;
+    background: var(--bs-report-dialog-bg);
+    position: relative;
+    transition:
+        background var(--tc-transition-fast),
+        border-color var(--tc-transition-fast);
+
+    // Inner dot — visible when checked.
+    &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 0.375rem;
+        height: 0.375rem;
+        border-radius: 50%;
+        background: var(--tc-app-accent-contrast);
+        opacity: 0;
+        transition: opacity var(--tc-transition-fast);
+    }
+}
+
+// ── Comment textarea ──────────────────────────────────────────────────────────
+
+.tc-report-dialog__comment {
+    appearance: none;
+    display: block;
+    width: 100%;
+    min-height: var(--bs-report-dialog-textarea-min-height);
+    padding: 0.5rem 0.625rem;
+    font-family: inherit;
+    font-size: var(--bs-report-dialog-textarea-size);
+    color: var(--bs-report-dialog-textarea-color);
+    background: var(--bs-report-dialog-textarea-bg);
+    border: var(--bs-report-dialog-textarea-border);
+    border-radius: 0;
+    resize: vertical;
+    outline: 0;
+    line-height: 1.5;
+    box-sizing: border-box;
+    transition: border-color var(--tc-transition-fast), box-shadow var(--tc-transition-fast);
+
+    &::placeholder {
+        color: var(--tc-text-faint, var(--tc-text-muted));
+        opacity: 1;
+    }
+
+    &:focus {
+        border-color: rgba(30, 41, 59, 0.5);
+        box-shadow: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
+    }
+}
+
+// ── Actions ───────────────────────────────────────────────────────────────────
+
+.tc-report-dialog__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--bs-report-dialog-gap);
+    flex-shrink: 0;
+    padding: var(--bs-report-dialog-padding);
+    border-top: 1px solid var(--bs-report-dialog-border-color);
+}
+
+.tc-report-dialog__btn {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0 1rem;
+    min-height: var(--bs-report-dialog-btn-min-height);
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-report-dialog-btn-font-size);
+    font-weight: 500;
+    letter-spacing: 0.025em;
+    color: var(--bs-report-dialog-btn-color);
+    background: var(--bs-report-dialog-btn-bg);
+    border: var(--bs-report-dialog-btn-border);
+    border-radius: 0;
+    cursor: pointer;
+    white-space: nowrap;
+    line-height: 1;
+    transition:
+        background var(--tc-transition-fast, 0.15s ease),
+        color var(--tc-transition-fast, 0.15s ease),
+        transform var(--tc-transition-fast, 0.15s ease);
+
+    &:hover:not(:disabled) {
+        background: var(--bs-report-dialog-btn-hover-bg);
+        color: var(--bs-report-dialog-btn-hover-color);
+        transform: translateY(-1px);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &:disabled {
+        opacity: 0.45;
+        pointer-events: none;
+        cursor: default;
+    }
+
+    @media (pointer: coarse) {
+        min-height: 44px;
+    }
+}
+
+// Submit Report is a danger action — uses red accent to signal intent.
+.tc-report-dialog__submit {
+    color: var(--bs-report-dialog-btn-submit-color);
+    background: var(--bs-report-dialog-btn-submit-bg);
+    border-color: transparent;
+
+    &:hover:not(:disabled) {
+        background: var(--bs-report-dialog-btn-submit-hover-bg);
+        color: var(--bs-report-dialog-btn-submit-hover-color);
+    }
+}
+
+// ── Reduced motion — skip transform / opacity transitions ─────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-report-dialog__backdrop {
+        transition: none;
+    }
+
+    .tc-report-dialog__panel {
+        transition: none;
+        opacity: 1;
+        transform: translateY(-50%) translateX(-50%);
+    }
+
+    .tc-report-dialog__btn {
+        transition:
+            background var(--tc-transition-fast, 0.15s ease),
+            color var(--tc-transition-fast, 0.15s ease);
+
+        &:hover:not(:disabled) {
+            transform: none;
+        }
+    }
+
+    .tc-report-dialog__close {
+        transition: none;
+    }
+
+    .tc-report-dialog__reason {
+        transition: none;
+    }
+
+    .tc-report-dialog__radio {
+        transition: none;
+    }
+
+    .tc-report-dialog__comment {
+        transition: none;
+    }
+}

@@ -17,6 +17,16 @@ export default class Parallel {
         let cancelled = false
         const total = tasks.length
 
+        if (total === 0) {
+            onAll?.()
+            return {
+                cancel() {},
+                get running() { return 0 },
+                get remaining() { return 0 },
+                get done() { return true }
+            }
+        }
+
         const startNext = (): void => {
             if (cancelled) return
             while (running < limit && index < total) {

@@ -1,0 +1,100 @@
+// Dungeon › tc-command-palette — gilded grimoire command overlay.
+// Token-swap sets the wood surface + dungeon ink scrim. Structural rules add
+// the inset bevel stack, top corner notches, gilded group caps, and keycap
+// plates — a full panel-signature treatment for this large overlay surface.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Token swap — host element carries the var defaults ────────────────────
+
+    tc-command-palette {
+        --bs-command-palette-bg:          var(--fg-panel-bg);
+        // Backdrop scrim is hardcoded rgba(15,23,42,0.5) in base — override to
+        // dungeon ink tone.
+        --bs-command-palette-backdrop-bg: rgba(10, 7, 4, 0.7);
+    }
+
+    // ── Dialog surface — gilded bevel + corner notches ────────────────────────
+
+    .tc-command-palette {
+        position: relative;
+        box-shadow: var(--fg-panel-shadow), var(--tc-shadow-lg);
+    }
+
+    // Top corner notches — mirroring the signature panel ornament.
+    .tc-command-palette::before,
+    .tc-command-palette::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+    }
+
+    .tc-command-palette::before {
+        left: -1px;
+    }
+
+    .tc-command-palette::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+
+    // ── Search header divider — gold-rule hairline ─────────────────────────────
+
+    .tc-command-palette-search {
+        border-bottom-color: var(--fg-gold-deep);
+    }
+
+    // Search input — body serif voice (input text itself stays readable).
+    .tc-command-palette-input {
+        font-family: var(--fg-body);
+        color: var(--fg-parch);
+
+        &::placeholder {
+            color: var(--fg-parch-dim);
+        }
+    }
+
+    // ── Group headings — gilded display micro-caps ────────────────────────────
+
+    // The base uses tc-font-mono + uppercase; override to display caps + gold
+    // tint for the grimoire voice. letter-spacing boosted to full display spec.
+    .tc-command-palette-group {
+        font-family: var(--fg-display);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: var(--fg-gold);
+    }
+
+    // ── Result rows ───────────────────────────────────────────────────────────
+
+    .tc-command-palette-item {
+        color: var(--fg-parch);
+    }
+
+    // Active (selected) row is already gold fill + ink text via token remap;
+    // no extra override needed — foundation handles it.
+
+    // ── kbd shortcut chips — keycap plates ───────────────────────────────────
+
+    .tc-command-palette-key {
+        background: var(--fg-keycap-bg);
+        border-color: var(--fg-gold-deep);
+        color: var(--fg-parch);
+        // Ensure square — base is already 0 but be explicit.
+        border-radius: 0;
+    }
+
+    // ── Footer hint bar ───────────────────────────────────────────────────────
+
+    .tc-command-palette-footer {
+        border-top-color: var(--fg-gold-deep);
+        color: var(--fg-parch-dim);
+    }
+}

@@ -1,0 +1,46 @@
+// Dungeon › tc-nav-button — square gilded icon button (back / close).
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-nav-button {
+        // Improvement 1: gilded rest-state glyph (was --fg-parch-3, dull tan).
+        --bs-nav-button-color: var(--fg-gold);
+        --bs-nav-button-bg: var(--fg-button-bg);
+        --bs-nav-button-border-color: var(--fg-gold-deep);
+        --bs-nav-button-hover-color: var(--fg-gold-bright);
+        --bs-nav-button-hover-bg: var(--fg-button-bg);
+        --bs-nav-button-hover-border-color: var(--fg-gold);
+        --bs-nav-button-active-color: var(--fg-gold-bright);
+        --bs-nav-button-active-bg: var(--fg-button-bg);
+        --bs-nav-button-active-border-color: var(--fg-gold);
+        --bs-nav-button-focus-ring-color: rgba(240, 210, 122, 0.4);
+    }
+
+    .tc-nav-button__btn {
+        // Improvement 2: add standing drop shadow to lift button off the panel.
+        box-shadow:
+            var(--fg-bevel-top),
+            inset 0 -6px 10px rgba(0, 0, 0, 0.4),
+            0 2px 0 rgba(0, 0, 0, 0.6);
+
+        // Improvement 5: display serif font so glyphs (× etc.) carry the theme voice.
+        font-family: var(--fg-display);
+
+        &:hover {
+            filter: brightness(1.15);
+        }
+
+        // Improvement 3: restore press feedback (base resets to translateY(0), swallowing the press).
+        &:active {
+            transform: translateY(1px);
+            filter: brightness(0.9);
+        }
+
+        // Improvement 4: crisp gold reticle focus ring instead of soft glow.
+        &:focus-visible {
+            box-shadow: none;
+            outline: 2px solid var(--fg-gold-bright);
+            outline-offset: 2px;
+        }
+    }
+}

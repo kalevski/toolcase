@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { createHash } from 'node:crypto'
 import { generatePKCE, generateState, generateNonce } from '../../src/oauth2/random'
 
@@ -22,9 +22,26 @@ describe('generatePKCE', () => {
 	})
 
 	it('plain mode: challenge equals verifier', () => {
+		vi.spyOn(console, 'warn').mockImplementation(() => {})
 		const pair = generatePKCE('plain')
 		expect(pair.method).toBe('plain')
 		expect(pair.codeChallenge).toBe(pair.codeVerifier)
+		vi.restoreAllMocks()
+	})
+
+	it('emits a console.warn when plain method is used', () => {
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+		generatePKCE('plain')
+		expect(warn).toHaveBeenCalledWith(expect.stringContaining('plain'))
+		vi.restoreAllMocks()
+	})
+
+	it('does not emit console.warn for S256', () => {
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+		generatePKCE('S256')
+		generatePKCE()
+		expect(warn).not.toHaveBeenCalled()
+		vi.restoreAllMocks()
 	})
 
 	it('rejects unknown method', () => {

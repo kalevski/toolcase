@@ -1,0 +1,59 @@
+// Dungeon › tc-timeline — quest-log / chronicle-scroll surface.
+// Token swap fixes the two white literals (glass bg, skeleton shimmer) that
+// the foundation remap cannot reach, promotes the card bg to a wood fill, and
+// pushes active node → gold-bright.
+// Structural adds: gilded bevel on cards, display-caps on titles, gold spine.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-timeline {
+        // ── Token swap — literals the foundation remap cannot catch ───────────
+        --bs-timeline-card-bg: var(--fg-panel-bg);
+        --bs-timeline-glass-bg: rgba(42, 31, 20, 0.72);
+        --bs-timeline-skeleton-shimmer: rgba(232, 220, 196, 0.15);
+
+        // ── Active node → gilded bright ───────────────────────────────────────
+        --bs-timeline-active-bg: var(--fg-gold-bright);
+        --bs-timeline-active-border: var(--fg-gold-bright);
+
+        // ── Spine → gold-deep (solid + default) ──────────────────────────────
+        --bs-timeline-line-color: var(--fg-gold-deep);
+        --bs-timeline-line-solid-color: var(--fg-gold);
+    }
+
+    // ── Card — gilded bevel (lighter than full panel-shadow; cards repeat) ──
+    .tc-timeline-card {
+        box-shadow: var(--fg-bevel-top), var(--tc-shadow-md);
+    }
+
+    // Elevated variant already has its own shadow; layer the bevel on top.
+    .tc-timeline--elevated .tc-timeline-card {
+        box-shadow: var(--fg-bevel-top), var(--bs-timeline-elevated-shadow);
+    }
+
+    // Glass variant: dark leather wash, keep backdrop-filter from base.
+    .tc-timeline--glass .tc-timeline-card {
+        background: var(--bs-timeline-glass-bg);
+    }
+
+    // ── Title — display caps (base hardcodes no font-family, so override here) ─
+    .tc-timeline-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+    }
+
+    // ── Gradient spine → gold ramp ───────────────────────────────────────────
+    // The base renders the gradient inline via --bs-timeline-line-color; repoint
+    // the gradient modifier to the fg-rule gold hairline token (vertical pass).
+    .tc-timeline-line--gradient {
+        background: linear-gradient(
+            to bottom,
+            transparent,
+            var(--fg-gold-deep) 8%,
+            var(--fg-gold) 50%,
+            var(--fg-gold-deep) 92%,
+            transparent
+        );
+    }
+}

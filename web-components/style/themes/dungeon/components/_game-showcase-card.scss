@@ -1,0 +1,87 @@
+// Dungeon › tc-game-showcase-card — gilded poster panel with wax-seal stamps and display-caps title.
+// Key fix: overrides the hardcoded 'Inter' font-family on .tc-game-showcase-card-title
+// (token remap alone cannot beat a literal font name in the base stylesheet).
+// Token-swapped for free via --tc-*: bg, border, shadows, art placeholder, text colors,
+// tag/stamp tones, compliance status colors, border-radius (already 0 everywhere).
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token overrides on host ────────────────────────────────────────────────
+
+    tc-game-showcase-card {
+        // Wood gradient card surface.
+        --bs-game-showcase-card-bg: var(--fg-panel-bg);
+
+        // Gilt wax-seal text on the ink stamp (base hardcodes #fff).
+        --bs-game-showcase-card-stamp-color: var(--fg-gold-bright);
+    }
+
+    // ── Outer card wrapper — gilded bevel + corner notches ────────────────────
+
+    .tc-game-showcase-card {
+        position: relative;
+        box-shadow: var(--fg-panel-shadow);
+
+        &:hover {
+            // Keep the dungeon bevel on hover; translateY still applies from base.
+            box-shadow: var(--fg-panel-shadow);
+        }
+    }
+
+    // Top corner notches — signature gilded ornament (mirrors _panel.scss).
+    .tc-game-showcase-card::before,
+    .tc-game-showcase-card::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        z-index: 2;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+    }
+
+    .tc-game-showcase-card::before {
+        left: -1px;
+    }
+
+    .tc-game-showcase-card::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+
+    // ── Title — override hardcoded 'Inter' to display caps ────────────────────
+
+    .tc-game-showcase-card-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    // ── Stamps — struck wax-seal badges ───────────────────────────────────────
+
+    .tc-game-showcase-card-stamp {
+        box-shadow: var(--fg-bevel-top);
+        border: 1px solid var(--fg-gold-deep);
+    }
+
+    // ── Compliance divider — gold hairline rule ────────────────────────────────
+
+    .tc-game-showcase-card-compliance {
+        position: relative;
+
+        // Replace the plain border-top with a gold gradient rule via ::before.
+        border-top: none;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--fg-rule);
+        }
+    }
+}

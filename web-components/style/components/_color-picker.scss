@@ -1,0 +1,257 @@
+// tc-color-picker — inline color-picker: swatch grid, trigger chip, hex input.
+// Sharp corners throughout (no border-radius). Overlay panel uses --tc-shadow-lg.
+// All cosmetic values flow through --bs-color-picker-* backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+// ── Host ──────────────────────────────────────────────────────────────────────
+
+tc-color-picker {
+    position: relative;
+}
+
+// ── Label ─────────────────────────────────────────────────────────────────────
+
+.tc-color-picker-label {
+    display: block;
+    margin-bottom: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--tc-text);
+    cursor: pointer;
+}
+
+// ── Trigger button ────────────────────────────────────────────────────────────
+
+.tc-color-picker-trigger {
+    --bs-color-picker-trigger-bg: var(--tc-surface);
+    --bs-color-picker-trigger-border: var(--tc-border-strong);
+    --bs-color-picker-trigger-color: var(--tc-text);
+
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.625rem;
+    font-family: inherit;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--bs-color-picker-trigger-color);
+    white-space: nowrap;
+    cursor: pointer;
+    background: var(--bs-color-picker-trigger-bg);
+    border: 1px solid var(--bs-color-picker-trigger-border);
+    border-radius: 0;
+    transition:
+        border-color var(--tc-transition-fast),
+        box-shadow var(--tc-transition-fast);
+
+    &:focus-visible {
+        outline: none;
+        box-shadow: var(--tc-focus-ring);
+    }
+
+    &[disabled],
+    &:disabled {
+        opacity: 0.5;
+        pointer-events: none;
+        cursor: default;
+    }
+}
+
+// Selected color chip inside the trigger.
+.tc-color-picker-chip {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    background: var(--tc-surface-muted);
+    border-radius: 0;
+}
+
+// Hex text inside the trigger — monospace for alignment.
+.tc-color-picker-hex-text {
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: 0.8125rem;
+    color: var(--tc-text-muted);
+}
+
+// ── Overlay panel ─────────────────────────────────────────────────────────────
+
+.tc-color-picker-panel {
+    --bs-color-picker-panel-bg: var(--tc-surface);
+    --bs-color-picker-panel-border: var(--tc-border);
+    --bs-color-picker-panel-shadow: var(--tc-shadow-lg);
+    --bs-color-picker-panel-z: var(--tc-z-dropdown);
+    --bs-color-picker-panel-padding: 0.625rem;
+    --bs-color-picker-panel-min-width: 160px;
+
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    z-index: var(--bs-color-picker-panel-z);
+    display: none;
+    width: max-content;
+    min-width: var(--bs-color-picker-panel-min-width);
+    padding: var(--bs-color-picker-panel-padding);
+    background: var(--bs-color-picker-panel-bg);
+    border: 1px solid var(--bs-color-picker-panel-border);
+    border-radius: 0;
+    box-shadow: var(--bs-color-picker-panel-shadow);
+
+    &.show {
+        display: block;
+    }
+}
+
+// ── Swatch grid ───────────────────────────────────────────────────────────────
+
+.tc-color-picker-grid {
+    display: grid;
+    gap: 4px;
+    margin-bottom: 0.5rem;
+}
+
+// Individual swatch — square (not a circle).
+.tc-color-picker-swatch {
+    --bs-color-picker-swatch-size: 24px;
+
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-color-picker-swatch-size);
+    height: var(--bs-color-picker-swatch-size);
+    padding: 0;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 0;
+    transition: border-color var(--tc-transition-fast);
+
+    // Outer frame drawn outside the swatch boundary (hover / selection ring).
+    &::before {
+        content: '';
+        position: absolute;
+        inset: -3px;
+        border: 2px solid transparent;
+        border-radius: 0;
+        transition: border-color var(--tc-transition-fast);
+        pointer-events: none;
+    }
+
+    &:hover {
+        border-color: rgba(0, 0, 0, 0.3);
+
+        &::before {
+            border-color: var(--tc-border-strong);
+        }
+    }
+
+    &:focus-visible {
+        outline: none;
+        border-color: rgba(0, 0, 0, 0.3);
+
+        &::before {
+            border-color: var(--tc-app-accent);
+        }
+    }
+
+    &[disabled],
+    &:disabled {
+        pointer-events: none;
+        opacity: 0.4;
+    }
+
+    // Selected swatch — prominent border to indicate current value.
+    &--selected {
+        border-color: rgba(0, 0, 0, 0.5);
+
+        &::before {
+            border-color: var(--tc-border-strong);
+        }
+    }
+}
+
+// Check icon overlay on the selected swatch.
+.tc-color-picker-check {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    // mix-blend-mode: difference keeps the check visible on both
+    // light and dark colored swatches.
+    mix-blend-mode: difference;
+    pointer-events: none;
+
+    svg {
+        width: 0.75rem;
+        height: 0.75rem;
+        stroke-width: 3;
+    }
+}
+
+// ── Loading skeleton grid ─────────────────────────────────────────────────────
+
+.tc-color-picker-swatch-skeleton {
+    --bs-color-picker-swatch-size: 24px;
+
+    width: var(--bs-color-picker-swatch-size);
+    height: var(--bs-color-picker-swatch-size);
+    background: var(--tc-surface-muted);
+    animation: tc-cp-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes tc-cp-pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.35; }
+}
+
+// ── Footer / hex input ────────────────────────────────────────────────────────
+
+.tc-color-picker-footer {
+    margin-top: 0.25rem;
+}
+
+// The hex input reuses .form-control for base styling; override only what
+// differs from the base (monospace font, smaller size, no border-radius).
+.tc-color-picker-hex.form-control {
+    padding: 0.25rem 0.5rem;
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: 0.8125rem;
+    border-radius: 0;
+}
+
+// ── Touch targets (WCAG 2.5.5 — 44px minimum on coarse pointer) ───────────────
+
+@media (pointer: coarse) {
+    .tc-color-picker-trigger {
+        min-height: 44px;
+    }
+
+    .tc-color-picker-swatch {
+        --bs-color-picker-swatch-size: 44px;
+    }
+
+    .tc-color-picker-swatch-skeleton {
+        --bs-color-picker-swatch-size: 44px;
+    }
+}
+
+// ── Reduced motion ─────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-color-picker-swatch-skeleton {
+        animation: none;
+        opacity: 0.5;
+    }
+}
+
+// ── Disabled host ─────────────────────────────────────────────────────────────
+
+tc-color-picker[disabled] {
+    opacity: 0.5;
+    pointer-events: none;
+}

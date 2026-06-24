@@ -1,0 +1,578 @@
+// tc-audio-mixer — framework-free audio mixer: toolbar, track headers, a
+// timeline of draggable/resizable clips with a playhead, and an effect-chain
+// inspector. Dense, businesslike slate surfaces; sharp corners everywhere
+// (border-radius: 0). Status colours (danger/warning/accent) appear ONLY as
+// signals (mute/solo/playhead/selection). Shadows only at the overlay tier
+// (the loading scrim). Every cosmetic value flows through --bs-audio-mixer-*
+// backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+tc-audio-mixer {
+    --bs-audio-mixer-surface: var(--tc-surface);
+    --bs-audio-mixer-lane-bg: var(--tc-ink);
+    --bs-audio-mixer-lane-alt-bg: var(--tc-surface-muted);
+    --bs-audio-mixer-border: var(--tc-border);
+    --bs-audio-mixer-border-strong: var(--tc-border-strong);
+    --bs-audio-mixer-text: var(--tc-text);
+    --bs-audio-mixer-muted: var(--tc-text-muted);
+    --bs-audio-mixer-faint: var(--tc-text-faint);
+
+    --bs-audio-mixer-toolbar-bg: var(--tc-surface-muted);
+    --bs-audio-mixer-header-width: 200px;
+
+    --bs-audio-mixer-ruler-bg: var(--tc-surface-muted);
+    --bs-audio-mixer-lanes-bg: var(--tc-ink);
+
+    --bs-audio-mixer-clip-bg: var(--tc-slate-700); // slate block
+    --bs-audio-mixer-clip-border: var(--tc-slate-500);
+    --bs-audio-mixer-clip-text: #fff;
+    --bs-audio-mixer-clip-active-bg: var(--tc-app-accent);
+    --bs-audio-mixer-clip-active-edge: var(--tc-accent);
+
+    --bs-audio-mixer-playhead-color: var(--tc-accent);
+    --bs-audio-mixer-mute-color: var(--tc-danger);
+    --bs-audio-mixer-solo-color: var(--tc-warning);
+
+    --bs-audio-mixer-inspector-bg: var(--tc-surface);
+    --bs-audio-mixer-mono: var(--tc-font-mono, ui-monospace, 'JetBrains Mono', 'SFMono-Regular', monospace);
+
+    --bs-audio-mixer-disabled-opacity: 0.55;
+    --bs-audio-mixer-scrim-bg: rgba(255, 255, 255, 0.6);
+    --bs-audio-mixer-scrim-shadow: var(--tc-shadow-lg);
+
+    --bs-audio-mixer-track-h: 64px;
+    --bs-audio-mixer-ruler-h: 28px;
+}
+
+tc-audio-mixer[disabled] {
+    opacity: var(--bs-audio-mixer-disabled-opacity);
+    pointer-events: none;
+}
+
+.tc-audio-mixer {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--bs-audio-mixer-border);
+    border-radius: 0;
+    background: var(--bs-audio-mixer-surface);
+    color: var(--bs-audio-mixer-text);
+    overflow: hidden;
+}
+
+// ── Toolbar ─────────────────────────────────────────────────────────────────
+
+.tc-audio-mixer-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--bs-audio-mixer-toolbar-bg);
+    border-bottom: 1px solid var(--bs-audio-mixer-border);
+}
+
+.tc-audio-mixer-time {
+    margin-left: auto;
+    font-family: var(--bs-audio-mixer-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    color: var(--bs-audio-mixer-muted);
+}
+
+.tc-audio-mixer-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 32px;
+    padding: 0.25rem 0.625rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--bs-audio-mixer-text);
+    background: var(--bs-audio-mixer-surface);
+    border: 1px solid var(--bs-audio-mixer-border-strong);
+    border-radius: 0;
+    cursor: pointer;
+    transition: background-color var(--tc-transition-fast), border-color var(--tc-transition-fast);
+
+    &:hover {
+        background: var(--tc-surface-muted);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &--primary {
+        color: var(--tc-app-accent-contrast);
+        background: var(--tc-app-accent);
+        border-color: var(--tc-app-accent);
+
+        &:hover {
+            background: var(--tc-app-accent);
+            transform: translateY(-1px);
+        }
+    }
+}
+
+.tc-audio-mixer-icon {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 auto;
+}
+
+// ── Body layout ─────────────────────────────────────────────────────────────
+
+.tc-audio-mixer-main {
+    display: flex;
+    align-items: stretch;
+    min-height: 0;
+}
+
+.tc-audio-mixer-stage {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+// ── Track headers column ────────────────────────────────────────────────────
+
+.tc-audio-mixer-tracks {
+    flex: 0 0 var(--bs-audio-mixer-header-width);
+    width: var(--bs-audio-mixer-header-width);
+    border-right: 1px solid var(--bs-audio-mixer-border-strong);
+    background: var(--bs-audio-mixer-surface);
+}
+
+.tc-audio-mixer-track-header {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.625rem;
+    border-bottom: 1px solid var(--bs-audio-mixer-border);
+    border-left: 3px solid transparent;
+    cursor: pointer;
+    transition: background-color var(--tc-transition-fast), border-color var(--tc-transition-fast);
+
+    &:hover {
+        background: var(--tc-surface-hover);
+    }
+
+    &--active {
+        background: var(--tc-surface-muted);
+        border-left-color: var(--tc-app-accent);
+    }
+}
+
+.tc-audio-mixer-track-name {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--bs-audio-mixer-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tc-audio-mixer-track-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+// ── Toggle chips (mute / solo) + danger (remove) ────────────────────────────
+
+.tc-audio-mixer-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    color: var(--bs-audio-mixer-muted);
+    background: var(--bs-audio-mixer-surface);
+    border: 1px solid var(--bs-audio-mixer-border-strong);
+    border-radius: 0;
+    cursor: pointer;
+    transition: background-color var(--tc-transition-fast), color var(--tc-transition-fast),
+        border-color var(--tc-transition-fast);
+
+    .tc-audio-mixer-icon {
+        width: 14px;
+        height: 14px;
+    }
+
+    &:hover {
+        background: var(--tc-surface-muted);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &--mute {
+        color: var(--tc-app-accent-contrast);
+        background: var(--bs-audio-mixer-mute-color);
+        border-color: var(--bs-audio-mixer-mute-color);
+    }
+
+    &--solo {
+        color: var(--tc-ink);
+        background: var(--bs-audio-mixer-solo-color);
+        border-color: var(--bs-audio-mixer-solo-color);
+    }
+
+    &--danger {
+        color: var(--tc-danger);
+        border-color: var(--tc-border-strong);
+
+        &:hover {
+            color: var(--tc-app-accent-contrast);
+            background: var(--tc-danger);
+            border-color: var(--tc-danger);
+        }
+    }
+}
+
+// ── Volume fader ────────────────────────────────────────────────────────────
+
+.tc-audio-mixer-fader {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 4px;
+    margin: 0;
+    accent-color: var(--tc-app-accent);
+    cursor: pointer;
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 3px;
+    }
+}
+
+// ── Timeline ────────────────────────────────────────────────────────────────
+
+.tc-audio-mixer-timeline {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    background: var(--bs-audio-mixer-lanes-bg);
+}
+
+.tc-audio-mixer-timeline-inner {
+    position: relative;
+}
+
+.tc-audio-mixer-ruler {
+    position: relative;
+    background: var(--bs-audio-mixer-ruler-bg);
+    border-bottom: 1px solid var(--bs-audio-mixer-border-strong);
+    cursor: pointer;
+    user-select: none;
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: -2px;
+    }
+}
+
+.tc-audio-mixer-tick {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    padding-left: 4px;
+    border-left: 1px solid var(--bs-audio-mixer-border-strong);
+    font-family: var(--bs-audio-mixer-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.03em;
+    color: var(--bs-audio-mixer-muted);
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.tc-audio-mixer-lanes {
+    position: relative;
+}
+
+.tc-audio-mixer-lane {
+    position: relative;
+    border-bottom: 1px solid var(--bs-audio-mixer-border);
+    background: var(--bs-audio-mixer-lane-bg);
+
+    &:nth-child(even) {
+        background: color-mix(in srgb, var(--bs-audio-mixer-lane-bg) 92%, #fff);
+    }
+}
+
+// ── Clips ───────────────────────────────────────────────────────────────────
+
+.tc-audio-mixer-clip {
+    position: absolute;
+    top: 6px;
+    bottom: 6px;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 0 8px;
+    color: var(--bs-audio-mixer-clip-text);
+    background: var(--bs-audio-mixer-clip-bg);
+    border: 1px solid var(--bs-audio-mixer-clip-border);
+    border-radius: 0;
+    cursor: grab;
+    overflow: hidden;
+    touch-action: none;
+    transition: background-color var(--tc-transition-fast), border-color var(--tc-transition-fast);
+
+    &:hover {
+        border-color: var(--tc-slate-400);
+    }
+
+    &:active {
+        cursor: grabbing;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-accent);
+        outline-offset: 1px;
+    }
+
+    &--selected {
+        background: var(--bs-audio-mixer-clip-active-bg);
+        border-color: var(--bs-audio-mixer-clip-active-edge);
+        border-width: 2px;
+    }
+}
+
+.tc-audio-mixer-clip-label {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+}
+
+.tc-audio-mixer-clip-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    cursor: ew-resize;
+
+    &--l {
+        left: 0;
+    }
+
+    &--r {
+        right: 0;
+    }
+}
+
+// ── Playhead ────────────────────────────────────────────────────────────────
+
+.tc-audio-mixer-playhead {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--bs-audio-mixer-playhead-color);
+    pointer-events: none;
+    z-index: 2;
+}
+
+// ── Inspector ───────────────────────────────────────────────────────────────
+
+.tc-audio-mixer-inspector {
+    flex: 0 0 240px;
+    width: 240px;
+    padding: 0.75rem;
+    border-left: 1px solid var(--bs-audio-mixer-border-strong);
+    background: var(--bs-audio-mixer-inspector-bg);
+    overflow-y: auto;
+}
+
+.tc-audio-mixer-inspector-title {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin-bottom: 0.625rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--bs-audio-mixer-text);
+
+    .tc-audio-mixer-icon {
+        width: 14px;
+        height: 14px;
+        color: var(--bs-audio-mixer-muted);
+    }
+}
+
+.tc-audio-mixer-inspector-empty {
+    font-size: 0.75rem;
+    color: var(--bs-audio-mixer-muted);
+}
+
+.tc-audio-mixer-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin: 0 0 0.75rem;
+
+    > div {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.25rem 0;
+        border-bottom: 1px solid var(--bs-audio-mixer-border);
+    }
+
+    dt {
+        margin: 0;
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--bs-audio-mixer-faint);
+    }
+
+    dd {
+        margin: 0;
+        font-family: var(--bs-audio-mixer-mono);
+        font-size: 0.75rem;
+        color: var(--bs-audio-mixer-text);
+    }
+}
+
+.tc-audio-mixer-field-label {
+    margin-bottom: 0.375rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--bs-audio-mixer-faint);
+}
+
+.tc-audio-mixer-effects {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0.5rem;
+    border: 1px solid var(--bs-audio-mixer-border);
+}
+
+.tc-audio-mixer-effect {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.25rem 0.25rem 0.25rem 0.5rem;
+
+    & + & {
+        border-top: 1px solid var(--bs-audio-mixer-border);
+    }
+}
+
+.tc-audio-mixer-effect-type {
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: capitalize;
+    color: var(--bs-audio-mixer-text);
+}
+
+.tc-audio-mixer-fx-add-row {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+
+    .tc-audio-mixer-icon-lead {
+        display: inline-flex;
+        color: var(--bs-audio-mixer-muted);
+
+        .tc-audio-mixer-icon {
+            width: 14px;
+            height: 14px;
+        }
+    }
+}
+
+.tc-audio-mixer-fx-add {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 32px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    color: var(--bs-audio-mixer-text);
+    background: var(--bs-audio-mixer-surface);
+    border: 1px solid var(--bs-audio-mixer-border-strong);
+    border-radius: 0;
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+}
+
+// ── Loading scrim / skeleton ────────────────────────────────────────────────
+
+.tc-audio-mixer--loading {
+    position: relative;
+    padding: 1rem;
+    box-shadow: var(--bs-audio-mixer-scrim-shadow);
+}
+
+.tc-audio-mixer-skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.tc-audio-mixer-skeleton-bar,
+.tc-audio-mixer-skeleton-row {
+    height: 48px;
+    background: linear-gradient(
+        90deg,
+        var(--tc-surface-muted) 25%,
+        var(--tc-surface-hover) 50%,
+        var(--tc-surface-muted) 75%
+    );
+    background-size: 200% 100%;
+    animation: tc-audio-mixer-shimmer 1.4s ease infinite;
+}
+
+.tc-audio-mixer-skeleton-bar {
+    height: 28px;
+}
+
+@keyframes tc-audio-mixer-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+// ── Coarse-pointer targets ──────────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-audio-mixer-chip,
+    .tc-audio-mixer-btn {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+// ── Reduced motion ──────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-audio-mixer-skeleton-bar,
+    .tc-audio-mixer-skeleton-row {
+        animation: none;
+        background: var(--tc-surface-muted);
+    }
+
+    .tc-audio-mixer-btn--primary:hover {
+        transform: none;
+    }
+}

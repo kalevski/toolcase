@@ -1,0 +1,26 @@
+// Dungeon › tc-setting-row — gilded divider rule + display-caps label.
+// The foundation token swap already delivers correct colors/fonts; this file
+// adds two signature polish steps that a flat token swap cannot carry:
+//   1. Replace the flat border-top hairline with the gold-gradient rule ornament.
+//   2. Promote __label to display caps (Cinzel serif, wide tracking).
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // 1. Gild the row divider: swap the flat border-top for a gold-gradient
+    //    hairline. border-top is zeroed out because a CSS gradient cannot ride
+    //    the border shorthand — it must be painted via background-image instead.
+    .tc-setting-row {
+        border-top: 0;
+        background-image: var(--fg-rule);
+        background-repeat: no-repeat;
+        background-position: top;
+        background-size: 100% 1px;
+    }
+
+    // 2. Display-caps label — matches the fantasy settings-screen header register.
+    .tc-setting-row__label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+}

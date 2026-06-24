@@ -1,0 +1,48 @@
+// Dungeon › tc-brief-card — quest-brief parchment card.
+// Foundation already remaps bg, border, shadow, text, and mono vars.
+// This file handles the two foundation bypasses:
+//   1. --bs-brief-card-separator-color is a Sass-literal rgba (not a --tc-* var), so it stays
+//      slate-tinted on dark wood and must be repointed explicitly.
+//   2. The three __diff-badge--* variants are compiled from Sass map.get() literals;
+//      a var swap cannot reach them — class-level overrides are the only path.
+// Also adds the gilded bevel and display-caps title treatment.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-brief-card {
+        // Repoint separator (Sass literal, not remappable via --tc-*).
+        --bs-brief-card-separator-color: var(--fg-gold-shadow);
+
+        // Wood-gradient surface instead of the flat --tc-surface fill.
+        --bs-brief-card-bg: var(--fg-panel-bg);
+    }
+
+    // Gilded bevel stack so the card reads as a framed parchment plate.
+    .tc-brief-card {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // Display-caps quest title.
+    .tc-brief-card__title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    // Difficulty badge — dungeon element status ramp.
+    // Sass map.get() tints are compiled literals; only class-level rules reach them.
+    .tc-brief-card__diff-badge--success {
+        background-color: rgba(111, 159, 58, 0.18);
+        color: var(--fg-stamina);
+    }
+
+    .tc-brief-card__diff-badge--warning {
+        background-color: rgba(232, 162, 58, 0.18);
+        color: var(--fg-legendary);
+    }
+
+    .tc-brief-card__diff-badge--danger {
+        background-color: rgba(168, 48, 42, 0.2);
+        color: var(--fg-blood-bright);
+    }
+}

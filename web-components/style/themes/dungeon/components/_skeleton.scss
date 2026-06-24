@@ -1,0 +1,11 @@
+// Dungeon › tc-skeleton — loading-state shimmer placeholder.
+// Foundation-only: all three --bs-skeleton-* color stops resolve through --tc-* vars
+// which the foundation already remaps to leather/gold-deep tones. No hardcoded
+// white/grey literals exist in the base; .tc-skeleton border-radius is already 0;
+// .tc-skeleton-circle 50% is a sanctioned circle. No structural ornament (bevel,
+// notch, display caps) is appropriate on a transient loading placeholder.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // No override needed — foundation token remapping is sufficient for this component.
+}

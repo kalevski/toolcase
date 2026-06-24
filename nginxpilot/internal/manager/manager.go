@@ -7,12 +7,15 @@ import (
 	"context"
 	"log/slog"
 	"math/rand/v2"
+	"os"
+	"path/filepath"
 	"reflect"
 	"sync"
 	"time"
 
 	"github.com/kalevski/toolcase/nginxpilot/internal/config"
 	"github.com/kalevski/toolcase/nginxpilot/internal/deploy"
+	gitsource "github.com/kalevski/toolcase/nginxpilot/internal/source/git"
 	"github.com/kalevski/toolcase/nginxpilot/internal/state"
 )
 
@@ -30,6 +33,7 @@ type Manager struct {
 	loops    map[string]*siteLoop
 	wg       sync.WaitGroup
 	ctx      context.Context
+	syncFn   func(ctx context.Context, site config.Site, defaults config.Defaults, dataDir string, store *state.Store, dep *deploy.Deployer, log *slog.Logger) (*state.SiteState, error)
 }
 
 type siteLoop struct {
@@ -65,8 +69,9 @@ func New(cfg *config.Config, store *state.Store, log *slog.Logger) *Manager {
 		log:      log,
 		store:    store,
 		cfg:      cfg,
-		deployer: deploy.New(cfg.DataDir, cfg.Defaults.KeepReleases, log),
+		deployer: deploy.New(cfg.DataDir, log),
 		loops:    map[string]*siteLoop{},
+		syncFn:   SyncSite,
 	}
 }
 
@@ -76,6 +81,7 @@ func New(cfg *config.Config, store *state.Store, log *slog.Logger) *Manager {
 func (m *Manager) Run(ctx context.Context) {
 	m.mu.Lock()
 	m.ctx = ctx
+	m.reconcileState()
 	for i := range m.cfg.Sites {
 		m.startLoop(m.cfg.Sites[i])
 	}
@@ -86,6 +92,25 @@ func (m *Manager) Run(ctx context.Context) {
 	<-ctx.Done()
 	m.log.Info("shutting down, waiting for in-flight syncs")
 	m.wg.Wait()
+}
+
+// reconcileState clears DeployedRef and HTTP validators for any site whose
+// state records a deploy but whose current/ symlink resolves to nothing.
+// Called once at startup (with m.mu held) before loops begin, so a daemon
+// restarted after a manual rm of current/ self-heals on the first tick.
+func (m *Manager) reconcileState() {
+	for _, site := range m.cfg.Sites {
+		if !m.deployer.CurrentExists(site.Domain) {
+			st, err := m.store.Load(site.Domain)
+			if err != nil || st.DeployedRef == "" {
+				continue
+			}
+			m.log.Warn("state records a deploy but current is missing; clearing ref so next sync redeploys",
+				"domain", site.Domain)
+			st.DeployedRef, st.ETag, st.LastModified, st.ContentHash = "", "", "", ""
+			_ = m.store.Save(st)
+		}
+	}
 }
 
 // startLoop must be called with m.mu held and m.ctx set.
@@ -148,12 +173,13 @@ func (m *Manager) syncOnce(ctx context.Context, sl *siteLoop) (streak int) {
 	m.mu.Lock()
 	dep := m.deployer
 	dataDir := m.cfg.DataDir
+	defaults := m.cfg.Defaults
 	m.mu.Unlock()
 
 	syncCtx, cancel := context.WithTimeout(ctx, syncTimeout)
 	defer cancel()
 
-	st, err := SyncSite(syncCtx, sl.site, dataDir, m.store, dep, m.log)
+	st, err := m.syncFn(syncCtx, sl.site, defaults, dataDir, m.store, dep, m.log)
 	if err != nil {
 		m.log.Error("sync failed", "domain", sl.site.Domain, "error", err,
 			"failure_streak", st.FailureStreak)
@@ -269,7 +295,7 @@ func (m *Manager) Reload(newCfg *config.Config) {
 	}
 
 	m.cfg = newCfg
-	m.deployer = deploy.New(newCfg.DataDir, newCfg.Defaults.KeepReleases, m.log)
+	m.deployer = deploy.New(newCfg.DataDir, m.log)
 
 	// Removed sites: stop the loop; content stays on disk (orphan).
 	for domain, sl := range m.loops {
@@ -293,11 +319,21 @@ func (m *Manager) Reload(newCfg *config.Config) {
 		case !sameSite(old, site) || sl.interval != site.Interval(newCfg.Defaults):
 			// Changed → restart loop. A source identity change is caught by
 			// the fingerprint check inside the sync and forces a full resync.
+			// We wait for the old loop's done channel before starting the new
+			// one so two syncs never overlap on the same domain (BUG-3/BUG-6).
 			m.log.Info("site changed, restarting loop", "domain", domain)
 			sl.cancel()
 			delete(m.loops, domain)
-			m.startLoop(site)
-			m.loops[domain].kick <- struct{}{}
+			go func(old *siteLoop, ns config.Site) {
+				<-old.done
+				m.mu.Lock()
+				defer m.mu.Unlock()
+				if _, exists := m.loops[ns.Domain]; exists {
+					return // re-added by a concurrent Reload
+				}
+				m.startLoop(ns)
+				m.loops[ns.Domain].kick <- struct{}{}
+			}(sl, site)
 		}
 	}
 
@@ -311,7 +347,8 @@ func sameSite(a, b config.Site) bool {
 }
 
 // warnOrphans logs site directories on disk that no configured domain owns
-// (spec §6: warning while orphans exist; --prune-orphans deletes).
+// (spec §6: warning while orphans exist; --prune-orphans deletes) and
+// immediately removes stale git bare-repo caches (task 592, IMP-5/613).
 func (m *Manager) warnOrphans() {
 	m.mu.Lock()
 	dep := m.deployer
@@ -329,6 +366,49 @@ func (m *Manager) warnOrphans() {
 	for _, domain := range orphans {
 		m.log.Warn("orphaned site content on disk (not in config); use --prune-orphans to delete",
 			"domain", domain)
+	}
+
+	m.pruneGitCaches()
+}
+
+// pruneGitCaches removes git bare-repo cache dirs under cache/git/ that no
+// configured site references, preventing unbounded growth when a site's URL
+// or branch changes. Git caches are fully disposable — deleted caches are
+// recloned on the next sync. Mirrors warnOrphans/PruneOrphans for sites
+// (task 592, cross-ref task 613).
+func (m *Manager) pruneGitCaches() {
+	m.mu.Lock()
+	dataDir := m.cfg.DataDir
+	sites := m.cfg.Sites
+	m.mu.Unlock()
+
+	live := map[string]bool{}
+	for _, site := range sites {
+		if site.Source.Type == config.SourceGit {
+			live[gitsource.CacheDir(site.Domain, dataDir, site.Source.URL, site.Source.Branch)] = true
+		}
+	}
+
+	cacheBase := filepath.Join(dataDir, "cache", "git")
+	entries, err := os.ReadDir(cacheBase)
+	if os.IsNotExist(err) {
+		return
+	}
+	if err != nil {
+		m.log.Warn("git cache GC scan failed", "error", err)
+		return
+	}
+	for _, e := range entries {
+		if !e.IsDir() {
+			continue
+		}
+		dir := filepath.Join(cacheBase, e.Name())
+		if !live[dir] {
+			m.log.Info("removing stale git cache", "dir", e.Name())
+			if err := os.RemoveAll(dir); err != nil {
+				m.log.Warn("git cache GC remove failed", "dir", e.Name(), "error", err)
+			}
+		}
 	}
 }
 

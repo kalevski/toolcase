@@ -36,6 +36,8 @@ export interface AtlasBuilderOptions {
 	 * whole-atlas concerns, not per-input.
 	 */
 	continueOnError?: boolean
+	/** Maximum allowed input pixels (width × height) per source image. Defaults to 50 000 000. */
+	maxInputPixels?: number
 }
 
 export interface AtlasBuildFailure {
@@ -202,9 +204,10 @@ export class AtlasBuilder {
 				if (!decoded) continue
 				if (placed.rect.width <= 0 || placed.rect.height <= 0) continue
 
-				const overlayBuffer = await this.prepareOverlay(sharp, decoded, placed.rotated)
+				const overlay = await this.prepareOverlay(sharp, decoded, placed.rotated)
 				composites.push({
-					input: overlayBuffer,
+					input: overlay.input,
+					raw: overlay.raw,
 					left: placed.rect.x,
 					top: placed.rect.y
 				})
@@ -238,7 +241,7 @@ export class AtlasBuilder {
 						channels: 4,
 						background: this.options.background ?? { r: 0, g: 0, b: 0, alpha: 0 }
 					}
-				}).composite(composites)
+				}, { limitInputPixels: this.options.maxInputPixels ?? 50_000_000, failOn: 'error' }).composite(composites)
 
 				const composedBuffer = await canvas.png().toBuffer()
 				let writer = ImageProcessor.fromBuffer(composedBuffer).format({
@@ -297,8 +300,13 @@ export class AtlasBuilder {
 			throw new AtlasBuildError('decode', 'input.path is required')
 		}
 		const id = typeof input.id === 'string' && input.id.length > 0 ? input.id : path.basename(input.path, path.extname(input.path))
+		const limit = this.options.maxInputPixels ?? 50_000_000
 		try {
-			const { data, info } = await sharp(input.path).ensureAlpha().raw().toBuffer({ resolveWithObject: true })
+			const meta = await sharp(input.path, { limitInputPixels: limit, failOn: 'error' }).metadata()
+			if (meta.width && meta.height && meta.width * meta.height > limit) {
+				throw new AtlasBuildError('decode', `input image exceeds pixel limit (${meta.width * meta.height} > ${limit})`, input.path)
+			}
+			const { data, info } = await sharp(input.path, { limitInputPixels: limit, failOn: 'error' }).rotate().ensureAlpha().raw().toBuffer({ resolveWithObject: true })
 			const useTrim = this.options.useAlphaTrimming !== false
 			const bounds = useTrim
 				? AtlasBuilder.computeAlphaBounds(data, info.width, info.height, this.options.packer?.alphaThreshold ?? 1)
@@ -321,16 +329,20 @@ export class AtlasBuilder {
 		}
 	}
 
-	private async prepareOverlay(sharp: SharpFactory, decoded: DecodedImage, rotated: boolean): Promise<Buffer> {
-		const raw = sharp(decoded.trimmedBuffer, {
-			raw: {
-				width: decoded.trimmedWidth,
-				height: decoded.trimmedHeight,
-				channels: 4
+	private async prepareOverlay(sharp: SharpFactory, decoded: DecodedImage, rotated: boolean): Promise<{ input: Buffer; raw: { width: number; height: number; channels: 1 | 2 | 3 | 4 } }> {
+		if (!rotated) {
+			return {
+				input: decoded.trimmedBuffer,
+				raw: { width: decoded.trimmedWidth, height: decoded.trimmedHeight, channels: 4 }
 			}
-		})
-		const withRotation = rotated ? raw.rotate(-90) : raw
-		return await withRotation.png().toBuffer()
+		}
+		const { data, info } = await sharp(decoded.trimmedBuffer, {
+			raw: { width: decoded.trimmedWidth, height: decoded.trimmedHeight, channels: 4 }
+		}).rotate(-90).raw().toBuffer({ resolveWithObject: true })
+		return {
+			input: data,
+			raw: { width: info.width, height: info.height, channels: info.channels }
+		}
 	}
 
 	private static computeAlphaBounds(data: Buffer, width: number, height: number, threshold: number): { left: number; top: number; width: number; height: number } {

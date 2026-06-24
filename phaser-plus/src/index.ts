@@ -3,11 +3,13 @@ import { Level as LogLevel } from '@toolcase/logging'
 import Engine from './engine/Engine'
 import Scene from './engine/Scene'
 import GameObject from './engine/GameObject'
+import GameObjectComponent from './engine/GameObjectComponent'
 import * as Events from './engine/Events'
 
 import Feature from './features/Feature'
 import FeatureRegistry from './features/FeatureRegistry'
 import ServiceRegistry from './features/ServiceRegistry'
+import type { Disposable } from './features/ServiceRegistry'
 import Layer from './features/Layer'
 import ObjectLayer from './features/ObjectLayer'
 import HTMLFeature from './features/HTMLFeature'
@@ -16,6 +18,7 @@ import SplitScreen from './features/SplitScreen'
 import GameObjectPool from './pool/GameObjectPool'
 
 import Matrix2 from './math/Matrix2'
+import { SpatialHash, Quadtree, Vec2, Easing, Random, AABB, Transform } from './structs'
 
 import Event from './flow/Event'
 import TimeEvent from './flow/TimeEvent'
@@ -40,6 +43,10 @@ import Timer from './flow/Timer'
 import ParallelRunner from './flow/Parallel'
 import throttle from './flow/throttle'
 import debounce from './flow/debounce'
+import TweenProcessor from './flow/TweenProcessor'
+import Timeline from './flow/Timeline'
+import Tween from './flow/Tween'
+import { EASE, resolveEase } from './flow/easing'
 
 const Flow = {
     Event,
@@ -51,6 +58,11 @@ const Flow = {
     BehaviorTreeProcessor,
     ReplayRecorder,
     Timer,
+    Tween,
+    Timeline,
+    TweenProcessor,
+    EASE,
+    resolveEase,
     Parallel: ParallelRunner,
     throttle,
     debounce,
@@ -69,9 +81,18 @@ const Flow = {
 }
 
 const Structs = {
-    Matrix2
+    Matrix2,
+    SpatialHash,
+    Quadtree,
+    Vec2,
+    AABB,
+    Transform,
+    Easing,
+    Random,
 }
 
+export type { Disposable }
+export type { SpatialPoint, SpatialRect, EasingFn, Rect } from './structs'
 export {
     Events,
     Flow,
@@ -80,6 +101,7 @@ export {
     Engine,
     Scene,
     GameObject,
+    GameObjectComponent,
     Feature,
     FeatureRegistry,
     ServiceRegistry,
@@ -96,6 +118,12 @@ export * from './debugger'
 export * from './perspective2d'
 export * from './effects'
 export * from './ai'
+export * from './tilemap'
 export * from './cinema'
 export * from './input'
 export * from './flow'
+export * from './audio'
+export * from './persistence'
+export * from './assets'
+export * from './particles'
+export * from './net'

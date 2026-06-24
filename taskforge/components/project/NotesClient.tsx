@@ -1,24 +1,24 @@
 'use client'
 
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-import {
-    Card,
-    Heading,
-    Text,
-    Table,
-    Button,
-    MarkdownEditor,
-    HelperText,
-    toast,
-    type TableColumn,
-} from '@toolcase/react-components'
+import { toast } from '@/lib/toast'
+import { useTc, useTcEvents, detailValue } from '@/lib/tc'
 import type { NoteDoc } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 import { useConfirm, usePrompt } from '../ConfirmModal'
 import { helpTexts } from '../helpTexts'
 
 const SLUG_RE = /^[a-z0-9][a-z0-9-]*$/
+
+// tc-advanced-table header descriptors; rows stay slotted React <tr> so the
+// per-row Delete button and row-open navigation keep their handlers.
+const ADV_COLUMNS = [
+    { key: 'id', label: 'File', width: '30%' },
+    { key: 'title', label: 'Title' },
+    { key: 'updated', label: 'Updated', width: '9rem' },
+    { key: 'actions', label: '', width: '7rem' },
+]
 
 function relativeTime(iso: string): string {
     const delta = Date.now() - new Date(iso).getTime()
@@ -31,6 +31,8 @@ function relativeTime(iso: string): string {
     return `${Math.floor(hours / 24)}d ago`
 }
 
+type Col = { key: string; header: string; width?: string; render: (n: NoteDoc) => React.ReactNode }
+
 export function NotesClient() {
     const { project, notes, agentSessions, refreshNotes } = useProject()
     const confirm = useConfirm()
@@ -42,14 +44,23 @@ export function NotesClient() {
     const [editor, setEditor] = useState('')
     const [saving, setSaving] = useState(false)
 
-    const noteAgentRunning = agentSessions['note-writer'].status === 'running'
+    const editorRef = useTcEvents<HTMLElement>({ 'tc-change': (e) => setEditor(detailValue<string>(e)) })
+
+    const noteAgentRunning = agentSessions['note-writer']?.status === 'running'
     const dirtyEditor = loaded !== null && editor !== loaded.content
+
+    // The id of the note whose content we currently want loaded. Lets a slow
+    // fetch bail if a newer openNote()/reload superseded it (avoids showing one
+    // note's body under another's title on rapid switches).
+    const targetRef = useRef<string | null>(null)
 
     const loadNote = useCallback(
         async (id: string) => {
+            targetRef.current = id
             const d = await fetch(`/api/projects/${project}/notes/${id}`).then((r) =>
                 r.ok ? r.json() : Promise.reject(),
             )
+            if (targetRef.current !== id) return // superseded by a newer selection
             setLoaded({ id, content: d.content })
             setEditor(d.content)
         },
@@ -97,7 +108,7 @@ export function NotesClient() {
             return
         }
         if (!dirtyEditor) {
-            void loadNote(openId).catch(() => {})
+            void loadNote(openId).catch(() => toast.error('Failed to refresh note content.'))
         }
         // eslint-disable-next-line
     }, [notes, noteAgentRunning])
@@ -183,91 +194,110 @@ export function NotesClient() {
         void refreshNotes()
     }
 
-    const columns: TableColumn<NoteDoc>[] = [
+    const columns: Col[] = [
         { key: 'id', header: 'File', width: '30%', render: (n) => <code>notes/{n.id}</code> },
         { key: 'title', header: 'Title', render: (n) => n.title },
-        { key: 'updated', header: 'Updated', width: '9rem', render: (n) => <Text variant="muted">{relativeTime(n.updatedAt)}</Text> },
+        { key: 'updated', header: 'Updated', width: '9rem', render: (n) => <tc-text variant="muted">{relativeTime(n.updatedAt)}</tc-text> },
         {
             key: 'actions',
             header: '',
             width: '7rem',
             render: (n) => (
-                <Button
-                    size="small"
+                <tc-button
+                    size="sm"
                     variant="danger"
                     outline
-                    disabled={noteAgentRunning}
+                    disabled={noteAgentRunning || undefined}
                     onClick={(e) => {
                         e.stopPropagation()
                         void onDelete(n.id)
                     }}
                 >
                     Delete
-                </Button>
+                </tc-button>
             ),
         },
     ]
 
+    const tableKey = notes.map((n) => n.id).join('_')
+    const tableRef = useTc<HTMLElement>({ columns: ADV_COLUMNS })
+
     return (
-        <div className="tf-stack">
-            <Card
-                header={
-                    <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                        <Heading as="h3">Notes</Heading>
-                        <Button size="small" variant="primary" style={{ marginLeft: 'auto' }} onClick={() => void onNew()} startIcon={<span>＋</span>}>
-                            New note
-                        </Button>
-                    </div>
-                }
-            >
-                <Table
-                    columns={columns}
-                    data={notes}
-                    rowKey={(n) => n.id}
-                    hoverable
-                    emptyMessage="No notes yet — create one, or let the notes agent (Agents page) write one."
-                    onRowClick={(n) => void openNote(n.id)}
-                />
-                <div className="tf-card-body">
-                    <HelperText text={helpTexts.notes.storage} />
+        <tc-stack gap="1.25rem">
+            <tc-card>
+                <div slot="header" style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                    <tc-heading as="h3">Notes</tc-heading>
+                    <tc-button size="sm" variant="primary" style={{ marginLeft: 'auto' }} onClick={() => void onNew()}>
+                        <tc-icon name="Plus" /> New note
+                    </tc-button>
                 </div>
-            </Card>
+                <tc-advanced-table key={tableKey} ref={tableRef}>
+                    {notes.length === 0 && (
+                        <tr>
+                            <td colSpan={4} style={{ textAlign: 'center', opacity: 0.6 }}>
+                                No notes yet — create one, or let the notes agent (Agents page) write one.
+                            </td>
+                        </tr>
+                    )}
+                    {notes.map((n) => (
+                        <tr
+                            key={n.id}
+                            style={{ cursor: 'pointer' }}
+                            tabIndex={0}
+                            role="button"
+                            aria-label={`Open notes/${n.id}`}
+                            onClick={() => void openNote(n.id)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault()
+                                    void openNote(n.id)
+                                }
+                            }}
+                        >
+                            {columns.map((c) => (
+                                <td key={c.key}>{c.render(n)}</td>
+                            ))}
+                        </tr>
+                    ))}
+                </tc-advanced-table>
+                <div className="tf-card-body">
+                    <tc-helper-text text={helpTexts.notes.storage} />
+                </div>
+            </tc-card>
 
             {openId && (
-                <Card header={<Heading as="h3">Edit — {openId}</Heading>}>
-                    <div className="tf-card-body tf-stack-sm">
-                        {noteAgentRunning && <HelperText variant="warning" text={helpTexts.notes.agentRunning} />}
+                <tc-card>
+                    <tc-heading slot="header" as="h3">
+                        Edit — {openId}
+                    </tc-heading>
+                    <tc-stack gap="0.75rem" style={{ padding: '1rem' }}>
+                        {noteAgentRunning && <tc-helper-text variant="warning" text={helpTexts.notes.agentRunning} />}
                         {loaded === null ? (
-                            <Text variant="muted">Loading…</Text>
+                            <tc-text variant="muted">Loading…</tc-text>
                         ) : (
-                            <MarkdownEditor
-                                value={editor}
-                                onChange={setEditor}
-                                height={420}
-                                disabled={noteAgentRunning}
-                            />
+                            <tc-markdown-editor ref={editorRef} value={editor} height="420" disabled={noteAgentRunning || undefined} />
                         )}
-                        <div className="tf-actions">
-                            <Button
+                        <tc-stack direction="horizontal" gap="0.75rem" wrap align="center">
+                            <tc-button
                                 variant="primary"
-                                loading={saving}
-                                disabled={noteAgentRunning || !dirtyEditor}
+                                loading={saving || undefined}
+                                disabled={noteAgentRunning || !dirtyEditor || undefined}
                                 onClick={() => void onSave()}
                             >
                                 Save
-                            </Button>
-                            <Button
+                            </tc-button>
+                            <tc-button
                                 variant="secondary"
                                 outline
-                                disabled={!dirtyEditor}
+                                disabled={!dirtyEditor || undefined}
                                 onClick={() => loaded && setEditor(loaded.content)}
                             >
                                 Discard local changes
-                            </Button>
-                        </div>
-                    </div>
-                </Card>
+                            </tc-button>
+                        </tc-stack>
+                    </tc-stack>
+                </tc-card>
             )}
-        </div>
+        </tc-stack>
     )
 }

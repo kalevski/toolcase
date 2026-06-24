@@ -1,0 +1,159 @@
+// Dungeon › tc-party-panel — gilded roster. Token swap carries the wood ground +
+// gold borders; structural rules add the panel bevel, inset-bevelled gold-edged
+// slots (stamina-tinted when ready), display-caps names + roles, mono count, and
+// the gilded bronze action button with a blood-red Leave variant.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-party-panel {
+        --bs-party-panel-bg: linear-gradient(180deg, rgba(232, 220, 196, 0.04), rgba(0, 0, 0, 0.18)),
+            radial-gradient(120% 80% at 50% 0%, #2e2418 0%, #1a130c 70%);
+        --bs-party-panel-border: var(--fg-gold-deep);
+        --bs-party-panel-header-bg: rgba(0, 0, 0, 0.3);
+        --bs-party-panel-header-border: rgba(201, 169, 97, 0.25);
+        --bs-party-panel-eyebrow-color: var(--fg-parch-dim);
+        --bs-party-panel-count-color: var(--fg-gold-bright);
+
+        // Slots — translucent black with a gold edge.
+        --bs-party-panel-slot-bg: rgba(0, 0, 0, 0.3);
+        --bs-party-panel-slot-border: var(--fg-gold-deep);
+        --bs-party-panel-slot-empty-bg: linear-gradient(180deg, rgba(10, 6, 4, 0.5), rgba(26, 18, 10, 0.4));
+        --bs-party-panel-slot-empty-color: var(--fg-parch-3);
+        --bs-party-panel-slot-empty-hover-bg: linear-gradient(180deg, rgba(10, 6, 4, 0.5), rgba(26, 18, 10, 0.4));
+        --bs-party-panel-slot-filled-bg: rgba(0, 0, 0, 0.3);
+        // Ready slot — stamina-green wash.
+        --bs-party-panel-slot-ready-bg: linear-gradient(90deg, rgba(111, 159, 58, 0.18), rgba(0, 0, 0, 0.3));
+
+        --bs-party-panel-member-name-color: var(--fg-parch);
+        --bs-party-panel-role-bg: transparent;
+        --bs-party-panel-role-color: var(--fg-parch-3);
+        --bs-party-panel-host-badge-color: var(--fg-gold-bright);
+        --bs-party-panel-ready-color: var(--fg-stamina-bright);
+        --bs-party-panel-waiting-color: var(--fg-parch-dim);
+
+        --bs-party-panel-actions-bg: rgba(0, 0, 0, 0.3);
+
+        // Buttons — bronze keycap gradient.
+        --bs-party-panel-btn-bg: linear-gradient(180deg, #3a2a1a, #1f1610);
+        --bs-party-panel-btn-color: var(--fg-gold-bright);
+        --bs-party-panel-btn-border: var(--fg-gold-deep);
+        --bs-party-panel-btn-hover-bg: linear-gradient(180deg, #3a2a1a, #1f1610);
+        --bs-party-panel-btn-hover-color: var(--fg-gold-bright);
+        // Leave — blood-red gradient.
+        --bs-party-panel-btn-leave-bg: linear-gradient(180deg, #5a1a16, #2a0a08);
+        --bs-party-panel-btn-leave-color: #f4c4be;
+    }
+
+    // Panel bevel + drop shadow + inner gold-edge hairline + corner notches.
+    .tc-party-panel {
+        position: relative;
+        box-shadow:
+            inset 0 0 0 1px var(--fg-gold-shadow),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18),
+            var(--fg-panel-shadow);
+
+        &::before,
+        &::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: var(--fg-notch-fill);
+            clip-path: var(--fg-notch-clip);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        &::before {
+            top: 0;
+            left: 0;
+        }
+
+        &::after {
+            bottom: 0;
+            right: 0;
+            transform: rotate(180deg);
+        }
+    }
+
+    // Count is mono gold.
+    .tc-party-panel-count {
+        font-family: var(--fg-mono);
+    }
+
+    // Slots container — 4px gap so each slot reads as a discrete gilded plate.
+    .tc-party-panel-slots {
+        gap: 4px;
+    }
+
+    // Slots — full border (not just bottom) + inset gilded top highlight.
+    .tc-party-panel-slot {
+        border: 1px solid var(--bs-party-panel-slot-border);
+        box-shadow: inset 0 1px 0 rgba(232, 200, 120, 0.12);
+
+        &.tc-party-panel-slot--ready {
+            border-color: var(--fg-stamina);
+        }
+
+        &.tc-party-panel-slot--ready .tc-party-panel-member-name {
+            text-shadow: 0 0 6px rgba(168, 214, 90, 0.35);
+        }
+
+        &.tc-party-panel-slot--empty {
+            border-style: dashed;
+            box-shadow: none;
+        }
+    }
+
+    // Member name + invite label read as display caps.
+    .tc-party-panel-member-name {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-size: 0.75rem;
+    }
+
+    .tc-party-panel-invite-label,
+    .tc-party-panel-invite-glyph {
+        font-family: var(--fg-display);
+        letter-spacing: 0.2em;
+    }
+
+    // Role chip — display caps, gold hairline border.
+    .tc-party-panel-role {
+        font-family: var(--fg-display);
+        letter-spacing: 0.18em;
+        border: 1px solid rgba(201, 169, 97, 0.35);
+    }
+
+    // Host + ready badges — display caps with glows.
+    .tc-party-panel-host-badge {
+        font-family: var(--fg-display);
+        text-shadow: 0 0 4px rgba(232, 200, 120, 0.6);
+    }
+
+    .tc-party-panel-ready-badge {
+        font-family: var(--fg-display);
+        letter-spacing: 0.2em;
+
+        &.tc-party-panel-ready-badge--ready {
+            text-shadow: 0 0 6px rgba(168, 214, 90, 0.4);
+        }
+    }
+
+    // Buttons — gilded keycap bevel + display caps.
+    .tc-party-panel-btn {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-weight: 600;
+        box-shadow:
+            inset 0 1px 0 rgba(232, 200, 120, 0.15),
+            inset 0 -8px 12px rgba(0, 0, 0, 0.4),
+            0 2px 0 rgba(0, 0, 0, 0.6);
+
+        &.tc-party-panel-btn--leave {
+            border-color: var(--fg-blood);
+        }
+    }
+}

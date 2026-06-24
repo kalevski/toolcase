@@ -1,0 +1,97 @@
+// tc-text — flexible text element with semantic HTML tags and style variants.
+//
+// Display strategy: the host tc-text is display:inline (registered in _reset.scss)
+// so it acts as a transparent wrapper. Block layout for as="p" and as="div" comes
+// from p.tc-text / div.tc-text { display: block } below. Inline tags (span, small)
+// already default to inline, so no explicit rule is needed. For variant="truncate",
+// .tc-text-truncate { display: block } overrides the browser default (specificity
+// 0-1-0 > element default 0-0-1), making truncation work even with inline as tags.
+//
+// Class naming: tc-text-<variant> and tc-text-<size> are separate namespaces.
+// The "default" variant and "default" size both produce class tc-text-default on
+// the inner element, but since the base .tc-text already sets both default color
+// and default font-size, .tc-text-default is a no-op class — no conflict.
+
+tc-text {
+    --bs-text-color: var(--tc-text);
+    --bs-text-muted-color: var(--tc-text-muted);
+    --bs-text-code-bg: var(--tc-surface-muted);
+    --bs-text-code-color: var(--tc-text);
+    --bs-text-font-size-small: 0.8rem;
+    --bs-text-font-size-default: 0.925rem;
+    --bs-text-font-size-large: 1.0625rem;
+    --bs-text-line-height: 1.6;
+}
+
+// Base inner element — default color and size from tokens.
+.tc-text {
+    margin: 0;
+    font-family: var(--tc-font-sans);
+    font-size: var(--bs-text-font-size-default);
+    line-height: var(--bs-text-line-height);
+    color: var(--bs-text-color);
+}
+
+// Block-level inner elements. Inline elements (span, small) default to inline
+// and need no explicit rule.
+p.tc-text,
+div.tc-text {
+    display: block;
+}
+
+// display:contents collapses the .tc-text-content span so the outer element's
+// text-overflow / overflow rules apply directly to the text nodes.
+.tc-text-content {
+    display: contents;
+}
+
+// ── Variants ─────────────────────────────────────────────────────────────────
+
+// default: inherits from .tc-text — no override needed.
+// .tc-text-default is intentionally a no-op class.
+.tc-text-default {}
+
+// muted: secondary text color.
+.tc-text-muted {
+    color: var(--bs-text-muted-color);
+}
+
+// mono: JetBrains Mono in normal text color.
+.tc-text-mono {
+    font-family: var(--tc-font-mono);
+}
+
+// code: inline code chip — mono font, muted surface, sharp corners.
+.tc-text-code {
+    font-family: var(--tc-font-mono);
+    font-size: 0.9em;
+    color: var(--bs-text-code-color);
+    background-color: var(--bs-text-code-bg);
+    padding: 0.125em 0.375em;
+    border-radius: 0;
+}
+
+// truncate: single-line ellipsis. display:block ensures the rule applies even
+// when the inner element is an inline tag (specificity 0-1-0 > browser default).
+.tc-text-truncate {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+// ── Sizes ─────────────────────────────────────────────────────────────────────
+
+.tc-text-small {
+    font-size: var(--bs-text-font-size-small);
+}
+
+// default size: inherited from .tc-text — no override needed. Class is no-op.
+.tc-text-default {
+    font-size: var(--bs-text-font-size-default);
+}
+
+.tc-text-large {
+    font-size: var(--bs-text-font-size-large);
+}

@@ -2,21 +2,9 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-import {
-    Table,
-    Badge,
-    StatusDot,
-    Tag,
-    Button,
-    Checkbox,
-    ChipGroup,
-    HelperText,
-    Select,
-    Tooltip,
-    toast,
-    type TableColumn,
-    type ChipGroupItem,
-} from '@toolcase/react-components'
+import { toast } from '@/lib/toast'
+import { useTc, useTcProps, useTcEvents } from '@/lib/tc'
+import type { ChipGroupItem } from '@toolcase/web-components'
 import type { TaskInfo, TaskRuntimeStatus } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 import { TaskDrawer } from '../TaskDrawer'
@@ -42,8 +30,23 @@ const STATUS_DOT: Record<TaskRuntimeStatus, 'online' | 'offline' | 'busy' | 'awa
 }
 
 type Filter = 'all' | TaskRuntimeStatus
+type Col = { key: string; header: React.ReactNode; width?: string; render: (t: TaskInfo) => React.ReactNode }
 
 const MODEL_ALIASES = ['fast', 'mid', 'deep']
+
+// Archived sub-table header descriptors (tc-advanced-table; rows are slotted
+// React <tr> so the per-row Restore button keeps its handler).
+const ARCHIVE_COLUMNS = [
+    { key: 'id', label: '#', width: '30%' },
+    { key: 'title', label: 'Title' },
+    { key: 'actions', label: '', width: '8rem' },
+]
+
+// Bare checkbox with its own change listener (React 18 won't fire onChange on tc-check).
+function Chk({ checked, indeterminate, onChange }: { checked: boolean; indeterminate?: boolean; onChange: (c: boolean) => void }) {
+    const ref = useTcEvents<HTMLElement>({ change: (e) => onChange((e.target as HTMLInputElement).checked) })
+    return <tc-check ref={ref} checked={checked || undefined} indeterminate={indeterminate ? '' : undefined} />
+}
 
 export function TasksClient() {
     const { project, tasks, running, busy, modelOptions, onReRunTask, onRunTasks, onResetErrors, setTasks, refresh } =
@@ -54,9 +57,7 @@ export function TasksClient() {
     const searchParams = useSearchParams()
 
     const [openTask, setOpenTask] = useState<string | null>(null)
-    // Default to the actionable view; fall back to All when nothing is pending
-    // (otherwise a fully-completed project opens on an empty table). Lazy
-    // initializer only — a manual chip selection must win for the session.
+    // Default to the actionable view; fall back to All when nothing is pending.
     const [statusFilter, setStatusFilter] = useState<Filter>(() =>
         tasks.some((t) => t.status === 'pending') ? 'pending' : 'all',
     )
@@ -73,6 +74,8 @@ export function TasksClient() {
     // A5 — archived list
     const [archived, setArchived] = useState<{ id: string; title: string }[]>([])
     const [showArchived, setShowArchived] = useState(false)
+
+    const pinRef = useTcEvents<HTMLElement>({ change: (e) => setPinModel((e.target as HTMLSelectElement).value) })
 
     // C3 — deep link from the search palette (?open=<id>)
     useEffect(() => {
@@ -100,15 +103,17 @@ export function TasksClient() {
     }, [tasks])
 
     const chips: ChipGroupItem[] = [
-        { id: 'all', label: 'All', active: statusFilter === 'all', count: tasks.length },
-        { id: 'pending', label: 'Pending', active: statusFilter === 'pending', count: counts.pending },
-        { id: 'running', label: 'Running', active: statusFilter === 'running', count: counts.running },
-        { id: 'done', label: 'Done', active: statusFilter === 'done', count: counts.done },
+        { id: 'all', label: 'All', selected: statusFilter === 'all', count: tasks.length },
+        { id: 'pending', label: 'Pending', selected: statusFilter === 'pending', count: counts.pending },
+        { id: 'running', label: 'Running', selected: statusFilter === 'running', count: counts.running },
+        { id: 'done', label: 'Done', selected: statusFilter === 'done', count: counts.done },
         ...(counts['needs-review'] > 0
-            ? [{ id: 'needs-review', label: 'Needs review', active: statusFilter === 'needs-review', count: counts['needs-review'] } as ChipGroupItem]
+            ? [{ id: 'needs-review', label: 'Needs review', selected: statusFilter === 'needs-review', count: counts['needs-review'] } as ChipGroupItem]
             : []),
-        { id: 'error', label: 'Error', active: statusFilter === 'error', count: counts.error },
+        { id: 'error', label: 'Error', selected: statusFilter === 'error', count: counts.error },
     ]
+
+    const chipRef = useTcProps<HTMLElement>({ items: chips, onToggle: (id: string) => setStatusFilter(id as Filter) })
 
     const shown = useMemo(() => {
         if (reordering) {
@@ -120,6 +125,37 @@ export function TasksClient() {
 
     const openTaskInfo = openTask ? tasks.find((t) => t.id === openTask) : undefined
     const pendingIds = useMemo(() => tasks.filter((t) => t.status === 'pending').map((t) => t.id), [tasks])
+
+    // Prune the bulk-selection set to ids still present in the live task list, so
+    // SSE removals/changes don't leave ghost ids that skew the select-all math.
+    useEffect(() => {
+        setSelected((prev) => {
+            if (prev.size === 0) return prev
+            const live = new Set(tasks.map((t) => t.id))
+            let changed = false
+            const next = new Set<string>()
+            for (const id of prev) {
+                if (live.has(id)) next.add(id)
+                else changed = true
+            }
+            return changed ? next : prev
+        })
+    }, [tasks])
+
+    // While reordering, keep orderIds in sync with the live pending ids so a task
+    // that disappears (or appears) via SSE never gets posted as a stale id on save.
+    useEffect(() => {
+        if (!reordering) return
+        setOrderIds((prev) => {
+            if (!prev) return prev
+            const live = new Set(pendingIds)
+            const kept = prev.filter((id) => live.has(id))
+            const added = pendingIds.filter((id) => !prev.includes(id))
+            const next = [...kept, ...added]
+            const same = next.length === prev.length && next.every((id, i) => id === prev[i])
+            return same ? prev : next
+        })
+    }, [pendingIds, reordering])
 
     // ── A3 bulk ─────────────────────────────────────────────────────────────
     const toggleSelect = (id: string, checked: boolean) => {
@@ -247,29 +283,25 @@ export function TasksClient() {
     }
 
     // ── columns ─────────────────────────────────────────────────────────────
-    const columns: TableColumn<TaskInfo>[] = [
+    const columns: Col[] = [
         ...(!reordering
             ? [
                   {
                       key: 'select',
                       header: (
-                          <Checkbox
+                          <Chk
                               checked={allShownSelected}
-                              onChange={(e) =>
-                                  setSelected(e.target.checked ? new Set(shown.map((t) => t.id)) : new Set())
-                              }
+                              indeterminate={!allShownSelected && shown.some((t) => selected.has(t.id))}
+                              onChange={(checked) => setSelected(checked ? new Set(shown.map((t) => t.id)) : new Set())}
                           />
                       ),
                       width: '2.5rem',
                       render: (t: TaskInfo) => (
                           <span onClick={(e) => e.stopPropagation()}>
-                              <Checkbox
-                                  checked={selected.has(t.id)}
-                                  onChange={(e) => toggleSelect(t.id, e.target.checked)}
-                              />
+                              <Chk checked={selected.has(t.id)} onChange={(checked) => toggleSelect(t.id, checked)} />
                           </span>
                       ),
-                  } as TableColumn<TaskInfo>,
+                  } as Col,
               ]
             : [
                   {
@@ -278,15 +310,11 @@ export function TasksClient() {
                       width: '6rem',
                       render: (t: TaskInfo) => (
                           <span style={{ display: 'inline-flex', gap: '0.25rem' }} onClick={(e) => e.stopPropagation()}>
-                              <Button size="small" variant="secondary" outline onClick={() => move(t.id, -1)}>
-                                  ↑
-                              </Button>
-                              <Button size="small" variant="secondary" outline onClick={() => move(t.id, 1)}>
-                                  ↓
-                              </Button>
+                              <tc-icon-button icon="ArrowUp" label="Move up" size="sm" variant="secondary" outline onClick={() => move(t.id, -1)} />
+                              <tc-icon-button icon="ArrowDown" label="Move down" size="sm" variant="secondary" outline onClick={() => move(t.id, 1)} />
                           </span>
                       ),
-                  } as TableColumn<TaskInfo>,
+                  } as Col,
               ]),
         { key: 'id', header: '#', width: '26%', render: (t) => <code>{t.id}</code> },
         { key: 'title', header: 'Title', render: (t) => t.title },
@@ -295,13 +323,13 @@ export function TasksClient() {
             header: 'Facets',
             render: (t) => (
                 <span style={{ display: 'inline-flex', gap: '0.3rem', flexWrap: 'wrap' }}>
-                    {t.severity && <Tag variant="warning">{t.severity}</Tag>}
-                    {t.project && <Tag variant="info">{t.project}</Tag>}
-                    {t.model && <Tag variant="secondary">⚡ {t.model}</Tag>}
+                    {t.severity && <tc-tag static variant="warning">{t.severity}</tc-tag>}
+                    {t.project && <tc-tag static variant="info">{t.project}</tc-tag>}
+                    {t.model && <tc-tag static variant="secondary"><tc-icon name="Zap" /> {t.model}</tc-tag>}
                     {t.depends && t.depends.length > 0 && (
-                        <Tooltip content={`Depends on: ${t.depends.join(', ')}`}>
-                            <Tag variant="secondary">⛓ {t.depends.join(',')}</Tag>
-                        </Tooltip>
+                        <tc-tooltip content={`Depends on: ${t.depends.join(', ')}`}>
+                            <tc-tag static variant="secondary"><tc-icon name="Link" /> {t.depends.join(',')}</tc-tag>
+                        </tc-tooltip>
                     )}
                 </span>
             ),
@@ -312,9 +340,9 @@ export function TasksClient() {
             width: '7rem',
             render: (t) =>
                 t.costUsd != null ? (
-                    <Tooltip content={`${(t.tokensIn ?? 0).toLocaleString()} in / ${(t.tokensOut ?? 0).toLocaleString()} out`}>
+                    <tc-tooltip content={`${(t.tokensIn ?? 0).toLocaleString()} in / ${(t.tokensOut ?? 0).toLocaleString()} out`}>
                         <code>${t.costUsd.toFixed(2)}</code>
-                    </Tooltip>
+                    </tc-tooltip>
                 ) : (
                     <span style={{ opacity: 0.4 }}>—</span>
                 ),
@@ -324,8 +352,8 @@ export function TasksClient() {
             header: 'Status',
             render: (t) => (
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <StatusDot status={STATUS_DOT[t.status]} pulse={t.status === 'running'} />
-                    <Badge variant={STATUS_BADGE[t.status]}>{t.status}</Badge>
+                    <tc-status-dot status={STATUS_DOT[t.status]} pulse={t.status === 'running' || undefined} />
+                    <tc-badge variant={STATUS_BADGE[t.status]}>{t.status}</tc-badge>
                 </span>
             ),
         },
@@ -333,38 +361,37 @@ export function TasksClient() {
 
     const selectedCount = selected.size
 
+    const archiveTableKey = archived.map((a) => a.id).join('_')
+    const archiveTableRef = useTc<HTMLElement>({ columns: ARCHIVE_COLUMNS })
+
     return (
-        <div className="tf-stack">
-            <div
-                className="tf-actions"
-                style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}
-            >
-                <ChipGroup items={chips} onToggle={(id) => setStatusFilter(id as Filter)} />
+        <tc-stack gap="1.25rem">
+            <tc-stack direction="horizontal" gap="0.75rem" wrap align="center">
+                <tc-chip-group ref={chipRef} />
                 <span style={{ marginLeft: 'auto', display: 'inline-flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    <Button
-                        size="small"
+                    <tc-button
+                        size="sm"
                         variant="primary"
-                        disabled={busy || reordering}
-                        startIcon={<span>＋</span>}
+                        disabled={busy || reordering || undefined}
                         onClick={() => openNewTask({ project, onCreated: (t) => setTasks(t) })}
                     >
-                        New task
-                    </Button>
-                    <Button
-                        size="small"
+                        <tc-icon name="Plus" /> New task
+                    </tc-button>
+                    <tc-button
+                        size="sm"
                         variant="secondary"
                         outline
-                        disabled={busy || reordering}
+                        disabled={busy || reordering || undefined}
                         onClick={() => openImportIssues({ project, onImported: (t) => setTasks(t) })}
                     >
-                        ⇩ Import from GitHub
-                    </Button>
+                        <tc-icon name="Download" /> Import from GitHub
+                    </tc-button>
                     {!reordering ? (
-                        <Button
-                            size="small"
+                        <tc-button
+                            size="sm"
                             variant="secondary"
                             outline
-                            disabled={busy || pendingIds.length < 2}
+                            disabled={busy || pendingIds.length < 2 || undefined}
                             title={helpTexts.tasks.reorder}
                             onClick={() => {
                                 setStatusFilter('pending')
@@ -372,116 +399,156 @@ export function TasksClient() {
                                 setOrderIds(pendingIds)
                             }}
                         >
-                            ⇅ Reorder
-                        </Button>
+                            <tc-icon name="ArrowUpDown" /> Reorder
+                        </tc-button>
                     ) : (
                         <>
-                            <Button size="small" variant="success" onClick={() => void saveOrder()}>
+                            <tc-button size="sm" variant="success" onClick={() => void saveOrder()}>
                                 Save order
-                            </Button>
-                            <Button size="small" variant="secondary" outline onClick={() => setOrderIds(null)}>
+                            </tc-button>
+                            <tc-button size="sm" variant="secondary" outline onClick={() => setOrderIds(null)}>
                                 Cancel
-                            </Button>
+                            </tc-button>
                         </>
                     )}
-                    <Button
-                        size="small"
+                    <tc-button
+                        size="sm"
                         variant="secondary"
                         outline
-                        disabled={busy || reordering || counts.done + counts['needs-review'] === 0}
+                        disabled={busy || reordering || counts.done + counts['needs-review'] === 0 || undefined}
                         title={helpTexts.tasks.archive}
                         onClick={() => void archiveDone()}
                     >
-                        🗄 Archive completed
-                    </Button>
-                    <Tooltip content={helpTexts.tasks.resetErrors}>
-                        <Button
-                            size="small"
+                        <tc-icon name="Archive" /> Archive completed
+                    </tc-button>
+                    <tc-tooltip content={helpTexts.tasks.resetErrors}>
+                        <tc-button
+                            size="sm"
                             variant="warning"
                             outline
-                            disabled={busy || counts.error === 0 || reordering}
+                            disabled={busy || counts.error === 0 || reordering || undefined}
                             title={running ? 'Stop the active run first.' : ''}
                             onClick={onResetErrors}
                         >
                             Move errors to pending{counts.error > 0 ? ` (${counts.error})` : ''}
-                        </Button>
-                    </Tooltip>
+                        </tc-button>
+                    </tc-tooltip>
                 </span>
-            </div>
+            </tc-stack>
 
             {selectedCount > 0 && !reordering && (
-                <div className="tf-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    <Badge variant="info">{selectedCount} selected</Badge>
-                    <Button size="small" variant="primary" outline disabled={busy || bulkBusy} onClick={() => void onRunTasks([...selected]).then(() => setSelected(new Set()))}>
-                        ▶ Re-run selected
-                    </Button>
-                    <Button size="small" variant="warning" outline disabled={busy || bulkBusy} onClick={() => void bulk('reset')}>
+                <tc-stack direction="horizontal" gap="0.5rem" wrap align="center">
+                    <tc-badge variant="info">{selectedCount} selected</tc-badge>
+                    {/* TODO: onRunTasks returns Promise<void> with no started/cancelled signal,
+                        so we can't tell whether the confirm was cancelled — selection is cleared
+                        unconditionally to preserve existing behavior. Surface a boolean from
+                        ProjectContext.onRunTasks to only clear on an actual run. */}
+                    <tc-button size="sm" variant="primary" outline disabled={busy || bulkBusy || undefined} onClick={() => void onRunTasks([...selected]).then(() => setSelected(new Set()))}>
+                        <tc-icon name="Play" /> Re-run selected
+                    </tc-button>
+                    <tc-button size="sm" variant="warning" outline disabled={busy || bulkBusy || undefined} onClick={() => void bulk('reset')}>
                         Reset to pending
-                    </Button>
+                    </tc-button>
                     <span style={{ display: 'inline-flex', gap: '0.25rem', alignItems: 'center' }}>
-                        <Select
-                            options={[
-                                { value: '', label: 'Run default' },
-                                ...MODEL_ALIASES.filter((a) => !modelOptions.some((o) => o.value === a)).map((a) => ({ value: a, label: a })),
-                                ...modelOptions,
-                            ]}
-                            value={pinModel}
-                            onChange={(e) => setPinModel(e.target.value)}
-                        />
-                        <Button size="small" variant="secondary" outline disabled={busy || bulkBusy} onClick={() => void bulk('pin', pinModel)}>
+                        <tc-select ref={pinRef} value={pinModel}>
+                            <tc-option value="">Run default</tc-option>
+                            {MODEL_ALIASES.filter((a) => !modelOptions.some((o) => o.value === a)).map((a) => (
+                                <tc-option key={a} value={a}>
+                                    {a}
+                                </tc-option>
+                            ))}
+                            {modelOptions.map((o) => (
+                                <tc-option key={o.value} value={o.value}>
+                                    {o.label}
+                                </tc-option>
+                            ))}
+                        </tc-select>
+                        <tc-button size="sm" variant="secondary" outline disabled={busy || bulkBusy || undefined} onClick={() => void bulk('pin', pinModel)}>
                             Pin model
-                        </Button>
+                        </tc-button>
                     </span>
-                    <Button size="small" variant="danger" outline disabled={busy || bulkBusy} onClick={() => void bulk('delete')}>
+                    <tc-button size="sm" variant="danger" outline disabled={busy || bulkBusy || undefined} onClick={() => void bulk('delete')}>
                         Delete
-                    </Button>
-                    <Button size="small" variant="secondary" outline onClick={() => setSelected(new Set())}>
+                    </tc-button>
+                    <tc-button size="sm" variant="secondary" outline onClick={() => setSelected(new Set())}>
                         Clear selection
-                    </Button>
-                </div>
+                    </tc-button>
+                </tc-stack>
             )}
 
-            <HelperText text={reordering ? helpTexts.tasks.reorderActive : helpTexts.tasks.statuses} />
+            <tc-helper-text text={reordering ? helpTexts.tasks.reorderActive : helpTexts.tasks.statuses} />
 
-            <Table
-                columns={columns}
-                data={shown}
-                rowKey={(t) => t.id}
-                hoverable
-                emptyMessage={
-                    statusFilter === 'all'
-                        ? 'No tasks yet — create one, import GitHub issues, or use the task creator on the Agents page.'
-                        : `No ${statusFilter} tasks.`
-                }
-                onRowClick={(t) => !reordering && setOpenTask(t.id)}
-            />
+            {/* The main task table stays a raw <table>: its header carries a React
+                select-all <tc-check> and its columns switch between select/reorder
+                modes — neither is expressible through tc-advanced-table's
+                string-label, component-rendered header. It keeps the .table skin. */}
+            <table className="table table-hover">
+                <thead>
+                    <tr>
+                        {columns.map((c) => (
+                            <th key={c.key} style={c.width ? { width: c.width } : undefined}>
+                                {c.header}
+                            </th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody>
+                    {shown.length === 0 ? (
+                        <tr>
+                            <td colSpan={columns.length} style={{ textAlign: 'center', opacity: 0.6 }}>
+                                {statusFilter === 'all'
+                                    ? 'No tasks yet — create one, import GitHub issues, or use the task creator on the Agents page.'
+                                    : `No ${statusFilter} tasks.`}
+                            </td>
+                        </tr>
+                    ) : (
+                        shown.map((t) => (
+                            <tr
+                                key={t.id}
+                                style={{ cursor: reordering ? 'default' : 'pointer' }}
+                                tabIndex={reordering ? undefined : 0}
+                                role={reordering ? undefined : 'button'}
+                                aria-label={reordering ? undefined : `Open task ${t.id}`}
+                                onClick={() => !reordering && setOpenTask(t.id)}
+                                onKeyDown={(e) => {
+                                    if (!reordering && (e.key === 'Enter' || e.key === ' ')) {
+                                        e.preventDefault()
+                                        setOpenTask(t.id)
+                                    }
+                                }}
+                            >
+                                {columns.map((c) => (
+                                    <td key={c.key}>{c.render(t)}</td>
+                                ))}
+                            </tr>
+                        ))
+                    )}
+                </tbody>
+            </table>
 
             {archived.length > 0 && (
-                <div className="tf-stack-sm">
-                    <Button size="small" variant="secondary" outline onClick={() => setShowArchived((v) => !v)}>
-                        {showArchived ? '▾' : '▸'} Archived ({archived.length})
-                    </Button>
+                <tc-stack gap="0.75rem">
+                    <tc-button size="sm" variant="secondary" outline onClick={() => setShowArchived((v) => !v)}>
+                        <tc-icon name={showArchived ? 'ChevronDown' : 'ChevronRight'} /> Archived ({archived.length})
+                    </tc-button>
                     {showArchived && (
-                        <Table
-                            columns={[
-                                { key: 'id', header: '#', width: '30%', render: (a: { id: string; title: string }) => <code>archive/{a.id}</code> },
-                                { key: 'title', header: 'Title', render: (a: { id: string; title: string }) => a.title },
-                                {
-                                    key: 'actions',
-                                    header: '',
-                                    width: '8rem',
-                                    render: (a: { id: string; title: string }) => (
-                                        <Button size="small" variant="secondary" outline disabled={busy} onClick={() => void restore(a.id)}>
+                        <tc-advanced-table key={archiveTableKey} ref={archiveTableRef}>
+                            {archived.map((a) => (
+                                <tr key={a.id}>
+                                    <td>
+                                        <code>archive/{a.id}</code>
+                                    </td>
+                                    <td>{a.title}</td>
+                                    <td>
+                                        <tc-button size="sm" variant="secondary" outline disabled={busy || undefined} onClick={() => void restore(a.id)}>
                                             Restore
-                                        </Button>
-                                    ),
-                                },
-                            ]}
-                            data={archived}
-                            rowKey={(a) => a.id}
-                        />
+                                        </tc-button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tc-advanced-table>
                     )}
-                </div>
+                </tc-stack>
             )}
 
             <TaskDrawer
@@ -496,6 +563,6 @@ export function TasksClient() {
                     void refresh()
                 }}
             />
-        </div>
+        </tc-stack>
     )
 }

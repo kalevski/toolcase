@@ -1,0 +1,38 @@
+// Dungeon › tc-compass-rose — gilded instrument face. The face circle is a
+// sanctioned circle. Token swap recolours the face to dark wood with a gold-deep
+// ring, the north needle to blood-bright over a parch south, gold-bright labels;
+// structural rules switch the labels to the display face (caps + weight).
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-compass-rose {
+        --bs-compass-rose-face-bg: #1a130c;
+        --bs-compass-rose-ring-color: var(--fg-gold-deep);
+        --bs-compass-rose-ring-width: 2;
+
+        --bs-compass-rose-tick-color: var(--fg-gold-deep);
+
+        --bs-compass-rose-needle-n-color: var(--fg-blood-bright);
+        --bs-compass-rose-needle-s-color: var(--fg-parch);
+        --bs-compass-rose-hub-color: var(--fg-gold);
+
+        --bs-compass-rose-label-color: var(--fg-gold-bright);
+        --bs-compass-rose-label-n-color: var(--fg-gold-bright);
+        --bs-compass-rose-label-spacing: 0.18em;
+    }
+
+    // Needle stroke matches gc's thin black outline — sharpens blade edges
+    // against the dark wood face without changing the fill colours.
+    .tc-compass-rose__needle-n,
+    .tc-compass-rose__needle-s {
+        stroke: #000;
+        stroke-width: 0.6;
+        paint-order: stroke fill;
+    }
+
+    // Labels read as gilded display caps.
+    .tc-compass-rose__label {
+        font-family: var(--fg-display);
+        font-weight: 700;
+    }
+}

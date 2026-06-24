@@ -1,0 +1,291 @@
+// tc-shop-panel — shop UI with item grid, prices, optional discounts, and buy/sell actions.
+// Slate neutrals; JetBrains Mono for prices and currency; sharp corners; 1px hairlines.
+// Affordability is communicated by reduced opacity on unaffordable/sold-out rows.
+// All cosmetics flow through --bs-shop-panel-* custom properties.
+
+tc-shop-panel {
+    // Panel
+    --bs-shop-panel-bg: var(--tc-surface);
+    --bs-shop-panel-border: 1px solid var(--tc-border);
+
+    // Header
+    --bs-shop-panel-header-bg: var(--tc-surface-muted);
+    --bs-shop-panel-header-border: 1px solid var(--tc-border);
+    --bs-shop-panel-mode-label-color: var(--tc-text-muted);
+    --bs-shop-panel-mode-label-font-size: 0.6875rem;
+
+    // Currency chip
+    --bs-shop-panel-currency-bg: var(--tc-surface);
+    --bs-shop-panel-currency-border: 1px solid var(--tc-border-strong);
+    --bs-shop-panel-currency-color: var(--tc-text);
+    --bs-shop-panel-currency-font-size: 0.75rem;
+
+    // Rows
+    --bs-shop-panel-row-border: 1px solid var(--tc-slate-100, #f1f5f9);
+    --bs-shop-panel-row-hover-bg: var(--tc-surface-hover, var(--tc-surface-muted));
+    --bs-shop-panel-sold-out-opacity: 0.45;
+    --bs-shop-panel-unaffordable-opacity: 0.5;
+
+    // Row parts
+    --bs-shop-panel-icon-font-size: 0.875rem;
+    --bs-shop-panel-icon-color: var(--tc-text-faint);
+    --bs-shop-panel-name-font-size: 0.8125rem;
+    --bs-shop-panel-name-color: var(--tc-text);
+    --bs-shop-panel-price-font-size: 0.75rem;
+    --bs-shop-panel-price-color: var(--tc-text);
+    --bs-shop-panel-price-old-color: var(--tc-text-faint);
+    --bs-shop-panel-discount-bg: #dcfce7;
+    --bs-shop-panel-discount-color: var(--tc-success, #22c55e);
+    --bs-shop-panel-discount-font-size: 0.6875rem;
+
+    // Action button
+    --bs-shop-panel-btn-font-size: 0.75rem;
+    --bs-shop-panel-btn-min-height: 1.75rem;
+    --bs-shop-panel-btn-bg: var(--tc-app-accent);
+    --bs-shop-panel-btn-color: var(--tc-app-accent-contrast);
+    --bs-shop-panel-btn-border: 1px solid var(--tc-app-accent);
+    --bs-shop-panel-btn-hover-bg: var(--tc-surface);
+    --bs-shop-panel-btn-hover-color: var(--tc-app-accent);
+    --bs-shop-panel-btn-hover-border: 1px solid var(--tc-app-accent);
+    --bs-shop-panel-btn-disabled-opacity: 0.45;
+
+    // Empty state
+    --bs-shop-panel-empty-color: var(--tc-text-faint);
+}
+
+// ── Panel shell ────────────────────────────────────────────────────────────────
+
+.tc-shop-panel {
+    display: flex;
+    flex-direction: column;
+    background: var(--bs-shop-panel-bg);
+    border: var(--bs-shop-panel-border);
+    border-radius: 0;
+    overflow: hidden;
+}
+
+// ── Header ─────────────────────────────────────────────────────────────────────
+
+.tc-shop-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--bs-shop-panel-header-bg);
+    border-bottom: var(--bs-shop-panel-header-border);
+}
+
+.tc-shop-panel-mode-label {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-shop-panel-mode-label-font-size);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bs-shop-panel-mode-label-color);
+    line-height: 1.4;
+}
+
+.tc-shop-panel-currency {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    background: var(--bs-shop-panel-currency-bg);
+    border: var(--bs-shop-panel-currency-border);
+    border-radius: 0;
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-shop-panel-currency-font-size);
+    font-weight: 600;
+    color: var(--bs-shop-panel-currency-color);
+    line-height: 1.4;
+}
+
+.tc-shop-panel-currency-icon {
+    color: var(--tc-text-faint);
+}
+
+// ── Rows container ─────────────────────────────────────────────────────────────
+
+.tc-shop-panel-rows {
+    display: flex;
+    flex-direction: column;
+}
+
+// ── Individual row ─────────────────────────────────────────────────────────────
+
+.tc-shop-panel-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.75rem;
+    border-bottom: var(--bs-shop-panel-row-border);
+    min-height: 36px;
+    background: transparent;
+    transition: background var(--tc-transition-fast, 0.15s ease);
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    &:hover {
+        background: var(--bs-shop-panel-row-hover-bg);
+    }
+
+    &.tc-shop-panel-row--sold-out {
+        opacity: var(--bs-shop-panel-sold-out-opacity);
+    }
+
+    &.tc-shop-panel-row--unaffordable {
+        opacity: var(--bs-shop-panel-unaffordable-opacity);
+    }
+}
+
+// ── Row parts ──────────────────────────────────────────────────────────────────
+
+.tc-shop-panel-row-icon {
+    font-size: var(--bs-shop-panel-icon-font-size);
+    color: var(--bs-shop-panel-icon-color);
+    flex-shrink: 0;
+    line-height: 1;
+    width: 1.25rem;
+    text-align: center;
+}
+
+.tc-shop-panel-row-name {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-shop-panel-name-font-size);
+    font-weight: 500;
+    color: var(--bs-shop-panel-name-color);
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.4;
+}
+
+.tc-shop-panel-discount {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 0 0.25rem;
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-shop-panel-discount-font-size);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--bs-shop-panel-discount-color);
+    background: var(--bs-shop-panel-discount-bg);
+    border-radius: 0;
+    line-height: 1.6;
+}
+
+.tc-shop-panel-price {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-shop-panel-price-font-size);
+    font-weight: 500;
+    color: var(--bs-shop-panel-price-color);
+    line-height: 1.4;
+}
+
+.tc-shop-panel-price-icon {
+    color: var(--tc-text-faint);
+}
+
+.tc-shop-panel-price-old {
+    color: var(--bs-shop-panel-price-old-color);
+    text-decoration: line-through;
+}
+
+.tc-shop-panel-price-value {
+    color: var(--bs-shop-panel-price-color);
+}
+
+// ── Action button ──────────────────────────────────────────────────────────────
+
+.tc-shop-panel-row-btn {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0 0.625rem;
+    min-height: var(--bs-shop-panel-btn-min-height);
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-shop-panel-btn-font-size);
+    font-weight: 500;
+    letter-spacing: 0.025em;
+    color: var(--bs-shop-panel-btn-color);
+    background: var(--bs-shop-panel-btn-bg);
+    border: var(--bs-shop-panel-btn-border);
+    border-radius: 0;
+    cursor: pointer;
+    transition:
+        background var(--tc-transition-fast, 0.15s ease),
+        color var(--tc-transition-fast, 0.15s ease),
+        border-color var(--tc-transition-fast, 0.15s ease),
+        transform var(--tc-transition-fast, 0.15s ease);
+    white-space: nowrap;
+    line-height: 1;
+
+    &:hover:not(:disabled) {
+        background: var(--bs-shop-panel-btn-hover-bg);
+        color: var(--bs-shop-panel-btn-hover-color);
+        border: var(--bs-shop-panel-btn-hover-border);
+        transform: translateY(-1px);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &:disabled {
+        opacity: var(--bs-shop-panel-btn-disabled-opacity);
+        pointer-events: none;
+        cursor: default;
+    }
+}
+
+// ── Empty state ────────────────────────────────────────────────────────────────
+
+.tc-shop-panel-empty {
+    padding: 1rem 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--bs-shop-panel-empty-color);
+    text-align: center;
+    margin: 0;
+}
+
+// ── 44 px coarse touch targets ─────────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-shop-panel-row {
+        min-height: 44px;
+    }
+
+    .tc-shop-panel-row-btn {
+        min-height: 44px;
+        padding: 0 0.875rem;
+    }
+}
+
+// ── Reduced motion ─────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-shop-panel-row,
+    .tc-shop-panel-row-btn {
+        transition:
+            background var(--tc-transition-fast, 0.15s ease),
+            color var(--tc-transition-fast, 0.15s ease),
+            border-color var(--tc-transition-fast, 0.15s ease);
+    }
+
+    .tc-shop-panel-row-btn:hover:not(:disabled) {
+        transform: none;
+    }
+}

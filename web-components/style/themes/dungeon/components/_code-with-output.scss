@@ -1,0 +1,33 @@
+// Dungeon › tc-code-with-output — docs/example code+output display.
+// Legibility fix: --bs-cwo-code-color repointed to parchment (the base resolves
+// --tc-text-inverse → ink, which is near-invisible on the ink code pane).
+// Light gilding: title cap → gold display font; lang label → gold; top bevel on
+// the outer frame. No full bevel/notches — this is docs chrome, not a panel.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token swap ────────────────────────────────────────────────────────────
+
+    tc-code-with-output {
+        // Legibility: parchment text on the dark ink code pane.
+        --bs-cwo-code-color: var(--fg-parch);
+
+        // Gilded title and lang label.
+        --bs-cwo-title-color: var(--fg-gold);
+        --bs-cwo-lang-color: var(--fg-gold);
+    }
+
+    // ── Structure: display-caps title ─────────────────────────────────────────
+
+    .tc-cwo-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+    }
+
+    // ── Structure: gilded top-edge highlight on the outer frame ───────────────
+
+    .tc-cwo {
+        box-shadow: var(--fg-bevel-top);
+    }
+}

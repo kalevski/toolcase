@@ -40,6 +40,7 @@ if count < limit then
 	redis.call("PEXPIRE", KEYS[1], window)
 	return {1, count + 1, limit - count - 1}
 end
+redis.call("PEXPIRE", KEYS[1], window)
 return {0, count, 0}
 `.trim()
 
@@ -62,13 +63,15 @@ if tokens >= cost then
 	allowed = 1
 end
 redis.call("HSET", key, "tokens", tostring(tokens), "last", tostring(now))
-local ttl = math.ceil(capacity / refill) + 1
+local ttl
+if refill > 0 then ttl = math.ceil(capacity / refill) + 1 else ttl = math.ceil(capacity) + 1 end
 redis.call("EXPIRE", key, ttl)
 return {allowed, tostring(tokens)}
 `.trim()
 
 const LUA_INCR_CAPPED = `
 local current = tonumber(redis.call("GET", KEYS[1]))
+local is_new = current == nil
 if current == nil then current = 0 end
 local delta = tonumber(ARGV[1])
 local cap = tonumber(ARGV[2])
@@ -76,7 +79,7 @@ if current + delta > cap then
 	return {0, current}
 end
 local next = redis.call("INCRBY", KEYS[1], delta)
-if ARGV[3] ~= "" then
+if is_new and ARGV[3] ~= "" then
 	redis.call("EXPIRE", KEYS[1], tonumber(ARGV[3]))
 end
 return {1, next}
@@ -91,7 +94,12 @@ return v
 `.trim()
 
 const LUA_VERSIONED_SET = `
-local cur = redis.call("HGET", KEYS[1], "version")
+local fields = redis.call("HMGET", KEYS[1], "version", "__vset")
+local cur = fields[1]
+local marker = fields[2]
+if not cur and not marker and redis.call("EXISTS", KEYS[1]) == 1 then
+	return {0, -1}
+end
 if cur and tonumber(cur) ~= tonumber(ARGV[1]) then
 	return {0, tonumber(cur)}
 end
@@ -99,7 +107,7 @@ if not cur and tonumber(ARGV[1]) ~= 0 then
 	return {0, 0}
 end
 local nextVersion = tonumber(ARGV[1]) + 1
-redis.call("HSET", KEYS[1], "version", tostring(nextVersion), "data", ARGV[2])
+redis.call("HSET", KEYS[1], "version", tostring(nextVersion), "data", ARGV[2], "__vset", "1")
 if ARGV[3] ~= "" then
 	redis.call("EXPIRE", KEYS[1], tonumber(ARGV[3]))
 end
@@ -108,7 +116,9 @@ return {1, nextVersion}
 
 const LUA_ADD_SCORE_RANK = `
 redis.call("ZADD", KEYS[1], ARGV[1], ARGV[2])
-local rank = redis.call("ZREVRANK", KEYS[1], ARGV[2])
+local rank
+if ARGV[3] == "asc" then rank = redis.call("ZRANK", KEYS[1], ARGV[2])
+else rank = redis.call("ZREVRANK", KEYS[1], ARGV[2]) end
 local score = redis.call("ZSCORE", KEYS[1], ARGV[2])
 if rank == false then rank = -1 end
 if score == false then score = "0" end
@@ -117,7 +127,7 @@ return {rank, score}
 
 const LUA_POP_N = `
 local results = {}
-local count = tonumber(ARGV[1])
+local count = math.min(tonumber(ARGV[1]), 1000)
 for i = 1, count do
 	local v = redis.call("LPOP", KEYS[1])
 	if not v then break end
@@ -143,7 +153,9 @@ if v == 1 then
 else
 	ttl = redis.call("TTL", KEYS[1])
 	if ttl < 0 then
+		redis.call("SET", KEYS[1], "1")
 		redis.call("EXPIRE", KEYS[1], tonumber(ARGV[1]))
+		v = 1
 		ttl = tonumber(ARGV[1])
 	end
 end

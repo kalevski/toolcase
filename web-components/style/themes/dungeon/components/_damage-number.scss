@@ -1,0 +1,44 @@
+// Dungeon › tc-damage-number — combat ticks in mono parchment with an ink glow;
+// crit = blood-bright with a red halo, heal = stamina-bright with a green halo,
+// miss = italic display caps. Token swap recolours; the .tc-* rules add the
+// text-shadow glows and the italic display miss the base draws flat.
+//
+// Design source:  game-components/style/components/_damage-number.scss
+// Target classes: web-components/style/components/_damage-number.scss
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-damage-number {
+        --bs-damage-number-color: var(--fg-parch-2);
+        --bs-damage-number-font-weight: 600;
+        --bs-damage-number-crit-color: var(--fg-blood-bright);
+        --bs-damage-number-crit-font-weight: 700;
+        --bs-damage-number-heal-color: var(--fg-stamina-bright);
+        --bs-damage-number-miss-color: var(--fg-parch-dim);
+    }
+
+    // Base float number — mono parchment with an ink glow.
+    .tc-damage-number-text {
+        font-family: var(--fg-mono);
+        text-shadow: 0 1px 2px #000, 0 0 4px #000;
+    }
+
+    // Crit = red halo + faint gold rim so the blow reads as a struck hit.
+    .tc-damage-number-text[data-variant='crit'] {
+        text-shadow: 0 1px 2px #000, 0 0 8px rgba(212, 74, 58, 0.7), 0 0 14px rgba(240, 210, 122, 0.25);
+    }
+
+    // Heal = green halo.
+    .tc-damage-number-text[data-variant='heal'] {
+        text-shadow: 0 1px 2px #000, 0 0 6px rgba(168, 214, 90, 0.6);
+    }
+
+    // Miss = italic display caps, wide-tracked. Ink backing keeps thin italic strokes
+    // readable on dark wood even under the Georgia fallback font.
+    .tc-damage-number-text[data-variant='miss'] {
+        font-family: var(--fg-display);
+        font-style: italic;
+        letter-spacing: 0.18em;
+        text-shadow: 0 1px 2px #000, 0 0 3px #000;
+    }
+}

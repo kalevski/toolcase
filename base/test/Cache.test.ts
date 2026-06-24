@@ -67,4 +67,55 @@ describe('Cache', () => {
         const result = await cache.get()
         expect(result).toBe('async-data')
     })
+
+    it('maxEntries caps the number of stored entries (LRU eviction)', async () => {
+        const fn = vi.fn((x: number) => x)
+        const cache = new Cache(fn, 60000, 2)
+
+        await cache.get(1) // cache: {1}
+        await cache.get(2) // cache: {1, 2}
+        await cache.get(3) // evicts 1 (LRU), cache: {2, 3}
+        await cache.get(1) // evicts 2 (LRU), cache: {3, 1}
+        expect(fn).toHaveBeenCalledTimes(4)
+
+        // 3 and 1 are both live; accessing them should not call fetchFn
+        await cache.get(3) // cache: {1, 3}
+        await cache.get(1) // cache: {3, 1}
+        expect(fn).toHaveBeenCalledTimes(4)
+
+        // 2 was evicted; getting it again must trigger fetchFn and evict 3
+        await cache.get(2) // evicts 3, cache: {1, 2}
+        expect(fn).toHaveBeenCalledTimes(5)
+    })
+
+    it('ms = 0 (default) caches forever — fetchFn is called only once across repeated calls', async () => {
+        const fn = vi.fn(() => 'value')
+        const cache = new Cache(fn) // ms defaults to 0 → cache-forever
+
+        await cache.get('key')
+        await cache.get('key')
+        await cache.get('key')
+
+        expect(fn).toHaveBeenCalledTimes(1)
+    })
+
+    it('concurrent get calls invoke fetchFn only once', async () => {
+        let resolver!: (v: string) => void
+        const fn = vi.fn(() => new Promise<string>(r => { resolver = r }))
+
+        const cache = new Cache(fn, 0)
+
+        const p1 = cache.get('key')
+        const p2 = cache.get('key')
+
+        // fn is called once; the second get reuses the inflight promise
+        expect(fn).toHaveBeenCalledTimes(1)
+
+        resolver('value')
+        const [a, b] = await Promise.all([p1, p2])
+
+        expect(fn).toHaveBeenCalledTimes(1)
+        expect(a).toBe('value')
+        expect(b).toBe('value')
+    })
 })

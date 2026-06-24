@@ -1,0 +1,166 @@
+// tc-code-with-output — code snippet alongside its output, split or stacked.
+// All cosmetics flow through --bs-cwo-* custom properties backed by --tc-* tokens.
+// Design rails: sharp corners, 1px hairline borders, no shadows, no accent.
+
+tc-code-with-output {
+    --bs-cwo-border: 1px solid var(--tc-border);
+
+    --bs-cwo-title-bg: var(--tc-surface-muted);
+    --bs-cwo-title-color: var(--tc-text);
+    --bs-cwo-title-padding: 0.5rem 0.75rem;
+    --bs-cwo-title-font-size: 0.875rem;
+    --bs-cwo-title-font-weight: 500;
+
+    --bs-cwo-code-bg: var(--tc-ink);
+    --bs-cwo-code-header-bg: var(--tc-ink-2);
+    --bs-cwo-code-header-padding: 0.375rem 0.75rem;
+    --bs-cwo-lang-color: var(--tc-text-muted);
+    --bs-cwo-lang-font-size: 0.7rem;
+    --bs-cwo-lang-letter-spacing: 0.08em;
+    --bs-cwo-code-color: var(--tc-text-inverse);
+    --bs-cwo-code-font-size: 0.85rem;
+    --bs-cwo-code-padding: 0.875rem 0.75rem;
+    --bs-cwo-code-line-height: 1.6;
+
+    --bs-cwo-output-bg: var(--tc-surface);
+    --bs-cwo-output-color: var(--tc-text);
+    --bs-cwo-output-padding: 0.75rem;
+    --bs-cwo-output-font-size: 0.875rem;
+
+    --bs-cwo-error-bg: var(--tc-danger-bg);
+    --bs-cwo-error-color: var(--tc-danger);
+}
+
+.tc-cwo {
+    border: var(--bs-cwo-border);
+    border-radius: 0;
+    overflow: hidden;
+}
+
+// ── Title ────────────────────────────────────────────────────────────────────
+
+.tc-cwo-title {
+    padding: var(--bs-cwo-title-padding);
+    background-color: var(--bs-cwo-title-bg);
+    color: var(--bs-cwo-title-color);
+    font-size: var(--bs-cwo-title-font-size);
+    font-weight: var(--bs-cwo-title-font-weight);
+    border-bottom: var(--bs-cwo-border);
+}
+
+// ── Pane container ───────────────────────────────────────────────────────────
+
+.tc-cwo-panes {
+    display: flex;
+    min-height: 0;
+}
+
+// Split: two columns, vertical divider (default)
+.tc-cwo-split .tc-cwo-panes {
+    flex-direction: row;
+}
+
+.tc-cwo-split .tc-cwo-code {
+    border-right: var(--bs-cwo-border);
+}
+
+// Stacked: code above output, horizontal divider
+.tc-cwo-stacked .tc-cwo-panes {
+    flex-direction: column;
+}
+
+.tc-cwo-stacked .tc-cwo-code {
+    border-bottom: var(--bs-cwo-border);
+}
+
+// ── Code pane ────────────────────────────────────────────────────────────────
+
+.tc-cwo-code {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bs-cwo-code-bg);
+    min-width: 0;
+}
+
+.tc-cwo-code-header {
+    display: flex;
+    align-items: center;
+    padding: var(--bs-cwo-code-header-padding);
+    background-color: var(--bs-cwo-code-header-bg);
+}
+
+.tc-cwo-lang {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-cwo-lang-font-size);
+    font-weight: 500;
+    letter-spacing: var(--bs-cwo-lang-letter-spacing);
+    color: var(--bs-cwo-lang-color);
+    text-transform: uppercase;
+}
+
+.tc-cwo-code pre {
+    margin: 0;
+    padding: var(--bs-cwo-code-padding);
+    background: transparent;
+    color: var(--bs-cwo-code-color);
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-cwo-code-font-size);
+    line-height: var(--bs-cwo-code-line-height);
+    overflow-x: auto;
+    border-radius: 0;
+}
+
+.tc-cwo-code-block {
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    white-space: pre;
+}
+
+// ── Output pane ──────────────────────────────────────────────────────────────
+
+.tc-cwo-output {
+    flex: 1;
+    background-color: var(--bs-cwo-output-bg);
+    color: var(--bs-cwo-output-color);
+    min-width: 0;
+}
+
+.tc-cwo-output-body {
+    display: none;
+    padding: var(--bs-cwo-output-padding);
+    font-size: var(--bs-cwo-output-font-size);
+    white-space: pre-wrap;
+    word-break: break-word;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+// Show only the relevant body container
+.tc-cwo-output:not(.tc-cwo-output-error) .tc-cwo-normal-content {
+    display: block;
+}
+
+.tc-cwo-output.tc-cwo-output-error .tc-cwo-error-content {
+    display: block;
+}
+
+// Error state: danger tint only — no accent colours
+.tc-cwo-output-error {
+    background-color: var(--bs-cwo-error-bg);
+    color: var(--bs-cwo-error-color);
+}
+
+// ── Reduced motion ───────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-cwo,
+    .tc-cwo-code,
+    .tc-cwo-output {
+        transition: none;
+    }
+}

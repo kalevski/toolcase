@@ -1,0 +1,49 @@
+// Dungeon › tc-range — ink-trough slider with a gold-gradient thumb.
+// No --bs-range-* var contract exists; pseudo-elements must be overridden directly.
+// Webkit and Gecko thumb/track rules are kept in separate rule blocks — mixing them
+// in a single selector list causes the entire rule to be dropped in one engine.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // --- Track: recessed ink groove ---
+    // Webkit
+    .form-range::-webkit-slider-runnable-track {
+        background-color: #0e0905;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.7);
+    }
+
+    // Gecko
+    .form-range::-moz-range-track {
+        background-color: #0e0905;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.7);
+    }
+
+    // --- Thumb: gold-gradient bevel (sanctioned circle — keep border-radius: 50%) ---
+    // Webkit
+    .form-range::-webkit-slider-thumb {
+        background: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold-deep));
+        border-color: var(--fg-gold);
+    }
+
+    // Gecko
+    .form-range::-moz-range-thumb {
+        background: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold-deep));
+        border-color: var(--fg-gold);
+    }
+
+    // --- Gecko filled-progress portion ---
+    .form-range::-moz-range-progress {
+        background-color: var(--fg-gold);
+    }
+
+    // --- Focus glow: replace hardcoded slate-blue literal with gold ---
+    // Webkit
+    .form-range:focus-visible::-webkit-slider-thumb {
+        box-shadow: 0 0 0 0.2rem rgba(240, 210, 122, 0.4);
+    }
+
+    // Gecko
+    .form-range:focus-visible::-moz-range-thumb {
+        box-shadow: 0 0 0 0.2rem rgba(240, 210, 122, 0.4);
+    }
+}

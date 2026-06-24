@@ -1,0 +1,24 @@
+// tc-stack — purely structural flexbox layout primitive.
+// No visible chrome; inline styles drive flex properties from attributes.
+// This partial registers display and provides --bs-stack-* defaults that
+// take effect when the corresponding attribute is absent (inline style is cleared).
+
+tc-stack {
+    // Public theming contract — override to change defaults for all instances.
+    --bs-stack-gap: 0px;
+    --bs-stack-align: stretch;
+    --bs-stack-justify: flex-start;
+
+    display: flex;
+    flex-direction: column;
+    // Applied when the JS attribute is absent (inline style cleared by render()).
+    gap: var(--bs-stack-gap);
+    align-items: var(--bs-stack-align);
+    justify-content: var(--bs-stack-justify);
+    flex-wrap: nowrap;
+}
+
+// inline attribute switches to inline-flex so the stack sits inside a text/flex row.
+tc-stack[inline] {
+    display: inline-flex;
+}

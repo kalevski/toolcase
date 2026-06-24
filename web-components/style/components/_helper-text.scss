@@ -1,0 +1,42 @@
+// tc-helper-text — inline contextual helper text with a leading lucide icon.
+// Sharp corners, dense secondary size, variant-specific status tinting.
+// All cosmetic values flow through --bs-helper-text-* backed by --tc-* tokens.
+
+tc-helper-text {
+    --bs-helper-text-font-size: 0.78125rem; // 12.5 px
+    --bs-helper-text-line-height: 1.4;
+    --bs-helper-text-color: var(--tc-text-muted);
+    --bs-helper-text-gap: 0.3125rem;        // 5 px
+    --bs-helper-text-icon-size: 0.78125rem; // matches font-size
+    --bs-helper-text-success-color: var(--tc-success);
+    --bs-helper-text-warning-color: var(--tc-warning);
+    --bs-helper-text-error-color: var(--tc-danger);
+}
+
+.tc-helper-text {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-helper-text-gap);
+    font-size: var(--bs-helper-text-font-size);
+    line-height: var(--bs-helper-text-line-height);
+    color: var(--bs-helper-text-color);
+
+    svg {
+        flex-shrink: 0;
+        width: var(--bs-helper-text-icon-size);
+        height: var(--bs-helper-text-icon-size);
+        // inherits currentColor via stroke="currentColor" on the lucide SVG
+    }
+}
+
+.tc-helper-text--success {
+    color: var(--bs-helper-text-success-color);
+}
+
+.tc-helper-text--warning {
+    color: var(--bs-helper-text-warning-color);
+}
+
+.tc-helper-text--error {
+    color: var(--bs-helper-text-error-color);
+}

@@ -1,0 +1,43 @@
+// tc-badge — .badge authored from scratch. Sharp chip, medium weight, solid
+// fill via the .text-bg-* utilities; .rounded-pill is the one sanctioned
+// rounded rectangle (pill counters).
+
+.badge {
+    --bs-badge-padding-x: 0.75rem;
+    --bs-badge-padding-y: 0.375rem;
+    --bs-badge-font-size: 0.75rem;
+    --bs-badge-font-weight: 500;
+    --bs-badge-color: #fff;
+    --bs-badge-border-radius: 0;
+
+    display: inline-flex;
+    align-items: center;
+    padding: var(--bs-badge-padding-y) var(--bs-badge-padding-x);
+    font-size: var(--bs-badge-font-size);
+    font-weight: var(--bs-badge-font-weight);
+    line-height: 1;
+    letter-spacing: 0.025em;
+    color: var(--bs-badge-color);
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: var(--bs-badge-border-radius);
+
+    &:empty {
+        display: none;
+    }
+}
+
+.badge.rounded-pill {
+    border-radius: 999px;
+}
+
+// Reference palette: secondary chips read slate-500 (lighter than the button
+// secondary ink), and warning chips keep white text on the amber fill.
+.badge.text-bg-secondary {
+    background-color: var(--tc-slate-500) !important;
+}
+
+.badge.text-bg-warning {
+    color: #fff !important;
+}

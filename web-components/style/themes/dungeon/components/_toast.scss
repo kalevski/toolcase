@@ -1,0 +1,80 @@
+// Dungeon › tc-toast — gilded herald-scroll pop-in.
+// Foundation remaps status stripe colors + mono meta font; this override
+// repoints the hardcoded white text literals to parch/gold, adds the gilded
+// border + bevel shadow, and applies display caps to the toast header.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Token swap ─────────────────────────────────────────────────────────
+    // Vars sit on .toast (and on .toast[class*='text-bg-'] for the variant
+    // block that re-asserts them with !important). Setting them here is enough
+    // because the base feeds color/background-color through the vars.
+    .toast {
+        --bs-toast-color: var(--fg-parch);
+        --bs-toast-bg: var(--fg-ink);
+        --bs-toast-header-color: var(--fg-gold-bright);
+        --bs-toast-header-border-color: rgba(201, 169, 97, 0.25);
+        --bs-toast-box-shadow: var(--fg-panel-shadow);
+
+        // Gilded frame — base has border-width 0, we add a 1px gold-deep hairline.
+        border: 1px solid var(--fg-gold-deep);
+        position: relative;
+    }
+
+    // Variant block re-declares white literals with !important; swap the vars
+    // on that selector too so the re-assertion picks up the parch/gold values.
+    .toast[class*='text-bg-'] {
+        --bs-toast-color: var(--fg-parch);
+        --bs-toast-bg: var(--fg-ink);
+        --bs-toast-header-color: var(--fg-gold-bright);
+        --bs-toast-header-border-color: rgba(201, 169, 97, 0.25);
+    }
+
+    // ── Display caps header ─────────────────────────────────────────────────
+    // Base hardcodes no font-family on .toast-header; set display font here.
+    .toast-header {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+
+        // Meta text (timestamps etc.) — parch-3 ghost instead of white/60.
+        small {
+            color: var(--fg-parch-3);
+        }
+
+        // Close glyph — parch-3 instead of white/70; gold-tinted hover bg.
+        .btn-close {
+            --bs-btn-close-color: var(--fg-parch-3);
+
+            &:hover {
+                color: var(--fg-gold-bright);
+                background-color: rgba(201, 169, 97, 0.15);
+            }
+        }
+    }
+
+    // ── Top corner notches ──────────────────────────────────────────────────
+    // Signature gilded ornament — mirrors .tc-panel--bordered treatment.
+    .toast::before,
+    .toast::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 12px;
+        height: 12px;
+        pointer-events: none;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+    }
+
+    .toast::before {
+        left: -1px;
+    }
+
+    .toast::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+}

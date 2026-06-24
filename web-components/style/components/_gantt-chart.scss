@@ -1,0 +1,333 @@
+// tc-gantt-chart — a light-DOM Gantt chart: time-based task bars positioned by
+// date math against an overall span, with progress fills, a date-marker axis,
+// and a horizontally-scrolling body. Slate neutrals carry it: the frame is the
+// Card surface (white --tc-surface behind a 1px hairline with --tc-shadow-sm);
+// row separators are slate-100 inner hairlines under the --tc-border outer
+// frame. Bar bases default to a muted slate fill; the inner progress fill uses
+// --tc-app-accent ink (or the task's own `color` — the one sanctioned data
+// encoding). Axis ticks are JetBrains Mono micro-labels in --tc-text-muted.
+// Hover is a subtle outline/well (never a new hue); focus is a visible 2px
+// accent outline; the tooltip is overlay tier — ink surface, white text,
+// --tc-shadow-md, a 3px colored left stripe. Sharp corners (radius 0)
+// everywhere — bars are rectangles, never rounded. Every cosmetic value flows
+// through a --bs-gantt-chart-* custom property.
+
+tc-gantt-chart {
+    --bs-gantt-chart-bg: var(--tc-surface);
+    --bs-gantt-chart-border: 1px solid var(--tc-border);
+    --bs-gantt-chart-shadow: var(--tc-shadow-sm);
+    --bs-gantt-chart-title-color: var(--tc-text);
+    --bs-gantt-chart-subtitle-color: var(--tc-text-muted);
+
+    // left label column width — the axis spacer matches it so ticks align
+    --bs-gantt-chart-label-width: 130px;
+    --bs-gantt-chart-row-height: 36px;
+
+    --bs-gantt-chart-axis-bg: var(--tc-surface-muted);
+    --bs-gantt-chart-tick-color: var(--tc-text-muted);
+    --bs-gantt-chart-gridline-color: var(--tc-border);
+    --bs-gantt-chart-row-separator: var(--tc-slate-100);
+    --bs-gantt-chart-label-color: var(--tc-text);
+
+    // bar base = muted slate well; progress/solid fill = ink accent (overridable
+    // per-task via --bs-gantt-chart-bar-color)
+    --bs-gantt-chart-bar-bg: var(--tc-slate-200);
+    --bs-gantt-chart-progress-fill: var(--tc-app-accent);
+    --bs-gantt-chart-bar-color: var(--bs-gantt-chart-progress-fill);
+
+    // state ladder
+    --bs-gantt-chart-bar-hover-outline: var(--tc-slate-400);
+    --bs-gantt-chart-focus-ring: var(--tc-app-accent);
+
+    --bs-gantt-chart-tooltip-bg: var(--tc-ink);
+    --bs-gantt-chart-tooltip-color: #fff;
+    --bs-gantt-chart-tooltip-stripe-width: 3px;
+    --bs-gantt-chart-tooltip-shadow: var(--tc-shadow-md);
+
+    --bs-gantt-chart-skeleton-bg: var(--tc-surface-muted);
+
+    display: block;
+}
+
+// --- frame (Card surface) ---
+.tc-gantt-chart {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    padding: 0.875rem 1rem;
+    background: var(--bs-gantt-chart-bg);
+    border: var(--bs-gantt-chart-border);
+    border-radius: 0;
+    box-shadow: var(--bs-gantt-chart-shadow);
+}
+
+// --- header ---
+.tc-gantt-chart-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.tc-gantt-chart-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--bs-gantt-chart-title-color);
+}
+
+.tc-gantt-chart-subtitle {
+    font-size: 0.8125rem;
+    line-height: 1.3;
+    color: var(--bs-gantt-chart-subtitle-color);
+}
+
+// --- scroll region (horizontal overflow) ---
+.tc-gantt-chart-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    // minimal scrollbar per the ScrollArea convention
+    scrollbar-width: thin;
+    scrollbar-color: var(--tc-slate-300) transparent;
+}
+
+.tc-gantt-chart-scroll::-webkit-scrollbar {
+    height: 8px;
+}
+
+.tc-gantt-chart-scroll::-webkit-scrollbar-thumb {
+    background: var(--tc-slate-300);
+    border-radius: 0;
+}
+
+.tc-gantt-chart-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.tc-gantt-chart-scroll:focus-visible {
+    outline: 2px solid var(--bs-gantt-chart-focus-ring);
+    outline-offset: 2px;
+}
+
+.tc-gantt-chart-grid {
+    display: flex;
+    flex-direction: column;
+}
+
+// --- axis (date markers) ---
+.tc-gantt-chart-axis {
+    display: flex;
+    align-items: stretch;
+    height: var(--bs-gantt-chart-row-height);
+    background: var(--bs-gantt-chart-axis-bg);
+    border-bottom: 1px solid var(--bs-gantt-chart-gridline-color);
+}
+
+.tc-gantt-chart-axis-spacer {
+    flex: 0 0 var(--bs-gantt-chart-label-width);
+    border-right: 1px solid var(--bs-gantt-chart-gridline-color);
+}
+
+.tc-gantt-chart-axis-track {
+    position: relative;
+    flex: 1 1 auto;
+}
+
+.tc-gantt-chart-tick {
+    position: absolute;
+    bottom: 0.375rem;
+    transform: translateX(-50%);
+    font-family: var(--tc-font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.04em;
+    color: var(--bs-gantt-chart-tick-color);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+}
+
+// --- body (rows + gridline overlay) ---
+.tc-gantt-chart-body {
+    position: relative;
+}
+
+.tc-gantt-chart-gridlines {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--bs-gantt-chart-label-width);
+    right: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.tc-gantt-chart-gridline {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--bs-gantt-chart-gridline-color);
+}
+
+// --- rows ---
+.tc-gantt-chart-row {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: stretch;
+    height: var(--bs-gantt-chart-row-height);
+    border-bottom: 1px solid var(--bs-gantt-chart-row-separator);
+}
+
+.tc-gantt-chart-row:last-child {
+    border-bottom: 0;
+}
+
+.tc-gantt-chart-label {
+    flex: 0 0 var(--bs-gantt-chart-label-width);
+    display: flex;
+    align-items: center;
+    padding-right: 0.5rem;
+    border-right: 1px solid var(--bs-gantt-chart-gridline-color);
+    font-size: 0.75rem;
+    color: var(--bs-gantt-chart-label-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tc-gantt-chart-track {
+    position: relative;
+    flex: 1 1 auto;
+}
+
+// --- bars ---
+.tc-gantt-chart-bar {
+    position: absolute;
+    top: 25%;
+    height: 50%;
+    min-width: 4px;
+    background: var(--bs-gantt-chart-bar-bg);
+    border-radius: 0;
+    cursor: pointer;
+    overflow: hidden;
+    outline: none;
+    transition: box-shadow var(--tc-transition-fast, 0.15s ease);
+}
+
+.tc-gantt-chart-progress {
+    height: 100%;
+    background: var(--bs-gantt-chart-bar-color);
+}
+
+// hover = a subtle hairline outline + faint well, never a new hue
+.tc-gantt-chart-bar:hover {
+    box-shadow: inset 0 0 0 1px var(--bs-gantt-chart-bar-hover-outline);
+}
+
+.tc-gantt-chart-bar:focus-visible {
+    outline: 2px solid var(--bs-gantt-chart-focus-ring);
+    outline-offset: 2px;
+}
+
+// --- empty ---
+.tc-gantt-chart-empty {
+    padding: 1.5rem 0;
+    font-size: 0.8125rem;
+    color: var(--tc-text-muted);
+    text-align: center;
+}
+
+// --- tooltip (overlay tier) ---
+.tc-gantt-chart-tooltip {
+    position: absolute;
+    z-index: var(--tc-z-tooltip, 1070);
+    transform: translate(-50%, calc(-100% - 8px));
+    display: flex;
+    flex-direction: column;
+    gap: 0.0625rem;
+    min-width: 0;
+    padding: 0.3125rem 0.5rem;
+    background: var(--bs-gantt-chart-tooltip-bg);
+    color: var(--bs-gantt-chart-tooltip-color);
+    border-radius: 0;
+    border-left: var(--bs-gantt-chart-tooltip-stripe-width) solid var(--bs-gantt-chart-bar-color, var(--tc-accent));
+    box-shadow: var(--bs-gantt-chart-tooltip-shadow);
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.tc-gantt-chart-tooltip[hidden] {
+    display: none;
+}
+
+.tc-gantt-chart-tooltip-name {
+    font-family: var(--tc-font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.75;
+}
+
+.tc-gantt-chart-tooltip-meta {
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+// --- loading skeleton (slate neutrals only) ---
+.tc-gantt-chart-skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--bs-gantt-chart-skeleton-bg) 25%,
+        var(--tc-surface-hover) 37%,
+        var(--bs-gantt-chart-skeleton-bg) 63%
+    );
+    background-size: 200% 100%;
+    animation: tc-gantt-chart-shimmer 1.4s ease infinite;
+}
+
+.tc-gantt-chart-skeleton--title {
+    width: 40%;
+    height: 0.95rem;
+}
+
+.tc-gantt-chart-skeleton-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.tc-gantt-chart-skeleton-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    height: calc(var(--bs-gantt-chart-row-height) - 8px);
+}
+
+.tc-gantt-chart-skeleton--label {
+    flex: 0 0 calc(var(--bs-gantt-chart-label-width) - 20px);
+    height: 0.75rem;
+}
+
+.tc-gantt-chart-skeleton--bar {
+    flex: 1 1 auto;
+    height: 0.875rem;
+}
+
+@keyframes tc-gantt-chart-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-gantt-chart-skeleton {
+        animation: none;
+        background: var(--bs-gantt-chart-skeleton-bg);
+    }
+
+    .tc-gantt-chart-bar {
+        transition: none;
+    }
+}

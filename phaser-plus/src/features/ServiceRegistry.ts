@@ -1,6 +1,10 @@
 type ServiceClass<T> = new () => T
 type ServiceFactory<T> = () => T
 
+export interface Disposable {
+    dispose(): void
+}
+
 export default class ServiceRegistry {
 
     private readonly services: Map<ServiceClass<unknown>, unknown> = new Map()
@@ -46,10 +50,15 @@ export default class ServiceRegistry {
 
     dispose<T>(serviceClass: ServiceClass<T>): void {
         this.assertClass(serviceClass)
+        const instance = this.services.get(serviceClass)
+        ;(instance as Partial<Disposable>)?.dispose?.()
         this.services.delete(serviceClass)
     }
 
     disposeAll(): void {
+        for (const instance of this.services.values()) {
+            ;(instance as Partial<Disposable>)?.dispose?.()
+        }
         this.services.clear()
         this.factories.clear()
     }

@@ -1,0 +1,213 @@
+import React, { useEffect, useRef, useState } from 'react'
+
+const TAGS = [
+    { id: 'design', label: 'Design', color: 'var(--tc-info, #0ea5e9)' },
+    { id: 'review', label: 'Review', color: 'var(--tc-warning, #f59e0b)' },
+    { id: 'approved', label: 'Approved', color: 'var(--tc-success, #10b981)' },
+    { id: 'draft', label: 'Draft' },
+]
+
+const MENU_ITEMS = [
+    { key: 'rename', label: 'Rename', icon: 'Pencil' },
+    { key: 'duplicate', label: 'Duplicate', icon: 'Copy' },
+    { key: 'download', label: 'Download', icon: 'Download' },
+    { key: 'delete', label: 'Delete', icon: 'Trash2' },
+]
+
+function EditableExample() {
+    const ref = useRef<any>(null)
+    const [log, setLog] = useState<string[]>([])
+
+    useEffect(() => {
+        const el = ref.current
+        if (!el) return
+
+        el.tags = TAGS
+        el.tagIds = ['design', 'review']
+        el.menuItems = MENU_ITEMS
+
+        const onName = (e: CustomEvent) => {
+            setLog((prev) => [`name changed → "${e.detail.name}"`, ...prev].slice(0, 5))
+        }
+        const onMenu = (e: CustomEvent) => {
+            setLog((prev) => [`menu clicked → "${e.detail.key}"`, ...prev].slice(0, 5))
+        }
+
+        el.addEventListener('tc-name-change', onName)
+        el.addEventListener('tc-menu-item-click', onMenu)
+        return () => {
+            el.removeEventListener('tc-name-change', onName)
+            el.removeEventListener('tc-menu-item-click', onMenu)
+        }
+    }, [])
+
+    return (
+        <div className="d-flex flex-column gap-3">
+            {/* @ts-ignore */}
+            <tc-file
+                ref={ref}
+                name="Q3-Report"
+                extension=".pdf"
+                format="PDF"
+                size="2621440"
+                items="12"
+            />
+            {log.length > 0 && (
+                <ul className="list-unstyled mb-0 small text-muted">
+                    {log.map((entry, i) => (
+                        <li key={i}>
+                            <code>{entry}</code>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+    )
+}
+
+function ReadonlyExample() {
+    const ref = useRef<any>(null)
+
+    useEffect(() => {
+        const el = ref.current
+        if (!el) return
+        el.tags = TAGS
+        el.tagIds = ['approved']
+    }, [])
+
+    return (
+        <>
+            {/* @ts-ignore */}
+            <tc-file
+                ref={ref}
+                readonly
+                name="Hero-Image"
+                extension=".png"
+                format="PNG"
+                size="5242880"
+                items="0"
+            />
+        </>
+    )
+}
+
+function LoadingExample() {
+    const [loaded, setLoaded] = useState(false)
+
+    return (
+        <div className="d-flex flex-column gap-2">
+            {/* @ts-ignore */}
+            <tc-file loading />
+            {/* @ts-ignore */}
+            <tc-file loading />
+            <button
+                className="btn btn-sm btn-secondary mt-2"
+                style={{ width: 'fit-content' }}
+                onClick={() => setLoaded((v) => !v)}
+            >
+                {loaded ? 'Show loading' : 'Show content'}
+            </button>
+            {loaded && (
+                /* @ts-ignore */
+                <tc-file name="dataset" extension=".csv" format="CSV" size="65536" />
+            )}
+        </div>
+    )
+}
+
+function CallbackPropertyExample() {
+    const ref = useRef<any>(null)
+    const [lastAction, setLastAction] = useState<string | null>(null)
+
+    useEffect(() => {
+        const el = ref.current
+        if (!el) return
+        el.menuItems = [
+            { key: 'open', label: 'Open', icon: 'FolderOpen' },
+            { key: 'share', label: 'Share', icon: 'Share2' },
+        ]
+        el.onMenuItemClick = (key: string) => setLastAction(key)
+        el.onNameChange = (name: string) => setLastAction(`rename → ${name}`)
+    }, [])
+
+    return (
+        <div className="d-flex flex-column gap-2">
+            {/* @ts-ignore */}
+            <tc-file ref={ref} name="presentation" extension=".pptx" format="PPTX" size="8388608" />
+            {lastAction && (
+                <p className="small text-muted mb-0">
+                    Last action: <code>{lastAction}</code>
+                </p>
+            )}
+        </div>
+    )
+}
+
+const FileDemo: React.FC = () => (
+    <div className="py-4">
+        <div className="container">
+            <div className="row">
+                <div className="col-12">
+                    <tc-rich-page-header
+                        title-text="File"
+                        description="File entry with editable name, format badge, byte size, nested item count, tag chips, and an action menu. Emits tc-name-change on rename and tc-menu-item-click on menu selection."
+                    >
+                        <tc-badge slot="chips" variant="secondary">
+                            Web Components
+                        </tc-badge>
+                    </tc-rich-page-header>
+
+                    <div className="d-flex flex-column gap-4 mt-4">
+                        <tc-section-card title="Editable file (with tags and menu)">
+                            <EditableExample />
+                        </tc-section-card>
+
+                        <tc-section-card title="Readonly variant">
+                            <ReadonlyExample />
+                        </tc-section-card>
+
+                        <tc-section-card title="Static examples">
+                            <div className="d-flex flex-column gap-2">
+                                {/* @ts-ignore */}
+                                <tc-file
+                                    name="architecture"
+                                    extension=".png"
+                                    format="PNG"
+                                    size="2097152"
+                                    items="3"
+                                />
+                                {/* @ts-ignore */}
+                                <tc-file
+                                    name="dataset"
+                                    extension=".json"
+                                    format="JSON"
+                                    size="512000"
+                                />
+                                {/* @ts-ignore */}
+                                <tc-file name="readme" extension=".md" size="4096" />
+                                {/* @ts-ignore */}
+                                <tc-file
+                                    name="video-clip"
+                                    extension=".mp4"
+                                    format="MP4"
+                                    size="52428800"
+                                    items="1"
+                                />
+                            </div>
+                        </tc-section-card>
+
+                        <tc-section-card title="Loading skeleton">
+                            <LoadingExample />
+                        </tc-section-card>
+
+                        <tc-section-card title="Callback property (onMenuItemClick / onNameChange)">
+                            <CallbackPropertyExample />
+                        </tc-section-card>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+)
+
+export default FileDemo

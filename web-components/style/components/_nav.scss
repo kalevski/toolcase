@@ -1,0 +1,231 @@
+// tc-nav — tabs (2px ink underline on the active tab), pills (solid ink),
+// underline, fill/justified growth.
+
+.nav {
+    --bs-nav-link-padding-x: 0.875rem;
+    --bs-nav-link-padding-y: 0.5625rem;
+    --bs-nav-link-font-size: 0.8125rem;
+    --bs-nav-link-font-weight: 400;
+    --bs-nav-link-color: var(--tc-text-muted);
+    --bs-nav-link-hover-color: var(--tc-text);
+    --bs-nav-link-disabled-color: var(--tc-text-faint);
+
+    display: flex;
+    flex-wrap: wrap;
+    padding-left: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.nav-item {
+    display: block;
+}
+
+.nav-link {
+    display: block;
+    padding: var(--bs-nav-link-padding-y) var(--bs-nav-link-padding-x);
+    font-size: var(--bs-nav-link-font-size);
+    font-weight: var(--bs-nav-link-font-weight);
+    color: var(--bs-nav-link-color);
+    text-decoration: none;
+    cursor: pointer;
+    background: none;
+    border: 0;
+    transition:
+        color var(--tc-transition-fast),
+        border-color var(--tc-transition-fast);
+
+    &:hover,
+    &:focus-visible {
+        color: var(--bs-nav-link-hover-color);
+        text-decoration: none;
+    }
+
+    &.active {
+        color: var(--tc-text);
+        font-weight: 500;
+    }
+
+    &.disabled {
+        color: var(--bs-nav-link-disabled-color);
+        pointer-events: none;
+        cursor: default;
+    }
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+
+.nav-tabs {
+    --bs-nav-tabs-border-width: var(--bs-border-width);
+    --bs-nav-tabs-border-color: var(--tc-border);
+    --bs-nav-tabs-border-radius: 0;
+    --bs-nav-tabs-link-active-color: var(--tc-text);
+    --bs-nav-tabs-link-active-bg: transparent;
+    --bs-nav-tabs-link-active-border-color: var(--tc-app-accent);
+    --bs-nav-tabs-link-hover-border-color: var(--tc-border-strong);
+
+    border-bottom: var(--bs-nav-tabs-border-width) solid var(--bs-nav-tabs-border-color);
+
+    .nav-link {
+        margin-bottom: calc(-1 * var(--bs-nav-tabs-border-width));
+        // The 2px underline is the only chrome. The explicit zeroes neutralise
+        // foreign Bootstrap builds sharing these classnames (e.g. the examples
+        // site also loads the react-components bridge CSS, whose .nav-tabs
+        // .nav-link carries a full border + top radius at equal specificity).
+        border: 0;
+        border-bottom: 2px solid transparent;
+        border-radius: 0;
+        background: none;
+
+        // Foreign sheets paint the underline on bare :focus — keep it idle
+        // there; the rules below (same specificity, later) re-enable it for
+        // hover / keyboard focus / active.
+        &:focus {
+            border-bottom-color: transparent;
+        }
+
+        &:hover,
+        &:focus-visible {
+            border-bottom-color: var(--bs-nav-tabs-link-hover-border-color);
+        }
+
+        &.active {
+            color: var(--bs-nav-tabs-link-active-color);
+            background: var(--bs-nav-tabs-link-active-bg);
+            border-bottom-color: var(--bs-nav-tabs-link-active-border-color);
+        }
+
+        &.disabled {
+            border-color: transparent;
+        }
+    }
+}
+
+// ── Pills ─────────────────────────────────────────────────────────────────────
+
+.nav-pills {
+    --bs-nav-link-padding-y: 0.375rem;
+    --bs-nav-pills-border-radius: 0;
+    --bs-nav-pills-link-active-color: var(--tc-app-accent-contrast);
+    --bs-nav-pills-link-active-bg: var(--tc-app-accent);
+
+    gap: 0.25rem;
+
+    .nav-link {
+        border-radius: var(--bs-nav-pills-border-radius);
+
+        &.active {
+            color: var(--bs-nav-pills-link-active-color);
+            background-color: var(--bs-nav-pills-link-active-bg);
+        }
+    }
+}
+
+// ── Underline ─────────────────────────────────────────────────────────────────
+
+// Same language as tabs — a 2px ink underline is the only chrome — but the
+// links sit flush (no x-padding) on a wider gap, with no rail underneath.
+.nav-underline {
+    --bs-nav-underline-gap: 1rem;
+    --bs-nav-underline-border-width: 2px;
+    --bs-nav-underline-link-active-color: var(--tc-text);
+
+    gap: var(--bs-nav-underline-gap);
+
+    .nav-link {
+        padding-right: 0;
+        padding-left: 0;
+        // Explicit zeroes neutralise foreign Bootstrap builds sharing these
+        // classnames (same guard as .nav-tabs): no box, no radius, no fill.
+        border: 0;
+        border-bottom: var(--bs-nav-underline-border-width) solid transparent;
+        border-radius: 0;
+        background: none;
+
+        // Foreign sheets underline bare :focus with currentcolor — keep it
+        // idle; hover / keyboard focus / active re-enable it below.
+        &:focus {
+            border-bottom-color: transparent;
+        }
+
+        &:hover,
+        &:focus-visible {
+            border-bottom-color: var(--tc-border-strong);
+        }
+
+        &.active {
+            // Weight stays at medium (foreign sheets push 700 — the toolcase
+            // voice caps emphasis at 500/600).
+            font-weight: 500;
+            color: var(--bs-nav-underline-link-active-color);
+            border-bottom-color: var(--tc-app-accent);
+        }
+
+        &.disabled {
+            border-bottom-color: transparent;
+        }
+    }
+
+    // In a column a bottom underline reads wrong — the marker moves to the
+    // left edge (the scrollspy side-rail pattern).
+    &.flex-column {
+        gap: 0.125rem;
+
+        .nav-link {
+            padding-right: 0.5rem;
+            padding-left: 0.5rem;
+            border: 0;
+            border-left: var(--bs-nav-underline-border-width) solid transparent;
+
+            &:focus {
+                border-left-color: transparent;
+            }
+
+            &:hover,
+            &:focus-visible {
+                border-left-color: var(--tc-border-strong);
+            }
+
+            &.active {
+                border-left-color: var(--tc-app-accent);
+            }
+
+            &.disabled {
+                border-left-color: transparent;
+            }
+        }
+    }
+}
+
+// ── Growth ────────────────────────────────────────────────────────────────────
+
+.nav-fill {
+    > .nav-item,
+    .nav-link {
+        flex: 1 1 auto;
+        text-align: center;
+    }
+}
+
+.nav-justified {
+    > .nav-item,
+    .nav-link {
+        flex-basis: 0;
+        flex-grow: 1;
+        text-align: center;
+    }
+}
+
+.nav-fill .nav-item .nav-link,
+.nav-justified .nav-item .nav-link {
+    width: 100%;
+}
+
+// Tab panes (consumer markup, toggled by the internal Tab plugin).
+.tab-content > .tab-pane {
+    display: none;
+}
+
+.tab-content > .active {
+    display: block;
+}

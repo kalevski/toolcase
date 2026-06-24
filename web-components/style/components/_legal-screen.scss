@@ -1,0 +1,312 @@
+// tc-legal-screen — legal / EULA boot screen with sidebar nav and optional accept footer.
+// Ported from gc-legal-screen; game chrome dropped in favour of the slate design system.
+// All cosmetics flow through --bs-legal-screen-* vars backed by --tc-* tokens.
+
+tc-legal-screen {
+    // Surface.
+    --bs-legal-screen-bg:           var(--tc-surface);
+    --bs-legal-screen-border-color: var(--tc-border);
+    --bs-legal-screen-shadow:       var(--tc-shadow-sm);
+
+    // Header.
+    --bs-legal-screen-header-bg:     transparent;
+    --bs-legal-screen-header-border: var(--tc-border);
+    --bs-legal-screen-padding-x:     1.25rem;
+    --bs-legal-screen-padding-y:     0.875rem;
+
+    // Eyebrow (mono micro-label above the title).
+    --bs-legal-screen-eyebrow-color: var(--tc-text-muted);
+    --bs-legal-screen-eyebrow-size:  10.5px;
+
+    // Title.
+    --bs-legal-screen-title-color: var(--tc-text);
+    --bs-legal-screen-title-size:  0.9375rem;
+
+    // Sidebar nav.
+    --bs-legal-screen-nav-width:          220px;
+    --bs-legal-screen-nav-bg:             var(--tc-surface-hover);
+    --bs-legal-screen-nav-border:         var(--tc-border);
+    --bs-legal-screen-nav-item-color:     var(--tc-text-muted);
+    --bs-legal-screen-nav-item-size:      0.8125rem;
+    --bs-legal-screen-nav-item-hover-bg:  var(--tc-surface-muted);
+    --bs-legal-screen-nav-active-bg:      var(--tc-app-accent);
+    --bs-legal-screen-nav-active-color: var(--tc-app-accent-contrast);
+
+    // Body panel.
+    --bs-legal-screen-body-bg:              var(--tc-surface);
+    --bs-legal-screen-body-padding-x:       1.5rem;
+    --bs-legal-screen-body-padding-y:       1.25rem;
+    --bs-legal-screen-section-eye-color:    var(--tc-text-muted);
+    --bs-legal-screen-section-eye-size:     10.5px;
+    --bs-legal-screen-section-title-color:  var(--tc-text);
+    --bs-legal-screen-section-title-size:   1.0625rem;
+    --bs-legal-screen-section-body-color:   var(--tc-text-muted);
+    --bs-legal-screen-section-body-size:    0.8125rem;
+
+    // Footer.
+    --bs-legal-screen-footer-bg:     var(--tc-surface-hover);
+    --bs-legal-screen-footer-border: var(--tc-border);
+}
+
+// ── Root shell ────────────────────────────────────────────────────────────────
+
+.tc-legal-screen {
+    display: flex;
+    flex-direction: column;
+    background: var(--bs-legal-screen-bg);
+    border: 1px solid var(--bs-legal-screen-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-legal-screen-shadow);
+    overflow: hidden;
+    height: 100%;
+    min-height: 0;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+
+.tc-legal-screen__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    gap: 0.75rem;
+    padding: var(--bs-legal-screen-padding-y) var(--bs-legal-screen-padding-x);
+    background: var(--bs-legal-screen-header-bg);
+    border-bottom: 1px solid var(--bs-legal-screen-header-border);
+}
+
+.tc-legal-screen__header-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+}
+
+.tc-legal-screen__eyebrow {
+    display: block;
+    font-family: 'JetBrains Mono', 'Fira Mono', monospace;
+    font-size: var(--bs-legal-screen-eyebrow-size);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bs-legal-screen-eyebrow-color);
+    line-height: 1;
+}
+
+.tc-legal-screen__title {
+    display: block;
+    font-size: var(--bs-legal-screen-title-size);
+    font-weight: 600;
+    color: var(--bs-legal-screen-title-color);
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+// ── Close button ──────────────────────────────────────────────────────────────
+
+.tc-legal-screen__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--tc-text-muted);
+    cursor: pointer;
+    border-radius: 0;
+    transition: background-color var(--tc-transition-fast), color var(--tc-transition-fast);
+
+    svg {
+        width: 1rem;
+        height: 1rem;
+        flex-shrink: 0;
+    }
+
+    &:hover {
+        background: var(--tc-surface-muted);
+        color: var(--tc-text);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    @media (pointer: coarse) {
+        width: 2.75rem;
+        height: 2.75rem;
+    }
+}
+
+// ── Two-column grid ───────────────────────────────────────────────────────────
+
+.tc-legal-screen__grid {
+    display: grid;
+    grid-template-columns: var(--bs-legal-screen-nav-width) 1fr;
+    flex: 1 1 auto;
+    min-height: 0;
+    border-bottom: 1px solid var(--bs-legal-screen-border-color);
+}
+
+// ── Sidebar nav ───────────────────────────────────────────────────────────────
+
+.tc-legal-screen__nav {
+    display: flex;
+    flex-direction: column;
+    background: var(--bs-legal-screen-nav-bg);
+    border-right: 1px solid var(--bs-legal-screen-nav-border);
+    overflow-y: auto;
+    padding: 0.5rem 0;
+}
+
+.tc-legal-screen__nav-item {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    border: none;
+    background: transparent;
+    color: var(--bs-legal-screen-nav-item-color);
+    font-size: var(--bs-legal-screen-nav-item-size);
+    font-weight: 400;
+    text-align: left;
+    line-height: 1.4;
+    cursor: pointer;
+    border-radius: 0;
+    transition: background-color var(--tc-transition-fast), color var(--tc-transition-fast);
+
+    &:hover {
+        background: var(--bs-legal-screen-nav-item-hover-bg);
+        color: var(--tc-text);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: -2px;
+    }
+
+    &--active {
+        background: var(--bs-legal-screen-nav-active-bg);
+        color: var(--bs-legal-screen-nav-active-color);
+        font-weight: 500;
+
+        &:hover {
+            background: var(--bs-legal-screen-nav-active-bg);
+            color: var(--bs-legal-screen-nav-active-color);
+        }
+    }
+
+    @media (pointer: coarse) {
+        min-height: 44px;
+    }
+}
+
+// ── Body / content panel ──────────────────────────────────────────────────────
+
+.tc-legal-screen__body {
+    background: var(--bs-legal-screen-body-bg);
+    padding: var(--bs-legal-screen-body-padding-y) var(--bs-legal-screen-body-padding-x);
+    overflow-y: auto;
+}
+
+.tc-legal-screen__section-eyebrow {
+    display: block;
+    font-family: 'JetBrains Mono', 'Fira Mono', monospace;
+    font-size: var(--bs-legal-screen-section-eye-size);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bs-legal-screen-section-eye-color);
+    line-height: 1;
+    margin-bottom: 0.375rem;
+}
+
+.tc-legal-screen__section-title {
+    font-size: var(--bs-legal-screen-section-title-size);
+    font-weight: 600;
+    color: var(--bs-legal-screen-section-title-color);
+    line-height: 1.3;
+    margin: 0 0 0.875rem;
+}
+
+.tc-legal-screen__section-body {
+    font-size: var(--bs-legal-screen-section-body-size);
+    color: var(--bs-legal-screen-section-body-color);
+    line-height: 1.65;
+    white-space: pre-wrap;
+}
+
+.tc-legal-screen__empty {
+    font-size: var(--bs-legal-screen-section-body-size);
+    color: var(--tc-text-faint);
+    font-style: italic;
+}
+
+// ── Footer ────────────────────────────────────────────────────────────────────
+
+.tc-legal-screen__footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-shrink: 0;
+    padding: var(--bs-legal-screen-padding-y) var(--bs-legal-screen-padding-x);
+    background: var(--bs-legal-screen-footer-bg);
+    border-top: 1px solid var(--bs-legal-screen-footer-border);
+}
+
+// Accept button — primary ink gradient to signal the one decisive action.
+.tc-legal-screen__accept {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.4375rem 1.25rem;
+    border: none;
+    border-radius: 0;
+    background: var(--tc-app-accent-gradient);
+    color: var(--tc-app-accent-contrast);
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0.025em;
+    cursor: pointer;
+    transition: transform var(--tc-transition-fast), box-shadow var(--tc-transition-fast);
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(30, 41, 59, 0.3);
+    }
+
+    &:active {
+        transform: none;
+        box-shadow: none;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    @media (pointer: coarse) {
+        min-height: 44px;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+
+// ── Reduced motion ────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-legal-screen__nav-item,
+    .tc-legal-screen__close,
+    .tc-legal-screen__accept {
+        transition: none;
+    }
+
+    .tc-legal-screen__accept:hover {
+        transform: none;
+        box-shadow: none;
+    }
+}

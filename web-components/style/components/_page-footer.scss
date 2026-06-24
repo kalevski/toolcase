@@ -1,0 +1,372 @@
+// tc-page-footer — full-site footer with brand column, nav-menu columns,
+// social icon links, optional CTA block, and a legal bar.
+// Sharp corners (border-radius: 0). Slate ladder. 1px hairline separators.
+// No boxes-in-boxes — sections divided by hairlines only.
+
+@use '../foundation/tokens' as *;
+
+tc-page-footer {
+    // Surface
+    --bs-page-footer-bg: var(--tc-surface);
+    --bs-page-footer-color: var(--tc-text);
+    --bs-page-footer-border-color: var(--tc-border);
+    --bs-page-footer-padding-x: 2rem;
+    --bs-page-footer-padding-y: 3rem;
+
+    // Brand wordmark
+    --bs-page-footer-brand-color: var(--tc-text);
+    --bs-page-footer-brand-font-size: 0.9375rem;
+    --bs-page-footer-brand-dot-bg: var(--tc-accent);
+
+    // Tagline
+    --bs-page-footer-tagline-color: var(--tc-text);
+    --bs-page-footer-tagline-font-size: 0.8125rem;
+
+    // Description
+    --bs-page-footer-description-color: var(--tc-text-muted);
+
+    // Menu column titles (mono, uppercase)
+    --bs-page-footer-menu-title-color: var(--tc-text-muted);
+    --bs-page-footer-menu-title-font-size: 0.6875rem;
+
+    // Menu links
+    --bs-page-footer-link-color: var(--tc-text-muted);
+    --bs-page-footer-link-hover-color: var(--tc-accent);
+    --bs-page-footer-link-font-size: 0.875rem;
+
+    // Social icon button hover well
+    --bs-page-footer-social-btn-size: 2rem;
+    --bs-page-footer-social-icon-size: 1rem;
+    --bs-page-footer-social-color: var(--tc-text-muted);
+    --bs-page-footer-social-hover-color: var(--tc-text);
+    --bs-page-footer-social-hover-bg: var(--tc-surface-muted);
+
+    // Legal bar
+    --bs-page-footer-legal-color: var(--tc-text-muted);
+    --bs-page-footer-legal-font-size: 0.75rem;
+    --bs-page-footer-legal-link-color: var(--tc-text-muted);
+    --bs-page-footer-legal-link-hover-color: var(--tc-text);
+
+    // CTA block
+    --bs-page-footer-cta-bg: var(--tc-surface-muted);
+    --bs-page-footer-cta-border-color: var(--tc-border);
+    --bs-page-footer-cta-heading-color: var(--tc-text);
+    --bs-page-footer-cta-desc-color: var(--tc-text-muted);
+}
+
+// ── Footer shell ──────────────────────────────────────────────────────────────
+
+.tc-page-footer {
+    display: block;
+    background: var(--bs-page-footer-bg);
+    color: var(--bs-page-footer-color);
+    border-top: 1px solid var(--bs-page-footer-border-color);
+    border-radius: 0;
+}
+
+// ── CTA block ─────────────────────────────────────────────────────────────────
+
+.tc-page-footer-cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.75rem;
+    padding: 2.5rem var(--bs-page-footer-padding-x);
+    border-bottom: 1px solid var(--bs-page-footer-cta-border-color);
+    background: var(--bs-page-footer-cta-bg);
+    border-radius: 0;
+}
+
+.tc-page-footer-cta-heading {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--bs-page-footer-cta-heading-color);
+    line-height: 1.3;
+}
+
+.tc-page-footer-cta-desc {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: var(--bs-page-footer-cta-desc-color);
+    line-height: 1.55;
+    max-width: 52ch;
+}
+
+// Primary ink-gradient CTA button
+.tc-page-footer-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.25rem;
+    padding: 0.5rem 1.5rem;
+    font-size: 0.925rem;
+    font-weight: 500;
+    letter-spacing: 0.025em;
+    line-height: 1.5;
+    border: 0;
+    border-radius: 0;
+    background: var(--tc-app-accent-gradient);
+    color: var(--tc-app-accent-contrast);
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        box-shadow var(--tc-transition-fast),
+        transform var(--tc-transition-fast);
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(30, 41, 59, 0.3);
+        color: #fff;
+        text-decoration: none;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &:focus:not(:focus-visible) {
+        outline: none;
+    }
+}
+
+// ── Main grid ─────────────────────────────────────────────────────────────────
+
+.tc-page-footer-main {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2.5rem;
+    padding: var(--bs-page-footer-padding-y) var(--bs-page-footer-padding-x);
+}
+
+// ── Brand column ──────────────────────────────────────────────────────────────
+
+.tc-page-footer-brand {
+    flex: 2 1 220px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+}
+
+// Mono wordmark with 2px cyan accent dot (same motif as Navbar brand)
+.tc-page-footer-brand-word {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--bs-font-monospace);
+    font-size: var(--bs-page-footer-brand-font-size);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--bs-page-footer-brand-color);
+}
+
+.tc-page-footer-brand-dot {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    background: var(--bs-page-footer-brand-dot-bg);
+    border-radius: 2px;
+}
+
+.tc-page-footer-tagline {
+    margin: 0;
+    font-size: var(--bs-page-footer-tagline-font-size);
+    font-weight: 500;
+    color: var(--bs-page-footer-tagline-color);
+    line-height: 1.4;
+}
+
+.tc-page-footer-description {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--bs-page-footer-description-color);
+    line-height: 1.6;
+    max-width: 30ch;
+}
+
+// Social icon button row
+.tc-page-footer-social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.125rem;
+    margin-top: 0.25rem;
+}
+
+.tc-page-footer-social-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: var(--bs-page-footer-social-btn-size);
+    height: var(--bs-page-footer-social-btn-size);
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--bs-page-footer-social-color);
+    text-decoration: none;
+    transition:
+        background-color var(--tc-transition-fast),
+        color var(--tc-transition-fast);
+
+    svg {
+        width: var(--bs-page-footer-social-icon-size);
+        height: var(--bs-page-footer-social-icon-size);
+        flex-shrink: 0;
+        stroke: currentColor;
+        fill: none;
+    }
+
+    &:hover,
+    &:focus {
+        background: var(--bs-page-footer-social-hover-bg);
+        color: var(--bs-page-footer-social-hover-color);
+        text-decoration: none;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &:focus:not(:focus-visible) {
+        outline: none;
+    }
+}
+
+// 44px coarse touch targets
+@media (pointer: coarse) {
+    .tc-page-footer-social-link {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+// ── Menu columns ──────────────────────────────────────────────────────────────
+
+.tc-page-footer-menu {
+    flex: 1 1 140px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+// Mono uppercase column title
+.tc-page-footer-menu-title {
+    margin: 0;
+    font-family: var(--bs-font-monospace);
+    font-size: var(--bs-page-footer-menu-title-font-size);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--bs-page-footer-menu-title-color);
+    line-height: 1.4;
+}
+
+.tc-page-footer-menu-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.tc-page-footer-menu-link {
+    display: inline-block;
+    font-size: var(--bs-page-footer-link-font-size);
+    color: var(--bs-page-footer-link-color);
+    text-decoration: none;
+    line-height: 1.5;
+    transition: color var(--tc-transition-fast);
+
+    &:hover {
+        color: var(--bs-page-footer-link-hover-color);
+        text-decoration: none;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+        color: var(--bs-page-footer-link-hover-color);
+    }
+
+    &:focus:not(:focus-visible) {
+        outline: none;
+    }
+}
+
+// ── Legal bar ────────────────────────────────────────────────────────────────
+
+.tc-page-footer-legal {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.5rem;
+    padding: 1rem var(--bs-page-footer-padding-x);
+    border-top: 1px solid var(--bs-page-footer-border-color);
+    border-radius: 0;
+}
+
+.tc-page-footer-legal-text {
+    flex: 1 1 auto;
+    font-family: var(--bs-font-monospace);
+    font-size: var(--bs-page-footer-legal-font-size);
+    color: var(--bs-page-footer-legal-color);
+    line-height: 1.5;
+}
+
+.tc-page-footer-legal-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 1rem;
+}
+
+.tc-page-footer-legal-link {
+    font-size: var(--bs-page-footer-legal-font-size);
+    color: var(--bs-page-footer-legal-link-color);
+    text-decoration: none;
+    transition: color var(--tc-transition-fast);
+
+    &:hover {
+        color: var(--bs-page-footer-legal-link-hover-color);
+        text-decoration: none;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+        color: var(--bs-page-footer-legal-link-hover-color);
+    }
+
+    &:focus:not(:focus-visible) {
+        outline: none;
+    }
+}
+
+// ── Reduced motion ────────────────────────────────────────────────────────────
+// Freeze decorative hover lift on CTA button; keep state-conveying color/bg
+// transitions (social links, menu links, legal links). Global reset in
+// _reset.scss handles the broad transition wipe; re-opt-in to color transitions.
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-page-footer-cta-btn {
+        transition: box-shadow var(--tc-transition-fast);
+        transform: none !important;
+    }
+
+    .tc-page-footer-social-link {
+        transition:
+            background-color var(--tc-transition-fast),
+            color var(--tc-transition-fast);
+    }
+
+    .tc-page-footer-menu-link,
+    .tc-page-footer-legal-link {
+        transition: color var(--tc-transition-fast);
+    }
+}

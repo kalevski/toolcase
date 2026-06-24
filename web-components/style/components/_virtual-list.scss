@@ -1,0 +1,111 @@
+// tc-virtual-list — windowed scroll viewport for large datasets. The viewport
+// is a --tc-surface panel with a single 1px --tc-border hairline frame; rows are
+// separated by fainter slate-100 inner hairlines. Hover wells to
+// --tc-surface-hover. No status color anywhere. Sharp corners throughout. A thin
+// slate scrollbar keeps the chrome quiet. Every cosmetic value flows through
+// --bs-virtual-list-* backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+// ── Component defaults ─────────────────────────────────────────────────────────
+
+tc-virtual-list {
+    --bs-virtual-list-bg: var(--tc-surface);
+    --bs-virtual-list-border: var(--tc-border);
+    --bs-virtual-list-row-separator: var(--tc-slate-100);
+    --bs-virtual-list-row-hover-bg: var(--tc-surface-hover);
+    --bs-virtual-list-row-padding: 0 0.875rem;
+    --bs-virtual-list-row-color: var(--tc-text);
+    --bs-virtual-list-row-font-size: 0.875rem;
+    --bs-virtual-list-scrollbar-size: 8px;
+    --bs-virtual-list-thumb-color: var(--tc-border-strong);
+    --bs-virtual-list-track-color: transparent;
+}
+
+// ── Scroll viewport ─────────────────────────────────────────────────────────────
+
+.tc-virtual-list {
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+    width: 100%;
+    background: var(--bs-virtual-list-bg);
+    border: 1px solid var(--bs-virtual-list-border);
+    border-radius: 0;
+
+    // Firefox — thin slate thumb over a quiet track.
+    scrollbar-width: thin;
+    scrollbar-color: var(--bs-virtual-list-thumb-color) var(--bs-virtual-list-track-color);
+
+    // WebKit / Blink — thin slate scrollbar, sharp thumb, transparent track.
+    &::-webkit-scrollbar {
+        width: var(--bs-virtual-list-scrollbar-size);
+        height: var(--bs-virtual-list-scrollbar-size);
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--bs-virtual-list-thumb-color);
+        border-radius: 0;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: var(--bs-virtual-list-track-color);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: -2px;
+    }
+}
+
+// ── Full-height sizer + translated window ───────────────────────────────────────
+
+.tc-virtual-list-sizer {
+    position: relative;
+    width: 100%;
+}
+
+.tc-virtual-list-window {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    will-change: transform;
+}
+
+// ── Rows ────────────────────────────────────────────────────────────────────────
+
+.tc-virtual-list-item {
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    padding: var(--bs-virtual-list-row-padding);
+    color: var(--bs-virtual-list-row-color);
+    font-size: var(--bs-virtual-list-row-font-size);
+    // Inner hairlines fainter than the outer frame.
+    border-bottom: 1px solid var(--bs-virtual-list-row-separator);
+    overflow: hidden;
+    transition: background-color var(--tc-transition-fast);
+
+    &:hover {
+        background: var(--bs-virtual-list-row-hover-bg);
+    }
+}
+
+// ── Reduced motion ──────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-virtual-list {
+        scroll-behavior: auto;
+    }
+
+    .tc-virtual-list-window {
+        will-change: auto;
+    }
+
+    // Keep the background state transition (it conveys hover state); only the
+    // decorative will-change hint is dropped above.
+    .tc-virtual-list-item {
+        transition: background-color var(--tc-transition-fast);
+    }
+}

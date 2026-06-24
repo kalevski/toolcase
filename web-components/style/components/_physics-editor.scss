@@ -1,0 +1,187 @@
+// tc-physics-editor — framework-free physics shape editor: a slate toolbar
+// (tool icon-buttons + undo/redo/delete/auto-fit action buttons) above a canvas
+// stage that draws an image background with polygon/circle/box overlays and
+// draggable vertex/handle markers. Dense, businesslike; sharp corners everywhere
+// (border-radius: 0). Colour is status only — the cyan accent is reserved for the
+// live drawing preview (a rare, genuine highlight, applied in canvas, not CSS).
+// Every cosmetic value flows through --bs-physics-editor-* backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+tc-physics-editor {
+    --bs-physics-editor-surface: var(--tc-surface);
+    --bs-physics-editor-border: var(--tc-border);
+    --bs-physics-editor-border-strong: var(--tc-border-strong);
+    --bs-physics-editor-text: var(--tc-text);
+
+    // Toolbar is a slate surface with a hairline border.
+    --bs-physics-editor-toolbar-bg: var(--tc-surface-muted);
+    --bs-physics-editor-toolbar-border: var(--tc-border);
+
+    // Icon-button state ladder: hover = slate well, active = ink fill / white icon.
+    --bs-physics-editor-tool-color: var(--tc-text-muted);
+    --bs-physics-editor-tool-hover-bg: var(--tc-surface-muted);
+    --bs-physics-editor-tool-active-bg: var(--tc-app-accent);
+    --bs-physics-editor-tool-active-color: var(--tc-app-accent-contrast);
+
+    // Stage: slate well with a checkerboard so transparency reads.
+    --bs-physics-editor-stage-bg: var(--tc-surface-muted);
+    --bs-physics-editor-stage-border: var(--tc-border-strong);
+    --bs-physics-editor-checker: var(--tc-slate-200, #e2e8f0);
+    --bs-physics-editor-checker-size: 12px;
+    --bs-physics-editor-canvas-height: 320px;
+
+    // Canvas-drawn shape colours (read back via getComputedStyle in JS).
+    --bs-physics-editor-shape-stroke: var(--tc-border-strong);
+    --bs-physics-editor-shape-fill: rgba(148, 163, 184, 0.16);
+    --bs-physics-editor-selected-stroke: var(--tc-app-accent);
+    --bs-physics-editor-selected-fill: rgba(30, 41, 59, 0.16);
+    --bs-physics-editor-handle-bg: var(--tc-surface);
+    --bs-physics-editor-handle-border: var(--tc-app-accent);
+    --bs-physics-editor-preview-stroke: var(--tc-accent);
+
+    --bs-physics-editor-focus-ring: var(--tc-app-accent);
+    --bs-physics-editor-disabled-opacity: 0.55;
+    --bs-physics-editor-icon-size: 1rem;
+}
+
+tc-physics-editor[disabled] {
+    opacity: var(--bs-physics-editor-disabled-opacity);
+}
+
+.tc-physics-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    border: 1px solid var(--bs-physics-editor-border);
+    border-radius: 0;
+    background: var(--bs-physics-editor-surface);
+    color: var(--bs-physics-editor-text);
+    padding: 0.75rem;
+}
+
+// Disabled = opacity + pointer-events (never colour-only).
+.tc-physics-editor--disabled {
+    pointer-events: none;
+}
+
+// ── Toolbar ──────────────────────────────────────────────────────────────────
+
+.tc-physics-editor-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0.4rem 0.5rem;
+    background: var(--bs-physics-editor-toolbar-bg);
+    border: 1px solid var(--bs-physics-editor-toolbar-border);
+    border-radius: 0;
+}
+
+.tc-physics-editor-tools,
+.tc-physics-editor-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.tc-physics-editor-tool,
+.tc-physics-editor-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    color: var(--bs-physics-editor-tool-color);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 0;
+    cursor: pointer;
+    transition:
+        background-color var(--tc-transition-fast, 0.15s ease),
+        color var(--tc-transition-fast, 0.15s ease);
+}
+
+.tc-physics-editor-tool:hover,
+.tc-physics-editor-action:hover {
+    // hover well
+    background: var(--bs-physics-editor-tool-hover-bg);
+}
+
+.tc-physics-editor-tool--active {
+    // active tool = ink fill, white icon
+    background: var(--bs-physics-editor-tool-active-bg);
+    color: var(--bs-physics-editor-tool-active-color);
+}
+
+.tc-physics-editor-tool svg,
+.tc-physics-editor-action svg {
+    width: var(--bs-physics-editor-icon-size);
+    height: var(--bs-physics-editor-icon-size);
+}
+
+// Undo / redo / delete / auto-fit disabled when unavailable.
+.tc-physics-editor-action--disabled {
+    opacity: var(--bs-physics-editor-disabled-opacity);
+    pointer-events: none;
+}
+
+// ── Stage / canvas ──────────────────────────────────────────────────────────
+
+.tc-physics-editor-stage {
+    position: relative;
+    border: 1px solid var(--bs-physics-editor-stage-border);
+    border-radius: 0;
+    background-color: var(--bs-physics-editor-stage-bg);
+    // Checkerboard so transparent source pixels are legible.
+    background-image:
+        linear-gradient(45deg, var(--bs-physics-editor-checker) 25%, transparent 25%),
+        linear-gradient(-45deg, var(--bs-physics-editor-checker) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, var(--bs-physics-editor-checker) 75%),
+        linear-gradient(-45deg, transparent 75%, var(--bs-physics-editor-checker) 75%);
+    background-size: calc(var(--bs-physics-editor-checker-size) * 2) calc(var(--bs-physics-editor-checker-size) * 2);
+    background-position:
+        0 0,
+        0 var(--bs-physics-editor-checker-size),
+        var(--bs-physics-editor-checker-size) calc(-1 * var(--bs-physics-editor-checker-size)),
+        calc(-1 * var(--bs-physics-editor-checker-size)) 0;
+}
+
+.tc-physics-editor-canvas {
+    display: block;
+    width: 100%;
+    height: var(--bs-physics-editor-canvas-height);
+    border-radius: 0;
+    touch-action: none;
+    cursor: crosshair;
+}
+
+// ── Focus always visible ────────────────────────────────────────────────────
+
+.tc-physics-editor-tool:focus-visible,
+.tc-physics-editor-action:focus-visible,
+.tc-physics-editor-canvas:focus-visible {
+    outline: 2px solid var(--bs-physics-editor-focus-ring);
+    outline-offset: 2px;
+}
+
+// ── 44px touch targets under coarse pointers ────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-physics-editor-tool,
+    .tc-physics-editor-action {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+// ── Reduced motion: drop colour transitions (no decorative motion to freeze) ──
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-physics-editor-tool,
+    .tc-physics-editor-action {
+        transition: none;
+    }
+}

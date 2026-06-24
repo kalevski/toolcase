@@ -1,0 +1,138 @@
+// Dungeon › tc-journal — gilded quest log: list rail + detail pane. Token swap
+// recolours rails/rows/pips; structural rules give the host the radial wood
+// fill + full gilded bevel stack, a gold-gradient selected row stripe,
+// display-caps row titles, glowing state pips, and mono reward values.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-journal {
+        --bs-journal-bg: transparent;
+        --bs-journal-border: 1px solid var(--fg-gold-deep);
+
+        --bs-journal-list-bg: rgba(0, 0, 0, 0.25);
+        --bs-journal-list-border-color: var(--fg-gold-deep);
+        --bs-journal-row-border-color: rgba(201, 169, 97, 0.15);
+        --bs-journal-row-hover-bg: rgba(201, 169, 97, 0.08);
+        --bs-journal-row-selected-bg: transparent;
+        --bs-journal-row-selected-accent: var(--fg-gold);
+        --bs-journal-row-title-color: var(--fg-parch);
+
+        --bs-journal-pip-active: var(--fg-gold-bright);
+        --bs-journal-pip-completed: var(--fg-stamina-bright);
+        --bs-journal-pip-failed: var(--fg-blood-bright);
+        --bs-journal-pip-inactive: var(--fg-parch-dim);
+
+        --bs-journal-detail-bg: transparent;
+        --bs-journal-title-color: var(--fg-gold-bright);
+        --bs-journal-description-color: var(--fg-parch);
+        --bs-journal-body-color: var(--fg-parch-3);
+        --bs-journal-eyebrow-color: var(--fg-gold-deep);
+        --bs-journal-empty-color: var(--fg-parch-3);
+
+        --bs-journal-state-active: var(--fg-gold-bright);
+        --bs-journal-state-completed: var(--fg-stamina-bright);
+        --bs-journal-state-failed: var(--fg-blood-bright);
+        --bs-journal-state-inactive: var(--fg-parch-dim);
+
+        --bs-journal-check-color: var(--fg-gold-deep);
+        --bs-journal-check-done-color: var(--fg-gold);
+        --bs-journal-objective-color: var(--fg-parch);
+        --bs-journal-objective-completed-color: var(--fg-stamina-bright);
+        --bs-journal-objective-optional-color: var(--fg-parch-dim);
+
+        --bs-journal-reward-bg: rgba(0, 0, 0, 0.3);
+        --bs-journal-reward-label-color: var(--fg-parch-3);
+        --bs-journal-reward-value-color: var(--fg-gold-bright);
+
+        // Radial wood fill + full gilded bevel stack (base ships flat).
+        background:
+            linear-gradient(180deg, rgba(232, 220, 196, 0.04), rgba(0, 0, 0, 0.18)),
+            radial-gradient(120% 80% at 50% 0%, #2e2418 0%, #1a130c 70%);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 0 0 2px var(--fg-gold-deep),
+            inset 0 0 0 3px var(--fg-gold-shadow),
+            inset 0 2px 0 rgba(255, 220, 150, 0.08),
+            0 8px 24px rgba(0, 0, 0, 0.6);
+    }
+
+    // Selected row: gold-gradient wash + gold inset stripe + gold-bright title.
+    .tc-journal-row--selected {
+        background: linear-gradient(90deg, rgba(201, 169, 97, 0.18), transparent);
+        box-shadow: inset 3px 0 0 var(--fg-gold);
+
+        .tc-journal-row-title {
+            color: var(--fg-gold-bright);
+        }
+    }
+
+    // Row titles read as display caps.
+    .tc-journal-row-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+    }
+
+    // Glowing state pips (active / completed / failed).
+    .tc-journal-row-pip {
+        box-shadow: 0 0 0 1px #000;
+    }
+    .tc-journal-row--active .tc-journal-row-pip {
+        box-shadow: 0 0 0 1px #000, 0 0 6px var(--fg-gold-bright);
+    }
+    .tc-journal-row--completed .tc-journal-row-pip {
+        box-shadow: 0 0 0 1px #000, 0 0 6px var(--fg-stamina-bright);
+    }
+    .tc-journal-row--failed .tc-journal-row-pip {
+        box-shadow: 0 0 0 1px #000, 0 0 6px var(--fg-blood-bright);
+    }
+
+    // Detail title reads as gilded display caps.
+    .tc-journal-detail-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    // Reward label as display caps; value as mono numerals.
+    .tc-journal-reward-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+    }
+    .tc-journal-reward-value,
+    .tc-journal-objective-optional {
+        font-family: var(--fg-mono);
+    }
+
+    // Reward rows read as struck plates: gold hairline + top highlight bevel.
+    .tc-journal-reward {
+        box-shadow:
+            inset 0 0 0 1px var(--fg-gold-shadow),
+            var(--fg-bevel-top);
+    }
+
+    // Ink tick on gold checkbox: fix low-contrast white-on-gold defect.
+    .tc-journal-objective-check--done::after {
+        background: var(--fg-ink);
+    }
+
+    // Section eyebrow labels (OBJECTIVES / REWARDS) read as gold headers.
+    .tc-journal-detail-eyebrow {
+        color: var(--fg-gold-deep);
+    }
+
+    // Top-left corner notch ornament on the host frame.
+    tc-journal::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 18px;
+        height: 18px;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+        pointer-events: none;
+        z-index: 1;
+    }
+}

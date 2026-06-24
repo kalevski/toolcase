@@ -1,6 +1,6 @@
 ---
 name: next-static-app
-description: Use when scaffolding or extending a statically-prerendered React Router v7 marketing/content site (landing page, docs, legal pages). NOT a Next.js project — this uses React Router v7, not Next.js. If you specifically need Next.js (App Router, RSC, Server Components, the `next` package, `next build`/`next dev`), this is the WRONG skill — do not load it. The "next-" prefix means "next-gen", not Next.js. Defines workspace layout (app/ + routes/ + modules/), file-based routing through routes.ts, prerender + SPA hydration config, root.tsx shell with Layout/App/ErrorBoundary, per-route meta() for SEO, modules/ section composition pattern, Tailwind v4 + @toolcase/react-components stack, public/ assets (sitemap, robots, og), and the nginx-served Docker build. Apply when adding a route, marketing section, legal page, SEO metadata, env var, sitemap entry, or scaffolding a new static-app workspace.
+description: Use when scaffolding or extending a statically-prerendered React Router v7 marketing/content site (landing page, docs, legal pages). NOT a Next.js project — this uses React Router v7, not Next.js. If you specifically need Next.js (App Router, RSC, Server Components, the `next` package, `next build`/`next dev`), this is the WRONG skill — do not load it. The "next-" prefix means "next-gen", not Next.js. Defines workspace layout (app/ + routes/ + modules/), file-based routing through routes.ts, prerender + SPA hydration config, root.tsx shell with Layout/App/ErrorBoundary, per-route meta() for SEO, modules/ section composition pattern, Tailwind v4 + @toolcase/web-components stack, public/ assets (sitemap, robots, og), and the nginx-served Docker build. Apply when adding a route, marketing section, legal page, SEO metadata, env var, sitemap entry, or scaffolding a new static-app workspace.
 ---
 
 # next-static-app — Architecture Reference
@@ -14,7 +14,7 @@ Stack baseline:
 - Vite + React 19 + TypeScript (`strict`, `react-jsx`).
 - `react-router` v7 with `@react-router/dev` Vite plugin + `@react-router/node` types. Routes declared in `app/routes.ts` via `index()` / `route()` helpers.
 - `react-router.config.ts` with `prerender: true, ssr: false` — every route is rendered to static HTML at build time, then hydrated as an SPA.
-- Tailwind v4 (`@import 'tailwindcss'`) + `@toolcase/react-components` for primitives + `bootstrap-icons` font + Bootstrap utility classes mixed in. The architecture is library-independent — swap freely, but pick **one** UI primitives library per app.
+- Tailwind v4 (`@import 'tailwindcss'`) + `@toolcase/web-components` for primitives + `bootstrap-icons` font + Bootstrap utility classes mixed in. The architecture is library-independent — swap freely, but pick **one** UI primitives library per app.
 - ESM (`"type": "module"`).
 - Node 18+ (`engines.node: ">=18"`); Docker builds on `node:20-alpine` (a modern LTS).
 - Dockerfile: `npm run build` → `build/client/` → copied into nginx:alpine.
@@ -23,7 +23,7 @@ Stack baseline:
 
 ## Optional @toolcase Libraries
 
-- **`@toolcase/react-components`** — primary UI primitives (`Hero`, `CoolNav`, `CoolButton`, `Brand`, `Icon`, `PageFooter`, `PricingCard`, `FeatureCard`, `PinnedFeatureShowcase`, `EarlySignupForm`, `Heading`, `Text`, `SectionCard`, etc.). See `react-components` skill for catalog.
+- **`@toolcase/web-components`** — primary UI primitives as framework-free `tc-*` Web Components (`tc-hero`, `tc-cool-nav`, `tc-cool-button`, `tc-brand`, `tc-icon`, `tc-page-footer`, `tc-pricing-card`, `tc-feature-card`, `tc-pinned-feature-showcase`, `tc-early-signup-form`, `tc-heading`, `tc-text`, `tc-section-card`, etc.). Call `register()` once at startup, **client-side only** (guard with `typeof window !== 'undefined'` or run it in a client entry / `useEffect`) — custom elements can't register during the Node prerender pass. See `web-components` skill for catalog.
 - **`@toolcase/base`** — pure helpers/data structures if a section needs them. No store/services in this stack, so usage is rare.
 - **`@toolcase/logging`** — rarely needed (but fine for e.g. client-side error logging). Static sites generally don't log to remote sinks at runtime, so prefer `console` directly unless you have a specific need like reporting client-side errors.
 
@@ -123,7 +123,7 @@ If a route legitimately needs SSR or dynamic data, the project doesn't fit this 
 ```tsx
 import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration } from 'react-router'
 import type { Route } from './+types/root'
-import '@toolcase/react-components/style.css'
+import '@toolcase/web-components/style.css'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import './app.css'
 
@@ -270,7 +270,7 @@ Rules:
 Reusable section components. Modules:
 
 - Are PascalCase, **named export** (not default), one per file: `export const Navbar = () => ...`.
-- Compose UI primitives from `@toolcase/react-components` (or whichever lib) with minimal wiring.
+- Compose UI primitives from `@toolcase/web-components` (or whichever lib) with minimal wiring.
 - May use `useState`/`useEffect`/`useRef` for local interactivity (cookie banner state, scroll-into-view, mounted flag).
 - **Never** read from a store, fetch from network at runtime, or import other modules' internals. Sections are independent — composed by the route, not chained.
 - Encapsulate their own data when it's static config (feature lists, plan tiers, sitemap-style menu definitions). Co-locate it at the top of the module file as `const items = [...]` / `const plans = [...]`.
@@ -278,17 +278,20 @@ Reusable section components. Modules:
 Module skeleton:
 
 ```tsx
-import { Hero } from '@toolcase/react-components'
+import { useEffect, useRef } from 'react'
 
+// tc-* elements take simple values as attributes and rich values (action
+// objects, item arrays) as JS properties — assign those through a ref.
 export const PageHero: React.FC = () => {
+    const ref = useRef<any>(null)
+    useEffect(() => {
+        if (!ref.current) return
+        ref.current.primaryAction = { label: '...', onClick: () => scrollToId('early-access') }
+        ref.current.secondaryAction = { label: '...', onClick: () => scrollToId('features') }
+    }, [])
     return (
-        <Hero
-            eyebrow="..."
-            title="..."
-            description="..."
-            primaryAction={{ label: '...', onClick: () => scrollToId('early-access') }}
-            secondaryAction={{ label: '...', onClick: () => scrollToId('features') }}
-        />
+        // @ts-ignore tc-hero registered by @toolcase/web-components
+        <tc-hero ref={ref} eyebrow="..." title="..." description="..." />
     )
 }
 ```
@@ -296,7 +299,7 @@ export const PageHero: React.FC = () => {
 Special modules every static-app has:
 
 - `Navbar.tsx` — top nav. Anchor links (`#section-id`) for in-page jumps; absolute paths for cross-route. CTA in `rightEl`.
-- `Footer.tsx` — `PageFooter` with menus, social links, legal links (Terms/Privacy/DMCA), copyright.
+- `Footer.tsx` — `tc-page-footer` with menus, social links, legal links (Terms/Privacy/DMCA), copyright.
 - `Analytics.tsx` — gated GA4/segment loader. Mounts a `<script>` tag inside `useEffect` only when `enabled`. Returns `null`. SSR-safe — guards `typeof window === 'undefined'`.
 - `CookieConsent.tsx` — banner + `useCookieConsent` hook. Reads/writes `localStorage` inside `useEffect` (NEVER during render — would crash prerender). Returns `null` until hydrated.
 - Section modules per landing block: `PageHero`, `HowItWorks`, `Features`, `Pricing`, `EarlyAccess`. Each owns a `<section id="...">` with a stable id used by anchor links and the sitemap.
@@ -550,7 +553,7 @@ CMD ["nginx", "-g", "daemon off;"]
 - ❌ Forgetting `meta()`. The page inherits the parent route's title — wrong, bad for SEO.
 - ❌ OG image referenced as a relative URL. Crawlers want absolute URLs. Always `https://<domain>/imgs/og-...`.
 - ❌ Env var without `VITE_` prefix in client code. It won't be inlined at build time — `import.meta.env.X` will be `undefined`.
-- ❌ Mixing UI primitives libraries. Pick one (`@toolcase/react-components`, MUI, Chakra, etc.) per app.
+- ❌ Mixing UI primitives libraries. Pick one (`@toolcase/web-components`, MUI, Chakra, etc.) per app.
 - ❌ Adding `ssr: true` to `react-router.config.ts` to "fix" hydration issues. That requires a Node runtime in production — the nginx-only Dockerfile no longer works. Fix the hydration root cause instead.
 - ❌ Storing user state in `localStorage` without a hydration flag. The first render shows server output; the second shows storage-derived output. Without a flag the content jumps. Use the `useCookieConsent` pattern.
 - ❌ Dynamic routes (`/post/:slug`) without an explicit `prerender: ['/post/...']` list. They'll fail at build time.

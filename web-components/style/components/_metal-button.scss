@@ -1,0 +1,160 @@
+// tc-metal-button — primary call-to-action button.
+// Port of gc-metal-button (game-components), restyled to the toolcase design system:
+// slate neutrals, sharp corners (border-radius: 0 everywhere), 1px hairline border,
+// ink accent for the primary variant. Game-specific chrome (metal textures, glows,
+// gilded frames) is dropped entirely.
+// All cosmetics flow through --bs-metal-button-* custom properties.
+
+@use '../foundation/tokens' as *;
+
+// ── Host defaults (variant=default) ─────────────────────────────────────────
+
+tc-metal-button {
+    --bs-metal-button-color: var(--tc-text);
+    --bs-metal-button-bg: transparent;
+    --bs-metal-button-border-color: var(--tc-border-strong);
+    --bs-metal-button-hover-bg: var(--tc-surface-muted);
+    --bs-metal-button-hover-color: var(--tc-text);
+    --bs-metal-button-hover-border-color: var(--tc-border-strong);
+    --bs-metal-button-active-bg: var(--tc-surface-muted);
+    --bs-metal-button-active-color: var(--tc-text);
+    --bs-metal-button-active-border-color: var(--tc-border-strong);
+    --bs-metal-button-focus-ring-color: rgba(30, 41, 59, 0.25);
+    --bs-metal-button-disabled-opacity: 0.65;
+    --bs-metal-button-padding-x: 1rem;
+    --bs-metal-button-padding-y: 0.5rem;
+    --bs-metal-button-font-size: 0.925rem;
+    --bs-metal-button-font-weight: 500;
+    --bs-metal-button-line-height: 1.6;
+    --bs-metal-button-border-width: 1px;
+    --bs-metal-button-border-radius: 0;
+    --bs-metal-button-min-height: 0;
+}
+
+// ── Variant token overrides ──────────────────────────────────────────────────
+
+tc-metal-button[variant='primary'] {
+    --bs-metal-button-color: var(--tc-app-accent-contrast);
+    --bs-metal-button-bg: var(--tc-app-accent-gradient);
+    --bs-metal-button-border-color: var(--tc-app-accent);
+    --bs-metal-button-hover-bg: var(--tc-app-accent-gradient);
+    --bs-metal-button-hover-color: var(--tc-app-accent-contrast);
+    --bs-metal-button-hover-border-color: var(--tc-app-accent);
+    --bs-metal-button-active-bg: var(--tc-app-accent-gradient);
+    --bs-metal-button-active-color: var(--tc-app-accent-contrast);
+    --bs-metal-button-active-border-color: var(--tc-app-accent);
+    --bs-metal-button-focus-ring-color: rgba(30, 41, 59, 0.35);
+}
+
+tc-metal-button[variant='danger'] {
+    --bs-metal-button-color: var(--tc-app-accent-contrast);
+    --bs-metal-button-bg: rgba(var(--bs-danger-rgb), 1);
+    --bs-metal-button-border-color: rgba(var(--bs-danger-rgb), 1);
+    --bs-metal-button-hover-bg: rgba(var(--bs-danger-rgb), 1);
+    --bs-metal-button-hover-color: var(--tc-app-accent-contrast);
+    --bs-metal-button-hover-border-color: rgba(var(--bs-danger-rgb), 1);
+    --bs-metal-button-active-bg: rgba(var(--bs-danger-rgb), 1);
+    --bs-metal-button-active-color: var(--tc-app-accent-contrast);
+    --bs-metal-button-active-border-color: rgba(var(--bs-danger-rgb), 1);
+    --bs-metal-button-focus-ring-color: rgba(var(--bs-danger-rgb), 0.25);
+}
+
+tc-metal-button[variant='ghost'] {
+    --bs-metal-button-color: var(--tc-text-muted);
+    --bs-metal-button-bg: transparent;
+    --bs-metal-button-border-color: transparent;
+    --bs-metal-button-hover-bg: var(--tc-surface-muted);
+    --bs-metal-button-hover-color: var(--tc-text);
+    --bs-metal-button-hover-border-color: transparent;
+    --bs-metal-button-active-bg: var(--tc-surface-muted);
+    --bs-metal-button-active-color: var(--tc-text);
+    --bs-metal-button-active-border-color: transparent;
+}
+
+// ── Inner button ─────────────────────────────────────────────────────────────
+
+.tc-metal-button__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: var(--bs-metal-button-padding-y) var(--bs-metal-button-padding-x);
+    min-height: var(--bs-metal-button-min-height);
+    font-family: var(--tc-font-sans);
+    font-size: var(--bs-metal-button-font-size);
+    font-weight: var(--bs-metal-button-font-weight);
+    line-height: var(--bs-metal-button-line-height);
+    letter-spacing: 0.025em;
+    color: var(--bs-metal-button-color);
+    background: var(--bs-metal-button-bg);
+    border: var(--bs-metal-button-border-width) solid var(--bs-metal-button-border-color);
+    border-radius: var(--bs-metal-button-border-radius);
+    cursor: pointer;
+    user-select: none;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    transition:
+        transform var(--tc-transition-fast, 0.15s ease),
+        box-shadow var(--tc-transition-fast, 0.15s ease),
+        background var(--tc-transition-fast, 0.15s ease),
+        color var(--tc-transition-fast, 0.15s ease);
+
+    &:hover {
+        color: var(--bs-metal-button-hover-color);
+        background: var(--bs-metal-button-hover-bg);
+        border-color: var(--bs-metal-button-hover-border-color);
+        transform: translateY(-1px);
+    }
+
+    &:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 var(--bs-focus-ring-width, 0.25rem) var(--bs-metal-button-focus-ring-color);
+    }
+
+    &:active {
+        color: var(--bs-metal-button-active-color);
+        background: var(--bs-metal-button-active-bg);
+        border-color: var(--bs-metal-button-active-border-color);
+        transform: translateY(0);
+    }
+
+    &:disabled {
+        opacity: var(--bs-metal-button-disabled-opacity);
+        pointer-events: none;
+        transform: none;
+    }
+}
+
+// ── Size modifiers ────────────────────────────────────────────────────────────
+
+.tc-metal-button__btn--sm {
+    --bs-metal-button-padding-x: 0.75rem;
+    --bs-metal-button-padding-y: 0.375rem;
+    --bs-metal-button-font-size: 0.8125rem;
+}
+
+.tc-metal-button__btn--lg {
+    --bs-metal-button-padding-x: 1.5rem;
+    --bs-metal-button-padding-y: 0.75rem;
+    --bs-metal-button-font-size: 1.04rem;
+}
+
+// Primary hover glow (matches tc-button primary treatment)
+tc-metal-button[variant='primary'] .tc-metal-button__btn:hover {
+    box-shadow: 0 4px 15px rgba(30, 41, 59, 0.3);
+}
+
+// WCAG 2.5.5 — 44 px minimum tappable area on touch devices.
+@media (pointer: coarse) {
+    tc-metal-button {
+        --bs-metal-button-min-height: 44px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-metal-button__btn {
+        transition: none;
+    }
+}

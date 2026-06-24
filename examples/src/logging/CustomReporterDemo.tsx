@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { LoggerFactory } from '@toolcase/logging'
-import { Button, Card, CodeSnippet, Heading, Text } from '@toolcase/react-components'
 import { ConsoleOutput, type LogEntry } from './_demo/LoggingDemo'
 
 const code = `import { LogReporter, LoggerFactory } from '@toolcase/logging'
@@ -47,15 +46,19 @@ export const CustomReporterDemo = () => {
     }
 
     return (
-        <Card>
-            <Heading as="h3">Custom Reporter</Heading>
-            <Text as="p" variant="muted">
-                Extend <code>LogReporter</code> to send logs anywhere — files, remote APIs, or custom formats.
-            </Text>
-            <CodeSnippet language="typescript" code={code} />
-            <Button size="small" onClick={run}>Run</Button>
-            <ConsoleOutput logs={logs} />
-        </Card>
+        <div className="card">
+            <div className="card-body">
+                <h3 className="card-title">Custom Reporter</h3>
+                <p className="text-body-secondary">
+                    Extend <code>LogReporter</code> to send logs anywhere — files, remote APIs, or custom formats.
+                </p>
+                <tc-code-snippet language="typescript" code={code}></tc-code-snippet>
+                <button type="button" className="btn btn-primary btn-sm" onClick={run}>
+                    Run
+                </button>
+                <ConsoleOutput logs={logs} />
+            </div>
+        </div>
     )
 }
 

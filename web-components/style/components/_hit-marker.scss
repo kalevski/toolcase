@@ -1,0 +1,123 @@
+// tc-hit-marker — a transient hit-confirmation reticle: four inward-pointing
+// corner ticks that pop in and fade out, then fire `tc-done`. Ported from
+// gc-hit-marker but re-skinned to the toolcase voice — no gilded frames, glows,
+// or fantasy fills. Just sharp slate/status hairline strokes; the kill variant
+// swaps the ☠ emoji for a lucide Skull glyph.
+//
+// The pop-and-fade IS the information (a hit registered), so the animation is
+// allowed — but it honours prefers-reduced-motion below by dropping the scale
+// transform and keeping only the opacity fade.
+//
+// Size and lifetime are driven from host inline styles (--bs-hit-marker-size,
+// --bs-hit-marker-duration), written by the element in sync with its `done`
+// timer. All other cosmetics flow through --bs-hit-marker-* custom properties.
+
+tc-hit-marker {
+    --bs-hit-marker-size: 24px;
+    --bs-hit-marker-duration: 350ms;
+    --bs-hit-marker-thickness: 2px;
+    --bs-hit-marker-color: var(--tc-app-accent);
+    --bs-hit-marker-crit-color: var(--tc-warning);
+    --bs-hit-marker-kill-color: var(--tc-danger);
+    --bs-hit-marker-glyph-scale: 0.6;
+    --bs-hit-marker-z-index: var(--tc-z-tooltip, 1070);
+
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    // Purely a visual overlay — never intercept clicks on whatever sits beneath.
+    pointer-events: none;
+}
+
+.tc-hit-marker {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-hit-marker-size);
+    height: var(--bs-hit-marker-size);
+    color: var(--bs-hit-marker-color);
+    border-radius: 0;
+    // Hidden until shown; the `show` attribute plays the pop animation.
+    opacity: 0;
+}
+
+.tc-hit-marker[data-variant='crit'] {
+    color: var(--bs-hit-marker-crit-color);
+}
+
+.tc-hit-marker[data-variant='kill'] {
+    color: var(--bs-hit-marker-kill-color);
+}
+
+.tc-hit-marker-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.tc-hit-marker-line {
+    stroke: currentColor;
+    stroke-width: var(--bs-hit-marker-thickness);
+    // Square caps keep the ticks sharp — no rounded corners.
+    stroke-linecap: square;
+}
+
+.tc-hit-marker-glyph {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: calc(var(--bs-hit-marker-size) * var(--bs-hit-marker-glyph-scale));
+    height: calc(var(--bs-hit-marker-size) * var(--bs-hit-marker-glyph-scale));
+    transform: translate(-50%, -50%);
+    color: var(--bs-hit-marker-kill-color);
+    stroke: currentColor;
+}
+
+tc-hit-marker[show] .tc-hit-marker {
+    animation: tc-hit-marker-pop var(--bs-hit-marker-duration) ease-out forwards;
+    will-change: transform, opacity;
+}
+
+@keyframes tc-hit-marker-pop {
+    0% {
+        transform: scale(1.4);
+        opacity: 0;
+    }
+    15% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    70% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+}
+
+// Reduced motion: drop the scale (decorative) but keep the opacity fade — the
+// appear-then-disappear is the state-conveying part.
+@media (prefers-reduced-motion: reduce) {
+    tc-hit-marker[show] .tc-hit-marker {
+        animation: tc-hit-marker-fade var(--bs-hit-marker-duration) ease-out forwards;
+    }
+
+    @keyframes tc-hit-marker-fade {
+        0% {
+            opacity: 0;
+        }
+        15% {
+            opacity: 1;
+        }
+        70% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 0;
+        }
+    }
+}

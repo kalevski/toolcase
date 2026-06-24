@@ -1,0 +1,222 @@
+// tc-migration-guide — step-by-step migration guide with version transition header
+// and before/after code diffs.
+// All cosmetics flow through --bs-migration-guide-* custom properties backed by --tc-* tokens.
+// Design rails: sharp corners, slate neutrals, 1px hairlines, status color for diff panels only.
+
+tc-migration-guide {
+    --bs-migration-guide-border: 1px solid var(--tc-border);
+    --bs-migration-guide-bg: var(--tc-surface);
+
+    --bs-migration-guide-header-bg: var(--tc-surface-muted);
+    --bs-migration-guide-header-padding-y: 0.875rem;
+    --bs-migration-guide-header-padding-x: 1.25rem;
+    --bs-migration-guide-header-color: var(--tc-text);
+
+    --bs-migration-guide-title-font-size: 0.9375rem;
+    --bs-migration-guide-title-font-weight: 600;
+
+    --bs-migration-guide-version-font-size: 0.6875rem;
+    --bs-migration-guide-version-color: var(--tc-text-muted);
+    --bs-migration-guide-version-letter-spacing: 0.06em;
+
+    --bs-migration-guide-arrow-size: 0.9rem;
+    --bs-migration-guide-arrow-color: var(--tc-text-faint);
+
+    --bs-migration-guide-step-padding-y: 1rem;
+    --bs-migration-guide-step-padding-x: 1.25rem;
+    --bs-migration-guide-step-separator: 1px solid var(--tc-border);
+
+    --bs-migration-guide-step-num-font-size: 0.6875rem;
+    --bs-migration-guide-step-num-color: var(--tc-text-faint);
+    --bs-migration-guide-step-num-letter-spacing: 0.08em;
+    --bs-migration-guide-step-num-min-width: 1.75rem;
+
+    --bs-migration-guide-step-title-font-size: 0.9375rem;
+    --bs-migration-guide-step-title-font-weight: 500;
+
+    --bs-migration-guide-step-desc-font-size: 0.875rem;
+    --bs-migration-guide-step-desc-color: var(--tc-text-muted);
+
+    --bs-migration-guide-code-font-size: 0.8125rem;
+    --bs-migration-guide-code-padding: 0.75rem 1rem;
+    --bs-migration-guide-code-line-height: 1.6;
+    --bs-migration-guide-code-bg: var(--tc-ink);
+    --bs-migration-guide-code-color: var(--tc-text-inverse);
+
+    --bs-migration-guide-diff-stripe-width: 3px;
+    --bs-migration-guide-diff-before-stripe: var(--tc-danger);
+    --bs-migration-guide-diff-before-bg: var(--tc-danger-bg);
+    --bs-migration-guide-diff-after-stripe: var(--tc-success);
+    --bs-migration-guide-diff-after-bg: var(--tc-success-bg);
+}
+
+.tc-migration-guide {
+    border: var(--bs-migration-guide-border);
+    border-radius: 0;
+    background: var(--bs-migration-guide-bg);
+    overflow: hidden;
+}
+
+// ── Header ───────────────────────────────────────────────────────────────────
+
+.tc-migration-guide__header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    padding: var(--bs-migration-guide-header-padding-y) var(--bs-migration-guide-header-padding-x);
+    background: var(--bs-migration-guide-header-bg);
+    border-bottom: var(--bs-migration-guide-border);
+}
+
+.tc-migration-guide__versions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.tc-migration-guide__version {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-migration-guide-version-font-size);
+    font-weight: 600;
+    letter-spacing: var(--bs-migration-guide-version-letter-spacing);
+    text-transform: uppercase;
+    color: var(--bs-migration-guide-version-color);
+}
+
+.tc-migration-guide__arrow {
+    display: inline-flex;
+    align-items: center;
+    color: var(--bs-migration-guide-arrow-color);
+
+    svg {
+        width: var(--bs-migration-guide-arrow-size);
+        height: var(--bs-migration-guide-arrow-size);
+    }
+}
+
+.tc-migration-guide__title {
+    margin: 0;
+    font-size: var(--bs-migration-guide-title-font-size);
+    font-weight: var(--bs-migration-guide-title-font-weight);
+    color: var(--bs-migration-guide-header-color);
+    line-height: 1.4;
+}
+
+// ── Steps list ───────────────────────────────────────────────────────────────
+
+.tc-migration-guide__steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.tc-migration-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.875rem;
+    padding: var(--bs-migration-guide-step-padding-y) var(--bs-migration-guide-step-padding-x);
+
+    & + & {
+        border-top: var(--bs-migration-guide-step-separator);
+    }
+}
+
+.tc-migration-step__num {
+    flex-shrink: 0;
+    min-width: var(--bs-migration-guide-step-num-min-width);
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-migration-guide-step-num-font-size);
+    font-weight: 600;
+    letter-spacing: var(--bs-migration-guide-step-num-letter-spacing);
+    text-transform: uppercase;
+    color: var(--bs-migration-guide-step-num-color);
+    line-height: 1.5;
+    padding-top: 0.15em; // optical alignment with title first line
+    text-align: right;
+}
+
+.tc-migration-step__body {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.tc-migration-step__title {
+    margin: 0;
+    font-size: var(--bs-migration-guide-step-title-font-size);
+    font-weight: var(--bs-migration-guide-step-title-font-weight);
+    color: var(--bs-migration-guide-header-color);
+    line-height: 1.4;
+}
+
+.tc-migration-step__desc {
+    margin: 0;
+    font-size: var(--bs-migration-guide-step-desc-font-size);
+    color: var(--bs-migration-guide-step-desc-color);
+    line-height: 1.55;
+}
+
+// ── Diff panels ──────────────────────────────────────────────────────────────
+
+.tc-migration-diff {
+    border: var(--bs-migration-guide-border);
+    border-radius: 0;
+    overflow: hidden;
+}
+
+// Shared panel rules: left colored stripe + soft tint frame + dark code surface
+.tc-migration-diff-before,
+.tc-migration-diff-after {
+    border-left-style: solid;
+    border-left-width: var(--bs-migration-guide-diff-stripe-width);
+
+    // Tiny vertical padding so the tint bg shows as a thin bar above/below the pre
+    padding-block: 2px;
+
+    pre {
+        margin: 0;
+        padding: var(--bs-migration-guide-code-padding);
+        background: var(--bs-migration-guide-code-bg);
+        color: var(--bs-migration-guide-code-color);
+        font-family: var(--tc-font-mono);
+        font-size: var(--bs-migration-guide-code-font-size);
+        line-height: var(--bs-migration-guide-code-line-height);
+        overflow-x: auto;
+        border-radius: 0;
+        white-space: pre;
+    }
+
+    code {
+        font-family: inherit;
+        font-size: inherit;
+        background: transparent;
+        padding: 0;
+        border-radius: 0;
+        white-space: pre;
+        color: inherit;
+    }
+}
+
+.tc-migration-diff-before {
+    border-left-color: var(--bs-migration-guide-diff-before-stripe);
+    background: var(--bs-migration-guide-diff-before-bg);
+    border-bottom: var(--bs-migration-guide-border);
+}
+
+.tc-migration-diff-after {
+    border-left-color: var(--bs-migration-guide-diff-after-stripe);
+    background: var(--bs-migration-guide-diff-after-bg);
+}
+
+// ── Reduced motion ───────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-migration-guide,
+    .tc-migration-step,
+    .tc-migration-diff-before,
+    .tc-migration-diff-after {
+        transition: none;
+    }
+}

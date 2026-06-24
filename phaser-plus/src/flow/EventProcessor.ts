@@ -18,7 +18,13 @@ type EventClass<E extends Event<P>, P> = new (scene: import('../engine/Scene').d
 
 export default class EventProcessor extends FlowProcessor {
 
-    private readonly timerDefPool = new ObjectPool(TimerDef)
+    private readonly timerDefPool = new ObjectPool(TimerDef, (def: TimerDef) => {
+        def.event = null
+        def.name = ''
+        def.time = 0
+        def.payload = null
+        def.context = null
+    })
 
     private queue: TimerDef[] = []
 
@@ -29,23 +35,28 @@ export default class EventProcessor extends FlowProcessor {
     }
 
     onUpdate(time: number, delta: number): void {
-        const indices: number[] = []
-        for (let index = 0; index < this.queue.length; index++) {
-            const def = this.queue[index]!
+        // Snapshot the current queue so that re-triggers during firing land in
+        // this.queue and are deferred to the next frame instead of mutating the
+        // active iteration.
+        const snapshot = this.queue
+        this.queue = []
+
+        const remaining: TimerDef[] = []
+        for (const def of snapshot) {
             def.time += delta / 1000
-            if (def.time > 0) {
+            if (def.time >= 0) {
                 if (def.name === TIMEOUT_FN_NAME) {
                     (def.event as TimerCallback).call(def.context)
                 } else {
                     (def.event as Event<unknown>).onFire(def.payload)
                 }
-                indices.unshift(index)
+                this.timerDefPool.release(def)
+            } else {
+                remaining.push(def)
             }
         }
-        for (const index of indices) {
-            const [removed] = this.queue.splice(index, 1)
-            if (removed) this.timerDefPool.release(removed)
-        }
+        // Prepend still-waiting defs before any newly triggered (next-frame) defs.
+        this.queue = [...remaining, ...this.queue]
     }
 
     onDestroy(): void {
@@ -95,7 +106,7 @@ export default class EventProcessor extends FlowProcessor {
             throw new Error(`event name=${eventName} is not registered`)
         }
         if (typeof delay !== 'number' || delay < 0) {
-            throw new Error(`delay must be a positive number`)
+            throw new Error(`delay must be a non-negative number`)
         }
         const def = this.timerDefPool.obtain()
         def.name = eventName
@@ -117,7 +128,7 @@ export default class EventProcessor extends FlowProcessor {
 
     triggerFn(callbackFn: () => void, delay: number = 0, context: unknown = null): this {
         if (typeof delay !== 'number' || delay < 0) {
-            throw new Error(`delay must be a positive number`)
+            throw new Error(`delay must be a non-negative number`)
         }
         if (typeof callbackFn !== 'function') {
             throw new Error(`callbackFn must be a function`)

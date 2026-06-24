@@ -1,0 +1,64 @@
+// Dungeon › tc-number-input — tuning field with keycap steppers and a
+// recessed mono numeral channel. Foundation remap handles colour tokens and
+// mono font; this file adds depth (slot fill, keycap bevel, display-caps
+// label, blood error ring).
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token swaps (host element carries the var defaults) ──────────────────
+
+    tc-number-input {
+        --bs-number-input-border-color: var(--fg-gold);
+        --bs-number-input-addon-bg: var(--fg-leather-2);
+        --bs-number-input-addon-color: var(--fg-parch-3);
+        --bs-number-input-stepper-bg: var(--fg-keycap-bg);
+        --bs-number-input-stepper-hover-bg: rgba(201, 169, 97, 0.18);
+        --bs-number-input-error-color: var(--fg-blood);
+        --bs-number-input-error-border-color: var(--fg-blood);
+    }
+
+    // ── Outer frame — gilded bevel + depth ───────────────────────────────────
+
+    .tc-number-input__group {
+        box-shadow: var(--fg-bevel-top), 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    // ── Input — recessed slot channel ────────────────────────────────────────
+
+    .tc-number-input__input {
+        background-image: var(--fg-slot-bg);
+        background-color: transparent;
+        color: var(--fg-parch);
+    }
+
+    // ── Label — display caps ─────────────────────────────────────────────────
+
+    .tc-number-input__label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+        color: var(--fg-gold-bright);
+    }
+
+    // ── Stepper buttons — keycap treatment ───────────────────────────────────
+
+    .tc-number-input__step-btn {
+        background-image: var(--fg-keycap-bg);
+        background-color: transparent;
+        color: var(--fg-gold);
+        box-shadow: inset 0 1px 0 rgba(232, 200, 120, 0.2);
+
+        &:hover:not([disabled]) {
+            color: var(--fg-gold-bright);
+        }
+    }
+
+    // ── Error focus ring — replace hardcoded red with blood-tinted ring ───────
+
+    .tc-number-input__group--error {
+        .tc-number-input__input:focus {
+            box-shadow: 0 0 0 0.2rem rgba(168, 48, 42, 0.2);
+        }
+    }
+}

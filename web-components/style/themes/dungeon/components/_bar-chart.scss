@@ -1,0 +1,38 @@
+// Dungeon › tc-bar-chart — gilded columns on a wood-panel surface.
+// Fixes the three raw-slate leaks the foundation cannot remap:
+//   1. series-3..6 (--tc-slate-*) → element/metal ramp
+//   2. --grid-color + --axis-color (--tc-slate-100/-200) → fg-gold-shadow hairlines
+//   3. --bg → wood panel gradient
+// Structural additions: bevel shadow on the inner frame, display-caps title.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // --- token swap on the host element ---
+    tc-bar-chart {
+        // bar series ramp: gold / gold-bright stay; slate-3..6 → element ramp
+        --bs-bar-chart-series-3: var(--fg-mana);
+        --bs-bar-chart-series-4: var(--fg-stamina);
+        --bs-bar-chart-series-5: var(--fg-arcane);
+        --bs-bar-chart-series-6: var(--fg-copper);
+
+        // wood panel surface instead of flat tc-surface
+        --bs-bar-chart-bg: var(--fg-panel-bg);
+
+        // carved gold-shadow hairlines instead of pale slate
+        --bs-bar-chart-grid-color: var(--fg-gold-shadow);
+        --bs-bar-chart-axis-color: var(--fg-gold-shadow);
+    }
+
+    // --- gilded bevel frame on the chart container ---
+    .tc-bar-chart__inner {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // --- display-caps header (base hardcodes no font-family on this element) ---
+    .tc-bar-chart__title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 600;
+    }
+}

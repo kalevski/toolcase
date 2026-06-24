@@ -1,0 +1,29 @@
+// Dungeon › tc-single-card-select — gilded card grid.
+// Token swap re-points the six surface/colour vars to --fg-* values, brightening the
+// selected frame, check, and focus ring in one move. Structural additions: display caps
+// on titles and a gold wash on the selected card.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-single-card-select {
+        --bs-single-card-select-bg:              var(--fg-slot-bg);
+        --bs-single-card-select-hover-bg:        rgba(201, 169, 97, 0.08);
+        --bs-single-card-select-selected-accent: var(--fg-gold-bright);
+        --bs-single-card-select-title-color:     var(--fg-gold-bright);
+        --bs-single-card-select-desc-color:      var(--fg-parch-3);
+        --bs-single-card-select-skeleton-bg:     var(--fg-leather-2);
+    }
+
+    // Title promoted to display caps — base inherits body sans, a var swap cannot carry this.
+    .tc-single-card-select-title {
+        font-family:     var(--fg-display);
+        text-transform:  uppercase;
+        letter-spacing:  0.06em;
+        font-weight:     600;
+    }
+
+    // Gilded wash behind the existing 2px gold frame + inset shadow.
+    .tc-single-card-select-option.is-selected {
+        background: linear-gradient(135deg, rgba(201, 169, 97, 0.14), transparent 60%);
+    }
+}

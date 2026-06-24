@@ -1,0 +1,141 @@
+// tc-rating — interactive star rating with optional half-stars, keyboard nav,
+// and read-only display. Sharp corners on the star buttons (border-radius: 0,
+// no box). Empty stars use the neutral ramp; filled stars carry the one
+// sanctioned accent (warm amber --tc-warning). Half-fill via a clipped overlay.
+// All cosmetic values flow through --bs-rating-* backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+// ── Component defaults ─────────────────────────────────────────────────────────
+
+tc-rating {
+    --bs-rating-size: 1.25rem;
+    --bs-rating-gap: 0.125rem;
+    --bs-rating-empty-color: var(--tc-border-strong);
+    --bs-rating-active-color: var(--tc-warning);
+    --bs-rating-hover-color: var(--tc-warning);
+    --bs-rating-hover-brightness: 1.12;
+    --bs-rating-disabled-opacity: 0.55;
+}
+
+// ── Root slider ────────────────────────────────────────────────────────────────
+
+.tc-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-rating-gap);
+    line-height: 1;
+    user-select: none;
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+}
+
+// ── Size variants ──────────────────────────────────────────────────────────────
+
+.tc-rating--small {
+    --bs-rating-size: 1rem;
+}
+
+.tc-rating--default {
+    --bs-rating-size: 1.25rem;
+}
+
+.tc-rating--large {
+    --bs-rating-size: 1.75rem;
+}
+
+// ── Star ───────────────────────────────────────────────────────────────────────
+
+.tc-rating-star {
+    position: relative;
+    display: inline-flex;
+    width: var(--bs-rating-size);
+    height: var(--bs-rating-size);
+    padding: 0;
+    margin: 0;
+    border: 0;
+    border-radius: 0; // sharp by mandate — the button carries no box
+    background: none;
+    color: var(--bs-rating-empty-color);
+    cursor: pointer;
+    appearance: none;
+
+    .tc-rating:not(.tc-rating--readonly) &:hover {
+        color: var(--bs-rating-empty-color);
+    }
+}
+
+// Layered glyphs: bg (empty) underneath, fill overlay clipped on top.
+.tc-rating-star-bg,
+.tc-rating-star-fill {
+    position: absolute;
+    inset: 0;
+    display: block;
+
+    svg {
+        width: var(--bs-rating-size);
+        height: var(--bs-rating-size);
+        display: block;
+    }
+}
+
+.tc-rating-star-bg {
+    color: var(--bs-rating-empty-color);
+}
+
+.tc-rating-star-fill {
+    overflow: hidden; // clip width drives the partial fill
+    width: 0;
+    color: var(--bs-rating-active-color);
+    transition: width var(--tc-transition-base);
+}
+
+.tc-rating-star--full .tc-rating-star-fill {
+    width: 100%;
+}
+
+.tc-rating-star--half .tc-rating-star-fill {
+    width: 50%;
+}
+
+.tc-rating-star--empty .tc-rating-star-fill {
+    width: 0;
+}
+
+// Hover preview brightens the previewed fill.
+.tc-rating-star--hover .tc-rating-star-fill {
+    color: var(--bs-rating-hover-color);
+    filter: brightness(var(--bs-rating-hover-brightness));
+}
+
+// ── Read-only ──────────────────────────────────────────────────────────────────
+
+.tc-rating--readonly {
+    .tc-rating-star {
+        cursor: default;
+        pointer-events: none;
+    }
+}
+
+// ── Coarse-pointer hit target (44px per star, interactive only) ─────────────────
+
+@media (pointer: coarse) {
+    .tc-rating:not(.tc-rating--readonly) .tc-rating-star::after {
+        content: '';
+        position: absolute;
+        inset: -12px;
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+// ── Reduced motion ─────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-rating-star-fill {
+        transition: none;
+    }
+}

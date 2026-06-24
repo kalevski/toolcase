@@ -1,0 +1,84 @@
+// tc-link — semantic anchor with variant color, underline mode, and optional external icon.
+// Color signals link semantics (primary = ink accent, others = status palette);
+// restrained by design — color is information, not decoration.
+
+.tc-link {
+    --bs-link-color: var(--tc-app-accent);
+    --bs-link-hover-color: var(--tc-app-accent-hover);
+
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2em;
+    color: var(--bs-link-color);
+    text-decoration: none;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    cursor: pointer;
+    transition: color var(--tc-transition-fast);
+
+    &:hover,
+    &:focus-visible {
+        color: var(--bs-link-hover-color);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    .tc-link__external-icon {
+        flex-shrink: 0;
+        width: 0.875em;
+        height: 0.875em;
+    }
+}
+
+// Underline modes
+.tc-link-underline-always {
+    text-decoration: underline;
+}
+
+.tc-link-underline-hover {
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+        text-decoration: underline;
+    }
+}
+
+.tc-link-underline-none {
+    text-decoration: none !important;
+}
+
+// Variants — status palette; primary uses the ink/app-accent link tone.
+.tc-link-primary {
+    --bs-link-color: var(--tc-app-accent);
+    --bs-link-hover-color: var(--tc-app-accent-hover);
+}
+
+.tc-link-secondary {
+    --bs-link-color: var(--tc-text-muted);
+    --bs-link-hover-color: var(--tc-text);
+}
+
+.tc-link-info {
+    --bs-link-color: var(--tc-info);
+    --bs-link-hover-color: var(--tc-info);
+}
+
+.tc-link-success {
+    --bs-link-color: var(--tc-success);
+    --bs-link-hover-color: var(--tc-success);
+}
+
+.tc-link-warning {
+    --bs-link-color: var(--tc-warning);
+    --bs-link-hover-color: var(--tc-warning);
+}
+
+.tc-link-danger {
+    --bs-link-color: var(--tc-danger);
+    --bs-link-hover-color: var(--tc-danger);
+}

@@ -1,0 +1,348 @@
+// tc-markdown-editor — split-pane markdown editor with write/preview tabs and a
+// formatting toolbar. Slate carries it: a white surface inside a 1px --tc-border
+// frame, faint slate-100 hairlines between tab strip / toolbar / body. Tabs use
+// the underline motif (2px ink underline on the active tab — no boxes/fills).
+// Toolbar buttons follow the state ladder (hover well → ink active). Sharp
+// corners and flat surfaces throughout. All cosmetics flow through
+// --bs-markdown-editor-* backed by --tc-* tokens.
+
+tc-markdown-editor {
+    --bs-markdown-editor-border: 1px solid var(--tc-border);
+    --bs-markdown-editor-surface: var(--tc-surface);
+    --bs-markdown-editor-hairline: 1px solid var(--tc-slate-100);
+
+    // Label
+    --bs-markdown-editor-label-color: var(--tc-text);
+    --bs-markdown-editor-label-font-size: 0.8125rem;
+
+    // Tabs
+    --bs-markdown-editor-tab-color: var(--tc-text-muted);
+    --bs-markdown-editor-tab-color-hover: var(--tc-text);
+    --bs-markdown-editor-tab-color-active: var(--tc-text);
+    --bs-markdown-editor-tab-underline: 2px solid var(--tc-app-accent);
+    --bs-markdown-editor-tab-font-size: 0.8125rem;
+    --bs-markdown-editor-tab-padding: 0.5rem 0.875rem;
+
+    // Toolbar
+    --bs-markdown-editor-toolbar-btn-color: var(--tc-text-muted);
+    --bs-markdown-editor-toolbar-btn-hover-bg: var(--tc-surface-muted);
+    --bs-markdown-editor-toolbar-btn-hover-color: var(--tc-text);
+    --bs-markdown-editor-toolbar-btn-active-bg: var(--tc-app-accent);
+    --bs-markdown-editor-toolbar-btn-active-color: var(--tc-app-accent-contrast);
+    --bs-markdown-editor-toolbar-btn-size: 1.875rem;
+    --bs-markdown-editor-toolbar-icon-size: 0.9375rem;
+
+    // Body / textarea
+    --bs-markdown-editor-body-color: var(--tc-text);
+    --bs-markdown-editor-body-font-size: 0.875rem;
+    --bs-markdown-editor-textarea-focus-border: rgba(30, 41, 59, 0.5);
+    --bs-markdown-editor-textarea-focus-ring: var(--tc-focus-ring);
+
+    // Preview prose + code surfaces
+    --bs-markdown-editor-code-bg: var(--tc-surface-muted);
+    --bs-markdown-editor-code-color: var(--tc-text);
+    --bs-markdown-editor-codeblock-bg: var(--tc-ink);
+    --bs-markdown-editor-codeblock-color: var(--tc-text-inverse);
+    --bs-markdown-editor-quote-border: 3px solid var(--tc-border);
+    --bs-markdown-editor-quote-color: var(--tc-text-muted);
+    --bs-markdown-editor-link-color: var(--tc-app-accent);
+}
+
+// ── Label ─────────────────────────────────────────────────────────────────────
+
+.tc-markdown-editor-label {
+    display: block;
+    margin-bottom: 0.375rem;
+    font-family: var(--tc-font-sans);
+    font-size: var(--bs-markdown-editor-label-font-size);
+    font-weight: 500;
+    color: var(--bs-markdown-editor-label-color);
+}
+
+// ── Shell ─────────────────────────────────────────────────────────────────────
+
+.tc-markdown-editor-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    border: var(--bs-markdown-editor-border);
+    border-radius: 0;
+    background: var(--bs-markdown-editor-surface);
+    overflow: hidden;
+}
+
+// ── Tab strip + toolbar ─────────────────────────────────────────────────────────
+
+.tc-markdown-editor-tabs {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
+    padding: 0 0.5rem;
+    border-bottom: var(--bs-markdown-editor-hairline);
+}
+
+.tc-markdown-editor-tablist {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.tc-markdown-editor-tab {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--bs-markdown-editor-tab-padding);
+    font-family: var(--tc-font-sans);
+    font-size: var(--bs-markdown-editor-tab-font-size);
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--bs-markdown-editor-tab-color);
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px; // sit flush on the strip hairline
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color var(--tc-transition-fast, 0.15s ease);
+
+    &:hover {
+        color: var(--bs-markdown-editor-tab-color-hover);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &--active {
+        color: var(--bs-markdown-editor-tab-color-active);
+        border-bottom: var(--bs-markdown-editor-tab-underline);
+        font-weight: 500;
+    }
+}
+
+.tc-markdown-editor-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.125rem;
+    padding: 0.25rem 0;
+}
+
+// Preview keeps the toolbar in the layout (so the tab strip height is identical
+// to Write) but hidden and inert — no jump when switching tabs.
+.tc-markdown-editor-toolbar--hidden {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.tc-markdown-editor-toolbar-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-markdown-editor-toolbar-btn-size);
+    height: var(--bs-markdown-editor-toolbar-btn-size);
+    padding: 0;
+    color: var(--bs-markdown-editor-toolbar-btn-color);
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    transition:
+        background-color var(--tc-transition-fast, 0.15s ease),
+        color var(--tc-transition-fast, 0.15s ease);
+
+    &:hover {
+        background: var(--bs-markdown-editor-toolbar-btn-hover-bg);
+        color: var(--bs-markdown-editor-toolbar-btn-hover-color);
+    }
+
+    &:active {
+        background: var(--bs-markdown-editor-toolbar-btn-active-bg);
+        color: var(--bs-markdown-editor-toolbar-btn-active-color);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: -2px;
+    }
+}
+
+// The toolbar buttons hold a raw inline lucide <svg> with no class, and icon()
+// strips its width/height — so size the svg directly here, otherwise it renders
+// at its default size and fills the whole button.
+.tc-markdown-editor-toolbar-btn svg {
+    width: var(--bs-markdown-editor-toolbar-icon-size);
+    height: var(--bs-markdown-editor-toolbar-icon-size);
+    flex-shrink: 0;
+    stroke: currentColor;
+    stroke-width: 2;
+}
+
+// ── Body ─────────────────────────────────────────────────────────────────────
+
+.tc-markdown-editor-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    overflow: auto;
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: -2px;
+    }
+}
+
+.tc-markdown-editor-textarea {
+    flex: 1 1 auto;
+    width: 100%;
+    // The textarea carries `form-control`; a co-loaded library (e.g.
+    // @toolcase/react-components) ships `.form-control{max-width:480px}`, which
+    // would cap the editor at 480px. Neutralise it so the field fills the pane.
+    max-width: none;
+    min-height: 0;
+    padding: 0.75rem 0.875rem;
+    resize: none;
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-markdown-editor-body-font-size);
+    line-height: 1.6;
+    color: var(--bs-markdown-editor-body-color);
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    outline: none;
+
+    &:focus,
+    &:focus-visible {
+        // Form-control focus-ring family, inset so the shell frame stays sharp.
+        outline: none;
+        box-shadow:
+            inset 0 0 0 1px var(--bs-markdown-editor-textarea-focus-border),
+            inset var(--bs-markdown-editor-textarea-focus-ring);
+    }
+}
+
+// ── Preview prose ──────────────────────────────────────────────────────────────
+
+.tc-markdown-editor-preview {
+    flex: 1 1 auto;
+    width: 100%;
+    padding: 0.75rem 0.875rem;
+    font-family: var(--tc-font-sans);
+    font-size: var(--bs-markdown-editor-body-font-size);
+    line-height: 1.6;
+    color: var(--bs-markdown-editor-body-color);
+
+    > :first-child {
+        margin-top: 0;
+    }
+
+    > :last-child {
+        margin-bottom: 0;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        line-height: 1.3;
+        margin: 1rem 0 0.5rem;
+        font-weight: 600;
+    }
+
+    p {
+        margin: 0 0 0.75rem;
+    }
+
+    a {
+        color: var(--bs-markdown-editor-link-color);
+        text-decoration: underline;
+    }
+
+    ul {
+        margin: 0 0 0.75rem;
+        padding-left: 1.5rem;
+    }
+
+    blockquote {
+        margin: 0 0 0.75rem;
+        padding-left: 1rem;
+        border-left: var(--bs-markdown-editor-quote-border);
+        color: var(--bs-markdown-editor-quote-color);
+    }
+
+    hr {
+        border: none;
+        border-top: 1px solid var(--tc-border);
+        margin: 1rem 0;
+    }
+
+    code {
+        font-family: var(--tc-font-mono);
+        font-size: 0.85em;
+        padding: 0.15em 0.35em;
+        background: var(--bs-markdown-editor-code-bg);
+        color: var(--bs-markdown-editor-code-color);
+        border-radius: 0;
+    }
+
+    pre.tc-markdown-editor-codeblock {
+        margin: 0 0 0.75rem;
+        padding: 0.75rem 0.875rem;
+        background: var(--bs-markdown-editor-codeblock-bg);
+        color: var(--bs-markdown-editor-codeblock-color);
+        border-radius: 0;
+        overflow: auto;
+
+        code {
+            padding: 0;
+            background: transparent;
+            color: inherit;
+            font-size: 0.85em;
+        }
+    }
+}
+
+.tc-markdown-editor-empty {
+    margin: 0;
+    color: var(--tc-text-faint);
+    font-style: italic;
+}
+
+// ── Disabled ──────────────────────────────────────────────────────────────────
+
+.tc-markdown-editor--disabled {
+    .tc-markdown-editor-shell {
+        opacity: 0.6;
+    }
+
+    .tc-markdown-editor-toolbar,
+    .tc-markdown-editor-textarea {
+        pointer-events: none;
+    }
+}
+
+// ── Coarse pointers — 44px touch targets ────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-markdown-editor-tab,
+    .tc-markdown-editor-toolbar-btn {
+        min-height: 44px;
+    }
+
+    .tc-markdown-editor-toolbar-btn {
+        min-width: 44px;
+    }
+}
+
+// ── Reduced motion ──────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-markdown-editor-tab,
+    .tc-markdown-editor-toolbar-btn {
+        transition: none;
+    }
+}

@@ -6,17 +6,11 @@ abstract class Algorithm {
 
     protected height: number
 
-    protected padding: number
-
-    protected extrude: number
-
     protected allowRotation: boolean
 
     constructor(options: AlgorithmOptions) {
         this.width = options.maxWidth
         this.height = options.maxHeight
-        this.padding = options.padding
-        this.extrude = options.extrude
         this.allowRotation = options.allowRotation
     }
 

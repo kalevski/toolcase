@@ -1,0 +1,13 @@
+// Aurora theme — opt-in dark "production-AI / automation" skin for
+// @toolcase/web-components (deep slate canvas, single mint/emerald accent,
+// ambient glow, gradient accents, mono dot eyebrows).
+//
+// Activate by wrapping content in the theme root:
+//   <tc-theme name="aurora"> … your tc-* components … </tc-theme>
+// (or any element with [data-tc-theme="aurora"]).
+//
+// Load order: foundation (token remap) first so the component partials override
+// on top of the already-aurora --tc-* / --bs-* tokens.
+
+@use 'foundation';
+@use 'components';

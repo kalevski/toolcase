@@ -1,0 +1,38 @@
+// Dungeon › tc-sprint-chain — quest-stage / objective chain.
+// Token swap recasts node states as a gilded waypoint path: past = visited gold-deep,
+// now = bright gold with a glow ring, future = hollow on ink.
+// Connectors become a gold gradient rule. Active label gets display caps.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-sprint-chain {
+        // Past node — visited/struck waypoint, dimmer gold
+        --bs-sprint-chain-past-node-bg: var(--fg-gold-deep);
+        --bs-sprint-chain-past-node-border: var(--fg-gold-deep);
+
+        // Now node — active waypoint, brightest gold
+        --bs-sprint-chain-now-node-bg: var(--fg-gold-bright);
+        --bs-sprint-chain-now-node-border: var(--fg-gold-bright);
+
+        // Future node — unvisited hollow ring on dark wood
+        --bs-sprint-chain-future-node-bg: var(--fg-ink);
+        --bs-sprint-chain-future-node-border: var(--fg-gold-deep);
+    }
+
+    // Active quest-stage node glows like a lit waypoint marker
+    .tc-sprint-chain-item-now .tc-sprint-chain-node {
+        box-shadow: 0 0 6px var(--fg-gold-bright);
+    }
+
+    // Connectors: gilded gradient path instead of a flat hairline
+    .tc-sprint-chain-item::before,
+    .tc-sprint-chain-item::after {
+        background: var(--fg-rule);
+    }
+
+    // Active stage label reads as display caps — current quest name stands out
+    .tc-sprint-chain-item-now .tc-sprint-chain-label {
+        font-family: var(--fg-display);
+        letter-spacing: 0.08em;
+    }
+}

@@ -1,0 +1,121 @@
+// Dungeon › tc-battle-pass — gilded season track. Token swap recolours the
+// frame/bar/cells; structural rules add the triple-gold inset bevel on the
+// shell, the gold-gradient + glow progress fill on a dark inset track, gilded
+// reward cells with bevel, display-caps labels, and mono tier numerals.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-battle-pass {
+        --bs-battle-pass-bg:
+            linear-gradient(180deg, rgba(232, 220, 196, 0.04), rgba(0, 0, 0, 0.18)),
+            radial-gradient(120% 80% at 50% 0%, #2e2418 0%, #1a130c 70%);
+        --bs-battle-pass-border-color: var(--fg-gold-deep);
+
+        // Header
+        --bs-battle-pass-eyebrow-color: var(--fg-parch-3);
+        --bs-battle-pass-season-color: var(--fg-gold-bright);
+        --bs-battle-pass-end-color: var(--fg-parch-3);
+        --bs-battle-pass-premium-bg: rgba(0, 0, 0, 0.4);
+        --bs-battle-pass-premium-color: var(--fg-gold-bright);
+
+        // Progress — dark inset track, gold gradient fill.
+        --bs-battle-pass-level-color: var(--fg-gold-bright);
+        --bs-battle-pass-bar-bg: linear-gradient(180deg, #0e0905, #1a120a);
+        --bs-battle-pass-bar-fill: linear-gradient(180deg, #f0d27a, #c9a961 60%, #5a4422);
+        --bs-battle-pass-xp-color: var(--fg-parch);
+
+        // Track
+        --bs-battle-pass-track-label-color: var(--fg-parch-3);
+        --bs-battle-pass-tier-current-bg: rgba(201, 169, 97, 0.08);
+        --bs-battle-pass-tier-current-marker: var(--fg-gold);
+
+        // Tier level marker
+        --bs-battle-pass-level-marker-bg: radial-gradient(80% 80% at 50% 30%, #2a1f14, #0e0905);
+        --bs-battle-pass-level-marker-border-color: var(--fg-gold-deep);
+        --bs-battle-pass-level-marker-color: var(--fg-gold-bright);
+        --bs-battle-pass-level-marker-current-bg: linear-gradient(180deg, #5a3a18, #2a1a0a);
+        --bs-battle-pass-level-marker-current-color: #fff;
+
+        // Reward cells
+        --bs-battle-pass-cell-bg: radial-gradient(80% 80% at 50% 30%, #2a1f14, #0e0905);
+        --bs-battle-pass-cell-border-color: var(--fg-gold-deep);
+        --bs-battle-pass-cell-color: var(--fg-parch);
+        --bs-battle-pass-cell-claimable-border-color: var(--fg-gold);
+        --bs-battle-pass-cell-premium-border-color: var(--fg-gold-bright);
+        --bs-battle-pass-cell-claimed-bg: rgba(111, 159, 58, 0.18);
+        --bs-battle-pass-cell-claimed-color: var(--fg-stamina-bright);
+        --bs-battle-pass-cell-empty-bg: rgba(0, 0, 0, 0.3);
+        --bs-battle-pass-cell-empty-border-color: var(--fg-gold-shadow);
+    }
+
+    // Triple-gold inset bevel on the shell.
+    .tc-battle-pass {
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 0 0 2px var(--fg-gold-deep),
+            inset 0 0 0 3px var(--fg-gold-shadow),
+            inset 0 2px 0 rgba(255, 220, 150, 0.08),
+            0 8px 24px rgba(0, 0, 0, 0.6);
+    }
+
+    // Display-caps labels.
+    .tc-battle-pass-season,
+    .tc-battle-pass-premium-badge,
+    .tc-battle-pass-level,
+    .tc-battle-pass-track-labels {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+    }
+
+    // Premium badge — gilded frame + glow; reset pill to sharp square.
+    .tc-battle-pass-premium-badge {
+        border: 1px solid var(--fg-gold);
+        border-radius: 0;
+        box-shadow:
+            inset 0 1px 0 rgba(232, 200, 120, 0.25),
+            0 0 8px rgba(232, 200, 120, 0.4);
+    }
+
+    // Current-tier level marker — gold glow text-shadow to echo gc emphasis.
+    .tc-battle-pass-tier.is-current .tc-battle-pass-tier-level {
+        text-shadow: 0 0 8px rgba(232, 200, 120, 0.8);
+    }
+
+    // Mono eyebrow / xp / tier numerals.
+    .tc-battle-pass-eyebrow,
+    .tc-battle-pass-end,
+    .tc-battle-pass-xp,
+    .tc-battle-pass-tier-level,
+    .tc-battle-pass-cell-label {
+        font-family: var(--fg-mono);
+    }
+
+    // Dark inset progress track + gold fill glow.
+    .tc-battle-pass-bar {
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.7);
+    }
+    .tc-battle-pass-bar-fill {
+        box-shadow: 0 0 8px rgba(232, 200, 120, 0.4);
+    }
+
+    // Gilded reward cell bevel.
+    .tc-battle-pass-cell {
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18),
+            inset 0 -2px 6px rgba(0, 0, 0, 0.6);
+    }
+    button.tc-battle-pass-cell.is-claimable {
+        color: var(--fg-gold-bright);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+            inset 0 1px 0 rgba(232, 200, 120, 0.25),
+            0 0 12px rgba(232, 200, 120, 0.4);
+
+        &:hover {
+            filter: brightness(1.15);
+        }
+    }
+}

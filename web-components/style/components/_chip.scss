@@ -1,0 +1,183 @@
+// tc-chip — compact interactive chip with optional icon, count badge, and remove button.
+// Sharp corners (border-radius: 0). Slate surface by default; ink fill when selected.
+// All cosmetics flow through --bs-chip-* custom properties backed by --tc-* tokens.
+
+@use 'sass:map';
+@use '../foundation/tokens' as *;
+
+tc-chip,
+tc-tag {
+    // Override the reset.scss inline-block to inline-flex so the chip button
+    // and remove button sit side-by-side in a unified visual unit.
+    display: inline-flex;
+    align-items: stretch;
+
+    --bs-chip-bg: var(--tc-surface);
+    --bs-chip-bg-hover: var(--tc-surface-muted);
+    --bs-chip-color: var(--tc-text);
+    --bs-chip-border-color: var(--tc-border);
+    --bs-chip-border-width: 1px;
+    --bs-chip-padding-x: 0.625rem;
+    --bs-chip-padding-y: 0.3125rem;
+    --bs-chip-font-size: 0.8125rem;
+    --bs-chip-font-weight: 500;
+    --bs-chip-gap: 0.3125rem;
+    --bs-chip-icon-size: 0.875rem;
+    --bs-chip-count-bg: var(--tc-surface-muted);
+    --bs-chip-count-color: var(--tc-text-muted);
+    --bs-chip-count-font-size: 0.6875rem;
+    --bs-chip-selected-bg: var(--tc-app-accent);
+    --bs-chip-selected-color: var(--tc-app-accent-contrast);
+    --bs-chip-remove-icon-size: 0.875rem;
+}
+
+.tc-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-chip-gap);
+    padding: var(--bs-chip-padding-y) var(--bs-chip-padding-x);
+    font-family: inherit;
+    font-size: var(--bs-chip-font-size);
+    font-weight: var(--bs-chip-font-weight);
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--bs-chip-color);
+    background-color: var(--bs-chip-bg);
+    border: var(--bs-chip-border-width) solid var(--bs-chip-border-color);
+    border-radius: 0;
+    cursor: pointer;
+    user-select: none;
+    transition:
+        background-color var(--tc-transition-fast),
+        color var(--tc-transition-fast),
+        border-color var(--tc-transition-fast);
+
+    &:hover:not([disabled]) {
+        background-color: var(--bs-chip-bg-hover);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+        position: relative;
+        z-index: 1;
+    }
+
+    &.is-selected {
+        background-color: var(--bs-chip-selected-bg);
+        color: var(--bs-chip-selected-color);
+        border-color: var(--bs-chip-selected-bg);
+    }
+
+    &[disabled] {
+        pointer-events: none;
+        cursor: default;
+    }
+}
+
+// Static chips (tc-tag, or tc-chip[static]) render a non-interactive <span> root.
+tc-tag .tc-chip,
+tc-chip[static] .tc-chip {
+    cursor: default;
+}
+
+// Colored variants — soft bg tint + dark emphasis text + solid variant hairline.
+// Only apply when not selected; selected always uses the ink fill.
+@each $name in ('primary', 'info', 'success', 'warning', 'danger') {
+    .tc-chip--#{$name}:not(.is-selected) {
+        --bs-chip-bg: #{map.get($theme-colors-soft, $name)};
+        --bs-chip-color: #{map.get($theme-colors-emphasis, $name)};
+        --bs-chip-border-color: #{map.get($theme-colors, $name)};
+    }
+}
+
+.tc-chip-icon {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+
+    svg {
+        width: var(--bs-chip-icon-size);
+        height: var(--bs-chip-icon-size);
+        display: block;
+        pointer-events: none;
+    }
+}
+
+.tc-chip-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.0625rem 0.3125rem;
+    font-size: var(--bs-chip-count-font-size);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0;
+    background-color: var(--bs-chip-count-bg);
+    color: var(--bs-chip-count-color);
+    border-radius: 0;
+}
+
+.tc-chip-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--bs-chip-padding-y) var(--bs-chip-padding-x);
+    margin-left: -1px;
+    border: var(--bs-chip-border-width) solid var(--bs-chip-border-color);
+    border-radius: 0;
+    background-color: var(--bs-chip-bg);
+    color: var(--bs-chip-color);
+    cursor: pointer;
+    line-height: 1;
+    transition: background-color var(--tc-transition-fast);
+
+    svg {
+        width: var(--bs-chip-remove-icon-size);
+        height: var(--bs-chip-remove-icon-size);
+        display: block;
+        pointer-events: none;
+    }
+
+    &:hover:not([disabled]) {
+        background-color: var(--bs-chip-bg-hover);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+        position: relative;
+        z-index: 1;
+    }
+
+    &[disabled] {
+        pointer-events: none;
+        cursor: default;
+    }
+}
+
+// Disabled: reduce opacity and block pointer events on the host so both
+// inner buttons are inert together.
+tc-chip:has(.tc-chip[disabled]) {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+// 44 px coarse touch target minimum on the chip body and the remove button.
+@media (pointer: coarse) {
+    .tc-chip {
+        min-height: 2.75rem;
+    }
+
+    .tc-chip-remove {
+        min-width: 2.75rem;
+        min-height: 2.75rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-chip,
+    .tc-chip-remove {
+        transition: none;
+    }
+}

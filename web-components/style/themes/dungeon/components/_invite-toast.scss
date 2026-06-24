@@ -1,0 +1,79 @@
+// Dungeon › tc-invite-toast — gilded invite popup. Token swap recolours the
+// labels/bar; structural rules give the panel the radial wood fill + full
+// gilded bevel stack (replacing the slate accent stripe), display-caps inviter
+// name, mono countdown, and a gold gradient countdown bar on a sunken track.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-invite-toast {
+        --bs-invite-toast-color: var(--fg-parch);
+        --bs-invite-toast-border-color: var(--fg-gold-deep);
+        --bs-invite-toast-accent: var(--fg-gold);
+
+        --bs-invite-toast-eyebrow-color: var(--fg-parch-dim);
+        --bs-invite-toast-countdown-color: var(--fg-gold-bright);
+
+        --bs-invite-toast-bar-bg: rgba(0, 0, 0, 0.6);
+        --bs-invite-toast-bar-border: var(--fg-gold-deep);
+        --bs-invite-toast-bar-fill: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold) 60%, var(--fg-gold-shadow));
+    }
+
+    // Panel: radial wood fill + gilded bevel stack. Drop the slate left stripe
+    // for a uniform gold border. position:relative anchors the corner notch.
+    .tc-invite-toast__panel {
+        position: relative;
+        background:
+            linear-gradient(180deg, rgba(232, 220, 196, 0.04), rgba(0, 0, 0, 0.18)),
+            radial-gradient(120% 80% at 50% 0%, #2e2418 0%, #1a130c 70%);
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 0 0 2px var(--fg-gold-deep),
+            inset 0 0 0 3px var(--fg-gold-shadow),
+            inset 0 2px 0 rgba(255, 220, 150, 0.08),
+            0 8px 24px rgba(0, 0, 0, 0.6);
+    }
+
+    .tc-invite-toast__panel::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 10px;
+        height: 10px;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+        pointer-events: none;
+    }
+
+    // Mono labels.
+    .tc-invite-toast__eyebrow,
+    .tc-invite-toast__countdown {
+        font-family: var(--fg-mono);
+    }
+
+    // Inviter name reads as gilded display caps.
+    .tc-invite-toast__inviter {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        color: var(--fg-gold-bright);
+    }
+
+    .tc-invite-toast__body {
+        color: var(--fg-parch-3);
+    }
+
+    // Countdown bar track sinks.
+    .tc-invite-toast__bar {
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.7);
+    }
+
+    // Countdown bar fill: scanline texture over the gold gradient for a
+    // struck-metal read consistent with resource bars.
+    .tc-invite-toast__bar-fill {
+        background:
+            var(--fg-scanlines),
+            linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold) 60%, var(--fg-gold-shadow));
+    }
+}

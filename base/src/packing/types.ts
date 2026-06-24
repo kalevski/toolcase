@@ -60,8 +60,6 @@ export interface AlgorithmOptions {
     maxWidth: number
     maxHeight: number
     allowRotation: boolean
-    padding: number
-    extrude: number
     pot: POTMode
 }
 
@@ -86,4 +84,6 @@ export interface PackerOptions extends AlgorithmOptions {
     trim: boolean
     alphaThreshold: number
     budget: MemoryBudget
+    padding: number
+    extrude: number
 }

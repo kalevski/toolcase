@@ -1,0 +1,52 @@
+// Dungeon › tc-dashboard-sidebar — leather rail with gilded right edge and gold-rule dividers.
+// Token swap pins the leather bg and gold-deep border tokens; structural rules upgrade the
+// right-edge border weight and replace flat 1px region dividers with the --fg-rule gradient.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-dashboard-sidebar {
+        --bs-dashboard-sidebar-bg: var(--fg-leather);
+        --bs-dashboard-sidebar-border: var(--fg-gold-deep);
+        --bs-dashboard-sidebar-panel-border: var(--fg-gold-deep);
+    }
+
+    // Heavier gilded right rail edge — 2px over the base 1px for a more deliberate frame.
+    .tc-dashboard-sidebar {
+        border-right: 2px solid var(--fg-gold-deep);
+        border-radius: 0;
+    }
+
+    // Brand bottom divider — gold-rule gradient via a pseudo-element bottom band.
+    .tc-dashboard-sidebar-brand {
+        position: relative;
+        border-bottom: none;
+
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--fg-rule);
+            pointer-events: none;
+        }
+    }
+
+    // Panel top divider — gold-rule gradient via a pseudo-element top band.
+    .tc-dashboard-sidebar-panel {
+        position: relative;
+        border-top: none;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--fg-rule);
+            pointer-events: none;
+        }
+    }
+}

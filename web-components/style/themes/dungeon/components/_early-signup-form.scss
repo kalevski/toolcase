@@ -1,0 +1,102 @@
+// Dungeon › tc-early-signup-form — gilded wood marketing card.
+// Token-swaps the light panel surface to wood + gold border + bevel; replaces
+// the slate-tailed submit gradient with a pure gold gradient; fixes the dark
+// variant's white literals to parchment/gold; overrides the hardcoded green
+// pulse keyframe and slate hover glow; applies display-caps to the headline.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Host-level token swap (light / default variant) ───────────────────────
+
+    tc-early-signup-form {
+        --bs-early-signup-form-bg: var(--fg-panel-bg);
+        --bs-early-signup-form-border: 1px solid var(--fg-gold-deep);
+        // Submit: replace the slate-tailed gradient with a pure gold gradient.
+        --bs-early-signup-form-submit-bg: linear-gradient(135deg, var(--fg-gold-bright), var(--fg-gold-deep));
+        --bs-early-signup-form-submit-color: var(--fg-ink);
+        --bs-early-signup-form-submit-border: var(--fg-gold-deep);
+        --bs-early-signup-form-input-bg: var(--fg-ink-2);
+        // Corner accent repointed to a whisper-gold tint.
+        --bs-early-signup-form-corner: rgba(201, 169, 97, 0.10);
+    }
+
+    // ── Dark variant: white literals → parchment/gold ─────────────────────────
+
+    tc-early-signup-form.tc-early-signup-form--dark {
+        --bs-early-signup-form-bg: var(--fg-ink);
+        --bs-early-signup-form-border: 1px solid var(--fg-gold-deep);
+        --bs-early-signup-form-divider: rgba(201, 169, 97, 0.15);
+        --bs-early-signup-form-color: var(--fg-parch);
+        --bs-early-signup-form-muted-color: var(--fg-parch-2);
+        --bs-early-signup-form-faint-color: var(--fg-parch-dim);
+        --bs-early-signup-form-eyebrow-color: var(--fg-parch-dim);
+        --bs-early-signup-form-corner: rgba(201, 169, 97, 0.06);
+        --bs-early-signup-form-form-bg: rgba(201, 169, 97, 0.03);
+        --bs-early-signup-form-input-bg: var(--fg-ink-2);
+        --bs-early-signup-form-input-color: var(--fg-parch);
+        --bs-early-signup-form-input-border: var(--fg-gold-deep);
+        --bs-early-signup-form-input-focus-border: var(--fg-gold);
+        --bs-early-signup-form-input-focus-ring: 0 0 0 0.2rem rgba(201, 169, 97, 0.20);
+        --bs-early-signup-form-input-placeholder-color: var(--fg-parch-dim);
+        --bs-early-signup-form-field-label-color: var(--fg-parch-dim);
+        --bs-early-signup-form-submit-bg: linear-gradient(135deg, var(--fg-gold-bright), var(--fg-gold-deep));
+        --bs-early-signup-form-submit-color: var(--fg-ink);
+        --bs-early-signup-form-submit-border: var(--fg-gold-deep);
+        --bs-early-signup-form-benefit-divider: rgba(201, 169, 97, 0.15);
+        --bs-early-signup-form-check-color: var(--fg-stamina-bright);
+        --bs-early-signup-form-success-color: var(--fg-stamina-bright);
+        --bs-early-signup-form-stat-color: var(--fg-parch-2);
+        --bs-early-signup-form-reset-color: var(--fg-parch-dim);
+        --bs-early-signup-form-reset-hover-color: var(--fg-parch);
+    }
+
+    // ── Outer panel: gilded bevel ─────────────────────────────────────────────
+
+    .tc-early-signup-form {
+        box-shadow: var(--fg-panel-shadow);
+
+        // Restyle the base corner-accent triangle as a gold notch ornament.
+        &::before {
+            background: var(--fg-notch-fill);
+            clip-path: var(--fg-notch-clip);
+            width: 14px;
+            height: 14px;
+            // Reset base positioning to top-right notch placement.
+            top: -1px;
+            right: -1px;
+        }
+    }
+
+    // ── Headline: display caps ─────────────────────────────────────────────────
+
+    .tc-early-signup-form__title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    // ── Submit: replace the slate hover-glow with a gold glow ─────────────────
+
+    .tc-early-signup-form__submit:hover:not(:disabled) {
+        box-shadow: 0 0 12px rgba(240, 210, 122, 0.35);
+    }
+
+    // ── Pulse dot: replace the hardcoded green keyframe with stamina gold ─────
+    //
+    // The base animation name tc-esf-pulse is declared globally; we redefine
+    // it inside the dungeon scope so the color tokens resolve to --fg-stamina-bright
+    // (the allowed element-green) instead of the hardcoded rgba(22,163,74,*).
+
+    @keyframes tc-esf-pulse {
+        0% {
+            box-shadow: 0 0 0 0 var(--fg-stamina-bright, rgba(22, 163, 74, 0.4));
+        }
+        70% {
+            box-shadow: 0 0 0 6px transparent;
+        }
+        100% {
+            box-shadow: 0 0 0 0 transparent;
+        }
+    }
+}

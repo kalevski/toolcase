@@ -1,0 +1,25 @@
+// Dungeon › tc-label — form caption rendered as gilded display caps.
+// Foundation remaps color + radius + focus ring for free; this override adds
+// display-caps typography and sharpens the required-asterisk to blood-bright.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-label {
+        // Sharper danger red on the asterisk than the foundation --tc-danger remap.
+        --bs-label-required-color: var(--fg-blood-bright);
+    }
+
+    // Display caps — base hardcodes font-family on the class, so var swap alone
+    // is not sufficient; override the class directly.
+    .tc-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 600;
+    }
+
+    // Gold hover tint instead of the generic surface-muted leather fallback.
+    .tc-label-info:hover {
+        background-color: rgba(201, 169, 97, 0.15);
+    }
+}

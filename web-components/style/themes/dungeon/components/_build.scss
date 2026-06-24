@@ -1,0 +1,45 @@
+// Dungeon › tc-build — forge/build ledger plate.
+// Foundation covers most token remaps (surface, border, text, status colors).
+// This file patches the three Sass-literal values that can't remap at runtime,
+// adds the gilded bevel to the card shell, and applies display caps to the name.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Host-level token patches ───────────────────────────────────────────────
+    // --bs-build-skeleton-shimmer is compiled from rgba(255,255,255,.6) — Sass literal.
+    // --bs-build-bg optionally upgraded to the wood gradient fill.
+    tc-build {
+        --bs-build-bg: var(--fg-panel-bg);
+        --bs-build-skeleton-shimmer: rgba(232, 220, 196, 0.25);
+    }
+
+    // ── Menu overlay token patches ─────────────────────────────────────────────
+    // --bs-build-menu-item-color compiled from $slate-700 (Sass literal).
+    // --bs-build-menu-item-active-color compiled from $white (Sass literal).
+    // Must override at the class level since the Sass literals bypass CSS vars.
+    .tc-build-menu {
+        --bs-build-menu-item-color: var(--fg-parch-2);
+        --bs-build-menu-item-active-color: var(--fg-ink);
+    }
+
+    // ── Card shell — gilded bevel ──────────────────────────────────────────────
+    .tc-build {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── Build name — subtle display treatment ─────────────────────────────────
+    // Base hardcodes no font-family; override on the class so display caps apply.
+    .tc-build-name {
+        font-family: var(--fg-display);
+        letter-spacing: 0.04em;
+    }
+
+    // ── Menu divider — gold hairline ───────────────────────────────────────────
+    // Base uses border-top (solid); replace with the gold gradient rule token.
+    .tc-build-menu-divider {
+        border-top: 0;
+        height: 1px;
+        background: var(--fg-rule);
+    }
+}

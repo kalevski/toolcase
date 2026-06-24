@@ -1,0 +1,196 @@
+// tc-equipment-doll — paper-doll equipment slots arranged around a neutral
+// character figure. Re-skinned from the game-components gc-equipment-doll: no
+// gilded frame, no glow, no fantasy fills. A faint slate figure backs sharp
+// hairline slot tiles; selection is the standard ink-active state.
+// All cosmetics flow through --bs-equipment-doll-* custom properties.
+
+@use '../foundation/tokens' as *;
+
+tc-equipment-doll {
+    --bs-equipment-doll-width: 240px;
+    --bs-equipment-doll-height: 360px;
+    --bs-equipment-doll-slot-size: 56px;
+
+    --bs-equipment-doll-surface: var(--tc-surface);
+    --bs-equipment-doll-border-color: var(--tc-border);
+    --bs-equipment-doll-grid-color: var(--tc-border);
+    --bs-equipment-doll-grid-size: 28px;
+
+    --bs-equipment-doll-figure-color: var(--tc-slate-300);
+    --bs-equipment-doll-figure-opacity: 0.45;
+
+    --bs-equipment-doll-slot-bg: var(--tc-surface);
+    --bs-equipment-doll-slot-border: var(--tc-border-strong);
+    --bs-equipment-doll-slot-empty-border: var(--tc-border);
+    --bs-equipment-doll-slot-hover-bg: var(--tc-surface-muted);
+    --bs-equipment-doll-icon-color: var(--tc-text);
+    --bs-equipment-doll-empty-color: var(--tc-text-faint);
+
+    --bs-equipment-doll-selected-bg: var(--tc-app-accent);
+    --bs-equipment-doll-selected-color: var(--tc-app-accent-contrast);
+
+    --bs-equipment-doll-label-color: var(--tc-text-muted);
+    --bs-equipment-doll-label-font-size: 0.6875rem;
+
+    --bs-equipment-doll-qty-bg: var(--tc-app-accent);
+    --bs-equipment-doll-qty-color: var(--tc-app-accent-contrast);
+}
+
+.tc-equipment-doll {
+    // Centre the fixed-size canvas within whatever block width the host gets.
+    &__canvas {
+        position: relative;
+        width: var(--bs-equipment-doll-width);
+        height: var(--bs-equipment-doll-height);
+        max-width: 100%;
+        margin-inline: auto;
+        background: var(--bs-equipment-doll-surface);
+        border: 1px solid var(--bs-equipment-doll-border-color);
+        border-radius: 0;
+
+        // Faint grid backdrop — hairlines, not boxes. Sits below the figure.
+        background-image:
+            linear-gradient(var(--bs-equipment-doll-grid-color) 1px, transparent 1px),
+            linear-gradient(90deg, var(--bs-equipment-doll-grid-color) 1px, transparent 1px);
+        background-size: var(--bs-equipment-doll-grid-size) var(--bs-equipment-doll-grid-size);
+    }
+
+    // Neutral humanoid figure, centred and faint so the slots read first.
+    &__figure {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        height: 78%;
+        width: auto;
+        color: var(--bs-equipment-doll-figure-color);
+        fill: currentColor;
+        opacity: var(--bs-equipment-doll-figure-opacity);
+        pointer-events: none;
+    }
+
+    // Custom text/glyph silhouette (when the `silhouette` attribute is set).
+    &__silhouette {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: clamp(2rem, 30%, 6rem);
+        line-height: 1;
+        color: var(--bs-equipment-doll-figure-color);
+        opacity: var(--bs-equipment-doll-figure-opacity);
+        pointer-events: none;
+    }
+
+    // Each slot is an absolutely-positioned button anchored on its x/y%, with the
+    // tile centred on the point and an optional mono label stacked below.
+    &__slot {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0;
+        margin: 0;
+        background: none;
+        border: 0;
+        border-radius: 0;
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
+        transition: var(--tc-transition-fast);
+
+        &:focus-visible {
+            outline: 2px solid var(--tc-app-accent);
+            outline-offset: 2px;
+        }
+
+        &:hover .tc-equipment-doll__tile {
+            background: var(--bs-equipment-doll-slot-hover-bg);
+        }
+    }
+
+    // Sharp square tile — the slot face.
+    &__tile {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: var(--bs-equipment-doll-slot-size);
+        height: var(--bs-equipment-doll-slot-size);
+        background: var(--bs-equipment-doll-slot-bg);
+        border: 1px solid var(--bs-equipment-doll-slot-border);
+        border-radius: 0;
+        color: var(--bs-equipment-doll-icon-color);
+        transition: var(--tc-transition-fast);
+    }
+
+    // Empty slot: dashed hairline, muted — reads as a vacant socket.
+    &__slot.is-empty &__tile {
+        background: transparent;
+        border-style: dashed;
+        border-color: var(--bs-equipment-doll-slot-empty-border);
+        color: var(--bs-equipment-doll-empty-color);
+    }
+
+    // Active = solid ink, white content (the standard active state).
+    &__slot.is-selected &__tile {
+        background: var(--bs-equipment-doll-selected-bg);
+        border-color: var(--bs-equipment-doll-selected-bg);
+        color: var(--bs-equipment-doll-selected-color);
+    }
+
+    &__icon {
+        max-width: 70%;
+        max-height: 70%;
+        font-size: calc(var(--bs-equipment-doll-slot-size) * 0.42);
+        line-height: 1;
+        object-fit: contain;
+    }
+
+    // Quantity pill in the tile corner — a sanctioned mono micro-badge.
+    &__qty {
+        position: absolute;
+        right: -1px;
+        bottom: -1px;
+        padding: 0 0.25rem;
+        background: var(--bs-equipment-doll-qty-bg);
+        color: var(--bs-equipment-doll-qty-color);
+        font-family: var(--bs-font-monospace, monospace);
+        font-size: 0.625rem;
+        font-weight: 500;
+        line-height: 1.4;
+    }
+
+    &__label {
+        font-family: var(--bs-font-monospace, monospace);
+        font-size: var(--bs-equipment-doll-label-font-size);
+        font-weight: 500;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--bs-equipment-doll-label-color);
+        white-space: nowrap;
+        line-height: 1;
+    }
+}
+
+// Coarse pointers: guarantee a 44px touch target on the slot tiles.
+@media (pointer: coarse) {
+    .tc-equipment-doll__tile {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    // Keep the colour/background state transitions (they convey selection/hover),
+    // there is no decorative transform to freeze here.
+    .tc-equipment-doll__slot,
+    .tc-equipment-doll__tile {
+        transition-duration: 0.001s;
+    }
+}

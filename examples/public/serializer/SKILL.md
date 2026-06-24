@@ -128,7 +128,7 @@ serializer.fields('Player')     // → [{ key: 'id', type: 'string', rule: 'opti
 - Map fields are reported with `rule: 'optional'` (protobuf has no rule concept for maps) and `type` set to the map's value type; the `default` key is absent (`undefined`).
 - `fields(key)` throws `Serializer: type key=<key> is not defined. known types: [...]` if `key` was never defined.
 
-### Versioning — `version()`, `getVersion()`, `migrate()`, `encodeVersioned()`, `decodeVersioned()`
+### Versioning — `version()`, `getVersion()`, `defineVersion()`, `migrate()`, `encodeVersioned()`, `decodeVersioned()`
 
 Stamps a 2-byte version header (`major`, `minor`) onto encoded frames and dispatches per-type migrations on decode when the frame is older than current. Both `major` and `minor` are byte-sized (0–255).
 
@@ -155,6 +155,32 @@ Decode rules:
 - `major > current.major` → throws (frame is from the future).
 
 `getVersion(): { major, minor }` returns the current marker.
+
+#### Breaking schema changes — `defineVersion()`
+
+`migrate()` alone is only safe when the new schema is a superset of the old one (fields added, never removed or retyped). For **breaking** changes — a field reordered, retyped, or removed — old bytes cannot be decoded correctly by the new schema. Register the prior field layout with `defineVersion()` so `decodeVersioned` decodes the raw bytes with the schema that produced them before running the migration handler:
+
+```ts
+// v1 had: id (uint32 tag 1), value (string tag 2)
+// v2 swapped the field order — a breaking change
+s.version(2, 0)
+s.define('Item', [
+    { key: 'value', type: 'string', rule: 'required' },   // tag 1 in v2
+    { key: 'id',    type: 'uint32', rule: 'required' }    // tag 2 in v2
+])
+
+// Register the v1 field layout so decodeVersioned can decode v1 bytes first
+s.defineVersion('Item', 1, [
+    { key: 'id',    type: 'uint32', rule: 'required' },   // tag 1 in v1
+    { key: 'value', type: 'string', rule: 'required' }    // tag 2 in v1
+])
+s.migrate('Item', 1, msg => ({ value: msg.value, id: msg.id }))
+
+const out = s.decodeVersioned('Item', v1Frame)
+// msg correctly decoded with v1 schema first, then migrated
+```
+
+`defineVersion(key, forMajor, fields)` stores a private protobuf `Type` keyed by `key:forMajor`. When `decodeVersioned` encounters a frame at that major version it uses this type; otherwise it falls back to the current `define()` schema.
 
 ### Streaming — `fragment()`, `reassemble()`
 

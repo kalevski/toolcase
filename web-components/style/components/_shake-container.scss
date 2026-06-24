@@ -1,0 +1,53 @@
+// tc-shake-container — rAF-driven camera-shake wrapper. Ported from
+// `gc-shake-container` but voiced for the web-components design system: no
+// Shadow DOM, no game chrome, no gilded frames — a bare block wrapper whose
+// inner div JS translates on demand. All cosmetics flow through
+// --bs-shake-container-* custom properties (the public theming contract).
+
+@use '../foundation/tokens' as *;
+
+// ── Component defaults ──────────────────────────────────────────────────────────
+
+tc-shake-container {
+    --bs-shake-container-bg: transparent;
+    --bs-shake-container-border-color: transparent;
+    --bs-shake-container-border-width: 0px;
+    --bs-shake-container-border-radius: 0;
+}
+
+// ── Host surface ────────────────────────────────────────────────────────────────
+// Block by default (registered in _reset.scss). The host itself carries no
+// visual chrome; it is a transparent layout wrapper. Authors size it by placing
+// content inside the default slot.
+
+tc-shake-container {
+    display: block;
+    background: var(--bs-shake-container-bg);
+    border: var(--bs-shake-container-border-width) solid var(--bs-shake-container-border-color);
+    border-radius: var(--bs-shake-container-border-radius);
+    // Clip the translate overshoot when overflow-hidden is desired by the author;
+    // the default is visible so the shake can be seen against surrounding content.
+    overflow: visible;
+}
+
+// ── Inner wrapper ───────────────────────────────────────────────────────────────
+// JS writes inline `transform: translate(x, y)` here during the shake; it
+// resets to '' when the animation ends. display: block gives it a real layout
+// box so the transform takes effect. will-change hints the compositor to keep
+// this element on its own layer, preventing per-frame layout/paint on the host.
+// No border-radius — sharp by mandate.
+
+.tc-shake-container-inner {
+    display: block;
+    will-change: transform;
+}
+
+// ── Reduced motion ──────────────────────────────────────────────────────────────
+// JS checks matchMedia and skips the shake when prefers-reduced-motion is active.
+// This rule is a belt-and-suspenders guard in case an inline transform leaks.
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-shake-container-inner {
+        transform: none !important;
+    }
+}

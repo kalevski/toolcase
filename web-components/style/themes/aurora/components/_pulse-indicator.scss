@@ -1,0 +1,15 @@
+// Aurora › tc-pulse-indicator — live mint pulse.
+// The dot rides --bs-pulse-indicator-color (defaults to success). Default it to
+// the mint accent so a bare indicator reads "live", and add a soft glow ring to
+// the static dot so it sits on the dark canvas like the AIHub live dots.
+
+tc-theme[name='aurora'],
+[data-tc-theme='aurora'] {
+    tc-pulse-indicator {
+        --bs-pulse-indicator-color: var(--ah-accent);
+    }
+
+    .tc-pulse-indicator-dot {
+        box-shadow: 0 0 8px var(--ah-accent-shadow);
+    }
+}

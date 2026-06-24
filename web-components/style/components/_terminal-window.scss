@@ -1,0 +1,179 @@
+// tc-terminal-window — faux terminal/console window with optional typing animation.
+// Dark code surface (--tc-ink / --tc-ink-2), JetBrains Mono throughout, sharp
+// corners, 1px hairline frame + shadow-sm. All cosmetics flow through
+// --bs-terminal-window-* vars backed by --tc-* tokens.
+// Traffic-light dots are the only sanctioned circles; kept muted/slate by default.
+// The prompt uses a restrained cyan accent; comment lines are faint/muted.
+// Honours prefers-reduced-motion (cursor blink freezes; text renders instantly).
+
+tc-terminal-window {
+    // Frame
+    --bs-terminal-window-bg: var(--tc-ink);
+    --bs-terminal-window-border: 1px solid var(--tc-border);
+    --bs-terminal-window-shadow: var(--tc-shadow-sm);
+
+    // Chrome bar (slightly lighter ink)
+    --bs-terminal-window-bar-bg: var(--tc-ink-2);
+    --bs-terminal-window-bar-border: 1px solid var(--tc-border);
+    --bs-terminal-window-bar-padding: 0.5rem 0.75rem;
+
+    // Traffic-light dots — muted slate by default, faint colored hint allowed
+    --bs-terminal-window-dot-size: 11px;
+    --bs-terminal-window-dot-gap: 0.5rem;
+    --bs-terminal-window-dot-red: oklch(0.62 0.09 25);
+    --bs-terminal-window-dot-amber: oklch(0.74 0.08 75);
+    --bs-terminal-window-dot-green: oklch(0.68 0.08 150);
+
+    // Title
+    --bs-terminal-window-title-color: var(--tc-slate-400);
+    --bs-terminal-window-title-size: 0.75rem;
+
+    // Body
+    --bs-terminal-window-body-bg: transparent;
+    --bs-terminal-window-padding-y: 0.875rem;
+    --bs-terminal-window-padding-x: 1rem;
+    --bs-terminal-window-font-size: 0.85rem;
+    --bs-terminal-window-line-height: 1.65;
+
+    // Text ladder on the dark surface
+    --bs-terminal-window-text-color: var(--tc-text-inverse);
+    --bs-terminal-window-prompt-color: var(--tc-accent); // restrained accent
+    --bs-terminal-window-comment-color: oklch(0.58 0.01 250); // faint muted ink
+
+    // Typing cursor
+    --bs-terminal-window-cursor-color: var(--tc-accent);
+    --bs-terminal-window-cursor-width: 0.5rem;
+}
+
+.tc-terminal-window {
+    background: var(--bs-terminal-window-bg);
+    border: var(--bs-terminal-window-border);
+    border-radius: 0;
+    box-shadow: var(--bs-terminal-window-shadow);
+    overflow: hidden;
+}
+
+// ── Chrome bar ───────────────────────────────────────────────────────────────
+
+.tc-terminal-window-bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: var(--bs-terminal-window-bar-padding);
+    background: var(--bs-terminal-window-bar-bg);
+    border-bottom: var(--bs-terminal-window-bar-border);
+}
+
+.tc-terminal-window-dots {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-terminal-window-dot-gap);
+    flex-shrink: 0;
+}
+
+.tc-terminal-window-dot {
+    display: inline-block;
+    width: var(--bs-terminal-window-dot-size);
+    height: var(--bs-terminal-window-dot-size);
+    border-radius: 50%; // sanctioned circle — window chrome convention
+}
+
+.tc-terminal-window-dot--red {
+    background: var(--bs-terminal-window-dot-red);
+}
+
+.tc-terminal-window-dot--amber {
+    background: var(--bs-terminal-window-dot-amber);
+}
+
+.tc-terminal-window-dot--green {
+    background: var(--bs-terminal-window-dot-green);
+}
+
+.tc-terminal-window-title {
+    // Centered in the bar regardless of the dots' width on the left.
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 60%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-terminal-window-title-size);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--bs-terminal-window-title-color);
+    user-select: none;
+
+    &:empty {
+        display: none;
+    }
+}
+
+// ── Body ─────────────────────────────────────────────────────────────────────
+
+.tc-terminal-window-body {
+    margin: 0;
+    padding: var(--bs-terminal-window-padding-y) var(--bs-terminal-window-padding-x);
+    background: var(--bs-terminal-window-body-bg);
+    color: var(--bs-terminal-window-text-color);
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-terminal-window-font-size);
+    line-height: var(--bs-terminal-window-line-height);
+    overflow-x: auto;
+}
+
+.tc-terminal-window-line {
+    display: block;
+    white-space: pre-wrap;
+    word-break: break-word;
+
+    // Lines not yet revealed during the typing animation.
+    &.tc-terminal-window-line--hidden {
+        display: none;
+    }
+}
+
+.tc-terminal-window-prompt {
+    color: var(--bs-terminal-window-prompt-color);
+    font-weight: 600;
+    margin-right: 0.5rem;
+    user-select: none;
+}
+
+.tc-terminal-window-line-comment {
+    color: var(--bs-terminal-window-comment-color);
+    font-style: italic;
+}
+
+.tc-terminal-window-text {
+    // Plain output text inherits the body color; command/comment lines recolor.
+}
+
+// ── Typing cursor ────────────────────────────────────────────────────────────
+
+.tc-terminal-window-cursor {
+    display: inline-block;
+    width: var(--bs-terminal-window-cursor-width);
+    height: 1em;
+    margin-left: 0.125rem;
+    vertical-align: text-bottom;
+    background: var(--bs-terminal-window-cursor-color);
+    animation: tc-terminal-window-blink 1s step-end infinite;
+}
+
+@keyframes tc-terminal-window-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+// ── Reduced motion ───────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-terminal-window-cursor {
+        // Static, non-blinking cursor; text is rendered instantly by the element.
+        animation: none;
+        opacity: 1;
+    }
+}

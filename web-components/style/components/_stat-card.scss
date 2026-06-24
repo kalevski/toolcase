@@ -1,0 +1,266 @@
+// tc-stat-card — statistic card with label, value, optional icon, delta, and footer.
+// White card surface, 1px hairline border, resting shadow, sharp corners by mandate.
+// All cosmetics flow through --bs-stat-card-* custom properties backed by --tc-* tokens.
+// Status colour appears ONLY on the delta badge, never on the card body itself.
+
+@use 'sass:map';
+@use '../foundation/tokens' as *;
+
+tc-stat-card {
+    --bs-stat-card-bg: var(--tc-surface);
+    --bs-stat-card-border-color: var(--tc-border);
+    --bs-stat-card-shadow: var(--tc-shadow-sm);
+    --bs-stat-card-padding-y: 1rem;
+    --bs-stat-card-padding-x: 1.25rem;
+    --bs-stat-card-icon-color: var(--tc-text-muted);
+    --bs-stat-card-icon-size: 1rem;
+    --bs-stat-card-icon-tile-bg: var(--tc-surface-muted);
+    --bs-stat-card-label-color: var(--tc-text-muted);
+    --bs-stat-card-label-font-size: 0.6875rem;
+    --bs-stat-card-label-letter-spacing: 0.08em;
+    --bs-stat-card-value-color: var(--tc-text);
+    --bs-stat-card-value-font-size: 1.75rem;
+    --bs-stat-card-value-font-weight: 600;
+    --bs-stat-card-unit-color: var(--tc-text-muted);
+    --bs-stat-card-unit-font-size: 0.9375rem;
+    --bs-stat-card-delta-gap: 0.25rem;
+    --bs-stat-card-delta-icon-size: 0.875rem;
+    --bs-stat-card-delta-font-size: 0.75rem;
+    --bs-stat-card-helper-color: var(--tc-text-muted);
+    --bs-stat-card-helper-font-size: 0.75rem;
+    --bs-stat-card-footer-bg: var(--tc-surface-muted);
+    --bs-stat-card-footer-border-color: var(--tc-border);
+    --bs-stat-card-footer-color: var(--tc-text-muted);
+    --bs-stat-card-footer-font-size: 0.75rem;
+    --bs-stat-card-skeleton-bg: var(--tc-surface-muted);
+    --bs-stat-card-skeleton-shimmer: rgba(255, 255, 255, 0.6);
+}
+
+// Wire Bootstrap card shell tokens so .card inherits our component tokens.
+.tc-stat-card {
+    --bs-card-bg: var(--bs-stat-card-bg);
+    --bs-card-border-color: var(--bs-stat-card-border-color);
+    --bs-card-box-shadow: var(--bs-stat-card-shadow);
+    --bs-card-border-radius: 0;
+    --bs-card-spacer-y: var(--bs-stat-card-padding-y);
+    --bs-card-spacer-x: var(--bs-stat-card-padding-x);
+}
+
+.tc-stat-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+// Header row: icon tile + label (on the same baseline row).
+.tc-stat-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+// Icon tile — slate muted background, muted icon color.
+.tc-stat-card-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0.25rem;
+    background: var(--bs-stat-card-icon-tile-bg);
+    border-radius: 0;
+    color: var(--bs-stat-card-icon-color);
+}
+
+.tc-stat-card-icon-svg {
+    display: block;
+    width: var(--bs-stat-card-icon-size);
+    height: var(--bs-stat-card-icon-size);
+    stroke: currentColor;
+    fill: none;
+}
+
+// Label — uppercase micro-label in muted slate.
+.tc-stat-card-label {
+    display: block;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-stat-card-label-font-size);
+    font-weight: 500;
+    line-height: 1.4;
+    text-transform: uppercase;
+    letter-spacing: var(--bs-stat-card-label-letter-spacing);
+    color: var(--bs-stat-card-label-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// Value row — flex baseline so unit aligns to value's text baseline.
+.tc-stat-card-value-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+    min-width: 0;
+}
+
+// Headline figure — large emphasis weight, mono.
+.tc-stat-card-value {
+    display: block;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-stat-card-value-font-size);
+    font-weight: var(--bs-stat-card-value-font-weight);
+    line-height: 1.1;
+    color: var(--bs-stat-card-value-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// Unit suffix — smaller, muted.
+.tc-stat-card-unit {
+    display: inline-block;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-stat-card-unit-font-size);
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--bs-stat-card-unit-color);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+// Delta row wrapper.
+.tc-stat-card-delta-row {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+// Delta badge — the ONLY sanctioned place for status colour.
+// Neutral = slate; up = success soft tint; down = danger soft tint.
+.tc-stat-card-delta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-stat-card-delta-gap);
+    padding: 0.1875rem 0.4375rem;
+    font-family: 'JetBrains Mono', 'JetBrainsMono NF', monospace;
+    font-size: var(--bs-stat-card-delta-font-size);
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    border-radius: 0;
+    border: 1px solid transparent;
+
+    // Default: neutral slate
+    background-color: var(--tc-surface-muted);
+    color: var(--tc-text-muted);
+    border-color: var(--tc-border);
+}
+
+.tc-stat-card-delta--up {
+    background-color: #{map.get($theme-colors-soft, 'success')};
+    color: #{map.get($theme-colors-emphasis, 'success')};
+    border-color: transparent;
+}
+
+.tc-stat-card-delta--down {
+    background-color: #{map.get($theme-colors-soft, 'danger')};
+    color: #{map.get($theme-colors-emphasis, 'danger')};
+    border-color: transparent;
+}
+
+.tc-stat-card-delta--neutral {
+    background-color: var(--tc-surface-muted);
+    color: var(--tc-text-muted);
+    border-color: var(--tc-border);
+}
+
+// Directional icon inside the delta badge.
+.tc-stat-card-delta-icon {
+    width: var(--bs-stat-card-delta-icon-size);
+    height: var(--bs-stat-card-delta-icon-size);
+    flex-shrink: 0;
+    stroke: currentColor;
+    fill: none;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.tc-stat-card-delta-text {
+    line-height: 1;
+}
+
+// Helper text — faint, small, below the delta.
+.tc-stat-card-helper {
+    display: block;
+    font-size: var(--bs-stat-card-helper-font-size);
+    line-height: 1.4;
+    color: var(--bs-stat-card-helper-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// Footer row — sits below the card-body, separated by the card hairline.
+.tc-stat-card-footer-row {
+    padding: calc(var(--bs-stat-card-padding-y) * 0.75) var(--bs-stat-card-padding-x);
+    border-top: 1px solid var(--bs-stat-card-footer-border-color);
+    background: var(--bs-stat-card-footer-bg);
+}
+
+.tc-stat-card-footer {
+    font-size: var(--bs-stat-card-footer-font-size);
+    line-height: 1.4;
+    color: var(--bs-stat-card-footer-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// ── Loading skeleton ──────────────────────────────────────────────────────────
+
+@keyframes tc-stat-card-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+%tc-stat-card-shimmer {
+    background: linear-gradient(
+        90deg,
+        var(--bs-stat-card-skeleton-bg) 25%,
+        var(--bs-stat-card-skeleton-shimmer) 50%,
+        var(--bs-stat-card-skeleton-bg) 75%
+    );
+    background-size: 200% 100%;
+    animation: tc-stat-card-shimmer 1.5s infinite linear;
+    border-radius: 0;
+}
+
+.tc-stat-card-skeleton {
+    display: block;
+    height: 0.75rem;
+    @extend %tc-stat-card-shimmer;
+
+    &--label {
+        width: 40%;
+        margin-bottom: 0.25rem;
+    }
+
+    &--value {
+        width: 60%;
+        height: 1.75rem;
+    }
+
+    &--delta {
+        width: 28%;
+        height: 1.25rem;
+        margin-top: 0.125rem;
+    }
+}
+
+// Honour prefers-reduced-motion: freeze shimmer to a static fill.
+@media (prefers-reduced-motion: reduce) {
+    .tc-stat-card-skeleton {
+        animation: none;
+        background: var(--bs-stat-card-skeleton-bg);
+    }
+}

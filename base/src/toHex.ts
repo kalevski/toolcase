@@ -1,5 +1,6 @@
 const toHex = (value: number, digits: number = 4): string => {
-    return ('0'.repeat(digits - 1) + value.toString(16)).slice(-digits)
+    const hex = (value >>> 0).toString(16)
+    return hex.padStart(Math.max(0, digits), '0').slice(-Math.max(1, digits))
 }
 
 export default toHex

@@ -1,0 +1,54 @@
+// Dungeon › tc-callout-quote — parchment lore blockquote.
+// Token swap upgrades the quote-mark to a gilded ornament and the left border
+// to a solid gold rule. Structural rules add serif italic body text and
+// display caps on the author attribution.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-callout-quote {
+        // Upgrade quote-mark glyph from faint text to a bronze-gold ornament.
+        --bs-callout-quote-mark-color: var(--fg-gold-deep);
+        // Strengthen the left rule to solid gold.
+        --bs-callout-quote-border-color: var(--fg-gold);
+    }
+
+    // Gilded left rule — replace the flat border with a gold gradient strip.
+    .tc-callout-quote {
+        position: relative;
+        border-left: none;
+        padding-left: calc(var(--bs-callout-quote-padding-x) + 4px);
+
+        &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--fg-rule);
+            // fg-rule is a horizontal gradient; rotate it for a vertical strip.
+            background: linear-gradient(
+                180deg,
+                var(--fg-gold-shadow) 0%,
+                var(--fg-gold-bright) 40%,
+                var(--fg-gold) 60%,
+                var(--fg-gold-shadow) 100%
+            );
+        }
+    }
+
+    // Parchment-lore voice: EB Garamond italic for the quoted passage.
+    .tc-callout-quote__text {
+        font-family: var(--fg-body);
+        font-style: italic;
+        font-weight: 400;
+    }
+
+    // Display caps for the author attribution — reads as a scribe's colophon.
+    .tc-callout-quote__author {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: 600;
+    }
+}

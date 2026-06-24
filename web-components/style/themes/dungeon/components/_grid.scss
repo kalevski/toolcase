@@ -1,0 +1,13 @@
+// Dungeon › tc-grid — no override needed.
+//
+// tc-grid is a pure CSS-grid layout primitive: it has no colours, borders, fills,
+// or text of its own — only track/gap geometry driven from --bs-grid-* inline
+// styles. There is nothing for the fantasy reskin to carry, so this block is
+// intentionally empty (the foundation token remap covers any inherited cosmetics).
+//
+// Design source:  game-components/style/components/_grid.scss
+// Target classes: web-components/style/components/_grid.scss
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+}

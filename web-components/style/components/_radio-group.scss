@@ -1,0 +1,73 @@
+// tc-radio-group — coordinated group of radio buttons with optional label.
+// Reuses the .form-check motif from tc-radio; adds group-level label,
+// inline-flex layout, and coarse targets.
+
+.tc-radio-group {
+    --bs-radio-group-label-color: var(--tc-text-muted);
+    --bs-radio-group-label-size: 0.8125rem;
+    --bs-radio-group-label-weight: 600;
+    --bs-radio-group-gap: 0.35rem;
+    --bs-radio-group-inline-gap: 1rem;
+
+    // Reset fieldset browser defaults
+    margin: 0;
+    padding: 0;
+    border: none;
+    min-width: 0;
+    display: block;
+}
+
+.tc-radio-group-label {
+    display: block;
+    font-size: var(--bs-radio-group-label-size);
+    font-weight: var(--bs-radio-group-label-weight);
+    color: var(--bs-radio-group-label-color);
+    margin-bottom: var(--bs-radio-group-gap);
+    // Reset fieldset legend alignment quirks
+    float: none;
+    padding: 0;
+    width: 100%;
+    line-height: 1.5;
+}
+
+.tc-radio-group-options {
+    display: block;
+
+    &--inline {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--bs-radio-group-inline-gap);
+
+        .form-check {
+            // Collapse default bottom margin inside the flex row
+            margin-bottom: 0;
+        }
+    }
+}
+
+// Disabled option rows
+.tc-radio-group .form-check:has(input:disabled) {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+// 44 px coarse touch targets on each option row
+@media (pointer: coarse) {
+    .tc-radio-group .form-check {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+
+        .form-check-input {
+            margin-top: 0;
+        }
+    }
+}
+
+// Honour prefers-reduced-motion — form-check-input already transitions; flatten here
+@media (prefers-reduced-motion: reduce) {
+    .tc-radio-group .form-check-input {
+        transition: none;
+    }
+}

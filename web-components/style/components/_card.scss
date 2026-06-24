@@ -1,0 +1,91 @@
+// tc-card — flat surface, 1px border, low shadow; subtle ink-gradient header.
+// Hover lift is opt-in via the host's text-bg-free default styling.
+
+.card {
+    --bs-card-spacer-y: 1.5rem;
+    --bs-card-spacer-x: 1.5rem;
+    --bs-card-title-spacer-y: 0.75rem;
+    --bs-card-border-width: var(--bs-border-width);
+    --bs-card-border-color: var(--tc-border);
+    --bs-card-border-radius: 0;
+    --bs-card-box-shadow: var(--tc-shadow-sm);
+    --bs-card-cap-padding-y: 0.75rem;
+    --bs-card-cap-padding-x: 1.5rem;
+    --bs-card-cap-bg: linear-gradient(135deg, rgba(30, 41, 59, 0.03), rgba(30, 41, 59, 0.01));
+    --bs-card-cap-color: var(--tc-text);
+    --bs-card-bg: var(--tc-surface);
+    --bs-card-color: var(--bs-body-color);
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+    color: var(--bs-card-color);
+    background: var(--bs-card-bg);
+    background-clip: border-box;
+    border: var(--bs-card-border-width) solid var(--bs-card-border-color);
+    border-radius: var(--bs-card-border-radius);
+    box-shadow: var(--bs-card-box-shadow);
+    transition:
+        box-shadow var(--tc-transition-base),
+        transform var(--tc-transition-base);
+}
+
+.card-header {
+    padding: var(--bs-card-cap-padding-y) var(--bs-card-cap-padding-x);
+    margin-bottom: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--bs-card-cap-color);
+    background: var(--bs-card-cap-bg);
+    border-bottom: var(--bs-card-border-width) solid rgba(30, 41, 59, 0.1);
+}
+
+.card-body {
+    flex: 1 1 auto;
+    padding: var(--bs-card-spacer-y) var(--bs-card-spacer-x);
+    color: var(--bs-card-color);
+}
+
+.card-footer {
+    padding: var(--bs-card-cap-padding-y) var(--bs-card-cap-padding-x);
+    color: var(--bs-card-cap-color);
+    background: var(--bs-card-cap-bg);
+    border-top: var(--bs-card-border-width) solid rgba(30, 41, 59, 0.1);
+}
+
+.card-title {
+    margin-bottom: var(--bs-card-title-spacer-y);
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+.card-subtitle {
+    margin-top: calc(-0.5 * var(--bs-card-title-spacer-y));
+    margin-bottom: 0;
+    font-size: 0.85rem;
+}
+
+.card-img-top,
+.card-img-bottom {
+    width: 100%;
+}
+
+// Solid-variant cards (text-bg-*) — flatten the caps so the fill reads as one
+// surface; keep the 1px outer border. currentcolor (not `inherit`: a CSS-wide
+// keyword in a custom property resolves the PROPERTY's inheritance, it does not
+// forward the keyword) so body/caps pick up the .text-bg-* contrast color.
+.card[class*='text-bg-'] {
+    --bs-card-color: currentcolor;
+    --bs-card-cap-color: currentcolor;
+    --bs-card-cap-bg: rgba(255, 255, 255, 0.08);
+    --bs-card-border-color: rgba(0, 0, 0, 0.2);
+    --bs-card-bg: transparent;
+
+    // Subtitle ghosts the contrast color instead of the muted-slate utility.
+    .card-subtitle {
+        color: currentcolor !important;
+        opacity: 0.75;
+    }
+}

@@ -1,0 +1,25 @@
+// @toolcase/web-components global stylesheet — authored from scratch, no
+// Bootstrap dependency. Import order determines cascade priority:
+//
+//   (1) Foundation — compile-time Sass tokens, element base styles, the
+//       Bootstrap-compatible 12-column grid, and the utility slice the
+//       components emit.
+//   (2) Component partials — full from-scratch styling for every class the
+//       tc-* components render, driven through --bs-<component>-* custom
+//       properties (Bootstrap 5.3 names) so themes re-skin via vars alone.
+//   (3) Default theme — the toolcase design system (product voice): the
+//       runtime --tc-* tokens and the --bs-* theming contract, applied at
+//       :root so components are styled with no wrapper required.
+
+@use './foundation';
+@use './components';
+@use './themes/default';
+
+//   (4) Dungeon theme — opt-in fantasy skin (gilded bronze, parchment, ink).
+//       Scoped under `tc-theme[name="dungeon"]`, so it is inert until a wrapper
+//       opts in; everything outside the wrapper keeps the default voice.
+@use './themes/dungeon';
+
+//   (5) Aurora theme — opt-in dark "production-AI" skin (deep slate, mint glow).
+//       Scoped under `tc-theme[name="aurora"]`, inert until a wrapper opts in.
+@use './themes/aurora';

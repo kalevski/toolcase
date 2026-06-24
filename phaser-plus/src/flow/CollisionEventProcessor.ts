@@ -79,7 +79,13 @@ export default class CollisionEventProcessor extends FlowProcessor {
         return this
     }
 
-    private onCollisionEnter(event: Physics.Matter.Events.CollisionStartEvent, bodyA: MatterBody, bodyB: MatterBody): void {
+    private onCollisionEnter(event: Physics.Matter.Events.CollisionStartEvent): void {
+        for (const pair of event.pairs) {
+            this.dispatchEnter(event, pair.bodyA as MatterBody, pair.bodyB as MatterBody)
+        }
+    }
+
+    private dispatchEnter(event: Physics.Matter.Events.CollisionStartEvent, bodyA: MatterBody, bodyB: MatterBody): void {
         const labelA = (bodyA as any)?.label
         const labelB = (bodyB as any)?.label
         if (labelA == null || labelB == null) return
@@ -93,7 +99,13 @@ export default class CollisionEventProcessor extends FlowProcessor {
         collisionEvent.onEnter(bodyA, bodyB, event)
     }
 
-    private onCollisionExit(event: Physics.Matter.Events.CollisionEndEvent, bodyA: MatterBody, bodyB: MatterBody): void {
+    private onCollisionExit(event: Physics.Matter.Events.CollisionEndEvent): void {
+        for (const pair of event.pairs) {
+            this.dispatchExit(event, pair.bodyA as MatterBody, pair.bodyB as MatterBody)
+        }
+    }
+
+    private dispatchExit(event: Physics.Matter.Events.CollisionEndEvent, bodyA: MatterBody, bodyB: MatterBody): void {
         const labelA = (bodyA as any)?.label
         const labelB = (bodyB as any)?.label
         if (labelA == null || labelB == null) return

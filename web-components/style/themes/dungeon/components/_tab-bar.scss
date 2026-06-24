@@ -1,0 +1,36 @@
+// Dungeon › tc-tab-bar — display-caps tabs, gold-bright active underline + wash.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-tab-bar {
+        --bs-tab-bar-border: 1px solid var(--fg-gold-deep);
+        --bs-tab-bar-tab-color: var(--fg-parch-3);
+        --bs-tab-bar-tab-color-hover: var(--fg-parch);
+        --bs-tab-bar-tab-color-active: var(--fg-gold-bright);
+        --bs-tab-bar-tab-underline: 2px solid var(--fg-gold-bright);
+    }
+
+    .tc-tab-bar-tab {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-size: 11px;
+
+        &:focus-visible {
+            outline-offset: -2px;
+        }
+
+        &--active {
+            background: rgba(201, 169, 97, 0.12);
+            font-weight: 600;
+
+            .tc-tab-bar-tab-icon {
+                stroke: var(--fg-gold-bright);
+            }
+        }
+    }
+
+    .tc-tab-bar-tab-icon {
+        stroke: var(--fg-gold);
+    }
+}

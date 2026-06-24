@@ -1,0 +1,57 @@
+// tc-platform-icon — platform badge: a Lucide glyph with an optional label.
+// Purely presentational; no shadow root; light DOM; display: inline-flex.
+// All cosmetics flow through --bs-platform-icon-* custom properties.
+
+tc-platform-icon {
+    --bs-platform-icon-size: 1rem;
+    --bs-platform-icon-gap: 0.375rem;
+    --bs-platform-icon-glyph-color: var(--tc-text-muted, #94a3b8);
+    --bs-platform-icon-label-color: var(--tc-text-muted, #94a3b8);
+    --bs-platform-icon-label-font-size: 0.8125rem;
+    --bs-platform-icon-label-font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-platform-icon-gap);
+    line-height: 1;
+}
+
+// ── Glyph ──────────────────────────────────────────────────────────────────────
+
+.tc-platform-icon__glyph {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--bs-platform-icon-glyph-color);
+
+    svg {
+        width: var(--bs-platform-icon-size);
+        height: var(--bs-platform-icon-size);
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: square;
+        stroke-linejoin: miter;
+    }
+}
+
+// ── Label ──────────────────────────────────────────────────────────────────────
+
+.tc-platform-icon__label {
+    font-family: var(--bs-platform-icon-label-font-family);
+    font-size: var(--bs-platform-icon-label-font-size);
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    color: var(--bs-platform-icon-label-color);
+    white-space: nowrap;
+    line-height: 1;
+}
+
+// ── Reduced motion ─────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-platform-icon__glyph svg {
+        transition: none;
+    }
+}

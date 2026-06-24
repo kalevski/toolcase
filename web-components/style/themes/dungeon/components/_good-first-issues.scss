@@ -1,0 +1,28 @@
+// Dungeon › tc-good-first-issues — quest board / bounty list.
+// Foundation covers most tokens (surface, border, hover, text, focus ring).
+// Critical fix: the base hardcodes --tc-slate-100 (#f1f5f9) as separator
+// fallback — bright white hairlines on dark wood. Repoint to gold-deep.
+// Structure adds: gilded bevel top-edge on the frame, display-caps header.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-good-first-issues {
+        // Critical: kill the #f1f5f9 white-hairline fallback on every
+        // header + row divider border-bottom.
+        --bs-good-first-issues-separator: var(--fg-gold-deep);
+    }
+
+    // Gilded top-edge highlight — gives the list frame the same bevel
+    // treatment as other dungeon surfaces without a full panel-shadow stack.
+    .tc-good-first-issues {
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // Board heading — reads as a quest-board section title.
+    .tc-good-first-issues-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+    }
+}

@@ -1,0 +1,68 @@
+// Dungeon › tc-time-picker — gilded column time picker.
+// Foundation handles most token remaps (surface/border/text → wood/gold/parch,
+// focus ring → gold, mono numerals). Structural additions here:
+//   1. Trigger inset-well via --fg-slot-bg.
+//   2. Overlay panel gilded bevel via --fg-panel-shadow.
+//   3. Display caps on label + column-label (base hardcodes font-family).
+//   4. Active option ink text (base hardcodes `color: #fff`).
+//   5. Invalid focus glow repointed from red literal to blood ramp.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Trigger ──────────────────────────────────────────────────────────────
+
+    .tc-time-picker-trigger {
+        --bs-time-picker-trigger-bg: var(--fg-slot-bg);
+        --bs-time-picker-trigger-border: var(--fg-gold-deep);
+
+        // Override the hardcoded red invalid focus glow to the blood ramp.
+        &.is-invalid:focus-visible {
+            box-shadow: 0 0 0 0.2rem var(--tc-danger-bg);
+        }
+    }
+
+    // ── Overlay panel ────────────────────────────────────────────────────────
+
+    .tc-time-picker-panel {
+        --bs-time-picker-panel-bg: var(--fg-panel-bg);
+        --bs-time-picker-panel-border: var(--fg-gold-deep);
+
+        // Gilded bevel stack (inset highlight + drop shadow).
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── Column header label — display caps ───────────────────────────────────
+
+    .tc-time-picker-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 600;
+        color: var(--fg-gold);
+    }
+
+    .tc-time-picker-column-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 600;
+        color: var(--fg-gold);
+    }
+
+    // ── Active option — override hardcoded #fff literal ───────────────────────
+
+    .tc-time-picker-option {
+        --bs-time-picker-option-active-bg: var(--fg-gold);
+
+        &--active {
+            color: var(--fg-ink);
+            background: var(--fg-gold);
+
+            &:hover {
+                background: var(--fg-gold);
+                color: var(--fg-ink);
+            }
+        }
+    }
+}

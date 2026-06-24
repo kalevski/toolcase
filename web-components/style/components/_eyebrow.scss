@@ -1,0 +1,39 @@
+// tc-eyebrow — small uppercase micro-label shown above a heading. Port of the
+// game-components `gc-eyebrow` (a bare slotted label) re-skinned to the
+// web-components design system: machine-facing JetBrains Mono, uppercase, wide
+// letter-spacing, slate-muted ink. Sharp by mandate; all cosmetics flow through
+// the public `--bs-eyebrow-*` theming contract.
+
+.tc-eyebrow {
+    --bs-eyebrow-font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    --bs-eyebrow-font-size: 0.6875rem;
+    --bs-eyebrow-font-weight: 500;
+    --bs-eyebrow-line-height: 1.4;
+    --bs-eyebrow-letter-spacing: 0.12em;
+    --bs-eyebrow-color: var(--tc-text-muted);
+
+    display: block;
+    font-family: var(--bs-eyebrow-font-family);
+    font-size: var(--bs-eyebrow-font-size);
+    font-weight: var(--bs-eyebrow-font-weight);
+    line-height: var(--bs-eyebrow-line-height);
+    letter-spacing: var(--bs-eyebrow-letter-spacing);
+    text-transform: uppercase;
+    color: var(--bs-eyebrow-color);
+
+    // Defensive cascade: a foreign Bootstrap sheet must not box or round it.
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+
+    &:empty {
+        display: none;
+    }
+}
+
+// The slot-content wrapper is purely structural — let inline content flow
+// through it so truncation/wrapping rules apply to the text directly.
+.tc-eyebrow-content {
+    display: contents;
+}

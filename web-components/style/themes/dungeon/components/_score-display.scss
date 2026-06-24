@@ -1,0 +1,54 @@
+// Dungeon › tc-score-display — borderless HUD readout.
+// Token swap can't carry: the display-caps label, the gold-bright glowing mono
+// value, and the blood-boxed multiplier badge. Base hardcodes mono on the label
+// row, so the label needs an explicit display-font swap; the value stays mono.
+// The score-display surface ships a border + box-shadow in base — the fantasy
+// look is chrome-less (just glowing text), so those are cleared.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-score-display {
+        --bs-score-display-bg: transparent;
+        --bs-score-display-border-color: transparent;
+        --bs-score-display-shadow: none;
+        --bs-score-display-label-color: var(--fg-parch-dim);
+        --bs-score-display-label-letter-spacing: 0.32em;
+        --bs-score-display-value-color: var(--fg-gold-bright);
+        --bs-score-display-value-font-weight: 700;
+        --bs-score-display-multiplier-color: var(--fg-blood-bright);
+    }
+
+    // Chrome-less surface — glowing text, no frame.
+    .tc-score-display {
+        padding: 0;
+        border: 0;
+        box-shadow: none;
+        background: transparent;
+    }
+
+    // Label reads as fine-tracked display caps (base hardcodes mono here).
+    .tc-score-display-label {
+        font-family: var(--fg-display);
+    }
+
+    // Value — mono numerals with gilded glow.
+    .tc-score-display-value {
+        font-family: var(--fg-mono);
+        letter-spacing: 0.06em;
+        text-shadow: 0 1px 2px #000, 0 0 12px rgba(232, 200, 120, 0.35);
+    }
+
+    // Multiplier — blood-outlined badge, display caps.
+    // Font size scales proportionally with the value font size (gc parity).
+    .tc-score-display-multiplier {
+        --bs-score-display-multiplier-font-size: calc(var(--bs-score-display-font-size, 1.75rem) * 0.55);
+        font-family: var(--fg-display);
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 2px 6px;
+        border: 1px solid var(--fg-blood);
+        background: rgba(0, 0, 0, 0.4);
+        text-shadow: 0 1px 2px #000, 0 0 8px rgba(212, 74, 58, 0.5);
+    }
+}

@@ -94,20 +94,22 @@ export abstract class BaseRepository<Entity = any, Driver = unknown> {
     }
 
     private report(label: string, elapsed: number, error?: unknown): void {
-        if (elapsed >= this.slowQueryMs) {
-            this.logger?.warn?.(`slow query: ${this.source}.${label} took ${elapsed}ms`, {
-                source: this.source,
-                op: label,
-                durationMs: elapsed,
-            })
-        } else {
-            this.logger?.debug?.(`${this.source}.${label} ${elapsed}ms`, {
-                source: this.source,
-                op: label,
-                durationMs: elapsed,
-            })
-        }
-        this.onOperation?.({ source: this.source, op: label, durationMs: elapsed, error })
+        try {
+            if (elapsed >= this.slowQueryMs) {
+                this.logger?.warn?.(`slow query: ${this.source}.${label} took ${elapsed}ms`, {
+                    source: this.source,
+                    op: label,
+                    durationMs: elapsed,
+                })
+            } else {
+                this.logger?.debug?.(`${this.source}.${label} ${elapsed}ms`, {
+                    source: this.source,
+                    op: label,
+                    durationMs: elapsed,
+                })
+            }
+            this.onOperation?.({ source: this.source, op: label, durationMs: elapsed, error })
+        } catch { /* never let telemetry mask the operation */ }
     }
 
     /**

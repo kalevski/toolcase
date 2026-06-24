@@ -1,0 +1,60 @@
+// Dungeon › tc-phone-input — fixes hardcoded slate/white literals that bypass
+// the foundation token remap, adds a gilded bevel on the input group, and
+// applies display-caps styling to the label.
+// The foundation already covers bg/border/focus-ring/shadow/radii; this file
+// only overrides what leaks through as hardcoded rgba(30,41,59,*) or #fff.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Token swaps on the host ───────────────────────────────────────────────
+    // Fix: --bs-phone-input-option-active-text was hardcoded #fff (white-on-gold
+    // is low contrast); swap to --fg-ink. Also richer leather tones for trigger.
+
+    tc-phone-input {
+        --bs-phone-input-option-active-text: var(--fg-ink);
+        --bs-phone-input-trigger-bg: var(--fg-leather-2);
+        --bs-phone-input-trigger-hover-bg: var(--fg-leather-3);
+    }
+
+    // ── Input group: gilded bevel + fix stale-slate focus border ─────────────
+
+    .tc-phone-input-group {
+        box-shadow: var(--fg-bevel-top);
+
+        // Foundation maps focus-ring to gold, but the base hardcodes the
+        // border-color on :focus-within to rgba(30,41,59,0.5) — override it.
+        &:focus-within {
+            border-color: var(--fg-gold-bright);
+        }
+    }
+
+    // ── Error focus ring: replace stale rgba(220,38,38,0.15) ─────────────────
+
+    .tc-phone-input--error .tc-phone-input-group:focus-within {
+        box-shadow: 0 0 0 0.2rem rgba(168, 48, 42, 0.2);
+    }
+
+    // ── Search field focus: replace slate rgba(30,41,59,*) with gold ─────────
+
+    .tc-phone-input-search:focus {
+        border-color: var(--fg-gold);
+        box-shadow: 0 0 0 0.15rem rgba(201, 169, 97, 0.2);
+    }
+
+    // ── Active option dial: replace rgba(255,255,255,0.7) with ink tint ──────
+
+    .tc-phone-input-option--active .tc-phone-input-option-dial {
+        color: rgba(26, 20, 13, 0.7);
+    }
+
+    // ── Label: display caps ───────────────────────────────────────────────────
+
+    .tc-phone-input-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+        color: var(--fg-gold-bright);
+    }
+}

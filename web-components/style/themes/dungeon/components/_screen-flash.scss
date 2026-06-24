@@ -1,0 +1,13 @@
+// Dungeon › tc-screen-flash — luminous full-screen flash.
+// A colour FX overlay (kept, not stripped). The token remap can't carry blend
+// behaviour, so the one structural change the fantasy look needs is the game's
+// `mix-blend-mode: screen`, which makes the flash read as a burst of light over
+// the dark dungeon HUD rather than a flat film. The flash colour itself stays
+// author-driven (inline flash-color attribute / --bs-screen-flash-color).
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    .tc-screen-flash-fill {
+        mix-blend-mode: screen;
+    }
+}

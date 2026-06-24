@@ -1,0 +1,39 @@
+// Dungeon › tc-asset-row-list — gilded ledger frame.
+// Foundation already maps --bs-asset-row-list-border-color → --tc-border → gold-deep
+// and --bs-asset-row-list-bg → --tc-surface → wood fill.
+// This override upgrades the background to the full wood gradient and adds the
+// inset bevel stack + top corner notches that token swaps alone cannot carry.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-asset-row-list {
+        --bs-asset-row-list-bg: var(--fg-panel-bg);
+    }
+
+    .tc-asset-row-list {
+        position: relative;
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // Top corner notches — the signature gilded ornament.
+    .tc-asset-row-list::before,
+    .tc-asset-row-list::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+    }
+
+    .tc-asset-row-list::before {
+        left: -1px;
+    }
+
+    .tc-asset-row-list::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+}

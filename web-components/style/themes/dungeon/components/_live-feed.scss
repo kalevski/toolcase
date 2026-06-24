@@ -1,0 +1,69 @@
+// Dungeon › tc-live-feed — gilded combat log / event ticker.
+// Token swap repoints the slate-100 row hairlines to faint gold and wires
+// the panel bg + gold border. Structural rules add the inset bevel stack,
+// display-caps header title, and the --fg-* element-colour icon ramp.
+// REC dot stays border-radius: 50% (sanctioned pulse circle).
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Token swap on the host ────────────────────────────────────────────────
+
+    tc-live-feed {
+        --bs-live-feed-bg: var(--fg-panel-bg);
+        --bs-live-feed-border: 1px solid var(--fg-gold-deep);
+        --bs-live-feed-header-bg: var(--fg-ink-2);
+        --bs-live-feed-header-border: 1px solid var(--fg-gold-deep);
+        --bs-live-feed-header-color: var(--fg-gold);
+        --bs-live-feed-row-border: 1px solid rgba(201, 169, 97, 0.15);
+        --bs-live-feed-row-hover-bg: rgba(201, 169, 97, 0.1);
+        --bs-live-feed-time-color: var(--fg-parch-dim);
+        --bs-live-feed-rec-dot-color: var(--fg-blood-bright);
+    }
+
+    // ── Gilded bevel on the frame ─────────────────────────────────────────────
+
+    .tc-live-feed {
+        box-shadow: var(--fg-panel-shadow);
+        color: var(--fg-parch);
+    }
+
+    // ── Display-caps header title (base hardcodes mono; override to Cinzel) ───
+
+    .tc-live-feed-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+    }
+
+    // ── Mono timestamps (explicit; base hardcodes --tc-font-mono) ────────────
+
+    .tc-live-feed-time {
+        font-family: var(--fg-mono);
+    }
+
+    // ── Scrollbar tinted to parchment-dim ─────────────────────────────────────
+
+    .tc-live-feed-body {
+        scrollbar-color: var(--fg-gold-deep) transparent;
+    }
+
+    // ── Level icon colours → --fg-* element ramp ─────────────────────────────
+
+    .tc-live-feed-row--info .tc-live-feed-icon {
+        color: var(--fg-mana-bright);
+    }
+
+    .tc-live-feed-row--success .tc-live-feed-icon {
+        color: var(--fg-uncommon);
+    }
+
+    .tc-live-feed-row--warning .tc-live-feed-icon {
+        color: var(--fg-legendary);
+    }
+
+    .tc-live-feed-row--danger .tc-live-feed-icon {
+        color: var(--fg-blood);
+    }
+}

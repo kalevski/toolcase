@@ -1,0 +1,103 @@
+// tc-toggle-row — generic labeled boolean toggle setting row built on the shared
+// tc-setting-row scaffold (`_setting-row.scss`). The control is a pill-track
+// switch (sanctioned pill geometry) with a pure-circle sliding knob — never a
+// check glyph. The checked track carries the signature 135° slate-ink gradient;
+// the off track is a flat slate well. All cosmetics flow through
+// `--bs-toggle-row-*`; the fantasy chrome of the gc-* original is dropped.
+
+tc-toggle-row {
+    --bs-toggle-row-track-width: 40px;
+    --bs-toggle-row-track-height: 22px;
+    --bs-toggle-row-track-bg: var(--tc-border-strong);
+    --bs-toggle-row-track-hover-bg: var(--tc-text-faint);
+    --bs-toggle-row-track-checked-bg: var(--tc-app-accent);
+    --bs-toggle-row-track-checked-gradient: var(--tc-app-accent-gradient);
+    --bs-toggle-row-track-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
+    --bs-toggle-row-knob-size: 18px;
+    --bs-toggle-row-knob-inset: 2px;
+    --bs-toggle-row-knob-bg: #ffffff;
+    --bs-toggle-row-knob-border: rgba(15, 23, 42, 0.08);
+    --bs-toggle-row-knob-shadow: 0 1px 2px rgba(15, 23, 42, 0.18);
+    --bs-toggle-row-focus-ring: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
+    --bs-toggle-row-disabled-opacity: 0.6;
+}
+
+.tc-toggle-row__switch {
+    position: relative;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    width: var(--bs-toggle-row-track-width);
+    height: var(--bs-toggle-row-track-height);
+    padding: 0;
+    appearance: none;
+    background: var(--bs-toggle-row-track-bg);
+    border: 0;
+    border-radius: 999px;
+    box-shadow: var(--bs-toggle-row-track-shadow);
+    cursor: pointer;
+    transition:
+        background-color var(--tc-transition-base),
+        box-shadow var(--tc-transition-base);
+
+    // Coarse pointers get a 44px hit area without changing the visual track.
+    @media (pointer: coarse) {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    &:hover {
+        background: var(--bs-toggle-row-track-hover-bg);
+    }
+
+    &:focus {
+        outline: 0;
+    }
+
+    &:focus-visible {
+        box-shadow: var(--bs-toggle-row-focus-ring);
+    }
+
+    &[data-checked='true'] {
+        background: var(--bs-toggle-row-track-checked-bg);
+        background-image: var(--bs-toggle-row-track-checked-gradient);
+        box-shadow: none;
+
+        .tc-toggle-row__knob {
+            // Slide the knob to the right edge of the track (transform stays
+            // reserved for the translateY centring, so animate `left`).
+            left: calc(
+                var(--bs-toggle-row-track-width) - var(--bs-toggle-row-knob-size) -
+                    var(--bs-toggle-row-knob-inset)
+            );
+        }
+    }
+
+    &:disabled {
+        opacity: var(--bs-toggle-row-disabled-opacity);
+        pointer-events: none;
+    }
+}
+
+.tc-toggle-row__knob {
+    // Pure circle — the one sanctioned curve. Centred vertically; slides
+    // horizontally from the inset-left rest position to the right edge.
+    position: absolute;
+    top: 50%;
+    left: var(--bs-toggle-row-knob-inset);
+    width: var(--bs-toggle-row-knob-size);
+    height: var(--bs-toggle-row-knob-size);
+    background: var(--bs-toggle-row-knob-bg);
+    border: 0.5px solid var(--bs-toggle-row-knob-border);
+    border-radius: 50%;
+    box-shadow: var(--bs-toggle-row-knob-shadow);
+    transform: translateY(-50%);
+    transition: left var(--tc-transition-base);
+}
+
+// The knob's slide is the only motion here — freeze it under reduced-motion.
+@media (prefers-reduced-motion: reduce) {
+    .tc-toggle-row__switch,
+    .tc-toggle-row__knob {
+        transition: none;
+    }
+}

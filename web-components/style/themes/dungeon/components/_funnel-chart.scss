@@ -1,0 +1,55 @@
+// Dungeon › tc-funnel-chart — graduated gilt tier ramp.
+// The foundation token-swap handles the frame (wood bg, gold-deep border,
+// parchment text, ink tooltip, gold focus ring). This file fixes the one
+// structural gap: series-2..6 are hardcoded to --tc-slate-700/600/500
+// which the foundation does NOT remap, leaving segments 2–6 slate-blue on
+// the wood card. We repoint them to the --fg-* metal/element ramp, swap the
+// hover hairline to gold, apply the panel-shadow bevel, and cap the title.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // -------------------------------------------------------------------------
+    // Host-element token overrides (mirrors where the base sets them: tc-funnel-chart)
+    // -------------------------------------------------------------------------
+    tc-funnel-chart {
+        // Segment ramp — graduated gilt/metal tiers replacing the slate palette.
+        // series-1 (gold via --tc-app-accent) is already free from the foundation.
+        --bs-funnel-chart-series-2: var(--fg-bronze);
+        --bs-funnel-chart-series-3: var(--fg-copper);
+        --bs-funnel-chart-series-4: var(--fg-gold-deep);
+        --bs-funnel-chart-series-5: var(--fg-silver);
+        --bs-funnel-chart-series-6: var(--fg-leather-3);
+
+        // Wood-grain card surface.
+        --bs-funnel-chart-bg: var(--fg-panel-bg);
+
+        // Gold hover hairline — replaces the white rgba(255,255,255,0.6).
+        --bs-funnel-chart-hover-outline: rgba(240, 210, 122, 0.6);
+
+        // In-segment label/percent colours.
+        // The new fills (bronze, copper, gold-deep, silver, leather-3) are all
+        // mid-dark values; white labels retain legibility across the ramp.
+        // series-5 (silver) is the lightest — still dark enough for #fff at the
+        // small sizes used, so no ink override is needed.
+        --bs-funnel-chart-label-color: #fff;
+        --bs-funnel-chart-percent-color: rgba(255, 255, 255, 0.85);
+    }
+
+    // -------------------------------------------------------------------------
+    // Inner card — gilded bevel stack (vars alone can't carry box-shadow).
+    // -------------------------------------------------------------------------
+    .tc-funnel-chart__inner {
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // -------------------------------------------------------------------------
+    // Title — display caps (HTML element, safe to apply Cinzel + tracking).
+    // -------------------------------------------------------------------------
+    .tc-funnel-chart__title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: 600;
+    }
+}

@@ -1,0 +1,56 @@
+// tc-breadcrumb — breadcrumbs speak in the mono register (structure, not
+// prose): JetBrains Mono, small, with a muted divider.
+
+.breadcrumb {
+    --bs-breadcrumb-padding-x: 0;
+    --bs-breadcrumb-padding-y: 0;
+    --bs-breadcrumb-margin-bottom: 1rem;
+    --bs-breadcrumb-font-size: 0.75rem;
+    --bs-breadcrumb-bg: transparent;
+    --bs-breadcrumb-border-radius: 0;
+    --bs-breadcrumb-divider-color: var(--tc-border-strong);
+    --bs-breadcrumb-item-padding-x: 0.5rem;
+    --bs-breadcrumb-item-active-color: var(--tc-text);
+    --bs-breadcrumb-divider: '/';
+
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: var(--bs-breadcrumb-padding-y) var(--bs-breadcrumb-padding-x);
+    margin: 0 0 var(--bs-breadcrumb-margin-bottom);
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-breadcrumb-font-size);
+    color: var(--tc-text-faint);
+    list-style: none;
+    background: var(--bs-breadcrumb-bg);
+    border-radius: var(--bs-breadcrumb-border-radius);
+}
+
+.breadcrumb-item {
+    display: flex;
+    align-items: center;
+
+    + .breadcrumb-item {
+        padding-left: var(--bs-breadcrumb-item-padding-x);
+
+        &::before {
+            float: left;
+            padding-right: var(--bs-breadcrumb-item-padding-x);
+            color: var(--bs-breadcrumb-divider-color);
+            content: var(--bs-breadcrumb-divider, '/');
+        }
+    }
+
+    &.active {
+        color: var(--bs-breadcrumb-item-active-color);
+    }
+
+    a {
+        color: var(--tc-text-muted);
+        text-decoration: none;
+
+        &:hover {
+            color: var(--tc-accent);
+        }
+    }
+}

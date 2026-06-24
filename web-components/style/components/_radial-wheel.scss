@@ -1,0 +1,234 @@
+// tc-radial-wheel — radial (pie) item / ability selector.
+// Port of gc-radial-wheel (game-components), restyled to the toolcase design
+// system: slate neutrals, 1px hairline borders, sharp corners where applicable.
+// SANCTIONED CIRCLES: the disc and each option button are genuinely circular
+// shapes — an explicit exception to the sharp-corner rule.
+// All cosmetics flow through --bs-radial-wheel-* custom properties.
+
+@use '../foundation/tokens' as *;
+
+// ── Custom-property defaults ────────────────────────────────────────────────
+
+tc-radial-wheel {
+    // Backdrop scrim
+    --bs-radial-wheel-backdrop-bg:      #0f172a;
+    --bs-radial-wheel-backdrop-opacity: 0.55;
+
+    // Z-index band — overlay tier
+    --bs-radial-wheel-z-backdrop: var(--tc-z-modal-backdrop, 1050);
+    --bs-radial-wheel-z-disc:     var(--tc-z-modal, 1055);
+
+    // Disc (circular hub surface)
+    --bs-radial-wheel-disc-bg:     var(--tc-surface);
+    --bs-radial-wheel-disc-border: var(--tc-border-strong);
+    --bs-radial-wheel-disc-shadow: var(--tc-shadow-lg);
+
+    // Option buttons
+    --bs-radial-wheel-option-size:        56px;  // overridden by JS inline var --tc-rw-size
+    --bs-radial-wheel-option-bg:          var(--tc-surface);
+    --bs-radial-wheel-option-border:      var(--tc-border-strong);
+    --bs-radial-wheel-option-color:       var(--tc-text);
+    --bs-radial-wheel-option-hover-bg:    var(--tc-surface-muted);
+    --bs-radial-wheel-option-hover-color: var(--tc-app-accent);
+    --bs-radial-wheel-option-shadow:      var(--tc-shadow-sm);
+    --bs-radial-wheel-option-hover-shadow: var(--tc-shadow-md);
+
+    // Center label
+    --bs-radial-wheel-center-color:    var(--tc-text-muted);
+    --bs-radial-wheel-center-size:     0.75rem;
+
+    // Pager dots — sit on the dark backdrop scrim, so they read in light ink.
+    --bs-radial-wheel-pager-color:        rgba(255, 255, 255, 0.45);
+    --bs-radial-wheel-pager-active-color: var(--tc-surface);
+
+    // Transition
+    --bs-radial-wheel-transition: opacity var(--tc-transition-base, 0.2s cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+// ── Host (hidden by default; shown when [open]) ─────────────────────────────
+
+// _reset.scss registers display:block; the component partial overrides that to
+// display:none for the closed state (the element has no layout impact when
+// absent). The open state switches to position:fixed so it never displaces
+// document flow.
+tc-radial-wheel:not([open]) {
+    display: none;
+}
+
+tc-radial-wheel[open] {
+    position: fixed;
+    inset: 0;
+    z-index: var(--bs-radial-wheel-z-disc);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+// ── Backdrop ────────────────────────────────────────────────────────────────
+
+.tc-radial-wheel-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: var(--bs-radial-wheel-backdrop-bg);
+    opacity: var(--bs-radial-wheel-backdrop-opacity);
+}
+
+// ── Stack (disc + pager column) ──────────────────────────────────────────────
+// Centres the disc and pins the pagination dots directly beneath it, both
+// horizontally centred over the backdrop.
+
+.tc-radial-wheel-stack {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+// ── Pager (canonical tc-page-indicator dots, centred below the disc) ──────────
+// Re-skin the indicator's own custom properties so the dots read on the dark
+// scrim; geometry and behaviour come from tc-page-indicator itself.
+
+.tc-radial-wheel-pager {
+    --bs-page-indicator-color:        var(--bs-radial-wheel-pager-color);
+    --bs-page-indicator-active-color: var(--bs-radial-wheel-pager-active-color);
+}
+
+// ── Disc (circular centred hub) ─────────────────────────────────────────────
+// SANCTIONED CIRCLE: the disc is a circular surface by design.
+
+.tc-radial-wheel-disc {
+    // Diameter = 2*radius + optionSize; the JS sets --tc-rw-radius and --tc-rw-size.
+    // Fall back to the default radius (120) and option-size (56) for the CSS calc.
+    --_radius: var(--tc-rw-radius, 120px);
+    --_size: var(--tc-rw-size, 56px);
+
+    position: relative;
+    width:  calc(var(--_radius) * 2 + var(--_size));
+    height: calc(var(--_radius) * 2 + var(--_size));
+    border-radius: 50%;   // SANCTIONED CIRCLE
+    background: var(--bs-radial-wheel-disc-bg);
+    border: 1px solid var(--bs-radial-wheel-disc-border);
+    box-shadow: var(--bs-radial-wheel-disc-shadow);
+}
+
+// ── Center label ─────────────────────────────────────────────────────────────
+
+.tc-radial-wheel-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 7rem;
+    text-align: center;
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-radial-wheel-center-size);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bs-radial-wheel-center-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+    user-select: none;
+}
+
+.tc-radial-wheel-center--empty {
+    // Keep the space reserved so the disc stays balanced when no label is set.
+    min-height: 1em;
+}
+
+// ── Option buttons ─────────────────────────────────────────────────────────
+// SANCTIONED CIRCLE: each option is a circular icon button.
+
+.tc-radial-wheel-option {
+    --_opt-size: var(--tc-rw-size, 56px);
+
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: var(--_opt-size);
+    height: var(--_opt-size);
+    min-width: var(--_opt-size);
+    min-height: var(--_opt-size);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bs-radial-wheel-option-bg);
+    border: 1px solid var(--bs-radial-wheel-option-border);
+    border-radius: 50%;   // SANCTIONED CIRCLE
+    box-shadow: var(--bs-radial-wheel-option-shadow);
+    color: var(--bs-radial-wheel-option-color);
+    cursor: pointer;
+    padding: 0;
+    outline: 0;
+    transition:
+        background-color var(--tc-transition-fast, 0.15s ease),
+        color var(--tc-transition-fast, 0.15s ease),
+        box-shadow var(--tc-transition-fast, 0.15s ease),
+        transform var(--tc-transition-fast, 0.15s ease);
+
+    // Per-option color overrides the shared default when JS sets it inline.
+    &:not([disabled]) {
+        color: var(--bs-radial-wheel-option-color);
+    }
+
+    &:hover:not([disabled]),
+    &.tc-radial-wheel-option--hover:not([disabled]) {
+        background: var(--bs-radial-wheel-option-hover-bg);
+        color: var(--bs-radial-wheel-option-hover-color);
+        box-shadow: var(--bs-radial-wheel-option-hover-shadow);
+        // Subtle lift — matches the standard state ladder 1px lift.
+        transform: translate(-50%, calc(-50% - 1px)) scale(1.08);
+        border-color: var(--tc-border-strong);
+        z-index: 1;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &[disabled],
+    &.tc-radial-wheel-option--disabled {
+        opacity: 0.38;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    @media (pointer: coarse) {
+        // Enforce 44 px minimum coarse touch target.
+        --_opt-size: max(var(--tc-rw-size, 56px), 44px);
+        width: var(--_opt-size);
+        height: var(--_opt-size);
+        min-width: var(--_opt-size);
+        min-height: var(--_opt-size);
+    }
+}
+
+.tc-radial-wheel-option-icon {
+    display: block;
+    font-size: calc(var(--tc-rw-size, 56px) * 0.4);
+    line-height: 1;
+    user-select: none;
+    // Use the per-option color override when provided by JS.
+    color: var(--bs-radial-wheel-option-color);
+}
+
+// ── Reduced motion ───────────────────────────────────────────────────────────
+// Freeze the transform lift; keep the state transitions (bg, color, border).
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-radial-wheel-option {
+        // Remove transform animation; keep bg/color/border-color transitions.
+        transition:
+            background-color var(--tc-transition-fast, 0.15s ease),
+            color var(--tc-transition-fast, 0.15s ease);
+
+        &:hover:not([disabled]),
+        &.tc-radial-wheel-option--hover:not([disabled]) {
+            transform: translate(-50%, -50%);  // no lift, no scale
+        }
+    }
+}

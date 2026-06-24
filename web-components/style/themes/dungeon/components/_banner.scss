@@ -1,0 +1,50 @@
+// Dungeon › tc-banner — herald proclamation banner.
+// Fixes Sass-baked emphasis text colors per variant, replaces the literal-cyan
+// announce stop with gold/leather, applies serif body font, tops the banner
+// with a gilded bevel highlight, and squares the two 2px focus radii.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Base banner surface ───────────────────────────────────────────────────
+
+    .tc-banner {
+        font-family: var(--fg-body);
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // ── Per-variant text color fix (Sass-baked emphasis → element-bright) ────
+
+    .tc-banner-info {
+        --bs-banner-color: var(--fg-mana-bright);
+    }
+
+    .tc-banner-warning {
+        --bs-banner-color: var(--fg-legendary);
+    }
+
+    .tc-banner-success {
+        --bs-banner-color: var(--fg-stamina-bright);
+    }
+
+    .tc-banner-error {
+        --bs-banner-color: var(--fg-blood-bright);
+    }
+
+    // ── Announce variant — replace literal cyan with gold/leather ─────────────
+    // Base hardcodes rgba(16,152,200,0.04) as the second stop; replace the
+    // entire bg with a warm gold gradient and repoint text/CTA to gold-bright.
+
+    .tc-banner-announce {
+        --bs-banner-bg: linear-gradient(135deg, rgba(201, 169, 97, 0.16), rgba(201, 169, 97, 0.04));
+        --bs-banner-color: var(--fg-gold-bright);
+        --bs-banner-cta-color: var(--fg-gold-bright);
+    }
+
+    // ── Square the focus radii (base sets 2px on both) ───────────────────────
+
+    .tc-banner-cta:focus-visible,
+    .tc-banner-close:focus-visible {
+        border-radius: 0;
+    }
+}

@@ -1,0 +1,236 @@
+// tc-item-slot — a single inventory / hotbar slot: an item glyph (image or
+// initials), a quantity badge, a rarity border accent, an optional hotkey, an
+// equipped marker, a radial cooldown sweep, and a locked state. Ported from the
+// game-components gc-item-slot, stripped of fantasy chrome (gilded frame, inset
+// glows, metal fills): a sharp hairline tile on a flat slate surface. Rarity is
+// a single muted border accent (sanctioned status tokens), not a glow. The host
+// element IS the tile; the composing tc-hotbar / tc-inventory-grid forward the
+// item data and `size`/`selected`/`hotkey`, and the slot owns its own interior.
+// All cosmetics flow through --bs-item-slot-* custom properties backed by --tc-*.
+
+@use '../foundation/tokens' as *;
+
+tc-item-slot {
+    --bs-item-slot-size: 56px;
+    --bs-item-slot-glyph-size: 24px;
+    --bs-item-slot-cd-angle: 0deg;
+
+    --bs-item-slot-bg: var(--tc-surface);
+    --bs-item-slot-border-color: var(--tc-border-strong);
+    --bs-item-slot-empty-border: var(--tc-border);
+    --bs-item-slot-hover-bg: var(--tc-surface-muted);
+    --bs-item-slot-glyph-color: var(--tc-text);
+    --bs-item-slot-empty-color: var(--tc-text-faint);
+
+    --bs-item-slot-selected-border: var(--tc-app-accent);
+    --bs-item-slot-selected-ring: rgba(30, 41, 59, 0.12);
+
+    --bs-item-slot-qty-bg: var(--tc-app-accent);
+    --bs-item-slot-qty-color: var(--tc-app-accent-contrast);
+
+    --bs-item-slot-hotkey-bg: var(--tc-app-accent);
+    --bs-item-slot-hotkey-color: var(--tc-app-accent-contrast);
+    --bs-item-slot-hotkey-font-size: 0.625rem;
+
+    --bs-item-slot-equipped-bg: var(--tc-success);
+    --bs-item-slot-equipped-color: var(--tc-app-accent-contrast);
+
+    --bs-item-slot-cooldown-veil: rgba(15, 23, 42, 0.55);
+    --bs-item-slot-cooldown-color: #fff;
+    --bs-item-slot-lock-color: var(--tc-text-muted);
+
+    // The host is the tile — inline-flex so the inner interior centres.
+    // Overrides the inline-block default registered in _reset.scss.
+    position: relative;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-item-slot-size);
+    height: var(--bs-item-slot-size);
+    background: var(--bs-item-slot-bg);
+    border: 1px solid var(--bs-item-slot-border-color);
+    border-radius: 0;
+    color: var(--bs-item-slot-glyph-color);
+    cursor: pointer;
+    user-select: none;
+    transition:
+        background var(--tc-transition-fast),
+        border-color var(--tc-transition-fast);
+
+    &:hover {
+        background: var(--bs-item-slot-hover-bg);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+}
+
+// Per-rarity accent — sanctioned status tokens only, kept muted. Drives the tile
+// border colour; themes can override --bs-item-slot-border-color. `common` keeps
+// the neutral border-strong default, so only the higher tiers are listed.
+tc-item-slot[data-rarity='uncommon'] {
+    --bs-item-slot-border-color: var(--tc-success);
+}
+tc-item-slot[data-rarity='rare'] {
+    --bs-item-slot-border-color: var(--tc-info);
+}
+tc-item-slot[data-rarity='epic'] {
+    --bs-item-slot-border-color: var(--tc-app-accent);
+}
+tc-item-slot[data-rarity='legendary'] {
+    --bs-item-slot-border-color: var(--tc-warning);
+}
+tc-item-slot[data-rarity='mythic'] {
+    --bs-item-slot-border-color: var(--tc-danger);
+}
+
+// Active = solid-ink border + focus-ring halo (the standard active state). Wins
+// over the rarity accent so selection stays legible at any tier.
+tc-item-slot[selected] {
+    --bs-item-slot-border-color: var(--bs-item-slot-selected-border);
+    box-shadow: 0 0 0 0.2rem var(--bs-item-slot-selected-ring);
+}
+
+// Empty socket: dashed hairline, muted, non-interactive cursor.
+tc-item-slot.tc-item-slot--empty {
+    background: transparent;
+    border-style: dashed;
+    border-color: var(--bs-item-slot-empty-border);
+    color: var(--bs-item-slot-empty-color);
+    cursor: default;
+
+    &:hover {
+        background: transparent;
+    }
+}
+
+// Locked: dimmed and inert (the JS also drops it from the tab order).
+tc-item-slot.tc-item-slot--locked {
+    cursor: default;
+    opacity: 0.7;
+
+    &:hover {
+        background: var(--bs-item-slot-bg);
+    }
+}
+
+.tc-item-slot__inner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+// Item glyph — an <img> source or a short initials / glyph label.
+.tc-item-slot__glyph {
+    max-width: 70%;
+    max-height: 70%;
+    font-size: var(--bs-item-slot-glyph-size);
+    font-weight: 600;
+    line-height: 1;
+    object-fit: contain;
+}
+
+// Quantity badge — sanctioned mono micro-label pinned to the top-left. Sharp.
+.tc-item-slot__qty {
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    padding: 0 0.25rem;
+    background: var(--bs-item-slot-qty-bg);
+    color: var(--bs-item-slot-qty-color);
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: 0.625rem;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+// Equipped marker — a small status-tinted mono cap, top-right. Sharp.
+.tc-item-slot__equipped {
+    position: absolute;
+    top: -1px;
+    right: -1px;
+    min-width: 0.875rem;
+    padding: 0 0.1875rem;
+    background: var(--bs-item-slot-equipped-bg);
+    color: var(--bs-item-slot-equipped-color);
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: 0.625rem;
+    font-weight: 600;
+    line-height: 1.4;
+    text-align: center;
+}
+
+// Hotkey badge — mono micro-label pinned to the bottom-right corner. Sharp.
+.tc-item-slot__hotkey {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    min-width: 0.875rem;
+    padding: 0 0.1875rem;
+    background: var(--bs-item-slot-hotkey-bg);
+    color: var(--bs-item-slot-hotkey-color);
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: var(--bs-item-slot-hotkey-font-size);
+    font-weight: 600;
+    line-height: 1.35;
+    text-align: center;
+}
+
+// Radial cooldown sweep — a flat slate veil masking the remaining fraction, with
+// a centred mono countdown. The angle is data-driven (no animation); it conveys
+// remaining time, so colour here is information, not decoration.
+.tc-item-slot__cooldown {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: conic-gradient(
+        var(--bs-item-slot-cooldown-veil) var(--bs-item-slot-cd-angle),
+        transparent 0
+    );
+}
+
+.tc-item-slot__cooldown-label {
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: calc(var(--bs-item-slot-glyph-size) * 0.8);
+    font-weight: 600;
+    line-height: 1;
+    color: var(--bs-item-slot-cooldown-color);
+}
+
+// Lock glyph — centred lucide icon, muted slate (replaces the gc-* emoji).
+.tc-item-slot__lock {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bs-item-slot-lock-color);
+
+    .tc-item-slot__lock-glyph {
+        width: calc(var(--bs-item-slot-glyph-size) * 0.85);
+        height: calc(var(--bs-item-slot-glyph-size) * 0.85);
+    }
+}
+
+// Coarse pointers: guarantee a 44px touch target on the slot.
+@media (pointer: coarse) {
+    tc-item-slot {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    // Keep the colour / background state transitions (they convey selection /
+    // hover); there is no decorative transform to freeze here.
+    tc-item-slot {
+        transition-duration: 0.001s;
+    }
+}

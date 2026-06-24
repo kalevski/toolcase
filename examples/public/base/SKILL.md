@@ -1,6 +1,6 @@
 ---
 name: base
-description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), utilities (generateId, retry, hex/byte/range helpers), JSONSchema validation, LSystem, Color palette, and HTTP REST primitives.
+description: Use when reaching for @toolcase/base — zero-dep TypeScript helpers + data structures (Cache, PriorityQueue, RingBuffer, Stack, Deque, VectorClock, State, AdjacencyMatrix, ObjectPool, WeightedRandom, BiMap, BloomFilter, MultiMap), events (EventEmitter, Broadcast), pathfinding (Dijkstra, AStar — class-based, step()-controlled, event-emitting), rectangle/atlas packing (Packing.Packer + MaxRects/Guillotine/Shelf/Skyline/BinaryTree algorithms, multi-page, POT, trim/extrude), spatial partitioning (Spatial.SpatialHash grid + Spatial.Quadtree — insert/remove/update/range-query/nearest-neighbour), async utilities (Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle, AsyncQueue — backpressure-aware producer/consumer channel), easing functions (30 easeIn*/easeOut*/easeInOut* functions for Sine/Quad/Cubic/Quart/Quint/Expo/Circ/Back/Elastic/Bounce families plus a CSS-compatible cubicBezier sampler — all exported individually and as Easing namespace), scalar math helpers (clamp, lerp, inverseLerp, mapRange, smoothstep, approximately), string helpers (slugify — URL-safe slug; truncate — length-limited string with suffix; escapeHtml — XSS-safe HTML escaping for & < > \" '), utilities (generateId, retry, hex/byte/range helpers, diff — structural delta for plain objects/arrays, patch — apply delta so patch(a,diff(a,b)) deep-equals b), timing (Stopwatch — start/stop/lap/elapsed with injectable clock; Ticker — fixed-step/variable-step update dispatcher driven by tick(delta)), JSONSchema validation, LSystem, Color palette, HTTP REST primitives, and tagged-union helpers Result<T,E> (ok/err constructors, isOk/isErr, map/mapErr, andThen/flatMap, unwrap/unwrapOr/unwrapErr) and Option<T> (some/none constructors, isSome/isNone, map, andThen/flatMap, unwrap/unwrapOr).
 ---
 
 # base — API Reference
@@ -11,14 +11,36 @@ Zero-dependency TypeScript helpers and data structures. Isomorphic (Node + brows
 import {
     HTTP,     // { Status, RESTError, RESTResponse }
     Packing,  // { Packer, MaxRects, Guillotine, Shelf, Skyline, BinaryTree, MultiPagePlanner, Sorter, Trimmer, Rotator, Algorithm, potCeil }
+    Spatial,  // { SpatialHash, Quadtree }
+    Async,    // { Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle, AsyncQueue }
+    Easing,   // { easeInSine…easeInOutBounce (30 fns) + cubicBezier }
     VectorClock, EventEmitter, Broadcast,
-    LSystem, ObjectPool, PriorityQueue,
-    generateId, toHex, formatByteSize,
+    LSystem, ObjectPool, PriorityQueue, RingBuffer, Stack, Deque,
+    generateId, ulid, toHex, formatByteSize, formatDuration, formatNumber, relativeTime,
     bufferToHex, hexToBuffer,
+    slugify, truncate, escapeHtml,
     Color, JSONSchema, getNumberInRange,
+    clamp, lerp, inverseLerp, mapRange, smoothstep, approximately,
+    // easing functions also available individually:
+    easeInSine, easeOutSine, easeInOutSine,
+    easeInQuad, easeOutQuad, easeInOutQuad,
+    // ... (all 30 + cubicBezier)
+    cubicBezier,
     Cache, AdjacencyMatrix, State, retry,
-    WeightedRandom, Dijkstra, AStar
+    WeightedRandom, Dijkstra, AStar,
+    DisjointSet, Trie,
+    BiMap, BloomFilter, MultiMap,
+    Vec2,
+    // tagged-union helpers:
+    ok, err,    // Result<T, E> factories
+    some, none, // Option<T> factories
+    TokenBucket,
+    Stopwatch,
+    Ticker,
+    diff,
+    patch
 } from '@toolcase/base'
+import type { Result, Option, Delta } from '@toolcase/base'
 ```
 
 ---
@@ -28,23 +50,40 @@ import {
 - [Data Structures](#data-structures)
   - [Cache](#cache)
   - [PriorityQueue](#priorityqueue)
+  - [RingBuffer](#ringbuffer)
+  - [Stack](#stack)
+  - [Deque](#deque)
   - [VectorClock](#vectorclock)
   - [State](#state)
   - [AdjacencyMatrix](#adjacencymatrix)
   - [ObjectPool](#objectpool)
   - [WeightedRandom](#weightedrandom)
+  - [DisjointSet](#disjointset)
+  - [Trie](#trie)
+  - [BiMap](#bimap)
+  - [BloomFilter](#bloomfilter)
+  - [MultiMap](#multimap)
 - [Events](#events)
   - [EventEmitter](#eventemitter)
   - [Broadcast](#broadcast)
 - [Pathfinding](#pathfinding)
   - [Dijkstra](#dijkstra)
   - [AStar](#astar)
+- [Easing](#easing)
+  - [Easing functions](#easing-functions)
+  - [cubicBezier](#cubicbezier)
+- [String helpers](#string-helpers)
+  - [slugify](#slugify)
+  - [truncate](#truncate)
+  - [escapeHtml](#escapehtml)
 - [Utilities](#utilities)
   - [generateId](#generateid)
+  - [ulid](#ulid)
   - [getNumberInRange](#getnumberinrange)
   - [retry](#retry)
   - [toHex / bufferToHex / hexToBuffer](#hex-helpers)
   - [formatByteSize](#formatbytesize)
+  - [Math helpers (clamp / lerp / inverseLerp / mapRange / smoothstep / approximately)](#math-helpers)
 - [Validation](#validation)
   - [JSONSchema](#jsonschema)
 - [Other](#other)
@@ -58,6 +97,23 @@ import {
   - [Packer](#packer)
   - [Algorithms](#algorithms)
   - [Helpers (Trimmer / Sorter / Rotator / MultiPagePlanner / potCeil)](#packing-helpers)
+- [Spatial](#spatial)
+  - [SpatialHash](#spatialhash)
+  - [Quadtree](#quadtree)
+- [Math](#math)
+  - [Vec2](#vec2)
+- [Async](#async)
+  - [Deferred](#deferred)
+  - [Semaphore](#semaphore)
+  - [Mutex](#mutex)
+  - [pLimit](#plimit)
+  - [withTimeout](#withtimeout)
+  - [sleep](#sleep)
+  - [debounce](#debounce)
+  - [throttle](#throttle)
+  - [AsyncQueue](#asyncqueue)
+- [TokenBucket](#tokenbucket)
+- [diff / patch](#diff--patch)
 
 ---
 
@@ -103,6 +159,110 @@ pq.enqueue({ id: 'a', weight: 5 })
 pq.enqueue({ id: 'b', weight: 1 })
 pq.dequeue() // { id: 'b', weight: 1 }
 ```
+
+### RingBuffer
+
+Fixed-capacity circular buffer. Oldest entry is overwritten when the buffer is full. Zero allocations after construction.
+
+```ts
+new RingBuffer<T>(capacity: number)
+```
+
+- `capacity: number` — (readonly) maximum number of items.
+- `size: number` — current item count.
+- `push(item: T): this` — append an item; overwrites the oldest when full. Throws if `item === undefined`. Chainable.
+- `peek(): T | null` — the oldest item without removing it; `null` when empty.
+- `tail(n: number): T[]` — the last `n` items in insertion order (newest last); clamped to `size`. Returns `[]` when `n <= 0` or buffer is empty.
+- `clear(): this` — reset to empty; capacity is preserved.
+- `[Symbol.iterator]` — iterate all items in insertion order (oldest → newest).
+
+Constructor throws if `capacity` is not a positive integer.
+
+```ts
+import { RingBuffer } from '@toolcase/base'
+
+const rb = new RingBuffer<number>(3)
+rb.push(1).push(2).push(3)
+rb.peek()        // 1 (oldest)
+rb.tail(2)       // [2, 3]
+[...rb]          // [1, 2, 3]
+
+rb.push(4)       // overwrites 1
+rb.peek()        // 2
+[...rb]          // [2, 3, 4]
+
+rb.clear()
+rb.size          // 0
+```
+
+### Stack
+
+LIFO stack backed by a plain array.
+
+```ts
+new Stack<T>()
+```
+
+- `size: number` — current item count.
+- `push(item: T): this` — push to the top. Throws if `item === undefined`. Chainable.
+- `pop(): T | null` — remove and return the top item; `null` when empty.
+- `peek(): T | null` — top item without removing it; `null` when empty.
+- `isEmpty(): boolean` — true when `size === 0`.
+- `clear(): this` — reset to empty. Chainable.
+- `[Symbol.iterator]` — iterate all items in insertion order (bottom → top).
+
+```ts
+import { Stack } from '@toolcase/base'
+
+const history = new Stack<string>()
+history.push('login').push('dashboard').push('settings')
+
+history.peek()   // 'settings'  (top, not removed)
+history.pop()    // 'settings'
+history.size     // 2
+[...history]     // ['login', 'dashboard']  (insertion order)
+history.clear()
+history.isEmpty() // true
+```
+
+### Deque
+
+Double-ended queue backed by a doubly-linked list. O(1) push and pop at both ends.
+
+```ts
+new Deque<T>()
+```
+
+- `size: number` — current item count.
+- `pushFront(item: T): this` — insert at the front. Throws if `item === undefined`. Chainable.
+- `pushBack(item: T): this` — insert at the back. Throws if `item === undefined`. Chainable.
+- `popFront(): T | null` — remove and return the front item; `null` when empty.
+- `popBack(): T | null` — remove and return the back item; `null` when empty.
+- `peekFront(): T | null` — front item without removing it; `null` when empty.
+- `peekBack(): T | null` — back item without removing it; `null` when empty.
+- `isEmpty(): boolean` — true when `size === 0`.
+- `clear(): this` — reset to empty. Chainable.
+- `[Symbol.iterator]` — iterate all items front to back.
+
+```ts
+import { Deque } from '@toolcase/base'
+
+const d = new Deque<number>()
+d.pushBack(2).pushBack(3).pushFront(1)
+
+d.peekFront()  // 1
+d.peekBack()   // 3
+[...d]         // [1, 2, 3]
+
+d.popFront()   // 1
+d.popBack()    // 3
+d.size         // 1
+
+d.clear()
+d.isEmpty()    // true
+```
+
+Use as a FIFO queue: `pushBack` + `popFront`. Use as a LIFO stack: `pushBack` + `popBack` (or `pushFront` + `popFront`). Sliding-window algorithms use both ends simultaneously.
 
 ### VectorClock
 
@@ -241,6 +401,161 @@ Pass a seeded `random` for deterministic tests:
 let s = 1
 const seeded = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296 }
 const wr = new WeightedRandom(['a', 'b'], (k) => k === 'a' ? 1 : 9, seeded)
+```
+
+### DisjointSet
+
+Union-Find with path compression and union-by-rank. Tracks disjoint sets identified by string keys.
+
+```ts
+new DisjointSet()
+```
+
+- `count: number` — (readonly getter) number of disjoint sets currently tracked.
+- `makeSet(id: string): this` — register `id` as a new singleton set. No-op if `id` already exists. Chainable.
+- `find(id: string): string | null` — return the representative (root) of the set containing `id`; `null` if `id` was never registered. Applies path compression on every call.
+- `union(a: string, b: string): boolean` — merge the sets containing `a` and `b`. Returns `true` if they were in different sets (a merge happened), `false` if they were already in the same set or either id is unknown.
+- `connected(a: string, b: string): boolean` — `true` if `a` and `b` share a representative (same set); `false` otherwise or if either is unknown.
+
+```ts
+import { DisjointSet } from '@toolcase/base'
+
+const ds = new DisjointSet()
+
+ds.makeSet('a').makeSet('b').makeSet('c').makeSet('d')
+ds.count           // 4
+
+ds.union('a', 'b') // true  — merged
+ds.union('c', 'd') // true  — merged
+ds.count           // 2
+
+ds.union('a', 'c') // true  — one group now
+ds.count           // 1
+
+ds.connected('b', 'd') // true
+ds.connected('a', 'z') // false (z unknown)
+ds.find('b')           // same root as find('d')
+```
+
+### Trie
+
+Prefix tree for O(m) insert, lookup, and delete (m = word length) and O(m + k) prefix enumeration (k = number of matches).
+
+```ts
+new Trie()
+```
+
+- `size: number` — number of distinct words currently stored.
+- `insert(word: string): this` — add `word` to the trie. No-op if already present. Chainable.
+- `has(word: string): boolean` — `true` only when `word` was inserted and not deleted (exact match, not prefix match).
+- `delete(word: string): boolean` — remove `word`; returns `true` if it existed, `false` otherwise. Prunes nodes that are no longer on any other path.
+- `startsWith(prefix: string): string[]` — all inserted words that begin with `prefix` (including `prefix` itself if it was inserted). Empty prefix returns every word. Returns `[]` when no match exists.
+- `clear(): this` — remove all words. Chainable.
+
+```ts
+import { Trie } from '@toolcase/base'
+
+const t = new Trie()
+t.insert('apple').insert('app').insert('application').insert('apt')
+
+t.has('apple')          // true
+t.has('app')            // true
+t.has('ap')             // false — not a terminal word
+
+t.startsWith('app')     // ['app', 'apple', 'application'] (order unspecified)
+t.startsWith('apt')     // ['apt']
+t.startsWith('xyz')     // []
+t.startsWith('')        // all four words
+
+t.delete('app')
+t.has('app')            // false
+t.has('apple')          // true  — sharing prefix is unaffected
+t.size                  // 3
+```
+
+### BiMap
+
+Bidirectional map enforcing a strict 1-to-1 (bijective) relationship between keys and values. Both directions are stored as `Map`s, so all lookups are O(1). Assigning a key to a new value (or a value to a new key) automatically displaces the existing pair.
+
+```ts
+new BiMap<K, V>()
+```
+
+- `size: number` — number of key-value pairs.
+- `set(key: K, value: V): this` — insert or replace the pair. If `value` was already mapped to a different key, that old key is removed. If `key` was already mapped to a different value, that old value is removed. Chainable.
+- `get(key: K): V | null` — forward lookup; `null` when key not present.
+- `getKey(value: V): K | null` — reverse lookup; `null` when value not present.
+- `has(key: K): boolean` — `true` when key exists.
+- `hasValue(value: V): boolean` — `true` when value exists.
+- `delete(key: K): boolean` — remove the pair by key; `true` if found.
+- `deleteByValue(value: V): boolean` — remove the pair by value; `true` if found.
+- `clear(): this` — remove all pairs. Chainable.
+- `[Symbol.iterator]` — iterate `[K, V]` pairs in insertion order.
+
+```ts
+import { BiMap } from '@toolcase/base'
+
+const ports = new BiMap<string, number>()
+ports.set('http', 80).set('https', 443).set('ftp', 21)
+
+ports.get('https')       // 443
+ports.getKey(80)         // 'http'
+ports.hasValue(443)      // true
+
+// Reassigning a value auto-removes the old key
+ports.set('alt-http', 80)
+ports.has('http')        // false
+ports.getKey(80)         // 'alt-http'
+ports.size               // 3
+
+ports.delete('ftp')
+ports.size               // 2
+
+for (const [svc, port] of ports) {
+    console.log(svc, '->', port)
+}
+```
+
+### MultiMap
+
+Maps each key to a `Set` of values. `size` counts total values across all keys. Adding the same key-value pair twice is a no-op (set semantics per key). Supports per-value removal or bulk removal of all values under a key.
+
+```ts
+new MultiMap<K, V>()
+```
+
+- `size: number` — total number of values across all keys.
+- `set(key: K, value: V): this` — add `value` to the set under `key`. No-op if the pair already exists. Chainable.
+- `get(key: K): ReadonlySet<V> | undefined` — the set of values under `key`; `undefined` when key not present.
+- `has(key: K, value?: V): boolean` — with only `key`: `true` when any values exist under it. With `value`: `true` when that specific pair exists.
+- `delete(key: K, value?: V): boolean` — with only `key`: remove all values under it (returns `true` if key existed). With `value`: remove that specific value (returns `true` if found; removes the key when its set becomes empty).
+- `keys(): IterableIterator<K>` — iterate all keys that have at least one value.
+- `clear(): this` — remove all entries. Chainable.
+- `[Symbol.iterator]` — iterate `[K, ReadonlySet<V>]` pairs.
+
+```ts
+import { MultiMap } from '@toolcase/base'
+
+const tags = new MultiMap<string, string>()
+tags.set('post:1', 'typescript').set('post:1', 'react')
+tags.set('post:2', 'typescript').set('post:2', 'css')
+
+tags.size                          // 4
+tags.get('post:1')                 // Set { 'typescript', 'react' }
+tags.has('post:1', 'react')        // true
+tags.has('post:1', 'vue')          // false
+
+tags.delete('post:1', 'react')
+tags.get('post:1')                 // Set { 'typescript' }
+tags.size                          // 3
+
+tags.delete('post:2')
+tags.has('post:2')                 // false
+tags.size                          // 1
+
+for (const [postId, tagSet] of tags) {
+    console.log(postId, [...tagSet])
+}
 ```
 
 ---
@@ -443,6 +758,27 @@ generateId(length: number = 8): string
 
 Uses `globalThis.crypto.getRandomValues`. `length` is the **string** length (rounded up to whole bytes internally, sliced).
 
+### ulid
+
+Monotonic sortable ID. 26-character Crockford Base32 string: 10-char millisecond timestamp prefix + 16-char random suffix. Lexicographic sort equals time order. Within the same millisecond the random suffix is incremented, guaranteeing strict monotonicity even under rapid-fire generation.
+
+```ts
+ulid(): string
+```
+
+Uses `globalThis.crypto.getRandomValues` for the random component. Throws `Error('ulid overflow: too many ids within the same millisecond')` if 32^16 IDs are generated in a single millisecond (unreachable in practice).
+
+```ts
+import { ulid } from '@toolcase/base'
+
+ulid()  // '01HWPEMZRQ8T3K4J5N6M7P8Q9R'  (example)
+ulid()  // '01HWPEMZRQ8T3K4J5N6M7P8Q9S'  (monotonically greater)
+
+// IDs sort in insertion order — safe to use as event-log keys
+const ids = [ulid(), ulid(), ulid()]
+ids.slice().sort() // same order as ids
+```
+
 ### getNumberInRange
 
 Parse-then-clamp.
@@ -494,6 +830,274 @@ Returns `'0 Bytes'` when `bytes === 0`. Powers of 1024: `Bytes / KB / MB / GB / 
 
 ```ts
 formatByteSize(1536) // "1.5 KB"
+```
+
+### formatDuration
+
+Convert a millisecond count to a compact, human-readable string. Shows the two most significant units; sub-second precision is dropped once the value reaches one second.
+
+```ts
+formatDuration(ms: number): string
+```
+
+Returns `'0ms'` when `ms` is `0`, negative, or non-finite.
+
+| Range | Format | Example |
+|---|---|---|
+| `< 1 s` | `Nms` | `'500ms'` |
+| `< 1 min` | `Ns` | `'45s'` |
+| `< 1 h` | `Nm Ns` | `'2m 30s'` |
+| `< 1 d` | `Nh Nm` | `'1h 30m'` |
+| `≥ 1 d` | `Nd Nh` | `'3d 2h'` |
+
+```ts
+formatDuration(500)         // '500ms'
+formatDuration(90_000)      // '1m 30s'
+formatDuration(5_400_000)   // '1h 30m'
+formatDuration(90_000_000)  // '1d 1h'
+formatDuration(0)           // '0ms'
+```
+
+### formatNumber
+
+Format a number with optional compact notation (`k` / `M` / `B` suffixes). In non-compact mode inserts thousands separators.
+
+```ts
+formatNumber(n: number, options?: FormatNumberOptions): string
+
+interface FormatNumberOptions {
+    compact?: boolean  // default false
+}
+```
+
+Returns `'0'` for `NaN` or `±Infinity`. Compact mode rounds to one decimal place and drops trailing `.0`.
+
+```ts
+// non-compact (default)
+formatNumber(999)          // '999'
+formatNumber(1_000)        // '1,000'
+formatNumber(1_234_567)    // '1,234,567'
+
+// compact
+formatNumber(1_200,  { compact: true }) // '1.2k'
+formatNumber(1_000,  { compact: true }) // '1k'
+formatNumber(3_400_000, { compact: true }) // '3.4M'
+formatNumber(2_500_000_000, { compact: true }) // '2.5B'
+formatNumber(-1_200, { compact: true }) // '-1.2k'
+```
+
+### relativeTime
+
+Turn a `Date` or Unix-millisecond timestamp into a human-readable relative-time string such as `'3 minutes ago'` or `'in 2 hours'`. Compares against `Date.now()` at call time.
+
+```ts
+relativeTime(date: Date | number): string
+```
+
+| Threshold | Format | Example |
+|---|---|---|
+| `< 1 s` | `'just now'` | `'just now'` |
+| `< 1 min` | `'N second(s) ago'` / `'in N second(s)'` | `'30 seconds ago'` |
+| `< 1 h` | `'N minute(s) ago'` / `'in N minute(s)'` | `'in 5 minutes'` |
+| `< 1 d` | `'N hour(s) ago'` / `'in N hour(s)'` | `'2 hours ago'` |
+| `≥ 1 d` | `'N day(s) ago'` / `'in N day(s)'` | `'in 3 days'` |
+
+```ts
+const now = Date.now()
+
+relativeTime(new Date(now - 500))              // 'just now'
+relativeTime(new Date(now - 30_000))           // '30 seconds ago'
+relativeTime(new Date(now - 3 * 60_000))       // '3 minutes ago'
+relativeTime(new Date(now - 2 * 3_600_000))    // '2 hours ago'
+relativeTime(new Date(now - 3 * 86_400_000))   // '3 days ago'
+relativeTime(new Date(now + 5 * 60_000))       // 'in 5 minutes'
+relativeTime(now + 2 * 3_600_000)              // 'in 2 hours' (timestamp accepted)
+```
+
+### Math helpers
+
+Zero-dependency scalar math. All functions are pure and accept / return plain `number` (or `boolean` for `approximately`).
+
+```ts
+import { clamp, lerp, inverseLerp, mapRange, smoothstep, approximately } from '@toolcase/base'
+```
+
+#### `clamp`
+
+```ts
+clamp(value: number, min: number, max: number): number
+```
+
+Constrain `value` to the closed interval `[min, max]`.
+
+```ts
+clamp(15, 0, 10)   // 10
+clamp(-5, 0, 10)   // 0
+clamp(5,  0, 10)   // 5
+```
+
+#### `lerp`
+
+```ts
+lerp(a: number, b: number, t: number): number
+```
+
+Linear interpolation between `a` (at `t=0`) and `b` (at `t=1`). Extrapolates outside `[0, 1]`.
+
+```ts
+lerp(0, 100, 0)    // 0
+lerp(0, 100, 0.5)  // 50
+lerp(0, 100, 1)    // 100
+lerp(0, 100, 1.5)  // 150  (extrapolation)
+```
+
+#### `inverseLerp`
+
+```ts
+inverseLerp(a: number, b: number, value: number): number
+```
+
+Inverse of `lerp` — returns the `t` such that `lerp(a, b, t) === value`. Returns `0` when `a === b` (degenerate case).
+
+```ts
+inverseLerp(0, 100, 25)  // 0.25
+inverseLerp(0, 100, 75)  // 0.75
+inverseLerp(5, 5, 99)    // 0  (degenerate)
+```
+
+#### `mapRange`
+
+```ts
+mapRange(value: number, inMin: number, inMax: number, outMin: number, outMax: number): number
+```
+
+Remap `value` from one range to another. Extrapolates when `value` is outside `[inMin, inMax]`.
+
+```ts
+mapRange(0.5, 0, 1, 0, 255)   // 127.5
+mapRange(128, 0, 255, 0, 1)   // 0.5020...
+mapRange(5,   0, 10, -100, 100) // 0
+```
+
+#### `smoothstep`
+
+```ts
+smoothstep(edge0: number, edge1: number, x: number): number
+```
+
+Smooth Hermite interpolation (Ken Perlin's cubic S-curve) returning `0` when `x <= edge0`, `1` when `x >= edge1`, and an ease-in/ease-out value in between. Output is clamped to `[0, 1]`.
+
+```ts
+smoothstep(0, 1, 0)    // 0
+smoothstep(0, 1, 0.25) // 0.15625  (easing in — below the linear)
+smoothstep(0, 1, 0.5)  // 0.5
+smoothstep(0, 1, 0.75) // 0.84375  (easing out — above the linear)
+smoothstep(0, 1, 1)    // 1
+```
+
+#### `approximately`
+
+```ts
+approximately(a: number, b: number, epsilon: number = 1e-7): boolean
+```
+
+Returns `true` when `|a - b| <= epsilon`. Useful for float equality checks after arithmetic.
+
+```ts
+0.1 + 0.2 === 0.3                    // false  (IEEE 754)
+approximately(0.1 + 0.2, 0.3)        // true
+approximately(1.0, 1.0 + 1e-6)       // false  (outside default epsilon)
+approximately(1.0, 1.0 + 1e-6, 1e-5) // true   (custom epsilon)
+```
+
+---
+
+## Easing
+
+30 zero-dependency easing functions grouped in 10 families (Sine, Quad, Cubic, Quart, Quint, Expo, Circ, Back, Elastic, Bounce), each with In / Out / InOut variants, plus a CSS-compatible `cubicBezier` sampler. All functions are isomorphic and have no side effects. Every function guarantees `f(0) === 0` and `f(1) === 1`.
+
+```ts
+import { Easing } from '@toolcase/base'
+// or individual named exports:
+import { easeInQuad, easeOutCubic, easeInOutBounce, cubicBezier } from '@toolcase/base'
+import type { EasingFn } from '@toolcase/base'
+```
+
+### Easing functions
+
+All 30 functions share the same signature:
+
+```ts
+(t: number) => number
+```
+
+`t` is the normalised progress in `[0, 1]`. Families that overshoot (Back, Elastic) may return values slightly outside `[0, 1]` between the endpoints; the endpoints themselves are always exact.
+
+| Export | Family | Behaviour |
+|---|---|---|
+| `easeInSine` / `easeOutSine` / `easeInOutSine` | Sine | Smooth sinusoidal acceleration |
+| `easeInQuad` / `easeOutQuad` / `easeInOutQuad` | Quad | t² — gentle curve |
+| `easeInCubic` / `easeOutCubic` / `easeInOutCubic` | Cubic | t³ — moderate curve |
+| `easeInQuart` / `easeOutQuart` / `easeInOutQuart` | Quart | t⁴ — steep curve |
+| `easeInQuint` / `easeOutQuint` / `easeInOutQuint` | Quint | t⁵ — very steep curve |
+| `easeInExpo` / `easeOutExpo` / `easeInOutExpo` | Expo | 2^(10t) — exponential |
+| `easeInCirc` / `easeOutCirc` / `easeInOutCirc` | Circ | Quarter-circle arc |
+| `easeInBack` / `easeOutBack` / `easeInOutBack` | Back | Overshoots and returns |
+| `easeInElastic` / `easeOutElastic` / `easeInOutElastic` | Elastic | Spring oscillation |
+| `easeInBounce` / `easeOutBounce` / `easeInOutBounce` | Bounce | Bouncing-ball effect |
+
+```ts
+import { easeInCubic, easeOutBounce, Easing } from '@toolcase/base'
+
+easeInCubic(0)    // 0
+easeInCubic(0.5)  // 0.125
+easeInCubic(1)    // 1
+
+easeOutBounce(0)    // 0
+easeOutBounce(0.5)  // ~0.766
+easeOutBounce(1)    // 1
+
+// Namespace form
+Easing.easeInElastic(0.8)   // ~-0.108  (overshoots — Back/Elastic families only)
+Easing.easeInOutBack(0.5)   // 0.5
+```
+
+Apply to any interpolation:
+
+```ts
+import { lerp, easeInOutCubic } from '@toolcase/base'
+
+function animate(start: number, end: number, rawT: number): number {
+    return lerp(start, end, easeInOutCubic(rawT))
+}
+```
+
+### cubicBezier
+
+CSS-compatible cubic-bezier curve sampler. Takes two inner control points (x1, y1) and (x2, y2) in `[0, 1]` and returns an `EasingFn` that maps `t → y` using Newton-Raphson + bisection to solve the parametric curve.
+
+```ts
+cubicBezier(x1: number, y1: number, x2: number, y2: number): EasingFn
+```
+
+Control points must satisfy `0 <= x1, x2 <= 1` for the mapping to be monotone (equivalent to the CSS `cubic-bezier()` constraint). `y1` and `y2` may be outside `[0, 1]` to allow overshoot.
+
+```ts
+import { cubicBezier } from '@toolcase/base'
+
+// CSS keyword equivalents
+const ease        = cubicBezier(0.25, 0.1,  0.25, 1.0)
+const easeIn      = cubicBezier(0.42, 0,    1.0,  1.0)
+const easeOut     = cubicBezier(0,    0,    0.58, 1.0)
+const easeInOut   = cubicBezier(0.42, 0,    0.58, 1.0)
+
+ease(0)    // 0
+ease(0.5)  // ~0.847
+ease(1)    // 1
+
+// Custom spring-like curve
+const spring = cubicBezier(0.175, 0.885, 0.32, 1.275)
+spring(0.8)  // > 1 (controlled overshoot)
 ```
 
 ---
@@ -1037,6 +1641,963 @@ const factory = new LoggerFactory([new ConsoleLogReporter()])
 factory.level = env('LOG_LEVEL', 'info') as any
 const port    = env('PORT', 3000, 'number')
 const debug   = env('DEBUG', false, 'boolean')
+```
+
+### Random
+
+Seedable pseudo-random number generator (mulberry32). Deterministic: identical seeds produce identical sequences. Zero dependencies, isomorphic.
+
+```ts
+new Random(seed: number)
+```
+
+- `next(): number` — uniform float in `[0, 1)`. Usable as `RandomFn` for `WeightedRandom`.
+- `int(min: number, max: number): number` — inclusive integer in `[min, max]`. Throws if `min`/`max` are not integers or `min > max`.
+- `float(min: number, max: number): number` — float in `[min, max)`. Throws if bounds are non-finite or `min > max`.
+- `bool(p: number = 0.5): boolean` — `true` with probability `p`. Throws if `p` is outside `[0, 1]`.
+- `pick<T>(arr: T[]): T` — uniformly random element. Throws on empty or non-array.
+- `shuffle<T>(arr: T[]): T[]` — Fisher-Yates shuffle; returns a new array without mutating the original.
+- `weighted<T>(entries: Array<{ item: T, weight: number }>): T` — weighted pick. Throws if entries is empty, any weight is negative/non-finite, or total weight is zero.
+
+```ts
+import { Random } from '@toolcase/base'
+
+const rng = new Random(42)
+
+rng.next()           // 0.7837119...
+rng.int(1, 6)        // 1–6 inclusive (dice roll)
+rng.float(0, 1)      // 0.something
+rng.bool(0.3)        // true ~30% of the time
+rng.pick(['a', 'b', 'c'])       // one of the three
+rng.shuffle([1, 2, 3, 4, 5])   // [3, 1, 5, 2, 4] (or similar)
+rng.weighted([
+    { item: 'common', weight: 7 },
+    { item: 'rare',   weight: 3 }
+])  // 'common' ~70% of the time
+```
+
+Inject into `WeightedRandom` for reproducible loot tables:
+
+```ts
+import { Random, WeightedRandom } from '@toolcase/base'
+
+const rng = new Random(seed)
+const loot = new WeightedRandom(entries, (e) => e.weight, () => rng.next())
+loot.pick() // deterministic given same seed
+```
+
+---
+
+## Async
+
+Zero-dependency async toolkit. Exported as the `Async` namespace.
+
+```ts
+import { Async } from '@toolcase/base'
+// Async = { Deferred, Semaphore, Mutex, pLimit, withTimeout, sleep, debounce, throttle, AsyncQueue }
+```
+
+### Deferred
+
+Promise with externally controlled resolve/reject. Useful for bridging callback-based APIs, coordinating between unrelated code paths, or creating one-shot gates.
+
+```ts
+new Async.Deferred<T>()
+```
+
+- `promise: Promise<T>` — the underlying promise (readonly).
+- `resolve(value: T): void` — settle with a value. Subsequent calls are no-ops (native Promise behaviour).
+- `reject(reason?: unknown): void` — settle with a rejection. Subsequent calls are no-ops.
+
+```ts
+const gate = new Async.Deferred<boolean>()
+
+// consumer
+gate.promise.then(ok => console.log('gate opened:', ok))
+
+// producer (from anywhere)
+gate.resolve(true)
+```
+
+### Semaphore
+
+Limits concurrent access. At most `permits` callers may hold the semaphore at once; excess callers queue and are admitted in FIFO order when a slot is released.
+
+```ts
+new Async.Semaphore(permits: number)
+```
+
+Throws if `permits` is not a positive integer.
+
+- `available: number` — current free permit count.
+- `acquire(): Promise<void>` — waits for a permit.
+- `release(): void` — returns a permit (or wakes the next queued waiter).
+- `run<T>(fn: () => T | Promise<T>): Promise<T>` — acquire → run → release (releases even on error).
+
+```ts
+const sem = new Async.Semaphore(3)
+
+const fetchPage = (url: string) => sem.run(() => fetch(url).then(r => r.json()))
+
+// fires at most 3 fetches at a time
+const pages = await Promise.all(urls.map(fetchPage))
+```
+
+### Mutex
+
+Mutual exclusion — one caller at a time. Thin wrapper around `Semaphore(1)` with a caller-held release function.
+
+```ts
+new Async.Mutex()
+```
+
+- `locked: boolean` — true when a caller holds the lock.
+- `acquire(): Promise<() => void>` — wait for the lock; the resolved value is the release function. Calling release more than once is a no-op.
+- `run<T>(fn: () => T | Promise<T>): Promise<T>` — acquire → run → release (releases even on error).
+
+```ts
+const mutex = new Async.Mutex()
+
+async function updateCounter() {
+    const release = await mutex.acquire()
+    try {
+        counter++
+    } finally {
+        release()
+    }
+}
+```
+
+### pLimit
+
+Concurrency gate. Returns a runner function that queues tasks and ensures at most `concurrency` run in parallel.
+
+```ts
+Async.pLimit(concurrency: number): <T>(fn: () => T | Promise<T>) => Promise<T>
+```
+
+Throws if `concurrency` is not a positive integer.
+
+```ts
+const limit = Async.pLimit(5)
+
+const results = await Promise.all(
+    urls.map(url => limit(() => fetch(url).then(r => r.json())))
+)
+```
+
+### withTimeout
+
+Races a promise against a deadline. Rejects with `Error('timed out after Nms')` if `fn` has not settled within `ms` milliseconds.
+
+```ts
+Async.withTimeout<T>(fn: () => T | Promise<T>, ms: number): Promise<T>
+```
+
+Throws synchronously if `ms <= 0`.
+
+Composes with `retry` — pass `withTimeout` inside the retry callback for per-attempt deadlines:
+
+```ts
+import { retry, Async } from '@toolcase/base'
+
+const result = await retry(
+    () => Async.withTimeout(() => fetch('/api/data').then(r => r.json()), 3_000),
+    { retries: 4, minTimeout: 500, factor: 2 }
+)
+```
+
+### sleep
+
+Resolves after `ms` milliseconds. Throws synchronously if `ms < 0`.
+
+```ts
+Async.sleep(ms: number): Promise<void>
+```
+
+```ts
+await Async.sleep(1_000)  // pause 1 second
+```
+
+### debounce
+
+Returns a debounced version of `fn` that fires only after `ms` have elapsed since the last call. The returned function also has a `cancel()` method to drop any pending invocation.
+
+```ts
+Async.debounce<T extends (...args: any[]) => void>(fn: T, ms: number): ((...args: Parameters<T>) => void) & { cancel(): void }
+```
+
+Throws if `fn` is not a function or `ms < 0`.
+
+```ts
+const onSearch = Async.debounce((query: string) => {
+    fetchSuggestions(query)
+}, 300)
+
+input.addEventListener('input', e => onSearch(e.currentTarget.value))
+
+// Cancel the pending call (e.g. on component unmount)
+onSearch.cancel()
+```
+
+### throttle
+
+Returns a throttled version of `fn` that fires at most once per `ms` window. Fires on the leading edge and again at the trailing edge if called during the window. The returned function also has a `cancel()` method to drop the pending trailing call.
+
+```ts
+Async.throttle<T extends (...args: any[]) => void>(fn: T, ms: number): ((...args: Parameters<T>) => void) & { cancel(): void }
+```
+
+Throws if `fn` is not a function or `ms < 0`.
+
+```ts
+const onScroll = Async.throttle(() => {
+    updateNavHighlight()
+}, 100)
+
+window.addEventListener('scroll', onScroll)
+
+// Drop trailing call (e.g. on unmount)
+onScroll.cancel()
+```
+
+### AsyncQueue
+
+Backpressure-aware producer/consumer channel. Async `push`/`pull`, `AsyncIterable` consumption, optional bounded capacity with backpressure, and close/drain semantics.
+
+```ts
+new Async.AsyncQueue<T>(capacity?: number)
+```
+
+- `capacity` — maximum number of buffered items. Default `Infinity` (unbounded). Pass a positive integer to enable backpressure. Constructor throws if `capacity` is not a positive integer.
+
+**Properties:**
+- `size: number` — current number of buffered items (readonly getter).
+- `closed: boolean` — `true` after `close()` is called (readonly getter).
+
+**Methods:**
+- `push(item: T): Promise<void>` — add an item. When bounded and full, blocks until a slot is freed. Throws synchronously if `item === undefined` or if the queue is closed.
+- `pull(): Promise<T>` — remove and return the next item. Blocks when the buffer is empty. Rejects with `Error('queue is closed')` when closed and empty.
+- `close(): void` — close the queue. Idempotent. Wakes all pending `pull()` callers with a rejection and all blocked `push()` callers with a rejection. Items already buffered can still be consumed after close.
+- `drain(): Promise<void>` — resolves when the buffer is empty (all buffered items have been consumed). Resolves immediately if already empty.
+- `[Symbol.asyncIterator](): AsyncIterator<T>` — iterate items via `for await...of`; terminates when the queue is closed and empty.
+
+```ts
+import { Async } from '@toolcase/base'
+
+// --- Unbounded (no backpressure) ---
+const q = new Async.AsyncQueue<string>()
+
+// Producer
+await q.push('hello')
+await q.push('world')
+q.close()
+
+// Consumer via for-await-of (terminates on close + empty)
+for await (const msg of q) {
+    console.log(msg)  // 'hello', 'world'
+}
+
+// --- Bounded with backpressure ---
+const bounded = new Async.AsyncQueue<number>(2)
+
+// push blocks when full until a consumer pulls
+const producer = (async () => {
+    for (let i = 0; i < 5; i++) {
+        await bounded.push(i)   // blocks at i=2, i=3, i=4 until consumer pulls
+    }
+    bounded.close()
+})()
+
+const consumer = (async () => {
+    for await (const n of bounded) {
+        console.log(n)          // 0, 1, 2, 3, 4
+    }
+})()
+
+await Promise.all([producer, consumer])
+
+// --- Drain: wait for all items to be consumed ---
+const channel = new Async.AsyncQueue<string>()
+await channel.push('a')
+await channel.push('b')
+channel.close()
+
+const drainP = channel.drain()          // resolves when buffer empties
+for await (const _ of channel) { /* consume */ }
+await drainP                            // already empty by now
+```
+
+---
+
+## Spatial
+
+2D broad-phase spatial partitioning. Exported as a single namespace `Spatial` with two structures behind a shared `SpatialRect` / `SpatialPoint` contract.
+
+```ts
+import { Spatial, type SpatialPoint, type SpatialRect } from '@toolcase/base'
+// Spatial = { SpatialHash, Quadtree }
+```
+
+Both structures store arbitrary items (`T`) keyed by their axis-aligned bounding rectangle (`SpatialRect`). Nearest-neighbour distance is measured from the query point to the nearest edge of an item's bounding rect (distance = 0 if the point is inside the rect).
+
+### SpatialHash
+
+Uniform-grid spatial hash. O(1) amortised insert/remove; query cost scales with the number of occupied cells the query rect touches. Best when objects are roughly uniform in size and the cell size is tuned to ~2× the average object diameter.
+
+```ts
+new Spatial.SpatialHash<T>(cellSize: number)
+```
+
+Constructor throws if `cellSize` is not a positive finite number.
+
+- `size: number` — read-only item count.
+- `insert(item: T, bounds: SpatialRect): void` — no-op if item is already inserted. Throws if `item === undefined`.
+- `remove(item: T): boolean` — returns `true` if removed; `false` if not present.
+- `update(item: T, bounds: SpatialRect): void` — remove + reinsert (for moving objects).
+- `query(bounds: SpatialRect): T[]` — all items whose bounds overlap the query rect; no duplicates.
+- `nearest(point: SpatialPoint, maxDist?: number): T | null` — item with the smallest distance to `point`; respects `maxDist` (default `Infinity`).
+- `clear(): this` — remove all items. Chainable.
+
+```ts
+import { Spatial, type SpatialRect } from '@toolcase/base'
+
+type Entity = { id: string }
+
+const hash = new Spatial.SpatialHash<Entity>(64)
+
+const player: Entity = { id: 'player' }
+hash.insert(player, { x: 100, y: 100, width: 32, height: 32 })
+
+const enemy: Entity = { id: 'enemy' }
+hash.insert(enemy, { x: 300, y: 300, width: 32, height: 32 })
+
+// Broad-phase range query
+const nearby = hash.query({ x: 80, y: 80, width: 100, height: 100 })
+// → [player]
+
+// Move player
+hash.update(player, { x: 280, y: 280, width: 32, height: 32 })
+
+// Nearest neighbour
+hash.nearest({ x: 0, y: 0 }) // → enemy (player moved away)
+```
+
+### Quadtree
+
+Recursive quadrant tree. Insert cost is O(log n) amortised; query prunes by bounding box; nearest-neighbour uses branch-and-bound pruning. Best when object density is uneven (sparse large regions + dense clusters).
+
+```ts
+new Spatial.Quadtree<T>(bounds: SpatialRect, capacity?: number, maxDepth?: number)
+```
+
+- `bounds` — the world rectangle this tree covers. Items outside it are rejected by `insert`.
+- `capacity` — max items per node before subdivision (default `8`).
+- `maxDepth` — max tree depth; nodes at max depth store all items regardless of count (default `8`).
+
+Constructor throws if `bounds` is null/undefined, `capacity < 1`, or `maxDepth < 0`.
+
+- `size: number` — read-only item count.
+- `insert(item: T, bounds: SpatialRect): boolean` — returns `true` if inserted; `false` if item was already present or its bounds don't intersect the tree bounds. Throws if `item === undefined`.
+- `remove(item: T): boolean` — returns `true` if removed; `false` if not present.
+- `update(item: T, bounds: SpatialRect): void` — remove + reinsert.
+- `query(bounds: SpatialRect): T[]` — all items whose bounds overlap the query rect.
+- `nearest(point: SpatialPoint, maxDist?: number): T | null` — nearest item to `point` (branch-and-bound). Returns `null` when empty or nothing within `maxDist`.
+- `clear(): this` — remove all items, preserve root bounds. Chainable.
+
+```ts
+import { Spatial } from '@toolcase/base'
+
+const world = { x: 0, y: 0, width: 1024, height: 1024 }
+const qt = new Spatial.Quadtree<string>(world, 4, 6)
+
+qt.insert('A', { x: 10, y: 10, width: 20, height: 20 })
+qt.insert('B', { x: 500, y: 500, width: 20, height: 20 })
+qt.insert('C', { x: 15, y: 15, width: 10, height: 10 })
+
+qt.query({ x: 0, y: 0, width: 100, height: 100 })
+// → ['A', 'C']  (B is outside the query rect)
+
+qt.nearest({ x: 0, y: 0 })
+// → 'A'  (closest bounding rect to origin)
+
+qt.update('A', { x: 600, y: 600, width: 20, height: 20 })
+qt.size // → 3
+
+qt.clear().size // → 0
+```
+
+---
+
+## Math
+
+### Vec2
+
+Immutable 2D vector. Every operation returns a new `Vec2` — the original is never modified. Zero dependencies, isomorphic.
+
+```ts
+new Vec2(x: number = 0, y: number = 0)
+```
+
+**Static constants:**
+- `Vec2.ZERO` — `Vec2(0, 0)` singleton.
+- `Vec2.ONE` — `Vec2(1, 1)` singleton.
+
+**Properties:**
+- `x: number` / `y: number` — (readonly) components.
+- `length: number` — Euclidean length (`Math.sqrt(x² + y²)`).
+- `lengthSq: number` — squared length (avoids `sqrt`; useful for distance comparisons).
+
+**Methods:**
+- `add(other: Vec2): Vec2` — component-wise sum.
+- `subtract(other: Vec2): Vec2` — component-wise difference.
+- `scale(factor: number): Vec2` — multiply both components by `factor`.
+- `dot(other: Vec2): number` — dot product (`x·ox + y·oy`).
+- `normalize(): Vec2` — unit vector in the same direction; returns `Vec2.ZERO` when length is 0.
+- `lerp(other: Vec2, t: number): Vec2` — linear interpolation; `t=0` → this, `t=1` → other. Extrapolates outside `[0, 1]`.
+- `rotate(angle: number): Vec2` — rotate by `angle` radians counter-clockwise.
+- `negate(): Vec2` — flip both components (`scale(-1)`).
+- `distanceTo(other: Vec2): number` — Euclidean distance between two points.
+- `equals(other: Vec2): boolean` — exact component equality.
+- `toArray(): [number, number]` — `[x, y]` tuple.
+- `toString(): string` — `"Vec2(x, y)"`.
+
+**`Rect` type** (also exported from `@toolcase/base`):
+
+```ts
+import type { Rect } from '@toolcase/base'
+// { x: number; y: number; width: number; height: number }
+```
+
+```ts
+import { Vec2 } from '@toolcase/base'
+import type { Rect } from '@toolcase/base'
+
+// Basic operations
+const a = new Vec2(3, 0)
+const b = new Vec2(0, 4)
+
+a.add(b).toString()       // 'Vec2(3, 4)'
+a.subtract(b).toString()  // 'Vec2(3, -4)'
+a.scale(2).toString()     // 'Vec2(6, 0)'
+
+// Length + normalize
+const c = new Vec2(3, 4)
+c.length                  // 5
+c.normalize().toString()  // 'Vec2(0.6, 0.8)'
+
+// Dot product (0 = perpendicular, 1 = same direction for unit vectors)
+a.dot(b)                  // 0
+a.dot(a)                  // 9
+
+// Lerp between two points
+new Vec2(0, 0).lerp(new Vec2(100, 200), 0.5).toString()  // 'Vec2(50, 100)'
+
+// Rotate 90° counter-clockwise
+new Vec2(1, 0).rotate(Math.PI / 2).toString()  // 'Vec2(~0, 1)'
+
+// Distance
+new Vec2(0, 0).distanceTo(new Vec2(3, 4))  // 5
+
+// Rect: derive center from bounds
+const bounds: Rect = { x: 0, y: 0, width: 100, height: 50 }
+const center = new Vec2(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
+center.toString()  // 'Vec2(50, 25)'
+```
+
+---
+
+## String helpers
+
+Three zero-dependency string utilities for HTML, URL slugs, and display truncation. All are pure functions (no side effects, no state).
+
+```ts
+import { slugify, truncate, escapeHtml } from '@toolcase/base'
+```
+
+### slugify
+
+Convert an arbitrary string into a URL-safe slug: lowercase, ASCII-only, hyphen-separated, no leading/trailing hyphens.
+
+```ts
+slugify(input: string): string
+```
+
+- Trims leading/trailing whitespace.
+- Lowercases.
+- Decomposes (NFD) and strips combining diacritical marks (U+0300–U+036F), converting accented letters to their ASCII base.
+- Removes any character that is not `a-z`, `0-9`, space, or `-`.
+- Collapses consecutive whitespace, underscores, and hyphens into a single `-`.
+- Strips any remaining leading or trailing `-`.
+
+```ts
+slugify('Hello, World!')        // 'hello-world'
+slugify('  héllo wörld  ')      // 'hello-world'
+slugify('café')                 // 'cafe'
+slugify('My Post Title 2024')   // 'my-post-title-2024'
+slugify('hello--world')         // 'hello-world'
+slugify('!!!---')               // ''
+```
+
+### truncate
+
+Shorten a string to `maxLength` characters, appending a suffix when truncated.
+
+```ts
+truncate(input: string, maxLength: number, suffix: string = '…'): string
+```
+
+- Returns `input` unchanged when `input.length <= maxLength`.
+- Otherwise cuts the input at `maxLength - suffix.length` characters and appends `suffix`.
+- When `maxLength < suffix.length`, the suffix itself is clipped to `maxLength`.
+
+```ts
+truncate('hello world', 8)         // 'hello w…'
+truncate('hello world', 8, '...')  // 'hello...'
+truncate('short', 10)              // 'short'
+truncate('hi', 1, '…')            // '…'
+```
+
+### escapeHtml
+
+Escape the five HTML special characters (`& < > " '`) so a string can be safely injected into HTML content or attributes without introducing markup or XSS vectors.
+
+```ts
+escapeHtml(input: string): string
+```
+
+| Character | Replacement |
+|---|---|
+| `&` | `&amp;` |
+| `<` | `&lt;` |
+| `>` | `&gt;` |
+| `"` | `&quot;` |
+| `'` | `&#39;` |
+
+```ts
+escapeHtml('& < > " \'')
+// '&amp; &lt; &gt; &quot; &#39;'
+
+escapeHtml('<script>alert("XSS")</script>')
+// '&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;'
+
+escapeHtml('hello world')
+// 'hello world'   (safe chars pass through unchanged)
+```
+
+Use before inserting any user-supplied text into `innerHTML`:
+
+```ts
+element.innerHTML = `<p>${escapeHtml(userInput)}</p>`
+```
+
+---
+
+## Result / Option
+
+Zero-dependency, isomorphic tagged-union helpers for explicit error handling without throwing.
+
+```ts
+import { ok, err, some, none } from '@toolcase/base'
+import type { Result, Option } from '@toolcase/base'
+```
+
+### Result\<T, E\>
+
+A value that is either a success (`Ok<T,E>`) or a failure (`Err<T,E>`). Construct with `ok(value)` / `err(error)`.
+
+```ts
+type Result<T, E> = Ok<T, E> | Err<T, E>
+
+ok<T, E = never>(value: T): Ok<T, E>
+err<T = never, E = unknown>(error: E): Err<T, E>
+```
+
+**`Ok<T, E>` methods:**
+
+| Method | Returns | Notes |
+|---|---|---|
+| `isOk()` | `this is Ok<T, E>` | always `true` — narrows the union |
+| `isErr()` | `this is Err<T, E>` | always `false` |
+| `map<U>(fn)` | `Ok<U, E>` | apply `fn` to value |
+| `mapErr<F>(fn)` | `Ok<T, F>` | no-op on Ok; preserves value |
+| `andThen<U>(fn)` | `Result<U, E>` | chain a fallible operation |
+| `flatMap<U>(fn)` | `Result<U, E>` | alias for `andThen` |
+| `unwrap()` | `T` | return value; never throws |
+| `unwrapErr()` | `never` | throws `Error('called unwrapErr on an Ok value')` |
+| `unwrapOr(default)` | `T` | returns value, ignores default |
+
+**`Err<T, E>` methods:**
+
+| Method | Returns | Notes |
+|---|---|---|
+| `isOk()` | `this is Ok<T, E>` | always `false` |
+| `isErr()` | `this is Err<T, E>` | always `true` — narrows the union |
+| `map<U>(fn)` | `Err<U, E>` | no-op on Err; preserves error |
+| `mapErr<F>(fn)` | `Err<T, F>` | apply `fn` to error |
+| `andThen<U>(fn)` | `Err<U, E>` | no-op on Err; short-circuits chain |
+| `flatMap<U>(fn)` | `Err<U, E>` | alias for `andThen` |
+| `unwrap()` | `never` | throws `Error('called unwrap on an Err value')` |
+| `unwrapErr()` | `E` | return error; never throws |
+| `unwrapOr(default)` | `T` | returns default value |
+
+```ts
+import { ok, err } from '@toolcase/base'
+import type { Result } from '@toolcase/base'
+
+function divide(a: number, b: number): Result<number, string> {
+    return b === 0 ? err('division by zero') : ok(a / b)
+}
+
+// Type-guard narrowing
+const r = divide(10, 2)
+if (r.isOk()) {
+    console.log(r.value)   // 5 — TypeScript knows it's Ok here
+}
+
+// Chaining — short-circuits on first error
+ok<number, string>(100)
+    .andThen(n => divide(n, 4))     // ok(25)
+    .andThen(n => divide(n, 0))     // err('division by zero')
+    .map(n => n * 100)              // skipped
+    .unwrapOr(-1)                   // -1
+
+// mapErr transforms the error type
+divide(1, 0)
+    .mapErr(msg => new Error(msg))
+    .unwrapErr()                    // Error('division by zero')
+```
+
+---
+
+### Option\<T\>
+
+A value that is either present (`Some<T>`) or absent (`None`). Construct with `some(value)` / `none()`.
+
+```ts
+type Option<T> = Some<T> | None
+
+some<T>(value: T): Some<T>
+none(): None
+```
+
+**`Some<T>` methods:**
+
+| Method | Returns | Notes |
+|---|---|---|
+| `isSome()` | `this is Some<T>` | always `true` — narrows the union |
+| `isNone()` | `this is None` | always `false` |
+| `map<U>(fn)` | `Some<U>` | apply `fn` to value |
+| `andThen<U>(fn)` | `Option<U>` | chain a fallible lookup |
+| `flatMap<U>(fn)` | `Option<U>` | alias for `andThen` |
+| `unwrap()` | `T` | return value; never throws |
+| `unwrapOr(default)` | `T` | returns value, ignores default |
+
+**`None` methods:**
+
+| Method | Returns | Notes |
+|---|---|---|
+| `isSome()` | `this is Some<never>` | always `false` |
+| `isNone()` | `this is None` | always `true` — narrows the union |
+| `map<U>(fn)` | `None` | no-op |
+| `andThen<U>(fn)` | `None` | no-op; short-circuits chain |
+| `flatMap<U>(fn)` | `None` | alias for `andThen` |
+| `unwrap()` | `never` | throws `Error('called unwrap on a None value')` |
+| `unwrapOr<T>(default)` | `T` | returns default value |
+
+`none()` returns a singleton — every call returns the same `None` instance.
+
+```ts
+import { some, none } from '@toolcase/base'
+import type { Option } from '@toolcase/base'
+
+const users: Record<number, string> = { 1: 'Alice', 2: 'Bob' }
+
+function findUser(id: number): Option<string> {
+    return id in users ? some(users[id]) : none()
+}
+
+// Type-guard narrowing
+const user = findUser(1)
+if (user.isSome()) {
+    console.log(user.value)   // 'Alice'
+}
+
+// Chaining — short-circuits at first None
+findUser(2)
+    .map(name => name.toUpperCase())             // some('BOB')
+    .andThen(name => name.length > 2             // some('Hello BOB')
+        ? some(`Hello ${name}`)
+        : none())
+    .unwrapOr('n/a')                             // 'Hello BOB'
+
+findUser(99)
+    .map(name => name.toUpperCase())             // none
+    .unwrapOr('unknown')                         // 'unknown'
+```
+
+---
+
+## TokenBucket
+
+Token-bucket rate limiter. The bucket starts full at `capacity`. Each `tryRemove`/`take` call drains tokens; between calls the bucket refills at `refillRate` tokens per unit of time (where the unit matches the clock injected via `now`). Zero dependencies, isomorphic.
+
+```ts
+new TokenBucket(capacity: number, refillRate: number, now?: () => number)
+```
+
+- `capacity: number` — (readonly) maximum number of tokens the bucket can hold. The bucket starts full.
+- `refillRate: number` — (readonly) tokens added per unit of time returned by `now`. With the default `Date.now()` clock, this is tokens per millisecond — so for 10 req/s use `10 / 1000`.
+- `now` — optional clock function. Defaults to `() => Date.now()`. Inject a deterministic clock in tests.
+
+**Properties:**
+- `tokens: number` — current token count computed as of `now()`, capped at `capacity`. Side-effect free (does not mutate state).
+
+**Methods:**
+- `tryRemove(n?: number): boolean` — refill, then try to consume `n` tokens (default `1`). Returns `true` and deducts from the bucket if sufficient tokens are available; `false` otherwise. Throws if `n <= 0`.
+- `take(n?: number): boolean` — alias for `tryRemove(n)`.
+
+```ts
+import { TokenBucket } from '@toolcase/base'
+
+// 10 tokens, refill 1 per ms (≈ 1 request/ms ceiling, or 1000 req/s)
+const bucket = new TokenBucket(10, 1)
+
+bucket.tryRemove(3)   // true  — 7 remaining
+bucket.tryRemove(8)   // false — only 7 left
+bucket.take()         // true  — 6 remaining (takes 1)
+
+console.log(bucket.tokens)   // ~6 + refill since last call
+```
+
+Inject a deterministic clock for testing:
+
+```ts
+let t = 0
+const bucket = new TokenBucket(5, 1, () => t)
+
+bucket.tryRemove(5)   // true  — empty
+bucket.tryRemove(1)   // false — no tokens
+
+t += 3                // advance 3 ticks
+bucket.tryRemove(3)   // true  — exactly 3 refilled
+bucket.tokens         // 0
+```
+
+---
+
+## BloomFilter
+
+Probabilistic set-membership structure. Uses a compact `Uint8Array` bit array and double-hashing (djb2 + sdbm) to derive `k` independent positions per item. Zero allocations after construction, O(k) `add` and `has`, no false negatives.
+
+```ts
+new BloomFilter(bitSize: number, hashCount: number)
+```
+
+- `bitSize: number` — (readonly) length of the bit array in bits. Must be a positive integer.
+- `hashCount: number` — number of hash positions set / checked per item. Must be a positive integer.
+
+Constructor throws if either argument is not a positive integer.
+
+**Methods:**
+- `add(item: string): this` — sets the `hashCount` bit positions for `item`. Chainable.
+- `has(item: string): boolean` — returns `true` if all `hashCount` positions for `item` are set. Returns `false` if any bit is unset (definite non-member). `true` may be a false positive; `false` is never a false negative.
+
+**Choosing parameters** — for `n` expected items and desired false-positive rate `p`:
+- `bitSize = Math.ceil(-n * Math.log(p) / Math.LN2 ** 2)`
+- `hashCount = Math.round((bitSize / n) * Math.LN2)`
+
+```ts
+import { BloomFilter } from '@toolcase/base'
+
+const bf = new BloomFilter(10000, 7)  // ~1000 items at <1% FPR
+
+bf.add('alice').add('bob').add('carol')
+
+bf.has('alice')   // true  — no false negatives, ever
+bf.has('dave')    // false — not a member (very likely)
+
+// false-positive rate sanity check (m=1000, k=3, n=100 → ≈ 1.7% FPR)
+const filter = new BloomFilter(1000, 3)
+for (let i = 0; i < 100; i++) filter.add(`user:${i}`)
+
+let fp = 0
+for (let i = 100; i < 1100; i++) {
+    if (filter.has(`user:${i}`)) fp++
+}
+console.log(`FPR: ${(fp / 10).toFixed(1)}%`)   // ≈ 1.7%
+```
+
+---
+
+---
+
+## Stopwatch
+
+Elapsed-time tracker with start/stop/lap. Paused intervals do not count towards `elapsed`. Clock-injectable for deterministic testing.
+
+```ts
+new Stopwatch(now?: () => number)
+```
+
+Constructor throws if `now` is provided but is not a function. Default clock: `() => Date.now()`.
+
+**Properties:**
+- `running: boolean` — `true` while the watch is ticking.
+- `elapsed: number` — total milliseconds measured (paused time excluded). Read-only. Computed lazily from the injected clock; side-effect free.
+- `laps: readonly number[]` — lap times in insertion order.
+
+**Methods:**
+- `start(): this` — begin timing. No-op when already running.
+- `stop(): this` — pause timing; accumulates elapsed so far. No-op when already stopped.
+- `lap(): number` — snapshot elapsed since the last `lap()` call (or since `start()`), push onto `laps`, and reset the lap counter. Works while stopped.
+- `reset(): this` — stop, clear elapsed, clear laps.
+
+```ts
+import { Stopwatch } from '@toolcase/base'
+
+let t = 0
+const sw = new Stopwatch(() => t)
+
+sw.start()
+t = 100
+const l1 = sw.lap()   // 100  — resets lap start
+t = 250
+const l2 = sw.lap()   // 150
+sw.stop()
+t = 999               // clock advances, elapsed stays frozen
+sw.elapsed            // 250
+sw.laps               // [100, 150]
+
+sw.reset()
+sw.elapsed            // 0
+sw.laps               // []
+```
+
+---
+
+## Ticker
+
+Fixed-step or variable-step update dispatcher. Drive it by calling `tick(delta)` from your animation or game loop; in fixed-step mode it accumulates remainders and fires once per complete interval.
+
+```ts
+new Ticker(step?: number)
+```
+
+- `step = 0` (default) — **variable-step**: each `tick(delta)` fires registered callbacks once with the actual `delta`.
+- `step > 0` — **fixed-step**: `tick(delta)` feeds the accumulator; callbacks fire once per complete `step` interval with the fixed step value, consuming remainders across calls.
+
+Constructor throws if `step < 0`.
+
+**Properties:**
+- `running: boolean` — `true` after `start()`, before `stop()` or `reset()`.
+- `elapsed: number` — total milliseconds fed via `tick()` calls so far (read-only).
+
+**Methods:**
+- `onTick(fn: (delta: number, elapsed: number) => void): this` — register a callback. Throws if `fn` is not a function.
+- `offTick(fn): this` — unregister a callback. No-op if not found.
+- `tick(delta: number): void` — feed a time delta (ms). No-op when not running. Throws if `delta < 0`.
+- `start(): this` — enable processing.
+- `stop(): this` — disable processing (accumulated state is preserved).
+- `reset(): this` — stop, clear `elapsed`, clear accumulator. Listeners are preserved.
+
+```ts
+import { Ticker } from '@toolcase/base'
+
+// variable-step
+const varTicker = new Ticker()
+varTicker.onTick((delta, elapsed) => console.log(delta, elapsed))
+varTicker.start()
+varTicker.tick(16)   // fires: 16, 16
+varTicker.tick(33)   // fires: 33, 49
+
+// fixed-step 60fps (≈16.67ms)
+const fixedTicker = new Ticker(1000 / 60)
+fixedTicker.onTick((step) => physicsUpdate(step))
+fixedTicker.start()
+
+// in phaser-plus onUpdate or rAF:
+function onUpdate(frameDelta: number) {
+    fixedTicker.tick(frameDelta)
+}
+```
+
+---
+
+## diff / patch
+
+Structural diff and patch for plain objects and arrays. Zero-dependency, isomorphic.
+
+```ts
+import { diff, patch } from '@toolcase/base'
+import type { Delta } from '@toolcase/base'
+```
+
+### `diff(a, b): Delta | null`
+
+Computes the structural delta from `a` to `b`. Returns `null` when `a` and `b` are deeply equal.
+
+Both arguments must be plain objects (`{}`) or arrays (`[]`). Nested values may be primitives, plain objects, or arrays. Type mismatches at the root (object vs. array) return `null`.
+
+```ts
+function diff(a: unknown, b: unknown): Delta | null
+```
+
+**Delta format (JSON-serializable):**
+
+| Entry type | Shape | Meaning |
+|---|---|---|
+| Added key | `[newValue]` | key was absent in `a`, present in `b` |
+| Replaced value | `[oldValue, newValue]` | key existed in both; value changed |
+| Removed key | `[oldValue, 0, 0]` | key was present in `a`, absent in `b` |
+| Nested object | `ObjectDelta` | both sides are plain objects; recurse |
+| Array context | `{ _t: 'a', _l: number, [index]: entry }` | both sides are arrays; `_l` = new length |
+
+Only changed keys appear in the delta — unchanged keys are omitted.
+
+### `patch(target, delta): unknown`
+
+Applies a delta produced by `diff` to `target`. Returns the new value without mutating `target`. Pass `null` as the delta to return `target` unchanged.
+
+```ts
+function patch(target: unknown, delta: Delta | null): unknown
+```
+
+### Types
+
+```ts
+type Edit = [unknown] | [unknown, unknown] | [unknown, 0, 0]
+type ObjectDelta = { [key: string]: unknown }
+type ArrayDelta  = { _t: 'a'; _l: number; [key: string]: unknown }
+type Delta       = ObjectDelta | ArrayDelta
+```
+
+### Examples
+
+```ts
+import { diff, patch } from '@toolcase/base'
+
+// object diff
+const a = { user: 'Alice', score: 10, tags: ['a', 'b'] }
+const b = { user: 'Alice', score: 99, tags: ['a', 'b', 'c'], active: true }
+
+const delta = diff(a, b)
+// { score: [10, 99], tags: { _t: 'a', _l: 3, '2': ['c'] }, active: [true] }
+
+const result = patch(a, delta)
+// { user: 'Alice', score: 99, tags: ['a', 'b', 'c'], active: true }
+
+// round-trip guarantee
+patch(a, diff(a, b))  // deep-equals b
+
+// no change
+diff(a, a)            // null
+patch(a, null)        // returns a (same reference)
+
+// array diff
+const x = [1, 2, 3]
+const y = [1, 99, 3, 4]
+patch(x, diff(x, y))  // [1, 99, 3, 4]
 ```
 
 ---

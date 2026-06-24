@@ -1,0 +1,100 @@
+// Dungeon › tc-perk-picker — gilded perk cards. Token swap recolours; structural
+// rules add the layered wood-gradient card fill with inset bevel, the radial
+// medallion icon well, display-caps perk names, and the gold-glow selected state.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-perk-picker {
+        --bs-perk-picker-card-border: var(--fg-gold-deep);
+        --bs-perk-picker-card-hover-border: var(--fg-gold);
+
+        --bs-perk-picker-selected-border: var(--fg-gold-bright);
+        --bs-perk-picker-selected-color: var(--fg-gold-bright);
+        --bs-perk-picker-selected-desc-color: var(--fg-parch-3);
+
+        --bs-perk-picker-icon-size: 3rem;
+        --bs-perk-picker-icon-svg-size: 1.5rem;
+        --bs-perk-picker-icon-color: var(--fg-gold-bright);
+        --bs-perk-picker-icon-selected-color: var(--fg-gold-bright);
+
+        --bs-perk-picker-name-color: var(--fg-gold-bright);
+        --bs-perk-picker-description-color: var(--fg-parch-3);
+    }
+
+    // Card: layered wood gradient + gilded inset bevel (base ships flat slate).
+    .tc-perk-picker-card {
+        background:
+            linear-gradient(180deg, rgba(232, 220, 196, 0.04), rgba(0, 0, 0, 0.18)),
+            radial-gradient(120% 80% at 50% 0%, #2e2418 0%, #1a130c 70%);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18),
+            0 4px 12px rgba(0, 0, 0, 0.5);
+
+        &:hover:not(.is-selected):not(.is-locked) {
+            background:
+                linear-gradient(180deg, rgba(232, 220, 196, 0.04), rgba(0, 0, 0, 0.18)),
+                radial-gradient(120% 80% at 50% 0%, #2e2418 0%, #1a130c 70%);
+            filter: brightness(1.15);
+            transform: translateY(-1px);
+        }
+
+        // Locked: desaturated ink wash so locked perks read as "sealed" not just faded.
+        &.is-locked {
+            filter: grayscale(0.4) brightness(0.8);
+        }
+
+        // Selected: gold glow, no solid ink fill.
+        &.is-selected {
+            background:
+                linear-gradient(180deg, rgba(232, 220, 196, 0.04), rgba(0, 0, 0, 0.18)),
+                radial-gradient(120% 80% at 50% 0%, #2e2418 0%, #1a130c 70%);
+            box-shadow:
+                inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+                inset 0 1px 0 rgba(232, 200, 120, 0.3),
+                0 0 18px rgba(232, 200, 120, 0.45);
+        }
+    }
+
+    // Icon well: radial bronze medallion with inset bevel.
+    .tc-perk-picker-card-icon {
+        background: radial-gradient(80% 80% at 50% 30%, #2a1f14, #0e0905);
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18),
+            inset 0 -2px 6px rgba(0, 0, 0, 0.6);
+        text-shadow: 0 1px 2px #000;
+
+        .is-selected & {
+            background: radial-gradient(80% 80% at 50% 30%, #2a1f14, #0e0905);
+            border-color: var(--fg-gold-bright);
+            box-shadow:
+                inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+                inset 0 1px 0 rgba(232, 200, 120, 0.3),
+                0 0 12px rgba(232, 200, 120, 0.5);
+        }
+    }
+
+    // Perk name: display caps gilded.
+    .tc-perk-picker-card-name {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        text-shadow: 0 1px 2px #000;
+    }
+
+    // Description: pin to body serif font to match fantasy reference.
+    .tc-perk-picker-card-description {
+        font-family: var(--fg-body);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    tc-theme[name='dungeon'],
+    [data-tc-theme='dungeon'] {
+        .tc-perk-picker-card:hover:not(.is-selected):not(.is-locked) {
+            transform: none;
+        }
+    }
+}

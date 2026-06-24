@@ -24,15 +24,13 @@
         "@toolcase/base": "*",
         "@toolcase/logging": "*",
         "@toolcase/serializer": "*",
-        "@toolcase/react-components": "*",
-        "@toolcase/game-components": "*",
+        "@toolcase/web-components": "*",
         "@toolcase/phaser-plus": "*",
         "@toolcase/node": "*",
         "phaser": "^4.0.0",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",
         "react-router": "^7.5.0",
-        "bootstrap": "^5.3.3",
         "bootstrap-icons": "^1.11.3"
     },
     "devDependencies": {

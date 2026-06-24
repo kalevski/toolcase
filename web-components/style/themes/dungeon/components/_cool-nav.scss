@@ -1,0 +1,84 @@
+// Dungeon › tc-cool-nav — gilded site chrome.
+// Token swaps repoint bg, border, and accent vars; structural rules add the
+// gold bottom rule, display-caps brand, and gold diamond accent dot.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Host token swap ───────────────────────────────────────────────────────
+
+    tc-cool-nav {
+        --bs-cool-nav-bg: var(--fg-leather);
+        --bs-cool-nav-color: var(--fg-parch);
+        --bs-cool-nav-border: var(--fg-gold-deep);
+        --bs-cool-nav-brand-color: var(--fg-parch);
+        --bs-cool-nav-brand-dot: var(--fg-gold-bright);
+        --bs-cool-nav-link-color: var(--fg-parch-2);
+        --bs-cool-nav-link-hover-color: var(--fg-gold-bright);
+        --bs-cool-nav-link-active-color: var(--fg-parch);
+        --bs-cool-nav-link-active-line: var(--fg-gold);
+        --bs-cool-nav-toggler-color: var(--fg-parch);
+        --bs-cool-nav-collapse-bg: var(--fg-ink-2);
+        --bs-cool-nav-scrolled-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.55);
+    }
+
+    // ── Dark variant — repoint hardcoded rgba literals ────────────────────────
+
+    tc-cool-nav.tc-cool-nav--dark {
+        --bs-cool-nav-bg: var(--fg-ink);
+        --bs-cool-nav-color: var(--fg-parch);
+        --bs-cool-nav-border: var(--fg-gold-shadow);
+        --bs-cool-nav-brand-color: var(--fg-parch);
+        --bs-cool-nav-link-color: var(--fg-parch-dim);
+        --bs-cool-nav-link-hover-color: var(--fg-gold-bright);
+        --bs-cool-nav-link-active-color: var(--fg-parch);
+        --bs-cool-nav-toggler-color: var(--fg-parch);
+        --bs-cool-nav-collapse-bg: var(--fg-ink);
+        --bs-cool-nav-scrolled-shadow: 0 2px 16px 0 rgba(0, 0, 0, 0.75);
+    }
+
+    // ── Inner nav bar — gold bottom rule + bevel highlight ────────────────────
+
+    .tc-cool-nav-inner {
+        border-bottom: none;
+        box-shadow: var(--fg-bevel-top), 0 1px 0 0 var(--fg-gold-deep);
+    }
+
+    // ── Brand — switch mono to display caps ───────────────────────────────────
+
+    .tc-cool-nav-brand {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 600;
+    }
+
+    // ── Brand accent dot — gold diamond ──────────────────────────────────────
+    // The base keeps the dot square (no border-radius); we repoint the fill to
+    // the gold-edge gradient and rotate 45deg for a diamond shape.
+
+    .tc-cool-nav-brand-dot {
+        background: var(--fg-gold-edge);
+        transform: rotate(45deg);
+        border-radius: 0;
+    }
+
+    // ── Nav links — override hardcoded sans to body serif ────────────────────
+
+    .tc-cool-nav-link {
+        font-family: var(--fg-body);
+        font-size: 0.875rem;
+        letter-spacing: 0.03em;
+    }
+
+    // ── Toggler — square edges (already square in base, enforce no rounding) ──
+
+    .tc-cool-nav-toggler {
+        border-radius: 0;
+        border-color: var(--fg-gold-deep);
+
+        &:hover {
+            background: rgba(201, 169, 97, 0.1); // --fg-gold at low opacity
+        }
+    }
+}

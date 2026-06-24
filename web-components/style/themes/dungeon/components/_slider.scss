@@ -1,0 +1,47 @@
+// Dungeon › tc-slider — gilded gauge with cabochon thumb and mono tooltip.
+// Foundation already handles track/fill/tick/label/error color via --tc-* remaps.
+// This partial adds gradient depth to the fill and thumb, a bevel highlight on
+// the thumb, mono tooltip numerals, and display-caps label treatment.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Token swap on host ────────────────────────────────────────────────────
+
+    tc-slider {
+        // Gradient gold fill instead of flat accent colour.
+        --bs-slider-fill-bg: var(--fg-gold-edge);
+        // Thumb reads as polished metal rather than flat ink.
+        --bs-slider-thumb-bg: var(--fg-gold-edge);
+        // Warm parchment text on the dark ink tooltip (replaces hardcoded #fff).
+        --bs-slider-tooltip-color: var(--fg-parch);
+    }
+
+    // ── Thumb — beveled cabochon ──────────────────────────────────────────────
+
+    .tc-slider-thumb {
+        // Top highlight band gives the circle a polished convex look.
+        box-shadow: var(--fg-bevel-top), var(--tc-shadow-md);
+
+        &:hover {
+            box-shadow: var(--fg-bevel-top), var(--tc-shadow-md);
+        }
+
+        // Focus ring is already gold via --tc-focus-ring; no override needed.
+    }
+
+    // ── Tooltip — inscribed mono numerals ─────────────────────────────────────
+
+    .tc-slider-tooltip {
+        font-family: var(--fg-mono);
+    }
+
+    // ── Label — gilded display caps ───────────────────────────────────────────
+
+    .tc-slider-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 600;
+    }
+}

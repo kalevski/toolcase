@@ -20,6 +20,13 @@ export const REPLAY_END = 'replay.end'
 
 export default class ReplayRecorder extends Feature {
 
+    /**
+     * Maximum number of frames the recording buffer will hold.
+     * When the limit is reached, recording stops automatically and a console
+     * warning is emitted. Set to 0 (default) for an unbounded buffer.
+     */
+    maxFrames: number = 0
+
     private mode: ReplayMode = 'idle'
 
     private currentTick: number = 0
@@ -76,6 +83,18 @@ export default class ReplayRecorder extends Feature {
         return this
     }
 
+    /**
+     * Jump playback to the given frame index. No-op when not playing.
+     * Useful for scrubbing from a `TimelinePanel` bound via `bindReplay`.
+     */
+    seekTo(frameIndex: number): this {
+        if (this.mode !== 'playing' || !this.currentSession) return this
+        const total = this.currentSession.frames.length
+        this.playCursor = Math.max(0, Math.min(Math.floor(frameIndex), total))
+        this.currentTick = this.playCursor
+        return this
+    }
+
     readInput<T = unknown>(key: string): T | undefined {
         if (this.mode === 'playing') {
             const frame = this.currentSession?.frames[this.playCursor]
@@ -107,6 +126,13 @@ export default class ReplayRecorder extends Feature {
 
     private advance(): void {
         if (this.mode === 'recording') {
+            if (this.maxFrames > 0 && this.currentSession!.frames.length >= this.maxFrames) {
+                console.warn(
+                    `[ReplayRecorder] buffer cap reached (${this.maxFrames} frames); recording stopped`
+                )
+                this.mode = 'idle'
+                return
+            }
             this.currentSession!.frames.push({
                 tick: this.currentTick,
                 inputs: { ...this.currentInputs }

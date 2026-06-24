@@ -1,0 +1,24 @@
+// Dungeon › tc-scroll-area — bronze rail in a recessed dark groove.
+// Foundation already gilds the thumb (--tc-border-strong → --fg-gold) and the
+// focus ring (--tc-app-accent → --fg-gold). This override deepens the thumb to
+// aged bronze, adds a recessed-groove track, and widens the scrollbar so the
+// metal rail reads legibly. An inset shadow is added to .tc-scroll-area so that
+// if the consumer opts in to the border it reads as a recessed bevel rather
+// than a flat hairline. No notches, bevels, or caps — this is inner utility
+// chrome framed by whatever panel wraps it.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-scroll-area {
+        --bs-scroll-area-thumb-color: var(--fg-bronze);
+        --bs-scroll-area-track-color: rgba(0, 0, 0, 0.35);
+        --bs-scroll-area-scrollbar-size: 10px;
+    }
+
+    // When the consumer opts in to a border, render it as a recessed bevel
+    // rather than a flat hairline — the inset shadow adds depth without
+    // changing the borderless default appearance.
+    .tc-scroll-area {
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.5);
+    }
+}

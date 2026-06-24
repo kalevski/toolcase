@@ -6,15 +6,6 @@ import type {
     PackingSprite as Sprite,
     PackingSortStrategy as SortStrategy,
 } from '@toolcase/base'
-import {
-    Button,
-    Card,
-    Checkbox,
-    CodeSnippet,
-    Heading,
-    Select,
-    Text,
-} from '@toolcase/react-components'
 
 const code = `import { Packing } from '@toolcase/base'
 
@@ -147,65 +138,91 @@ export const PackingDemo = () => {
         : 0
 
     return (
-        <Card>
-            <Heading as="h3">Packing</Heading>
-            <Text as="p" variant="muted">
+        <div className="card">
+            <div className="card-body">
+            <h3 className="card-title">Packing</h3>
+            <p className="text-body-secondary">
                 Bin-packing toolkit — pack 2D rects into atlas pages with five algorithms (MaxRects,
                 Guillotine, Shelf, Skyline, BinaryTree). Supports rotation, padding, sort presets,
                 multi-page planning, and POT sizing. Useful for sprite atlases and texture packers.
-            </Text>
-            <CodeSnippet code={code.trim()} language="typescript" />
+            </p>
+            <tc-code-snippet code={code.trim()} language="typescript"></tc-code-snippet>
 
             <div className="row g-3 mt-2">
                 <div className="col-sm-6 col-lg-3">
-                    <Select
-                        label="Algorithm"
-                        size="small"
+                    <label className="form-label" htmlFor="packing-algorithm">
+                        Algorithm
+                    </label>
+                    <select
+                        id="packing-algorithm"
+                        className="form-select form-select-sm"
                         value={algorithm}
                         onChange={(e) => setAlgorithm(e.target.value as AlgorithmKind)}
-                        options={ALGOS}
-                    />
+                    >
+                        {ALGOS.map((o) => (
+                            <option key={o.value} value={o.value}>
+                                {o.label}
+                            </option>
+                        ))}
+                    </select>
                 </div>
                 <div className="col-sm-6 col-lg-3">
-                    <Select
-                        label="Sort"
-                        size="small"
+                    <label className="form-label" htmlFor="packing-sort">
+                        Sort
+                    </label>
+                    <select
+                        id="packing-sort"
+                        className="form-select form-select-sm"
                         value={sort}
                         onChange={(e) => setSort(e.target.value as SortStrategy | 'none')}
-                        options={SORTS}
-                    />
+                    >
+                        {SORTS.map((o) => (
+                            <option key={o.value} value={o.value}>
+                                {o.label}
+                            </option>
+                        ))}
+                    </select>
                 </div>
                 <div className="col-sm-6 col-lg-3">
-                    <Select
-                        label="Sprites"
-                        size="small"
+                    <label className="form-label" htmlFor="packing-count">
+                        Sprites
+                    </label>
+                    <select
+                        id="packing-count"
+                        className="form-select form-select-sm"
                         value={String(count)}
                         onChange={(e) => setCount(Number(e.target.value))}
-                        options={[
-                            { value: '20', label: '20' },
-                            { value: '40', label: '40' },
-                            { value: '60', label: '60' },
-                            { value: '100', label: '100' },
-                            { value: '160', label: '160' },
-                        ]}
-                    />
+                    >
+                        <option value="20">20</option>
+                        <option value="40">40</option>
+                        <option value="60">60</option>
+                        <option value="100">100</option>
+                        <option value="160">160</option>
+                    </select>
                 </div>
                 <div className="col-sm-6 col-lg-3 d-flex align-items-end gap-2">
-                    <Button size="small" onClick={() => setSeed(seed + 1)}>
+                    <button type="button" className="btn btn-primary btn-sm" onClick={() => setSeed(seed + 1)}>
                         Reseed
-                    </Button>
-                    <Button size="small" variant="secondary" outline onClick={pack}>
+                    </button>
+                    <button type="button" className="btn btn-outline-secondary btn-sm" onClick={pack}>
                         Repack
-                    </Button>
+                    </button>
                 </div>
             </div>
 
             <div className="mt-3">
-                <Checkbox
-                    label="Allow rotation"
-                    checked={allowRotation}
-                    onChange={(e) => setAllowRotation(e.target.checked)}
-                />
+                <div className="form-check">
+                    <input
+                        className="form-check-input"
+                        type="checkbox"
+                        id="packing-allow-rotation"
+                        checked={allowRotation}
+                        onChange={(e) => setAllowRotation(e.target.checked)}
+                    />
+                    <label className="form-check-label" htmlFor="packing-allow-rotation">
+                        Allow rotation
+                    </label>
+                </div>
             </div>
 
             <div className="row g-2 mt-3">
@@ -221,7 +238,8 @@ export const PackingDemo = () => {
                     <PageView key={i} index={i} width={page.width} height={page.height} occupancy={page.occupancy} sprites={page.sprites} />
                 ))}
             </div>
-        </Card>
+            </div>
+        </div>
     )
 }
 

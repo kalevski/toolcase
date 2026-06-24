@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { useRouter } from 'next/navigation'
-import { EmptyState, Button } from '@toolcase/react-components'
+import { tcIcon } from '@/lib/icons'
 
 export function NoAccessClient({ login }: { login: string }) {
     const router = useRouter()
@@ -20,16 +20,16 @@ export function NoAccessClient({ login }: { login: string }) {
                 padding: '2rem',
             }}
         >
-            <EmptyState icon="lock">
+            <tc-empty-state icon={tcIcon('lock')}>
                 <h2>No permissions yet</h2>
                 <p>
                     Signed in as <strong>@{login}</strong>. Your account has no access — ask an admin to grant
                     you a role.
                 </p>
-                <Button variant="secondary" outline onClick={logout}>
+                <tc-button variant="secondary" outline onClick={logout}>
                     Logout
-                </Button>
-            </EmptyState>
+                </tc-button>
+            </tc-empty-state>
         </div>
     )
 }

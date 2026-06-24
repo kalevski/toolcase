@@ -1,5 +1,5 @@
 import { Cache } from '@toolcase/base'
-import { createHash } from 'node:crypto'
+import { createHash, timingSafeEqual } from 'node:crypto'
 import { OIDCVerificationError, OAuth2ProtocolError } from '../errors'
 import { fetchWithOptions, type HttpOptions } from '../http/options'
 import type { OAuth2ProviderConfig, ClientAuthMethod } from './types'
@@ -36,9 +36,7 @@ export interface OIDCDiscoveryDocument {
 
 const DISCOVERY_TTL_MS = 24 * 60 * 60 * 1000
 
-let discoveryFetchOpts: HttpOptions = {}
-
-let discoveryCache = new Cache<OIDCDiscoveryDocument>(async (issuer: string) => fetchDiscovery(issuer, discoveryFetchOpts), DISCOVERY_TTL_MS)
+let discoveryCache = new Cache<OIDCDiscoveryDocument>((issuer: string) => fetchDiscovery(issuer, {}), DISCOVERY_TTL_MS)
 
 async function fetchDiscovery(issuer: string, opts: HttpOptions): Promise<OIDCDiscoveryDocument> {
 	const base = issuer.endsWith('/') ? issuer.slice(0, -1) : issuer
@@ -64,16 +62,22 @@ async function fetchDiscovery(issuer: string, opts: HttpOptions): Promise<OIDCDi
 	if (typeof parsed.issuer !== 'string' || typeof parsed.token_endpoint !== 'string' || typeof parsed.authorization_endpoint !== 'string' || typeof parsed.jwks_uri !== 'string') {
 		throw new OAuth2ProtocolError('discovery document missing required fields')
 	}
+	if (parsed.issuer !== base && parsed.issuer !== issuer) {
+		throw new OAuth2ProtocolError(`discovery issuer mismatch: requested ${issuer}, got ${parsed.issuer}`)
+	}
 	return parsed as OIDCDiscoveryDocument
 }
 
 export async function fetchOIDCDiscovery(issuer: string, opts: HttpOptions & { cacheTtlMs?: number } = {}): Promise<OIDCDiscoveryDocument> {
-	if (opts.cacheTtlMs === 0) {
-		return fetchDiscovery(issuer, opts)
+	const { cacheTtlMs, ...fetchOpts } = opts
+	// Bypass the shared cache when caller supplies a custom fetchImpl or headers — these
+	// are caller-specific and cannot be keyed into a shared cache without a race or
+	// confused-deputy / SSRF hazard.
+	if (cacheTtlMs === 0 || fetchOpts.fetchImpl !== undefined || fetchOpts.headers !== undefined) {
+		return fetchDiscovery(issuer, fetchOpts)
 	}
-	discoveryFetchOpts = opts
-	if (typeof opts.cacheTtlMs === 'number' && opts.cacheTtlMs > 0) {
-		discoveryCache.setMS(opts.cacheTtlMs)
+	if (typeof cacheTtlMs === 'number' && cacheTtlMs > 0) {
+		discoveryCache.setMS(cacheTtlMs)
 	}
 	const result = await discoveryCache.get(issuer)
 	if (!result) throw new OAuth2ProtocolError('discovery returned empty')
@@ -84,24 +88,27 @@ export function clearDiscoveryCache(issuer?: string): void {
 	if (issuer) {
 		discoveryCache.invalidate(issuer)
 	} else {
-		discoveryCache = new Cache<OIDCDiscoveryDocument>(async (i: string) => fetchDiscovery(i, discoveryFetchOpts), DISCOVERY_TTL_MS)
+		discoveryCache = new Cache<OIDCDiscoveryDocument>((i: string) => fetchDiscovery(i, {}), DISCOVERY_TTL_MS)
 	}
 }
 
 const DEFAULT_JWKS_TTL_MS = 600_000
 
-let jwksCache = new Cache<any>(async (jwksUri: string) => createJwksGetter(jwksUri), DEFAULT_JWKS_TTL_MS)
+let jwksCache = new Cache<any>(async (jwksUri: string) => createJwksGetter(jwksUri, {}), DEFAULT_JWKS_TTL_MS)
 
-async function createJwksGetter(jwksUri: string): Promise<any> {
+async function createJwksGetter(jwksUri: string, opts: HttpOptions): Promise<any> {
 	const j = await loadJose()
-	return j.createRemoteJWKSet(new URL(jwksUri))
+	return j.createRemoteJWKSet(new URL(jwksUri), {
+		[j.customFetch]: opts.fetchImpl,
+		timeoutDuration: opts.timeoutMs,
+	})
 }
 
 export function clearJwksCache(jwksUri?: string): void {
 	if (jwksUri) {
 		jwksCache.invalidate(jwksUri)
 	} else {
-		jwksCache = new Cache<any>(async (uri: string) => createJwksGetter(uri), DEFAULT_JWKS_TTL_MS)
+		jwksCache = new Cache<any>(async (uri: string) => createJwksGetter(uri, {}), DEFAULT_JWKS_TTL_MS)
 	}
 }
 
@@ -113,6 +120,7 @@ export interface VerifyIdTokenOptions {
 	clockToleranceSeconds?: number
 	jwksCacheMs?: number
 	allowedAlgorithms?: readonly string[]
+	http?: HttpOptions
 }
 
 export interface OIDCVerifyContext {
@@ -152,13 +160,24 @@ export async function verifyIdToken(idToken: string, options: VerifyIdTokenOptio
 		if (!options.jwksUri) {
 			throw new OIDCVerificationError('verifyIdToken: jwksUri or jwks is required')
 		}
-		if (typeof options.jwksCacheMs === 'number' && options.jwksCacheMs > 0) {
-			jwksCache.setMS(options.jwksCacheMs)
+		const httpOpts = options.http ?? {}
+		// Bypass the shared cache when caller supplies a custom fetchImpl — per-call
+		// fetch impls cannot be keyed into a shared cache without SSRF / confused-deputy hazard.
+		if (httpOpts.fetchImpl !== undefined) {
+			jwks = await createJwksGetter(options.jwksUri, httpOpts)
+		} else {
+			if (typeof options.jwksCacheMs === 'number' && options.jwksCacheMs > 0) {
+				jwksCache.setMS(options.jwksCacheMs)
+			}
+			jwks = await jwksCache.get(options.jwksUri)
+			if (!jwks) throw new OIDCVerificationError('jwks fetch failed')
 		}
-		jwks = await jwksCache.get(options.jwksUri)
-		if (!jwks) throw new OIDCVerificationError('jwks fetch failed')
 	}
 	const algorithms = options.allowedAlgorithms ? [...options.allowedAlgorithms] : [...DEFAULT_ALG_LIST]
+	const SYM = /^(HS\d{3}|none)$/i
+	if (algorithms.some(a => SYM.test(a))) {
+		throw new OIDCVerificationError('symmetric/none algorithms are not allowed for ID tokens')
+	}
 	let verifyResult: { payload: any; protectedHeader: any }
 	try {
 		verifyResult = await j.jwtVerify(idToken, jwks as any, {
@@ -172,7 +191,7 @@ export async function verifyIdToken(idToken: string, options: VerifyIdTokenOptio
 	}
 	const { payload, protectedHeader } = verifyResult
 	if (ctx.nonce !== undefined) {
-		if (payload.nonce !== ctx.nonce) {
+		if (typeof payload.nonce !== 'string' || !timingSafeStringEqual(payload.nonce, ctx.nonce)) {
 			throw new OIDCVerificationError('nonce mismatch')
 		}
 	}
@@ -198,17 +217,13 @@ export async function verifyIdToken(idToken: string, options: VerifyIdTokenOptio
 			}
 		}
 	}
-	if (ctx.accessToken !== undefined && typeof payload.at_hash === 'string') {
-		const expected = computeHalfHash(ctx.accessToken, protectedHeader.alg)
-		if (expected !== payload.at_hash) {
-			throw new OIDCVerificationError('at_hash mismatch')
-		}
+	if (ctx.accessToken !== undefined) {
+		if (typeof payload.at_hash !== 'string') throw new OIDCVerificationError('at_hash required but absent')
+		if (!timingSafeStringEqual(computeHalfHash(ctx.accessToken, protectedHeader.alg), payload.at_hash)) throw new OIDCVerificationError('at_hash mismatch')
 	}
-	if (ctx.authorizationCode !== undefined && typeof payload.c_hash === 'string') {
-		const expected = computeHalfHash(ctx.authorizationCode, protectedHeader.alg)
-		if (expected !== payload.c_hash) {
-			throw new OIDCVerificationError('c_hash mismatch')
-		}
+	if (ctx.authorizationCode !== undefined) {
+		if (typeof payload.c_hash !== 'string') throw new OIDCVerificationError('c_hash required but absent')
+		if (!timingSafeStringEqual(computeHalfHash(ctx.authorizationCode, protectedHeader.alg), payload.c_hash)) throw new OIDCVerificationError('c_hash mismatch')
 	}
 	return {
 		header: { alg: protectedHeader.alg, kid: protectedHeader.kid, typ: protectedHeader.typ },
@@ -217,17 +232,31 @@ export async function verifyIdToken(idToken: string, options: VerifyIdTokenOptio
 	}
 }
 
+// Maps JWT algorithm identifiers to the hash used for at_hash/c_hash per RFC 7519 §3.
+// EdDSA maps to sha512 (Ed25519 convention, RFC 8037 §2.4).
+// Ed448 uses SHAKE-256 internally, which has no standardised at_hash mapping —
+// tokens signed with Ed448 will be rejected by this function (fail-closed).
+const ALG_HASH_MAP: Readonly<Record<string, string>> = {
+	RS256: 'sha256', ES256: 'sha256', PS256: 'sha256',
+	RS384: 'sha384', ES384: 'sha384', PS384: 'sha384',
+	RS512: 'sha512', ES512: 'sha512', PS512: 'sha512',
+	EdDSA: 'sha512'
+}
+
 function computeHalfHash(value: string, alg: string): string {
-	const algoMap: Record<string, string> = {
-		RS256: 'sha256', ES256: 'sha256', PS256: 'sha256', HS256: 'sha256',
-		RS384: 'sha384', ES384: 'sha384', PS384: 'sha384', HS384: 'sha384',
-		RS512: 'sha512', ES512: 'sha512', PS512: 'sha512', HS512: 'sha512',
-		EdDSA: 'sha512'
-	}
-	const algo = algoMap[alg] ?? 'sha256'
+	const algo = ALG_HASH_MAP[alg]
+	if (!algo) throw new OIDCVerificationError(`computeHalfHash: unsupported algorithm for at_hash/c_hash: ${alg}`)
 	const digest = createHash(algo).update(value).digest()
 	const half = digest.subarray(0, digest.length / 2)
 	return half.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
+function timingSafeStringEqual(a: string, b: string): boolean {
+	const bufA = Buffer.from(a, 'utf8')
+	const bufB = Buffer.from(b, 'utf8')
+	// Length mismatch means definite inequality; length is not secret for hash outputs or nonces.
+	if (bufA.length !== bufB.length) return false
+	return timingSafeEqual(bufA, bufB)
 }
 
 export interface OidcProviderInput {

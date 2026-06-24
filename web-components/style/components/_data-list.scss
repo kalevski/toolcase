@@ -1,0 +1,247 @@
+// tc-data-list — generic data-driven row list. Owns the shared skeleton every
+// domain list repeats: a bordered panel, an optional header, flex rows with a
+// text block + trailing slot, per-row action buttons, an empty state, and an
+// optional selectable (listbox) highlight. Domain rows are supplied via the
+// `renderRow` hook and reuse these BEM parts. Sharp corners; 1px hairlines.
+// All cosmetics flow through --bs-data-list-* custom properties.
+
+@use '../foundation/tokens' as *;
+
+tc-data-list {
+    --bs-data-list-bg: var(--tc-surface);
+    --bs-data-list-border: 1px solid var(--tc-border);
+    --bs-data-list-separator: 1px solid var(--tc-border);
+    --bs-data-list-row-hover-bg: var(--tc-surface-hover, var(--tc-surface-muted));
+    --bs-data-list-row-selected-bg: var(--tc-surface-muted);
+
+    --bs-data-list-header-bg: var(--tc-surface-muted);
+    --bs-data-list-title-color: var(--tc-text);
+    --bs-data-list-title-font-size: 0.8125rem;
+
+    --bs-data-list-primary-color: var(--tc-text);
+    --bs-data-list-primary-font-size: 0.875rem;
+    --bs-data-list-secondary-color: var(--tc-text-muted);
+    --bs-data-list-secondary-font-size: 0.75rem;
+    --bs-data-list-trailing-color: var(--tc-text-faint);
+    --bs-data-list-trailing-font-size: 0.6875rem;
+
+    --bs-data-list-action-bg: var(--tc-surface);
+    --bs-data-list-action-color: var(--tc-text);
+    --bs-data-list-action-border: 1px solid var(--tc-border-strong);
+    --bs-data-list-action-hover-bg: var(--tc-app-accent);
+    --bs-data-list-action-hover-color: var(--tc-app-accent-contrast);
+
+    --bs-data-list-empty-color: var(--tc-text-faint);
+}
+
+// ── Panel shell ──────────────────────────────────────────────────────────────
+
+.tc-data-list {
+    display: flex;
+    flex-direction: column;
+    background: var(--bs-data-list-bg);
+    border: var(--bs-data-list-border);
+    border-radius: 0;
+    overflow: hidden;
+}
+
+// ── Header ───────────────────────────────────────────────────────────────────
+
+.tc-data-list__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.5rem 0.875rem;
+    background: var(--bs-data-list-header-bg);
+    border-bottom: var(--bs-data-list-separator);
+}
+
+.tc-data-list__title {
+    font-size: var(--bs-data-list-title-font-size);
+    font-weight: 600;
+    letter-spacing: 0.025em;
+    color: var(--bs-data-list-title-color);
+}
+
+// ── Body ─────────────────────────────────────────────────────────────────────
+
+.tc-data-list__body {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+// ── Row ──────────────────────────────────────────────────────────────────────
+
+.tc-data-list__row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.875rem;
+    min-height: 44px;
+    background: transparent;
+    border-bottom: var(--bs-data-list-separator);
+    transition: background var(--tc-transition-fast, 0.15s ease);
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    &:hover {
+        background: var(--bs-data-list-row-hover-bg);
+    }
+
+    &--selected {
+        background: var(--bs-data-list-row-selected-bg);
+        box-shadow: inset 2px 0 0 var(--tc-app-accent);
+    }
+}
+
+// Selectable rows are focusable options.
+.tc-data-list[selectable] .tc-data-list__row {
+    cursor: pointer;
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: -2px;
+    }
+}
+
+// ── Leading icon ─────────────────────────────────────────────────────────────
+
+.tc-data-list__icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bs-data-list-secondary-color);
+
+    svg {
+        width: 1rem;
+        height: 1rem;
+    }
+}
+
+// ── Text block ───────────────────────────────────────────────────────────────
+
+.tc-data-list__text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.tc-data-list__primary {
+    font-size: var(--bs-data-list-primary-font-size);
+    font-weight: 500;
+    color: var(--bs-data-list-primary-color);
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tc-data-list__secondary {
+    font-size: var(--bs-data-list-secondary-font-size);
+    color: var(--bs-data-list-secondary-color);
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// ── Trailing meta ────────────────────────────────────────────────────────────
+
+.tc-data-list__trailing {
+    flex-shrink: 0;
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-data-list-trailing-font-size);
+    color: var(--bs-data-list-trailing-color);
+    white-space: nowrap;
+}
+
+// ── Action button ────────────────────────────────────────────────────────────
+
+.tc-data-list__action {
+    appearance: none;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 0 0.625rem;
+    min-height: 1.75rem;
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.025em;
+    line-height: 1;
+    color: var(--bs-data-list-action-color);
+    background: var(--bs-data-list-action-bg);
+    border: var(--bs-data-list-action-border);
+    border-radius: 0;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+        background var(--tc-transition-fast, 0.15s ease),
+        color var(--tc-transition-fast, 0.15s ease),
+        transform var(--tc-transition-fast, 0.15s ease);
+
+    &:hover:not(:disabled) {
+        background: var(--bs-data-list-action-hover-bg);
+        color: var(--bs-data-list-action-hover-color);
+        transform: translateY(-1px);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &:disabled {
+        opacity: 0.45;
+        pointer-events: none;
+        cursor: default;
+    }
+
+    svg {
+        width: 0.875rem;
+        height: 0.875rem;
+    }
+}
+
+// ── Empty state ──────────────────────────────────────────────────────────────
+
+.tc-data-list__empty {
+    list-style: none;
+    padding: 1rem 0.875rem;
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--bs-data-list-empty-color);
+    text-align: center;
+}
+
+// ── 44px coarse touch targets ────────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-data-list__action {
+        min-height: 44px;
+    }
+}
+
+// ── Reduced motion ───────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-data-list__row,
+    .tc-data-list__action {
+        transition: background var(--tc-transition-fast, 0.15s ease);
+    }
+
+    .tc-data-list__action:hover:not(:disabled) {
+        transform: none;
+    }
+}

@@ -1,0 +1,108 @@
+// tc-avatar — circular user avatar: image, initials, or lucide user glyph.
+// border-radius: 50% is a sanctioned exception for genuinely circular shapes
+// (styleguide principle 3). The image clips itself via its own border-radius so
+// the container can stay overflow:visible and the status dot can peek out.
+
+@use 'sass:map';
+@use '../foundation/tokens' as *;
+
+.tc-avatar {
+    --bs-avatar-size: 40px;
+    --bs-avatar-font-size: 0.875rem;
+    --bs-avatar-bg: var(--tc-surface-muted);
+    --bs-avatar-color: var(--tc-text-muted);
+    --bs-avatar-status-size: 9px;
+    --bs-avatar-status-ring: 2px;
+    --bs-avatar-status-offset: 2px;
+
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: var(--bs-avatar-size);
+    height: var(--bs-avatar-size);
+    border-radius: 50%;
+    background-color: var(--bs-avatar-bg);
+    color: var(--bs-avatar-color);
+    font-size: var(--bs-avatar-font-size);
+    font-weight: 600;
+    vertical-align: middle;
+    user-select: none;
+    // No overflow:hidden — status dot needs to overlap the ring at the edge.
+    // Image clips itself; see .tc-avatar-img below.
+}
+
+.tc-avatar-small {
+    --bs-avatar-size: 28px;
+    --bs-avatar-font-size: 0.6875rem;
+    --bs-avatar-status-size: 7px;
+    --bs-avatar-status-offset: 1px;
+}
+
+.tc-avatar-large {
+    --bs-avatar-size: 56px;
+    --bs-avatar-font-size: 1.125rem;
+    --bs-avatar-status-size: 11px;
+    --bs-avatar-status-offset: 3px;
+}
+
+// Image — absolutely positioned to fill the circle; self-clips via border-radius.
+.tc-avatar-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+    border: 0;
+}
+
+// Placeholder glyph — scales to ~55% of the avatar diameter.
+.tc-avatar-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 55%;
+    height: 55%;
+
+    svg {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+// Initials — centred single/double letter.
+.tc-avatar-initials {
+    line-height: 1;
+    letter-spacing: 0.01em;
+}
+
+// Variant tints: soft background + matching dark-emphasis text.
+// Secondary is the default (slate ink); the rest follow the theme-colors maps.
+@each $name, $bg in $theme-colors-soft {
+    .tc-avatar-#{$name} {
+        --bs-avatar-bg: #{$bg};
+        --bs-avatar-color: #{map.get($theme-colors-emphasis, $name)};
+    }
+}
+
+// Status dot — small circle at the bottom-right edge.
+// box-shadow provides the tc-surface ring without affecting element dimensions.
+.tc-avatar-status {
+    position: absolute;
+    bottom: var(--bs-avatar-status-offset);
+    right: var(--bs-avatar-status-offset);
+    width: var(--bs-avatar-status-size);
+    height: var(--bs-avatar-status-size);
+    border-radius: 50%;
+    // tc-surface ring separates the dot from the avatar background.
+    box-shadow: 0 0 0 var(--bs-avatar-status-ring) var(--tc-surface);
+    background-color: var(--tc-text-faint); // offline / bare fallback
+
+    &-online  { background-color: var(--tc-success); }
+    &-busy    { background-color: var(--tc-danger); }
+    &-away    { background-color: var(--tc-warning); }
+    &-offline { background-color: var(--tc-text-faint); }
+}

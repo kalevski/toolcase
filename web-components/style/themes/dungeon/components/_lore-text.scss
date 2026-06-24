@@ -1,0 +1,46 @@
+// Dungeon › tc-lore-text — italic flavor prose with a gilded gradient rule on the left edge.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-lore-text {
+        --bs-lore-text-color: var(--fg-parch-3);
+        // Improvement 4: faint parchment wash so longer passages read as an aged page.
+        --bs-lore-text-bg: rgba(232, 220, 196, 0.04);
+        // Improvement 1: suppress the flat solid border; gradient rule is drawn via ::before.
+        --bs-lore-text-border-color: transparent;
+    }
+
+    // Improvement 1: gilded gradient hairline replaces the flat solid bar.
+    .tc-lore-text {
+        position: relative;
+        border-left: none;
+        padding-left: calc(1rem + 2px); // preserve original padding-left offset
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 2px;
+            height: 100%;
+            background: var(--fg-rule);
+        }
+    }
+
+    .tc-lore-text__content {
+        font-family: var(--fg-body);
+        font-style: italic;
+        // Improvement 3: shadow keeps parchment-3 italic legible over lighter wood bands.
+        text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+
+        // Improvement 2: Cinzel drop-cap anchors the prose in the dungeon serif register.
+        &::first-letter {
+            font-family: var(--fg-display);
+            color: var(--fg-gold);
+            font-size: 2.4em;
+            line-height: 1;
+            float: left;
+            margin-right: 0.08em;
+        }
+    }
+}

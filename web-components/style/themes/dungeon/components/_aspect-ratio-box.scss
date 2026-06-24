@@ -1,0 +1,8 @@
+// Dungeon › tc-aspect-ratio-box — purely structural layout primitive. It only
+// reserves an intrinsic aspect ratio for slotted content; its surface/border are
+// transparent by default and any chrome is the caller's concern. No fantasy
+// structure to attach — no override needed; the empty block compiles to nothing.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+}

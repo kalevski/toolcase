@@ -1,0 +1,37 @@
+// Dungeon › tc-resizable-panel — gilded seam between wood panes.
+// Foundation already recolours pane bg → dark surface, divider → gold-deep,
+// hover/active → gold via --tc-app-accent, grip dots → gold via --tc-border-strong.
+// This partial sharpens the hover to gold-bright and adds a recessed channel
+// bevel so the divider reads as a sunken gilded seam rather than a flat hairline.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token sharpening ─────────────────────────────────────────────────────────
+    // Restate the divider hover to the brighter gold so dragging feels active.
+    // Pane bg → leather for a wood-grain split-view feel.
+
+    tc-resizable-panel {
+        --bs-resizable-panel-pane-bg: var(--fg-leather);
+        --bs-resizable-panel-divider-bg: var(--fg-gold-deep);
+        --bs-resizable-panel-divider-hover-bg: var(--fg-gold-bright);
+        --bs-resizable-panel-divider-active-bg: var(--fg-gold-bright);
+    }
+
+    // ── Gilded seam bevel ────────────────────────────────────────────────────────
+    // A recessed channel: dark inset on the near edge, faint gold highlight on
+    // the far edge — gives the 1px hairline depth between the two panes.
+
+    // Vertical divider (horizontal layout — splits left/right).
+    .tc-resizable-panel--horizontal > .tc-resizable-panel-divider {
+        box-shadow:
+            inset 1px 0 0 rgba(0, 0, 0, 0.55),
+            inset -1px 0 0 rgba(232, 200, 120, 0.18);
+    }
+
+    // Horizontal divider (vertical layout — splits top/bottom).
+    .tc-resizable-panel--vertical > .tc-resizable-panel-divider {
+        box-shadow:
+            inset 0 1px 0 rgba(0, 0, 0, 0.55),
+            inset 0 -1px 0 rgba(232, 200, 120, 0.18);
+    }
+}

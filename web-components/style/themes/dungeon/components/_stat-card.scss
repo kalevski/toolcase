@@ -1,0 +1,98 @@
+// Dungeon › tc-stat-card — gilded character-stat plaque.
+// Token vars sit on the tc-stat-card host element; structural rules target the
+// .tc-stat-card* classes. Three gaps the foundation can't close:
+//   (1) label hardcodes JetBrains Mono — override class to display caps.
+//   (2) delta --up/--down colours come from baked Sass maps — override classes.
+//   (3) skeleton shimmer is a white literal — swap to gold shimmer.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── 1. Token swap on host element ────────────────────────────────────────
+
+    tc-stat-card {
+        --bs-stat-card-bg:               var(--fg-panel-bg);
+        --bs-stat-card-border-color:     var(--fg-gold);
+        --bs-stat-card-value-color:      var(--fg-gold-bright);
+        --bs-stat-card-icon-tile-bg:     var(--fg-slot-bg);
+        --bs-stat-card-skeleton-shimmer: rgba(240, 210, 122, 0.25);
+    }
+
+    // ── 2. Gilded bevel frame ────────────────────────────────────────────────
+
+    .tc-stat-card {
+        position: relative;
+        box-shadow: var(--fg-panel-shadow);
+        color: var(--fg-parch);
+    }
+
+    // Top corner notches — signature dungeon ornament.
+    .tc-stat-card::before,
+    .tc-stat-card::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+    }
+    .tc-stat-card::before {
+        left: -1px;
+    }
+    .tc-stat-card::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+
+    // ── 3. Label → display caps ──────────────────────────────────────────────
+    // Base hardcodes font-family: 'JetBrains Mono' directly on the class;
+    // token swap alone cannot reach it — must override the class.
+
+    .tc-stat-card-label {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 600;
+        color: var(--fg-parch-3);
+    }
+
+    // ── 4. Headline value — struck-metal shadow ──────────────────────────────
+
+    .tc-stat-card-value {
+        text-shadow: 0 1px 2px #000;
+    }
+
+    // ── 5. Icon tile — recessed slot with gold-deep border ───────────────────
+
+    .tc-stat-card-icon {
+        border: 1px solid var(--fg-gold-deep);
+    }
+
+    // ── 6. Delta badge — fix baked Sass-map colours ──────────────────────────
+    // Base bakes $theme-colors-soft/emphasis at compile time (slate tints).
+    // Override classes directly so the fantasy palette wins at runtime.
+
+    .tc-stat-card-delta--up {
+        color: var(--fg-stamina-bright);
+        background-color: var(--tc-success-bg);
+        border-color: transparent;
+    }
+
+    .tc-stat-card-delta--down {
+        color: var(--fg-blood-bright);
+        background-color: var(--tc-danger-bg);
+        border-color: transparent;
+    }
+
+    // ── 7. Footer — gold-rule separator ─────────────────────────────────────
+
+    .tc-stat-card-footer-row {
+        border-top-width: 1px;
+        border-top-style: solid;
+        border-image: var(--fg-rule) 1;
+        // border-top shorthand would reset border-image; set separately.
+        border-top-color: var(--fg-gold-deep);
+    }
+}

@@ -15,6 +15,7 @@ export interface TaskRow {
     severity?: string
     project?: string // the task's **Project:** facet (NOT the workspace project)
     model?: string // pinned per-task model (**Model:** facet)
+    account?: string // pinned per-task Claude identity (**Account:** facet)
     depends?: string[] // A4 — **Depends:** facet (stored as CSV)
     error?: string
 }
@@ -26,6 +27,7 @@ interface Raw {
     severity: string | null
     facet_project: string | null
     model: string | null
+    account: string | null
     depends: string | null
     last_error: string | null
 }
@@ -45,6 +47,7 @@ function map(r: Raw): TaskRow {
         severity: r.severity ?? undefined,
         project: r.facet_project ?? undefined,
         model: r.model ?? undefined,
+        account: r.account ?? undefined,
         depends: depends?.length ? depends : undefined,
         error: r.last_error ?? undefined,
     }
@@ -56,6 +59,7 @@ export interface ParsedMeta {
     severity?: string
     project?: string
     model?: string
+    account?: string
     depends?: string[]
     error?: string
 }
@@ -67,13 +71,14 @@ export interface ParsedMeta {
  */
 export function syncTask(project: string, id: string, meta: ParsedMeta, mtimeMs: number): void {
     prep(
-        `INSERT INTO task (project, id, title, severity, facet_project, model, depends, status, last_error, synced_mtime, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `INSERT INTO task (project, id, title, severity, facet_project, model, account, depends, status, last_error, synced_mtime, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
          ON CONFLICT(project, id) DO UPDATE SET
             title         = excluded.title,
             severity      = excluded.severity,
             facet_project = excluded.facet_project,
             model         = excluded.model,
+            account       = excluded.account,
             depends       = excluded.depends,
             synced_mtime  = excluded.synced_mtime,
             updated_at    = excluded.updated_at`,
@@ -84,6 +89,7 @@ export function syncTask(project: string, id: string, meta: ParsedMeta, mtimeMs:
         meta.severity ?? null,
         meta.project ?? null,
         meta.model ?? null,
+        meta.account ?? null,
         meta.depends?.length ? meta.depends.join(',') : null,
         meta.status,
         meta.error ?? null,
@@ -133,14 +139,14 @@ export function setStatus(project: string, id: string, status: TaskStatus, error
 
 export function listTasks(project: string): TaskRow[] {
     return allRows<Raw>(
-        'SELECT id, title, status, severity, facet_project, model, depends, last_error FROM task WHERE project = ? ORDER BY id',
+        'SELECT id, title, status, severity, facet_project, model, account, depends, last_error FROM task WHERE project = ? ORDER BY id',
         project,
     ).map(map)
 }
 
 export function getTask(project: string, id: string): TaskRow | null {
     const r = getRow<Raw>(
-        'SELECT id, title, status, severity, facet_project, model, depends, last_error FROM task WHERE project = ? AND id = ?',
+        'SELECT id, title, status, severity, facet_project, model, account, depends, last_error FROM task WHERE project = ? AND id = ?',
         project,
         id,
     )

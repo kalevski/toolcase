@@ -1,5 +1,4 @@
 import { useState, ReactNode } from 'react'
-import { Button, Card, CodeSnippet, Heading, Text } from '@toolcase/react-components'
 
 export type LogEntry = { time: string; text: string; level?: string }
 
@@ -85,14 +84,21 @@ export const DemoSection = ({
     running,
     extra,
 }: DemoSectionProps) => (
-    <Card>
-        <Heading as="h3">{title}</Heading>
-        <Text as="p" variant="muted">{description}</Text>
-        <CodeSnippet code={code.trim()} language={language} />
-        {extra}
-        <Button size="small" onClick={onRun} disabled={running}>
-            {running ? 'Running...' : 'Run'}
-        </Button>
-        <ConsoleOutput logs={logs} />
-    </Card>
+    <div className="card">
+        <div className="card-body">
+            <h3 className="card-title">{title}</h3>
+            <p className="text-body-secondary">{description}</p>
+            <tc-code-snippet code={code.trim()} language={language}></tc-code-snippet>
+            {extra}
+            <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                onClick={onRun}
+                disabled={running}
+            >
+                {running ? 'Running...' : 'Run'}
+            </button>
+            <ConsoleOutput logs={logs} />
+        </div>
+    </div>
 )

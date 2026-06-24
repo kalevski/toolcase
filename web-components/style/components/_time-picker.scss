@@ -1,0 +1,297 @@
+// tc-time-picker — scrollable-column time picker (12h / 24h, optional seconds).
+// Sharp corners everywhere (no border-radius). Trigger uses the form-control
+// treatment; the panel is an overlay-tier surface. Column numerals are mono.
+// All cosmetic values flow through --bs-time-picker-* backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+// ── Host ──────────────────────────────────────────────────────────────────────
+
+tc-time-picker {
+    position: relative;
+}
+
+.tc-time-picker {
+    display: block;
+}
+
+// ── Label ─────────────────────────────────────────────────────────────────────
+
+.tc-time-picker-label {
+    display: block;
+    margin-bottom: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--tc-text);
+}
+
+// ── Control (trigger + icon / clear) ──────────────────────────────────────────
+
+.tc-time-picker-control {
+    position: relative;
+}
+
+.tc-time-picker-trigger {
+    --bs-time-picker-trigger-bg: var(--tc-surface);
+    --bs-time-picker-trigger-border: var(--tc-border-strong);
+    --bs-time-picker-trigger-color: var(--tc-text);
+
+    display: inline-flex;
+    align-items: center;
+    width: 100%;
+    padding: 0.375rem 2.25rem 0.375rem 0.625rem;
+    font-family: inherit;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    text-align: left;
+    color: var(--bs-time-picker-trigger-color);
+    cursor: pointer;
+    background: var(--bs-time-picker-trigger-bg);
+    border: 1px solid var(--bs-time-picker-trigger-border);
+    border-radius: 0;
+    transition:
+        border-color var(--tc-transition-fast),
+        box-shadow var(--tc-transition-fast);
+
+    &:focus-visible {
+        outline: none;
+        box-shadow: var(--tc-focus-ring);
+    }
+
+    &.is-invalid {
+        border-color: var(--tc-danger);
+
+        &:focus-visible {
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.18);
+        }
+    }
+
+    &[disabled],
+    &:disabled {
+        opacity: 0.5;
+        pointer-events: none;
+        cursor: default;
+    }
+}
+
+.tc-time-picker-value {
+    flex: 1 1 auto;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-family: var(--bs-font-monospace, monospace);
+
+    &--placeholder {
+        font-family: inherit;
+        color: var(--tc-text-faint);
+    }
+}
+
+// Trailing clock icon — purely decorative, clicks fall through to the trigger.
+.tc-time-picker-icon {
+    position: absolute;
+    top: 50%;
+    right: 0.625rem;
+    transform: translateY(-50%);
+    display: inline-flex;
+    color: var(--tc-text-muted);
+    pointer-events: none;
+
+    svg {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    &[hidden] {
+        display: none;
+    }
+}
+
+// Clear button — overlays the icon slot when a value is present.
+.tc-time-picker-clear {
+    position: absolute;
+    top: 50%;
+    right: 0.375rem;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    color: var(--tc-text-muted);
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    transition:
+        color var(--tc-transition-fast),
+        background-color var(--tc-transition-fast);
+
+    &:hover {
+        color: var(--tc-text);
+        background: var(--tc-surface-muted);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 1px;
+    }
+
+    svg {
+        width: 0.875rem;
+        height: 0.875rem;
+    }
+
+    &[hidden] {
+        display: none;
+    }
+}
+
+// ── Overlay panel ─────────────────────────────────────────────────────────────
+
+.tc-time-picker-panel {
+    --bs-time-picker-panel-bg: var(--tc-surface);
+    --bs-time-picker-panel-border: var(--tc-border);
+    --bs-time-picker-panel-shadow: var(--tc-shadow-lg);
+    --bs-time-picker-panel-z: var(--tc-z-dropdown);
+
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    z-index: var(--bs-time-picker-panel-z);
+    display: none;
+    padding: 0.375rem;
+    background: var(--bs-time-picker-panel-bg);
+    border: 1px solid var(--bs-time-picker-panel-border);
+    border-radius: 0;
+    box-shadow: var(--bs-time-picker-panel-shadow);
+
+    &.show {
+        display: flex;
+        gap: 1px;
+    }
+}
+
+// ── Columns ─────────────────────────────────────────────────────────────────
+
+.tc-time-picker-column-wrap {
+    display: flex;
+    flex-direction: column;
+    min-width: 3rem;
+}
+
+.tc-time-picker-column-label {
+    padding: 0 0 0.25rem;
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--tc-text-faint);
+}
+
+.tc-time-picker-column {
+    --bs-time-picker-column-height: 220px;
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: var(--bs-time-picker-column-height);
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+// Hairline separators between adjacent columns.
+.tc-time-picker-column-wrap + .tc-time-picker-column-wrap {
+    padding-left: 1px;
+    border-left: 1px solid var(--tc-border);
+}
+
+// ── Option cells ──────────────────────────────────────────────────────────────
+
+.tc-time-picker-option {
+    --bs-time-picker-option-color: var(--tc-text);
+    --bs-time-picker-option-hover-bg: var(--tc-surface-muted);
+    --bs-time-picker-option-active-bg: var(--tc-app-accent);
+
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.75rem;
+    padding: 0.375rem 0.75rem;
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--bs-time-picker-option-color);
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    transition:
+        background-color var(--tc-transition-fast),
+        color var(--tc-transition-fast);
+
+    &:hover {
+        background: var(--bs-time-picker-option-hover-bg);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: -2px;
+    }
+
+    &--active {
+        color: var(--tc-app-accent-contrast);
+        background: var(--bs-time-picker-option-active-bg);
+
+        &:hover {
+            background: var(--bs-time-picker-option-active-bg);
+        }
+    }
+}
+
+// ── Validation feedback ─────────────────────────────────────────────────────
+
+.tc-time-picker .invalid-feedback {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.8125rem;
+    color: var(--tc-danger);
+}
+
+// ── Disabled host ─────────────────────────────────────────────────────────────
+
+tc-time-picker[disabled] {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+// ── Touch targets (WCAG 2.5.5 — 44px minimum on coarse pointer) ───────────────
+
+@media (pointer: coarse) {
+    .tc-time-picker-trigger {
+        min-height: 44px;
+    }
+
+    .tc-time-picker-option {
+        min-height: 44px;
+    }
+}
+
+// ── Reduced motion ─────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-time-picker-trigger,
+    .tc-time-picker-clear,
+    .tc-time-picker-option {
+        // Keep the state-conveying color/background transitions; there are no
+        // decorative transforms to freeze here.
+        transition:
+            background-color var(--tc-transition-fast),
+            color var(--tc-transition-fast),
+            border-color var(--tc-transition-fast);
+    }
+}

@@ -1,0 +1,42 @@
+// Dungeon › tc-area-chart — element-ramp series recolor + gilded frame.
+// The foundation remaps bg/border/label/tooltip via --tc-* tokens (wood surface,
+// gold-deep border, parch labels, ink tooltip). The two gaps this file fixes:
+//   1. Series 3-6 still pull from the raw slate ramp → repoint to element palette.
+//   2. Gridlines / faint axes reference --tc-slate-100/200 → repoint to gold-shadow.
+// The __inner block also receives the gilded bevel stack; title gets display caps.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-area-chart {
+        // ── series ramp ────────────────────────────────────────────────────────
+        // series-1 (gold) and series-2 (gold-bright) are already free via
+        // --tc-app-accent / --tc-accent token remapping in the foundation.
+        // series-3..6 pull raw slate; repoint to on-theme element / metal hues.
+        --bs-area-chart-series-3: var(--fg-mana);
+        --bs-area-chart-series-4: var(--fg-stamina);
+        --bs-area-chart-series-5: var(--fg-arcane);
+        --bs-area-chart-series-6: var(--fg-copper);
+
+        // ── surface ────────────────────────────────────────────────────────────
+        --bs-area-chart-bg: var(--fg-panel-bg);
+
+        // ── grid / axes ────────────────────────────────────────────────────────
+        // Replace slate hairlines with faint gold-shadow lines (carved grid).
+        --bs-area-chart-grid-color: var(--fg-gold-shadow);
+        --bs-area-chart-axis-faint-color: var(--fg-gold-shadow);
+    }
+
+    // ── inner frame — gilded bevel ─────────────────────────────────────────────
+    .tc-area-chart__inner {
+        position: relative;
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── title — display caps ───────────────────────────────────────────────────
+    .tc-area-chart__title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 600;
+    }
+}

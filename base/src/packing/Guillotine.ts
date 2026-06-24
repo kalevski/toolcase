@@ -151,6 +151,7 @@ class Guillotine extends Algorithm {
             case 'best-long-side-fit': return Math.max(leftoverHorizontal, leftoverVertical)
             case 'best-area-fit': return free.width * free.height - w * h
             case 'worst-area-fit': return -(free.width * free.height - w * h)
+            default: throw new Error(`unknown free-rect choice: ${this.choice}`)
         }
     }
 

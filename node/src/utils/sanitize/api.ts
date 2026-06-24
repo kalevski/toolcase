@@ -1,4 +1,4 @@
-import { pipe, traverseEntity } from './sanitize'
+import { pipe, traverseEntity, FORBIDDEN_KEYS } from './sanitize'
 import { FieldRule, FieldSchema, Visitor } from './types'
 import {
 	allowOnly,
@@ -183,6 +183,7 @@ export function createSanitizer<T extends object>(
 		const source = data as Record<string, unknown>
 		const result: Record<string, unknown> = {}
 		for (const key of Object.keys(source)) {
+			if (FORBIDDEN_KEYS.has(key)) continue
 			const field = compiled[key]
 			if (!field) {
 				if (strict) continue
@@ -212,6 +213,7 @@ export function createSanitizer<T extends object>(
 		const source = data as Record<string, unknown>
 		const result: Record<string, unknown> = {}
 		for (const key of Object.keys(source)) {
+			if (FORBIDDEN_KEYS.has(key)) continue
 			const field = compiled[key] ?? FALLBACK_FIELD
 			if (field.skipOutput) continue
 			if (restricted?.has(key)) continue
@@ -227,6 +229,7 @@ export function createSanitizer<T extends object>(
 	): unknown => {
 		const result: Record<string, unknown> = {}
 		for (const key of Object.keys(data)) {
+			if (FORBIDDEN_KEYS.has(key)) continue
 			if (strict) {
 				if (allowed) {
 					if (!allowed.has(key)) continue

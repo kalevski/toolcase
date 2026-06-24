@@ -7,11 +7,14 @@ class ObjectPool<T extends Record<string, any>> {
 
     private objectClass: new () => T
 
+    /** Cumulative count of instances ever created, not the current live count. */
     readonly instances: number = 0
 
     private resetFn: ResetFn<T> = () => {}
 
     private instanceFn: InstanceFn<T> = () => new this.objectClass()
+
+    private inPool = new Set<T>()
 
     constructor(objectClass: new () => T, resetFn: ResetFn<T> | null = null, instanceFn: InstanceFn<T> | null = null) {
         this.objectClass = objectClass
@@ -30,17 +33,21 @@ class ObjectPool<T extends Record<string, any>> {
             this.createInstance()
         }
         const object = this.pool.pop()!
+        this.inPool.delete(object)
         return object
     }
 
     release = (object: T): this => {
+        if (this.inPool.has(object)) return this
         this.resetFn(object)
+        this.inPool.add(object)
         this.pool.push(object)
         return this
     }
 
     dispose(): void {
         this.pool = []
+        this.inPool.clear()
     }
 
     private createInstance(): void {
@@ -51,6 +58,7 @@ class ObjectPool<T extends Record<string, any>> {
         } else {
             throw new Error(`object ${JSON.stringify(object)} already has release function`)
         }
+        this.inPool.add(object)
         this.pool.push(object)
     }
 }

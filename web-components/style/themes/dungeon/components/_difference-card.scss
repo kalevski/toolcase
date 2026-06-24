@@ -1,0 +1,100 @@
+// Dungeon › tc-difference-card — gilded stat tile.
+// The foundation token remap covers bg/border/text colour, but two defect
+// classes require explicit overrides here:
+//   (1) 'Inter' hardcoded on title/value wins over the remapped font fallback.
+//   (2) --up/--down chip colours are Sass map literals baked at build time,
+//       not runtime --tc-* vars, so the foundation remap cannot touch them.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token swap ────────────────────────────────────────────────────────────
+    // Vars live on the host element tc-difference-card.
+    tc-difference-card {
+        --bs-difference-card-bg: var(--fg-panel-bg);
+        --bs-difference-card-border-color: var(--fg-gold-deep);
+        --bs-difference-card-value-color: var(--fg-gold-bright);
+        --bs-difference-card-skeleton-bg: var(--fg-leather);
+        --bs-difference-card-skeleton-shimmer: rgba(201, 169, 97, 0.25);
+    }
+
+    // ── Structure: gilded bevel ───────────────────────────────────────────────
+    // Base wires only --tc-shadow-sm; add the full inset bevel + drop shadow.
+    .tc-difference-card {
+        position: relative;
+        box-shadow: var(--fg-panel-shadow);
+        border-radius: 0;
+    }
+
+    // ── Structure: corner notches ─────────────────────────────────────────────
+    .tc-difference-card::before,
+    .tc-difference-card::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+        z-index: 1;
+    }
+
+    .tc-difference-card::before {
+        left: -1px;
+    }
+
+    .tc-difference-card::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+
+    // ── Font defect: title hardcodes 'Inter' ──────────────────────────────────
+    // Override with display caps to match the gilded stat-readout treatment.
+    .tc-difference-card-title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 600;
+    }
+
+    // ── Font defect: value hardcodes 'Inter' ──────────────────────────────────
+    // Mono numerals for the prominent metric value.
+    .tc-difference-card-value {
+        font-family: var(--fg-mono);
+    }
+
+    // ── Color defect: delta chips use build-time Sass map literals ────────────
+    // --up chip: stamina-green tint with gold-deep border.
+    .tc-difference-card-delta--up {
+        background-color: rgba(var(--fg-stamina-rgb, 74, 182, 90), 0.15);
+        color: var(--fg-stamina-bright);
+        border-color: var(--fg-gold-deep);
+        border-radius: 0;
+    }
+
+    // --down chip: blood-red tint with gold-deep border.
+    .tc-difference-card-delta--down {
+        background-color: rgba(var(--fg-blood-rgb, 180, 40, 40), 0.15);
+        color: var(--fg-blood-bright);
+        border-color: var(--fg-gold-deep);
+        border-radius: 0;
+    }
+
+    // --neutral chip: leather surface with parchment text + gold border.
+    .tc-difference-card-delta--neutral {
+        background-color: var(--fg-leather-2);
+        color: var(--fg-parch-dim);
+        border-color: var(--fg-gold-deep);
+        border-radius: 0;
+    }
+
+    // Base chip itself — ensure no stray radius on the unstyled default.
+    .tc-difference-card-delta {
+        border-radius: 0;
+    }
+
+    // ── Skeleton: ensure no stray radius ─────────────────────────────────────
+    .tc-difference-card-skeleton {
+        border-radius: 0;
+    }
+}

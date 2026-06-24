@@ -1,0 +1,10 @@
+// Dungeon theme — opt-in fantasy skin for @toolcase/web-components.
+//
+// Activate by wrapping content in the theme root:
+//   <tc-theme name="dungeon"> … your tc-* components … </tc-theme>
+//
+// Load order: foundation (token remap) first so component partials override on
+// top of the already-fantasy --tc-* / --bs-* tokens.
+
+@use 'foundation';
+@use 'components';

@@ -1,0 +1,28 @@
+// Dungeon › tc-file-tags — rune-label chip picker.
+// The foundation token remap handles most of the reskin (chip bg → leather,
+// borders → gold-deep, menu bg → wood panel, active option → gold fill).
+// This override does only what vars alone cannot:
+//   1. Flip the hardcoded #fff active-option text to --fg-ink (engraved on gold).
+//   2. Give chips a top bevel so they read as seated rune labels.
+//   3. Add the gilded panel shadow to the floating menu.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-file-tags {
+        // Active option text: base hardcodes #fff; ink reads as engraved on gold.
+        --bs-file-tags-option-active-color: var(--fg-ink);
+
+        // Chips: use the darker radial wood slot fill for a recessed rune feel.
+        --bs-file-tags-chip-bg: var(--fg-slot-bg);
+    }
+
+    // Each selected chip reads as a seated rune label — top bevel lift.
+    .tc-file-tags-chip {
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // Floating menu — gilded panel shadow (inset bevel + drop shadow).
+    .tc-file-tags-menu {
+        box-shadow: var(--fg-panel-shadow);
+    }
+}

@@ -1,0 +1,19 @@
+// tc-asset-row-list — bordered container for a sequence of tc-asset-row elements.
+// Provides a single 1px --tc-border outer frame; inner separators are owned by
+// tc-asset-row (border-bottom hairline, removed on :last-child). All cosmetics
+// flow through --bs-asset-row-list-* custom properties backed by --tc-* tokens.
+
+tc-asset-row-list {
+    --bs-asset-row-list-border-color: var(--tc-border);
+    --bs-asset-row-list-bg: var(--tc-surface);
+}
+
+.tc-asset-row-list {
+    border: 1px solid var(--bs-asset-row-list-border-color);
+    border-radius: 0;
+    background-color: var(--bs-asset-row-list-bg);
+}
+
+.tc-asset-row-list-body {
+    display: block;
+}

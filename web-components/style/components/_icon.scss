@@ -1,0 +1,33 @@
+// tc-icon — inline glyph from lucide-static. No background, no border, no
+// radius. Color inherits from surrounding text (currentColor) by default;
+// a caller-supplied `color` attribute overrides it via --bs-icon-color.
+
+.tc-icon {
+    --bs-icon-size: 1em;
+    --bs-icon-color: currentColor;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-icon-size);
+    height: var(--bs-icon-size);
+    color: var(--bs-icon-color);
+    vertical-align: -0.125em; // align optical baseline with surrounding text
+    flex-shrink: 0;
+    line-height: 1;
+    user-select: none;
+
+    svg.tc-icon__svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+        stroke: currentColor;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-icon svg.tc-icon__svg {
+        transition: none !important;
+        animation: none !important;
+    }
+}

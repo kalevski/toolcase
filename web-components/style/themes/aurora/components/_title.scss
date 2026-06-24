@@ -1,0 +1,15 @@
+// Aurora › tc-title — display-type section title.
+// Token remap already sets the emphasis off-white colour; swap the typeface to
+// the Space Grotesk display family with the tight AIHub tracking.
+
+tc-theme[name='aurora'],
+[data-tc-theme='aurora'] {
+    tc-title {
+        --bs-title-color: var(--ah-emphasis);
+    }
+
+    .tc-title {
+        font-family: var(--ah-display);
+        letter-spacing: -0.02em;
+    }
+}

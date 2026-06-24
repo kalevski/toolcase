@@ -1,0 +1,72 @@
+// tc-badge-row — horizontal row of paired key/value chips.
+// Sharp square badges; slate neutrals default; JetBrains Mono for values.
+
+@use 'sass:color';
+@use 'sass:map';
+@use '../foundation/tokens' as *;
+
+.tc-badge-row {
+    --bs-badge-row-padding-x: 0.5rem;
+    --bs-badge-row-padding-y: 0.225rem;
+    --bs-badge-row-font-size: 0.72rem;
+}
+
+.tc-badge-row--sm {
+    --bs-badge-row-padding-x: 0.375rem;
+    --bs-badge-row-padding-y: 0.15rem;
+    --bs-badge-row-font-size: 0.65rem;
+}
+
+.tc-badge-row-item {
+    // Default per-item accent; overridden by inline style when badge.color is set.
+    --bs-badge-row-color: var(--tc-border);
+
+    display: inline-flex;
+    align-items: stretch;
+    border-radius: 0;
+    overflow: hidden;
+    font-family: var(--bs-font-monospace);
+    font-size: var(--bs-badge-row-font-size);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0.025em;
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.tc-badge-row-label {
+    display: flex;
+    align-items: center;
+    padding: var(--bs-badge-row-padding-y) var(--bs-badge-row-padding-x);
+    background: var(--tc-surface-muted);
+    color: var(--tc-text);
+}
+
+.tc-badge-row-value {
+    display: flex;
+    align-items: center;
+    padding: var(--bs-badge-row-padding-y) var(--bs-badge-row-padding-x);
+    // Per-item accent flows through --bs-badge-row-color (slate-200 default or
+    // user-supplied color set via inline style).
+    background: var(--bs-badge-row-color);
+    color: var(--tc-ink);
+    font-family: var(--bs-font-monospace);
+}
+
+// Status variant tints — soft background, emphasis text.
+@each $name, $_ in $theme-colors {
+    $soft: map.get($theme-colors-soft, $name);
+    $emphasis: map.get($theme-colors-emphasis, $name);
+
+    .tc-badge-row-item--#{$name} {
+        .tc-badge-row-label {
+            background: #{$soft};
+            color: #{$emphasis};
+        }
+
+        .tc-badge-row-value {
+            --bs-badge-row-color: #{color.adjust($soft, $lightness: -8%)};
+            color: #{$emphasis};
+        }
+    }
+}

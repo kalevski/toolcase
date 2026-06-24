@@ -113,10 +113,7 @@ class Shelf extends Algorithm {
         const useRotated = this.allowRotation && (w > this.width || (h <= this.width && w > h))
         const placedW = useRotated ? h : w
         const placedH = useRotated ? w : h
-        if (placedW > this.width) {
-            if (!this.allowRotation) return null
-            return null
-        }
+        if (placedW > this.width) return null
         if (this.nextY + placedH > this.height) return null
         const row: ShelfRow = { y: this.nextY, height: placedH, cursor: 0 }
         this.shelves.push(row)

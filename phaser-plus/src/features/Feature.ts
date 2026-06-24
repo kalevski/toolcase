@@ -12,6 +12,8 @@ export default class Feature {
 
     protected readonly logger: Logger
 
+    private readonly _suppressedWarnings: Set<string> = new Set()
+
     constructor(scene: Scene, key: string) {
         this.scene = scene
         this.game = scene.game
@@ -28,12 +30,25 @@ export default class Feature {
     onDestroy(): void {}
 
     /**
-     * Emit a feature event. Warns when no listener is registered.
+     * Mark one or more event names as fire-and-forget so that `emit` will not
+     * warn when no listener is registered for them.
+     */
+    protected suppressWarning(...events: string[]): void {
+        for (const event of events) {
+            this._suppressedWarnings.add(event)
+        }
+    }
+
+    /**
+     * Emit a feature event. Warns when no listener is registered unless the
+     * event was opted-out via `suppressWarning`.
      */
     protected emit(event: string, ...messages: unknown[]): void {
         const events = this.scene.features as unknown as { listenerCount(name: string): number, emit(name: string, ...args: unknown[]): boolean }
         if (events.listenerCount(event) === 0) {
-            this.logger.warning(`event=(${event}) is not handled, payload sent:`, ...messages)
+            if (!this._suppressedWarnings.has(event)) {
+                this.logger.warning(`event=(${event}) is not handled, payload sent:`, ...messages)
+            }
             return
         }
         events.emit(event, ...messages)

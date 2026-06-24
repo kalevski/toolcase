@@ -45,7 +45,9 @@ const buildEdgeCost = (mesh: NavMesh) => (from: GridNode, to: GridNode): number 
     const dx = Math.abs(to.x - from.x)
     const dy = Math.abs(to.y - from.y)
     const stepCost = (dx !== 0 && dy !== 0) ? DIAG : STRAIGHT
-    return stepCost * mesh.cost(to.x, to.y)
+    // Clamp to ≥ 1 so the octile heuristic (which assumes min step cost = 1) stays admissible.
+    // A mesh.cost() below 1 would let the heuristic over-estimate and produce non-optimal paths.
+    return stepCost * Math.max(1, mesh.cost(to.x, to.y))
 }
 
 /**
@@ -53,6 +55,22 @@ const buildEdgeCost = (mesh: NavMesh) => (from: GridNode, to: GridNode): number 
  * `budgetMs` per `onUpdate` tick stepping each one. Each query owns an
  * `@toolcase/base` `AStar` instance whose `step()` is invoked round-robin until
  * the path resolves or the budget runs out.
+ *
+ * ## `PATH_FAILED` reason strings
+ * | Reason | Source |
+ * |---|---|
+ * | `'end_blocked'` | The destination tile is not navigable (`mesh.isBlocked`). |
+ * | `'error'` | The `cost()`/heuristic threw during a search step. |
+ * | `'exhausted'` | The frontier was fully explored without reaching the goal (unreachable). |
+ * | `'max_iterations'` | The per-query `maxIterations` cap was hit before the goal was found. |
+ *
+ * **Note on `maxIterations`:** The default of 5 000 is intentionally conservative.
+ * On an 8-connected grid the frontier expands roughly as a circle, so a 100×100
+ * grid can already exhaust the budget for long diagonal paths. Callers that need
+ * large maps should raise the cap via `findPath(…, maxIterations)`. Because both
+ * `'exhausted'` and `'max_iterations'` can mean "no path exists", they are
+ * indistinguishable from the caller's perspective — both should be treated as
+ * a permanent failure.
  */
 export default class PathFinder extends Feature {
 
@@ -122,7 +140,12 @@ export default class PathFinder extends Feature {
         while (this.active.length > 0 && performance.now() - start < this.budgetMs && safety < safetyLimit) {
             const path = this.active.shift()!
             const search = path.search!
-            search.step()
+            try {
+                search.step()
+            } catch {
+                path.markFailed('error')
+                continue
+            }
             safety++
 
             if (search.isComplete) continue

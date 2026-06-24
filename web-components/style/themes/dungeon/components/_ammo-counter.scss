@@ -1,0 +1,55 @@
+// Dungeon › tc-ammo-counter — beveled HUD readout. Token swap recolours the
+// frame; structural rules add the dual gradient/radial fill + inset bevel,
+// display-caps weapon + state micro-labels, mono numerals, and the gold-bright
+// magazine count with a blood glow on low ammo.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-ammo-counter {
+        --bs-ammo-counter-bg:
+            linear-gradient(180deg, rgba(232, 220, 196, 0.04), rgba(0, 0, 0, 0.18)),
+            radial-gradient(120% 80% at 50% 0%, #2e2418 0%, #1a130c 70%);
+        --bs-ammo-counter-border-color: var(--fg-gold-deep);
+        --bs-ammo-counter-weapon-color: var(--fg-parch-dim);
+        --bs-ammo-counter-weapon-letter-spacing: 0.32em;
+        --bs-ammo-counter-mag-color: var(--fg-gold-bright);
+        --bs-ammo-counter-sep-color: var(--fg-parch-3);
+        --bs-ammo-counter-max-color: var(--fg-parch-3);
+        --bs-ammo-counter-reserve-color: var(--fg-parch);
+        --bs-ammo-counter-low-color: var(--fg-blood-bright);
+        --bs-ammo-counter-state-color: var(--fg-gold-bright);
+        --bs-ammo-counter-state-letter-spacing: 0.32em;
+    }
+
+    // Inset bevel stack the base ships flat.
+    .tc-ammo-counter {
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18),
+            0 4px 10px rgba(0, 0, 0, 0.6);
+    }
+
+    // Weapon + state micro-labels read as display caps.
+    .tc-ammo-counter-weapon,
+    .tc-ammo-counter-state {
+        font-family: var(--fg-display);
+    }
+
+    // Mono numerals on the readout row, gold mag count glows.
+    .tc-ammo-counter-row {
+        font-family: var(--fg-mono);
+    }
+    .tc-ammo-counter-mag {
+        text-shadow: 0 1px 2px #000;
+    }
+
+    // Reserve tracking matches the gc reference (0.08em vs base 0.04em).
+    .tc-ammo-counter-reserve {
+        letter-spacing: 0.08em;
+    }
+
+    // Low magazine — blood glow on the count.
+    tc-ammo-counter[data-state='low'] .tc-ammo-counter-mag {
+        text-shadow: 0 0 8px rgba(212, 74, 58, 0.6), 0 1px 2px #000;
+    }
+}

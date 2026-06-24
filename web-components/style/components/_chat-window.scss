@@ -1,0 +1,234 @@
+// tc-chat-window — scrolling chat log with channel tabs and a compose row.
+// Web-components design system: white surface, 1px --tc-border frame, sharp
+// corners, hairline separators, slate ink for active/primary states.
+// Channel tabs follow the underline-nav motif (2px ink underline = the only
+// chrome). Sender handles render in JetBrains Mono (machine-facing log voice);
+// message bodies stay in the prose family. Per-message / per-channel colour is
+// information, injected via inline --bs-chat-window-*-color custom properties.
+// Send button reuses the primary slate-ink gradient + 1px-lift feedback.
+// All cosmetics flow through --bs-chat-window-* — the public theming contract.
+
+tc-chat-window {
+    --bs-chat-window-width: 100%;
+    --bs-chat-window-height: 360px;
+    --bs-chat-window-bg: var(--tc-surface);
+    --bs-chat-window-border: 1px solid var(--tc-border);
+
+    --bs-chat-window-tabs-bg: var(--tc-surface-muted);
+    --bs-chat-window-tabs-border: 1px solid var(--tc-border);
+    --bs-chat-window-tab-rest-color: var(--tc-text-muted);
+    --bs-chat-window-tab-active-color: var(--tc-app-accent);
+    --bs-chat-window-tab-font-size: 0.6875rem;
+    // --bs-chat-window-tab-color is intentionally left undeclared at the host
+    // level so the per-channel inline override can fall back to the active
+    // accent via var(--bs-chat-window-tab-color, --bs-chat-window-tab-active-color).
+
+    --bs-chat-window-message-color: var(--tc-text);
+    --bs-chat-window-message-font-size: 0.8125rem;
+    --bs-chat-window-message-hover-bg: var(--tc-surface-hover);
+    --bs-chat-window-system-color: var(--tc-text-faint);
+
+    --bs-chat-window-compose-border: 1px solid var(--tc-border);
+    --bs-chat-window-input-bg: var(--tc-surface);
+    --bs-chat-window-input-border: 1px solid var(--tc-border-strong);
+    --bs-chat-window-input-color: var(--tc-text);
+    --bs-chat-window-input-font-size: 0.8125rem;
+    --bs-chat-window-input-focus-border: rgba(30, 41, 59, 0.5);
+    --bs-chat-window-input-focus-ring: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
+    --bs-chat-window-send-bg: var(--tc-app-accent-gradient);
+    --bs-chat-window-send-color: var(--tc-app-accent-contrast);
+    --bs-chat-window-send-font-size: 0.8125rem;
+}
+
+.tc-chat-window {
+    display: flex;
+    flex-direction: column;
+    width: var(--bs-chat-window-width);
+    height: var(--bs-chat-window-height);
+    background: var(--bs-chat-window-bg);
+    border: var(--bs-chat-window-border);
+    border-radius: 0;
+    overflow: hidden;
+}
+
+// ── Channel tabs (underline nav) ────────────────────────────────────────────
+
+.tc-chat-window-tabs {
+    display: flex;
+    flex-shrink: 0;
+    gap: 0.25rem;
+    padding: 0 0.5rem;
+    background: var(--bs-chat-window-tabs-bg);
+    border-bottom: var(--bs-chat-window-tabs-border);
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.tc-chat-window-tab {
+    appearance: none;
+    background: none;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    margin: 0;
+    padding: 0.5rem 0.625rem;
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: var(--bs-chat-window-tab-font-size);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 500;
+    color: var(--bs-chat-window-tab-rest-color);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color var(--tc-transition-fast, 0.15s ease), border-color var(--tc-transition-fast, 0.15s ease);
+
+    // Per-channel colour wins when supplied (injected inline), else slate-ink.
+    &:hover {
+        color: var(--bs-chat-window-tab-color, var(--bs-chat-window-tab-active-color));
+    }
+
+    &.is-active {
+        color: var(--bs-chat-window-tab-color, var(--bs-chat-window-tab-active-color));
+        border-bottom-color: var(--bs-chat-window-tab-color, var(--bs-chat-window-tab-active-color));
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: -2px;
+    }
+}
+
+// ── Scrollable message log ──────────────────────────────────────────────────
+
+.tc-chat-window-messages {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0.5rem 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--tc-border) transparent;
+}
+
+.tc-chat-window-message {
+    padding: 0.25rem 0.75rem;
+    font-size: var(--bs-chat-window-message-font-size);
+    line-height: 1.5;
+    color: var(--tc-text);
+    word-break: break-word;
+
+    &:hover {
+        background: var(--bs-chat-window-message-hover-bg);
+    }
+
+    &.is-system {
+        color: var(--bs-chat-window-system-color);
+        font-style: italic;
+        text-align: center;
+    }
+}
+
+.tc-chat-window-message-sender {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-weight: 600;
+    color: var(--bs-chat-window-message-color);
+    margin-right: 0.4375rem;
+
+    &::after {
+        content: ':';
+        color: var(--tc-text-faint);
+    }
+}
+
+.tc-chat-window-message-body {
+    color: var(--tc-text);
+}
+
+.is-system .tc-chat-window-message-body {
+    color: inherit;
+}
+
+// ── Compose row ─────────────────────────────────────────────────────────────
+
+.tc-chat-window-compose {
+    display: flex;
+    flex-shrink: 0;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-top: var(--bs-chat-window-compose-border);
+}
+
+.tc-chat-window-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 0.4375rem 0.625rem;
+    background: var(--bs-chat-window-input-bg);
+    border: var(--bs-chat-window-input-border);
+    border-radius: 0;
+    color: var(--bs-chat-window-input-color);
+    font-size: var(--bs-chat-window-input-font-size);
+    line-height: 1.4;
+
+    &::placeholder {
+        color: var(--tc-text-faint);
+    }
+
+    &:focus {
+        outline: 0;
+        border-color: var(--bs-chat-window-input-focus-border);
+        box-shadow: var(--bs-chat-window-input-focus-ring);
+    }
+}
+
+.tc-chat-window-send {
+    appearance: none;
+    flex-shrink: 0;
+    padding: 0.4375rem 0.875rem;
+    background: var(--bs-chat-window-send-bg);
+    border: 0;
+    border-radius: 0;
+    color: var(--bs-chat-window-send-color);
+    font-size: var(--bs-chat-window-send-font-size);
+    font-weight: 500;
+    letter-spacing: 0.025em;
+    cursor: pointer;
+    transition: transform var(--tc-transition-base, 0.2s cubic-bezier(0.4, 0, 0.2, 1)),
+        box-shadow var(--tc-transition-base, 0.2s cubic-bezier(0.4, 0, 0.2, 1));
+
+    // Solid fill never darkens — the 1px lift is the feedback.
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(30, 41, 59, 0.3);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+}
+
+// ── Coarse-pointer touch targets ────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-chat-window-tab,
+    .tc-chat-window-input,
+    .tc-chat-window-send {
+        min-height: 44px;
+    }
+}
+
+// ── Reduced motion ──────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-chat-window-send {
+        transition: box-shadow var(--tc-transition-base, 0.2s ease);
+
+        &:hover {
+            transform: none;
+        }
+    }
+}

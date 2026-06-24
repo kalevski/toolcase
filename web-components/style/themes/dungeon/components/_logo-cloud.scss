@@ -1,0 +1,30 @@
+// Dungeon › tc-logo-cloud — partner/brand logo grid with display-caps title.
+// Token swap repoints the title colour to gold; the class override swaps the
+// base mono font for Cinzel display caps. Grayscale variant gains a sepia
+// tint for fantasy surface cohesion. Cells/grid are transparent — unchanged.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-logo-cloud {
+        --bs-logo-cloud-title-color: var(--fg-gold);
+    }
+
+    // Override the base's hardcoded monospace family with the display serif.
+    .tc-logo-cloud__title {
+        font-family: var(--fg-display);
+        letter-spacing: 0.16em;
+    }
+
+    // Sepia-tinted desaturation fits the parchment/leather palette better
+    // than pure grayscale. Hover/focus-within still restores full colour.
+    .tc-logo-cloud--grayscale {
+        .tc-logo-cloud-img {
+            filter: sepia(0.6) grayscale(0.4);
+        }
+
+        .tc-logo-cloud-cell:hover .tc-logo-cloud-img,
+        .tc-logo-cloud-cell:focus-within .tc-logo-cloud-img {
+            filter: none;
+        }
+    }
+}

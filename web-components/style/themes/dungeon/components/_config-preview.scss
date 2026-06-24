@@ -1,0 +1,31 @@
+// Dungeon › tc-config-preview — JSON config display on ink surface.
+// Legibility fix: repoints text-color from dark-ink (--tc-text-inverse) to parchment.
+// Warm fantasy syntax token ramp replaces the muted oklch() literals.
+// Gilded top bevel + gold-deep header rule added; no notches (docs surface, not HUD).
+// Sanctioned shapes kept: live badge border-radius:999px, live dot border-radius:50%.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-config-preview {
+        // Legibility fix — tc-text-inverse resolves to ink on an ink panel.
+        --bs-config-preview-text-color: var(--fg-parch);
+
+        // Warm fantasy syntax token ramp — overrides hardcoded oklch() literals.
+        --bs-config-preview-key-color: var(--fg-mana-bright);
+        --bs-config-preview-string-color: var(--fg-stamina-bright);
+        --bs-config-preview-number-color: var(--fg-legendary);
+        --bs-config-preview-boolean-color: var(--fg-arcane-bright);
+        --bs-config-preview-null-color: var(--fg-blood-bright);
+        --bs-config-preview-comment-color: var(--fg-parch-dim);
+    }
+
+    // Gilded top highlight — light surface bevel on the panel frame.
+    .tc-config-preview {
+        box-shadow: var(--fg-bevel-top);
+    }
+
+    // Gilded header divider rule below the header cap.
+    .tc-config-preview-header {
+        border-bottom: 1px solid var(--fg-gold-deep);
+    }
+}

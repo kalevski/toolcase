@@ -1,0 +1,92 @@
+// tc-crosshair — configurable aiming reticle, ported from gc-crosshair.
+// The game-components fantasy chrome (parchment fill, dark glow box-shadows,
+// the 8-point rune star) is dropped: arms and markers are sharp 1px-idiom
+// shapes drawn in the ink accent. The center dot stays a sharp square (sharp by
+// mandate); only the ring is a sanctioned circle. Geometry (size/thickness/gap)
+// is driven from the host inline styles set in render(); arm lengths come from
+// per-element inline styles. The host is decorative (aria-hidden) and
+// pointer-transparent so it can sit as an overlay marker.
+//
+// All cosmetics flow through --bs-crosshair-* — the public theming contract.
+
+tc-crosshair {
+    --bs-crosshair-size: 24px;
+    --bs-crosshair-thickness: 2px;
+    --bs-crosshair-gap: 4px;
+    // Ink accent for the primary/active product voice; overridden by the host
+    // inline style when the `color` attribute is set.
+    --bs-crosshair-color: var(--tc-app-accent);
+
+    position: relative;
+    width: var(--bs-crosshair-size);
+    height: var(--bs-crosshair-size);
+    pointer-events: none;
+    vertical-align: middle;
+}
+
+.tc-crosshair-arm {
+    position: absolute;
+    background: var(--bs-crosshair-color);
+    border-radius: 0;
+}
+
+.tc-crosshair-arm--top {
+    left: 50%;
+    top: 0;
+    width: var(--bs-crosshair-thickness);
+    transform: translateX(-50%);
+}
+
+.tc-crosshair-arm--bottom {
+    left: 50%;
+    bottom: 0;
+    width: var(--bs-crosshair-thickness);
+    transform: translateX(-50%);
+}
+
+.tc-crosshair-arm--left {
+    top: 50%;
+    left: 0;
+    height: var(--bs-crosshair-thickness);
+    transform: translateY(-50%);
+}
+
+.tc-crosshair-arm--right {
+    top: 50%;
+    right: 0;
+    height: var(--bs-crosshair-thickness);
+    transform: translateY(-50%);
+}
+
+.tc-crosshair-dot {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: var(--bs-crosshair-thickness);
+    height: var(--bs-crosshair-thickness);
+    background: var(--bs-crosshair-color);
+    // Sharp center pip — keeps the "sharp by mandate" rule; the ring is the only
+    // sanctioned circle here.
+    border-radius: 0;
+}
+
+.tc-crosshair-ring {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 60%;
+    height: 60%;
+    border: var(--bs-crosshair-thickness) solid var(--bs-crosshair-color);
+    border-radius: 50%;
+}
+
+.tc-crosshair-diamond {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 42%;
+    height: 42%;
+    border: var(--bs-crosshair-thickness) solid var(--bs-crosshair-color);
+    border-radius: 0;
+    transform: rotate(45deg);
+}

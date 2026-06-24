@@ -1,0 +1,106 @@
+// tc-otp-input — per-digit OTP cells with keyboard navigation and paste support.
+// All cosmetic values flow through --bs-otp-input-* custom properties
+// backed by --tc-* tokens.
+
+tc-otp-input {
+    --bs-otp-input-cell-size: 2.75rem;
+    --bs-otp-input-gap: 0.5rem;
+    --bs-otp-input-bg: var(--tc-surface);
+    --bs-otp-input-color: var(--tc-text);
+    --bs-otp-input-border-color: var(--tc-border-strong);
+    --bs-otp-input-focus-border-color: var(--tc-ink);
+    --bs-otp-input-focus-ring: var(--tc-focus-ring);
+    --bs-otp-input-filled-border-color: var(--tc-ink);
+    --bs-otp-input-error-border-color: var(--tc-danger);
+    --bs-otp-input-error-color: var(--tc-danger);
+    --bs-otp-input-error-focus-ring: 0 0 0 0.2rem rgba(239, 68, 68, 0.15);
+}
+
+// ── Label ──────────────────────────────────────────────────────────────────
+
+.tc-otp-input__label {
+    display: inline-block;
+    margin-bottom: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--tc-text);
+}
+
+// ── Cell row ───────────────────────────────────────────────────────────────
+
+.tc-otp-input__cells {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: var(--bs-otp-input-gap);
+}
+
+// ── Individual cell ────────────────────────────────────────────────────────
+
+.tc-otp-input__cell {
+    width: var(--bs-otp-input-cell-size);
+    height: var(--bs-otp-input-cell-size);
+    flex: 0 0 var(--bs-otp-input-cell-size);
+    padding: 0;
+    text-align: center;
+    font-family: var(--tc-font-mono);
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--bs-otp-input-color);
+    background-color: var(--bs-otp-input-bg);
+    border: 1px solid var(--bs-otp-input-border-color);
+    border-radius: 0;
+    appearance: none;
+    outline: none;
+    transition:
+        border-color var(--tc-transition-fast),
+        box-shadow var(--tc-transition-fast);
+
+    &:focus {
+        position: relative;
+        z-index: 1;
+        border-color: var(--bs-otp-input-focus-border-color);
+        box-shadow: var(--bs-otp-input-focus-ring);
+    }
+
+    &.tc-otp-input__cell--filled {
+        border-color: var(--bs-otp-input-filled-border-color);
+    }
+}
+
+// ── Error state ────────────────────────────────────────────────────────────
+
+.tc-otp-input[aria-invalid='true'] {
+    .tc-otp-input__cell {
+        border-color: var(--bs-otp-input-error-border-color);
+
+        &:focus {
+            border-color: var(--bs-otp-input-error-border-color);
+            box-shadow: var(--bs-otp-input-error-focus-ring);
+        }
+    }
+}
+
+.tc-otp-input__error {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+    color: var(--bs-otp-input-error-color);
+}
+
+// ── 44 px coarse touch target ──────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-otp-input__cell {
+        min-width: 2.75rem;
+        min-height: 2.75rem;
+    }
+}
+
+// ── Reduced motion ─────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-otp-input__cell {
+        transition: none;
+    }
+}

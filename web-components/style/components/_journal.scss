@@ -1,0 +1,368 @@
+// tc-journal — quest / lore journal: entry list (left) + detail view (right).
+// Port of gc-journal; restyled to the slate/ink design system.
+// All cosmetics flow through --bs-journal-* custom properties.
+
+tc-journal {
+    // Frame
+    --bs-journal-bg: var(--tc-surface);
+    --bs-journal-border: 1px solid var(--tc-border);
+    --bs-journal-min-height: 18rem;
+
+    // List rail
+    --bs-journal-list-width: 14rem;
+    --bs-journal-list-bg: var(--tc-surface);
+    --bs-journal-list-border-color: var(--tc-border);
+
+    // Rows
+    --bs-journal-row-border-color: var(--tc-border);
+    --bs-journal-row-hover-bg: var(--tc-surface-hover, var(--tc-surface-muted));
+    --bs-journal-row-selected-bg: var(--tc-surface-muted);
+    --bs-journal-row-selected-accent: var(--tc-app-accent);
+    --bs-journal-row-title-color: var(--tc-text);
+    --bs-journal-row-title-font-size: 0.8125rem;
+
+    // State pip palette
+    --bs-journal-pip-active: var(--tc-app-accent);
+    --bs-journal-pip-completed: var(--tc-success, #22c55e);
+    --bs-journal-pip-failed: var(--tc-danger, #ef4444);
+    --bs-journal-pip-inactive: var(--tc-text-faint);
+
+    // Detail
+    --bs-journal-detail-bg: var(--tc-surface);
+    --bs-journal-title-color: var(--tc-text);
+    --bs-journal-title-font-size: 1.125rem;
+    --bs-journal-description-color: var(--tc-text);
+    --bs-journal-body-color: var(--tc-text-muted);
+    --bs-journal-eyebrow-color: var(--tc-text-muted);
+    --bs-journal-empty-color: var(--tc-text-faint);
+
+    // State eyebrow palette
+    --bs-journal-state-active: var(--tc-app-accent);
+    --bs-journal-state-completed: var(--tc-success, #22c55e);
+    --bs-journal-state-failed: var(--tc-danger, #ef4444);
+    --bs-journal-state-inactive: var(--tc-text-faint);
+
+    // Objectives
+    --bs-journal-check-size: 1rem;
+    --bs-journal-check-color: var(--tc-border-strong);
+    --bs-journal-check-done-color: var(--tc-app-accent);
+    --bs-journal-objective-color: var(--tc-text);
+    --bs-journal-objective-completed-color: var(--tc-text-faint);
+    --bs-journal-objective-optional-color: var(--tc-text-faint);
+
+    // Rewards
+    --bs-journal-reward-bg: var(--tc-surface-muted);
+    --bs-journal-reward-label-color: var(--tc-text-muted);
+    --bs-journal-reward-value-color: var(--tc-text);
+
+    background: var(--bs-journal-bg);
+    border: var(--bs-journal-border);
+    border-radius: 0;
+    overflow: hidden;
+}
+
+.tc-journal {
+    display: flex;
+    align-items: stretch;
+    min-height: var(--bs-journal-min-height);
+}
+
+// ── List rail ───────────────────────────────────────────────────────────────────
+
+.tc-journal-list {
+    flex: 0 0 var(--bs-journal-list-width);
+    display: flex;
+    flex-direction: column;
+    background: var(--bs-journal-list-bg);
+    border-right: 1px solid var(--bs-journal-list-border-color);
+    overflow-y: auto;
+}
+
+.tc-journal-list-empty {
+    margin: 0;
+    padding: 1rem 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--bs-journal-empty-color);
+    text-align: center;
+}
+
+// ── Row ─────────────────────────────────────────────────────────────────────────
+
+.tc-journal-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    min-height: 40px;
+    border-bottom: 1px solid var(--bs-journal-row-border-color);
+    border-left: 3px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    outline: none;
+    transition: background var(--tc-transition-fast, 0.15s ease);
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    &:hover {
+        background: var(--bs-journal-row-hover-bg);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: -2px;
+    }
+
+    &--selected {
+        background: var(--bs-journal-row-selected-bg);
+        border-left-color: var(--bs-journal-row-selected-accent);
+    }
+}
+
+.tc-journal-row-pip {
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 0;
+    background: var(--bs-journal-pip-active);
+}
+
+.tc-journal-row--active .tc-journal-row-pip {
+    background: var(--bs-journal-pip-active);
+}
+.tc-journal-row--completed .tc-journal-row-pip {
+    background: var(--bs-journal-pip-completed);
+}
+.tc-journal-row--failed .tc-journal-row-pip {
+    background: var(--bs-journal-pip-failed);
+}
+.tc-journal-row--inactive .tc-journal-row-pip {
+    background: var(--bs-journal-pip-inactive);
+}
+
+.tc-journal-row-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: var(--bs-journal-row-title-font-size);
+    font-weight: 500;
+    color: var(--bs-journal-row-title-color);
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tc-journal-row--inactive .tc-journal-row-title {
+    color: var(--tc-text-muted);
+}
+
+// ── Detail pane ───────────────────────────────────────────────────────────────────
+
+.tc-journal-detail {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    padding: 1rem 1.125rem;
+    background: var(--bs-journal-detail-bg);
+    overflow-y: auto;
+}
+
+.tc-journal-detail-empty {
+    margin: auto;
+    font-size: 0.8125rem;
+    color: var(--bs-journal-empty-color);
+}
+
+// Mono uppercase state micro-label (replaces gc-eyebrow).
+.tc-journal-detail-state {
+    align-self: flex-start;
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1;
+    color: var(--bs-journal-state-active);
+
+    &--active {
+        color: var(--bs-journal-state-active);
+    }
+    &--completed {
+        color: var(--bs-journal-state-completed);
+    }
+    &--failed {
+        color: var(--bs-journal-state-failed);
+    }
+    &--inactive {
+        color: var(--bs-journal-state-inactive);
+    }
+}
+
+.tc-journal-detail-title {
+    margin: 0;
+    font-size: var(--bs-journal-title-font-size);
+    font-weight: 600;
+    color: var(--bs-journal-title-color);
+    line-height: 1.3;
+}
+
+.tc-journal-detail-description {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--bs-journal-description-color);
+    line-height: 1.5;
+}
+
+.tc-journal-detail-body {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--bs-journal-body-color);
+    line-height: 1.6;
+}
+
+.tc-journal-detail-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+.tc-journal-detail-eyebrow {
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--bs-journal-eyebrow-color);
+    line-height: 1;
+}
+
+// ── Objectives ────────────────────────────────────────────────────────────────────
+
+.tc-journal-objectives {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.tc-journal-objective {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tc-journal-objective-check {
+    flex-shrink: 0;
+    width: var(--bs-journal-check-size);
+    height: var(--bs-journal-check-size);
+    border: 1px solid var(--bs-journal-check-color);
+    border-radius: 0;
+    background: transparent;
+    transition:
+        background var(--tc-transition-fast, 0.15s ease),
+        border-color var(--tc-transition-fast, 0.15s ease);
+
+    &--done {
+        border-color: var(--bs-journal-check-done-color);
+        background: var(--bs-journal-check-done-color);
+        position: relative;
+
+        // White tick injected via mask so it recolors correctly.
+        &::after {
+            content: '';
+            display: block;
+            position: absolute;
+            inset: 0;
+            background: #fff;
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpolyline points='1.5,5.5 4,8 8.5,2' fill='none' stroke='%23fff' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            mask-size: cover;
+        }
+    }
+}
+
+.tc-journal-objective-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 0.8125rem;
+    color: var(--bs-journal-objective-color);
+    line-height: 1.4;
+}
+
+.tc-journal-objective--completed .tc-journal-objective-label {
+    color: var(--bs-journal-objective-completed-color);
+    text-decoration: line-through;
+    text-decoration-color: var(--bs-journal-objective-completed-color);
+}
+
+.tc-journal-objective-optional {
+    flex-shrink: 0;
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.625rem;
+    letter-spacing: 0.04em;
+    color: var(--bs-journal-objective-optional-color);
+}
+
+// ── Rewards ───────────────────────────────────────────────────────────────────────
+
+.tc-journal-rewards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.tc-journal-reward {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.5rem;
+    background: var(--bs-journal-reward-bg);
+    border-radius: 0;
+}
+
+.tc-journal-reward-icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    font-size: 0.875rem;
+    line-height: 1;
+}
+
+.tc-journal-reward-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 0.8125rem;
+    color: var(--bs-journal-reward-label-color);
+    line-height: 1.4;
+}
+
+.tc-journal-reward-value {
+    flex-shrink: 0;
+    font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--bs-journal-reward-value-color);
+    line-height: 1.4;
+}
+
+// ── 44px coarse touch targets ──────────────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-journal-row {
+        min-height: 44px;
+    }
+}
+
+// ── Reduced motion ─────────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-journal-row,
+    .tc-journal-objective-check {
+        transition: background var(--tc-transition-fast, 0.15s ease);
+    }
+}

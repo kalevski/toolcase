@@ -1,0 +1,78 @@
+// Dungeon › tc-report-dialog — gilded moderation modal overlay.
+// Token swap fixes the hardcoded slate-navy backdrop, red-literal submit hover,
+// and ink textarea well. Structural rules add the gilded bevel + top corner
+// notches on the panel frame, display caps on the title, gold radio inner dot,
+// and a gold textarea focus glow that replaces the slate-blue literal.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+
+    // ── Token swap on the host element ────────────────────────────────────────
+
+    tc-report-dialog {
+        // Panel surface → wood gradient fill
+        --bs-report-dialog-bg: var(--fg-panel-bg);
+
+        // Backdrop → ink scrim (was hardcoded #0f172a slate-navy)
+        --bs-report-dialog-backdrop-bg: var(--fg-ink);
+
+        // Submit danger button → blood ramp (fallback was #dc2626 / hover #b91c1c)
+        --bs-report-dialog-btn-submit-bg:       var(--fg-blood);
+        --bs-report-dialog-btn-submit-hover-bg: var(--fg-blood-bright);
+
+        // Textarea well → deep ink pit
+        --bs-report-dialog-textarea-bg: #0e0905;
+    }
+
+    // ── Panel frame — gilded bevel + corner notches ───────────────────────────
+
+    .tc-report-dialog__panel {
+        position: relative;
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // Top corner notches — signature gilded ornament.
+    .tc-report-dialog__panel::before,
+    .tc-report-dialog__panel::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        z-index: 1;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+    }
+
+    .tc-report-dialog__panel::before {
+        left: -1px;
+    }
+
+    .tc-report-dialog__panel::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+
+    // ── Title — display caps ──────────────────────────────────────────────────
+
+    .tc-report-dialog__title {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+    }
+
+    // ── Radio inner dot — gold instead of hardcoded #fff ─────────────────────
+    // The circle shape itself is a sanctioned circle per spec — keep border-radius: 50%.
+
+    .tc-report-dialog__radio::after {
+        background: var(--fg-gold-bright);
+    }
+
+    // ── Textarea focus glow — gold instead of hardcoded slate-blue ───────────
+
+    .tc-report-dialog__comment:focus {
+        border-color: var(--fg-gold);
+        box-shadow: 0 0 0 0.2rem rgba(240, 210, 122, 0.35);
+    }
+}

@@ -1,0 +1,31 @@
+// Dungeon › tc-currency-display — gold-bright readout: display-caps wide-tracked
+// label, gilded icon, mono amount with ink shadow. Host var sets the gold tint;
+// the .tc-* rules add display caps on the label and the shadowed mono amount.
+//
+// Design source:  game-components/style/components/_currency-display.scss
+// Target classes: web-components/style/components/_currency-display.scss
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-currency-display {
+        --bs-currency-display-color: var(--fg-gold-bright);
+    }
+
+    .tc-currency-display {
+        --bs-currency-display-label-color: var(--fg-parch-dim);
+        --bs-currency-display-amount-color: var(--fg-gold-bright);
+    }
+
+    // Label = wide-tracked display caps.
+    .tc-currency-display-label {
+        font-family: var(--fg-display);
+        letter-spacing: 0.32em;
+    }
+
+    // Amount = mono figure with an ink shadow (already mono in base).
+    .tc-currency-display-amount {
+        font-family: var(--fg-mono);
+        letter-spacing: 0.04em;
+        text-shadow: 0 1px 2px #000;
+    }
+}

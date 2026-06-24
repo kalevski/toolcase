@@ -1,0 +1,10 @@
+// Dungeon › tc-stack — no override needed.
+//
+// tc-stack is a purely structural flexbox layout primitive: no colours,
+// borders, surfaces, or text of its own. The foundation token remap carries
+// nothing here because there is nothing cosmetic to reskin. Deliberately left
+// empty — adding decoration would be inventing chrome the component doesn't have.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+}

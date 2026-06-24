@@ -21,4 +21,15 @@ describe('toHex', () => {
     it('handles large numbers', () => {
         expect(toHex(65535, 4)).toBe('ffff')
     })
+
+    it('does not throw when digits <= 0 and returns non-empty hex string', () => {
+        expect(() => toHex(255, 0)).not.toThrow()
+        expect(toHex(255, 0).length).toBeGreaterThan(0)
+    })
+
+    it('handles negative values without a minus sign', () => {
+        const result = toHex(-1)
+        expect(result).not.toContain('-')
+        expect(result).toBe('ffff')
+    })
 })

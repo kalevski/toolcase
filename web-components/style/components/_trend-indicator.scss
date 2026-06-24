@@ -1,0 +1,78 @@
+// tc-trend-indicator — directional trend badge with lucide arrow icon and value text.
+// Up = --tc-success, down = --tc-danger, neutral = --tc-text-muted (slate).
+// Three sizes scale icon and text proportionally.
+// All cosmetics via --bs-trend-indicator-* backed by --tc-* tokens.
+
+tc-trend-indicator,
+tc-leaderboard-trend {
+    vertical-align: middle;
+}
+
+.tc-trend-indicator {
+    --bs-trend-indicator-icon-size: 1rem;
+    --bs-trend-indicator-font-size: 0.8125rem;
+    --bs-trend-indicator-gap: 0.25rem;
+    --bs-trend-indicator-color: var(--tc-text-muted);
+
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-trend-indicator-gap);
+    font-family: 'JetBrains Mono', 'JetBrainsMono NF', monospace;
+    font-size: var(--bs-trend-indicator-font-size);
+    font-weight: 500;
+    color: var(--bs-trend-indicator-color);
+    letter-spacing: 0.01em;
+    line-height: 1;
+    white-space: nowrap;
+    border-radius: 0;
+}
+
+.tc-trend-indicator--up {
+    --bs-trend-indicator-color: var(--tc-success);
+}
+
+.tc-trend-indicator--down {
+    --bs-trend-indicator-color: var(--tc-danger);
+}
+
+.tc-trend-indicator--neutral {
+    --bs-trend-indicator-color: var(--tc-text-muted);
+}
+
+.tc-trend-indicator--small {
+    --bs-trend-indicator-icon-size: 0.75rem;
+    --bs-trend-indicator-font-size: 0.6875rem;
+    --bs-trend-indicator-gap: 0.1875rem;
+}
+
+.tc-trend-indicator--default {
+    --bs-trend-indicator-icon-size: 1rem;
+    --bs-trend-indicator-font-size: 0.8125rem;
+    --bs-trend-indicator-gap: 0.25rem;
+}
+
+.tc-trend-indicator--large {
+    --bs-trend-indicator-icon-size: 1.25rem;
+    --bs-trend-indicator-font-size: 1rem;
+    --bs-trend-indicator-gap: 0.375rem;
+}
+
+.tc-trend-indicator-icon {
+    width: var(--bs-trend-indicator-icon-size);
+    height: var(--bs-trend-indicator-icon-size);
+    flex-shrink: 0;
+    display: inline-block;
+    vertical-align: middle;
+    // stroke inherits currentColor from parent; lucide SVGs use stroke-based drawing
+    fill: none;
+}
+
+.tc-trend-indicator-value {
+    line-height: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-trend-indicator {
+        transition: none;
+    }
+}

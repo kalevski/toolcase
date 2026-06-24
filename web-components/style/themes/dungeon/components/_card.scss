@@ -1,0 +1,71 @@
+// Dungeon › .card — panel-motif treatment for Bootstrap's flat card surface.
+// Token-swaps the wood gradient + gold cap text, then adds the gilded bevel
+// stack, header/footer gold hairlines, and top corner notches that a var swap
+// alone cannot carry. Mirrors _panel.scss.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token swap ───────────────────────────────────────────────────────────
+    .card {
+        --bs-card-bg: var(--fg-panel-bg);
+        --bs-card-cap-bg: transparent;
+        --bs-card-cap-color: var(--fg-gold-bright);
+        --bs-card-border-color: var(--fg-gold-deep);
+        --bs-card-border-radius: 0;
+
+        // ── Bevel stack + drop shadow ─────────────────────────────────────
+        position: relative;
+        color: var(--fg-parch);
+        box-shadow: var(--fg-panel-shadow);
+    }
+
+    // ── Top corner notches — signature gilded ornament ────────────────────
+    .card::before,
+    .card::after {
+        content: '';
+        position: absolute;
+        top: -1px;
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+        z-index: 1;
+    }
+
+    .card::before {
+        left: -1px;
+    }
+
+    .card::after {
+        right: -1px;
+        transform: scaleX(-1);
+    }
+
+    // ── Gilded caps ───────────────────────────────────────────────────────
+    .card-header {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 600;
+        // Replace the slate rgba hairline with a gold divider.
+        border-bottom-color: var(--fg-gold-deep);
+    }
+
+    .card-footer {
+        // Replace the slate rgba hairline with a gold divider.
+        border-top-color: var(--fg-gold-deep);
+    }
+
+    // ── Solid-variant cards (text-bg-*) ───────────────────────────────────
+    // Neutral overlays survive as-is; restore square corners and drop the
+    // notches so busy solid fills don't clash with the gilded ornament.
+    .card[class*='text-bg-'] {
+        --bs-card-border-radius: 0;
+
+        &::before,
+        &::after {
+            display: none;
+        }
+    }
+}

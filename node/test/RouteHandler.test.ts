@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import type { FastifyInstance, FastifyReply } from 'fastify'
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { RouteHandler } from '../src/RouteHandler'
 import {
     NotFoundError,
@@ -16,6 +16,10 @@ class TestRouteHandler extends RouteHandler {
 
     callMapError(error: unknown, reply: FastifyReply): unknown {
         return this.mapError(error, reply)
+    }
+
+    callParseId(req: FastifyRequest): unknown {
+        return this.parseId(req)
     }
 }
 
@@ -82,5 +86,42 @@ describe('RouteHandler.mapError', () => {
         const body = ep.callMapError(new Error('boom'), reply) as { cause: string }
         expect(code).toHaveBeenCalledWith(500)
         expect(body.cause).toBe('internal_error')
+    })
+})
+
+describe('RouteHandler.parseId', () => {
+
+    function makeReq(idValue: string) {
+        return { params: { id: idValue } } as unknown as FastifyRequest
+    }
+
+    it('custom parseId throwing non-ValidationError yields ValidationError with no details', () => {
+        const ep = new TestRouteHandler({
+            parseId: () => { throw new Error('secret internal detail') },
+        })
+        let caught: unknown
+        try {
+            ep.callParseId(makeReq('bad'))
+        } catch (e) {
+            caught = e
+        }
+        expect(caught).toBeInstanceOf(ValidationError)
+        expect((caught as ValidationError).details).toBeUndefined()
+        expect(String(caught)).not.toContain('secret internal detail')
+    })
+
+    it('custom parseId throwing ValidationError passes it through unchanged', () => {
+        const ep = new TestRouteHandler({
+            parseId: () => { throw new ValidationError('custom message', { field: 'id' }) },
+        })
+        let caught: unknown
+        try {
+            ep.callParseId(makeReq('bad'))
+        } catch (e) {
+            caught = e
+        }
+        expect(caught).toBeInstanceOf(ValidationError)
+        expect((caught as ValidationError).details).toEqual({ field: 'id' })
+        expect(String(caught)).toContain('custom message')
     })
 })

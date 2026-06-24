@@ -1,0 +1,103 @@
+// Dungeon › tc-loading-overlay — gilded loading scrim. Backdrop blurs to ink; the
+// panel becomes a layered gilded ink card; the spinner ring keeps its sanctioned
+// circle but recolours to gold-bright with a glow; label row goes mono caps with a
+// gold percent; the progress bar turns into an inset ink groove with a gold
+// gradient fill + scanlines; tip switches to the serif body face, italic. Token
+// swap can't carry the panel bevel, the gradient fill, the scanlines, or the recasts.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-loading-overlay {
+        --bs-loading-overlay-backdrop-bg: rgba(0, 0, 0, 0.65);
+
+        // Improvement 1: use sanctioned wood-panel recipe token instead of hand-rolled gradient.
+        --bs-loading-overlay-panel-bg: var(--fg-panel-bg);
+        --bs-loading-overlay-panel-border: 1px solid var(--fg-gold-deep);
+
+        --bs-loading-overlay-spinner-color: var(--fg-gold-bright);
+
+        // Improvement 6: brighten label from parch-3 to parch for legibility on dark panel.
+        --bs-loading-overlay-label-color: var(--fg-parch);
+        --bs-loading-overlay-pct-color: var(--fg-gold-bright);
+
+        // Improvement 4: replace literal hex with palette tokens.
+        --bs-loading-overlay-bar-bg: linear-gradient(180deg, var(--fg-ink), var(--fg-ink-2));
+        --bs-loading-overlay-bar-fill: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold) 60%, var(--fg-gold-shadow));
+
+        // Improvement 3: thicken bar so gilded groove, scanlines, and gold fill are visible.
+        --bs-loading-overlay-bar-height: 10px;
+
+        --bs-loading-overlay-tip-color: var(--fg-parch-3);
+    }
+
+    // Backdrop gains an ink blur.
+    .tc-loading-overlay-backdrop {
+        backdrop-filter: blur(2px);
+    }
+
+    // Panel — warm wood recipe fill + sanctioned bevel shadow (Improvement 1).
+    .tc-loading-overlay-panel {
+        // Improvement 1: sanctioned panel-shadow recipe; keep extra drop layer appended.
+        box-shadow:
+            var(--fg-panel-shadow),
+            0 20px 50px rgba(0, 0, 0, 0.8);
+        color: var(--fg-parch);
+        // Needed for corner-notch ::before to be contained.
+        position: relative;
+    }
+
+    // Improvement 2: corner notch — top-right framed-panel glyph.
+    .tc-loading-overlay-panel::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 18px;
+        height: 18px;
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
+        pointer-events: none;
+    }
+
+    // Spinner ring keeps its sanctioned circle; gold glow halo.
+    .tc-loading-overlay-spinner-ring {
+        border-color: var(--fg-gold-shadow);
+        filter: drop-shadow(0 0 8px rgba(232, 200, 120, 0.4));
+    }
+
+    // Label row reads mono caps.
+    .tc-loading-overlay-label {
+        font-family: var(--fg-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-weight: 400;
+    }
+
+    // Bar — inset ink groove with a gilded fill (base ships a flat hairline track).
+    .tc-loading-overlay-bar {
+        border: 1px solid var(--fg-gold-deep);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+            inset 0 1px 0 rgba(232, 200, 120, 0.18);
+    }
+
+    // Scanlines wash over the fill (web has no scanline element — overlay the bar).
+    .tc-loading-overlay-bar::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: var(--fg-scanlines);
+    }
+
+    // Improvement 5: gold-rule divider separates tip from spinner/label cluster.
+    // Improvement 6 (tip color via var above); serif body face stays italic.
+    .tc-loading-overlay-tip {
+        font-family: var(--fg-body);
+        font-style: italic;
+        letter-spacing: normal;
+        padding-top: 0.75rem;
+        border-top: 1px solid transparent;
+        border-image: var(--fg-rule) 1;
+    }
+}

@@ -1,0 +1,137 @@
+// tc-confirm-dialog — centred yes/no confirmation modal, overlay tier.
+// Fully custom (no Bootstrap plugin). All cosmetics flow through
+// --bs-confirm-dialog-* vars backed by --tc-* tokens. The fantasy chrome of the
+// game-components source (gilded frame, diamond divider, metal buttons) is
+// dropped in favour of the slate design system: sharp corners, 1px hairline,
+// the single hard overlay shadow.
+
+tc-confirm-dialog {
+    // Surface + chrome.
+    --bs-confirm-dialog-bg:           var(--tc-surface);
+    --bs-confirm-dialog-color:        var(--tc-text);
+    --bs-confirm-dialog-border-color: var(--tc-border);
+    --bs-confirm-dialog-shadow:       var(--tc-shadow-lg);
+    --bs-confirm-dialog-width:        420px;
+    --bs-confirm-dialog-padding:      1.25rem;
+    --bs-confirm-dialog-gap:          0.75rem;
+
+    // Eyebrow micro-label — muted by default, danger emphasis under [danger].
+    --bs-confirm-dialog-eyebrow-color: var(--tc-text-muted);
+
+    // Z-index band — backdrop below panel, both in the modal overlay tier.
+    --bs-confirm-dialog-z-backdrop: var(--tc-z-modal-backdrop);
+    --bs-confirm-dialog-z-panel:    var(--tc-z-modal);
+
+    // Transition.
+    --bs-confirm-dialog-transition: transform var(--tc-transition-base), opacity var(--tc-transition-base);
+
+    // Backdrop scrim.
+    --bs-confirm-dialog-backdrop-bg:      #0f172a;
+    --bs-confirm-dialog-backdrop-opacity: 0.5;
+}
+
+tc-confirm-dialog[danger] {
+    --bs-confirm-dialog-eyebrow-color: var(--tc-danger);
+}
+
+// ── Backdrop ──────────────────────────────────────────────────────────────────
+
+.tc-confirm-dialog__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--bs-confirm-dialog-z-backdrop);
+    background: var(--bs-confirm-dialog-backdrop-bg);
+    opacity: 0;
+    transition: opacity var(--tc-transition-base);
+
+    tc-confirm-dialog.tc-confirm-dialog--open & {
+        opacity: var(--bs-confirm-dialog-backdrop-opacity);
+    }
+}
+
+// ── Panel ─────────────────────────────────────────────────────────────────────
+
+.tc-confirm-dialog__panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: var(--bs-confirm-dialog-z-panel);
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-confirm-dialog-gap);
+    width: var(--bs-confirm-dialog-width);
+    max-width: calc(100vw - 2rem);
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+    padding: var(--bs-confirm-dialog-padding);
+    color: var(--bs-confirm-dialog-color);
+    background: var(--bs-confirm-dialog-bg);
+    border: 1px solid var(--bs-confirm-dialog-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-confirm-dialog-shadow);
+    outline: 0;
+    // Closed state — nudged down + faded; centring offset folded into transform.
+    transform: translate(-50%, calc(-50% + 0.75rem));
+    opacity: 0;
+    transition: var(--bs-confirm-dialog-transition);
+
+    tc-confirm-dialog.tc-confirm-dialog--open & {
+        transform: translate(-50%, -50%);
+        opacity: 1;
+    }
+}
+
+// ── Eyebrow — mono uppercase micro-label ────────────────────────────────────────
+
+.tc-confirm-dialog__eyebrow {
+    font-family: var(--tc-font-mono);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bs-confirm-dialog-eyebrow-color);
+}
+
+// ── Title ─────────────────────────────────────────────────────────────────────
+
+.tc-confirm-dialog__title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--tc-text);
+}
+
+// ── Message ───────────────────────────────────────────────────────────────────
+
+.tc-confirm-dialog__message {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--tc-text-muted);
+}
+
+// ── Actions ───────────────────────────────────────────────────────────────────
+
+.tc-confirm-dialog__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+// ── Reduced motion — show/hide via [hidden] only, no fade/slide animation ──────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-confirm-dialog__panel {
+        transition: none;
+        transform: translate(-50%, -50%);
+        opacity: 1;
+    }
+
+    .tc-confirm-dialog__backdrop {
+        transition: none;
+    }
+}

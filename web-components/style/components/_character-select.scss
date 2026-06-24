@@ -1,0 +1,256 @@
+// tc-character-select — roster / character-selection screen. Ported from the
+// game-components `gc-character-select`, but stripped of the fantasy chrome
+// (gilded frames, portrait glows, metal fills): a flat slate layout with a
+// tile grid on one side and a detail panel on the other, hairline borders,
+// sharp corners, slate hover wells, and a 2px ink frame on the selected tile.
+// Every cosmetic value flows through `--bs-character-select-*` so themes can
+// re-skin via vars alone.
+
+tc-character-select {
+    --bs-character-select-gap: 1rem;
+
+    --bs-character-select-tile-min-col: 160px;
+    --bs-character-select-tile-gap: 0.5rem;
+    --bs-character-select-tile-padding: 0.75rem;
+    --bs-character-select-tile-bg: var(--tc-surface);
+    --bs-character-select-tile-border-color: var(--tc-border);
+    --bs-character-select-tile-hover-bg: var(--tc-surface-muted);
+    --bs-character-select-tile-hover-border-color: var(--tc-border-strong);
+    --bs-character-select-selected-accent: var(--tc-app-accent);
+
+    --bs-character-select-portrait-size: 48px;
+    --bs-character-select-portrait-bg: var(--tc-surface-muted);
+    --bs-character-select-portrait-color: var(--tc-text);
+    --bs-character-select-portrait-size-font: 1.125rem;
+
+    --bs-character-select-name-color: var(--tc-text);
+    --bs-character-select-name-size: 0.9375rem;
+    --bs-character-select-role-color: var(--tc-text-muted);
+    --bs-character-select-role-size: 11px;
+    --bs-character-select-role-spacing: 0.08em;
+
+    --bs-character-select-lock-color: var(--tc-text-faint);
+    --bs-character-select-lock-size: 0.875rem;
+
+    --bs-character-select-detail-padding: 1.25rem;
+    --bs-character-select-detail-bg: var(--tc-surface);
+    --bs-character-select-detail-border-color: var(--tc-border);
+    --bs-character-select-detail-min-width: 220px;
+    --bs-character-select-detail-name-color: var(--tc-text);
+    --bs-character-select-detail-name-size: 1.25rem;
+    --bs-character-select-detail-description-color: var(--tc-text-muted);
+    --bs-character-select-detail-stat-border-color: var(--tc-border);
+    --bs-character-select-detail-stat-label-color: var(--tc-text-muted);
+    --bs-character-select-detail-stat-value-color: var(--tc-text);
+
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--bs-character-select-gap);
+
+    // Side-by-side once there is room: tile grid + a fixed-min detail panel.
+    @media (min-width: 768px) {
+        grid-template-columns: 1fr minmax(var(--bs-character-select-detail-min-width), 0.6fr);
+        align-items: start;
+    }
+}
+
+.tc-character-select-grid {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fill,
+        minmax(var(--bs-character-select-tile-min-col), 1fr)
+    );
+    gap: var(--bs-character-select-tile-gap);
+}
+
+.tc-character-select-tile {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--bs-character-select-tile-gap);
+    min-height: 44px;
+    padding: var(--bs-character-select-tile-padding);
+    background: var(--bs-character-select-tile-bg);
+    border: 1px solid var(--bs-character-select-tile-border-color);
+    border-radius: 0;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+
+    @media (pointer: coarse) {
+        min-height: 56px;
+    }
+
+    &:hover:not(.is-selected):not(.is-locked) {
+        background: var(--bs-character-select-tile-hover-bg);
+        border-color: var(--bs-character-select-tile-hover-border-color);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--bs-character-select-selected-accent);
+        outline-offset: 2px;
+        z-index: 1;
+    }
+
+    // Selected: 2px ink frame (inset shadow keeps the box from shifting).
+    &.is-selected {
+        border-color: var(--bs-character-select-selected-accent);
+        box-shadow: inset 0 0 0 1px var(--bs-character-select-selected-accent);
+        z-index: 1;
+    }
+
+    // Disabled = opacity + pointer-events, never colour-only.
+    &.is-locked {
+        opacity: 0.55;
+        cursor: default;
+        pointer-events: none;
+    }
+}
+
+// Square initials/glyph portrait — sharp corners, slate well. Image portraits
+// fill the same box via object-fit.
+.tc-character-select-portrait {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-character-select-portrait-size);
+    height: var(--bs-character-select-portrait-size);
+    background: var(--bs-character-select-portrait-bg);
+    color: var(--bs-character-select-portrait-color);
+    border-radius: 0;
+    overflow: hidden;
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-character-select-portrait-size-font);
+    font-weight: 600;
+    line-height: 1;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
+.tc-character-select-tile-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.tc-character-select-tile-name {
+    font-size: var(--bs-character-select-name-size);
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--bs-character-select-name-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// Mono micro-label — machine-facing role tag.
+.tc-character-select-tile-role {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-character-select-role-size);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: var(--bs-character-select-role-spacing);
+    color: var(--bs-character-select-role-color);
+}
+
+.tc-character-select-lock {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-character-select-lock-size);
+    height: var(--bs-character-select-lock-size);
+    color: var(--bs-character-select-lock-color);
+
+    svg {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+// Detail panel — flat slate card, hairline border, sharp corners.
+.tc-character-select-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: var(--bs-character-select-detail-padding);
+    background: var(--bs-character-select-detail-bg);
+    border: 1px solid var(--bs-character-select-detail-border-color);
+    border-radius: 0;
+}
+
+.tc-character-select-detail-empty {
+    margin: 0;
+    color: var(--bs-character-select-detail-description-color);
+    font-size: 0.875rem;
+}
+
+// Mono uppercase eyebrow above the detail name.
+.tc-character-select-detail-role {
+    font-family: var(--tc-font-mono);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--bs-character-select-role-color);
+}
+
+.tc-character-select-detail-name {
+    margin: 0;
+    font-size: var(--bs-character-select-detail-name-size);
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--bs-character-select-detail-name-color);
+}
+
+.tc-character-select-detail-description {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--bs-character-select-detail-description-color);
+}
+
+// Stats: hairline-separated label/value rows.
+.tc-character-select-detail-stats {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0.25rem;
+    border-top: 1px solid var(--bs-character-select-detail-stat-border-color);
+}
+
+.tc-character-select-detail-stat {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--bs-character-select-detail-stat-border-color);
+}
+
+.tc-character-select-detail-stat-label {
+    font-size: 0.8125rem;
+    color: var(--bs-character-select-detail-stat-label-color);
+}
+
+.tc-character-select-detail-stat-value {
+    font-family: var(--tc-font-mono);
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: var(--bs-character-select-detail-stat-value-color);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-character-select-tile {
+        transition: none;
+    }
+}

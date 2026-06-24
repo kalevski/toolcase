@@ -22,12 +22,13 @@ export class Leaderboard {
 		this.direction = options.direction ?? 'desc'
 	}
 
-	addScore(boardKey: string, member: string, score: number): Promise<number> {
-		return this.client.zAdd(this.keys.build(boardKey), { score, value: member })
+	async addScore(boardKey: string, member: string, score: number): Promise<void> {
+		await this.client.zAdd(this.keys.build(boardKey), { score, value: member })
 	}
 
-	incrScore(boardKey: string, member: string, delta: number): Promise<number> {
-		return this.client.zIncrBy(this.keys.build(boardKey), delta, member) as unknown as Promise<number>
+	async incrScore(boardKey: string, member: string, delta: number): Promise<number> {
+		const reply = await this.client.zIncrBy(this.keys.build(boardKey), delta, member)
+		return Number(reply)
 	}
 
 	async addScoreAndRank(
@@ -37,7 +38,7 @@ export class Leaderboard {
 	): Promise<{ rank: number | null; score: number }> {
 		const reply = (await this.scripts.get('addScoreAndRank').run(this.client, {
 			keys: [this.keys.build(boardKey)],
-			arguments: [String(score), member],
+			arguments: [String(score), member, this.direction],
 		})) as [number | string, number | string]
 		const rank = Number(reply[0])
 		return {

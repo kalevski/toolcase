@@ -1,0 +1,64 @@
+// tc-page-indicator — dot page-navigation widget.
+// Dots are sanctioned circles (styleguide §1 rule 3 lists "carousel dots"
+// as an explicit exception to the no-radius mandate).
+// All cosmetics flow through --bs-page-indicator-* custom properties.
+
+tc-page-indicator {
+    --bs-page-indicator-size: 8px;
+    --bs-page-indicator-gap: 6px;
+    --bs-page-indicator-color: var(--tc-border-strong);
+    --bs-page-indicator-active-color: var(--tc-app-accent);
+    --bs-page-indicator-dot-border-width: 1px;
+
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-page-indicator-gap);
+}
+
+.tc-page-indicator-dot {
+    position: relative;
+    display: block;
+    width: var(--bs-page-indicator-size);
+    height: var(--bs-page-indicator-size);
+    flex-shrink: 0;
+    padding: 0;
+    border-radius: 50%;
+    border: var(--bs-page-indicator-dot-border-width) solid var(--bs-page-indicator-color);
+    background: transparent;
+    cursor: pointer;
+    transition: background-color var(--tc-transition-fast), border-color var(--tc-transition-fast);
+
+    // Expand the hit area to 44 px without growing the visual dot.
+    &::after {
+        content: '';
+        position: absolute;
+        inset: -18px;
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    &:hover {
+        background: color-mix(in srgb, var(--bs-page-indicator-color) 20%, transparent);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+}
+
+.tc-page-indicator-dot--active {
+    background: var(--bs-page-indicator-active-color);
+    border-color: var(--bs-page-indicator-active-color);
+
+    &:hover {
+        background: var(--bs-page-indicator-active-color);
+        border-color: var(--bs-page-indicator-active-color);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-page-indicator-dot {
+        transition: none;
+    }
+}

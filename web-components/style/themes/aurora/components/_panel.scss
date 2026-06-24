@@ -1,0 +1,18 @@
+// Aurora › tc-panel — the framed surface, mirrors .card.
+// Gradient fill + top highlight; the header gets a hairline that reads on the
+// dark surface. No hover-lift (panels are containers, not interactive tiles).
+
+tc-theme[name='aurora'],
+[data-tc-theme='aurora'] {
+    tc-panel {
+        --bs-panel-bg: var(--ah-surface-grad);
+        --bs-panel-border-color: var(--ah-border);
+        --bs-panel-header-bg: transparent;
+        --bs-panel-header-border-color: var(--ah-border);
+        --bs-panel-header-color: var(--ah-emphasis);
+    }
+
+    .tc-panel {
+        box-shadow: var(--ah-bevel-top);
+    }
+}

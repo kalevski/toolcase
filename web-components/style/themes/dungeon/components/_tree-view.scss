@@ -1,0 +1,42 @@
+// Dungeon › tc-tree-view — hierarchical skill tree / dungeon map index.
+// Foundation reskin already covers ~90% (all color vars route through --tc-*
+// which the foundation remaps to parch/wood/gold). This override fine-tunes
+// the guide hairline intensity, strengthens the marker gold, adds a gold-
+// gradient wash to the selected row, and optionally frames the tree surface
+// with a top bevel highlight when used as a standalone panel.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    // ── Token swap on the host element ──────────────────────────────────────────
+
+    tc-tree-view {
+        // Softer gold hairline for dense vertical indentation guides.
+        // Using a raw rgba rather than --fg-gold-deep at full opacity avoids
+        // the visual noise of many overlapping guide lines on deep trees.
+        --bs-tree-view-guide-color: rgba(201, 169, 97, 0.2);
+
+        // Brighter gold for the left-marker in checkbox-mode selected rows,
+        // making the affordance more legible against the dark wood surface.
+        --bs-tree-view-marker-color: var(--fg-gold-bright);
+
+        // Gold gradient wash for single-select selected rows — richer than
+        // the flat accent gold the foundation provides.
+        --bs-tree-view-selected-bg: linear-gradient(
+            90deg,
+            var(--fg-gold) 0%,
+            var(--fg-gold-deep) 100%
+        );
+
+        // Ink text on the gold gradient is already handled by --tc-app-accent-contrast
+        // (remapped to --fg-ink by the foundation), so no extra var needed here.
+    }
+
+    // ── Surface frame — top bevel highlight ─────────────────────────────────────
+    // Gives the tree a faint gilded top edge when used as a standalone panel,
+    // without committing to full corner notches (the tree is typically embedded
+    // inside a tc-panel that already carries those ornaments).
+
+    .tc-tree-view {
+        box-shadow: var(--fg-bevel-top);
+    }
+}

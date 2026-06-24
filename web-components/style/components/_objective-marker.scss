@@ -1,0 +1,92 @@
+// tc-objective-marker — absolutely-positioned world-space marker with a
+// map-pin glyph, optional label, and formatted distance readout.
+// Sharp corners everywhere; circular / pill shapes are not used here.
+// Color flows through --bs-objective-marker-color (default: --tc-app-accent).
+// All cosmetics use --bs-objective-marker-* backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+tc-objective-marker {
+    --bs-objective-marker-size: 18px;
+    --bs-objective-marker-color: var(--tc-app-accent);
+    --bs-objective-marker-bg: var(--tc-surface);
+    --bs-objective-marker-border-color: var(--tc-border);
+    --bs-objective-marker-text-color: var(--tc-text);
+    --bs-objective-marker-distance-color: var(--tc-text-muted);
+    --bs-objective-marker-label-size: 11px;
+    --bs-objective-marker-distance-size: 10px;
+
+    position: absolute;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    pointer-events: none;
+    transform: translate(-50%, -100%);
+    color: var(--bs-objective-marker-color);
+}
+
+.tc-objective-marker {
+    // Map-pin icon; size driven by --bs-objective-marker-size.
+    &__glyph {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--bs-objective-marker-color);
+
+        svg {
+            width: var(--bs-objective-marker-size);
+            height: var(--bs-objective-marker-size);
+            stroke: currentColor;
+        }
+    }
+
+    // Label + distance chip — 1px hairline, slate surface, no border-radius.
+    &__text {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1px;
+        background: var(--bs-objective-marker-bg);
+        border: 1px solid var(--bs-objective-marker-border-color);
+        padding: 2px 8px;
+        border-radius: 0;
+        white-space: nowrap;
+    }
+
+    // Uppercase micro-label in JetBrains Mono (machine-facing structure text).
+    &__label {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: var(--bs-objective-marker-label-size);
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--bs-objective-marker-text-color);
+        line-height: 1.3;
+    }
+
+    // Distance readout in JetBrains Mono — muted, tabular.
+    &__distance {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: var(--bs-objective-marker-distance-size);
+        letter-spacing: 0.06em;
+        color: var(--bs-objective-marker-distance-color);
+        line-height: 1.3;
+    }
+}
+
+// Pulse animation on the glyph when [pulse] is present.
+tc-objective-marker[pulse] .tc-objective-marker__glyph {
+    animation: tc-objective-marker-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes tc-objective-marker-pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50%       { transform: scale(1.2); opacity: 0.65; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    tc-objective-marker[pulse] .tc-objective-marker__glyph {
+        animation: none;
+    }
+}

@@ -1,0 +1,198 @@
+// tc-slider — single-handle range slider with fill, ticks, tooltip, and error.
+// Sharp corners on track (border-radius: 0); sanctioned circle (50%) on the thumb.
+// All cosmetic values flow through --bs-slider-* backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+// ── Component defaults ─────────────────────────────────────────────────────────
+
+tc-slider {
+    --bs-slider-track-height: 4px;
+    --bs-slider-track-bg: var(--tc-surface-muted);
+    --bs-slider-track-border: 1px solid var(--tc-border-strong);
+    --bs-slider-fill-bg: var(--tc-app-accent);
+    --bs-slider-thumb-size: 16px;
+    --bs-slider-thumb-bg: var(--tc-surface);
+    --bs-slider-thumb-border: 1.5px solid var(--tc-border-strong);
+    --bs-slider-thumb-shadow: var(--tc-shadow-sm);
+    --bs-slider-thumb-active-border-color: var(--tc-app-accent);
+    --bs-slider-tooltip-bg: var(--tc-ink);
+    --bs-slider-tooltip-color: #fff;
+    --bs-slider-tooltip-shadow: var(--tc-shadow-md);
+    --bs-slider-tick-color: var(--tc-border-strong);
+    --bs-slider-label-color: var(--tc-text);
+    --bs-slider-error-color: var(--tc-danger);
+    --bs-slider-disabled-opacity: 0.45;
+
+    position: relative;
+    user-select: none;
+}
+
+// ── Disabled ──────────────────────────────────────────────────────────────────
+
+tc-slider[disabled] {
+    opacity: var(--bs-slider-disabled-opacity);
+    pointer-events: none;
+}
+
+// ── Label ─────────────────────────────────────────────────────────────────────
+
+.tc-slider-label {
+    display: block;
+    margin-bottom: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--bs-slider-label-color);
+}
+
+// ── Track ─────────────────────────────────────────────────────────────────────
+
+.tc-slider-track {
+    position: relative;
+    height: var(--bs-slider-track-height);
+    background: var(--bs-slider-track-bg);
+    border: var(--bs-slider-track-border);
+    border-radius: 0;
+    margin-block: 20px;
+    cursor: pointer;
+}
+
+// ── Fill ──────────────────────────────────────────────────────────────────────
+
+.tc-slider-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: var(--bs-slider-fill-bg);
+    border-radius: 0;
+    pointer-events: none;
+}
+
+// ── Thumb ─────────────────────────────────────────────────────────────────────
+
+.tc-slider-thumb {
+    position: absolute;
+    top: 50%;
+    width: var(--bs-slider-thumb-size);
+    height: var(--bs-slider-thumb-size);
+    transform: translate(-50%, -50%);
+    background: var(--bs-slider-thumb-bg);
+    border: var(--bs-slider-thumb-border);
+    border-radius: 50%;
+    box-shadow: var(--bs-slider-thumb-shadow);
+    cursor: grab;
+    touch-action: none;
+    transition:
+        box-shadow var(--tc-transition-fast),
+        border-color var(--tc-transition-fast),
+        transform var(--tc-transition-fast);
+
+    &:hover {
+        transform: translate(-50%, -50%) scale(1.18);
+        box-shadow: var(--tc-shadow-md);
+    }
+
+    // Keyboard focus is always visible: outline + the form-control focus ring.
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+        box-shadow: var(--tc-focus-ring, 0 0 0 0.2rem rgba(30, 41, 59, 0.12));
+    }
+
+    &.tc-slider-thumb--dragging,
+    &:active {
+        cursor: grabbing;
+        border-color: var(--bs-slider-thumb-active-border-color);
+        border-width: 2px;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    // 44px coarse-pointer hit area.
+    &::after {
+        content: '';
+        position: absolute;
+        inset: -14px;
+        border-radius: 50%;
+    }
+}
+
+// ── Tooltip ───────────────────────────────────────────────────────────────────
+
+.tc-slider-tooltip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 2px 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.4;
+    white-space: nowrap;
+    color: var(--bs-slider-tooltip-color);
+    background: var(--bs-slider-tooltip-bg);
+    box-shadow: var(--bs-slider-tooltip-shadow);
+    border-radius: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--tc-transition-fast);
+}
+
+// Tooltip reveals on hover, focus, or while dragging.
+.tc-slider-thumb:hover .tc-slider-tooltip,
+.tc-slider-thumb:focus-visible .tc-slider-tooltip,
+.tc-slider-thumb--dragging .tc-slider-tooltip {
+    opacity: 1;
+}
+
+// ── Ticks ─────────────────────────────────────────────────────────────────────
+
+.tc-slider-ticks {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    height: 6px;
+    pointer-events: none;
+}
+
+.tc-slider-tick {
+    position: absolute;
+    width: 1px;
+    height: 6px;
+    background: var(--bs-slider-tick-color);
+    transform: translateX(-50%);
+}
+
+// ── Error ─────────────────────────────────────────────────────────────────────
+
+.tc-slider-error {
+    margin-top: 0.375rem;
+    font-size: 0.8125rem;
+    color: var(--bs-slider-error-color);
+}
+
+// danger is the only status color: recolor the track border on error.
+tc-slider.tc-slider--error {
+    --bs-slider-track-border: 1px solid var(--bs-slider-error-color);
+}
+
+// ── Reduced motion ────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-slider-thumb {
+        // Keep state transitions (border-color); drop the decorative spring/lift.
+        transition:
+            box-shadow var(--tc-transition-fast),
+            border-color var(--tc-transition-fast);
+
+        &:hover {
+            transform: translate(-50%, -50%);
+        }
+
+        &.tc-slider-thumb--dragging,
+        &:active {
+            transform: translate(-50%, -50%);
+        }
+    }
+}

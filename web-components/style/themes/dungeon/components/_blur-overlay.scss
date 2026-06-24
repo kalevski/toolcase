@@ -1,0 +1,11 @@
+// Dungeon › tc-blur-overlay — full-surface backdrop-blur scrim. It has no frame,
+// border, or text of its own; the only cosmetic is the wash tint. Swap the slate
+// scrim for an ink wash so the blurred backdrop reads as the fantasy dark. No
+// structure to add beyond the single token.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-blur-overlay {
+        --bs-blur-overlay-bg: rgba(10, 6, 4, 0.55);
+    }
+}

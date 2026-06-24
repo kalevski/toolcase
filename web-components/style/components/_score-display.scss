@@ -1,0 +1,104 @@
+// tc-score-display — score readout HUD panel.
+// All cosmetics flow through --bs-score-display-* custom properties backed by --tc-* tokens.
+// Sharp corners; slate neutrals; white surface; 1px hairline; JetBrains Mono machine-facing
+// readout. Game-component fantasy chrome (gilded frames, glows, fantasy fills) is dropped —
+// state and alignment are expressed through the slate ladder and the ink accent.
+
+@use '../foundation/tokens' as *;
+
+tc-score-display {
+    --bs-score-display-bg: var(--tc-surface);
+    --bs-score-display-border-color: var(--tc-border-strong);
+    --bs-score-display-shadow: var(--tc-shadow-sm);
+    --bs-score-display-padding-y: 0.625rem;
+    --bs-score-display-padding-x: 0.875rem;
+    --bs-score-display-min-width: 6rem;
+
+    --bs-score-display-label-color: var(--tc-text-muted);
+    --bs-score-display-label-font-size: 0.6875rem;
+    --bs-score-display-label-letter-spacing: 0.12em;
+
+    // --bs-score-display-font-size is intentionally omitted here; it is written
+    // inline by render() from the font-size attribute so each instance can carry
+    // an independent value. The fallback below is only reached if the element is
+    // used in plain HTML before the custom element upgrades.
+    --bs-score-display-value-color: var(--tc-text);
+    --bs-score-display-value-font-weight: 600;
+
+    --bs-score-display-multiplier-color: var(--tc-app-accent);
+    --bs-score-display-multiplier-font-size: 1rem;
+}
+
+.tc-score-display {
+    box-sizing: border-box;
+    min-width: var(--bs-score-display-min-width);
+    padding: var(--bs-score-display-padding-y) var(--bs-score-display-padding-x);
+    background: var(--bs-score-display-bg);
+    border: 1px solid var(--bs-score-display-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-score-display-shadow);
+}
+
+// Label — uppercase JetBrains Mono micro-label in muted slate.
+.tc-score-display-label {
+    display: block;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-score-display-label-font-size);
+    font-weight: 500;
+    line-height: 1.4;
+    text-transform: uppercase;
+    letter-spacing: var(--bs-score-display-label-letter-spacing);
+    color: var(--bs-score-display-label-color);
+    margin-bottom: 0.125rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// Value row — score + optional multiplier, baseline-aligned, all mono.
+.tc-score-display-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.375rem;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+}
+
+.tc-score-display-value {
+    font-size: var(--bs-score-display-font-size, 1.75rem);
+    font-weight: var(--bs-score-display-value-font-weight);
+    line-height: 1.1;
+    color: var(--bs-score-display-value-color);
+}
+
+// Multiplier — ink accent so it reads as an active modifier, not plain text.
+.tc-score-display-multiplier {
+    font-size: var(--bs-score-display-multiplier-font-size);
+    font-weight: 500;
+    color: var(--bs-score-display-multiplier-color);
+}
+
+// Alignment variants — driven by data-align on the host.
+tc-score-display[data-align='center'] .tc-score-display-label {
+    text-align: center;
+}
+
+tc-score-display[data-align='center'] .tc-score-display-row {
+    justify-content: center;
+}
+
+tc-score-display[data-align='right'] .tc-score-display-label {
+    text-align: right;
+}
+
+tc-score-display[data-align='right'] .tc-score-display-row {
+    justify-content: flex-end;
+}
+
+// prefers-reduced-motion — this component has no animations; placeholder for
+// future additions (e.g. score tick-up transitions).
+@media (prefers-reduced-motion: reduce) {
+    .tc-score-display-value,
+    .tc-score-display-multiplier {
+        transition: none;
+    }
+}

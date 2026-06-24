@@ -1,0 +1,25 @@
+// Dungeon › tc-marquee — scrolling proclamation crawl.
+// Token swap recolors separators to gold ornaments and brightens item text to
+// parch. Display-caps treatment renders the strip as a fantasy headline ticker.
+// No frame/bevel/notch — the marquee is a transparent strip over its context.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    .tc-marquee {
+        --bs-marquee-item-color: var(--fg-parch);
+        --bs-marquee-sep-color: var(--fg-gold);
+    }
+
+    // Display-caps — renders items as a fantasy proclamation crawl.
+    .tc-marquee-item {
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+    }
+
+    // Gold separator — recolored to gold via --bs-marquee-sep-color above;
+    // no structural override needed since glyph is author-supplied markup.
+    .tc-marquee-sep {
+        color: var(--fg-gold);
+    }
+}

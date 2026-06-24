@@ -3,6 +3,64 @@ import { buildAuthorizeURL, exchangeCode, refreshToken, revokeToken, fetchUserin
 import { defineOAuth2Provider } from '../../src/oauth2/types'
 import { OAuth2TokenError, OAuth2ProtocolError } from '../../src/errors'
 
+describe('defineOAuth2Provider — PKCE defaults and warnings', () => {
+
+	it('defaults pkceMethod to S256 for public clients (no clientSecret)', () => {
+		const provider = defineOAuth2Provider({
+			authorizationEndpoint: 'https://idp.test/auth',
+			tokenEndpoint: 'https://idp.test/token',
+			clientId: 'pub-client'
+		})
+		expect(provider.pkceMethod).toBe('S256')
+	})
+
+	it('does not override pkceMethod when caller sets it explicitly for a public client', () => {
+		vi.spyOn(console, 'warn').mockImplementation(() => {})
+		const provider = defineOAuth2Provider({
+			authorizationEndpoint: 'https://idp.test/auth',
+			tokenEndpoint: 'https://idp.test/token',
+			clientId: 'pub-client',
+			pkceMethod: 'plain'
+		})
+		expect(provider.pkceMethod).toBe('plain')
+		vi.restoreAllMocks()
+	})
+
+	it('does not set pkceMethod by default for confidential clients', () => {
+		const provider = defineOAuth2Provider({
+			authorizationEndpoint: 'https://idp.test/auth',
+			tokenEndpoint: 'https://idp.test/token',
+			clientId: 'cid',
+			clientSecret: 'cs'
+		})
+		expect(provider.pkceMethod).toBeUndefined()
+	})
+
+	it('emits console.warn when plain pkceMethod is configured', () => {
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+		defineOAuth2Provider({
+			authorizationEndpoint: 'https://idp.test/auth',
+			tokenEndpoint: 'https://idp.test/token',
+			clientId: 'cid',
+			pkceMethod: 'plain'
+		})
+		expect(warn).toHaveBeenCalledWith(expect.stringContaining('plain'))
+		vi.restoreAllMocks()
+	})
+
+	it('does not emit console.warn for S256', () => {
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+		defineOAuth2Provider({
+			authorizationEndpoint: 'https://idp.test/auth',
+			tokenEndpoint: 'https://idp.test/token',
+			clientId: 'cid',
+			pkceMethod: 'S256'
+		})
+		expect(warn).not.toHaveBeenCalled()
+		vi.restoreAllMocks()
+	})
+})
+
 const baseProvider = defineOAuth2Provider({
 	authorizationEndpoint: 'https://idp.test/authorize',
 	tokenEndpoint: 'https://idp.test/token',
@@ -103,6 +161,26 @@ describe('exchangeCode', () => {
 		await expect(exchangeCode(baseProvider, { code: 'c', redirectUri: 'https://app.test/cb' }, { fetchImpl })).rejects.toBeInstanceOf(OAuth2TokenError)
 	})
 
+	it('upstreamBody contains only error/error_description — no extra fields', async () => {
+		const fetchImpl = mockFetch(400, {
+			error: 'invalid_grant',
+			error_description: 'bad code',
+			access_token: 'leaked-token',
+			client_secret: 'leaked-secret'
+		})
+		let err: OAuth2TokenError | undefined
+		try {
+			await exchangeCode(baseProvider, { code: 'c', redirectUri: 'https://app.test/cb' }, { fetchImpl })
+		} catch (e) {
+			err = e as OAuth2TokenError
+		}
+		expect(err).toBeInstanceOf(OAuth2TokenError)
+		const body = err!.upstreamBody as Record<string, unknown>
+		expect(body).toEqual({ error: 'invalid_grant', error_description: 'bad code' })
+		expect(body).not.toHaveProperty('access_token')
+		expect(body).not.toHaveProperty('client_secret')
+	})
+
 	it('throws OAuth2ProtocolError when access_token missing', async () => {
 		const fetchImpl = mockFetch(200, { token_type: 'Bearer' })
 		await expect(exchangeCode(baseProvider, { code: 'c', redirectUri: 'https://app.test/cb' }, { fetchImpl })).rejects.toBeInstanceOf(OAuth2ProtocolError)
@@ -145,6 +223,21 @@ describe('revokeToken', () => {
 	it('throws when revocationEndpoint missing', async () => {
 		const provider = defineOAuth2Provider({ ...baseProvider, revocationEndpoint: undefined })
 		await expect(revokeToken(provider, 'tk')).rejects.toThrow(/revocationEndpoint is required/)
+	})
+})
+
+describe('upstreamBody redaction', () => {
+
+	it('non-JSON error response yields undefined upstreamBody', async () => {
+		const fetchImpl = vi.fn(async () => new Response('Service Unavailable', { status: 503 })) as any
+		let err: OAuth2TokenError | undefined
+		try {
+			await exchangeCode(baseProvider, { code: 'c', redirectUri: 'https://app.test/cb' }, { fetchImpl })
+		} catch (e) {
+			err = e as OAuth2TokenError
+		}
+		expect(err).toBeInstanceOf(OAuth2TokenError)
+		expect(err!.upstreamBody).toBeUndefined()
 	})
 })
 

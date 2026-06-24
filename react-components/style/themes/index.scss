@@ -1,7 +1,0 @@
-// ── Themes ───────────────────────────────────────────────────────────────
-// Opt-in theme overrides scoped to `.theme.theme--{name}` wrappers. The
-// default (unwrapped) look remains the light toolcase baseline. Add new
-// themes by dropping a `_{name}.scss` partial next to this file and
-// `@use`-ing it below.
-
-@use './dark';

@@ -1,0 +1,62 @@
+// tc-infinite-scroll — Intersection Observer sentinel that fires tc-load-more.
+// Loading and end rows are centered, muted, dense. Sentinel is zero-height.
+
+tc-infinite-scroll {
+    --bs-infinite-scroll-row-gap: 0.5rem;
+    --bs-infinite-scroll-row-padding: 0.75rem 0;
+    --bs-infinite-scroll-loading-color: var(--tc-text-muted);
+    --bs-infinite-scroll-end-color: var(--tc-text-faint);
+    --bs-infinite-scroll-end-font-size: 0.6875rem;
+    --bs-infinite-scroll-spinner-size: 1rem;
+    --bs-infinite-scroll-spinner-border-width: 2px;
+}
+
+.tc-infinite-scroll-sentinel {
+    display: block;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.tc-infinite-scroll-loading,
+.tc-infinite-scroll-end {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: var(--bs-infinite-scroll-row-gap);
+    padding: var(--bs-infinite-scroll-row-padding);
+    text-align: center;
+}
+
+.tc-infinite-scroll-loading--visible {
+    display: flex;
+    color: var(--bs-infinite-scroll-loading-color);
+}
+
+.tc-infinite-scroll-end--visible {
+    display: flex;
+    color: var(--bs-infinite-scroll-end-color);
+}
+
+// Default inline spinner — re-uses the slate-200 border ring motif from tc-spinner.
+.tc-infinite-scroll__spinner {
+    width: var(--bs-infinite-scroll-spinner-size);
+    height: var(--bs-infinite-scroll-spinner-size);
+    border-width: var(--bs-infinite-scroll-spinner-border-width);
+    flex-shrink: 0;
+}
+
+// Uppercase mono micro-label for the default "End" indicator.
+.tc-infinite-scroll__end-label {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-infinite-scroll-end-font-size);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--bs-infinite-scroll-end-color);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-infinite-scroll__spinner {
+        animation-duration: 1.5s;
+    }
+}

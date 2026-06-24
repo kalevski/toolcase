@@ -15,7 +15,8 @@ export async function loadSharp(): Promise<SharpFactory> {
         return factory
     }).catch(error => {
         pending = null
-        throw error
+        const cause = error instanceof Error ? error.message : String(error)
+        throw new Error(`sharp is not installed — add it as an optional dependency: npm install sharp. Original error: ${cause}`)
     })
     return pending
 }

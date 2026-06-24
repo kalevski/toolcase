@@ -6,7 +6,7 @@ import { HEAD, HASH, NOISE, SAMPLE_SRC, SAFE_SAMPLE, MIX_OUT } from './_prelude'
 // --------------------------------------------------------------------------
 export class OutlineEffect extends Effect {
     static readonly KEY = 'reef.Outline'
-    static readonly FRAGMENT = `${HEAD}
+    static readonly FRAGMENT = `${HEAD}${SAFE_SAMPLE}
         uniform float uSpread;
         uniform float uSoftness;
         uniform vec3 uColor;
@@ -20,7 +20,7 @@ export class OutlineEffect extends Effect {
             for (int x = -1; x <= 1; x++) {
                 for (int y = -1; y <= 1; y++) {
                     if (x == 0 && y == 0) continue;
-                    a = max(a, texture2D(uMainSampler, outTexCoord + vec2(float(x), float(y)) * uSpread).a);
+                    a = max(a, safeSample(outTexCoord + vec2(float(x), float(y)) * uSpread).a);
                 }
             }
             float edge = smoothstep(0.0, uSoftness, a) * (1.0 - src.a);
@@ -70,8 +70,24 @@ export class PatternEffect extends Effect {
     }
 }
 
+// --------------------------------------------------------------------------
+// PatternAdditive — additive-blend variant of PatternEffect. Brightens the
+// tiled pattern output (×1.6, clamped) so it composes correctly under Phaser's
+// additive blend mode, mirroring DistortionAdditiveEffect.
+// --------------------------------------------------------------------------
 export class PatternAdditiveEffect extends PatternEffect {
     static readonly KEY: string = 'reef.PatternAdditive'
+    static readonly FRAGMENT: string = `${HEAD}
+        uniform vec2 uTile;
+        uniform vec2 uScroll;
+        uniform vec3 uColor;
+        void main() {
+            ${SAMPLE_SRC}
+            vec2 tiled = fract(outTexCoord / uTile + uScroll * uTime);
+            vec4 patSrc = texture2D(uMainSampler, tiled);
+            vec3 outRgb = clamp(mix(src.rgb, patSrc.rgb * uColor, src.a) * 1.6, 0.0, 1.0);
+            ${MIX_OUT}
+        }`
 }
 
 // --------------------------------------------------------------------------
@@ -79,7 +95,7 @@ export class PatternAdditiveEffect extends PatternEffect {
 // --------------------------------------------------------------------------
 export class EdgeColorEffect extends Effect {
     static readonly KEY = 'reef.EdgeColor'
-    static readonly FRAGMENT = `${HEAD}
+    static readonly FRAGMENT = `${HEAD}${SAFE_SAMPLE}
         uniform vec3 uColor;
         uniform float uWidth;
         void main() {
@@ -88,7 +104,7 @@ export class EdgeColorEffect extends Effect {
             float minA = 1.0;
             for (int x = -1; x <= 1; x++) {
                 for (int y = -1; y <= 1; y++) {
-                    minA = min(minA, texture2D(uMainSampler, outTexCoord + vec2(float(x), float(y)) * px).a);
+                    minA = min(minA, safeSample(outTexCoord + vec2(float(x), float(y)) * px).a);
                 }
             }
             float edge = src.a * (1.0 - minA);
@@ -129,7 +145,7 @@ export class BlurEffect extends Effect {
                 acc += texture2D(uMainSampler, outTexCoord - vec2(0.0, float(i)) * px) * weights[i];
             }
             vec4 src = texture2D(uMainSampler, outTexCoord);
-            vec3 outRgb = (acc / 1.74).rgb;
+            vec3 outRgb = (acc / 1.77297).rgb;
             ${MIX_OUT}
         }`
     alpha: number = 1
@@ -429,8 +445,36 @@ export class WaterAndBackgroundEffect extends Effect {
     }
 }
 
+// --------------------------------------------------------------------------
+// WaterAndBackgroundDeluxe — enhanced variant of WaterAndBackgroundEffect with
+// foam highlights, depth-graded tint, and a horizon glow on the upper half for
+// a richer scene. Distinct FRAGMENT; use WaterAndBackground for the lighter look.
+// --------------------------------------------------------------------------
 export class WaterAndBackgroundDeluxeEffect extends WaterAndBackgroundEffect {
     static readonly KEY: string = 'reef.WaterAndBackgroundDeluxe'
+    static readonly FRAGMENT: string = `${HEAD}${HASH}${NOISE}${SAFE_SAMPLE}
+        uniform float uHeat;
+        uniform float uSpeed;
+        uniform float uLight;
+        void main() {
+            vec2 uv = outTexCoord;
+            if (uv.y > 0.5) {
+                vec2 q = uv * 6.0 + uTime * uSpeed * vec2(0.4, 0.6);
+                vec2 d = (vec2(fbm(q), fbm(q + 1.7)) - 0.5) * 0.05 * uHeat;
+                vec2 reflected = vec2(uv.x, 1.0 - uv.y) + d;
+                vec4 src = safeSample(reflected);
+                float depth = (uv.y - 0.5) * 2.0;
+                float caustic = pow(0.5 + 0.5 * sin((uv.y - 0.5) * 30.0 + uTime * 2.0 + d.x * 20.0), 2.0);
+                float foam = smoothstep(0.7, 1.0, fbm(q * 2.5 + uTime * 0.5)) * (1.0 - depth) * 0.4;
+                vec3 tint = mix(vec3(0.45, 0.75, 0.95), vec3(0.1, 0.3, 0.6), depth);
+                vec3 outRgb = src.rgb * tint + caustic * vec3(0.10) * uLight + foam;
+                gl_FragColor = vec4(clamp(mix(src.rgb, outRgb, uAlpha), 0.0, 1.0), src.a);
+                return;
+            }
+            vec4 src = safeSample(uv);
+            float horizon = smoothstep(0.48, 0.5, uv.y) * 0.15 * uLight;
+            gl_FragColor = vec4(clamp(src.rgb + vec3(0.45, 0.75, 0.95) * horizon, 0.0, 1.0), src.a);
+        }`
 }
 
 // --------------------------------------------------------------------------

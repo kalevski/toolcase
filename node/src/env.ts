@@ -18,7 +18,9 @@ function env(
     if (type === 'number') {
         if (value === undefined) return defaultValue as number | null
         const numberValue = parseInt(value, 10)
-        return numberValue.toString() === value ? numberValue : (defaultValue as number | null)
+        if (numberValue.toString() === value) return numberValue
+        console.warn(`[env] ${key}="${value}" is not a valid integer; using default`)
+        return defaultValue as number | null
     }
     if (type === 'boolean') {
         const boolValue = (value + '').toLowerCase()

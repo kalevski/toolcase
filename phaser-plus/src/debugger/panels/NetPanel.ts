@@ -10,6 +10,15 @@ interface NetState {
 
 const MAX_LOG = 50
 
+/**
+ * Debugger panel for network telemetry.
+ *
+ * The reporting API (`reportRTT`, `reportLoss`, `sent`, `received`, `logMessage`)
+ * is the intended bind surface for the future `NetFeature`. Until that subsystem
+ * ships, callers push metrics manually — typically from a WebSocket message handler
+ * or a ping loop. The panel contract is stable so that wiring in `NetFeature` later
+ * only removes the manual calls, not any panel-side changes.
+ */
 export default class NetPanel extends Panel {
 
     state: NetState = {
@@ -39,22 +48,48 @@ export default class NetPanel extends Panel {
         this.components.clear = this.base.addButton({ title: 'Clear log' }).on('click', () => this.clear())
     }
 
+    /**
+     * Push the current round-trip time.
+     *
+     * **Manual-instrumentation hook** — intended to be called by `NetFeature`
+     * once it ships. Until then, call this yourself from a ping response handler.
+     */
     reportRTT(ms: number): this {
         this.state.rtt = Math.round(ms)
         return this
     }
 
+    /**
+     * Push the current packet-loss percentage (0–100).
+     *
+     * **Manual-instrumentation hook** — intended to be called by `NetFeature`
+     * once it ships.
+     */
     reportLoss(pct: number): this {
         this.state.loss = Math.round(pct * 100) / 100
         return this
     }
 
+    /**
+     * Record one outbound message. Pass `label` to append a log entry.
+     *
+     * **Manual-instrumentation hook** — intended to be called by `NetFeature`
+     * once it ships. Until then, call this yourself immediately after each
+     * `socket.send()` (or equivalent).
+     */
     sent(label: string = ''): this {
         this.sentBucket += 1
         if (label !== '') this.logMessage(`→ ${label}`)
         return this
     }
 
+    /**
+     * Record one inbound message. Pass `label` to append a log entry.
+     *
+     * **Manual-instrumentation hook** — intended to be called by `NetFeature`
+     * once it ships. Until then, call this yourself from your socket `message`
+     * event handler.
+     */
     received(label: string = ''): this {
         this.recvBucket += 1
         if (label !== '') this.logMessage(`← ${label}`)

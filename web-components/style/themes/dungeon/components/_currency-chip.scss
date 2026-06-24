@@ -1,0 +1,18 @@
+// Dungeon › tc-currency-chip — gold-bright mono glyph + amount on a dark fill.
+
+tc-theme[name='dungeon'],
+[data-tc-theme='dungeon'] {
+    tc-currency-chip {
+        --bs-currency-chip-color: var(--fg-gold-bright);
+    }
+
+    .tc-currency-chip {
+        --bs-currency-chip-bg: rgba(0, 0, 0, 0.4);
+        --bs-currency-chip-border-color: var(--fg-gold-deep);
+        --bs-currency-chip-amount-color: var(--fg-gold-bright);
+    }
+
+    .tc-currency-chip-amount {
+        letter-spacing: 0.04em;
+    }
+}
