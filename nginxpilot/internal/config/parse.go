@@ -15,10 +15,12 @@ import (
 // DefaultPath is where the daemon looks for its config unless --config is given.
 const DefaultPath = "/etc/nginxpilot/config.yml"
 
-// fragment is the only shape an included file may have: a sites: list.
-// No globals, no nested include:.
+// fragment is the shape an included file may have: sites:, upstreams: and/or
+// proxies: lists. No globals, no nested include:.
 type fragment struct {
-	Sites []Site `yaml:"sites"`
+	Sites     []Site     `yaml:"sites"`
+	Upstreams []Upstream `yaml:"upstreams"`
+	Proxies   []Proxy    `yaml:"proxies"`
 }
 
 // LoadResult carries the parsed config plus non-fatal warnings (e.g. an
@@ -46,6 +48,12 @@ func Load(path string) (*LoadResult, error) {
 	cfg.Path = abs
 	for i := range cfg.Sites {
 		cfg.Sites[i].File = abs
+	}
+	for i := range cfg.Upstreams {
+		cfg.Upstreams[i].File = abs
+	}
+	for i := range cfg.Proxies {
+		cfg.Proxies[i].File = abs
 	}
 
 	applyDefaults(&cfg)
@@ -100,12 +108,20 @@ func loadIncludes(cfg *Config, res *LoadResult) error {
 			}
 			var frag fragment
 			if err := strictDecode(raw, &frag); err != nil {
-				return fmt.Errorf("%s: %w (fragments may only contain a sites: list)", file, err)
+				return fmt.Errorf("%s: %w (fragments may only contain sites:, upstreams: and/or proxies: lists)", file, err)
 			}
 			for i := range frag.Sites {
 				frag.Sites[i].File = file
 			}
+			for i := range frag.Upstreams {
+				frag.Upstreams[i].File = file
+			}
+			for i := range frag.Proxies {
+				frag.Proxies[i].File = file
+			}
 			cfg.Sites = append(cfg.Sites, frag.Sites...)
+			cfg.Upstreams = append(cfg.Upstreams, frag.Upstreams...)
+			cfg.Proxies = append(cfg.Proxies, frag.Proxies...)
 		}
 	}
 	return nil

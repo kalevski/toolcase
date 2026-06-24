@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"path"
+	"regexp"
 	"strings"
 	"time"
 
@@ -11,6 +12,10 @@ import (
 
 // MinInterval protects upstreams from over-eager polling (spec §3).
 const MinInterval = 30 * time.Second
+
+// upstreamNameRe restricts upstream names to a safe nginx identifier so the
+// generated `upstream <name>` / `proxy_pass http://<name>` are unambiguous.
+var upstreamNameRe = regexp.MustCompile(`^[A-Za-z0-9_]+$`)
 
 // Validate checks the merged configuration. It normalizes domains to their
 // punycode/ASCII form in place.
@@ -31,7 +36,7 @@ func Validate(cfg *Config) error {
 		return fmt.Errorf("admin.token_env and admin.token_file are mutually exclusive")
 	}
 
-	seen := map[string]string{} // domain -> file
+	seen := map[string]string{} // domain -> file (sites + proxies share the namespace)
 	for i := range cfg.Sites {
 		site := &cfg.Sites[i]
 		if err := validateSite(site); err != nil {
@@ -42,21 +47,166 @@ func Validate(cfg *Config) error {
 		}
 		seen[site.Domain] = site.File
 	}
+
+	upstreams, err := validateUpstreams(cfg)
+	if err != nil {
+		return err
+	}
+	if err := validateProxies(cfg, upstreams, seen); err != nil {
+		return err
+	}
+	return nil
+}
+
+// normalizeDomain validates and rewrites a domain to its punycode/ASCII
+// (IDNA2008) form — filesystem-safe and identical to what nginx sees in
+// SNI/Host (spec Q12). Wildcards are rejected (no v1 support).
+func normalizeDomain(domain string) (string, error) {
+	if domain == "" {
+		return "", fmt.Errorf("domain is required")
+	}
+	if strings.Contains(domain, "*") {
+		return "", fmt.Errorf("wildcard domains are not supported in v1")
+	}
+	ascii, err := idna.Lookup.ToASCII(domain)
+	if err != nil {
+		return "", fmt.Errorf("invalid domain: %w", err)
+	}
+	return ascii, nil
+}
+
+// validateUpstreams checks every upstream and returns the set of declared
+// names (post-validation) for proxy reference resolution.
+func validateUpstreams(cfg *Config) (map[string]bool, error) {
+	names := map[string]string{} // name -> file
+	for i := range cfg.Upstreams {
+		u := &cfg.Upstreams[i]
+		if u.Name == "" {
+			return nil, fmt.Errorf("upstream (%s): name is required", u.File)
+		}
+		if !upstreamNameRe.MatchString(u.Name) {
+			return nil, fmt.Errorf("upstream %q (%s): name must match [A-Za-z0-9_]+", u.Name, u.File)
+		}
+		if prev, dup := names[u.Name]; dup {
+			return nil, fmt.Errorf("duplicate upstream %q declared in %s and %s", u.Name, prev, u.File)
+		}
+		names[u.Name] = u.File
+
+		switch u.Balancer {
+		case "", BalancerRoundRobin, BalancerLeastConn, BalancerIPHash:
+		default:
+			return nil, fmt.Errorf("upstream %q: balancer %q must be round_robin | least_conn | ip_hash", u.Name, u.Balancer)
+		}
+		if u.Keepalive < 0 {
+			return nil, fmt.Errorf("upstream %q: keepalive must be >= 0", u.Name)
+		}
+		if len(u.Servers) == 0 {
+			return nil, fmt.Errorf("upstream %q: at least one server is required", u.Name)
+		}
+		for j := range u.Servers {
+			s := u.Servers[j]
+			if s.Address == "" {
+				return nil, fmt.Errorf("upstream %q: server[%d].address is required", u.Name, j)
+			}
+			if s.Weight < 0 {
+				return nil, fmt.Errorf("upstream %q: server %q weight must be >= 0", u.Name, s.Address)
+			}
+			if s.MaxFails != nil && *s.MaxFails < 0 {
+				return nil, fmt.Errorf("upstream %q: server %q max_fails must be >= 0", u.Name, s.Address)
+			}
+		}
+	}
+	out := make(map[string]bool, len(names))
+	for n := range names {
+		out[n] = true
+	}
+	return out, nil
+}
+
+// validateProxies checks reverse-proxy entities, resolving upstream references
+// against declared names and guarding the shared domain namespace.
+func validateProxies(cfg *Config, upstreams map[string]bool, seen map[string]string) error {
+	for i := range cfg.Proxies {
+		p := &cfg.Proxies[i]
+		ascii, err := normalizeDomain(p.Domain)
+		if err != nil {
+			return fmt.Errorf("proxy %q (%s): %w", p.Domain, p.File, err)
+		}
+		p.Domain = ascii
+
+		if p.Listen < 0 || p.Listen > 65535 {
+			return fmt.Errorf("proxy %q: listen %d must be 1..65535", p.Domain, p.Listen)
+		}
+
+		if err := validateProxyTargets(p, upstreams); err != nil {
+			return fmt.Errorf("proxy %q (%s): %w", p.Domain, p.File, err)
+		}
+
+		if prev, dup := seen[p.Domain]; dup {
+			return fmt.Errorf("duplicate domain %q declared in %s and %s", p.Domain, prev, p.File)
+		}
+		seen[p.Domain] = p.File
+	}
+	return nil
+}
+
+// validateProxyTargets enforces the upstream/pass exactly-one rule at the
+// proxy and location levels, with locations inheriting the proxy default.
+func validateProxyTargets(p *Proxy, upstreams map[string]bool) error {
+	if err := checkTarget("", p.Upstream, p.Pass, upstreams, true); err != nil {
+		return err
+	}
+	for j := range p.Locations {
+		loc := &p.Locations[j]
+		if loc.Path == "" {
+			loc.Path = "/"
+		}
+		if !strings.HasPrefix(loc.Path, "/") {
+			return fmt.Errorf("location[%d] path %q must start with /", j, loc.Path)
+		}
+		// A location may inherit the proxy default; resolve the effective pair.
+		up, pass := loc.Upstream, loc.Pass
+		if up == "" && pass == "" {
+			up, pass = p.Upstream, p.Pass
+		}
+		if err := checkTarget(fmt.Sprintf("location %q ", loc.Path), up, pass, upstreams, false); err != nil {
+			return err
+		}
+	}
+	// With no locations the proxy default must itself be a complete target.
+	if len(p.Locations) == 0 && p.Upstream == "" && p.Pass == "" {
+		return fmt.Errorf("a proxy needs upstream/pass (or at least one location that sets one)")
+	}
+	return nil
+}
+
+// checkTarget validates a single (upstream, pass) pair. optional allows the
+// pair to be empty (a proxy default that locations override); when false
+// exactly one of the two must be set.
+func checkTarget(prefix, upstream, pass string, upstreams map[string]bool, optional bool) error {
+	switch {
+	case upstream != "" && pass != "":
+		return fmt.Errorf("%supstream and pass are mutually exclusive", prefix)
+	case upstream != "":
+		if !upstreams[upstream] {
+			return fmt.Errorf("%sreferences unknown upstream %q", prefix, upstream)
+		}
+	case pass != "":
+		if !strings.HasPrefix(pass, "http://") && !strings.HasPrefix(pass, "https://") {
+			return fmt.Errorf("%spass %q must be an http:// or https:// URL", prefix, pass)
+		}
+	default:
+		if !optional {
+			return fmt.Errorf("%supstream or pass is required", prefix)
+		}
+	}
 	return nil
 }
 
 func validateSite(site *Site) error {
-	if site.Domain == "" {
-		return fmt.Errorf("domain is required")
-	}
-	if strings.Contains(site.Domain, "*") {
-		return fmt.Errorf("wildcard domains are not supported in v1")
-	}
-	// Normalize to punycode/ASCII (IDNA2008) — filesystem-safe, identical to
-	// what nginx sees in SNI/Host (spec Q12).
-	ascii, err := idna.Lookup.ToASCII(site.Domain)
+	ascii, err := normalizeDomain(site.Domain)
 	if err != nil {
-		return fmt.Errorf("invalid domain: %w", err)
+		return err
 	}
 	site.Domain = ascii
 

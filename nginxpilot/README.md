@@ -57,7 +57,7 @@ Onboarding more sites later: drop a file into `sites.d/` and `kill -HUP $(pidof 
 
 ## Configuration
 
-YAML, strict (unknown keys are errors). Default path `/etc/nginxpilot/config.yml`, override with `--config`. Fragments pulled in via `include:` globs may contain **only** `sites:` lists; duplicate domains across files are a validation error.
+YAML, strict (unknown keys are errors). Default path `/etc/nginxpilot/config.yml`, override with `--config`. Fragments pulled in via `include:` globs may contain `sites:`, `upstreams:` and/or `proxies:` lists; duplicate domains across files (sites **and** proxies share one domain namespace) are a validation error.
 
 ### git source
 
@@ -165,6 +165,42 @@ Downloads use conditional GET (ETag / Last-Modified); unchanged content is a che
 
 Inline secrets are a **parse-time error** — only `*_env` / `*_file` references are accepted, so config files stay safe to commit. Secret files must be `0600`/`0640` and owned by the daemon user or root, or the daemon refuses to start. systemd `LoadCredential` works via `*_file` + `$CREDENTIALS_DIRECTORY`.
 
+### Reverse proxies and upstreams
+
+`sites:` are content the daemon syncs; `upstreams:` and `proxies:` are **config-only entities** — the daemon never syncs, serves, or proxies them. They exist so `print-vhost` (and the admin `/vhost/<domain>` endpoint) can **generate** the nginx `upstream {}` + `server { … proxy_pass … }` config for you to paste and adapt. nginxpilot stays out of the request path and never writes nginx config; nginx is still the proxy.
+
+```yaml
+upstreams:
+  - name: api_pool                 # [A-Za-z0-9_]+ (referenced as proxy_pass http://api_pool)
+    balancer: least_conn           # round_robin (default) | least_conn | ip_hash
+    keepalive: 32                  # optional keepalive connection cache
+    servers:
+      - address: 10.0.0.1:8080     # host:port | ip:port | unix:/path.sock
+        weight: 2                  # optional
+        max_fails: 3               # optional
+        fail_timeout: 30s          # optional
+      - address: 10.0.0.2:8080
+        backup: true               # backup | down flags
+
+proxies:
+  - domain: api.example.com
+    upstream: api_pool             # reference a named upstream …
+    # pass: http://127.0.0.1:9000  # … OR a single inline target (exactly one)
+    listen: 80                     # optional, default 80
+    client_max_body_size: 20MiB    # optional
+    connect_timeout: 60s           # optional proxy_connect_timeout
+    read_timeout: 60s              # optional proxy_read_timeout
+    send_timeout: 60s              # optional proxy_send_timeout
+    locations:                     # optional; default is a single "/" → upstream/pass
+      - path: /
+        upstream: api_pool         # per-location override (else inherits the proxy default)
+      - path: /ws
+        upstream: api_pool
+        websocket: true            # adds the Upgrade/Connection upgrade headers + HTTP/1.1
+```
+
+Generate the nginx config: `nginxpilot print-vhost api.example.com`. The output is **self-contained** — it emits each referenced named upstream `upstream {}` block followed by the `server {}` block. If you share one upstream across several proxies, emit it once and drop the duplicate. Standard forwarding headers (`Host`, `X-Real-IP`, `X-Forwarded-For`, `X-Forwarded-Proto`) are always set; TLS stays a commented certbot hint (nginxpilot does not manage certificates).
+
 ## CLI
 
 | Subcommand | Purpose |
@@ -172,7 +208,7 @@ Inline secrets are a **parse-time error** — only `*_env` / `*_file` references
 | `run` | The daemon (default). Flags: `--config`, `--log-format logfmt\|json`, `--prune-orphans`. |
 | `validate` | Parse + validate merged config, check `git` presence, verify secret refs resolve. CI-friendly exit codes. |
 | `sync <domain>` | One-shot in-process sync, no daemon needed; non-zero exit on failure. |
-| `print-vhost <domain>` | Print a commented nginx server-block starting snippet. |
+| `print-vhost <domain>` | Print a commented nginx snippet — a content-serving block for a static site, or `upstream {}` + `proxy_pass` blocks for a reverse proxy. |
 | `status [--json]` | Human table (or raw JSON) from the daemon's `/status` endpoint. |
 | `version` | Build info. |
 
@@ -183,6 +219,7 @@ Loopback HTTP (default `127.0.0.1:9090`; `admin.listen: ""` disables; `admin.tok
 - `GET /healthz` — liveness
 - `GET /status` — per-site JSON: deployed ref, last success/error, failure streak, `never_synced`, next sync
 - `POST /sync/<domain>` — force an immediate sync
+- `GET /vhost/<domain>` — `text/plain` generated nginx config for a site or reverse proxy (same output as `print-vhost`)
 
 ## Signals
 

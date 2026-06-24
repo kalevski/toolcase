@@ -303,3 +303,61 @@ func TestReconcileStateSkipsWhenCurrentExists(t *testing.T) {
 		t.Errorf("DeployedRef must not be cleared when current/ exists; got %q", got.DeployedRef)
 	}
 }
+
+// TestStatusNextSyncIsUTC guards the /status JSON timezone consistency: the
+// loop must record next_sync in UTC so it matches last_success / last_error_time
+// (both stored as UTC) rather than emitting a local-offset timestamp in the
+// same payload.
+func TestStatusNextSyncIsUTC(t *testing.T) {
+	t.Parallel()
+
+	dir := t.TempDir()
+	store, err := state.NewStore(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+
+	// A long interval keeps the first tick far in the future: the loop sets
+	// next_sync at startup and then blocks, so syncFn never runs in this window.
+	site := config.Site{
+		Domain: "example.com",
+		Source: config.Source{Type: "git", URL: "fake://v1", Interval: config.Duration(time.Hour)},
+	}
+	m := &Manager{
+		log:      logger,
+		store:    store,
+		cfg:      &config.Config{DataDir: dir, Sites: []config.Site{site}},
+		deployer: deploy.New(dir, logger),
+		loops:    map[string]*siteLoop{},
+		syncFn: func(context.Context, config.Site, config.Defaults, string, *state.Store, *deploy.Deployer, *slog.Logger) (*state.SiteState, error) {
+			return &state.SiteState{Domain: "example.com"}, nil
+		},
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	m.mu.Lock()
+	m.ctx = ctx
+	m.startLoop(site)
+	m.mu.Unlock()
+
+	var ns *time.Time
+	for i := 0; i < 200; i++ {
+		s := m.Status()
+		if len(s) == 1 && s[0].NextSync != nil {
+			ns = s[0].NextSync
+			break
+		}
+		time.Sleep(time.Millisecond)
+	}
+	if ns == nil {
+		t.Fatal("next_sync was never set")
+	}
+	if loc := ns.Location(); loc != time.UTC {
+		t.Fatalf("next_sync must be UTC for consistency with last_success/last_error_time, got %v", loc)
+	}
+
+	cancel()
+	m.wg.Wait()
+}

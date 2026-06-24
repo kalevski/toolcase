@@ -31,6 +31,19 @@ const (
 	AuthHeader      = "header"
 )
 
+// Upstream load-balancing methods (nginx upstream{} directives). The empty
+// string is treated as round-robin (nginx's default, no directive emitted).
+const (
+	BalancerRoundRobin = "round_robin"
+	BalancerLeastConn  = "least_conn"
+	BalancerIPHash     = "ip_hash"
+)
+
+// DefaultProxyListen is the listen port used for a reverse proxy when the
+// entity does not set one. Mirrors the static print-vhost output (:80, plus
+// a commented certbot/TLS hint).
+const DefaultProxyListen = 80
+
 // Config is the merged result of the main file and all included fragments.
 type Config struct {
 	DataDir  string   `yaml:"data_dir"`
@@ -40,8 +53,86 @@ type Config struct {
 	Include  []string `yaml:"include"`
 	Sites    []Site   `yaml:"sites"`
 
+	// Upstreams and Proxies are config-only entities: nginx upstream{} pools
+	// and reverse-proxy server{} blocks. The daemon never syncs or serves
+	// them — they exist purely so `print-vhost` / the admin /vhost endpoint
+	// can generate nginx configuration to paste and adapt (the daemon stays
+	// out of the request path and never writes nginx config).
+	Upstreams []Upstream `yaml:"upstreams"`
+	Proxies   []Proxy    `yaml:"proxies"`
+
 	// Path is the main config file path the config was loaded from.
 	Path string `yaml:"-"`
+}
+
+// Upstream is a named nginx upstream{} block — a pool of backend servers a
+// reverse proxy can proxy_pass to by name.
+type Upstream struct {
+	Name string `yaml:"name"`
+	// Balancer selects the load-balancing method: "" / round_robin (default),
+	// least_conn, or ip_hash.
+	Balancer string `yaml:"balancer"`
+	// Keepalive sets the keepalive connection cache size (0 = omit).
+	Keepalive int              `yaml:"keepalive"`
+	Servers   []UpstreamServer `yaml:"servers"`
+
+	// File records which config file declared this upstream (provenance for
+	// duplicate-name errors and logs).
+	File string `yaml:"-"`
+}
+
+// UpstreamServer is one backend in an upstream pool.
+type UpstreamServer struct {
+	// Address is "host:port", an IP:port, or "unix:/path/to.sock".
+	Address     string   `yaml:"address"`
+	Weight      int      `yaml:"weight"`
+	MaxFails    *int     `yaml:"max_fails"`
+	FailTimeout Duration `yaml:"fail_timeout"`
+	Backup      bool     `yaml:"backup"`
+	Down        bool     `yaml:"down"`
+}
+
+// Proxy is a reverse-proxy vhost: an nginx server{} block whose locations
+// proxy_pass to a named upstream or a single inline target.
+type Proxy struct {
+	Domain string `yaml:"domain"`
+	// Listen is the HTTP port (default DefaultProxyListen).
+	Listen int `yaml:"listen"`
+	// Upstream / Pass set the default backend for all locations. Exactly one
+	// of them is required unless every location sets its own. Upstream names
+	// an entry in Config.Upstreams; Pass is an inline scheme://host:port.
+	Upstream  string          `yaml:"upstream"`
+	Pass      string          `yaml:"pass"`
+	Locations []ProxyLocation `yaml:"locations"`
+
+	// Optional proxy tuning applied at the server level.
+	ConnectTimeout    Duration `yaml:"connect_timeout"`
+	ReadTimeout       Duration `yaml:"read_timeout"`
+	SendTimeout       Duration `yaml:"send_timeout"`
+	ClientMaxBodySize ByteSize `yaml:"client_max_body_size"`
+
+	// File records which config file declared this proxy (provenance).
+	File string `yaml:"-"`
+}
+
+// ProxyLocation maps a location path to a backend, overriding the proxy's
+// default Upstream/Pass when set.
+type ProxyLocation struct {
+	// Path defaults to "/".
+	Path     string `yaml:"path"`
+	Upstream string `yaml:"upstream"`
+	Pass     string `yaml:"pass"`
+	// Websocket adds the Upgrade/Connection headers + HTTP/1.1 for WebSocket
+	// and other connection-upgrade traffic.
+	Websocket bool `yaml:"websocket"`
+}
+
+// ListenPort returns the effective listen port for the proxy.
+func (p Proxy) ListenPort() int {
+	if p.Listen > 0 {
+		return p.Listen
+	}
+	return DefaultProxyListen
 }
 
 // Admin configures the loopback admin HTTP endpoint.

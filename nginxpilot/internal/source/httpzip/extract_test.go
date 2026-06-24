@@ -358,16 +358,22 @@ func TestExtractOK(t *testing.T) {
 	}
 }
 
-// TestExtractBeltAndBraces verifies the second uncompressed-size guard
-// (extract.go:88-92) fires when a crafted archive declares a small
-// uncompressed size in the central directory header but actually contains
-// more bytes — the declared-total pre-flight passes, but actual writes exceed
-// the cap.
-func TestExtractBeltAndBraces(t *testing.T) {
+// TestExtractRejectsSizeTamperedArchive verifies the security property the
+// uncompressed-size guards exist to enforce: an archive that lies about its
+// uncompressed size — declaring a tiny size in the central directory to slip
+// past the declared-total pre-flight while actually holding far more bytes —
+// cannot smuggle oversized content into staging.
+//
+// In practice the stdlib zip reader detects the size/CRC mismatch on read and
+// fails the copy (so the extract.go belt-and-braces cap is an unreachable
+// backstop, not the active defence here); either way extraction must error and
+// no oversized file may land in staging.
+func TestExtractRejectsSizeTamperedArchive(t *testing.T) {
 	const maxUncomp = 10
 	const fakeSize = 5   // claimed in central directory — passes pre-flight
 	const realSize = 100 // actual decompressed bytes — exceeds cap
 
+	dest := t.TempDir()
 	path, size := buildZipWithFakeDeclaredSize(t, "evil.bin",
 		bytes.Repeat([]byte("X"), realSize), fakeSize)
 
@@ -378,11 +384,12 @@ func TestExtractBeltAndBraces(t *testing.T) {
 		MaxArchiveSize:      config.DefaultMaxArchiveSize,
 	}.Effective(), nil)
 
-	err := s.extract(path, size, t.TempDir())
+	err := s.extract(path, size, dest)
 	if err == nil {
-		t.Fatal("expected belt-and-braces size error, got nil")
+		t.Fatal("expected size-tampered archive to be rejected, got nil")
 	}
-	if !strings.Contains(err.Error(), "max_uncompressed_size") {
-		t.Fatalf("expected max_uncompressed_size error, got: %v", err)
+	// Whatever the failure mode, no oversized content may have been committed.
+	if fi, statErr := os.Stat(filepath.Join(dest, "evil.bin")); statErr == nil && fi.Size() > maxUncomp {
+		t.Fatalf("oversized file written despite rejection: %d bytes", fi.Size())
 	}
 }

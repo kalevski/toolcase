@@ -135,7 +135,7 @@ func (m *Manager) loop(ctx context.Context, sl *siteLoop) {
 	// Startup jitter avoids a thundering herd when many sites share an
 	// interval (spec §2).
 	first := jitter(sl.interval)
-	sl.setNext(time.Now().Add(first))
+	sl.setNext(time.Now().UTC().Add(first))
 	timer := time.NewTimer(first)
 	defer timer.Stop()
 
@@ -161,7 +161,7 @@ func (m *Manager) loop(ctx context.Context, sl *siteLoop) {
 		// Exponential backoff on failure streaks: interval × 2^streak,
 		// capped at 4× (spec Q19).
 		delay := backoff(sl.interval, streak)
-		sl.setNext(time.Now().Add(delay))
+		sl.setNext(time.Now().UTC().Add(delay))
 		timer.Reset(delay)
 	}
 }
@@ -276,6 +276,15 @@ func (m *Manager) Status() []SiteStatus {
 		out = append(out, status)
 	}
 	return out
+}
+
+// Config returns the live config under lock. Reload swaps the pointer
+// wholesale, so callers always observe the current sites/upstreams/proxies —
+// used by the admin /vhost endpoint to generate nginx config on demand.
+func (m *Manager) Config() *config.Config {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.cfg
 }
 
 // Reload applies a freshly validated config: diff-based per spec §6.

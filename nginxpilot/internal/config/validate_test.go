@@ -560,3 +560,148 @@ func TestValidateHTTPZipInsecureWithFlagOK(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
+
+// ---- upstreams & reverse proxies ------------------------------------------
+
+func validUpstream() Upstream {
+	return Upstream{
+		Name:    "api_pool",
+		Servers: []UpstreamServer{{Address: "10.0.0.1:8080"}},
+		File:    "test",
+	}
+}
+
+func TestValidateProxyReferencingUpstreamOK(t *testing.T) {
+	cfg := minValidConfig()
+	cfg.Upstreams = []Upstream{validUpstream()}
+	cfg.Proxies = []Proxy{{Domain: "api.example.com", Upstream: "api_pool", File: "test"}}
+	if err := Validate(&cfg); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestValidateUpstreamNameRequired(t *testing.T) {
+	cfg := minValidConfig()
+	u := validUpstream()
+	u.Name = ""
+	cfg.Upstreams = []Upstream{u}
+	if err := Validate(&cfg); err == nil || !strings.Contains(err.Error(), "name is required") {
+		t.Fatalf("expected name required error, got: %v", err)
+	}
+}
+
+func TestValidateUpstreamBadName(t *testing.T) {
+	cfg := minValidConfig()
+	u := validUpstream()
+	u.Name = "api-pool" // hyphen not allowed
+	cfg.Upstreams = []Upstream{u}
+	if err := Validate(&cfg); err == nil || !strings.Contains(err.Error(), "[A-Za-z0-9_]") {
+		t.Fatalf("expected name charset error, got: %v", err)
+	}
+}
+
+func TestValidateUpstreamBadBalancer(t *testing.T) {
+	cfg := minValidConfig()
+	u := validUpstream()
+	u.Balancer = "magic"
+	cfg.Upstreams = []Upstream{u}
+	if err := Validate(&cfg); err == nil || !strings.Contains(err.Error(), "balancer") {
+		t.Fatalf("expected balancer error, got: %v", err)
+	}
+}
+
+func TestValidateUpstreamNoServers(t *testing.T) {
+	cfg := minValidConfig()
+	u := validUpstream()
+	u.Servers = nil
+	cfg.Upstreams = []Upstream{u}
+	if err := Validate(&cfg); err == nil || !strings.Contains(err.Error(), "at least one server") {
+		t.Fatalf("expected no-servers error, got: %v", err)
+	}
+}
+
+func TestValidateUpstreamDuplicateName(t *testing.T) {
+	cfg := minValidConfig()
+	cfg.Upstreams = []Upstream{validUpstream(), validUpstream()}
+	if err := Validate(&cfg); err == nil || !strings.Contains(err.Error(), "duplicate upstream") {
+		t.Fatalf("expected duplicate upstream error, got: %v", err)
+	}
+}
+
+func TestValidateProxyUnknownUpstream(t *testing.T) {
+	cfg := minValidConfig()
+	cfg.Proxies = []Proxy{{Domain: "api.example.com", Upstream: "missing", File: "test"}}
+	if err := Validate(&cfg); err == nil || !strings.Contains(err.Error(), "unknown upstream") {
+		t.Fatalf("expected unknown upstream error, got: %v", err)
+	}
+}
+
+func TestValidateProxyUpstreamAndPassMutuallyExclusive(t *testing.T) {
+	cfg := minValidConfig()
+	cfg.Upstreams = []Upstream{validUpstream()}
+	cfg.Proxies = []Proxy{{Domain: "api.example.com", Upstream: "api_pool", Pass: "http://x:1", File: "test"}}
+	if err := Validate(&cfg); err == nil || !strings.Contains(err.Error(), "mutually exclusive") {
+		t.Fatalf("expected mutual-exclusion error, got: %v", err)
+	}
+}
+
+func TestValidateProxyNoTarget(t *testing.T) {
+	cfg := minValidConfig()
+	cfg.Proxies = []Proxy{{Domain: "api.example.com", File: "test"}}
+	if err := Validate(&cfg); err == nil || !strings.Contains(err.Error(), "upstream/pass") {
+		t.Fatalf("expected no-target error, got: %v", err)
+	}
+}
+
+func TestValidateProxyInlinePassBadScheme(t *testing.T) {
+	cfg := minValidConfig()
+	cfg.Proxies = []Proxy{{Domain: "api.example.com", Pass: "10.0.0.1:8080", File: "test"}}
+	if err := Validate(&cfg); err == nil || !strings.Contains(err.Error(), "http://") {
+		t.Fatalf("expected pass scheme error, got: %v", err)
+	}
+}
+
+func TestValidateProxyDomainCollidesWithSite(t *testing.T) {
+	cfg := minValidConfig()
+	cfg.Sites = []Site{{
+		Domain: "example.com",
+		Source: Source{Type: SourceHTTPZip, URL: "https://x/a.zip"},
+		File:   "site.yml",
+	}}
+	cfg.Proxies = []Proxy{{Domain: "example.com", Pass: "http://127.0.0.1:9000", File: "proxy.yml"}}
+	if err := Validate(&cfg); err == nil || !strings.Contains(err.Error(), "duplicate domain") {
+		t.Fatalf("expected duplicate domain error, got: %v", err)
+	}
+}
+
+func TestValidateProxyLocationInheritsDefault(t *testing.T) {
+	cfg := minValidConfig()
+	cfg.Upstreams = []Upstream{validUpstream()}
+	cfg.Proxies = []Proxy{{
+		Domain:    "api.example.com",
+		Upstream:  "api_pool",
+		Locations: []ProxyLocation{{Path: "/static"}}, // no target → inherits api_pool
+		File:      "test",
+	}}
+	if err := Validate(&cfg); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if cfg.Proxies[0].Locations[0].Path != "/static" {
+		t.Fatalf("path mangled: %q", cfg.Proxies[0].Locations[0].Path)
+	}
+}
+
+func TestValidateProxyLocationPathDefaulted(t *testing.T) {
+	cfg := minValidConfig()
+	cfg.Proxies = []Proxy{{
+		Domain:    "api.example.com",
+		Locations: []ProxyLocation{{Pass: "http://127.0.0.1:9000"}}, // empty path → "/"
+		File:      "test",
+	}}
+	if err := Validate(&cfg); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got := cfg.Proxies[0].Locations[0].Path; got != "/" {
+		t.Fatalf("want default path /, got %q", got)
+	}
+}

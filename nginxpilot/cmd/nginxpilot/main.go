@@ -20,7 +20,7 @@ Usage:
   nginxpilot [run] [flags]         run the daemon (default)
   nginxpilot validate [flags]      parse + validate the merged config
   nginxpilot sync <domain> [flags] one-shot sync for one site
-  nginxpilot print-vhost <domain>  print an nginx server-block snippet
+  nginxpilot print-vhost <domain>  print an nginx snippet (static site or reverse proxy)
   nginxpilot status [--json]       show per-site status from the daemon
   nginxpilot version               print build info
 
