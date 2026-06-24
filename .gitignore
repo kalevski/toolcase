@@ -1,4 +1,6 @@
 lib
+# taskforge uses lib/ as a SOURCE dir (Next.js app helpers), not build output — keep it tracked
+!taskforge/lib/
 node_modules
 .parcel-cache
 .DS_Store
