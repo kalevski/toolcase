@@ -8,6 +8,7 @@ import EndpointDemo from './EndpointDemo'
 import KVServiceDemo from './KVServiceDemo'
 import NodeStoreDemo from './NodeStoreDemo'
 import OAuth2Demo from './OAuth2Demo'
+import ImagingDemo from './ImagingDemo'
 
 export type NodeExampleDef = {
     key: string
@@ -25,4 +26,5 @@ export const nodeExamples: NodeExampleDef[] = [
     { key: 'kv', label: 'KVService', element: <KVServiceDemo /> },
     { key: 'node-store', label: 'NodeStore', element: <NodeStoreDemo /> },
     { key: 'oauth2', label: 'OAuth2 / OIDC', element: <OAuth2Demo /> },
+    { key: 'imaging', label: 'Imaging', element: <ImagingDemo /> },
 ]
