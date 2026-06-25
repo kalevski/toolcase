@@ -16,6 +16,12 @@ import { ROLE_RANK, type AppUser, type Role, type SessionPayload } from '@/serve
 
 export const SESSION_COOKIE = 'perch_session'
 export const STATE_COOKIE = 'perch_oauth_state'
+// The GitHub access token is kept OUT of the session payload (§7) but the
+// create-site wizard needs it to call the GitHub REST API on the user's behalf
+// (§9 step 1, §13). It lives in its own short-lived `httpOnly` cookie — never in
+// the session token, never in the database, and never handed to nginxpilot (which
+// keeps §9's "don't persist a credential for nginxpilot" intact).
+export const GH_TOKEN_COOKIE = 'perch_gh_token'
 
 /** A GitHub identity, normalized from the `/user` profile response. */
 export interface GithubProfile {
@@ -93,6 +99,16 @@ export function clearedCookieOptions() {
 
 export function stateCookieOptions() {
     return { httpOnly: true, sameSite: 'lax' as const, path: '/', secure: isSecure(), maxAge: 600 }
+}
+
+/** Cookie options for the GitHub access token — `httpOnly`, scoped to the session lifetime. */
+export function ghTokenCookieOptions() {
+    return { httpOnly: true, sameSite: 'lax' as const, path: '/', secure: isSecure(), maxAge: config.sessionTtl }
+}
+
+/** Read the caller's GitHub access token from its `httpOnly` cookie (null if absent). */
+export async function getGithubToken(): Promise<string | null> {
+    return (await cookies()).get(GH_TOKEN_COOKIE)?.value ?? null
 }
 
 /** Verify a session token and check expiry. */

@@ -33,3 +33,9 @@ Rules:
   (`resolveOnLogin`), and the per-request `authorize(minRole)` guard. The OAuth
   routes live under `app/api/auth/**`. See
   `notes/static-hosting-app-design.md` §3, §5, §7, §12 for the architecture.
+- `infrastructure/` holds server-only adapters to external systems (no DB, no
+  policy). `infrastructure/github.ts` is a fetch-based GitHub REST helper —
+  `gh()` plus `listRepos`/`listBranches` — reused with the *caller's* OAuth
+  access token (read from the `perch_gh_token` `httpOnly` cookie set at login).
+  The create-site wizard's repo/branch pickers call it through the
+  `app/api/github/**` routes (§9 step 1, §13).

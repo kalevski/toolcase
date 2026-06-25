@@ -1,11 +1,13 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import {
+    GH_TOKEN_COOKIE,
     SESSION_COOKIE,
     STATE_COOKIE,
     checkAllowlist,
     clearedCookieOptions,
     exchangeCodeForToken,
     fetchGithubProfile,
+    ghTokenCookieOptions,
     makeSessionToken,
     resolveOnLogin,
     sessionCookieOptions,
@@ -36,8 +38,10 @@ export async function GET(req: NextRequest) {
     }
 
     try {
-        // The GitHub access token lives only for this callback — used to read the
-        // profile, then dropped. It is never written into the session (§7).
+        // The GitHub access token is never written into the session payload (§7).
+        // It is used here to read the profile, and then stashed in its own
+        // `httpOnly` cookie so the create-site wizard can list the user's repos
+        // and branches (§9 step 1) — see GH_TOKEN_COOKIE in services/auth.ts.
         const token = await exchangeCodeForToken(code)
         const profile = await fetchGithubProfile(token)
 
@@ -50,6 +54,7 @@ export async function GET(req: NextRequest) {
 
         const res = NextResponse.redirect(new URL('/', base))
         res.cookies.set(SESSION_COOKIE, session, sessionCookieOptions())
+        res.cookies.set(GH_TOKEN_COOKIE, token, ghTokenCookieOptions())
         res.cookies.set(STATE_COOKIE, '', clearedCookieOptions())
         return res
     } catch {
