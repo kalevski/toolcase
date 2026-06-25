@@ -104,6 +104,22 @@ export const config = {
     // every 15 minutes.
     sponsorsReconcileCron: optional('PERCH_SPONSORS_RECONCILE_CRON', '*/15 * * * *'),
 
+    // ── nginxpilot integration seam (§4, §16) ──
+    // Base URL of nginxpilot's admin REST API (loopback by default — `admin.listen`
+    // defaults to 127.0.0.1:9090; keep it off the public network, §16).
+    nginxpilotAdminUrl: optional('PERCH_NGINXPILOT_ADMIN_URL', 'http://127.0.0.1:9090').replace(/\/+$/, ''),
+    // Bearer token matching nginxpilot's `admin.token_env`. Optional: empty means the
+    // admin endpoint runs unauthenticated (loopback default) and Perch sends no header.
+    nginxpilotAdminToken: optional('PERCH_NGINXPILOT_ADMIN_TOKEN', ''),
+    // Shared `sites.d/` directory Perch drops fragments into (Channel A). nginxpilot
+    // picks them up on reload. Server-controlled path; fragment filenames are
+    // server-generated (§16), never derived from user input.
+    nginxpilotSitesDir: optional('PERCH_NGINXPILOT_SITES_DIR', '/etc/nginxpilot/sites.d'),
+    // Fallback reload trigger (§4): until nginxpilot ships `POST /reload` (M4), Perch
+    // touches this file and a reload-sidecar HUPs nginxpilot. Empty disables the
+    // fallback (the file-drop alone is then picked up by a path/timer watcher).
+    nginxpilotReloadTrigger: optional('PERCH_NGINXPILOT_RELOAD_TRIGGER', ''),
+
     port: num('PORT', 4100),
 }
 

@@ -50,6 +50,18 @@ Rules:
   is its GraphQL sibling — `fetchSponsorshipsAsMaintainer` pages the owner's
   `viewer.sponsorshipsAsMaintainer` connection with a dedicated owner PAT.
   `infrastructure/server-log.ts` is the `[perch]` structured stdout logger.
+  `infrastructure/nginxpilot.ts` is the deploy-engine seam (§4): two channels —
+  Channel A writes/removes YAML site fragments atomically into the shared `sites.d/`
+  dir under a deterministic, server-generated filename (`writeFragment` /
+  `removeFragment`); Channel B is the read/operate REST admin API (`status`, `sync`,
+  `vhost`, `healthz`) with an optional `Authorization: Bearer` from nginxpilot's
+  `admin.token_env`. `reload()` tries `POST /reload` and otherwise falls back to the
+  file-drop + reload-sidecar trigger — isolated in one function so M4 can drop the
+  fallback once nginxpilot ships the endpoint (§17). The pure fragment *rendering* —
+  exact §4 schema, secrets by env-var name only, never inlined — lives in the
+  unit-tested `domain/nginxpilot-fragment.ts` (`renderFragment` / `fragmentFilename`).
+  Note: nginxpilot's `github-token` auth validates `token_env` (not the §4 doc's
+  `key_env`, which is the `ssh-key` method's key), so the renderer emits `token_env`.
 - `services/sponsors-reconcile.ts` + `app/api/webhooks/github-sponsors/route.ts`
   drive sponsorship state (§8). The webhook verifies the `X-Hub-Signature-256`
   HMAC (constant-time, 401 on mismatch) and upserts `created`/`tier_changed`/
