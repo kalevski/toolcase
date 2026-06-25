@@ -21,3 +21,24 @@ body {
     color: #1a1a1a;
     background: #fff;
 }
+
+/* Padding for the dashboard-layout content region (the default slot). */
+.perch-shell-content {
+    padding: 1.5rem;
+}
+
+/* The side-nav fills the sidebar-menu slot. */
+.perch-sidebar-menu {
+    display: block;
+}
+
+/* AuthGate loading / error placeholder, centered in the viewport. */
+.perch-gate-status {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    color: #6b7280;
+    font-size: 0.9375rem;
+}

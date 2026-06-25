@@ -1,0 +1,66 @@
+'use client'
+
+import { useMemo } from 'react'
+import { useTc } from '@/lib/tc'
+
+// Human-readable copy for the `?error=` codes the OAuth callback can redirect
+// back with (§7). Anything unmapped falls back to a generic message.
+const ERRORS: Record<string, string> = {
+    state: 'Sign-in expired or was tampered with. Please try again.',
+    not_allowed: 'Your GitHub account is not allowed to access Perch.',
+    oauth: 'GitHub sign-in failed. Please try again.',
+}
+
+// tc-login renders its connect options from a JS property (object data the
+// element can only receive as a DOM *property*, never a stringified attribute —
+// hence useTc). Lucide ships no GitHub brand glyph, so we use `git-branch`,
+// matching TaskForge.
+const CONNECT = [{ key: 'github', label: 'Sign in with GitHub', icon: 'git-branch', variant: 'primary' as const }]
+
+export function LoginClient({ error }: { error?: string }) {
+    const message = error ? (ERRORS[error] ?? 'Sign-in failed. Please try again.') : null
+
+    // Object prop (`connect`) + CustomEvent (`tc-connect`) both flow through the
+    // useTc bridge. Clicking a connect button kicks off the GitHub OAuth code
+    // flow at GET /api/auth/github, which redirects to GitHub.
+    const ref = useTc<HTMLElement>(
+        useMemo(() => ({ connect: CONNECT }), []),
+        useMemo(
+            () => ({
+                'tc-connect': () => {
+                    window.location.href = '/api/auth/github'
+                },
+            }),
+            [],
+        ),
+    )
+
+    return (
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+            {message && (
+                <div
+                    role="alert"
+                    style={{
+                        padding: '0.75rem 1rem',
+                        background: '#fde2e1',
+                        color: '#842029',
+                        borderBottom: '1px solid #f5c2c7',
+                        textAlign: 'center',
+                        fontSize: '0.9375rem',
+                    }}
+                >
+                    {message}
+                </div>
+            )}
+            <div style={{ flex: 1, display: 'flex' }}>
+                <tc-login
+                    ref={ref}
+                    title="Perch"
+                    description="Deploy a branch of your GitHub repository as a static website."
+                >
+                    <tc-brand slot="logo" primary-text="Perch" color="#0ea5e9" />
+                </tc-login>
+            </div>
+        </div>
+    )
+}
