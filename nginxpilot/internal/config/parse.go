@@ -15,9 +15,11 @@ import (
 // DefaultPath is where the daemon looks for its config unless --config is given.
 const DefaultPath = "/etc/nginxpilot/config.yml"
 
-// fragment is the shape an included file may have: sites:, upstreams: and/or
-// proxies: lists. No globals, no nested include:.
-type fragment struct {
+// Fragment is the shape an included file may have: sites:, upstreams: and/or
+// proxies: lists. No globals, no nested include:. It is both what `include:`
+// globs pull in from sites.d/ and what the admin write-API accepts, so the
+// file-drop and REST paths parse identically.
+type Fragment struct {
 	Sites     []Site     `yaml:"sites"`
 	Upstreams []Upstream `yaml:"upstreams"`
 	Proxies   []Proxy    `yaml:"proxies"`
@@ -106,18 +108,9 @@ func loadIncludes(cfg *Config, res *LoadResult) error {
 			if err != nil {
 				return fmt.Errorf("include %s: %w", file, err)
 			}
-			var frag fragment
-			if err := strictDecode(raw, &frag); err != nil {
-				return fmt.Errorf("%s: %w (fragments may only contain sites:, upstreams: and/or proxies: lists)", file, err)
-			}
-			for i := range frag.Sites {
-				frag.Sites[i].File = file
-			}
-			for i := range frag.Upstreams {
-				frag.Upstreams[i].File = file
-			}
-			for i := range frag.Proxies {
-				frag.Proxies[i].File = file
+			frag, err := ParseFragment(raw, file)
+			if err != nil {
+				return err
 			}
 			cfg.Sites = append(cfg.Sites, frag.Sites...)
 			cfg.Upstreams = append(cfg.Upstreams, frag.Upstreams...)
@@ -125,6 +118,28 @@ func loadIncludes(cfg *Config, res *LoadResult) error {
 		}
 	}
 	return nil
+}
+
+// ParseFragment strict-decodes one sites.d-style fragment — the same bytes a
+// file dropped into sites.d/ would contain — attributing provenance to file.
+// It performs no cross-config checks (duplicate domains across files): merge
+// the result into a Config and call Validate for that. Reused by both the
+// include loader and the admin write-API so the two paths parse identically.
+func ParseFragment(raw []byte, file string) (*Fragment, error) {
+	var frag Fragment
+	if err := strictDecode(raw, &frag); err != nil {
+		return nil, fmt.Errorf("%s: %w (fragments may only contain sites:, upstreams: and/or proxies: lists)", file, err)
+	}
+	for i := range frag.Sites {
+		frag.Sites[i].File = file
+	}
+	for i := range frag.Upstreams {
+		frag.Upstreams[i].File = file
+	}
+	for i := range frag.Proxies {
+		frag.Proxies[i].File = file
+	}
+	return &frag, nil
 }
 
 // strictDecode decodes YAML rejecting unknown keys. An empty document is

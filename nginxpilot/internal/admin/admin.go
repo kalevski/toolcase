@@ -5,6 +5,8 @@
 //	POST /sync/<domain>  force an immediate sync (tick-now)
 //	GET  /vhost/<domain> generated nginx config for a site or reverse proxy
 //	POST /reload         diff-based config reload (same as SIGHUP)
+//	POST /sites          write a site fragment into sites.d/ and reload
+//	DELETE /sites/{domain} remove a domain's fragment and reload
 //
 // Loopback only by default; an optional bearer token (admin.token_env)
 // guards reverse-proxied setups.
@@ -86,6 +88,8 @@ func (s *Server) routes() http.Handler {
 	mux.HandleFunc("POST /sync/{domain}", s.auth(s.handleSync))
 	mux.HandleFunc("GET /vhost/{domain}", s.auth(s.handleVhost))
 	mux.HandleFunc("POST /reload", s.auth(s.handleReload))
+	mux.HandleFunc("POST /sites", s.auth(s.handleCreateSite))
+	mux.HandleFunc("DELETE /sites/{domain}", s.auth(s.handleDeleteSite))
 	return mux
 }
 

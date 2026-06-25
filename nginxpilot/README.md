@@ -221,6 +221,8 @@ Loopback HTTP (default `127.0.0.1:9090`; `admin.listen: ""` disables; `admin.tok
 - `POST /sync/<domain>` — force an immediate sync
 - `GET /vhost/<domain>` — `text/plain` generated nginx config for a site or reverse proxy (same output as `print-vhost`)
 - `POST /reload` — diff-based config reload (same work as `SIGHUP`); lets a separate process apply config changes without signalling the daemon. An invalid on-disk config is rejected wholesale and the running config stays active (`500`); success returns `200`.
+- `POST /sites` — write a site fragment into `sites.d/` and reload. The request body is the YAML fragment a file-drop would contain (`config/parse.go` schema), declaring **exactly one** `sites:` entry (no `upstreams:`/`proxies:`). The fragment is validated against the running config first (`400` on a bad source, duplicate domain, unknown key, …) so an invalid fragment never lands on disk; on success it is written atomically as `<domain>.yml` and the daemon reloads (`201` created, `200` if it replaced an existing fragment). The target directory and extension are derived from the first `include:` glob.
+- `DELETE /sites/{domain}` — remove the deterministic `<domain>.yml` fragment and reload (`200`); `404` if no such fragment exists. Lets a control plane manage sites entirely over REST so `sites.d/` stops being a shared-write surface.
 
 ## Signals
 

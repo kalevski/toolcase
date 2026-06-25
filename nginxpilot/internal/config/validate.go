@@ -58,6 +58,14 @@ func Validate(cfg *Config) error {
 	return nil
 }
 
+// NormalizeDomain validates a domain and rewrites it to its punycode/ASCII
+// (IDNA2008) form — the same normalization Validate applies in place. Exposed
+// so the admin write-API can derive a fragment's deterministic, filesystem-safe
+// filename from a request-supplied domain.
+func NormalizeDomain(domain string) (string, error) {
+	return normalizeDomain(domain)
+}
+
 // normalizeDomain validates and rewrites a domain to its punycode/ASCII
 // (IDNA2008) form — filesystem-safe and identical to what nginx sees in
 // SNI/Host (spec Q12). Wildcards are rejected (no v1 support).
