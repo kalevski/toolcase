@@ -17,6 +17,7 @@
         "phaser-plus",
         "node",
         "taskforge",
+        "perch",
         "examples"
     ],
     "devDependencies": {
