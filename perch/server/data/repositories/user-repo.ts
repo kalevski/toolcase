@@ -70,6 +70,16 @@ export function getByLogin(login: string): AppUser | undefined {
 }
 
 /**
+ * The bootstrap owner — the first account to ever sign in (§2, §6). Returned as
+ * the earliest-added `owner`-role row so the plans/sponsor UI can link to the
+ * right GitHub Sponsors page (§14). `undefined` before anyone has signed in.
+ */
+export function getOwner(): AppUser | undefined {
+    const r = getRow<Raw>(`SELECT * FROM app_user WHERE role = 'owner' ORDER BY added_at LIMIT 1`)
+    return r ? map(r) : undefined
+}
+
+/**
  * Count `owner`-role users. `resolveOnLogin` assigns `owner` to the very first
  * sign-in (`ownerCount() === 0`), else `standard` (§6).
  */
