@@ -20,6 +20,11 @@
 //     count + custom-domain gates, the plan-derived fragment refresh interval, and
 //     the post-deploy byte cap (over_quota → grace → suspend, reversible on trim or
 //     upgrade) (§11). Pure decisions in `domain/quota.ts`; this is the server-only wiring.
+//   - sites.ts — the `/api/sites` policy layer: per-site tenant isolation (re-checks
+//     `site.owner_id === session.sub`, owner role bypasses) plus create/update/delete/
+//     redeploy/verify/status orchestration over the quota (§728), domains (§729), and
+//     deploy (§727) services. Pure ownership + source-input decisions live in
+//     `domain/site-access.ts` and `domain/site-input.ts`; this is the server-only wiring.
 //   - domains.ts — the shared hostname namespace + custom-domain provisioning:
 //     strict label/custom-domain validation with global uniqueness, subdomain attach
 //     (pure nginxpilot fragment, no nginx reload), server-side DNS verification against

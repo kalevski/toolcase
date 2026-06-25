@@ -141,6 +141,21 @@ export function updateSource(
     prep('UPDATE site SET branch = ?, subdir = ?, updated_at = ? WHERE id = ?').run(branch, subdir ?? null, at, id)
 }
 
+/**
+ * Move a site to a new hostname (the deploy service's PATCH-hostname path, §9 step 6).
+ * Both the hostname and its kind change together (subdomain ⇄ custom). Throws on a
+ * `hostname` conflict (it is UNIQUE) — the service checks the shared namespace first.
+ * The new fragment + (custom) vhost/cert are the service's job; this only persists the row.
+ */
+export function updateHostname(
+    id: string,
+    hostname: string,
+    hostKind: SiteHostKind,
+    at: string = new Date().toISOString(),
+): void {
+    prep('UPDATE site SET hostname = ?, host_kind = ?, updated_at = ? WHERE id = ?').run(hostname, hostKind, at, id)
+}
+
 /** Delete a site row (after its fragment + vhost/cert are torn down). */
 export function remove(id: string): void {
     prep('DELETE FROM site WHERE id = ?').run(id)
