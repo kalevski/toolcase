@@ -4,6 +4,7 @@
 //	GET  /status         per-site status JSON
 //	POST /sync/<domain>  force an immediate sync (tick-now)
 //	GET  /vhost/<domain> generated nginx config for a site or reverse proxy
+//	POST /reload         diff-based config reload (same as SIGHUP)
 //
 // Loopback only by default; an optional bearer token (admin.token_env)
 // guards reverse-proxied setups.
@@ -25,17 +26,22 @@ import (
 
 // Server is the admin HTTP endpoint.
 type Server struct {
-	mgr   *manager.Manager
-	token string
-	log   *slog.Logger
+	mgr    *manager.Manager
+	token  string
+	log    *slog.Logger
+	reload func() error
 }
 
 // New builds the admin server. token may be empty only when no auth is
 // configured (admin.token_env is unset). Callers must not pass an empty token
 // when a token was expected — use resolveAdminToken in cmd/nginxpilot/run.go
 // to enforce that invariant before constructing the server.
-func New(mgr *manager.Manager, token string, log *slog.Logger) *Server {
-	return &Server{mgr: mgr, token: token, log: log}
+//
+// reload performs a diff-based config reload — the same work SIGHUP triggers —
+// and reports an error when the on-disk config fails to load/validate (in which
+// case the running config is kept). It may be nil, which disables POST /reload.
+func New(mgr *manager.Manager, token string, log *slog.Logger, reload func() error) *Server {
+	return &Server{mgr: mgr, token: token, log: log, reload: reload}
 }
 
 // Run serves until ctx is cancelled. An empty listen address disables the
@@ -79,6 +85,7 @@ func (s *Server) routes() http.Handler {
 	mux.HandleFunc("GET /status", s.auth(s.handleStatus))
 	mux.HandleFunc("POST /sync/{domain}", s.auth(s.handleSync))
 	mux.HandleFunc("GET /vhost/{domain}", s.auth(s.handleVhost))
+	mux.HandleFunc("POST /reload", s.auth(s.handleReload))
 	return mux
 }
 
@@ -143,4 +150,21 @@ func (s *Server) handleVhost(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	_, _ = w.Write([]byte(out))
+}
+
+// handleReload runs a diff-based config reload — the REST equivalent of SIGHUP —
+// so a separate process (e.g. Perch) can apply config changes without signalling
+// the daemon directly. An invalid on-disk config is rejected wholesale and the
+// running config stays active (spec §6).
+func (s *Server) handleReload(w http.ResponseWriter, _ *http.Request) {
+	if s.reload == nil {
+		http.Error(w, "reload not available", http.StatusNotImplemented)
+		return
+	}
+	if err := s.reload(); err != nil {
+		http.Error(w, "reload rejected; running config kept", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	_, _ = w.Write([]byte("reloaded\n"))
 }

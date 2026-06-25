@@ -220,6 +220,7 @@ Loopback HTTP (default `127.0.0.1:9090`; `admin.listen: ""` disables; `admin.tok
 - `GET /status` — per-site JSON: deployed ref, last success/error, failure streak, `never_synced`, next sync
 - `POST /sync/<domain>` — force an immediate sync
 - `GET /vhost/<domain>` — `text/plain` generated nginx config for a site or reverse proxy (same output as `print-vhost`)
+- `POST /reload` — diff-based config reload (same work as `SIGHUP`); lets a separate process apply config changes without signalling the daemon. An invalid on-disk config is rejected wholesale and the running config stays active (`500`); success returns `200`.
 
 ## Signals
 
