@@ -282,6 +282,7 @@ import TabBarDemo from './TabBarDemo'
 import TabSectionsDemo from './TabSectionsDemo'
 import TableDemo from './TableDemo'
 import AdvancedTableDemo from './AdvancedTableDemo'
+import TeamListDemo from './TeamListDemo'
 import TagInputDemo from './TagInputDemo'
 import TerminalWindowDemo from './TerminalWindowDemo'
 import TestimonialCarouselDemo from './TestimonialCarouselDemo'
@@ -487,6 +488,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'download-stats', complexity: 'Composite', element: <DownloadStatsDemo /> },
     { key: 'empty-state', complexity: 'Primitives', element: <EmptyStateDemo /> },
     { key: 'entity-cell', complexity: 'Simple', element: <EntityCellDemo /> },
+    { key: 'team-list', complexity: 'Simple', element: <TeamListDemo /> },
     { key: 'equipment-doll', complexity: 'Composite', element: <EquipmentDollDemo /> },
     { key: 'hotbar', complexity: 'Composite', element: <HotbarDemo /> },
     { key: 'inventory-grid', complexity: 'Composite', element: <InventoryGridDemo /> },

@@ -21,12 +21,13 @@ import 'server-only'
 import * as baseDomainRepo from '@/server/data/repositories/base-domain-repo'
 import * as planTierRepo from '@/server/data/repositories/plan-tier-repo'
 import * as siteRepo from '@/server/data/repositories/site-repo'
+import * as userRepo from '@/server/data/repositories/user-repo'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
 import * as deploy from '@/server/services/deploy'
 import { checkBaseDomain, parsePlanTiers } from '@/server/domain/admin'
 import { NginxpilotError } from '@/server/infrastructure/nginxpilot'
 import { slog } from '@/server/infrastructure/server-log'
-import type { AuditEntry, BaseDomain, PlanTier, Site } from '@/server/domain/types'
+import type { AppUser, AuditEntry, BaseDomain, PlanTier, Site } from '@/server/domain/types'
 import type { AuditFilter } from '@/server/data/repositories/audit-repo'
 
 /**
@@ -137,6 +138,11 @@ export function replacePlanTiers(actor: AdminActor, input: unknown): PlanTier[] 
 /** Every site, newest first — the global owner moderation view. */
 export function listAllSites(): Site[] {
     return siteRepo.list()
+}
+
+/** Every signed-in user, oldest first (the bootstrap owner leads) — owner roster (§6, §13). */
+export function listUsers(): AppUser[] {
+    return userRepo.list()
 }
 
 /**

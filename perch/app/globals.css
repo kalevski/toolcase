@@ -412,3 +412,163 @@ body {
         transition: none;
     }
 }
+
+/* ── Owner admin (components/OwnerAdmin.tsx, §13 §14, task 736) ────────────────── */
+
+.perch-admin {
+    max-width: 72rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Each admin area's body inside its tc-section-card. */
+.perch-admin-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+}
+
+.perch-admin-hint {
+    font-size: 0.875rem;
+}
+
+.perch-admin-hint code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.85em;
+    background: #f1f5f9;
+    padding: 0.05rem 0.3rem;
+}
+
+.perch-admin-busy {
+    margin: 0;
+    color: #475569;
+    font-size: 0.8125rem;
+}
+
+.perch-admin-mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8125rem;
+}
+
+/* Site moderation table — status pill + suspend button. */
+.perch-admin-empty-cell {
+    text-align: center;
+    color: #94a3b8;
+    padding: 1rem;
+}
+
+.perch-admin-status {
+    text-transform: capitalize;
+    font-size: 0.8125rem;
+}
+
+.perch-admin-status--live {
+    color: #166534;
+}
+
+.perch-admin-status--failed,
+.perch-admin-status--suspended {
+    color: #b91c1c;
+}
+
+.perch-admin-status--over_quota {
+    color: #b45309;
+}
+
+.perch-admin-suspend-btn {
+    font: inherit;
+    font-size: 0.8125rem;
+    color: #b91c1c;
+    background: #fff;
+    border: 1px solid #f1c4c4;
+    padding: 0.25rem 0.6rem;
+    cursor: pointer;
+}
+
+.perch-admin-suspend-btn:hover {
+    background: #fef2f2;
+    border-color: #b91c1c;
+}
+
+.perch-admin-suspend-btn:focus-visible {
+    outline: 2px solid #b91c1c;
+    outline-offset: 2px;
+}
+
+.perch-admin-suspended {
+    color: #94a3b8;
+    font-size: 0.8125rem;
+}
+
+/* Base-domain list + add row. */
+.perch-admin-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #e5e7eb;
+}
+
+.perch-admin-list-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.perch-admin-list-row:last-child {
+    border-bottom: none;
+}
+
+.perch-admin-add-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.perch-admin-add-row > tc-input {
+    flex: 1 1 14rem;
+    min-width: 0;
+}
+
+/* Plan-tier editor rows. */
+.perch-admin-tiers {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+}
+
+.perch-admin-tier-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.perch-admin-tier-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+}
+
+.perch-admin-tier-field > .form-control,
+.perch-admin-tier-field > .form-select {
+    width: 12rem;
+    max-width: 100%;
+}
+
+.perch-admin-field-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #334155;
+}
+
+.perch-admin-tier-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}

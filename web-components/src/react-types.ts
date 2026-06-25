@@ -347,6 +347,7 @@ export interface ToolcaseIntrinsicElements {
     'tc-table': TcProps<{ 'borderless'?: boolean; 'compact'?: boolean; 'empty-message'?: string | number; 'hoverable'?: boolean; 'loading'?: boolean; 'loading-rows'?: string | number; 'sticky-header'?: boolean; 'striped'?: boolean; onTcRowClick?: (e: CustomEvent) => void }>
     'tc-tag': TcProps<{ 'count'?: string | number; 'disabled'?: boolean; 'icon'?: string | number; 'removable'?: boolean; 'selected'?: boolean; 'static'?: boolean; 'variant'?: string | number; onTcClick?: (e: CustomEvent) => void; onTcRemove?: (e: CustomEvent) => void }>
     'tc-tag-input': TcProps<{ 'allow-create'?: boolean; 'disabled'?: boolean; 'label'?: string | number; 'loading'?: boolean; 'max-tags'?: string | number; 'placeholder'?: string | number; onTcChange?: (e: CustomEvent) => void }>
+    'tc-team-list': TcProps
     'tc-terminal-window': TcProps<{ 'animate-typing'?: boolean; 'prompt'?: string | number; 'speed'?: string | number; 'title'?: string | number }>
     'tc-testimonial-carousel': TcProps<{ 'autoplay'?: boolean; 'interval'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-text': TcProps<{ 'as'?: string | number; 'size'?: string | number; 'variant'?: string | number }>

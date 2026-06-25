@@ -4,7 +4,7 @@
 // `ownerCount`, block last-owner demotion) belong in a service, not here.
 
 import 'server-only'
-import { prep, getRow } from '@/server/data/db'
+import { prep, getRow, allRows } from '@/server/data/db'
 import type { AppUser, Role } from '@/server/domain/types'
 
 interface Raw {
@@ -25,6 +25,14 @@ function map(r: Raw): AppUser {
         role: r.role as Role,
         addedAt: r.added_at,
     }
+}
+
+/**
+ * Every signed-in user, oldest first (so the bootstrap owner leads). Backs the
+ * owner-only `GET /api/admin/users` moderation view (§6, §13).
+ */
+export function list(): AppUser[] {
+    return allRows<Raw>('SELECT * FROM app_user ORDER BY added_at').map(map)
 }
 
 /** Insert a freshly signed-in GitHub identity. Throws on `github_id` conflict. */

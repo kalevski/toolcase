@@ -251,6 +251,7 @@ import { SingleCardSelect } from './SingleCardSelect'
 import { TabBar } from './TabBar'
 import { TabSections } from './TabSections'
 import { Table } from './Table'
+import { TeamList } from './TeamList'
 import { TerminalWindow } from './TerminalWindow'
 import { TestimonialCarousel } from './TestimonialCarousel'
 import { TimePicker } from './TimePicker'
@@ -617,6 +618,7 @@ export function register(): void {
     define('tc-tab-sections', TabSections)
     define('tc-table', Table)
     define('tc-advanced-table', AdvancedTable)
+    define('tc-team-list', TeamList)
     define('tc-audio-mixer', AudioMixer)
     define('tc-terminal-window', TerminalWindow)
     define('tc-testimonial-carousel', TestimonialCarousel)
