@@ -18,6 +18,11 @@ Rules:
   may import them too.
 - `data/db.ts` is the single owner of the `node:sqlite` `DatabaseSync` handle
   (cached on `globalThis`, WAL mode, append-only ordered `MIGRATIONS[]`), ported
-  from TaskForge with a fresh §12 schema as migration `v1`. No services, auth, or
-  repositories exist yet. See `notes/static-hosting-app-design.md` §3, §5, §12 for
-  the target architecture.
+  from TaskForge with a fresh §12 schema as migration `v1`.
+- `data/repositories/` holds one raw-SQL module per §12 table — `userRepo`,
+  `baseDomainRepo`, `siteRepo`, `sponsorshipRepo`, `planTierRepo`, `auditRepo` —
+  each a namespace of prepared-statement helpers over `db.ts` that map snake_case
+  rows to the camelCase `domain/types.ts` shapes. Import directly
+  (`import * as siteRepo from '@/server/data/repositories/site-repo'`) or via the
+  `repositories/index.ts` barrels. No services or auth exist yet. See
+  `notes/static-hosting-app-design.md` §3, §5, §12 for the target architecture.

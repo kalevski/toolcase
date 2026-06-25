@@ -1,7 +1,14 @@
-// Repository layer — raw-SQL access, one file per table, server-only. No
-// repositories yet; this file only marks the layer and the `server-only` guard
-// convention. See notes/static-hosting-app-design.md §5, §12.
+// Repository layer — raw-SQL access, one file per §12 table, server-only. Each
+// module is a namespace of prepared-statement CRUD/query helpers over `db.ts`,
+// returning the `server/domain/types.ts` row types. Services import a repo either
+// directly (`import * as userRepo from '@/server/data/repositories/user-repo'`)
+// or via these barrels. See notes/static-hosting-app-design.md §5, §12.
 
 import 'server-only'
 
-export {}
+export * as userRepo from './user-repo'
+export * as baseDomainRepo from './base-domain-repo'
+export * as siteRepo from './site-repo'
+export * as sponsorshipRepo from './sponsorship-repo'
+export * as planTierRepo from './plan-tier-repo'
+export * as auditRepo from './audit-repo'

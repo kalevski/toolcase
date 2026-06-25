@@ -149,3 +149,49 @@ export interface Sponsorship {
     effectiveAt: string
     updatedAt: string
 }
+
+// ── Base domains (`base_domain` row) ─────────────────────────────────────────
+
+/** An owner-registered base domain backing the subdomain pool (§10, §12). */
+export interface BaseDomain {
+    /** Fully-qualified base domain; primary key (e.g. `perch.dev`). */
+    domain: string
+    /** ISO timestamp the owner registered it. */
+    createdAt: string
+}
+
+// ── Plan tiers (`plan_tier` row) ─────────────────────────────────────────────
+
+/** A paid plan a sponsorship tier can map to (the free tier is never stored). */
+export type PaidPlan = Exclude<Plan, 'free'>
+
+/**
+ * One owner-editable `$ → plan` mapping row: a sponsorship of at least
+ * `minCents` per month grants `plan` (highest matching `minCents` wins).
+ * Mirrors the `plan_tier` table (§8, §12).
+ */
+export interface PlanTier {
+    /** Inclusive monthly-cents floor for this tier; primary key. */
+    minCents: number
+    plan: PaidPlan
+}
+
+// ── Audit log (`audit` row) ──────────────────────────────────────────────────
+
+/** One append-only audit-log entry. Mirrors the `audit` table (§12, §16). */
+export interface AuditEntry {
+    /** Auto-increment id; also the DESC ordering key. */
+    id: number
+    /** ISO timestamp the action occurred. */
+    at: string
+    /** Acting GitHub id, or null for unauthenticated/system actions. */
+    githubId: number | null
+    /** Acting GitHub login, or null. */
+    login: string | null
+    /** Action name (e.g. `site.create`, `plan_tier.update`). */
+    action: string
+    /** Affected site id/hostname, if any. */
+    site: string | null
+    /** Free-form detail, if any. */
+    detail: string | null
+}
