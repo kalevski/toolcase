@@ -200,3 +200,112 @@ body {
     color: #3f6212;
     font-size: 0.9375rem;
 }
+
+/* ── Site dashboard (components/SiteDashboard.tsx, §9 §11 §14, task 734) ───────── */
+
+/* The sites view is wider than the single-column create flow. */
+.perch-home--wide {
+    max-width: 64rem;
+}
+
+.perch-home-subtitle {
+    margin: 0 0 1rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.perch-home-create {
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.perch-site-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* One site card: header (host + status dot), a note, a two-column body, and a log. */
+.perch-site {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.25rem;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+}
+
+.perch-site-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.perch-site-id {
+    min-width: 0;
+}
+
+.perch-site-host {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.perch-site-source {
+    margin: 0.125rem 0 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8125rem;
+    color: #6b7280;
+    overflow-wrap: anywhere;
+}
+
+.perch-site-note {
+    margin: 0;
+    padding: 0.625rem 0.875rem;
+    background: #f8fafc;
+    border-left: 3px solid #0ea5e9;
+    color: #334155;
+    font-size: 0.875rem;
+}
+
+.perch-site-loaderror {
+    margin: 0;
+    color: #842029;
+    font-size: 0.875rem;
+}
+
+/* Build + status on the left, storage on the right; collapses to one column. */
+.perch-site-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: 1rem;
+    align-items: start;
+}
+
+.perch-site-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.perch-site-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.perch-site-redeploy-msg {
+    color: #475569;
+    font-size: 0.8125rem;
+}
+
+@media (max-width: 48rem) {
+    .perch-site-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
