@@ -46,4 +46,15 @@ Rules:
   `gh()` plus `listRepos`/`listBranches` — reused with the *caller's* OAuth
   access token (read from the `perch_gh_token` `httpOnly` cookie set at login).
   The create-site wizard's repo/branch pickers call it through the
-  `app/api/github/**` routes (§9 step 1, §13).
+  `app/api/github/**` routes (§9 step 1, §13). `infrastructure/github-sponsors.ts`
+  is its GraphQL sibling — `fetchSponsorshipsAsMaintainer` pages the owner's
+  `viewer.sponsorshipsAsMaintainer` connection with a dedicated owner PAT.
+  `infrastructure/server-log.ts` is the `[perch]` structured stdout logger.
+- `services/sponsors-reconcile.ts` + `app/api/webhooks/github-sponsors/route.ts`
+  drive sponsorship state (§8). The webhook verifies the `X-Hub-Signature-256`
+  HMAC (constant-time, 401 on mismatch) and upserts `created`/`tier_changed`/
+  `cancelled`/`pending_cancellation` events; the reconcile service is a 60s cron
+  ticker (mirroring TaskForge's `scheduler.ts`, started from `instrumentation.ts`)
+  that re-reads the authoritative GraphQL state and overrides stale rows. The pure
+  signature/parse/reconcile rules live in `domain/sponsorship-events.ts` and the
+  cron grammar in `domain/cron.ts`, both unit-tested.
