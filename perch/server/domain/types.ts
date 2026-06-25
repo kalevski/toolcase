@@ -150,6 +150,37 @@ export interface Site {
     updatedAt: string
 }
 
+// ── Usage & identity (`GET /api/me`) ─────────────────────────────────────────
+
+/**
+ * A user's current consumption against their plan — the count and total
+ * deployed bytes of the sites they own (§7 step 4, §11). Computed per request
+ * from `siteRepo`; never stored.
+ */
+export interface SiteUsage {
+    /** Number of sites the user currently owns. */
+    siteCount: number
+    /** Sum of last-measured deployed bytes across those sites (unmeasured sites count 0). */
+    totalBytes: number
+}
+
+/**
+ * The `GET /api/me` response: identity plus the effective plan, its limits, and
+ * current usage, so the client can gate UI on role/plan/quota headroom
+ * (§7 step 4, §13). `role` is the freshly re-read role; `plan`/`limits` come from
+ * `services/plan.ts`; `usage` summarizes the caller's sites.
+ */
+export interface MeResponse {
+    githubId: number
+    login: string
+    name: string
+    avatarUrl?: string
+    role: Role
+    plan: Plan
+    limits: PlanLimits
+    usage: SiteUsage
+}
+
 // ── Sponsorship (`sponsorship` row) ──────────────────────────────────────────
 
 /** Sponsorship lifecycle, from the Sponsors webhook / GraphQL reconcile (§8, §12). */
