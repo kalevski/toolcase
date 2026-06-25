@@ -42,3 +42,161 @@ body {
     color: #6b7280;
     font-size: 0.9375rem;
 }
+
+/* ── Create-site wizard (components/CreateSiteWizard.tsx, §14) ───────────────── */
+
+.perch-home {
+    max-width: 46rem;
+}
+
+.perch-home-header {
+    margin-bottom: 1.5rem;
+}
+
+.perch-home-title {
+    margin: 0 0 0.375rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.perch-home-lead {
+    margin: 0;
+    color: #6b7280;
+}
+
+.perch-wizard {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Each step's content stack inside the wizard body. */
+.perch-wizard-step {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+}
+
+.perch-wizard-heading {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 600;
+}
+
+.perch-wizard-hint {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.perch-wizard-hint code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8125em;
+    background: #f1f5f9;
+    padding: 0.05rem 0.3rem;
+}
+
+.perch-wizard-field-label,
+.perch-wizard-host-mode .perch-wizard-field-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #334155;
+}
+
+.perch-wizard-host-mode {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* label . base-domain row */
+.perch-wizard-subdomain {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.perch-wizard-subdomain > tc-input {
+    flex: 1 1 12rem;
+    min-width: 0;
+}
+
+.perch-wizard-subdomain > tc-extended-select {
+    flex: 1 1 14rem;
+    min-width: 0;
+}
+
+.perch-wizard-dot {
+    color: #94a3b8;
+    font-weight: 700;
+}
+
+.perch-wizard-preview {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #475569;
+}
+
+.perch-wizard-preview strong {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* Review summary grid. */
+.perch-wizard-review {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.4rem 1rem;
+    margin: 0;
+    font-size: 0.9375rem;
+}
+
+.perch-wizard-review dt {
+    color: #6b7280;
+}
+
+.perch-wizard-review dd {
+    margin: 0;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+}
+
+/* Inline validation / quota error, surfaced above the wizard. */
+.perch-wizard-error {
+    padding: 0.75rem 1rem;
+    background: #fde2e1;
+    color: #842029;
+    border: 1px solid #f5c2c7;
+    font-size: 0.9375rem;
+}
+
+/* Post-create confirmation. */
+.perch-wizard-success {
+    max-width: 36rem;
+    padding: 1.5rem;
+    border: 1px solid #bbf7d0;
+    background: #f0fdf4;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+}
+
+.perch-wizard-success-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #166534;
+}
+
+.perch-wizard-success-host {
+    margin: 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 1rem;
+    color: #14532d;
+}
+
+.perch-wizard-success-body {
+    margin: 0 0 0.5rem;
+    color: #3f6212;
+    font-size: 0.9375rem;
+}
