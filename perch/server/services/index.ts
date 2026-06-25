@@ -20,6 +20,12 @@
 //     count + custom-domain gates, the plan-derived fragment refresh interval, and
 //     the post-deploy byte cap (over_quota → grace → suspend, reversible on trim or
 //     upgrade) (§11). Pure decisions in `domain/quota.ts`; this is the server-only wiring.
+//   - domains.ts — the shared hostname namespace + custom-domain provisioning:
+//     strict label/custom-domain validation with global uniqueness, subdomain attach
+//     (pure nginxpilot fragment, no nginx reload), server-side DNS verification against
+//     the ingress IP (fail-closed takeover guard), and per-custom-domain vhost + certbot
+//     install/teardown (§10, §16). Pure shape/verify decisions in `domain/hostname.ts`;
+//     the nginx/certbot/DNS I/O is in `infrastructure/nginx.ts`.
 //
 // See notes/static-hosting-app-design.md §5, §7, §13.
 

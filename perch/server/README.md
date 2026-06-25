@@ -62,6 +62,23 @@ Rules:
   unit-tested `domain/nginxpilot-fragment.ts` (`renderFragment` / `fragmentFilename`).
   Note: nginxpilot's `github-token` auth validates `token_env` (not the §4 doc's
   `key_env`, which is the `ssh-key` method's key), so the renderer emits `token_env`.
+  `infrastructure/nginx.ts` is the **custom-domain** seam (§10): the raw nginx +
+  certbot + DNS I/O a custom domain needs (subdomains skip it entirely — the wildcard
+  server block already covers them). `resolveIpv4` does the A-record lookup for the
+  "Verify" step; `installVhost`/`removeVhost` atomically write/delete a per-domain
+  vhost in nginx `conf.d/` at a server-derived (never user-input) path; `obtainCert`/
+  `dropCert` shell out to certbot HTTP-01; `reload` reloads nginx. All driven by
+  `services/domains.ts`.
+- `services/domains.ts` owns the shared **hostname namespace** + custom-domain
+  provisioning (§10, §16): `validateLabel`/`validateCustomDomain` strictly validate a
+  hostname (DNS-safe charset, length, reserved-word blocklist) and enforce global
+  uniqueness across the single `site.hostname` namespace before it can reach a fragment
+  or nginx config; `attachSubdomain` is a pure nginxpilot fragment (no nginx reload —
+  the wildcard covers it); `verifyCustomDomain` resolves the domain server-side and
+  fails closed unless it points at `PERCH_INGRESS_IPV4` (takeover guard); and
+  `provisionCustomVhost`/`teardownCustomVhost` install/drop the per-domain vhost + cert.
+  The pure shape/verify decisions live in the unit-tested `domain/hostname.ts`
+  (`checkLabel`, `checkDomain`, `dnsPointsAt`, `RESERVED_LABELS`).
 - `services/sponsors-reconcile.ts` + `app/api/webhooks/github-sponsors/route.ts`
   drive sponsorship state (§8). The webhook verifies the `X-Hub-Signature-256`
   HMAC (constant-time, 401 on mismatch) and upserts `created`/`tier_changed`/

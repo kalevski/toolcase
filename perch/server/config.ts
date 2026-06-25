@@ -127,6 +127,29 @@ export const config = {
     // trim the build or upgrade their plan. Owner-tunable.
     quotaGraceSec: num('PERCH_QUOTA_GRACE_SEC', 86400),
 
+    // ── custom domains (§10, §16) ──
+    // Public ingress IPv4 a user's custom domain must point at. Perch hands this out
+    // in the A-record instructions and re-resolves the domain server-side to confirm
+    // it points here BEFORE issuing a cert (§16: prevents domain takeover). Empty
+    // means custom-domain verification is unavailable — the verify step then fails
+    // closed (it can't confirm a match it has no IP to compare against).
+    ingressIpv4: optional('PERCH_INGRESS_IPV4', ''),
+    // nginx `conf.d/` dir Perch installs per-custom-domain vhosts into. Server-
+    // controlled path; vhost filenames are derived from the validated domain only,
+    // never from raw user input (§16: path traversal).
+    nginxConfDir: optional('PERCH_NGINX_CONF_DIR', '/etc/nginx/conf.d'),
+    // Command (argv, whitespace-split) Perch runs to reload nginx after installing or
+    // dropping a custom-domain vhost. Subdomain sites never trigger this — the
+    // wildcard server block already covers `*.basedomain` (§4, §10).
+    nginxReloadCmd: optional('PERCH_NGINX_RELOAD_CMD', 'nginx -s reload'),
+    // certbot binary + HTTP-01 knobs for obtaining a per-custom-domain cert (§10).
+    certbotBin: optional('PERCH_CERTBOT_BIN', 'certbot'),
+    // ACME registration email; empty registers without an email (lab/dev only).
+    certbotEmail: optional('PERCH_CERTBOT_EMAIL', ''),
+    // Webroot the HTTP-01 challenge files are served from (must be the docroot nginx
+    // exposes at `/.well-known/acme-challenge/` for the domain).
+    certbotWebroot: optional('PERCH_CERTBOT_WEBROOT', '/var/www/certbot'),
+
     port: num('PORT', 4100),
 }
 
