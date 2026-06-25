@@ -24,5 +24,12 @@ Rules:
   each a namespace of prepared-statement helpers over `db.ts` that map snake_case
   rows to the camelCase `domain/types.ts` shapes. Import directly
   (`import * as siteRepo from '@/server/data/repositories/site-repo'`) or via the
-  `repositories/index.ts` barrels. No services or auth exist yet. See
-  `notes/static-hosting-app-design.md` §3, §5, §12 for the target architecture.
+  `repositories/index.ts` barrels.
+- `config.ts` is the single, validated read of `process.env` (fail-fast on a
+  missing required var). Server-only; the GitHub OAuth credentials, the
+  `PERCH_AUTH_SECRET` cookie key, and the session TTL all live here.
+- `services/auth.ts` is the first service: GitHub OAuth2 code flow, the
+  HMAC-signed `httpOnly` session cookie, owner-bootstrap role resolution
+  (`resolveOnLogin`), and the per-request `authorize(minRole)` guard. The OAuth
+  routes live under `app/api/auth/**`. See
+  `notes/static-hosting-app-design.md` §3, §5, §7, §12 for the architecture.

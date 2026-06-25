@@ -42,6 +42,17 @@ export function insert(user: AppUser): void {
     )
 }
 
+/**
+ * Refresh the mutable GitHub profile fields on an existing row (login, name,
+ * avatar can all change upstream). Role and `added_at` are left untouched. Used
+ * by `resolveOnLogin` to keep returning-user details current (§7).
+ */
+export function updateProfile(githubId: number, login: string, name: string, avatarUrl?: string): void {
+    prep(
+        `UPDATE app_user SET login = ?, name = ?, avatar_url = ? WHERE github_id = ?`,
+    ).run(login, name, avatarUrl ?? null, githubId)
+}
+
 export function get(githubId: number): AppUser | undefined {
     const r = getRow<Raw>('SELECT * FROM app_user WHERE github_id = ?', githubId)
     return r ? map(r) : undefined

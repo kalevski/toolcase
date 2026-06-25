@@ -13,6 +13,23 @@ export const ROLE_RANK: Record<Role, number> = {
     owner: 2,
 }
 
+/**
+ * Decoded HMAC-signed session-cookie payload (§7). The GitHub access token is
+ * deliberately NOT part of this — it is used only during the OAuth callback and
+ * never persisted. `iat`/`exp` are unix seconds.
+ */
+export interface SessionPayload {
+    /** GitHub numeric id (`app_user.github_id`). */
+    sub: number
+    login: string
+    /** Role captured at sign-in; `authorize` re-reads the live role each request. */
+    role: Role
+    /** Issued-at (unix seconds). */
+    iat: number
+    /** Expiry (unix seconds). */
+    exp: number
+}
+
 // ── Plans & limits (sponsor-driven) ──────────────────────────────────────────
 
 export type Plan = 'free' | 'bronze' | 'silver' | 'gold'
