@@ -62,6 +62,7 @@ func SyncSite(ctx context.Context, site config.Site, defaults config.Defaults, d
 	if st.SourceFingerprint != "" && st.SourceFingerprint != fp {
 		log.Info("source identity changed, forcing full resync", "domain", site.Domain)
 		st.DeployedRef, st.ETag, st.LastModified, st.ContentHash = "", "", "", ""
+		st.DeployedBytes = 0
 	}
 	st.SourceFingerprint = fp
 
@@ -112,6 +113,7 @@ func doSync(ctx context.Context, site config.Site, dataDir string, keep int, st 
 	if !res.Changed && !dep.CurrentExists(site.Domain) {
 		log.Warn("deployed ref recorded but current release missing; forcing resync", "domain", site.Domain)
 		st.DeployedRef, st.ETag, st.LastModified, st.ContentHash = "", "", "", ""
+		st.DeployedBytes = 0
 		// re-run the source with cleared validators
 		res, err = src.Sync(ctx, st, staging)
 		if err != nil {
@@ -171,6 +173,15 @@ func doSync(ctx context.Context, site config.Site, dataDir string, keep int, st 
 		st.ContentHash = res.ContentHash
 	}
 	st.LastSuccess = time.Now().UTC()
+
+	// Measure the freshly promoted release once and cache it on the state so
+	// GET /status reports the deployed size without re-walking (task 739). A
+	// measurement failure is non-fatal — the deploy already succeeded.
+	if size, err := deploy.DirSize(releasePath); err != nil {
+		log.Warn("measure deployed size failed", "domain", site.Domain, "error", err)
+	} else {
+		st.DeployedBytes = size
+	}
 
 	log.Info("deployed", "domain", site.Domain, "ref", res.Ref,
 		"release", filepath.Base(releasePath), "files", n)

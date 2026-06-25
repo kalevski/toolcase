@@ -54,6 +54,7 @@ type SiteStatus struct {
 	SourceType    string     `json:"source_type"`
 	SourceURL     string     `json:"source_url"`
 	DeployedRef   string     `json:"deployed_ref,omitempty"`
+	Bytes         int64      `json:"bytes"` // live current release size, cached per sync (task 739)
 	LastSuccess   *time.Time `json:"last_success,omitempty"`
 	LastError     string     `json:"last_error,omitempty"`
 	LastErrorTime *time.Time `json:"last_error_time,omitempty"`
@@ -108,6 +109,7 @@ func (m *Manager) reconcileState() {
 			m.log.Warn("state records a deploy but current is missing; clearing ref so next sync redeploys",
 				"domain", site.Domain)
 			st.DeployedRef, st.ETag, st.LastModified, st.ContentHash = "", "", "", ""
+			st.DeployedBytes = 0
 			_ = m.store.Save(st)
 		}
 	}
@@ -254,6 +256,7 @@ func (m *Manager) Status() []SiteStatus {
 			SourceType:    site.Source.Type,
 			SourceURL:     site.Source.URL,
 			DeployedRef:   st.DeployedRef,
+			Bytes:         st.DeployedBytes,
 			LastError:     st.LastError,
 			FailureStreak: st.FailureStreak,
 			NeverSynced:   st.NeverSynced(),

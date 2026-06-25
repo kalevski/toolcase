@@ -124,6 +124,29 @@ func CountRegularFiles(dir string) (int, error) {
 	return count, err
 }
 
+// DirSize returns the total size in bytes of every regular file under dir
+// (symlinks and directory entries themselves are not counted). It is used to
+// measure a deployed release once per sync so GET /status can report a site's
+// size without nginx, a `du` sidecar, or a per-call re-walk (task 739).
+func DirSize(dir string) (int64, error) {
+	var total int64
+	err := filepath.WalkDir(dir, func(_ string, entry fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		if !entry.Type().IsRegular() {
+			return nil
+		}
+		info, err := entry.Info()
+		if err != nil {
+			return err
+		}
+		total += info.Size()
+		return nil
+	})
+	return total, err
+}
+
 // Promote turns a fully staged directory into the live release:
 // normalize perms, fsync, rename into releases/, swap the symlink, prune.
 // ref should be a short content identifier (git SHA / hash prefix).

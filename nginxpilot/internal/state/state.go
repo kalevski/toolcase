@@ -25,6 +25,11 @@ type SiteState struct {
 	// DeployedRef is the git SHA or the content hash of the deployed zip.
 	DeployedRef string `json:"deployed_ref,omitempty"`
 
+	// DeployedBytes is the total size of the live `current` release directory,
+	// measured once per successful deploy and cached here so GET /status can
+	// report it without re-walking the tree on every call (task 739).
+	DeployedBytes int64 `json:"deployed_bytes,omitempty"`
+
 	// HTTP validators (http-zip sources).
 	ETag         string `json:"etag,omitempty"`
 	LastModified string `json:"last_modified,omitempty"`

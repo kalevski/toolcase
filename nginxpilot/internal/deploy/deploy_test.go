@@ -419,3 +419,44 @@ func TestApplyExcludesPatternIsExact(t *testing.T) {
 		}
 	}
 }
+
+// TestDirSize verifies that DirSize sums the bytes of regular files across
+// nested directories and ignores directory entries themselves (task 739).
+func TestDirSize(t *testing.T) {
+	t.Parallel()
+
+	root := t.TempDir()
+	sub := filepath.Join(root, "assets")
+	if err := os.MkdirAll(sub, 0o750); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "index.html"), []byte("<html/>"), 0o640); err != nil {
+		t.Fatal(err) // 7 bytes
+	}
+	if err := os.WriteFile(filepath.Join(sub, "app.css"), []byte("body{}"), 0o640); err != nil {
+		t.Fatal(err) // 6 bytes
+	}
+
+	got, err := DirSize(root)
+	if err != nil {
+		t.Fatalf("DirSize: %v", err)
+	}
+	const want = int64(7 + 6)
+	if got != want {
+		t.Errorf("DirSize = %d, want %d", got, want)
+	}
+}
+
+// TestDirSizeEmpty verifies DirSize reports zero for a directory with no
+// regular files (e.g. a never-deployed site).
+func TestDirSizeEmpty(t *testing.T) {
+	t.Parallel()
+
+	got, err := DirSize(t.TempDir())
+	if err != nil {
+		t.Fatalf("DirSize: %v", err)
+	}
+	if got != 0 {
+		t.Errorf("DirSize of empty dir = %d, want 0", got)
+	}
+}
