@@ -120,6 +120,13 @@ export const config = {
     // fallback (the file-drop alone is then picked up by a path/timer watcher).
     nginxpilotReloadTrigger: optional('PERCH_NGINXPILOT_RELOAD_TRIGGER', ''),
 
+    // ── quota enforcement (§11) ──
+    // Grace window (seconds) an over-quota site keeps serving after it is flagged
+    // before Perch suspends it (removes the fragment so it stops serving). `0`
+    // suspends on the next enforcement pass; the default 24h gives the user time to
+    // trim the build or upgrade their plan. Owner-tunable.
+    quotaGraceSec: num('PERCH_QUOTA_GRACE_SEC', 86400),
+
     port: num('PORT', 4100),
 }
 

@@ -16,6 +16,10 @@
 //     failed`): provision / track / redeploy / update / remove, driving nginxpilot
 //     (fragment + reload + sync) with last-known-good semantics (§9). Pure logic in
 //     `domain/deploy-machine.ts`; this is the server-only wiring.
+//   - quota.ts — the control-plane quota gates nginxpilot can't provide: pre-create
+//     count + custom-domain gates, the plan-derived fragment refresh interval, and
+//     the post-deploy byte cap (over_quota → grace → suspend, reversible on trim or
+//     upgrade) (§11). Pure decisions in `domain/quota.ts`; this is the server-only wiring.
 //
 // See notes/static-hosting-app-design.md §5, §7, §13.
 

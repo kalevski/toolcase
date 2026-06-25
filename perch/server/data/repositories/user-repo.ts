@@ -59,6 +59,17 @@ export function get(githubId: number): AppUser | undefined {
 }
 
 /**
+ * Look up a user by GitHub login. `login` is mutable upstream (the stable key is
+ * `github_id`), so this returns the most-recently-added match. Used by the quota
+ * service to resolve a login to its `github_id` for the per-user site-count gate
+ * (§11): plan limits are keyed by login, but `site.owner_id` is the `github_id`.
+ */
+export function getByLogin(login: string): AppUser | undefined {
+    const r = getRow<Raw>('SELECT * FROM app_user WHERE login = ? ORDER BY added_at DESC LIMIT 1', login)
+    return r ? map(r) : undefined
+}
+
+/**
  * Count `owner`-role users. `resolveOnLogin` assigns `owner` to the very first
  * sign-in (`ownerCount() === 0`), else `standard` (§6).
  */
