@@ -14,8 +14,10 @@ Rules:
 
 - Every module under `services/` and `data/` begins with `import 'server-only'` so
   it can never be bundled into a client component.
-- `domain/` holds **pure** types only — no `server-only`, no I/O — so client code
-  may import them too.
+- `domain/` holds **pure** shared types and pure decision helpers — no
+  `server-only`, no I/O — so client code may import them and the rules are
+  unit-testable in isolation. `domain/plan-resolution.ts` (the sponsorship → plan
+  bucketing) is the first such helper, wrapped by `services/plan.ts`.
 - `data/db.ts` is the single owner of the `node:sqlite` `DatabaseSync` handle
   (cached on `globalThis`, WAL mode, append-only ordered `MIGRATIONS[]`), ported
   from TaskForge with a fresh §12 schema as migration `v1`.
@@ -33,6 +35,12 @@ Rules:
   (`resolveOnLogin`), and the per-request `authorize(minRole)` guard. The OAuth
   routes live under `app/api/auth/**`. See
   `notes/static-hosting-app-design.md` §3, §5, §7, §12 for the architecture.
+- `services/plan.ts` computes a user's effective plan and quota limits — never
+  stored on the user — from their `sponsorship` row bucketed through the
+  owner-editable `plan_tier` mapping (`resolvePlan` / `resolveLimits`), so a tier
+  change applies immediately. The pure bucketing rules live in
+  `domain/plan-resolution.ts` and the `PLAN_LIMITS` defaults in `domain/types.ts`
+  (§6, §8, §15).
 - `infrastructure/` holds server-only adapters to external systems (no DB, no
   policy). `infrastructure/github.ts` is a fetch-based GitHub REST helper —
   `gh()` plus `listRepos`/`listBranches` — reused with the *caller's* OAuth
