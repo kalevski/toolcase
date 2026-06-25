@@ -79,6 +79,15 @@ Rules:
   `provisionCustomVhost`/`teardownCustomVhost` install/drop the per-domain vhost + cert.
   The pure shape/verify decisions live in the unit-tested `domain/hostname.ts`
   (`checkLabel`, `checkDomain`, `dnsPointsAt`, `RESERVED_LABELS`).
+- `services/admin.ts` + `app/api/admin/**` are the owner-only control surface (§13),
+  every route guarded by `authorize('owner')` (a non-owner gets 403): the subdomain
+  pool (`base-domains` list/add/remove), the `$ → plan` mapping (`plan-tiers` read/replace
+  — computed plans apply immediately, §8), global site moderation (`sites` list-all +
+  `sites/{id}/suspend`, which drops the fragment via the deploy service and keeps the row),
+  and the `audit` read (id DESC). Every owner mutation is audited against the acting owner
+  (§16). The pure role gate + plan-tier/base-domain validation live in the unit-tested
+  `domain/admin.ts` (`meetsMinRole`, `parsePlanTiers`, `checkBaseDomain`); `meetsMinRole`
+  is the exact decision `authorize` enforces.
 - `services/sponsors-reconcile.ts` + `app/api/webhooks/github-sponsors/route.ts`
   drive sponsorship state (§8). The webhook verifies the `X-Hub-Signature-256`
   HMAC (constant-time, 401 on mismatch) and upserts `created`/`tier_changed`/

@@ -241,3 +241,21 @@ export async function remove(deps: DeployDeps, site: Site): Promise<void> {
     deps.store.remove(site.id)
     deps.audit('site.remove', site)
 }
+
+/**
+ * Suspend a site (owner moderation, §11/§13): drop the fragment + reload so nginxpilot
+ * stops serving it, and mark the row `suspended` — but KEEP the row (unlike `remove`),
+ * so the suspension is reversible by re-provisioning. Returns the updated `Site`.
+ *
+ * Deliberately emits NO audit entry: suspension is the one transition that can be
+ * initiated by the platform `owner` rather than the site's own owner, so the moderation
+ * record — attributed to the acting owner — is the admin service's responsibility, not
+ * this machine's (which would mis-attribute it to the tenant).
+ */
+export async function suspend(deps: DeployDeps, site: Site): Promise<Site> {
+    await deps.client.removeFragment(site.id)
+    await deps.client.reload()
+    const at = deps.now()
+    deps.store.updateStatus(site.id, 'suspended', at)
+    return { ...site, status: 'suspended', updatedAt: at }
+}

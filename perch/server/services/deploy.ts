@@ -91,3 +91,12 @@ export function update(site: Site, changes: SiteSourceChanges): Promise<Site> {
 export function remove(site: Site): Promise<void> {
     return machine.remove(deps(), site)
 }
+
+/**
+ * Suspend a site (owner moderation, §13): drop the fragment + reload so nginxpilot stops
+ * serving it, and mark the row `suspended` (the row is kept, so it's reversible). The
+ * moderation audit — attributed to the acting owner — is written by the admin service.
+ */
+export function suspend(site: Site): Promise<Site> {
+    return machine.suspend(deps(), site)
+}

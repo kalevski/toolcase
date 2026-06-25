@@ -12,7 +12,8 @@ import { cookies } from 'next/headers'
 import { config } from '@/server/config'
 import * as userRepo from '@/server/data/repositories/user-repo'
 import { tx } from '@/server/data/db'
-import { ROLE_RANK, type AppUser, type Role, type SessionPayload } from '@/server/domain/types'
+import { type AppUser, type Role, type SessionPayload } from '@/server/domain/types'
+import { meetsMinRole } from '@/server/domain/admin'
 
 export const SESSION_COOKIE = 'perch_session'
 export const STATE_COOKIE = 'perch_oauth_state'
@@ -265,6 +266,6 @@ export async function authorize(minRole: Role): Promise<AuthzResult> {
     const session = await getSession()
     if (!session) return { ok: false, status: 401 }
     const role = getRole(session.sub) ?? 'guest'
-    if (ROLE_RANK[role] < ROLE_RANK[minRole]) return { ok: false, status: 403 }
+    if (!meetsMinRole(role, minRole)) return { ok: false, status: 403 }
     return { ok: true, session, role }
 }

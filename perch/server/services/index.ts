@@ -31,6 +31,12 @@
 //     the ingress IP (fail-closed takeover guard), and per-custom-domain vhost + certbot
 //     install/teardown (§10, §16). Pure shape/verify decisions in `domain/hostname.ts`;
 //     the nginx/certbot/DNS I/O is in `infrastructure/nginx.ts`.
+//   - admin.ts — the owner-only control surface behind `authorize('owner')`: the
+//     subdomain pool (base-domain list/add/remove), the `$ → plan` mapping read/replace
+//     (computed plans apply immediately), global site moderation (list all + suspend any,
+//     dropping the fragment via the deploy service), and the audit-log read. Every owner
+//     mutation is audited against the acting owner (§13, §16). Pure validation +
+//     the role gate live in `domain/admin.ts`; this is the server-only wiring.
 //
 // See notes/static-hosting-app-design.md §5, §7, §13.
 

@@ -13,6 +13,7 @@ import {
     update,
     redeploy,
     remove,
+    suspend,
     type DeployDeps,
 } from './deploy-machine'
 
@@ -254,5 +255,21 @@ describe('remove', () => {
         await remove(h.deps, site({ status: 'live' }))
         expect(h.calls).toEqual(['removeFragment', 'reload', 'store.remove'])
         expect(h.audits).toEqual([{ action: 'site.remove', site: 'alice.perch.dev', detail: undefined }])
+    })
+})
+
+describe('suspend', () => {
+    it('removes the fragment, reloads and marks the row suspended — keeping the row', async () => {
+        const h = harness()
+        const result = await suspend(h.deps, site({ status: 'live' }))
+
+        // Same stop-serving sequence as remove, but NO store.remove — the row survives.
+        expect(h.calls).toEqual(['removeFragment', 'reload'])
+        expect(result.status).toBe('suspended')
+        expect(h.store['abc123'].status).toBe('suspended')
+
+        // The machine does not audit: the moderation entry is the admin service's job,
+        // attributed to the acting owner rather than the site's tenant.
+        expect(h.audits).toEqual([])
     })
 })
