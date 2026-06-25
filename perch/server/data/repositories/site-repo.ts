@@ -128,6 +128,19 @@ export function updateLastError(
     prep('UPDATE site SET last_error = ?, updated_at = ? WHERE id = ?').run(lastError, at, id)
 }
 
+/**
+ * Rewrite the source branch/subdir (the deploy service's `update`, §9 step 6). The
+ * new fragment + reload + sync are the service's job; this only persists the row.
+ */
+export function updateSource(
+    id: string,
+    branch: string,
+    subdir: string | undefined,
+    at: string = new Date().toISOString(),
+): void {
+    prep('UPDATE site SET branch = ?, subdir = ?, updated_at = ? WHERE id = ?').run(branch, subdir ?? null, at, id)
+}
+
 /** Delete a site row (after its fragment + vhost/cert are torn down). */
 export function remove(id: string): void {
     prep('DELETE FROM site WHERE id = ?').run(id)

@@ -12,6 +12,10 @@
 //     the owner's `sponsorshipsAsMaintainer` and upserts authoritative sponsorship
 //     state, self-healing missed/forged webhooks (§8, §16). The Sponsors webhook
 //     itself lives in `app/api/webhooks/github-sponsors/route.ts`.
+//   - deploy.ts — the site-lifecycle state machine (`draft → provisioning → live →
+//     failed`): provision / track / redeploy / update / remove, driving nginxpilot
+//     (fragment + reload + sync) with last-known-good semantics (§9). Pure logic in
+//     `domain/deploy-machine.ts`; this is the server-only wiring.
 //
 // See notes/static-hosting-app-design.md §5, §7, §13.
 

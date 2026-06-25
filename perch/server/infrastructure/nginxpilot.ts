@@ -104,6 +104,13 @@ export interface NginxpilotSiteStatus {
     syncing: boolean
     /** ISO timestamp of the next scheduled poll, if scheduled. */
     next_sync?: string
+    /**
+     * Deployed size of the live release in bytes, when nginxpilot reports it (the
+     * §11/§17 cross-repo field that lets Perch enforce byte quotas without shared-FS
+     * access). Absent on daemons that predate it — quota enforcement falls back to a
+     * `du` sidecar until it lands.
+     */
+    bytes?: number
 }
 
 /** The `GET /status` envelope. */
