@@ -70,4 +70,12 @@ tc-theme[name='dungeon'],
     .tc-entity-profile-card__meta-value {
         font-family: var(--fg-body);
     }
+
+    // The meta grid's background is the hairline-gap colour; gold-deep here shows
+    // through empty cells (an incomplete last row / extra auto-fill track) as a
+    // solid gold block. Pin it to dark ink so gaps stay subtle and empty cells
+    // recede into the panel.
+    .tc-entity-profile-card__meta {
+        background-color: var(--fg-ink);
+    }
 }

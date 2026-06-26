@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { fixedOriginOffset } from './internal/containingBlock'
 const TAG_NAME = 'tc-pie-chart'
 
 // One slice = a label, a numeric value and an optional explicit colour. Mirrors
@@ -451,8 +452,13 @@ export class PieChart extends HTMLElement {
         const cr = this.donut ? (tr + tr * 0.58) / 2 : tr * 0.6
         const px = (cx + Math.cos(geo.midAngle) * cr) * scale
         const py = (cy + Math.sin(geo.midAngle) * cr) * scale
-        tip.style.left = `${px}px`
-        tip.style.top = `${py}px`
+        // tooltip is position:fixed — rebase svg-local pixels to the viewport so
+        // it escapes overflow/stacking-context clipping (rect is viewport-relative);
+        // subtract the containing-block origin when a transformed/filtered ancestor
+        // has hijacked `fixed` (see fixedOriginOffset).
+        const o = fixedOriginOffset(this)
+        tip.style.left = `${rect.left + px - o.x}px`
+        tip.style.top = `${rect.top + py - o.y}px`
         tip.hidden = false
     }
 

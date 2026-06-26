@@ -1,4 +1,6 @@
 import { esc } from './internal/esc'
+import { fieldMessageHtml } from './internal/field-message'
+import { requiredMark, reflectFieldValidity, dispatchFieldChange } from './internal/form-field'
 const TAG_NAME = 'tc-select'
 
 let _idCounter = 0
@@ -20,6 +22,7 @@ export class Select extends HTMLElement {
     static formAssociated = true
 
     private _selectId: string
+    private _helpId: string
     private _optionData: OptionData[] = []
     private _renderPending = false
     private _initialised = false
@@ -27,12 +30,26 @@ export class Select extends HTMLElement {
     private _defaultValue = ''
 
     static get observedAttributes(): string[] {
-        return ['value', 'multiple', 'size', 'disabled', 'state', 'label', 'name']
+        return [
+            'value',
+            'multiple',
+            'size',
+            'disabled',
+            'required',
+            'placeholder',
+            'state',
+            'label',
+            'name',
+            'help',
+            'error',
+        ]
     }
 
     constructor() {
         super()
-        this._selectId = `tc-select-${++_idCounter}`
+        const uid = ++_idCounter
+        this._selectId = `tc-select-${uid}`
+        this._helpId = `tc-select-help-${uid}`
         this._internals = this.attachInternals()
     }
 
@@ -53,14 +70,17 @@ export class Select extends HTMLElement {
         if (name === 'value') {
             this._syncValue(next)
             this._internals.setFormValue(next || null)
+            this._syncValidity()
             return
         }
         this.render()
+        this._syncValidity()
     }
 
     formResetCallback(): void {
         this._syncValue(this._defaultValue)
         this._internals.setFormValue(this._defaultValue || null)
+        this._syncValidity()
     }
 
     formDisabledCallback(disabled: boolean): void {
@@ -84,6 +104,7 @@ export class Select extends HTMLElement {
                 } else {
                     this._internals.setFormValue(this.value || null)
                 }
+                this._syncValidity()
                 this._initialised = true
             }
         })
@@ -141,6 +162,21 @@ export class Select extends HTMLElement {
         else this.removeAttribute('disabled')
     }
 
+    get required(): boolean {
+        return this.hasAttribute('required')
+    }
+    set required(v: boolean) {
+        if (v) this.setAttribute('required', '')
+        else this.removeAttribute('required')
+    }
+
+    get placeholder(): string {
+        return this.getAttribute('placeholder') ?? ''
+    }
+    set placeholder(v: string) {
+        this.setAttribute('placeholder', v)
+    }
+
     get state(): SelectState | null {
         const v = this.getAttribute('state') as SelectState
         return STATES.includes(v) ? v : null
@@ -166,6 +202,22 @@ export class Select extends HTMLElement {
         else this.removeAttribute('name')
     }
 
+    get help(): string | null {
+        return this.getAttribute('help')
+    }
+    set help(v: string | null) {
+        if (v != null) this.setAttribute('help', v)
+        else this.removeAttribute('help')
+    }
+
+    get error(): string | null {
+        return this.getAttribute('error')
+    }
+    set error(v: string | null) {
+        if (v != null) this.setAttribute('error', v)
+        else this.removeAttribute('error')
+    }
+
     private _syncValue(next: string | null): void {
         const sel = this.querySelector<HTMLSelectElement>('select')
         if (sel) sel.value = next ?? ''
@@ -176,21 +228,44 @@ export class Select extends HTMLElement {
         if (!sel) return
         if (this.multiple) {
             const values = Array.from(sel.selectedOptions).map((o) => o.value)
-            this.dispatchEvent(new CustomEvent('tc-change', { bubbles: true, detail: { values } }))
             const fd = new FormData()
             const name = this.name ?? ''
             values.forEach((v) => fd.append(name, v))
             this._internals.setFormValue(fd)
+            this._syncValidity()
+            // Unified change event: detail.value carries the selected array.
+            dispatchFieldChange(this, values)
         } else {
             this.setAttribute('value', sel.value)
             this._internals.setFormValue(sel.value || null)
+            this._syncValidity()
+            dispatchFieldChange(this, sel.value)
         }
+    }
+
+    /** Reflect required/state/error into the form so checkValidity works. */
+    private _syncValidity(): void {
+        const sel = this.querySelector<HTMLSelectElement>('select')
+        const hasValue = this.multiple ? !!sel && sel.selectedOptions.length > 0 : this.value !== ''
+        const error = this.error
+        const requiredEmpty = this.required && !hasValue
+        const invalid = !!error || this.state === 'invalid' || requiredEmpty
+        reflectFieldValidity(this._internals, {
+            invalid,
+            valueMissing: requiredEmpty && !error,
+            message:
+                error ||
+                (requiredEmpty ? 'Please make a selection.' : 'Please provide a valid selection.'),
+            anchor: sel ?? undefined,
+        })
     }
 
     private render(): void {
         const label = this.label
         const size = this.size
-        const state = this.state
+        const error = this.error
+        // An `error` message forces the invalid state.
+        const state: SelectState | null = error ? 'invalid' : this.state
         const multiple = this.multiple
         const disabled = this.disabled
         const existingSel = this.querySelector<HTMLSelectElement>('select')
@@ -229,15 +304,25 @@ export class Select extends HTMLElement {
             }
         }
 
+        const required = this.required
+        const placeholder = this.placeholder
         const sizeClass = size ? ` form-select-${size}` : ''
         const stateClass =
             state === 'valid' ? ' is-valid' : state === 'invalid' ? ' is-invalid' : ''
         const disabledAttr = disabled ? ' disabled' : ''
+        const requiredAttr = required ? ' required aria-required="true"' : ''
         const multipleAttr = multiple ? ' multiple' : ''
 
         const labelHtml = label
-            ? `<label class="form-label" for="${this._selectId}">${esc(label)}</label>`
+            ? `<label class="form-label" for="${this._selectId}">${esc(label)}${requiredMark(required)}</label>`
             : ''
+
+        // Placeholder is a disabled, value-less leading option (single-select only),
+        // selected when nothing else is.
+        const placeholderHtml =
+            placeholder && !multiple
+                ? `<option value="" disabled${currentValues.length ? '' : ' selected'}>${esc(placeholder)}</option>`
+                : ''
 
         const optionsHtml = this._optionData
             .map((opt) => {
@@ -247,19 +332,24 @@ export class Select extends HTMLElement {
             })
             .join('')
 
-        const feedbackHtml =
-            state === 'valid'
-                ? `<div class="valid-feedback">Looks good!</div>`
-                : state === 'invalid'
-                  ? `<div class="invalid-feedback">Please provide a valid selection.</div>`
-                  : ''
+        // One reserved slot below the control, used by invalid > valid > hint.
+        const messageHtml = fieldMessageHtml({
+            id: this._helpId,
+            state,
+            error,
+            hint: this.help,
+            invalidText: 'Please provide a valid selection.',
+            validText: 'Looks good!',
+        })
+        const describe = this.help || state ? ` aria-describedby="${this._helpId}"` : ''
 
         this.innerHTML = [
             labelHtml,
-            `<select id="${this._selectId}" class="form-select${sizeClass}${stateClass}"${multipleAttr}${disabledAttr}>`,
+            `<select id="${this._selectId}" class="form-select${sizeClass}${stateClass}"${multipleAttr}${disabledAttr}${requiredAttr}${describe}>`,
+            placeholderHtml,
             optionsHtml,
             `</select>`,
-            feedbackHtml,
+            messageHtml,
         ].join('')
 
         // Restore the selected values from before the re-render.

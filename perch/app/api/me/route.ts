@@ -9,7 +9,7 @@ import { resolveLimits, resolvePlan } from '@/server/services/plan'
 import * as userRepo from '@/server/data/repositories/user-repo'
 import * as siteRepo from '@/server/data/repositories/site-repo'
 import { summarizeUsage } from '@/server/domain/usage'
-import type { MeResponse } from '@/server/domain/types'
+import { accountLevel, type MeResponse } from '@/server/domain/types'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -24,13 +24,15 @@ export async function GET() {
     const user = userRepo.get(authz.session.sub)
     if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
 
+    const plan = resolvePlan(user.login)
     const body: MeResponse = {
         githubId: user.githubId,
         login: user.login,
         name: user.name,
         avatarUrl: user.avatarUrl,
         role: authz.role,
-        plan: resolvePlan(user.login),
+        plan,
+        level: accountLevel(authz.role, plan),
         limits: resolveLimits(user.login),
         usage: summarizeUsage(siteRepo.listByOwner(user.githubId)),
     }

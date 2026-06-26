@@ -66,6 +66,12 @@ COPY --from=builder --chown=app:app /repo/perch/public ./perch/public
 # uid — otherwise every cached response logs `EACCES … mkdir .next/cache`.
 RUN mkdir -p /app/perch/.next/cache && chmod -R 0777 /app/perch/.next/cache
 
+# Durable control-plane state (the SQLite store) lives under WORKSPACE_DIR=/workspace.
+# Pre-create it owned by `app` so a fresh named volume mounted here is seeded with
+# that ownership and the default `app` user can write the DB. (run-docker.sh instead
+# bind-mounts a host dir as an arbitrary host uid, which masks this dir — unaffected.)
+RUN mkdir -p /workspace && chown app:app /workspace
+
 USER app
 EXPOSE 3000
 CMD ["node", "perch/server.js"]

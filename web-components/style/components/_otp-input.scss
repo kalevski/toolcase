@@ -81,11 +81,15 @@ tc-otp-input {
     }
 }
 
-.tc-otp-input__error {
-    display: block;
-    margin-top: 0.35rem;
-    font-size: 0.8rem;
-    color: var(--bs-otp-input-error-color);
+// Field-message slot styling lives in style/components/_field-message.scss.
+
+// ── Disabled host ──────────────────────────────────────────────────────────
+// Dim + inert the whole control when `disabled` is set (the cells are also
+// natively disabled via the attribute).
+
+tc-otp-input[disabled] {
+    opacity: 0.6;
+    pointer-events: none;
 }
 
 // ── 44 px coarse touch target ──────────────────────────────────────────────

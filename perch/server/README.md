@@ -50,14 +50,17 @@ Rules:
   is its GraphQL sibling — `fetchSponsorshipsAsMaintainer` pages the owner's
   `viewer.sponsorshipsAsMaintainer` connection with a dedicated owner PAT.
   `infrastructure/server-log.ts` is the `[perch]` structured stdout logger.
-  `infrastructure/nginxpilot.ts` is the deploy-engine seam (§4): two channels —
-  Channel A writes/removes YAML site fragments atomically into the shared `sites.d/`
-  dir under a deterministic, server-generated filename (`writeFragment` /
-  `removeFragment`); Channel B is the read/operate REST admin API (`status`, `sync`,
-  `vhost`, `healthz`) with an optional `Authorization: Bearer` from nginxpilot's
-  `admin.token_env`. `reload()` tries `POST /reload` and otherwise falls back to the
-  file-drop + reload-sidecar trigger — isolated in one function so M4 can drop the
-  fallback once nginxpilot ships the endpoint (§17). The pure fragment *rendering* —
+  `infrastructure/nginxpilot.ts` is the deploy-engine seam (§4), driven ENTIRELY over
+  nginxpilot's admin REST API — Perch never touches the daemon's filesystem, so the two
+  only need a shared network (no shared `sites.d/` volume). Two channels: Channel A is
+  config — `writeFragment` `POST`s the rendered fragment to `/sites` and `removeFragment`
+  `DELETE`s `/sites/{domain}` (keyed on the domain, since that's the `<domain>.yml` file
+  nginxpilot derives); each validates the candidate merged config and reloads atomically
+  daemon-side, so a bad fragment is a `400` that never lands. Channel B is the read/operate
+  API (`status`, `sync`, `vhost`, `healthz`) with an optional `Authorization: Bearer` from
+  nginxpilot's `admin.token_env`. `reload()` is a thin `POST /reload`; because Channel A
+  writes already reload, it's an idempotent no-op after a write (kept as an explicit step
+  so the deploy machine stays decoupled from that atomicity). The pure fragment *rendering* —
   exact §4 schema, secrets by env-var name only, never inlined — lives in the
   unit-tested `domain/nginxpilot-fragment.ts` (`renderFragment` / `fragmentFilename`).
   Note: nginxpilot's `github-token` auth validates `token_env` (not the §4 doc's

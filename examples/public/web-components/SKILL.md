@@ -886,6 +886,8 @@ Default slot — all child elements are laid out in the flex container.
 
 CSS-grid layout primitive. Set a column and/or row count, a gap, and a uniform cell size; children are laid out directly as grid items. Purely structural — no visible chrome, no shadows, no border-radius. All cosmetics flow through `--bs-grid-*` custom properties.
 
+**Responsive (mobile-first).** Every layout attribute has per-breakpoint variants — `columns-{bp}`, `rows-{bp}`, `gap-{bp}`, `cell-size-{bp}` where `{bp}` is `sm | md | lg | xl | xxl` (576 / 768 / 992 / 1200 / 1400 px). The bare attribute is the base/mobile value; each breakpoint variant overrides it from that viewport up, exactly like `tc-col`'s `span-{bp}`. The breakpoint cascade is resolved in pure CSS media queries — there is no JS resize listener, so it reflows for free and is SSR-safe.
+
 **Tag:** `tc-grid`
 
 **Attributes**
@@ -896,6 +898,10 @@ CSS-grid layout primitive. Set a column and/or row count, a gap, and a uniform c
 | `rows` | string \| number | — | Number of equal-height rows. Produces `grid-template-rows: repeat(<rows>, <cell-size>)`. When omitted, no explicit row track is set. |
 | `gap` | string \| number | `0` | Gap between cells. Bare numbers are treated as `px` (e.g. `gap="8"` → `8px`); any CSS length string is accepted (`1rem`, `0.5em`, …). |
 | `cell-size` | string \| number | `1fr` | Size of each track in the `repeat()`. Bare numbers are treated as `px` (e.g. `cell-size="64"` → `64px`); any CSS grid track size is accepted (`1fr`, `64px`, `minmax(0, 1fr)`, …). |
+| `columns-{bp}` | string \| number | — | Per-breakpoint column count (`{bp}` = `sm`/`md`/`lg`/`xl`/`xxl`). Overrides `columns` from that breakpoint up. |
+| `rows-{bp}` | string \| number | — | Per-breakpoint row count. Overrides `rows` from that breakpoint up. |
+| `gap-{bp}` | string \| number | — | Per-breakpoint gap. Overrides `gap` from that breakpoint up. |
+| `cell-size-{bp}` | string \| number | — | Per-breakpoint track size. Overrides `cell-size` (for both column and row tracks) from that breakpoint up. |
 
 **JS Properties**
 
@@ -918,15 +924,23 @@ Default slot — the grid items (any elements). They are laid out directly; the 
 
 | Property | Default | Description |
 |----------|---------|-------------|
-| `--bs-grid-template-columns` | `none` | Resolved column template; written by the element when `columns` is set. |
-| `--bs-grid-template-rows` | `none` | Resolved row template; written by the element when `rows` is set. |
-| `--bs-grid-gap` | `0` | Resolved gap; written by the element when `gap` is set. |
+| `--bs-grid-template-columns` | `none` | Resolved base column template; written by the element when `columns` is set. |
+| `--bs-grid-template-rows` | `none` | Resolved base row template; written by the element when `rows` is set. |
+| `--bs-grid-gap` | `0` | Resolved base gap; written by the element when `gap` is set. |
+| `--bs-grid-template-columns-{bp}` | — | Per-breakpoint column template; written only when that breakpoint overrides `columns`/`cell-size`. Falls back through smaller breakpoints to the base var. |
+| `--bs-grid-template-rows-{bp}` | — | Per-breakpoint row template; written only when that breakpoint overrides `rows`/`cell-size`. |
+| `--bs-grid-gap-{bp}` | — | Per-breakpoint gap; written only when that breakpoint overrides `gap`. |
 
 ```html
 <!-- Three equal columns, 8px gap -->
 <tc-grid columns="3" gap="8">
     <div>1</div><div>2</div><div>3</div>
     <div>4</div><div>5</div><div>6</div>
+</tc-grid>
+
+<!-- Responsive: 1 column on mobile, 2 from md, 4 from lg; gap grows too -->
+<tc-grid columns="1" columns-md="2" columns-lg="4" gap="8" gap-md="16">
+    <div>1</div><div>2</div><div>3</div><div>4</div>
 </tc-grid>
 
 <!-- Fixed 64px square cells, 4 columns -->
@@ -7395,7 +7409,29 @@ Tooltip positioned by Popper.js.
 
 ## Forms
 
-> **Form association.** `tc-input`, `tc-textarea`, `tc-select`, `tc-switch`, `tc-radio-group`, and `tc-checkbox-group` are **form-associated custom elements** (Chrome 77+, Firefox 98+, Safari 16.4+). Add a `name` attribute to any of them and they participate in `<form>` submission, `form.reset()`, and `form.checkValidity()` just like native controls — no hidden inputs, no JS glue.
+> **Unified field contract.** Every tc-* input shares one API so they're interchangeable in a form:
+>
+> | Member | Type | On |
+> | --- | --- | --- |
+> | `label` | string | all |
+> | `name` | string | all |
+> | `value` | per control (string / number / boolean / string[] / [number,number]) | all |
+> | `disabled` | boolean | all |
+> | `required` | boolean — renders a `*` on the label + `aria-required` + native validity | all |
+> | `placeholder` | string | text-entry & selects (input, textarea, select, number, phone, otp, time, combo-box, extended-select, tag-input) |
+> | `state` | `valid` \| `invalid` | all |
+> | `help` | string (hint) | all |
+> | `error` | string (forces invalid) | all |
+> | `readonly` / `size` (`sm`\|`lg`) | — | text fields (`tc-input`, `tc-textarea`) + `tc-select` (size) |
+>
+> **One change event.** Every input fires `tc-change` with `detail: { value }` (bubbles + composed) — one listener shape for the whole set. Native-backed controls still emit their native `change` too.
+>
+> ```js
+> el.addEventListener('tc-change', e => console.log(e.detail.value))
+> ```
+> (`tc-form-input` also keeps its `onChange(value, hasError)` JS callback; `tc-otp-input` also fires `tc-complete`.)
+
+> **Form association.** ALL tc-* inputs — `tc-input`, `tc-textarea`, `tc-select`, `tc-form-input`, `tc-number-input`, `tc-otp-input`, `tc-phone-input`, `tc-slider`, `tc-range`, `tc-range-slider`, `tc-time-picker`, `tc-date-picker`, `tc-color-picker`, `tc-icon-picker`, `tc-combo-box`, `tc-extended-select`, `tc-tag-input`, `tc-check`, `tc-radio`, `tc-radio-group`, `tc-checkbox-group`, `tc-switch` — are **form-associated custom elements** (Chrome 77+, Firefox 98+, Safari 16.4+). Add a `name` attribute and they participate in `<form>` submission, `form.reset()`, and `form.checkValidity()` just like native controls — no hidden inputs, no JS glue.
 >
 > ```html
 > <form id="f">
@@ -7414,6 +7450,24 @@ Tooltip positioned by Popper.js.
 > ```
 >
 > **Notes:** The `name` attribute belongs on the outer `tc-*` element, not the inner native control. `tc-checkbox-group` with multiple values — use `new FormData(form).getAll('fieldname')`. Inner radio buttons in `tc-radio-group` use an internal name for browser grouping; the user `name` attribute feeds `ElementInternals` only.
+
+> **Reserved message slot (alignment).** Every form input — `tc-input`, `tc-textarea`, `tc-select`, `tc-form-input`, `tc-number-input`, `tc-otp-input`, `tc-phone-input`, `tc-slider`, `tc-range`, `tc-range-slider`, `tc-time-picker`, `tc-date-picker`, `tc-color-picker`, `tc-icon-picker`, `tc-combo-box`, `tc-extended-select`, `tc-tag-input`, the toggle/group controls, etc. — renders a single, always-present message line below the control (the `.tc-field-message` slot). It **always reserves one line of height even when empty**, so fields stay vertically aligned in a form column and toggling a message on/off never shifts layout.
+>
+> One slot per field, one message at a time, by precedence: **invalid > valid > hint**. Drive it with three shared attributes available on every field:
+>
+> | Attribute | Type | Slot shows |
+> | --- | --- | --- |
+> | `help` | string | muted hint text (lowest precedence) |
+> | `state` | `valid` \| `invalid` | green/red validity styling + default copy |
+> | `error` | string | a custom invalid message (non-empty ⇒ invalid state) |
+>
+> ```html
+> <!-- both fields occupy the same height; the second just fills its reserved slot -->
+> <tc-input label="Name"></tc-input>
+> <tc-input label="Email" error="Enter a valid email address."></tc-input>
+> ```
+>
+> Bare inline toggles (`<tc-check>` / `<tc-radio>` / `<tc-switch>` with no `label`/`help`/`error`/`state`, and any `inline` check/radio) render **no** slot, so they can be embedded in dense rows without an extra gutter.
 
 ### tc-card-options
 
@@ -7996,12 +8050,14 @@ A trigger button with a filterable dropdown of options. Clicking the trigger ope
 | `value` | string | — | `value` of the currently selected option |
 | `placeholder` | string | `"Select…"` | Trigger label shown when nothing is selected |
 | `disabled` | boolean | false | Dims the trigger and prevents the dropdown from opening |
+| `max-height` | number \| CSS length | `240px` | Caps how tall the option list grows before it scrolls. A bare number is read as px (`max-height="320"`); any CSS length (`50vh`, `20rem`) is honoured as-is |
 
 **JS Properties**
 
 | Property | Type | Description |
 |----------|------|-------------|
 | `options` | `ComboOption[]` | Options list — set via JS property, not attribute |
+| `maxHeight` | string | Reflects the `max-height` attribute |
 | `value` | string | Reflects the `value` attribute |
 | `placeholder` | string | Reflects the `placeholder` attribute |
 | `disabled` | boolean | Reflects the `disabled` attribute |
@@ -8063,6 +8119,7 @@ Searchable icon-grid dropdown for selecting a lucide icon by name.
 | `value` | string | — | Currently selected lucide icon name (kebab-case, e.g. `star`). Reflected back to the attribute on selection. |
 | `columns` | number | `6` | Number of columns in the icon grid. |
 | `loading` | boolean | false | When set, renders an animated skeleton placeholder grid and disables interaction. |
+| `max-height` | number \| CSS length | `240px` | Caps how tall the icon grid grows before it scrolls. A bare number is read as px (`max-height="320"`); any CSS length (`50vh`, `20rem`) is honoured as-is. |
 
 **JS Properties**
 
@@ -15258,8 +15315,9 @@ User profile panel with a circular avatar (image or initials chip), a display na
 | `avatar-src` | string | — | Avatar image URL. When present, renders an `<img>`; otherwise a circular initials chip is shown. |
 | `initials` | string | — | Fallback avatar text shown when `avatar-src` is absent. Derived from `username` when omitted. |
 | `plan` | string | `Free` | Plan label rendered as an uppercase mono micro-label below the name. |
-| `icon` | string | `settings` | Lucide icon name for the settings button (rendered as inline SVG). `gear` aliases to `settings`. |
-| `icon-highlighted` | boolean | `false` | Applies the rare cyan `--tc-accent` accent to the settings icon button. |
+| `icon` | string | `settings` | Lucide icon name for the trailing icon button (rendered as inline SVG). `gear` aliases to `settings`. Set to e.g. `log-out` to repurpose the button as a direct sign-out action. |
+| `icon-label` | string | `Settings` | Accessible label (`aria-label`) for the trailing icon button. Override it whenever `icon` is changed (e.g. `"Sign out"`). |
+| `icon-highlighted` | boolean | `false` | Applies the rare cyan `--tc-accent` accent to the icon button. |
 | `loading` | boolean | `false` | Renders skeleton avatar/name/plan placeholders and disables interaction. |
 
 **JS Properties**
@@ -15267,7 +15325,7 @@ User profile panel with a circular avatar (image or initials chip), a display na
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
 | `menuItems` | `UserPanelMenuItem[]` | `[]` | Dropdown menu items — each `{ key: string, label: string, icon?: string }`. When non-empty, the panel becomes a dropdown trigger. |
-| `onIconClick` | `(() => void) \| null` | `null` | Callback invoked alongside `tc-icon-click` when the settings button is clicked. |
+| `onIconClick` | `(() => void) \| null` | `null` | Callback invoked alongside `tc-icon-click` when the icon button is clicked. Wire it (with `icon="log-out"` / `icon-label="Sign out"`) for a dropdown-free sign-out action. |
 | `onMenuClick` | `((key: string) => void) \| null` | `null` | Callback invoked alongside `tc-menu-click` when a menu item is chosen. |
 
 Each attribute is also reflected as a same-named JS property (e.g. `avatarSrc`, `iconHighlighted`).
@@ -15285,7 +15343,7 @@ None. All content is driven by attributes and JS properties.
 
 **Accessibility**
 
-The settings button is a real `<button>` with `aria-label="Settings"`. When `menuItems` are present the name/plan trigger carries `role="button"`, `aria-haspopup="menu"`, and `aria-expanded`; the menu has `role="menu"` and items `role="menuitem"`. Outside-click and `Escape` close the menu (`Escape` returns focus to the trigger); arrow keys / Home / End move between items. Icons are decorative (`aria-hidden`); the avatar image carries `alt` text (the initials chip is labelled).
+The trailing icon button is a real `<button>` whose `aria-label` is the `icon-label` attribute (defaulting to `"Settings"`) — set it to match the icon's meaning (e.g. `"Sign out"`). When `menuItems` are present the name/plan trigger carries `role="button"`, `aria-haspopup="menu"`, and `aria-expanded`; the menu has `role="menu"` and items `role="menuitem"`. Outside-click and `Escape` close the menu (`Escape` returns focus to the trigger); arrow keys / Home / End move between items. Icons are decorative (`aria-hidden`); the avatar image carries `alt` text (the initials chip is labelled).
 
 **CSS custom properties (theming)**
 
@@ -15316,6 +15374,12 @@ The settings button is a real `<button>` with `aria-label="Settings"`. When `men
 
 <!-- Initials fallback, highlighted settings icon -->
 <tc-user-panel username="Daniel Kalevski" initials="DK" icon-highlighted></tc-user-panel>
+
+<!-- Icon as a direct sign-out action (no dropdown) -->
+<tc-user-panel id="up-signout" username="Daniel Kalevski" plan="Pro" icon="log-out" icon-label="Sign out"></tc-user-panel>
+<script>
+  document.querySelector('#up-signout').addEventListener('tc-icon-click', () => signOut())
+</script>
 
 <!-- With dropdown menu + events -->
 <tc-user-panel id="up" username="Daniel Kalevski" plan="Pro"></tc-user-panel>
@@ -18801,6 +18865,7 @@ Searchable dropdown with debounced filtering (150 ms), keyboard navigation, opti
 | `search-placeholder` | string | `"Search…"` | Placeholder text in the search input |
 | `no-results-text` | string | `"No results"` | Message shown when the filter returns no matches |
 | `loading` | boolean | false | Disables the trigger and shows a spinner; the menu cannot be opened |
+| `max-height` | number \| CSS length | `240px` | Caps how tall the option list grows before it scrolls. A bare number is read as px (`max-height="320"`); any CSS length (`50vh`, `20rem`) is honoured as-is |
 
 **JS Properties**
 
@@ -20945,6 +21010,7 @@ International phone input with a searchable country-selector dropdown, dial-code
 | `label` | string | — | Visible label rendered above the control; linked to the number input via `for`/`id` |
 | `placeholder` | string | — | Placeholder text for the number field |
 | `error` | string | — | Error message shown below the control; adds error border and `aria-invalid` to the number input |
+| `max-height` | number \| CSS length | `280px` | Caps how tall the country dropdown grows before it scrolls. A bare number is read as px (`max-height="320"`); any CSS length (`50vh`, `20rem`) is honoured as-is |
 
 **JS Properties**
 
@@ -21032,6 +21098,7 @@ Tag input with autocomplete recommendations and optional create-on-type. A form-
 | `allow-create` | boolean | `false` | When present, a typed value not in `recommendations` can be committed as a new tag. |
 | `max-tags` | number | `0` | Cap on tag count (`0` = unlimited). Once reached, the field is blocked and a "Tag limit reached" hint is shown. |
 | `loading` | boolean | `false` | When present, renders an animated placeholder skeleton instead of the control. |
+| `max-height` | number \| CSS length | `220px` | Caps how tall the suggestion menu grows before it scrolls. A bare number is read as px (`max-height="320"`); any CSS length (`50vh`, `20rem`) is honoured as-is. |
 
 **JS Properties**
 

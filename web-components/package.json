@@ -1,6 +1,6 @@
 {
     "name": "@toolcase/web-components",
-    "version": "5.0.0",
+    "version": "5.0.5",
     "description": "Framework-free HTML5 Web Components (tc-*) with their own from-scratch toolcase styling and a Bootstrap-compatible class/grid API — drop into any stack without React, Vue, or Angular.",
     "main": "lib/index.main.js",
     "module": "lib/index.module.js",

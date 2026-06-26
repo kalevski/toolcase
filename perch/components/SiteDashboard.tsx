@@ -1,7 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useTc } from '@/lib/tc'
+import { useTc, targetValue } from '@/lib/tc'
+import { useToast } from './Toast'
 import { buildSiteDashboard, type SiteStatusPayload } from '@/server/domain/site-dashboard'
 import type { PlanLimits, Site, SiteUsage } from '@/server/domain/types'
 
@@ -13,7 +14,6 @@ import type { PlanLimits, Site, SiteUsage } from '@/server/domain/types'
 //   • tc-status-dot / tc-status-card — live | provisioning | failed | over-quota | suspended
 //   • tc-build (+ a Redeploy button) — last deploy ref/size, POST …/redeploy
 //   • tc-usage-summary-panel         — bytes-used bars vs the plan's maxBytesPerSite
-//   • tc-terminal-window             — the deploy log
 //
 // All presentation is derived by the pure `domain/site-dashboard.ts` view-model, so
 // the component is just data-fetching + wiring. The last-known-good guarantee (a bad
@@ -37,20 +37,42 @@ function redeployError(code: unknown, status: number): string {
     return `Redeploy failed (HTTP ${status}).`
 }
 
+const DELETE_ERROR_COPY: Record<string, string> = {
+    unauthorized: 'Your session expired. Sign in again to delete this site.',
+    site_not_found: 'This site no longer exists.',
+    forbidden: 'You do not have access to this site.',
+    nginxpilot_error: 'The deploy engine is unavailable right now. Try again shortly.',
+    internal_error: 'Something went wrong deleting the site. Try again.',
+}
+
+function deleteError(code: unknown, status: number): string {
+    if (typeof code === 'string' && DELETE_ERROR_COPY[code]) return DELETE_ERROR_COPY[code]
+    if (typeof code === 'string' && code) return code
+    return `Delete failed (HTTP ${status}).`
+}
+
 export function SiteDashboard({
     site,
     limits,
     accountUsage,
+    onDeleted,
 }: {
     site: Site
     limits: PlanLimits
     /** Account-wide usage, to add an "All your sites" storage bar beside the per-site one. */
     accountUsage?: SiteUsage
+    /** Called after the site is deleted (204) — the parent navigates away from the gone page. */
+    onDeleted?: () => void
 }) {
+    const toast = useToast()
     const [payload, setPayload] = useState<SiteStatusPayload | null>(null)
     const [loadError, setLoadError] = useState(false)
     const [redeploying, setRedeploying] = useState(false)
-    const [redeployMsg, setRedeployMsg] = useState<string | null>(null)
+    const [deleting, setDeleting] = useState(false)
+    const [deleteMsg, setDeleteMsg] = useState<string | null>(null)
+    // Type-to-confirm: the user must type the hostname before Delete enables, so a
+    // destructive, irreversible action can't be a single misclick.
+    const [confirmText, setConfirmText] = useState('')
 
     const statusUrl = `/api/sites/${encodeURIComponent(site.id)}/status`
 
@@ -94,15 +116,14 @@ export function SiteDashboard({
 
     const redeploy = useCallback(async () => {
         setRedeploying(true)
-        setRedeployMsg(null)
         try {
             const res = await fetch(`/api/sites/${encodeURIComponent(site.id)}/redeploy`, { method: 'POST' })
             if (!res.ok) {
                 const data = (await res.json().catch(() => ({}))) as { error?: unknown }
-                setRedeployMsg(redeployError(data.error, res.status))
+                toast.show(redeployError(data.error, res.status), { variant: 'error', title: 'Redeploy failed' })
                 return
             }
-            setRedeployMsg('Redeploy started — Perch is fetching the latest commit.')
+            toast.show('Redeploy started — Perch is fetching the latest commit.', { variant: 'success' })
             // Pull a fresh reading so the build card flips to "running" promptly.
             try {
                 const next = await fetchStatus()
@@ -111,11 +132,51 @@ export function SiteDashboard({
                 /* the poll loop will catch up */
             }
         } catch {
-            setRedeployMsg('Network error starting the redeploy. Check your connection and try again.')
+            toast.show('Network error starting the redeploy. Check your connection and try again.', {
+                variant: 'error',
+                title: 'Redeploy failed',
+            })
         } finally {
             setRedeploying(false)
         }
-    }, [site.id, fetchStatus])
+    }, [site.id, fetchStatus, toast])
+
+    // The type-to-confirm field; reads its value live into `confirmText`.
+    const confirmInputRef = useTc<HTMLElement & { value: string }>(undefined, {
+        input: (e: Event) => setConfirmText(targetValue(e)),
+    })
+
+    // Delete-confirm modal. `tc-hidden` clears any stale error AND the typed
+    // confirmation so reopening is clean; the ref drives show()/hide() imperatively.
+    const deleteModalRef = useTc<HTMLElement & { show(): void; hide(): void }>(undefined, {
+        'tc-hidden': () => {
+            setDeleteMsg(null)
+            setConfirmText('')
+            if (confirmInputRef.current) confirmInputRef.current.value = ''
+        },
+    })
+
+    const canDelete = confirmText.trim() === site.hostname
+
+    const confirmDelete = useCallback(async () => {
+        if (confirmText.trim() !== site.hostname) return
+        setDeleting(true)
+        setDeleteMsg(null)
+        try {
+            const res = await fetch(`/api/sites/${encodeURIComponent(site.id)}`, { method: 'DELETE' })
+            if (res.status === 204) {
+                deleteModalRef.current?.hide()
+                onDeleted?.()
+                return
+            }
+            const data = (await res.json().catch(() => ({}))) as { error?: unknown }
+            setDeleteMsg(deleteError(data.error, res.status))
+        } catch {
+            setDeleteMsg('Network error deleting the site. Check your connection and try again.')
+        } finally {
+            setDeleting(false)
+        }
+    }, [site.id, site.hostname, confirmText, onDeleted, deleteModalRef])
 
     const view = useMemo(
         () => (payload ? buildSiteDashboard(payload, limits, accountUsage) : null),
@@ -125,7 +186,6 @@ export function SiteDashboard({
     // ── tc-* element refs (object props flow through lib/tc.ts) ──────────────────
     const statusCardRef = useTc<HTMLElement>(useMemo(() => ({ items: view?.statusItems ?? [] }), [view]))
     const usageRef = useTc<HTMLElement>(useMemo(() => ({ usage: view?.usage ?? [] }), [view]))
-    const terminalRef = useTc<HTMLElement>(useMemo(() => ({ lines: view?.log ?? [] }), [view]))
 
     const loading = !view
     const head = view?.headline
@@ -175,11 +235,14 @@ export function SiteDashboard({
                         <tc-button variant="secondary" onClick={redeploy} disabled={redeploying || undefined}>
                             {redeploying ? 'Redeploying…' : 'Redeploy'}
                         </tc-button>
-                        {redeployMsg && (
-                            <span className="perch-site-redeploy-msg" role="status">
-                                {redeployMsg}
-                            </span>
-                        )}
+                        <tc-button
+                            variant="danger"
+                            outline
+                            onClick={() => deleteModalRef.current?.show()}
+                            disabled={deleting || undefined}
+                        >
+                            Delete site
+                        </tc-button>
                     </div>
 
                     <tc-status-card ref={statusCardRef} title="Status" loading={loading || undefined} />
@@ -190,7 +253,41 @@ export function SiteDashboard({
                 </div>
             </div>
 
-            <tc-terminal-window ref={terminalRef} title={`deploy · ${site.hostname}`} prompt="❯" />
+            {/* Delete confirmation. Body is one stable wrapper div (the modal relocates
+                children into its body once at connect, so conditional content must live
+                inside a node that's always present, not be a direct modal child). */}
+            <tc-modal ref={deleteModalRef} title="Delete site" centered static-backdrop>
+                <div className="perch-site-delete-body">
+                    <p>
+                        Permanently delete <strong>{site.hostname}</strong>? Perch removes its serving config and
+                        deployed files. This cannot be undone.
+                    </p>
+                    <label className="perch-site-delete-confirm">
+                        <span className="perch-wizard-field-label">
+                            Type <strong>{site.hostname}</strong> to confirm
+                        </span>
+                        <tc-input ref={confirmInputRef} placeholder={site.hostname} autocomplete="off" />
+                    </label>
+                    {deleteMsg && <tc-banner variant="danger">{deleteMsg}</tc-banner>}
+                </div>
+                <tc-button
+                    slot="footer"
+                    variant="secondary"
+                    outline
+                    onClick={() => deleteModalRef.current?.hide()}
+                    disabled={deleting || undefined}
+                >
+                    Cancel
+                </tc-button>
+                <tc-button
+                    slot="footer"
+                    variant="danger"
+                    onClick={confirmDelete}
+                    disabled={deleting || !canDelete || undefined}
+                >
+                    {deleting ? 'Deleting…' : 'Delete site'}
+                </tc-button>
+            </tc-modal>
         </section>
     )
 }

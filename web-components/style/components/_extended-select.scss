@@ -15,6 +15,7 @@ tc-extended-select {
     --bs-extended-select-menu-border: 1px solid var(--tc-border);
     --bs-extended-select-menu-shadow: var(--tc-shadow-lg);
     --bs-extended-select-menu-z-index: var(--tc-z-dropdown);
+    --bs-extended-select-list-max-height: 240px; // cap before the list scrolls; override via the `max-height` attribute
     --bs-extended-select-option-color: var(--tc-text);
     --bs-extended-select-option-hover-bg: var(--tc-surface-muted);
     --bs-extended-select-option-selected-bg: var(--tc-app-accent);
@@ -29,9 +30,17 @@ tc-extended-select {
     --bs-extended-select-no-results-color: var(--tc-text-muted);
     --bs-extended-select-disabled-opacity: 0.55;
     --bs-extended-select-caret-color: var(--tc-text-muted);
+    // Invalid border/ring reuse the shared danger token (no new prefix).
+    --bs-extended-select-trigger-invalid-border-color: var(--tc-danger);
 
     display: block;
     position: relative;
+}
+
+// Field label above the trigger — shared .form-label cosmetics; only the
+// spacing below it is component-local.
+.tc-extended-select__label {
+    margin-bottom: 0.4rem;
 }
 
 // ── Trigger button ───────────────────────────────────────────────────────────
@@ -52,7 +61,9 @@ tc-extended-select {
     border: var(--bs-extended-select-trigger-border);
     border-radius: 0; // sharp corners — design system rule
     cursor: pointer;
-    transition: border-color var(--tc-transition-base), box-shadow var(--tc-transition-base);
+    transition:
+        border-color var(--tc-transition-base),
+        box-shadow var(--tc-transition-base);
     gap: 0.5rem;
 
     &:focus-visible {
@@ -62,6 +73,16 @@ tc-extended-select {
 
     &--placeholder {
         color: var(--bs-extended-select-trigger-placeholder-color);
+    }
+
+    // Invalid state — danger border, matching .form-control.is-invalid. Sharp
+    // corners preserved; the focus ring tints danger so the cue survives focus.
+    &--invalid {
+        border-color: var(--bs-extended-select-trigger-invalid-border-color);
+
+        &:focus-visible {
+            box-shadow: 0 0 0 0.2rem rgba(var(--bs-danger-rgb), 0.15);
+        }
     }
 
     // Caret rotates when the menu is open
@@ -110,10 +131,12 @@ tc-extended-select {
 // ── Dropdown menu panel ──────────────────────────────────────────────────────
 
 .tc-extended-select__menu {
-    position: absolute;
-    top: calc(100% + 2px);
-    left: 0;
-    right: 0;
+    // Fixed to the viewport with top/left/width set by JS (anchored to the
+    // trigger). This escapes `overflow: hidden/auto` clipping when the select
+    // lives inside a scroll container (modal body, form-wizard step) and lets
+    // the menu paint above sibling content via its z-index, rather than being
+    // trapped in an ancestor's clipped box. Mirrors the tc-context-menu pattern.
+    position: fixed;
     z-index: var(--bs-extended-select-menu-z-index);
     background-color: var(--bs-extended-select-menu-bg);
     border: var(--bs-extended-select-menu-border);
@@ -183,7 +206,7 @@ tc-extended-select {
     margin: 0;
     padding: 0.25rem 0;
     list-style: none;
-    max-height: 240px;
+    max-height: var(--bs-extended-select-list-max-height);
     overflow-y: auto;
     overscroll-behavior: contain;
 }
@@ -197,7 +220,9 @@ tc-extended-select {
     font-size: var(--bs-extended-select-option-font-size);
     color: var(--bs-extended-select-option-color);
     cursor: pointer;
-    transition: background-color var(--tc-transition-base), color var(--tc-transition-base);
+    transition:
+        background-color var(--tc-transition-base),
+        color var(--tc-transition-base);
     border-radius: 0;
     user-select: none;
     -webkit-user-select: none;
@@ -267,6 +292,15 @@ tc-extended-select {
     align-items: center;
     justify-content: center;
     padding: 0.75rem;
+}
+
+// ── Disabled state — dim the whole field and swallow pointer events ──────────
+// Matches the shared form-field contract; the trigger also carries the native
+// `disabled` attribute so it is unfocusable.
+
+tc-extended-select[disabled] {
+    opacity: 0.6;
+    pointer-events: none;
 }
 
 // ── Loading state — attribute selector rules ─────────────────────────────────

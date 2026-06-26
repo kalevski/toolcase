@@ -134,17 +134,21 @@
     }
 }
 
-// Variant items — soft tinted fill with emphasis text.
+// Variant items — soft tinted fill. Driven by the runtime `--bs-<name>-rgb`
+// tokens (which every theme remaps) rather than compile-time $theme-colors-soft
+// /-emphasis literals, so the tint and text stay legible on the dark themes
+// instead of baking pale light-theme fills. Text is the themed body color on a
+// faint variant tint — readable on any surface; the active state fills solid.
 @each $name, $value in $theme-colors {
     .list-group-item-#{$name} {
-        --bs-list-group-color: #{map.get($theme-colors-emphasis, $name)};
-        --bs-list-group-bg: #{map.get($theme-colors-soft, $name)};
-        --bs-list-group-action-color: #{map.get($theme-colors-emphasis, $name)};
-        --bs-list-group-action-hover-color: #{map.get($theme-colors-emphasis, $name)};
-        --bs-list-group-action-hover-bg: #{rgba($value, 0.25)};
-        --bs-list-group-active-color: #fff;
-        --bs-list-group-active-bg: #{map.get($theme-colors-emphasis, $name)};
-        --bs-list-group-active-border-color: #{map.get($theme-colors-emphasis, $name)};
+        --bs-list-group-color: var(--tc-text);
+        --bs-list-group-bg: rgba(var(--bs-#{$name}-rgb), 0.16);
+        --bs-list-group-action-color: var(--tc-text);
+        --bs-list-group-action-hover-color: var(--tc-text);
+        --bs-list-group-action-hover-bg: rgba(var(--bs-#{$name}-rgb), 0.26);
+        --bs-list-group-active-color: var(--tc-app-accent-contrast);
+        --bs-list-group-active-bg: rgba(var(--bs-#{$name}-rgb), 1);
+        --bs-list-group-active-border-color: rgba(var(--bs-#{$name}-rgb), 1);
 
         color: var(--bs-list-group-color);
         background-color: var(--bs-list-group-bg);

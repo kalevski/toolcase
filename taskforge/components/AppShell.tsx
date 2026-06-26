@@ -22,8 +22,6 @@ const STATE_HAS_BADGE: Record<EngineState, boolean> = {
     IDLE: false,
 }
 
-const USER_MENU = [{ key: 'logout', label: 'Logout', icon: tcIcon('box-arrow-right') }]
-
 type ProjectSub = 'overview' | 'tasks' | 'agents' | 'knowledge' | 'notes' | 'run' | 'runs' | 'git' | 'settings'
 
 /** Derive the active project + sub-page (or top-level section) from the URL. */
@@ -125,15 +123,13 @@ export function AppShell({
         }
     }
 
-    const onMenuClick = async (key: string) => {
-        if (key === 'logout') {
-            await fetch('/api/auth/logout', { method: 'POST' })
-            router.push('/login')
-        }
+    const onSignOut = async () => {
+        await fetch('/api/auth/logout', { method: 'POST' })
+        router.push('/login')
     }
 
     const sideNavRef = useTcProps<HTMLElement>({ sections, onItemClick })
-    const userRef = useTcProps<HTMLElement>({ menuItems: USER_MENU, onMenuClick })
+    const userRef = useTcProps<HTMLElement>({ onIconClick: onSignOut })
 
     return (
         <tc-dashboard-layout>
@@ -147,6 +143,8 @@ export function AppShell({
                 username={me.login}
                 avatar-src={me.avatarUrl}
                 plan={me.role}
+                icon={tcIcon('box-arrow-right')}
+                icon-label="Sign out"
             />
             <div className="tf-content">{children}</div>
         </tc-dashboard-layout>

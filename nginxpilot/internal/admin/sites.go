@@ -11,9 +11,19 @@ import (
 	"github.com/kalevski/toolcase/nginxpilot/internal/config"
 )
 
-// maxFragmentBytes caps the POST /sites request body. A site fragment is a few
-// hundred bytes; anything larger is a client error, not a fragment.
+// maxFragmentBytes caps a fragment request body. A site/upstream/proxy fragment
+// is a few hundred bytes; anything larger is a client error, not a fragment.
 const maxFragmentBytes = 64 << 10
+
+// Fragment filename stem prefixes. Sites keep a bare <domain> stem for
+// backward compatibility with already-deployed fragments; upstreams and
+// proxies are namespaced so a site, a proxy (which shares the domain
+// namespace) and an upstream never collide on one file and DELETE on one
+// entity kind can never remove another's fragment.
+const (
+	upstreamStemPrefix = "upstream-"
+	proxyStemPrefix    = "proxy-"
+)
 
 // handleCreateSite accepts a site fragment (the same YAML a file dropped into
 // sites.d/ would contain — see config.Fragment / config/parse.go), validates it
@@ -23,25 +33,12 @@ const maxFragmentBytes = 64 << 10
 // for DELETE /sites/{domain}. Invalid fragments are rejected before anything is
 // written, so a bad fragment can never land on disk and break the next reload.
 func (s *Server) handleCreateSite(w http.ResponseWriter, r *http.Request) {
-	if s.reload == nil {
-		http.Error(w, "fragment management not available", http.StatusNotImplemented)
+	cfg, dir, ext, ok := s.fragmentTarget(w)
+	if !ok {
 		return
 	}
-
-	cfg := s.mgr.Config()
-	dir, ext, err := fragmentTarget(cfg)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotImplemented)
-		return
-	}
-
-	body, err := io.ReadAll(io.LimitReader(r.Body, maxFragmentBytes+1))
-	if err != nil {
-		http.Error(w, "read body failed", http.StatusBadRequest)
-		return
-	}
-	if len(body) > maxFragmentBytes {
-		http.Error(w, "fragment too large", http.StatusRequestEntityTooLarge)
+	body, ok := readFragmentBody(w, r)
+	if !ok {
 		return
 	}
 
@@ -75,10 +72,75 @@ func (s *Server) handleCreateSite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	s.writeFragmentAndReload(w, target, body, "site", domain)
+}
+
+// handleDeleteSite removes the deterministic fragment file for a domain and
+// reloads. Removing a site is always valid config, so the reload should accept
+// it; a rejected reload (e.g. an unrelated invalid file) keeps the running
+// config and is reported as a 500.
+func (s *Server) handleDeleteSite(w http.ResponseWriter, r *http.Request) {
+	_, dir, ext, ok := s.fragmentTarget(w)
+	if !ok {
+		return
+	}
+
+	domain, err := config.NormalizeDomain(r.PathValue("domain"))
+	if err != nil {
+		http.Error(w, fmt.Sprintf("invalid domain: %v", err), http.StatusBadRequest)
+		return
+	}
+	target, err := fragmentPath(dir, ext, domain)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	s.removeFragmentAndReload(w, target, "site", domain)
+}
+
+// fragmentTarget resolves the prerequisites shared by every fragment write:
+// the reload hook must be wired and the config must declare an include: glob.
+// It returns the running config plus the sites.d/ directory and extension, or
+// writes a 501 and returns ok=false.
+func (s *Server) fragmentTarget(w http.ResponseWriter) (cfg *config.Config, dir, ext string, ok bool) {
+	if s.reload == nil {
+		http.Error(w, "fragment management not available", http.StatusNotImplemented)
+		return nil, "", "", false
+	}
+	cfg = s.mgr.Config()
+	dir, ext, err := fragmentDir(cfg)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotImplemented)
+		return nil, "", "", false
+	}
+	return cfg, dir, ext, true
+}
+
+// readFragmentBody reads and size-limits a fragment request body, writing the
+// appropriate error response and returning ok=false on failure.
+func readFragmentBody(w http.ResponseWriter, r *http.Request) ([]byte, bool) {
+	body, err := io.ReadAll(io.LimitReader(r.Body, maxFragmentBytes+1))
+	if err != nil {
+		http.Error(w, "read body failed", http.StatusBadRequest)
+		return nil, false
+	}
+	if len(body) > maxFragmentBytes {
+		http.Error(w, "fragment too large", http.StatusRequestEntityTooLarge)
+		return nil, false
+	}
+	return body, true
+}
+
+// writeFragmentAndReload writes a validated fragment to disk and reloads,
+// rolling the file back if the on-disk reload is rejected. kind/key are used
+// only for logging and the error/status text. Responds 201 (created) or 200
+// (updated an existing fragment).
+func (s *Server) writeFragmentAndReload(w http.ResponseWriter, target string, body []byte, kind, key string) {
 	_, statErr := os.Stat(target)
 	existed := statErr == nil
 	if err := writeFileAtomic(target, body); err != nil {
-		s.log.Error("write site fragment failed", "domain", domain, "file", target, "error", err)
+		s.log.Error("write "+kind+" fragment failed", "key", key, "file", target, "error", err)
 		http.Error(w, "write fragment failed", http.StatusInternalServerError)
 		return
 	}
@@ -94,7 +156,7 @@ func (s *Server) handleCreateSite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.log.Info("site fragment written via API", "domain", domain, "file", target)
+	s.log.Info(kind+" fragment written via API", "key", key, "file", target)
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	if existed {
 		_, _ = w.Write([]byte("updated\n"))
@@ -104,40 +166,15 @@ func (s *Server) handleCreateSite(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte("created\n"))
 }
 
-// handleDeleteSite removes the deterministic fragment file for a domain and
-// reloads. Removing a site is always valid config, so the reload should accept
-// it; a rejected reload (e.g. an unrelated invalid file) keeps the running
-// config and is reported as a 500.
-func (s *Server) handleDeleteSite(w http.ResponseWriter, r *http.Request) {
-	if s.reload == nil {
-		http.Error(w, "fragment management not available", http.StatusNotImplemented)
-		return
-	}
-
-	cfg := s.mgr.Config()
-	dir, ext, err := fragmentTarget(cfg)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotImplemented)
-		return
-	}
-
-	domain, err := config.NormalizeDomain(r.PathValue("domain"))
-	if err != nil {
-		http.Error(w, fmt.Sprintf("invalid domain: %v", err), http.StatusBadRequest)
-		return
-	}
-	target, err := fragmentPath(dir, ext, domain)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
+// removeFragmentAndReload deletes a deterministic fragment file and reloads.
+// kind/key drive the logging and error text. 404 when the file is absent.
+func (s *Server) removeFragmentAndReload(w http.ResponseWriter, target, kind, key string) {
 	if err := os.Remove(target); err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			http.Error(w, "no fragment for domain", http.StatusNotFound)
+			http.Error(w, "no fragment for "+kind, http.StatusNotFound)
 			return
 		}
-		s.log.Error("remove site fragment failed", "domain", domain, "file", target, "error", err)
+		s.log.Error("remove "+kind+" fragment failed", "key", key, "file", target, "error", err)
 		http.Error(w, "remove fragment failed", http.StatusInternalServerError)
 		return
 	}
@@ -147,18 +184,21 @@ func (s *Server) handleDeleteSite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.log.Info("site fragment removed via API", "domain", domain, "file", target)
+	s.log.Info(kind+" fragment removed via API", "key", key, "file", target)
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	_, _ = w.Write([]byte("deleted\n"))
 }
 
 // validateCandidate runs the full config validation over the running config
 // with the target fragment file swapped for the new one, so the API rejects the
-// exact set of errors a reload would (duplicate domains across files, malformed
-// sources, …) without first writing to disk. Sites are copied by value, so
-// Validate's in-place domain normalization never mutates the live config.
+// exact set of errors a reload would (duplicate domains/names across files,
+// malformed sources, unknown upstream references, …) without first writing to
+// disk. Entries are dropped by their declaring File and the fragment's entries
+// appended; every list is rebuilt into a fresh slice so Validate's in-place
+// normalization never mutates the live config.
 func validateCandidate(cfg *config.Config, frag *config.Fragment, target string) error {
 	cand := *cfg
+
 	sites := make([]config.Site, 0, len(cfg.Sites)+len(frag.Sites))
 	for _, st := range cfg.Sites {
 		if st.File != target { // drop the fragment we're replacing (update case)
@@ -166,14 +206,31 @@ func validateCandidate(cfg *config.Config, frag *config.Fragment, target string)
 		}
 	}
 	cand.Sites = append(sites, frag.Sites...)
+
+	upstreams := make([]config.Upstream, 0, len(cfg.Upstreams)+len(frag.Upstreams))
+	for _, u := range cfg.Upstreams {
+		if u.File != target {
+			upstreams = append(upstreams, u)
+		}
+	}
+	cand.Upstreams = append(upstreams, frag.Upstreams...)
+
+	proxies := make([]config.Proxy, 0, len(cfg.Proxies)+len(frag.Proxies))
+	for _, p := range cfg.Proxies {
+		if p.File != target {
+			proxies = append(proxies, p)
+		}
+	}
+	cand.Proxies = append(proxies, frag.Proxies...)
+
 	return config.Validate(&cand)
 }
 
-// fragmentTarget derives the sites.d/ directory and fragment extension from the
+// fragmentDir derives the sites.d/ directory and fragment extension from the
 // first include glob, resolved relative to the main config file. Writing files
 // here (matching the glob's extension) means the include loader picks them up on
 // the next reload exactly as a hand-dropped file would.
-func fragmentTarget(cfg *config.Config) (dir, ext string, err error) {
+func fragmentDir(cfg *config.Config) (dir, ext string, err error) {
 	if len(cfg.Include) == 0 {
 		return "", "", errors.New("fragment management requires an include: glob in the config")
 	}
@@ -188,13 +245,14 @@ func fragmentTarget(cfg *config.Config) (dir, ext string, err error) {
 	return filepath.Dir(pattern), ext, nil
 }
 
-// fragmentPath builds the fragment file path for a (already-normalized) domain,
-// guarding against any path-separator surprises as defense in depth on top of
-// NormalizeDomain.
-func fragmentPath(dir, ext, domain string) (string, error) {
-	name := domain + ext
+// fragmentPath builds the fragment file path for an (already-normalized) stem —
+// a domain for a site/proxy, "upstream-<name>" for an upstream — guarding
+// against any path-separator surprises as defense in depth on top of
+// NormalizeDomain / the upstream name regex.
+func fragmentPath(dir, ext, stem string) (string, error) {
+	name := stem + ext
 	if name != filepath.Base(name) {
-		return "", fmt.Errorf("invalid domain %q", domain)
+		return "", fmt.Errorf("invalid fragment name %q", stem)
 	}
 	return filepath.Join(dir, name), nil
 }

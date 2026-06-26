@@ -1,15 +1,28 @@
 // Package admin serves the loopback admin surface (spec §6, Q5/Q25):
 //
-//	GET  /healthz        daemon liveness
-//	GET  /status         per-site status JSON
-//	POST /sync/<domain>  force an immediate sync (tick-now)
-//	GET  /vhost/<domain> generated nginx config for a site or reverse proxy
-//	POST /reload         diff-based config reload (same as SIGHUP)
-//	POST /sites          write a site fragment into sites.d/ and reload
-//	DELETE /sites/{domain} remove a domain's fragment and reload
+//	GET  /healthz             daemon liveness
+//	GET  /status              per-site runtime status JSON
+//	POST /sync/<domain>       force an immediate sync (tick-now)
+//	GET  /vhost/<domain>      generated nginx config for a site or reverse proxy
+//	POST /reload              diff-based config reload (same as SIGHUP)
 //
-// Loopback only by default; an optional bearer token (admin.token_env)
-// guards reverse-proxied setups.
+// Config management — a control plane (Perch) drives the whole config over
+// REST instead of writing fragment files into sites.d/ by hand:
+//
+//	GET    /sites             list configured sites
+//	POST   /sites             write a site fragment and reload
+//	DELETE /sites/{domain}    remove a site's fragment and reload
+//	GET    /upstreams         list configured upstreams
+//	POST   /upstreams         write an upstream fragment and reload
+//	DELETE /upstreams/{name}  remove an upstream's fragment and reload
+//	GET    /proxies           list configured reverse proxies
+//	POST   /proxies           write a proxy fragment and reload
+//	DELETE /proxies/{domain}  remove a proxy's fragment and reload
+//
+// Each write/delete validates the candidate merged config before touching disk,
+// so an invalid fragment never lands in sites.d/ and the running config is the
+// last known-good. Loopback only by default; an optional bearer token
+// (admin.token_env) guards reverse-proxied setups.
 package admin
 
 import (
@@ -88,8 +101,15 @@ func (s *Server) routes() http.Handler {
 	mux.HandleFunc("POST /sync/{domain}", s.auth(s.handleSync))
 	mux.HandleFunc("GET /vhost/{domain}", s.auth(s.handleVhost))
 	mux.HandleFunc("POST /reload", s.auth(s.handleReload))
+	mux.HandleFunc("GET /sites", s.auth(s.handleListSites))
 	mux.HandleFunc("POST /sites", s.auth(s.handleCreateSite))
 	mux.HandleFunc("DELETE /sites/{domain}", s.auth(s.handleDeleteSite))
+	mux.HandleFunc("GET /upstreams", s.auth(s.handleListUpstreams))
+	mux.HandleFunc("POST /upstreams", s.auth(s.handleCreateUpstream))
+	mux.HandleFunc("DELETE /upstreams/{name}", s.auth(s.handleDeleteUpstream))
+	mux.HandleFunc("GET /proxies", s.auth(s.handleListProxies))
+	mux.HandleFunc("POST /proxies", s.auth(s.handleCreateProxy))
+	mux.HandleFunc("DELETE /proxies/{domain}", s.auth(s.handleDeleteProxy))
 	return mux
 }
 

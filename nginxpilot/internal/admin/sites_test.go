@@ -22,6 +22,12 @@ type sitesEnv struct {
 	sitesDir  string
 	reloads   *int
 	reloadErr *error
+	// cfg is the live config the manager serves. Run() is never called in
+	// these tests, so the injected reload is a no-op counter and cannot apply
+	// on-disk fragments back into the manager; tests that need the running
+	// config to already contain an entity (cross-references, the GET list
+	// handlers) seed it here directly.
+	cfg *config.Config
 }
 
 func newSitesEnv(t *testing.T, token string, seed ...config.Site) sitesEnv {
@@ -57,6 +63,7 @@ func newSitesEnv(t *testing.T, token string, seed ...config.Site) sitesEnv {
 		sitesDir:  sitesDir,
 		reloads:   &n,
 		reloadErr: &rerr,
+		cfg:       cfg,
 	}
 }
 

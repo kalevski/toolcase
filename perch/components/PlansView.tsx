@@ -1,7 +1,10 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTc, useTcProps } from '@/lib/tc'
+import { useMe } from '@/lib/me-context'
+import { apiFetch, describeApiError } from '@/lib/fetcher'
+import { LoadingState, ErrorState } from './states'
 import {
     buildPricingCards,
     buildQuotaWarnings,
@@ -27,49 +30,58 @@ import type { MeResponse, Site } from '@/server/domain/types'
 
 type LoadState =
     | { phase: 'loading' }
-    | { phase: 'error' }
-    | { phase: 'ready'; me: MeResponse; sites: Site[]; ctx: PlansContext }
+    | { phase: 'error'; message: string }
+    | { phase: 'ready'; sites: Site[]; ctx: PlansContext }
 
 export function PlansView() {
+    // Identity/plan come from context (AuthGate already fetched /api/me, plan WS-3);
+    // only the sites list and the plans context are fetched here.
+    const me = useMe()
     const [state, setState] = useState<LoadState>({ phase: 'loading' })
 
-    useEffect(() => {
-        let cancelled = false
-        const json = <T,>(r: Response): Promise<T> => (r.ok ? (r.json() as Promise<T>) : Promise.reject(r))
-        Promise.all([
-            fetch('/api/me', { cache: 'no-store' }).then((r) => json<MeResponse>(r)),
-            fetch('/api/sites', { cache: 'no-store' }).then((r) => json<Site[]>(r)),
-            fetch('/api/plans', { cache: 'no-store' }).then((r) => json<PlansContext>(r)),
-        ])
-            .then(([me, sites, ctx]) => {
-                if (!cancelled) setState({ phase: 'ready', me, sites, ctx })
-            })
-            .catch(() => {
-                if (!cancelled) setState({ phase: 'error' })
-            })
-        return () => {
-            cancelled = true
+    const load = useCallback(async (signal?: AbortSignal) => {
+        setState({ phase: 'loading' })
+        try {
+            const [sites, ctx] = await Promise.all([
+                apiFetch<Site[]>('/api/sites', { signal }),
+                apiFetch<PlansContext>('/api/plans', { signal }),
+            ])
+            setState({ phase: 'ready', sites, ctx })
+        } catch (err) {
+            if (signal?.aborted) return
+            setState({ phase: 'error', message: describeApiError(err) })
         }
     }, [])
 
+    useEffect(() => {
+        const ctrl = new AbortController()
+        void load(ctrl.signal)
+        return () => ctrl.abort()
+    }, [load])
+
     if (state.phase === 'loading') {
         return (
-            <section className="perch-plans" role="status" aria-busy="true">
-                <p className="perch-home-lead">Loading plans…</p>
+            <section className="perch-plans">
+                <header className="perch-home-header">
+                    <h1 className="perch-home-title">Plans</h1>
+                </header>
+                <LoadingState shape="cards" count={4} label="Loading plans…" />
             </section>
         )
     }
 
     if (state.phase === 'error') {
         return (
-            <section className="perch-plans" role="alert">
-                <h1 className="perch-home-title">Couldn’t load plans</h1>
-                <p className="perch-home-lead">Refresh the page to try again.</p>
+            <section className="perch-plans">
+                <header className="perch-home-header">
+                    <h1 className="perch-home-title">Plans</h1>
+                </header>
+                <ErrorState title="Couldn’t load plans" message={state.message} onRetry={() => void load()} />
             </section>
         )
     }
 
-    return <PlansContent {...state} />
+    return <PlansContent me={me} sites={state.sites} ctx={state.ctx} />
 }
 
 function PlansContent({ me, sites, ctx }: { me: MeResponse; sites: Site[]; ctx: PlansContext }) {

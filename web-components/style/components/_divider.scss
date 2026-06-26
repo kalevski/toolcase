@@ -41,10 +41,19 @@
 
 // ── Vertical ────────────────────────────────────────────────────────────────
 
+// The host element must stretch to the flex row's cross axis so the inner
+// divider has a height to fill; otherwise the `flex:1` hairlines collapse to
+// 0 and nothing renders. (The host is `display:block`, so its own
+// `align-self` is what fills the row — not the inner element's.)
+tc-divider[vertical] {
+    align-self: stretch;
+}
+
 .tc-divider.tc-divider--vertical {
     flex-direction: column;
     align-self: stretch;
     width: auto;
+    height: 100%;
 
     &::before,
     &::after {

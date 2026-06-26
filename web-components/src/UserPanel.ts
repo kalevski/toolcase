@@ -27,7 +27,16 @@ export class UserPanel extends HTMLElement {
     onMenuClick: ((key: string) => void) | null = null
 
     static get observedAttributes(): string[] {
-        return ['avatar-src', 'username', 'initials', 'plan', 'icon', 'icon-highlighted', 'loading']
+        return [
+            'avatar-src',
+            'username',
+            'initials',
+            'plan',
+            'icon',
+            'icon-label',
+            'icon-highlighted',
+            'loading',
+        ]
     }
 
     connectedCallback(): void {
@@ -88,6 +97,14 @@ export class UserPanel extends HTMLElement {
     set icon(v: string | null) {
         if (v != null) this.setAttribute('icon', v)
         else this.removeAttribute('icon')
+    }
+
+    get iconLabel(): string | null {
+        return this.getAttribute('icon-label')
+    }
+    set iconLabel(v: string | null) {
+        if (v != null) this.setAttribute('icon-label', v)
+        else this.removeAttribute('icon-label')
     }
 
     get iconHighlighted(): boolean {
@@ -153,7 +170,10 @@ export class UserPanel extends HTMLElement {
         const trigger = this.querySelector<HTMLElement>('.tc-user-panel-info')
         const menuEl = this.querySelector<HTMLElement>('.tc-user-panel-menu')
         if (trigger) trigger.setAttribute('aria-expanded', 'true')
-        if (menuEl) menuEl.classList.add('show')
+        if (menuEl) {
+            menuEl.classList.add('show')
+            this._positionMenu(menuEl)
+        }
 
         const enabled = Array.from(
             this.querySelectorAll<HTMLButtonElement>('.tc-user-panel-menu-item'),
@@ -172,9 +192,27 @@ export class UserPanel extends HTMLElement {
         const trigger = this.querySelector<HTMLElement>('.tc-user-panel-info')
         const menuEl = this.querySelector<HTMLElement>('.tc-user-panel-menu')
         if (trigger) trigger.setAttribute('aria-expanded', 'false')
-        if (menuEl) menuEl.classList.remove('show')
+        if (menuEl) {
+            menuEl.classList.remove('show')
+            menuEl.classList.remove('tc-user-panel-menu--up')
+        }
         this._removeMenuOutsideListener()
         if (refocus) trigger?.focus()
+    }
+
+    // Open above the panel when there isn't room below it (and there's more room
+    // above). Measured against the viewport after the menu is shown.
+    private _positionMenu(menuEl: HTMLElement): void {
+        menuEl.classList.remove('tc-user-panel-menu--up')
+        if (typeof window === 'undefined') return
+        const hostRect = this.getBoundingClientRect()
+        const menuHeight = menuEl.offsetHeight
+        const gap = 2
+        const spaceBelow = window.innerHeight - hostRect.bottom
+        const spaceAbove = hostRect.top
+        if (spaceBelow < menuHeight + gap && spaceAbove > spaceBelow) {
+            menuEl.classList.add('tc-user-panel-menu--up')
+        }
     }
 
     private _removeMenuOutsideListener(): void {
@@ -287,9 +325,10 @@ export class UserPanel extends HTMLElement {
             `</div>`
 
         const iconSvg = lucideByName(iconName)
+        const iconLabel = this.getAttribute('icon-label') || 'Settings'
         const iconBtnClass =
             'tc-user-panel-icon' + (highlighted ? ' tc-user-panel-icon--highlighted' : '')
-        const iconHtml = `<button type="button" class="${iconBtnClass}" aria-label="Settings">${iconSvg}</button>`
+        const iconHtml = `<button type="button" class="${iconBtnClass}" aria-label="${esc(iconLabel)}">${iconSvg}</button>`
 
         const menuHtml = hasMenu
             ? `<div class="tc-user-panel-menu" role="menu">${this._buildMenuItemsHtml()}</div>`

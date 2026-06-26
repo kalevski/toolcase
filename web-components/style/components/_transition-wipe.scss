@@ -116,18 +116,17 @@ tc-transition-wipe[show] .tc-transition-wipe-fill[data-direction='down'] {
 }
 
 // ── Direction: iris ─────────────────────────────────────────────────────────────
-// Iris / circular reveal. Rest = fill covers viewport (large circle); [show] =
-// iris closes (circle shrinks to 0) revealing content beneath. This direction
-// is intentionally inverted vs. the slide/fade variants: the fill starts
-// visible and the [show] state hides it — useful for "iris open" reveals where
-// content is uncovered as the wipe runs.
+// Iris / circular cover. Like the slide/fade variants, the fill is clear at rest
+// and covers the viewport while [show] is set: the circle grows from 0 to full.
+// (Previously this was inverted — the fill covered the viewport at rest — which
+// meant an idle iris wipe blanketed the whole fixed-position screen.)
 
 .tc-transition-wipe-fill[data-direction='iris'] {
-    clip-path: circle(150% at 50% 50%);
+    clip-path: circle(0% at 50% 50%);
 }
 
 tc-transition-wipe[show] .tc-transition-wipe-fill[data-direction='iris'] {
-    clip-path: circle(0% at 50% 50%);
+    clip-path: circle(150% at 50% 50%);
 }
 
 // ── Reduced motion ──────────────────────────────────────────────────────────────

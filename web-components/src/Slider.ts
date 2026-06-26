@@ -1,7 +1,17 @@
 import { esc } from './internal/esc'
+import { fieldMessageHtml } from './internal/field-message'
+import {
+    requiredMark,
+    setFieldFormValue,
+    reflectFieldValidity,
+    dispatchFieldChange,
+} from './internal/form-field'
 const TAG_NAME = 'tc-slider'
 
 let _idCounter = 0
+
+export type SliderState = 'valid' | 'invalid'
+const STATES: SliderState[] = ['valid', 'invalid']
 
 function snapToStep(v: number, min: number, max: number, step: number): number {
     if (step <= 0 || max <= min) return Math.min(Math.max(v, min), max)
@@ -16,14 +26,27 @@ function snapToStep(v: number, min: number, max: number, step: number): number {
 }
 
 export class Slider extends HTMLElement {
+    // Participates in native <form> submission/validation like every tc-* input.
+    static formAssociated = true
+
     private _initialised = false
     private _idPrefix = `tc-slider-${++_idCounter}`
+    // Shared id for the reserved field-message slot, referenced by aria-describedby.
+    private _helpId = `${this._idPrefix}-help`
     private _dragging = false
     private _dragMoveHandler: ((e: PointerEvent) => void) | null = null
     private _dragUpHandler: (() => void) | null = null
     private _formatValue: ((value: number) => string) | null = null
+    private _internals: ElementInternals
+    // Initial `value` attribute, captured on first connect for formResetCallback.
+    private _defaultValue: string | null = null
 
     onChange: ((value: number) => void) | null = null
+
+    constructor() {
+        super()
+        this._internals = this.attachInternals()
+    }
 
     static get observedAttributes(): string[] {
         return [
@@ -34,17 +57,24 @@ export class Slider extends HTMLElement {
             'ticks',
             'show-tooltip',
             'label',
+            'name',
+            'required',
             'error',
+            'state',
+            'help',
             'disabled',
         ]
     }
 
     connectedCallback(): void {
         if (!this._initialised) {
+            // Capture the authored value so a form reset can restore it.
+            this._defaultValue = this.getAttribute('value')
             this.render()
             this._initialised = true
         }
         this._attachHandlers()
+        this._syncForm()
     }
 
     disconnectedCallback(): void {
@@ -52,14 +82,31 @@ export class Slider extends HTMLElement {
         this._cleanupDrag()
     }
 
+    /** Called by the browser when the associated form resets. */
+    formResetCallback(): void {
+        // Restore the authored value (or clear it) without re-rendering structure.
+        if (this._defaultValue != null) this.setAttribute('value', this._defaultValue)
+        else this.removeAttribute('value')
+        this._patchValue()
+        this._syncForm()
+    }
+
+    /** Called by the browser when a containing fieldset/form is disabled/enabled. */
+    formDisabledCallback(disabled: boolean): void {
+        this.disabled = disabled
+    }
+
     attributeChangedCallback(name: string, _old: string | null, _next: string | null): void {
         if (!this.isConnected || !this._initialised) return
         // A bare value change only repositions the fill/thumb — no structural re-render.
         if (name === 'value') {
             this._patchValue()
+            this._syncForm()
             return
         }
         this.render()
+        // required/error/state changes shift effective validity, so re-sync.
+        this._syncForm()
     }
 
     // ── Attribute-backed props ──────────────────────────────────────────────
@@ -119,12 +166,49 @@ export class Slider extends HTMLElement {
         else this.removeAttribute('error')
     }
 
+    // Hint text shown in the reserved message slot (lowest precedence).
+    get help(): string | null {
+        return this.getAttribute('help')
+    }
+    set help(v: string | null) {
+        if (v != null) this.setAttribute('help', v)
+        else this.removeAttribute('help')
+    }
+
+    // 'valid' | 'invalid'; an `error` message forces 'invalid'.
+    get state(): SliderState | null {
+        const v = this.getAttribute('state') as SliderState
+        return STATES.includes(v) ? v : null
+    }
+    set state(v: SliderState | null) {
+        if (v != null) this.setAttribute('state', v)
+        else this.removeAttribute('state')
+    }
+
     get disabled(): boolean {
         return this.hasAttribute('disabled')
     }
     set disabled(v: boolean) {
         if (v) this.setAttribute('disabled', '')
         else this.removeAttribute('disabled')
+    }
+
+    // ── name (form field name) ───────────────────────────────────────────────
+    get name(): string | null {
+        return this.getAttribute('name')
+    }
+    set name(v: string | null) {
+        if (v != null) this.setAttribute('name', v)
+        else this.removeAttribute('name')
+    }
+
+    // ── required ─────────────────────────────────────────────────────────────
+    get required(): boolean {
+        return this.hasAttribute('required')
+    }
+    set required(v: boolean) {
+        if (v) this.setAttribute('required', '')
+        else this.removeAttribute('required')
     }
 
     // `value` is controlled via the attribute — the getter always returns a
@@ -196,14 +280,30 @@ export class Slider extends HTMLElement {
         }
     }
 
+    /** Push value + validity into the form. A slider always resolves to a number,
+     *  so "empty" only means the author never set a `value` attribute; required
+     *  flags that case as invalid. Must NOT re-render — value patches are in-place. */
+    private _syncForm(): void {
+        const hasValue = this.getAttribute('value') !== null
+        const value = this._currentValue()
+        // Serialize as a string (or null when no value was authored).
+        setFieldFormValue(this._internals, this.name, hasValue ? String(value) : null)
+        const error = this.error
+        const requiredEmpty = this.required && !hasValue
+        const invalid = !!error || this.state === 'invalid' || requiredEmpty
+        reflectFieldValidity(this._internals, {
+            invalid,
+            valueMissing: requiredEmpty && !error,
+            message:
+                error ||
+                (requiredEmpty ? 'This field is required.' : 'Please choose a valid value.'),
+            anchor: this.querySelector<HTMLElement>('.tc-slider-thumb') ?? undefined,
+        })
+    }
+
     private _fireChange(value: number): void {
-        this.dispatchEvent(
-            new CustomEvent('tc-change', {
-                bubbles: true,
-                composed: true,
-                detail: { value },
-            }),
-        )
+        // Canonical tc-change carries `detail: { value }` (shared contract).
+        dispatchFieldChange(this, value)
         if (typeof this.onChange === 'function') this.onChange(value)
     }
 
@@ -324,7 +424,12 @@ export class Slider extends HTMLElement {
 
         const label = this.label
         const error = this.error
+        // An `error` message forces the invalid state; `state` covers valid/invalid
+        // without an accompanying message string.
+        const state: SliderState | null = error ? 'invalid' : this.state
+        const isInvalid = state === 'invalid'
         const disabled = this.disabled
+        const required = this.required
         const ticks = this.ticks
         const showTooltip = this.showTooltip
 
@@ -332,11 +437,12 @@ export class Slider extends HTMLElement {
         const valueText = this._format(value)
 
         const labelId = label != null ? `${this._idPrefix}-label` : null
-        const errorId = error ? `${this._idPrefix}-error` : null
+        // The thumb points at the single reserved slot whenever it carries a message.
+        const describedById = error || state || this.help ? this._helpId : null
 
         const labelHtml =
             label != null
-                ? `<label class="tc-slider-label" id="${labelId}">${esc(label)}</label>`
+                ? `<label class="tc-slider-label" id="${labelId}">${esc(label)}${requiredMark(required)}</label>`
                 : ''
 
         const tooltipHtml = showTooltip
@@ -363,16 +469,23 @@ export class Slider extends HTMLElement {
             `aria-valuenow="${esc(String(value))}"`,
             `aria-valuetext="${esc(valueText)}"`,
             labelId ? `aria-labelledby="${labelId}"` : '',
-            error ? `aria-invalid="true"` : '',
-            errorId ? `aria-describedby="${errorId}"` : '',
+            required ? `aria-required="true"` : '',
+            isInvalid ? `aria-invalid="true"` : '',
+            describedById ? `aria-describedby="${describedById}"` : '',
             `style="left:${pct}%"`,
         ]
             .filter(Boolean)
             .join(' ')
 
-        const errorHtml = error
-            ? `<div class="tc-slider-error" id="${errorId}">${esc(error)}</div>`
-            : ''
+        // One reserved message slot below the track: invalid > valid > hint.
+        const messageHtml = fieldMessageHtml({
+            id: this._helpId,
+            state,
+            error,
+            hint: this.help,
+            invalidText: 'Please choose a valid value.',
+            validText: 'Looks good!',
+        })
 
         this.innerHTML = [
             labelHtml,
@@ -383,10 +496,11 @@ export class Slider extends HTMLElement {
             `</div>`,
             ticksHtml,
             `</div>`,
-            errorHtml,
+            messageHtml,
         ].join('')
 
-        if (error) this.classList.add('tc-slider--error')
+        // The danger track-border recolor is keyed off the invalid state.
+        if (isInvalid) this.classList.add('tc-slider--error')
         else this.classList.remove('tc-slider--error')
 
         if (disabled) this.setAttribute('aria-disabled', 'true')

@@ -17,6 +17,12 @@ tc-number-input {
     --bs-number-input-focus-ring: var(--tc-focus-ring);
 }
 
+// Disabled field: dim + lock, matching the shared input disabled pattern.
+tc-number-input[disabled] {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
 // ── Label ──────────────────────────────────────────────────────────────────
 
 .tc-number-input__label {
@@ -159,7 +165,9 @@ tc-number-input {
         color: var(--tc-text);
 
         @media (prefers-reduced-motion: no-preference) {
-            transition: background-color var(--tc-transition-fast), color var(--tc-transition-fast);
+            transition:
+                background-color var(--tc-transition-fast),
+                color var(--tc-transition-fast);
         }
     }
 
@@ -182,14 +190,7 @@ tc-number-input {
     }
 }
 
-// ── Error message ───────────────────────────────────────────────────────────
-
-.tc-number-input__error {
-    display: block;
-    margin-top: 0.35rem;
-    font-size: 0.8rem;
-    color: var(--bs-number-input-error-color);
-}
+// Field-message slot styling lives in style/components/_field-message.scss.
 
 // ── Reduced motion ──────────────────────────────────────────────────────────
 

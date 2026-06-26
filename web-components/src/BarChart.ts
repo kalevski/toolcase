@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { fixedOriginOffset } from './internal/containingBlock'
 const TAG_NAME = 'tc-bar-chart'
 
 // One bar = a category label, a numeric value, and an optional explicit color.
@@ -408,8 +409,13 @@ export class BarChart extends HTMLElement {
         const rect = svg ? svg.getBoundingClientRect() : null
         const scaleX = rect && this._vw ? rect.width / this._vw : 1
         const scaleY = rect && this._vh ? rect.height / this._vh : 1
-        tip.style.left = `${anchor.ax * scaleX}px`
-        tip.style.top = `${anchor.ay * scaleY}px`
+        // rebase to viewport coords (tooltip is position:fixed) by adding the
+        // SVG's viewport origin, so it floats free of any clipping/stacking ancestor;
+        // subtract the containing-block origin when a transformed/filtered ancestor
+        // has hijacked `fixed` (see fixedOriginOffset).
+        const o = fixedOriginOffset(this)
+        tip.style.left = `${(rect ? rect.left : 0) + anchor.ax * scaleX - o.x}px`
+        tip.style.top = `${(rect ? rect.top : 0) + anchor.ay * scaleY - o.y}px`
         tip.hidden = false
     }
 

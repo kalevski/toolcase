@@ -4,6 +4,8 @@
 // with a real gap between boxes (matching tc-single-card-select).
 // No shadows; flat selectable surfaces; accent frame + check indicator on the selected card.
 
+@use '../foundation/tokens' as *;
+
 tc-card-options {
     --bs-card-options-border-color: var(--tc-border);
     --bs-card-options-bg: var(--tc-surface);
@@ -23,11 +25,24 @@ tc-card-options {
 }
 
 // Host element IS the grid; a real gap separates each bordered card box.
+// Mobile-first: collapse to a single column, step up to the author's count at md+.
 .tc-card-options {
     display: grid;
-    grid-template-columns: repeat(var(--bs-card-options-columns), 1fr);
+    grid-template-columns: repeat(1, 1fr);
     gap: var(--bs-card-options-gap);
     border-radius: 0;
+}
+
+@include media-up(sm) {
+    .tc-card-options {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@include media-up(md) {
+    .tc-card-options {
+        grid-template-columns: repeat(var(--bs-card-options-columns), 1fr);
+    }
 }
 
 .tc-card-options-card {

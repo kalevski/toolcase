@@ -4,6 +4,18 @@
     box-sizing: border-box;
 }
 
+/* Perch-specific brand tokens layered on top of the @toolcase/web-components
+   design tokens (--tc-*). Everything cosmetic in this sheet reads a token so the
+   dark-mode block at the bottom can re-skin the whole app from one place. */
+:root {
+    /* Brand accent — sky blue, distinct from the library's slate + cyan. */
+    --perch-accent: #0ea5e9;
+    --perch-accent-strong: #0284c7;
+    /* GitHub-Sponsors brand pink for the sponsor call-to-action. */
+    --perch-sponsor: #bf3989;
+    --perch-sponsor-strong: #99316f;
+}
+
 html,
 body {
     margin: 0;
@@ -18,8 +30,8 @@ body {
         Roboto,
         sans-serif;
     line-height: 1.5;
-    color: #1a1a1a;
-    background: #fff;
+    color: var(--tc-text);
+    background: var(--tc-surface);
 }
 
 /* Padding for the dashboard-layout content region (the default slot). */
@@ -32,6 +44,29 @@ body {
     display: block;
 }
 
+/* Login screen (components/LoginClient.tsx). Full-height column: optional error
+   banner on top, then the tc-login card (or a redirect spinner) filling the rest. */
+.perch-login {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.perch-login-body {
+    flex: 1;
+    display: flex;
+}
+
+.perch-login-redirect {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: var(--tc-text-muted);
+    font-size: 0.9375rem;
+}
+
 /* AuthGate loading / error placeholder, centered in the viewport. */
 .perch-gate-status {
     min-height: 100vh;
@@ -39,7 +74,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: 0.375rem;
-    color: #6b7280;
+    color: var(--tc-text-muted);
     font-size: 0.9375rem;
 }
 
@@ -53,6 +88,21 @@ body {
     margin-bottom: 1.5rem;
 }
 
+/* List view: title block on the left, "New site" action on the right. */
+.perch-home-header--row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+/* Empty state — centre the "Create your first site" call-to-action. */
+.perch-home-empty {
+    display: flex;
+    justify-content: center;
+    padding: 2.5rem 0;
+}
+
 .perch-home-title {
     margin: 0 0 0.375rem;
     font-size: 1.5rem;
@@ -61,7 +111,7 @@ body {
 
 .perch-home-lead {
     margin: 0;
-    color: #6b7280;
+    color: var(--tc-text-muted);
 }
 
 .perch-wizard {
@@ -85,14 +135,14 @@ body {
 
 .perch-wizard-hint {
     margin: 0;
-    color: #6b7280;
+    color: var(--tc-text-muted);
     font-size: 0.875rem;
 }
 
 .perch-wizard-hint code {
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 0.8125em;
-    background: #f1f5f9;
+    background: var(--tc-surface-muted);
     padding: 0.05rem 0.3rem;
 }
 
@@ -100,7 +150,7 @@ body {
 .perch-wizard-host-mode .perch-wizard-field-label {
     font-size: 0.8125rem;
     font-weight: 600;
-    color: #334155;
+    color: var(--tc-text);
 }
 
 .perch-wizard-host-mode {
@@ -127,14 +177,14 @@ body {
 }
 
 .perch-wizard-dot {
-    color: #94a3b8;
+    color: var(--tc-text-faint);
     font-weight: 700;
 }
 
 .perch-wizard-preview {
     margin: 0;
     font-size: 0.875rem;
-    color: #475569;
+    color: var(--tc-text-muted);
 }
 
 .perch-wizard-preview strong {
@@ -151,7 +201,7 @@ body {
 }
 
 .perch-wizard-review dt {
-    color: #6b7280;
+    color: var(--tc-text-muted);
 }
 
 .perch-wizard-review dd {
@@ -163,9 +213,9 @@ body {
 /* Inline validation / quota error, surfaced above the wizard. */
 .perch-wizard-error {
     padding: 0.75rem 1rem;
-    background: #fde2e1;
-    color: #842029;
-    border: 1px solid #f5c2c7;
+    background: color-mix(in srgb, var(--tc-danger) 12%, var(--tc-surface));
+    color: var(--tc-danger);
+    border: 1px solid color-mix(in srgb, var(--tc-danger) 35%, var(--tc-border));
     font-size: 0.9375rem;
 }
 
@@ -173,8 +223,8 @@ body {
 .perch-wizard-success {
     max-width: 36rem;
     padding: 1.5rem;
-    border: 1px solid #bbf7d0;
-    background: #f0fdf4;
+    border: 1px solid color-mix(in srgb, var(--tc-success) 35%, var(--tc-border));
+    background: color-mix(in srgb, var(--tc-success) 10%, var(--tc-surface));
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -185,19 +235,19 @@ body {
     margin: 0;
     font-size: 1.25rem;
     font-weight: 600;
-    color: #166534;
+    color: var(--tc-success);
 }
 
 .perch-wizard-success-host {
     margin: 0;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 1rem;
-    color: #14532d;
+    color: var(--tc-success);
 }
 
 .perch-wizard-success-body {
     margin: 0 0 0.5rem;
-    color: #3f6212;
+    color: var(--tc-success);
     font-size: 0.9375rem;
 }
 
@@ -208,22 +258,120 @@ body {
     max-width: 64rem;
 }
 
-.perch-home-subtitle {
-    margin: 0 0 1rem;
-    font-size: 1.125rem;
-    font-weight: 600;
-}
-
-.perch-home-create {
-    margin-top: 2.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #e5e7eb;
-}
-
 .perch-site-list {
     display: flex;
     flex-direction: column;
     gap: 2rem;
+}
+
+/* ── Site summary cards (components/SiteCard.tsx, §14) ─────────────────────────── */
+
+/* Responsive grid of scannable cards; each links to its per-site page. */
+.perch-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+    gap: 1.25rem;
+}
+
+.perch-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.25rem;
+    border: 1px solid var(--tc-border);
+    background: var(--tc-surface);
+    cursor: pointer;
+    transition:
+        border-color 0.12s ease,
+        box-shadow 0.12s ease,
+        transform 0.12s ease;
+}
+
+.perch-card:hover {
+    border-color: var(--perch-accent);
+    box-shadow: var(--tc-shadow-sm);
+}
+
+.perch-card:focus-visible {
+    outline: 2px solid var(--perch-accent);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .perch-card:active {
+        transform: translateY(1px);
+    }
+}
+
+.perch-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.perch-card-id {
+    min-width: 0;
+}
+
+.perch-card-host {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.perch-card-source {
+    margin: 0.125rem 0 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8125rem;
+    color: var(--tc-text-muted);
+    overflow-wrap: anywhere;
+}
+
+.perch-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    margin: 0;
+}
+
+.perch-card-stat {
+    min-width: 0;
+}
+
+.perch-card-stat dt {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--tc-text-muted);
+}
+
+.perch-card-stat dd {
+    margin: 0.125rem 0 0;
+    font-size: 0.875rem;
+    color: var(--tc-text);
+}
+
+/* Back link on the per-site page (components/SiteDetail.tsx). */
+.perch-back {
+    align-self: flex-start;
+    margin-bottom: 0.5rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--perch-accent-strong);
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.perch-back:hover {
+    text-decoration: underline;
+}
+
+.perch-back:focus-visible {
+    outline: 2px solid var(--perch-accent);
+    outline-offset: 2px;
 }
 
 /* One site card: header (host + status dot), a note, a two-column body, and a log. */
@@ -232,8 +380,8 @@ body {
     flex-direction: column;
     gap: 1rem;
     padding: 1.25rem;
-    border: 1px solid #e5e7eb;
-    background: #fff;
+    border: 1px solid var(--tc-border);
+    background: var(--tc-surface);
 }
 
 .perch-site-header {
@@ -258,22 +406,22 @@ body {
     margin: 0.125rem 0 0;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 0.8125rem;
-    color: #6b7280;
+    color: var(--tc-text-muted);
     overflow-wrap: anywhere;
 }
 
 .perch-site-note {
     margin: 0;
     padding: 0.625rem 0.875rem;
-    background: #f8fafc;
-    border-left: 3px solid #0ea5e9;
-    color: #334155;
+    background: var(--tc-surface-hover);
+    border-left: 3px solid var(--perch-accent);
+    color: var(--tc-text);
     font-size: 0.875rem;
 }
 
 .perch-site-loaderror {
     margin: 0;
-    color: #842029;
+    color: var(--tc-danger);
     font-size: 0.875rem;
 }
 
@@ -300,8 +448,22 @@ body {
 }
 
 .perch-site-redeploy-msg {
-    color: #475569;
+    color: var(--tc-text-muted);
     font-size: 0.8125rem;
+}
+
+/* Delete-confirm modal body — paragraph + type-to-confirm field + error stack. */
+.perch-site-delete-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* Type-to-confirm field: label above the hostname input. */
+.perch-site-delete-confirm {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
 }
 
 @media (max-width: 48rem) {
@@ -354,7 +516,7 @@ body {
 .perch-sponsor {
     margin-top: 1rem;
     padding-top: 1.5rem;
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid var(--tc-border);
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -375,10 +537,10 @@ body {
     padding: 0.625rem 1.1rem;
     font-size: 0.9375rem;
     font-weight: 600;
-    color: #bf3989;
+    color: var(--perch-sponsor);
     text-decoration: none;
-    background: #fff;
-    border: 1px solid #d8b3c7;
+    background: var(--tc-surface);
+    border: 1px solid color-mix(in srgb, var(--perch-sponsor) 35%, var(--tc-border));
     transition:
         background 0.15s ease,
         border-color 0.15s ease,
@@ -386,19 +548,19 @@ body {
 }
 
 .perch-sponsor-cta:hover {
-    background: #fdf0f7;
-    border-color: #bf3989;
-    color: #99316f;
+    background: color-mix(in srgb, var(--perch-sponsor) 12%, var(--tc-surface));
+    border-color: var(--perch-sponsor);
+    color: var(--perch-sponsor-strong);
 }
 
 .perch-sponsor-cta:focus-visible {
-    outline: 2px solid #bf3989;
+    outline: 2px solid var(--perch-sponsor);
     outline-offset: 2px;
 }
 
 .perch-sponsor-empty {
     margin: 0;
-    color: #6b7280;
+    color: var(--tc-text-muted);
     font-size: 0.9375rem;
 }
 
@@ -436,13 +598,13 @@ body {
 .perch-admin-hint code {
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 0.85em;
-    background: #f1f5f9;
+    background: var(--tc-surface-muted);
     padding: 0.05rem 0.3rem;
 }
 
 .perch-admin-busy {
     margin: 0;
-    color: #475569;
+    color: var(--tc-text-muted);
     font-size: 0.8125rem;
 }
 
@@ -454,7 +616,7 @@ body {
 /* Site moderation table — status pill + suspend button. */
 .perch-admin-empty-cell {
     text-align: center;
-    color: #94a3b8;
+    color: var(--tc-text-faint);
     padding: 1rem;
 }
 
@@ -464,40 +626,40 @@ body {
 }
 
 .perch-admin-status--live {
-    color: #166534;
+    color: var(--tc-success);
 }
 
 .perch-admin-status--failed,
 .perch-admin-status--suspended {
-    color: #b91c1c;
+    color: var(--tc-danger);
 }
 
 .perch-admin-status--over_quota {
-    color: #b45309;
+    color: var(--tc-warning);
 }
 
 .perch-admin-suspend-btn {
     font: inherit;
     font-size: 0.8125rem;
-    color: #b91c1c;
-    background: #fff;
-    border: 1px solid #f1c4c4;
+    color: var(--tc-danger);
+    background: var(--tc-surface);
+    border: 1px solid color-mix(in srgb, var(--tc-danger) 35%, var(--tc-border));
     padding: 0.25rem 0.6rem;
     cursor: pointer;
 }
 
 .perch-admin-suspend-btn:hover {
-    background: #fef2f2;
-    border-color: #b91c1c;
+    background: color-mix(in srgb, var(--tc-danger) 8%, var(--tc-surface));
+    border-color: var(--tc-danger);
 }
 
 .perch-admin-suspend-btn:focus-visible {
-    outline: 2px solid #b91c1c;
+    outline: 2px solid var(--tc-danger);
     outline-offset: 2px;
 }
 
 .perch-admin-suspended {
-    color: #94a3b8;
+    color: var(--tc-text-faint);
     font-size: 0.8125rem;
 }
 
@@ -506,7 +668,7 @@ body {
     list-style: none;
     margin: 0;
     padding: 0;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--tc-border);
 }
 
 .perch-admin-list-row {
@@ -515,7 +677,7 @@ body {
     justify-content: space-between;
     gap: 1rem;
     padding: 0.5rem 0.75rem;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--tc-surface-muted);
 }
 
 .perch-admin-list-row:last-child {
@@ -534,6 +696,31 @@ body {
     min-width: 0;
 }
 
+.perch-admin-add-row > tc-extended-select {
+    flex: 0 1 13rem;
+    min-width: 9rem;
+}
+
+/* Base-domain audience-tier groups. */
+.perch-admin-domain-group + .perch-admin-domain-group {
+    margin-top: 1rem;
+}
+
+.perch-admin-domain-group-title {
+    margin: 0 0 0.375rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--tc-text-muted);
+}
+
+.perch-admin-domain-group-title > .perch-admin-hint {
+    text-transform: none;
+    letter-spacing: normal;
+    font-weight: 400;
+}
+
 /* Plan-tier editor rows. */
 .perch-admin-tiers {
     display: flex;
@@ -548,27 +735,376 @@ body {
     flex-wrap: wrap;
 }
 
-.perch-admin-tier-field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    min-width: 0;
-}
-
-.perch-admin-tier-field > .form-control,
-.perch-admin-tier-field > .form-select {
+/* A single tc-* field (tc-input / tc-select) in a horizontal form row, sized
+   like the form-control it replaced. The control + label + reserved message slot
+   are rendered inside the host. */
+.perch-admin-field {
     width: 12rem;
     max-width: 100%;
 }
 
+/* Standalone section sub-label (e.g. "Default target", "Servers"). */
 .perch-admin-field-label {
     font-size: 0.75rem;
     font-weight: 600;
-    color: #334155;
+    color: var(--tc-text);
+}
+
+/* tc-* fields reserve a one-line message slot below the control; lift the row's
+   trailing action button (and inline flag checks) so they align with the input
+   boxes rather than the bottom of that gutter. */
+.perch-admin-tier-row > tc-button {
+    margin-bottom: 1.5rem;
 }
 
 .perch-admin-tier-actions {
     display: flex;
     gap: 0.5rem;
     flex-wrap: wrap;
+}
+
+/* Inline checkbox field (routing server/location flags: backup, down, websocket).
+   The tc-check is inline (no message gutter), so lift it to control height. */
+.perch-routing-check {
+    align-self: flex-end;
+    margin-bottom: 1.5rem;
+}
+
+/* Role tc-select on the Users roster — sized to the role labels, not the row. */
+.perch-admin-role-select {
+    width: auto;
+    min-width: 9rem;
+}
+
+/* ── Users roster (components/admin/AdminUsers.tsx) ────────────────────────────── */
+
+/* Search + level-filter bar above the roster. */
+.perch-admin-userbar {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.perch-admin-search {
+    flex: 1 1 16rem;
+    min-width: 0;
+}
+
+.perch-admin-level-filter {
+    width: auto;
+    min-width: 9rem;
+    flex: 0 0 auto;
+}
+
+/* Each user is a stacked card row: identity line, meta line, optional editor. */
+.perch-admin-user {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--tc-surface-muted);
+}
+
+.perch-admin-user:last-child {
+    border-bottom: none;
+}
+
+.perch-admin-user-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.perch-admin-user-id {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    min-width: 0;
+}
+
+.perch-admin-user-name {
+    font-weight: 600;
+}
+
+.perch-admin-badges {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    flex-wrap: wrap;
+}
+
+.perch-admin-user-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* Text-button toggle (Limits / Close) — quiet, matches the admin link affordances. */
+.perch-admin-linkbtn {
+    font: inherit;
+    font-size: 0.8125rem;
+    color: var(--perch-accent-strong);
+    background: none;
+    border: none;
+    padding: 0.25rem 0.4rem;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.perch-admin-linkbtn:hover {
+    color: var(--perch-accent);
+}
+
+.perch-admin-linkbtn:focus-visible {
+    outline: 2px solid var(--perch-accent);
+    outline-offset: 2px;
+}
+
+/* Effective-limits readout — wrapping inline definition pairs. */
+.perch-admin-user-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.25rem;
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--tc-text-muted);
+}
+
+.perch-admin-user-meta dt,
+.perch-admin-user-meta dd {
+    display: inline;
+    margin: 0;
+}
+
+.perch-admin-user-meta dt {
+    color: var(--tc-text-faint);
+}
+
+.perch-admin-user-meta dd {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: var(--tc-text);
+}
+
+/* Inline per-user limit override editor. */
+.perch-admin-limits {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: var(--tc-surface-hover);
+    border: 1px solid var(--tc-border);
+}
+
+.perch-admin-limits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 0.75rem;
+}
+
+/* ── Toast stack (components/Toast.tsx, plan Phase 1) ──────────────────────────── */
+
+.perch-toasts {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: var(--tc-z-tooltip);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: min(28rem, calc(100vw - 2rem));
+    pointer-events: none;
+}
+
+.perch-toasts > tc-toast {
+    pointer-events: auto;
+}
+
+/* ── Shared state kit (components/states.tsx, plan WS-4) ───────────────────────── */
+
+.perch-loading {
+    display: block;
+}
+
+/* Skeleton list (admin/routing tables, etc.) and detail-view stacks. */
+.perch-skeleton-rows,
+.perch-skeleton-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* A skeleton placeholder shaped like a SiteCard. */
+.perch-skeleton-card {
+    gap: 0.75rem;
+    cursor: default;
+}
+
+.perch-skeleton-card:hover {
+    border-color: var(--tc-border);
+    box-shadow: none;
+}
+
+/* AuthGate error: centred message + retry, inside .perch-gate-status. */
+.perch-gate-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    text-align: center;
+    color: var(--tc-text-muted);
+}
+
+.perch-gate-error p {
+    margin: 0;
+}
+
+/* EmptyState title + description (children of tc-empty-state). */
+.perch-empty-title {
+    display: block;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--tc-text);
+}
+
+.perch-empty-desc {
+    margin: 0.25rem 0 0;
+    color: var(--tc-text-muted);
+    font-size: 0.9375rem;
+}
+
+/* ── Navigation & IA (plan WS-5) ──────────────────────────────────────────────── */
+
+/* Skip-to-content link: off-screen until keyboard-focused. */
+.perch-skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: var(--tc-z-tooltip);
+    padding: 0.5rem 0.75rem;
+    background: var(--tc-surface);
+    color: var(--perch-accent-strong);
+    border: 1px solid var(--tc-border);
+    font-size: 0.875rem;
+}
+
+.perch-skip-link:focus {
+    left: 0.5rem;
+    top: 0.5rem;
+}
+
+.perch-breadcrumbs {
+    margin-bottom: 1rem;
+}
+
+/* Admin landing hub — a card per admin area. */
+.perch-admin-hub {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 1rem;
+}
+
+.perch-admin-hub-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    padding: 1.1rem 1.25rem;
+    border: 1px solid var(--tc-border);
+    background: var(--tc-surface);
+    text-decoration: none;
+    transition:
+        border-color 0.12s ease,
+        box-shadow 0.12s ease;
+}
+
+.perch-admin-hub-card:hover {
+    border-color: var(--perch-accent);
+    box-shadow: var(--tc-shadow-sm);
+}
+
+.perch-admin-hub-card:focus-visible {
+    outline: 2px solid var(--perch-accent);
+    outline-offset: 2px;
+}
+
+.perch-admin-hub-label {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--tc-text);
+}
+
+.perch-admin-hub-desc {
+    font-size: 0.875rem;
+    color: var(--tc-text-muted);
+}
+
+/* 404 page (app/not-found.tsx). */
+.perch-notfound {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-align: center;
+    padding: 2rem;
+}
+
+.perch-notfound-code {
+    margin: 0;
+    font-family: var(--tc-font-mono);
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--tc-text-faint);
+}
+
+.perch-notfound-title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--tc-text);
+}
+
+.perch-notfound-lead {
+    margin: 0;
+    color: var(--tc-text-muted);
+}
+
+.perch-notfound-link {
+    margin-top: 0.75rem;
+    color: var(--perch-accent-strong);
+    text-decoration: none;
+}
+
+.perch-notfound-link:hover {
+    text-decoration: underline;
+}
+
+/* ── Dark mode (plan WS-1) ─────────────────────────────────────────────────────
+   Auto-applied from the OS preference. Remaps the structural @toolcase/web-components
+   design tokens (--tc-*) to a dark slate palette; every tc-* component and every
+   .perch-* rule in this sheet reads those tokens, so the whole surface follows from
+   one place. Status and brand hues keep their identity — their tinted fills are
+   derived from the surface via color-mix, so they invert for free. Some tc-*
+   components still bake light-theme literals upstream and may need follow-up there. */
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+
+        --tc-surface: #0f172a;
+        --tc-surface-muted: #1e293b;
+        --tc-surface-hover: #1a2436;
+        --tc-border: #334155;
+        --tc-border-strong: #475569;
+        --tc-text: #e2e8f0;
+        --tc-text-muted: #94a3b8;
+        --tc-text-faint: #64748b;
+
+        /* Brand reads a touch brighter against dark slate. */
+        --perch-accent: #38bdf8;
+        --perch-accent-strong: #7dd3fc;
+    }
 }

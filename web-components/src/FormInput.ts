@@ -1,4 +1,6 @@
 import { esc } from './internal/esc'
+import { fieldMessageHtml } from './internal/field-message'
+import { setFieldFormValue, reflectFieldValidity, dispatchFieldChange } from './internal/form-field'
 // tc-form-input — universal form-input dispatcher (port of react-components
 // FormInput). A single light-DOM custom element whose `type` attribute selects
 // which native control to render, with built-in validation, helper/error lines,
@@ -75,14 +77,21 @@ const isEmpty = (value: unknown): boolean => {
 }
 
 export class FormInput extends HTMLElement {
+    // Participates in native <form> submission/validation like every tc-* input.
+    // (Composes native controls, so the form would also see those directly; the
+    // ElementInternals value is the single coerced/validated source of truth.)
+    static formAssociated = true
+
     private _initialised = false
     private _inputId: string
     private _helpId: string
-    private _errorId: string
+    private _internals: ElementInternals
 
     private _currentValue: unknown = undefined
     private _valueExplicit: unknown = undefined
     private _defaultValue: unknown = undefined
+    // Snapshot of the value at first connect, restored by formResetCallback.
+    private _resetValue: unknown = undefined
     private _options: FormInputOption[] = []
     private _slotOptions: FormInputOption[] = []
     private _validate: FormInputValidator | FormInputValidator[] | null = null
@@ -116,7 +125,7 @@ export class FormInput extends HTMLElement {
         const uid = ++_idCounter
         this._inputId = `tc-form-input-${uid}`
         this._helpId = `tc-form-input-help-${uid}`
-        this._errorId = `tc-form-input-error-${uid}`
+        this._internals = this.attachInternals()
     }
 
     connectedCallback(): void {
@@ -124,6 +133,8 @@ export class FormInput extends HTMLElement {
             this._captureSlotOptions()
             this._currentValue =
                 this._valueExplicit !== undefined ? this._valueExplicit : this._defaultValue
+            // Remember the initial value so a native form reset can restore it.
+            this._resetValue = this._currentValue
             this.render()
             this._initialised = true
             this._runValidation(false)
@@ -139,6 +150,22 @@ export class FormInput extends HTMLElement {
     disconnectedCallback(): void {
         this.removeEventListener('input', this._onControlEvent)
         this.removeEventListener('change', this._onControlEvent)
+    }
+
+    /** Restore the value captured at first connect when the form resets, then
+     *  re-run validation so the slot/validity reflect the reset state. */
+    formResetCallback(): void {
+        this._valueExplicit = this._resetValue
+        this._currentValue = this._resetValue
+        if (this._initialised) {
+            this.render()
+            this._runValidation(false)
+        }
+    }
+
+    /** Mirror a containing fieldset/form disabling into the host attribute. */
+    formDisabledCallback(disabled: boolean): void {
+        this.disabled = disabled
     }
 
     attributeChangedCallback(): void {
@@ -395,13 +422,9 @@ export class FormInput extends HTMLElement {
             const sig = `${hasError}::${JSON.stringify(value ?? null)}`
             if (sig === this._lastSignature) return hasError
             this._lastSignature = sig
-            this.dispatchEvent(
-                new CustomEvent('tc-change', {
-                    bubbles: true,
-                    composed: true,
-                    detail: { value, hasError },
-                }),
-            )
+            // Canonical tc-change carries only `{ value }` for cross-component
+            // uniformity; hasError stays available through the onChange callback.
+            dispatchFieldChange(this, value)
             if (typeof this.onChange === 'function') this.onChange(value, hasError)
         }
         return hasError
@@ -410,15 +433,35 @@ export class FormInput extends HTMLElement {
     private _applyValidationState(message: string | null, hasError: boolean): void {
         this.classList.toggle('tc-form-input--error', hasError)
 
-        const errEl = this.querySelector('.tc-form-input-error')
-        if (errEl) {
-            errEl.innerHTML =
-                hasError && message ? `${errorMarkIcon}<span>${esc(message)}</span>` : ''
+        // Push the coerced value + validity into the form. _currentValue is already
+        // the coerced shape (_getValue: boolean for checkbox/switch/optionless radio,
+        // number for number/range, string otherwise). For the boolean controls the
+        // native checkbox submits "on" when checked, which is setFieldFormValue's
+        // default trueValue — so no per-control value lookup is needed here.
+        const value = this._currentValue
+        setFieldFormValue(this._internals, this.name, value == null ? null : value)
+        reflectFieldValidity(this._internals, {
+            invalid: hasError,
+            message: message ?? 'Invalid value',
+            anchor:
+                this.querySelector<HTMLElement>(
+                    '.form-control, .form-select, .form-range, .form-check-input',
+                ) ?? undefined,
+        })
+
+        // Swap the reserved slot's contents in place (control is untouched, so a
+        // focused field is never disrupted). Invalid shows the message; otherwise
+        // it falls back to the hint, keeping the same reserved height either way.
+        const slot = this.querySelector('.tc-field-message')
+        if (slot) {
+            slot.outerHTML = fieldMessageHtml({
+                id: this._helpId,
+                error: hasError ? (message ?? '') : null,
+                hint: this.help,
+            })
         }
 
-        const describedBy = [this.help ? this._helpId : '', hasError ? this._errorId : '']
-            .filter(Boolean)
-            .join(' ')
+        const describedBy = this.help || hasError ? this._helpId : ''
 
         const controls = this.querySelectorAll<HTMLElement>(
             '.form-control, .form-select, .form-range, .form-check-input',
@@ -458,17 +501,15 @@ export class FormInput extends HTMLElement {
         const type = this.type
         const inline = INLINE_TYPES.includes(type) || (type === 'radio' && !this._hasOptions())
 
-        const helpHtml = this.help
-            ? `<div id="${this._helpId}" class="tc-form-input-help">${esc(this.help)}</div>`
-            : ''
-        const errorHtml = `<div id="${this._errorId}" class="tc-form-input-error" role="alert" aria-live="polite"></div>`
+        // One reserved slot below the control; _runValidation() fills it with the
+        // error message when invalid, otherwise it shows the hint (or stays empty
+        // but height-reserved). Always present so the field never changes height.
+        const messageHtml = fieldMessageHtml({ id: this._helpId, hint: this.help })
 
         if (inline) {
-            this.innerHTML = [this._renderInlineControl(), helpHtml, errorHtml].join('')
+            this.innerHTML = [this._renderInlineControl(), messageHtml].join('')
         } else {
-            this.innerHTML = [this._renderLabel(), this._renderControl(), helpHtml, errorHtml].join(
-                '',
-            )
+            this.innerHTML = [this._renderLabel(), this._renderControl(), messageHtml].join('')
         }
 
         // Restore current value into freshly-built controls where needed.
@@ -499,7 +540,10 @@ export class FormInput extends HTMLElement {
 
     private _commonAttrs(): string {
         const parts: string[] = []
-        if (this.name) parts.push(`name="${esc(this.name)}"`)
+        // No `name` on the inner native control: the host is formAssociated and
+        // submits the coerced value through ElementInternals under its own `name`.
+        // A name here would double-submit. (Radio grouping uses an internal name —
+        // see _renderRadioGroup.)
         if (this.disabled) parts.push('disabled')
         if (this.required) parts.push('required aria-required="true"')
         return parts.length ? ` ${parts.join(' ')}` : ''
@@ -574,7 +618,10 @@ export class FormInput extends HTMLElement {
     }
 
     private _renderRadioGroup(): string {
-        const name = this.name ?? this._inputId
+        // Internal-only group name (not this.name): the radios share it for native
+        // single-selection grouping, while form submission flows through the host's
+        // ElementInternals under the user's `name`. Avoids double submission.
+        const name = `${this._inputId}-group`
         const current = this._currentValue != null ? String(this._currentValue) : ''
         const rows = this._optionList()
             .map((o, idx) => {
@@ -629,12 +676,6 @@ function nativeType(type: FormInputType): string {
     if (type === 'datetime') return 'datetime-local'
     return type
 }
-
-// Inline lucide "x" glyph for the error line (stroke=currentColor flows --tc-danger).
-const errorMarkIcon =
-    `<svg class="tc-form-input-error-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" ` +
-    `stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">` +
-    `<path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`
 
 declare global {
     interface HTMLElementTagNameMap {

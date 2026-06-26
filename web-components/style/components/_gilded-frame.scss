@@ -30,6 +30,13 @@ tc-gilded-frame {
     display: block;
 }
 
+// Headings carry the global emphasis color by default, which is dark and turns
+// invisible on the dark/ink tone. Slotted headings should take the frame's own
+// text color instead so they read on every tone.
+.tc-gilded-frame :is(h1, h2, h3, h4, h5, h6) {
+    color: inherit;
+}
+
 // ── Tones ──────────────────────────────────────────────────────────────────
 
 .tc-gilded-frame--tone-dark {

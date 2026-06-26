@@ -1,9 +1,15 @@
 lib
-# taskforge uses lib/ as a SOURCE dir (Next.js app helpers), not build output — keep it tracked
+# taskforge & perch use lib/ as a SOURCE dir (Next.js app helpers — the @/lib/tc
+# web-components interop shim), not build output — keep it tracked.
 !taskforge/lib/
+!perch/lib/
 node_modules
 .parcel-cache
 .DS_Store
+
+# Docker stack secrets (docker-compose.yml reads root .env). Never commit.
+.env
+.env*.local
 examples/dist
 !examples/dist/CNAME
 tasks/*.md

@@ -4,6 +4,8 @@
 // 1px-bordered box with a real gap between boxes (matching tc-single-card-select).
 // Ink fill (--tc-app-accent) on selected cards with white text and a visible check.
 
+@use '../foundation/tokens' as *;
+
 tc-multi-card-select {
     --bs-multi-card-select-border-color: var(--tc-border);
     --bs-multi-card-select-bg: var(--tc-surface);
@@ -24,11 +26,24 @@ tc-multi-card-select {
 }
 
 // Host IS the grid; a real gap separates each bordered card box.
+// Mobile-first: collapse to a single column, step up to the author's count at md+.
 .tc-multi-card-select {
     display: grid;
-    grid-template-columns: repeat(var(--bs-multi-card-select-columns), 1fr);
+    grid-template-columns: repeat(1, 1fr);
     gap: var(--bs-multi-card-select-gap);
     border-radius: 0;
+}
+
+@include media-up(sm) {
+    .tc-multi-card-select {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@include media-up(md) {
+    .tc-multi-card-select {
+        grid-template-columns: repeat(var(--bs-multi-card-select-columns), 1fr);
+    }
 }
 
 .tc-multi-card-select-card {

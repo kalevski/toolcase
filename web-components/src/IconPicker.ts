@@ -1,8 +1,23 @@
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
+import { fieldMessageHtml } from './internal/field-message'
+import {
+    requiredMark,
+    setFieldFormValue,
+    reflectFieldValidity,
+    dispatchFieldChange,
+} from './internal/form-field'
+import { fixedOriginOffset } from './internal/containingBlock'
+import { cssLength } from './internal/cssLength'
 import { icon, chevronDownIcon } from './icons'
 
 const TAG_NAME = 'tc-icon-picker'
+
+let _ipIdCounter = 0
+
+export type IconPickerState = 'valid' | 'invalid'
+
+const STATES: IconPickerState[] = ['valid', 'invalid']
 
 export interface IconOption {
     value: string
@@ -10,35 +25,105 @@ export interface IconOption {
 }
 
 export class IconPicker extends HTMLElement {
+    // Participates in native <form> submission/validation like every tc-* input.
+    static formAssociated = true
+
     private _initialised = false
     private _icons: IconOption[] = []
     private _isOpen = false
     private _highlightIdx = -1
     private _searchValue = ''
+    // Stable id for the reserved message slot (aria-describedby target on the trigger).
+    private _helpId = `tc-ip-help-${++_ipIdCounter}`
+    private _internals: ElementInternals
+    private _defaultValue: string | null = null
     private _outsideHandler: ((e: MouseEvent) => void) | null = null
     private _keydownHandler: ((e: KeyboardEvent) => void) | null = null
+    private _repositionHandler: (() => void) | null = null
 
     onChange: ((value: string) => void) | null = null
 
     static get observedAttributes(): string[] {
-        return ['label', 'value', 'columns', 'loading']
+        return [
+            'label',
+            'value',
+            'columns',
+            'loading',
+            'disabled',
+            'required',
+            'name',
+            'max-height',
+            'help',
+            'error',
+            'state',
+        ]
+    }
+
+    constructor() {
+        super()
+        this._internals = this.attachInternals()
     }
 
     connectedCallback(): void {
         if (!this._initialised) {
+            this._defaultValue = this.getAttribute('value')
             this.render()
             this._initialised = true
         }
+        this._applyMaxHeight()
+        this._syncForm()
     }
 
     disconnectedCallback(): void {
         this._removeDocListeners()
     }
 
+    /** Reset to the value present at first connect when the form resets. */
+    formResetCallback(): void {
+        this.value = this._defaultValue
+        this._syncForm()
+    }
+
+    /** Mirror a containing fieldset/form disabling into the host attribute. */
+    formDisabledCallback(disabled: boolean): void {
+        this.disabled = disabled
+    }
+
+    /** Push value + validity into the form. Effective invalid = error / state
+     *  invalid / required-but-empty. */
+    private _syncForm(): void {
+        const value = this.value
+        setFieldFormValue(this._internals, this.name, value)
+        const error = this.error
+        const requiredEmpty = this.required && !value
+        const invalid = !!error || this.state === 'invalid' || requiredEmpty
+        reflectFieldValidity(this._internals, {
+            invalid,
+            valueMissing: requiredEmpty && !error,
+            message:
+                error || (requiredEmpty ? 'This field is required.' : 'Please select a valid icon.'),
+            anchor: this._getTrigger() ?? undefined,
+        })
+    }
+
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
+        this._applyMaxHeight()
         if (this._isOpen) this._forceClose()
         this.render()
+        // Keep the form value/validity in step with value/required/error/state/name.
+        this._syncForm()
+    }
+
+    /**
+     * Cap how tall the icon grid grows before it scrolls. A bare number is read
+     * as pixels; any CSS length (`50vh`, `20rem`, …) is honoured as-is. Removing
+     * the attribute restores the stylesheet default (240px).
+     */
+    private _applyMaxHeight(): void {
+        const h = cssLength(this.getAttribute('max-height'))
+        if (h) this.style.setProperty('--bs-icon-picker-options-max-height', h)
+        else this.style.removeProperty('--bs-icon-picker-options-max-height')
     }
 
     get label(): string | null {
@@ -83,6 +168,64 @@ export class IconPicker extends HTMLElement {
         else this.removeAttribute('loading')
     }
 
+    get disabled(): boolean {
+        return this.hasAttribute('disabled')
+    }
+    set disabled(v: boolean) {
+        if (v) this.setAttribute('disabled', '')
+        else this.removeAttribute('disabled')
+    }
+
+    get required(): boolean {
+        return this.hasAttribute('required')
+    }
+    set required(v: boolean) {
+        if (v) this.setAttribute('required', '')
+        else this.removeAttribute('required')
+    }
+
+    // ── name (form field name) ──────────────────────────────────────────────
+    get name(): string | null {
+        return this.getAttribute('name')
+    }
+    set name(v: string | null) {
+        if (v != null) this.setAttribute('name', v)
+        else this.removeAttribute('name')
+    }
+
+    get maxHeight(): string {
+        return this.getAttribute('max-height') ?? ''
+    }
+    set maxHeight(v: string) {
+        if (v) this.setAttribute('max-height', v)
+        else this.removeAttribute('max-height')
+    }
+
+    get help(): string | null {
+        return this.getAttribute('help')
+    }
+    set help(v: string | null) {
+        if (v != null) this.setAttribute('help', v)
+        else this.removeAttribute('help')
+    }
+
+    get error(): string | null {
+        return this.getAttribute('error')
+    }
+    set error(v: string | null) {
+        if (v != null) this.setAttribute('error', v)
+        else this.removeAttribute('error')
+    }
+
+    get state(): IconPickerState | null {
+        const v = this.getAttribute('state') as IconPickerState
+        return STATES.includes(v) ? v : null
+    }
+    set state(v: IconPickerState | null) {
+        if (v != null) this.setAttribute('state', v)
+        else this.removeAttribute('state')
+    }
+
     private _getTrigger(): HTMLButtonElement | null {
         return this.querySelector('.tc-icon-picker-trigger')
     }
@@ -114,13 +257,53 @@ export class IconPicker extends HTMLElement {
         this._removeDocListeners()
     }
 
+    private _positionPopup(): void {
+        const popup = this.querySelector<HTMLElement>('.tc-icon-picker-popup')
+        const anchor = this.querySelector<HTMLElement>('.tc-icon-picker-trigger')
+        if (!popup || !anchor) return
+
+        const gap = 2
+        const margin = 4
+        const r = anchor.getBoundingClientRect()
+        const vw = window.innerWidth
+        const vh = window.innerHeight
+
+        const popupH = popup.offsetHeight
+        const popupW = popup.offsetWidth
+        const spaceBelow = vh - r.bottom
+        const flipUp = spaceBelow < popupH + gap && r.top > spaceBelow
+
+        let top = flipUp
+            ? Math.max(margin, r.top - popupH - gap)
+            : Math.min(r.bottom + gap, vh - popupH - margin)
+        let left = Math.max(margin, Math.min(r.left, vw - popupW - margin))
+        top = Math.max(margin, top)
+
+        // Re-base onto the containing block when a transformed/filtered ancestor
+        // has hijacked `position: fixed` (see fixedOriginOffset).
+        const o = fixedOriginOffset(this)
+        top -= o.y
+        left -= o.x
+
+        popup.style.top = `${top}px`
+        popup.style.left = `${left}px`
+    }
+
     private _openPopup(): void {
-        if (this._isOpen) return
+        if (this._isOpen || this.disabled) return
         this._isOpen = true
         const trigger = this._getTrigger()
         const popup = this._getPopup()
         if (trigger) trigger.setAttribute('aria-expanded', 'true')
         if (popup) popup.classList.add('show')
+
+        // Anchor the fixed-positioned popup to the trigger (escapes overflow
+        // clipping from ancestor scroll containers), then keep it anchored
+        // while the page or an ancestor scrolls/resizes underneath it.
+        this._positionPopup()
+        this._repositionHandler = () => this._positionPopup()
+        window.addEventListener('scroll', this._repositionHandler, true)
+        window.addEventListener('resize', this._repositionHandler)
 
         const searchInput = this._getSearchInput()
         if (searchInput) searchInput.focus()
@@ -155,18 +338,20 @@ export class IconPicker extends HTMLElement {
             document.removeEventListener('keydown', this._keydownHandler)
             this._keydownHandler = null
         }
+        if (this._repositionHandler) {
+            window.removeEventListener('scroll', this._repositionHandler, true)
+            window.removeEventListener('resize', this._repositionHandler)
+            this._repositionHandler = null
+        }
     }
 
     private _selectIcon(value: string): void {
+        // setAttribute('value') triggers attributeChangedCallback → render +
+        // _syncForm, so the new value reaches the form before we dispatch.
         this._closePopup(false)
         this.setAttribute('value', value)
-        this.dispatchEvent(
-            new CustomEvent('tc-change', {
-                bubbles: true,
-                composed: true,
-                detail: { value },
-            }),
-        )
+        // Canonical tc-change with the unified `{ value }` detail.
+        dispatchFieldChange(this, value)
         if (typeof this.onChange === 'function') this.onChange(value)
         this._getTrigger()?.focus()
     }
@@ -262,9 +447,17 @@ export class IconPicker extends HTMLElement {
         const labelText = this.getAttribute('label')
         const currentValue = this.value ?? ''
         const loading = this.loading
+        const disabled = this.disabled
+        const required = this.required
+        const error = this.error
+        // A non-empty `error` forces the invalid state (matches tc-select).
+        const state: IconPickerState | null = error ? 'invalid' : this.state
+        const disabledAttr = disabled ? ' disabled aria-disabled="true"' : ''
+        // The trigger is the focusable control, so the required hint rides there.
+        const requiredAttr = required ? ' aria-required="true"' : ''
 
         const labelHtml = labelText
-            ? `<label class="tc-icon-picker-label">${esc(labelText)}</label>`
+            ? `<label class="tc-icon-picker-label">${esc(labelText)}${requiredMark(required)}</label>`
             : ''
 
         const selectedIconHtml = currentValue ? lucideByName(currentValue) : ''
@@ -281,7 +474,24 @@ export class IconPicker extends HTMLElement {
             popupHtml = `<div class="tc-icon-picker-popup" role="listbox" aria-label="Icons">${searchHtml}<div class="tc-icon-picker-options">${gridContent}</div></div>`
         }
 
-        this.innerHTML = `${labelHtml}<button class="tc-icon-picker-trigger" type="button" aria-haspopup="listbox" aria-expanded="${expanded}">${triggerInner}</button>${popupHtml}`
+        // Bespoke trigger: no native .form-control, so paint the invalid border
+        // via a local .is-invalid rule in _icon-picker.scss (not message styling).
+        const triggerStateClass = state === 'invalid' ? ' is-invalid' : ''
+        // Point aria-describedby at the slot only when it carries a message.
+        const describe = this.help || state ? ` aria-describedby="${this._helpId}"` : ''
+
+        // One reserved message slot as the LAST child of the host, after the
+        // trigger and overlay popup (invalid > valid > hint).
+        const messageHtml = fieldMessageHtml({
+            id: this._helpId,
+            state,
+            error,
+            hint: this.help,
+            invalidText: 'Please select a valid icon.',
+            validText: 'Looks good!',
+        })
+
+        this.innerHTML = `${labelHtml}<button class="tc-icon-picker-trigger${triggerStateClass}" type="button" aria-haspopup="listbox" aria-expanded="${expanded}"${requiredAttr}${describe}${disabledAttr}>${triggerInner}</button>${popupHtml}${messageHtml}`
 
         if (this._isOpen) {
             const popup = this._getPopup()
@@ -317,6 +527,9 @@ export class IconPicker extends HTMLElement {
                     this._highlightIdx = -1
                     const el = this.querySelector<HTMLElement>('.tc-icon-picker-options')
                     if (el) el.innerHTML = this._renderGridContent(this._getFilteredIcons())
+                    // Filtering changes the popup height; re-anchor so a flipped-up
+                    // popup stays attached to the trigger instead of drifting.
+                    if (this._isOpen) this._positionPopup()
                 })
             }
         }

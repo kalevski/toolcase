@@ -4,13 +4,21 @@
 
 // ── Auth / roles ─────────────────────────────────────────────────────────────
 
-export type Role = 'owner' | 'standard' | 'guest'
+export type Role = 'owner' | 'maintainer' | 'standard' | 'guest'
 
-/** Strict ordering used for `minRole` comparisons. Higher = more access. */
+/**
+ * Strict ordering used for `minRole` comparisons. Higher = more access. The
+ * hierarchy is linear and a superset chain: a `maintainer` is everything a
+ * `standard` is plus the routing surface (proxies/upstreams) and exemption from
+ * hosting quotas; an `owner` is everything a `maintainer` is plus the admin
+ * surface. So `authorize('maintainer')` admits maintainers *and* owners, while
+ * `authorize('owner')` (the admin endpoints) still excludes maintainers.
+ */
 export const ROLE_RANK: Record<Role, number> = {
     guest: 0,
     standard: 1,
-    owner: 2,
+    maintainer: 2,
+    owner: 3,
 }
 
 /**
@@ -103,6 +111,106 @@ export const PLAN_LIMITS: Record<Plan, PlanLimits> = {
     },
 }
 
+/**
+ * Limits for instance operators (§6) — exempt from all tier quotas. The owner
+ * runs the instance and maintainers help operate it, so they create unlimited
+ * resources and are never gated or suspended by a plan: `Infinity` caps make
+ * every count/byte gate pass, the fastest poll cadence applies, and private
+ * repos are allowed. `resolveLimits` returns this for any `owner`- or
+ * `maintainer`-role user instead of `PLAN_LIMITS[plan]`.
+ */
+export const UNLIMITED_LIMITS: PlanLimits = {
+    maxSites: Infinity,
+    maxBytesPerSite: Infinity,
+    maxBytesTotal: Infinity,
+    minIntervalSec: PLAN_LIMITS.gold.minIntervalSec,
+    customDomains: Infinity,
+    keepReleases: PLAN_LIMITS.gold.keepReleases,
+    privateRepos: true,
+}
+
+// ── Account level (the unified free/paid/maintainer/owner ladder) ─────────────
+
+/**
+ * A single human-facing "level" for an account, collapsing the two independent
+ * axes (the access {@link Role} and the sponsorship-driven {@link Plan}) into one
+ * ladder the UI shows everywhere — so an `owner` reads as **owner**, never as the
+ * "free" plan they happen to hold for billing. Strictly ordered low → high.
+ */
+export type AccountLevel = 'free' | 'paid' | 'maintainer' | 'owner'
+
+/** Every account level, lowest first. */
+export const ACCOUNT_LEVELS: readonly AccountLevel[] = ['free', 'paid', 'maintainer', 'owner']
+
+/** Title-case display labels for each level (badges, the user-panel micro-label). */
+export const ACCOUNT_LEVEL_LABEL: Record<AccountLevel, string> = {
+    free: 'Free',
+    paid: 'Paid',
+    maintainer: 'Maintainer',
+    owner: 'Owner',
+}
+
+/**
+ * Collapse a user's role + effective plan into one {@link AccountLevel}. The role
+ * wins outright (an instance operator is shown as such regardless of any
+ * sponsorship), otherwise a paid (non-free) plan reads as `paid` and everyone
+ * else as `free`. Pure, so the user-panel and the admin roster share one rule.
+ */
+export function accountLevel(role: Role, plan: Plan): AccountLevel {
+    if (role === 'owner') return 'owner'
+    if (role === 'maintainer') return 'maintainer'
+    return plan === 'free' ? 'free' : 'paid'
+}
+
+// ── Per-user custom limit overrides (`user_limit` row) ─────────────────────────
+
+/**
+ * An owner-set partial override of a user's quota limits (§11, §15). Only the
+ * fields present are overridden; the rest fall through to the role/plan default.
+ * Stored in the `user_limit` table; a row exists only when at least one field is
+ * customised. Byte/count fields are finite integers (no `Infinity` — JSON can't
+ * carry it; leave a field absent to inherit the default, which may be unlimited).
+ */
+export type UserLimitOverride = Partial<PlanLimits>
+
+/** The keys of {@link PlanLimits} that are numeric quotas (everything but `privateRepos`). */
+export const NUMERIC_LIMIT_KEYS = [
+    'maxSites',
+    'maxBytesPerSite',
+    'maxBytesTotal',
+    'minIntervalSec',
+    'customDomains',
+    'keepReleases',
+] as const
+
+/**
+ * Apply a {@link UserLimitOverride} on top of a base {@link PlanLimits}. Only the
+ * override's present keys win; an absent/empty override returns `base` unchanged.
+ * Pure (no I/O), so the resolution is unit-testable; `services/plan.ts` supplies
+ * the base (role/plan defaults) and the stored override.
+ */
+export function mergeLimits(base: PlanLimits, override?: UserLimitOverride | null): PlanLimits {
+    if (!override) return base
+    return { ...base, ...override }
+}
+
+/**
+ * Restore `Infinity` limits after a JSON round-trip. `JSON.stringify(Infinity)`
+ * emits `null` (Infinity isn't representable in JSON), so an unlimited quota sent
+ * from the server (`maxSites: Infinity` for an owner) arrives at the client as
+ * `null` — and `n < null` coerces to `n < 0`, silently gating everything off. Every
+ * client that reads limits off an API response MUST run them through this first:
+ * any numeric field that came back non-finite (null/NaN) is treated as unlimited
+ * (`Infinity`), never `0`. Pure, so it's safe on both sides of the wire.
+ */
+export function reviveLimits(limits: PlanLimits): PlanLimits {
+    const out: PlanLimits = { ...limits }
+    for (const key of NUMERIC_LIMIT_KEYS) {
+        if (!Number.isFinite(out[key])) out[key] = Infinity
+    }
+    return out
+}
+
 // ── App user (`app_user` row) ────────────────────────────────────────────────
 
 /** A signed-in GitHub identity. Mirrors the `app_user` table (§12). */
@@ -177,8 +285,27 @@ export interface MeResponse {
     avatarUrl?: string
     role: Role
     plan: Plan
+    /** The unified free/paid/maintainer/owner label for the account (see {@link accountLevel}). */
+    level: AccountLevel
     limits: PlanLimits
     usage: SiteUsage
+}
+
+/**
+ * One enriched row of the owner-only admin Users roster (`GET /api/admin/users`).
+ * Bundles the stored user with everything the admin page shows per account: the
+ * effective plan + level, current usage, the *effective* limits (after any custom
+ * override), and the raw `customLimits` override (`null` when none is set).
+ */
+export interface AdminUserRow {
+    user: AppUser
+    plan: Plan
+    level: AccountLevel
+    usage: SiteUsage
+    /** Effective limits the user gets right now (role/plan default merged with `customLimits`). */
+    limits: PlanLimits
+    /** The owner-set override, or `null` when the user runs on pure role/plan defaults. */
+    customLimits: UserLimitOverride | null
 }
 
 // ── Sponsorship (`sponsorship` row) ──────────────────────────────────────────
@@ -200,10 +327,50 @@ export interface Sponsorship {
 
 // ── Base domains (`base_domain` row) ─────────────────────────────────────────
 
+/**
+ * Which audience a base domain is offered to (§10). A strict superset chain of
+ * three groups, so a caller who can see a higher tier can see every lower one:
+ *
+ *   • `free`  — available to everybody, including free-plan accounts.
+ *   • `paid`  — reserved for sponsored (paid-plan) accounts and instance operators.
+ *   • `staff` — reserved for instance operators (the `maintainer`/`owner` roles).
+ *
+ * The visibility a given caller gets is computed by {@link visibleBaseDomainTiers}.
+ */
+export type BaseDomainTier = 'free' | 'paid' | 'staff'
+
+/** Every base-domain tier, lowest-audience first (the superset chain order). */
+export const BASE_DOMAIN_TIERS: readonly BaseDomainTier[] = ['free', 'paid', 'staff']
+
+/** Type guard: a request-supplied value is one of the three base-domain tiers. */
+export function isBaseDomainTier(value: unknown): value is BaseDomainTier {
+    return typeof value === 'string' && (BASE_DOMAIN_TIERS as readonly string[]).includes(value)
+}
+
+/**
+ * The base-domain tiers a caller may see, keyed off role first, then plan (§10):
+ *
+ *   • `owner` / `maintainer` (instance operators) → every tier, incl. `staff`.
+ *     The role wins outright, so a maintainer on a `free` plan still sees all.
+ *   • a paid plan (`bronze | silver | gold`)      → `free` + `paid`.
+ *   • the `free` plan                              → `free` only.
+ *
+ * Pure (no I/O), so the standard `/api/base-domains` projection and the create-site
+ * wizard can both gate on it and it's unit-testable directly. The result is always a
+ * prefix of {@link BASE_DOMAIN_TIERS} — each step strictly contains the one below.
+ */
+export function visibleBaseDomainTiers(role: Role, plan: Plan): BaseDomainTier[] {
+    if (role === 'owner' || role === 'maintainer') return ['free', 'paid', 'staff']
+    if (plan !== 'free') return ['free', 'paid']
+    return ['free']
+}
+
 /** An owner-registered base domain backing the subdomain pool (§10, §12). */
 export interface BaseDomain {
     /** Fully-qualified base domain; primary key (e.g. `perch.dev`). */
     domain: string
+    /** The audience this domain is offered to; gates which users may pick it (§10). */
+    tier: BaseDomainTier
     /** ISO timestamp the owner registered it. */
     createdAt: string
 }

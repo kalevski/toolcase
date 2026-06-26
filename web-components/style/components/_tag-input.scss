@@ -20,6 +20,9 @@ tc-tag-input {
     --bs-tag-input-placeholder-color: var(--tc-text-faint);
     --bs-tag-input-focus-border: rgba(30, 41, 59, 0.5);
     --bs-tag-input-focus-ring: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
+    // Invalid border/ring reuse the shared danger token (no new prefix).
+    --bs-tag-input-invalid-border-color: var(--tc-danger);
+    --bs-tag-input-invalid-ring: 0 0 0 0.2rem rgba(var(--bs-danger-rgb), 0.15);
     --bs-tag-input-padding-x: 0.5rem;
     --bs-tag-input-padding-y: 0.375rem;
 
@@ -102,6 +105,17 @@ tc-tag-input {
         border-color: var(--bs-tag-input-focus-border);
         box-shadow: var(--bs-tag-input-focus-ring);
     }
+
+    // Invalid state — danger border, matching .form-control.is-invalid. Sharp
+    // corners preserved; the focus ring tints danger so the cue survives focus.
+    &--invalid {
+        border-color: var(--bs-tag-input-invalid-border-color);
+
+        &:focus-within {
+            border-color: var(--bs-tag-input-invalid-border-color);
+            box-shadow: var(--bs-tag-input-invalid-ring);
+        }
+    }
 }
 
 // ── Text field ───────────────────────────────────────────────────────────────
@@ -150,8 +164,9 @@ tc-tag-input {
     align-items: center;
     justify-content: center;
     // Bleed into the chip's right padding so the button meets the chip edge.
-    margin: calc(-1 * var(--bs-tag-input-chip-padding-y)) calc(-1 * var(--bs-tag-input-chip-padding-x))
-        calc(-1 * var(--bs-tag-input-chip-padding-y)) 0;
+    margin: calc(-1 * var(--bs-tag-input-chip-padding-y))
+        calc(-1 * var(--bs-tag-input-chip-padding-x)) calc(-1 * var(--bs-tag-input-chip-padding-y))
+        0;
     padding: var(--bs-tag-input-chip-padding-y) var(--bs-tag-input-chip-padding-x);
     border: 0;
     border-radius: 0;
@@ -185,10 +200,10 @@ tc-tag-input {
 // ── Suggestion menu (overlay) ────────────────────────────────────────────────
 
 .tc-tag-input-menu {
-    position: absolute;
-    top: calc(100% + 2px);
-    left: 0;
-    right: 0;
+    // Fixed to the viewport with top/left/width set by JS (anchored to the
+    // trigger) — escapes overflow:hidden/auto clipping inside modal/scroll
+    // containers. Mirrors the tc-context-menu pattern.
+    position: fixed;
     z-index: var(--bs-tag-input-menu-z-index);
     display: none;
     margin: 0;
@@ -218,7 +233,9 @@ tc-tag-input {
     cursor: pointer;
     border-radius: 0;
     white-space: nowrap;
-    transition: background-color var(--tc-transition-fast), color var(--tc-transition-fast);
+    transition:
+        background-color var(--tc-transition-fast),
+        color var(--tc-transition-fast);
 
     &:hover {
         background-color: var(--bs-tag-input-option-hover-bg);
@@ -275,6 +292,14 @@ tc-tag-input {
 
 // ── Disabled ─────────────────────────────────────────────────────────────────
 
+// Host-level disabled — dim and swallow pointer events for the whole field,
+// matching the shared form-field contract. The inner `.tc-tag-input--disabled`
+// class (set by render) covers the same ground for nested cosmetics.
+tc-tag-input[disabled] {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
 .tc-tag-input--disabled {
     opacity: 0.6;
 
@@ -287,8 +312,12 @@ tc-tag-input {
 // ── Loading skeleton ─────────────────────────────────────────────────────────
 
 @keyframes tc-tag-input-shimmer {
-    0%   { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
 }
 
 .tc-tag-input-skeleton {

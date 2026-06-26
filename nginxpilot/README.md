@@ -221,8 +221,46 @@ Loopback HTTP (default `127.0.0.1:9090`; `admin.listen: ""` disables; `admin.tok
 - `POST /sync/<domain>` — force an immediate sync
 - `GET /vhost/<domain>` — `text/plain` generated nginx config for a site or reverse proxy (same output as `print-vhost`)
 - `POST /reload` — diff-based config reload (same work as `SIGHUP`); lets a separate process apply config changes without signalling the daemon. An invalid on-disk config is rejected wholesale and the running config stays active (`500`); success returns `200`.
-- `POST /sites` — write a site fragment into `sites.d/` and reload. The request body is the YAML fragment a file-drop would contain (`config/parse.go` schema), declaring **exactly one** `sites:` entry (no `upstreams:`/`proxies:`). The fragment is validated against the running config first (`400` on a bad source, duplicate domain, unknown key, …) so an invalid fragment never lands on disk; on success it is written atomically as `<domain>.yml` and the daemon reloads (`201` created, `200` if it replaced an existing fragment). The target directory and extension are derived from the first `include:` glob.
-- `DELETE /sites/{domain}` — remove the deterministic `<domain>.yml` fragment and reload (`200`); `404` if no such fragment exists. Lets a control plane manage sites entirely over REST so `sites.d/` stops being a shared-write surface.
+### Config management over REST
+
+A control plane (e.g. Perch) drives the **entire** config — sites, upstreams and reverse proxies — over the API, so `sites.d/` never has to be a hand-edited or shared-write surface. Each write parses the same YAML fragment a file-drop would contain (`config/parse.go` schema), validates the **candidate merged config** before touching disk (so a bad fragment never lands in `sites.d/`), writes it atomically under a deterministic filename, then reloads; the target directory and extension are derived from the first `include:` glob. A write must declare **exactly one** entity of its kind (and none of the others). Each kind has a deterministic filename so it maps 1:1 to its `DELETE`, and the three filename namespaces never collide:
+
+| Endpoint | Body declares | Filename | Notes |
+|---|---|---|---|
+| `GET /sites` | — | — | JSON list of configured sites |
+| `POST /sites` | one `sites:` entry | `<domain>.yml` | `201` created / `200` replaced |
+| `DELETE /sites/{domain}` | — | `<domain>.yml` | `200` / `404` |
+| `GET /upstreams` | — | — | JSON list of configured upstreams |
+| `POST /upstreams` | one `upstreams:` entry | `upstream-<name>.yml` | `201` / `200` |
+| `DELETE /upstreams/{name}` | — | `upstream-<name>.yml` | `200` / `404`; **`409`** if a proxy still references it (checked before any disk change, so the on-disk config never drifts into a state a restart would reject — repoint or delete the dependent proxy first) |
+| `GET /proxies` | — | — | JSON list of configured reverse proxies |
+| `POST /proxies` | one `proxies:` entry | `proxy-<domain>.yml` | `201` / `200`; a proxy that names an `upstream:` resolves against the upstreams **already** in the running config, so create the upstream first |
+| `DELETE /proxies/{domain}` | — | `proxy-<domain>.yml` | `200` / `404` |
+
+Validation errors come back as a precise `400` (bad source, duplicate domain — sites and proxies share one domain namespace —, unknown upstream reference, unknown key, …). If the post-write reload is rejected (e.g. a concurrent edit to another file) the write is rolled back and reported as `500`. The `GET` list endpoints serialize the running merged config (main file + all fragments) as JSON; secret material is never present (auth carries only `*_env` / `*_file` references) and durations/sizes render as their human strings (`"5m"`, `"512MiB"`).
+
+```bash
+# Stand up a reverse proxy entirely over REST — no YAML files touched by hand.
+BASE=http://127.0.0.1:9090
+
+curl -fsS -X POST $BASE/upstreams --data-binary @- <<'EOF'
+upstreams:
+  - name: api_pool
+    balancer: least_conn
+    servers:
+      - address: 10.0.0.1:8080
+      - address: 10.0.0.2:8080
+EOF
+
+curl -fsS -X POST $BASE/proxies --data-binary @- <<'EOF'
+proxies:
+  - domain: api.example.com
+    upstream: api_pool
+EOF
+
+curl -fsS $BASE/proxies                 # confirm it landed
+curl -fsS $BASE/vhost/api.example.com   # generate the nginx config to paste
+```
 
 ## Signals
 

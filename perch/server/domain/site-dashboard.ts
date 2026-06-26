@@ -133,8 +133,9 @@ function round1(n: number): number {
     return Math.round(n * 10) / 10
 }
 
-/** Human-readable byte size — e.g. `0 B`, `12.3 MB`, `1.5 GB`. */
+/** Human-readable byte size — e.g. `0 B`, `12.3 MB`, `1.5 GB`, `∞` (unlimited). */
 export function formatBytes(n: number | undefined): string {
+    if (n === Infinity) return '∞'
     if (!n || !isFinite(n) || n <= 0) return '0 B'
     const units = ['B', 'KB', 'MB', 'GB', 'TB']
     let value = n

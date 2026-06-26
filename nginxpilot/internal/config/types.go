@@ -68,63 +68,64 @@ type Config struct {
 // Upstream is a named nginx upstream{} block — a pool of backend servers a
 // reverse proxy can proxy_pass to by name.
 type Upstream struct {
-	Name string `yaml:"name"`
+	Name string `yaml:"name" json:"name"`
 	// Balancer selects the load-balancing method: "" / round_robin (default),
 	// least_conn, or ip_hash.
-	Balancer string `yaml:"balancer"`
+	Balancer string `yaml:"balancer" json:"balancer,omitempty"`
 	// Keepalive sets the keepalive connection cache size (0 = omit).
-	Keepalive int              `yaml:"keepalive"`
-	Servers   []UpstreamServer `yaml:"servers"`
+	Keepalive int              `yaml:"keepalive" json:"keepalive,omitempty"`
+	Servers   []UpstreamServer `yaml:"servers" json:"servers"`
 
 	// File records which config file declared this upstream (provenance for
-	// duplicate-name errors and logs).
-	File string `yaml:"-"`
+	// duplicate-name errors and logs). Never serialized over the admin API.
+	File string `yaml:"-" json:"-"`
 }
 
 // UpstreamServer is one backend in an upstream pool.
 type UpstreamServer struct {
 	// Address is "host:port", an IP:port, or "unix:/path/to.sock".
-	Address     string   `yaml:"address"`
-	Weight      int      `yaml:"weight"`
-	MaxFails    *int     `yaml:"max_fails"`
-	FailTimeout Duration `yaml:"fail_timeout"`
-	Backup      bool     `yaml:"backup"`
-	Down        bool     `yaml:"down"`
+	Address     string   `yaml:"address" json:"address"`
+	Weight      int      `yaml:"weight" json:"weight,omitempty"`
+	MaxFails    *int     `yaml:"max_fails" json:"max_fails,omitempty"`
+	FailTimeout Duration `yaml:"fail_timeout" json:"fail_timeout,omitempty"`
+	Backup      bool     `yaml:"backup" json:"backup,omitempty"`
+	Down        bool     `yaml:"down" json:"down,omitempty"`
 }
 
 // Proxy is a reverse-proxy vhost: an nginx server{} block whose locations
 // proxy_pass to a named upstream or a single inline target.
 type Proxy struct {
-	Domain string `yaml:"domain"`
+	Domain string `yaml:"domain" json:"domain"`
 	// Listen is the HTTP port (default DefaultProxyListen).
-	Listen int `yaml:"listen"`
+	Listen int `yaml:"listen" json:"listen,omitempty"`
 	// Upstream / Pass set the default backend for all locations. Exactly one
 	// of them is required unless every location sets its own. Upstream names
 	// an entry in Config.Upstreams; Pass is an inline scheme://host:port.
-	Upstream  string          `yaml:"upstream"`
-	Pass      string          `yaml:"pass"`
-	Locations []ProxyLocation `yaml:"locations"`
+	Upstream  string          `yaml:"upstream" json:"upstream,omitempty"`
+	Pass      string          `yaml:"pass" json:"pass,omitempty"`
+	Locations []ProxyLocation `yaml:"locations" json:"locations,omitempty"`
 
 	// Optional proxy tuning applied at the server level.
-	ConnectTimeout    Duration `yaml:"connect_timeout"`
-	ReadTimeout       Duration `yaml:"read_timeout"`
-	SendTimeout       Duration `yaml:"send_timeout"`
-	ClientMaxBodySize ByteSize `yaml:"client_max_body_size"`
+	ConnectTimeout    Duration `yaml:"connect_timeout" json:"connect_timeout,omitempty"`
+	ReadTimeout       Duration `yaml:"read_timeout" json:"read_timeout,omitempty"`
+	SendTimeout       Duration `yaml:"send_timeout" json:"send_timeout,omitempty"`
+	ClientMaxBodySize ByteSize `yaml:"client_max_body_size" json:"client_max_body_size,omitempty"`
 
-	// File records which config file declared this proxy (provenance).
-	File string `yaml:"-"`
+	// File records which config file declared this proxy (provenance). Never
+	// serialized over the admin API.
+	File string `yaml:"-" json:"-"`
 }
 
 // ProxyLocation maps a location path to a backend, overriding the proxy's
 // default Upstream/Pass when set.
 type ProxyLocation struct {
 	// Path defaults to "/".
-	Path     string `yaml:"path"`
-	Upstream string `yaml:"upstream"`
-	Pass     string `yaml:"pass"`
+	Path     string `yaml:"path" json:"path"`
+	Upstream string `yaml:"upstream" json:"upstream,omitempty"`
+	Pass     string `yaml:"pass" json:"pass,omitempty"`
 	// Websocket adds the Upgrade/Connection headers + HTTP/1.1 for WebSocket
 	// and other connection-upgrade traffic.
-	Websocket bool `yaml:"websocket"`
+	Websocket bool `yaml:"websocket" json:"websocket,omitempty"`
 }
 
 // ListenPort returns the effective listen port for the proxy.
@@ -164,13 +165,13 @@ type Defaults struct {
 
 // Site maps one domain to one content source.
 type Site struct {
-	Domain  string   `yaml:"domain"`
-	Source  Source   `yaml:"source"`
-	Exclude []string `yaml:"exclude"`
+	Domain  string   `yaml:"domain" json:"domain"`
+	Source  Source   `yaml:"source" json:"source"`
+	Exclude []string `yaml:"exclude" json:"exclude,omitempty"`
 
 	// File records which config file declared this site (provenance for
-	// duplicate-domain errors and logs).
-	File string `yaml:"-"`
+	// duplicate-domain errors and logs). Never serialized over the admin API.
+	File string `yaml:"-" json:"-"`
 }
 
 // Interval returns the effective poll interval for the site.
@@ -198,24 +199,24 @@ func (s Site) KeepReleases(d Defaults) int {
 
 // Source describes where a site's content comes from.
 type Source struct {
-	Type         string   `yaml:"type"`
-	URL          string   `yaml:"url"`
-	Interval     Duration `yaml:"interval"`
-	KeepReleases *int     `yaml:"keep_releases"`
-	Auth         Auth     `yaml:"auth"`
+	Type         string   `yaml:"type" json:"type"`
+	URL          string   `yaml:"url" json:"url"`
+	Interval     Duration `yaml:"interval" json:"interval,omitempty"`
+	KeepReleases *int     `yaml:"keep_releases" json:"keep_releases,omitempty"`
+	Auth         Auth     `yaml:"auth" json:"auth"`
 
 	// git only
-	Branch string `yaml:"branch"`
-	Subdir string `yaml:"subdir"`
+	Branch string `yaml:"branch" json:"branch,omitempty"`
+	Subdir string `yaml:"subdir" json:"subdir,omitempty"`
 
 	// post-fetch gate (both source types)
-	RequireFile []string `yaml:"require_file"`
+	RequireFile []string `yaml:"require_file" json:"require_file,omitempty"`
 
 	// http-zip only
-	ChecksumURL     string `yaml:"checksum_url"`
-	StripComponents *int   `yaml:"strip_components"`
-	AllowInsecure   bool   `yaml:"allow_insecure"`
-	Limits          Limits `yaml:"limits"`
+	ChecksumURL     string `yaml:"checksum_url" json:"checksum_url,omitempty"`
+	StripComponents *int   `yaml:"strip_components" json:"strip_components,omitempty"`
+	AllowInsecure   bool   `yaml:"allow_insecure" json:"allow_insecure,omitempty"`
+	Limits          Limits `yaml:"limits" json:"limits"`
 }
 
 // Fingerprint identifies the source identity; when it changes (URL, branch,
@@ -238,38 +239,39 @@ func stripOrMinusOne(p *int) int {
 // referenced indirectly (*_env / *_file); inline values are a parse-time
 // error (see validate.go).
 type Auth struct {
-	Method string `yaml:"method"`
+	Method string `yaml:"method" json:"method,omitempty"`
 
 	// ssh-key: supply the private key either by path (key_file) or by
 	// reference to an env var holding the key material (key_env). Exactly
 	// one is required. key_env materializes the key into a daemon-owned
 	// 0600 temp file at sync time — no on-host staging/ownership dance.
-	KeyFile    string `yaml:"key_file"`
-	KeyEnv     string `yaml:"key_env"`
-	KnownHosts string `yaml:"known_hosts"`
+	KeyFile    string `yaml:"key_file" json:"key_file,omitempty"`
+	KeyEnv     string `yaml:"key_env" json:"key_env,omitempty"`
+	KnownHosts string `yaml:"known_hosts" json:"known_hosts,omitempty"`
 
 	// https-token / basic
-	Username string `yaml:"username"`
+	Username string `yaml:"username" json:"username,omitempty"`
 
 	// token references (https-token, bearer)
-	TokenEnv  string `yaml:"token_env"`
-	TokenFile string `yaml:"token_file"`
+	TokenEnv  string `yaml:"token_env" json:"token_env,omitempty"`
+	TokenFile string `yaml:"token_file" json:"token_file,omitempty"`
 
 	// basic password references
-	PasswordEnv  string `yaml:"password_env"`
-	PasswordFile string `yaml:"password_file"`
+	PasswordEnv  string `yaml:"password_env" json:"password_env,omitempty"`
+	PasswordFile string `yaml:"password_file" json:"password_file,omitempty"`
 
 	// header
-	Name      string `yaml:"name"`
-	ValueEnv  string `yaml:"value_env"`
-	ValueFile string `yaml:"value_file"`
+	Name      string `yaml:"name" json:"name,omitempty"`
+	ValueEnv  string `yaml:"value_env" json:"value_env,omitempty"`
+	ValueFile string `yaml:"value_file" json:"value_file,omitempty"`
 
 	// Inline secret traps: declared so strict decoding accepts the key and
-	// validation can emit a targeted error instead of "unknown field".
-	Token    string `yaml:"token"`
-	Password string `yaml:"password"`
-	Value    string `yaml:"value"`
-	Key      string `yaml:"key"`
+	// validation can emit a targeted error instead of "unknown field". Never
+	// serialized — they are always empty in a validated config anyway.
+	Token    string `yaml:"token" json:"-"`
+	Password string `yaml:"password" json:"-"`
+	Value    string `yaml:"value" json:"-"`
+	Key      string `yaml:"key" json:"-"`
 }
 
 // MethodOrNone returns the effective auth method.
@@ -282,10 +284,10 @@ func (a Auth) MethodOrNone() string {
 
 // Limits bounds http-zip archives. Zero values mean "use default".
 type Limits struct {
-	MaxArchiveSize      ByteSize `yaml:"max_archive_size"`
-	MaxUncompressedSize ByteSize `yaml:"max_uncompressed_size"`
-	MaxEntries          int      `yaml:"max_entries"`
-	MaxCompressionRatio int      `yaml:"max_compression_ratio"`
+	MaxArchiveSize      ByteSize `yaml:"max_archive_size" json:"max_archive_size,omitempty"`
+	MaxUncompressedSize ByteSize `yaml:"max_uncompressed_size" json:"max_uncompressed_size,omitempty"`
+	MaxEntries          int      `yaml:"max_entries" json:"max_entries,omitempty"`
+	MaxCompressionRatio int      `yaml:"max_compression_ratio" json:"max_compression_ratio,omitempty"`
 }
 
 // Defaults from the spec (section 4.2).
@@ -336,6 +338,12 @@ func (d *Duration) UnmarshalYAML(node *yaml.Node) error {
 
 // String implements fmt.Stringer.
 func (d Duration) String() string { return time.Duration(d).String() }
+
+// MarshalJSON renders the duration as its human string ("5m", "30s") so the
+// admin read-API is symmetric with the YAML the write-API accepts.
+func (d Duration) MarshalJSON() ([]byte, error) {
+	return []byte(strconv.Quote(d.String())), nil
+}
 
 // ByteSize is a byte count with YAML support for "512MiB", "2GiB", "100KB"
 // or a plain integer (bytes).
@@ -407,4 +415,10 @@ func (b ByteSize) String() string {
 	default:
 		return strconv.FormatInt(int64(b), 10)
 	}
+}
+
+// MarshalJSON renders the size as its human string ("512MiB") so the admin
+// read-API is symmetric with the YAML the write-API accepts.
+func (b ByteSize) MarshalJSON() ([]byte, error) {
+	return []byte(strconv.Quote(b.String())), nil
 }

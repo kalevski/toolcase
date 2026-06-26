@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { fixedOriginOffset } from './internal/containingBlock'
 import * as LucideIcons from 'lucide-static'
 import { icon, chevronRightIcon } from './icons'
 
@@ -176,9 +177,14 @@ export class ContextMenu extends HTMLElement {
         const menu = this._getMenu()
         if (!menu) return
 
+        // Pointer coords are viewport-relative; re-base onto the containing
+        // block when a transformed/filtered ancestor has hijacked `fixed`
+        // (see fixedOriginOffset).
+        const o = fixedOriginOffset(this)
+
         // Place at pointer before measuring
-        menu.style.left = `${x}px`
-        menu.style.top = `${y}px`
+        menu.style.left = `${x - o.x}px`
+        menu.style.top = `${y - o.y}px`
         menu.classList.add('show')
         this._isOpen = true
 
@@ -191,8 +197,8 @@ export class ContextMenu extends HTMLElement {
             let adjY = y
             if (x + rect.width > vw) adjX = Math.max(0, vw - rect.width - 4)
             if (y + rect.height > vh) adjY = Math.max(0, vh - rect.height - 4)
-            menu.style.left = `${adjX}px`
-            menu.style.top = `${adjY}px`
+            menu.style.left = `${adjX - o.x}px`
+            menu.style.top = `${adjY - o.y}px`
         })
 
         // Focus first enabled item

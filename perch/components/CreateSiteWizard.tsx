@@ -7,10 +7,18 @@ import type {
     SingleCardSelectOption,
 } from '@toolcase/web-components'
 import { useTc, detailValue, targetValue } from '@/lib/tc'
-import type { BaseDomain } from '@/server/domain/types'
+import type { BaseDomain, BaseDomainTier } from '@/server/domain/types'
 
-// Create-site wizard (§9, §10, §14). A guided four-step flow built on
-// `tc-form-wizard`: pick repo → pick branch (+ build subdir) → choose hostname →
+// Per-tier badge shown beside a base domain in the picker (§10). Free is the
+// baseline everyone sees, so it carries no badge; paid/staff are perks.
+const TIER_LABEL: Record<BaseDomainTier, string | undefined> = {
+    free: undefined,
+    paid: 'Sponsors',
+    staff: 'Staff',
+}
+
+// Create-site wizard (§9, §10, §14). A guided three-step flow built on
+// `tc-form-wizard`: pick repo + branch (+ build subdir) → choose hostname →
 // review and submit. Every `tc-*` element is driven through the `lib/tc.ts`
 // bridge — object data (`items`/`options`/`steps`) flows in as element
 // *properties* and `tc-change`/`tc-complete` come back as CustomEvents — because
@@ -58,7 +66,6 @@ interface CreatedSite {
 
 const STEPS: FormWizardStep[] = [
     { label: 'Repository', icon: 'github' },
-    { label: 'Branch', icon: 'git-branch' },
     { label: 'Hostname', icon: 'globe' },
     { label: 'Review', icon: 'clipboard-check' },
 ]
@@ -208,8 +215,10 @@ export function CreateSiteWizard() {
         [branches, selectedRepo],
     )
 
+    // Annotate the audience tier so a paid/staff domain reads as a perk, not the
+    // default. Free domains carry no badge (they're the baseline everyone sees).
     const baseDomainItems = useMemo<ExtendedSelectItem[]>(
-        () => baseDomains.map((b) => ({ key: b.domain, label: b.domain })),
+        () => baseDomains.map((b) => ({ key: b.domain, label: b.domain, description: TIER_LABEL[b.tier] })),
         [baseDomains],
     )
 
@@ -386,9 +395,9 @@ export function CreateSiteWizard() {
             )}
 
             <tc-form-wizard ref={wizardRef} complete-label="Create site" complete-icon="rocket">
-                {/* Step 1 — repository */}
+                {/* Step 1 — repository, branch + build subdir */}
                 <div slot="step-0" className="perch-wizard-step">
-                    <h3 className="perch-wizard-heading">Choose a repository</h3>
+                    <h3 className="perch-wizard-heading">Repository &amp; branch</h3>
                     <p className="perch-wizard-hint">
                         Perch deploys pre-built static content — pick a repo whose branch already holds the
                         built site (e.g. a <code>gh-pages</code> or <code>dist</code> branch).
@@ -399,12 +408,7 @@ export function CreateSiteWizard() {
                         search-placeholder="Search repositories…"
                         no-results-text="No repositories found"
                     />
-                </div>
-
-                {/* Step 2 — branch + build subdir */}
-                <div slot="step-1" className="perch-wizard-step">
-                    <h3 className="perch-wizard-heading">Branch &amp; build directory</h3>
-                    {selectedRepo ? (
+                    {selectedRepo && (
                         <>
                             <tc-extended-select
                                 ref={branchSelectRef}
@@ -419,13 +423,11 @@ export function CreateSiteWizard() {
                                 help="The folder inside the branch that holds index.html. Leave blank if the site is at the repo root. Perch only publishes once an index.html exists (the require_file gate)."
                             />
                         </>
-                    ) : (
-                        <p className="perch-wizard-hint">Pick a repository first.</p>
                     )}
                 </div>
 
-                {/* Step 3 — hostname */}
-                <div slot="step-2" className="perch-wizard-step">
+                {/* Step 2 — hostname */}
+                <div slot="step-1" className="perch-wizard-step">
                     <h3 className="perch-wizard-heading">Hostname</h3>
                     <tc-single-card-select ref={hostKindRef} columns="2" aria-label="Hostname type" />
 
@@ -463,8 +465,8 @@ export function CreateSiteWizard() {
                     </div>
                 </div>
 
-                {/* Step 4 — review */}
-                <div slot="step-3" className="perch-wizard-step">
+                {/* Step 3 — review */}
+                <div slot="step-2" className="perch-wizard-step">
                     <h3 className="perch-wizard-heading">Review</h3>
                     <dl className="perch-wizard-review">
                         <dt>Repository</dt>

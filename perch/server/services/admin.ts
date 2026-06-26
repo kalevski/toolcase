@@ -22,12 +22,28 @@ import * as baseDomainRepo from '@/server/data/repositories/base-domain-repo'
 import * as planTierRepo from '@/server/data/repositories/plan-tier-repo'
 import * as siteRepo from '@/server/data/repositories/site-repo'
 import * as userRepo from '@/server/data/repositories/user-repo'
+import * as userLimitRepo from '@/server/data/repositories/user-limit-repo'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
 import * as deploy from '@/server/services/deploy'
-import { checkBaseDomain, parsePlanTiers } from '@/server/domain/admin'
+import { checkBaseDomain, isAssignableRole, parsePlanTiers, parseUserLimits } from '@/server/domain/admin'
+import { resolveLimits, resolvePlan } from '@/server/services/plan'
+import { summarizeUsage } from '@/server/domain/usage'
 import { NginxpilotError } from '@/server/infrastructure/nginxpilot'
 import { slog } from '@/server/infrastructure/server-log'
-import type { AppUser, AuditEntry, BaseDomain, PlanTier, Site } from '@/server/domain/types'
+import {
+    accountLevel,
+    isBaseDomainTier,
+    visibleBaseDomainTiers,
+    type AdminUserRow,
+    type AppUser,
+    type AuditEntry,
+    type BaseDomain,
+    type BaseDomainTier,
+    type PlanTier,
+    type Role,
+    type Site,
+    type UserLimitOverride,
+} from '@/server/domain/types'
 import type { AuditFilter } from '@/server/data/repositories/audit-repo'
 
 /**
@@ -66,30 +82,50 @@ function audit(actor: AdminActor, action: string, opts: { site?: string; detail?
 
 // ── base domains (the subdomain pool, §10) ─────────────────────────────────────
 
-/** Every registered base domain, oldest first. */
+/** Every registered base domain, oldest first — the owner sees the whole pool. */
 export function listBaseDomains(): BaseDomain[] {
     return baseDomainRepo.list()
 }
 
 /**
- * Register a base domain (`POST /api/admin/base-domains`): validate the FQDN shape,
- * reject a duplicate (`409`), persist it, and audit. Returns the new row.
+ * The base domains a given user may attach a subdomain under, filtered by the
+ * tier-visibility rules (§10): a free-plan user sees only `free` domains, a paid
+ * (sponsored) user sees `free` + `paid`, and an instance operator (`maintainer`/
+ * `owner`) sees every tier including `staff`. Backs the standard, non-owner
+ * `GET /api/base-domains` projection the create-site wizard reads. Role is read
+ * live from the repo (authoritative); the plan is computed from the sponsorship.
  */
-export function addBaseDomain(actor: AdminActor, raw: unknown): BaseDomain {
+export function listBaseDomainsFor(login: string): BaseDomain[] {
+    const role: Role = userRepo.getByLogin(login)?.role ?? 'guest'
+    const allowed = new Set(visibleBaseDomainTiers(role, resolvePlan(login)))
+    return baseDomainRepo.list().filter((b) => allowed.has(b.tier))
+}
+
+/**
+ * Register a base domain (`POST /api/admin/base-domains`): validate the FQDN shape
+ * and the audience `tier`, reject a duplicate (`409`), persist it, and audit. `tier`
+ * defaults to `free` when omitted. Returns the new row.
+ */
+export function addBaseDomain(actor: AdminActor, raw: unknown, rawTier: unknown = 'free'): BaseDomain {
     if (typeof raw !== 'string') throw new AdminError('"domain" is required', 'invalid_request', 400)
     const checked = checkBaseDomain(raw)
     if (!checked.ok) throw new AdminError(checked.message, `domain_${checked.reason}`, 400)
     const domain = checked.domain
+
+    const tier: BaseDomainTier = rawTier === undefined || rawTier === null ? 'free' : (rawTier as BaseDomainTier)
+    if (!isBaseDomainTier(tier)) {
+        throw new AdminError('tier must be one of: free, paid, staff', 'invalid_tier', 400)
+    }
 
     if (baseDomainRepo.list().some((b) => b.domain.toLowerCase() === domain)) {
         throw new AdminError(`base domain "${domain}" is already registered`, 'base_domain_exists', 409)
     }
 
     const createdAt = new Date().toISOString()
-    baseDomainRepo.add(domain, createdAt)
-    audit(actor, 'admin.base_domain.add', { detail: domain })
-    slog('info', 'admin', 'base domain added', { domain, by: actor.login })
-    return { domain, createdAt }
+    baseDomainRepo.add(domain, tier, createdAt)
+    audit(actor, 'admin.base_domain.add', { detail: `${domain} (${tier})` })
+    slog('info', 'admin', 'base domain added', { domain, tier, by: actor.login })
+    return { domain, tier, createdAt }
 }
 
 /**
@@ -143,6 +179,111 @@ export function listAllSites(): Site[] {
 /** Every signed-in user, oldest first (the bootstrap owner leads) — owner roster (§6, §13). */
 export function listUsers(): AppUser[] {
     return userRepo.list()
+}
+
+/**
+ * Enrich one user into an {@link AdminUserRow}: their effective plan + unified
+ * account level, current usage (count + bytes across their sites), the *effective*
+ * limits (role/plan default merged with any override), and the raw custom override.
+ * `override` is passed in by {@link listUsersDetailed} from a single batch read; it
+ * defaults to a per-user read so the single-row callers (set/clear) stay correct.
+ */
+function enrichUser(user: AppUser, override?: UserLimitOverride | null): AdminUserRow {
+    const plan = resolvePlan(user.login)
+    const custom = override !== undefined ? override : (userLimitRepo.get(user.githubId) ?? null)
+    return {
+        user,
+        plan,
+        level: accountLevel(user.role, plan),
+        usage: summarizeUsage(siteRepo.listByOwner(user.githubId)),
+        limits: resolveLimits(user.login),
+        customLimits: custom,
+    }
+}
+
+/**
+ * The enriched owner roster (`GET /api/admin/users`): every user with their plan,
+ * level, usage, effective limits, and custom override. Overrides are read in one
+ * batch query and zipped in, so the roster is a handful of queries, not N per user.
+ */
+export function listUsersDetailed(): AdminUserRow[] {
+    const overrides = userLimitRepo.all()
+    return userRepo.list().map((u) => enrichUser(u, overrides.get(u.githubId) ?? null))
+}
+
+/**
+ * Set (replace) a user's custom limit override (`PUT /api/admin/users/{id}/limits`).
+ * Validates the body (`400`), requires the target to exist (`404`), persists the
+ * override (an all-empty body clears it), and audits. Effective limits update
+ * immediately — they're resolved per request (§11). Returns the enriched user row.
+ */
+export function setUserLimits(actor: AdminActor, githubId: unknown, raw: unknown): AdminUserRow {
+    if (typeof githubId !== 'number' || !Number.isInteger(githubId)) {
+        throw new AdminError('"githubId" must be an integer', 'invalid_request', 400)
+    }
+    const target = userRepo.get(githubId)
+    if (!target) throw new AdminError('user not found', 'user_not_found', 404)
+
+    const checked = parseUserLimits(raw)
+    if (!checked.ok) throw new AdminError(checked.message, `limits_${checked.reason}`, 400)
+
+    userLimitRepo.set(githubId, checked.override, new Date().toISOString())
+    const detail = summarizeOverride(checked.override)
+    audit(actor, 'admin.user.limits', { detail: `${target.login}: ${detail}` })
+    slog('info', 'admin', 'user limits set', { login: target.login, detail, by: actor.login })
+    return enrichUser(target)
+}
+
+/** Clear a user's custom override (`DELETE /api/admin/users/{id}/limits`), reverting to defaults. */
+export function clearUserLimits(actor: AdminActor, githubId: unknown): AdminUserRow {
+    if (typeof githubId !== 'number' || !Number.isInteger(githubId)) {
+        throw new AdminError('"githubId" must be an integer', 'invalid_request', 400)
+    }
+    const target = userRepo.get(githubId)
+    if (!target) throw new AdminError('user not found', 'user_not_found', 404)
+
+    userLimitRepo.remove(githubId)
+    audit(actor, 'admin.user.limits', { detail: `${target.login}: cleared (defaults)` })
+    slog('info', 'admin', 'user limits cleared', { login: target.login, by: actor.login })
+    return enrichUser(target)
+}
+
+/** A compact `key=value` summary of an override for the audit detail. */
+function summarizeOverride(o: UserLimitOverride): string {
+    const parts = Object.entries(o).map(([k, v]) => `${k}=${v}`)
+    return parts.length ? parts.join(',') : '(empty)'
+}
+
+/**
+ * Change a user's role (`PATCH /api/admin/users`) — the owner-only power to grant
+ * `maintainer` (routing access + quota exemption, but no admin) or `owner`, or to
+ * drop back to `standard`. Validates the target role (`400`), requires the target
+ * to exist (`404`), and refuses to demote the *last* `owner` (`409`) so the
+ * instance can never be locked out of its admin surface. A no-op (same role)
+ * short-circuits without an audit entry. Returns the updated user.
+ */
+export function setUserRole(actor: AdminActor, githubId: unknown, rawRole: unknown): AppUser {
+    if (typeof githubId !== 'number' || !Number.isInteger(githubId)) {
+        throw new AdminError('"githubId" must be an integer', 'invalid_request', 400)
+    }
+    if (!isAssignableRole(rawRole)) {
+        throw new AdminError('role must be one of: owner, maintainer, standard', 'invalid_role', 400)
+    }
+    const role: Role = rawRole
+
+    const target = userRepo.get(githubId)
+    if (!target) throw new AdminError('user not found', 'user_not_found', 404)
+    if (target.role === role) return target
+
+    // Demoting the only owner would leave nobody able to reach the admin surface.
+    if (target.role === 'owner' && role !== 'owner' && userRepo.ownerCount() <= 1) {
+        throw new AdminError('cannot demote the last owner', 'last_owner', 409)
+    }
+
+    userRepo.setRole(githubId, role)
+    audit(actor, 'admin.user.role', { detail: `${target.login}: ${target.role} → ${role}` })
+    slog('info', 'admin', 'user role changed', { login: target.login, from: target.role, to: role, by: actor.login })
+    return { ...target, role }
 }
 
 /**

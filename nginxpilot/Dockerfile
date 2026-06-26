@@ -24,8 +24,14 @@ RUN apk add --no-cache git openssh-client ca-certificates tzdata su-exec
 
 RUN addgroup -S nginxpilot 2>/dev/null; \
     adduser -S -D -H -G nginx nginxpilot && \
-    mkdir -p /var/lib/nginxpilot && \
+    mkdir -p /var/lib/nginxpilot/sites.d && \
     chown -R nginxpilot:nginx /var/lib/nginxpilot
+
+# sites.d/ lives UNDER data_dir so the unprivileged daemon (which owns data_dir)
+# can write fragments there itself when a control plane drives config over the
+# admin API (POST/DELETE /sites). Point the config's `include:` at
+# /var/lib/nginxpilot/sites.d/*.yml. Because data_dir is a VOLUME, Docker seeds a
+# fresh volume from this pre-created, daemon-owned dir on first mount.
 
 COPY --from=build /out/nginxpilot /usr/local/bin/nginxpilot
 COPY docker/entrypoint.sh /usr/local/bin/nginxpilot-entrypoint.sh

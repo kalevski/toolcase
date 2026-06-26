@@ -5,15 +5,18 @@
 
 import 'server-only'
 import { prep, allRows } from '@/server/data/db'
-import type { BaseDomain } from '@/server/domain/types'
+import type { BaseDomain, BaseDomainTier } from '@/server/domain/types'
 
 interface Raw {
     domain: string
+    tier: string
     created_at: string
 }
 
 function map(r: Raw): BaseDomain {
-    return { domain: r.domain, createdAt: r.created_at }
+    // `tier` is NOT NULL DEFAULT 'free' in the schema; the cast narrows the column
+    // text to the union without a runtime check (the write path validates it).
+    return { domain: r.domain, tier: r.tier as BaseDomainTier, createdAt: r.created_at }
 }
 
 /** All registered base domains, oldest first. */
@@ -22,12 +25,12 @@ export function list(): BaseDomain[] {
 }
 
 /**
- * Register a base domain. `createdAt` defaults to now. Throws on conflict
- * (the domain is the primary key, so registration is idempotent only if callers
- * dedupe first).
+ * Register a base domain in an audience `tier` (§10). `createdAt` defaults to now.
+ * Throws on conflict (the domain is the primary key, so registration is idempotent
+ * only if callers dedupe first).
  */
-export function add(domain: string, createdAt: string = new Date().toISOString()): void {
-    prep('INSERT INTO base_domain (domain, created_at) VALUES (?, ?)').run(domain, createdAt)
+export function add(domain: string, tier: BaseDomainTier, createdAt: string = new Date().toISOString()): void {
+    prep('INSERT INTO base_domain (domain, tier, created_at) VALUES (?, ?, ?)').run(domain, tier, createdAt)
 }
 
 /** Remove a base domain. No-op if it was never registered. */

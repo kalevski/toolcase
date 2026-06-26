@@ -149,7 +149,7 @@ tc-heatmap {
 // Ink surface, white text, overlay shadow; centred above the hovered cell.
 
 .tc-heatmap-tooltip {
-    position: absolute;
+    position: fixed;
     z-index: var(--tc-z-tooltip, 1070);
     transform: translate(-50%, calc(-100% - 6px));
     padding: 0.25rem 0.5rem;

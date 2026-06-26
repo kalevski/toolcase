@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { fixedOriginOffset } from './internal/containingBlock'
 const TAG_NAME = 'tc-gantt-chart'
 
 // One task bar on the Gantt timeline. `label` is the canonical display field;
@@ -335,12 +336,15 @@ export class GanttChart extends HTMLElement {
             `<span class="tc-gantt-chart-tooltip-name">${esc(r.label)}</span>` +
             `<span class="tc-gantt-chart-tooltip-meta">${esc(r.task.start)} – ${esc(r.task.end)}${progressText}</span>`
 
-        // position relative to the chart root (which is position: relative); the
-        // bar may be scrolled, so derive its centre from live bounding boxes.
-        const rootRect = root.getBoundingClientRect()
+        // position: fixed tooltip lives in viewport space, so place it directly
+        // from the bar's live viewport rect (no root-rect subtraction). This
+        // escapes the scroll container's overflow clipping. Subtract the
+        // containing-block origin when a transformed/filtered ancestor has
+        // hijacked `fixed` (see fixedOriginOffset).
         const barRect = bar.getBoundingClientRect()
-        tip.style.left = `${barRect.left + barRect.width / 2 - rootRect.left}px`
-        tip.style.top = `${barRect.top - rootRect.top}px`
+        const o = fixedOriginOffset(this)
+        tip.style.left = `${barRect.left + barRect.width / 2 - o.x}px`
+        tip.style.top = `${barRect.top - o.y}px`
         tip.hidden = false
     }
 

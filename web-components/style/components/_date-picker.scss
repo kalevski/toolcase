@@ -38,6 +38,13 @@ tc-date-picker {
             border-color: rgba(30, 41, 59, 0.5);
             box-shadow: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
         }
+
+        // Keep the invalid border visible on focus: the local :focus rule above
+        // is more specific than _input.scss's .is-invalid:focus, so re-assert the
+        // danger border here. (.is-invalid base border still comes from _input.scss.)
+        &.is-invalid:focus {
+            border-color: var(--tc-danger);
+        }
     }
 }
 

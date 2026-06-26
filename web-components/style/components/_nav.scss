@@ -116,7 +116,10 @@
 
         &.active {
             color: var(--bs-nav-pills-link-active-color);
-            background-color: var(--bs-nav-pills-link-active-bg);
+            // `background` (not `background-color`) so a theme can supply a
+            // gradient fill (aurora's mint→emerald) — a gradient in
+            // background-color is invalid and leaves the pill unfilled.
+            background: var(--bs-nav-pills-link-active-bg);
         }
     }
 }

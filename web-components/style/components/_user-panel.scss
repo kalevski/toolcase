@@ -215,6 +215,12 @@ tc-user-panel {
     &.show {
         display: block;
     }
+
+    // Flipped above the panel when there is no room below (set via JS).
+    &.tc-user-panel-menu--up {
+        top: auto;
+        bottom: calc(100% + 2px);
+    }
 }
 
 .tc-user-panel-menu-item {

@@ -46,6 +46,14 @@
     }
 }
 
+// Group-level disabled — fades the whole host and blocks interaction. The inner
+// radios are also natively disabled (render adds `disabled`), so this is purely
+// the cosmetic host treatment.
+tc-radio-group[disabled] {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
 // Disabled option rows
 .tc-radio-group .form-check:has(input:disabled) {
     opacity: 0.5;

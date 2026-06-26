@@ -165,14 +165,10 @@ tc-slider[disabled] {
 }
 
 // ── Error ─────────────────────────────────────────────────────────────────────
+// The message itself lives in the shared field-message slot (see
+// style/components/_field-message.scss); danger is the only status color, so
+// here we only recolor the track border on the invalid state.
 
-.tc-slider-error {
-    margin-top: 0.375rem;
-    font-size: 0.8125rem;
-    color: var(--bs-slider-error-color);
-}
-
-// danger is the only status color: recolor the track border on error.
 tc-slider.tc-slider--error {
     --bs-slider-track-border: 1px solid var(--bs-slider-error-color);
 }

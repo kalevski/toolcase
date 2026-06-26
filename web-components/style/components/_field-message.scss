@@ -1,0 +1,51 @@
+// Reserved message gutter shared by every tc-* form field (tc-input, tc-textarea,
+// tc-select, tc-form-input, the pickers and the toggles). The slot is ALWAYS
+// rendered and ALWAYS reserves one line of height, so fields stay vertically
+// aligned and toggling a hint / valid / invalid message never shifts layout.
+//
+// One slot per field, one message at a time — precedence invalid > valid > hint
+// is decided in src/internal/field-message.ts; here we only paint it.
+// All cosmetics flow through --bs-field-message-* backed by --tc-* tokens.
+
+.tc-field-message {
+    --bs-field-message-color: var(--tc-text-muted);
+    --bs-field-message-size: 0.8rem;
+    --bs-field-message-line-height: 1.45;
+    --bs-field-message-gap: 0.3rem;
+    --bs-field-message-margin-top: 0.35rem;
+
+    display: flex;
+    align-items: flex-start;
+    gap: var(--bs-field-message-gap);
+    margin-top: var(--bs-field-message-margin-top);
+    // Reserve exactly one line: an empty slot keeps this height, a one-line
+    // message fills it without growing, so the field's footprint is constant.
+    min-height: calc(var(--bs-field-message-size) * var(--bs-field-message-line-height));
+    font-size: var(--bs-field-message-size);
+    line-height: var(--bs-field-message-line-height);
+    color: var(--bs-field-message-color);
+}
+
+// Status tints — color is the information (styleguide §1).
+.tc-field-message--valid {
+    --bs-field-message-color: var(--tc-success);
+}
+
+.tc-field-message--invalid {
+    --bs-field-message-color: var(--tc-danger);
+}
+
+// Leading status glyph (valid / invalid only); sized to the text line.
+.tc-field-message-icon {
+    flex: none;
+    width: 0.9em;
+    height: 0.9em;
+    margin-top: 0.12em;
+}
+
+// Required-field asterisk on labels — the unified marker for every tc-* input
+// (rendered via requiredMark() in src/internal/form-field.ts).
+.tc-field-required {
+    margin-left: 0.15rem;
+    color: var(--tc-danger);
+}

@@ -1,5 +1,6 @@
 // GET    /api/admin/base-domains — list the owner-managed subdomain pool (§10).
-// POST   /api/admin/base-domains — register a base domain ({ domain }).
+// POST   /api/admin/base-domains — register a base domain ({ domain, tier? }); tier
+//        is one of free|paid|staff (the audience group, §10), defaulting to free.
 // DELETE /api/admin/base-domains — remove a base domain (?domain= or { domain }).
 //
 // All guarded by `authorize('owner')` — a non-owner session is rejected 401/403 and
@@ -24,16 +25,16 @@ export async function POST(req: Request) {
     const authz = await authorize('owner')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
-    let body: { domain?: unknown }
+    let body: { domain?: unknown; tier?: unknown }
     try {
-        body = (await req.json()) as { domain?: unknown }
+        body = (await req.json()) as { domain?: unknown; tier?: unknown }
     } catch {
         return NextResponse.json({ error: 'invalid_json' }, { status: 400 })
     }
 
     try {
         const actor = { githubId: authz.session.sub, login: authz.session.login }
-        const created = admin.addBaseDomain(actor, body.domain)
+        const created = admin.addBaseDomain(actor, body.domain, body.tier)
         return NextResponse.json(created, { status: 201 })
     } catch (err) {
         const { status, code } = admin.httpErrorFor(err)

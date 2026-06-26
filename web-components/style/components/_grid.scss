@@ -4,10 +4,37 @@
 // chrome of its own. The host lays out its light-DOM children directly.
 //
 // All cosmetics flow through --bs-grid-* custom properties (the public theming
-// contract). The element class (Grid.ts) writes the resolved track/gap values
-// onto the host as inline --bs-grid-* properties; these defaults apply when an
-// attribute is absent. Sharp corners, slate neutrals — honours
+// contract). Grid.ts writes the resolved track/gap values onto the host as
+// inline --bs-grid-* properties: the base (mobile) value on the unsuffixed var,
+// and per-breakpoint overrides on --bs-grid-*-{bp}. This partial wires those
+// into a mobile-first media cascade so the layout reflows by viewport without
+// any JS resize listener. Sharp corners, slate neutrals — honours
 // prefers-reduced-motion implicitly (no animation involved).
+
+@use '../foundation/tokens' as *;
+
+// Build a mobile-first fallback chain for a --bs-grid-* family. At breakpoint
+// `$upto` the value resolves to that breakpoint's var, falling back through
+// every smaller breakpoint down to the base (unsuffixed) var, then `$default`.
+// e.g. grid-chain('bs-grid-gap', 'md', 0) →
+//   var(--bs-grid-gap-md, var(--bs-grid-gap-sm, var(--bs-grid-gap, 0)))
+// Larger media blocks come later in source order, so they win once matched;
+// the chain lets an unset level inherit the nearest smaller one.
+@function grid-chain($prop, $upto, $default) {
+    $order: '' 'sm' 'md' 'lg' 'xl' 'xxl';
+    $chain: $default;
+    @each $bp in $order {
+        $name: --#{$prop};
+        @if $bp != '' {
+            $name: --#{$prop}-#{$bp};
+        }
+        $chain: var(#{$name}, #{$chain});
+        @if $bp == $upto {
+            @return $chain;
+        }
+    }
+    @return $chain;
+}
 
 tc-grid {
     // Defaults mirror gc-grid: no template until columns/rows are set, zero gap.
@@ -17,7 +44,20 @@ tc-grid {
 
     // display: grid is set on the host in foundation/_reset.scss so an unstyled
     // tc-grid never falls back to inline before this sheet loads.
-    grid-template-columns: var(--bs-grid-template-columns);
-    grid-template-rows: var(--bs-grid-template-rows);
-    gap: var(--bs-grid-gap);
+    grid-template-columns: grid-chain('bs-grid-template-columns', '', none);
+    grid-template-rows: grid-chain('bs-grid-template-rows', '', none);
+    gap: grid-chain('bs-grid-gap', '', 0);
+}
+
+// Mobile-first overrides — each breakpoint re-resolves the three families from
+// its own var down through the smaller levels. A breakpoint with no override
+// for a family inherits the nearest smaller value via the chain.
+@each $bp, $min in $grid-breakpoints {
+    @include media-up($bp) {
+        tc-grid {
+            grid-template-columns: grid-chain('bs-grid-template-columns', $bp, none);
+            grid-template-rows: grid-chain('bs-grid-template-rows', $bp, none);
+            gap: grid-chain('bs-grid-gap', $bp, 0);
+        }
+    }
 }

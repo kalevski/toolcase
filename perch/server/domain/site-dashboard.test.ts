@@ -55,6 +55,7 @@ describe('helpers', () => {
         expect(formatBytes(512)).toBe('512 B')
         expect(formatBytes(12.3 * MB)).toBe('12 MB')
         expect(formatBytes(1.5 * 1024 * MB)).toBe('1.5 GB')
+        expect(formatBytes(Infinity)).toBe('∞')
     })
 
     it('shortRef truncates SHAs but leaves branch names alone', () => {

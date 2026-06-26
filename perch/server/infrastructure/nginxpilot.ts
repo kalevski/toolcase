@@ -1,31 +1,32 @@
 // nginxpilot integration client — the load-bearing seam Perch drives the deploy
-// engine through (§4). Two channels:
+// engine through (§4). Perch never touches nginxpilot's filesystem: the entire
+// config and every operation go over the loopback/networked REST admin API, so the
+// two processes only need to share a network (no shared `sites.d/` volume). Two
+// channels, both pure HTTP:
 //
-//   • Channel A (config): write/remove YAML site fragments in the shared `sites.d/`
-//     dir and reload the daemon. Fragment *rendering* is the pure, unit-tested
-//     `domain/nginxpilot-fragment.ts`; this module owns only the atomic filesystem
-//     write and the deterministic, server-generated path (§16).
+//   • Channel A (config): `POST /sites` writes a site's fragment and
+//     `DELETE /sites/{domain}` removes it. nginxpilot validates the candidate merged
+//     config, writes the fragment under its own deterministic `<domain>.yml`, and
+//     reloads — all atomically on its side, so a bad fragment comes back as a `400`
+//     and never reaches disk or the running config. Fragment *rendering* is the pure,
+//     unit-tested `domain/nginxpilot-fragment.ts`; this module just ships the YAML.
 //   • Channel B (operations): the read/operate REST admin API — `GET /status`,
-//     `POST /sync/{domain}`, `GET /vhost/{domain}`, `GET /healthz` — with the
-//     optional `Authorization: Bearer` from nginxpilot's `admin.token_env`.
-//
-// `reload()` is isolated behind one function so M4 can drop the file-drop + sidecar
-// fallback the moment nginxpilot ships `POST /reload` (§4, §17).
+//     `POST /sync/{domain}`, `GET /vhost/{domain}`, `GET /healthz`, `POST /reload` —
+//     with the optional `Authorization: Bearer` from nginxpilot's `admin.token_env`.
 //
 // Server-only. Never import from a client component.
 
 import 'server-only'
-import { mkdir, rename, rm, writeFile } from 'node:fs/promises'
-import { randomBytes } from 'node:crypto'
-import path from 'node:path'
 import { config } from '@/server/config'
 import { slog } from '@/server/infrastructure/server-log'
 import type { Site } from '@/server/domain/types'
+import { renderFragment, type FragmentOptions } from '@/server/domain/nginxpilot-fragment'
 import {
-    fragmentFilename,
-    renderFragment,
-    type FragmentOptions,
-} from '@/server/domain/nginxpilot-fragment'
+    renderUpstreamFragment,
+    renderProxyFragment,
+    type Upstream,
+    type Proxy,
+} from '@/server/domain/routing'
 
 // Re-export the pure fragment surface so callers (the deploy service) reach the
 // whole seam through one module.
@@ -47,45 +48,138 @@ export class NginxpilotError extends Error {
     }
 }
 
-// ── Channel A: fragment write / remove (atomic, server-generated path) ─────────
+// ── low-level admin HTTP ────────────────────────────────────────────────────────
 
-/** Absolute on-disk path of a site's fragment, inside the shared `sites.d/` dir. */
-export function fragmentPath(siteId: string): string {
-    // `fragmentFilename` validates the id (§16: rejects anything path-unsafe), so
-    // the join can never escape `sitesDir`.
-    return path.join(config.nginxpilotSitesDir, fragmentFilename(siteId))
+/** Optional request shaping for the admin fetch helpers. */
+interface AdminInit {
+    body?: string
+    headers?: Record<string, string>
 }
 
+/** Auth headers for the admin API — Bearer only when a token is configured. */
+function authHeaders(): Record<string, string> {
+    return config.nginxpilotAdminToken ? { Authorization: `Bearer ${config.nginxpilotAdminToken}` } : {}
+}
+
+/** Low-level admin fetch. Returns the raw `Response` so callers can branch on status. */
+async function adminFetch(method: string, apiPath: string, init: AdminInit = {}): Promise<Response> {
+    return fetch(`${config.nginxpilotAdminUrl}${apiPath}`, {
+        method,
+        cache: 'no-store',
+        headers: { ...authHeaders(), ...(init.headers ?? {}) },
+        body: init.body,
+    })
+}
+
+/** Admin fetch that throws `NginxpilotError` on any non-2xx response. */
+async function adminOk(method: string, apiPath: string, init: AdminInit = {}): Promise<Response> {
+    const res = await adminFetch(method, apiPath, init)
+    if (!res.ok) {
+        const detail = await res.text().catch(() => '')
+        throw new NginxpilotError(
+            `nginxpilot ${method} ${apiPath} failed (${res.status})${detail ? `: ${detail.trim()}` : ''}`,
+            res.status,
+        )
+    }
+    return res
+}
+
+// ── Channel A: config over REST (no filesystem) ─────────────────────────────────
+
 /**
- * Render a site's fragment and write it into `sites.d/` atomically: write to a
- * sibling temp file, then `rename` over the target (a rename is atomic on the same
- * filesystem, so nginxpilot never reads a half-written fragment). Returns the path.
- * Does NOT reload — the caller pairs this with `reload()`.
+ * Render a site's fragment and write it through nginxpilot's `POST /sites` admin
+ * endpoint. nginxpilot validates the candidate merged config, writes the fragment
+ * under its own deterministic `<domain>.yml`, and reloads — all atomically, so a
+ * rejected fragment comes back as a `400` (no disk write, running config untouched).
+ * Returns the site's domain (the key `removeFragment` deletes by). The write reloads
+ * on nginxpilot's side, so a following `reload()` is an idempotent no-op.
  */
 export async function writeFragment(site: Site, options: FragmentOptions): Promise<string> {
     const yaml = renderFragment(site, options)
-    const dest = fragmentPath(site.id)
-    await mkdir(config.nginxpilotSitesDir, { recursive: true })
-    const tmp = `${dest}.tmp-${randomBytes(6).toString('hex')}`
-    try {
-        await writeFile(tmp, yaml, { encoding: 'utf8', mode: 0o644 })
-        await rename(tmp, dest)
-    } catch (err) {
-        await rm(tmp, { force: true }).catch(() => {})
-        throw err
+    await adminOk('POST', '/sites', { body: yaml, headers: { 'Content-Type': 'application/yaml' } })
+    slog('info', 'nginxpilot', 'wrote site fragment via API', { site: site.id, domain: site.hostname })
+    return site.hostname
+}
+
+/**
+ * Remove a site's fragment via `DELETE /sites/{domain}` (idempotent — a `404` means
+ * the fragment is already gone, which is success). nginxpilot reloads on its side.
+ * Keyed on the domain because that is the filename nginxpilot derives the fragment
+ * from (`<domain>.yml`), not Perch's internal site id.
+ */
+export async function removeFragment(domain: string): Promise<void> {
+    const res = await adminFetch('DELETE', `/sites/${encodeURIComponent(domain)}`)
+    if (!res.ok && res.status !== 404) {
+        const detail = await res.text().catch(() => '')
+        throw new NginxpilotError(
+            `nginxpilot DELETE /sites/${domain} failed (${res.status})${detail ? `: ${detail.trim()}` : ''}`,
+            res.status,
+        )
     }
-    slog('info', 'nginxpilot', 'wrote site fragment', { site: site.id, path: dest })
-    return dest
+    slog('info', 'nginxpilot', 'removed site fragment via API', { domain })
 }
 
-/** Delete a site's fragment (idempotent — a missing file is not an error). Does NOT reload. */
-export async function removeFragment(siteId: string): Promise<void> {
-    const dest = fragmentPath(siteId)
-    await rm(dest, { force: true })
-    slog('info', 'nginxpilot', 'removed site fragment', { site: siteId, path: dest })
+// ── Channel A: routing config over REST (upstreams + proxies) ───────────────────
+//
+// Same two-call shape as sites — `GET` reads the running merged config, `POST`
+// writes one entity's fragment (validated + reloaded atomically on nginxpilot's
+// side, so a bad fragment is a 400 that never lands), `DELETE` removes it. An
+// upstream that is still referenced by a proxy is a 409 on delete — that status is
+// preserved so the routing service can surface a precise "still in use" error.
+
+/** Every configured upstream from `GET /upstreams`. */
+export async function listUpstreams(): Promise<Upstream[]> {
+    const res = await adminOk('GET', '/upstreams')
+    return ((await res.json()) as { upstreams?: Upstream[] }).upstreams ?? []
 }
 
-// ── Channel B: REST admin API ─────────────────────────────────────────────────
+/** Write an upstream's fragment via `POST /upstreams` (validated + reloaded daemon-side). */
+export async function writeUpstream(upstream: Upstream): Promise<void> {
+    const yaml = renderUpstreamFragment(upstream)
+    await adminOk('POST', '/upstreams', { body: yaml, headers: { 'Content-Type': 'application/yaml' } })
+    slog('info', 'nginxpilot', 'wrote upstream fragment via API', { name: upstream.name })
+}
+
+/** Remove an upstream via `DELETE /upstreams/{name}` (404 = already gone → success; 409 = in use). */
+export async function removeUpstream(name: string): Promise<void> {
+    const res = await adminFetch('DELETE', `/upstreams/${encodeURIComponent(name)}`)
+    if (!res.ok && res.status !== 404) {
+        const detail = await res.text().catch(() => '')
+        throw new NginxpilotError(
+            `nginxpilot DELETE /upstreams/${name} failed (${res.status})${detail ? `: ${detail.trim()}` : ''}`,
+            res.status,
+        )
+    }
+    slog('info', 'nginxpilot', 'removed upstream fragment via API', { name })
+}
+
+/** Every configured reverse proxy from `GET /proxies`. */
+export async function listProxies(): Promise<Proxy[]> {
+    const res = await adminOk('GET', '/proxies')
+    return ((await res.json()) as { proxies?: Proxy[] }).proxies ?? []
+}
+
+/** Write a proxy's fragment via `POST /proxies` (validated + reloaded daemon-side). */
+export async function writeProxy(proxy: Proxy): Promise<void> {
+    const yaml = renderProxyFragment(proxy)
+    await adminOk('POST', '/proxies', { body: yaml, headers: { 'Content-Type': 'application/yaml' } })
+    slog('info', 'nginxpilot', 'wrote proxy fragment via API', { domain: proxy.domain })
+}
+
+/** Remove a proxy via `DELETE /proxies/{domain}` (404 = already gone → success). */
+export async function removeProxy(domain: string): Promise<void> {
+    const res = await adminFetch('DELETE', `/proxies/${encodeURIComponent(domain)}`)
+    if (!res.ok && res.status !== 404) {
+        const detail = await res.text().catch(() => '')
+        throw new NginxpilotError(
+            `nginxpilot DELETE /proxies/${domain} failed (${res.status})${detail ? `: ${detail.trim()}` : ''}`,
+            res.status,
+        )
+    }
+    slog('info', 'nginxpilot', 'removed proxy fragment via API', { domain })
+}
+
+// ── Channel B: REST admin API (read / operate) ──────────────────────────────────
 
 /** One site's status from `GET /status` — mirrors nginxpilot's `manager.SiteStatus`. */
 export interface NginxpilotSiteStatus {
@@ -116,33 +210,6 @@ export interface NginxpilotSiteStatus {
 /** The `GET /status` envelope. */
 export interface NginxpilotStatus {
     sites: NginxpilotSiteStatus[]
-}
-
-/** Auth headers for the admin API — Bearer only when a token is configured. */
-function authHeaders(): Record<string, string> {
-    return config.nginxpilotAdminToken ? { Authorization: `Bearer ${config.nginxpilotAdminToken}` } : {}
-}
-
-/** Low-level admin fetch. Returns the raw `Response` so callers can branch on status. */
-async function adminFetch(method: string, apiPath: string, headers: Record<string, string> = {}): Promise<Response> {
-    return fetch(`${config.nginxpilotAdminUrl}${apiPath}`, {
-        method,
-        cache: 'no-store',
-        headers: { ...authHeaders(), ...headers },
-    })
-}
-
-/** Admin fetch that throws `NginxpilotError` on any non-2xx response. */
-async function adminOk(method: string, apiPath: string): Promise<Response> {
-    const res = await adminFetch(method, apiPath)
-    if (!res.ok) {
-        const detail = await res.text().catch(() => '')
-        throw new NginxpilotError(
-            `nginxpilot ${method} ${apiPath} failed (${res.status})${detail ? `: ${detail.trim()}` : ''}`,
-            res.status,
-        )
-    }
-    return res
 }
 
 /** Daemon liveness — `GET /healthz` (unauthenticated). True iff it answers 2xx. */
@@ -177,63 +244,20 @@ export async function vhost(domain: string): Promise<string> {
     return res.text()
 }
 
-// ── reload (isolated fallback — §4, §17) ──────────────────────────────────────
+// ── reload ───────────────────────────────────────────────────────────────────────
+
+/** Outcome of `reload()` — always the REST path now that the file-drop fallback is gone. */
+export type ReloadResult = { method: 'rest' }
 
 /**
- * Outcome of `reload()`:
- *   • `rest`    — nginxpilot's `POST /reload` handled it (the M4 clean path).
- *   • `sidecar` — `POST /reload` is absent (404/405), so we fell back to the
- *                 file-drop + reload-sidecar. `triggered` is true when the reload
- *                 trigger file was touched; false when no trigger is configured and
- *                 we rely on a path/timer watcher of `sites.d/` alone.
- */
-export type ReloadResult = { method: 'rest' } | { method: 'sidecar'; triggered: boolean }
-
-/**
- * Reload nginxpilot so it picks up fragment changes. Tries the REST `POST /reload`
- * first; if that endpoint isn't implemented yet (404/405) it falls back to the
- * file-drop + reload-sidecar path (§4). A real failure (5xx, connection refused)
- * propagates — only "endpoint absent" triggers the fallback. This is the ONE place
- * the fallback lives, so M4 can delete the `else` branch when `POST /reload` lands.
+ * Reload nginxpilot via `POST /reload` (diff-based, the REST equivalent of SIGHUP).
+ * Channel A writes already reload on nginxpilot's side, so after a write/remove this
+ * is an idempotent no-op (an empty diff returns `200`); it stays an explicit step so
+ * the deploy machine need not assume that atomicity. A non-2xx (rejected on-disk
+ * config, connection refused) is a real failure and propagates.
  */
 export async function reload(): Promise<ReloadResult> {
-    let res: Response
-    try {
-        res = await adminFetch('POST', '/reload')
-    } catch (err) {
-        throw new NginxpilotError(`nginxpilot POST /reload unreachable: ${(err as Error).message}`)
-    }
-    if (res.ok) {
-        slog('info', 'nginxpilot', 'reloaded via REST')
-        return { method: 'rest' }
-    }
-    // Endpoint not present yet → fall back. Any other non-2xx is a genuine failure.
-    if (res.status !== 404 && res.status !== 405) {
-        const detail = await res.text().catch(() => '')
-        throw new NginxpilotError(
-            `nginxpilot POST /reload failed (${res.status})${detail ? `: ${detail.trim()}` : ''}`,
-            res.status,
-        )
-    }
-    return reloadViaSidecar()
-}
-
-/**
- * Fallback reload: touch the configured trigger file so a co-located reload-sidecar
- * sends nginxpilot SIGHUP. When no trigger is configured, the fragment file-drop
- * itself is the only signal (a systemd path/timer watcher of `sites.d/` picks it
- * up); we log so the deploy isn't silently slow.
- */
-async function reloadViaSidecar(): Promise<ReloadResult> {
-    const trigger = config.nginxpilotReloadTrigger
-    if (!trigger) {
-        slog('warn', 'nginxpilot', 'POST /reload absent and no reload trigger configured — relying on a sites.d watcher')
-        return { method: 'sidecar', triggered: false }
-    }
-    await mkdir(path.dirname(trigger), { recursive: true })
-    // Writing a fresh timestamp updates mtime, which is what an inotify/path-unit
-    // sidecar watches for.
-    await writeFile(trigger, `${new Date().toISOString()}\n`, 'utf8')
-    slog('info', 'nginxpilot', 'requested reload via sidecar trigger', { trigger })
-    return { method: 'sidecar', triggered: true }
+    await adminOk('POST', '/reload')
+    slog('info', 'nginxpilot', 'reloaded via REST')
+    return { method: 'rest' }
 }

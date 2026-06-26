@@ -90,7 +90,10 @@ export class SettingsCategoryList extends HTMLElement {
                 const cls = `tc-settings-category-list-item${isSelected ? ' tc-settings-category-list-item--active' : ''}`
                 let iconHtml = ''
                 if (cat.icon) {
-                    const lucide = lucideByName(cat.icon)
+                    // Pass the sizing class so icon() keeps a hook for the CSS
+                    // width/height rule — without it the stripped SVG has no
+                    // dimensions and renders at the wrong size / invisibly.
+                    const lucide = lucideByName(cat.icon, 'tc-settings-category-list-icon')
                     iconHtml = lucide
                         ? `<span class="tc-settings-category-list-icon-wrap" aria-hidden="true">${lucide}</span>`
                         : `<span class="tc-settings-category-list-icon-wrap tc-settings-category-list-icon-wrap--text" aria-hidden="true">${esc(cat.icon)}</span>`

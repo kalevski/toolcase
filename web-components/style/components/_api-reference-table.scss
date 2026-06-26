@@ -72,7 +72,8 @@ tc-api-reference-table {
     border: var(--bs-api-reference-table-border);
     border-radius: var(--bs-api-reference-table-border-radius);
     background: var(--bs-api-reference-table-bg);
-    overflow: hidden;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 // ── Title header cap ─────────────────────────────────────────────────────────

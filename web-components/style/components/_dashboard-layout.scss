@@ -227,6 +227,13 @@ tc-dashboard-layout {
 // ── Desktop (≥992px): pinned full-height sidebar, navbar over content column ─────
 
 @include media-up(lg) {
+    // Pin the whole shell to the viewport so the page itself never scrolls — the
+    // navbar + sidebar stay put and only __content scrolls inside its grid cell.
+    tc-dashboard-layout {
+        height: 100vh;
+        max-height: 100vh;
+    }
+
     .tc-dashboard-layout__wrapper {
         grid-template-columns: var(--bs-dashboard-layout-sidebar-width) 1fr;
     }

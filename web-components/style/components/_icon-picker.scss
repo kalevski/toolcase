@@ -8,6 +8,14 @@
 
 tc-icon-picker {
     position: relative;
+    --bs-icon-picker-options-max-height: 240px; // cap before the icon grid scrolls; override via the `max-height` attribute
+}
+
+// Disabled host: dim and lock the whole control (mirrors tc-color-picker so the
+// new `disabled` attribute reads consistently across the picker pair).
+tc-icon-picker[disabled] {
+    opacity: 0.6;
+    pointer-events: none;
 }
 
 // ── Label ─────────────────────────────────────────────────────────────────────
@@ -55,6 +63,12 @@ tc-icon-picker {
         pointer-events: none;
         cursor: default;
     }
+
+    // Invalid state: the trigger is bespoke (not a .form-control), so the danger
+    // border is asserted here via --tc-danger, mirroring _input.scss's .is-invalid.
+    &.is-invalid {
+        border-color: var(--tc-danger);
+    }
 }
 
 // Icon inside the trigger
@@ -95,9 +109,10 @@ tc-icon-picker {
     --bs-icon-picker-popup-padding: 0.5rem;
     --bs-icon-picker-popup-min-width: 200px;
 
-    position: absolute;
-    top: calc(100% + 2px);
-    left: 0;
+    // Fixed to the viewport with top/left set by JS (anchored to the trigger) —
+    // escapes overflow:hidden/auto clipping inside modal/scroll containers.
+    // Mirrors the tc-context-menu pattern.
+    position: fixed;
     z-index: var(--bs-icon-picker-popup-z);
     display: none;
     width: max-content;
@@ -145,7 +160,7 @@ tc-icon-picker {
 
 .tc-icon-picker-options {
     // scrollable when the grid is large
-    max-height: 240px;
+    max-height: var(--bs-icon-picker-options-max-height);
     overflow-y: auto;
 }
 
@@ -238,8 +253,13 @@ tc-icon-picker {
 }
 
 @keyframes tc-ip-pulse {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0.35; }
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.35;
+    }
 }
 
 // ── Touch targets (WCAG 2.5.5 — 44px minimum on coarse pointer) ──────────────

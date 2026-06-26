@@ -45,6 +45,26 @@ const GridDemo: React.FC = () => (
                             </tc-grid>
                         </tc-section-card>
 
+                        <tc-section-card title="Responsive — 1 col on mobile → 2 (sm) → 3 (md) → 6 (lg). Resize the window.">
+                            {/* @ts-ignore */}
+                            <tc-grid
+                                columns="1"
+                                columns-sm="2"
+                                columns-md="3"
+                                columns-lg="6"
+                                gap="6"
+                                gap-md="12"
+                            >
+                                <Cell>1</Cell>
+                                <Cell>2</Cell>
+                                <Cell>3</Cell>
+                                <Cell>4</Cell>
+                                <Cell>5</Cell>
+                                <Cell>6</Cell>
+                                {/* @ts-ignore */}
+                            </tc-grid>
+                        </tc-section-card>
+
                         <tc-section-card title="Fixed cell size (4 columns × 64px, gap 1rem)">
                             {/* @ts-ignore */}
                             <tc-grid columns="4" cell-size="64px" gap="1rem">

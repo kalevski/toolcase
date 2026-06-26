@@ -202,6 +202,11 @@ tc-tree-view {
 // ── Checkbox — grandfathered form-check glyph ──────────────────────────────────────
 
 .tc-tree-view-checkbox.form-check-input {
+    // The form-check fill/border tokens are normally provided by a `.form-check`
+    // wrapper; this checkbox is bare, so set them here or the appearance:none box
+    // paints with no fill and an invalid (→ none) border — i.e. invisible.
+    --bs-form-check-bg: var(--tc-surface);
+    --bs-form-check-border-color: var(--tc-border-strong);
     flex-shrink: 0;
     width: 0.95rem;
     height: 0.95rem;

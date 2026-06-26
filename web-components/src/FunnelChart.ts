@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { fixedOriginOffset } from './internal/containingBlock'
 const TAG_NAME = 'tc-funnel-chart'
 
 // One funnel step = a stage label, a numeric value, and an optional explicit colour.
@@ -361,8 +362,13 @@ export class FunnelChart extends HTMLElement {
         const rect = svg ? svg.getBoundingClientRect() : null
         const scaleX = rect && this._vw ? rect.width / this._vw : 1
         const scaleY = rect && this._vh ? rect.height / this._vh : 1
-        tip.style.left = `${anchor.ax * scaleX}px`
-        tip.style.top = `${anchor.ay * scaleY}px`
+        // tooltip is position:fixed — rebase svg-local pixels to the viewport so
+        // it escapes overflow/stacking-context clipping (rect is viewport-relative);
+        // subtract the containing-block origin when a transformed/filtered ancestor
+        // has hijacked `fixed` (see fixedOriginOffset).
+        const o = fixedOriginOffset(this)
+        tip.style.left = `${(rect ? rect.left : 0) + anchor.ax * scaleX - o.x}px`
+        tip.style.top = `${(rect ? rect.top : 0) + anchor.ay * scaleY - o.y}px`
         tip.hidden = false
     }
 

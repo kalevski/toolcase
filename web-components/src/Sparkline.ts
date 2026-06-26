@@ -48,8 +48,18 @@ export class Sparkline extends HTMLElement {
             .filter((n) => !isNaN(n))
     }
 
-    set data(v: number[]) {
-        this._data = Array.isArray(v) ? v : []
+    set data(v: number[] | string) {
+        // React (and plain property assignment) may hand us the raw
+        // comma-separated string once the element is upgraded — parse it the
+        // same way the `data` attribute is parsed rather than discarding it.
+        if (typeof v === 'string') {
+            this._data = v
+                .split(',')
+                .map((s) => parseFloat(s.trim()))
+                .filter((n) => !isNaN(n))
+        } else {
+            this._data = Array.isArray(v) ? v : []
+        }
         if (this._initialised) this.render()
     }
 

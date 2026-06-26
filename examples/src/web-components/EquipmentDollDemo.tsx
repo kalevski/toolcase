@@ -14,7 +14,7 @@ const HUMANOID_SLOTS = [
         id: 'chest',
         label: 'Chest',
         x: 50,
-        y: 34,
+        y: 32,
         item: { id: 'plate', name: 'Plate Armor', icon: 'C' },
     },
     {
@@ -38,7 +38,7 @@ const HUMANOID_SLOTS = [
         y: 64,
         item: { id: 'gloves', name: 'Gauntlets', icon: 'G' },
     },
-    { id: 'belt', label: 'Belt', x: 50, y: 60, item: null },
+    { id: 'belt', label: 'Belt', x: 50, y: 51, item: null },
     {
         id: 'ring',
         label: 'Ring',
@@ -50,14 +50,14 @@ const HUMANOID_SLOTS = [
         id: 'legs',
         label: 'Legs',
         x: 50,
-        y: 78,
+        y: 71,
         item: { id: 'greaves', name: 'Greaves', icon: 'L' },
     },
     {
         id: 'feet',
         label: 'Feet',
         x: 50,
-        y: 94,
+        y: 90,
         item: { id: 'boots', name: 'Boots', icon: 'B', qty: 2 },
     },
 ]

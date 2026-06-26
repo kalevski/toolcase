@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { fixedOriginOffset } from './internal/containingBlock'
 const TAG_NAME = 'tc-heatmap'
 
 export interface HeatmapCell {
@@ -283,12 +284,15 @@ export class Heatmap extends HTMLElement {
             tooltip.textContent = text
             tooltip.hidden = false
 
-            // Position the tooltip centred above the cell, relative to the
-            // scroll container (the positioned ancestor).
+            // position: fixed tooltip lives in viewport space, so place it
+            // centred above the cell using the cell's live viewport rect
+            // directly. This escapes the scroll container's overflow-x clipping.
+            // Subtract the containing-block origin when a transformed/filtered
+            // ancestor has hijacked `fixed` (see fixedOriginOffset).
             const cellRect = cell.getBoundingClientRect()
-            const scrollRect = scroll.getBoundingClientRect()
-            tooltip.style.left = `${cellRect.left - scrollRect.left + scroll.scrollLeft + cellRect.width / 2}px`
-            tooltip.style.top = `${cellRect.top - scrollRect.top + scroll.scrollTop}px`
+            const o = fixedOriginOffset(this)
+            tooltip.style.left = `${cellRect.left + cellRect.width / 2 - o.x}px`
+            tooltip.style.top = `${cellRect.top - o.y}px`
 
             cell.classList.add('tc-heatmap-cell--active')
 

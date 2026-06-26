@@ -25,11 +25,11 @@ import type {
 
 /** The slice of the nginxpilot client the state machine drives (both channels, §4). */
 export interface DeployClient {
-    /** Channel A: render + atomically write the site's `sites.d/` fragment. */
+    /** Channel A: render the site's fragment and write it via `POST /sites` (atomic). */
     writeFragment(site: Site, options: FragmentOptions): Promise<string>
-    /** Channel A: remove the site's fragment (idempotent). */
-    removeFragment(siteId: string): Promise<void>
-    /** Channel A: reload nginxpilot so fragment changes are picked up. */
+    /** Channel A: remove the site's fragment via `DELETE /sites/{domain}` (idempotent). */
+    removeFragment(domain: string): Promise<void>
+    /** Channel A: reload nginxpilot (idempotent after a write — the API already reloaded). */
     reload(): Promise<ReloadResult>
     /** Channel B: `POST /sync/{domain}` — force an immediate deploy. */
     sync(domain: string): Promise<void>
@@ -236,7 +236,7 @@ export async function update(deps: DeployDeps, site: Site, changes: SiteSourceCh
  * and delete the row. Custom-domain vhost/cert teardown is handled separately in §729.
  */
 export async function remove(deps: DeployDeps, site: Site): Promise<void> {
-    await deps.client.removeFragment(site.id)
+    await deps.client.removeFragment(site.hostname)
     await deps.client.reload()
     deps.store.remove(site.id)
     deps.audit('site.remove', site)
@@ -253,7 +253,7 @@ export async function remove(deps: DeployDeps, site: Site): Promise<void> {
  * this machine's (which would mis-attribute it to the tenant).
  */
 export async function suspend(deps: DeployDeps, site: Site): Promise<Site> {
-    await deps.client.removeFragment(site.id)
+    await deps.client.removeFragment(site.hostname)
     await deps.client.reload()
     const at = deps.now()
     deps.store.updateStatus(site.id, 'suspended', at)

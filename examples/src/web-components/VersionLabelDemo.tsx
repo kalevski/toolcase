@@ -45,11 +45,25 @@ const VersionLabelDemo: React.FC = () => (
                                     borderRadius: 0,
                                 }}
                             >
-                                {/* @ts-ignore */}
+                                {/* On a dark surface, re-skin the label through its
+                                    public --bs-version-label-* contract so the
+                                    segments keep contrast. */}
                                 <tc-version-label
                                     version="0.9.1"
                                     build="7b3a8c2"
                                     branch="release"
+                                    style={
+                                        {
+                                            '--bs-version-label-color': 'rgba(248,250,252,0.75)',
+                                            '--bs-version-label-version-color': '#f8fafc',
+                                            '--bs-version-label-build-color':
+                                                'rgba(248,250,252,0.6)',
+                                            '--bs-version-label-branch-color': '#7dd3fc',
+                                            '--bs-version-label-sep-color': 'rgba(248,250,252,0.35)',
+                                            '--bs-version-label-border-color':
+                                                'rgba(255,255,255,0.15)',
+                                        } as React.CSSProperties
+                                    }
                                 />
                             </div>
                         </tc-section-card>

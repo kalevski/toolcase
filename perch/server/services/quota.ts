@@ -156,7 +156,7 @@ export async function enforceBytes(site: Site): Promise<Site> {
 
         case 'suspend': {
             // Stop serving: drop the fragment and reload so nginxpilot forgets the site.
-            await nginxpilot.removeFragment(site.id)
+            await nginxpilot.removeFragment(site.hostname)
             await nginxpilot.reload()
             siteRepo.updateStatus(site.id, 'suspended', now)
             notify('site.suspended', site, owner, `suspended after grace window — still over byte quota (${usage})`)

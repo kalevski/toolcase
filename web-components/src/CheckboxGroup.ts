@@ -1,7 +1,13 @@
 import { esc } from './internal/esc'
+import { fieldMessageHtml } from './internal/field-message'
+import { requiredMark, reflectFieldValidity, dispatchFieldChange } from './internal/form-field'
 const TAG_NAME = 'tc-checkbox-group'
 
 let _idCounter = 0
+
+export type CheckboxGroupState = 'valid' | 'invalid'
+
+const STATES: CheckboxGroupState[] = ['valid', 'invalid']
 
 export interface CheckboxGroupOption {
     value: string
@@ -19,6 +25,7 @@ export class CheckboxGroup extends HTMLElement {
 
     private _initialised = false
     private _idPrefix: string
+    private _helpId: string
     private _options: CheckboxGroupOption[] = []
     private _value: string[] = []
     private _internals: ElementInternals
@@ -26,12 +33,14 @@ export class CheckboxGroup extends HTMLElement {
     onChange: ((checkedValues: string[]) => void) | null = null
 
     static get observedAttributes(): string[] {
-        return ['label', 'inline', 'name', 'required']
+        return ['label', 'inline', 'name', 'disabled', 'required', 'state', 'help', 'error']
     }
 
     constructor() {
         super()
-        this._idPrefix = `tc-cbg-${++_idCounter}`
+        const uid = ++_idCounter
+        this._idPrefix = `tc-cbg-${uid}`
+        this._helpId = `tc-cbg-help-${uid}`
         this._internals = this.attachInternals()
     }
 
@@ -55,9 +64,12 @@ export class CheckboxGroup extends HTMLElement {
     attributeChangedCallback(attr: string, _old: string | null, _next: string | null): void {
         if (!this.isConnected || !this._initialised) return
         this.render()
-        // Re-sync form value when name changes — FormData keys are baked in at
-        // setFormValue call time, so a name change requires a fresh call.
-        if (attr === 'name') this._syncFormValue()
+        // A name change rekeys the FormData; required/state/error change the
+        // effective validity. Both need a fresh _syncFormValue (which now also
+        // reflects validity). Other attrs (label/inline) don't touch the form.
+        if (attr === 'name' || attr === 'required' || attr === 'state' || attr === 'error') {
+            this._syncFormValue()
+        }
     }
 
     formResetCallback(): void {
@@ -85,6 +97,20 @@ export class CheckboxGroup extends HTMLElement {
             }
             this._internals.setFormValue(fd)
         }
+        // Reflect validity so form.checkValidity()/:invalid work. Reuse the
+        // centralised _effectiveState (which already folds in required-empty) so
+        // the form's validity matches the visible chrome exactly.
+        const error = this.error
+        const requiredEmpty = this.required && this._value.length === 0
+        const invalid = this._effectiveState() === 'invalid'
+        reflectFieldValidity(this._internals, {
+            invalid,
+            valueMissing: requiredEmpty && !error,
+            message:
+                error ||
+                (requiredEmpty ? 'Please select at least one option.' : 'Invalid selection.'),
+            anchor: this.querySelector<HTMLInputElement>('input[type="checkbox"]') ?? undefined,
+        })
     }
 
     get label(): string | null {
@@ -103,6 +129,14 @@ export class CheckboxGroup extends HTMLElement {
         else this.removeAttribute('inline')
     }
 
+    get disabled(): boolean {
+        return this.hasAttribute('disabled')
+    }
+    set disabled(v: boolean) {
+        if (v) this.setAttribute('disabled', '')
+        else this.removeAttribute('disabled')
+    }
+
     get name(): string | null {
         return this.getAttribute('name')
     }
@@ -117,6 +151,77 @@ export class CheckboxGroup extends HTMLElement {
     set required(v: boolean) {
         if (v) this.setAttribute('required', '')
         else this.removeAttribute('required')
+    }
+
+    get state(): CheckboxGroupState | null {
+        const v = this.getAttribute('state') as CheckboxGroupState
+        return STATES.includes(v) ? v : null
+    }
+    set state(v: CheckboxGroupState | null) {
+        if (v != null) this.setAttribute('state', v)
+        else this.removeAttribute('state')
+    }
+
+    get help(): string | null {
+        return this.getAttribute('help')
+    }
+    set help(v: string | null) {
+        if (v != null) this.setAttribute('help', v)
+        else this.removeAttribute('help')
+    }
+
+    get error(): string | null {
+        return this.getAttribute('error')
+    }
+    set error(v: string | null) {
+        if (v != null) this.setAttribute('error', v)
+        else this.removeAttribute('error')
+    }
+
+    /** Effective validity: an `error` string or `state="invalid"` forces invalid;
+     *  otherwise a `required` group with nothing checked is invalid; else honour
+     *  `state` (which may be 'valid'). Centralised so render() and the in-place
+     *  change-patch agree. */
+    private _effectiveState(): CheckboxGroupState | null {
+        if (this.error || this.state === 'invalid') return 'invalid'
+        if (this.required && this._value.length === 0) return 'invalid'
+        return this.state
+    }
+
+    /** In-place validity-chrome update — used on change so the focused checkbox
+     *  is never disrupted. Keeps the fieldset aria-invalid, the per-box
+     *  is-invalid/is-valid classes, and the reserved message slot in sync with
+     *  _effectiveState(), matching exactly what render() would emit. */
+    private _patchState(): void {
+        const state = this._effectiveState()
+
+        const fieldset = this.querySelector<HTMLElement>('.tc-checkbox-group')
+        if (fieldset) {
+            if (state === 'invalid') fieldset.setAttribute('aria-invalid', 'true')
+            else fieldset.removeAttribute('aria-invalid')
+            if (this.help || state) fieldset.setAttribute('aria-describedby', this._helpId)
+            else fieldset.removeAttribute('aria-describedby')
+        }
+
+        for (const input of Array.from(
+            this.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'),
+        )) {
+            input.classList.remove('is-valid', 'is-invalid')
+            if (state === 'valid') input.classList.add('is-valid')
+            else if (state === 'invalid') input.classList.add('is-invalid')
+        }
+
+        const slot = this.querySelector('.tc-field-message')
+        if (slot) {
+            slot.outerHTML = fieldMessageHtml({
+                id: this._helpId,
+                state,
+                error: this.error,
+                hint: this.help,
+                invalidText: 'Please select at least one option.',
+                validText: 'Looks good!',
+            })
+        }
     }
 
     get options(): CheckboxGroupOption[] {
@@ -153,39 +258,43 @@ export class CheckboxGroup extends HTMLElement {
             this._value = this._value.filter((v) => v !== optValue)
         }
 
-        // Patch aria-invalid in place without full re-render (preserves focus)
-        const fieldset = this.querySelector<HTMLElement>('.tc-checkbox-group')
-        if (fieldset && this.required) {
-            if (this._value.length === 0) fieldset.setAttribute('aria-invalid', 'true')
-            else fieldset.removeAttribute('aria-invalid')
-        }
+        // Patch validity chrome in place without a full re-render — re-rendering
+        // here would drop focus on the just-clicked checkbox. We mirror what
+        // render() would produce: aria-invalid on the fieldset, is-invalid/is-valid
+        // on each box, and the reserved message slot's contents.
+        this._patchState()
 
         this._syncFormValue()
 
-        this.dispatchEvent(
-            new CustomEvent('tc-change', {
-                bubbles: true,
-                composed: true,
-                detail: { value: this._value },
-            }),
-        )
+        // Unified change event: detail.value carries the selected-values array.
+        dispatchFieldChange(this, this._value)
         if (typeof this.onChange === 'function') this.onChange(this._value)
     }
 
     private render(): void {
         const label = this.label
         const inline = this.inline
+        const disabled = this.disabled
         const required = this.required
+        const error = this.error
+        const help = this.help
+        const state = this._effectiveState()
 
         // Preserve focus across re-renders
         const focusedValue = this.querySelector<HTMLInputElement>('input:focus')?.value ?? null
 
-        const isInvalid = required && this._value.length === 0
+        const isInvalid = state === 'invalid'
         const ariaRequiredAttr = required ? ' aria-required="true"' : ''
         const ariaInvalidAttr = isInvalid ? ' aria-invalid="true"' : ''
 
+        // Each checkbox gets the control's invalid/valid visual when invalid/valid.
+        const inputStateClass =
+            state === 'valid' ? ' is-valid' : state === 'invalid' ? ' is-invalid' : ''
+
         const legendHtml =
-            label != null ? `<legend class="tc-checkbox-group-label">${esc(label)}</legend>` : ''
+            label != null
+                ? `<legend class="tc-checkbox-group-label">${esc(label)}${requiredMark(required)}</legend>`
+                : ''
 
         const optionsClass = inline
             ? 'tc-checkbox-group-options tc-checkbox-group-options--inline'
@@ -195,13 +304,15 @@ export class CheckboxGroup extends HTMLElement {
             .map((opt, idx) => {
                 const inputId = `${this._idPrefix}-${idx}`
                 const checkedAttr = this._value.includes(opt.value) ? ' checked' : ''
-                const disabledAttr = opt.disabled ? ' disabled' : ''
+                // A group-level `disabled` disables every box; a per-option
+                // `disabled` only that row.
+                const disabledAttr = disabled || opt.disabled ? ' disabled' : ''
                 // Inner checkboxes carry no `name` — ElementInternals owns form
                 // submission. Checkbox mutual exclusion is not applicable; the
                 // checked state is managed entirely in JS.
                 return [
                     `<div class="form-check">`,
-                    `<input type="checkbox" class="form-check-input" id="${inputId}"`,
+                    `<input type="checkbox" class="form-check-input${inputStateClass}" id="${inputId}"`,
                     ` value="${esc(opt.value)}"${checkedAttr}${disabledAttr}>`,
                     `<label class="form-check-label" for="${inputId}">${esc(opt.label)}</label>`,
                     `</div>`,
@@ -209,12 +320,28 @@ export class CheckboxGroup extends HTMLElement {
             })
             .join('')
 
+        // A checkbox group is always a standalone field: ALWAYS render the reserved
+        // slot (even empty) so it reserves its line and groups stay aligned. It is
+        // the last child, placed after the option rows. The required-empty case
+        // feeds the slot via _effectiveState → invalidText.
+        const messageHtml = fieldMessageHtml({
+            id: this._helpId,
+            state,
+            error,
+            hint: help,
+            invalidText: 'Please select at least one option.',
+            validText: 'Looks good!',
+        })
+        // Group has no single input — describe the fieldset itself.
+        const describe = help || state ? ` aria-describedby="${this._helpId}"` : ''
+
         this.innerHTML = [
-            `<fieldset class="tc-checkbox-group"${ariaRequiredAttr}${ariaInvalidAttr}>`,
+            `<fieldset class="tc-checkbox-group"${ariaRequiredAttr}${ariaInvalidAttr}${describe}>`,
             legendHtml,
             `<div class="${optionsClass}">`,
             optionsHtml,
             `</div>`,
+            messageHtml,
             `</fieldset>`,
         ].join('')
 

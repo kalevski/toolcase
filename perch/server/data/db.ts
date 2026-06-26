@@ -136,6 +136,30 @@ const MIGRATIONS: string[] = [
     );
     CREATE INDEX idx_audit_id ON audit(id DESC);
     `,
+    // v2 — base-domain audience tiers (§10). Each base domain is offered to one of
+    // three groups: free accounts, paid (sponsored) accounts, or staff (maintainer/
+    // owner). Existing rows default to `free` so nothing a user could already pick
+    // disappears on upgrade.
+    `
+    ALTER TABLE base_domain ADD COLUMN tier TEXT NOT NULL DEFAULT 'free';  -- free | paid | staff
+    `,
+    // v3 — per-user custom limit overrides (§11, §15). An owner can tweak any one
+    // user's quotas above/below their role/plan default. A row exists only when a
+    // user is customised; every column is nullable and a NULL field inherits the
+    // default. Cascades away if the user row is ever deleted.
+    `
+    CREATE TABLE user_limit (
+        github_id          INTEGER PRIMARY KEY REFERENCES app_user(github_id) ON DELETE CASCADE,
+        max_sites          INTEGER,        -- NULL = inherit role/plan default
+        max_bytes_per_site INTEGER,
+        max_bytes_total    INTEGER,
+        min_interval_sec   INTEGER,
+        custom_domains     INTEGER,
+        keep_releases      INTEGER,
+        private_repos      INTEGER,        -- 0 | 1 | NULL (inherit)
+        updated_at         TEXT NOT NULL
+    );
+    `,
 ]
 
 function migrate(db: DatabaseSync): void {
