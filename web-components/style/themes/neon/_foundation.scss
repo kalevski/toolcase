@@ -1,0 +1,249 @@
+// Neon theme — foundation token layer.
+//
+// An OPT-IN dark "synthwave / cyberpunk game" skin for @toolcase/web-components,
+// ported from the NEON DRIFT landing page: a deep navy-purple void lit by a DUAL
+// neon accent — hot magenta (primary) + electric cyan (signature) — with glowing
+// outlines, gradient neon text and a violet ambient field. It applies only inside
+// a theme root — either the custom element `<tc-theme name="neon"> … </tc-theme>`
+// or any element carrying `[data-tc-theme="neon"]` (a plain wrapper div, which the
+// examples site uses). Everything outside the root keeps the default toolcase
+// (light / product) voice.
+//
+// HOW IT WORKS — read this before authoring a component override:
+//   Every tc-* component drives its cosmetics through --bs-<component>-* custom
+//   properties whose DEFAULTS resolve to --tc-* design tokens (e.g.
+//   `--bs-panel-bg: var(--tc-surface)`). Re-pointing the --tc-* tokens here, at
+//   the theme root, re-skins the colours / borders / type of ALL components in
+//   one shot. The per-component partials in ./components/ only add the NEON
+//   STRUCTURE a flat token swap can't carry: the magenta gradient + glow on
+//   primary actions, the cyan dot eyebrow, the ambient glow field, gradient neon
+//   display text, and the dark frosted navbar.
+//
+// DUAL ACCENT — the trait that sets neon apart from the single-accent aurora:
+//   --tc-app-accent → magenta  (primary buttons, CTA fills, default link family)
+//   --tc-accent     → cyan     (eyebrows, brand dot, focus highlights, signature)
+//   Component partials lean on the magenta family for fills (dark-ink legible)
+//   and the cyan family for "signature" lit details.
+//
+// AESTHETIC: deep navy-purple void (#05030f → #1d1444), magenta + cyan neon
+// accents, faint violet hairlines, layered translucent surfaces, magenta glow.
+// SHARP corners are kept (border-radius: 0; circles only) — consistent with the
+// toolcase mandate and the aurora/dungeon themes; neon's identity is the dual
+// palette + glow, not rounded (or clipped) corners.
+//
+// FONTS: 'Orbitron' (display) and 'Ubuntu Mono' (mono) are NOT bundled — load
+// them on the host page (e.g. Google Fonts) for the full look; they degrade to
+// system sans-serif / monospace. 'Inter' (body) is shared with the default theme.
+
+@use '../../foundation/tokens' as *;
+
+tc-theme[name='neon'],
+[data-tc-theme='neon'] {
+    color-scheme: dark;
+
+    // `tc-theme` is display:contents (no box), so `background` would not paint —
+    // for the neon void, wrap content in `tc-artboard-backdrop` or set the glow
+    // field on your own container. `color` / `font-family` / the custom
+    // properties below all inherit through the contents box to descendants.
+    color: var(--nd-text);
+    font-family: var(--nd-body);
+
+    // ── Neon palette (--nd-*) — the theme's design tokens ────────────────────
+    // Backdrop — deepest navy-purple void up through layered purple surfaces.
+    --nd-bg: #05030f;
+    --nd-bg-2: #0a0720;
+    --nd-surface: #0d0822;
+    --nd-surface-2: #140d31;
+    --nd-surface-3: #1d1444;
+
+    // Hairlines — translucent BLACK so resting edges read as subtle dark grooves
+    // (not bright violet-white lines) on any surface depth; the strong tier stays
+    // magenta so hover/emphasis edges still light up neon.
+    --nd-border-faint: rgba(0, 0, 0, 0.28);
+    --nd-border: rgba(0, 0, 0, 0.42);
+    --nd-border-strong: rgba(255, 43, 214, 0.34);
+
+    // Text ramp — lilac-white down to muted violet-grey.
+    --nd-text: #f3e9ff;
+    --nd-text-2: #c0b4e4;
+    // Muted ramp end — kept light enough to clear ~4.5:1 on the purple surfaces
+    // for body-sized faint text / descriptions.
+    --nd-muted: #9c90c6;
+    --nd-emphasis: #fdf7ff;
+
+    // Magenta accent — the PRIMARY signature hue (buttons, CTAs, links).
+    --nd-accent: #ff2bd6;
+    --nd-accent-hover: #ff5ee0;
+    // Pink second stop for the primary FILL gradient — keeps the dark-ink label
+    // legible across the whole magenta→pink sweep.
+    --nd-accent-2: #ff5fb8;
+    --nd-accent-bright: #ff86e4; // accent-coloured TEXT on the dark surfaces
+    --nd-accent-ink: #0b0218; // dark-ink label ON a bright accent fill
+    --nd-accent-soft: rgba(255, 43, 214, 0.14);
+    --nd-accent-line: rgba(255, 43, 214, 0.34);
+    --nd-accent-glow: rgba(255, 43, 214, 0.12);
+    --nd-accent-shadow: rgba(255, 43, 214, 0.5);
+
+    // Cyan accent — the SECONDARY signature hue (eyebrows, brand dot, lit detail).
+    --nd-cyan: #00e5ff;
+    --nd-cyan-bright: #7af1ff;
+    --nd-cyan-soft: rgba(0, 229, 255, 0.14);
+    --nd-cyan-line: rgba(0, 229, 255, 0.34);
+    --nd-cyan-shadow: rgba(0, 229, 255, 0.5);
+
+    // Violet — the tertiary glow accent for the ambient field.
+    --nd-violet: #8a4bff;
+
+    // Semantic element colours — bright tones legible on the dark void.
+    --nd-success: #3ce88f;
+    --nd-info: #5b9dff;
+    --nd-warn: #ffb454;
+    --nd-danger: #ff5d6c;
+
+    // Typography families.
+    --nd-display: 'Orbitron', 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --nd-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --nd-mono: 'Ubuntu Mono', 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+    --nd-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+    // ── Reusable signature recipes (referenced by component partials) ────────
+    // The magenta→pink gradient — primary action / CTA FILLS that carry a
+    // dark-ink label, so contrast holds across the whole sweep.
+    --nd-accent-grad: linear-gradient(135deg, var(--nd-accent), var(--nd-accent-2));
+    // The DUAL magenta→cyan gradient — for clipped neon display TEXT only
+    // (headings / hero / brand wordmark), never behind dark-ink labels.
+    --nd-accent-grad-text: linear-gradient(120deg, var(--nd-accent) 0%, #ff88e6 45%, var(--nd-cyan) 100%);
+    // Soft top-down surface gradient for cards / panels.
+    --nd-surface-grad: linear-gradient(180deg, var(--nd-surface-2), var(--nd-surface));
+    // Magenta neon glow for raised primary elements (lit ring + depth shadow).
+    --nd-glow: 0 0 22px -2px var(--nd-accent-shadow), 0 8px 26px -8px rgba(0, 0, 0, 0.6);
+    --nd-glow-strong: 0 0 38px -2px var(--nd-accent-shadow), 0 14px 34px -8px rgba(0, 0, 0, 0.7);
+    // Hairline top highlight — "light catches the top edge".
+    --nd-bevel-top: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    // Ambient neon glow field for full-bleed backdrops (magenta + cyan + violet).
+    --nd-glow-field:
+        radial-gradient(820px 520px at 78% -8%, var(--nd-accent-glow), transparent 60%),
+        radial-gradient(700px 600px at 8% 12%, rgba(0, 229, 255, 0.1), transparent 62%),
+        radial-gradient(900px 700px at 50% 120%, rgba(138, 75, 255, 0.14), transparent 55%);
+    // Frosted dark glass for floating menus / popovers / overlay panels.
+    --nd-overlay-bg: linear-gradient(180deg, rgba(20, 13, 49, 0.92), rgba(10, 7, 32, 0.95));
+    --nd-overlay-blur: blur(14px) saturate(130%);
+
+    // ── Remap toolcase tokens (--tc-*) onto the neon palette ─────────────────
+    // This block alone flips every component's colours / borders / type, because
+    // the --bs-<component>-* defaults all resolve through these tokens.
+    --tc-font-sans: var(--nd-body);
+    --tc-font-mono: var(--nd-mono);
+
+    --tc-white: #ffffff;
+    --tc-black: #000000;
+
+    --tc-surface: var(--nd-surface);
+    --tc-surface-muted: var(--nd-surface-2);
+    --tc-surface-hover: var(--nd-surface-3);
+    --tc-surface-dark: var(--nd-bg);
+    --tc-border: var(--nd-border);
+    --tc-border-faint: var(--nd-border-faint);
+    --tc-border-strong: var(--nd-border-strong);
+    --tc-text: var(--nd-text);
+    --tc-text-muted: var(--nd-text-2);
+    --tc-text-faint: var(--nd-muted);
+    // text-inverse means "readable text on a dark/ink surface" everywhere it is
+    // used (code blocks, dark nav, dark backdrops) — NOT on the accent. The
+    // accent's on-fill ink is --tc-app-accent-contrast. Keep this LIGHT; pointing
+    // it at the dark accent-ink turns dark-on-dark code blocks invisible.
+    --tc-text-inverse: var(--nd-emphasis);
+    --tc-emphasis: var(--nd-emphasis);
+
+    // Ink — the darkest surface (toasts, tooltips, code blocks, footers).
+    --tc-ink: #05030f;
+    --tc-ink-2: var(--nd-bg-2);
+
+    // App accent — primary buttons / links read magenta with dark-ink contrast.
+    --tc-app-accent: var(--nd-accent);
+    --tc-app-accent-hover: var(--nd-accent-hover);
+    --tc-app-accent-contrast: var(--nd-accent-ink);
+    // Primary-action gradient → full magenta→pink (no slate stop), so the dark-ink
+    // on-fill text stays legible across the whole sweep. Mirrors the .btn-primary
+    // override; pointing the shared token here fixes every CTA that used the base
+    // `var(--tc-app-accent), #2b3a51` gradient (it became magenta→slate here).
+    --tc-app-accent-gradient: var(--nd-accent-grad);
+
+    // Accent — the SECONDARY (cyan) signature: highlights / focus / brand dot.
+    // accent-fg leans bright so accent-coloured TEXT stays legible on dark.
+    --tc-accent: var(--nd-cyan);
+    --tc-accent-fg: var(--nd-cyan-bright);
+    --tc-accent-soft: var(--nd-cyan-soft);
+    --tc-accent-hex: #00e5ff;
+    --tc-cyan: var(--nd-cyan);
+
+    --tc-success: var(--nd-success);
+    --tc-success-bg: rgba(60, 232, 143, 0.16);
+    --tc-info: var(--nd-info);
+    --tc-info-bg: rgba(91, 157, 255, 0.16);
+    --tc-warning: var(--nd-warn);
+    --tc-warning-bg: rgba(255, 180, 84, 0.16);
+    --tc-danger: var(--nd-danger);
+    --tc-danger-bg: rgba(255, 93, 108, 0.16);
+
+    // Shadows lean dark + deep; surfaces lean on hairlines + neon glow accents.
+    --tc-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+    --tc-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.55);
+    --tc-shadow-lg: 0 24px 60px -28px rgba(0, 0, 0, 0.85);
+    --tc-shadow-hover: 0 0 26px -6px var(--nd-accent-shadow), 0 14px 34px -12px rgba(0, 0, 0, 0.7);
+
+    --tc-transition-fast: 0.18s var(--nd-ease);
+    --tc-transition-base: 0.25s var(--nd-ease);
+
+    // Focus ring — a soft magenta neon halo.
+    --tc-focus-ring: 0 0 0 3px var(--nd-accent-soft);
+
+    // ── Bootstrap-compatible contract (--bs-*) ───────────────────────────────
+    --bs-primary: var(--nd-accent);
+    --bs-primary-rgb: 255, 43, 214;
+    --bs-secondary: var(--nd-text-2);
+    --bs-secondary-rgb: 192, 180, 228;
+    --bs-success: var(--nd-success);
+    --bs-success-rgb: 60, 232, 143;
+    --bs-danger: var(--nd-danger);
+    --bs-danger-rgb: 255, 93, 108;
+    --bs-warning: var(--nd-warn);
+    --bs-warning-rgb: 255, 180, 84;
+    --bs-info: var(--nd-info);
+    --bs-info-rgb: 91, 157, 255;
+    --bs-light: var(--nd-text);
+    --bs-light-rgb: 243, 233, 255;
+    --bs-dark: var(--nd-bg);
+    --bs-dark-rgb: 5, 3, 15;
+
+    --bs-font-sans-serif: var(--nd-body);
+    --bs-font-monospace: var(--nd-mono);
+    --bs-body-font-family: var(--nd-body);
+    --bs-body-bg: var(--nd-bg);
+    --bs-body-bg-rgb: 5, 3, 15;
+    --bs-body-color: var(--nd-text);
+    --bs-body-color-rgb: 243, 233, 255;
+    --bs-emphasis-color: var(--nd-emphasis);
+    --bs-emphasis-color-rgb: 253, 247, 255;
+
+    --bs-secondary-color: var(--nd-text-2);
+    --bs-secondary-bg: var(--nd-surface-2);
+    --bs-tertiary-color: var(--nd-muted);
+    --bs-tertiary-bg: var(--nd-surface-3);
+
+    --bs-border-color: var(--nd-border);
+    --bs-border-color-translucent: rgba(0, 0, 0, 0.3);
+    --bs-border-radius: 0;
+
+    // Links decouple from the magenta app-accent → bright magenta at rest, cyan
+    // on hover (the neon hover-shift the landing page nav uses).
+    --bs-link-color: var(--nd-accent-bright);
+    --bs-link-hover-color: var(--nd-cyan-bright);
+
+    --bs-box-shadow-sm: var(--tc-shadow-sm);
+    --bs-box-shadow: var(--tc-shadow-md);
+    --bs-box-shadow-lg: var(--tc-shadow-lg);
+
+    --bs-focus-ring-color: var(--nd-accent-soft);
+}

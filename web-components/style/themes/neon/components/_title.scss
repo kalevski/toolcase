@@ -1,0 +1,15 @@
+// Neon › tc-title — display-type section title.
+// Token remap already sets the emphasis neon-bright colour; swap the typeface to
+// the Space Grotesk display family with the tight synthwave tracking.
+
+tc-theme[name='neon'],
+[data-tc-theme='neon'] {
+    tc-title {
+        --bs-title-color: var(--nd-emphasis);
+    }
+
+    .tc-title {
+        font-family: var(--nd-display);
+        letter-spacing: -0.02em;
+    }
+}

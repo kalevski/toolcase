@@ -1302,7 +1302,7 @@ Theming host element — the `--tc-*` token override container. Every `tc-*` com
 
 Two ways to theme a subtree:
 
-1. **Named theme** via the `name` attribute — opt into a bundled skin. `default` is the product (slate) voice applied globally; `dungeon` (gilded fantasy) and `aurora` (dark "production-AI") are opt-in skins that stay inert until a `tc-theme` wrapper requests them. Each named skin is scoped under `tc-theme[name="…"]` (a plain wrapper carrying `[data-tc-theme="…"]` is matched too). The `dungeon` and `aurora` skins reference display fonts (Cinzel / EB Garamond for dungeon) that are **not** bundled — load them on the host page for the full look; both degrade to system serifs/sans.
+1. **Named theme** via the `name` attribute — opt into a bundled skin. `default` is the product (slate) voice applied globally; `dungeon` (gilded fantasy), `aurora` (dark "production-AI"), `sunshine` (warm citrus boutique) and `neon` (dark synthwave / cyberpunk, dual magenta + cyan accents) are opt-in skins that stay inert until a `tc-theme` wrapper requests them. Each named skin is scoped under `tc-theme[name="…"]` (a plain wrapper carrying `[data-tc-theme="…"]` is matched too). The `dungeon`, `aurora`, `sunshine` and `neon` skins reference display fonts (Cinzel / EB Garamond for dungeon; Orbitron / Ubuntu Mono for neon) that are **not** bundled — load them on the host page for the full look; all degrade to system serifs/sans.
 2. **Ad-hoc token overrides** — set `--tc-*` (or the finer-grained `--bs-<component>-*`) custom properties directly on the `tc-theme` element via `style` or a class. Because the tokens inherit through the `display: contents` box, every descendant component picks them up.
 
 **Tag:** `tc-theme`
@@ -1311,7 +1311,7 @@ Two ways to theme a subtree:
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `name` | `default\|dungeon\|aurora` | — | Selects a bundled named theme for the wrapped subtree. Absent → the subtree inherits the ambient (global `:root`) theme. Unrecognised values simply match no theme scope, so the subtree keeps the inherited skin. |
+| `name` | `default\|dungeon\|aurora\|sunshine\|neon` | — | Selects a bundled named theme for the wrapped subtree. Absent → the subtree inherits the ambient (global `:root`) theme. Unrecognised values simply match no theme scope, so the subtree keeps the inherited skin. |
 
 **JS Properties**
 

@@ -1,0 +1,27 @@
+// Neon › tc-eyebrow — the signature mono micro-label with a leading cyan dot.
+// Base eyebrow is a plain mono caption; Neon prefixes it with a glowing dot and
+// tints it the cyan hue. The dot is injected via ::before on the .tc-eyebrow
+// class (which carries the --bs-eyebrow-* defaults, so the override wins).
+
+tc-theme[name='neon'],
+[data-tc-theme='neon'] {
+    .tc-eyebrow {
+        --bs-eyebrow-color: var(--nd-cyan);
+        --bs-eyebrow-letter-spacing: 0.18em;
+        --bs-eyebrow-font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6em;
+        text-transform: uppercase;
+    }
+
+    .tc-eyebrow::before {
+        content: '';
+        flex: none;
+        width: 0.45em;
+        height: 0.45em;
+        border-radius: 50%;
+        background: var(--nd-cyan);
+        box-shadow: 0 0 0 0.27em var(--nd-cyan-soft);
+    }
+}

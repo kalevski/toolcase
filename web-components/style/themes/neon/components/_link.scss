@@ -1,0 +1,27 @@
+// Neon › tc-link — magenta inline anchor.
+// The default link is already magenta via the --tc-app-accent remap; only the
+// status variants are repointed onto the brighter neon element tones so they
+// stay legible on the dark surface.
+
+tc-theme[name='neon'],
+[data-tc-theme='neon'] {
+    .tc-link-success {
+        --bs-link-color: var(--nd-success);
+        --bs-link-hover-color: var(--nd-success);
+    }
+
+    .tc-link-danger {
+        --bs-link-color: var(--nd-danger);
+        --bs-link-hover-color: var(--nd-danger);
+    }
+
+    .tc-link-info {
+        --bs-link-color: var(--nd-info);
+        --bs-link-hover-color: var(--nd-info);
+    }
+
+    .tc-link-warning {
+        --bs-link-color: var(--nd-warn);
+        --bs-link-hover-color: var(--nd-warn);
+    }
+}

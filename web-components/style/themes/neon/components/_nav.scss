@@ -1,0 +1,17 @@
+// Neon › tc-nav — magenta active tab/pill.
+// The active state reads in the accent hue; pills get the magenta gradient fill
+// with dark-ink text. Underline tabs already carry the active border via the
+// token remap (--tc-app-accent → magenta).
+
+tc-theme[name='neon'],
+[data-tc-theme='neon'] {
+    .nav {
+        --bs-nav-link-hover-color: var(--nd-accent-bright);
+        --bs-nav-tabs-link-active-color: var(--nd-accent-bright);
+    }
+
+    .nav-pills {
+        --bs-nav-pills-link-active-bg: var(--nd-accent-grad);
+        --bs-nav-pills-link-active-color: var(--nd-accent-ink);
+    }
+}

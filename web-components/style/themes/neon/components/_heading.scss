@@ -1,0 +1,18 @@
+// Neon › tc-heading — display type with a magenta neon gradient treatment.
+// The base inner .tc-heading sets `font-family: var(--tc-font-sans)` literally,
+// so the display swap is applied on the class. The optional --gradient treatment
+// runs magenta→bright-magenta (the base end stop is --tc-ink, near-black, which
+// would fade the text into the void canvas).
+
+tc-theme[name='neon'],
+[data-tc-theme='neon'] {
+    tc-heading {
+        --bs-heading-gradient-start: var(--nd-accent);
+        --bs-heading-gradient-end: var(--nd-accent-bright);
+    }
+
+    .tc-heading {
+        font-family: var(--nd-display);
+        letter-spacing: -0.02em;
+    }
+}

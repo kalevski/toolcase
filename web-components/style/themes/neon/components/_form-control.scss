@@ -1,0 +1,44 @@
+// Neon › form-check + list-group text.
+// Both bake a light-theme slate literal (#334155 / $slate-700) directly into
+// the text colour, bypassing the --tc-* token remap → dark text on the dark
+// surface (~1.8:1). Repoint to the neon text ramp.
+//
+// The checked indicators also bake light-theme glyph colours into inline SVG
+// data-URIs (which can't read --tc-* vars): the checkbox/indeterminate check is
+// a WHITE stroke — invisible on the bright magenta checked fill — and the radio
+// dot is a dark slate (#1e293b) — invisible on the dark surface well. Re-issue
+// both with neon-correct fills, and swap the slate focus ring for the magenta halo.
+
+tc-theme[name='neon'],
+[data-tc-theme='neon'] {
+    // .form-check-label hard-codes `color: #334155`.
+    .form-check-label {
+        color: var(--nd-text-2);
+    }
+
+    // Checkbox tick + indeterminate dash sit on the magenta checked fill → dark ink.
+    .form-check-input:checked[type='checkbox'] {
+        --bs-form-check-bg-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%230b0218' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+    }
+
+    .form-check-input[type='checkbox']:indeterminate {
+        --bs-form-check-bg-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%230b0218' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10h8'/%3e%3c/svg%3e");
+    }
+
+    // Radio keeps the dark surface well → make the dot magenta so it reads.
+    .form-check-input:checked[type='radio'] {
+        --bs-form-check-bg-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3ccircle r='5' cx='8' cy='8' fill='%23ff2bd6'/%3e%3c/svg%3e");
+    }
+
+    // Base focus ring is a slate hairline + halo (invisible on the dark canvas).
+    .form-check-input:focus-visible {
+        border-color: var(--nd-accent);
+        box-shadow: var(--tc-focus-ring);
+    }
+
+    // list-group seeds --bs-list-group-color / -action-color from $slate-700.
+    .list-group {
+        --bs-list-group-color: var(--nd-text);
+        --bs-list-group-action-color: var(--nd-text-2);
+    }
+}

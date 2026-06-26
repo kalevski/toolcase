@@ -1,0 +1,29 @@
+// Neon › tc-artboard-backdrop — the ambient glow canvas. This is the
+// recommended way to paint the neon surface (the tc-theme wrapper is
+// display:contents and cannot carry a background): deep navy-purple void base
+// layered with the magenta/cyan neon glow field, mirroring the game `body::before`
+// ambient light.
+
+tc-theme[name='neon'],
+[data-tc-theme='neon'] {
+    tc-artboard-backdrop,
+    .tc-artboard-backdrop--dark {
+        --bs-artboard-backdrop-bg: var(--nd-glow-field), var(--nd-bg);
+        --bs-artboard-backdrop-color: var(--nd-text);
+        --bs-artboard-backdrop-border-color: transparent;
+    }
+
+    .tc-artboard-backdrop--scene {
+        --bs-artboard-backdrop-bg:
+            radial-gradient(60% 50% at 50% 30%, var(--nd-accent-glow), transparent 60%),
+            linear-gradient(180deg, var(--nd-surface), var(--nd-bg));
+        --bs-artboard-backdrop-color: var(--nd-text);
+        --bs-artboard-backdrop-border-color: var(--nd-border);
+    }
+
+    .tc-artboard-backdrop--parch {
+        --bs-artboard-backdrop-bg: var(--nd-glow-field), var(--nd-bg-2);
+        --bs-artboard-backdrop-color: var(--nd-text);
+        --bs-artboard-backdrop-border-color: var(--nd-border);
+    }
+}

@@ -1,0 +1,15 @@
+// Neon theme — opt-in dark "synthwave / cyberpunk game" skin for
+// @toolcase/web-components (deep navy-purple void, DUAL magenta + cyan neon
+// accents, glowing outlines, gradient neon text, cyan dot eyebrows).
+//
+// Ported from the NEON DRIFT landing page design system.
+//
+// Activate by wrapping content in the theme root:
+//   <tc-theme name="neon"> … your tc-* components … </tc-theme>
+// (or any element with [data-tc-theme="neon"]).
+//
+// Load order: foundation (token remap) first so the component partials override
+// on top of the already-neon --tc-* / --bs-* tokens.
+
+@use 'foundation';
+@use 'components';

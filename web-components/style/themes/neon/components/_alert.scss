@@ -1,0 +1,50 @@
+// Neon › tc-alert — tinted notice with an accent heading.
+// Foundation remaps the element rgb vars, so variant tints shift to neon hues.
+// This fixes the Sass-baked emphasis text colours (which bypass the rgb remap)
+// and repoints the slate-literal primary / light / dark variants onto the dark
+// palette.
+
+tc-theme[name='neon'],
+[data-tc-theme='neon'] {
+    .alert {
+        color: var(--nd-text);
+        box-shadow: var(--nd-bevel-top);
+    }
+
+    .alert-heading {
+        color: var(--nd-emphasis);
+    }
+
+    .alert-primary {
+        --bs-alert-bg: var(--nd-accent-soft);
+        --bs-alert-color: var(--nd-accent-bright);
+        --bs-alert-border-color: var(--nd-accent-line);
+    }
+
+    .alert-success {
+        --bs-alert-color: var(--nd-success);
+    }
+
+    .alert-danger {
+        --bs-alert-color: var(--nd-danger);
+    }
+
+    .alert-warning {
+        --bs-alert-color: var(--nd-warn);
+    }
+
+    .alert-info {
+        --bs-alert-color: var(--nd-info);
+    }
+
+    .alert-light {
+        --bs-alert-bg: var(--nd-surface-3);
+        --bs-alert-border-color: var(--nd-border-strong);
+        --bs-alert-color: var(--nd-text);
+    }
+
+    .alert-dark {
+        --bs-alert-bg: var(--nd-bg-2);
+        --bs-alert-color: var(--nd-text);
+    }
+}

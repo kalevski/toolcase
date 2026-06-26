@@ -29,3 +29,9 @@
 //       CITRINA / nekadnesto.mk storefront. Scoped under
 //       `tc-theme[name="sunshine"]`, inert until a wrapper opts in.
 @use './themes/sunshine';
+
+//   (7) Neon theme — opt-in dark "synthwave / cyberpunk game" skin (deep
+//       navy-purple void, DUAL magenta + cyan neon accents, glowing outlines,
+//       gradient neon text). Ported from the NEON DRIFT landing page. Scoped
+//       under `tc-theme[name="neon"]`, inert until a wrapper opts in.
+@use './themes/neon';

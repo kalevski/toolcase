@@ -1,0 +1,24 @@
+// Neon › tc-code-snippet — deep-void code surface, neon syntax accents.
+// Foundation maps the void bg, border and mono font. Fix the legibility trap
+// (--tc-text-inverse → dark ink on dark bg) and repoint the hardcoded syntax
+// token hexes onto the neon palette: muted comments, cyan keywords, magenta
+// strings.
+
+tc-theme[name='neon'],
+[data-tc-theme='neon'] {
+    tc-code-snippet {
+        --bs-code-snippet-code-color: var(--nd-text);
+        --bs-code-snippet-title-color: var(--nd-accent-bright);
+        --bs-code-snippet-header-border: 1px solid var(--nd-border);
+
+        --bs-code-snippet-tok-keyword: var(--nd-cyan);
+        --bs-code-snippet-tok-string: var(--nd-accent-bright);
+        --bs-code-snippet-tok-comment: var(--nd-muted);
+        --bs-code-snippet-tok-number: var(--nd-warn);
+        --bs-code-snippet-tok-variable: var(--nd-cyan-bright);
+    }
+
+    .tc-code-snippet-copy--copied {
+        color: var(--nd-cyan);
+    }
+}

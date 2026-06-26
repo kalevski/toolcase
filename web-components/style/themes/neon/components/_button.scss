@@ -1,0 +1,115 @@
+// Neon › .btn — magenta gradient primary with a neon glow lift.
+// The base .btn-primary bg is `linear-gradient(135deg, var(--tc-app-accent),
+// #2b3a51)` — that #2b3a51 slate stop survives the token remap, so primary
+// reads magenta→slate. We repoint it to the full magenta→cyan neon gradient,
+// dark-ink label, and add the signature glow drop-shadow + translateY hover lift.
+
+tc-theme[name='neon'],
+[data-tc-theme='neon'] {
+    .btn {
+        --bs-btn-focus-shadow-rgb: 255, 43, 214;
+        font-weight: 600;
+        transition:
+            transform 0.18s var(--nd-ease),
+            background 0.2s,
+            border-color 0.2s,
+            box-shadow 0.25s,
+            color 0.2s;
+    }
+
+    // Primary — magenta→cyan neon gradient, dark-ink label, magenta glow.
+    .btn-primary {
+        --bs-btn-bg: var(--nd-accent-grad);
+        --bs-btn-hover-bg: var(--nd-accent-grad);
+        --bs-btn-active-bg: linear-gradient(135deg, var(--nd-accent-2), var(--nd-accent-2));
+        --bs-btn-color: var(--nd-accent-ink);
+        --bs-btn-hover-color: var(--nd-accent-ink);
+        --bs-btn-active-color: var(--nd-accent-ink);
+        --bs-btn-border-color: transparent;
+        --bs-btn-hover-border-color: transparent;
+        --bs-btn-active-border-color: transparent;
+        // Loading / disabled primary renders as the base disabled state, whose
+        // colour falls back to the base white over a flat magenta fill (~1.6:1).
+        // Keep the dark ink so `<tc-button loading>` stays legible.
+        --bs-btn-disabled-color: var(--nd-accent-ink);
+        --bs-btn-disabled-bg: var(--nd-accent-2);
+        box-shadow: var(--nd-glow), var(--nd-bevel-top);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--nd-glow-strong), var(--nd-bevel-top);
+    }
+
+    .btn-primary:active,
+    .btn-primary.active {
+        transform: translateY(0);
+        box-shadow: var(--nd-glow);
+    }
+
+    // Outline / ghost buttons pick up the magenta accent on hover.
+    .btn-outline-primary {
+        --bs-btn-color: var(--nd-accent-bright);
+        --bs-btn-border-color: var(--nd-accent-line);
+        --bs-btn-hover-bg: var(--nd-accent-soft);
+        --bs-btn-hover-color: var(--nd-accent-bright);
+        --bs-btn-hover-border-color: var(--nd-accent);
+    }
+
+    // Outline-dark inherits --bs-dark (the near-black canvas) as its text +
+    // border → invisible on the dark ground (~1.1:1). Flip it to a light
+    // hairline/label so it reads as a neutral ghost button.
+    .btn-outline-dark {
+        --bs-btn-color: var(--nd-text);
+        --bs-btn-border-color: var(--nd-border-strong);
+        --bs-btn-hover-color: var(--nd-emphasis);
+        --bs-btn-hover-bg: var(--nd-surface-2);
+        --bs-btn-hover-border-color: var(--nd-border-strong);
+        --bs-btn-active-color: var(--nd-emphasis);
+        --bs-btn-active-bg: var(--nd-surface-2);
+        --bs-btn-active-border-color: var(--nd-border-strong);
+        --bs-btn-disabled-color: var(--nd-text-2);
+        --bs-btn-disabled-border-color: var(--nd-border);
+    }
+
+    // Solid semantic fills are bright on the dark canvas — the base keeps white
+    // text (only `light` flips), leaving success/warning/info/danger at
+    // ~1.9–2.8:1. Flip them all to near-black ink so they clear AA.
+    .btn-success,
+    .btn-warning,
+    .btn-info,
+    .btn-danger,
+    .btn-light {
+        --bs-btn-color: var(--nd-accent-ink);
+        --bs-btn-hover-color: var(--nd-accent-ink);
+        --bs-btn-active-color: var(--nd-accent-ink);
+        --bs-btn-disabled-color: var(--nd-accent-ink);
+    }
+
+    // Secondary maps to the light-grey secondary-TEXT tone; as a button FILL it
+    // reads as a pale wash with unreadable white text (~2.1:1). Re-skin it as a
+    // quiet dark surface with light text — the dark-theme secondary convention.
+    .btn-secondary {
+        --bs-btn-color: var(--nd-text);
+        --bs-btn-bg: var(--nd-surface-3);
+        --bs-btn-border-color: var(--nd-border-strong);
+        --bs-btn-hover-color: var(--nd-emphasis);
+        --bs-btn-hover-bg: var(--nd-surface-2);
+        --bs-btn-hover-border-color: var(--nd-border-strong);
+        --bs-btn-active-color: var(--nd-emphasis);
+        --bs-btn-active-bg: var(--nd-surface-2);
+        --bs-btn-active-border-color: var(--nd-border-strong);
+        --bs-btn-disabled-color: var(--nd-text-2);
+        --bs-btn-disabled-bg: var(--nd-surface-3);
+        --bs-btn-disabled-border-color: var(--nd-border);
+    }
+
+    // Plain-link buttons keep no lift / glow.
+    .btn-link {
+        box-shadow: none;
+        &:hover {
+            transform: none;
+            box-shadow: none;
+        }
+    }
+}

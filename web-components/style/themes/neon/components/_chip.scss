@@ -1,0 +1,57 @@
+// Neon › tc-chip — selected/active chips glow magenta.
+// Resting chips stay neutral on the dark void; the active/selected state and
+// the count badge pick up the soft magenta accent so selection reads at a glance.
+
+tc-theme[name='neon'],
+[data-tc-theme='neon'] {
+    tc-chip,
+    .tc-chip {
+        --bs-chip-bg: var(--nd-surface-2);
+        --bs-chip-bg-hover: var(--nd-surface-3);
+        --bs-chip-border-color: var(--nd-border);
+        --bs-chip-count-bg: var(--nd-accent-soft);
+    }
+
+    // Colored variants — the base pairs a LIGHT pastel fill with DARK emphasis
+    // text, but the foundation token remap re-points --bs-chip-bg to the dark
+    // surface (winning by source order) while leaving the dark text → ~1.0–2.5:1
+    // (dark ink on a dark chip). Re-skin each variant the neon way: a soft
+    // semantic tint with the matching BRIGHT tone for text + hairline.
+    .tc-chip--primary:not(.is-selected) {
+        --bs-chip-bg: var(--nd-accent-soft);
+        --bs-chip-color: var(--nd-accent-bright);
+        --bs-chip-border-color: var(--nd-accent-line);
+    }
+
+    .tc-chip--info:not(.is-selected) {
+        --bs-chip-bg: var(--tc-info-bg);
+        --bs-chip-color: var(--nd-info);
+        --bs-chip-border-color: var(--nd-info);
+    }
+
+    .tc-chip--success:not(.is-selected) {
+        --bs-chip-bg: var(--tc-success-bg);
+        --bs-chip-color: var(--nd-success);
+        --bs-chip-border-color: var(--nd-success);
+    }
+
+    .tc-chip--warning:not(.is-selected) {
+        --bs-chip-bg: var(--tc-warning-bg);
+        --bs-chip-color: var(--nd-warn);
+        --bs-chip-border-color: var(--nd-warn);
+    }
+
+    .tc-chip--danger:not(.is-selected) {
+        --bs-chip-bg: var(--tc-danger-bg);
+        --bs-chip-color: var(--nd-danger);
+        --bs-chip-border-color: var(--nd-danger);
+    }
+
+    .tc-chip.active,
+    .tc-chip[aria-pressed='true'],
+    .tc-chip[aria-selected='true'] {
+        --bs-chip-bg: var(--nd-accent-soft);
+        --bs-chip-color: var(--nd-accent-bright);
+        --bs-chip-border-color: var(--nd-accent-line);
+    }
+}

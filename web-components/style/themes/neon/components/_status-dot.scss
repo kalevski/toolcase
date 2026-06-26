@@ -1,0 +1,10 @@
+// Neon › tc-status-dot — marker gains a neon glow halo.
+// Status hues come from the token remap; the marker is a sanctioned circle. Add
+// a neon glow so the marker reads as lit against the dark void surface.
+
+tc-theme[name='neon'],
+[data-tc-theme='neon'] {
+    .tc-status-dot-marker {
+        box-shadow: 0 0 6px currentcolor;
+    }
+}

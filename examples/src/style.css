@@ -1,5 +1,5 @@
 /* @toolcase examples — site shell, ported from @toolcase website */
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Cinzel:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Cinzel:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Orbitron:wght@500;600;700;800;900&family=Ubuntu+Mono:wght@400;700&display=swap');
 
 :root {
     --bg: oklch(0.985 0.003 95);
@@ -727,6 +727,16 @@ code, pre, .mono { font-family: var(--font-mono); }
         radial-gradient(700px 600px at 8% 12%, rgba(36, 90, 120, 0.14), transparent 62%),
         radial-gradient(900px 700px at 50% 120%, rgba(47, 230, 173, 0.1), transparent 55%),
         #07090d;
+    padding: 24px;
+}
+/* neon theme: deep navy-purple void lit by the dual magenta + cyan glow field so
+   demos sit on the proper synthwave ground */
+.example__canvas > .wc-theme-scope[data-tc-theme='neon'] {
+    background:
+        radial-gradient(820px 520px at 78% -8%, rgba(255, 43, 214, 0.12), transparent 60%),
+        radial-gradient(700px 600px at 8% 12%, rgba(0, 229, 255, 0.1), transparent 62%),
+        radial-gradient(900px 700px at 50% 120%, rgba(138, 75, 255, 0.14), transparent 55%),
+        #05030f;
     padding: 24px;
 }
 
