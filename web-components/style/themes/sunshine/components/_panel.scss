@@ -1,0 +1,19 @@
+// Sunshine › tc-panel — the framed warm surface, mirrors .card.
+// Soft gradient fill + warm top highlight; the header gets an emphasis-ink
+// heading and a hairline rule. No hover-lift (panels are containers, not
+// interactive tiles).
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    tc-panel {
+        --bs-panel-bg: var(--sun-surface-grad);
+        --bs-panel-border-color: var(--sun-line);
+        --bs-panel-header-bg: transparent;
+        --bs-panel-header-border-color: var(--sun-line);
+        --bs-panel-header-color: var(--sun-emphasis);
+    }
+
+    .tc-panel {
+        box-shadow: var(--sun-bevel-top), var(--tc-shadow-sm);
+    }
+}

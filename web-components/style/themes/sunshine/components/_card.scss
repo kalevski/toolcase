@@ -1,0 +1,62 @@
+// Sunshine › .card — warm paper tile with a lemon top-bar + glow hover-lift.
+// Token swap gives the cream fill; this adds the soft top-down surface gradient,
+// the thin warm top highlight, the lemon accent bar that scales in on hover, and
+// the translateY lift + border-darken — the CITRINA .pcard interaction.
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    .card {
+        --bs-card-bg: var(--sun-surface-grad);
+        --bs-card-border-color: var(--sun-line);
+        --bs-card-cap-bg: transparent;
+        --bs-card-color: var(--sun-ink-1);
+        position: relative;
+        box-shadow: var(--sun-bevel-top), var(--tc-shadow-sm);
+        transition:
+            transform 0.22s var(--sun-ease),
+            border-color 0.22s,
+            box-shadow 0.22s;
+    }
+
+    // Lemon accent bar across the card top — scales in from the left on hover.
+    .card::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: 3px;
+        background: var(--sun-lead);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.22s var(--sun-ease);
+        z-index: 3;
+    }
+
+    .card:hover {
+        transform: translateY(-3px);
+        border-color: var(--sun-line-strong);
+        box-shadow: var(--sun-bevel-top), var(--tc-shadow-hover);
+    }
+
+    .card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .card-header {
+        border-bottom-color: var(--sun-line);
+    }
+
+    .card-footer {
+        border-top-color: var(--sun-line);
+    }
+
+    // Solid-variant cards (text-bg-*) keep their fill — drop the lift + bar so
+    // the saturated surface doesn't float.
+    .card[class*='text-bg-']:hover {
+        transform: none;
+    }
+    .card[class*='text-bg-']::before {
+        display: none;
+    }
+}

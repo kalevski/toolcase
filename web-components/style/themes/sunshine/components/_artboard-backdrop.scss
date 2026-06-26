@@ -1,0 +1,29 @@
+// Sunshine › tc-artboard-backdrop — the citrus-paper canvas. This is the
+// recommended way to paint the sunshine surface (the tc-theme wrapper is
+// display:contents and cannot carry a background): a warm cream base layered
+// with the faint lemon + leaf radial glow field, mirroring CITRINA's
+// `body::before` citrus-paper texture.
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    tc-artboard-backdrop,
+    .tc-artboard-backdrop--dark {
+        --bs-artboard-backdrop-bg: var(--sun-glow-field), var(--sun-bg);
+        --bs-artboard-backdrop-color: var(--sun-ink-1);
+        --bs-artboard-backdrop-border-color: var(--sun-line);
+    }
+
+    .tc-artboard-backdrop--scene {
+        --bs-artboard-backdrop-bg:
+            radial-gradient(60% 50% at 50% 30%, var(--sun-lead-tint), transparent 60%),
+            linear-gradient(180deg, var(--sun-surface), var(--sun-bg));
+        --bs-artboard-backdrop-color: var(--sun-ink-1);
+        --bs-artboard-backdrop-border-color: var(--sun-line);
+    }
+
+    .tc-artboard-backdrop--parch {
+        --bs-artboard-backdrop-bg: var(--sun-glow-field), var(--sun-bg-2);
+        --bs-artboard-backdrop-color: var(--sun-ink-1);
+        --bs-artboard-backdrop-border-color: var(--sun-line);
+    }
+}

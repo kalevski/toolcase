@@ -1,0 +1,28 @@
+// Sunshine › tc-check — lemon checked fill with a dark on-lead tick.
+// The base checkbox tick + indeterminate dash bake a WHITE stroke into an inline
+// SVG data-URI (which can't read --tc-* vars) — invisible on the bright lemon
+// checked fill (~1.4:1). Re-issue both with the dark on-lead ink stroke, repoint
+// the radio dot onto the same ink, and swap the slate focus ring for the leaf
+// halo.
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    // Checkbox tick sits on the lemon checked fill → dark on-lead ink (#2e2400).
+    .form-check-input:checked[type='checkbox'] {
+        --bs-form-check-bg-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%232e2400' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+    }
+
+    .form-check-input[type='checkbox']:indeterminate {
+        --bs-form-check-bg-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%232e2400' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10h8'/%3e%3c/svg%3e");
+    }
+
+    // Radio dot rides the lemon checked fill → match the dark on-lead ink.
+    .form-check-input:checked[type='radio'] {
+        --bs-form-check-bg-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3ccircle r='5' cx='8' cy='8' fill='%232e2400'/%3e%3c/svg%3e");
+    }
+
+    .form-check-input:focus-visible {
+        border-color: var(--sun-leaf);
+        box-shadow: var(--tc-focus-ring);
+    }
+}

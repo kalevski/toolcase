@@ -1,0 +1,17 @@
+// Sunshine › tc-nav — leaf active tab, lemon active pill.
+// The hover / active tab reads leaf green (legible on cream); the active pill
+// fills with the lemon→amber gradient and carries the dark on-lead ink label
+// (the base pill keeps white text over the bright lemon → ~1.4:1).
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    .nav {
+        --bs-nav-link-hover-color: var(--sun-leaf-lo);
+        --bs-nav-tabs-link-active-color: var(--sun-leaf-lo);
+    }
+
+    .nav-pills {
+        --bs-nav-pills-link-active-bg: var(--sun-lead-grad);
+        --bs-nav-pills-link-active-color: var(--sun-on-lead);
+    }
+}

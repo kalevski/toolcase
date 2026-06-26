@@ -1,0 +1,253 @@
+// Sunshine theme — foundation token layer.
+//
+// An OPT-IN warm "citrus boutique" skin for @toolcase/web-components, ported
+// from the CITRINA / nekadnesto.mk storefront: warm cream surfaces, deep
+// olive-green ink, a constant leaf-green brand, and a bright LEMON lead accent
+// (the sunshine pop). It applies only inside a theme root — either the custom
+// element `<tc-theme name="sunshine"> … </tc-theme>` or any element carrying
+// `[data-tc-theme="sunshine"]` (a plain wrapper div, which the examples site
+// uses). Everything outside the root keeps the default toolcase voice.
+//
+// HOW IT WORKS — read this before authoring a component override:
+//   Every tc-* component drives its cosmetics through --bs-<component>-* custom
+//   properties whose DEFAULTS resolve to --tc-* design tokens (e.g.
+//   `--bs-panel-bg: var(--tc-surface)`). Re-pointing the --tc-* tokens here, at
+//   the theme root, re-skins the colours / borders / type of ALL components in
+//   one shot. The per-component partials in ./components/ only add the CITRINA
+//   STRUCTURE a flat token swap can't carry (the lemon gradient + warm glow on
+//   primary actions, the hover-lift + lemon top-bar on cards, the citrus-paper
+//   glow field, the leaf eyebrow with its lemon tick) PLUS the bright-accent
+//   contrast fixes: like aurora's mint, sunshine's LEMON accent is bright, so
+//   every base spot that paints the accent under hardcoded white text needs the
+//   label flipped to the dark on-lead ink.
+//
+// AESTHETIC: warm cream canvas (#FBF3E2 → #FFFDF7), deep olive-green ink
+// (#20301A), a leaf-green brand constant (#5F8A2E) for links / focus / eyebrow,
+// and a bright lemon lead accent (#F2B705) for primary CTAs / pops — with dark
+// olive ink on the lemon fills. Soft warm shadows, a faint citrus-paper texture.
+// SHARP corners are kept (border-radius: 0; circles only) per the toolcase
+// mandate — CITRINA itself is rounded, but sunshine carries its identity through
+// palette + warmth + type, not rounding (matching aurora / dungeon).
+//
+// FONTS: 'Bricolage Grotesque' (display) and 'Hanken Grotesk' (body) are NOT
+// bundled — load them on the host page (e.g. Google Fonts) for the full look;
+// both degrade to system-ui sans-serif. 'IBM Plex Mono' is the mono face and
+// likewise degrades to the system monospace stack.
+
+@use '../../foundation/tokens' as *;
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    color-scheme: light;
+
+    // `tc-theme` is display:contents (no box), so `background` would not paint —
+    // for the cream canvas, wrap content in `tc-artboard-backdrop` or set the
+    // glow field on your own container. `color` / `font-family` / the custom
+    // properties below all inherit through the contents box to descendants.
+    color: var(--sun-ink-1);
+    font-family: var(--sun-body);
+
+    // ── Sunshine palette (--sun-*) — the theme's design tokens ───────────────
+    // Warm neutral surface scale — recessed cream up through brightest paper.
+    --sun-bg: #f6ecd8; // recessed page base — warm cream
+    --sun-bg-2: #fbf3e2; // base surface
+    --sun-surface: #fffdf7; // raised card surface
+    --sun-surface-hi: #ffffff; // brightest
+    --sun-well: #f1e6ce; // inputs / wells / image plates
+    --sun-well-2: #eadcbe; // stronger fill
+
+    // Hairlines — low-opacity olive-ink over cream.
+    --sun-line-faint: rgba(34, 48, 26, 0.07);
+    --sun-line: rgba(34, 48, 26, 0.14);
+    --sun-line-strong: rgba(34, 48, 26, 0.26);
+
+    // Ink — deep olive-green text ramp.
+    --sun-ink-1: #20301a; // primary text
+    --sun-ink-2: #44503a; // secondary
+    --sun-ink-3: #6e775f; // muted / captions
+    --sun-ink-4: #9aa189; // faint / disabled
+    --sun-emphasis: #18230f; // strongest heading ink
+
+    // Brand leaf green — the constant (avocado-ish). Links, focus, eyebrow text.
+    --sun-leaf: #5f8a2e;
+    --sun-leaf-hi: #6fa037;
+    --sun-leaf-lo: #4c7122;
+    --sun-leaf-deep: #2e4417;
+    --sun-leaf-tint: rgba(95, 138, 46, 0.12);
+
+    // Lemon lead accent — the sunshine pop. Primary CTAs + decorative bars.
+    // On-lead ink is the dark olive label that rides every lemon fill.
+    --sun-lead: #f2b705;
+    --sun-lead-hi: #ffc92e;
+    --sun-lead-lo: #d49a00;
+    --sun-lead-tint: rgba(242, 183, 5, 0.16);
+    --sun-lead-line: rgba(242, 183, 5, 0.45);
+    --sun-lead-glow: rgba(242, 183, 5, 0.4);
+    --sun-on-lead: #2e2400; // text on lemon-coloured fills
+
+    // Fixed pops — coral (sale / hearts / danger) and plum (info).
+    --sun-coral: #f2604b;
+    --sun-coral-tint: rgba(242, 96, 75, 0.14);
+    --sun-plum: #9c4a7a;
+    --sun-plum-tint: rgba(156, 74, 122, 0.12);
+
+    // Typography families.
+    --sun-display: 'Bricolage Grotesque', 'Hanken Grotesk', system-ui, sans-serif;
+    --sun-body: 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --sun-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+    --sun-ease: cubic-bezier(0.2, 0.9, 0.25, 1);
+    --sun-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+    // ── Corner radii (CITRINA boutique scale) ────────────────────────────────
+    // Sunshine deliberately OPTS OUT of the toolcase sharp-corner mandate to
+    // honour the rounded CITRINA storefront: every component that ships with a
+    // square corner is rounded inside this theme root (see ./components/_radius,
+    // a generated sweep over every `border-radius` the base sets to 0 / a var).
+    // Genuinely circular shapes (50%) and pills (999px) are left untouched.
+    --sun-r-xs: 6px;
+    --sun-r-sm: 10px;
+    --sun-r-md: 14px;
+    --sun-r-lg: 20px;
+    --sun-r-xl: 30px;
+    // The two knobs the _radius sweep drives: a mid radius for controls / chips /
+    // most chrome, and a larger one for big container surfaces.
+    --sun-radius: 12px;
+    --sun-radius-lg: 18px;
+
+    // ── Reusable signature recipes (referenced by component partials) ────────
+    // The lemon→amber gradient — primary actions, pills, bar fills.
+    --sun-lead-grad: linear-gradient(135deg, var(--sun-lead-hi), var(--sun-lead));
+    // Soft top-down surface gradient for raised cards / panels.
+    --sun-surface-grad: linear-gradient(180deg, var(--sun-surface-hi), var(--sun-surface));
+    // Warm glow drop-shadow for the raised lemon primary action.
+    --sun-lead-shadow: 0 0 0 1px var(--sun-lead-line), 0 12px 28px -10px var(--sun-lead-glow);
+    --sun-lead-shadow-strong: 0 0 0 1px var(--sun-lead-line), 0 18px 38px -10px var(--sun-lead-glow);
+    // Hairline top highlight — "light catches the top edge" on raised surfaces.
+    --sun-bevel-top: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    // Faint citrus-paper texture for full-bleed backdrops (CITRINA body::before).
+    --sun-glow-field:
+        radial-gradient(60% 40% at 85% -5%, var(--sun-lead-tint), transparent 70%),
+        radial-gradient(50% 38% at -8% 8%, var(--sun-leaf-tint), transparent 72%);
+    // Frosted warm glass for floating menus / popovers / overlay panels.
+    --sun-overlay-bg: linear-gradient(180deg, rgba(255, 253, 247, 0.92), rgba(251, 243, 226, 0.95));
+    --sun-overlay-blur: blur(14px) saturate(120%);
+
+    // ── Remap toolcase tokens (--tc-*) onto the sunshine palette ─────────────
+    // This block alone flips every component's colours / borders / type, because
+    // the --bs-<component>-* defaults all resolve through these tokens.
+    --tc-font-sans: var(--sun-body);
+    --tc-font-mono: var(--sun-mono);
+
+    --tc-white: #ffffff;
+    --tc-black: #000000;
+
+    --tc-surface: var(--sun-surface);
+    --tc-surface-muted: var(--sun-well);
+    --tc-surface-hover: var(--sun-bg-2);
+    --tc-surface-dark: var(--sun-leaf-deep);
+    --tc-border: var(--sun-line);
+    --tc-border-faint: var(--sun-line-faint);
+    --tc-border-strong: var(--sun-line-strong);
+    --tc-text: var(--sun-ink-1);
+    --tc-text-muted: var(--sun-ink-3);
+    --tc-text-faint: var(--sun-ink-4);
+    // text-inverse means "readable text on a dark/ink surface" (code blocks, the
+    // dark footer, toasts) — keep it LIGHT cream so it reads on the warm ink.
+    --tc-text-inverse: var(--sun-bg-2);
+    --tc-emphasis: var(--sun-emphasis);
+
+    // Ink — the dark warm-brown surface (toasts, tooltips, code blocks, footers).
+    --tc-ink: #241a10;
+    --tc-ink-2: #2e2316;
+
+    // App accent — PRIMARY actions read bright lemon with dark olive-ink text.
+    --tc-app-accent: var(--sun-lead);
+    --tc-app-accent-hover: var(--sun-lead-hi);
+    --tc-app-accent-contrast: var(--sun-on-lead);
+    // Primary-action gradient → lemon→amber (no slate stop), so the dark on-lead
+    // ink stays legible across the whole sweep. Mirrors the .btn-primary override;
+    // pointing the shared token here fixes every CTA that used the base
+    // `var(--tc-app-accent), #2b3a51` gradient (it became lemon→slate otherwise).
+    --tc-app-accent-gradient: var(--sun-lead-grad);
+
+    // Accent — the LEAF-GREEN signature: links, focus, the brand dot, accent
+    // text. Leaf reads cleanly on cream (lemon as text would be ~1.5:1), so the
+    // bright lemon stays for FILLS / decorative bars while leaf carries text.
+    --tc-accent: var(--sun-leaf);
+    --tc-accent-fg: var(--sun-leaf-lo);
+    --tc-accent-soft: var(--sun-leaf-tint);
+    --tc-accent-hex: #5f8a2e;
+    --tc-cyan: #4a9fb0;
+
+    --tc-success: var(--sun-leaf);
+    --tc-success-bg: var(--sun-leaf-tint);
+    --tc-info: var(--sun-plum);
+    --tc-info-bg: var(--sun-plum-tint);
+    --tc-warning: var(--sun-lead-lo);
+    --tc-warning-bg: var(--sun-lead-tint);
+    --tc-danger: var(--sun-coral);
+    --tc-danger-bg: var(--sun-coral-tint);
+
+    // Shadows — soft and warm (CITRINA's brown-tinted drop shadows). Surfaces
+    // lean on 1px olive hairlines + the warm lift on raised tiles.
+    --tc-shadow-sm: 0 1px 2px rgba(54, 44, 18, 0.05), 0 2px 6px rgba(54, 44, 18, 0.06);
+    --tc-shadow-md: 0 6px 18px -6px rgba(54, 44, 18, 0.14);
+    --tc-shadow-lg: 0 28px 64px -16px rgba(54, 44, 18, 0.28);
+    --tc-shadow-hover: 0 14px 34px -10px rgba(54, 44, 18, 0.2);
+
+    --tc-transition-fast: 0.14s var(--sun-ease);
+    --tc-transition-base: 0.22s var(--sun-ease);
+
+    // Focus ring — a soft leaf-green halo (CITRINA's exact --focus-ring).
+    --tc-focus-ring: 0 0 0 3px rgba(95, 138, 46, 0.34);
+
+    // ── Bootstrap-compatible contract (--bs-*) ───────────────────────────────
+    --bs-primary: var(--sun-lead);
+    --bs-primary-rgb: 242, 183, 5;
+    --bs-secondary: var(--sun-ink-3);
+    --bs-secondary-rgb: 110, 119, 95;
+    --bs-success: var(--sun-leaf);
+    --bs-success-rgb: 95, 138, 46;
+    --bs-danger: var(--sun-coral);
+    --bs-danger-rgb: 242, 96, 75;
+    --bs-warning: var(--sun-lead-lo);
+    --bs-warning-rgb: 212, 154, 0;
+    --bs-info: var(--sun-plum);
+    --bs-info-rgb: 156, 74, 122;
+    --bs-light: var(--sun-bg-2);
+    --bs-light-rgb: 251, 243, 226;
+    --bs-dark: var(--sun-leaf-deep);
+    --bs-dark-rgb: 46, 68, 23;
+
+    --bs-font-sans-serif: var(--sun-body);
+    --bs-font-monospace: var(--sun-mono);
+    --bs-body-font-family: var(--sun-body);
+    --bs-body-bg: var(--sun-bg-2);
+    --bs-body-bg-rgb: 251, 243, 226;
+    --bs-body-color: var(--sun-ink-1);
+    --bs-body-color-rgb: 32, 48, 26;
+    --bs-emphasis-color: var(--sun-emphasis);
+    --bs-emphasis-color-rgb: 24, 35, 15;
+
+    --bs-secondary-color: var(--sun-ink-3);
+    --bs-secondary-bg: var(--sun-well);
+    --bs-tertiary-color: var(--sun-ink-4);
+    --bs-tertiary-bg: var(--sun-bg);
+
+    --bs-border-color: var(--sun-line);
+    --bs-border-color-translucent: rgba(34, 48, 26, 0.12);
+    // Rounded by design (CITRINA) — overrides the default theme's mandated 0.
+    --bs-border-radius: var(--sun-radius);
+
+    // Links read leaf-green (not the bright lemon accent) so inline anchors stay
+    // legible on the cream canvas.
+    --bs-link-color: var(--sun-leaf);
+    --bs-link-hover-color: var(--sun-leaf-lo);
+
+    --bs-box-shadow-sm: var(--tc-shadow-sm);
+    --bs-box-shadow: var(--tc-shadow-md);
+    --bs-box-shadow-lg: var(--tc-shadow-lg);
+
+    --bs-focus-ring-color: rgba(95, 138, 46, 0.34);
+}

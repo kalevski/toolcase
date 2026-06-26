@@ -91,6 +91,7 @@ const routeThemes: Record<string, { value: string; label: string }[]> = {
         { value: 'default', label: 'Default' },
         { value: 'dungeon', label: 'Dungeon' },
         { value: 'aurora', label: 'Aurora' },
+        { value: 'sunshine', label: 'Sunshine' },
     ],
 }
 

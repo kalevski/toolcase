@@ -1,0 +1,23 @@
+// Sunshine › tc-chip — warm well chip, lemon selection.
+// Resting chips sit on the cream well with a leaf-tinted icon; the selected /
+// active state and the count badge pick up the soft lemon accent so selection
+// reads at a glance (CITRINA's filter chips).
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    tc-chip,
+    .tc-chip {
+        --bs-chip-bg: var(--sun-well);
+        --bs-chip-bg-hover: var(--sun-well-2);
+        --bs-chip-border-color: var(--sun-line);
+        --bs-chip-count-bg: var(--sun-lead-tint);
+    }
+
+    .tc-chip.active,
+    .tc-chip[aria-pressed='true'],
+    .tc-chip[aria-selected='true'] {
+        --bs-chip-bg: var(--sun-lead-tint);
+        --bs-chip-color: var(--sun-leaf-lo);
+        --bs-chip-border-color: var(--sun-lead-line);
+    }
+}

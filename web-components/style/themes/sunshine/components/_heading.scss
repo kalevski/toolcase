@@ -1,0 +1,19 @@
+// Sunshine › tc-heading — display type with a lemon→leaf gradient treatment.
+// The base inner .tc-heading sets `font-family: var(--tc-font-sans)` literally,
+// so the display swap is applied on the class. The optional --gradient treatment
+// runs lemon→leaf (the base end stop is --tc-ink, near-black, which would mute
+// the citrus pop).
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    tc-heading {
+        --bs-heading-gradient-start: var(--sun-lead);
+        --bs-heading-gradient-end: var(--sun-leaf);
+    }
+
+    .tc-heading {
+        font-family: var(--sun-display);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+    }
+}

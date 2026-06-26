@@ -1,0 +1,17 @@
+// Sunshine › tc-spinner — leaf arc on a faint cream track.
+// The grow / dots / bars / orbit / pulse variants ride currentcolor, so they
+// pick up the leaf accent for free. Only the spinner-border track is an
+// off-palette literal (--tc-slate-200) that needs a warm-hairline replacement.
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    .spinner-border,
+    .spinner-pulse {
+        color: var(--sun-leaf);
+    }
+
+    .spinner-border {
+        border-color: var(--sun-line-strong);
+        border-top-color: currentcolor;
+    }
+}
