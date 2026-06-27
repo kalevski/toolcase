@@ -7,6 +7,7 @@ import type {
     SingleCardSelectOption,
 } from '@toolcase/web-components'
 import { useTc, detailValue, targetValue } from '@/lib/tc'
+import { useBranding } from '@/lib/branding-context'
 import type { BaseDomain, BaseDomainTier } from '@/server/domain/types'
 
 // Per-tier badge shown beside a base domain in the picker (§10). Free is the
@@ -106,6 +107,7 @@ function errorMessage(code: unknown, status: number): string {
 }
 
 export function CreateSiteWizard() {
+    const branding = useBranding()
     // ── step 1: repository ──
     const [repos, setRepos] = useState<RepoSummary[]>([])
     const [reposLoading, setReposLoading] = useState(true)
@@ -238,19 +240,23 @@ export function CreateSiteWizard() {
         [],
     )
 
-    // The A-record copy for the custom-domain path (§10). The exact ingress IP and
-    // the Verify action live on the site dashboard after the site is created, so the
-    // template uses the documented placeholder.
+    // The A-record copy for the custom-domain path (§10). The ingress IP comes from
+    // the instance settings (owner-set, else the env default); the Verify action lives
+    // on the site dashboard after the site is created. Falls back to a documented
+    // placeholder when no server IP is configured yet.
     const dnsInstructions = useMemo(() => {
         const host = customDomain.trim() || 'www.example.com'
-        return [
+        const ipv4 = branding.ingressIpv4 || '<server IP not configured>'
+        const lines = [
             `; DNS records for ${host} — then create the site and click Verify on its dashboard.`,
-            'A      @      <PERCH_INGRESS_IPV4>',
-            'A      www    <PERCH_INGRESS_IPV4>',
-            '; optional, for IPv6:',
-            'AAAA   @      <PERCH_INGRESS_IPV6>',
-        ].join('\n')
-    }, [customDomain])
+            `A      @      ${ipv4}`,
+            `A      www    ${ipv4}`,
+        ]
+        if (branding.ingressIpv6) {
+            lines.push('; optional, for IPv6:', `AAAA   @      ${branding.ingressIpv6}`)
+        }
+        return lines.join('\n')
+    }, [customDomain, branding.ingressIpv4, branding.ingressIpv6])
 
     // ── element refs (every tc-* element is wired through lib/tc.ts) ─────────────
 

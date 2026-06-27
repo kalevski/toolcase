@@ -701,6 +701,58 @@ body {
     min-width: 9rem;
 }
 
+/* Admin Settings form — two-column on wide, single-column on mobile (mobile-first). */
+.perch-admin-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.perch-admin-settings-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+}
+
+.perch-admin-settings-full {
+    grid-column: 1 / -1;
+}
+
+.perch-admin-settings-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+@media (min-width: 640px) {
+    .perch-admin-settings-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* Custom-domain A-record + Verify card on the site dashboard. */
+.perch-site-domain {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.perch-site-dns {
+    margin: 0;
+    padding: 0.75rem;
+    background: var(--tc-surface-muted, #f4f5f7);
+    border: 1px solid var(--tc-border, #d8dde3);
+    font-family: var(--tc-font-mono, ui-monospace, monospace);
+    font-size: 0.8125rem;
+    white-space: pre-wrap;
+    overflow-x: auto;
+}
+
+.perch-site-verify-result {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
 /* Base-domain audience-tier groups. */
 .perch-admin-domain-group + .perch-admin-domain-group {
     margin-top: 1rem;

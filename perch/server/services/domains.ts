@@ -28,7 +28,7 @@ import * as nginx from '@/server/infrastructure/nginx'
 import * as nginxpilot from '@/server/infrastructure/nginxpilot'
 import * as deploy from '@/server/services/deploy'
 import { assertCanUseCustomDomain } from '@/server/services/quota'
-import { config } from '@/server/config'
+import { effectiveIngressIpv4 } from '@/server/services/settings'
 import { slog } from '@/server/infrastructure/server-log'
 import { checkDomain, checkLabel, dnsPointsAt } from '@/server/domain/hostname'
 import type { Site } from '@/server/domain/types'
@@ -139,19 +139,20 @@ export interface DomainVerification {
     domain: string
     /** True iff the domain's A-records include our ingress IP. */
     verified: boolean
-    /** The ingress IP the domain must point at (`config.ingressIpv4`). */
+    /** The ingress IP the domain must point at (the effective setting, §13). */
     expected: string
     /** The A-records actually resolved (empty on NXDOMAIN / no A record / error). */
     resolved: string[]
 }
 
 /**
- * Resolve a custom domain server-side and confirm it points at `PERCH_INGRESS_IPV4`
- * before provisioning (§10 "Verify", §16: prevents claiming a domain you don't
- * control). **Fails closed** at every step: an unconfigured ingress IP, an
- * NXDOMAIN/no-A-record/resolver error, or a non-matching A-record all yield
- * `verified: false` (never an issued cert). Validates the domain shape first, so a
- * malformed domain is rejected (`HostnameError`) before any lookup.
+ * Resolve a custom domain server-side and confirm it points at the effective ingress
+ * IP before provisioning (§10 "Verify", §16: prevents claiming a domain you don't
+ * control). The ingress IP comes from the settings service (the owner-set override,
+ * else the `PERCH_INGRESS_IPV4` env default). **Fails closed** at every step: an
+ * unconfigured ingress IP, an NXDOMAIN/no-A-record/resolver error, or a non-matching
+ * A-record all yield `verified: false` (never an issued cert). Validates the domain
+ * shape first, so a malformed domain is rejected (`HostnameError`) before any lookup.
  */
 export async function verifyCustomDomain(domain: string): Promise<DomainVerification> {
     const checked = checkDomain(domain)
@@ -159,14 +160,14 @@ export async function verifyCustomDomain(domain: string): Promise<DomainVerifica
         throw new HostnameError(checked.message, `domain_${checked.reason}`, 400)
     }
     const host = checked.domain
-    const expected = config.ingressIpv4
+    const expected = effectiveIngressIpv4()
 
     if (!expected) {
         // We have no ingress IP to compare against — verification is unavailable.
         // Fail loudly rather than silently report "not verified", so the operator
-        // knows to set PERCH_INGRESS_IPV4 (§16).
+        // knows to set the ingress IP (admin Settings, or PERCH_INGRESS_IPV4) (§16).
         throw new HostnameError(
-            'custom-domain verification is unavailable (PERCH_INGRESS_IPV4 is unset)',
+            'custom-domain verification is unavailable — set the server IP in admin Settings',
             'ingress_unconfigured',
             503,
         )

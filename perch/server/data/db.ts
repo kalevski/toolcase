@@ -160,6 +160,18 @@ const MIGRATIONS: string[] = [
         updated_at         TEXT NOT NULL
     );
     `,
+    // v4 — global instance settings (owner-editable branding + custom-domain
+    // ingress). A generic key/value store: one row per setting, value is the raw
+    // string the UI persisted (validated in `domain/settings.ts` before it lands).
+    // A missing key falls through to its built-in default / env fallback, so the
+    // table is empty on a fresh instance and every setting is optional.
+    `
+    CREATE TABLE app_setting (
+        key        TEXT PRIMARY KEY,       -- app_name | tagline | theme | brand_color | ingress_ipv4 | ingress_ipv6
+        value      TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+    );
+    `,
 ]
 
 function migrate(db: DatabaseSync): void {

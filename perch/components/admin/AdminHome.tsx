@@ -14,6 +14,7 @@ const AREAS = [
     { href: '/admin/users', label: 'Users', desc: 'Grant roles and override per-user quotas.' },
     { href: '/admin/domains', label: 'Domains', desc: 'The subdomain pool, grouped by audience tier.' },
     { href: '/admin/plans', label: 'Plans', desc: 'Map monthly sponsorship thresholds to paid plans.' },
+    { href: '/admin/settings', label: 'Settings', desc: 'Branding, theme, and the custom-domain server IP.' },
     { href: '/admin/audit', label: 'Audit', desc: 'Immutable trail of every owner mutation.' },
 ]
 

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { useTc } from '@/lib/tc'
+import { useBranding } from '@/lib/branding-context'
 
 // Human-readable copy for the `?error=` codes the OAuth callback can redirect
 // back with (§7). Anything unmapped falls back to a generic message.
@@ -18,6 +19,7 @@ const ERRORS: Record<string, string> = {
 const CONNECT = [{ key: 'github', label: 'Sign in with GitHub', icon: 'git-branch', variant: 'primary' as const }]
 
 export function LoginClient({ error }: { error?: string }) {
+    const branding = useBranding()
     const message = error ? (ERRORS[error] ?? 'Sign-in failed. Please try again.') : null
     // Clicking connect kicks off a full-page redirect to GitHub; flip to a
     // "redirecting…" state so the click has immediate, visible feedback while the
@@ -51,12 +53,8 @@ export function LoginClient({ error }: { error?: string }) {
                 </div>
             ) : (
                 <div className="perch-login-body">
-                    <tc-login
-                        ref={ref}
-                        title="Perch"
-                        description="Deploy a branch of your GitHub repository as a static website."
-                    >
-                        <tc-brand slot="logo" primary-text="Perch" color="#0ea5e9" />
+                    <tc-login ref={ref} title={branding.appName} description={branding.tagline}>
+                        <tc-brand slot="logo" primary-text={branding.appName} color={branding.brandColor} />
                     </tc-login>
                 </div>
             )}

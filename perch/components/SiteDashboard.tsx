@@ -3,8 +3,18 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTc, targetValue } from '@/lib/tc'
 import { useToast } from './Toast'
+import { useBranding } from '@/lib/branding-context'
 import { buildSiteDashboard, type SiteStatusPayload } from '@/server/domain/site-dashboard'
 import type { PlanLimits, Site, SiteUsage } from '@/server/domain/types'
+
+// The custom-domain verification result returned by POST /api/sites/{id}/verify-domain.
+interface VerifyResult {
+    domain: string
+    verified: boolean
+    expected: string
+    resolved: string[]
+    provisioned: boolean
+}
 
 // Per-site dashboard (§9 step 5, §11, §14, task 734). A live status view for one
 // site composed entirely of `tc-*` Web Components driven through the `lib/tc.ts`
@@ -65,7 +75,10 @@ export function SiteDashboard({
     onDeleted?: () => void
 }) {
     const toast = useToast()
+    const branding = useBranding()
     const [payload, setPayload] = useState<SiteStatusPayload | null>(null)
+    const [verifying, setVerifying] = useState(false)
+    const [verifyResult, setVerifyResult] = useState<VerifyResult | null>(null)
     const [loadError, setLoadError] = useState(false)
     const [redeploying, setRedeploying] = useState(false)
     const [deleting, setDeleting] = useState(false)
@@ -178,6 +191,49 @@ export function SiteDashboard({
         }
     }, [site.id, site.hostname, confirmText, onDeleted, deleteModalRef])
 
+    // Custom-domain DNS verification (§10, §729). POSTs to verify-domain; on a
+    // confirmed A-record the server installs the vhost + cert and marks the site live.
+    const verifyDomain = useCallback(async () => {
+        setVerifying(true)
+        try {
+            const res = await fetch(`/api/sites/${encodeURIComponent(site.id)}/verify-domain`, { method: 'POST' })
+            const data = (await res.json().catch(() => ({}))) as Partial<VerifyResult> & { error?: string }
+            if (!res.ok) {
+                const code = data.error
+                const msg =
+                    code === 'ingress_unconfigured'
+                        ? 'No server IP is configured yet — ask the owner to set it in admin Settings.'
+                        : code
+                          ? `Verification failed: ${code}.`
+                          : `Verification failed (HTTP ${res.status}).`
+                toast.show(msg, { variant: 'error', title: 'Domain not verified' })
+                return
+            }
+            const result = data as VerifyResult
+            setVerifyResult(result)
+            if (result.provisioned) {
+                toast.show('Domain verified — certificate issued and the site is going live.', { variant: 'success' })
+                // Pull fresh status so the build/status cards reflect the new live state.
+                try {
+                    setPayload(await fetchStatus())
+                } catch {
+                    /* the poll loop will catch up */
+                }
+            } else if (result.verified) {
+                toast.show('Domain already verified and serving.', { variant: 'success' })
+            } else {
+                toast.show(`${result.domain} does not point at ${result.expected} yet.`, {
+                    variant: 'warning',
+                    title: 'DNS not pointing here yet',
+                })
+            }
+        } catch {
+            toast.show('Network error verifying the domain. Try again.', { variant: 'error' })
+        } finally {
+            setVerifying(false)
+        }
+    }, [site.id, fetchStatus, toast])
+
     const view = useMemo(
         () => (payload ? buildSiteDashboard(payload, limits, accountUsage) : null),
         [payload, limits, accountUsage],
@@ -252,6 +308,53 @@ export function SiteDashboard({
                     <tc-usage-summary-panel ref={usageRef} title="Storage" loading={loading || undefined} />
                 </div>
             </div>
+
+            {/* Custom-domain A-record + Verify (§10). Only for custom-domain sites —
+                subdomains are covered by the wildcard server block and need no DNS work. */}
+            {site.hostKind === 'custom' && (
+                <tc-section-card title="Custom domain" icon="globe">
+                    <div className="perch-site-domain">
+                        <p className="perch-site-note">
+                            Point <strong>{site.hostname}</strong> at this server, then verify. Perch confirms the DNS
+                            and issues the TLS certificate before going live.
+                        </p>
+                        <pre className="perch-site-dns" aria-label="DNS records">
+                            {branding.ingressIpv4
+                                ? `A    ${site.hostname}    ${branding.ingressIpv4}${
+                                      branding.ingressIpv6 ? `\nAAAA ${site.hostname}    ${branding.ingressIpv6}` : ''
+                                  }`
+                                : 'No server IP is configured yet — the owner must set it in admin Settings.'}
+                        </pre>
+                        {verifyResult && (
+                            <div className="perch-site-verify-result" role="status">
+                                <tc-status-dot
+                                    status={verifyResult.verified ? 'online' : 'away'}
+                                    label={
+                                        verifyResult.verified
+                                            ? verifyResult.provisioned
+                                                ? 'Verified — going live'
+                                                : 'Verified'
+                                            : 'Not pointing here yet'
+                                    }
+                                />
+                                <p className="perch-site-note">
+                                    Expected <strong>{verifyResult.expected}</strong>; resolved{' '}
+                                    {verifyResult.resolved.length ? verifyResult.resolved.join(', ') : '(no A record)'}.
+                                </p>
+                            </div>
+                        )}
+                        <div className="perch-site-actions">
+                            <tc-button
+                                variant="primary"
+                                onClick={verifyDomain}
+                                disabled={verifying || !branding.ingressIpv4 || undefined}
+                            >
+                                {verifying ? 'Verifying…' : 'Verify domain'}
+                            </tc-button>
+                        </div>
+                    </div>
+                </tc-section-card>
+            )}
 
             {/* Delete confirmation. Body is one stable wrapper div (the modal relocates
                 children into its body once at connect, so conditional content must live

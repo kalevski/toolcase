@@ -4,6 +4,7 @@ import { useMemo, type ReactNode } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import type { SideNavItem, SideNavSection } from '@toolcase/web-components'
 import { useTcProps } from '@/lib/tc'
+import { useBranding } from '@/lib/branding-context'
 import { Breadcrumbs } from './Breadcrumbs'
 import { CommandPalette } from './CommandPalette'
 import { ACCOUNT_LEVEL_LABEL, ROLE_RANK, type MeResponse } from '@/server/domain/types'
@@ -19,6 +20,7 @@ import { ACCOUNT_LEVEL_LABEL, ROLE_RANK, type MeResponse } from '@/server/domain
 export function AppShell({ me, children }: { me: MeResponse; children: ReactNode }) {
     const router = useRouter()
     const pathname = usePathname()
+    const branding = useBranding()
 
     // Navigation is data — `tc-side-nav` takes its sections as a JS property and
     // reports clicks via `tc-item-click` / the `onItemClick` callback. The Routing
@@ -27,7 +29,7 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
     const sections = useMemo<SideNavSection[]>(() => {
         const main: SideNavSection = {
             key: 'main',
-            title: 'Perch',
+            title: branding.appName,
             items: [
                 {
                     key: 'sites',
@@ -91,6 +93,13 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
                     active: pathname.startsWith('/admin/domains'),
                 },
                 {
+                    key: 'admin-settings',
+                    label: 'Settings',
+                    icon: 'settings',
+                    href: '/admin/settings',
+                    active: pathname.startsWith('/admin/settings'),
+                },
+                {
                     key: 'admin-plans',
                     label: 'Plans',
                     icon: 'credit-card',
@@ -111,7 +120,7 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
         if (rank >= ROLE_RANK.maintainer) out.push(routing)
         if (me.role === 'owner') out.push(admin)
         return out
-    }, [pathname, me.role])
+    }, [pathname, me.role, branding.appName])
 
     // Intercept the side-nav anchor click so navigation stays a client-side
     // router push instead of a full page load. preventDefault works because the
@@ -137,7 +146,7 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
                 Skip to content
             </a>
             <tc-dashboard-layout>
-                <tc-brand slot="brand" primary-text="Perch" color="#0ea5e9" />
+                <tc-brand slot="brand" primary-text={branding.appName} color={branding.brandColor} />
                 <div slot="sidebar-menu" className="perch-sidebar-menu">
                     <tc-side-nav ref={sideNavRef} />
                 </div>

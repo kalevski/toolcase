@@ -130,7 +130,13 @@ export const config = {
     // it points here BEFORE issuing a cert (§16: prevents domain takeover). Empty
     // means custom-domain verification is unavailable — the verify step then fails
     // closed (it can't confirm a match it has no IP to compare against).
+    // This is the *fallback* default: the owner can override it at runtime from the
+    // admin Settings surface (`app_setting` table); `services/settings.ts` resolves
+    // the effective value (stored override wins, else this env default).
     ingressIpv4: optional('PERCH_INGRESS_IPV4', ''),
+    // Public ingress IPv6 handed out in the AAAA-record instructions (optional —
+    // empty omits the AAAA line). Same stored-override-then-env path as ingressIpv4.
+    ingressIpv6: optional('PERCH_INGRESS_IPV6', ''),
     // nginx `conf.d/` dir Perch installs per-custom-domain vhosts into. Server-
     // controlled path; vhost filenames are derived from the validated domain only,
     // never from raw user input (§16: path traversal).
