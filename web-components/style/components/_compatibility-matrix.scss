@@ -7,7 +7,7 @@
 tc-compatibility-matrix {
     // ── Frame ────────────────────────────────────────────────────────────────
     --bs-compatibility-matrix-border: 1px solid var(--tc-border);
-    --bs-compatibility-matrix-inner-border: 1px solid var(--tc-slate-100);
+    --bs-compatibility-matrix-inner-border: 1px solid var(--tc-border-faint);
     --bs-compatibility-matrix-bg: var(--tc-surface);
 
     // ── Header (optional title) ──────────────────────────────────────────────

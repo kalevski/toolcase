@@ -243,24 +243,53 @@ export function SiteDashboard({
     const statusCardRef = useTc<HTMLElement>(useMemo(() => ({ items: view?.statusItems ?? [] }), [view]))
     const usageRef = useTc<HTMLElement>(useMemo(() => ({ usage: view?.usage ?? [] }), [view]))
 
+    // The custom-domain A/AAAA records, rendered through the same tc-code-snippet
+    // the create-site wizard uses (copy button + mono framing) instead of a bespoke
+    // <pre>. Driven via the `code` property so the multi-line value flows through the
+    // lib/tc.ts bridge; only rendered when an ingress IP is configured.
+    const dnsCode = useMemo(() => {
+        const lines = [`A     ${site.hostname}    ${branding.ingressIpv4}`]
+        if (branding.ingressIpv6) lines.push(`AAAA  ${site.hostname}    ${branding.ingressIpv6}`)
+        return lines.join('\n')
+    }, [site.hostname, branding.ingressIpv4, branding.ingressIpv6])
+    const dnsSnippetRef = useTc<HTMLElement>(useMemo(() => ({ code: dnsCode }), [dnsCode]))
+
     const loading = !view
     const head = view?.headline
 
     return (
         <section className="perch-site" aria-label={`Site ${site.hostname}`}>
-            <header className="perch-site-header">
-                <div className="perch-site-id">
-                    <h2 className="perch-site-host">{site.hostname}</h2>
-                    <p className="perch-site-source">
-                        {site.repoOwner}/{site.repoName} · {site.branch}
-                        {site.subdir ? ` · ${site.subdir}` : ''}
-                    </p>
+            {/* Page toolbar: live status + identity on the left, primary action on the
+                right. Delete lives in an overflow menu so the destructive action can't
+                sit shoulder-to-shoulder with Redeploy. */}
+            <header className="perch-site-toolbar">
+                <div className="perch-site-ident">
+                    {head ? (
+                        <tc-status-dot status={head.dot} label={head.label} pulse={head.pulse || undefined} />
+                    ) : (
+                        <tc-status-dot status="away" label="Loading…" />
+                    )}
+                    <div className="perch-site-id">
+                        <h2 className="perch-site-host">{site.hostname}</h2>
+                        <p className="perch-site-source">
+                            {site.repoOwner}/{site.repoName} · {site.branch}
+                            {site.subdir ? ` · ${site.subdir}` : ''}
+                        </p>
+                    </div>
                 </div>
-                {head ? (
-                    <tc-status-dot status={head.dot} label={head.label} pulse={head.pulse || undefined} />
-                ) : (
-                    <tc-status-dot status="away" label="Loading…" />
-                )}
+                <div className="perch-site-actions">
+                    <tc-button variant="primary" onClick={redeploy} disabled={redeploying || undefined}>
+                        {redeploying ? 'Redeploying…' : 'Redeploy'}
+                    </tc-button>
+                    <tc-dropdown className="perch-site-menu" label="More" variant="secondary" direction="down">
+                        <tc-dropdown-item
+                            className="perch-danger-item"
+                            onClick={() => deleteModalRef.current?.show()}
+                        >
+                            Delete site
+                        </tc-dropdown-item>
+                    </tc-dropdown>
+                </div>
             </header>
 
             {loadError && (
@@ -287,20 +316,6 @@ export function SiteDashboard({
                     ) : (
                         <tc-build loading name={site.hostname} />
                     )}
-                    <div className="perch-site-actions">
-                        <tc-button variant="secondary" onClick={redeploy} disabled={redeploying || undefined}>
-                            {redeploying ? 'Redeploying…' : 'Redeploy'}
-                        </tc-button>
-                        <tc-button
-                            variant="danger"
-                            outline
-                            onClick={() => deleteModalRef.current?.show()}
-                            disabled={deleting || undefined}
-                        >
-                            Delete site
-                        </tc-button>
-                    </div>
-
                     <tc-status-card ref={statusCardRef} title="Status" loading={loading || undefined} />
                 </div>
 
@@ -318,13 +333,13 @@ export function SiteDashboard({
                             Point <strong>{site.hostname}</strong> at this server, then verify. Perch confirms the DNS
                             and issues the TLS certificate before going live.
                         </p>
-                        <pre className="perch-site-dns" aria-label="DNS records">
-                            {branding.ingressIpv4
-                                ? `A    ${site.hostname}    ${branding.ingressIpv4}${
-                                      branding.ingressIpv6 ? `\nAAAA ${site.hostname}    ${branding.ingressIpv6}` : ''
-                                  }`
-                                : 'No server IP is configured yet — the owner must set it in admin Settings.'}
-                        </pre>
+                        {branding.ingressIpv4 ? (
+                            <tc-code-snippet ref={dnsSnippetRef} language="dns" title="DNS records" />
+                        ) : (
+                            <tc-banner variant="warning">
+                                No server IP is configured yet — the owner must set it in admin Settings.
+                            </tc-banner>
+                        )}
                         {verifyResult && (
                             <div className="perch-site-verify-result" role="status">
                                 <tc-status-dot

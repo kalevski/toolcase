@@ -75,12 +75,18 @@ export function useMaintainerData<T>(fetcher: () => Promise<T | null>): {
 export function RoutingPage<T>({
     title,
     subtitle,
+    icon,
+    iconColor = 'cyan',
     state,
     onRetry,
     children,
 }: {
     title: string
     subtitle?: string
+    /** Lucide glyph (kebab-case) for the header icon chip — mirrors the side-nav icon. */
+    icon?: string
+    /** Header icon chip tint (tc-rich-page-header palette). */
+    iconColor?: string
     state: RoutingDataState<T>
     onRetry?: () => void
     children: (data: T) => ReactNode
@@ -100,12 +106,16 @@ export function RoutingPage<T>({
         body = <LoadingState shape="rows" count={4} />
     }
 
+    // Same attribute-driven tc-rich-page-header as the admin frame — keeps the
+    // maintainer routing pages visually consistent with the owner admin surface.
     return (
         <section className="perch-admin">
-            <header className="perch-home-header">
-                <h1 className="perch-home-title">{title}</h1>
-                {subtitle && <p className="perch-home-lead">{subtitle}</p>}
-            </header>
+            <tc-rich-page-header
+                title-text={title}
+                description={subtitle}
+                icon-name={icon}
+                icon-color={iconColor}
+            />
             {body}
         </section>
     )

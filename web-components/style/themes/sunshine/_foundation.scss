@@ -27,7 +27,7 @@
 // olive ink on the lemon fills. Soft warm shadows, a faint citrus-paper texture.
 // SHARP corners are kept (border-radius: 0; circles only) per the toolcase
 // mandate — CITRINA itself is rounded, but sunshine carries its identity through
-// palette + warmth + type, not rounding (matching aurora / dungeon).
+// palette + warmth + type, not rounding (matching default / aurora / dungeon).
 //
 // FONTS: 'Bricolage Grotesque' (display) and 'Hanken Grotesk' (body) are NOT
 // bundled — load them on the host page (e.g. Google Fonts) for the full look;
@@ -99,21 +99,11 @@ tc-theme[name='sunshine'],
     --sun-ease: cubic-bezier(0.2, 0.9, 0.25, 1);
     --sun-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
-    // ── Corner radii (CITRINA boutique scale) ────────────────────────────────
-    // Sunshine deliberately OPTS OUT of the toolcase sharp-corner mandate to
-    // honour the rounded CITRINA storefront: every component that ships with a
-    // square corner is rounded inside this theme root (see ./components/_radius,
-    // a generated sweep over every `border-radius` the base sets to 0 / a var).
-    // Genuinely circular shapes (50%) and pills (999px) are left untouched.
-    --sun-r-xs: 6px;
-    --sun-r-sm: 10px;
-    --sun-r-md: 14px;
-    --sun-r-lg: 20px;
-    --sun-r-xl: 30px;
-    // The two knobs the _radius sweep drives: a mid radius for controls / chips /
-    // most chrome, and a larger one for big container surfaces.
-    --sun-radius: 12px;
-    --sun-radius-lg: 18px;
+    // ── Corner radii ─────────────────────────────────────────────────────────
+    // Sunshine keeps the toolcase SHARP-corner mandate (border-radius: 0 on every
+    // component; circles via 50% and pills via 999px only) — matching the default
+    // theme / aurora / dungeon. It carries its CITRINA identity through palette +
+    // warmth + type, not rounding. No radius tokens / no radius sweep.
 
     // ── Reusable signature recipes (referenced by component partials) ────────
     // The lemon→amber gradient — primary actions, pills, bar fills.
@@ -237,8 +227,7 @@ tc-theme[name='sunshine'],
 
     --bs-border-color: var(--sun-line);
     --bs-border-color-translucent: rgba(34, 48, 26, 0.12);
-    // Rounded by design (CITRINA) — overrides the default theme's mandated 0.
-    --bs-border-radius: var(--sun-radius);
+    --bs-border-radius: 0; // sharp by mandate — circles only via 50%
 
     // Links read leaf-green (not the bright lemon accent) so inline anchors stay
     // legible on the cream canvas.

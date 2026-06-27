@@ -12,7 +12,7 @@
 tc-virtual-list {
     --bs-virtual-list-bg: var(--tc-surface);
     --bs-virtual-list-border: var(--tc-border);
-    --bs-virtual-list-row-separator: var(--tc-slate-100);
+    --bs-virtual-list-row-separator: var(--tc-border-faint);
     --bs-virtual-list-row-hover-bg: var(--tc-surface-hover);
     --bs-virtual-list-row-padding: 0 0.875rem;
     --bs-virtual-list-row-color: var(--tc-text);

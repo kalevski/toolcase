@@ -78,7 +78,11 @@ export function SkillEditorClient({
                 </tc-breadcrumb-item>
                 <tc-breadcrumb-item active>{isNew ? 'New' : initialName}</tc-breadcrumb-item>
             </tc-breadcrumb>
-            <tc-heading as="h1">{isNew ? 'New skill' : initialName}</tc-heading>
+            <tc-rich-page-header
+                title-text={isNew ? 'New skill' : initialName}
+                icon-name="Lightbulb"
+                icon-color="amber"
+            />
 
             {isNew && <tc-input ref={nameRef} label="Skill name" placeholder="my-skill" value={name} />}
 

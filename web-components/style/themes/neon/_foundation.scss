@@ -59,8 +59,8 @@ tc-theme[name='neon'],
     // Hairlines — translucent BLACK so resting edges read as subtle dark grooves
     // (not bright violet-white lines) on any surface depth; the strong tier stays
     // magenta so hover/emphasis edges still light up neon.
-    --nd-border-faint: rgba(0, 0, 0, 0.28);
-    --nd-border: rgba(0, 0, 0, 0.42);
+    --nd-border-faint: rgba(255, 255, 255, 0.07);
+    --nd-border: rgba(255, 255, 255, 0.14);
     --nd-border-strong: rgba(255, 43, 214, 0.34);
 
     // Text ramp — lilac-white down to muted violet-grey.

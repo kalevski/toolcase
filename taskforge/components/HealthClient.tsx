@@ -54,7 +54,12 @@ export function HealthClient({ projects }: { projects: string[] }) {
 
     return (
         <tc-stack gap="1.25rem">
-            <tc-helper-text text={helpTexts.health.intro} />
+            <tc-rich-page-header
+                title-text="Health"
+                icon-name="HeartPulse"
+                icon-color="emerald"
+                description={helpTexts.health.intro}
+            />
 
             <tc-grid columns="2" gap="1.25rem">
                 <tc-card>

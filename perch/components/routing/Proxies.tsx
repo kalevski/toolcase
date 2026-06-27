@@ -36,6 +36,8 @@ export function Proxies() {
         <RoutingPage
             title="Proxies"
             subtitle="Reverse-proxy vhosts routing to upstream pools or inline targets. Maintainer access."
+            icon="globe"
+            iconColor="cyan"
             state={state}
             onRetry={() => void reload()}
         >

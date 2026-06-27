@@ -36,6 +36,8 @@ export function AdminSites() {
         <AdminPage
             title="Sites"
             subtitle="Every site across all tenants. Owner-only."
+            icon="layout-dashboard"
+            iconColor="blue"
             state={state}
             onRetry={() => void reload()}
         >

@@ -115,7 +115,12 @@ export function AccountsClient({ accounts }: { accounts: AccountSummary[] }) {
 
     return (
         <tc-stack gap="1.25rem">
-            <tc-helper-text text={helpTexts.accounts.intro} />
+            <tc-rich-page-header
+                title-text="Accounts"
+                icon-name="Key"
+                icon-color="cyan"
+                description={helpTexts.accounts.intro}
+            />
 
             <AddAccountForm existing={rows.map((r) => r.alias)} onCreated={onCreated} />
 

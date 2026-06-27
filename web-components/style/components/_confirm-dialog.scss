@@ -61,7 +61,7 @@ tc-confirm-dialog[danger] {
     gap: var(--bs-confirm-dialog-gap);
     width: var(--bs-confirm-dialog-width);
     max-width: calc(100vw - 2rem);
-    max-height: calc(100vh - 2rem);
+    max-height: calc(100dvh - 2rem);
     overflow-y: auto;
     padding: var(--bs-confirm-dialog-padding);
     color: var(--bs-confirm-dialog-color);

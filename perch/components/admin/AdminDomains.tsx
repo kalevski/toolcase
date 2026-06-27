@@ -37,6 +37,8 @@ export function AdminDomains() {
         <AdminPage
             title="Domains"
             subtitle="The subdomain pool backing tenant sites, grouped by audience. Owner-only."
+            icon="globe"
+            iconColor="cyan"
             state={state}
             onRetry={() => void reload()}
         >

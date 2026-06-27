@@ -84,16 +84,11 @@ body {
     max-width: 46rem;
 }
 
-.perch-home-header {
+/* Unlike .perch-admin / .perch-plans (flex columns), .perch-home is plain block
+   flow, so space the shared tc-rich-page-header from the body below it. */
+.perch-home > tc-rich-page-header {
+    display: block;
     margin-bottom: 1.5rem;
-}
-
-/* List view: title block on the left, "New site" action on the right. */
-.perch-home-header--row {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
 }
 
 /* Empty state — centre the "Create your first site" call-to-action. */
@@ -101,12 +96,6 @@ body {
     display: flex;
     justify-content: center;
     padding: 2.5rem 0;
-}
-
-.perch-home-title {
-    margin: 0 0 0.375rem;
-    font-size: 1.5rem;
-    font-weight: 600;
 }
 
 .perch-home-lead {
@@ -374,25 +363,41 @@ body {
     outline-offset: 2px;
 }
 
-/* One site card: header (host + status dot), a note, a two-column body, and a log. */
+/* Per-site page: a toolbar header, a note, a two-column body of self-framed
+   tc-* cards, and a custom-domain section. No outer card frame — the page reads
+   as a resource view and the inner tc-* cards carry the surfaces. */
 .perch-site {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    padding: 1.25rem;
-    border: 1px solid var(--tc-border);
-    background: var(--tc-surface);
+    gap: 1.25rem;
 }
 
-.perch-site-header {
+/* Toolbar: status + identity on the left, primary action + overflow on the right,
+   separated from the body by a hairline rule. Wraps the action cluster on narrow. */
+.perch-site-toolbar {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: 1rem;
+    flex-wrap: wrap;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--tc-border);
+}
+
+.perch-site-ident {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
 }
 
 .perch-site-id {
     min-width: 0;
+}
+
+/* Destructive entry inside the toolbar's "More" overflow menu. */
+.perch-site-menu .dropdown-item {
+    color: var(--tc-danger);
 }
 
 .perch-site-host {
@@ -470,6 +475,15 @@ body {
     .perch-site-grid {
         grid-template-columns: minmax(0, 1fr);
     }
+
+    /* Stack the toolbar: identity on top, full-width action cluster below. */
+    .perch-site-toolbar {
+        align-items: stretch;
+    }
+
+    .perch-site-actions {
+        justify-content: flex-end;
+    }
 }
 
 /* ── Plans & sponsor (components/PlansView.tsx, §11 §14 §15, task 735) ─────────── */
@@ -488,28 +502,15 @@ body {
     gap: 0.75rem;
 }
 
-/* Four equal-height pricing cards; collapses to fewer columns as space shrinks. */
+/* Four equal-height pricing cards. tc-grid owns the responsive column cascade
+   (columns 1 → sm 2 → lg 4); this only keeps the cards stretching to equal
+   height and stops a long feature line from overflowing its 1fr track. */
 .perch-pricing-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1rem;
     align-items: stretch;
 }
 
 .perch-pricing-grid > tc-pricing-card {
     min-width: 0;
-}
-
-@media (max-width: 64rem) {
-    .perch-pricing-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 36rem) {
-    .perch-pricing-grid {
-        grid-template-columns: minmax(0, 1fr);
-    }
 }
 
 /* Sponsor section: heading, CTA, then the live sponsor wall. */
@@ -734,17 +735,6 @@ body {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-}
-
-.perch-site-dns {
-    margin: 0;
-    padding: 0.75rem;
-    background: var(--tc-surface-muted, #f4f5f7);
-    border: 1px solid var(--tc-border, #d8dde3);
-    font-family: var(--tc-font-mono, ui-monospace, monospace);
-    font-size: 0.8125rem;
-    white-space: pre-wrap;
-    overflow-x: auto;
 }
 
 .perch-site-verify-result {

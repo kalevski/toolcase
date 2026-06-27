@@ -51,9 +51,9 @@ tc-theme[name='aurora'],
 
     // Hairlines — translucent BLACK so edges read as subtle dark grooves (not
     // bright white lines) on any surface depth; the strong tier deepens further.
-    --ah-border-faint: rgba(0, 0, 0, 0.25);
-    --ah-border: rgba(0, 0, 0, 0.4);
-    --ah-border-strong: rgba(0, 0, 0, 0.6);
+    --ah-border-faint: rgba(255, 255, 255, 0.06);
+    --ah-border: rgba(255, 255, 255, 0.12);
+    --ah-border-strong: rgba(255, 255, 255, 0.22);
 
     // Text ramp — cool off-white down to muted slate-grey.
     --ah-text: #e9eef4;

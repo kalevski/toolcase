@@ -9,7 +9,7 @@
 tc-json-schema-def {
     --bs-json-schema-def-bg: var(--tc-surface);
     --bs-json-schema-def-border-color: var(--tc-border);
-    --bs-json-schema-def-row-border: var(--tc-slate-100, #f1f5f9);
+    --bs-json-schema-def-row-border: var(--tc-border-faint);
     // Dense editor sizing: tight rows + compact form controls.
     --bs-json-schema-def-row-padding-y: 0.25rem;
     --bs-json-schema-def-row-padding-x: 0.75rem;

@@ -7,7 +7,7 @@
 //   node scripts/gen-sunshine-border.mjs
 //   npm -w @toolcase/web-components run build:css   # re-emit with the new sweep
 //
-// Strategy — for every component SURFACE (a selector the radius sweep rounds, so
+// Strategy — for every component SURFACE (a flat-cornered selector, so
 // cards / chips / buttons / tiles / inputs … and NOT inner bars / dots / circles):
 //   (a) the surface draws a transparent border through its own
 //       `border: var(--bs-X-border-width) solid var(--bs-X-border-color)` machinery
@@ -26,7 +26,7 @@ const here = dirname(fileURLToPath(import.meta.url))
 const css = readFileSync(resolve(here, '../lib/index.css'), 'utf8')
 const SCSS_OUT = resolve(here, '../style/themes/sunshine/components/_border.scss')
 
-// ── parser (shared shape with gen-sunshine-radius) ──────────────────────────
+// ── tiny CSS parser: collect (selector, body) for every style rule ──────────
 const rules = []
 function parse(str) {
     let i = 0

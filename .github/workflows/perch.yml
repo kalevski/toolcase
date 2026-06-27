@@ -1,42 +1,36 @@
-name: nginxpilot
+name: perch
 
 on:
   push:
     branches: [main, 'feature/static-host']
-    paths: ['nginxpilot/**', '.github/workflows/nginxpilot.yml']
+    # the image bundles built @toolcase/base + web-components, so changes there
+    # must rebuild perch too (build context is the repo root).
+    paths:
+      - 'perch/**'
+      - 'base/**'
+      - 'web-components/**'
+      - 'package-lock.json'
+      - '.dockerignore'
+      - '.github/workflows/perch.yml'
   pull_request:
-    paths: ['nginxpilot/**', '.github/workflows/nginxpilot.yml']
+    paths:
+      - 'perch/**'
+      - 'base/**'
+      - 'web-components/**'
+      - 'package-lock.json'
+      - '.dockerignore'
+      - '.github/workflows/perch.yml'
 
 permissions:
   contents: read
   packages: write
 
 env:
-  IMAGE_NAME: ghcr.io/${{ github.repository }}/nginxpilot
+  IMAGE_NAME: ghcr.io/${{ github.repository }}/perch
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: nginxpilot
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: nginxpilot/go.mod
-          cache-dependency-path: nginxpilot/go.sum
-
-      - name: go vet
-        run: go vet ./...
-
-      - name: go build
-        run: CGO_ENABLED=0 go build ./...
-
   docker:
     runs-on: ubuntu-latest
-    needs: build
     steps:
       - uses: actions/checkout@v4
 
@@ -64,12 +58,13 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: nginxpilot
+          # repo root: perch's @toolcase/* deps are file:../ workspace
+          # siblings, so the build needs the whole monorepo (see perch/Dockerfile).
+          context: .
+          file: perch/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name == 'push' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            VERSION=${{ github.sha }}
-          cache-from: type=gha,scope=nginxpilot
-          cache-to: type=gha,scope=nginxpilot,mode=max
+          cache-from: type=gha,scope=perch
+          cache-to: type=gha,scope=perch,mode=max

@@ -8,7 +8,7 @@
 tc-comparator {
     // ── Layout ──────────────────────────────────────────────────────────────
     --bs-comparator-border: 1px solid var(--tc-border);
-    --bs-comparator-inner-border: 1px solid var(--tc-slate-100);
+    --bs-comparator-inner-border: 1px solid var(--tc-border-faint);
     --bs-comparator-bg: var(--tc-surface);
 
     // ── Header ──────────────────────────────────────────────────────────────

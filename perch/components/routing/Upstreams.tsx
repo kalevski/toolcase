@@ -29,6 +29,8 @@ export function Upstreams() {
         <RoutingPage
             title="Upstreams"
             subtitle="Named pools of backend servers a proxy can route to. Maintainer access."
+            icon="server"
+            iconColor="blue"
             state={state}
             onRetry={() => void reload()}
         >

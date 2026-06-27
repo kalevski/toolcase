@@ -29,6 +29,8 @@ export function AdminSettings() {
         <AdminPage
             title="Settings"
             subtitle="Branding and custom-domain ingress for this instance. Owner-only."
+            icon="settings"
+            iconColor="slate"
             state={state}
             onRetry={() => void reload()}
         >

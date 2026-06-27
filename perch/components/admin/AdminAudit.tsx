@@ -23,6 +23,8 @@ export function AdminAudit() {
         <AdminPage
             title="Audit"
             subtitle="The append-only trail of owner actions and quota events. Owner-only."
+            icon="scroll-text"
+            iconColor="amber"
             state={state}
             onRetry={() => void reload()}
         >

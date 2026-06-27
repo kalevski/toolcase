@@ -26,6 +26,8 @@ export function AdminPlans() {
         <AdminPage
             title="Plans"
             subtitle="Map sponsorship tiers to plans. Owner-only."
+            icon="credit-card"
+            iconColor="emerald"
             state={state}
             onRetry={() => void reload()}
         >

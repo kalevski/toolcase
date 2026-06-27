@@ -62,9 +62,7 @@ export function PlansView() {
     if (state.phase === 'loading') {
         return (
             <section className="perch-plans">
-                <header className="perch-home-header">
-                    <h1 className="perch-home-title">Plans</h1>
-                </header>
+                <tc-rich-page-header title-text="Plans" icon-name="credit-card" icon-color="emerald" />
                 <LoadingState shape="cards" count={4} label="Loading plans…" />
             </section>
         )
@@ -73,9 +71,7 @@ export function PlansView() {
     if (state.phase === 'error') {
         return (
             <section className="perch-plans">
-                <header className="perch-home-header">
-                    <h1 className="perch-home-title">Plans</h1>
-                </header>
+                <tc-rich-page-header title-text="Plans" icon-name="credit-card" icon-color="emerald" />
                 <ErrorState title="Couldn’t load plans" message={state.message} onRetry={() => void load()} />
             </section>
         )
@@ -114,13 +110,12 @@ function PlansContent({ me, sites, ctx }: { me: MeResponse; sites: Site[]; ctx: 
                 </tc-announcement-bar>
             )}
 
-            <header className="perch-home-header">
-                <h1 className="perch-home-title">Plans</h1>
-                <p className="perch-home-lead">
-                    You’re on the <strong>{me.plan}</strong> plan. Quotas lift when you sponsor the owner on
-                    GitHub — your sponsorship tier maps to the plan below.
-                </p>
-            </header>
+            <tc-rich-page-header
+                title-text="Plans"
+                icon-name="credit-card"
+                icon-color="emerald"
+                description={`You’re on the ${me.plan} plan. Quotas lift when you sponsor the owner on GitHub — your sponsorship tier maps to the plan below.`}
+            />
 
             {/* Per-site warning detail (§11). */}
             {warnings.length > 0 && (
@@ -133,11 +128,14 @@ function PlansContent({ me, sites, ctx }: { me: MeResponse; sites: Site[]; ctx: 
                 </div>
             )}
 
-            <div className="perch-pricing-grid">
+            {/* tc-grid is a pure CSS-grid layout primitive (it never relocates its
+                children), so the React-rendered pricing cards stay direct children
+                and the four-up → two-up → one-up cascade comes from the library. */}
+            <tc-grid className="perch-pricing-grid" columns="1" columns-sm="2" columns-lg="4" gap="1rem">
                 {cards.map((card) => (
                     <PricingCard key={card.plan} card={card} />
                 ))}
-            </div>
+            </tc-grid>
 
             <section className="perch-sponsor">
                 <header className="perch-sponsor-header">

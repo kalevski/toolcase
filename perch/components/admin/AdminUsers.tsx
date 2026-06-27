@@ -65,6 +65,8 @@ export function AdminUsers() {
         <AdminPage
             title="Users"
             subtitle="Everyone with a Perch account — their level, usage, and limits. Grant roles or override quotas here. Owner-only."
+            icon="users"
+            iconColor="violet"
             state={state}
             onRetry={() => void reload()}
         >

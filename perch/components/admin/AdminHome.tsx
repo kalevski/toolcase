@@ -30,10 +30,12 @@ export function AdminHome() {
 
     return (
         <section className="perch-admin">
-            <header className="perch-home-header">
-                <h1 className="perch-home-title">Admin</h1>
-                <p className="perch-home-lead">Owner controls for this Perch instance.</p>
-            </header>
+            <tc-rich-page-header
+                title-text="Admin"
+                description="Owner controls for this Perch instance."
+                icon-name="shield"
+                icon-color="violet"
+            />
             <div className="perch-admin-hub">
                 {AREAS.map((a) => (
                     <Link key={a.href} className="perch-admin-hub-card" href={a.href}>

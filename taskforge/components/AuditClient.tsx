@@ -83,7 +83,12 @@ export function AuditClient() {
 
     return (
         <tc-stack gap="1.25rem">
-            <tc-helper-text text={helpTexts.audit.intro} />
+            <tc-rich-page-header
+                title-text="Audit log"
+                icon-name="BookCheck"
+                icon-color="slate"
+                description={helpTexts.audit.intro}
+            />
             <tc-stack direction="horizontal" gap="1rem" wrap align="flex-end">
                 <tc-input ref={projectRef} label="Project" placeholder="filter…" value={project} />
                 <tc-input ref={loginRef} label="User" placeholder="login" value={login} />

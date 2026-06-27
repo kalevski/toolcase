@@ -85,9 +85,12 @@ export function DashboardHome() {
     if (state.phase === 'loading') {
         return (
             <section className="perch-home perch-home--wide">
-                <header className="perch-home-header">
-                    <h1 className="perch-home-title">Your sites</h1>
-                </header>
+                <tc-rich-page-header
+                    key="loading"
+                    title-text="Your sites"
+                    icon-name="layout-dashboard"
+                    icon-color="blue"
+                />
                 <LoadingState shape="cards" count={3} label="Loading your sites…" />
             </section>
         )
@@ -96,9 +99,12 @@ export function DashboardHome() {
     if (state.phase === 'error') {
         return (
             <section className="perch-home">
-                <header className="perch-home-header">
-                    <h1 className="perch-home-title">Your sites</h1>
-                </header>
+                <tc-rich-page-header
+                    key="error"
+                    title-text="Your sites"
+                    icon-name="layout-dashboard"
+                    icon-color="blue"
+                />
                 <ErrorState title="Couldn’t load your sites" message={state.message} onRetry={() => void load()} />
             </section>
         )
@@ -108,39 +114,41 @@ export function DashboardHome() {
     const canCreate = sites.length < me.limits.maxSites
     const hasSites = sites.length > 0
 
+    // Plain-text lead for the header `description` attribute (the inline <strong> the
+    // bespoke header carried isn't expressible as an attribute — a fair trade for the
+    // shared, themed tc-rich-page-header used across every page).
+    const lead = hasSites
+        ? isFinite(me.limits.maxSites)
+            ? `${sites.length} of ${me.limits.maxSites} site${me.limits.maxSites === 1 ? '' : 's'} on your ${me.plan} plan.`
+            : `${sites.length} site${sites.length === 1 ? '' : 's'} — unlimited as the owner.`
+        : 'Publish a branch of one of your GitHub repositories as a static website. Pick the repository and branch, choose a hostname, and Perch deploys it.'
+
     return (
         <section className={`perch-home${hasSites ? ' perch-home--wide' : ''}`}>
-            <header className="perch-home-header perch-home-header--row">
-                <div>
-                    <h1 className="perch-home-title">{hasSites ? 'Your sites' : 'Create a site'}</h1>
-                    <p className="perch-home-lead">
-                        {hasSites ? (
-                            isFinite(me.limits.maxSites) ? (
-                                <>
-                                    {sites.length} of {me.limits.maxSites} site
-                                    {me.limits.maxSites === 1 ? '' : 's'} on your{' '}
-                                    <strong>{me.plan}</strong> plan.
-                                </>
-                            ) : (
-                                <>
-                                    {sites.length} site{sites.length === 1 ? '' : 's'} —{' '}
-                                    <strong>unlimited</strong> as the owner.
-                                </>
-                            )
-                        ) : (
-                            <>
-                                Publish a branch of one of your GitHub repositories as a static website.
-                                Pick the repository and branch, choose a hostname, and Perch deploys it.
-                            </>
-                        )}
-                    </p>
-                </div>
-                {canCreate && hasSites && (
-                    <tc-button variant="primary" onClick={openModal}>
+            {/* Keyed per mode so the empty → has-sites transition mounts a FRESH
+                header (the action button is present from connect, so the slot capture
+                runs cleanly). Within a mode the title is constant and the action
+                button stays mounted — only its `disabled` toggles — so the 30s poll
+                re-renders never add/remove a relocated slot child. */}
+            <tc-rich-page-header
+                key={hasSites ? 'sites' : 'create'}
+                title-text={hasSites ? 'Your sites' : 'Create a site'}
+                icon-name="layout-dashboard"
+                icon-color="blue"
+                description={lead}
+            >
+                {hasSites && (
+                    <tc-button
+                        slot="actions"
+                        variant="primary"
+                        disabled={!canCreate || undefined}
+                        title={canCreate ? undefined : 'You’ve reached your plan’s site limit.'}
+                        onClick={openModal}
+                    >
                         New site
                     </tc-button>
                 )}
-            </header>
+            </tc-rich-page-header>
 
             {hasSites ? (
                 <div className="perch-card-grid">

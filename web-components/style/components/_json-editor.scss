@@ -8,7 +8,7 @@
 tc-json-editor {
     --bs-json-editor-bg: var(--tc-surface);
     --bs-json-editor-border-color: var(--tc-border);
-    --bs-json-editor-row-border: var(--tc-slate-100, #f1f5f9);
+    --bs-json-editor-row-border: var(--tc-border-faint);
     // Dense data-editor sizing: tight rows + compact form controls.
     --bs-json-editor-row-padding-y: 0.25rem;
     --bs-json-editor-row-padding-x: 0.75rem;

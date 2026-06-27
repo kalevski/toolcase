@@ -7,7 +7,7 @@
 tc-feature-matrix {
     // ── Frame ────────────────────────────────────────────────────────────────
     --bs-feature-matrix-border: 1px solid var(--tc-border);
-    --bs-feature-matrix-inner-border: 1px solid var(--tc-slate-100);
+    --bs-feature-matrix-inner-border: 1px solid var(--tc-border-faint);
     --bs-feature-matrix-bg: var(--tc-surface);
 
     // ── Optional header ───────────────────────────────────────────────────────

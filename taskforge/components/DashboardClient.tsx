@@ -292,12 +292,11 @@ export function DashboardClient({ projects }: { projects: ProjectSummary[] }) {
                 {helpTexts.dashboard.intro}
             </tc-announcement-bar>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
-                <tc-heading as="h1">Dashboard</tc-heading>
-                <tc-button variant="primary" onClick={onNew}>
+            <tc-rich-page-header title-text="Dashboard" icon-name="LayoutDashboard" icon-color="blue">
+                <tc-button slot="actions" variant="primary" onClick={onNew}>
                     <tc-icon name={tcIcon('Plus')} /> New project
                 </tc-button>
-            </div>
+            </tc-rich-page-header>
 
             <tc-metric-grid ref={metricsRef} columns={3} />
 

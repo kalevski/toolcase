@@ -133,7 +133,12 @@ export function UsersClient({ users, meId }: { users: UserRecord[]; meId: number
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <tc-heading as="h1">Users &amp; roles</tc-heading>
+            <tc-rich-page-header
+                title-text="Users & roles"
+                icon-name="Users"
+                icon-color="violet"
+                description="Everyone with access to this TaskForge instance, and the role each one holds."
+            />
             <tc-advanced-table key={tableKey} ref={tableRef}>
                 {displayed.map((u) => {
                     const lastAdmin = u.role === 'admin' && adminCount === 1

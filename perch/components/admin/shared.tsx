@@ -78,12 +78,18 @@ export function useOwnerData<T>(fetcher: () => Promise<T | null>): {
 export function AdminPage<T>({
     title,
     subtitle,
+    icon,
+    iconColor = 'slate',
     state,
     onRetry,
     children,
 }: {
     title: string
     subtitle?: string
+    /** Lucide glyph (kebab-case) for the header icon chip — mirrors the side-nav icon. */
+    icon?: string
+    /** Header icon chip tint (tc-rich-page-header palette). */
+    iconColor?: string
     state: OwnerDataState<T>
     onRetry?: () => void
     children: (data: T) => ReactNode
@@ -103,12 +109,17 @@ export function AdminPage<T>({
         body = <LoadingState shape="rows" count={4} />
     }
 
+    // tc-rich-page-header is attribute-driven with no slotted children here, so it
+    // re-skins through the library tokens and stays consistent across every admin
+    // page. Title/subtitle are static per page, so it never re-renders its subtree.
     return (
         <section className="perch-admin">
-            <header className="perch-home-header">
-                <h1 className="perch-home-title">{title}</h1>
-                {subtitle && <p className="perch-home-lead">{subtitle}</p>}
-            </header>
+            <tc-rich-page-header
+                title-text={title}
+                description={subtitle}
+                icon-name={icon}
+                icon-color={iconColor}
+            />
             {body}
         </section>
     )

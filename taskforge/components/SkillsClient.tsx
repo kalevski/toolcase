@@ -62,15 +62,16 @@ export function SkillsClient({ skills }: { skills: SkillSummary[] }) {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-                <tc-heading as="h1">Skills</tc-heading>
-                <div style={{ flex: 1 }} />
-                <tc-button variant="primary" onClick={() => router.push('/skills/new')}>
+            <tc-rich-page-header
+                title-text="Skills"
+                icon-name="Lightbulb"
+                icon-color="amber"
+                description={helpTexts.skills.shared}
+            >
+                <tc-button slot="actions" variant="primary" onClick={() => router.push('/skills/new')}>
                     <tc-icon name="Plus" /> New skill
                 </tc-button>
-            </div>
-
-            <tc-helper-text text={helpTexts.skills.shared} />
+            </tc-rich-page-header>
 
             {rows.length === 0 ? (
                 <tc-empty-state icon={tcIcon('lightbulb')}>
