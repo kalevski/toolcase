@@ -9,6 +9,7 @@
 // See notes/static-hosting-app-design.md §4, §9, §16.
 
 import type { Site } from './types'
+import type { TlsMode } from './routing'
 
 // ── deterministic, server-generated identifiers (§16: no user input in paths) ──
 
@@ -59,6 +60,25 @@ export interface FragmentAuth {
     tokenEnv: string
 }
 
+/**
+ * Managed-mode TLS + security options for a site's server block (§0/Phase D) — the
+ * `WebOptions` subset sites accept (no `websocket`/`cache`; those are proxy-only). The
+ * caller (the sites service) resolves the *effective* values: a subdomain inherits its
+ * base domain's TLS policy (one wildcard cert per base), a custom domain uses its own
+ * per-site setting. Inert unless nginxpilot runs in managed mode. `auto` is preferred
+ * over `required` so a not-yet-issued cert degrades to HTTP rather than disabling the site.
+ */
+export interface SiteWebOptions {
+    tls?: TlsMode
+    force_ssl?: boolean
+    http2?: boolean
+    hsts?: boolean
+    block_exploits?: boolean
+    gzip?: boolean
+    /** Raw nginx passthrough; rides the daemon's `nginx -t` gate. */
+    advanced?: string
+}
+
 /** Policy-derived knobs the `Site` row itself doesn't carry (§9, §11, §15). */
 export interface FragmentOptions {
     /**
@@ -82,6 +102,11 @@ export interface FragmentOptions {
      * free tier deploys public repos only and writes no `auth` block (zero secrets).
      */
     auth?: FragmentAuth
+    /**
+     * Managed-mode TLS + security options for the site's server block (§0/Phase D).
+     * Omit (or all-off) to emit a plain HTTP site. Inert when nginxpilot isn't managed.
+     */
+    web?: SiteWebOptions
 }
 
 const DEFAULT_REQUIRE_FILE = ['index.html']
@@ -119,6 +144,23 @@ export function renderFragment(site: Site, options: FragmentOptions): string {
         lines.push(`        token_env: ${scalar(options.auth.tokenEnv)}`)
     }
     if (exclude.length > 0) lines.push(`    exclude: ${flowSeq(exclude)}`)
+
+    // Managed-mode TLS + security options (§0/Phase D), emitted at the site (server-block)
+    // level in a deterministic order so the golden tests stay stable. Inert unless the
+    // daemon runs in managed mode.
+    const web = options.web
+    if (web) {
+        if (web.tls && web.tls !== 'off') lines.push(`    tls: ${scalar(web.tls)}`)
+        if (web.force_ssl) lines.push('    force_ssl: true')
+        if (web.http2) lines.push('    http2: true')
+        if (web.hsts) lines.push('    hsts: true')
+        if (web.block_exploits) lines.push('    block_exploits: true')
+        if (web.gzip) lines.push('    gzip: true')
+        if (web.advanced && web.advanced.trim()) {
+            lines.push('    advanced: |')
+            for (const line of web.advanced.trim().split('\n')) lines.push(line ? `      ${line}` : '')
+        }
+    }
 
     return lines.join('\n') + '\n'
 }

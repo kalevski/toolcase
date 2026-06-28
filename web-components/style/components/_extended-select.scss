@@ -50,11 +50,13 @@ tc-extended-select {
     align-items: center;
     width: 100%;
     min-height: var(--bs-extended-select-trigger-height);
-    padding: 0.4375rem 0.625rem;
+    // Match .form-control (tc-input): same padding + line-height + font-size +
+    // 1px border → identical box height.
+    padding: 0.5rem 0.75rem;
     font-family: var(--bs-body-font-family, inherit);
     font-size: 0.925rem;
     font-weight: 400;
-    line-height: 1.5;
+    line-height: 1.6;
     color: var(--bs-extended-select-trigger-color);
     text-align: left;
     background-color: var(--bs-extended-select-trigger-bg);

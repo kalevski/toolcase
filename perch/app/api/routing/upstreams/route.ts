@@ -3,12 +3,12 @@
 // DELETE /api/routing/upstreams?name=<name> — remove an upstream (409 if still in use).
 //
 // Guarded by `authorize('maintainer')` — owners and maintainers, never a standard
-// user. Maintainers operate the reverse-proxy routing surface but have no access to
-// the owner-only `/api/admin/**` endpoints.
+// user. Every op runs against the caller's ACTIVE realm (multiple_realms.md §E.2).
 
 import { NextResponse } from 'next/server'
 import { authorize } from '@/server/services/auth'
 import * as routing from '@/server/services/routing'
+import * as realms from '@/server/services/realms'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -18,7 +18,8 @@ export async function GET() {
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     try {
-        return NextResponse.json(await routing.listUpstreams())
+        const client = await realms.clientForActive(authz.session.sub, authz.role)
+        return NextResponse.json(await routing.listUpstreams(client))
     } catch (err) {
         const { status, code } = routing.httpErrorFor(err)
         return NextResponse.json({ error: code }, { status })
@@ -38,7 +39,8 @@ export async function POST(req: Request) {
 
     try {
         const actor = { githubId: authz.session.sub, login: authz.session.login }
-        const upstream = await routing.createUpstream(actor, body)
+        const client = await realms.clientForActive(authz.session.sub, authz.role)
+        const upstream = await routing.createUpstream(client, actor, body)
         return NextResponse.json(upstream, { status: 201 })
     } catch (err) {
         const { status, code } = routing.httpErrorFor(err)
@@ -53,7 +55,8 @@ export async function DELETE(req: Request) {
     const name = new URL(req.url).searchParams.get('name') ?? undefined
     try {
         const actor = { githubId: authz.session.sub, login: authz.session.login }
-        await routing.deleteUpstream(actor, name)
+        const client = await realms.clientForActive(authz.session.sub, authz.role)
+        await routing.deleteUpstream(client, actor, name)
         return new NextResponse(null, { status: 204 })
     } catch (err) {
         const { status, code } = routing.httpErrorFor(err)

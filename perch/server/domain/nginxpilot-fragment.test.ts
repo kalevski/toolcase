@@ -24,6 +24,7 @@ function aliceSite(overrides: Partial<Site> = {}): Site {
         subdir: 'dist/',
         hostname: 'alice.perch.dev',
         hostKind: 'subdomain',
+        realmId: 'realm-test',
         status: 'provisioning',
         createdAt: '2026-06-25T00:00:00.000Z',
         updatedAt: '2026-06-25T00:00:00.000Z',
@@ -85,6 +86,34 @@ sites:
     it('quotes a hostname that tries to smuggle YAML structure (defense in depth, §16)', () => {
         const yaml = renderFragment(aliceSite({ hostname: 'evil\ninjected: true' }), { intervalSec: 900 })
         expect(yaml).toContain('domain: "evil\\ninjected: true"')
+    })
+
+    it('emits managed-mode TLS + security options when provided (§0/Phase D)', () => {
+        const yaml = renderFragment(aliceSite(), {
+            intervalSec: 900,
+            web: { tls: 'auto', force_ssl: true, http2: true, hsts: true, block_exploits: true, gzip: true },
+        })
+        expect(yaml).toContain('    tls: auto')
+        expect(yaml).toContain('    force_ssl: true')
+        expect(yaml).toContain('    http2: true')
+        expect(yaml).toContain('    hsts: true')
+        expect(yaml).toContain('    block_exploits: true')
+        expect(yaml).toContain('    gzip: true')
+    })
+
+    it('emits an advanced block scalar for a site', () => {
+        const yaml = renderFragment(aliceSite(), {
+            intervalSec: 900,
+            web: { tls: 'auto', advanced: 'add_header A 1;\nadd_header B 2;' },
+        })
+        expect(yaml).toContain('    advanced: |\n      add_header A 1;\n      add_header B 2;\n')
+    })
+
+    it('omits the web block entirely when tls is off / unset (byte-for-byte unchanged)', () => {
+        const withOff = renderFragment(aliceSite(), { intervalSec: 900, web: { tls: 'off' } })
+        const without = renderFragment(aliceSite(), { intervalSec: 900 })
+        expect(withOff).toBe(without)
+        expect(withOff).not.toContain('tls:')
     })
 })
 

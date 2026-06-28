@@ -43,6 +43,23 @@ export interface ProxyLocation {
     websocket?: boolean
 }
 
+/**
+ * TLS termination mode for a managed-mode server block (§0). `off` is the default
+ * (plain HTTP); `auto` serves HTTPS when a cert exists and degrades to HTTP otherwise;
+ * `required` hard-fails the block until a cert is present. Shared by proxies, sites
+ * (the `WebOptions` subset) and streams.
+ */
+export type TlsMode = 'off' | 'auto' | 'required'
+
+/** Proxy response-cache config (a struct, not a bool — nginxpilot's `cache:` block). */
+export interface ProxyCache {
+    enabled: boolean
+    /** `proxy_cache_valid` entries, e.g. `["200 10m", "404 1m"]`. */
+    valid?: string[]
+    /** `keys_zone` size, e.g. `10m`. */
+    zone_size?: string
+}
+
 /** A reverse-proxy vhost: an nginx `server{}` block whose locations proxy_pass. */
 export interface Proxy {
     domain: string
@@ -54,6 +71,21 @@ export interface Proxy {
     read_timeout?: string
     send_timeout?: string
     client_max_body_size?: string
+    // ── TLS + security toggles (managed mode, §0/Phase B) ──
+    tls?: TlsMode
+    /** 80 → 301 https redirect. Requires `tls: auto|required`. */
+    force_ssl?: boolean
+    /** `http2 on;`. Requires `tls`. */
+    http2?: boolean
+    /** HSTS header. Bool form for now; struct form is a later nicety. Requires `tls`. */
+    hsts?: boolean
+    block_exploits?: boolean
+    /** Proxy-level upgrade headers on ALL locations (distinct from `ProxyLocation.websocket`). */
+    websocket?: boolean
+    gzip?: boolean
+    cache?: ProxyCache
+    /** Raw nginx passthrough; rides the daemon's `nginx -t` gate. */
+    advanced?: string
 }
 
 // ── validation (the POST-body gate; mirrors internal/config/validate.go) ───────
@@ -61,6 +93,7 @@ export interface Proxy {
 /** nginxpilot's `upstreamNameRe` — a safe nginx identifier. */
 const UPSTREAM_NAME = /^[A-Za-z0-9_]+$/
 const BALANCERS: ReadonlySet<string> = new Set(['', 'round_robin', 'least_conn', 'ip_hash'])
+const TLS_MODES: ReadonlySet<string> = new Set(['off', 'auto', 'required'])
 
 /** Result of a parse/validate: the normalized entity, or a typed rejection. */
 export type Check<T> = { ok: true; value: T } | { ok: false; reason: string; message: string }
@@ -193,6 +226,55 @@ export function parseProxy(input: unknown): Check<Proxy> {
         const v = o[key]
         if (typeof v === 'string' && v.trim()) value[key] = v.trim()
     }
+
+    // ── TLS + security toggles (mirror nginxpilot's WebOptions validation, §0/Phase B) ──
+    const tlsRaw = o.tls === undefined || o.tls === null || o.tls === '' ? 'off' : o.tls
+    if (typeof tlsRaw !== 'string' || !TLS_MODES.has(tlsRaw)) {
+        return reject('bad_tls', 'tls must be one of: off, auto, required')
+    }
+    const tls = tlsRaw as TlsMode
+    const forceSsl = o.force_ssl === true
+    const http2 = o.http2 === true
+    const hsts = o.hsts === true
+    // force_ssl / http2 / hsts are meaningless without TLS — reject early so the user
+    // sees it before the round-trip (nginxpilot enforces the same rule).
+    if ((forceSsl || http2 || hsts) && tls === 'off') {
+        return reject('tls_required', 'force_ssl, http2 and hsts require tls: auto or required')
+    }
+
+    let cache: ProxyCache | undefined
+    if (o.cache !== undefined && o.cache !== null) {
+        const c = asObject(o.cache)
+        if (!c) return reject('bad_cache', 'cache must be an object')
+        if (typeof c.enabled !== 'boolean') return reject('bad_cache', 'cache.enabled must be a boolean')
+        if (c.valid !== undefined && c.valid !== null) {
+            if (!Array.isArray(c.valid) || c.valid.some((v) => typeof v !== 'string')) {
+                return reject('bad_cache', 'cache.valid must be an array of strings')
+            }
+        }
+        // A disabled cache normalizes away entirely (drop-defaults); only an enabled
+        // cache contributes to the fragment.
+        if (c.enabled) {
+            const cv: ProxyCache = { enabled: true }
+            const valid = Array.isArray(c.valid) ? (c.valid as string[]).map((s) => s.trim()).filter(Boolean) : []
+            if (valid.length) cv.valid = valid
+            if (typeof c.zone_size === 'string' && c.zone_size.trim()) cv.zone_size = c.zone_size.trim()
+            cache = cv
+        }
+    }
+
+    const advanced = typeof o.advanced === 'string' && o.advanced.trim() ? o.advanced.trim() : undefined
+
+    if (tls !== 'off') value.tls = tls
+    if (forceSsl) value.force_ssl = true
+    if (http2) value.http2 = true
+    if (hsts) value.hsts = true
+    if (o.block_exploits === true) value.block_exploits = true
+    if (o.websocket === true) value.websocket = true
+    if (o.gzip === true) value.gzip = true
+    if (cache) value.cache = cache
+    if (advanced) value.advanced = advanced
+
     return { ok: true, value }
 }
 
@@ -216,6 +298,11 @@ function quote(value: string): string {
 
 function scalar(value: string): string {
     return PLAIN_SCALAR.test(value) ? value : quote(value)
+}
+
+/** Emit a YAML flow sequence, quoting each item only when needed: `[a, "b c"]`. */
+function flowSeq(items: string[]): string {
+    return `[${items.map(scalar).join(', ')}]`
 }
 
 /** Render the `upstreams: [ … ]` fragment for `POST /upstreams` (exactly one upstream). */
@@ -253,6 +340,24 @@ export function renderProxyFragment(p: Proxy): string {
     if (p.read_timeout) lines.push(`    read_timeout: ${scalar(p.read_timeout)}`)
     if (p.send_timeout) lines.push(`    send_timeout: ${scalar(p.send_timeout)}`)
     if (p.client_max_body_size) lines.push(`    client_max_body_size: ${scalar(p.client_max_body_size)}`)
+    // TLS + security toggles, in a deterministic order so the golden tests stay stable.
+    if (p.tls) lines.push(`    tls: ${scalar(p.tls)}`)
+    if (p.force_ssl) lines.push('    force_ssl: true')
+    if (p.http2) lines.push('    http2: true')
+    if (p.hsts) lines.push('    hsts: true')
+    if (p.block_exploits) lines.push('    block_exploits: true')
+    if (p.websocket) lines.push('    websocket: true')
+    if (p.gzip) lines.push('    gzip: true')
+    if (p.cache) {
+        lines.push('    cache:')
+        lines.push(`      enabled: ${p.cache.enabled ? 'true' : 'false'}`)
+        if (p.cache.valid && p.cache.valid.length) lines.push(`      valid: ${flowSeq(p.cache.valid)}`)
+        if (p.cache.zone_size) lines.push(`      zone_size: ${scalar(p.cache.zone_size)}`)
+    }
+    if (p.advanced) {
+        lines.push('    advanced: |')
+        for (const line of p.advanced.split('\n')) lines.push(line ? `      ${line}` : '')
+    }
     if (p.locations && p.locations.length) {
         lines.push('    locations:')
         for (const l of p.locations) {

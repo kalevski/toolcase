@@ -3,9 +3,10 @@
 import { useCallback, useMemo, useState } from 'react'
 import type { ExtendedSelectItem } from '@toolcase/web-components'
 import { useTc, detailValue, targetValue } from '@/lib/tc'
-import { BASE_DOMAIN_TIERS, type BaseDomain, type BaseDomainTier } from '@/server/domain/types'
+import { BASE_DOMAIN_TIERS, type BaseDomain, type BaseDomainTier, type BaseDomainTls } from '@/server/domain/types'
 import { AdminPage, json, useOwnerData } from './shared'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
+import { SelectField, type SelectOption } from '@/components/fields'
 
 // Owner-only subdomain pool (§10/§13). The owner registers base domains, each one
 // backing `<label>.<domain>` sites, and assigns each to one of three audience
@@ -22,6 +23,14 @@ const TIER_META: Record<BaseDomainTier, { label: string; note: string }> = {
 }
 
 const TIER_ITEMS: ExtendedSelectItem[] = BASE_DOMAIN_TIERS.map((t) => ({ key: t, label: TIER_META[t].label }))
+
+// Subdomain TLS policy (§0/Phase D) — one wildcard cert per base domain; `auto`
+// degrades to HTTP if the cert isn't issued yet. This per-base-domain select is the
+// only place subdomain TLS is set (never per subdomain).
+const TLS_OPTIONS: SelectOption[] = [
+    { value: 'auto', label: 'HTTPS (auto)' },
+    { value: 'off', label: 'HTTP only' },
+]
 
 export function AdminDomains() {
     const fetcher = useCallback(async (): Promise<BaseDomain[] | null> => {
@@ -103,6 +112,32 @@ function BaseDomainsForm({
         }
     }, [draft, tier, busy, onChanged, inputRef])
 
+    // Flip a base domain's subdomain TLS policy in place (PATCH). Applies to every
+    // `<label>.<domain>` site under it on their next deploy (§0/Phase D).
+    const setTls = useCallback(
+        async (domain: string, tls: BaseDomainTls) => {
+            setError(null)
+            try {
+                const res = await fetch('/api/admin/base-domains', {
+                    method: 'PATCH',
+                    headers: { 'content-type': 'application/json' },
+                    body: JSON.stringify({ domain, tls }),
+                })
+                if (!res.ok) {
+                    const body = (await res.json().catch(() => null)) as { error?: string } | null
+                    setError(
+                        body?.error ? `Couldn’t update TLS: ${body.error}.` : `Couldn’t update TLS (error ${res.status}).`,
+                    )
+                    return
+                }
+                onChanged()
+            } catch {
+                setError('Couldn’t update TLS — network error.')
+            }
+        },
+        [onChanged],
+    )
+
     const doRemove = useCallback(async () => {
         const domain = pending
         if (!domain || busy) return
@@ -150,15 +185,24 @@ function BaseDomainsForm({
                                     {rows.map((b) => (
                                         <li key={b.domain} className="perch-admin-list-row">
                                             <span className="perch-admin-mono">{b.domain}</span>
-                                            <tc-button
-                                                variant="danger"
-                                                size="sm"
-                                                outline
-                                                disabled={busy || undefined}
-                                                onClick={() => setPending(b.domain)}
-                                            >
-                                                Remove
-                                            </tc-button>
+                                            <span className="perch-admin-domain-controls">
+                                                <SelectField
+                                                    size="sm"
+                                                    ariaLabel={`Subdomain HTTPS for ${b.domain}`}
+                                                    value={b.tls}
+                                                    options={TLS_OPTIONS}
+                                                    onValue={(v) => void setTls(b.domain, v as BaseDomainTls)}
+                                                />
+                                                <tc-button
+                                                    variant="danger"
+                                                    size="sm"
+                                                    outline
+                                                    disabled={busy || undefined}
+                                                    onClick={() => setPending(b.domain)}
+                                                >
+                                                    Remove
+                                                </tc-button>
+                                            </span>
                                         </li>
                                     ))}
                                 </ul>

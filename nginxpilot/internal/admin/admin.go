@@ -37,6 +37,7 @@ import (
 
 	"github.com/kalevski/toolcase/nginxpilot/internal/manager"
 	"github.com/kalevski/toolcase/nginxpilot/internal/nginxconf"
+	"github.com/kalevski/toolcase/nginxpilot/internal/nginxctl"
 )
 
 // Server is the admin HTTP endpoint.
@@ -110,6 +111,13 @@ func (s *Server) routes() http.Handler {
 	mux.HandleFunc("GET /proxies", s.auth(s.handleListProxies))
 	mux.HandleFunc("POST /proxies", s.auth(s.handleCreateProxy))
 	mux.HandleFunc("DELETE /proxies/{domain}", s.auth(s.handleDeleteProxy))
+	mux.HandleFunc("GET /streams", s.auth(s.handleListStreams))
+	mux.HandleFunc("POST /streams", s.auth(s.handleCreateStream))
+	mux.HandleFunc("DELETE /streams/{name}", s.auth(s.handleDeleteStream))
+	mux.HandleFunc("GET /stream-upstreams", s.auth(s.handleListStreamUpstreams))
+	mux.HandleFunc("POST /stream-upstreams", s.auth(s.handleCreateStreamUpstream))
+	mux.HandleFunc("DELETE /stream-upstreams/{name}", s.auth(s.handleDeleteStreamUpstream))
+	mux.HandleFunc("POST /nginx/test", s.auth(s.handleNginxTest))
 	return mux
 }
 
@@ -130,10 +138,51 @@ func (s *Server) auth(next http.HandlerFunc) http.HandlerFunc {
 
 func (s *Server) handleStatus(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	payload := map[string]any{"sites": s.mgr.Status()}
+	// Managed mode: surface the last apply's per-resource states (active /
+	// disabled with the nginx -t reason) so a control plane sees quarantined
+	// resources.
+	if managed, resources := s.mgr.NginxStatus(); managed {
+		disabled := 0
+		for _, r := range resources {
+			if r.State == "disabled" {
+				disabled++
+			}
+		}
+		if resources == nil {
+			resources = []nginxctl.ResourceResult{}
+		}
+		payload["nginx"] = map[string]any{
+			"managed":        true,
+			"resources":      resources,
+			"disabled_count": disabled,
+		}
+	}
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
-	if err := enc.Encode(map[string]any{"sites": s.mgr.Status()}); err != nil {
+	if err := enc.Encode(payload); err != nil {
 		s.log.Warn("status encode failed", "error", err)
+	}
+}
+
+// handleNginxTest runs a managed-mode dry-run apply (render + validate, no
+// swap/reload) and returns the per-resource pass/fail set, so a control plane
+// can preview before committing. 501 when managed mode is off.
+func (s *Server) handleNginxTest(w http.ResponseWriter, r *http.Request) {
+	res, managed, err := s.mgr.NginxTest(r.Context())
+	if !managed {
+		http.Error(w, "managed mode is off (nginx.manage: false)", http.StatusNotImplemented)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "  ")
+	out := map[string]any{"resources": res.Resources}
+	if err != nil {
+		out["error"] = err.Error()
+	}
+	if err := enc.Encode(out); err != nil {
+		s.log.Warn("nginx test encode failed", "error", err)
 	}
 }
 

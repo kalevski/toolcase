@@ -21,6 +21,7 @@ interface Raw {
     bytes: number | null
     last_ref: string | null
     last_error: string | null
+    realm_id: string | null
     created_at: string
     updated_at: string
 }
@@ -36,6 +37,8 @@ function map(r: Raw): Site {
         hostname: r.hostname,
         hostKind: r.host_kind as SiteHostKind,
         status: r.status as SiteStatus,
+        // Backfilled to the default realm at boot; `''` only in the migration→seed window.
+        realmId: r.realm_id ?? '',
         bytes: r.bytes ?? undefined,
         lastRef: r.last_ref ?? undefined,
         lastError: r.last_error ?? undefined,
@@ -44,14 +47,14 @@ function map(r: Raw): Site {
     }
 }
 
-/** Insert a new site. Throws on `id` or `hostname` conflict (hostname is UNIQUE). */
+/** Insert a new site. Throws on `id` or `(realm_id, hostname)` conflict (UNIQUE per realm). */
 export function create(site: Site): void {
     prep(
         `INSERT INTO site (
             id, owner_id, repo_owner, repo_name, branch, subdir,
             hostname, host_kind, status, bytes, last_ref, last_error,
-            created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            realm_id, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ).run(
         site.id,
         site.ownerId,
@@ -65,6 +68,7 @@ export function create(site: Site): void {
         site.bytes ?? null,
         site.lastRef ?? null,
         site.lastError ?? null,
+        site.realmId || null,
         site.createdAt,
         site.updatedAt,
     )
@@ -77,7 +81,10 @@ export function get(id: string): Site | undefined {
 
 /** Sites owned by one user, newest first (the standard-user dashboard list). */
 export function listByOwner(ownerId: number): Site[] {
-    return allRows<Raw>('SELECT * FROM site WHERE owner_id = ? ORDER BY created_at DESC', ownerId).map(map)
+    return allRows<Raw>(
+        'SELECT * FROM site WHERE owner_id = ? ORDER BY created_at DESC',
+        ownerId,
+    ).map(map)
 }
 
 /** Every site, newest first (owner moderation view). */
@@ -85,37 +92,90 @@ export function list(): Site[] {
     return allRows<Raw>('SELECT * FROM site ORDER BY created_at DESC').map(map)
 }
 
-// ── hostname uniqueness ──────────────────────────────────────────────────────
-// Subdomain labels and custom domains share one namespace (§10); these lookups
-// let a service reject a duplicate before it ever reaches a YAML fragment.
+// ── hostname uniqueness (per-realm, multiple_realms.md §10.2) ──────────────────
+// Subdomain labels and custom domains share one namespace WITHIN a realm (§10); two
+// realms are independent ingresses, so the same hostname can exist in each. These
+// lookups scope to a realm so a service rejects a duplicate before it reaches a fragment.
 
-/** The site occupying a hostname, if any. */
-export function getByHostname(hostname: string): Site | undefined {
-    const r = getRow<Raw>('SELECT * FROM site WHERE hostname = ?', hostname)
+/** The site occupying a hostname within a realm, if any. */
+export function getByHostname(hostname: string, realmId: string): Site | undefined {
+    const r = getRow<Raw>(
+        'SELECT * FROM site WHERE hostname = ? AND realm_id = ?',
+        hostname,
+        realmId,
+    )
     return r ? map(r) : undefined
 }
 
-/** Whether a hostname is already taken. */
-export function hostnameTaken(hostname: string): boolean {
-    return getRow<{ n: number }>('SELECT COUNT(*) AS n FROM site WHERE hostname = ?', hostname)?.n
+/** Whether a hostname is already taken within a realm. */
+export function hostnameTaken(hostname: string, realmId: string): boolean {
+    return getRow<{ n: number }>(
+        'SELECT COUNT(*) AS n FROM site WHERE hostname = ? AND realm_id = ?',
+        hostname,
+        realmId,
+    )?.n
         ? true
         : false
+}
+
+// ── realm scoping (multiple_realms.md §B.2 / removal guards §9) ────────────────
+
+/** Count sites bound to a realm — the realm-removal guard ("can't remove a realm with sites"). */
+export function countByRealm(realmId: string): number {
+    return (
+        getRow<{ n: number }>('SELECT COUNT(*) AS n FROM site WHERE realm_id = ?', realmId)?.n ?? 0
+    )
+}
+
+/** Count sites a user owns in a realm — the grant-revoke guard ("can't revoke a realm they own sites in"). */
+export function countByOwnerInRealm(ownerId: number, realmId: string): number {
+    return (
+        getRow<{ n: number }>(
+            'SELECT COUNT(*) AS n FROM site WHERE owner_id = ? AND realm_id = ?',
+            ownerId,
+            realmId,
+        )?.n ?? 0
+    )
+}
+
+/** Backfill any NULL `realm_id` to the seed default realm (boot-time, multiple_realms.md §2.3). */
+export function backfillRealm(realmId: string): number {
+    return Number(
+        prep('UPDATE site SET realm_id = ? WHERE realm_id IS NULL').run(realmId).changes ?? 0,
+    )
+}
+
+/** Count sites with no realm assigned (the §9 backfill-correctness assertion). */
+export function countOrphans(): number {
+    return getRow<{ n: number }>('SELECT COUNT(*) AS n FROM site WHERE realm_id IS NULL')?.n ?? 0
 }
 
 // ── mutations (each bumps updated_at) ────────────────────────────────────────
 
 /** Advance the lifecycle status (e.g. `provisioning → live`). */
-export function updateStatus(id: string, status: SiteStatus, at: string = new Date().toISOString()): void {
+export function updateStatus(
+    id: string,
+    status: SiteStatus,
+    at: string = new Date().toISOString(),
+): void {
     prep('UPDATE site SET status = ?, updated_at = ? WHERE id = ?').run(status, at, id)
 }
 
 /** Record the last measured deployed size (post-deploy byte-quota check, §11). */
-export function updateBytes(id: string, bytes: number, at: string = new Date().toISOString()): void {
+export function updateBytes(
+    id: string,
+    bytes: number,
+    at: string = new Date().toISOString(),
+): void {
     prep('UPDATE site SET bytes = ?, updated_at = ? WHERE id = ?').run(bytes, at, id)
 }
 
 /** Record the last live git ref reported by nginxpilot `/status`. */
-export function updateLastRef(id: string, lastRef: string, at: string = new Date().toISOString()): void {
+export function updateLastRef(
+    id: string,
+    lastRef: string,
+    at: string = new Date().toISOString(),
+): void {
     prep('UPDATE site SET last_ref = ?, updated_at = ? WHERE id = ?').run(lastRef, at, id)
 }
 
@@ -138,7 +198,12 @@ export function updateSource(
     subdir: string | undefined,
     at: string = new Date().toISOString(),
 ): void {
-    prep('UPDATE site SET branch = ?, subdir = ?, updated_at = ? WHERE id = ?').run(branch, subdir ?? null, at, id)
+    prep('UPDATE site SET branch = ?, subdir = ?, updated_at = ? WHERE id = ?').run(
+        branch,
+        subdir ?? null,
+        at,
+        id,
+    )
 }
 
 /**
@@ -153,7 +218,12 @@ export function updateHostname(
     hostKind: SiteHostKind,
     at: string = new Date().toISOString(),
 ): void {
-    prep('UPDATE site SET hostname = ?, host_kind = ?, updated_at = ? WHERE id = ?').run(hostname, hostKind, at, id)
+    prep('UPDATE site SET hostname = ?, host_kind = ?, updated_at = ? WHERE id = ?').run(
+        hostname,
+        hostKind,
+        at,
+        id,
+    )
 }
 
 /** Delete a site row (after its fragment + vhost/cert are torn down). */

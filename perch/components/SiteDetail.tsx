@@ -49,16 +49,16 @@ export function SiteDetail({ siteId }: { siteId: string }) {
 
     if (state.phase === 'loading') {
         return (
-            <section className="perch-home perch-home--wide">
+            <>
                 {back}
                 <LoadingState shape="detail" label="Loading site…" />
-            </section>
+            </>
         )
     }
 
     if (state.phase === 'error') {
         return (
-            <section className="perch-home perch-home--wide">
+            <>
                 {back}
                 {state.notFound ? (
                     <EmptyState
@@ -73,12 +73,12 @@ export function SiteDetail({ siteId }: { siteId: string }) {
                 ) : (
                     <ErrorState title="Couldn’t load this site" message={state.message} onRetry={() => void load()} />
                 )}
-            </section>
+            </>
         )
     }
 
     return (
-        <section className="perch-home perch-home--wide">
+        <>
             {back}
             <SiteDashboard
                 site={state.site}
@@ -86,6 +86,6 @@ export function SiteDetail({ siteId }: { siteId: string }) {
                 accountUsage={me.usage}
                 onDeleted={() => router.push('/')}
             />
-        </section>
+        </>
     )
 }

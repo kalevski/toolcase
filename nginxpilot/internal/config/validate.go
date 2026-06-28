@@ -36,10 +36,20 @@ func Validate(cfg *Config) error {
 		return fmt.Errorf("admin.token_env and admin.token_file are mutually exclusive")
 	}
 
+	if err := validateNginx(cfg); err != nil {
+		return err
+	}
+	if err := validateTls(cfg); err != nil {
+		return err
+	}
+
 	seen := map[string]string{} // domain -> file (sites + proxies share the namespace)
 	for i := range cfg.Sites {
 		site := &cfg.Sites[i]
 		if err := validateSite(site); err != nil {
+			return fmt.Errorf("site %q (%s): %w", site.Domain, site.File, err)
+		}
+		if err := validateWebOptions(&site.WebOptions); err != nil {
 			return fmt.Errorf("site %q (%s): %w", site.Domain, site.File, err)
 		}
 		if prev, dup := seen[site.Domain]; dup {
@@ -53,6 +63,14 @@ func Validate(cfg *Config) error {
 		return err
 	}
 	if err := validateProxies(cfg, upstreams, seen); err != nil {
+		return err
+	}
+
+	streamUpstreams, err := validateStreamUpstreams(cfg)
+	if err != nil {
+		return err
+	}
+	if err := validateStreams(cfg, streamUpstreams); err != nil {
 		return err
 	}
 	return nil
@@ -147,6 +165,13 @@ func validateProxies(cfg *Config, upstreams map[string]bool, seen map[string]str
 		}
 
 		if err := validateProxyTargets(p, upstreams); err != nil {
+			return fmt.Errorf("proxy %q (%s): %w", p.Domain, p.File, err)
+		}
+
+		if err := validateWebOptions(&p.WebOptions); err != nil {
+			return fmt.Errorf("proxy %q (%s): %w", p.Domain, p.File, err)
+		}
+		if err := validateCache(p.Cache); err != nil {
 			return fmt.Errorf("proxy %q (%s): %w", p.Domain, p.File, err)
 		}
 

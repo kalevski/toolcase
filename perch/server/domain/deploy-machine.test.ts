@@ -27,6 +27,7 @@ function site(overrides: Partial<Site> = {}): Site {
         subdir: 'dist/',
         hostname: 'alice.perch.dev',
         hostKind: 'subdomain',
+        realmId: 'realm-test',
         status: 'draft',
         createdAt: '2026-06-25T00:00:00.000Z',
         updatedAt: '2026-06-25T00:00:00.000Z',

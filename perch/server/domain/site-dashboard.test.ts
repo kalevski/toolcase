@@ -27,6 +27,7 @@ function site(over: Partial<Site> = {}): Site {
         branch: 'gh-pages',
         hostname: 'alice.perch.dev',
         hostKind: 'subdomain',
+        realmId: 'realm-test',
         status: 'live',
         createdAt: '2026-01-01T00:00:00.000Z',
         updatedAt: '2026-01-01T00:00:00.000Z',
@@ -174,6 +175,36 @@ describe('buildSiteDashboard', () => {
         )
         expect(view.usage).toHaveLength(2)
         expect(view.usage[1]).toMatchObject({ label: 'All your sites', measurementUnit: 'MB', total: 50 })
+    })
+
+    it('injects a "TLS / nginx" error item when managed mode disabled the resource', () => {
+        const view = buildSiteDashboard(
+            {
+                ...payload({ status: 'live', lastRef: 'r1' }, np({ deployed_ref: 'r1' })),
+                nginxResource: { state: 'disabled', reason: 'nginx: [emerg] duplicate listen 443' },
+            },
+            LIMITS,
+        )
+        const item = view.statusItems.find((i) => i.id === 'nginx')
+        expect(item).toMatchObject({ label: 'TLS / nginx', status: 'error', detail: 'nginx: [emerg] duplicate listen 443' })
+    })
+
+    it('falls back to a generic reason when the daemon gives none', () => {
+        const view = buildSiteDashboard(
+            { ...payload({ status: 'live', lastRef: 'r1' }, np({ deployed_ref: 'r1' })), nginxResource: { state: 'disabled' } },
+            LIMITS,
+        )
+        expect(view.statusItems.find((i) => i.id === 'nginx')).toMatchObject({ detail: 'disabled by nginx -t' })
+    })
+
+    it('adds no nginx item when the resource is active or absent', () => {
+        const active = buildSiteDashboard(
+            { ...payload({ status: 'live', lastRef: 'r1' }, np({ deployed_ref: 'r1' })), nginxResource: { state: 'active' } },
+            LIMITS,
+        )
+        expect(active.statusItems.find((i) => i.id === 'nginx')).toBeUndefined()
+        const absent = buildSiteDashboard(payload({ status: 'live', lastRef: 'r1' }, np({ deployed_ref: 'r1' })), LIMITS)
+        expect(absent.statusItems.find((i) => i.id === 'nginx')).toBeUndefined()
     })
 
     it('picks GB units for large plan limits', () => {

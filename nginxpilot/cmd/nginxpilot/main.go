@@ -18,9 +18,10 @@ const usage = `nginxpilot — keep nginx static site directories in sync with re
 
 Usage:
   nginxpilot [run] [flags]         run the daemon (default)
-  nginxpilot validate [flags]      parse + validate the merged config
+  nginxpilot validate [flags]      parse + validate the merged config (managed mode also runs nginx -t)
   nginxpilot sync <domain> [flags] one-shot sync for one site
   nginxpilot print-vhost <domain>  print an nginx snippet (static site or reverse proxy)
+  nginxpilot print-include         print the nginx.conf include snippet for managed mode
   nginxpilot status [--json]       show per-site status from the daemon
   nginxpilot version               print build info
 
@@ -50,6 +51,8 @@ func main() {
 		code = cmdSync(args)
 	case "print-vhost":
 		code = cmdPrintVhost(args)
+	case "print-include":
+		code = cmdPrintInclude(args)
 	case "status":
 		code = cmdStatus(args)
 	case "version":

@@ -45,10 +45,24 @@ export interface SiteDeployStatus {
     bytes?: number
 }
 
+/**
+ * The managed-mode resource state for this site's hostname (§0/Phase A), resolved
+ * server-side by matching `status.nginx.resources[].key === site.hostname`. Present
+ * only when the daemon runs in managed mode and has an entry for the domain; a
+ * `disabled` state means `nginx -t` quarantined the site's config (it isn't serving),
+ * with `reason` carrying the daemon's verdict.
+ */
+export interface SiteNginxResource {
+    state: 'active' | 'disabled'
+    reason?: string
+}
+
 /** The `GET /api/sites/{id}/status` response: the stored row + the live entry (or null). */
 export interface SiteStatusPayload {
     site: Site
     nginxpilot: SiteDeployStatus | null
+    /** Managed-mode resource state for this domain, when nginxpilot runs managed (§0). */
+    nginxResource?: SiteNginxResource | null
 }
 
 // ── view-model output (string-literal unions match the tc-* prop contracts) ──────
@@ -239,7 +253,7 @@ export function buildSiteDashboard(
     limits: PlanLimits,
     account?: SiteUsage,
 ): SiteDashboardView {
-    const { site, nginxpilot: np } = payload
+    const { site, nginxpilot: np, nginxResource } = payload
     const status = toDashboardStatus(site.status)
     const head = headline(status)
 
@@ -301,6 +315,18 @@ export function buildSiteDashboard(
             detail: `${formatBytes(siteBytes)} / ${formatBytes(limits.maxBytesPerSite)}`,
         },
     ]
+
+    // Managed-mode quarantine (§0/Phase A): when nginxpilot's `nginx -t` gate disabled
+    // this site's config, surface it as an error row carrying the daemon's reason — the
+    // site's TLS/server block isn't live until the operator fixes the offending config.
+    if (nginxResource?.state === 'disabled') {
+        statusItems.push({
+            id: 'nginx',
+            label: 'TLS / nginx',
+            status: 'error',
+            detail: nginxResource.reason ?? 'disabled by nginx -t',
+        })
+    }
 
     // ── usage bars ──
     const usage: DashboardUsage[] = [usageRow('This site', siteBytes, limits.maxBytesPerSite, overQuota)]

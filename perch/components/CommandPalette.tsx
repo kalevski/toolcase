@@ -34,12 +34,21 @@ export function CommandPalette() {
             list.push(
                 { id: 'proxies', label: 'Proxies', group: 'Routing', icon: 'globe', href: '/proxies' },
                 { id: 'upstreams', label: 'Upstreams', group: 'Routing', icon: 'server', href: '/upstreams' },
+                { id: 'streams', label: 'Streams', group: 'Routing', icon: 'cable', href: '/streams' },
+                {
+                    id: 'stream-upstreams',
+                    label: 'Stream upstreams',
+                    group: 'Routing',
+                    icon: 'network',
+                    href: '/stream-upstreams',
+                },
             )
         }
         if (me.role === 'owner') {
             list.push(
                 { id: 'admin-sites', label: 'Admin · Sites', group: 'Admin', icon: 'layout-dashboard', href: '/admin/sites' },
                 { id: 'admin-users', label: 'Admin · Users', group: 'Admin', icon: 'users', href: '/admin/users' },
+                { id: 'admin-realms', label: 'Admin · Realms', group: 'Admin', icon: 'server', href: '/admin/realms' },
                 { id: 'admin-domains', label: 'Admin · Domains', group: 'Admin', icon: 'globe', href: '/admin/domains' },
                 { id: 'admin-plans', label: 'Admin · Plans', group: 'Admin', icon: 'credit-card', href: '/admin/plans' },
                 { id: 'admin-audit', label: 'Admin · Audit', group: 'Admin', icon: 'scroll-text', href: '/admin/audit' },

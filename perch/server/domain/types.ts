@@ -248,6 +248,12 @@ export interface Site {
     hostname: string
     hostKind: SiteHostKind
     status: SiteStatus
+    /**
+     * The realm (registered nginxpilot instance) this site deploys to (multiple_realms.md
+     * §2.1). Set at create time to the active realm; backfilled to the default realm for
+     * pre-realms rows. Hostname uniqueness is scoped to this realm.
+     */
+    realmId: string
     /** Last measured deployed size in bytes, if known. */
     bytes?: number
     /** Last live git ref reported by nginxpilot `/status`. */
@@ -289,6 +295,19 @@ export interface MeResponse {
     level: AccountLevel
     limits: PlanLimits
     usage: SiteUsage
+    /**
+     * The realm the caller currently operates on (multiple_realms.md §E.4): the owner's
+     * switcher selection, or a non-owner's owner-assigned default. Drives the header label
+     * + which realm realm-selected ops target.
+     */
+    activeRealm: Realm
+    /** Whether this caller may switch realms — `true` only for the owner (§0.6). */
+    canSwitchRealms: boolean
+    /**
+     * The full realm set the switcher lists — present ONLY for the owner. A non-owner never
+     * receives the other realms (they can't switch), so this is omitted for them.
+     */
+    realms?: Realm[]
 }
 
 /**
@@ -306,6 +325,8 @@ export interface AdminUserRow {
     limits: PlanLimits
     /** The owner-set override, or `null` when the user runs on pure role/plan defaults. */
     customLimits: UserLimitOverride | null
+    /** The realms this user is granted, with their own default marked (multiple_realms.md §F.2). */
+    realmGrants: UserRealmGrant[]
 }
 
 // ── Sponsorship (`sponsorship` row) ──────────────────────────────────────────
@@ -365,14 +386,68 @@ export function visibleBaseDomainTiers(role: Role, plan: Plan): BaseDomainTier[]
     return ['free']
 }
 
+/**
+ * Subdomain TLS policy for a base domain (§0/Phase D). TLS for subdomains is decided
+ * once per base domain — a single wildcard cert (`*.base.dev`) covers every label — so
+ * the knob lives here, never per subdomain. `required` makes no sense at wildcard scope,
+ * so it's deliberately off/auto only; `auto` degrades to HTTP when the cert isn't issued
+ * yet (so a missing cert never takes subdomains down).
+ */
+export type BaseDomainTls = 'off' | 'auto'
+
+/** Every base-domain TLS policy. */
+export const BASE_DOMAIN_TLS: readonly BaseDomainTls[] = ['off', 'auto']
+
+/** Type guard: a request-supplied value is one of the base-domain TLS policies. */
+export function isBaseDomainTls(value: unknown): value is BaseDomainTls {
+    return value === 'off' || value === 'auto'
+}
+
 /** An owner-registered base domain backing the subdomain pool (§10, §12). */
 export interface BaseDomain {
     /** Fully-qualified base domain; primary key (e.g. `perch.dev`). */
     domain: string
     /** The audience this domain is offered to; gates which users may pick it (§10). */
     tier: BaseDomainTier
+    /** Subdomain TLS policy (§0/Phase D): one wildcard cert per base. Defaults to `auto`. */
+    tls: BaseDomainTls
+    /**
+     * The realm (nginxpilot instance) whose wildcard serves this base domain
+     * (multiple_realms.md §2.1, §10.4). Backfilled to the default realm for pre-realms rows.
+     */
+    realmId: string
     /** ISO timestamp the owner registered it. */
     createdAt: string
+}
+
+// ── Realms (`realm` / `user_realm` rows) ──────────────────────────────────────
+
+/**
+ * One registered nginxpilot instance the control plane drives (multiple_realms.md §1).
+ * The client-facing DTO: the admin token NEVER appears here — only {@link hasToken}
+ * signals whether the instance is authenticated. Server-only code resolves the decrypted
+ * token through a `RealmConnection` (`infrastructure/nginxpilot.ts`), never this shape.
+ */
+export interface Realm {
+    id: string
+    /** Human label ("prod-eu", "lab"). */
+    name: string
+    /** Normalized admin REST base URL (no trailing `/`). */
+    adminUrl: string
+    /** True when this realm is authenticated (a token is stored). The token itself never reaches the client. */
+    hasToken: boolean
+    /** The single global default realm — new users land here and it's the owner's fallback active realm. */
+    isDefault: boolean
+    /** ISO timestamp the owner registered it. */
+    createdAt: string
+}
+
+/** A user's realm grant as the owner roster shows it (multiple_realms.md §2.4). */
+export interface UserRealmGrant {
+    realmId: string
+    realmName: string
+    /** This user's own operating realm among their grants (owner-set). */
+    isDefault: boolean
 }
 
 // ── Plan tiers (`plan_tier` row) ─────────────────────────────────────────────

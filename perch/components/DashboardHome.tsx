@@ -84,7 +84,7 @@ export function DashboardHome() {
 
     if (state.phase === 'loading') {
         return (
-            <section className="perch-home perch-home--wide">
+            <>
                 <tc-rich-page-header
                     key="loading"
                     title-text="Your sites"
@@ -92,7 +92,7 @@ export function DashboardHome() {
                     icon-color="blue"
                 />
                 <LoadingState shape="cards" count={3} label="Loading your sites…" />
-            </section>
+            </>
         )
     }
 

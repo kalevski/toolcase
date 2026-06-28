@@ -22,12 +22,12 @@ import * as userRepo from '@/server/data/repositories/user-repo'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
 import * as deploy from '@/server/services/deploy'
 import * as domains from '@/server/services/domains'
+import * as realms from '@/server/services/realms'
 import { HostnameError } from '@/server/services/domains'
 import { QuotaError, assertCanCreateSite, assertCanUseCustomDomain } from '@/server/services/quota'
 import { GithubError } from '@/server/infrastructure/github'
 import { NginxpilotError, type NginxpilotSiteStatus } from '@/server/infrastructure/nginxpilot'
 import { NginxError } from '@/server/infrastructure/nginx'
-import * as nginxpilot from '@/server/infrastructure/nginxpilot'
 import { resolveSiteAccess, type SiteViewer } from '@/server/domain/site-access'
 import { checkBranch, checkRepoName, checkRepoOwner, checkSubdir } from '@/server/domain/site-input'
 import { checkDomain, checkLabel } from '@/server/domain/hostname'
@@ -122,13 +122,17 @@ function audit(action: string, owner: AppUser, site: Site, detail?: string): voi
  * resulting fully-qualified hostname. Custom domains additionally pass the plan gate
  * (§728) — they're a paid capability. Throws `HostnameError` / `QuotaError`.
  */
-function resolveHostname(spec: HostnameSpec, owner: AppUser): string {
+function resolveHostname(spec: HostnameSpec, owner: AppUser, realmId: string): string {
     if (spec.kind === 'subdomain') {
-        return domains.validateLabel(str(spec.label, 'hostname.label'), str(spec.baseDomain, 'hostname.baseDomain'))
+        return domains.validateLabel(
+            str(spec.label, 'hostname.label'),
+            str(spec.baseDomain, 'hostname.baseDomain'),
+            realmId,
+        )
     }
     if (spec.kind === 'custom') {
         assertCanUseCustomDomain(owner.login)
-        return domains.validateCustomDomain(str(spec.domain, 'hostname.domain'))
+        return domains.validateCustomDomain(str(spec.domain, 'hostname.domain'), realmId)
     }
     throw new SiteError('hostname.kind must be "subdomain" or "custom"', 'invalid_request', 400)
 }
@@ -185,7 +189,11 @@ export async function createSite(viewer: SiteViewer, body: CreateSiteRequest): P
     // Hard, pre-emptive count gate (§11 point 1) before we touch the namespace.
     assertCanCreateSite(owner.login)
 
-    const hostname = resolveHostname(body.hostname, owner)
+    // Pick the target realm (multiple_realms.md §D.2): the active realm (the owner's
+    // switcher choice; a non-owner's owner-assigned default). The site is bound to it and
+    // hostname uniqueness is scoped to it.
+    const activeRealm = await realms.resolveActiveRealm(viewer.sub, viewer.role)
+    const hostname = resolveHostname(body.hostname, owner, activeRealm.id)
 
     const now = new Date().toISOString()
     const site: Site = {
@@ -197,6 +205,7 @@ export async function createSite(viewer: SiteViewer, body: CreateSiteRequest): P
         subdir,
         hostname,
         hostKind: body.hostname.kind,
+        realmId: activeRealm.id,
         status: 'draft',
         createdAt: now,
         updatedAt: now,
@@ -260,7 +269,8 @@ async function changeHostname(
     spec: HostnameSpec,
     source: { branch?: string; subdir?: string; hasSubdir: boolean },
 ): Promise<Site> {
-    const newHostname = resolveHostname(spec, owner)
+    // A rehost stays within the site's own realm (multiple_realms.md §D.2).
+    const newHostname = resolveHostname(spec, owner, site.realmId)
     const newKind: SiteHostKind = spec.kind
 
     if (site.hostKind === 'custom') {
@@ -336,22 +346,35 @@ export async function verifyDomain(viewer: SiteViewer, id: string): Promise<Veri
 
 // ── status proxy (§13) ───────────────────────────────────────────────────────────
 
+/** The managed-mode resource state for a domain (§0/Phase A) — null unless managed + present. */
+export interface SiteNginxResourceState {
+    state: 'active' | 'disabled'
+    reason?: string
+}
+
 /** The site's stored row plus the live nginxpilot `/status` entry for its domain (or null). */
 export interface SiteStatusResult {
     site: Site
     nginxpilot: NginxpilotSiteStatus | null
+    /** Managed-mode resource state for this domain (null in unmanaged mode or when unseen). */
+    nginxResource: SiteNginxResourceState | null
 }
 
 /**
  * Proxy nginxpilot's `GET /status` for an owned site's domain (§13). Returns the stored row
  * alongside the live per-site status entry (null when nginxpilot hasn't seen the domain yet —
- * e.g. before the first reload). Ownership is re-checked first.
+ * e.g. before the first reload). In managed mode, also resolves the daemon's per-resource
+ * `nginx -t` verdict for this hostname (§0/Phase A) so the dashboard can surface a quarantined
+ * site. Ownership is re-checked first.
  */
 export async function siteStatus(viewer: SiteViewer, id: string): Promise<SiteStatusResult> {
     const site = ownedSite(id, viewer)
-    const env = await nginxpilot.status()
+    // Status is a realm-scoped op — read the site's OWN realm (multiple_realms.md §D.2).
+    const env = await realms.clientForSite(site).status()
     const entry = env.sites.find((s) => s.domain === site.hostname) ?? null
-    return { site, nginxpilot: entry }
+    const resource = env.nginx?.resources.find((r) => r.kind === 'site' && r.key === site.hostname)
+    const nginxResource = resource ? { state: resource.state, reason: resource.reason } : null
+    return { site, nginxpilot: entry, nginxResource }
 }
 
 // ── error → HTTP mapping (so routes stay thin) ───────────────────────────────────

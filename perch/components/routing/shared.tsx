@@ -116,7 +116,89 @@ export function RoutingPage<T>({
                 icon-name={icon}
                 icon-color={iconColor}
             />
+            <RoutingTestButton />
             {body}
         </section>
+    )
+}
+
+/** One resource verdict from the managed-mode dry run (`POST /nginx/test`). */
+interface NginxTestResource {
+    kind: string
+    key: string
+    state: 'active' | 'disabled'
+    reason?: string
+}
+
+interface NginxTestResponse {
+    managed: boolean
+    resources?: NginxTestResource[]
+    error?: string
+}
+
+/**
+ * Managed-mode "Test config" dry run (Phase E). POSTs `/api/routing/nginx-test` and
+ * renders the per-resource pass/fail set so a maintainer can preview the daemon's
+ * `nginx -t` verdict before trusting a live apply. Shows a muted note when managed mode
+ * is off (the toggles still save; they're just inert until managed). Shared across all
+ * four routing pages via {@link RoutingPage}.
+ */
+function RoutingTestButton() {
+    const [busy, setBusy] = useState(false)
+    const [result, setResult] = useState<NginxTestResponse | null>(null)
+    const [failed, setFailed] = useState(false)
+
+    const run = useCallback(async () => {
+        setBusy(true)
+        setFailed(false)
+        try {
+            const res = await fetch('/api/routing/nginx-test', { method: 'POST' })
+            if (!res.ok) {
+                setResult(null)
+                setFailed(true)
+                return
+            }
+            setResult((await res.json()) as NginxTestResponse)
+        } catch {
+            setResult(null)
+            setFailed(true)
+        } finally {
+            setBusy(false)
+        }
+    }, [])
+
+    const disabled = result?.resources?.filter((r) => r.state === 'disabled') ?? []
+
+    return (
+        <div className="perch-routing-test">
+            <tc-button variant="secondary" outline size="sm" onClick={run} disabled={busy || undefined}>
+                {busy ? 'Testing…' : 'Test config'}
+            </tc-button>
+            {failed && <tc-banner variant="danger">Couldn’t run the dry run — the deploy engine didn’t answer.</tc-banner>}
+            {result && !result.managed && (
+                <tc-banner variant="info">
+                    Managed mode is off — TLS &amp; security toggles and streams are inert until nginxpilot runs in
+                    managed mode. Settings still save.
+                </tc-banner>
+            )}
+            {result?.managed && disabled.length === 0 && (
+                <tc-banner variant="success">All resources pass nginx&nbsp;-t.</tc-banner>
+            )}
+            {result?.managed && disabled.length > 0 && (
+                <tc-banner variant="danger">
+                    {disabled.length} resource{disabled.length === 1 ? '' : 's'} would be disabled by nginx&nbsp;-t:
+                    <ul className="perch-admin-list">
+                        {disabled.map((r) => (
+                            <li key={`${r.kind}:${r.key}`}>
+                                <span className="perch-admin-mono">
+                                    {r.kind} {r.key}
+                                </span>
+                                {r.reason ? ` — ${r.reason}` : ''}
+                            </li>
+                        ))}
+                    </ul>
+                </tc-banner>
+            )}
+        </div>
     )
 }

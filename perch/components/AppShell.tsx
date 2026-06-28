@@ -7,6 +7,7 @@ import { useTcProps } from '@/lib/tc'
 import { useBranding } from '@/lib/branding-context'
 import { Breadcrumbs } from './Breadcrumbs'
 import { CommandPalette } from './CommandPalette'
+import { RealmSwitcher } from './RealmSwitcher'
 import { ACCOUNT_LEVEL_LABEL, ROLE_RANK, type MeResponse } from '@/server/domain/types'
 
 // The authenticated frame (§14). `tc-dashboard-layout` is the responsive shell:
@@ -65,6 +66,20 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
                     href: '/upstreams',
                     active: pathname.startsWith('/upstreams'),
                 },
+                {
+                    key: 'routing-streams',
+                    label: 'Streams',
+                    icon: 'cable',
+                    href: '/streams',
+                    active: pathname.startsWith('/streams'),
+                },
+                {
+                    key: 'routing-stream-upstreams',
+                    label: 'Stream upstreams',
+                    icon: 'network',
+                    href: '/stream-upstreams',
+                    active: pathname.startsWith('/stream-upstreams'),
+                },
             ],
         }
         const admin: SideNavSection = {
@@ -84,6 +99,13 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
                     icon: 'users',
                     href: '/admin/users',
                     active: pathname.startsWith('/admin/users'),
+                },
+                {
+                    key: 'admin-realms',
+                    label: 'Realms',
+                    icon: 'server',
+                    href: '/admin/realms',
+                    active: pathname.startsWith('/admin/realms'),
                 },
                 {
                     key: 'admin-domains',
@@ -150,6 +172,7 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
                 <div slot="sidebar-menu" className="perch-sidebar-menu">
                     <tc-side-nav ref={sideNavRef} />
                 </div>
+                <RealmSwitcher />
                 <tc-user-panel
                     slot="sidebar-panel"
                     ref={userRef}

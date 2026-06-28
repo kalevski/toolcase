@@ -12,7 +12,8 @@ git remotes / zip endpoints ──fetch──► nginxpilot ──writes──�
 
 - **Atomic deploys** — content is staged, fsynced, then made live with a `rename(2)` symlink swap. nginx never serves a half-written directory, and content updates need **no nginx reload**.
 - **Last known-good wins** — any sync failure (network, auth, corrupt zip) leaves `current` untouched.
-- **Zero request-path coupling** — not a proxy, not a web server, no TLS management (use certbot), no build steps (CI builds → artifact/built branch → daemon deploys).
+- **Zero request-path coupling** — not a proxy, not a web server (CI builds → artifact/built branch → daemon deploys).
+- **Optional [managed mode](#managed-mode)** — opt in (`nginx.manage: true`) and nginxpilot also **writes the live nginx config and reloads nginx**: TLS termination from a cert dir, per-host toggles (force-SSL/HTTP2/HSTS/cache/…), L4 `stream` blocks, and crash-proof validation (a resource that fails `nginx -t` is quarantined, never fatal). Default is the decoupled generate-only behavior above.
 
 Full design rationale: [`nginxpilot.md`](../nginxpilot.md) in the repo root.
 
@@ -199,16 +200,114 @@ proxies:
         websocket: true            # adds the Upgrade/Connection upgrade headers + HTTP/1.1
 ```
 
-Generate the nginx config: `nginxpilot print-vhost api.example.com`. The output is **self-contained** — it emits each referenced named upstream `upstream {}` block followed by the `server {}` block. If you share one upstream across several proxies, emit it once and drop the duplicate. Standard forwarding headers (`Host`, `X-Real-IP`, `X-Forwarded-For`, `X-Forwarded-Proto`) are always set; TLS stays a commented certbot hint (nginxpilot does not manage certificates).
+Generate the nginx config: `nginxpilot print-vhost api.example.com`. The output is **self-contained** — it emits each referenced named upstream `upstream {}` block followed by the `server {}` block. If you share one upstream across several proxies, emit it once and drop the duplicate. Standard forwarding headers (`Host`, `X-Real-IP`, `X-Forwarded-For`, `X-Forwarded-Proto`) are always set; TLS stays a commented certbot hint unless you opt into [managed mode](#managed-mode).
+
+## Managed mode
+
+By default nginxpilot is a config **generator** (print-vhost + manual paste). Opt into **managed mode** and it becomes the thing that **writes the live nginx config and reloads nginx** — unlocking TLS termination, per-host toggles and `stream` blocks. The default (`nginx.manage: false`) is unchanged: existing deployments behave exactly as before.
+
+```yaml
+nginx:
+  manage: true                                        # opt-in; default false
+  conf_dir: /etc/nginx/conf.d/nginxpilot.d            # http-context files nginxpilot owns
+  stream_conf_dir: /etc/nginx/stream.d/nginxpilot.d   # stream-context (L4) files
+  managed_include_dir: /etc/nginx/conf.d/nginxpilot.d # shared snippets (block-exploits)
+  test_cmd:   ["nginx", "-t"]                         # overridable (systemctl/docker variants)
+  reload_cmd: ["nginx", "-s", "reload"]
+tls:
+  cert_dir_env: NGINXPILOT_CERT_DIR                   # env var holding the cert dir path …
+  # cert_dir: /etc/nginxpilot/certs                   # … or a direct path (exactly one)
+  reload_on_change: true                              # watch the cert dir, reload on renewal (default true)
+  # watch_interval: 60s                               # cert-dir poll interval (default 60s)
+```
+
+Wire the managed dirs into `nginx.conf` once (the Docker image bakes this in):
+
+```bash
+nginxpilot print-include    # prints the http include + the top-level stream{} block to add
+```
+
+### Crash-proof apply (never crash nginx)
+
+On startup, on reload, and on cert renewal, nginxpilot renders **one file per resource**, validates the whole set with `nginx -t` in a staging dir, then:
+
+- **all valid** → atomically swaps the files into the live dirs and reloads.
+- **something invalid** → a quarantine pass adds resources one at a time, `nginx -t` after each, and **disables** just the offending one (recorded with its `nginx -t` stderr) — the rest keep serving. nginx is **only ever handed config that already passed `nginx -t`**.
+- a reload that somehow fails after a passing test rolls the live dirs back to the previous snapshot.
+
+Disabled resources surface in `GET /status` under `nginx.resources` (and `nginxpilot validate` exits non-zero if any resource fails `nginx -t`). Preview without committing: `POST /nginx/test`.
+
+### TLS termination from a cert directory
+
+nginxpilot **consumes** certs (certbot/acme.sh/external issue and renew them) and reloads on renewal. Discovery per domain (first match wins), so a plain certbot tree works with zero config:
+
+```
+<cert_dir>/<domain>/fullchain.pem + privkey.pem      # certbot live layout
+<cert_dir>/<domain>.crt           + <domain>.key     # flat layout
+```
+
+Opt in per resource with `tls:` — `off` (default, HTTP only), `auto` (use a cert if found, else serve HTTP + warn), or `required` (no cert → the resource is disabled rather than silently served plaintext).
+
+### Per-host toggles
+
+Booleans/structs on a `proxy` (and, where meaningful, a `site`). All render in managed mode **and** `print-vhost`:
+
+```yaml
+proxies:
+  - domain: app.example.com
+    upstream: app_pool
+    tls: auto
+    force_ssl: true              # 80 → 301 https (requires TLS)
+    http2: true                  # http2 on; (requires TLS)
+    hsts: true                   # or { max_age: 63072000, include_subdomains: true, preload: false }
+    block_exploits: true         # deny common SQLi/scanner patterns (managed include / inline)
+    websocket: true              # Upgrade/Connection headers on ALL locations
+    cache:                       # http proxy cache
+      enabled: true
+      valid: ["200 10m", "404 1m"]
+      zone_size: 10m
+    gzip: true
+    advanced: |                  # raw escape hatch inside the server{} block
+      add_header X-Frame-Options SAMEORIGIN;
+```
+
+`force_ssl` / `http2` / `hsts` require effective TLS — without it they are a validation error (no surprise plaintext). The `advanced` escape hatch rides the same `nginx -t` gate, so a bad snippet only disables that one resource.
+
+### Stream (TCP/UDP) resources
+
+L4 proxying lives in nginx's top-level `stream {}` context. Streams are keyed by **name** (L4 has no Host):
+
+```yaml
+stream_upstreams:
+  - name: db_pool
+    balancer: least_conn         # round_robin | least_conn | hash
+    servers:
+      - address: 10.0.0.1:5432
+      - address: 10.0.0.2:5432
+
+streams:
+  - name: postgres
+    listen: 5432
+    protocol: tcp                # tcp (default) | udp
+    upstream: db_pool            # … or pass: 10.0.0.9:5432 (exactly one)
+    proxy_protocol: false
+    connect_timeout: 5s
+    timeout: 10m                 # proxy_timeout
+    # tls: auto                  # optional TLS-terminated TCP …
+    # tls_domain: db.example.com # … cert to use (L4 has no SNI)
+```
+
+Stream and http upstream names are separate namespaces (the same name in each is fine). `print-include` emits the `stream { include …; }` line to add to `nginx.conf`.
 
 ## CLI
 
 | Subcommand | Purpose |
 |---|---|
 | `run` | The daemon (default). Flags: `--config`, `--log-format logfmt\|json`, `--prune-orphans`. |
-| `validate` | Parse + validate merged config, check `git` presence, verify secret refs resolve. CI-friendly exit codes. |
+| `validate` | Parse + validate merged config, check `git` presence, verify secret refs resolve. In managed mode also renders to a temp dir and runs `nginx -t`. CI-friendly exit codes. |
 | `sync <domain>` | One-shot in-process sync, no daemon needed; non-zero exit on failure. |
-| `print-vhost <domain>` | Print a commented nginx snippet — a content-serving block for a static site, or `upstream {}` + `proxy_pass` blocks for a reverse proxy. |
+| `print-vhost <domain>` | Print a commented nginx snippet — a content-serving block for a static site, or `upstream {}` + `proxy_pass` blocks for a reverse proxy. Honours TLS + toggles. |
+| `print-include` | Print the `nginx.conf` include snippet for managed mode (http include + the top-level `stream {}` block). |
 | `status [--json]` | Human table (or raw JSON) from the daemon's `/status` endpoint. |
 | `version` | Build info. |
 
@@ -217,10 +316,11 @@ Generate the nginx config: `nginxpilot print-vhost api.example.com`. The output 
 Loopback HTTP (default `127.0.0.1:9090`; `admin.listen: ""` disables; `admin.token_env` adds bearer auth):
 
 - `GET /healthz` — liveness
-- `GET /status` — per-site JSON: deployed ref, `bytes` (size of the live `current` release directory, measured once per sync), last success/error, failure streak, `never_synced`, next sync
+- `GET /status` — per-site JSON: deployed ref, `bytes` (size of the live `current` release directory, measured once per sync), last success/error, failure streak, `never_synced`, next sync. In managed mode an `nginx` object reports each resource's `state` (`active`/`disabled`) and the `nginx -t` reason for any disabled one.
 - `POST /sync/<domain>` — force an immediate sync
 - `GET /vhost/<domain>` — `text/plain` generated nginx config for a site or reverse proxy (same output as `print-vhost`)
-- `POST /reload` — diff-based config reload (same work as `SIGHUP`); lets a separate process apply config changes without signalling the daemon. An invalid on-disk config is rejected wholesale and the running config stays active (`500`); success returns `200`.
+- `POST /reload` — diff-based config reload (same work as `SIGHUP`); lets a separate process apply config changes without signalling the daemon. An invalid on-disk config is rejected wholesale and the running config stays active (`500`); success returns `200`. In managed mode a reload also re-renders + reloads nginx.
+- `POST /nginx/test` — managed-mode dry run: render + `nginx -t` with no swap/reload, returning the per-resource pass/fail set so a control plane can preview before committing (`501` when managed mode is off).
 ### Config management over REST
 
 A control plane (e.g. Perch) drives the **entire** config — sites, upstreams and reverse proxies — over the API, so `sites.d/` never has to be a hand-edited or shared-write surface. Each write parses the same YAML fragment a file-drop would contain (`config/parse.go` schema), validates the **candidate merged config** before touching disk (so a bad fragment never lands in `sites.d/`), writes it atomically under a deterministic filename, then reloads; the target directory and extension are derived from the first `include:` glob. A write must declare **exactly one** entity of its kind (and none of the others). Each kind has a deterministic filename so it maps 1:1 to its `DELETE`, and the three filename namespaces never collide:
@@ -236,6 +336,12 @@ A control plane (e.g. Perch) drives the **entire** config — sites, upstreams a
 | `GET /proxies` | — | — | JSON list of configured reverse proxies |
 | `POST /proxies` | one `proxies:` entry | `proxy-<domain>.yml` | `201` / `200`; a proxy that names an `upstream:` resolves against the upstreams **already** in the running config, so create the upstream first |
 | `DELETE /proxies/{domain}` | — | `proxy-<domain>.yml` | `200` / `404` |
+| `GET /stream-upstreams` | — | — | JSON list of stream (L4) upstreams |
+| `POST /stream-upstreams` | one `stream_upstreams:` entry | `stream-upstream-<name>.yml` | `201` / `200` |
+| `DELETE /stream-upstreams/{name}` | — | `stream-upstream-<name>.yml` | `200` / `404`; **`409`** if a stream still references it |
+| `GET /streams` | — | — | JSON list of stream (L4) resources |
+| `POST /streams` | one `streams:` entry | `stream-<name>.yml` | `201` / `200`; a stream that names an `upstream:` resolves against stream upstreams already in the running config |
+| `DELETE /streams/{name}` | — | `stream-<name>.yml` | `200` / `404` |
 
 Validation errors come back as a precise `400` (bad source, duplicate domain — sites and proxies share one domain namespace —, unknown upstream reference, unknown key, …). If the post-write reload is rejected (e.g. a concurrent edit to another file) the write is rolled back and reported as `500`. The `GET` list endpoints serialize the running merged config (main file + all fragments) as JSON; secret material is never present (auth carries only `*_env` / `*_file` references) and durations/sizes render as their human strings (`"5m"`, `"512MiB"`).
 
@@ -264,7 +370,7 @@ curl -fsS $BASE/vhost/api.example.com   # generate the nginx config to paste
 
 ## Signals
 
-- `SIGHUP` — diff-based reload. Added sites start + sync immediately; removed sites stop but content stays on disk (orphan, warned; delete with `--prune-orphans`); an invalid config is rejected wholesale and the running config stays active.
+- `SIGHUP` — diff-based reload. Added sites start + sync immediately; removed sites stop but content stays on disk (orphan, warned; delete with `--prune-orphans`); an invalid config is rejected wholesale and the running config stays active. In managed mode the reload also re-renders + validates + reloads nginx (quarantining any resource that fails `nginx -t`).
 - `SIGTERM`/`SIGINT` — graceful shutdown: in-flight swaps finish, downloads abort.
 
 ## Failure semantics
@@ -290,8 +396,9 @@ docker run -d \
   ghcr.io/kalevski/toolcase/nginxpilot:latest
 ```
 
-- Mount your vhosts into `/etc/nginx/conf.d/`, each `root` pointing at `…/sites/<domain>/current` (generate a starting snippet with `print-vhost`, below).
-- The daemon runs as the unprivileged `nginxpilot` user (member of group `nginx`) so its `0750`/`0640` content stays readable by the workers; nginx is PID-managed by the official entrypoint, content swaps need no reload.
+- Mount your vhosts into `/etc/nginx/conf.d/`, each `root` pointing at `…/sites/<domain>/current` (generate a starting snippet with `print-vhost`, below) — **or** turn on [managed mode](#managed-mode) and let nginxpilot write them.
+- The daemon runs as the unprivileged `nginxpilot` user (member of group `nginx`) so its `0750`/`0640` content stays readable by the workers; nginx is supervised by the entrypoint (restarted on crash), content swaps need no reload.
+- **Managed mode in the image**: the http include and the top-level `stream {}` block are baked into `nginx.conf`, and the daemon-owned dirs under `/etc/nginx/nginxpilot/` are pre-created. Point your config at them: `nginx.conf_dir: /etc/nginx/nginxpilot/conf.d`, `nginx.stream_conf_dir: /etc/nginx/nginxpilot/stream.d`, `nginx.managed_include_dir: /etc/nginx/nginxpilot/conf.d`. Mount your cert dir and set `tls.cert_dir`.
 - Port 9090 is the admin endpoint — set `admin.listen: 0.0.0.0:9090` in the config and publish the port if you want `/status` from outside.
 - Any argument bypasses the supervisor and runs the CLI directly:
 

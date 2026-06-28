@@ -17,7 +17,7 @@ import 'server-only'
 import * as siteRepo from '@/server/data/repositories/site-repo'
 import * as userRepo from '@/server/data/repositories/user-repo'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
-import * as nginxpilot from '@/server/infrastructure/nginxpilot'
+import * as realms from '@/server/services/realms'
 import { resolveLimits } from '@/server/services/plan'
 import { config } from '@/server/config'
 import { slog } from '@/server/infrastructure/server-log'
@@ -124,6 +124,9 @@ export async function enforceBytes(site: Site): Promise<Site> {
     const limits = limitsForOwner(owner)
     const bytes = site.bytes ?? 0
     const now = new Date().toISOString()
+    // Enforcement is a realm-scoped op — drive the site's OWN realm (multiple_realms.md §D.3),
+    // never a global client. The byte-quota sweep iterates sites and hits each site's realm.
+    const client = realms.clientForSite(site)
 
     const action = decideByteQuota({
         status: site.status,
@@ -156,8 +159,8 @@ export async function enforceBytes(site: Site): Promise<Site> {
 
         case 'suspend': {
             // Stop serving: drop the fragment and reload so nginxpilot forgets the site.
-            await nginxpilot.removeFragment(site.hostname)
-            await nginxpilot.reload()
+            await client.removeFragment(site.hostname)
+            await client.reload()
             siteRepo.updateStatus(site.id, 'suspended', now)
             notify('site.suspended', site, owner, `suspended after grace window — still over byte quota (${usage})`)
             return { ...site, status: 'suspended', updatedAt: now }
@@ -166,9 +169,9 @@ export async function enforceBytes(site: Site): Promise<Site> {
         case 'reinstate': {
             if (site.status === 'suspended') {
                 // The fragment was removed at suspension — re-create it and re-deploy.
-                await nginxpilot.writeFragment(site, { intervalSec: limits.minIntervalSec })
-                await nginxpilot.reload()
-                await nginxpilot.sync(site.hostname)
+                await client.writeFragment(site, { intervalSec: limits.minIntervalSec })
+                await client.reload()
+                await client.sync(site.hostname)
                 siteRepo.updateStatus(site.id, 'provisioning', now)
                 notify('site.reinstated', site, owner, `within byte quota again (${usage}); re-provisioning`)
                 return { ...site, status: 'provisioning', updatedAt: now }

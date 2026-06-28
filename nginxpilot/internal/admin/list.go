@@ -40,6 +40,24 @@ func (s *Server) handleListProxies(w http.ResponseWriter, _ *http.Request) {
 	writeJSON(w, map[string]any{"proxies": proxies}, s)
 }
 
+func (s *Server) handleListStreams(w http.ResponseWriter, _ *http.Request) {
+	cfg := s.mgr.Config()
+	streams := cfg.Streams
+	if streams == nil {
+		streams = []config.Stream{}
+	}
+	writeJSON(w, map[string]any{"streams": streams}, s)
+}
+
+func (s *Server) handleListStreamUpstreams(w http.ResponseWriter, _ *http.Request) {
+	cfg := s.mgr.Config()
+	ups := cfg.StreamUpstreams
+	if ups == nil {
+		ups = []config.StreamUpstream{}
+	}
+	writeJSON(w, map[string]any{"stream_upstreams": ups}, s)
+}
+
 func writeJSON(w http.ResponseWriter, v any, s *Server) {
 	w.Header().Set("Content-Type", "application/json")
 	enc := json.NewEncoder(w)

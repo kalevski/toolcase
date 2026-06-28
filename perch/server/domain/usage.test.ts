@@ -15,6 +15,7 @@ function site(over: Partial<Site>): Site {
         branch: 'gh-pages',
         hostname: 'alice.perch.dev',
         hostKind: 'subdomain',
+        realmId: 'realm-test',
         status: 'live',
         createdAt: '2026-01-01T00:00:00.000Z',
         updatedAt: '2026-01-01T00:00:00.000Z',

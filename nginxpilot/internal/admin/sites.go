@@ -21,8 +21,10 @@ const maxFragmentBytes = 64 << 10
 // namespace) and an upstream never collide on one file and DELETE on one
 // entity kind can never remove another's fragment.
 const (
-	upstreamStemPrefix = "upstream-"
-	proxyStemPrefix    = "proxy-"
+	upstreamStemPrefix       = "upstream-"
+	proxyStemPrefix          = "proxy-"
+	streamStemPrefix         = "stream-"
+	streamUpstreamStemPrefix = "stream-upstream-"
 )
 
 // handleCreateSite accepts a site fragment (the same YAML a file dropped into
@@ -222,6 +224,22 @@ func validateCandidate(cfg *config.Config, frag *config.Fragment, target string)
 		}
 	}
 	cand.Proxies = append(proxies, frag.Proxies...)
+
+	streamUpstreams := make([]config.StreamUpstream, 0, len(cfg.StreamUpstreams)+len(frag.StreamUpstreams))
+	for _, u := range cfg.StreamUpstreams {
+		if u.File != target {
+			streamUpstreams = append(streamUpstreams, u)
+		}
+	}
+	cand.StreamUpstreams = append(streamUpstreams, frag.StreamUpstreams...)
+
+	streams := make([]config.Stream, 0, len(cfg.Streams)+len(frag.Streams))
+	for _, st := range cfg.Streams {
+		if st.File != target {
+			streams = append(streams, st)
+		}
+	}
+	cand.Streams = append(streams, frag.Streams...)
 
 	return config.Validate(&cand)
 }

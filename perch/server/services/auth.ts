@@ -11,12 +11,19 @@ import crypto from 'node:crypto'
 import { cookies } from 'next/headers'
 import { config } from '@/server/config'
 import * as userRepo from '@/server/data/repositories/user-repo'
+import * as realmRepo from '@/server/data/repositories/realm-repo'
+import * as userRealmRepo from '@/server/data/repositories/user-realm-repo'
 import { tx } from '@/server/data/db'
 import { type AppUser, type Role, type SessionPayload } from '@/server/domain/types'
 import { meetsMinRole } from '@/server/domain/admin'
 
 export const SESSION_COOKIE = 'perch_session'
 export const STATE_COOKIE = 'perch_oauth_state'
+// The owner's active-realm selection (multiple_realms.md Phase E). A signed httpOnly
+// cookie carrying just the chosen realm id — set by the owner-only switcher, read as a
+// *hint* by `resolveActiveRealm` (always re-validated against the DB). Non-owners never
+// set or use it: they're pinned to their owner-assigned default realm (§0.6).
+export const REALM_COOKIE = 'perch_realm'
 // The GitHub access token is kept OUT of the session payload (§7) but the
 // create-site wizard needs it to call the GitHub REST API on the user's behalf
 // (§9 step 1, §13). It lives in its own short-lived `httpOnly` cookie — never in
@@ -110,6 +117,27 @@ export function ghTokenCookieOptions() {
 /** Read the caller's GitHub access token from its `httpOnly` cookie (null if absent). */
 export async function getGithubToken(): Promise<string | null> {
     return (await cookies()).get(GH_TOKEN_COOKIE)?.value ?? null
+}
+
+// ── active-realm cookie (owner switcher, multiple_realms.md Phase E) ────────────
+
+/** Cookie options for the active-realm hint — `httpOnly`, signed, scoped to the session lifetime. */
+export function realmCookieOptions() {
+    return { httpOnly: true, sameSite: 'lax' as const, path: '/', secure: isSecure(), maxAge: config.sessionTtl }
+}
+
+/** Sign a realm id into a tamper-evident cookie value (still re-validated against the DB on read). */
+export function signRealmToken(realmId: string): string {
+    return signToken({ r: realmId, exp: Math.floor(Date.now() / 1000) + config.sessionTtl })
+}
+
+/** Read + verify the active-realm cookie; returns the realm-id *hint* or null. */
+export async function readActiveRealmCookie(): Promise<string | null> {
+    const token = (await cookies()).get(REALM_COOKIE)?.value
+    const payload = verifyToken<{ r: string; exp: number }>(token)
+    if (!payload) return null
+    if (typeof payload.exp !== 'number' || payload.exp * 1000 < Date.now()) return null
+    return typeof payload.r === 'string' ? payload.r : null
 }
 
 /** Verify a session token and check expiry. */
@@ -246,6 +274,14 @@ export function resolveOnLogin(profile: GithubProfile): AppUser {
             addedAt: new Date().toISOString(),
         }
         userRepo.insert(record)
+        // Grant the new user the global default realm as their assigned operating realm
+        // (multiple_realms.md §F.1). Owners implicitly see all realms regardless of grants
+        // (role wins, mirroring base-domain tier logic); the grant is still useful as their
+        // initial per-user default. Done inline (not via services/realms) to avoid an
+        // auth↔realms import cycle. The default realm exists by signup time (ensureSeed runs
+        // at boot); if it somehow doesn't yet, this is a harmless no-op.
+        const def = realmRepo.getDefault()
+        if (def) userRealmRepo.grant(profile.githubId, def.id, true, record.addedAt)
         return record
     })
 }

@@ -1,10 +1,10 @@
 'use client'
 
 import { useCallback, useState } from 'react'
-import type { Proxy, ProxyLocation, Upstream } from '@/server/domain/routing'
+import type { Proxy, ProxyLocation, TlsMode, Upstream } from '@/server/domain/routing'
 import { RoutingPage, json, useMaintainerData } from './shared'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
-import { CheckField, SelectField, TextField, type SelectOption } from '@/components/fields'
+import { CheckField, SelectField, TextAreaField, TextField, type SelectOption } from '@/components/fields'
 
 // Maintainer routing surface — reverse-proxy vhosts (nginx `server{}` blocks). List
 // the configured proxies, add one (routing to a named upstream pool or an inline
@@ -72,6 +72,13 @@ const LOC_KIND_OPTIONS: SelectOption[] = [
     ...KIND_OPTIONS,
 ]
 
+// TLS termination modes (managed mode, §0/Phase B).
+const TLS_OPTIONS: SelectOption[] = [
+    { value: 'off', label: 'off' },
+    { value: 'auto', label: 'auto' },
+    { value: 'required', label: 'required' },
+]
+
 function describeTarget(p: Proxy): string {
     if (p.upstream) return `→ ${p.upstream}`
     if (p.pass) return `→ ${p.pass}`
@@ -94,6 +101,18 @@ function ProxiesManager({
     const [targetValue, setTargetValue] = useState('')
     const [maxBody, setMaxBody] = useState('')
     const [locations, setLocations] = useState<LocationDraft[]>([])
+    // TLS & security toggles (Phase B).
+    const [tls, setTls] = useState<TlsMode>('off')
+    const [forceSsl, setForceSsl] = useState(false)
+    const [http2, setHttp2] = useState(false)
+    const [hsts, setHsts] = useState(false)
+    const [blockExploits, setBlockExploits] = useState(false)
+    const [websocket, setWebsocket] = useState(false)
+    const [gzip, setGzip] = useState(false)
+    const [cacheEnabled, setCacheEnabled] = useState(false)
+    const [cacheZone, setCacheZone] = useState('')
+    const [cacheValid, setCacheValid] = useState('')
+    const [advanced, setAdvanced] = useState('')
     const [error, setError] = useState<string | null>(null)
     const [busy, setBusy] = useState(false)
     // The proxy awaiting remove confirmation (drives the ConfirmDialog).
@@ -111,6 +130,17 @@ function ProxiesManager({
         setTargetValue('')
         setMaxBody('')
         setLocations([])
+        setTls('off')
+        setForceSsl(false)
+        setHttp2(false)
+        setHsts(false)
+        setBlockExploits(false)
+        setWebsocket(false)
+        setGzip(false)
+        setCacheEnabled(false)
+        setCacheZone('')
+        setCacheValid('')
+        setAdvanced('')
     }
 
     const create = useCallback(async () => {
@@ -127,6 +157,28 @@ function ProxiesManager({
             else payload.pass = targetValue.trim()
         }
         if (maxBody.trim()) payload.client_max_body_size = maxBody.trim()
+
+        // TLS & security. Guard the daemon's rule client-side so the user sees it
+        // before the round-trip (parseProxy enforces the same).
+        const tlsOn = tls !== 'off'
+        if ((forceSsl || http2 || hsts) && !tlsOn) {
+            setError('Enable TLS first to use Force HTTPS, HTTP/2 or HSTS.')
+            return
+        }
+        if (tlsOn) payload.tls = tls
+        if (forceSsl) payload.force_ssl = true
+        if (http2) payload.http2 = true
+        if (hsts) payload.hsts = true
+        if (blockExploits) payload.block_exploits = true
+        if (websocket) payload.websocket = true
+        if (gzip) payload.gzip = true
+        if (cacheEnabled) {
+            const valid = cacheValid.split(',').map((s) => s.trim()).filter(Boolean)
+            payload.cache = { enabled: true }
+            if (valid.length) payload.cache.valid = valid
+            if (cacheZone.trim()) payload.cache.zone_size = cacheZone.trim()
+        }
+        if (advanced.trim()) payload.advanced = advanced
 
         const builtLocs: ProxyLocation[] = []
         for (const l of locations) {
@@ -170,7 +222,27 @@ function ProxiesManager({
         } finally {
             setBusy(false)
         }
-    }, [busy, domain, listen, targetKind, targetValue, maxBody, locations, onChanged])
+    }, [
+        busy,
+        domain,
+        listen,
+        targetKind,
+        targetValue,
+        maxBody,
+        locations,
+        tls,
+        forceSsl,
+        http2,
+        hsts,
+        blockExploits,
+        websocket,
+        gzip,
+        cacheEnabled,
+        cacheZone,
+        cacheValid,
+        advanced,
+        onChanged,
+    ])
 
     const doRemove = useCallback(async () => {
         const proxyDomain = pending
@@ -250,6 +322,7 @@ function ProxiesManager({
                                         <span className="perch-admin-mono">{p.domain}</span>{' '}
                                         <span className="perch-admin-hint">
                                             :{p.listen ?? 80} {describeTarget(p)}
+                                            {p.tls ? ` · TLS ${p.tls}` : ''}
                                         </span>
                                     </span>
                                     <tc-button
@@ -321,6 +394,106 @@ function ProxiesManager({
                         />
                         {targetControl(targetKind, targetValue, setTargetValue)}
                     </div>
+
+                    <span className="perch-admin-field-label">TLS &amp; security</span>
+                    <div className="perch-admin-tier-row">
+                        <SelectField
+                            className="perch-admin-field"
+                            size="sm"
+                            label="TLS"
+                            value={tls}
+                            options={TLS_OPTIONS}
+                            onValue={(v) => {
+                                const mode = v as TlsMode
+                                setTls(mode)
+                                if (mode === 'off') {
+                                    setForceSsl(false)
+                                    setHttp2(false)
+                                    setHsts(false)
+                                }
+                            }}
+                        />
+                        <CheckField
+                            className="perch-routing-check"
+                            inline
+                            label="Force HTTPS"
+                            disabled={tls === 'off'}
+                            checked={forceSsl}
+                            onChecked={setForceSsl}
+                        />
+                        <CheckField
+                            className="perch-routing-check"
+                            inline
+                            label="HTTP/2"
+                            disabled={tls === 'off'}
+                            checked={http2}
+                            onChecked={setHttp2}
+                        />
+                        <CheckField
+                            className="perch-routing-check"
+                            inline
+                            label="HSTS"
+                            disabled={tls === 'off'}
+                            checked={hsts}
+                            onChecked={setHsts}
+                        />
+                        <CheckField
+                            className="perch-routing-check"
+                            inline
+                            label="Block exploits"
+                            checked={blockExploits}
+                            onChecked={setBlockExploits}
+                        />
+                        <CheckField
+                            className="perch-routing-check"
+                            inline
+                            label="WebSocket (all)"
+                            checked={websocket}
+                            onChecked={setWebsocket}
+                        />
+                        <CheckField
+                            className="perch-routing-check"
+                            inline
+                            label="Gzip"
+                            checked={gzip}
+                            onChecked={setGzip}
+                        />
+                        <CheckField
+                            className="perch-routing-check"
+                            inline
+                            label="Cache"
+                            checked={cacheEnabled}
+                            onChecked={setCacheEnabled}
+                        />
+                    </div>
+                    {cacheEnabled && (
+                        <div className="perch-admin-tier-row">
+                            <TextField
+                                className="perch-admin-field"
+                                size="sm"
+                                label="Cache zone size"
+                                placeholder="10m"
+                                value={cacheZone}
+                                onValue={setCacheZone}
+                            />
+                            <TextField
+                                className="perch-admin-field"
+                                size="sm"
+                                label="Cache valid (comma-separated)"
+                                placeholder="200 10m, 404 1m"
+                                value={cacheValid}
+                                onValue={setCacheValid}
+                            />
+                        </div>
+                    )}
+                    <TextAreaField
+                        className="perch-admin-field"
+                        label="Advanced (raw nginx)"
+                        rows={3}
+                        placeholder="add_header X-Frame-Options SAMEORIGIN;"
+                        value={advanced}
+                        onValue={setAdvanced}
+                    />
 
                     <span className="perch-admin-field-label">Locations (optional)</span>
                     {locations.map((l, i) => (

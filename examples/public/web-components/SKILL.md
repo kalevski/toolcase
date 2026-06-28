@@ -15588,7 +15588,7 @@ None. `tc-rich-page-header` is purely presentational.
 | `--bs-rich-page-header-bg` | `var(--tc-surface)` | Header background color. |
 | `--bs-rich-page-header-border-color` | `var(--tc-border)` | Bottom hairline border color. |
 | `--bs-rich-page-header-padding-y` | `1.5rem` | Vertical padding. |
-| `--bs-rich-page-header-padding-x` | `0` | Horizontal padding. |
+| `--bs-rich-page-header-padding-x` | `1.5rem` | Horizontal padding. |
 | `--bs-rich-page-header-gap` | `1rem` | Gap between icon tile and body, and between main and actions. |
 | `--bs-rich-page-header-body-gap` | `0.5rem` | Gap between chips, title, sub, and description. |
 | `--bs-rich-page-header-title-color` | `var(--tc-text)` | Title text color. |

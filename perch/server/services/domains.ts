@@ -25,8 +25,8 @@ import * as baseDomainRepo from '@/server/data/repositories/base-domain-repo'
 import * as userRepo from '@/server/data/repositories/user-repo'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
 import * as nginx from '@/server/infrastructure/nginx'
-import * as nginxpilot from '@/server/infrastructure/nginxpilot'
 import * as deploy from '@/server/services/deploy'
+import * as realms from '@/server/services/realms'
 import { assertCanUseCustomDomain } from '@/server/services/quota'
 import { effectiveIngressIpv4 } from '@/server/services/settings'
 import { slog } from '@/server/infrastructure/server-log'
@@ -63,10 +63,14 @@ export class HostnameError extends Error {
  *      AND custom domains, so a label can't collide with either (§10: one namespace).
  *
  * Throws `HostnameError` on any failure; never performs I/O beyond the repo reads.
+ *
+ * Realm-scoped (multiple_realms.md §D.4): the base domain must be one registered IN
+ * `realmId`, and uniqueness is checked within that realm — two realms are independent
+ * ingresses, so the same hostname may exist in each.
  */
-export function validateLabel(label: string, baseDomain: string): string {
+export function validateLabel(label: string, baseDomain: string, realmId: string): string {
     const base = baseDomain.trim().toLowerCase()
-    if (!baseDomainRepo.list().some((b) => b.domain.toLowerCase() === base)) {
+    if (!baseDomainRepo.listByRealm(realmId).some((b) => b.domain.toLowerCase() === base)) {
         throw new HostnameError(`unknown base domain "${baseDomain}"`, 'unknown_base_domain', 400)
     }
 
@@ -76,7 +80,7 @@ export function validateLabel(label: string, baseDomain: string): string {
     }
 
     const hostname = `${checked.label}.${base}`
-    if (siteRepo.hostnameTaken(hostname)) {
+    if (siteRepo.hostnameTaken(hostname, realmId)) {
         throw new HostnameError(`"${hostname}" is already taken`, 'hostname_taken', 409)
     }
     return hostname
@@ -92,15 +96,18 @@ export function validateLabel(label: string, baseDomain: string): string {
  *
  * This is the strict gate a custom domain passes before DNS verification and before it
  * ever reaches `GET /vhost/{domain}` or a cert request (§16). Throws `HostnameError`.
+ *
+ * Realm-scoped (multiple_realms.md §D.4): the "is this one of our base domains?" check and
+ * the uniqueness check both scope to `realmId`.
  */
-export function validateCustomDomain(domain: string): string {
+export function validateCustomDomain(domain: string, realmId: string): string {
     const checked = checkDomain(domain)
     if (!checked.ok) {
         throw new HostnameError(checked.message, `domain_${checked.reason}`, 400)
     }
     const host = checked.domain
 
-    for (const { domain: base } of baseDomainRepo.list()) {
+    for (const { domain: base } of baseDomainRepo.listByRealm(realmId)) {
         const b = base.toLowerCase()
         if (host === b || host.endsWith(`.${b}`)) {
             throw new HostnameError(
@@ -111,7 +118,7 @@ export function validateCustomDomain(domain: string): string {
         }
     }
 
-    if (siteRepo.hostnameTaken(host)) {
+    if (siteRepo.hostnameTaken(host, realmId)) {
         throw new HostnameError(`"${host}" is already taken`, 'hostname_taken', 409)
     }
     return host
@@ -229,7 +236,8 @@ export async function provisionCustomVhost(site: Site): Promise<Site> {
         )
     }
 
-    const vhostText = await nginxpilot.vhost(site.hostname)
+    // The vhost is rendered by the site's OWN nginxpilot realm (multiple_realms.md §D.4).
+    const vhostText = await realms.clientForSite(site).vhost(site.hostname)
     await nginx.installVhost(site.hostname, vhostText)
     await nginx.obtainCert(site.hostname)
     await nginx.reload()

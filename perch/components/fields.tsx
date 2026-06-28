@@ -16,6 +16,7 @@
 //     bind the inner native `input` event or the `tc-change` CustomEvent through
 //     JSX props, so every wrapper attaches its listener via `useTc`.
 
+import { useMemo } from 'react'
 import { useTc, targetValue, detailValue } from '@/lib/tc'
 
 type FieldSize = 'sm' | 'lg'
@@ -75,6 +76,59 @@ export function TextField({
             max={max}
             step={step}
             inputmode={inputMode}
+            required={required}
+            disabled={disabled}
+            aria-label={ariaLabel}
+            className={className}
+        />
+    )
+}
+
+export interface TextAreaFieldProps {
+    value: string
+    onValue: (value: string) => void
+    label?: string
+    placeholder?: string
+    /** Hint rendered in the reserved message slot below the control. */
+    help?: string
+    rows?: number
+    size?: FieldSize
+    disabled?: boolean
+    required?: boolean
+    ariaLabel?: string
+    className?: string
+}
+
+/**
+ * Labelled multi-line textarea — tc-textarea. Same `input`-event binding as
+ * {@link TextField} (tc-textarea inherits the text-field base), with a `rows` knob.
+ * Used for raw passthrough fields like a proxy's `advanced` nginx block.
+ */
+export function TextAreaField({
+    value,
+    onValue,
+    label,
+    placeholder,
+    help,
+    rows,
+    size,
+    disabled,
+    required,
+    ariaLabel,
+    className,
+}: TextAreaFieldProps) {
+    const ref = useTc<HTMLElement>(undefined, {
+        input: (event) => onValue(targetValue(event)),
+    })
+    return (
+        <tc-textarea
+            ref={ref}
+            value={value}
+            size={size}
+            label={label}
+            placeholder={placeholder}
+            help={help}
+            rows={rows}
             required={required}
             disabled={disabled}
             aria-label={ariaLabel}
@@ -167,6 +221,58 @@ export function CheckField({ checked, onChecked, label, disabled, inline, classN
             disabled={disabled}
             inline={inline}
             label={label}
+            className={className}
+        />
+    )
+}
+
+export interface ColorFieldProps {
+    value: string
+    onValue: (value: string) => void
+    /** Quick-pick swatches (hex strings); the picker's footer still accepts any hex. */
+    colors: string[]
+    label?: string
+    /** Hint rendered in the reserved message slot below the control. */
+    help?: string
+    /** Swatch grid columns (default 8). */
+    columns?: number
+    disabled?: boolean
+    required?: boolean
+    ariaLabel?: string
+    className?: string
+}
+
+/**
+ * Labelled colour picker — tc-color-picker. `colors` is set as an element *property*
+ * (JSX can't pass an array), and a selection (swatch click or a valid hex typed in the
+ * footer) arrives via the `tc-change` `{ value }` CustomEvent — same bridge as the other
+ * wrappers. The emitted value is always a `#rgb`/`#rrggbb` hex.
+ */
+export function ColorField({
+    value,
+    onValue,
+    colors,
+    label,
+    help,
+    columns,
+    disabled,
+    required,
+    ariaLabel,
+    className,
+}: ColorFieldProps) {
+    const ref = useTc<HTMLElement>(useMemo(() => ({ colors }), [colors]), {
+        'tc-change': (event) => onValue(detailValue<string>(event)),
+    })
+    return (
+        <tc-color-picker
+            ref={ref}
+            value={value}
+            label={label}
+            help={help}
+            columns={columns}
+            required={required}
+            disabled={disabled}
+            aria-label={ariaLabel}
             className={className}
         />
     )

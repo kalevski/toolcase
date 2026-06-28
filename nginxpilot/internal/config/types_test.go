@@ -8,10 +8,10 @@ func intPtr(v int) *int { return &v }
 
 func TestSiteKeepReleases(t *testing.T) {
 	tests := []struct {
-		name         string
-		siteKeep     *int
-		defaultKeep  int
-		want         int
+		name        string
+		siteKeep    *int
+		defaultKeep int
+		want        int
 	}{
 		{
 			name:        "per-site value wins over defaults and built-in",

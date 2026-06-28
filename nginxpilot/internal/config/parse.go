@@ -15,14 +15,16 @@ import (
 // DefaultPath is where the daemon looks for its config unless --config is given.
 const DefaultPath = "/etc/nginxpilot/config.yml"
 
-// Fragment is the shape an included file may have: sites:, upstreams: and/or
-// proxies: lists. No globals, no nested include:. It is both what `include:`
-// globs pull in from sites.d/ and what the admin write-API accepts, so the
-// file-drop and REST paths parse identically.
+// Fragment is the shape an included file may have: sites:, upstreams:,
+// proxies:, stream_upstreams: and/or streams: lists. No globals, no nested
+// include:. It is both what `include:` globs pull in from sites.d/ and what the
+// admin write-API accepts, so the file-drop and REST paths parse identically.
 type Fragment struct {
-	Sites     []Site     `yaml:"sites"`
-	Upstreams []Upstream `yaml:"upstreams"`
-	Proxies   []Proxy    `yaml:"proxies"`
+	Sites           []Site           `yaml:"sites"`
+	Upstreams       []Upstream       `yaml:"upstreams"`
+	Proxies         []Proxy          `yaml:"proxies"`
+	StreamUpstreams []StreamUpstream `yaml:"stream_upstreams"`
+	Streams         []Stream         `yaml:"streams"`
 }
 
 // LoadResult carries the parsed config plus non-fatal warnings (e.g. an
@@ -57,6 +59,12 @@ func Load(path string) (*LoadResult, error) {
 	for i := range cfg.Proxies {
 		cfg.Proxies[i].File = abs
 	}
+	for i := range cfg.StreamUpstreams {
+		cfg.StreamUpstreams[i].File = abs
+	}
+	for i := range cfg.Streams {
+		cfg.Streams[i].File = abs
+	}
 
 	applyDefaults(&cfg)
 
@@ -82,6 +90,33 @@ func applyDefaults(cfg *Config) {
 	}
 	if cfg.Defaults.KeepReleases == 0 {
 		cfg.Defaults.KeepReleases = 3
+	}
+	applyNginxDefaults(cfg)
+}
+
+// applyNginxDefaults fills managed-mode paths and commands when nginx.manage is
+// on and the field was left unset. Inert when manage is false.
+func applyNginxDefaults(cfg *Config) {
+	if !cfg.Nginx.Manage {
+		return
+	}
+	if cfg.Nginx.ConfDir == "" {
+		cfg.Nginx.ConfDir = DefaultConfDir
+	}
+	if cfg.Nginx.StreamConfDir == "" {
+		cfg.Nginx.StreamConfDir = DefaultStreamConfDir
+	}
+	if cfg.Nginx.ManagedIncludeDir == "" {
+		cfg.Nginx.ManagedIncludeDir = DefaultManagedIncludeDir
+	}
+	if len(cfg.Nginx.TestCmd) == 0 {
+		cfg.Nginx.TestCmd = []string{"nginx", "-t"}
+	}
+	if len(cfg.Nginx.ReloadCmd) == 0 {
+		cfg.Nginx.ReloadCmd = []string{"nginx", "-s", "reload"}
+	}
+	if cfg.Tls.WatchInterval == 0 {
+		cfg.Tls.WatchInterval = Duration(DefaultWatchInterval * 1e9)
 	}
 }
 
@@ -115,6 +150,8 @@ func loadIncludes(cfg *Config, res *LoadResult) error {
 			cfg.Sites = append(cfg.Sites, frag.Sites...)
 			cfg.Upstreams = append(cfg.Upstreams, frag.Upstreams...)
 			cfg.Proxies = append(cfg.Proxies, frag.Proxies...)
+			cfg.StreamUpstreams = append(cfg.StreamUpstreams, frag.StreamUpstreams...)
+			cfg.Streams = append(cfg.Streams, frag.Streams...)
 		}
 	}
 	return nil
@@ -138,6 +175,12 @@ func ParseFragment(raw []byte, file string) (*Fragment, error) {
 	}
 	for i := range frag.Proxies {
 		frag.Proxies[i].File = file
+	}
+	for i := range frag.StreamUpstreams {
+		frag.StreamUpstreams[i].File = file
+	}
+	for i := range frag.Streams {
+		frag.Streams[i].File = file
 	}
 	return &frag, nil
 }

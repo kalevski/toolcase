@@ -84,6 +84,20 @@ export const config = {
     authSecret: requiredSecret('PERCH_AUTH_SECRET', 16),
     sessionTtl: num('PERCH_SESSION_TTL', 86400),
 
+    // ── realm secret encryption (multiple_realms.md §B.1, §10.5) ──
+    // A realm's nginxpilot admin token is encrypted at rest with AES-256-GCM
+    // (`server/infrastructure/cipher.ts`). The key comes from a dedicated
+    // `PERCH_REALM_KEY` (recommended — any string; it's hashed to 32 bytes) when set,
+    // otherwise it is HKDF-derived from `PERCH_AUTH_SECRET` so an existing deployment
+    // needs no new env. `PERCH_REALM_KEY_PREV` (optional) keeps a rotated-out key in the
+    // ring so ciphertext sealed with the old key still decrypts after a rotation.
+    realmKey: optional('PERCH_REALM_KEY', ''),
+    realmKeyPrev: optional('PERCH_REALM_KEY_PREV', ''),
+    // Optional SSRF allowlist for realm admin URLs (host globs, comma-separated). Empty
+    // means owner-only registration is the sole control (the owner can already point the
+    // single env instance anywhere today). See `services/realms.ts` createRealm (§9).
+    realmUrlAllowlist: csv('PERCH_REALM_URL_ALLOWLIST'),
+
     // ── optional allowlist / org gate (§7 — off by default for a public free service) ──
     allowedLogins: csv('PERCH_ALLOWED_LOGINS'),
     allowedOrg: optional('PERCH_ALLOWED_ORG', ''),

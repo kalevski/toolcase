@@ -53,13 +53,27 @@ type Config struct {
 	Include  []string `yaml:"include"`
 	Sites    []Site   `yaml:"sites"`
 
-	// Upstreams and Proxies are config-only entities: nginx upstream{} pools
-	// and reverse-proxy server{} blocks. The daemon never syncs or serves
-	// them — they exist purely so `print-vhost` / the admin /vhost endpoint
-	// can generate nginx configuration to paste and adapt (the daemon stays
-	// out of the request path and never writes nginx config).
+	// Nginx and Tls configure the opt-in managed mode (nginx.manage: true):
+	// nginxpilot writes the live nginx config, validates with `nginx -t`,
+	// quarantines bad resources, and reloads nginx. Default (manage: false)
+	// keeps today's generate-only behavior — print-vhost + manual paste.
+	Nginx Nginx `yaml:"nginx"`
+	Tls   Tls   `yaml:"tls"`
+
+	// Upstreams and Proxies are config-only entities in generate-only mode:
+	// nginx upstream{} pools and reverse-proxy server{} blocks. In managed
+	// mode nginxpilot also writes and reloads them as live nginx config. They
+	// exist so `print-vhost` / the admin /vhost endpoint can generate nginx
+	// configuration to paste and adapt.
 	Upstreams []Upstream `yaml:"upstreams"`
 	Proxies   []Proxy    `yaml:"proxies"`
+
+	// StreamUpstreams and Streams are stream-context (L4 TCP/UDP) resources.
+	// nginx `stream {}` is a different top-level context than `http {}`, so
+	// these render into a separate stream_conf_dir and only take effect in
+	// managed mode (with the stream include wired into nginx.conf).
+	StreamUpstreams []StreamUpstream `yaml:"stream_upstreams"`
+	Streams         []Stream         `yaml:"streams"`
 
 	// Path is the main config file path the config was loaded from.
 	Path string `yaml:"-"`
@@ -110,6 +124,17 @@ type Proxy struct {
 	ReadTimeout       Duration `yaml:"read_timeout" json:"read_timeout,omitempty"`
 	SendTimeout       Duration `yaml:"send_timeout" json:"send_timeout,omitempty"`
 	ClientMaxBodySize ByteSize `yaml:"client_max_body_size" json:"client_max_body_size,omitempty"`
+
+	// WebOptions are the per-host HTTP toggles (TLS, force_ssl, http2, hsts,
+	// block_exploits, gzip, advanced) shared with Site, inlined into the YAML.
+	WebOptions `yaml:",inline"`
+
+	// Websocket applies the Upgrade/Connection/HTTP1.1 block to every location
+	// (not just per-location). A per-location websocket:true still works too.
+	Websocket bool `yaml:"websocket" json:"websocket,omitempty"`
+
+	// Cache configures an http proxy cache (proxy_cache_path + proxy_cache).
+	Cache Cache `yaml:"cache" json:"cache,omitempty"`
 
 	// File records which config file declared this proxy (provenance). Never
 	// serialized over the admin API.
@@ -168,6 +193,11 @@ type Site struct {
 	Domain  string   `yaml:"domain" json:"domain"`
 	Source  Source   `yaml:"source" json:"source"`
 	Exclude []string `yaml:"exclude" json:"exclude,omitempty"`
+
+	// WebOptions are the per-host HTTP toggles (TLS, force_ssl, http2, hsts,
+	// block_exploits, gzip, advanced), inlined into the YAML. Meaningful for a
+	// static site served by nginx in managed mode (and emitted by print-vhost).
+	WebOptions `yaml:",inline"`
 
 	// File records which config file declared this site (provenance for
 	// duplicate-domain errors and logs). Never serialized over the admin API.

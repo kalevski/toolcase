@@ -18,6 +18,7 @@
         "node",
         "taskforge",
         "perch",
+        "wharf",
         "examples"
     ],
     "devDependencies": {

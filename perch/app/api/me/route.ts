@@ -6,6 +6,7 @@
 import { NextResponse } from 'next/server'
 import { authorize } from '@/server/services/auth'
 import { resolveLimits, resolvePlan } from '@/server/services/plan'
+import * as realms from '@/server/services/realms'
 import * as userRepo from '@/server/data/repositories/user-repo'
 import * as siteRepo from '@/server/data/repositories/site-repo'
 import { summarizeUsage } from '@/server/domain/usage'
@@ -25,6 +26,10 @@ export async function GET() {
     if (!user) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
 
     const plan = resolvePlan(user.login)
+    // Active realm + the switch set (multiple_realms.md §E.4). The owner gets the full realm
+    // list (the switcher lists them); a non-owner never receives the others (they can't switch).
+    const canSwitchRealms = realms.canSwitchRealms(authz.role)
+    const activeRealm = await realms.resolveActiveRealm(user.githubId, authz.role)
     const body: MeResponse = {
         githubId: user.githubId,
         login: user.login,
@@ -35,6 +40,9 @@ export async function GET() {
         level: accountLevel(authz.role, plan),
         limits: resolveLimits(user.login),
         usage: summarizeUsage(siteRepo.listByOwner(user.githubId)),
+        activeRealm,
+        canSwitchRealms,
+        ...(canSwitchRealms ? { realms: realms.realmsVisibleTo(user.githubId, authz.role) } : {}),
     }
     return NextResponse.json(body)
 }

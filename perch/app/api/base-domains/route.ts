@@ -10,6 +10,7 @@
 import { NextResponse } from 'next/server'
 import { authorize } from '@/server/services/auth'
 import * as admin from '@/server/services/admin'
+import * as realms from '@/server/services/realms'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -18,5 +19,7 @@ export async function GET() {
     const authz = await authorize('standard')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
-    return NextResponse.json(admin.listBaseDomainsFor(authz.session.login))
+    // Scope the wizard's base-domain pool to the caller's active/assigned realm (§E.2).
+    const active = await realms.resolveActiveRealm(authz.session.sub, authz.role)
+    return NextResponse.json(admin.listBaseDomainsFor(authz.session.login, active.id))
 }

@@ -172,6 +172,83 @@ const MIGRATIONS: string[] = [
         updated_at TEXT NOT NULL
     );
     `,
+    // v5 — per-base-domain subdomain TLS policy (§0/Phase D). One wildcard cert per base
+    // domain covers every `<label>.<base>` subdomain, so TLS is decided once here, never
+    // per subdomain. `auto` degrades to HTTP when the cert isn't issued yet (so a missing
+    // cert never takes subdomains down); existing rows default to `auto`. Inert unless
+    // nginxpilot runs in managed mode.
+    `
+    ALTER TABLE base_domain ADD COLUMN tls TEXT NOT NULL DEFAULT 'auto';  -- off | auto
+    `,
+    // v6 — realms: registered nginxpilot instances (owner-managed, multiple_realms.md §2.1).
+    // Each realm is one nginxpilot the control plane can drive. `token_enc` is the
+    // AES-256-GCM ciphertext of the bearer token (NULL = unauthenticated instance); the
+    // plaintext token never leaves the server. The partial unique index enforces "exactly
+    // one default realm" at the DB layer — setting a new default is a two-step tx.
+    `
+    CREATE TABLE realm (
+        id          TEXT PRIMARY KEY,         -- server-generated short id
+        name        TEXT NOT NULL,            -- human label ("prod-eu", "lab")
+        admin_url   TEXT NOT NULL,            -- https://nginxpilot.internal:9090 (normalized, no trailing /)
+        token_enc   TEXT,                     -- AES-256-GCM ciphertext of the bearer token; NULL = unauthenticated
+        is_default  INTEGER NOT NULL DEFAULT 0,
+        created_at  TEXT NOT NULL
+    );
+    CREATE UNIQUE INDEX idx_realm_one_default ON realm(is_default) WHERE is_default = 1;
+    `,
+    // v7 — per-user realm access grants (M:N, multiple_realms.md §2.1). A row = "this user
+    // may use this realm". `is_default` marks the user's own operating realm among their
+    // grants (owner-managed; non-owners never switch, §0.6). Cascades with the user/realm.
+    `
+    CREATE TABLE user_realm (
+        github_id  INTEGER NOT NULL REFERENCES app_user(github_id) ON DELETE CASCADE,
+        realm_id   TEXT    NOT NULL REFERENCES realm(id)           ON DELETE CASCADE,
+        is_default INTEGER NOT NULL DEFAULT 0,
+        granted_at TEXT    NOT NULL,
+        PRIMARY KEY (github_id, realm_id)
+    );
+    `,
+    // v8 — sites belong to a realm (the instance they deploy to, multiple_realms.md §2.1,
+    // §10.2). Hostname uniqueness becomes PER-REALM: two nginx ingresses are independent,
+    // so the same hostname can legitimately exist in each. SQLite can't drop a column-level
+    // UNIQUE in place, so rebuild the table: add `realm_id`, swap the global UNIQUE(hostname)
+    // for UNIQUE(realm_id, hostname). `realm_id` is left NULL here and backfilled to the
+    // seed default realm at boot (`services/realms.ts` ensureSeed), after which app code
+    // treats it as required. Nothing references `site` by FK, so the rebuild is safe.
+    `
+    CREATE TABLE site_new (
+        id          TEXT PRIMARY KEY,
+        owner_id    INTEGER NOT NULL,
+        repo_owner  TEXT NOT NULL,
+        repo_name   TEXT NOT NULL,
+        branch      TEXT NOT NULL,
+        subdir      TEXT,
+        hostname    TEXT NOT NULL,
+        host_kind   TEXT NOT NULL,
+        status      TEXT NOT NULL,
+        bytes       INTEGER,
+        last_ref    TEXT,
+        last_error  TEXT,
+        realm_id    TEXT REFERENCES realm(id),
+        created_at  TEXT NOT NULL,
+        updated_at  TEXT NOT NULL
+    );
+    INSERT INTO site_new (id, owner_id, repo_owner, repo_name, branch, subdir, hostname,
+                          host_kind, status, bytes, last_ref, last_error, realm_id, created_at, updated_at)
+        SELECT id, owner_id, repo_owner, repo_name, branch, subdir, hostname,
+               host_kind, status, bytes, last_ref, last_error, NULL, created_at, updated_at
+        FROM site;
+    DROP TABLE site;
+    ALTER TABLE site_new RENAME TO site;
+    CREATE INDEX idx_site_owner ON site(owner_id);
+    CREATE UNIQUE INDEX idx_site_realm_hostname ON site(realm_id, hostname);
+    `,
+    // v9 — base-domain pools belong to a realm (multiple_realms.md §2.1, §10.4): a
+    // wildcard is served by exactly one instance. Nullable to survive the ALTER; the seed
+    // backfill assigns the default realm at boot, after which app code treats it as set.
+    `
+    ALTER TABLE base_domain ADD COLUMN realm_id TEXT REFERENCES realm(id);
+    `,
 ]
 
 function migrate(db: DatabaseSync): void {

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { AdminPage, json, useOwnerData } from './shared'
-import { TextField, SelectField, type SelectOption } from '@/components/fields'
+import { TextField, SelectField, ColorField, type SelectOption } from '@/components/fields'
 import { useToast } from '@/components/Toast'
 import { useBranding } from '@/lib/branding-context'
 import { THEME_NAMES, THEME_LABEL, type SiteSettings } from '@/server/domain/settings'
@@ -14,6 +14,14 @@ import { THEME_NAMES, THEME_LABEL, type SiteSettings } from '@/server/domain/set
 // re-pulls the public branding so the theme + brand update live, and toasts.
 
 const THEME_OPTIONS: SelectOption[] = THEME_NAMES.map((t) => ({ value: t, label: THEME_LABEL[t] }))
+
+// Quick-pick brand swatches (a spread of hues; the default #0ea5e9 leads). The picker's
+// footer hex input still accepts any #rgb/#rrggbb, so this is convenience, not a limit.
+const BRAND_SWATCHES = [
+    '#0ea5e9', '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#ec4899', '#f43f5e',
+    '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16', '#22c55e', '#10b981', '#14b8a6',
+    '#06b6d4', '#64748b', '#475569', '#111827',
+]
 
 export function AdminSettings() {
     const fetcher = useCallback(async (): Promise<SiteSettings | null> => {
@@ -125,12 +133,12 @@ function SettingsForm({ settings, onSaved }: { settings: SiteSettings; onSaved: 
                         help="One line under the brand on the login screen."
                         disabled={busy}
                     />
-                    <TextField
+                    <ColorField
                         label="Brand colour"
                         value={brandColor}
                         onValue={setBrandColor}
-                        placeholder="#0ea5e9"
-                        help="Hex colour for the brand dot / login logo (e.g. #0ea5e9)."
+                        colors={BRAND_SWATCHES}
+                        help="Brand dot / login logo colour. Pick a swatch or enter a hex (#rgb or #rrggbb)."
                         disabled={busy}
                     />
                 </div>

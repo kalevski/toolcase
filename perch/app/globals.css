@@ -242,9 +242,10 @@ body {
 
 /* ── Site dashboard (components/SiteDashboard.tsx, §9 §11 §14, task 734) ───────── */
 
-/* The sites view is wider than the single-column create flow. */
+/* The sites view is wider than the single-column create flow. Matches the shared
+   app width (.perch-admin / .perch-plans, 72rem) so / lines up with every other page. */
 .perch-home--wide {
-    max-width: 64rem;
+    max-width: 72rem;
 }
 
 .perch-site-list {
@@ -761,6 +762,88 @@ body {
     text-transform: none;
     letter-spacing: normal;
     font-weight: 400;
+}
+
+/* Per-row controls (base domains + realms) — buttons/selects aligned at the row's end. */
+.perch-admin-domain-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* Realm registry rows (multiple_realms.md §C) — column so the inline token-rotate editor
+   drops below the row, mirroring the Users roster layout. */
+.perch-admin-realm {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--tc-surface-muted);
+}
+
+.perch-admin-realm:last-child {
+    border-bottom: none;
+}
+
+.perch-admin-realm-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.perch-admin-realm-id {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.perch-admin-realm-name {
+    font-weight: 600;
+}
+
+/* Realm health dot — a small circular status light fed by the live /test check. The dot is
+   genuinely circular, so border-radius: 50% is allowed (styleguide carve-out). */
+.perch-realm-dot {
+    display: inline-block;
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: 50%;
+    flex: 0 0 auto;
+    background: var(--tc-text-muted);
+}
+
+.perch-realm-dot--ok {
+    background: var(--tc-success, #16a34a);
+}
+
+.perch-realm-dot--warn {
+    background: var(--tc-warning, #d97706);
+}
+
+.perch-realm-dot--down {
+    background: var(--tc-danger, #dc2626);
+}
+
+.perch-realm-dot--unknown {
+    background: var(--tc-text-muted);
+}
+
+/* Per-user realm grant checkboxes (multiple_realms.md §F.2). */
+.perch-admin-realm-grants {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Owner realm switcher in the sidebar panel (multiple_realms.md §E.3). */
+.perch-realm-switcher {
+    padding: 0.5rem 0.75rem 0;
 }
 
 /* Plan-tier editor rows. */

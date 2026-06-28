@@ -23,6 +23,7 @@ import * as planTierRepo from '@/server/data/repositories/plan-tier-repo'
 import * as siteRepo from '@/server/data/repositories/site-repo'
 import * as userRepo from '@/server/data/repositories/user-repo'
 import * as userLimitRepo from '@/server/data/repositories/user-limit-repo'
+import * as userRealmRepo from '@/server/data/repositories/user-realm-repo'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
 import * as deploy from '@/server/services/deploy'
 import { checkBaseDomain, isAssignableRole, parsePlanTiers, parseUserLimits } from '@/server/domain/admin'
@@ -33,12 +34,14 @@ import { slog } from '@/server/infrastructure/server-log'
 import {
     accountLevel,
     isBaseDomainTier,
+    isBaseDomainTls,
     visibleBaseDomainTiers,
     type AdminUserRow,
     type AppUser,
     type AuditEntry,
     type BaseDomain,
     type BaseDomainTier,
+    type BaseDomainTls,
     type PlanTier,
     type Role,
     type Site,
@@ -80,33 +83,40 @@ function audit(actor: AdminActor, action: string, opts: { site?: string; detail?
     })
 }
 
-// ── base domains (the subdomain pool, §10) ─────────────────────────────────────
+// ── base domains (the subdomain pool, §10; per-realm, multiple_realms.md §E.2) ──
 
-/** Every registered base domain, oldest first — the owner sees the whole pool. */
-export function listBaseDomains(): BaseDomain[] {
-    return baseDomainRepo.list()
+/** The base domains served by one realm's wildcard, oldest first — the owner's pool view. */
+export function listBaseDomains(realmId: string): BaseDomain[] {
+    return baseDomainRepo.listByRealm(realmId)
 }
 
 /**
- * The base domains a given user may attach a subdomain under, filtered by the
- * tier-visibility rules (§10): a free-plan user sees only `free` domains, a paid
- * (sponsored) user sees `free` + `paid`, and an instance operator (`maintainer`/
- * `owner`) sees every tier including `staff`. Backs the standard, non-owner
- * `GET /api/base-domains` projection the create-site wizard reads. Role is read
- * live from the repo (authoritative); the plan is computed from the sponsorship.
+ * The base domains a given user may attach a subdomain under, within `realmId` (the caller's
+ * active/assigned realm, multiple_realms.md §E.2), filtered by the tier-visibility rules
+ * (§10): a free-plan user sees only `free` domains, a paid (sponsored) user sees `free` +
+ * `paid`, and an instance operator (`maintainer`/`owner`) sees every tier including `staff`.
+ * Backs the standard, non-owner `GET /api/base-domains` projection the create-site wizard
+ * reads. Role is read live (authoritative); the plan is computed from the sponsorship.
  */
-export function listBaseDomainsFor(login: string): BaseDomain[] {
+export function listBaseDomainsFor(login: string, realmId: string): BaseDomain[] {
     const role: Role = userRepo.getByLogin(login)?.role ?? 'guest'
     const allowed = new Set(visibleBaseDomainTiers(role, resolvePlan(login)))
-    return baseDomainRepo.list().filter((b) => allowed.has(b.tier))
+    return baseDomainRepo.listByRealm(realmId).filter((b) => allowed.has(b.tier))
 }
 
 /**
- * Register a base domain (`POST /api/admin/base-domains`): validate the FQDN shape
- * and the audience `tier`, reject a duplicate (`409`), persist it, and audit. `tier`
- * defaults to `free` when omitted. Returns the new row.
+ * Register a base domain (`POST /api/admin/base-domains`): validate the FQDN shape, the
+ * audience `tier`, and the subdomain TLS policy, reject a duplicate (`409`), persist it,
+ * and audit. `tier` defaults to `free`, `tls` to `auto` (§0/Phase D) when omitted.
+ * Returns the new row.
  */
-export function addBaseDomain(actor: AdminActor, raw: unknown, rawTier: unknown = 'free'): BaseDomain {
+export function addBaseDomain(
+    actor: AdminActor,
+    raw: unknown,
+    rawTier: unknown = 'free',
+    rawTls: unknown = 'auto',
+    realmId: string,
+): BaseDomain {
     if (typeof raw !== 'string') throw new AdminError('"domain" is required', 'invalid_request', 400)
     const checked = checkBaseDomain(raw)
     if (!checked.ok) throw new AdminError(checked.message, `domain_${checked.reason}`, 400)
@@ -117,15 +127,48 @@ export function addBaseDomain(actor: AdminActor, raw: unknown, rawTier: unknown 
         throw new AdminError('tier must be one of: free, paid, staff', 'invalid_tier', 400)
     }
 
+    const tls: BaseDomainTls = rawTls === undefined || rawTls === null ? 'auto' : (rawTls as BaseDomainTls)
+    if (!isBaseDomainTls(tls)) {
+        throw new AdminError('tls must be one of: off, auto', 'invalid_tls', 400)
+    }
+
+    // `domain` is the global PK, so a base domain belongs to exactly one realm — reject a
+    // re-register anywhere, not just in this realm (multiple_realms.md §10.4).
     if (baseDomainRepo.list().some((b) => b.domain.toLowerCase() === domain)) {
         throw new AdminError(`base domain "${domain}" is already registered`, 'base_domain_exists', 409)
     }
 
     const createdAt = new Date().toISOString()
-    baseDomainRepo.add(domain, tier, createdAt)
-    audit(actor, 'admin.base_domain.add', { detail: `${domain} (${tier})` })
-    slog('info', 'admin', 'base domain added', { domain, tier, by: actor.login })
-    return { domain, tier, createdAt }
+    baseDomainRepo.add(domain, tier, tls, realmId, createdAt)
+    audit(actor, 'admin.base_domain.add', { detail: `${domain} (${tier}, tls=${tls}, realm=${realmId})` })
+    slog('info', 'admin', 'base domain added', { domain, tier, tls, realmId, by: actor.login })
+    return { domain, tier, tls, realmId, createdAt }
+}
+
+/**
+ * Update an existing base domain's subdomain TLS policy (`PATCH /api/admin/base-domains`,
+ * §0/Phase D): validate the FQDN + the `tls` value, require the domain to exist (`404`),
+ * persist, and audit. Returns the updated row. Effective subdomain fragments pick this up
+ * on their next deploy.
+ */
+export function setBaseDomainTls(actor: AdminActor, raw: unknown, rawTls: unknown): BaseDomain {
+    if (typeof raw !== 'string') throw new AdminError('"domain" is required', 'invalid_request', 400)
+    const checked = checkBaseDomain(raw)
+    if (!checked.ok) throw new AdminError(checked.message, `domain_${checked.reason}`, 400)
+    const domain = checked.domain
+
+    if (!isBaseDomainTls(rawTls)) {
+        throw new AdminError('tls must be one of: off, auto', 'invalid_tls', 400)
+    }
+    const tls: BaseDomainTls = rawTls
+
+    const existing = baseDomainRepo.list().find((b) => b.domain.toLowerCase() === domain)
+    if (!existing) throw new AdminError(`base domain "${domain}" is not registered`, 'base_domain_not_found', 404)
+
+    baseDomainRepo.setTls(domain, tls)
+    audit(actor, 'admin.base_domain.tls', { detail: `${domain}: tls=${tls}` })
+    slog('info', 'admin', 'base domain tls set', { domain, tls, by: actor.login })
+    return { ...existing, tls }
 }
 
 /**
@@ -198,6 +241,7 @@ function enrichUser(user: AppUser, override?: UserLimitOverride | null): AdminUs
         usage: summarizeUsage(siteRepo.listByOwner(user.githubId)),
         limits: resolveLimits(user.login),
         customLimits: custom,
+        realmGrants: userRealmRepo.listForUser(user.githubId),
     }
 }
 

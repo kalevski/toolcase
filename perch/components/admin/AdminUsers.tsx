@@ -7,13 +7,20 @@ import {
     type AccountLevel,
     type AdminUserRow,
     type PlanLimits,
+    type Realm,
     type Role,
     type UserLimitOverride,
 } from '@/server/domain/types'
 import { formatBytes } from '@/server/domain/site-dashboard'
 import { AdminPage, json, useOwnerData } from './shared'
 import { useToast } from '@/components/Toast'
-import { SelectField, TextField, type SelectOption } from '@/components/fields'
+import { CheckField, SelectField, TextField, type SelectOption } from '@/components/fields'
+
+/** The roster payload: users + the full realm set (for the per-user realm grant editor). */
+interface RosterData {
+    users: AdminUserRow[]
+    realms: Realm[]
+}
 
 // Owner-only user roster + management (§6/§13). Every signed-in account, enriched
 // with its unified level (owner/maintainer/paid/free), effective plan, current
@@ -50,11 +57,21 @@ const fmtCount = (n: number) => (isFinite(n) ? String(n) : '∞')
 const fmtBytes = (n: number) => (isFinite(n) ? formatBytes(n) : '∞')
 
 export function AdminUsers() {
-    const fetcher = useCallback(async (): Promise<AdminUserRow[] | null> => {
+    const fetcher = useCallback(async (): Promise<RosterData | null> => {
         try {
-            const rows = await fetch('/api/admin/users', { cache: 'no-store' }).then((r) => json<AdminUserRow[]>(r))
+            // Fetch the roster and the realm set together — the per-user realm grant editor
+            // needs the full realm list to offer (multiple_realms.md §F.2).
+            const [rows, realms] = await Promise.all([
+                fetch('/api/admin/users', { cache: 'no-store' }).then((r) =>
+                    json<AdminUserRow[]>(r),
+                ),
+                fetch('/api/admin/realms', { cache: 'no-store' }).then((r) => json<Realm[]>(r)),
+            ])
             // Infinity limits arrive as null over JSON — revive so unlimited shows as ∞.
-            return rows.map((row) => ({ ...row, limits: reviveLimits(row.limits) }))
+            return {
+                users: rows.map((row) => ({ ...row, limits: reviveLimits(row.limits) })),
+                realms,
+            }
         } catch {
             return null
         }
@@ -64,23 +81,41 @@ export function AdminUsers() {
     return (
         <AdminPage
             title="Users"
-            subtitle="Everyone with a Perch account — their level, usage, and limits. Grant roles or override quotas here. Owner-only."
+            subtitle="Everyone with a Perch account — their level, usage, and limits. Grant roles, realms, or override quotas here. Owner-only."
             icon="users"
             iconColor="violet"
             state={state}
             onRetry={() => void reload()}
         >
-            {(users) => <UsersRoster users={users} onChanged={() => void reload()} />}
+            {(data) => (
+                <UsersRoster
+                    users={data.users}
+                    realms={data.realms}
+                    onChanged={() => void reload()}
+                />
+            )}
         </AdminPage>
     )
 }
 
-function UsersRoster({ users, onChanged }: { users: AdminUserRow[]; onChanged: () => void }) {
+function UsersRoster({
+    users,
+    realms,
+    onChanged,
+}: {
+    users: AdminUserRow[]
+    realms: Realm[]
+    onChanged: () => void
+}) {
     const toast = useToast()
     const [error, setError] = useState<string | null>(null)
     const [busyId, setBusyId] = useState<number | null>(null)
     const [editingId, setEditingId] = useState<number | null>(null)
+    const [editingRealmsId, setEditingRealmsId] = useState<number | null>(null)
     const [query, setQuery] = useState('')
+    // Multi-realm deployments expose a per-user realm grant editor; a single-realm
+    // instance hides it (the one realm is implicit — zero change for that common case).
+    const multiRealm = realms.length > 1
     const [levelFilter, setLevelFilter] = useState<'all' | AccountLevel>('all')
 
     const changeRole = useCallback(
@@ -119,7 +154,9 @@ function UsersRoster({ users, onChanged }: { users: AdminUserRow[]; onChanged: (
         return users.filter((row) => {
             if (levelFilter !== 'all' && row.level !== levelFilter) return false
             if (!q) return true
-            return row.user.login.toLowerCase().includes(q) || row.user.name.toLowerCase().includes(q)
+            return (
+                row.user.login.toLowerCase().includes(q) || row.user.name.toLowerCase().includes(q)
+            )
         })
     }, [users, query, levelFilter])
 
@@ -127,9 +164,9 @@ function UsersRoster({ users, onChanged }: { users: AdminUserRow[]; onChanged: (
         <tc-section-card title="Users" icon="users">
             <div className="perch-admin-section">
                 <p className="perch-home-lead perch-admin-hint">
-                    {users.length} account{users.length === 1 ? '' : 's'}. Maintainers get the Routing surface and skip
-                    hosting quotas; owners additionally get this Admin surface. Override a user’s quotas with{' '}
-                    <strong>Limits</strong>.
+                    {users.length} account{users.length === 1 ? '' : 's'}. Maintainers get the
+                    Routing surface and skip hosting quotas; owners additionally get this Admin
+                    surface. Override a user’s quotas with <strong>Limits</strong>.
                 </p>
                 {error && <tc-banner variant="danger">{error}</tc-banner>}
 
@@ -171,7 +208,9 @@ function UsersRoster({ users, onChanged }: { users: AdminUserRow[]; onChanged: (
                                             <tc-badge variant={LEVEL_VARIANT[row.level]}>
                                                 {ACCOUNT_LEVEL_LABEL[row.level]}
                                             </tc-badge>
-                                            {row.plan !== 'free' && <tc-badge variant="light">{row.plan}</tc-badge>}
+                                            {row.plan !== 'free' && (
+                                                <tc-badge variant="light">{row.plan}</tc-badge>
+                                            )}
                                             {row.customLimits && (
                                                 <tc-badge variant="warning">custom limits</tc-badge>
                                             )}
@@ -181,7 +220,11 @@ function UsersRoster({ users, onChanged }: { users: AdminUserRow[]; onChanged: (
                                         <SelectField
                                             className="perch-admin-role-select"
                                             size="sm"
-                                            value={ROLES.includes(row.user.role) ? row.user.role : 'standard'}
+                                            value={
+                                                ROLES.includes(row.user.role)
+                                                    ? row.user.role
+                                                    : 'standard'
+                                            }
                                             options={ROLE_OPTIONS}
                                             disabled={busyId === row.user.githubId}
                                             onValue={(v) => void changeRole(row, v as Role)}
@@ -193,12 +236,34 @@ function UsersRoster({ users, onChanged }: { users: AdminUserRow[]; onChanged: (
                                             aria-expanded={editingId === row.user.githubId}
                                             onClick={() =>
                                                 setEditingId((id) =>
-                                                    id === row.user.githubId ? null : row.user.githubId,
+                                                    id === row.user.githubId
+                                                        ? null
+                                                        : row.user.githubId,
                                                 )
                                             }
                                         >
                                             {editingId === row.user.githubId ? 'Close' : 'Limits'}
                                         </button>
+                                        {multiRealm && (
+                                            <button
+                                                type="button"
+                                                className="perch-admin-linkbtn"
+                                                aria-expanded={
+                                                    editingRealmsId === row.user.githubId
+                                                }
+                                                onClick={() =>
+                                                    setEditingRealmsId((id) =>
+                                                        id === row.user.githubId
+                                                            ? null
+                                                            : row.user.githubId,
+                                                    )
+                                                }
+                                            >
+                                                {editingRealmsId === row.user.githubId
+                                                    ? 'Close'
+                                                    : 'Realms'}
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
 
@@ -212,20 +277,24 @@ function UsersRoster({ users, onChanged }: { users: AdminUserRow[]; onChanged: (
                                     <span>
                                         <dt>Storage</dt>{' '}
                                         <dd>
-                                            {formatBytes(row.usage.totalBytes)} / {fmtBytes(row.limits.maxBytesTotal)}
+                                            {formatBytes(row.usage.totalBytes)} /{' '}
+                                            {fmtBytes(row.limits.maxBytesTotal)}
                                         </dd>
                                     </span>
                                     <span>
-                                        <dt>Per-site cap</dt> <dd>{fmtBytes(row.limits.maxBytesPerSite)}</dd>
+                                        <dt>Per-site cap</dt>{' '}
+                                        <dd>{fmtBytes(row.limits.maxBytesPerSite)}</dd>
                                     </span>
                                     <span>
-                                        <dt>Custom domains</dt> <dd>{fmtCount(row.limits.customDomains)}</dd>
+                                        <dt>Custom domains</dt>{' '}
+                                        <dd>{fmtCount(row.limits.customDomains)}</dd>
                                     </span>
                                     <span>
                                         <dt>Poll floor</dt> <dd>{row.limits.minIntervalSec}s</dd>
                                     </span>
                                     <span>
-                                        <dt>Private repos</dt> <dd>{row.limits.privateRepos ? 'yes' : 'no'}</dd>
+                                        <dt>Private repos</dt>{' '}
+                                        <dd>{row.limits.privateRepos ? 'yes' : 'no'}</dd>
                                     </span>
                                 </dl>
 
@@ -234,6 +303,17 @@ function UsersRoster({ users, onChanged }: { users: AdminUserRow[]; onChanged: (
                                         row={row}
                                         onSaved={() => {
                                             setEditingId(null)
+                                            onChanged()
+                                        }}
+                                    />
+                                )}
+
+                                {multiRealm && editingRealmsId === row.user.githubId && (
+                                    <RealmsEditor
+                                        row={row}
+                                        realms={realms}
+                                        onSaved={() => {
+                                            setEditingRealmsId(null)
                                             onChanged()
                                         }}
                                     />
@@ -285,7 +365,11 @@ function LimitsEditor({ row, onSaved }: { row: AdminUserRow; onSaved: () => void
     const toast = useToast()
     const [draft, setDraft] = useState<Draft>(() => seedDraft(row.customLimits))
     const [repos, setRepos] = useState<ReposChoice>(
-        row.customLimits?.privateRepos === undefined ? 'inherit' : row.customLimits.privateRepos ? 'allow' : 'deny',
+        row.customLimits?.privateRepos === undefined
+            ? 'inherit'
+            : row.customLimits.privateRepos
+              ? 'allow'
+              : 'deny',
     )
     const [busy, setBusy] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -316,7 +400,9 @@ function LimitsEditor({ row, onSaved }: { row: AdminUserRow; onSaved: () => void
             })
             if (!res.ok) {
                 const body = (await res.json().catch(() => null)) as { error?: string } | null
-                setError(`Couldn’t save limits${body?.error ? `: ${body.error}` : ` (error ${res.status})`}.`)
+                setError(
+                    `Couldn’t save limits${body?.error ? `: ${body.error}` : ` (error ${res.status})`}.`,
+                )
                 return
             }
             toast.show(`Saved limit overrides for ${row.user.login}.`, { variant: 'success' })
@@ -335,7 +421,9 @@ function LimitsEditor({ row, onSaved }: { row: AdminUserRow; onSaved: () => void
             const res = await fetch(limitsUrl, { method: 'DELETE' })
             if (!res.ok) {
                 const body = (await res.json().catch(() => null)) as { error?: string } | null
-                setError(`Couldn’t clear limits${body?.error ? `: ${body.error}` : ` (error ${res.status})`}.`)
+                setError(
+                    `Couldn’t clear limits${body?.error ? `: ${body.error}` : ` (error ${res.status})`}.`,
+                )
                 return
             }
             toast.show(`Cleared limit overrides for ${row.user.login}.`, { variant: 'success' })
@@ -350,8 +438,8 @@ function LimitsEditor({ row, onSaved }: { row: AdminUserRow; onSaved: () => void
     return (
         <div className="perch-admin-limits">
             <p className="perch-admin-hint">
-                Leave a field blank to inherit the {ACCOUNT_LEVEL_LABEL[row.level].toLowerCase()} default. Overrides
-                apply immediately.
+                Leave a field blank to inherit the {ACCOUNT_LEVEL_LABEL[row.level].toLowerCase()}{' '}
+                default. Overrides apply immediately.
             </p>
             {error && <tc-banner variant="danger">{error}</tc-banner>}
             <div className="perch-admin-limits-grid">
@@ -387,10 +475,129 @@ function LimitsEditor({ row, onSaved }: { row: AdminUserRow; onSaved: () => void
                     {busy ? 'Saving…' : 'Save limits'}
                 </tc-button>
                 {row.customLimits && (
-                    <tc-button variant="secondary" size="sm" outline onClick={clear} disabled={busy || undefined}>
+                    <tc-button
+                        variant="secondary"
+                        size="sm"
+                        outline
+                        onClick={clear}
+                        disabled={busy || undefined}
+                    >
                         Clear override
                     </tc-button>
                 )}
+            </div>
+        </div>
+    )
+}
+
+// ── per-user realm grant editor (multiple_realms.md §F.2) ──────────────────────────
+
+/**
+ * Owner control over which realms a user may use and which is their operating default.
+ * Non-owners never switch (§0.6), so for a user the grant set governs ACCESS and bounds
+ * which realm the owner can make their default. PUTs the whole set + default at once.
+ */
+function RealmsEditor({
+    row,
+    realms,
+    onSaved,
+}: {
+    row: AdminUserRow
+    realms: Realm[]
+    onSaved: () => void
+}) {
+    const toast = useToast()
+    const [granted, setGranted] = useState<Set<string>>(
+        () => new Set(row.realmGrants.map((g) => g.realmId)),
+    )
+    const [defaultId, setDefaultId] = useState<string>(
+        () => row.realmGrants.find((g) => g.isDefault)?.realmId ?? '',
+    )
+    const [busy, setBusy] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+
+    const realmsUrl = `/api/admin/users/${encodeURIComponent(String(row.user.githubId))}/realms`
+
+    const toggle = useCallback((id: string, on: boolean) => {
+        setGranted((prev) => {
+            const next = new Set(prev)
+            if (on) next.add(id)
+            else next.delete(id)
+            return next
+        })
+        // Clear the default if it was just un-granted.
+        setDefaultId((d) => (on || d !== id ? d : ''))
+    }, [])
+
+    // Default options = the currently-granted realms (plus a "no default" sentinel).
+    const grantedList = realms.filter((r) => granted.has(r.id))
+    const defaultOptions: SelectOption[] = [
+        { value: '', label: 'No default' },
+        ...grantedList.map((r) => ({ value: r.id, label: r.name })),
+    ]
+
+    const save = useCallback(async () => {
+        setError(null)
+        const realmIds = [...granted]
+        const defaultRealmId = defaultId && granted.has(defaultId) ? defaultId : null
+        setBusy(true)
+        try {
+            const res = await fetch(realmsUrl, {
+                method: 'PUT',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ realmIds, defaultRealmId }),
+            })
+            if (!res.ok) {
+                const body = (await res.json().catch(() => null)) as { error?: string } | null
+                setError(
+                    body?.error === 'realm_has_user_sites'
+                        ? `Can’t revoke a realm — ${row.user.login} still owns sites there. Delete them first.`
+                        : `Couldn’t save realms${body?.error ? `: ${body.error}` : ` (error ${res.status})`}.`,
+                )
+                return
+            }
+            toast.show(`Saved realm access for ${row.user.login}.`, { variant: 'success' })
+            onSaved()
+        } catch {
+            setError('Couldn’t save realms — network error.')
+        } finally {
+            setBusy(false)
+        }
+    }, [granted, defaultId, realmsUrl, onSaved, toast, row.user.login])
+
+    return (
+        <div className="perch-admin-limits">
+            <p className="perch-admin-hint">
+                Which realms {row.user.login} may use, and which is their operating default. They
+                don’t switch — they always operate on the default realm among their grants.
+            </p>
+            {error && <tc-banner variant="danger">{error}</tc-banner>}
+            <div className="perch-admin-realm-grants">
+                {realms.map((r) => (
+                    <CheckField
+                        key={r.id}
+                        inline
+                        checked={granted.has(r.id)}
+                        disabled={busy}
+                        label={r.isDefault ? `${r.name} (default realm)` : r.name}
+                        onChecked={(on) => toggle(r.id, on)}
+                    />
+                ))}
+            </div>
+            <div className="perch-admin-limits-grid">
+                <SelectField
+                    size="sm"
+                    label="Their default realm"
+                    value={defaultId}
+                    options={defaultOptions}
+                    disabled={busy || grantedList.length === 0}
+                    onValue={setDefaultId}
+                />
+            </div>
+            <div className="perch-admin-tier-actions">
+                <tc-button variant="primary" size="sm" onClick={save} disabled={busy || undefined}>
+                    {busy ? 'Saving…' : 'Save realms'}
+                </tc-button>
             </div>
         </div>
     )

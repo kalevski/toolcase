@@ -8,6 +8,8 @@ import 'server-only'
 
 export * as userRepo from './user-repo'
 export * as userLimitRepo from './user-limit-repo'
+export * as realmRepo from './realm-repo'
+export * as userRealmRepo from './user-realm-repo'
 export * as baseDomainRepo from './base-domain-repo'
 export * as siteRepo from './site-repo'
 export * as sponsorshipRepo from './sponsorship-repo'
