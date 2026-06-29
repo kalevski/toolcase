@@ -1,4 +1,11 @@
 import { esc } from './internal/esc'
+import { fieldMessageHtml } from './internal/field-message'
+import {
+    requiredMark,
+    setFieldFormValue,
+    reflectFieldValidity,
+    dispatchFieldChange,
+} from './internal/form-field'
 const TAG_NAME = 'tc-check'
 
 let _idCounter = 0
@@ -8,35 +15,81 @@ export type CheckState = 'valid' | 'invalid'
 const STATES: CheckState[] = ['valid', 'invalid']
 
 export class Check extends HTMLElement {
+    // Participates in native <form> submission/validation like every tc-* input.
+    // A checkbox submits its `value` (default 'on') only when checked.
+    static formAssociated = true
+
     private _inputId: string
+    private _helpId: string
     private _initialised = false
+    private _internals: ElementInternals
+    private _defaultChecked = false
 
     static get observedAttributes(): string[] {
         return [
             'checked',
             'value',
+            'name',
             'label',
             'indeterminate',
             'disabled',
+            'required',
             'inline',
             'reverse',
             'state',
+            'help',
+            'error',
         ]
     }
 
     constructor() {
         super()
-        this._inputId = `tc-check-${++_idCounter}`
+        const uid = ++_idCounter
+        this._inputId = `tc-check-${uid}`
+        this._helpId = `tc-check-help-${uid}`
+        this._internals = this.attachInternals()
     }
 
     connectedCallback(): void {
+        if (!this._initialised) {
+            // Snapshot the authored checked state so formResetCallback can restore it.
+            this._defaultChecked = this.hasAttribute('checked')
+        }
         this.addEventListener('change', this._onNativeChange)
         this.render()
         this._initialised = true
+        this._syncForm()
     }
 
     disconnectedCallback(): void {
         this.removeEventListener('change', this._onNativeChange)
+    }
+
+    /** Called by the browser when the associated form resets. */
+    formResetCallback(): void {
+        this.checked = this._defaultChecked
+        this._syncForm()
+    }
+
+    /** Called by the browser when a containing fieldset/form is disabled/enabled. */
+    formDisabledCallback(disabled: boolean): void {
+        this.disabled = disabled
+    }
+
+    /** Push checked-as-value + validity into the form. A checkbox submits
+     *  `value` (default 'on') only when checked; a `required` checkbox that is
+     *  unchecked is value-missing. */
+    private _syncForm(): void {
+        setFieldFormValue(this._internals, this.name, this.checked, this.value || 'on')
+        const error = this.error
+        const requiredEmpty = this.required && !this.checked
+        const invalid = !!error || this.state === 'invalid' || requiredEmpty
+        reflectFieldValidity(this._internals, {
+            invalid,
+            valueMissing: requiredEmpty && !error,
+            message: error || (requiredEmpty ? 'Please check this field.' : 'Invalid value.'),
+            anchor: this.querySelector<HTMLInputElement>('input') ?? undefined,
+        })
     }
 
     attributeChangedCallback(name: string, _old: string | null, _next: string | null): void {
@@ -47,9 +100,13 @@ export class Check extends HTMLElement {
                 input.checked = this.hasAttribute('checked')
                 input.indeterminate = this.hasAttribute('indeterminate')
             }
+            // checked toggles both the submitted value and the required-empty
+            // validity, so resync the form on either flag without a full re-render.
+            this._syncForm()
             return
         }
         this.render()
+        this._syncForm()
     }
 
     get checked(): boolean {
@@ -69,6 +126,22 @@ export class Check extends HTMLElement {
     }
     set value(v: string) {
         this.setAttribute('value', v)
+    }
+
+    get name(): string | null {
+        return this.getAttribute('name')
+    }
+    set name(v: string | null) {
+        if (v != null) this.setAttribute('name', v)
+        else this.removeAttribute('name')
+    }
+
+    get required(): boolean {
+        return this.hasAttribute('required')
+    }
+    set required(v: boolean) {
+        if (v) this.setAttribute('required', '')
+        else this.removeAttribute('required')
     }
 
     get label(): string | null {
@@ -120,6 +193,22 @@ export class Check extends HTMLElement {
         else this.removeAttribute('state')
     }
 
+    get help(): string | null {
+        return this.getAttribute('help')
+    }
+    set help(v: string | null) {
+        if (v != null) this.setAttribute('help', v)
+        else this.removeAttribute('help')
+    }
+
+    get error(): string | null {
+        return this.getAttribute('error')
+    }
+    set error(v: string | null) {
+        if (v != null) this.setAttribute('error', v)
+        else this.removeAttribute('error')
+    }
+
     private _onNativeChange = (e: Event): void => {
         const input = e.target as HTMLInputElement
         if (input.tagName === 'INPUT') {
@@ -127,16 +216,27 @@ export class Check extends HTMLElement {
             if (isChecked !== this.hasAttribute('checked')) {
                 if (isChecked) this.setAttribute('checked', '')
                 else this.removeAttribute('checked')
+                // attributeChangedCallback('checked') resyncs the form value.
+            } else {
+                // No attribute flip (already in sync) → resync explicitly so the
+                // form value always tracks the native input's checked state.
+                this._syncForm()
             }
+            // Unified change event alongside the native one: detail.value is the boolean.
+            dispatchFieldChange(this, this.checked)
         }
     }
 
     private render(): void {
         const label = this.label
-        const state = this.state
+        const error = this.error
+        // An `error` message forces the invalid state, mirroring tc-select.
+        const state: CheckState | null = error ? 'invalid' : this.state
+        const help = this.help
         const checkedAttr = this.hasAttribute('checked') ? ' checked' : ''
         const indeterminate = this.indeterminate
         const disabled = this.disabled
+        const required = this.required
         const inline = this.inline
         const reverse = this.reverse
         const value = this.value
@@ -146,26 +246,45 @@ export class Check extends HTMLElement {
         const stateClass =
             state === 'valid' ? ' is-valid' : state === 'invalid' ? ' is-invalid' : ''
         const disabledAttr = disabled ? ' disabled' : ''
+        const requiredAttr = required ? ' aria-required="true"' : ''
         const valueAttr = value ? ` value="${esc(value)}"` : ''
 
+        // The asterisk belongs on the visible label; an inline check defers its
+        // labelling to the enclosing group, so only labelled non-inline checks
+        // append the mark.
         const labelHtml =
             label != null
-                ? `<label class="form-check-label" for="${this._inputId}">${esc(label)}</label>`
+                ? `<label class="form-check-label" for="${this._inputId}">${esc(label)}${
+                      inline ? '' : requiredMark(required)
+                  }</label>`
                 : ''
 
-        const feedbackHtml =
-            state === 'valid'
-                ? `<div class="valid-feedback">Looks good!</div>`
-                : state === 'invalid'
-                  ? `<div class="invalid-feedback">Please check this field.</div>`
-                  : ''
+        // Reserved field-message slot lives BELOW the control row, as the last
+        // child. Gated: (1) a bare <tc-check> with no label/help/error/state (e.g.
+        // embedded inside another control) must add NO gutter, and (2) an `inline`
+        // check is part of a horizontal set — its messaging belongs to the
+        // enclosing group, so a per-item block slot would break the row. Either
+        // case skips the slot.
+        const hasField =
+            !inline && (label != null || help != null || error != null || state != null)
+        const messageHtml = hasField
+            ? fieldMessageHtml({
+                  id: this._helpId,
+                  state,
+                  error,
+                  hint: help,
+                  invalidText: 'Please check this field.',
+                  validText: 'Looks good!',
+              })
+            : ''
+        const describe = hasField && (help || state) ? ` aria-describedby="${this._helpId}"` : ''
 
         this.innerHTML = [
             `<div class="form-check${inlineClass}${reverseClass}">`,
-            `<input id="${this._inputId}" class="form-check-input${stateClass}" type="checkbox"${valueAttr}${checkedAttr}${disabledAttr}>`,
+            `<input id="${this._inputId}" class="form-check-input${stateClass}" type="checkbox"${valueAttr}${checkedAttr}${disabledAttr}${requiredAttr}${describe}>`,
             labelHtml,
-            feedbackHtml,
             `</div>`,
+            messageHtml,
         ].join('')
 
         // indeterminate cannot be set via HTML attribute — must be applied imperatively.

@@ -71,7 +71,7 @@ export function AgentPanel({
     useEffect(() => {
         const body = termRef.current?.querySelector('.tc-terminal-window-body')
         if (body) body.scrollTop = body.scrollHeight
-    }, [tcLines])
+    }, [tcLines, termRef])
 
     const logText = () => lines.map((l) => l.text).join('\n')
 

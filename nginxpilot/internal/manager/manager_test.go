@@ -185,6 +185,45 @@ func TestReconcileStateClearsStaleRef(t *testing.T) {
 	}
 }
 
+// TestStatusReportsDeployedBytes verifies that GET /status surfaces the
+// per-sync cached deployed size from state (task 739): Status reads the value
+// straight from the state file rather than re-walking the release tree.
+func TestStatusReportsDeployedBytes(t *testing.T) {
+	t.Parallel()
+
+	dir := t.TempDir()
+	store, err := state.NewStore(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+
+	const domain = "sized.example.com"
+	const bytes = int64(4096)
+
+	if err := store.Save(&state.SiteState{Domain: domain, DeployedRef: "abc123", DeployedBytes: bytes}); err != nil {
+		t.Fatal(err)
+	}
+
+	site := config.Site{Domain: domain, Source: config.Source{Type: "git", URL: "fake://x"}}
+	m := &Manager{
+		log:      logger,
+		store:    store,
+		cfg:      &config.Config{DataDir: dir, Sites: []config.Site{site}},
+		deployer: deploy.New(dir, logger),
+		loops:    map[string]*siteLoop{domain: {site: site}},
+		syncFn:   SyncSite,
+	}
+
+	got := m.Status()
+	if len(got) != 1 {
+		t.Fatalf("expected 1 site in status, got %d", len(got))
+	}
+	if got[0].Bytes != bytes {
+		t.Errorf("status bytes = %d, want %d", got[0].Bytes, bytes)
+	}
+}
+
 // TestPruneGitCaches verifies that pruneGitCaches removes cache dirs not
 // referenced by any configured git site and leaves live ones untouched.
 func TestPruneGitCaches(t *testing.T) {

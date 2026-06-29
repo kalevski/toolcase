@@ -1,7 +1,6 @@
 import { isImageSrc } from './internal/image'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
-import { icon } from './icons'
 
 const TAG_NAME = 'tc-character-select'
 

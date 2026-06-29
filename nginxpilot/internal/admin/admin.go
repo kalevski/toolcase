@@ -1,12 +1,29 @@
 // Package admin serves the loopback admin surface (spec §6, Q5/Q25):
 //
-//	GET  /healthz        daemon liveness
-//	GET  /status         per-site status JSON
-//	POST /sync/<domain>  force an immediate sync (tick-now)
-//	GET  /vhost/<domain> generated nginx config for a site or reverse proxy
+//	GET  /healthz             daemon liveness
+//	GET  /status              per-site runtime status JSON
+//	POST /sync/<domain>       force an immediate sync (tick-now)
+//	GET  /vhost/<domain>      generated nginx config for a site or reverse proxy
+//	POST /reload              diff-based config reload (same as SIGHUP)
 //
-// Loopback only by default; an optional bearer token (admin.token_env)
-// guards reverse-proxied setups.
+// Config management — a control plane (Perch) drives the whole config over
+// REST instead of writing fragment files into sites.d/ by hand:
+//
+//	GET    /sites             list configured sites
+//	POST   /sites             write a site fragment and reload
+//	DELETE /sites/{domain}    remove a site's fragment and reload
+//	GET    /upstreams         list configured upstreams
+//	POST   /upstreams         write an upstream fragment and reload
+//	DELETE /upstreams/{name}  remove an upstream's fragment and reload
+//	GET    /proxies           list configured reverse proxies
+//	POST   /proxies           write a proxy fragment and reload
+//	DELETE /proxies/{domain}  remove a proxy's fragment and reload
+//	GET    /certs             list TLS certs discovered in the cert dir (read-only)
+//
+// Each write/delete validates the candidate merged config before touching disk,
+// so an invalid fragment never lands in sites.d/ and the running config is the
+// last known-good. Loopback only by default; an optional bearer token
+// (admin.token_env) guards reverse-proxied setups.
 package admin
 
 import (
@@ -21,21 +38,27 @@ import (
 
 	"github.com/kalevski/toolcase/nginxpilot/internal/manager"
 	"github.com/kalevski/toolcase/nginxpilot/internal/nginxconf"
+	"github.com/kalevski/toolcase/nginxpilot/internal/nginxctl"
 )
 
 // Server is the admin HTTP endpoint.
 type Server struct {
-	mgr   *manager.Manager
-	token string
-	log   *slog.Logger
+	mgr    *manager.Manager
+	token  string
+	log    *slog.Logger
+	reload func() error
 }
 
 // New builds the admin server. token may be empty only when no auth is
 // configured (admin.token_env is unset). Callers must not pass an empty token
 // when a token was expected — use resolveAdminToken in cmd/nginxpilot/run.go
 // to enforce that invariant before constructing the server.
-func New(mgr *manager.Manager, token string, log *slog.Logger) *Server {
-	return &Server{mgr: mgr, token: token, log: log}
+//
+// reload performs a diff-based config reload — the same work SIGHUP triggers —
+// and reports an error when the on-disk config fails to load/validate (in which
+// case the running config is kept). It may be nil, which disables POST /reload.
+func New(mgr *manager.Manager, token string, log *slog.Logger, reload func() error) *Server {
+	return &Server{mgr: mgr, token: token, log: log, reload: reload}
 }
 
 // Run serves until ctx is cancelled. An empty listen address disables the
@@ -79,6 +102,24 @@ func (s *Server) routes() http.Handler {
 	mux.HandleFunc("GET /status", s.auth(s.handleStatus))
 	mux.HandleFunc("POST /sync/{domain}", s.auth(s.handleSync))
 	mux.HandleFunc("GET /vhost/{domain}", s.auth(s.handleVhost))
+	mux.HandleFunc("POST /reload", s.auth(s.handleReload))
+	mux.HandleFunc("GET /sites", s.auth(s.handleListSites))
+	mux.HandleFunc("POST /sites", s.auth(s.handleCreateSite))
+	mux.HandleFunc("DELETE /sites/{domain}", s.auth(s.handleDeleteSite))
+	mux.HandleFunc("GET /upstreams", s.auth(s.handleListUpstreams))
+	mux.HandleFunc("POST /upstreams", s.auth(s.handleCreateUpstream))
+	mux.HandleFunc("DELETE /upstreams/{name}", s.auth(s.handleDeleteUpstream))
+	mux.HandleFunc("GET /proxies", s.auth(s.handleListProxies))
+	mux.HandleFunc("POST /proxies", s.auth(s.handleCreateProxy))
+	mux.HandleFunc("DELETE /proxies/{domain}", s.auth(s.handleDeleteProxy))
+	mux.HandleFunc("GET /streams", s.auth(s.handleListStreams))
+	mux.HandleFunc("POST /streams", s.auth(s.handleCreateStream))
+	mux.HandleFunc("DELETE /streams/{name}", s.auth(s.handleDeleteStream))
+	mux.HandleFunc("GET /stream-upstreams", s.auth(s.handleListStreamUpstreams))
+	mux.HandleFunc("POST /stream-upstreams", s.auth(s.handleCreateStreamUpstream))
+	mux.HandleFunc("DELETE /stream-upstreams/{name}", s.auth(s.handleDeleteStreamUpstream))
+	mux.HandleFunc("POST /nginx/test", s.auth(s.handleNginxTest))
+	mux.HandleFunc("GET /certs", s.auth(s.handleListCerts))
 	return mux
 }
 
@@ -99,10 +140,51 @@ func (s *Server) auth(next http.HandlerFunc) http.HandlerFunc {
 
 func (s *Server) handleStatus(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	payload := map[string]any{"sites": s.mgr.Status()}
+	// Managed mode: surface the last apply's per-resource states (active /
+	// disabled with the nginx -t reason) so a control plane sees quarantined
+	// resources.
+	if managed, resources := s.mgr.NginxStatus(); managed {
+		disabled := 0
+		for _, r := range resources {
+			if r.State == "disabled" {
+				disabled++
+			}
+		}
+		if resources == nil {
+			resources = []nginxctl.ResourceResult{}
+		}
+		payload["nginx"] = map[string]any{
+			"managed":        true,
+			"resources":      resources,
+			"disabled_count": disabled,
+		}
+	}
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
-	if err := enc.Encode(map[string]any{"sites": s.mgr.Status()}); err != nil {
+	if err := enc.Encode(payload); err != nil {
 		s.log.Warn("status encode failed", "error", err)
+	}
+}
+
+// handleNginxTest runs a managed-mode dry-run apply (render + validate, no
+// swap/reload) and returns the per-resource pass/fail set, so a control plane
+// can preview before committing. 501 when managed mode is off.
+func (s *Server) handleNginxTest(w http.ResponseWriter, r *http.Request) {
+	res, managed, err := s.mgr.NginxTest(r.Context())
+	if !managed {
+		http.Error(w, "managed mode is off (nginx.manage: false)", http.StatusNotImplemented)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "  ")
+	out := map[string]any{"resources": res.Resources}
+	if err != nil {
+		out["error"] = err.Error()
+	}
+	if err := enc.Encode(out); err != nil {
+		s.log.Warn("nginx test encode failed", "error", err)
 	}
 }
 
@@ -143,4 +225,21 @@ func (s *Server) handleVhost(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	_, _ = w.Write([]byte(out))
+}
+
+// handleReload runs a diff-based config reload — the REST equivalent of SIGHUP —
+// so a separate process (e.g. Perch) can apply config changes without signalling
+// the daemon directly. An invalid on-disk config is rejected wholesale and the
+// running config stays active (spec §6).
+func (s *Server) handleReload(w http.ResponseWriter, _ *http.Request) {
+	if s.reload == nil {
+		http.Error(w, "reload not available", http.StatusNotImplemented)
+		return
+	}
+	if err := s.reload(); err != nil {
+		http.Error(w, "reload rejected; running config kept", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	_, _ = w.Write([]byte("reloaded\n"))
 }

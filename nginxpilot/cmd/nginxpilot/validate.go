@@ -1,12 +1,16 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 
+	"github.com/kalevski/toolcase/nginxpilot/internal/certs"
 	"github.com/kalevski/toolcase/nginxpilot/internal/config"
+	"github.com/kalevski/toolcase/nginxpilot/internal/nginxctl"
 )
 
 // cmdValidate parses + validates the merged config, checks the git binary
@@ -71,6 +75,15 @@ func cmdValidate(args []string) int {
 		}
 	}
 
+	// Managed mode: render to a temp dir and run the real `nginx -t` so CI
+	// catches breakage before it reaches the host. Any disabled resource (one
+	// that nginx -t rejects) is a validation failure.
+	if cfg.Nginx.Manage {
+		if err := validateManaged(cfg); err != nil {
+			fail("%v", err)
+		}
+	}
+
 	if failed {
 		return 1
 	}
@@ -90,4 +103,44 @@ func cmdValidate(args []string) int {
 		fmt.Printf("  %-30s %-9s %s\n", p.Domain, "proxy", target)
 	}
 	return 0
+}
+
+// validateManaged renders the managed config into a temp dir and runs the real
+// `nginx -t` on it (via the engine's dry run), so `validate` exercises the same
+// gate the daemon applies. Returns an error if nginx -t can't run or rejects any
+// resource.
+func validateManaged(cfg *config.Config) error {
+	tmp, err := os.MkdirTemp("", "nginxpilot-validate-")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tmp)
+
+	// Point the engine at temp dirs so validate never writes to /etc/nginx.
+	managed := *cfg
+	managed.Nginx.ConfDir = filepath.Join(tmp, "conf.d")
+	managed.Nginx.StreamConfDir = filepath.Join(tmp, "stream.d")
+	managed.Nginx.ManagedIncludeDir = filepath.Join(tmp, "conf.d")
+
+	log := newLogger("logfmt", "error")
+	eng := nginxctl.New(&managed, log)
+
+	var idx *certs.Index
+	if dir, derr := cfg.Tls.ResolveDir(); derr == nil && dir != "" {
+		idx, _ = certs.Load(dir)
+	}
+
+	res, err := eng.DryRun(context.Background(), &managed, idx)
+	if err != nil {
+		return fmt.Errorf("managed-mode nginx -t failed (is the nginx binary installed?): %w", err)
+	}
+	disabled := res.Disabled()
+	if len(disabled) == 0 {
+		fmt.Printf("nginx -t: OK (%d resource(s) valid)\n", len(res.Resources))
+		return nil
+	}
+	for _, r := range disabled {
+		fmt.Fprintf(os.Stderr, "INVALID: nginx -t rejected %s %q: %s\n", r.Kind, r.Key, r.Reason)
+	}
+	return fmt.Errorf("%d resource(s) rejected by nginx -t", len(disabled))
 }

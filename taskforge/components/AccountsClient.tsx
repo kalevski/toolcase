@@ -114,8 +114,13 @@ export function AccountsClient({ accounts }: { accounts: AccountSummary[] }) {
     const tableKey = rows.map((r) => r.alias).join('_')
 
     return (
-        <tc-stack gap="1.25rem">
-            <tc-helper-text text={helpTexts.accounts.intro} />
+        <div className="taskforge-page">
+            <tc-rich-page-header
+                title-text="Accounts"
+                icon-name="Key"
+                icon-color="cyan"
+                description={helpTexts.accounts.intro}
+            />
 
             <AddAccountForm existing={rows.map((r) => r.alias)} onCreated={onCreated} />
 
@@ -203,7 +208,7 @@ export function AccountsClient({ accounts }: { accounts: AccountSummary[] }) {
                     })}
                 </tc-advanced-table>
             )}
-        </tc-stack>
+        </div>
     )
 }
 

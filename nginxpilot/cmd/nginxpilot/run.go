@@ -70,29 +70,36 @@ func cmdRun(args []string) int {
 		log.Error("admin token misconfiguration; refusing to start", "error", err)
 		return 1
 	}
-	adminSrv := admin.New(mgr, token, log)
+	// reload performs a diff-based reload from the on-disk config; a config that
+	// fails validation is rejected wholesale and the running config stays active
+	// (spec §6). Shared by SIGHUP and the admin POST /reload endpoint.
+	reload := func() error {
+		newRes, err := config.Load(*configPath)
+		if err != nil {
+			log.Error("reload rejected, keeping running config", "error", err)
+			return err
+		}
+		for _, w := range newRes.Warnings {
+			log.Warn(w)
+		}
+		mgr.Reload(newRes.Config)
+		log.Info("config reloaded", "sites", len(newRes.Config.Sites))
+		return nil
+	}
+
+	adminSrv := admin.New(mgr, token, log, reload)
 	go func() {
 		if err := adminSrv.Run(ctx, cfg.Admin.ListenAddr()); err != nil {
 			log.Error("admin endpoint failed", "error", err)
 		}
 	}()
 
-	// SIGHUP → diff-based reload; a config that fails validation is
-	// rejected wholesale and the running config stays active (spec §6).
+	// SIGHUP → diff-based reload (see reload above).
 	hup := make(chan os.Signal, 1)
 	signal.Notify(hup, syscall.SIGHUP)
 	go func() {
 		for range hup {
-			newRes, err := config.Load(*configPath)
-			if err != nil {
-				log.Error("reload rejected, keeping running config", "error", err)
-				continue
-			}
-			for _, w := range newRes.Warnings {
-				log.Warn(w)
-			}
-			mgr.Reload(newRes.Config)
-			log.Info("config reloaded", "sites", len(newRes.Config.Sites))
+			_ = reload()
 		}
 	}()
 

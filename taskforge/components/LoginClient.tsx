@@ -3,6 +3,7 @@
 import React, { useEffect } from 'react'
 import { toast } from '@/lib/toast'
 import { useTc } from '@/lib/tc'
+import { useBranding } from '@/lib/branding-context'
 
 const ERRORS: Record<string, string> = {
     state: 'Sign-in expired or was tampered with. Please try again.',
@@ -15,6 +16,7 @@ const ERRORS: Record<string, string> = {
 const CONNECT = [{ key: 'github', label: 'Sign in with GitHub', icon: 'git-branch', variant: 'primary' as const }]
 
 export function LoginClient({ error }: { error?: string }) {
+    const branding = useBranding()
     useEffect(() => {
         if (error) toast.error(ERRORS[error] ?? 'Sign-in failed.')
     }, [error])
@@ -35,7 +37,12 @@ export function LoginClient({ error }: { error?: string }) {
                 title="TaskForge"
                 description="Drive the Claude Code CLI over your local repositories."
             >
-                <tc-brand slot="logo" primary-text="Task Forge" color="#6c5ce7" />
+                <tc-brand
+                    slot="logo"
+                    primary-text="Task Forge"
+                    secondary-text={branding.secondaryText || undefined}
+                    color="#6c5ce7"
+                />
             </tc-login>
         </div>
     )

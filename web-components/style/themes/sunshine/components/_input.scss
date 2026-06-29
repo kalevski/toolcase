@@ -1,0 +1,24 @@
+// Sunshine › tc-input — warm well field with a leaf focus halo.
+// Foundation remaps the field bg / border / text / placeholder. These fix the
+// hardcoded slate values that survive: the form label colour, the recessed well
+// fill, and the slate focus border + ring, replaced with the leaf accent line
+// and the soft leaf glow (CITRINA's --focus-ring).
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    .form-label {
+        color: var(--sun-ink-2);
+    }
+
+    .form-control,
+    .form-select {
+        --bs-form-control-bg: var(--sun-well);
+        box-shadow: inset 0 1px 2px rgba(54, 44, 18, 0.06);
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--sun-leaf);
+        box-shadow: var(--tc-focus-ring);
+    }
+}

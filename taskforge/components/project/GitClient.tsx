@@ -160,7 +160,7 @@ export function GitClient() {
     // ── render ────────────────────────────────────────────────────────────────
 
     return (
-        <tc-stack gap="1.25rem">
+        <div className="taskforge-page">
             <tc-card>
                 <tc-heading slot="header" as="h3">
                     Repository status
@@ -360,6 +360,6 @@ export function GitClient() {
                     {running ? ', or wait for the current run to finish.' : '.'}
                 </tc-banner>
             )}
-        </tc-stack>
+        </div>
     )
 }

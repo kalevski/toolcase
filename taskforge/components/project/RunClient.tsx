@@ -16,23 +16,6 @@ const COMMIT_MODE_OPTIONS = [
     { value: 'ai', label: 'AI-generated' },
 ]
 
-/** Small uppercase divider label that groups related run-config controls. */
-function SectionLabel({ children }: { children: React.ReactNode }) {
-    return (
-        <div
-            style={{
-                fontSize: '0.72rem',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                opacity: 0.55,
-            }}
-        >
-            {children}
-        </div>
-    )
-}
-
 export function RunClient() {
     const {
         project, config, snapshot, lines, running, busy, dirty, progressPct, startDisabled, modelOptions,
@@ -73,7 +56,7 @@ export function RunClient() {
     useEffect(() => {
         const body = termRef.current?.querySelector('.tc-terminal-window-body')
         if (body) body.scrollTop = body.scrollHeight
-    }, [tcLines])
+    }, [tcLines, termRef])
 
     const logText = () => lines.map((l) => l.text).join('\n')
 
@@ -97,14 +80,14 @@ export function RunClient() {
     }
 
     return (
-        <tc-stack gap="1.25rem">
+        <div className="taskforge-page">
             <tc-card>
                 <tc-stack gap="1.25rem" style={{ padding: '1rem' }}>
                     <tc-heading as="h3">Run configuration</tc-heading>
 
                     {/* ── Which tasks run ─────────────────────────────────── */}
                     <tc-stack gap="0.75rem">
-                        <SectionLabel>Which tasks run</SectionLabel>
+                        <tc-eyebrow>Which tasks run</tc-eyebrow>
                         <tc-stack direction="horizontal" gap="1rem" wrap align="flex-end">
                             <tc-input ref={filterRef} label="Task filter" placeholder="substring of path" value={filter} disabled={busy || undefined} />
                             <tc-input ref={severityRef} label="Severity (CSV)" placeholder="high,critical" value={severity} disabled={busy || undefined} />
@@ -127,8 +110,9 @@ export function RunClient() {
                     </tc-stack>
 
                     {/* ── Execution ───────────────────────────────────────── */}
-                    <tc-stack gap="0.75rem" style={{ borderTop: '1px solid var(--tc-border, #e7eaee)', paddingTop: '1rem' }}>
-                        <SectionLabel>Execution</SectionLabel>
+                    <tc-divider />
+                    <tc-stack gap="0.75rem">
+                        <tc-eyebrow>Execution</tc-eyebrow>
                         <tc-stack direction="horizontal" gap="1rem" wrap align="flex-end">
                             <div style={{ minWidth: 200 }}>
                                 <tc-select ref={modelRef} label="Model" value={model} disabled={busy || undefined}>
@@ -153,8 +137,9 @@ export function RunClient() {
                     </tc-stack>
 
                     {/* ── Commit & push ───────────────────────────────────── */}
-                    <tc-stack gap="0.75rem" style={{ borderTop: '1px solid var(--tc-border, #e7eaee)', paddingTop: '1rem' }}>
-                        <SectionLabel>Commit &amp; push</SectionLabel>
+                    <tc-divider />
+                    <tc-stack gap="0.75rem">
+                        <tc-eyebrow>Commit &amp; push</tc-eyebrow>
                         <tc-stack direction="horizontal" gap="1rem" wrap align="flex-end">
                             <tc-tooltip content={helpTexts.run.commitAfter}>
                                 <span>
@@ -200,7 +185,8 @@ export function RunClient() {
                     </tc-stack>
 
                     {/* ── Launch ──────────────────────────────────────────── */}
-                    <tc-stack gap="0.75rem" style={{ borderTop: '1px solid var(--tc-border, #e7eaee)', paddingTop: '1rem' }}>
+                    <tc-divider />
+                    <tc-stack gap="0.75rem">
                     <tc-text variant="muted">
                         {matchingCount === 0
                             ? 'No tasks match the current selection.'
@@ -259,6 +245,6 @@ export function RunClient() {
                 </tc-stack>
                 <tc-terminal-window ref={termRef} title={`run — ${project}`} />
             </tc-stack>
-        </tc-stack>
+        </div>
     )
 }

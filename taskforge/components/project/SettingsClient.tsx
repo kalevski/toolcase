@@ -201,7 +201,7 @@ export function SettingsClient() {
     const eff = (k: string) => String(effective[k] ?? '—')
 
     return (
-        <tc-stack gap="1.25rem">
+        <div className="taskforge-page">
             <tc-helper-text text={helpTexts.settings.intro} />
 
             <tc-card>
@@ -253,6 +253,7 @@ export function SettingsClient() {
                             </Sel>
                         </div>
                     </tc-stack>
+                    <tc-divider label="Branch & push" />
                     <tc-stack direction="horizontal" gap="1rem" wrap align="flex-end">
                         <TriSel label="Branch per run" value={branchPerRun} onChange={setBranchPerRun} />
                         <TriSel label="Push after run" value={pushAfter} onChange={setPushAfter} />
@@ -292,7 +293,7 @@ export function SettingsClient() {
                         onChange={setNotifyOverridden}
                     />
                     {notifyOverridden && (
-                        <tc-stack direction="horizontal" gap="1rem" wrap align="flex-end">
+                        <tc-stack direction="horizontal" gap="1rem" wrap align="flex-end" style={{ paddingTop: '0.25rem' }}>
                             {NOTIFY_EVENTS.map((ev) => (
                                 <Chk
                                     key={ev}
@@ -326,6 +327,6 @@ export function SettingsClient() {
                 </tc-button>
                 <tc-text variant="muted">Empty / “Use default” values fall back to the environment configuration.</tc-text>
             </tc-stack>
-        </tc-stack>
+        </div>
     )
 }

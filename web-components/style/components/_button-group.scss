@@ -9,20 +9,22 @@
     vertical-align: middle;
 
     .btn {
-        --bs-btn-color: var(--tc-slate-700);
-        --bs-btn-bg: #fff;
+        // Themed tokens (not #fff / slate-700 literals) so the segmented control
+        // re-skins under the dark themes instead of rendering a white box.
+        --bs-btn-color: var(--tc-text);
+        --bs-btn-bg: var(--tc-surface);
         --bs-btn-border-color: var(--tc-border-strong);
         --bs-btn-font-size: 12.5px;
         --bs-btn-padding-y: 7px;
         --bs-btn-padding-x: 13px;
-        --bs-btn-hover-color: var(--tc-slate-700);
-        --bs-btn-hover-bg: #fff;
+        --bs-btn-hover-color: var(--tc-text);
+        --bs-btn-hover-bg: var(--tc-surface-hover);
         --bs-btn-hover-border-color: var(--tc-border-strong);
         --bs-btn-active-color: var(--tc-app-accent-contrast);
         --bs-btn-active-bg: var(--tc-app-accent);
         --bs-btn-active-border-color: var(--tc-app-accent);
-        --bs-btn-disabled-color: var(--tc-slate-700);
-        --bs-btn-disabled-bg: #fff;
+        --bs-btn-disabled-color: var(--tc-text-muted);
+        --bs-btn-disabled-bg: var(--tc-surface);
         --bs-btn-disabled-border-color: var(--tc-border-strong);
 
         position: relative;

@@ -24,8 +24,31 @@ RUN apk add --no-cache git openssh-client ca-certificates tzdata su-exec
 
 RUN addgroup -S nginxpilot 2>/dev/null; \
     adduser -S -D -H -G nginx nginxpilot && \
-    mkdir -p /var/lib/nginxpilot && \
+    mkdir -p /var/lib/nginxpilot/sites.d && \
     chown -R nginxpilot:nginx /var/lib/nginxpilot
+
+# Managed mode (nginx.manage: true): nginxpilot writes the live nginx config
+# into these dirs. The daemon (nginxpilot:nginx) owns the PARENT dir so it can
+# atomically rename its conf.d/stream.d children into place while unprivileged.
+# nginx.conf includes both at build time, so the image is managed-mode-ready; in
+# generate-only mode the (empty) globs are inert. To use managed mode, point the
+# config at these paths:
+#   nginx: { manage: true, conf_dir: /etc/nginx/nginxpilot/conf.d,
+#            stream_conf_dir: /etc/nginx/nginxpilot/stream.d,
+#            managed_include_dir: /etc/nginx/nginxpilot/conf.d }
+RUN mkdir -p /etc/nginx/nginxpilot/conf.d /etc/nginx/nginxpilot/stream.d && \
+    chown -R nginxpilot:nginx /etc/nginx/nginxpilot && \
+    chmod -R 0750 /etc/nginx/nginxpilot && \
+    printf '# nginxpilot managed http-context config (nested include).\ninclude /etc/nginx/nginxpilot/conf.d/*.conf;\n' \
+        > /etc/nginx/conf.d/zz-nginxpilot-managed.conf && \
+    printf '\n# nginxpilot managed stream-context (L4 TCP/UDP) config.\nstream {\n    include /etc/nginx/nginxpilot/stream.d/*.conf;\n}\n' \
+        >> /etc/nginx/nginx.conf
+
+# sites.d/ lives UNDER data_dir so the unprivileged daemon (which owns data_dir)
+# can write fragments there itself when a control plane drives config over the
+# admin API (POST/DELETE /sites). Point the config's `include:` at
+# /var/lib/nginxpilot/sites.d/*.yml. Because data_dir is a VOLUME, Docker seeds a
+# fresh volume from this pre-created, daemon-owned dir on first mount.
 
 COPY --from=build /out/nginxpilot /usr/local/bin/nginxpilot
 COPY docker/entrypoint.sh /usr/local/bin/nginxpilot-entrypoint.sh

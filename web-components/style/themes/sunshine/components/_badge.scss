@@ -1,0 +1,18 @@
+// Sunshine › tc-badge — soft lemon primary, dark-ink amber.
+// The primary badge fills bright lemon under the base white label (~1.4:1) — at
+// chip size a soft lemon pill with leaf text reads better. The warning badge
+// hard-forces white text over the amber fill (~2.4:1); flip it to the dark
+// on-lead ink. Both need !important + the higher theme-scope specificity to beat
+// the base overrides.
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    .badge.text-bg-primary {
+        background-color: var(--sun-lead-tint) !important;
+        color: var(--sun-leaf-lo) !important;
+    }
+
+    .badge.text-bg-warning {
+        color: var(--sun-on-lead) !important;
+    }
+}

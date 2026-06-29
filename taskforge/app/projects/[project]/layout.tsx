@@ -12,6 +12,7 @@ import * as agentPromptRepo from '@/server/data/repositories/agent-prompt-repo'
 import { AppShell } from '@/components/AppShell'
 import { ProjectProvider } from '@/components/ProjectContext'
 import { ProjectHeader } from '@/components/ProjectHeader'
+import { ProjectTabs } from '@/components/project/ProjectTabs'
 import { ActivityBar } from '@/components/project/ActivityBar'
 import { SearchPalette } from '@/components/project/SearchPalette'
 import type { AgentKind, AgentPromptRecord, GitStatus } from '@/server/domain/types'
@@ -82,6 +83,7 @@ export default async function ProjectLayout({
             >
                 <ActivityBar />
                 <ProjectHeader />
+                <ProjectTabs />
                 <SearchPalette />
                 {children}
             </ProjectProvider>

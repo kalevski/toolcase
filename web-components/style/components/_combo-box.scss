@@ -18,6 +18,7 @@ tc-combo-box {
     --bs-combo-box-popover-border: 1px solid var(--tc-border);
     --bs-combo-box-popover-shadow: var(--tc-shadow-lg);
     --bs-combo-box-popover-z: var(--tc-z-dropdown);
+    --bs-combo-box-list-max-height: 240px; // cap before the list scrolls; override via the `max-height` attribute
     --bs-combo-box-search-border: 1px solid var(--tc-border);
     --bs-combo-box-search-bg: var(--tc-surface);
     --bs-combo-box-search-color: var(--tc-text);
@@ -29,9 +30,26 @@ tc-combo-box {
     --bs-combo-box-option-font-size: 0.875rem;
     --bs-combo-box-empty-color: var(--tc-text-muted);
     --bs-combo-box-disabled-opacity: 0.55;
+    // Invalid border/ring reuse the shared danger token (styleguide: colour is
+    // the information). No new prefix.
+    --bs-combo-box-trigger-invalid-border-color: var(--tc-danger);
 
     position: relative;
     min-width: var(--bs-combo-box-min-width);
+}
+
+// Host-level disabled — dim the whole field and swallow pointer events so the
+// trigger, popover, and label all read as inert (matches the shared form-field
+// contract). The trigger also carries the native `disabled` attribute.
+tc-combo-box[disabled] {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+// Field label above the trigger — leans on the shared .form-label cosmetics;
+// only the spacing below it is component-local.
+.tc-combo-box__label {
+    margin-bottom: 0.4rem;
 }
 
 // ── Trigger button ───────────────────────────────────────────────────────────
@@ -55,7 +73,9 @@ tc-combo-box {
     cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
-    transition: border-color var(--tc-transition-base), box-shadow var(--tc-transition-base);
+    transition:
+        border-color var(--tc-transition-base),
+        box-shadow var(--tc-transition-base);
 
     &:focus-visible {
         outline: none;
@@ -64,6 +84,16 @@ tc-combo-box {
 
     &--placeholder {
         color: var(--bs-combo-box-trigger-placeholder-color);
+    }
+
+    // Invalid state — danger border, matching .form-control.is-invalid. Sharp
+    // corners preserved; the focus ring tints danger so the cue survives focus.
+    &--invalid {
+        border-color: var(--bs-combo-box-trigger-invalid-border-color);
+
+        &:focus-visible {
+            box-shadow: 0 0 0 0.2rem rgba(var(--bs-danger-rgb), 0.15);
+        }
     }
 
     &:disabled {
@@ -103,10 +133,10 @@ tc-combo-box {
 // ── Popover (overlay tier — the only place a shadow is allowed) ──────────────
 
 .tc-combo-box__popover {
-    position: absolute;
-    top: calc(100% + 2px);
-    left: 0;
-    right: 0;
+    // Fixed to the viewport with top/left/width set by JS (anchored to the trigger) —
+    // escapes overflow:hidden/auto clipping inside modal/scroll containers.
+    // Mirrors the tc-context-menu pattern.
+    position: fixed;
     z-index: var(--bs-combo-box-popover-z);
     background-color: var(--bs-combo-box-popover-bg);
     border: var(--bs-combo-box-popover-border);
@@ -135,7 +165,9 @@ tc-combo-box {
     border: var(--bs-combo-box-search-border);
     border-radius: 0;
     outline: none;
-    transition: border-color var(--tc-transition-base), box-shadow var(--tc-transition-base);
+    transition:
+        border-color var(--tc-transition-base),
+        box-shadow var(--tc-transition-base);
 
     &:focus-visible {
         box-shadow: var(--bs-combo-box-search-focus-shadow);
@@ -149,7 +181,7 @@ tc-combo-box {
 // ── Options list ─────────────────────────────────────────────────────────────
 
 .tc-combo-box__list {
-    max-height: 240px;
+    max-height: var(--bs-combo-box-list-max-height);
     overflow-y: auto;
     overscroll-behavior: contain;
 }
@@ -164,7 +196,9 @@ tc-combo-box {
     cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
-    transition: background-color var(--tc-transition-base), color var(--tc-transition-base);
+    transition:
+        background-color var(--tc-transition-base),
+        color var(--tc-transition-base);
 
     &:first-child {
         border-top: 0;

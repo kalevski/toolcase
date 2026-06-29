@@ -20,6 +20,7 @@ import {
 } from '@/server/infrastructure/fs-workspace'
 import * as projectRepo from '@/server/data/repositories/project-repo'
 import * as searchRepo from '@/server/data/repositories/search-repo'
+import { agentSessionsBusy } from '@/server/services/locks'
 import { ensureImported } from '@/server/services/migrate-fs'
 import { PROJECT_CLAUDE_MD } from '@/server/templates/project-claude'
 
@@ -106,7 +107,10 @@ export async function readProjectMeta(name: string): Promise<ProjectMeta> {
 /** Delete a project folder + its DB rows. Refuses while a run holds the lock. */
 export async function deleteProject(name: string): Promise<void> {
     const root = projectPath(name) // validates the name
-    if (engine.isLocked(name)) {
+    // SEC-3 — also refuse while a one-shot agent session is live, so deletion
+    // can't race a running agent's writes (mirrors every other mutating route,
+    // which checks both engine.isLocked and the agent-session busy state).
+    if (engine.isLocked(name) || agentSessionsBusy(name)) {
         throw new ProjectLockedError(`A run is in progress for ${name}`)
     }
     await fs.rm(root, { recursive: true, force: true })

@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { fixedOriginOffset } from './internal/containingBlock'
 const TAG_NAME = 'tc-line-chart'
 
 // One series = a name, an ordered list of {x, y} points, and an optional explicit
@@ -463,8 +464,13 @@ export class LineChart extends HTMLElement {
         const rect = svg ? svg.getBoundingClientRect() : null
         const scaleX = rect && this._vw ? rect.width / this._vw : 1
         const scaleY = rect && this._vh ? rect.height / this._vh : 1
-        tip.style.left = `${a.cx * scaleX}px`
-        tip.style.top = `${a.cy * scaleY}px`
+        // rebase to viewport coords (tooltip is position:fixed) by adding the
+        // SVG's viewport origin, so it floats free of any clipping/stacking ancestor;
+        // subtract the containing-block origin when a transformed/filtered ancestor
+        // has hijacked `fixed` (see fixedOriginOffset).
+        const o = fixedOriginOffset(this)
+        tip.style.left = `${(rect ? rect.left : 0) + a.cx * scaleX - o.x}px`
+        tip.style.top = `${(rect ? rect.top : 0) + a.cy * scaleY - o.y}px`
         tip.hidden = false
 
         this.dispatchEvent(

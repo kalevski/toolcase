@@ -6,8 +6,10 @@
         "build": "npm run build --workspaces",
         "test": "vitest run",
         "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
         "lint:exports": "publint base && publint logging && publint serializer && publint web-components && publint phaser-plus && publint node",
-        "format": "prettier --write ."
+        "format": "prettier --write .",
+        "fix": "eslint . --fix && prettier --write ."
     },
     "workspaces": [
         "base",
@@ -17,6 +19,8 @@
         "phaser-plus",
         "node",
         "taskforge",
+        "perch",
+        "wharf",
         "examples"
     ],
     "devDependencies": {
@@ -24,6 +28,7 @@
         "concurrently": "^9.2.3",
         "eslint": "^10.1.0",
         "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-react-hooks": "^7.1.1",
         "phaser": "^4.1.0",
         "prettier": "^3.8.1",
         "publint": "^0.3.18",

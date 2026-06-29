@@ -1,9 +1,21 @@
 import { esc } from './internal/esc'
+import { fieldMessageHtml } from './internal/field-message'
+import {
+    requiredMark,
+    setFieldFormValue,
+    reflectFieldValidity,
+    dispatchFieldChange,
+} from './internal/form-field'
+import { fixedOriginOffset } from './internal/containingBlock'
+import { cssLength } from './internal/cssLength'
 import { chevronDownIcon } from './icons'
 
 const TAG_NAME = 'tc-phone-input'
 
 let _idCounter = 0
+
+export type PhoneInputState = 'valid' | 'invalid'
+const STATES: PhoneInputState[] = ['valid', 'invalid']
 
 function flagEmoji(code: string): string {
     return Array.from(code.toUpperCase())
@@ -73,21 +85,40 @@ export const PHONE_COUNTRIES: PhoneCountry[] = [
 ]
 
 export class PhoneInput extends HTMLElement {
+    // Participates in native <form> submission/validation like every tc-* input.
+    static formAssociated = true
+
     private _initialised = false
     private _idPrefix: string
     private _inputId: string
-    private _errorId: string
+    // Shared id for the reserved field-message slot, referenced by aria-describedby.
+    private _helpId: string
     private _selectedCountry: PhoneCountry
     private _numberValue = ''
     private _isOpen = false
     private _activeIdx = -1
     private _menuOutsideHandler: ((e: MouseEvent) => void) | null = null
     private _menuKeyHandler: ((e: KeyboardEvent) => void) | null = null
+    private _repositionHandler: (() => void) | null = null
+    private _internals: ElementInternals
+    private _defaultValue = ''
 
     onChange: ((value: string) => void) | null = null
 
     static get observedAttributes(): string[] {
-        return ['value', 'name', 'default-country', 'label', 'placeholder', 'error']
+        return [
+            'value',
+            'name',
+            'default-country',
+            'label',
+            'placeholder',
+            'disabled',
+            'required',
+            'error',
+            'state',
+            'help',
+            'max-height',
+        ]
     }
 
     constructor() {
@@ -95,8 +126,9 @@ export class PhoneInput extends HTMLElement {
         const uid = ++_idCounter
         this._idPrefix = `tc-phone-${uid}`
         this._inputId = `${this._idPrefix}-input`
-        this._errorId = `${this._idPrefix}-error`
+        this._helpId = `${this._idPrefix}-help`
         this._selectedCountry = PHONE_COUNTRIES.find((c) => c.code === 'US') ?? PHONE_COUNTRIES[0]
+        this._internals = this.attachInternals()
     }
 
     // ── Getters/setters ───────────────────────────────────────────────────────
@@ -149,6 +181,49 @@ export class PhoneInput extends HTMLElement {
         else this.removeAttribute('error')
     }
 
+    // Hint text shown in the reserved message slot (lowest precedence).
+    get help(): string | null {
+        return this.getAttribute('help')
+    }
+    set help(v: string | null) {
+        if (v != null) this.setAttribute('help', v)
+        else this.removeAttribute('help')
+    }
+
+    // 'valid' | 'invalid'; an `error` message forces 'invalid'.
+    get state(): PhoneInputState | null {
+        const v = this.getAttribute('state') as PhoneInputState
+        return STATES.includes(v) ? v : null
+    }
+    set state(v: PhoneInputState | null) {
+        if (v != null) this.setAttribute('state', v)
+        else this.removeAttribute('state')
+    }
+
+    get maxHeight(): string {
+        return this.getAttribute('max-height') ?? ''
+    }
+    set maxHeight(v: string) {
+        if (v) this.setAttribute('max-height', v)
+        else this.removeAttribute('max-height')
+    }
+
+    get disabled(): boolean {
+        return this.hasAttribute('disabled')
+    }
+    set disabled(v: boolean) {
+        if (v) this.setAttribute('disabled', '')
+        else this.removeAttribute('disabled')
+    }
+
+    get required(): boolean {
+        return this.hasAttribute('required')
+    }
+    set required(v: boolean) {
+        if (v) this.setAttribute('required', '')
+        else this.removeAttribute('required')
+    }
+
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
     connectedCallback(): void {
@@ -160,9 +235,55 @@ export class PhoneInput extends HTMLElement {
             }
             const v = this.getAttribute('value')
             if (v) this._parseValue(v)
+            // Capture the initial value once so formResetCallback can restore it.
+            this._defaultValue = v ?? ''
             this.render()
             this._initialised = true
         }
+        this._applyMaxHeight()
+        this._syncForm()
+    }
+
+    /** Called by the browser when the associated form resets. */
+    formResetCallback(): void {
+        this.value = this._defaultValue || null
+        this._syncForm()
+    }
+
+    /** Called by the browser when a containing fieldset/form is disabled/enabled. */
+    formDisabledCallback(disabled: boolean): void {
+        this.disabled = disabled
+    }
+
+    /** Push value + validity into the form. The submitted value is the composite
+     *  phone string (dial code + number); the field is "empty" when no number has
+     *  been entered. Effective invalid = error / state invalid / required-empty. */
+    private _syncForm(): void {
+        const numberEntered = this._numberValue !== ''
+        const value = this._computeValue()
+        setFieldFormValue(this._internals, this.name, numberEntered ? value : null)
+        const error = this.error
+        const requiredEmpty = this.required && !numberEntered
+        const invalid = !!error || this.state === 'invalid' || requiredEmpty
+        reflectFieldValidity(this._internals, {
+            invalid,
+            valueMissing: requiredEmpty && !error,
+            message:
+                error ||
+                (requiredEmpty ? 'This field is required.' : 'Please enter a valid phone number.'),
+            anchor: this.querySelector<HTMLInputElement>('.tc-phone-input-number') ?? undefined,
+        })
+    }
+
+    /**
+     * Cap how tall the country dropdown grows before it scrolls. A bare number
+     * is read as pixels; any CSS length (`50vh`, `20rem`, …) is honoured as-is.
+     * Removing the attribute restores the stylesheet default (280px).
+     */
+    private _applyMaxHeight(): void {
+        const h = cssLength(this.getAttribute('max-height'))
+        if (h) this.style.setProperty('--bs-phone-input-dropdown-max-height', h)
+        else this.style.removeProperty('--bs-phone-input-dropdown-max-height')
     }
 
     disconnectedCallback(): void {
@@ -172,6 +293,11 @@ export class PhoneInput extends HTMLElement {
 
     attributeChangedCallback(name: string, _old: string | null, next: string | null): void {
         if (!this.isConnected || !this._initialised) return
+
+        if (name === 'max-height') {
+            this._applyMaxHeight()
+            return
+        }
 
         if (name === 'value') {
             if (next !== null) this._parseValue(next)
@@ -188,6 +314,8 @@ export class PhoneInput extends HTMLElement {
 
         const hadFocus = !!this.querySelector('.tc-phone-input-number:focus')
         this.render()
+        // value/required/state/error all affect the reflected validity + form value.
+        this._syncForm()
         if (hadFocus) {
             this.querySelector<HTMLInputElement>('.tc-phone-input-number')?.focus()
         }
@@ -216,13 +344,9 @@ export class PhoneInput extends HTMLElement {
         const val = this._computeValue()
         const hidden = this.querySelector<HTMLInputElement>('input[type="hidden"]')
         if (hidden) hidden.value = val
-        this.dispatchEvent(
-            new CustomEvent('tc-change', {
-                bubbles: true,
-                composed: true,
-                detail: { value: val },
-            }),
-        )
+        // Reflect the new value into the form before notifying listeners.
+        this._syncForm()
+        dispatchFieldChange(this, val)
         if (typeof this.onChange === 'function') this.onChange(val)
     }
 
@@ -237,6 +361,14 @@ export class PhoneInput extends HTMLElement {
         const dropdown = this.querySelector<HTMLElement>('.tc-phone-input-dropdown')
         if (trigger) trigger.setAttribute('aria-expanded', 'true')
         if (dropdown) dropdown.classList.add('tc-phone-input-dropdown--open')
+
+        // Anchor the fixed-positioned dropdown to the trigger (escapes overflow
+        // clipping from ancestor scroll containers), then keep it anchored while
+        // the page or an ancestor scrolls/resizes underneath it.
+        this._positionDropdown()
+        this._repositionHandler = () => this._positionDropdown()
+        window.addEventListener('scroll', this._repositionHandler, true)
+        window.addEventListener('resize', this._repositionHandler)
 
         const searchInput = this.querySelector<HTMLInputElement>('.tc-phone-input-search')
         if (searchInput) {
@@ -275,6 +407,11 @@ export class PhoneInput extends HTMLElement {
         if (this._menuKeyHandler) {
             document.removeEventListener('keydown', this._menuKeyHandler)
             this._menuKeyHandler = null
+        }
+        if (this._repositionHandler) {
+            window.removeEventListener('scroll', this._repositionHandler, true)
+            window.removeEventListener('resize', this._repositionHandler)
+            this._repositionHandler = null
         }
     }
 
@@ -342,6 +479,44 @@ export class PhoneInput extends HTMLElement {
         }
     }
 
+    /**
+     * Position the fixed dropdown against the wrap (trigger anchor) in viewport
+     * coordinates. The dropdown keeps its own CSS width; it opens below by
+     * default and flips above when there isn't room beneath it. Left/top are
+     * clamped so the panel never spills off-screen.
+     */
+    private _positionDropdown(): void {
+        const dropdown = this.querySelector<HTMLElement>('.tc-phone-input-dropdown')
+        const anchor = this.querySelector<HTMLElement>('.tc-phone-input-wrap')
+        if (!dropdown || !anchor) return
+
+        const gap = 2
+        const margin = 4
+        const r = anchor.getBoundingClientRect()
+        const vw = window.innerWidth
+        const vh = window.innerHeight
+
+        const ddH = dropdown.offsetHeight
+        const ddW = dropdown.offsetWidth
+        const spaceBelow = vh - r.bottom
+        const flipUp = spaceBelow < ddH + gap && r.top > spaceBelow
+
+        let top = flipUp
+            ? Math.max(margin, r.top - ddH - gap)
+            : Math.min(r.bottom + gap, vh - ddH - margin)
+        let left = Math.max(margin, Math.min(r.left, vw - ddW - margin))
+        top = Math.max(margin, top)
+
+        // Re-base onto the containing block when a transformed/filtered ancestor
+        // has hijacked `position: fixed` (see fixedOriginOffset).
+        const o = fixedOriginOffset(this)
+        top -= o.y
+        left -= o.x
+
+        dropdown.style.top = `${top}px`
+        dropdown.style.left = `${left}px`
+    }
+
     private _buildTriggerInner(): string {
         const c = this._selectedCountry
         return (
@@ -388,40 +563,59 @@ export class PhoneInput extends HTMLElement {
         this._activeIdx = -1
         const listEl = this.querySelector<HTMLElement>('.tc-phone-input-list')
         if (listEl) listEl.innerHTML = this._buildOptionsHtml(filter)
+        // Filtering changes the dropdown height; re-anchor so a flipped-up
+        // dropdown stays attached to the trigger instead of drifting.
+        if (this._isOpen) this._positionDropdown()
     }
 
     private render(): void {
         const label = this.label
         const placeholder = this.placeholder ?? ''
         const error = this.error
-        const name = this.name
-        const hasError = !!error
+        const required = this.required
+        const disabled = this.disabled
+        // An `error` message forces the invalid state; `state` covers valid/invalid
+        // without an accompanying message string.
+        const state: PhoneInputState | null = error ? 'invalid' : this.state
+        const isInvalid = state === 'invalid'
 
         const labelHtml = label
-            ? `<label class="tc-phone-input-label" for="${this._inputId}">${esc(label)}</label>`
+            ? `<label class="tc-phone-input-label" for="${this._inputId}">${esc(label)}${requiredMark(required)}</label>`
             : ''
 
-        const ariaDescribedBy = hasError ? ` aria-describedby="${this._errorId}"` : ''
-        const ariaInvalid = hasError ? ' aria-invalid="true"' : ''
+        // The number input points at the single reserved slot whenever it carries
+        // a message (hint / valid / invalid).
+        const ariaDescribedBy =
+            error || state || this.help ? ` aria-describedby="${this._helpId}"` : ''
+        const ariaInvalid = isInvalid ? ' aria-invalid="true"' : ''
+        // aria-required goes on the number input (the primary text-entry control).
+        const ariaRequired = required ? ' aria-required="true"' : ''
+        const disabledAttr = disabled ? ' disabled' : ''
         const triggerAriaLabel = `Country: ${this._selectedCountry.name} (${this._selectedCountry.dialCode})`
 
-        const hiddenHtml = name
-            ? `<input type="hidden" name="${esc(name)}" value="${esc(this._computeValue())}">`
-            : ''
+        // Value submission flows through ElementInternals (formAssociated) — no
+        // hidden mirror input, which would double-submit under the same name.
 
-        const errorHtml = hasError
-            ? `<div class="tc-phone-input-error" id="${this._errorId}" role="alert">${esc(error!)}</div>`
-            : ''
+        // One reserved message slot below the group: invalid > valid > hint.
+        const messageHtml = fieldMessageHtml({
+            id: this._helpId,
+            state,
+            error,
+            hint: this.help,
+            invalidText: 'Please enter a valid phone number.',
+            validText: 'Looks good!',
+        })
 
         const optionsHtml = this._buildOptionsHtml('')
 
         this.innerHTML = [
-            `<div class="tc-phone-input${hasError ? ' tc-phone-input--error' : ''}">`,
+            `<div class="tc-phone-input${isInvalid ? ' tc-phone-input--error' : ''}">`,
             labelHtml,
             `<div class="tc-phone-input-wrap">`,
             `<div class="tc-phone-input-group">`,
             `<button type="button" class="tc-phone-input-country"`,
             ` aria-haspopup="listbox" aria-expanded="false"`,
+            disabledAttr,
             ` aria-label="${esc(triggerAriaLabel)}">`,
             this._buildTriggerInner(),
             `</button>`,
@@ -433,7 +627,9 @@ export class PhoneInput extends HTMLElement {
             ` placeholder="${esc(placeholder)}"`,
             ` value="${esc(this._numberValue)}"`,
             ariaInvalid,
+            ariaRequired,
             ariaDescribedBy,
+            disabledAttr,
             `>`,
             `</div>`,
             `<div class="tc-phone-input-dropdown" role="listbox" aria-label="Country selector">`,
@@ -446,8 +642,7 @@ export class PhoneInput extends HTMLElement {
             `</div>`,
             `</div>`,
             `</div>`,
-            hiddenHtml,
-            errorHtml,
+            messageHtml,
             `</div>`,
         ].join('')
 

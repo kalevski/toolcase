@@ -33,7 +33,7 @@ function trustedOrigin(): string {
 // Paths that never require a session. `/api/health` (exact) is the D4 liveness
 // probe for Docker HEALTHCHECK — details stay admin-gated at /api/health/details.
 const PUBLIC_PREFIXES = ['/login', '/api/auth/github']
-const PUBLIC_EXACT = ['/api/health']
+const PUBLIC_EXACT = ['/api/health', '/api/settings']
 
 function isPublic(pathname: string): boolean {
     if (PUBLIC_EXACT.includes(pathname)) return true

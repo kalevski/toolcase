@@ -1,0 +1,80 @@
+// Sunshine › .btn — lemon gradient primary with a warm glow lift.
+// The base .btn-primary bg is `linear-gradient(135deg, var(--tc-app-accent),
+// #2b3a51)` under hardcoded WHITE text — under the lemon remap that reads
+// lemon→slate with ~1.4:1 white. Repoint it to the lemon→amber gradient, the
+// dark on-lead ink label, and add the signature warm glow + translateY lift
+// (CITRINA's .btn-lead).
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    .btn {
+        --bs-btn-focus-shadow-rgb: 95, 138, 46;
+        font-weight: 600;
+        transition:
+            transform 0.14s var(--sun-ease),
+            background 0.2s,
+            border-color 0.2s,
+            box-shadow 0.22s,
+            color 0.2s;
+    }
+
+    // Primary — lemon→amber gradient, dark on-lead ink, warm glow lift.
+    .btn-primary {
+        --bs-btn-bg: var(--sun-lead-grad);
+        --bs-btn-hover-bg: var(--sun-lead-grad);
+        --bs-btn-active-bg: linear-gradient(135deg, var(--sun-lead), var(--sun-lead-lo));
+        --bs-btn-color: var(--sun-on-lead);
+        --bs-btn-hover-color: var(--sun-on-lead);
+        --bs-btn-active-color: var(--sun-on-lead);
+        --bs-btn-border-color: transparent;
+        --bs-btn-hover-border-color: transparent;
+        --bs-btn-active-border-color: transparent;
+        // Loading / disabled primary falls back to white over a flat lemon fill
+        // (~1.4:1) — keep the dark ink so `<tc-button loading>` stays legible.
+        --bs-btn-disabled-color: var(--sun-on-lead);
+        --bs-btn-disabled-bg: var(--sun-lead);
+        box-shadow: var(--sun-lead-shadow);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--sun-lead-shadow-strong);
+    }
+
+    .btn-primary:active,
+    .btn-primary.active {
+        transform: translateY(1px);
+        box-shadow: var(--sun-lead-shadow);
+    }
+
+    // Outline / ghost primary picks up the leaf accent on hover (lemon outline
+    // text would read ~1.5:1 on cream — use leaf for the resting label/border).
+    .btn-outline-primary {
+        --bs-btn-color: var(--sun-leaf-lo);
+        --bs-btn-border-color: var(--sun-line-strong);
+        --bs-btn-hover-bg: var(--sun-leaf-tint);
+        --bs-btn-hover-color: var(--sun-leaf-lo);
+        --bs-btn-hover-border-color: var(--sun-leaf);
+        --bs-btn-active-color: var(--sun-leaf-lo);
+        --bs-btn-active-bg: var(--sun-leaf-tint);
+        --bs-btn-active-border-color: var(--sun-leaf);
+    }
+
+    // Warning solid fill is bright amber → the base keeps white text (~2.4:1).
+    // Flip it to the dark on-lead ink so it clears AA, matching the lemon family.
+    .btn-warning {
+        --bs-btn-color: var(--sun-on-lead);
+        --bs-btn-hover-color: var(--sun-on-lead);
+        --bs-btn-active-color: var(--sun-on-lead);
+        --bs-btn-disabled-color: var(--sun-on-lead);
+    }
+
+    // Plain-link buttons keep no lift / glow.
+    .btn-link {
+        box-shadow: none;
+        &:hover {
+            transform: none;
+            box-shadow: none;
+        }
+    }
+}

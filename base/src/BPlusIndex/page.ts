@@ -2,7 +2,7 @@ import { crc32 } from './crc32'
 import { readU16, writeU16, readU32, writeU32, readU48, writeU48, readU64, writeU64 } from './encode'
 import {
     HEADER_SIZE, CRC_SIZE, FORMAT_VERSION,
-    NULL_PAGE, OVERFLOW_FLAG,
+    OVERFLOW_FLAG,
     PAGE_TYPE_SUPERBLOCK, PAGE_TYPE_INTERNAL, PAGE_TYPE_LEAF,
     PAGE_TYPE_OVERFLOW, PAGE_TYPE_FREELIST,
     SuperblockData, InternalNode, LeafNode, LeafEntry,

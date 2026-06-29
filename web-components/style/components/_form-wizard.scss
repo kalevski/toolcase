@@ -255,12 +255,23 @@ tc-form-wizard {
     padding: var(--bs-form-wizard-body-padding);
     min-height: var(--bs-form-wizard-body-min-height);
     background: var(--bs-form-wizard-body-bg);
-    animation: tc-form-wizard-fade-in 0.18s ease forwards;
+    // Opacity-only entrance, and deliberately NOT `forwards`. A keyframe that
+    // touches `transform` turns the body into a containing block AND stacking
+    // context for position:fixed descendants — and with animation-fill-mode:
+    // forwards that lingers indefinitely even when the held value is `none`
+    // (Chromium keeps the box composited through the fill phase). That trapped
+    // the fixed popover menus (tc-extended-select / tc-combo-box) inside the
+    // body's local stacking context, so a later sibling like the footer Back
+    // button painted over them despite the menu's higher z-index. Fading only
+    // opacity, with no fill, leaves the body free of both once the 0.18s
+    // entrance ends, so the menu anchors to the viewport and stacks above the
+    // footer again.
+    animation: tc-form-wizard-fade-in 0.18s ease;
 }
 
 @keyframes tc-form-wizard-fade-in {
-    from { opacity: 0; transform: translateY(4px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; }
+    to   { opacity: 1; }
 }
 
 // ── Footer ────────────────────────────────────────────────────────────────────

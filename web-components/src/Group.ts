@@ -1,6 +1,6 @@
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
-import { icon, chevronDownIcon } from './icons'
+import { chevronDownIcon } from './icons'
 
 const TAG_NAME = 'tc-group'
 

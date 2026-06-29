@@ -9,10 +9,6 @@
     --bs-form-input-label-color: var(--tc-text);
     --bs-form-input-label-size: 13px;
     --bs-form-input-label-weight: 500;
-    --bs-form-input-help-color: var(--tc-text-muted);
-    --bs-form-input-help-size: 12.5px;
-    --bs-form-input-error-color: var(--tc-danger);
-    --bs-form-input-error-size: 12.5px;
     --bs-form-input-required-color: var(--tc-danger);
     --bs-form-input-disabled-opacity: 0.6;
 
@@ -33,33 +29,7 @@
     color: var(--bs-form-input-required-color);
 }
 
-.tc-form-input-help {
-    margin-top: 0.35rem;
-    font-size: var(--bs-form-input-help-size);
-    line-height: 1.45;
-    color: var(--bs-form-input-help-color);
-}
-
-.tc-form-input-error {
-    display: none;
-    align-items: center;
-    gap: 0.3rem;
-    margin-top: 0.35rem;
-    font-size: var(--bs-form-input-error-size);
-    line-height: 1.4;
-    color: var(--bs-form-input-error-color);
-
-    // Only show when the JS layer has injected a message.
-    &:not(:empty) {
-        display: flex;
-    }
-}
-
-.tc-form-input-error-icon {
-    flex: none;
-    width: 0.9em;
-    height: 0.9em;
-}
+// Helper / validation text is the shared reserved slot — see _field-message.scss.
 
 // Radio-group rows generated for `type="radio"` with options.
 .tc-form-input-radio-group {

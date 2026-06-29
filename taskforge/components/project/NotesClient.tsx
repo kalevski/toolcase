@@ -223,7 +223,7 @@ export function NotesClient() {
     const tableRef = useTc<HTMLElement>({ columns: ADV_COLUMNS })
 
     return (
-        <tc-stack gap="1.25rem">
+        <div className="taskforge-page">
             <tc-card>
                 <div slot="header" style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                     <tc-heading as="h3">Notes</tc-heading>
@@ -298,6 +298,6 @@ export function NotesClient() {
                     </tc-stack>
                 </tc-card>
             )}
-        </tc-stack>
+        </div>
     )
 }

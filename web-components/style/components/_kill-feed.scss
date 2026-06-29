@@ -6,7 +6,7 @@
 tc-kill-feed {
     --bs-kill-feed-bg: var(--tc-surface);
     --bs-kill-feed-border: 1px solid var(--tc-border);
-    --bs-kill-feed-row-border: 1px solid var(--tc-slate-100, #f1f5f9);
+    --bs-kill-feed-row-border: 1px solid var(--tc-border-faint);
     --bs-kill-feed-name-font-size: 0.8125rem;
     --bs-kill-feed-killer-color: var(--tc-text);
     --bs-kill-feed-victim-color: var(--tc-text-muted);

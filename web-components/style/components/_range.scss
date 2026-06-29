@@ -1,5 +1,13 @@
 // tc-range — flat 6px track, circular ink-ringed thumb (sanctioned circle).
 
+// Host-level disabled treatment, matching the rest of the form-field set: dim
+// the whole control and block interaction. (The native :disabled rule below
+// still recolors the thumb.)
+tc-range[disabled] {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
 .form-range {
     width: 100%;
     height: 1.25rem;
@@ -88,6 +96,20 @@
         &::-moz-range-thumb {
             background-color: var(--tc-text-faint);
             border-color: var(--tc-text-faint);
+        }
+    }
+
+    // .form-range is not in _input.scss's .is-invalid selector list (which only
+    // covers .form-control/.form-select/.form-check-input), so the invalid cue
+    // is applied here: tint the thumb ring with --tc-danger so the danger state
+    // is visible on the control itself, not just in the message slot.
+    &.is-invalid {
+        &::-webkit-slider-thumb {
+            border-color: var(--tc-danger);
+        }
+
+        &::-moz-range-thumb {
+            border-color: var(--tc-danger);
         }
     }
 }

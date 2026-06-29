@@ -79,6 +79,37 @@ const InputDemo: React.FC = () => (
                             </div>
                         </tc-section-card>
 
+                        <tc-section-card title="Reserved message slot — alignment">
+                            <p className="text-muted mb-3" style={{ fontSize: '0.875rem' }}>
+                                Every field reserves one line below the control for
+                                hint/valid/invalid text. The columns stay aligned even though only
+                                some fields show a message, and a field never changes height when
+                                its message appears or disappears.
+                            </p>
+                            <div className="row g-3">
+                                <div className="col-12 col-md-4">
+                                    {/* @ts-ignore */}
+                                    <tc-input label="First name" value="Ada" />
+                                </div>
+                                <div className="col-12 col-md-4">
+                                    {/* @ts-ignore */}
+                                    <tc-input
+                                        label="Email"
+                                        value="not-an-email"
+                                        error="Enter a valid email address."
+                                    />
+                                </div>
+                                <div className="col-12 col-md-4">
+                                    {/* @ts-ignore */}
+                                    <tc-input
+                                        label="Username"
+                                        value="ada"
+                                        help="3–20 characters."
+                                    />
+                                </div>
+                            </div>
+                        </tc-section-card>
+
                         <tc-section-card title="Disabled &amp; Readonly">
                             <div className="d-flex flex-column gap-3" style={{ maxWidth: 400 }}>
                                 {/* @ts-ignore */}

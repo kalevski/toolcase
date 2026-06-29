@@ -1,0 +1,18 @@
+// Neon › tc-brand — wordmark with a dual neon gradient underline.
+// The primary wordmark reads in the emphasis off-white; the accent underline bar
+// becomes the magenta→cyan neon sweep. --bs-brand-underline-color is a solid
+// colour slot, so the gradient is applied as a background on .tc-brand__underline.
+
+tc-theme[name='neon'],
+[data-tc-theme='neon'] {
+    tc-brand {
+        --bs-brand-primary-color: var(--nd-emphasis);
+        --bs-brand-primary-font: var(--nd-display);
+        --bs-brand-label-bg: var(--nd-accent-soft);
+        --bs-brand-label-color: var(--nd-accent-bright);
+    }
+
+    .tc-brand__underline {
+        background: var(--nd-accent-grad-text);
+    }
+}

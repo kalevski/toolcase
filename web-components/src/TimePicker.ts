@@ -1,4 +1,12 @@
 import { esc } from './internal/esc'
+import { fieldMessageHtml } from './internal/field-message'
+import {
+    requiredMark,
+    setFieldFormValue,
+    reflectFieldValidity,
+    dispatchFieldChange,
+} from './internal/form-field'
+import { fixedOriginOffset } from './internal/containingBlock'
 import { X, Clock } from 'lucide-static'
 import { icon } from './icons'
 
@@ -8,6 +16,9 @@ let _tpIdCounter = 0
 
 export type TimePickerFormat = '12h' | '24h'
 const FORMATS: TimePickerFormat[] = ['12h', '24h']
+
+export type TimePickerState = 'valid' | 'invalid'
+const STATES: TimePickerState[] = ['valid', 'invalid']
 
 type ColumnName = 'hours' | 'minutes' | 'seconds' | 'period'
 
@@ -39,12 +50,19 @@ function from12h(dh: number, period: 'AM' | 'PM'): number {
 }
 
 export class TimePicker extends HTMLElement {
+    // Participates in native <form> submission/validation like every tc-* input.
+    static formAssociated = true
+
     private _initialised = false
     private _isOpen = false
-    private _errorId: string
+    // Shared id for the reserved field-message slot, referenced by aria-describedby.
+    private _helpId: string
     private _labelId: string
     private _outsideHandler: ((e: MouseEvent) => void) | null = null
     private _keydownHandler: ((e: KeyboardEvent) => void) | null = null
+    private _repositionHandler: (() => void) | null = null
+    private _internals: ElementInternals
+    private _defaultValue = ''
 
     onChange: ((value: string) => void) | null = null
 
@@ -55,8 +73,12 @@ export class TimePicker extends HTMLElement {
             'minute-step',
             'show-seconds',
             'label',
+            'name',
             'placeholder',
+            'required',
             'error',
+            'state',
+            'help',
             'disabled',
             'clearable',
         ]
@@ -65,19 +87,54 @@ export class TimePicker extends HTMLElement {
     constructor() {
         super()
         const n = ++_tpIdCounter
-        this._errorId = `tc-time-picker-error-${n}`
+        this._helpId = `tc-time-picker-help-${n}`
         this._labelId = `tc-time-picker-label-${n}`
+        this._internals = this.attachInternals()
     }
 
     connectedCallback(): void {
         if (!this._initialised) {
+            // Capture the initial value once so formResetCallback can restore it.
+            this._defaultValue = this.getAttribute('value') ?? ''
             this.render()
             this._initialised = true
         }
+        this._syncForm()
     }
 
     disconnectedCallback(): void {
         this._removeDocListeners()
+    }
+
+    /** Called by the browser when the associated form resets. */
+    formResetCallback(): void {
+        this.value = this._defaultValue || null
+        this._syncForm()
+    }
+
+    /** Called by the browser when a containing fieldset/form is disabled/enabled. */
+    formDisabledCallback(disabled: boolean): void {
+        this.disabled = disabled
+    }
+
+    /** Push value + validity into the form. The submitted value is the canonical
+     *  `HH:MM[:SS]` string. Effective invalid = error / state invalid /
+     *  required-but-empty. */
+    private _syncForm(): void {
+        const value = this.value
+        const empty = value == null || value === ''
+        setFieldFormValue(this._internals, this.name, empty ? null : value)
+        const error = this.error
+        const requiredEmpty = this.required && empty
+        const invalid = !!error || this.state === 'invalid' || requiredEmpty
+        reflectFieldValidity(this._internals, {
+            invalid,
+            valueMissing: requiredEmpty && !error,
+            message:
+                error ||
+                (requiredEmpty ? 'This field is required.' : 'Please choose a valid time.'),
+            anchor: this._trigger() ?? undefined,
+        })
     }
 
     attributeChangedCallback(name: string): void {
@@ -86,10 +143,13 @@ export class TimePicker extends HTMLElement {
         // focus/scroll state during selection; structural attributes re-render.
         if (name === 'value') {
             this._patchValue()
+            this._syncForm()
             return
         }
         if (this._isOpen) this._forceClose()
         this.render()
+        // required/state/error all affect the reflected validity computed in _syncForm.
+        this._syncForm()
     }
 
     // ── Attribute-backed props ────────────────────────────────────────────────
@@ -134,6 +194,22 @@ export class TimePicker extends HTMLElement {
         else this.removeAttribute('label')
     }
 
+    get name(): string | null {
+        return this.getAttribute('name')
+    }
+    set name(v: string | null) {
+        if (v != null) this.setAttribute('name', v)
+        else this.removeAttribute('name')
+    }
+
+    get required(): boolean {
+        return this.hasAttribute('required')
+    }
+    set required(v: boolean) {
+        if (v) this.setAttribute('required', '')
+        else this.removeAttribute('required')
+    }
+
     get placeholder(): string | null {
         return this.getAttribute('placeholder')
     }
@@ -148,6 +224,25 @@ export class TimePicker extends HTMLElement {
     set error(v: string | null) {
         if (v != null) this.setAttribute('error', v)
         else this.removeAttribute('error')
+    }
+
+    // Hint text shown in the reserved message slot (lowest precedence).
+    get help(): string | null {
+        return this.getAttribute('help')
+    }
+    set help(v: string | null) {
+        if (v != null) this.setAttribute('help', v)
+        else this.removeAttribute('help')
+    }
+
+    // 'valid' | 'invalid'; an `error` message forces 'invalid'.
+    get state(): TimePickerState | null {
+        const v = this.getAttribute('state') as TimePickerState
+        return STATES.includes(v) ? v : null
+    }
+    set state(v: TimePickerState | null) {
+        if (v != null) this.setAttribute('state', v)
+        else this.removeAttribute('state')
     }
 
     get disabled(): boolean {
@@ -208,6 +303,43 @@ export class TimePicker extends HTMLElement {
         return this.querySelector('.tc-time-picker-panel')
     }
 
+    // ── Positioning ─────────────────────────────────────────────────────────────
+
+    // Anchors the fixed-positioned panel to the trigger (escapes overflow
+    // clipping from ancestor scroll containers). The panel keeps its natural
+    // multi-column width — only top/left are set from the trigger.
+    private _positionPanel(): void {
+        const panel = this.querySelector<HTMLElement>('.tc-time-picker-panel')
+        const anchor = this.querySelector<HTMLElement>('.tc-time-picker-trigger')
+        if (!panel || !anchor) return
+
+        const gap = 2
+        const margin = 4
+        const r = anchor.getBoundingClientRect()
+        const vw = window.innerWidth
+        const vh = window.innerHeight
+
+        const panelH = panel.offsetHeight
+        const panelW = panel.offsetWidth
+        const spaceBelow = vh - r.bottom
+        const flipUp = spaceBelow < panelH + gap && r.top > spaceBelow
+
+        let top = flipUp
+            ? Math.max(margin, r.top - panelH - gap)
+            : Math.min(r.bottom + gap, vh - panelH - margin)
+        let left = Math.max(margin, Math.min(r.left, vw - panelW - margin))
+        top = Math.max(margin, top)
+
+        // Re-base onto the containing block when a transformed/filtered ancestor
+        // has hijacked `position: fixed` (see fixedOriginOffset).
+        const o = fixedOriginOffset(this)
+        top -= o.y
+        left -= o.x
+
+        panel.style.top = `${top}px`
+        panel.style.left = `${left}px`
+    }
+
     // ── Open / close ──────────────────────────────────────────────────────────
 
     private _open(): void {
@@ -215,6 +347,14 @@ export class TimePicker extends HTMLElement {
         this._isOpen = true
         this._trigger()?.setAttribute('aria-expanded', 'true')
         this._panel()?.classList.add('show')
+
+        // Anchor the fixed-positioned panel to the trigger (escapes overflow
+        // clipping from ancestor scroll containers), then keep it anchored
+        // while the page or an ancestor scrolls/resizes underneath it.
+        this._positionPanel()
+        this._repositionHandler = () => this._positionPanel()
+        window.addEventListener('scroll', this._repositionHandler, true)
+        window.addEventListener('resize', this._repositionHandler)
 
         this._scrollSelectedIntoView()
         // Move focus into the first column's active (or first) option.
@@ -250,6 +390,11 @@ export class TimePicker extends HTMLElement {
         if (this._keydownHandler) {
             document.removeEventListener('keydown', this._keydownHandler)
             this._keydownHandler = null
+        }
+        if (this._repositionHandler) {
+            window.removeEventListener('scroll', this._repositionHandler, true)
+            window.removeEventListener('resize', this._repositionHandler)
+            this._repositionHandler = null
         }
     }
 
@@ -360,35 +505,31 @@ export class TimePicker extends HTMLElement {
     }
 
     private _commit(value: string): void {
-        // setAttribute fires attributeChangedCallback('value') → _patchValue(),
-        // which keeps the open panel's focus/scroll intact (no full re-render).
+        // setAttribute fires attributeChangedCallback('value') → _patchValue() +
+        // _syncForm(), which keeps the open panel's focus/scroll intact (no full
+        // re-render). When the value is unchanged the callback won't fire, so sync
+        // explicitly to cover that path.
         if (this.getAttribute('value') !== value) {
             this.setAttribute('value', value)
         } else {
             this._patchValue()
+            this._syncForm()
         }
-        this.dispatchEvent(
-            new CustomEvent('tc-change', {
-                bubbles: true,
-                composed: true,
-                detail: { value },
-            }),
-        )
+        dispatchFieldChange(this, value)
         if (typeof this.onChange === 'function') this.onChange(value)
     }
 
     private _clear(): void {
         const had = this._parseValue() != null
         this.removeAttribute('value')
-        if (!had) this._patchValue()
+        // removeAttribute fires attributeChangedCallback('value') only when the
+        // attribute was present; otherwise patch + sync directly.
+        if (!had) {
+            this._patchValue()
+            this._syncForm()
+        }
         if (this._isOpen) this._close(false)
-        this.dispatchEvent(
-            new CustomEvent('tc-change', {
-                bubbles: true,
-                composed: true,
-                detail: { value: '' },
-            }),
-        )
+        dispatchFieldChange(this, '')
         if (typeof this.onChange === 'function') this.onChange('')
     }
 
@@ -493,20 +634,27 @@ export class TimePicker extends HTMLElement {
         const label = this.getAttribute('label')
         const placeholder = this.getAttribute('placeholder') || 'Select time'
         const error = this.getAttribute('error')
-        const invalid = error != null && error !== ''
+        // An `error` message forces the invalid state; `state` covers valid/invalid
+        // without an accompanying message string.
+        const state: TimePickerState | null = error ? 'invalid' : this.state
+        const invalid = state === 'invalid'
         const disabled = this.disabled
         const clearable = this.clearable
         const display = this._formatDisplay()
         const hasValue = display != null
         const showClear = clearable && hasValue
 
+        const required = this.required
         const disabledAttr = disabled ? ' disabled' : ''
-        const describedBy = invalid ? ` aria-describedby="${this._errorId}"` : ''
+        // The trigger points at the single reserved slot whenever it carries a message.
+        const describedBy = error || state || this.help ? ` aria-describedby="${this._helpId}"` : ''
         const labelledBy = label != null ? ` aria-labelledby="${this._labelId}"` : ''
+        // aria-required on the trigger (the focusable primary control).
+        const requiredAttr = required ? ' aria-required="true"' : ''
 
         const labelHtml =
             label != null
-                ? `<label class="tc-time-picker-label form-label" id="${this._labelId}">${esc(label)}</label>`
+                ? `<label class="tc-time-picker-label form-label" id="${this._labelId}">${esc(label)}${requiredMark(required)}</label>`
                 : ''
 
         const colLabels: Record<ColumnName, string> = {
@@ -530,22 +678,28 @@ export class TimePicker extends HTMLElement {
             ? 'tc-time-picker-trigger form-control is-invalid'
             : 'tc-time-picker-trigger form-control'
 
-        const feedbackHtml = invalid
-            ? `<div class="invalid-feedback" id="${this._errorId}">${esc(error as string)}</div>`
-            : ''
+        // One reserved message slot below the control: invalid > valid > hint.
+        const messageHtml = fieldMessageHtml({
+            id: this._helpId,
+            state,
+            error,
+            hint: this.help,
+            invalidText: 'Please choose a valid time.',
+            validText: 'Looks good!',
+        })
 
         this.innerHTML = [
             `<div class="tc-time-picker">`,
             labelHtml,
             `<div class="tc-time-picker-control">`,
-            `<button class="${triggerClass}" type="button" aria-haspopup="dialog" aria-expanded="false"${labelledBy}${describedBy}${disabledAttr}>`,
+            `<button class="${triggerClass}" type="button" aria-haspopup="dialog" aria-expanded="false"${labelledBy}${describedBy}${requiredAttr}${disabledAttr}>`,
             `<span class="${valueClass}">${esc(hasValue ? (display as string) : placeholder)}</span>`,
             `</button>`,
             `<span class="tc-time-picker-icon" aria-hidden="true"${showClear ? ' hidden' : ''}>${clockIconHtml}</span>`,
             clearHtml,
             `<div class="tc-time-picker-panel" role="dialog" aria-label="Choose time">${columnsHtml}</div>`,
             `</div>`,
-            feedbackHtml,
+            messageHtml,
             `</div>`,
         ].join('')
 

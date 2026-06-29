@@ -212,3 +212,16 @@
         min-height: 44px;
     }
 }
+
+// Reserved field-message slot (shared form-field contract). When a button opts in
+// (the `field` attribute, or `help`/`error`/`state`), it renders an always-present
+// `.tc-field-message` gutter below the control so it lines up with adjacent
+// tc-input/tc-select in a form row — no margin hack needed. Default buttons (no
+// slot) are unaffected and stay plain inline-block.
+tc-button:has(> .tc-field-message),
+tc-metal-button:has(> .tc-field-message) {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: stretch;
+    vertical-align: top;
+}

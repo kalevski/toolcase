@@ -52,6 +52,8 @@ interface Session {
     ring: SseEvent[]
     stopRequested: boolean
     timedOut: boolean
+    /** IMP-1 — pending SIGKILL grace timer from killGroup; cleared on child exit. */
+    killTimer: ReturnType<typeof setTimeout> | null
 }
 
 function freshSession(): Session {
@@ -64,6 +66,7 @@ function freshSession(): Session {
         ring: [],
         stopRequested: false,
         timedOut: false,
+        killTimer: null,
     }
 }
 
@@ -106,6 +109,14 @@ function buildCustomPrompt(project: string, def: AgentDef, userPrompt: string): 
 
 class AgentSessionManager extends EventEmitter {
     private sessions = new Map<string, Map<AgentKind, Session>>()
+
+    constructor() {
+        super()
+        // COR-3 — every open SSE stream adds one 'event' listener; lift the
+        // default 10-listener cap so concurrent SSE clients don't trip
+        // MaxListenersExceededWarning (listeners are removed on SSE cancel()).
+        this.setMaxListeners(0)
+    }
 
     private get(project: string, agent: AgentKind): Session {
         let perProject = this.sessions.get(project)
@@ -297,7 +308,7 @@ class AgentSessionManager extends EventEmitter {
             timeoutMs > 0
                 ? setTimeout(() => {
                       s.timedOut = true
-                      this.killGroup(child)
+                      this.killGroup(s, child)
                   }, timeoutMs)
                 : null
 
@@ -305,11 +316,21 @@ class AgentSessionManager extends EventEmitter {
             child.stdout?.on('data', (chunk: Buffer) => parser.feed(chunk.toString()))
             child.stderr?.on('data', (chunk: Buffer) => this.log(project, agent, 'error', chunk.toString()))
             child.on('close', (code) => {
+                // IMP-1 — child exited; cancel any pending kill-group SIGKILL timer
+                // so it can't later signal a reused pid.
+                if (s.killTimer) {
+                    clearTimeout(s.killTimer)
+                    s.killTimer = null
+                }
                 parser.flush()
                 exitCode = code
                 resolve()
             })
             child.on('error', (err) => {
+                if (s.killTimer) {
+                    clearTimeout(s.killTimer)
+                    s.killTimer = null
+                }
                 this.log(project, agent, 'error', err.message)
                 resolve()
             })
@@ -363,12 +384,12 @@ class AgentSessionManager extends EventEmitter {
         if (s.status === 'running') {
             s.stopRequested = true
             slog('info', 'agent-session', `${agent} stop requested`, { project, pid: s.child?.pid })
-            if (s.child) this.killGroup(s.child)
+            if (s.child) this.killGroup(s, s.child)
         }
         return this.snapshot(project, agent)
     }
 
-    private killGroup(child: ChildProcess): void {
+    private killGroup(s: Session, child: ChildProcess): void {
         if (!child.pid) return
         const pid = child.pid
         try {
@@ -376,7 +397,10 @@ class AgentSessionManager extends EventEmitter {
         } catch {
             child.kill('SIGTERM')
         }
-        setTimeout(() => {
+        // IMP-1 — track the SIGKILL timer so the child's close handler can cancel
+        // it; a clean early exit would otherwise leave it to fire against a
+        // possibly-reused pid (an unrelated process group).
+        s.killTimer = setTimeout(() => {
             try {
                 process.kill(-pid, 'SIGKILL')
             } catch {

@@ -1,0 +1,200 @@
+// Sunshine › accent-fill contrast pass.
+//
+// Two systematic assumptions break under the bright LEMON accent (the same trap
+// aurora's bright mint hits — independent of the light canvas):
+//
+//  1. ACCENT FILLS + WHITE TEXT. Dozens of components paint a part with the app
+//     accent (`--bs-*-bg: var(--tc-app-accent)`) and a hard-coded `#fff` label.
+//     The token remap turns the accent bright lemon, so white text lands at
+//     ~1.4:1. These are STATE-specific vars (selected / active / current /
+//     claimed / done) so repointing the matching `--bs-*-color` to the dark
+//     on-lead ink fixes only the accent state and leaves neutral states alone.
+//
+//  2. THE #2b3a51 SLATE-STOP GRADIENT. A whole family of CTA buttons fill with
+//     `linear-gradient(135deg, var(--tc-app-accent), #2b3a51)` + white text. The
+//     slate stop survives the remap, so the button renders lemon→slate (a muddy
+//     olive) under white. Repoint the fill to the lemon→amber gradient and the
+//     label to the dark on-lead ink.
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    // ── 1. Accent-fill state labels → dark on-lead ink ──────────────────────
+    tc-asset-bundle {
+        --bs-asset-bundle-control-active-color: var(--sun-on-lead);
+    }
+    tc-battle-pass {
+        --bs-battle-pass-premium-color: var(--sun-on-lead);
+        --bs-battle-pass-level-marker-current-color: var(--sun-on-lead);
+        --bs-battle-pass-cell-claimed-color: var(--sun-on-lead);
+    }
+    tc-codex {
+        --bs-codex-row-selected-color: var(--sun-on-lead);
+    }
+    tc-ecosystem-map {
+        --bs-ecosystem-map-core-text: var(--sun-on-lead);
+    }
+    tc-equipment-doll {
+        --bs-equipment-doll-qty-color: var(--sun-on-lead);
+        --bs-equipment-doll-selected-color: var(--sun-on-lead);
+    }
+    tc-form-wizard {
+        --bs-form-wizard-current-color: var(--sun-on-lead);
+        --bs-form-wizard-done-color: var(--sun-on-lead);
+    }
+    tc-graphics-preset-picker {
+        --bs-graphics-preset-picker-active-color: var(--sun-on-lead);
+    }
+    tc-item-slot {
+        // hotkey / qty / equipped sit on the bright accent → ink. NOT cooldown:
+        // its label rides a dark veil, where the base white is correct.
+        --bs-item-slot-hotkey-color: var(--sun-on-lead);
+        --bs-item-slot-qty-color: var(--sun-on-lead);
+        --bs-item-slot-equipped-color: var(--sun-on-lead);
+    }
+    tc-menu-item {
+        --bs-menu-item-selected-color: var(--sun-on-lead);
+        --bs-menu-item-selected-icon-color: rgba(46, 36, 0, 0.82);
+        --bs-menu-item-hotkey-selected-color: rgba(46, 36, 0, 0.85);
+    }
+    tc-level-header {
+        --bs-level-header-badge-color: var(--sun-on-lead);
+    }
+    tc-level-select {
+        --bs-level-select-node-selected-color: var(--sun-on-lead);
+    }
+    tc-lobby {
+        --bs-lobby-btn-start-color: var(--sun-on-lead);
+        --bs-lobby-btn-active-color: var(--sun-on-lead);
+    }
+    tc-main-menu {
+        --bs-main-menu-item-selected-color: var(--sun-on-lead);
+        --bs-main-menu-badge-selected-color: var(--sun-on-lead);
+    }
+    tc-maintainer-card {
+        // sponsor pill rides the danger (coral) fill — ink clears AA where white
+        // is marginal on the bright coral.
+        --bs-maintainer-card-sponsor-color: var(--sun-on-lead);
+    }
+    tc-matchmaking-screen {
+        --bs-matchmaking-screen-btn-accept-color: var(--sun-on-lead);
+    }
+    tc-normal-map-generator {
+        --bs-normal-map-generator-seg-active-color: var(--sun-on-lead);
+        --bs-normal-map-generator-tool-active-color: var(--sun-on-lead);
+    }
+    tc-perk-picker {
+        --bs-perk-picker-selected-color: var(--sun-on-lead);
+        --bs-perk-picker-icon-selected-color: var(--sun-on-lead);
+        --bs-perk-picker-selected-desc-color: rgba(46, 36, 0, 0.78);
+    }
+    tc-pricing-card {
+        --bs-pricing-card-badge-color: var(--sun-on-lead);
+    }
+    tc-shop-panel {
+        --bs-shop-panel-btn-color: var(--sun-on-lead);
+    }
+    tc-side-nav {
+        --bs-side-nav-badge-color: var(--sun-on-lead);
+    }
+    tc-skill-tree {
+        --bs-skill-tree-node-selected-color: var(--sun-on-lead);
+    }
+    tc-stepper {
+        --bs-stepper-active-color: var(--sun-on-lead);
+        --bs-stepper-complete-color: var(--sun-on-lead);
+    }
+    tc-user-panel {
+        --bs-user-panel-avatar-color: var(--sun-on-lead);
+    }
+    tc-vertical-item-list {
+        --bs-vertical-item-list-badge-color: var(--sun-on-lead);
+    }
+
+    // ── 2. #2b3a51 slate-stop CTA gradients → lemon→amber + ink ──────────────
+    tc-bitmap-font-generator {
+        --bs-bitmap-font-generator-btn-primary-bg: var(--sun-lead-grad);
+        --bs-bitmap-font-generator-btn-primary-color: var(--sun-on-lead);
+        --bs-bitmap-font-generator-btn-active-color: var(--sun-on-lead);
+    }
+    tc-chat-window {
+        --bs-chat-window-send-bg: var(--sun-lead-grad);
+        --bs-chat-window-send-color: var(--sun-on-lead);
+    }
+    tc-crafting-panel {
+        --bs-crafting-panel-craft-bg: var(--sun-lead-grad);
+        --bs-crafting-panel-craft-color: var(--sun-on-lead);
+    }
+    tc-early-signup-form {
+        --bs-early-signup-form-submit-bg: var(--sun-lead-grad);
+        --bs-early-signup-form-submit-color: var(--sun-on-lead);
+    }
+    tc-github-stars-card {
+        --bs-github-stars-card-cta-bg: var(--sun-lead-grad);
+        --bs-github-stars-card-cta-color: var(--sun-on-lead);
+    }
+    tc-image-crop {
+        --bs-image-crop-btn-primary-bg: var(--sun-lead-grad);
+        --bs-image-crop-btn-primary-color: var(--sun-on-lead);
+    }
+    // metal-button: only the PRIMARY variant carries the slate gradient; default
+    // + ghost are neutral/transparent, so scope to the variant. danger keeps its
+    // coral fill → ink label.
+    tc-metal-button[variant='primary'] {
+        --bs-metal-button-bg: var(--sun-lead-grad);
+        --bs-metal-button-hover-bg: var(--sun-lead-grad);
+        --bs-metal-button-active-bg: var(--sun-lead-grad);
+        --bs-metal-button-color: var(--sun-on-lead);
+    }
+    tc-metal-button[variant='danger'] {
+        --bs-metal-button-color: var(--sun-on-lead);
+    }
+    tc-newsletter-signup {
+        --bs-newsletter-signup-submit-bg: var(--sun-lead-grad);
+        --bs-newsletter-signup-submit-color: var(--sun-on-lead);
+    }
+    tc-node-editor {
+        --bs-node-editor-selected-header-bg: var(--sun-lead-grad);
+        --bs-node-editor-selected-header-text: var(--sun-on-lead);
+    }
+    tc-pricing-card {
+        --bs-pricing-card-highlight-cap-bg: var(--sun-lead-grad);
+    }
+    tc-usage-summary-panel {
+        --bs-usage-summary-panel-title-bg: var(--sun-lead-grad);
+        --bs-usage-summary-panel-title-color: var(--sun-on-lead);
+    }
+
+    // legal-screen + page-footer paint the slate gradient directly on the
+    // element (no var), so re-skin the element and flip the label to ink.
+    .tc-legal-screen__accept,
+    .tc-page-footer-cta-btn {
+        background: var(--sun-lead-grad) !important;
+        color: var(--sun-on-lead) !important;
+    }
+
+    // ── 3. State-scoped accent labels set directly on the element ────────────
+    // These hard-code `#fff` inside a `.is-selected` / `--complete` / `--live`
+    // block (no var to repoint), so scope the override to the SAME accent state.
+    .tc-crafting-panel-row.is-selected .tc-crafting-panel-row-name,
+    .tc-crafting-panel-row.is-selected .tc-crafting-panel-row-icon {
+        color: var(--sun-on-lead);
+    }
+    .tc-pipeline-step--complete .tc-pipeline-marker,
+    .tc-pipeline-step--live .tc-pipeline-marker {
+        color: var(--sun-on-lead);
+    }
+    .tc-skill-tree__node--selected .tc-skill-tree__rank,
+    .tc-skill-tree__node--selected .tc-skill-tree__label {
+        color: var(--sun-on-lead);
+    }
+    .tc-legal-screen__nav-item--active {
+        color: var(--sun-on-lead);
+    }
+    // game-showcase stamp shares one colour var across the ink default ("Featured",
+    // light-on-ink, correct) and the bright success/warning variants. Scope the
+    // ink flip to the coloured variants only.
+    .tc-game-showcase-card-stamp--success,
+    .tc-game-showcase-card-stamp--warning {
+        color: var(--sun-on-lead);
+    }
+}

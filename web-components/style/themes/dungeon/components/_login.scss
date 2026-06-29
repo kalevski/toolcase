@@ -7,8 +7,10 @@
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
     tc-login {
-        // ── Title colour → ink on parchment ────────────────────────────────────
-        --bs-login-title-color: var(--fg-ink);
+        // Title → bright parchment. The form surface remaps to the dark ink-brown
+        // (--tc-surface #211a12), not a light parchment plate, so an ink title was
+        // dark-on-dark and unreadable; use the light parchment text instead.
+        --bs-login-title-color: var(--fg-parch);
 
         // ── Description → parchment-dim muted text ─────────────────────────────
         --bs-login-desc-color: var(--fg-parch-dim);

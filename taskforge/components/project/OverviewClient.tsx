@@ -169,7 +169,7 @@ export function OverviewClient() {
     )
 
     return (
-        <tc-stack gap="1.25rem">
+        <div className="taskforge-page">
             <tc-helper-text text={helpTexts.overview.how} />
 
             <tc-metric-grid ref={topMetricsRef} columns={4} />
@@ -326,6 +326,6 @@ export function OverviewClient() {
                     </p>
                 </tc-empty-state>
             )}
-        </tc-stack>
+        </div>
     )
 }

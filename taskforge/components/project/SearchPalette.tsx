@@ -1,12 +1,23 @@
 'use client'
 
-// C3 — workspace search palette (Cmd/Ctrl+K): one box over tasks, knowledge,
-// notes; results grouped by type; Enter / click deep-links into the owning page
-// (?open=<id> is picked up by the target client).
+// C3 / Modernization — workspace search palette (Cmd/Ctrl+K). Promoted to the
+// shared `tc-command-palette` so all three control panels share one global
+// search surface (design-system §7). The palette filters the project's in-memory
+// tasks / knowledge / notes (loaded into ProjectContext server-side) by title +
+// id + description keywords; selecting a result deep-links into the owning page
+// via `?open=<id>` (picked up by the target client).
+//
+// Note vs. the previous bespoke palette: tc-command-palette owns its own input
+// and filters its `items` client-side (label + keywords), so this drops the
+// per-keystroke server FTS5 snippet search. The doc bodies aren't loaded on the
+// client anyway, and title/id/description keyword matching covers the common
+// "jump to a task/doc/note" case while unifying the surface across apps.
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import type { SearchDocType, SearchHit } from '@/server/domain/types'
+import type { CommandPaletteItem } from '@toolcase/web-components'
+import { useTc } from '@/lib/tc'
+import type { SearchDocType } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 
 const TYPE_LABEL: Record<SearchDocType, string> = {
@@ -15,180 +26,93 @@ const TYPE_LABEL: Record<SearchDocType, string> = {
     note: 'Notes',
 }
 
-const TYPE_ORDER: SearchDocType[] = ['task', 'knowledge', 'note']
-
-function hrefFor(project: string, hit: SearchHit): string {
-    const page = hit.type === 'task' ? 'tasks' : hit.type === 'knowledge' ? 'knowledge' : 'notes'
-    return `/projects/${project}/${page}?open=${encodeURIComponent(hit.id)}`
+const TYPE_ICON: Record<SearchDocType, string> = {
+    task: 'list-checks',
+    knowledge: 'book-text',
+    note: 'sticky-note',
 }
 
-/** Render an FTS5 `<mark>`-delimited snippet without dangerouslySetInnerHTML. */
-function Snippet({ text }: { text: string }) {
-    const parts = text.split(/<\/?mark>/g)
-    return (
-        <span className="tf-palette__snippet">
-            {parts.map((p, i) => (i % 2 === 1 ? <mark key={i}>{p}</mark> : <React.Fragment key={i}>{p}</React.Fragment>))}
-        </span>
-    )
+const PAGE_FOR: Record<SearchDocType, string> = {
+    task: 'tasks',
+    knowledge: 'knowledge',
+    note: 'notes',
+}
+
+// Encode the doc type into the command id so tc-select can route without a
+// lookup table: `<type>:<docId>`.
+function itemId(type: SearchDocType, docId: string): string {
+    return `${type}:${docId}`
 }
 
 export function SearchPalette() {
-    const { project } = useProject()
+    const { project, tasks, knowledge, notes } = useProject()
     const router = useRouter()
     const [open, setOpen] = useState(false)
-    const [query, setQuery] = useState('')
-    const [hits, setHits] = useState<SearchHit[]>([])
-    const [available, setAvailable] = useState(true)
-    const [active, setActive] = useState(0)
-    const inputRef = useRef<HTMLInputElement>(null)
-    const debounce = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-    // global hotkey
+    // global hotkey — ⌘/Ctrl+K toggles; Esc is handled by the palette itself.
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
             if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
                 e.preventDefault()
                 setOpen((v) => !v)
-            } else if (e.key === 'Escape') {
-                setOpen(false)
             }
         }
         window.addEventListener('keydown', onKey)
         return () => window.removeEventListener('keydown', onKey)
     }, [])
 
-    useEffect(() => {
-        if (open) {
-            setQuery('')
-            setHits([])
-            setActive(0)
-            // Reset availability too — otherwise an earlier `available:false`
-            // response leaves the "unavailable" banner stuck across re-opens.
-            setAvailable(true)
-            setTimeout(() => inputRef.current?.focus(), 0)
-        } else if (debounce.current) {
-            // Cancel any in-flight debounced search when the palette closes.
-            clearTimeout(debounce.current)
-            debounce.current = null
+    const items = useMemo<CommandPaletteItem[]>(() => {
+        const out: CommandPaletteItem[] = []
+        for (const t of tasks) {
+            out.push({
+                id: itemId('task', t.id),
+                label: t.title || t.id,
+                group: TYPE_LABEL.task,
+                icon: TYPE_ICON.task,
+                keywords: [t.id, t.status, t.severity ?? '', t.project ?? ''].filter(Boolean),
+            })
         }
-    }, [open])
-
-    // Clear a pending debounce timer on unmount so it can't fire setState after
-    // the palette is gone (or against a stale project after navigation).
-    useEffect(() => () => void (debounce.current && clearTimeout(debounce.current)), [])
-
-    const runSearch = useCallback(
-        (q: string) => {
-            if (debounce.current) clearTimeout(debounce.current)
-            debounce.current = setTimeout(async () => {
-                if (!q.trim()) {
-                    setHits([])
-                    return
-                }
-                try {
-                    const d = await fetch(
-                        `/api/projects/${project}/search?q=${encodeURIComponent(q)}`,
-                    ).then((r) => (r.ok ? r.json() : null))
-                    if (d) {
-                        setAvailable(d.available !== false)
-                        setHits(d.hits ?? [])
-                        setActive(0)
-                    }
-                } catch {
-                    /* transient */
-                }
-            }, 180)
-        },
-        [project],
-    )
-
-    const grouped = useMemo(() => {
-        const flat: { hit: SearchHit; index: number }[] = []
-        const groups: { type: SearchDocType; items: { hit: SearchHit; index: number }[] }[] = []
-        for (const type of TYPE_ORDER) {
-            const items = hits.filter((h) => h.type === type).map((hit) => ({ hit, index: 0 }))
-            if (!items.length) continue
-            for (const item of items) {
-                item.index = flat.length
-                flat.push(item)
-            }
-            groups.push({ type, items })
+        for (const k of knowledge) {
+            out.push({
+                id: itemId('knowledge', k.id),
+                label: k.title || k.id,
+                group: TYPE_LABEL.knowledge,
+                icon: TYPE_ICON.knowledge,
+                keywords: [k.id, k.description].filter(Boolean),
+            })
         }
-        return { flat, groups }
-    }, [hits])
+        for (const n of notes) {
+            out.push({
+                id: itemId('note', n.id),
+                label: n.title || n.id,
+                group: TYPE_LABEL.note,
+                icon: TYPE_ICON.note,
+                keywords: [n.id],
+            })
+        }
+        return out
+    }, [tasks, knowledge, notes])
 
-    const go = useCallback(
-        (hit: SearchHit) => {
+    const onSelect = useCallback(
+        (e: Event) => {
+            const item = (e as CustomEvent).detail?.item as CommandPaletteItem | undefined
+            if (!item) return
+            const sep = item.id.indexOf(':')
+            const type = item.id.slice(0, sep) as SearchDocType
+            const docId = item.id.slice(sep + 1)
             setOpen(false)
-            router.push(hrefFor(project, hit))
+            router.push(`/projects/${project}/${PAGE_FOR[type]}?open=${encodeURIComponent(docId)}`)
         },
         [project, router],
     )
 
-    const onInputKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'ArrowDown') {
-            e.preventDefault()
-            setActive((a) => Math.min(a + 1, grouped.flat.length - 1))
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault()
-            setActive((a) => Math.max(a - 1, 0))
-        } else if (e.key === 'Enter' && grouped.flat[active]) {
-            e.preventDefault()
-            go(grouped.flat[active].hit)
-        }
-    }
-
-    if (!open) return null
-
-    return (
-        <div className="tf-palette__backdrop" onClick={() => setOpen(false)}>
-            <div className="tf-palette" role="dialog" aria-label="Workspace search" onClick={(e) => e.stopPropagation()}>
-                <div className="tf-palette__head">
-                    <input
-                        ref={inputRef}
-                        className="tf-palette__input"
-                        placeholder={`Search ${project} tasks, knowledge, notes…`}
-                        value={query}
-                        onChange={(e) => {
-                            setQuery(e.target.value)
-                            runSearch(e.target.value)
-                        }}
-                        onKeyDown={onInputKey}
-                    />
-                    <tc-kbd>esc</tc-kbd>
-                </div>
-                {!available && (
-                    <div className="tf-palette__empty">
-                        <tc-text variant="muted">Search unavailable — this runtime&apos;s SQLite lacks FTS5.</tc-text>
-                    </div>
-                )}
-                {available && query.trim() && grouped.flat.length === 0 && (
-                    <div className="tf-palette__empty">
-                        <tc-text variant="muted">No matches.</tc-text>
-                    </div>
-                )}
-                <div className="tf-palette__results">
-                    {grouped.groups.map((g) => (
-                        <div key={g.type} className="tf-palette__group">
-                            <div className="tf-palette__group-title">{TYPE_LABEL[g.type]}</div>
-                            {g.items.map(({ hit, index }) => (
-                                <button
-                                    key={`${hit.type}:${hit.id}`}
-                                    type="button"
-                                    className={`tf-palette__row${index === active ? ' tf-palette__row--active' : ''}`}
-                                    onMouseEnter={() => setActive(index)}
-                                    onClick={() => go(hit)}
-                                >
-                                    <span className="tf-palette__row-title">
-                                        {hit.title} <tc-badge variant="secondary">{hit.id}</tc-badge>
-                                    </span>
-                                    <Snippet text={hit.snippet} />
-                                </button>
-                            ))}
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
+    const paletteRef = useTc<HTMLElement>(
+        useMemo(() => ({ items, open }), [items, open]),
+        {
+            'tc-select': onSelect,
+            'tc-close': () => setOpen(false),
+        },
     )
+
+    return <tc-command-palette ref={paletteRef} placeholder={`Search ${project} tasks, knowledge, notes…`} />
 }

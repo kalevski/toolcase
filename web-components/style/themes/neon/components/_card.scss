@@ -1,0 +1,40 @@
+// Neon › .card — deep void surface with a neon glow hover-lift.
+// Token swap gives the dark fill; this adds the top-down surface gradient, the
+// thin top highlight, and the signature translateY lift + border-brighten on
+// hover that the neon game-service cards use.
+
+tc-theme[name='neon'],
+[data-tc-theme='neon'] {
+    .card {
+        --bs-card-bg: var(--nd-surface-grad);
+        --bs-card-border-color: var(--nd-border);
+        --bs-card-cap-bg: transparent;
+        --bs-card-color: var(--nd-text);
+        position: relative;
+        box-shadow: var(--nd-bevel-top);
+        transition:
+            transform 0.3s var(--nd-ease),
+            border-color 0.3s,
+            box-shadow 0.3s;
+    }
+
+    .card:hover {
+        transform: translateY(-4px);
+        border-color: var(--nd-border-strong);
+        box-shadow: var(--tc-shadow-hover), var(--nd-bevel-top);
+    }
+
+    .card-header {
+        border-bottom-color: var(--nd-border);
+    }
+
+    .card-footer {
+        border-top-color: var(--nd-border);
+    }
+
+    // Solid-variant cards (text-bg-*) keep their fill — drop the hover lift so
+    // the bright surface doesn't float.
+    .card[class*='text-bg-']:hover {
+        transform: none;
+    }
+}

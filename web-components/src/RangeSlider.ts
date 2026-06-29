@@ -1,5 +1,18 @@
 import { esc } from './internal/esc'
+import { fieldMessageHtml } from './internal/field-message'
+import {
+    requiredMark,
+    setFieldFormValue,
+    reflectFieldValidity,
+    dispatchFieldChange,
+} from './internal/form-field'
 const TAG_NAME = 'tc-range-slider'
+
+let _rsIdCounter = 0
+
+export type RangeSliderState = 'valid' | 'invalid'
+
+const STATES: RangeSliderState[] = ['valid', 'invalid']
 
 function snapToStep(v: number, min: number, max: number, step: number): number {
     if (step <= 0 || max <= min) return Math.min(Math.max(v, min), max)
@@ -14,24 +27,53 @@ function snapToStep(v: number, min: number, max: number, step: number): number {
 }
 
 export class RangeSlider extends HTMLElement {
+    // Participates in native <form> submission/validation like every tc-* input.
+    static formAssociated = true
+
     private _initialised = false
     private _value: [number, number] = [0, 100]
     private _dragging: 'lo' | 'hi' | null = null
     private _dragMoveHandler: ((e: PointerEvent) => void) | null = null
     private _dragUpHandler: (() => void) | null = null
+    // Stable id for the reserved message slot (aria-describedby target on the handles).
+    private _helpId = `tc-rs-help-${++_rsIdCounter}`
+    private _internals: ElementInternals
+    // Initial [lo, hi] pair, captured on first connect for formResetCallback.
+    private _defaultValue: [number, number] | null = null
 
     onChange: ((value: [number, number]) => void) | null = null
 
+    constructor() {
+        super()
+        this._internals = this.attachInternals()
+    }
+
     static get observedAttributes(): string[] {
-        return ['min', 'max', 'step', 'ticks', 'show-tooltip', 'label', 'disabled']
+        return [
+            'min',
+            'max',
+            'step',
+            'ticks',
+            'show-tooltip',
+            'label',
+            'name',
+            'required',
+            'disabled',
+            'help',
+            'error',
+            'state',
+        ]
     }
 
     connectedCallback(): void {
         if (!this._initialised) {
             this.render()
+            // Capture the coerced initial pair so a form reset can restore it.
+            this._defaultValue = [...this._value] as [number, number]
             this._initialised = true
         }
         this._attachHandlers()
+        this._syncForm()
     }
 
     disconnectedCallback(): void {
@@ -39,9 +81,26 @@ export class RangeSlider extends HTMLElement {
         this._cleanupDrag()
     }
 
+    /** Called by the browser when the associated form resets. */
+    formResetCallback(): void {
+        if (this._defaultValue) {
+            this._value = this._coerce(this._defaultValue[0], this._defaultValue[1])
+            // Patch positions in-place — reset must not disrupt the bespoke track.
+            this._patchPositions()
+        }
+        this._syncForm()
+    }
+
+    /** Called by the browser when a containing fieldset/form is disabled/enabled. */
+    formDisabledCallback(disabled: boolean): void {
+        this.disabled = disabled
+    }
+
     attributeChangedCallback(_name: string, _old: string | null, _next: string | null): void {
         if (!this.isConnected || !this._initialised) return
         this.render()
+        // required/error/state changes shift effective validity, so re-sync.
+        this._syncForm()
     }
 
     get min(): number {
@@ -99,13 +158,59 @@ export class RangeSlider extends HTMLElement {
         else this.removeAttribute('disabled')
     }
 
+    // ── name (form field name) ───────────────────────────────────────────────
+    get name(): string | null {
+        return this.getAttribute('name')
+    }
+    set name(v: string | null) {
+        if (v != null) this.setAttribute('name', v)
+        else this.removeAttribute('name')
+    }
+
+    // ── required ─────────────────────────────────────────────────────────────
+    get required(): boolean {
+        return this.hasAttribute('required')
+    }
+    set required(v: boolean) {
+        if (v) this.setAttribute('required', '')
+        else this.removeAttribute('required')
+    }
+
+    get help(): string | null {
+        return this.getAttribute('help')
+    }
+    set help(v: string | null) {
+        if (v != null) this.setAttribute('help', v)
+        else this.removeAttribute('help')
+    }
+
+    get error(): string | null {
+        return this.getAttribute('error')
+    }
+    set error(v: string | null) {
+        if (v != null) this.setAttribute('error', v)
+        else this.removeAttribute('error')
+    }
+
+    get state(): RangeSliderState | null {
+        const v = this.getAttribute('state') as RangeSliderState
+        return STATES.includes(v) ? v : null
+    }
+    set state(v: RangeSliderState | null) {
+        if (v != null) this.setAttribute('state', v)
+        else this.removeAttribute('state')
+    }
+
     get value(): [number, number] {
         return [...this._value] as [number, number]
     }
     set value(v: [number, number]) {
         if (!Array.isArray(v) || v.length < 2) return
         this._value = this._coerce(v[0], v[1])
-        if (this._initialised) this._patchPositions()
+        if (this._initialised) {
+            this._patchPositions()
+            this._syncForm()
+        }
     }
 
     private _coerce(lo: number, hi: number): [number, number] {
@@ -154,15 +259,27 @@ export class RangeSlider extends HTMLElement {
         }
     }
 
+    /** Push value + validity into the form. The pair is submitted as two entries
+     *  under `name` (the array branch of setFieldFormValue). A range slider always
+     *  has a pair, so required-but-empty never applies — required only renders the
+     *  asterisk + aria. Must NOT re-render — positions are patched in-place. */
+    private _syncForm(): void {
+        const value: [number, number] = [...this._value] as [number, number]
+        setFieldFormValue(this._internals, this.name, value)
+        const error = this.error
+        const invalid = !!error || this.state === 'invalid'
+        reflectFieldValidity(this._internals, {
+            invalid,
+            message: error || 'Please select a valid range.',
+            anchor: this.querySelector<HTMLElement>('.tc-range-slider-handle--lo') ?? undefined,
+        })
+    }
+
     private _fireChange(): void {
         const value: [number, number] = [...this._value] as [number, number]
-        this.dispatchEvent(
-            new CustomEvent('tc-change', {
-                bubbles: true,
-                composed: true,
-                detail: { value },
-            }),
-        )
+        // Keep the form value current, then fire the canonical tc-change.
+        this._syncForm()
+        dispatchFieldChange(this, value)
         if (typeof this.onChange === 'function') this.onChange(value)
     }
 
@@ -330,8 +447,18 @@ export class RangeSlider extends HTMLElement {
 
         const label = this.label
         const disabled = this.disabled
+        const required = this.required
         const ticks = this.ticks
         const showTooltip = this.showTooltip
+        const error = this.error
+        // A non-empty `error` forces the invalid state (matches tc-select).
+        const state: RangeSliderState | null = error ? 'invalid' : this.state
+
+        // Bespoke track: no native .form-range, so paint the invalid cue via a
+        // local .is-invalid rule in _range-slider.scss (not message styling).
+        const trackStateClass = state === 'invalid' ? ' is-invalid' : ''
+        // Both handles describe the same shared slot when it carries a message.
+        const describe = this.help || state ? ` aria-describedby="${this._helpId}"` : ''
 
         const pct = (v: number) => (max === min ? 0 : ((v - min) / (max - min)) * 100)
         const loPct = pct(lo)
@@ -354,11 +481,24 @@ export class RangeSlider extends HTMLElement {
         })()
 
         const labelHtml =
-            label != null ? `<label class="tc-range-slider-label">${esc(label)}</label>` : ''
+            label != null
+                ? `<label class="tc-range-slider-label">${esc(label)}${requiredMark(required)}</label>`
+                : ''
+
+        // One reserved message slot as the LAST child of the host, after the track
+        // (invalid > valid > hint).
+        const messageHtml = fieldMessageHtml({
+            id: this._helpId,
+            state,
+            error,
+            hint: this.help,
+            invalidText: 'Please select a valid range.',
+            validText: 'Looks good!',
+        })
 
         const html = [
             labelHtml,
-            `<div class="tc-range-slider-track">`,
+            `<div class="tc-range-slider-track${trackStateClass}">`,
             `<div class="tc-range-slider-fill" style="left:${loPct}%;width:${hiPct - loPct}%"></div>`,
             `<div class="tc-range-slider-handle tc-range-slider-handle--lo"`,
             ` role="slider"`,
@@ -367,6 +507,9 @@ export class RangeSlider extends HTMLElement {
             ` aria-valuemax="${esc(String(hi))}"`,
             ` aria-valuenow="${esc(String(lo))}"`,
             ` aria-label="Lower value"`,
+            // aria-required goes on the primary (lower) handle.
+            required ? ` aria-required="true"` : '',
+            describe,
             ` style="left:${loPct}%"`,
             `>`,
             tooltipHtml(lo),
@@ -378,12 +521,14 @@ export class RangeSlider extends HTMLElement {
             ` aria-valuemax="${esc(String(max))}"`,
             ` aria-valuenow="${esc(String(hi))}"`,
             ` aria-label="Upper value"`,
+            describe,
             ` style="left:${hiPct}%"`,
             `>`,
             tooltipHtml(hi),
             `</div>`,
             ticksHtml,
             `</div>`,
+            messageHtml,
         ].join('')
 
         this.innerHTML = html

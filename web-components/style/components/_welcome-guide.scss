@@ -40,7 +40,7 @@ tc-welcome-guide {
 
     // ── Progress bar ──────────────────────────────────────────────────────────
     --bs-welcome-guide-progress-height: 0.5rem;
-    --bs-welcome-guide-progress-bg: var(--tc-slate-200, #e2e8f0);
+    --bs-welcome-guide-progress-bg: var(--tc-border);
     --bs-welcome-guide-progress-fill: var(--tc-app-accent);
     --bs-welcome-guide-progress-label-font-size: 0.8125rem;
     --bs-welcome-guide-progress-label-color: var(--tc-text-muted);

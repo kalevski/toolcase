@@ -435,7 +435,9 @@ export async function discardPaths(project: string, paths: string[]): Promise<vo
         await git(project, ['checkout', '--', ...tracked])
     }
     if (untracked.length) {
-        await git(project, ['clean', '-f', '--', ...untracked])
+        // IMP-2 — `-d` so untracked *directories* are removed too (without it
+        // discarding an untracked dir silently leaves it on disk; matches discardAll).
+        await git(project, ['clean', '-fd', '--', ...untracked])
     }
 }
 

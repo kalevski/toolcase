@@ -20,6 +20,7 @@ tc-phone-input {
     --bs-phone-input-dropdown-border: var(--tc-border);
     --bs-phone-input-dropdown-shadow: var(--tc-shadow-lg);
     --bs-phone-input-dropdown-z: var(--tc-z-dropdown);
+    --bs-phone-input-dropdown-max-height: 280px; // cap before the dropdown scrolls; override via the `max-height` attribute
     --bs-phone-input-option-hover-bg: var(--tc-surface-muted);
     --bs-phone-input-option-active-bg: var(--tc-app-accent);
     --bs-phone-input-option-active-text: var(--tc-app-accent-contrast);
@@ -151,14 +152,13 @@ tc-phone-input {
 // ── Dropdown overlay ──────────────────────────────────────────────────────────
 
 .tc-phone-input-dropdown {
-    position: absolute;
-    top: calc(100% + 2px);
-    left: 0;
+    // Fixed to the viewport with top/left/width set by JS (anchored to the trigger) — escapes overflow:hidden/auto clipping inside modal/scroll containers. Mirrors the tc-context-menu pattern.
+    position: fixed;
     z-index: var(--bs-phone-input-dropdown-z);
     display: none;
     flex-direction: column;
     width: 280px;
-    max-height: 280px;
+    max-height: var(--bs-phone-input-dropdown-max-height);
     overflow: hidden;
     background: var(--bs-phone-input-dropdown-bg);
     border: 1px solid var(--bs-phone-input-dropdown-border);
@@ -273,13 +273,15 @@ tc-phone-input {
     font-style: italic;
 }
 
-// ── Error message ─────────────────────────────────────────────────────────────
+// Field-message slot styling lives in style/components/_field-message.scss.
 
-.tc-phone-input-error {
-    display: block;
-    margin-top: 0.3rem;
-    font-size: 0.8125rem;
-    color: var(--bs-phone-input-error-color);
+// ── Disabled host ─────────────────────────────────────────────────────────────
+// Dim + inert the whole control when `disabled` is set (the trigger and number
+// input are also natively disabled via the attribute).
+
+tc-phone-input[disabled] {
+    opacity: 0.6;
+    pointer-events: none;
 }
 
 // ── Touch targets (WCAG 2.5.5 — 44px on coarse pointer) ──────────────────────

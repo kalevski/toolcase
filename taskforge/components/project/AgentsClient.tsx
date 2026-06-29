@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from '@/lib/toast'
-import { useTcEvents } from '@/lib/tc'
+import { useTc, useTcEvents } from '@/lib/tc'
+import type { TabBarItem } from '@toolcase/web-components'
 import type { AgentKind } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 import { useConfirm } from '../ConfirmModal'
@@ -55,6 +56,15 @@ export function AgentsClient({ isAdmin = false }: { isAdmin?: boolean }) {
             router.replace(`?${params.toString()}`, { scroll: false })
         },
         [router, searchParams],
+    )
+
+    // T3 — agent-kind tabs render as a tc-tab-bar (was a Bootstrap nav-tabs)
+    // matching the project tab-bar pattern. Selection still lives in ?tab= so the
+    // activity bar can deep-link to a running agent.
+    const tabItems = useMemo<TabBarItem[]>(() => tabKinds.map((k) => ({ id: k.kind, label: k.label })), [tabKinds])
+    const tabBarRef = useTc<HTMLElement>(
+        useMemo(() => ({ tabs: tabItems, activeId: activeTab }), [tabItems, activeTab]),
+        { 'tc-change': (e: Event) => onTabChange((e as CustomEvent).detail?.id as string) },
     )
 
     // ── C4 admin: define a custom agent kind ────────────────────────────────
@@ -119,9 +129,9 @@ export function AgentsClient({ isAdmin = false }: { isAdmin?: boolean }) {
         router.refresh()
     }
 
-    // tc-tab-sections only renders string content, so the tab strip is plain
-    // Bootstrap nav-tabs (web-components-styled) and the active panel — which
-    // hosts live React (AgentPanel) — is rendered below it.
+    // The tab strip is a tc-tab-bar (T3); the active panel — which hosts live
+    // React (AgentPanel) — is rendered below it (tc-tab-sections would force the
+    // panel content into a managed string slot, so we drive the panel ourselves).
     const active = tabKinds.find((k) => k.kind === activeTab)
 
     const renderPanel = (k: (typeof tabKinds)[number]) => (
@@ -137,7 +147,6 @@ export function AgentsClient({ isAdmin = false }: { isAdmin?: boolean }) {
             style={{ paddingTop: '1rem' }}
             id={`agent-panel-${k.kind}`}
             role="tabpanel"
-            aria-labelledby={`agent-tab-${k.kind}`}
         >
             <tc-helper-text text={BUNDLED_HELP[k.kind] ?? helpTexts.agents.custom} />
             {k.custom && isAdmin && (
@@ -185,25 +194,11 @@ export function AgentsClient({ isAdmin = false }: { isAdmin?: boolean }) {
     )
 
     return (
-        <tc-stack gap="1.25rem">
+        <div className="taskforge-page">
             <div>
-                <ul className="nav nav-tabs" role="tablist">
-                    {tabKinds.map((k) => (
-                        <li className="nav-item" key={k.kind} role="presentation">
-                            <button
-                                type="button"
-                                role="tab"
-                                id={`agent-tab-${k.kind}`}
-                                aria-selected={activeTab === k.kind}
-                                aria-controls={`agent-panel-${k.kind}`}
-                                className={`nav-link${activeTab === k.kind ? ' active' : ''}`}
-                                onClick={() => onTabChange(k.kind)}
-                            >
-                                {k.label}
-                            </button>
-                        </li>
-                    ))}
-                </ul>
+                <div className="tf-project-tabs">
+                    <tc-tab-bar ref={tabBarRef} />
+                </div>
                 {active && renderPanel(active)}
             </div>
 
@@ -252,6 +247,6 @@ export function AgentsClient({ isAdmin = false }: { isAdmin?: boolean }) {
                     </tc-stack>
                 </tc-card>
             )}
-        </tc-stack>
+        </div>
     )
 }

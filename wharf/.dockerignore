@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.env
+.env*.local
+npm-debug.log*
+README.md
+# Local store / backups — must never enter the image.
+wharf.db
+wharf.db-*
+backups/
+client-go/bin/

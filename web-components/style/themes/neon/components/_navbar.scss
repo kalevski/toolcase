@@ -1,0 +1,18 @@
+// Neon › tc-navbar — frosted dark glass bar.
+// The base --bs-navbar-bg is a hardcoded light `rgba(255,255,255,0.85)` that the
+// token remap does not reach; repoint it to a translucent deep void fill so the
+// blur reads as dark glass, and tint the brand dot with the cyan glow ring.
+
+tc-theme[name='neon'],
+[data-tc-theme='neon'] {
+    tc-navbar,
+    .navbar {
+        --bs-navbar-bg: rgba(5, 3, 15, 0.72);
+        --bs-navbar-backdrop-filter: saturate(1.4) blur(14px);
+        --bs-navbar-border-color: var(--nd-border);
+        --bs-navbar-divider-color: var(--nd-border);
+        --bs-navbar-active-color: var(--nd-accent-bright);
+        --bs-navbar-brand-dot-bg: var(--nd-cyan);
+        --bs-navbar-brand-dot-glow: var(--nd-cyan-soft);
+    }
+}

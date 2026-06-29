@@ -1,0 +1,19 @@
+// Sunshine › tc-navbar — warm frosted cream glass bar.
+// The base --bs-navbar-bg is a hardcoded white `rgba(255,255,255,0.85)` that the
+// token remap does not reach; repoint it to a translucent cream fill so the blur
+// reads as warm glass over the citrus page, give the active link a lemon tone,
+// and tint the brand dot lemon (CITRINA's sticky header).
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    tc-navbar,
+    .navbar {
+        --bs-navbar-bg: rgba(251, 243, 226, 0.82);
+        --bs-navbar-backdrop-filter: saturate(1.2) blur(14px);
+        --bs-navbar-border-color: var(--sun-line);
+        --bs-navbar-divider-color: var(--sun-line);
+        --bs-navbar-active-color: var(--sun-leaf-lo);
+        --bs-navbar-brand-dot-bg: var(--sun-lead);
+        --bs-navbar-brand-dot-glow: var(--sun-lead-tint);
+    }
+}

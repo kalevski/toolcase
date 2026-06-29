@@ -158,7 +158,7 @@ tc-funnel-chart {
 
 // --- tooltip (overlay tier) ---
 .tc-funnel-chart__tooltip {
-    position: absolute;
+    position: fixed;
     z-index: var(--tc-z-tooltip, 1070);
     transform: translate(-50%, calc(-100% - 10px));
     display: flex;

@@ -1,6 +1,6 @@
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
-import { icon, chevronRightIcon } from './icons'
+import { chevronRightIcon } from './icons'
 
 const TAG_NAME = 'tc-tree-view'
 

@@ -36,10 +36,20 @@ func Validate(cfg *Config) error {
 		return fmt.Errorf("admin.token_env and admin.token_file are mutually exclusive")
 	}
 
+	if err := validateNginx(cfg); err != nil {
+		return err
+	}
+	if err := validateTls(cfg); err != nil {
+		return err
+	}
+
 	seen := map[string]string{} // domain -> file (sites + proxies share the namespace)
 	for i := range cfg.Sites {
 		site := &cfg.Sites[i]
 		if err := validateSite(site); err != nil {
+			return fmt.Errorf("site %q (%s): %w", site.Domain, site.File, err)
+		}
+		if err := validateWebOptions(&site.WebOptions); err != nil {
 			return fmt.Errorf("site %q (%s): %w", site.Domain, site.File, err)
 		}
 		if prev, dup := seen[site.Domain]; dup {
@@ -55,7 +65,23 @@ func Validate(cfg *Config) error {
 	if err := validateProxies(cfg, upstreams, seen); err != nil {
 		return err
 	}
+
+	streamUpstreams, err := validateStreamUpstreams(cfg)
+	if err != nil {
+		return err
+	}
+	if err := validateStreams(cfg, streamUpstreams); err != nil {
+		return err
+	}
 	return nil
+}
+
+// NormalizeDomain validates a domain and rewrites it to its punycode/ASCII
+// (IDNA2008) form — the same normalization Validate applies in place. Exposed
+// so the admin write-API can derive a fragment's deterministic, filesystem-safe
+// filename from a request-supplied domain.
+func NormalizeDomain(domain string) (string, error) {
+	return normalizeDomain(domain)
 }
 
 // normalizeDomain validates and rewrites a domain to its punycode/ASCII
@@ -139,6 +165,13 @@ func validateProxies(cfg *Config, upstreams map[string]bool, seen map[string]str
 		}
 
 		if err := validateProxyTargets(p, upstreams); err != nil {
+			return fmt.Errorf("proxy %q (%s): %w", p.Domain, p.File, err)
+		}
+
+		if err := validateWebOptions(&p.WebOptions); err != nil {
+			return fmt.Errorf("proxy %q (%s): %w", p.Domain, p.File, err)
+		}
+		if err := validateCache(p.Cache); err != nil {
 			return fmt.Errorf("proxy %q (%s): %w", p.Domain, p.File, err)
 		}
 

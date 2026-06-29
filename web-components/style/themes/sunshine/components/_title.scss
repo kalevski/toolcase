@@ -1,0 +1,16 @@
+// Sunshine › tc-title — display-type section title.
+// Token remap already sets the emphasis-ink colour; swap the typeface to the
+// Bricolage Grotesque display family with the tight CITRINA tracking.
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    tc-title {
+        --bs-title-color: var(--sun-emphasis);
+    }
+
+    .tc-title {
+        font-family: var(--sun-display);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+    }
+}

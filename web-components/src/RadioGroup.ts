@@ -1,7 +1,13 @@
 import { esc } from './internal/esc'
+import { fieldMessageHtml } from './internal/field-message'
+import { requiredMark, reflectFieldValidity, dispatchFieldChange } from './internal/form-field'
 const TAG_NAME = 'tc-radio-group'
 
 let _idCounter = 0
+
+export type RadioGroupState = 'valid' | 'invalid'
+
+const STATES: RadioGroupState[] = ['valid', 'invalid']
 
 export interface RadioGroupOption {
     value: string
@@ -18,6 +24,7 @@ export class RadioGroup extends HTMLElement {
 
     private _initialised = false
     private _idPrefix: string
+    private _helpId: string
     private _options: RadioGroupOption[] = []
     private _value = ''
     private _internals: ElementInternals
@@ -26,12 +33,24 @@ export class RadioGroup extends HTMLElement {
     onChange: ((value: string) => void) | null = null
 
     static get observedAttributes(): string[] {
-        return ['label', 'value', 'name', 'inline']
+        return [
+            'label',
+            'value',
+            'name',
+            'inline',
+            'disabled',
+            'required',
+            'state',
+            'help',
+            'error',
+        ]
     }
 
     constructor() {
         super()
-        this._idPrefix = `tc-rg-${++_idCounter}`
+        const uid = ++_idCounter
+        this._idPrefix = `tc-rg-${uid}`
+        this._helpId = `tc-rg-help-${uid}`
         this._internals = this.attachInternals()
     }
 
@@ -42,7 +61,7 @@ export class RadioGroup extends HTMLElement {
             this.render()
             this._initialised = true
         }
-        this._internals.setFormValue(this._value || null)
+        this._syncForm()
         // Listeners are (re)attached on every connect — disconnectedCallback removes
         // them, and a move/remount (React reconciliation) disconnects then reconnects
         // without re-running the one-time init above. Re-adding the same handler
@@ -61,7 +80,7 @@ export class RadioGroup extends HTMLElement {
         if (this._defaultValue) this.setAttribute('value', this._defaultValue)
         else this.removeAttribute('value')
         this._patchCheckedAndTabindex()
-        this._internals.setFormValue(this._value || null)
+        this._syncForm()
     }
 
     formDisabledCallback(disabled: boolean): void {
@@ -72,17 +91,35 @@ export class RadioGroup extends HTMLElement {
         }
     }
 
+    /** Push value + validity into the form. A `required` group with no selection
+     *  is value-missing; an `error`/state="invalid" forces invalid. Centralised so
+     *  every value-commit path reflects the same validity. */
+    private _syncForm(): void {
+        this._internals.setFormValue(this._value || null)
+        const error = this.error
+        const requiredEmpty = this.required && this._value === ''
+        const invalid = !!error || this.state === 'invalid' || requiredEmpty
+        reflectFieldValidity(this._internals, {
+            invalid,
+            valueMissing: requiredEmpty && !error,
+            message: error || (requiredEmpty ? 'Please make a selection.' : 'Invalid selection.'),
+            anchor: this.querySelector<HTMLInputElement>('input[type="radio"]') ?? undefined,
+        })
+    }
+
     attributeChangedCallback(name: string, _old: string | null, next: string | null): void {
         if (!this.isConnected || !this._initialised) return
         if (name === 'value') {
             // Surgical patch for value changes — avoids destroying focus on user interaction
             this._value = next ?? ''
             this._patchCheckedAndTabindex()
-            this._internals.setFormValue(this._value || null)
+            this._syncForm()
             return
         }
         const focusedValue = this.querySelector<HTMLInputElement>('input:focus')?.value ?? null
         this.render()
+        // required/state/error re-render the chrome + slot; resync validity.
+        this._syncForm()
         if (focusedValue !== null) {
             for (const input of Array.from(
                 this.querySelectorAll<HTMLInputElement>('input[type="radio"]'),
@@ -126,6 +163,47 @@ export class RadioGroup extends HTMLElement {
     set inline(v: boolean) {
         if (v) this.setAttribute('inline', '')
         else this.removeAttribute('inline')
+    }
+
+    get disabled(): boolean {
+        return this.hasAttribute('disabled')
+    }
+    set disabled(v: boolean) {
+        if (v) this.setAttribute('disabled', '')
+        else this.removeAttribute('disabled')
+    }
+
+    get required(): boolean {
+        return this.hasAttribute('required')
+    }
+    set required(v: boolean) {
+        if (v) this.setAttribute('required', '')
+        else this.removeAttribute('required')
+    }
+
+    get state(): RadioGroupState | null {
+        const v = this.getAttribute('state') as RadioGroupState
+        return STATES.includes(v) ? v : null
+    }
+    set state(v: RadioGroupState | null) {
+        if (v != null) this.setAttribute('state', v)
+        else this.removeAttribute('state')
+    }
+
+    get help(): string | null {
+        return this.getAttribute('help')
+    }
+    set help(v: string | null) {
+        if (v != null) this.setAttribute('help', v)
+        else this.removeAttribute('help')
+    }
+
+    get error(): string | null {
+        return this.getAttribute('error')
+    }
+    set error(v: string | null) {
+        if (v != null) this.setAttribute('error', v)
+        else this.removeAttribute('error')
     }
 
     get options(): RadioGroupOption[] {
@@ -182,17 +260,12 @@ export class RadioGroup extends HTMLElement {
         if (optValue === this._value) return
 
         this._value = optValue
-        // Triggers attributeChangedCallback → _patchCheckedAndTabindex (surgical, no full re-render)
+        // Triggers attributeChangedCallback('value') → _patchCheckedAndTabindex +
+        // _syncForm (surgical, no full re-render).
         this.setAttribute('value', optValue)
-        this._internals.setFormValue(optValue || null)
 
-        this.dispatchEvent(
-            new CustomEvent('tc-change', {
-                bubbles: true,
-                composed: true,
-                detail: { value: optValue },
-            }),
-        )
+        // Unified change event with the canonical { value } detail shape.
+        dispatchFieldChange(this, optValue)
         if (typeof this.onChange === 'function') this.onChange(optValue)
     }
 
@@ -222,9 +295,8 @@ export class RadioGroup extends HTMLElement {
         if (!nextOption || nextOption.value === this._value) return
 
         this._value = nextOption.value
-        // Triggers attributeChangedCallback → _patchCheckedAndTabindex
+        // Triggers attributeChangedCallback('value') → _patchCheckedAndTabindex + _syncForm
         this.setAttribute('value', nextOption.value)
-        this._internals.setFormValue(nextOption.value || null)
 
         // Focus the newly selected input after DOM patch
         const nextInput = Array.from(
@@ -232,19 +304,20 @@ export class RadioGroup extends HTMLElement {
         ).find((inp) => inp.value === nextOption.value)
         if (nextInput) nextInput.focus()
 
-        this.dispatchEvent(
-            new CustomEvent('tc-change', {
-                bubbles: true,
-                composed: true,
-                detail: { value: nextOption.value },
-            }),
-        )
+        // Unified change event with the canonical { value } detail shape.
+        dispatchFieldChange(this, nextOption.value)
         if (typeof this.onChange === 'function') this.onChange(nextOption.value)
     }
 
     private render(): void {
         const label = this.label
         const inline = this.inline
+        const disabled = this.disabled
+        const required = this.required
+        const error = this.error
+        // An `error` message forces the invalid state, mirroring tc-select.
+        const state: RadioGroupState | null = error ? 'invalid' : this.state
+        const help = this.help
 
         const selectedEnabled = this._options.find((o) => o.value === this._value && !o.disabled)
         const firstEnabled = this._options.find((o) => !o.disabled)
@@ -256,8 +329,14 @@ export class RadioGroup extends HTMLElement {
             ? 'tc-radio-group-options tc-radio-group-options--inline'
             : 'tc-radio-group-options'
 
+        // Each radio gets the control's invalid/valid visual when the group state set.
+        const inputStateClass =
+            state === 'valid' ? ' is-valid' : state === 'invalid' ? ' is-invalid' : ''
+
         const legendHtml =
-            label != null ? `<legend class="tc-radio-group-label">${esc(label)}</legend>` : ''
+            label != null
+                ? `<legend class="tc-radio-group-label">${esc(label)}${requiredMark(required)}</legend>`
+                : ''
 
         const optionsHtml = this._options
             .map((opt, idx) => {
@@ -265,7 +344,10 @@ export class RadioGroup extends HTMLElement {
                 const isSelected = opt.value === this._value
                 const isTabbable = opt.value === tabbableValue
                 const checkedAttr = isSelected ? ' checked' : ''
-                const disabledAttr = opt.disabled ? ' disabled aria-disabled="true"' : ''
+                // A group-level `disabled` disables every option; a per-option
+                // `disabled` only that row.
+                const disabledAttr =
+                    disabled || opt.disabled ? ' disabled aria-disabled="true"' : ''
                 const tabindex = isTabbable ? '0' : '-1'
 
                 // Inner radios carry no `name` — ElementInternals owns form
@@ -273,7 +355,7 @@ export class RadioGroup extends HTMLElement {
                 // by _patchCheckedAndTabindex rather than native browser grouping.
                 return [
                     `<div class="form-check">`,
-                    `<input type="radio" class="form-check-input" id="${inputId}"`,
+                    `<input type="radio" class="form-check-input${inputStateClass}" id="${inputId}"`,
                     ` value="${esc(opt.value)}"${checkedAttr}${disabledAttr} tabindex="${tabindex}">`,
                     `<label class="form-check-label" for="${inputId}">${esc(opt.label)}</label>`,
                     `</div>`,
@@ -281,12 +363,28 @@ export class RadioGroup extends HTMLElement {
             })
             .join('')
 
+        // A radio group is always a standalone field: ALWAYS render the reserved
+        // slot (even empty) so it reserves its line and groups stay aligned. It is
+        // the last child, placed after the option rows.
+        const messageHtml = fieldMessageHtml({
+            id: this._helpId,
+            state,
+            error,
+            hint: help,
+            invalidText: 'Please make a selection.',
+            validText: 'Looks good!',
+        })
+        // Group has no single input — describe the fieldset itself.
+        const describe = help || state ? ` aria-describedby="${this._helpId}"` : ''
+        const requiredAttr = required ? ' aria-required="true"' : ''
+
         this.innerHTML = [
-            `<fieldset class="tc-radio-group">`,
+            `<fieldset class="tc-radio-group"${requiredAttr}${describe}>`,
             legendHtml,
             `<div class="${optionsClass}">`,
             optionsHtml,
             `</div>`,
+            messageHtml,
             `</fieldset>`,
         ].join('')
     }

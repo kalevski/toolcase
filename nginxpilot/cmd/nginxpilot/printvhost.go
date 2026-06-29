@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/kalevski/toolcase/nginxpilot/internal/certs"
 	"github.com/kalevski/toolcase/nginxpilot/internal/config"
 	"github.com/kalevski/toolcase/nginxpilot/internal/nginxconf"
 )
@@ -27,7 +28,16 @@ func cmdPrintVhost(args []string) int {
 		return 1
 	}
 
-	out, err := nginxconf.Vhost(res.Config, domain)
+	// If a cert dir is configured and present, render real cert paths; otherwise
+	// the snippet falls back to conventional certbot paths.
+	var opts nginxconf.Options
+	if dir, derr := res.Config.Tls.ResolveDir(); derr == nil && dir != "" {
+		if idx, lerr := certs.Load(dir); lerr == nil {
+			opts.Certs = idx
+		}
+	}
+
+	out, err := nginxconf.VhostOpts(res.Config, domain, opts)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		return 1

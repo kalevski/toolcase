@@ -1,0 +1,30 @@
+// Sunshine › tc-alert — warm tinted notices.
+// The base variant bg + left-border already pick up the sunshine palette through
+// the --bs-*-rgb remap. Only the TEXT colour is a baked $theme-colors-emphasis
+// Sass literal (slate-900 for primary, dark sky for info) that clashes with the
+// warm tints — repoint those onto the olive / plum ramp so the label reads
+// on-brand. The remaining variants (success / warning / danger) already sit in
+// the right hue family.
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    .alert {
+        color: var(--sun-ink-1);
+    }
+
+    .alert-heading {
+        color: var(--sun-emphasis);
+    }
+
+    .alert-primary {
+        --bs-alert-color: var(--sun-leaf-lo);
+    }
+
+    .alert-info {
+        --bs-alert-color: var(--sun-plum);
+    }
+
+    .alert-warning {
+        --bs-alert-color: var(--sun-lead-lo);
+    }
+}

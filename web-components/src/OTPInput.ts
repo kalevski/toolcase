@@ -1,32 +1,61 @@
 import { esc } from './internal/esc'
+import { fieldMessageHtml } from './internal/field-message'
+import {
+    requiredMark,
+    setFieldFormValue,
+    reflectFieldValidity,
+    dispatchFieldChange,
+} from './internal/form-field'
 const TAG_NAME = 'tc-otp-input'
 
 let _idCounter = 0
 
 export type OTPInputMode = 'numeric' | 'alphanumeric'
+export type OTPInputState = 'valid' | 'invalid'
 
 const MODES: OTPInputMode[] = ['numeric', 'alphanumeric']
+const STATES: OTPInputState[] = ['valid', 'invalid']
 
 export class OTPInput extends HTMLElement {
+    // Participates in native <form> submission/validation like every tc-* input.
+    static formAssociated = true
+
     private _initialised = false
     private _idPrefix: string
-    private _errorId: string
+    // Shared id for the reserved field-message slot, referenced by aria-describedby.
+    private _helpId: string
     private _labelId: string
     private _cells: string[] = []
+    private _internals: ElementInternals
+    private _defaultValue = ''
 
     onChange: ((value: string) => void) | null = null
     onComplete: ((value: string) => void) | null = null
 
     static get observedAttributes(): string[] {
-        return ['length', 'value', 'name', 'mode', 'masked', 'label', 'error']
+        return [
+            'length',
+            'value',
+            'name',
+            'mode',
+            'masked',
+            'label',
+            'placeholder',
+            'disabled',
+            'required',
+            'error',
+            'state',
+            'help',
+        ]
     }
 
     constructor() {
         super()
         const uid = ++_idCounter
         this._idPrefix = `tc-otp-${uid}`
-        this._errorId = `${this._idPrefix}-error`
+        this._helpId = `${this._idPrefix}-help`
         this._labelId = `${this._idPrefix}-label`
+        this._internals = this.attachInternals()
     }
 
     // ── length ─────────────────────────────────────────────────────────────
@@ -102,6 +131,51 @@ export class OTPInput extends HTMLElement {
         else this.removeAttribute('error')
     }
 
+    // ── help (hint text shown in the reserved message slot) ──────────────────
+    get help(): string | null {
+        return this.getAttribute('help')
+    }
+    set help(v: string | null) {
+        if (v != null) this.setAttribute('help', v)
+        else this.removeAttribute('help')
+    }
+
+    // ── state ('valid' | 'invalid'); an `error` message forces 'invalid' ─────
+    get state(): OTPInputState | null {
+        const v = this.getAttribute('state') as OTPInputState
+        return STATES.includes(v) ? v : null
+    }
+    set state(v: OTPInputState | null) {
+        if (v != null) this.setAttribute('state', v)
+        else this.removeAttribute('state')
+    }
+
+    // ── placeholder (shown in each empty cell) ───────────────────────────────
+    get placeholder(): string {
+        return this.getAttribute('placeholder') ?? ''
+    }
+    set placeholder(v: string) {
+        this.setAttribute('placeholder', v)
+    }
+
+    // ── disabled ─────────────────────────────────────────────────────────────
+    get disabled(): boolean {
+        return this.hasAttribute('disabled')
+    }
+    set disabled(v: boolean) {
+        if (v) this.setAttribute('disabled', '')
+        else this.removeAttribute('disabled')
+    }
+
+    // ── required ─────────────────────────────────────────────────────────────
+    get required(): boolean {
+        return this.hasAttribute('required')
+    }
+    set required(v: boolean) {
+        if (v) this.setAttribute('required', '')
+        else this.removeAttribute('required')
+    }
+
     // ───────────────────────────────────────────────────────────────────────
 
     connectedCallback(): void {
@@ -109,6 +183,8 @@ export class OTPInput extends HTMLElement {
             const len = this.length
             const val = this.getAttribute('value') ?? ''
             this._cells = Array.from({ length: len }, (_, i) => val[i] ?? '')
+            // Capture the initial value once so formResetCallback can restore it.
+            this._defaultValue = val
             this.render()
             this._initialised = true
         }
@@ -120,6 +196,7 @@ export class OTPInput extends HTMLElement {
         this.addEventListener('input', this._onInput)
         this.addEventListener('paste', this._onPaste)
         this.addEventListener('focusin', this._onFocusin)
+        this._syncForm()
     }
 
     disconnectedCallback(): void {
@@ -127,6 +204,34 @@ export class OTPInput extends HTMLElement {
         this.removeEventListener('input', this._onInput)
         this.removeEventListener('paste', this._onPaste)
         this.removeEventListener('focusin', this._onFocusin)
+    }
+
+    /** Called by the browser when the associated form resets. */
+    formResetCallback(): void {
+        this.value = this._defaultValue
+        this._syncForm()
+    }
+
+    /** Called by the browser when a containing fieldset/form is disabled/enabled. */
+    formDisabledCallback(disabled: boolean): void {
+        this.disabled = disabled
+    }
+
+    /** Push value + validity into the form. Effective invalid = error / state
+     *  invalid / required-but-empty. */
+    private _syncForm(): void {
+        const value = this.value
+        setFieldFormValue(this._internals, this.name, value === '' ? null : value)
+        const error = this.error
+        const requiredEmpty = this.required && value === ''
+        const invalid = !!error || this.state === 'invalid' || requiredEmpty
+        reflectFieldValidity(this._internals, {
+            invalid,
+            valueMissing: requiredEmpty && !error,
+            message:
+                error || (requiredEmpty ? 'This field is required.' : 'Please enter a valid code.'),
+            anchor: this.querySelector<HTMLInputElement>('.tc-otp-input__cell') ?? undefined,
+        })
     }
 
     attributeChangedCallback(name: string, _old: string | null, next: string | null): void {
@@ -139,6 +244,7 @@ export class OTPInput extends HTMLElement {
             this._patchCellValues()
             const hidden = this.querySelector<HTMLInputElement>('input[type="hidden"]')
             if (hidden) hidden.value = str
+            this._syncForm()
             return
         }
 
@@ -149,6 +255,8 @@ export class OTPInput extends HTMLElement {
 
         const focusedIdx = this._getFocusedCellIndex()
         this.render()
+        // required/state/error all affect the reflected validity computed in _syncForm.
+        this._syncForm()
         if (focusedIdx >= 0) {
             const cells = this._getCells()
             const target = cells[Math.min(focusedIdx, cells.length - 1)]
@@ -305,15 +413,12 @@ export class OTPInput extends HTMLElement {
         const hidden = this.querySelector<HTMLInputElement>('input[type="hidden"]')
         if (hidden) hidden.value = combined
 
-        this.dispatchEvent(
-            new CustomEvent('tc-change', {
-                bubbles: true,
-                composed: true,
-                detail: { value: combined },
-            }),
-        )
+        // Reflect the new value into the form before notifying listeners.
+        this._syncForm()
+        dispatchFieldChange(this, combined)
         if (typeof this.onChange === 'function') this.onChange(combined)
 
+        // OTP-specific: announce completion separately from the contract's tc-change.
         if (this._cells.length > 0 && this._cells.every((c) => c !== '')) {
             this.dispatchEvent(
                 new CustomEvent('tc-complete', {
@@ -330,10 +435,15 @@ export class OTPInput extends HTMLElement {
         const len = this.length
         const label = this.label
         const error = this.error
-        const name = this.name
         const masked = this.masked
         const mode = this.mode
-        const hasError = !!error
+        const required = this.required
+        const disabled = this.disabled
+        const placeholder = this.placeholder
+        // An `error` message forces the invalid state; `state` covers valid/invalid
+        // without an accompanying message string.
+        const state: OTPInputState | null = error ? 'invalid' : this.state
+        const isInvalid = state === 'invalid'
 
         const inputType = masked ? 'password' : 'text'
         const inputMode = mode === 'numeric' ? 'numeric' : 'text'
@@ -341,11 +451,19 @@ export class OTPInput extends HTMLElement {
         const ariaLabelledBy = label
             ? ` aria-labelledby="${this._labelId}"`
             : ` aria-label="One-time password"`
-        const ariaInvalid = hasError ? ' aria-invalid="true"' : ''
-        const ariaDescribedBy = hasError ? ` aria-describedby="${this._errorId}"` : ''
+        // The invalid cell border is driven by [aria-invalid='true'] on the wrapper.
+        const ariaInvalid = isInvalid ? ' aria-invalid="true"' : ''
+        // Cells point at the single reserved slot whenever it carries a message.
+        const ariaDescribedBy =
+            error || state || this.help ? ` aria-describedby="${this._helpId}"` : ''
+        // Only the first cell carries aria-required so SRs announce the group once.
+        const disabledAttr = disabled ? ' disabled' : ''
+        // A single-char placeholder per cell hints at the expected input.
+        const placeholderChar = placeholder.slice(0, 1)
+        const placeholderAttr = placeholderChar ? ` placeholder="${esc(placeholderChar)}"` : ''
 
         const labelHtml = label
-            ? `<label class="tc-otp-input__label" id="${this._labelId}">${esc(label)}</label>`
+            ? `<label class="tc-otp-input__label" id="${this._labelId}">${esc(label)}${requiredMark(required)}</label>`
             : ''
 
         const cellsHtml = Array.from({ length: len }, (_, i) => {
@@ -361,20 +479,29 @@ export class OTPInput extends HTMLElement {
                 ` maxlength="1"`,
                 ` autocomplete="one-time-code"`,
                 ` aria-label="${esc(cellAriaLabel)}"`,
-                hasError ? ' aria-invalid="true"' : '',
+                // aria-required on the first cell only — represents the whole group.
+                required && i === 0 ? ' aria-required="true"' : '',
+                isInvalid ? ' aria-invalid="true"' : '',
                 ariaDescribedBy,
+                placeholderAttr,
+                disabledAttr,
                 valueAttr,
                 `>`,
             ].join('')
         }).join('')
 
-        const hiddenHtml = name
-            ? `<input type="hidden" name="${esc(name)}" value="${esc(this._cells.join(''))}">`
-            : ''
+        // Value submission flows through ElementInternals (formAssociated) — no
+        // hidden mirror input, which would double-submit under the same name.
 
-        const errorHtml = hasError
-            ? `<div class="tc-otp-input__error" id="${this._errorId}" role="alert">${esc(error!)}</div>`
-            : ''
+        // One reserved message slot below the cells: invalid > valid > hint.
+        const messageHtml = fieldMessageHtml({
+            id: this._helpId,
+            state,
+            error,
+            hint: this.help,
+            invalidText: 'Please enter a valid code.',
+            validText: 'Looks good!',
+        })
 
         this.innerHTML = [
             `<div class="tc-otp-input"`,
@@ -386,8 +513,7 @@ export class OTPInput extends HTMLElement {
             `<div class="tc-otp-input__cells">`,
             cellsHtml,
             `</div>`,
-            hiddenHtml,
-            errorHtml,
+            messageHtml,
             `</div>`,
         ].join('')
     }

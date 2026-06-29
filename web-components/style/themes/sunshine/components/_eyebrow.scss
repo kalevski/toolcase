@@ -1,0 +1,26 @@
+// Sunshine › tc-eyebrow — leaf-green mono micro-label with a leading lemon tick.
+// CITRINA's eyebrow is a mono caps caption in leaf green, prefixed by a short
+// lemon bar. The tick is injected via ::before on the .tc-eyebrow class (which
+// carries the --bs-eyebrow-* defaults, so the override wins).
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    .tc-eyebrow {
+        --bs-eyebrow-color: var(--sun-leaf);
+        --bs-eyebrow-letter-spacing: 0.22em;
+        --bs-eyebrow-font-weight: 600;
+        font-family: var(--sun-mono);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.7em;
+        text-transform: uppercase;
+    }
+
+    .tc-eyebrow::before {
+        content: '';
+        flex: none;
+        width: 1em;
+        height: 2px;
+        background: var(--sun-lead);
+    }
+}

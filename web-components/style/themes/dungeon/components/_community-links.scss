@@ -29,4 +29,12 @@ tc-theme[name='dungeon'],
         text-transform: uppercase;
         letter-spacing: 0.14em;
     }
+
+    // The grid background doubles as the hairline-gap colour; on an incomplete
+    // row its gold-deep fill shows through the empty cells as glaring gold
+    // blocks. Pin the grid backing to dark ink so the gaps stay as subtle dark
+    // hairlines and empty cells recede; the gold outer frame (border) remains.
+    .tc-community-links-grid {
+        background-color: var(--fg-ink);
+    }
 }

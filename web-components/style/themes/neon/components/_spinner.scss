@@ -1,0 +1,17 @@
+// Neon › tc-spinner — magenta arc on a faint void track.
+// The grow / dots / bars / orbit / pulse variants ride currentcolor, so they
+// pick up the neon accent hue for free. Only the spinner-border track is an
+// off-palette literal (--tc-slate-200) that needs a faint-hairline replacement.
+
+tc-theme[name='neon'],
+[data-tc-theme='neon'] {
+    .spinner-border,
+    .spinner-pulse {
+        color: var(--nd-accent);
+    }
+
+    .spinner-border {
+        border-color: var(--nd-border-strong);
+        border-top-color: currentcolor;
+    }
+}

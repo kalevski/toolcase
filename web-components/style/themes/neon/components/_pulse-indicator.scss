@@ -1,0 +1,15 @@
+// Neon › tc-pulse-indicator — live magenta neon pulse.
+// The dot rides --bs-pulse-indicator-color (defaults to success). Default it to
+// the magenta accent so a bare indicator reads "live", and add a soft glow ring to
+// the static dot so it sits on the dark void like the neon live dots.
+
+tc-theme[name='neon'],
+[data-tc-theme='neon'] {
+    tc-pulse-indicator {
+        --bs-pulse-indicator-color: var(--nd-accent);
+    }
+
+    .tc-pulse-indicator-dot {
+        box-shadow: 0 0 8px var(--nd-accent-shadow);
+    }
+}

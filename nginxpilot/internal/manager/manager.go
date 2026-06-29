@@ -13,8 +13,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/kalevski/toolcase/nginxpilot/internal/certs"
 	"github.com/kalevski/toolcase/nginxpilot/internal/config"
 	"github.com/kalevski/toolcase/nginxpilot/internal/deploy"
+	"github.com/kalevski/toolcase/nginxpilot/internal/nginxctl"
 	gitsource "github.com/kalevski/toolcase/nginxpilot/internal/source/git"
 	"github.com/kalevski/toolcase/nginxpilot/internal/state"
 )
@@ -34,6 +36,16 @@ type Manager struct {
 	wg       sync.WaitGroup
 	ctx      context.Context
 	syncFn   func(ctx context.Context, site config.Site, defaults config.Defaults, dataDir string, store *state.Store, dep *deploy.Deployer, log *slog.Logger) (*state.SiteState, error)
+
+	// Managed mode (nginx.manage: true). engine is nil in generate-only mode.
+	engine         *nginxctl.Engine
+	certDir        string
+	watchInterval  time.Duration
+	reloadOnChange bool
+
+	applyMu   sync.Mutex
+	lastApply nginxctl.ApplyResult
+	certIndex *certs.Index
 }
 
 type siteLoop struct {
@@ -54,6 +66,7 @@ type SiteStatus struct {
 	SourceType    string     `json:"source_type"`
 	SourceURL     string     `json:"source_url"`
 	DeployedRef   string     `json:"deployed_ref,omitempty"`
+	Bytes         int64      `json:"bytes"` // live current release size, cached per sync (task 739)
 	LastSuccess   *time.Time `json:"last_success,omitempty"`
 	LastError     string     `json:"last_error,omitempty"`
 	LastErrorTime *time.Time `json:"last_error_time,omitempty"`
@@ -65,7 +78,7 @@ type SiteStatus struct {
 
 // New builds a Manager for a validated config.
 func New(cfg *config.Config, store *state.Store, log *slog.Logger) *Manager {
-	return &Manager{
+	m := &Manager{
 		log:      log,
 		store:    store,
 		cfg:      cfg,
@@ -73,6 +86,17 @@ func New(cfg *config.Config, store *state.Store, log *slog.Logger) *Manager {
 		loops:    map[string]*siteLoop{},
 		syncFn:   SyncSite,
 	}
+	if cfg.Nginx.Manage {
+		m.engine = nginxctl.New(cfg, log)
+		dir, err := cfg.Tls.ResolveDir()
+		if err != nil {
+			log.Warn("cert dir not resolvable; TLS resources will fall back to HTTP (or be disabled if required)", "error", err)
+		}
+		m.certDir = dir
+		m.watchInterval = time.Duration(cfg.Tls.WatchInterval)
+		m.reloadOnChange = cfg.Tls.ReloadOnChangeEnabled()
+	}
+	return m
 }
 
 // Run starts every site loop and blocks until ctx is cancelled and all
@@ -88,6 +112,13 @@ func (m *Manager) Run(ctx context.Context) {
 	m.mu.Unlock()
 
 	m.warnOrphans()
+
+	// Managed mode: write the live nginx config and start watching for cert
+	// renewals. nginx only ever receives config that passed `nginx -t`.
+	if m.engine != nil {
+		m.applyManaged(ctx)
+		go m.runCertWatch(ctx)
+	}
 
 	<-ctx.Done()
 	m.log.Info("shutting down, waiting for in-flight syncs")
@@ -108,6 +139,7 @@ func (m *Manager) reconcileState() {
 			m.log.Warn("state records a deploy but current is missing; clearing ref so next sync redeploys",
 				"domain", site.Domain)
 			st.DeployedRef, st.ETag, st.LastModified, st.ContentHash = "", "", "", ""
+			st.DeployedBytes = 0
 			_ = m.store.Save(st)
 		}
 	}
@@ -254,6 +286,7 @@ func (m *Manager) Status() []SiteStatus {
 			SourceType:    site.Source.Type,
 			SourceURL:     site.Source.URL,
 			DeployedRef:   st.DeployedRef,
+			Bytes:         st.DeployedBytes,
 			LastError:     st.LastError,
 			FailureStreak: st.FailureStreak,
 			NeverSynced:   st.NeverSynced(),
@@ -347,6 +380,10 @@ func (m *Manager) Reload(newCfg *config.Config) {
 	}
 
 	go m.warnOrphans()
+
+	// Managed mode: re-render and reload nginx for the new config (off the lock
+	// path — applyManaged reads m.Config()).
+	m.triggerApply()
 }
 
 // sameSite compares sites ignoring provenance.

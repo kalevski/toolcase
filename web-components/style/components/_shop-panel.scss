@@ -21,7 +21,7 @@ tc-shop-panel {
     --bs-shop-panel-currency-font-size: 0.75rem;
 
     // Rows
-    --bs-shop-panel-row-border: 1px solid var(--tc-slate-100, #f1f5f9);
+    --bs-shop-panel-row-border: 1px solid var(--tc-border-faint);
     --bs-shop-panel-row-hover-bg: var(--tc-surface-hover, var(--tc-surface-muted));
     --bs-shop-panel-sold-out-opacity: 0.45;
     --bs-shop-panel-unaffordable-opacity: 0.5;

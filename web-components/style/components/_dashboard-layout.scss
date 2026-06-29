@@ -148,7 +148,7 @@ tc-dashboard-layout {
     // Always full viewport height so the flex column has a fixed box to divide:
     // brand + panel stay pinned (flex: 0 0 auto), menu fills the rest and scrolls.
     // Avoids the height:100% chain collapsing when an ancestor has no set height.
-    height: 100vh;
+    height: 100dvh;
     background: var(--bs-dashboard-layout-sidebar-bg);
     border-right: 1px solid var(--bs-dashboard-layout-sidebar-border);
     border-radius: 0;
@@ -227,6 +227,13 @@ tc-dashboard-layout {
 // ── Desktop (≥992px): pinned full-height sidebar, navbar over content column ─────
 
 @include media-up(lg) {
+    // Pin the whole shell to the viewport so the page itself never scrolls — the
+    // navbar + sidebar stay put and only __content scrolls inside its grid cell.
+    tc-dashboard-layout {
+        height: 100dvh;
+        max-height: 100dvh;
+    }
+
     .tc-dashboard-layout__wrapper {
         grid-template-columns: var(--bs-dashboard-layout-sidebar-width) 1fr;
     }

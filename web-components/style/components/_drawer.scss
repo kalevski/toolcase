@@ -86,7 +86,7 @@ tc-drawer {
         left: 0;
         right: 0;
         height: var(--bs-drawer-height-default);
-        max-height: 100vh;
+        max-height: 100dvh;
         border-bottom: 1px solid var(--bs-drawer-border-color);
         transform: translateY(-100%);
         opacity: 0;
@@ -97,7 +97,7 @@ tc-drawer {
         left: 0;
         right: 0;
         height: var(--bs-drawer-height-default);
-        max-height: 100vh;
+        max-height: 100dvh;
         border-top: 1px solid var(--bs-drawer-border-color);
         transform: translateY(100%);
         opacity: 0;

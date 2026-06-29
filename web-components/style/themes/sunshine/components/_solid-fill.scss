@@ -1,0 +1,15 @@
+// Sunshine › solid-fill contrast pass — the cross-component `.text-bg-*` helper.
+// The foundation utility pairs every variant fill with WHITE text. That holds
+// for the mid-tone semantic fills on the cream canvas, but the PRIMARY fill is
+// now the bright lemon accent (~1.4:1 under white) and WARNING is bright amber
+// (~2.4:1). Flip those two to the dark on-lead ink so any consumer of the helper
+// clears AA. Per-component partials with higher specificity still win where they
+// re-skin.
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    .text-bg-primary,
+    .text-bg-warning {
+        color: var(--sun-on-lead) !important;
+    }
+}

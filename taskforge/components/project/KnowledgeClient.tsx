@@ -98,7 +98,7 @@ export function KnowledgeClient() {
     const tableRef = useTc<HTMLElement>({ columns: ADV_COLUMNS })
 
     return (
-        <tc-stack gap="1.25rem">
+        <div className="taskforge-page">
             <tc-card>
                 <div slot="header" style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                     <tc-heading as="h3">Knowledge base</tc-heading>
@@ -153,6 +153,6 @@ export function KnowledgeClient() {
             )}
 
             <KnowledgeDrawer project={project} docId={openDoc} onClose={() => setOpenDoc(null)} />
-        </tc-stack>
+        </div>
     )
 }

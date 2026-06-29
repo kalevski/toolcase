@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import type { SideNavItem, SideNavSection } from '@toolcase/web-components'
 import { useTcProps } from '@/lib/tc'
 import { tcIcon } from '@/lib/icons'
+import { useBranding } from '@/lib/branding-context'
 import type { EngineState, MeResponse, ProjectNavItem } from '@/server/domain/types'
 
 const STATE_ICON: Record<EngineState, string> = {
@@ -22,26 +23,24 @@ const STATE_HAS_BADGE: Record<EngineState, boolean> = {
     IDLE: false,
 }
 
-const USER_MENU = [{ key: 'logout', label: 'Logout', icon: tcIcon('box-arrow-right') }]
-
-type ProjectSub = 'overview' | 'tasks' | 'agents' | 'knowledge' | 'notes' | 'run' | 'runs' | 'git' | 'settings'
-
-/** Derive the active project + sub-page (or top-level section) from the URL. */
+/** Derive the active project + top-level section from the URL. The project's
+ *  sub-pages no longer live in the sidebar — they render as a `tc-tab-bar`
+ *  above the page body (see `ProjectTabs`), matching the Wharf project pattern. */
 function deriveActive(pathname: string): {
     activeProject: string | null
-    sub: ProjectSub | null
-    section: 'dashboard' | 'skills' | 'users' | 'accounts' | 'audit' | 'health' | null
+    section: 'dashboard' | 'skills' | 'users' | 'accounts' | 'audit' | 'health' | 'settings' | null
 } {
     const m = pathname.match(/^\/projects\/([^/]+)(?:\/(tasks|knowledge|notes|runs|run|git|agents|settings))?\/?$/)
     if (m) {
-        return { activeProject: decodeURIComponent(m[1]), sub: (m[2] as ProjectSub) ?? 'overview', section: null }
+        return { activeProject: decodeURIComponent(m[1]), section: null }
     }
-    if (pathname.startsWith('/skills')) return { activeProject: null, sub: null, section: 'skills' }
-    if (pathname.startsWith('/users')) return { activeProject: null, sub: null, section: 'users' }
-    if (pathname.startsWith('/accounts')) return { activeProject: null, sub: null, section: 'accounts' }
-    if (pathname.startsWith('/audit')) return { activeProject: null, sub: null, section: 'audit' }
-    if (pathname.startsWith('/health')) return { activeProject: null, sub: null, section: 'health' }
-    return { activeProject: null, sub: null, section: 'dashboard' }
+    if (pathname.startsWith('/skills')) return { activeProject: null, section: 'skills' }
+    if (pathname.startsWith('/users')) return { activeProject: null, section: 'users' }
+    if (pathname.startsWith('/accounts')) return { activeProject: null, section: 'accounts' }
+    if (pathname.startsWith('/audit')) return { activeProject: null, section: 'audit' }
+    if (pathname.startsWith('/health')) return { activeProject: null, section: 'health' }
+    if (pathname.startsWith('/settings')) return { activeProject: null, section: 'settings' }
+    return { activeProject: null, section: 'dashboard' }
 }
 
 export function AppShell({
@@ -55,7 +54,8 @@ export function AppShell({
 }) {
     const router = useRouter()
     const pathname = usePathname()
-    const { activeProject, sub, section } = deriveActive(pathname)
+    const branding = useBranding()
+    const { activeProject, section } = deriveActive(pathname)
 
     // Projects are a first-class nav list: each row links to its overview,
     // highlights when active, and shows a state badge when its engine isn't idle.
@@ -81,24 +81,6 @@ export function AppShell({
             : [{ key: 'no-projects', label: 'No projects yet', icon: tcIcon('plus-circle'), href: '/' }],
     }
 
-    const projectSection: SideNavSection | null = activeProject
-        ? {
-              key: 'project',
-              title: activeProject,
-              items: [
-                  { key: 'overview', label: 'Overview', icon: tcIcon('speedometer2'), href: `/projects/${activeProject}`, active: sub === 'overview' },
-                  { key: 'tasks', label: 'Tasks', icon: tcIcon('list-task'), href: `/projects/${activeProject}/tasks`, active: sub === 'tasks' },
-                  { key: 'knowledge', label: 'Knowledge', icon: tcIcon('journal-text'), href: `/projects/${activeProject}/knowledge`, active: sub === 'knowledge' },
-                  { key: 'agents', label: 'Agents', icon: tcIcon('robot'), href: `/projects/${activeProject}/agents`, active: sub === 'agents' },
-                  { key: 'notes', label: 'Notes', icon: tcIcon('stickies'), href: `/projects/${activeProject}/notes`, active: sub === 'notes' },
-                  { key: 'run', label: 'Run', icon: tcIcon('play-circle'), href: `/projects/${activeProject}/run`, active: sub === 'run' },
-                  { key: 'runs', label: 'Run history', icon: tcIcon('clock-history'), href: `/projects/${activeProject}/runs`, active: sub === 'runs' },
-                  { key: 'git', label: 'Git', icon: tcIcon('diagram-2'), href: `/projects/${activeProject}/git`, active: sub === 'git' },
-                  { key: 'settings', label: 'Settings', icon: tcIcon('sliders'), href: `/projects/${activeProject}/settings`, active: sub === 'settings' },
-              ],
-          }
-        : null
-
     const generalSection: SideNavSection = {
         key: 'general',
         title: 'General',
@@ -111,12 +93,13 @@ export function AppShell({
                       { key: 'accounts', label: 'Accounts', icon: tcIcon('key'), href: '/accounts', active: section === 'accounts' } as SideNavItem,
                       { key: 'audit', label: 'Audit log', icon: tcIcon('journal-check'), href: '/audit', active: section === 'audit' } as SideNavItem,
                       { key: 'health', label: 'Health', icon: tcIcon('heart-pulse'), href: '/health', active: section === 'health' } as SideNavItem,
+                      { key: 'settings', label: 'Settings', icon: tcIcon('gear'), href: '/settings', active: section === 'settings' } as SideNavItem,
                   ]
                 : []),
         ],
     }
 
-    const sections: SideNavSection[] = [generalSection, projectsSection, ...(projectSection ? [projectSection] : [])]
+    const sections: SideNavSection[] = [generalSection, projectsSection]
 
     const onItemClick = (event: Event, item: SideNavItem) => {
         if (item.href) {
@@ -125,19 +108,22 @@ export function AppShell({
         }
     }
 
-    const onMenuClick = async (key: string) => {
-        if (key === 'logout') {
-            await fetch('/api/auth/logout', { method: 'POST' })
-            router.push('/login')
-        }
+    const onSignOut = async () => {
+        await fetch('/api/auth/logout', { method: 'POST' })
+        router.push('/login')
     }
 
     const sideNavRef = useTcProps<HTMLElement>({ sections, onItemClick })
-    const userRef = useTcProps<HTMLElement>({ menuItems: USER_MENU, onMenuClick })
+    const userRef = useTcProps<HTMLElement>({ onIconClick: onSignOut })
 
     return (
         <tc-dashboard-layout>
-            <tc-brand slot="brand" primary-text="Task Forge" color="#6c5ce7" />
+            <tc-brand
+                slot="brand"
+                primary-text="Task Forge"
+                secondary-text={branding.secondaryText || undefined}
+                color="#6c5ce7"
+            />
             <div slot="sidebar-menu" className="tf-sidebar-menu">
                 <tc-side-nav ref={sideNavRef} />
             </div>
@@ -147,6 +133,8 @@ export function AppShell({
                 username={me.login}
                 avatar-src={me.avatarUrl}
                 plan={me.role}
+                icon={tcIcon('box-arrow-right')}
+                icon-label="Sign out"
             />
             <div className="tf-content">{children}</div>
         </tc-dashboard-layout>

@@ -7,7 +7,9 @@ export const dynamic = 'force-dynamic'
 
 export async function DELETE(_req: Request, ctx: { params: Promise<{ project: string }> }) {
     const params = await ctx.params
-    const auth = await guard('standard')
+    // SEC-3 — project deletion irrecoverably destroys the workspace + DB rows
+    // (backups of the same data are admin-gated), so require admin.
+    const auth = await guard('admin')
     if ('res' in auth) return auth.res
     try {
         if (!(await projectExists(params.project))) return error('project not found', 404)

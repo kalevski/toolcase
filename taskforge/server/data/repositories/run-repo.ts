@@ -22,13 +22,25 @@ interface Raw {
     pr_url: string | null
 }
 
-function map(r: Raw): RunRecord {
+/**
+ * Map a raw row to a RunRecord. `cost` may be supplied pre-computed (the
+ * correlated-subquery path used by `list()`, avoiding an N+1); when omitted the
+ * cost is resolved per-row via `telemetryRepo.costBetween` (the single-row
+ * `get()` path).
+ */
+function map(r: Raw, cost?: number | null): RunRecord {
     let options: Partial<RunOptions> = {}
     try {
         options = JSON.parse(r.options_json)
     } catch {
         /* tolerate corrupt rows */
     }
+    const costUsd =
+        cost !== undefined
+            ? cost
+            : r.finished_at
+              ? telemetryRepo.costBetween(r.project, r.started_at, r.finished_at)
+              : null
     return {
         id: r.id,
         project: r.project,
@@ -42,7 +54,7 @@ function map(r: Raw): RunRecord {
         startedBy: r.started_by,
         branch: r.branch,
         prUrl: r.pr_url,
-        costUsd: r.finished_at ? telemetryRepo.costBetween(r.project, r.started_at, r.finished_at) : null,
+        costUsd,
     }
 }
 
@@ -72,13 +84,21 @@ export function finalize(id: number, reason: string, done: number, error: number
 }
 
 export function list(project: string, limit = 50): RunRecord[] {
-    return allRows<Raw>(
+    // COR-2 — fold the per-run cost into the listing query via a correlated
+    // subquery (mirrors telemetryRepo.costBetween) instead of one costBetween
+    // call per row, so listing N runs is a single query, not N+1.
+    return allRows<Raw & { cost: number | null }>(
         `SELECT id, project, started_at, finished_at, reason, options_json, done, error, total,
-                started_by, branch, pr_url
+                started_by, branch, pr_url,
+                (SELECT SUM(t.cost_usd) FROM telemetry t
+                   WHERE t.project = run.project
+                     AND run.finished_at IS NOT NULL
+                     AND t.created_at >= run.started_at
+                     AND t.created_at <= run.finished_at) AS cost
          FROM run WHERE project = ? ORDER BY id DESC LIMIT ?`,
         project,
         limit,
-    ).map(map)
+    ).map((r) => map(r, r.cost ?? null))
 }
 
 export function get(project: string, id: number): RunRecord | null {
@@ -92,11 +112,25 @@ export function get(project: string, id: number): RunRecord | null {
     return r ? map(r) : null
 }
 
-/** The persisted event frames of one run, in order (terminal replay). */
-export function events(runId: number, limit = 2000): { type: string; payload: string; createdAt: string }[] {
-    return allRows<{ type: string; payload: string; created_at: string }>(
+/**
+ * The persisted event frames of one run, in order (terminal replay). Fetches
+ * `limit + 1` rows to detect truncation: when more than `limit` frames exist the
+ * extra row is dropped and `truncated` is set, mirroring the `patchTruncated`
+ * pattern so the UI can flag a partial log instead of silently cutting it (IMP-3).
+ */
+export function events(
+    runId: number,
+    limit = 2000,
+): { events: { type: string; payload: string; createdAt: string }[]; truncated: boolean } {
+    const rows = allRows<{ type: string; payload: string; created_at: string }>(
         `SELECT type, payload, created_at FROM run_event WHERE run_id = ? ORDER BY id LIMIT ?`,
         runId,
-        limit,
-    ).map((r) => ({ type: r.type, payload: r.payload, createdAt: r.created_at }))
+        limit + 1,
+    )
+    const truncated = rows.length > limit
+    const kept = truncated ? rows.slice(0, limit) : rows
+    return {
+        events: kept.map((r) => ({ type: r.type, payload: r.payload, createdAt: r.created_at })),
+        truncated,
+    }
 }

@@ -25,6 +25,7 @@ const MAP: Record<string, string> = {
     'exclamation-octagon': 'OctagonAlert',
     'exclamation-triangle': 'TriangleAlert',
     folder2: 'Folder',
+    gear: 'Settings',
     'grid-1x2': 'LayoutDashboard',
     'moon-fill': 'Moon',
     'pause-circle-fill': 'CirclePause',

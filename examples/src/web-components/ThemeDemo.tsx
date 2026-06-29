@@ -106,6 +106,33 @@ const ThemeDemo: React.FC = () => {
                                     <Cluster />
                                 </tc-theme>
                             </tc-section-card>
+
+                            <tc-section-card title='Named theme — name="sunshine"'>
+                                <p className="text-muted small mb-3">
+                                    The warm <code>sunshine</code> skin — a citrus-boutique palette
+                                    (cream canvas, olive-green ink, bright lemon accent) ported from
+                                    the nekadnesto.mk storefront — re-skins the same subtree. (Display
+                                    fonts are not bundled — they degrade to system sans-serif.)
+                                </p>
+                                {/* @ts-ignore */}
+                                <tc-theme name="sunshine">
+                                    <Cluster />
+                                </tc-theme>
+                            </tc-section-card>
+
+                            <tc-section-card title='Named theme — name="neon"'>
+                                <p className="text-muted small mb-3">
+                                    The dark <code>neon</code> skin — a synthwave / cyberpunk palette
+                                    (deep navy-purple void, dual hot-magenta + electric-cyan accents,
+                                    glowing outlines) ported from the Neon Drift landing page —
+                                    re-skins the same subtree. (Display fonts are not bundled — they
+                                    degrade to system sans-serif.)
+                                </p>
+                                {/* @ts-ignore */}
+                                <tc-theme name="neon">
+                                    <Cluster />
+                                </tc-theme>
+                            </tc-section-card>
                         </div>
                     </div>
                 </div>

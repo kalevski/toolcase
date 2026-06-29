@@ -14,7 +14,6 @@ interface _SyncHandle {
 async function _openSyncHandle(name: string): Promise<_SyncHandle> {
     // navigator.storage.getDirectory() is only present in browser/worker contexts.
     // Reading it lazily here (never at module load time) keeps Node.js builds safe.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const nav = (globalThis as any).navigator
     if (typeof nav?.storage?.getDirectory !== 'function') {
         throw new Error(
@@ -22,7 +21,6 @@ async function _openSyncHandle(name: string): Promise<_SyncHandle> {
             '(navigator.storage.getDirectory). It must run inside a dedicated Web Worker.'
         )
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const root = await (nav.storage.getDirectory() as Promise<any>)
     const fh = await root.getFileHandle(name, { create: true })
     return fh.createSyncAccessHandle() as _SyncHandle

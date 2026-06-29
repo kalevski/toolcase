@@ -1,10 +1,23 @@
 import { esc } from './internal/esc'
 import { Search, Check } from 'lucide-static'
 import { icon, chevronDownIcon } from './icons'
+import { fixedContainingBlock } from './internal/containingBlock'
+import { cssLength } from './internal/cssLength'
+import { fieldMessageHtml } from './internal/field-message'
+import {
+    requiredMark,
+    setFieldFormValue,
+    reflectFieldValidity,
+    dispatchFieldChange,
+} from './internal/form-field'
 
 const TAG_NAME = 'tc-extended-select'
 
 let _idCounter = 0
+
+export type ExtendedSelectState = 'valid' | 'invalid'
+
+const STATES: ExtendedSelectState[] = ['valid', 'invalid']
 
 // Pre-compute at module load — these icons are always in the rendered HTML
 const searchIconHtml = icon(Search, 'tc-extended-select__search-icon')
@@ -17,9 +30,13 @@ export interface ExtendedSelectItem {
 }
 
 export class ExtendedSelect extends HTMLElement {
+    // Participates in native <form> submission/validation like every tc-* input.
+    static formAssociated = true
+
     private _initialised = false
     private _idPrefix: string
     private _listId: string
+    private _helpId: string
     private _items: ExtendedSelectItem[] = []
     private _filteredItems: ExtendedSelectItem[] = []
     private _searchQuery = ''
@@ -28,11 +45,32 @@ export class ExtendedSelect extends HTMLElement {
     private _debounceTimer: ReturnType<typeof setTimeout> | null = null
     private _outsideHandler: ((e: MouseEvent) => void) | null = null
     private _keyHandler: ((e: KeyboardEvent) => void) | null = null
+    private _repositionHandler: (() => void) | null = null
+    private _internals: ElementInternals
+    private _defaultValue = ''
+    // The ancestor (if any) that establishes the menu's containing block while
+    // open — see _containingBlock(). Cached on open; the menu's fixed coords are
+    // resolved against this box, not the viewport, when it is non-null.
+    private _cbEl: HTMLElement | null = null
 
     onChange: ((value: string) => void) | null = null
 
     static get observedAttributes(): string[] {
-        return ['value', 'name', 'placeholder', 'search-placeholder', 'no-results-text', 'loading']
+        return [
+            'value',
+            'name',
+            'placeholder',
+            'search-placeholder',
+            'no-results-text',
+            'loading',
+            'disabled',
+            'required',
+            'max-height',
+            'label',
+            'help',
+            'error',
+            'state',
+        ]
     }
 
     constructor() {
@@ -40,14 +78,20 @@ export class ExtendedSelect extends HTMLElement {
         const n = ++_idCounter
         this._idPrefix = `tc-es-opt-${n}`
         this._listId = `tc-es-list-${n}`
+        // Stable id for the reserved message slot (trigger aria-describedby).
+        this._helpId = `tc-es-help-${n}`
+        this._internals = this.attachInternals()
     }
 
     connectedCallback(): void {
         if (!this._initialised) {
+            this._defaultValue = this.getAttribute('value') ?? ''
             this._filteredItems = this._items
             this.render()
             this._initialised = true
         }
+        this._applyMaxHeight()
+        this._syncForm()
     }
 
     disconnectedCallback(): void {
@@ -62,9 +106,28 @@ export class ExtendedSelect extends HTMLElement {
         if (!this.isConnected || !this._initialised) return
         if (name === 'value') {
             this._syncValueInDOM(next)
+            this._syncForm()
         } else if (name === 'name') {
+            // The hidden input no longer submits (its name is cleared in render),
+            // but keep its name attribute in sync for any external querying; the
+            // canonical submission value flows through ElementInternals below.
             const hidden = this.querySelector<HTMLInputElement>('.tc-extended-select__hidden')
             if (hidden) hidden.name = next ?? ''
+            this._syncForm()
+        } else if (name === 'required') {
+            const trigger = this.querySelector<HTMLButtonElement>('.tc-extended-select__trigger')
+            if (trigger) {
+                if (this.required) trigger.setAttribute('aria-required', 'true')
+                else trigger.removeAttribute('aria-required')
+            }
+            this._patchValidation()
+            this._syncForm()
+        } else if (name === 'disabled') {
+            const isDisabled = this.disabled
+            const trigger = this.querySelector<HTMLButtonElement>('.tc-extended-select__trigger')
+            if (trigger) trigger.disabled = isDisabled
+            // A disabled control must not keep an open menu around.
+            if (isDisabled && this._isOpen) this._closeMenu(false)
         } else if (name === 'placeholder') {
             if (!this.value) this._updateTriggerLabel()
         } else if (name === 'search-placeholder') {
@@ -81,7 +144,60 @@ export class ExtendedSelect extends HTMLElement {
             } else {
                 this.removeAttribute('aria-busy')
             }
+        } else if (name === 'max-height') {
+            this._applyMaxHeight()
+        } else if (name === 'label' || name === 'help' || name === 'error' || name === 'state') {
+            // Patch the reserved slot, the label, and the trigger's invalid
+            // border in place. A full render() would tear down the menu and drop
+            // its anchoring / focus, so we touch only the affected nodes.
+            this._patchValidation()
+            // error/state change the effective validity → reflect into the form.
+            this._syncForm()
         }
+    }
+
+    /** Called by the browser when the associated form resets. */
+    formResetCallback(): void {
+        this.value = this._defaultValue
+        this._syncValueInDOM(this._defaultValue)
+        this._syncForm()
+    }
+
+    /** Called by the browser when a containing fieldset/form is disabled/enabled. */
+    formDisabledCallback(disabled: boolean): void {
+        this.disabled = disabled
+    }
+
+    /**
+     * Push value + validity into the form. Effective invalid = error / state
+     * invalid / required-but-empty. Mirrors the shared form-field contract.
+     */
+    private _syncForm(): void {
+        const value = this.value
+        setFieldFormValue(this._internals, this.name || null, value === '' ? null : value)
+        const error = this.error
+        const requiredEmpty = this.required && value === ''
+        const invalid = !!error || this.state === 'invalid' || requiredEmpty
+        reflectFieldValidity(this._internals, {
+            invalid,
+            valueMissing: requiredEmpty && !error,
+            message:
+                error ||
+                (requiredEmpty ? 'Please make a selection.' : 'Please provide a valid selection.'),
+            anchor:
+                this.querySelector<HTMLButtonElement>('.tc-extended-select__trigger') ?? undefined,
+        })
+    }
+
+    /**
+     * Cap how tall the options list grows before it scrolls. A bare number is
+     * read as pixels; any CSS length (`50vh`, `20rem`, …) is honoured as-is.
+     * Removing the attribute restores the stylesheet default (240px).
+     */
+    private _applyMaxHeight(): void {
+        const h = cssLength(this.getAttribute('max-height'))
+        if (h) this.style.setProperty('--bs-extended-select-list-max-height', h)
+        else this.style.removeProperty('--bs-extended-select-list-max-height')
     }
 
     get value(): string {
@@ -127,6 +243,65 @@ export class ExtendedSelect extends HTMLElement {
     set loading(v: boolean) {
         if (v) this.setAttribute('loading', '')
         else this.removeAttribute('loading')
+    }
+
+    // ── disabled ─────────────────────────────────────────────────────────────
+    get disabled(): boolean {
+        return this.hasAttribute('disabled')
+    }
+    set disabled(v: boolean) {
+        if (v) this.setAttribute('disabled', '')
+        else this.removeAttribute('disabled')
+    }
+
+    // ── required ─────────────────────────────────────────────────────────────
+    get required(): boolean {
+        return this.hasAttribute('required')
+    }
+    set required(v: boolean) {
+        if (v) this.setAttribute('required', '')
+        else this.removeAttribute('required')
+    }
+
+    get maxHeight(): string {
+        return this.getAttribute('max-height') ?? ''
+    }
+    set maxHeight(v: string) {
+        if (v) this.setAttribute('max-height', v)
+        else this.removeAttribute('max-height')
+    }
+
+    get label(): string | null {
+        return this.getAttribute('label')
+    }
+    set label(v: string | null) {
+        if (v != null) this.setAttribute('label', v)
+        else this.removeAttribute('label')
+    }
+
+    get help(): string | null {
+        return this.getAttribute('help')
+    }
+    set help(v: string | null) {
+        if (v != null) this.setAttribute('help', v)
+        else this.removeAttribute('help')
+    }
+
+    get error(): string | null {
+        return this.getAttribute('error')
+    }
+    set error(v: string | null) {
+        if (v != null) this.setAttribute('error', v)
+        else this.removeAttribute('error')
+    }
+
+    get state(): ExtendedSelectState | null {
+        const v = this.getAttribute('state') as ExtendedSelectState
+        return STATES.includes(v) ? v : null
+    }
+    set state(v: ExtendedSelectState | null) {
+        if (v != null) this.setAttribute('state', v)
+        else this.removeAttribute('state')
     }
 
     get items(): ExtendedSelectItem[] {
@@ -206,14 +381,54 @@ export class ExtendedSelect extends HTMLElement {
         if (!listEl) return
         listEl.innerHTML = this._renderOptions()
         this._updateActiveDescendant()
+        // Filtering changes the menu height; re-anchor so a flipped-up menu
+        // stays attached to the trigger instead of drifting.
+        if (this._isOpen) this._positionMenu()
+    }
+
+    // Effective validity: a non-empty `error` forces invalid, else honour `state`.
+    private _effectiveState(): ExtendedSelectState | null {
+        return this.error ? 'invalid' : this.state
     }
 
     private render(): void {
         const currentValue = this.value
         const isPlaceholder = !currentValue
-        const triggerCls = `tc-extended-select__trigger${isPlaceholder ? ' tc-extended-select__trigger--placeholder' : ''}`
+        const state = this._effectiveState()
+        const invalidCls = state === 'invalid' ? ' tc-extended-select__trigger--invalid' : ''
+        const triggerCls = `tc-extended-select__trigger${isPlaceholder ? ' tc-extended-select__trigger--placeholder' : ''}${invalidCls}`
 
-        this.innerHTML = `<input type="hidden" name="${esc(this.name)}" value="${esc(currentValue)}" class="tc-extended-select__hidden"><button type="button" class="${triggerCls}" role="combobox" aria-expanded="false" aria-controls="${this._listId}" aria-haspopup="listbox"><span class="tc-extended-select__trigger-label">${this._triggerLabelHtml()}</span><span class="tc-extended-select__trigger-spinner" aria-hidden="true"><span class="spinner-border spinner-border-sm"></span></span><span class="tc-extended-select__caret" aria-hidden="true">${chevronDownIcon}</span></button><div class="tc-extended-select__menu"><div class="tc-extended-select__search-wrap">${searchIconHtml}<input type="text" class="tc-extended-select__search-input" placeholder="${esc(this.searchPlaceholder)}" autocomplete="off" aria-label="Search options"></div><ul class="tc-extended-select__list" id="${this._listId}" role="listbox">${this._renderOptions()}</ul><div class="tc-extended-select__loading-indicator" aria-live="polite" aria-label="Loading"><span class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading…</span></span></div></div>`
+        const required = this.required
+        const disabled = this.disabled
+        const label = this.label
+        const labelHtml = label
+            ? `<label class="form-label tc-extended-select__label">${esc(label)}${requiredMark(required)}</label>`
+            : ''
+
+        // Describe the trigger by the reserved slot only when it carries content.
+        const describe = this.help || state ? ` aria-describedby="${this._helpId}"` : ''
+        // aria-required surfaces the requirement on the focusable trigger.
+        const requiredAttr = required ? ' aria-required="true"' : ''
+        const disabledAttr = disabled ? ' disabled' : ''
+
+        // Reserved message slot — plain block flow as the LAST host child, after
+        // the trigger and the (fixed-positioned) menu. Kept outside the menu so
+        // it never inherits the menu's overflow/fixed positioning and stays
+        // visible beneath the control.
+        const messageHtml = fieldMessageHtml({
+            id: this._helpId,
+            state,
+            error: this.error,
+            hint: this.help,
+            invalidText: 'Please provide a valid selection.',
+            validText: 'Looks good!',
+        })
+
+        // The hidden input mirrors the value in the DOM (read by _syncValueInDOM)
+        // but no longer submits — form submission flows through ElementInternals
+        // (_syncForm) so the value is not duplicated under `name`. Its `name`
+        // attribute is therefore intentionally omitted.
+        this.innerHTML = `${labelHtml}<input type="hidden" value="${esc(currentValue)}" class="tc-extended-select__hidden"><button type="button" class="${triggerCls}" role="combobox" aria-expanded="false" aria-controls="${this._listId}" aria-haspopup="listbox"${describe}${requiredAttr}${disabledAttr}><span class="tc-extended-select__trigger-label">${this._triggerLabelHtml()}</span><span class="tc-extended-select__trigger-spinner" aria-hidden="true"><span class="spinner-border spinner-border-sm"></span></span><span class="tc-extended-select__caret" aria-hidden="true">${chevronDownIcon}</span></button><div class="tc-extended-select__menu"><div class="tc-extended-select__search-wrap">${searchIconHtml}<input type="text" class="tc-extended-select__search-input" placeholder="${esc(this.searchPlaceholder)}" autocomplete="off" aria-label="Search options"></div><ul class="tc-extended-select__list" id="${this._listId}" role="listbox">${this._renderOptions()}</ul><div class="tc-extended-select__loading-indicator" aria-live="polite" aria-label="Loading"><span class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading…</span></span></div></div>${messageHtml}`
 
         if (this.loading) this.setAttribute('aria-busy', 'true')
 
@@ -232,10 +447,56 @@ export class ExtendedSelect extends HTMLElement {
         }
     }
 
+    /**
+     * Patch the label, the trigger's invalid border + aria-describedby, and the
+     * reserved message slot in place — leaving the menu (and its anchoring /
+     * focus) untouched. Used for label/help/error/state attribute changes.
+     */
+    private _patchValidation(): void {
+        const state = this._effectiveState()
+
+        // Slot — outerHTML keeps the single .tc-field-message contract.
+        const slot = this.querySelector<HTMLElement>('.tc-field-message')
+        if (slot) {
+            slot.outerHTML = fieldMessageHtml({
+                id: this._helpId,
+                state,
+                error: this.error,
+                hint: this.help,
+                invalidText: 'Please provide a valid selection.',
+                validText: 'Looks good!',
+            })
+        }
+
+        // Trigger invalid border + describedby.
+        const trigger = this.querySelector<HTMLButtonElement>('.tc-extended-select__trigger')
+        if (trigger) {
+            trigger.classList.toggle('tc-extended-select__trigger--invalid', state === 'invalid')
+            if (this.help || state) trigger.setAttribute('aria-describedby', this._helpId)
+            else trigger.removeAttribute('aria-describedby')
+        }
+
+        // Label — insert / update / remove as the first host child.
+        const label = this.label
+        const labelEl = this.querySelector<HTMLLabelElement>('.tc-extended-select__label')
+        if (label) {
+            if (labelEl) {
+                labelEl.textContent = label
+            } else {
+                this.insertAdjacentHTML(
+                    'afterbegin',
+                    `<label class="form-label tc-extended-select__label">${esc(label)}</label>`,
+                )
+            }
+        } else if (labelEl) {
+            labelEl.remove()
+        }
+    }
+
     // ── Open / Close ─────────────────────────────────────────────────────────
 
     private _openMenu(): void {
-        if (this._isOpen || this.loading) return
+        if (this._isOpen || this.loading || this.disabled) return
         this._isOpen = true
 
         const menu = this.querySelector('.tc-extended-select__menu')
@@ -243,6 +504,15 @@ export class ExtendedSelect extends HTMLElement {
 
         if (menu) menu.classList.add('tc-extended-select__menu--open')
         if (trigger) trigger.setAttribute('aria-expanded', 'true')
+
+        // Anchor the fixed-positioned menu to the trigger (escapes overflow
+        // clipping from ancestor scroll containers), then keep it anchored
+        // while the page or an ancestor scrolls/resizes underneath it.
+        this._cbEl = fixedContainingBlock(this)
+        this._positionMenu()
+        this._repositionHandler = () => this._positionMenu()
+        window.addEventListener('scroll', this._repositionHandler, true)
+        window.addEventListener('resize', this._repositionHandler)
 
         // Pre-highlight selected item
         const v = this.value
@@ -289,6 +559,12 @@ export class ExtendedSelect extends HTMLElement {
             document.removeEventListener('keydown', this._keyHandler)
             this._keyHandler = null
         }
+        if (this._repositionHandler) {
+            window.removeEventListener('scroll', this._repositionHandler, true)
+            window.removeEventListener('resize', this._repositionHandler)
+            this._repositionHandler = null
+        }
+        this._cbEl = null
 
         // Clear search and reset list
         const si = this.querySelector<HTMLInputElement>('.tc-extended-select__search-input')
@@ -304,6 +580,54 @@ export class ExtendedSelect extends HTMLElement {
         if (refocus) {
             this.querySelector<HTMLButtonElement>('.tc-extended-select__trigger')?.focus()
         }
+    }
+
+    /**
+     * Position the fixed menu against the trigger in viewport coordinates.
+     * Width matches the trigger; the menu opens below by default and flips
+     * above when there isn't room beneath it. Left/top are clamped so the
+     * panel never spills off-screen.
+     *
+     * When an ancestor establishes a containing block (see _containingBlock),
+     * `position: fixed` is resolved against that ancestor's box rather than the
+     * viewport, so the viewport coordinates are converted into its local frame
+     * before being written — otherwise the menu drifts by the ancestor's offset.
+     */
+    private _positionMenu(): void {
+        const menu = this.querySelector<HTMLElement>('.tc-extended-select__menu')
+        const trigger = this.querySelector<HTMLElement>('.tc-extended-select__trigger')
+        if (!menu || !trigger) return
+
+        const gap = 2
+        const margin = 4 // keep a small breathing gap from viewport edges
+        const r = trigger.getBoundingClientRect()
+        const vw = window.innerWidth
+        const vh = window.innerHeight
+
+        menu.style.width = `${r.width}px`
+
+        // Measure after width is applied; menu is laid out (visibility:hidden)
+        // even before the --open class, so offsetHeight is reliable here.
+        const menuH = menu.offsetHeight
+        const spaceBelow = vh - r.bottom
+        const flipUp = spaceBelow < menuH + gap && r.top > spaceBelow
+
+        let top = flipUp
+            ? Math.max(margin, r.top - menuH - gap)
+            : Math.min(r.bottom + gap, vh - menuH - margin)
+        let left = Math.max(margin, Math.min(r.left, vw - r.width - margin))
+        top = Math.max(margin, top)
+
+        // Re-base the viewport coords onto the containing block's frame when a
+        // transformed/filtered/contained ancestor has hijacked `fixed`.
+        if (this._cbEl) {
+            const cb = this._cbEl.getBoundingClientRect()
+            top -= cb.top
+            left -= cb.left
+        }
+
+        menu.style.top = `${top}px`
+        menu.style.left = `${left}px`
     }
 
     // ── Active option tracking ────────────────────────────────────────────────
@@ -341,13 +665,10 @@ export class ExtendedSelect extends HTMLElement {
 
     private _selectItem(key: string): void {
         this.value = key
-        this.dispatchEvent(
-            new CustomEvent('tc-change', {
-                bubbles: true,
-                composed: true,
-                detail: { value: key },
-            }),
-        )
+        // Push the new selection into the form before announcing it.
+        this._syncForm()
+        // Canonical change event — detail is exactly { value }.
+        dispatchFieldChange(this, key)
         this.dispatchEvent(new Event('change', { bubbles: true }))
         if (typeof this.onChange === 'function') this.onChange(key)
         this._closeMenu()

@@ -1,0 +1,84 @@
+// Pure ${KEY} interpolation for env-var values (planning §3.1, §8.5, decision #11).
+// No I/O, no node:* — operates only on the maps it is handed. `$$` escapes a
+// literal `$`; an unknown reference resolves to '' (empty string).
+
+/**
+ * Thrown when the ${KEY} dependency graph contains a cycle (e.g. A->B->A).
+ * `key` names a participant in the offending cycle (planning §3.1).
+ */
+export class InterpolationCycleError extends Error {
+    constructor(
+        message: string,
+        readonly key: string,
+    ) {
+        super(message)
+        this.name = 'InterpolationCycleError'
+    }
+}
+
+// One alternation matched left-to-right in a SINGLE pass (wharf D2): `$$` (an
+// escaped literal `$`) OR `${KEY}` where KEY matches the env-var key shape.
+// Because `$$` is the first alternative it is always consumed before its leading
+// `$` could begin a reference, so `$${X}` stays the literal `${X}`. No out-of-band
+// sentinel — a real value can no longer collide with an escape marker.
+const TOKEN_PATTERN = /(\$\$)|\$\{([A-Za-z_][A-Za-z0-9_]*)\}/g
+
+/**
+ * Single-pass substitution of ${KEY} in `template`, resolving each key via
+ * `resolve` (undefined -> ''). `$$` collapses to a literal `$` and is protected
+ * from being read as the start of a reference (planning §8.5).
+ */
+export function interpolateValue(
+    template: string,
+    resolve: (key: string) => string | undefined,
+): string {
+    return template.replace(
+        TOKEN_PATTERN,
+        (_match, escaped: string | undefined, key: string | undefined) => {
+            // `$$` → a single literal `$`.
+            if (escaped !== undefined) return '$'
+            // `${KEY}` → resolved value (undefined → '').
+            const value = resolve(key as string)
+            return value === undefined ? '' : value
+        },
+    )
+}
+
+/**
+ * Resolve every value's ${KEY} references against the OTHER values in `raw`,
+ * recursively, with cycle detection. Values with no ${} pass through unchanged
+ * (e.g. already-final secret/masked strings). Throws InterpolationCycleError if
+ * a reference cycle is detected, naming a key in the cycle (planning §3.1).
+ */
+export function interpolateAll(raw: Record<string, string>): Record<string, string> {
+    const resolved: Record<string, string> = {}
+    // Keys currently on the resolution stack — re-entry means a cycle.
+    const inProgress = new Set<string>()
+
+    const resolveKey = (key: string): string => {
+        // Memoized: already fully resolved.
+        if (Object.prototype.hasOwnProperty.call(resolved, key)) {
+            return resolved[key]
+        }
+        // Unknown key -> '' (matches single-pass `resolve` contract).
+        if (!Object.prototype.hasOwnProperty.call(raw, key)) {
+            return ''
+        }
+        if (inProgress.has(key)) {
+            throw new InterpolationCycleError(
+                `Interpolation cycle detected involving key "${key}"`,
+                key,
+            )
+        }
+        inProgress.add(key)
+        const value = interpolateValue(raw[key], (refKey) => resolveKey(refKey))
+        inProgress.delete(key)
+        resolved[key] = value
+        return value
+    }
+
+    for (const key of Object.keys(raw)) {
+        resolveKey(key)
+    }
+    return resolved
+}

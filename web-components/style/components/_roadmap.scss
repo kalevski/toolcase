@@ -78,11 +78,13 @@ tc-roadmap {
     border: 1px solid var(--bs-roadmap-border);
 }
 
-// Kanban — columns side by side; auto-fill collapses toward stacked on narrow
-// viewports (wraps to fewer columns, then a single column).
+// Kanban — columns side by side; auto-fit collapses toward stacked on narrow
+// viewports (wraps to fewer columns, then a single column). `auto-fit` (not
+// `auto-fill`) so any leftover track is collapsed — otherwise an empty trailing
+// track shows the wrapper's hairline background as a phantom extra column.
 .tc-roadmap--kanban {
     grid-template-columns: repeat(
-        auto-fill,
+        auto-fit,
         minmax(min(100%, var(--bs-roadmap-column-min-width)), 1fr)
     );
 }

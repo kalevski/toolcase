@@ -64,6 +64,21 @@
     flex-shrink: 0 !important;
 }
 
+// Flex/grid gap — the demos and consumer markup lean on `.gap-{0…5}` for
+// spacing between flex children (column stacks especially). Maps the same
+// `$spacers` scale the margin/padding utilities use.
+@each $key, $value in $spacers {
+    .gap-#{$key} {
+        gap: $value !important;
+    }
+    .row-gap-#{$key} {
+        row-gap: $value !important;
+    }
+    .column-gap-#{$key} {
+        column-gap: $value !important;
+    }
+}
+
 .justify-content-start {
     justify-content: flex-start !important;
 }

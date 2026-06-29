@@ -1,0 +1,15 @@
+// Sunshine theme — opt-in warm "citrus boutique" skin for
+// @toolcase/web-components (cream canvas, olive-green ink, leaf-green brand,
+// bright lemon lead accent, soft warm shadows, faint citrus-paper texture).
+//
+// Ported from the CITRINA / nekadnesto.mk storefront design system.
+//
+// Activate by wrapping content in the theme root:
+//   <tc-theme name="sunshine"> … your tc-* components … </tc-theme>
+// (or any element with [data-tc-theme="sunshine"]).
+//
+// Load order: foundation (token remap) first so the component partials override
+// on top of the already-sunshine --tc-* / --bs-* tokens.
+
+@use 'foundation';
+@use 'components';

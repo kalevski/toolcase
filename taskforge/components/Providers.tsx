@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { Modal } from '@/lib/modal'
+import { BrandingProvider } from '@/lib/branding-context'
 import { ConfirmModal, PromptModal } from './ConfirmModal'
 import { NewProjectModal } from './NewProjectModal'
 import { NewTaskModal } from './NewTaskModal'
@@ -39,16 +40,18 @@ export function Providers({ children }: { children: React.ReactNode }) {
     if (!mounted) return null
 
     return (
-        <Modal.ModalContext>
-            {children}
-            <Modal.ModalRender>
-                <ConfirmModal key="confirm" />
-                <PromptModal key="prompt" />
-                <NewProjectModal key="newProject" />
-                <NewTaskModal key="newTask" />
-                <ImportIssuesModal key="importIssues" />
-                <FeedbackModal key="taskFeedback" />
-            </Modal.ModalRender>
-        </Modal.ModalContext>
+        <BrandingProvider>
+            <Modal.ModalContext>
+                {children}
+                <Modal.ModalRender>
+                    <ConfirmModal key="confirm" />
+                    <PromptModal key="prompt" />
+                    <NewProjectModal key="newProject" />
+                    <NewTaskModal key="newTask" />
+                    <ImportIssuesModal key="importIssues" />
+                    <FeedbackModal key="taskFeedback" />
+                </Modal.ModalRender>
+            </Modal.ModalContext>
+        </BrandingProvider>
     )
 }

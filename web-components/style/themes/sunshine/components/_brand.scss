@@ -1,0 +1,19 @@
+// Sunshine › tc-brand — display wordmark with a lemon underline + leaf label.
+// The primary wordmark reads in the Bricolage display face; the underline bar
+// becomes the lemon→amber sweep (--bs-brand-underline-color is a solid-colour
+// slot, so the gradient is applied as a background on .tc-brand__underline), and
+// the optional label chip leans the leaf-green brand tint.
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    tc-brand {
+        --bs-brand-primary-color: var(--sun-emphasis);
+        --bs-brand-primary-font: var(--sun-display);
+        --bs-brand-label-bg: var(--sun-lead-tint);
+        --bs-brand-label-color: var(--sun-leaf-lo);
+    }
+
+    .tc-brand__underline {
+        background: var(--sun-lead-grad);
+    }
+}

@@ -71,13 +71,13 @@ describe('SubscriberPool', () => {
 	})
 
 	it('uses this.connection (not stale client) for unsubscribe after reconnect', async () => {
-		let clientCount = 0
+		let _clientCount = 0
 		const clients: ReturnType<typeof makeFakeClient>[] = []
 
 		const pool = new SubscriberPool(() => {
 			const c = makeFakeClient()
 			clients.push(c)
-			clientCount++
+			_clientCount++
 			return c as never
 		})
 
@@ -185,7 +185,7 @@ describe('SubscriberPool', () => {
 		expect(callCount).toBe(1)
 
 		// Drain the pool so connection is cleaned up
-		const sub = await pool.subscribeRaw('ch2', vi.fn())
+		const _sub = await pool.subscribeRaw('ch2', vi.fn())
 		// Close all to null out connection
 		await pool.close()
 

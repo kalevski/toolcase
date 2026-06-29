@@ -1,0 +1,18 @@
+// Neon › tc-panel — the framed surface, mirrors .card.
+// Gradient fill + top highlight; the header gets a hairline that reads on the
+// dark void. No hover-lift (panels are containers, not interactive tiles).
+
+tc-theme[name='neon'],
+[data-tc-theme='neon'] {
+    tc-panel {
+        --bs-panel-bg: var(--nd-surface-grad);
+        --bs-panel-border-color: var(--nd-border);
+        --bs-panel-header-bg: transparent;
+        --bs-panel-header-border-color: var(--nd-border);
+        --bs-panel-header-color: var(--nd-emphasis);
+    }
+
+    .tc-panel {
+        box-shadow: var(--nd-bevel-top);
+    }
+}

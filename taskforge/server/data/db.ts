@@ -286,23 +286,28 @@ function migrate(db: DatabaseSync): void {
             applied_at TEXT NOT NULL
         );`,
     )
-    const rows = db.prepare('SELECT version FROM schema_migrations').all() as unknown as {
-        version: number
-    }[]
-    const applied = new Set(rows.map((r) => r.version))
-    const insert = db.prepare('INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)')
-    for (let i = 0; i < MIGRATIONS.length; i++) {
-        const version = i + 1
-        if (applied.has(version)) continue
-        db.exec('BEGIN')
-        try {
+    // DAT-1 — serialize the whole migration sequence behind the SQLite write
+    // lock. `BEGIN IMMEDIATE` grabs the RESERVED lock up front, so if two
+    // processes boot at once only one migrates; the other blocks (busy_timeout)
+    // then sees the migrations already applied. The applied set is re-read
+    // *inside* the lock so we never re-run a migration a peer just committed.
+    db.exec('BEGIN IMMEDIATE')
+    try {
+        const rows = db.prepare('SELECT version FROM schema_migrations').all() as unknown as {
+            version: number
+        }[]
+        const applied = new Set(rows.map((r) => r.version))
+        const insert = db.prepare('INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)')
+        for (let i = 0; i < MIGRATIONS.length; i++) {
+            const version = i + 1
+            if (applied.has(version)) continue
             db.exec(MIGRATIONS[i])
             insert.run(version, new Date().toISOString())
-            db.exec('COMMIT')
-        } catch (err) {
-            db.exec('ROLLBACK')
-            throw err
         }
+        db.exec('COMMIT')
+    } catch (err) {
+        db.exec('ROLLBACK')
+        throw err
     }
 }
 

@@ -1,0 +1,22 @@
+// Neon › tc-input — dark field with a magenta neon focus halo.
+// Foundation remaps the field bg / border / text / placeholder. These fix the
+// hardcoded slate values that survive: the form label colour and the slate focus
+// border + ring, replaced with the magenta accent line and soft glow.
+
+tc-theme[name='neon'],
+[data-tc-theme='neon'] {
+    .form-label {
+        color: var(--nd-text-2);
+    }
+
+    .form-control,
+    .form-select {
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--nd-accent);
+        box-shadow: var(--tc-focus-ring);
+    }
+}

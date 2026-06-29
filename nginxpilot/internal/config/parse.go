@@ -15,12 +15,16 @@ import (
 // DefaultPath is where the daemon looks for its config unless --config is given.
 const DefaultPath = "/etc/nginxpilot/config.yml"
 
-// fragment is the shape an included file may have: sites:, upstreams: and/or
-// proxies: lists. No globals, no nested include:.
-type fragment struct {
-	Sites     []Site     `yaml:"sites"`
-	Upstreams []Upstream `yaml:"upstreams"`
-	Proxies   []Proxy    `yaml:"proxies"`
+// Fragment is the shape an included file may have: sites:, upstreams:,
+// proxies:, stream_upstreams: and/or streams: lists. No globals, no nested
+// include:. It is both what `include:` globs pull in from sites.d/ and what the
+// admin write-API accepts, so the file-drop and REST paths parse identically.
+type Fragment struct {
+	Sites           []Site           `yaml:"sites"`
+	Upstreams       []Upstream       `yaml:"upstreams"`
+	Proxies         []Proxy          `yaml:"proxies"`
+	StreamUpstreams []StreamUpstream `yaml:"stream_upstreams"`
+	Streams         []Stream         `yaml:"streams"`
 }
 
 // LoadResult carries the parsed config plus non-fatal warnings (e.g. an
@@ -55,6 +59,12 @@ func Load(path string) (*LoadResult, error) {
 	for i := range cfg.Proxies {
 		cfg.Proxies[i].File = abs
 	}
+	for i := range cfg.StreamUpstreams {
+		cfg.StreamUpstreams[i].File = abs
+	}
+	for i := range cfg.Streams {
+		cfg.Streams[i].File = abs
+	}
 
 	applyDefaults(&cfg)
 
@@ -81,6 +91,33 @@ func applyDefaults(cfg *Config) {
 	if cfg.Defaults.KeepReleases == 0 {
 		cfg.Defaults.KeepReleases = 3
 	}
+	applyNginxDefaults(cfg)
+}
+
+// applyNginxDefaults fills managed-mode paths and commands when nginx.manage is
+// on and the field was left unset. Inert when manage is false.
+func applyNginxDefaults(cfg *Config) {
+	if !cfg.Nginx.Manage {
+		return
+	}
+	if cfg.Nginx.ConfDir == "" {
+		cfg.Nginx.ConfDir = DefaultConfDir
+	}
+	if cfg.Nginx.StreamConfDir == "" {
+		cfg.Nginx.StreamConfDir = DefaultStreamConfDir
+	}
+	if cfg.Nginx.ManagedIncludeDir == "" {
+		cfg.Nginx.ManagedIncludeDir = DefaultManagedIncludeDir
+	}
+	if len(cfg.Nginx.TestCmd) == 0 {
+		cfg.Nginx.TestCmd = []string{"nginx", "-t"}
+	}
+	if len(cfg.Nginx.ReloadCmd) == 0 {
+		cfg.Nginx.ReloadCmd = []string{"nginx", "-s", "reload"}
+	}
+	if cfg.Tls.WatchInterval == 0 {
+		cfg.Tls.WatchInterval = Duration(DefaultWatchInterval * 1e9)
+	}
 }
 
 // loadIncludes expands include: globs (relative to the main file's directory),
@@ -106,25 +143,46 @@ func loadIncludes(cfg *Config, res *LoadResult) error {
 			if err != nil {
 				return fmt.Errorf("include %s: %w", file, err)
 			}
-			var frag fragment
-			if err := strictDecode(raw, &frag); err != nil {
-				return fmt.Errorf("%s: %w (fragments may only contain sites:, upstreams: and/or proxies: lists)", file, err)
-			}
-			for i := range frag.Sites {
-				frag.Sites[i].File = file
-			}
-			for i := range frag.Upstreams {
-				frag.Upstreams[i].File = file
-			}
-			for i := range frag.Proxies {
-				frag.Proxies[i].File = file
+			frag, err := ParseFragment(raw, file)
+			if err != nil {
+				return err
 			}
 			cfg.Sites = append(cfg.Sites, frag.Sites...)
 			cfg.Upstreams = append(cfg.Upstreams, frag.Upstreams...)
 			cfg.Proxies = append(cfg.Proxies, frag.Proxies...)
+			cfg.StreamUpstreams = append(cfg.StreamUpstreams, frag.StreamUpstreams...)
+			cfg.Streams = append(cfg.Streams, frag.Streams...)
 		}
 	}
 	return nil
+}
+
+// ParseFragment strict-decodes one sites.d-style fragment — the same bytes a
+// file dropped into sites.d/ would contain — attributing provenance to file.
+// It performs no cross-config checks (duplicate domains across files): merge
+// the result into a Config and call Validate for that. Reused by both the
+// include loader and the admin write-API so the two paths parse identically.
+func ParseFragment(raw []byte, file string) (*Fragment, error) {
+	var frag Fragment
+	if err := strictDecode(raw, &frag); err != nil {
+		return nil, fmt.Errorf("%s: %w (fragments may only contain sites:, upstreams: and/or proxies: lists)", file, err)
+	}
+	for i := range frag.Sites {
+		frag.Sites[i].File = file
+	}
+	for i := range frag.Upstreams {
+		frag.Upstreams[i].File = file
+	}
+	for i := range frag.Proxies {
+		frag.Proxies[i].File = file
+	}
+	for i := range frag.StreamUpstreams {
+		frag.StreamUpstreams[i].File = file
+	}
+	for i := range frag.Streams {
+		frag.Streams[i].File = file
+	}
+	return &frag, nil
 }
 
 // strictDecode decodes YAML rejecting unknown keys. An empty document is

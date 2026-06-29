@@ -20,7 +20,7 @@
 .spinner-border {
     --bs-spinner-border-width: 2.5px;
 
-    border: var(--bs-spinner-border-width) solid var(--tc-slate-200);
+    border: var(--bs-spinner-border-width) solid var(--tc-border);
     border-top-color: currentcolor;
     animation: spinner-border var(--bs-spinner-animation-speed) linear infinite;
 }

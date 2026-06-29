@@ -90,7 +90,12 @@ export class ProgressBar extends HTMLElement {
         const animatedClass = animated ? ' progress-bar-animated' : ''
         const labelText = showLabel ? `${Math.round(pct)}%` : ''
 
-        this.innerHTML = `<div class="progress" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" style="width:${pct}%"><div class="progress-bar${variantClass}${stripedClass}${animatedClass}">${labelText}</div></div>`
+        // The host is the flex child inside `.progress-stacked`; the segment
+        // width must live on it so the inner bar can fill 100% of that slot.
+        // (Setting width on the inner `.progress` made it resolve against a
+        // zero-width host, collapsing every segment.)
+        this.style.width = `${pct}%`
+        this.innerHTML = `<div class="progress" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar${variantClass}${stripedClass}${animatedClass}" style="width:100%">${labelText}</div></div>`
     }
 }
 

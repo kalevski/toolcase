@@ -1,6 +1,5 @@
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
-import { icon } from './icons'
 import { lockBody, unlockBody } from './internal/scroll-lock'
 import { overlayStack } from './internal/overlay-stack'
 

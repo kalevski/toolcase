@@ -49,10 +49,11 @@ tc-theme[name='aurora'],
     --ah-surface-2: #131a24;
     --ah-surface-3: #18212e;
 
-    // Hairlines — translucent white so they read on any surface depth.
-    --ah-border-faint: rgba(255, 255, 255, 0.04);
-    --ah-border: rgba(255, 255, 255, 0.08);
-    --ah-border-strong: rgba(255, 255, 255, 0.14);
+    // Hairlines — translucent BLACK so edges read as subtle dark grooves (not
+    // bright white lines) on any surface depth; the strong tier deepens further.
+    --ah-border-faint: rgba(255, 255, 255, 0.06);
+    --ah-border: rgba(255, 255, 255, 0.12);
+    --ah-border-strong: rgba(255, 255, 255, 0.22);
 
     // Text ramp — cool off-white down to muted slate-grey.
     --ah-text: #e9eef4;
@@ -210,7 +211,7 @@ tc-theme[name='aurora'],
     --bs-tertiary-bg: var(--ah-surface-3);
 
     --bs-border-color: var(--ah-border);
-    --bs-border-color-translucent: rgba(255, 255, 255, 0.1);
+    --bs-border-color-translucent: rgba(0, 0, 0, 0.28);
     --bs-border-radius: 0;
 
     --bs-link-color: var(--ah-accent);

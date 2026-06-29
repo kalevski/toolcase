@@ -1,0 +1,18 @@
+// Sunshine › tc-progress — lemon gradient gauge on a warm-well trough.
+// Recessed cream-well trough; the bar fill is the lemon→amber gradient with the
+// dark on-lead ink numeral for legibility on the bright fill.
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    .progress,
+    .progress-stacked {
+        --bs-progress-bg: var(--sun-well);
+        --bs-progress-bar-bg: var(--sun-lead-grad);
+        --bs-progress-bar-color: var(--sun-on-lead);
+    }
+
+    .progress {
+        box-shadow: inset 0 1px 2px rgba(54, 44, 18, 0.12);
+        border: 1px solid var(--sun-line);
+    }
+}

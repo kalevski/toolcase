@@ -197,7 +197,7 @@ export function RunsClient() {
     )
 
     return (
-        <tc-stack gap="1.25rem">
+        <div className="taskforge-page">
             <tc-helper-text text={helpTexts.run.history} />
             <tc-table
                 ref={tableRef}
@@ -262,6 +262,6 @@ export function RunsClient() {
                     )}
                 </tc-stack>
             </tc-drawer>
-        </tc-stack>
+        </div>
     )
 }

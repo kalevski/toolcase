@@ -107,14 +107,29 @@ tc-switch {
             // the translateY centring, so animate `left`). Account for the 1px
             // track border so the knob keeps its inset symmetrically.
             left: calc(
-                var(--bs-switch-track-width) - var(--bs-switch-knob-size) -
-                    var(--bs-switch-knob-inset) - 2px
+                var(--bs-switch-track-width) - var(--bs-switch-knob-size) - var(
+                        --bs-switch-knob-inset
+                    ) -
+                    2px
             );
         }
     }
 
     &:disabled {
         pointer-events: none;
+    }
+
+    // Validity chrome on the control itself (the reserved message slot below
+    // carries the text — styled in _field-message.scss, never here). Color is the
+    // information (styleguide §1); we recolour the track border to match the
+    // shared danger / success tokens. The off-track keeps its slate well; only the
+    // border shifts so the toggle still reads as a live control.
+    &--invalid {
+        border-color: var(--tc-danger);
+    }
+
+    &--valid {
+        border-color: var(--tc-success);
     }
 }
 

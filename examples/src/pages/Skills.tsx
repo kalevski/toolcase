@@ -26,6 +26,12 @@ const skills: SkillEntry[] = [
             'Architecture blueprint for statically-prerendered React Router v7 marketing/content sites — Vite + React 19, file-based routing, prerender + SPA hydration, Tailwind v4, nginx Docker build.',
     },
     {
+        key: 'next-fullstack-app',
+        name: 'next-fullstack-app',
+        description:
+            'Architecture blueprint for self-hosted full-stack Next.js App Router apps — node:sqlite system-of-record + append-only migrations, layered server (config → data → domain → infrastructure → services → web), GitHub-OAuth HMAC-cookie auth + three-tier roles, guard→validate→service→audit route contract, tc-* dashboard UI, monorepo Docker standalone build.',
+    },
+    {
         key: 'phaser-game-dev',
         name: 'phaser-game-dev',
         description:

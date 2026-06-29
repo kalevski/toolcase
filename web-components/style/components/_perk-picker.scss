@@ -37,10 +37,23 @@ tc-perk-picker {
     --bs-perk-picker-disabled-opacity: 0.45;
 }
 
+// Mobile-first: collapse to a single column, step up to the author's count at md+.
 .tc-perk-picker-grid {
     display: grid;
-    grid-template-columns: repeat(var(--bs-perk-picker-columns), 1fr);
+    grid-template-columns: repeat(1, 1fr);
     gap: var(--bs-perk-picker-gap);
+}
+
+@include media-up(sm) {
+    .tc-perk-picker-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@include media-up(md) {
+    .tc-perk-picker-grid {
+        grid-template-columns: repeat(var(--bs-perk-picker-columns), 1fr);
+    }
 }
 
 .tc-perk-picker-card {

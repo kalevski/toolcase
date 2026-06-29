@@ -56,6 +56,12 @@ tc-color-picker {
         pointer-events: none;
         cursor: default;
     }
+
+    // Invalid state: the trigger is bespoke (not a .form-control), so the danger
+    // border is asserted here via --tc-danger, mirroring _input.scss's .is-invalid.
+    &.is-invalid {
+        border-color: var(--tc-danger);
+    }
 }
 
 // Selected color chip inside the trigger.
@@ -86,9 +92,10 @@ tc-color-picker {
     --bs-color-picker-panel-padding: 0.625rem;
     --bs-color-picker-panel-min-width: 160px;
 
-    position: absolute;
-    top: calc(100% + 2px);
-    left: 0;
+    // Fixed to the viewport with top/left set by JS (anchored to the trigger) —
+    // escapes overflow:hidden/auto clipping inside modal/scroll containers.
+    // Mirrors the tc-context-menu pattern.
+    position: fixed;
     z-index: var(--bs-color-picker-panel-z);
     display: none;
     width: max-content;
@@ -205,8 +212,13 @@ tc-color-picker {
 }
 
 @keyframes tc-cp-pulse {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0.35; }
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.35;
+    }
 }
 
 // ── Footer / hex input ────────────────────────────────────────────────────────

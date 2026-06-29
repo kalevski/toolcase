@@ -49,8 +49,18 @@ tc-range-slider[disabled] {
     height: var(--bs-range-slider-track-height);
     background: var(--bs-range-slider-track-bg);
     border-radius: 0;
-    margin-block: 20px;
+    // Extra headroom up top: the always-on value tooltip sits ~34px above the
+    // track, so a smaller top margin let it collide with the field label above.
+    margin-top: 38px;
+    margin-bottom: 20px;
     cursor: pointer;
+}
+
+// Invalid state: the track is bespoke (no native .form-range), so the danger cue
+// is asserted here via --tc-danger — recolor the fill (the most prominent track
+// element) instead of adding a border, keeping it simple and sharp-cornered.
+.tc-range-slider-track.is-invalid .tc-range-slider-fill {
+    background: var(--tc-danger);
 }
 
 // ── Fill ──────────────────────────────────────────────────────────────────────

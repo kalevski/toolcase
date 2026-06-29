@@ -17,14 +17,15 @@ export async function GET(_req: Request, ctx: { params: Promise<{ project: strin
         if (!Number.isInteger(id) || id <= 0) return error('invalid run id', 400)
         const run = runRepo.get(params.project, id)
         if (!run) return error('run not found', 404)
-        const events = runRepo.events(id).map((e) => {
+        const replay = runRepo.events(id)
+        const events = replay.events.map((e) => {
             try {
                 return JSON.parse(e.payload)
             } catch {
                 return { type: e.type }
             }
         })
-        return json({ run, events })
+        return json({ run, events, eventsTruncated: replay.truncated })
     } catch (e) {
         if (e instanceof UnsafePathError) return error('invalid name', 400)
         throw e
