@@ -11,9 +11,7 @@ WORKDIR /repo
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm ci \
-    && npm run build --workspace=@toolcase/base \
-    && npm run build --workspace=@toolcase/web-components \
-    && npm run build --workspace=@toolcase/perch
+    && npm run build -w @toolcase/base -w @toolcase/web-components -w @toolcase/perch
 
 # ── runtime stage ────────────────────────────────────────────────────────────
 FROM node:24-slim AS runner
