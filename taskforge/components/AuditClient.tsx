@@ -3,7 +3,8 @@
 // D3 — admin audit-log table with filters.
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useTcEvents, useTcProps, escapeHtml } from '@/lib/tc'
+import { useTc, useTcEvents, useTcProps, escapeHtml } from '@/lib/tc'
+import type { TabBarItem, TimelineItem } from '@toolcase/web-components'
 import type { AuditRecord } from '@/server/domain/types'
 import { helpTexts } from './helpTexts'
 
@@ -33,6 +34,14 @@ const COLUMNS = [
     { key: 'detail', header: 'Detail', render: (e: AuditRecord) => `<tc-text variant="muted">${escapeHtml(e.detail ?? '')}</tc-text>` },
 ]
 
+// T7 — the audit log also offers a tc-timeline feed view (parity with the
+// cross-app audit look), toggled by a tc-tab-bar; the filtered tc-table is the
+// default. Both render the same filtered `entries`.
+const VIEW_TABS: TabBarItem[] = [
+    { id: 'table', label: 'Table' },
+    { id: 'feed', label: 'Feed' },
+]
+
 export function AuditClient() {
     const [entries, setEntries] = useState<AuditRecord[]>([])
     const [actions, setActions] = useState<string[]>([])
@@ -41,6 +50,7 @@ export function AuditClient() {
     const [login, setLogin] = useState('')
     const [action, setAction] = useState('')
     const [loading, setLoading] = useState(false)
+    const [view, setView] = useState<'table' | 'feed'>('table')
 
     const projectRef = useTcEvents<HTMLElement>({ input: (e) => setProject((e.target as HTMLInputElement).value) })
     const loginRef = useTcEvents<HTMLElement>({ input: (e) => setLogin((e.target as HTMLInputElement).value) })
@@ -81,8 +91,28 @@ export function AuditClient() {
         useMemo(() => ({ columns: COLUMNS, data: entries }), [entries]),
     )
 
+    const timelineItems = useMemo<TimelineItem[]>(
+        () =>
+            entries.map((e) => ({
+                title: e.action,
+                date: new Date(e.at).toLocaleString(),
+                subtitle: e.login ? `@${e.login}` : undefined,
+                badge: e.project || undefined,
+                description: e.detail || undefined,
+                icon: 'BookCheck',
+                status: 'completed',
+            })),
+        [entries],
+    )
+    const timelineRef = useTcProps<HTMLElement>(useMemo(() => ({ items: timelineItems }), [timelineItems]))
+
+    const viewRef = useTc<HTMLElement>(
+        useMemo(() => ({ tabs: VIEW_TABS, activeId: view }), [view]),
+        { 'tc-change': (e: Event) => setView(((e as CustomEvent).detail?.id as 'table' | 'feed') ?? 'table') },
+    )
+
     return (
-        <tc-stack gap="1.25rem">
+        <div className="taskforge-page">
             <tc-rich-page-header
                 title-text="Audit log"
                 icon-name="BookCheck"
@@ -102,13 +132,24 @@ export function AuditClient() {
                         ))}
                     </tc-select>
                 </div>
+                <div className="tf-project-tabs" style={{ marginLeft: 'auto', marginBottom: 0 }}>
+                    <tc-tab-bar ref={viewRef} size="sm" />
+                </div>
             </tc-stack>
-            <tc-table
-                ref={tableRef}
-                hoverable
-                empty-message="No audit entries match."
-                loading={loading && entries.length === 0 ? true : undefined}
-            />
+            {view === 'table' ? (
+                <tc-table
+                    ref={tableRef}
+                    hoverable
+                    empty-message="No audit entries match."
+                    loading={loading && entries.length === 0 ? true : undefined}
+                />
+            ) : entries.length === 0 ? (
+                <tc-empty-state icon="BookCheck">
+                    <h3>No audit entries match.</h3>
+                </tc-empty-state>
+            ) : (
+                <tc-timeline ref={timelineRef} variant="minimal" connector="solid" />
+            )}
             <tc-stack direction="horizontal" gap="0.75rem" wrap align="center">
                 <tc-text variant="muted">
                     {entries.length} of {total} entries
@@ -119,6 +160,6 @@ export function AuditClient() {
                     </tc-button>
                 )}
             </tc-stack>
-        </tc-stack>
+        </div>
     )
 }

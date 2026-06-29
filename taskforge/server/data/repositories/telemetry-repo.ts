@@ -200,3 +200,26 @@ export function globalCostPerDay(days = 30): { date: string; costUsd: number }[]
         since,
     ).map((r) => ({ date: r.date, costUsd: r.cost ?? 0 }))
 }
+
+/**
+ * Per-project per-day cost + attempt-count trend (Dashboard row sparklines).
+ * One grouped query for all projects, so the dashboard fetches the whole grid
+ * in a single request rather than one telemetry call per project row.
+ * Returns `{ [project]: { date, costUsd, runs }[] }` ordered by date.
+ */
+export function costPerDayByProject(
+    days = 30,
+): Record<string, { date: string; costUsd: number; runs: number }[]> {
+    const since = new Date(Date.now() - days * 86400_000).toISOString()
+    const rows = allRows<{ project: string; date: string; cost: number | null; runs: number }>(
+        `SELECT project, substr(created_at, 1, 10) AS date, SUM(cost_usd) AS cost, COUNT(*) AS runs
+         FROM telemetry WHERE created_at >= ?
+         GROUP BY project, date ORDER BY project, date`,
+        since,
+    )
+    const out: Record<string, { date: string; costUsd: number; runs: number }[]> = {}
+    for (const r of rows) {
+        ;(out[r.project] ??= []).push({ date: r.date, costUsd: r.cost ?? 0, runs: r.runs })
+    }
+    return out
+}

@@ -71,7 +71,7 @@ export function SkillEditorClient({
     }
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <div className="taskforge-page">
             <tc-breadcrumb>
                 <tc-breadcrumb-item href="/skills" onClick={goSkills}>
                     Skills

@@ -6,7 +6,27 @@ import type { SideNavItem, SideNavSection, TabBarItem } from '@toolcase/web-comp
 import { useTc, useTcProps } from '@/lib/tc'
 import { apiFetch } from '@/lib/fetcher'
 import { useBranding } from '@/lib/branding-context'
+import { CommandPalette } from './CommandPalette'
+import { Breadcrumbs, type Crumb } from './Breadcrumbs'
 import { type MeResponse, type ProjectSummary } from '@/server/domain/types'
+
+// Human labels for project sub-routes / admin pages, for the breadcrumb trail.
+const PROJECT_SEGMENT_LABELS: Record<string, string> = {
+    env: 'Env vars',
+    flags: 'Flags',
+    notes: 'Notes',
+    secrets: 'Secrets',
+    docker: 'Docker',
+    audit: 'Audit',
+    members: 'Members',
+    instances: 'Instance',
+}
+const ADMIN_SEGMENT_LABELS: Record<string, string> = {
+    users: 'Users',
+    audit: 'Audit',
+    backups: 'Backups',
+    settings: 'Settings',
+}
 
 /** Sentinel side-nav key for the owner-only "Create project" action. */
 const CREATE_VALUE = '__create__'
@@ -47,6 +67,28 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
     )
     const canManage = active ? active.effectiveRole !== 'developer' : false
     const isOwner = me.role === 'owner'
+
+    // ── breadcrumb trail (nested routes only) ──────────────────────────────────
+    const crumbs = useMemo<Crumb[]>(() => {
+        if (pathname.startsWith('/admin/')) {
+            const seg = pathname.split('/')[2]
+            const trail: Crumb[] = [{ label: 'Admin' }]
+            if (seg && ADMIN_SEGMENT_LABELS[seg]) trail.push({ label: ADMIN_SEGMENT_LABELS[seg] })
+            return trail
+        }
+        if (activeProjectId) {
+            const base = `/projects/${activeProjectId}`
+            const trail: Crumb[] = [
+                { label: 'Projects', href: '/' },
+                { label: active?.project.name ?? 'Project', href: base },
+            ]
+            const seg = pathname.slice(base.length).split('/').filter(Boolean)[0]
+            if (seg && PROJECT_SEGMENT_LABELS[seg]) trail.push({ label: PROJECT_SEGMENT_LABELS[seg] })
+            return trail
+        }
+        if (pathname === '/projects/new') return [{ label: 'Projects', href: '/' }, { label: 'New project' }]
+        return []
+    }, [pathname, activeProjectId, active])
 
     // With no "all projects" view, landing on the dashboard root with at least one
     // visible project selects (navigates to) the first one.
@@ -93,12 +135,15 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
         return out
     }, [projects, activeProjectId, isOwner, pathname])
 
-    const onItemClick = (event: Event, item: SideNavItem) => {
-        if (item.href) {
-            event.preventDefault()
-            router.push(item.href)
-        }
-    }
+    const onItemClick = useCallback(
+        (event: Event, item: SideNavItem) => {
+            if (item.href) {
+                event.preventDefault()
+                router.push(item.href)
+            }
+        },
+        [router],
+    )
 
     // ── project tabs: the open project's sections, gated by effective role ─────────
     // Each tab maps to a route; the active tab is derived from the current path.
@@ -145,17 +190,17 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
         [tabDefs, pathname, router],
     )
 
-    const onSignOut = async () => {
+    const onSignOut = useCallback(async () => {
         await fetch('/api/auth/logout', { method: 'POST' })
         router.push('/login')
-    }
+    }, [router])
 
-    const sideNavRef = useTcProps<HTMLElement>(useMemo(() => ({ sections, onItemClick }), [sections]))
+    const sideNavRef = useTcProps<HTMLElement>(useMemo(() => ({ sections, onItemClick }), [sections, onItemClick]))
     const tabBarRef = useTc<HTMLElement>(
         useMemo(() => ({ tabs: tabItems, activeId: activeTabId }), [tabItems, activeTabId]),
         { 'tc-change': onTabChange },
     )
-    const userRef = useTcProps<HTMLElement>(useMemo(() => ({ onIconClick: onSignOut }), []))
+    const userRef = useTcProps<HTMLElement>(useMemo(() => ({ onIconClick: onSignOut }), [onSignOut]))
 
     return (
         <>
@@ -163,7 +208,12 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
                 Skip to content
             </a>
             <tc-dashboard-layout>
-                <tc-brand slot="brand" primary-text={branding.appName} color={branding.brandColor} />
+                <tc-brand
+                    slot="brand"
+                    primary-text={branding.appName}
+                    secondary-text={branding.secondaryText || undefined}
+                    color={branding.brandColor}
+                />
                 <div slot="sidebar-menu" className="wharf-sidebar-menu">
                     <tc-side-nav ref={sideNavRef} />
                 </div>
@@ -177,6 +227,7 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
                     icon-label="Sign out"
                 />
                 <div className="wharf-shell-content" id="wharf-main">
+                    <Breadcrumbs key={pathname} trail={crumbs} />
                     {tabItems.length > 0 && (
                         <div className="wharf-project-tabs">
                             <tc-tab-bar ref={tabBarRef} />
@@ -185,6 +236,8 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
                     {children}
                 </div>
             </tc-dashboard-layout>
+            {/* Cmd/Ctrl-K jump-to; renders hidden until invoked. */}
+            <CommandPalette />
         </>
     )
 }

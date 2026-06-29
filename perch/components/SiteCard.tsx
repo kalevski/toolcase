@@ -100,19 +100,16 @@ export function SiteCard({ site, limits }: { site: Site; limits: PlanLimits }) {
                 )}
             </header>
 
-            <dl className="perch-card-meta">
-                <div className="perch-card-stat">
-                    <dt>Last deploy</dt>
-                    <dd>{view?.build.date ?? '—'}</dd>
-                </div>
-                <div className="perch-card-stat">
-                    <dt>Storage</dt>
-                    <dd>
-                        {formatBytes(view ? (payload?.nginxpilot?.bytes ?? site.bytes ?? 0) : site.bytes ?? 0)} /{' '}
-                        {formatBytes(limits.maxBytesPerSite)}
-                    </dd>
-                </div>
-            </dl>
+            {/* P7: Wharf-style count badges (storage · last deploy) for visual
+                parity with .wharf-card, kept alongside Perch's live status dot. */}
+            <div className="perch-card-badges">
+                <tc-badge variant="info">
+                    {formatBytes(view ? (payload?.nginxpilot?.bytes ?? site.bytes ?? 0) : site.bytes ?? 0)} /{' '}
+                    {formatBytes(limits.maxBytesPerSite)}
+                </tc-badge>
+                <tc-badge variant="secondary">Deployed {view?.build.date ?? '—'}</tc-badge>
+                <tc-badge variant="light">{site.hostKind === 'custom' ? 'custom domain' : 'subdomain'}</tc-badge>
+            </div>
         </article>
     )
 }

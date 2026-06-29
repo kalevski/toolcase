@@ -9,7 +9,7 @@ import {
 } from './internal/form-field'
 import { fixedOriginOffset } from './internal/containingBlock'
 import { cssLength } from './internal/cssLength'
-import { icon, chevronDownIcon } from './icons'
+import { chevronDownIcon } from './icons'
 
 const TAG_NAME = 'tc-icon-picker'
 

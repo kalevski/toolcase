@@ -61,7 +61,7 @@ export function SkillsClient({ skills }: { skills: SkillSummary[] }) {
     ]
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <div className="taskforge-page">
             <tc-rich-page-header
                 title-text="Skills"
                 icon-name="Lightbulb"

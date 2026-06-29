@@ -53,7 +53,7 @@ export function HealthClient({ projects }: { projects: string[] }) {
     )
 
     return (
-        <tc-stack gap="1.25rem">
+        <div className="taskforge-page">
             <tc-rich-page-header
                 title-text="Health"
                 icon-name="HeartPulse"
@@ -188,6 +188,6 @@ export function HealthClient({ projects }: { projects: string[] }) {
                     </tc-stack>
                 </tc-stack>
             </tc-card>
-        </tc-stack>
+        </div>
     )
 }

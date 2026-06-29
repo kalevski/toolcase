@@ -9,6 +9,12 @@ export const dynamic = 'force-dynamic'
 export async function GET(req: Request) {
     const auth = await guard('standard')
     if ('res' in auth) return auth.res
-    const days = Number(new URL(req.url).searchParams.get('days')) || 30
-    return json(telemetryRepo.globalCostPerDay(Math.min(Math.max(days, 1), 365)))
+    const url = new URL(req.url)
+    const days = Math.min(Math.max(Number(url.searchParams.get('days')) || 30, 1), 365)
+    // `?by=project` returns the per-project cost/runs trend grid (dashboard row
+    // sparklines); the default is the all-projects cost-per-day series.
+    if (url.searchParams.get('by') === 'project') {
+        return json(telemetryRepo.costPerDayByProject(days))
+    }
+    return json(telemetryRepo.globalCostPerDay(days))
 }

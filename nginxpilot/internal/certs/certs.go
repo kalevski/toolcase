@@ -12,6 +12,8 @@ package certs
 
 import (
 	"context"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	"log/slog"
 	"os"
@@ -27,7 +29,18 @@ type Entry struct {
 	CertPath string
 	KeyPath  string
 	ModTime  time.Time
+	// Names are the leaf certificate's SAN DNS names (lowercased), e.g.
+	// ["webapp.mk", "*.webapp.mk"]. Empty when the cert could not be parsed —
+	// matching then falls back to the directory/file-name key alone.
+	Names []string
 }
+
+// Match kinds for For's SAN fallback, ordered so a higher value wins.
+const (
+	matchNone = iota
+	matchWildcard
+	matchExact
+)
 
 // Index maps domains to their discovered cert/key pair. The zero/nil Index is
 // usable: For always reports ok=false, so resources fall back to plain HTTP.
@@ -45,16 +58,60 @@ func (i *Index) Dir() string {
 }
 
 // For returns the cert and key paths for a domain, or ok=false when none is
-// discovered.
+// discovered. Matching is tried in order of decreasing precedence:
+//
+//  1. exact directory/file-name key (fast path; works even when the cert's
+//     SANs could not be parsed),
+//  2. exact SAN match (a multi-SAN cert listing the domain explicitly),
+//  3. wildcard SAN match (e.g. *.webapp.mk covers test.webapp.mk).
+//
+// For wildcard candidates the most specific (longest) pattern wins; ties and
+// equal-precedence matches are broken by sorted domain key for determinism.
 func (i *Index) For(domain string) (cert, key string, ok bool) {
 	if i == nil {
 		return "", "", false
 	}
-	e, ok := i.entries[domain]
-	if !ok {
+	if e, ok := i.entries[domain]; ok {
+		return e.CertPath, e.KeyPath, true
+	}
+	bestKind, bestSpec := matchNone, -1
+	var best Entry
+	for _, d := range i.Domains() { // sorted → deterministic selection
+		e := i.entries[d]
+		for _, name := range e.Names {
+			kind := matchName(name, domain)
+			if kind == matchNone {
+				continue
+			}
+			if kind > bestKind || (kind == bestKind && len(name) > bestSpec) {
+				bestKind, bestSpec, best = kind, len(name), e
+			}
+		}
+	}
+	if bestKind == matchNone {
 		return "", "", false
 	}
-	return e.CertPath, e.KeyPath, true
+	return best.CertPath, best.KeyPath, true
+}
+
+// matchName reports how pattern (a SAN DNS name) matches host: matchExact for
+// an identical name, matchWildcard for an RFC 6125 wildcard (the leftmost label
+// is "*", matching exactly one label — *.example.com covers a.example.com but
+// not example.com nor a.b.example.com), else matchNone. Comparison is
+// case-insensitive and ignores a trailing dot.
+func matchName(pattern, host string) int {
+	pattern = strings.ToLower(strings.TrimSuffix(pattern, "."))
+	host = strings.ToLower(strings.TrimSuffix(host, "."))
+	if pattern == host {
+		return matchExact
+	}
+	if base, isWild := strings.CutPrefix(pattern, "*."); isWild {
+		suffix := "." + base
+		if left, found := strings.CutSuffix(host, suffix); found && left != "" && !strings.Contains(left, ".") {
+			return matchWildcard
+		}
+	}
+	return matchNone
 }
 
 // Domains lists the discovered domains (sorted), for logging/status.
@@ -110,7 +167,7 @@ func Load(dir string) (*Index, error) {
 		cert := filepath.Join(dir, domain, "fullchain.pem")
 		key := filepath.Join(dir, domain, "privkey.pem")
 		if regular(cert) && regular(key) {
-			idx.entries[domain] = Entry{CertPath: cert, KeyPath: key, ModTime: mtime(key)}
+			idx.entries[domain] = Entry{CertPath: cert, KeyPath: key, ModTime: mtime(key), Names: sanNames(cert)}
 		}
 	}
 
@@ -127,10 +184,41 @@ func Load(dir string) (*Index, error) {
 		cert := filepath.Join(dir, e.Name())
 		key := filepath.Join(dir, domain+".key")
 		if regular(cert) && regular(key) {
-			idx.entries[domain] = Entry{CertPath: cert, KeyPath: key, ModTime: mtime(key)}
+			idx.entries[domain] = Entry{CertPath: cert, KeyPath: key, ModTime: mtime(key), Names: sanNames(cert)}
 		}
 	}
 	return idx, nil
+}
+
+// sanNames parses the leaf certificate (the first CERTIFICATE block in a
+// fullchain/flat PEM) and returns its SAN DNS names, lowercased. Best-effort: a
+// missing/unreadable/unparseable file yields nil, leaving the entry matchable
+// only by its directory/file-name key.
+func sanNames(certPath string) []string {
+	data, err := os.ReadFile(certPath)
+	if err != nil {
+		return nil
+	}
+	for len(data) > 0 {
+		var block *pem.Block
+		block, data = pem.Decode(data)
+		if block == nil {
+			return nil
+		}
+		if block.Type != "CERTIFICATE" {
+			continue
+		}
+		c, err := x509.ParseCertificate(block.Bytes)
+		if err != nil {
+			return nil
+		}
+		names := make([]string, 0, len(c.DNSNames))
+		for _, n := range c.DNSNames {
+			names = append(names, strings.ToLower(n))
+		}
+		return names
+	}
+	return nil
 }
 
 func regular(path string) bool {

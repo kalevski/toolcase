@@ -1382,7 +1382,7 @@ describe('StreamReporter', () => {
         const { PassThrough } = await import('node:stream')
         const errors: Error[] = []
         const stream = new PassThrough()
-        const reporter = new StreamReporter(stream, { onError: err => errors.push(err) })
+        const _reporter = new StreamReporter(stream, { onError: err => errors.push(err) })
         const err = new Error('stream error')
         stream.emit('error', err)
         expect(errors).toHaveLength(1)
@@ -2912,7 +2912,7 @@ describe('BeaconReporter', () => {
         const mockWindow: any = { onerror: null, addEventListener: () => {} }
         ;(globalThis as any).window = mockWindow
         try {
-            const reporter = new BeaconReporter({ url: '/logs', maxSize: 1, flushInterval: 0, captureErrors: true })
+            const _reporter = new BeaconReporter({ url: '/logs', maxSize: 1, flushInterval: 0, captureErrors: true })
             mockWindow.onerror('Something went wrong', 'app.js', 10, 5, new Error('test'))
             expect(beaconCalls).toHaveLength(1)
             expect(beaconCalls[0][0].level).toBe('error')
@@ -2931,7 +2931,7 @@ describe('BeaconReporter', () => {
         const mockWindow: any = { onerror: null, addEventListener: () => {} }
         ;(globalThis as any).window = mockWindow
         try {
-            const reporter = new BeaconReporter({ url: '/logs', maxSize: 1, flushInterval: 0, captureErrors: true, errorScope: 'global' })
+            const _reporter = new BeaconReporter({ url: '/logs', maxSize: 1, flushInterval: 0, captureErrors: true, errorScope: 'global' })
             mockWindow.onerror('err', 'app.js', 1, 1, new Error('x'))
             expect(beaconCalls[0][0].scope).toBe('global')
         } finally {
@@ -2949,7 +2949,7 @@ describe('BeaconReporter', () => {
         const mockWindow: any = { onerror: null, addEventListener: (_evt: string, fn: any) => listeners.push(fn) }
         ;(globalThis as any).window = mockWindow
         try {
-            const reporter = new BeaconReporter({ url: '/logs', maxSize: 1, flushInterval: 0, captureErrors: true })
+            const _reporter = new BeaconReporter({ url: '/logs', maxSize: 1, flushInterval: 0, captureErrors: true })
             listeners.forEach(fn => fn({ reason: new Error('promise rejected') }))
             expect(beaconCalls).toHaveLength(1)
             expect(beaconCalls[0][0].level).toBe('error')

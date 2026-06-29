@@ -411,6 +411,20 @@ docker run --rm -v /etc/nginxpilot:/etc/nginxpilot:ro \
 
 Note the canonical deployment model is still the static binary + systemd on the nginx host; the image bundles both processes for container-based setups.
 
+### Environment variables
+
+nginxpilot is **config-file driven** (`config.yml`), so its env surface is tiny — env vars are only for the container wrapper and for injecting secrets the config references by name:
+
+| Variable | Default | Description |
+|---|---|---|
+| `NGINXPILOT_CONFIG` | `/etc/nginxpilot/config.yml` | Config path the entrypoint passes to `nginxpilot run`. |
+| _`auth.token_env` value_ | — | Per-source: name of the env var holding a git HTTPS/GitHub token (e.g. set `token_env: GH_TOKEN`, then pass `-e GH_TOKEN=…`). |
+| _`auth.key_env` value_ | — | Per-source: name of the env var holding an SSH private key (alternative to `key_file`). |
+| _`admin.token_env` value_ | — | Name of the env var holding the admin-API bearer token, when the admin endpoint is exposed. |
+| `TZ` | `UTC` | Timezone (image ships `tzdata`); affects release timestamps + logs. |
+
+The `*_env` rows are **indirection**: you choose the variable name in the config, then pass that variable to the container. Everything else — data dir, intervals, sources, TLS, per-host toggles — lives in the YAML, not the environment.
+
 ## Building
 
 ```bash

@@ -187,6 +187,8 @@ function UsageSection() {
 
 type Col = { key: string; header: string; align?: 'right'; render: (p: ProjectSummary) => React.ReactNode }
 
+type ProjectTrend = { date: string; costUsd: number; runs: number }
+
 // tc-advanced-table header descriptors (the body rows are slotted React <tr>,
 // so they keep their onClick navigation + Delete handler).
 const ADV_COLUMNS = [
@@ -194,6 +196,7 @@ const ADV_COLUMNS = [
     { key: 'pending', label: 'Pending', align: 'right' as const },
     { key: 'done', label: 'Done', align: 'right' as const },
     { key: 'error', label: 'Errors', align: 'right' as const },
+    { key: 'trend', label: 'Cost trend' },
     { key: 'state', label: 'State' },
     { key: 'actions', label: '', align: 'right' as const },
 ]
@@ -202,6 +205,22 @@ export function DashboardClient({ projects }: { projects: ProjectSummary[] }) {
     const router = useRouter()
     const newProject = useNewProject()
     const confirm = useConfirm()
+
+    // Modernization — per-project 30-day cost trend, one fetch for the whole grid
+    // (the route groups by project), rendered as a tc-sparkline on each row.
+    const [trends, setTrends] = React.useState<Record<string, ProjectTrend[]>>({})
+    React.useEffect(() => {
+        let cancelled = false
+        fetch('/api/telemetry/global?by=project')
+            .then((r) => (r.ok ? r.json() : null))
+            .then((d) => {
+                if (!cancelled && d) setTrends(d as Record<string, ProjectTrend[]>)
+            })
+            .catch(() => {})
+        return () => {
+            cancelled = true
+        }
+    }, [])
 
     const pendingTotal = projects.reduce((sum, p) => sum + p.pending, 0)
     const running = projects.filter((p) => p.state !== 'IDLE').length
@@ -256,6 +275,26 @@ export function DashboardClient({ projects }: { projects: ProjectSummary[] }) {
             render: (p) => (p.error > 0 ? <tc-badge variant="danger">{p.error}</tc-badge> : p.error),
         },
         {
+            key: 'trend',
+            header: 'Cost trend',
+            render: (p) => {
+                const series = trends[p.name] ?? []
+                const data = series.map((d) => Math.round(d.costUsd * 100) / 100)
+                // Need ≥2 points for a meaningful line; otherwise a muted dash.
+                if (data.filter((v) => v > 0).length < 2) {
+                    return <span style={{ opacity: 0.4 }}>—</span>
+                }
+                const total = series.reduce((s, d) => s + d.costUsd, 0)
+                return (
+                    <tc-tooltip content={`30-day cost $${total.toFixed(2)} · ${series.length} active day(s)`}>
+                        <span onClick={(e) => e.stopPropagation()} style={{ display: 'inline-block' }}>
+                            <tc-sparkline data={data.join(',')} type="line" color="#6366f1" width={96} height={28} />
+                        </span>
+                    </tc-tooltip>
+                )
+            },
+        },
+        {
             key: 'state',
             header: 'State',
             render: (p) => (
@@ -287,7 +326,7 @@ export function DashboardClient({ projects }: { projects: ProjectSummary[] }) {
     ]
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div className="taskforge-page">
             <tc-announcement-bar variant="info" icon-name={tcIcon('info-circle')} dismissible persist-dismiss-key="tf-intro-dashboard">
                 {helpTexts.dashboard.intro}
             </tc-announcement-bar>

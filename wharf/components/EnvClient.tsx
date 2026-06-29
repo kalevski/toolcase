@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { apiFetch, describeApiError, isAuthError, ApiError } from '@/lib/fetcher'
 import { useTc, detailValue } from '@/lib/tc'
+import { EnvVarDrawer } from './EnvVarDrawer'
 import type {
     Environment,
     EnvVar,
@@ -52,6 +53,8 @@ export function EnvClient({ projectId }: { projectId: string }) {
     const [rows, setRows] = useState<EnvVar[] | null>(null)
     const [resolved, setResolved] = useState<ResolvedConfig | null>(null)
     const [err, setErr] = useState<string | null>(null)
+    // W3 — env-var inspect drawer (read-only; the table + inline edit stay in view).
+    const [inspectVar, setInspectVar] = useState<EnvVar | null>(null)
 
     const canSeeSecrets = detail ? detail.effectiveRole !== 'developer' : false
 
@@ -365,6 +368,7 @@ export function EnvClient({ projectId }: { projectId: string }) {
                                                 key={row.id}
                                                 row={row}
                                                 isBaseline={!isInstanceScope}
+                                                onInspect={() => setInspectVar(row)}
                                                 onDelete={() => deleteVar(row.id)}
                                                 onSave={(body) => patchVar(row.id, body)}
                                                 onToggleRequired={() =>
@@ -385,6 +389,10 @@ export function EnvClient({ projectId }: { projectId: string }) {
                                 <ResolvedPanel resolved={resolved} neverFetched={!selectedInstance?.lastFetchAt} />
                             </div>
                         </tc-section-card>
+                    )}
+
+                    {inspectVar && (
+                        <EnvVarDrawer key={inspectVar.id} row={inspectVar} onClose={() => setInspectVar(null)} />
                     )}
                 </>
             )}
@@ -642,12 +650,14 @@ function AddVarForm({
 function VarRow({
     row,
     isBaseline,
+    onInspect,
     onDelete,
     onSave,
     onToggleRequired,
 }: {
     row: EnvVar
     isBaseline: boolean
+    onInspect: () => void
     onDelete: () => void
     onSave: (body: { value?: string; description?: string }) => void
     onToggleRequired: () => void
@@ -723,6 +733,9 @@ function VarRow({
                         flexWrap: 'wrap',
                     }}
                 >
+                    <tc-button size="sm" variant="secondary" outline onClick={onInspect}>
+                        Inspect
+                    </tc-button>
                     <tc-button size="sm" variant="secondary" outline onClick={editing ? () => setEditing(false) : startEdit}>
                         {editing ? 'Cancel' : 'Edit'}
                     </tc-button>

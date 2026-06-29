@@ -1,8 +1,8 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import type { BalancerMethod, Upstream, UpstreamServer } from '@/server/domain/routing'
-import { RoutingPage, json, useMaintainerData } from './shared'
+import { RoutingPage, RoutingListTable, json, useMaintainerData, type RoutingListItem } from './shared'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { CheckField, SelectField, TextField, type SelectOption } from '@/components/fields'
 
@@ -147,6 +147,15 @@ function UpstreamsManager({ upstreams, onChanged }: { upstreams: Upstream[]; onC
         }
     }, [pending, busy, onChanged])
 
+    const items = useMemo<RoutingListItem[]>(
+        () =>
+            upstreams.map((u) => ({
+                name: u.name,
+                hint: `${balancerLabel(u.balancer)} · ${u.servers.length} server${u.servers.length === 1 ? '' : 's'} (${u.servers.map((s) => s.address).join(', ')})`,
+            })),
+        [upstreams],
+    )
+
     return (
         <>
             <tc-section-card title="Upstream pools" icon="server">
@@ -159,29 +168,7 @@ function UpstreamsManager({ upstreams, onChanged }: { upstreams: Upstream[]; onC
                     {upstreams.length === 0 ? (
                         <tc-empty-state icon="server">No upstreams yet.</tc-empty-state>
                     ) : (
-                        <ul className="perch-admin-list">
-                            {upstreams.map((u) => (
-                                <li key={u.name} className="perch-admin-list-row">
-                                    <span>
-                                        <span className="perch-admin-mono">{u.name}</span>{' '}
-                                        <span className="perch-admin-hint">
-                                            {balancerLabel(u.balancer)} · {u.servers.length} server
-                                            {u.servers.length === 1 ? '' : 's'} (
-                                            {u.servers.map((s) => s.address).join(', ')})
-                                        </span>
-                                    </span>
-                                    <tc-button
-                                        variant="danger"
-                                        size="sm"
-                                        outline
-                                        disabled={busy || undefined}
-                                        onClick={() => setPending(u.name)}
-                                    >
-                                        Remove
-                                    </tc-button>
-                                </li>
-                            ))}
-                        </ul>
+                        <RoutingListTable items={items} busy={busy} onRemove={setPending} />
                     )}
                 </div>
             </tc-section-card>

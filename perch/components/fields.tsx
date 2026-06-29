@@ -21,6 +21,11 @@ import { useTc, targetValue, detailValue } from '@/lib/tc'
 
 type FieldSize = 'sm' | 'lg'
 
+/** The unified validation state shared by every native tc-* input (label/value/help/error
+ *  + a reserved `.tc-field-message` slot). Drive validation through `state`/`error`/`help`
+ *  so spacing and error display stay aligned across every Perch form. */
+type FieldState = 'valid' | 'invalid'
+
 export interface TextFieldProps {
     value: string
     onValue: (value: string) => void
@@ -30,6 +35,10 @@ export interface TextFieldProps {
     placeholder?: string
     /** Hint rendered in the reserved message slot below the control. */
     help?: string
+    /** Validation state — drives the unified `.tc-field-message` slot (invalid > valid). */
+    state?: FieldState
+    /** Error text shown in the reserved message slot (implies the invalid state). */
+    error?: string
     size?: FieldSize
     disabled?: boolean
     required?: boolean
@@ -49,6 +58,8 @@ export function TextField({
     label,
     placeholder,
     help,
+    state,
+    error,
     size,
     disabled,
     required,
@@ -72,6 +83,8 @@ export function TextField({
             label={label}
             placeholder={placeholder}
             help={help}
+            state={state}
+            error={error}
             min={min}
             max={max}
             step={step}
@@ -91,6 +104,10 @@ export interface TextAreaFieldProps {
     placeholder?: string
     /** Hint rendered in the reserved message slot below the control. */
     help?: string
+    /** Validation state — drives the unified `.tc-field-message` slot (invalid > valid). */
+    state?: FieldState
+    /** Error text shown in the reserved message slot (implies the invalid state). */
+    error?: string
     rows?: number
     size?: FieldSize
     disabled?: boolean
@@ -110,6 +127,8 @@ export function TextAreaField({
     label,
     placeholder,
     help,
+    state,
+    error,
     rows,
     size,
     disabled,
@@ -128,6 +147,8 @@ export function TextAreaField({
             label={label}
             placeholder={placeholder}
             help={help}
+            state={state}
+            error={error}
             rows={rows}
             required={required}
             disabled={disabled}
@@ -151,6 +172,12 @@ export interface SelectFieldProps {
     label?: string
     /** A leading disabled placeholder option (single-select). */
     placeholder?: string
+    /** Hint rendered in the reserved message slot below the control. */
+    help?: string
+    /** Validation state — drives the unified `.tc-field-message` slot (invalid > valid). */
+    state?: FieldState
+    /** Error text shown in the reserved message slot (implies the invalid state). */
+    error?: string
     size?: FieldSize
     disabled?: boolean
     ariaLabel?: string
@@ -164,6 +191,9 @@ export function SelectField({
     options,
     label,
     placeholder,
+    help,
+    state,
+    error,
     size,
     disabled,
     ariaLabel,
@@ -186,6 +216,9 @@ export function SelectField({
             size={size}
             label={label}
             placeholder={placeholder}
+            help={help}
+            state={state}
+            error={error}
             disabled={disabled}
             aria-label={ariaLabel}
             className={className}

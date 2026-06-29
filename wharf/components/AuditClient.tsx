@@ -2,10 +2,28 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { apiFetch, describeApiError } from '@/lib/fetcher'
-import { useTc, escapeHtml } from '@/lib/tc'
+import { useTc } from '@/lib/tc'
 import type { AuditEntry } from '@/server/domain/types'
+import type { AdvancedTableColumn, AdvancedTableSort, TimelineItem } from '@toolcase/web-components'
 
 const PAGE = 100
+const TABLE_PAGE = 20
+
+type View = 'timeline' | 'table'
+
+// Map an audit action to a lucide glyph for the timeline node. Falls back to a
+// generic dot when the action isn't recognised (Timeline draws a dot itself).
+function actionIcon(action: string): string {
+    const a = action.toLowerCase()
+    if (a.includes('delete') || a.includes('revoke')) return 'trash-2'
+    if (a.includes('create') || a.includes('add')) return 'plus'
+    if (a.includes('reveal') || a.includes('export')) return 'eye'
+    if (a.includes('clone')) return 'copy'
+    if (a.includes('fetch') || a.includes('agent')) return 'download'
+    if (a.includes('key')) return 'key-round'
+    if (a.includes('member') || a.includes('role') || a.includes('user')) return 'users'
+    return 'circle'
+}
 
 // Shared audit view: project-scoped when `projectId` is set, else the global log.
 export function AuditClient({ projectId, title }: { projectId?: string; title: string }) {
@@ -14,6 +32,9 @@ export function AuditClient({ projectId, title }: { projectId?: string; title: s
     const [err, setErr] = useState<string | null>(null)
     const [loading, setLoading] = useState(true)
     const [done, setDone] = useState(false)
+    const [view, setView] = useState<View>('timeline')
+    const [offset, setOffset] = useState(0)
+    const [sort, setSort] = useState<AdvancedTableSort | null>(null)
 
     const loadPage = useCallback(
         async (before?: number, signal?: AbortSignal) => {
@@ -38,31 +59,76 @@ export function AuditClient({ projectId, title }: { projectId?: string; title: s
         return () => ctrl.abort()
     }, [loadPage])
 
-    const columns = useMemo(
+    // ── timeline items (scannable: when / who / action badge / detail) ─────────
+    const timelineItems = useMemo<TimelineItem[]>(
+        () =>
+            entries.map((row) => ({
+                title: row.action,
+                date: new Date(row.at).toLocaleString(),
+                meta: row.login ?? '—',
+                description: row.detail ?? undefined,
+                icon: actionIcon(row.action),
+            })),
+        [entries],
+    )
+    const timelineRef = useTc<HTMLElement>(
+        useMemo(() => ({ items: timelineItems }), [timelineItems]),
+    )
+
+    // ── table view (sortable + paginated; client-side over loaded rows) ────────
+    const columns = useMemo<AdvancedTableColumn[]>(
         () => [
-            {
-                key: 'at',
-                header: 'When',
-                render: (row: AuditEntry) =>
-                    `<span style="white-space:nowrap">${escapeHtml(new Date(row.at).toLocaleString())}</span>`,
-            },
-            { key: 'login', header: 'Who', render: (row: AuditEntry) => escapeHtml(row.login ?? '—') },
-            {
-                key: 'action',
-                header: 'Action',
-                render: (row: AuditEntry) =>
-                    `<tc-badge variant="info">${escapeHtml(row.action)}</tc-badge>`,
-            },
-            {
-                key: 'detail',
-                header: 'Detail',
-                render: (row: AuditEntry) =>
-                    `<span style="color:var(--tc-text-muted)">${escapeHtml(row.detail ?? '')}</span>`,
-            },
+            { key: 'at', label: 'When' },
+            { key: 'login', label: 'Who' },
+            { key: 'action', label: 'Action' },
+            { key: 'detail', label: 'Detail' },
         ],
         [],
     )
-    const tableRef = useTc<HTMLElement>(useMemo(() => ({ columns, data: entries }), [columns, entries]))
+    const sortable = useMemo(() => ['at', 'login', 'action'], [])
+
+    const sorted = useMemo(() => {
+        const list = [...entries]
+        if (sort) {
+            const dir = sort.direction === 'asc' ? 1 : -1
+            list.sort((a, b) => {
+                let av: number | string
+                let bv: number | string
+                if (sort.column === 'at') {
+                    av = new Date(a.at).getTime()
+                    bv = new Date(b.at).getTime()
+                } else if (sort.column === 'login') {
+                    av = (a.login ?? '').toLowerCase()
+                    bv = (b.login ?? '').toLowerCase()
+                } else {
+                    av = a.action.toLowerCase()
+                    bv = b.action.toLowerCase()
+                }
+                return av < bv ? -dir : av > bv ? dir : 0
+            })
+        }
+        return list
+    }, [entries, sort])
+
+    const total = sorted.length
+    const safeOffset = Math.min(offset, Math.max(0, total - 1))
+    const pageRows = useMemo(() => sorted.slice(safeOffset, safeOffset + TABLE_PAGE), [sorted, safeOffset])
+
+    const tableRef = useTc<HTMLElement>(
+        useMemo(
+            () => ({ columns, sortableColumns: sortable, sort, limit: TABLE_PAGE, offset: safeOffset, total }),
+            [columns, sortable, sort, safeOffset, total],
+        ),
+        {
+            'tc-page-change': (e: Event) => setOffset((e as CustomEvent).detail?.offset ?? 0),
+            'tc-sort-change': (e: Event) => {
+                const d = (e as CustomEvent).detail
+                setSort(d?.column ? { column: d.column, direction: d.direction } : null)
+                setOffset(0)
+            },
+        },
+    )
+    const tableKey = `${sort?.column ?? ''}_${sort?.direction ?? ''}_${safeOffset}_${pageRows.map((r) => r.id).join('-')}`
 
     return (
         <div className="wharf-page">
@@ -72,6 +138,26 @@ export function AuditClient({ projectId, title }: { projectId?: string; title: s
             {err && <tc-banner variant="error">{err}</tc-banner>}
 
             <tc-section-card title="Activity" icon="ScrollText">
+                {entries.length > 0 && (
+                    <div slot="action" style={{ display: 'flex', gap: '0.375rem' }}>
+                        <tc-button
+                            size="sm"
+                            variant="secondary"
+                            outline={view === 'timeline' ? undefined : true}
+                            onClick={() => setView('timeline')}
+                        >
+                            Timeline
+                        </tc-button>
+                        <tc-button
+                            size="sm"
+                            variant="secondary"
+                            outline={view === 'table' ? undefined : true}
+                            onClick={() => setView('table')}
+                        >
+                            Table
+                        </tc-button>
+                    </div>
+                )}
                 <div className="wharf-section-body">
                     <p style={{ margin: '0 0 1rem', color: 'var(--tc-text-muted)' }}>
                         Reveals, value-bearing exports, agent fetches and clones are all recorded.
@@ -85,9 +171,9 @@ export function AuditClient({ projectId, title }: { projectId?: string; title: s
                             <h2>No activity yet</h2>
                             <p>Actions will appear here as they happen.</p>
                         </tc-empty-state>
-                    ) : (
+                    ) : view === 'timeline' ? (
                         <>
-                            <tc-table ref={tableRef} />
+                            <tc-timeline ref={timelineRef} variant="minimal" connector="solid" />
                             {!done && (
                                 <tc-button
                                     variant="secondary"
@@ -97,6 +183,32 @@ export function AuditClient({ projectId, title }: { projectId?: string; title: s
                                     style={{ marginTop: '1rem' }}
                                 >
                                     Load more
+                                </tc-button>
+                            )}
+                        </>
+                    ) : (
+                        <>
+                            <tc-advanced-table key={tableKey} ref={tableRef}>
+                                {pageRows.map((row) => (
+                                    <tr key={row.id}>
+                                        <td style={{ whiteSpace: 'nowrap' }}>{new Date(row.at).toLocaleString()}</td>
+                                        <td>{row.login ?? '—'}</td>
+                                        <td>
+                                            <tc-badge variant="info">{row.action}</tc-badge>
+                                        </td>
+                                        <td style={{ color: 'var(--tc-text-muted)' }}>{row.detail ?? ''}</td>
+                                    </tr>
+                                ))}
+                            </tc-advanced-table>
+                            {!done && (
+                                <tc-button
+                                    variant="secondary"
+                                    outline
+                                    size="sm"
+                                    onClick={() => void loadPage(entries[entries.length - 1]?.id)}
+                                    style={{ marginTop: '1rem' }}
+                                >
+                                    Load more rows
                                 </tc-button>
                             )}
                         </>

@@ -1,6 +1,5 @@
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
-import { icon } from './icons'
 import type { ActionItem } from './ActionItems'
 
 const TAG_NAME = 'tc-file'

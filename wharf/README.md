@@ -50,8 +50,58 @@ the **monorepo root**:
 
 ```bash
 docker build -t wharf -f wharf/Dockerfile .
-./wharf/run-docker.sh        # publishes PORT; keeps AGENT_PORT internal; bind-mounts state
+
+# run — publishes ONLY the dashboard; the Agent API stays on the internal network
+docker run -d --restart unless-stopped \
+  --name wharf \
+  -p 3000:3000 \
+  --env-file wharf/.env \
+  -v "$HOME/wharf-workspace:/workspace" \
+  -e WORKSPACE_DIR=/workspace -e BACKUP_DIR=/workspace/backups \
+  -e HOME=/workspace -e PORT=3000 -e AGENT_PORT=4000 -e HOSTNAME=0.0.0.0 \
+  wharf
 ```
+
+`./wharf/run-docker.sh` wraps this — bind-mounts state, runs as your uid, and
+supports a `NETWORK=` mode where target containers reach the Agent API over the
+same Docker network. **Never publish `AGENT_PORT` externally** — it serves
+resolved secrets to machines.
+
+## Environment variables
+
+### Required
+
+| Variable | Description |
+|---|---|
+| `GITHUB_CLIENT_ID` | GitHub OAuth app client ID. |
+| `GITHUB_CLIENT_SECRET` | GitHub OAuth app client secret. |
+| `OAUTH_REDIRECT_URI` | OAuth callback URL — must exactly match the GitHub app. |
+| `AUTH_SECRET` | HMAC key for session + OAuth state, e.g. `openssl rand -hex 32`. |
+| `ENCRYPTION_KEY` | AES-256-GCM key for values at rest (secrets, notes, backups). 32-byte hex (64 chars). **Distinct from `AUTH_SECRET`.** |
+
+### Auth / storage
+
+| Variable | Default | Description |
+|---|---|---|
+| `ENCRYPTION_KEY_PREV` | _(none)_ | Previous encryption key kept during a rotation so old ciphertext/backups still decrypt. |
+| `PUBLIC_ORIGIN` | origin of `OAUTH_REDIRECT_URI` | Public scheme+host; set only when a proxy strips the path. |
+| `GITHUB_ALLOWED_LOGINS` | _(open)_ | Comma-separated GitHub logins allowed to sign in. |
+| `GITHUB_ALLOWED_ORG` | _(none)_ | Require membership of this GitHub org. |
+| `SESSION_TTL` | `86400` | Session lifetime in seconds. |
+| `WORKSPACE_DIR` | `/workspace` | Durable state dir (holds the SQLite store). |
+| `DB_PATH` | `$WORKSPACE_DIR/wharf.db` | SQLite system-of-record path. |
+| `BACKUP_DIR` | `$WORKSPACE_DIR/backups` | Where encrypted DB snapshots are written. |
+| `BACKUP_INTERVAL_HOURS` / `BACKUP_RETENTION` | `24` / `14` | Snapshot cadence + how many to keep. |
+| `AUDIT_RETENTION_DAYS` | `90` | Audit-log retention. |
+
+### Ports
+
+| Variable | Default | Description |
+|---|---|---|
+| `PORT` | `3000` | **Dashboard** (human, GitHub-authenticated) — safe to publish. |
+| `AGENT_PORT` | `4000` | **Agent API** (machine, instance-key) — bind to the internal network, **never publish**. |
+| `AGENT_HOST` | `0.0.0.0` | Bind address for the Agent listener. |
+| `WHARF_CLIENT_DIR` | `/app/wharf/client-bin` | Where the cross-compiled `wharf-client` binaries live (baked into the image), served at `/v1/client/*`. |
 
 ## Go client (`client-go/`)
 

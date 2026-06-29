@@ -1,8 +1,8 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import type { Stream, StreamTlsMode, StreamUpstream } from '@/server/domain/streams'
-import { RoutingPage, json, useMaintainerData } from './shared'
+import { RoutingPage, RoutingListTable, json, useMaintainerData, type RoutingListItem } from './shared'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { CheckField, SelectField, TextField, type SelectOption } from '@/components/fields'
 
@@ -183,6 +183,15 @@ function StreamsManager({
         }
     }, [pending, busy, onChanged])
 
+    const items = useMemo<RoutingListItem[]>(
+        () =>
+            streams.map((s) => ({
+                name: s.name,
+                hint: `${s.protocol ?? 'tcp'} :${s.listen} ${describeTarget(s)}${s.tls ? ` · TLS ${s.tls}` : ''}`,
+            })),
+        [streams],
+    )
+
     // Stream-upstream pool options, with a leading clear choice.
     const upstreamOptions: SelectOption[] = [
         { value: '', label: '— pick stream upstream —' },
@@ -223,28 +232,7 @@ function StreamsManager({
                     {streams.length === 0 ? (
                         <tc-empty-state icon="cable">No streams yet.</tc-empty-state>
                     ) : (
-                        <ul className="perch-admin-list">
-                            {streams.map((s) => (
-                                <li key={s.name} className="perch-admin-list-row">
-                                    <span>
-                                        <span className="perch-admin-mono">{s.name}</span>{' '}
-                                        <span className="perch-admin-hint">
-                                            {s.protocol ?? 'tcp'} :{s.listen} {describeTarget(s)}
-                                            {s.tls ? ` · TLS ${s.tls}` : ''}
-                                        </span>
-                                    </span>
-                                    <tc-button
-                                        variant="danger"
-                                        size="sm"
-                                        outline
-                                        disabled={busy || undefined}
-                                        onClick={() => setPending(s.name)}
-                                    >
-                                        Remove
-                                    </tc-button>
-                                </li>
-                            ))}
-                        </ul>
+                        <RoutingListTable items={items} busy={busy} onRemove={setPending} />
                     )}
                 </div>
             </tc-section-card>

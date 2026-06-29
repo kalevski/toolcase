@@ -1,10 +1,23 @@
 'use client'
 
-import { useCallback, useEffect, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
+import type { TableColumn } from '@toolcase/web-components'
 import { ROLE_RANK } from '@/server/domain/types'
 import { useMe } from '@/lib/me-context'
 import { LoadingState, ErrorState } from '@/components/states'
+import { DataTable } from '@/components/DataTable'
+import { SubTabBar, type SubTab } from '@/components/SubTabBar'
+import { escapeHtml } from '@/lib/tc'
+
+// The four routing sub-pages, surfaced as a Wharf-style tc-tab-bar above the body
+// (P5) instead of four flat sidebar items.
+const ROUTING_TABS: SubTab[] = [
+    { id: 'proxies', label: 'Proxies', icon: 'globe', href: '/proxies' },
+    { id: 'upstreams', label: 'Upstreams', icon: 'server', href: '/upstreams' },
+    { id: 'streams', label: 'Streams', icon: 'cable', href: '/streams' },
+    { id: 'stream-upstreams', label: 'Stream upstreams', icon: 'network', href: '/stream-upstreams' },
+]
 
 // Shared plumbing for the maintainer routing pages (Proxies, Upstreams) — the
 // maintainer counterpart to `components/admin/shared.tsx`. Same gate shape, one
@@ -116,6 +129,7 @@ export function RoutingPage<T>({
                 icon-name={icon}
                 icon-color={iconColor}
             />
+            <SubTabBar tabs={ROUTING_TABS} />
             <RoutingTestButton />
             {body}
         </section>
@@ -200,5 +214,64 @@ function RoutingTestButton() {
                 </tc-banner>
             )}
         </div>
+    )
+}
+
+/**
+ * Relocation-safe `tc-table` listing for the four routing surfaces (proxies,
+ * upstreams, streams, stream upstreams) — each is a "mono name · descriptive hint
+ * · Remove" row. The table renders the whole listing from its `columns`/`data`
+ * properties (no slotted children); the Remove button is a delegated `<button>`.
+ *
+ * @param items   the rows; each yields a stable `name` (the delete key) and a `hint`.
+ * @param onRemove invoked with the row's `name` when its Remove button is clicked.
+ */
+export interface RoutingListItem extends Record<string, unknown> {
+    name: string
+    hint: string
+}
+
+export function RoutingListTable({
+    items,
+    busy,
+    onRemove,
+}: {
+    items: RoutingListItem[]
+    busy: boolean
+    onRemove: (name: string) => void
+}) {
+    const columns = useMemo<TableColumn[]>(
+        () => [
+            {
+                key: 'name',
+                header: 'Name',
+                render: (row: RoutingListItem) =>
+                    `<span class="perch-admin-mono">${escapeHtml(row.name)}</span> ` +
+                    `<span class="perch-admin-hint">${escapeHtml(row.hint)}</span>`,
+            },
+            {
+                key: 'action',
+                header: '',
+                align: 'right',
+                render: (row: RoutingListItem) =>
+                    `<button type="button" class="btn btn-sm btn-outline-danger" data-action="remove"` +
+                    ` data-name="${escapeHtml(row.name)}"${busy ? ' disabled' : ''}>Remove</button>`,
+            },
+        ],
+        [busy],
+    )
+    const onAction = useCallback(
+        (action: string, dataset: DOMStringMap) => {
+            if (action === 'remove' && dataset.name) onRemove(dataset.name)
+        },
+        [onRemove],
+    )
+    return (
+        <DataTable<RoutingListItem>
+            columns={columns}
+            rows={items}
+            rowKey={(row) => row.name}
+            onAction={onAction}
+        />
     )
 }

@@ -54,7 +54,12 @@ export function LoginClient({ error }: { error?: string }) {
             ) : (
                 <div className="perch-login-body">
                     <tc-login ref={ref} title={branding.appName} description={branding.tagline}>
-                        <tc-brand slot="logo" primary-text={branding.appName} color={branding.brandColor} />
+                        <tc-brand
+                            slot="logo"
+                            primary-text={branding.appName}
+                            secondary-text={branding.secondaryText || undefined}
+                            color={branding.brandColor}
+                        />
                     </tc-login>
                 </div>
             )}

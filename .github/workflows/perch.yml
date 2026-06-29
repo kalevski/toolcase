@@ -2,7 +2,7 @@ name: perch
 
 on:
   push:
-    branches: [main, 'feature/static-host']
+    branches: [main]
     # the image bundles built @toolcase/base + web-components, so changes there
     # must rebuild perch too (build context is the repo root).
     paths:

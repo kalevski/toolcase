@@ -1,12 +1,12 @@
 'use client'
 
 import { useCallback, useMemo, useState } from 'react'
-import type { ExtendedSelectItem } from '@toolcase/web-components'
-import { useTc, detailValue, targetValue } from '@/lib/tc'
+import type { ExtendedSelectItem, TableColumn } from '@toolcase/web-components'
+import { useTc, detailValue, targetValue, escapeHtml } from '@/lib/tc'
 import { BASE_DOMAIN_TIERS, type BaseDomain, type BaseDomainTier, type BaseDomainTls } from '@/server/domain/types'
 import { AdminPage, json, useOwnerData } from './shared'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
-import { SelectField, type SelectOption } from '@/components/fields'
+import { DataTable } from '@/components/DataTable'
 
 // Owner-only subdomain pool (§10/§13). The owner registers base domains, each one
 // backing `<label>.<domain>` sites, and assigns each to one of three audience
@@ -27,9 +27,47 @@ const TIER_ITEMS: ExtendedSelectItem[] = BASE_DOMAIN_TIERS.map((t) => ({ key: t,
 // Subdomain TLS policy (§0/Phase D) — one wildcard cert per base domain; `auto`
 // degrades to HTTP if the cert isn't issued yet. This per-base-domain select is the
 // only place subdomain TLS is set (never per subdomain).
-const TLS_OPTIONS: SelectOption[] = [
+const TLS_OPTIONS: { value: BaseDomainTls; label: string }[] = [
     { value: 'auto', label: 'HTTPS (auto)' },
     { value: 'off', label: 'HTTP only' },
+]
+
+// One DataTable row per base domain. Domain auto-escapes (no render); TLS is a
+// native Bootstrap-compatible <select> (painted by tc-* style.css) and Remove a
+// danger button — both carry data-action + data-domain for the delegated handler.
+interface DomainRow extends Record<string, unknown> {
+    domain: string
+    tls: BaseDomainTls
+}
+
+const DOMAIN_COLUMNS = (busy: boolean): TableColumn[] => [
+    {
+        key: 'domain',
+        header: 'Domain',
+        render: (row: DomainRow) => `<span class="perch-admin-mono">${escapeHtml(row.domain)}</span>`,
+    },
+    {
+        key: 'tls',
+        header: 'Subdomain TLS',
+        width: '12rem',
+        render: (row: DomainRow) => {
+            const opts = TLS_OPTIONS.map(
+                (o) =>
+                    `<option value="${o.value}"${o.value === row.tls ? ' selected' : ''}>${escapeHtml(o.label)}</option>`,
+            ).join('')
+            return (
+                `<select class="form-select form-select-sm" data-action="tls" data-domain="${escapeHtml(row.domain)}"` +
+                ` aria-label="Subdomain HTTPS for ${escapeHtml(row.domain)}"${busy ? ' disabled' : ''}>${opts}</select>`
+            )
+        },
+    },
+    {
+        key: 'action',
+        header: '',
+        align: 'right',
+        render: (row: DomainRow) =>
+            `<button type="button" class="btn btn-sm btn-outline-danger" data-action="remove" data-domain="${escapeHtml(row.domain)}"${busy ? ' disabled' : ''}>Remove</button>`,
+    },
 ]
 
 export function AdminDomains() {
@@ -78,11 +116,13 @@ function BaseDomainsForm({
         { 'tc-change': (event: Event) => setTier(detailValue<BaseDomainTier>(event)) },
     )
 
-    // Bucket the pool by tier for grouped display, in the canonical free→paid→staff order.
+    // Bucket the pool by tier for grouped display, in the canonical free→paid→staff
+    // order. Each bucket is already a stable DataTable row set (memoised) so the
+    // tc-table only re-applies its `data` property when the pool actually changes.
     const byTier = useMemo(() => {
-        const groups = new Map<BaseDomainTier, BaseDomain[]>()
+        const groups = new Map<BaseDomainTier, DomainRow[]>()
         for (const t of BASE_DOMAIN_TIERS) groups.set(t, [])
-        for (const b of baseDomains) groups.get(b.tier)?.push(b)
+        for (const b of baseDomains) groups.get(b.tier)?.push({ domain: b.domain, tls: b.tls })
         return groups
     }, [baseDomains])
 
@@ -160,6 +200,24 @@ function BaseDomainsForm({
         }
     }, [pending, busy, onChanged])
 
+    // One delegated handler for every base-domain row control across all tier
+    // tables: a TLS <select> change PATCHes in place; a Remove click opens the
+    // confirm dialog (the actual DELETE runs on confirm).
+    const onRowAction = useCallback(
+        (action: string, dataset: DOMStringMap, event: Event) => {
+            const domain = dataset.domain
+            if (!domain) return
+            if (action === 'tls') {
+                void setTls(domain, (event.target as HTMLSelectElement).value as BaseDomainTls)
+            } else if (action === 'remove') {
+                setPending(domain)
+            }
+        },
+        [setTls],
+    )
+
+    const columns = useMemo(() => DOMAIN_COLUMNS(busy), [busy])
+
     return (
         <tc-section-card title="Base domains" icon="globe">
             <div className="perch-admin-section">
@@ -181,31 +239,12 @@ function BaseDomainsForm({
                                     {TIER_META[t].label}
                                     <span className="perch-admin-hint"> — {TIER_META[t].note}</span>
                                 </h4>
-                                <ul className="perch-admin-list">
-                                    {rows.map((b) => (
-                                        <li key={b.domain} className="perch-admin-list-row">
-                                            <span className="perch-admin-mono">{b.domain}</span>
-                                            <span className="perch-admin-domain-controls">
-                                                <SelectField
-                                                    size="sm"
-                                                    ariaLabel={`Subdomain HTTPS for ${b.domain}`}
-                                                    value={b.tls}
-                                                    options={TLS_OPTIONS}
-                                                    onValue={(v) => void setTls(b.domain, v as BaseDomainTls)}
-                                                />
-                                                <tc-button
-                                                    variant="danger"
-                                                    size="sm"
-                                                    outline
-                                                    disabled={busy || undefined}
-                                                    onClick={() => setPending(b.domain)}
-                                                >
-                                                    Remove
-                                                </tc-button>
-                                            </span>
-                                        </li>
-                                    ))}
-                                </ul>
+                                <DataTable<DomainRow>
+                                    columns={columns}
+                                    rows={rows}
+                                    rowKey={(row) => row.domain}
+                                    onAction={onRowAction}
+                                />
                             </div>
                         )
                     })

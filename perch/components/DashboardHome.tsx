@@ -1,12 +1,14 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import type { MetricGridItem } from '@toolcase/web-components'
 import { CreateSiteWizard } from './CreateSiteWizard'
 import { SiteCard } from './SiteCard'
 import { LoadingState, ErrorState } from './states'
-import { useTc } from '@/lib/tc'
+import { useTc, useTcProps } from '@/lib/tc'
 import { useMe } from '@/lib/me-context'
 import { apiFetch, describeApiError } from '@/lib/fetcher'
+import { formatBytes } from '@/server/domain/site-dashboard'
 import { type Site } from '@/server/domain/types'
 
 // Dashboard content region (§14). Lists the signed-in user's sites as scannable
@@ -151,11 +153,17 @@ export function DashboardHome() {
             </tc-rich-page-header>
 
             {hasSites ? (
-                <div className="perch-card-grid">
-                    {sites.map((site) => (
-                        <SiteCard key={site.id} site={site} limits={me.limits} />
-                    ))}
-                </div>
+                <>
+                    {/* P6: a Wharf-style roll-up of the account totals opens the
+                        dashboard. Sites + storage come from the server-computed
+                        me.usage; custom domains are counted off the loaded sites. */}
+                    <SitesMetrics sites={sites} />
+                    <div className="perch-card-grid">
+                        {sites.map((site) => (
+                            <SiteCard key={site.id} site={site} limits={me.limits} />
+                        ))}
+                    </div>
+                </>
             ) : canCreate ? (
                 <div className="perch-home-empty">
                     <tc-button variant="primary" size="lg" onClick={openModal}>
@@ -183,4 +191,45 @@ export function DashboardHome() {
             )}
         </section>
     )
+}
+
+/**
+ * Account roll-up shown above the site grid (P6) — Sites / Storage used / Custom
+ * domains. `tc-metric-grid` is attribute + property driven (no slotted children),
+ * so it's safely inside the relocation boundary. Sites + storage read the
+ * server-computed `me.usage`; custom domains are counted off the loaded sites.
+ */
+function SitesMetrics({ sites }: { sites: Site[] }) {
+    const me = useMe()
+    const items = useMemo<MetricGridItem[]>(() => {
+        const customDomains = sites.filter((s) => s.hostKind === 'custom').length
+        const maxSites = me.limits.maxSites
+        const maxBytes = me.limits.maxBytesTotal
+        const maxCustom = me.limits.customDomains
+        return [
+            {
+                key: 'sites',
+                label: 'Sites',
+                value: String(me.usage.siteCount),
+                icon: 'LayoutDashboard',
+                hint: isFinite(maxSites) ? `of ${maxSites} on your ${me.plan} plan` : 'unlimited',
+            },
+            {
+                key: 'storage',
+                label: 'Storage used',
+                value: formatBytes(me.usage.totalBytes),
+                icon: 'HardDrive',
+                hint: isFinite(maxBytes) ? `of ${formatBytes(maxBytes)}` : 'unlimited',
+            },
+            {
+                key: 'custom-domains',
+                label: 'Custom domains',
+                value: String(customDomains),
+                icon: 'Globe',
+                hint: isFinite(maxCustom) ? `of ${maxCustom} allowed` : 'unlimited',
+            },
+        ]
+    }, [sites, me.usage.siteCount, me.usage.totalBytes, me.limits, me.plan])
+    const ref = useTcProps<HTMLElement>(useMemo(() => ({ items }), [items]))
+    return <tc-metric-grid ref={ref} columns="3" className="perch-sites-metrics" />
 }

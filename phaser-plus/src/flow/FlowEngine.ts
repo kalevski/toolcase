@@ -7,7 +7,7 @@ import CollisionEventProcessor from './CollisionEventProcessor'
 import JobProcessor from './JobProcessor'
 import TweenProcessor from './TweenProcessor'
 import Timeline from './Timeline'
-import type { TweenOptions, TweenHandle, TimelineHandle } from './TweenProcessor'
+import type { TweenOptions, TweenHandle } from './TweenProcessor'
 
 type ProcessorClass<T extends FlowProcessor> = new (scene: Scene, eventType: string) => T
 

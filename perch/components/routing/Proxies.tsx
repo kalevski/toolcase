@@ -1,8 +1,8 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import type { Proxy, ProxyLocation, TlsMode, Upstream } from '@/server/domain/routing'
-import { RoutingPage, json, useMaintainerData } from './shared'
+import { RoutingPage, RoutingListTable, json, useMaintainerData, type RoutingListItem } from './shared'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { CheckField, SelectField, TextAreaField, TextField, type SelectOption } from '@/components/fields'
 
@@ -266,6 +266,15 @@ function ProxiesManager({
         }
     }, [pending, busy, onChanged])
 
+    const items = useMemo<RoutingListItem[]>(
+        () =>
+            proxies.map((p) => ({
+                name: p.domain,
+                hint: `:${p.listen ?? 80} ${describeTarget(p)}${p.tls ? ` · TLS ${p.tls}` : ''}`,
+            })),
+        [proxies],
+    )
+
     // Upstream-pool options, with a leading clear choice. Rebuilt as the pool set
     // changes; SelectField remounts cleanly on a different option set.
     const upstreamOptions: SelectOption[] = [
@@ -315,28 +324,7 @@ function ProxiesManager({
                     {proxies.length === 0 ? (
                         <tc-empty-state icon="globe">No proxies yet.</tc-empty-state>
                     ) : (
-                        <ul className="perch-admin-list">
-                            {proxies.map((p) => (
-                                <li key={p.domain} className="perch-admin-list-row">
-                                    <span>
-                                        <span className="perch-admin-mono">{p.domain}</span>{' '}
-                                        <span className="perch-admin-hint">
-                                            :{p.listen ?? 80} {describeTarget(p)}
-                                            {p.tls ? ` · TLS ${p.tls}` : ''}
-                                        </span>
-                                    </span>
-                                    <tc-button
-                                        variant="danger"
-                                        size="sm"
-                                        outline
-                                        disabled={busy || undefined}
-                                        onClick={() => setPending(p.domain)}
-                                    >
-                                        Remove
-                                    </tc-button>
-                                </li>
-                            ))}
-                        </ul>
+                        <RoutingListTable items={items} busy={busy} onRemove={setPending} />
                     )}
                 </div>
             </tc-section-card>

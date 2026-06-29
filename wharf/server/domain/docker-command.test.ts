@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildDockerCommand, type RenderOpts } from '@/server/domain/docker-command'
+import { buildDockerCommand } from '@/server/domain/docker-command'
 import type { DockerSpec } from '@/server/domain/types'
 
 // A minimal-but-complete spec; tests tweak fields per case.

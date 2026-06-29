@@ -50,6 +50,8 @@ export interface SiteSettings {
     appName: string
     /** One-line tagline shown under the brand on the login screen. */
     tagline: string
+    /** Optional second brand word shown inline after the app name in `tc-brand`. */
+    secondaryText: string
     /** Active theme — drives every `tc-*` component's skin. */
     theme: ThemeName
     /** Brand accent colour (hex) — the `tc-brand` dot / login logo colour. */
@@ -64,6 +66,7 @@ export interface SiteSettings {
 export const DEFAULT_SETTINGS: SiteSettings = {
     appName: 'Wharf',
     tagline: 'Configuration for your Docker containers — env vars, secrets, feature flags.',
+    secondaryText: '',
     theme: 'default',
     brandColor: '#0d9488',
     baseUrl: 'http://localhost:3000',
@@ -74,6 +77,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
 export const SETTING_KEYS: Record<keyof SiteSettings, string> = {
     appName: 'app_name',
     tagline: 'tagline',
+    secondaryText: 'secondary_text',
     theme: 'theme',
     brandColor: 'brand_color',
     baseUrl: 'base_url',
@@ -85,6 +89,7 @@ export const SETTING_KEYS: Record<keyof SiteSettings, string> = {
 /** Max length for the free-text fields (defensive — keeps the brand/tab sane). */
 export const APP_NAME_MAX = 60
 export const TAGLINE_MAX = 160
+export const SECONDARY_TEXT_MAX = 40
 export const URL_MAX = 255
 
 const HEX_COLOR_RE = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/
@@ -114,6 +119,7 @@ export type SettingsRejection =
     | 'not_object'
     | 'app_name'
     | 'tagline'
+    | 'secondary_text'
     | 'theme'
     | 'brand_color'
     | 'base_url'
@@ -162,6 +168,13 @@ export function parseSettingsUpdate(input: unknown): SettingsCheck {
             return { ok: false, reason: 'tagline', message: `tagline must be ≤ ${TAGLINE_MAX} characters` }
         }
         patch.tagline = src.tagline.trim()
+    }
+
+    if (src.secondaryText !== undefined) {
+        if (typeof src.secondaryText !== 'string' || src.secondaryText.trim().length > SECONDARY_TEXT_MAX) {
+            return { ok: false, reason: 'secondary_text', message: `secondaryText must be ≤ ${SECONDARY_TEXT_MAX} characters` }
+        }
+        patch.secondaryText = src.secondaryText.trim()
     }
 
     if (src.theme !== undefined) {
@@ -213,6 +226,9 @@ export function decodeStored(map: Record<string, string>): Partial<SiteSettings>
 
     const tagline = map[SETTING_KEYS.tagline]
     if (typeof tagline === 'string') out.tagline = tagline
+
+    const secondaryText = map[SETTING_KEYS.secondaryText]
+    if (typeof secondaryText === 'string') out.secondaryText = secondaryText
 
     const theme = map[SETTING_KEYS.theme]
     if (isThemeName(theme)) out.theme = theme

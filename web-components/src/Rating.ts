@@ -1,5 +1,4 @@
 import { lucideByName } from './internal/lucide'
-import { icon } from './icons'
 
 const TAG_NAME = 'tc-rating'
 

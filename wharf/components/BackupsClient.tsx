@@ -1,8 +1,21 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { apiFetch, describeApiError } from '@/lib/fetcher'
+import { useTc } from '@/lib/tc'
 import type { Backup } from '@/server/domain/types'
+import type { AdvancedTableColumn, AdvancedTableSort } from '@toolcase/web-components'
+
+const PAGE_SIZE = 10
+
+const COLUMNS: AdvancedTableColumn[] = [
+    { key: 'createdAt', label: 'Created' },
+    { key: 'kind', label: 'Kind' },
+    { key: 'sizeBytes', label: 'Size', align: 'right' },
+    { key: 'keyId', label: 'Key' },
+    { key: 'download', label: 'Download', align: 'right' },
+]
+const SORTABLE = ['createdAt', 'kind', 'sizeBytes']
 
 function fmtSize(n: number): string {
     if (n < 1024) return `${n} B`
@@ -14,6 +27,8 @@ export function BackupsClient() {
     const [backups, setBackups] = useState<Backup[] | null>(null)
     const [err, setErr] = useState<string | null>(null)
     const [busy, setBusy] = useState(false)
+    const [offset, setOffset] = useState(0)
+    const [sort, setSort] = useState<AdvancedTableSort | null>({ column: 'createdAt', direction: 'desc' })
 
     const load = useCallback(async (signal?: AbortSignal) => {
         try {
@@ -34,6 +49,7 @@ export function BackupsClient() {
         setErr(null)
         try {
             await apiFetch('/api/admin/backups', { method: 'POST' })
+            setOffset(0)
             await load()
         } catch (e) {
             setErr(describeApiError(e))
@@ -41,6 +57,50 @@ export function BackupsClient() {
             setBusy(false)
         }
     }
+
+    const sorted = useMemo(() => {
+        const list = [...(backups ?? [])]
+        if (sort) {
+            const dir = sort.direction === 'asc' ? 1 : -1
+            list.sort((a, b) => {
+                let av: number | string
+                let bv: number | string
+                if (sort.column === 'sizeBytes') {
+                    av = a.sizeBytes
+                    bv = b.sizeBytes
+                } else if (sort.column === 'kind') {
+                    av = a.kind
+                    bv = b.kind
+                } else {
+                    av = new Date(a.createdAt).getTime()
+                    bv = new Date(b.createdAt).getTime()
+                }
+                return av < bv ? -dir : av > bv ? dir : 0
+            })
+        }
+        return list
+    }, [backups, sort])
+
+    const total = sorted.length
+    const safeOffset = Math.min(offset, Math.max(0, total - 1))
+    const pageRows = useMemo(() => sorted.slice(safeOffset, safeOffset + PAGE_SIZE), [sorted, safeOffset])
+
+    const tableRef = useTc<HTMLElement>(
+        useMemo(
+            () => ({ columns: COLUMNS, sortableColumns: SORTABLE, sort, limit: PAGE_SIZE, offset: safeOffset, total }),
+            [sort, safeOffset, total],
+        ),
+        {
+            'tc-page-change': (e: Event) => setOffset((e as CustomEvent).detail?.offset ?? 0),
+            'tc-sort-change': (e: Event) => {
+                const d = (e as CustomEvent).detail
+                setSort(d?.column ? { column: d.column, direction: d.direction } : null)
+                setOffset(0)
+            },
+        },
+    )
+
+    const tableKey = `${sort?.column ?? ''}_${sort?.direction ?? ''}_${safeOffset}_${pageRows.map((b) => b.id).join('-')}`
 
     return (
         <div className="wharf-page">
@@ -77,34 +137,23 @@ export function BackupsClient() {
                             <p>Take one now, or wait for the scheduled snapshot.</p>
                         </tc-empty-state>
                     ) : (
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th>Created</th>
-                                    <th>Kind</th>
-                                    <th>Size</th>
-                                    <th>Key</th>
-                                    <th style={{ textAlign: 'right' }}>Download</th>
+                        <tc-advanced-table key={tableKey} ref={tableRef}>
+                            {pageRows.map((b) => (
+                                <tr key={b.id}>
+                                    <td>{new Date(b.createdAt).toLocaleString()}</td>
+                                    <td>
+                                        <tc-badge variant={b.kind === 'manual' ? 'primary' : 'secondary'}>{b.kind}</tc-badge>
+                                    </td>
+                                    <td style={{ textAlign: 'right' }}>{fmtSize(b.sizeBytes)}</td>
+                                    <td><code style={{ fontSize: '0.8125rem' }}>{b.keyId ?? '—'}</code></td>
+                                    <td style={{ textAlign: 'right' }}>
+                                        <a href={`/api/admin/backups/${b.id}`} download>
+                                            Download
+                                        </a>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {backups.map((b) => (
-                                    <tr key={b.id}>
-                                        <td>{new Date(b.createdAt).toLocaleString()}</td>
-                                        <td>
-                                            <tc-badge variant={b.kind === 'manual' ? 'primary' : 'secondary'}>{b.kind}</tc-badge>
-                                        </td>
-                                        <td>{fmtSize(b.sizeBytes)}</td>
-                                        <td><code style={{ fontSize: '0.8125rem' }}>{b.keyId ?? '—'}</code></td>
-                                        <td style={{ textAlign: 'right' }}>
-                                            <a href={`/api/admin/backups/${b.id}`} download>
-                                                Download
-                                            </a>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                            ))}
+                        </tc-advanced-table>
                     )}
                 </div>
             </tc-section-card>

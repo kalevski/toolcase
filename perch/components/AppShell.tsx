@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, type ReactNode } from 'react'
+import { useCallback, useMemo, type ReactNode } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import type { SideNavItem, SideNavSection } from '@toolcase/web-components'
 import { useTcProps } from '@/lib/tc'
@@ -48,37 +48,22 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
                 },
             ],
         }
+        // The four routing sub-pages and the owner admin sub-pages now live behind a
+        // tc-tab-bar above each page body (P5, Wharf's project-tab pattern), so the
+        // sidebar carries ONE entry per section — clicking it lands on the section's
+        // first page (the tab bar handles intra-section navigation from there).
         const routing: SideNavSection = {
             key: 'routing',
             title: 'Routing',
             items: [
                 {
-                    key: 'routing-proxies',
-                    label: 'Proxies',
-                    icon: 'globe',
+                    key: 'routing',
+                    label: 'Routing',
+                    icon: 'route',
                     href: '/proxies',
-                    active: pathname.startsWith('/proxies'),
-                },
-                {
-                    key: 'routing-upstreams',
-                    label: 'Upstreams',
-                    icon: 'server',
-                    href: '/upstreams',
-                    active: pathname.startsWith('/upstreams'),
-                },
-                {
-                    key: 'routing-streams',
-                    label: 'Streams',
-                    icon: 'cable',
-                    href: '/streams',
-                    active: pathname.startsWith('/streams'),
-                },
-                {
-                    key: 'routing-stream-upstreams',
-                    label: 'Stream upstreams',
-                    icon: 'network',
-                    href: '/stream-upstreams',
-                    active: pathname.startsWith('/stream-upstreams'),
+                    active: ['/proxies', '/upstreams', '/streams', '/stream-upstreams'].some((p) =>
+                        pathname.startsWith(p),
+                    ),
                 },
             ],
         }
@@ -87,53 +72,11 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
             title: 'Admin',
             items: [
                 {
-                    key: 'admin-sites',
-                    label: 'Sites',
-                    icon: 'layout-dashboard',
-                    href: '/admin/sites',
-                    active: pathname.startsWith('/admin/sites'),
-                },
-                {
-                    key: 'admin-users',
-                    label: 'Users',
-                    icon: 'users',
-                    href: '/admin/users',
-                    active: pathname.startsWith('/admin/users'),
-                },
-                {
-                    key: 'admin-realms',
-                    label: 'Realms',
-                    icon: 'server',
-                    href: '/admin/realms',
-                    active: pathname.startsWith('/admin/realms'),
-                },
-                {
-                    key: 'admin-domains',
-                    label: 'Domains',
-                    icon: 'globe',
-                    href: '/admin/domains',
-                    active: pathname.startsWith('/admin/domains'),
-                },
-                {
-                    key: 'admin-settings',
-                    label: 'Settings',
-                    icon: 'settings',
-                    href: '/admin/settings',
-                    active: pathname.startsWith('/admin/settings'),
-                },
-                {
-                    key: 'admin-plans',
-                    label: 'Plans',
-                    icon: 'credit-card',
-                    href: '/admin/plans',
-                    active: pathname.startsWith('/admin/plans'),
-                },
-                {
-                    key: 'admin-audit',
-                    label: 'Audit',
-                    icon: 'scroll-text',
-                    href: '/admin/audit',
-                    active: pathname.startsWith('/admin/audit'),
+                    key: 'admin',
+                    label: 'Admin',
+                    icon: 'shield',
+                    href: '/admin',
+                    active: pathname.startsWith('/admin'),
                 },
             ],
         }
@@ -147,20 +90,23 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
     // Intercept the side-nav anchor click so navigation stays a client-side
     // router push instead of a full page load. preventDefault works because the
     // component invokes onItemClick synchronously inside its click handler.
-    const onItemClick = (event: Event, item: SideNavItem) => {
-        if (item.href) {
-            event.preventDefault()
-            router.push(item.href)
-        }
-    }
+    const onItemClick = useCallback(
+        (event: Event, item: SideNavItem) => {
+            if (item.href) {
+                event.preventDefault()
+                router.push(item.href)
+            }
+        },
+        [router],
+    )
 
-    const onSignOut = async () => {
+    const onSignOut = useCallback(async () => {
         await fetch('/api/auth/logout', { method: 'POST' })
         router.push('/login')
-    }
+    }, [router])
 
-    const sideNavRef = useTcProps<HTMLElement>(useMemo(() => ({ sections, onItemClick }), [sections]))
-    const userRef = useTcProps<HTMLElement>(useMemo(() => ({ onIconClick: onSignOut }), []))
+    const sideNavRef = useTcProps<HTMLElement>(useMemo(() => ({ sections, onItemClick }), [sections, onItemClick]))
+    const userRef = useTcProps<HTMLElement>(useMemo(() => ({ onIconClick: onSignOut }), [onSignOut]))
 
     return (
         <>
@@ -168,7 +114,12 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
                 Skip to content
             </a>
             <tc-dashboard-layout>
-                <tc-brand slot="brand" primary-text={branding.appName} color={branding.brandColor} />
+                <tc-brand
+                    slot="brand"
+                    primary-text={branding.appName}
+                    secondary-text={branding.secondaryText || undefined}
+                    color={branding.brandColor}
+                />
                 <div slot="sidebar-menu" className="perch-sidebar-menu">
                     <tc-side-nav ref={sideNavRef} />
                 </div>

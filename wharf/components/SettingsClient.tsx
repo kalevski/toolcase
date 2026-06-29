@@ -30,6 +30,7 @@ export function SettingsClient() {
 
     const [appName, setAppName] = useState('')
     const [tagline, setTagline] = useState('')
+    const [secondaryText, setSecondaryText] = useState('')
     const [theme, setTheme] = useState<ThemeName>('default')
     const [brandColor, setBrandColor] = useState('#0d9488')
     const [baseUrl, setBaseUrl] = useState('')
@@ -39,6 +40,8 @@ export function SettingsClient() {
     appNameRef.current = appName
     const taglineRef = useRef(tagline)
     taglineRef.current = tagline
+    const secondaryTextRef = useRef(secondaryText)
+    secondaryTextRef.current = secondaryText
     const themeRef = useRef(theme)
     themeRef.current = theme
     const brandColorRef = useRef(brandColor)
@@ -57,6 +60,7 @@ export function SettingsClient() {
                 if (ctrl.signal.aborted) return
                 setAppName(s.appName)
                 setTagline(s.tagline)
+                setSecondaryText(s.secondaryText)
                 setTheme(s.theme)
                 setBrandColor(s.brandColor)
                 setBaseUrl(s.baseUrl)
@@ -81,6 +85,7 @@ export function SettingsClient() {
                 body: JSON.stringify({
                     appName: appNameRef.current,
                     tagline: taglineRef.current,
+                    secondaryText: secondaryTextRef.current,
                     theme: themeRef.current,
                     brandColor: brandColorRef.current,
                     baseUrl: baseUrlRef.current,
@@ -104,6 +109,10 @@ export function SettingsClient() {
     const taglineTc = useTc<HTMLElement>(
         useMemo(() => ({ value: tagline }), [tagline]),
         { 'tc-change': (e: Event) => { setTagline(detailValue<string>(e) ?? ''); setSaved(false) } },
+    )
+    const secondaryTextTc = useTc<HTMLElement>(
+        useMemo(() => ({ value: secondaryText }), [secondaryText]),
+        { 'tc-change': (e: Event) => { setSecondaryText(detailValue<string>(e) ?? ''); setSaved(false) } },
     )
     const themeTc = useTc<HTMLElement>(
         useMemo(() => ({ items: THEME_ITEMS, value: theme }), [theme]),
@@ -147,6 +156,7 @@ export function SettingsClient() {
             <tc-section-card title="Branding" icon="Palette">
                 <div className="wharf-section-body">
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        <tc-eyebrow>Identity</tc-eyebrow>
                         <tc-input
                             ref={appNameTc}
                             label="Application name"
@@ -160,6 +170,15 @@ export function SettingsClient() {
                             placeholder="Configuration for your Docker containers."
                             help="One line under the brand on the login screen."
                         />
+                        <tc-input
+                            ref={secondaryTextTc}
+                            label="Secondary brand text"
+                            placeholder="cloud"
+                            help="Optional second word shown inline after the app name in the brand. Leave blank for none."
+                        />
+
+                        <tc-divider label="Appearance" />
+
                         <tc-extended-select
                             ref={themeTc}
                             label="Theme"

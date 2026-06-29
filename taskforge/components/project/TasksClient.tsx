@@ -30,7 +30,9 @@ const STATUS_DOT: Record<TaskRuntimeStatus, 'online' | 'offline' | 'busy' | 'awa
 }
 
 type Filter = 'all' | TaskRuntimeStatus
-type Col = { key: string; header: React.ReactNode; width?: string; render: (t: TaskInfo) => React.ReactNode }
+// tc-advanced-table header descriptors (string labels — the component renders
+// the <th> from these as a JS property) paired with a body-cell renderer.
+type AdvCol = { key: string; label: string; width?: string; align?: 'left' | 'right' | 'center'; render: (t: TaskInfo) => React.ReactNode }
 
 const MODEL_ALIASES = ['fast', 'mid', 'deep']
 
@@ -283,44 +285,39 @@ export function TasksClient() {
     }
 
     // ── columns ─────────────────────────────────────────────────────────────
-    const columns: Col[] = [
-        ...(!reordering
-            ? [
-                  {
-                      key: 'select',
-                      header: (
-                          <Chk
-                              checked={allShownSelected}
-                              indeterminate={!allShownSelected && shown.some((t) => selected.has(t.id))}
-                              onChange={(checked) => setSelected(checked ? new Set(shown.map((t) => t.id)) : new Set())}
-                          />
-                      ),
-                      width: '2.5rem',
-                      render: (t: TaskInfo) => (
-                          <span onClick={(e) => e.stopPropagation()}>
-                              <Chk checked={selected.has(t.id)} onChange={(checked) => toggleSelect(t.id, checked)} />
-                          </span>
-                      ),
-                  } as Col,
-              ]
-            : [
-                  {
-                      key: 'move',
-                      header: 'Order',
-                      width: '6rem',
-                      render: (t: TaskInfo) => (
-                          <span style={{ display: 'inline-flex', gap: '0.25rem' }} onClick={(e) => e.stopPropagation()}>
-                              <tc-icon-button icon="ArrowUp" label="Move up" size="sm" variant="secondary" outline onClick={() => move(t.id, -1)} />
-                              <tc-icon-button icon="ArrowDown" label="Move down" size="sm" variant="secondary" outline onClick={() => move(t.id, 1)} />
-                          </span>
-                      ),
-                  } as Col,
-              ]),
-        { key: 'id', header: '#', width: '26%', render: (t) => <code>{t.id}</code> },
-        { key: 'title', header: 'Title', render: (t) => t.title },
+    // tc-advanced-table drives its header row from the `columns` JS property
+    // (string labels only). The first column switches between a row-select
+    // checkbox (normal mode) and up/down reorder buttons (reorder mode); the
+    // select-all lives in a toolbar above the table since the component's header
+    // cells can't host a React component.
+    const columns: AdvCol[] = [
+        !reordering
+            ? {
+                  key: 'select',
+                  label: '',
+                  width: '2.5rem',
+                  render: (t: TaskInfo) => (
+                      <span onClick={(e) => e.stopPropagation()}>
+                          <Chk checked={selected.has(t.id)} onChange={(checked) => toggleSelect(t.id, checked)} />
+                      </span>
+                  ),
+              }
+            : {
+                  key: 'move',
+                  label: 'Order',
+                  width: '6rem',
+                  render: (t: TaskInfo) => (
+                      <span style={{ display: 'inline-flex', gap: '0.25rem' }} onClick={(e) => e.stopPropagation()}>
+                          <tc-icon-button icon="ArrowUp" label="Move up" size="sm" variant="secondary" outline onClick={() => move(t.id, -1)} />
+                          <tc-icon-button icon="ArrowDown" label="Move down" size="sm" variant="secondary" outline onClick={() => move(t.id, 1)} />
+                      </span>
+                  ),
+              },
+        { key: 'id', label: '#', width: '26%', render: (t) => <code>{t.id}</code> },
+        { key: 'title', label: 'Title', render: (t) => t.title },
         {
             key: 'facets',
-            header: 'Facets',
+            label: 'Facets',
             render: (t) => (
                 <span style={{ display: 'inline-flex', gap: '0.3rem', flexWrap: 'wrap' }}>
                     {t.severity && <tc-tag static variant="warning">{t.severity}</tc-tag>}
@@ -336,7 +333,7 @@ export function TasksClient() {
         },
         {
             key: 'cost',
-            header: 'Last cost',
+            label: 'Last cost',
             width: '7rem',
             render: (t) =>
                 t.costUsd != null ? (
@@ -349,7 +346,7 @@ export function TasksClient() {
         },
         {
             key: 'status',
-            header: 'Status',
+            label: 'Status',
             render: (t) => (
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
                     <tc-status-dot status={STATUS_DOT[t.status]} pulse={t.status === 'running' || undefined} />
@@ -359,13 +356,33 @@ export function TasksClient() {
         },
     ]
 
+    // Header descriptors fed to tc-advanced-table as a property (label + width +
+    // align only — body cells are slotted React <tr>). useMemo so identity only
+    // changes when the column SET changes (select ↔ move on reorder toggle),
+    // which is also part of the remount key below.
+    const advColumns = useMemo(
+        () => columns.map(({ key, label, width, align }) => ({ key, label, ...(width ? { width } : {}), ...(align ? { align } : {}) })),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [reordering],
+    )
+    const tasksTableRef = useTcProps<HTMLElement>(useMemo(() => ({ columns: advColumns }), [advColumns]))
+
+    // tc-advanced-table relocates its slotted <tr> children into its own <tbody>
+    // on connect, so React can't safely reorder those moved nodes. Remount the
+    // table with a fresh key whenever the displayed ROWS (order/set) or the
+    // column mode change. Selection toggles deliberately stay OUT of the key:
+    // they only flip a checkbox's `checked` inside an existing row, which React
+    // patches in place — keying on selection would remount (and drop checkbox
+    // focus) on every click. (Same technique as the Dashboard / Users tables.)
+    const tasksTableKey = `${reordering ? 'reorder' : statusFilter}:${shown.map((t) => t.id).join('_')}`
+
     const selectedCount = selected.size
 
     const archiveTableKey = archived.map((a) => a.id).join('_')
     const archiveTableRef = useTc<HTMLElement>({ columns: ARCHIVE_COLUMNS })
 
     return (
-        <tc-stack gap="1.25rem">
+        <div className="taskforge-page">
             <tc-stack direction="horizontal" gap="0.75rem" wrap align="center">
                 <tc-chip-group ref={chipRef} />
                 <span style={{ marginLeft: 'auto', display: 'inline-flex', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -478,53 +495,63 @@ export function TasksClient() {
 
             <tc-helper-text text={reordering ? helpTexts.tasks.reorderActive : helpTexts.tasks.statuses} />
 
-            {/* The main task table stays a raw <table>: its header carries a React
-                select-all <tc-check> and its columns switch between select/reorder
-                modes — neither is expressible through tc-advanced-table's
-                string-label, component-rendered header. It keeps the .table skin. */}
-            <table className="table table-hover">
-                <thead>
+            {/* Select-all lives above the table: tc-advanced-table renders its
+                header <th> from string labels, so it can't host a React <tc-check>
+                in the select column header. Only shown in normal (non-reorder)
+                mode when there are rows to select. */}
+            {!reordering && shown.length > 0 && (
+                <tc-stack direction="horizontal" gap="0.5rem" align="center" inline>
+                    <Chk
+                        checked={allShownSelected}
+                        indeterminate={!allShownSelected && shown.some((t) => selected.has(t.id))}
+                        onChange={(checked) => setSelected(checked ? new Set(shown.map((t) => t.id)) : new Set())}
+                    />
+                    <tc-text variant="muted" style={{ fontSize: '0.8rem' }}>
+                        Select all{selectedCount > 0 ? ` · ${selectedCount} selected` : ''}
+                    </tc-text>
+                </tc-stack>
+            )}
+
+            {/* T2 — the task table is a tc-advanced-table fed string-label columns
+                (a property) with slotted React <tr> rows, so each row keeps its
+                click→drawer handler and live tc-* cells. The whole table is keyed
+                (tasksTableKey) so it remounts on any row reorder/filter/column-mode
+                change — the component relocates slotted rows into its own tbody,
+                which would otherwise fight React reconciliation on reorder. */}
+            <tc-advanced-table key={tasksTableKey} ref={tasksTableRef}>
+                {shown.length === 0 ? (
                     <tr>
-                        {columns.map((c) => (
-                            <th key={c.key} style={c.width ? { width: c.width } : undefined}>
-                                {c.header}
-                            </th>
-                        ))}
+                        <td colSpan={columns.length} style={{ textAlign: 'center', opacity: 0.6 }}>
+                            {statusFilter === 'all'
+                                ? 'No tasks yet — create one, import GitHub issues, or use the task creator on the Agents page.'
+                                : `No ${statusFilter} tasks.`}
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    {shown.length === 0 ? (
-                        <tr>
-                            <td colSpan={columns.length} style={{ textAlign: 'center', opacity: 0.6 }}>
-                                {statusFilter === 'all'
-                                    ? 'No tasks yet — create one, import GitHub issues, or use the task creator on the Agents page.'
-                                    : `No ${statusFilter} tasks.`}
-                            </td>
+                ) : (
+                    shown.map((t) => (
+                        <tr
+                            key={t.id}
+                            style={{ cursor: reordering ? 'default' : 'pointer' }}
+                            tabIndex={reordering ? undefined : 0}
+                            role={reordering ? undefined : 'button'}
+                            aria-label={reordering ? undefined : `Open task ${t.id}`}
+                            onClick={() => !reordering && setOpenTask(t.id)}
+                            onKeyDown={(e) => {
+                                if (!reordering && (e.key === 'Enter' || e.key === ' ')) {
+                                    e.preventDefault()
+                                    setOpenTask(t.id)
+                                }
+                            }}
+                        >
+                            {columns.map((c) => (
+                                <td key={c.key} style={c.align === 'right' ? { textAlign: 'right' } : undefined}>
+                                    {c.render(t)}
+                                </td>
+                            ))}
                         </tr>
-                    ) : (
-                        shown.map((t) => (
-                            <tr
-                                key={t.id}
-                                style={{ cursor: reordering ? 'default' : 'pointer' }}
-                                tabIndex={reordering ? undefined : 0}
-                                role={reordering ? undefined : 'button'}
-                                aria-label={reordering ? undefined : `Open task ${t.id}`}
-                                onClick={() => !reordering && setOpenTask(t.id)}
-                                onKeyDown={(e) => {
-                                    if (!reordering && (e.key === 'Enter' || e.key === ' ')) {
-                                        e.preventDefault()
-                                        setOpenTask(t.id)
-                                    }
-                                }}
-                            >
-                                {columns.map((c) => (
-                                    <td key={c.key}>{c.render(t)}</td>
-                                ))}
-                            </tr>
-                        ))
-                    )}
-                </tbody>
-            </table>
+                    ))
+                )}
+            </tc-advanced-table>
 
             {archived.length > 0 && (
                 <tc-stack gap="0.75rem">
@@ -563,6 +590,6 @@ export function TasksClient() {
                     void refresh()
                 }}
             />
-        </tc-stack>
+        </div>
     )
 }

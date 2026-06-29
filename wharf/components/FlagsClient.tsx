@@ -122,9 +122,6 @@ export function FlagsClient({ projectId }: { projectId: string }) {
         )
     }
 
-    const isOwner = detail.isOwner
-    const canManage = detail.effectiveRole !== 'developer'
-
     return (
         <div className="wharf-page">
             <tc-rich-page-header

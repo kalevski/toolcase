@@ -50,7 +50,7 @@ function RoleSelect({
     // attribute, so a rejected pick would otherwise linger in the native select.
     useEffect(() => {
         if (ref.current) (ref.current as HTMLSelectElement).value = value
-    }, [value])
+    }, [value, ref])
     return (
         <tc-select ref={ref} value={value} disabled={disabled || undefined}>
             {ROLE_OPTIONS.map((o) => (
@@ -132,7 +132,7 @@ export function UsersClient({ users, meId }: { users: UserRecord[]; meId: number
     const tableKey = `${sort?.column ?? 'none'}:${sort?.direction ?? ''}:${displayed.map((u) => u.githubId).join('_')}`
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <div className="taskforge-page">
             <tc-rich-page-header
                 title-text="Users & roles"
                 icon-name="Users"

@@ -2,7 +2,7 @@ name: nginxpilot
 
 on:
   push:
-    branches: [main, 'feature/static-host']
+    branches: [main]
     paths: ['nginxpilot/**', '.github/workflows/nginxpilot.yml']
   pull_request:
     paths: ['nginxpilot/**', '.github/workflows/nginxpilot.yml']

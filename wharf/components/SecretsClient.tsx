@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { apiFetch, describeApiError, ApiError, isAuthError } from '@/lib/fetcher'
 import { useTc, detailValue } from '@/lib/tc'
 import type { ProjectDetail, SecretMeta, SecretGenKind } from '@/server/domain/types'
+import type { AdvancedTableColumn, AdvancedTableSort } from '@toolcase/web-components'
 
 const KIND_OPTIONS: { value: SecretGenKind; label: string }[] = [
     { value: 'password', label: 'password' },
@@ -13,11 +14,30 @@ const KIND_OPTIONS: { value: SecretGenKind; label: string }[] = [
     { value: 'base64', label: 'base64' },
 ]
 
+const PAGE_SIZE = 10
+
+function buildColumns(canManage: boolean): AdvancedTableColumn[] {
+    const cols: AdvancedTableColumn[] = [
+        { key: 'key', label: 'Key' },
+        { key: 'description', label: 'Description' },
+    ]
+    if (canManage) {
+        cols.push({ key: 'value', label: 'Value' })
+        cols.push({ key: 'actions', label: 'Actions', align: 'right' })
+    }
+    return cols
+}
+
 export function SecretsClient({ projectId }: { projectId: string }) {
     const router = useRouter()
     const [detail, setDetail] = useState<ProjectDetail | null>(null)
     const [secrets, setSecrets] = useState<SecretMeta[] | null>(null)
     const [err, setErr] = useState<string | null>(null)
+    const [offset, setOffset] = useState(0)
+    const [sort, setSort] = useState<AdvancedTableSort | null>({ column: 'key', direction: 'asc' })
+    // Revealed plaintext keyed by secret id (cleared on reload).
+    const [revealed, setRevealed] = useState<Record<string, string>>({})
+    const [busyReveal, setBusyReveal] = useState<string | null>(null)
 
     const canManage = detail ? detail.effectiveRole !== 'developer' : false
 
@@ -29,6 +49,7 @@ export function SecretsClient({ projectId }: { projectId: string }) {
                 if (signal?.aborted) return
                 setDetail(d)
                 setSecrets(s)
+                setRevealed({})
             } catch (e) {
                 if (signal?.aborted) return
                 setErr(isAuthError(e) ? 'You don’t have access to this project.' : describeApiError(e))
@@ -145,6 +166,74 @@ export function SecretsClient({ projectId }: { projectId: string }) {
         }
     }
 
+    const reveal = async (secret: SecretMeta) => {
+        setBusyReveal(secret.id)
+        setErr(null)
+        try {
+            const { value } = await apiFetch<{ value: string }>(
+                `/api/projects/${projectId}/secrets/${secret.id}/reveal`,
+            )
+            setRevealed((prev) => ({ ...prev, [secret.id]: value }))
+        } catch (e) {
+            setErr(describeApiError(e))
+        } finally {
+            setBusyReveal(null)
+        }
+    }
+
+    const hide = (id: string) =>
+        setRevealed((prev) => {
+            const next = { ...prev }
+            delete next[id]
+            return next
+        })
+
+    // ── edit (modal) ──────────────────────────────────────────────────────────
+    const [editTarget, setEditTarget] = useState<SecretMeta | null>(null)
+    const [eValue, setEValue] = useState('')
+    const [eDesc, setEDesc] = useState('')
+    const eValueRef = useRef(eValue)
+    eValueRef.current = eValue
+    const eDescRef = useRef(eDesc)
+    eDescRef.current = eDesc
+
+    const openEdit = (secret: SecretMeta) => {
+        setEValue('')
+        setEDesc(secret.description ?? '')
+        setEditTarget(secret)
+    }
+
+    const eValueTc = useTc<HTMLElement>(
+        useMemo(() => ({ value: eValue }), [eValue]),
+        { 'tc-change': (e: Event) => setEValue(detailValue<string>(e) ?? '') },
+    )
+    const eDescTc = useTc<HTMLElement>(
+        useMemo(() => ({ value: eDesc }), [eDesc]),
+        { 'tc-change': (e: Event) => setEDesc(detailValue<string>(e) ?? '') },
+    )
+    const editModalRef = useTc<HTMLElement>(
+        useMemo(() => ({ open: editTarget !== null }), [editTarget]),
+        { 'tc-hidden': () => setEditTarget(null) },
+    )
+
+    const saveEdit = async () => {
+        const target = editTarget
+        if (!target) return
+        setErr(null)
+        const body: { value?: string; description?: string } = { description: eDescRef.current }
+        if (eValueRef.current.length > 0) body.value = eValueRef.current
+        try {
+            await apiFetch(`/api/projects/${projectId}/secrets/${target.id}`, {
+                method: 'PATCH',
+                body: JSON.stringify(body),
+            })
+            setEditTarget(null)
+            await load()
+        } catch (e) {
+            setErr(describeApiError(e))
+        }
+    }
+
     // ── delete confirmation ───────────────────────────────────────────────────
     const [pendingDelete, setPendingDelete] = useState<SecretMeta | null>(null)
     const confirmTc = useTc<HTMLElement>(
@@ -158,6 +247,48 @@ export function SecretsClient({ projectId }: { projectId: string }) {
             'tc-cancel': () => setPendingDelete(null),
         },
     )
+
+    // ── table: client-side sort + page ────────────────────────────────────────
+    const columns = useMemo(() => buildColumns(canManage), [canManage])
+    const sortable = useMemo(() => ['key', 'description'], [])
+
+    const sorted = useMemo(() => {
+        const list = [...(secrets ?? [])]
+        if (sort) {
+            const dir = sort.direction === 'asc' ? 1 : -1
+            list.sort((a, b) => {
+                const av = (sort.column === 'description' ? a.description ?? '' : a.key).toLowerCase()
+                const bv = (sort.column === 'description' ? b.description ?? '' : b.key).toLowerCase()
+                return av < bv ? -dir : av > bv ? dir : 0
+            })
+        }
+        return list
+    }, [secrets, sort])
+
+    const total = sorted.length
+    const safeOffset = Math.min(offset, Math.max(0, total - 1))
+    const pageRows = useMemo(() => sorted.slice(safeOffset, safeOffset + PAGE_SIZE), [sorted, safeOffset])
+
+    const tableRef = useTc<HTMLElement>(
+        useMemo(
+            () => ({ columns, sortableColumns: sortable, sort, limit: PAGE_SIZE, offset: safeOffset, total }),
+            [columns, sortable, sort, safeOffset, total],
+        ),
+        {
+            'tc-page-change': (e: Event) => setOffset((e as CustomEvent).detail?.offset ?? 0),
+            'tc-sort-change': (e: Event) => {
+                const d = (e as CustomEvent).detail
+                setSort(d?.column ? { column: d.column, direction: d.direction } : null)
+                setOffset(0)
+            },
+        },
+    )
+
+    // Remount when the visible rows / reveal state change so the captured <tr>
+    // set is always rebuilt cleanly.
+    const tableKey = `${canManage}_${sort?.column ?? ''}_${sort?.direction ?? ''}_${safeOffset}_${pageRows
+        .map((s) => `${s.id}:${revealed[s.id] != null ? 1 : 0}`)
+        .join('-')}`
 
     if (err && !detail) return <tc-banner variant="error">{err}</tc-banner>
     if (!detail || secrets === null) {
@@ -240,32 +371,69 @@ export function SecretsClient({ projectId }: { projectId: string }) {
                             <p>{canManage ? 'Add or generate a secret above.' : 'No secrets yet.'}</p>
                         </tc-empty-state>
                     ) : (
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th>Key</th>
-                                    <th>Description</th>
-                                    {canManage && <th>Value</th>}
-                                    {canManage && <th style={{ textAlign: 'right' }}>Actions</th>}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {secrets.map((s) => (
-                                    <SecretRow
-                                        key={s.id}
-                                        projectId={projectId}
-                                        secret={s}
-                                        canManage={canManage}
-                                        onChanged={load}
-                                        onError={setErr}
-                                        onDelete={() => setPendingDelete(s)}
-                                    />
-                                ))}
-                            </tbody>
-                        </table>
+                        <tc-advanced-table key={tableKey} ref={tableRef}>
+                            {pageRows.map((s) => {
+                                const shown = revealed[s.id]
+                                return (
+                                    <tr key={s.id}>
+                                        <td>
+                                            <code className="wharf-mono">{s.key}</code>
+                                        </td>
+                                        <td style={{ color: 'var(--tc-text-muted)' }}>{s.description ?? '—'}</td>
+                                        {canManage && (
+                                            <td>
+                                                {shown == null ? (
+                                                    <span style={{ color: 'var(--tc-text-faint)' }}>••••••••</span>
+                                                ) : (
+                                                    <code className="wharf-mono" style={{ wordBreak: 'break-all' }}>{shown}</code>
+                                                )}
+                                            </td>
+                                        )}
+                                        {canManage && (
+                                            <td style={{ textAlign: 'right' }}>
+                                                <span style={{ display: 'inline-flex', gap: '0.5rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                                                    {shown == null ? (
+                                                        <tc-button size="sm" variant="secondary" outline disabled={busyReveal === s.id} onClick={() => reveal(s)}>
+                                                            {busyReveal === s.id ? 'Revealing…' : 'Reveal'}
+                                                        </tc-button>
+                                                    ) : (
+                                                        <tc-button size="sm" variant="secondary" outline onClick={() => hide(s.id)}>
+                                                            Hide
+                                                        </tc-button>
+                                                    )}
+                                                    <tc-button size="sm" variant="secondary" outline onClick={() => openEdit(s)}>
+                                                        Edit
+                                                    </tc-button>
+                                                    <tc-button size="sm" variant="danger" outline onClick={() => setPendingDelete(s)}>
+                                                        Delete
+                                                    </tc-button>
+                                                </span>
+                                            </td>
+                                        )}
+                                    </tr>
+                                )
+                            })}
+                        </tc-advanced-table>
                     )}
                 </div>
             </tc-section-card>
+
+            <tc-modal ref={editModalRef} title="Edit secret" centered>
+                <p style={{ margin: '0 0 0.75rem', color: 'var(--tc-text-muted)' }}>
+                    Update <code className="wharf-mono">{editTarget?.key ?? ''}</code>. Leave the value blank to keep
+                    the current secret.
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <tc-input ref={eValueTc} label="New value" placeholder="leave blank to keep current" />
+                    <tc-input ref={eDescTc} label="Description" placeholder="optional" />
+                </div>
+                <tc-button slot="footer" variant="secondary" outline onClick={() => setEditTarget(null)}>
+                    Cancel
+                </tc-button>
+                <tc-button slot="footer" variant="primary" onClick={saveEdit}>
+                    Save
+                </tc-button>
+            </tc-modal>
 
             <tc-confirm-dialog
                 ref={confirmTc}
@@ -290,157 +458,4 @@ function createError(e: unknown): string {
         if (e.status === 400) return 'Invalid key. Use letters, digits and underscores; must not start with a digit.'
     }
     return describeApiError(e)
-}
-
-function SecretRow({
-    projectId,
-    secret,
-    canManage,
-    onChanged,
-    onError,
-    onDelete,
-}: {
-    projectId: string
-    secret: SecretMeta
-    canManage: boolean
-    onChanged: () => Promise<void>
-    onError: (msg: string | null) => void
-    onDelete: () => void
-}) {
-    const [revealed, setRevealed] = useState<string | null>(null)
-    const [busy, setBusy] = useState(false)
-    const [editing, setEditing] = useState(false)
-    const [eValue, setEValue] = useState('')
-    const [eDesc, setEDesc] = useState(secret.description ?? '')
-    const eValueRef = useRef(eValue)
-    eValueRef.current = eValue
-    const eDescRef = useRef(eDesc)
-    eDescRef.current = eDesc
-
-    const eValueTc = useTc<HTMLElement>(
-        useMemo(() => ({ value: eValue }), [eValue]),
-        { 'tc-change': (e: Event) => setEValue(detailValue<string>(e) ?? '') },
-    )
-    const eDescTc = useTc<HTMLElement>(
-        useMemo(() => ({ value: eDesc }), [eDesc]),
-        { 'tc-change': (e: Event) => setEDesc(detailValue<string>(e) ?? '') },
-    )
-
-    const reveal = async () => {
-        setBusy(true)
-        onError(null)
-        try {
-            const { value } = await apiFetch<{ value: string }>(
-                `/api/projects/${projectId}/secrets/${secret.id}/reveal`,
-            )
-            setRevealed(value)
-        } catch (e) {
-            onError(describeApiError(e))
-        } finally {
-            setBusy(false)
-        }
-    }
-
-    const saveEdit = async () => {
-        onError(null)
-        const body: { value?: string; description?: string } = { description: eDescRef.current }
-        if (eValueRef.current.length > 0) body.value = eValueRef.current
-        try {
-            await apiFetch(`/api/projects/${projectId}/secrets/${secret.id}`, {
-                method: 'PATCH',
-                body: JSON.stringify(body),
-            })
-            setEditing(false)
-            setEValue('')
-            setRevealed(null)
-            await onChanged()
-        } catch (e) {
-            onError(describeApiError(e))
-        }
-    }
-
-    return (
-        <>
-            <tr>
-                <td>
-                    <code className="wharf-mono">{secret.key}</code>
-                </td>
-                <td style={{ color: 'var(--tc-text-muted)' }}>{secret.description ?? '—'}</td>
-                {canManage && (
-                    <td>
-                        {revealed === null ? (
-                            <span style={{ color: 'var(--tc-text-faint)' }}>••••••••</span>
-                        ) : (
-                            <code className="wharf-mono" style={{ wordBreak: 'break-all' }}>{revealed}</code>
-                        )}
-                    </td>
-                )}
-                {canManage && (
-                    <td
-                        style={{
-                            textAlign: 'right',
-                            display: 'flex',
-                            gap: '0.5rem',
-                            justifyContent: 'flex-end',
-                            flexWrap: 'wrap',
-                        }}
-                    >
-                        {revealed === null ? (
-                            <tc-button size="sm" variant="secondary" outline disabled={busy} onClick={reveal}>
-                                {busy ? 'Revealing…' : 'Reveal'}
-                            </tc-button>
-                        ) : (
-                            <tc-button size="sm" variant="secondary" outline onClick={() => setRevealed(null)}>
-                                Hide
-                            </tc-button>
-                        )}
-                        <tc-button
-                            size="sm"
-                            variant="secondary"
-                            outline
-                            onClick={() => {
-                                setEditing((v) => !v)
-                                setEValue('')
-                                setEDesc(secret.description ?? '')
-                            }}
-                        >
-                            {editing ? 'Cancel' : 'Edit'}
-                        </tc-button>
-                        <tc-button size="sm" variant="danger" outline onClick={onDelete}>
-                            Delete
-                        </tc-button>
-                    </td>
-                )}
-            </tr>
-            {canManage && editing && (
-                <tr>
-                    <td colSpan={4}>
-                        <div style={{ padding: '0.5rem 0' }}>
-                            <div
-                                style={{
-                                    display: 'flex',
-                                    gap: '0.5rem',
-                                    alignItems: 'flex-end',
-                                    flexWrap: 'wrap',
-                                }}
-                            >
-                                <tc-input
-                                    ref={eValueTc}
-                                    label="New value"
-                                    placeholder="leave blank to keep current"
-                                    style={{ flex: '1 1 16rem' }}
-                                />
-                                <tc-input ref={eDescTc} label="Description" placeholder="optional" style={{ flex: '1 1 12rem' }} />
-                            </div>
-                            <div style={{ marginTop: '0.5rem' }}>
-                                <tc-button size="sm" variant="primary" onClick={saveEdit}>
-                                    Save
-                                </tc-button>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-            )}
-        </>
-    )
 }

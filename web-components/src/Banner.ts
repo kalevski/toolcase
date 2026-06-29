@@ -1,6 +1,6 @@
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
-import { icon, closeIcon } from './icons'
+import { closeIcon } from './icons'
 
 const TAG_NAME = 'tc-banner'
 

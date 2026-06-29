@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { BPlusIndex, MemoryAdapter } from '../src/BPlusIndex'
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -841,7 +841,7 @@ describe('BPlusIndex — floor / ceil', () => {
     })
 
     it('floor returns undefined when target is below all keys', async () => {
-        const idx = await evenKeys()
+        const _idx = await evenKeys()
         // All keys are >= 0; querying below 0 → undefined
         const idx2 = await numIdx()
         for (const v of [5, 10, 15]) await idx2.set(v, v)

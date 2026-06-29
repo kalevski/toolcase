@@ -434,6 +434,8 @@ export function DockerClient({ projectId }: { projectId: string }) {
 
                             <tc-input ref={nameRef} label="Command name" placeholder="e.g. api-server" style={inputStyle} />
 
+                        <tc-divider label="Image" />
+
                         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '0.75rem' }}>
                             <div>
                                 <label style={labelStyle}>Image</label>
@@ -449,6 +451,8 @@ export function DockerClient({ projectId }: { projectId: string }) {
                             <label style={labelStyle}>Container name</label>
                             <input className="form-control" value={spec.containerName} placeholder="api" onChange={(e) => editSpec({ containerName: e.target.value })} style={inputStyle} />
                         </div>
+
+                        <tc-divider label="Runtime" />
 
                         <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
                             <label style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
@@ -475,6 +479,8 @@ export function DockerClient({ projectId }: { projectId: string }) {
                                 <tc-extended-select ref={pullRef} />
                             </div>
                         </div>
+
+                        <tc-divider label="Networking" />
 
                         <div>
                             <label style={labelStyle}>Network</label>
@@ -519,6 +525,8 @@ export function DockerClient({ projectId }: { projectId: string }) {
                             )}
                         />
 
+                        <tc-divider label="Environment" />
+
                         {/* inline env */}
                         <KvEditor title="Inline env (-e)" rows={spec.envInline} onChange={(envInline) => editSpec({ envInline })} />
 
@@ -541,6 +549,8 @@ export function DockerClient({ projectId }: { projectId: string }) {
                         {/* labels */}
                         <KvEditor title="Labels (-l)" rows={spec.labels} onChange={(labels) => editSpec({ labels })} />
 
+                        <tc-divider label="Resources" />
+
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                             <div>
                                 <label style={labelStyle}>Memory</label>
@@ -559,6 +569,8 @@ export function DockerClient({ projectId }: { projectId: string }) {
                                 <input className="form-control" value={spec.workdir ?? ''} placeholder="/app" onChange={(e) => editSpec({ workdir: e.target.value || undefined })} style={inputStyle} />
                             </div>
                         </div>
+
+                        <tc-divider label="Command" />
 
                         <div>
                             <label style={labelStyle}>Command args (space-separated)</label>

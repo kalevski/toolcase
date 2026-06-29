@@ -1,13 +1,16 @@
 'use client'
 
 import { useCallback, useMemo } from 'react'
-import type { ActivityItem } from '@toolcase/web-components'
+import type { TimelineItem } from '@toolcase/web-components'
 import { useTcProps } from '@/lib/tc'
 import type { AuditEntry } from '@/server/domain/types'
 import { AdminPage, json, useOwnerData } from './shared'
 
-// Owner-only audit feed (§12/§13). The append-only log of every owner mutation
-// and quota event, newest-first, rendered as a `tc-activity-card`.
+// Owner-only audit feed (§12/§13, P8). The append-only log of every owner mutation
+// and quota event, newest-first, promoted from a `tc-activity-card` to a
+// `tc-timeline` (the same feed look proposed for Wharf). tc-timeline is driven by
+// its `items` property (no slotted children), so it stays inside the relocation
+// boundary.
 
 export function AdminAudit() {
     const fetcher = useCallback(async (): Promise<AuditEntry[] | null> => {
@@ -44,22 +47,23 @@ function auditIcon(action: string): string {
 }
 
 function AuditFeed({ audit }: { audit: AuditEntry[] }) {
-    const activities = useMemo<ActivityItem[]>(
+    const items = useMemo<TimelineItem[]>(
         () =>
             audit.map((e) => {
                 const actor = e.login ?? 'system'
                 const detailParts = [e.detail, e.site ? `site ${e.site}` : null].filter(Boolean)
                 return {
-                    id: String(e.id),
                     icon: auditIcon(e.action),
                     title: `${actor} · ${e.action}`,
                     description: detailParts.join(' — ') || undefined,
-                    timestamp: String(e.at).replace('T', ' ').slice(0, 19),
+                    date: String(e.at).replace('T', ' ').slice(0, 19),
+                    // The feed is newest-first history — every entry is a completed event.
+                    status: 'completed',
                 }
             }),
         [audit],
     )
-    const ref = useTcProps<HTMLElement>(useMemo(() => ({ activities }), [activities]))
+    const ref = useTcProps<HTMLElement>(useMemo(() => ({ items }), [items]))
 
     return (
         <tc-section-card title="Audit feed" icon="scroll-text">
@@ -67,7 +71,7 @@ function AuditFeed({ audit }: { audit: AuditEntry[] }) {
                 {audit.length === 0 ? (
                     <tc-empty-state icon="scroll-text">No audit entries yet.</tc-empty-state>
                 ) : (
-                    <tc-activity-card ref={ref} />
+                    <tc-timeline ref={ref} variant="minimal" connector="solid" />
                 )}
             </div>
         </tc-section-card>

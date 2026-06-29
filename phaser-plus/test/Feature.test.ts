@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import Feature from '../src/features/Feature'
 
 function makeScene(listenerCount = 0): { scene: any, warnSpy: ReturnType<typeof vi.fn>, emitSpy: ReturnType<typeof vi.fn> } {

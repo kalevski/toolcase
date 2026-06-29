@@ -32,6 +32,17 @@ body {
     width: 100%;
 }
 
+/* ── T4 page body wrapper ─────────────────────────────────────────────────────
+   Parity with Wharf's `.wharf-page`: the authenticated page body is a single
+   vertical-rhythm column wrapping the rich page header → banner → sections
+   sequence. Locks every page to the shared body skeleton (see the layout
+   contract) rather than per-page bespoke gaps. */
+.taskforge-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
 /* sidebar: projects list + section nav, scrolls when the project list is long */
 .tf-sidebar-menu {
     display: flex;
@@ -49,6 +60,21 @@ body {
 }
 .tf-sidebar-menu .component-side-nav__item .component-badge {
     margin-left: auto;
+}
+
+/* ── T1 project sub-nav tab-bar ───────────────────────────────────────────────
+   The project's sub-pages render as a tc-tab-bar above the page body (parity
+   with Wharf's project tabs) instead of an extra sidebar section. It scrolls
+   horizontally on mobile so all nine tabs stay reachable on narrow screens. */
+.tf-project-tabs {
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+}
+
+@media (max-width: 48rem) {
+    .tf-project-tabs {
+        margin-bottom: 1rem;
+    }
 }
 
 /* ── IconButton chrome ──────────────────────────────────────────────────────
@@ -412,39 +438,10 @@ body {
 
 /* ── data tables ─────────────────────────────────────────────────────────────
    Every data table is now a `tc-table` / `tc-advanced-table` web component
-   except the Tasks table (its header carries a React select-all `tc-check` and
-   its columns switch between select/reorder modes — neither expressible via
-   tc-advanced-table's string-label header), which stays a raw
-   `<table class="table table-hover">`. @toolcase/web-components ships no base
-   `.table` rule, so this minimal token-driven skin keeps that one table's
-   header aligned with its column data. */
-
-.table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.9rem;
-}
-
-.table th,
-.table td {
-    text-align: left;
-    padding: 0.6rem 0.75rem;
-    border-bottom: 1px solid var(--tc-border, #e7eaee);
-    vertical-align: middle;
-}
-
-.table thead th {
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--tc-text-muted, #6b7280);
-    border-bottom-width: 2px;
-}
-
-.table-hover tbody tr:hover {
-    background: var(--tc-surface-hover, #f6f7f9);
-}
+   (the Tasks table moved to `tc-advanced-table` in T2 — string-label columns as
+   a property + slotted React <tr> rows, keyed-remounted on reorder/filter). No
+   raw `<table class="table">` markup remains, so the bespoke `.table` skin was
+   removed. */
 
 /* ── dead-control suppression ─────────────────────────────────────────────────
    tc-user-panel always renders a built-in settings gear that emits

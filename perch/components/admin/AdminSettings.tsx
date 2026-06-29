@@ -53,6 +53,7 @@ function SettingsForm({ settings, onSaved }: { settings: SiteSettings; onSaved: 
 
     const [appName, setAppName] = useState(settings.appName)
     const [tagline, setTagline] = useState(settings.tagline)
+    const [secondaryText, setSecondaryText] = useState(settings.secondaryText)
     const [theme, setTheme] = useState<string>(settings.theme)
     const [brandColor, setBrandColor] = useState(settings.brandColor)
     const [ingressIpv4, setIngressIpv4] = useState(settings.ingressIpv4)
@@ -64,6 +65,7 @@ function SettingsForm({ settings, onSaved }: { settings: SiteSettings; onSaved: 
     useEffect(() => {
         setAppName(settings.appName)
         setTagline(settings.tagline)
+        setSecondaryText(settings.secondaryText)
         setTheme(settings.theme)
         setBrandColor(settings.brandColor)
         setIngressIpv4(settings.ingressIpv4)
@@ -78,7 +80,7 @@ function SettingsForm({ settings, onSaved }: { settings: SiteSettings; onSaved: 
             const res = await fetch('/api/admin/settings', {
                 method: 'PUT',
                 headers: { 'content-type': 'application/json' },
-                body: JSON.stringify({ appName, tagline, theme, brandColor, ingressIpv4, ingressIpv6 }),
+                body: JSON.stringify({ appName, tagline, secondaryText, theme, brandColor, ingressIpv4, ingressIpv6 }),
             })
             if (!res.ok) {
                 const body = (await res.json().catch(() => null)) as { error?: string } | null
@@ -95,7 +97,7 @@ function SettingsForm({ settings, onSaved }: { settings: SiteSettings; onSaved: 
         } finally {
             setBusy(false)
         }
-    }, [appName, tagline, theme, brandColor, ingressIpv4, ingressIpv6, busy, branding, onSaved, toast])
+    }, [appName, tagline, secondaryText, theme, brandColor, ingressIpv4, ingressIpv6, busy, branding, onSaved, toast])
 
     return (
         <form
@@ -131,6 +133,14 @@ function SettingsForm({ settings, onSaved }: { settings: SiteSettings; onSaved: 
                         onValue={setTagline}
                         placeholder="Deploy a branch of your GitHub repository as a static website."
                         help="One line under the brand on the login screen."
+                        disabled={busy}
+                    />
+                    <TextField
+                        label="Secondary brand text"
+                        value={secondaryText}
+                        onValue={setSecondaryText}
+                        placeholder="cloud"
+                        help="Optional second word shown inline after the app name in the brand. Leave blank for none."
                         disabled={busy}
                     />
                     <ColorField

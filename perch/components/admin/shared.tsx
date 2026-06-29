@@ -4,6 +4,21 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { useMe } from '@/lib/me-context'
 import { LoadingState, ErrorState } from '@/components/states'
+import { SubTabBar, type SubTab } from '@/components/SubTabBar'
+
+// The owner admin surface, surfaced as a Wharf-style tc-tab-bar above the body
+// (P5) so every admin sub-page shares one tabbed navigation. The leading "Overview"
+// tab returns to the /admin hub.
+export const ADMIN_TABS: SubTab[] = [
+    { id: 'admin-home', label: 'Overview', icon: 'shield', href: '/admin' },
+    { id: 'admin-sites', label: 'Sites', icon: 'layout-dashboard', href: '/admin/sites' },
+    { id: 'admin-users', label: 'Users', icon: 'users', href: '/admin/users' },
+    { id: 'admin-realms', label: 'Realms', icon: 'server', href: '/admin/realms' },
+    { id: 'admin-domains', label: 'Domains', icon: 'globe', href: '/admin/domains' },
+    { id: 'admin-plans', label: 'Plans', icon: 'credit-card', href: '/admin/plans' },
+    { id: 'admin-settings', label: 'Settings', icon: 'settings', href: '/admin/settings' },
+    { id: 'admin-audit', label: 'Audit', icon: 'scroll-text', href: '/admin/audit' },
+]
 
 // Shared plumbing for the owner-only admin pages (§13). Each admin surface
 // (Sites, Users, Domains, Plans, Audit) lives at its own route and fetches only
@@ -120,6 +135,7 @@ export function AdminPage<T>({
                 icon-name={icon}
                 icon-color={iconColor}
             />
+            <SubTabBar tabs={ADMIN_TABS} />
             {body}
         </section>
     )

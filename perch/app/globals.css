@@ -343,6 +343,21 @@ body {
     color: var(--tc-text);
 }
 
+/* P7: Wharf-style count badges on the site card. */
+.perch-card-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin-top: auto;
+}
+
+/* P6: account roll-up grid above the site grid. tc-metric-grid owns its own
+   mobile-first column cascade; just space it from the cards below. */
+.perch-sites-metrics {
+    display: block;
+    margin-bottom: 1.5rem;
+}
+
 /* Back link on the per-site page (components/SiteDetail.tsx). */
 .perch-back {
     align-self: flex-start;
@@ -431,11 +446,10 @@ body {
     font-size: 0.875rem;
 }
 
-/* Build + status on the left, storage on the right; collapses to one column. */
+/* Build + status on the left, storage on the right. tc-grid owns the column
+   template + mobile-first collapse (see SiteDashboard); this only keeps the
+   columns top-aligned. */
 .perch-site-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-    gap: 1rem;
     align-items: start;
 }
 
@@ -473,11 +487,8 @@ body {
 }
 
 @media (max-width: 48rem) {
-    .perch-site-grid {
-        grid-template-columns: minmax(0, 1fr);
-    }
-
-    /* Stack the toolbar: identity on top, full-width action cluster below. */
+    /* Stack the toolbar: identity on top, full-width action cluster below.
+       (.perch-site-grid's column collapse is owned by tc-grid's own cascade.) */
     .perch-site-toolbar {
         align-items: stretch;
     }
@@ -742,6 +753,31 @@ body {
     display: flex;
     flex-direction: column;
     gap: 0.375rem;
+}
+
+/* ── tc-table admin/routing listings (P1) ──────────────────────────────────────
+   The admin (domains/realms/users) and routing (proxies/upstreams/streams/
+   stream-upstreams) listings now render through tc-table fed escaped-HTML rows
+   (the relocation-safe pattern). These rules style the inline controls injected
+   into table cells so they match the surrounding tc-* form family. */
+
+/* A native <select> rendered inside a table cell (domain TLS, user role) keeps the
+   form-select look but sizes down to the cell. */
+.perch-admin tc-table .form-select,
+.perch-admin tc-table .perch-admin-role-select {
+    max-width: 100%;
+}
+
+/* The user identity cell stacks the name/badges line above the effective-limits
+   readout; the meta <dl> drops to a new line under it. */
+.perch-admin tc-table .perch-admin-user-id {
+    margin-bottom: 0.375rem;
+}
+
+/* Right-aligned action clusters inside a cell hug the row end. */
+.perch-admin tc-table .perch-admin-domain-controls,
+.perch-admin tc-table .perch-admin-user-actions {
+    justify-content: flex-end;
 }
 
 /* Base-domain audience-tier groups. */
@@ -1125,21 +1161,11 @@ body {
     margin-bottom: 1rem;
 }
 
-/* Admin landing hub — a card per admin area. */
-.perch-admin-hub {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
-    gap: 1rem;
-}
-
+/* Admin landing hub (P2) — a tc-feature-card per admin area, laid out by tc-grid.
+   The cards are clickable links (router push), so add the affordances tc-feature-card
+   doesn't carry on its own. */
 .perch-admin-hub-card {
-    display: flex;
-    flex-direction: column;
-    gap: 0.375rem;
-    padding: 1.1rem 1.25rem;
-    border: 1px solid var(--tc-border);
-    background: var(--tc-surface);
-    text-decoration: none;
+    cursor: pointer;
     transition:
         border-color 0.12s ease,
         box-shadow 0.12s ease;
@@ -1155,15 +1181,10 @@ body {
     outline-offset: 2px;
 }
 
-.perch-admin-hub-label {
-    font-size: 1.0625rem;
-    font-weight: 600;
-    color: var(--tc-text);
-}
-
-.perch-admin-hub-desc {
-    font-size: 0.875rem;
-    color: var(--tc-text-muted);
+/* Wharf-style sub-navigation tab bar above admin/routing page bodies (P5). */
+.perch-sub-tabs {
+    display: block;
+    margin-bottom: 0.25rem;
 }
 
 /* 404 page (app/not-found.tsx). */

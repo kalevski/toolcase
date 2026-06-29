@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { apiFetch, describeApiError, isAuthError } from '@/lib/fetcher'
 import { useTc, detailValue } from '@/lib/tc'
+import { InstanceDrawer } from './InstanceDrawer'
 import type { Environment, Instance, ProjectDetail } from '@/server/domain/types'
 
 type ConfirmTarget = { kind: 'env' | 'instance'; id: string } | null
@@ -17,6 +18,8 @@ export function ProjectClient({ projectId }: { projectId: string }) {
     const [newEnv, setNewEnv] = useState('')
     const [confirmTarget, setConfirmTarget] = useState<ConfirmTarget>(null)
     const [deleteProjectOpen, setDeleteProjectOpen] = useState(false)
+    // W3 — instance row→drawer (keyed by id; the full page is the deep-link fallback).
+    const [drawerInstanceId, setDrawerInstanceId] = useState<string | null>(null)
     const newEnvRef = useRef(newEnv)
     newEnvRef.current = newEnv
     const [envModalOpen, setEnvModalOpen] = useState(false)
@@ -297,7 +300,7 @@ export function ProjectClient({ projectId }: { projectId: string }) {
                                     instances={instances[env.id] ?? []}
                                     canManage={canManage}
                                     onOpenEnv={() => router.push(`/projects/${projectId}/env?env=${env.id}`)}
-                                    onOpenInstance={(instId) => router.push(`/projects/${projectId}/instances/${instId}`)}
+                                    onOpenInstance={(instId) => setDrawerInstanceId(instId)}
                                     onDeleteEnv={() => setConfirmTarget({ kind: 'env', id: env.id })}
                                     onCloneEnv={() => openCloneEnv(env)}
                                     onToggleStrict={() => toggleStrict(env)}
@@ -309,6 +312,16 @@ export function ProjectClient({ projectId }: { projectId: string }) {
                     )}
                 </div>
             </tc-section-card>
+
+            {drawerInstanceId && (
+                <InstanceDrawer
+                    key={drawerInstanceId}
+                    projectId={projectId}
+                    instanceId={drawerInstanceId}
+                    onClose={() => setDrawerInstanceId(null)}
+                    onChanged={() => void load()}
+                />
+            )}
 
             <tc-confirm-dialog
                 ref={confirmRef}

@@ -301,7 +301,16 @@ export function SiteDashboard({
             {/* Last-known-good semantics, stated plainly (§9 step 5). */}
             <p className="perch-site-note">{view?.lastKnownGood ?? 'Loading deploy status…'}</p>
 
-            <div className="perch-site-grid">
+            {/* Build + status on the left, storage on the right. tc-grid is a pure
+                layout primitive (it never relocates its children), so it's safely
+                inside the relocation boundary; it collapses to one column on mobile
+                via the mobile-first columns ladder (1 → md 3fr/2fr). */}
+            <tc-grid
+                className="perch-site-grid"
+                columns="minmax(0, 1fr)"
+                columns-md="minmax(0, 3fr) minmax(0, 2fr)"
+                gap="1rem"
+            >
                 <div className="perch-site-col">
                     {/* Last deploy + Redeploy */}
                     {view ? (
@@ -322,7 +331,7 @@ export function SiteDashboard({
                 <div className="perch-site-col">
                     <tc-usage-summary-panel ref={usageRef} title="Storage" loading={loading || undefined} />
                 </div>
-            </div>
+            </tc-grid>
 
             {/* Custom-domain A-record + Verify (§10). Only for custom-domain sites —
                 subdomains are covered by the wildcard server block and need no DNS work. */}

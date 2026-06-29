@@ -1,6 +1,5 @@
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
-import { icon } from './icons'
 
 const TAG_NAME = 'tc-card-options'
 

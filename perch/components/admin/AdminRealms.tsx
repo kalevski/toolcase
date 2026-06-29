@@ -1,9 +1,12 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import type { TableColumn } from '@toolcase/web-components'
+import { escapeHtml } from '@/lib/tc'
 import type { Realm } from '@/server/domain/types'
 import { AdminPage, json, useOwnerData } from './shared'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
+import { DataTable } from '@/components/DataTable'
 import { TextField } from '@/components/fields'
 import { useToast } from '@/components/Toast'
 
@@ -20,6 +23,84 @@ interface RealmTest {
     managed: boolean
     error?: string
 }
+
+// ── tc-table model (P1/P3) ─────────────────────────────────────────────────────
+// One row per realm. The identity cell (health dot + name + mono URL + badges) and
+// the action cell (Test / Set default / Rotate / Remove) are rendered as HTML
+// strings; the write-only token-rotate editor stays a React panel BELOW the table
+// (keyed off `rotating`), so no React subtree is captured into a table cell.
+
+type RealmTestState = RealmTest | 'loading' | undefined
+
+interface RealmRow extends Record<string, unknown> {
+    realm: Realm
+    test: RealmTestState
+}
+
+/** Health-dot class + title: green = ok, amber = reachable-but-status-failed,
+ *  red = unreachable, grey = unknown/loading. */
+function healthDotMeta(test: RealmTestState): { cls: string; title: string } {
+    if (test === 'loading') return { cls: 'perch-realm-dot--unknown', title: 'Checking…' }
+    if (test) {
+        if (test.ok)
+            return {
+                cls: 'perch-realm-dot--ok',
+                title: test.managed ? 'Healthy (managed mode)' : 'Healthy',
+            }
+        if (test.healthz)
+            return {
+                cls: 'perch-realm-dot--warn',
+                title: `Reachable but ${test.error ?? 'status failed'}`,
+            }
+        return { cls: 'perch-realm-dot--down', title: test.error ?? 'Unreachable' }
+    }
+    return { cls: 'perch-realm-dot--unknown', title: 'Health unknown' }
+}
+
+function badge(variant: string, text: string): string {
+    return `<span class="badge text-bg-${variant}">${escapeHtml(text)}</span>`
+}
+
+function realmIdentityHtml(row: RealmRow): string {
+    const { realm: r, test } = row
+    const { cls, title } = healthDotMeta(test)
+    const badges: string[] = []
+    if (r.isDefault) badges.push(badge('primary', 'default'))
+    badges.push(badge(r.hasToken ? 'light' : 'secondary', r.hasToken ? 'token set' : 'no token'))
+    if (test && test !== 'loading' && test.managed) badges.push(badge('info', 'managed'))
+    if (test && test !== 'loading' && !test.ok) badges.push(badge('danger', test.error ?? 'unreachable'))
+    return (
+        `<span class="perch-admin-realm-id">` +
+        `<span class="perch-realm-dot ${cls}" title="${escapeHtml(title)}" aria-label="${escapeHtml(title)}"></span>` +
+        `<span class="perch-admin-realm-name">${escapeHtml(r.name)}</span>` +
+        `<span class="perch-admin-mono perch-admin-hint">${escapeHtml(r.adminUrl)}</span>` +
+        `<span class="perch-admin-badges">${badges.join('')}</span>` +
+        `</span>`
+    )
+}
+
+function realmActionsHtml(row: RealmRow, busy: boolean, rotatingId: string | null): string {
+    const { realm: r } = row
+    const id = escapeHtml(r.id)
+    const btn = (action: string, label: string, danger = false) =>
+        `<button type="button" class="btn btn-sm btn-outline-${danger ? 'danger' : 'secondary'}" ` +
+        `data-action="${action}" data-id="${id}"${busy && danger ? ' disabled' : ''}>${escapeHtml(label)}</button>`
+    const parts = [btn('test', 'Test')]
+    if (!r.isDefault) parts.push(btn('default', 'Set default'))
+    parts.push(btn('rotate', rotatingId === r.id ? 'Close' : 'Rotate token'))
+    parts.push(btn('remove', 'Remove', true))
+    return `<span class="perch-admin-domain-controls">${parts.join('')}</span>`
+}
+
+const REALM_COLUMNS = (busy: boolean, rotatingId: string | null): TableColumn[] => [
+    { key: 'identity', header: 'Realm', render: (row: RealmRow) => realmIdentityHtml(row) },
+    {
+        key: 'actions',
+        header: '',
+        align: 'right',
+        render: (row: RealmRow) => realmActionsHtml(row, busy, rotatingId),
+    },
+]
 
 export function AdminRealms() {
     const fetcher = useCallback(async (): Promise<Realm[] | null> => {
@@ -177,6 +258,30 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
         }
     }, [pending, busy, onChanged, toast])
 
+    // One delegated handler for every realm-row control: Test / Set default /
+    // Rotate (toggle the below-table editor) / Remove (open the confirm dialog).
+    const onRowAction = useCallback(
+        (action: string, dataset: DOMStringMap) => {
+            const id = dataset.id
+            if (!id) return
+            const realm = realms.find((r) => r.id === id)
+            if (!realm) return
+            if (action === 'test') void runTest(id)
+            else if (action === 'default')
+                void patch(realm, { default: true }, `“${realm.name}” is now the default realm.`)
+            else if (action === 'rotate') setRotating((cur) => (cur === id ? null : id))
+            else if (action === 'remove') setPending(realm)
+        },
+        [realms, runTest, patch],
+    )
+
+    const columns = useMemo(() => REALM_COLUMNS(busy, rotating), [busy, rotating])
+    const rows = useMemo<RealmRow[]>(
+        () => realms.map((r) => ({ realm: r, test: tests[r.id] })),
+        [realms, tests],
+    )
+    const rotatingRealm = rotating ? realms.find((r) => r.id === rotating) : undefined
+
     return (
         <tc-section-card title="Realms" icon="server">
             <div className="perch-admin-section">
@@ -190,99 +295,30 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
                 {realms.length === 0 ? (
                     <tc-empty-state icon="server">No realms registered.</tc-empty-state>
                 ) : (
-                    <ul className="perch-admin-list">
-                        {realms.map((r) => {
-                            const test = tests[r.id]
-                            return (
-                                <li key={r.id} className="perch-admin-realm">
-                                    <div className="perch-admin-realm-main">
-                                        <span className="perch-admin-realm-id">
-                                            <HealthDot test={test} />
-                                            <span className="perch-admin-realm-name">{r.name}</span>
-                                            <span className="perch-admin-mono perch-admin-hint">
-                                                {r.adminUrl}
-                                            </span>
-                                            <span className="perch-admin-badges">
-                                                {r.isDefault && (
-                                                    <tc-badge variant="primary">default</tc-badge>
-                                                )}
-                                                <tc-badge
-                                                    variant={r.hasToken ? 'light' : 'secondary'}
-                                                >
-                                                    {r.hasToken ? 'token set' : 'no token'}
-                                                </tc-badge>
-                                                {test && test !== 'loading' && test.managed && (
-                                                    <tc-badge variant="info">managed</tc-badge>
-                                                )}
-                                                {test && test !== 'loading' && !test.ok && (
-                                                    <tc-badge variant="danger">
-                                                        {test.error ?? 'unreachable'}
-                                                    </tc-badge>
-                                                )}
-                                            </span>
-                                        </span>
-                                        <span className="perch-admin-domain-controls">
-                                            <tc-button
-                                                size="sm"
-                                                outline
-                                                onClick={() => void runTest(r.id)}
-                                            >
-                                                Test
-                                            </tc-button>
-                                            {!r.isDefault && (
-                                                <tc-button
-                                                    size="sm"
-                                                    outline
-                                                    onClick={() =>
-                                                        void patch(
-                                                            r,
-                                                            { default: true },
-                                                            `“${r.name}” is now the default realm.`,
-                                                        )
-                                                    }
-                                                >
-                                                    Set default
-                                                </tc-button>
-                                            )}
-                                            <tc-button
-                                                size="sm"
-                                                outline
-                                                onClick={() =>
-                                                    setRotating((id) => (id === r.id ? null : r.id))
-                                                }
-                                            >
-                                                {rotating === r.id ? 'Close' : 'Rotate token'}
-                                            </tc-button>
-                                            <tc-button
-                                                variant="danger"
-                                                size="sm"
-                                                outline
-                                                disabled={busy || undefined}
-                                                onClick={() => setPending(r)}
-                                            >
-                                                Remove
-                                            </tc-button>
-                                        </span>
-                                    </div>
-                                    {rotating === r.id && (
-                                        <RotateTokenRow
-                                            realm={r}
-                                            onDone={async (value) => {
-                                                const ok = await patch(
-                                                    r,
-                                                    { token: value },
-                                                    value
-                                                        ? `Token rotated for “${r.name}”.`
-                                                        : `Token cleared for “${r.name}”.`,
-                                                )
-                                                if (ok) setRotating(null)
-                                            }}
-                                        />
-                                    )}
-                                </li>
+                    <DataTable<RealmRow>
+                        columns={columns}
+                        rows={rows}
+                        rowKey={(row) => row.realm.id}
+                        onAction={onRowAction}
+                    />
+                )}
+
+                {/* The write-only token-rotate editor renders below the table (not
+                    inside a cell) so no React subtree is captured by tc-table. */}
+                {rotatingRealm && (
+                    <RotateTokenRow
+                        realm={rotatingRealm}
+                        onDone={async (value) => {
+                            const ok = await patch(
+                                rotatingRealm,
+                                { token: value },
+                                value
+                                    ? `Token rotated for “${rotatingRealm.name}”.`
+                                    : `Token cleared for “${rotatingRealm.name}”.`,
                             )
-                        })}
-                    </ul>
+                            if (ok) setRotating(null)
+                        }}
+                    />
                 )}
 
                 <form
@@ -335,27 +371,6 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
             />
         </tc-section-card>
     )
-}
-
-/** A small status dot: green = ok, amber = reachable-but-status-failed, red = unreachable, grey = unknown/loading. */
-function HealthDot({ test }: { test?: RealmTest | 'loading' }) {
-    let cls = 'perch-realm-dot perch-realm-dot--unknown'
-    let title = 'Health unknown'
-    if (test === 'loading') {
-        title = 'Checking…'
-    } else if (test) {
-        if (test.ok) {
-            cls = 'perch-realm-dot perch-realm-dot--ok'
-            title = test.managed ? 'Healthy (managed mode)' : 'Healthy'
-        } else if (test.healthz) {
-            cls = 'perch-realm-dot perch-realm-dot--warn'
-            title = `Reachable but ${test.error ?? 'status failed'}`
-        } else {
-            cls = 'perch-realm-dot perch-realm-dot--down'
-            title = test.error ?? 'Unreachable'
-        }
-    }
-    return <span className={cls} title={title} aria-label={title} />
 }
 
 /** Inline write-only token rotation for one realm. Empty value clears the token (→ unauthenticated). */
