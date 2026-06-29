@@ -24,6 +24,7 @@ COPY phaser-plus/package.json phaser-plus/package.json
 COPY node/package.json node/package.json
 COPY taskforge/package.json taskforge/package.json
 COPY perch/package.json perch/package.json
+COPY wharf/package.json wharf/package.json
 COPY examples/package.json examples/package.json
 RUN npm ci
 
