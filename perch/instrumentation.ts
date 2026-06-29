@@ -13,5 +13,10 @@ export async function register(): Promise<void> {
 
         const { ensureReconcileSchedulerStarted } = await import('@/server/services/sponsors-reconcile')
         ensureReconcileSchedulerStarted()
+
+        // Byte-quota sweep ticker (§11, C1): measures each site's deployed size from its
+        // realm and enforces the per-site cap, so quotas hold without a per-request poll.
+        const { ensureQuotaSweepStarted } = await import('@/server/services/quota-sweep')
+        ensureQuotaSweepStarted()
     }
 }

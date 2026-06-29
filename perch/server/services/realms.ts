@@ -16,12 +16,14 @@
 
 import 'server-only'
 import { randomBytes } from 'node:crypto'
+import { lookup } from 'node:dns/promises'
 import * as realmRepo from '@/server/data/repositories/realm-repo'
 import * as userRealmRepo from '@/server/data/repositories/user-realm-repo'
 import * as siteRepo from '@/server/data/repositories/site-repo'
 import * as baseDomainRepo from '@/server/data/repositories/base-domain-repo'
 import * as userRepo from '@/server/data/repositories/user-repo'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
+import { tx } from '@/server/data/db'
 import { encrypt, decrypt } from '@/server/infrastructure/cipher'
 import {
     nginxpilotClient,
@@ -174,6 +176,11 @@ export async function resolveActiveRealm(githubId: number, role: Role): Promise<
         const def = defaultRealmStored()
         if (def) return toDto(def)
     }
+    // Distinguish "seeding actually failed" from "no realm configured" (D1) so the operator
+    // sees the real cause rather than a generic 409.
+    if (lastSeedError) {
+        throw new RealmError(`realm seeding failed: ${lastSeedError}`, 'seed_failed', 409)
+    }
     throw new RealmError('no realm is configured', 'no_realm', 409)
 }
 
@@ -200,6 +207,52 @@ export function canSwitchRealms(role: Role): boolean {
 
 /** Hosts that should never be a realm target unless explicitly allow-listed (cloud metadata). */
 const BLOCKED_HOSTS = new Set(['169.254.169.254', 'metadata.google.internal', 'metadata'])
+
+/** Literal hostnames that always resolve to the local machine and must never be a target (S2). */
+const BLOCKED_LITERAL_HOSTS = new Set(['localhost', '0.0.0.0', '::', '[::]'])
+
+/**
+ * Whether a literal IPv4/IPv6 address is private, loopback, link-local, or otherwise
+ * unroutable on the public internet (S2 SSRF defense-in-depth). Covers RFC1918
+ * (10/8, 172.16/12, 192.168/16), loopback (127/8, ::1), link-local (169.254/16, fe80::/10),
+ * the unspecified address (0.0.0.0, ::), CGNAT (100.64/10), and IPv4-mapped IPv6. Returns
+ * false for anything that isn't a recognizable IP literal (a DNS name is checked separately).
+ */
+export function isPrivateOrLoopbackIp(raw: string): boolean {
+    let ip = raw.trim().toLowerCase()
+    // URL hostnames keep IPv6 in brackets — strip them for parsing.
+    if (ip.startsWith('[') && ip.endsWith(']')) ip = ip.slice(1, -1)
+    // Drop a zone id (fe80::1%eth0).
+    const pct = ip.indexOf('%')
+    if (pct >= 0) ip = ip.slice(0, pct)
+
+    // IPv4 (dotted quad).
+    if (/^\d{1,3}(\.\d{1,3}){3}$/.test(ip)) {
+        const o = ip.split('.').map(Number)
+        if (o.some((n) => n > 255)) return false
+        const [a, b] = o
+        if (a === 10) return true
+        if (a === 127) return true // loopback
+        if (a === 0) return true // 0.0.0.0/8 (unspecified)
+        if (a === 172 && b >= 16 && b <= 31) return true
+        if (a === 192 && b === 168) return true
+        if (a === 169 && b === 254) return true // link-local
+        if (a === 100 && b >= 64 && b <= 127) return true // CGNAT
+        return false
+    }
+
+    // IPv6 (contains a colon).
+    if (ip.includes(':')) {
+        if (ip === '::1' || ip === '::') return true // loopback / unspecified
+        if (ip.startsWith('fe80') || ip.startsWith('fc') || ip.startsWith('fd')) return true // link-local / ULA
+        // IPv4-mapped (::ffff:127.0.0.1) — re-check the embedded v4 literal.
+        const mapped = ip.match(/(\d{1,3}(?:\.\d{1,3}){3})$/)
+        if (mapped) return isPrivateOrLoopbackIp(mapped[1])
+        return false
+    }
+
+    return false
+}
 
 /** Glob match for the optional allowlist (`*.example.com` style; `*` = any label run). */
 function hostMatchesGlob(host: string, glob: string): boolean {
@@ -244,11 +297,55 @@ export function validateAdminUrl(raw: unknown): string {
                 400,
             )
         }
-    } else if (BLOCKED_HOSTS.has(host)) {
-        throw new RealmError(`admin URL host "${host}" is blocked`, 'url_blocked', 400)
+    } else {
+        // No allowlist: belt-and-suspenders. Block the cloud-metadata hosts AND any literal
+        // private/loopback/link-local IP, plus `localhost`/`0.0.0.0` (S2). A DNS name that
+        // resolves into those ranges is rejected separately by `assertAdminUrlResolvesSafely`.
+        if (BLOCKED_HOSTS.has(host) || BLOCKED_LITERAL_HOSTS.has(host) || isPrivateOrLoopbackIp(host)) {
+            throw new RealmError(`admin URL host "${host}" is blocked`, 'url_blocked', 400)
+        }
     }
     // Normalize: drop a trailing slash on the path so `${adminUrl}${apiPath}` is clean.
     return url.toString().replace(/\/+$/, '')
+}
+
+/**
+ * Best-effort DNS guard against SSRF via a name that resolves into a private/loopback range
+ * (S2). Resolves every A/AAAA record for the host and rejects if ANY lands in a blocked
+ * range. Skipped when an allowlist is configured (the allowlist is then the contract) or for
+ * a literal IP (already checked synchronously). A resolution failure is NOT fatal — the
+ * synchronous literal checks remain the hard gate and a hostname we can't resolve can't be
+ * reached anyway; we log and allow so a transient resolver hiccup doesn't block a valid realm.
+ */
+export async function assertAdminUrlResolvesSafely(adminUrl: string): Promise<void> {
+    if (config.realmUrlAllowlist.length > 0) return
+    let host: string
+    try {
+        host = new URL(adminUrl).hostname.toLowerCase()
+    } catch {
+        return
+    }
+    if (host.startsWith('[') && host.endsWith(']')) host = host.slice(1, -1)
+    // A literal IP was already vetted synchronously; resolving it is a no-op.
+    if (/^\d{1,3}(\.\d{1,3}){3}$/.test(host) || host.includes(':')) return
+    try {
+        const addrs = await lookup(host, { all: true })
+        for (const { address } of addrs) {
+            if (isPrivateOrLoopbackIp(address)) {
+                throw new RealmError(
+                    `admin URL host "${host}" resolves to a blocked address (${address})`,
+                    'url_blocked',
+                    400,
+                )
+            }
+        }
+    } catch (err) {
+        if (err instanceof RealmError) throw err
+        slog('warn', 'realms', 'admin URL DNS pre-check failed (allowing)', {
+            host,
+            error: (err as Error).message,
+        })
+    }
 }
 
 // ── owner CRUD ────────────────────────────────────────────────────────────────────
@@ -258,13 +355,15 @@ export function validateAdminUrl(raw: unknown): string {
  * (empty → unauthenticated), and persist. The first realm registered becomes the default.
  * Returns the masked DTO.
  */
-export function createRealm(
+export async function createRealm(
     actor: RealmActor,
     input: { name?: unknown; adminUrl?: unknown; token?: unknown },
-): Realm {
+): Promise<Realm> {
     const name = typeof input.name === 'string' ? input.name.trim() : ''
     if (!name) throw new RealmError('"name" is required', 'invalid_request', 400)
     const adminUrl = validateAdminUrl(input.adminUrl)
+    // Best-effort DNS pre-check (S2): reject a name that resolves into a private/loopback range.
+    await assertAdminUrlResolvesSafely(adminUrl)
     const token = typeof input.token === 'string' ? input.token.trim() : ''
 
     const isFirst = realmRepo.count() === 0
@@ -471,6 +570,9 @@ export function grantDefaultRealmOnSignup(githubId: number): void {
 // ── boot seed + backfill (§2.2 / §2.3) ───────────────────────────────────────────
 
 let seedDone = false
+/** The last `ensureSeed` failure, surfaced by `resolveActiveRealm` so a `no_realm` 409
+ *  distinguishes "no realm configured" from "seeding failed" (D1). Cleared on success. */
+let lastSeedError: string | null = null
 
 /**
  * Idempotent boot seed (called from `instrumentation.register` and lazily). When the realm
@@ -482,54 +584,65 @@ let seedDone = false
 export function ensureSeed(): void {
     if (seedDone) return
     try {
-        if (realmRepo.count() === 0 && config.nginxpilotAdminUrl) {
-            const id = generateRealmId()
-            const token = config.nginxpilotAdminToken
-            realmRepo.create(
-                {
+        // Atomic commit (D1): seed + every backfill/grant land together or not at all, so a
+        // failure mid-way can never leave a realm with some rows backfilled and others orphaned.
+        tx(() => {
+            if (realmRepo.count() === 0 && config.nginxpilotAdminUrl) {
+                const id = generateRealmId()
+                const token = config.nginxpilotAdminToken
+                realmRepo.create(
+                    {
+                        id,
+                        name: 'default',
+                        adminUrl: config.nginxpilotAdminUrl.replace(/\/+$/, ''),
+                        isDefault: true,
+                        createdAt: new Date().toISOString(),
+                    },
+                    token ? encrypt(token) : null,
+                )
+                slog('info', 'realms', 'seeded default realm from env', {
                     id,
-                    name: 'default',
-                    adminUrl: config.nginxpilotAdminUrl.replace(/\/+$/, ''),
-                    isDefault: true,
-                    createdAt: new Date().toISOString(),
-                },
-                token ? encrypt(token) : null,
-            )
-            slog('info', 'realms', 'seeded default realm from env', {
-                id,
-                adminUrl: config.nginxpilotAdminUrl,
-            })
-        }
-
-        const def = defaultRealmStored()
-        if (def) {
-            const sites = siteRepo.backfillRealm(def.id)
-            const bases = baseDomainRepo.backfillRealm(def.id)
-            userRealmRepo.grantAllUsers(def.id, new Date().toISOString())
-            if (sites || bases) {
-                slog('info', 'realms', 'backfilled rows to default realm', {
-                    sites,
-                    bases,
-                    realm: def.id,
+                    adminUrl: config.nginxpilotAdminUrl,
                 })
             }
-        } else {
-            // No default realm AND orphan rows → the seed couldn't run (env unset) but data
-            // exists. Surface it loudly so the operator registers a realm and re-assigns (§9).
-            const orphans = siteRepo.countOrphans() + baseDomainRepo.countOrphans()
-            if (orphans > 0) {
-                slog(
-                    'error',
-                    'realms',
-                    'orphan sites/base-domains with no realm — register a realm',
-                    { orphans },
-                )
+
+            const def = defaultRealmStored()
+            if (def) {
+                const sites = siteRepo.backfillRealm(def.id)
+                const bases = baseDomainRepo.backfillRealm(def.id)
+                userRealmRepo.grantAllUsers(def.id, new Date().toISOString())
+                if (sites || bases) {
+                    slog('info', 'realms', 'backfilled rows to default realm', {
+                        sites,
+                        bases,
+                        realm: def.id,
+                    })
+                }
+            } else {
+                // No default realm AND orphan rows → the seed couldn't run (env unset) but data
+                // exists. Surface it loudly so the operator registers a realm and re-assigns (§9).
+                const orphans = siteRepo.countOrphans() + baseDomainRepo.countOrphans()
+                if (orphans > 0) {
+                    slog(
+                        'error',
+                        'realms',
+                        'orphan sites/base-domains with no realm — register a realm',
+                        { orphans },
+                    )
+                }
             }
-        }
+        })
+        // Only reached on a clean commit — "seed succeeded (or wasn't needed)". A throw above
+        // skips this, so `seedDone` stays false and a later call retries (D1: a transient DB
+        // error is no longer silently swallowed into a confusing `no_realm` 409 with no cause).
         seedDone = true
+        lastSeedError = null
     } catch (err) {
         // Don't cache failure — let a later call retry (e.g. DB not ready at first import).
-        slog('error', 'realms', 'ensureSeed failed', { error: (err as Error).message })
+        // The rolled-back tx means the DB is untouched, so the retry starts clean. Record the
+        // cause so `resolveActiveRealm` can surface "seed failed" instead of a bare "no realm".
+        lastSeedError = (err as Error).message
+        slog('error', 'realms', 'ensureSeed failed', { error: lastSeedError })
     }
 }
 

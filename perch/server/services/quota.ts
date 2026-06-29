@@ -73,6 +73,19 @@ export function assertCanUseCustomDomain(login: string): void {
     }
 }
 
+/**
+ * Reject deploying a PRIVATE repo when the user's plan doesn't allow it (free tier,
+ * §9). The plan boundary (`PLAN_LIMITS.free.privateRepos = false`) was previously
+ * advertised but never enforced (C2). Callers must have established the repo is
+ * actually private from authoritative GitHub metadata — never the client flag.
+ */
+export function assertCanUsePrivateRepo(login: string): void {
+    const limits = resolveLimits(login)
+    if (!limits.privateRepos) {
+        throw new QuotaError('private repositories require a paid (sponsor) plan', 'private_repos_not_allowed', 403)
+    }
+}
+
 // ── refresh cadence (§11 point 3) ────────────────────────────────────────────
 
 /**

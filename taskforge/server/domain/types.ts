@@ -30,7 +30,6 @@ export interface RolesFile {
 export interface SessionPayload {
     sub: number // github id
     login: string
-    role: Role // advisory hint; roles.json is authoritative per request
     iat: number
     exp: number
 }

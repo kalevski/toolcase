@@ -76,8 +76,11 @@ export function list(filter: AuditFilter = {}): AuditEntry[] {
         params.push(filter.site)
     }
     if (filter.action) {
-        where.push('action LIKE ?')
-        params.push(`${filter.action}%`)
+        // Prefix match: escape the LIKE metacharacters (`%`/`_`/the escape char itself) so
+        // `site_create` matches only that literal prefix, never `siteXcreate` (C4).
+        const escaped = filter.action.replace(/[\\%_]/g, '\\$&')
+        where.push("action LIKE ? ESCAPE '\\'")
+        params.push(`${escaped}%`)
     }
     if (filter.beforeId) {
         where.push('id < ?')

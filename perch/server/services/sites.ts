@@ -24,10 +24,19 @@ import * as deploy from '@/server/services/deploy'
 import * as domains from '@/server/services/domains'
 import * as realms from '@/server/services/realms'
 import { HostnameError } from '@/server/services/domains'
-import { QuotaError, assertCanCreateSite, assertCanUseCustomDomain } from '@/server/services/quota'
+import {
+    QuotaError,
+    assertCanCreateSite,
+    assertCanUseCustomDomain,
+    assertCanUsePrivateRepo,
+    enforceBytes,
+} from '@/server/services/quota'
+import { resolveLimits } from '@/server/services/plan'
+import * as github from '@/server/infrastructure/github'
 import { GithubError } from '@/server/infrastructure/github'
 import { NginxpilotError, type NginxpilotSiteStatus } from '@/server/infrastructure/nginxpilot'
 import { NginxError } from '@/server/infrastructure/nginx'
+import { slog } from '@/server/infrastructure/server-log'
 import { resolveSiteAccess, type SiteViewer } from '@/server/domain/site-access'
 import { checkBranch, checkRepoName, checkRepoOwner, checkSubdir } from '@/server/domain/site-input'
 import { checkDomain, checkLabel } from '@/server/domain/hostname'
@@ -162,6 +171,25 @@ export function getSite(viewer: SiteViewer, id: string): Site {
     return ownedSite(id, viewer)
 }
 
+// ── byte measurement + enforcement (§9 step 5, §11) ────────────────────────────
+
+/**
+ * Measure and enforce a site's byte quota in the background after a deploy (C1).
+ * `deploy.track` polls `GET /status` until the site is live, recording `bytes` via the
+ * deploy machine; `enforceBytes` then applies the over_quota → grace → suspend ladder.
+ * Fire-and-forget: the request returns immediately on the freshly-provisioned row, and
+ * the periodic sweep (`services/quota-sweep.ts`) is the durable backstop if this process
+ * is restarted mid-track. Errors are logged, never surfaced to the deploy caller.
+ */
+function trackAndEnforce(site: Site): void {
+    void deploy
+        .track(site)
+        .then((tracked) => enforceBytes(tracked))
+        .catch((err) =>
+            slog('error', 'sites', 'background track/enforce failed', { site: site.id, error: String(err) }),
+        )
+}
+
 // ── create (§9 steps 1–4) ──────────────────────────────────────────────────────
 
 /**
@@ -171,7 +199,7 @@ export function getSite(viewer: SiteViewer, id: string): Site {
  * cert, installed later via {@link verifyDomain} once DNS verifies (§729) — provision here
  * primes the content channel regardless. Returns the provisioned (`provisioning`) site.
  */
-export async function createSite(viewer: SiteViewer, body: CreateSiteRequest): Promise<Site> {
+export async function createSite(viewer: SiteViewer, body: CreateSiteRequest, token: string | null): Promise<Site> {
     const owner = userRepo.get(viewer.sub)
     if (!owner) throw new SiteError('account not found', 'account_not_found', 401)
 
@@ -188,6 +216,17 @@ export async function createSite(viewer: SiteViewer, body: CreateSiteRequest): P
 
     // Hard, pre-emptive count gate (§11 point 1) before we touch the namespace.
     assertCanCreateSite(owner.login)
+
+    // Private-repo plan gate (C2): only the free tier is restricted, so skip the GitHub
+    // round-trip for plans that already allow private repos. Re-read the repo's `private`
+    // flag from authoritative GitHub metadata — never a client-supplied flag.
+    if (!resolveLimits(owner.login).privateRepos) {
+        if (!token) {
+            throw new SiteError('GitHub authentication required to create a site', 'github_token_missing', 401)
+        }
+        const meta = await github.getRepo(token, repoOwner, repoName)
+        if (meta.private) assertCanUsePrivateRepo(owner.login)
+    }
 
     // Pick the target realm (multiple_realms.md §D.2): the active realm (the owner's
     // switcher choice; a non-owner's owner-assigned default). The site is bound to it and
@@ -213,7 +252,9 @@ export async function createSite(viewer: SiteViewer, body: CreateSiteRequest): P
     siteRepo.create(site)
     audit('site.create', owner, site, `${repoOwner}/${repoName}@${branch}${subdir ? ` subdir=${subdir}` : ''}`)
 
-    return deploy.provision(site)
+    const provisioned = await deploy.provision(site)
+    trackAndEnforce(provisioned)
+    return provisioned
 }
 
 // ── update (§9 step 6) ─────────────────────────────────────────────────────────
@@ -254,6 +295,7 @@ export async function updateSite(viewer: SiteViewer, id: string, body: UpdateSit
         branch,
         ...(hasSubdir ? { subdir: subdir ?? null } : {}),
     })
+    trackAndEnforce(site)
     return site
 }
 
@@ -288,7 +330,9 @@ async function changeHostname(
     audit('site.rehost', owner, { ...site, hostname: newHostname }, `${site.hostname} → ${newHostname}`)
 
     const moved: Site = { ...site, branch, subdir, hostname: newHostname, hostKind: newKind, updatedAt: at }
-    return deploy.provision(moved)
+    const provisioned = await deploy.provision(moved)
+    trackAndEnforce(provisioned)
+    return provisioned
 }
 
 // ── delete (§9 step 7) ─────────────────────────────────────────────────────────
@@ -300,10 +344,27 @@ async function changeHostname(
  */
 export async function deleteSite(viewer: SiteViewer, id: string): Promise<void> {
     const site = ownedSite(id, viewer)
+    // Best-effort teardown end-to-end (I3): infra failures (a hung reload, an
+    // already-gone fragment, an unreachable daemon) must NOT strand a half-deleted site with
+    // a stuck DB row + a 502. The custom-vhost teardown is already best-effort internally;
+    // guard the nginxpilot fragment removal the same way, then always delete the row.
     if (site.hostKind === 'custom') {
         await domains.teardownCustomVhost(site)
     }
-    await deploy.remove(site)
+    try {
+        await deploy.remove(site)
+    } catch (err) {
+        // `deploy.remove` failed before deleting the row (fragment remove / reload threw).
+        // Log it and delete the row anyway so the dashboard reflects reality; nginxpilot's
+        // periodic sync reconciles the now-orphaned fragment (and the byte sweep skips it).
+        slog('warn', 'sites', 'deploy.remove failed during delete (removing row anyway)', {
+            site: site.id,
+            hostname: site.hostname,
+            error: (err as Error).message,
+        })
+        siteRepo.remove(site.id)
+        audit('site.remove', ownerOf(site), site, 'forced row removal after teardown failure')
+    }
 }
 
 // ── redeploy (§9 step 6 — the "Redeploy" button) ─────────────────────────────────
@@ -311,7 +372,9 @@ export async function deleteSite(viewer: SiteViewer, id: string): Promise<void> 
 /** Force an immediate redeploy of an owned site (`POST /sync/{domain}`, §13 re-check). */
 export async function redeploySite(viewer: SiteViewer, id: string): Promise<Site> {
     const site = ownedSite(id, viewer)
-    return deploy.redeploy(site)
+    const redeployed = await deploy.redeploy(site)
+    trackAndEnforce(redeployed)
+    return redeployed
 }
 
 // ── custom-domain verify (§10, §729) ─────────────────────────────────────────────
@@ -374,7 +437,18 @@ export async function siteStatus(viewer: SiteViewer, id: string): Promise<SiteSt
     const entry = env.sites.find((s) => s.domain === site.hostname) ?? null
     const resource = env.nginx?.resources.find((r) => r.kind === 'site' && r.key === site.hostname)
     const nginxResource = resource ? { state: resource.state, reason: resource.reason } : null
-    return { site, nginxpilot: entry, nginxResource }
+
+    // Interactive enforcement fallback (C1): record the freshly-measured size and run the
+    // byte-cap ladder on a status read, so an over-quota site flags/suspends even if the
+    // background sweep hasn't run yet. enforceBytes is a no-op while within the cap.
+    let current = site
+    if (entry?.bytes != null && entry.bytes !== current.bytes) {
+        const at = new Date().toISOString()
+        siteRepo.updateBytes(current.id, entry.bytes, at)
+        current = { ...current, bytes: entry.bytes, updatedAt: at }
+    }
+    current = await enforceBytes(current)
+    return { site: current, nginxpilot: entry, nginxResource }
 }
 
 // ── error → HTTP mapping (so routes stay thin) ───────────────────────────────────

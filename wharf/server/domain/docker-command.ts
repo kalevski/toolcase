@@ -82,7 +82,9 @@ function buildSh(spec: DockerSpec, opts: RenderOpts): string {
 
     for (const p of spec.ports) {
         const suffix = p.protocol === 'udp' ? '/udp' : ''
-        flags.push(`-p ${p.host}:${p.container}${suffix}`)
+        // Ports are validated as integers server-side (wharf S2); shEscape regardless
+        // so the rendered text can never inject shell even if an unvalidated spec leaks in.
+        flags.push(`-p ${shEscape(String(p.host))}:${shEscape(String(p.container))}${suffix}`)
     }
     for (const v of spec.volumes) {
         flags.push(`-v ${shEscape(v.host)}:${shEscape(v.container)}:${v.mode}`)
@@ -100,6 +102,11 @@ function buildSh(spec: DockerSpec, opts: RenderOpts): string {
     const wharf = buildEnvFlags(spec, opts, flags)
 
     if (!wharf && spec.entrypoint) flags.push(`--entrypoint ${shEscape(spec.entrypoint)}`)
+    // extraArgs is a deliberate RAW shell escape-hatch (wharf S2): the devops author
+    // types free-form flags (e.g. `--cap-add NET_ADMIN`) that must reach the shell as
+    // multiple unescaped tokens. The injection-prone structured fields (restart,
+    // protocol, ports) are validated/escaped above; this field is the author's own
+    // responsibility and is intentionally emitted verbatim.
     if (spec.extraArgs) flags.push(spec.extraArgs)
 
     // Trailing positional: image then (for non-wharf) the command args.

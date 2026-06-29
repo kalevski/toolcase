@@ -29,6 +29,21 @@ import { checkDomain } from '@/server/domain/hostname'
 
 const run = promisify(execFile)
 
+/**
+ * Timeouts for the certbot / nginx-reload shell-outs (I2). A stalled certbot HTTP-01
+ * challenge or a hung `nginx -s reload` would otherwise block the Node handler
+ * indefinitely. `execFile`'s `timeout` kills the child (SIGTERM) past the limit; the
+ * resulting error is mapped to `NginxError` (→ 502) by the callers below. Reload is
+ * quick (seconds); certbot's ACME round-trip can take longer, hence a larger budget.
+ * Both overridable via env.
+ */
+function envMs(name: string, fallback: number): number {
+    const raw = Number(process.env[name])
+    return Number.isFinite(raw) && raw > 0 ? raw : fallback
+}
+const RELOAD_TIMEOUT_MS = envMs('PERCH_NGINX_RELOAD_TIMEOUT_MS', 30_000)
+const CERTBOT_TIMEOUT_MS = envMs('PERCH_CERTBOT_TIMEOUT_MS', 120_000)
+
 export class NginxError extends Error {
     constructor(
         message: string,
@@ -119,10 +134,13 @@ export async function reload(): Promise<void> {
     const [bin, ...args] = argv(config.nginxReloadCmd)
     if (!bin) throw new NginxError('PERCH_NGINX_RELOAD_CMD is empty')
     try {
-        await run(bin, args)
+        await run(bin, args, { timeout: RELOAD_TIMEOUT_MS })
         slog('info', 'nginx', 'reloaded nginx', { cmd: config.nginxReloadCmd })
     } catch (err) {
-        throw new NginxError(`nginx reload failed: ${(err as Error).message}`, err)
+        // execFile rejects with `killed: true` + a `signal` when the timeout fires (I2).
+        const e = err as NodeJS.ErrnoException & { killed?: boolean; signal?: string }
+        const reason = e?.killed && e?.signal ? `timed out after ${RELOAD_TIMEOUT_MS}ms` : e?.message
+        throw new NginxError(`nginx reload failed: ${reason}`, err)
     }
 }
 
@@ -157,10 +175,13 @@ export async function obtainCert(domain: string): Promise<void> {
         slog('warn', 'nginx', 'certbot running without a registration email (set PERCH_CERTBOT_EMAIL)', { domain: d })
     }
     try {
-        await run(config.certbotBin, args)
+        await run(config.certbotBin, args, { timeout: CERTBOT_TIMEOUT_MS })
         slog('info', 'nginx', 'obtained custom-domain cert', { domain: d })
     } catch (err) {
-        throw new NginxError(`certbot failed for ${d}: ${(err as Error).message}`, err)
+        // execFile rejects with `killed: true` + a `signal` when the timeout fires (I2).
+        const e = err as NodeJS.ErrnoException & { killed?: boolean; signal?: string }
+        const reason = e?.killed && e?.signal ? `timed out after ${CERTBOT_TIMEOUT_MS}ms` : e?.message
+        throw new NginxError(`certbot failed for ${d}: ${reason}`, err)
     }
 }
 
@@ -168,7 +189,9 @@ export async function obtainCert(domain: string): Promise<void> {
 export async function dropCert(domain: string): Promise<void> {
     const d = safeDomain(domain)
     try {
-        await run(config.certbotBin, ['delete', '--non-interactive', '--cert-name', d])
+        await run(config.certbotBin, ['delete', '--non-interactive', '--cert-name', d], {
+            timeout: CERTBOT_TIMEOUT_MS,
+        })
         slog('info', 'nginx', 'deleted custom-domain cert', { domain: d })
     } catch (err) {
         // Teardown must not wedge on an already-absent cert; log and move on.

@@ -88,6 +88,11 @@ export function makeSessionToken(profile: GithubProfile, role: Role): string {
 }
 
 function isSecure(): boolean {
+    // In production a cookie must always be `secure`, regardless of the redirect-URI
+    // scheme (S4): an http redirect URI in prod is a misconfiguration, not a reason to
+    // ship session/token cookies over cleartext. Outside production (dev/test), follow
+    // the redirect-URI scheme so a plain-http dev loop still works.
+    if (process.env.NODE_ENV === 'production') return true
     return config.oauthRedirectUri.startsWith('https://')
 }
 
@@ -109,9 +114,17 @@ export function stateCookieOptions() {
     return { httpOnly: true, sameSite: 'lax' as const, path: '/', secure: isSecure(), maxAge: 600 }
 }
 
-/** Cookie options for the GitHub access token — `httpOnly`, scoped to the session lifetime. */
+/**
+ * Cookie options for the GitHub access token (S4). The token is only needed during the
+ * create-site wizard's repo/branch listing, so it gets a short maxAge (10 min) rather
+ * than the full session lifetime — keeping a `read:user`/private-repo-scoped credential
+ * resident only as long as the wizard plausibly runs, shrinking the token-theft blast
+ * radius. `secure` is forced in production by `isSecure()`.
+ */
+export const GH_TOKEN_MAX_AGE_SEC = 600
+
 export function ghTokenCookieOptions() {
-    return { httpOnly: true, sameSite: 'lax' as const, path: '/', secure: isSecure(), maxAge: config.sessionTtl }
+    return { httpOnly: true, sameSite: 'lax' as const, path: '/', secure: isSecure(), maxAge: GH_TOKEN_MAX_AGE_SEC }
 }
 
 /** Read the caller's GitHub access token from its `httpOnly` cookie (null if absent). */
@@ -156,15 +169,56 @@ export async function getSession(): Promise<SessionPayload | null> {
 
 // ── OAuth state (CSRF, single-use) ────────────────────────────────────────────
 
-export function makeStateToken(): string {
-    const nonce = crypto.randomBytes(16).toString('hex')
-    return signToken({ n: nonce, exp: Math.floor(Date.now() / 1000) + 600 })
+const STATE_TTL_SEC = 600
+
+/**
+ * Nonces already redeemed by a callback (S1). A signed `state` token stays valid for
+ * its full 10-min TTL, so without this the same `state` + matching cookie could be
+ * replayed within the window. We record each nonce on first successful verification
+ * and reject a second presentation. The single-process app makes an in-memory `Set`
+ * sufficient; a periodic sweep drops entries past their expiry so the set can't grow
+ * unbounded. Survives dev hot-reload via `globalThis`.
+ */
+declare global {
+    var __perchConsumedNonces: Map<string, number> | undefined
 }
 
+function consumedNonces(): Map<string, number> {
+    if (!globalThis.__perchConsumedNonces) globalThis.__perchConsumedNonces = new Map()
+    return globalThis.__perchConsumedNonces
+}
+
+/** Drop nonces whose token has already expired (cheap, runs on each verification). */
+function sweepConsumedNonces(now: number): void {
+    const map = consumedNonces()
+    for (const [nonce, exp] of map) {
+        if (exp * 1000 < now) map.delete(nonce)
+    }
+}
+
+export function makeStateToken(): string {
+    const nonce = crypto.randomBytes(16).toString('hex')
+    return signToken({ n: nonce, exp: Math.floor(Date.now() / 1000) + STATE_TTL_SEC })
+}
+
+/**
+ * Verify a `state` token's signature + expiry AND mark its nonce consumed (single-use,
+ * S1). The first valid presentation returns true and records the nonce; any later
+ * presentation of the same nonce (a replay) returns false. The cookie pairing in the
+ * callback is the primary CSRF control; this closes the replay window the doc-comment
+ * claimed but nothing enforced.
+ */
 export function verifyStateToken(token: string | undefined): boolean {
     const payload = verifyToken<{ n: string; exp: number }>(token)
     if (!payload) return false
-    return typeof payload.exp === 'number' && payload.exp * 1000 >= Date.now()
+    if (typeof payload.exp !== 'number' || payload.exp * 1000 < Date.now()) return false
+    if (typeof payload.n !== 'string' || payload.n === '') return false
+    const now = Date.now()
+    sweepConsumedNonces(now)
+    const map = consumedNonces()
+    if (map.has(payload.n)) return false // already redeemed — reject the replay
+    map.set(payload.n, payload.exp)
+    return true
 }
 
 // ── OAuth flow ────────────────────────────────────────────────────────────────

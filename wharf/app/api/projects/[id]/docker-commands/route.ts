@@ -3,6 +3,7 @@ import {
     listCommands,
     createCommand,
     DockerCommandExistsError,
+    DockerSpecInvalidError,
 } from '@/server/services/docker-commands'
 import type { DockerSpec } from '@/server/domain/types'
 
@@ -39,6 +40,7 @@ export async function POST(req: Request, { params }: Ctx) {
         audit(auth, 'docker.create', id, name)
         return json(cmd, 201)
     } catch (e) {
+        if (e instanceof DockerSpecInvalidError) return error(e.message || 'invalid spec', 400)
         if (e instanceof DockerCommandExistsError) return error('command name already exists', 409)
         throw e
     }

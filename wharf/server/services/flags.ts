@@ -172,8 +172,11 @@ export function setValue(
     const raw = serializeValue(flag.type, fields.value)
     const existing = flagRepo.valueRow(flagId, environmentId)
     const now = new Date().toISOString()
+    // Capture the id ONCE so the persisted row and the returned object agree on the
+    // create path (wharf C2 — the returned `id` was previously hardcoded to '').
+    const valueId = existing?.id ?? ID.flagValue()
     flagRepo.upsertValue({
-        id: existing?.id ?? ID.flagValue(),
+        id: valueId,
         flagId,
         environmentId,
         enabled,
@@ -181,7 +184,7 @@ export function setValue(
         updatedAt: now,
     })
     return {
-        id: existing?.id ?? '',
+        id: valueId,
         flagId,
         environmentId,
         enabled,

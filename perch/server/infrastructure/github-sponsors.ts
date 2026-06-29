@@ -30,8 +30,8 @@ const QUERY = `query($cursor: String) {
         createdAt
         tier { monthlyPriceInCents }
         sponsorEntity {
-          ... on User { login }
-          ... on Organization { login }
+          ... on User { databaseId login }
+          ... on Organization { databaseId login }
         }
       }
     }

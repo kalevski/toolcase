@@ -42,6 +42,7 @@ export async function POST(req: Request) {
 
     const now = new Date().toISOString()
     sponsorshipRepo.upsert({
+        sponsorId: parsed.sponsorId,
         sponsorLogin: parsed.sponsorLogin,
         tierCents: parsed.tierCents,
         status: parsed.status,
@@ -49,6 +50,7 @@ export async function POST(req: Request) {
         updatedAt: now,
     })
     slog('info', 'sponsors-webhook', 'sponsorship upserted', {
+        sponsorId: parsed.sponsorId,
         login: parsed.sponsorLogin,
         status: parsed.status,
         tierCents: parsed.tierCents,

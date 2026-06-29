@@ -24,10 +24,11 @@ import * as siteRepo from '@/server/data/repositories/site-repo'
 import * as userRepo from '@/server/data/repositories/user-repo'
 import * as userLimitRepo from '@/server/data/repositories/user-limit-repo'
 import * as userRealmRepo from '@/server/data/repositories/user-realm-repo'
+import * as sponsorshipRepo from '@/server/data/repositories/sponsorship-repo'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
 import * as deploy from '@/server/services/deploy'
 import { checkBaseDomain, isAssignableRole, parsePlanTiers, parseUserLimits } from '@/server/domain/admin'
-import { resolveLimits, resolvePlan } from '@/server/services/plan'
+import { resolveLimits, resolvePlan, effectivePlanFor, effectiveLimitsFor } from '@/server/services/plan'
 import { summarizeUsage } from '@/server/domain/usage'
 import { NginxpilotError } from '@/server/infrastructure/nginxpilot'
 import { slog } from '@/server/infrastructure/server-log'
@@ -247,12 +248,44 @@ function enrichUser(user: AppUser, override?: UserLimitOverride | null): AdminUs
 
 /**
  * The enriched owner roster (`GET /api/admin/users`): every user with their plan,
- * level, usage, effective limits, and custom override. Overrides are read in one
- * batch query and zipped in, so the roster is a handful of queries, not N per user.
+ * level, usage, effective limits, and custom override. Every per-user input is read
+ * in ONE bulk query and zipped in (I1) — overrides, active sponsorships, plan tiers,
+ * all sites grouped by owner, and all realm grants grouped by user — so the roster is
+ * a fixed handful of queries regardless of user count, not the previous N+1 (which ran
+ * resolvePlan + resolveLimits + a per-user site query + a per-user grant query each).
+ *
+ * Note: this intentionally returns the full roster (no server-side pagination). The
+ * admin UI searches/filters the whole set client-side; paginating here would break that
+ * UX and is deferred until the roster grows enough to need server-side search.
  */
 export function listUsersDetailed(): AdminUserRow[] {
+    const users = userRepo.list()
+    const tiers = planTierRepo.list()
     const overrides = userLimitRepo.all()
-    return userRepo.list().map((u) => enrichUser(u, overrides.get(u.githubId) ?? null))
+    const grantsByUser = userRealmRepo.allByUser()
+    const sponsorshipsById = new Map(sponsorshipRepo.listActive().map((s) => [s.sponsorId, s] as const))
+
+    // All sites in one query, grouped by owner, for per-user usage summaries.
+    const sitesByOwner = new Map<number, Site[]>()
+    for (const site of siteRepo.list()) {
+        const arr = sitesByOwner.get(site.ownerId)
+        if (arr) arr.push(site)
+        else sitesByOwner.set(site.ownerId, [site])
+    }
+
+    return users.map((u) => {
+        const override = overrides.get(u.githubId) ?? null
+        const plan = effectivePlanFor(u, sponsorshipsById, tiers)
+        return {
+            user: u,
+            plan,
+            level: accountLevel(u.role, plan),
+            usage: summarizeUsage(sitesByOwner.get(u.githubId) ?? []),
+            limits: effectiveLimitsFor(u, plan, override),
+            customLimits: override,
+            realmGrants: grantsByUser.get(u.githubId) ?? [],
+        }
+    })
 }
 
 /**

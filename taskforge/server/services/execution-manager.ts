@@ -99,6 +99,8 @@ interface RepoRun {
     /** Kill only the in-flight task's process; the run continues with the next task. */
     skipRequested: boolean
     child: ChildProcess | null
+    /** IMP-1 — pending SIGKILL grace timer from force/skip; cleared on child exit. */
+    killTimer: ReturnType<typeof setTimeout> | null
     sleepResolver: (() => void) | null
     logger: RunLogger | null
     ring: SseEvent[]
@@ -125,6 +127,7 @@ function freshRun(): RepoRun {
         forceRequested: false,
         skipRequested: false,
         child: null,
+        killTimer: null,
         sleepResolver: null,
         logger: null,
         ring: [],
@@ -166,6 +169,14 @@ Task:`
 
 class ExecutionManager extends EventEmitter {
     private runs = new Map<string, RepoRun>()
+
+    constructor() {
+        super()
+        // COR-3 — every open SSE stream adds one 'event' listener; the default
+        // cap of 10 would warn from the 11th concurrent client. Listeners are
+        // removed on SSE cancel(), so lift the bound rather than mask a leak.
+        this.setMaxListeners(0)
+    }
 
     private get(repo: string): RepoRun {
         let r = this.runs.get(repo)
@@ -254,7 +265,28 @@ class ExecutionManager extends EventEmitter {
         // The IDLE→claimed transition is owned by start() (set synchronously
         // before its first await), so no state re-check is needed here.
         await fs.mkdir(projectTasksDir(repo), { recursive: true })
-        // A present .lock with no in-memory run is stale (process restart) → reclaim.
+        // DAT-2 — honor a foreign .lock: if it names a PID that is still alive
+        // (and isn't us), another process holds the checkout — refuse instead of
+        // overwriting. A .lock for a dead/absent PID is stale → reclaim.
+        const existing = await fs.readFile(this.lockPath(repo), 'utf8').catch(() => null)
+        if (existing) {
+            const pid = Number(existing.trim())
+            if (Number.isInteger(pid) && pid > 0 && pid !== process.pid) {
+                let alive = false
+                try {
+                    process.kill(pid, 0) // signal 0 = liveness probe, kills nothing
+                    alive = true
+                } catch (e) {
+                    // ESRCH → no such process (dead, reclaim). EPERM → the process
+                    // exists but is owned by another user (alive, foreign owner) —
+                    // treat as held, never reclaim a live foreign lock.
+                    alive = (e as NodeJS.ErrnoException)?.code === 'EPERM'
+                }
+                if (alive) {
+                    throw new LockHeldError(`Lock held by live process ${pid} for ${repo}`)
+                }
+            }
+        }
         await fs.writeFile(this.lockPath(repo), String(process.pid), 'utf8').catch(() => {})
     }
 
@@ -382,7 +414,10 @@ class ExecutionManager extends EventEmitter {
                 r.child.kill('SIGTERM')
             }
             const grace = config.forceKillGraceMs
-            setTimeout(() => {
+            // IMP-1 — track the SIGKILL timer so the child's close handler can
+            // cancel it; otherwise it fires after a clean exit and may SIGKILL a
+            // reused pid (an unrelated process group).
+            r.killTimer = setTimeout(() => {
                 try {
                     process.kill(-pid, 'SIGKILL')
                 } catch {
@@ -409,7 +444,9 @@ class ExecutionManager extends EventEmitter {
             } catch {
                 r.child.kill('SIGTERM')
             }
-            setTimeout(() => {
+            // IMP-1 — track the SIGKILL timer so the child's close handler can
+            // cancel it before it can hit a reused pid.
+            r.killTimer = setTimeout(() => {
                 try {
                     process.kill(-pid, 'SIGKILL')
                 } catch {
@@ -1139,11 +1176,21 @@ class ExecutionManager extends EventEmitter {
                 this.log(repo, 'error', text, rel)
             })
             child.on('close', (code) => {
+                // IMP-1 — child has exited; cancel any pending force/skip SIGKILL
+                // timer so it can't later signal a reused pid.
+                if (r.killTimer) {
+                    clearTimeout(r.killTimer)
+                    r.killTimer = null
+                }
                 parser.flush()
                 exitCode = code
                 resolve()
             })
             child.on('error', (err) => {
+                if (r.killTimer) {
+                    clearTimeout(r.killTimer)
+                    r.killTimer = null
+                }
                 stderrBuf += `\n${scrub(err.message)}`
                 resolve()
             })

@@ -668,8 +668,13 @@ export function ProjectProvider({
 
     const onStopAgent = useCallback(
         async (kind: AgentKind) => {
+            // COR-1 — AGENT_LABELS only covers the bundled kinds; fall back to the
+            // configured label (custom kinds) then the raw kind so the kill button
+            // never throws on a custom agent panel (mirrors the agent:done handler).
+            const label =
+                AGENT_LABELS[kind] ?? config.agentKinds.find((k) => k.kind === kind)?.label ?? kind
             const ok = await confirm({
-                title: `Kill the running ${AGENT_LABELS[kind].toLowerCase()}?`,
+                title: `Kill the running ${label.toLowerCase()}?`,
                 body: 'The agent process is terminated immediately. Partial files it already wrote stay on disk.',
                 confirmLabel: 'Kill agent',
                 confirmVariant: 'danger',
@@ -677,7 +682,7 @@ export function ProjectProvider({
             if (!ok) return
             await fetch(`/api/projects/${project}/agents/${kind}/stop`, { method: 'POST' }).catch(() => {})
         },
-        [project, confirm],
+        [project, confirm, config.agentKinds],
     )
 
     const onNewBranch = useCallback(async () => {

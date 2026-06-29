@@ -71,6 +71,11 @@ export function generateSecret(bytes: Uint8Array, spec: SecretGenSpec): string {
             const charset =
                 spec.charset ??
                 (spec.kind === 'password' ? DEFAULT_PASSWORD_CHARSET : DEFAULT_TOKEN_CHARSET)
+            // An empty charset would make `byte % 0` → NaN → charset[NaN] → 'undefined'
+            // (a non-secret). Refuse it outright (wharf I3).
+            if (charset.length === 0) {
+                throw new RangeError('charset must not be empty')
+            }
             let out = ''
             // NOTE: byte % charset.length introduces a slight modulo bias when 256
             // is not a multiple of charset.length. Acceptable for these defaults;

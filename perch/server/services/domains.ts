@@ -256,8 +256,34 @@ export async function provisionCustomVhost(site: Site): Promise<Site> {
  * site deletion and when a custom-domain site is suspended.
  */
 export async function teardownCustomVhost(site: Site): Promise<void> {
-    await nginx.removeVhost(site.hostname)
-    await nginx.dropCert(site.hostname)
-    await nginx.reload()
+    // Best-effort end-to-end (I3): a teardown that's part of a delete must never strand a
+    // half-deleted site. Each step is independently guarded — a failed vhost remove, cert
+    // drop, or reload is logged and we press on — so the caller can always proceed to remove
+    // the DB row. `removeVhost`/`dropCert` are already idempotent; this also tolerates a
+    // reload failure (which previously threw `NginxError` and blocked the row delete).
+    try {
+        await nginx.removeVhost(site.hostname)
+    } catch (err) {
+        slog('warn', 'domains', 'vhost remove failed during teardown (continuing)', {
+            domain: site.hostname,
+            error: (err as Error).message,
+        })
+    }
+    try {
+        await nginx.dropCert(site.hostname)
+    } catch (err) {
+        slog('warn', 'domains', 'cert drop failed during teardown (continuing)', {
+            domain: site.hostname,
+            error: (err as Error).message,
+        })
+    }
+    try {
+        await nginx.reload()
+    } catch (err) {
+        slog('warn', 'domains', 'nginx reload failed during teardown (continuing)', {
+            domain: site.hostname,
+            error: (err as Error).message,
+        })
+    }
     audit('site.custom_domain.teardown', site, `dropped vhost + cert for ${site.hostname}`)
 }

@@ -35,6 +35,8 @@ export function verifyHubSignature(
 
 /** A sponsorship-event payload decoded to the fields we persist. */
 export interface ParsedSponsorshipEvent {
+    /** Sponsor's immutable numeric GitHub id — the key we store by (S3). */
+    sponsorId: number
     sponsorLogin: string
     tierCents: number
     status: SponsorshipStatus
@@ -66,6 +68,9 @@ export function parseSponsorshipEvent(payload: unknown): ParsedSponsorshipEvent 
     const p = payload as any
     const status = ACTION_STATUS[p.action]
     if (!status) return null
+    // Key by the sponsor's immutable numeric GitHub id, not the (reusable) login (S3).
+    const sponsorId = p.sponsorship?.sponsor?.id
+    if (typeof sponsorId !== 'number' || !Number.isInteger(sponsorId)) return null
     const sponsorLogin = p.sponsorship?.sponsor?.login
     if (typeof sponsorLogin !== 'string' || sponsorLogin === '') return null
     const tierCents = p.sponsorship?.tier?.monthly_price_in_cents
@@ -78,14 +83,15 @@ export function parseSponsorshipEvent(payload: unknown): ParsedSponsorshipEvent 
             : typeof p.sponsorship?.created_at === 'string'
               ? p.sponsorship.created_at
               : null
-    return { sponsorLogin, tierCents, status, effectiveAt }
+    return { sponsorId, sponsorLogin, tierCents, status, effectiveAt }
 }
 
 // ── GraphQL reconcile nodes → Sponsorship (§8) ───────────────────────────────
 
 /** One node from the `sponsorshipsAsMaintainer` GraphQL connection, trimmed. */
 export interface GraphqlSponsorshipNode {
-    sponsorEntity?: { login?: string } | null
+    /** `databaseId` is the sponsor's immutable numeric GitHub id (the key, S3). */
+    sponsorEntity?: { databaseId?: number; login?: string } | null
     tier?: { monthlyPriceInCents?: number } | null
     isActive?: boolean
     createdAt?: string
@@ -101,9 +107,13 @@ export interface GraphqlSponsorshipNode {
 export function reconcileToSponsorships(nodes: GraphqlSponsorshipNode[], now: string): Sponsorship[] {
     const out: Sponsorship[] = []
     for (const n of nodes) {
+        // Skip nodes missing the immutable id — we key by id, never login (S3).
+        const sponsorId = n.sponsorEntity?.databaseId
+        if (typeof sponsorId !== 'number' || !Number.isInteger(sponsorId)) continue
         const sponsorLogin = n.sponsorEntity?.login
         if (typeof sponsorLogin !== 'string' || sponsorLogin === '') continue
         out.push({
+            sponsorId,
             sponsorLogin,
             tierCents: typeof n.tier?.monthlyPriceInCents === 'number' ? n.tier.monthlyPriceInCents : 0,
             status: n.isActive ? 'active' : 'cancelled',

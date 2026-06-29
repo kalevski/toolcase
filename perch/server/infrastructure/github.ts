@@ -73,6 +73,21 @@ export async function listRepos(token: string): Promise<GithubRepoSummary[]> {
     }))
 }
 
+/**
+ * Fetch one repo's metadata with the caller's token (§9). Used to re-verify a
+ * repo's `private` flag server-side at create time — the client-sent flag is never
+ * trusted for the plan gate (C2). Throws `GithubError` (404 when the token can't
+ * see the repo, which is itself a signal the repo is private/inaccessible).
+ */
+export async function getRepo(token: string, owner: string, repo: string): Promise<GithubRepoSummary> {
+    const r = await gh<{ name: string; default_branch: string; private: boolean; owner: { login: string } | null }>(
+        token,
+        'GET',
+        `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`,
+    )
+    return { name: r.name, owner: r.owner?.login ?? owner, defaultBranch: r.default_branch, private: r.private }
+}
+
 /** List the branches of one repo (§9 step 1). */
 export async function listBranches(token: string, owner: string, repo: string): Promise<GithubBranchSummary[]> {
     const data = await gh<{ name: string }[]>(

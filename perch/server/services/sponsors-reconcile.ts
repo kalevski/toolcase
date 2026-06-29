@@ -29,7 +29,19 @@ export async function reconcileNow(): Promise<number> {
     const now = new Date().toISOString()
     const rows = reconcileToSponsorships(nodes, now)
     for (const r of rows) sponsorshipRepo.upsert(r)
-    slog('info', 'sponsors-reconcile', 'reconciled sponsorships', { count: rows.length })
+    // The GraphQL connection is authoritative (§8): delete any local row whose sponsor
+    // is no longer present, so a vacated/recycled login can't linger as an active grant
+    // (S3). Without this, a takeover where the old account left the sponsor list would
+    // leave a stale row that a recycled login could inherit.
+    const present = new Set(rows.map((r) => r.sponsorId))
+    let pruned = 0
+    for (const id of sponsorshipRepo.allIds()) {
+        if (!present.has(id)) {
+            sponsorshipRepo.removeById(id)
+            pruned++
+        }
+    }
+    slog('info', 'sponsors-reconcile', 'reconciled sponsorships', { count: rows.length, pruned })
     return rows.length
 }
 

@@ -81,7 +81,10 @@ export function list(filter: AuditFilter = {}): AuditEntry[] {
     const sql = `SELECT id, at, github_id, login, action, detail, project_id FROM audit
                  ${where.length ? `WHERE ${where.join(' AND ')}` : ''}
                  ORDER BY id DESC LIMIT ?`
-    params.push(Math.min(filter.limit ?? 100, 500))
+    // Defense-in-depth against a non-numeric limit reaching `LIMIT NaN` (wharf C1):
+    // only honour a finite limit, otherwise fall back to the default.
+    const limit = Number.isFinite(filter.limit) ? (filter.limit as number) : 100
+    params.push(Math.min(limit, 500))
     return allRows<Raw>(sql, ...params).map(map)
 }
 

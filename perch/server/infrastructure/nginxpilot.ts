@@ -169,6 +169,17 @@ interface AdminInit {
 }
 
 /**
+ * Per-request timeout for nginxpilot admin calls (I2). A hung daemon would otherwise
+ * block the Node handler indefinitely (the client `apiFetch` aborts at 10s, but the
+ * server-side work continues), exhausting request workers under load. Overridable via
+ * `PERCH_NGINXPILOT_TIMEOUT_MS`. An abort surfaces as a `NginxpilotError` (→ 502).
+ */
+const ADMIN_FETCH_TIMEOUT_MS = (() => {
+    const raw = Number(process.env.PERCH_NGINXPILOT_TIMEOUT_MS)
+    return Number.isFinite(raw) && raw > 0 ? raw : 15_000
+})()
+
+/**
  * Build a client bound to ONE nginxpilot instance (multiple_realms.md Phase A). Every
  * method closes over `conn`, so the same surface targets whichever realm the caller
  * resolved. The returned object exposes the full admin API — config writes (Channel A)
@@ -180,18 +191,36 @@ export function nginxpilotClient(conn: RealmConnection) {
         return conn.adminToken ? { Authorization: `Bearer ${conn.adminToken}` } : {}
     }
 
-    /** Low-level admin fetch. Returns the raw `Response` so callers can branch on status. */
+    /**
+     * Low-level admin fetch. Returns the raw `Response` so callers can branch on status.
+     * Bounded by `ADMIN_FETCH_TIMEOUT_MS` via `AbortSignal.timeout` (I2): a stalled daemon
+     * aborts the request rather than wedging the handler. The abort is mapped to a
+     * `NginxpilotError` (→ 502) so it slots into the existing error handling.
+     */
     async function adminFetch(
         method: string,
         apiPath: string,
         init: AdminInit = {},
     ): Promise<Response> {
-        return fetch(`${conn.adminUrl}${apiPath}`, {
-            method,
-            cache: 'no-store',
-            headers: { ...authHeaders(), ...(init.headers ?? {}) },
-            body: init.body,
-        })
+        try {
+            return await fetch(`${conn.adminUrl}${apiPath}`, {
+                method,
+                cache: 'no-store',
+                headers: { ...authHeaders(), ...(init.headers ?? {}) },
+                body: init.body,
+                signal: AbortSignal.timeout(ADMIN_FETCH_TIMEOUT_MS),
+            })
+        } catch (err) {
+            const e = err as Error
+            if (e?.name === 'TimeoutError' || e?.name === 'AbortError') {
+                throw new NginxpilotError(
+                    `nginxpilot ${method} ${apiPath} timed out after ${ADMIN_FETCH_TIMEOUT_MS}ms`,
+                    504,
+                )
+            }
+            // A connection-refused / DNS failure is a transport error → 502 via NginxpilotError.
+            throw new NginxpilotError(`nginxpilot ${method} ${apiPath} failed: ${e?.message ?? 'network error'}`)
+        }
     }
 
     /** Admin fetch that throws `NginxpilotError` on any non-2xx response. */

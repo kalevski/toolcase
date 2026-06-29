@@ -214,7 +214,11 @@ const MIGRATIONS: string[] = [
     // UNIQUE in place, so rebuild the table: add `realm_id`, swap the global UNIQUE(hostname)
     // for UNIQUE(realm_id, hostname). `realm_id` is left NULL here and backfilled to the
     // seed default realm at boot (`services/realms.ts` ensureSeed), after which app code
-    // treats it as required. Nothing references `site` by FK, so the rebuild is safe.
+    // treats it as required. This is a CREATE-new / DROP-old / RENAME rebuild, which SQLite
+    // requires `foreign_keys` to be OFF for — the migration runner toggles it OFF around the
+    // whole run and back ON afterwards (D2), so a future inbound FK can't silently corrupt
+    // data on an un-migrated instance. (A `PRAGMA` inside this SQL would be a no-op — it runs
+    // inside the migration's `BEGIN`/`COMMIT`, where SQLite ignores the foreign_keys toggle.)
     `
     CREATE TABLE site_new (
         id          TEXT PRIMARY KEY,
@@ -249,6 +253,32 @@ const MIGRATIONS: string[] = [
     `
     ALTER TABLE base_domain ADD COLUMN realm_id TEXT REFERENCES realm(id);
     `,
+    // v10 — sponsorships are keyed by the sponsor's IMMUTABLE numeric GitHub id, not
+    // their (reusable) login (S3). A recycled username could otherwise inherit a stale
+    // sponsorship and silently get a paid plan. Rebuild the table: `sponsor_id` becomes
+    // the PK (== app_user.github_id), `sponsor_login` is kept for display only. Existing
+    // rows are backfilled by joining the old login-keyed rows to app_user; rows whose
+    // login has no matching user can't be linked to an id (and granted nothing under
+    // id-based resolution, since plan lookup needs the user row), so they're dropped —
+    // the GraphQL reconcile re-creates any still-valid sponsorship with its id within a
+    // minute. CREATE-new / DROP-old / RENAME rebuild (foreign_keys is toggled OFF around
+    // the whole migration run; see `migrate`).
+    `
+    CREATE TABLE sponsorship_new (
+        sponsor_id    INTEGER PRIMARY KEY,     -- == app_user.github_id (immutable)
+        sponsor_login TEXT NOT NULL,           -- display only; NOT the key
+        tier_cents    INTEGER NOT NULL,
+        status        TEXT NOT NULL,           -- active | pending_cancel | cancelled
+        effective_at  TEXT NOT NULL,
+        updated_at    TEXT NOT NULL
+    );
+    INSERT INTO sponsorship_new (sponsor_id, sponsor_login, tier_cents, status, effective_at, updated_at)
+        SELECT u.github_id, s.sponsor_login, s.tier_cents, s.status, s.effective_at, s.updated_at
+        FROM sponsorship s
+        JOIN app_user u ON u.login = s.sponsor_login;
+    DROP TABLE sponsorship;
+    ALTER TABLE sponsorship_new RENAME TO sponsorship;
+    `,
 ]
 
 function migrate(db: DatabaseSync): void {
@@ -263,18 +293,29 @@ function migrate(db: DatabaseSync): void {
     }[]
     const applied = new Set(rows.map((r) => r.version))
     const insert = db.prepare('INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)')
-    for (let i = 0; i < MIGRATIONS.length; i++) {
-        const version = i + 1
-        if (applied.has(version)) continue
-        db.exec('BEGIN')
-        try {
-            db.exec(MIGRATIONS[i])
-            insert.run(version, new Date().toISOString())
-            db.exec('COMMIT')
-        } catch (err) {
-            db.exec('ROLLBACK')
-            throw err
+    // SQLite requires foreign keys OFF during a CREATE-new / DROP-old / RENAME table
+    // rebuild (migrations v8/v10), and the PRAGMA is a no-op *inside* a transaction — so
+    // toggle it here, around the whole migration run, OUTSIDE any `BEGIN` (D2). Today only
+    // the rebuild migrations need this; doing it for the loop is simplest and harmless,
+    // since migrations either don't touch FKs or are run on a freshly-open connection
+    // before any request. It is restored to ON before the connection serves traffic.
+    db.exec('PRAGMA foreign_keys = OFF;')
+    try {
+        for (let i = 0; i < MIGRATIONS.length; i++) {
+            const version = i + 1
+            if (applied.has(version)) continue
+            db.exec('BEGIN')
+            try {
+                db.exec(MIGRATIONS[i])
+                insert.run(version, new Date().toISOString())
+                db.exec('COMMIT')
+            } catch (err) {
+                db.exec('ROLLBACK')
+                throw err
+            }
         }
+    } finally {
+        db.exec('PRAGMA foreign_keys = ON;')
     }
 }
 

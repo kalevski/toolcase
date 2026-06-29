@@ -25,6 +25,20 @@ describe('interpolateValue', () => {
     it('passes a value with no references through unchanged', () => {
         expect(interpolateValue('plain-value', () => 'WRONG')).toBe('plain-value')
     })
+
+    it('does not corrupt a value that contains the old sentinel substring (wharf D2)', () => {
+        // The previous implementation split/joined on ` __WHARF_DOLLAR__ `; a real
+        // value containing it round-tripped into a `$`. The single-pass regex never
+        // touches it.
+        expect(interpolateValue(' __WHARF_DOLLAR__ ', () => undefined)).toBe(
+            ' __WHARF_DOLLAR__ ',
+        )
+    })
+
+    it('collapses consecutive $$ escapes independently', () => {
+        expect(interpolateValue('$$$$', () => undefined)).toBe('$$')
+        expect(interpolateValue('a$$b$$c', () => undefined)).toBe('a$b$c')
+    })
 })
 
 describe('interpolateAll', () => {

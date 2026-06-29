@@ -22,6 +22,56 @@ export class DockerCommandExistsError extends Error {}
 export class DockerCommandNotFoundError extends Error {}
 /** envSource 'instance' needs the env-vars resolver (later phase) → route maps to 422. */
 export class InstanceEnvUnavailableError extends Error {}
+/** A persisted/incoming DockerSpec failed server-side validation (wharf S2) → route maps to 400. */
+export class DockerSpecInvalidError extends Error {}
+
+const RESTART_VALUES: ReadonlySet<string> = new Set([
+    'no',
+    'on-failure',
+    'always',
+    'unless-stopped',
+])
+const PULL_VALUES: ReadonlySet<string> = new Set(['missing', 'always', 'never'])
+const ENV_SOURCE_VALUES: ReadonlySet<string> = new Set(['none', 'wharf', 'instance'])
+
+function isPort(n: unknown): n is number {
+    return typeof n === 'number' && Number.isInteger(n) && n >= 0 && n <= 65535
+}
+
+/**
+ * Validate an incoming DockerSpec before persisting (wharf S2). The renderer
+ * `shEscape`s most string fields, but a few are interpolated raw into the
+ * generated `docker run` text that a devops later copies into a shell — so the
+ * fields that bypass escaping (`restart`, `protocol`, the numeric ports) must be
+ * proven safe here. Throws DockerSpecInvalidError on any violation.
+ *
+ * NOTE on `extraArgs`: it is a deliberate raw shell escape-hatch (free-form flags
+ * such as `--cap-add NET_ADMIN`); it is rendered unescaped by design and is the
+ * devops author's own responsibility — see docker-command.ts.
+ */
+function validateSpec(spec: DockerSpec): void {
+    if (!spec || typeof spec !== 'object') throw new DockerSpecInvalidError('spec required')
+    if (!RESTART_VALUES.has(spec.restart)) {
+        throw new DockerSpecInvalidError('invalid restart policy')
+    }
+    if (!PULL_VALUES.has(spec.pull)) throw new DockerSpecInvalidError('invalid pull policy')
+    if (!ENV_SOURCE_VALUES.has(spec.envSource)) {
+        throw new DockerSpecInvalidError('invalid envSource')
+    }
+    if (!Array.isArray(spec.ports)) throw new DockerSpecInvalidError('ports must be an array')
+    for (const p of spec.ports) {
+        if (!isPort(p.host) || !isPort(p.container)) {
+            throw new DockerSpecInvalidError('port must be an integer in 0–65535')
+        }
+        if (p.protocol !== 'tcp' && p.protocol !== 'udp') {
+            throw new DockerSpecInvalidError('invalid port protocol')
+        }
+    }
+    if (!Array.isArray(spec.volumes)) throw new DockerSpecInvalidError('volumes must be an array')
+    for (const v of spec.volumes) {
+        if (v.mode !== 'rw' && v.mode !== 'ro') throw new DockerSpecInvalidError('invalid volume mode')
+    }
+}
 
 /** Sensible default spec for a fresh builder form (planning §7.1). */
 export function defaultDockerSpec(): DockerSpec {
@@ -67,6 +117,7 @@ export function createCommand(
 ): DockerCommand {
     const name = fields.name.trim()
     if (!name) throw new Error('name required')
+    validateSpec(fields.spec)
     if (dockerCommandRepo.byName(projectId, name)) throw new DockerCommandExistsError()
     const now = new Date().toISOString()
     const cmd: DockerCommand = {
@@ -90,6 +141,7 @@ export function updateCommand(
 ): DockerCommand {
     const cmd = getCommand(projectId, cmdId)
     if (!cmd) throw new DockerCommandNotFoundError()
+    if (fields.spec !== undefined) validateSpec(fields.spec)
     let name = cmd.name
     if (fields.name !== undefined) {
         name = fields.name.trim()

@@ -22,7 +22,16 @@ function stamp(): string {
     return new Date().toISOString().replace(/[:.]/g, '-')
 }
 
-/** Take an encrypted snapshot now. `kind` distinguishes ticker auto-backups from manual. */
+/**
+ * Take an encrypted snapshot now. `kind` distinguishes ticker auto-backups from manual.
+ *
+ * PERF / wharf C3: the snapshot path here is fully SYNCHRONOUS on the single shared
+ * `DatabaseSync` handle (`vacuumInto` + `readFileSync` + `sealBytes` + `writeFileSync`).
+ * Because every repository call is synchronous SQLite on that same handle, a large-DB
+ * VACUUM + file read BLOCKS all request serving for its duration. This is acceptable
+ * while the DB stays small; the proper fix is SQLite's online backup API or a worker
+ * thread (out of scope here — see ensureBackupTickerStarted for the partial mitigation).
+ */
 export function takeBackup(kind: 'auto' | 'manual', createdBy?: number): Backup {
     mkdirSync(config.backupDir, { recursive: true })
     const id = ID.backup()
@@ -90,6 +99,11 @@ export function ensureBackupTickerStarted(): void {
     if (globalThis.__wharfBackupTicker) return
     const everyMs = Math.max(1, config.backupIntervalHours) * 3600_000
     globalThis.__wharfBackupTicker = setInterval(() => {
+        // wharf C3 (partial): the synchronous snapshot in takeBackup blocks request
+        // serving for its duration — documented there. Here we only guarantee a
+        // failure is caught + logged and never throws out of the interval callback
+        // (an unhandled throw from a timer would crash the process). A full fix
+        // (online-backup API / worker thread) is out of scope.
         try {
             takeBackup('auto')
         } catch (err) {

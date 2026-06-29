@@ -13,6 +13,8 @@ export async function GET(req: Request, { params }: Ctx) {
     if ('res' in auth) return auth.res
     const sp = new URL(req.url).searchParams
     const before = sp.get('before') ? Number(sp.get('before')) : undefined
-    const limit = sp.get('limit') ? Number(sp.get('limit')) : undefined
+    // Guard non-numeric ?limit= (e.g. `?limit=abc` → NaN → `LIMIT NaN` 500, wharf C1).
+    const lim = Number(sp.get('limit'))
+    const limit = Number.isFinite(lim) ? lim : undefined
     return json(listProjectAudit(id, { before, limit }))
 }

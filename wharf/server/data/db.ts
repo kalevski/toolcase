@@ -253,6 +253,13 @@ function migrate(db: DatabaseSync): void {
     }[]
     const applied = new Set(rows.map((r) => r.version))
     const insert = db.prepare('INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)')
+    // GUARD RAIL (wharf D1): each MIGRATIONS[i] is run inside one manual BEGIN/COMMIT
+    // and MUST be a single transaction-safe unit. SQLite implicitly COMMITs the open
+    // transaction on certain statements (e.g. some forms of `ALTER`/`VACUUM`/`PRAGMA`
+    // schema changes) — any such statement would silently break the ROLLBACK guarantee
+    // below, leaving a half-applied migration recorded as un-applied. Keep migrations
+    // append-only and prefer one DDL statement per migration where rollback matters;
+    // never mix DDL that triggers an implicit commit with statements you expect to roll back.
     for (let i = 0; i < MIGRATIONS.length; i++) {
         const version = i + 1
         if (applied.has(version)) continue

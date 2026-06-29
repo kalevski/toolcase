@@ -23,7 +23,9 @@ function trustedOrigin(): string {
 }
 
 const PUBLIC_PREFIXES = ['/login', '/api/auth/github']
-const PUBLIC_EXACT = ['/api/health']
+// `/api/settings` is intentionally public: the login screen reads app name/theme/
+// brand colour before any session exists (wharf S1).
+const PUBLIC_EXACT = ['/api/health', '/api/settings']
 
 function isPublic(pathname: string): boolean {
     if (PUBLIC_EXACT.includes(pathname)) return true

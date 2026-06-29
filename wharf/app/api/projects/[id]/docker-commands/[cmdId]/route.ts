@@ -5,6 +5,7 @@ import {
     deleteCommand,
     DockerCommandExistsError,
     DockerCommandNotFoundError,
+    DockerSpecInvalidError,
 } from '@/server/services/docker-commands'
 import type { DockerSpec } from '@/server/domain/types'
 
@@ -40,6 +41,7 @@ export async function PATCH(req: Request, { params }: Ctx) {
         audit(auth, 'docker.update', id, cmdId)
         return json(cmd)
     } catch (e) {
+        if (e instanceof DockerSpecInvalidError) return error(e.message || 'invalid spec', 400)
         if (e instanceof DockerCommandNotFoundError) return error('not found', 404)
         if (e instanceof DockerCommandExistsError) return error('command name already exists', 409)
         throw e

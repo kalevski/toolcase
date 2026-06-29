@@ -32,6 +32,16 @@ export async function POST(req: Request, { params }: Ctx) {
     if (!body.kind || !KINDS.has(body.kind)) return error('invalid kind', 400)
     const length = Number(body.length)
     if (!Number.isInteger(length) || length <= 0) return error('invalid length', 400)
+    // Clamp: a huge length would allocate ~length bytes of entropy synchronously,
+    // blocking the event loop / risking OOM (wharf S3).
+    if (length > 4096) return error('length too large', 400)
+    // A 0/1-char charset can't produce a secret (% 0 → NaN, or all-same char); a
+    // non-string charset is invalid too (wharf I3). undefined = use the default.
+    if (body.charset !== undefined) {
+        if (typeof body.charset !== 'string' || body.charset.length < 2) {
+            return error('charset must be at least 2 characters', 400)
+        }
+    }
     try {
         const meta = generateSecret_(
             id,

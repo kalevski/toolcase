@@ -37,7 +37,12 @@ function fieldMatcher(field: string, min: number, max: number): (v: number) => b
                 lo = a
                 hi = b
             }
-            if (lo < min || hi > max || lo > hi) throw new InvalidCronError(`out of range: ${part}`)
+            // COR-4 — dow treats 7 ≡ 0, so a stepped range may reach `max + 1`
+            // for dow (e.g. `0-7/2`), matching the plain-range/bare-number
+            // branches; norm() folds 7 → 0 below.
+            if (lo < min || hi > max + (max === 6 ? 1 : 0) || lo > hi) {
+                throw new InvalidCronError(`out of range: ${part}`)
+            }
             for (let v = lo; v <= hi; v += n) accept.add(norm(v))
             continue
         }

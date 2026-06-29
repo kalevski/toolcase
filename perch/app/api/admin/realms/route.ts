@@ -32,7 +32,7 @@ export async function POST(req: Request) {
 
     try {
         const actor = { githubId: authz.session.sub, login: authz.session.login }
-        const created = realms.createRealm(actor, body)
+        const created = await realms.createRealm(actor, body)
         return NextResponse.json(created, { status: 201 })
     } catch (err) {
         const { status, code } = realms.httpErrorFor(err)

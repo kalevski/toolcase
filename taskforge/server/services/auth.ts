@@ -49,12 +49,14 @@ function verifyToken<T = any>(token: string | undefined): T | null {
 
 // ── session cookie ────────────────────────────────────────────────────────────
 
-export function makeSessionToken(profile: GithubProfile, role: Role): string {
+// The session cookie deliberately carries NO role — authorization re-reads the
+// authoritative role from roles.json on every request (see `authorize`), so a
+// role embedded here would only be a stale foot-gun (taskforge IMP-4).
+export function makeSessionToken(profile: GithubProfile): string {
     const now = Math.floor(Date.now() / 1000)
     const payload: SessionPayload = {
         sub: profile.githubId,
         login: profile.login,
-        role,
         iat: now,
         exp: now + config.sessionTtl,
     }

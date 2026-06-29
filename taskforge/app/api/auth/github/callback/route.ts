@@ -43,8 +43,10 @@ export async function GET(req: NextRequest) {
             return loginError('not_allowed')
         }
 
-        const user = await resolveOnLogin(profile)
-        const session = makeSessionToken(profile, user.role)
+        // resolveOnLogin persists/updates the user's authoritative role in roles.json;
+        // the role is intentionally NOT embedded in the session token (IMP-4).
+        await resolveOnLogin(profile)
+        const session = makeSessionToken(profile)
 
         const res = NextResponse.redirect(new URL('/', base))
         res.cookies.set(SESSION_COOKIE, session, sessionCookieOptions())

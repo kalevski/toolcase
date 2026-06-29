@@ -31,6 +31,27 @@ export function listForUser(githubId: number): GrantRow[] {
     ).map((r) => ({ realmId: r.realm_id, realmName: r.realm_name, isDefault: r.is_default === 1 }))
 }
 
+/**
+ * Every grant for every user, keyed by `github_id` — one query for the owner roster
+ * (I1). Replaces N per-user `listForUser` calls in `admin.listUsersDetailed`; the row
+ * shape per user matches `listForUser` (oldest grant first within each user).
+ */
+export function allByUser(): Map<number, GrantRow[]> {
+    const rows = allRows<RawGrant & { github_id: number }>(
+        `SELECT ur.github_id AS github_id, ur.realm_id AS realm_id, r.name AS realm_name, ur.is_default AS is_default
+         FROM user_realm ur JOIN realm r ON r.id = ur.realm_id
+         ORDER BY ur.github_id, ur.granted_at`,
+    )
+    const out = new Map<number, GrantRow[]>()
+    for (const r of rows) {
+        const grant: GrantRow = { realmId: r.realm_id, realmName: r.realm_name, isDefault: r.is_default === 1 }
+        const arr = out.get(r.github_id)
+        if (arr) arr.push(grant)
+        else out.set(r.github_id, [grant])
+    }
+    return out
+}
+
 /** Whether a user is granted a realm. */
 export function hasAccess(githubId: number, realmId: string): boolean {
     return getRow<{ n: number }>(

@@ -16,6 +16,7 @@ const TIERS: PlanTier[] = [
 
 function sponsorship(over: Partial<Sponsorship>): Sponsorship {
     return {
+        sponsorId: 1,
         sponsorLogin: 'alice',
         tierCents: 0,
         status: 'active',

@@ -336,7 +336,13 @@ export type SponsorshipStatus = 'active' | 'pending_cancel' | 'cancelled'
 
 /** A GitHub sponsorship, linked to a user by login. Mirrors the `sponsorship` table (§12). */
 export interface Sponsorship {
-    /** Sponsor GitHub login; primary key. Equals `app_user.login` for linking. */
+    /**
+     * Sponsor's immutable numeric GitHub id; the primary key. Linking is by id
+     * (== `app_user.github_id`), NOT login — GitHub usernames are reusable, so a
+     * recycled login must never inherit a stale sponsorship (S3).
+     */
+    sponsorId: number
+    /** Sponsor GitHub login at the time of the event — display only, never the key. */
     sponsorLogin: string
     /** Monthly sponsorship amount in cents; bucketed to a plan via `plan_tier`. */
     tierCents: number
