@@ -1,8 +1,9 @@
 lib
-# taskforge & perch use lib/ as a SOURCE dir (Next.js app helpers — the @/lib/tc
-# web-components interop shim), not build output — keep it tracked.
+# taskforge, perch & wharf use lib/ as a SOURCE dir (Next.js app helpers — the
+# @/lib/tc web-components interop shim), not build output — keep it tracked.
 !taskforge/lib/
 !perch/lib/
+!wharf/lib/
 node_modules
 .parcel-cache
 .DS_Store
