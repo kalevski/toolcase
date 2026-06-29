@@ -13,7 +13,7 @@
     },
     "dependencies": {
         "@toolcase/base": "^5.0.0",
-        "@toolcase/web-components": "^5.0.0",
+        "@toolcase/web-components": "^5.0.7",
         "next": "^16.2.9",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",

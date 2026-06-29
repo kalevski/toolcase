@@ -51,7 +51,6 @@ export class LocalStorageAdapter implements StorageAdapter {
     }
 
     private _storage(): Storage {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const ls = (globalThis as any).localStorage as Storage | undefined
         if (!ls) {
             throw new Error(
