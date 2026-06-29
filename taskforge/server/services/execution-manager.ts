@@ -272,7 +272,7 @@ class ExecutionManager extends EventEmitter {
         if (existing) {
             const pid = Number(existing.trim())
             if (Number.isInteger(pid) && pid > 0 && pid !== process.pid) {
-                let alive = false
+                let alive: boolean
                 try {
                     process.kill(pid, 0) // signal 0 = liveness probe, kills nothing
                     alive = true
