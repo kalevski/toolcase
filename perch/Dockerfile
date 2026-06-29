@@ -5,7 +5,7 @@
 # path below is repo-root-relative. Node >= 22.5 for the built-in node:sqlite.
 
 # ── build stage ──────────────────────────────────────────────────────────────
-FROM node:24-slim AS builder
+FROM node:22-slim AS builder
 WORKDIR /repo
 
 COPY . .
@@ -14,7 +14,7 @@ RUN npm ci \
     && npm run build -w @toolcase/base -w @toolcase/web-components -w @toolcase/perch
 
 # ── runtime stage ────────────────────────────────────────────────────────────
-FROM node:24-slim AS runner
+FROM node:22-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production

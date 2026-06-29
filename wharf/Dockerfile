@@ -21,7 +21,7 @@ RUN set -eu; for p in linux/amd64 linux/arm64; do \
     cd /out && find . -type f -name wharf-client -exec sha256sum {} \; > checksums.txt
 
 # ── Stage 2 — Next.js builder: build the app SECOND ────────────────────────────
-FROM node:24-slim AS builder
+FROM node:22-slim AS builder
 WORKDIR /repo
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -29,7 +29,7 @@ RUN npm ci \
  && npm run build -w @toolcase/base -w @toolcase/web-components -w @toolcase/wharf
 
 # ── Stage 3 — runner: serve LAST (Next on PORT + Agent on AGENT_PORT) ──────────
-FROM node:24-slim AS runner
+FROM node:22-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 \
     PORT=3000 AGENT_PORT=4000 WORKSPACE_DIR=/workspace \
