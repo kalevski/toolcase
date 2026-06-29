@@ -18,6 +18,7 @@
 //	GET    /proxies           list configured reverse proxies
 //	POST   /proxies           write a proxy fragment and reload
 //	DELETE /proxies/{domain}  remove a proxy's fragment and reload
+//	GET    /certs             list TLS certs discovered in the cert dir (read-only)
 //
 // Each write/delete validates the candidate merged config before touching disk,
 // so an invalid fragment never lands in sites.d/ and the running config is the
@@ -118,6 +119,7 @@ func (s *Server) routes() http.Handler {
 	mux.HandleFunc("POST /stream-upstreams", s.auth(s.handleCreateStreamUpstream))
 	mux.HandleFunc("DELETE /stream-upstreams/{name}", s.auth(s.handleDeleteStreamUpstream))
 	mux.HandleFunc("POST /nginx/test", s.auth(s.handleNginxTest))
+	mux.HandleFunc("GET /certs", s.auth(s.handleListCerts))
 	return mux
 }
 

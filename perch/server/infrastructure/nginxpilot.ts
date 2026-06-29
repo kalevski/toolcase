@@ -134,6 +134,29 @@ export interface NginxTestResult {
     error?: string
 }
 
+/**
+ * One TLS certificate from `GET /certs` — mirrors nginxpilot's `admin.certInfo`.
+ * Read-only discovery: file paths plus parsed leaf metadata, NEVER key material
+ * (the privkey *path* is exposed, never its bytes). The parsed fields are
+ * best-effort — `not_before`/`not_after`/`issuer` are absent when nginxpilot
+ * couldn't parse the leaf cert (`names` is then empty too).
+ */
+export interface NginxpilotCert {
+    /** The index key — the cert directory / file-name stem nginxpilot discovered it under. */
+    domain: string
+    /** Leaf-cert SAN DNS names (lowercased); empty when the cert couldn't be parsed. */
+    names: string[]
+    cert_path: string
+    key_path: string
+    /** ISO timestamp of the key file's mtime (changes on renewal). */
+    mod_time: string
+    /** ISO validity window; absent when the cert couldn't be parsed. */
+    not_before?: string
+    not_after?: string
+    /** Issuer CN (or full DN when no CN); absent when the cert couldn't be parsed. */
+    issuer?: string
+}
+
 /** Outcome of `reload()` — always the REST path now that the file-drop fallback is gone. */
 export type ReloadResult = { method: 'rest' }
 
@@ -407,6 +430,18 @@ export function nginxpilotClient(conn: RealmConnection) {
     }
 
     /**
+     * Every TLS certificate nginxpilot discovered in its cert dir — `GET /certs`
+     * (read-only; drives the admin Certificates page). Metadata only — no key
+     * material crosses the wire. An unconfigured/missing cert dir answers `200`
+     * with an empty list, so this never throws for "no certs", only for transport
+     * or auth failures.
+     */
+    async function listCertificates(): Promise<NginxpilotCert[]> {
+        const res = await adminOk('GET', '/certs')
+        return ((await res.json()) as { certs?: NginxpilotCert[] }).certs ?? []
+    }
+
+    /**
      * Reload nginxpilot via `POST /reload` (diff-based, the REST equivalent of SIGHUP).
      * Channel A writes already reload on nginxpilot's side, so after a write/remove this
      * is an idempotent no-op (an empty diff returns `200`); it stays an explicit step so
@@ -439,6 +474,7 @@ export function nginxpilotClient(conn: RealmConnection) {
         nginxTest,
         sync,
         vhost,
+        listCertificates,
         reload,
     }
 }

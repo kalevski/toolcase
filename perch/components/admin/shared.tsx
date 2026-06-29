@@ -15,6 +15,7 @@ export const ADMIN_TABS: SubTab[] = [
     { id: 'admin-users', label: 'Users', icon: 'users', href: '/admin/users' },
     { id: 'admin-realms', label: 'Realms', icon: 'server', href: '/admin/realms' },
     { id: 'admin-domains', label: 'Domains', icon: 'globe', href: '/admin/domains' },
+    { id: 'admin-certificates', label: 'Certificates', icon: 'shield-check', href: '/admin/certificates' },
     { id: 'admin-plans', label: 'Plans', icon: 'credit-card', href: '/admin/plans' },
     { id: 'admin-settings', label: 'Settings', icon: 'settings', href: '/admin/settings' },
     { id: 'admin-audit', label: 'Audit', icon: 'scroll-text', href: '/admin/audit' },

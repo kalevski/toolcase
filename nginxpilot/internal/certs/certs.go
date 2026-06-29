@@ -33,6 +33,21 @@ type Entry struct {
 	// ["webapp.mk", "*.webapp.mk"]. Empty when the cert could not be parsed —
 	// matching then falls back to the directory/file-name key alone.
 	Names []string
+	// NotBefore/NotAfter are the leaf certificate's validity window and Issuer
+	// its issuer CN. Parsed best-effort alongside Names: all three are zero when
+	// the cert could not be parsed. Surfaced for the admin cert-listing API; the
+	// apply path (For) never reads them.
+	NotBefore time.Time
+	NotAfter  time.Time
+	Issuer    string
+}
+
+// Cert pairs an index key with its Entry, for enumerating the whole index
+// (Index.List) — the read-only cert-listing admin API. Domain is the
+// directory/file-name key the entry was discovered under.
+type Cert struct {
+	Domain string
+	Entry
 }
 
 // Match kinds for For's SAN fallback, ordered so a higher value wins.
@@ -127,6 +142,20 @@ func (i *Index) Domains() []string {
 	return out
 }
 
+// List returns every indexed cert/key pair (key + Entry), sorted by domain key.
+// The nil/empty Index yields an empty, non-nil slice. Unlike For it does no
+// SAN-fallback matching — it's the inverse of Domains, for enumerating the index.
+func (i *Index) List() []Cert {
+	out := []Cert{}
+	if i == nil {
+		return out
+	}
+	for _, d := range i.Domains() { // sorted → deterministic order
+		out = append(out, Cert{Domain: d, Entry: i.entries[d]})
+	}
+	return out
+}
+
 // Fingerprint is a stable digest of (domain, key-mtime) pairs. It changes when
 // a cert is added, removed, or renewed in place (renewals rewrite the same
 // paths with a fresh mtime), so a watcher can cheaply detect renewals.
@@ -167,7 +196,7 @@ func Load(dir string) (*Index, error) {
 		cert := filepath.Join(dir, domain, "fullchain.pem")
 		key := filepath.Join(dir, domain, "privkey.pem")
 		if regular(cert) && regular(key) {
-			idx.entries[domain] = Entry{CertPath: cert, KeyPath: key, ModTime: mtime(key), Names: sanNames(cert)}
+			idx.entries[domain] = newEntry(cert, key)
 		}
 	}
 
@@ -184,17 +213,34 @@ func Load(dir string) (*Index, error) {
 		cert := filepath.Join(dir, e.Name())
 		key := filepath.Join(dir, domain+".key")
 		if regular(cert) && regular(key) {
-			idx.entries[domain] = Entry{CertPath: cert, KeyPath: key, ModTime: mtime(key), Names: sanNames(cert)}
+			idx.entries[domain] = newEntry(cert, key)
 		}
 	}
 	return idx, nil
 }
 
-// sanNames parses the leaf certificate (the first CERTIFICATE block in a
-// fullchain/flat PEM) and returns its SAN DNS names, lowercased. Best-effort: a
-// missing/unreadable/unparseable file yields nil, leaving the entry matchable
-// only by its directory/file-name key.
-func sanNames(certPath string) []string {
+// newEntry builds an Entry for a cert/key pair, parsing the leaf cert's SANs and
+// validity/issuer metadata best-effort (an unparseable cert still yields a
+// usable Entry matchable by its directory/file-name key).
+func newEntry(cert, key string) Entry {
+	e := Entry{CertPath: cert, KeyPath: key, ModTime: mtime(key)}
+	if leaf := parseLeaf(cert); leaf != nil {
+		for _, n := range leaf.DNSNames {
+			e.Names = append(e.Names, strings.ToLower(n))
+		}
+		e.NotBefore, e.NotAfter = leaf.NotBefore, leaf.NotAfter
+		e.Issuer = leaf.Issuer.CommonName
+		if e.Issuer == "" {
+			e.Issuer = leaf.Issuer.String()
+		}
+	}
+	return e
+}
+
+// parseLeaf parses the leaf certificate (the first CERTIFICATE block in a
+// fullchain/flat PEM). Best-effort: a missing/unreadable/unparseable file yields
+// nil, leaving the entry matchable only by its directory/file-name key.
+func parseLeaf(certPath string) *x509.Certificate {
 	data, err := os.ReadFile(certPath)
 	if err != nil {
 		return nil
@@ -212,11 +258,7 @@ func sanNames(certPath string) []string {
 		if err != nil {
 			return nil
 		}
-		names := make([]string, 0, len(c.DNSNames))
-		for _, n := range c.DNSNames {
-			names = append(names, strings.ToLower(n))
-		}
-		return names
+		return c
 	}
 	return nil
 }

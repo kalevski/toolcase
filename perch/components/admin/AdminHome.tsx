@@ -31,6 +31,12 @@ const AREAS = [
     },
     { href: '/admin/domains', label: 'Domains', icon: 'Globe', desc: 'The subdomain pool, grouped by audience tier.' },
     {
+        href: '/admin/certificates',
+        label: 'Certificates',
+        icon: 'ShieldCheck',
+        desc: 'TLS certificates nginxpilot discovered, with expiry.',
+    },
+    {
         href: '/admin/plans',
         label: 'Plans',
         icon: 'CreditCard',

@@ -65,6 +65,22 @@ func (m *Manager) runCertWatch(ctx context.Context) {
 	w.Run(ctx, func(*certs.Index) { m.applyManaged(ctx) })
 }
 
+// CertDir resolves the configured TLS cert directory, independent of managed
+// mode (m.certDir is populated only when nginx.manage is on). Returns "" when
+// TLS is unconfigured or the configured cert_dir_env names an unset variable.
+// The admin cert-listing endpoint reads disk fresh from this dir, so it reflects
+// renewals immediately and works in generate-only mode too.
+func (m *Manager) CertDir() string {
+	if m.certDir != "" {
+		return m.certDir
+	}
+	dir, err := m.Config().Tls.ResolveDir()
+	if err != nil {
+		return ""
+	}
+	return dir
+}
+
 // NginxStatus returns the managed-mode flag and the last apply's per-resource
 // states for GET /status.
 func (m *Manager) NginxStatus() (managed bool, resources []nginxctl.ResourceResult) {
