@@ -1,0 +1,104 @@
+// Blueprint › tc-context-menu — white paper surface with teal hover wells, pink danger, mono item voice, and a faint violet hairline frame.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Floating menu surface ────────────────────────────────────────────────
+
+    .tc-context-menu-list {
+        // Surface: raised white card, violet-tinted hairline, violet shadow.
+        --bs-context-menu-bg:     var(--bp-paper);
+        --bs-context-menu-border: 1px solid var(--bp-border);
+        --bs-context-menu-shadow: var(--tc-shadow-md);
+
+        // Item typography — mono eyebrow voice at body size keeps the HUD feel
+        // without forcing uppercase on prose labels.
+        --bs-context-menu-item-font-size:  0.8125rem; // 13px — unchanged from base
+        --bs-context-menu-item-color:      var(--bp-text);
+
+        // Hover well: faint teal-soft tint so active selection reads as an
+        // action accent (teal = everyday action in the blueprint palette).
+        --bs-context-menu-item-hover-bg:   var(--bp-teal-soft);
+        --bs-context-menu-item-hover-color: var(--bp-text);
+
+        // Danger: real-red, not pink — pink is the primary CTA accent; danger
+        // must carry genuine severity signal on this light-theme surface.
+        --bs-context-menu-danger-color:     var(--bp-danger);
+        --bs-context-menu-danger-hover-bg:  var(--bp-danger-soft);
+
+        // Separator: faint violet hairline matches the border family.
+        --bs-context-menu-separator-color: var(--bp-border-faint);
+    }
+
+    // ── Item typography ──────────────────────────────────────────────────────
+
+    .tc-context-menu-item {
+        // Mono font for the item row — the blueprint convention for micro-labels
+        // and nav items. Keeps tracking tight (not the uppercase eyebrow variant).
+        font-family: var(--bp-mono);
+        font-size:   var(--bs-context-menu-item-font-size);
+        font-weight: 500;
+        letter-spacing: 0.01em;
+        color: var(--bp-text);
+        transition:
+            background-color var(--bp-ease),
+            color var(--bp-ease);
+
+        // Icon: route to muted text so it doesn't compete with the label, and
+        // picks up color via currentColor on hover.
+        svg {
+            color: var(--bp-text-faint);
+            transition: color var(--bp-ease);
+        }
+
+        &:hover,
+        &:focus-visible {
+            svg {
+                // On hover the teal well shows — shift icon to teal-fg for AA
+                // contrast on the teal-soft fill.
+                color: var(--bp-teal-fg);
+            }
+        }
+
+        // Danger variant — real red; override icon color too.
+        &--danger {
+            color: var(--bp-danger);
+
+            svg {
+                color: var(--bp-danger);
+            }
+
+            &:hover,
+            &:focus-visible {
+                color: var(--bp-danger);
+                background-color: var(--bp-danger-soft);
+
+                svg {
+                    color: var(--bp-danger);
+                }
+            }
+        }
+
+        // Open submenu parent — same teal well as hover.
+        &--open {
+            background-color: var(--bp-teal-soft);
+
+            svg {
+                color: var(--bp-teal-fg);
+            }
+        }
+    }
+
+    // ── Chevron — tints to muted, shifts to teal on active ──────────────────
+
+    .tc-context-menu-chevron {
+        color: var(--bp-text-faint);
+        transition: color var(--bp-ease);
+
+        .tc-context-menu-item:hover &,
+        .tc-context-menu-item:focus-visible &,
+        .tc-context-menu-item--open & {
+            color: var(--bp-teal-fg);
+        }
+    }
+}

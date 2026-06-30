@@ -1,0 +1,149 @@
+// Blueprint › tc-version-picker — segmented mono version selector: paper frame,
+// pink active fill with glow, teal "latest" tag, violet "lts" tag, faint muted
+// deprecated state; dropdown variant uses mono eyebrow label + tinted select.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    .tc-version-picker {
+        // Re-point all base --bs-version-picker-* vars to blueprint tokens.
+        // The base partial drives every cosmetic through these vars, so
+        // overriding them here is the cleanest path — no class duplication.
+
+        // Frame + surface
+        --bs-version-picker-border:       var(--bp-border-strong);
+        --bs-version-picker-surface:      var(--bp-paper);
+
+        // Text
+        --bs-version-picker-color:        var(--bp-text);
+        --bs-version-picker-muted:        var(--bp-text-muted);
+
+        // Hover well — recessed well tint
+        --bs-version-picker-hover-bg:     var(--bp-bg-2);
+
+        // Active / selected segment — pink primary (arcade CTA rotation)
+        --bs-version-picker-active-bg:    var(--bp-pink);
+        --bs-version-picker-active-color: var(--bp-pink-ink);
+
+        // Tag tints: success → teal, info → violet
+        --bs-version-picker-tag-success:    var(--bp-teal-fg);
+        --bs-version-picker-tag-success-bg: var(--bp-teal-soft);
+        --bs-version-picker-tag-info:       var(--bp-violet-fg);
+        --bs-version-picker-tag-info-bg:    var(--bp-violet-soft);
+    }
+
+    // ── Segmented frame ──────────────────────────────────────────────────────
+    // The outer border is already painted by the base rule via
+    // --bs-version-picker-border; add the shadow to lift the card off the page.
+    .tc-version-picker--segmented {
+        background: var(--bp-paper);
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Option buttons ───────────────────────────────────────────────────────
+    .tc-version-picker__option {
+        // Blueprint mono face for version strings — uppercase + tight tracking.
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        transition:
+            background-color var(--bp-ease),
+            color var(--bp-ease);
+
+        // Internal separator hairline → faint divider token
+        border-left-color: var(--bp-border-faint);
+
+        &:focus-visible {
+            // Pink glow ring replaces the generic app-accent outline.
+            outline: 2px solid var(--bp-pink);
+            outline-offset: -2px;
+            box-shadow: var(--bp-glow-pink);
+        }
+
+        // Active segment: pink fill with a soft ambient glow.
+        &--active,
+        &--active:hover {
+            background: var(--bp-pink);
+            color: var(--bp-pink-ink);
+            box-shadow: var(--bp-glow-pink);
+        }
+
+        // Deprecated segment: faint amber-ish muted text (uses the base
+        // faint text — amber-soft would be too colourful for a subtle struck state).
+        &--deprecated {
+            color: var(--bp-text-faint);
+        }
+    }
+
+    // ── Option label (version string) ────────────────────────────────────────
+    .tc-version-picker__option-label {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+    }
+
+    // ── Status tags ──────────────────────────────────────────────────────────
+    .tc-version-picker__tag {
+        // All tags: mono micro-label, uppercase — base already sets most of
+        // this; reinforce the font family to bp-mono.
+        font-family: var(--bp-mono);
+
+        &--latest {
+            // Teal soft tint → success colour in blueprint
+            color: var(--bp-teal-fg);
+            background: var(--bp-teal-soft);
+        }
+
+        &--lts {
+            // Violet soft tint → info/supporting colour in blueprint
+            color: var(--bp-violet-fg);
+            background: var(--bp-violet-soft);
+        }
+
+        &--deprecated {
+            // Deprecated annotation: neutral paper-tint chip so it stays
+            // visually recessive — no accent bleed.
+            color: var(--bp-text-faint);
+            background: var(--bp-paper-tint-2);
+        }
+    }
+
+    // On an active (pink-filled) segment, lift tag contrast onto the fill.
+    // Replace the base rgba(255,255,255,0.18) ghost with a named token.
+    .tc-version-picker__option--active .tc-version-picker__tag {
+        color: var(--bp-pink-ink);
+        background: rgba(255, 255, 255, 0.2); // translucent tint over pink fill
+    }
+
+    // ── Dropdown variant ─────────────────────────────────────────────────────
+    // The label row and the native <select> get blueprint mono eyebrow treatment.
+    .tc-version-picker__label-icon {
+        // Icon inherits muted colour from base var; no override needed — the
+        // var is already re-pointed to --bp-text-muted above.
+        color: var(--bp-text-muted);
+    }
+
+    .tc-version-picker__label-text {
+        // Eyebrow / kicker: mono uppercase with loose tracking.
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--bp-text-muted);
+    }
+
+    .tc-version-picker__select {
+        // The select reuses .form-select cosmetics; anchor font to bp-mono
+        // so the selected version string reads as a mono HUD token, matching
+        // the segmented variant's aesthetic.
+        font-family: var(--bp-mono);
+
+        // Reroute any default form-select border/bg to blueprint surface tokens.
+        --bs-border-color: var(--bp-border);
+        background-color: var(--bp-paper);
+        color: var(--bp-text);
+
+        &:focus {
+            border-color: var(--bp-pink);
+            box-shadow: var(--bp-glow-pink);
+        }
+    }
+}

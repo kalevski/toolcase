@@ -1,0 +1,131 @@
+// Blueprint › tc-bar-chart — light-paper chart frame; pink/teal/violet/amber series ramp; mono axis + value labels; paper tooltip with pink left stripe; teal focus ring.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-bar-chart {
+        // ── series ramp: pink primary → teal action → violet → amber → teal/violet darker ──
+        --bs-bar-chart-series-1: var(--bp-pink);
+        --bs-bar-chart-series-2: var(--bp-teal);
+        --bs-bar-chart-series-3: var(--bp-violet);
+        --bs-bar-chart-series-4: var(--bp-amber);
+        --bs-bar-chart-series-5: var(--bp-teal-fg);       // darker teal keeps legibility as 5th series
+        --bs-bar-chart-series-6: var(--bp-violet-fg);     // darker violet keeps legibility as 6th series
+
+        // ── chart frame ──
+        --bs-bar-chart-bg:     var(--bp-paper);
+        --bs-bar-chart-border: 1px solid var(--bp-border);
+
+        // ── grid + axes ── faint ruled lines; baseline axis slightly stronger
+        --bs-bar-chart-grid-color: var(--bp-border-faint);
+        --bs-bar-chart-axis-color: var(--bp-border);
+
+        // ── axis / category labels (mono micro-labels) ──
+        --bs-bar-chart-label-color: var(--bp-text-muted);
+        --bs-bar-chart-label-size:  11px;
+
+        // ── per-bar value labels (inline numbers painted above/beside bars) ──
+        --bs-bar-chart-value-color: var(--bp-text);
+
+        // ── header ──
+        --bs-bar-chart-title-color:    var(--bp-text);
+        --bs-bar-chart-subtitle-color: var(--bp-text-muted);
+
+        // ── bar state ──
+        --bs-bar-chart-bar-opacity:       1;
+        --bs-bar-chart-bar-hover-opacity: 0.78;           // slightly more contrast than base default
+
+        // ── focus ring: teal (everyday action color for keyboard nav) ──
+        --bs-bar-chart-focus-ring: var(--bp-teal);
+
+        // ── tooltip ── light paper surface; colored left stripe from bar series color;
+        // the base renders border-left using --tc-bar-color which already picks up the
+        // series fill, so the stripe color is automatic.
+        --bs-bar-chart-tooltip-bg:           var(--bp-paper);
+        --bs-bar-chart-tooltip-color:        var(--bp-text);
+        --bs-bar-chart-tooltip-stripe-width: 3px;
+        --bs-bar-chart-tooltip-shadow:       var(--tc-shadow-lg);
+
+        // ── loading skeleton ──
+        --bs-bar-chart-skeleton-bg: var(--bp-bg-2);
+    }
+
+    // ── inner frame: paper + hairline + shadow ──
+    .tc-bar-chart__inner {
+        background: var(--bp-paper);
+        border:     1px solid var(--bp-border);
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── title: display face, tight tracking ──
+    .tc-bar-chart__title {
+        font-family:     var(--bp-display);
+        color:           var(--bp-text);
+        letter-spacing:  -0.01em;
+    }
+
+    // ── subtitle: body face, muted ──
+    .tc-bar-chart__subtitle {
+        font-family: var(--bp-body);
+        color:       var(--bp-text-muted);
+    }
+
+    // ── axis + category labels: mono micro-label style ──
+    // SVG text nodes — addressed via fill, not color
+    .tc-bar-chart__axis-label,
+    .tc-bar-chart__cat-label {
+        font-family:     var(--bp-mono);
+        fill:            var(--bp-text-muted);
+        letter-spacing:  0.06em;
+        text-transform:  uppercase;
+    }
+
+    // ── per-bar value labels ──
+    .tc-bar-chart__value {
+        font-family: var(--bp-mono);
+        fill:        var(--bp-text);
+        font-weight: 600;
+        letter-spacing: 0.04em;
+    }
+
+    // ── tooltip: paper surface + hairline ──
+    // The base sets border-left: <stripe-width> solid var(--tc-bar-color, ...) which
+    // naturally picks up the active series color — no override needed for the stripe.
+    .tc-bar-chart__tooltip {
+        background: var(--bp-paper);
+        color:      var(--bp-text);
+        border:     1px solid var(--bp-border);
+        box-shadow: var(--tc-shadow-lg);
+    }
+
+    // ── tooltip name row: mono micro-label, full opacity (overrides base 0.75) ──
+    .tc-bar-chart__tooltip-name {
+        font-family:    var(--bp-mono);
+        color:          var(--bp-text-muted);
+        letter-spacing: 0.06em;
+        opacity:        1;    // base sets 0.75; we already use --bp-text-muted so full opacity is correct
+    }
+
+    // ── tooltip value: display face, strong ink ──
+    .tc-bar-chart__tooltip-value {
+        font-family: var(--bp-display);
+        color:       var(--bp-text);
+    }
+
+    // ── empty state: body face, faint ink ──
+    .tc-bar-chart__empty {
+        font-family: var(--bp-body);
+        color:       var(--bp-text-faint);
+    }
+
+    // ── skeleton shimmer: bp-bg-2 base + paper-tint highlight ──
+    .tc-bar-chart__skeleton {
+        background: linear-gradient(
+            90deg,
+            var(--bp-bg-2)       25%,
+            var(--bp-paper-tint) 37%,
+            var(--bp-bg-2)       63%
+        );
+        background-size: 200% 100%;
+    }
+}

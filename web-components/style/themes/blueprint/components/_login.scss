@@ -1,0 +1,142 @@
+// Blueprint › tc-login — lavender-grid aside with pink CTA accent; white form column with display title and mono eyebrow.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-login {
+        // ── Column divider ───────────────────────────────────────────────────────
+        --bs-login-column-divider: 1px solid var(--bp-border);
+
+        // ── Aside: replace dark ink ground with blueprint grid field ────────────
+        // The aside becomes the theme's signature surface: lavender + violet grid
+        // pattern + ambient pink/teal glow — the "blueprint paper" motif.
+        --bs-login-aside-bg: var(--bp-bg);
+
+        // ── Form column ──────────────────────────────────────────────────────────
+        --bs-login-form-bg: var(--bp-paper);
+
+        // ── Title ────────────────────────────────────────────────────────────────
+        --bs-login-title-color: var(--bp-emphasis);
+
+        // ── Description ──────────────────────────────────────────────────────────
+        --bs-login-desc-color: var(--bp-text-muted);
+
+        // ── Skeleton shimmer ─────────────────────────────────────────────────────
+        // Reroute surface-muted → recessed well token; shimmer stays white (light theme).
+        --bs-login-skel-bg: var(--bp-bg-2);
+        --bs-login-skel-shimmer: rgba(255, 255, 255, 0.72);
+    }
+
+    // ── Aside: blueprint grid + ambient glow layers ──────────────────────────────
+    // Two pseudo-elements stack on the aside:
+    //   ::before  — the violet dot-grid field (--bp-grid-field / --bp-grid-size)
+    //   ::after   — the pink+teal ambient glow blob (--bp-glow-field)
+    // Together they produce the "technical paper" aesthetic without adding markup.
+
+    .tc-login-aside {
+        background: var(--bp-bg);
+
+        &::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background-image: var(--bp-grid-field);
+            background-size: var(--bp-grid-size, 38px) var(--bp-grid-size, 38px);
+            opacity: 0.9;
+        }
+
+        &::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+            background: var(--bp-glow-field);
+            opacity: 0.55;
+        }
+    }
+
+    // Ensure the aside image (if supplied) sits above the grid/glow layers
+    // and keeps the luminosity blend so it reads as an inked illustration.
+    .tc-login-aside-pattern {
+        z-index: 2;
+    }
+
+    .tc-login-aside-img {
+        opacity: 0.28;
+        mix-blend-mode: multiply;
+    }
+
+    // ── Form column ──────────────────────────────────────────────────────────────
+
+    .tc-login-form {
+        background: var(--bp-paper);
+    }
+
+    // ── Title: display face, tight tracking ──────────────────────────────────────
+    // The login title is a product moment — it earns the --bp-display face.
+    // Uppercase with tight tracking signals authority without being shouty.
+
+    .tc-login-title {
+        font-family: var(--bp-display);
+        font-size: 1.625rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        text-transform: uppercase;
+        color: var(--bp-emphasis);
+        text-wrap: balance;
+    }
+
+    // ── Description ──────────────────────────────────────────────────────────────
+
+    .tc-login-description {
+        font-family: var(--bp-body);
+        color: var(--bp-text-muted);
+        font-size: 0.9375rem;
+        line-height: 1.6;
+    }
+
+    // ── Connect button group ─────────────────────────────────────────────────────
+    // Individual button cosmetics come from the blueprint button partial.
+    // Here we only ensure the primary (first) connect button reads as the pink CTA
+    // when it carries no explicit variant — override via --bs-btn-* if the component
+    // renders unstyled <button> elements inside .tc-login-connect.
+
+    .tc-login-connect-btn {
+        font-family: var(--bp-mono);
+        font-size: 0.8125rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        transition:
+            background-color 0.18s var(--bp-ease),
+            border-color     0.18s var(--bp-ease),
+            box-shadow       0.18s var(--bp-ease),
+            transform        0.18s var(--bp-ease);
+
+        &:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--tc-shadow-hover);
+        }
+
+        &:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+    }
+
+    // ── Skeleton ─────────────────────────────────────────────────────────────────
+    // Reroutes skel-bg to the recessed well token; shimmer stays near-white
+    // since this is a light theme — no override needed beyond the tc-login var above.
+
+    .tc-login-skel {
+        background: linear-gradient(
+            90deg,
+            var(--bp-bg-2) 25%,
+            rgba(255, 255, 255, 0.72) 50%,
+            var(--bp-bg-2) 75%
+        );
+        background-size: 200% 100%;
+    }
+}

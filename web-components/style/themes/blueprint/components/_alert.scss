@@ -1,0 +1,125 @@
+// Blueprint › tc-alert — soft-tinted panel with a 4px severity stripe, display heading, and mono status label.
+//
+// The left-border stripe maps to the blueprint accent rotation:
+//   primary  → pink  (--bp-pink)
+//   success  → teal  (--bp-teal)
+//   info     → violet (--bp-violet)
+//   warning  → amber (--bp-amber)
+//   danger   → real red (--bp-danger)
+// Fill is the matching *-soft token; text uses matching *-fg dark variant for AA on white.
+// Replaces slate-gradient literals in alert-primary/alert-dark and $slate-* in alert-light.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Base alert shell ───────────────────────────────────────────────────────
+    .alert {
+        --bs-alert-bg: var(--bp-paper-tint);           // soft off-white ground
+        --bs-alert-color: var(--bp-text);
+        --bs-alert-border-color: var(--bp-border);     // default: no-variant hairline stripe
+        --bs-alert-link-color: var(--bp-violet-fg);    // violet for in-body links
+
+        background: var(--bs-alert-bg);
+        color: var(--bs-alert-color);
+        border-left-color: var(--bs-alert-border-color);
+        box-shadow: var(--tc-shadow-sm);
+
+        // Heading inside an alert: display font, emphasis ink
+        .alert-heading {
+            font-family: var(--bp-display);
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: var(--bp-emphasis);
+        }
+
+        // Status/type kicker rendered inline — mono treatment
+        .alert-link {
+            font-family: var(--bp-body);
+            font-weight: 600;
+            color: var(--bs-alert-link-color);
+            text-decoration-color: color-mix(in srgb, var(--bs-alert-link-color) 40%, transparent);
+        }
+    }
+
+    // ── Severity variants ──────────────────────────────────────────────────────
+
+    // PRIMARY — pink (brand/CTA severity). Replaces the dark slate gradient wash.
+    .alert-primary {
+        --bs-alert-bg: var(--bp-pink-surface);         // pink surface gradient from foundation
+        --bs-alert-color: var(--bp-text-soft);
+        --bs-alert-border-color: var(--bp-pink);
+        --bs-alert-link-color: var(--bp-pink);
+    }
+
+    // SECONDARY — violet soft tint
+    .alert-secondary {
+        --bs-alert-bg: var(--bp-violet-soft);
+        --bs-alert-color: var(--bp-text-soft);
+        --bs-alert-border-color: var(--bp-violet);
+        --bs-alert-link-color: var(--bp-violet-fg);
+    }
+
+    // SUCCESS — teal (status: success maps to teal in blueprint)
+    .alert-success {
+        --bs-alert-bg: var(--bp-teal-soft);
+        --bs-alert-color: var(--bp-teal-fg);
+        --bs-alert-border-color: var(--bp-teal);
+        --bs-alert-link-color: var(--bp-teal-fg);
+
+        .alert-heading {
+            color: var(--bp-teal-fg);
+        }
+    }
+
+    // DANGER — real red (not pink)
+    .alert-danger {
+        --bs-alert-bg: var(--bp-danger-soft);
+        --bs-alert-color: var(--bp-danger);
+        --bs-alert-border-color: var(--bp-danger);
+        --bs-alert-link-color: var(--bp-danger);
+
+        .alert-heading {
+            color: var(--bp-danger);
+        }
+    }
+
+    // WARNING — amber
+    .alert-warning {
+        --bs-alert-bg: var(--bp-amber-soft);
+        --bs-alert-color: var(--bp-amber-fg);
+        --bs-alert-border-color: var(--bp-amber);
+        --bs-alert-link-color: var(--bp-amber-fg);
+
+        .alert-heading {
+            color: var(--bp-amber-fg);
+        }
+    }
+
+    // INFO — violet
+    .alert-info {
+        --bs-alert-bg: var(--bp-violet-soft);
+        --bs-alert-color: var(--bp-violet-fg);
+        --bs-alert-border-color: var(--bp-violet);
+        --bs-alert-link-color: var(--bp-violet-fg);
+
+        .alert-heading {
+            color: var(--bp-violet-fg);
+        }
+    }
+
+    // LIGHT — replaces $slate-50 / $slate-300 literals with blueprint tokens
+    .alert-light {
+        --bs-alert-bg: var(--bp-bg);                   // lavender page tint
+        --bs-alert-color: var(--bp-text-muted);
+        --bs-alert-border-color: var(--bp-border-strong);
+        --bs-alert-link-color: var(--bp-text-soft);
+    }
+
+    // DARK — replaces the dark slate rgba gradient with a blueprint violet-tinted wash
+    .alert-dark {
+        --bs-alert-bg: var(--bp-paper-tint-2);         // deepest tinted paper (no dark-on-dark)
+        --bs-alert-color: var(--bp-text);
+        --bs-alert-border-color: var(--bp-border-strong);
+        --bs-alert-link-color: var(--bp-text-soft);
+    }
+}

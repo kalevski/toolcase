@@ -1,0 +1,88 @@
+// Blueprint › tc-usage-summary-panel — white paper card, pink mono title header, teal progress fills, amber warn state, lavender skeleton shimmer.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Component token overrides ──────────────────────────────────────────────
+    // Re-point every --bs-usage-summary-panel-* var to blueprint palette tokens.
+    // The base partial drives all cosmetics through these vars; element rules
+    // below handle typography stacks and the warn-row accent that has no var.
+
+    tc-usage-summary-panel {
+        // Card shell — white paper surface, lavender hairline, ambient shadow
+        --bs-usage-summary-panel-bg:                var(--bp-paper);
+        --bs-usage-summary-panel-border-color:      var(--bp-border);
+        --bs-usage-summary-panel-shadow:            var(--tc-shadow-sm);
+
+        // Title header — pink-grad fill (brand/primary); bp-pink-ink for legible white text
+        // --tc-app-accent-gradient maps to --bp-pink-grad in this theme so no raw hex needed
+        --bs-usage-summary-panel-title-bg:          var(--bp-pink-grad);
+        --bs-usage-summary-panel-title-color:       var(--bp-pink-ink);
+
+        // Row body text — primary ink / muted mono value
+        --bs-usage-summary-panel-label-color:       var(--bp-text);
+        --bs-usage-summary-panel-value-color:       var(--bp-text-muted);
+
+        // Row separator — faint divider token (never raw slate)
+        --bs-usage-summary-panel-row-border-color:  var(--bp-border-faint);
+
+        // Progress track background — lavender hairline keeps it unobtrusive
+        --bs-usage-summary-panel-bar-bg:            var(--bp-border);
+
+        // Normal fill → teal (everyday action color in the arcade rotation)
+        --bs-usage-summary-panel-bar-fill:          var(--bp-teal);
+
+        // Warn fill → amber (blueprint warning accent; maps to --tc-warning)
+        // Label stays primary ink (no extra noise); value gets amber-fg for AA on white
+        --bs-usage-summary-panel-warn-fill:         var(--bp-amber);
+        --bs-usage-summary-panel-warn-label-color:  var(--bp-text);
+        --bs-usage-summary-panel-warn-value-color:  var(--bp-amber-fg);
+
+        // Skeleton — paper-tint-2 base + paper shimmer; keeps it on-palette
+        --bs-usage-summary-panel-skeleton-bg:       var(--bp-paper-tint-2);
+        --bs-usage-summary-panel-skeleton-shimmer:  var(--bp-paper);
+    }
+
+    // ── Title — blueprint mono eyebrow face ───────────────────────────────────
+    // The base partial hard-codes 'JetBrains Mono'; override to the theme font
+    // var so the title renders in --bp-mono (the blueprint mono eyebrow stack).
+    // Uppercase + tight tracking already come from the base partial.
+    .tc-usage-summary-panel-title {
+        font-family: var(--bp-mono);
+        // Divider under the gradient header: faint white rule on the pink fill
+        border-bottom-color: rgba(255, 255, 255, 0.15);
+    }
+
+    // ── Label — Space Grotesk body face ───────────────────────────────────────
+    .tc-usage-summary-panel-label {
+        font-family: var(--bp-body);
+    }
+
+    // ── Value — mono face, tabular figures for numeric alignment ─────────────
+    // Base partial already uses JetBrains Mono; ensure tabular-nums for
+    // legible "used / total" stacking in narrow panels.
+    .tc-usage-summary-panel-value {
+        font-family: var(--bp-mono);
+        font-variant-numeric: tabular-nums;
+    }
+
+    // ── Warn row value — amber-fg + display weight signals the alert ──────────
+    // --bs-usage-summary-panel-warn-value-color points to --bp-amber-fg (dark
+    // amber for AA contrast on white); weight is already 600 in the base partial.
+    .tc-usage-summary-panel-row--warn {
+        .tc-usage-summary-panel-value {
+            font-family: var(--bp-mono);
+        }
+    }
+
+    // ── Skeleton shimmer — honour prefers-reduced-motion ─────────────────────
+    // The @keyframes live in the base partial; token overrides above swap the
+    // shimmer to on-palette lavender tones.  The @media freeze rule in the base
+    // partial already stops the animation; we only ensure the static fallback
+    // also uses the blueprint surface token.
+    @media (prefers-reduced-motion: reduce) {
+        .tc-usage-summary-panel-skeleton {
+            background: var(--bp-paper-tint-2);
+        }
+    }
+}

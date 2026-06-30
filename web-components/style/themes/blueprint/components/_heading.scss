@@ -1,0 +1,20 @@
+// Blueprint › tc-heading — display type in the Chakra Petch face. The base inner
+// .tc-heading sets `font-family: var(--tc-font-sans)` literally, so the display
+// swap is applied on the class. The optional --gradient treatment runs
+// pink→violet (the base end stop is --tc-ink, near-black, which would fade the
+// text into the canvas). Case is left untouched — the blueprint design uppercases
+// headings, but forcing it theme-wide would mangle arbitrary app copy, so that
+// stays a per-usage choice.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-heading {
+        --bs-heading-gradient-start: var(--bp-pink);
+        --bs-heading-gradient-end: var(--bp-violet);
+    }
+
+    .tc-heading {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+    }
+}

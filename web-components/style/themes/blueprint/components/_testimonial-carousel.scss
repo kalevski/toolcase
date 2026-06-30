@@ -1,0 +1,120 @@
+// Blueprint › tc-testimonial-carousel — white paper card with teal controls, pink active dot, display-font author name, mono role label.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-testimonial-carousel {
+        // ── Surface tokens ──────────────────────────────────────────────────────
+        --bs-testimonial-carousel-surface: var(--bp-paper);
+        --bs-testimonial-carousel-border: var(--bp-border);
+        --bs-testimonial-carousel-shadow: var(--tc-shadow-sm);
+
+        // ── Text tokens ─────────────────────────────────────────────────────────
+        --bs-testimonial-carousel-quote-color: var(--bp-text);
+        --bs-testimonial-carousel-author-color: var(--bp-emphasis);
+        --bs-testimonial-carousel-muted-color: var(--bp-text-muted);
+
+        // ── Controls — teal as the everyday action accent ────────────────────────
+        --bs-testimonial-carousel-control-color: var(--bp-teal-fg);
+        --bs-testimonial-carousel-control-hover-bg: var(--bp-teal-soft);
+
+        // ── Dot indicators — inactive: faint border; active: pink primary ────────
+        --bs-testimonial-carousel-dot-color: var(--bp-border-strong);
+        --bs-testimonial-carousel-dot-active-color: var(--bp-pink);
+
+        // ── Star rating — amber for filled stars (supporting accent) ─────────────
+        --bs-testimonial-carousel-star-color: var(--bp-amber);
+        --bs-testimonial-carousel-star-empty-color: var(--bp-border-strong);
+    }
+
+    // ── Slide card: lifted paper surface with a subtle teal top edge accent ──────
+
+    .tc-testimonial-carousel-slide {
+        background: var(--bp-paper);
+        border-color: var(--bp-border);
+        border-top: 2px solid var(--bp-teal);   // teal top-edge marks the active slide region
+        box-shadow: var(--tc-shadow-sm);
+        transition: box-shadow var(--bp-ease);
+
+        &:hover {
+            box-shadow: var(--tc-shadow-md);
+        }
+    }
+
+    // ── Quote text — body font, readable prose ink ────────────────────────────────
+
+    .tc-testimonial-carousel-quote {
+        font-family: var(--bp-body);
+        color: var(--bp-text);
+        font-size: 1rem;
+        line-height: 1.7;
+    }
+
+    // ── Author name — display font, strong emphasis ink ───────────────────────────
+
+    .tc-testimonial-carousel-name {
+        font-family: var(--bp-display);
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: var(--bp-emphasis);
+    }
+
+    // ── Role / org — mono micro-label, muted teal-fg ─────────────────────────────
+
+    .tc-testimonial-carousel-role {
+        font-family: var(--bp-mono);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--bp-teal-fg);   // teal-fg clears AA contrast on white paper
+    }
+
+    // ── Prev / Next controls — teal border + teal hover tint ─────────────────────
+
+    .tc-testimonial-carousel-prev,
+    .tc-testimonial-carousel-next {
+        border-color: var(--bp-border);
+        color: var(--bp-teal-fg);
+        background: var(--bp-paper);
+        transition: background-color var(--bp-ease), border-color var(--bp-ease), box-shadow var(--bp-ease);
+
+        &:hover {
+            background: var(--bp-teal-soft);
+            border-color: var(--bp-teal-line);
+            box-shadow: var(--bp-glow-teal);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-teal);
+            outline-offset: 2px;
+        }
+    }
+
+    // ── Dot indicators — square inactive dots, pink pill for active ───────────────
+
+    .tc-testimonial-carousel-dot {
+        border-color: var(--bp-border-strong);
+        background: transparent;
+        transition: background-color var(--bp-ease), border-color var(--bp-ease), width var(--bp-ease);
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-pink);
+            outline-offset: 2px;
+        }
+    }
+
+    .tc-testimonial-carousel-dot--active {
+        // Filled pink pill — pink is the blueprint primary/selected accent
+        border-color: var(--bp-pink);
+        background: var(--bp-pink);
+    }
+
+    // ── Star rating — amber filled, faint border empty ────────────────────────────
+
+    .tc-testimonial-carousel-star {
+        color: var(--bp-border-strong);
+    }
+
+    .tc-testimonial-carousel-star--filled {
+        color: var(--bp-amber);
+    }
+}

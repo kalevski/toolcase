@@ -1,0 +1,20 @@
+// Blueprint › tc-crosshair — teal HUD reticle with soft glow on the ring.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-crosshair {
+        // Reroute the single cosmetic token from --tc-app-accent (which inherits the base
+        // theme's generic accent and may carry a dark-slate or cyan literal) to blueprint
+        // teal — the everyday action/HUD accent in the blueprint rotation.
+        // Pink is primary CTA; teal is the precision-instrument / HUD read — fitting here.
+        --bs-crosshair-color: var(--bp-teal);
+    }
+
+    // Ring: add a soft teal glow to evoke the vector-blueprint HUD aesthetic.
+    // Applied via filter drop-shadow rather than box-shadow because the ring element
+    // is absolutely positioned and has no painted background to shadow off.
+    .tc-crosshair-ring {
+        filter: drop-shadow(0 0 3px var(--bp-teal-glow));
+    }
+}

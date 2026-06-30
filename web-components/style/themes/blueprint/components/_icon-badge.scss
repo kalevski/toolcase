@@ -1,0 +1,26 @@
+// Blueprint › tc-icon-badge — paper-white chip, teal hairline border, mono glyph fallback.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-icon-badge {
+        // Surface: raised white tile on the lavender canvas with a teal-tinted hairline.
+        // Teal border (--bp-teal-line) gives the chip a technical/HUD edge without being
+        // as loud as the full --bp-teal accent; falls back to the standard --bp-border.
+        --bs-icon-badge-bg: var(--bp-paper);
+        --bs-icon-badge-border-color: var(--bp-border);
+        --bs-icon-badge-color: var(--bp-text);
+
+        // Soft violet shadow keeps the chip lifted off the lavender page.
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    .tc-icon-badge__glyph {
+        // Replace the generic monospace stack with the blueprint mono face
+        // (JetBrains Mono) so text-fallback glyphs render in the HUD typeface.
+        // Uppercase + tracked is handled at the usage site via the caller's label;
+        // we only swap the family here so the cascade stays narrow.
+        font-family: var(--bp-mono);
+        color: var(--bs-icon-badge-color);
+    }
+}

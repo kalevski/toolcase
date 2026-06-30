@@ -1,0 +1,145 @@
+// Blueprint › tc-journal — lavender-rail quest journal; pink selection accent, teal action states, display titles, mono eyebrows.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-journal {
+        // Frame — white paper card on the lavender canvas
+        --bs-journal-bg: var(--bp-paper);
+        --bs-journal-border: 1px solid var(--bp-border);
+
+        // List rail — recessed lavender so it reads as a sidebar, not equal pane
+        --bs-journal-list-bg: var(--bp-bg);
+        --bs-journal-list-border-color: var(--bp-border);
+
+        // Row dividers
+        --bs-journal-row-border-color: var(--bp-border-faint);
+
+        // Row interactions — hover lifts slightly into the tint-2 well; selected = pink surface + pink left-rail
+        --bs-journal-row-hover-bg: var(--bp-bg-2);
+        --bs-journal-row-selected-bg: var(--bp-pink-surface);
+        --bs-journal-row-selected-accent: var(--bp-pink); // 3px left border strip
+
+        // Row title — primary ink
+        --bs-journal-row-title-color: var(--bp-text);
+
+        // State pips — semantic arcade rotation:
+        //   active   = teal (in-progress action)
+        //   completed = teal (success maps to teal in blueprint)
+        //   failed   = real danger red (NOT pink — pink is primary CTA, not error)
+        //   inactive  = faint text
+        --bs-journal-pip-active: var(--bp-teal);
+        --bs-journal-pip-completed: var(--bp-teal);
+        --bs-journal-pip-failed: var(--bp-danger);
+        --bs-journal-pip-inactive: var(--bp-text-faint);
+
+        // Detail pane — same white paper, distinct from the list rail
+        --bs-journal-detail-bg: var(--bp-paper);
+
+        // Detail title — display face for quest/entry names
+        --bs-journal-title-color: var(--bp-emphasis);
+
+        // Description body copy — soft ink
+        --bs-journal-description-color: var(--bp-text-soft);
+
+        // Narrative body text — muted
+        --bs-journal-body-color: var(--bp-text-muted);
+
+        // Eyebrow micro-label — faint until coloured by state modifier below
+        --bs-journal-eyebrow-color: var(--bp-text-faint);
+
+        // Empty state placeholder
+        --bs-journal-empty-color: var(--bp-text-faint);
+
+        // State eyebrow text palette — mono uppercase, semantic colors
+        --bs-journal-state-active: var(--bp-teal-fg);       // teal text on white clears AA
+        --bs-journal-state-completed: var(--bp-teal-fg);
+        --bs-journal-state-failed: var(--bp-danger);
+        --bs-journal-state-inactive: var(--bp-text-faint);
+
+        // Objectives — check border uses border token; done = pink (primary CTA accent)
+        --bs-journal-check-color: var(--bp-border-strong);
+        --bs-journal-check-done-color: var(--bp-pink);
+        --bs-journal-objective-color: var(--bp-text);
+        --bs-journal-objective-completed-color: var(--bp-text-faint);
+        --bs-journal-objective-optional-color: var(--bp-text-faint);
+
+        // Rewards — recessed bg-2 well; label muted, value in mono teal
+        --bs-journal-reward-bg: var(--bp-bg-2);
+        --bs-journal-reward-label-color: var(--bp-text-muted);
+        --bs-journal-reward-value-color: var(--bp-teal-fg);  // mono + teal-fg = HUD readout feel
+
+        // Apply box shadow to the frame
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Detail title — Chakra Petch display face, tight tracking ────────────────────
+
+    .tc-journal-detail-title {
+        font-family: var(--bp-display);
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: var(--bp-emphasis);
+    }
+
+    // ── Eyebrow / state micro-labels — Space Mono with tighter override ──────────────
+
+    .tc-journal-detail-state,
+    .tc-journal-detail-eyebrow {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.1em;
+    }
+
+    // ── Row title — body face (Space Grotesk) at default weight, blueprint ink ────────
+
+    .tc-journal-row-title {
+        font-family: var(--bp-body);
+        color: var(--bp-text);
+    }
+
+    // Inactive rows are visually demoted
+    .tc-journal-row--inactive .tc-journal-row-title {
+        color: var(--bp-text-faint);
+    }
+
+    // ── Selected row — pink surface + focus ring tinted to pink ─────────────────────
+
+    .tc-journal-row {
+        transition: background var(--bp-ease, 0.15s ease);
+
+        &:focus-visible {
+            outline-color: var(--bp-pink);
+        }
+    }
+
+    // ── Reward value — mono face for the HUD-style numeric readout ──────────────────
+
+    .tc-journal-reward-value {
+        font-family: var(--bp-mono);
+        color: var(--bp-teal-fg);
+        letter-spacing: 0.04em;
+    }
+
+    // ── Reward label ─────────────────────────────────────────────────────────────────
+
+    .tc-journal-reward-label {
+        font-family: var(--bp-body);
+    }
+
+    // ── Objective optional tag — mono, amber-fg for a supporting supporting accent ───
+
+    .tc-journal-objective-optional {
+        font-family: var(--bp-mono);
+        color: var(--bp-amber-fg);  // amber = supporting accent; distinguishes optional from inactive
+        letter-spacing: 0.06em;
+    }
+
+    // ── List empty / detail empty — mono faint ───────────────────────────────────────
+
+    .tc-journal-list-empty,
+    .tc-journal-detail-empty {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        color: var(--bp-text-faint);
+    }
+}

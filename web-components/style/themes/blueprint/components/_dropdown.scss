@@ -1,0 +1,75 @@
+// Blueprint › tc-dropdown — white paper panel, teal hover, pink active, mono section headers.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-dropdown {
+        .dropdown-menu {
+            // Surface: raised white card with a hairline border and a soft violet-tinted shadow.
+            --bs-dropdown-bg: var(--bp-paper);
+            --bs-dropdown-border-color: var(--bp-border);
+            --bs-dropdown-box-shadow: var(--tc-shadow-sm);
+
+            // Body text: blueprint primary ink (replaces raw --tc-slate-700 leak).
+            --bs-dropdown-color: var(--bp-text);
+
+            // Item text: primary ink at rest; full primary on hover.
+            --bs-dropdown-link-color: var(--bp-text-soft);
+            --bs-dropdown-link-hover-color: var(--bp-text);
+            --bs-dropdown-link-hover-bg: var(--bp-teal-soft); // teal wash — everyday action tint
+
+            // Active / selected: pink primary fill (arcade accent rotation: pink = primary).
+            --bs-dropdown-link-active-color: var(--bp-pink-ink); // white on pink
+            --bs-dropdown-link-active-bg: var(--bp-pink);
+
+            // Disabled: faint blueprint ink.
+            --bs-dropdown-link-disabled-color: var(--bp-text-faint);
+
+            // Dividers: very faint hairline, not the heavier track border.
+            --bs-dropdown-divider-bg: var(--bp-border-faint);
+
+            // Tighten the active item hover text color when active (teal hover in active state
+            // would fight pink fill — keep it as-is; active overrides hover in source order).
+
+            .dropdown-item {
+                // Transition through --bp-ease so motion matches the theme rhythm.
+                transition:
+                    background-color 120ms var(--bp-ease),
+                    color 120ms var(--bp-ease);
+
+                // Teal text on the teal-soft hover fill clears AA contrast.
+                &:hover,
+                &:focus-visible {
+                    color: var(--bp-teal-fg);
+                }
+
+                // Active: clear any lingering gradient image (react-components defence stays).
+                &.active,
+                &:active {
+                    background-image: none;
+
+                    // Shortcut hint on active row: white at reduced opacity.
+                    kbd {
+                        color: rgba(255, 255, 255, 0.55);
+                    }
+                }
+
+                // Shortcut hint at rest: blueprint faint ink (no change needed — var(--tc-text-faint)
+                // resolves through the foundation map; explicit override keeps it blueprint-native).
+                kbd {
+                    font-family: var(--bp-mono);
+                    color: var(--bp-text-faint);
+                }
+            }
+        }
+
+        // Section header: blueprint mono — uppercase, wide tracking, teal accent.
+        .dropdown-header {
+            font-family: var(--bp-mono);
+            font-size: 0.625rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--bp-teal-fg); // teal on white clears AA; marks the label as a HUD/nav element
+        }
+    }
+}

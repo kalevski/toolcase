@@ -1,0 +1,47 @@
+// Blueprint › tc-skill-bar — pink glow on selected slots, teal cd-bar, mono cd-label.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-skill-bar {
+        // Selected state — pink is the blueprint primary/CTA accent; the glow ring
+        // makes the active slot unmistakeable on the lavender paper ground.
+        --bs-skill-bar-selected-border:  var(--bp-pink);
+        --bs-skill-bar-selected-shadow:  0 0 0 2px var(--bp-pink-line), var(--bp-glow-pink), var(--tc-shadow-sm);
+
+        // Cooldown overlay — retain the dark film (functional dimming, not a theme surface);
+        // the label and bar are the only cosmetic layers we re-point.
+        --bs-skill-bar-cd-label-color:   var(--bp-pink-ink); // white — legible on the dark overlay
+        --bs-skill-bar-cd-bar-color:     var(--bp-teal);     // teal = action/informational, not a CTA
+
+        // Disabled — default 0.45 is sufficient; no override needed.
+    }
+
+    // Cooldown label — upgrade from generic monospace to the blueprint HUD face.
+    // Uppercase + wide tracking reads as a timer readout on a light-theme HUD.
+    .tc-skill-bar__cd-label {
+        font-family:     var(--bp-mono);
+        text-transform:  uppercase;
+        letter-spacing:  0.08em;
+        font-variant-numeric: tabular-nums;
+    }
+
+    // Slot — transition the box-shadow so the selected-ring animates in cleanly.
+    .tc-skill-bar__slot {
+        transition: opacity 0.18s var(--bp-ease);
+
+        // When the inner ability card gains the selected border, smooth the glow in.
+        .tc-ability-card {
+            transition:
+                border-color 0.18s var(--bp-ease),
+                box-shadow   0.18s var(--bp-ease);
+        }
+    }
+
+    // Reduced motion — suppress the glow transition; keep instant state feedback.
+    @media (prefers-reduced-motion: reduce) {
+        .tc-skill-bar__slot .tc-ability-card {
+            transition: none;
+        }
+    }
+}

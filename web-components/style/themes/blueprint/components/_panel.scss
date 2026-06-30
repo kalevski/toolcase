@@ -1,0 +1,29 @@
+// Blueprint › tc-panel — framed surface, mirrors .card minus the interactive
+// lift (panels are containers). Token remap supplies the white fill + lilac
+// hairline; this adds the soft shadow and the faint panel-header divider, plus a
+// mono uppercase HUD header label like the template's panel chrome (§8.10).
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-panel {
+        --bs-panel-bg: var(--bp-paper);
+        --bs-panel-border-color: var(--bp-border);
+    }
+
+    .tc-panel {
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // Panel header reads as a mono HUD readout — uppercase, tracked, faint —
+    // on a transparent ground with a faint lilac under-rule (§8.10).
+    tc-panel-header {
+        --bs-panel-header-bg: transparent;
+        --bs-panel-header-border-color: var(--bp-border-faint);
+        --bs-panel-header-color: var(--bp-text-muted);
+        --bs-panel-header-font-size: 0.6875rem;
+        font-family: var(--bp-mono);
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+}

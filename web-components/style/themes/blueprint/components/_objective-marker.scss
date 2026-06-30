@@ -1,0 +1,47 @@
+// Blueprint › tc-objective-marker — pink map-pin glyph, white paper chip, teal distance readout, pink pulse glow.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-objective-marker {
+        // Primary accent → pink (map-pin glyph color).
+        --bs-objective-marker-color: var(--bp-pink);
+        // Text chip surface: raised white paper with blueprint hairline border.
+        --bs-objective-marker-bg: var(--bp-paper);
+        --bs-objective-marker-border-color: var(--bp-border);
+        // Label ink: primary blueprint text.
+        --bs-objective-marker-text-color: var(--bp-text);
+        // Distance readout: teal-fg for legible HUD data on white.
+        --bs-objective-marker-distance-color: var(--bp-teal-fg);
+    }
+
+    // Text chip: blueprint card surface — paper + hairline + subtle shadow.
+    .tc-objective-marker__text {
+        background: var(--bp-paper);
+        border-color: var(--bp-border);
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // Label: already mono+uppercase in the base; ensure blueprint text token.
+    .tc-objective-marker__label {
+        font-family: var(--bp-mono);
+        color: var(--bp-text);
+        letter-spacing: 0.10em;
+    }
+
+    // Distance: mono, teal-fg (AA-clear on white), tight tracking.
+    .tc-objective-marker__distance {
+        font-family: var(--bp-mono);
+        color: var(--bp-teal-fg);
+        letter-spacing: 0.06em;
+    }
+
+    // Pulse: override the scale animation with a pink glow halo on the glyph.
+    tc-objective-marker[pulse] .tc-objective-marker__glyph {
+        filter: drop-shadow(0 0 4px var(--bp-pink-glow));
+    }
+
+    @keyframes tc-objective-marker-pulse {
+        0%, 100% { transform: scale(1);   opacity: 1;    filter: drop-shadow(0 0 2px var(--bp-pink-glow)); }
+        50%       { transform: scale(1.2); opacity: 0.75; filter: drop-shadow(0 0 8px var(--bp-glow-pink)); }
+    }
+}

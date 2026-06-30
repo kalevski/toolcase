@@ -1,0 +1,27 @@
+// Blueprint › tc-fps-cap-select — mono HUD readout on a white hairline surface; teal focus ring replaces the baked slate-rgba literals.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-fps-cap-select {
+        // Font: reinforce mono so frame-rate presets read as machine/HUD data.
+        --bs-fps-cap-select-font: var(--bp-mono);
+        --bs-fps-cap-select-font-size: 0.7rem;
+        // Slightly wider tracking than the base 0.04em — matches the mono eyebrow
+        // cadence used across blueprint labels/badges.
+        --bs-fps-cap-select-letter-spacing: 0.07em;
+
+        // Surface: white raised card + default hairline border.
+        --bs-fps-cap-select-bg: var(--bp-paper);
+        --bs-fps-cap-select-color: var(--bp-text);
+        --bs-fps-cap-select-border-color: var(--bp-border);
+
+        // Focus: replace the baked dark-slate rgba(30,41,59,*) with teal action tokens.
+        --bs-fps-cap-select-focus-border-color: var(--bp-teal-line);
+        --bs-fps-cap-select-focus-ring: var(--bp-glow-teal);
+
+        // Disabled: recessed well + faint ink — readable but clearly inert.
+        --bs-fps-cap-select-disabled-bg: var(--bp-bg-2);
+        --bs-fps-cap-select-disabled-color: var(--bp-text-faint);
+    }
+}

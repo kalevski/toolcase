@@ -1,0 +1,73 @@
+// Blueprint › tc-scoring-rules — white-paper rule list; display titles, mono points in teal, accent palette remapped to blueprint tokens; hairline row dividers.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-scoring-rules {
+        // Row divider — route away from raw --tc-border (slate leak)
+        --bs-scoring-rules-row-border-color: var(--bp-border-faint);
+
+        // Typography
+        --bs-scoring-rules-title-color:  var(--bp-text);
+        --bs-scoring-rules-desc-color:   var(--bp-text-muted);
+
+        // Points cell — teal-fg clears AA on white paper; mono font applied below
+        --bs-scoring-rules-points-color: var(--bp-teal-fg);
+
+        // Accent palette — replace slate/cyan literals with blueprint tokens
+        --bs-scoring-rules-accent-pink:   var(--bp-pink);          // primary brand
+        --bs-scoring-rules-accent-yellow: var(--bp-amber);         // amber replaces tc-warning slate
+        --bs-scoring-rules-accent-cyan:   var(--bp-teal);          // teal replaces tc-accent-fg cyan literal
+        --bs-scoring-rules-accent-green:  var(--bp-teal);          // success = teal in blueprint
+        --bs-scoring-rules-accent-red:    var(--bp-danger);        // real red, not pink
+    }
+
+    // Container: white raised paper, soft shadow — the list reads as a card surface
+    .tc-scoring-rules {
+        background-color: var(--bp-paper);
+        border: 1px solid var(--bp-border);
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // Each row
+    .tc-scoring-rule {
+        transition: background-color 0.15s var(--bp-ease);
+
+        &:hover {
+            background-color: var(--bp-bg-2); // subtle recessed tint on hover
+        }
+    }
+
+    // Icon: default to faint ink; accent overrides come from --bs-scoring-rule-accent-color set on the row
+    .tc-scoring-rule-icon {
+        color: var(--bp-text-faint);
+    }
+
+    // Title: display font, tight tracking — blueprint heading convention
+    .tc-scoring-rule-title {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+        color: var(--bs-scoring-rules-title-color); // already wired; explicit for clarity
+    }
+
+    // Description: body font, muted
+    .tc-scoring-rule-desc {
+        font-family: var(--bp-body);
+        color: var(--bs-scoring-rules-desc-color);
+    }
+
+    // Points: mono HUD style — uppercase micro label feel, teal ink
+    .tc-scoring-rule-points {
+        font-family: var(--bp-mono);
+        color: var(--bs-scoring-rules-points-color); // resolves to --bp-teal-fg
+        letter-spacing: 0.04em;
+    }
+
+    // Suffix label: mono, faint — subordinate to the number
+    .tc-scoring-rule-suffix {
+        font-family: var(--bp-mono);
+        color: var(--bp-text-faint);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+}

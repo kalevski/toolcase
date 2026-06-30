@@ -1,0 +1,128 @@
+// Blueprint › tc-mouse-sensitivity — teal-accent HUD sliders: blueprint-border tracks, white raised thumbs with teal rings, mono teal key labels, glow focus ring.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-mouse-sensitivity {
+        // Track: blueprint hairline, no fill illusion until progress pseudo-el
+        --bs-mouse-sensitivity-track-color: var(--bp-border);
+
+        // Fill (Firefox ::-moz-range-progress + conceptual WebKit fill) → teal action
+        --bs-mouse-sensitivity-fill-color: var(--bp-teal);
+
+        // Thumb: white raised card dot, teal ring — teal is the everyday-action accent
+        --bs-mouse-sensitivity-thumb-bg: var(--bp-paper);
+        --bs-mouse-sensitivity-thumb-border: var(--bp-teal);
+        --bs-mouse-sensitivity-thumb-active-bg: var(--bp-teal-soft);
+
+        // Shadow: keep the shared violet-tinted sm shadow
+        --bs-mouse-sensitivity-thumb-shadow: var(--tc-shadow-sm);
+
+        // Focus ring: replace the baked dark-slate rgba literal with blueprint teal glow
+        --bs-mouse-sensitivity-focus-ring: var(--bp-glow-teal);
+
+        // Disabled state: faint ink, no interaction affordance
+        --bs-mouse-sensitivity-disabled-color: var(--bp-text-faint);
+
+        // Key micro-label: teal-fg for AA contrast on white; mono already set upstream
+        --bs-mouse-sensitivity-key-color: var(--bp-teal-fg);
+
+        // Value decimal readout: muted ink, subordinate to the slider itself
+        --bs-mouse-sensitivity-value-color: var(--bp-text-muted);
+    }
+
+    // Reroute the font-family tokens to blueprint's mono face
+    .tc-mouse-sensitivity__key {
+        font-family: var(--bp-mono);
+        // letter-spacing and text-transform already set in base; tighten spacing
+        // slightly for the blueprint HUD aesthetic
+        letter-spacing: 0.12em;
+        color: var(--bs-mouse-sensitivity-key-color);
+    }
+
+    .tc-mouse-sensitivity__value {
+        font-family: var(--bp-mono);
+        // Numeric readout: tabular figures so the decimal never shifts width
+        font-variant-numeric: tabular-nums;
+        color: var(--bs-mouse-sensitivity-value-color);
+    }
+
+    // WebKit track: use a teal gradient to paint the filled (left-of-thumb) portion
+    // via a CSS custom property trick — not natively supported on WebKit, so we
+    // decorate the runnable track with a strong teal left-border hint via outline.
+    // The fill illusion on WebKit requires JS or a background-size trick; we apply
+    // a blueprint-styled track color here and defer fill to browsers that expose
+    // ::-moz-range-progress natively.
+    .tc-mouse-sensitivity__input {
+        &::-webkit-slider-runnable-track {
+            background-color: var(--bs-mouse-sensitivity-track-color);
+            // Sharpen to zero radius (already set in base; confirm no rounding leaks)
+            border-radius: 0;
+        }
+
+        &::-webkit-slider-thumb {
+            background-color: var(--bs-mouse-sensitivity-thumb-bg);
+            border-color: var(--bs-mouse-sensitivity-thumb-border);
+            // On hover, shift thumb bg to a very soft teal tint for discoverability
+            transition: background-color var(--bp-ease, 150ms ease), box-shadow var(--bp-ease, 150ms ease);
+
+            &:hover {
+                background-color: var(--bp-teal-soft);
+            }
+        }
+
+        &:focus-visible {
+            &::-webkit-slider-thumb {
+                box-shadow: var(--bs-mouse-sensitivity-focus-ring);
+            }
+
+            &::-moz-range-thumb {
+                box-shadow: var(--bs-mouse-sensitivity-focus-ring);
+            }
+        }
+
+        &::-moz-range-track {
+            background-color: var(--bs-mouse-sensitivity-track-color);
+            border-radius: 0;
+        }
+
+        &::-moz-range-progress {
+            // Teal fill for the completed portion of the track
+            background-color: var(--bs-mouse-sensitivity-fill-color);
+            border-radius: 0;
+        }
+
+        &::-moz-range-thumb {
+            background-color: var(--bs-mouse-sensitivity-thumb-bg);
+            border-color: var(--bs-mouse-sensitivity-thumb-border);
+            transition: background-color var(--bp-ease, 150ms ease), box-shadow var(--bp-ease, 150ms ease);
+
+            &:hover {
+                background-color: var(--bp-teal-soft);
+            }
+        }
+
+        &:disabled {
+            &::-webkit-slider-thumb {
+                background-color: var(--bs-mouse-sensitivity-disabled-color);
+                border-color: var(--bs-mouse-sensitivity-disabled-color);
+            }
+
+            &::-moz-range-thumb {
+                background-color: var(--bs-mouse-sensitivity-disabled-color);
+                border-color: var(--bs-mouse-sensitivity-disabled-color);
+            }
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .tc-mouse-sensitivity__input {
+            &::-webkit-slider-thumb {
+                transition: none;
+            }
+
+            &::-moz-range-thumb {
+                transition: none;
+            }
+        }
+    }
+}

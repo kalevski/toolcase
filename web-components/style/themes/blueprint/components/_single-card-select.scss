@@ -1,0 +1,108 @@
+// Blueprint › tc-single-card-select — radio-card grid: paper tiles with teal hover lift + HUD bracket; pink 2px frame + glow for the selected card; display titles, body descriptions.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Custom-property re-skin ──────────────────────────────────────────────
+    tc-single-card-select {
+        // Unselected card: white paper + faint violet hairline
+        --bs-single-card-select-bg:               var(--bp-paper);
+        --bs-single-card-select-border-color:      var(--bp-border);
+        // Hover: soft lavender tint (card stays paper, border shifts to teal in the rule below)
+        --bs-single-card-select-hover-bg:          var(--bp-paper-tint-2);
+        // Selected accent: pink CTA (drives border-color + check color + outline)
+        --bs-single-card-select-selected-accent:   var(--bp-pink);
+        // Typography
+        --bs-single-card-select-title-color:       var(--bp-text);
+        --bs-single-card-select-desc-color:        var(--bp-text-muted);
+        // Skeleton shimmer uses the recessed well tint
+        --bs-single-card-select-skeleton-bg:       var(--bp-bg-2);
+    }
+
+    // ── Card option tile ─────────────────────────────────────────────────────
+    .tc-single-card-select-option {
+        // Violet-tinted shadow lifts the tile off the canvas
+        box-shadow: var(--tc-shadow-sm);
+        transition: border-color var(--bp-ease), background-color var(--bp-ease),
+                    transform var(--bp-ease), box-shadow var(--bp-ease);
+
+        // HUD corner bracket — top-left teal L-shape (tappable tile indicator)
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            opacity: 0;
+            transition: opacity var(--bp-ease);
+            pointer-events: none;
+        }
+
+        // Hover (unselected): show bracket + teal border + lift + deeper shadow
+        &:hover:not(.is-selected) {
+            background: var(--bp-paper-tint-2);
+            border-color: var(--bp-teal);
+            transform: translateY(-2px);
+            box-shadow: var(--tc-shadow-hover);
+
+            &::before {
+                opacity: 1;
+            }
+        }
+
+        // Focus ring: teal (everyday action, less aggressive than the pink selection accent)
+        &:focus-visible {
+            outline-color: var(--bp-teal);
+        }
+
+        // Selected: pink 2px frame + inner ring + glow; card stays on white paper
+        &.is-selected {
+            border-color: var(--bp-pink);
+            // The base partial adds inset 0 0 0 1px selected-accent on top of the border,
+            // producing the 2px double-frame. We extend it with the pink glow here.
+            box-shadow: inset 0 0 0 1px var(--bp-pink), var(--bp-glow-pink), var(--tc-shadow-sm);
+            transform: translateY(-2px);
+
+            // HUD bracket switches to pink to echo the selection accent
+            &::before {
+                border-top-color: var(--bp-pink-line);
+                border-left-color: var(--bp-pink-line);
+                opacity: 1;
+            }
+        }
+    }
+
+    // ── Title — display font for card headings ───────────────────────────────
+    .tc-single-card-select-title {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+        font-weight: 700;
+    }
+
+    // ── Description — body font, muted ──────────────────────────────────────
+    .tc-single-card-select-desc {
+        font-family: var(--bp-body);
+    }
+
+    // ── Check mark — pink so it reads clearly on the white paper card ────────
+    .tc-single-card-select-check {
+        color: var(--bp-pink);
+    }
+
+    // ── Skeleton shimmer — lavender-tinted wave ──────────────────────────────
+    // Override the baked gradient stops (which reference --tc-surface) with
+    // blueprint bg tokens so the shimmer wave blends with the lavender canvas.
+    .tc-single-card-select-option--skeleton {
+        background: linear-gradient(
+            90deg,
+            var(--bp-bg-2)   0%,
+            var(--bp-paper)  50%,
+            var(--bp-bg-2)   100%
+        ) !important; // override the base baked literal gradient stops
+        background-size: 200% 100% !important;
+        box-shadow: var(--tc-shadow-sm);
+    }
+}

@@ -1,0 +1,15 @@
+// Blueprint › tc-pulse-indicator — the live teal "● LIVE BUILD" dot. The dot
+// rides --bs-pulse-indicator-color (defaults to success → teal via the remap);
+// default it to teal explicitly and add a soft halo ring so a bare indicator
+// reads "live" on the light paper.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-pulse-indicator {
+        --bs-pulse-indicator-color: var(--bp-teal);
+    }
+
+    .tc-pulse-indicator-dot {
+        box-shadow: 0 0 0 0.2em var(--bp-teal-soft);
+    }
+}

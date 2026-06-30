@@ -1,0 +1,62 @@
+// Blueprint › tc-button-group — segmented control: paper segments, --bp-border-strong hairlines, pink active fill, mono label font.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    .btn-group,
+    .btn-group-vertical {
+
+        .btn {
+            // Paper base — white segments with a crisp violet-tinted hairline.
+            --bs-btn-color:              var(--bp-text);
+            --bs-btn-bg:                 var(--bp-paper);
+            --bs-btn-border-color:       var(--bp-border-strong);
+
+            // Hover — recessed tint to signal interactivity without lift.
+            --bs-btn-hover-color:        var(--bp-text-soft);
+            --bs-btn-hover-bg:           var(--bp-bg-2);
+            --bs-btn-hover-border-color: var(--bp-border-strong);
+
+            // Active / selected → pink primary fill.
+            --bs-btn-active-color:       var(--bp-pink-ink);
+            --bs-btn-active-bg:          var(--bp-pink);
+            --bs-btn-active-border-color: var(--bp-pink);
+
+            // Disabled — paper surface, faint text, soft hairline.
+            --bs-btn-disabled-color:       var(--bp-text-faint);
+            --bs-btn-disabled-bg:          var(--bp-paper);
+            --bs-btn-disabled-border-color: var(--bp-border-faint);
+
+            // Mono label: eyebrow-style uppercase + spaced tracking for segment labels.
+            font-family: var(--bp-mono);
+            font-size: 11px;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+
+            // Active glow: soft pink halo on the selected segment.
+            &.active,
+            &:active {
+                box-shadow: var(--bp-glow-pink);
+            }
+
+            // Focus ring uses teal (action accent) — distinct from the pink selection.
+            &:focus-visible {
+                outline: 2px solid var(--bp-teal);
+                outline-offset: 2px;
+            }
+        }
+    }
+
+    // Size overrides — preserve mono font at each scale.
+    .btn-group-sm > .btn,
+    .btn-group-sm > tc-button > .btn {
+        font-size: 10px;
+        letter-spacing: .08em;
+    }
+
+    .btn-group-lg > .btn,
+    .btn-group-lg > tc-button > .btn {
+        font-size: 12.5px;
+        letter-spacing: .06em;
+    }
+}

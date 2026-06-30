@@ -1,0 +1,30 @@
+// Blueprint › tc-particle-emitter — light-canvas particle stage; replaces dark-slate/cyan defaults with blueprint pink/teal/violet palette.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-particle-emitter {
+        // Canvas surface: white paper ground so particles pop on the light theme.
+        --bs-particle-emitter-bg: var(--bp-paper);
+        // Hairline border using the standard blueprint border token.
+        --bs-particle-emitter-border-color: var(--bp-border);
+        --bs-particle-emitter-border-width: 1px;
+
+        // Particle color palette remapped to blueprint arcade tokens.
+        // color-1: deep ink (replaces slate-900 #0f172a)
+        --bs-particle-emitter-color-1: var(--bp-emphasis);
+        // color-2: muted text (replaces slate-600 #475569)
+        --bs-particle-emitter-color-2: var(--bp-text-muted);
+        // color-3: teal action accent (replaces cyan #22d3ee — keeps the "bright spark" role)
+        --bs-particle-emitter-color-3: var(--bp-teal);
+        // color-4: pink primary brand (replaces slate-300 #cbd5e1 — gives the burst a signature flourish)
+        --bs-particle-emitter-color-4: var(--bp-pink);
+    }
+
+    // The canvas element receives the background and border via CSS variables.
+    // A soft shadow grounds it as a raised surface against --bp-bg.
+    .tc-particle-emitter__canvas {
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+}

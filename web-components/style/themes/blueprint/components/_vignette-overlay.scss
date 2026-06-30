@@ -1,0 +1,21 @@
+// Blueprint › tc-vignette-overlay — replaces harsh pure-black edge with blueprint
+// emphasis ink at reduced intensity so the vignette reads as cinematic depth
+// rather than a dark-theme damage flash against the lavender paper ground.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-vignette-overlay {
+        // Pure #000000 at the base default intensity of 0.6 punches too hard on
+        // the blueprint light canvas — it reads as an out-of-place dark-mode relic.
+        // --bp-emphasis (#0f0e22) is the deepest ink in the palette; at 35% opacity
+        // it produces a soft, warm-violet edge darkening that stays on-theme while
+        // still performing the vignette's feedback/depth job.
+        --bs-vignette-overlay-color: var(--bp-emphasis);
+
+        // Bring intensity down from the base 0.6 default. The dark edge of
+        // --bp-emphasis is perceptually stronger on a light ground than true black
+        // on a dark ground, so a lower value achieves equivalent visual weight.
+        --bs-vignette-overlay-intensity: 0.35;
+    }
+}

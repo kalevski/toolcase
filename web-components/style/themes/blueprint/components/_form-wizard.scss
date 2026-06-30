@@ -1,0 +1,120 @@
+// Blueprint › tc-form-wizard — lavender-paper card shell; pink active step + underline;
+// teal done markers + connectors; mono uppercase step labels; --bp-bg-2 header/footer wells.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-form-wizard {
+        // ── Host shell ────────────────────────────────────────────────────────────
+        // Raise to paper, swap the generic surface/border tokens for bp equivalents.
+        --bs-form-wizard-body-bg:     var(--bp-paper);
+        --bs-form-wizard-body-border: 1px solid var(--bp-border);
+
+        // Footer/header wells sit one step recessed from the main body.
+        --bs-form-wizard-footer-bg:     var(--bp-bg-2);
+        --bs-form-wizard-footer-border: 1px solid var(--bp-border-faint);
+
+        // Smooth transitions ride the theme ease curve.
+        --bs-form-wizard-marker-transition:
+            background var(--bp-ease),
+            border-color var(--bp-ease),
+            color var(--bp-ease);
+
+        // ── State: done — teal (success / completed action) ───────────────────────
+        --bs-form-wizard-done-bg:     var(--bp-teal);
+        --bs-form-wizard-done-border: var(--bp-teal);
+        --bs-form-wizard-done-color:  var(--bp-teal-ink);
+
+        // ── State: current — pink (primary / CTA) ────────────────────────────────
+        --bs-form-wizard-current-bg:        var(--bp-pink);
+        --bs-form-wizard-current-border:    var(--bp-pink);
+        --bs-form-wizard-current-color:     var(--bp-pink-ink);
+        --bs-form-wizard-current-underline: var(--bp-pink);
+
+        // ── State: upcoming — faint border, muted ink ─────────────────────────────
+        // Route away from raw tc-slate-* refs; use bp border/text tokens.
+        --bs-form-wizard-upcoming-border: var(--bp-border-strong);
+        --bs-form-wizard-upcoming-color:  var(--bp-text-faint);
+
+        // ── Connectors ────────────────────────────────────────────────────────────
+        // Idle connector → faint divider track; done connector → teal to match marker.
+        --bs-form-wizard-connector-color:      var(--bp-border-faint);
+        --bs-form-wizard-connector-done-color: var(--bp-teal);
+
+        // ── Labels ────────────────────────────────────────────────────────────────
+        --bs-form-wizard-label-color:               var(--bp-text-faint);
+        --bs-form-wizard-label-done-color:          var(--bp-teal-fg);
+        --bs-form-wizard-label-current-color:       var(--bp-text);
+        --bs-form-wizard-label-current-font-weight: 700;
+    }
+
+    // ── Host border + shadow ──────────────────────────────────────────────────────
+    // Override the tc-surface generic with paper + a tinted shadow.
+    tc-form-wizard {
+        background: var(--bp-paper);
+        border-color: var(--bp-border);
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Stepper header ────────────────────────────────────────────────────────────
+    // The steps strip reuses --bs-form-wizard-footer-bg/-border (set above).
+    // Also reinforce the bottom-border colour to the faint token explicitly.
+    .tc-form-wizard-steps {
+        border-bottom-color: var(--bp-border-faint);
+    }
+
+    // ── Step labels — mono eyebrow treatment ─────────────────────────────────────
+    // Labels read as micro-labels / step kickers → mono font, uppercase, loose tracking.
+    .tc-form-wizard-tab-label {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: .07em;
+        font-size: 0.6875rem; // slightly tighter than base 0.8125rem for mono caps
+    }
+
+    // Done label gets teal-fg so it reads as a positive completed state at AA contrast.
+    .tc-form-wizard-tab--done .tc-form-wizard-tab-label {
+        color: var(--bp-teal-fg);
+    }
+
+    // Current label uses primary ink + a soft pink glow on its underline strip.
+    .tc-form-wizard-tab--current .tc-form-wizard-tab-label {
+        color: var(--bp-text);
+    }
+
+    // ── Done marker — teal glow on hover ─────────────────────────────────────────
+    .tc-form-wizard-tab--done {
+        &:hover .tc-form-wizard-tab-marker {
+            opacity: 1; // override base 0.85 fade; use a glow instead
+            box-shadow: var(--bp-glow-teal);
+        }
+
+        &:focus-visible {
+            outline-color: var(--bp-teal);
+        }
+    }
+
+    // ── Current marker — pink glow ────────────────────────────────────────────────
+    .tc-form-wizard-tab--current {
+        // Pink underline strip gets a soft glow to read as the active accent.
+        &::after {
+            box-shadow: 0 1px 4px 0 var(--bp-pink-glow);
+        }
+
+        &:focus-visible {
+            outline-color: var(--bp-pink);
+        }
+    }
+
+    // ── Body panel ────────────────────────────────────────────────────────────────
+    // Explicit paper fill so slotted content always paints on white.
+    .tc-form-wizard-body {
+        background: var(--bp-paper);
+    }
+
+    // ── Footer ────────────────────────────────────────────────────────────────────
+    // Top border rides the faint token (divider weight), not the default track weight.
+    .tc-form-wizard-footer {
+        border-top-color: var(--bp-border-faint);
+    }
+}

@@ -1,0 +1,89 @@
+// Blueprint › tc-dialogue-box — HUD dialogue panel: teal mono speaker eyebrow, bp-paper surface, pink advance caret, teal-tinted choice hover.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-dialogue-box {
+        // Surface: raised white card with blueprint hairline + violet shadow
+        --bs-dialogue-box-bg: var(--bp-paper);
+        --bs-dialogue-box-border: 1px solid var(--bp-border);
+        --bs-dialogue-box-shadow: var(--tc-shadow-lg);
+
+        // Speaker eyebrow: mono uppercase label in teal, hairline below in faint rule
+        --bs-dialogue-box-speaker-color: var(--bp-teal-fg);
+        --bs-dialogue-box-speaker-font-size: 0.6875rem;         // tighter than base — HUD micro-label
+        --bs-dialogue-box-speaker-font-weight: 600;
+        --bs-dialogue-box-speaker-letter-spacing: 0.12em;
+        --bs-dialogue-box-speaker-border: 1px solid var(--bp-border-faint);
+
+        // Body text: blueprint body face, primary ink
+        --bs-dialogue-box-text-color: var(--bp-text);
+
+        // Advance indicator: pink = primary action signal ("tap to continue")
+        --bs-dialogue-box-indicator-color: var(--bp-pink);
+
+        // Choice buttons: recessed tint ground at rest, teal hover
+        --bs-dialogue-box-choice-bg: var(--bp-paper-tint);
+        --bs-dialogue-box-choice-color: var(--bp-text);
+        --bs-dialogue-box-choice-border: 1px solid var(--bp-border);
+        --bs-dialogue-box-choice-hover-bg: var(--bp-teal-soft);
+        --bs-dialogue-box-choice-font-size: 0.875rem;
+
+        // Choice markers: faint at rest, teal on hover (driven by the marker rules below)
+        --bs-dialogue-box-choice-marker-color: var(--bp-text-faint);
+        --bs-dialogue-box-choice-marker-hover-color: var(--bp-teal-fg);
+
+        // HUD corner bracket — top-left teal L-bracket signals a tappable panel
+        position: relative;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            pointer-events: none;
+        }
+    }
+
+    // Speaker name rendered in mono uppercase — the HUD eyebrow treatment
+    .tc-dialogue-box-speaker-name {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: var(--bs-dialogue-box-speaker-letter-spacing, 0.12em);
+    }
+
+    // Body text in blueprint body face for readable prose rhythm
+    .tc-dialogue-box-text {
+        font-family: var(--bp-body);
+        color: var(--bs-dialogue-box-text-color);
+    }
+
+    // Choice buttons: teal border accent on hover, smooth via blueprint ease
+    .tc-dialogue-box-choice {
+        font-family: var(--bp-body);
+        transition:
+            background-color 180ms var(--bp-ease),
+            border-color 180ms var(--bp-ease);
+
+        &:hover {
+            border-color: var(--bp-teal-line);
+        }
+
+        // Focus ring: pink primary accent
+        &:focus-visible {
+            outline-color: var(--bp-pink);
+        }
+    }
+
+    // Choice label: mono uppercase for the short answer options (fits HUD vocabulary)
+    .tc-dialogue-box-choice-label {
+        font-family: var(--bp-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+    }
+}

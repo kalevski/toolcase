@@ -1,0 +1,26 @@
+// Blueprint › tc-nav-button — ghost icon button re-skinned to teal action accent with pink active state and a teal focus ring.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-nav-button {
+        // Default: muted teal icon on a transparent ghost ground.
+        // Teal is the everyday action accent in the blueprint rotation (pink=primary CTA, teal=action).
+        --bs-nav-button-color: var(--bp-teal-fg);
+        --bs-nav-button-bg: transparent;
+        --bs-nav-button-border-color: transparent;
+
+        // Hover: soft teal fill so the ghost acquires presence without becoming a CTA.
+        --bs-nav-button-hover-color: var(--bp-teal);
+        --bs-nav-button-hover-bg: var(--bp-teal-soft);
+        --bs-nav-button-hover-border-color: transparent;
+
+        // Active / pressed: pink surface — signals commitment; separates a decisive tap from a hover.
+        --bs-nav-button-active-color: var(--bp-pink);
+        --bs-nav-button-active-bg: var(--bp-pink-soft);
+        --bs-nav-button-active-border-color: transparent;
+
+        // Replace the baked dark-slate focus ring rgba(30,41,59,.25) with the teal glow token.
+        --bs-nav-button-focus-ring-color: var(--bp-teal-glow);
+    }
+}

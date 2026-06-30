@@ -1,0 +1,66 @@
+// Blueprint › tc-hero-stats-bar — white paper strip, teal hairline dividers, display numerics, mono labels, pink primary accent.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-hero-stats-bar {
+        // Surface — raised paper strip with a teal-tinted bottom border to anchor it
+        background: var(--bp-paper);
+        border-bottom: 1px solid var(--bp-border);
+        box-shadow: var(--tc-shadow-sm);
+
+        // Value: large display numerics — Chakra Petch, tightly tracked, primary ink
+        --bs-hero-stats-bar-value-color: var(--bp-text);
+
+        // Unit: mono, teal-fg so it clears AA contrast on white
+        --bs-hero-stats-bar-unit-color: var(--bp-teal-fg);
+
+        // Label eyebrow: mono uppercase (already uppercase in base), muted ink
+        --bs-hero-stats-bar-label-color: var(--bp-text-muted);
+
+        // Hairline between items — faint lavender rule
+        --bs-hero-stats-bar-divider-color: var(--bp-border-rule);
+
+        // Zero / empty state — faintest ink to signal "no data"
+        --bs-hero-stats-bar-zero-color: var(--bp-text-faint);
+    }
+
+    .tc-hero-stats-bar-value {
+        // Override the base monospace stack with the blueprint display font for numeric impact
+        font-family: var(--bp-display);
+        letter-spacing: -0.02em;
+    }
+
+    .tc-hero-stats-bar-unit {
+        // Keep mono but tighten tracking slightly for HUD-style legibility
+        font-family: var(--bp-mono);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    .tc-hero-stats-bar-label {
+        // Mono eyebrow — already uppercase+tracked in base; bump tracking to blueprint spec
+        font-family: var(--bp-mono);
+        letter-spacing: 0.12em;
+        color: var(--bp-text-muted);
+    }
+
+    // Pink primary accent — first item reads as the headline stat
+    .tc-hero-stats-bar-item:first-child {
+        .tc-hero-stats-bar-value {
+            color: var(--bp-pink);
+        }
+
+        .tc-hero-stats-bar-unit {
+            color: var(--bp-pink);
+            opacity: 0.75;
+        }
+    }
+
+    // Zero / null state — value inherits the zero token set above
+    .tc-hero-stats-bar-item--zero {
+        .tc-hero-stats-bar-value {
+            color: var(--bs-hero-stats-bar-zero-color);
+        }
+    }
+}

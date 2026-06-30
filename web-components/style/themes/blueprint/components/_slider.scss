@@ -1,0 +1,88 @@
+// Blueprint › tc-slider — teal fill channel with pink active-grab state; mono HUD label; glow focus ring.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-slider {
+        // Track: recessed well background, hairline border — reads as a precision gauge channel.
+        --bs-slider-track-bg:    var(--bp-bg-2);
+        --bs-slider-track-border: 1px solid var(--bp-border);
+
+        // Fill: teal gradient — everyday action color (sliders adjust, not submit).
+        --bs-slider-fill-bg:     var(--bp-teal-grad);
+
+        // Thumb: white paper with teal border at rest.
+        --bs-slider-thumb-bg:    var(--bp-paper);
+        --bs-slider-thumb-border: 1.5px solid var(--bp-teal);
+        --bs-slider-thumb-shadow: var(--tc-shadow-sm);
+
+        // Active/drag state flips to pink — "you are grabbing this" accent.
+        --bs-slider-thumb-active-border-color: var(--bp-pink);
+
+        // Tooltip: emphasis ink ground, paper-tint text, mono numerics.
+        --bs-slider-tooltip-bg:    var(--bp-emphasis);
+        --bs-slider-tooltip-color: var(--bp-paper-tint);
+        --bs-slider-tooltip-shadow: var(--tc-shadow-md);
+
+        // Ticks: recessive rule color, lighter than the track hairline.
+        --bs-slider-tick-color: var(--bp-border-rule);
+
+        // Label: muted text for the HUD micro-label treatment below.
+        --bs-slider-label-color: var(--bp-text-muted);
+
+        // Error: real danger red (not pink).
+        --bs-slider-error-color: var(--bp-danger);
+    }
+
+    // ── Label — mono eyebrow treatment ─────────────────────────────────────────
+    // Labels on sliders read as instrument captions, not form prose.
+
+    .tc-slider-label {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;  // 11px — tighter than base 0.875rem
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: .09em;
+        color: var(--bs-slider-label-color);
+    }
+
+    // ── Tooltip — mono numeric pill ─────────────────────────────────────────────
+
+    .tc-slider-tooltip {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        letter-spacing: .04em;
+        font-variant-numeric: tabular-nums;
+        // border: 1px solid var(--bp-border-strong) omitted — tooltip is dark ink, no visible border needed
+    }
+
+    // ── Thumb — teal hover glow; pink drag glow; visible focus ring ─────────────
+
+    .tc-slider-thumb {
+        &:hover {
+            // Teal halo on hover to signal the fill color relationship.
+            box-shadow: var(--tc-shadow-md), var(--bp-glow-teal);
+        }
+
+        &:focus-visible {
+            // Replace the baked dark-slate focus ring literal with a blueprint teal halo.
+            outline: 2px solid var(--bp-teal);
+            outline-offset: 2px;
+            box-shadow: var(--bp-glow-teal);
+        }
+
+        &.tc-slider-thumb--dragging,
+        &:active {
+            // Pink glow while dragging — matches the active border flip.
+            box-shadow: var(--tc-shadow-sm), var(--bp-glow-pink);
+        }
+    }
+
+    // ── Error state — danger hairline on track ──────────────────────────────────
+
+    tc-slider.tc-slider--error {
+        --bs-slider-track-border: 1px solid var(--bp-danger);
+        // Fill stays teal — only the empty track border signals the error.
+    }
+
+}

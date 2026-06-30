@@ -1,0 +1,25 @@
+// Blueprint › tc-helper-text — mono micro-label treatment with blueprint status accent rotation.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-helper-text {
+        // Route base text from --tc-text-muted to the blueprint ink ramp
+        --bs-helper-text-color: var(--bp-text-muted);
+
+        // Blueprint status rotation: success→teal, warning→amber, danger→real red.
+        // *-fg variants are darkened for AA contrast on the --bp-paper white ground.
+        --bs-helper-text-success-color: var(--bp-teal-fg);
+        --bs-helper-text-warning-color: var(--bp-amber-fg);
+        --bs-helper-text-error-color: var(--bp-danger);
+    }
+
+    .tc-helper-text {
+        // Eyebrow/micro-label typography: mono face, uppercase, loose tracking.
+        // Helper text sits below form fields and acts as a status/hint kicker —
+        // exactly the usage the blueprint mono vocab is designed for.
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem; // 11 px — tighter than base; mono reads larger at equal size
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+}

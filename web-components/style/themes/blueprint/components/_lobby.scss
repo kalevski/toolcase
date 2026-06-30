@@ -1,0 +1,212 @@
+// Blueprint › tc-lobby — multiplayer lobby panel reskinned to the vector-blueprint aesthetic:
+// white paper card with violet hairlines, teal-accented ready states, pink CTA start button,
+// mono eyebrows/meta labels, and HUD corner-bracket on filled player slots.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-lobby {
+        // ── Custom-property re-skin via --bs-lobby-* API ──────────────────────
+
+        // Canvas / panel
+        --bs-lobby-bg:               var(--bp-paper);
+        --bs-lobby-border:           var(--bp-border);
+
+        // Header band — very slightly recessed
+        --bs-lobby-header-bg:        var(--bp-bg-2);
+        --bs-lobby-header-border:    var(--bp-border);
+
+        // Eyebrow: mono label, teal-fg for legibility on white
+        --bs-lobby-eyebrow-color:    var(--bp-teal-fg);
+
+        // Title: primary ink
+        --bs-lobby-title-color:      var(--bp-text);
+
+        // Meta strip
+        --bs-lobby-meta-bg:          var(--bp-paper);
+        --bs-lobby-meta-border:      var(--bp-border-faint);
+        --bs-lobby-meta-key-color:   var(--bp-text-faint);
+        --bs-lobby-meta-val-color:   var(--bp-text);
+
+        // Slot defaults — plain paper, border via --bp-border-faint
+        --bs-lobby-slot-bg:          var(--bp-paper);
+        --bs-lobby-slot-border:      var(--bp-border-faint);
+        --bs-lobby-slot-empty-color: var(--bp-text-faint);
+
+        // Filled slot: paper-tint wash
+        --bs-lobby-slot-filled-bg:   var(--bp-paper-tint);
+
+        // Ready slot: soft teal surface tint
+        --bs-lobby-slot-ready-bg:    var(--bp-teal-soft);
+
+        // Player name
+        --bs-lobby-player-name-color: var(--bp-text);
+
+        // Rank badge: violet-soft tint + violet-fg text (supporting accent)
+        --bs-lobby-rank-bg:          var(--bp-violet-soft);
+        --bs-lobby-rank-color:       var(--bp-violet-fg);
+
+        // Host badge: pink primary accent
+        --bs-lobby-host-badge-color: var(--bp-pink);
+
+        // Ready / waiting status text (teal success / faint)
+        --bs-lobby-ready-color:      var(--bp-teal-fg);
+        --bs-lobby-waiting-color:    var(--bp-text-faint);
+
+        // Actions footer
+        --bs-lobby-actions-bg:       var(--bp-bg-2);
+
+        // Secondary button (default/ready toggle)
+        --bs-lobby-btn-color:        var(--bp-text);
+        --bs-lobby-btn-bg:           var(--bp-paper);
+        --bs-lobby-btn-border:       var(--bp-border-soft);
+        --bs-lobby-btn-hover-bg:     var(--bp-paper-tint-2);
+        --bs-lobby-btn-hover-color:  var(--bp-text-soft);
+
+        // Active (ready = true) → teal everyday-action fill
+        --bs-lobby-btn-active-bg:    var(--bp-teal);
+        --bs-lobby-btn-active-color: var(--bp-teal-ink);
+
+        // Start button → pink primary CTA
+        --bs-lobby-btn-start-bg:     var(--bp-pink);
+        --bs-lobby-btn-start-color:  var(--bp-pink-ink);
+    }
+
+    // ── Panel wrapper ──────────────────────────────────────────────────────────
+    // Elevate the card with a soft violet-tinted shadow to lift it off the
+    // lavender canvas.
+
+    .tc-lobby {
+        box-shadow: var(--tc-shadow-sm);
+        transition: box-shadow var(--bp-ease, 0.18s ease);
+    }
+
+    // ── Header ─────────────────────────────────────────────────────────────────
+
+    .tc-lobby-eyebrow {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.1em;
+    }
+
+    .tc-lobby-title {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+    }
+
+    // ── Meta strip ─────────────────────────────────────────────────────────────
+
+    .tc-lobby-meta-key {
+        font-family: var(--bp-mono);
+        color: var(--bp-text-faint);
+    }
+
+    .tc-lobby-meta-val {
+        font-family: var(--bp-mono);
+        color: var(--bp-text);
+    }
+
+    // ── Player slots ───────────────────────────────────────────────────────────
+
+    .tc-lobby-empty-label {
+        font-family: var(--bp-mono);
+        color: var(--bp-text-faint);
+        letter-spacing: 0.08em;
+    }
+
+    .tc-lobby-player-name {
+        font-family: var(--bp-body);
+        color: var(--bp-text);
+    }
+
+    // Filled slot: HUD corner-bracket (teal, top-left) signals a tappable tile
+    .tc-lobby-slot--filled {
+        position: relative;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            pointer-events: none;
+        }
+    }
+
+    // Ready slot: teal border on the left edge for a quick scan-state indicator
+    .tc-lobby-slot--ready {
+        border-left: 3px solid var(--bp-teal);
+    }
+
+    // Rank badge
+    .tc-lobby-rank {
+        font-family: var(--bp-mono);
+        background: var(--bp-violet-soft);
+        color: var(--bp-violet-fg);
+        letter-spacing: 0.04em;
+    }
+
+    // Host badge: pink primary, mono caps
+    .tc-lobby-host-badge {
+        font-family: var(--bp-mono);
+        color: var(--bp-pink);
+        letter-spacing: 0.08em;
+    }
+
+    // Ready / waiting badges
+    .tc-lobby-ready-badge {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+
+        &.tc-lobby-ready-badge--ready {
+            color: var(--bp-teal-fg);
+        }
+
+        &.tc-lobby-ready-badge--waiting {
+            color: var(--bp-text-faint);
+        }
+    }
+
+    // ── Buttons ────────────────────────────────────────────────────────────────
+
+    .tc-lobby-btn {
+        font-family: var(--bp-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        transition:
+            background-color var(--bp-ease, 0.18s ease),
+            color var(--bp-ease, 0.18s ease),
+            box-shadow var(--bp-ease, 0.18s ease),
+            opacity var(--bp-ease, 0.18s ease);
+
+        &:focus-visible {
+            // Replace the default tc-app-accent outline with teal in blueprint
+            outline-color: var(--bp-teal);
+        }
+
+        // Active (ready toggled on) → teal fill + soft glow
+        &.tc-lobby-btn--active {
+            box-shadow: var(--bp-glow-teal);
+
+            &:hover:not(:disabled) {
+                opacity: 0.9;
+            }
+        }
+
+        // Start button → pink CTA + pink glow on hover
+        &.tc-lobby-btn--start {
+            background: var(--bp-pink-grad);
+            border-color: transparent;
+            box-shadow: var(--bp-glow-pink);
+
+            &:hover:not(:disabled) {
+                background: var(--bp-pink-hover);
+                box-shadow: var(--bp-glow-pink-strong);
+                opacity: 1; // override the default opacity fallback
+            }
+        }
+    }
+}

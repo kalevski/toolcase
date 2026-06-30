@@ -1,0 +1,213 @@
+// Blueprint › tc-legal-screen — white paper shell, mono eyebrows, display title,
+// teal sidebar nav with pink active state, pink CTA accept button.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-legal-screen {
+        // ── Surface ───────────────────────────────────────────────────────────
+        --bs-legal-screen-bg:           var(--bp-paper);
+        --bs-legal-screen-border-color: var(--bp-border);
+        --bs-legal-screen-shadow:       var(--tc-shadow-md);
+
+        // ── Header ────────────────────────────────────────────────────────────
+        --bs-legal-screen-header-bg:     var(--bp-paper-tint);
+        --bs-legal-screen-header-border: var(--bp-border);
+
+        // ── Eyebrow — mono micro-label ────────────────────────────────────────
+        // Teal foreground on white clears AA; consistent with mono labels across
+        // the blueprint system (confirms, tabs, nav kickers).
+        --bs-legal-screen-eyebrow-color: var(--bp-teal-fg);
+
+        // ── Title ─────────────────────────────────────────────────────────────
+        --bs-legal-screen-title-color: var(--bp-emphasis);
+
+        // ── Sidebar nav ───────────────────────────────────────────────────────
+        // Recessed well signals it is structural chrome, not content.
+        --bs-legal-screen-nav-bg:             var(--bp-bg-2);
+        --bs-legal-screen-nav-border:         var(--bp-border);
+        --bs-legal-screen-nav-item-color:     var(--bp-text-muted);
+        --bs-legal-screen-nav-item-hover-bg:  var(--bp-paper-tint-2);
+        // Active nav item → pink primary; white ink label.
+        --bs-legal-screen-nav-active-bg:      var(--bp-pink);
+        --bs-legal-screen-nav-active-color:   var(--bp-pink-ink);
+
+        // ── Body panel ────────────────────────────────────────────────────────
+        --bs-legal-screen-body-bg:             var(--bp-paper);
+        --bs-legal-screen-section-eye-color:   var(--bp-teal-fg);
+        --bs-legal-screen-section-title-color: var(--bp-text);
+        --bs-legal-screen-section-body-color:  var(--bp-text-muted);
+
+        // ── Footer ────────────────────────────────────────────────────────────
+        --bs-legal-screen-footer-bg:     var(--bp-paper-tint);
+        --bs-legal-screen-footer-border: var(--bp-border);
+    }
+
+    // ── Root shell ────────────────────────────────────────────────────────────
+    .tc-legal-screen {
+        // Top accent stripe marks this as a primary-register overlay.
+        box-shadow:
+            var(--tc-shadow-md),
+            inset 0 3px 0 0 var(--bp-pink);
+        border-color: var(--bp-border-pink);
+    }
+
+    // ── Header ────────────────────────────────────────────────────────────────
+    // Inset pink top-stripe is on the root; header itself gets a subtle paper tint
+    // to separate it visually from the body without heavy contrast.
+    .tc-legal-screen__header {
+        background: var(--bs-legal-screen-header-bg);
+        border-bottom-color: var(--bp-border-faint);
+    }
+
+    // ── Eyebrow — mono micro-label ────────────────────────────────────────────
+    .tc-legal-screen__eyebrow {
+        font-family: var(--bp-mono);
+        color: var(--bs-legal-screen-eyebrow-color);
+        letter-spacing: 0.1em; // blueprint mono eyebrow standard
+    }
+
+    // ── Title — display type ──────────────────────────────────────────────────
+    // Main header title reads as the document name — display face grounds it.
+    .tc-legal-screen__title {
+        font-family: var(--bp-display);
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: var(--bs-legal-screen-title-color);
+    }
+
+    // ── Close button ─────────────────────────────────────────────────────────
+    .tc-legal-screen__close {
+        color: var(--bp-text-faint);
+        transition: background-color var(--bp-ease), color var(--bp-ease);
+
+        &:hover {
+            background: var(--bp-paper-tint-2);
+            color: var(--bp-text);
+        }
+
+        &:focus-visible {
+            outline-color: var(--bp-teal);
+        }
+    }
+
+    // ── Grid border — hairline between nav+body ───────────────────────────────
+    .tc-legal-screen__grid {
+        border-bottom-color: var(--bp-border);
+    }
+
+    // ── Sidebar nav ───────────────────────────────────────────────────────────
+    .tc-legal-screen__nav {
+        background: var(--bs-legal-screen-nav-bg);
+        border-right-color: var(--bp-border);
+    }
+
+    .tc-legal-screen__nav-item {
+        font-family: var(--bp-body);
+        color: var(--bs-legal-screen-nav-item-color);
+        transition: background-color var(--bp-ease), color var(--bp-ease);
+
+        &:hover {
+            background: var(--bs-legal-screen-nav-item-hover-bg);
+            color: var(--bp-text-soft);
+        }
+
+        &:focus-visible {
+            outline-color: var(--bp-teal);
+        }
+
+        &--active {
+            background: var(--bs-legal-screen-nav-active-bg);
+            color: var(--bs-legal-screen-nav-active-color);
+            font-weight: 600;
+
+            // Left accent rule signals active section inside the teal/pink system.
+            box-shadow: inset 3px 0 0 0 var(--bp-pink-hover);
+
+            &:hover {
+                background: var(--bp-pink-hover);
+                color: var(--bp-pink-ink);
+            }
+        }
+    }
+
+    // ── Body panel ────────────────────────────────────────────────────────────
+    .tc-legal-screen__body {
+        background: var(--bs-legal-screen-body-bg);
+    }
+
+    // ── Section eyebrow — mono kicker inside content area ────────────────────
+    .tc-legal-screen__section-eyebrow {
+        font-family: var(--bp-mono);
+        color: var(--bs-legal-screen-section-eye-color);
+        letter-spacing: 0.1em;
+    }
+
+    // ── Section title — display heading ──────────────────────────────────────
+    .tc-legal-screen__section-title {
+        font-family: var(--bp-display);
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: var(--bs-legal-screen-section-title-color);
+    }
+
+    // ── Section body prose ────────────────────────────────────────────────────
+    .tc-legal-screen__section-body {
+        font-family: var(--bp-body);
+        color: var(--bs-legal-screen-section-body-color);
+    }
+
+    // ── Empty state ───────────────────────────────────────────────────────────
+    .tc-legal-screen__empty {
+        font-family: var(--bp-body);
+        color: var(--bp-text-faint);
+    }
+
+    // ── Footer ────────────────────────────────────────────────────────────────
+    .tc-legal-screen__footer {
+        background: var(--bs-legal-screen-footer-bg);
+        border-top-color: var(--bp-border-faint);
+    }
+
+    // ── Accept button — pink CTA (primary decisive action) ───────────────────
+    // Replaces the generic --tc-app-accent-gradient and the hardcoded dark hover
+    // shadow (rgba(30,41,59,0.3) — Slate literal) with blueprint pink tokens.
+    .tc-legal-screen__accept {
+        font-family: var(--bp-display);
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        background: var(--bp-pink-grad);
+        color: var(--bp-pink-ink);
+        transition: transform var(--bp-ease), box-shadow var(--bp-ease);
+
+        &:hover {
+            transform: translateY(-2px);
+            // Replace the slate shadow literal with the blueprint pink glow.
+            box-shadow: var(--bp-glow-pink);
+        }
+
+        &:active {
+            transform: none;
+            box-shadow: none;
+        }
+
+        &:focus-visible {
+            outline-color: var(--bp-pink);
+        }
+    }
+
+    // ── Reduced motion ────────────────────────────────────────────────────────
+    @media (prefers-reduced-motion: reduce) {
+        .tc-legal-screen__nav-item,
+        .tc-legal-screen__close,
+        .tc-legal-screen__accept {
+            transition: none;
+        }
+
+        .tc-legal-screen__accept:hover {
+            transform: none;
+            box-shadow: none;
+        }
+    }
+}

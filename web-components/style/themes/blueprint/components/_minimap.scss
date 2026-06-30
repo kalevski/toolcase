@@ -1,0 +1,68 @@
+// Blueprint › tc-minimap — dark navy map canvas with violet grid, teal entity markers, pink player dot, and a teal HUD frame border.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-minimap {
+        // Surface: replace the raw slate-900 bg with a deep navy from the blueprint ink stack.
+        // The map canvas intentionally stays dark (it is a game HUD element, not a card surface);
+        // the outer frame is white paper so it integrates cleanly with the light page.
+        --bs-minimap-surface: var(--bp-paper);
+        --bs-minimap-border-color: var(--bp-teal);         // teal HUD frame — marks this as a live action element
+        --bs-minimap-bg-color: var(--bp-emphasis);         // #0f0e22 deep violet-navy — replaces dark slate literal
+        --bs-minimap-grid-color: var(--bp-border-soft);    // subtle violet hairlines on the dark canvas
+        --bs-minimap-marker-color: var(--bp-teal);         // entity markers → teal (action accent)
+        --bs-minimap-player-color: var(--bp-pink);         // player dot → pink (primary/CTA accent)
+
+        // Two-sided border: teal top/left read as the "active scan" edges; hairline on other sides
+        border-color: var(--bs-minimap-border-color);
+        box-shadow: var(--tc-shadow-sm), var(--bp-glow-teal);
+
+        // HUD corner bracket — top-left, teal, signals a live/interactive panel
+        &::before {
+            content: '';
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            width: 14px;
+            height: 14px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        // Bottom-right HUD bracket mirrored
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: 6px;
+            right: 6px;
+            width: 14px;
+            height: 14px;
+            border-bottom: 2px solid var(--bp-teal);
+            border-right: 2px solid var(--bp-teal);
+            pointer-events: none;
+            z-index: 2;
+        }
+    }
+
+    // Background: violet-hairline grid on the deep navy canvas; opacity lifted slightly
+    // so the blueprint grid reads crisply against the dark ground.
+    .tc-minimap__bg {
+        opacity: 0.9;
+    }
+
+    // Entity marker: teal circle + soft teal halo — live/pulse dot treatment
+    .tc-minimap__marker {
+        box-shadow: 0 0 0 0.2em var(--bp-teal-soft);
+    }
+
+    // Player marker: pink circle + pink glow, standing out from the teal entity field.
+    // Outline colour matches the surface (--bs-minimap-surface = --bp-paper) so the
+    // separation ring is always the white paper colour.
+    .tc-minimap__player {
+        background: var(--bp-pink);
+        outline-color: var(--bp-paper);
+        box-shadow: var(--bp-glow-pink);
+    }
+}

@@ -1,0 +1,53 @@
+// Blueprint › tc-asset-row — list row rerouted to bp tokens: paper ground, faint hairline,
+// display-face name, mono uppercase tags (teal chip), mono size readout, muted icon.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-asset-row {
+        // Ground: white paper surface; separator becomes bp faint divider (kills slate leak)
+        --bs-asset-row-name-color:       var(--bp-text);
+        --bs-asset-row-size-color:       var(--bp-text-faint);
+        --bs-asset-row-tag-bg:           var(--bp-teal-soft);
+        --bs-asset-row-tag-color:        var(--bp-teal-fg);
+        --bs-asset-row-tag-border-color: var(--bp-border-chip);
+        --bs-asset-row-separator-color:  var(--bp-border-faint);
+        --bs-asset-row-hover-bg:         var(--bp-paper-tint);
+
+        background-color: var(--bp-paper);
+        transition: background-color var(--bp-ease, 160ms ease);
+    }
+
+    // Icon: nudge toward violet-inflected muted ink
+    .tc-asset-row-icon {
+        color: var(--bp-text-muted);
+    }
+
+    // Name: display face for asset titles — tight tracking, weight stays 500
+    .tc-asset-row-name {
+        font-family: var(--bp-display);
+        color: var(--bs-asset-row-name-color);
+        letter-spacing: -0.01em; // display face tightened slightly
+    }
+
+    // Tags: mono eyebrow treatment — uppercase, loose tracking, teal chip
+    .tc-asset-row-tag {
+        font-family: var(--bp-mono);
+        font-size: 0.67rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 600;
+        color: var(--bs-asset-row-tag-color);
+        background-color: var(--bs-asset-row-tag-bg);
+        border-color: var(--bs-asset-row-tag-border-color);
+    }
+
+    // Size: mono HUD readout — faint, legible at small size
+    .tc-asset-row-size {
+        font-family: var(--bp-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.04em;
+        color: var(--bs-asset-row-size-color);
+        font-variant-numeric: tabular-nums;
+    }
+}

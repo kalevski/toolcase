@@ -1,0 +1,103 @@
+// Blueprint › tc-codex — bestiary/codex browser reskinned as a blueprint HUD panel: paper surfaces with violet hairlines, pink selected row, teal eyebrow + stat values, mono labels.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-codex {
+        // ── Entry list ──────────────────────────────────────────────────────────
+        --bs-codex-list-bg: var(--bp-paper);
+        --bs-codex-list-border-color: var(--bp-border);
+
+        // ── Entry rows ──────────────────────────────────────────────────────────
+        --bs-codex-row-color: var(--bp-text);
+        // Inner row separators → faint divider hairline (not the heavier frame border)
+        --bs-codex-row-separator-color: var(--bp-border-faint);
+        --bs-codex-row-hover-bg: var(--bp-paper-tint-2);
+        // Selected row → pink primary fill (arcade accent rotation: pink = primary)
+        --bs-codex-row-selected-bg: var(--bp-pink);
+        --bs-codex-row-selected-color: var(--bp-pink-ink);
+
+        // ── Glyphs ──────────────────────────────────────────────────────────────
+        --bs-codex-glyph-color: var(--bp-text-muted);
+        --bs-codex-glyph-undiscovered-color: var(--bp-text-faint);
+
+        // ── Detail panel ────────────────────────────────────────────────────────
+        --bs-codex-detail-bg: var(--bp-paper);
+        --bs-codex-detail-border-color: var(--bp-border);
+        // Eyebrow → teal mono label (teal = action / supporting HUD color)
+        --bs-codex-detail-eyebrow-color: var(--bp-teal-fg);
+        --bs-codex-detail-name-color: var(--bp-emphasis);
+        --bs-codex-detail-description-color: var(--bp-text-muted);
+        // Stat dividers → border token (tracks)
+        --bs-codex-detail-stat-border-color: var(--bp-border);
+        --bs-codex-detail-stat-label-color: var(--bp-text-faint);
+        --bs-codex-detail-stat-value-color: var(--bp-text-soft);
+    }
+
+    // ── Entry list container ────────────────────────────────────────────────────
+    .tc-codex-list {
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Entry row refinements ───────────────────────────────────────────────────
+    .tc-codex-row {
+        transition: background-color 0.15s var(--bp-ease), color 0.15s var(--bp-ease);
+
+        &:focus-visible {
+            // Pink glow for focus ring to match selected-state accent
+            outline-color: var(--bp-pink);
+        }
+    }
+
+    // Row name → body font (Space Grotesk), medium weight
+    .tc-codex-row-name {
+        font-family: var(--bp-body);
+        font-weight: 500;
+    }
+
+    // ── Detail panel container ──────────────────────────────────────────────────
+    .tc-codex-detail {
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // Eyebrow → mono, uppercase, teal — HUD micro-label treatment
+    .tc-codex-detail-eyebrow {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.12em;
+        color: var(--bp-teal-fg);
+    }
+
+    // Detail name → display font for title weight
+    .tc-codex-detail-name {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+        color: var(--bp-emphasis);
+    }
+
+    // Empty state hint
+    .tc-codex-detail-empty {
+        font-family: var(--bp-body);
+        color: var(--bp-text-faint);
+    }
+
+    // Description body copy → body font
+    .tc-codex-detail-description {
+        font-family: var(--bp-body);
+        color: var(--bp-text-muted);
+    }
+
+    // Stat values → mono tabular, teal-fg so they stand out from muted labels
+    .tc-codex-detail-stat-value {
+        font-family: var(--bp-mono);
+        color: var(--bp-teal-fg);
+    }
+
+    // Stat labels → mono micro-label style
+    .tc-codex-detail-stat-label {
+        font-family: var(--bp-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--bp-text-faint);
+    }
+}

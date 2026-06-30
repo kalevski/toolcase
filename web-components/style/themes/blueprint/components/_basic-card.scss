@@ -1,0 +1,92 @@
+// Blueprint › tc-basic-card — white HUD tile: display metric value, mono label, teal icon chip, corner-bracket lift on hover.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-basic-card,
+    tc-colored-card {
+        // Surface: white paper, lilac hairline, soft violet-tinted shadow.
+        --bs-basic-card-bg: var(--bp-paper);
+        --bs-basic-card-border-color: var(--bp-border);
+        --bs-basic-card-shadow: var(--tc-shadow-sm);
+
+        // Icon chip: recessed lavender well, teal glyph — action color for everyday UI chips.
+        --bs-basic-card-icon-bg: var(--bp-bg-2);
+        --bs-basic-card-icon-color: var(--bp-teal-fg);
+
+        // Primary (metric value / card title): blueprint emphasis ink — display font applied below.
+        --bs-basic-card-primary-color: var(--bp-emphasis);
+
+        // Secondary (label / caption): muted ink — mono font applied below.
+        --bs-basic-card-secondary-color: var(--bp-text-faint);
+
+        // Skeleton shimmer: lavender base + white glide (replaces raw rgba(255,255,255,.6)).
+        --bs-basic-card-skeleton-bg: var(--bp-paper-tint-2);
+        --bs-basic-card-skeleton-shimmer: rgba(255, 255, 255, 0.75);
+    }
+
+    // HUD tile container — position:relative so the corner-bracket anchors inside it.
+    .tc-basic-card {
+        position: relative;
+        transition:
+            transform 0.22s var(--bp-ease),
+            border-color 0.22s,
+            box-shadow 0.22s;
+
+        // HUD corner-bracket: top-left L-tick in teal — the blueprint signature detail.
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            opacity: 0.6;
+            pointer-events: none;
+            transition: opacity 0.22s;
+        }
+
+        &:hover {
+            transform: translateY(-2px);
+            border-color: var(--bp-teal);
+            box-shadow: var(--tc-shadow-hover);
+
+            &::before {
+                opacity: 1;
+            }
+        }
+    }
+
+    // Icon chip: teal-line border to reinforce the HUD accent rotation.
+    .tc-basic-card-icon {
+        border-color: var(--bp-border);
+        background: var(--bs-basic-card-icon-bg);
+        color: var(--bs-basic-card-icon-color);
+    }
+
+    // Accent variant (tc-colored-card / color attr): soft tint from the component's
+    // own color-mix logic still works; we nudge the border to the faint lavender track
+    // so accent chips don't compete with the card's main teal bracket.
+    .tc-basic-card--accent .tc-basic-card-icon {
+        border-color: transparent;
+    }
+
+    // Primary text: display font for metric values / tile titles — tight tracking, blueprint ink.
+    .tc-basic-card-primary {
+        font-family: var(--bp-display);
+        font-size: var(--bs-basic-card-primary-font-size);
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        color: var(--bs-basic-card-primary-color);
+    }
+
+    // Secondary text: mono micro-label — uppercase HUD readout treatment.
+    .tc-basic-card-secondary {
+        font-family: var(--bp-mono);
+        font-size: var(--bs-basic-card-secondary-font-size);
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--bs-basic-card-secondary-color);
+    }
+}

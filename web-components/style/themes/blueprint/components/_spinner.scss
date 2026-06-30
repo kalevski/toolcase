@@ -1,0 +1,61 @@
+// Blueprint › tc-spinner — teal-arc ring track, HUD orbit satellite, sonar glow pulse; all variants routed to blueprint border/action tokens.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    // ── spinner-border: ring with a spinning teal arc ────────────────────────
+    // The track border comes from --tc-border in the base; reroute to the
+    // blueprint hairline token so it reads as a deliberate lavender-grey track
+    // rather than the inherited light-slate ramp.
+    .spinner-border {
+        border-color: var(--bp-border);       // track: blueprint hairline
+        border-top-color: var(--bp-teal);     // arc: teal action accent
+
+        // Slightly crisper timing fits the HUD/technical aesthetic
+        --bs-spinner-animation-speed: 0.75s;
+    }
+
+    // ── spinner-grow: filled pulse dot ───────────────────────────────────────
+    // currentcolor drives the fill; callers can still override with text-*
+    // utilities, but the default context colour is teal via --tc-color-action
+    // if the host sets it; no change needed here — inherit is safe.
+    // We only nudge the speed to match the ring variant's pacing.
+    .spinner-grow {
+        --bs-spinner-animation-speed: 0.9s;
+    }
+
+    // ── spinner-dots: bouncing trio ──────────────────────────────────────────
+    // Dots inherit currentcolor from the parent; no track to recolour.
+    // Speed kept at default 0.9s — feels deliberate at this scale.
+
+    // ── spinner-bars: equalizer rectangles ──────────────────────────────────
+    // Bars inherit currentcolor; the teal context colour (set by consumers)
+    // makes them read as an audio-mixer HUD element, which fits blueprint.
+    // No structural change needed.
+
+    // ── spinner-pulse: sonar ping with teal glow ─────────────────────────────
+    // The border is `currentcolor`; wrapping in teal context gives the sonar
+    // ring its hue. We add a ::after pseudo-ring to simulate the blueprint
+    // glow token without touching the animation keyframe.
+    .spinner-pulse {
+        --bs-spinner-animation-speed: 1.2s;
+
+        // Subtle teal glow; the ring expands and fades so the box-shadow
+        // follows it — a second layer of depth without an extra element.
+        filter: drop-shadow(0 0 3px var(--bp-teal-soft));
+    }
+
+    // ── spinner-orbit: dashed orbit ring + satellite dot ─────────────────────
+    // This is the most "blueprint" variant: a dashed technical orbit ring with
+    // a dot on the rim. Give it the teal action colour and a soft glow halo
+    // to reinforce the HUD corner-bracket vocabulary.
+    .spinner-orbit {
+        border-color: var(--bp-teal);         // dashed orbit ring: teal
+        --bs-spinner-animation-speed: 1.4s;   // slightly crisper than default 1.6s
+
+        // Soft teal halo around the whole orbit disc — reads as a live-ping dot
+        filter: drop-shadow(0 0 4px var(--bp-teal-soft));
+    }
+
+    // The satellite dot on the rim inherits currentcolor from the orbit ring;
+    // no separate rule needed — it picks up teal from the parent context.
+}

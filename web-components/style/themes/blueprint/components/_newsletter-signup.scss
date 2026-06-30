@@ -1,0 +1,174 @@
+// Blueprint › tc-newsletter-signup — pink-primary CTA panel with mono eyebrow, display title, teal success state, and violet focus rings.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-newsletter-signup {
+        // Surface: raised white card with hairline border
+        --bs-newsletter-signup-bg:                  var(--bp-paper);
+        --bs-newsletter-signup-border:              1px solid var(--bp-border);
+
+        // Text
+        --bs-newsletter-signup-color:               var(--bp-text);
+        --bs-newsletter-signup-muted-color:         var(--bp-text-muted);
+
+        // Title — bump to display family via element override below
+        --bs-newsletter-signup-title-size:          1.25rem;
+        --bs-newsletter-signup-title-weight:        700;
+
+        // Input — white surface, standard hairline, violet focus ring
+        --bs-newsletter-signup-input-bg:            var(--bp-paper);
+        --bs-newsletter-signup-input-color:         var(--bp-text);
+        --bs-newsletter-signup-input-border:        var(--bp-border-strong);
+        --bs-newsletter-signup-input-focus-ring:    0 0 0 3px var(--bp-violet-soft);
+        --bs-newsletter-signup-input-placeholder-color: var(--bp-text-faint);
+
+        // Submit CTA — pink primary
+        --bs-newsletter-signup-submit-bg:           var(--bp-pink-grad);
+        --bs-newsletter-signup-submit-color:        var(--bp-pink-ink);
+        --bs-newsletter-signup-submit-border:       var(--bp-pink);
+
+        // Error — real-red danger tokens
+        --bs-newsletter-signup-error-color:         var(--bp-danger);
+        --bs-newsletter-signup-error-bg:            var(--bp-danger-soft);
+
+        // Success — teal tokens
+        --bs-newsletter-signup-success-color:       var(--bp-teal-fg);
+        --bs-newsletter-signup-success-bg:          var(--bp-teal-soft);
+        --bs-newsletter-signup-success-border:      var(--bp-teal);
+
+        // Privacy link — faint → muted on hover
+        --bs-newsletter-signup-privacy-color:       var(--bp-text-faint);
+        --bs-newsletter-signup-privacy-hover-color: var(--bp-teal-fg);
+    }
+
+    // ── Outer panel ─────────────────────────────────────────────────────────────
+
+    .tc-newsletter-signup {
+        background: var(--bs-newsletter-signup-bg);
+        border: var(--bs-newsletter-signup-border);
+        box-shadow: var(--tc-shadow-sm);
+        // Light grid-field backdrop for visual depth
+        background-image: var(--bp-grid-field);
+        background-size: var(--bp-grid-size) var(--bp-grid-size);
+    }
+
+    // ── Title — Chakra Petch display, tight tracking ─────────────────────────────
+    // The --bs-font-sans-serif base var is overridden directly since the
+    // title element has no dedicated font var in the custom-property API.
+
+    .tc-newsletter-signup-title {
+        font-family: var(--bp-display);
+        letter-spacing: -0.02em;
+        color: var(--bp-emphasis);
+    }
+
+    // ── Description ─────────────────────────────────────────────────────────────
+
+    .tc-newsletter-signup-description {
+        font-family: var(--bp-body);
+        color: var(--bp-text-muted);
+        line-height: 1.65;
+    }
+
+    // ── Email input — violet focus ring, danger tint on invalid ─────────────────
+
+    .tc-newsletter-signup-input {
+        font-family: var(--bp-body);
+        background-color: var(--bs-newsletter-signup-input-bg);
+        border-color: var(--bp-border-strong);
+        color: var(--bs-newsletter-signup-input-color);
+        transition: border-color var(--bp-ease), box-shadow var(--bp-ease);
+
+        &::placeholder {
+            color: var(--bp-text-faint);
+        }
+
+        &:focus {
+            border-color: var(--bp-violet);
+            box-shadow: var(--bs-newsletter-signup-input-focus-ring);
+        }
+
+        &[aria-invalid='true'] {
+            border-color: var(--bp-danger);
+        }
+    }
+
+    // ── Submit button — pink primary, pink glow on hover ────────────────────────
+
+    .tc-newsletter-signup-submit {
+        font-family: var(--bp-mono);
+        font-weight: 700;
+        font-size: 0.8125rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        background: var(--bs-newsletter-signup-submit-bg);
+        color: var(--bs-newsletter-signup-submit-color);
+        border-color: var(--bp-pink);
+        transition: transform var(--bp-ease), box-shadow var(--bp-ease);
+
+        &:hover:not(:disabled) {
+            transform: translateY(-2px);
+            // Replace dark slate shadow with pink glow
+            box-shadow: var(--bp-glow-pink);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-pink);
+            outline-offset: 2px;
+            box-shadow: var(--bp-glow-pink-strong);
+        }
+    }
+
+    // ── Spinner — white on pink fill (already correct, reinforce) ───────────────
+
+    .tc-newsletter-signup-spinner {
+        // Spinner border is already #fff / rgba(255,255,255,.35) — legible on pink.
+        // No change needed; kept here for future token migration awareness.
+        border-color: rgba(255, 255, 255, 0.35);
+        border-top-color: var(--bp-pink-ink);
+    }
+
+    // ── Inline validation error text ────────────────────────────────────────────
+
+    .tc-newsletter-signup-error {
+        font-family: var(--bp-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.04em;
+        color: var(--bp-danger);
+    }
+
+    // ── Success state — teal left-accent, soft teal tint ────────────────────────
+
+    .tc-newsletter-signup-success {
+        background: var(--bs-newsletter-signup-success-bg);
+        border-left-color: var(--bp-teal);
+    }
+
+    .tc-newsletter-signup-success-icon {
+        color: var(--bp-teal-fg);
+    }
+
+    .tc-newsletter-signup-success-message {
+        font-family: var(--bp-body);
+        font-weight: 600;
+        color: var(--bp-teal-fg);
+    }
+
+    // ── Privacy link — teal-fg on hover for brand consistency ───────────────────
+
+    .tc-newsletter-signup-privacy {
+        font-family: var(--bp-body);
+        color: var(--bp-text-faint);
+        transition: color var(--bp-ease);
+
+        &:hover {
+            color: var(--bp-teal-fg);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-violet);
+            outline-offset: 2px;
+        }
+    }
+}

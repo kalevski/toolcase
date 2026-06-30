@@ -1,0 +1,37 @@
+// Blueprint › tc-file-tags — tag picker. Chips read as mono uppercase HUD tags
+// on a soft lavender well with a lilac hairline; the active add-menu option
+// takes the pink accent (white label stays legible), search + menu sit on white
+// paper. The chip accent stripe (--bs-file-tags-chip-color) is left for the
+// per-tag inline colour.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-file-tags {
+        --bs-file-tags-chip-bg: var(--bp-bg-2);
+        --bs-file-tags-chip-border-color: var(--bp-border-chip);
+        --bs-file-tags-chip-text-color: var(--bp-text);
+        --bs-file-tags-remove-bg-hover: var(--bp-border);
+
+        --bs-file-tags-add-color: var(--bp-text-muted);
+        --bs-file-tags-add-border-color: var(--bp-border-soft);
+        --bs-file-tags-add-bg-hover: var(--bp-teal-soft);
+        --bs-file-tags-add-color-hover: var(--bp-teal-fg);
+
+        --bs-file-tags-menu-bg: var(--bp-paper);
+        --bs-file-tags-menu-border-color: var(--bp-border);
+        --bs-file-tags-search-border-color: var(--bp-border);
+
+        --bs-file-tags-option-color: var(--bp-text);
+        --bs-file-tags-option-hover-bg: var(--bp-bg-2);
+        --bs-file-tags-option-active-bg: var(--bp-pink);
+        --bs-file-tags-option-active-color: var(--bp-pink-ink);
+        --bs-file-tags-no-results-color: var(--bp-text-faint);
+    }
+
+    // Chips as mono uppercase tags.
+    .tc-file-tags-chip {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+}

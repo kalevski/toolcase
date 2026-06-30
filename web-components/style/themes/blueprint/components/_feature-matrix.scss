@@ -1,0 +1,39 @@
+// Blueprint › tc-feature-matrix — comparison table with the blueprint voice:
+// white paper frame, lilac hairlines, mono uppercase column labels, a Chakra
+// Petch title, a pink-tinted highlight band, and teal/amber status icons. Token
+// remap already maps the surfaces; this sets the type voice + accent rotation.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-feature-matrix {
+        --bs-feature-matrix-border: 1px solid var(--bp-border);
+        --bs-feature-matrix-inner-border: 1px solid var(--bp-border-faint);
+        --bs-feature-matrix-bg: var(--bp-paper);
+        --bs-feature-matrix-header-bg: var(--bp-bg-2);
+        --bs-feature-matrix-title-color: var(--bp-emphasis);
+        --bs-feature-matrix-head-bg: var(--bp-bg-2);
+        --bs-feature-matrix-col-label-color: var(--bp-text-muted);
+        --bs-feature-matrix-col-label-letter-spacing: 0.1em;
+        --bs-feature-matrix-row-label-color: var(--bp-text);
+        --bs-feature-matrix-row-hint-color: var(--bp-text-muted);
+        // Highlight column band → faint pink (the "popular" plan hue).
+        --bs-feature-matrix-highlight-bg: var(--bp-pink-soft);
+        --bs-feature-matrix-row-hover-bg: var(--bp-paper-tint);
+        // Status icons: yes→teal, partial→amber, no→faint.
+        --bs-feature-matrix-yes-color: var(--bp-teal);
+        --bs-feature-matrix-no-color: var(--bp-text-faint);
+        --bs-feature-matrix-partial-color: var(--bp-amber);
+        --bs-feature-matrix-text-value-color: var(--bp-text-muted);
+    }
+
+    // Title in the display face; column labels as mono HUD captions.
+    .tc-feature-matrix-title {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+    }
+
+    .tc-feature-matrix-col-label {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+    }
+}

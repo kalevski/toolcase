@@ -1,0 +1,124 @@
+// Blueprint › tc-controls-rebind-list — white-paper rebind list with display
+// action labels, violet key-caps, teal "Rebind" affordance, and faint lavender
+// row separators routed off the raw slate literals in the base partial.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Component token overrides ─────────────────────────────────────────────
+
+    tc-controls-rebind-list {
+        // Surface — raised white card lifted off the lavender page.
+        --bs-controls-rebind-list-bg:                  var(--bp-paper);
+        --bs-controls-rebind-list-border-color:        var(--bp-border);
+
+        // Inner separators — faint divider token replaces baked slate-100 literal.
+        --bs-controls-rebind-list-separator-color:     var(--bp-border-faint);
+
+        // Row hover — barely-there paper-tint wash; the teal left-stripe below
+        // carries the affordance signal, so the fill stays very quiet.
+        --bs-controls-rebind-list-row-hover-bg:        var(--bp-paper-tint);
+
+        // Action label — primary ink, display typeface weight handled per-element.
+        --bs-controls-rebind-list-action-color:        var(--bp-text);
+
+        // "Unbound" placeholder — faint mono micro-label.
+        --bs-controls-rebind-list-empty-color:         var(--bp-text-faint);
+
+        // Key-cap — violet soft-fill + violet-fg text.  Violet is the blueprint
+        // "support" accent: it reads as a physical keyboard key without competing
+        // with the teal action or pink CTA roles.
+        --bs-controls-rebind-list-key-font-family:     var(--bp-mono);
+        --bs-controls-rebind-list-key-color:           var(--bp-violet-fg);
+        --bs-controls-rebind-list-key-bg:              var(--bp-violet-soft);
+        --bs-controls-rebind-list-key-border-color:    var(--bp-border-strong);
+
+        // Rebind affordance — faint at rest; teal-fg on reveal (row hover/focus).
+        // teal-fg clears AA contrast on white paper (unlike raw --bp-teal).
+        --bs-controls-rebind-list-rebind-color:        var(--bp-text-faint);
+        --bs-controls-rebind-list-rebind-hover-color:  var(--bp-teal-fg);
+    }
+
+    // ── Outer frame ───────────────────────────────────────────────────────────
+
+    .tc-controls-rebind-list {
+        // Lift the list off the lavender page background with a soft violet shadow.
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Row — teal left-edge accent stripe ────────────────────────────────────
+    // A 2px transparent left border is reserved on every row so content never
+    // shifts on hover; the stripe fills on hover/focus.
+
+    .tc-controls-rebind-list-row {
+        border-left: 2px solid transparent;
+        // Offset the 2px reserved border so text aligns with the outer frame.
+        padding-left: calc(var(--bs-controls-rebind-list-padding-x) - 2px);
+        transition:
+            background-color 0.18s var(--bp-ease),
+            border-color 0.18s var(--bp-ease);
+
+        &:hover {
+            border-left-color: var(--bp-teal);
+        }
+
+        &:focus-visible {
+            // Teal outline — action accent, inset so the frame is not clipped.
+            outline-color: var(--bp-teal);
+            border-left-color: var(--bp-teal);
+        }
+    }
+
+    // ── Action label — display typeface ───────────────────────────────────────
+    // Chakra Petch at 500 weight reads as a named entity / action label without
+    // shouting.  Tight letter-spacing tightens the display treatment.
+
+    .tc-controls-rebind-list-action {
+        font-family: var(--bp-display);
+        font-weight: 500;
+        letter-spacing: -0.01em;
+        color: var(--bp-text);
+    }
+
+    // ── "Unbound" empty placeholder — mono italic ─────────────────────────────
+    // Faint mono italic signals "nothing assigned here" without a heavy visual
+    // presence.  Color is already routed via token above; the family echoes the
+    // key-cap register for visual coherence.
+
+    .tc-controls-rebind-list-empty {
+        font-family: var(--bp-mono);
+        color: var(--bp-text-faint);
+    }
+
+    // ── Key-cap — mono label, violet-tinted ───────────────────────────────────
+    // JetBrains Mono uppercase keeps the kbd glyph in the HUD / micro-label
+    // register.  Violet-soft fill + thicker bottom border mimics a physical key
+    // edge and differentiates it clearly from the teal action accent.
+
+    .tc-controls-rebind-list-key {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--bp-violet-fg);
+        background-color: var(--bp-violet-soft);
+        border-color: var(--bp-border-strong);
+        // Subtle box-shadow reinforces the key-cap depth illusion.
+        box-shadow: 0 1px 0 var(--bp-border-strong);
+    }
+
+    // ── Rebind affordance — mono uppercase, teal on reveal ────────────────────
+    // The mono uppercase register matches the key-cap so the pair reads as a
+    // cohesive control unit.  Teal-fg clears AA on white paper; raw --bp-teal
+    // is fine on dark fills but falls below 3:1 on --bp-paper.
+
+    .tc-controls-rebind-list-rebind {
+        font-family: var(--bp-mono);
+        color: var(--bp-text-faint);
+        transition: color 0.18s var(--bp-ease);
+    }
+
+    // Reveal on row hover / focus is handled via the base partial's
+    // .tc-controls-rebind-list-row:hover .tc-controls-rebind-list-rebind rule,
+    // which reads --bs-controls-rebind-list-rebind-hover-color already remapped
+    // to --bp-teal-fg above.  No additional selector needed here.
+}

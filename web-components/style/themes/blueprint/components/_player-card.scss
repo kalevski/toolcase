@@ -1,0 +1,241 @@
+// Blueprint › tc-player-card — HUD identity panel: display name, teal presence pip with halo, mono rank/level badges, display stat numerics, and teal/danger action buttons with a corner-bracket lift.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-player-card {
+        // ── Surface ───────────────────────────────────────────────────────────
+        // White paper card, lilac hairline, soft violet-tinted shadow.
+        --bs-player-card-bg:             var(--bp-paper);
+        --bs-player-card-border:         var(--bp-border);
+
+        // ── Header ────────────────────────────────────────────────────────────
+        // Faint violet gradient cap — matches the blueprint card-header convention.
+        --bs-player-card-header-bg:      linear-gradient(135deg, rgba(91, 61, 242, 0.04), rgba(91, 61, 242, 0.01));
+        --bs-player-card-header-border:  var(--bp-border-faint);
+
+        // ── Identity text ─────────────────────────────────────────────────────
+        // Name → display font, emphasis ink (applied via element rule below).
+        // Card-title → mono micro-label, faint ink (applied below).
+        --bs-player-card-name-color:     var(--bp-emphasis);
+        --bs-player-card-title-color:    var(--bp-text-faint);
+
+        // ── Presence pip + label ──────────────────────────────────────────────
+        // Status → teal (success), away → amber, busy → real danger red,
+        // in-game → pink (primary CTA accent), offline → faint text.
+        --bs-player-card-pip-online:     var(--bp-teal);
+        --bs-player-card-pip-away:       var(--bp-amber);
+        --bs-player-card-pip-busy:       var(--bp-danger);
+        --bs-player-card-pip-in-game:    var(--bp-pink);
+        --bs-player-card-pip-offline:    var(--bp-text-faint);
+        --bs-player-card-status-color:   var(--bp-text-muted);
+
+        // ── Meta row (rank + level) ───────────────────────────────────────────
+        --bs-player-card-meta-bg:        var(--bp-paper);
+        --bs-player-card-meta-border:    var(--bp-border-faint);
+        // Rank chip → teal soft tint (action chip, everyday accent rotation).
+        --bs-player-card-rank-bg:        var(--bp-teal-soft);
+        --bs-player-card-rank-color:     var(--bp-teal-fg);
+        // Level → violet supporting accent (applied via element rule below).
+        --bs-player-card-level-color:    var(--bp-violet-fg);
+
+        // ── Stats grid ────────────────────────────────────────────────────────
+        --bs-player-card-stats-bg:       var(--bp-paper);
+        --bs-player-card-stats-border:   var(--bp-border-faint);
+        // Stat labels → mono micro-label faint ink (applied below).
+        --bs-player-card-stat-label-color: var(--bp-text-faint);
+        // Stat values → display font, emphasis ink (applied below).
+        --bs-player-card-stat-value-color: var(--bp-emphasis);
+
+        // ── Action buttons ────────────────────────────────────────────────────
+        // Footer tray → recessed well, hairline separator.
+        --bs-player-card-actions-bg:     var(--bp-bg-2);
+        --bs-player-card-actions-border: var(--bp-border-faint);
+        // Default action button → body text ink, paper fill, border hairline.
+        --bs-player-card-btn-color:      var(--bp-text);
+        --bs-player-card-btn-bg:         var(--bp-paper);
+        --bs-player-card-btn-border:     var(--bp-border);
+        // Hover → teal surface tint (everyday action accent).
+        --bs-player-card-btn-hover-bg:   var(--bp-teal-soft);
+        --bs-player-card-btn-hover-color:var(--bp-teal-fg);
+        // Danger variant → real danger red (not pink — pink is primary CTA).
+        --bs-player-card-btn-danger-color:        var(--bp-danger);
+        --bs-player-card-btn-danger-hover-bg:      var(--bp-danger);
+        --bs-player-card-btn-danger-hover-color:   #fff;
+    }
+
+    // ── Card shell ────────────────────────────────────────────────────────────
+    // position:relative required for the corner-bracket ::before anchor.
+    .tc-player-card {
+        position: relative;
+        box-shadow: var(--tc-shadow-sm);
+        transition:
+            transform 0.22s var(--bp-ease),
+            border-color 0.22s,
+            box-shadow 0.22s;
+
+        // HUD corner-bracket: top-left L-tick in teal — blueprint signature.
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            opacity: 0.55;
+            pointer-events: none;
+            transition: opacity 0.22s;
+        }
+
+        &:hover {
+            transform: translateY(-2px);
+            border-color: var(--bp-teal);
+            box-shadow: var(--tc-shadow-hover);
+
+            &::before {
+                opacity: 1;
+            }
+        }
+    }
+
+    // ── Name ──────────────────────────────────────────────────────────────────
+    // Display font for the player callsign — the primary identity glyph.
+    .tc-player-card-name {
+        font-family: var(--bp-display);
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        color: var(--bs-player-card-name-color);
+    }
+
+    // ── Card title (subtitle / role) ──────────────────────────────────────────
+    // Mono micro-label: uppercase, loose tracking, faint ink — HUD eyebrow.
+    .tc-player-card-card-title {
+        font-family: var(--bp-mono);
+        font-size: 0.625rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--bs-player-card-title-color);
+    }
+
+    // ── Status label ──────────────────────────────────────────────────────────
+    // Mono micro-label alongside the pip — read as HUD system readout.
+    .tc-player-card-status-label {
+        font-family: var(--bp-mono);
+        font-size: 0.625rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.09em;
+        color: var(--bs-player-card-status-color);
+    }
+
+    // ── Presence pip ──────────────────────────────────────────────────────────
+    // Online status gets a soft teal halo ring — live/pulse dot treatment.
+    .tc-player-card-pip {
+        .tc-player-card-presence[data-status="online"] & {
+            box-shadow: 0 0 0 0.2em var(--bp-teal-soft);
+        }
+        // In-game → pink halo (primary accent pulse).
+        .tc-player-card-presence[data-status="in-game"] & {
+            box-shadow: 0 0 0 0.2em var(--bp-pink-soft);
+        }
+    }
+
+    // ── Meta row (rank + level) ───────────────────────────────────────────────
+    .tc-player-card-meta {
+        // Faint divider lines use bp tokens — no raw tc-slate-* leakage.
+        border-bottom-color: var(--bp-border-faint);
+    }
+
+    // Rank chip: teal-soft tint + teal border — action chip in the blueprint accent rotation.
+    .tc-player-card-rank {
+        font-family: var(--bp-mono);
+        font-size: 0.5625rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        background: var(--bs-player-card-rank-bg);
+        color: var(--bs-player-card-rank-color);
+        border-color: var(--bp-teal-line);
+    }
+
+    // Level label: mono, violet-fg (supporting accent separates it from the teal rank chip).
+    .tc-player-card-level {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        font-weight: 600;
+        color: var(--bs-player-card-level-color);
+        letter-spacing: 0.04em;
+    }
+
+    // ── Stats grid ────────────────────────────────────────────────────────────
+    .tc-player-card-stat-label {
+        // Mono micro-label: same HUD eyebrow treatment as card-title / status.
+        font-family: var(--bp-mono);
+        font-size: 0.5625rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--bs-player-card-stat-label-color);
+    }
+
+    // Stat value: display font for numerical readouts — high-impact, tight tracking.
+    .tc-player-card-stat-value {
+        font-family: var(--bp-display);
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        color: var(--bs-player-card-stat-value-color);
+        font-variant-numeric: tabular-nums;
+    }
+
+    // ── Action buttons ────────────────────────────────────────────────────────
+    // Buttons use a mono-or-body label; add tight tracking for the mono feel.
+    .tc-player-card-action-btn {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        transition:
+            background-color 0.18s var(--bp-ease),
+            color 0.18s var(--bp-ease),
+            border-color 0.18s var(--bp-ease),
+            box-shadow 0.18s var(--bp-ease),
+            opacity 0.18s;
+
+        &:hover:not(:disabled) {
+            // Teal border reinforces the everyday-action accent on hover.
+            border-color: var(--bp-teal-line);
+            box-shadow: var(--bp-glow-teal);
+        }
+
+        &:focus-visible {
+            // Focus ring: pink — primary CTA accent for keyboard nav.
+            outline-color: var(--bp-pink);
+        }
+
+        // Danger variant: real danger red text + border at rest, solid fill on hover.
+        &.tc-player-card-action-btn--danger {
+            color: var(--bs-player-card-btn-danger-color);
+            border-color: var(--bp-danger);
+
+            &:hover:not(:disabled) {
+                background: var(--bs-player-card-btn-danger-hover-bg);
+                color: var(--bs-player-card-btn-danger-hover-color);
+                border-color: var(--bp-danger);
+                box-shadow: none;
+            }
+        }
+    }
+
+    // ── Reduced motion ────────────────────────────────────────────────────────
+    @media (prefers-reduced-motion: reduce) {
+        .tc-player-card,
+        .tc-player-card::before,
+        .tc-player-card-action-btn {
+            transition: none;
+        }
+    }
+}

@@ -1,0 +1,36 @@
+// Blueprint › tc-key — mono-cap keycap with teal hairline, violet-tinted surface, pink active state.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-key {
+        // Surface: pale violet-tinted paper, strong blueprint hairline
+        --bs-key-font-family: var(--bp-mono);
+        --bs-key-font-weight: 600;
+        --bs-key-color: var(--bp-text-soft);
+        --bs-key-bg: var(--bp-paper-tint);
+        --bs-key-border-color: var(--bp-border-strong);
+
+        // Active → pink primary accent with glow
+        --bs-key-active-color: var(--bp-pink-ink);
+        --bs-key-active-bg: var(--bp-pink);
+        --bs-key-active-border-color: var(--bp-pink);
+    }
+
+    .tc-key {
+        // Uppercase mono label — blueprint HUD treatment
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        // Thicker bottom edge for keycap depth, recoloured to blueprint teal hairline
+        border-bottom-color: var(--bp-teal-line, var(--bp-border-soft));
+        border-bottom-width: 2px;
+        // Faint violet-tinted shadow replaces the default none
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    .tc-key--active {
+        // Override border-bottom depth line to match pink active state
+        border-bottom-color: var(--bp-pink-hover);
+        box-shadow: var(--bp-glow-pink);
+    }
+}

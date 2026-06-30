@@ -1,0 +1,171 @@
+// Blueprint › tc-crafting-panel — lavender-paper list + detail surfaces, pink
+// primary selection + CTA, teal mono eyebrows, display output title, faint
+// hairline separators; replaces the dark slate craft-hover shadow literal.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-crafting-panel {
+        // ── Recipe list ─────────────────────────────────────────────────────
+        --bs-crafting-panel-list-bg:            var(--bp-paper);
+        --bs-crafting-panel-list-border-color:  var(--bp-border);
+
+        // Inner row separators → faint divider token (not the outer frame weight)
+        --bs-crafting-panel-row-separator-color: var(--bp-border-faint);
+
+        // Row hover = recessed well, not a tint
+        --bs-crafting-panel-row-hover-bg:       var(--bp-bg-2);
+
+        // Selected accent → pink primary
+        --bs-crafting-panel-selected-accent:    var(--bp-pink);
+
+        // Row item name
+        --bs-crafting-panel-row-name-color:     var(--bp-text);
+
+        // ── Icon tiles ──────────────────────────────────────────────────────
+        --bs-crafting-panel-icon-bg:            var(--bp-paper-tint);
+        --bs-crafting-panel-icon-color:         var(--bp-text-muted);
+
+        // ── Detail panel ────────────────────────────────────────────────────
+        --bs-crafting-panel-detail-bg:          var(--bp-paper);
+        --bs-crafting-panel-detail-border-color: var(--bp-border);
+
+        // Eyebrow micro-label → teal-fg (AA on white) via mono font
+        --bs-crafting-panel-eyebrow-color:      var(--bp-teal-fg);
+        --bs-crafting-panel-eyebrow-spacing:    0.12em;   // mono uppercase spacing
+
+        // Output name — base partial uses this for font-size/weight only; family
+        // is set below on the element since there is no --bs-* font-family var.
+        --bs-crafting-panel-output-name-color:  var(--bp-emphasis);
+
+        // ── Ingredients ─────────────────────────────────────────────────────
+        --bs-crafting-panel-ingredient-border-color: var(--bp-border-faint);
+        --bs-crafting-panel-ingredient-name-color:   var(--bp-text-soft);
+        --bs-crafting-panel-ingredient-qty-color:    var(--bp-text-muted);
+
+        // Insufficient = real danger red (information, not decoration)
+        --bs-crafting-panel-insufficient-color: var(--bp-danger);
+
+        // ── Craft button — pink gradient CTA ────────────────────────────────
+        --bs-crafting-panel-craft-bg:           var(--bp-pink-grad);
+        --bs-crafting-panel-craft-color:        var(--bp-pink-ink);
+
+        // Replace the dark slate literal (rgba(30,41,59,0.3)) with a violet-
+        // tinted shadow token so the button glow fits the light theme.
+        --bs-crafting-panel-craft-hover-shadow: var(--bp-glow-pink);
+    }
+
+    // ── List surface — paper card with tinted shadow ─────────────────────────
+
+    .tc-crafting-panel-list {
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Row — selected state: pink fill + HUD corner bracket ─────────────────
+
+    .tc-crafting-panel-row {
+        transition: background-color var(--bp-ease);
+
+        &.is-selected {
+            background: var(--bp-pink);
+            position: relative;  // anchor for the corner bracket
+
+            // HUD corner bracket — top-left teal accent mark
+            &::before {
+                content: '';
+                position: absolute;
+                top: 6px;
+                left: 6px;
+                width: 10px;
+                height: 10px;
+                border-top: 2px solid var(--bp-teal);
+                border-left: 2px solid var(--bp-teal);
+                pointer-events: none;
+            }
+
+            .tc-crafting-panel-row-name {
+                color: var(--bp-pink-ink);
+            }
+
+            .tc-crafting-panel-row-icon {
+                // Icon tile inside selected row: semi-transparent white on pink
+                background: rgba(255, 255, 255, 0.18);
+                color: var(--bp-pink-ink);
+            }
+        }
+    }
+
+    // ── Eyebrows — mono uppercase, teal accent ───────────────────────────────
+
+    .tc-crafting-panel-eyebrow {
+        font-family: var(--bp-mono);
+        color: var(--bp-teal-fg);
+        letter-spacing: 0.12em;
+    }
+
+    // ── Output name — display heading font ──────────────────────────────────
+
+    .tc-crafting-panel-output-name {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+        color: var(--bp-emphasis);
+    }
+
+    // ── Output qty — mono tabular number ────────────────────────────────────
+
+    .tc-crafting-panel-output-qty {
+        font-family: var(--bp-mono);
+        color: var(--bp-text-faint);
+    }
+
+    // ── Ingredient qty — mono tabular number ────────────────────────────────
+
+    .tc-crafting-panel-ingredient-qty {
+        font-family: var(--bp-mono);
+    }
+
+    // ── Detail panel — paper card with tinted shadow ─────────────────────────
+
+    .tc-crafting-panel-detail {
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // Detail empty state: softer muted tone
+    .tc-crafting-panel-detail-empty {
+        color: var(--bp-text-faint);
+        font-family: var(--bp-body);
+    }
+
+    // ── Craft button — pink gradient, display font, glow on hover ────────────
+
+    .tc-crafting-panel-craft {
+        font-family: var(--bp-display);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        background: var(--bp-pink-grad);
+        color: var(--bp-pink-ink);
+        transition: transform var(--bp-ease), box-shadow var(--bp-ease);
+
+        &:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--bp-glow-pink);
+        }
+
+        &:focus-visible {
+            outline-color: var(--bp-pink);
+        }
+    }
+
+    // ── Reduced motion — freeze CTA lift, keep bg transitions ────────────────
+
+    @media (prefers-reduced-motion: reduce) {
+        .tc-crafting-panel-craft {
+            transition: box-shadow var(--bp-ease);
+
+            &:hover:not(:disabled) {
+                transform: none;
+            }
+        }
+    }
+}

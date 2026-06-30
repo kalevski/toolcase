@@ -1,0 +1,102 @@
+// Blueprint › tc-group — white paper container, teal chevron+action, mono badge, pink focus accent.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-group {
+        // ── Surface & border ─────────────────────────────────────────────────────
+        --bs-group-bg:               var(--bp-paper);
+        --bs-group-border-color:     var(--bp-border);
+
+        // ── Header ───────────────────────────────────────────────────────────────
+        --bs-group-header-bg:        var(--bp-paper);
+        --bs-group-header-hover-bg:  var(--bp-bg-2);      // recessed tint on hover
+        --bs-group-header-color:     var(--bp-text);
+
+        // ── Toggle (label row) ───────────────────────────────────────────────────
+        --bs-group-toggle-color:     var(--bp-text-soft);
+
+        // ── Badge ────────────────────────────────────────────────────────────────
+        --bs-group-badge-bg:         var(--bp-teal-soft);  // soft teal chip fill
+        --bs-group-badge-color:      var(--bp-teal-fg);    // AA-passing teal text on white/soft
+        --bs-group-badge-font-size:  0.6875rem;
+
+        // ── Action button ────────────────────────────────────────────────────────
+        --bs-group-action-color:       var(--bp-text-faint);
+        --bs-group-action-hover-bg:    var(--bp-bg-2);
+        --bs-group-action-active-color: var(--bp-teal-fg);
+
+        // ── Body ─────────────────────────────────────────────────────────────────
+        --bs-group-body-bg:          var(--bp-paper);
+    }
+
+    // ── Container ────────────────────────────────────────────────────────────────
+    .tc-group {
+        box-shadow: var(--tc-shadow-sm);
+        transition: box-shadow var(--bp-ease);
+
+        &:hover {
+            box-shadow: var(--tc-shadow-md);
+        }
+    }
+
+    // ── Header hairline ──────────────────────────────────────────────────────────
+    // The base partial keeps a hairline border-bottom on .tc-group-header;
+    // route it to --bp-border-faint so it reads as a soft divider, not a heavy rule.
+    .tc-group-header {
+        border-bottom-color: var(--bp-border-faint);
+    }
+
+    // ── Toggle label ─────────────────────────────────────────────────────────────
+    // Display font for the group label heading — blueprint titles use Chakra Petch.
+    .tc-group-toggle {
+        font-family: var(--bp-display);
+        letter-spacing: 0.03em;
+        color: var(--bp-text-soft);
+
+        &:focus-visible {
+            outline-color: var(--bp-pink);  // pink primary focus ring
+        }
+
+        // Chevron icon inherits teal accent
+        svg {
+            color: var(--bp-teal-fg);
+        }
+    }
+
+    // ── Badge ────────────────────────────────────────────────────────────────────
+    // Mono treatment — badges/counters are HUD micro-labels in blueprint.
+    .tc-group-badge {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    // ── Action button ────────────────────────────────────────────────────────────
+    .tc-group-action {
+        color: var(--bp-text-faint);
+        transition: background var(--bp-ease), color var(--bp-ease);
+
+        &:hover {
+            color: var(--bp-teal-fg);
+        }
+
+        &:active {
+            background: var(--bp-teal-soft);
+            color: var(--bp-teal-fg);
+        }
+
+        &:focus-visible {
+            outline-color: var(--bp-pink);  // pink primary focus ring
+        }
+    }
+
+    // Action label text — mono eyebrow style
+    .tc-group-action-label {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 0.6875rem;
+        color: var(--bp-text-faint);
+    }
+}

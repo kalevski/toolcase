@@ -1,0 +1,47 @@
+// Blueprint › tc-buff-icon — light paper tile with teal/danger accent stripe, mono time caption on a teal ink strip.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-buff-icon {
+        // Surface: white raised paper tile with a violet-tinted hairline.
+        --bs-buff-icon-bg: var(--bp-paper);
+        --bs-buff-icon-border-color: var(--bp-border);
+
+        // Glyph: primary ink on the light surface.
+        --bs-buff-icon-glyph-color: var(--bp-text);
+
+        // Accent stripe default: faint muted tint when no kind is set.
+        --bs-buff-icon-accent: var(--bp-border-strong);
+
+        // Time strip: teal ink bar (blueprint action color) with white text.
+        // Base uses --tc-ink / --tc-surface (dark/light); blueprint remaps to bp tokens.
+        --bs-buff-icon-time-bg: var(--bp-teal);
+        --bs-buff-icon-time-color: var(--bp-teal-ink);
+    }
+
+    // Buff (positive status) → teal accent stripe (action / success in blueprint).
+    tc-buff-icon[data-kind='buff'] {
+        --bs-buff-icon-accent: var(--bp-teal);
+    }
+
+    // Debuff (negative status) → real danger red, not pink (pink = primary CTA).
+    tc-buff-icon[data-kind='debuff'] {
+        --bs-buff-icon-accent: var(--bp-danger);
+
+        // Time strip on a debuff reads as a danger band instead of teal.
+        --bs-buff-icon-time-bg: var(--bp-danger);
+    }
+
+    // Duration caption: blueprint mono label — uppercase, tracked, small.
+    .tc-buff-icon__time {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    // Glyph: keep the mono fallback (single-letter buffs) in the blueprint body font stack.
+    .tc-buff-icon__glyph {
+        font-family: var(--bp-mono);
+    }
+}

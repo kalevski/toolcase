@@ -1,0 +1,124 @@
+// Blueprint › tc-chat-window — white-paper panel, mono channel tabs, teal send action, pink active state.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Host custom-property overrides ────────────────────────────────────────
+    // Drive all cosmetics through the --bs-chat-window-* theming contract.
+    // Element-level rules below handle the two literals that escape the vars.
+
+    tc-chat-window {
+        // Container surface: raised white card with blueprint hairline frame.
+        --bs-chat-window-bg: var(--bp-paper);
+        --bs-chat-window-border: 1px solid var(--bp-border);
+
+        // Tabs strip: recessed well, separated from the log by a hairline.
+        --bs-chat-window-tabs-bg: var(--bp-bg-2);
+        --bs-chat-window-tabs-border: 1px solid var(--bp-border);
+
+        // Tab text: muted at rest → teal-fg on hover/active (AA on white+bg-2).
+        --bs-chat-window-tab-rest-color: var(--bp-text-faint);
+        --bs-chat-window-tab-active-color: var(--bp-teal-fg);
+
+        // Tab mono label kept; just nudge the font-size token (already correct).
+        --bs-chat-window-tab-font-size: 0.6875rem;
+
+        // Message log: blueprint ink on white, faint tint on hover.
+        --bs-chat-window-message-color: var(--bp-text-soft);
+        --bs-chat-window-message-font-size: 0.8125rem;
+        --bs-chat-window-message-hover-bg: var(--bp-bg);
+        --bs-chat-window-system-color: var(--bp-text-faint);
+
+        // Compose strip: hairline top divider, white input, teal-ish focus ring.
+        --bs-chat-window-compose-border: 1px solid var(--bp-border-faint);
+        --bs-chat-window-input-bg: var(--bp-paper);
+        --bs-chat-window-input-border: 1px solid var(--bp-border);
+        --bs-chat-window-input-color: var(--bp-text);
+        --bs-chat-window-input-font-size: 0.8125rem;
+
+        // Replace the dark-slate rgba focus literals with teal tokens.
+        --bs-chat-window-input-focus-border: var(--bp-teal-line);
+        --bs-chat-window-input-focus-ring: 0 0 0 0.2rem var(--bp-teal-soft);
+
+        // Send button: teal gradient fill + white label (primary everyday action).
+        --bs-chat-window-send-bg: var(--bp-teal-grad);
+        --bs-chat-window-send-color: var(--bp-teal-ink);
+        --bs-chat-window-send-font-size: 0.8125rem;
+    }
+
+    // ── Send button: replace dark-slate hover shadow with teal glow ───────────
+    // The base partial bakes rgba(30,41,59,0.3) here — no var exists for it.
+
+    .tc-chat-window-send {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        transition: transform var(--bp-ease), box-shadow var(--bp-ease);
+
+        &:hover {
+            box-shadow: var(--bp-glow-teal);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-teal);
+            outline-offset: 2px;
+        }
+    }
+
+    // ── Active tab: pink primary accent for the selected channel ─────────────
+    // The active tab is the "primary" state (selected channel = CTA-weight).
+    // Per-channel --bs-chat-window-tab-color overrides still cascade over this.
+
+    .tc-chat-window-tab {
+        font-family: var(--bp-mono);
+
+        &.is-active {
+            color: var(--bp-pink);
+            border-bottom-color: var(--bp-pink);
+        }
+
+        &:hover {
+            color: var(--bp-teal-fg);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-teal);
+            outline-offset: -2px;
+        }
+    }
+
+    // ── Sender handle: teal-fg so names read as labels, not raw body text ─────
+
+    .tc-chat-window-message-sender {
+        color: var(--bp-teal-fg);
+
+        &::after {
+            // colon separator → faint blueprint ink
+            color: var(--bp-text-faint);
+        }
+    }
+
+    // ── Message body: primary blueprint ink ───────────────────────────────────
+
+    .tc-chat-window-message-body {
+        color: var(--bp-text);
+    }
+
+    // ── System messages: faint italic, violet tint to distinguish from chat ───
+
+    .tc-chat-window-message.is-system {
+        color: var(--bp-text-faint);
+    }
+
+    // ── Scrollbar: blueprint hairline thumb on transparent track ──────────────
+
+    .tc-chat-window-messages {
+        scrollbar-color: var(--bp-border) transparent;
+    }
+
+    // ── Input placeholder: faint blueprint text ───────────────────────────────
+
+    .tc-chat-window-input::placeholder {
+        color: var(--bp-text-faint);
+    }
+}

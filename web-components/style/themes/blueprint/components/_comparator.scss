@@ -1,0 +1,172 @@
+// Blueprint › tc-comparator — white-paper comparison table: teal yes-indicators, pink winner column highlight with display-font tally, mono eyebrow labels throughout.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-comparator {
+        // ── Layout ──────────────────────────────────────────────────────────────
+        --bs-comparator-border:       1px solid var(--bp-border);
+        --bs-comparator-inner-border: 1px solid var(--bp-border-faint);
+        --bs-comparator-bg:           var(--bp-paper);
+
+        // ── Header ──────────────────────────────────────────────────────────────
+        // Recessed header well: --bp-bg-2 with a bottom hairline
+        --bs-comparator-header-bg:          var(--bp-bg-2);
+        --bs-comparator-title-font-size:    1.0625rem;
+        --bs-comparator-title-font-weight:  700;
+        --bs-comparator-title-color:        var(--bp-emphasis);
+        --bs-comparator-desc-font-size:     0.875rem;
+        --bs-comparator-desc-color:         var(--bp-text-muted);
+
+        // ── Tech header row ──────────────────────────────────────────────────────
+        --bs-comparator-tech-head-bg:              var(--bp-bg-2);
+        --bs-comparator-tech-name-color:           var(--bp-text-soft);
+        --bs-comparator-tech-name-font-weight:     700;
+        --bs-comparator-tech-label-color:          var(--bp-teal-fg);  // teal eyebrow on white → clears AA
+        --bs-comparator-tech-label-letter-spacing: 0.1em;
+        --bs-comparator-tech-icon-color:           var(--bp-text-faint);
+
+        // ── Feature rows ─────────────────────────────────────────────────────────
+        --bs-comparator-feature-label-color: var(--bp-text);
+        --bs-comparator-feature-desc-color:  var(--bp-text-faint);
+
+        // ── Status indicators ────────────────────────────────────────────────────
+        // yes → teal (success token), no → faint text (not a hard red — absence)
+        --bs-comparator-yes-color: var(--bp-teal);
+        --bs-comparator-no-color:  var(--bp-text-faint);
+
+        // ── Winner highlight ─────────────────────────────────────────────────────
+        // Pink-surface soft gradient tint on the winning column; yes-indicator
+        // stays teal (readable on the tinted ground)
+        --bs-comparator-winner-bg:                  var(--bp-paper-tint-2);
+        --bs-comparator-winner-indicator-yes-color: var(--bp-teal);
+
+        // ── Summary row ──────────────────────────────────────────────────────────
+        --bs-comparator-summary-bg:           var(--bp-bg-2);
+        --bs-comparator-summary-border:       1px solid var(--bp-border);
+        --bs-comparator-tally-color:          var(--bp-text-soft);
+        --bs-comparator-tally-letter-spacing: 0.08em;
+        --bs-comparator-tally-label-color:    var(--bp-text-faint);
+
+        // ── Skeleton ─────────────────────────────────────────────────────────────
+        --bs-comparator-skel-bg: var(--bp-border-faint);
+    }
+
+    // ── Outer frame ───────────────────────────────────────────────────────────────
+    // White paper card with blueprint hairline and subtle violet-tinted shadow
+    .tc-comparator {
+        background: var(--bp-paper);
+        border: 1px solid var(--bp-border);
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Header ────────────────────────────────────────────────────────────────────
+    .tc-comparator__header {
+        border-bottom: 1px solid var(--bp-border);
+    }
+
+    // Title uses display face — section name treatment
+    .tc-comparator__title {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+    }
+
+    // Description stays body; muted prose under the display heading
+    .tc-comparator__desc {
+        font-family: var(--bp-body);
+    }
+
+    // ── Tech header row ───────────────────────────────────────────────────────────
+    .tc-comparator__head-row {
+        border-bottom: 1px solid var(--bp-border);
+    }
+
+    // Tech name is a recognisable product label → display face, tight tracking
+    .tc-comparator__tech-name {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+        color: var(--bp-text-soft);
+    }
+
+    // Tech label (e.g. "v2.1", "BETA") → mono eyebrow, teal-fg for legibility on white
+    .tc-comparator__tech-label {
+        font-family: var(--bp-mono);
+        color: var(--bp-teal-fg);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+    }
+
+    // ── Feature rows ──────────────────────────────────────────────────────────────
+    .tc-comparator__feature-label {
+        font-family: var(--bp-body);
+        color: var(--bp-text);
+    }
+
+    .tc-comparator__feature-desc {
+        font-family: var(--bp-body);
+        color: var(--bp-text-faint);
+    }
+
+    // ── Value renderer (inline mono text cell value) ──────────────────────────────
+    .tc-comparator__value {
+        font-family: var(--bp-mono);
+        color: var(--bp-text-soft);
+        letter-spacing: 0.03em;
+    }
+
+    // ── Winner column ─────────────────────────────────────────────────────────────
+    // Soft pink-surface tint marks the winning column without harsh contrast;
+    // a pink top-border stripe signals the primary/CTA accent
+    .tc-comparator__cell--winner {
+        background: var(--bp-paper-tint-2);
+        position: relative;
+
+        &::before {
+            content: '';
+            position: absolute;
+            inset-inline: 0;
+            top: 0;
+            height: 2px;
+            background: var(--bp-pink);
+            pointer-events: none;
+        }
+    }
+
+    // The head cell of the winner column gets the pink stripe too, plus a
+    // slightly stronger tint so the winner identity reads at a glance
+    .tc-comparator__head-row .tc-comparator__cell--winner {
+        background: var(--bp-pink-surface);
+    }
+
+    // ── Summary row ───────────────────────────────────────────────────────────────
+    .tc-comparator__summary {
+        background: var(--bp-bg-2);
+    }
+
+    // Tally score: display face so the number reads as a headline stat
+    .tc-comparator__tally {
+        font-family: var(--bp-display);
+        font-size: 1rem;
+        letter-spacing: 0.04em;
+        color: var(--bp-text-soft);
+    }
+
+    // Winner tally gets pink accent — primary/CTA color for the winning score
+    .tc-comparator__cell--winner .tc-comparator__tally {
+        color: var(--bp-pink);
+    }
+
+    // Tally label (e.g. "FEATURES") → mono eyebrow
+    .tc-comparator__tally-label {
+        font-family: var(--bp-mono);
+        color: var(--bp-text-faint);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    // ── Skeleton shimmer → bp-border-faint base with bp-bg-2 shimmer ─────────────
+    .tc-comparator__skel-cell,
+    .tc-comparator__skel-label {
+        background: var(--bp-border-faint);
+    }
+}

@@ -1,0 +1,100 @@
+// Blueprint › tc-level-select — vector-blueprint level/stage grid: lavender canvas, teal edges+hover, pink selected nodes, teal completed, mono labels with loose tracking.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-level-select {
+        // Canvas: lavender paper with blueprint hairline border
+        --bs-level-select-bg:                    var(--bp-bg);
+        --bs-level-select-border-color:          var(--bp-border);
+
+        // Edge (SVG connector lines)
+        --bs-level-select-edge-color:            var(--bp-border-strong);       // default grey-violet hairline
+        --bs-level-select-edge-completed-color:  var(--bp-teal);                // teal = completed progress (action/success)
+
+        // Node base: white paper card, border hairline
+        --bs-level-select-node-bg:               var(--bp-paper);
+        --bs-level-select-node-border-color:     var(--bp-border-strong);
+        --bs-level-select-node-color:            var(--bp-text);
+        --bs-level-select-node-transition:       background var(--bp-ease), border-color var(--bp-ease), color var(--bp-ease), box-shadow var(--bp-ease), transform var(--bp-ease);
+
+        // Node hover: teal accent border + faint teal surface lift
+        --bs-level-select-node-hover-bg:         var(--bp-teal-soft);
+        --bs-level-select-node-hover-border:     var(--bp-teal);
+
+        // Node selected: pink CTA fill (primary accent rotation)
+        --bs-level-select-node-selected-bg:      var(--bp-pink);
+        --bs-level-select-node-selected-color:   var(--bp-pink-ink);
+        --bs-level-select-node-selected-border:  var(--bp-pink);
+
+        // Node completed (not selected): white paper + teal ink + teal border (success = teal)
+        --bs-level-select-node-completed-bg:     var(--bp-paper);
+        --bs-level-select-node-completed-color:  var(--bp-teal-fg);
+        --bs-level-select-node-completed-border: var(--bp-teal);
+
+        // Node locked: recessed well, faint ink, muted border
+        --bs-level-select-node-locked-bg:        var(--bp-bg-2);
+        --bs-level-select-node-locked-color:     var(--bp-text-faint);
+        --bs-level-select-node-locked-border:    var(--bp-border-faint);
+        --bs-level-select-node-locked-opacity:   0.5;
+
+        // Stars: empty = border-rule grey; filled = pink (primary accent)
+        --bs-level-select-star-color:            var(--bp-border-rule);
+        --bs-level-select-star-filled-color:     var(--bp-pink);
+
+        // Label: muted ink (text-muted), inherits mono from base
+        --bs-level-select-label-color:           var(--bp-text-muted);
+    }
+
+    // Canvas background: blueprint grid field as visual texture
+    .tc-level-select__canvas {
+        background-color: var(--bs-level-select-bg);
+        background-image: var(--bp-grid-field);
+        background-size: var(--bp-grid-size) var(--bp-grid-size);
+        border-color: var(--bs-level-select-border-color);
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // Nodes: white card with violet-tinted shadow; lift + teal glow on hover
+    .tc-level-select__node {
+        box-shadow: var(--tc-shadow-sm);
+
+        &:hover:not(.tc-level-select__node--locked):not(.tc-level-select__node--selected) {
+            box-shadow: var(--tc-shadow-hover), 0 0 0 2px var(--bp-teal-soft);
+            transform: translate(-50%, -50%) translateY(-2px);
+        }
+    }
+
+    // Selected: pink fill + pink glow
+    .tc-level-select__node--selected {
+        box-shadow: var(--bp-glow-pink);
+    }
+
+    // Completed (not selected): teal glow ring
+    .tc-level-select__node--completed:not(.tc-level-select__node--selected) {
+        box-shadow: 0 0 0 2px var(--bp-teal-soft);
+    }
+
+    // Locked: no shadow, already dimmed by opacity var
+    .tc-level-select__node--locked {
+        box-shadow: none;
+    }
+
+    // Label: blueprint mono font, uppercase, loose tracking
+    .tc-level-select__label {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: var(--bs-level-select-label-color);
+    }
+
+    // Star: filled star on selected node — keep white (pink-ink) rather than base rgba(255,255,255,.9)
+    .tc-level-select__star--filled {
+        .tc-level-select__node--selected & {
+            color: var(--bp-pink-ink);
+        }
+    }
+
+    // Default glyph dot: square (no border-radius override needed — radius sweep handles it)
+    // Completed edge uses teal; no additional overrides needed beyond the var repoints above.
+}

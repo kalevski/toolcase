@@ -1,0 +1,58 @@
+// Blueprint › tc-video-embed — blueprint media tile: lavender loading well, near-black
+// letterbox fill, hairline border, teal HUD corner bracket, pink accent top stripe.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-video-embed {
+        // Reroute the dark-slate defaults to blueprint tokens.
+        // --tc-ink (dark slate) → --bp-emphasis (near-black #0f0e22) keeps the
+        // cinematic void for the video surface while using a blueprint token.
+        --bs-video-embed-bg:         var(--bp-emphasis);
+        // --tc-surface-muted (dark muted) → --bp-bg-2 (recessed lavender well)
+        // so the loading placeholder reads as a blueprint surface, not a dark slab.
+        --bs-video-embed-loading-bg: var(--bp-bg-2);
+        --bs-video-embed-border:     var(--bp-border);
+        // Lift the tile off the page with the tinted blueprint shadow.
+        --bs-video-embed-shadow:     var(--tc-shadow-sm);
+    }
+
+    .tc-video-embed {
+        // Pink accent stripe along the top edge — signals this as a primary media surface.
+        border-top: 2px solid var(--bp-pink);
+        transition: box-shadow var(--bp-ease, .18s ease),
+                    transform  var(--bp-ease, .18s ease);
+
+        // HUD corner bracket (teal, top-left) — blueprint tappable-tile marker.
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top:  2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        // Subtle lift on hover to reinforce tappable-tile affordance.
+        &:hover {
+            box-shadow: var(--tc-shadow-hover);
+            transform: translateY(-2px);
+        }
+    }
+
+    // The loading frame's background colour is driven by the custom property
+    // above; no additional rule needed unless we want to add a blueprint glyph
+    // watermark in the empty state. Keeping it clean for now.
+    .tc-video-embed-frame {
+        // Ensure the frame inherits the blueprint loading background token.
+        // (The base partial already reads --bs-video-embed-loading-bg here.)
+        background: var(--bs-video-embed-loading-bg);
+    }
+
+    // The media (iframe / video) background matches the letterbox fill token
+    // already re-pointed above; no further override required.
+}

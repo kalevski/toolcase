@@ -1,0 +1,145 @@
+// Blueprint › tc-boss-bar — instrumentation panel: white paper surface, Chakra Petch boss name,
+// mono HUD labels, pink primary fill bar, violet-soft ghost band, teal corner bracket.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-boss-bar {
+        // Surface — white card, hairline border, soft shadow. The bar is a full-width
+        // HUD panel, so paper + border reads as a framed instrument strip.
+        --bs-boss-bar-bg:           var(--bp-paper);
+        --bs-boss-bar-border-color: var(--bp-border);
+        --bs-boss-bar-shadow:       var(--tc-shadow-sm);
+
+        // Boss name — primary ink; font-family pinned below to --bp-display.
+        // Boss names are titles, not prose: display type with tight tracking is apt.
+        --bs-boss-bar-name-color:       var(--bp-emphasis);
+        --bs-boss-bar-name-font-size:   1rem;
+        --bs-boss-bar-name-font-weight: 700;
+
+        // Epithet — muted body; sits beside the name as a soft subtitle.
+        --bs-boss-bar-epithet-color:     var(--bp-text-muted);
+        --bs-boss-bar-epithet-font-size: 0.8125rem;
+
+        // Phase tag — teal-fg mono eyebrow (uppercase + tracking handled below).
+        --bs-boss-bar-phase-color:          var(--bp-teal-fg);
+        --bs-boss-bar-phase-font-size:      0.625rem;
+        --bs-boss-bar-phase-letter-spacing: 0.16em;
+
+        // Track — recessed well so the fill reads as raised above it.
+        --bs-boss-bar-track-bg:    var(--bp-bg-2);
+        --bs-boss-bar-track-height: 0.75rem; // slightly taller than base — more visible as a HUD strip
+
+        // Fill — pink is the primary/highest-stakes accent in the blueprint rotation.
+        // A boss health bar is the most consequential live indicator on screen.
+        --bs-boss-bar-fill-bg:         var(--bp-pink);
+        --bs-boss-bar-fill-transition: width 0.3s var(--bp-ease);
+
+        // Ghost band — violet-soft marks the residual injury trail (a distinct register
+        // from the live pink fill; using danger-red here would false-read as an error state).
+        --bs-boss-bar-ghost-bg: var(--bp-violet-soft);
+
+        // Phase ticks — paper white cuts cleanly through the colored fill layers.
+        --bs-boss-bar-tick-color: var(--bp-paper);
+
+        // Numeric readout — muted mono, tabular figures handled below.
+        --bs-boss-bar-numeric-color:     var(--bp-text-muted);
+        --bs-boss-bar-numeric-font-size: 0.75rem;
+    }
+
+    // ── Boss name — display heading treatment ────────────────────────────────────
+    // Chakra Petch carries the blueprint's game-HUD character. Boss names are titles;
+    // tight negative tracking suits large-cap display at this weight.
+    .tc-boss-bar__name {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+        text-transform: uppercase;
+    }
+
+    // ── Epithet — body face, normal case ────────────────────────────────────────
+    // Intentionally NOT display — the epithet is a subtitle/descriptor, not a title.
+    .tc-boss-bar__epithet {
+        font-family: var(--bp-body);
+        font-style: italic; // soft visual offset so it reads below the name
+    }
+
+    // ── Phase tag — mono micro-label ────────────────────────────────────────────
+    // Uppercase mono label in teal matches the blueprint eyebrow pattern.
+    .tc-boss-bar__phase {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+    }
+
+    // ── Inline track text — mono, tabular figures ───────────────────────────────
+    .tc-boss-bar__inline-text {
+        font-family: var(--bp-mono);
+        font-variant-numeric: tabular-nums;
+        // Slightly higher contrast on the light track well (readable over bp-bg-2).
+        color: var(--bp-text-muted);
+    }
+
+    // ── Numeric readout — mono, tabular figures, trailing edge ──────────────────
+    .tc-boss-bar__numeric {
+        font-family: var(--bp-mono);
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.04em;
+    }
+
+    // ── Panel structure + HUD corner-bracket ────────────────────────────────────
+    // The boss bar reads as an instrumentation tile: the teal L-bracket appears
+    // permanently (not just on hover) because this is a passive HUD element, not
+    // a tappable card. Permanent bracket = "you are reading live data".
+    .tc-boss-bar {
+        position: relative;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            pointer-events: none;
+        }
+
+        // Indent the header so the bracket doesn't overlap the boss name.
+        // 8px inset + 12px bracket + 6px gap = 26px; round to 1.75rem for grid alignment.
+        .tc-boss-bar__header {
+            padding-left: 1.75rem;
+        }
+    }
+
+    // ── Low health state — fill shifts to danger red ────────────────────────────
+    // When the host sets a data-state='low' attribute (or equivalent), the fill
+    // repoints to real danger red. Pink is the normal primary fill; danger is
+    // reserved for critical/alarm states only (blueprint_theme.md accent rotation).
+    tc-boss-bar[data-state='low'] {
+        --bs-boss-bar-fill-bg: var(--bp-danger);
+
+        // The bracket pulses faintly to signal alarm without full distraction.
+        .tc-boss-bar::before {
+            animation: bp-boss-bar-alarm 1.4s ease-in-out infinite;
+        }
+    }
+
+    // ── Fill glow — pink glow on the fill bar ───────────────────────────────────
+    // A soft pink ambient glow on the fill bar reinforces the primary-accent
+    // reading and gives the strip a light instrumentation quality on white paper.
+    .tc-boss-bar__fill {
+        box-shadow: var(--bp-glow-pink);
+    }
+
+    // ── Reduced motion ───────────────────────────────────────────────────────────
+    @media (prefers-reduced-motion: reduce) {
+        tc-boss-bar[data-state='low'] .tc-boss-bar::before {
+            animation: none;
+        }
+    }
+
+    @keyframes bp-boss-bar-alarm {
+        0%, 100% { opacity: 1; }
+        50%       { opacity: 0.35; }
+    }
+}

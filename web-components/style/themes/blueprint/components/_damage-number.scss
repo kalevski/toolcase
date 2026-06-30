@@ -1,0 +1,61 @@
+// Blueprint › tc-damage-number — arcade HUD numerals: mono for normal/miss, display for crits; pink=crit, teal=heal, amber=hit, faint=miss.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-damage-number {
+        // Default hit: amber — warm, readable, distinct from teal success and pink crit.
+        --bs-damage-number-color: var(--bp-amber-fg);
+        --bs-damage-number-font-size: 1.125rem;
+        --bs-damage-number-font-weight: 600;
+        // Mono face for regular damage ticks — HUD-label register, uppercase feel.
+        --bs-damage-number-letter-spacing: 0.08em;
+
+        // Crit: pink primary, display face, larger, glowing — the big moment.
+        --bs-damage-number-crit-font-size: 1.75rem;
+        --bs-damage-number-crit-font-weight: 700;
+        --bs-damage-number-crit-color: var(--bp-pink);
+
+        // Heal: teal success register — matches status convention.
+        --bs-damage-number-heal-color: var(--bp-teal-fg);
+
+        // Miss: faint — it's non-information; quiet it down.
+        --bs-damage-number-miss-color: var(--bp-text-faint);
+        --bs-damage-number-miss-font-size: 0.8125rem;
+
+        // Give crits a little more vertical travel for drama.
+        --bs-damage-number-rise: 72px;
+    }
+
+    .tc-damage-number-text {
+        // Mono family matches --bp-mono token intent (JetBrains Mono is already the face).
+        font-family: var(--bp-mono);
+        color: var(--bs-damage-number-color);
+        // Subtle text-shadow lift so numbers read against any light surface.
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+
+    .tc-damage-number-text[data-variant='crit'] {
+        // Display face for the crit headline — Chakra Petch, tight tracking, uppercase.
+        font-family: var(--bp-display);
+        color: var(--bs-damage-number-crit-color);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        // Pink glow — the one theatrical flourish; kept to this single variant.
+        text-shadow: var(--bp-glow-pink);
+    }
+
+    .tc-damage-number-text[data-variant='heal'] {
+        font-family: var(--bp-mono);
+        color: var(--bs-damage-number-heal-color);
+        // Soft teal glow mirrors the live/pulse dot treatment.
+        text-shadow: 0 0 8px var(--bp-teal-soft);
+    }
+
+    .tc-damage-number-text[data-variant='miss'] {
+        font-family: var(--bp-mono);
+        color: var(--bs-damage-number-miss-color);
+        // Remove glow entirely — miss is the quietest state.
+        text-shadow: none;
+    }
+}

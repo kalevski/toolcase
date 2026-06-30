@@ -1,0 +1,50 @@
+// Blueprint › tc-page-indicator — teal inactive dots, pink active dot with glow; mono label scale.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-page-indicator {
+        // Inactive dot: teal hairline ring, no fill — maps to the everyday-action (teal) tier.
+        --bs-page-indicator-color: var(--bp-teal-line);
+
+        // Active dot: pink fill — maps to the primary/selected (pink) tier.
+        --bs-page-indicator-active-color: var(--bp-pink);
+    }
+
+    .tc-page-indicator-dot {
+        // Inactive dot ring uses teal hairline; fill stays transparent (base handles it).
+        border-color: var(--bp-teal-line);
+        transition: background-color var(--bp-ease), border-color var(--bp-ease), box-shadow var(--bp-ease);
+
+        &:hover {
+            // Teal soft tint on hover — keeps the everyday-action identity.
+            background: var(--bp-teal-soft);
+            border-color: var(--bp-teal);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-teal);
+            outline-offset: 2px;
+            box-shadow: var(--bp-glow-teal);
+        }
+    }
+
+    .tc-page-indicator-dot--active {
+        background: var(--bp-pink);
+        border-color: var(--bp-pink);
+        // Pink glow halo on the active dot — signals primary/selected state.
+        box-shadow: var(--bp-glow-pink);
+
+        &:hover {
+            background: var(--bp-pink-hover);
+            border-color: var(--bp-pink-hover);
+            box-shadow: var(--bp-glow-pink-strong);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .tc-page-indicator-dot {
+            transition: none;
+        }
+    }
+}

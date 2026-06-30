@@ -1,0 +1,65 @@
+// Blueprint › tc-action-header — display-type title, faint lilac rule, teal ghost actions.
+//
+// The base partial routes almost all cosmetics through --bs-action-header-* vars,
+// so this partial re-points those vars to blueprint tokens and adds the mono HUD
+// label treatment to the content slot + the teal ghost ladder to the secondary
+// action buttons (matching the teal "everyday action" role in the accent rotation).
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    .tc-action-header {
+        // Faint lilac hairline divider instead of the slate --tc-border.
+        --bs-action-header-border-color: var(--bp-border-faint);
+        // Primary ink — no slate remap needed; --tc-text is re-pointed by foundation.
+        --bs-action-header-color: var(--bp-text);
+        // Transparent bg is fine; keeps consistency with panel/card children.
+        --bs-action-header-bg: transparent;
+    }
+
+    // Content slot: mono HUD label treatment — uppercase, tracked, muted.
+    // Mirrors the panel-header chrome style so action-headers feel like instrument
+    // readouts rather than plain paragraph text.
+    .tc-action-header-content {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--bp-text-muted);
+    }
+
+    // Secondary "ghost" action buttons inside the header: teal hover so they read
+    // as everyday-action rather than primary (pink) or structural chrome.
+    // We re-point every --bs-btn-* var the base partial overrides, routing away
+    // from the slate --tc-* refs it bakes in.
+    .tc-action-header-actions {
+        .btn-secondary {
+            --bs-btn-color: var(--bp-text-soft);
+            --bs-btn-bg: transparent;
+            --bs-btn-border-color: var(--bp-border-soft);
+            --bs-btn-hover-color: var(--bp-teal-fg);
+            --bs-btn-hover-bg: var(--bp-teal-soft);
+            --bs-btn-hover-border-color: var(--bp-teal);
+            // Active / pressed: solid teal fill with white ink.
+            --bs-btn-active-color: var(--bp-teal-ink);
+            --bs-btn-active-bg: var(--bp-teal);
+            --bs-btn-active-border-color: var(--bp-teal);
+            // Disabled: faint border + muted text, transparent ground.
+            --bs-btn-disabled-color: var(--bp-text-faint);
+            --bs-btn-disabled-bg: transparent;
+            --bs-btn-disabled-border-color: var(--bp-border-faint);
+
+            // Mono label + display-weight so buttons feel part of the HUD chrome.
+            font-family: var(--bp-mono);
+            font-size: 0.6875rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+
+            transition:
+                color 0.18s var(--bp-ease),
+                background 0.18s var(--bp-ease),
+                border-color 0.18s var(--bp-ease);
+        }
+    }
+}

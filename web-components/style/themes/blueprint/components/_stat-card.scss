@@ -1,0 +1,118 @@
+// Blueprint › tc-stat-card — white-paper card, display headline, mono labels/delta, teal icon tile, teal/danger delta badges.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Component token overrides ───────────────────────────────────────────
+    tc-stat-card {
+        // Surface: white raised card on the lavender canvas.
+        --bs-stat-card-bg:                var(--bp-paper);
+        --bs-stat-card-border-color:      var(--bp-border);
+        --bs-stat-card-shadow:            var(--tc-shadow-sm);
+
+        // Icon tile: recessed well tinted with teal action color.
+        --bs-stat-card-icon-tile-bg:      var(--bp-teal-soft);
+        --bs-stat-card-icon-color:        var(--bp-teal-fg);
+
+        // Label: mono eyebrow — uppercase, loose tracking, muted ink.
+        --bs-stat-card-label-color:       var(--bp-text-muted);
+        --bs-stat-card-label-font-size:   0.6875rem;
+        --bs-stat-card-label-letter-spacing: 0.12em;
+
+        // Value: strong primary ink (Chakra Petch applied on the element below).
+        --bs-stat-card-value-color:       var(--bp-emphasis);
+        --bs-stat-card-value-font-size:   1.75rem;
+        --bs-stat-card-value-font-weight: 700;
+
+        // Unit: faint muted suffix.
+        --bs-stat-card-unit-color:        var(--bp-text-faint);
+
+        // Helper: faint body copy.
+        --bs-stat-card-helper-color:      var(--bp-text-faint);
+
+        // Footer: recessed well background separated by a faint divider.
+        --bs-stat-card-footer-bg:         var(--bp-bg-2);
+        --bs-stat-card-footer-border-color: var(--bp-border-faint);
+        --bs-stat-card-footer-color:      var(--bp-text-muted);
+
+        // Skeleton: lavender well shimmer on the paper surface.
+        --bs-stat-card-skeleton-bg:       var(--bp-paper-tint-2);
+        --bs-stat-card-skeleton-shimmer:  rgba(255, 255, 255, 0.7);
+    }
+
+    // ── Value headline: Chakra Petch display font ───────────────────────────
+    // The base partial sets JetBrains Mono on the value; blueprint promotes
+    // large headline figures to --bp-display (Chakra Petch) for the arcade
+    // display-heading treatment.
+    .tc-stat-card-value {
+        font-family: var(--bp-display);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: var(--bp-emphasis);
+    }
+
+    // Unit stays on --bp-mono (the element already uses JetBrains Mono;
+    // we just tighten its color to the faint token).
+    .tc-stat-card-unit {
+        color: var(--bp-text-faint);
+    }
+
+    // ── Label: full mono eyebrow treatment ─────────────────────────────────
+    // Base already uses JetBrains Mono + uppercase; boost tracking to blueprint
+    // mono-label spec (.10–.18em range) and wire the --bp-mono font stack.
+    .tc-stat-card-label {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.12em;
+        color: var(--bp-text-muted);
+    }
+
+    // ── Delta badges: blueprint status colour rotation ──────────────────────
+    // Base uses baked map.get($theme-colors-soft/emphasis, 'success'/'danger')
+    // literals that bypass the blueprint remap. Override with --bp tokens:
+    //   success (up)   → teal soft tint  + teal-fg text
+    //   danger (down)  → bp-danger-soft  + bp-danger text  (real red, NOT pink)
+    //   neutral        → paper-tint-2 bg + text-muted
+    .tc-stat-card-delta {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        // Neutral default: lavender tint + muted ink + hairline border.
+        background-color: var(--bp-paper-tint-2);
+        color: var(--bp-text-muted);
+        border-color: var(--bp-border-chip);
+    }
+
+    .tc-stat-card-delta--up {
+        background-color: var(--bp-teal-soft);
+        color: var(--bp-teal-fg);           // teal text on white clears AA
+        border-color: var(--bp-teal-line);
+    }
+
+    .tc-stat-card-delta--down {
+        background-color: var(--bp-danger-soft);
+        color: var(--bp-danger);
+        border-color: transparent;
+    }
+
+    .tc-stat-card-delta--neutral {
+        background-color: var(--bp-paper-tint-2);
+        color: var(--bp-text-muted);
+        border-color: var(--bp-border-chip);
+    }
+
+    // ── Helper text ─────────────────────────────────────────────────────────
+    .tc-stat-card-helper {
+        color: var(--bp-text-faint);
+    }
+
+    // ── Footer row ──────────────────────────────────────────────────────────
+    .tc-stat-card-footer-row {
+        background: var(--bp-bg-2);
+        border-top-color: var(--bp-border-faint);
+    }
+
+    .tc-stat-card-footer {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        color: var(--bp-text-muted);
+    }
+}

@@ -1,0 +1,31 @@
+// Blueprint › tc-logo-cloud — eyebrow title in bp-mono/teal-fg; teal focus ring on linked cells; grayscale opacity lifted for light canvas.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-logo-cloud {
+        // Title: reroute to blueprint mono eyebrow treatment (teal-fg clears AA on white)
+        --bs-logo-cloud-title-color: var(--bp-teal-fg);
+
+        // Grayscale: lift opacity slightly — light --bp-bg canvas makes dimmed logos too faint
+        --bs-logo-cloud-grayscale-opacity: 0.65;
+
+        // Smooth with the blueprint ease curve
+        --bs-logo-cloud-grayscale-transition: filter var(--bp-ease), opacity var(--bp-ease);
+    }
+
+    .tc-logo-cloud__title {
+        // Override the base --bs-font-monospace fallback with the blueprint mono face
+        font-family: var(--bp-mono);
+        // Tighten tracking to match blueprint eyebrow convention (.06–.12em)
+        letter-spacing: 0.1em;
+        color: var(--bp-teal-fg);
+    }
+
+    // Linked logo cells: reroute focus ring from --tc-app-accent to blueprint teal
+    a.tc-logo-cloud-cell {
+        &:focus-visible {
+            outline-color: var(--bp-teal);
+        }
+    }
+}

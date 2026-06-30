@@ -1,0 +1,130 @@
+// Blueprint › tc-migration-guide — lavender-paper card, Chakra Petch display title,
+// mono teal version chips, violet step counters, teal/danger diff stripes on a dark code surface.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-migration-guide {
+        // ── Component-level token remaps ─────────────────────────────────────────
+        --bs-migration-guide-border:              1px solid var(--bp-border);
+        --bs-migration-guide-bg:                  var(--bp-paper);
+
+        // Header: recessed lavender well so the card has a clear crown
+        --bs-migration-guide-header-bg:           var(--bp-bg-2);
+        --bs-migration-guide-header-color:        var(--bp-text);
+
+        // Version badge: mono, teal text — eyebrow treatment
+        --bs-migration-guide-version-color:       var(--bp-teal-fg);
+        --bs-migration-guide-version-letter-spacing: 0.10em;
+
+        // Arrow between versions: teal, matches the version chip accent
+        --bs-migration-guide-arrow-color:         var(--bp-teal);
+
+        // Step separators → faint divider token (no slate leak)
+        --bs-migration-guide-step-separator:      1px solid var(--bp-border-faint);
+
+        // Step number gutter: violet supporting accent, slightly wider tracking
+        --bs-migration-guide-step-num-color:      var(--bp-violet-fg);
+        --bs-migration-guide-step-num-letter-spacing: 0.12em;
+
+        // Step body text
+        --bs-migration-guide-step-desc-color:     var(--bp-text-muted);
+
+        // Code surface: keep the dark ground; --tc-ink maps correctly in blueprint
+        // (no override needed for code-bg / code-color — --tc-ink is the dark surface)
+
+        // Diff stripes: before → real danger red; after → teal (success role in blueprint)
+        --bs-migration-guide-diff-stripe-width:   4px;
+        --bs-migration-guide-diff-before-stripe:  var(--bp-danger);
+        --bs-migration-guide-diff-before-bg:      var(--bp-danger-soft);
+        --bs-migration-guide-diff-after-stripe:   var(--bp-teal);
+        --bs-migration-guide-diff-after-bg:       var(--bp-teal-soft);
+    }
+
+    // ── Outer card ───────────────────────────────────────────────────────────────
+    // A slim top accent border in pink (primary brand) marks the card crown.
+    .tc-migration-guide {
+        border-color: var(--bp-border);
+        box-shadow: var(--tc-shadow-sm);
+        border-top: 2px solid var(--bp-pink);        // primary CTA accent — marks upgrade intent
+    }
+
+    // ── Header ───────────────────────────────────────────────────────────────────
+    .tc-migration-guide__header {
+        border-bottom-color: var(--bp-border);
+    }
+
+    // Version tokens: chip treatment — teal-soft fill, teal-fg text, mono uppercase
+    // The base already sets font-family:mono, uppercase, letter-spacing via the vars above;
+    // we add the pill surface here (no border-radius override — radius sweep handles corners).
+    .tc-migration-guide__version {
+        font-family:      var(--bp-mono);            // JetBrains Mono — HUD/label register
+        color:            var(--bp-teal-fg);
+        background:       var(--bp-teal-soft);
+        padding:          0.15em 0.45em;
+        display:          inline-block;
+    }
+
+    // Arrow between version chips: teal, slightly bolder
+    .tc-migration-guide__arrow {
+        color: var(--bp-teal);
+    }
+
+    // Guide title: Chakra Petch display — authoritative, tight tracking
+    .tc-migration-guide__title {
+        font-family:      var(--bp-display);
+        font-size:        1rem;
+        font-weight:      700;
+        letter-spacing:   -0.01em;
+        color:            var(--bp-text);
+    }
+
+    // ── Steps ────────────────────────────────────────────────────────────────────
+    // Step number gutter: JetBrains Mono, violet-fg — supporting accent in the arcade rotation
+    .tc-migration-step__num {
+        font-family:  var(--bp-mono);
+        color:        var(--bp-violet-fg);
+    }
+
+    // Step title: Space Grotesk (body face) but slightly heavier for scanability
+    .tc-migration-step__title {
+        font-family:  var(--bp-body);
+        font-weight:  600;
+        color:        var(--bp-text-soft);
+    }
+
+    // Step description: body, muted — standard prose treatment
+    .tc-migration-step__desc {
+        font-family:  var(--bp-body);
+        color:        var(--bp-text-muted);
+    }
+
+    // ── Diff panels ──────────────────────────────────────────────────────────────
+    // Outer diff wrapper hairline synced to bp-border
+    .tc-migration-diff {
+        border-color: var(--bp-border);
+    }
+
+    // Before panel: danger-soft tint frame, real-red left stripe, dark code surface
+    .tc-migration-diff-before {
+        border-left-color: var(--bp-danger);
+        background:        var(--bp-danger-soft);
+        border-bottom-color: var(--bp-border);
+    }
+
+    // After panel: teal-soft tint frame, teal left stripe (success in blueprint)
+    .tc-migration-diff-after {
+        border-left-color: var(--bp-teal);
+        background:        var(--bp-teal-soft);
+    }
+
+    // Code surface inside both panels: dark ground, JetBrains Mono
+    // --tc-ink maps to the dark foundation surface in blueprint — no hex override needed.
+    // Font family promoted to bp-mono for full brand consistency.
+    .tc-migration-diff-before,
+    .tc-migration-diff-after {
+        pre {
+            font-family: var(--bp-mono);
+        }
+    }
+}

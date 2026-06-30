@@ -1,0 +1,149 @@
+// Blueprint › tc-tag-input — paper control with teal focus ring, violet chip tints, pink active option, mono label/meta.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-tag-input {
+        // ── Field label ───────────────────────────────────────────────────────
+        // Labels are micro-UI identifiers — mono uppercase eyebrow treatment
+        // consistent with every other blueprint form field label.
+        --bs-tag-input-label-color: var(--bp-text);
+
+        // ── Control (form surface) ────────────────────────────────────────────
+        // White paper against the lavender page canvas; standard hairline.
+        --bs-tag-input-bg:               var(--bp-paper);
+        --bs-tag-input-border-color:     var(--bp-border);
+        --bs-tag-input-text-color:       var(--bp-text);
+        --bs-tag-input-placeholder-color: var(--bp-text-faint);
+
+        // The base bakes a dark-slate rgba (rgba(30,41,59,…)) for both the
+        // focus-border and the focus-ring — replace both with teal, which is
+        // the everyday-action accent in the blueprint rotation and consistent
+        // with what combo-box, extended-select, and other form fields use.
+        --bs-tag-input-focus-border: var(--bp-teal);
+        --bs-tag-input-focus-ring:   0 0 0 0.18rem var(--bp-teal-soft), 0 0 0 1px var(--bp-teal);
+
+        // Invalid state — real red, not the pink brand accent.
+        --bs-tag-input-invalid-border-color: var(--bp-danger);
+        --bs-tag-input-invalid-ring: 0 0 0 0.18rem rgba(220, 38, 38, 0.18), 0 0 0 1px var(--bp-danger);
+
+        // ── Tag chips ─────────────────────────────────────────────────────────
+        // Violet-soft fill distinguishes committed chips from the white control
+        // background; violet-fg gives AA contrast on that tint; --bp-border-chip
+        // is the named hairline for chip/tool surfaces.
+        --bs-tag-input-chip-bg:           var(--bp-violet-soft);
+        --bs-tag-input-chip-border-color: var(--bp-border-chip);
+        --bs-tag-input-chip-text-color:   var(--bp-violet-fg);
+
+        // Remove button hover/active — step up the violet-soft surface so the
+        // hit zone reads as interactive without introducing a new hue.
+        --bs-tag-input-remove-bg-hover:   var(--bp-border-chip);
+        --bs-tag-input-remove-bg-active:  var(--bp-border-soft);
+
+        // ── Suggestion menu (overlay) ─────────────────────────────────────────
+        // Paper bg + strong hairline + violet-tinted shadow — the floating
+        // panel sits above the control so it earns tc-shadow-md.
+        --bs-tag-input-menu-bg:           var(--bp-paper);
+        --bs-tag-input-menu-border-color: var(--bp-border-strong);
+        --bs-tag-input-menu-shadow:       var(--tc-shadow-md);
+
+        // ── Options ───────────────────────────────────────────────────────────
+        --bs-tag-input-option-color:     var(--bp-text);
+        // Recessed well tone for hover — same as combo-box / extended-select.
+        --bs-tag-input-option-hover-bg:  var(--bp-bg-2);
+        // Pink is the primary/CTA accent — the strongest affordance on the list.
+        --bs-tag-input-option-active-bg:    var(--bp-pink);
+        --bs-tag-input-option-active-color: var(--bp-pink-ink);
+
+        // ── Meta (counter / hint) ─────────────────────────────────────────────
+        --bs-tag-input-meta-color: var(--bp-text-faint);
+
+        // ── Skeleton ──────────────────────────────────────────────────────────
+        // Replace the base's raw rgba(255,255,255,0.6) shimmer literal with
+        // paper-tint tokens so the sweep stays within the blueprint palette.
+        --bs-tag-input-skeleton-bg:      var(--bp-bg-2);
+        --bs-tag-input-skeleton-shimmer: var(--bp-paper-tint);
+    }
+
+    // ── Label — mono uppercase eyebrow ───────────────────────────────────────
+    // Consistent with every other blueprint form-field label; teal-fg clears
+    // AA contrast on the white --bp-paper control surface.
+    .tc-tag-input-label {
+        font-family:    var(--bp-mono);
+        font-size:      0.6875rem;
+        font-weight:    600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color:          var(--bp-teal-fg);
+    }
+
+    // ── Tag chips — mono label treatment ─────────────────────────────────────
+    // Chips are committed micro-values; the mono face with a touch of tracking
+    // reads them as discrete tokens / tags rather than flowing prose.
+    .tc-tag-input-tag {
+        font-family:    var(--bp-mono);
+        font-size:      0.6875rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    // ── Remove button — teal focus ring ──────────────────────────────────────
+    // The base falls back to --tc-app-accent for focus-visible; override to
+    // the blueprint teal glow so keyboard navigation is theme-coherent.
+    .tc-tag-input-remove:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 0.15rem var(--bp-teal-soft), 0 0 0 1px var(--bp-teal);
+    }
+
+    // ── Suggestion menu — option dividers ────────────────────────────────────
+    // Items in the suggestion list need a light separator; use the faint
+    // divider token rather than any --tc-surface-muted or slate-ramp reference.
+    .tc-tag-input-menu-item + .tc-tag-input-menu-item {
+        border-top: 1px solid var(--bp-border-faint);
+    }
+
+    // ── "Create" option — teal accent ────────────────────────────────────────
+    // The create-on-type option is an action (not a selection) — teal is the
+    // everyday-action accent in the blueprint rotation. The label text shifts
+    // to teal-fg when not active so it signals "do" rather than "pick".
+    .tc-tag-input-menu-item--create:not(.tc-tag-input-menu-item--active) {
+        color: var(--bp-teal-fg);
+    }
+
+    // ── Active option — pink focus ring (legible on pink fill) ───────────────
+    // When the active row receives keyboard focus the inset ring must stay
+    // visible on the --bp-pink fill; white 2px clears against any tinted bg.
+    .tc-tag-input-menu-item--active:focus-visible {
+        box-shadow: inset 0 0 0 2px var(--bp-pink-ink);
+    }
+
+    // ── Meta — mono tabular ───────────────────────────────────────────────────
+    // Counter ("3/10") is a digit pair that benefits from tabular-nums and the
+    // mono face for optical stability as the count changes.
+    .tc-tag-input-meta {
+        font-family: var(--bp-mono);
+        font-size:   0.6875rem;
+    }
+
+    .tc-tag-input-counter {
+        color:               var(--bp-text-muted);
+        letter-spacing:      0.04em;
+        font-variant-numeric: tabular-nums;
+    }
+
+    // ── Limit-reached hint ────────────────────────────────────────────────────
+    // Amber is the warning/supporting accent in blueprint; using it here
+    // signals "capacity reached" without being as alarming as danger-red.
+    .tc-tag-input-hint {
+        color:          var(--bp-amber-fg);
+        font-style:     normal; // override base italic — mono face reads plainly
+        letter-spacing: 0.04em;
+    }
+
+    // ── Invalid state — danger border already set via custom property; ────────
+    // add a matching red glow ring on the control's focus-within so the cue
+    // survives keyboard focus without leaking the dark-slate base ring.
+    .tc-tag-input-control--invalid:focus-within {
+        box-shadow: 0 0 0 0.18rem rgba(220, 38, 38, 0.18), 0 0 0 1px var(--bp-danger);
+    }
+}

@@ -1,0 +1,74 @@
+// Blueprint › tc-tab-bar — mono eyebrow labels, pink active underline, hairline bar border.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Token overrides ─────────────────────────────────────────────────────────
+    // Drive every cosmetic through the --bs-tab-bar-* contract where possible.
+
+    tc-tab-bar {
+        // Bottom hairline uses the blueprint border token instead of --tc-border
+        --bs-tab-bar-border:         1px solid var(--bp-border);
+
+        // Tab base ink → muted violet-slate
+        --bs-tab-bar-tab-color:      var(--bp-text-muted);
+
+        // Hover ink → stronger but not full primary
+        --bs-tab-bar-tab-color-hover: var(--bp-text-soft);
+
+        // Hover bg stays transparent (bar is open/flat; no pill bg on hover)
+        --bs-tab-bar-tab-bg-hover:   transparent;
+
+        // Active ink → full primary text
+        --bs-tab-bar-tab-color-active: var(--bp-text);
+
+        // Active underline → pink (primary/selected per accent rotation)
+        --bs-tab-bar-tab-underline:  2px solid var(--bp-pink);
+    }
+
+    // ── Tab button typography ────────────────────────────────────────────────────
+    // Tab labels are nav/eyebrow items → --bp-mono, uppercase, tracked.
+
+    .tc-tab-bar-tab {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;          // slightly smaller to suit tight monospace caps
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        transition: color 0.18s var(--bp-ease);
+
+        // Focus ring uses the pink accent glow
+        &:focus-visible {
+            outline-color: var(--bp-pink);
+            box-shadow: var(--bp-glow-pink);
+        }
+
+        // Active tab: mono stays uppercase, ink shifts to full --bp-text,
+        // underline is already driven by --bs-tab-bar-tab-underline above.
+        &--active {
+            color: var(--bp-text);
+
+            // Subtle pink tint on the label when active — reinforces selection
+            // without needing a background pill.
+            // (Not driven by a var so we target it directly here.)
+            .tc-tab-bar-tab-icon {
+                color: var(--bp-pink);
+            }
+        }
+
+        &:hover:not(.tc-tab-bar-tab--active) {
+            // Faint pink glow under hover without a filled bg
+            text-shadow: 0 0 8px var(--bp-pink-glow);
+        }
+    }
+
+    // ── Small size variant ───────────────────────────────────────────────────────
+    // Keep mono + uppercase; just reduce tracking a touch at the smaller scale.
+
+    tc-tab-bar.tc-tab-bar--sm {
+        .tc-tab-bar-tab {
+            font-size: 0.625rem;
+            letter-spacing: 0.08em;
+        }
+    }
+}

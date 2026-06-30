@@ -1,0 +1,135 @@
+// Blueprint › tc-area-chart — light-paper chart frame; pink/teal/violet/amber series ramp; mono axis labels; paper tooltip with pink left stripe.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-area-chart {
+        // ── series ramp: pink primary → teal action → violet → amber → teal/violet softer ──
+        --bs-area-chart-series-1: var(--bp-pink);
+        --bs-area-chart-series-2: var(--bp-teal);
+        --bs-area-chart-series-3: var(--bp-violet);
+        --bs-area-chart-series-4: var(--bp-amber);
+        --bs-area-chart-series-5: var(--bp-teal-fg);       // darker teal keeps legibility
+        --bs-area-chart-series-6: var(--bp-violet-fg);     // darker violet keeps legibility
+
+        // ── chart frame ──
+        --bs-area-chart-bg:     var(--bp-paper);
+        --bs-area-chart-border: 1px solid var(--bp-border);
+
+        // ── grid + axes ──
+        // faint ruled lines; axes slightly stronger
+        --bs-area-chart-grid-color:       var(--bp-border-faint);
+        --bs-area-chart-axis-color:       var(--bp-border);
+        --bs-area-chart-axis-faint-color: var(--bp-border-faint);
+
+        // ── axis labels (mono micro-labels) ──
+        --bs-area-chart-label-color: var(--bp-text-muted);
+        --bs-area-chart-label-size:  11px;
+
+        // ── header ──
+        --bs-area-chart-title-color:    var(--bp-text);
+        --bs-area-chart-subtitle-color: var(--bp-text-muted);
+
+        // ── area fill ── slightly higher opacity so tinted fills read on white
+        --bs-area-chart-area-opacity: 0.14;
+        --bs-area-chart-line-width:   2px;
+
+        // dot halo matches the paper surface
+        --bs-area-chart-dot-stroke: var(--bp-paper);
+
+        // ── tooltip ── light paper surface; colored left stripe from series color
+        // (the base renders border-left with --tc-series-color, which already works)
+        --bs-area-chart-tooltip-bg:           var(--bp-paper);
+        --bs-area-chart-tooltip-color:        var(--bp-text);
+        --bs-area-chart-tooltip-stripe-width: 3px;
+        --bs-area-chart-tooltip-shadow:       var(--tc-shadow-lg);
+
+        // ── legend chips ──
+        --bs-area-chart-legend-chip-bg:     var(--bp-bg-2);
+        --bs-area-chart-legend-chip-color:  var(--bp-text);
+        --bs-area-chart-legend-chip-border: 1px solid var(--bp-border-chip);
+
+        // ── loading skeleton ──
+        --bs-area-chart-skeleton-bg: var(--bp-bg-2);
+    }
+
+    // ── inner frame: paper + hairline + shadow ──
+    .tc-area-chart__inner {
+        background: var(--bp-paper);
+        border:     1px solid var(--bp-border);
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── title: display face, tighter tracking ──
+    .tc-area-chart__title {
+        font-family: var(--bp-display);
+        color:       var(--bp-text);
+        letter-spacing: -0.01em;
+    }
+
+    // ── subtitle: body face, muted ──
+    .tc-area-chart__subtitle {
+        font-family: var(--bp-body);
+        color:       var(--bp-text-muted);
+    }
+
+    // ── axis labels: mono micro-label style ──
+    .tc-area-chart__y-label,
+    .tc-area-chart__x-label {
+        font-family: var(--bp-mono);
+        fill:        var(--bp-text-muted);
+        letter-spacing: 0.04em;
+    }
+
+    // ── tooltip: paper surface + hairline; stripe already driven by --tc-series-color ──
+    .tc-area-chart__tooltip {
+        background: var(--bp-paper);
+        color:      var(--bp-text);
+        border:     1px solid var(--bp-border);
+        box-shadow: var(--tc-shadow-lg);
+        // override the base's left-only border; the stripe is added on top via border-left
+        // The base sets border-left independently using the stripe-width token — that still wins.
+    }
+
+    // ── tooltip name row: mono micro-label ──
+    .tc-area-chart__tooltip-name {
+        font-family: var(--bp-mono);
+        color:       var(--bp-text-muted);
+        letter-spacing: 0.06em;
+        opacity: 1; // base sets 0.75 opacity which would muddy the muted color; keep full
+    }
+
+    // ── tooltip value: display face, strong ink ──
+    .tc-area-chart__tooltip-value {
+        font-family: var(--bp-display);
+        color:       var(--bp-text);
+    }
+
+    // ── legend chips: mono label, soft chip style ──
+    .tc-area-chart__legend-chip {
+        font-family: var(--bp-mono);
+        font-size:   0.6875rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        background: var(--bp-bg-2);
+        color:      var(--bp-text);
+        border:     1px solid var(--bp-border-chip);
+    }
+
+    // ── empty state: body face, faint ink ──
+    .tc-area-chart__empty {
+        font-family: var(--bp-body);
+        color:       var(--bp-text-faint);
+    }
+
+    // ── skeleton shimmer: uses --bp-bg-2 base + slightly lighter mid-stop ──
+    .tc-area-chart__skeleton {
+        background: linear-gradient(
+            90deg,
+            var(--bp-bg-2)          25%,
+            var(--bp-paper-tint)    37%,
+            var(--bp-bg-2)          63%
+        );
+        background-size: 200% 100%;
+    }
+}

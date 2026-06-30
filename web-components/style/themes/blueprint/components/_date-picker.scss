@@ -1,0 +1,64 @@
+// Blueprint › tc-date-picker — paper input surface, muted mono label, pink focus halo, teal calendar indicator.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Token remaps ───────────────────────────────────────────────────────────
+    // Route the component's own --bs-date-picker-* vars to blueprint tokens so
+    // every cosmetic decision flows through the theme's palette, not the base
+    // --tc-* neutrals.
+
+    tc-date-picker {
+        --bs-date-picker-bg:           var(--bp-paper);
+        --bs-date-picker-border-color: var(--bp-border-strong);
+        --bs-date-picker-label-color:  var(--bp-text-muted);
+    }
+
+    // ── Label ──────────────────────────────────────────────────────────────────
+    // Mono voice for the label — reads as a HUD datum / field identifier.
+    // Matches the eyebrow register used on chips, badges, and nav items.
+
+    .tc-date-picker .form-label {
+        font-family: var(--bp-mono);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--bp-text-muted);
+    }
+
+    // ── Native date input ──────────────────────────────────────────────────────
+
+    .tc-date-picker input[type='date'].form-control {
+
+        // Replace the baked slate focus ring (rgba(30,41,59,*) — leaks the
+        // dark-slate ramp). Blueprint uses pink border + violet-tinted shadow.
+        &:focus {
+            border-color: var(--bp-pink);
+            box-shadow: var(--bp-glow-pink);
+        }
+
+        // Re-assert danger border on focused-invalid state (the local :focus rule
+        // above is more specific and would otherwise win). Routes to --bp-danger
+        // rather than the base --tc-danger literal so the token stays on-theme.
+        &.is-invalid:focus {
+            border-color: var(--bp-danger);
+            box-shadow: none;
+        }
+
+        // Calendar picker icon — teal action accent at rest, full opacity on hover.
+        // The indicator is a UA-rendered SVG so we can only drive it through
+        // opacity/filter; tinting with brightness+sepia pushes it toward teal.
+        &::-webkit-calendar-picker-indicator {
+            opacity: 0.65;
+            // Shift the neutral grey chevron toward the teal action hue.
+            filter: invert(40%) sepia(60%) saturate(400%) hue-rotate(140deg) brightness(0.9);
+            cursor: pointer;
+            transition: opacity var(--bp-ease), filter var(--bp-ease);
+
+            &:hover {
+                opacity: 1;
+                filter: invert(35%) sepia(80%) saturate(500%) hue-rotate(145deg) brightness(0.95);
+            }
+        }
+    }
+}

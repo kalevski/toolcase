@@ -1,0 +1,106 @@
+// Blueprint › tc-loading-overlay — light lavender scrim, white panel with teal spinner ring and pink progress fill, mono label/tip typography.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-loading-overlay {
+        // Backdrop: soft lavender wash instead of dark slate-900 scrim — keeps
+        // the blueprint light-theme feel while still dimming the page.
+        --bs-loading-overlay-backdrop-bg: rgba(90, 80, 160, 0.18);
+
+        // Panel: raised white card with blueprint hairline and violet-tinted shadow.
+        --bs-loading-overlay-panel-bg:     var(--bp-paper);
+        --bs-loading-overlay-panel-border: 1px solid var(--bp-border);
+        --bs-loading-overlay-panel-shadow: var(--tc-shadow-lg);
+
+        // Spinner ring: teal action accent (replaces tc-app-accent which can be
+        // any hue; teal is the blueprint everyday-action color).
+        --bs-loading-overlay-spinner-color: var(--bp-teal);
+
+        // Label text: primary ink.
+        --bs-loading-overlay-label-color: var(--bp-text);
+
+        // Percentage readout: muted ink (already mono in base, kept that way).
+        --bs-loading-overlay-pct-color: var(--bp-text-muted);
+
+        // Progress bar track: faint hairline fill.
+        --bs-loading-overlay-bar-bg: var(--bp-border-faint);
+
+        // Progress bar fill: pink primary / CTA per accent rotation.
+        --bs-loading-overlay-bar-fill: var(--bp-pink);
+
+        // Tip line: faint secondary text.
+        --bs-loading-overlay-tip-color: var(--bp-text-faint);
+    }
+
+    // Spinner track: use the blueprint border token instead of tc-border-strong
+    // so it harmonises with the lavender hairline family.
+    .tc-loading-overlay-spinner-ring {
+        border-color:     var(--bp-border-strong);
+        border-top-color: currentcolor; // arc colour driven by --bs-loading-overlay-spinner-color above
+    }
+
+    // Label: Space Grotesk body font (blueprint body), medium weight.
+    .tc-loading-overlay-label {
+        font-family: var(--bp-body);
+        color: var(--bs-loading-overlay-label-color);
+    }
+
+    // Percentage: JetBrains Mono micro-label style — uppercase, wide tracking,
+    // teal-fg so it reads as a machine-facing status value.
+    .tc-loading-overlay-pct {
+        font-family: var(--bp-mono);
+        color: var(--bp-teal-fg);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    // Progress bar fill: gradient for visual richness on the pink primary fill.
+    .tc-loading-overlay-bar-fill {
+        background: var(--bp-pink-grad, var(--bp-pink));
+    }
+
+    // Indeterminate fill: same pink gradient sweep.
+    .tc-loading-overlay-bar--indeterminate .tc-loading-overlay-bar-fill {
+        background: var(--bp-pink-grad, var(--bp-pink));
+    }
+
+    // Tip: JetBrains Mono, faint, wide-ish tracking — machine-facing status text.
+    .tc-loading-overlay-tip {
+        font-family: var(--bp-mono);
+        color: var(--bs-loading-overlay-tip-color);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+    }
+
+    // HUD corner bracket on the panel — a subtle teal L-bracket top-left gives
+    // the panel the blueprint "vector HUD" reading without adding icon assets.
+    .tc-loading-overlay-panel {
+        position: relative; // already set in base, but safe to repeat for clarity
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            pointer-events: none;
+        }
+
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            width: 12px;
+            height: 12px;
+            border-bottom: 2px solid var(--bp-border-soft);
+            border-right: 2px solid var(--bp-border-soft);
+            pointer-events: none;
+        }
+    }
+}

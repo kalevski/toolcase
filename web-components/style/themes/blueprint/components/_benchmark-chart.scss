@@ -1,0 +1,77 @@
+// Blueprint › tc-benchmark-chart — lavender-paper card surface, teal bars, pink→violet leader gradient, mono data labels.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-benchmark-chart {
+        // Surface: render against the page background with no chrome of its own.
+        // Individual containers or cards above this element supply the paper/border.
+        --bs-benchmark-chart-track-bg:   var(--bp-bg-2);       // recessed well — matches page indented surfaces
+        --bs-benchmark-chart-bar-fill:   var(--bp-teal);       // teal = everyday action/data, not a CTA
+        // Leader gradient: replace dark-slate stop (#2b3a51) with blueprint violet.
+        // The gradient runs via SVG linearGradient stops (--from / --to).
+        --bs-benchmark-chart-leader-from: var(--bp-pink);      // pink = primary emphasis
+        --bs-benchmark-chart-leader-to:   var(--bp-violet);    // violet = supporting accent, replaces slate dark stop
+        --bs-benchmark-chart-sep-color:  var(--bp-border-faint);
+        --bs-benchmark-chart-label-color: var(--bp-text);
+        --bs-benchmark-chart-value-color: var(--bp-text-soft);
+        --bs-benchmark-chart-unit-color:  var(--bp-text-faint);
+        --bs-benchmark-chart-title-color: var(--bp-text);
+        --bs-benchmark-chart-caption-color: var(--bp-text-faint);
+        --bs-benchmark-chart-hover-bg:   var(--bp-paper-tint);
+    }
+
+    // Title: display face, tight — section heading treatment
+    .tc-benchmark-chart__title,
+    .tc-benchmark-chart__title-slot {
+        font-family: var(--bp-display);
+        font-size: 0.9rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--bs-benchmark-chart-title-color);
+    }
+
+    // Labels: body face, blueprint text token — readable row identifiers
+    .tc-benchmark-chart__label {
+        font-family: var(--bp-body);
+        fill: var(--bs-benchmark-chart-label-color);
+    }
+
+    // Leader row label gets extra weight to mirror the visual emphasis of the gradient bar
+    .tc-benchmark-chart__row--leader .tc-benchmark-chart__label {
+        font-weight: 700;
+        fill: var(--bp-emphasis);
+    }
+
+    // Values: mono face — machine-facing numbers, tabular alignment preserved from base
+    .tc-benchmark-chart__value {
+        font-family: var(--bp-mono);
+        fill: var(--bs-benchmark-chart-value-color);
+    }
+
+    .tc-benchmark-chart__unit {
+        font-family: var(--bp-mono);
+        fill: var(--bs-benchmark-chart-unit-color);
+    }
+
+    // Caption (e.g. "Higher is better"): mono eyebrow style — uppercase, loose tracking
+    .tc-benchmark-chart__caption {
+        font-family: var(--bp-mono);
+        color: var(--bs-benchmark-chart-caption-color);
+        letter-spacing: 0.1em;
+        // text-transform: uppercase already set in base partial
+    }
+
+    // Empty state: body face, muted
+    .tc-benchmark-chart__empty {
+        font-family: var(--bp-body);
+        color: var(--bp-text-faint);
+    }
+
+    // Focus ring: pink to match primary accent rotation
+    .tc-benchmark-chart__row[role='button']:focus-visible {
+        outline: 2px solid var(--bp-pink);
+        outline-offset: 2px;
+    }
+}

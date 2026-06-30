@@ -1,0 +1,94 @@
+// Blueprint › tc-dashboard-sidebar — white paper rail with lavender well menu, teal-accented brand strip, and mono-labeled panel footer.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-dashboard-sidebar {
+        // Re-point every cosmetic token to blueprint palette.
+        // The sidebar reads as a raised white card (brand + panel) wrapping
+        // a slightly recessed lavender scroll well (menu). The right edge
+        // is a single --bp-border hairline separating it from content.
+        --bs-dashboard-sidebar-bg:           var(--bp-paper);
+        --bs-dashboard-sidebar-color:        var(--bp-text);
+        --bs-dashboard-sidebar-border:       var(--bp-border);
+        --bs-dashboard-sidebar-panel-border: var(--bp-border-faint);
+    }
+
+    // ── Outer shell ──────────────────────────────────────────────────────────
+    .tc-dashboard-sidebar {
+        background: var(--bs-dashboard-sidebar-bg);
+        color: var(--bs-dashboard-sidebar-color);
+        border-right: 1px solid var(--bs-dashboard-sidebar-border);
+        box-shadow: var(--tc-shadow-sm);
+        font-family: var(--bp-body);
+    }
+
+    // ── Brand strip ──────────────────────────────────────────────────────────
+    // Subtle lavender tint lifts the brand area above the scroll well below it.
+    // Bottom hairline is the default --bp-border weight.
+    .tc-dashboard-sidebar-brand {
+        background: var(--bp-paper-tint);
+        border-bottom: 1px solid var(--bs-dashboard-sidebar-border);
+
+        // Any text rendered directly in the brand slot gets display treatment.
+        font-family: var(--bp-display);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: var(--bp-emphasis);
+
+        // Replace the base theme's cyan brand dot with teal.
+        // The ::before glyph on the brand slot anchor (if used) inherits color,
+        // so we set the accent color on the container for child-slot decoration.
+        --bp-brand-accent: var(--bp-teal);
+
+        // Teal accent rule — a 2px left border on the brand container signals
+        // the active product identity without an icon dependency.
+        border-left: 3px solid var(--bp-teal);
+        padding-left: calc(var(--bs-dashboard-sidebar-brand-padding) - 3px);
+    }
+
+    // ── Scrollable menu well ─────────────────────────────────────────────────
+    // Recessed lavender canvas reads as a contained scroll region distinct
+    // from the raised brand and panel surfaces.
+    .tc-dashboard-sidebar-menu {
+        background: var(--bp-bg);
+
+        // Faint inner shadow at top to reinforce the recessed-well read.
+        box-shadow: inset 0 4px 8px -4px color-mix(in srgb, var(--bp-violet) 8%, transparent);
+
+        // Custom scrollbar — thin teal track on lavender ground.
+        scrollbar-width: thin;
+        scrollbar-color: var(--bp-border-strong) transparent;
+
+        &::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: var(--bp-border-strong);
+        }
+    }
+
+    // ── Pinned panel footer ───────────────────────────────────────────────────
+    // Slightly deeper tint than the brand strip — distinguishes bottom from top
+    // while keeping the full sidebar read as one white-ish rail.
+    // Top hairline uses --bp-border-faint (softer than the brand divider).
+    .tc-dashboard-sidebar-panel {
+        background: var(--bp-paper-tint-2);
+        border-top: 1px solid var(--bs-dashboard-sidebar-panel-border);
+
+        // Micro-label aesthetic: any direct text in the panel reads as a
+        // mono eyebrow — user name, workspace name, version tag, etc.
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;          // 11px — compact HUD label
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--bp-text-muted);
+    }
+
+}

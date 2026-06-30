@@ -1,0 +1,86 @@
+// Blueprint › tc-confirm-dialog — white paper modal, mono eyebrow, display title,
+// violet-ink backdrop, pink top-accent stripe; danger variant swaps stripe to red.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-confirm-dialog {
+        // ── Surface + chrome ──────────────────────────────────────────────────
+        --bs-confirm-dialog-bg:           var(--bp-paper);
+        --bs-confirm-dialog-color:        var(--bp-text);
+        --bs-confirm-dialog-border-color: var(--bp-border);
+        --bs-confirm-dialog-shadow:       var(--tc-shadow-lg);
+
+        // ── Eyebrow ───────────────────────────────────────────────────────────
+        // Teal — "action register" read, consistent with mono labels elsewhere.
+        --bs-confirm-dialog-eyebrow-color: var(--bp-teal-fg);
+
+        // ── Backdrop — violet-ink scrim (not dark slate) ──────────────────────
+        // Replace the #0f172a literal with the blueprint dark violet base tint.
+        --bs-confirm-dialog-backdrop-bg:      rgba(26, 24, 48, 1);
+        --bs-confirm-dialog-backdrop-opacity: 0.5;
+    }
+
+    // Danger variant: eyebrow stays red, panel accent stripe flips to danger.
+    tc-confirm-dialog[danger] {
+        --bs-confirm-dialog-eyebrow-color: var(--bp-danger);
+    }
+
+    // ── Panel ─────────────────────────────────────────────────────────────────
+    .tc-confirm-dialog__panel {
+        // Inset top stripe — 3px pink accent line reads the dialog as a CTA-tier
+        // overlay without adding an extra element; flush inset means it clips to
+        // the panel's own border-radius (applied by the radius sweep).
+        box-shadow:
+            var(--tc-shadow-lg),
+            inset 0 3px 0 0 var(--bp-pink);
+
+        // Thin pink hairline on the border reinforces the primary-action register.
+        border-color: var(--bp-border-pink);
+    }
+
+    // Danger panels: red accent stripe replaces pink.
+    tc-confirm-dialog[danger] .tc-confirm-dialog__panel {
+        box-shadow:
+            var(--tc-shadow-lg),
+            inset 0 3px 0 0 var(--bp-danger);
+        border-color: var(--bp-border);
+    }
+
+    // ── Eyebrow — mono micro-label ────────────────────────────────────────────
+    // Switches to the blueprint mono face; uppercase + loose tracking already
+    // applied by the base partial, so only the font-family needs a re-point.
+    .tc-confirm-dialog__eyebrow {
+        font-family: var(--bp-mono);
+        color: var(--bs-confirm-dialog-eyebrow-color);
+        // Nudge tracking to the blueprint mono eyebrow standard.
+        letter-spacing: 0.1em;
+    }
+
+    // ── Title — display type ──────────────────────────────────────────────────
+    // Confirm dialogs are decision-moment headings — blueprint display face
+    // (Chakra Petch) lifts them out of body copy without needing uppercase.
+    .tc-confirm-dialog__title {
+        font-family: var(--bp-display);
+        font-weight: 700;
+        letter-spacing: -0.01em; // tight display tracking
+        color: var(--bp-text);
+    }
+
+    // ── Message ───────────────────────────────────────────────────────────────
+    // Body face inherits from the theme root; muted violet tone via token remap.
+    .tc-confirm-dialog__message {
+        font-family: var(--bp-body);
+        color: var(--bp-text-muted);
+    }
+
+    // ── Actions row ───────────────────────────────────────────────────────────
+    // Layout only — button cosmetics come from the blueprint button partial.
+    // A faint hairline above the actions block gives the footer visual weight
+    // without a heavy rule; mirrors the panel-header divider pattern.
+    .tc-confirm-dialog__actions {
+        margin-top: 0.5rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--bp-border-faint);
+    }
+}

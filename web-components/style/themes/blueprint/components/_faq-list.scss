@@ -1,0 +1,97 @@
+// Blueprint › tc-faq-list — accordion FAQ styled as a white --bp-paper panel with teal chevron, mono question labels, and a pink active/open accent.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-faq-list {
+        // Re-point the component's own custom-property API to blueprint tokens.
+        --bs-faq-list-border:           var(--bp-border);
+        --bs-faq-list-separator:        var(--bp-border-faint);   // inner row dividers — lighter than the outer hull
+        --bs-faq-list-bg:               var(--bp-paper);
+        --bs-faq-list-question-color:   var(--bp-text);
+        --bs-faq-list-answer-color:     var(--bp-text-muted);
+        --bs-faq-list-hover-bg:         var(--bp-paper-tint);
+        --bs-faq-list-title-font-size:  0.6875rem;                // keeps it compact as a mono eyebrow
+        --bs-faq-list-title-font-weight: 600;
+    }
+
+    // ── Outer hull ────────────────────────────────────────────────────────────
+    .tc-faq-list {
+        background-color: var(--bp-paper);
+        border: 1px solid var(--bp-border);
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Title row ─────────────────────────────────────────────────────────────
+    .tc-faq-list-title-row {
+        border-bottom: 1px solid var(--bp-border);
+        background-color: var(--bp-bg-2);       // slightly recessed shelf above the items
+    }
+
+    .tc-faq-list-title {
+        font-family: var(--bp-mono);
+        font-size: var(--bs-faq-list-title-font-size);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .10em;
+        color: var(--bp-teal-fg);               // teal-fg satisfies AA contrast on --bp-bg-2
+    }
+
+    // ── Question button ───────────────────────────────────────────────────────
+    .tc-faq-list-question {
+        font-family: var(--bp-body);
+        font-size: var(--bs-faq-list-question-font-size);
+        font-weight: 500;
+        color: var(--bp-text);
+        background: transparent;
+        transition: background-color var(--bp-ease);
+
+        &:hover {
+            background-color: var(--bp-paper-tint);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-teal);
+            outline-offset: -2px;
+        }
+    }
+
+    // ── Chevron — teal tint, rotates when open ────────────────────────────────
+    .tc-faq-list-chevron {
+        color: var(--bp-teal-fg);               // teal glyph for everyday-action affordance
+        transition: transform var(--bp-ease);
+    }
+
+    // ── Open state — pink accent on the active question row ───────────────────
+    .tc-faq-list-item--open {
+
+        .tc-faq-list-question {
+            color: var(--bp-pink);              // pink = primary/selected state
+            background-color: var(--bp-pink-surface); // very soft pink tint (gradient var)
+        }
+
+        .tc-faq-list-question-text {
+            font-weight: 600;
+        }
+
+        .tc-faq-list-chevron {
+            color: var(--bp-pink);              // chevron follows the accent rotation
+            transform: rotate(180deg);
+        }
+    }
+
+    // ── Answer panel ─────────────────────────────────────────────────────────
+    .tc-faq-list-answer {
+        font-family: var(--bp-body);
+        font-size: var(--bs-faq-list-answer-font-size);
+        color: var(--bp-text-muted);
+        line-height: 1.65;
+        // Soft left rule — teal hairline signals the answer belongs to the open question
+        border-left: 2px solid var(--bp-teal-line);
+        margin-left: var(--bs-faq-list-padding-x);
+        padding-left: calc(var(--bs-faq-list-padding-x) - 2px); // compensate for the 2px border
+        padding-right: var(--bs-faq-list-padding-x);
+        padding-bottom: var(--bs-faq-list-padding-y);
+    }
+
+}

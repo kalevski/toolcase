@@ -1,0 +1,109 @@
+// Blueprint › tc-title-screen — lavender grid-field full-viewport title screen: display-font heading, teal mono eyebrow, faint hairline divider, pink-glow ambient backdrop.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-title-screen {
+        // Full-viewport surface: blueprint lavender canvas, not slate dark
+        --bs-title-screen-bg:            var(--bp-bg);
+
+        // Eyebrow: teal mono micro-label (blueprint HUD convention; replaces raw cyan)
+        --bs-title-screen-eyebrow-color: var(--bp-teal-fg);
+
+        // Title heading: strongest ink, display font applied below
+        --bs-title-screen-title-color:   var(--bp-emphasis);
+
+        // Hairline divider: routes to faint blueprint token (never raw tc-border
+        // which would leak the light-slate ramp)
+        --bs-title-screen-divider-color: var(--bp-border-faint);
+
+        // Subtitle: muted body text
+        --bs-title-screen-subtitle-color: var(--bp-text-muted);
+    }
+
+    // ── Host surface ─────────────────────────────────────────────────────────
+    // Layer the blueprint grid field + pink+teal ambient glow over the lavender
+    // canvas — the component IS the full viewport at this moment, so the
+    // atmosphere is the entire scene.
+
+    tc-title-screen {
+        background:
+            var(--bp-glow-field),   // pink+teal ambient glow (faint, centred)
+            var(--bp-grid-field)    // violet dot-grid tactical overlay
+            var(--bp-bg);           // lavender page fallback
+    }
+
+    // ── Panel: centred content column ────────────────────────────────────────
+    // Raised white card surfaces the content against the grid field backdrop.
+    // HUD corner brackets (teal top-left / muted bottom-right) mark it as a
+    // blueprint interactive tile.
+
+    .tc-title-screen__panel {
+        background: var(--bp-paper);
+        border:     1px solid var(--bp-border);
+        box-shadow: var(--tc-shadow-md);
+        position:   relative; // needed for bracket pseudo-elements
+
+        // Top-left HUD corner bracket — teal, primary action register
+        &::before {
+            content:      '';
+            position:     absolute;
+            top:          8px;
+            left:         8px;
+            width:        14px;
+            height:       14px;
+            border-top:   2px solid var(--bp-teal);
+            border-left:  2px solid var(--bp-teal);
+            pointer-events: none;
+        }
+
+        // Bottom-right bracket — muted border tone, quiet counterpoint
+        &::after {
+            content:       '';
+            position:      absolute;
+            bottom:        8px;
+            right:         8px;
+            width:         14px;
+            height:        14px;
+            border-bottom: 2px solid var(--bp-border-strong);
+            border-right:  2px solid var(--bp-border-strong);
+            pointer-events: none;
+        }
+    }
+
+    // ── Eyebrow ───────────────────────────────────────────────────────────────
+    // Blueprint mono voice: JetBrains Mono, uppercase, teal-fg for AA contrast
+    // on white. Replaces the base's raw --tc-cyan / #22d3ee literal.
+
+    .tc-title-screen__eyebrow {
+        font-family:    var(--bp-mono);
+        letter-spacing: 0.14em;
+        // color flows from --bs-title-screen-eyebrow-color → --bp-teal-fg (set above)
+    }
+
+    // ── Title heading ─────────────────────────────────────────────────────────
+    // Chakra Petch display font — the game/product name is a brand moment.
+    // Uppercase + tight tracking gives the compressed vector-blueprint silhouette.
+
+    .tc-title-screen__title {
+        font-family:    var(--bp-display);
+        letter-spacing: -0.02em;
+        text-transform: uppercase;
+        // color flows from --bs-title-screen-title-color → --bp-emphasis (set above)
+    }
+
+    // ── Hairline divider ──────────────────────────────────────────────────────
+    // --bs-title-screen-divider-color is already routed to --bp-border-faint
+    // via the var block above; no additional rule needed — included for clarity.
+
+    // .tc-title-screen__divider — no override beyond the token remap
+
+    // ── Subtitle ─────────────────────────────────────────────────────────────
+    // Space Grotesk body text at muted ink — supporting copy, stays legible
+    // without competing with the display heading.
+
+    .tc-title-screen__subtitle {
+        font-family: var(--bp-body);
+        // color flows from --bs-title-screen-subtitle-color → --bp-text-muted
+    }
+}

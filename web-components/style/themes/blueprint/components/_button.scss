@@ -1,0 +1,94 @@
+// Blueprint › .btn — the arcade CTA. The base .btn-primary fills with
+// var(--tc-app-accent-gradient), which the foundation remaps to the solid pink
+// sweep (--bp-pink-grad) — so primary goes pink with its legible white label for
+// free. This partial adds the SIGNATURE: the pink glow drop-shadow + translateY
+// lift on primary, the teal "action" glow on success, and the display typeface +
+// uppercase tracking the template buttons use (blueprint_theme.md §8.2).
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    .btn {
+        --bs-btn-focus-shadow-rgb: 224, 17, 114;
+        --bs-btn-font-family: var(--bp-display);
+        --bs-btn-font-weight: 700;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        transition:
+            transform 0.18s var(--bp-ease),
+            background 0.2s,
+            border-color 0.2s,
+            box-shadow 0.25s,
+            color 0.2s;
+    }
+
+    // Primary — pink gradient (free via the token remap) + pink glow + lift.
+    .btn-primary {
+        --bs-btn-color: var(--bp-pink-ink);
+        --bs-btn-hover-color: var(--bp-pink-ink);
+        --bs-btn-active-color: var(--bp-pink-ink);
+        --bs-btn-disabled-color: var(--bp-pink-ink);
+        --bs-btn-border-color: transparent;
+        --bs-btn-hover-border-color: transparent;
+        --bs-btn-active-border-color: transparent;
+        box-shadow: var(--bp-glow-pink);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--bp-glow-pink-strong);
+    }
+
+    .btn-primary:active,
+    .btn-primary.active {
+        transform: translateY(0);
+        box-shadow: var(--bp-glow-pink);
+    }
+
+    // Success — the teal "action" button ("OPEN CONSOLE"): teal fill, white ink,
+    // teal glow.
+    .btn-success {
+        --bs-btn-bg: var(--bp-teal);
+        --bs-btn-hover-bg: var(--bp-teal-hover);
+        --bs-btn-active-bg: var(--bp-teal-hover);
+        --bs-btn-color: var(--bp-teal-ink);
+        --bs-btn-hover-color: var(--bp-teal-ink);
+        --bs-btn-active-color: var(--bp-teal-ink);
+        --bs-btn-border-color: transparent;
+        --bs-btn-hover-border-color: transparent;
+        box-shadow: var(--bp-glow-teal);
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+    }
+
+    // Outline primary picks up the pink accent on hover.
+    .btn-outline-primary {
+        --bs-btn-color: var(--bp-pink);
+        --bs-btn-border-color: var(--bp-pink-line);
+        --bs-btn-hover-bg: var(--bp-pink);
+        --bs-btn-hover-color: var(--bp-pink-ink);
+        --bs-btn-hover-border-color: var(--bp-pink);
+    }
+
+    // Neutral outline → teal text + border on hover (the template's neutral CTA).
+    .btn-outline-dark,
+    .btn-outline-secondary {
+        --bs-btn-color: var(--bp-text);
+        --bs-btn-border-color: var(--bp-border-soft);
+        --bs-btn-hover-bg: var(--bp-teal-soft);
+        --bs-btn-hover-color: var(--bp-teal-fg);
+        --bs-btn-hover-border-color: var(--bp-teal);
+    }
+
+    // Plain-link buttons keep no lift / glow.
+    .btn-link {
+        --bs-btn-color: var(--bp-pink);
+        box-shadow: none;
+        text-transform: none;
+        &:hover {
+            transform: none;
+            box-shadow: none;
+        }
+    }
+}

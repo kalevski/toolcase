@@ -1,0 +1,309 @@
+// Blueprint › tc-cool-button — grouped button with arcade accent variants, mono label
+// typography, blueprint hairline divider, and tinted addon regions per variant.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    // ── Primary (pink CTA) ──────────────────────────────────────────────────────
+    // Pink is the primary brand action. Gradient fill, white ink, pink glow on hover.
+    .btn-primary.tc-cool-button {
+        --bs-btn-font-family: var(--bp-display);
+        --bs-btn-font-weight: 600;
+        --bs-btn-letter-spacing: 0.06em;
+        --bs-btn-color: var(--bp-pink-ink);
+        --bs-btn-bg: var(--bp-pink-grad);
+        --bs-btn-border-color: var(--bp-pink);
+        --bs-btn-hover-color: var(--bp-pink-ink);
+        --bs-btn-hover-bg: var(--bp-pink-grad);
+        --bs-btn-hover-border-color: var(--bp-pink-hover);
+        --bs-btn-active-color: var(--bp-pink-ink);
+        --bs-btn-active-bg: var(--bp-pink-grad);
+        --bs-btn-active-border-color: var(--bp-pink-hover);
+        --bs-btn-disabled-color: var(--bp-pink-ink);
+        --bs-btn-disabled-bg: var(--bp-pink);
+        --bs-btn-disabled-border-color: var(--bp-pink);
+        // Semi-transparent white divider reads against the solid pink fill.
+        --bs-cool-button-divider-color: rgba(255, 255, 255, 0.35);
+        // Addon region mirrors the pink fill with a slight overlay.
+        --bs-cool-button-addon-bg: rgba(255, 255, 255, 0.15);
+        --bs-cool-button-addon-color: var(--bp-pink-ink);
+
+        &:hover {
+            box-shadow: var(--bp-glow-pink);
+        }
+    }
+
+    // ── Secondary (teal action) ─────────────────────────────────────────────────
+    // Teal is the everyday action hue. Solid fill, white ink.
+    .btn-secondary.tc-cool-button {
+        --bs-btn-font-family: var(--bp-display);
+        --bs-btn-font-weight: 600;
+        --bs-btn-letter-spacing: 0.06em;
+        --bs-btn-color: var(--bp-teal-ink);
+        --bs-btn-bg: var(--bp-teal-grad);
+        --bs-btn-border-color: var(--bp-teal);
+        --bs-btn-hover-color: var(--bp-teal-ink);
+        --bs-btn-hover-bg: var(--bp-teal-grad);
+        --bs-btn-hover-border-color: var(--bp-teal-hover);
+        --bs-btn-active-color: var(--bp-teal-ink);
+        --bs-btn-active-bg: var(--bp-teal-grad);
+        --bs-btn-active-border-color: var(--bp-teal-hover);
+        --bs-btn-disabled-color: var(--bp-teal-ink);
+        --bs-btn-disabled-bg: var(--bp-teal);
+        --bs-btn-disabled-border-color: var(--bp-teal);
+        --bs-cool-button-divider-color: rgba(255, 255, 255, 0.3);
+        --bs-cool-button-addon-bg: rgba(255, 255, 255, 0.15);
+        --bs-cool-button-addon-color: var(--bp-teal-ink);
+
+        &:hover {
+            box-shadow: var(--bp-glow-teal);
+        }
+    }
+
+    // ── Success → teal (status mapping) ────────────────────────────────────────
+    .btn-success.tc-cool-button {
+        --bs-btn-font-family: var(--bp-display);
+        --bs-btn-font-weight: 600;
+        --bs-btn-letter-spacing: 0.06em;
+        --bs-btn-color: var(--bp-teal-ink);
+        --bs-btn-bg: var(--bp-teal-grad);
+        --bs-btn-border-color: var(--bp-teal);
+        --bs-btn-hover-color: var(--bp-teal-ink);
+        --bs-btn-hover-bg: var(--bp-teal-grad);
+        --bs-btn-hover-border-color: var(--bp-teal-hover);
+        --bs-btn-active-color: var(--bp-teal-ink);
+        --bs-btn-active-bg: var(--bp-teal-grad);
+        --bs-btn-active-border-color: var(--bp-teal-hover);
+        --bs-btn-disabled-color: var(--bp-teal-ink);
+        --bs-btn-disabled-bg: var(--bp-teal);
+        --bs-btn-disabled-border-color: var(--bp-teal);
+        --bs-cool-button-divider-color: rgba(255, 255, 255, 0.3);
+        --bs-cool-button-addon-bg: rgba(255, 255, 255, 0.15);
+        --bs-cool-button-addon-color: var(--bp-teal-ink);
+
+        &:hover {
+            box-shadow: var(--bp-glow-teal);
+        }
+    }
+
+    // ── Danger → real red (NOT pink — pink is CTA) ──────────────────────────────
+    .btn-danger.tc-cool-button {
+        --bs-btn-font-family: var(--bp-display);
+        --bs-btn-font-weight: 600;
+        --bs-btn-letter-spacing: 0.06em;
+        --bs-btn-color: #fff;
+        --bs-btn-bg: var(--bp-danger);
+        --bs-btn-border-color: var(--bp-danger);
+        --bs-btn-hover-color: #fff;
+        --bs-btn-hover-bg: var(--bp-danger);
+        --bs-btn-hover-border-color: var(--bp-danger);
+        --bs-btn-active-color: #fff;
+        --bs-btn-active-bg: var(--bp-danger);
+        --bs-btn-active-border-color: var(--bp-danger);
+        --bs-btn-disabled-color: #fff;
+        --bs-btn-disabled-bg: var(--bp-danger);
+        --bs-btn-disabled-border-color: var(--bp-danger);
+        --bs-cool-button-divider-color: rgba(255, 255, 255, 0.28);
+        --bs-cool-button-addon-bg: rgba(255, 255, 255, 0.15);
+        --bs-cool-button-addon-color: #fff;
+    }
+
+    // ── Warning → amber (supporting accent) ────────────────────────────────────
+    .btn-warning.tc-cool-button {
+        --bs-btn-font-family: var(--bp-display);
+        --bs-btn-font-weight: 600;
+        --bs-btn-letter-spacing: 0.06em;
+        --bs-btn-color: var(--bp-amber-ink);
+        --bs-btn-bg: var(--bp-amber);
+        --bs-btn-border-color: var(--bp-amber);
+        --bs-btn-hover-color: var(--bp-amber-ink);
+        --bs-btn-hover-bg: var(--bp-amber);
+        --bs-btn-hover-border-color: var(--bp-amber);
+        --bs-btn-active-color: var(--bp-amber-ink);
+        --bs-btn-active-bg: var(--bp-amber);
+        --bs-btn-active-border-color: var(--bp-amber);
+        --bs-btn-disabled-color: var(--bp-amber-ink);
+        --bs-btn-disabled-bg: var(--bp-amber);
+        --bs-btn-disabled-border-color: var(--bp-amber);
+        --bs-cool-button-divider-color: rgba(255, 255, 255, 0.28);
+        --bs-cool-button-addon-bg: rgba(255, 255, 255, 0.15);
+        --bs-cool-button-addon-color: var(--bp-amber-ink);
+    }
+
+    // ── Info → violet (supporting accent) ──────────────────────────────────────
+    .btn-info.tc-cool-button {
+        --bs-btn-font-family: var(--bp-display);
+        --bs-btn-font-weight: 600;
+        --bs-btn-letter-spacing: 0.06em;
+        --bs-btn-color: var(--bp-violet-ink);
+        --bs-btn-bg: var(--bp-violet);
+        --bs-btn-border-color: var(--bp-violet);
+        --bs-btn-hover-color: var(--bp-violet-ink);
+        --bs-btn-hover-bg: var(--bp-violet);
+        --bs-btn-hover-border-color: var(--bp-violet);
+        --bs-btn-active-color: var(--bp-violet-ink);
+        --bs-btn-active-bg: var(--bp-violet);
+        --bs-btn-active-border-color: var(--bp-violet);
+        --bs-btn-disabled-color: var(--bp-violet-ink);
+        --bs-btn-disabled-bg: var(--bp-violet);
+        --bs-btn-disabled-border-color: var(--bp-violet);
+        --bs-cool-button-divider-color: rgba(255, 255, 255, 0.28);
+        --bs-cool-button-addon-bg: rgba(255, 255, 255, 0.15);
+        --bs-cool-button-addon-color: var(--bp-violet-ink);
+    }
+
+    // ── Outline variants ────────────────────────────────────────────────────────
+    // Blueprint light canvas: hairline borders from --bp-border-* tokens,
+    // ink text, soft tint hover. Divider snaps to the strong hairline.
+    // Addon gets the recessed --bp-bg-2 well treatment.
+
+    .btn-outline-primary.tc-cool-button {
+        --bs-btn-font-family: var(--bp-display);
+        --bs-btn-font-weight: 600;
+        --bs-btn-letter-spacing: 0.06em;
+        --bs-btn-color: var(--bp-pink);
+        --bs-btn-bg: transparent;
+        --bs-btn-border-color: var(--bp-border-soft);
+        --bs-btn-hover-color: var(--bp-pink);
+        --bs-btn-hover-bg: var(--bp-pink-soft);
+        --bs-btn-hover-border-color: var(--bp-pink-line);
+        --bs-btn-active-color: var(--bp-pink);
+        --bs-btn-active-bg: var(--bp-pink-soft);
+        --bs-btn-active-border-color: var(--bp-pink-line);
+        --bs-btn-disabled-color: var(--bp-pink);
+        --bs-btn-disabled-bg: transparent;
+        --bs-btn-disabled-border-color: var(--bp-border-soft);
+        --bs-cool-button-divider-color: var(--bp-border-strong);
+        --bs-cool-button-addon-bg: var(--bp-bg-2);
+        --bs-cool-button-addon-color: var(--bp-text-muted);
+    }
+
+    .btn-outline-secondary.tc-cool-button {
+        --bs-btn-font-family: var(--bp-display);
+        --bs-btn-font-weight: 600;
+        --bs-btn-letter-spacing: 0.06em;
+        --bs-btn-color: var(--bp-teal-fg);
+        --bs-btn-bg: transparent;
+        --bs-btn-border-color: var(--bp-border-soft);
+        --bs-btn-hover-color: var(--bp-teal-fg);
+        --bs-btn-hover-bg: var(--bp-teal-soft);
+        --bs-btn-hover-border-color: var(--bp-teal-line);
+        --bs-btn-active-color: var(--bp-teal-fg);
+        --bs-btn-active-bg: var(--bp-teal-soft);
+        --bs-btn-active-border-color: var(--bp-teal-line);
+        --bs-btn-disabled-color: var(--bp-teal-fg);
+        --bs-btn-disabled-bg: transparent;
+        --bs-btn-disabled-border-color: var(--bp-border-soft);
+        --bs-cool-button-divider-color: var(--bp-border-strong);
+        --bs-cool-button-addon-bg: var(--bp-bg-2);
+        --bs-cool-button-addon-color: var(--bp-text-muted);
+    }
+
+    .btn-outline-success.tc-cool-button {
+        --bs-btn-font-family: var(--bp-display);
+        --bs-btn-font-weight: 600;
+        --bs-btn-letter-spacing: 0.06em;
+        --bs-btn-color: var(--bp-teal-fg);
+        --bs-btn-bg: transparent;
+        --bs-btn-border-color: var(--bp-border-soft);
+        --bs-btn-hover-color: var(--bp-teal-fg);
+        --bs-btn-hover-bg: var(--bp-teal-soft);
+        --bs-btn-hover-border-color: var(--bp-teal-line);
+        --bs-btn-active-color: var(--bp-teal-fg);
+        --bs-btn-active-bg: var(--bp-teal-soft);
+        --bs-btn-active-border-color: var(--bp-teal-line);
+        --bs-btn-disabled-color: var(--bp-teal-fg);
+        --bs-btn-disabled-bg: transparent;
+        --bs-btn-disabled-border-color: var(--bp-border-soft);
+        --bs-cool-button-divider-color: var(--bp-border-strong);
+        --bs-cool-button-addon-bg: var(--bp-bg-2);
+        --bs-cool-button-addon-color: var(--bp-text-muted);
+    }
+
+    .btn-outline-danger.tc-cool-button {
+        --bs-btn-font-family: var(--bp-display);
+        --bs-btn-font-weight: 600;
+        --bs-btn-letter-spacing: 0.06em;
+        --bs-btn-color: var(--bp-danger);
+        --bs-btn-bg: transparent;
+        --bs-btn-border-color: var(--bp-border-soft);
+        --bs-btn-hover-color: var(--bp-danger);
+        --bs-btn-hover-bg: var(--bp-danger-soft);
+        --bs-btn-hover-border-color: var(--bp-danger);
+        --bs-btn-active-color: var(--bp-danger);
+        --bs-btn-active-bg: var(--bp-danger-soft);
+        --bs-btn-active-border-color: var(--bp-danger);
+        --bs-btn-disabled-color: var(--bp-danger);
+        --bs-btn-disabled-bg: transparent;
+        --bs-btn-disabled-border-color: var(--bp-border-soft);
+        --bs-cool-button-divider-color: var(--bp-border-strong);
+        --bs-cool-button-addon-bg: var(--bp-bg-2);
+        --bs-cool-button-addon-color: var(--bp-text-muted);
+    }
+
+    .btn-outline-warning.tc-cool-button {
+        --bs-btn-font-family: var(--bp-display);
+        --bs-btn-font-weight: 600;
+        --bs-btn-letter-spacing: 0.06em;
+        --bs-btn-color: var(--bp-amber-fg);
+        --bs-btn-bg: transparent;
+        --bs-btn-border-color: var(--bp-border-soft);
+        --bs-btn-hover-color: var(--bp-amber-fg);
+        --bs-btn-hover-bg: var(--bp-amber-soft);
+        --bs-btn-hover-border-color: var(--bp-amber);
+        --bs-btn-active-color: var(--bp-amber-fg);
+        --bs-btn-active-bg: var(--bp-amber-soft);
+        --bs-btn-active-border-color: var(--bp-amber);
+        --bs-btn-disabled-color: var(--bp-amber-fg);
+        --bs-btn-disabled-bg: transparent;
+        --bs-btn-disabled-border-color: var(--bp-border-soft);
+        --bs-cool-button-divider-color: var(--bp-border-strong);
+        --bs-cool-button-addon-bg: var(--bp-bg-2);
+        --bs-cool-button-addon-color: var(--bp-text-muted);
+    }
+
+    .btn-outline-info.tc-cool-button {
+        --bs-btn-font-family: var(--bp-display);
+        --bs-btn-font-weight: 600;
+        --bs-btn-letter-spacing: 0.06em;
+        --bs-btn-color: var(--bp-violet-fg);
+        --bs-btn-bg: transparent;
+        --bs-btn-border-color: var(--bp-border-soft);
+        --bs-btn-hover-color: var(--bp-violet-fg);
+        --bs-btn-hover-bg: var(--bp-violet-soft);
+        --bs-btn-hover-border-color: var(--bp-violet);
+        --bs-btn-active-color: var(--bp-violet-fg);
+        --bs-btn-active-bg: var(--bp-violet-soft);
+        --bs-btn-active-border-color: var(--bp-violet);
+        --bs-btn-disabled-color: var(--bp-violet-fg);
+        --bs-btn-disabled-bg: transparent;
+        --bs-btn-disabled-border-color: var(--bp-border-soft);
+        --bs-cool-button-divider-color: var(--bp-border-strong);
+        --bs-cool-button-addon-bg: var(--bp-bg-2);
+        --bs-cool-button-addon-color: var(--bp-text-muted);
+    }
+
+    // ── Addon mono label treatment ──────────────────────────────────────────────
+    // The addon segment is a micro-label / glyph indicator — apply mono font
+    // with loose tracking so it reads as a HUD kicker, not a second label.
+    .tc-cool-button-addon {
+        font-family: var(--bp-mono);
+        font-size: 0.8em;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        transition:
+            background var(--bp-ease),
+            color var(--bp-ease);
+    }
+
+    // ── Divider transition ──────────────────────────────────────────────────────
+    .tc-cool-button-divider {
+        transition: background var(--bp-ease);
+    }
+
+    // ── Content label ───────────────────────────────────────────────────────────
+    // Display font + tight tracking for the main call-to-action label area.
+    .tc-cool-button-content {
+        font-family: var(--bp-display);
+        letter-spacing: 0.04em;
+    }
+}

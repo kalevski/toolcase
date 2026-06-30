@@ -1,0 +1,127 @@
+// Blueprint › tc-funnel-chart — light-theme funnel: pink→teal→violet→amber accent
+// rotation for segment fills, paper card frame, mono eyebrow subtitle, paper-
+// surface tooltip (ink text + colored left-stripe), bp-bg shimmer skeleton.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-funnel-chart {
+        // --- segment fill ramp ---
+        // Series rotate through the accent stack: pink (primary) leads the widest
+        // stage; teal carries the action tier; violet + amber fill supporting slots.
+        // All fills are dark enough to keep white --bp-*-ink labels legible.
+        --bs-funnel-chart-series-1: var(--bp-pink);          // widest — primary CTA tier
+        --bs-funnel-chart-series-2: var(--bp-teal);          // action tier
+        --bs-funnel-chart-series-3: var(--bp-violet);        // support tier
+        --bs-funnel-chart-series-4: var(--bp-amber);         // support tier
+        --bs-funnel-chart-series-5: var(--bp-teal-fg);       // deeper teal (on white — passes AA; on fill → white label OK)
+        --bs-funnel-chart-series-6: var(--bp-violet-fg);     // deeper violet
+
+        // --- card frame ---
+        --bs-funnel-chart-bg: var(--bp-paper);
+        --bs-funnel-chart-border: 1px solid var(--bp-border);
+
+        // --- header text ---
+        // Title → display face (Chakra Petch) via font-family override below
+        --bs-funnel-chart-title-color: var(--bp-text);
+        --bs-funnel-chart-subtitle-color: var(--bp-text-muted);
+
+        // --- in-segment labels — white on all accent fills ---
+        --bs-funnel-chart-label-color: #fff;
+        --bs-funnel-chart-percent-color: rgba(255, 255, 255, 0.82);
+
+        // --- hover outline — faint white hairline over the fill ---
+        --bs-funnel-chart-hover-outline: rgba(255, 255, 255, 0.5);
+
+        // --- focus ring → pink (primary) ---
+        --bs-funnel-chart-focus-ring: var(--bp-pink);
+
+        // --- tooltip — paper card with ink text; stripe uses segment color ---
+        --bs-funnel-chart-tooltip-bg: var(--bp-paper);
+        --bs-funnel-chart-tooltip-color: var(--bp-text);
+        // stripe-width left as base default (3px); stripe color flows from
+        // var(--tc-funnel-color) already threaded through the base partial
+
+        // --- skeleton shimmer — blueprint canvas tones ---
+        --bs-funnel-chart-skeleton-bg: var(--bp-bg-2);
+    }
+
+    // Card shadow + slight lift feel
+    .tc-funnel-chart__inner {
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // Title — display face, tight tracking
+    .tc-funnel-chart__title {
+        font-family: var(--bp-display);
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: var(--bp-text);
+        text-wrap: balance;
+    }
+
+    // Subtitle — mono eyebrow treatment
+    .tc-funnel-chart__subtitle {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--bp-text-muted);
+    }
+
+    // In-segment stage name — body face (Space Grotesk via bp-body)
+    .tc-funnel-chart__label {
+        font-family: var(--bp-body);
+    }
+
+    // Percent readout — mono, tabular; already set in base but reaffirm font
+    .tc-funnel-chart__percent {
+        font-family: var(--bp-mono);
+    }
+
+    // Segment fill transition uses blueprint ease
+    .tc-funnel-chart__shape {
+        transition: fill-opacity 0.15s var(--bp-ease);
+    }
+
+    // Tooltip — paper card style: hairline border, shadow, ink text
+    .tc-funnel-chart__tooltip {
+        border: 1px solid var(--bp-border);
+        box-shadow: var(--tc-shadow-md);
+    }
+
+    // Tooltip stage name — mono micro-label
+    .tc-funnel-chart__tooltip-name {
+        font-family: var(--bp-mono);
+        color: var(--bp-text-muted);
+        letter-spacing: 0.08em;
+        opacity: 1; // override base 0.75 — contrast is fine on paper bg
+    }
+
+    // Tooltip value — display face for the number
+    .tc-funnel-chart__tooltip-value {
+        font-family: var(--bp-display);
+        color: var(--bp-text);
+    }
+
+    // Empty state — faint mono label
+    .tc-funnel-chart__empty {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--bp-text-faint);
+    }
+
+    // Skeleton shimmer — reroute gradient stops to blueprint canvas tokens,
+    // replacing the default --tc-surface-hover shimmer highlight
+    .tc-funnel-chart__skeleton {
+        background: linear-gradient(
+            90deg,
+            var(--bp-bg-2) 25%,
+            var(--bp-bg) 37%,
+            var(--bp-bg-2) 63%
+        );
+        background-size: 200% 100%;
+    }
+}

@@ -1,0 +1,93 @@
+// Blueprint › tc-api-reference-table — lavender-paper surface, teal group headings, violet name tokens, amber returns, pink deprecation badge.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-api-reference-table {
+        // Outer frame — white raised card with default hairline and soft shadow
+        --bs-api-reference-table-border-color: var(--bp-border);
+        --bs-api-reference-table-border: 1px solid var(--bs-api-reference-table-border-color);
+        --bs-api-reference-table-bg: var(--bp-paper);
+
+        // Title header cap — lavender well, display font for the section name
+        --bs-api-reference-table-title-bg: var(--bp-paper-tint-2);
+        --bs-api-reference-table-title-color: var(--bp-emphasis);
+        --bs-api-reference-table-title-font-size: 0.9375rem;
+        --bs-api-reference-table-title-font-weight: 700;
+        --bs-api-reference-table-title-border: 1px solid var(--bp-border-strong);
+
+        // Group heading — mono micro-label in teal (action accent per rotation)
+        --bs-api-reference-table-group-heading-color: var(--bp-teal-fg);
+        --bs-api-reference-table-group-heading-bg: var(--bp-bg-2);
+        --bs-api-reference-table-group-heading-letter-spacing: 0.1em;
+        --bs-api-reference-table-group-separator: 1px solid var(--bp-border-strong);
+
+        // Table header — recessed well, mono uppercase labels in muted ink
+        --bs-api-reference-table-thead-bg: var(--bp-bg-2);
+        --bs-api-reference-table-thead-color: var(--bp-text-muted);
+        --bs-api-reference-table-thead-letter-spacing: 0.06em;
+        --bs-api-reference-table-thead-border: 1px solid var(--bp-border);
+
+        // Row separators — faint divider hairline, paper background
+        --bs-api-reference-table-row-border: 1px solid var(--bp-border-faint);
+        --bs-api-reference-table-row-bg: var(--bp-paper);
+        // Deprecated row — amber soft tint (warning = amber in arcade rotation)
+        --bs-api-reference-table-row-bg-depr: var(--bp-amber-soft);
+
+        // Name column — violet fg for the machine identifier (supporting accent)
+        --bs-api-reference-table-name-color: var(--bp-violet-fg);
+
+        // Signature column — muted prose ink
+        --bs-api-reference-table-sig-color: var(--bp-text-muted);
+
+        // Returns column — amber fg (supporting accent, distinct from name)
+        --bs-api-reference-table-returns-color: var(--bp-amber-fg);
+
+        // Description column — standard body ink
+        --bs-api-reference-table-desc-color: var(--bp-text-soft);
+
+        // Deprecation badge — pink primary accent (status = pink in arcade rotation)
+        --bs-api-reference-table-depr-badge-bg: var(--bp-pink-soft);
+        --bs-api-reference-table-depr-badge-color: var(--bp-pink);
+    }
+
+    // Title cap typography — display font gives it blueprint heading weight
+    .tc-api-reference-table-title {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+    }
+
+    // Group heading — blueprint mono label style (bp-mono is the eyebrow font)
+    .tc-api-reference-group-heading {
+        font-family: var(--bp-mono);
+    }
+
+    // Table header cells — bp-mono eyebrow treatment
+    .tc-api-reference-table-table {
+        th {
+            font-family: var(--bp-mono);
+        }
+    }
+
+    // Description paragraphs — Space Grotesk body
+    .tc-api-reference-desc {
+        font-family: var(--bp-body);
+    }
+
+    // Deprecation badge — bp-mono micro-label
+    .tc-api-deprecated-badge {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    // Deprecation note — bp-body italic
+    .tc-api-deprecated-note {
+        font-family: var(--bp-body);
+        color: var(--bp-text-muted);
+    }
+
+    // Outer wrapper — white card surface with violet-tinted shadow
+    .tc-api-reference-table {
+        box-shadow: var(--tc-shadow-sm);
+    }
+}

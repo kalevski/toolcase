@@ -35,3 +35,10 @@
 //       gradient neon text). Ported from the NEON DRIFT landing page. Scoped
 //       under `tc-theme[name="neon"]`, inert until a wrapper opts in.
 @use './themes/neon';
+
+//   (8) Blueprint theme — opt-in LIGHT "vector blueprint" skin (lavender paper
+//       ruled with a faint violet grid, white HUD cards with lilac hairlines,
+//       a four-colour arcade accent set — pink · teal · violet · amber — and,
+//       uniquely, ROUNDED corners). Ported from the VECTOR BLUEPRINT landing.
+//       Scoped under `tc-theme[name="blueprint"]`, inert until a wrapper opts in.
+@use './themes/blueprint';

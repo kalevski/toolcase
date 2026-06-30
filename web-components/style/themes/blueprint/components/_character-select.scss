@@ -1,0 +1,120 @@
+// Blueprint › tc-character-select — HUD roster screen: teal action hover, pink selected state with
+// corner-bracket accent, blueprint-paper surfaces, mono role eyebrows, display detail name,
+// violet stat values for visual distinction, faint hairline stat dividers.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-character-select {
+        // Tile surfaces: raised paper on the lavender page ground.
+        --bs-character-select-tile-bg:              var(--bp-paper);
+        --bs-character-select-tile-border-color:    var(--bp-border);
+
+        // Hover: recessed teal-action treatment — well fill + stronger hairline.
+        --bs-character-select-tile-hover-bg:        var(--bp-teal-soft);
+        --bs-character-select-tile-hover-border-color: var(--bp-teal-line);
+
+        // Selected: pink primary CTA accent (the blueprint accent rotation rule).
+        --bs-character-select-selected-accent:      var(--bp-pink);
+
+        // Portrait wells: recessed --bp-bg-2, teal initials for the HUD machine-label feel.
+        --bs-character-select-portrait-bg:          var(--bp-bg-2);
+        --bs-character-select-portrait-color:       var(--bp-teal-fg);
+
+        // Name text: strongest ink.
+        --bs-character-select-name-color:           var(--bp-text);
+
+        // Role eyebrow: teal-fg so it clears AA on white — matches mono kicker convention.
+        --bs-character-select-role-color:           var(--bp-teal-fg);
+
+        // Lock glyph: faint ink.
+        --bs-character-select-lock-color:           var(--bp-text-faint);
+
+        // Detail panel: same paper surface + border.
+        --bs-character-select-detail-bg:            var(--bp-paper);
+        --bs-character-select-detail-border-color:  var(--bp-border);
+
+        // Detail name: primary ink.
+        --bs-character-select-detail-name-color:    var(--bp-text);
+
+        // Detail description + empty state: muted ink.
+        --bs-character-select-detail-description-color: var(--bp-text-muted);
+
+        // Stat dividers: faint hairlines (not the default --tc-border which leaks slate).
+        --bs-character-select-detail-stat-border-color: var(--bp-border-faint);
+
+        // Stat labels: muted; stat values: violet supporting accent for visual contrast.
+        --bs-character-select-detail-stat-label-color: var(--bp-text-muted);
+        --bs-character-select-detail-stat-value-color: var(--bp-violet-fg);
+    }
+
+    // ── Tile hover: translateY micro-lift reinforces the tappable-tile feel.
+    .tc-character-select-tile {
+        transition: border-color 0.18s var(--bp-ease),
+                    background-color 0.18s var(--bp-ease),
+                    transform 0.18s var(--bp-ease),
+                    box-shadow 0.18s var(--bp-ease);
+
+        &:hover:not(.is-selected):not(.is-locked) {
+            transform: translateY(-2px);
+            box-shadow: var(--tc-shadow-sm);
+        }
+    }
+
+    // ── Selected tile: pink inset frame + HUD corner-bracket (teal, top-left).
+    // The bracket is the blueprint's interactive-card signal — used sparingly here
+    // only on the selected state so it doesn't clutter every unselected tile.
+    .tc-character-select-tile.is-selected {
+        box-shadow: inset 0 0 0 1px var(--bp-pink), var(--bp-glow-pink);
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            pointer-events: none;
+        }
+    }
+
+    // ── Role eyebrow: --bp-mono ensures the machine-label identity even if the
+    // base partial's var(--tc-font-mono) resolves differently under blueprint.
+    .tc-character-select-tile-role,
+    .tc-character-select-detail-role {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.1em;
+    }
+
+    // ── Tile name: display face for character names — they read as titles, not prose.
+    .tc-character-select-tile-name {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+    }
+
+    // ── Detail name heading: display face, tight tracking — the centrepiece of the panel.
+    .tc-character-select-detail-name {
+        font-family: var(--bp-display);
+        letter-spacing: -0.02em;
+    }
+
+    // ── Stat values: tabular mono for clean column alignment (base already sets mono;
+    // this reinforces with --bp-mono so the face is consistent within the blueprint stack).
+    .tc-character-select-detail-stat-value {
+        font-family: var(--bp-mono);
+    }
+
+    // ── Detail panel: soft drop shadow anchors the panel against the page.
+    .tc-character-select-detail {
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .tc-character-select-tile {
+            transition: none;
+            transform: none;
+        }
+    }
+}

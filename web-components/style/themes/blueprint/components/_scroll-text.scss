@@ -1,0 +1,29 @@
+// Blueprint › tc-scroll-text — white paper surface with a teal mono header strip and violet-tinted scrollbar thumb.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-scroll-text {
+        // Surface: raised paper on the lavender canvas, standard hairline.
+        --bs-scroll-text-bg:           var(--bp-paper);
+        --bs-scroll-text-border-color: var(--bp-border);
+
+        // Header: blueprint mono HUD label — teal ink, uppercase already set by base.
+        --bs-scroll-text-header-color:          var(--bp-teal-fg);
+        --bs-scroll-text-header-border-color:   var(--bp-border-faint);
+        --bs-scroll-text-header-font-size:      0.6875rem;
+        --bs-scroll-text-header-letter-spacing: 0.12em; // slightly wider tracking for the HUD feel
+
+        // Body: primary text on white, Space Grotesk sizing unchanged.
+        --bs-scroll-text-body-color: var(--bp-text);
+
+        // Scrollbar: teal line token — legible against the white paper without
+        // calling the thumb out too loudly.
+        --bs-scroll-text-scrollbar-color: var(--bp-teal-line);
+    }
+
+    // Override font-family directly — the header bakes a literal 'JetBrains Mono'
+    // fallback that we promote to the blueprint mono stack.
+    .tc-scroll-text__header {
+        font-family: var(--bp-mono);
+    }
+}

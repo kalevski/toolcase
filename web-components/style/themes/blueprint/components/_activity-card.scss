@@ -1,0 +1,145 @@
+// Blueprint › tc-activity-card — HUD-panel surface with mono timestamps, teal timeline rail, and a corner-bracket lift on hover.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-activity-card {
+        // Surface: white paper, lilac hairline, soft shadow.
+        --bs-activity-card-bg: var(--bp-paper);
+        --bs-activity-card-border-color: var(--bp-border);
+        --bs-activity-card-shadow: var(--tc-shadow-sm);
+
+        // Header cap: faint violet gradient (matches .card cap).
+        --bs-activity-card-header-bg: linear-gradient(135deg, rgba(91, 61, 242, 0.04), rgba(91, 61, 242, 0.01));
+        --bs-activity-card-header-border-color: var(--bp-border-faint);
+
+        // Card title: display font, blueprint primary ink.
+        --bs-activity-card-title-color: var(--bp-emphasis);
+
+        // Icon chip: lavender recessed well, teal glyph.
+        --bs-activity-card-icon-chip-bg: var(--bp-bg-2);
+        --bs-activity-card-icon-chip-color: var(--bp-teal-fg);
+
+        // Timeline rail: faint lavender divider line.
+        --bs-activity-card-rail-color: var(--bp-border-faint);
+
+        // Item text.
+        --bs-activity-card-item-title-color: var(--bp-text);
+        --bs-activity-card-item-desc-color: var(--bp-text-muted);
+
+        // Timestamp: faint text (overridden below to mono).
+        --bs-activity-card-time-color: var(--bp-text-faint);
+
+        // Skeleton shimmer: lavender base + white glide.
+        --bs-activity-card-skeleton-bg: var(--bp-paper-tint-2);
+        --bs-activity-card-skeleton-shimmer: rgba(255, 255, 255, 0.7);
+    }
+
+    // Inner card wrapper — position:relative so the corner bracket anchors correctly.
+    .tc-activity-card-inner {
+        position: relative;
+        transition:
+            transform 0.25s var(--bp-ease),
+            border-color 0.25s,
+            box-shadow 0.25s;
+
+        // HUD corner-bracket: top-left L-tick in teal — blueprint signature detail.
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            opacity: 0.65;
+            pointer-events: none;
+            transition: opacity 0.25s;
+        }
+
+        &:hover {
+            transform: translateY(-2px);
+            border-color: var(--bp-teal);
+            box-shadow: var(--tc-shadow-hover);
+
+            &::before {
+                opacity: 1;
+            }
+        }
+    }
+
+    // Card title: display font, tight tracking — blueprint heading treatment.
+    .tc-activity-card-title {
+        font-family: var(--bp-display);
+        font-size: 0.875rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        color: var(--bs-activity-card-title-color);
+    }
+
+    // Icon chip: teal border accent to reinforce the timeline rhythm.
+    .tc-activity-icon-chip {
+        border-color: var(--bp-border);
+
+        // Teal-variant chip for action/status events (author can add class .tc-activity-icon-chip--teal).
+        &--teal {
+            background: var(--bp-teal-soft);
+            border-color: var(--bp-teal-line);
+            color: var(--bp-teal-fg);
+        }
+
+        // Pink-variant chip for primary/important events.
+        &--pink {
+            background: var(--bp-pink-soft);
+            border-color: var(--bp-pink-line);
+            color: var(--bp-pink);
+        }
+
+        // Violet-variant chip for info/system events.
+        &--violet {
+            background: var(--bp-violet-soft);
+            border-color: var(--bp-border-strong);
+            color: var(--bp-violet-fg);
+        }
+
+        // Amber-variant chip for warning events.
+        &--amber {
+            background: var(--bp-amber-soft);
+            border-color: var(--bp-border-strong);
+            color: var(--bp-amber-fg);
+        }
+
+        // Danger-variant chip for error events.
+        &--danger {
+            background: var(--bp-danger-soft);
+            border-color: var(--bp-danger);
+            color: var(--bp-danger);
+        }
+    }
+
+    // Timestamp: mono font, uppercase micro-label treatment — blueprint HUD readout.
+    .tc-activity-time {
+        font-family: var(--bp-mono);
+        font-size: 0.625rem; // 10px — tight HUD size
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--bs-activity-card-time-color);
+    }
+
+    // Activity title: body font, blueprint primary text.
+    .tc-activity-title {
+        font-family: var(--bp-body);
+        color: var(--bs-activity-card-item-title-color);
+    }
+
+    // Activity description: body font, muted ink.
+    .tc-activity-desc {
+        font-family: var(--bp-body);
+        color: var(--bs-activity-card-item-desc-color);
+    }
+
+    // Rail line: routed to faint lavender divider token (never raw tc-slate-*).
+    .tc-activity-icon--has-rail::after {
+        background: var(--bp-border-faint);
+    }
+}

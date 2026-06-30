@@ -1,0 +1,23 @@
+// Blueprint › tc-field-message — the reserved form-field message gutter. The
+// token remap already tints the muted/danger states; this routes the "valid"
+// state to the darker teal-fg (bright teal text on white paper is too faint) and
+// keeps the required asterisk a real red.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    .tc-field-message {
+        --bs-field-message-color: var(--bp-text-muted);
+    }
+
+    .tc-field-message--valid {
+        --bs-field-message-color: var(--bp-teal-fg);
+    }
+
+    .tc-field-message--invalid {
+        --bs-field-message-color: var(--bp-danger);
+    }
+
+    .tc-field-required {
+        color: var(--bp-danger);
+    }
+}

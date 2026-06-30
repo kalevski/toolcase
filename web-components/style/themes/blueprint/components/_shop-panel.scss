@@ -1,0 +1,182 @@
+// Blueprint › tc-shop-panel — arcade storefront: paper shell, teal HUD header, pink CTA buttons, display-face prices, teal discount chips.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Token overrides via --bs-shop-panel-* ──────────────────────────────────
+
+    tc-shop-panel {
+        // Panel shell — white paper card, blueprint hairline, violet-tinted shadow
+        --bs-shop-panel-bg:                    var(--bp-paper);
+        --bs-shop-panel-border:                1px solid var(--bp-border);
+
+        // Header — recessed well behind the mode label + currency chip
+        --bs-shop-panel-header-bg:             var(--bp-bg-2);
+        --bs-shop-panel-header-border:         1px solid var(--bp-border-faint);
+
+        // Mode label — mono HUD kicker (color set via direct rule below)
+        --bs-shop-panel-mode-label-color:      var(--bp-teal-fg);
+        --bs-shop-panel-mode-label-font-size:  0.6875rem;
+
+        // Currency chip — teal-tinted surface so it reads as a live HUD value
+        --bs-shop-panel-currency-bg:           var(--bp-teal-soft);
+        --bs-shop-panel-currency-border:       1px solid var(--bp-teal-line);
+        --bs-shop-panel-currency-color:        var(--bp-teal-fg);
+        --bs-shop-panel-currency-font-size:    0.75rem;
+
+        // Row dividers + hover
+        --bs-shop-panel-row-border:            1px solid var(--bp-border-faint);
+        --bs-shop-panel-row-hover-bg:          var(--bp-paper-tint);
+
+        // State opacities — keep base values
+        --bs-shop-panel-sold-out-opacity:      0.4;
+        --bs-shop-panel-unaffordable-opacity:  0.48;
+
+        // Row icon
+        --bs-shop-panel-icon-color:            var(--bp-teal-fg);
+        --bs-shop-panel-icon-font-size:        0.875rem;
+
+        // Item name
+        --bs-shop-panel-name-color:            var(--bp-text);
+        --bs-shop-panel-name-font-size:        0.8125rem;
+
+        // Price — base value uses --tc-text; route to soft ink
+        --bs-shop-panel-price-color:           var(--bp-text-soft);
+        --bs-shop-panel-price-font-size:       0.75rem;
+        --bs-shop-panel-price-old-color:       var(--bp-text-faint);
+
+        // Discount badge — replace baked #dcfce7 / #22c55e with teal tint (success = teal)
+        --bs-shop-panel-discount-bg:           var(--bp-teal-soft);
+        --bs-shop-panel-discount-color:        var(--bp-teal-fg);
+        --bs-shop-panel-discount-font-size:    0.6875rem;
+
+        // Action button — pink = primary CTA in blueprint arcade rotation
+        --bs-shop-panel-btn-bg:                var(--bp-pink);
+        --bs-shop-panel-btn-color:             var(--bp-pink-ink);
+        --bs-shop-panel-btn-border:            1px solid var(--bp-pink);
+        --bs-shop-panel-btn-hover-bg:          var(--bp-paper);
+        --bs-shop-panel-btn-hover-color:       var(--bp-pink);
+        --bs-shop-panel-btn-hover-border:      1px solid var(--bp-pink-line);
+        --bs-shop-panel-btn-font-size:         0.6875rem;
+        --bs-shop-panel-btn-min-height:        1.75rem;
+        --bs-shop-panel-btn-disabled-opacity:  0.4;
+
+        // Empty state
+        --bs-shop-panel-empty-color:           var(--bp-text-faint);
+    }
+
+    // ── Panel shell ────────────────────────────────────────────────────────────
+
+    .tc-shop-panel {
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Header ─────────────────────────────────────────────────────────────────
+
+    // Mode label — --bp-mono for HUD/kicker eyebrow; color flows from token above
+    .tc-shop-panel-mode-label {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.1em; // slightly wider than base 0.08em for blueprint HUD feel
+    }
+
+    // Currency chip — mono face, slight extra tracking
+    .tc-shop-panel-currency {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        font-variant-numeric: tabular-nums;
+    }
+
+    // Currency icon inside the chip matches chip text color
+    .tc-shop-panel-currency-icon {
+        color: var(--bp-teal-fg);
+        opacity: 0.7;
+    }
+
+    // ── Row parts ──────────────────────────────────────────────────────────────
+
+    // Item name stays mono (already in base) — reroute font family to bp-mono var
+    .tc-shop-panel-row-name {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.03em;
+    }
+
+    // Price value — use --bp-display (Chakra Petch) for the numeric amount;
+    // prices read as titled HUD values in the blueprint arcade aesthetic
+    .tc-shop-panel-price-value {
+        font-family: var(--bp-display);
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        font-variant-numeric: tabular-nums;
+        color: var(--bp-text-soft);
+    }
+
+    // Old (struck-through) price — faint, keep mono so it doesn't fight the display face
+    .tc-shop-panel-price-old {
+        font-family: var(--bp-mono);
+        font-variant-numeric: tabular-nums;
+    }
+
+    // Price icon — route away from --tc-text-faint literal to bp token
+    .tc-shop-panel-price-icon {
+        color: var(--bp-text-faint);
+    }
+
+    // Discount badge — mono, uppercase, tight tracking to read as a status chip
+    .tc-shop-panel-discount {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    // ── Action button ──────────────────────────────────────────────────────────
+
+    .tc-shop-panel-row-btn {
+        font-family: var(--bp-mono);
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        // Pink glow on hover lift — hallmark of blueprint primary CTA
+        transition:
+            background var(--bp-ease, 0.18s ease),
+            color var(--bp-ease, 0.18s ease),
+            border-color var(--bp-ease, 0.18s ease),
+            box-shadow var(--bp-ease, 0.18s ease),
+            transform var(--bp-ease, 0.18s ease);
+
+        &:hover:not(:disabled) {
+            box-shadow: var(--bp-glow-pink);
+            transform: translateY(-2px);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-pink);
+            outline-offset: 2px;
+            box-shadow: var(--bp-glow-pink);
+        }
+    }
+
+    // ── Empty state ────────────────────────────────────────────────────────────
+
+    .tc-shop-panel-empty {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        font-size: 0.6875rem;
+    }
+
+    // ── Reduced motion ─────────────────────────────────────────────────────────
+
+    @media (prefers-reduced-motion: reduce) {
+        .tc-shop-panel-row-btn {
+            transition:
+                background var(--bp-ease, 0.18s ease),
+                color var(--bp-ease, 0.18s ease),
+                border-color var(--bp-ease, 0.18s ease);
+
+            &:hover:not(:disabled) {
+                transform: none;
+                box-shadow: none;
+            }
+        }
+    }
+}

@@ -1,0 +1,48 @@
+// Blueprint › tc-tooltip — white paper panel, teal left-stripe, mono HUD text; replaces dark-ink ground with blueprint light surface.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    // Re-point the Bootstrap tooltip custom-property API to blueprint tokens.
+    // The base partial drives all cosmetics through these vars, so overriding
+    // them here is the cleanest possible re-skin with zero selector duplication.
+    .tooltip {
+        --bs-tooltip-color: var(--bp-text);           // dark ink on white — replaces baked #fff (which was for the dark bg)
+        --bs-tooltip-bg: var(--bp-paper);             // white raised surface instead of --tc-ink dark slate
+        --bs-tooltip-border-radius: 0;                // kept at 0; radius sweep owns corners
+
+        // Use the monospace HUD register for tooltip copy — micro-labels belong
+        // in --bp-mono (JetBrains Mono), uppercase, with loose tracking.
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;                         // slightly tighter than default 0.75rem for HUD feel
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+
+    .tooltip-inner {
+        // Blueprint paper surface with hairline border and teal left-accent stripe.
+        background-color: var(--bs-tooltip-bg);
+        color: var(--bs-tooltip-color);
+        border: 1px solid var(--bp-border);
+        border-left: 2px solid var(--bp-teal);        // teal stripe = informational/action accent rotation
+        box-shadow: var(--tc-shadow-sm), 0 0 0 0 var(--bp-glow-teal); // subtle presence; glow zero-spread keeps it quiet
+        text-align: left;                             // left-align reads better with mono HUD text than centered
+    }
+
+    // Arrow colors must track --bs-tooltip-bg since the base partial uses it
+    // directly in border-color rules. All four placement variants covered.
+    .tooltip[data-popper-placement^='top'] .tooltip-arrow::before {
+        border-top-color: var(--bp-border);
+    }
+
+    .tooltip[data-popper-placement^='bottom'] .tooltip-arrow::before {
+        border-bottom-color: var(--bp-border);
+    }
+
+    .tooltip[data-popper-placement^='left'] .tooltip-arrow::before {
+        border-left-color: var(--bp-border);
+    }
+
+    .tooltip[data-popper-placement^='right'] .tooltip-arrow::before {
+        border-right-color: var(--bp-border);
+    }
+}

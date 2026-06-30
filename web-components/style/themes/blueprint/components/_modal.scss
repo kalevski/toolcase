@@ -1,0 +1,82 @@
+// Blueprint › tc-modal — white paper sheet, teal-ruled dividers, display title, mono close label; backdrop swaps slate for a violet-tinted wash.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Custom-property re-skin ───────────────────────────────────────────────
+    // Drive as much as possible through --bs-modal-* so the Bootstrap scaffold
+    // inherits the blueprint palette with no specificity wrestling.
+
+    .modal {
+        --bs-modal-color:               var(--bp-text);
+        --bs-modal-bg:                  var(--bp-paper);           // raised white card
+        --bs-modal-border-color:        var(--bp-border);          // 1px lavender hairline
+        --bs-modal-box-shadow:          var(--tc-shadow-lg);       // violet-tinted lift
+
+        --bs-modal-header-border-color: var(--bp-border-faint);    // softer divider under header
+        --bs-modal-footer-border-color: var(--bp-border-faint);    // matching divider above footer
+    }
+
+    // ── Backdrop — replace baked #0f172a slate literal ────────────────────────
+    // The base partial hardcodes --bs-backdrop-bg: #0f172a (dark slate).
+    // Blueprint is a light theme; we keep a dark scrim but re-tint it toward
+    // the violet end of the palette so it reads as "in-system".
+    .modal-backdrop {
+        --bs-backdrop-bg:      #1a1830; // --bp-text hue (deep violet-navy) — matches --bp-emphasis
+        --bs-backdrop-opacity: 0.45;    // slightly lighter than base so the light page still reads
+    }
+
+    // ── Header ────────────────────────────────────────────────────────────────
+    .modal-header {
+        background: var(--bp-paper-tint); // very faint violet lift to distinguish from body
+    }
+
+    // ── Title — display face, tight tracking ──────────────────────────────────
+    // .modal-title in the base sets font-size/weight only; we layer on display
+    // font and ink. --bp-display = Chakra Petch; tighten to match blueprint HUD
+    // panel headers.
+    .modal-title {
+        font-family: var(--bp-display);
+        font-size:   0.9375rem;          // 15 px — slightly larger than base 14 px
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: var(--bp-text);
+    }
+
+    // ── Body ──────────────────────────────────────────────────────────────────
+    // Base paints .modal-body color with --tc-text-muted (slate-based); reroute
+    // to the blueprint muted token so no raw slate leaks.
+    .modal-body {
+        color:       var(--bp-text-muted);
+        font-family: var(--bp-body);     // Space Grotesk for prose
+        font-size:   0.8125rem;
+    }
+
+    // ── Footer ────────────────────────────────────────────────────────────────
+    // Recessed background distinguishes the action row from the content body.
+    .modal-footer {
+        background: var(--bp-bg-2);
+    }
+
+    // ── Close button — mono eyebrow style ─────────────────────────────────────
+    // The SVG glyph is already rendered by the base; we just tune the hit-area
+    // color so it sits on the --bp-paper-tint header correctly.
+    .modal-header .btn-close {
+        color:   var(--bp-text-muted);
+        opacity: 1;
+
+        &:hover {
+            color:   var(--bp-pink);     // pink hover — primary brand accent
+            opacity: 1;
+        }
+    }
+
+    // ── Content — teal top accent bar ────────────────────────────────────────
+    // A 3px teal top border gives the dialog a subtle HUD-panel identity
+    // without adding a full title-bar glyph. Applied to .modal-content so it
+    // lives inside the shadow and stays within the border-radius sweep.
+    .modal-content {
+        border-top: 3px solid var(--bp-teal);
+    }
+
+}

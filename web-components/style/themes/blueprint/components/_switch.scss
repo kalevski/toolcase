@@ -1,0 +1,52 @@
+// Blueprint › tc-switch — recessed slate-lavender off-track, pink-gradient checked track, violet-tinted knob shadow.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-switch {
+        // Off-track: recessed lavender well with a hairline border
+        --bs-switch-track-bg: var(--bp-bg-2);
+        --bs-switch-track-border: var(--bp-border);
+
+        // Hover nudges the fill to the default border shade — still clearly off
+        --bs-switch-track-hover-bg: var(--bp-border);
+
+        // Checked: pink is the blueprint primary/CTA accent
+        --bs-switch-track-checked-bg: var(--bp-pink);
+        --bs-switch-track-checked-gradient: var(--bp-pink-grad);
+
+        // Inset shadow: faint violet tint instead of raw slate
+        --bs-switch-track-shadow: inset 0 1px 2px rgba(91, 61, 242, 0.08);
+
+        // Knob: raised white card surface with a soft violet-shifted border + shadow
+        --bs-switch-knob-bg: var(--bp-paper);
+        --bs-switch-knob-border: rgba(91, 61, 242, 0.14);
+        --bs-switch-knob-shadow: 0 1px 3px rgba(26, 24, 48, 0.22);
+
+        // Focus: pink glow ring — consistent with the CTA accent
+        --bs-switch-focus-ring: var(--bp-glow-pink);
+
+        // Disabled fade kept at base value; label picks up blueprint body text
+        --bs-switch-label-size: 0.9rem;
+    }
+
+    // Label: blueprint body face, primary ink
+    .tc-switch__label {
+        font-family: var(--bp-body);
+        color: var(--bp-text);
+    }
+
+    // Validity states: repoint to blueprint semantic tokens
+    // (base partial colors the track border; we override only the border-color here)
+    .tc-switch__track {
+        &--invalid {
+            border-color: var(--bp-danger);
+        }
+
+        &--valid {
+            // Success = teal in the blueprint accent rotation
+            border-color: var(--bp-teal);
+        }
+    }
+
+}

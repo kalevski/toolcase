@@ -1,0 +1,226 @@
+// Blueprint › tc-early-signup-form — paper card with pink CTA, teal benefit/stat
+// accents, mono eyebrow+labels, display title, and a pink corner-triangle accent.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Host-level token remap ────────────────────────────────────────────────
+
+    tc-early-signup-form {
+        // Surface — raised white card on the lavender page canvas.
+        --bs-early-signup-form-bg:              var(--bp-paper);
+        --bs-early-signup-form-border:          1px solid var(--bp-border);
+        --bs-early-signup-form-shadow:          var(--tc-shadow-sm);
+
+        // Dividers — soft hairlines so the zones breathe without heavy edges.
+        --bs-early-signup-form-divider:         var(--bp-border-faint);
+        --bs-early-signup-form-benefit-divider: var(--bp-border-faint);
+
+        // Text hierarchy.
+        --bs-early-signup-form-color:           var(--bp-text);
+        --bs-early-signup-form-muted-color:     var(--bp-text-muted);
+        --bs-early-signup-form-faint-color:     var(--bp-text-faint);
+
+        // Eyebrow — mono micro-label; teal-fg clears AA on white.
+        --bs-early-signup-form-eyebrow-color:   var(--bp-teal-fg);
+
+        // Brand dot — pink primary.
+        --bs-early-signup-form-dot-color:       var(--bp-pink);
+
+        // Corner triangle accent — soft pink surface tint (not the harsh slate).
+        --bs-early-signup-form-corner:          var(--bp-pink-surface);
+
+        // Form zone well — recessed bg so the form reads as inset.
+        --bs-early-signup-form-form-bg:         var(--bp-bg-2);
+
+        // Input — white surface, blueprint border and focus.
+        --bs-early-signup-form-input-bg:        var(--bp-paper);
+        --bs-early-signup-form-input-color:     var(--bp-text);
+        --bs-early-signup-form-input-border:    var(--bp-border-strong);
+        --bs-early-signup-form-input-focus-border: var(--bp-pink);
+        --bs-early-signup-form-input-focus-ring: var(--bp-glow-pink);
+        --bs-early-signup-form-input-placeholder-color: var(--bp-text-faint);
+
+        // Field micro-label above the input group.
+        --bs-early-signup-form-field-label-color: var(--bp-text-muted);
+
+        // Submit — pink CTA (primary ACENT ROTATION rule).
+        --bs-early-signup-form-submit-bg:       var(--bp-pink-grad);
+        --bs-early-signup-form-submit-color:    var(--bp-pink-ink);
+        --bs-early-signup-form-submit-border:   var(--bp-pink);
+
+        // Benefit check icon + success icon — teal (action/success in blueprint).
+        --bs-early-signup-form-check-color:     var(--bp-teal);
+        --bs-early-signup-form-success-color:   var(--bp-teal);
+
+        // Stat — muted mono text.
+        --bs-early-signup-form-stat-color:      var(--bp-text-muted);
+
+        // Reset link — faint until hover.
+        --bs-early-signup-form-reset-color:     var(--bp-text-faint);
+        --bs-early-signup-form-reset-hover-color: var(--bp-teal-fg);
+
+        // Error — real red (not pink, which is the primary brand color).
+        --bs-early-signup-form-error-color:     var(--bp-danger);
+    }
+
+    // ── Dark variant: blueprint is a LIGHT theme — remap to light blueprint ───
+    // The --dark modifier was designed for ink backgrounds; flatten it back to the
+    // blueprint paper surface so nothing inverts to a dark-on-dark scheme.
+
+    tc-early-signup-form.tc-early-signup-form--dark {
+        --bs-early-signup-form-bg:              var(--bp-paper);
+        --bs-early-signup-form-border:          1px solid var(--bp-border);
+        --bs-early-signup-form-shadow:          var(--tc-shadow-md);
+        --bs-early-signup-form-divider:         var(--bp-border-faint);
+        --bs-early-signup-form-color:           var(--bp-text);
+        --bs-early-signup-form-muted-color:     var(--bp-text-muted);
+        --bs-early-signup-form-faint-color:     var(--bp-text-faint);
+        --bs-early-signup-form-eyebrow-color:   var(--bp-teal-fg);
+        --bs-early-signup-form-corner:          var(--bp-pink-surface);
+        --bs-early-signup-form-form-bg:         var(--bp-bg-2);
+        --bs-early-signup-form-input-bg:        var(--bp-paper);
+        --bs-early-signup-form-input-color:     var(--bp-text);
+        --bs-early-signup-form-input-border:    var(--bp-border-strong);
+        --bs-early-signup-form-input-focus-border: var(--bp-pink);
+        --bs-early-signup-form-input-focus-ring: var(--bp-glow-pink);
+        --bs-early-signup-form-input-placeholder-color: var(--bp-text-faint);
+        --bs-early-signup-form-field-label-color: var(--bp-text-muted);
+        --bs-early-signup-form-submit-bg:       var(--bp-pink-grad);
+        --bs-early-signup-form-submit-color:    var(--bp-pink-ink);
+        --bs-early-signup-form-submit-border:   var(--bp-pink);
+        --bs-early-signup-form-benefit-divider: var(--bp-border-faint);
+        --bs-early-signup-form-check-color:     var(--bp-teal);
+        --bs-early-signup-form-success-color:   var(--bp-teal);
+        --bs-early-signup-form-stat-color:      var(--bp-text-muted);
+        --bs-early-signup-form-reset-color:     var(--bp-text-faint);
+        --bs-early-signup-form-reset-hover-color: var(--bp-teal-fg);
+        --bs-early-signup-form-error-color:     var(--bp-danger);
+    }
+
+    // ── Eyebrow text — swap to --bp-mono ─────────────────────────────────────
+    // The base partial uses --bs-font-monospace which resolves to the system
+    // mono stack. In blueprint all eyebrows and micro-labels use JetBrains Mono.
+
+    .tc-early-signup-form__eyebrow-text {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.14em; // slightly wider track for the blueprint HUD feel
+    }
+
+    // ── Title — display typeface with tight tracking ──────────────────────────
+
+    .tc-early-signup-form__title {
+        font-family: var(--bp-display);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: var(--bp-emphasis);
+    }
+
+    // ── Field micro-label — blueprint mono ───────────────────────────────────
+
+    .tc-early-signup-form__field-label {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.12em;
+        color: var(--bp-text-muted);
+    }
+
+    // ── Submit button — pink glow + lift on hover ─────────────────────────────
+    // Replace the base's dark-slate rgba(30,41,59,*) hover shadow with the
+    // blueprint pink glow so the hover effect matches the light-theme CTA.
+
+    .tc-early-signup-form__submit {
+        font-family: var(--bp-display);
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        transition:
+            transform 0.18s var(--bp-ease),
+            box-shadow 0.2s var(--bp-ease);
+
+        &:hover:not(:disabled) {
+            // Override the base's dark-slate drop-shadow with blueprint pink glow.
+            box-shadow: var(--bp-glow-pink-strong);
+            transform: translateY(-1px);
+        }
+
+        &:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: var(--bp-glow-pink);
+        }
+
+        &:focus-visible {
+            outline-color: var(--bp-pink);
+        }
+    }
+
+    // ── Stat mono text — blueprint mono, slightly wider tracking ─────────────
+
+    .tc-early-signup-form__stat {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        color: var(--bp-text-muted);
+    }
+
+    // ── Stat pulse dot — teal circle + teal halo ─────────────────────────────
+    // Replace the hardcoded rgba(22,163,74,*) keyframe (green) with blueprint
+    // teal tokens. The animation name is the same (tc-esf-pulse); we override
+    // the static box-shadow so the resting state matches.
+
+    .tc-early-signup-form__stat-pulse {
+        background: var(--bp-teal);
+        // Resting halo uses teal-soft so it complements rather than glows cold.
+        box-shadow: 0 0 0 0 var(--bp-teal-soft);
+    }
+
+    // Re-declare the keyframe within the theme scope so the teal color is used.
+    @keyframes tc-esf-pulse {
+        0% {
+            box-shadow: 0 0 0 0 var(--bp-teal-soft);
+        }
+        70% {
+            box-shadow: 0 0 0 6px transparent;
+        }
+        100% {
+            box-shadow: 0 0 0 0 transparent;
+        }
+    }
+
+    // ── Helper footnote — blueprint mono ─────────────────────────────────────
+
+    .tc-early-signup-form__helper {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.04em;
+        color: var(--bp-text-faint);
+    }
+
+    // ── Reset link — teal on hover ────────────────────────────────────────────
+
+    .tc-early-signup-form__reset {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.04em;
+        color: var(--bp-text-faint);
+
+        &:hover {
+            color: var(--bp-teal-fg);
+        }
+
+        &:focus-visible {
+            outline-color: var(--bp-pink);
+        }
+    }
+
+    // ── Success title — display typeface ─────────────────────────────────────
+
+    .tc-early-signup-form__success-title {
+        font-family: var(--bp-display);
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: var(--bp-emphasis);
+    }
+
+    // ── Error message — real red danger soft tint ─────────────────────────────
+
+    .tc-early-signup-form__error {
+        color: var(--bp-danger);
+    }
+}

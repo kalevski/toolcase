@@ -1,0 +1,60 @@
+// Blueprint › tc-rarity-chip — mono arcade labels: soft-tint fills, hairline borders, accent-rotation per rarity tier.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Base (common / default) ──────────────────────────────────────────────
+    // Quiet neutral: lavender-well fill, chip hairline, muted ink.
+    // Font overridden to --bp-mono (Chakra Petch gives the HUD-label feel);
+    // letter-spacing bumped slightly tighter than base for blueprint's dense grid.
+    .tc-rarity-chip {
+        --bs-rarity-chip-bg:           var(--bp-bg-2);
+        --bs-rarity-chip-color:        var(--bp-text-muted);
+        --bs-rarity-chip-border-color: var(--bp-border-chip);
+        --bs-rarity-chip-letter-spacing: 0.12em;
+
+        font-family: var(--bp-mono);
+    }
+
+    // ── Uncommon — teal (action / success) ──────────────────────────────────
+    // --bp-teal-fg is the darker teal safe for text on white; --bp-teal-soft fills.
+    .tc-rarity-chip--uncommon {
+        --bs-rarity-chip-bg:           var(--bp-teal-soft);
+        --bs-rarity-chip-color:        var(--bp-teal-fg);
+        --bs-rarity-chip-border-color: var(--bp-teal-line);
+    }
+
+    // ── Rare — violet (supporting info accent) ───────────────────────────────
+    // --bp-violet-fg is the darker violet safe for text on white; --bp-violet-soft fills.
+    .tc-rarity-chip--rare {
+        --bs-rarity-chip-bg:           var(--bp-violet-soft);
+        --bs-rarity-chip-color:        var(--bp-violet-fg);
+        --bs-rarity-chip-border-color: var(--bp-violet);
+    }
+
+    // ── Epic — pink (primary brand accent) ──────────────────────────────────
+    // Pink is the blueprint primary CTA color; epic sits one step below mythic
+    // so we use the soft surface rather than a solid fill, keeping pink as the
+    // border+text signal without overwhelming a small chip.
+    .tc-rarity-chip--epic {
+        --bs-rarity-chip-bg:           var(--bp-pink-surface);
+        --bs-rarity-chip-color:        var(--bp-pink);
+        --bs-rarity-chip-border-color: var(--bp-pink-line);
+    }
+
+    // ── Legendary — amber (warning / supporting) ─────────────────────────────
+    // --bp-amber-fg is the darker amber that clears AA on white.
+    .tc-rarity-chip--legendary {
+        --bs-rarity-chip-bg:           var(--bp-amber-soft);
+        --bs-rarity-chip-color:        var(--bp-amber-fg);
+        --bs-rarity-chip-border-color: var(--bp-amber);
+    }
+
+    // ── Mythic — danger red (real red, distinct from pink brand) ────────────
+    // --bp-danger is the semantic red (#dc2626); --bp-danger-soft is the tint fill.
+    .tc-rarity-chip--mythic {
+        --bs-rarity-chip-bg:           var(--bp-danger-soft);
+        --bs-rarity-chip-color:        var(--bp-danger);
+        --bs-rarity-chip-border-color: var(--bp-danger);
+    }
+}

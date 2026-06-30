@@ -1,0 +1,15 @@
+// Blueprint › tc-pricing-card — the "popular" plan glow. The badge fill + the
+// highlight top-cap already go pink via the token remap (--tc-app-accent /
+// --tc-app-accent-gradient). This adds the signature pink-glow shadow + 1.5px
+// pink border on the highlighted plan (blueprint_theme.md §8.7).
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-pricing-card {
+        --bs-pricing-card-border-color: var(--bp-border);
+        --bs-pricing-card-shadow: 0 2px 12px rgba(40, 30, 90, 0.05);
+        --bs-pricing-card-highlight-border-color: var(--bp-pink);
+        --bs-pricing-card-highlight-shadow: 0 12px 34px rgba(224, 17, 114, 0.18);
+        --bs-pricing-card-feature-included-color: var(--bp-teal-fg);
+    }
+}

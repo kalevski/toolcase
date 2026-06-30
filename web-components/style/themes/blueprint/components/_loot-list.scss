@@ -1,0 +1,200 @@
+// Blueprint › tc-loot-list — arcade-HUD loot panel: paper surface, mono eyebrow header, pink CTA, teal action buttons, rarity stripes on the blueprint accent rotation.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Custom-property overrides ───────────────────────────────────────────────
+
+    tc-loot-list {
+        // Panel shell — white paper card, hairline border, soft violet shadow
+        --bs-loot-list-bg:            var(--bp-paper);
+        --bs-loot-list-border:        1px solid var(--bp-border);
+
+        // Header — recessed well behind the eyebrow title
+        --bs-loot-list-header-bg:     var(--bp-bg-2);
+        --bs-loot-list-header-border: 1px solid var(--bp-border);
+
+        // Eyebrow title — mono kicker in teal-fg for AA on the recessed bg
+        --bs-loot-list-title-color:   var(--bp-teal-fg);
+        --bs-loot-list-title-font-size: 0.6875rem;
+
+        // Row dividers — replace raw tc-slate-100 with blueprint faint hairline
+        --bs-loot-list-row-border:     1px solid var(--bp-border-faint);
+        --bs-loot-list-row-hover-bg:   var(--bp-paper-tint-2);
+
+        // Item icon — muted violet-grey
+        --bs-loot-list-icon-color:    var(--bp-text-faint);
+        --bs-loot-list-icon-font-size: 0.875rem;
+
+        // Item name — primary ink, display handled by base (stays mono)
+        --bs-loot-list-name-color:    var(--bp-text);
+        --bs-loot-list-name-font-size: 0.8125rem;
+
+        // Quantity — muted supporting text
+        --bs-loot-list-qty-color:     var(--bp-text-muted);
+        --bs-loot-list-qty-font-size: 0.75rem;
+
+        // Rarity stripes — blueprint accent rotation:
+        //   common     → faint border (near-invisible, indicating no special tier)
+        //   uncommon   → teal (success / action)
+        //   rare       → violet (supporting cool)
+        //   epic       → pink (primary brand — elevated tier)
+        //   legendary  → amber (warm supporting — prestige)
+        //   mythic     → danger red (extreme rarity, alarm register)
+        --bs-loot-list-rarity-common:    var(--bp-border-strong);
+        --bs-loot-list-rarity-uncommon:  var(--bp-teal);
+        --bs-loot-list-rarity-rare:      var(--bp-violet);
+        --bs-loot-list-rarity-epic:      var(--bp-pink);
+        --bs-loot-list-rarity-legendary: var(--bp-amber);
+        --bs-loot-list-rarity-mythic:    var(--bp-danger);
+
+        // Per-row action button — teal (everyday action, secondary register)
+        --bs-loot-list-btn-bg:           var(--bp-paper);
+        --bs-loot-list-btn-color:        var(--bp-teal-fg);
+        --bs-loot-list-btn-border:       1px solid var(--bp-teal-line, var(--bp-teal));
+        --bs-loot-list-btn-hover-bg:     var(--bp-teal);
+        --bs-loot-list-btn-hover-color:  var(--bp-teal-ink);
+        --bs-loot-list-btn-font-size:    0.6875rem;
+        --bs-loot-list-btn-min-height:   1.75rem;
+        --bs-loot-list-btn-disabled-opacity: 0.4;
+
+        // Empty state
+        --bs-loot-list-empty-color:   var(--bp-text-faint);
+    }
+
+    // ── Panel shell ─────────────────────────────────────────────────────────────
+
+    .tc-loot-list {
+        box-shadow: var(--tc-shadow-sm);
+        transition: box-shadow var(--bp-ease, 0.18s ease);
+    }
+
+    // ── Header ──────────────────────────────────────────────────────────────────
+
+    .tc-loot-list-title {
+        // Switch to the blueprint mono stack; keep the base uppercase+tracking
+        font-family: var(--bp-mono);
+        letter-spacing: 0.1em;
+        color: var(--bs-loot-list-title-color);
+    }
+
+    // ── Row hover — faint left-glow for rarity hint on hover ────────────────────
+
+    .tc-loot-list-row {
+        transition:
+            background var(--bp-ease, 0.18s ease),
+            box-shadow  var(--bp-ease, 0.18s ease);
+
+        // Subtle inset-left glow on hover echoing the rarity stripe
+        &:hover {
+            box-shadow: inset 3px 0 8px -4px currentColor;
+        }
+    }
+
+    // ── Row rarity — soft tinted backgrounds for elevated tiers ─────────────────
+    // common / uncommon: no background tint — stripe alone is sufficient
+    // rare+: very faint fill amplifies the stripe without shouting
+
+    .tc-loot-list-row--rare {
+        // Violet-soft tint on the row, matching the violet stripe
+        background: var(--bp-violet-soft);
+    }
+
+    .tc-loot-list-row--epic {
+        // Pink-surface gradient — signals the primary/elevated tier clearly
+        background: var(--bp-pink-surface);
+    }
+
+    .tc-loot-list-row--legendary {
+        // Amber-soft tint
+        background: var(--bp-amber-soft);
+    }
+
+    .tc-loot-list-row--mythic {
+        // Danger-soft tint — aligns with the red stripe
+        background: var(--bp-danger-soft);
+    }
+
+    // ── Item name — display font for the item name specifically ─────────────────
+    // Loot item names are titles/IDs, not running prose — display face fits here.
+
+    .tc-loot-list-name {
+        font-family: var(--bp-display);
+        font-size: 0.8rem;
+        letter-spacing: 0.02em;
+        color: var(--bs-loot-list-name-color);
+    }
+
+    // Quantity stays mono (it's a number label, not a title)
+    .tc-loot-list-qty {
+        font-family: var(--bp-mono);
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.04em;
+    }
+
+    // ── Per-row action button ────────────────────────────────────────────────────
+
+    .tc-loot-list-btn {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        border-color: var(--bp-teal-line, var(--bp-teal));
+        transition:
+            background var(--bp-ease, 0.18s ease),
+            color       var(--bp-ease, 0.18s ease),
+            box-shadow  var(--bp-ease, 0.18s ease),
+            transform   var(--bp-ease, 0.18s ease);
+
+        &:hover:not(:disabled) {
+            box-shadow: var(--bp-glow-teal);
+        }
+
+        &:focus-visible {
+            outline-color: var(--bp-teal);
+        }
+    }
+
+    // ── "Take All" CTA — pink primary action ────────────────────────────────────
+    // Overrides the shared btn vars just for this element (it sits in the header).
+
+    .tc-loot-list-take-all {
+        background:   var(--bp-pink-grad);
+        color:        var(--bp-pink-ink);
+        border-color: transparent;
+        font-family:  var(--bp-mono);
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+
+        &:hover:not(:disabled) {
+            background:  var(--bp-pink-hover);
+            color:       var(--bp-pink-ink);
+            box-shadow:  var(--bp-glow-pink);
+            transform:   translateY(-1px);
+            border-color: transparent;
+        }
+
+        &:focus-visible {
+            outline-color: var(--bp-pink);
+        }
+    }
+
+    // ── Empty state ──────────────────────────────────────────────────────────────
+
+    .tc-loot-list-empty {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        font-size: 0.6875rem;
+        color: var(--bp-text-faint);
+
+        // Blueprint glyph vocab — hollow diamond as the empty-slot marker
+        &::before {
+            content: '◇';
+            display: block;
+            font-size: 1.25rem;
+            margin-bottom: 0.375rem;
+            color: var(--bp-border-strong);
+            letter-spacing: 0; // reset — glyph doesn't need tracking
+        }
+    }
+}

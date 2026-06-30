@@ -1,0 +1,85 @@
+// Blueprint › tc-setting-slider — teal-accented range control: hairline track, teal fill+thumb, mono readout, teal-ink mute toggle.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Custom-property overrides ──────────────────────────────────────────────
+    // Re-point every --bs-setting-slider-* var to blueprint tokens.
+    // The thumb's border-radius:50% is the one sanctioned circle and is untouched.
+    tc-setting-slider,
+    tc-volume-slider,
+    tc-deadzone-slider,
+    tc-fov-slider {
+        // Track: a light hairline on the lavender ground
+        --bs-setting-slider-track-color:         var(--bp-border);
+
+        // Fill: teal — everyday action accent (slider is a control, not a CTA)
+        --bs-setting-slider-fill-color:          var(--bp-teal);
+
+        // Thumb: white face, teal ring, subtle violet-tinted shadow
+        --bs-setting-slider-thumb-bg:            var(--bp-paper);
+        --bs-setting-slider-thumb-border:        var(--bp-teal);
+        --bs-setting-slider-thumb-active-bg:     var(--bp-teal-soft);
+        --bs-setting-slider-thumb-shadow:        var(--tc-shadow-sm);
+
+        // Focus ring: teal glow replaces raw slate rgba literal
+        --bs-setting-slider-focus-ring:          var(--bp-glow-teal);
+
+        // Disabled: faint text token
+        --bs-setting-slider-disabled-color:      var(--bp-text-faint);
+
+        // Value readout: muted ink, mono already set in base
+        --bs-setting-slider-value-color:         var(--bp-text-muted);
+
+        // Mute button: hairline border, muted icon; active → teal ink fill
+        --bs-setting-slider-mute-border-color:   var(--bp-border);
+        --bs-setting-slider-mute-color:          var(--bp-text-muted);
+        --bs-setting-slider-mute-bg:             transparent;
+        --bs-setting-slider-mute-hover-bg:       var(--bp-teal-soft);
+        --bs-setting-slider-mute-active-bg:      var(--bp-teal);
+        --bs-setting-slider-mute-active-border:  var(--bp-teal);
+        --bs-setting-slider-mute-active-color:   var(--bp-teal-ink);
+        --bs-setting-slider-mute-focus-ring:     var(--bp-glow-teal);
+    }
+
+    // ── Value readout ──────────────────────────────────────────────────────────
+    // Base already sets font-family: var(--tc-font-mono). Override to --bp-mono
+    // and push to full mono micro-label treatment: uppercase, widened tracking.
+    .tc-setting-slider__value {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--bp-text-muted);
+    }
+
+    // ── Track fill overlay (WebKit) ────────────────────────────────────────────
+    // WebKit does not expose ::-webkit-slider-fill (only Firefox has
+    // ::-moz-range-progress). Paint the filled portion via a CSS gradient on the
+    // track pseudo-element driven by a custom property the component sets inline.
+    // The base partial does not wire this up — add it here as a progressive
+    // enhancement so the teal fill is visible in Chromium/Safari.
+    // The inline style `--_pct` is written by the SettingSlider.ts component
+    // via setProperty on the host; if absent we fall back to a flat hairline.
+    .tc-setting-slider__input {
+        &::-webkit-slider-runnable-track {
+            background: linear-gradient(
+                to right,
+                var(--bp-teal) 0%,
+                var(--bp-teal) var(--_pct, 0%),
+                var(--bp-border) var(--_pct, 0%),
+                var(--bp-border) 100%
+            );
+        }
+
+        // Teal thumb hover: deepen toward hover token
+        &:hover:not(:disabled) {
+            &::-webkit-slider-thumb {
+                border-color: var(--bp-teal-hover);
+            }
+
+            &::-moz-range-thumb {
+                border-color: var(--bp-teal-hover);
+            }
+        }
+    }
+}

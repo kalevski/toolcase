@@ -1,0 +1,44 @@
+// Blueprint › tc-eyebrow — the signature mono micro-label with a leading teal
+// pulsing dot. Base eyebrow is a plain mono caption; the template prefixes it
+// with a teal status dot, tints it teal and tracks it wide (.18em). The dot is
+// injected via ::before on the .tc-eyebrow class (which carries the
+// --bs-eyebrow-* defaults, so the override wins). See blueprint_theme.md §8.3.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    .tc-eyebrow {
+        --bs-eyebrow-color: var(--bp-teal-fg);
+        --bs-eyebrow-letter-spacing: 0.18em;
+        --bs-eyebrow-font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6em;
+        text-transform: uppercase;
+    }
+
+    .tc-eyebrow::before {
+        content: '';
+        flex: none;
+        width: 0.45em;
+        height: 0.45em;
+        border-radius: 50%;
+        background: var(--bp-teal);
+        box-shadow: 0 0 0 0.27em var(--bp-teal-soft);
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        .tc-eyebrow::before {
+            animation: bp-dot-glow 1.4s ease-in-out infinite;
+        }
+    }
+}
+
+@keyframes bp-dot-glow {
+    0%,
+    100% {
+        opacity: 0.55;
+    }
+    50% {
+        opacity: 1;
+    }
+}

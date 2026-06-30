@@ -1,0 +1,80 @@
+// Blueprint › tc-tree-view — lavender-paper surface, pink selected fill, teal action accents, mono labels, faint-violet indentation guides.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Custom property overrides ─────────────────────────────────────────────────────
+    // Re-point every --bs-tree-view-* token; class rules below only handle things
+    // that have no var (e.g. the ::before guide hairline, typography on the label).
+
+    tc-tree-view {
+        // Surface — raised white card on the lavender page canvas.
+        --bs-tree-view-surface: var(--bp-paper);
+        --bs-tree-view-color: var(--bp-text);
+
+        // Hover — recessed well tint, no fill surprise.
+        --bs-tree-view-hover-bg: var(--bp-bg-2);
+
+        // Selected (single-select) — pink is the primary/active accent.
+        --bs-tree-view-selected-bg: var(--bp-pink);
+        --bs-tree-view-selected-color: var(--bp-pink-ink);
+
+        // Left-marker (checkbox mode selected) — pink stripe.
+        --bs-tree-view-marker-color: var(--bp-pink);
+
+        // Indentation guide — faint violet hairline, not a raw slate ref.
+        --bs-tree-view-guide-color: var(--bp-border-faint);
+
+        // Toggle chevron — muted ink at rest; colour applied via :hover rule below.
+        --bs-tree-view-toggle-color: var(--bp-text-muted);
+
+        // Leading icon — faint ink; brightens when row is selected via override.
+        --bs-tree-view-icon-color: var(--bp-text-faint);
+
+        // Spinner — teal signals "loading/action" in the arcade rotation.
+        --bs-tree-view-spinner-color: var(--bp-teal-fg);
+
+        // Focus ring — teal (everyday action), replaces the old cyan accent.
+        --bs-tree-view-focus-color: var(--bp-teal);
+
+        font-family: var(--bp-body);
+    }
+
+    // ── Label typography — mono eyebrow treatment ─────────────────────────────────────
+    // Tree node labels read as navigation/HUD items; --bp-mono + uppercase gives
+    // them the blueprint's characteristic instrument-panel register.
+    .tc-tree-view-label {
+        font-family: var(--bp-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--bp-text-soft);
+    }
+
+    // ── Toggle chevron — teal on hover ────────────────────────────────────────────────
+    // The --bs-tree-view-toggle-color var only sets the resting state; the :hover
+    // colour has no var, so we override the element rule directly.
+    .tc-tree-view-row:hover .tc-tree-view-toggle {
+        color: var(--bp-teal-fg);
+    }
+
+    // ── Selected row — restore legible label + icon on pink fill ─────────────────────
+    .tc-tree-view-row--selected {
+        .tc-tree-view-label {
+            // Override the mono color; white on pink keeps the label legible.
+            color: var(--bp-pink-ink);
+        }
+    }
+
+    // ── Checkbox — blueprint paper background, violet-border input ────────────────────
+    .tc-tree-view-checkbox.form-check-input {
+        --bs-form-check-bg: var(--bp-paper);
+        --bs-form-check-border-color: var(--bp-border-strong);
+    }
+
+    // ── Checkbox mode: selected marker row — label keeps ink text (not pink fill) ─────
+    .tc-tree-view--checkbox .tc-tree-view-row--selected .tc-tree-view-label {
+        color: var(--bp-text-soft);
+    }
+
+}

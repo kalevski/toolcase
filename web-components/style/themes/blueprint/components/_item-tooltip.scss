@@ -1,0 +1,148 @@
+// Blueprint › tc-item-tooltip — white-paper overlay card with blueprint typography:
+// display name, mono rarity chip, mono-tabular stat/req rows, and the full arcade
+// accent rotation on rarity tiers (teal=uncommon, violet=rare, pink=epic,
+// amber=legendary, danger=mythic). Met/unmet req values use teal / real-red.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-item-tooltip {
+        // ── Surface ────────────────────────────────────────────────────────────
+        // Raised white card on the tooltip layer; hairline border, violet-tinted
+        // shadow from the foundation token (no custom shadow literal needed).
+        --bs-item-tooltip-surface: var(--bp-paper);
+        --bs-item-tooltip-border-color: var(--bp-border);
+        --bs-item-tooltip-separator-color: var(--bp-border-faint);
+        --bs-item-tooltip-shadow: var(--tc-shadow-lg);
+
+        // ── Name ───────────────────────────────────────────────────────────────
+        // Display face (Chakra Petch) at the title slot; tight tracking is baked
+        // into --bp-display so no extra letter-spacing override needed.
+        --bs-item-tooltip-name-color: var(--bp-emphasis);
+        --bs-item-tooltip-name-font-size: 1rem;
+        --bs-item-tooltip-name-font-weight: 700;
+
+        // ── Stats ──────────────────────────────────────────────────────────────
+        --bs-item-tooltip-stat-label-color: var(--bp-text-muted);
+        --bs-item-tooltip-stat-value-color: var(--bp-text-soft);
+        --bs-item-tooltip-stat-font-size: 0.8125rem;
+
+        // ── Requirements ───────────────────────────────────────────────────────
+        --bs-item-tooltip-req-label-color: var(--bp-text-muted);
+        --bs-item-tooltip-req-value-color: var(--bp-text-soft);
+        // Met → teal (action signal); unmet → real red (NOT pink, which is CTA).
+        --bs-item-tooltip-req-met-color: var(--bp-teal-fg);
+        --bs-item-tooltip-req-unmet-color: var(--bp-danger);
+
+        // ── Flavor ─────────────────────────────────────────────────────────────
+        --bs-item-tooltip-flavor-color: var(--bp-text-faint);
+        --bs-item-tooltip-flavor-font-size: 0.8125rem;
+
+        // ── Rarity default (common) ────────────────────────────────────────────
+        // Common keeps the faint muted default — no accent spend on the base tier.
+        --bs-item-tooltip-rarity-color: var(--bp-text-faint);
+
+        // Drive body copy through Space Grotesk so the whole card reads on-brand.
+        font-family: var(--bp-body);
+        color: var(--bp-text);
+
+        // Thin accent bar on the left edge — blueprint "hairline frame" motif.
+        // Sits inside the card via inset so it does not add layout width.
+        &::before {
+            content: '';
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 2px;
+            background: var(--bp-teal);
+            opacity: 0.6;
+        }
+    }
+
+    // ── Per-rarity accent rotation ────────────────────────────────────────────
+    // Mirrors the blueprint status rotation: success=teal, info=violet,
+    // epic=pink (primary brand), legendary=amber, mythic=danger (real red).
+
+    tc-item-tooltip[data-rarity='uncommon'] {
+        --bs-item-tooltip-rarity-color: var(--bp-teal-fg);
+    }
+
+    tc-item-tooltip[data-rarity='rare'] {
+        --bs-item-tooltip-rarity-color: var(--bp-violet-fg);
+    }
+
+    tc-item-tooltip[data-rarity='epic'] {
+        // Pink is the primary brand accent — correct for the top-tier CTA slot.
+        --bs-item-tooltip-rarity-color: var(--bp-pink);
+    }
+
+    tc-item-tooltip[data-rarity='legendary'] {
+        --bs-item-tooltip-rarity-color: var(--bp-amber-fg);
+    }
+
+    tc-item-tooltip[data-rarity='mythic'] {
+        --bs-item-tooltip-rarity-color: var(--bp-danger);
+    }
+
+    // ── Item name ─────────────────────────────────────────────────────────────
+    .tc-item-tooltip__name {
+        // Chakra Petch display face for the item title — the blueprint heading
+        // signature. No forced uppercase; titles may be mixed-case proper nouns.
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+    }
+
+    // ── Rarity chip ───────────────────────────────────────────────────────────
+    // Mono micro-label — border-outlined, uppercase, loose tracking.
+    // The chip colour is driven by the var resolved per rarity attr above.
+    .tc-item-tooltip__rarity {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.12em;
+        font-size: 0.6rem;
+        // currentcolor traces to --bs-item-tooltip-rarity-color (set above).
+        // No background fill — outline-only chip keeps it featherweight.
+    }
+
+    // ── Stat labels & values ──────────────────────────────────────────────────
+    .tc-item-tooltip__stat-label {
+        font-family: var(--bp-body);
+    }
+
+    .tc-item-tooltip__stat-value {
+        // JetBrains Mono for machine-facing figures; tabular-nums is already set
+        // in the base partial — no need to repeat it here.
+        font-family: var(--bp-mono);
+        color: var(--bp-text-soft);
+    }
+
+    // ── Requirements section ──────────────────────────────────────────────────
+    .tc-item-tooltip__reqs {
+        // Faint hairline separator routes to the blueprint divider token,
+        // replacing the raw tc-border default.
+        border-top-color: var(--bp-border-faint);
+    }
+
+    .tc-item-tooltip__req-label {
+        font-family: var(--bp-body);
+    }
+
+    .tc-item-tooltip__req-value {
+        font-family: var(--bp-mono);
+    }
+
+    // Met: teal with a subtle soft glow on the value text to reinforce signal.
+    .tc-item-tooltip__req--met .tc-item-tooltip__req-value {
+        color: var(--bp-teal-fg);
+    }
+
+    // Unmet: real red (--bp-danger) — not pink, which is reserved for CTA.
+    .tc-item-tooltip__req--unmet .tc-item-tooltip__req-value {
+        color: var(--bp-danger);
+    }
+
+    // ── Flavor text ───────────────────────────────────────────────────────────
+    .tc-item-tooltip__flavor {
+        border-top-color: var(--bp-border-faint);
+        color: var(--bp-text-faint);
+        // Italic is already set in the base partial — keep it.
+        font-family: var(--bp-body);
+    }
+}

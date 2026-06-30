@@ -1,0 +1,82 @@
+// Blueprint › tc-community-links — white paper cards on a hairline grid; mono count labels, display section title, teal hover lift.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-community-links {
+        // Surface: white raised cards separated by --bp-border hairlines (grid gap trick).
+        --bs-community-links-bg: var(--bp-paper);
+        --bs-community-links-border: var(--bp-border);
+        --bs-community-links-gap: 1px;
+
+        // Ink
+        --bs-community-links-color: var(--bp-text);
+        --bs-community-links-muted: var(--bp-text-faint);
+        --bs-community-links-title-color: var(--bp-emphasis);
+
+        // Icon: teal action color draws the eye to platform glyphs
+        --bs-community-links-icon-color: var(--bp-teal-fg);
+
+        // Hover: --bp-paper-tint lifts the card gently; teal glow shadow; 2px lift matches blueprint HUD feel
+        --bs-community-links-hover-bg: var(--bp-paper-tint);
+        --bs-community-links-hover-shadow: var(--bp-glow-teal);
+        --bs-community-links-hover-translate: -2px;
+
+        // Count: mono micro-label inherits the token defaults (size + spacing stay as-is)
+        --bs-community-links-count-color: var(--bp-teal-fg);
+    }
+
+    // Section heading — display font for blueprint title treatment
+    .tc-community-links__title {
+        font-family: var(--bp-display);
+        font-size: 0.9375rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--bp-emphasis);
+    }
+
+    // Grid outer border uses --bp-border (already set via the var above)
+    // No additional rule needed — the grid reads --bs-community-links-border.
+
+    // Count chip: explicit mono font so it never falls back to system monospace
+    .tc-community-links-item__count {
+        font-family: var(--bp-mono);
+        color: var(--bp-teal-fg);
+    }
+
+    // Description line: use body font explicitly (Space Grotesk)
+    .tc-community-links-item__desc {
+        font-family: var(--bp-body);
+        color: var(--bp-text-muted);
+    }
+
+    // Label: body font, slightly stronger ink
+    .tc-community-links-item__label {
+        font-family: var(--bp-body);
+        color: var(--bp-text-soft);
+        font-weight: 600;
+    }
+
+    // Hover state: icon brightens to full teal on card hover
+    .tc-community-links-item {
+        transition:
+            background-color var(--bp-ease),
+            box-shadow var(--bp-ease),
+            transform var(--bp-ease);
+
+        &:hover,
+        &:focus {
+            // Teal line accent on left edge signals interactivity (blueprint HUD convention)
+            border-left: 2px solid var(--bp-teal);
+            padding-left: calc(var(--bs-community-links-card-padding-x) - 2px);
+
+            .tc-community-links-item__icon {
+                color: var(--bp-teal);
+            }
+
+            .tc-community-links-item__label {
+                color: var(--bp-emphasis);
+            }
+        }
+    }
+}

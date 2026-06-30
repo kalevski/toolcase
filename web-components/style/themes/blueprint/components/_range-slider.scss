@@ -1,0 +1,98 @@
+// Blueprint › tc-range-slider — pink fill, teal-accented handle, mono micro-labels, paper tooltip with hairline.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-range-slider {
+        // Track: hairline-border tone, not raw slate
+        --bs-range-slider-track-bg: var(--bp-border);
+
+        // Fill: pink = primary action in the blueprint accent rotation
+        --bs-range-slider-fill-bg: var(--bp-pink);
+
+        // Handle: raised paper disc with teal active-border on drag
+        --bs-range-slider-handle-bg: var(--bp-paper);
+        --bs-range-slider-handle-border: 1.5px solid var(--bp-border-strong);
+        --bs-range-slider-handle-shadow: var(--tc-shadow-sm);
+        --bs-range-slider-handle-active-border-color: var(--bp-pink);
+
+        // Tooltip: dark-ink chip on paper — light theme, sharp contrast
+        --bs-range-slider-tooltip-bg: var(--bp-paper);
+        --bs-range-slider-tooltip-color: var(--bp-text);
+        --bs-range-slider-tooltip-shadow: var(--tc-shadow-md);
+
+        // Ticks: secondary hairline tone
+        --bs-range-slider-tick-color: var(--bp-border-strong);
+    }
+
+    // ── Label ──────────────────────────────────────────────────────────────────
+    // Mono micro-label treatment: uppercase + loose tracking, muted ink
+
+    .tc-range-slider-label {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        font-weight: 500;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        color: var(--bp-text-muted);
+    }
+
+    // ── Track ─────────────────────────────────────────────────────────────────
+    // Clean flat track; no extra overrides needed — vars handle it.
+    // Invalid state: reroute fill to --bp-danger so no raw tc-danger literal leaks
+
+    .tc-range-slider-track.is-invalid .tc-range-slider-fill {
+        background: var(--bp-danger);
+    }
+
+    // ── Handle ────────────────────────────────────────────────────────────────
+
+    .tc-range-slider-handle {
+        transition:
+            box-shadow var(--bp-ease),
+            border-color var(--bp-ease),
+            transform var(--bp-ease);
+
+        &:hover {
+            // Pink glow on hover — the one bold moment, handle is the interaction focal point
+            box-shadow: var(--tc-shadow-md), var(--bp-glow-pink);
+            border-color: var(--bp-pink);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-pink);
+            outline-offset: 2px;
+        }
+
+        &.tc-range-slider-handle--dragging,
+        &:active {
+            border-color: var(--bp-pink);
+            box-shadow: var(--tc-shadow-sm), var(--bp-glow-pink);
+        }
+    }
+
+    // ── Tooltip ───────────────────────────────────────────────────────────────
+    // Paper chip with hairline border and mono numerals
+
+    .tc-range-slider-tooltip {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        // Hairline border so the paper chip reads against the lavender canvas
+        border: 1px solid var(--bp-border);
+        // Slight pink line on the bottom edge — echoes the fill accent without shouting
+        border-bottom-color: var(--bp-pink-line);
+    }
+
+    // ── Reduced motion ────────────────────────────────────────────────────────
+
+    @media (prefers-reduced-motion: reduce) {
+        .tc-range-slider-handle {
+            transition:
+                box-shadow var(--bp-ease),
+                border-color var(--bp-ease);
+        }
+    }
+}

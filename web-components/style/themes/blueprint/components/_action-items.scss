@@ -1,0 +1,87 @@
+// Blueprint › tc-action-items — white-paper overlay panel with bp-border hairline,
+// mono-labeled items, teal active row, danger-soft hover, and slate-token eviction.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Trigger button ────────────────────────────────────────────────────────
+    // The trigger inherits .btn / .btn-secondary from the base partial.
+    // Re-point it to blueprint secondary styling: crisp bp-border border,
+    // bp-text label, bp-bg-2 hover well — consistent with btn-outline-secondary
+    // treatment in _button.scss.
+    .tc-action-items-trigger {
+        --bs-btn-color: var(--bp-text);
+        --bs-btn-bg: var(--bp-paper);
+        --bs-btn-border-color: var(--bp-border-soft);
+        --bs-btn-hover-color: var(--bp-teal-fg);
+        --bs-btn-hover-bg: var(--bp-teal-soft);
+        --bs-btn-hover-border-color: var(--bp-teal-line);
+        --bs-btn-active-color: var(--bp-teal-fg);
+        --bs-btn-active-bg: var(--bp-teal-soft);
+        --bs-btn-active-border-color: var(--bp-teal-line);
+        // Mono uppercase for the trigger label — acts as a UI control eyebrow.
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    // ── Overlay menu ─────────────────────────────────────────────────────────
+    .tc-action-items-menu {
+        // Evict slate/surface tokens → bp paper + border hairline.
+        --bs-action-items-bg: var(--bp-paper);
+        --bs-action-items-border-color: var(--bp-border);
+        --bs-action-items-shadow: var(--tc-shadow-lg); // already violet-tinted
+
+        // Item defaults — evict var(--tc-slate-700) which leaks the raw slate ramp.
+        --bs-action-items-item-color: var(--bp-text-soft);
+        --bs-action-items-item-hover-color: var(--bp-text);
+        // Hover well → recessed lavender (--bp-bg-2) in place of tc-surface-muted.
+        --bs-action-items-item-hover-bg: var(--bp-bg-2);
+
+        // Active row → teal (everyday action) with white ink.
+        --bs-action-items-item-active-color: var(--bp-teal-ink);
+        --bs-action-items-item-active-bg: var(--bp-teal);
+
+        // Disabled → faint text (base partial also applies 0.5 opacity).
+        --bs-action-items-item-disabled-color: var(--bp-text-faint);
+
+        // Danger → real red (not pink — pink is CTA brand, not destructive).
+        --bs-action-items-danger-color: var(--bp-danger);
+
+        // Divider → faintest border so it reads as a breath, not a stripe.
+        --bs-action-items-divider-color: var(--bp-border-faint);
+    }
+
+    // ── Menu items ────────────────────────────────────────────────────────────
+    .tc-action-items-item {
+        // Mono face at the panel scale — reads as a HUD control list.
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        font-weight: 500;
+
+        // Smooth hover transition aligned to --bp-ease.
+        transition:
+            background-color 0.15s var(--bp-ease),
+            color 0.15s var(--bp-ease);
+
+        // Active row: teal fill hardened for specificity (vars already set above).
+        &:active {
+            background-color: var(--bp-teal);
+            color: var(--bp-teal-ink);
+        }
+
+        // Danger variant — danger-soft well on hover so the red isn't jarring.
+        &--danger {
+            color: var(--bp-danger);
+
+            &:hover,
+            &:focus-visible {
+                color: var(--bp-danger);
+                background-color: var(--bp-danger-soft);
+            }
+        }
+    }
+}

@@ -1,0 +1,79 @@
+// Blueprint › tc-stepper — pink active marker (primary CTA), teal complete marker (success), mono step numbers, display active label.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-stepper {
+        // ── Connector ─────────────────────────────────────────────────────────────
+        // Route away from --tc-border / --tc-success to blueprint tokens
+        --bs-stepper-connector-color:          var(--bp-border-faint);
+        --bs-stepper-connector-complete-color: var(--bp-teal);        // teal = success/done
+        --bs-stepper-connector-active-color:   var(--bp-pink-soft);   // soft pink for the in-progress segment
+
+        // ── Pending marker ────────────────────────────────────────────────────────
+        --bs-stepper-pending-bg:               transparent;
+        --bs-stepper-pending-border:           var(--bp-border-strong);
+        --bs-stepper-pending-color:            var(--bp-text-faint);
+
+        // ── Active marker — pink = primary selected ────────────────────────────
+        --bs-stepper-active-bg:                var(--bp-pink);
+        --bs-stepper-active-border:            var(--bp-pink);
+        --bs-stepper-active-color:             var(--bp-pink-ink);    // white text on pink
+
+        // ── Complete marker — teal = success/done ─────────────────────────────
+        --bs-stepper-complete-bg:              var(--bp-teal);
+        --bs-stepper-complete-border:          var(--bp-teal);
+        --bs-stepper-complete-color:           var(--bp-teal-ink);    // white text on teal
+
+        // ── Labels ────────────────────────────────────────────────────────────────
+        --bs-stepper-label-color:              var(--bp-text-muted);
+        --bs-stepper-active-label-color:       var(--bp-emphasis);
+        --bs-stepper-active-label-font-weight: 700;
+        --bs-stepper-complete-label-color:     var(--bp-text-soft);
+        --bs-stepper-description-color:        var(--bp-text-faint);
+        --bs-stepper-optional-color:           var(--bp-text-faint);
+    }
+
+    // ── Marker number — mono HUD readout feel ─────────────────────────────────────
+    .tc-stepper-num {
+        font-family: var(--bp-mono);
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
+
+    // ── Active label — display face, tight tracking ───────────────────────────────
+    .tc-stepper-step-active .tc-stepper-label {
+        font-family: var(--bp-display);
+        letter-spacing: -.01em;
+    }
+
+    // ── Optional hint — mono micro-label ─────────────────────────────────────────
+    .tc-stepper-optional {
+        font-family: var(--bp-mono);
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        font-style: normal; // override base italic; mono uppercase reads fine without it
+    }
+
+    // ── Connector glows on complete ───────────────────────────────────────────────
+    // A subtle teal line for done segments; nothing extra needed — token swap suffices.
+
+    // ── Clickable step interactive ladder ─────────────────────────────────────────
+    .tc-stepper-step:is(button) {
+        transition: background var(--bp-ease, 0.18s ease);
+
+        &:hover {
+            background: var(--bp-paper-tint-2); // recessed lavender tint, replaces --tc-surface-muted
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-teal);  // teal = everyday action focus ring
+            outline-offset: 2px;
+        }
+    }
+
+    // ── Active marker glow — soft pink ambient ────────────────────────────────────
+    .tc-stepper-step-active .tc-stepper-marker {
+        box-shadow: var(--bp-glow-pink);
+    }
+}

@@ -1,0 +1,84 @@
+// Blueprint › tc-range — pink-accented thumb on a hairline track, violet focus glow, danger ring for invalid.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Track ────────────────────────────────────────────────────────────────
+    // Replace the default --tc-border track with the blueprint hairline token.
+    // The filled portion (moz only) and the thumb ring both use the pink primary
+    // accent, consistent with the blueprint accent rotation (pink = primary action).
+
+    .form-range {
+
+        // Focus-visible: swap the hard slate rgba() literal for a violet-tinted ring
+        // that matches the blueprint shadow vocabulary.
+        &:focus-visible {
+            &::-webkit-slider-thumb {
+                box-shadow: 0 0 0 0.2rem var(--bp-violet-soft);
+            }
+
+            &::-moz-range-thumb {
+                box-shadow: 0 0 0 0.2rem var(--bp-violet-soft);
+            }
+        }
+
+        // webkit track: hairline blueprint border token instead of raw --tc-border.
+        &::-webkit-slider-runnable-track {
+            background-color: var(--bp-border);
+        }
+
+        // webkit thumb: white paper fill, pink border ring (primary accent).
+        &::-webkit-slider-thumb {
+            background-color: var(--bp-paper);
+            border-color: var(--bp-pink);
+
+            &:active {
+                background-color: var(--bp-paper-tint-2);
+            }
+        }
+
+        // moz track.
+        &::-moz-range-track {
+            background-color: var(--bp-border);
+        }
+
+        // moz filled portion up to the thumb.
+        &::-moz-range-progress {
+            background-color: var(--bp-pink);
+        }
+
+        // moz thumb: matches webkit thumb.
+        &::-moz-range-thumb {
+            background-color: var(--bp-paper);
+            border-color: var(--bp-pink);
+
+            &:active {
+                background-color: var(--bp-paper-tint-2);
+            }
+        }
+
+        // Disabled: muted faint ink; pointer-events already blocked by the host rule.
+        &:disabled {
+            &::-webkit-slider-thumb {
+                background-color: var(--bp-bg-2);
+                border-color: var(--bp-border-strong);
+            }
+
+            &::-moz-range-thumb {
+                background-color: var(--bp-bg-2);
+                border-color: var(--bp-border-strong);
+            }
+        }
+
+        // Invalid: swap thumb ring to blueprint danger red (real red, not pink).
+        &.is-invalid {
+            &::-webkit-slider-thumb {
+                border-color: var(--bp-danger);
+            }
+
+            &::-moz-range-thumb {
+                border-color: var(--bp-danger);
+            }
+        }
+    }
+}

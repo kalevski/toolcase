@@ -1,0 +1,108 @@
+// Blueprint › tc-metal-button — arcade CTA button: pink primary with glow lift,
+// teal secondary action, ghost/default as hairline ink, display typeface uppercase.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Host defaults (variant=default) ──────────────────────────────────────
+    // Neutral ghost-frame: light paper bg, blueprint hairline border, primary ink.
+    tc-metal-button {
+        --bs-metal-button-color: var(--bp-text);
+        --bs-metal-button-bg: var(--bp-paper);
+        --bs-metal-button-border-color: var(--bp-border-soft);
+        --bs-metal-button-hover-bg: var(--bp-teal-soft);
+        --bs-metal-button-hover-color: var(--bp-teal-fg);
+        --bs-metal-button-hover-border-color: var(--bp-teal);
+        --bs-metal-button-active-bg: var(--bp-teal-soft);
+        --bs-metal-button-active-color: var(--bp-teal-fg);
+        --bs-metal-button-active-border-color: var(--bp-teal);
+        // Replace the baked slate literal focus ring with a teal halo.
+        --bs-metal-button-focus-ring-color: var(--bp-teal-glow);
+    }
+
+    // ── Inner button typography ───────────────────────────────────────────────
+    // Blueprint buttons use the display face, uppercase, tight tracking — same
+    // treatment as .btn in the blueprint _button.scss partial.
+    .tc-metal-button__btn {
+        font-family: var(--bp-display);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        transition:
+            transform 0.18s var(--bp-ease),
+            background 0.2s,
+            border-color 0.2s,
+            box-shadow 0.25s,
+            color 0.2s;
+    }
+
+    // ── variant=primary — pink gradient CTA with pink glow lift ───────────────
+    tc-metal-button[variant='primary'] {
+        --bs-metal-button-color: var(--bp-pink-ink);
+        --bs-metal-button-bg: var(--bp-pink-grad);
+        --bs-metal-button-border-color: transparent;
+        --bs-metal-button-hover-bg: var(--bp-pink-grad);
+        --bs-metal-button-hover-color: var(--bp-pink-ink);
+        --bs-metal-button-hover-border-color: transparent;
+        --bs-metal-button-active-bg: var(--bp-pink-grad);
+        --bs-metal-button-active-color: var(--bp-pink-ink);
+        --bs-metal-button-active-border-color: transparent;
+        // Replace the slate-tinted ring literal with a pink halo.
+        --bs-metal-button-focus-ring-color: var(--bp-pink-glow);
+    }
+
+    // Idle state: low-level pink glow so it reads as the signature CTA.
+    tc-metal-button[variant='primary'] .tc-metal-button__btn {
+        box-shadow: var(--bp-glow-pink);
+    }
+
+    // Replace the baked rgba(30,41,59,0.3) hover shadow with the strong pink glow
+    // + a 2px lift (base already does translateY(-1px); we bump to -2px via the
+    // combined selector so our rule wins the cascade).
+    tc-metal-button[variant='primary'] .tc-metal-button__btn:hover {
+        box-shadow: var(--bp-glow-pink-strong);
+        transform: translateY(-2px);
+    }
+
+    tc-metal-button[variant='primary'] .tc-metal-button__btn:active {
+        transform: translateY(0);
+        box-shadow: var(--bp-glow-pink);
+    }
+
+    // ── variant=danger — real red, not pink ───────────────────────────────────
+    tc-metal-button[variant='danger'] {
+        --bs-metal-button-color: #fff;
+        --bs-metal-button-bg: var(--bp-danger);
+        --bs-metal-button-border-color: transparent;
+        --bs-metal-button-hover-bg: var(--bp-danger);
+        --bs-metal-button-hover-color: #fff;
+        --bs-metal-button-hover-border-color: transparent;
+        --bs-metal-button-active-bg: var(--bp-danger);
+        --bs-metal-button-active-color: #fff;
+        --bs-metal-button-active-border-color: transparent;
+        // Danger focus ring: red halo using the soft tint.
+        --bs-metal-button-focus-ring-color: color-mix(in srgb, var(--bp-danger) 30%, transparent);
+    }
+
+    tc-metal-button[variant='danger'] .tc-metal-button__btn:hover {
+        transform: translateY(-2px);
+    }
+
+    tc-metal-button[variant='danger'] .tc-metal-button__btn:active {
+        transform: translateY(0);
+    }
+
+    // ── variant=ghost — transparent ink-only, teal on hover ──────────────────
+    tc-metal-button[variant='ghost'] {
+        --bs-metal-button-color: var(--bp-text-muted);
+        --bs-metal-button-bg: transparent;
+        --bs-metal-button-border-color: transparent;
+        --bs-metal-button-hover-bg: var(--bp-teal-soft);
+        --bs-metal-button-hover-color: var(--bp-teal-fg);
+        --bs-metal-button-hover-border-color: transparent;
+        --bs-metal-button-active-bg: var(--bp-teal-soft);
+        --bs-metal-button-active-color: var(--bp-teal-fg);
+        --bs-metal-button-active-border-color: transparent;
+        --bs-metal-button-focus-ring-color: var(--bp-teal-glow);
+    }
+}

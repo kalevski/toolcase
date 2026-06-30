@@ -1,0 +1,181 @@
+// Blueprint › tc-guild-panel — light vector-blueprint skin: paper card with teal HUD bracket,
+// display titles, mono labels in teal-fg, violet numeric stat values, violet-soft rank chips,
+// teal live pip with halo, and recessed stats strip in --bp-bg-2.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Custom-property overrides ─────────────────────────────────────────────
+    // Drive cosmetics through the component's --bs-guild-panel-* contract.
+    // Prefer token-level re-points so element rules stay minimal.
+
+    tc-guild-panel {
+        // Surface
+        --bs-guild-panel-bg:                  var(--bp-paper);
+        --bs-guild-panel-border:              var(--bp-border);
+        --bs-guild-panel-separator:           var(--bp-border-faint);
+
+        // Header text
+        // Eyebrow + stat labels get teal-fg (darker teal that clears AA on white).
+        --bs-guild-panel-eyebrow-color:       var(--bp-teal-fg);
+        --bs-guild-panel-name-color:          var(--bp-emphasis);
+        --bs-guild-panel-tag-color:           var(--bp-text-muted);
+        --bs-guild-panel-motto-color:         var(--bp-text-muted);
+
+        // Stats strip — recessed well separates it from the header/roster.
+        --bs-guild-panel-stats-bg:            var(--bp-bg-2);
+        --bs-guild-panel-stat-label-color:    var(--bp-teal-fg);
+        // Stat values use violet-fg: violet is the supporting numeric-HUD accent in
+        // the arcade rotation (pink=CTA, teal=action, violet+amber=support).
+        --bs-guild-panel-stat-value-color:    var(--bp-violet-fg);
+
+        // Roster
+        --bs-guild-panel-row-hover-bg:        var(--bp-paper-tint);
+        --bs-guild-panel-member-name-color:   var(--bp-text);
+        // Rank chip — violet-soft fill + violet-fg ink (soft tint recipe).
+        --bs-guild-panel-member-rank-bg:      var(--bp-violet-soft);
+        --bs-guild-panel-member-rank-color:   var(--bp-violet-fg);
+        --bs-guild-panel-member-contribution-color: var(--bp-text-muted);
+
+        // Pips
+        --bs-guild-panel-pip-online:          var(--bp-teal);
+        --bs-guild-panel-pip-offline:         var(--bp-text-faint);
+    }
+
+    // ── Panel shell ───────────────────────────────────────────────────────────
+
+    .tc-guild-panel {
+        background: var(--bp-paper);
+        border: 1px solid var(--bp-border);
+        box-shadow: var(--tc-shadow-sm);
+        // HUD corner bracket — teal top-left accent (tappable-tile recipe).
+        // Signals this panel is an interactive game object, not a static card.
+        position: relative;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            pointer-events: none;
+        }
+    }
+
+    // ── Header ────────────────────────────────────────────────────────────────
+
+    .tc-guild-panel-header {
+        border-bottom-color: var(--bp-border-faint);
+    }
+
+    // Eyebrow and stat labels — inherit teal-fg from the custom-property override
+    // above; add the blueprint mono face explicitly since --bs-font-monospace may
+    // resolve to a system font outside the theme context.
+    .tc-guild-panel-eyebrow,
+    .tc-guild-panel-stat-label {
+        font-family: var(--bp-mono);
+        color: var(--bp-teal-fg);
+    }
+
+    // Guild name title — display face, tight tracking, strong ink.
+    .tc-guild-panel-name-text {
+        font-family: var(--bp-display);
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        text-transform: uppercase;
+        color: var(--bp-emphasis);
+    }
+
+    // Tag (e.g. [IRON]) — mono, muted.
+    .tc-guild-panel-tag {
+        font-family: var(--bp-mono);
+        color: var(--bp-text-muted);
+        letter-spacing: 0.06em;
+    }
+
+    .tc-guild-panel-motto {
+        color: var(--bp-text-muted);
+        font-style: italic;
+    }
+
+    // ── Stats strip ───────────────────────────────────────────────────────────
+
+    .tc-guild-panel-stats {
+        // The gap row (background: separator) between stat cells becomes a hairline
+        // in blueprint. Override the background used for the 1px gap columns.
+        background: var(--bp-border-faint);
+        border-bottom-color: var(--bp-border-faint);
+    }
+
+    .tc-guild-panel-stat {
+        background: var(--bp-bg-2);
+    }
+
+    // Stat values — display face for numeric HUD weight.
+    .tc-guild-panel-stat-value {
+        font-family: var(--bp-display);
+        font-weight: 700;
+        color: var(--bp-violet-fg);
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.01em;
+    }
+
+    // ── Roster ────────────────────────────────────────────────────────────────
+
+    .tc-guild-panel-member {
+        border-bottom-color: var(--bp-border-faint);
+        transition: background-color 0.15s var(--bp-ease, ease);
+
+        &:hover {
+            background: var(--bp-paper-tint);
+        }
+
+        // Offline — already handled by base (opacity: 0.65); no override needed.
+    }
+
+    .tc-guild-panel-member-name {
+        font-family: var(--bp-body);
+        color: var(--bp-text);
+    }
+
+    // Rank chip — violet-soft fill, violet-fg text, mono face.
+    .tc-guild-panel-member-rank {
+        font-family: var(--bp-mono);
+        background: var(--bp-violet-soft);
+        color: var(--bp-violet-fg);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    .tc-guild-panel-member-contribution {
+        font-family: var(--bp-mono);
+        color: var(--bp-text-muted);
+    }
+
+    // Online pip — teal fill + teal-soft halo ring (live/pulse dot recipe).
+    .tc-guild-panel-member-pip {
+        background: var(--bp-pip-offline, var(--bp-text-faint));
+
+        .tc-guild-panel-member--online & {
+            background: var(--bp-teal);
+            box-shadow: 0 0 0 0.2em var(--bp-teal-soft);
+        }
+    }
+
+    // Empty state
+    .tc-guild-panel-empty {
+        color: var(--bp-text-faint);
+        font-family: var(--bp-body);
+    }
+
+    // ── Reduced motion ────────────────────────────────────────────────────────
+
+    @media (prefers-reduced-motion: reduce) {
+        .tc-guild-panel-member {
+            transition: none;
+        }
+    }
+}

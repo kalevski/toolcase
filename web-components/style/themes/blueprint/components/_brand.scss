@@ -1,0 +1,17 @@
+// Blueprint › tc-brand — wordmark in the Chakra Petch display face with a pink
+// accent. The wordmark reads in the near-black violet ink; the label/underline
+// pick up the brand pink.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-brand {
+        --bs-brand-primary-color: var(--bp-emphasis);
+        --bs-brand-primary-font: var(--bp-display);
+        --bs-brand-label-bg: var(--bp-pink-soft);
+        --bs-brand-label-color: var(--bp-pink);
+    }
+
+    .tc-brand__underline {
+        background: var(--bp-pink-grad);
+    }
+}

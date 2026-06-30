@@ -1,0 +1,156 @@
+// Blueprint › tc-skill-tree — technical diagram sheet: white canvas, teal progress edges, pink selected node with HUD corner bracket, mono labels throughout.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Token overrides ──────────────────────────────────────────────────────
+
+    tc-skill-tree {
+        // Canvas: white sheet with hairline border and a soft violet-tinted shadow
+        --bs-skill-tree-bg:                  var(--bp-paper);
+        --bs-skill-tree-border-color:        var(--bp-border);
+
+        // Edges: faint hairline for locked paths; teal for traversed/unlocked paths
+        --bs-skill-tree-edge-color:          var(--bp-border-strong);
+        --bs-skill-tree-edge-unlocked-color: var(--bp-teal);
+
+        // Node base
+        --bs-skill-tree-node-bg:             var(--bp-paper);
+        --bs-skill-tree-node-border-color:   var(--bp-border-strong);
+        --bs-skill-tree-node-color:          var(--bp-text);
+        --bs-skill-tree-node-transition:     background var(--bp-ease), border-color var(--bp-ease), color var(--bp-ease), box-shadow var(--bp-ease);
+
+        // Node hover — teal lift signals interactability
+        --bs-skill-tree-node-hover-bg:       var(--bp-bg);
+        --bs-skill-tree-node-hover-border:   var(--bp-teal);
+
+        // Node selected — pink primary; white label inherits correctly
+        --bs-skill-tree-node-selected-bg:    var(--bp-pink);
+        --bs-skill-tree-node-selected-color: var(--bp-pink-ink);
+        --bs-skill-tree-node-selected-border:var(--bp-pink);
+
+        // Node unlocked (achieved, not active) — teal success state
+        --bs-skill-tree-node-unlocked-bg:    var(--bp-paper);
+        --bs-skill-tree-node-unlocked-color: var(--bp-teal-fg);
+        --bs-skill-tree-node-unlocked-border:var(--bp-teal);
+
+        // Node locked — recessed well, faint border, opacity preserved
+        --bs-skill-tree-node-locked-bg:      var(--bp-bg-2);
+        --bs-skill-tree-node-locked-color:   var(--bp-text-faint);
+        --bs-skill-tree-node-locked-border:  var(--bp-border-faint);
+        --bs-skill-tree-node-locked-opacity: 0.55;
+
+        // Label — inherit mono family; route colors to bp tokens
+        --bs-skill-tree-label-color:         var(--bp-text-muted);
+
+        // Rank counter
+        --bs-skill-tree-rank-color:          var(--bp-text-faint);
+
+        // Points strip — recessed bg, hairline, teal value
+        --bs-skill-tree-points-bg:           var(--bp-bg-2);
+        --bs-skill-tree-points-border-color: var(--bp-border);
+        --bs-skill-tree-points-label-color:  var(--bp-text-muted);
+        --bs-skill-tree-points-value-color:  var(--bp-teal-fg);
+    }
+
+    // ── Canvas ───────────────────────────────────────────────────────────────
+
+    .tc-skill-tree__canvas {
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Edges ────────────────────────────────────────────────────────────────
+
+    .tc-skill-tree__edge--unlocked {
+        // Teal glow trace on traversed path — readable on the white canvas
+        filter: drop-shadow(0 0 2px var(--bp-teal-soft));
+    }
+
+    // ── Node hover ───────────────────────────────────────────────────────────
+
+    .tc-skill-tree__node {
+        &:hover:not(.tc-skill-tree__node--locked):not(.tc-skill-tree__node--selected) {
+            box-shadow: var(--bp-glow-teal);
+        }
+
+        &:focus-visible {
+            // Blueprint focus ring follows the pink primary accent
+            outline-color: var(--bp-pink);
+        }
+    }
+
+    // ── Selected node — HUD corner bracket ───────────────────────────────────
+    // Blueprint signature: a teal corner bracket marks the active node,
+    // decoupled from the pink fill so the two accents work together.
+
+    .tc-skill-tree__node--selected {
+        position: relative; // already absolute, but explicit for ::before stacking
+        box-shadow: var(--bp-glow-pink);
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            width: 10px;
+            height: 10px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            pointer-events: none;
+        }
+    }
+
+    // ── Unlocked node — live pulse dot on glyph-dot variant ──────────────────
+    // When a node uses the default state dot (no icon), give it the teal halo.
+
+    .tc-skill-tree__node--unlocked:not(.tc-skill-tree__node--selected) {
+        .tc-skill-tree__glyph-dot {
+            box-shadow: 0 0 0 0.2em var(--bp-teal-soft);
+        }
+    }
+
+    // ── Rank counter — fix baked white literal on selected ───────────────────
+    // Base partial bakes rgba(255,255,255,0.75) directly; that is correct on
+    // --bp-pink fill (white text on pink passes AA), so no override needed.
+    // On non-selected nodes, route to the bp token.
+
+    .tc-skill-tree__rank {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    // ── Label — mono treatment ────────────────────────────────────────────────
+
+    .tc-skill-tree__label {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+
+    // ── Points strip ──────────────────────────────────────────────────────────
+
+    .tc-skill-tree__points-label {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.1em;
+    }
+
+    .tc-skill-tree__points-value {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.04em;
+        font-variant-numeric: tabular-nums;
+    }
+
+    // ── Reduced motion ────────────────────────────────────────────────────────
+
+    @media (prefers-reduced-motion: reduce) {
+        .tc-skill-tree__node--selected::before {
+            // Bracket is static — no transition to suppress, but keep it visible
+            opacity: 1;
+        }
+
+        .tc-skill-tree__edge--unlocked {
+            filter: none;
+        }
+    }
+}

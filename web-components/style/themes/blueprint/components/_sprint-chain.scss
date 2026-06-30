@@ -1,0 +1,149 @@
+// Blueprint › tc-sprint-chain — mono tag-labels, teal=past, pink=now with glow, faint connector hairline, violet-tinted shadow on node.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-sprint-chain {
+        // Connector — replace raw tc-border with blueprint faint hairline
+        --bs-sprint-chain-connector-color: var(--bp-border-faint);
+
+        // Label typography — uses body font; muted default
+        --bs-sprint-chain-label-font-size: 0.8125rem;
+        --bs-sprint-chain-label-font-weight: 400;
+        --bs-sprint-chain-label-color: var(--bp-text-muted);
+
+        // Tag micro-label — mono eyebrow treatment
+        --bs-sprint-chain-tag-font-size: 0.6875rem;
+        --bs-sprint-chain-tag-font-family: var(--bp-mono);
+        --bs-sprint-chain-tag-color: var(--bp-text-faint);
+
+        // Header — soft ink, body font
+        --bs-sprint-chain-header-font-size: 0.8125rem;
+        --bs-sprint-chain-header-color: var(--bp-text-soft);
+
+        // State: past — teal-line fill (done/success = teal in blueprint)
+        --bs-sprint-chain-past-node-bg: var(--bp-teal);
+        --bs-sprint-chain-past-node-border: var(--bp-teal);
+        --bs-sprint-chain-past-label-color: var(--bp-text-faint);
+
+        // State: now — pink fill (primary CTA = pink in blueprint)
+        --bs-sprint-chain-now-node-bg: var(--bp-pink);
+        --bs-sprint-chain-now-node-border: var(--bp-pink);
+        --bs-sprint-chain-now-label-color: var(--bp-text);
+        --bs-sprint-chain-now-label-font-weight: 700;
+
+        // State: future — hollow ring, paper centre, blueprint border
+        --bs-sprint-chain-future-node-bg: var(--bp-paper);
+        --bs-sprint-chain-future-node-border: var(--bp-border-strong);
+        --bs-sprint-chain-future-label-color: var(--bp-text-faint);
+    }
+
+    // Connector hairlines: ensure no baked tc-border leaks through
+    .tc-sprint-chain-item::before,
+    .tc-sprint-chain-item::after {
+        background: var(--bp-border-faint);
+    }
+
+    // Header: display font for the section title slot, mono for the end slot
+    .tc-sprint-chain-header {
+        font-family: var(--bp-body);
+        color: var(--bp-text-soft);
+    }
+
+    .tc-sprint-chain-header-end {
+        // Treat the end slot as a mono kicker/status label
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--bp-text-faint);
+    }
+
+    // Tag: mono eyebrow — uppercase, loose tracking
+    .tc-sprint-chain-tag {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--bp-text-faint);
+    }
+
+    // ── State: past (complete) ─────────────────────────────────────────────────
+    // Teal fill + soft halo; connector up to this node sharpens to teal-line
+    .tc-sprint-chain-item-past {
+
+        .tc-sprint-chain-node {
+            background: var(--bp-teal);
+            border-color: var(--bp-teal);
+            // Soft teal halo to read as "done"
+            box-shadow: 0 0 0 0.2em var(--bp-teal-soft);
+        }
+
+        .tc-sprint-chain-label {
+            color: var(--bp-text-faint);
+        }
+
+        .tc-sprint-chain-tag {
+            color: var(--bp-teal-fg);
+        }
+
+        // The right-hand connector leaving a past node sharpens to teal-line
+        &::after {
+            background: var(--bp-teal-line);
+        }
+    }
+
+    // ── State: now (current sprint) ───────────────────────────────────────────
+    // Pink fill + pink glow; bold mono label; live pulse dot inside node via inner ring
+    .tc-sprint-chain-item-now {
+
+        .tc-sprint-chain-node {
+            background: var(--bp-pink);
+            border-color: var(--bp-pink);
+            // Pink glow halo — marks the live sprint clearly on the canvas
+            box-shadow: var(--bp-glow-pink), var(--tc-shadow-sm);
+
+            // Inner white dot — marks the active position
+            &::after {
+                content: '';
+                position: absolute;
+                inset: 50%;
+                translate: -50% -50%;
+                width: 0.3125rem;
+                height: 0.3125rem;
+                border-radius: 50%;
+                background: var(--bp-pink-ink);
+                pointer-events: none;
+            }
+        }
+
+        .tc-sprint-chain-label {
+            color: var(--bp-text);
+            font-weight: 700;
+            font-family: var(--bp-display);
+            letter-spacing: 0.01em;
+        }
+
+        .tc-sprint-chain-tag {
+            color: var(--bp-pink);
+        }
+    }
+
+    // ── State: future ─────────────────────────────────────────────────────────
+    // Hollow paper ring — quiet, placeholder feel
+    .tc-sprint-chain-item-future {
+
+        .tc-sprint-chain-node {
+            background: var(--bp-paper);
+            border-color: var(--bp-border-strong);
+            box-shadow: none;
+        }
+
+        .tc-sprint-chain-label {
+            color: var(--bp-text-faint);
+        }
+    }
+
+}

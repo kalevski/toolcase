@@ -1,0 +1,185 @@
+// Blueprint › tc-json-editor — lavender-paper surface, teal rails + mono keys, pink add/action accents, violet-tinted skeleton shimmer.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Custom-property re-map ────────────────────────────────────────────────
+    // Drive every cosmetic through the --bs-json-editor-* contract so nested
+    // components (inputs, switches) inherit correctly without extra overrides.
+
+    tc-json-editor {
+        --bs-json-editor-bg:              var(--bp-paper);
+        --bs-json-editor-border-color:    var(--bp-border);
+        --bs-json-editor-row-border:      var(--bp-border-faint);
+
+        // Row hover: faint lavender tint rather than the default slate surface-hover
+        --bs-json-editor-row-hover-bg:    var(--bp-bg-2);
+
+        // Key labels → mono, teal-fg so they read as typed identifiers
+        --bs-json-editor-key-color:       var(--bp-teal-fg);
+
+        // Group header: paper-tint-2 to separate from row bg; border uses strong hairline
+        --bs-json-editor-header-bg:       var(--bp-paper-tint-2);
+        --bs-json-editor-header-hover-bg: var(--bp-paper-tint);
+        --bs-json-editor-header-color:    var(--bp-text-soft);
+
+        // Left-rail indent line → default hairline token (no raw slate refs)
+        --bs-json-editor-rail-color:      var(--bp-border);
+
+        // Count / index labels → faint mono text
+        --bs-json-editor-count-color:     var(--bp-text-faint);
+
+        // Icon buttons: muted icon on paper, teal hover to signal action
+        --bs-json-editor-icon-color:      var(--bp-text-faint);
+        --bs-json-editor-icon-hover-bg:   var(--bp-teal-soft);
+        --bs-json-editor-icon-hover-color: var(--bp-teal-fg);
+
+        // Muted (empty / chevron) → faint ink
+        --bs-json-editor-muted-color:     var(--bp-text-faint);
+
+        // Error state → real danger red, not pink
+        --bs-json-editor-error-color:     var(--bp-danger);
+
+        // Mono font → blueprint JetBrains Mono stack
+        --bs-json-editor-mono:            var(--bp-mono);
+    }
+
+    // ── Outer panel ──────────────────────────────────────────────────────────
+
+    .tc-json-editor {
+        background: var(--bs-json-editor-bg);
+        border: 1px solid var(--bs-json-editor-border-color);
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Key labels — mono uppercase eyebrow treatment ─────────────────────────
+
+    .tc-json-editor-key {
+        font-family: var(--bp-mono);
+        font-size: 11px;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        color: var(--bp-teal-fg);
+    }
+
+    // ── Group header ──────────────────────────────────────────────────────────
+
+    .tc-json-editor-group-header {
+        background: var(--bp-paper-tint-2);
+        border-bottom-color: var(--bp-border-strong);
+    }
+
+    .tc-json-editor-toggle {
+        font-family: var(--bp-mono);
+        font-size: 11px;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--bp-text-soft);
+
+        &:hover {
+            background: var(--bp-paper-tint);
+        }
+
+        &:focus-visible {
+            // Pink focus ring — primary accent for blueprint
+            outline-color: var(--bp-pink);
+        }
+    }
+
+    // ── Count / array-index badges ────────────────────────────────────────────
+    // Render as soft chips: violet-soft fill + violet-fg text, mono font.
+
+    .tc-json-editor-count,
+    .tc-json-editor-array-index {
+        font-family: var(--bp-mono);
+        font-size: 10px;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        color: var(--bp-violet-fg);
+        background: var(--bp-violet-soft);
+        padding: 0.0625rem 0.3125rem;
+    }
+
+    // ── Chevron ───────────────────────────────────────────────────────────────
+
+    .tc-json-editor-chevron svg {
+        color: var(--bp-text-faint);
+    }
+
+    // ── Icon buttons (add / remove) ───────────────────────────────────────────
+    // Remove btn → faint/danger on hover. Add btn → teal.
+
+    .tc-json-editor-icon-btn {
+        color: var(--bp-text-faint);
+        transition: background var(--bp-ease, 0.18s ease),
+                    color var(--bp-ease, 0.18s ease);
+
+        &:hover {
+            background: var(--bp-teal-soft);
+            color: var(--bp-teal-fg);
+        }
+
+        &:active {
+            background: var(--bp-teal-line, var(--bp-border-strong));
+        }
+
+        &:focus-visible {
+            outline-color: var(--bp-pink);
+        }
+    }
+
+    // "Add" icon button → pink accent (primary action in the arcade rotation)
+    .tc-json-editor-icon-btn.tc-json-editor-add {
+        &:hover {
+            background: var(--bp-pink-soft);
+            color: var(--bp-pink);
+        }
+
+        &:active {
+            background: var(--bp-pink-line, var(--bp-border-pink));
+        }
+    }
+
+    // ── Empty state ───────────────────────────────────────────────────────────
+
+    .tc-json-editor-empty {
+        font-family: var(--bp-mono);
+        font-size: 11px;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        color: var(--bp-text-faint);
+    }
+
+    // ── Error text ────────────────────────────────────────────────────────────
+
+    .tc-json-editor-error {
+        color: var(--bp-danger);
+        font-family: var(--bp-body);
+        font-size: 0.8125rem;
+        background: var(--bp-danger-soft);
+        padding: 0.25rem var(--bs-json-editor-row-padding-x, 0.75rem);
+    }
+
+    // ── Loading skeleton — violet-tinted shimmer ──────────────────────────────
+    // Replace raw --tc-surface-muted / --tc-surface-hover (slate) with
+    // blueprint lavender tokens.
+
+    .tc-json-editor-skeleton-key,
+    .tc-json-editor-skeleton-field {
+        background: linear-gradient(
+            90deg,
+            var(--bp-bg)       25%,
+            var(--bp-bg-2)     37%,
+            var(--bp-bg)       63%
+        );
+        background-size: 200% 100%;
+    }
+
+    // Skeleton static fallback under prefers-reduced-motion
+    @media (prefers-reduced-motion: reduce) {
+        .tc-json-editor-skeleton-key,
+        .tc-json-editor-skeleton-field {
+            background: var(--bp-bg);
+        }
+    }
+}

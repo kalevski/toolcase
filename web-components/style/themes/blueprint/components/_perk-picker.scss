@@ -1,0 +1,147 @@
+// Blueprint › tc-perk-picker — white paper cards with teal HUD brackets, pink selected fill, display name + mono icon glyph.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-perk-picker {
+        // ── Card surface tokens ──────────────────────────────────────────────────
+        --bs-perk-picker-card-bg:           var(--bp-paper);
+        --bs-perk-picker-card-border:       var(--bp-border);
+        --bs-perk-picker-card-hover-bg:     var(--bp-paper-tint);
+        --bs-perk-picker-card-hover-border: var(--bp-border-strong);
+
+        // ── Selected state → pink CTA fill ──────────────────────────────────────
+        --bs-perk-picker-selected-bg:           var(--bp-pink);
+        --bs-perk-picker-selected-border:       var(--bp-pink);
+        --bs-perk-picker-selected-color:        var(--bp-pink-ink);
+        --bs-perk-picker-selected-desc-color:   color-mix(in srgb, var(--bp-pink-ink) 72%, transparent);
+
+        // ── Icon tile ────────────────────────────────────────────────────────────
+        // Teal-tinted well at rest; semi-transparent white when selected (on pink).
+        --bs-perk-picker-icon-bg:              var(--bp-bg-2);
+        --bs-perk-picker-icon-color:           var(--bp-teal-fg);   // teal text on white clears AA
+        --bs-perk-picker-icon-selected-bg:     rgba(255, 255, 255, 0.18);
+        --bs-perk-picker-icon-selected-color:  var(--bp-pink-ink);
+
+        // ── Name / description typography tokens ─────────────────────────────────
+        --bs-perk-picker-name-color:        var(--bp-text);
+        --bs-perk-picker-description-color: var(--bp-text-muted);
+    }
+
+    // ── Card shell ───────────────────────────────────────────────────────────────
+    .tc-perk-picker-card {
+        background: var(--bs-perk-picker-card-bg);
+        border-color: var(--bs-perk-picker-card-border);
+        box-shadow: var(--tc-shadow-sm);
+        transition:
+            background-color 0.18s var(--bp-ease),
+            border-color     0.18s var(--bp-ease),
+            box-shadow       0.18s var(--bp-ease),
+            transform        0.18s var(--bp-ease);
+
+        // HUD corner bracket — teal top-left decoration signals "tappable tile".
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            pointer-events: none;
+            opacity: 0.55;
+            transition: opacity 0.18s var(--bp-ease);
+        }
+
+        &:hover:not(.is-selected):not(.is-locked) {
+            background: var(--bs-perk-picker-card-hover-bg);
+            border-color: var(--bs-perk-picker-card-hover-border);
+            box-shadow: var(--tc-shadow-hover);
+            transform: translateY(-2px);
+
+            // Bracket pops on hover.
+            &::before {
+                opacity: 1;
+            }
+        }
+
+        &:focus-visible {
+            // Pink focus ring — primary accent in blueprint.
+            outline-color: var(--bp-pink);
+        }
+
+        // ── Selected: pink gradient fill + pink glow ──────────────────────────
+        &.is-selected {
+            background: var(--bp-pink-grad);
+            border-color: var(--bs-perk-picker-selected-border);
+            box-shadow: var(--bp-glow-pink);
+            transform: translateY(-2px);
+
+            // Bracket becomes white on the pink fill.
+            &::before {
+                border-color: rgba(255, 255, 255, 0.5);
+                opacity: 1;
+            }
+        }
+
+        // ── Locked: standard fade, bracket hidden ────────────────────────────
+        &.is-locked::before {
+            display: none;
+        }
+    }
+
+    // ── Icon tile ─────────────────────────────────────────────────────────────
+    .tc-perk-picker-card-icon {
+        background: var(--bs-perk-picker-icon-bg);
+        color: var(--bs-perk-picker-icon-color);
+
+        // Text-glyph variant → mono eyebrow style (uppercase short code).
+        &--text {
+            font-family: var(--bp-mono);
+            font-size: 0.8125rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--bp-teal-fg);
+
+            .is-selected & {
+                color: var(--bs-perk-picker-icon-selected-color);
+                letter-spacing: 0.08em;   // keep tracking on pink fill
+            }
+        }
+    }
+
+    // ── Perk name — display font, tight tracking ──────────────────────────────
+    .tc-perk-picker-card-name {
+        font-family: var(--bp-display);
+        font-size: 0.875rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: var(--bs-perk-picker-name-color);
+        text-transform: uppercase;   // display font reads best in uppercase for short labels
+
+        .is-selected & {
+            color: var(--bs-perk-picker-selected-color);
+        }
+    }
+
+    // ── Description — body font, muted ───────────────────────────────────────
+    .tc-perk-picker-card-description {
+        font-family: var(--bp-body);
+        color: var(--bs-perk-picker-description-color);
+
+        .is-selected & {
+            color: var(--bs-perk-picker-selected-desc-color);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .tc-perk-picker-card {
+            transition: none;
+
+            &::before {
+                transition: none;
+            }
+        }
+    }
+}

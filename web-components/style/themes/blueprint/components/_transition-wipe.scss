@@ -1,0 +1,33 @@
+// Blueprint › tc-transition-wipe — pink primary fill (CTA accent) with teal glow halo and blueprint ease curve.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-transition-wipe {
+        // Replace the baked var(--tc-ink) dark surface with the blueprint pink
+        // primary fill — a full-screen wipe is a high-drama moment that belongs in
+        // the "primary action / CTA" tier of the accent rotation (pink = primary).
+        // Consumers can still override via the `wipe-color` attribute, which writes
+        // through as an inline --bs-transition-wipe-color override just as in base.
+        --bs-transition-wipe-color: var(--bp-pink);
+    }
+
+    .tc-transition-wipe-fill {
+        // Use the richer pink gradient instead of a flat fill so the wipe surface
+        // reads as intentional blueprint chrome rather than a raw color block.
+        // Falls back to --bp-pink if the gradient token is not yet resolved.
+        background: var(--bp-pink-grad, var(--bp-pink));
+
+        // Teal ambient glow bleeds inward from all edges during the wipe, giving
+        // the fill a soft HUD-lit edge — blueprint action-accent vocabulary.
+        // The glow is visible only while the fill is opaque / in-frame, so it
+        // never lingers when the wipe is at rest (opacity-0 / translated off).
+        box-shadow: inset 0 0 80px 24px var(--bp-teal-soft);
+
+        // Blueprint ease curve for a more deliberate, hardware-style motion feel.
+        transition:
+            opacity var(--bs-transition-wipe-duration) var(--bp-ease, ease-in-out),
+            transform var(--bs-transition-wipe-duration) var(--bp-ease, ease-in-out),
+            clip-path var(--bs-transition-wipe-duration) var(--bp-ease, ease-in-out);
+    }
+}

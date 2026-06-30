@@ -1,0 +1,62 @@
+// Blueprint › tc-list-row — white-paper rows with faint lavender dividers, pink selected accent, and mono meta text.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    // ── Surface & divider ──────────────────────────────────────────────────────
+    tc-list-row {
+        // White paper background; faint lavender hairline replaces slate divider.
+        --bs-list-row-bg: var(--bp-paper);
+        --bs-list-row-border-color: var(--bp-border-faint);
+
+        // Primary ink for labels; Space Grotesk body voice is inherited from root.
+        --bs-list-row-label-color: var(--bp-text);
+
+        // Mono meta in blueprint-text-faint; already uses --tc-font-mono → JetBrains Mono.
+        --bs-list-row-meta-color: var(--bp-text-faint);
+        --bs-list-row-meta-font-family: var(--bp-mono, 'JetBrains Mono', monospace);
+
+        // Pink primary accent for selected state (replaces --tc-app-accent).
+        --bs-list-row-accent: var(--bp-pink);
+
+        // Soft lavender tint for selected row background.
+        --bs-list-row-selected-bg: var(--bp-pink-surface, color-mix(in srgb, var(--bp-pink) 6%, var(--bp-paper)));
+
+        // Pink focus ring.
+        --bs-list-row-focus-outline: 2px solid var(--bp-pink);
+
+        // Smooth transition using blueprint ease.
+        transition: background 0.14s var(--bp-ease, ease);
+
+        // ── Hover: paper-tint lift replaces the dark rgba(255,255,255,.04) literal ──
+        &:hover:not(.tc-list-row--selected):not(.tc-list-row--disabled) {
+            background: var(--bp-paper-tint);
+        }
+    }
+
+    // ── Meta text: mono uppercase micro-label voice ────────────────────────────
+    // The trailing value reads as a HUD readout — uppercase, teal-fg for legibility.
+    tc-list-row .tc-list-row-meta {
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        font-size: 0.75rem;
+        color: var(--bp-teal-fg); // AA-safe teal text on white
+    }
+
+    // ── Selected state: pink left-rail + accent label ──────────────────────────
+    // --bs-list-row-accent is already pointed at --bp-pink above; the base
+    // partial drives left-border + label/media color through it automatically.
+    // We add a soft pink ambient shadow to reinforce the active row.
+    tc-list-row.tc-list-row--selected {
+        box-shadow: inset 3px 0 0 var(--bp-pink); // redundant safety; base uses border-left
+
+        .tc-list-row-label {
+            // Slightly bolder weight; accent color from --bs-list-row-accent (already pink).
+            font-weight: 600;
+        }
+    }
+
+    // ── Last row: no orphan hairline ───────────────────────────────────────────
+    tc-list-row:last-child {
+        border-bottom: none;
+    }
+}

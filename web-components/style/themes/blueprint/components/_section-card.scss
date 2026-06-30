@@ -1,0 +1,125 @@
+// Blueprint › tc-section-card — technical panel: display title, teal icon chip, subtle header tint, HUD corner bracket.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Token overrides ───────────────────────────────────────────────────────
+    //
+    // Re-point every --bs-section-card-* var to blueprint tokens.
+    // The base partial drives all cosmetics through these, so this is the
+    // cleanest re-skin with minimal selector noise.
+
+    tc-section-card {
+        // Card shell
+        --bs-section-card-bg:                    var(--bp-paper);
+        --bs-section-card-border-color:          var(--bp-border);
+        --bs-section-card-shadow:                var(--tc-shadow-sm);
+
+        // Header — very faint teal wash to signal "panel header" without
+        // fighting the body; replaces the slate gradient literals.
+        --bs-section-card-header-bg:             linear-gradient(
+                                                     135deg,
+                                                     var(--bp-teal-soft),
+                                                     transparent 80%
+                                                 );
+        --bs-section-card-header-border-color:   var(--bp-border);
+
+        // Title — Chakra Petch for section names; blueprint treats titled
+        // sections as display-level headings.
+        --bs-section-card-title-color:           var(--bp-text);
+
+        // Icon chip — paper-tint fill, teal icon so it reads as an action glyph.
+        --bs-section-card-icon-color:            var(--bp-teal-fg);
+        --bs-section-card-icon-chip-bg:          var(--bp-paper-tint);
+        --bs-section-card-icon-chip-border-color: var(--bp-border);
+
+        // Danger variant — replace slate gradient stops with --bp-danger rgba;
+        // use the semantic danger tokens everywhere else.
+        --bs-section-card-danger-border-color:        var(--bp-danger);
+        --bs-section-card-danger-header-bg:           linear-gradient(
+                                                          135deg,
+                                                          rgba(220, 38, 38, 0.06),
+                                                          rgba(220, 38, 38, 0.02) 80%
+                                                      );
+        --bs-section-card-danger-header-border-color: rgba(220, 38, 38, 0.22);
+        --bs-section-card-danger-title-color:         var(--bp-danger);
+        --bs-section-card-danger-icon-color:          var(--bp-danger);
+        --bs-section-card-danger-icon-chip-bg:        var(--bp-danger-soft);
+        --bs-section-card-danger-icon-chip-border-color: rgba(220, 38, 38, 0.22);
+    }
+
+    // ── Title typography ──────────────────────────────────────────────────────
+    //
+    // Override font-family; the base partial hard-codes 'Inter'.
+    // --bp-display is Chakra Petch — display weight for section names.
+
+    .tc-section-card-title {
+        font-family: var(--bp-display);
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        font-size: 0.8125rem; // slightly tighter than base 0.9375rem at uppercase
+        color: var(--bs-section-card-title-color);
+    }
+
+    // ── Icon chip — teal tint on hover ────────────────────────────────────────
+
+    .tc-section-card-icon {
+        background: var(--bs-section-card-icon-chip-bg);
+        border-color: var(--bs-section-card-icon-chip-border-color);
+        color: var(--bs-section-card-icon-color);
+        transition: background var(--bp-ease, 0.2s ease),
+                    border-color var(--bp-ease, 0.2s ease),
+                    color var(--bp-ease, 0.2s ease);
+    }
+
+    // ── Header — HUD corner bracket ───────────────────────────────────────────
+    //
+    // Blueprint engineering-panel idiom: a 12×12 teal L-bracket anchored
+    // top-left of the header signals "this panel is a discrete tile."
+    // position:relative is already present on flex containers; we add it
+    // explicitly to be safe.
+
+    .tc-section-card-header {
+        position: relative;
+        background: var(--bs-section-card-header-bg);
+        border-bottom-color: var(--bs-section-card-header-border-color);
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            pointer-events: none;
+        }
+
+        // Nudge padding-left so the bracket doesn't sit under the icon chip.
+        padding-left: 1.75rem;
+    }
+
+    // ── Danger variant — left accent stripe visual polish ─────────────────────
+    //
+    // The base partial already paints the 4px left border; we only re-point
+    // the header bracket to danger red so the two accents stay in sync.
+
+    .tc-section-card--danger {
+        .tc-section-card-header::before {
+            border-top-color: var(--bp-danger);
+            border-left-color: var(--bp-danger);
+        }
+    }
+
+    // ── Body — recessed well ──────────────────────────────────────────────────
+    //
+    // Blueprint bodies sit slightly recessed so the card hierarchy is clear
+    // without requiring additional chrome.
+
+    .tc-section-card-body {
+        background: var(--bp-bg-2);
+    }
+
+}

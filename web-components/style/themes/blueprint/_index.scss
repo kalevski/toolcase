@@ -1,0 +1,16 @@
+// Blueprint theme — opt-in light "vector blueprint" skin for
+// @toolcase/web-components (lavender-grey paper canvas ruled with a faint violet
+// grid, white cards with lilac hairlines, HUD corner-brackets, a four-colour
+// arcade accent set — pink · teal · violet · amber — and, uniquely among the
+// toolcase themes, ROUNDED corners).
+//
+// Activate by wrapping content in the theme root:
+//   <tc-theme name="blueprint"> … your tc-* components … </tc-theme>
+// (or any element with [data-tc-theme="blueprint"]).
+//
+// Load order: foundation (token remap) first so the component partials override
+// on top of the already-blueprint --tc-* / --bs-* tokens; the radius sweep
+// (inside components) loads last to re-round every flat-cornered surface.
+
+@use 'foundation';
+@use 'components';

@@ -1,0 +1,32 @@
+// Blueprint › tc-setting-row — HUD field-row: mono uppercase label, faint divider hairline, body prose description.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    .tc-setting-row {
+        // Divider becomes a blueprint grid rule — faint, not a full border weight.
+        --bs-setting-row-border: 1px solid var(--bp-border-faint);
+
+        // Label reads as a HUD field identifier: mono face, uppercase, tracked.
+        --bs-setting-row-label-color: var(--bp-text-soft);
+        --bs-setting-row-label-size: 0.75rem;
+        --bs-setting-row-label-weight: 500;
+
+        // Description is clearly secondary prose.
+        --bs-setting-row-description-color: var(--bp-text-faint);
+
+        // Label gets mono treatment via element rule (no --bs-* var for font-family).
+        &__label {
+            font-family: var(--bp-mono);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        // Description gets the body face for comfortable prose reading.
+        &__description {
+            font-family: var(--bp-body);
+            letter-spacing: 0;
+        }
+    }
+
+}

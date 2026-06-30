@@ -1,0 +1,122 @@
+// Blueprint › tc-chip — mono-uppercase chips with paper surface, chip-hairline border,
+// soft tint variants, and pink selected fill; count badge uses teal-soft; remove button mirrors chip surface.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-chip,
+    tc-tag {
+        // Default surface: white paper, chip-specific hairline, primary ink.
+        // Drive all cosmetics through --bs-chip-* so variants below only
+        // need to repoint the relevant var.
+        --bs-chip-bg:               var(--bp-paper);
+        --bs-chip-bg-hover:         var(--bp-paper-tint-2);
+        --bs-chip-color:            var(--bp-text-soft);
+        --bs-chip-border-color:     var(--bp-border-chip);
+
+        // Selected (active) → pink primary fill, white ink.
+        --bs-chip-selected-bg:      var(--bp-pink);
+        --bs-chip-selected-color:   var(--bp-pink-ink);
+
+        // Count badge: teal soft tint so it reads as an informational counter.
+        --bs-chip-count-bg:         var(--bp-teal-soft);
+        --bs-chip-count-color:      var(--bp-teal-fg);
+    }
+
+    // ── Chip body ────────────────────────────────────────────────────────────
+    .tc-chip {
+        // Mono face — mirrors eyebrows, nav HUD labels, and badge labels.
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+
+        transition:
+            background-color var(--bp-ease),
+            color            var(--bp-ease),
+            border-color     var(--bp-ease),
+            box-shadow       var(--bp-ease);
+
+        &:hover:not([disabled]) {
+            border-color: var(--bp-border-strong);
+        }
+
+        &:focus-visible {
+            // Pink glow ring on focus — keeps the blueprint arcade accent.
+            outline: 2px solid var(--bp-pink);
+            outline-offset: 2px;
+        }
+
+        // Selected: solid pink fill + glow halo.
+        &.is-selected {
+            border-color: var(--bp-pink);
+            box-shadow: var(--bp-glow-pink);
+        }
+    }
+
+    // ── Colored (semantic) variants ──────────────────────────────────────────
+    // Repoint the soft fills and emphasis text to --bp-* tokens so no raw
+    // tc-slate-* or theme-colors-soft literals leak into the blueprint theme.
+
+    // primary → pink soft tint + pink-fg text + pink hairline
+    .tc-chip--primary:not(.is-selected) {
+        --bs-chip-bg:           var(--bp-pink-soft);
+        --bs-chip-color:        var(--bp-pink);
+        --bs-chip-border-color: var(--bp-pink-line);
+    }
+
+    // info → violet soft tint
+    .tc-chip--info:not(.is-selected) {
+        --bs-chip-bg:           var(--bp-violet-soft);
+        --bs-chip-color:        var(--bp-violet-fg);
+        --bs-chip-border-color: var(--bp-violet);
+    }
+
+    // success → teal soft tint (status: success = teal in blueprint)
+    .tc-chip--success:not(.is-selected) {
+        --bs-chip-bg:           var(--bp-teal-soft);
+        --bs-chip-color:        var(--bp-teal-fg);
+        --bs-chip-border-color: var(--bp-teal);
+    }
+
+    // warning → amber soft tint
+    .tc-chip--warning:not(.is-selected) {
+        --bs-chip-bg:           var(--bp-amber-soft);
+        --bs-chip-color:        var(--bp-amber-fg);
+        --bs-chip-border-color: var(--bp-amber);
+    }
+
+    // danger → real red (NOT pink — danger is --bp-danger in blueprint)
+    .tc-chip--danger:not(.is-selected) {
+        --bs-chip-bg:           var(--bp-danger-soft);
+        --bs-chip-color:        var(--bp-danger);
+        --bs-chip-border-color: var(--bp-danger);
+    }
+
+    // ── Count badge ──────────────────────────────────────────────────────────
+    .tc-chip-count {
+        // Mono face for count label, consistent with chip text style.
+        font-family: var(--bp-mono);
+        letter-spacing: 0.04em;
+    }
+
+    // ── Remove button ────────────────────────────────────────────────────────
+    .tc-chip-remove {
+        // Inherits --bs-chip-* vars for bg/color/border from the host,
+        // so the remove button is always visually fused with the chip body.
+        // Only override transition to match the chip's ease token.
+        transition:
+            background-color var(--bp-ease),
+            color            var(--bp-ease);
+
+        &:hover:not([disabled]) {
+            // Stronger recessed tint on remove hover to signal destructive action.
+            background-color: var(--bp-paper-tint-2);
+            color: var(--bp-pink);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-pink);
+            outline-offset: 2px;
+        }
+    }
+}

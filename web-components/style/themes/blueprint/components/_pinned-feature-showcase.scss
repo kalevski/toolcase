@@ -1,0 +1,93 @@
+// Blueprint › tc-pinned-feature-showcase — blueprint editorial skin: display panel title, mono teal eyebrow, paper item cards with HUD corner-bracket and hover lift.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-pinned-feature-showcase {
+        // Eyebrow — reroute from generic monospace + tc-text-muted to bp-mono + teal
+        --bs-pinned-feature-showcase-eyebrow-color: var(--bp-teal-fg);
+        --bs-pinned-feature-showcase-eyebrow-letter-spacing: 0.12em;
+
+        // Title — blueprint display face (Chakra Petch), stronger ink
+        --bs-pinned-feature-showcase-title-color: var(--bp-emphasis);
+        --bs-pinned-feature-showcase-title-font-weight: 700;
+        --bs-pinned-feature-showcase-title-letter-spacing: -0.02em;
+
+        // Description — reroute tc-text-muted → bp-text-muted (no slate leak)
+        --bs-pinned-feature-showcase-desc-color: var(--bp-text-muted);
+
+        // Item box — reroute tc-border → bp-border (no slate leak)
+        --bs-pinned-feature-showcase-item-border: var(--bp-border);
+
+        // Item title — inherit bp-text (no slate)
+        --bs-pinned-feature-showcase-item-title-color: var(--bp-text);
+        --bs-pinned-feature-showcase-item-title-font-weight: 600;
+
+        // Item description — bp-text-muted
+        --bs-pinned-feature-showcase-item-desc-color: var(--bp-text-muted);
+
+        // Item icon — teal accent instead of slate-muted
+        --bs-pinned-feature-showcase-item-icon-color: var(--bp-teal-fg);
+    }
+
+    // Eyebrow: switch to bp-mono face so it reads as a HUD label
+    .tc-pinned-feature-showcase-eyebrow {
+        font-family: var(--bp-mono);
+        color: var(--bp-teal-fg);  // belt-and-suspenders; token above handles it too
+    }
+
+    // Panel title: switch to bp-display (Chakra Petch) for the editorial headline
+    .tc-pinned-feature-showcase-title {
+        font-family: var(--bp-display);
+    }
+
+    // Media container: paper ground + hairline frame
+    .tc-pinned-feature-showcase-media {
+        background: var(--bp-paper);
+        border: 1px solid var(--bp-border);
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // Feature item: paper card + hairline + soft lift shadow.
+    // Position relative so the HUD corner-bracket ::before can anchor.
+    .tc-pinned-feature-showcase-item {
+        position: relative;
+        background: var(--bp-paper);
+        border-color: var(--bp-border);  // drives the 1px solid already set by the base
+        box-shadow: var(--tc-shadow-sm);
+        transition: transform 0.18s var(--bp-ease, ease), box-shadow 0.18s var(--bp-ease, ease), border-color 0.18s var(--bp-ease, ease);
+
+        // HUD corner-bracket — teal L-shaped mark, top-left corner
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            pointer-events: none;
+        }
+
+        // Hover: 2px lift + stronger shadow + teal accent border
+        &:hover {
+            transform: translateY(-2px);
+            border-color: var(--bp-teal-line, var(--bp-border-strong));
+            box-shadow: var(--tc-shadow-md, var(--tc-shadow-sm)), var(--bp-glow-teal);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            transition: none;
+
+            &:hover {
+                transform: none;
+            }
+        }
+    }
+
+    // Item title: switch to bp-display for consistent title hierarchy across the list
+    .tc-pinned-feature-showcase-item-title {
+        font-family: var(--bp-display);
+    }
+}

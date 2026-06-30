@@ -1,0 +1,71 @@
+// Blueprint › tc-debug-overlay — dark-ink HUD panel with mono labels, teal/amber/danger FPS status, and a HUD corner-bracket accent.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-debug-overlay {
+        // The debug overlay is a game/canvas HUD — it intentionally stays on the
+        // dark ink surface (--tc-ink → #1a1830 in blueprint) so it reads over any
+        // lit or colourful canvas content. The foundation remap already provides
+        // --tc-ink, --tc-text-inverse, and --tc-font-mono; we wire those in and
+        // replace the base oklch() FPS colours with blueprint arcade tokens.
+
+        // Surface — keep the dark ink panel; use the slightly lighter ink-2 for
+        // a subtle depth lift over pure black, and trim with the blueprint border.
+        --bs-debug-overlay-bg: var(--tc-ink);
+        --bs-debug-overlay-border: 1px solid var(--bp-border-strong);
+
+        // Crisp violet-tinted drop shadow appropriate for a floating overlay tier.
+        --bs-debug-overlay-shadow: var(--tc-shadow-lg);
+
+        // Typography — JetBrains Mono (already mapped via --tc-font-mono).
+        // Label color: a mid-violet readable on the dark ink (#8e89b3 on #1a1830).
+        --bs-debug-overlay-label-color: var(--bp-text-faint);
+        // Value color: full white — keeps tabular numbers punchy on the dark surface.
+        --bs-debug-overlay-value-color: var(--tc-text-inverse);
+
+        // FPS status colours — vivid arcade accents chosen for legibility on the
+        // dark ink ground. Use the full-brightness token (not the -fg darkened
+        // variant, which is calibrated for text on white, not dark surfaces).
+        // good  → teal  (success in the blueprint accent rotation)
+        // warn  → amber (supporting warning accent)
+        // danger → red  (real danger, not pink which reads as brand)
+        --bs-debug-overlay-fps-good-color: var(--bp-teal);
+        --bs-debug-overlay-fps-warning-color: var(--bp-amber);
+        --bs-debug-overlay-fps-danger-color: var(--bp-danger);
+    }
+
+    // HUD corner-bracket — blueprint structural accent on the panel surface.
+    // A 12×12 teal bracket marks the top-left corner, signalling this as a live
+    // telemetry readout rather than a static card.
+    .tc-debug-overlay-panel {
+        position: relative;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            pointer-events: none;
+        }
+    }
+
+    // Row label — mono eyebrow: uppercase + wide tracking already in base; here
+    // we lock the font family explicitly to --bp-mono for full blueprint fidelity
+    // even if --tc-font-mono ever diverges.
+    .tc-debug-overlay-label {
+        font-family: var(--bp-mono);
+    }
+
+    // Value — tabular mono, white on ink (already driven by --bs-debug-overlay-value-color).
+    .tc-debug-overlay-value {
+        font-family: var(--bp-mono);
+    }
+
+    // FPS status — the three arcade-accent colours are wired through the
+    // --bs-debug-overlay-fps-* vars set above; no extra selectors needed beyond
+    // what the base partial already provides.
+}

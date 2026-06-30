@@ -1,0 +1,39 @@
+// Blueprint › tc-chip-group — hairline-framed chip group with display title and mono eyebrow subtitle.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    // Re-point the border to the dedicated chip-border token (cooler violet tint vs. generic --tc-border).
+    tc-chip-group {
+        --bs-chip-group-border-color: var(--bp-border-chip);
+
+        // Title: display face (Chakra Petch), primary ink, tight tracking — reads as a section heading.
+        --bs-chip-group-title-font-size: 0.875rem;
+        --bs-chip-group-title-font-weight: 600;
+
+        // Subtitle: mono eyebrow style — muted, uppercase, loose tracking.
+        --bs-chip-group-subtitle-color: var(--bp-text-muted);
+    }
+
+    // Override literal color on title (base rule writes `color: var(--tc-text)` directly, not via a var).
+    .tc-chip-group-title {
+        font-family: var(--bp-display);
+        color: var(--bp-text);
+        letter-spacing: -0.01em; // Chakra Petch reads tighter at small sizes
+    }
+
+    // Subtitle as a mono eyebrow: uppercase, spaced-out, faint ink.
+    .tc-chip-group-subtitle {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 0.6875rem; // slightly smaller — eyebrow rhythm
+        color: var(--bp-text-faint);
+    }
+
+    // Framed variant: swap the generic border + add a subtle paper surface and shadow.
+    .tc-chip-group.has-border {
+        background: var(--bp-paper);
+        border-color: var(--bp-border-chip);
+        box-shadow: var(--tc-shadow-sm);
+    }
+}

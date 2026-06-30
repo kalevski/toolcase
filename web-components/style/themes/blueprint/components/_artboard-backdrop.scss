@@ -1,0 +1,30 @@
+// Blueprint › tc-artboard-backdrop — the lavender "paper" canvas ruled with the
+// faint violet blueprint grid + pink/teal ambient glow. This is the recommended
+// way to paint the blueprint surface: the tc-theme wrapper is display:contents
+// and cannot carry a background, so wrap content in a backdrop element. Mirrors
+// the template's layered `body::before` (grid) + glow field.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-artboard-backdrop,
+    .tc-artboard-backdrop--dark,
+    .tc-artboard-backdrop--parch {
+        // grid lines sit ON TOP of the glow + paper fill (later layers paint last).
+        --bs-artboard-backdrop-bg: var(--bp-grid-field), var(--bp-glow-field), var(--bp-bg);
+        background-size:
+            var(--bp-grid-size),
+            var(--bp-grid-size),
+            cover,
+            cover;
+        --bs-artboard-backdrop-color: var(--bp-text);
+        --bs-artboard-backdrop-border-color: transparent;
+    }
+
+    .tc-artboard-backdrop--scene {
+        --bs-artboard-backdrop-bg:
+            radial-gradient(60% 50% at 50% 25%, rgba(91, 61, 242, 0.08), transparent 60%),
+            linear-gradient(180deg, var(--bp-paper-tint), var(--bp-bg));
+        --bs-artboard-backdrop-color: var(--bp-text);
+        --bs-artboard-backdrop-border-color: var(--bp-border);
+    }
+}

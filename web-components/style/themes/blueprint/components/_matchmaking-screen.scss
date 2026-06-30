@@ -1,0 +1,178 @@
+// Blueprint › tc-matchmaking-screen — lavender-paper panel with teal spin-ring,
+// pink primary CTA, mono eyebrow/meta labels, and state-keyed accent rotation.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Custom-property re-skin ───────────────────────────────────────────────
+    // Drive as much as possible through the --bs-matchmaking-screen-* contract
+    // so the base structural rules pick up the blueprint palette automatically.
+
+    tc-matchmaking-screen {
+        // Panel surface: white raised card on the lavender page
+        --bs-matchmaking-screen-bg:               var(--bp-paper);
+        --bs-matchmaking-screen-border:           var(--bp-border);
+
+        // Ring defaults (idle state)
+        --bs-matchmaking-screen-ring-border:      var(--bp-border-strong);
+        --bs-matchmaking-screen-ring-color:       var(--bp-text-faint);
+
+        // Searching/connecting spin — teal (everyday action accent)
+        --bs-matchmaking-screen-ring-spin-color:  var(--bp-teal);
+
+        // Found — teal success ring + check
+        --bs-matchmaking-screen-ring-found-border: var(--bp-teal);
+        --bs-matchmaking-screen-ring-found-color:  var(--bp-teal);
+        --bs-matchmaking-screen-ring-found-bg:     var(--bp-teal-soft);
+
+        // Failed — real danger red (NOT pink)
+        --bs-matchmaking-screen-ring-failed-border: var(--bp-danger);
+        --bs-matchmaking-screen-ring-failed-color:  var(--bp-danger);
+
+        // Eyebrow — teal-fg so it clears AA on white; --bp-mono for HUD font
+        --bs-matchmaking-screen-eyebrow-color:    var(--bp-teal-fg);
+
+        // Title — display font, darkest ink
+        --bs-matchmaking-screen-title-color:      var(--bp-emphasis);
+
+        // Meta strip: recessed well, faint hairline, muted key / readable value
+        --bs-matchmaking-screen-meta-bg:          var(--bp-bg-2);
+        --bs-matchmaking-screen-meta-border:      var(--bp-border-faint);
+        --bs-matchmaking-screen-meta-key-color:   var(--bp-text-faint);
+        --bs-matchmaking-screen-meta-val-color:   var(--bp-text-soft);
+
+        // Cancel / secondary button — plain paper surface
+        --bs-matchmaking-screen-btn-color:        var(--bp-text-soft);
+        --bs-matchmaking-screen-btn-bg:           var(--bp-paper);
+        --bs-matchmaking-screen-btn-border:       var(--bp-border-soft);
+        --bs-matchmaking-screen-btn-hover-bg:     var(--bp-paper-tint);
+
+        // Accept / primary CTA — pink gradient (blueprint primary)
+        --bs-matchmaking-screen-btn-accept-bg:    var(--bp-pink);
+        --bs-matchmaking-screen-btn-accept-color: var(--bp-pink-ink);
+    }
+
+    // ── Root panel ───────────────────────────────────────────────────────────
+    // Soft shadow lifts the card off the lavender page; top pink accent stripe
+    // reinforces blueprint's CTA-primary identity.
+
+    .tc-matchmaking-screen {
+        box-shadow: var(--tc-shadow-sm);
+        border-color: var(--bp-border);
+        border-top: 3px solid var(--bp-pink); // blueprint primary crown stripe
+
+        // data-state drives visual accent rotation via ring + text colours below
+    }
+
+    // ── Spin ring — teal glow halo while searching / connecting ───────────────
+
+    .tc-matchmaking-screen-ring--spin {
+        box-shadow: 0 0 0 .25em var(--bp-teal-soft);
+    }
+
+    // ── Found ring — teal success halo ───────────────────────────────────────
+
+    .tc-matchmaking-screen-ring--found {
+        box-shadow: 0 0 0 .25em var(--bp-teal-soft);
+    }
+
+    // ── Failed ring — danger glow ─────────────────────────────────────────────
+
+    .tc-matchmaking-screen-ring--failed {
+        background: var(--bp-danger-soft);
+    }
+
+    // ── Eyebrow — blueprint mono HUD font ────────────────────────────────────
+    // The base already sets font-family to --tc-font-mono; override to --bp-mono
+    // so blueprint's JetBrains Mono stack is authoritative here.
+
+    .tc-matchmaking-screen-eyebrow {
+        font-family: var(--bp-mono);
+        letter-spacing: .1em;
+        color: var(--bp-teal-fg); // teal-fg clears AA on white
+
+        // Per-state eyebrow colour hints (error state → danger)
+        .tc-matchmaking-screen[data-state='failed'] & {
+            color: var(--bp-danger);
+        }
+
+        .tc-matchmaking-screen[data-state='found'] & {
+            color: var(--bp-teal-fg);
+        }
+    }
+
+    // ── Title — display font (Chakra Petch), tight tracking ──────────────────
+
+    .tc-matchmaking-screen-title {
+        font-family: var(--bp-display);
+        letter-spacing: -.01em;
+        font-weight: 700;
+
+        // Failed state title → danger red
+        .tc-matchmaking-screen[data-state='failed'] & {
+            color: var(--bp-danger);
+        }
+
+        // Found state title → teal emphasis
+        .tc-matchmaking-screen[data-state='found'] & {
+            color: var(--bp-teal-fg);
+        }
+    }
+
+    // ── Meta strip — mono font, faint separators ─────────────────────────────
+
+    .tc-matchmaking-screen-meta {
+        border-color: var(--bp-border-faint);
+    }
+
+    .tc-matchmaking-screen-meta-item {
+        border-right-color: var(--bp-border-faint);
+    }
+
+    .tc-matchmaking-screen-meta-key {
+        font-family: var(--bp-mono);
+        letter-spacing: .12em;
+        color: var(--bp-text-faint);
+    }
+
+    .tc-matchmaking-screen-meta-val {
+        font-family: var(--bp-mono);
+        color: var(--bp-text-soft);
+    }
+
+    // ── Cancel / secondary button ─────────────────────────────────────────────
+
+    .tc-matchmaking-screen-btn {
+        font-family: var(--bp-body);
+        transition:
+            background-color var(--bp-ease, .18s ease),
+            box-shadow        var(--bp-ease, .18s ease),
+            opacity           var(--bp-ease, .18s ease);
+
+        &:focus-visible {
+            outline-color: var(--bp-teal);
+        }
+    }
+
+    // ── Accept / primary CTA — pink gradient + glow ───────────────────────────
+
+    .tc-matchmaking-screen-btn--accept {
+        background: var(--bp-pink-grad);
+        color: var(--bp-pink-ink);
+        border-color: var(--bp-pink);
+        font-family: var(--bp-display);
+        font-weight: 700;
+        letter-spacing: .03em;
+        text-transform: uppercase;
+
+        &:hover:not(:disabled) {
+            opacity: 1; // override base .88 — use glow instead
+            box-shadow: var(--bp-glow-pink);
+        }
+
+        &:focus-visible {
+            outline-color: var(--bp-pink);
+            box-shadow: var(--bp-glow-pink-strong);
+        }
+    }
+}

@@ -1,0 +1,126 @@
+// Blueprint › tc-cool-nav — frosted lavender navbar: paper surface with bp-border
+// hairline, mono-uppercase nav links, pink active underline, pink/teal-glow CTA,
+// brand dot flipped to teal, scrolled shadow replaced with violet-tinted token.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-cool-nav {
+        // Surface — translucent lavender-paper (matches bp-bg tinted slightly white)
+        --bs-cool-nav-bg: rgba(244, 243, 251, 0.88);         // --bp-paper-tint at ~88% opacity
+        --bs-cool-nav-color: var(--bp-text);
+        --bs-cool-nav-border: var(--bp-border);
+
+        // Brand — display font, teal dot as the "live" glyph
+        --bs-cool-nav-brand-color: var(--bp-emphasis);
+        --bs-cool-nav-brand-dot: var(--bp-teal);              // signature teal square
+
+        // Links — muted ink, teal hover (everyday action), full ink active
+        --bs-cool-nav-link-color: var(--bp-text-muted);
+        --bs-cool-nav-link-hover-color: var(--bp-teal-fg);    // teal-fg clears AA on white
+        --bs-cool-nav-link-active-color: var(--bp-text);
+        --bs-cool-nav-link-active-line: var(--bp-pink);       // pink underline = primary accent
+
+        // Toggler & collapse
+        --bs-cool-nav-toggler-color: var(--bp-text);
+        --bs-cool-nav-collapse-bg: var(--bp-paper);           // solid white when expanded mobile
+
+        // Scrolled state — use the pre-baked violet-tinted shadow token
+        --bs-cool-nav-scrolled-shadow: var(--tc-shadow-sm);
+    }
+
+    // Dark variant of cool-nav repointed for blueprint light palette
+    tc-cool-nav.tc-cool-nav--dark {
+        --bs-cool-nav-bg: var(--bp-paper);
+        --bs-cool-nav-color: var(--bp-text);
+        --bs-cool-nav-border: var(--bp-border);
+        --bs-cool-nav-brand-color: var(--bp-emphasis);
+        --bs-cool-nav-link-color: var(--bp-text-muted);
+        --bs-cool-nav-link-hover-color: var(--bp-teal-fg);
+        --bs-cool-nav-link-active-color: var(--bp-text);
+        --bs-cool-nav-collapse-bg: var(--bp-bg-2);
+        --bs-cool-nav-scrolled-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Brand ─────────────────────────────────────────────────────────────────
+
+    // Brand text: display font (Chakra Petch), tight tracking per blueprint spec
+    .tc-cool-nav-brand {
+        font-family: var(--bp-display);
+        font-size: 1rem;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+    }
+
+    // Teal brand dot with soft halo ring (live/pulse aesthetic)
+    .tc-cool-nav-brand-dot {
+        background-color: var(--bp-teal);
+        box-shadow: 0 0 0 0.18em var(--bp-teal-soft);
+    }
+
+    // ── Nav links — mono uppercase HUD labels ─────────────────────────────────
+
+    .tc-cool-nav-link {
+        font-family: var(--bp-mono);
+        font-size: 0.8125rem;
+        font-weight: 500;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        transition: color var(--bp-ease);
+    }
+
+    // ── Inner bar — backdrop blur for frosted glass effect ────────────────────
+
+    .tc-cool-nav-inner {
+        backdrop-filter: saturate(1.2) blur(10px);
+        -webkit-backdrop-filter: saturate(1.2) blur(10px);
+    }
+
+    // ── Toggler — teal-tinted hover state ─────────────────────────────────────
+
+    .tc-cool-nav-toggler {
+        border-color: var(--bp-border);
+        color: var(--bp-text);
+
+        &:hover {
+            background: var(--bp-teal-soft);
+        }
+
+        &:focus-visible {
+            outline-color: var(--bp-teal);
+        }
+    }
+
+    // ── Login CTA — pink primary glow; teal for secondary/outline ────────────
+    // The login button uses Bootstrap btn-{variant} classes.
+    // Re-point the focus outline; gradient and color handled by _button.scss.
+
+    .tc-cool-nav-login {
+        &.btn-primary {
+            // Pink CTA: pick up bp-pink-grad from the button blueprint partial.
+            // Override focus ring to match.
+            &:focus-visible {
+                outline: 2px solid var(--bp-pink);
+                outline-offset: 3px;
+                box-shadow: var(--bp-glow-pink);
+            }
+        }
+
+        &.btn-outline-primary,
+        &.btn-secondary,
+        &.btn-outline-secondary {
+            &:focus-visible {
+                outline: 2px solid var(--bp-teal);
+                outline-offset: 3px;
+                box-shadow: var(--bp-glow-teal);
+            }
+        }
+    }
+
+    // ── Collapse panel (mobile) — solid paper with top hairline ──────────────
+    // Already driven via --bs-cool-nav-collapse-bg; add subtle left-edge accent.
+
+    .tc-cool-nav-collapse {
+        border-top-color: var(--bp-border);
+    }
+}

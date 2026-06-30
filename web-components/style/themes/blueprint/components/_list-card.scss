@@ -1,0 +1,143 @@
+// Blueprint › tc-list-card — white HUD panel: display title, mono rank chips + value readouts, teal row accents, corner-bracket lift on hover.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-list-card {
+        // ── Card surface ──────────────────────────────────────────────────────
+        // White paper panel with a lilac hairline and violet-tinted shadow,
+        // consistent with other blueprint dashboard tiles (basic-card, brief-card).
+        --bs-list-card-bg:                  var(--bp-paper);
+        --bs-list-card-border-color:        var(--bp-border);
+        --bs-list-card-shadow:              var(--tc-shadow-sm);
+
+        // ── Header ────────────────────────────────────────────────────────────
+        // Recessed lavender tint replaces the baked dark-slate gradient
+        // (rgba(30,41,59,…)) that would read wrong on a light blueprint canvas.
+        --bs-list-card-header-bg:           var(--bp-bg-2);
+        --bs-list-card-header-border-color: var(--bp-border-faint);
+
+        // Title: emphasis ink — display font applied below.
+        --bs-list-card-title-color:         var(--bp-emphasis);
+
+        // ── Row separators ─────────────────────────────────────────────────────
+        // Base partial uses --tc-border-faint / a raw slate rgba — route to the
+        // matching blueprint faint-divider token so it doesn't leak the slate ramp.
+        --bs-list-card-row-separator-color: var(--bp-border-faint);
+
+        // ── Rank chip ─────────────────────────────────────────────────────────
+        // Recessed lavender well / muted-text digit — the rank is a HUD kicker,
+        // not a primary action, so it stays in the neutral register.
+        --bs-list-card-rank-bg:             var(--bp-bg-2);
+        --bs-list-card-rank-color:          var(--bp-text-muted);
+
+        // ── Label + icon ──────────────────────────────────────────────────────
+        --bs-list-card-label-color:         var(--bp-text);
+        --bs-list-card-icon-color:          var(--bp-teal-fg); // teal clears AA on white paper
+
+        // ── Value readout ──────────────────────────────────────────────────────
+        // Muted-faint ink; mono font already in base partial — just reroute color.
+        --bs-list-card-value-color:         var(--bp-text-faint);
+
+        // ── Skeleton shimmer ──────────────────────────────────────────────────
+        // Replace the raw rgba(255,255,255,.6) shimmer with the blueprint surface
+        // family so the placeholder reads coherently on the lavender page.
+        --bs-list-card-skeleton-bg:         var(--bp-paper-tint-2);
+        --bs-list-card-skeleton-shimmer:    rgba(255, 255, 255, 0.8);
+    }
+
+    // ── Card shell — HUD tile treatment ───────────────────────────────────────
+    // position:relative anchors the corner-bracket ::before pseudo-element.
+    .tc-list-card-inner {
+        position: relative;
+        transition:
+            transform 0.22s var(--bp-ease),
+            border-color 0.22s var(--bp-ease),
+            box-shadow 0.22s var(--bp-ease);
+
+        // HUD corner-bracket: top-left L-tick in teal — the blueprint signature
+        // detail shared with basic-card, brief-card, etc.
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            opacity: 0.5;
+            pointer-events: none;
+            transition: opacity 0.22s var(--bp-ease);
+        }
+
+        &:hover {
+            transform: translateY(-2px);
+            border-color: var(--bp-teal);
+            box-shadow: var(--tc-shadow-hover);
+
+            &::before {
+                opacity: 1;
+            }
+        }
+    }
+
+    // ── Header ────────────────────────────────────────────────────────────────
+
+    // Title: Chakra Petch display typeface — this is a named section/panel heading,
+    // the display register in the blueprint accent rotation.
+    .tc-list-card-title {
+        font-family: var(--bp-display);
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        color: var(--bs-list-card-title-color);
+    }
+
+    // ── Row — teal left-edge accent on hover ──────────────────────────────────
+    // A 2px transparent left border swaps to teal on hover so each row reads
+    // as a tappable entity without a full background wash.
+    .tc-list-card-item {
+        border-left: 2px solid transparent;
+        // Compensate the 2px left border so content columns don't shift.
+        padding-left: calc(var(--bs-list-card-row-padding-x) - 2px);
+        transition:
+            background-color 0.18s var(--bp-ease),
+            border-color 0.18s var(--bp-ease);
+
+        &:hover {
+            background-color: var(--bp-paper-tint);
+            border-left-color: var(--bp-teal);
+        }
+    }
+
+    // ── Rank chip — mono HUD readout ──────────────────────────────────────────
+    // JetBrains Mono is already applied by base partial; reinforce the uppercase
+    // HUD treatment: loose tracking, recessed lavender background.
+    .tc-list-card-rank {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        background: var(--bs-list-card-rank-bg);
+        color: var(--bs-list-card-rank-color);
+    }
+
+    // ── Label ─────────────────────────────────────────────────────────────────
+    // Body copy stays in --bp-body (Space Grotesk); color already set via the
+    // custom property above.  No font-family override needed.
+
+    // ── Value readout — mono micro-label ─────────────────────────────────────
+    // JetBrains Mono already applied by base; add uppercase HUD register to
+    // match rank chip and keep the readout family visually unified.
+    .tc-list-card-value {
+        font-family: var(--bp-mono);
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--bs-list-card-value-color);
+    }
+
+    // ── Icons ─────────────────────────────────────────────────────────────────
+    // Lead-column icons receive teal-fg which clears AA contrast on white paper.
+    // currentColor flows down from .tc-list-card-lead → color: --bs-list-card-icon-color.
+    // No additional rule needed beyond the custom-property assignment above.
+}

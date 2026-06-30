@@ -1,0 +1,28 @@
+// Blueprint › tc-navbar — frosted light glass over the lavender paper. The base
+// --bs-navbar-bg is already a translucent white (blueprint IS light, so the base
+// light glass is correct); this tints it toward the lavender canvas, sets the
+// active link pink, mono-tracks the links (the template nav uses mono uppercase
+// links), and gives the brand dot the pink fill + halo.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-navbar,
+    .navbar {
+        --bs-navbar-bg: rgba(238, 241, 248, 0.82);
+        --bs-navbar-backdrop-filter: saturate(1.3) blur(12px);
+        --bs-navbar-border-color: var(--bp-border);
+        --bs-navbar-divider-color: var(--bp-border-faint);
+        --bs-navbar-active-color: var(--bp-pink);
+        --bs-navbar-brand-dot-bg: var(--bp-pink);
+        --bs-navbar-brand-dot-glow: var(--bp-pink-soft);
+    }
+
+    // Nav links read as mono uppercase HUD labels (§8.1).
+    .navbar .nav-link,
+    tc-navbar .nav-link {
+        font-family: var(--bp-mono);
+        font-size: 0.8125rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+}

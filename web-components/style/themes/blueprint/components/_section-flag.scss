@@ -1,0 +1,48 @@
+// Blueprint › tc-section-flag — pink accent-bar marker, Chakra Petch display title, mono eyebrow subtitle.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Custom-property re-skin ──────────────────────────────────────────────────
+    // Drive all cosmetics through --bs-section-flag-* so the base partial handles
+    // layout; we only override visuals here.
+    tc-section-flag {
+        // Accent marker — pink is blueprint's primary brand accent (CTA/selected tier).
+        --bs-section-flag-marker-color: var(--bp-pink);
+
+        // Marker width is intentionally thicker than the 3px base default to read
+        // as a strong editorial flag against the light lavender canvas.
+        --bs-section-flag-marker-width: 4px;
+
+        // Title — strongest ink for maximum legibility on --bp-bg.
+        --bs-section-flag-title-color: var(--bp-emphasis);
+
+        // Subtitle — muted ink; typography rule below upgrades it to a mono eyebrow.
+        --bs-section-flag-subtitle-color: var(--bp-text-muted);
+    }
+
+    // ── Title: Chakra Petch display family ───────────────────────────────────────
+    // Section headings are title-tier in the blueprint type scale.
+    .tc-section-flag-title {
+        font-family: var(--bp-display);
+        letter-spacing: -0.02em;
+        font-weight: 700;
+    }
+
+    // ── Subtitle: JetBrains Mono micro-label / eyebrow style ────────────────────
+    // The subtitle is treated as a kicker or context label — mono, uppercase,
+    // teal-fg so it reads as a secondary blueprint accent (everyday action tier).
+    .tc-section-flag-subtitle {
+        font-family: var(--bp-mono);
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--bp-teal-fg); // explicit — mono kicker text keys to teal in blueprint
+    }
+
+    // ── Center variant: marker becomes a horizontal accent bar ──────────────────
+    // In center alignment the marker swaps to a wide horizontal band; keep it pink.
+    // No extra rules needed — the base partial handles the width/height swap.
+    // Marker color and font overrides cascade from the rules above.
+}

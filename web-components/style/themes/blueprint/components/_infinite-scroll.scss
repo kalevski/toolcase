@@ -1,0 +1,32 @@
+// Blueprint › tc-infinite-scroll — reroutes loading/end row colors to blueprint ink tokens; end-label uses --bp-mono with teal accent.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-infinite-scroll {
+        // Loading spinner row: use text-muted mapped to blueprint's muted ink
+        --bs-infinite-scroll-loading-color: var(--bp-text-muted);
+
+        // End-of-list row: use faint ink — blueprint's faintest text ramp level
+        --bs-infinite-scroll-end-color: var(--bp-text-faint);
+    }
+
+    // End label: override base mono font ref with the blueprint mono token
+    // and apply the teal accent for a subtle HUD "data exhausted" signal
+    .tc-infinite-scroll__end-label {
+        font-family: var(--bp-mono);
+        color: var(--bp-teal-fg); // teal text on white clears AA (--bp-teal-fg is the darker text-safe variant)
+        letter-spacing: 0.12em;
+    }
+
+    // Loading row separator: add a faint top hairline when the row becomes visible
+    // so it visually detaches from the content list beneath it
+    .tc-infinite-scroll-loading--visible {
+        border-top: 1px solid var(--bp-border-faint);
+    }
+
+    // End row separator: same hairline treatment as loading row
+    .tc-infinite-scroll-end--visible {
+        border-top: 1px solid var(--bp-border-faint);
+    }
+}

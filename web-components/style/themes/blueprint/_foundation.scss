@@ -1,0 +1,285 @@
+// Blueprint theme — foundation token layer.
+//
+// An OPT-IN light "vector blueprint" skin for @toolcase/web-components, ported
+// from the VECTOR BLUEPRINT (light) landing design (option 2b in the WebGame
+// Cloud template). A cool lavender-grey "paper" canvas ruled with a faint violet
+// grid, white cards with thin lilac hairlines, HUD corner-brackets and mono
+// micro-labels, painted with a four-colour arcade accent set (pink · teal ·
+// violet · amber). It applies only inside a theme root — either the custom
+// element `<tc-theme name="blueprint"> … </tc-theme>` or any element carrying
+// `[data-tc-theme="blueprint"]` (a plain wrapper div, which the examples site
+// uses). Everything outside the root keeps the default toolcase voice.
+//
+// HOW IT WORKS — read this before authoring a component override:
+//   Every tc-* component drives its cosmetics through --bs-<component>-* custom
+//   properties whose DEFAULTS resolve to --tc-* design tokens (e.g.
+//   `--bs-panel-bg: var(--tc-surface)`). Re-pointing the --tc-* tokens here, at
+//   the theme root, re-skins the colours / borders / type of ALL components in
+//   one shot. The per-component partials in ./components/ only add the BLUEPRINT
+//   STRUCTURE a flat token swap can't carry: the HUD corner-brackets on cards,
+//   the blueprint grid + ambient glow backdrop, gradient spotlight cards, the
+//   mono dot eyebrow, the pricing "popular" ribbon, the stat marquee, PLUS the
+//   bright-accent contrast fixes (white-on-pink / white-on-teal fills are fine,
+//   but accent-coloured TEXT is darkened so it clears AA on the light canvas).
+//
+// AESTHETIC: cool lavender-grey canvas (#eef1f8), near-black violet ink
+// (#1a1830), white card surfaces, thin lilac hairlines (#e3e0f2), a faint violet
+// blueprint grid + pink/teal ambient glow, soft long violet-tinted shadows, and
+// — unlike every other toolcase theme — ROUNDED corners (3–14px). Pink (#e01172)
+// is the primary CTA hue; teal (#0aa89a) is the everyday action hue; violet and
+// amber are supporting accents.
+//
+// ⚠ ROUNDED CORNERS — DELIBERATE DIVERGENCE:
+//   The toolcase mandate (and default / aurora / sunshine / dungeon / neon) is
+//   SHARP corners (border-radius: 0; circles only via 50%). Blueprint breaks this
+//   on purpose — its identity is the rounded rectangle. The base partials hardcode
+//   `border-radius: 0` on ~282 surfaces, so a root `--bs-border-radius` override
+//   alone is not enough: the radius sweep in ./components/_radius.scss (GENERATED
+//   by scripts/gen-blueprint-radius.mjs) re-rounds every flat surface scoped to
+//   this theme. See blueprint_theme.md §1 / §5.
+//
+// FONTS: 'Space Grotesk' (body/UI) and 'Chakra Petch' (display headings) are NOT
+// bundled — load them on the host page (e.g. Google Fonts) for the full look;
+// both degrade to system-ui sans-serif. 'JetBrains Mono' is the mono face (shared
+// with the default theme) and likewise degrades to the system monospace stack.
+
+@use '../../foundation/tokens' as *;
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    color-scheme: light;
+
+    // `tc-theme` is display:contents (no box), so `background` would not paint —
+    // for the lavender canvas + blueprint grid, wrap content in
+    // `tc-artboard-backdrop` or set the grid/glow field on your own container.
+    // `color` / `font-family` / the custom properties below all inherit through
+    // the contents box to descendants.
+    color: var(--bp-text);
+    font-family: var(--bp-body);
+
+    // ── Blueprint palette (--bp-*) — the theme's design tokens ───────────────
+    // Canvas + paper — recessed lavender page up through brightest white card.
+    --bp-bg: #eef1f8; // page canvas — cool lavender-grey "paper"
+    --bp-bg-2: #f4f3fb; // recessed wells / muted surface
+    --bp-paper: #ffffff; // raised card / panel surface
+    --bp-paper-tint: #fbfaff; // art-frame top
+    --bp-paper-tint-2: #f1eefb; // art-frame bottom
+
+    // Hairlines — low-opacity violet-ink over the lavender paper.
+    --bp-border: #e3e0f2; // default card / surface hairline
+    --bp-border-strong: #d4d0ea; // art frame / CTA panel
+    --bp-border-soft: #c5c1e0; // secondary buttons
+    --bp-border-faint: #e9e6f6; // panel-header dividers
+    --bp-border-rule: #d9d5ee; // ticker / divider rules
+    --bp-border-chip: #d8d4ec; // tool chips
+    --bp-border-pink: #f3bcd4; // pink spotlight card
+
+    // Ink — near-black violet text ramp.
+    --bp-text: #1a1830; // primary text / headings
+    --bp-text-muted: #5d5887; // nav links, paragraphs, descriptions
+    --bp-text-faint: #8e89b3; // .CLOUD suffix, footer micro-copy, /mo
+    --bp-text-soft: #3c3960; // pricing list items (non-emphasis)
+    --bp-emphasis: #0f0e22; // strongest heading ink
+
+    // ── Accent set — four arcade hues ────────────────────────────────────────
+    // Pink / magenta — the PRIMARY brand + CTA hue.
+    --bp-pink: #e01172;
+    --bp-pink-hover: #f5237f;
+    --bp-pink-ink: #ffffff; // text on pink fills
+    --bp-pink-soft: rgba(224, 17, 114, 0.1);
+    --bp-pink-line: rgba(224, 17, 114, 0.4);
+    --bp-pink-glow: rgba(224, 17, 114, 0.3);
+
+    // Teal — the everyday ACTION hue (secondary buttons, "open console").
+    --bp-teal: #0aa89a;
+    --bp-teal-hover: #0bbcab;
+    --bp-teal-fg: #097f74; // darker teal so accent TEXT clears AA on white
+    --bp-teal-ink: #ffffff; // text on teal fills
+    --bp-teal-soft: rgba(10, 168, 154, 0.08);
+    --bp-teal-line: rgba(10, 168, 154, 0.4);
+    --bp-teal-glow: rgba(10, 168, 154, 0.32);
+
+    // Violet / indigo — grid + supporting accent.
+    --bp-violet: #5b3df2;
+    --bp-violet-fg: #4b30d6; // darker for violet TEXT on white
+    --bp-violet-ink: #ffffff;
+    --bp-violet-soft: rgba(91, 61, 242, 0.1);
+
+    // Amber — supporting accent (warnings, highlights).
+    --bp-amber: #d98a14;
+    --bp-amber-fg: #b5710c;
+    --bp-amber-ink: #ffffff;
+    --bp-amber-soft: rgba(217, 138, 20, 0.14);
+
+    // Danger — kept a true red (pink reads as brand, not error).
+    --bp-danger: #dc2626;
+    --bp-danger-soft: #fee2e2;
+
+    // Typography families.
+    --bp-display: 'Chakra Petch', 'Space Grotesk', system-ui, -apple-system, sans-serif;
+    --bp-body: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --bp-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+    --bp-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+    // ── Corner radii — the blueprint signature (rounded, soft) ───────────────
+    // Overrides the toolcase sharp mandate. The radius sweep
+    // (./components/_radius.scss) re-rounds every hardcoded `border-radius: 0`
+    // surface; these tokens are the scale it draws from.
+    --bp-r-xs: 3px; // eyebrow pill
+    --bp-r-sm: 4px; // nav button, ribbon badge, small chips
+    --bp-r-md: 5px; // buttons, tool chips, inputs — the default control radius
+    --bp-r-lg: 8px; // cards, tools panel, framed surfaces
+    --bp-r-xl: 10px; // art frame, pricing cards, modals
+    --bp-r-2xl: 14px; // big CTA panel
+
+    // ── Reusable signature recipes (referenced by component partials) ────────
+    // Pink primary-action gradient — no dark slate stop (would muddy a bright
+    // accent), so the white on-fill label stays legible across the sweep.
+    --bp-pink-grad: linear-gradient(135deg, var(--bp-pink), var(--bp-pink-hover));
+    // Teal action gradient.
+    --bp-teal-grad: linear-gradient(135deg, var(--bp-teal-hover), var(--bp-teal));
+    // Pink spotlight surface (the P-04 "Live Configs" card).
+    --bp-pink-surface: linear-gradient(135deg, #fde4ee, #ffffff);
+    // CTA panel surface.
+    --bp-cta-grad: linear-gradient(135deg, #ffffff, #f3eefc);
+    // Art-frame inner surface.
+    --bp-frame-grad: linear-gradient(180deg, var(--bp-paper-tint), var(--bp-paper-tint-2));
+    // Pink glow drop-shadow for the raised primary action.
+    --bp-glow-pink: 0 6px 20px var(--bp-pink-glow);
+    --bp-glow-pink-strong: 0 10px 28px var(--bp-pink-glow);
+    // Teal glow for the action button.
+    --bp-glow-teal: 0 4px 14px var(--bp-teal-glow);
+    // Hairline top highlight — "light catches the top edge" on raised surfaces.
+    --bp-bevel-top: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    // Blueprint grid field — faint violet 38px ruling for full-bleed backdrops.
+    --bp-grid-line: rgba(91, 61, 242, 0.06);
+    --bp-grid-size: 38px 38px;
+    --bp-grid-field:
+        linear-gradient(var(--bp-grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--bp-grid-line) 1px, transparent 1px);
+    // Ambient glow field — pink top-right + teal bottom-left radials.
+    --bp-glow-field:
+        radial-gradient(ellipse at 70% 12%, rgba(224, 17, 114, 0.05), transparent 55%),
+        radial-gradient(ellipse at 12% 70%, rgba(10, 168, 154, 0.06), transparent 55%);
+    // Frosted light glass for floating menus / popovers / overlay panels.
+    --bp-overlay-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(248, 247, 253, 0.96));
+    --bp-overlay-blur: blur(14px) saturate(120%);
+
+    // ── Remap toolcase tokens (--tc-*) onto the blueprint palette ────────────
+    // This block alone flips every component's colours / borders / type, because
+    // the --bs-<component>-* defaults all resolve through these tokens.
+    --tc-font-sans: var(--bp-body);
+    --tc-font-mono: var(--bp-mono);
+
+    --tc-white: #ffffff;
+    --tc-black: #000000;
+
+    --tc-surface: var(--bp-paper);
+    --tc-surface-muted: var(--bp-bg-2);
+    --tc-surface-hover: var(--bp-paper-tint);
+    --tc-surface-dark: var(--bp-text);
+    --tc-border: var(--bp-border);
+    --tc-border-faint: var(--bp-border-faint);
+    --tc-border-strong: var(--bp-border-strong);
+    --tc-text: var(--bp-text);
+    --tc-text-muted: var(--bp-text-muted);
+    --tc-text-faint: var(--bp-text-faint);
+    // text-inverse means "readable text on a dark/ink surface" (code blocks, the
+    // dark footer, toasts, tooltips) — keep it LIGHT so it reads on the dark ink.
+    --tc-text-inverse: #ffffff;
+    --tc-emphasis: var(--bp-emphasis);
+
+    // Ink — the dark violet surface (toasts, tooltips, code blocks, footers).
+    --tc-ink: #1a1830;
+    --tc-ink-2: #2a2748;
+
+    // App accent — PRIMARY actions / links read pink with white on-fill text.
+    --tc-app-accent: var(--bp-pink);
+    --tc-app-accent-hover: var(--bp-pink-hover);
+    --tc-app-accent-contrast: var(--bp-pink-ink);
+    // Primary-action gradient → solid pink sweep (no slate stop), so the white
+    // on-fill label stays legible across the whole gradient. Mirrors the
+    // .btn-primary override; pointing the shared token here fixes every CTA that
+    // used the base `var(--tc-app-accent), #2b3a51` gradient.
+    --tc-app-accent-gradient: var(--bp-pink-grad);
+
+    // Accent — the TEAL "action" signature: highlights, focus rings, brand dot.
+    // Teal reads cleanly on white as a FILL; accent-coloured TEXT uses the darker
+    // teal-fg so it clears AA on the light canvas.
+    --tc-accent: var(--bp-teal);
+    --tc-accent-fg: var(--bp-teal-fg);
+    --tc-accent-soft: var(--bp-teal-soft);
+    --tc-accent-hex: #0aa89a;
+    --tc-cyan: #0aa89a;
+
+    --tc-success: var(--bp-teal);
+    --tc-success-bg: rgba(10, 168, 154, 0.12);
+    --tc-info: var(--bp-violet);
+    --tc-info-bg: var(--bp-violet-soft);
+    --tc-warning: var(--bp-amber);
+    --tc-warning-bg: var(--bp-amber-soft);
+    --tc-danger: var(--bp-danger);
+    --tc-danger-bg: var(--bp-danger-soft);
+
+    // Shadows — soft, long, low-opacity, tinted with the dark-violet ink.
+    --tc-shadow-sm: 0 2px 10px rgba(40, 30, 90, 0.05);
+    --tc-shadow-md: 0 12px 34px rgba(40, 30, 90, 0.1);
+    --tc-shadow-lg: 0 24px 50px rgba(40, 30, 90, 0.14);
+    --tc-shadow-hover: 0 12px 34px rgba(40, 30, 90, 0.14);
+
+    --tc-transition-fast: 0.15s ease;
+    --tc-transition-base: 0.2s var(--bp-ease);
+
+    // Focus ring — a soft pink halo.
+    --tc-focus-ring: 0 0 0 0.2rem rgba(224, 17, 114, 0.2);
+
+    // ── Bootstrap-compatible contract (--bs-*) ───────────────────────────────
+    --bs-primary: var(--bp-pink);
+    --bs-primary-rgb: 224, 17, 114;
+    --bs-secondary: var(--bp-text-muted);
+    --bs-secondary-rgb: 93, 88, 135;
+    --bs-success: var(--bp-teal);
+    --bs-success-rgb: 10, 168, 154;
+    --bs-danger: var(--bp-danger);
+    --bs-danger-rgb: 220, 38, 38;
+    --bs-warning: var(--bp-amber);
+    --bs-warning-rgb: 217, 138, 20;
+    --bs-info: var(--bp-violet);
+    --bs-info-rgb: 91, 61, 242;
+    --bs-light: var(--bp-bg);
+    --bs-light-rgb: 238, 241, 248;
+    --bs-dark: var(--bp-text);
+    --bs-dark-rgb: 26, 24, 48;
+
+    --bs-font-sans-serif: var(--bp-body);
+    --bs-font-monospace: var(--bp-mono);
+    --bs-body-font-family: var(--bp-body);
+    --bs-body-bg: var(--bp-bg);
+    --bs-body-bg-rgb: 238, 241, 248;
+    --bs-body-color: var(--bp-text);
+    --bs-body-color-rgb: 26, 24, 48;
+    --bs-emphasis-color: var(--bp-emphasis);
+    --bs-emphasis-color-rgb: 15, 14, 34;
+
+    --bs-secondary-color: var(--bp-text-muted);
+    --bs-secondary-bg: var(--bp-bg-2);
+    --bs-tertiary-color: var(--bp-text-faint);
+    --bs-tertiary-bg: var(--bp-bg);
+
+    --bs-border-color: var(--bp-border);
+    --bs-border-color-translucent: rgba(26, 24, 48, 0.1);
+    // ⚠ Rounded by theme decision (see header). The radius sweep handles the
+    // hardcoded `border-radius: 0` surfaces; this is the default for var-driven ones.
+    --bs-border-radius: var(--bp-r-md);
+
+    // Links read pink (the brand/primary hue) on the light canvas.
+    --bs-link-color: var(--bp-pink);
+    --bs-link-hover-color: var(--bp-pink-hover);
+
+    --bs-box-shadow-sm: var(--tc-shadow-sm);
+    --bs-box-shadow: var(--tc-shadow-md);
+    --bs-box-shadow-lg: var(--tc-shadow-lg);
+
+    --bs-focus-ring-color: rgba(224, 17, 114, 0.2);
+}

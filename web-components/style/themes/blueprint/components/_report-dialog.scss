@@ -1,0 +1,158 @@
+// Blueprint › tc-report-dialog — white paper modal with violet-ink scrim, mono eyebrow,
+// display title, pink top-accent stripe, teal radio selection, and bp-danger submit action.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-report-dialog {
+        // ── Surface + chrome ──────────────────────────────────────────────────
+        --bs-report-dialog-bg:           var(--bp-paper);
+        --bs-report-dialog-border-color: var(--bp-border-pink);
+        --bs-report-dialog-shadow:       var(--tc-shadow-lg);
+
+        // ── Eyebrow — teal mono micro-label ──────────────────────────────────
+        // Teal reads as "action register" — consistent with mono eyebrows across
+        // blueprint overlays (confirm-dialog, drawers, etc.).
+        --bs-report-dialog-eyebrow-color: var(--bp-teal-fg);
+
+        // ── Title ─────────────────────────────────────────────────────────────
+        --bs-report-dialog-title-color: var(--bp-text);
+
+        // ── Backdrop — violet-ink scrim, replaces the #0f172a slate literal ──
+        --bs-report-dialog-backdrop-bg:      rgba(26, 24, 48, 1);
+        --bs-report-dialog-backdrop-opacity: 0.55;
+
+        // ── Message ───────────────────────────────────────────────────────────
+        --bs-report-dialog-message-color: var(--bp-text-muted);
+
+        // ── Reason rows ───────────────────────────────────────────────────────
+        --bs-report-dialog-reason-color:        var(--bp-text);
+        --bs-report-dialog-reason-hover-bg:     var(--bp-paper-tint);
+        // Checked row: teal soft-tint fill + border matches the panel hairline.
+        --bs-report-dialog-reason-checked-bg:   var(--bp-teal-soft);
+        --bs-report-dialog-reason-checked-color: var(--bp-teal-fg);
+
+        // ── Radio indicator ───────────────────────────────────────────────────
+        --bs-report-dialog-radio-border:         1px solid var(--bp-border-strong);
+        // Teal as the "everyday action" accent — accent rotation: pink=primary,
+        // teal=action/selection, violet+amber=support.
+        --bs-report-dialog-radio-checked-bg:     var(--bp-teal);
+        --bs-report-dialog-radio-checked-border: var(--bp-teal);
+
+        // ── Textarea ──────────────────────────────────────────────────────────
+        --bs-report-dialog-textarea-bg:     var(--bp-bg-2);
+        --bs-report-dialog-textarea-border: 1px solid var(--bp-border);
+        --bs-report-dialog-textarea-color:  var(--bp-text);
+
+        // ── Action buttons ────────────────────────────────────────────────────
+        // Cancel — secondary/ghost treatment on bp-paper ground.
+        --bs-report-dialog-btn-bg:         var(--bp-paper);
+        --bs-report-dialog-btn-color:      var(--bp-text-soft);
+        --bs-report-dialog-btn-border:     1px solid var(--bp-border-soft);
+        --bs-report-dialog-btn-hover-bg:   var(--bp-paper-tint-2);
+        --bs-report-dialog-btn-hover-color: var(--bp-text);
+
+        // Submit — real danger (not pink, which is the CTA brand color).
+        --bs-report-dialog-btn-submit-bg:         var(--bp-danger);
+        --bs-report-dialog-btn-submit-color:      #fff;
+        --bs-report-dialog-btn-submit-hover-bg:   color-mix(in srgb, var(--bp-danger) 85%, #000);
+        --bs-report-dialog-btn-submit-hover-color: #fff;
+
+        // ── Close button ──────────────────────────────────────────────────────
+        --bs-report-dialog-close-color:       var(--bp-text-faint);
+        --bs-report-dialog-close-hover-color: var(--bp-text);
+        --bs-report-dialog-close-hover-bg:    var(--bp-paper-tint);
+    }
+
+    // ── Panel — pink inset top stripe + violet-tinted shadow ─────────────────
+    // The 3px pink stripe signals a CTA-tier / primary-action overlay; mirrors
+    // the confirm-dialog treatment so all modals share the same visual register.
+    .tc-report-dialog__panel {
+        box-shadow:
+            var(--tc-shadow-lg),
+            inset 0 3px 0 0 var(--bp-pink);
+    }
+
+    // ── Eyebrow — blueprint mono face ────────────────────────────────────────
+    // Base partial already sets uppercase + letter-spacing; we re-point the
+    // font-family and tighten to blueprint mono standard tracking.
+    .tc-report-dialog__eyebrow {
+        font-family: var(--bp-mono);
+        color: var(--bs-report-dialog-eyebrow-color);
+        letter-spacing: 0.1em;
+    }
+
+    // ── Title — display type ──────────────────────────────────────────────────
+    // Modal title is a decision-moment heading → Chakra Petch display face.
+    .tc-report-dialog__title {
+        font-family: var(--bp-display);
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: var(--bp-text);
+    }
+
+    // ── Message ───────────────────────────────────────────────────────────────
+    .tc-report-dialog__message {
+        font-family: var(--bp-body);
+        color: var(--bp-text-muted);
+    }
+
+    // ── Header divider ────────────────────────────────────────────────────────
+    .tc-report-dialog__header {
+        border-bottom-color: var(--bp-border-faint);
+    }
+
+    // ── Reason label — body face for readability ──────────────────────────────
+    .tc-report-dialog__reason-label {
+        font-family: var(--bp-body);
+    }
+
+    // ── Textarea — replace the clashing slate-literal focus ring ─────────────
+    // Base partial bakes `rgba(30, 41, 59, *)` (slate-800) for focus.
+    // Re-point to a teal glow that fits the blueprint light ground.
+    .tc-report-dialog__comment {
+        &:focus {
+            border-color: var(--bp-teal-line, var(--bp-teal));
+            box-shadow: var(--bp-glow-teal);
+        }
+
+        &::placeholder {
+            color: var(--bp-text-faint);
+        }
+    }
+
+    // ── Actions footer divider ────────────────────────────────────────────────
+    .tc-report-dialog__actions {
+        border-top-color: var(--bp-border-faint);
+    }
+
+    // ── Action buttons — mono face + uppercase + blueprint tracking ───────────
+    // Button font + casing is already mono in the base partial; re-point the
+    // family and add the blueprint display-register tracking nudge.
+    .tc-report-dialog__btn {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    // ── Submit button — danger soft glow on focus ─────────────────────────────
+    .tc-report-dialog__submit {
+        &:focus-visible {
+            outline-color: var(--bp-danger);
+        }
+    }
+
+    // ── Focus rings — use bp-teal for radio/cancel, bp-danger for submit ──────
+    // Override the generic --tc-app-accent outline in the base partial.
+    .tc-report-dialog__close {
+        &:focus-visible {
+            outline-color: var(--bp-teal);
+        }
+    }
+
+    .tc-report-dialog__reason {
+        input:focus-visible + .tc-report-dialog__radio {
+            outline-color: var(--bp-teal);
+        }
+    }
+}

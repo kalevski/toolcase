@@ -1,0 +1,387 @@
+// Blueprint › tc-audio-mixer — light lavender panels with a recessed teal-tinted lane field; clips as teal chips (idle) / pink chips (selected); pink playhead; amber solo / red mute signals; all dark slate literals replaced.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-audio-mixer {
+        // ── Surface & borders ────────────────────────────────────────────────
+        --bs-audio-mixer-surface:        var(--bp-paper);
+        --bs-audio-mixer-border:         var(--bp-border);
+        --bs-audio-mixer-border-strong:  var(--bp-border-strong);
+
+        // ── Ink ──────────────────────────────────────────────────────────────
+        --bs-audio-mixer-text:           var(--bp-text);
+        --bs-audio-mixer-muted:          var(--bp-text-muted);
+        --bs-audio-mixer-faint:          var(--bp-text-faint);
+
+        // ── Toolbar ──────────────────────────────────────────────────────────
+        --bs-audio-mixer-toolbar-bg:     var(--bp-bg-2);
+
+        // ── Ruler ────────────────────────────────────────────────────────────
+        --bs-audio-mixer-ruler-bg:       var(--bp-bg-2);
+
+        // ── Lane field — recessed well, distinct from panel surfaces ─────────
+        // Uses bp-bg-2 so the timeline reads as a "working area" within the
+        // otherwise white blueprint panels.
+        --bs-audio-mixer-lanes-bg:       var(--bp-bg-2);
+        --bs-audio-mixer-lane-bg:        var(--bp-bg-2);
+        --bs-audio-mixer-lane-alt-bg:    var(--bp-paper-tint);
+
+        // ── Clips — teal idle / pink selected ────────────────────────────────
+        // Idle clips: teal-soft fill + teal border line + darker teal-fg label
+        // (teal-fg clears AA on white; teal-soft is the matching surface tint).
+        --bs-audio-mixer-clip-bg:        var(--bp-teal-soft);
+        --bs-audio-mixer-clip-border:    var(--bp-teal-line);
+        --bs-audio-mixer-clip-text:      var(--bp-teal-fg);
+
+        // Selected clips: pink brand fill + pink border + white label
+        --bs-audio-mixer-clip-active-bg:   var(--bp-pink-surface);
+        --bs-audio-mixer-clip-active-edge: var(--bp-pink-line);
+
+        // ── Playhead — pink primary accent ───────────────────────────────────
+        --bs-audio-mixer-playhead-color: var(--bp-pink);
+
+        // ── Status signals — danger red / amber warning ───────────────────────
+        --bs-audio-mixer-mute-color:     var(--bp-danger);
+        --bs-audio-mixer-solo-color:     var(--bp-amber);
+
+        // ── Inspector panel ───────────────────────────────────────────────────
+        --bs-audio-mixer-inspector-bg:   var(--bp-paper);
+
+        // ── Mono typeface — JetBrains Mono via blueprint body token ───────────
+        --bs-audio-mixer-mono:           var(--bp-mono);
+
+        // ── Loading scrim — white-paper overlay ───────────────────────────────
+        --bs-audio-mixer-scrim-bg:       rgba(255, 255, 255, 0.75);
+        --bs-audio-mixer-scrim-shadow:   var(--tc-shadow-lg);
+    }
+
+    // ── Outer shell ───────────────────────────────────────────────────────────
+
+    .tc-audio-mixer {
+        border-color: var(--bp-border);
+        background: var(--bp-paper);
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Toolbar ───────────────────────────────────────────────────────────────
+
+    .tc-audio-mixer-toolbar {
+        background: var(--bp-bg-2);
+        border-bottom-color: var(--bp-border);
+    }
+
+    // Time display — mono HUD label in blueprint teal-fg
+    .tc-audio-mixer-time {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.08em;
+        color: var(--bp-teal-fg);
+        font-variant-numeric: tabular-nums;
+    }
+
+    // ── Toolbar buttons ───────────────────────────────────────────────────────
+
+    .tc-audio-mixer-btn {
+        font-family: var(--bp-body);
+        color: var(--bp-text);
+        background: var(--bp-paper);
+        border-color: var(--bp-border-strong);
+
+        &:hover {
+            background: var(--bp-paper-tint);
+            border-color: var(--bp-border-soft);
+        }
+
+        &:focus-visible {
+            outline-color: var(--bp-teal);
+        }
+
+        // Primary CTA — pink gradient per blueprint accent rotation
+        &--primary {
+            color: var(--bp-pink-ink);
+            background: var(--bp-pink-grad);
+            border-color: var(--bp-pink);
+
+            &:hover {
+                background: var(--bp-pink-hover);
+                border-color: var(--bp-pink-hover);
+                box-shadow: var(--bp-glow-pink);
+            }
+        }
+    }
+
+    // ── Track headers ─────────────────────────────────────────────────────────
+
+    .tc-audio-mixer-tracks {
+        background: var(--bp-paper);
+        border-right-color: var(--bp-border-strong);
+    }
+
+    .tc-audio-mixer-track-header {
+        border-bottom-color: var(--bp-border-faint);
+        border-left-color: transparent;
+
+        &:hover {
+            background: var(--bp-paper-tint);
+        }
+
+        // Active track — pink left stripe (primary selection signal)
+        &--active {
+            background: var(--bp-pink-surface);
+            border-left-color: var(--bp-pink);
+        }
+    }
+
+    .tc-audio-mixer-track-name {
+        font-family: var(--bp-body);
+        font-weight: 600;
+        color: var(--bp-text);
+    }
+
+    // ── Toggle chips (mute / solo / danger) ───────────────────────────────────
+
+    .tc-audio-mixer-chip {
+        color: var(--bp-text-muted);
+        background: var(--bp-paper);
+        border-color: var(--bp-border-strong);
+
+        &:hover {
+            background: var(--bp-paper-tint);
+            border-color: var(--bp-border-soft);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-teal);
+            outline-offset: 2px;
+        }
+
+        // Mute: danger red fill — real error/signal color, not pink
+        &--mute {
+            color: #fff;
+            background: var(--bp-danger);
+            border-color: var(--bp-danger);
+        }
+
+        // Solo: amber fill — warning/highlight signal
+        &--solo {
+            color: var(--bp-amber-ink);
+            background: var(--bp-amber);
+            border-color: var(--bp-amber);
+        }
+
+        // Danger remove: destructive affordance in resting + hover states
+        &--danger {
+            color: var(--bp-danger);
+            border-color: var(--bp-border-strong);
+
+            &:hover {
+                color: #fff;
+                background: var(--bp-danger);
+                border-color: var(--bp-danger);
+            }
+        }
+    }
+
+    // ── Volume fader ──────────────────────────────────────────────────────────
+
+    .tc-audio-mixer-fader {
+        // Teal: everyday control action color
+        accent-color: var(--bp-teal);
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-teal);
+            outline-offset: 3px;
+        }
+    }
+
+    // ── Ruler ─────────────────────────────────────────────────────────────────
+
+    .tc-audio-mixer-ruler {
+        background: var(--bp-bg-2);
+        border-bottom-color: var(--bp-border-strong);
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-teal);
+            outline-offset: -2px;
+        }
+    }
+
+    .tc-audio-mixer-tick {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        color: var(--bp-text-faint);
+        border-left-color: var(--bp-border-rule);
+        font-variant-numeric: tabular-nums;
+    }
+
+    // ── Lanes ─────────────────────────────────────────────────────────────────
+
+    .tc-audio-mixer-timeline {
+        background: var(--bp-bg-2);
+    }
+
+    .tc-audio-mixer-lane {
+        background: var(--bp-bg-2);
+        border-bottom-color: var(--bp-border-faint);
+
+        // Alternating lane — very slight lift against the recessed ground
+        &:nth-child(even) {
+            background: color-mix(in srgb, var(--bp-bg-2) 80%, var(--bp-paper));
+        }
+    }
+
+    // ── Clips ─────────────────────────────────────────────────────────────────
+
+    .tc-audio-mixer-clip {
+        // Idle clip — teal-soft chip; replaces dark slate-700/500 literals
+        color: var(--bp-teal-fg);
+        background: var(--bp-teal-soft);
+        border-color: var(--bp-teal-line);
+
+        &:hover {
+            // Slightly stronger teal border on hover; replaces --tc-slate-400
+            border-color: var(--bp-teal);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-teal);
+            outline-offset: 1px;
+        }
+
+        // Selected clip — pink brand chip; pink-ink label for legibility on pink fill
+        &--selected {
+            color: var(--bp-pink-ink);
+            background: var(--bp-pink-surface);
+            border-color: var(--bp-pink-line);
+            border-width: 2px;
+        }
+    }
+
+    .tc-audio-mixer-clip-label {
+        // Label inherits clip color; mono for HUD readability
+        font-family: var(--bp-mono);
+        letter-spacing: 0.04em;
+        font-size: 0.6875rem;
+    }
+
+    // ── Playhead ──────────────────────────────────────────────────────────────
+
+    .tc-audio-mixer-playhead {
+        // Pink: primary accent = cursor/position marker
+        background: var(--bp-pink);
+        box-shadow: 0 0 0 1px var(--bp-pink-glow);
+    }
+
+    // ── Inspector ─────────────────────────────────────────────────────────────
+
+    .tc-audio-mixer-inspector {
+        background: var(--bp-paper);
+        border-left-color: var(--bp-border-strong);
+    }
+
+    .tc-audio-mixer-inspector-title {
+        font-family: var(--bp-display);
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        color: var(--bp-text);
+
+        .tc-audio-mixer-icon {
+            color: var(--bp-teal-fg);
+        }
+    }
+
+    .tc-audio-mixer-inspector-empty {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        color: var(--bp-text-faint);
+    }
+
+    // Meta key/value rows — dt as mono eyebrow, dd as teal-fg value
+    .tc-audio-mixer-meta {
+        > div {
+            border-bottom-color: var(--bp-border-faint);
+        }
+
+        dt {
+            font-family: var(--bp-mono);
+            letter-spacing: 0.08em;
+            color: var(--bp-text-faint);
+        }
+
+        dd {
+            font-family: var(--bp-mono);
+            color: var(--bp-teal-fg);
+            font-variant-numeric: tabular-nums;
+        }
+    }
+
+    // Field labels — mono eyebrow style
+    .tc-audio-mixer-field-label {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.10em;
+        color: var(--bp-text-faint);
+    }
+
+    // ── Effects chain ─────────────────────────────────────────────────────────
+
+    .tc-audio-mixer-effects {
+        border-color: var(--bp-border);
+        background: var(--bp-paper-tint);
+    }
+
+    .tc-audio-mixer-effect {
+        & + & {
+            border-top-color: var(--bp-border-faint);
+        }
+    }
+
+    .tc-audio-mixer-effect-type {
+        font-family: var(--bp-body);
+        color: var(--bp-text);
+    }
+
+    .tc-audio-mixer-fx-add-row {
+        .tc-audio-mixer-icon-lead {
+            color: var(--bp-teal-fg);
+        }
+    }
+
+    .tc-audio-mixer-fx-add {
+        font-family: var(--bp-body);
+        color: var(--bp-text);
+        background: var(--bp-paper);
+        border-color: var(--bp-border-strong);
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-teal);
+            outline-offset: 2px;
+        }
+    }
+
+    // ── Skeleton shimmer — lavender-tinted light gradient ─────────────────────
+    // Replaces the dark tc-surface-muted/tc-surface-hover stops with blueprint
+    // paper tones so the shimmer reads as a "loading" state on a light surface.
+
+    .tc-audio-mixer-skeleton-bar,
+    .tc-audio-mixer-skeleton-row {
+        background: linear-gradient(
+            90deg,
+            var(--bp-bg-2) 25%,
+            var(--bp-paper-tint) 50%,
+            var(--bp-bg-2) 75%
+        );
+        background-size: 200% 100%;
+    }
+
+    // ── Reduced motion override ────────────────────────────────────────────────
+
+    @media (prefers-reduced-motion: reduce) {
+        .tc-audio-mixer-skeleton-bar,
+        .tc-audio-mixer-skeleton-row {
+            animation: none;
+            background: var(--bp-bg-2);
+        }
+    }
+
+}

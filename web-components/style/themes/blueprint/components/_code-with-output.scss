@@ -1,0 +1,100 @@
+// Blueprint › tc-code-with-output — dark code pane on --bp-paper with teal lang label, lavender output well, pink error tint.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Custom-property re-points ─────────────────────────────────────────────
+    // Drive everything through --bs-cwo-* so no class-level overrides are needed
+    // for base cosmetics.
+
+    tc-code-with-output {
+        // Outer hairline: blueprint border token instead of raw --tc-border
+        --bs-cwo-border: 1px solid var(--bp-border);
+
+        // Title bar: paper surface, display font, teal-fg ink for a HUD label feel
+        --bs-cwo-title-bg:          var(--bp-paper-tint);
+        --bs-cwo-title-color:       var(--bp-text);
+        --bs-cwo-title-font-size:   0.8rem;
+        --bs-cwo-title-font-weight: 600;
+
+        // Code pane: keep the dark --tc-ink ground (foundation maps it for light themes);
+        // --tc-text-inverse resolves to the bright-on-dark text supplied by foundation.
+        // No change needed for --bs-cwo-code-bg / --bs-cwo-code-color — they already
+        // reference --tc-ink / --tc-text-inverse which blueprint foundation wires correctly.
+
+        // Code header bar: slightly lighter ink surface for contrast band
+        // --bs-cwo-code-header-bg stays as --tc-ink-2 (foundation-mapped, correct)
+
+        // Lang label: mono font is already the right family; override color to teal-fg
+        // for the arcade accent-rotation (teal = action/label on code surfaces).
+        --bs-cwo-lang-color:          var(--bp-teal-fg);
+        --bs-cwo-lang-font-size:      0.68rem;
+        --bs-cwo-lang-letter-spacing: 0.12em;
+
+        // Output pane: recessed lavender well instead of bare --tc-surface
+        --bs-cwo-output-bg:    var(--bp-bg-2);
+        --bs-cwo-output-color: var(--bp-text);
+
+        // Error state: real-red tint (--bp-danger-soft fill, --bp-danger ink)
+        --bs-cwo-error-bg:    var(--bp-danger-soft);
+        --bs-cwo-error-color: var(--bp-danger);
+    }
+
+    // ── Outer wrapper ─────────────────────────────────────────────────────────
+
+    .tc-cwo {
+        // Replace the foundation default; blueprint hairline + soft violet shadow
+        border-color: var(--bp-border);
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Title bar ─────────────────────────────────────────────────────────────
+
+    .tc-cwo-title {
+        // Display font for heading-level label (HUD section name feel)
+        font-family: var(--bp-display);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        // Stronger divider between title and panes
+        border-bottom-color: var(--bp-border-strong);
+    }
+
+    // ── Code pane header (language label row) ─────────────────────────────────
+
+    .tc-cwo-code-header {
+        // Thin rule below the lang label band
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08); // subtle on dark surface
+    }
+
+    .tc-cwo-lang {
+        // Mono font already set globally; force the blueprint mono face explicitly
+        font-family: var(--bp-mono);
+    }
+
+    // ── Output pane ──────────────────────────────────────────────────────────
+
+    .tc-cwo-output-body {
+        // Blueprint body font for rendered output prose
+        font-family: var(--bp-body);
+    }
+
+    // ── Error state override ──────────────────────────────────────────────────
+    // --bs-cwo-error-* already re-pointed above; add a left accent bar for visual
+    // weight on the error condition (blueprint convention for danger callouts).
+
+    .tc-cwo-output-error {
+        border-left: 3px solid var(--bp-danger);
+    }
+
+    // ── Divider between split/stacked panes ──────────────────────────────────
+    // Replace any raw --tc-border leak with blueprint border token.
+
+    .tc-cwo-split .tc-cwo-code {
+        border-right-color: var(--bp-border);
+    }
+
+    .tc-cwo-stacked .tc-cwo-code {
+        border-bottom-color: var(--bp-border);
+    }
+
+}

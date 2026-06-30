@@ -1,0 +1,70 @@
+// Blueprint › tc-cdn-map — lavender-paper map surface; pink primary nodes, teal accent nodes; replaces slate/cyan glow literals.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Shell ──────────────────────────────────────────────────────────────────
+    // White raised card surface, lilac hairline, soft violet-tinted shadow.
+    tc-cdn-map {
+        --bs-cdn-map-surface: var(--bp-paper);
+        --bs-cdn-map-border-color: var(--bp-border);
+
+        // Grid lines routed through the component's own grid-color var.
+        // Using --bp-border-faint keeps the engineering-grid feel without
+        // overpowering the node markers; the base partial sets opacity: 0.2
+        // on the grid overlay, so the hairline reads as a faint blueprint ruled field.
+        --bs-cdn-map-grid-color: var(--bp-border-soft);
+
+        // Node palette: pink = primary (CTA), teal = accent (action).
+        --bs-cdn-map-primary-color: var(--bp-pink);
+        --bs-cdn-map-accent-color: var(--bp-teal);
+
+        // Label: mono micro-label voice; muted ink (overridden per-variant below).
+        --bs-cdn-map-label-color: var(--bp-text-muted);
+        --bs-cdn-map-label-font-size: 0.68rem;
+
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Grid overlay ───────────────────────────────────────────────────────────
+    // No extra rules needed — the base partial already drives the grid via
+    // --bs-cdn-map-grid-color; the opacity: 0.2 keeps it subtle.
+
+    // ── Node dots ─────────────────────────────────────────────────────────────
+
+    .tc-cdn-map__node-dot {
+
+        // PRIMARY dot — pink glow replaces the hardcoded rgba(30,41,59,0.14)
+        // dark-slate radial. Pink-soft is the matching semi-transparent tint.
+        .is-primary & {
+            &::before {
+                background: radial-gradient(circle, var(--bp-pink-soft) 0%, transparent 70%);
+            }
+        }
+
+        // ACCENT dot — teal glow replaces the hardcoded rgba(6,182,212,0.24)
+        // cyan radial. Teal-soft carries the matching hue at the right transparency.
+        // The pulse animation in the base partial is kept as-is (teal live-pulse
+        // is semantically correct in the blueprint accent rotation).
+        .is-accent & {
+            &::before {
+                background: radial-gradient(circle, var(--bp-teal-soft) 0%, transparent 70%);
+            }
+        }
+    }
+
+    // ── Node labels ────────────────────────────────────────────────────────────
+    // Blueprint micro-label voice: JetBrains Mono, uppercase, tracked out.
+    // Primary label stays --bp-text-muted (set via the component var above).
+    // Accent label gets teal-fg for a live/active signal.
+
+    .tc-cdn-map__node-label {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.09em;
+
+        // Accent nodes: teal-fg for AA-safe teal text on white card surface.
+        .is-accent & {
+            color: var(--bp-teal-fg);
+        }
+    }
+}

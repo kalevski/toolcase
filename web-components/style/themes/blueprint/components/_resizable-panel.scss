@@ -1,0 +1,66 @@
+// Blueprint › tc-resizable-panel — panes on white paper, teal divider hairline that flares pink on drag.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-resizable-panel {
+        // Pane background: raised white paper surface (consistent with blueprint card/panel surfaces).
+        --bs-resizable-panel-pane-bg: var(--bp-paper);
+
+        // Divider: a crisp blueprint-border hairline at rest.
+        --bs-resizable-panel-divider-bg: var(--bp-border);
+
+        // Hover → teal (everyday action accent); signals the handle is interactive before a grab.
+        --bs-resizable-panel-divider-hover-bg: var(--bp-teal);
+
+        // Active/dragging → pink (primary action); the divider "activates" into the CTA accent.
+        --bs-resizable-panel-divider-active-bg: var(--bp-pink);
+
+        // Grip dots: muted border-strong at rest; swap to white on teal/pink divider backgrounds.
+        --bs-resizable-panel-grip-color: var(--bp-border-strong);
+        --bs-resizable-panel-grip-hover-color: var(--bp-pink-ink); // white — readable on both teal and pink fills
+    }
+
+    // ── Divider ────────────────────────────────────────────────────────────────────
+
+    .tc-resizable-panel-divider {
+        // Smooth the teal→pink transition with the blueprint ease curve.
+        transition:
+            background-color 180ms var(--bp-ease),
+            box-shadow 180ms var(--bp-ease);
+
+        &:hover {
+            // Teal glow halo when hovering — gentle affordance without shouting.
+            box-shadow: 0 0 0 2px var(--bp-teal-soft);
+        }
+
+        &:focus-visible {
+            // Blueprint focus ring: pink outline (primary accent), no slate bleed.
+            outline: 2px solid var(--bp-pink);
+            outline-offset: -1px;
+            box-shadow: var(--bp-glow-pink);
+        }
+
+        &:active {
+            box-shadow: 0 0 0 2px var(--bp-pink-soft);
+        }
+    }
+
+    // While dragging: pink glow persists across the full session.
+    .tc-resizable-panel--dragging .tc-resizable-panel-divider {
+        box-shadow: 0 0 0 2px var(--bp-pink-soft);
+    }
+
+    // ── Grip dots ─────────────────────────────────────────────────────────────────
+
+    // Grip inherits `color` from --bs-resizable-panel-grip-color via radial-gradient(currentColor …).
+    // The var swap above handles both rest and hover/drag states; no extra rules needed here.
+
+    // ── Reduced motion ─────────────────────────────────────────────────────────────
+
+    @media (prefers-reduced-motion: reduce) {
+        .tc-resizable-panel-divider {
+            transition: none;
+        }
+    }
+}

@@ -1,0 +1,27 @@
+// Blueprint › tc-buff-bar — HUD buff row: teal-dimmed cooldown sweep, pink mono stack badge.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-buff-bar {
+        // Cooldown overlay: replaces the raw dark-slate rgba(15,23,42,.55) with a
+        // blueprint-violet tint that reads as a spent-time dim on a light theme.
+        --bs-buff-bar-cooldown-overlay: rgba(91, 61, 242, 0.35); // --bp-violet hue, soft
+
+        // Stack badge: pink primary fill (accent-rotation: pink = primary/selected),
+        // white ink, mono font for the HUD numeric feel.
+        --bs-buff-bar-stack-bg: var(--bp-pink);
+        --bs-buff-bar-stack-color: var(--bp-pink-ink);
+    }
+
+    // Override the stack badge font to --bp-mono (JetBrains Mono) for the
+    // blueprint arcade-HUD micro-label treatment; base uses --bs-font-monospace.
+    .tc-buff-bar__stack {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    // Cooldown sweep: the conic-gradient gradient stop text is already driven by
+    // --bs-buff-bar-cooldown-overlay above; no element rule needed.
+    // The cell and row are pure layout — no cosmetics to override.
+}

@@ -1,0 +1,63 @@
+// Blueprint › tc-credits-scroll — cinematic light surface; display titles, teal mono role labels, teal pause indicator.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-credits-scroll {
+        // Surface: white card on the lavender canvas, hairline border, no dark slate.
+        --bs-credits-scroll-bg: var(--bp-paper);
+        --bs-credits-scroll-border: var(--bp-border);
+
+        // Section title: display face (Chakra Petch), primary ink, tight tracking.
+        --bs-credits-scroll-title-color: var(--bp-text);
+        --bs-credits-scroll-title-font-size: 1.25rem;
+        --bs-credits-scroll-title-font-weight: 700;
+
+        // Role label: mono face for machine-facing micro-labels, teal for action-tier.
+        --bs-credits-scroll-role-color: var(--bp-teal-fg);
+        --bs-credits-scroll-role-font-size: 0.6875rem;
+        --bs-credits-scroll-role-letter-spacing: 0.13em;
+
+        // Names: body prose, soft primary ink.
+        --bs-credits-scroll-name-color: var(--bp-text-soft);
+        --bs-credits-scroll-name-font-size: 0.9375rem;
+
+        // Pause indicator: paper surface, strong hairline, teal icon.
+        --bs-credits-scroll-indicator-bg: var(--bp-paper);
+        --bs-credits-scroll-indicator-border: var(--bp-border-strong);
+        --bs-credits-scroll-indicator-color: var(--bp-teal-fg);
+
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // Focus ring: pink primary accent (keyboard nav).
+    tc-credits-scroll:focus-visible {
+        outline-color: var(--bp-pink);
+    }
+
+    // Section title: display face, tight tracking — cinematic heading weight.
+    .tc-credits-scroll-title {
+        font-family: var(--bp-display);
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        text-transform: uppercase;
+        color: var(--bs-credits-scroll-title-color);
+    }
+
+    // Role label: mono face, uppercase, teal micro-label.
+    .tc-credits-scroll-role {
+        font-family: var(--bp-mono);
+        color: var(--bs-credits-scroll-role-color);
+        letter-spacing: var(--bs-credits-scroll-role-letter-spacing);
+    }
+
+    // Names: body face, soft ink.
+    .tc-credits-scroll-name {
+        font-family: var(--bp-body);
+        color: var(--bs-credits-scroll-name-color);
+    }
+
+    // Pause indicator: inherits paper/border/icon vars set above; shadow for lift.
+    .tc-credits-scroll-indicator {
+        box-shadow: var(--tc-shadow-sm);
+    }
+}

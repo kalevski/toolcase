@@ -1,0 +1,176 @@
+// Blueprint › tc-data-list — white-paper bordered panel, display primary labels,
+// mono trailing meta + action buttons, teal accent rotation for hover/selected
+// states, and pink CTA action hover; all cosmetics driven via --bs-data-list-*.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-data-list {
+        // ── Surface ───────────────────────────────────────────────────────────
+        // White raised card on the lavender page; shadow lifts it off --bp-bg.
+        --bs-data-list-bg:              var(--bp-paper);
+        --bs-data-list-border:          1px solid var(--bp-border);
+
+        // ── Separators ────────────────────────────────────────────────────────
+        // Faint dividers — blueprint divider token, not the raw slate literal.
+        --bs-data-list-separator:       1px solid var(--bp-border-faint);
+
+        // ── Row states ────────────────────────────────────────────────────────
+        // Hover: barely-there lavender paper-tint wash.
+        // Selected: stronger paper-tint-2 fill to read clearly at a glance.
+        --bs-data-list-row-hover-bg:    var(--bp-paper-tint);
+        --bs-data-list-row-selected-bg: var(--bp-paper-tint-2);
+
+        // ── Header ────────────────────────────────────────────────────────────
+        // Recessed well background separates the header from the row body.
+        --bs-data-list-header-bg:       var(--bp-bg-2);
+
+        // Title: display font (Chakra Petch) — blueprint's section-name register.
+        --bs-data-list-title-color:     var(--bp-text);
+        --bs-data-list-title-font-size: 0.8125rem;
+
+        // ── Row text ──────────────────────────────────────────────────────────
+        --bs-data-list-primary-color:   var(--bp-text);
+        --bs-data-list-primary-font-size: 0.875rem;
+        --bs-data-list-secondary-color: var(--bp-text-muted);
+        --bs-data-list-secondary-font-size: 0.75rem;
+
+        // Trailing meta: faint ink — it's a HUD readout, not a primary label.
+        --bs-data-list-trailing-color:  var(--bp-text-faint);
+        --bs-data-list-trailing-font-size: 0.6875rem;
+
+        // ── Action button ─────────────────────────────────────────────────────
+        // Default: white paper + primary ink + hairline border (blueprint chip).
+        // Hover: pink primary-CTA fill with white ink — arcade accent rotation.
+        --bs-data-list-action-bg:           var(--bp-paper);
+        --bs-data-list-action-color:        var(--bp-text-soft);
+        --bs-data-list-action-border:       1px solid var(--bp-border-soft);
+        --bs-data-list-action-hover-bg:     var(--bp-pink);
+        --bs-data-list-action-hover-color:  var(--bp-pink-ink);
+
+        // ── Empty state ───────────────────────────────────────────────────────
+        --bs-data-list-empty-color:     var(--bp-text-faint);
+
+        // Outer frame shadow — lifts the panel off --bp-bg.
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Header title — display typeface (Chakra Petch) ────────────────────────
+    // Section names / list headings sit in the display register: tight tracking,
+    // strong ink.  Font-family applied here because --bs-data-list-title-* has
+    // no font-family slot in the base API.
+    .tc-data-list__title {
+        font-family: var(--bp-display);
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: var(--bp-text);
+        text-transform: uppercase; // Chakra Petch reads best caps at this size
+    }
+
+    // ── Primary row label — display typeface ──────────────────────────────────
+    // Named entities (item name, entry label) use Chakra Petch at weight 500
+    // so each row reads as a distinct titled object, not plain prose.
+    .tc-data-list__primary {
+        font-family: var(--bp-display);
+        font-weight: 500;
+        letter-spacing: -0.005em;
+        color: var(--bp-text);
+    }
+
+    // ── Secondary / description — mono micro-label treatment ──────────────────
+    // Short descriptors sit in the HUD / kicker register: mono, uppercase,
+    // loose tracking, muted-text color (not teal — avoids over-accenting).
+    .tc-data-list__secondary {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--bp-text-muted);
+    }
+
+    // ── Trailing meta — mono HUD readout ──────────────────────────────────────
+    // Values / timestamps / counts rendered in mono with faint ink, reinforcing
+    // the blueprint "telemetry readout" feel.  The base already sets mono via
+    // var(--tc-font-mono); we override color to the BP faint-ink token.
+    .tc-data-list__trailing {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.04em;
+        color: var(--bp-text-faint);
+    }
+
+    // ── Leading icon — teal accent ────────────────────────────────────────────
+    // Icons sit in the everyday-action register; teal gives them a subtle
+    // directional / status signal without competing with row content.
+    .tc-data-list__icon {
+        color: var(--bp-teal-fg);
+    }
+
+    // ── Action button — mono chip style ───────────────────────────────────────
+    // Blueprint action chips: mono uppercase, tight height, hairline border.
+    // Hover flips to pink fill (primary CTA) with glow.
+    .tc-data-list__action {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--bp-text-soft);
+        background: var(--bp-paper);
+        border: 1px solid var(--bp-border-soft);
+        transition:
+            background var(--bp-ease, 0.18s ease),
+            color var(--bp-ease, 0.18s ease),
+            box-shadow var(--bp-ease, 0.18s ease),
+            transform var(--bp-ease, 0.18s ease);
+
+        &:hover:not(:disabled) {
+            background: var(--bp-pink);
+            color: var(--bp-pink-ink);
+            border-color: var(--bp-pink);
+            box-shadow: var(--bp-glow-pink);
+        }
+
+        &:focus-visible {
+            // Teal focus ring — everyday-action register for keyboard nav.
+            outline: 2px solid var(--bp-teal);
+            outline-offset: 2px;
+        }
+    }
+
+    // ── Selected row — teal left-edge accent flash ────────────────────────────
+    // Teal inset bar marks the selected row: teal is the blueprint's "active
+    // state / current item" accent (distinct from pink's primary-CTA role).
+    .tc-data-list__row--selected {
+        box-shadow: inset 2px 0 0 var(--bp-teal);
+    }
+
+    // ── Selectable rows — teal focus ring ────────────────────────────────────
+    .tc-data-list[selectable] .tc-data-list__row:focus-visible {
+        outline: 2px solid var(--bp-teal);
+        outline-offset: -2px;
+    }
+
+    // ── Row hover — subtle left-edge teal flash ───────────────────────────────
+    // Non-selected hover rows gain a faint teal left border so rows read as
+    // tappable without stealing the selected row's stronger indicator.
+    .tc-data-list__row {
+        border-left: 2px solid transparent;
+        padding-left: calc(0.875rem - 2px); // compensate for the 2px border
+
+        &:hover {
+            border-left-color: var(--bp-teal-soft);
+        }
+
+        &--selected {
+            border-left-color: var(--bp-teal);
+        }
+    }
+
+    // ── Empty state — faint mono label ────────────────────────────────────────
+    .tc-data-list__empty {
+        font-family: var(--bp-mono);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--bp-text-faint);
+    }
+}

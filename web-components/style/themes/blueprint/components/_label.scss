@@ -1,0 +1,38 @@
+// Blueprint › tc-label — mono-eyebrow treatment: JetBrains Mono, uppercase, teal-fg ink, pink required marker.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-label {
+        // Typography: mono utility face — labels read as HUD annotations on blueprint forms.
+        --bs-label-font-size: 0.75rem;        // 12px — mono reads slightly large, trim it
+        --bs-label-font-weight: 500;
+        --bs-label-color: var(--bp-teal-fg);  // teal text on white clears AA; gives fields a technical-instrument feel
+        --bs-label-sm-font-size: 0.6875rem;   // 11px
+        --bs-label-lg-font-size: 0.8125rem;   // 13px
+        --bs-label-gap: 0.3125rem;
+
+        // Required marker → pink (primary accent, strong call-to-attention)
+        --bs-label-required-color: var(--bp-pink);
+
+        // Info icon: muted at rest, teal tint on hover
+        --bs-label-info-color: var(--bp-text-faint);
+        --bs-label-info-hover-bg: var(--bp-teal-soft);
+    }
+
+    .tc-label {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        // color and font-size already routed through --bs-label-color / --bs-label-font-size
+    }
+
+    .tc-label-info {
+        transition: background-color 0.15s var(--bp-ease);
+
+        &:focus-visible {
+            // Override default app-accent outline with blueprint teal
+            outline-color: var(--bp-teal);
+        }
+    }
+}

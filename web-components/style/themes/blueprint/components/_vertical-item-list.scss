@@ -1,0 +1,91 @@
+// Blueprint › tc-vertical-item-list — white paper surface, mono item labels, pink active left-edge marker, teal hover well, mono uppercase badges, faint hairline content divider.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-vertical-item-list {
+        // ── Surface ────────────────────────────────────────────────────────────
+        // The overall wrapper sits on --bp-paper (white raised card) rather than
+        // the canvas; the content panel shares the same white ground.
+        --bs-vertical-item-list-surface: var(--bp-paper);
+
+        // Content divider: faint blueprint hairline — never raw tc-slate-*.
+        --bs-vertical-item-list-border: 1px solid var(--bp-border-faint);
+
+        // ── Item default state — muted on transparent ground ───────────────────
+        --bs-vertical-item-list-item-color: var(--bp-text-muted);
+
+        // Hover: softest raised tint (paper-tint) as a subtle well; text lifts to
+        // full primary ink.
+        --bs-vertical-item-list-item-hover-bg: var(--bp-paper-tint);
+        --bs-vertical-item-list-item-hover-color: var(--bp-text);
+
+        // ── Active item — primary pink accent ──────────────────────────────────
+        // Active label: strong soft-ink (not raw black) — the 2px pink bar carries
+        // the selection signal; the label weight supports it.
+        --bs-vertical-item-list-item-active-color: var(--bp-text-soft);
+        --bs-vertical-item-list-item-active-weight: 600;
+
+        // Active marker bar: pink = primary/selected per the arcade accent rotation.
+        --bs-vertical-item-list-marker-color: var(--bp-pink);
+        --bs-vertical-item-list-marker-width: 2px;
+
+        // ── Icon ───────────────────────────────────────────────────────────────
+        // Resting icon is faint; on hover/active it inherits the label color.
+        --bs-vertical-item-list-icon-color: var(--bp-text-faint);
+
+        // ── Badge — teal fill + white ink (everyday/action accent) ─────────────
+        --bs-vertical-item-list-badge-bg: var(--bp-teal);
+        --bs-vertical-item-list-badge-color: var(--bp-teal-ink);
+
+        // ── Content panel ──────────────────────────────────────────────────────
+        --bs-vertical-item-list-content-color: var(--bp-text);
+
+        // ── Focus ring: pink — consistent with blueprint interactive elements ───
+        --bs-vertical-item-list-focus-color: var(--bp-pink);
+
+        // ── Skeleton shimmer: blueprint canvas ground + white gloss ────────────
+        --bs-vertical-item-list-skeleton-bg: var(--bp-border-faint);
+        --bs-vertical-item-list-skeleton-shimmer: rgba(255, 255, 255, 0.72);
+    }
+
+    // ── Item — font, transition, and state overrides ───────────────────────────
+
+    .tc-vertical-item-list-item {
+        // Blueprint body face for nav labels.
+        font-family: var(--bp-body);
+        transition:
+            background-color var(--bp-ease),
+            color var(--bp-ease);
+
+        &:hover {
+            // Teal inset hairline on hover reinforces the affordance without a
+            // competing solid bar — only the active marker uses pink.
+            box-shadow: inset 2px 0 0 var(--bp-teal-line);
+        }
+
+        &--active {
+            // Active item: pink solid inset bar + soft glow to signal selection.
+            box-shadow: inset 2px 0 0 var(--bp-pink), var(--bp-glow-pink);
+
+            .tc-vertical-item-list-icon {
+                // Icon tinted pink on the active item.
+                color: var(--bp-pink);
+            }
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bs-vertical-item-list-focus-color);
+            outline-offset: -2px;
+        }
+    }
+
+    // ── Badge — mono uppercase HUD voice ──────────────────────────────────────
+
+    .tc-vertical-item-list-badge {
+        // Mono uppercase for counts/status labels — blueprint kicker voice.
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+}

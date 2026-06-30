@@ -1,0 +1,52 @@
+// Blueprint › tc-waypoint-marker — teal-accented HUD waypoint chip on white paper with mono label/distance and a teal glow on the glyph.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-waypoint-marker {
+        // Glyph accent → teal (action color; navigation/location reads as an
+        // everyday action, not a primary CTA — teal is the right register).
+        --bs-waypoint-marker-color:          var(--bp-teal);
+
+        // Chip surface → white paper + default hairline border.
+        --bs-waypoint-marker-bg:             var(--bp-paper);
+        --bs-waypoint-marker-border-color:   var(--bp-border);
+
+        // Label ink → primary text; distance → faint muted.
+        --bs-waypoint-marker-text-color:     var(--bp-text);
+        --bs-waypoint-marker-distance-color: var(--bp-text-faint);
+    }
+
+    .tc-waypoint-marker {
+
+        // Glyph: teal color already set via --bs-waypoint-marker-color;
+        // add a soft teal ambient halo to read as a live, pulsing beacon.
+        &__glyph {
+            filter: drop-shadow(0 0 4px var(--bp-teal-soft));
+        }
+
+        // Text chip: white paper, teal-tinted hairline, subtle violet shadow
+        // so the chip lifts off the underlying canvas/map surface.
+        &__text {
+            background:   var(--bs-waypoint-marker-bg);
+            border-color: var(--bs-waypoint-marker-border-color);
+            box-shadow:   var(--tc-shadow-sm);
+        }
+
+        // Label: already mono + uppercase + tracked in base; apply bp-mono font
+        // family explicitly so the blueprint font stack is respected, and use
+        // --bp-text for solid ink on the white chip.
+        &__label {
+            font-family: var(--bp-mono);
+            color:        var(--bs-waypoint-marker-text-color);
+        }
+
+        // Distance: bp-mono at faint ink — tabular-nums keeps the readout
+        // visually stable as values update.
+        &__distance {
+            font-family:          var(--bp-mono);
+            color:                var(--bs-waypoint-marker-distance-color);
+            font-variant-numeric: tabular-nums;
+        }
+    }
+}

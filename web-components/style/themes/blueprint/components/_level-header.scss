@@ -1,0 +1,97 @@
+// Blueprint › tc-level-header — HUD level banner: pink badge tile, display title, teal XP fill, mono meta labels.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-level-header {
+        // Surface — white card with hairline and violet-tinted shadow.
+        --bs-level-header-bg:           var(--bp-paper);
+        --bs-level-header-border-color: var(--bp-border);
+
+        // Badge — pink primary tile (level number is the primary accent).
+        --bs-level-header-badge-bg:    var(--bp-pink);
+        --bs-level-header-badge-color: var(--bp-pink-ink);
+
+        // Title — display face, darkest ink.
+        --bs-level-header-title-color: var(--bp-text);
+
+        // XP track — recessed well + teal action fill.
+        --bs-level-header-track-bg:    var(--bp-bg-2);
+        --bs-level-header-fill-bg:     var(--bp-teal);
+
+        // Meta labels — faint and muted blueprint ink.
+        --bs-level-header-xp-color:   var(--bp-text-muted);
+        --bs-level-header-next-color:  var(--bp-text-faint);
+    }
+
+    .tc-level-header {
+        box-shadow: var(--tc-shadow-sm);
+        border-color: var(--bp-border);
+    }
+
+    // Badge tile — HUD corner bracket accent (::after) marks it as a hot tile.
+    .tc-level-header__badge {
+        position: relative;
+        background: var(--bp-pink-grad);
+
+        // Bottom-right HUD corner bracket in teal — contrasts the pink badge.
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: 6px;
+            right: 6px;
+            width: 10px;
+            height: 10px;
+            border-bottom: 2px solid var(--bp-teal);
+            border-right:  2px solid var(--bp-teal);
+            pointer-events: none;
+        }
+    }
+
+    // Badge label — mono eyebrow treatment.
+    .tc-level-header__badge-label {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        opacity: 0.85; // slightly subordinate to the value number
+    }
+
+    // Badge value — display face for the number itself (prominent).
+    .tc-level-header__badge-value {
+        font-family: var(--bp-display);
+        letter-spacing: -0.02em;
+    }
+
+    // Title — display face, tight tracking.
+    .tc-level-header__title {
+        font-family: var(--bp-display);
+        font-size:   var(--bs-level-header-title-font-size);
+        letter-spacing: -0.01em;
+        color: var(--bp-text);
+    }
+
+    // XP track — subtle inner shadow to reinforce recessed well read.
+    .tc-level-header__track {
+        background: var(--bp-bg-2);
+        border: 1px solid var(--bp-border-faint);
+    }
+
+    // XP fill — teal progress; glow signals live state.
+    .tc-level-header__fill {
+        background: var(--bp-teal-grad);
+        box-shadow: var(--bp-glow-teal);
+    }
+
+    // Meta labels — mono face, arcade HUD read-out style.
+    .tc-level-header__xp {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        color: var(--bp-text-muted);
+    }
+
+    .tc-level-header__next {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        color: var(--bp-text-faint);
+    }
+}

@@ -1,0 +1,51 @@
+// Blueprint › tc-graphics-preset-picker — segmented preset selector with pink active fill, teal focus glow, and mono machine labels on a hairline-framed paper surface.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-graphics-preset-picker {
+        // Typography: blueprint mono for machine-facing uppercase labels.
+        --bs-graphics-preset-picker-font: var(--bp-mono);
+        --bs-graphics-preset-picker-letter-spacing: 0.10em;
+
+        // Frame + separator hairlines → blueprint border token (no raw slate refs).
+        --bs-graphics-preset-picker-border-color: var(--bp-border);
+        --bs-graphics-preset-picker-separator-color: var(--bp-border);
+
+        // Resting segment: paper ground, muted ink.
+        --bs-graphics-preset-picker-bg: var(--bp-paper);
+        --bs-graphics-preset-picker-color: var(--bp-text-muted);
+
+        // Hover: recessed well + primary text — a subtle step up before selection.
+        --bs-graphics-preset-picker-hover-bg: var(--bp-bg-2);
+        --bs-graphics-preset-picker-hover-color: var(--bp-text);
+
+        // Active (selected): pink = primary/selected in the arcade accent rotation.
+        // --bp-pink-ink is white, guaranteed legible on the pink fill.
+        --bs-graphics-preset-picker-active-bg: var(--bp-pink);
+        --bs-graphics-preset-picker-active-color: var(--bp-pink-ink);
+
+        // Focus ring: teal everyday-action glow instead of dark slate alpha.
+        --bs-graphics-preset-picker-focus-ring: var(--bp-glow-teal);
+    }
+
+    // Reinforce the outer frame transition; the radius sweep owns corners.
+    .tc-graphics-preset-picker__group {
+        transition: border-color var(--bp-ease);
+    }
+
+    .tc-graphics-preset-picker__preset {
+        // Teal outline on keyboard focus — clear against the light paper surface.
+        &:focus-visible {
+            outline-color: var(--bp-teal);
+        }
+
+        // Active segment: strong border on the strong-border side so the
+        // selected pill reads as slightly lifted inside the hairline frame.
+        &[data-active='true'] {
+            // A 1px teal top accent reinforces the "selected track" metaphor
+            // without fighting the radius sweep (top is always 0 for the group).
+            box-shadow: inset 0 2px 0 0 var(--bp-pink-hover);
+        }
+    }
+}

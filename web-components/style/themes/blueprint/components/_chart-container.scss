@@ -1,0 +1,90 @@
+// Blueprint › tc-chart-container — white paper card, teal-inked mono subtitle/legend, display title, violet-tinted skeleton shimmer.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-chart-container {
+        // Surface: crisp white raised card with blueprint hairline and violet-tinted shadow.
+        --bs-chart-container-bg:                var(--bp-paper);
+        --bs-chart-container-border-color:      var(--bp-border);
+        --bs-chart-container-shadow:            var(--tc-shadow-sm);
+
+        // Header: very faint tinted wash — replaces the clashing dark-slate rgba gradient.
+        --bs-chart-container-header-bg:         var(--bp-paper-tint);
+        --bs-chart-container-header-border-color: var(--bp-border);
+
+        // Title: display face, primary ink.
+        --bs-chart-container-title-color:       var(--bp-text);
+
+        // Subtitle / legend: muted ink — painted via mono rules below.
+        --bs-chart-container-subtitle-color:    var(--bp-text-muted);
+
+        // Skeleton: bp-bg-2 base with a white shimmer (light theme — legible).
+        --bs-chart-container-skeleton-bg:       var(--bp-bg-2);
+        --bs-chart-container-skeleton-shimmer:  rgba(255, 255, 255, 0.72);
+
+        // Empty state: faint ink.
+        --bs-chart-container-empty-color:       var(--bp-text-faint);
+    }
+
+    // Title: blueprint display face — tight tracking, heavier weight, reads as a
+    // data-panel heading rather than body copy.
+    .tc-chart-container-title {
+        font-family:     var(--bp-display);
+        font-size:       0.9375rem;
+        font-weight:     600;
+        letter-spacing:  -0.01em;
+        text-transform:  uppercase;
+        color:           var(--bs-chart-container-title-color);
+    }
+
+    // Subtitle: mono eyebrow treatment — teal ink, small caps feel via letter-spacing.
+    .tc-chart-container-subtitle {
+        font-family:     var(--bp-mono);
+        font-size:       0.6875rem;
+        font-weight:     500;
+        letter-spacing:  0.08em;
+        text-transform:  uppercase;
+        color:           var(--bp-teal-fg);
+    }
+
+    // Legend / footer: same mono register as subtitle, slightly more breathing room.
+    .tc-chart-container-legend {
+        font-family:    var(--bp-mono);
+        font-size:      0.6875rem;
+        font-weight:    400;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color:          var(--bp-text-faint);
+        border-top-color: var(--bp-border-faint);
+    }
+
+    // Actions focus ring: pink primary accent (blueprint's primary = pink).
+    .tc-chart-container-actions {
+        :focus-visible {
+            outline-color: var(--bp-pink);
+        }
+    }
+
+    // Empty state: mono label register to match the panel vocabulary.
+    .tc-chart-container-empty-text {
+        font-family:    var(--bp-mono);
+        font-size:      0.75rem;
+        font-weight:    400;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color:          var(--bp-text-faint);
+    }
+
+    // Skeleton shimmer: override the gradient stops to use the blueprint-tinted bg
+    // and a clean white flash rather than the default tc-surface-muted shades.
+    .tc-chart-container-skeleton-bar {
+        background: linear-gradient(
+            90deg,
+            var(--bs-chart-container-skeleton-bg) 25%,
+            var(--bs-chart-container-skeleton-shimmer) 50%,
+            var(--bs-chart-container-skeleton-bg) 75%
+        );
+        background-size: 200% 100%;
+    }
+}

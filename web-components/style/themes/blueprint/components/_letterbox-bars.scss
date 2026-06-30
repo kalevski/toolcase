@@ -1,0 +1,46 @@
+// Blueprint › tc-letterbox-bars — HUD scan-line bars: deep blueprint-ink fill with a teal inner-edge accent line evoking a technical viewport reticle.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // Re-skin the bar fill to the deepest blueprint ink (#0f0e22) — darker than the
+    // base --tc-ink default, appropriate for a full cinema blackout effect on the
+    // lavender-canvas blueprint ground.
+    tc-letterbox-bars {
+        --bs-letterbox-bars-color: var(--bp-emphasis);
+    }
+
+    // ── Inner-edge teal accent line ────────────────────────────────────────────────
+    // Each bar grows a 2px teal reticle line on its inward-facing edge via ::after,
+    // suggesting a blueprint HUD scan boundary rather than a plain matte bar.
+    // pointer-events: none is inherited from the host; these are purely decorative.
+
+    .tc-letterbox-bar {
+        overflow: visible; // allow ::after to sit at the inner edge without clipping
+        position: relative;
+    }
+
+    .tc-letterbox-bar--top::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 2px;
+        background: var(--bp-teal);
+        box-shadow: var(--bp-glow-teal);
+        pointer-events: none;
+    }
+
+    .tc-letterbox-bar--bottom::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: 2px;
+        background: var(--bp-teal);
+        box-shadow: var(--bp-glow-teal);
+        pointer-events: none;
+    }
+}

@@ -1,0 +1,93 @@
+// Blueprint › tc-equipment-doll — lavender-paper HUD with teal-hairline grid, pink active slots, and mono slot labels.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-equipment-doll {
+        // Canvas surface: crisp white paper on a faint blueprint grid.
+        // Grid lines use --bp-border-faint (violet hairlines) in place of the
+        // default slate ramp, which would leak the light-slate tone into this theme.
+        --bs-equipment-doll-surface:          var(--bp-paper);
+        --bs-equipment-doll-border-color:     var(--bp-border);
+        --bs-equipment-doll-grid-color:       var(--bp-border-faint);
+
+        // Figure silhouette: routed to --bp-text-faint (violet-grey) so it reads
+        // as a ghost outline on the blueprint paper rather than a warm slate fill.
+        --bs-equipment-doll-figure-color:     var(--bp-text-faint);
+        --bs-equipment-doll-figure-opacity:   0.35;
+
+        // Slot tile cosmetics: white card on a teal-tinged border.
+        // Filled slots use --bp-border-strong; empty dashes use --bp-border-soft.
+        --bs-equipment-doll-slot-bg:          var(--bp-paper);
+        --bs-equipment-doll-slot-border:      var(--bp-border-strong);
+        --bs-equipment-doll-slot-empty-border: var(--bp-border-soft);
+        --bs-equipment-doll-slot-hover-bg:    var(--bp-teal-soft);
+        --bs-equipment-doll-icon-color:       var(--bp-text);
+        --bs-equipment-doll-empty-color:      var(--bp-text-faint);
+
+        // Active/selected: pink primary (arcade accent rotation — pink = primary/selected).
+        --bs-equipment-doll-selected-bg:      var(--bp-pink);
+        --bs-equipment-doll-selected-color:   var(--bp-pink-ink);
+
+        // Slot label: mono micro-label in muted violet-grey ink.
+        --bs-equipment-doll-label-color:      var(--bp-text-muted);
+        --bs-equipment-doll-label-font-size:  0.6875rem;
+
+        // Quantity corner pill: teal (everyday action accent, not primary).
+        --bs-equipment-doll-qty-bg:           var(--bp-teal);
+        --bs-equipment-doll-qty-color:        var(--bp-teal-ink);
+    }
+
+    // ── Canvas ───────────────────────────────────────────────────────────────
+    // Add a soft shadow so the fixed-size canvas reads as a raised blueprint
+    // sheet floating above the page surface.
+    .tc-equipment-doll__canvas {
+        box-shadow: var(--tc-shadow-sm);
+        // Blueprint grid: use the teal glow token for the outermost box so the
+        // whole canvas has a faint HUD-frame quality.
+        outline: 1px solid var(--bp-teal-line);
+        outline-offset: 2px;
+    }
+
+    // ── Slot tiles ────────────────────────────────────────────────────────────
+    // Hover: teal-soft fill + teal-line border so interactive slots are clearly
+    // distinguished from static canvas elements — no translateY (slots are
+    // abs-positioned; lift would misalign with the doll layout).
+    .tc-equipment-doll__slot:hover .tc-equipment-doll__tile {
+        border-color: var(--bp-teal);
+        box-shadow: var(--bp-glow-teal);
+    }
+
+    // Focus ring: teal halo matches the action accent family.
+    .tc-equipment-doll__slot:focus-visible {
+        outline-color: var(--bp-teal);
+    }
+
+    // Empty slot dashes: reduce opacity so the vacancy reads as a ghost socket
+    // rather than a structural error.
+    .tc-equipment-doll__slot.is-empty .tc-equipment-doll__tile {
+        opacity: 0.7;
+    }
+
+    // Selected tile: pink glow to reinforce the active-item state.
+    .tc-equipment-doll__slot.is-selected .tc-equipment-doll__tile {
+        box-shadow: var(--bp-glow-pink);
+    }
+
+    // ── Slot label ────────────────────────────────────────────────────────────
+    // Route to --bp-mono so the label typeface aligns with the blueprint HUD
+    // micro-label convention (uppercase, JetBrains Mono, loose tracking).
+    .tc-equipment-doll__label {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.1em;
+        color: var(--bp-text-muted);
+    }
+
+    // ── Quantity pill ─────────────────────────────────────────────────────────
+    // Mono typeface for the corner badge — digits in a monospaced face
+    // read cleanly at 10px and align properly in tight corners.
+    .tc-equipment-doll__qty {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.04em;
+    }
+}

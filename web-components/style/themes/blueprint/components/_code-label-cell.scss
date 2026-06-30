@@ -1,0 +1,28 @@
+// Blueprint › tc-code-label-cell — mono uppercase code chip (teal-tinted) beside a Space Grotesk label.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-code-label-cell {
+        // Code chip: JetBrains Mono, uppercase, teal-fg text on a soft teal fill,
+        // teal hairline border — reads as a HUD identifier tag / machine token.
+        --bs-code-label-cell-code-color: var(--bp-teal-fg);
+        --bs-code-label-cell-code-bg: var(--bp-teal-soft);
+        --bs-code-label-cell-code-border: 1px solid var(--bp-teal-line);
+
+        // Name label: Space Grotesk body, muted blueprint ink.
+        --bs-code-label-cell-name-color: var(--bp-text-muted);
+    }
+
+    // Override the mono font to the blueprint mono stack and add the arcade
+    // micro-label treatment (uppercase + loose tracking).
+    .tc-code-label-cell-code {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    // Name: use the blueprint body stack for crisp legibility.
+    .tc-code-label-cell-name {
+        font-family: var(--bp-body);
+    }
+}

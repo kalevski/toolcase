@@ -1,0 +1,96 @@
+// Blueprint › tc-toast — paper surface with ink text, tinted border hairline,
+// and blueprint accent-rotation status stripes (pink/teal/violet/amber/red).
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Base surface ──────────────────────────────────────────────────────────
+    // The default theme bakes dark --tc-ink; blueprint is light, so flip to
+    // white paper with a violet-tinted hairline border and a soft shadow.
+    .toast {
+        --bs-toast-color:                var(--bp-text);
+        --bs-toast-bg:                   var(--bp-paper);
+        --bs-toast-border-width:         1px;
+        --bs-toast-border-color:         var(--bp-border);
+        --bs-toast-box-shadow:           var(--tc-shadow-md);
+        --bs-toast-header-color:         var(--bp-text);
+        --bs-toast-header-bg:            transparent;
+        --bs-toast-header-border-color:  var(--bp-border-faint);
+        --bs-toast-font-size:            0.8125rem;
+    }
+
+    // ── Header ────────────────────────────────────────────────────────────────
+    .toast-header {
+        // Title text reads as a blueprint display label — tight, purposeful.
+        font-family: var(--bp-display);
+        letter-spacing: 0.02em;
+        color: var(--bs-toast-header-color);
+
+        // Meta / timestamp — mono micro-label, muted ink.
+        small {
+            font-family: var(--bp-mono);
+            font-size: 0.6875rem;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: var(--bp-text-faint); // replaces rgba(255,255,255,0.6)
+        }
+
+        // Close button — rerouted from white-on-ink to ink-on-paper.
+        .btn-close {
+            --bs-btn-close-color: var(--bp-text-muted);
+
+            &:hover {
+                color: var(--bp-text);
+                background-color: var(--bp-bg-2); // replaces rgba(255,255,255,0.15)
+            }
+        }
+    }
+
+    // ── Body ──────────────────────────────────────────────────────────────────
+    .toast-body {
+        color: var(--bp-text);
+        font-family: var(--bp-body);
+    }
+
+    // ── Status variants — blueprint accent rotation ───────────────────────────
+    // The base partial forces dark ink on all text-bg-* toasts; blueprint
+    // overrides the fill back to paper and lets only the 3px stripe carry color.
+    // Specificity is matched: same compound selector as the base rule.
+    .toast[class*='text-bg-'] {
+        --bs-toast-bg:                   var(--bp-paper) !important;  // override base's !important fill
+        --bs-toast-color:                var(--bp-text) !important;
+        --bs-toast-header-color:         var(--bp-text) !important;
+        --bs-toast-header-bg:            transparent !important;
+        --bs-toast-header-border-color:  var(--bp-border-faint) !important;
+        --bs-toast-border-color:         var(--bp-border) !important;
+
+        // Make sure the Bootstrap utility !important fill is suppressed.
+        color:            var(--bs-toast-color) !important;
+        background-color: var(--bs-toast-bg)    !important;
+
+        // Default stripe for any unrecognised text-bg-* variant.
+        border-left: 3px solid var(--bp-border-strong);
+    }
+
+    // Accent rotation: pink=primary, teal=success/action, violet=info,
+    // amber=warning, real red=danger.
+    .toast.text-bg-success {
+        border-left-color: var(--bp-teal);       // status success → teal
+    }
+
+    .toast.text-bg-danger {
+        border-left-color: var(--bp-danger);     // real red, not pink
+    }
+
+    .toast.text-bg-warning {
+        border-left-color: var(--bp-amber);      // amber for caution
+    }
+
+    .toast.text-bg-info {
+        border-left-color: var(--bp-violet);     // violet for informational
+    }
+
+    .toast.text-bg-primary {
+        border-left-color: var(--bp-pink);       // pink = primary / CTA accent
+    }
+}

@@ -1,0 +1,128 @@
+// Blueprint › tc-resource-bar — HUD instrument strip: recessed well track, blueprint accent-rotation fills
+// (health=pink, mana=violet, stamina=teal), mono value readout, display label, pink fill glow.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Element-scoped custom-property overrides ─────────────────────────────────
+    // Applied to all four element names (tc-health-bar etc. are aliases that render
+    // the same .tc-resource-bar class tree; the vars must land on the host element).
+    tc-resource-bar,
+    tc-health-bar,
+    tc-mana-bar,
+    tc-stamina-bar {
+        // Label row — display face for the bar name; HUD identity, not prose.
+        --bs-resource-bar-label-color:       var(--bp-emphasis);
+        --bs-resource-bar-label-font-size:   0.8125rem;
+        --bs-resource-bar-label-font-weight: 700;
+
+        // Value readout — mono face, muted. Tabular figures applied below.
+        --bs-resource-bar-value-color:     var(--bp-text-muted);
+        --bs-resource-bar-value-font-size: 0.6875rem;
+
+        // Track — recessed well so the fill reads as raised above it.
+        --bs-resource-bar-track-bg:    var(--bp-bg-2);
+        --bs-resource-bar-track-height: 0.625rem;
+
+        // Default fill — pink is the primary accent in the blueprint rotation.
+        // Health bars use this; variants override below.
+        --bs-resource-bar-fill-bg:         var(--bp-pink);
+        --bs-resource-bar-fill-transition: width 0.3s var(--bp-ease);
+
+        // Ghost band — replaces raw var(--tc-slate-400) which leaks the light-slate
+        // ramp into dark/alternate themes. Border-strong reads as a soft residual
+        // trail without false-reading as a second fill color.
+        --bs-resource-bar-ghost-bg: var(--bp-border-strong);
+
+        // Tick dividers — paper white cuts cleanly through both ghost and fill layers.
+        --bs-resource-bar-tick-color: var(--bp-paper);
+
+        // Inline text overlay — mono, muted, readable over the recessed track.
+        --bs-resource-bar-inline-text-color: var(--bp-text-muted);
+    }
+
+    // ── Per-variant fill colors — blueprint accent rotation ──────────────────────
+    // Health: pink — the highest-stakes live indicator; primary accent is appropriate.
+    // Mana:   violet — arcane/supernatural register; the supporting violet slot fits
+    //         conventional "blue for mana" while staying within the blueprint palette.
+    //         --bp-violet-fg is the accessible darker shade for text; the fill itself
+    //         can be the full --bp-violet since it's used on a track, not as text.
+    // Stamina: teal — action/endurance register; teal is the everyday-action accent.
+    .tc-resource-bar--health {
+        --bs-resource-bar-fill-bg: var(--bp-pink);
+    }
+
+    .tc-resource-bar--mana {
+        --bs-resource-bar-fill-bg: var(--bp-violet);
+    }
+
+    .tc-resource-bar--stamina {
+        --bs-resource-bar-fill-bg: var(--bp-teal);
+    }
+
+    // ── Label — display type treatment ───────────────────────────────────────────
+    // Bar labels name a live HUD metric. Chakra Petch (--bp-display) in uppercase
+    // with tight tracking reads as instrument labeling rather than prose copy.
+    .tc-resource-bar__label {
+        font-family: var(--bp-display);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    // ── Value readout — mono, tabular figures ────────────────────────────────────
+    // The "123 / 500" counter is machine-facing data. JetBrains Mono keeps digits
+    // aligned across value changes; tabular-nums prevents layout shift as numbers
+    // update. Overrides the baked 'JetBrains Mono' literal with the --bp-mono var
+    // so the theme's font stack stays consistent.
+    .tc-resource-bar__label-value {
+        font-family: var(--bp-mono);
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    // ── Inline track text — mono, tabular figures ────────────────────────────────
+    .tc-resource-bar__inline-text {
+        font-family: var(--bp-mono);
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.04em;
+    }
+
+    // ── Fill — pink glow for health / default bars ───────────────────────────────
+    // A soft glow on the active fill reinforces the instrumentation reading and
+    // gives the strip a light HUD quality on the white-paper blueprint surface.
+    // The glow token is pink; mana and stamina fills get their own soft halo.
+    .tc-resource-bar--health .tc-resource-bar__fill,
+    .tc-resource-bar__fill {
+        box-shadow: var(--bp-glow-pink);
+    }
+
+    // Mana fill — violet glow (--bp-violet-soft used as ambient halo)
+    .tc-resource-bar--mana .tc-resource-bar__fill {
+        box-shadow: 0 0 0 0.15em var(--bp-violet-soft);
+    }
+
+    // Stamina fill — teal glow
+    .tc-resource-bar--stamina .tc-resource-bar__fill {
+        box-shadow: var(--bp-glow-teal);
+    }
+
+    // ── Track — hairline border over the recessed well ───────────────────────────
+    // A 1px --bp-border outline frames the track as a precision instrument gauge
+    // rather than a plain colored strip. The outline sits outside overflow:hidden
+    // via outline rather than border so it doesn't shrink the fill lane.
+    .tc-resource-bar__track {
+        outline: 1px solid var(--bp-border);
+        outline-offset: 0px;
+    }
+
+    // ── Reduced motion ───────────────────────────────────────────────────────────
+    @media (prefers-reduced-motion: reduce) {
+        tc-resource-bar,
+        tc-health-bar,
+        tc-mana-bar,
+        tc-stamina-bar {
+            --bs-resource-bar-fill-transition: none;
+        }
+    }
+}

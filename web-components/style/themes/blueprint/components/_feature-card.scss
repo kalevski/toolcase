@@ -1,0 +1,66 @@
+// Blueprint › tc-feature-card — THE signature HUD feature panel (§8.4): white
+// paper, lilac hairline, soft violet shadow, an L-shaped teal corner-bracket
+// tick, a mono uppercase eyebrow, a Chakra Petch title, a soft-teal icon tile,
+// and an accent border-swap + lift on hover.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-feature-card {
+        --bs-feature-card-bg: var(--bp-paper);
+        --bs-feature-card-border-color: var(--bp-border);
+        --bs-feature-card-shadow: var(--tc-shadow-sm);
+        --bs-feature-card-shadow-hover: var(--tc-shadow-hover);
+        --bs-feature-card-title-color: var(--bp-text);
+        --bs-feature-card-desc-color: var(--bp-text-muted);
+        --bs-feature-card-eyebrow-color: var(--bp-teal-fg);
+        --bs-feature-card-icon-bg: var(--bp-teal-soft);
+        --bs-feature-card-icon-color: var(--bp-teal-fg);
+    }
+
+    .tc-feature-card {
+        position: relative;
+        transition:
+            transform 0.25s var(--bp-ease),
+            border-color 0.25s,
+            box-shadow 0.25s;
+    }
+
+    // HUD corner-bracket — teal L-tick top-left.
+    .tc-feature-card::before {
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        width: 12px;
+        height: 12px;
+        border-top: 2px solid var(--bp-teal);
+        border-left: 2px solid var(--bp-teal);
+        opacity: 0.7;
+        pointer-events: none;
+        transition: opacity 0.25s;
+    }
+
+    .tc-feature-card:hover {
+        transform: translateY(-3px);
+        border-color: var(--bp-teal);
+    }
+
+    .tc-feature-card:hover::before {
+        opacity: 1;
+    }
+
+    // Eyebrow reads as a mono uppercase micro-label.
+    .tc-feature-card-eyebrow {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+
+    // Title in the display face.
+    .tc-feature-card-title {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+    }
+}

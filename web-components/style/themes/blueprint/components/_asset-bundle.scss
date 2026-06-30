@@ -1,0 +1,306 @@
+// Blueprint › tc-asset-bundle — white-paper card with teal/pink accent rotation,
+// mono HUD labels, blueprint hairlines, and clashing slate/green/cyan literals replaced.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Token overrides ─────────────────────────────────────────────────────────
+
+    tc-asset-bundle {
+        // Card shell
+        --bs-asset-bundle-bg:                   var(--bp-paper);
+        --bs-asset-bundle-border-color:          var(--bp-border);
+        --bs-asset-bundle-shadow:                var(--tc-shadow-sm);
+
+        // Header cap: replace dark slate gradient with a soft violet-tinted wash
+        // (matches blueprint "faint ink-gradient" intent without dark slate stops)
+        --bs-asset-bundle-header-cap:
+            linear-gradient(180deg, var(--bp-paper-tint-2) 0%, var(--bp-paper) 100%);
+
+        // Text ink
+        --bs-asset-bundle-name-color:            var(--bp-text);
+        --bs-asset-bundle-target-color:          var(--bp-text-muted);
+        --bs-asset-bundle-section-title-color:   var(--bp-teal-fg);   // teal mono eyebrow
+        --bs-asset-bundle-divider-color:         var(--bp-border-faint);
+
+        // Tag chips — included → teal semantic, excluded → real danger red
+        --bs-asset-bundle-tag-included-bg:       var(--bp-teal-soft);
+        --bs-asset-bundle-tag-included-color:    var(--bp-teal-fg);
+        --bs-asset-bundle-tag-included-border:   var(--bp-teal-line);
+        --bs-asset-bundle-tag-excluded-bg:       var(--bp-danger-soft);
+        --bs-asset-bundle-tag-excluded-color:    var(--bp-danger);
+        --bs-asset-bundle-tag-excluded-border:   rgba(220, 38, 38, 0.25); // no token for danger border; stays near bp-danger
+
+        // Counts / build refs — recessed well fill, blueprint text
+        --bs-asset-bundle-count-bg:              var(--bp-bg-2);
+        --bs-asset-bundle-count-label-color:     var(--bp-text-muted);
+        --bs-asset-bundle-count-value-color:     var(--bp-text);
+        --bs-asset-bundle-build-ref-color:       var(--bp-text-soft);
+        --bs-asset-bundle-build-ref-bg:          var(--bp-bg-2);
+
+        // Category badge — faint violet chip
+        --bs-asset-bundle-category-bg:          var(--bp-violet-soft);
+        --bs-asset-bundle-category-color:        var(--bp-violet-fg);
+
+        // Controls — muted → hover → active (pink = primary CTA / active)
+        --bs-asset-bundle-control-color:         var(--bp-text-faint);
+        --bs-asset-bundle-control-hover-bg:      var(--bp-bg-2);
+        --bs-asset-bundle-control-hover-color:   var(--bp-text);
+        --bs-asset-bundle-control-active-bg:     var(--bp-pink);
+        --bs-asset-bundle-control-active-color:  var(--bp-pink-ink);
+
+        // Skeleton shimmer — paper + light tint sweep
+        --bs-asset-bundle-skeleton-bg:           var(--bp-border-faint);
+        --bs-asset-bundle-skeleton-shimmer:      var(--bp-paper-tint);
+    }
+
+    // ── Card shell — teal HUD corner bracket on the card ───────────────────────
+    // Applied once and sparingly: this is a tappable bundle tile, fits the rule.
+
+    .tc-asset-bundle {
+        background: var(--bs-asset-bundle-bg);
+        border-color: var(--bs-asset-bundle-border-color);
+        box-shadow: var(--bs-asset-bundle-shadow);
+        position: relative;
+        transition: box-shadow var(--bp-ease), transform var(--bp-ease);
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            pointer-events: none;
+        }
+
+        &:hover {
+            box-shadow: var(--tc-shadow-hover);
+            transform: translateY(-2px);
+        }
+    }
+
+    // ── Bundle name — display font, tight tracking ──────────────────────────────
+
+    .tc-asset-bundle-name {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+        color: var(--bs-asset-bundle-name-color);
+    }
+
+    // ── Target line — mono HUD label ────────────────────────────────────────────
+
+    .tc-asset-bundle-target-name {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.05em;
+        color: var(--bp-text-muted);
+    }
+
+    // ── Category badge — violet mono chip ───────────────────────────────────────
+
+    .tc-asset-bundle-category {
+        font-family: var(--bp-mono);
+        font-size: 0.625rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        background: var(--bs-asset-bundle-category-bg);
+        color: var(--bs-asset-bundle-category-color);
+        border: 1px solid var(--bp-border-chip);
+    }
+
+    // ── Section titles — teal mono eyebrow ─────────────────────────────────────
+
+    .tc-asset-bundle-section-title {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.1em;
+        color: var(--bs-asset-bundle-section-title-color);
+    }
+
+    // ── Tag chips ───────────────────────────────────────────────────────────────
+
+    .tc-asset-bundle-tag {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    // ── Count badges ────────────────────────────────────────────────────────────
+
+    .tc-asset-bundle-count {
+        background: var(--bs-asset-bundle-count-bg);
+        border: 1px solid var(--bp-border-faint);
+    }
+
+    .tc-asset-bundle-count-value {
+        font-family: var(--bp-mono);
+        color: var(--bs-asset-bundle-count-value-color);
+    }
+
+    // ── Build ref tags ──────────────────────────────────────────────────────────
+
+    .tc-asset-bundle-build-ref {
+        font-family: var(--bp-mono);
+        background: var(--bs-asset-bundle-build-ref-bg);
+        color: var(--bs-asset-bundle-build-ref-color);
+        border: 1px solid var(--bp-border-faint);
+    }
+
+    .tc-asset-bundle-build-tag {
+        font-family: var(--bp-mono);
+        background: var(--bp-paper);
+        color: var(--bs-asset-bundle-control-color);
+        border-color: var(--bs-asset-bundle-border-color);
+
+        &[data-tag]:hover {
+            background: var(--bs-asset-bundle-control-hover-bg);
+            color: var(--bs-asset-bundle-control-hover-color);
+            border-color: var(--bp-border-strong);
+        }
+
+        &[data-tag]:focus-visible {
+            outline-color: var(--bp-teal);
+        }
+
+        // Active tag → pink primary
+        &--active,
+        &--active:hover {
+            background: var(--bs-asset-bundle-control-active-bg);
+            color: var(--bs-asset-bundle-control-active-color);
+            border-color: var(--bs-asset-bundle-control-active-bg);
+        }
+
+        &--static {
+            background: var(--bs-asset-bundle-build-ref-bg);
+            color: var(--bs-asset-bundle-build-ref-color);
+            border-color: transparent;
+        }
+    }
+
+    // ── Advanced toggle ─────────────────────────────────────────────────────────
+
+    .tc-asset-bundle-advanced-toggle {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.1em;
+        color: var(--bs-asset-bundle-control-color);
+
+        &:hover {
+            background: var(--bs-asset-bundle-control-hover-bg);
+            color: var(--bs-asset-bundle-control-hover-color);
+        }
+
+        &:active {
+            background: var(--bs-asset-bundle-control-active-bg);
+            color: var(--bs-asset-bundle-control-active-color);
+        }
+
+        &:focus-visible {
+            outline-color: var(--bp-teal);
+        }
+    }
+
+    // ── Opt rows ────────────────────────────────────────────────────────────────
+
+    .tc-asset-bundle-opt {
+        background: var(--bs-asset-bundle-count-bg);
+        border: 1px solid var(--bp-border-faint);
+    }
+
+    .tc-asset-bundle-opt-value {
+        font-family: var(--bp-mono);
+        color: var(--bs-asset-bundle-count-value-color);
+    }
+
+    // Bool indicator: on → teal (success), off → faint
+    .tc-asset-bundle-opt-bool {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        font-size: 0.6875rem;
+
+        &--on {
+            color: var(--bp-teal-fg); // teal = success in blueprint
+        }
+
+        &--off {
+            color: var(--bp-text-faint);
+        }
+    }
+
+    // ── Action menu ─────────────────────────────────────────────────────────────
+    // Fixes the hardcoded $slate-700 literal baked into .tc-asset-bundle-menu
+
+    .tc-asset-bundle-menu-trigger {
+        color: var(--bs-asset-bundle-control-color);
+
+        &:hover {
+            color: var(--bs-asset-bundle-control-hover-color);
+            background-color: var(--bs-asset-bundle-control-hover-bg);
+        }
+
+        &:focus-visible {
+            outline-color: var(--bp-teal);
+        }
+    }
+
+    .tc-asset-bundle-menu {
+        // Override the $slate-700 hardcoded literal; route to blueprint ink
+        --bs-asset-bundle-menu-item-color: var(--bp-text);
+
+        background-color: var(--bp-paper);
+        border-color: var(--bs-asset-bundle-border-color);
+        box-shadow: var(--tc-shadow-lg);
+
+        .tc-asset-bundle-menu-divider {
+            border-top-color: var(--bp-border-faint);
+        }
+    }
+
+    .tc-asset-bundle-menu-item {
+        font-family: var(--bp-body);
+        color: var(--bs-asset-bundle-menu-item-color);
+
+        &:hover,
+        &:focus-visible {
+            background-color: var(--bs-asset-bundle-control-hover-bg);
+            color: var(--bs-asset-bundle-control-hover-color);
+        }
+
+        &:active {
+            background-color: var(--bs-asset-bundle-control-active-bg);
+            color: var(--bs-asset-bundle-control-active-color);
+        }
+
+        &[disabled],
+        &:disabled {
+            color: var(--bp-text-faint);
+        }
+
+        // Danger menu item stays on real red
+        &--danger {
+            color: var(--bp-danger);
+
+            &:hover,
+            &:focus-visible {
+                color: var(--bp-danger);
+                background-color: var(--bp-danger-soft);
+            }
+        }
+    }
+
+    // ── Loading skeleton ────────────────────────────────────────────────────────
+    // Shimmer rides over the lavender-tinted bg-2 fill
+
+    .tc-asset-bundle-skeleton {
+        background: linear-gradient(
+            90deg,
+            var(--bs-asset-bundle-skeleton-bg) 25%,
+            var(--bs-asset-bundle-skeleton-shimmer) 50%,
+            var(--bs-asset-bundle-skeleton-bg) 75%
+        );
+        background-size: 200% 100%;
+    }
+
+}

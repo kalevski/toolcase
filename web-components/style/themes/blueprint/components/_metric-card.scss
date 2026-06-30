@@ -1,0 +1,127 @@
+// Blueprint › tc-metric-card — white paper card, Chakra Petch display value, teal mono label, HUD lift on hover.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Component token overrides ──────────────────────────────────────────────
+    // Re-point every --bs-metric-card-* var to blueprint palette tokens.
+    // Cosmetics flow through these vars; element rules below handle structural
+    // details that have no var (hover lift, bracket glyph, border-left accent).
+
+    tc-metric-card {
+        --bs-metric-card-bg:                var(--bp-paper);
+        --bs-metric-card-border-color:      var(--bp-border);
+        --bs-metric-card-shadow:            var(--tc-shadow-sm);
+
+        // Icon chip — teal-soft fill keeps it legible on white without shouting
+        --bs-metric-card-icon-chip-bg:      var(--bp-teal-soft);
+        --bs-metric-card-icon-color:        var(--bp-teal-fg);
+
+        // Title label — bp-mono already uppercase/tracked; teal-fg clears AA on white
+        --bs-metric-card-title-color:       var(--bp-teal-fg);
+        --bs-metric-card-title-font-size:   0.6875rem;
+        --bs-metric-card-title-letter-spacing: 0.1em;
+
+        // Value — display face in darkest ink so the number reads as the hero
+        --bs-metric-card-value-color:       var(--bp-emphasis);
+        --bs-metric-card-value-font-size:   1.875rem;
+        --bs-metric-card-value-font-weight: 600;
+
+        // Subtitle — muted supporting line
+        --bs-metric-card-subtitle-color:    var(--bp-text-muted);
+
+        // Default sparkline stroke — teal reads as live/active data
+        --bs-metric-card-trend:             var(--bp-teal);
+
+        // Skeleton — shimmer highlight stays on-palette (paper over paper-tint)
+        --bs-metric-card-skeleton-bg:       var(--bp-paper-tint-2);
+        --bs-metric-card-skeleton-shimmer:  var(--bp-paper);
+    }
+
+    // ── Title — switch to bp-mono stack ───────────────────────────────────────
+    // The base partial hard-codes 'JetBrains Mono'; override to the theme font var.
+    .tc-metric-card-title {
+        font-family: var(--bp-mono);
+    }
+
+    // ── Value — Chakra Petch display face, tight tracking ─────────────────────
+    // The base partial uses JetBrains Mono for the value; blueprint upgrades it
+    // to the display face so the headline figure reads with architectural weight.
+    .tc-metric-card-value {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+        font-variant-numeric: tabular-nums;
+    }
+
+    // ── Subtitle — bp-body stack ───────────────────────────────────────────────
+    .tc-metric-card-subtitle {
+        font-family: var(--bp-body);
+    }
+
+    // ── Interactive card lift — HUD aesthetic ─────────────────────────────────
+    // Dashboard metric cards are tappable tiles; a 2 px translateY lift +
+    // teal left-border accent signals interactivity without a gimmicky outline.
+    // The ::before bracket is the blueprint HUD signature (top-left corner only).
+    .tc-metric-card {
+        position: relative;
+        transition: transform 180ms var(--bp-ease),
+                    box-shadow 180ms var(--bp-ease),
+                    border-color 180ms var(--bp-ease);
+
+        // HUD corner bracket — top-left, 2px teal, appears on hover/focus-within
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            opacity: 0;
+            transition: opacity 180ms var(--bp-ease);
+            pointer-events: none;
+            // z-index above card bg, below content
+            z-index: 1;
+        }
+
+        &:hover,
+        &:focus-within {
+            --bs-metric-card-border-color: var(--bp-teal-line);
+            --bs-metric-card-shadow: var(--tc-shadow-hover);
+            transform: translateY(-2px);
+            // Left-edge accent stripe reinforces the teal hover state
+            border-left-color: var(--bp-teal) !important;
+
+            &::before {
+                opacity: 1;
+            }
+        }
+    }
+
+    // ── Sparkline area fill — subtle teal wash under the trend line ────────────
+    // No fill var exists on the base partial; apply it directly on the svg path
+    // wrapper so it doesn't interfere with the caller's trend-color override.
+    .tc-metric-card-spark {
+        svg {
+            // Faint teal gradient drop behind the sparkline (not a fill= attr so
+            // the SVG path itself keeps fill:none from the base partial).
+            filter: drop-shadow(0 1px 2px var(--bp-teal-soft));
+        }
+    }
+
+    // ── Skeleton shimmer — stays on-palette ───────────────────────────────────
+    // The @keyframes and %extend live in the base partial; only the color tokens
+    // are overridden above via --bs-metric-card-skeleton-* vars. No extra rules
+    // needed unless we want to tint the skeleton bars; leave them neutral.
+
+    @media (prefers-reduced-motion: reduce) {
+        .tc-metric-card {
+            transition: none;
+
+            &::before {
+                transition: none;
+            }
+        }
+    }
+}

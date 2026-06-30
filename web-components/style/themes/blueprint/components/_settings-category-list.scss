@@ -1,0 +1,68 @@
+// Blueprint › tc-settings-category-list — recessed nav rail with mono labels, pink active indicator, teal icon tint on default items.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-settings-category-list {
+        // Nav column surface — recessed well so it reads behind the content area
+        --bs-settings-category-list-nav-bg:          var(--bp-bg-2);
+        --bs-settings-category-list-nav-border-color: var(--bp-border);
+
+        // Category item default state — muted mono label
+        --bs-settings-category-list-item-color:        var(--bp-text-muted);
+        --bs-settings-category-list-item-hover-color:  var(--bp-text-soft);
+        --bs-settings-category-list-item-hover-bg:     var(--bp-paper-tint);
+        // keep font-size + letter-spacing from the base; mono uppercase is already correct
+
+        // Active item — pink primary accent
+        --bs-settings-category-list-item-active-color:        var(--bp-pink);
+        --bs-settings-category-list-item-active-bg:           var(--bp-pink-surface);
+        --bs-settings-category-list-item-active-border-color: var(--bp-pink);
+
+        // Icon — teal for default state (everyday action tint), pink when active (driven by icon-active-color)
+        --bs-settings-category-list-icon-color:        var(--bp-teal-fg);
+        --bs-settings-category-list-icon-active-color: var(--bp-pink);
+    }
+
+    // ── Nav column ──────────────────────────────────────────────────────────────
+
+    .tc-settings-category-list-nav {
+        // Hairline divider between rail and content; bg driven by custom prop above
+        border-right-color: var(--bp-border);
+    }
+
+    // ── Category item ───────────────────────────────────────────────────────────
+
+    .tc-settings-category-list-item {
+        // Wire transition to the blueprint ease curve
+        transition:
+            background var(--bp-ease, 0.18s ease),
+            color var(--bp-ease, 0.18s ease);
+
+        &:hover {
+            // Subtle paper-tint lift — no shadow needed on a list item
+        }
+
+        &:focus-visible {
+            // Pink focus ring to match the primary accent
+            outline-color: var(--bp-pink);
+        }
+
+        // Active: left-border accent stripe + soft pink surface tint
+        &.tc-settings-category-list-item--active {
+            // bp-pink-surface is the soft card gradient; fallback to a flat tint
+            // if the token resolves to a gradient, background handles it cleanly
+            background: var(--bp-pink-surface, var(--bp-paper-tint-2));
+            border-left-color: var(--bp-pink);
+            color: var(--bp-pink);
+            font-weight: 600; // slightly bolder to reinforce selection within the mono style
+        }
+    }
+
+    // ── Body content area ───────────────────────────────────────────────────────
+
+    .tc-settings-category-list-body {
+        // Raised paper surface behind the slotted content
+        background: var(--bp-paper);
+    }
+}

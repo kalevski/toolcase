@@ -1,0 +1,52 @@
+// Blueprint › tc-version-label — schematic build-stamp: teal border hairline, mono HUD typography, teal branch qualifier, muted build hash.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-version-label {
+        // Container: paper background with a teal-tinted hairline so the stamp
+        // reads as a live HUD readout against the lavender canvas.
+        --bs-version-label-bg:           var(--bp-paper);
+        --bs-version-label-border-color: var(--bp-teal-line);
+
+        // Typography: --bp-mono is already JetBrains Mono; reinforce the
+        // uppercase/tight-tracking HUD eyebrow feel with slightly wider spacing.
+        --bs-version-label-font-size:       0.6875rem;
+        --bs-version-label-font-weight:     500;
+        --bs-version-label-letter-spacing:  0.08em;
+
+        // Separator dot → faint border token (never raw slate).
+        --bs-version-label-sep-color:     var(--bp-border-faint);
+
+        // Version segment → strong primary ink — the canonical version number is
+        // the most important piece of information in this stamp.
+        --bs-version-label-version-color: var(--bp-text);
+
+        // Build segment → muted ink for the hash / commit id.
+        --bs-version-label-build-color:   var(--bp-text-muted);
+
+        // Branch segment → teal foreground (passes AA on white); teal signals
+        // "live/active qualifier" in the blueprint accent rotation.
+        --bs-version-label-branch-color:  var(--bp-teal-fg);
+
+        // Overall label color fallback.
+        --bs-version-label-color:         var(--bp-text-faint);
+    }
+
+    // Override the hard-coded JetBrains Mono font-family stack to also pull in
+    // --bp-mono so the theme's loaded typeface takes precedence.
+    .tc-version-label {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: var(--bs-version-label-letter-spacing);
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // Branch segment: subtle teal-soft background tint to distinguish it from
+    // the version/build pair — reads as a live environment tag.
+    .tc-version-label-branch {
+        background: var(--bp-teal-soft);
+        padding-inline: 0.25em;
+        // border-radius intentionally omitted — radius sweep owns corners.
+    }
+}

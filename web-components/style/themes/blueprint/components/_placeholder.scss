@@ -1,0 +1,25 @@
+// Blueprint › tc-placeholder — lavender-tinted skeleton bars; replaces raw
+// --tc-slate-* fills with --bp-border tokens so the shimmer stays on-theme.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    // Skeleton bar fill: route away from --tc-slate-200 (raw slate ramp)
+    // to --bp-border, the default lavender hairline token, which reads as a
+    // subtle blueprint-tinted placeholder on the --bp-bg canvas.
+    .placeholder {
+        background-color: var(--bp-border);
+    }
+
+    // Wave shimmer: replace the slate-200/slate-100 gradient stops with
+    // bp-border (denser) and bp-border-faint (lighter highlight) so the
+    // travelling highlight stays within the blueprint lavender family.
+    .placeholder-wave .placeholder {
+        background: linear-gradient(
+            90deg,
+            var(--bp-border)       25%,
+            var(--bp-border-faint) 37%,
+            var(--bp-border)       63%
+        );
+        background-size: 400px 100%;
+    }
+}

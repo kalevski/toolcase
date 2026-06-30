@@ -1,0 +1,35 @@
+// Blueprint › tc-fullscreen-toggle — setting-row scaffold re-skinned with blueprint mono label, muted description, and hairline border.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-fullscreen-toggle {
+        // Hairline separator: blueprint faint divider instead of the default tc-border
+        --bs-setting-row-border: 1px solid var(--bp-border-faint);
+
+        // Label: mono uppercase micro-label voice (blueprint eyebrow pattern)
+        --bs-setting-row-label-color: var(--bp-text-soft);
+        --bs-setting-row-label-size: 0.75rem;
+        --bs-setting-row-label-weight: 600;
+
+        // Description: faint muted ink at reading size
+        --bs-setting-row-description-color: var(--bp-text-faint);
+        --bs-setting-row-description-size: 0.6875rem;
+
+        // Tighten vertical rhythm to suit compact HUD rows
+        --bs-setting-row-padding-y: 0.625rem;
+        --bs-setting-row-padding-x: 1rem;
+
+        .tc-setting-row__label {
+            font-family: var(--bp-mono);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--bs-setting-row-label-color);
+        }
+
+        .tc-setting-row__description {
+            font-family: var(--bp-body);
+            letter-spacing: 0;
+            color: var(--bs-setting-row-description-color);
+        }
+    }
+}

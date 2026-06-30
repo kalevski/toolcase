@@ -1,0 +1,42 @@
+// Blueprint › tc-close-button — muted-ink glyph, violet-tinted hover well, pink focus ring.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    .btn-close {
+        // Remap glyph color to blueprint's muted ink; default opacity is already
+        // 1 in the base, so we only need color and focus/hover deltas.
+        --bs-btn-close-color: var(--bp-text-muted);
+        --bs-btn-close-focus-shadow: var(--bp-glow-pink);
+
+        transition:
+            color var(--bp-ease),
+            background-color var(--bp-ease),
+            opacity var(--tc-transition-fast);
+
+        &:hover {
+            // Lift glyph to primary ink; soft violet-tinted well (bp-bg-2 reads
+            // as a recessed chip — appropriate for an inline dismiss target).
+            color: var(--bp-text);
+            background-color: var(--bp-paper-tint-2);
+        }
+
+        &:focus-visible {
+            // Pink glow ring — primary interaction accent for blueprint.
+            outline: 0;
+            box-shadow: var(--bp-glow-pink);
+        }
+    }
+
+    // On colored fills (text-bg-* toasts that are dark in blueprint context) —
+    // keep the base's translucent-white approach; no override needed there.
+    // On text-bg-light and text-bg-danger-soft / tinted surfaces, stay ink.
+    [class*='text-bg-light'] .btn-close {
+        --bs-btn-close-color: var(--bp-text-muted);
+
+        &:hover {
+            color: var(--bp-text);
+            background-color: var(--bp-paper-tint-2);
+        }
+    }
+}

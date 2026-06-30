@@ -1,0 +1,130 @@
+// Blueprint › tc-good-first-issues — lavender-paper panel, display title, mono meta labels, violet link hover, teal focus glow.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-good-first-issues {
+        // ── Token re-map ──────────────────────────────────────────────────────
+        // Panel shell
+        --bs-good-first-issues-border: var(--bp-border);
+        --bs-good-first-issues-bg: var(--bp-paper);
+
+        // Separator rows: replace raw tc-slate-100 leak with a blueprint hairline
+        --bs-good-first-issues-separator: var(--bp-border-faint);
+
+        // Row backgrounds
+        --bs-good-first-issues-row-bg: var(--bp-paper);
+        --bs-good-first-issues-row-hover-bg: var(--bp-paper-tint);
+
+        // Header title ink
+        --bs-good-first-issues-header-color: var(--bp-text);
+
+        // Issue title link: default ink → violet-fg on hover (violet = supporting accent)
+        --bs-good-first-issues-link-color: var(--bp-text-soft);
+        --bs-good-first-issues-link-hover-color: var(--bp-violet-fg);
+
+        // Repo slug — mono, quiet
+        --bs-good-first-issues-repo-color: var(--bp-text-faint);
+
+        // Meta line (comments count, updated time)
+        --bs-good-first-issues-meta-color: var(--bp-text-faint);
+
+        // Label chips — soft lavender tint
+        --bs-good-first-issues-chip-bg: var(--bp-paper-tint-2);
+        --bs-good-first-issues-chip-border: var(--bp-border-chip);
+        --bs-good-first-issues-chip-color: var(--bp-text-soft);
+    }
+
+    // ── Panel shell ───────────────────────────────────────────────────────────
+    .tc-good-first-issues {
+        box-shadow: var(--tc-shadow-sm);
+        border-color: var(--bp-border-strong); // slightly stronger outer frame
+    }
+
+    // ── Header ────────────────────────────────────────────────────────────────
+    .tc-good-first-issues-header {
+        background: var(--bp-bg-2); // recessed well matches blueprint panel headers
+        border-bottom-color: var(--bp-border);
+    }
+
+    .tc-good-first-issues-title {
+        font-family: var(--bp-display);
+        font-size: 0.8125rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--bp-text);
+    }
+
+    // ── List rows ─────────────────────────────────────────────────────────────
+    .tc-good-first-issues-item {
+        transition: background-color var(--bp-ease, 0.18s ease);
+
+        &:hover {
+            background: var(--bp-paper-tint);
+        }
+    }
+
+    // ── Issue title link ──────────────────────────────────────────────────────
+    .tc-good-first-issues-item-link {
+        font-family: var(--bp-body);
+        font-weight: 500;
+        color: var(--bp-text-soft);
+        transition:
+            color var(--bp-ease, 0.18s ease),
+            text-decoration-color var(--bp-ease, 0.18s ease);
+
+        &:hover {
+            color: var(--bp-violet-fg);
+        }
+
+        &:focus-visible {
+            // Teal glow focus ring (everyday action color)
+            outline: 2px solid var(--bp-teal);
+            outline-offset: 2px;
+            box-shadow: var(--bp-glow-teal);
+        }
+    }
+
+    // ── Repo slug ─────────────────────────────────────────────────────────────
+    // Already renders with bs-font-monospace; apply blueprint mono token +
+    // mono uppercase HUD style.
+    .tc-good-first-issues-item-repo {
+        font-family: var(--bp-mono);
+        font-size: 0.625rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--bp-text-faint);
+    }
+
+    // ── Label chips ───────────────────────────────────────────────────────────
+    .tc-good-first-issues-label {
+        font-family: var(--bp-mono);
+        font-size: 0.625rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        background: var(--bp-paper-tint-2);
+        border-color: var(--bp-border-chip);
+        color: var(--bp-text-soft);
+    }
+
+    // ── Meta line ─────────────────────────────────────────────────────────────
+    // Already monospace in base; apply blueprint mono token + uppercase HUD tracking
+    .tc-good-first-issues-item-meta {
+        font-family: var(--bp-mono);
+        font-size: 0.625rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--bp-text-faint);
+    }
+
+    // ── Empty state ───────────────────────────────────────────────────────────
+    .tc-good-first-issues-empty {
+        color: var(--bp-text-faint);
+    }
+
+    .tc-good-first-issues-empty-text {
+        font-family: var(--bp-body);
+        font-size: 0.875rem;
+        color: var(--bp-text-faint);
+    }
+}

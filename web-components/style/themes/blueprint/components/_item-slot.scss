@@ -1,0 +1,114 @@
+// Blueprint › tc-item-slot — lavender-paper tile with teal/pink/violet/amber rarity accents, mono badges, and a blueprint-tinted cooldown veil.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Base tile ──────────────────────────────────────────────────────────────
+    tc-item-slot {
+        --bs-item-slot-bg:            var(--bp-paper);
+        --bs-item-slot-border-color:  var(--bp-border-strong);
+        --bs-item-slot-empty-border:  var(--bp-border);
+        --bs-item-slot-hover-bg:      var(--bp-paper-tint);
+        --bs-item-slot-glyph-color:   var(--bp-text);
+        --bs-item-slot-empty-color:   var(--bp-text-faint);
+
+        // Selected: pink primary ring — replaces the dark-slate rgba literal.
+        --bs-item-slot-selected-border: var(--bp-pink);
+        --bs-item-slot-selected-ring:   var(--bp-pink-soft);
+
+        // Quantity badge (top-left) — teal action; mono font already set in base.
+        --bs-item-slot-qty-bg:    var(--bp-teal);
+        --bs-item-slot-qty-color: var(--bp-teal-ink);
+
+        // Hotkey badge (bottom-right) — violet support accent.
+        --bs-item-slot-hotkey-bg:    var(--bp-violet);
+        --bs-item-slot-hotkey-color: var(--bp-violet-ink);
+
+        // Equipped marker (top-right) — teal success signal.
+        --bs-item-slot-equipped-bg:    var(--bp-teal);
+        --bs-item-slot-equipped-color: var(--bp-teal-ink);
+
+        // Cooldown veil — replaces rgba(15,23,42,.55) dark-slate literal.
+        // Semi-transparent lavender ink reads clearly over the light paper tile.
+        --bs-item-slot-cooldown-veil: rgba(26, 24, 48, 0.48);
+        // Countdown label inside the veil: white stays legible on the dark overlay.
+        --bs-item-slot-cooldown-color: #fff;
+
+        // Lock glyph — muted ink instead of slate.
+        --bs-item-slot-lock-color: var(--bp-text-faint);
+
+        // Transition with the blueprint ease curve.
+        transition:
+            background var(--bp-ease),
+            border-color var(--bp-ease),
+            box-shadow var(--bp-ease);
+    }
+
+    // ── Rarity border accents (blueprint accent rotation) ─────────────────────
+    // common → default neutral, no override needed.
+
+    // uncommon → teal (success signal).
+    tc-item-slot[data-rarity='uncommon'] {
+        --bs-item-slot-border-color: var(--bp-teal);
+    }
+
+    // rare → violet (supporting info accent).
+    tc-item-slot[data-rarity='rare'] {
+        --bs-item-slot-border-color: var(--bp-violet);
+    }
+
+    // epic → pink (primary/CTA accent — highest non-legendary tier).
+    tc-item-slot[data-rarity='epic'] {
+        --bs-item-slot-border-color: var(--bp-pink);
+    }
+
+    // legendary → amber (warning/prestige support accent).
+    tc-item-slot[data-rarity='legendary'] {
+        --bs-item-slot-border-color: var(--bp-amber);
+    }
+
+    // mythic → danger red (real red, not pink — top tier signal).
+    tc-item-slot[data-rarity='mythic'] {
+        --bs-item-slot-border-color: var(--bp-danger);
+    }
+
+    // ── Selected state ─────────────────────────────────────────────────────────
+    // Pink glow ring mirrors the blueprint primary-CTA glow token.
+    tc-item-slot[selected] {
+        box-shadow: var(--bp-glow-pink);
+    }
+
+    // ── Quantity badge — enforce bp-mono font ──────────────────────────────────
+    .tc-item-slot__qty {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    // ── Equipped marker — bp-mono, tight uppercase micro-label ────────────────
+    .tc-item-slot__equipped {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    // ── Hotkey badge — bp-mono micro-label ────────────────────────────────────
+    .tc-item-slot__hotkey {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    // ── Cooldown countdown label — bp-mono ────────────────────────────────────
+    .tc-item-slot__cooldown-label {
+        font-family: var(--bp-mono);
+        font-weight: 600;
+        letter-spacing: 0.04em;
+    }
+
+    // ── Focus ring — pink primary ──────────────────────────────────────────────
+    // Overrides the base outline that uses --tc-app-accent.
+    tc-item-slot:focus-visible {
+        outline-color: var(--bp-pink);
+    }
+}

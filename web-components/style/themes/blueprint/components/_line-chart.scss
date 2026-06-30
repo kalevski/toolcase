@@ -1,0 +1,122 @@
+// Blueprint › tc-line-chart — lavender-paper surface, arcade series ramp (pink→teal→violet→amber),
+// blueprint-border hairlines, mono axis labels, dark-navy tooltip overlay, mono legend voice.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-line-chart {
+        // --- series stroke ramp: blueprint accent rotation ---
+        // 1 = pink (primary), 2 = teal (action), 3 = violet (support),
+        // 4 = amber (support), 5 = danger red, 6 = teal-fg (darker teal for contrast)
+        --bs-line-chart-series-1: var(--bp-pink);
+        --bs-line-chart-series-2: var(--bp-teal);
+        --bs-line-chart-series-3: var(--bp-violet);
+        --bs-line-chart-series-4: var(--bp-amber);
+        --bs-line-chart-series-5: var(--bp-danger);
+        --bs-line-chart-series-6: var(--bp-teal-fg);
+
+        // --- surface ---
+        --bs-line-chart-bg: var(--bp-paper);
+        --bs-line-chart-border: 1px solid var(--bp-border);
+
+        // --- header type ---
+        // title uses --bp-display (Chakra Petch) via .tc-line-chart-title override below
+        --bs-line-chart-title-color: var(--bp-text);
+        --bs-line-chart-subtitle-color: var(--bp-text-muted);
+
+        // --- grid + axes ---
+        // grid hairlines → faint divider token (replaces slate-100 which leaks the slate ramp)
+        --bs-line-chart-grid-color: var(--bp-border-faint);
+        // axis baselines → standard border (replaces --tc-border-strong)
+        --bs-line-chart-axis-color: var(--bp-border);
+
+        // --- axis tick labels — mono micro, blueprint-faint ink ---
+        --bs-line-chart-axis-label-color: var(--bp-text-faint);
+        // size unchanged (0.6875rem); override font family via element rule below
+
+        // --- point markers ---
+        --bs-line-chart-point-fill: var(--bp-paper);
+
+        // --- tooltip: dark navy overlay (--bp-emphasis), white label text ---
+        --bs-line-chart-tooltip-bg: var(--bp-emphasis);
+        --bs-line-chart-tooltip-color: #fff;
+        --bs-line-chart-tooltip-shadow: var(--tc-shadow-md);
+        // stripe width unchanged at 3px; stripe hue is already var(--tc-line-color) — per-series, correct
+
+        // --- legend ---
+        --bs-line-chart-legend-color: var(--bp-text);
+
+        // --- skeleton shimmer ---
+        --bs-line-chart-skeleton-bg: var(--bp-bg-2);
+    }
+
+    // panel shadow on the chart frame
+    .tc-line-chart-inner {
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // title → display face (Chakra Petch), tight tracking
+    .tc-line-chart-title {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+    }
+
+    // subtitle → body face already, just confirm muted color flows through var
+    // (no override needed beyond --bs-line-chart-subtitle-color above)
+
+    // axis tick labels → blueprint mono face + uppercase micro voice
+    .tc-line-chart-axis-label {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        // text-transform not valid on SVG text; font-family + letter-spacing carry the voice
+    }
+
+    // tooltip x-axis label inherits --tc-font-mono from base; point to --bp-mono
+    .tc-line-chart-tooltip-x {
+        font-family: var(--bp-mono);
+        opacity: 0.7;
+    }
+
+    // tooltip value — tabular mono, slightly brighter
+    .tc-line-chart-tooltip-value {
+        font-family: var(--bp-mono);
+    }
+
+    // legend items — mono micro labels, uppercase with loose tracking
+    .tc-line-chart-legend-item {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--bp-text-muted);
+
+        &:hover {
+            color: var(--bp-text);
+        }
+    }
+
+    // focus ring → pink (primary accent)
+    .tc-line-chart-legend-item:focus-visible {
+        outline-color: var(--bp-pink);
+    }
+
+    // empty state → faint blueprint ink
+    .tc-line-chart-empty {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--bp-text-faint);
+    }
+
+    // skeleton shimmer: replace the baked surface-hover midpoint with blueprint border-faint
+    .tc-line-chart-skeleton {
+        background: linear-gradient(
+            90deg,
+            var(--bp-bg-2)        25%,
+            var(--bp-border-faint) 37%,
+            var(--bp-bg-2)        63%
+        );
+        background-size: 200% 100%;
+    }
+}

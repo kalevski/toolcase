@@ -1,0 +1,56 @@
+// Blueprint › tc-check — pink-fill checked state, teal focus ring, --bp-text label; replaces all slate literals.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Custom-property overrides ─────────────────────────────────────────────
+    // Drive through the Bootstrap-compatible API that .form-check declares so
+    // the cascade stays clean and state rules stay minimal.
+
+    .form-check {
+        // Unchecked surface: white paper + strong hairline
+        --bs-form-check-bg:                  var(--bp-paper);
+        --bs-form-check-border-color:        var(--bp-border-strong);
+
+        // Checked: pink (primary) fill + matching border
+        --bs-form-check-checked-bg:          var(--bp-pink);
+        --bs-form-check-checked-border-color: var(--bp-pink);
+    }
+
+    // ── Label — replace hardcoded #334155 slate literal ──────────────────────
+    .form-check-label {
+        font-family:  var(--bp-body);
+        color:        var(--bp-text);
+    }
+
+    // ── Input states ──────────────────────────────────────────────────────────
+    .form-check-input {
+        // Transition rides the --bp-ease curve
+        transition:
+            background-color 150ms var(--bp-ease),
+            border-color     150ms var(--bp-ease),
+            box-shadow       150ms var(--bp-ease);
+
+        // Focus ring: teal glow (replaces hardcoded rgba(30,41,59,…) slate ring)
+        &:focus-visible {
+            border-color: var(--bp-teal);
+            box-shadow:   var(--bp-glow-teal);
+        }
+
+        // Hover (unchecked): nudge border toward strong to signal interactivity
+        &:not(:checked):not(:disabled):hover {
+            --bs-form-check-border-color: var(--bp-border-soft);
+        }
+
+        // Checked radio: keep paper bg, replace the hardcoded %231e293b dot
+        // with the pink brand fill so radio + checkbox share the same accent.
+        &:checked[type='radio'] {
+            background-color: var(--bp-paper);
+            --bs-form-check-bg-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3ccircle r='5' cx='8' cy='8' fill='%23e01172'/%3e%3c/svg%3e");
+            // Teal ring on radio to distinguish it from checkbox at a glance
+            border-color: var(--bp-pink);
+        }
+
+        // Disabled: label inherits the fade from the base partial; no override needed.
+    }
+}

@@ -1,0 +1,124 @@
+// Blueprint › tc-battle-pass — light blueprint reskin: white paper shell, pink primary
+// (progress fill, current-tier marker, premium badge, claimable-premium border),
+// teal action (claimed fill, claimable-free border), mono eyebrows/labels in teal-fg ink;
+// replaces the dark-slate tier-current literal and cyan accent with --bp tokens.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-battle-pass {
+        // ── Shell tokens ───────────────────────────────────────────────────────
+        --bs-battle-pass-bg:           var(--bp-paper);
+        --bs-battle-pass-border-color: var(--bp-border);
+        --bs-battle-pass-shadow:       var(--tc-shadow-sm);
+
+        // ── Header tokens ──────────────────────────────────────────────────────
+        // Eyebrow: mono + teal-fg so it reads as a HUD label above the title.
+        --bs-battle-pass-eyebrow-color:      var(--bp-teal-fg);
+        --bs-battle-pass-season-color:       var(--bp-emphasis);
+        // End-date countdown: faint mono — supporting info, not a CTA.
+        --bs-battle-pass-end-color:          var(--bp-text-faint);
+        // Premium badge: pink is the primary/CTA accent in blueprint.
+        --bs-battle-pass-premium-bg:         var(--bp-pink);
+        --bs-battle-pass-premium-color:      var(--bp-pink-ink);
+
+        // ── Progress tokens ────────────────────────────────────────────────────
+        --bs-battle-pass-level-color:    var(--bp-text-soft);
+        // Bar track: border-rule so it reads as a quiet track, not a surface.
+        --bs-battle-pass-bar-bg:         var(--bp-border-rule);
+        // Bar fill: pink (primary progress = primary CTA accent).
+        --bs-battle-pass-bar-fill:       var(--bp-pink);
+        --bs-battle-pass-xp-color:       var(--bp-text-faint);
+
+        // ── Track label tokens ─────────────────────────────────────────────────
+        --bs-battle-pass-track-label-color: var(--bp-teal-fg);
+
+        // ── Current-tier tokens ────────────────────────────────────────────────
+        // Replace the dark rgba(30,41,59,0.04) literal with the pink surface tint.
+        --bs-battle-pass-tier-current-bg:     var(--bp-pink-surface);
+        --bs-battle-pass-tier-current-marker: var(--bp-pink);
+
+        // ── Level-marker tokens ────────────────────────────────────────────────
+        --bs-battle-pass-level-marker-bg:           var(--bp-bg-2);
+        --bs-battle-pass-level-marker-border-color: var(--bp-border);
+        --bs-battle-pass-level-marker-color:        var(--bp-text-muted);
+        // Current tier marker: pink fill — matches the left-bar marker accent.
+        --bs-battle-pass-level-marker-current-bg:    var(--bp-pink);
+        --bs-battle-pass-level-marker-current-color: var(--bp-pink-ink);
+
+        // ── Reward-cell tokens ─────────────────────────────────────────────────
+        --bs-battle-pass-cell-bg:           var(--bp-paper);
+        --bs-battle-pass-cell-border-color: var(--bp-border);
+        --bs-battle-pass-cell-color:        var(--bp-text);
+
+        // Claimable free cell: teal border (teal = everyday action).
+        --bs-battle-pass-cell-claimable-border-color: var(--bp-teal-line);
+        // Claimable premium cell: pink border (pink = primary/premium CTA).
+        --bs-battle-pass-cell-premium-border-color:   var(--bp-pink-line);
+
+        // Claimed cell: teal fill — "secured reward" maps to success=teal;
+        // replaces the old --tc-app-accent which was cyan.
+        --bs-battle-pass-cell-claimed-bg:    var(--bp-teal);
+        --bs-battle-pass-cell-claimed-color: var(--bp-teal-ink);
+
+        // Empty slot: recessed well, faint dashed border.
+        --bs-battle-pass-cell-empty-bg:           var(--bp-bg-2);
+        --bs-battle-pass-cell-empty-border-color: var(--bp-border-faint);
+    }
+
+    // ── Eyebrow / level / xp / track-labels — switch font family to --bp-mono ──
+    // The base partial sets 'JetBrains Mono' as a literal font-family string;
+    // override to the theme token so all mono labels honour the blueprint font stack.
+
+    .tc-battle-pass-eyebrow,
+    .tc-battle-pass-end,
+    .tc-battle-pass-level,
+    .tc-battle-pass-xp,
+    .tc-battle-pass-track-labels,
+    .tc-battle-pass-tier-level {
+        font-family: var(--bp-mono);
+    }
+
+    // ── Season title — display face, tight tracking ────────────────────────────
+    .tc-battle-pass-season {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+    }
+
+    // ── Premium badge — display face (short uppercase label, button-weight) ─────
+    .tc-battle-pass-premium-badge {
+        font-family: var(--bp-mono);
+        // Pill shape is sanctioned for badges per styleguide; leave border-radius intact.
+    }
+
+    // ── Claimable-cell hover: 2px lift + teal glow (free) / pink glow (premium) ─
+    button.tc-battle-pass-cell.is-claimable {
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--tc-shadow-sm);
+        }
+
+        // Free claimable: teal glow on hover.
+        &:not(.is-premium):hover {
+            box-shadow: var(--tc-shadow-sm), var(--bp-glow-teal);
+        }
+
+        // Premium claimable: pink glow on hover.
+        &.is-premium:hover {
+            box-shadow: var(--tc-shadow-sm), var(--bp-glow-pink);
+        }
+
+        &:focus-visible {
+            // Focus ring: teal for free, pink for premium is handled via the
+            // inherited --tc-app-accent chain; give a consistent violet outline
+            // that works on both cell types.
+            outline: 2px solid var(--bp-violet);
+            outline-offset: 2px;
+        }
+    }
+
+    // ── Progress bar fill: smooth ease via blueprint timing ───────────────────
+    .tc-battle-pass-bar-fill {
+        transition: width 0.45s var(--bp-ease);
+    }
+}
