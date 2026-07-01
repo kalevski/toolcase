@@ -1,0 +1,144 @@
+// Blueprint › tc-cookbook-grid — white HUD cards with dark violet-ink code surfaces, teal HUD corner-brackets, mono tags, and pink-focus linked cards.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-cookbook-grid {
+        // Card surface: white paper, lilac hairline, soft violet-tinted shadow at rest.
+        --bs-cookbook-grid-card-bg: var(--bp-paper);
+        --bs-cookbook-grid-card-border: var(--bp-border);
+        --bs-cookbook-grid-card-shadow: var(--tc-shadow-sm);
+        --bs-cookbook-grid-card-shadow-hover: var(--tc-shadow-hover);
+
+        // Section title and recipe title: blueprint emphasis ink.
+        --bs-cookbook-grid-section-title-color: var(--bp-emphasis);
+        --bs-cookbook-grid-title-color: var(--bp-text);
+
+        // Description: muted ink for secondary prose.
+        --bs-cookbook-grid-desc-color: var(--bp-text-muted);
+
+        // Code surface: keep the dark ink ground (the base already uses --tc-ink).
+        // --bs-cookbook-grid-code-bg stays as --tc-ink (foundation maps it dark).
+        // Code text stays as --tc-text-inverse (white on dark) — legible, intentional.
+
+        // Language micro-label: replace raw --tc-slate-400 (slate leak) with bright
+        // teal on the ink surface — arcade HUD readout, clears contrast on dark bg.
+        --bs-cookbook-grid-lang-color: #4fd6c6; // bright teal-on-ink (echoes code-snippet pattern)
+
+        // Tags: lavender recessed well + muted ink text.
+        --bs-cookbook-grid-tag-bg: var(--bp-paper-tint-2);
+        --bs-cookbook-grid-tag-color: var(--bp-text-muted);
+
+        // Lift magnitude: 2px matches the blueprint card standard.
+        --bs-cookbook-grid-hover-translate: -2px;
+    }
+
+    // Section heading: display font, tight tracking — blueprint title treatment.
+    .tc-cookbook-grid__title {
+        font-family: var(--bp-display);
+        font-size: 1.125rem;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        color: var(--bs-cookbook-grid-section-title-color);
+    }
+
+    // Card: position:relative so the HUD corner-bracket can anchor.
+    .tc-cookbook-grid-item {
+        background: var(--bs-cookbook-grid-card-bg);
+        border-color: var(--bp-border);
+        transition:
+            box-shadow 0.22s var(--bp-ease),
+            transform 0.22s var(--bp-ease),
+            border-color 0.22s;
+        position: relative;
+
+        // HUD corner-bracket: top-left L-tick in teal — blueprint signature detail
+        // on tappable cards. Visible at reduced opacity at rest, full on hover.
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            opacity: 0.45;
+            pointer-events: none;
+            transition: opacity 0.22s;
+        }
+    }
+
+    // Linked card: teal border accent + 2px lift + corner-bracket brightens on hover.
+    .tc-cookbook-grid-item--linked {
+        &:hover {
+            border-color: var(--bp-teal);
+            box-shadow: var(--tc-shadow-hover);
+            transform: translateY(var(--bs-cookbook-grid-hover-translate));
+
+            &::before {
+                opacity: 1;
+            }
+        }
+
+        // Pink focus ring — primary blueprint focus colour.
+        &:focus-visible {
+            outline: 2px solid var(--bp-pink);
+            outline-offset: 2px;
+        }
+    }
+
+    // Recipe title: display font for card headings.
+    .tc-cookbook-grid-item__title {
+        font-family: var(--bp-display);
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        color: var(--bs-cookbook-grid-title-color);
+    }
+
+    // Description: body font, muted ink.
+    .tc-cookbook-grid-item__desc {
+        font-family: var(--bp-body);
+        color: var(--bs-cookbook-grid-desc-color);
+    }
+
+    // Code wrap: border-top separates the dark code surface from the white card body.
+    .tc-cookbook-grid-item__code-wrap {
+        border-top: 1px solid var(--bp-border-faint);
+        // background stays --tc-ink (dark) via --bs-cookbook-grid-code-bg — intentional.
+    }
+
+    // Language micro-label: mono uppercase HUD readout on dark ink surface.
+    // Token --bs-cookbook-grid-lang-color above routes to bright teal (#4fd6c6).
+    .tc-cookbook-grid-item__lang {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--bs-cookbook-grid-lang-color);
+    }
+
+    // Code text: mono font — color stays --tc-text-inverse (white on ink), legible.
+    .tc-cookbook-grid-item__code {
+        font-family: var(--bp-mono);
+    }
+
+    // Tags: border-chip hairline reinforces the blueprint chip vocabulary.
+    .tc-cookbook-grid-item__tag {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        background: var(--bs-cookbook-grid-tag-bg);
+        color: var(--bs-cookbook-grid-tag-color);
+        border: 1px solid var(--bp-border-chip);
+    }
+
+    // Reduced-motion: no lift, only shadow and border-color transitions.
+    @media (prefers-reduced-motion: reduce) {
+        .tc-cookbook-grid-item--linked {
+            transition: box-shadow 0.22s, border-color 0.22s;
+
+            &:hover {
+                transform: none;
+            }
+        }
+    }
+}

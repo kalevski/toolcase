@@ -1,0 +1,105 @@
+// Blueprint › tc-command-reference — white raised card, teal command names, violet flag identifiers, pink search focus ring, mono micro-labels, --bp-border-faint hairline separators replacing raw slate tokens.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-command-reference {
+        // ── Outer frame ──────────────────────────────────────────────────────
+        // White raised card surface with standard blueprint hairline + soft shadow
+        --bs-command-reference-border-color: var(--bp-border);
+        --bs-command-reference-border: 1px solid var(--bs-command-reference-border-color);
+        --bs-command-reference-bg: var(--bp-paper);
+
+        // ── Title header cap ─────────────────────────────────────────────────
+        // Lavender-tinted well (paper-tint-2), strong hairline below, display font
+        --bs-command-reference-title-bg: var(--bp-paper-tint-2);
+        --bs-command-reference-title-color: var(--bp-emphasis);
+        --bs-command-reference-title-font-weight: 700;
+        --bs-command-reference-title-border: 1px solid var(--bp-border-strong);
+
+        // ── Search bar ───────────────────────────────────────────────────────
+        // Recessed well bg for the strip, standard border below
+        --bs-command-reference-search-bg: var(--bp-bg-2);
+        --bs-command-reference-search-border: 1px solid var(--bp-border);
+        // Search icon — teal-fg so it has a purposeful accent on the light well
+        --bs-command-reference-search-icon-color: var(--bp-teal-fg);
+        // Input wrap — white paper lifts off the recessed strip
+        --bs-command-reference-input-bg: var(--bp-paper);
+        --bs-command-reference-input-border: 1px solid var(--bp-border-strong);
+        --bs-command-reference-input-color: var(--bp-text);
+        --bs-command-reference-input-placeholder-color: var(--bp-text-faint);
+        // Focus ring — pink (primary CTA accent in the arcade rotation)
+        --bs-command-reference-input-focus-ring: 0 0 0 2px var(--bp-pink-glow);
+
+        // ── Item rows ────────────────────────────────────────────────────────
+        // Faint divider replaces the clashing raw var(--tc-slate-100)
+        --bs-command-reference-item-border: 1px solid var(--bp-border-faint);
+        --bs-command-reference-item-bg: var(--bp-paper);
+
+        // ── Command name / usage ─────────────────────────────────────────────
+        // Teal-fg for the command name — everyday action identifier per arcade rotation
+        --bs-command-reference-name-color: var(--bp-teal-fg);
+        // Usage syntax (positional args, options) — softer muted ink
+        --bs-command-reference-usage-color: var(--bp-text-muted);
+
+        // ── Description ──────────────────────────────────────────────────────
+        --bs-command-reference-desc-color: var(--bp-text-soft);
+
+        // ── Aliases ──────────────────────────────────────────────────────────
+        // Mono micro-label "ALIASES" — teal-fg, inherits uppercase + letter-spacing from base
+        --bs-command-reference-aliases-label-color: var(--bp-teal-fg);
+        // Alias chips — violet-soft fill + violet-fg text (supporting accent per rotation)
+        --bs-command-reference-alias-color: var(--bp-violet-fg);
+        --bs-command-reference-alias-bg: var(--bp-violet-soft);
+        // Faint violet-tinted chip border (border-chip token tuned for chips/pills)
+        --bs-command-reference-alias-border: 1px solid var(--bp-border-chip);
+
+        // ── Flags ────────────────────────────────────────────────────────────
+        // Flag name — violet-fg for the machine token (supporting accent, distinct from teal command names)
+        --bs-command-reference-flag-name-color: var(--bp-violet-fg);
+        --bs-command-reference-flag-desc-color: var(--bp-text-muted);
+        // Flags separator — faint divider, replacing the clashing raw var(--tc-slate-100)
+        --bs-command-reference-flags-border-top: 1px solid var(--bp-border-faint);
+
+        // ── Empty state ───────────────────────────────────────────────────────
+        --bs-command-reference-empty-color: var(--bp-text-faint);
+    }
+
+    // ── Typography overrides ─────────────────────────────────────────────────
+    // Title cap — display font gives it blueprint heading weight
+    .tc-command-reference-title {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+    }
+
+    // Search input — Space Grotesk body for legible freeform text
+    .tc-command-reference-input {
+        font-family: var(--bp-body);
+    }
+
+    // Aliases micro-label — bp-mono eyebrow treatment (uppercase + tracking already set in base)
+    .tc-command-reference-aliases-label {
+        font-family: var(--bp-mono);
+    }
+
+    // Alias chips — bp-mono for the machine string
+    .tc-command-reference-alias {
+        font-family: var(--bp-mono);
+    }
+
+    // Empty state — body prose, centered faint ink
+    .tc-command-reference-empty {
+        font-family: var(--bp-body);
+    }
+
+    // ── Search input focus — pink border to match the glow ring ──────────────
+    .tc-command-reference-search-wrap {
+        &:focus-within {
+            border-color: var(--bp-pink);
+        }
+    }
+
+    // ── Outer wrapper — white card surface with violet-tinted shadow ─────────
+    .tc-command-reference {
+        box-shadow: var(--tc-shadow-sm);
+    }
+}

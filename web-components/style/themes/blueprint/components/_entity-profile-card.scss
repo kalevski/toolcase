@@ -1,0 +1,148 @@
+// Blueprint › tc-entity-profile-card — white-paper card, lavender-pink hero cap, display title, mono teal meta-labels, HUD corner bracket.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Custom-property overrides ──────────────────────────────────────────────
+    // Re-point all --bs-entity-profile-card-* vars to blueprint tokens so every
+    // downstream rule picks up the new palette automatically.
+
+    tc-entity-profile-card {
+        // Surface — white raised card with violet-tinted hairline and soft shadow
+        --bs-entity-profile-card-bg:                    var(--bp-paper);
+        --bs-entity-profile-card-border-color:          var(--bp-border);
+        --bs-entity-profile-card-shadow:                var(--tc-shadow-sm);
+
+        // Hero gradient cap — replace the near-black rgba(0,0,0,0.04) with a soft
+        // pink-surface tint so the top of the card reads as blueprint "branded".
+        --bs-entity-profile-card-hero-gradient-start:   var(--bp-paper-tint-2);
+
+        // Title — display face, blueprint ink
+        --bs-entity-profile-card-title-color:           var(--bp-text);
+        --bs-entity-profile-card-title-font-size:       1.0625rem;
+        --bs-entity-profile-card-title-font-weight:     700;
+
+        // Subtitle — muted body text
+        --bs-entity-profile-card-subtitle-color:        var(--bp-text-muted);
+
+        // Meta grid separators — faint blueprint dividers
+        --bs-entity-profile-card-meta-separator:        var(--bp-border-faint);
+
+        // Meta labels — teal micro-kicker style (teal-fg clears AA on white)
+        --bs-entity-profile-card-meta-label-color:      var(--bp-teal-fg);
+        --bs-entity-profile-card-meta-label-letter-spacing: 0.10em;
+
+        // Meta values — primary ink
+        --bs-entity-profile-card-meta-value-color:      var(--bp-text);
+
+        // Skeleton — lavender tint base + white shimmer highlight
+        --bs-entity-profile-card-skeleton-bg:           var(--bp-paper-tint-2);
+        --bs-entity-profile-card-skeleton-shimmer:      var(--bp-paper);
+    }
+
+    // ── Card shell ─────────────────────────────────────────────────────────────
+
+    .tc-entity-profile-card {
+        // Propagate to Bootstrap card shell vars (base already does this wiring
+        // but we repeat here to ensure blueprint scope wins).
+        --bs-card-bg:           var(--bs-entity-profile-card-bg);
+        --bs-card-border-color: var(--bs-entity-profile-card-border-color);
+        --bs-card-box-shadow:   var(--bs-entity-profile-card-shadow);
+
+        position: relative; // anchor for the HUD corner bracket
+        overflow: hidden;   // keep bracket inside rounded corners (radius sweep)
+
+        // HUD corner bracket — teal top-left accent mark, signals interactivity
+        // without cluttering the card. Use sparingly (applied here because the
+        // entity-profile-card is a tappable tile / detail-entry surface).
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            pointer-events: none;
+            transition: opacity 0.18s var(--bp-ease);
+            opacity: 0.55;
+        }
+
+        &:hover::before,
+        &:focus-within::before {
+            opacity: 1;
+        }
+    }
+
+    // ── Hero section ───────────────────────────────────────────────────────────
+
+    .tc-entity-profile-card__hero {
+        // Swap the base gradient: lavender-pink tint → transparent.
+        // The gradient-start token now holds --bp-paper-tint-2 (set above).
+        background: linear-gradient(
+            to bottom,
+            var(--bs-entity-profile-card-hero-gradient-start),
+            transparent
+        );
+        border-bottom: 1px solid var(--bp-border);
+    }
+
+    // ── Title — display typeface, tight tracking ───────────────────────────────
+
+    .tc-entity-profile-card__title {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em; // tight display-style tracking
+        color: var(--bs-entity-profile-card-title-color);
+    }
+
+    // ── Subtitle — body typeface, muted ────────────────────────────────────────
+
+    .tc-entity-profile-card__subtitle {
+        font-family: var(--bp-body);
+        color: var(--bs-entity-profile-card-subtitle-color);
+    }
+
+    // ── Meta grid ─────────────────────────────────────────────────────────────
+    // The 1px gap between cells uses --bs-entity-profile-card-meta-separator as
+    // background; that token now points to --bp-border-faint (already set above).
+
+    .tc-entity-profile-card__meta {
+        background-color: var(--bs-entity-profile-card-meta-separator);
+    }
+
+    .tc-entity-profile-card__meta-cell {
+        background: var(--bs-entity-profile-card-bg);
+    }
+
+    // Meta label — mono uppercase kicker, teal to match the HUD bracket accent
+    .tc-entity-profile-card__meta-label {
+        font-family: var(--bp-mono);
+        color: var(--bs-entity-profile-card-meta-label-color);
+        letter-spacing: var(--bs-entity-profile-card-meta-label-letter-spacing);
+        // text-transform already uppercase in base; we inherit it.
+    }
+
+    // Meta value — body typeface, primary ink
+    .tc-entity-profile-card__meta-value {
+        font-family: var(--bp-body);
+        color: var(--bs-entity-profile-card-meta-value-color);
+    }
+
+    // ── Skeleton shimmer ──────────────────────────────────────────────────────
+    // Blueprint shimmer rides on the lavender-tint base → white highlight so it
+    // feels paper-light rather than slate-dark.  The tokens are already set on
+    // tc-entity-profile-card above; the animation re-uses the base keyframe
+    // (tc-entity-profile-card-shimmer defined at global scope in the base partial)
+    // so no @keyframes redeclaration needed here.
+
+    .tc-entity-profile-card-skeleton {
+        background: linear-gradient(
+            90deg,
+            var(--bs-entity-profile-card-skeleton-bg)      25%,
+            var(--bs-entity-profile-card-skeleton-shimmer) 50%,
+            var(--bs-entity-profile-card-skeleton-bg)      75%
+        );
+        background-size: 200% 100%;
+    }
+}

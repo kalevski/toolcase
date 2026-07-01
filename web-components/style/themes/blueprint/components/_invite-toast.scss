@@ -1,0 +1,141 @@
+// Blueprint › tc-invite-toast — white paper panel, teal left-stripe, pink Accept CTA, mono eyebrow/countdown, teal depleting bar.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Token overrides — surface, chrome, accent rotation ──────────────────────
+
+    tc-invite-toast {
+        // Surface: white raised card, blueprint hairline, elevation shadow.
+        --bs-invite-toast-bg:           var(--bp-paper);
+        --bs-invite-toast-color:        var(--bp-text);
+        --bs-invite-toast-border-color: var(--bp-border);
+        --bs-invite-toast-shadow:       var(--tc-shadow-lg);
+
+        // Accent stripe (left border on the panel) → teal (everyday action color).
+        --bs-invite-toast-accent:       var(--bp-teal);
+
+        // Eyebrow + countdown: mono micro-label tones.
+        --bs-invite-toast-eyebrow-color:   var(--bp-teal-fg);
+        --bs-invite-toast-countdown-color: var(--bp-text-faint);
+
+        // Countdown bar: recessed well track, teal fill (depleting = urgency/action).
+        --bs-invite-toast-bar-bg:     var(--bp-bg-2);
+        --bs-invite-toast-bar-border: var(--bp-border-faint);
+        --bs-invite-toast-bar-fill:   var(--bp-teal);
+    }
+
+    // ── Panel — blueprint raised card ────────────────────────────────────────────
+
+    .tc-invite-toast__panel {
+        background: var(--bs-invite-toast-bg);
+        border-color: var(--bs-invite-toast-border-color);
+        // Left stripe routes through --bs-invite-toast-accent (teal) above;
+        // re-declare here to ensure the 3px left border picks it up explicitly.
+        border-left-color: var(--bs-invite-toast-accent);
+        box-shadow: var(--bs-invite-toast-shadow);
+    }
+
+    // ── Eyebrow — mono machine-label, teal ink ───────────────────────────────────
+
+    .tc-invite-toast__eyebrow {
+        font-family: var(--bp-mono);
+        font-size: 0.625rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--bp-teal-fg);
+    }
+
+    // ── Countdown — tabular mono, faint ink ──────────────────────────────────────
+
+    .tc-invite-toast__countdown {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.08em;
+        color: var(--bp-text-faint);
+    }
+
+    // ── Inviter name — display heading, blueprint primary ink ────────────────────
+
+    .tc-invite-toast__inviter {
+        font-family: var(--bp-display);
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: var(--bp-text);
+    }
+
+    // ── Body copy — Space Grotesk prose, muted ink ───────────────────────────────
+
+    .tc-invite-toast__body {
+        font-family: var(--bp-body);
+        color: var(--bp-text-muted);
+    }
+
+    // ── Countdown bar — recessed track, teal fill ────────────────────────────────
+
+    .tc-invite-toast__bar {
+        background: var(--bs-invite-toast-bar-bg);
+        border-color: var(--bs-invite-toast-bar-border);
+    }
+
+    .tc-invite-toast__bar-fill {
+        // Teal fill — urgency is communicated by depletion, not color change.
+        background: var(--bp-teal);
+    }
+
+    // ── Accept button — pink primary CTA (arcade accent rotation: pink = primary) ─
+
+    .tc-invite-toast__accept.btn {
+        background: var(--bp-pink);
+        border-color: var(--bp-pink);
+        color: var(--bp-pink-ink);
+        font-family: var(--bp-mono);
+        font-size: 0.625rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        transition: background var(--bp-ease), border-color var(--bp-ease), box-shadow var(--bp-ease);
+
+        &:hover,
+        &:focus-visible {
+            background: var(--bp-pink-hover);
+            border-color: var(--bp-pink-hover);
+            color: var(--bp-pink-ink);
+            box-shadow: var(--bp-glow-pink);
+        }
+
+        &:active {
+            background: var(--bp-pink);
+            border-color: var(--bp-pink);
+            box-shadow: none;
+        }
+    }
+
+    // ── Decline button — soft secondary (outline, blueprint border) ──────────────
+
+    .tc-invite-toast__decline.btn {
+        background: transparent;
+        border-color: var(--bp-border-soft);
+        color: var(--bp-text-muted);
+        font-family: var(--bp-mono);
+        font-size: 0.625rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        transition: background var(--bp-ease), border-color var(--bp-ease), color var(--bp-ease);
+
+        &:hover,
+        &:focus-visible {
+            background: var(--bp-bg-2);
+            border-color: var(--bp-border-strong);
+            color: var(--bp-text-soft);
+        }
+
+        &:active {
+            background: var(--bp-bg);
+            border-color: var(--bp-border);
+            color: var(--bp-text-muted);
+        }
+    }
+}

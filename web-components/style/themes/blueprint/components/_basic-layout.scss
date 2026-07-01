@@ -1,0 +1,18 @@
+// Blueprint › tc-basic-layout — brand header as raised white paper panel over lavender page ground.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // Re-skin via the component's own custom-property API.
+    // Brand header: raised white surface, primary ink, hairline border — reads as a
+    // distinct nav/branding shelf lifted off the lavender canvas below.
+    // Main area: the page canvas itself (lavender --bp-bg) with primary text colour.
+    tc-basic-layout {
+        --bs-basic-layout-brand-bg:     var(--bp-paper);
+        --bs-basic-layout-brand-color:  var(--bp-text);
+        --bs-basic-layout-brand-border: var(--bp-border);
+        --bs-basic-layout-main-bg:      var(--bp-bg);
+        --bs-basic-layout-main-color:   var(--bp-text);
+    }
+
+}

@@ -1,0 +1,143 @@
+// Blueprint › tc-welcome-guide — dark hero left panel with pink/teal arcade glow; light checklist right panel with teal progress and teal completed checks.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-welcome-guide {
+        // ── Card shell ───────────────────────────────────────────────────────────
+        --bs-welcome-guide-bg:            var(--bp-paper);
+        --bs-welcome-guide-border:        1px solid var(--bp-border);
+
+        // ── Left (dark hero) panel ───────────────────────────────────────────────
+        // The hero stays dark — white text on a deep ground is deliberate and
+        // legible; this is the one dark surface in a light theme.
+        --bs-welcome-guide-left-bg:       #0d0c1e; // near-black with violet bias, deepens the arcade glow
+        --bs-welcome-guide-left-color:    #ffffff;
+
+        // Title: Chakra Petch display face, tight tracking.
+        --bs-welcome-guide-title-font-family: var(--bp-display);
+        --bs-welcome-guide-title-font-size:   clamp(1.25rem, 2.4vw, 1.5rem);
+        --bs-welcome-guide-title-font-weight: 700;
+
+        // Message text: reroute away from --tc-border-strong (slate leak) →
+        // a warm off-white with slight violet bias, readable on the dark hero.
+        --bs-welcome-guide-message-color: rgba(255, 255, 255, 0.62);
+
+        // ── Right (light checklist) panel ────────────────────────────────────────
+        --bs-welcome-guide-right-bg:      var(--bp-paper);
+
+        // Progress track + fill: pink is the primary CTA accent.
+        --bs-welcome-guide-progress-bg:   var(--bp-border-faint);
+        --bs-welcome-guide-progress-fill: var(--bp-pink);
+
+        // Progress labels: mono face, muted ink.
+        --bs-welcome-guide-progress-label-color: var(--bp-text-muted);
+
+        // Steps: body ink, teal completed/active, paper hover.
+        --bs-welcome-guide-step-label-color:          var(--bp-text);
+        --bs-welcome-guide-step-active-hover-bg:      var(--bp-paper-tint);
+        --bs-welcome-guide-step-active-label-weight:  600;
+        --bs-welcome-guide-step-completed-label-color: var(--bp-text-faint);
+        --bs-welcome-guide-step-locked-label-color:    var(--bp-text-faint);
+
+        // Check indicators: teal = success/done; active = teal border + ring.
+        --bs-welcome-guide-check-completed-bg:     var(--bp-teal);
+        --bs-welcome-guide-check-completed-border: var(--bp-teal);
+        --bs-welcome-guide-check-completed-color:  var(--bp-teal-ink);
+
+        --bs-welcome-guide-check-active-bg:     var(--bp-paper);
+        --bs-welcome-guide-check-active-border: var(--bp-teal-fg);
+        --bs-welcome-guide-check-active-color:  transparent;
+        --bs-welcome-guide-check-active-ring:   var(--bp-teal-soft);
+
+        --bs-welcome-guide-check-locked-bg:     var(--bp-bg-2);
+        --bs-welcome-guide-check-locked-border: var(--bp-border);
+        --bs-welcome-guide-check-locked-color:  var(--bp-text-faint);
+
+        // Skeleton shimmer: lavender ground + white highlight.
+        --bs-welcome-guide-skel-bg:      var(--bp-paper-tint-2);
+        --bs-welcome-guide-skel-shimmer: rgba(255, 255, 255, 0.72);
+    }
+
+    // ── Left panel: override hardcoded glow + grid overlay ───────────────────────
+    // The base partial bakes raw hsla(280,…) violet and hsla(193,…) cyan into
+    // the ::before radial gradients — those are design-system colors that bypass
+    // the token contract. Route them to the blueprint pink+teal glow ambient.
+
+    .tc-welcome-guide__left {
+        // Typography on the hero panel: body face for legibility.
+        font-family: var(--bp-body);
+
+        &::before {
+            // Replace the raw violet+cyan blobs with blueprint pink + teal ambient.
+            background:
+                radial-gradient(circle at 22% 20%, var(--bp-glow-pink), transparent 50%),
+                radial-gradient(circle at 82% 80%, var(--bp-glow-teal), transparent 50%);
+        }
+
+        &::after {
+            // Faint blueprint grid: violet-tinted lines instead of neutral white.
+            background-image:
+                linear-gradient(rgba(91, 61, 242, 0.07) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(91, 61, 242, 0.07) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+    }
+
+    // ── Title: Chakra Petch, tight tracking ──────────────────────────────────────
+    .tc-welcome-guide__title {
+        font-family: var(--bp-display);
+        letter-spacing: -0.025em;
+        text-wrap: balance;
+        color: #ffffff; // explicit white — on the intentionally dark hero panel
+    }
+
+    // ── Progress labels: mono face, muted, uppercase micro-label ─────────────────
+    .tc-welcome-guide__progress-label {
+        font-family: var(--bp-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--bp-text-muted);
+    }
+
+    .tc-welcome-guide__progress-value {
+        font-family: var(--bp-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.04em;
+        color: var(--bp-teal-fg); // teal value readout — teal = action/everyday
+        font-variant-numeric: tabular-nums;
+    }
+
+    // ── Right panel: hairline separator uses blueprint border token ───────────────
+    .tc-welcome-guide__right {
+        border-top-color: var(--bp-border);
+        background: var(--bp-paper);
+    }
+
+    // ── Active step: teal focus ring instead of generic app-accent ───────────────
+    .tc-welcome-guide__step {
+        &:focus-visible {
+            outline-color: var(--bp-teal);
+        }
+    }
+
+    // Active step hover: teal border-color on the check box (overrides base rule).
+    .tc-welcome-guide__step--active {
+        &:hover .tc-welcome-guide__check {
+            border-color: var(--bp-teal-fg);
+            box-shadow: 0 0 0 3px var(--bp-teal-soft);
+        }
+    }
+
+    // Step labels: body face for prose readability.
+    .tc-welcome-guide__step-label {
+        font-family: var(--bp-body);
+    }
+
+    // ── Desktop: side-by-side — right panel border uses blueprint token ───────────
+    @media (min-width: 768px) {
+        .tc-welcome-guide__right {
+            border-left-color: var(--bp-border);
+        }
+    }
+}

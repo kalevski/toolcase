@@ -1,0 +1,78 @@
+// Blueprint › tc-kill-feed — HUD event panel: paper surface, mono names, pink headshot accent, teal weapon glyph.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-kill-feed {
+        // Surface: raised paper panel on the lavender canvas
+        --bs-kill-feed-bg:              var(--bp-paper);
+        --bs-kill-feed-border:          1px solid var(--bp-border);
+        --bs-kill-feed-row-border:      1px solid var(--bp-border-faint);
+
+        // Name typography — both use bp-mono already; calibrate ink weight
+        --bs-kill-feed-name-font-size:  0.8125rem;
+        --bs-kill-feed-killer-color:    var(--bp-text);        // primary actor — strongest ink
+        --bs-kill-feed-victim-color:    var(--bp-text-muted);  // secondary actor — receded
+
+        // Weapon label — faintest ink; reads as metadata
+        --bs-kill-feed-weapon-color:    var(--bp-text-faint);
+        --bs-kill-feed-weapon-font-size: 0.75rem;
+
+        // Headshot badge — pink (primary accent) replaces the default cyan --tc-accent
+        --bs-kill-feed-headshot-color:  var(--bp-pink);
+        --bs-kill-feed-headshot-font-size: 0.6875rem;
+    }
+
+    .tc-kill-feed {
+        // Raise the panel with a violet-tinted shadow; no border-radius (sweep owns corners)
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Killer ────────────────────────────────────────────────────────────────────
+    // Enforce bp-mono for the name spans; apply uppercase + tracking that matches
+    // the blueprint mono-label convention for HUD readouts.
+
+    .tc-kill-feed-killer {
+        font-family:    var(--bp-mono);
+        font-weight:    600;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+    }
+
+    // ── Victim ────────────────────────────────────────────────────────────────────
+
+    .tc-kill-feed-victim {
+        font-family:    var(--bp-mono);
+        font-weight:    400;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+    }
+
+    // ── Weapon ────────────────────────────────────────────────────────────────────
+    // Use teal-fg for the weapon name — teal is the "action/everyday" accent and
+    // a weapon is the instrument of the action. Teal-fg is the AA-safe dark variant
+    // for teal text on white surfaces.
+
+    .tc-kill-feed-weapon {
+        font-family:    var(--bp-mono);
+        color:          var(--bp-teal-fg);
+        text-transform: uppercase;
+        letter-spacing: .08em;
+    }
+
+    // ── Headshot ──────────────────────────────────────────────────────────────────
+    // Pink = primary/exceptional event. Mono + tight tracking reads as a status chip.
+
+    .tc-kill-feed-headshot {
+        font-family:    var(--bp-mono);
+        font-weight:    700;
+        text-transform: uppercase;
+        letter-spacing: .10em;
+        // Soft pink tint behind the label makes the headshot badge pop without a
+        // hard box — uses bp-pink-soft which is a very faint pink fill.
+        background:     var(--bp-pink-soft);
+        padding:        0 0.3em;
+        // No border-radius — radius sweep handles all corners
+    }
+
+}

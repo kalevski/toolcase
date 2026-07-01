@@ -1,0 +1,51 @@
+// Blueprint › tc-compass-bar — HUD heading strip with lavender-paper track, pink centre pointer, teal markers, and mono typography throughout.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-compass-bar {
+        // Track surface: recessed well so the strip reads as an inset viewport.
+        --bs-compass-bar-track-bg:    var(--bp-bg-2);
+        --bs-compass-bar-track-border: 1px solid var(--bp-border);
+
+        // Cardinal direction labels: blueprint mono eyebrow style.
+        --bs-compass-bar-cardinal-color:   var(--bp-text-faint);
+
+        // Centre axis + pointer: pink = primary "you are here" reference.
+        --bs-compass-bar-center-color:  var(--bp-pink);
+        --bs-compass-bar-pointer-color: var(--bp-pink);
+
+        // Markers: teal = action/everyday accent.
+        --bs-compass-bar-marker-color:       var(--bp-teal);
+        --bs-compass-bar-marker-label-color: var(--bp-text-faint);
+
+        // Heading readout below the track.
+        --bs-compass-bar-heading-color: var(--bp-text-soft);
+    }
+
+    // Track: soft shadow to lift it off the page surface.
+    .tc-compass-bar__track {
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // Cardinal labels inherit --bp-mono for the HUD/mono eyebrow register.
+    .tc-compass-bar__cardinal {
+        font-family: var(--bp-mono);
+    }
+
+    // Heading readout: mono so it reads as a machine-facing HUD datum.
+    .tc-compass-bar__heading {
+        font-family: var(--bp-mono);
+    }
+
+    // Marker label: mono micro-label in faint ink.
+    .tc-compass-bar__marker-label {
+        font-family: var(--bp-mono);
+    }
+
+    // Glyph markers: inherit the teal marker-color token already set above;
+    // no extra rule needed unless the glyph needs distinct sizing.
+    // (per-marker inline --bs-compass-bar-marker-color overrides remain intact)
+
+    // Tick diamond fills from --bs-compass-bar-marker-color (teal by default),
+    // so no additional rule is required — the base rule handles it.
+}

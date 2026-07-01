@@ -1,0 +1,70 @@
+// Blueprint › tc-terminal-window — dark ink console framed in a blueprint hairline; arcade dot trio; teal prompt + cursor; mono title; comment lines in faint lavender.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-terminal-window {
+        // Frame — keep the dark ink ground (terminal exception: dark surfaces
+        // stay dark in blueprint). Wire the border to the blueprint hairline
+        // vocab so the terminal reads as a framed panel on the light canvas.
+        --bs-terminal-window-border: 1px solid var(--bp-border-strong);
+        --bs-terminal-window-shadow: var(--tc-shadow-sm);
+
+        // Chrome bar — a notch brighter than the ink body; still very dark.
+        // Tint toward the blueprint's violet-ink identity without going light.
+        // No gradient token covers this dark range, so a direct rgba overlay
+        // over --tc-ink-2 is the cleanest option inside the dark exception.
+        --bs-terminal-window-bar-bg: var(--tc-ink-2);
+        // Border-bottom separating bar from body routes through blueprint hairline.
+        --bs-terminal-window-bar-border: 1px solid var(--bp-border-strong);
+
+        // Traffic-light dots — full arcade accent rotation:
+        //   close  → pink  (primary brand)
+        //   minimize → amber (supporting)
+        //   full-screen → teal (action)
+        --bs-terminal-window-dot-red:   var(--bp-pink);
+        --bs-terminal-window-dot-amber: var(--bp-amber);
+        --bs-terminal-window-dot-green: var(--bp-teal);
+
+        // Title — upgrade to the blueprint mono token; switch from the leaking
+        // --tc-slate-400 to a translucent white that reads cleanly on the dark bar.
+        --bs-terminal-window-title-color: rgba(255, 255, 255, 0.45);
+
+        // Prompt — teal is the blueprint "action" hue; perfect for the shell sigil ($, >, ❯).
+        --bs-terminal-window-prompt-color: var(--bp-teal);
+
+        // Comment lines — replace the baked oklch(0.58 0.01 250) literal with a
+        // blueprint-aligned faint lavender that reads as a subdued comment on dark ink.
+        --bs-terminal-window-comment-color: var(--bp-text-faint);
+
+        // Typing cursor — match the prompt hue so sigil + caret form one visual unit.
+        --bs-terminal-window-cursor-color: var(--bp-teal);
+    }
+
+    // Title font: upgrade to the blueprint mono token so the path label in the
+    // bar shares the JetBrains Mono voice used throughout the blueprint HUD.
+    .tc-terminal-window-title {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.08em;
+        text-transform: none; // paths and filenames must NOT be uppercased
+    }
+
+    // Prompt glyph — soft teal glow so the sigil reads as the active element
+    // even when the terminal body is dense with output text.
+    .tc-terminal-window-prompt {
+        text-shadow: 0 0 8px var(--bp-teal-glow);
+    }
+
+    // Blinking cursor — teal glow pulse that echoes the prompt.
+    .tc-terminal-window-cursor {
+        box-shadow: 0 0 6px var(--bp-teal-glow);
+    }
+
+    // Comment lines — override the element-level color to ensure the token
+    // beats any inherited literal from the base partial.
+    .tc-terminal-window-line-comment {
+        color: var(--bp-text-faint);
+        font-style: italic;
+        opacity: 0.75; // further soften so comments recede behind active output
+    }
+}

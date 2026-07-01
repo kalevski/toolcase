@@ -1,0 +1,213 @@
+// Blueprint › tc-roadmap — vector-blueprint kanban board: display title, mono column labels,
+// arcade accent rotation (teal=shipped, violet=in-progress, amber=considering), paper cards
+// with HUD corner-bracket hover lift, chip tags, and --bp-border hairline grid seams.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Board-level custom properties ─────────────────────────────────────────
+    tc-roadmap {
+        // Board surfaces — white paper separated by blueprint hairlines
+        --bs-roadmap-surface: var(--bp-paper);
+        --bs-roadmap-border:  var(--bp-border);
+
+        // Board title — Chakra Petch display heading
+        --bs-roadmap-title-color:       var(--bp-text);
+        --bs-roadmap-title-font-size:   1.125rem;
+        --bs-roadmap-title-font-weight: 700;
+
+        // Column header text — mono eyebrow treatment
+        --bs-roadmap-heading-color:       var(--bp-text-soft);
+        --bs-roadmap-heading-font-size:   0.6875rem;
+        --bs-roadmap-heading-font-weight: 700;
+
+        // Status tag — mono micro-label
+        --bs-roadmap-status-tag-color: var(--bp-text-faint);
+
+        // Count badge
+        --bs-roadmap-count-font-size: 0.625rem;
+
+        // Item card surfaces
+        --bs-roadmap-item-bg:           var(--bp-paper);
+        --bs-roadmap-item-border:       var(--bp-border);
+        --bs-roadmap-item-shadow:       var(--tc-shadow-sm);
+        --bs-roadmap-item-hover-bg:     var(--bp-paper-tint);
+        --bs-roadmap-item-hover-shadow: var(--tc-shadow-hover);
+
+        // Item card text
+        --bs-roadmap-item-title-color:    var(--bp-text);
+        --bs-roadmap-item-desc-color:     var(--bp-text-muted);
+
+        // Tag chips — faint tint + chip border
+        --bs-roadmap-tag-bg:     var(--bp-bg-2);
+        --bs-roadmap-tag-color:  var(--bp-text-faint);
+        --bs-roadmap-tag-border: var(--bp-border-chip);
+    }
+
+    // ── Board title — Chakra Petch display ───────────────────────────────────
+    .tc-roadmap-title {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+        color: var(--bs-roadmap-title-color);
+    }
+
+    // ── Board wrapper — hairline grid seams on blueprint paper ───────────────
+    .tc-roadmap {
+        background: var(--bp-border);           // seam color bleeds through 1px gaps
+        border-color: var(--bp-border);
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Column accent rotation — arcade status palette ───────────────────────
+    // Shipped → teal (success/done)
+    // In-progress → violet (active/info)
+    // Planned → muted text (neutral)
+    // Considering → amber (caution/backlog)
+
+    .tc-roadmap-column {
+        background: var(--bp-paper);            // each column is a paper surface
+
+        &--shipped {
+            --bs-roadmap-accent:    var(--bp-teal);
+            --bs-roadmap-accent-bg: var(--bp-teal-soft);
+        }
+
+        &--in-progress {
+            --bs-roadmap-accent:    var(--bp-violet);
+            --bs-roadmap-accent-bg: var(--bp-violet-soft);
+        }
+
+        &--planned {
+            // neutral — keep muted text but route through bp tokens
+            --bs-roadmap-accent:    var(--bp-text-faint);
+            --bs-roadmap-accent-bg: var(--bp-bg-2);
+        }
+
+        &--considering {
+            --bs-roadmap-accent:    var(--bp-amber);
+            --bs-roadmap-accent-bg: var(--bp-amber-soft);
+        }
+    }
+
+    // ── Column header — mono eyebrow ─────────────────────────────────────────
+    .tc-roadmap-column-header {
+        font-family: var(--bp-mono);
+        font-size: var(--bs-roadmap-heading-font-size);
+        font-weight: var(--bs-roadmap-heading-font-weight);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--bs-roadmap-heading-color);
+        border-bottom-color: var(--bp-border-faint);
+        background: var(--bp-paper-tint);       // ever-so-slight tint lifts the header from body
+    }
+
+    // ── Status dot — keep circle, tint via accent (already hooked up in base) ─
+    // Live-pulse glow on the in-progress dot
+    .tc-roadmap-column--in-progress .tc-roadmap-status-dot {
+        box-shadow: 0 0 0 0.2em var(--bp-violet-soft);
+    }
+
+    .tc-roadmap-column--shipped .tc-roadmap-status-dot {
+        box-shadow: 0 0 0 0.2em var(--bp-teal-soft);
+    }
+
+    // ── Status tag — mono micro-label ────────────────────────────────────────
+    .tc-roadmap-status-tag {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.1em;
+        color: var(--bs-roadmap-status-tag-color);
+    }
+
+    // ── Count badge — mono chip tinted by accent ─────────────────────────────
+    .tc-roadmap-count {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        // color + background already driven by --bs-roadmap-accent / accent-bg
+    }
+
+    // ── Item card — paper tile with HUD corner-bracket on hover ─────────────
+    .tc-roadmap-item {
+        background: var(--bs-roadmap-item-bg);
+        border-color: var(--bs-roadmap-item-border);
+        box-shadow: var(--bs-roadmap-item-shadow);
+        transition:
+            background-color var(--bp-ease),
+            border-color     var(--bp-ease),
+            box-shadow       var(--bp-ease),
+            transform        var(--bp-ease);
+        position: relative;                     // anchor for HUD bracket ::before
+
+        // HUD corner-bracket — teal 12×12 bracket top-left; appears on hover
+        &::before {
+            content: '';
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            opacity: 0;
+            transition: opacity var(--bp-ease);
+            pointer-events: none;
+        }
+
+        &:hover {
+            background: var(--bs-roadmap-item-hover-bg);
+            border-color: var(--bp-border-strong);
+            box-shadow: var(--bs-roadmap-item-hover-shadow);
+            transform: translateY(-2px);
+
+            &::before {
+                opacity: 1;
+            }
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-teal);
+            outline-offset: 2px;
+        }
+    }
+
+    // Item title — display font, tight tracking
+    .tc-roadmap-item-title {
+        font-family: var(--bp-display);
+        font-size: var(--bs-roadmap-item-title-font-size);
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: var(--bs-roadmap-item-title-color);
+    }
+
+    // Item description — body font (Space Grotesk via --bp-body)
+    .tc-roadmap-item-description {
+        font-family: var(--bp-body);
+        color: var(--bs-roadmap-item-desc-color);
+    }
+
+    // ── Tag chips — mono micro-labels on recessed tint ───────────────────────
+    .tc-roadmap-item-tag {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        color: var(--bs-roadmap-tag-color);
+        background: var(--bs-roadmap-tag-bg);
+        border-color: var(--bs-roadmap-tag-border);
+    }
+
+    // ── Reduced motion — freeze lift + bracket fade ──────────────────────────
+    @media (prefers-reduced-motion: reduce) {
+        .tc-roadmap-item {
+            transition:
+                background-color var(--bp-ease),
+                border-color     var(--bp-ease),
+                box-shadow       var(--bp-ease);
+
+            &:hover {
+                transform: none;
+
+                &::before {
+                    opacity: 1;        // bracket still appears, just no motion
+                }
+            }
+        }
+    }
+}

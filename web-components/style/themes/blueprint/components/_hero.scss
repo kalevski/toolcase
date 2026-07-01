@@ -1,0 +1,181 @@
+// Blueprint › tc-hero — lavender-canvas section: display titles, mono eyebrow/stat labels,
+// pink metric accent bars, teal bg-icons, paper stat cards with hairline borders.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-hero {
+        // ── Section surface ───────────────────────────────────────────────────
+        // Hero sits on the lavender page canvas; a faint-border bottom edge
+        // separates it from the next section without a heavy rule.
+        --bs-hero-bg:           var(--bp-bg);
+        --bs-hero-border-color: var(--bp-border-faint);
+
+        // ── Eyebrow ───────────────────────────────────────────────────────────
+        // Mono face, teal-fg for AA contrast on the lavender canvas. Matches
+        // the blueprint HUD kicker / status-label convention.
+        --bs-hero-eyebrow-color:          var(--bp-teal-fg);
+        --bs-hero-eyebrow-font-size:      0.6875rem;
+        --bs-hero-eyebrow-letter-spacing: 0.14em;
+
+        // ── Title ─────────────────────────────────────────────────────────────
+        // Display face (Chakra Petch) — blueprint's heading voice.
+        // Strongest ink for maximum contrast on the light canvas.
+        --bs-hero-title-color:       var(--bp-emphasis);
+        --bs-hero-title-font-weight: 700;
+
+        // ── Description ───────────────────────────────────────────────────────
+        --bs-hero-description-color: var(--bp-text-muted);
+
+        // ── Stat cards ────────────────────────────────────────────────────────
+        // Raised white paper cards with a standard hairline — they read as
+        // data panels against the lavender bg.
+        --bs-hero-stat-card-bg:     var(--bp-paper);
+        --bs-hero-stat-card-border: var(--bp-border);
+
+        // Stat value: violet-fg for distinction from plain --bp-text; mono face
+        // is already set in the base partial so font-family is not re-declared
+        // here — only the color token is swapped.
+        --bs-hero-stat-value-color: var(--bp-violet-fg);
+
+        // Stat label: faint ink — supporting HUD annotation tone.
+        --bs-hero-stat-label-color: var(--bp-text-faint);
+
+        // ── Metrics ───────────────────────────────────────────────────────────
+        --bs-hero-metric-value-color: var(--bp-text);
+        --bs-hero-metric-label-color: var(--bp-text-faint);
+
+        // ── Background icons ──────────────────────────────────────────────────
+        // Teal-colored; slightly higher opacity than default (0.06) so the
+        // blueprint grid-field motif stays visible on the lighter canvas.
+        --bs-hero-bg-icon-color:    var(--bp-teal);
+        --bs-hero-bg-icon-opacity:  0.07;
+    }
+
+    // ── Section shell ─────────────────────────────────────────────────────────
+    // The hero section uses the page canvas as its ground. The optional
+    // blueprint grid-field backdrop sits behind the content via a soft
+    // pseudo-element so it doesn't compete with bg images if supplied.
+
+    .tc-hero {
+        font-family: var(--bp-body);
+
+        &::before {
+            // Blueprint grid-field: a faint violet dot-grid ambiance behind
+            // the hero content. Rendered as an inset pseudo so it stacks under
+            // .tc-hero-bg (z-index 0) and the main content (z-index 1).
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background-image: var(--bp-grid-field);
+            background-size: var(--bp-grid-size, 38px) var(--bp-grid-size, 38px);
+            pointer-events: none;
+            opacity: 0.55;
+        }
+    }
+
+    // ── Eyebrow ───────────────────────────────────────────────────────────────
+
+    .tc-hero-eyebrow {
+        // Override the hard-coded JetBrains Mono literal with the theme token
+        // so it inherits any font-family overrides declared on the theme root.
+        font-family: var(--bp-mono);
+        color: var(--bs-hero-eyebrow-color); // already set to --bp-teal-fg above
+    }
+
+    // ── Title ─────────────────────────────────────────────────────────────────
+
+    .tc-hero-title {
+        font-family:    var(--bp-display);
+        letter-spacing: -0.01em; // Chakra Petch reads tighter than a neutral grotesque
+        text-wrap:      balance;
+    }
+
+    // ── Description ───────────────────────────────────────────────────────────
+
+    .tc-hero-description {
+        font-family: var(--bp-body);
+        line-height:  1.65;
+    }
+
+    // ── Stat cards ────────────────────────────────────────────────────────────
+    // Paper card with a hairline top accent (pink) — a lightweight HUD panel
+    // motif: one deliberate line of colour, everything else neutral.
+
+    .tc-hero-stat-card {
+        background: var(--bs-hero-stat-card-bg);
+        border:     1px solid var(--bs-hero-stat-card-border);
+        box-shadow: var(--tc-shadow-sm);
+        // Pink top rule signals a "live stat" readout — blueprint primary accent.
+        border-top: 2px solid var(--bp-pink);
+        position: relative;
+        transition: box-shadow var(--bp-ease), transform var(--bp-ease);
+
+        &:hover {
+            box-shadow: var(--tc-shadow-md);
+            transform:  translateY(-2px);
+        }
+    }
+
+    .tc-hero-stat-value {
+        font-family: var(--bp-mono);
+        color:       var(--bs-hero-stat-value-color); // --bp-violet-fg
+        font-variant-numeric: tabular-nums;
+    }
+
+    .tc-hero-stat-label {
+        font-family: var(--bp-mono);
+        color:       var(--bs-hero-stat-label-color); // --bp-text-faint
+    }
+
+    // ── Separator ─────────────────────────────────────────────────────────────
+
+    .tc-hero-separator {
+        background: var(--bp-border-faint);
+    }
+
+    // ── Metrics band ──────────────────────────────────────────────────────────
+    // Bottom band sits on a subtly recessed well to distinguish it from the
+    // main hero body above the separator.
+
+    .tc-hero-bottom {
+        background: var(--bp-bg-2); // recessed well — slightly deeper lavender
+    }
+
+    // ── Metric accent bar ─────────────────────────────────────────────────────
+    // The ::before bar is the one bold moment per metric — replace the slate
+    // --tc-app-accent with pink (blueprint primary). Full opacity: the 2px line
+    // is the label accent, not a ghost, so 0.6 opacity is dropped.
+
+    .tc-hero-metric::before {
+        background: var(--bp-pink);
+        opacity:    1;
+        height:     2px;
+        width:      2rem; // slightly tighter than default 2.5rem — more precise feel
+    }
+
+    .tc-hero-metric-value {
+        font-family: var(--bp-mono);
+        color:       var(--bs-hero-metric-value-color); // --bp-text
+        font-variant-numeric: tabular-nums;
+    }
+
+    .tc-hero-metric-label {
+        color: var(--bs-hero-metric-label-color); // --bp-text-faint
+    }
+
+    // ── Reduced motion ────────────────────────────────────────────────────────
+
+    @media (prefers-reduced-motion: reduce) {
+        .tc-hero-stat-card {
+            transition: none;
+
+            &:hover {
+                transform:  none;
+                box-shadow: var(--tc-shadow-sm);
+            }
+        }
+    }
+
+}

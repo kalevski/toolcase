@@ -1,0 +1,160 @@
+// Blueprint › tc-linked-providers-card — white HUD card: teal connected-dot pulse, mono provider labels, accent border on hover, pink unlink action.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-linked-providers-card {
+        // ── Theming contract re-points ──────────────────────────────────────────
+
+        // Row separators: blueprint faint lavender hairline (replaces raw rgba(148,163,184,.35)).
+        --bs-linked-providers-card-row-separator:    var(--bp-border-faint);
+
+        // Row hover: lavender recessed well instead of slate-50.
+        --bs-linked-providers-card-row-hover-bg:     var(--bp-bg-2);
+
+        // Label: blueprint primary ink.
+        --bs-linked-providers-card-label-color:      var(--bp-text);
+
+        // Account / sub-label: muted ink.
+        --bs-linked-providers-card-account-color:    var(--bp-text-muted);
+
+        // Icon tile: lavender recessed bg + lilac hairline border.
+        --bs-linked-providers-card-tile-bg:          var(--bp-bg-2);
+        --bs-linked-providers-card-tile-border-color: var(--bp-border);
+
+        // Default icon glyph color (when no brand inline color is applied).
+        --bs-linked-providers-card-icon-default-color: var(--bp-teal-fg);
+
+        // Action button (unlink): muted ink at rest, pink on hover — pink = primary/destructive action.
+        --bs-linked-providers-card-btn-color:        var(--bp-text-faint);
+        --bs-linked-providers-card-btn-hover-color:  var(--bp-pink);
+        --bs-linked-providers-card-btn-hover-bg:     var(--bp-pink-soft);
+
+        // Connected status dot: teal = success/live in blueprint.
+        --bs-linked-providers-card-connected-dot-color: var(--bp-teal);
+
+        // Empty state copy: faint muted ink.
+        --bs-linked-providers-card-empty-color:      var(--bp-text-faint);
+
+        // Title: blueprint primary ink (display font applied below).
+        --bs-linked-providers-card-title-color:      var(--bp-emphasis);
+    }
+
+    // ── Outer card frame ────────────────────────────────────────────────────────
+    // .card class supplies the white bg/border/shadow; we just ensure
+    // the inner layout clips cleanly and re-skin the border to a blueprint hairline.
+
+    .tc-linked-providers-card {
+        overflow: hidden;
+        border-color: var(--bp-border);
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Card header ─────────────────────────────────────────────────────────────
+    // .card-header supplies the cap; override its gradient to the blueprint
+    // paper-tint-2 fill so the dark slate gradient (#2b3a51 → #1e293b) is replaced.
+
+    .tc-linked-providers-card__header {
+        // Replace any baked slate gradient from the base card-header cap.
+        background: var(--bp-paper-tint-2);
+        border-bottom-color: var(--bp-border);
+    }
+
+    // Title: display font with tight tracking — blueprint HUD section heading treatment.
+    .tc-linked-providers-card__title {
+        font-family: var(--bp-display);
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        color: var(--bs-linked-providers-card-title-color);
+    }
+
+    // ── Provider rows ────────────────────────────────────────────────────────────
+
+    .tc-linked-providers-card__row {
+        // Inherit separator and hover bg from the re-pointed custom props above.
+        // Add a subtle border-left accent on hover as a blueprint HUD highlight.
+        transition:
+            background-color 0.18s var(--bp-ease),
+            border-left-color 0.18s var(--bp-ease);
+
+        &:hover {
+            border-left: 2px solid var(--bp-teal);
+            // Compensate padding so layout does not shift on hover.
+            padding-left: calc(var(--bs-linked-providers-card-row-padding-x) - 2px);
+        }
+
+        // Rows after the first: lavender hairline (set via custom prop, but
+        // we reinforce it here in case .card overrides border-color globally).
+        & + & {
+            border-top-color: var(--bp-border-faint);
+        }
+    }
+
+    // ── Icon tile ────────────────────────────────────────────────────────────────
+    // Brand color applied via inline style from JS is preserved (currentColor on SVG).
+    // Tile bg and border re-pointed above; reinforce here for specificity.
+
+    .tc-linked-providers-card__tile {
+        background: var(--bs-linked-providers-card-tile-bg);
+        border-color: var(--bs-linked-providers-card-tile-border-color);
+        // Border-radius deliberately NOT set — radius sweep owns all corners.
+    }
+
+    // ── Provider label (name) ───────────────────────────────────────────────────
+    // Body font (Space Grotesk) at medium weight — clear, readable UI label.
+
+    .tc-linked-providers-card__label {
+        font-family: var(--bp-body);
+        font-weight: 500;
+        color: var(--bs-linked-providers-card-label-color);
+    }
+
+    // ── Account sub-label ───────────────────────────────────────────────────────
+    // Mono micro-label treatment — HUD readout for the linked account identifier.
+
+    .tc-linked-providers-card__account {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.05em;
+        color: var(--bs-linked-providers-card-account-color);
+    }
+
+    // ── Connected status dot ─────────────────────────────────────────────────────
+    // Teal live-dot with a soft halo ring — blueprint "live/active" glyph pattern.
+
+    .tc-linked-providers-card__connected-dot {
+        background: var(--bp-teal);
+        // Soft halo ring: teal glow (sanctioned circle, radius sweep does not touch this).
+        box-shadow: 0 0 0 0.2em var(--bp-teal-soft);
+    }
+
+    // ── Action button (unlink / manage) ─────────────────────────────────────────
+    // At rest: faint; on hover: pink fill + bg — pink = primary/destructive accent rotation.
+
+    .tc-linked-providers-card__btn {
+        color: var(--bs-linked-providers-card-btn-color);
+        transition:
+            background-color 0.18s var(--bp-ease),
+            color 0.18s var(--bp-ease);
+
+        &:hover {
+            color: var(--bs-linked-providers-card-btn-hover-color);
+            background: var(--bs-linked-providers-card-btn-hover-bg);
+        }
+
+        // Focus ring: pink accent (consistent with primary action color).
+        &:focus-visible {
+            outline: 2px solid var(--bp-pink);
+            outline-offset: 2px;
+        }
+    }
+
+    // ── Empty state ──────────────────────────────────────────────────────────────
+    // Mono micro-label treatment to match blueprint faint readout style.
+
+    .tc-linked-providers-card__empty {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--bs-linked-providers-card-empty-color);
+    }
+}

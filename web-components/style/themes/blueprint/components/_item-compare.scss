@@ -1,0 +1,136 @@
+// Blueprint › tc-item-compare — two-column stat sheet: paper card with teal HUD bracket,
+// mono eyebrow column labels, display-face item names, teal delta-up / danger delta-down.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-item-compare {
+        // Surface — white raised card, blueprint border, soft violet-tinted shadow.
+        --bs-item-compare-surface:         var(--bp-paper);
+        --bs-item-compare-border-color:    var(--bp-border);
+        // Internal separator is a faint divider, not the full border weight.
+        --bs-item-compare-separator-color: var(--bp-border-faint);
+
+        // Name — display face for the item title, blueprint ink.
+        --bs-item-compare-name-color:       var(--bp-text);
+        --bs-item-compare-name-font-size:   0.9375rem;
+        --bs-item-compare-name-font-weight: 600;
+
+        // Stat labels — muted blueprint prose; values — primary ink.
+        --bs-item-compare-stat-label-color: var(--bp-text-muted);
+        --bs-item-compare-stat-value-color: var(--bp-text);
+        --bs-item-compare-stat-font-size:   0.8125rem;
+
+        // Empty placeholder — faintest blueprint ink.
+        --bs-item-compare-empty-color: var(--bp-text-faint);
+
+        // Delta colors: up → teal (positive action), down → real danger red.
+        --bs-item-compare-delta-up-color:    var(--bp-teal);
+        --bs-item-compare-delta-down-color:  var(--bp-danger);
+        --bs-item-compare-delta-label-color: var(--bp-text-muted);
+        --bs-item-compare-delta-font-size:   0.8125rem;
+    }
+
+    // Grid frame — paper ground, soft shadow lift, teal HUD corner bracket.
+    .tc-item-compare__grid {
+        background: var(--bs-item-compare-separator-color);
+        border-color: var(--bp-border);
+        box-shadow: var(--tc-shadow-sm);
+        position: relative;
+
+        // HUD corner bracket: top-left, 2px teal L-shape.
+        // Applied to the grid (the outer frame) so it reads as a scan-target tile.
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            pointer-events: none;
+            z-index: 1;
+        }
+    }
+
+    // Each column sits on white paper with a tight top indent to clear the bracket.
+    .tc-item-compare__col {
+        background: var(--bp-paper);
+        padding-top: 1.25rem; // extra headroom for the HUD bracket in the left col
+    }
+
+    // Column label eyebrow (tc-eyebrow renders .tc-eyebrow underneath, but the
+    // override here targets the class placed on tc-eyebrow inside the component).
+    .tc-item-compare__col-label {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 0.6875rem;
+        color: var(--bp-teal-fg); // AA-safe teal text on white
+        font-weight: 600;
+    }
+
+    // Item type micro-label (optional) — same mono treatment, violet for variety.
+    .tc-item-compare__type {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 0.625rem;
+        color: var(--bp-violet-fg);
+        font-weight: 500;
+    }
+
+    // Item name — display face, tight tracking; not uppercase (it's a proper name).
+    .tc-item-compare__name {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+        color: var(--bp-emphasis);
+    }
+
+    // Stat label — blueprint muted prose, body weight.
+    .tc-item-compare__stat-label {
+        color: var(--bp-text-muted);
+        font-family: var(--bp-body);
+    }
+
+    // Stat value — mono, tabular, primary ink (already mono in base; reroute color).
+    .tc-item-compare__stat-value {
+        font-family: var(--bp-mono);
+        color: var(--bp-text);
+    }
+
+    // Delta separator hairline — faint blueprint divider.
+    .tc-item-compare__deltas {
+        border-top-color: var(--bp-border-faint);
+    }
+
+    // "Difference" eyebrow — violet supporting accent to distinguish from col labels.
+    .tc-item-compare__deltas-label {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 0.6875rem;
+        color: var(--bp-violet-fg);
+        font-weight: 600;
+    }
+
+    // Delta label — muted prose, same as stat labels.
+    .tc-item-compare__delta-label {
+        color: var(--bp-text-muted);
+        font-family: var(--bp-body);
+    }
+
+    // Delta value — mono, tabular; color comes from --bs vars wired above.
+    .tc-item-compare__delta-value {
+        font-family: var(--bp-mono);
+    }
+
+    // Empty column placeholder — faint mono em-dash.
+    .tc-item-compare__col--empty {
+        .tc-item-compare__empty {
+            font-family: var(--bp-mono);
+            color: var(--bp-text-faint);
+        }
+    }
+}

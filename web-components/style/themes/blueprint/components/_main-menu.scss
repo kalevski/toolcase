@@ -1,0 +1,147 @@
+// Blueprint › tc-main-menu — white paper panel with recessed mono-eyebrow header, teal hover wells, pink selected state, and faint violet hairlines.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Token re-map via --bs-main-menu-* custom properties ───────────────────
+    // Driving all cosmetics through the component's own variable API means any
+    // consumer that overrides these vars will still pick up blueprint defaults.
+
+    tc-main-menu {
+        // Surface: raised white card, violet-tinted hairline border.
+        --bs-main-menu-bg:                   var(--bp-paper);
+        --bs-main-menu-border:               var(--bp-border);
+
+        // Header: recessed lavender well distinguishes the header zone from the
+        // item list below — replaces the base --tc-surface-muted which would
+        // read as generic grey on the blueprint canvas.
+        --bs-main-menu-header-bg:            var(--bp-bg-2);
+        --bs-main-menu-header-border:        var(--bp-border-faint);
+
+        // Typography in the header area.
+        --bs-main-menu-eyebrow-color:        var(--bp-teal-fg);   // teal eyebrow = action/HUD voice; clears AA on --bp-bg-2
+        --bs-main-menu-title-color:          var(--bp-emphasis);   // strongest ink for the panel heading
+        --bs-main-menu-subtitle-color:       var(--bp-text-muted);
+
+        // Item rows.
+        --bs-main-menu-item-color:           var(--bp-text);
+        --bs-main-menu-item-border:          var(--bp-border-faint); // faint dividers — not the full border weight
+
+        // Hover: teal-soft fill — teal is the everyday action accent in the
+        // blueprint palette; keeps item color on neutral ink (no contrast flip).
+        --bs-main-menu-item-hover-bg:        var(--bp-teal-soft);
+
+        // Selected: pink = the primary / CTA accent in the blueprint rotation.
+        // --bp-pink-ink is #fff — legible on the pink fill.
+        --bs-main-menu-item-selected-bg:     var(--bp-pink);
+        --bs-main-menu-item-selected-color:  var(--bp-pink-ink);
+
+        // Disabled: faint text, halved opacity (base default 0.5 is preserved).
+        --bs-main-menu-item-disabled-color:  var(--bp-text-faint);
+
+        // Badge: recessed lavender chip when idle; ghosted white when selected.
+        --bs-main-menu-badge-bg:             var(--bp-bg-2);
+        --bs-main-menu-badge-color:          var(--bp-text-muted);
+        --bs-main-menu-badge-selected-bg:    rgba(255, 255, 255, 0.22); // soft overlay on pink fill
+        --bs-main-menu-badge-selected-color: var(--bp-pink-ink);
+    }
+
+    // ── Outer shell ──────────────────────────────────────────────────────────
+    // The base partial already applies all --bs-main-menu-* vars; only
+    // supplementary layout/cosmetic details that have no var hook go here.
+
+    .tc-main-menu {
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Header — mono eyebrow + display title ────────────────────────────────
+
+    .tc-main-menu-eyebrow {
+        // Reinforce the blueprint mono HUD register: JetBrains Mono, uppercase,
+        // teal ink. The font-family and text-transform are already in the base
+        // partial; we override the color token and add a touch more tracking for
+        // the blueprint eyebrow voice.
+        font-family: var(--bp-mono);
+        letter-spacing: 0.12em;
+        color: var(--bs-main-menu-eyebrow-color);
+    }
+
+    .tc-main-menu-title {
+        // Chakra Petch (display register) for the panel heading — consistent with
+        // blueprint section titles (list-card-title, panel headers, etc.).
+        font-family: var(--bp-display);
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        color: var(--bs-main-menu-title-color);
+    }
+
+    .tc-main-menu-subtitle {
+        font-family: var(--bp-body);
+        color: var(--bs-main-menu-subtitle-color);
+    }
+
+    // ── Item rows — teal left-edge accent on hover ────────────────────────────
+    // A 2px transparent left border swaps to teal on hover so the active row is
+    // immediately legible without a full background wash.  The 2px is absorbed
+    // into padding so content does not shift.
+
+    .tc-main-menu-item {
+        font-family: var(--bp-body);
+        border-left: 2px solid transparent;
+        // Absorb the 2px into the existing 0.875rem left padding.
+        padding-left: calc(0.875rem - 2px);
+        transition:
+            background-color 0.18s var(--bp-ease),
+            border-color     0.18s var(--bp-ease),
+            color             0.18s var(--bp-ease);
+
+        &:hover:not(.tc-main-menu-item--disabled):not(.tc-main-menu-item--selected) {
+            border-left-color: var(--bp-teal);
+        }
+
+        &.tc-main-menu-item--selected {
+            // Pink selected state — left border accent shifts to a bright white
+            // glow-line to remain visible against the pink background fill.
+            border-left-color: rgba(255, 255, 255, 0.5);
+        }
+    }
+
+    // ── Item label — mono nav voice ───────────────────────────────────────────
+    // Blueprint nav/menu items use JetBrains Mono in the standard (not all-caps)
+    // register — same pattern as context-menu items.
+
+    .tc-main-menu-item-label {
+        font-family: var(--bp-mono);
+        font-weight: 500;
+        letter-spacing: 0.02em;
+    }
+
+    // ── Badge chip ────────────────────────────────────────────────────────────
+    // JetBrains Mono is already in the base partial. Reinforce the blueprint
+    // chip treatment: recessed lavender well, uppercase, loose tracking.
+
+    .tc-main-menu-badge {
+        font-family: var(--bp-mono);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        border: 1px solid var(--bp-border-chip);
+        background: var(--bs-main-menu-badge-bg);
+        color: var(--bs-main-menu-badge-color);
+
+        // On selected rows the base partial sets --bs-main-menu-badge-selected-*;
+        // only the border needs overriding since the fill is already a rgba overlay.
+        .tc-main-menu-item--selected & {
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+    }
+
+    // ── Focus ring ────────────────────────────────────────────────────────────
+    // Replace the base --tc-app-accent ring with the blueprint pink glow so the
+    // focus indicator matches the selected-item accent.
+
+    tc-main-menu:focus-visible {
+        outline-color: var(--bp-pink);
+        box-shadow: var(--bp-glow-pink);
+    }
+}

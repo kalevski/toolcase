@@ -1,0 +1,60 @@
+// Blueprint › tc-brightness-calibration — calibration card with a hairline-bordered
+// grayscale ramp, --bp-paper shell, and a mono teal percentage HUD readout.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-brightness-calibration {
+        // Card shell — white paper ground + lilac hairline + soft shadow.
+        --bs-brightness-calibration-bg: var(--bp-paper);
+        --bs-brightness-calibration-border-color: var(--bp-border);
+        --bs-brightness-calibration-shadow: var(--tc-shadow-sm);
+
+        // Reference ramp — replace raw var(--tc-slate-*) to avoid light-slate leakage.
+        // Dark band: deepest ink so it reads as near-black at any gamma.
+        --bs-brightness-calibration-band-dark: var(--bp-emphasis);
+        // Mid band: the muted purple-ink mid-tone that sits midway in the ramp.
+        --bs-brightness-calibration-band-mid: var(--bp-text-muted);
+        // Bright band: lavender page ground — distinct from white so "not blown out"
+        // is visually meaningful against the --bp-paper card shell.
+        --bs-brightness-calibration-band-bright: var(--bp-bg);
+        --bs-brightness-calibration-band-border-color: var(--bp-border);
+
+        // Band label colours: dark/mid keep their contrast-safe rgba whites;
+        // bright band label must be dark ink on the lavender ground.
+        --bs-brightness-calibration-band-label-bright: var(--bp-text);
+
+        // Control row label — body ink.
+        --bs-brightness-calibration-row-label-color: var(--bp-text);
+
+        // Percentage readout — teal HUD colour (machine-facing, mono-coded below).
+        --bs-brightness-calibration-row-value-color: var(--bp-teal-fg);
+    }
+
+    .tc-brightness-calibration {
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // "Brightness" row label → mono eyebrow treatment (§8.1 — labels/kickers).
+    .tc-brightness-calibration__row-label {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--bp-text-muted);
+    }
+
+    // Percentage readout → mono HUD; teal-fg already set via the token above,
+    // but lock the font-family explicitly in case the base declaration is missing.
+    .tc-brightness-calibration__row-value {
+        font-family: var(--bp-mono);
+        color: var(--bp-teal-fg);
+        letter-spacing: 0.04em;
+    }
+
+    // Band label inside the bright swatch — dark ink on lavender ground.
+    .tc-brightness-calibration__band--bright .tc-brightness-calibration__band-label {
+        color: var(--bp-text);
+    }
+}

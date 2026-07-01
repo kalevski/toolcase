@@ -1,0 +1,109 @@
+// Blueprint › tc-rich-page-header — lavender-paper surface, display title, mono eyebrow subtitle, blueprint-token icon variants.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Surface tokens ──────────────────────────────────────────────────────────
+    tc-rich-page-header {
+        --bs-rich-page-header-bg: var(--bp-paper);
+        --bs-rich-page-header-border-color: var(--bp-border);
+
+        // Title — display face, tight tracking, strongest ink
+        --bs-rich-page-header-title-color: var(--bp-emphasis);
+        --bs-rich-page-header-title-weight: 700;
+
+        // Subtitle — reads as a mono eyebrow (color set on element below)
+        --bs-rich-page-header-sub-color: var(--bp-teal-fg);
+
+        // Description — body prose in muted ink
+        --bs-rich-page-header-description-color: var(--bp-text-muted);
+
+        // Icon tile default — recessed well, soft border, muted glyph
+        --bs-rich-page-header-icon-bg: var(--bp-bg-2);
+        --bs-rich-page-header-icon-color: var(--bp-text-soft);
+        --bs-rich-page-header-icon-border-color: var(--bp-border);
+    }
+
+    // ── Typography overrides ────────────────────────────────────────────────────
+    // Title: Chakra Petch display, tight tracking — the page name deserves presence.
+    .tc-rich-page-header-title {
+        font-family: var(--bp-display);
+        letter-spacing: -0.02em;
+    }
+
+    // Subtitle: JetBrains Mono micro-label style — uppercase, loose tracking.
+    // This is the eyebrow / breadcrumb tier of the header.
+    .tc-rich-page-header-sub {
+        font-family: var(--bp-mono);
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--bp-teal-fg); // explicit — mono labels key to teal in blueprint
+    }
+
+    // Description: Space Grotesk body; inherits --bp-body from the theme root.
+    .tc-rich-page-header-description {
+        font-family: var(--bp-body);
+    }
+
+    // ── Icon tile variants — replace all baked hex literals ────────────────────
+    // Each variant re-points the three --bs-rich-page-header-icon-* props only;
+    // nothing else changes, matching the base partial's contract.
+
+    // violet → blueprint violet tokens
+    .tc-rich-page-header-icon--violet {
+        --bs-rich-page-header-icon-bg: var(--bp-violet-soft);
+        --bs-rich-page-header-icon-color: var(--bp-violet-fg);
+        --bs-rich-page-header-icon-border-color: var(--bp-border-strong);
+    }
+
+    // cyan → blueprint teal (teal is blueprint's action/everday accent)
+    .tc-rich-page-header-icon--cyan {
+        --bs-rich-page-header-icon-bg: var(--bp-teal-soft);
+        --bs-rich-page-header-icon-color: var(--bp-teal-fg);
+        --bs-rich-page-header-icon-border-color: var(--bp-teal-line);
+    }
+
+    // emerald → blueprint teal (nearest semantic — success/healthy green)
+    .tc-rich-page-header-icon--emerald {
+        --bs-rich-page-header-icon-bg: var(--bp-teal-soft);
+        --bs-rich-page-header-icon-color: var(--bp-teal-fg);
+        --bs-rich-page-header-icon-border-color: var(--bp-teal-line);
+    }
+
+    // amber → blueprint amber tokens
+    .tc-rich-page-header-icon--amber {
+        --bs-rich-page-header-icon-bg: var(--bp-amber-soft);
+        --bs-rich-page-header-icon-color: var(--bp-amber-fg);
+        --bs-rich-page-header-icon-border-color: var(--bp-border-strong);
+    }
+
+    // pink → blueprint pink tokens (primary brand accent)
+    .tc-rich-page-header-icon--pink {
+        --bs-rich-page-header-icon-bg: var(--bp-pink-soft);
+        --bs-rich-page-header-icon-color: var(--bp-pink);
+        --bs-rich-page-header-icon-border-color: var(--bp-pink-line);
+    }
+
+    // blue → blueprint violet (closest cool-blue analog in the palette)
+    .tc-rich-page-header-icon--blue {
+        --bs-rich-page-header-icon-bg: var(--bp-violet-soft);
+        --bs-rich-page-header-icon-color: var(--bp-violet-fg);
+        --bs-rich-page-header-icon-border-color: var(--bp-border-strong);
+    }
+
+    // slate → blueprint neutral well (bg-2 + standard border, no color accent)
+    .tc-rich-page-header-icon--slate {
+        --bs-rich-page-header-icon-bg: var(--bp-bg-2);
+        --bs-rich-page-header-icon-color: var(--bp-text-soft);
+        --bs-rich-page-header-icon-border-color: var(--bp-border);
+    }
+
+    // rose → blueprint pink (rose and pink share the same semantic slot here)
+    .tc-rich-page-header-icon--rose {
+        --bs-rich-page-header-icon-bg: var(--bp-pink-soft);
+        --bs-rich-page-header-icon-color: var(--bp-pink);
+        --bs-rich-page-header-icon-border-color: var(--bp-pink-line);
+    }
+}

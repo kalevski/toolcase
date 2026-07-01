@@ -1,0 +1,30 @@
+// Blueprint › tc-interact-prompt — flat HUD chip with a teal keycap, mono label, and pink-accented hold-bar fill.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-interact-prompt {
+        // Surface — white paper with standard hairline, floating via md shadow.
+        --bs-interact-prompt-bg: var(--bp-paper);
+        --bs-interact-prompt-color: var(--bp-text);
+        --bs-interact-prompt-border-color: var(--bp-border);
+        --bs-interact-prompt-shadow: var(--tc-shadow-md);
+
+        // Label — mono uppercase, teal-fg for sufficient contrast on white.
+        --bs-interact-prompt-text-font: var(--bp-mono);
+        --bs-interact-prompt-text-color: var(--bp-teal-fg);
+        --bs-interact-prompt-text-spacing: 0.1em;
+
+        // Keycap — recessed well tint, strong border with heavier bottom edge (physical cap feel).
+        --bs-interact-prompt-key-font: var(--bp-mono);
+        --bs-interact-prompt-key-color: var(--bp-text-soft);
+        --bs-interact-prompt-key-bg: var(--bp-bg-2);
+        --bs-interact-prompt-key-border-color: var(--bp-border-strong);
+
+        // Hold-to-interact bar track — faint recessed well; fill is the pink CTA gradient.
+        --bs-interact-prompt-hold-track-bg: var(--bp-bg-2);
+        --bs-interact-prompt-hold-track-border-color: var(--bp-border-faint);
+        // Replace the baked #2b3a51 dark-slate stop with the pink brand gradient.
+        --bs-interact-prompt-hold-fill-bg: var(--bp-pink-grad);
+    }
+}

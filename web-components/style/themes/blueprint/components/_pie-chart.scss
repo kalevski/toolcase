@@ -1,0 +1,155 @@
+// Blueprint › tc-pie-chart — lavender-paper card with arcade slice ramp (pink/teal/violet/amber), mono legend percentages, and ink tooltip.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-pie-chart {
+        // --- slice fill ramp: arcade accent rotation (pink=primary, teal=action, violet+amber=support, then repeating soft variants) ---
+        --bs-pie-chart-slice-1: var(--bp-pink);
+        --bs-pie-chart-slice-2: var(--bp-teal);
+        --bs-pie-chart-slice-3: var(--bp-violet);
+        --bs-pie-chart-slice-4: var(--bp-amber);
+        --bs-pie-chart-slice-5: var(--bp-pink-hover);       // lighter pink — second pink series
+        --bs-pie-chart-slice-6: var(--bp-teal-hover);       // lighter teal — second teal series
+        --bs-pie-chart-slice-7: var(--bp-danger);           // real red for 7th data series
+        --bs-pie-chart-slice-8: var(--bp-text-faint);       // muted violet-grey for trailing series
+
+        // --- card surface ---
+        --bs-pie-chart-bg: var(--bp-paper);
+        --bs-pie-chart-border: 1px solid var(--bp-border);
+
+        // --- header typography ---
+        --bs-pie-chart-title-color: var(--bp-text);
+        --bs-pie-chart-subtitle-color: var(--bp-text-muted);
+
+        // --- slice gap: show the card ground so halos read cleanly ---
+        --bs-pie-chart-slice-stroke: var(--bp-paper);
+        --bs-pie-chart-slice-stroke-width: 2;
+        --bs-pie-chart-dim-opacity: 0.4;
+
+        // --- donut hole + centre label ---
+        --bs-pie-chart-hole-fill: var(--bp-paper);
+        --bs-pie-chart-center-label-color: var(--bp-text-faint);
+        --bs-pie-chart-center-value-color: var(--bp-text);
+
+        // --- tooltip: ink ground, white text ---
+        --bs-pie-chart-tooltip-bg: var(--bp-emphasis);
+        --bs-pie-chart-tooltip-color: #fff;
+        --bs-pie-chart-tooltip-stripe-width: 3px;
+        --bs-pie-chart-tooltip-shadow: var(--tc-shadow-md);
+
+        // --- legend ---
+        --bs-pie-chart-legend-color: var(--bp-text);
+        --bs-pie-chart-legend-pct-color: var(--bp-text-muted);
+        --bs-pie-chart-legend-off-opacity: 0.4;
+
+        // --- skeleton ---
+        --bs-pie-chart-skeleton-bg: var(--bp-bg-2);
+    }
+
+    // --- card wrapper ---
+    .tc-pie-chart-inner {
+        background: var(--bs-pie-chart-bg);
+        border: var(--bs-pie-chart-border);
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // --- header: display font for title, mono eyebrow for subtitle ---
+    .tc-pie-chart-title {
+        font-family: var(--bp-display);
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: var(--bs-pie-chart-title-color);
+    }
+
+    .tc-pie-chart-subtitle {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--bp-teal-fg);           // teal eyebrow — action/label register
+    }
+
+    // --- centre donut label: mono sub-value ---
+    .tc-pie-chart-center-label {
+        font-family: var(--bp-mono);
+        fill: var(--bs-pie-chart-center-label-color);
+    }
+
+    .tc-pie-chart-center-value {
+        font-family: var(--bp-display);
+        fill: var(--bs-pie-chart-center-value-color);
+    }
+
+    // --- tooltip ---
+    .tc-pie-chart-tooltip {
+        background: var(--bs-pie-chart-tooltip-bg);
+        color: var(--bs-pie-chart-tooltip-color);
+        box-shadow: var(--bs-pie-chart-tooltip-shadow);
+    }
+
+    .tc-pie-chart-tooltip-label {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        opacity: 0.75;
+    }
+
+    .tc-pie-chart-tooltip-value {
+        font-family: var(--bp-body);
+        font-weight: 600;
+    }
+
+    .tc-pie-chart-tooltip-pct {
+        font-family: var(--bp-mono);
+        color: var(--bp-teal-hover);        // teal accent on ink for percentage readout
+        opacity: 1;                          // override base 0.75 — teal is already muted enough
+    }
+
+    // --- legend ---
+    .tc-pie-chart-legend-item {
+        font-family: var(--bp-body);
+        color: var(--bs-pie-chart-legend-color);
+        transition: background-color var(--bp-ease, 0.15s ease),
+                    opacity var(--bp-ease, 0.15s ease);
+
+        &:hover,
+        &.tc-pie-chart-legend-item--active {
+            background: var(--bp-bg-2);     // recessed lavender well on hover/active
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-pink);
+            outline-offset: 2px;
+        }
+    }
+
+    .tc-pie-chart-legend-pct {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--bp-text-muted);
+    }
+
+    // --- skeleton shimmer: violet-tinted lavender ground ---
+    .tc-pie-chart-skeleton {
+        background: linear-gradient(
+            90deg,
+            var(--bp-bg-2) 25%,
+            var(--bp-paper-tint-2) 37%,
+            var(--bp-bg-2) 63%
+        );
+        background-size: 200% 100%;
+    }
+
+    // --- empty state ---
+    .tc-pie-chart-empty {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--bp-text-faint);
+    }
+}

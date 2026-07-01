@@ -1,0 +1,69 @@
+// Blueprint › tc-accordion — white-paper panels with a display-font header,
+// pink active state (left inset accent + tinted wash), and a chevron recoloured
+// to match: muted-ink at rest, pink when expanded.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    .accordion {
+        // Surface — white paper, lilac hairline.
+        --bs-accordion-bg: var(--bp-paper);
+        --bs-accordion-border-color: var(--bp-border);
+
+        // Button — display typeface for titled-section feel; primary ink at rest.
+        --bs-accordion-btn-color: var(--bp-text);
+        --bs-accordion-btn-bg: var(--bp-paper);
+
+        // Chevron at rest: bp-text-muted (#5d5887) url-encoded.
+        --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%235d5887'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+
+        // Chevron expanded: bp-pink (#e01172) url-encoded.
+        --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23e01172'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+
+        // Active header — emphasis ink on a soft pink-surface wash.
+        --bs-accordion-active-color: var(--bp-emphasis);
+        --bs-accordion-active-bg: var(--bp-pink-surface);
+
+        // Focus ring — pink glow to match the primary accent.
+        --bs-accordion-btn-focus-box-shadow: var(--bp-glow-pink);
+    }
+
+    // Item hairline — use the stronger border for item outlines so the stack
+    // reads as a discrete panel list rather than a floating blob.
+    .accordion-item {
+        border-color: var(--bp-border-strong);
+        background-color: var(--bp-paper);
+    }
+
+    // Header button — display typeface, soft tracking, text token.
+    .accordion-button {
+        font-family: var(--bp-display);
+        letter-spacing: 0.01em;
+        color: var(--bp-text);
+        background-color: var(--bp-paper);
+
+        // Hover — paper-tint wash; no lift (accordion is not a tappable tile).
+        &:hover {
+            background-color: var(--bp-paper-tint);
+        }
+
+        // Expanded — pink left-rail accent via inset box-shadow.
+        &:not(.collapsed) {
+            color: var(--bp-emphasis);
+            background-color: var(--bp-pink-surface);
+            box-shadow: inset 3px 0 0 var(--bp-pink);
+        }
+    }
+
+    // Body — muted ink, slightly smaller, breathable.
+    .accordion-body {
+        color: var(--bp-text-muted);
+        font-family: var(--bp-body);
+    }
+
+    // Flush variant — dividers only; route to faint border token so no raw
+    // --tc-slate-* leaks in from the base partial's inherited border-color.
+    .accordion-flush > .accordion-item {
+        border-color: var(--bp-border-faint);
+    }
+}

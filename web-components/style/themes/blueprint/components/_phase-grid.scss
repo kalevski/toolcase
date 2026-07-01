@@ -1,0 +1,193 @@
+// Blueprint › tc-phase-grid — Chakra Petch titles, mono status labels, pink=active/teal=complete accent rotation, violet tag chips, teal-on-ink command block.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Custom-property overrides ─────────────────────────────────────────────
+    // Re-point every --bs-phase-grid-* token to blueprint equivalents.
+    // The 1px-gap grid background (card border) becomes the blueprint hairline.
+
+    tc-phase-grid {
+        // Card surface — raised white paper, blueprint hairline as gap colour
+        --bs-phase-grid-card-bg:    var(--bp-paper);
+        --bs-phase-grid-card-border: var(--bp-border);
+
+        // Title — display face (Chakra Petch), tight tracking, strong ink
+        --bs-phase-grid-title-color:       var(--bp-text);
+        --bs-phase-grid-title-font-size:   0.9375rem;
+        --bs-phase-grid-title-font-weight: 600;
+
+        // Description — muted body copy
+        --bs-phase-grid-desc-color: var(--bp-text-muted);
+
+        // Status label micro-text — mono, uppercase already set in base
+        --bs-phase-grid-status-label-font-size: 0.6875rem;
+
+        // Status accent rotation:
+        //   complete  → teal   (done / success)
+        //   active    → pink   (primary/running — the most important state)
+        //   upcoming  → faint  (neutral, not yet started)
+        //   blocked   → danger (real red, not pink)
+        --bs-phase-grid-complete-color: var(--bp-teal);
+        --bs-phase-grid-active-color:   var(--bp-pink);
+        --bs-phase-grid-upcoming-color: var(--bp-text-faint);
+        --bs-phase-grid-blocked-color:  var(--bp-danger);
+
+        // Tag chips — violet-soft fill + violet-fg text (supporting accent for metadata)
+        --bs-phase-grid-tag-bg:     var(--bp-violet-soft);
+        --bs-phase-grid-tag-color:  var(--bp-violet-fg);
+        --bs-phase-grid-tag-border: transparent;
+
+        // Command block — near-black ink ground, teal code text (HUD/terminal aesthetic)
+        --bs-phase-grid-command-bg:    var(--bp-emphasis);
+        --bs-phase-grid-command-color: var(--bp-teal);
+    }
+
+    // ── Grid wrapper ──────────────────────────────────────────────────────────
+    // Outer border also gets the blueprint hairline; shadow grounds the grid.
+
+    .tc-phase-grid {
+        border-color: var(--bp-border);
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Card item ─────────────────────────────────────────────────────────────
+
+    .tc-phase-grid-item {
+        position: relative; // anchor for HUD bracket ::before
+
+        // HUD corner bracket — teal, top-left, marks each card as a tappable tile
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            pointer-events: none;
+            opacity: 0.5;
+            transition: opacity 0.18s var(--bp-ease);
+        }
+
+        &:hover::before {
+            opacity: 1;
+        }
+
+        // Subtle lift on hover — signals interactivity
+        transition: transform 0.18s var(--bp-ease), box-shadow 0.18s var(--bp-ease);
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--tc-shadow-hover);
+            z-index: 1; // stay above sibling cards during lift
+        }
+
+        // Active-state card gets a faint pink surface wash to match the pink stripe
+        &--active {
+            background: var(--bp-pink-surface);
+        }
+
+        // Complete card gets a faint teal surface wash
+        &--complete {
+            background: var(--bp-teal-soft);
+        }
+    }
+
+    // ── Title — display face ──────────────────────────────────────────────────
+
+    .tc-phase-grid-item-title {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em; // Chakra Petch reads tight at card scale
+        text-wrap: balance;
+        color: var(--bp-text);
+    }
+
+    // ── Description ───────────────────────────────────────────────────────────
+
+    .tc-phase-grid-item-description {
+        font-family: var(--bp-body);
+        color: var(--bp-text-muted);
+    }
+
+    // ── Status indicator row ──────────────────────────────────────────────────
+    // Base already uses --bs-font-monospace + uppercase + letter-spacing 0.05em.
+    // Blueprint overrides to --bp-mono and bumps tracking for the HUD register.
+
+    .tc-phase-grid-item-status {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.10em;
+
+        // Status label colour inherits from the --bs-phase-grid-*-color tokens above;
+        // no need to re-declare per-modifier here unless overriding specifics.
+
+        // Active: pink label + live-pulse dot via the icon glow
+        &--active {
+            color: var(--bp-pink);
+        }
+
+        // Complete: teal
+        &--complete {
+            color: var(--bp-teal-fg); // teal-fg passes AA on white; teal itself can fail
+        }
+
+        // Upcoming: faint
+        &--upcoming {
+            color: var(--bp-text-faint);
+        }
+
+        // Blocked: danger red
+        &--blocked {
+            color: var(--bp-danger);
+        }
+    }
+
+    // Active spinner — add a pink glow so it reads as the "live" state
+    .tc-phase-grid-item-status-icon--active {
+        filter: drop-shadow(0 0 3px var(--bp-pink-glow));
+        color: var(--bp-pink);
+    }
+
+    // ── Tag chips ─────────────────────────────────────────────────────────────
+    // Violet-soft fill already set via --bs-phase-grid-tag-* above.
+    // Add explicit mono font + uppercase + tracking for the micro-label treatment.
+
+    .tc-phase-grid-item-tag {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--bp-violet-fg);
+        background: var(--bp-violet-soft);
+        border-color: transparent;
+    }
+
+    // ── Command block ─────────────────────────────────────────────────────────
+    // Dark ink ground (--bp-emphasis ≈ #0f0e22), teal code text.
+    // A faint teal left accent stripe marks it as an active terminal line.
+
+    .tc-phase-grid-item-command {
+        border-left: 2px solid var(--bp-teal-line);
+    }
+
+    .tc-phase-grid-item-command-code {
+        font-family: var(--bp-mono);
+        font-size: 0.75rem;
+        color: var(--bp-teal);
+        background: transparent;
+
+        // Faint teal glow on the code text — subtle terminal warmth
+        text-shadow: 0 0 6px var(--bp-teal-glow);
+    }
+
+    // ── Reduced-motion: preserve spinning state signal ────────────────────────
+    @media (prefers-reduced-motion: reduce) {
+        .tc-phase-grid-item {
+            transition: none;
+
+            &:hover {
+                transform: none;
+            }
+        }
+    }
+}

@@ -1,0 +1,23 @@
+// Blueprint › tc-blur-overlay — light lavender-violet scrim replacing the dark slate wash.
+//
+// The base partial bakes rgba(15,23,42,0.45) — a slate-900 dark wash — which is
+// a dark-on-dark clash on the blueprint light theme. Here the scrim is re-pointed
+// to a semi-transparent blueprint canvas tint (--bp-bg at ~70% opacity) blended
+// with a faint violet ambient, so the overlay reads as a frosted light sheet
+// consistent with the blueprint paper palette instead of a dark arcade dimmer.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-blur-overlay {
+        // Replace the dark slate scrim with a light lavender wash.
+        // rgba approximation of --bp-bg (#eef1f8) at 72% + slight violet push.
+        // Written as a direct rgba because CSS color-mix over a custom property
+        // hex is not universally supported; the visual matches --bp-bg exactly.
+        --bs-blur-overlay-bg: rgba(238, 241, 248, 0.82);
+
+        // Slightly softer blur — the light scrim reads as translucent paper; less
+        // blur is needed to separate it visually from the blurred content behind.
+        --bs-blur-overlay-blur: 10px;
+    }
+}

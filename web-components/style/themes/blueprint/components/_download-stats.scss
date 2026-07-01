@@ -1,0 +1,97 @@
+// Blueprint › tc-download-stats — white card, teal sparkline + stat numbers, mono package/period labels.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-download-stats {
+        // Surface: white raised card with violet-tinted hairline and soft shadow.
+        --bs-download-stats-bg: var(--bp-paper);
+        --bs-download-stats-border-color: var(--bp-border);
+        --bs-download-stats-shadow: var(--tc-shadow-sm);
+
+        // Icon: teal action accent (download arrow reads as an action glyph).
+        --bs-download-stats-icon-color: var(--bp-teal-fg);
+
+        // Package name: violet-fg for inline code-style contrast; mono font already applied in base.
+        --bs-download-stats-package-color: var(--bp-violet-fg);
+
+        // Stat numbers: strong ink — these are the headline figures.
+        --bs-download-stats-number-color: var(--bp-text);
+
+        // Period label (DAILY / WEEKLY / MONTHLY): muted mono eyebrow.
+        --bs-download-stats-period-color: var(--bp-text-faint);
+
+        // Inner cell separators: faintest hairline to avoid visual noise inside the card.
+        --bs-download-stats-cell-separator-color: var(--bp-border-faint);
+
+        // Sparkline: teal — the "action/live data" accent in the blueprint palette.
+        --bs-download-stats-sparkline-color: var(--bp-teal);
+    }
+
+    // ── Outer card frame ──────────────────────────────────────────────────────
+
+    .tc-download-stats {
+        // Re-assert the border with the blueprint token (base uses var(--bs-…-border-color),
+        // which already resolves correctly; this reinforces the 1px hairline intent).
+        border-color: var(--bp-border);
+    }
+
+    // ── Header: package name row ──────────────────────────────────────────────
+
+    .tc-download-stats__header {
+        // Recessed strip to distinguish it from the stat cells below.
+        background: var(--bp-bg-2);
+        border-bottom-color: var(--bp-border);
+    }
+
+    .tc-download-stats__package {
+        // Mono font already set in the base; remap to bp-mono token + tighten tracking.
+        font-family: var(--bp-mono);
+        letter-spacing: 0.10em;
+        text-transform: uppercase;
+        color: var(--bp-violet-fg);
+    }
+
+    .tc-download-stats__icon {
+        color: var(--bp-teal-fg);
+    }
+
+    // ── Stat cells ────────────────────────────────────────────────────────────
+
+    .tc-download-stats__cell + .tc-download-stats__cell {
+        border-left-color: var(--bp-border-faint);
+    }
+
+    .tc-download-stats__number {
+        // Display font for headline figures — the blueprint "price/title" register.
+        font-family: var(--bp-display);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: var(--bp-text);
+    }
+
+    .tc-download-stats__period {
+        // Mono eyebrow: uppercase, loose tracking — blueprint HUD label treatment.
+        font-family: var(--bp-mono);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--bp-text-faint);
+    }
+
+    // ── Sparkline ─────────────────────────────────────────────────────────────
+
+    .tc-download-stats__sparkline {
+        border-top-color: var(--bp-border-faint);
+    }
+
+    .tc-download-stats__sparkline-line {
+        // Teal live-data accent; slightly thicker stroke for the blueprint aesthetic.
+        stroke: var(--bp-teal);
+        stroke-width: 1.75;
+    }
+
+    .tc-download-stats__sparkline-dot {
+        // Terminal dot matches the line color.
+        fill: var(--bp-teal);
+    }
+}

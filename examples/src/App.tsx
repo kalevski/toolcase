@@ -93,6 +93,7 @@ const routeThemes: Record<string, { value: string; label: string }[]> = {
         { value: 'aurora', label: 'Aurora' },
         { value: 'sunshine', label: 'Sunshine' },
         { value: 'neon', label: 'Neon' },
+        { value: 'blueprint', label: 'Blueprint' },
     ],
 }
 

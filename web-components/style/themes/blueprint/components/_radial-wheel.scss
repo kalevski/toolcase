@@ -1,0 +1,82 @@
+// Blueprint › tc-radial-wheel — teal-action disc with lavender scrim, paper option buttons, pink primary focus, and mono hub label.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-radial-wheel {
+        // ── Backdrop scrim ───────────────────────────────────────────────────
+        // Replace dark-slate #0f172a with a deep blueprint-indigo derived from
+        // --bp-emphasis so the lavender palette bleeds through at 55% opacity.
+        --bs-radial-wheel-backdrop-bg:      var(--bp-emphasis);
+        --bs-radial-wheel-backdrop-opacity: 0.60;
+
+        // ── Disc (circular hub surface) ──────────────────────────────────────
+        // White paper card with the standard hairline border and a violet-tinted
+        // shadow; matches how blueprint elevates every modal-tier surface.
+        --bs-radial-wheel-disc-bg:     var(--bp-paper);
+        --bs-radial-wheel-disc-border: var(--bp-border-strong);
+        --bs-radial-wheel-disc-shadow: var(--tc-shadow-lg);
+
+        // ── Option buttons (resting state) ───────────────────────────────────
+        // Paper white with a default hairline; teal icon glyph on rest so the
+        // options feel "action"-coded per the blueprint accent rotation.
+        --bs-radial-wheel-option-bg:     var(--bp-paper);
+        --bs-radial-wheel-option-border: var(--bp-border);
+        --bs-radial-wheel-option-color:  var(--bp-text-muted);
+        --bs-radial-wheel-option-shadow: var(--tc-shadow-sm);
+
+        // ── Option buttons (hover / active state) ────────────────────────────
+        // Teal soft fill + teal-fg glyph; violet-tinted hover shadow.
+        --bs-radial-wheel-option-hover-bg:    var(--bp-teal-soft);
+        --bs-radial-wheel-option-hover-color: var(--bp-teal-fg);
+        --bs-radial-wheel-option-hover-shadow: var(--tc-shadow-hover);
+
+        // ── Center hub label ─────────────────────────────────────────────────
+        // Faint blueprint ink on the paper disc; already mono+uppercase from base.
+        --bs-radial-wheel-center-color: var(--bp-text-faint);
+        --bs-radial-wheel-center-size:  0.7rem;
+
+        // ── Pager dots ───────────────────────────────────────────────────────
+        // Base renders dots on the dark scrim using rgba-white; blueprint scrim
+        // is still dark-indigo so keep them legible — softer blueprint border
+        // for inactive, bright paper for active.
+        --bs-radial-wheel-pager-color:        var(--bp-border-soft);
+        --bs-radial-wheel-pager-active-color: var(--bp-paper);
+    }
+
+    // ── Option button — border emphasis on hover ─────────────────────────────
+    // The base partial uses a literal `var(--tc-border-strong)` for the hover
+    // border-color (not exposed through a custom property), so we override it here.
+    .tc-radial-wheel-option {
+        transition:
+            background-color 0.15s var(--bp-ease, ease),
+            color            0.15s var(--bp-ease, ease),
+            box-shadow       0.15s var(--bp-ease, ease),
+            border-color     0.15s var(--bp-ease, ease),
+            transform        0.15s var(--bp-ease, ease);
+
+        &:hover:not([disabled]),
+        &.tc-radial-wheel-option--hover:not([disabled]) {
+            // Swap the hardcoded --tc-border-strong hover border for teal-line.
+            border-color: var(--bp-teal-line);
+            // Subtle teal outer glow so the lifted button pops against the disc.
+            box-shadow:
+                var(--tc-shadow-hover),
+                var(--bp-glow-teal);
+        }
+
+        // Pink primary focus ring (blueprint primary = pink).
+        &:focus-visible {
+            outline-color: var(--bp-pink);
+        }
+    }
+
+    // ── Center label — enforce blueprint mono face ───────────────────────────
+    // Base already sets --tc-font-mono; remap to --bp-mono so the theme's
+    // JetBrains Mono var drives the hub text when fonts are overridden.
+    .tc-radial-wheel-center {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.10em;
+        color: var(--bp-text-faint);
+    }
+}

@@ -1,0 +1,128 @@
+// Blueprint › tc-nav — mono uppercase labels, pink active accent on tabs/underline/pills, teal hover hairlines.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Base nav tokens ────────────────────────────────────────────────────────
+
+    .nav {
+        // Mono uppercase micro-label treatment — the canonical blueprint nav voice.
+        --bs-nav-link-font-size: 0.75rem;
+        --bs-nav-link-font-weight: 500;
+        --bs-nav-link-color: var(--bp-text-muted);
+        --bs-nav-link-hover-color: var(--bp-text-soft);
+        --bs-nav-link-disabled-color: var(--bp-text-faint);
+    }
+
+    .nav-link {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.09em;
+        transition:
+            color var(--bp-ease),
+            border-color var(--bp-ease),
+            background var(--bp-ease);
+
+        &.active {
+            // Active label: primary ink, slight weight bump already in base.
+            color: var(--bp-text);
+        }
+
+        &:focus-visible {
+            // Blueprint focus ring uses pink glow — consistent with CTA focus.
+            outline: 2px solid var(--bp-pink);
+            outline-offset: 2px;
+        }
+    }
+
+    // ── Tabs ───────────────────────────────────────────────────────────────────
+
+    .nav-tabs {
+        // The rail: faint divider hairline — blueprint divider token.
+        --bs-nav-tabs-border-color: var(--bp-border-faint);
+        --bs-nav-tabs-border-width: 1px;
+
+        // Active tab cosmetics: pink underline on white/transparent ground.
+        --bs-nav-tabs-link-active-color: var(--bp-text);
+        --bs-nav-tabs-link-active-bg: transparent;
+        --bs-nav-tabs-link-active-border-color: var(--bp-pink);
+
+        // Hover underline: teal hairline — everyday action accent.
+        --bs-nav-tabs-link-hover-border-color: var(--bp-teal);
+
+        .nav-link {
+            // Active tab label: display face, tighter tracking — titles/names
+            // in blueprint use --bp-display; the active tab is the "selected
+            // heading" so it earns a brief display upgrade.
+            &.active {
+                font-family: var(--bp-display);
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+                color: var(--bp-text);
+            }
+
+            &:hover,
+            &:focus-visible {
+                // Teal hover underline signals an actionable everyday state.
+                border-bottom-color: var(--bp-teal);
+                color: var(--bp-text-soft);
+            }
+        }
+    }
+
+    // ── Pills ──────────────────────────────────────────────────────────────────
+
+    .nav-pills {
+        // Active pill: pink fill + white ink — primary / selected CTA pattern.
+        --bs-nav-pills-link-active-color: var(--bp-pink-ink);
+        --bs-nav-pills-link-active-bg: var(--bp-pink);
+
+        .nav-link {
+            &:hover:not(.active):not(.disabled) {
+                // Soft pink tint on hover signals the pill is about to be selected.
+                background: var(--bp-pink-soft);
+                color: var(--bp-pink);
+            }
+
+            &.active {
+                // Pink glow reinforces the selected state — arcade primary pattern.
+                box-shadow: var(--bp-glow-pink);
+            }
+        }
+    }
+
+    // ── Underline ──────────────────────────────────────────────────────────────
+
+    .nav-underline {
+        --bs-nav-underline-link-active-color: var(--bp-text);
+
+        .nav-link {
+            &:hover,
+            &:focus-visible {
+                // Teal hover underline — everyday action, same as tabs hover.
+                border-bottom-color: var(--bp-teal-line);
+                color: var(--bp-text-soft);
+            }
+
+            &.active {
+                // Pink underline: primary accent marks the selected item.
+                border-bottom-color: var(--bp-pink);
+                color: var(--bp-text);
+            }
+        }
+
+        // Column / scrollspy side-rail variant.
+        &.flex-column {
+            .nav-link {
+                &:hover,
+                &:focus-visible {
+                    border-left-color: var(--bp-teal-line);
+                }
+
+                &.active {
+                    border-left-color: var(--bp-pink);
+                }
+            }
+        }
+    }
+}

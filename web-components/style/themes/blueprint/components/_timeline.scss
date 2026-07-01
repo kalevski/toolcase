@@ -1,0 +1,148 @@
+// Blueprint › tc-timeline — schematic spine with teal/pink status nodes, mono eyebrows, and paper-white cards.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-timeline {
+        // ── Card surface ──────────────────────────────────────────────────
+        // White raised paper; hairline border from the blueprint border ramp
+        --bs-timeline-card-bg: var(--bp-paper);
+        --bs-timeline-card-border-color: var(--bp-border);
+
+        // ── Connector spine ───────────────────────────────────────────────
+        // Default / gradient spine → teal schematic trace
+        --bs-timeline-line-color: var(--bp-teal-line);
+        // Solid variant → stronger teal stroke
+        --bs-timeline-line-solid-color: var(--bp-teal);
+        --bs-timeline-line-solid-width: 2px;
+
+        // ── Status node colors ────────────────────────────────────────────
+        // completed → teal (success = teal per blueprint accent rotation)
+        --bs-timeline-completed-bg: var(--bp-teal);
+        --bs-timeline-completed-border: var(--bp-teal);
+        // active → pink (primary CTA)
+        --bs-timeline-active-bg: var(--bp-pink);
+        --bs-timeline-active-border: var(--bp-pink);
+        // upcoming → unlit: white fill, faint border
+        --bs-timeline-upcoming-bg: var(--bp-paper);
+        --bs-timeline-upcoming-border: var(--bp-border-strong);
+
+        // ── Typography ────────────────────────────────────────────────────
+        // Date eyebrow: mono uppercase label → teal-fg for legibility on white
+        --bs-timeline-date-color: var(--bp-teal-fg);
+        --bs-timeline-date-font-size: 0.6875rem;
+        // Title: display face, blueprint navy
+        --bs-timeline-title-color: var(--bp-text);
+        --bs-timeline-title-font-size: 0.9375rem;
+        --bs-timeline-title-font-weight: 600;
+        // Subtitle/description: body text, muted
+        --bs-timeline-subtitle-color: var(--bp-text-muted);
+        --bs-timeline-description-color: var(--bp-text-muted);
+        // Meta: faint mono label
+        --bs-timeline-meta-color: var(--bp-text-faint);
+
+        // ── Badge ─────────────────────────────────────────────────────────
+        // Violet soft tint — supporting accent per blueprint rotation
+        --bs-timeline-badge-bg: var(--bp-violet-soft);
+        --bs-timeline-badge-color: var(--bp-violet-fg);
+        --bs-timeline-badge-border-color: transparent;
+
+        // ── Tags ──────────────────────────────────────────────────────────
+        // Recessed paper tint with chip border
+        --bs-timeline-tag-bg: var(--bp-paper-tint);
+        --bs-timeline-tag-color: var(--bp-text-soft);
+        --bs-timeline-tag-border-color: var(--bp-border-chip);
+
+        // ── Progress ──────────────────────────────────────────────────────
+        // Pink fill (primary CTA); track → faint divider color
+        --bs-timeline-progress-bg: var(--bp-border-faint);
+        --bs-timeline-progress-fill: var(--bp-pink);
+
+        // ── Elevated variant shadow ───────────────────────────────────────
+        --bs-timeline-elevated-shadow: var(--tc-shadow-md);
+
+        // ── Glass variant surface ─────────────────────────────────────────
+        // Lavender-tinted translucent white — consistent with bp-paper family
+        --bs-timeline-glass-bg: rgba(255, 255, 255, 0.80);
+
+        // ── Skeleton ──────────────────────────────────────────────────────
+        // Base → recessed well; shimmer → paper white highlight
+        --bs-timeline-skeleton-bg: var(--bp-bg-2);
+        --bs-timeline-skeleton-shimmer: var(--bp-paper);
+    }
+
+    // ── Connector spine ───────────────────────────────────────────────────────
+    // Dashed variant: border-left is a direct paint, override via element rule
+    .tc-timeline-line--dashed {
+        border-left-color: var(--bp-border);
+    }
+
+    // ── Active node: pink glow halo ───────────────────────────────────────────
+    // The glow is additive cosmetic not expressible via a --bs-* var
+    .tc-timeline-node--dot.tc-timeline-node--active {
+        box-shadow: 0 0 0 0.2em var(--bp-pink-glow);
+    }
+
+    // ── Completed node: subtle teal halo ─────────────────────────────────────
+    .tc-timeline-node--dot.tc-timeline-node--completed {
+        box-shadow: 0 0 0 0.15em var(--bp-teal-soft);
+    }
+
+    // ── Icon node surface ─────────────────────────────────────────────────────
+    // Uses --tc-surface-muted directly in base — override to bp-bg-2
+    .tc-timeline-node--icon {
+        background: var(--bp-bg-2);
+        border-color: var(--bp-border);
+    }
+
+    // ── Icon SVG color ────────────────────────────────────────────────────────
+    .tc-timeline-icon-svg {
+        color: var(--bp-text-muted);
+    }
+
+    // ── Date label: mono uppercase schematic stamp ────────────────────────────
+    .tc-timeline-date {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    // ── Meta label: mono, faint ───────────────────────────────────────────────
+    .tc-timeline-meta {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    // ── Title: display face ───────────────────────────────────────────────────
+    .tc-timeline-title {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+    }
+
+    // ── Badge: mono label treatment ───────────────────────────────────────────
+    .tc-timeline-badge {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+    }
+
+    // ── Tag: body text, chip treatment ───────────────────────────────────────
+    .tc-timeline-tag {
+        font-family: var(--bp-body);
+    }
+
+    // ── Card shadow baseline ──────────────────────────────────────────────────
+    .tc-timeline-card {
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // Outlined: no shadow — border-only chrome
+    .tc-timeline--outlined .tc-timeline-card {
+        box-shadow: none;
+    }
+
+    // Minimal: no shadow, no border chrome
+    .tc-timeline--minimal .tc-timeline-card {
+        box-shadow: none;
+    }
+}

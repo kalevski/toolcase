@@ -1,0 +1,141 @@
+// Blueprint › tc-brief-card — HUD task tile: teal left-accent strip on interactive, display title, mono ID/meta readouts, bp-token difficulty badges.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-brief-card {
+        // Surface: white paper raised card, lilac hairline, soft violet-tinted shadow.
+        --bs-brief-card-bg: var(--bp-paper);
+        --bs-brief-card-border-color: var(--bp-border);
+        --bs-brief-card-shadow: var(--tc-shadow-sm);
+        --bs-brief-card-shadow-hover: var(--tc-shadow-hover);
+
+        // Separator: route the raw rgba(30,41,59,0.07) literal to the bp faint divider token.
+        --bs-brief-card-separator-color: var(--bp-border-faint);
+
+        // Title: strongest blueprint ink — display font applied below.
+        --bs-brief-card-title-color: var(--bp-emphasis);
+
+        // Body copy: muted prose ink.
+        --bs-brief-card-body-color: var(--bp-text-muted);
+
+        // Meta footer text: faint ink — mono font applied below.
+        --bs-brief-card-meta-color: var(--bp-text-faint);
+
+        // ID micro-label: teal for the HUD readout accent rotation — mono font applied below.
+        --bs-brief-card-id-color: var(--bp-teal-fg);
+    }
+
+    // Card shell — position:relative anchors the interactive corner-bracket.
+    .tc-brief-card {
+        position: relative;
+        transition:
+            transform 0.22s var(--bp-ease),
+            border-color 0.22s var(--bp-ease),
+            box-shadow 0.22s var(--bp-ease);
+    }
+
+    // Interactive variant: teal left-accent strip + HUD corner-bracket on hover.
+    .tc-brief-card--interactive {
+        // Left accent strip — teal, hairline width, full card height.
+        &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--bp-teal);
+            opacity: 0;
+            transition: opacity 0.22s var(--bp-ease);
+            pointer-events: none;
+        }
+
+        // HUD corner-bracket: top-left L-tick in teal — blueprint signature detail.
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-right: 2px solid var(--bp-teal);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.22s var(--bp-ease);
+        }
+
+        &:hover {
+            transform: translateY(-3px);
+            border-color: var(--bp-teal-line, var(--bp-teal));
+            box-shadow: var(--bs-brief-card-shadow-hover);
+
+            &::before,
+            &::after {
+                opacity: 1;
+            }
+        }
+
+        // Focus: pink outline — primary action color in the accent rotation.
+        &:focus-visible {
+            outline: 2px solid var(--bp-pink);
+            outline-offset: 2px;
+        }
+    }
+
+    // ID micro-label: mono HUD readout — teal ink, wide tracking.
+    .tc-brief-card__id {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.12em;
+        color: var(--bs-brief-card-id-color);
+    }
+
+    // Title: display face, tight tracking, strongest ink.
+    .tc-brief-card__title {
+        font-family: var(--bp-display);
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        color: var(--bs-brief-card-title-color);
+    }
+
+    // Icon slot: teal tint so the glyph reads as an action/HUD accent.
+    .tc-brief-card__icon-slot {
+        color: var(--bp-teal-fg);
+    }
+
+    // Difficulty badges — replace the baked $theme-colors-soft/emphasis map literals
+    // with explicit bp tokens so they stay coherent in the light blueprint theme.
+
+    // Easy / low: success → teal soft tint + teal text.
+    .tc-brief-card__diff-badge--success {
+        background-color: var(--bp-teal-soft);
+        color: var(--bp-teal-fg);
+        font-family: var(--bp-mono);
+        letter-spacing: 0.08em;
+    }
+
+    // Medium: warning → amber soft tint + amber text.
+    .tc-brief-card__diff-badge--warning {
+        background-color: var(--bp-amber-soft);
+        color: var(--bp-amber-fg);
+        font-family: var(--bp-mono);
+        letter-spacing: 0.08em;
+    }
+
+    // Hard / critical: danger → real red (not pink — bp-danger is the semantic red).
+    .tc-brief-card__diff-badge--danger {
+        background-color: var(--bp-danger-soft);
+        color: var(--bp-danger);
+        font-family: var(--bp-mono);
+        letter-spacing: 0.08em;
+    }
+
+    // Meta footer slots: mono micro-labels, wide tracking — HUD readout treatment.
+    .tc-brief-card__meta-left-slot,
+    .tc-brief-card__meta-right-slot {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--bs-brief-card-meta-color);
+    }
+}

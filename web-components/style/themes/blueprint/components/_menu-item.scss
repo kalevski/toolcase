@@ -1,0 +1,76 @@
+// Blueprint › tc-menu-item — white paper rows, teal hover wash, pink selected fill, mono hotkey badge.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-menu-item {
+        // ── Surface & text ───────────────────────────────────────────────────────
+        // Transparent rows sit on whatever panel/surface holds the list.
+        --bs-menu-item-bg: transparent;
+        --bs-menu-item-color: var(--bp-text-soft);
+
+        // Hairline divider: blueprint faint token (not raw slate).
+        --bs-menu-item-border-color: var(--bp-border-faint);
+
+        // ── Icon: muted blueprint ink at rest ────────────────────────────────────
+        --bs-menu-item-icon-color: var(--bp-text-faint);
+
+        // ── Hover: teal action wash ───────────────────────────────────────────────
+        // Teal-soft fill + teal-fg text clears AA on a white ground.
+        --bs-menu-item-hover-bg: var(--bp-teal-soft);
+        --bs-menu-item-hover-color: var(--bp-teal-fg);
+
+        // ── Selected / active: pink primary fill (arcade accent rotation) ─────────
+        --bs-menu-item-selected-bg: var(--bp-pink);
+        --bs-menu-item-selected-color: var(--bp-pink-ink); // white on pink
+
+        // Icon on selected row: white at 80 % opacity for visual hierarchy.
+        --bs-menu-item-selected-icon-color: rgba(255, 255, 255, 0.8);
+
+        // ── Hotkey badge: mono font, blueprint surface ─────────────────────────────
+        --bs-menu-item-hotkey-font-family: var(--bp-mono);
+        --bs-menu-item-hotkey-color: var(--bp-text-faint);
+        --bs-menu-item-hotkey-bg: var(--bp-bg-2);             // recessed well tint
+        --bs-menu-item-hotkey-border: 1px solid var(--bp-border-chip);
+
+        // Hotkey on selected row: white ink on a semi-transparent overlay.
+        --bs-menu-item-hotkey-selected-color: rgba(255, 255, 255, 0.85);
+        --bs-menu-item-hotkey-selected-bg: rgba(255, 255, 255, 0.15);
+        --bs-menu-item-hotkey-selected-border: 1px solid rgba(255, 255, 255, 0.2);
+
+        // Smooth transitions through the blueprint easing curve.
+        transition:
+            background-color 120ms var(--bp-ease),
+            color 120ms var(--bp-ease);
+
+        // Focus ring: pink glow outlines the active row clearly.
+        &:focus-visible {
+            outline-color: var(--bp-pink);
+        }
+
+        // Hover: tighten icon color to match teal text.
+        &:hover:not(.tc-menu-item--selected):not(.tc-menu-item--disabled) {
+            .tc-menu-item-icon {
+                color: var(--bp-teal-fg);
+            }
+        }
+    }
+
+    // ── Label: body copy via blueprint body font ──────────────────────────────────
+    tc-menu-item .tc-menu-item-label {
+        font-family: var(--bp-body);
+        color: inherit; // picks up the parent token cascade cleanly
+    }
+
+    // ── Hotkey badge: mono, uppercase, wide tracking (HUD/nav style) ─────────────
+    tc-menu-item .tc-menu-item-hotkey {
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    // ── Selected row: pink fill, white label, icon tint ──────────────────────────
+    tc-menu-item.tc-menu-item--selected {
+        .tc-menu-item-label {
+            font-weight: 600; // slightly bolder weight on the active label
+        }
+    }
+}

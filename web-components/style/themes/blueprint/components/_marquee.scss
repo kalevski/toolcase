@@ -1,0 +1,42 @@
+// Blueprint › tc-marquee — HUD ticker strip: mono ink on a hairline-bordered track, teal separators, soft paper ground.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    .tc-marquee {
+        // Surface: raised paper strip with top/bottom hairline rules
+        background-color: var(--bp-paper);
+        border-block: 1px solid var(--bp-border-rule);
+
+        // Route item and separator ink to blueprint tokens
+        --bs-marquee-item-color:  var(--bp-text-soft);
+        --bs-marquee-sep-color:   var(--bp-teal-fg);
+        --bs-marquee-sep-gap:     0.75rem;
+        --bs-marquee-padding-y:   0.5rem;
+    }
+
+    .tc-marquee-item {
+        // Mono face; uppercase micro-label rhythm matches the HUD aesthetic
+        font-family: var(--bp-mono);
+        font-size:   0.6875rem;   // 11 px — keeps it ticker-scale
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--bs-marquee-item-color);
+    }
+
+    .tc-marquee-sep {
+        // Teal ◈ separator glyph — visible accent without shouting
+        color: var(--bs-marquee-sep-color);
+        font-family: var(--bp-mono);
+        font-size: 0.625rem;
+        line-height: 1;
+        opacity: 0.75;
+    }
+
+    // Pause-on-hover: dim the whole strip slightly so the pause is perceptible
+    tc-marquee[pause-on-hover]:hover .tc-marquee-track {
+        opacity: 0.6;
+        transition: opacity 0.2s var(--bp-ease);
+    }
+}

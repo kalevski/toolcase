@@ -1,0 +1,92 @@
+// Blueprint › tc-cycle-wheel — schematic-dial skin: teal dashed ring tracks, pink active accent, display value, mono labels.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-cycle-wheel {
+        // Active/selected accent → pink (primary in blueprint's accent rotation).
+        // Muted ring labels, ticks, and tracks use border/faint tokens — no raw slate refs.
+        --bs-cycle-wheel-accent:      var(--bp-pink);
+        --bs-cycle-wheel-value:       var(--bp-text);
+        --bs-cycle-wheel-bg:          var(--bp-paper);
+        --bs-cycle-wheel-muted:       var(--bp-text-faint);
+        --bs-cycle-wheel-border:      var(--bp-border);
+        // Tracks: teal-line gives the blueprint "schematic circuit" read on dashed SVG strokes.
+        --bs-cycle-wheel-track:       var(--bp-teal-line);
+        // Tick hairlines: faint divider token, clearly lighter than the track.
+        --bs-cycle-wheel-tick:        var(--bp-border-faint);
+        // Pill: teal-soft fill + teal-fg text (success = teal in blueprint).
+        --bs-cycle-wheel-pill-bg:     var(--bp-teal-soft);
+        --bs-cycle-wheel-pill-color:  var(--bp-teal-fg);
+        // Mono micro-label sizing preserved; letter-spacing lifted slightly for the mono voice.
+        --bs-cycle-wheel-label-letter-spacing: 0.15em;
+    }
+
+    // Ring track opacity values from the base are fine — we only need to ensure
+    // the outer track reads as the dominant schematic circle at the new teal color.
+    .tc-cycle-wheel__track--outer {
+        opacity: 0.7; // slightly stronger so the teal circuit ring reads clearly
+    }
+
+    .tc-cycle-wheel__track--inner {
+        opacity: 0.35;
+    }
+
+    // Phase labels — blueprint mono voice: uppercase, loose tracking, faint ink.
+    .tc-cycle-wheel__label {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+    }
+
+    // Active label inherits accent (--bp-pink) from the var; reinforce with mono weight.
+    .tc-cycle-wheel__label--active {
+        font-family: var(--bp-mono);
+    }
+
+    // Tick hairlines already driven by --bs-cycle-wheel-tick; no extra rule needed.
+
+    // Arrow line and dot are driven by --bs-cycle-wheel-accent (now --bp-pink).
+    // Add a soft pink glow to the dot to make the active phase unmistakably hot.
+    .tc-cycle-wheel__arrow circle {
+        filter: drop-shadow(0 0 4px var(--bp-pink-glow));
+    }
+
+    // Core — raised white card on the blueprint canvas, teal-tinted shadow.
+    .tc-cycle-wheel__core {
+        border-color: var(--bp-border);
+        background: var(--bp-paper);
+        box-shadow: var(--tc-shadow-sm), 0 0 0 3px var(--bp-bg-2);
+        // The outer ring of --bp-bg-2 acts as a subtle "inset well" gap,
+        // separating the white core from the rotating SVG ring cleanly.
+    }
+
+    // Eyebrow label — mono micro-label voice (uppercase already set in base).
+    .tc-cycle-wheel__core-label {
+        font-family: var(--bp-mono);
+        color: var(--bp-text-muted);
+        letter-spacing: 0.14em;
+        font-size: 0.65rem;
+    }
+
+    // Big numeric/value — display type, tight tracking; this is the hero number.
+    .tc-cycle-wheel__core-value {
+        font-family: var(--bp-display);
+        color: var(--bp-text);
+        letter-spacing: -0.03em;
+    }
+
+    // Pill — teal soft chip; base already rounds it to 50rem (sanctioned pill).
+    .tc-cycle-wheel__core-pill {
+        font-family: var(--bp-mono);
+        font-size: 0.65rem;
+        letter-spacing: 0.1em;
+        // fill + color already driven by --bs-cycle-wheel-pill-bg / pill-color above
+    }
+
+    // Sub-text — body face, muted.
+    .tc-cycle-wheel__core-sub {
+        font-family: var(--bp-body);
+        color: var(--bp-text-muted);
+        font-size: 0.8rem;
+    }
+}

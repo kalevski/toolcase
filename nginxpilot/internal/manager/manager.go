@@ -13,8 +13,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/kalevski/toolcase/nginxpilot/internal/acme"
 	"github.com/kalevski/toolcase/nginxpilot/internal/certs"
 	"github.com/kalevski/toolcase/nginxpilot/internal/config"
+	"github.com/kalevski/toolcase/nginxpilot/internal/credstore"
 	"github.com/kalevski/toolcase/nginxpilot/internal/deploy"
 	"github.com/kalevski/toolcase/nginxpilot/internal/nginxctl"
 	gitsource "github.com/kalevski/toolcase/nginxpilot/internal/source/git"
@@ -46,6 +48,14 @@ type Manager struct {
 	applyMu   sync.Mutex
 	lastApply nginxctl.ApplyResult
 	certIndex *certs.Index
+
+	// ACME / certbot issuance (acme is nil unless acme.enabled). creds is the
+	// runtime credentials store, always present so credentials can be saved
+	// before issuance is turned on. acmeMu serializes certbot runs + manual
+	// cert writes (they share the cert dir and certbot locks /etc/letsencrypt).
+	acme   *acme.Client
+	creds  *credstore.Store
+	acmeMu sync.Mutex
 }
 
 type siteLoop struct {
@@ -96,7 +106,33 @@ func New(cfg *config.Config, store *state.Store, log *slog.Logger) *Manager {
 		m.watchInterval = time.Duration(cfg.Tls.WatchInterval)
 		m.reloadOnChange = cfg.Tls.ReloadOnChangeEnabled()
 	}
+
+	// Credentials store is always available (save creds before enabling ACME).
+	m.creds = credstore.New(filepath.Join(cfg.DataDir, "acme", "credentials"))
+	if cfg.Acme.Enabled {
+		m.acme = acme.New(cfg.Acme, m.creds, cfg.DataDir, log)
+		warnAcmeMismatches(cfg, log)
+	}
 	return m
+}
+
+// warnAcmeMismatches surfaces the soft (non-fatal) ACME configuration mismatches
+// the plan flags as warnings rather than hard validation errors.
+func warnAcmeMismatches(cfg *config.Config, log *slog.Logger) {
+	if !cfg.Nginx.Manage {
+		log.Warn("acme.enabled but nginx.manage is false; issued certs are written but you must reload nginx yourself")
+	}
+	if dir, err := cfg.Tls.ResolveDir(); err == nil && dir != "" && dir != cfg.Acme.LiveDir() {
+		log.Warn("tls.cert_dir does not match acme config_dir/live; issued certs may not be discovered",
+			"tls.cert_dir", dir, "expected", cfg.Acme.LiveDir())
+	}
+	switch cfg.Acme.ChallengeOrDefault() {
+	case config.ChallengeNginx, config.ChallengeStandalone:
+		if cfg.Nginx.Manage {
+			log.Warn("acme.challenge conflicts with managed nginx; prefer dns or http (webroot)",
+				"challenge", cfg.Acme.ChallengeOrDefault())
+		}
+	}
 }
 
 // Run starts every site loop and blocks until ctx is cancelled and all
@@ -324,6 +360,23 @@ func (m *Manager) Config() *config.Config {
 // The caller guarantees newCfg passed validation — a config that fails
 // validation must never reach here (reload rejected wholesale).
 func (m *Manager) Reload(newCfg *config.Config) {
+	// Rebuild the ACME client from the new config FIRST, under acmeMu and before
+	// taking m.mu. New() builds m.acme once at startup, so without this a reload
+	// that flips acme.enabled (or changes the provider / config_dir / challenge)
+	// never takes effect — the issue/renew endpoints would keep returning 501
+	// (or run with stale settings) until a full restart. Done outside m.mu to
+	// preserve the acmeMu→m.mu lock order the issue/renew paths use (they hold
+	// acmeMu while calling m.Config()/applyManaged, which take m.mu). m.creds is
+	// path-stable (DataDir/acme/credentials) and always present, so it is reused.
+	m.acmeMu.Lock()
+	if newCfg.Acme.Enabled {
+		m.acme = acme.New(newCfg.Acme, m.creds, newCfg.DataDir, m.log)
+		warnAcmeMismatches(newCfg, m.log)
+	} else {
+		m.acme = nil
+	}
+	m.acmeMu.Unlock()
+
 	m.mu.Lock()
 	defer m.mu.Unlock()
 

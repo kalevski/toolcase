@@ -1,0 +1,170 @@
+// Blueprint › tc-gantt-chart — lavender-paper card frame, teal-ink axis + gridlines, pink progress fills, mono tick labels, violet-tinted scrollbar.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── token overrides via --bs-gantt-chart-* API ─────────────────────────
+
+    tc-gantt-chart {
+        // Card frame: white paper raised over lavender page, violet-tinted hairline
+        --bs-gantt-chart-bg:                  var(--bp-paper);
+        --bs-gantt-chart-border:              1px solid var(--bp-border);
+        --bs-gantt-chart-shadow:              var(--tc-shadow-sm);
+
+        // Header ink
+        --bs-gantt-chart-title-color:         var(--bp-text);
+        --bs-gantt-chart-subtitle-color:      var(--bp-text-muted);
+
+        // Axis: faint lavender well, teal-fg ticks, border-faint hairline
+        --bs-gantt-chart-axis-bg:             var(--bp-bg-2);
+        --bs-gantt-chart-tick-color:          var(--bp-teal-fg);
+        --bs-gantt-chart-gridline-color:      var(--bp-border-faint);
+
+        // Row separators: lightest divider — not raw slate-100
+        --bs-gantt-chart-row-separator:       var(--bp-border-faint);
+
+        // Label column text
+        --bs-gantt-chart-label-color:         var(--bp-text-soft);
+
+        // Bars: soft violet tint for the empty track; pink for progress (primary CTA accent)
+        --bs-gantt-chart-bar-bg:              var(--bp-violet-soft);
+        --bs-gantt-chart-progress-fill:       var(--bp-pink);
+        --bs-gantt-chart-bar-color:           var(--bp-pink);
+
+        // Hover outline: strong border token (visible but not a new hue)
+        --bs-gantt-chart-bar-hover-outline:   var(--bp-border-strong);
+
+        // Focus ring: teal (everyday action accent)
+        --bs-gantt-chart-focus-ring:          var(--bp-teal);
+
+        // Tooltip: paper surface + strong border hairline (blueprint is light-theme)
+        --bs-gantt-chart-tooltip-bg:          var(--bp-paper);
+        --bs-gantt-chart-tooltip-color:       var(--bp-text);
+        --bs-gantt-chart-tooltip-shadow:      var(--tc-shadow-md);
+
+        // Skeleton shimmer: lavender well, animated over paper-tint
+        --bs-gantt-chart-skeleton-bg:         var(--bp-bg-2);
+    }
+
+    // ── title typography: display face, tight tracking ──────────────────────
+
+    .tc-gantt-chart-title {
+        font-family: var(--bp-display);
+        font-size: 0.9rem;
+        letter-spacing: -0.01em;
+        text-transform: uppercase;
+        color: var(--bp-text);
+    }
+
+    // subtitle stays body face but gets muted violet ink
+    .tc-gantt-chart-subtitle {
+        font-family: var(--bp-body);
+        color: var(--bp-text-muted);
+    }
+
+    // ── axis: mono labels, teal-fg ticks ────────────────────────────────────
+
+    .tc-gantt-chart-tick {
+        font-family: var(--bp-mono);
+        font-size: 0.6rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--bp-teal-fg); // AA-compliant teal text on white/lavender
+    }
+
+    // ── label column: mono eyebrow style ────────────────────────────────────
+
+    .tc-gantt-chart-label {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        letter-spacing: 0.04em;
+        color: var(--bp-text-soft);
+        border-right-color: var(--bp-border);
+    }
+
+    // ── bars: progress fill accent + hover glow ──────────────────────────────
+
+    .tc-gantt-chart-bar {
+        background: var(--bs-gantt-chart-bar-bg);
+        transition: box-shadow 0.15s var(--bp-ease, ease);
+
+        &:hover {
+            // teal glow halo on hover — arcade HUD flourish
+            box-shadow:
+                inset 0 0 0 1px var(--bp-border-strong),
+                var(--bp-glow-teal);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-teal);
+            outline-offset: 2px;
+            box-shadow: var(--bp-glow-teal);
+        }
+    }
+
+    .tc-gantt-chart-progress {
+        // pink progress fill; tasks with a custom color still use --bs-gantt-chart-bar-color
+        background: var(--bs-gantt-chart-bar-color);
+    }
+
+    // ── scrollbar: violet-tinted thumb ──────────────────────────────────────
+
+    .tc-gantt-chart-scroll {
+        scrollbar-color: var(--bp-border-soft) transparent;
+
+        &::-webkit-scrollbar-thumb {
+            background: var(--bp-border-soft);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-teal);
+            outline-offset: 2px;
+        }
+    }
+
+    // ── tooltip: light paper panel with pink/teal left stripe ───────────────
+
+    .tc-gantt-chart-tooltip {
+        background: var(--bp-paper);
+        color: var(--bp-text);
+        // stripe inherits var(--bs-gantt-chart-bar-color) from base partial — pink by default
+        border-left-color: var(--bs-gantt-chart-bar-color, var(--bp-pink));
+        box-shadow: var(--tc-shadow-md), var(--bp-glow-pink);
+    }
+
+    .tc-gantt-chart-tooltip-name {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--bp-text-muted);
+        opacity: 1; // override base 0.75 — full legibility on paper
+    }
+
+    .tc-gantt-chart-tooltip-meta {
+        font-family: var(--bp-body);
+        color: var(--bp-text);
+    }
+
+    // ── empty state ──────────────────────────────────────────────────────────
+
+    .tc-gantt-chart-empty {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--bp-text-faint);
+    }
+
+    // ── skeleton shimmer: lavender → paper-tint wave ─────────────────────────
+
+    .tc-gantt-chart-skeleton {
+        // replace slate-200/surface-hover gradient with lavender tokens
+        background: linear-gradient(
+            90deg,
+            var(--bp-bg-2) 25%,
+            var(--bp-paper-tint) 37%,
+            var(--bp-bg-2) 63%
+        );
+        background-size: 200% 100%;
+    }
+}

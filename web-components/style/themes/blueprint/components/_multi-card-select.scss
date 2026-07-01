@@ -1,0 +1,114 @@
+// Blueprint › tc-multi-card-select — interactive card-grid checkgroup: paper tiles, pink selected fill, HUD corner brackets on hover.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Custom-property re-skin ──────────────────────────────────────────────
+    tc-multi-card-select {
+        // Unselected card: white paper + faint violet hairline
+        --bs-multi-card-select-bg:            var(--bp-paper);
+        --bs-multi-card-select-border-color:  var(--bp-border);
+        // Hover: recessed lavender well
+        --bs-multi-card-select-hover-bg:      var(--bp-paper-tint-2);
+        // Selected: pink CTA fill + white label
+        --bs-multi-card-select-selected-bg:   var(--bp-pink);
+        --bs-multi-card-select-selected-text: var(--bp-pink-ink);
+        // Typography
+        --bs-multi-card-select-label-color:   var(--bp-text);
+        --bs-multi-card-select-desc-color:    var(--bp-text-muted);
+        // Skeleton shimmer uses the recessed well tint
+        --bs-multi-card-select-skeleton-bg:   var(--bp-bg-2);
+    }
+
+    // ── Card tile ────────────────────────────────────────────────────────────
+    .tc-multi-card-select-card {
+        // Violet-tinted shadow lifts the tile off the canvas
+        box-shadow: var(--tc-shadow-sm);
+        transition: border-color var(--bp-ease), background-color var(--bp-ease),
+                    color var(--bp-ease), transform var(--bp-ease), box-shadow var(--bp-ease);
+
+        // HUD corner bracket — top-left teal L-shape (tappable tile indicator)
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            opacity: 0;
+            transition: opacity var(--bp-ease);
+            pointer-events: none;
+        }
+
+        // Hover: show bracket + stronger border + lift + deeper shadow
+        &:hover:not(.tc-multi-card-select-card--disabled):not(.is-selected) {
+            background: var(--bp-paper-tint-2);
+            border-color: var(--bp-teal);
+            transform: translateY(-2px);
+            box-shadow: var(--tc-shadow-hover);
+
+            &::before {
+                opacity: 1;
+            }
+        }
+
+        // Focus ring uses teal (everyday action, less visually aggressive than pink)
+        &:focus-visible {
+            outline-color: var(--bp-teal);
+        }
+
+        // Selected: pink ink fill — glow + strong shadow
+        &.is-selected {
+            background: var(--bp-pink);
+            border-color: var(--bp-pink);
+            box-shadow: var(--bp-glow-pink), var(--tc-shadow-md);
+            transform: translateY(-2px);
+
+            // HUD bracket switches to pink-ink (white) so it reads on the fill
+            &::before {
+                border-top-color: var(--bp-pink-ink);
+                border-left-color: var(--bp-pink-ink);
+                opacity: 1;
+            }
+
+            .tc-multi-card-select-desc {
+                // Slightly transparent white rather than a dark muted token
+                color: color-mix(in srgb, var(--bp-pink-ink) 72%, transparent);
+            }
+        }
+    }
+
+    // ── Label — display font for card titles ─────────────────────────────────
+    .tc-multi-card-select-label {
+        font-family: var(--bp-display);
+        font-size: 0.9375rem;
+        letter-spacing: -0.01em;
+        font-weight: 600;
+    }
+
+    // ── Description — body font, muted ───────────────────────────────────────
+    .tc-multi-card-select-desc {
+        font-family: var(--bp-body);
+        font-size: 0.8125rem;
+    }
+
+    // ── Skeleton shimmer — lavender-tinted wave ──────────────────────────────
+    // Override the baked gradient stops to use blueprint bg tokens
+    .tc-multi-card-select-card--skeleton {
+        background: linear-gradient(
+            90deg,
+            var(--bp-bg-2)   0%,
+            var(--bp-paper)  50%,
+            var(--bp-bg-2)   100%
+        ) !important; // override the base baked literal gradient
+        background-size: 200% 100% !important;
+    }
+
+    // ── Check mark — pink before selection, ink-white after ─────────────────
+    .tc-multi-card-select-check {
+        // Deselected state: show teal so the check is accessible on paper
+        color: var(--bp-teal);
+    }
+}

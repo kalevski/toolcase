@@ -1,0 +1,24 @@
+// Blueprint › tc-sparkline — teal trend line with a pink terminal dot; crisp wired micro-chart aesthetic.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    // Route the single color token to blueprint's teal (everyday data/action accent).
+    // All three painted shapes — line stroke, bar fill, dot fill — inherit this.
+    tc-sparkline {
+        --bs-sparkline-color: var(--bp-teal);
+    }
+
+    // Terminal dot (end-point on line charts) flips to pink — the primary signal accent —
+    // so the latest data point reads as the most important mark on the chart.
+    // Bar charts do not render a dot, so this rule is effectively line-chart-only.
+    .tc-sparkline-dot {
+        fill: var(--bp-pink);
+    }
+
+    // Line type: add a faint teal glow behind the stroke for the blueprint "live wire" quality.
+    // filter: drop-shadow is composited outside the SVG element bounds (overflow:visible is
+    // already set on .tc-sparkline), so it won't clip.
+    .tc-sparkline--line {
+        filter: drop-shadow(0 0 2px var(--bp-teal-soft));
+    }
+}

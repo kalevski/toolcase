@@ -1,0 +1,140 @@
+// Blueprint › tc-leaderboard — white paper table, mono header labels, violet-tinted hairlines,
+// amber/teal/violet rank stripes replacing the metal tones, display-font points column.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Custom property overrides ──────────────────────────────────────────────
+    // Re-point every --bs-leaderboard-* var so element/class rules below pick
+    // them up automatically without needing selector re-declarations.
+
+    tc-leaderboard {
+        --bs-leaderboard-bg:               var(--bp-paper);
+        --bs-leaderboard-border:           1px solid var(--bp-border);
+
+        // Inner row hairlines → faint divider token (replaces raw slate-100 literal)
+        --bs-leaderboard-row-hairline:     1px solid var(--bp-border-faint);
+
+        --bs-leaderboard-th-color:         var(--bp-text-faint);
+
+        --bs-leaderboard-td-color:         var(--bp-text);
+
+        // Hover/active: lavender page tint lifts the row subtly
+        --bs-leaderboard-row-hover-bg:     var(--bp-bg);
+        --bs-leaderboard-row-active-bg:    var(--bp-bg-2);
+
+        // Rank stripe accent rotation: amber (gold) → teal (silver) → violet (bronze)
+        // These replace the baked hex literals #d97706 / #94a3b8 / #b45309.
+        --bs-leaderboard-gold:             var(--bp-amber);
+        --bs-leaderboard-silver:           var(--bp-teal);
+        --bs-leaderboard-bronze:           var(--bp-violet);
+    }
+
+    // ── Table surface ─────────────────────────────────────────────────────────
+
+    .tc-leaderboard {
+        box-shadow: var(--tc-shadow-sm);
+        // border is driven through --bs-leaderboard-border above
+    }
+
+    // ── Header ────────────────────────────────────────────────────────────────
+
+    .tc-leaderboard-thead-row {
+        // Recessed header well distinguishes it from data rows
+        background: var(--bp-bg-2);
+    }
+
+    .tc-leaderboard-th {
+        // Override base's var(--tc-font-mono) with the blueprint mono face
+        font-family: var(--bp-mono);
+        // Slightly wider tracking for the blueprint HUD-label feel
+        letter-spacing: 0.08em;
+        color: var(--bs-leaderboard-th-color); // resolves to --bp-text-faint
+        // Header bottom border reuses --bs-leaderboard-border (already bp-border)
+    }
+
+    // ── Rows ──────────────────────────────────────────────────────────────────
+
+    .tc-leaderboard-row {
+        transition: background-color var(--bp-ease, 0.18s ease);
+    }
+
+    .tc-leaderboard-row--interactive {
+        &:focus-visible {
+            // Pink primary focus ring (replaces generic --tc-app-accent)
+            outline: 2px solid var(--bp-pink);
+            outline-offset: -2px;
+        }
+    }
+
+    // ── Cells ─────────────────────────────────────────────────────────────────
+
+    .tc-leaderboard-td {
+        // border-bottom driven through --bs-leaderboard-row-hairline (bp-border-faint)
+    }
+
+    // ── Rank cell ─────────────────────────────────────────────────────────────
+
+    // Rank number text: match the stripe accent color via the -fg tokens
+    // (guaranteed AA on white --bp-paper background)
+    .tc-leaderboard-rank--gold   { color: var(--bp-amber-fg); }
+    .tc-leaderboard-rank--silver { color: var(--bp-teal-fg); }
+    .tc-leaderboard-rank--bronze { color: var(--bp-violet-fg); }
+    .tc-leaderboard-rank--default { color: var(--bp-text-faint); }
+
+    .tc-leaderboard-rank {
+        font-family: var(--bp-mono);
+        // Tabular nums already set in base; ensure mono face carries through
+    }
+
+    // ── Developer cell ────────────────────────────────────────────────────────
+
+    .tc-leaderboard-name {
+        font-family: var(--bp-body);
+        font-weight: 500;
+        color: var(--bp-text);
+    }
+
+    // Avatar initials: recessed fill + border ring + mono face
+    .tc-leaderboard-avatar--initials {
+        font-family: var(--bp-mono);
+        font-weight: 600;
+        background: var(--bp-bg-2);
+        color: var(--bp-text-muted);
+        border: 1px solid var(--bp-border);
+    }
+
+    .tc-leaderboard-avatar {
+        // Plain image avatar: subtle recessed fallback bg
+        background: var(--bp-bg-2);
+    }
+
+    // ── Tier cell ─────────────────────────────────────────────────────────────
+
+    .tc-leaderboard-tier {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--bp-text-muted);
+    }
+
+    // ── Sprints cell ──────────────────────────────────────────────────────────
+
+    .tc-leaderboard-td-sprints {
+        // Replace base's raw var(--tc-text-muted) with the blueprint equivalent
+        color: var(--bp-text-faint);
+        font-family: var(--bp-body);
+    }
+
+    // ── Points cell ───────────────────────────────────────────────────────────
+
+    .tc-leaderboard-points {
+        // Display face for the score number — prominent HUD readout
+        font-family: var(--bp-display);
+        font-size: var(--bs-leaderboard-points-font-size);
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: var(--bp-text);
+    }
+}

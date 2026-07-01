@@ -1,0 +1,162 @@
+// Blueprint › tc-extended-select — teal focus/hover, pink selected, mono labels, paper surface with violet-tinted shadow.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-extended-select {
+        // ── Trigger surface ───────────────────────────────────────────────────
+        --bs-extended-select-trigger-bg:             var(--bp-paper);
+        --bs-extended-select-trigger-border:         1px solid var(--bp-border-strong);
+        --bs-extended-select-trigger-color:          var(--bp-text);
+        --bs-extended-select-trigger-placeholder-color: var(--bp-text-faint);
+
+        // Teal focus ring — blueprint everyday-action accent
+        --bs-extended-select-trigger-focus-shadow:   0 0 0 0.2rem var(--bp-teal-soft);
+
+        // ── Menu panel ────────────────────────────────────────────────────────
+        --bs-extended-select-menu-bg:                var(--bp-paper);
+        --bs-extended-select-menu-border:            1px solid var(--bp-border);
+        --bs-extended-select-menu-shadow:            var(--tc-shadow-lg);
+
+        // ── Search row ────────────────────────────────────────────────────────
+        --bs-extended-select-search-border:          1px solid var(--bp-border-faint);
+        --bs-extended-select-search-icon-color:      var(--bp-text-faint);
+
+        // ── Options ───────────────────────────────────────────────────────────
+        --bs-extended-select-option-color:           var(--bp-text);
+        --bs-extended-select-option-hover-bg:        var(--bp-teal-soft);
+        // Pink = primary/selected in the blueprint accent rotation
+        --bs-extended-select-option-selected-bg:     var(--bp-pink);
+        --bs-extended-select-option-selected-color:  var(--bp-pink-ink);
+        --bs-extended-select-option-desc-color:      var(--bp-text-muted);
+
+        // ── Misc ──────────────────────────────────────────────────────────────
+        --bs-extended-select-caret-color:            var(--bp-text-faint);
+        --bs-extended-select-no-results-color:       var(--bp-text-faint);
+        --bs-extended-select-trigger-invalid-border-color: var(--bp-danger);
+    }
+
+    // ── Trigger button ────────────────────────────────────────────────────────
+
+    .tc-extended-select__trigger {
+        // Body font for the selected-value label; keeps it legible at form size
+        font-family: var(--bp-body);
+        transition:
+            border-color var(--bp-ease),
+            box-shadow var(--bp-ease);
+
+        &:hover:not([disabled]) {
+            border-color: var(--bp-border-soft);
+        }
+
+        &--invalid:focus-visible {
+            // Danger-tinted ring replaces the teal one on invalid fields
+            box-shadow: 0 0 0 0.2rem var(--bp-danger-soft);
+        }
+    }
+
+    .tc-extended-select__trigger-label {
+        // Mono font for the currently-selected value — HUD readout feel
+        font-family: var(--bp-mono);
+        font-size: 0.8rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    .tc-extended-select__caret {
+        // Caret matches the placeholder tint; no change needed beyond the var
+        color: var(--bp-text-faint);
+        transition: transform var(--bp-ease);
+    }
+
+    // ── Menu panel ────────────────────────────────────────────────────────────
+
+    .tc-extended-select__menu {
+        // Teal left-edge stripe: the one contained visual accent on the panel.
+        // Signals "active/open" without overwhelming the neutral surface.
+        border-left: 2px solid var(--bp-teal);
+
+        transition:
+            opacity var(--bp-ease),
+            visibility var(--bp-ease),
+            transform var(--bp-ease);
+    }
+
+    // ── Search row ────────────────────────────────────────────────────────────
+
+    .tc-extended-select__search-wrap {
+        // Recessed well — visually separates the filter from the option list
+        background-color: var(--bp-bg-2);
+    }
+
+    .tc-extended-select__search-input {
+        font-family: var(--bp-body);
+        font-size: 0.875rem;
+        color: var(--bp-text);
+
+        &::placeholder {
+            color: var(--bp-text-faint);
+        }
+    }
+
+    // ── Options list ──────────────────────────────────────────────────────────
+
+    .tc-extended-select__option {
+        font-family: var(--bp-body);
+        transition:
+            background-color var(--bp-ease),
+            color var(--bp-ease);
+
+        // Option label in mono — consistent HUD read
+        .tc-extended-select__option-label {
+            font-family: var(--bp-mono);
+            font-size: 0.775rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .tc-extended-select__option-desc {
+            font-family: var(--bp-body);
+            color: var(--bp-text-muted);
+        }
+
+        // On the selected row, dim the description relative to the pink surface
+        &--selected {
+            .tc-extended-select__option-desc {
+                color: color-mix(in srgb, var(--bp-pink-ink) 65%, transparent);
+            }
+
+            // Mono label stays white on the pink fill — sufficient contrast
+            .tc-extended-select__option-label {
+                color: var(--bp-pink-ink);
+            }
+        }
+    }
+
+    // ── No-results message ────────────────────────────────────────────────────
+
+    .tc-extended-select__no-results {
+        font-family: var(--bp-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--bp-text-faint);
+    }
+
+    // ── Loading indicator ─────────────────────────────────────────────────────
+
+    .tc-extended-select__loading-indicator {
+        // Spinner inherits the teal action accent from the current color
+        color: var(--bp-teal);
+    }
+
+    // ── Field label ───────────────────────────────────────────────────────────
+
+    .tc-extended-select__label {
+        font-family: var(--bp-mono);
+        font-size: 0.7rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--bp-text-soft);
+    }
+}

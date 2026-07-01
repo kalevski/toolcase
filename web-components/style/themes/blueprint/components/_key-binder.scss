@@ -1,0 +1,69 @@
+// Blueprint › tc-key-binder — mono-label kbd tile: paper surface, teal hover accent, pink capturing fill, mono uppercase label.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-key-binder {
+        // Surface: raised paper tile with hairline border and subtle shadow.
+        --bs-key-binder-bg:           var(--bp-paper);
+        --bs-key-binder-border-color: var(--bp-border-strong);
+        --bs-key-binder-color:        var(--bp-text);
+
+        // Hover: teal accent border signals interactivity; light tint background.
+        --bs-key-binder-hover-bg:           var(--bp-teal-soft);
+        --bs-key-binder-hover-border-color: var(--bp-teal);
+
+        // Capturing: pink primary fill — "press any key" active state.
+        --bs-key-binder-capturing-bg:           var(--bp-pink);
+        --bs-key-binder-capturing-border-color: var(--bp-pink);
+        --bs-key-binder-capturing-color:        var(--bp-pink-ink);
+
+        // Empty / unbound: faint dashed border, muted placeholder text.
+        --bs-key-binder-empty-color:        var(--bp-text-faint);
+        --bs-key-binder-empty-border-color: var(--bp-border-faint);
+
+        // Disabled: recessed well, softened text.
+        --bs-key-binder-disabled-bg:           var(--bp-bg-2);
+        --bs-key-binder-disabled-border-color: var(--bp-border-faint);
+        --bs-key-binder-disabled-color:        var(--bp-text-faint);
+
+        // Shadow lifts the tile off the canvas like a physical keycap.
+        box-shadow: var(--tc-shadow-sm);
+
+        // Transition eases via the theme ease curve.
+        transition-timing-function: var(--bp-ease);
+
+        &:hover:not([disabled]):not(.tc-key-binder--capturing) {
+            // Subtle lift on hover to reinforce the physical keycap metaphor.
+            transform: translateY(-2px);
+            box-shadow: var(--tc-shadow-hover);
+        }
+
+        &:focus-visible {
+            // Teal glow focus ring — everyday action colour.
+            outline-color: var(--bp-teal);
+            box-shadow: var(--tc-shadow-sm), var(--bp-glow-teal);
+        }
+    }
+
+    // Capturing: pink glow reinforces the "waiting for input" ping.
+    tc-key-binder.tc-key-binder--capturing {
+        box-shadow: var(--tc-shadow-sm), var(--bp-glow-pink);
+        transform: none; // no lift while capturing
+    }
+
+    // Empty: no shadow, sits flush to signal "unset".
+    tc-key-binder.tc-key-binder--empty:not(.tc-key-binder--capturing) {
+        box-shadow: none;
+    }
+
+    // Key label: blueprint mono (JetBrains Mono via --bp-mono), uppercase, loose tracking —
+    // canonical blueprint eyebrow/HUD treatment for machine-facing identifiers.
+    .tc-key-binder__label {
+        font-family: var(--bp-mono);
+        font-size:   0.75rem;       // slightly tighter than base; kbd labels are short
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+}

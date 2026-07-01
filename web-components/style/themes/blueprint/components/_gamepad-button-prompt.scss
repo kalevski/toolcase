@@ -1,0 +1,83 @@
+// Blueprint › tc-gamepad-button-prompt — sharp paper key-cap with mono glyph, per-button accent coloring, and mono caption label.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    .tc-gamepad-button-prompt {
+        // Widen the gap slightly so the mono label has breathing room.
+        --bs-gamepad-button-prompt-gap: 0.5rem;
+
+        // Key-cap surface: raised white paper card, blueprint hairline borders.
+        --bs-gamepad-button-prompt-cap-bg: var(--bp-paper);
+        --bs-gamepad-button-prompt-cap-color: var(--bp-text);
+        --bs-gamepad-button-prompt-cap-border-color: var(--bp-border-strong);
+        --bs-gamepad-button-prompt-cap-border-width: 1px;
+
+        // Glyph: bold mono weight on the cap face.
+        --bs-gamepad-button-prompt-glyph-weight: 700;
+
+        // Label: small mono uppercase kicker beneath/beside the cap.
+        --bs-gamepad-button-prompt-label-color: var(--bp-text-muted);
+    }
+
+    .tc-gamepad-button-prompt__glyph {
+        // Mono uppercase face — the blueprint HUD/label signature.
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+
+        // Raised paper surface with a violet-tinted drop shadow to suggest key elevation.
+        background-color: var(--bs-gamepad-button-prompt-cap-bg);
+        border-color: var(--bs-gamepad-button-prompt-cap-border-color);
+        box-shadow: var(--tc-shadow-sm);
+
+        // Heavier bottom edge doubles as the key-cap bottom wall (mirrors tc-kbd).
+        // border-bottom-width is already 2px in the base partial; we reinforce the color.
+        border-bottom-color: var(--bp-border-soft);
+    }
+
+    .tc-gamepad-button-prompt__label {
+        // Mono uppercase label — mirrors eyebrow / status label treatment.
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 0.6875rem; // 11px — tighter than the default 13px for a HUD kicker
+        color: var(--bs-gamepad-button-prompt-label-color);
+    }
+
+    // ── Per-button accent coloring (data-button attribute hook) ──────────────
+    // Classic gamepad layout mapped to the blueprint arcade accent rotation:
+    //   A → teal  (primary action — the "confirm" button)
+    //   B → danger red  (cancel/back)
+    //   X → violet  (special/secondary action)
+    //   Y → amber  (context/menu action)
+
+    [data-button='A'] .tc-gamepad-button-prompt__glyph {
+        --bs-gamepad-button-prompt-cap-bg: var(--bp-teal-soft);
+        --bs-gamepad-button-prompt-cap-color: var(--bp-teal-fg);
+        --bs-gamepad-button-prompt-cap-border-color: var(--bp-teal-line);
+        border-bottom-color: var(--bp-teal-line);
+        // Subtle teal ambient glow — action button gets a live-pulse halo.
+        box-shadow: var(--tc-shadow-sm), 0 0 0 0.15em var(--bp-teal-soft);
+    }
+
+    [data-button='B'] .tc-gamepad-button-prompt__glyph {
+        --bs-gamepad-button-prompt-cap-bg: var(--bp-danger-soft);
+        --bs-gamepad-button-prompt-cap-color: var(--bp-danger);
+        --bs-gamepad-button-prompt-cap-border-color: var(--bp-danger);
+        border-bottom-color: var(--bp-danger);
+    }
+
+    [data-button='X'] .tc-gamepad-button-prompt__glyph {
+        --bs-gamepad-button-prompt-cap-bg: var(--bp-violet-soft);
+        --bs-gamepad-button-prompt-cap-color: var(--bp-violet-fg);
+        --bs-gamepad-button-prompt-cap-border-color: var(--bp-violet);
+        border-bottom-color: var(--bp-violet);
+    }
+
+    [data-button='Y'] .tc-gamepad-button-prompt__glyph {
+        --bs-gamepad-button-prompt-cap-bg: var(--bp-amber-soft);
+        --bs-gamepad-button-prompt-cap-color: var(--bp-amber-fg);
+        --bs-gamepad-button-prompt-cap-border-color: var(--bp-amber);
+        border-bottom-color: var(--bp-amber);
+    }
+}

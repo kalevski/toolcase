@@ -1,0 +1,113 @@
+// Blueprint › tc-player-frame — HUD nameplate: paper card, teal portrait well with corner-bracket,
+// display-face player name, mono class eyebrow, and arcade-accent resource bars
+// (teal=HP / violet=MP / amber=stamina).
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Token overrides ───────────────────────────────────────────────────────────
+    tc-player-frame {
+        // Surface
+        --bs-player-frame-bg:               var(--bp-paper);
+        --bs-player-frame-border:           var(--bp-border);
+
+        // Portrait tile — recessed well, teal separator
+        --bs-player-frame-portrait-bg:      var(--bp-bg-2);
+        --bs-player-frame-portrait-border:  var(--bp-teal);
+
+        // Glyph — substantial ink, not primary text
+        --bs-player-frame-glyph-color:      var(--bp-text-soft);
+
+        // Level badge — teal HUD label on tinted ground
+        --bs-player-frame-level-bg:         var(--bp-paper-tint-2);
+        --bs-player-frame-level-border:     var(--bp-border);
+        --bs-player-frame-level-color:      var(--bp-teal-fg);
+
+        // Name + class
+        --bs-player-frame-name-color:       var(--bp-text);
+        --bs-player-frame-class-color:      var(--bp-teal-fg);
+
+        // HP → teal (alive/success), MP → violet (arcane/support), stamina → amber (resource warning)
+        --bs-player-frame-hp-track-bg:      var(--bp-border-faint);
+        --bs-player-frame-hp-fill:          var(--bp-teal);
+
+        --bs-player-frame-mp-track-bg:      var(--bp-border-faint);
+        --bs-player-frame-mp-fill:          var(--bp-violet);
+
+        --bs-player-frame-stamina-track-bg: var(--bp-border-faint);
+        --bs-player-frame-stamina-fill:     var(--bp-amber);
+    }
+
+    // ── Shell — paper card with shadow ────────────────────────────────────────────
+    .tc-player-frame {
+        background:  var(--bs-player-frame-bg);
+        border:      1px solid var(--bs-player-frame-border);
+        box-shadow:  var(--tc-shadow-sm);
+        transition:  box-shadow var(--bp-ease, 0.18s ease),
+                     transform  var(--bp-ease, 0.18s ease);
+    }
+
+    // ── Portrait tile ─────────────────────────────────────────────────────────────
+    .tc-player-frame__portrait {
+        background:   var(--bs-player-frame-portrait-bg);
+        border-right: 2px solid var(--bs-player-frame-portrait-border);
+        // HUD corner-bracket — top-left anchor marks the portrait as a framed entity
+        position: relative;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top:    7px;
+            left:   7px;
+            width:  12px;
+            height: 12px;
+            border-top:  2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            pointer-events: none;
+        }
+    }
+
+    // ── Glyph — entity icon in the portrait well ──────────────────────────────────
+    .tc-player-frame__glyph {
+        color: var(--bs-player-frame-glyph-color);
+    }
+
+    // ── Level badge — mono HUD strip ──────────────────────────────────────────────
+    .tc-player-frame__level {
+        // Re-route to bp-mono; the base uses --bs-font-monospace which stays JetBrains but
+        // the blueprint explicit font var ensures the theme-level override is honored.
+        font-family:     var(--bp-mono);
+        letter-spacing:  0.1em;
+        text-transform:  uppercase;
+        color:           var(--bs-player-frame-level-color);
+        background:      var(--bs-player-frame-level-bg);
+        border-top:      1px solid var(--bs-player-frame-level-border);
+    }
+
+    // ── Player name — display face, title treatment ───────────────────────────────
+    .tc-player-frame__name {
+        font-family:     var(--bp-display);
+        font-weight:     700;
+        letter-spacing:  -0.01em;     // Chakra Petch reads tighter at small sizes
+        color:           var(--bs-player-frame-name-color);
+    }
+
+    // ── Class label — mono eyebrow / role tag ─────────────────────────────────────
+    .tc-player-frame__class {
+        font-family:     var(--bp-mono);
+        font-weight:     500;
+        letter-spacing:  0.1em;
+        text-transform:  uppercase;
+        color:           var(--bs-player-frame-class-color);
+    }
+
+    // ── Bar tracks — hairline, no baked literal ───────────────────────────────────
+    // Fills are driven by the token overrides above; only track bg needs a rule nudge
+    // because the base partial hardcodes per-kind vars on .tc-player-frame__bar.
+    .tc-player-frame__bar {
+        background: var(--bs-player-frame-hp-track-bg);  // default (hp) track
+
+        &[data-kind="mp"]      { background: var(--bs-player-frame-mp-track-bg); }
+        &[data-kind="stamina"] { background: var(--bs-player-frame-stamina-track-bg); }
+    }
+}

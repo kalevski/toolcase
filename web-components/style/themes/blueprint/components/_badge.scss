@@ -1,0 +1,70 @@
+// Blueprint › tc-badge — mono-uppercase chip using the arcade accent rotation:
+// pink=primary, teal=secondary/success, violet=info, amber=warning, danger=real-red.
+// Soft-tint variants (text-bg-*) use the --bp-*-soft fill + matching -fg text.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    .badge {
+        // Mono label face — uppercase + loose tracking is the blueprint badge
+        // signature; mirrors eyebrows and nav HUD labels.
+        --bs-badge-font-size: 0.6875rem;
+        --bs-badge-font-weight: 600;
+        --bs-badge-color: var(--bp-pink-ink);
+
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    // ── Solid colour variants (text-bg-*) ───────────────────────────────────
+
+    // Primary — pink (replaces base white-on-accent with pink brand fill)
+    .badge.text-bg-primary {
+        background-color: var(--bp-pink) !important;
+        color: var(--bp-pink-ink) !important;
+    }
+
+    // Secondary — teal soft tint (replaces raw tc-slate-500 leak)
+    .badge.text-bg-secondary {
+        background-color: var(--bp-teal-soft) !important;
+        color: var(--bp-teal-fg) !important;
+    }
+
+    // Success — solid teal action fill
+    .badge.text-bg-success {
+        background-color: var(--bp-teal) !important;
+        color: var(--bp-teal-ink) !important;
+    }
+
+    // Info — violet supporting accent
+    .badge.text-bg-info {
+        background-color: var(--bp-violet-soft) !important;
+        color: var(--bp-violet-fg) !important;
+    }
+
+    // Warning — amber soft tint; white ink declared in base is correct for
+    // amber but we reroute to the amber-fg for soft tint readability.
+    .badge.text-bg-warning {
+        background-color: var(--bp-amber-soft) !important;
+        color: var(--bp-amber-fg) !important;
+    }
+
+    // Danger — real red (not pink); base literal overridden here.
+    .badge.text-bg-danger {
+        background-color: var(--bp-danger) !important;
+        color: #fff !important;
+    }
+
+    // Light — paper tint chip; readable dark ink
+    .badge.text-bg-light {
+        background-color: var(--bp-paper-tint) !important;
+        color: var(--bp-text-soft) !important;
+        border: 1px solid var(--bp-border-chip);
+    }
+
+    // Dark — strong ink fill; white label
+    .badge.text-bg-dark {
+        background-color: var(--bp-emphasis) !important;
+        color: #fff !important;
+    }
+}

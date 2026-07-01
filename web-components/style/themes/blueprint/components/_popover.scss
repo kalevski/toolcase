@@ -1,0 +1,64 @@
+// Blueprint › tc-popover — white paper panel with a teal accent cap, mono header label, and blueprint hairline border.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    // ─── Popover panel ────────────────────────────────────────────────────────
+    // Re-skin via --bs-popover-* custom properties so the base structural rules
+    // remain untouched. The 2px teal top-border is set via a direct rule below
+    // because there is no --bs-popover-* var for per-side border overrides.
+
+    .popover {
+        --bs-popover-bg:                var(--bp-paper);
+        --bs-popover-border-color:      var(--bp-border);
+        --bs-popover-box-shadow:        var(--tc-shadow-lg);
+        --bs-popover-font-size:         0.8125rem;
+
+        // Header cap: recessed lavender well that reads as a title area
+        --bs-popover-header-bg:         var(--bp-bg-2);
+        --bs-popover-header-color:      var(--bp-text-soft);
+
+        // Body text: blueprint primary ink
+        --bs-popover-body-color:        var(--bp-text);
+
+        // Arrow border follows panel border; fill faces match their respective surface
+        --bs-popover-arrow-border:      var(--bp-border-strong);
+
+        // Teal accent stripe on top — informational overlay maps to teal in the
+        // blueprint accent rotation (pink=primary CTA, teal=action/information)
+        border-top: 2px solid var(--bp-teal);
+
+        font-family: var(--bp-body);
+    }
+
+    // ─── Header cap ───────────────────────────────────────────────────────────
+    // Treat popover titles as mono eyebrow labels: uppercase, tracked, teal-fg.
+    // The base rule already applies --bs-popover-header-color; we layer the
+    // font stack and casing on top.
+
+    .popover-header {
+        font-family:     var(--bp-mono);
+        font-size:       0.6875rem;   // slightly smaller — mono reads large at equal size
+        font-weight:     600;
+        letter-spacing:  0.10em;
+        text-transform:  uppercase;
+        color:           var(--bp-teal-fg);   // AA-safe teal text on --bp-bg-2 white/lavender
+        border-bottom-color: var(--bp-border);
+    }
+
+    // ─── Body ─────────────────────────────────────────────────────────────────
+    // Body color is handled via --bs-popover-body-color above.
+    // Space Grotesk inherits from .popover font-family; no extra rules needed.
+
+    // ─── Arrow fill correction ─────────────────────────────────────────────────
+    // The base partial hard-codes border-*-color: var(--bs-popover-bg) for the
+    // inner "::after" arrow, which already resolves to --bp-paper via the token
+    // above. No override needed for the fill.
+    //
+    // The outer "::before" arrow (border outline) uses --bs-popover-arrow-border,
+    // which is remapped to --bp-border-strong above. This gives the arrow a
+    // slightly crisper edge than the panel border, matching the blueprint
+    // hairline language.
+    //
+    // No per-placement rules are needed — the four placement blocks in the base
+    // partial reference only these two vars.
+}

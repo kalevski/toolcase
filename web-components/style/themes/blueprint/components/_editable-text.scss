@@ -1,0 +1,39 @@
+// Blueprint › tc-editable-text — inline text field with teal focus ring and recessed hover state.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-editable-text {
+        // Ink: use the primary text token; placeholder steps down to the faintest ink
+        --bs-editable-text-color:             var(--bp-text);
+        --bs-editable-text-placeholder-color: var(--bp-text-faint);
+
+        // Hover: recessed-well tint signals interactivity without painting a full field box
+        --bs-editable-text-hover-bg:          var(--bp-bg-2);
+
+        // Focus border: teal is the everyday action accent across blueprint
+        --bs-editable-text-focus-border:      var(--bp-teal);
+
+        // Focus ring: teal ambient glow matches the theme-wide focus convention
+        --bs-editable-text-focus-ring:        0 0 0 3px var(--bp-teal-soft);
+    }
+
+    .tc-editable-text__input {
+        // Body font for editable UI copy (Space Grotesk) — not a label or display heading
+        font-family: var(--bp-body);
+        color:       var(--bs-editable-text-color);
+
+        // Hover: border matches bg so the reveal is tonal, not a hard stroke
+        &:hover:not(:disabled):not(:focus) {
+            background-color: var(--bs-editable-text-hover-bg);
+            border-color:     var(--bs-editable-text-hover-bg);
+        }
+
+        // Focus: raise to paper-white surface, teal hairline + soft glow
+        &:focus,
+        &:focus-visible {
+            background-color: var(--bp-paper);
+            border-color:     var(--bs-editable-text-focus-border);
+            box-shadow:       var(--bs-editable-text-focus-ring);
+        }
+    }
+}

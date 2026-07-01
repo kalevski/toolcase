@@ -1,0 +1,157 @@
+// Blueprint › tc-table — lavender-paper surface, teal active-sort accent, pink
+// clickable-row highlight; fixes the raw var(--tc-slate-100) hairline leak.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Custom-property re-skin ──────────────────────────────────────────────
+    // Drive all cosmetics through the --bs-table-* API; only fall back to
+    // element rules for things with no matching var (sort-icon colour,
+    // sticky shadow, Bootstrap-compat .table overrides).
+
+    tc-table {
+        // Surface & frame
+        --bs-table-bg:               var(--bp-paper);
+        --bs-table-border:           1px solid var(--bp-border);
+
+        // Header cap — slight lavender recess to lift the mono labels off the
+        // data rows without resorting to colour.
+        --bs-table-head-bg:          var(--bp-bg);
+        --bs-table-head-border:      1px solid var(--bp-border-strong);
+
+        // Row hairlines — fixes the raw var(--tc-slate-100, #f1f5f9) slate leak.
+        --bs-table-row-hairline:     1px solid var(--bp-border-faint);
+
+        // Ink
+        --bs-table-th-color:         var(--bp-text-muted);
+        --bs-table-td-color:         var(--bp-text);
+
+        // Stripe / hover / active rows — step through lavender tints so each
+        // state reads distinctly without harsh contrast.
+        --bs-table-stripe-bg:        var(--bp-paper-tint);
+        --bs-table-row-hover-bg:     var(--bp-paper-tint);
+        --bs-table-row-active-bg:    var(--bp-paper-tint-2);
+
+        // Empty state
+        --bs-table-empty-color:      var(--bp-text-faint);
+    }
+
+    // ── Wrap / outer frame ───────────────────────────────────────────────────
+
+    .tc-table-wrap {
+        // The outer frame already uses --bs-table-border; add the shadow to
+        // ground the panel on the lavender page canvas.
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Header: mono eyebrow treatment ──────────────────────────────────────
+    // The base partial already applies font-mono + uppercase — wire it to the
+    // blueprint mono family and tighten the letter-spacing to match the
+    // eyebrow spec (.06–.18 em).
+
+    .tc-table-th {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.09em;
+        color: var(--bp-text-muted);
+    }
+
+    // Sort button: idle inherits muted; hover → bp-text (already base behaviour
+    // but re-affirmed here so the override chain is explicit).
+    .tc-table-sort {
+        transition: color 0.15s var(--bp-ease);
+
+        &:hover {
+            color: var(--bp-text-soft);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-teal);
+            outline-offset: 2px;
+        }
+    }
+
+    // Sort-icon: idle → faint; active column → teal action accent.
+    .tc-table-sort-icon {
+        color: var(--bp-text-faint);
+    }
+
+    .tc-table-th[aria-sort='ascending'] .tc-table-sort-icon,
+    .tc-table-th[aria-sort='descending'] .tc-table-sort-icon {
+        color: var(--bp-teal-fg);  // teal text on white — clears AA
+    }
+
+    // Active-sort column label also picks up teal so the entire header cell
+    // reads as the current sort axis.
+    .tc-table-th[aria-sort='ascending'] .tc-table-sort,
+    .tc-table-th[aria-sort='descending'] .tc-table-sort {
+        color: var(--bp-teal-fg);
+    }
+
+    // ── Body cells ───────────────────────────────────────────────────────────
+
+    .tc-table-td {
+        font-family: var(--bp-body);
+        color: var(--bp-text);
+    }
+
+    // ── Clickable rows: pink primary highlight ───────────────────────────────
+    // Pink = primary/selected in the blueprint accent rotation.  The
+    // --bp-pink-surface gradient is a very soft pink blush — legible and
+    // non-distracting on a data row.
+
+    .tc-table-row--clickable {
+        &:hover,
+        &:focus-within {
+            background: var(--bp-pink-surface);
+        }
+
+        &:active {
+            background: var(--bp-paper-tint-2);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-pink);
+            outline-offset: -2px;
+        }
+    }
+
+    // ── Sticky header: replace tc-border-strong shadow with bp token ─────────
+    // The base partial bakes `box-shadow: 0 1px 0 var(--tc-border-strong)` as
+    // a literal rule — override it to stay within the blueprint hairline family.
+
+    .tc-table-wrap--sticky .tc-table-head .tc-table-th {
+        background: var(--bp-bg);
+        box-shadow: 0 1px 0 var(--bp-border-strong);
+    }
+
+    // ── Bootstrap-compatible .table surface ─────────────────────────────────
+    // The plain .table path paints its own literals — remap them to bp tokens
+    // so consumers using the Bootstrap-compat surface get a consistent skin.
+
+    .table {
+        color: var(--bp-text);
+        background: var(--bp-paper);
+    }
+
+    .table > * > tr > th,
+    .table > * > tr > td {
+        border-bottom: 1px solid var(--bp-border-faint);
+    }
+
+    .table > thead > tr > th {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        color: var(--bp-text-muted);
+        background: var(--bp-bg);
+        border-bottom: 1px solid var(--bp-border-strong);
+    }
+
+    .table.table-bordered,
+    .table.table-bordered > * > tr > th,
+    .table.table-bordered > * > tr > td {
+        border-color: var(--bp-border);
+    }
+}

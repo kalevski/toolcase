@@ -1,0 +1,44 @@
+// Blueprint › tc-controller-layout-preview — lavender-paper shell, teal face-button
+// strokes as the focal accent, mono uppercase platform label in teal-fg eyebrow style.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-controller-layout-preview {
+        // Controller shell — recessed lavender well, strong hairline.
+        --bs-controller-layout-preview-shell-bg: var(--bp-bg-2);
+        --bs-controller-layout-preview-shell-border: var(--bp-border-strong);
+
+        // D-pad and detail fills — faint ink so they read as secondary geometry.
+        --bs-controller-layout-preview-detail-bg: var(--bp-text-faint);
+
+        // Thumbsticks — raised paper fill, same hairline as shell.
+        --bs-controller-layout-preview-stick-bg: var(--bp-paper);
+        --bs-controller-layout-preview-stick-border: var(--bp-border-strong);
+        // Hub dot uses muted ink so the stick centre reads as a subtle pivot mark.
+        --bs-controller-layout-preview-stick-hub-color: var(--bp-text-faint);
+
+        // Face buttons — paper fill; teal stroke makes the binding cluster the
+        // focal point (teal = everyday-action accent in the blueprint rotation).
+        --bs-controller-layout-preview-button-bg: var(--bp-paper);
+        --bs-controller-layout-preview-button-border: var(--bp-teal);
+        --bs-controller-layout-preview-button-border-width: 1.5;
+
+        // Glyph text — primary ink for legibility inside the button wells.
+        --bs-controller-layout-preview-glyph-color: var(--bp-text);
+
+        // Platform label — mono uppercase eyebrow in teal-fg (clears AA on white).
+        --bs-controller-layout-preview-label-color: var(--bp-teal-fg);
+        --bs-controller-layout-preview-label-spacing: 0.12em;
+    }
+
+    // Reinforce mono font on the glyph and label in case base --tc-font-mono
+    // resolves to a non-blueprint stack outside the theme root.
+    .tc-controller-layout-preview__glyph {
+        font-family: var(--bp-mono);
+    }
+
+    .tc-controller-layout-preview__label {
+        font-family: var(--bp-mono);
+    }
+}

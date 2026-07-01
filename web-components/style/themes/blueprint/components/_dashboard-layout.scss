@@ -1,0 +1,161 @@
+// Blueprint › tc-dashboard-layout — lavender-canvas shell: white sidebar + navbar on --bp-bg content rail, teal toggle accent, mono brand label, hairline borders throughout.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Custom-property re-skin ───────────────────────────────────────────────
+    // Drive as much as possible through the component's own --bs-dashboard-layout-*
+    // API so we stay in the cleanest re-skin path.
+
+    tc-dashboard-layout {
+        // Navbar: white frosted glass panel, lilac hairline bottom.
+        --bs-dashboard-layout-navbar-bg: rgba(255, 255, 255, 0.90);
+        --bs-dashboard-layout-navbar-border: var(--bp-border);
+        --bs-dashboard-layout-navbar-color: var(--bp-text);
+
+        // Sidebar: white card rail, lilac hairline right edge.
+        --bs-dashboard-layout-sidebar-bg: var(--bp-paper);
+        --bs-dashboard-layout-sidebar-border: var(--bp-border);
+
+        // Content area: lavender recessed well (the "paper" behind the cards).
+        --bs-dashboard-layout-content-bg: var(--bp-bg);
+
+        // Toggle hover: soft violet tint on hover.
+        --bs-dashboard-layout-toggle-hover-bg: var(--bp-paper-tint-2);
+
+        // Overlay: violet-tinted backdrop (warmer than pure black).
+        --bs-dashboard-layout-overlay-bg: rgba(26, 24, 48, 0.45);
+
+        // Transition uses the theme ease so motion feels consistent.
+        --bs-dashboard-layout-transition: 220ms var(--bp-ease);
+    }
+
+    // ── Navbar ────────────────────────────────────────────────────────────────
+
+    .tc-dashboard-layout__navbar {
+        // Reinforce the frosted-paper look with the theme shadow.
+        box-shadow: var(--tc-shadow-sm);
+        // Slightly stronger blur than the default 8px to read as a floating panel.
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+
+    // ── Toggle button ─────────────────────────────────────────────────────────
+
+    .tc-dashboard-layout__toggle {
+        // Teal icon on hover — everyday action accent.
+        color: var(--bp-text-muted);
+
+        &:hover {
+            color: var(--bp-teal);
+        }
+
+        &:focus-visible {
+            // Override the generic tc-app-accent ring with teal.
+            outline-color: var(--bp-teal);
+        }
+    }
+
+    // ── Brand slot ────────────────────────────────────────────────────────────
+
+    .tc-dashboard-layout__brand {
+        // Hairline border matches the sidebar border token (already set via var).
+        border-bottom-color: var(--bp-border);
+
+        // Mono micro-label treatment for whatever the brand slot contains:
+        // headings/spans inside the brand area get display typography.
+        & > * {
+            font-family: var(--bp-display);
+            font-size: 0.9rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--bp-text);
+        }
+
+        // Teal HUD corner-bracket — marks the brand area as the HQ anchor.
+        position: relative;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            pointer-events: none;
+        }
+    }
+
+    // ── Sidebar ───────────────────────────────────────────────────────────────
+
+    .tc-dashboard-layout__sidebar {
+        // Elevated card shadow so the drawer feels like a raised panel.
+        box-shadow: var(--tc-shadow-md);
+    }
+
+    // Open state: stronger shadow to reinforce the "drawer over content" depth.
+    .tc-dashboard-layout__wrapper--open {
+        .tc-dashboard-layout__sidebar {
+            box-shadow: var(--tc-shadow-lg);
+        }
+    }
+
+    // ── Sidebar panel (footer slot) ───────────────────────────────────────────
+
+    .tc-dashboard-layout__sidebar-panel {
+        // Faint divider — uses border-faint for a subtle separation.
+        border-top-color: var(--bp-border-faint);
+    }
+
+    // ── Sidebar menu scrollbar ────────────────────────────────────────────────
+
+    .tc-dashboard-layout__sidebar-menu {
+        // Slim lavender scrollbar so the sidebar stays clean on Webkit.
+        scrollbar-width: thin;
+        scrollbar-color: var(--bp-border-strong) transparent;
+
+        &::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: var(--bp-border-strong);
+        }
+    }
+
+    // ── Content area ──────────────────────────────────────────────────────────
+
+    .tc-dashboard-layout__content {
+        // Content scrollbar matches the sidebar scrollbar.
+        scrollbar-width: thin;
+        scrollbar-color: var(--bp-border-strong) transparent;
+
+        &::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: var(--bp-border-strong);
+        }
+    }
+
+    // ── Backdrop overlay ──────────────────────────────────────────────────────
+    // The overlay-bg token is already remapped above to the violet-tinted value;
+    // the backdrop-filter blur is kept from the base but reduced slightly for
+    // the lighter theme so content behind the drawer stays legible.
+
+    .tc-dashboard-layout__overlay {
+        backdrop-filter: blur(1px);
+        -webkit-backdrop-filter: blur(1px);
+    }
+}

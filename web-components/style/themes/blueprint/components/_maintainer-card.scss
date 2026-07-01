@@ -1,0 +1,167 @@
+// Blueprint › tc-maintainer-card — white-paper profile card; display name, mono role eyebrow, teal social links, pink sponsor CTA.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-maintainer-card {
+        // Surface: white raised card, violet-tinted hairline, soft shadow.
+        --bs-maintainer-card-bg:                var(--bp-paper);
+        --bs-maintainer-card-border:            var(--bp-border);
+        --bs-maintainer-card-shadow:            var(--tc-shadow-sm);
+        --bs-maintainer-card-shadow-hover:      var(--tc-shadow-hover);
+
+        // Name: display typeface, strong ink.
+        --bs-maintainer-card-name-color:        var(--bp-emphasis);
+        --bs-maintainer-card-name-size:         1.0625rem;
+
+        // Role + location + bio: muted ink.
+        --bs-maintainer-card-role-color:        var(--bp-text-muted);
+        --bs-maintainer-card-role-size:         0.8125rem;
+        --bs-maintainer-card-location-color:    var(--bp-text-faint);
+        --bs-maintainer-card-location-size:     0.8125rem;
+        --bs-maintainer-card-bio-color:         var(--bp-text-muted);
+        --bs-maintainer-card-bio-size:          0.875rem;
+
+        // Social links: faint ink → teal on hover.
+        --bs-maintainer-card-link-color:        var(--bp-text-faint);
+        --bs-maintainer-card-link-hover-bg:     var(--bp-teal-soft);
+        --bs-maintainer-card-link-hover-color:  var(--bp-teal-fg);
+
+        // Sponsor CTA: pink primary (arcade accent rotation — pink = primary/CTA).
+        --bs-maintainer-card-sponsor-bg:        var(--bp-pink);
+        --bs-maintainer-card-sponsor-color:     var(--bp-pink-ink);
+        // hover-bg has no --bs-* var; overridden directly on the element below.
+    }
+
+    // Card frame — white paper, hairline, shadow; HUD corner-bracket on hover.
+    .tc-maintainer-card {
+        background-color: var(--bp-paper);
+        border: 1px solid var(--bp-border);
+        box-shadow: var(--tc-shadow-sm);
+        position: relative;
+        transition:
+            box-shadow var(--bp-ease),
+            transform var(--bp-ease),
+            border-color var(--bp-ease);
+
+        // HUD corner-bracket — top-left teal L-bracket signals interactivity.
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity var(--bp-ease);
+        }
+
+        &:hover {
+            border-color: var(--bp-border-strong);
+            box-shadow: var(--tc-shadow-hover);
+            transform: translateY(-2px);
+
+            &::before {
+                opacity: 1;
+            }
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .tc-maintainer-card {
+            transition: box-shadow var(--bp-ease), border-color var(--bp-ease);
+
+            &:hover {
+                transform: none;
+            }
+        }
+    }
+
+    // Avatar ring uses the component's border var (already remapped to --bp-border).
+    .tc-maintainer-card__avatar {
+        border-color: var(--bp-border-strong);
+    }
+
+    // Name: display typeface, tight tracking — blueprint title treatment.
+    .tc-maintainer-card__name {
+        font-family: var(--bp-display);
+        color: var(--bp-emphasis);
+        letter-spacing: -0.01em;
+    }
+
+    // Role: mono eyebrow — uppercase, spaced, teal accent for readable contrast on white.
+    .tc-maintainer-card__role {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--bp-teal-fg);
+    }
+
+    // Location: faint body text, no extra treatment needed beyond token remap.
+    .tc-maintainer-card__location {
+        color: var(--bp-text-faint);
+        font-family: var(--bp-body);
+
+        svg {
+            color: var(--bp-teal-fg);
+        }
+    }
+
+    // Bio: legible body prose.
+    .tc-maintainer-card__bio {
+        font-family: var(--bp-body);
+        color: var(--bp-text-muted);
+    }
+
+    // Social link icon buttons → teal hover well.
+    .tc-maintainer-card__link {
+        color: var(--bp-text-faint);
+        transition:
+            background-color var(--bp-ease),
+            color var(--bp-ease);
+
+        &:hover,
+        &:focus {
+            background-color: var(--bp-teal-soft);
+            color: var(--bp-teal-fg);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-teal);
+            outline-offset: 2px;
+        }
+    }
+
+    // Sponsor CTA — pink primary gradient, mono label uppercase.
+    .tc-maintainer-card__sponsor {
+        background: var(--bp-pink-grad);
+        color: var(--bp-pink-ink);
+        font-family: var(--bp-mono);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        border: none;
+        transition:
+            background-color var(--bp-ease),
+            box-shadow var(--bp-ease);
+
+        &:hover,
+        &:focus {
+            // Shift to solid pink-hover on hover; keep ink white.
+            background: var(--bp-pink-hover);
+            color: var(--bp-pink-ink);
+            box-shadow: var(--bp-glow-pink);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-pink);
+            outline-offset: 2px;
+        }
+    }
+
+}

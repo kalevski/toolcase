@@ -1,0 +1,149 @@
+// Blueprint › tc-page-footer — lavender-ground footer; display wordmark, teal menu
+// voice, pink CTA button with glow, mono legal bar; replaces slate shadow literal.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    // ── Token remap ──────────────────────────────────────────────────────────
+    tc-page-footer {
+        // Surface — lavender page ground, not white, so the footer visually
+        // anchors below the page content without a heavy block colour.
+        --bs-page-footer-bg: var(--bp-bg);
+        --bs-page-footer-color: var(--bp-text);
+        --bs-page-footer-border-color: var(--bp-border);
+
+        // Brand wordmark — emphasis ink on lavender
+        --bs-page-footer-brand-color: var(--bp-emphasis);
+        --bs-page-footer-brand-dot-bg: var(--bp-pink);
+
+        // Tagline — blueprint mono voice, muted
+        --bs-page-footer-tagline-color: var(--bp-text-muted);
+
+        // Description — faintest ink
+        --bs-page-footer-description-color: var(--bp-text-faint);
+
+        // Menu column titles — teal for the everyday-action accent rotation
+        --bs-page-footer-menu-title-color: var(--bp-teal-fg);
+
+        // Menu links
+        --bs-page-footer-link-color: var(--bp-text-muted);
+        --bs-page-footer-link-hover-color: var(--bp-teal-fg);
+
+        // Social icon buttons
+        --bs-page-footer-social-color: var(--bp-text-faint);
+        --bs-page-footer-social-hover-color: var(--bp-teal-fg);
+        --bs-page-footer-social-hover-bg: var(--bp-teal-soft);
+
+        // Legal bar
+        --bs-page-footer-legal-color: var(--bp-text-faint);
+        --bs-page-footer-legal-link-color: var(--bp-text-faint);
+        --bs-page-footer-legal-link-hover-color: var(--bp-text-muted);
+
+        // CTA block — raised paper-tint card, faint divider hairline
+        --bs-page-footer-cta-bg: var(--bp-paper-tint);
+        --bs-page-footer-cta-border-color: var(--bp-border-faint);
+        --bs-page-footer-cta-heading-color: var(--bp-emphasis);
+        --bs-page-footer-cta-desc-color: var(--bp-text-muted);
+    }
+
+    // ── Brand wordmark — display font, tight tracking ────────────────────────
+    // The base uses --bs-font-monospace; blueprint upgrades the wordmark to the
+    // display face (Chakra Petch) for stronger brand presence in the footer.
+    .tc-page-footer-brand-word {
+        font-family: var(--bp-display);
+        font-size: 1rem;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+    }
+
+    // Tagline — mono micro-label voice, spaced out
+    .tc-page-footer-tagline {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--bs-page-footer-tagline-color);
+    }
+
+    // ── Menu column titles — teal mono, already uppercase in base ────────────
+    .tc-page-footer-menu-title {
+        font-family: var(--bp-mono);
+        color: var(--bs-page-footer-menu-title-color);
+        letter-spacing: 0.1em;
+    }
+
+    // ── CTA block — display heading, pink gradient button ────────────────────
+    .tc-page-footer-cta-heading {
+        font-family: var(--bp-display);
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        text-transform: uppercase;
+    }
+
+    // Replace the hardcoded slate-800 hover shadow with blueprint pink glow.
+    // The `color: #fff` on hover is correct (matches --bp-pink-ink) so we
+    // express it through the token and apply the pink gradient.
+    .tc-page-footer-cta-btn {
+        font-family: var(--bp-mono);
+        font-size: 0.8125rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        background: var(--bp-pink-grad);
+        color: var(--bp-pink-ink);
+        transition:
+            box-shadow var(--bp-ease),
+            transform var(--bp-ease);
+
+        &:hover {
+            // Replace rgba(30,41,59,0.3) slate shadow with blueprint pink glow
+            box-shadow: var(--bp-glow-pink);
+            color: var(--bp-pink-ink);
+            transform: translateY(-1px);
+        }
+
+        &:focus-visible {
+            outline-color: var(--bp-teal);
+        }
+    }
+
+    // ── Social links — teal hover well ──────────────────────────────────────
+    .tc-page-footer-social-link {
+        &:focus-visible {
+            outline-color: var(--bp-teal);
+        }
+    }
+
+    // ── Menu links — teal hover, teal focus ring ─────────────────────────────
+    .tc-page-footer-menu-link {
+        &:focus-visible {
+            outline-color: var(--bp-teal);
+            color: var(--bs-page-footer-link-hover-color);
+        }
+    }
+
+    // ── Legal bar — mono throughout ──────────────────────────────────────────
+    // The base already sets --bs-font-monospace on .tc-page-footer-legal-text;
+    // blueprint routes it through --bp-mono for the JetBrains Mono face.
+    .tc-page-footer-legal-text {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.04em;
+    }
+
+    .tc-page-footer-legal-link {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.04em;
+
+        &:focus-visible {
+            outline-color: var(--bp-teal);
+            color: var(--bs-page-footer-legal-link-hover-color);
+        }
+    }
+
+    // ── Reduced-motion: freeze lift, preserve color/glow ────────────────────
+    @media (prefers-reduced-motion: reduce) {
+        .tc-page-footer-cta-btn {
+            transition: box-shadow var(--bp-ease);
+            transform: none !important;
+        }
+    }
+}

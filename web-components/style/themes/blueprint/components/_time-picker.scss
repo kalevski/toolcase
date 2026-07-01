@@ -1,0 +1,170 @@
+// Blueprint › tc-time-picker — paper trigger with mono column labels, pink selected cell, teal action accents.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Trigger surface ────────────────────────────────────────────────────────
+    // Re-point the three trigger vars to blueprint paper/hairline/ink tokens.
+    // Removes any residual --tc-surface (dark-slate-ramp) inheritance.
+
+    .tc-time-picker-trigger {
+        --bs-time-picker-trigger-bg:     var(--bp-paper);
+        --bs-time-picker-trigger-border: var(--bp-border-strong);
+        --bs-time-picker-trigger-color:  var(--bp-text);
+
+        transition:
+            border-color 150ms var(--bp-ease),
+            box-shadow   150ms var(--bp-ease);
+
+        &:focus-visible {
+            border-color: var(--bp-teal);
+            box-shadow: var(--bp-glow-teal);
+            outline: none;
+        }
+
+        // Invalid state: danger border + faint danger glow.
+        &.is-invalid {
+            border-color: var(--bp-danger);
+
+            &:focus-visible {
+                border-color: var(--bp-danger);
+                box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--bp-danger) 18%, transparent);
+            }
+        }
+    }
+
+    // ── Label ──────────────────────────────────────────────────────────────────
+    // Mono eyebrow voice — matches badge/chip/nav label register in the theme.
+
+    .tc-time-picker-label {
+        font-family: var(--bp-mono);
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--bp-text-muted);
+    }
+
+    // ── Value display ──────────────────────────────────────────────────────────
+    // The selected time reads as a HUD datum — mono face, full-ink weight.
+
+    .tc-time-picker-value {
+        font-family: var(--bp-mono);
+        color: var(--bp-text);
+
+        // Placeholder stays faint; inherits the mono face from above.
+        &--placeholder {
+            color: var(--bp-text-faint);
+        }
+    }
+
+    // ── Clock icon ─────────────────────────────────────────────────────────────
+
+    .tc-time-picker-icon {
+        color: var(--bp-text-faint);
+    }
+
+    // ── Clear button ───────────────────────────────────────────────────────────
+    // Teal hover — everyday action accent; no bg at rest so the icon floats.
+
+    .tc-time-picker-clear {
+        color: var(--bp-text-faint);
+        transition:
+            color            120ms var(--bp-ease),
+            background-color 120ms var(--bp-ease);
+
+        &:hover {
+            color: var(--bp-teal);
+            background: var(--bp-teal-soft);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-teal);
+            outline-offset: 1px;
+        }
+    }
+
+    // ── Overlay panel ──────────────────────────────────────────────────────────
+    // White paper surface with a violet-tinted shadow — same treatment as
+    // dropdown and context-menu panels in the blueprint theme.
+
+    .tc-time-picker-panel {
+        --bs-time-picker-panel-bg:     var(--bp-paper);
+        --bs-time-picker-panel-border: var(--bp-border);
+        --bs-time-picker-panel-shadow: var(--tc-shadow-md);
+    }
+
+    // ── Column separators ──────────────────────────────────────────────────────
+    // Route away from raw --tc-border; use the faint hairline divider token.
+
+    .tc-time-picker-column-wrap + .tc-time-picker-column-wrap {
+        border-left-color: var(--bp-border-faint);
+    }
+
+    // ── Column labels (HR / MIN / SEC / AM / PM) ───────────────────────────────
+    // These are pure HUD eyebrows — teal-fg on white clears AA; mono uppercase.
+
+    .tc-time-picker-column-label {
+        font-family: var(--bp-mono);
+        font-size: 0.6rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--bp-teal-fg);
+    }
+
+    // ── Option cells ───────────────────────────────────────────────────────────
+    // At rest: blueprint ink on transparent. Hover: teal-soft tint (action
+    // register, keeps every idle cell quiet). Active/selected: pink fill with
+    // white ink — pink is the primary/selected accent in the blueprint rotation.
+
+    .tc-time-picker-option {
+        --bs-time-picker-option-color:     var(--bp-text);
+        --bs-time-picker-option-hover-bg:  var(--bp-teal-soft);
+        --bs-time-picker-option-active-bg: var(--bp-pink);
+
+        font-family: var(--bp-mono);
+        transition:
+            background-color 100ms var(--bp-ease),
+            color            100ms var(--bp-ease);
+
+        &:hover {
+            color: var(--bp-teal-fg);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-teal);
+            outline-offset: -2px;
+        }
+
+        // Active/selected cell — pink primary, white ink.
+        &--active {
+            color: var(--bp-pink-ink);
+            background: var(--bs-time-picker-option-active-bg);
+
+            &:hover {
+                color: var(--bp-pink-ink);
+                background: var(--bp-pink-hover);
+            }
+        }
+    }
+
+    // ── Scrollbar styling (panel columns) ─────────────────────────────────────
+    // Thin scrollbar tinted to blueprint violet-border family.
+
+    .tc-time-picker-column {
+        scrollbar-color: var(--bp-border-strong) transparent;
+
+        &::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: var(--bp-border-strong);
+        }
+
+        &::-webkit-scrollbar-track {
+            background: transparent;
+        }
+    }
+}

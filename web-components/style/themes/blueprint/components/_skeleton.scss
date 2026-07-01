@@ -1,0 +1,14 @@
+// Blueprint › tc-skeleton — lavender-tinted shimmer; base→canvas, shine→paper, shade→hairline.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-skeleton {
+        // Remap the three shimmer stops to blueprint's lavender-tinted surface ramp.
+        // --bp-bg (#eef1f8) is the page canvas — reads as a recessed placeholder base.
+        // --bp-paper (#fff) is the raised-card white — the bright leading sweep.
+        // --bp-border (#e3e0f2) is the default hairline — soft trailing shadow.
+        --bs-skeleton-base-color:  var(--bp-bg);
+        --bs-skeleton-shine-color: var(--bp-paper);
+        --bs-skeleton-shade-color: var(--bp-border);
+    }
+}

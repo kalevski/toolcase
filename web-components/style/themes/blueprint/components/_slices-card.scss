@@ -1,0 +1,94 @@
+// Blueprint › tc-slices-card — white paper card, teal mono eyebrow title, display total, mono legend numerics.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Component token overrides ─────────────────────────────────────────────
+
+    tc-slices-card {
+        // Surface: white raised card on the lavender canvas
+        --bs-slices-card-bg: var(--bp-paper);
+        --bs-slices-card-border-color: var(--bp-border);
+        --bs-slices-card-shadow: var(--tc-shadow-sm);
+
+        // Header: recessed well so the title row reads as a cap, not floating text
+        --bs-slices-card-header-bg: var(--bp-bg-2);
+        --bs-slices-card-header-border-color: var(--bp-border-faint);
+
+        // Title eyebrow: teal-fg for AA contrast on the recessed well (not cyan — routed to bp token)
+        --bs-slices-card-title-color: var(--bp-teal-fg);
+        --bs-slices-card-title-font-size: 0.6875rem;
+        --bs-slices-card-title-letter-spacing: 0.1em;
+
+        // Total figure: display font for the donut-hole number — blueprint uses Chakra Petch for prices/numbers
+        --bs-slices-card-total-color: var(--bp-text);
+        --bs-slices-card-total-font-size: 1rem;
+        --bs-slices-card-total-font-weight: 700;
+
+        // Legend labels: body ink
+        --bs-slices-card-legend-label-color: var(--bp-text);
+        --bs-slices-card-legend-label-font-size: 0.8125rem;
+
+        // Legend values + percents: muted mono — blueprint uses faint for secondary numeric data
+        --bs-slices-card-legend-value-color: var(--bp-text-muted);
+        --bs-slices-card-legend-value-font-size: 0.75rem;
+        --bs-slices-card-legend-percent-color: var(--bp-text-faint);
+        --bs-slices-card-legend-percent-font-size: 0.75rem;
+
+        // Empty ring: hairline border token (replaces raw var(--tc-border) which would leak slate)
+        --bs-slices-card-empty-ring-color: var(--bp-border);
+
+        // Skeleton: recessed well base + paper-tint shimmer sweep
+        --bs-slices-card-skeleton-bg: var(--bp-bg-2);
+        --bs-slices-card-skeleton-shimmer: var(--bp-paper-tint);
+        --bs-slices-card-skeleton-ring-color: var(--bp-border-faint);
+    }
+
+    // ── Typography overrides ──────────────────────────────────────────────────
+
+    // Title eyebrow: mono uppercase — already set in base, just ensure bp-mono is used
+    .tc-slices-card-title {
+        font-family: var(--bp-mono);
+        color: var(--bp-teal-fg);
+    }
+
+    // Total figure in donut hole: display font (Chakra Petch) — numeric hero treatment
+    .tc-slices-card-total {
+        font-family: var(--bp-display);
+        color: var(--bp-text);
+        font-weight: 700;
+        letter-spacing: -0.01em;
+    }
+
+    // Legend label: body font for readability
+    .tc-slices-card-legend-label {
+        font-family: var(--bp-body);
+        color: var(--bp-text);
+    }
+
+    // Value + percent columns: mono for digit alignment; tabular numerics
+    .tc-slices-card-legend-value,
+    .tc-slices-card-legend-percent {
+        font-family: var(--bp-mono);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .tc-slices-card-legend-value {
+        color: var(--bp-text-muted);
+    }
+
+    .tc-slices-card-legend-percent {
+        // Faint accent: teal-fg for the percent column gives a subtle data-viz accent
+        // without fighting the slice colors in the ring
+        color: var(--bp-teal-fg);
+    }
+
+    // ── Legend row separator ──────────────────────────────────────────────────
+
+    // Hairline rule between legend items (border-faint = divider token; not raw slate)
+    .tc-slices-card-legend-item + .tc-slices-card-legend-item {
+        border-top: 1px solid var(--bp-border-faint);
+        padding-top: 0.375rem;
+    }
+
+}

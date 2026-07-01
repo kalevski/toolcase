@@ -1,0 +1,140 @@
+// Blueprint › tc-ecosystem-map — pink core disc, teal ring hairlines + node accents, mono labels in --bp-mono, paper-white node chips with teal hover border.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-ecosystem-map {
+        // Core disc — pink primary focal point (replaces generic --tc-app-accent)
+        --bs-ecosystem-map-core-fill: var(--bp-pink);
+        --bs-ecosystem-map-core-text: var(--bp-pink-ink);
+
+        // Ring hairlines + connectors — teal-line for the blueprint grid feel
+        --bs-ecosystem-map-ring-stroke: var(--bp-teal-line);
+        --bs-ecosystem-map-connector-stroke: var(--bp-teal-line);
+
+        // SVG node dots — paper fill, teal hairline border
+        --bs-ecosystem-map-node-fill: var(--bp-paper);
+        --bs-ecosystem-map-node-stroke: var(--bp-border);
+
+        // SVG node text + label (micro-mono)
+        --bs-ecosystem-map-node-text: var(--bp-text);
+        --bs-ecosystem-map-node-label-color: var(--bp-text-faint);
+
+        // Title
+        --bs-ecosystem-map-title-color: var(--bp-text);
+
+        // List fallback chips
+        --bs-ecosystem-map-list-bg: var(--bp-paper);
+        --bs-ecosystem-map-list-border: var(--bp-border-chip);
+        --bs-ecosystem-map-list-label-color: var(--bp-teal-fg); // teal = action/structure labels (mono eyebrow)
+    }
+
+    // Title — display font, tight tracking
+    .tc-ecosystem-map__title {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+        color: var(--bs-ecosystem-map-title-color);
+    }
+
+    // Core name + label inside the SVG disc — bp-mono, uppercase
+    .tc-ecosystem-map__core-name {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        font-size: 0.7rem;
+        fill: var(--bs-ecosystem-map-core-text);
+    }
+
+    .tc-ecosystem-map__core-label {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.1em;
+        fill: var(--bs-ecosystem-map-core-text);
+    }
+
+    // Ring circles — teal dashed hairlines for the blueprint grid aesthetic
+    .tc-ecosystem-map__ring-circle {
+        stroke: var(--bp-teal-line);
+        stroke-dasharray: 4 4;
+    }
+
+    // Connectors — teal, slightly more opaque than the base 0.35 for blueprint legibility
+    .tc-ecosystem-map__connector {
+        stroke: var(--bp-teal-line);
+        opacity: 0.5;
+    }
+
+    // Node dots — paper fill, bp-border hairline; teal accent on hover/focus
+    .tc-ecosystem-map__node-dot {
+        fill: var(--bp-paper);
+        stroke: var(--bp-border);
+    }
+
+    .tc-ecosystem-map__node-group,
+    .tc-ecosystem-map__node-link {
+        &:hover .tc-ecosystem-map__node-dot,
+        &:focus .tc-ecosystem-map__node-dot {
+            stroke: var(--bp-teal);
+            fill: var(--bp-teal-soft);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-teal);
+            outline-offset: 3px;
+        }
+
+        &:focus-visible .tc-ecosystem-map__node-dot {
+            stroke: var(--bp-teal);
+            stroke-width: 2;
+        }
+    }
+
+    // Node labels inside SVG — mono micro-label, teal-fg for legibility on white
+    .tc-ecosystem-map__node-label {
+        font-family: var(--bp-mono);
+        fill: var(--bp-text-faint);
+        letter-spacing: 0.06em;
+    }
+
+    // List fallback group headings — mono eyebrow in teal (action/structure)
+    .tc-ecosystem-map__list-label {
+        font-family: var(--bp-mono);
+        color: var(--bp-teal-fg);
+        letter-spacing: 0.12em;
+    }
+
+    // List fallback chips — paper card, bp-border-chip hairline, mono text
+    .tc-ecosystem-map__node {
+        font-family: var(--bp-mono);
+        background: var(--bp-paper);
+        border-color: var(--bp-border-chip);
+        color: var(--bp-text);
+        letter-spacing: 0.04em;
+        box-shadow: var(--tc-shadow-sm);
+        transition: border-color var(--bp-ease), box-shadow var(--bp-ease);
+
+        &:hover,
+        &:focus {
+            border-color: var(--bp-teal);
+            box-shadow: var(--bp-glow-teal);
+            text-decoration: none;
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-teal);
+            outline-offset: 2px;
+        }
+
+        // Core chip — pink primary fill
+        &--core {
+            background: var(--bp-pink);
+            border-color: var(--bp-pink);
+            color: var(--bp-pink-ink);
+            box-shadow: var(--bp-glow-pink);
+
+            &:hover {
+                background: var(--bp-pink-hover);
+                border-color: var(--bp-pink-hover);
+                box-shadow: var(--bp-glow-pink-strong);
+            }
+        }
+    }
+}

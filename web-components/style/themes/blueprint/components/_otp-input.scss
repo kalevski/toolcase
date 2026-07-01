@@ -1,0 +1,52 @@
+// Blueprint › tc-otp-input — mono-label, white cells with pink focus glow and violet filled accent.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Custom-property re-skin ─────────────────────────────────────────────
+    // Drive all cell cosmetics through the --bs-otp-input-* contract.
+
+    tc-otp-input {
+        --bs-otp-input-bg:                 var(--bp-paper);
+        --bs-otp-input-color:              var(--bp-text);
+        --bs-otp-input-border-color:       var(--bp-border);
+        // Focus → pink primary accent
+        --bs-otp-input-focus-border-color: var(--bp-pink);
+        --bs-otp-input-focus-ring:         var(--bp-glow-pink);
+        // Filled → violet supporting accent (digit committed)
+        --bs-otp-input-filled-border-color: var(--bp-violet);
+        // Error → real danger red (NOT pink)
+        --bs-otp-input-error-border-color: var(--bp-danger);
+        --bs-otp-input-error-color:        var(--bp-danger);
+        // Replace the hardcoded rgba(239,68,68,…) literal with the danger-soft token
+        --bs-otp-input-error-focus-ring:   0 0 0 0.2rem var(--bp-danger-soft);
+    }
+
+    // ── Label — mono eyebrow style ──────────────────────────────────────────
+    // OTP labels read as micro-labels / UI kickers → --bp-mono uppercase.
+
+    .tc-otp-input__label {
+        font-family:    var(--bp-mono);
+        font-size:      0.7rem;
+        font-weight:    600;
+        text-transform: uppercase;
+        letter-spacing: .1em;
+        color:          var(--bp-teal-fg); // teal text on white passes AA
+    }
+
+    // ── Cell — blueprint surface + transition ───────────────────────────────
+
+    .tc-otp-input__cell {
+        // Cells are HUD-style inputs: use mono font to match numeric display aesthetic
+        font-family:  var(--bp-mono);
+        font-size:    1.1rem;
+        font-weight:  600;
+        letter-spacing: .05em;
+        background-color: var(--bs-otp-input-bg);
+        border-color: var(--bs-otp-input-border-color);
+        transition:
+            border-color 180ms var(--bp-ease),
+            box-shadow   180ms var(--bp-ease);
+    }
+
+}

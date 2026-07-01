@@ -23,6 +23,7 @@ Usage:
   nginxpilot print-vhost <domain>  print an nginx snippet (static site or reverse proxy)
   nginxpilot print-include         print the nginx.conf include snippet for managed mode
   nginxpilot status [--json]       show per-site status from the daemon
+  nginxpilot cert <action>         manage TLS certificates (issue/upload/renew/delete/list, creds)
   nginxpilot version               print build info
 
 Common flags:
@@ -55,6 +56,8 @@ func main() {
 		code = cmdPrintInclude(args)
 	case "status":
 		code = cmdStatus(args)
+	case "cert":
+		code = cmdCert(args)
 	case "version":
 		fmt.Printf("nginxpilot %s\n", version)
 	case "help", "--help", "-h":

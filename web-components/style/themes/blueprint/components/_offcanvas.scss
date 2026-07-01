@@ -1,0 +1,98 @@
+// Blueprint › tc-offcanvas — white paper sliding panel, teal edge accent, mono eyebrow title, violet-navy backdrop scrim.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Custom-property re-skin ───────────────────────────────────────────────
+    // Reroute the --bs-offcanvas-* contract so the Bootstrap scaffold
+    // inherits blueprint palette without specificity wrestling.
+
+    .offcanvas {
+        --bs-offcanvas-color:        var(--bp-text);
+        --bs-offcanvas-bg:           var(--bp-paper);          // raised white surface
+        --bs-offcanvas-border-color: var(--bp-border-strong);  // firm hairline at the sliding edge
+        --bs-offcanvas-box-shadow:   var(--tc-shadow-lg);      // violet-tinted depth
+        --bs-offcanvas-header-bg:    var(--bp-bg-2);           // recessed well to frame the chrome row
+    }
+
+    // ── Panel edge accent — teal rail along the exposed border ────────────────
+    // Each placement puts the accent on the edge that faces the page content,
+    // giving the panel a HUD-panel identity without an extra element.
+
+    .offcanvas-start {
+        border-right-color: var(--bp-teal);
+        border-right-width: 2px;
+    }
+
+    .offcanvas-end {
+        border-left-color: var(--bp-teal);
+        border-left-width: 2px;
+    }
+
+    .offcanvas-top {
+        border-bottom-color: var(--bp-teal);
+        border-bottom-width: 2px;
+    }
+
+    .offcanvas-bottom {
+        border-top-color: var(--bp-teal);
+        border-top-width: 2px;
+    }
+
+    // ── Header ────────────────────────────────────────────────────────────────
+    // Inherits --bs-offcanvas-header-bg set above (--bp-bg-2).
+    // Replace the base's raw var(--tc-border) divider with the blueprint faint
+    // separator token so no slate-ramp value leaks through.
+
+    .offcanvas-header {
+        background: var(--bp-bg-2);
+        border-bottom-color: var(--bp-border-faint);
+    }
+
+    // ── Title — mono eyebrow treatment ────────────────────────────────────────
+    // Blueprint sliding panels use the same HUD-label register as drawers:
+    // --bp-mono (JetBrains Mono), uppercase, loose tracking, dark-violet ink.
+    // This signals "system panel" rather than "content heading".
+
+    .offcanvas-title {
+        font-family:     var(--bp-mono);
+        font-size:       0.6875rem;     // 11px — eyebrow scale
+        font-weight:     600;
+        text-transform:  uppercase;
+        letter-spacing:  .10em;
+        color:           var(--bp-text-soft);
+    }
+
+    // ── Body ──────────────────────────────────────────────────────────────────
+    // White paper ground with Space Grotesk prose type.
+    // Faint blueprint grid lines echo the canvas aesthetic — same cross-hatch
+    // used on tc-drawer so both sliding surfaces feel family-related.
+
+    .offcanvas-body {
+        background: var(--bp-paper);
+        color:       var(--bp-text-muted);
+        font-family: var(--bp-body);
+
+        background-image:
+            linear-gradient(var(--bp-border-faint) 1px, transparent 1px),
+            linear-gradient(90deg, var(--bp-border-faint) 1px, transparent 1px);
+        background-size:     24px 24px;
+        background-position: top left;
+    }
+
+    // ── Backdrop — replace baked #0f172a slate literal ────────────────────────
+    // The base partial hardcodes background-color: #0f172a (dark slate) directly
+    // on .offcanvas-backdrop — there is no CSS custom property to intercept, so
+    // we must override the property. We keep a dark scrim (correct for a light
+    // theme) but re-tint it toward --bp-emphasis (deep violet-navy) so it reads
+    // as in-system rather than a generic Bootstrap slate.
+
+    .offcanvas-backdrop {
+        background-color: #1a1830; // --bp-emphasis hue — violet-navy scrim, replaces #0f172a slate
+
+        &.show {
+            opacity: 0.45; // slightly lighter than base 0.5 — light page context still reads through
+        }
+    }
+
+}

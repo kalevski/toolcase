@@ -1,0 +1,45 @@
+// Blueprint › tc-kbd — mono HUD key caps on lavender paper; teal bottom-edge depth, violet-tinted shadow.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    .tc-kbd {
+        // Wrapper carries no cosmetics — gap/flex geometry only.
+        --bs-kbd-sep-color: var(--bp-text-faint);
+        --bs-kbd-sep-margin: 0.3em;
+    }
+
+    .tc-kbd-key {
+        // JetBrains Mono is the blueprint register for micro-labels, badges, HUD text.
+        --bs-kbd-font-family: var(--bp-mono);
+        --bs-kbd-font-weight: 500;
+        --bs-kbd-color: var(--bp-text);
+        // Raised card surface — white key cap against the lavender page ground.
+        --bs-kbd-bg: var(--bp-paper);
+        // Top + sides: default hairline; bottom edge repointed to teal for a crisp depth tick.
+        --bs-kbd-border-color: var(--bp-border-strong);
+        --bs-kbd-border-width: 1px;
+        --bs-kbd-padding-x: 0.4em;
+        --bs-kbd-padding-y: 0.22em;
+
+        // Violet-tinted shadow gives the key cap a physical lift off the page.
+        box-shadow: var(--tc-shadow-sm);
+
+        // Repoint the bottom-edge "depth" border to teal — reads as a HUD rail mark,
+        // not a generic grey edge. Uses a border-bottom override since there is no
+        // --bs-kbd-border-bottom-color var in the base partial.
+        border-bottom-color: var(--bp-teal-fg);
+
+        // Uppercase + wide tracking: blueprint mono micro-label convention.
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 0.6875rem; // Slightly tighter than base ~11.5px to stay HUD-scale.
+    }
+
+    .tc-kbd-sep {
+        // Separator inherits --bs-kbd-sep-color (--bp-text-faint) from .tc-kbd above.
+        // Also set to bp-mono so the + / → glyph matches the key cap register.
+        font-family: var(--bp-mono);
+        // Faint, not invisible — reads as punctuation between caps, not accent.
+        color: var(--bp-text-faint);
+    }
+}

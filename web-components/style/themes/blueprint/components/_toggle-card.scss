@@ -1,0 +1,146 @@
+// Blueprint › tc-toggle-card — white paper card, teal idle track, pink active state with HUD corner bracket on hover.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-toggle-card {
+        // Surface & hairline
+        --bs-toggle-card-bg:                var(--bp-paper);
+        --bs-toggle-card-border-color:      var(--bp-border);
+        --bs-toggle-card-hover-bg:          var(--bp-paper-tint);
+        --bs-toggle-card-hover-border-color: var(--bp-border-strong);
+
+        // Active accent → pink (blueprint primary)
+        --bs-toggle-card-on-accent:         var(--bp-pink);
+
+        // Ink
+        --bs-toggle-card-label-color:       var(--bp-text);
+        --bs-toggle-card-icon-color:        var(--bp-text-faint);
+        --bs-toggle-card-hint-color:        var(--bp-text-muted);
+
+        // Switch track idle → teal border token (muted, not full teal fill)
+        --bs-toggle-card-switch-track-off:  var(--bp-border-strong);
+        --bs-toggle-card-switch-knob:       #ffffff;
+    }
+
+    .tc-toggle-card {
+        // Override the baked slate shadow on the card (no shadow on default state — paper sits flat)
+        box-shadow: none;
+        transition:
+            background-color var(--bp-ease, 150ms ease),
+            border-color var(--bp-ease, 150ms ease),
+            box-shadow var(--bp-ease, 150ms ease),
+            transform var(--bp-ease, 150ms ease);
+
+        // HUD corner bracket — teal, top-left only; appears on hover
+        position: relative;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            opacity: 0;
+            transition: opacity var(--bp-ease, 150ms ease);
+            pointer-events: none;
+        }
+
+        &:hover:not(.tc-toggle-card--disabled):not(.tc-toggle-card--loading) {
+            box-shadow: var(--tc-shadow-sm);
+            transform: translateY(-2px);
+
+            &::before {
+                opacity: 1;
+            }
+        }
+
+        &:focus-visible {
+            // Pink glow ring for focus (matches --on-accent)
+            outline: 2px solid var(--bp-pink);
+            outline-offset: 2px;
+            box-shadow: var(--bp-glow-pink);
+        }
+
+        // ON state: pink left-bar + border, card tinted with pink-surface gradient
+        &.tc-toggle-card--on {
+            border-color: var(--bp-pink);
+            box-shadow: inset 3px 0 0 0 var(--bp-pink);
+            background: var(--bp-pink-surface);
+
+            &::before {
+                // HUD bracket shifts to pink when card is active
+                border-top-color: var(--bp-pink);
+                border-left-color: var(--bp-pink);
+            }
+
+            .tc-toggle-card-icon {
+                color: var(--bp-pink);
+            }
+
+            // ON state: restore translateY lift on hover even when active
+            &:hover:not(.tc-toggle-card--disabled):not(.tc-toggle-card--loading) {
+                transform: translateY(-2px);
+                box-shadow:
+                    inset 3px 0 0 0 var(--bp-pink),
+                    var(--tc-shadow-sm),
+                    var(--bp-glow-pink);
+
+                &::before {
+                    opacity: 1;
+                }
+            }
+        }
+    }
+
+    // Label: display face (Chakra Petch) for the card title — blueprint convention for card titles
+    .tc-toggle-card-label {
+        font-family: var(--bp-display);
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        color: var(--bp-text);
+    }
+
+    // Hint: body face, muted ink
+    .tc-toggle-card-hint {
+        font-family: var(--bp-body);
+        color: var(--bp-text-muted);
+    }
+
+    // Badge: mono face — already correct via --tc-font-mono; reroute colors to bp tokens
+    .tc-toggle-card-badge {
+        font-family: var(--bp-mono);
+        color: var(--bp-teal-fg);               // teal text on white for AA contrast
+        background: var(--bp-teal-soft);
+        border-color: var(--bp-teal-line);
+        letter-spacing: 0.08em;
+    }
+
+    // Switch track: idle uses border token; active → pink gradient
+    // Replace the baked slate inset shadow on the idle track
+    .tc-toggle-card-switch {
+        box-shadow: inset 0 1px 2px rgba(26, 24, 48, 0.07); // bp-text-ish tint, not slate
+        transition: background-color var(--bp-ease, 150ms ease);
+    }
+
+    // Knob: replace baked slate shadow
+    .tc-toggle-card-knob {
+        box-shadow: 0 0 0 0.5px rgba(26, 24, 48, 0.08);
+    }
+
+    // ON: switch track → pink gradient; replace --tc-app-accent-gradient with blueprint pink
+    .tc-toggle-card--on {
+        .tc-toggle-card-switch {
+            background-color: var(--bp-pink);
+            background-image: var(--bp-pink-grad);
+            box-shadow: var(--bp-glow-pink);
+        }
+    }
+
+    // Spinner color → pink (matches on-accent)
+    .tc-toggle-card-spinner {
+        color: var(--bp-pink);
+    }
+}

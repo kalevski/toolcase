@@ -1,0 +1,101 @@
+// Blueprint › tc-combo-box — teal focus ring, pink selected option, mono uppercase label, paper popover with faint-border dividers.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-combo-box {
+        // ── Trigger ──────────────────────────────────────────────────────────
+        // White paper surface with a standard hairline — reads as a lifted
+        // form field against the lavender --bp-bg page ground.
+        --bs-combo-box-trigger-bg:                  var(--bp-paper);
+        --bs-combo-box-trigger-color:               var(--bp-text);
+        --bs-combo-box-trigger-border:              1px solid var(--bp-border);
+        --bs-combo-box-trigger-placeholder-color:   var(--bp-text-faint);
+
+        // Teal is the everyday-action accent in blueprint; it replaces the
+        // generic --tc-focus-ring with a teal glow so focus is theme-coherent.
+        --bs-combo-box-trigger-focus-shadow:        0 0 0 0.18rem var(--bp-teal-soft), 0 0 0 1px var(--bp-teal);
+
+        // ── Caret ─────────────────────────────────────────────────────────────
+        --bs-combo-box-caret-color:                 var(--bp-text-faint);
+
+        // ── Popover ───────────────────────────────────────────────────────────
+        // Paper bg + hairline + violet-tinted shadow from the theme shadow
+        // stack — the only layer that earns a shadow is the floating overlay.
+        --bs-combo-box-popover-bg:                  var(--bp-paper);
+        --bs-combo-box-popover-border:              1px solid var(--bp-border-strong);
+        --bs-combo-box-popover-shadow:              var(--tc-shadow-md);
+
+        // ── Search row ────────────────────────────────────────────────────────
+        // --bp-bg-2 is the recessed-well tone — visually separates the search
+        // strip from the option list below it without a second hairline.
+        --bs-combo-box-search-border:               1px solid var(--bp-border);
+        --bs-combo-box-search-bg:                   var(--bp-bg-2);
+        --bs-combo-box-search-color:                var(--bp-text);
+        --bs-combo-box-search-focus-shadow:         0 0 0 0.15rem var(--bp-teal-soft), 0 0 0 1px var(--bp-teal);
+
+        // ── Options ───────────────────────────────────────────────────────────
+        --bs-combo-box-option-color:                var(--bp-text);
+
+        // Subtle recessed hover — same well tone used for search bg.
+        --bs-combo-box-option-hover-bg:             var(--bp-bg-2);
+
+        // Pink = primary/CTA in the blueprint accent rotation; selected is
+        // the strongest affordance on the list so it earns the pink slot.
+        --bs-combo-box-option-selected-bg:          var(--bp-pink);
+        --bs-combo-box-option-selected-color:       var(--bp-pink-ink);
+
+        // ── Empty / no-match message ──────────────────────────────────────────
+        --bs-combo-box-empty-color:                 var(--bp-text-faint);
+
+        // ── Invalid state ─────────────────────────────────────────────────────
+        // Blueprint danger is real red, separate from the pink brand accent.
+        --bs-combo-box-trigger-invalid-border-color: var(--bp-danger);
+    }
+
+    // ── Label — mono eyebrow treatment ───────────────────────────────────────
+    // Combo-box labels are micro-UI identifiers; the blueprint mono face with
+    // tight uppercase tracking makes them read as HUD labels, not prose.
+    .tc-combo-box__label {
+        font-family:    var(--bp-mono);
+        font-size:      0.6875rem;
+        font-weight:    600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color:          var(--bp-teal-fg); // teal-fg clears AA on white --bp-paper
+    }
+
+    // ── Trigger — strong border on open state ────────────────────────────────
+    // When the popover is open the trigger shifts to a stronger hairline so the
+    // open/closed boundary reads clearly even before the glow kicks in.
+    .tc-combo-box__trigger[aria-expanded='true'] {
+        border-color: var(--bp-border-strong);
+    }
+
+    // ── Option dividers — replace --tc-surface-muted leak ────────────────────
+    // The base partial uses --tc-surface-muted for the per-option border-top;
+    // that token is not re-mapped in blueprint and would leak the raw slate
+    // ramp.  Override directly to the faint divider token.
+    .tc-combo-box__option {
+        border-top-color: var(--bp-border-faint);
+    }
+
+    // ── Selected option — focus ring in pink to match the fill ───────────────
+    // When a selected row receives keyboard focus the inset ring should stay
+    // legible on the pink fill; a white ring at 2px reads against any tinted bg.
+    .tc-combo-box__option--selected:focus-visible {
+        box-shadow: inset 0 0 0 2px var(--bp-pink-ink);
+    }
+
+    // ── Invalid trigger — danger focus ring ──────────────────────────────────
+    // Override the base's rgba(--bs-danger-rgb) ring with the blueprint token
+    // so the hue is unambiguously --bp-danger, not whatever --bs-danger-rgb maps to.
+    .tc-combo-box__trigger--invalid:focus-visible {
+        box-shadow: 0 0 0 0.18rem rgba(220, 38, 38, 0.2), 0 0 0 1px var(--bp-danger);
+    }
+
+    // ── Search input placeholder ──────────────────────────────────────────────
+    .tc-combo-box__search-input::placeholder {
+        color: var(--bp-text-faint);
+    }
+}

@@ -1,0 +1,17 @@
+// Blueprint › tc-hit-marker — teal confirmation tick, amber crit, red kill; all via --bs-hit-marker-* token re-points.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-hit-marker {
+        // Default reticle → teal (everyday action/confirmation in the arcade rotation).
+        // Uses --bp-teal rather than --bp-teal-fg because currentColor paints SVG
+        // strokes, not text on white; the full vivid teal reads cleanly as a HUD glyph.
+        --bs-hit-marker-color: var(--bp-teal);
+
+        // Crit variant → amber (supporting warning accent; distinguishable from teal).
+        --bs-hit-marker-crit-color: var(--bp-amber);
+
+        // Kill variant → danger red (real red, NOT pink — kill is a hard stop signal).
+        --bs-hit-marker-kill-color: var(--bp-danger);
+    }
+}

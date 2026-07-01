@@ -1,0 +1,61 @@
+// Blueprint › tc-gilded-frame — paper-white framed surface; dark tone flips to ink-paper contrast; leather becomes a recessed well; display headings use Chakra Petch.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Host default (mirrors dark tone default in base) ─────────────────────
+    // Blueprint's "dark" tone: deep emphasis ink fill with near-white text
+    // and a teal hairline so the frame reads as a primary panel surface.
+    tc-gilded-frame {
+        --bs-gilded-frame-bg:           var(--bp-emphasis);
+        --bs-gilded-frame-color:        var(--bp-paper-tint);
+        --bs-gilded-frame-border-color: var(--bp-teal-line);
+        --bs-gilded-frame-border-width: 1px;
+    }
+
+    // ── Tone: dark ───────────────────────────────────────────────────────────
+    // Deep ink panel — primary frame surface in blueprint.
+    // Pink top-edge accent glow marks it as the "primary" tier.
+    .tc-gilded-frame--tone-dark {
+        --bs-gilded-frame-bg:           var(--bp-emphasis);
+        --bs-gilded-frame-color:        var(--bp-paper-tint);
+        --bs-gilded-frame-border-color: var(--bp-teal-line);
+
+        // Pink top-edge accent line — the frame "gilded" detail
+        &.tc-gilded-frame {
+            border-top-color: var(--bp-pink-line);
+        }
+    }
+
+    // ── Tone: leather ────────────────────────────────────────────────────────
+    // Recessed well — slightly deeper lavender background with a standard
+    // hairline border; reads as a secondary / inset panel.
+    .tc-gilded-frame--tone-leather {
+        --bs-gilded-frame-bg:           var(--bp-bg-2);
+        --bs-gilded-frame-color:        var(--bp-text);
+        --bs-gilded-frame-border-color: var(--bp-border);
+    }
+
+    // ── Tone: transparent ────────────────────────────────────────────────────
+    // Borderless passthrough — inherits color from parent; faint hairline
+    // divider so the frame boundary is still readable on the lavender canvas.
+    .tc-gilded-frame--tone-transparent {
+        --bs-gilded-frame-bg:           transparent;
+        --bs-gilded-frame-color:        inherit;
+        --bs-gilded-frame-border-color: var(--bp-border-faint);
+    }
+
+    // ── Heading typography inside the frame ──────────────────────────────────
+    // The base partial forces headings to inherit the frame color. In blueprint
+    // we additionally stamp the display font + tight tracking on h1–h3 so that
+    // titling inside a panel reads as a Chakra Petch blueprint heading.
+    .tc-gilded-frame :is(h1, h2, h3) {
+        font-family: var(--bp-display);
+        letter-spacing: -0.02em;
+    }
+
+    // h4–h6 use bp-body (Space Grotesk) for hierarchy contrast
+    .tc-gilded-frame :is(h4, h5, h6) {
+        font-family: var(--bp-body);
+    }
+}

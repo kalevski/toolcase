@@ -1,0 +1,78 @@
+// Blueprint › tc-stamp — pressed-ink badge: mono face + arcade accent rotation;
+// default is teal-fg ink on teal-soft fill; primary flips to pink brand fill with
+// pink glow; color variants follow pink=primary / teal=action / violet+amber=support.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-stamp {
+        // Mono label voice — same face used for HUD labels, eyebrows, and nav chips.
+        // Tighten padding slightly to match the blueprint label density.
+        --bs-stamp-font-size: 0.625rem;
+        --bs-stamp-font-weight: 700;
+        --bs-stamp-letter-spacing: 0.12em;
+
+        // Default: teal-fg ink on teal-soft fill — reads as "action applied".
+        // Border inherits currentcolor (teal-fg) from the base rule; no override needed.
+        --bs-stamp-color: var(--bp-teal-fg);
+        --bs-stamp-bg: var(--bp-teal-soft);
+    }
+
+    .tc-stamp {
+        font-family: var(--bp-mono);
+
+        // Soft ink-bleed glow — mimics a freshly pressed rubber stamp under the
+        // blueprint light. Uses a spread-only shadow so it doesn't fight the tilt.
+        box-shadow: 0 0 0 2px var(--bp-teal-soft), var(--bp-glow-teal);
+    }
+
+    // ── Color variants — arcade accent rotation ──────────────────────────────
+
+    // Primary — pink brand fill; white ink; pink glow (= the CTA stamp).
+    .tc-stamp-primary {
+        --bs-stamp-color: var(--bp-pink-ink);
+        --bs-stamp-bg: var(--bp-pink);
+
+        box-shadow: 0 0 0 2px var(--bp-pink-soft), var(--bp-glow-pink);
+    }
+
+    // Secondary — teal-soft tint; teal-fg text (matches the default but
+    // preserves an explicit secondary slot so callers can switch independently).
+    .tc-stamp-secondary {
+        --bs-stamp-color: var(--bp-teal-fg);
+        --bs-stamp-bg: var(--bp-teal-soft);
+
+        box-shadow: 0 0 0 2px var(--bp-teal-soft), var(--bp-glow-teal);
+    }
+
+    // Success — solid teal action fill; white ink.
+    .tc-stamp-success {
+        --bs-stamp-color: var(--bp-teal-ink);
+        --bs-stamp-bg: var(--bp-teal);
+
+        box-shadow: 0 0 0 2px var(--bp-teal-soft), var(--bp-glow-teal);
+    }
+
+    // Danger — real red (not pink); white ink; no glow to keep urgency flat.
+    .tc-stamp-danger {
+        --bs-stamp-color: #fff;
+        --bs-stamp-bg: var(--bp-danger);
+
+        box-shadow: none;
+    }
+
+    // Warning — amber soft tint; amber-fg text (AA-safe on white/light ground).
+    .tc-stamp-warning {
+        --bs-stamp-color: var(--bp-amber-fg);
+        --bs-stamp-bg: var(--bp-amber-soft);
+
+        box-shadow: none;
+    }
+
+    // Info — violet soft tint; violet-fg text (supporting accent).
+    .tc-stamp-info {
+        --bs-stamp-color: var(--bp-violet-fg);
+        --bs-stamp-bg: var(--bp-violet-soft);
+
+        box-shadow: none;
+    }
+}

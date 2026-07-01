@@ -1,0 +1,107 @@
+// Blueprint › tc-ammo-counter — HUD readout reskinned as a blueprint panel: teal eyebrow label,
+// display-face mag count, mono secondary readout, danger-ink low state, teal reloading state.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-ammo-counter {
+        // Surface — white card, hairline border, soft shadow.
+        --bs-ammo-counter-bg:           var(--bp-paper);
+        --bs-ammo-counter-border-color: var(--bp-border);
+        --bs-ammo-counter-shadow:       var(--tc-shadow-sm);
+
+        // Weapon name eyebrow — teal-fg ink, mono font already applied by the base partial.
+        --bs-ammo-counter-weapon-color:          var(--bp-teal-fg);
+        --bs-ammo-counter-weapon-font-size:      0.625rem;
+        --bs-ammo-counter-weapon-letter-spacing: 0.14em;
+
+        // Mag count — primary display number, emphasis ink so it reads at a glance.
+        --bs-ammo-counter-mag-color:       var(--bp-emphasis);
+        --bs-ammo-counter-mag-font-size:   1.875rem;
+        --bs-ammo-counter-mag-font-weight: 700;
+
+        // Separator and max — faint / muted so the live count gets all the visual weight.
+        --bs-ammo-counter-sep-color:       var(--bp-text-faint);
+        --bs-ammo-counter-max-color:       var(--bp-text-muted);
+        --bs-ammo-counter-secondary-font-size: 1rem;
+
+        // Reserve — soft muted, slightly tighter than base.
+        --bs-ammo-counter-reserve-color:     var(--bp-text-faint);
+        --bs-ammo-counter-reserve-font-size: 0.75rem;
+
+        // State label — reloading text in teal, sized to match weapon eyebrow.
+        --bs-ammo-counter-state-color:          var(--bp-teal-fg);
+        --bs-ammo-counter-state-font-size:      0.625rem;
+        --bs-ammo-counter-state-letter-spacing: 0.14em;
+
+        // Low-ammo danger ink — real red, NOT pink (pink is primary CTA, not danger).
+        --bs-ammo-counter-low-color: var(--bp-danger);
+    }
+
+    // Weapon name — switch to --bp-mono family; base partial already uppercases it.
+    .tc-ammo-counter-weapon {
+        font-family: var(--bp-mono);
+    }
+
+    // Mag count — switch to --bp-display (Chakra Petch) for the hero number.
+    // Tight tracking suits a large display numeral in a HUD context.
+    .tc-ammo-counter-mag {
+        font-family: var(--bp-display);
+        letter-spacing: -0.02em;
+    }
+
+    // Separator and reserve — keep in mono; the base partial already does this for the row,
+    // but we pin the font-family here so blueprint-level @font-face stacks are honoured.
+    .tc-ammo-counter-sep,
+    .tc-ammo-counter-max,
+    .tc-ammo-counter-reserve {
+        font-family: var(--bp-mono);
+    }
+
+    // State label — mono family for the reloading eyebrow.
+    .tc-ammo-counter-state {
+        font-family: var(--bp-mono);
+    }
+
+    // HUD corner-bracket — teal bracket on the top-left of the container, applied sparingly
+    // because the component reads as a tappable / interactive HUD tile.
+    .tc-ammo-counter {
+        position: relative;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 7px;
+            left: 7px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            pointer-events: none;
+        }
+    }
+
+    // Low state — danger ink on the mag count; dim the separator to keep it subordinate.
+    tc-ammo-counter[data-state='low'] {
+        .tc-ammo-counter-sep {
+            color: var(--bp-border-strong); // further dimmed so danger count pops harder
+        }
+    }
+
+    // Reloading state — state label pulses softly; mag dims to faint to yield emphasis.
+    tc-ammo-counter[data-state='reloading'] {
+        .tc-ammo-counter-state {
+            // Gentle blink on the reloading label — conveys live activity without jarring flash.
+            animation: bp-ammo-reload-blink 1.1s ease-in-out infinite;
+
+            @media (prefers-reduced-motion: reduce) {
+                animation: none;
+            }
+        }
+    }
+
+    @keyframes bp-ammo-reload-blink {
+        0%, 100% { opacity: 1; }
+        50%       { opacity: 0.4; }
+    }
+}

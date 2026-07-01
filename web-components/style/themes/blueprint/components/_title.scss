@@ -1,0 +1,15 @@
+// Blueprint › tc-title — display-type section title in Chakra Petch with tight
+// tracking. Token remap already sets the emphasis violet-ink colour; this swaps
+// the typeface to the display family.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-title {
+        --bs-title-color: var(--bp-emphasis);
+    }
+
+    .tc-title {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+    }
+}

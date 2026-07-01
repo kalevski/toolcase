@@ -1,0 +1,64 @@
+// Blueprint › .card — the HUD panel. The token remap gives the white surface,
+// lilac hairline and soft violet-tinted shadow for free; this adds the BLUEPRINT
+// STRUCTURE: the L-shaped corner-bracket tick (top-left, teal), the accent
+// border-swap + lift on hover, and a faint lilac cap gradient. The bracket is an
+// absolutely-positioned ::before with only border-left + border-top — the
+// signature HUD detail from the feature cards (blueprint_theme.md §8.4).
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    .card {
+        --bs-card-border-color: var(--bp-border);
+        --bs-card-cap-bg: linear-gradient(135deg, rgba(91, 61, 242, 0.04), rgba(91, 61, 242, 0.01));
+        --bs-card-box-shadow: var(--tc-shadow-sm);
+        position: relative;
+        transition:
+            transform 0.25s var(--bp-ease),
+            border-color 0.25s,
+            box-shadow 0.25s;
+    }
+
+    // HUD corner-bracket — a 12×12 L-tick in the card's teal accent.
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        width: 12px;
+        height: 12px;
+        border-top: 2px solid var(--bp-teal);
+        border-left: 2px solid var(--bp-teal);
+        opacity: 0.7;
+        pointer-events: none;
+        transition: opacity 0.25s;
+    }
+
+    .card:hover {
+        transform: translateY(-3px);
+        border-color: var(--bp-teal);
+        box-shadow: var(--tc-shadow-hover);
+    }
+
+    .card:hover::before {
+        opacity: 1;
+    }
+
+    .card-header {
+        border-bottom-color: var(--bp-border-faint);
+    }
+
+    .card-footer {
+        border-top-color: var(--bp-border-faint);
+    }
+
+    // Solid-variant cards (text-bg-*) carry their own fill — no bracket, no lift,
+    // so the painted surface doesn't float or fight a tick in a clashing hue.
+    .card[class*='text-bg-']::before {
+        display: none;
+    }
+
+    .card[class*='text-bg-']:hover {
+        transform: none;
+        box-shadow: var(--tc-shadow-sm);
+    }
+}

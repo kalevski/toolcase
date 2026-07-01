@@ -1,0 +1,132 @@
+// Blueprint › tc-number-input — white paper field with teal steppers, mono numeric
+// ink, pink focus ring, and blueprint hairline border; error state routes to --bp-danger.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-number-input {
+        // Re-point all cosmetic custom properties to blueprint tokens.
+        // The border / bg / text follow the paper surface convention;
+        // steppers use teal as the everyday action accent.
+        --bs-number-input-border-color:        var(--bp-border);
+        --bs-number-input-bg:                  var(--bp-paper);
+        --bs-number-input-color:               var(--bp-text);
+        --bs-number-input-addon-bg:            var(--bp-bg-2);
+        --bs-number-input-addon-color:         var(--bp-text-muted);
+        --bs-number-input-stepper-bg:          var(--bp-bg-2);
+        --bs-number-input-stepper-hover-bg:    var(--bp-teal-soft);
+        --bs-number-input-stepper-disabled-opacity: 0.35;
+        --bs-number-input-error-color:         var(--bp-danger);
+        --bs-number-input-error-border-color:  var(--bp-danger);
+        // Pink focus ring — matches the other blueprint form controls
+        --bs-number-input-focus-ring:          0 0 0 0.2rem var(--bp-pink-glow);
+    }
+
+    // ── Label ─────────────────────────────────────────────────────────────────
+    // Mono micro-label: uppercase, tracked — blueprint eyebrow convention.
+
+    .tc-number-input__label {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: .09em;
+        text-transform: uppercase;
+        color: var(--bp-text-muted);
+    }
+
+    // ── Group frame ────────────────────────────────────────────────────────────
+    // 1 px --bp-border hairline; --tc-shadow-sm lifts it gently off the canvas.
+
+    .tc-number-input__group {
+        border-color: var(--bs-number-input-border-color);
+        box-shadow: var(--tc-shadow-sm);
+
+        > * + * {
+            border-left-color: var(--bp-border);
+        }
+
+        // Error state: swap outer frame to danger and tint the focus shadow.
+        &.tc-number-input__group--error {
+            border-color: var(--bp-danger);
+
+            > * + * {
+                border-left-color: var(--bp-danger-soft);
+            }
+
+            .tc-number-input__input:focus {
+                // Soft danger halo — distinct from the normal pink ring.
+                box-shadow: 0 0 0 0.2rem rgba(220, 38, 38, 0.18);
+            }
+        }
+    }
+
+    // ── Addon (prefix / suffix) ────────────────────────────────────────────────
+    // Recessed bg, mono font; the separator line is already inherited from group.
+
+    .tc-number-input__addon {
+        background-color: var(--bs-number-input-addon-bg);
+        color: var(--bs-number-input-addon-color);
+        font-family: var(--bp-mono);
+        font-size: 0.75rem;
+        letter-spacing: .04em;
+        border-left-color: var(--bp-border);
+        border-right-color: var(--bp-border);
+    }
+
+    // ── Input ──────────────────────────────────────────────────────────────────
+    // White paper ground; mono numeric ink; pink focus ring.
+
+    .tc-number-input__input {
+        background-color: var(--bs-number-input-bg);
+        color: var(--bs-number-input-color);
+        font-family: var(--bp-mono);
+        font-variant-numeric: tabular-nums;
+
+        &::placeholder {
+            color: var(--bp-text-faint);
+        }
+
+        &[aria-invalid='true'] {
+            color: var(--bp-danger);
+        }
+
+        &:focus {
+            box-shadow: var(--bs-number-input-focus-ring);
+        }
+    }
+
+    // ── Stepper column ─────────────────────────────────────────────────────────
+    // Internal hairline between the two buttons uses blueprint border token.
+
+    .tc-number-input__stepper {
+        .tc-number-input__step-btn + .tc-number-input__step-btn {
+            border-top-color: var(--bp-border);
+        }
+    }
+
+    // ── Stepper buttons ────────────────────────────────────────────────────────
+    // Teal is the blueprint everyday-action accent. Hover tints the button
+    // background with the teal-soft fill and shifts the icon to full teal.
+
+    .tc-number-input__step-btn {
+        background-color: var(--bs-number-input-stepper-bg);
+        color: var(--bp-text-faint);
+
+        @media (prefers-reduced-motion: no-preference) {
+            transition:
+                background-color 140ms var(--bp-ease),
+                color             140ms var(--bp-ease);
+        }
+
+        &:hover:not([disabled]) {
+            background-color: var(--bs-number-input-stepper-hover-bg);
+            // Use the darker teal fg so the icon clears AA on the soft fill.
+            color: var(--bp-teal-fg);
+        }
+
+        // Disabled buttons dim further to match blueprint's 0.35 opacity convention.
+        &[disabled],
+        &[aria-disabled='true'] {
+            opacity: var(--bs-number-input-stepper-disabled-opacity);
+        }
+    }
+}

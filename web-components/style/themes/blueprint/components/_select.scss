@@ -1,0 +1,43 @@
+// Blueprint › tc-select — paper-white field, teal chevron + focus ring, bp-border hairline.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // Re-skin via Bootstrap-compatible custom properties where they exist.
+    // The chevron SVG stroke color is baked into the data URI; we swap the
+    // slate %2364748b for --bp-teal (%230aa89a) to stay on-theme.
+    .form-select {
+        --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%230aa89a' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+        --bs-form-select-border-color: var(--bp-border);
+
+        // Replace the hardcoded dark-slate focus tokens with teal.
+        --bs-form-select-focus-border-color: var(--bp-teal);
+        --bs-form-select-focus-box-shadow: var(--bp-glow-teal);
+
+        font-family: var(--bp-body);
+        color: var(--bp-text);
+        background-color: var(--bp-paper);
+        transition:
+            border-color var(--bp-ease),
+            box-shadow var(--bp-ease);
+
+        &:hover:not(:disabled):not([multiple]):not([size]):not([size='1']) {
+            // Subtle border lift on hover — teal hairline signals interactivity.
+            --bs-form-select-border-color: var(--bp-border-strong);
+        }
+
+        &:focus {
+            border-color: var(--bs-form-select-focus-border-color);
+            box-shadow: var(--bs-form-select-focus-box-shadow);
+        }
+
+        &:disabled {
+            // Recessed well + faint ink for disabled state.
+            color: var(--bp-text-faint);
+            background-color: var(--bp-bg-2);
+            // Soften the chevron on disabled: swap to faint ink color (%238e89b3).
+            --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%238e89b3' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+            --bs-form-select-border-color: var(--bp-border-faint);
+        }
+    }
+}

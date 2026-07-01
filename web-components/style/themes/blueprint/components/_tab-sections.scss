@@ -1,0 +1,80 @@
+// Blueprint › tc-tab-sections — mono HUD tab row (teal inactive / pink active underline) on lavender canvas.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-tab-sections {
+        // Nav hairline → blueprint border token (replaces --tc-border)
+        --bs-tab-sections-nav-border: 1px solid var(--bp-border);
+
+        // Tab labels: inactive → muted text; reads as tappable HUD nav label
+        --bs-tab-sections-tab-color: var(--bp-text-muted);
+        // Hover → stronger ink so the label lifts visually
+        --bs-tab-sections-tab-color-hover: var(--bp-text-soft);
+        // Active → primary ink; pairing with the pink underline below
+        --bs-tab-sections-tab-color-active: var(--bp-text);
+        // Active underline: pink = primary/selected in the arcade accent rotation
+        --bs-tab-sections-tab-underline: 2px solid var(--bp-pink);
+
+        // Panel body text → standard blueprint ink
+        --bs-tab-sections-panel-color: var(--bp-text);
+
+        // Skeleton pulse blocks → faint lavender tint (light theme; no dark flips)
+        --bs-tab-sections-skeleton-bg: var(--bp-border-faint);
+    }
+
+    // ── Tab labels: mono HUD letterform ──────────────────────────────────────
+    // bp-mono (JetBrains Mono) + uppercase + loose tracking = HUD nav aesthetic
+    .tc-tab-sections-tab {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        font-weight: 500;
+        // Smooth accent color transition using blueprint ease
+        transition: color 0.18s var(--bp-ease, ease);
+
+        &:hover {
+            // Teal is the everyday action accent; tinting the label on hover
+            color: var(--bp-teal-fg);
+        }
+
+        // Active: primary pink label matches the underline stroke
+        &--active {
+            color: var(--bp-pink);
+            font-weight: 600;
+        }
+
+        // Focus ring → blueprint pink (primary accent)
+        &:focus-visible {
+            outline-color: var(--bp-pink);
+        }
+    }
+
+    // ── Panel content area ────────────────────────────────────────────────────
+    .tc-tab-sections-panel {
+        // Focus ring on keyboard-navigable panels → pink primary
+        &:focus-visible {
+            outline-color: var(--bp-pink);
+        }
+    }
+
+    // ── Loading skeleton ──────────────────────────────────────────────────────
+    // Skeleton blocks use --bp-border-faint fill (set via the custom property above).
+    // Add a soft pulse animation using bp-paper-tint so it reads as "loading"
+    // on the lavender --bp-bg canvas without reaching for hardcoded hex values.
+    .tc-tab-sections--loading {
+        .tc-tab-sections-tab-skeleton,
+        .tc-tab-sections-line {
+            // Pulse from faint border to slightly more visible paper-tint-2
+            animation: bp-tab-skeleton-pulse 1.4s ease-in-out infinite;
+        }
+    }
+
+    @keyframes bp-tab-skeleton-pulse {
+        0%, 100% {
+            background-color: var(--bp-border-faint);
+        }
+        50% {
+            background-color: var(--bp-paper-tint-2);
+        }
+    }
+}

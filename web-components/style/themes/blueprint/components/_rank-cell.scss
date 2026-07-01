@@ -1,0 +1,62 @@
+// Blueprint › tc-rank-cell — mono HUD badge with pink/violet/amber prestige stripes replacing gold/silver/bronze.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Custom property overrides ─────────────────────────────────────────────
+    // Remap the three tier accent tokens to blueprint's arcade rotation.
+    // Pink = first place (primary prestige); violet = second (supporting cool);
+    // amber = third (supporting warm — natural bronze analog).
+    // Using the -fg variants for text so they clear AA on --bp-paper white.
+
+    tc-rank-cell {
+        --bs-rank-cell-gold:    var(--bp-pink);     // 1st — pink stripe
+        --bs-rank-cell-silver:  var(--bp-violet);   // 2nd — violet stripe
+        --bs-rank-cell-bronze:  var(--bp-amber);    // 3rd — amber stripe
+        // Stripe stays 3 px — enough visual weight without being a thick gutter
+        --bs-rank-cell-stripe-width: 3px;
+    }
+
+    // ── Base cell surface ─────────────────────────────────────────────────────
+
+    .tc-rank-cell {
+        background: var(--bp-paper);
+        border-color: var(--bp-border-faint);   // hairline sides + top + bottom
+        border-left-color: var(--bp-border);    // default stripe: neutral border weight
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;              // mono labels read as HUD micro-text
+        color: var(--bp-text-faint);            // neutral rank: receded, not invisible
+    }
+
+    // ── Tier states ───────────────────────────────────────────────────────────
+    // Each tier gets a soft surface tint behind the number so the stripe accent
+    // has a matching ground — the badge reads as a single coloured unit, not
+    // just a coloured edge on a white box.  -fg tokens guarantee AA contrast on
+    // their respective -soft fills.
+
+    .tc-rank-cell--gold {
+        // 1st place → pink (primary prestige)
+        background: var(--bp-pink-soft);
+        border-left-color: var(--bs-rank-cell-gold);  // resolves to --bp-pink
+        color: var(--bp-pink);                        // bright pink on soft — clears AA
+    }
+
+    .tc-rank-cell--silver {
+        // 2nd place → violet (supporting)
+        background: var(--bp-violet-soft);
+        border-left-color: var(--bs-rank-cell-silver);  // resolves to --bp-violet
+        color: var(--bp-violet-fg);                     // darker violet-fg on soft fill
+    }
+
+    .tc-rank-cell--bronze {
+        // 3rd place → amber (supporting warm)
+        background: var(--bp-amber-soft);
+        border-left-color: var(--bs-rank-cell-bronze);  // resolves to --bp-amber
+        color: var(--bp-amber-fg);                      // darker amber-fg on soft fill
+    }
+
+    // ── Number glyph ─────────────────────────────────────────────────────────
+    // The inner span inherits all the above; no additional overrides needed.
+    // font-variant-numeric: tabular-nums is set in the base and carries through.
+}

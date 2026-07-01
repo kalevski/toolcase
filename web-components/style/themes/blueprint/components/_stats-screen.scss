@@ -1,0 +1,93 @@
+// Blueprint › tc-stats-screen — white paper panel, teal-accent mono eyebrow/section labels, display title, pink separator, tabular-nums values in primary ink.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-stats-screen {
+        // ── Panel surface ──────────────────────────────────────────────────────
+        // Raised white card on the lavender page; violet-tinted hairline border.
+        --bs-stats-screen-bg:               var(--bp-paper);
+        --bs-stats-screen-border:           var(--bp-border);
+
+        // ── Header ─────────────────────────────────────────────────────────────
+        // Recessed well differentiates the header from the body rows.
+        --bs-stats-screen-header-bg:        var(--bp-bg-2);
+        --bs-stats-screen-header-border:    var(--bp-border);
+
+        // Eyebrow — mono HUD label in teal-fg (clears AA contrast on --bp-bg-2).
+        --bs-stats-screen-eyebrow-color:    var(--bp-teal-fg);
+
+        // Title — primary ink; element-level rule applies display font below.
+        --bs-stats-screen-title-color:      var(--bp-text);
+
+        // Summary prose — muted body ink.
+        --bs-stats-screen-summary-color:    var(--bp-text-muted);
+
+        // Separator — pink brand rule (short 3rem hairline; reads as an accent tick).
+        --bs-stats-screen-separator-color:  var(--bp-pink);
+
+        // ── Sections ───────────────────────────────────────────────────────────
+        // Section borders — faint lavender dividers between groups.
+        --bs-stats-screen-section-border:   var(--bp-border-faint);
+
+        // Section title label — faintest mono ink; less prominent than the eyebrow.
+        --bs-stats-screen-section-title-color: var(--bp-text-faint);
+
+        // ── Stat rows ──────────────────────────────────────────────────────────
+        // Row hairlines — one step lighter than section dividers.
+        --bs-stats-screen-stat-border:      var(--bp-border-faint);
+
+        // Stat label — body muted ink; keeps the value dominant.
+        --bs-stats-screen-stat-label-color: var(--bp-text-muted);
+
+        // Stat value — primary ink for maximum readability of the datum.
+        --bs-stats-screen-stat-value-color: var(--bp-text);
+    }
+
+    // ── Panel shadow + border ──────────────────────────────────────────────────
+    .tc-stats-screen {
+        box-shadow: var(--tc-shadow-sm);
+        border-color: var(--bp-border);
+    }
+
+    // ── Eyebrow — mono HUD style ───────────────────────────────────────────────
+    // Base already sets font-family to --tc-font-mono and uppercase; remap to the
+    // blueprint mono stack and widen tracking to the .10–.18em HUD spec.
+    .tc-stats-screen-eyebrow {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.14em;
+        color: var(--bp-teal-fg);
+    }
+
+    // ── Title — display font for section-name impact ───────────────────────────
+    .tc-stats-screen-title {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+        color: var(--bp-text);
+    }
+
+    // ── Separator — thin pink brand accent tick ────────────────────────────────
+    // Replaces the neutral slate hairline with a 2px pink rule for visual weight.
+    .tc-stats-screen-separator {
+        height: 2px;
+        background: var(--bp-pink);
+        max-width: 2.5rem;
+        // Subtle glow so the pink rule reads as an arc reactor pulse on white.
+        box-shadow: var(--bp-glow-pink);
+    }
+
+    // ── Section title — mono micro-label ──────────────────────────────────────
+    // Remap to the blueprint mono stack with slightly wider tracking than the base.
+    .tc-stats-screen-section-title {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.12em;
+        color: var(--bp-text-faint);
+    }
+
+    // ── Stat value — mono tabular-nums, bump tracking for HUD cadence ─────────
+    .tc-stats-screen-stat-value {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.04em;
+        color: var(--bp-text);
+    }
+}

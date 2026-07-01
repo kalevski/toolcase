@@ -1,0 +1,106 @@
+// Blueprint › tc-user-panel — white-paper identity strip; pink avatar accent,
+// mono teal plan label, teal-action icon states, pink-primary active/selected.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-user-panel {
+        // ── Panel surface ──────────────────────────────────────────────────────
+        --bs-user-panel-bg: var(--bp-paper);
+
+        // ── Avatar — pink is the primary brand splash ──────────────────────────
+        --bs-user-panel-avatar-bg: var(--bp-pink);
+        --bs-user-panel-avatar-color: var(--bp-pink-ink);
+
+        // ── Name — display face for identity weight ────────────────────────────
+        --bs-user-panel-name-color: var(--bp-text);
+
+        // ── Plan label — teal mono eyebrow (teal = everyday status/action) ──────
+        --bs-user-panel-plan-color: var(--bp-teal-fg);
+
+        // ── Info block trigger hover ────────────────────────────────────────────
+        --bs-user-panel-trigger-hover-bg: var(--bp-paper-tint-2);
+
+        // ── Settings icon — muted default, teal hover, pink active ─────────────
+        --bs-user-panel-icon-color: var(--bp-text-muted);
+        --bs-user-panel-icon-hover-bg: var(--bp-teal-soft);
+        --bs-user-panel-icon-hover-color: var(--bp-teal-fg);
+        --bs-user-panel-icon-active-bg: var(--bp-pink);
+        --bs-user-panel-icon-active-color: var(--bp-pink-ink);
+        // Highlighted state → teal glyph (attention without full active weight)
+        --bs-user-panel-icon-highlight-color: var(--bp-teal-fg);
+
+        // ── Dropdown menu surface ───────────────────────────────────────────────
+        --bs-user-panel-menu-bg: var(--bp-paper);
+        --bs-user-panel-menu-border-color: var(--bp-border);
+        --bs-user-panel-menu-shadow: var(--tc-shadow-lg);
+
+        // ── Menu items — teal hover, pink active (accent rotation) ──────────────
+        --bs-user-panel-menu-item-color: var(--bp-text);
+        --bs-user-panel-menu-item-hover-bg: var(--bp-teal-soft);
+        --bs-user-panel-menu-item-hover-color: var(--bp-teal-fg);
+        --bs-user-panel-menu-item-active-bg: var(--bp-pink);
+        --bs-user-panel-menu-item-active-color: var(--bp-pink-ink);
+
+        // ── Skeleton — lavender-tinted shimmer on bp-bg ground ─────────────────
+        --bs-user-panel-skeleton-bg: var(--bp-border-faint);
+        // Replace the raw rgba(255,255,255,0.6) shimmer with bp-paper-tint
+        // so the animation reads cleanly against the lavender page canvas.
+        --bs-user-panel-skeleton-shimmer: var(--bp-paper-tint);
+    }
+
+    // ── Panel container — hairline + paper card ─────────────────────────────────
+    .tc-user-panel {
+        background-color: var(--bs-user-panel-bg);
+        border: 1px solid var(--bp-border);
+        box-shadow: var(--tc-shadow-sm);
+        transition: box-shadow var(--bp-ease);
+    }
+
+    // ── Name — display face for identity legibility ─────────────────────────────
+    .tc-user-panel-name {
+        font-family: var(--bp-display);
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: var(--bs-user-panel-name-color);
+    }
+
+    // ── Plan label — mono eyebrow (base already uppercase + tracked) ────────────
+    .tc-user-panel-plan {
+        font-family: var(--bp-mono);
+        color: var(--bs-user-panel-plan-color);
+        // Slightly more air than the base 0.08em to match bp-mono eyebrow recipe
+        letter-spacing: 0.1em;
+    }
+
+    // ── Info trigger focus ring → teal ──────────────────────────────────────────
+    .tc-user-panel-info[role='button']:focus-visible {
+        outline-color: var(--bp-teal);
+    }
+
+    // ── Icon button focus ring → teal ───────────────────────────────────────────
+    .tc-user-panel-icon:focus-visible {
+        outline-color: var(--bp-teal);
+    }
+
+    // ── Dropdown menu — hairline card floating above the strip ──────────────────
+    .tc-user-panel-menu {
+        background-color: var(--bs-user-panel-menu-bg);
+        border-color: var(--bs-user-panel-menu-border-color);
+        box-shadow: var(--bs-user-panel-menu-shadow);
+    }
+
+    // ── Menu item icon glyphs — faint default, inherits color on hover/active ───
+    .tc-user-panel-menu-icon {
+        color: var(--bp-text-faint);
+    }
+
+    // Hover/active states inherit item color so the glyph and label move together
+    .tc-user-panel-menu-item:hover .tc-user-panel-menu-icon,
+    .tc-user-panel-menu-item:focus-visible .tc-user-panel-menu-icon {
+        color: var(--bp-teal-fg);
+    }
+
+    .tc-user-panel-menu-item:active .tc-user-panel-menu-icon {
+        color: var(--bp-pink-ink);
+    }
+}

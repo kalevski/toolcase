@@ -1,0 +1,117 @@
+// Blueprint › tc-image-crop — lavender-well stage, teal zoom thumb, pink primary CTA; replaces slate literals and --tc-* leaks.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-image-crop {
+        // Stage: recessed lavender well instead of the slate surface-muted default.
+        --bs-image-crop-field: var(--bp-bg-2);
+        --bs-image-crop-border: var(--bp-border);
+        --bs-image-crop-window-border: var(--bp-border-strong);
+
+        // Scrim: the base partial bakes rgba(15,23,42,0.55) — a hard dark-slate literal.
+        // Replace with a violet-dark semi-transparent that reads on the lavender field.
+        --bs-image-crop-scrim: rgba(26, 24, 48, 0.58); // close to --bp-text (#1a1830) at 58 %
+
+        // Toolbar label: mono eyebrow treatment (ZOOM label).
+        --bs-image-crop-label-color: var(--bp-text-muted);
+
+        // Zoom control: teal = everyday action.
+        --bs-image-crop-zoom-track: var(--bp-border-strong);
+        --bs-image-crop-zoom-thumb-bg: var(--bp-paper);
+        --bs-image-crop-zoom-thumb-border: var(--bp-teal);
+
+        // Ghost (Reset) button: blueprint hairline + paper hover.
+        --bs-image-crop-btn-border: var(--bp-border-soft);
+        --bs-image-crop-btn-color: var(--bp-text);
+        --bs-image-crop-btn-hover-bg: var(--bp-bg-2);
+
+        // Primary (Apply) button: pink = primary CTA per accent rotation.
+        --bs-image-crop-btn-primary-bg: var(--bp-pink-grad);
+        --bs-image-crop-btn-primary-color: var(--bp-pink-ink);
+        // Replace the baked rgba(30,41,59,0.3) dark-slate lift shadow with a pink glow.
+        --bs-image-crop-btn-primary-lift: var(--bp-glow-pink);
+
+        // Error: real red, not pink.
+        --bs-image-crop-error-color: var(--bp-danger);
+
+        // Focus ring: teal for interactive elements (everyday action).
+        --bs-image-crop-focus-outline: 2px solid var(--bp-teal);
+    }
+
+    // ── Stage surface ─────────────────────────────────────────────────────────────
+
+    .tc-image-crop-stage {
+        // Promote the stage border to the blueprint border token (already wired via
+        // --bs-image-crop-border, but box-shadow adds a teal inner accent line when
+        // the stage is grabbed to signal the active drag state).
+        box-shadow: inset 0 0 0 1px var(--bp-border);
+
+        &.tc-image-crop-stage--grabbing {
+            box-shadow: inset 0 0 0 1px var(--bp-teal-line);
+        }
+    }
+
+    // ── Zoom label: mono eyebrow ──────────────────────────────────────────────────
+
+    .tc-image-crop-zoom-label {
+        // Override the base --tc-font-mono reference; wire to the blueprint mono token.
+        font-family: var(--bp-mono);
+        letter-spacing: 0.1em;
+        color: var(--bp-text-muted);
+    }
+
+    // ── Zoom slider: teal progress fill (Firefox) ─────────────────────────────────
+
+    .tc-image-crop-zoom {
+        // Firefox moz-range-progress uses --tc-app-accent in the base; reroute to teal.
+        &::-moz-range-progress {
+            background-color: var(--bp-teal);
+        }
+
+        // Webkit: paint the filled portion of the track with teal via a gradient trick.
+        // The base partial does not use a CSS-variable-driven fill on webkit, so we
+        // replicate the thumb accent colour on the track using accent-color which
+        // applies to range inputs in modern browsers.
+        accent-color: var(--bp-teal);
+    }
+
+    // ── Error message ─────────────────────────────────────────────────────────────
+
+    .tc-image-crop-error {
+        // Mono micro-label treatment for the error string — keeps it typographically
+        // consistent with the zoom label while the danger color flags the problem.
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--bp-danger);
+    }
+
+    // ── Primary (Apply) button: pink CTA ─────────────────────────────────────────
+
+    .tc-image-crop-btn--primary {
+        font-family: var(--bp-display);
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        transition: transform var(--bp-ease), box-shadow var(--bp-ease);
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--bp-glow-pink);
+        }
+    }
+
+    // ── Ghost (Reset) button ──────────────────────────────────────────────────────
+
+    .tc-image-crop-btn--ghost {
+        font-family: var(--bp-body);
+        color: var(--bp-text-soft);
+        border-color: var(--bp-border-soft);
+
+        &:hover {
+            background: var(--bp-bg-2);
+            color: var(--bp-text);
+        }
+    }
+}

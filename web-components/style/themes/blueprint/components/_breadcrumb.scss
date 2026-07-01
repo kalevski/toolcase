@@ -1,0 +1,57 @@
+// Blueprint › tc-breadcrumb — mono eyebrow register: diamond divider, teal link hover, muted-ink trail.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    // Reroute every --bs-breadcrumb-* property to blueprint tokens.
+    // The divider glyph shifts to ◇ — fits the vector/blueprint glyph vocab.
+    // Link hover uses --bp-teal-fg (darker teal, AA-safe on white) per the
+    // everyday-action accent rotation (teal = action, not pink which is CTA-only).
+
+    .breadcrumb {
+        --bs-breadcrumb-divider-color: var(--bp-border-strong);
+        --bs-breadcrumb-item-active-color: var(--bp-text);
+        --bs-breadcrumb-divider: '◇';
+
+        // Override the literal color: var(--tc-text-faint) painted in the base rule
+        color: var(--bp-text-faint);
+
+        // Explicit blueprint mono — ensures Chakra Petch/Space Grotesk don't bleed in
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;       // slightly smaller than base 0.75rem; mono reads large
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+
+    .breadcrumb-item {
+        // Divider color is already driven by --bs-breadcrumb-divider-color above;
+        // this re-scopes ::before just in case Bootstrap specificity wins
+        + .breadcrumb-item::before {
+            color: var(--bp-border-strong);
+            // Scale the diamond down slightly so it aligns with the x-height
+            font-size: 0.55rem;
+            line-height: 1;
+            vertical-align: middle;
+        }
+
+        a {
+            color: var(--bp-text-muted);
+            text-decoration: none;
+            transition: color 0.15s var(--bp-ease, ease);
+
+            &:hover {
+                color: var(--bp-teal-fg); // AA-safe teal on --bp-paper / --bp-bg
+            }
+
+            &:focus-visible {
+                outline: 2px solid var(--bp-teal);
+                outline-offset: 2px;
+            }
+        }
+
+        // Active (current page) uses primary ink — it is text, not a link
+        &.active {
+            color: var(--bp-text);
+        }
+    }
+}

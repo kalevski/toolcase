@@ -1,0 +1,133 @@
+// Blueprint › tc-entity-cell — paper card surface, teal initials tile, mono sublabel, pink active press.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Custom-property re-skin ──────────────────────────────────────────────
+    tc-entity-cell {
+        --bs-entity-cell-bg:              var(--bp-paper);
+        --bs-entity-cell-border-color:    var(--bp-border);
+        --bs-entity-cell-hover-bg:        var(--bp-paper-tint);
+        --bs-entity-cell-name-color:      var(--bp-text);
+        --bs-entity-cell-sublabel-color:  var(--bp-text-muted);
+    }
+
+    // ── Cell wrapper ─────────────────────────────────────────────────────────
+    .tc-entity-cell {
+        background:   var(--bs-entity-cell-bg);
+        border-color: var(--bs-entity-cell-border-color);
+        box-shadow:   var(--tc-shadow-sm);
+        transition:
+            background-color var(--bp-ease),
+            border-color     var(--bp-ease),
+            box-shadow       var(--bp-ease);
+    }
+
+    // ── Initials tile — default (slate → teal-soft fill) ────────────────────
+    // The base partial hardcodes $slate-100 / $slate-700; reroute to bp tokens.
+    .tc-entity-cell__tile {
+        background-color: var(--bp-teal-soft);
+        color:            var(--bp-teal-fg);
+        font-family:      var(--bp-mono);           // mono — initials read as a HUD glyph
+        font-weight:      700;
+        letter-spacing:   0.06em;
+        text-transform:   uppercase;
+    }
+
+    // ── Name — display font, tight tracking ─────────────────────────────────
+    .tc-entity-cell__name {
+        font-family: var(--bp-display);
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: var(--bs-entity-cell-name-color);
+    }
+
+    // ── Sublabel — mono eyebrow style ────────────────────────────────────────
+    .tc-entity-cell__sublabel {
+        font-family:    var(--bp-mono);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color:          var(--bs-entity-cell-sublabel-color);
+    }
+
+    // ── Color variants — replace baked $theme-colors-soft/emphasis + raw hex ─
+    // slate: teal-soft (default already covers this, explicit for clarity)
+    .tc-entity-cell__tile--slate {
+        background-color: var(--bp-teal-soft);
+        color:            var(--bp-teal-fg);
+    }
+
+    // blue → violet (info accent)
+    .tc-entity-cell__tile--blue {
+        background-color: var(--bp-violet-soft);
+        color:            var(--bp-violet-fg);
+    }
+
+    // green → teal (success)
+    .tc-entity-cell__tile--green {
+        background-color: var(--bp-teal-soft);
+        color:            var(--bp-teal-fg);
+    }
+
+    // red → danger
+    .tc-entity-cell__tile--red {
+        background-color: var(--bp-danger-soft);
+        color:            var(--bp-danger);
+    }
+
+    // yellow → amber
+    .tc-entity-cell__tile--yellow {
+        background-color: var(--bp-amber-soft);
+        color:            var(--bp-amber-fg);
+    }
+
+    // purple → violet (was hardcoded #f3e8ff / #6b21a8)
+    .tc-entity-cell__tile--purple {
+        background-color: var(--bp-violet-soft);
+        color:            var(--bp-violet-fg);
+    }
+
+    // orange → amber (was hardcoded #ffedd5 / #9a3412)
+    .tc-entity-cell__tile--orange {
+        background-color: var(--bp-amber-soft);
+        color:            var(--bp-amber-fg);
+    }
+
+    // ── Interactive state ladder ─────────────────────────────────────────────
+    .tc-entity-cell--interactive {
+        cursor: pointer;
+
+        &:hover {
+            background-color: var(--bs-entity-cell-hover-bg);
+            border-color:     var(--bp-border-strong);
+            box-shadow:       var(--tc-shadow-hover);
+            transform:        translateY(-2px);  // blueprint lift on hover
+        }
+
+        // Active press → pink primary (replaces generic --tc-app-accent)
+        &:active {
+            background-color: var(--bp-pink);
+            border-color:     var(--bp-pink);
+            color:            var(--bp-pink-ink);
+            box-shadow:       var(--bp-glow-pink);
+            transform:        translateY(0);
+
+            .tc-entity-cell__name,
+            .tc-entity-cell__sublabel {
+                color: var(--bp-pink-ink);
+            }
+
+            // Tile inverts to a strong pink-tinted surface on press
+            .tc-entity-cell__tile {
+                background-color: rgba(255, 255, 255, 0.18);
+                color:            var(--bp-pink-ink);
+            }
+        }
+
+        &:focus-visible {
+            outline:        2px solid var(--bp-pink);
+            outline-offset: 2px;
+            box-shadow:     var(--bp-glow-pink);
+        }
+    }
+}

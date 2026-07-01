@@ -1,0 +1,52 @@
+// Blueprint › tc-carousel — teal nav chips + pink active indicator pill; slate token rerouted to --bp border tokens.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Controls — teal-tinted chips replace the base translucent-white chips ──
+    //
+    // Base bakes rgba(255,255,255,0.15/0.30) and color:#fff directly.
+    // Blueprint is a light theme so those translucent-white fills vanish against
+    // a light slide background. We swap to --bp-teal-soft fill + --bp-teal-fg
+    // glyph (teal-on-white clears AA), with a solid teal fill + white ink on
+    // hover/focus per the "everyday action = teal" rotation.
+
+    .carousel-control-prev,
+    .carousel-control-next {
+        color: var(--bp-teal-fg);
+        background: var(--bp-teal-soft);
+        border: 1px solid var(--bp-teal-line);
+        transition: background-color var(--bp-ease), color var(--bp-ease), box-shadow var(--bp-ease);
+
+        &:hover,
+        &:focus-visible {
+            color: var(--bp-teal-ink);
+            background: var(--bp-teal);
+            box-shadow: var(--bp-glow-teal);
+            outline: none;
+        }
+    }
+
+    // ── Indicators — reroute slate token; active pill → pink (primary/selected) ─
+    //
+    // Base uses var(--tc-slate-300) for inactive dots — that leaks the light-slate
+    // ramp. Route to --bp-border-strong instead.
+    // Active: base uses var(--tc-app-accent); blueprint overrides to --bp-pink so
+    // the selected state follows the pink=primary accent rotation.
+    // Note: base sets border-radius:3px on .active — that is a cosmetic corner we
+    // must not duplicate here; the radius sweep handles all corners.
+
+    .carousel-indicators {
+        [data-bs-slide-to] {
+            background-color: var(--bp-border-strong);
+            transition:
+                background-color var(--bp-ease),
+                width var(--bp-ease);
+
+            &.active {
+                background-color: var(--bp-pink);
+                box-shadow: 0 0 0 2px var(--bp-pink-soft);
+            }
+        }
+    }
+}

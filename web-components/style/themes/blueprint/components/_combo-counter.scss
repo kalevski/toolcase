@@ -1,0 +1,70 @@
+// Blueprint › tc-combo-counter — HUD readout on white paper with teal eyebrow, pink value, and a drained pink timer bar; HUD corner bracket marks the tile as live.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Token re-map ────────────────────────────────────────────────────────
+    tc-combo-counter {
+        // Surface: white paper, blueprint hairline, soft violet-tinted shadow.
+        --bs-combo-counter-bg:           var(--bp-paper);
+        --bs-combo-counter-border-color: var(--bp-border);
+        --bs-combo-counter-shadow:       var(--tc-shadow-sm);
+
+        // Eyebrow: --bp-mono (JetBrains Mono) lettered in teal — mono labels = teal in blueprint.
+        --bs-combo-counter-eyebrow-color:          var(--bp-teal-fg);
+        --bs-combo-counter-eyebrow-font-size:      0.6875rem;
+        --bs-combo-counter-eyebrow-letter-spacing: 0.14em;
+
+        // Value figure: pink — the primary/active accent in blueprint's arcade rotation.
+        --bs-combo-counter-value-color:  var(--bp-pink);
+        --bs-combo-counter-value-size:   36px;
+        --bs-combo-counter-value-weight: 700;
+
+        // Timer bar: recessed well track + pink fill to echo the value.
+        --bs-combo-counter-bar-track:  var(--bp-bg-2);
+        --bs-combo-counter-bar-border: var(--bp-border-faint);
+        --bs-combo-counter-bar-fill:   var(--bp-pink);
+    }
+
+    // ── Eyebrow — force font family to the blueprint mono token ─────────────
+    .tc-combo-counter-eyebrow {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+    }
+
+    // ── Value figure — blueprint display font for the numeric punch ─────────
+    // The large multiplier digit earns a display treatment in blueprint.
+    .tc-combo-counter-value {
+        font-family: var(--bp-display);
+        letter-spacing: -0.02em; // Chakra Petch looks tighter at headline scale
+    }
+
+    // ── Card surface — HUD corner bracket (top-left teal L-mark) ───────────
+    // Marks the panel as an active live tile; placed via ::before on the host wrapper.
+    .tc-combo-counter {
+        position: relative;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 7px;
+            left: 7px;
+            width: 11px;
+            height: 11px;
+            border-top:  2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            pointer-events: none;
+        }
+
+        // Nudge content right so the bracket doesn't overlap the eyebrow.
+        padding-left: 1.25rem;
+    }
+
+    // ── Timer bar fill — pink glow on the leading edge ──────────────────────
+    // A subtle box-shadow on the fill adds a soft pink pulse, consistent with
+    // the blueprint "glow-on-active" language.
+    .tc-combo-counter-bar-fill {
+        box-shadow: 2px 0 6px 0 var(--bp-pink-glow);
+    }
+
+}

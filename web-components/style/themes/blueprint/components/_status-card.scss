@@ -1,0 +1,88 @@
+// Blueprint › tc-status-card — lavender-paper card, display title, mono detail labels, blueprint accent-rotation status dots.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    // ── Custom-property overrides ────────────────────────────────────────────────
+
+    tc-status-card {
+        // Card shell: white paper surface, hairline border, violet-tinted shadow.
+        --bs-status-card-bg:               var(--bp-paper);
+        --bs-status-card-border-color:     var(--bp-border);
+        --bs-status-card-shadow:           var(--tc-shadow-sm);
+
+        // Header cap: soft lavender gradient (replaces dark slate rgba literals).
+        --bs-status-card-header-bg:        linear-gradient(135deg, var(--bp-paper-tint), var(--bp-paper-tint-2));
+        --bs-status-card-header-border-color: var(--bp-border-faint);
+
+        // Title: override Inter → display face (Chakra Petch), tighten tracking.
+        --bs-status-card-title-color:      var(--bp-text);
+
+        // Row separator: route away from $slate-100 literal → blueprint faint divider.
+        --bs-status-card-item-separator-color: var(--bp-border-faint);
+
+        // Label / detail text.
+        --bs-status-card-label-color:      var(--bp-text);
+        --bs-status-card-detail-color:     var(--bp-text-muted);
+
+        // Skeleton: bg→recessed well, shimmer→white.
+        --bs-status-card-skeleton-bg:      var(--bp-bg-2);
+        --bs-status-card-skeleton-shimmer: rgba(255, 255, 255, 0.72);
+    }
+
+    // ── Title: display face ──────────────────────────────────────────────────────
+    // .tc-status-card-title bakes `font-family: 'Inter'` as a literal — override it.
+
+    .tc-status-card-title {
+        font-family: var(--bp-display);
+        font-weight: 600;
+        letter-spacing: -0.01em; // Chakra Petch reads clean with slight tight-tracking
+        color: var(--bs-status-card-title-color);
+    }
+
+    // ── Detail text: mono eyebrow treatment ─────────────────────────────────────
+    // Already uses --tc-font-mono (mapped to --bp-mono by foundation), but add
+    // uppercase + loose tracking so it reads as a true HUD/label field.
+
+    .tc-status-card-detail {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem; // slightly tighter than base 0.75rem for mono caps
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--bp-text-muted);
+    }
+
+    // ── Status indicator — blueprint accent rotation ─────────────────────────────
+    // ok → teal (with live-dot pulse halo), warning → amber, error → danger red,
+    // inactive → faint muted. Drive via --bs-status-card-indicator-* overrides.
+
+    .tc-status-card-indicator {
+        // Default / fallback: faint muted circle.
+        --bs-status-card-indicator-color:  var(--bp-text-faint);
+        --bs-status-card-indicator-bg:     var(--bp-bg-2);
+
+        &--ok {
+            // Teal = "action/operational" — success state in blueprint.
+            --bs-status-card-indicator-color: var(--bp-teal);
+            --bs-status-card-indicator-bg:    var(--bp-teal-soft);
+            // Live-dot pulse halo: teal circle + soft ring (blueprint live-dot recipe).
+            box-shadow: 0 0 0 0.2em var(--bp-teal-soft);
+        }
+
+        &--warning {
+            // Amber = supporting accent for cautionary states.
+            --bs-status-card-indicator-color: var(--bp-amber-fg); // darker for icon contrast on amber-soft
+            --bs-status-card-indicator-bg:    var(--bp-amber-soft);
+        }
+
+        &--error {
+            // Danger = real red (NOT pink — pink is primary/CTA only).
+            --bs-status-card-indicator-color: var(--bp-danger);
+            --bs-status-card-indicator-bg:    var(--bp-danger-soft);
+        }
+
+        &--inactive {
+            --bs-status-card-indicator-color: var(--bp-text-faint);
+            --bs-status-card-indicator-bg:    var(--bp-bg-2);
+        }
+    }
+}

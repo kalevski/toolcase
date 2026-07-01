@@ -1,0 +1,42 @@
+// Blueprint › tc-lore-text — pink left-rule flavor block; Space Grotesk italic prose on a soft pink-tinted well.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-lore-text {
+        // Left-rule: primary pink accent — lore/flavor text is a primary narrative element.
+        --bs-lore-text-border-color: var(--bp-pink);
+        --bs-lore-text-border-width: 3px;
+
+        // Soft pink-tinted surface behind the prose block.
+        --bs-lore-text-bg:           var(--bp-pink-surface);
+
+        // Prose: Space Grotesk body font, muted violet-tinted ink, keep italic.
+        --bs-lore-text-color:        var(--bp-text-muted);
+        --bs-lore-text-font-style:   italic;
+        --bs-lore-text-font-size:    0.925rem;
+        --bs-lore-text-font-weight:  400;
+        --bs-lore-text-line-height:  1.75;
+    }
+
+    .tc-lore-text {
+        // Body font family (Space Grotesk) — no --bs- var for font-family on this component.
+        font-family: var(--bp-body);
+
+        // Faint pink glow along the left rule so the accent reads as a deliberate brand mark.
+        box-shadow: -2px 0 8px 0 var(--bp-pink-glow);
+    }
+
+    .tc-lore-text__content {
+        font-family: var(--bp-body);
+
+        // Inner paragraphs: slightly looser spacing to breathe on the tinted ground.
+        p {
+            margin-bottom: 0.6em;
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+    }
+}

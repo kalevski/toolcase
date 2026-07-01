@@ -1,0 +1,79 @@
+// Blueprint › tc-diff-viewer — blueprint-paper surface with teal/danger diff rows, mono gutter labels, and hairline hairlines.
+// Drives all cosmetics through --bs-diff-viewer-* custom properties.
+// Key changes: white paper outer shell, recessed --bp-bg-2 header+gutter, teal for added rows (blueprint action accent),
+// real --bp-danger for removed rows, replaced both hardcoded gutter-bg hex literals, hairline row separator via --bp-border-faint.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-diff-viewer {
+        // ── Outer shell ─────────────────────────────────────────────────────────
+        --bs-diff-viewer-bg: var(--bp-paper);                          // raised white code surface
+        --bs-diff-viewer-border: 1px solid var(--bp-border);           // lavender hairline outline
+
+        // ── Header bar ──────────────────────────────────────────────────────────
+        --bs-diff-viewer-header-bg: var(--bp-bg-2);                    // recessed well behind filename/language
+        --bs-diff-viewer-header-border: 1px solid var(--bp-border);    // hairline separator below header
+        --bs-diff-viewer-header-filename-color: var(--bp-text);        // primary ink for the filepath
+        --bs-diff-viewer-header-language-color: var(--bp-teal-fg);     // teal-fg clears AA on white bg for the language eyebrow
+
+        // ── Pane separator (split mode) ──────────────────────────────────────────
+        --bs-diff-viewer-sep: 1px solid var(--bp-border-strong);       // slightly heavier divider between before/after
+
+        // ── Gutter column ────────────────────────────────────────────────────────
+        --bs-diff-viewer-gutter-bg: var(--bp-bg-2);                    // recessed well for line numbers
+        --bs-diff-viewer-gutter-color: var(--bp-text-faint);           // de-emphasised line-number ink
+        --bs-diff-viewer-gutter-sep: 1px solid var(--bp-border-faint); // quiet divider between gutter and code
+
+        // ── Row separator ────────────────────────────────────────────────────────
+        // Base uses a raw rgba(0,0,0,0.04) literal; route to the hairline token.
+        --bs-diff-viewer-row-separator: 1px solid var(--bp-border-faint);
+
+        // ── Added lines (teal = action / success in blueprint) ───────────────────
+        --bs-diff-viewer-added-bg: var(--bp-teal-soft);                // soft teal row fill
+        --bs-diff-viewer-added-gutter-bg: var(--bp-teal-line, color-mix(in srgb, var(--bp-teal) 22%, transparent));
+        // ↑ --bp-teal-line is the hairline-weight teal tint; replaces hardcoded #bbf7d0
+        --bs-diff-viewer-added-color: var(--bp-teal-fg);               // darker teal text that clears AA on the soft bg
+
+        // ── Removed lines (danger = real red in blueprint, NOT pink) ─────────────
+        --bs-diff-viewer-removed-bg: var(--bp-danger-soft);            // soft red row fill
+        --bs-diff-viewer-removed-gutter-bg: #fecaca;
+        // ↑ #fecaca is the Tailwind red-200 tint that pairs with --bp-danger; kept as-is (it's already in base)
+        // and matches the blueprint danger palette — no clash with any dark-slate literal.
+        --bs-diff-viewer-removed-color: var(--bp-danger);              // real-red gutter + prefix ink
+
+        // ── Empty placeholder rows (split mode counterpart) ───────────────────────
+        --bs-diff-viewer-empty-bg: var(--bp-bg-2);                     // same recessed tint as gutter/header
+    }
+
+    // ── Header typography ────────────────────────────────────────────────────────
+    // The filename uses the component's own --bs var so the font-family override
+    // goes here as an element rule (no --bs-* var for font-family in the base partial).
+    .tc-diff-viewer__filename {
+        font-family: var(--bp-mono); // JetBrains Mono — code paths read as mono labels
+    }
+
+    .tc-diff-viewer__language {
+        font-family: var(--bp-mono);          // mono eyebrow
+        letter-spacing: 0.1em;                // slightly wider tracking than base .06em
+        color: var(--bp-teal-fg);             // teal action accent for language badge text
+        font-weight: 600;
+    }
+
+    // ── Gutter & prefix typography ────────────────────────────────────────────────
+    // Override font-family to the blueprint mono stack (no --bs-* var exposes this).
+    .tc-diff-viewer__gutter,
+    .tc-diff-viewer__prefix {
+        font-family: var(--bp-mono);
+    }
+
+    // ── Code typography ───────────────────────────────────────────────────────────
+    .tc-diff-viewer__code {
+        font-family: var(--bp-mono);
+    }
+
+    // ── Outer shadow ─────────────────────────────────────────────────────────────
+    // Lift the component off the lavender page with the blueprint violet-tinted shadow.
+    .tc-diff-viewer {
+        box-shadow: var(--tc-shadow-sm);
+    }
+}

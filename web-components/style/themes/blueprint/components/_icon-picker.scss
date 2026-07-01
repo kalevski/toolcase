@@ -1,0 +1,167 @@
+// Blueprint › tc-icon-picker — paper popup with teal hover, pink selected, mono label + search.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Label ──────────────────────────────────────────────────────────────────
+
+    .tc-icon-picker-label {
+        font-family: var(--bp-mono);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--bp-text-muted);
+    }
+
+    // ── Trigger button ─────────────────────────────────────────────────────────
+
+    .tc-icon-picker-trigger {
+        --bs-icon-picker-trigger-bg:     var(--bp-paper);
+        --bs-icon-picker-trigger-border: var(--bp-border-strong);
+        --bs-icon-picker-trigger-color:  var(--bp-text);
+
+        font-family: var(--bp-body);
+        font-size: 0.875rem;
+        transition:
+            border-color var(--bp-ease),
+            box-shadow   var(--bp-ease);
+
+        &:hover {
+            --bs-icon-picker-trigger-border: var(--bp-border-soft);
+            box-shadow: var(--tc-shadow-sm);
+        }
+
+        &:focus-visible {
+            outline: none;
+            border-color: var(--bp-teal);
+            box-shadow: var(--bp-glow-teal);
+        }
+
+        &.is-invalid {
+            border-color: var(--bp-danger);
+        }
+    }
+
+    // Icon slot inside the trigger — use text color so it reads naturally
+    .tc-icon-picker-trigger-icon {
+        color: var(--bp-text-soft);
+    }
+
+    // Chevron — subdued; brightens on hover via parent
+    .tc-icon-picker-trigger-chevron {
+        color: var(--bp-text-faint);
+
+        .tc-icon-picker-trigger:hover & {
+            color: var(--bp-teal-fg);
+        }
+    }
+
+    // ── Overlay popup ──────────────────────────────────────────────────────────
+
+    .tc-icon-picker-popup {
+        // Raised paper surface: white card, hairline border, violet-tinted shadow
+        --bs-icon-picker-popup-bg:      var(--bp-paper);
+        --bs-icon-picker-popup-border:  var(--bp-border);
+        --bs-icon-picker-popup-shadow:  var(--tc-shadow-lg);
+        --bs-icon-picker-popup-padding: 0.5rem;
+
+        border-color: var(--bp-border);
+        background:   var(--bp-paper);
+        box-shadow:   var(--tc-shadow-lg);
+    }
+
+    // ── Search input ───────────────────────────────────────────────────────────
+
+    .tc-icon-picker-search {
+        font-family: var(--bp-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.04em;
+        color: var(--bp-text);
+        background: var(--bp-bg-2);         // recessed well inside the popup
+        border-color: var(--bp-border-strong);
+
+        &::placeholder {
+            color: var(--bp-text-faint);
+            font-family: var(--bp-mono);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        &:focus {
+            border-color: var(--bp-teal);
+            box-shadow: var(--bp-glow-teal);
+        }
+    }
+
+    // ── Icon option cell ───────────────────────────────────────────────────────
+
+    .tc-icon-picker-option {
+        color: var(--bp-text-soft);
+        border-color: transparent;
+        transition:
+            background     var(--bp-ease),
+            color          var(--bp-ease),
+            border-color   var(--bp-ease),
+            box-shadow     var(--bp-ease);
+
+        &:hover {
+            // Teal soft tint on hover — everyday action accent
+            background: var(--bp-teal-soft);
+            color: var(--bp-teal-fg);
+        }
+
+        &:focus-visible {
+            outline: none;
+            box-shadow: var(--bp-glow-teal);
+        }
+
+        // Keyboard-roving highlight: teal soft tint + hairline border
+        &--highlighted {
+            background: var(--bp-teal-soft);
+            border-color: var(--bp-teal-line);
+            color: var(--bp-teal-fg);
+        }
+
+        // Selected cell — pink primary fill, white ink
+        &--selected {
+            background:   var(--bp-pink);
+            border-color: var(--bp-pink);
+            color:        var(--bp-pink-ink);
+            box-shadow:   var(--bp-glow-pink);
+
+            &:hover {
+                background:   var(--bp-pink-hover);
+                border-color: var(--bp-pink-hover);
+            }
+        }
+
+        // Selected + keyboard-highlighted
+        &--selected#{&}--highlighted {
+            background:   var(--bp-pink);
+            border-color: var(--bp-pink-line);
+            color:        var(--bp-pink-ink);
+            box-shadow:   var(--bp-glow-pink-strong);
+        }
+    }
+
+    // ── Empty message ──────────────────────────────────────────────────────────
+
+    .tc-icon-picker-empty {
+        font-family: var(--bp-mono);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--bp-text-faint);
+    }
+
+    // ── Loading skeleton cells ─────────────────────────────────────────────────
+
+    .tc-icon-picker-skeleton-cell {
+        // Use bp-bg-2 for the recessed shimmer; animation keeps the pulse keyframe from base
+        --bs-icon-picker-skeleton-bg: var(--bp-bg-2);
+
+        background: var(--bp-bg-2);
+        border: 1px solid var(--bp-border-faint);
+    }
+}

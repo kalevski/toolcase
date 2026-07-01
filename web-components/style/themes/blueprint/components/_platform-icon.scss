@@ -1,0 +1,23 @@
+// Blueprint › tc-platform-icon — teal mono label + teal glyph; routes the slate fallback to blueprint ink tokens.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-platform-icon {
+        // Route the slate-literal fallback (#94a3b8) to the blueprint muted ink token.
+        // Teal is the everyday/action accent in blueprint; platform identifiers read
+        // as interactive affordances, so teal is the right accent here.
+        --bs-platform-icon-glyph-color: var(--bp-teal-fg);
+        --bs-platform-icon-label-color: var(--bp-text-muted);
+
+        // Mono is already the base font-family; lift letter-spacing to the
+        // blueprint eyebrow standard (.08em) so labels read as HUD micro-labels.
+        --bs-platform-icon-label-font-family: var(--bp-mono);
+    }
+
+    .tc-platform-icon__label {
+        // Blueprint mono eyebrow treatment: uppercase + open tracking.
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 600;
+    }
+}

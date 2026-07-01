@@ -1,0 +1,24 @@
+// Blueprint › tc-code-snippet — dark violet-ink code surface with arcade syntax
+// accents. Foundation maps the ink bg / border / mono font and flips the code
+// colour to light (--tc-text-inverse → white) so it reads on the dark surface.
+// This repoints the hardcoded muted syntax-token hexes onto the blueprint arcade
+// palette: violet keywords, teal strings, faint comments, amber numbers, pink
+// variables — bright enough to read on the #1a1830 ink.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-code-snippet {
+        --bs-code-snippet-title-color: var(--bp-text-faint);
+        --bs-code-snippet-header-border: 1px solid rgba(255, 255, 255, 0.08);
+
+        --bs-code-snippet-tok-keyword: #b9a9ff; // bright violet on ink
+        --bs-code-snippet-tok-string: #4fd6c6; // bright teal on ink
+        --bs-code-snippet-tok-comment: #8e89b3; // faint lilac
+        --bs-code-snippet-tok-number: #ffb13d; // bright amber on ink
+        --bs-code-snippet-tok-variable: #ff7fb4; // bright pink on ink
+    }
+
+    .tc-code-snippet-copy--copied {
+        color: #4fd6c6;
+    }
+}

@@ -1,16 +1,23 @@
 'use client'
 
-// Admin-only instance branding. One field today: the optional second brand word shown
-// inline after "Task Forge" in the sidebar brand and the login logo. Loads from
-// `GET /api/admin/settings`, saves via `PUT`, then re-pulls the public branding so the
-// brand updates live.
+// Admin-only instance branding. Two fields: the optional second brand word shown inline
+// after "Task Forge" in the sidebar brand + login logo, and the tc-* theme applied to
+// the whole instance. Loads from `GET /api/admin/settings`, saves via `PUT`, then
+// re-pulls the public branding so the brand + theme update live.
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { toast } from '@/lib/toast'
-import { useTcEvents } from '@/lib/tc'
+import { useTc, useTcEvents, detailValue } from '@/lib/tc'
 import { tcIcon } from '@/lib/icons'
 import { useBranding } from '@/lib/branding-context'
-import type { SiteSettings } from '@/server/domain/site-settings'
+import {
+    THEME_NAMES,
+    THEME_LABEL,
+    type SiteSettings,
+    type ThemeName,
+} from '@/server/domain/site-settings'
+
+const THEME_ITEMS = THEME_NAMES.map((t) => ({ key: t, label: THEME_LABEL[t] }))
 
 export function SiteSettingsClient() {
     const branding = useBranding()
@@ -19,6 +26,7 @@ export function SiteSettingsClient() {
     const [bootErr, setBootErr] = useState<string | null>(null)
     const [busy, setBusy] = useState(false)
     const [secondaryText, setSecondaryText] = useState('')
+    const [theme, setTheme] = useState<ThemeName>('default')
 
     useEffect(() => {
         const ctrl = new AbortController()
@@ -29,6 +37,7 @@ export function SiteSettingsClient() {
                 const s = (await res.json()) as SiteSettings
                 if (ctrl.signal.aborted) return
                 setSecondaryText(s.secondaryText)
+                setTheme(s.theme)
                 setReady(true)
             } catch (e) {
                 if (ctrl.signal.aborted) return
@@ -46,6 +55,11 @@ export function SiteSettingsClient() {
         input: (e) => setSecondaryText((e.target as HTMLInputElement).value),
     })
 
+    const themeTc = useTc<HTMLElement>(
+        useMemo(() => ({ items: THEME_ITEMS, value: theme }), [theme]),
+        { 'tc-change': (e: Event) => setTheme((detailValue<string>(e) as ThemeName) ?? 'default') },
+    )
+
     const save = async () => {
         if (busy) return
         setBusy(true)
@@ -53,7 +67,7 @@ export function SiteSettingsClient() {
             const res = await fetch('/api/admin/settings', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ secondaryText }),
+                body: JSON.stringify({ secondaryText, theme }),
             })
             if (!res.ok) {
                 const body = (await res.json().catch(() => null)) as { error?: string } | null
@@ -99,6 +113,13 @@ export function SiteSettingsClient() {
                         value={secondaryText}
                         help="Optional second word shown inline after “Task Forge” in the brand. Leave blank for none."
                         disabled={busy || undefined}
+                    />
+                    <tc-extended-select
+                        ref={themeTc}
+                        label="Theme"
+                        help="Re-skins every component. The “Task Forge” wordmark stays fixed. Applies live on save."
+                        disabled={busy || undefined}
+                        style={{ maxWidth: '20rem' }}
                     />
                     <div>
                         <tc-button variant="primary" onClick={save} disabled={busy || undefined}>

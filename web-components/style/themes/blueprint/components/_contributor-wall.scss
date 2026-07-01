@@ -1,0 +1,98 @@
+// Blueprint › tc-contributor-wall — avatar ring tokens remapped to blueprint hairlines; title in display face; initials in mono; hover lifts with teal glow ring; overflow chip in teal-soft tint.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    // ── Token re-points via --bs-contributor-wall-* vars ─────────────────────
+    // Drive the re-skin through the component's own custom-property API first;
+    // only add structural rules below for things that have no var hook.
+
+    tc-contributor-wall {
+        // Separator ring between overlapping avatars → blueprint hairline.
+        --bs-contributor-wall-avatar-ring-color: var(--bp-border);
+
+        // Initials-tile background → recessed well; initials text → primary ink.
+        --bs-contributor-wall-avatar-bg: var(--bp-bg-2);
+        --bs-contributor-wall-avatar-color: var(--bp-text-muted);
+
+        // Hover ring → teal (everyday action hue), matching the blueprint accent rotation.
+        --bs-contributor-wall-hover-ring-color: var(--bp-teal);
+
+        // Overflow chip → teal-soft tint with teal-fg text so it reads AA on white.
+        --bs-contributor-wall-more-bg: var(--bp-teal-soft);
+        --bs-contributor-wall-more-color: var(--bp-teal-fg);
+
+        // Section title → blueprint primary ink.
+        --bs-contributor-wall-title-color: var(--bp-text);
+    }
+
+    // ── Title / header ────────────────────────────────────────────────────────
+    .tc-contributor-wall__title {
+        font-family: var(--bp-display);
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: var(--bs-contributor-wall-title-color);
+    }
+
+    // ── Initials tiles — mono micro-label ────────────────────────────────────
+    .tc-contributor-wall-item__initials {
+        // Override the base partial's --bs-font-monospace with the blueprint mono
+        // token; uppercase + tight size reads cleanly at 40px avatar size.
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--bp-text-muted);
+    }
+
+    // ── Avatar tiles — hover: teal glow ring + lift ───────────────────────────
+    .tc-contributor-wall-item {
+        // Bevel top edge: a 1px inset white highlight makes the avatar tile read
+        // as a raised disc on the blueprint paper surface.
+        box-shadow:
+            0 0 0 var(--bs-contributor-wall-avatar-ring-size) var(--bs-contributor-wall-avatar-ring-color),
+            var(--bp-bevel-top);
+        transition:
+            transform var(--tc-transition-fast),
+            box-shadow var(--tc-transition-fast);
+
+        &:hover,
+        &:focus {
+            // Teal glow ring replaces the neutral separator ring on interaction.
+            box-shadow:
+                0 0 0 2px var(--bp-teal),
+                var(--bp-glow-teal);
+        }
+
+        &:focus-visible {
+            // Pink focus ring for keyboard navigation — matches the theme's focus contract.
+            outline-color: var(--bp-pink);
+            box-shadow:
+                0 0 0 2px var(--bp-pink),
+                var(--bp-glow-pink);
+        }
+    }
+
+    // ── Overflow chip — teal-soft surface, mono +N label ─────────────────────
+    .tc-contributor-wall-more {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        // Bevel-top keeps visual consistency with the avatar disc row.
+        box-shadow:
+            0 0 0 var(--bs-contributor-wall-avatar-ring-size) var(--bs-contributor-wall-avatar-ring-color),
+            var(--bp-bevel-top);
+        // Teal line border for a subtle accent read — just the right side of
+        // "not invisible" on the bp-bg canvas.
+        border: 1px solid var(--bp-teal-line);
+    }
+
+    // ── Reduced-motion: freeze lift; keep ring transition ────────────────────
+    @media (prefers-reduced-motion: reduce) {
+        .tc-contributor-wall-item {
+            &:hover,
+            &:focus {
+                box-shadow:
+                    0 0 0 2px var(--bp-teal),
+                    var(--bp-glow-teal);
+            }
+        }
+    }
+}

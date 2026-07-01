@@ -1,0 +1,93 @@
+// Blueprint › tc-drawer — slide-out panel reskinned as a crisp blueprint sheet: white paper surface, strong teal header accent, mono eyebrow title, pink close focus ring.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-drawer {
+        // Surface — white paper panel, blueprint hairline border, violet-tinted shadow.
+        --bs-drawer-bg:           var(--bp-paper);
+        --bs-drawer-border-color: var(--bp-border-strong);
+        --bs-drawer-shadow:       var(--tc-shadow-lg);
+
+        // Backdrop — dark navy base replaced with blueprint emphasis ink for a light-theme-coherent scrim.
+        --bs-drawer-backdrop-bg:      #1a1830; // --bp-emphasis (darkest ink) — scrim stays dark by design
+        --bs-drawer-backdrop-opacity: 0.45;
+    }
+
+    // ── Panel ──────────────────────────────────────────────────────────────────
+
+    .tc-drawer__panel {
+        background: var(--bp-paper);
+        border-color: var(--bp-border-strong);
+
+        // Side edge borders — re-point to blueprint hairline token.
+        &.tc-drawer__panel--right  { border-left-color:   var(--bp-border-strong); }
+        &.tc-drawer__panel--left   { border-right-color:  var(--bp-border-strong); }
+        &.tc-drawer__panel--top    { border-bottom-color: var(--bp-border-strong); }
+        &.tc-drawer__panel--bottom { border-top-color:    var(--bp-border-strong); }
+    }
+
+    // ── Header ─────────────────────────────────────────────────────────────────
+
+    .tc-drawer__header {
+        // Subtle tinted well — distinguishes chrome from body scroll area.
+        background: var(--bp-bg-2);
+        border-bottom-color: var(--bp-border);
+
+        // Teal left-edge accent stripe — marks the drawer as an action surface.
+        position: relative;
+
+        &::before {
+            content: '';
+            position: absolute;
+            inset-block: 0;
+            left: 0;
+            width: 3px;
+            background: var(--bp-teal);
+        }
+    }
+
+    // ── Title ──────────────────────────────────────────────────────────────────
+
+    .tc-drawer__title {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;         // 11px — mono eyebrow scale
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .10em;
+        color: var(--bp-text-soft);   // readable dark-violet, not flat black
+    }
+
+    // ── Close button ───────────────────────────────────────────────────────────
+
+    .tc-drawer__close {
+        color: var(--bp-text-faint);
+
+        &:hover {
+            // Teal soft tint on hover — secondary/everyday action per accent rotation.
+            background: var(--bp-teal-soft);
+            color: var(--bp-teal-fg);
+        }
+
+        &:focus-visible {
+            // Pink focus ring — primary/selected state per accent rotation.
+            outline-color: var(--bp-pink);
+        }
+    }
+
+    // ── Body ───────────────────────────────────────────────────────────────────
+
+    .tc-drawer__body {
+        background: var(--bp-paper);
+        color: var(--bp-text-muted);
+        font-family: var(--bp-body);
+
+        // Faint blueprint-grid texture via background — echo the canvas grid aesthetic
+        // without importing assets; grid lines formed by cross-hatched linear-gradients.
+        background-image:
+            linear-gradient(var(--bp-border-faint) 1px, transparent 1px),
+            linear-gradient(90deg, var(--bp-border-faint) 1px, transparent 1px);
+        background-size: 24px 24px;
+        background-position: top left;
+    }
+}

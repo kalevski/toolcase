@@ -1,0 +1,143 @@
+// Blueprint › tc-advanced-table — white paper surface, teal sort accents, mono filter labels, pink active sort indicator, violet-tinted hairlines, and a soft scrim overlay.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-advanced-table {
+        // Surface & borders
+        --bs-advanced-table-bg:               var(--bp-paper);
+        --bs-advanced-table-border:           1px solid var(--bp-border);
+
+        // Header cap — recessed well so the column labels read as a distinct tier
+        --bs-advanced-table-head-bg:          var(--bp-bg-2);
+        --bs-advanced-table-head-border:      1px solid var(--bp-border-strong);
+
+        // Sortable column hover: slightly deeper than the resting head cap
+        --bs-advanced-table-head-hover-bg:    var(--bp-paper-tint-2);
+
+        // Row dividers — faint violet hairline keeps rows distinct without noise
+        --bs-advanced-table-row-hairline:     1px solid var(--bp-border-faint);
+
+        // Column header labels — muted ink; active/sorted column → full text ink
+        --bs-advanced-table-th-color:         var(--bp-text-muted);
+        --bs-advanced-table-th-active-color:  var(--bp-text);
+        --bs-advanced-table-th-font-size:     0.6875rem;
+
+        // Body cell ink
+        --bs-advanced-table-td-color:         var(--bp-text);
+        --bs-advanced-table-td-font-size:     0.875rem;
+
+        // Generous cell padding so the blueprint grid breathes
+        --bs-advanced-table-cell-padding-y:   0.625rem;
+        --bs-advanced-table-cell-padding-x:   0.75rem;
+
+        // Toolbar
+        --bs-advanced-table-toolbar-gap:      0.75rem;
+        --bs-advanced-table-filter-label-color: var(--bp-teal-fg);  // teal = everyday-action label tone
+        --bs-advanced-table-filter-label-size:  0.6875rem;
+
+        // Loading overlay — soft white scrim over the paper surface
+        --bs-advanced-table-overlay-scrim:    rgba(255, 255, 255, 0.80);
+        --bs-advanced-table-spinner-color:    var(--bp-teal);        // teal spinner = "action in progress"
+
+        // Pagination summary
+        --bs-advanced-table-summary-color:    var(--bp-text-faint);
+    }
+
+    // ── Body wrap ─────────────────────────────────────────────────────────────
+
+    .tc-advanced-table-body-wrap {
+        border: var(--bs-advanced-table-border);
+        background: var(--bs-advanced-table-bg);
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Filter labels — mono eyebrow style ───────────────────────────────────
+
+    .tc-advanced-table-filter-label {
+        font-family: var(--bp-mono);
+        font-size: var(--bs-advanced-table-filter-label-size);
+        font-weight: 600;
+        letter-spacing: 0.10em;       // wider mono tracking for blueprint HUD feel
+        text-transform: uppercase;
+        color: var(--bs-advanced-table-filter-label-color);
+    }
+
+    // ── Column header ─────────────────────────────────────────────────────────
+
+    .tc-advanced-table-th {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.08em;
+        color: var(--bs-advanced-table-th-color);
+        background: var(--bs-advanced-table-head-bg);
+        border-bottom: var(--bs-advanced-table-head-border);
+    }
+
+    // Sortable header button — teal on hover (everyday-action rotation)
+    .tc-advanced-table-sort {
+        transition: color var(--bp-ease, 0.18s ease);
+
+        &:hover {
+            color: var(--bp-teal-fg);     // teal text on white clears AA
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bp-teal);
+            outline-offset: 2px;
+        }
+    }
+
+    // Sort chevron in resting state — soft faint ink
+    .tc-advanced-table-sort-icon {
+        color: var(--bp-text-faint);
+    }
+
+    // Active/sorted column — pink is primary/selected in the arcade accent rotation
+    .tc-advanced-table-sort--active {
+        color: var(--bp-pink);
+
+        .tc-advanced-table-sort-icon {
+            color: var(--bp-pink);
+        }
+    }
+
+    // Whole sortable cell hover well
+    .tc-advanced-table-th:has(.tc-advanced-table-sort):hover {
+        background: var(--bs-advanced-table-head-hover-bg);
+    }
+
+    // ── Body rows ─────────────────────────────────────────────────────────────
+
+    .tc-advanced-table-body > tr > td,
+    .tc-advanced-table-body > tr > th {
+        color: var(--bs-advanced-table-td-color);
+        border-bottom: var(--bs-advanced-table-row-hairline);
+    }
+
+    // Subtle row hover — paper-tint lift so rows feel interactive
+    .tc-advanced-table-body > tr:hover > td,
+    .tc-advanced-table-body > tr:hover > th {
+        background: var(--bp-paper-tint);
+    }
+
+    // ── Loading overlay ───────────────────────────────────────────────────────
+
+    .tc-advanced-table-overlay {
+        background: var(--bs-advanced-table-overlay-scrim);
+        // Soft backdrop blur reinforces the blueprint "glass panel" aesthetic
+        backdrop-filter: blur(2px);
+    }
+
+    .tc-advanced-table-spinner {
+        color: var(--bs-advanced-table-spinner-color);
+    }
+
+    // ── Pagination footer ─────────────────────────────────────────────────────
+
+    .tc-advanced-table-page-summary {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        color: var(--bs-advanced-table-summary-color);
+    }
+
+}

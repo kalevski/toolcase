@@ -1,0 +1,100 @@
+// Blueprint › tc-inventory-grid — white-paper frame holding teal-hairline slot tiles; pink selection ring; mono qty badge.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-inventory-grid {
+        // Frame surface: raised white card with a blueprint hairline border and a
+        // subtle violet-tinted shadow so the grid lifts off the lavender page.
+        --bs-inventory-grid-surface:      var(--bp-paper);
+        --bs-inventory-grid-border-color: var(--bp-border);
+
+        // Slot tile defaults: white fill, teal-weighted strong hairline so each
+        // cell reads as a distinct socket against the frame.
+        --bs-inventory-grid-slot-bg:           var(--bp-paper);
+        --bs-inventory-grid-slot-border:       var(--bp-border-strong);
+
+        // Empty slots: dashed faint border, ghost glyph text.
+        --bs-inventory-grid-slot-empty-border: var(--bp-border-faint);
+        --bs-inventory-grid-empty-color:       var(--bp-text-faint);
+
+        // Hover: recessed-well tint so the tap target reads as responsive.
+        --bs-inventory-grid-slot-hover-bg:     var(--bp-paper-tint);
+
+        // Glyph / icon text rendered inside a slot.
+        --bs-inventory-grid-glyph-color:       var(--bp-text);
+
+        // Selection: pink primary accent border + teal glow ring.
+        // The teal glow (not pink) keeps the halo legible against the white slot
+        // background; the solid pink border carries the "selected" signal.
+        --bs-inventory-grid-selected-border:   var(--bp-pink);
+        --bs-inventory-grid-selected-ring:     var(--bp-glow-teal);
+
+        // Quantity badge: teal fill (everyday action accent) with white ink.
+        --bs-inventory-grid-qty-bg:    var(--bp-teal);
+        --bs-inventory-grid-qty-color: var(--bp-teal-ink);
+
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // -------------------------------------------------------------------------
+    // Slot cell — standalone fallback paint (:not(:defined) era)
+    // -------------------------------------------------------------------------
+
+    .tc-inventory-grid__slot:not(:defined) {
+        // Smooth ease on background/border so hover feels responsive, not jumpy.
+        transition-timing-function: var(--bp-ease);
+    }
+
+    // Selected slot: pink border already wired via the custom-property above;
+    // add a faint pink surface tint so the chosen item stands out without
+    // relying solely on the ring.
+    .tc-inventory-grid__slot--selected:not(:defined) {
+        background: var(--bp-pink-surface);
+    }
+
+    // Focus ring: keeps the blueprint pink accent consistent with the rest of
+    // the system's primary focus signal.
+    .tc-inventory-grid__slot:not(:defined):focus-visible {
+        outline-color: var(--bp-pink);
+    }
+
+    // -------------------------------------------------------------------------
+    // Quantity badge — mono micro-label
+    // -------------------------------------------------------------------------
+
+    .tc-inventory-grid__qty {
+        // Override the generic monospace stack with the blueprint mono font so
+        // quantity numbers read as proper HUD labels.
+        font-family: var(--bp-mono);
+        font-size: 0.6rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    // -------------------------------------------------------------------------
+    // HUD corner-bracket on non-empty, non-empty slot tiles
+    // (applied only in blueprint via the scoped ::before)
+    // -------------------------------------------------------------------------
+
+    // Teal corner bracket marks each occupied slot as an interactive tile.
+    // Kept very small (10×10) so it reads as HUD chrome, not visual noise.
+    .tc-inventory-grid__slot:not(:defined):not(.tc-inventory-grid__slot--empty)::before {
+        content: '';
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        width: 10px;
+        height: 10px;
+        border-top: 2px solid var(--bp-teal);
+        border-left: 2px solid var(--bp-teal);
+        pointer-events: none;
+    }
+
+    // On the selected slot, flip the bracket to pink to reinforce the primary
+    // selection signal.
+    .tc-inventory-grid__slot--selected:not(:defined)::before {
+        border-top-color:  var(--bp-pink);
+        border-left-color: var(--bp-pink);
+    }
+}

@@ -1,0 +1,110 @@
+// Blueprint › tc-pipeline — mono step-labels, teal=complete, pink=live with glow pulse, faint connector hairline.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-pipeline {
+        // Connector — replace tc-border token with blueprint hairline
+        --bs-pipeline-connector-color: var(--bp-border-faint);
+
+        // Default marker — blueprint neutral ring, faint ink number
+        --bs-pipeline-marker-bg: var(--bp-paper);
+        --bs-pipeline-marker-border: var(--bp-border-strong);
+        --bs-pipeline-marker-color: var(--bp-text-faint);
+        --bs-pipeline-marker-font-size: 0.8125rem;
+        --bs-pipeline-marker-font-weight: 600;
+
+        // Title — mono eyebrow treatment for step labels
+        --bs-pipeline-title-font-size: 0.6875rem;
+        --bs-pipeline-title-color: var(--bp-text-faint);
+        --bs-pipeline-title-font-weight: 500;
+
+        // Complete — success maps to teal in blueprint
+        --bs-pipeline-complete-color: var(--bp-teal);
+        --bs-pipeline-complete-title-color: var(--bp-text-soft);
+
+        // Live — primary action maps to pink in blueprint
+        --bs-pipeline-live-color: var(--bp-pink);
+        --bs-pipeline-live-title-color: var(--bp-pink);
+        --bs-pipeline-live-title-font-weight: 700;
+
+        // Pulse timing — slightly slower for a composed feel
+        --bs-pipeline-pulse-duration: 2s;
+    }
+
+    // Connector: replace any baked tc-border with blueprint faint divider
+    .tc-pipeline-connector {
+        background: var(--bp-border-faint);
+    }
+
+    // Default marker: paper ground, blueprint border ring
+    .tc-pipeline-marker {
+        background: var(--bp-paper);
+        border-color: var(--bp-border-strong);
+        color: var(--bp-text-faint);
+        font-family: var(--bp-mono);
+        font-size: 0.8125rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        // Subtle paper shadow so marker reads above the connector
+        box-shadow: var(--tc-shadow-sm);
+        transition: border-color 0.18s var(--bp-ease),
+                    background 0.18s var(--bp-ease),
+                    box-shadow 0.18s var(--bp-ease);
+    }
+
+    // Step title: mono eyebrow — uppercase, loose tracking
+    .tc-pipeline-title {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--bp-text-faint);
+    }
+
+    // State: complete — teal fill, teal-ink checkmark, connector sharpens
+    .tc-pipeline-step--complete {
+
+        .tc-pipeline-marker {
+            background: var(--bp-teal);
+            border-color: var(--bp-teal);
+            color: var(--bp-teal-ink);
+            box-shadow: 0 0 0 3px var(--bp-teal-soft), var(--tc-shadow-sm);
+        }
+
+        .tc-pipeline-title {
+            color: var(--bp-text-soft);
+        }
+
+        // Connector trailing out of a complete step sharpens to teal-line
+        .tc-pipeline-connector {
+            background: var(--bp-teal-line);
+        }
+    }
+
+    // State: live — pink fill, pink glow pulse ring, bold mono title
+    .tc-pipeline-step--live {
+
+        .tc-pipeline-marker {
+            background: var(--bp-pink);
+            border-color: var(--bp-pink);
+            color: var(--bp-pink-ink);
+            // Pink glow halo — seats the live marker on the canvas
+            box-shadow: var(--bp-glow-pink), var(--tc-shadow-sm);
+
+            // Pulse ring: override the baked live-color border in the base keyframe
+            &::after {
+                border-color: var(--bp-pink);
+            }
+        }
+
+        .tc-pipeline-title {
+            color: var(--bp-pink);
+            font-weight: 700;
+        }
+    }
+
+    // Reduced-motion guard already in base; nothing extra needed here
+
+}

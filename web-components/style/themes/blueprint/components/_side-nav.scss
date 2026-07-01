@@ -1,0 +1,102 @@
+// Blueprint › tc-side-nav — white paper panel, mono section titles, pink active left-edge marker, teal hover well, mono uppercase badges.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-side-nav {
+        // ── Surface tokens ─────────────────────────────────────────────────────
+        // Section titles: blueprint mono micro-label voice — --bp-text-faint is
+        // the receded label color, consistent with eyebrow/kicker treatment.
+        --bs-side-nav-section-title-color: var(--bp-text-faint);
+        --bs-side-nav-section-title-letter-spacing: 0.12em;
+
+        // Item default: muted text on transparent ground.
+        --bs-side-nav-item-color: var(--bp-text-muted);
+
+        // Hover: --bp-paper-tint is the softest raised tint — subtle teal-scented
+        // well rather than a heavy slate fill. Text lifts to full ink.
+        --bs-side-nav-item-hover-bg: var(--bp-paper-tint);
+        --bs-side-nav-item-hover-color: var(--bp-text);
+
+        // Active item: strong ink text, no bg fill — the marker bar does the work.
+        --bs-side-nav-item-active-color: var(--bp-text-soft);
+        --bs-side-nav-item-active-weight: 600;
+
+        // Active marker: 2px pink bar on the left edge — primary/selected accent.
+        --bs-side-nav-marker-color: var(--bp-pink);
+        --bs-side-nav-marker-width: 2px;
+
+        // Icon resting state: faint; lifts to full text on hover/active.
+        --bs-side-nav-icon-color: var(--bp-text-faint);
+
+        // Badge: teal fill + white ink — everyday/action accent, not CTA.
+        --bs-side-nav-badge-bg: var(--bp-teal);
+        --bs-side-nav-badge-color: var(--bp-teal-ink);
+
+        // Focus ring: pink glow — consistent with other blueprint interactive focus.
+        --bs-side-nav-focus-color: var(--bp-pink);
+
+        // Skeleton shimmer: blueprint canvas ground + white gloss.
+        --bs-side-nav-skeleton-bg: var(--bp-border-faint);
+        --bs-side-nav-skeleton-shimmer: rgba(255, 255, 255, 0.72);
+    }
+
+    // ── Section title — mono uppercase micro-label ─────────────────────────────
+
+    .tc-side-nav-section-title {
+        // Override inherited font stack with the blueprint mono voice.
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        color: var(--bs-side-nav-section-title-color);
+        letter-spacing: var(--bs-side-nav-section-title-letter-spacing);
+    }
+
+    // ── Divider between sections — faint hairline ──────────────────────────────
+
+    .tc-side-nav-section + .tc-side-nav-section {
+        // A borderline divider uses the faint divider token — not tc-slate-*.
+        border-top: 1px solid var(--bp-border-faint);
+        padding-top: 0.25rem;
+        margin-top: 0.125rem;
+    }
+
+    // ── Item — hover & active states ───────────────────────────────────────────
+
+    .tc-side-nav-item {
+        font-family: var(--bp-body);
+        transition:
+            background-color var(--bp-ease),
+            color var(--bp-ease);
+
+        &:hover {
+            // Teal hairline left-accent reinforces the hover affordance.
+            box-shadow: inset 2px 0 0 var(--bp-teal-line);
+        }
+
+        &.active {
+            // Active item gets a pink left-edge glow in addition to the solid bar.
+            box-shadow: inset 2px 0 0 var(--bp-pink), var(--bp-glow-pink);
+
+            .tc-side-nav-icon {
+                // Icon tinted to match the active accent.
+                color: var(--bp-pink);
+            }
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bs-side-nav-focus-color);
+            outline-offset: -2px;
+        }
+    }
+
+    // ── Badge — mono face, uppercase, teal fill ────────────────────────────────
+
+    .tc-side-nav-badge {
+        // Mono uppercase for badge labels — the blueprint HUD/kicker voice.
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        background: var(--bs-side-nav-badge-bg);
+        color: var(--bs-side-nav-badge-color);
+    }
+}

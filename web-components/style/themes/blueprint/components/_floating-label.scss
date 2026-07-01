@@ -1,0 +1,33 @@
+// Blueprint › tc-floating-label — mono eyebrow label floats to teal-fg on focus/fill; idle label uses faint ink.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    .form-floating {
+
+        // Idle label: use the faint ink token so it reads as a ghost placeholder,
+        // not competing with filled text. Opacity stays at 1 when floated.
+        > label {
+            color: var(--bs-form-floating-label-color, var(--bp-text-faint));
+            font-family: var(--bp-body);
+            transition:
+                transform 0.1s var(--bp-ease),
+                opacity 0.1s var(--bp-ease),
+                font-size 0.1s var(--bp-ease),
+                padding 0.1s var(--bp-ease),
+                color 0.1s var(--bp-ease);
+        }
+
+        // Floated (active / filled) label — becomes a mono eyebrow in teal-fg.
+        // --bp-teal-fg is darker teal that clears AA contrast on white --bp-paper.
+        > .form-control:focus ~ label,
+        > .form-control:not(:placeholder-shown) ~ label,
+        > .form-select ~ label {
+            --bs-form-floating-label-color: var(--bp-teal-fg);
+            --bs-form-floating-label-opacity: 1;
+            font-family: var(--bp-mono);
+            color: var(--bp-teal-fg);
+            letter-spacing: 0.1em;
+        }
+    }
+}

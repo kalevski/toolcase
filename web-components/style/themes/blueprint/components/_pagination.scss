@@ -1,0 +1,56 @@
+// Blueprint › tc-pagination — joined pager strip: paper surface, bp-border hairlines,
+// mono numerals, pink active page (primary accent), lavender hover tint.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    .pagination {
+        // Surface: white paper with a single outer hairline (the strip reads as one unit)
+        --bs-pagination-bg:                  var(--bp-paper);
+        --bs-pagination-border-color:        var(--bp-border);
+
+        // Default ink: replace tc-slate-600 leak with a real blueprint text token
+        --bs-pagination-color:               var(--bp-text-muted);
+
+        // Hover: lavender canvas tint, darker ink — barely-there lift
+        --bs-pagination-hover-color:         var(--bp-text-soft);
+        --bs-pagination-hover-bg:            var(--bp-bg);
+        --bs-pagination-hover-border-color:  var(--bp-border);
+
+        // Focus: violet-tinted ring consistent with blueprint shadow system
+        --bs-pagination-focus-color:         var(--bp-text-soft);
+        --bs-pagination-focus-bg:            var(--bp-bg);
+        --bs-pagination-focus-box-shadow:    0 0 0 .2rem var(--bp-teal-soft);
+
+        // Active page: pink fill — primary accent per blueprint rotation
+        --bs-pagination-active-color:        var(--bp-pink-ink);
+        --bs-pagination-active-bg:           var(--bp-pink);
+        --bs-pagination-active-border-color: var(--bp-pink);
+
+        // Disabled: recessed well + faint ink, no pointer events (already handled in base)
+        --bs-pagination-disabled-color:      var(--bp-text-faint);
+        --bs-pagination-disabled-bg:         var(--bp-bg-2);
+        --bs-pagination-disabled-border-color: var(--bp-border-faint);
+
+        // Typography: mono register — numerals read as data labels
+        font-family: var(--bp-mono);
+        letter-spacing: .06em;
+        text-transform: uppercase;
+
+        // Outer strip shadow: lightweight, violet-tinted
+        box-shadow: var(--tc-shadow-sm);
+
+        // Active page: reinforce with a subtle teal underline on the pinned cell
+        // (adds a second visual cue beyond fill — small blueprint detail)
+        .page-item.active .page-link {
+            box-shadow: inset 0 -2px 0 0 var(--bp-teal);
+        }
+
+        // Hover transition: honour ease token
+        .page-link {
+            transition:
+                color       calc(var(--bp-ease, 200ms) * 0.5),
+                background-color calc(var(--bp-ease, 200ms) * 0.5);
+        }
+    }
+}

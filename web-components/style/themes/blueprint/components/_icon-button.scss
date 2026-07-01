@@ -1,0 +1,46 @@
+// Blueprint › tc-icon-button — ghost-secondary → teal hover well; pink focus ring; primary carries pink glow.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Secondary ghost (icon toolbar default) ────────────────────────────────
+    // Base partial bakes --tc-text-muted / --tc-surface-muted which are
+    // slate-tinted; replace with blueprint ink + teal hover well.
+    .btn-secondary.tc-icon-button {
+        --bs-btn-color: var(--bp-text-muted);
+        --bs-btn-hover-color: var(--bp-teal-fg);
+        --bs-btn-hover-bg: var(--bp-teal-soft);
+        --bs-btn-active-color: var(--bp-teal-fg);
+        --bs-btn-active-bg: var(--bp-teal-soft);
+        --bs-btn-disabled-color: var(--bp-text-faint);
+    }
+
+    // ── Primary icon button — pink glow (inherits gradient from _button.scss) ─
+    // _button.scss already injects .btn-primary pink vars + glow; we re-affirm
+    // the glow here for the compact square form and scale it back slightly on
+    // active to mimic a "pressed" feel without the translateY that icon buttons
+    // suppress (they carry no text label so the lift reads awkward).
+    .btn-primary.tc-icon-button {
+        box-shadow: var(--bp-glow-pink);
+
+        &:hover {
+            box-shadow: var(--bp-glow-pink-strong);
+        }
+
+        &:active,
+        &.active {
+            box-shadow: var(--bp-glow-pink);
+        }
+    }
+
+    // ── Focus ring — use the blueprint pink accent ────────────────────────────
+    // Base partial paints outline: 2px solid var(--tc-app-accent); the foundation
+    // remaps --tc-app-accent to --bp-pink already, so this is belt-and-suspenders:
+    // also route the Bootstrap focus-shadow-rgb to pink so :focus-visible
+    // box-shadows (when Bootstrap's own ring kicks in) stay on-brand.
+    .tc-icon-button:focus-visible {
+        outline-color: var(--bp-pink);
+        // Soft pink ambient behind the crisp outline ring.
+        box-shadow: 0 0 0 3px var(--bp-pink-soft);
+    }
+}

@@ -1,0 +1,19 @@
+// Blueprint › tc-screen-flash — re-skins the default flash color to blueprint paper white and
+// overlays a teal glow halo so hits/transitions feel at home in the vector-blueprint palette.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-screen-flash {
+        // Replace the baked #ffffff default with the blueprint paper token.
+        // Keeps the fill on-palette so the flash reads as "same world" rather than
+        // a jarring pure-white burst against the lavender canvas.
+        --bs-screen-flash-color: var(--bp-paper);
+    }
+
+    .tc-screen-flash-fill {
+        // Teal glow radiates outward from every edge during the flash, reinforcing
+        // the blueprint action-accent vocabulary (teal = everyday action / feedback).
+        // The box-shadow is visible only while opacity > 0 so it never lingers.
+        box-shadow: inset 0 0 80px 20px var(--bp-teal-soft);
+    }
+}

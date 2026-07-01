@@ -1,0 +1,48 @@
+// Blueprint › tc-form-input — mono uppercase label, pink required mark, teal loading accent, recessed loading bar.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    // ── Label typography ──────────────────────────────────────────────────────
+    // Blueprint labels read as HUD micro-labels: mono, uppercase, tracked.
+    // Weight is trimmed to 400 — the mono face already reads heavy at small sizes.
+    .tc-form-input {
+        --bs-form-input-label-color: var(--bp-text-muted);
+        --bs-form-input-label-weight: 400;
+    }
+
+    .tc-form-input-label {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: var(--bp-text-muted); // echoes the token above for direct-painted consumers
+    }
+
+    // ── Required asterisk ─────────────────────────────────────────────────────
+    // Blueprint primary accent is pink; the asterisk is a field affordance,
+    // not a danger signal — reroute from --tc-danger to --bp-pink.
+    .tc-form-input {
+        --bs-form-input-required-color: var(--bp-pink);
+    }
+
+    .tc-form-input-required {
+        color: var(--bp-pink);
+    }
+
+    // ── Loading state ─────────────────────────────────────────────────────────
+    // Spinner adopts teal (action color); the placeholder bar uses the recessed
+    // well fill with a faint hairline — consistent with other skeleton surfaces.
+    .tc-form-input-loading {
+        color: var(--bp-text-faint);
+    }
+
+    .tc-form-input-loading .spinner-border {
+        color: var(--bp-teal);
+        border-color: var(--bp-teal-soft);
+        border-right-color: var(--bp-teal);
+    }
+
+    .tc-form-input-loading-bar {
+        background-color: var(--bp-bg-2);      // recessed-well fill
+        border-color: var(--bp-border-faint);  // gentler than the default --tc-border
+    }
+}

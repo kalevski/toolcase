@@ -1,0 +1,13 @@
+// Blueprint › tc-rune-corner — teal HUD corner-bracket accent replacing the default app-accent.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-rune-corner {
+        // Reroute the fill from --tc-app-accent (which may carry a dark-theme or
+        // non-blueprint accent) to the blueprint teal — the everyday "action" token.
+        // This gives every gilded-frame / card / panel a crisp vector-HUD corner mark
+        // consistent with the blueprint aesthetic.
+        --bs-rune-corner-bg: var(--bp-teal);
+    }
+}

@@ -1,0 +1,107 @@
+// Blueprint › tc-textarea — recessed paper surface, pink focus halo, teal valid / red invalid, mono micro-label voice.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    // ── Form-control surface ──────────────────────────────────────────────────
+    // Re-point the Bootstrap form-control custom-property API away from the
+    // slate/cyan literals baked in the base partial to blueprint tokens.
+    tc-textarea .form-control {
+        --bs-form-control-color:                var(--bp-text);
+        --bs-form-control-bg:                   var(--bp-paper);
+        --bs-form-control-border-color:         var(--bp-border-strong);
+        --bs-form-control-placeholder-color:    var(--bp-text-faint);
+        --bs-form-control-disabled-color:       var(--bp-text-faint);
+        --bs-form-control-disabled-bg:          var(--bp-bg-2);          // recessed well
+        --bs-form-control-disabled-border-color: var(--bp-border-faint);
+
+        font-family: var(--bp-body);
+        // Vertical resize only (base already sets this; repeat here so the
+        // blueprint override is self-contained and doesn't depend on load order).
+        resize: vertical;
+        transition:
+            border-color 0.18s var(--bp-ease),
+            box-shadow   0.18s var(--bp-ease);
+
+        // Placeholder text colour — some engines ignore the custom prop and need
+        // a direct pseudo-element rule.
+        &::placeholder {
+            color: var(--bp-text-faint);
+            opacity: 1;
+        }
+
+        // Focus: pink border + soft pink halo (matches the rest of the form
+        // control suite wired in _input.scss; scoped here for textarea context).
+        &:focus {
+            border-color: var(--bp-pink);
+            outline: 0;
+            box-shadow: var(--tc-focus-ring); // 0 0 0 .2rem rgba(224,17,114,.2)
+        }
+
+        // Disabled: recessed-well ground, no resize affordance.
+        &:disabled {
+            resize: none;
+            cursor: not-allowed;
+            opacity: 1; // override Browser default opacity dimming; tokens handle the tint
+        }
+    }
+
+    // ── Validation states ─────────────────────────────────────────────────────
+    // Blueprint status rotation: success→teal, danger→real red.
+    // *-fg / teal-line / pink-line used so the glow reads on the white ground.
+    tc-textarea .form-control.is-valid {
+        border-color: var(--bp-teal);
+
+        &:focus {
+            border-color: var(--bp-teal);
+            box-shadow: var(--bp-glow-teal); // soft teal halo
+        }
+    }
+
+    tc-textarea .form-control.is-invalid {
+        border-color: var(--bp-danger);
+
+        &:focus {
+            border-color: var(--bp-danger);
+            box-shadow: 0 0 0 0.2rem rgba(220, 38, 38, 0.18); // danger soft halo (--bp-danger #dc2626)
+        }
+    }
+
+    // ── Label typography ──────────────────────────────────────────────────────
+    // Blueprint form labels read as HUD micro-labels: mono face, uppercase,
+    // tracked — consistent with tc-form-input and tc-input label treatment.
+    tc-textarea .form-label {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;           // 11 px — mono reads larger at equal size
+        font-weight: 400;               // mono already reads heavy; keep it light
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--bp-text-muted);
+    }
+
+    // ── Required asterisk ─────────────────────────────────────────────────────
+    // Blueprint primary CTA is pink; the required mark is a field affordance,
+    // not a danger indicator — reroute from --tc-danger to --bp-pink.
+    tc-textarea .tc-field-required {
+        color: var(--bp-pink);
+    }
+
+    // ── Field message slot ────────────────────────────────────────────────────
+    // The reserved .tc-field-message gutter adopts the mono micro-label voice
+    // and blueprint status accent rotation (success→teal, danger→real red).
+    tc-textarea .tc-field-message {
+        --bs-field-message-color: var(--bp-text-faint);
+
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    tc-textarea .tc-field-message--valid {
+        --bs-field-message-color: var(--bp-teal-fg); // darker teal for AA contrast on white
+    }
+
+    tc-textarea .tc-field-message--invalid {
+        --bs-field-message-color: var(--bp-danger);
+    }
+}

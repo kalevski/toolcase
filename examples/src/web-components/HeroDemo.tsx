@@ -1,12 +1,30 @@
 import React, { useEffect, useRef } from 'react'
 
 const HeroDemo: React.FC = () => {
+    const blueprintRef = useRef<any>(null)
     const basicRef = useRef<any>(null)
     const fullRef = useRef<any>(null)
     const minimalRef = useRef<any>(null)
     const statsRef = useRef<any>(null)
     const metricsRef = useRef<any>(null)
     const bgIconsRef = useRef<any>(null)
+
+    // Blueprint split — two-column hero with a framed preview panel on the right,
+    // mirroring the "vector blueprint" landing hero.
+    useEffect(() => {
+        if (blueprintRef.current) {
+            blueprintRef.current.primaryAction = {
+                label: 'Insert coin — start free',
+                icon: 'Zap',
+                href: '#',
+            }
+            blueprintRef.current.secondaryAction = {
+                label: 'Watch tour',
+                icon: 'Play',
+                href: '#',
+            }
+        }
+    }, [])
 
     useEffect(() => {
         if (basicRef.current) {
@@ -105,6 +123,21 @@ const HeroDemo: React.FC = () => {
                         </tc-rich-page-header>
 
                         <div className="d-flex flex-column gap-4 mt-4">
+                            <tc-section-card title="Blueprint split — two columns, preview panel, note + action icons">
+                                {/* @ts-ignore */}
+                                <tc-hero
+                                    ref={blueprintRef}
+                                    eyebrow="Cloud console for web gaming"
+                                    title="Build worlds. We run the backend."
+                                    description="Store the art, pack the bundles, build every version, tune the live game, run the team — one console handles the machinery behind your web games."
+                                    note="Free indie plan · No card · 1UP when you grow"
+                                    preview
+                                    backdrop="grid"
+                                    media-label="Live build"
+                                    media-caption="vector-thrust · world.js"
+                                />
+                            </tc-section-card>
+
                             <tc-section-card title="Basic — title, description, actions (href)">
                                 {/* @ts-ignore */}
                                 <tc-hero

@@ -1,0 +1,90 @@
+// Blueprint › tc-action-row-list — white-paper list frame, display titles, mono
+// descriptions, teal trailing chevron, and a soft teal hover wash per row.
+// The main fix is routing the baked $slate-100 separator literal to --bp-border-faint.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    .tc-action-row-list {
+        // ── Surface ───────────────────────────────────────────────────────────
+        --bs-action-row-list-bg:               var(--bp-paper);
+        --bs-action-row-list-border-color:     var(--bp-border);
+
+        // ── Inner row separators ──────────────────────────────────────────────
+        // Base partial bakes #{$slate-100} here — a raw slate literal that leaks
+        // the light-slate ramp under dark-adjacent palettes.  Route to the
+        // blueprint faint-divider token instead.
+        --bs-action-row-list-separator-color:  var(--bp-border-faint);
+
+        // ── Hover tint ────────────────────────────────────────────────────────
+        // A barely-there lavender wash — visually consistent with the --bp-paper
+        // surface family without introducing a second painted background.
+        --bs-action-row-list-hover-bg:         var(--bp-paper-tint);
+
+        // ── Text ──────────────────────────────────────────────────────────────
+        --bs-action-row-list-title-color:      var(--bp-text);
+        --bs-action-row-list-desc-color:       var(--bp-text-muted);
+
+        // Outer frame shadow — lifts the list off the page background gently.
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Row title — display typeface (Chakra Petch), tight tracking ───────────
+    // The display font is the blueprint's visual signature for named entities /
+    // action labels.  Weight 500 keeps it sturdy without shouting.
+    .tc-action-row-title {
+        font-family: var(--bp-display);
+        font-weight: 500;
+        letter-spacing: -0.01em;
+        color: var(--bp-text);
+    }
+
+    // ── Row description — mono micro-label treatment ──────────────────────────
+    // Short descriptors sit in the HUD / kicker register: mono, uppercase,
+    // loose tracking, muted teal.  Only applied when a desc is present.
+    .tc-action-row-desc {
+        font-family: var(--bp-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--bp-teal-fg); // teal-fg clears AA contrast on white paper
+    }
+
+    // ── Trailing icon — teal chevron ──────────────────────────────────────────
+    // The chevron sits in the "everyday action" slot; teal is the blueprint's
+    // action accent, giving the arrow a clear directional affordance.
+    .tc-action-row-trailing-icon {
+        color: var(--bp-teal);
+        transition: transform 0.18s var(--bp-ease), color 0.18s;
+    }
+
+    // On hover, nudge the trailing icon right for a subtle affordance cue.
+    .tc-action-row:hover .tc-action-row-trailing-icon {
+        color: var(--bp-teal-hover);
+        transform: translateX(2px);
+    }
+
+    // ── Leading icon — inherits title color (--bp-text) by default ────────────
+    // No override needed — currentColor flows through correctly.
+
+    // ── Hover row — teal left-edge accent flash ───────────────────────────────
+    // A thin teal left border appears on hover to reinforce the row as a tappable
+    // entity.  The padding-left compensates so content doesn't shift.
+    .tc-action-row {
+        border-left: 2px solid transparent;
+        padding-left: calc(var(--bs-action-row-list-padding-x) - 2px); // offset the 2px border
+        transition:
+            background-color 0.18s var(--bp-ease),
+            border-color 0.18s var(--bp-ease);
+    }
+
+    .tc-action-row:hover {
+        border-left-color: var(--bp-teal);
+    }
+
+    // Disabled rows keep muted teal-faint border so they stay visually coherent
+    // but clearly unavailable (opacity: 0.5 already applied by base partial).
+    .tc-action-row[data-disabled='true'] {
+        border-left-color: transparent;
+    }
+}

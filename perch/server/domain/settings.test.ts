@@ -18,7 +18,7 @@ import {
 describe('isThemeName (tracks the bundled web-components skins)', () => {
     it('accepts every bundled theme and rejects anything else', () => {
         for (const t of THEME_NAMES) expect(isThemeName(t)).toBe(true)
-        expect(THEME_NAMES).toEqual(['default', 'dungeon', 'aurora', 'sunshine', 'neon'])
+        expect(THEME_NAMES).toEqual(['default', 'dungeon', 'aurora', 'sunshine', 'neon', 'blueprint'])
         expect(isThemeName('midnight')).toBe(false)
         expect(isThemeName('')).toBe(false)
         expect(isThemeName(42)).toBe(false)

@@ -1,0 +1,35 @@
+// Blueprint › tc-toggle-row — pink checked track (primary CTA), teal hover, blueprint hairline knob border, violet focus ring.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-toggle-row {
+        // Off track: blueprint border tone — a flat, clearly inactive well.
+        --bs-toggle-row-track-bg: var(--bp-border);
+
+        // Hover: step up to the stronger border tone; teal would read as
+        // "active" prematurely, so we use the muted border family instead.
+        --bs-toggle-row-track-hover-bg: var(--bp-border-strong);
+
+        // Checked track: pink is the blueprint primary/CTA accent rotation.
+        --bs-toggle-row-track-checked-bg: var(--bp-pink);
+        --bs-toggle-row-track-checked-gradient: var(--bp-pink-grad);
+
+        // Track inner shadow: replace dark-slate literal with a violet-tinted
+        // shadow that reads naturally against the light lavender canvas.
+        --bs-toggle-row-track-shadow: inset 0 1px 2px rgba(91, 61, 242, 0.10);
+
+        // Knob: stays white; border replaces the dark-slate literal with the
+        // standard blueprint hairline token so it is themeable.
+        --bs-toggle-row-knob-bg: var(--bp-paper);
+        --bs-toggle-row-knob-border: var(--bp-border);
+
+        // Knob drop-shadow: violet-tinted to match the blueprint shadow family.
+        --bs-toggle-row-knob-shadow: 0 1px 2px rgba(91, 61, 242, 0.18);
+
+        // Focus ring: pink glow — coherent with the checked-state colour and
+        // the broader blueprint primary accent rotation.
+        --bs-toggle-row-focus-ring: var(--bp-glow-pink);
+    }
+
+}

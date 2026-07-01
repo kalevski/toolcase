@@ -1,0 +1,43 @@
+// Blueprint › tc-radio-group — mono-uppercase group label in teal-fg, body text for option labels; inherits pink radio dot + teal focus ring from _check.scss.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Group-level custom-property overrides ────────────────────────────────
+    // The legend/label track is a micro-label eyebrow: mono, uppercase, loose
+    // tracking, teal-fg for hierarchy — signals "field group header" vs prose.
+    .tc-radio-group {
+        --bs-radio-group-label-color:  var(--bp-teal-fg);   // eyebrow teal text on white (AA-safe)
+        --bs-radio-group-label-size:   0.6875rem;            // ~11px — HUD-scale eyebrow
+        --bs-radio-group-label-weight: 600;
+    }
+
+    // ── Group label — styled as a blueprint eyebrow ──────────────────────────
+    .tc-radio-group-label {
+        font-family:    var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: .1em;
+        color:          var(--bs-radio-group-label-color);
+        // Thin teal hairline below the label separates it from the options
+        padding-bottom: .35rem;
+        border-bottom:  1px solid var(--bp-teal-line);
+        margin-bottom:  .55rem; // slightly more breathing room after the rule
+    }
+
+    // ── Option labels — body typeface, primary ink ───────────────────────────
+    // .form-check-label reset is owned by _check.scss (--bp-body + --bp-text).
+    // No override needed here; listed as a comment for traceability.
+
+    // ── Inline variant gap ───────────────────────────────────────────────────
+    // Standard gap reads fine; no visual change needed for the blueprint skin.
+
+    // ── Disabled host treatment ──────────────────────────────────────────────
+    // The base partial already applies opacity .6 + pointer-events none to
+    // tc-radio-group[disabled]. Blueprint dims the label rule as well so the
+    // hairline doesn't punch through at full teal strength when the group fades.
+    tc-radio-group[disabled] {
+        .tc-radio-group-label {
+            border-bottom-color: var(--bp-border-faint);
+        }
+    }
+}

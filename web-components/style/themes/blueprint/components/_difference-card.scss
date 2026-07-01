@@ -1,0 +1,121 @@
+// Blueprint › tc-difference-card — white paper tile, display-font value, mono uppercase title, teal/danger/neutral delta chips, HUD corner bracket.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    // ── Component token remaps ────────────────────────────────────────────────
+    tc-difference-card {
+        // Surface: raised white paper with violet hairline + tinted shadow
+        --bs-difference-card-bg:             var(--bp-paper);
+        --bs-difference-card-border-color:   var(--bp-border);
+        --bs-difference-card-shadow:         var(--tc-shadow-sm);
+
+        // Title label — muted violet-ink
+        --bs-difference-card-title-color:    var(--bp-text-muted);
+
+        // Value — primary ink (darkest, legible on white)
+        --bs-difference-card-value-color:    var(--bp-emphasis);
+        --bs-difference-card-value-font-size: 1.625rem; // slightly roomier for Chakra Petch
+
+        // Period caption — faint muted tone
+        --bs-difference-card-period-color:   var(--bp-text-faint);
+
+        // Skeleton shimmer: lavender well + white highlight
+        --bs-difference-card-skeleton-bg:        var(--bp-bg-2);
+        --bs-difference-card-skeleton-shimmer:   rgba(255, 255, 255, 0.72);
+    }
+
+    // ── Card wrapper — white paper, violet hairline, violet-tinted shadow ────
+    .tc-difference-card {
+        position: relative; // anchor for HUD corner bracket
+        background-color: var(--bp-paper);
+        border: 1px solid var(--bp-border);
+        box-shadow: var(--tc-shadow-sm);
+        transition: box-shadow 160ms var(--bp-ease), transform 160ms var(--bp-ease);
+
+        // HUD corner bracket — teal top-left accent (interactive tile cue)
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            pointer-events: none;
+        }
+
+        &:hover {
+            box-shadow: var(--tc-shadow-hover);
+            transform: translateY(-2px);
+        }
+    }
+
+    // ── Title label — mono uppercase, muted violet ───────────────────────────
+    .tc-difference-card-title {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--bs-difference-card-title-color); // --bp-text-muted via token
+    }
+
+    // ── Value — display font, tight tracking, emphasis ink ───────────────────
+    .tc-difference-card-value {
+        font-family: var(--bp-display);
+        font-size: var(--bs-difference-card-value-font-size);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: var(--bs-difference-card-value-color); // --bp-emphasis via token
+    }
+
+    // ── Delta chip — mono font, soft tint fills; blueprint accent rotation ───
+    // Base delta: neutral slate → violet soft tint
+    .tc-difference-card-delta {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        // Neutral default — override below with modifiers
+        background-color: var(--bp-paper-tint-2);
+        color: var(--bp-text-faint);
+        border-color: var(--bp-border-chip);
+    }
+
+    // Positive delta — teal soft tint + teal-fg text (AA on white)
+    .tc-difference-card-delta--up {
+        background-color: var(--bp-teal-soft);
+        color: var(--bp-teal-fg);
+        border-color: transparent;
+    }
+
+    // Negative delta — danger soft tint + danger text
+    .tc-difference-card-delta--down {
+        background-color: var(--bp-danger-soft);
+        color: var(--bp-danger);
+        border-color: transparent;
+    }
+
+    // Neutral — violet paper tint + faint muted text
+    .tc-difference-card-delta--neutral {
+        background-color: var(--bp-paper-tint-2);
+        color: var(--bp-text-faint);
+        border-color: var(--bp-border-chip);
+    }
+
+    // ── Period caption — mono micro-label, violet-faint ──────────────────────
+    .tc-difference-card-period {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        color: var(--bs-difference-card-period-color); // --bp-text-faint via token
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    // ── Skeleton shimmer — lavender well palette ──────────────────────────────
+    // The shimmer gradient uses --bs-difference-card-skeleton-* tokens remapped above;
+    // no rule override needed beyond the token reassignment on tc-difference-card.
+    // Honour prefers-reduced-motion — stays static (base rule handles animation:none).
+}

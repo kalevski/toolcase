@@ -1,0 +1,26 @@
+// Blueprint › tc-toggle — pink primary on-state, violet-tinted track and shadows, focus ring via --bp-pink-soft.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-toggle {
+        // Off-state track: lavender-border fill reads clearly as inactive on the light canvas.
+        --bs-toggle-track-bg: var(--bp-border-strong);
+        // Hover on off-state: step up to text-faint (still clearly inactive, but responsive).
+        --bs-toggle-track-hover-bg: var(--bp-text-faint);
+        // On-state: pink primary per the blueprint accent rotation.
+        --bs-toggle-track-checked-bg: var(--bp-pink);
+        --bs-toggle-track-checked-gradient: var(--bp-pink-grad);
+        // Replace the baked slate inset shadow literal with a violet-tinted hairline.
+        --bs-toggle-track-shadow: inset 0 1px 2px var(--bp-border);
+        // Knob stays white (--bp-paper); replace slate shadow literal with a soft border token.
+        --bs-toggle-knob-bg: var(--bp-paper);
+        --bs-toggle-knob-shadow: 0 0 0 0.5px var(--bp-border-strong);
+        // Focus ring: pink-soft translucent halo — matches the primary action accent.
+        --bs-toggle-focus-ring: var(--bp-pink-soft);
+
+        &:focus-visible {
+            // Override the base outline which refs --tc-app-accent; use blueprint pink directly.
+            outline-color: var(--bp-pink);
+        }
+    }
+}

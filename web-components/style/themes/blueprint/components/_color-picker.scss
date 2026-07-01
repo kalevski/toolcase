@@ -1,0 +1,131 @@
+// Blueprint › tc-color-picker — teal mono hex label, pink selection ring, paper panel, blueprint-tinted swatch skeleton.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Label ─────────────────────────────────────────────────────────────────
+    // Match the form-label voice used in _input.scss — muted ink, not full --bp-text.
+
+    .tc-color-picker-label {
+        font-family: var(--bp-body);
+        color: var(--bp-text-muted);
+    }
+
+    // ── Trigger button ─────────────────────────────────────────────────────────
+    // Paper surface on the lavender canvas; strong hairline at rest; pink border
+    // + glow on focus (mirrors the focus pattern from _input.scss).
+
+    .tc-color-picker-trigger {
+        --bs-color-picker-trigger-bg:     var(--bp-paper);
+        --bs-color-picker-trigger-border: var(--bp-border-strong);
+        --bs-color-picker-trigger-color:  var(--bp-text);
+
+        font-family: var(--bp-body);
+        transition:
+            border-color var(--bp-ease),
+            box-shadow   var(--bp-ease);
+
+        &:hover:not([disabled]):not(:disabled) {
+            --bs-color-picker-trigger-border: var(--bp-border-soft);
+            background: var(--bp-paper-tint);
+        }
+
+        &:focus-visible {
+            border-color: var(--bp-pink);
+            box-shadow: var(--bp-glow-pink);
+        }
+
+        // is-invalid already routes to --tc-danger; no override needed — it reads
+        // fine against the blueprint canvas.
+    }
+
+    // ── Color chip ─────────────────────────────────────────────────────────────
+    // Replace the raw rgba(0,0,0,0.15) border with a blueprint hairline token.
+
+    .tc-color-picker-chip {
+        border-color: var(--bp-border);
+    }
+
+    // ── Hex text ───────────────────────────────────────────────────────────────
+    // Mono labels in the blueprint voice use --bp-mono + teal-fg so they read as
+    // a HUD datum rather than plain body text.
+
+    .tc-color-picker-hex-text {
+        font-family: var(--bp-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--bp-teal-fg);
+    }
+
+    // ── Overlay panel ──────────────────────────────────────────────────────────
+    // Raised white card with strong hairline + violet-tinted shadow; matches the
+    // tc-dropdown / tc-context-menu surface treatment already established.
+
+    .tc-color-picker-panel {
+        --bs-color-picker-panel-bg:     var(--bp-paper);
+        --bs-color-picker-panel-border: var(--bp-border-strong);
+        --bs-color-picker-panel-shadow: var(--tc-shadow-lg);
+    }
+
+    // ── Swatches ───────────────────────────────────────────────────────────────
+    // Replace every raw rgba(0,0,0,*) literal — they read muddy against the
+    // lavender canvas and bypass the token system.
+
+    .tc-color-picker-swatch {
+
+        &:hover {
+            // Replace rgba(0,0,0,0.3) inner border → blueprint border token.
+            border-color: var(--bp-border-strong);
+
+            &::before {
+                // Replace --tc-border-strong outer ring → teal action accent.
+                border-color: var(--bp-teal);
+            }
+        }
+
+        &:focus-visible {
+            border-color: var(--bp-border-strong);
+
+            &::before {
+                // Replace --tc-app-accent → pink primary per blueprint focus pattern.
+                border-color: var(--bp-pink);
+            }
+        }
+
+        // Selected state: pink primary accent for the outer selection ring.
+        // Replace rgba(0,0,0,0.5) inner border + --tc-border-strong outer ring.
+        &--selected {
+            border-color: var(--bp-border-strong);
+
+            &::before {
+                border-color: var(--bp-pink);
+            }
+        }
+    }
+
+    // ── Loading skeleton ───────────────────────────────────────────────────────
+    // Use the recessed-well tint instead of --tc-surface-muted (which can pull
+    // in the neutral slate ramp); the pulse keyframes are already defined on
+    // tc-cp-pulse in the base partial — we only override the fill color here.
+
+    .tc-color-picker-swatch-skeleton {
+        background: var(--bp-bg-2);
+    }
+
+    // ── Footer hex input ───────────────────────────────────────────────────────
+    // The .form-control focus ring is already handled by _input.scss (pink border
+    // + --tc-focus-ring). Override only the monospace font so it aligns with the
+    // hex-text label above.
+
+    .tc-color-picker-hex.form-control {
+        font-family: var(--bp-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.06em;
+        color: var(--bp-text);
+
+        &::placeholder {
+            color: var(--bp-text-faint);
+        }
+    }
+}

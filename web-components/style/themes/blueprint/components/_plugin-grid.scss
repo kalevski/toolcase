@@ -1,0 +1,146 @@
+// Blueprint › tc-plugin-grid — white HUD plugin tiles: display names, mono install chips, teal copy action, corner-bracket lift on hover.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Component-level token overrides ─────────────────────────────────────
+    // Re-point all --bs-plugin-grid-* vars to blueprint tokens so every
+    // cosmetic is driven through the var API — no raw class rules needed for
+    // these baseline properties.
+    tc-plugin-grid {
+        // Card surface: white paper, lilac hairline, soft violet-tinted shadow.
+        --bs-plugin-grid-card-bg:            var(--bp-paper);
+        --bs-plugin-grid-card-border:        1px solid var(--bp-border);
+        --bs-plugin-grid-card-shadow:        var(--tc-shadow-sm);
+        --bs-plugin-grid-card-shadow-hover:  var(--tc-shadow-hover);
+
+        // Section header — strong blueprint ink.
+        --bs-plugin-grid-header-color:       var(--bp-emphasis);
+        --bs-plugin-grid-name-color:         var(--bp-text);
+
+        // Description — muted violet-inflected prose color.
+        --bs-plugin-grid-desc-color:         var(--bp-text-muted);
+
+        // Install chip — recessed lavender well, primary ink.
+        --bs-plugin-grid-install-bg:         var(--bp-bg-2);
+        --bs-plugin-grid-install-color:      var(--bp-text-soft);
+
+        // Download count — faint supporting readout.
+        --bs-plugin-grid-downloads-color:    var(--bp-text-faint);
+
+        // Copy icon button — muted at rest, teal on hover (set below on class rule).
+        --bs-plugin-grid-copy-color:         var(--bp-text-faint);
+    }
+
+    // ── Section header ───────────────────────────────────────────────────────
+    // Chakra Petch display title with tight blueprint tracking.
+    .tc-plugin-grid-title {
+        font-family: var(--bp-display);
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: var(--bp-emphasis);
+        text-wrap: balance;
+    }
+
+    // ── Individual plugin card ────────────────────────────────────────────────
+    // Tappable tile: corner-bracket HUD mark, accent border on hover, 2px lift.
+    .tc-plugin-card {
+        position: relative;
+        background: var(--bs-plugin-grid-card-bg);
+        transition:
+            transform 0.22s var(--bp-ease),
+            border-color 0.22s,
+            box-shadow 0.22s;
+
+        // HUD corner-bracket: top-left L-tick in teal — blueprint signature detail.
+        // Matches the pattern established on tc-basic-card.
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            opacity: 0.5;
+            pointer-events: none;
+            transition: opacity 0.22s;
+        }
+
+        &:hover {
+            transform: translateY(-2px);
+            border-color: var(--bp-border-strong);
+            box-shadow: var(--bs-plugin-grid-card-shadow-hover);
+
+            &::before {
+                opacity: 1;
+            }
+        }
+    }
+
+    // ── Logo area ────────────────────────────────────────────────────────────
+    // Sit the icon/image on the recessed bg-2 well so it reads as a contained chip.
+    .tc-plugin-card-logo {
+        background: var(--bp-bg-2);
+        padding: 0.35rem;
+        color: var(--bp-teal-fg); // SVG icons inherit stroke via currentColor
+    }
+
+    // ── Plugin name ───────────────────────────────────────────────────────────
+    // Chakra Petch display font — same treatment as tc-basic-card primary text.
+    .tc-plugin-card-name {
+        font-family: var(--bp-display);
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        color: var(--bp-text);
+    }
+
+    // ── Description ───────────────────────────────────────────────────────────
+    // Space Grotesk body; muted but readable on white paper.
+    .tc-plugin-card-desc {
+        font-family: var(--bp-body);
+        color: var(--bp-text-muted);
+        line-height: 1.55;
+    }
+
+    // ── Install command chip ──────────────────────────────────────────────────
+    // JetBrains Mono on the recessed lavender well — a natural HUD readout.
+    // Border wraps the chip in the same hairline family as the card frame.
+    .tc-plugin-card-install {
+        font-family: var(--bp-mono);
+        font-size: 0.75rem;
+        color: var(--bs-plugin-grid-install-color);
+        background: var(--bs-plugin-grid-install-bg);
+        border: 1px solid var(--bp-border-chip);
+        letter-spacing: 0.02em;
+    }
+
+    // ── Copy button ───────────────────────────────────────────────────────────
+    // Teal on hover — everyday action accent in the arcade color rotation.
+    .tc-plugin-card-copy {
+        color: var(--bs-plugin-grid-copy-color);
+        transition: color 0.18s;
+
+        &:hover {
+            color: var(--bp-teal-fg); // darker teal clears AA on white
+        }
+
+        &:focus-visible {
+            // Re-point focus ring to teal (the action accent) instead of the
+            // generic app-accent so it stays consistent within the blueprint theme.
+            outline-color: var(--bp-teal);
+        }
+    }
+
+    // ── Download count ────────────────────────────────────────────────────────
+    // Mono micro-label treatment: uppercase, loose tracking — HUD readout style.
+    .tc-plugin-card-downloads {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--bp-text-faint);
+        font-variant-numeric: tabular-nums; // digit columns stay stable
+    }
+}

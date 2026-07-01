@@ -1,0 +1,34 @@
+// Blueprint › tc-compass-rose — HUD instrument face: paper-white disc, teal tick marks,
+// pink north needle + hub (primary accent), muted south arm, mono cardinal labels.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-compass-rose {
+        // Face: raised white card disc (circle is sanctioned geometry).
+        --bs-compass-rose-face-bg: var(--bp-paper);
+
+        // Outer hairline ring — blueprint border token; stronger than divider weight.
+        --bs-compass-rose-ring-color: var(--bp-border-strong);
+        --bs-compass-rose-ring-width: 1.5;
+
+        // Cardinal index ticks — secondary border weight, recedes behind the needle.
+        --bs-compass-rose-tick-color: var(--bp-border-soft);
+        --bs-compass-rose-tick-width: 1.5;
+
+        // North needle + hub → pink (blueprint primary/CTA accent rotation).
+        --bs-compass-rose-needle-n-color: var(--bp-pink);
+        --bs-compass-rose-hub-color: var(--bp-pink);
+
+        // South needle → muted hairline colour; replaces the leaking var(--tc-slate-300).
+        --bs-compass-rose-needle-s-color: var(--bp-border-strong);
+
+        // Cardinal labels: mono font, loose tracking, faint base ink.
+        // --tc-font-mono is already remapped to --bp-mono by the foundation, so
+        // only the fill tokens need explicit overrides here.
+        --bs-compass-rose-label-color: var(--bp-text-faint);
+        --bs-compass-rose-label-spacing: 0.1em;
+
+        // North label: full primary ink + pink fill for emphasis (matches needle).
+        --bs-compass-rose-label-n-color: var(--bp-pink);
+    }
+}

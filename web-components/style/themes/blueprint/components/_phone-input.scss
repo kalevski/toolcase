@@ -1,0 +1,191 @@
+// Blueprint › tc-phone-input — lavender-paper input group, mono dial codes, pink active option, teal search focus.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Host custom properties ────────────────────────────────────────────────
+
+    tc-phone-input {
+        // Surface + text
+        --bs-phone-input-bg:                  var(--bp-paper);
+        --bs-phone-input-border:              var(--bp-border);
+        --bs-phone-input-text:                var(--bp-text);
+        --bs-phone-input-muted:               var(--bp-text-muted);
+        --bs-phone-input-placeholder:         var(--bp-text-faint);
+
+        // Country trigger
+        --bs-phone-input-trigger-bg:          var(--bp-bg);
+        --bs-phone-input-trigger-hover-bg:    var(--bp-teal-soft);
+
+        // Focus ring → teal
+        --bs-phone-input-focus-ring:          0 0 0 0.18rem var(--bp-teal-soft);
+
+        // Dropdown
+        --bs-phone-input-dropdown-bg:         var(--bp-paper);
+        --bs-phone-input-dropdown-border:     var(--bp-border);
+        --bs-phone-input-dropdown-shadow:     var(--tc-shadow-lg);
+
+        // Option states → pink active, bp-bg-2 hover
+        --bs-phone-input-option-hover-bg:     var(--bp-bg-2);
+        --bs-phone-input-option-active-bg:    var(--bp-pink);
+        --bs-phone-input-option-active-text:  var(--bp-pink-ink);
+
+        // Error
+        --bs-phone-input-error-color:         var(--bp-danger);
+    }
+
+    // ── Label — mono eyebrow style ────────────────────────────────────────────
+
+    .tc-phone-input-label {
+        font-family:     var(--bp-mono);
+        font-size:       0.6875rem;           // 11px — standard mono label size
+        font-weight:     600;
+        text-transform:  uppercase;
+        letter-spacing:  .08em;
+        color:           var(--bp-text-muted);
+    }
+
+    // ── Input group — hairline border, paper bg ───────────────────────────────
+
+    .tc-phone-input-group {
+        border-color: var(--bp-border-strong);
+        background:   var(--bp-paper);
+        transition:
+            border-color var(--bp-ease),
+            box-shadow   var(--bp-ease);
+
+        &:focus-within {
+            // Replace slate rgba literal with teal blueprint focus
+            border-color: var(--bp-teal);
+            box-shadow:   0 0 0 0.18rem var(--bp-teal-soft);
+        }
+
+        .tc-phone-input--error & {
+            border-color: var(--bp-danger);
+
+            &:focus-within {
+                border-color: var(--bp-danger);
+                // Replace hardcoded rgba(220,38,38,*) with danger-soft token
+                box-shadow: 0 0 0 0.18rem var(--bp-danger-soft);
+            }
+        }
+    }
+
+    // ── Country trigger ───────────────────────────────────────────────────────
+
+    .tc-phone-input-country {
+        background:   var(--bp-bg);
+        // Internal separator matches the outer hairline family
+        border-right-color: var(--bp-border);
+        transition: background-color var(--bp-ease);
+
+        svg {
+            // Chevron/caret inherits teal-fg for legibility on the light ground
+            color: var(--bp-teal-fg);
+        }
+
+        &:hover {
+            background: var(--bp-teal-soft);
+        }
+
+        &:focus-visible {
+            // Teal inset ring consistent with focus-within treatment
+            box-shadow: inset 0 0 0 2px var(--bp-teal);
+        }
+    }
+
+    // ── Dial code — mono font to match blueprint HUD labels ──────────────────
+
+    .tc-phone-input-dial {
+        font-family: var(--bp-mono);
+        font-size:   0.75rem;
+        color:       var(--bp-text-muted);
+        letter-spacing: .03em;
+    }
+
+    // ── Number input ──────────────────────────────────────────────────────────
+
+    .tc-phone-input-number {
+        font-family: var(--bp-body);
+        color:       var(--bp-text);
+        background:  var(--bp-paper);
+
+        &::placeholder {
+            color:   var(--bp-text-faint);
+            opacity: 1;
+        }
+    }
+
+    // ── Dropdown ──────────────────────────────────────────────────────────────
+
+    .tc-phone-input-dropdown {
+        background:  var(--bp-paper);
+        border:      1px solid var(--bp-border);
+        box-shadow:  var(--tc-shadow-lg);
+    }
+
+    // ── Dropdown search wrap + search input ───────────────────────────────────
+
+    .tc-phone-input-search-wrap {
+        border-bottom-color: var(--bp-border-faint);
+    }
+
+    .tc-phone-input-search {
+        font-family: var(--bp-body);
+        color:       var(--bp-text);
+        background:  var(--bp-bg-2);
+        border-color: var(--bp-border);
+
+        &::placeholder {
+            color:   var(--bp-text-faint);
+            opacity: 1;
+        }
+
+        &:focus {
+            // Replace slate rgba literals with teal blueprint focus
+            border-color: var(--bp-teal);
+            box-shadow:   0 0 0 0.15rem var(--bp-teal-soft);
+            outline: none;
+        }
+    }
+
+    // ── Country option ────────────────────────────────────────────────────────
+
+    .tc-phone-input-option {
+        font-family: var(--bp-body);
+        color:       var(--bp-text);
+        transition:
+            background-color var(--bp-ease),
+            color            var(--bp-ease);
+
+        &--active {
+            background: var(--bp-pink);
+            color:      var(--bp-pink-ink);
+
+            .tc-phone-input-option-dial {
+                // Dial code on the pink active row — keep readable
+                color: color-mix(in srgb, var(--bp-pink-ink) 75%, transparent);
+            }
+        }
+    }
+
+    // ── Option dial code — mono ───────────────────────────────────────────────
+
+    .tc-phone-input-option-dial {
+        font-family:    var(--bp-mono);
+        font-size:      0.6875rem;
+        letter-spacing: .03em;
+        color:          var(--bp-text-faint);
+    }
+
+    // ── No-results ────────────────────────────────────────────────────────────
+
+    .tc-phone-input-no-results {
+        font-family: var(--bp-mono);
+        font-size:   0.75rem;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color:       var(--bp-text-faint);
+        font-style:  normal; // override italic from base
+    }
+}

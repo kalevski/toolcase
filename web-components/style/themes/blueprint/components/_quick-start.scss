@@ -1,0 +1,135 @@
+// Blueprint › tc-quick-start — numbered step guide; teal connector rail + mono markers, display step titles, tinted code/output wells.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Token overrides ──────────────────────────────────────────────────────────
+
+    tc-quick-start {
+        // Section title: display face, tight tracking, primary ink
+        --bs-quick-start-title-font-size: 1.125rem;
+        --bs-quick-start-title-font-weight: 700;
+        --bs-quick-start-title-color: var(--bp-emphasis);
+
+        // Step markers: teal-accented circle with mono numerals
+        --bs-quick-start-marker-color: var(--bp-teal-fg);
+        --bs-quick-start-marker-border: 2px solid var(--bp-teal-line);
+        --bs-quick-start-marker-bg: var(--bp-teal-soft);
+
+        // Connector rail: teal hairline
+        --bs-quick-start-connector-color: var(--bp-teal-line);
+        --bs-quick-start-connector-width: 1px;
+
+        // Step title: display face
+        --bs-quick-start-step-title-color: var(--bp-text);
+        --bs-quick-start-step-title-font-weight: 600;
+
+        // Step description: body ink, muted
+        --bs-quick-start-step-desc-color: var(--bp-text-muted);
+
+        // Code block: recessed paper-tint well, primary ink, blueprint border
+        --bs-quick-start-code-bg: var(--bp-bg-2);
+        --bs-quick-start-code-color: var(--bp-text);
+        --bs-quick-start-code-border: 1px solid var(--bp-border);
+
+        // Output block: slightly deeper well, muted ink, border continues code block
+        --bs-quick-start-output-bg: var(--bp-paper-tint-2);
+        --bs-quick-start-output-color: var(--bp-text-muted);
+        --bs-quick-start-output-border: 1px solid var(--bp-border);
+
+        // Copy button: muted text, teal hover surface
+        --bs-quick-start-copy-color: var(--bp-text-faint);
+        --bs-quick-start-copy-hover-bg: var(--bp-teal-soft);
+        --bs-quick-start-copy-hover-color: var(--bp-teal-fg);
+        --bs-quick-start-copy-focus-ring: 2px solid var(--bp-teal);
+    }
+
+    // ── Section title ────────────────────────────────────────────────────────────
+
+    .tc-quick-start-title {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+        color: var(--bs-quick-start-title-color);
+    }
+
+    // ── Marker ───────────────────────────────────────────────────────────────────
+    // Mono face for the step number — small-caps arcade HUD feel.
+
+    .tc-quick-start-marker {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        // border-radius kept 50% from base; radius sweep does not affect circles
+        transition: background-color 0.15s var(--bp-ease),
+                    border-color 0.15s var(--bp-ease),
+                    box-shadow 0.15s var(--bp-ease);
+    }
+
+    // Active/last-in-flow marker gets a gentle teal glow to mark the live step.
+    .tc-quick-start-step:last-child .tc-quick-start-marker {
+        box-shadow: var(--bp-glow-teal);
+    }
+
+    // ── Step title ───────────────────────────────────────────────────────────────
+    // Display face, slightly tight tracking — blueprint section heading feel.
+
+    .tc-quick-start-step-title {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+    }
+
+    // ── Step description ─────────────────────────────────────────────────────────
+
+    .tc-quick-start-step-desc {
+        font-family: var(--bp-body);
+    }
+
+    // ── Code block ───────────────────────────────────────────────────────────────
+    // Mono font is inherited from base; blueprint adds a left accent bar (violet)
+    // to signal "this is a command you run".
+
+    .tc-quick-start-code {
+        font-family: var(--bp-mono);
+        border-left: 3px solid var(--bp-violet);
+        // Override any slate gradient literal the base might accumulate
+        background: var(--bs-quick-start-code-bg);
+        color: var(--bs-quick-start-code-color);
+    }
+
+    // ── Output block ─────────────────────────────────────────────────────────────
+    // Amber left bar visually separates "input command" from "expected output".
+
+    .tc-quick-start-output {
+        font-family: var(--bp-mono);
+        color: var(--bs-quick-start-output-color);
+        background: var(--bs-quick-start-output-bg);
+        border-left: 3px solid var(--bp-amber);
+    }
+
+    // ── Copy button ──────────────────────────────────────────────────────────────
+
+    .tc-quick-start-copy {
+        transition: background-color 0.15s var(--bp-ease),
+                    color 0.15s var(--bp-ease);
+
+        &:hover {
+            background: var(--bs-quick-start-copy-hover-bg);
+            color: var(--bs-quick-start-copy-hover-color);
+        }
+
+        &:focus-visible {
+            outline: var(--bs-quick-start-copy-focus-ring);
+            outline-offset: 2px;
+        }
+    }
+
+    // ── Reduced motion ───────────────────────────────────────────────────────────
+
+    @media (prefers-reduced-motion: reduce) {
+        .tc-quick-start-marker,
+        .tc-quick-start-copy {
+            transition: none;
+        }
+    }
+}

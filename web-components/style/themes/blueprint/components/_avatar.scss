@@ -1,0 +1,100 @@
+// Blueprint › tc-avatar — mono initials, blueprint soft-tint variants, teal live-dot with halo.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Base surface ─────────────────────────────────────────────────────────
+    // Drive through the --bs-avatar-* vars so no element selectors are needed
+    // for the core surface.
+    .tc-avatar {
+        --bs-avatar-bg:    var(--bp-paper-tint);
+        --bs-avatar-color: var(--bp-text-muted);
+
+        // Blueprint status-dot ring matches the white card surface.
+        --bs-avatar-status-ring: 2px;
+    }
+
+    // ── Initials typography ───────────────────────────────────────────────────
+    // Blueprint micro-labels → mono, uppercase, loose tracking.
+    .tc-avatar-initials {
+        font-family:     var(--bp-mono);
+        text-transform:  uppercase;
+        letter-spacing:  .08em;
+        font-weight:     700;
+    }
+
+    // ── Variant tints ─────────────────────────────────────────────────────────
+    // The base partial bakes $theme-colors-soft / $theme-colors-emphasis as
+    // literals, which use slate ramps that clash on blueprint. Override each
+    // variant by re-pointing the custom-props to blueprint palette tokens.
+
+    // primary → violet soft (violet is the supporting accent; pink=primary CTA,
+    // but avatar "primary" reads as an informational chip, not a call-to-action).
+    .tc-avatar-primary {
+        --bs-avatar-bg:    var(--bp-violet-soft);
+        --bs-avatar-color: var(--bp-violet-fg);
+    }
+
+    // secondary → blueprint default paper tint with muted ink.
+    .tc-avatar-secondary {
+        --bs-avatar-bg:    var(--bp-paper-tint-2);
+        --bs-avatar-color: var(--bp-text-muted);
+    }
+
+    // success → teal soft + teal-fg text (AA on white).
+    .tc-avatar-success {
+        --bs-avatar-bg:    var(--bp-teal-soft);
+        --bs-avatar-color: var(--bp-teal-fg);
+    }
+
+    // danger → real danger soft + danger ink.
+    .tc-avatar-danger {
+        --bs-avatar-bg:    var(--bp-danger-soft);
+        --bs-avatar-color: var(--bp-danger);
+    }
+
+    // warning → amber soft + amber-fg text (AA on white).
+    .tc-avatar-warning {
+        --bs-avatar-bg:    var(--bp-amber-soft);
+        --bs-avatar-color: var(--bp-amber-fg);
+    }
+
+    // info → pink soft + pink brand ink.
+    .tc-avatar-info {
+        --bs-avatar-bg:    var(--bp-pink-soft);
+        --bs-avatar-color: var(--bp-pink);
+    }
+
+    // ── Status dot ────────────────────────────────────────────────────────────
+    // Repoint the dot ring to the blueprint paper surface so it separates
+    // cleanly from any bg color.
+    .tc-avatar-status {
+        box-shadow: 0 0 0 var(--bs-avatar-status-ring) var(--bp-paper);
+    }
+
+    // online → teal circle + soft halo ring (blueprint live-dot spec).
+    .tc-avatar-status-online {
+        background-color: var(--bp-teal);
+        box-shadow:
+            0 0 0 var(--bs-avatar-status-ring) var(--bp-paper),
+            0 0 0 .25em var(--bp-teal-soft);
+    }
+
+    // busy → danger red.
+    .tc-avatar-status-busy {
+        background-color: var(--bp-danger);
+        box-shadow: 0 0 0 var(--bs-avatar-status-ring) var(--bp-paper);
+    }
+
+    // away → amber.
+    .tc-avatar-status-away {
+        background-color: var(--bp-amber);
+        box-shadow: 0 0 0 var(--bs-avatar-status-ring) var(--bp-paper);
+    }
+
+    // offline → faint border-tone so it reads as "inactive".
+    .tc-avatar-status-offline {
+        background-color: var(--bp-border-strong);
+        box-shadow: 0 0 0 var(--bs-avatar-status-ring) var(--bp-paper);
+    }
+}

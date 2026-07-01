@@ -1,0 +1,98 @@
+// Blueprint › tc-list — white-paper surface, faint lavender dividers, pink selected rail, mono teal meta labels.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Token remaps on the host element ──────────────────────────────────────
+    // Drive all cosmetics through the existing --bs-list-* API so no selectors
+    // need specificity battles with the base partial.
+
+    tc-list {
+        // Container surface: raised white card on the lavender page
+        --bs-list-bg:            var(--bp-paper);
+        --bs-list-border-color:  var(--bp-border);
+
+        // Row dividers: one step lighter than the outer frame hairline
+        --bs-list-row-border-color: var(--bp-border-faint);
+
+        // Icon: muted violet-slate default
+        --bs-list-icon-color:    var(--bp-text-faint);
+
+        // Label: primary ink
+        --bs-list-label-color:   var(--bp-text);
+
+        // Meta: mono face, teal for secondary data (set via font override below)
+        --bs-list-meta-color:    var(--bp-teal-fg);
+
+        // Selected: pink primary accent — rail + fill + label + icon
+        --bs-list-selected-bg:           var(--bp-pink-surface);
+        --bs-list-selected-label-color:  var(--bp-pink);
+        --bs-list-selected-icon-color:   var(--bp-pink);
+        --bs-list-selected-border-color: var(--bp-pink);
+
+        // Focus ring: pink, consistent with blueprint interactive elements
+        --bs-list-focus-outline: 2px solid var(--bp-pink);
+    }
+
+    // ── Container ─────────────────────────────────────────────────────────────
+    // Add a subtle violet-tinted shadow to lift the list off --bp-bg.
+
+    .tc-list {
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Row hover ─────────────────────────────────────────────────────────────
+    // The base partial uses rgba(255,255,255,0.04) — a dark-theme literal.
+    // Replace with --bp-paper-tint (faintest lavender wash from the palette).
+
+    .tc-list-item {
+        transition: background 0.14s var(--bp-ease, ease);
+
+        &:hover:not(.tc-list-item--disabled):not(.tc-list-item--selected) {
+            background: var(--bp-paper-tint);
+        }
+    }
+
+    // ── Selected state: glow accent on the rail ────────────────────────────────
+    // Optionally add a faint pink glow to the left rail so the selection reads
+    // as a primary-accent pick (arcade convention: pink = selected/primary).
+
+    .tc-list-item--selected {
+        box-shadow: inset 3px 0 0 var(--bp-pink), var(--bp-glow-pink);
+    }
+
+    // ── Meta: mono face + uppercase tracking ──────────────────────────────────
+    // Meta text is the HUD / status-label register in blueprint — mono,
+    // uppercase, wide tracking. The color token is already wired above (teal-fg).
+
+    .tc-list-item-meta {
+        font-family:     var(--bp-mono);
+        text-transform:  uppercase;
+        letter-spacing:  0.07em;
+        font-size:       0.75rem; // slightly tighter than base 0.8125rem at mono weight
+    }
+
+    // ── Label: body face ──────────────────────────────────────────────────────
+
+    .tc-list-item-label {
+        font-family: var(--bp-body);
+    }
+
+    // ── Selected label: display face for titles in primary state ──────────────
+    // Promote the selected-item label to --bp-display (Chakra Petch) so the
+    // chosen entry reads as a named section title, not just a highlighted row.
+
+    .tc-list-item--selected .tc-list-item-label {
+        font-family:    var(--bp-display);
+        letter-spacing: -0.01em;
+        font-weight:    600;
+    }
+
+    // ── Reduced motion ────────────────────────────────────────────────────────
+
+    @media (prefers-reduced-motion: reduce) {
+        .tc-list-item {
+            transition: none;
+        }
+    }
+}

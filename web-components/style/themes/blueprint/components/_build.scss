@@ -1,0 +1,180 @@
+// Blueprint › tc-build — build status card: paper surface, mono meta labels,
+// teal/pink/violet/danger status rotation, pink CTA active state in the action menu,
+// teal left-border accent on clickable hover, shimmer re-keyed to light-theme tokens.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Card shell tokens ──────────────────────────────────────────────────────
+
+    tc-build {
+        --bs-build-bg:                   var(--bp-paper);
+        --bs-build-border-color:         var(--bp-border);
+        --bs-build-shadow:               var(--tc-shadow-sm);
+        --bs-build-shadow-hover:         var(--tc-shadow-hover);
+
+        // Build name reads as a display title
+        --bs-build-name-color:           var(--bp-text);
+
+        // Meta items already use the mono stack in the base; reroute color
+        --bs-build-meta-color:           var(--bp-text-faint);
+
+        // Status icon accent rotation: teal=success, danger=fail, violet=running/info, faint=queued
+        --bs-build-status-icon-pass-color:    var(--bp-teal);
+        --bs-build-status-icon-fail-color:    var(--bp-danger);
+        --bs-build-status-icon-running-color: var(--bp-violet);
+        --bs-build-status-icon-queued-color:  var(--bp-text-faint);
+
+        // Kebab trigger
+        --bs-build-menu-trigger-color:        var(--bp-text-faint);
+        --bs-build-menu-trigger-hover-color:  var(--bp-text);
+
+        // Skeleton: light-theme safe — no dark or white literals
+        --bs-build-skeleton-bg:      var(--bp-bg-2);
+        --bs-build-skeleton-shimmer: var(--bp-paper);
+    }
+
+    // ── Card shell ─────────────────────────────────────────────────────────────
+
+    .tc-build {
+        background: var(--bs-build-bg);
+        border-color: var(--bs-build-border-color);
+        box-shadow: var(--bs-build-shadow);
+
+        // Clickable variant: teal left-border accent + 2px lift instead of the
+        // base 1px lift — more deliberate for a "run" context
+        &--clickable {
+            border-left: 2px solid var(--bp-border-faint);
+            transition:
+                box-shadow var(--bp-ease),
+                transform var(--bp-ease),
+                border-left-color var(--bp-ease);
+
+            &:hover {
+                box-shadow: var(--bs-build-shadow-hover);
+                transform: translateY(-2px);
+                border-left-color: var(--bp-teal);
+            }
+
+            &:focus-visible {
+                outline-color: var(--bp-pink);
+            }
+        }
+    }
+
+    // ── Build name — display typeface ──────────────────────────────────────────
+
+    .tc-build-name {
+        font-family: var(--bp-display);
+        // Chakra Petch at 0.9375rem reads slightly small; nudge weight to 700
+        font-weight: 700;
+        color: var(--bp-text);
+        letter-spacing: -0.01em;
+    }
+
+    // ── Meta row — mono labels ─────────────────────────────────────────────────
+
+    .tc-build-meta-item {
+        // Base already sets --tc-font-mono; override to bp-mono token so the
+        // theme's JetBrains Mono loads correctly
+        font-family: var(--bp-mono);
+        color: var(--bp-text-faint);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .tc-build-meta-sep {
+        color: var(--bp-border-rule);
+        opacity: 1; // base dims this further; hairline token is already subtle
+    }
+
+    // ── Menu trigger ──────────────────────────────────────────────────────────
+
+    .tc-build-menu-trigger {
+        color: var(--bp-text-faint);
+
+        &:hover {
+            color: var(--bp-text);
+            background-color: var(--bp-bg);
+        }
+
+        &:focus-visible {
+            outline-color: var(--bp-pink);
+        }
+    }
+
+    // ── Dropdown overlay tokens ────────────────────────────────────────────────
+
+    .tc-build-menu {
+        // Replace the $slate-700 baked literal on --bs-build-menu-item-color
+        --bs-build-menu-bg:                   var(--bp-paper);
+        --bs-build-menu-border-color:         var(--bp-border);
+        --bs-build-menu-shadow:               var(--tc-shadow-lg);
+
+        // Item ink: reroute slate literal → bp token
+        --bs-build-menu-item-color:           var(--bp-text-soft);
+        --bs-build-menu-item-hover-color:     var(--bp-text);
+        --bs-build-menu-item-hover-bg:        var(--bp-bg);
+
+        // Active state → pink primary (CTA rotation)
+        --bs-build-menu-item-active-color:    var(--bp-pink-ink);
+        --bs-build-menu-item-active-bg:       var(--bp-pink);
+
+        --bs-build-menu-item-disabled-color:  var(--bp-text-faint);
+        --bs-build-menu-danger-color:         var(--bp-danger);
+
+        background-color: var(--bp-paper);
+        border-color: var(--bp-border);
+
+        .tc-build-menu-divider {
+            border-top-color: var(--bp-border-faint);
+        }
+    }
+
+    // ── Menu items ─────────────────────────────────────────────────────────────
+
+    .tc-build-menu-item {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--bs-build-menu-item-color);
+
+        &:hover,
+        &:focus-visible {
+            color: var(--bs-build-menu-item-hover-color);
+            background-color: var(--bs-build-menu-item-hover-bg);
+        }
+
+        &:active {
+            color: var(--bs-build-menu-item-active-color);
+            background-color: var(--bs-build-menu-item-active-bg);
+        }
+
+        &--danger {
+            color: var(--bp-danger);
+
+            &:hover,
+            &:focus-visible {
+                color: var(--bp-danger);
+                background-color: var(--bp-danger-soft);
+            }
+        }
+    }
+
+    // ── Skeleton shimmer — light theme re-key ─────────────────────────────────
+    // Base uses rgba(255,255,255,0.6) as the shimmer highlight — fine on dark
+    // surfaces but on the light blueprint paper it creates a pale flash that
+    // barely reads. Re-key to the paper token so the gradient stays perceptible.
+
+    .tc-build-skeleton {
+        background: linear-gradient(
+            90deg,
+            var(--bp-bg-2) 25%,
+            var(--bp-paper) 50%,
+            var(--bp-bg-2) 75%
+        );
+        background-size: 200% 100%;
+    }
+
+}

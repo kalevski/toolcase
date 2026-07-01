@@ -1,0 +1,27 @@
+// Blueprint › tc-link — pink inline anchor (default via the --tc-app-accent
+// remap). Status variants are repointed onto the darkened accent text tones so
+// they clear AA on the light lavender canvas (bright teal/violet/amber text on
+// white is too low-contrast at body size).
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    .tc-link-success {
+        --bs-link-color: var(--bp-teal-fg);
+        --bs-link-hover-color: var(--bp-teal);
+    }
+
+    .tc-link-info {
+        --bs-link-color: var(--bp-violet-fg);
+        --bs-link-hover-color: var(--bp-violet);
+    }
+
+    .tc-link-warning {
+        --bs-link-color: var(--bp-amber-fg);
+        --bs-link-hover-color: var(--bp-amber);
+    }
+
+    .tc-link-danger {
+        --bs-link-color: var(--bp-danger);
+        --bs-link-hover-color: #b91c1c;
+    }
+}

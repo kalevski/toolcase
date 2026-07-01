@@ -1,0 +1,100 @@
+// Blueprint › tc-lightbox — dark-stage overlay with pink primary focus, teal thumbnail hover, mono counter, and blueprint-tinted scrim.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-lightbox {
+        // ── Backdrop scrim ───────────────────────────────────────────────────
+        // Repoint the baked dark-slate literal to the blueprint near-black.
+        --bs-lightbox-backdrop-bg:      var(--bp-emphasis);   // #0f0e22 — violet-black, not cold slate
+        --bs-lightbox-backdrop-opacity: 0.86;
+
+        // ── Overlay surface ──────────────────────────────────────────────────
+        // Stage stays dark — images need a neutral dark ground; --bp-emphasis
+        // gives it the same violet-black hue as the scrim so stage + backdrop
+        // feel unified.
+        --bs-lightbox-stage-bg:      var(--bp-emphasis);
+        --bs-lightbox-shadow:        var(--tc-shadow-lg);     // already violet-tinted, keep
+
+        // ── Controls (close + arrows) ────────────────────────────────────────
+        // White labels on the dark stage — legible by construction.
+        --bs-lightbox-control-color: #ffffff;
+        // Hover wash: swap the neutral white wash for a pink-tinted wash so
+        // the interaction reads as blueprint-primary rather than generic white.
+        --bs-lightbox-control-wash:  var(--bp-pink-soft);
+
+        // ── Caption ──────────────────────────────────────────────────────────
+        // Replace the raw rgba(255,255,255,0.7) with a paper-near tint.
+        --bs-lightbox-caption-color: rgba(255, 255, 255, 0.65);
+
+        // ── Thumbnails ───────────────────────────────────────────────────────
+        // Inactive border: a white whisper — same visual weight as before.
+        --bs-lightbox-thumb-border:        rgba(255, 255, 255, 0.18);
+        // Active border: pink (blueprint primary/CTA) replacing cyan --tc-accent.
+        --bs-lightbox-thumb-active-border: var(--bp-pink);
+        --bs-lightbox-thumb-opacity:       0.50;
+
+        // ── Transition ───────────────────────────────────────────────────────
+        --bs-lightbox-transition: opacity 240ms var(--bp-ease);
+    }
+
+    // ── Counter ───────────────────────────────────────────────────────────────
+    // Upgrade to blueprint mono voice: uppercase, loose tracking, teal-fg on
+    // dark stage so it reads as a HUD datum rather than body copy.
+    .tc-lightbox__counter {
+        font-family: var(--bp-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--bp-teal-hover);    // bright teal reads cleanly on --bp-emphasis dark
+        font-variant-numeric: tabular-nums;
+    }
+
+    // ── Caption ───────────────────────────────────────────────────────────────
+    // Use blueprint body face; the default inherits from base but is explicitly
+    // anchored here so it doesn't accidentally pick up display styling.
+    .tc-lightbox__caption {
+        font-family: var(--bp-body);
+        font-size: 0.8125rem;
+        line-height: 1.55;
+        color: var(--bs-lightbox-caption-color);
+    }
+
+    // ── Close button — focus ring ─────────────────────────────────────────────
+    // Replace cyan --tc-accent outline with blueprint primary pink.
+    .tc-lightbox__close {
+        &:focus-visible {
+            outline-color: var(--bp-pink);
+            box-shadow: var(--bp-glow-pink);
+        }
+    }
+
+    // ── Arrows — focus ring ───────────────────────────────────────────────────
+    .tc-lightbox__arrow {
+        &:focus-visible {
+            outline-color: var(--bp-pink);
+            box-shadow: var(--bp-glow-pink);
+        }
+    }
+
+    // ── Thumbnails ────────────────────────────────────────────────────────────
+    .tc-lightbox__thumbnail {
+        // Hover: teal border lift (everyday action color) before committing to pink.
+        &:hover {
+            border-color: var(--bp-teal-hover);
+        }
+
+        &:focus-visible {
+            // Pink focus, consistent with controls.
+            outline-color: var(--bp-pink);
+            box-shadow: var(--bp-glow-pink);
+        }
+
+        &.tc-lightbox__thumbnail--active {
+            // Active selection: pink border + soft pink glow so the selected
+            // thumbnail reads unmistakably as the blueprint primary state.
+            border-color: var(--bp-pink);
+            box-shadow: 0 0 0 2px var(--bp-pink-soft);
+        }
+    }
+}

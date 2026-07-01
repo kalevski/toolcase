@@ -1,0 +1,66 @@
+// Blueprint › tc-state-machine — vertical pipeline tracker: teal=done, pink=active (with glow pulse), lavender hairline=pending, real-red=error; connector routed to --bp-border-faint; labels in display, descriptions in mono uppercase.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    .tc-state-machine {
+        // Connector rail: faint lavender divider (never raw tc-slate-* leak).
+        --bs-state-machine-connector-color: var(--bp-border-faint);
+
+        // Label: blueprint primary ink at body weight.
+        --bs-state-machine-label-color: var(--bp-text);
+        --bs-state-machine-label-font-weight: 600;
+
+        // Description: faint ink (pairs with mono treatment below).
+        --bs-state-machine-description-color: var(--bp-text-faint);
+    }
+
+    // Label: display font signals a named step/stage in a progression.
+    .tc-state-machine-label {
+        font-family: var(--bp-display);
+        letter-spacing: 0.01em;
+    }
+
+    // Description: mono uppercase micro-readout — blueprint HUD data treatment.
+    .tc-state-machine-description {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--bs-state-machine-description-color);
+    }
+
+    // ── Status marker variants ────────────────────────────────────────────────
+
+    // Done — solid teal fill; status=success maps to teal in the arcade palette.
+    .tc-state-machine-marker-done {
+        background: var(--bp-teal);
+        color: var(--bp-teal-ink);
+    }
+
+    // Active — pink primary fill; pulse halo uses --bp-glow-pink instead of
+    // the base's raw --tc-app-accent ring which leaks cyan on blueprint.
+    .tc-state-machine-marker-active {
+        background: var(--bp-pink);
+        color: var(--bp-pink-ink);
+
+        &::after {
+            border-color: var(--bp-pink);
+            // Replace the default 0.5-opacity border with a soft pink glow
+            // ring drawn as box-shadow so it reads as a halo on the white ground.
+            box-shadow: 0 0 0 0 var(--bp-pink-soft);
+        }
+    }
+
+    // Pending — lavender hairline ring on transparent ground; faint text.
+    .tc-state-machine-marker-pending {
+        background: transparent;
+        border-color: var(--bp-border-strong);
+        color: var(--bp-text-faint);
+    }
+
+    // Error — real red (--bp-danger), not pink; danger-soft fill for legibility.
+    .tc-state-machine-marker-error {
+        background: var(--bp-danger-soft);
+        color: var(--bp-danger);
+    }
+}

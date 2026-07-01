@@ -1,0 +1,155 @@
+// Blueprint › tc-badge-row — mono HUD chips: recessed label half + teal-tinted value half; status variants rerouted to bp soft/fg tokens.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Sizing vars (unchanged; inherited from base) ──────────────────────────
+    // --bs-badge-row-padding-x / -y / -font-size stay as-is; we only restyle cosmetics.
+
+    .tc-badge-row-item {
+        // Default accent: teal-soft fill for the value half (overridden by inline
+        // style when badge.color is set, same as base).
+        --bs-badge-row-color: var(--bp-teal-soft);
+
+        font-family: var(--bp-mono);
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .tc-badge-row-label {
+        // Recessed "key" half — sits slightly behind the value.
+        background: var(--bp-bg-2);
+        color: var(--bp-text-muted);
+        border: 1px solid var(--bp-border);
+        // Right border removed: value half supplies its own left edge via its border.
+        border-right: none;
+    }
+
+    .tc-badge-row-value {
+        // Teal-soft default fill; text in accessible teal-fg (passes AA on white).
+        background: var(--bs-badge-row-color);
+        color: var(--bp-teal-fg);
+        border: 1px solid var(--bp-border);
+        font-family: var(--bp-mono);
+        font-weight: 700;
+        letter-spacing: 0.10em;
+        text-transform: uppercase;
+    }
+
+    // ── Status variant overrides ──────────────────────────────────────────────
+    // Base bakes $theme-colors-soft / $theme-colors-emphasis literals which
+    // don't remap in blueprint; replace them all with bp tokens.
+
+    // primary → pink (brand CTA)
+    .tc-badge-row-item--primary {
+        .tc-badge-row-label {
+            background: var(--bp-pink-soft);
+            color: var(--bp-pink);
+            border-color: var(--bp-pink-line);
+        }
+        .tc-badge-row-value {
+            --bs-badge-row-color: var(--bp-pink-soft);
+            background: var(--bp-pink);
+            color: var(--bp-pink-ink);
+            border-color: var(--bp-pink);
+        }
+    }
+
+    // secondary → violet (supporting)
+    .tc-badge-row-item--secondary {
+        .tc-badge-row-label {
+            background: var(--bp-violet-soft);
+            color: var(--bp-violet-fg);
+            border-color: var(--bp-border-chip);
+        }
+        .tc-badge-row-value {
+            --bs-badge-row-color: var(--bp-violet-soft);
+            color: var(--bp-violet-fg);
+            border-color: var(--bp-border-chip);
+        }
+    }
+
+    // success → teal
+    .tc-badge-row-item--success {
+        .tc-badge-row-label {
+            background: var(--bp-teal-soft);
+            color: var(--bp-teal-fg);
+            border-color: var(--bp-teal-line);
+        }
+        .tc-badge-row-value {
+            --bs-badge-row-color: var(--bp-teal-soft);
+            color: var(--bp-teal-fg);
+            border-color: var(--bp-teal-line);
+        }
+    }
+
+    // info → violet
+    .tc-badge-row-item--info {
+        .tc-badge-row-label {
+            background: var(--bp-violet-soft);
+            color: var(--bp-violet-fg);
+            border-color: var(--bp-border-chip);
+        }
+        .tc-badge-row-value {
+            --bs-badge-row-color: var(--bp-violet-soft);
+            color: var(--bp-violet-fg);
+            border-color: var(--bp-border-chip);
+        }
+    }
+
+    // warning → amber
+    .tc-badge-row-item--warning {
+        .tc-badge-row-label {
+            background: var(--bp-amber-soft);
+            color: var(--bp-amber-fg);
+            border-color: var(--bp-amber-soft);
+        }
+        .tc-badge-row-value {
+            --bs-badge-row-color: var(--bp-amber-soft);
+            color: var(--bp-amber-fg);
+            border-color: var(--bp-amber-soft);
+        }
+    }
+
+    // danger → real red (not pink — per palette spec)
+    .tc-badge-row-item--danger {
+        .tc-badge-row-label {
+            background: var(--bp-danger-soft);
+            color: var(--bp-danger);
+            border-color: var(--bp-danger-soft);
+        }
+        .tc-badge-row-value {
+            --bs-badge-row-color: var(--bp-danger-soft);
+            color: var(--bp-danger);
+            border-color: var(--bp-danger-soft);
+        }
+    }
+
+    // light / dark → neutral paper tones
+    .tc-badge-row-item--light {
+        .tc-badge-row-label {
+            background: var(--bp-paper-tint);
+            color: var(--bp-text-muted);
+            border-color: var(--bp-border-faint);
+        }
+        .tc-badge-row-value {
+            --bs-badge-row-color: var(--bp-paper-tint);
+            color: var(--bp-text-muted);
+            border-color: var(--bp-border-faint);
+        }
+    }
+
+    .tc-badge-row-item--dark {
+        .tc-badge-row-label {
+            background: var(--bp-text-soft);
+            color: var(--bp-paper);
+            border-color: var(--bp-text-soft);
+        }
+        .tc-badge-row-value {
+            --bs-badge-row-color: var(--bp-text-soft);
+            color: var(--bp-paper);
+            border-color: var(--bp-text-soft);
+        }
+    }
+}

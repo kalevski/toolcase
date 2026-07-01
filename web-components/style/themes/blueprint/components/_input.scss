@@ -1,0 +1,23 @@
+// Blueprint › tc-input / form controls — pink focus halo. Foundation maps the
+// field bg / border / text and the pink focus ring. This sets the focus border
+// to the pink accent line and tints the form label. On the light canvas the base
+// checkbox tick (white on the pink checked fill) and the radio dot read fine, so
+// the only glyph fix is the focus treatment.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    .form-label {
+        color: var(--bp-text-muted);
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--bp-pink);
+        box-shadow: var(--tc-focus-ring);
+    }
+
+    .form-check-input:focus-visible {
+        border-color: var(--bp-pink);
+        box-shadow: var(--tc-focus-ring);
+    }
+}

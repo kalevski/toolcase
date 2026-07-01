@@ -1,0 +1,36 @@
+// Blueprint › tc-rating — amber filled stars on a violet-tinted empty track; pink focus ring; amber-fg hover deepens the fill color instead of a brightness filter.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-rating {
+        // Empty star glyph uses the violet-tinted border ramp — reads as a
+        // considered neutral rather than a raw grey.
+        --bs-rating-empty-color: var(--bp-border-strong);
+
+        // Filled stars map to blueprint's amber supporting accent, preserving
+        // the original tc-warning semantic while grounding it in the token set.
+        --bs-rating-active-color: var(--bp-amber);
+
+        // Hover deepens to the AA-safe amber text shade rather than a
+        // brightness filter — avoids the washed-out look on the light canvas.
+        --bs-rating-hover-color: var(--bp-amber-fg);
+
+        // Hover brightness reset: the color shift above does the work.
+        --bs-rating-hover-brightness: 1;
+    }
+
+    .tc-rating {
+        &:focus-visible {
+            // Primary pink focus ring — matches blueprint's CTA/primary accent
+            // rotation (pink = primary action).
+            outline-color: var(--bp-pink);
+        }
+    }
+
+    .tc-rating-star-fill {
+        // Swap the transition easing to the blueprint curve.
+        transition-timing-function: var(--bp-ease);
+    }
+
+}

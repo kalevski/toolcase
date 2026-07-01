@@ -1,0 +1,162 @@
+// Blueprint › tc-compatibility-matrix — HUD instrument-panel matrix: teal/amber/danger status palette, mono labels on a paper ground, teal corner bracket anchor.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Frame ─────────────────────────────────────────────────────────────────
+    tc-compatibility-matrix {
+        --bs-compatibility-matrix-border:        1px solid var(--bp-border);
+        --bs-compatibility-matrix-inner-border:  1px solid var(--bp-border-faint);
+        --bs-compatibility-matrix-bg:            var(--bp-paper);
+
+        // ── Header (optional title) ───────────────────────────────────────────
+        // Recessed well — gives the title a HUD shelf feel above the grid.
+        --bs-compatibility-matrix-header-bg:           var(--bp-bg-2);
+        --bs-compatibility-matrix-header-padding-y:    0.875rem;
+        --bs-compatibility-matrix-header-padding-x:    1.25rem;
+        --bs-compatibility-matrix-title-font-size:     0.9375rem;
+        --bs-compatibility-matrix-title-font-weight:   700;
+        --bs-compatibility-matrix-title-color:         var(--bp-text);
+
+        // ── Platform header row ───────────────────────────────────────────────
+        // Slightly darker recessed shelf for column labels.
+        --bs-compatibility-matrix-head-bg:                     var(--bp-bg-2);
+        --bs-compatibility-matrix-head-padding-y:              0.625rem;
+        --bs-compatibility-matrix-head-padding-x:              1rem;
+        --bs-compatibility-matrix-platform-label-font-size:    0.625rem;
+        // Teal-fg keeps AA contrast on white/lavender; reads as active-system ink.
+        --bs-compatibility-matrix-platform-label-color:        var(--bp-teal-fg);
+        --bs-compatibility-matrix-platform-label-letter-spacing: 0.12em;
+
+        // ── Version column (sticky first column) ─────────────────────────────
+        --bs-compatibility-matrix-version-bg:                  var(--bp-bg-2);
+        --bs-compatibility-matrix-version-padding-y:           0.625rem;
+        --bs-compatibility-matrix-version-padding-x:           1rem;
+        --bs-compatibility-matrix-version-label-font-size:     0.625rem;
+        --bs-compatibility-matrix-version-label-color:         var(--bp-text-muted);
+        --bs-compatibility-matrix-version-label-letter-spacing: 0.1em;
+        --bs-compatibility-matrix-version-min-width:           7rem;
+
+        // ── Status cells ──────────────────────────────────────────────────────
+        --bs-compatibility-matrix-cell-padding-y:   0.625rem;
+        --bs-compatibility-matrix-cell-padding-x:   1rem;
+        --bs-compatibility-matrix-indicator-size:   1rem;
+
+        // ── Status colors — blueprint accent rotation ─────────────────────────
+        // yes   → teal  (action/success — see blueprint_theme.md status mapping)
+        // no    → real danger red (NOT pink; pink is primary CTA only)
+        // partial → amber (supporting/warning)
+        // unknown → faint text
+        --bs-compatibility-matrix-yes-color:      var(--bp-teal-fg);
+        --bs-compatibility-matrix-no-color:       var(--bp-danger);
+        --bs-compatibility-matrix-partial-color:  var(--bp-amber-fg);
+        --bs-compatibility-matrix-unknown-color:  var(--bp-text-faint);
+
+        // ── Legend ────────────────────────────────────────────────────────────
+        --bs-compatibility-matrix-legend-bg:             var(--bp-bg-2);
+        --bs-compatibility-matrix-legend-border:         1px solid var(--bp-border-faint);
+        --bs-compatibility-matrix-legend-padding-y:      0.625rem;
+        --bs-compatibility-matrix-legend-padding-x:      1.25rem;
+        --bs-compatibility-matrix-legend-label-font-size: 0.6875rem;
+        --bs-compatibility-matrix-legend-label-color:    var(--bp-text-muted);
+        --bs-compatibility-matrix-legend-gap:            1.25rem;
+        --bs-compatibility-matrix-legend-item-gap:       0.375rem;
+    }
+
+    // ── Outer frame ───────────────────────────────────────────────────────────
+    // Paper ground + violet-tinted shadow lifts it off the lavender page canvas.
+    .tc-compatibility-matrix {
+        border: var(--bs-compatibility-matrix-border);
+        background: var(--bs-compatibility-matrix-bg);
+        box-shadow: var(--tc-shadow-sm);
+        overflow: hidden;
+    }
+
+    // ── Optional header ───────────────────────────────────────────────────────
+    .tc-compatibility-matrix__header {
+        background: var(--bs-compatibility-matrix-header-bg);
+        border-bottom: var(--bs-compatibility-matrix-border);
+    }
+
+    // Title: display face (Chakra Petch) with tight tracking — instrument-panel heading.
+    .tc-compatibility-matrix__title {
+        font-family: var(--bp-display);
+        font-size: var(--bs-compatibility-matrix-title-font-size);
+        font-weight: var(--bs-compatibility-matrix-title-font-weight);
+        color: var(--bs-compatibility-matrix-title-color);
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        line-height: 1.25;
+    }
+
+    // ── Platform header row ───────────────────────────────────────────────────
+    .tc-compatibility-matrix__head-row {
+        background: var(--bs-compatibility-matrix-head-bg);
+        border-bottom: var(--bs-compatibility-matrix-border);
+    }
+
+    // Platform labels: mono uppercase — HUD column identifiers.
+    .tc-compatibility-matrix__platform-label {
+        font-family: var(--bp-mono);
+        font-size: var(--bs-compatibility-matrix-platform-label-font-size);
+        color: var(--bs-compatibility-matrix-platform-label-color);
+        letter-spacing: var(--bs-compatibility-matrix-platform-label-letter-spacing);
+        text-transform: uppercase;
+    }
+
+    // ── Corner cell: teal HUD bracket ────────────────────────────────────────
+    // The top-left corner is a fixed structural anchor — the bracket signals "instrument panel"
+    // without decorating data cells. Applied sparingly per blueprint aesthetic guidance.
+    .tc-compatibility-matrix__corner {
+        position: relative;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            pointer-events: none;
+        }
+    }
+
+    // ── Version column ────────────────────────────────────────────────────────
+    .tc-compatibility-matrix__version-cell {
+        background: var(--bs-compatibility-matrix-version-bg);
+        border-right: var(--bs-compatibility-matrix-border);
+    }
+
+    // Version labels: mono uppercase — version strings are data identifiers, not prose.
+    .tc-compatibility-matrix__version-label {
+        font-family: var(--bp-mono);
+        font-size: var(--bs-compatibility-matrix-version-label-font-size);
+        color: var(--bs-compatibility-matrix-version-label-color);
+        letter-spacing: var(--bs-compatibility-matrix-version-label-letter-spacing);
+        text-transform: uppercase;
+        font-variant-numeric: tabular-nums;
+    }
+
+    // ── Inner cell dividers ───────────────────────────────────────────────────
+    // Route to --bp-border-faint; avoids slate token leak from --tc-border-faint.
+    .tc-compatibility-matrix__cell {
+        border-bottom: var(--bs-compatibility-matrix-inner-border);
+    }
+
+    // ── Legend ────────────────────────────────────────────────────────────────
+    .tc-compatibility-matrix__legend {
+        background: var(--bs-compatibility-matrix-legend-bg);
+        border-top: var(--bs-compatibility-matrix-legend-border);
+    }
+
+    // Legend labels: mono for consistency with header labels.
+    .tc-compatibility-matrix__legend-label {
+        font-family: var(--bp-mono);
+        font-size: var(--bs-compatibility-matrix-legend-label-font-size);
+        color: var(--bs-compatibility-matrix-legend-label-color);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+}

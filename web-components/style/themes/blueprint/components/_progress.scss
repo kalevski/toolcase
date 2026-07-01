@@ -1,0 +1,60 @@
+// Blueprint › tc-progress — teal-fill track on a lavender hairline ground; mono label; semantic state variants via soft tints.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Track ──────────────────────────────────────────────────────────────
+    // Reroute track from the base --tc-border (which leaks raw slate) to the
+    // blueprint hairline token. Shadow stays off — bars sit flush in-plane.
+    .progress,
+    .progress-stacked {
+        --bs-progress-bg: var(--bp-border);
+        --bs-progress-box-shadow: none;
+
+        // Default fill: teal (everyday action/progress in the accent rotation).
+        // Text-on-fill uses the teal ink token for legibility.
+        --bs-progress-bar-bg: var(--bp-teal);
+        --bs-progress-bar-color: var(--bp-teal-ink);
+    }
+
+    // ── Labelled bar ───────────────────────────────────────────────────────
+    // The base already switches to --tc-font-mono for labelled bars; reinforce
+    // with the blueprint mono token so the label reads as a HUD readout.
+    .progress:has(.progress-bar:not(:empty)) {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        font-size: 0.6rem;
+    }
+
+    // ── Semantic state variants (Bootstrap .bg-* on .progress-bar) ─────────
+    // Map to blueprint's semantic palette: success→teal (same as default,
+    // stated explicitly), info→violet, warning→amber, danger→real red.
+    .progress-bar.bg-success {
+        background-color: var(--bp-teal) !important;
+        color: var(--bp-teal-ink);
+    }
+
+    .progress-bar.bg-info {
+        background-color: var(--bp-violet) !important;
+        color: var(--bp-violet-ink);
+    }
+
+    .progress-bar.bg-warning {
+        background-color: var(--bp-amber) !important;
+        color: var(--bp-amber-ink);
+    }
+
+    .progress-bar.bg-danger {
+        background-color: var(--bp-danger) !important;
+        color: #fff; // --bp-danger has no -ink token; white clears AA on #dc2626
+    }
+
+    // Pink (primary/CTA accent) — not a Bootstrap semantic class but provided
+    // for cases where a progress bar is the primary KPI element on a card.
+    .progress-bar.bg-primary {
+        background-color: var(--bp-pink) !important;
+        color: var(--bp-pink-ink);
+    }
+
+}

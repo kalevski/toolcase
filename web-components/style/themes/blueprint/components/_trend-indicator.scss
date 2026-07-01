@@ -1,0 +1,28 @@
+// Blueprint › tc-trend-indicator — semantic color remap to blueprint accent rotation; mono HUD typography with tighter tracking.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    // Neutral default → blueprint violet-grey (not slate).
+    // Up    → teal-fg  (teal is blueprint's success/action color; -fg variant clears AA on --bp-bg).
+    // Down  → danger   (real red, kept identical to the base semantic intent).
+    // Typography reinforced with --bp-mono token + slightly wider tracking for the HUD/eyebrow register.
+
+    .tc-trend-indicator {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        --bs-trend-indicator-color: var(--bp-text-muted);
+    }
+
+    .tc-trend-indicator--up {
+        // Teal replaces the default --tc-success green; -fg is darker to hold contrast on the lavender ground.
+        --bs-trend-indicator-color: var(--bp-teal-fg);
+    }
+
+    .tc-trend-indicator--down {
+        --bs-trend-indicator-color: var(--bp-danger);
+    }
+
+    .tc-trend-indicator--neutral {
+        --bs-trend-indicator-color: var(--bp-text-muted);
+    }
+}

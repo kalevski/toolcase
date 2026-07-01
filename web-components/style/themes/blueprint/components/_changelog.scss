@@ -1,0 +1,106 @@
+// Blueprint › tc-changelog — teal-dot timeline rail, mono uppercase dates, display titles, teal soft chips, pink read-more.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-changelog {
+        // Rail: faint lavender hairline (divider token)
+        --bs-changelog-rail-color: var(--bp-border-faint);
+
+        // Dot: teal — matches the blueprint "live/pulse" glyph convention
+        --bs-changelog-dot-color: var(--bp-teal);
+
+        // Date: teal-fg ensures AA contrast on white; mono uppercase via class rule below
+        --bs-changelog-date-color: var(--bp-teal-fg);
+
+        // Title: strongest ink, display face applied via class rule below
+        --bs-changelog-title-color: var(--bp-text);
+
+        // Description: muted prose
+        --bs-changelog-desc-color: var(--bp-text-muted);
+
+        // Tags: teal-soft fill, teal-fg text, chip border
+        --bs-changelog-tag-bg: var(--bp-teal-soft);
+        --bs-changelog-tag-color: var(--bp-teal-fg);
+        --bs-changelog-tag-border-color: var(--bp-border-chip);
+
+        // Read-more: faint default; pink on hover (pink = primary action in the accent rotation)
+        --bs-changelog-more-color: var(--bp-text-faint);
+        --bs-changelog-more-hover-color: var(--bp-pink);
+
+        // Skeleton: use the recessed well token as base; paper-tint as shimmer highlight
+        --bs-changelog-skeleton-bg: var(--bp-bg-2);
+        --bs-changelog-skeleton-shimmer: var(--bp-paper-tint);
+    }
+
+    // ── Dot: teal halo ring (blueprint live/pulse convention) ────────────────────
+
+    .tc-changelog-dot {
+        box-shadow: 0 0 0 0.2em var(--bp-teal-soft);
+        transition: box-shadow 200ms var(--bp-ease);
+    }
+
+    // ── Date: mono, uppercase, tight tracking ─────────────────────────────────────
+
+    .tc-changelog-date {
+        font-family: var(--bp-mono);
+        font-size: 0.625rem; // slightly tighter than base 0.6875rem — mono reads large
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--bs-changelog-date-color);
+    }
+
+    // ── Title: display face, tight tracking ───────────────────────────────────────
+
+    .tc-changelog-title {
+        font-family: var(--bp-display);
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: var(--bs-changelog-title-color);
+    }
+
+    // ── Description: body color already covered by token; line-height nudge ──────
+
+    .tc-changelog-desc {
+        font-family: var(--bp-body);
+        color: var(--bs-changelog-desc-color);
+    }
+
+    // ── Tags: mono uppercase chips ────────────────────────────────────────────────
+
+    .tc-changelog-tag {
+        font-family: var(--bp-mono);
+        font-size: 0.5625rem; // mono reads large; bring it down a notch
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        background: var(--bs-changelog-tag-bg);
+        color: var(--bs-changelog-tag-color);
+        border-color: var(--bs-changelog-tag-border-color);
+    }
+
+    // ── Read-more: mono, pink hover, pink focus ring ───────────────────────────────
+
+    .tc-changelog-more {
+        font-family: var(--bp-mono);
+        font-size: 0.625rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--bs-changelog-more-color);
+        transition: color 150ms var(--bp-ease);
+
+        &:hover {
+            color: var(--bs-changelog-more-hover-color);
+        }
+
+        &:focus-visible {
+            outline-color: var(--bp-pink);
+        }
+    }
+
+    // ── Skeleton dot: no halo on placeholder ──────────────────────────────────────
+
+    .tc-changelog-dot--skeleton {
+        box-shadow: none;
+    }
+
+}

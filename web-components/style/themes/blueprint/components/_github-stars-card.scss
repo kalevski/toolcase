@@ -1,0 +1,144 @@
+// Blueprint › tc-github-stars-card — paper card with teal stat icons, display numerics,
+// mono slug/labels, pink-gradient CTA, and a HUD corner-bracket on the card tile.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-github-stars-card {
+        // ── Card surface ─────────────────────────────────────────────────────
+        --bs-github-stars-card-bg:     var(--bp-paper);
+        --bs-github-stars-card-border: 1px solid var(--bp-border);
+        --bs-github-stars-card-shadow: var(--tc-shadow-sm);
+
+        // ── Header ───────────────────────────────────────────────────────────
+        // GitHub octocat icon gets teal action color (everyday, not primary)
+        --bs-github-stars-card-gh-icon-color: var(--bp-teal-fg);
+
+        // Slug link — mono font already applied by base; reroute color to
+        // bp-text-soft for legibility against bp-paper.
+        --bs-github-stars-card-slug-color: var(--bp-text-soft);
+
+        // ── Stats row ────────────────────────────────────────────────────────
+        // Dividers route to blueprint hairline token (avoids tc-slate-* leak)
+        --bs-github-stars-card-stats-divider: 1px solid var(--bp-border-faint);
+
+        // Stat icons — teal action color consistent with the header icon
+        --bs-github-stars-card-stat-icon-color: var(--bp-teal-fg);
+
+        // Stat value — display font for numeric/data emphasis; primary ink
+        --bs-github-stars-card-stat-value-color: var(--bp-text);
+
+        // Stat label — already mono+uppercase+tracking in base; route to
+        // faint text so the numeric value stands out as the hero
+        --bs-github-stars-card-stat-label-color: var(--bp-text-faint);
+
+        // ── CTA ──────────────────────────────────────────────────────────────
+        // Pink gradient = primary CTA in the arcade accent rotation
+        --bs-github-stars-card-cta-bg:         var(--bp-pink-grad);
+        --bs-github-stars-card-cta-color:      var(--bp-pink-ink);
+        // Replace the baked rgba(30,41,59,0.3) dark-slate glow with pink glow
+        --bs-github-stars-card-cta-hover-shadow: var(--bp-glow-pink);
+
+        // ── Error state ──────────────────────────────────────────────────────
+        // Real red for actual errors (not pink, which is the primary brand)
+        --bs-github-stars-card-error-color: var(--bp-danger);
+
+        // ── Skeleton ─────────────────────────────────────────────────────────
+        // Recessed well as skeleton base; paper-tint-2 for the shimmer sweep
+        --bs-github-stars-card-skeleton-bg:      var(--bp-bg-2);
+        --bs-github-stars-card-skeleton-shimmer: var(--bp-paper-tint-2);
+    }
+
+    // ── Card wrapper — HUD corner-bracket treatment ───────────────────────────
+    // This is an interactive tile (CTA inside), so the corner-bracket applies.
+    .tc-github-stars-card {
+        position: relative;
+        transition: transform var(--bp-ease, 0.18s ease), box-shadow var(--bp-ease, 0.18s ease);
+
+        // Top-left HUD bracket (teal, 2px, 12×12px)
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--tc-shadow-hover);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            transition: none;
+
+            &:hover {
+                transform: none;
+                box-shadow: var(--tc-shadow-sm);
+            }
+        }
+    }
+
+    // ── Header — recessed well + slug hover accent ────────────────────────────
+    .tc-github-stars-card-head {
+        // Recessed well background to visually separate the header from stats
+        background: var(--bp-bg-2);
+    }
+
+    .tc-github-stars-card-slug {
+        // Use the blueprint body font stack for the repo slug; override the
+        // base JetBrains Mono literal so bp-mono (JetBrains Mono via var) owns it
+        font-family: var(--bp-mono);
+        color: var(--bp-text-soft);
+        letter-spacing: 0.04em;
+
+        &:hover {
+            color: var(--bp-teal-fg);
+            // Underline provided by base :hover rule — color override is enough
+        }
+
+        &:focus-visible {
+            outline-color: var(--bp-teal);
+        }
+    }
+
+    // ── Stat value — display font for numeric hero text ───────────────────────
+    .tc-github-stars-card-stat-value {
+        // Chakra Petch (display) for strong numeric readout;
+        // tight tracking consistent with blueprint titles
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+        color: var(--bp-text);
+    }
+
+    // Version string keeps its neutral styling (no case/tracking override needed)
+    .tc-github-stars-card-version {
+        color: var(--bp-text-muted);
+    }
+
+    // ── CTA button — blueprint font and case ─────────────────────────────────
+    .tc-github-stars-card-cta {
+        // Override the base 'Inter' literal with the blueprint mono font;
+        // uppercase + wider tracking reinforces the arcade HUD feel on the CTA
+        font-family: var(--bp-mono);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+
+        &:focus-visible {
+            outline-color: var(--bp-pink);
+        }
+    }
+
+    // ── Error state ───────────────────────────────────────────────────────────
+    .tc-github-stars-card-error {
+        // Soft danger surface behind the inline alert text
+        background: var(--bp-danger-soft);
+        border-top-color: var(--bp-danger);
+    }
+}

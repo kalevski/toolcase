@@ -1,0 +1,37 @@
+// Blueprint › tc-ping-display — tier colours remapped to accent rotation; value label gets mono eyebrow voice.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-ping-display {
+        // ── Tier colour remap ─────────────────────────────────────────────────────
+        // unknown: faint text token (replaces slate fallback #94a3b8)
+        --bs-ping-display-color-unknown: var(--bp-text-faint);
+        // success: teal — matches blueprint "status: success" convention
+        --bs-ping-display-color-success: var(--bp-teal);
+        // warning: amber — matches blueprint "status: warning" convention
+        --bs-ping-display-color-warning: var(--bp-amber);
+        // danger: real red — matches blueprint "status: danger" convention (NOT pink, which is CTA)
+        --bs-ping-display-color-danger:  var(--bp-danger);
+
+        // ── Mono eyebrow voice ────────────────────────────────────────────────────
+        // Bump letter-spacing to the blueprint micro-label spec (.08em)
+        --bs-ping-display-letter-spacing: 0.08em;
+    }
+
+    // ── Value label ───────────────────────────────────────────────────────────────
+    // Override font-family to --bp-mono (JetBrains Mono) for the HUD readout aesthetic.
+    // The --tc-font-mono fallback in the base partial is fine, but the theme token is
+    // more explicit and keeps this label in step with other blueprint micro-labels.
+    .tc-ping-display-value {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+    }
+
+    // ── Success pip: live halo ring ────────────────────────────────────────────────
+    // Good ping reads as "connected / live" — give the success pip a teal halo per
+    // the blueprint live/pulse-dot recipe (box-shadow 0 0 0 .2em --bp-teal-soft).
+    tc-ping-display[data-tier="success"] .tc-ping-display-pip {
+        box-shadow: 0 0 0 0.2em var(--bp-teal-soft);
+    }
+}

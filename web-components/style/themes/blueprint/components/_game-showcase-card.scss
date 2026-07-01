@@ -1,0 +1,172 @@
+// Blueprint › tc-game-showcase-card — white paper card with teal HUD bracket, display title, mono meta/tags/stamps, arcade accent rotation, and blueprint hairlines.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-game-showcase-card {
+        // ── Card surface ─────────────────────────────────────────────────────────
+        --bs-game-showcase-card-bg:           var(--bp-paper);
+        --bs-game-showcase-card-border:       1px solid var(--bp-border);
+        --bs-game-showcase-card-shadow:       var(--tc-shadow-sm);
+        --bs-game-showcase-card-shadow-hover: var(--tc-shadow-hover);
+        --bs-game-showcase-card-transition:   transform 180ms var(--bp-ease), box-shadow 180ms var(--bp-ease);
+
+        // ── Art region ───────────────────────────────────────────────────────────
+        // Recessed well behind any cover art / placeholder
+        --bs-game-showcase-card-art-bg:       var(--bp-bg-2);
+
+        // ── Stamps ───────────────────────────────────────────────────────────────
+        // Default stamp: ink-dark → emphasis text; arcade tone modifiers below
+        --bs-game-showcase-card-stamp-bg:     var(--bp-emphasis);
+        --bs-game-showcase-card-stamp-color:  var(--bp-pink-ink);   // white — legible on dark fill
+
+        // Tone modifiers: pink = primary/CTA, teal = action/success, amber = warning, danger-red = fail
+        --bs-game-showcase-card-stamp-success-bg: var(--bp-teal);
+        --bs-game-showcase-card-stamp-warning-bg: var(--bp-amber);
+        --bs-game-showcase-card-stamp-danger-bg:  var(--bp-danger);
+        --bs-game-showcase-card-stamp-info-bg:    var(--bp-violet);
+
+        // ── Meta row ─────────────────────────────────────────────────────────────
+        // Eyebrow/HUD meta → teal-fg for AA contrast on white
+        --bs-game-showcase-card-meta-color:   var(--bp-teal-fg);
+
+        // ── Title ────────────────────────────────────────────────────────────────
+        --bs-game-showcase-card-title-color:      var(--bp-emphasis);
+        --bs-game-showcase-card-title-font-size:  1.0625rem;
+        --bs-game-showcase-card-title-weight:     700;
+
+        // ── Pitch ────────────────────────────────────────────────────────────────
+        --bs-game-showcase-card-pitch-color:  var(--bp-text-muted);
+
+        // ── Tags ─────────────────────────────────────────────────────────────────
+        // Soft violet chip: violet-soft fill, violet-fg text, chip hairline
+        --bs-game-showcase-card-tag-bg:      var(--bp-violet-soft);
+        --bs-game-showcase-card-tag-color:   var(--bp-violet-fg);
+        --bs-game-showcase-card-tag-border:  1px solid var(--bp-border-chip);
+
+        // ── Compliance ───────────────────────────────────────────────────────────
+        // Arcade accent rotation: pass→teal, warn→amber, fail→danger-red
+        --bs-game-showcase-card-pass-color:  var(--bp-teal-fg);
+        --bs-game-showcase-card-warn-color:  var(--bp-amber-fg);
+        --bs-game-showcase-card-fail-color:  var(--bp-danger);
+    }
+
+    // ── Card wrapper — hover lift + HUD corner bracket ───────────────────────────
+
+    .tc-game-showcase-card {
+        position: relative;   // anchor for ::before HUD bracket
+
+        &:hover {
+            transform: translateY(-2px);
+            // Reinforce border on hover to read as tappable tile
+            border-color: var(--bp-border-strong);
+        }
+
+        // HUD corner bracket — top-left, teal, signals an interactive tile
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            pointer-events: none;
+            z-index: 2;
+            transition: opacity 150ms var(--bp-ease);
+            opacity: 0.7;
+        }
+
+        &:hover::before {
+            opacity: 1;
+        }
+    }
+
+    // Clickable host: accent border on focus-visible (ring handled by _reset.scss,
+    // this adds an accent border so the card reads as selected/focused)
+    tc-game-showcase-card[role='button']:focus-visible .tc-game-showcase-card {
+        border-color: var(--bp-teal);
+        box-shadow: var(--bp-glow-teal);
+    }
+
+    // ── Art placeholder ──────────────────────────────────────────────────────────
+    // Blueprint grid-field backdrop so placeholder is never a flat void
+
+    .tc-game-showcase-card-art-placeholder {
+        background: var(--bp-bg-2);
+        // Subtle grid pattern using the blueprint grid-field token
+        background-image: var(--bp-grid-field);
+        background-size: var(--bp-grid-size) var(--bp-grid-size);
+    }
+
+    // ── Stamps bar ───────────────────────────────────────────────────────────────
+
+    .tc-game-showcase-card-stamps {
+        // Divider uses faint hairline (not raw tc-border)
+        border-bottom: 1px solid var(--bp-border-faint);
+    }
+
+    .tc-game-showcase-card-stamp {
+        // Mono font already set in base; blueprint overrides family explicitly
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+
+        // Warning stamp: amber fill needs dark ink for contrast (not white)
+        &--warning {
+            color: var(--bp-amber-ink);   // white — amber token is dark enough to pass AA
+        }
+    }
+
+    // ── Meta row ─────────────────────────────────────────────────────────────────
+
+    .tc-game-showcase-card-meta {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.08em;
+    }
+
+    // ── Title ────────────────────────────────────────────────────────────────────
+    // Display font (Chakra Petch) + tight tracking for arcade heading feel
+
+    .tc-game-showcase-card-title {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+        color: var(--bs-game-showcase-card-title-color);
+    }
+
+    // ── Pitch ────────────────────────────────────────────────────────────────────
+
+    .tc-game-showcase-card-pitch {
+        font-family: var(--bp-body);
+        color: var(--bs-game-showcase-card-pitch-color);
+    }
+
+    // ── Tags ─────────────────────────────────────────────────────────────────────
+
+    .tc-game-showcase-card-tag {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    // ── Compliance row ───────────────────────────────────────────────────────────
+
+    .tc-game-showcase-card-compliance {
+        // Separator uses faint hairline
+        border-top: 1px solid var(--bp-border-faint);
+    }
+
+    .tc-game-showcase-card-compliance-item {
+        font-family: var(--bp-mono);
+        // Default (unchecked) compliance text → muted blueprint ink
+        color: var(--bp-text-faint);
+
+        &--pass { color: var(--bs-game-showcase-card-pass-color); }
+        &--warn { color: var(--bs-game-showcase-card-warn-color); }
+        &--fail { color: var(--bs-game-showcase-card-fail-color); }
+    }
+
+    .tc-game-showcase-card-compliance-label {
+        letter-spacing: 0.06em;
+    }
+}

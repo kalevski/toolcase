@@ -1,0 +1,79 @@
+// Blueprint › tc-config-preview — light paper terminal: white-on-paper panel, violet-tinted header cap, blueprint mono syntax tokens, teal live badge.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-config-preview {
+        // ── Panel surface: swap dark ink for white paper with a hairline ──────
+        --bs-config-preview-bg: var(--bp-paper);
+        --bs-config-preview-border: 1px solid var(--bp-border);
+
+        // ── Header cap: recessed tint, slightly darker hairline ───────────────
+        --bs-config-preview-header-bg: var(--bp-bg-2);
+        --bs-config-preview-header-border: 1px solid var(--bp-border-strong);
+
+        // ── Body text: dark ink on paper (primary blueprint text) ─────────────
+        --bs-config-preview-text-color: var(--bp-text);
+
+        // ── Syntax tokens: blueprint arcade palette, muted-but-readable ───────
+        // Keys  → violet-fg (violet text on white, AA-compliant)
+        --bs-config-preview-key-color: var(--bp-violet-fg);
+        // Strings → teal-fg (teal text on white, AA-compliant)
+        --bs-config-preview-string-color: var(--bp-teal-fg);
+        // Numbers → amber-fg (amber text on white, AA-compliant)
+        --bs-config-preview-number-color: var(--bp-amber-fg);
+        // Booleans → pink brand (primary accent, sufficiently dark on paper)
+        --bs-config-preview-boolean-color: var(--bp-pink);
+        // Null → danger red (real red for null/absent values)
+        --bs-config-preview-null-color: var(--bp-danger);
+        // Comments → faint text (subdued, non-distracting)
+        --bs-config-preview-comment-color: var(--bp-text-faint);
+
+        // ── Live badge: teal action accent (replaces cyan) ────────────────────
+        --bs-config-preview-live-badge-bg: var(--bp-teal-soft);
+        --bs-config-preview-live-badge-color: var(--bp-teal-fg);
+        --bs-config-preview-live-badge-border: 1px solid var(--bp-teal-line);
+        --bs-config-preview-live-dot-color: var(--bp-teal);
+    }
+
+    // ── Panel shell: paper surface + violet-tinted shadow ────────────────────
+    .tc-config-preview {
+        background: var(--bs-config-preview-bg);
+        border: var(--bs-config-preview-border);
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Header: mono eyebrow treatment, recessed tint ────────────────────────
+    .tc-config-preview-header {
+        background: var(--bs-config-preview-header-bg);
+        border-bottom: var(--bs-config-preview-header-border);
+    }
+
+    // ── Live badge: mono font, uppercase micro-label, teal ────────────────────
+    .tc-config-preview-live-badge {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        background: var(--bs-config-preview-live-badge-bg);
+        border: var(--bs-config-preview-live-badge-border);
+        color: var(--bs-config-preview-live-badge-color);
+    }
+
+    // ── Live dot: teal pulse with soft halo ──────────────────────────────────
+    .tc-config-preview-live-dot {
+        background: var(--bs-config-preview-live-dot-color);
+        box-shadow: 0 0 0 0.2em var(--bp-teal-soft);
+    }
+
+    // ── Body <pre>: paper background, bp-mono, blueprint text ────────────────
+    .tc-config-preview-body {
+        background: var(--bp-paper);
+        color: var(--bs-config-preview-text-color);
+        font-family: var(--bp-mono);
+    }
+
+    // ── Comments: italic faint, matching base italic rule ─────────────────────
+    .tc-config-preview-comment {
+        color: var(--bs-config-preview-comment-color);
+    }
+}

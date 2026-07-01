@@ -1,0 +1,40 @@
+// Blueprint › tc-input-group — teal mono addon text on --bp-bg-2 surface; pink focus accent propagated to the group border; hairline --bp-border unifies the row.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    // Addon spans: muted recessed surface + hairline + teal mono label.
+    // --tc-surface-muted, --tc-border-strong, --tc-text-muted, --tc-font-mono are
+    // already remapped in _foundation.scss, so most cosmetics flow through those.
+    // We override the border color to the softer hairline and lift the text to
+    // teal-fg so it reads as a functional label rather than plain muted copy.
+    .input-group-text {
+        background-color: var(--bp-bg-2);
+        border-color: var(--bp-border);
+        color: var(--bp-teal-fg); // teal text on white/lavender clears AA per --bp-teal-fg definition
+        font-family: var(--bp-mono);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    // When the sibling control inside the group is focused, match the pink
+    // focus border on the addon so the joined row reads as one coherent unit.
+    .input-group:focus-within .input-group-text {
+        border-color: var(--bp-pink);
+    }
+
+    // Inline buttons inside the group: suppress the lift transform (base already
+    // does this) and apply the standard blueprint teal-action fill so they
+    // sit comfortably beside the input without requiring a full CTA pink.
+    // Primary .btn-primary inside the group keeps its own pink treatment from
+    // _button.scss — only the bare .btn gets the teal default.
+    .input-group > .btn:not([class*='btn-']) {
+        background-color: var(--bp-teal);
+        border-color: var(--bp-teal);
+        color: var(--bp-teal-ink);
+
+        &:hover {
+            background-color: var(--bp-teal-hover);
+            border-color: var(--bp-teal-hover);
+        }
+    }
+}

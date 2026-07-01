@@ -1,0 +1,105 @@
+// Blueprint › tc-character-create — white paper card with HUD corner bracket,
+// teal mono eyebrow, display heading, teal footer divider, and a pink-gradient
+// confirm CTA with lift/glow (the CTA is already handled by _button.scss via
+// .btn.btn-primary, so we only lock in the component-level token overrides and
+// the signature border/shadow/typography treatments here).
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-character-create {
+        // ── Surface ──────────────────────────────────────────────────────────
+        --bs-character-create-bg: var(--bp-paper);
+        --bs-character-create-border-color: var(--bp-border);
+        --bs-character-create-border-width: 1px;
+        --bs-character-create-shadow: var(--tc-shadow-sm);
+
+        // ── Eyebrow (mono micro-label) ────────────────────────────────────────
+        // Overridden to teal-fg so the eyebrow reads as a live HUD label rather
+        // than muted body copy. Letter-spacing is widened to .12em via the class
+        // rule below (the base only sets .1em via the --bs var).
+        --bs-character-create-eyebrow-color: var(--bp-teal-fg);
+        --bs-character-create-eyebrow-size: 0.6875rem;
+        --bs-character-create-eyebrow-spacing: 0.12em;
+
+        // ── Field labels ──────────────────────────────────────────────────────
+        --bs-character-create-label-color: var(--bp-text-soft);
+        --bs-character-create-label-size: 13px;
+        --bs-character-create-label-weight: 600;
+
+        // ── Range value readout ───────────────────────────────────────────────
+        // Violet tabular-num readout sits in the supporting accent slot.
+        --bs-character-create-range-value-color: var(--bp-violet-fg);
+
+        // ── Footer divider ────────────────────────────────────────────────────
+        // Route away from raw tc-border → blueprint hairline token.
+        --bs-character-create-footer-border-color: var(--bp-border-faint);
+
+        // ── Spacing (keep base values; no cosmetic reason to change) ──────────
+        --bs-character-create-gap: 1.25rem;
+
+        // HUD corner bracket — positioned relative to the element host.
+        position: relative;
+
+        // Teal top-left corner bracket: the blueprint signature for tappable
+        // panels / interactive cards.
+        &::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            pointer-events: none;
+        }
+    }
+
+    // ── Eyebrow: swap base tc-font-mono → blueprint --bp-mono, widen tracking ──
+    .tc-character-create-eyebrow {
+        font-family: var(--bp-mono);
+        // color already driven by --bs-character-create-eyebrow-color above.
+        // A small leading glyph in the blueprint glyph vocab signals "HUD":
+        &::before {
+            content: '◈ ';
+            // Inherit the eyebrow teal-fg color — no extra var needed.
+        }
+    }
+
+    // ── Field labels: body font → bp-body (overrides tc-font-sans baseline) ─
+    .tc-character-create-field-label {
+        font-family: var(--bp-body);
+    }
+
+    // ── Range value readout: keep bp-mono with tabular numerics ──────────────
+    .tc-character-create-range-value {
+        font-family: var(--bp-mono);
+        // Color driven by --bs-character-create-range-value-color above.
+    }
+
+    // ── Footer: top-border uses the token override set above; no extra rule ──
+    // The heading in the eyebrow slot reads as a display title when the consumer
+    // sets a heading — if an <h*> is ever slotted, it would pick up display
+    // treatment from _heading.scss. No extra rule needed here.
+
+    // ── Name input: subtle teal focus accent (overrides default accent ring) ─
+    .tc-character-create-name {
+        // Drive border-color through the Bootstrap form-control var so we stay
+        // inside the Bootstrap variable contract.
+        --bs-focus-ring-color: var(--bp-teal-soft);
+        &:focus {
+            border-color: var(--bp-teal);
+            box-shadow: 0 0 0 0.2rem var(--bp-teal-soft);
+        }
+    }
+
+    // ── Confirm button: the base .btn.btn-primary already picks up the pink
+    // gradient + glow + lift from _button.scss. We only ensure the scoped
+    // touch-target coarse rule is correctly resolved inside the theme. ─────────
+    @media (pointer: coarse) {
+        .tc-character-create-confirm {
+            min-height: 44px;
+        }
+    }
+}

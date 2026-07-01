@@ -1,0 +1,236 @@
+// Blueprint › tc-bitmap-font-generator — control-panel surface with white-paper
+// groups, teal HUD group-title labels, pink primary CTA with glow lift, teal
+// secondary hover, pink focus ring, and an ink code block with arcade meta text.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-bitmap-font-generator {
+        // ── Surface & structure ────────────────────────────────────────────────
+        --bs-bitmap-font-generator-surface:        var(--bp-paper);
+        --bs-bitmap-font-generator-surface-muted:  var(--bp-paper-tint);
+        --bs-bitmap-font-generator-border:         var(--bp-border);
+        --bs-bitmap-font-generator-border-strong:  var(--bp-border-strong);
+        // Replace raw var(--tc-slate-100) inner-row hairlines with the faint
+        // blueprint divider token so slate values don't leak in.
+        --bs-bitmap-font-generator-hairline:       var(--bp-border-faint);
+
+        // ── Ink / type ─────────────────────────────────────────────────────────
+        --bs-bitmap-font-generator-text:           var(--bp-text);
+        --bs-bitmap-font-generator-muted:          var(--bp-text-muted);
+        --bs-bitmap-font-generator-faint:          var(--bp-text-faint);
+        // JetBrains Mono carried in from --bp-mono; retain the full fallback
+        // stack because the display rule below overrides only labeled sections.
+        --bs-bitmap-font-generator-mono:           var(--bp-mono);
+
+        // ── Group / label type ─────────────────────────────────────────────────
+        --bs-bitmap-font-generator-group-title-color: var(--bp-teal-fg);
+        --bs-bitmap-font-generator-label-color:       var(--bp-text-muted);
+
+        // ── Input / select / focus ─────────────────────────────────────────────
+        --bs-bitmap-font-generator-input-bg:           var(--bp-paper);
+        --bs-bitmap-font-generator-input-border:       var(--bp-border-strong);
+        --bs-bitmap-font-generator-input-color:        var(--bp-text);
+        // Replace rgba(30,41,59,*) slate literals with blueprint pink tokens.
+        --bs-bitmap-font-generator-input-focus-border: var(--bp-pink-line);
+        --bs-bitmap-font-generator-input-focus-ring:   var(--bp-glow-pink);
+
+        // ── Canvas preview ────────────────────────────────────────────────────
+        // Recessed well — a shade darker than the paper so the canvas reads as
+        // a viewport inset, not a floating element.
+        --bs-bitmap-font-generator-canvas-bg: var(--bp-bg-2);
+
+        // ── Code / descriptor block ────────────────────────────────────────────
+        // Foundation maps --tc-ink → the dark violet base (§ foundation map).
+        // We inherit that for free; only the text color is set here.
+        --bs-bitmap-font-generator-code-bg:    var(--tc-ink);
+        --bs-bitmap-font-generator-code-color: var(--tc-text-inverse);
+
+        // ── Secondary buttons ─────────────────────────────────────────────────
+        --bs-bitmap-font-generator-btn-bg:          var(--bp-paper);
+        --bs-bitmap-font-generator-btn-border:      var(--bp-border-soft);
+        --bs-bitmap-font-generator-btn-color:       var(--bp-text-soft);
+        --bs-bitmap-font-generator-btn-hover-bg:    var(--bp-teal-soft);
+        --bs-bitmap-font-generator-btn-active-bg:   var(--bp-teal);
+        --bs-bitmap-font-generator-btn-active-color: var(--bp-teal-ink);
+
+        // ── Primary (Generate) button ─────────────────────────────────────────
+        // Pink gradient → white ink, pink glow for lift.
+        --bs-bitmap-font-generator-btn-primary-bg:    var(--bp-pink-grad);
+        --bs-bitmap-font-generator-btn-primary-color: var(--bp-pink-ink);
+        // Replace rgba(30,41,59,*) slate shadow literal with the strong pink glow.
+        --bs-bitmap-font-generator-btn-primary-lift:  var(--bp-glow-pink-strong);
+    }
+
+    // ── Outer wrapper ──────────────────────────────────────────────────────────
+    // White paper card with a lilac hairline and a soft violet-tinted shadow.
+    .tc-bfg {
+        background: var(--bp-paper);
+        border-color: var(--bp-border);
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Control groups ─────────────────────────────────────────────────────────
+    .tc-bfg-group {
+        background: var(--bp-paper);
+        border-color: var(--bp-border);
+    }
+
+    // Group title: mono uppercase HUD label in teal — signals machine-facing
+    // sections the way blueprint panel headers and eyebrows do.
+    .tc-bfg-group-title {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--bp-teal-fg);
+        background: var(--bp-paper-tint);
+        border-bottom-color: var(--bp-border-faint);
+    }
+
+    // ── Inputs / selects / textarea ────────────────────────────────────────────
+    .tc-bfg-input,
+    .tc-bfg-select {
+        background: var(--bp-paper);
+        border-color: var(--bp-border-strong);
+        color: var(--bp-text);
+        transition: border-color 0.15s var(--bp-ease), box-shadow 0.15s var(--bp-ease);
+    }
+
+    .tc-bfg-color {
+        background: var(--bp-paper);
+        border-color: var(--bp-border-strong);
+    }
+
+    .tc-bfg-input:focus,
+    .tc-bfg-select:focus,
+    .tc-bfg-color:focus,
+    .tc-bfg-textarea:focus {
+        border-color: var(--bp-pink);
+        box-shadow: var(--bp-glow-pink);
+        outline: none;
+    }
+
+    // Checkbox accent → pink (primary), consistent with the CTA rotation.
+    .tc-bfg-check input[type='checkbox'] {
+        accent-color: var(--bp-pink);
+    }
+
+    // ── Canvas preview ─────────────────────────────────────────────────────────
+    .tc-bfg-canvas {
+        background: var(--bp-bg-2);
+        border-color: var(--bp-border);
+    }
+
+    // ── Meta readout (dimensions / format / glyph count) ──────────────────────
+    // Mono teal label: the data-oriented readout in the toolbar reads as a
+    // HUD status line, echoing blueprint's mono eyebrow convention.
+    .tc-bfg-meta {
+        font-family: var(--bp-mono);
+        font-size: 0.75rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--bp-teal-fg);
+    }
+
+    // ── Secondary buttons (Copy / Download) ───────────────────────────────────
+    .tc-bfg-btn {
+        font-family: var(--bp-display);
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        background: var(--bp-paper);
+        border-color: var(--bp-border-soft);
+        color: var(--bp-text-soft);
+        transition:
+            background 0.15s var(--bp-ease),
+            border-color 0.15s var(--bp-ease),
+            color 0.15s var(--bp-ease),
+            transform 0.18s var(--bp-ease),
+            box-shadow 0.18s var(--bp-ease);
+    }
+
+    .tc-bfg-btn:hover {
+        background: var(--bp-teal-soft);
+        border-color: var(--bp-teal);
+        color: var(--bp-teal-fg);
+    }
+
+    .tc-bfg-btn:active {
+        background: var(--bp-teal);
+        border-color: var(--bp-teal);
+        color: var(--bp-teal-ink);
+    }
+
+    // ── Primary (Generate) button — pink gradient + lift ──────────────────────
+    // Follows the same pattern as .btn-primary in blueprint/_button.scss:
+    // pink gradient fill, white ink, pink glow resting, strong glow + 2px lift
+    // on hover, no glow on active (snapped back).
+    .tc-bfg-btn--primary {
+        background: var(--bp-pink-grad);
+        border-color: transparent;
+        color: var(--bp-pink-ink);
+        box-shadow: var(--bp-glow-pink);
+    }
+
+    .tc-bfg-btn--primary:hover {
+        background: var(--bp-pink-grad);
+        border-color: transparent;
+        color: var(--bp-pink-ink);
+        transform: translateY(-2px);
+        box-shadow: var(--bp-glow-pink-strong);
+    }
+
+    .tc-bfg-btn--primary:active {
+        transform: translateY(0);
+        box-shadow: var(--bp-glow-pink);
+        color: var(--bp-pink-ink);
+    }
+
+    // Focus-visible for keyboard users — pink outline matches the CTA accent.
+    .tc-bfg-btn:focus-visible {
+        outline: 2px solid var(--bp-pink);
+        outline-offset: 2px;
+        box-shadow: var(--bp-glow-pink);
+    }
+
+    // ── Output / descriptor block ─────────────────────────────────────────────
+    .tc-bfg-output {
+        border-color: var(--bp-border);
+    }
+
+    // The output header row mirrors the group-title HUD treatment so the two
+    // panels (controls / export) read as part of the same visual system.
+    .tc-bfg-output-head {
+        background: var(--bp-paper-tint);
+        border-bottom-color: var(--bp-border-faint);
+    }
+
+    .tc-bfg-output-title {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--bp-teal-fg);
+    }
+
+    // The code block keeps the dark ink surface (--tc-ink via foundation) and
+    // the light text-inverse. No further override needed; the base partial drives
+    // these through --bs-bitmap-font-generator-code-bg/color which are set above.
+    .tc-bfg-pre {
+        background: var(--tc-ink);
+    }
+
+    .tc-bfg-code {
+        color: var(--tc-text-inverse);
+    }
+
+    // Freeze the decorative lift under reduced-motion.
+    @media (prefers-reduced-motion: reduce) {
+        .tc-bfg-btn--primary:hover {
+            transform: none;
+        }
+    }
+}

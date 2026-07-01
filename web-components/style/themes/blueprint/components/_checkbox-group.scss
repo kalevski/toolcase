@@ -1,0 +1,32 @@
+// Blueprint › tc-checkbox-group — mono uppercase group label, teal-invalid danger state, blueprint token wiring.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    .tc-checkbox-group {
+        // Group label: mono eyebrow treatment — uppercase, tracked, muted ink
+        --bs-checkbox-group-label-color: var(--bp-text-muted);
+        --bs-checkbox-group-label-size: 0.6875rem;   // 11px — compact HUD label
+        --bs-checkbox-group-label-weight: 600;
+        --bs-checkbox-group-gap: 0.5rem;
+        --bs-checkbox-group-inline-gap: 1.25rem;
+
+        // Invalid: real danger red (not pink — pink is CTA/primary, not error)
+        --bs-checkbox-group-invalid-color: var(--bp-danger);
+    }
+
+    // Eyebrow-style group label
+    .tc-checkbox-group-label {
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--bs-checkbox-group-label-color);
+    }
+
+    // Invalid state: danger tint on the group label
+    .tc-checkbox-group[aria-invalid='true'] {
+        .tc-checkbox-group-label {
+            color: var(--bs-checkbox-group-invalid-color);
+        }
+    }
+}

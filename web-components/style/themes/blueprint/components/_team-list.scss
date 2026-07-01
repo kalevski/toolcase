@@ -1,0 +1,108 @@
+// Blueprint › tc-team-list — white-paper roster card with teal avatar gradient,
+// display-weight names, mono email + role chips, and a teal HUD corner bracket
+// on each member row to signal interactivity.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Container ──────────────────────────────────────────────────────────────
+    // Lift the list off the lavender page ground as a raised paper card.
+    tc-team-list {
+        --bs-team-list-bg:            var(--bp-paper);
+        --bs-team-list-border:        var(--bp-border);
+        --bs-team-list-separator:     var(--bp-border-faint);
+
+        // Row hover: the recessed well tint — visible but gentle on a light theme.
+        --bs-team-list-row-hover-bg:  var(--bp-bg);
+
+        // ── Name ───────────────────────────────────────────────────────────────
+        // Chakra Petch gives each member a named, structured presence.
+        --bs-team-list-name-color:    var(--bp-text);
+        --bs-team-list-name-weight:   600;
+
+        // ── Email ──────────────────────────────────────────────────────────────
+        --bs-team-list-email-color:   var(--bp-text-faint);
+
+        // ── Role chip ──────────────────────────────────────────────────────────
+        // Teal-soft fill + teal-fg text — the standard blueprint eyebrow treatment.
+        --bs-team-list-role-bg:       var(--bp-teal-soft);
+        --bs-team-list-role-color:    var(--bp-teal-fg);
+
+        // ── Avatar ─────────────────────────────────────────────────────────────
+        // Replace the dark #2b3a51 gradient stop with the blueprint teal gradient.
+        // --bp-teal-grad is the canonical two-stop teal sweep for this theme.
+        --bs-team-list-avatar-gradient: var(--bp-teal-grad);
+        --bs-team-list-avatar-color:    var(--bp-teal-ink);
+    }
+
+    // ── Card shell ─────────────────────────────────────────────────────────────
+    .tc-team-list {
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Member rows ────────────────────────────────────────────────────────────
+    // Position:relative hosts the HUD corner bracket pseudo-element.
+    .tc-team-list-member {
+        position: relative;
+        transition: background-color var(--bp-ease);
+
+        // HUD corner bracket — top-left teal L-shape, marks the row as interactive.
+        // Used sparingly per blueprint spec: only on hover-bearing tiles.
+        &::before {
+            content: '';
+            position: absolute;
+            top:    8px;
+            left:   8px;
+            width:  10px;
+            height: 10px;
+            border-top:  2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
+            opacity: 0;
+            transition: opacity var(--bp-ease);
+            pointer-events: none;
+        }
+
+        &:hover::before {
+            opacity: 1;
+        }
+    }
+
+    // ── Name ───────────────────────────────────────────────────────────────────
+    // Chakra Petch display face; tight tracking suits the structured roster feel.
+    .tc-team-list-name {
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+    }
+
+    // ── Email ──────────────────────────────────────────────────────────────────
+    // JetBrains Mono already applied by base via --tc-font-mono which foundation
+    // remaps to --bp-mono; only the color token needs re-pointing (done via var
+    // above). No extra rule needed here.
+
+    // ── Role chip ──────────────────────────────────────────────────────────────
+    // Mono uppercase micro-label — the blueprint eyebrow / kicker treatment.
+    .tc-team-list-role {
+        font-family:     var(--bp-mono);
+        font-size:       0.625rem;
+        font-weight:     600;
+        letter-spacing:  0.1em;
+        text-transform:  uppercase;
+    }
+
+    // ── Avatar default fill ────────────────────────────────────────────────────
+    // Non-gradient fallback: use the teal-soft tint so it still feels on-theme.
+    .tc-team-list-avatar {
+        background: var(--bp-teal-soft);
+        color:      var(--bp-teal-fg);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .tc-team-list-member {
+            transition: none;
+
+            &::before {
+                transition: none;
+            }
+        }
+    }
+}

@@ -1,0 +1,135 @@
+// Blueprint › tc-live-feed — HUD-panel feed: white paper surface, teal REC indicator, pink primary focus ring, mono header, status rows via accent rotation.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-live-feed {
+        // Surface: white raised card framed by the default hairline
+        --bs-live-feed-bg:             var(--bp-paper);
+        --bs-live-feed-border:         1px solid var(--bp-border);
+
+        // Header: recessed well so the body reads as the active surface
+        --bs-live-feed-header-bg:      var(--bp-bg-2);
+        --bs-live-feed-header-border:  1px solid var(--bp-border);
+        --bs-live-feed-header-color:   var(--bp-teal-fg);   // teal = everyday action / live label
+        --bs-live-feed-header-font-size: 0.6875rem;
+
+        // Row anatomy
+        --bs-live-feed-row-border:     1px solid var(--bp-border-faint);
+        --bs-live-feed-row-hover-bg:   var(--bp-paper-tint);
+
+        // Timestamps — faint mono ink
+        --bs-live-feed-time-color:     var(--bp-text-faint);
+        --bs-live-feed-time-font-size: 11.5px;
+
+        // Event label copy
+        --bs-live-feed-label-font-size: 0.8125rem;
+
+        // REC dot: pink (primary brand / alert signal) instead of raw danger
+        --bs-live-feed-rec-dot-color:  var(--bp-pink);
+        --bs-live-feed-rec-animation-speed: 0.9s;
+    }
+
+    // ── Outer frame ───────────────────────────────────────────────────────────
+
+    .tc-live-feed {
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Header bar ────────────────────────────────────────────────────────────
+
+    .tc-live-feed-title {
+        // Mono eyebrow: uppercase + airy tracking — blueprint HUD label style
+        font-family: var(--bp-mono);
+        font-size: var(--bs-live-feed-header-font-size);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--bp-teal-fg);
+        font-weight: 600;
+    }
+
+    // ── REC indicator ─────────────────────────────────────────────────────────
+
+    .tc-live-feed-rec-dot {
+        // Pink pulse halo: live/presence dot convention from blueprint spec
+        background: var(--bp-pink);
+        box-shadow: 0 0 0 0 var(--bp-pink-soft);
+        animation: bp-live-feed-rec-pulse var(--bs-live-feed-rec-animation-speed) ease-in-out infinite alternate;
+    }
+
+    .tc-live-feed-rec-label {
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: 700;
+        color: var(--bp-pink);
+    }
+
+    @keyframes bp-live-feed-rec-pulse {
+        0%   { opacity: 1;    box-shadow: 0 0 0 0    var(--bp-pink-soft); }
+        100% { opacity: 0.3;  box-shadow: 0 0 0 4px  transparent; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .tc-live-feed-rec-dot {
+            animation: none;
+            opacity: 1;
+            box-shadow: none;
+        }
+    }
+
+    // ── Scrollable body ───────────────────────────────────────────────────────
+
+    .tc-live-feed-body {
+        scrollbar-color: var(--bp-border) transparent;
+    }
+
+    // ── Event rows ────────────────────────────────────────────────────────────
+
+    .tc-live-feed-row {
+        transition: background var(--bp-ease, 120ms ease);
+
+        &:focus-visible {
+            // Pink primary focus ring (blueprint CTA / primary = pink)
+            outline: 2px solid var(--bp-pink);
+            outline-offset: -2px;
+        }
+    }
+
+    // ── Timestamps ────────────────────────────────────────────────────────────
+
+    .tc-live-feed-time {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.04em;
+    }
+
+    // ── Row label copy ────────────────────────────────────────────────────────
+
+    .tc-live-feed-label {
+        font-family: var(--bp-body);
+        color: var(--bp-text);
+    }
+
+    // ── Level icon colours — accent rotation ─────────────────────────────────
+    // info    → violet  (supporting accent)
+    // success → teal    (action / positive signal)
+    // warning → amber   (supporting accent)
+    // danger  → real red (semantic danger, not pink)
+
+    .tc-live-feed-row--info .tc-live-feed-icon {
+        color: var(--bp-violet-fg);
+    }
+
+    .tc-live-feed-row--success .tc-live-feed-icon {
+        color: var(--bp-teal-fg);
+    }
+
+    .tc-live-feed-row--warning .tc-live-feed-icon {
+        color: var(--bp-amber-fg);
+    }
+
+    .tc-live-feed-row--danger .tc-live-feed-icon {
+        color: var(--bp-danger);
+    }
+}

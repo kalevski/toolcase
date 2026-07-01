@@ -1,0 +1,59 @@
+// Blueprint › tc-install-tabs — mono HUD tab row (teal inactive / pink active) over a violet-ink command surface.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+    tc-install-tabs {
+        // Tab row hairline → blueprint border token
+        --bs-install-tabs-tab-row-border: 1px solid var(--bp-border);
+
+        // Tab labels — inactive: muted teal-fg so they read as tappable HUD labels
+        --bs-install-tabs-tab-color: var(--bp-teal-fg);
+        // Active tab: pink primary (arcade accent rotation: pink = selected/active)
+        --bs-install-tabs-tab-color-active: var(--bp-pink);
+        // Active underline: pink 2px stroke
+        --bs-install-tabs-tab-active-underline: 2px solid var(--bp-pink);
+
+        // Code panel: violet-ink dark surface (foundation maps --tc-ink → #1a1830)
+        --bs-install-tabs-panel-bg: var(--tc-ink);
+        --bs-install-tabs-panel-border: 1px solid var(--bp-border);
+        // Code text: bright on dark ink — foundation maps --tc-text-inverse → #fff
+        --bs-install-tabs-code-color: var(--tc-text-inverse);
+
+        // Copy button — muted on ink; teal glow on hover for the action accent
+        --bs-install-tabs-copy-color: var(--bp-text-faint);
+        // Soft white hover bg is fine on the dark ink surface; keep as-is
+        --bs-install-tabs-copy-hover-bg: rgba(255, 255, 255, 0.08);
+        // Copied confirmation: bright arcade teal replacing the hardcoded #99cc88 green
+        --bs-install-tabs-copy-copied-color: #4fd6c6; // bright teal on ink (matches code-snippet)
+    }
+
+    // Tab labels: mono HUD treatment — uppercase + tight tracking (bp-mono is JetBrains Mono)
+    // bp-mono is already wired as --tc-font-mono in foundation, but we add the HUD letterform rules
+    .tc-install-tabs-tab {
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 500;
+
+        &:focus-visible {
+            // Repoint focus ring from generic --tc-app-accent to blueprint pink (primary)
+            outline-color: var(--bp-pink);
+        }
+    }
+
+    // Copy button focus ring → pink primary
+    .tc-install-tabs-copy {
+        &:hover {
+            // On hover: teal ink for the icon (action accent) over the dim hover bg
+            color: var(--bp-teal-ink);
+        }
+
+        &:focus-visible {
+            outline-color: var(--bp-pink);
+        }
+    }
+
+    // Copied state: bright teal confirmation glow — soft halo matches pulse/live token style
+    .tc-install-tabs-copy--copied {
+        color: #4fd6c6; // bright teal on ink
+    }
+}

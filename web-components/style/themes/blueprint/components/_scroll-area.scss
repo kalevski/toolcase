@@ -1,0 +1,41 @@
+// Blueprint › tc-scroll-area — teal scrollbar thumb on transparent track; border routes to bp-border; pink focus ring.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    tc-scroll-area {
+        // Optional hairline border → blueprint default hairline token.
+        --bs-scroll-area-border-color: var(--bp-border);
+
+        // Scrollbar thumb → teal (quiet, action-register colour) on transparent track.
+        --bs-scroll-area-thumb-color: var(--bp-teal);
+        --bs-scroll-area-track-color: transparent;
+    }
+
+    .tc-scroll-area {
+        // Focus ring uses pink (primary/CTA accent) consistent with the blueprint accent rotation.
+        &:focus-visible {
+            outline-color: var(--bp-pink);
+        }
+
+        // WebKit thumb picks up the var already set above, but the hover state
+        // is only expressible via a pseudo-element rule, not the var alone.
+        &::-webkit-scrollbar-thumb {
+            background: var(--bp-teal);
+
+            &:hover {
+                background: var(--bp-teal-hover);
+            }
+        }
+
+        // Track: keep transparent; show --bp-bg-2 on hover so the rail is
+        // discoverable without being noisy at rest.
+        &::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        &:hover::-webkit-scrollbar-track {
+            background: var(--bp-bg-2);
+        }
+    }
+}

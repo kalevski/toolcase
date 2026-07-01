@@ -1,0 +1,106 @@
+// Blueprint › tc-sponsor-wall — lavender-tinted logo grid, mono tier labels in teal, cells lift and colorize on hover.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Custom-property overrides ────────────────────────────────────────────
+    // Re-point the component's own --bs-sponsor-wall-* API to blueprint tokens.
+    // This is the primary re-skin; element rules below cover what vars can't reach.
+
+    tc-sponsor-wall {
+        // Title & tier-label text: blueprint mono, teal-fg for AA contrast on --bp-bg
+        --bs-sponsor-wall-title-color:     var(--bp-teal-fg);
+        --bs-sponsor-wall-label-color:     var(--bp-text-faint);
+
+        // Logo grid: paper cells separated by a blueprint hairline
+        --bs-sponsor-wall-cell-bg:         var(--bp-paper);
+        --bs-sponsor-wall-cell-border:     var(--bp-border);
+
+        // Rest state: greyscale + slightly lifted opacity (blueprint is lighter than base)
+        --bs-sponsor-wall-logo-grayscale:  1;
+        --bs-sponsor-wall-logo-opacity:    0.45;
+
+        // Hover lift: a touch more height than the 1px base default
+        --bs-sponsor-wall-hover-translate: -2px;
+
+        // Smooth via the blueprint ease curve
+        --bs-sponsor-wall-logo-transition: filter var(--bp-ease) 180ms,
+                                           opacity var(--bp-ease) 180ms,
+                                           transform var(--bp-ease) 120ms;
+    }
+
+    // ── Title ────────────────────────────────────────────────────────────────
+    // Switch to the blueprint mono stack; the base already does uppercase+tracking
+    // but --bs-font-monospace may not resolve to --bp-mono in all contexts.
+    .tc-sponsor-wall-title {
+        font-family:     var(--bp-mono);
+        letter-spacing:  0.12em;
+        color:           var(--bs-sponsor-wall-title-color); // already re-pointed above
+    }
+
+    // ── Tier label ───────────────────────────────────────────────────────────
+    .tc-sponsor-tier-label {
+        font-family:    var(--bp-mono);
+        letter-spacing: 0.10em;
+        color:          var(--bs-sponsor-wall-label-color); // already --bp-text-faint
+    }
+
+    // ── Logo grid container ──────────────────────────────────────────────────
+    // The backing "border" is the gap fill between cells.
+    // Re-point to blueprint's hairline token (already done via --bs-sponsor-wall-cell-border,
+    // but the background property is painted inline — override it here).
+    .tc-sponsor-tier-logos {
+        background: var(--bp-border);
+        border-color: var(--bp-border);
+    }
+
+    // ── Logo cell ────────────────────────────────────────────────────────────
+    .tc-sponsor-logo-wrap {
+        background: var(--bp-paper);
+        // Subtle transition on the cell background so hover feels deliberate
+        transition: transform var(--bp-ease) 120ms,
+                    background var(--bp-ease) 180ms;
+
+        &:hover,
+        &:focus-within {
+            // Lift is handled by --bs-sponsor-wall-hover-translate above.
+            // Warm the cell slightly on hover so the colorised logo has a clean ground.
+            background: var(--bp-paper-tint);
+            box-shadow: var(--tc-shadow-sm);
+        }
+
+        // Focus ring → pink (primary brand, replaces the generic --tc-app-accent)
+        &:focus-visible {
+            outline: 2px solid var(--bp-pink);
+            outline-offset: 2px;
+        }
+    }
+
+    a.tc-sponsor-logo-wrap {
+        &:focus-visible {
+            outline: 2px solid var(--bp-pink);
+            outline-offset: 2px;
+        }
+    }
+
+    // ── Logo image ───────────────────────────────────────────────────────────
+    // No changes needed here — filter/opacity vars are already re-pointed above.
+    // The lift-to-color on hover is inherited from the base rule through the
+    // re-pointed --bs-sponsor-wall-logo-* vars.
+
+    // ── Reduced-motion: preserve the opacity cross-fade, drop the lift ───────
+    @media (prefers-reduced-motion: reduce) {
+        .tc-sponsor-logo-wrap {
+            transition: background var(--bp-ease) 180ms;
+
+            &:hover,
+            &:focus-within {
+                transform: none;
+            }
+        }
+
+        tc-sponsor-wall {
+            --bs-sponsor-wall-logo-transition: opacity var(--bp-ease) 200ms;
+        }
+    }
+}

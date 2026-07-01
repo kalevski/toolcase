@@ -1,0 +1,149 @@
+// Blueprint › tc-list-group — paper card with teal-accented active state, mono counters, and pink primary active fill.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Outer container ──────────────────────────────────────────────────────
+    .list-group {
+        // Replace $slate-700 literal with bp ink; route outer hairline to bp border.
+        --bs-list-group-color:              var(--bp-text);
+        --bs-list-group-bg:                 var(--bp-paper);
+        --bs-list-group-border-color:       var(--bp-border);
+
+        // Action states: hover lifts to paper-tint; active uses a muted well.
+        --bs-list-group-action-color:       var(--bp-text-soft);
+        --bs-list-group-action-hover-color: var(--bp-text);
+        --bs-list-group-action-hover-bg:    var(--bp-paper-tint);
+        --bs-list-group-action-active-color: var(--bp-text);
+        --bs-list-group-action-active-bg:   var(--bp-paper-tint-2);
+
+        // Disabled: faint ink on recessed well.
+        --bs-list-group-disabled-color:     var(--bp-text-faint);
+        --bs-list-group-disabled-bg:        var(--bp-bg-2);
+
+        // Active item: pink primary fill (accent rotation: pink = primary/selected).
+        --bs-list-group-active-color:       var(--bp-pink-ink);
+        --bs-list-group-active-bg:          var(--bp-pink);
+        // Replace the $slate-100 literal that was used as the active border.
+        --bs-list-group-active-border-color: var(--bp-pink-hover);
+
+        // Subtle shadow to read as a raised paper card.
+        box-shadow: var(--tc-shadow-sm);
+    }
+
+    // ── Item separators ──────────────────────────────────────────────────────
+    // The base partial bakes "$slate-100" directly into border-bottom and the
+    // horizontal mixin — override here to replace those literals with bp tokens.
+    .list-group-item {
+        // Inner dividers: faint bp hairline (replaces $slate-100 bake).
+        border-bottom-color: var(--bp-border-faint);
+
+        // Active item: ensure the left accent stripe echoes the pink selection.
+        &.active {
+            border-color: var(--bp-pink-hover);
+            // A subtle left accent stripe marks the selected entry.
+            border-left: 3px solid var(--bp-pink);
+        }
+    }
+
+    // ── Horizontal item separators ───────────────────────────────────────────
+    // The mixin bakes "$slate-100" as the right-border color; override it here.
+    .list-group-horizontal,
+    .list-group-horizontal-sm,
+    .list-group-horizontal-md,
+    .list-group-horizontal-lg,
+    .list-group-horizontal-xl,
+    .list-group-horizontal-xxl {
+        > .list-group-item {
+            border-right-color: var(--bp-border-faint);
+        }
+    }
+
+    // ── Numbered counter ─────────────────────────────────────────────────────
+    // The base partial uses var(--tc-font-mono) — reroute to --bp-mono so the
+    // monospaced counter renders in JetBrains Mono with blueprint tracking.
+    .list-group-numbered {
+        > .list-group-item::before {
+            font-family: var(--bp-mono);
+            color: var(--bp-teal-fg);    // teal = everyday action/label accent
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+        }
+    }
+
+    // ── Flush variant ────────────────────────────────────────────────────────
+    // Flush strips the outer border — inner dividers still come from
+    // .list-group-item; no extra tokens needed, but ensure bg stays paper.
+    .list-group-flush {
+        box-shadow: none; // flush = embedded; no card lift
+
+        > .list-group-item {
+            background-color: transparent; // let the parent surface show through
+        }
+    }
+
+    // ── Variant color items (.list-group-item-{name}) ────────────────────────
+    // The base loop drives these via rgba(var(--bs-{name}-rgb), 0.16).
+    // Blueprint maps the semantic names to bp soft/fg tokens for crisp tints:
+    //   primary   → pink soft/fg
+    //   secondary → faint lavender (paper-tint-2 + muted text)
+    //   success   → teal soft/fg
+    //   info      → violet soft/fg
+    //   warning   → amber soft/fg
+    //   danger    → bp-danger soft/fg (real red, not pink)
+
+    .list-group-item-primary {
+        --bs-list-group-bg:                 var(--bp-pink-soft);
+        --bs-list-group-color:              var(--bp-pink);
+        --bs-list-group-action-hover-bg:    var(--bp-pink-line);
+        --bs-list-group-active-bg:          var(--bp-pink);
+        --bs-list-group-active-color:       var(--bp-pink-ink);
+        --bs-list-group-active-border-color: var(--bp-pink-hover);
+    }
+
+    .list-group-item-secondary {
+        --bs-list-group-bg:                 var(--bp-paper-tint-2);
+        --bs-list-group-color:              var(--bp-text-muted);
+        --bs-list-group-action-hover-bg:    var(--bp-bg-2);
+        --bs-list-group-active-bg:          var(--bp-border-strong);
+        --bs-list-group-active-color:       var(--bp-text);
+        --bs-list-group-active-border-color: var(--bp-border);
+    }
+
+    .list-group-item-success {
+        --bs-list-group-bg:                 var(--bp-teal-soft);
+        --bs-list-group-color:              var(--bp-teal-fg);
+        --bs-list-group-action-hover-bg:    var(--bp-teal-line);
+        --bs-list-group-active-bg:          var(--bp-teal);
+        --bs-list-group-active-color:       var(--bp-teal-ink);
+        --bs-list-group-active-border-color: var(--bp-teal-hover);
+    }
+
+    .list-group-item-info {
+        --bs-list-group-bg:                 var(--bp-violet-soft);
+        --bs-list-group-color:              var(--bp-violet-fg);
+        --bs-list-group-action-hover-bg:    rgba(var(--bp-violet), 0.14);
+        --bs-list-group-active-bg:          var(--bp-violet);
+        --bs-list-group-active-color:       var(--bp-violet-ink);
+        --bs-list-group-active-border-color: var(--bp-violet);
+    }
+
+    .list-group-item-warning {
+        --bs-list-group-bg:                 var(--bp-amber-soft);
+        --bs-list-group-color:              var(--bp-amber-fg);
+        --bs-list-group-action-hover-bg:    rgba(var(--bp-amber), 0.14);
+        --bs-list-group-active-bg:          var(--bp-amber);
+        --bs-list-group-active-color:       var(--bp-amber-ink);
+        --bs-list-group-active-border-color: var(--bp-amber);
+    }
+
+    .list-group-item-danger {
+        --bs-list-group-bg:                 var(--bp-danger-soft);
+        --bs-list-group-color:              var(--bp-danger);
+        --bs-list-group-action-hover-bg:    rgba(220, 38, 38, 0.14); // --bp-danger at lower alpha
+        --bs-list-group-active-bg:          var(--bp-danger);
+        --bs-list-group-active-color:       #fff;
+        --bs-list-group-active-border-color: var(--bp-danger);
+    }
+}

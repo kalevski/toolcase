@@ -4,12 +4,21 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { useMe } from '@/lib/me-context'
 import { LoadingState, ErrorState } from '@/components/states'
-import { SubTabBar, type SubTab } from '@/components/SubTabBar'
 
-// The owner admin surface, surfaced as a Wharf-style tc-tab-bar above the body
-// (P5) so every admin sub-page shares one tabbed navigation. The leading "Overview"
-// tab returns to the /admin hub.
-export const ADMIN_TABS: SubTab[] = [
+// The owner admin surface. Each area is its own page reached from a dedicated
+// left-sidebar entry (AppShell builds the Admin nav section from this list), so
+// there is no intra-section tab bar. The leading "Overview" entry is the /admin hub.
+export interface AdminNavItem {
+    /** Stable key, also used as the side-nav item key. */
+    id: string
+    label: string
+    /** Lucide glyph (kebab-case) for the side-nav + page-header icon. */
+    icon: string
+    /** Route this area lives at. */
+    href: string
+}
+
+export const ADMIN_TABS: AdminNavItem[] = [
     { id: 'admin-home', label: 'Overview', icon: 'shield', href: '/admin' },
     { id: 'admin-sites', label: 'Sites', icon: 'layout-dashboard', href: '/admin/sites' },
     { id: 'admin-users', label: 'Users', icon: 'users', href: '/admin/users' },
@@ -136,7 +145,6 @@ export function AdminPage<T>({
                 icon-name={icon}
                 icon-color={iconColor}
             />
-            <SubTabBar tabs={ADMIN_TABS} />
             {body}
         </section>
     )

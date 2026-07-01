@@ -1,0 +1,81 @@
+// Blueprint › tc-file-dropzone — paper-white well, dashed teal hairline, teal drag-active glow; chips as mono eyebrow pills.
+
+tc-theme[name='blueprint'],
+[data-tc-theme='blueprint'] {
+
+    // ── Custom-property re-skin ───────────────────────────────────────────────
+    // Drive everything through the component's own --bs-file-dropzone-* API.
+    // Base uses --tc-accent (cyan) for the active border — repoint to teal here.
+
+    tc-file-dropzone {
+        // Surface: raised white card, teal-tinted dashed perimeter
+        --bs-file-dropzone-bg:                var(--bp-paper);
+        --bs-file-dropzone-border-color:      var(--bp-border-strong);
+        --bs-file-dropzone-border-style:      dashed;
+        --bs-file-dropzone-border-width:      1.5px;
+
+        // Drag-active: teal wash + teal border (teal = everyday action)
+        --bs-file-dropzone-active-bg:         var(--bp-teal-soft);
+        --bs-file-dropzone-active-border-color: var(--bp-teal);
+
+        // Upload icon: teal so it reads as interactive affordance
+        --bs-file-dropzone-icon-color:        var(--bp-teal-fg);
+
+        // Prompt: body font at muted ink — readable but subordinate
+        --bs-file-dropzone-prompt-color:      var(--bp-text-muted);
+
+        // Format chips: mono eyebrow style — faint chip border, faint ink
+        --bs-file-dropzone-chip-color:        var(--bp-text-faint);
+        --bs-file-dropzone-chip-border-color: var(--bp-border-chip);
+
+        // Smooth transition using the blueprint ease curve
+        --bs-file-dropzone-transition:
+            background-color 180ms var(--bp-ease),
+            border-color     180ms var(--bp-ease),
+            box-shadow       180ms var(--bp-ease);
+    }
+
+    // ── Area wrapper: recessed well bg, soft shadow ───────────────────────────
+
+    .tc-file-dropzone__area {
+        background-color: var(--bs-file-dropzone-bg);
+        box-shadow: var(--tc-shadow-sm);
+
+        &:focus-visible {
+            // Blueprint focus ring: teal rather than the generic --tc-app-accent
+            outline-color: var(--bp-teal);
+        }
+    }
+
+    // ── Drag-active state: teal glow ─────────────────────────────────────────
+    // Box-shadow glow cannot be driven through a --bs-* var, so we add it here.
+
+    .tc-file-dropzone--active .tc-file-dropzone__area {
+        box-shadow: var(--tc-shadow-sm), var(--bp-glow-teal);
+    }
+
+    // ── Prompt text: Space Grotesk body ──────────────────────────────────────
+
+    .tc-file-dropzone__prompt {
+        font-family: var(--bp-body);
+        color: var(--bs-file-dropzone-prompt-color);
+
+        // Inline teal "click to browse" treatment — highlight the action word
+        // without wrapping it in markup; style the whole prompt uniformly.
+        // The component renders plain text, so we just ensure the font is right.
+    }
+
+    // ── Format chips: mono eyebrow pill style ────────────────────────────────
+    // The base partial already sets font-family: var(--tc-font-mono) and
+    // text-transform: uppercase. We layer the blueprint mono face + soft tint.
+
+    .tc-file-dropzone__format-chip {
+        font-family: var(--bp-mono);
+        letter-spacing: 0.08em;
+        color: var(--bs-file-dropzone-chip-color);
+        border-color: var(--bs-file-dropzone-chip-border-color);
+
+        // Soft teal-tinted chip fill — connects chips to the zone's action color
+        background-color: var(--bp-teal-soft);
+    }
+}
