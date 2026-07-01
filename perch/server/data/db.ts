@@ -351,10 +351,30 @@ export function exec(sql: string): void {
     wrap().db.exec(sql)
 }
 
-/** Run `fn` inside a transaction (synchronous — DatabaseSync is sync). */
+// Reentrancy depth for `tx`. DatabaseSync has no nested transactions — a second
+// `BEGIN` throws "cannot start a transaction within a transaction" — so a `tx()`
+// composed inside another `tx()` (e.g. `ensureSeed` calling `grantAllUsers`) must
+// JOIN the open transaction rather than start a new one.
+let txDepth = 0
+
+/**
+ * Run `fn` inside a transaction (synchronous — DatabaseSync is sync). Reentrant:
+ * the outermost call owns BEGIN/COMMIT/ROLLBACK; nested calls just run `fn` within
+ * the open transaction. A throw at any depth propagates to the outermost call,
+ * which rolls the whole unit back (all-or-nothing).
+ */
 export function tx<T>(fn: () => T): T {
     const { db } = wrap()
+    if (txDepth > 0) {
+        txDepth++
+        try {
+            return fn()
+        } finally {
+            txDepth--
+        }
+    }
     db.exec('BEGIN')
+    txDepth++
     try {
         const result = fn()
         db.exec('COMMIT')
@@ -362,6 +382,8 @@ export function tx<T>(fn: () => T): T {
     } catch (err) {
         db.exec('ROLLBACK')
         throw err
+    } finally {
+        txDepth--
     }
 }
 

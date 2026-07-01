@@ -9,6 +9,7 @@ import { Breadcrumbs } from './Breadcrumbs'
 import { CommandPalette } from './CommandPalette'
 import { RealmSwitcher } from './RealmSwitcher'
 import { ACCOUNT_LEVEL_LABEL, ROLE_RANK, type MeResponse } from '@/server/domain/types'
+import { ADMIN_TABS } from './admin/shared'
 
 // The authenticated frame (§14). `tc-dashboard-layout` is the responsive shell:
 // it renders the top navbar bar and the collapsible sidebar aside (the "navbar"
@@ -48,10 +49,10 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
                 },
             ],
         }
-        // The four routing sub-pages and the owner admin sub-pages now live behind a
-        // tc-tab-bar above each page body (P5, Wharf's project-tab pattern), so the
-        // sidebar carries ONE entry per section — clicking it lands on the section's
-        // first page (the tab bar handles intra-section navigation from there).
+        // The four routing sub-pages still live behind a tc-tab-bar above each page
+        // body (P5, Wharf's project-tab pattern), so the sidebar carries ONE Routing
+        // entry — clicking it lands on the first page and the tab bar handles
+        // intra-section navigation from there.
         const routing: SideNavSection = {
             key: 'routing',
             title: 'Routing',
@@ -67,18 +68,24 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
                 },
             ],
         }
+        // Every admin area is its own sidebar entry (Overview, Sites, Users, Realms,
+        // Domains, Certificates, Plans, Settings, Audit) — one route per page, no
+        // intra-section tab bar. ADMIN_TABS is the single source for the list.
         const admin: SideNavSection = {
             key: 'admin',
             title: 'Admin',
-            items: [
-                {
-                    key: 'admin',
-                    label: 'Admin',
-                    icon: 'shield',
-                    href: '/admin',
-                    active: pathname.startsWith('/admin'),
-                },
-            ],
+            items: ADMIN_TABS.map((tab) => ({
+                key: tab.id,
+                label: tab.label,
+                icon: tab.icon,
+                href: tab.href,
+                // Overview owns the exact /admin path; every other area owns its own
+                // subtree, so /admin/sites highlights Sites rather than Overview.
+                active:
+                    tab.href === '/admin'
+                        ? pathname === '/admin'
+                        : pathname === tab.href || pathname.startsWith(`${tab.href}/`),
+            })),
         }
         const rank = ROLE_RANK[me.role]
         const out: SideNavSection[] = [main]

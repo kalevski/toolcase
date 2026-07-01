@@ -47,6 +47,8 @@ type Server struct {
 	token  string
 	log    *slog.Logger
 	reload func() error
+	// jobs tracks async certbot issuances (POST /certs runs off the request path).
+	jobs *certJobStore
 }
 
 // New builds the admin server. token may be empty only when no auth is
@@ -58,7 +60,7 @@ type Server struct {
 // and reports an error when the on-disk config fails to load/validate (in which
 // case the running config is kept). It may be nil, which disables POST /reload.
 func New(mgr *manager.Manager, token string, log *slog.Logger, reload func() error) *Server {
-	return &Server{mgr: mgr, token: token, log: log, reload: reload}
+	return &Server{mgr: mgr, token: token, log: log, reload: reload, jobs: newCertJobStore()}
 }
 
 // Run serves until ctx is cancelled. An empty listen address disables the
@@ -120,6 +122,16 @@ func (s *Server) routes() http.Handler {
 	mux.HandleFunc("DELETE /stream-upstreams/{name}", s.auth(s.handleDeleteStreamUpstream))
 	mux.HandleFunc("POST /nginx/test", s.auth(s.handleNginxTest))
 	mux.HandleFunc("GET /certs", s.auth(s.handleListCerts))
+	mux.HandleFunc("POST /certs", s.auth(s.handleIssueCert))
+	mux.HandleFunc("GET /certs/jobs", s.auth(s.handleListCertJobs))
+	mux.HandleFunc("GET /certs/jobs/{id}", s.auth(s.handleCertJob))
+	mux.HandleFunc("PUT /certs/{domain}", s.auth(s.handleUploadCert))
+	mux.HandleFunc("POST /certs/renew", s.auth(s.handleRenewDue))
+	mux.HandleFunc("POST /certs/{domain}/renew", s.auth(s.handleRenewCert))
+	mux.HandleFunc("DELETE /certs/{domain}", s.auth(s.handleDeleteCert))
+	mux.HandleFunc("GET /acme/credentials", s.auth(s.handleListCreds))
+	mux.HandleFunc("PUT /acme/credentials/{provider}", s.auth(s.handleSetCreds))
+	mux.HandleFunc("DELETE /acme/credentials/{provider}", s.auth(s.handleDeleteCreds))
 	return mux
 }
 

@@ -2,8 +2,10 @@
 
 // Client branding context. Fetches the PUBLIC `GET /api/settings` once on mount and
 // shares the effective instance branding down the tree, so the sidebar brand and the
-// login logo read the live secondary brand text instead of hardcoding it. The brand
-// wordmark ("Task Forge") + accent (#6c5ce7) stay fixed in the components.
+// login logo read the live secondary brand text instead of hardcoding it. It also
+// applies the chosen theme to the document root (`data-tc-theme`), which re-skins
+// every `tc-*` component at once. The brand wordmark ("Task Forge") + accent (#6c5ce7)
+// stay fixed in the components regardless of theme.
 //
 // `domain/site-settings.ts` is pure (no `server-only`), so importing the type +
 // defaults here is safe. Until the fetch resolves the context serves DEFAULT_SETTINGS
@@ -38,6 +40,17 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         void refresh()
     }, [refresh])
+
+    // Apply the theme to the document root. `default` is the global `:root` voice, so
+    // it carries NO attribute; every other skin is scoped under `[data-tc-theme="…"]`.
+    useEffect(() => {
+        const root = document.documentElement
+        if (settings.theme && settings.theme !== 'default') {
+            root.setAttribute('data-tc-theme', settings.theme)
+        } else {
+            root.removeAttribute('data-tc-theme')
+        }
+    }, [settings.theme])
 
     return <BrandingContext.Provider value={{ ...settings, refresh }}>{children}</BrandingContext.Provider>
 }

@@ -22,6 +22,10 @@ touches nginxpilot's filesystem — the two only share a network.
 - **Custom domains.** Hands out A/AAAA-record instructions, re-resolves the
   domain server-side to confirm it points at this ingress, then issues a cert via
   `certbot` and installs a per-domain vhost.
+- **Certificate management.** The owner admin surface drives nginxpilot's
+  certificate lifecycle for the active realm — issue via certbot, upload a manual
+  pair, renew, delete, and store per-provider DNS credentials — all over the admin
+  REST API (see [Certificate management](#certificate-management)).
 - **Multi-realm.** One Perch can target several nginxpilot daemons ("realms");
   each realm's admin token is encrypted at rest (AES-256-GCM).
 
@@ -136,3 +140,32 @@ knobs. Required vars fail fast at boot if missing.
 
 > Per-site GitHub tokens are stored as generated `PERCH_GH_TOKEN_<SITE_ID>` env
 > names handed to nginxpilot fragments — not something you set by hand.
+
+## Certificate management
+
+The **Admin → Certificates** page manages TLS certificates on the **active realm's**
+nginxpilot over its admin REST API (no filesystem access). It drives nginxpilot's
+ACME / cert endpoints (see `nginxpilot/cert_feature.md`):
+
+| Action | nginxpilot endpoint | Notes |
+|---|---|---|
+| List discovered certs | `GET /certs` | Metadata only — never key material. |
+| Issue via certbot | `POST /certs` | One or more domains; a leading `*.` wildcard is allowed only when the daemon's challenge is DNS-01. A staging toggle uses the CA's staging endpoint. `501` when `acme.enabled: false`. |
+| Upload a manual pair | `PUT /certs/{domain}` | Bring-your-own cert/key (no certbot). The daemon validates the pair before writing. Works whenever `tls.cert_dir` is set. |
+| Force-renew one | `POST /certs/{domain}/renew` | |
+| Renew all due | `POST /certs/renew` | |
+| Delete | `DELETE /certs/{domain}` | certbot-managed **or** a manual pair — the daemon picks the source. |
+| DNS provider credentials | `GET`/`PUT`/`DELETE /acme/credentials/{provider}` | The runtime store certbot reads at issue time (DigitalOcean / Cloudflare / Route 53 / Google / … or a raw passthrough body). |
+
+**Owner-only, and secrets are write-only.** Every Perch route is `authorize('owner')`-gated.
+Private keys and provider tokens are POSTed but **never read back** — the list endpoints
+return metadata only (provider names, mechanism, mtime), and nothing secret is logged or
+audited (only the domain / provider name). Because these endpoints accept secret material,
+exposing the realm's nginxpilot admin port **requires** its `admin.token_env` (which Perch
+stores encrypted at rest per realm).
+
+> **Two distinct cert mechanisms.** This page manages certs **on the nginxpilot daemon**
+> (the per-realm, REST-driven model above). It is separate from the legacy host-level
+> custom-domain path under *Custom domains (certbot)*, where Perch itself shells out to
+> `certbot` and writes a vhost into its own nginx `conf.d/` (the `PERCH_CERTBOT_*` /
+> `PERCH_NGINX_*` env vars). The two don't interact.

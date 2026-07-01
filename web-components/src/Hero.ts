@@ -1,6 +1,5 @@
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
-import { icon } from './icons'
 
 const TAG_NAME = 'tc-hero'
 
@@ -11,6 +10,8 @@ export interface HeroAction {
     label: string
     href?: string
     onClick?: () => void
+    // Optional lucide icon (kebab-case or PascalCase) rendered before the label.
+    icon?: string
 }
 
 export interface HeroStatCard {
@@ -22,8 +23,6 @@ export interface HeroMetric {
     label: string
     value: string
 }
-
-// Convert kebab-case or lowercase name to PascalCase for lucide-static lookup.
 
 // Fixed scatter positions for background icons (top/right/bottom/left as percentages).
 const BG_ICON_POSITIONS: Array<{
@@ -42,6 +41,27 @@ const BG_ICON_POSITIONS: Array<{
     { bottom: '12%', left: '28%', rotate: 15 },
 ]
 
+// Built-in decorative "blueprint" preview rendered inside the media panel when
+// `preview` is set and no `media-src` is supplied. Purely cosmetic (aria-hidden);
+// every colour flows from --tc-* tokens via _hero.scss so themes re-skin it.
+const BLUEPRINT_CANVAS =
+    '<div class="tc-hero-canvas" aria-hidden="true">' +
+    '<span class="tc-hero-canvas-floor"></span>' +
+    '<svg class="tc-hero-canvas-art" viewBox="0 0 440 300" preserveAspectRatio="xMidYMid slice">' +
+    '<g class="tc-hero-vec tc-hero-vec--ship">' +
+    '<polygon points="210,150 232,196 210,184 188,196" />' +
+    '<line x1="210" y1="196" x2="210" y2="216" />' +
+    '</g>' +
+    '<polygon class="tc-hero-vec tc-hero-vec--a" points="330,58 352,70 350,92 330,102 312,88 314,66" />' +
+    '<polygon class="tc-hero-vec tc-hero-vec--b" points="96,96 112,104 110,122 92,124 82,108" />' +
+    '<polygon class="tc-hero-vec tc-hero-vec--c" points="140,46 152,52 150,66 136,66 130,54" />' +
+    '</svg>' +
+    '<span class="tc-hero-canvas-corner tc-hero-canvas-corner--tl"></span>' +
+    '<span class="tc-hero-canvas-corner tc-hero-canvas-corner--tr"></span>' +
+    '<span class="tc-hero-canvas-corner tc-hero-canvas-corner--bl"></span>' +
+    '<span class="tc-hero-canvas-corner tc-hero-canvas-corner--br"></span>' +
+    '</div>'
+
 export class Hero extends HTMLElement {
     private _initialised = false
     private _primaryAction: HeroAction | null = null
@@ -54,7 +74,20 @@ export class Hero extends HTMLElement {
     onSecondaryAction: (() => void) | null = null
 
     static get observedAttributes(): string[] {
-        return ['eyebrow', 'title', 'title-as', 'description', 'background-pattern-src']
+        return [
+            'eyebrow',
+            'title',
+            'title-as',
+            'description',
+            'note',
+            'background-pattern-src',
+            'backdrop',
+            'media-src',
+            'media-alt',
+            'media-label',
+            'media-caption',
+            'preview',
+        ]
     }
 
     connectedCallback(): void {
@@ -97,12 +130,68 @@ export class Hero extends HTMLElement {
         else this.removeAttribute('description')
     }
 
+    get note(): string | null {
+        return this.getAttribute('note')
+    }
+    set note(v: string | null) {
+        if (v != null) this.setAttribute('note', v)
+        else this.removeAttribute('note')
+    }
+
     get backgroundPatternSrc(): string | null {
         return this.getAttribute('background-pattern-src')
     }
     set backgroundPatternSrc(v: string | null) {
         if (v != null) this.setAttribute('background-pattern-src', v)
         else this.removeAttribute('background-pattern-src')
+    }
+
+    get backdrop(): string | null {
+        return this.getAttribute('backdrop')
+    }
+    set backdrop(v: string | null) {
+        if (v != null) this.setAttribute('backdrop', v)
+        else this.removeAttribute('backdrop')
+    }
+
+    get mediaSrc(): string | null {
+        return this.getAttribute('media-src')
+    }
+    set mediaSrc(v: string | null) {
+        if (v != null) this.setAttribute('media-src', v)
+        else this.removeAttribute('media-src')
+    }
+
+    get mediaAlt(): string | null {
+        return this.getAttribute('media-alt')
+    }
+    set mediaAlt(v: string | null) {
+        if (v != null) this.setAttribute('media-alt', v)
+        else this.removeAttribute('media-alt')
+    }
+
+    get mediaLabel(): string | null {
+        return this.getAttribute('media-label')
+    }
+    set mediaLabel(v: string | null) {
+        if (v != null) this.setAttribute('media-label', v)
+        else this.removeAttribute('media-label')
+    }
+
+    get mediaCaption(): string | null {
+        return this.getAttribute('media-caption')
+    }
+    set mediaCaption(v: string | null) {
+        if (v != null) this.setAttribute('media-caption', v)
+        else this.removeAttribute('media-caption')
+    }
+
+    get preview(): boolean {
+        return this.hasAttribute('preview')
+    }
+    set preview(v: boolean) {
+        if (v) this.setAttribute('preview', '')
+        else this.removeAttribute('preview')
     }
 
     get primaryAction(): HeroAction | null {
@@ -163,14 +252,46 @@ export class Hero extends HTMLElement {
         }
     }
 
+    private _actionHtml(
+        action: HeroAction,
+        which: 'primary' | 'secondary',
+        variant: 'primary' | 'secondary',
+    ): string {
+        const label = esc(action.label)
+        const iconHtml = action.icon
+            ? lucideByName(action.icon, `tc-hero-btn-icon`)
+            : ''
+        const cls =
+            variant === 'primary'
+                ? 'btn btn-primary tc-hero-btn-primary'
+                : 'btn btn-outline-primary tc-hero-btn-secondary'
+        const inner = iconHtml + `<span class="tc-hero-btn-label">${label}</span>`
+        if (action.href) {
+            return `<a href="${esc(action.href)}" class="${cls}" data-which="${which}">${inner}</a>`
+        }
+        return `<button type="button" class="${cls}" data-which="${which}">${inner}</button>`
+    }
+
     private render(): void {
         const eyebrow = this.getAttribute('eyebrow')
         const titleText = this.getAttribute('title') ?? ''
         const titleAs = this.titleAs
         const description = this.getAttribute('description') ?? ''
+        const note = this.getAttribute('note') ?? ''
         const bgPatternSrc = this.getAttribute('background-pattern-src')
+        const backdrop = this.getAttribute('backdrop')
+        const mediaSrc = this.getAttribute('media-src')
+        const mediaAlt = this.getAttribute('media-alt') ?? ''
+        const mediaLabel = this.getAttribute('media-label') ?? ''
+        const mediaCaption = this.getAttribute('media-caption') ?? ''
+        const hasPreview = this.hasAttribute('preview')
+        const showMedia = !!mediaSrc || hasPreview
 
-        // Background layer
+        // Blueprint grid + glow backdrop layer (opt-in via backdrop="grid").
+        const backdropHtml =
+            backdrop === 'grid' ? '<div class="tc-hero-backdrop" aria-hidden="true"></div>' : ''
+
+        // Background layer (pattern image + scattered icons).
         const patternStyle = bgPatternSrc
             ? ` style="background-image: url('${esc(bgPatternSrc)}');"`
             : ''
@@ -178,7 +299,7 @@ export class Hero extends HTMLElement {
         const bgIconsHtml = this._bgIcons
             .slice(0, BG_ICON_POSITIONS.length)
             .map((name, i) => {
-                const svg = lucideByName(name)
+                const svg = lucideByName(name, 'tc-hero-bg-icon')
                 if (!svg) return ''
                 const pos = BG_ICON_POSITIONS[i]
                 const style = [
@@ -190,7 +311,7 @@ export class Hero extends HTMLElement {
                 ].join('')
                 return (
                     `<span class="tc-hero-bg-icon-wrap" aria-hidden="true" style="${style}">` +
-                    icon(svg, 'tc-hero-bg-icon') +
+                    svg +
                     `</span>`
                 )
             })
@@ -201,8 +322,13 @@ export class Hero extends HTMLElement {
                 ? `<div class="tc-hero-bg"${patternStyle}>${bgIconsHtml}</div>`
                 : ''
 
-        // Eyebrow
-        const eyebrowHtml = eyebrow ? `<span class="tc-hero-eyebrow">${esc(eyebrow)}</span>` : ''
+        // Eyebrow — a bordered mono badge with a pulsing status dot.
+        const eyebrowHtml = eyebrow
+            ? '<span class="tc-hero-eyebrow">' +
+              '<span class="tc-hero-eyebrow-dot" aria-hidden="true"></span>' +
+              esc(eyebrow) +
+              '</span>'
+            : ''
 
         // Title heading
         const titleHtml = `<${titleAs} class="tc-hero-title">${esc(titleText)}</${titleAs}>`
@@ -212,34 +338,22 @@ export class Hero extends HTMLElement {
             ? `<p class="tc-hero-description">${esc(description)}</p>`
             : ''
 
-        // Primary action
-        let primaryHtml = ''
-        if (this._primaryAction) {
-            const label = esc(this._primaryAction.label)
-            if (this._primaryAction.href) {
-                primaryHtml = `<a href="${esc(this._primaryAction.href)}" class="btn btn-primary tc-hero-btn-primary" data-which="primary">${label}</a>`
-            } else {
-                primaryHtml = `<button type="button" class="btn btn-primary tc-hero-btn-primary" data-which="primary">${label}</button>`
-            }
-        }
-
-        // Secondary action
-        let secondaryHtml = ''
-        if (this._secondaryAction) {
-            const label = esc(this._secondaryAction.label)
-            if (this._secondaryAction.href) {
-                secondaryHtml = `<a href="${esc(this._secondaryAction.href)}" class="btn btn-outline-primary tc-hero-btn-secondary" data-which="secondary">${label}</a>`
-            } else {
-                secondaryHtml = `<button type="button" class="btn btn-outline-primary tc-hero-btn-secondary" data-which="secondary">${label}</button>`
-            }
-        }
-
+        // Actions
+        const primaryHtml = this._primaryAction
+            ? this._actionHtml(this._primaryAction, 'primary', 'primary')
+            : ''
+        const secondaryHtml = this._secondaryAction
+            ? this._actionHtml(this._secondaryAction, 'secondary', 'secondary')
+            : ''
         const actionsHtml =
             primaryHtml || secondaryHtml
                 ? `<div class="tc-hero-actions">${primaryHtml}${secondaryHtml}</div>`
                 : ''
 
-        // Stat cards (centered row, sits inside the main column under the actions)
+        // Footnote micro-copy under the actions.
+        const noteHtml = note ? `<p class="tc-hero-note">${esc(note)}</p>` : ''
+
+        // Stat cards (row, sits inside the main column under the note)
         const statCardsHtml = this._statCards.length
             ? `<div class="tc-hero-stats">${this._statCards
                   .map(
@@ -252,8 +366,37 @@ export class Hero extends HTMLElement {
                   .join('')}</div>`
             : ''
 
-        // Metrics live in a separate centered band below a hairline separator,
-        // mirroring the react Hero's __separator + __bottom structure.
+        // Media column — a framed preview panel with an optional titlebar and
+        // either a supplied image or the built-in blueprint canvas.
+        let mediaHtml = ''
+        if (showMedia) {
+            const barHtml =
+                mediaLabel || mediaCaption
+                    ? '<div class="tc-hero-panel-bar">' +
+                      (mediaLabel
+                          ? '<span class="tc-hero-panel-status">' +
+                            '<span class="tc-hero-panel-dot" aria-hidden="true"></span>' +
+                            esc(mediaLabel) +
+                            '</span>'
+                          : '<span></span>') +
+                      (mediaCaption
+                          ? `<span class="tc-hero-panel-caption">${esc(mediaCaption)}</span>`
+                          : '') +
+                      '</div>'
+                    : ''
+            const bodyHtml = mediaSrc
+                ? `<img class="tc-hero-panel-img" src="${esc(mediaSrc)}" alt="${esc(mediaAlt)}" />`
+                : BLUEPRINT_CANVAS
+            mediaHtml =
+                '<div class="tc-hero-media">' +
+                '<div class="tc-hero-panel">' +
+                barHtml +
+                `<div class="tc-hero-panel-body">${bodyHtml}</div>` +
+                '</div>' +
+                '</div>'
+        }
+
+        // Metrics live in a separate centered band below a hairline separator.
         const metricsHtml = this._metrics.length
             ? '<div class="tc-hero-separator" aria-hidden="true"></div>' +
               '<div class="tc-hero-bottom"><div class="tc-hero-bottom-inner">' +
@@ -269,20 +412,24 @@ export class Hero extends HTMLElement {
               '</div></div>'
             : ''
 
-        // Main region: centered text column (eyebrow → title → description →
-        // actions → stat cards) inside a max-width grid, mirroring the react Hero.
+        // Grid switches to a two-column split whenever there is a media column.
+        const gridClass = showMedia ? 'tc-hero-grid tc-hero-grid--split' : 'tc-hero-grid'
+
         this.innerHTML = [
             '<section class="tc-hero">',
+            backdropHtml,
             backgroundHtml,
             '<div class="tc-hero-main">',
-            '<div class="tc-hero-grid">',
+            `<div class="${gridClass}">`,
             '<div class="tc-hero-body">',
             eyebrowHtml,
             titleHtml,
             descriptionHtml,
             actionsHtml,
+            noteHtml,
             statCardsHtml,
             '</div>',
+            mediaHtml,
             '</div>',
             '</div>',
             metricsHtml,

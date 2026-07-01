@@ -60,6 +60,10 @@ type Config struct {
 	Nginx Nginx `yaml:"nginx"`
 	Tls   Tls   `yaml:"tls"`
 
+	// Acme configures certbot-driven certificate issuance (opt-in). When
+	// disabled (default) the issue/renew/delete cert endpoints return 501.
+	Acme Acme `yaml:"acme"`
+
 	// Upstreams and Proxies are config-only entities in generate-only mode:
 	// nginx upstream{} pools and reverse-proxy server{} blocks. In managed
 	// mode nginxpilot also writes and reloads them as live nginx config. They

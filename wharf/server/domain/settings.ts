@@ -21,7 +21,7 @@
  * them and the branding context applies the chosen one as `data-tc-theme` on the
  * document root, so every `tc-*` element re-skins at once.
  */
-export const THEME_NAMES = ['default', 'dungeon', 'aurora', 'sunshine', 'neon'] as const
+export const THEME_NAMES = ['default', 'dungeon', 'aurora', 'sunshine', 'neon', 'blueprint'] as const
 
 export type ThemeName = (typeof THEME_NAMES)[number]
 
@@ -32,6 +32,7 @@ export const THEME_LABEL: Record<ThemeName, string> = {
     aurora: 'Aurora (dark)',
     sunshine: 'Sunshine (warm citrus)',
     neon: 'Neon (synthwave)',
+    blueprint: 'Blueprint (light vector)',
 }
 
 /** Type guard: a request-supplied value is one of the bundled theme names. */

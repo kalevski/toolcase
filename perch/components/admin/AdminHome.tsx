@@ -3,15 +3,13 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useMe } from '@/lib/me-context'
-import { SubTabBar } from '@/components/SubTabBar'
-import { ADMIN_TABS } from './shared'
 
 // Admin landing hub (plan WS-5 / P2). `/admin` used to bounce straight to Sites;
 // this gives the owner a real entry point with one card per area. Owner-gated
 // client-side (every /api/admin/** route is independently owner-gated server-side).
 // The hand-rolled link-card grid is now a tc-feature-card grid laid out by tc-grid
-// (both attribute-driven, no slot relocation), with the shared admin tc-tab-bar on
-// top for parity with every other admin page.
+// (both attribute-driven, no slot relocation). Navigation between admin areas is
+// the left sidebar (AppShell's Admin section) — this page is the Overview landing.
 
 // tc-feature-card resolves its `icon` attribute by a DIRECT lucide-static lookup
 // (PascalCase), unlike the side-nav / tab-bar which accept kebab names.
@@ -69,7 +67,6 @@ export function AdminHome() {
                 icon-name="shield"
                 icon-color="violet"
             />
-            <SubTabBar tabs={ADMIN_TABS} />
             {/* tc-grid owns the mobile-first column cascade (1 → sm 2 → lg 3);
                 each card is an attribute-driven tc-feature-card. */}
             <tc-grid columns="1" columns-sm="2" columns-lg="3" gap="1rem" className="perch-admin-hub">

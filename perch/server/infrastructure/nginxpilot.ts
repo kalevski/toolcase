@@ -39,6 +39,7 @@ import {
     type Stream,
     type StreamUpstream,
 } from '@/server/domain/streams'
+import type { AcmeCredentialRequest } from '@/server/domain/cert-input'
 
 // Re-export the pure fragment surface so callers (the deploy service) reach the
 // whole seam through one module.
@@ -55,6 +56,14 @@ export class NginxpilotError extends Error {
     constructor(
         message: string,
         public status?: number,
+        /**
+         * The trimmed response body for a non-2xx admin reply, when there is one. For the
+         * cert/ACME write endpoints this carries the daemon's operator-facing reason (a
+         * certbot error, "acme is not enabled", a bad-PEM message) which `services/certs.ts`
+         * forwards to the owner — far more useful than a bare status. Never set for transport
+         * failures (timeout / connection refused).
+         */
+        public detail?: string,
     ) {
         super(message)
     }
@@ -157,6 +166,65 @@ export interface NginxpilotCert {
     issuer?: string
 }
 
+/**
+ * One stored ACME DNS-provider credential as `GET /acme/credentials` reports it — mirrors
+ * nginxpilot's `credstore.Info`. Metadata ONLY: the secret material (token / key / JSON) is
+ * never returned by the daemon and never crosses this wire. `mechanism` is how certbot consumes
+ * it (`flag` = `--dns-<provider>-credentials`, `aws-file` = `AWS_SHARED_CREDENTIALS_FILE`,
+ * `google` = `GOOGLE_APPLICATION_CREDENTIALS`).
+ */
+export interface AcmeCredentialInfo {
+    provider: string
+    mechanism: string
+    /** ISO timestamp of the artifact's mtime (changes when the credential is replaced). */
+    mod_time: string
+}
+
+/** Lifecycle of an async certbot issuance (`POST /certs` → `GET /certs/jobs/{id}`). */
+export type CertJobState = 'pending' | 'running' | 'succeeded' | 'failed'
+
+/**
+ * `POST /certs` is ASYNC (202): certbot runs off the request path on the daemon, so the call
+ * returns a tracking job id immediately instead of blocking for minutes. Poll
+ * {@link nginxpilotClient.getCertJob} (`GET /certs/jobs/{id}`) until the job is terminal.
+ */
+export interface CertIssueAccepted {
+    status: string // "accepted"
+    job_id: string
+    state: CertJobState
+    cert_name: string
+    domains: string[]
+}
+
+/** One async issuance job as `GET /certs/jobs/{id}` reports it. Jobs are ephemeral on the daemon. */
+export interface CertJob {
+    id: string
+    state: CertJobState
+    cert_name: string
+    domains: string[]
+    staging: boolean
+    /** The certbot failure reason — set when `state === 'failed'`. */
+    error?: string
+    /** The freshly-loaded issued cert — set when `state === 'succeeded'` (best-effort, may be null). */
+    cert?: NginxpilotCert | null
+    created_at: string
+    updated_at: string
+}
+
+/** `PUT /certs/{domain}` result — whether the manual pair replaced an existing one, plus its `certInfo`. */
+export interface CertUploadResult {
+    status: 'created' | 'replaced'
+    domain: string
+    cert: NginxpilotCert | null
+}
+
+/** `PUT /acme/credentials/{provider}` result — created vs replaced, plus the resolved mechanism. */
+export interface AcmeCredentialResult {
+    status: 'created' | 'replaced'
+    provider: string
+    mechanism: string
+}
+
 /** Outcome of `reload()` — always the REST path now that the file-drop fallback is gone. */
 export type ReloadResult = { method: 'rest' }
 
@@ -166,6 +234,13 @@ export type ReloadResult = { method: 'rest' }
 interface AdminInit {
     body?: string
     headers?: Record<string, string>
+    /**
+     * Per-call abort budget, overriding `ADMIN_FETCH_TIMEOUT_MS`. Set for the certbot-backed
+     * cert ops (issue/renew), which the daemon runs synchronously and can take minutes
+     * (DNS-01 propagation wait + buffer); the default 15s budget aborts those mid-run, which
+     * surfaces as a detail-less `504`→`nginxpilot_error` long before certbot finishes.
+     */
+    timeoutMs?: number
 }
 
 /**
@@ -177,6 +252,19 @@ interface AdminInit {
 const ADMIN_FETCH_TIMEOUT_MS = (() => {
     const raw = Number(process.env.PERCH_NGINXPILOT_TIMEOUT_MS)
     return Number.isFinite(raw) && raw > 0 ? raw : 15_000
+})()
+
+/**
+ * Longer abort budget for the certbot-backed cert ops (issue / renew). The daemon runs
+ * certbot synchronously and blocks until it returns; a DNS-01 issue waits for record
+ * propagation (`acme.dns.propagation_seconds`, default 60s) plus a buffer — the daemon's
+ * own ceiling is ~180s. Perch must wait LONGER than the daemon, or it aborts the request
+ * mid-run and reports a detail-less `nginxpilot_error` while certbot is still working.
+ * Default 300s; override via `PERCH_NGINXPILOT_CERT_TIMEOUT_MS`.
+ */
+const CERT_OP_TIMEOUT_MS = (() => {
+    const raw = Number(process.env.PERCH_NGINXPILOT_CERT_TIMEOUT_MS)
+    return Number.isFinite(raw) && raw > 0 ? raw : 300_000
 })()
 
 /**
@@ -202,19 +290,20 @@ export function nginxpilotClient(conn: RealmConnection) {
         apiPath: string,
         init: AdminInit = {},
     ): Promise<Response> {
+        const timeoutMs = init.timeoutMs ?? ADMIN_FETCH_TIMEOUT_MS
         try {
             return await fetch(`${conn.adminUrl}${apiPath}`, {
                 method,
                 cache: 'no-store',
                 headers: { ...authHeaders(), ...(init.headers ?? {}) },
                 body: init.body,
-                signal: AbortSignal.timeout(ADMIN_FETCH_TIMEOUT_MS),
+                signal: AbortSignal.timeout(timeoutMs),
             })
         } catch (err) {
             const e = err as Error
             if (e?.name === 'TimeoutError' || e?.name === 'AbortError') {
                 throw new NginxpilotError(
-                    `nginxpilot ${method} ${apiPath} timed out after ${ADMIN_FETCH_TIMEOUT_MS}ms`,
+                    `nginxpilot ${method} ${apiPath} timed out after ${timeoutMs}ms`,
                     504,
                 )
             }
@@ -231,10 +320,11 @@ export function nginxpilotClient(conn: RealmConnection) {
     ): Promise<Response> {
         const res = await adminFetch(method, apiPath, init)
         if (!res.ok) {
-            const detail = await res.text().catch(() => '')
+            const detail = (await res.text().catch(() => '')).trim()
             throw new NginxpilotError(
-                `nginxpilot ${method} ${apiPath} failed (${res.status})${detail ? `: ${detail.trim()}` : ''}`,
+                `nginxpilot ${method} ${apiPath} failed (${res.status})${detail ? `: ${detail}` : ''}`,
                 res.status,
+                detail || undefined,
             )
         }
         return res
@@ -470,6 +560,132 @@ export function nginxpilotClient(conn: RealmConnection) {
         return ((await res.json()) as { certs?: NginxpilotCert[] }).certs ?? []
     }
 
+    // ── Channel A: certificate lifecycle over REST (issue / upload / renew / delete) ──────
+    // certbot-driven issuance + manual bring-your-own upload (cert_feature.md). All write
+    // endpoints; a non-2xx propagates as `NginxpilotError` carrying the daemon's reason in
+    // `.detail` (501 = acme/cert-dir not enabled, 400 = bad input, 502 = certbot failure) so
+    // `services/certs.ts` can forward an operator-useful message.
+
+    /**
+     * Start a certbot issuance — `POST /certs`. `domains` may include ONE leading-wildcard entry
+     * (only valid when the daemon's `acme.challenge` is `dns`; the daemon rejects otherwise).
+     * ASYNC: the daemon runs certbot off the request path and replies `202` immediately with a
+     * tracking job id — no long-held connection. Poll {@link getCertJob} until the job is terminal.
+     * Synchronous validation errors still come back here (`501` = `acme.enabled: false`, `400` =
+     * bad input). The default fetch budget is fine since the reply is instant.
+     */
+    async function issueCertificate(req: {
+        domains: string[]
+        certName?: string
+        staging?: boolean
+        /** Per-issue ACME-account email override (omit → daemon's acme.email). */
+        email?: string
+        /** Per-issue DNS provider override (omit → daemon's acme.dns.provider). */
+        provider?: string
+    }): Promise<CertIssueAccepted> {
+        const res = await adminOk('POST', '/certs', {
+            body: JSON.stringify({
+                domains: req.domains,
+                cert_name: req.certName,
+                email: req.email,
+                provider: req.provider,
+                staging: req.staging ?? false,
+            }),
+            headers: { 'Content-Type': 'application/json' },
+        })
+        const accepted = (await res.json()) as CertIssueAccepted
+        slog('info', 'nginxpilot', 'started certificate issuance via API', {
+            domains: req.domains,
+            job: accepted.job_id,
+        })
+        return accepted
+    }
+
+    /** Poll one async issuance job — `GET /certs/jobs/{id}`. `404` (unknown/pruned job) → `NginxpilotError`. */
+    async function getCertJob(id: string): Promise<CertJob> {
+        const res = await adminOk('GET', `/certs/jobs/${encodeURIComponent(id)}`)
+        return (await res.json()) as CertJob
+    }
+
+    /**
+     * Upload a manually-supplied cert/key pair — `PUT /certs/{domain}` (no certbot, no ACME).
+     * Works whenever `tls.cert_dir` is set, independent of `acme.enabled` (`501` = no cert dir).
+     * The daemon validates the pair (`tls.X509KeyPair` + expiry) before writing. The private key
+     * is NEVER logged here.
+     */
+    async function uploadCertificate(
+        domain: string,
+        req: { cert: string; key: string },
+    ): Promise<CertUploadResult> {
+        const res = await adminOk('PUT', `/certs/${encodeURIComponent(domain)}`, {
+            body: JSON.stringify({ cert: req.cert, key: req.key }),
+            headers: { 'Content-Type': 'application/json' },
+        })
+        slog('info', 'nginxpilot', 'uploaded manual certificate via API', { domain })
+        return (await res.json()) as CertUploadResult
+    }
+
+    /** Renew every cert near expiry — `POST /certs/renew`. Returns certbot's plain-text summary. */
+    async function renewDueCertificates(): Promise<string> {
+        const res = await adminOk('POST', '/certs/renew', { timeoutMs: CERT_OP_TIMEOUT_MS })
+        slog('info', 'nginxpilot', 'renewed due certificates via API')
+        return res.text()
+    }
+
+    /** Force-renew one cert by name — `POST /certs/{domain}/renew`. */
+    async function renewCertificate(domain: string): Promise<void> {
+        await adminOk('POST', `/certs/${encodeURIComponent(domain)}/renew`, {
+            timeoutMs: CERT_OP_TIMEOUT_MS,
+        })
+        slog('info', 'nginxpilot', 'force-renewed certificate via API', { domain })
+    }
+
+    /**
+     * Delete a cert — `DELETE /certs/{domain}`. The daemon removes whichever source owns the name
+     * (a certbot-managed live dir → `certbot delete`, else a flat manual pair → unlink). `404` when
+     * neither exists.
+     */
+    async function deleteCertificate(domain: string): Promise<void> {
+        await adminOk('DELETE', `/certs/${encodeURIComponent(domain)}`)
+        slog('info', 'nginxpilot', 'deleted certificate via API', { domain })
+    }
+
+    // ── Channel A: ACME DNS-provider credentials store over REST (cert_feature.md §2.8) ──────
+
+    /**
+     * List the stored DNS-provider credentials — `GET /acme/credentials`. Metadata only (provider
+     * names + mechanism + mtime); the daemon never returns the secret bytes. An empty/disabled
+     * store answers `200` with an empty list, so this only throws on transport / auth failure.
+     */
+    async function listAcmeCredentials(): Promise<AcmeCredentialInfo[]> {
+        const res = await adminOk('GET', '/acme/credentials')
+        return ((await res.json()) as { credentials?: AcmeCredentialInfo[] }).credentials ?? []
+    }
+
+    /**
+     * Store (or replace) a provider's credential — `PUT /acme/credentials/{provider}`. Accepts the
+     * raw passthrough body or the convenience fields (`credstore.Request`); the daemon writes a
+     * `0600` artifact and applies it on the NEXT issue/renew. The secret is NEVER logged here.
+     * `400` (mapped from the daemon) when `acme` is off or the body doesn't match the provider.
+     */
+    async function setAcmeCredentials(
+        provider: string,
+        req: AcmeCredentialRequest,
+    ): Promise<AcmeCredentialResult> {
+        const res = await adminOk('PUT', `/acme/credentials/${encodeURIComponent(provider)}`, {
+            body: JSON.stringify(req),
+            headers: { 'Content-Type': 'application/json' },
+        })
+        slog('info', 'nginxpilot', 'stored acme provider credentials via API', { provider })
+        return (await res.json()) as AcmeCredentialResult
+    }
+
+    /** Remove a provider's stored credential — `DELETE /acme/credentials/{provider}` (`404` when absent). */
+    async function deleteAcmeCredentials(provider: string): Promise<void> {
+        await adminOk('DELETE', `/acme/credentials/${encodeURIComponent(provider)}`)
+        slog('info', 'nginxpilot', 'deleted acme provider credentials via API', { provider })
+    }
+
     /**
      * Reload nginxpilot via `POST /reload` (diff-based, the REST equivalent of SIGHUP).
      * Channel A writes already reload on nginxpilot's side, so after a write/remove this
@@ -504,6 +720,15 @@ export function nginxpilotClient(conn: RealmConnection) {
         sync,
         vhost,
         listCertificates,
+        issueCertificate,
+        getCertJob,
+        uploadCertificate,
+        renewDueCertificates,
+        renewCertificate,
+        deleteCertificate,
+        listAcmeCredentials,
+        setAcmeCredentials,
+        deleteAcmeCredentials,
         reload,
     }
 }

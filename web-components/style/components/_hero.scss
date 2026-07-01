@@ -1,7 +1,9 @@
-// tc-hero — large hero section with eyebrow, title, description, primary/secondary
-// action buttons, optional background pattern/scattered icons, stat cards, and metrics.
-// All cosmetics flow through --bs-hero-* custom properties backed by --tc-* tokens.
-// Sharp corners (radius: 0), slate neutrals, ink-gradient primary button, no cyan accent.
+// tc-hero — large hero section. Default: centered single column (eyebrow badge,
+// title, description, actions, note, stat cards, metrics). With a media column
+// (`media-src` or `preview`) it becomes a two-column blueprint split: text left,
+// a framed preview panel right — mirroring the "vector blueprint" landing hero.
+// All cosmetics flow through --bs-hero-* custom properties backed by --tc-*
+// tokens. Sharp corners (radius: 0), 1px hairline borders; only status dots curve.
 
 @use '../foundation/tokens' as *;
 
@@ -11,23 +13,55 @@ tc-hero {
     // Main region padding mirrors the react Hero's clamp() vertical rhythm.
     --bs-hero-padding-x: clamp(1.5rem, 6vw, 7rem);
     --bs-hero-padding-y: clamp(2.5rem, 5vw, 5rem);
-    // Outer grid cap (react: 960px) and inner text-column cap (react: 640px).
+    // Outer grid cap (centered) and inner text-column cap.
     --bs-hero-grid-max-width: 60rem;
+    // Wider cap once the media split kicks in.
+    --bs-hero-split-max-width: 74rem;
     --bs-hero-body-max-width: 40rem;
     --bs-hero-grid-gap: clamp(1.25rem, 4vw, 1.75rem);
 
+    // Eyebrow badge
     --bs-hero-eyebrow-color: var(--tc-text-muted);
     --bs-hero-eyebrow-font-size: 0.6875rem;
-    --bs-hero-eyebrow-letter-spacing: 0.12em;
+    --bs-hero-eyebrow-letter-spacing: 0.16em;
+    --bs-hero-eyebrow-border: var(--tc-border);
+    --bs-hero-eyebrow-bg: var(--tc-surface-muted);
+    --bs-hero-eyebrow-dot-color: var(--tc-accent);
 
+    // Title — text-transform + font-family are token hooks so themes (e.g.
+    // blueprint) can uppercase / re-font without touching the component.
     --bs-hero-title-color: var(--tc-text);
+    --bs-hero-title-font-family: inherit;
     --bs-hero-title-font-size: clamp(2rem, 4vw, 3.5rem);
     --bs-hero-title-font-weight: 600;
+    --bs-hero-title-line-height: 1.12;
+    --bs-hero-title-text-transform: none;
 
     --bs-hero-description-color: var(--tc-text-muted);
     --bs-hero-description-font-size: 1.0625rem;
 
     --bs-hero-actions-gap: 0.75rem;
+
+    --bs-hero-note-color: var(--tc-text-faint);
+
+    // Media / preview panel
+    --bs-hero-panel-bg: var(--tc-surface);
+    --bs-hero-panel-border: var(--tc-border);
+    --bs-hero-panel-shadow: var(--tc-shadow-lg);
+    --bs-hero-panel-bar-bg: var(--tc-surface-muted);
+    --bs-hero-panel-bar-border: var(--tc-border);
+    --bs-hero-panel-status-color: var(--tc-accent-fg);
+    --bs-hero-panel-caption-color: var(--tc-text-muted);
+    --bs-hero-canvas-bg: var(--tc-surface-muted);
+    --bs-hero-canvas-height: clamp(15rem, 22vw, 18.75rem);
+    --bs-hero-grid-line-color: var(--tc-border);
+    --bs-hero-corner-color: var(--tc-accent);
+    // Vector shape strokes.
+    --bs-hero-vec-ship: var(--tc-accent);
+    --bs-hero-vec-thrust: var(--tc-warning);
+    --bs-hero-vec-a: var(--tc-app-accent);
+    --bs-hero-vec-b: var(--tc-text-faint);
+    --bs-hero-vec-c: var(--tc-accent-fg);
 
     --bs-hero-stat-card-bg: var(--tc-surface-muted);
     --bs-hero-stat-card-border: var(--tc-border);
@@ -51,6 +85,12 @@ tc-hero {
     --bs-hero-bg-icon-color: var(--tc-text-muted);
     --bs-hero-bg-icon-size: 2.5rem;
     --bs-hero-bg-icon-opacity: 0.06;
+
+    // Blueprint backdrop (opt-in via backdrop="grid").
+    --bs-hero-backdrop-line: var(--tc-border-faint);
+    --bs-hero-backdrop-size: 38px;
+    --bs-hero-backdrop-glow-1: var(--tc-accent-soft);
+    --bs-hero-backdrop-glow-2: var(--tc-surface-muted);
 }
 
 // ── Section shell ─────────────────────────────────────────────────────────────
@@ -62,7 +102,30 @@ tc-hero {
     border-bottom: 1px solid var(--bs-hero-border-color);
 }
 
-// ── Background layer ──────────────────────────────────────────────────────────
+// ── Blueprint backdrop layer ──────────────────────────────────────────────────
+
+.tc-hero-backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+        linear-gradient(var(--bs-hero-backdrop-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--bs-hero-backdrop-line) 1px, transparent 1px);
+    background-size: var(--bs-hero-backdrop-size) var(--bs-hero-backdrop-size);
+}
+
+.tc-hero-backdrop::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 72% 12%, var(--bs-hero-backdrop-glow-1), transparent 55%),
+        radial-gradient(ellipse at 10% 78%, var(--bs-hero-backdrop-glow-2), transparent 55%);
+    opacity: 0.6;
+}
+
+// ── Background layer (pattern image + scattered icons) ─────────────────────────
 
 .tc-hero-bg {
     position: absolute;
@@ -93,8 +156,6 @@ tc-hero {
 }
 
 // ── Foreground main region ────────────────────────────────────────────────────
-// Centered, vertically padded region (react: .component-hero__main) that holds
-// the single-column grid. Everything in the hero text column is centered.
 
 .tc-hero-main {
     position: relative;
@@ -124,29 +185,46 @@ tc-hero {
     align-items: center;
     text-align: center;
     gap: 1.25rem;
+    min-width: 0;
 }
 
-// ── Eyebrow ───────────────────────────────────────────────────────────────────
+// ── Eyebrow badge ─────────────────────────────────────────────────────────────
 
 .tc-hero-eyebrow {
-    display: block;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
     font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
     font-size: var(--bs-hero-eyebrow-font-size);
-    font-weight: 500;
-    line-height: 1.4;
+    font-weight: 600;
+    line-height: 1;
     letter-spacing: var(--bs-hero-eyebrow-letter-spacing);
     text-transform: uppercase;
     color: var(--bs-hero-eyebrow-color);
+    border: 1px solid var(--bs-hero-eyebrow-border);
+    background: var(--bs-hero-eyebrow-bg);
+    padding: 0.4375rem 0.75rem;
+}
+
+.tc-hero-eyebrow-dot {
+    flex: none;
+    width: 0.4375rem;
+    height: 0.4375rem;
+    border-radius: 50%;
+    background: var(--bs-hero-eyebrow-dot-color);
+    animation: tc-hero-dot-pulse 1.6s ease-in-out infinite;
 }
 
 // ── Title ─────────────────────────────────────────────────────────────────────
 
 .tc-hero-title {
     margin: 0;
+    font-family: var(--bs-hero-title-font-family, inherit);
     font-size: var(--bs-hero-title-font-size);
     font-weight: var(--bs-hero-title-font-weight);
-    line-height: 1.15;
+    line-height: var(--bs-hero-title-line-height, 1.12);
     letter-spacing: -0.02em;
+    text-transform: var(--bs-hero-title-text-transform, none);
     color: var(--bs-hero-title-color);
     text-align: center;
 }
@@ -163,7 +241,7 @@ tc-hero {
 }
 
 // ── Actions row ───────────────────────────────────────────────────────────────
-// Mobile: stacked, full-width buttons. ≥576px: centered row (react parity).
+// Mobile: stacked, full-width buttons. ≥576px: centered row.
 
 .tc-hero-actions {
     display: flex;
@@ -176,12 +254,198 @@ tc-hero {
     max-width: 22rem;
 }
 
-// Action buttons inherit .btn styles from _button.scss.
-// Primary: ink gradient with 1px lift on hover (defined in .btn-primary).
-// Secondary: outline button with muted-surface hover wash (defined in .btn-outline-primary).
+// Action buttons inherit .btn styles from _button.scss; they gain flex so an
+// optional leading lucide icon aligns with the label.
+.tc-hero-btn-primary,
+.tc-hero-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.tc-hero-btn-icon {
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    stroke: currentColor;
+    fill: none;
+}
+
+// ── Footnote ──────────────────────────────────────────────────────────────────
+
+.tc-hero-note {
+    margin: 0;
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bs-hero-note-color);
+}
+
+// ── Media / preview panel ─────────────────────────────────────────────────────
+
+.tc-hero-media {
+    width: 100%;
+    min-width: 0;
+}
+
+.tc-hero-panel {
+    border: 1px solid var(--bs-hero-panel-border);
+    background: var(--bs-hero-panel-bg);
+    box-shadow: var(--bs-hero-panel-shadow);
+    overflow: hidden;
+}
+
+.tc-hero-panel-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.625rem 0.875rem;
+    border-bottom: 1px solid var(--bs-hero-panel-bar-border);
+    background: var(--bs-hero-panel-bar-bg);
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.tc-hero-panel-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--bs-hero-panel-status-color);
+}
+
+.tc-hero-panel-dot {
+    flex: none;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: currentColor;
+    animation: tc-hero-dot-pulse 1.6s ease-in-out infinite;
+}
+
+.tc-hero-panel-caption {
+    color: var(--bs-hero-panel-caption-color);
+}
+
+.tc-hero-panel-body {
+    position: relative;
+}
+
+.tc-hero-panel-img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+// ── Built-in blueprint canvas ─────────────────────────────────────────────────
+
+.tc-hero-canvas {
+    position: relative;
+    height: var(--bs-hero-canvas-height);
+    background: var(--bs-hero-canvas-bg);
+    overflow: hidden;
+}
+
+.tc-hero-canvas-floor {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 120px;
+    background-image:
+        linear-gradient(var(--bs-hero-grid-line-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--bs-hero-grid-line-color) 1px, transparent 1px);
+    background-size: 44px 44px;
+    transform: perspective(220px) rotateX(62deg);
+    transform-origin: bottom;
+    -webkit-mask-image: linear-gradient(transparent, #000 60%);
+    mask-image: linear-gradient(transparent, #000 60%);
+    animation: tc-hero-floor-scroll 1.6s linear infinite;
+}
+
+.tc-hero-canvas-art {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.tc-hero-vec {
+    fill: none;
+    stroke-width: 2.2;
+}
+
+.tc-hero-vec--ship {
+    stroke: var(--bs-hero-vec-ship);
+}
+
+.tc-hero-vec--ship line {
+    stroke: var(--bs-hero-vec-thrust);
+    stroke-width: 2.6;
+}
+
+.tc-hero-vec--a {
+    stroke: var(--bs-hero-vec-a);
+    transform-origin: 330px 80px;
+    animation: tc-hero-drift 7s ease-in-out infinite;
+}
+
+.tc-hero-vec--b {
+    stroke: var(--bs-hero-vec-b);
+    transform-origin: 96px 110px;
+    animation: tc-hero-drift 9s ease-in-out infinite 1s;
+}
+
+.tc-hero-vec--c {
+    stroke: var(--bs-hero-vec-c);
+    stroke-width: 1.8;
+    transform-origin: 140px 56px;
+    animation: tc-hero-drift 11s ease-in-out infinite 0.5s;
+}
+
+// L-shaped blueprint corner marks.
+.tc-hero-canvas-corner {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+}
+
+.tc-hero-canvas-corner--tl {
+    top: 8px;
+    left: 8px;
+    border-left: 2px solid var(--bs-hero-corner-color);
+    border-top: 2px solid var(--bs-hero-corner-color);
+}
+
+.tc-hero-canvas-corner--tr {
+    top: 8px;
+    right: 8px;
+    border-right: 2px solid var(--bs-hero-corner-color);
+    border-top: 2px solid var(--bs-hero-corner-color);
+}
+
+.tc-hero-canvas-corner--bl {
+    bottom: 8px;
+    left: 8px;
+    border-left: 2px solid var(--bs-hero-corner-color);
+    border-bottom: 2px solid var(--bs-hero-corner-color);
+}
+
+.tc-hero-canvas-corner--br {
+    bottom: 8px;
+    right: 8px;
+    border-right: 2px solid var(--bs-hero-corner-color);
+    border-bottom: 2px solid var(--bs-hero-corner-color);
+}
 
 // ── Stat cards row ────────────────────────────────────────────────────────────
-// Centered, wrapping row sitting under the actions inside the text column.
 
 .tc-hero-stats {
     display: flex;
@@ -224,8 +488,6 @@ tc-hero {
 }
 
 // ── Metrics band ──────────────────────────────────────────────────────────────
-// Metrics drop into a separate band below a hairline separator (react:
-// __separator + __bottom + __bottom-inner), centered in a responsive grid.
 
 .tc-hero-separator {
     position: relative;
@@ -251,7 +513,6 @@ tc-hero {
 
 .tc-hero-metrics {
     display: grid;
-    // Mobile: single column. ≥576px: responsive auto-fit (react parity).
     grid-template-columns: minmax(0, 1fr);
     justify-items: center;
     text-align: center;
@@ -268,8 +529,6 @@ tc-hero {
     gap: 0.375rem;
 }
 
-// 3px accent bar above each metric — the react Hero's __metric::before motif,
-// recoloured to the slate ink accent to stay on the product voice.
 .tc-hero-metric::before {
     content: '';
     width: 2.5rem;
@@ -297,9 +556,7 @@ tc-hero {
     color: var(--bs-hero-metric-label-color);
 }
 
-// ── Responsive (mobile-first min-width queries) ────────────────────────────────
-// ≥576px: actions become a centered auto-width row; metrics fan into a
-// responsive multi-column grid — matching the react Hero breakpoints.
+// ── Responsive ────────────────────────────────────────────────────────────────
 
 @media (min-width: 576px) {
     .tc-hero-actions {
@@ -314,9 +571,52 @@ tc-hero {
     }
 }
 
+// ≥992px: the media split becomes a real two-column grid with left-aligned text.
+@media (min-width: 992px) {
+    .tc-hero-grid--split {
+        max-width: var(--bs-hero-split-max-width);
+        grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
+        align-items: center;
+        justify-items: stretch;
+        gap: clamp(1.75rem, 4vw, 2.75rem);
+    }
+
+    .tc-hero-grid--split .tc-hero-body {
+        align-items: flex-start;
+        text-align: left;
+        margin: 0;
+        max-width: 34rem;
+    }
+
+    .tc-hero-grid--split .tc-hero-title,
+    .tc-hero-grid--split .tc-hero-description {
+        text-align: left;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .tc-hero-grid--split .tc-hero-description {
+        max-width: 30rem;
+    }
+
+    .tc-hero-grid--split .tc-hero-actions,
+    .tc-hero-grid--split .tc-hero-stats {
+        justify-content: flex-start;
+    }
+}
+
 // ── Reduced motion ────────────────────────────────────────────────────────────
 
 @media (prefers-reduced-motion: reduce) {
+    .tc-hero-eyebrow-dot,
+    .tc-hero-panel-dot,
+    .tc-hero-canvas-floor,
+    .tc-hero-vec--a,
+    .tc-hero-vec--b,
+    .tc-hero-vec--c {
+        animation: none;
+    }
+
     .tc-hero-btn-primary,
     .tc-hero-btn-secondary {
         transition: none;
@@ -327,5 +627,37 @@ tc-hero {
     .tc-hero-btn-secondary:hover {
         transform: none;
         box-shadow: none;
+    }
+}
+
+// ── Keyframes ─────────────────────────────────────────────────────────────────
+
+@keyframes tc-hero-dot-pulse {
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.4;
+        transform: scale(0.82);
+    }
+}
+
+@keyframes tc-hero-floor-scroll {
+    to {
+        background-position:
+            0 44px,
+            44px 0;
+    }
+}
+
+@keyframes tc-hero-drift {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-8px);
     }
 }

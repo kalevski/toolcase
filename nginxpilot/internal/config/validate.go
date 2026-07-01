@@ -42,6 +42,9 @@ func Validate(cfg *Config) error {
 	if err := validateTls(cfg); err != nil {
 		return err
 	}
+	if err := validateAcme(cfg); err != nil {
+		return err
+	}
 
 	seen := map[string]string{} // domain -> file (sites + proxies share the namespace)
 	for i := range cfg.Sites {

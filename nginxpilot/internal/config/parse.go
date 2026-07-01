@@ -92,6 +92,7 @@ func applyDefaults(cfg *Config) {
 		cfg.Defaults.KeepReleases = 3
 	}
 	applyNginxDefaults(cfg)
+	applyAcmeDefaults(cfg)
 }
 
 // applyNginxDefaults fills managed-mode paths and commands when nginx.manage is
