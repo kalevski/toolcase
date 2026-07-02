@@ -150,6 +150,37 @@ func TestApplyAllValid(t *testing.T) {
 	}
 }
 
+// An explicitly disabled proxy (enabled: false) renders no file and is not
+// reported as quarantined — it simply doesn't exist as far as nginx goes.
+func TestApplySkipsDisabledProxy(t *testing.T) {
+	fake := &fakeNginx{}
+	eng, cfg := testEngine(t, fake.run)
+	off := false
+	cfg.Proxies = []config.Proxy{
+		{Domain: "on.example.com", Pass: "http://127.0.0.1:9001"},
+		{Domain: "off.example.com", Pass: "http://127.0.0.1:9002", Enabled: &off},
+	}
+
+	res, err := eng.Apply(context.Background(), cfg, nil)
+	if err != nil {
+		t.Fatalf("apply: %v", err)
+	}
+	if len(res.Disabled()) != 0 {
+		t.Errorf("a config-disabled proxy is not a quarantine, got %v", res.Disabled())
+	}
+	if !fileExists(eng.confDir, "proxy-on.example.com.conf") {
+		t.Error("enabled proxy file should be live")
+	}
+	if fileExists(eng.confDir, "proxy-off.example.com.conf") {
+		t.Error("disabled proxy file must not be rendered")
+	}
+	for _, r := range res.Resources {
+		if r.Key == "off.example.com" {
+			t.Errorf("disabled proxy should not appear as a resource, got %v", r)
+		}
+	}
+}
+
 // A reload that fails after a passing -t rolls the live dir back to the previous
 // snapshot so nginx keeps serving last-good.
 func TestApplyReloadFailureRollsBack(t *testing.T) {

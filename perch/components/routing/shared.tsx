@@ -220,26 +220,37 @@ function RoutingTestButton() {
 /**
  * Relocation-safe `tc-table` listing for the four routing surfaces (proxies,
  * upstreams, streams, stream upstreams) — each is a "mono name · descriptive hint
- * · Remove" row. The table renders the whole listing from its `columns`/`data`
- * properties (no slotted children); the Remove button is a delegated `<button>`.
+ * · [Edit ·] Remove" row. The table renders the whole listing from its
+ * `columns`/`data` properties (no slotted children); the action buttons are
+ * delegated `<button>`s.
  *
  * @param items   the rows; each yields a stable `name` (the delete key) and a `hint`.
+ * @param onEdit  when provided, each row also gets an Edit button invoking it with the row's `name`.
+ * @param onToggle when provided, a row with a `toggleLabel` also gets that button (enable/disable).
  * @param onRemove invoked with the row's `name` when its Remove button is clicked.
  */
 export interface RoutingListItem extends Record<string, unknown> {
     name: string
     hint: string
+    /** Label for the row's toggle button (e.g. "Disable"/"Enable"); omit for no toggle. */
+    toggleLabel?: string
 }
 
 export function RoutingListTable({
     items,
     busy,
+    onEdit,
+    onToggle,
     onRemove,
 }: {
     items: RoutingListItem[]
     busy: boolean
+    onEdit?: (name: string) => void
+    onToggle?: (name: string) => void
     onRemove: (name: string) => void
 }) {
+    const hasEdit = !!onEdit
+    const hasToggle = !!onToggle
     const columns = useMemo<TableColumn[]>(
         () => [
             {
@@ -254,17 +265,27 @@ export function RoutingListTable({
                 header: '',
                 align: 'right',
                 render: (row: RoutingListItem) =>
+                    (hasToggle && row.toggleLabel
+                        ? `<button type="button" class="btn btn-sm btn-outline-secondary" data-action="toggle"` +
+                          ` data-name="${escapeHtml(row.name)}"${busy ? ' disabled' : ''}>${escapeHtml(row.toggleLabel)}</button> `
+                        : '') +
+                    (hasEdit
+                        ? `<button type="button" class="btn btn-sm btn-outline-secondary" data-action="edit"` +
+                          ` data-name="${escapeHtml(row.name)}"${busy ? ' disabled' : ''}>Edit</button> `
+                        : '') +
                     `<button type="button" class="btn btn-sm btn-outline-danger" data-action="remove"` +
                     ` data-name="${escapeHtml(row.name)}"${busy ? ' disabled' : ''}>Remove</button>`,
             },
         ],
-        [busy],
+        [busy, hasEdit, hasToggle],
     )
     const onAction = useCallback(
         (action: string, dataset: DOMStringMap) => {
+            if (action === 'toggle' && dataset.name) onToggle?.(dataset.name)
+            if (action === 'edit' && dataset.name) onEdit?.(dataset.name)
             if (action === 'remove' && dataset.name) onRemove(dataset.name)
         },
-        [onRemove],
+        [onEdit, onToggle, onRemove],
     )
     return (
         <DataTable<RoutingListItem>

@@ -60,9 +60,30 @@ export interface ProxyCache {
     zone_size?: string
 }
 
+/**
+ * nginxpilot's HSTS read shape — the daemon accepts a bare bool on write but its
+ * admin API always serializes the struct form (`hsts: {}` when off), so a proxy
+ * read back over `GET /proxies` carries an object here. Use {@link hstsEnabled}
+ * instead of truthiness.
+ */
+export interface HstsOptions {
+    enabled?: boolean
+    max_age?: number
+    include_subdomains?: boolean
+    preload?: boolean
+}
+
+/** Effective HSTS state for either the bool write form or the struct read form. */
+export function hstsEnabled(h: boolean | HstsOptions | undefined): boolean {
+    if (typeof h === 'boolean') return h
+    return h?.enabled === true
+}
+
 /** A reverse-proxy vhost: an nginx `server{}` block whose locations proxy_pass. */
 export interface Proxy {
     domain: string
+    /** `false` keeps the proxy configured but renders no nginx server block. Absent = enabled. */
+    enabled?: boolean
     listen?: number
     upstream?: string
     pass?: string
@@ -77,8 +98,8 @@ export interface Proxy {
     force_ssl?: boolean
     /** `http2 on;`. Requires `tls`. */
     http2?: boolean
-    /** HSTS header. Bool form for now; struct form is a later nicety. Requires `tls`. */
-    hsts?: boolean
+    /** HSTS header. Written as a bool; read back as {@link HstsOptions}. Requires `tls`. */
+    hsts?: boolean | HstsOptions
     block_exploits?: boolean
     /** Proxy-level upgrade headers on ALL locations (distinct from `ProxyLocation.websocket`). */
     websocket?: boolean
@@ -186,6 +207,10 @@ export function parseProxy(input: unknown): Check<Proxy> {
     if (!domain) return reject('domain_required', 'proxy domain is required')
     if (domain.includes('*')) return reject('wildcard', 'wildcard domains are not supported')
 
+    if (o.enabled !== undefined && o.enabled !== null && typeof o.enabled !== 'boolean') {
+        return reject('bad_enabled', 'enabled must be a boolean')
+    }
+
     const listen = optInt(o.listen)
     if (!listen.ok || (listen.value !== undefined && (listen.value < 1 || listen.value > 65535))) {
         return reject('bad_listen', 'listen must be a port in 1..65535')
@@ -218,6 +243,8 @@ export function parseProxy(input: unknown): Check<Proxy> {
     if (defaultErr) return reject('bad_target', defaultErr)
 
     const value: Proxy = { domain }
+    // Only the explicit disable is kept — absent/true both mean enabled (drop-defaults).
+    if (o.enabled === false) value.enabled = false
     if (listen.value !== undefined && listen.value !== 80) value.listen = listen.value
     if (upstream) value.upstream = upstream
     if (pass) value.pass = pass
@@ -235,7 +262,9 @@ export function parseProxy(input: unknown): Check<Proxy> {
     const tls = tlsRaw as TlsMode
     const forceSsl = o.force_ssl === true
     const http2 = o.http2 === true
-    const hsts = o.hsts === true
+    // hsts arrives as a bool (our own UI) or the daemon's struct read-shape (a
+    // proxy read back from GET /proxies and POSTed back for an edit/toggle).
+    const hsts = o.hsts === true || asObject(o.hsts)?.enabled === true
     // force_ssl / http2 / hsts are meaningless without TLS — reject early so the user
     // sees it before the round-trip (nginxpilot enforces the same rule).
     if ((forceSsl || http2 || hsts) && tls === 'off') {
@@ -246,7 +275,11 @@ export function parseProxy(input: unknown): Check<Proxy> {
     if (o.cache !== undefined && o.cache !== null) {
         const c = asObject(o.cache)
         if (!c) return reject('bad_cache', 'cache must be an object')
-        if (typeof c.enabled !== 'boolean') return reject('bad_cache', 'cache.enabled must be a boolean')
+        // The daemon's read API serializes a disabled cache as `cache: {}` (Go
+        // omitempty drops `enabled: false`), so a missing enabled means disabled.
+        if (c.enabled !== undefined && typeof c.enabled !== 'boolean') {
+            return reject('bad_cache', 'cache.enabled must be a boolean')
+        }
         if (c.valid !== undefined && c.valid !== null) {
             if (!Array.isArray(c.valid) || c.valid.some((v) => typeof v !== 'string')) {
                 return reject('bad_cache', 'cache.valid must be an array of strings')
@@ -333,6 +366,7 @@ export function renderProxyFragment(p: Proxy): string {
         'proxies:',
         `  - domain: ${scalar(p.domain)}`,
     ]
+    if (p.enabled === false) lines.push('    enabled: false')
     if (p.listen) lines.push(`    listen: ${p.listen}`)
     if (p.upstream) lines.push(`    upstream: ${scalar(p.upstream)}`)
     if (p.pass) lines.push(`    pass: ${scalar(p.pass)}`)
@@ -344,7 +378,7 @@ export function renderProxyFragment(p: Proxy): string {
     if (p.tls) lines.push(`    tls: ${scalar(p.tls)}`)
     if (p.force_ssl) lines.push('    force_ssl: true')
     if (p.http2) lines.push('    http2: true')
-    if (p.hsts) lines.push('    hsts: true')
+    if (hstsEnabled(p.hsts)) lines.push('    hsts: true')
     if (p.block_exploits) lines.push('    block_exploits: true')
     if (p.websocket) lines.push('    websocket: true')
     if (p.gzip) lines.push('    gzip: true')

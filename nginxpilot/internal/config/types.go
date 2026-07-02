@@ -114,6 +114,10 @@ type UpstreamServer struct {
 // proxy_pass to a named upstream or a single inline target.
 type Proxy struct {
 	Domain string `yaml:"domain" json:"domain"`
+	// Enabled toggles the proxy without deleting it (nil/absent = enabled). A
+	// disabled proxy stays in config and the admin API but renders no nginx
+	// server block, so nginx stops routing its domain.
+	Enabled *bool `yaml:"enabled" json:"enabled,omitempty"`
 	// Listen is the HTTP port (default DefaultProxyListen).
 	Listen int `yaml:"listen" json:"listen,omitempty"`
 	// Upstream / Pass set the default backend for all locations. Exactly one
@@ -155,6 +159,11 @@ type ProxyLocation struct {
 	// Websocket adds the Upgrade/Connection headers + HTTP/1.1 for WebSocket
 	// and other connection-upgrade traffic.
 	Websocket bool `yaml:"websocket" json:"websocket,omitempty"`
+}
+
+// IsEnabled reports the effective enabled state (default true).
+func (p Proxy) IsEnabled() bool {
+	return p.Enabled == nil || *p.Enabled
 }
 
 // ListenPort returns the effective listen port for the proxy.

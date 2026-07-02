@@ -71,7 +71,7 @@ func CachePathInclude(cfg *config.Config) string {
 	any := false
 	for i := range cfg.Proxies {
 		p := &cfg.Proxies[i]
-		if !p.Cache.Enabled {
+		if !p.Cache.Enabled || !p.IsEnabled() {
 			continue
 		}
 		if !any {

@@ -1,14 +1,15 @@
 'use client'
 
-import { useCallback, useMemo, useState } from 'react'
-import type { Proxy, ProxyLocation, TlsMode, Upstream } from '@/server/domain/routing'
+import { useCallback, useMemo, useRef, useState } from 'react'
+import { hstsEnabled, type Proxy, type ProxyLocation, type TlsMode, type Upstream } from '@/server/domain/routing'
 import { RoutingPage, RoutingListTable, json, useMaintainerData, type RoutingListItem } from './shared'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { CheckField, SelectField, TextAreaField, TextField, type SelectOption } from '@/components/fields'
 
 // Maintainer routing surface — reverse-proxy vhosts (nginx `server{}` blocks). List
 // the configured proxies, add one (routing to a named upstream pool or an inline
-// `pass` URL, with optional per-path locations), and remove one. Drives the
+// `pass` URL, with optional per-path locations), edit one (the same form, prefilled
+// — the POST endpoint replaces by domain), and remove one. Drives the
 // `/api/routing/proxies` endpoints (`authorize('maintainer')`-gated). Upstreams are
 // fetched alongside to populate the target dropdowns; a proxy that names an unknown
 // upstream is rejected by nginxpilot (400).
@@ -96,6 +97,7 @@ function ProxiesManager({
     onChanged: () => void
 }) {
     const [domain, setDomain] = useState('')
+    const [enabled, setEnabled] = useState(true)
     const [listen, setListen] = useState('')
     const [targetKind, setTargetKind] = useState<TargetKind>('upstream')
     const [targetValue, setTargetValue] = useState('')
@@ -117,6 +119,12 @@ function ProxiesManager({
     const [busy, setBusy] = useState(false)
     // The proxy awaiting remove confirmation (drives the ConfirmDialog).
     const [pending, setPending] = useState<string | null>(null)
+    // The proxy awaiting disable confirmation (disabling stops its traffic).
+    const [pendingDisable, setPendingDisable] = useState<string | null>(null)
+    // The domain being edited (null = the form creates a new proxy). Editing keeps
+    // the domain locked — it's the replace key of `POST /api/routing/proxies`.
+    const [editing, setEditing] = useState<string | null>(null)
+    const formCard = useRef<HTMLElement>(null)
 
     const setLoc = (i: number, patch: Partial<LocationDraft>) =>
         setLocations((prev) => prev.map((l, idx) => (idx === i ? { ...l, ...patch } : l)))
@@ -124,7 +132,9 @@ function ProxiesManager({
     const removeLoc = (i: number) => setLocations((prev) => prev.filter((_, idx) => idx !== i))
 
     const reset = () => {
+        setEditing(null)
         setDomain('')
+        setEnabled(true)
         setListen('')
         setTargetKind('upstream')
         setTargetValue('')
@@ -143,6 +153,49 @@ function ProxiesManager({
         setAdvanced('')
     }
 
+    // Load an existing proxy into the form (edit mode). Saving POSTs the same
+    // endpoint, which replaces the fragment for that domain.
+    const startEdit = useCallback(
+        (proxyDomain: string) => {
+            const p = proxies.find((x) => x.domain === proxyDomain)
+            if (!p) return
+            setEditing(p.domain)
+            setDomain(p.domain)
+            setEnabled(p.enabled !== false)
+            setListen(p.listen ? String(p.listen) : '')
+            if (p.pass) {
+                setTargetKind('pass')
+                setTargetValue(p.pass)
+            } else {
+                setTargetKind('upstream')
+                setTargetValue(p.upstream ?? '')
+            }
+            setMaxBody(p.client_max_body_size ?? '')
+            setLocations(
+                (p.locations ?? []).map((l) => ({
+                    path: l.path,
+                    kind: l.upstream ? 'upstream' : l.pass ? 'pass' : 'inherit',
+                    value: l.upstream ?? l.pass ?? '',
+                    websocket: !!l.websocket,
+                })),
+            )
+            setTls(p.tls ?? 'off')
+            setForceSsl(!!p.force_ssl)
+            setHttp2(!!p.http2)
+            setHsts(hstsEnabled(p.hsts))
+            setBlockExploits(!!p.block_exploits)
+            setWebsocket(!!p.websocket)
+            setGzip(!!p.gzip)
+            setCacheEnabled(!!p.cache?.enabled)
+            setCacheZone(p.cache?.zone_size ?? '')
+            setCacheValid(p.cache?.valid?.join(', ') ?? '')
+            setAdvanced(p.advanced ?? '')
+            setError(null)
+            formCard.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        },
+        [proxies],
+    )
+
     const create = useCallback(async () => {
         if (busy) return
         const d = domain.trim()
@@ -151,6 +204,7 @@ function ProxiesManager({
             return
         }
         const payload: Proxy = { domain: d }
+        if (!enabled) payload.enabled = false
         if (listen.trim()) payload.listen = Number(listen)
         if (targetValue.trim()) {
             if (targetKind === 'upstream') payload.upstream = targetValue.trim()
@@ -225,6 +279,7 @@ function ProxiesManager({
     }, [
         busy,
         domain,
+        enabled,
         listen,
         targetKind,
         targetValue,
@@ -266,11 +321,60 @@ function ProxiesManager({
         }
     }, [pending, busy, onChanged])
 
+    // Flip a proxy's enabled state by POSTing the full object back (the endpoint
+    // replaces by domain). `enabled: undefined` drops out of the JSON, which is
+    // the daemon's default-enabled form.
+    const applyEnabled = useCallback(
+        async (proxyDomain: string, next: boolean) => {
+            const p = proxies.find((x) => x.domain === proxyDomain)
+            if (!p || busy) return
+            setBusy(true)
+            setError(null)
+            const verb = next ? 'enable' : 'disable'
+            try {
+                const res = await fetch('/api/routing/proxies', {
+                    method: 'POST',
+                    headers: { 'content-type': 'application/json' },
+                    body: JSON.stringify({ ...p, enabled: next ? undefined : false }),
+                })
+                if (!res.ok) {
+                    const body = (await res.json().catch(() => null)) as { error?: string } | null
+                    setError(
+                        body?.error
+                            ? `Couldn’t ${verb} ${proxyDomain}: ${body.error}.`
+                            : `Couldn’t ${verb} ${proxyDomain} (error ${res.status}).`,
+                    )
+                    return
+                }
+                onChanged()
+            } catch {
+                setError(`Couldn’t ${verb} ${proxyDomain} — network error.`)
+            } finally {
+                setBusy(false)
+            }
+        },
+        [proxies, busy, onChanged],
+    )
+
+    // Enable is instant; disable stops traffic, so it goes through a confirm.
+    const toggle = useCallback(
+        (proxyDomain: string) => {
+            const p = proxies.find((x) => x.domain === proxyDomain)
+            if (!p) return
+            if (p.enabled === false) void applyEnabled(proxyDomain, true)
+            else setPendingDisable(proxyDomain)
+        },
+        [proxies, applyEnabled],
+    )
+
     const items = useMemo<RoutingListItem[]>(
         () =>
             proxies.map((p) => ({
                 name: p.domain,
-                hint: `:${p.listen ?? 80} ${describeTarget(p)}${p.tls ? ` · TLS ${p.tls}` : ''}`,
+                hint: `:${p.listen ?? 80} ${describeTarget(p)}${p.tls ? ` · TLS ${p.tls}` : ''}${
+                    p.enabled === false ? ' · disabled' : ''
+                }`,
+                toggleLabel: p.enabled === false ? 'Enable' : 'Disable',
             })),
         [proxies],
     )
@@ -324,12 +428,22 @@ function ProxiesManager({
                     {proxies.length === 0 ? (
                         <tc-empty-state icon="globe">No proxies yet.</tc-empty-state>
                     ) : (
-                        <RoutingListTable items={items} busy={busy} onRemove={setPending} />
+                        <RoutingListTable
+                            items={items}
+                            busy={busy}
+                            onEdit={startEdit}
+                            onToggle={toggle}
+                            onRemove={setPending}
+                        />
                     )}
                 </div>
             </tc-section-card>
 
-            <tc-section-card title="New proxy" icon="plus">
+            <tc-section-card
+                ref={formCard}
+                title={editing ? `Edit proxy — ${editing}` : 'New proxy'}
+                icon={editing ? 'pencil' : 'plus'}
+            >
                 <form
                     className="perch-admin-section"
                     onSubmit={(e) => {
@@ -344,6 +458,7 @@ function ProxiesManager({
                             label="Domain"
                             placeholder="api.example.com"
                             value={domain}
+                            disabled={!!editing}
                             onValue={setDomain}
                         />
                         <TextField
@@ -364,6 +479,13 @@ function ProxiesManager({
                             placeholder="512MiB"
                             value={maxBody}
                             onValue={setMaxBody}
+                        />
+                        <CheckField
+                            className="perch-routing-check"
+                            inline
+                            label="Enabled"
+                            checked={enabled}
+                            onChecked={setEnabled}
                         />
                     </div>
 
@@ -520,12 +642,35 @@ function ProxiesManager({
                         <tc-button variant="secondary" outline onClick={addLoc}>
                             Add location
                         </tc-button>
+                        {editing && (
+                            <tc-button variant="secondary" outline onClick={reset}>
+                                Cancel
+                            </tc-button>
+                        )}
                         <tc-button type="submit" variant="primary" loading={busy || undefined}>
-                            Create proxy
+                            {editing ? 'Save changes' : 'Create proxy'}
                         </tc-button>
                     </div>
                 </form>
             </tc-section-card>
+
+            <ConfirmDialog
+                open={!!pendingDisable}
+                title="Disable proxy?"
+                message={
+                    pendingDisable
+                        ? `Disable the reverse proxy for ${pendingDisable}. Traffic to it stops being routed once nginx reloads; the configuration is kept and can be re-enabled anytime.`
+                        : undefined
+                }
+                confirmLabel="Disable"
+                danger
+                onConfirm={() => {
+                    const d = pendingDisable
+                    setPendingDisable(null)
+                    if (d) void applyEnabled(d, false)
+                }}
+                onCancel={() => setPendingDisable(null)}
+            />
 
             <ConfirmDialog
                 open={!!pending}

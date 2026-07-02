@@ -74,6 +74,12 @@ func renderResources(cfg *config.Config, certs nginxconf.CertResolver, includeDi
 	}
 	for i := range cfg.Proxies {
 		p := &cfg.Proxies[i]
+		// A disabled proxy renders nothing — it keeps its config (and admin API
+		// presence) but nginx stops routing its domain. Not a quarantine, so it
+		// is not reported in `disabled`.
+		if !p.IsEnabled() {
+			continue
+		}
 		content, err := nginxconf.ProxyVhost(cfg, p, opts)
 		if err != nil {
 			disabled = append(disabled, disableResult(KindProxy, p.Domain, "proxy-"+p.Domain+".conf", err))
