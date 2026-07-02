@@ -391,6 +391,7 @@ The image is built on **`nginx:alpine`** — one container runs nginx *and* the 
 ```bash
 docker run -d \
   -p 80:80 \
+  -p 443:443 \
   -v /etc/nginxpilot:/etc/nginxpilot:ro \
   -v ./example.com.conf:/etc/nginx/conf.d/example.com.conf:ro \
   -v nginxpilot-sites:/var/lib/nginxpilot \
@@ -398,7 +399,7 @@ docker run -d \
 ```
 
 - Mount your vhosts into `/etc/nginx/conf.d/`, each `root` pointing at `…/sites/<domain>/current` (generate a starting snippet with `print-vhost`, below) — **or** turn on [managed mode](#managed-mode) and let nginxpilot write them.
-- The daemon runs as the unprivileged `nginxpilot` user (member of group `nginx`) so its `0750`/`0640` content stays readable by the workers; nginx is supervised by the entrypoint (restarted on crash), content swaps need no reload.
+- The daemon **and nginx** both run as the unprivileged `nginxpilot` user (member of group `nginx`) — the daemon's managed-mode `nginx -t` / `nginx -s reload` need a same-uid master, and low ports come from a `cap_net_bind_service` file capability on the nginx binary (pidfile at `/run/nginxpilot/nginx.pid`). nginx is supervised by the entrypoint (restarted on crash), content swaps need no reload.
 - **Managed mode in the image**: the http include and the top-level `stream {}` block are baked into `nginx.conf`, and the daemon-owned dirs under `/etc/nginx/nginxpilot/` are pre-created. Point your config at them: `nginx.conf_dir: /etc/nginx/nginxpilot/conf.d`, `nginx.stream_conf_dir: /etc/nginx/nginxpilot/stream.d`, `nginx.managed_include_dir: /etc/nginx/nginxpilot/conf.d`. Mount your cert dir and set `tls.cert_dir`.
 - Port 9090 is the admin endpoint — set `admin.listen: 0.0.0.0:9090` in the config and publish the port if you want `/status` from outside.
 - Any argument bypasses the supervisor and runs the CLI directly:

@@ -6,8 +6,10 @@
 # (nginx.manage: true) it also writes the live nginx config under
 # /etc/nginx/nginxpilot/ and reloads nginx — but nginx is only ever handed
 # config that already passed `nginx -t`, so a bad resource is quarantined, never
-# fatal. The daemon runs with group `nginx` so the 0750/0640 permissions it
-# enforces stay readable by the nginx workers.
+# fatal. Both processes run as the unprivileged `nginxpilot` user (group
+# `nginx`): the daemon must `nginx -t` (opens the pidfile) and `nginx -s reload`
+# (signals the master), which only works when the master shares its uid. Low
+# ports come from the cap_net_bind_service file capability set at build.
 #
 # nginx is supervised: if it crashes (or a worker dies), it is restarted instead
 # of taking the container down. The daemon re-applies managed config on its next
@@ -20,6 +22,26 @@
 set -eu
 
 NGINXPILOT_CONFIG="${NGINXPILOT_CONFIG:-/etc/nginxpilot/config.yml}"
+
+# Managed-mode dirs are created at runtime, NOT baked into the image: the apply
+# engine swaps them with rename(2), and overlayfs returns EXDEV when renaming a
+# directory that exists in a lower image layer. Created here they live on the
+# container's writable layer, where rename works. /run/nginxpilot holds the
+# nginx pidfile — daemon-owned so its `nginx -t` can open it.
+mkdir -p /etc/nginx/nginxpilot/conf.d /etc/nginx/nginxpilot/stream.d /run/nginxpilot
+chown nginxpilot:nginx /etc/nginx/nginxpilot /etc/nginx/nginxpilot/conf.d \
+    /etc/nginx/nginxpilot/stream.d /run/nginxpilot
+chmod 0750 /etc/nginx/nginxpilot /etc/nginx/nginxpilot/conf.d /etc/nginx/nginxpilot/stream.d
+chmod 0770 /run/nginxpilot
+
+# The nginx:alpine log symlinks (/var/log/nginx/*.log → /dev/stdout|stderr)
+# reopen the container's std streams. Those pipe inodes belong to root (PID 1
+# is this supervisor), so hand them to the unprivileged children or nginx
+# fails at startup with "could not open error log file". No stream redirects
+# on these commands — /dev/stderr resolves through the command's OWN fd 2, so
+# a `2>/dev/null` would make chown target /dev/null instead of the pipe.
+chown nginxpilot:nginx /dev/stdout /dev/stderr || \
+    chmod 666 /dev/stdout /dev/stderr || true
 
 if [ "$#" -gt 0 ]; then
     exec su-exec nginxpilot:nginx nginxpilot "$@"
@@ -44,7 +66,7 @@ nginxpilot_pid=$!
 # takes the container down. The official nginx entrypoint (envsubst templates,
 # ipv6 detection) runs each cycle.
 while [ "$stopping" -eq 0 ]; do
-    /docker-entrypoint.sh nginx -g 'daemon off;' &
+    su-exec nginxpilot:nginx /docker-entrypoint.sh nginx -g 'daemon off;' &
     nginx_pid=$!
     wait "$nginx_pid" && code=0 || code=$?
     [ "$stopping" -eq 1 ] && break
