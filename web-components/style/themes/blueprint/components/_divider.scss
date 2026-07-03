@@ -2,17 +2,16 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     .tc-divider {
         // Hairline → blueprint faint-divider token (never raw tc-border or slate refs)
         --bs-divider-border-color: var(--bp-border-faint);
 
         // Label ink → faint blueprint text; bg → page canvas so the cutout reads cleanly
-        --bs-divider-label-color:  var(--bp-text-faint);
-        --bs-divider-label-bg:     var(--bp-bg);
+        --bs-divider-label-color: var(--bp-text-faint);
+        --bs-divider-label-bg: var(--bp-bg);
 
         // Tighten tracking slightly — blueprint mono labels sit at .10em+
-        --bs-divider-label-letter-spacing: 0.10em;
+        --bs-divider-label-letter-spacing: 0.1em;
     }
 
     // Override the label font-family to use the blueprint mono face

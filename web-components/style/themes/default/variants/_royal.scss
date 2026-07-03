@@ -1,0 +1,37 @@
+// Default Royal variant — violet primary / magenta secondary accent swap.
+//
+// Recolors ONLY the accent families of the stock default theme: the primary
+// CTA accent (--tc-app-accent*) and the informational secondary accent
+// (--tc-accent*), plus the literals derived from them (--bs-primary, link rgb
+// triplets, focus ring). Surfaces, borders, the text ramp, semantic status
+// colors, fonts and shadows stay the base default-theme values.
+// Use with: <tc-theme name="default" variant="royal"> … </tc-theme>
+// (or any element with [data-tc-theme='default'][data-tc-variant='royal']).
+
+tc-theme[name='default'][variant='royal'],
+[data-tc-theme='default'][data-tc-variant='royal'] {
+    // Primary accent — CTA violet (hover darkens, matching the base slate-800→900 direction)
+    --tc-app-accent: #7c3aed;
+    --tc-app-accent-hover: #6a2ad1;
+    --tc-app-accent-contrast: #ffffff;
+    --tc-app-accent-gradient: linear-gradient(135deg, var(--tc-app-accent), #5a23b3);
+
+    // Secondary accent — informational magenta, spent sparingly (links, focus
+    // tints, highlights, the brand dot)
+    --tc-accent: #c026d3;
+    --tc-accent-fg: #a21caf;
+    --tc-accent-soft: #f7e5fa;
+    --tc-accent-hex: #c026d3;
+
+    // Derived literals — recomputed from the new primary. Redeclared here (not
+    // inherited) because the base resolves its var() refs at :root, baking the
+    // slate accent into the computed value.
+    --bs-primary: #7c3aed;
+    --bs-primary-rgb: 124, 58, 237;
+    --bs-link-color: var(--tc-app-accent);
+    --bs-link-color-rgb: 124, 58, 237;
+    --bs-link-hover-color: var(--tc-app-accent-hover);
+    --bs-link-hover-color-rgb: 106, 42, 209;
+    --tc-focus-ring: 0 0 0 0.2rem rgba(124, 58, 237, 0.15);
+    --bs-focus-ring-color: rgba(124, 58, 237, 0.15);
+}

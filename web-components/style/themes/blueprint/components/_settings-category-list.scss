@@ -2,25 +2,24 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-settings-category-list {
         // Nav column surface — recessed well so it reads behind the content area
-        --bs-settings-category-list-nav-bg:          var(--bp-bg-2);
+        --bs-settings-category-list-nav-bg: var(--bp-bg-2);
         --bs-settings-category-list-nav-border-color: var(--bp-border);
 
         // Category item default state — muted mono label
-        --bs-settings-category-list-item-color:        var(--bp-text-muted);
-        --bs-settings-category-list-item-hover-color:  var(--bp-text-soft);
-        --bs-settings-category-list-item-hover-bg:     var(--bp-paper-tint);
+        --bs-settings-category-list-item-color: var(--bp-text-muted);
+        --bs-settings-category-list-item-hover-color: var(--bp-text-soft);
+        --bs-settings-category-list-item-hover-bg: var(--bp-paper-tint);
         // keep font-size + letter-spacing from the base; mono uppercase is already correct
 
         // Active item — pink primary accent
-        --bs-settings-category-list-item-active-color:        var(--bp-pink);
-        --bs-settings-category-list-item-active-bg:           var(--bp-pink-surface);
+        --bs-settings-category-list-item-active-color: var(--bp-pink);
+        --bs-settings-category-list-item-active-bg: var(--bp-pink-surface);
         --bs-settings-category-list-item-active-border-color: var(--bp-pink);
 
         // Icon — teal for default state (everyday action tint), pink when active (driven by icon-active-color)
-        --bs-settings-category-list-icon-color:        var(--bp-teal-fg);
+        --bs-settings-category-list-icon-color: var(--bp-teal-fg);
         --bs-settings-category-list-icon-active-color: var(--bp-pink);
     }
 

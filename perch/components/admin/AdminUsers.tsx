@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useMemo, useState } from 'react'
-import type { TableColumn } from '@toolcase/web-components'
+import type { AdvancedTableColumn } from '@toolcase/web-components'
 import { escapeHtml } from '@/lib/tc'
 import {
     ACCOUNT_LEVEL_LABEL,
@@ -15,7 +15,6 @@ import {
 } from '@/server/domain/types'
 import { formatBytes } from '@/server/domain/site-dashboard'
 import { AdminPage, json, useOwnerData } from './shared'
-import { DataTable } from '@/components/DataTable'
 import { useToast } from '@/components/Toast'
 import { CheckField, SelectField, TextField, type SelectOption } from '@/components/fields'
 
@@ -113,20 +112,10 @@ function userActionsHtml(r: AdminUserRow, multiRealm: boolean, editingId: number
     return `<span class="perch-admin-user-actions">${parts.join('')}</span>`
 }
 
-const USER_COLUMNS = (
-    busy: boolean,
-    multiRealm: boolean,
-    editingId: number | null,
-    editingRealmsId: number | null,
-): TableColumn[] => [
-    { key: 'user', header: 'User', render: (rt: UserTableRow) => userIdentityHtml(rt.row) },
-    { key: 'role', header: 'Role', width: '11rem', render: (rt: UserTableRow) => roleSelectHtml(rt.row, busy) },
-    {
-        key: 'actions',
-        header: '',
-        align: 'right',
-        render: (rt: UserTableRow) => userActionsHtml(rt.row, multiRealm, editingId, editingRealmsId),
-    },
+const USER_COLUMNS: AdvancedTableColumn[] = [
+    { key: 'user', label: 'User' },
+    { key: 'role', label: 'Role', width: '11rem' },
+    { key: 'actions', label: '', align: 'right' },
 ]
 
 export function AdminUsers() {
@@ -233,32 +222,9 @@ function UsersRoster({
         })
     }, [users, query, levelFilter])
 
-    // One delegated handler for every user-row control: a role <select> change
-    // PATCHes the role; the Limits / Realms link-buttons toggle the matching
-    // below-table editor panel.
-    const onRowAction = useCallback(
-        (action: string, dataset: DOMStringMap, event: Event) => {
-            const githubId = Number(dataset.id)
-            if (!Number.isFinite(githubId)) return
-            const row = users.find((u) => u.user.githubId === githubId)
-            if (!row) return
-            if (action === 'role') {
-                void changeRole(row, (event.target as HTMLSelectElement).value as Role)
-            } else if (action === 'limits') {
-                setEditingId((id) => (id === githubId ? null : githubId))
-                setEditingRealmsId(null)
-            } else if (action === 'realms') {
-                setEditingRealmsId((id) => (id === githubId ? null : githubId))
-                setEditingId(null)
-            }
-        },
-        [users, changeRole],
-    )
-
-    const columns = useMemo(
-        () => USER_COLUMNS(busyId !== null, multiRealm, editingId, editingRealmsId),
-        [busyId, multiRealm, editingId, editingRealmsId],
-    )
+    const setTableColumns = useCallback((el: any) => {
+        if (el) el.columns = USER_COLUMNS
+    }, [])
     const tableRows = useMemo<UserTableRow[]>(() => filtered.map((row) => ({ row })), [filtered])
     const editingRow = editingId != null ? users.find((u) => u.user.githubId === editingId) : undefined
     const editingRealmsRow =
@@ -299,12 +265,88 @@ function UsersRoster({
                         {users.length === 0 ? 'No users yet.' : 'No users match your search.'}
                     </tc-empty-state>
                 ) : (
-                    <DataTable<UserTableRow>
-                        columns={columns}
-                        rows={tableRows}
-                        rowKey={(rt) => rt.row.user.githubId}
-                        onAction={onRowAction}
-                    />
+                    <tc-advanced-table
+                        ref={setTableColumns}
+                        limit={String(filtered.length || 10)}
+                        offset="0"
+                        total={String(filtered.length)}
+                    >
+                        {filtered.map((row) => (
+                            <tr key={row.user.githubId}>
+                                <td>
+                                    <div className="perch-admin-user-id">
+                                        <span className="perch-admin-user-name">{escapeHtml(row.user.name || row.user.login)}</span>{' '}
+                                        <span className="perch-admin-hint">@{escapeHtml(row.user.login)}</span>
+                                        <span className="perch-admin-badges">
+                                            <span className={`badge text-bg-${LEVEL_VARIANT[row.level]}`}>{ACCOUNT_LEVEL_LABEL[row.level]}</span>
+                                            {row.customLimits && <span className="badge text-bg-warning">custom limits</span>}
+                                        </span>
+                                    </div>
+                                    <dl className="perch-admin-user-meta">
+                                        <div>
+                                            <dt>Sites</dt> <dd>{row.usage.siteCount} / {fmtCount(row.limits.maxSites)}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Storage</dt> <dd>{formatBytes(row.usage.totalBytes)} / {fmtBytes(row.limits.maxBytesTotal)}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Per-site cap</dt> <dd>{fmtBytes(row.limits.maxBytesPerSite)}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Custom domains</dt> <dd>{fmtCount(row.limits.customDomains)}</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Poll floor</dt> <dd>{row.limits.minIntervalSec}s</dd>
+                                        </div>
+                                        <div>
+                                            <dt>Private repos</dt> <dd>{row.limits.privateRepos ? 'yes' : 'no'}</dd>
+                                        </div>
+                                    </dl>
+                                </td>
+                                <td>
+                                    <select
+                                        className="form-select form-select-sm perch-admin-role-select"
+                                        value={ROLES.includes(row.user.role) ? row.user.role : 'standard'}
+                                        onChange={(e) => void changeRole(row, e.currentTarget.value as Role)}
+                                        aria-label={`Role for ${escapeHtml(row.user.login)}`}
+                                        disabled={busyId !== null}
+                                    >
+                                        {ROLES.map((role) => (
+                                            <option key={role} value={role}>
+                                                {role}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </td>
+                                <td className="text-end">
+                                    <span className="perch-admin-user-actions">
+                                        <button
+                                            type="button"
+                                            className="perch-admin-linkbtn"
+                                            onClick={() => {
+                                                setEditingId((id) => (id === row.user.githubId ? null : row.user.githubId))
+                                                setEditingRealmsId(null)
+                                            }}
+                                        >
+                                            {editingId === row.user.githubId ? 'Close' : 'Limits'}
+                                        </button>
+                                        {multiRealm && (
+                                            <button
+                                                type="button"
+                                                className="perch-admin-linkbtn"
+                                                onClick={() => {
+                                                    setEditingRealmsId((id) => (id === row.user.githubId ? null : row.user.githubId))
+                                                    setEditingId(null)
+                                                }}
+                                            >
+                                                {editingRealmsId === row.user.githubId ? 'Close' : 'Realms'}
+                                            </button>
+                                        )}
+                                    </span>
+                                </td>
+                            </tr>
+                        ))}
+                    </tc-advanced-table>
                 )}
 
                 {/* The inline limit / realm editors render below the table (not in a

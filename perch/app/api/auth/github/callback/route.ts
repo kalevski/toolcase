@@ -7,12 +7,13 @@ import {
     clearedCookieOptions,
     exchangeCodeForToken,
     fetchGithubProfile,
-    ghTokenCookieOptions,
     makeSessionToken,
     resolveOnLogin,
+    saveGithubToken,
     sessionCookieOptions,
     verifyStateToken,
 } from '@/server/services/auth'
+import { refreshGithubCredentials } from '@/server/services/sites'
 import { config } from '@/server/config'
 
 export const runtime = 'nodejs'
@@ -39,9 +40,9 @@ export async function GET(req: NextRequest) {
 
     try {
         // The GitHub access token is never written into the session payload (§7).
-        // It is used here to read the profile, and then stashed in its own
-        // `httpOnly` cookie so the create-site wizard can list the user's repos
-        // and branches (§9 step 1) — see GH_TOKEN_COOKIE in services/auth.ts.
+        // It identifies the user here, then is stored encrypted (`user_github_token`)
+        // so the wizard's repo/branch listing works for the whole session and private
+        // sites keep a valid clone credential — see `saveGithubToken` in services/auth.ts.
         const token = await exchangeCodeForToken(code)
         const profile = await fetchGithubProfile(token)
 
@@ -51,10 +52,16 @@ export async function GET(req: NextRequest) {
 
         const user = resolveOnLogin(profile)
         const session = makeSessionToken(profile, user.role)
+        saveGithubToken(profile.githubId, token)
+        // A fresh token may replace a revoked/rotated one — re-push it to the
+        // git-credentials store of every realm the user's private sites deploy to,
+        // so interval pulls recover without a redeploy. Fire-and-forget.
+        refreshGithubCredentials(profile.githubId)
 
         const res = NextResponse.redirect(new URL('/', base))
         res.cookies.set(SESSION_COOKIE, session, sessionCookieOptions())
-        res.cookies.set(GH_TOKEN_COOKIE, token, ghTokenCookieOptions())
+        // Clear the legacy short-lived token cookie (the token lives in the DB now).
+        res.cookies.set(GH_TOKEN_COOKIE, '', clearedCookieOptions())
         res.cookies.set(STATE_COOKIE, '', clearedCookieOptions())
         return res
     } catch {

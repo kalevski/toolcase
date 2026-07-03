@@ -4,36 +4,35 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-bitmap-font-generator {
         // ── Surface & structure ────────────────────────────────────────────────
-        --bs-bitmap-font-generator-surface:        var(--bp-paper);
-        --bs-bitmap-font-generator-surface-muted:  var(--bp-paper-tint);
-        --bs-bitmap-font-generator-border:         var(--bp-border);
-        --bs-bitmap-font-generator-border-strong:  var(--bp-border-strong);
+        --bs-bitmap-font-generator-surface: var(--bp-paper);
+        --bs-bitmap-font-generator-surface-muted: var(--bp-paper-tint);
+        --bs-bitmap-font-generator-border: var(--bp-border);
+        --bs-bitmap-font-generator-border-strong: var(--bp-border-strong);
         // Replace raw var(--tc-slate-100) inner-row hairlines with the faint
         // blueprint divider token so slate values don't leak in.
-        --bs-bitmap-font-generator-hairline:       var(--bp-border-faint);
+        --bs-bitmap-font-generator-hairline: var(--bp-border-faint);
 
         // ── Ink / type ─────────────────────────────────────────────────────────
-        --bs-bitmap-font-generator-text:           var(--bp-text);
-        --bs-bitmap-font-generator-muted:          var(--bp-text-muted);
-        --bs-bitmap-font-generator-faint:          var(--bp-text-faint);
+        --bs-bitmap-font-generator-text: var(--bp-text);
+        --bs-bitmap-font-generator-muted: var(--bp-text-muted);
+        --bs-bitmap-font-generator-faint: var(--bp-text-faint);
         // JetBrains Mono carried in from --bp-mono; retain the full fallback
         // stack because the display rule below overrides only labeled sections.
-        --bs-bitmap-font-generator-mono:           var(--bp-mono);
+        --bs-bitmap-font-generator-mono: var(--bp-mono);
 
         // ── Group / label type ─────────────────────────────────────────────────
         --bs-bitmap-font-generator-group-title-color: var(--bp-teal-fg);
-        --bs-bitmap-font-generator-label-color:       var(--bp-text-muted);
+        --bs-bitmap-font-generator-label-color: var(--bp-text-muted);
 
         // ── Input / select / focus ─────────────────────────────────────────────
-        --bs-bitmap-font-generator-input-bg:           var(--bp-paper);
-        --bs-bitmap-font-generator-input-border:       var(--bp-border-strong);
-        --bs-bitmap-font-generator-input-color:        var(--bp-text);
+        --bs-bitmap-font-generator-input-bg: var(--bp-paper);
+        --bs-bitmap-font-generator-input-border: var(--bp-border-strong);
+        --bs-bitmap-font-generator-input-color: var(--bp-text);
         // Replace rgba(30,41,59,*) slate literals with blueprint pink tokens.
         --bs-bitmap-font-generator-input-focus-border: var(--bp-pink-line);
-        --bs-bitmap-font-generator-input-focus-ring:   var(--bp-glow-pink);
+        --bs-bitmap-font-generator-input-focus-ring: var(--bp-glow-pink);
 
         // ── Canvas preview ────────────────────────────────────────────────────
         // Recessed well — a shade darker than the paper so the canvas reads as
@@ -43,23 +42,23 @@ tc-theme[name='blueprint'],
         // ── Code / descriptor block ────────────────────────────────────────────
         // Foundation maps --tc-ink → the dark violet base (§ foundation map).
         // We inherit that for free; only the text color is set here.
-        --bs-bitmap-font-generator-code-bg:    var(--tc-ink);
+        --bs-bitmap-font-generator-code-bg: var(--tc-ink);
         --bs-bitmap-font-generator-code-color: var(--tc-text-inverse);
 
         // ── Secondary buttons ─────────────────────────────────────────────────
-        --bs-bitmap-font-generator-btn-bg:          var(--bp-paper);
-        --bs-bitmap-font-generator-btn-border:      var(--bp-border-soft);
-        --bs-bitmap-font-generator-btn-color:       var(--bp-text-soft);
-        --bs-bitmap-font-generator-btn-hover-bg:    var(--bp-teal-soft);
-        --bs-bitmap-font-generator-btn-active-bg:   var(--bp-teal);
+        --bs-bitmap-font-generator-btn-bg: var(--bp-paper);
+        --bs-bitmap-font-generator-btn-border: var(--bp-border-soft);
+        --bs-bitmap-font-generator-btn-color: var(--bp-text-soft);
+        --bs-bitmap-font-generator-btn-hover-bg: var(--bp-teal-soft);
+        --bs-bitmap-font-generator-btn-active-bg: var(--bp-teal);
         --bs-bitmap-font-generator-btn-active-color: var(--bp-teal-ink);
 
         // ── Primary (Generate) button ─────────────────────────────────────────
         // Pink gradient → white ink, pink glow for lift.
-        --bs-bitmap-font-generator-btn-primary-bg:    var(--bp-pink-grad);
+        --bs-bitmap-font-generator-btn-primary-bg: var(--bp-pink-grad);
         --bs-bitmap-font-generator-btn-primary-color: var(--bp-pink-ink);
         // Replace rgba(30,41,59,*) slate shadow literal with the strong pink glow.
-        --bs-bitmap-font-generator-btn-primary-lift:  var(--bp-glow-pink-strong);
+        --bs-bitmap-font-generator-btn-primary-lift: var(--bp-glow-pink-strong);
     }
 
     // ── Outer wrapper ──────────────────────────────────────────────────────────
@@ -95,7 +94,9 @@ tc-theme[name='blueprint'],
         background: var(--bp-paper);
         border-color: var(--bp-border-strong);
         color: var(--bp-text);
-        transition: border-color 0.15s var(--bp-ease), box-shadow 0.15s var(--bp-ease);
+        transition:
+            border-color 0.15s var(--bp-ease),
+            box-shadow 0.15s var(--bp-ease);
     }
 
     .tc-bfg-color {

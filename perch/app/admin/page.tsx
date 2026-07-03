@@ -1,19 +1,11 @@
-import type { Metadata } from 'next'
-import { AuthGate } from '@/components/AuthGate'
-import { AdminHome } from '@/components/admin/AdminHome'
+import { redirect } from 'next/navigation'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = { title: 'Admin' }
-
-// /admin is the owner hub — a landing page linking to the five admin areas
-// (Sites, Users, Domains, Plans, Audit). AuthGate renders the shell; AdminHome
-// redirects any non-owner away.
+// /admin has no overview page of its own — the owner hub is the sidebar (Sites,
+// Users, Realms, Domains, Certificates, Settings, Audit); bare /admin bounces
+// straight to Sites.
 export default function AdminIndexPage() {
-    return (
-        <AuthGate>
-            <AdminHome />
-        </AuthGate>
-    )
+    redirect('/admin/sites')
 }

@@ -5,23 +5,22 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // ── 1. Token swap ────────────────────────────────────────────────────────
     // Vars live on .list-group (matches the base file).
     .list-group {
-        --bs-list-group-bg:                  var(--fg-panel-bg);
-        --bs-list-group-border-color:        var(--fg-gold-deep);
+        --bs-list-group-bg: var(--fg-panel-bg);
+        --bs-list-group-border-color: var(--fg-gold-deep);
         // Override the hardcoded $slate-700 literals:
-        --bs-list-group-color:               var(--fg-parch);
-        --bs-list-group-action-color:        var(--fg-parch);
-        --bs-list-group-action-hover-color:  var(--fg-parch);
-        --bs-list-group-action-hover-bg:     rgba(201, 169, 97, 0.1);
+        --bs-list-group-color: var(--fg-parch);
+        --bs-list-group-action-color: var(--fg-parch);
+        --bs-list-group-action-hover-color: var(--fg-parch);
+        --bs-list-group-action-hover-bg: rgba(201, 169, 97, 0.1);
         // Active row — foundation already points accent to gold; adjust contrast:
-        --bs-list-group-active-color:        var(--fg-ink);
+        --bs-list-group-active-color: var(--fg-ink);
         --bs-list-group-active-border-color: var(--fg-gold);
         // Disabled text:
-        --bs-list-group-disabled-color:      var(--fg-parch-dim);
-        --bs-list-group-disabled-bg:         transparent;
+        --bs-list-group-disabled-color: var(--fg-parch-dim);
+        --bs-list-group-disabled-bg: transparent;
     }
 
     // ── 2. Structure — gilded outer bevel ────────────────────────────────────

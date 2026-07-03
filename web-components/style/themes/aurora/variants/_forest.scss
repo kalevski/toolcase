@@ -1,0 +1,40 @@
+// Aurora Forest variant — emerald-green primary with a lime secondary accent.
+//
+// Swaps ONLY the accent hue families of the aurora foundation: the mint/emerald
+// primary (--ah-accent*) turns emerald green and the signature-highlight
+// secondary (--tc-accent*) turns lime. Canvas, surfaces, hairlines, text ramp,
+// semantic status colours, fonts and shadows are untouched. The variant rule
+// matches the SAME theme root as the foundation, so every var()-built recipe
+// (--ah-accent-grad, --ah-glow*, glow field, focus ring, links, --tc-app-accent*)
+// re-resolves against the new hues automatically — only the literals baked into
+// the foundation (rgba derivatives, --bs-primary-rgb, --tc-accent-hex/--tc-cyan)
+// are re-issued here.
+//
+// NOTE: the primary sits near the semantic success green (--ah-success:
+// #35d07f); success badges/alerts keep their own hue but read as cousins here.
+// Use with: <tc-theme name="aurora" variant="forest"> … </tc-theme>
+
+@use '../../../foundation/tokens' as *;
+
+tc-theme[name='aurora'][variant='forest'],
+[data-tc-theme='aurora'][data-tc-variant='forest'] {
+    // ── Primary accent — emerald green (replaces mint/emerald) ───────────────
+    --ah-accent: #34d399;
+    --ah-accent-2: #4ade80; // hover + gradient second stop
+    --ah-accent-bright: #6ee7b7; // accent text / link hover / gradient-text end
+    --ah-accent-ink: #03271a; // dark forest on-fill ink (keeps the dark-ink convention)
+    --ah-accent-soft: rgba(52, 211, 153, 0.13);
+    --ah-accent-line: rgba(52, 211, 153, 0.32);
+    --ah-accent-glow: rgba(52, 211, 153, 0.1);
+    --ah-accent-shadow: rgba(52, 211, 153, 0.5);
+
+    // ── Secondary accent — lime (signature highlights / eyebrows / brand dot) ─
+    --tc-accent: #a3e635;
+    --tc-accent-fg: #bef264; // bright tint so accent-coloured TEXT clears the dark surfaces
+    --tc-accent-soft: rgba(163, 230, 53, 0.13);
+    --tc-accent-hex: #a3e635;
+    --tc-cyan: #a3e635;
+
+    // ── Foundation literals derived from the old accent hex ──────────────────
+    --bs-primary-rgb: 52, 211, 153;
+}

@@ -57,7 +57,9 @@ tc-theme[name='blueprint'],
         --bs-gamepad-button-prompt-cap-border-color: var(--bp-teal-line);
         border-bottom-color: var(--bp-teal-line);
         // Subtle teal ambient glow — action button gets a live-pulse halo.
-        box-shadow: var(--tc-shadow-sm), 0 0 0 0.15em var(--bp-teal-soft);
+        box-shadow:
+            var(--tc-shadow-sm),
+            0 0 0 0.15em var(--bp-teal-soft);
     }
 
     [data-button='B'] .tc-gamepad-button-prompt__glyph {

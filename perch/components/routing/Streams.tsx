@@ -1,13 +1,17 @@
 'use client'
 
 import { useCallback, useMemo, useState } from 'react'
-import type { TabBarItem } from '@toolcase/web-components'
+import type { AdvancedTableColumn, TabBarItem } from '@toolcase/web-components'
 import { useTc } from '@/lib/tc'
 import type { Stream, StreamTlsMode, StreamUpstream } from '@/server/domain/streams'
 import {
     RoutingPage,
     RoutingListTable,
     SaveWarningsBanner,
+    cellBadge,
+    cellJoin,
+    cellMono,
+    cellMuted,
     json,
     saveErrorMessage,
     saveRouting,
@@ -107,10 +111,38 @@ export function Streams() {
     )
 }
 
-function describeTarget(s: Stream): string {
-    if (s.upstream) return `→ ${s.upstream}`
-    if (s.pass) return `→ ${s.pass}`
-    return '—'
+// List columns (between the built-in Name column and the actions).
+const STREAM_COLUMNS: AdvancedTableColumn[] = [
+    { key: 'protocol', label: 'Protocol' },
+    { key: 'listen', label: 'Listen' },
+    { key: 'target', label: 'Target' },
+    { key: 'tls', label: 'TLS' },
+    { key: 'tuning', label: 'Tuning' },
+]
+
+/** TLS cell: the L4 termination mode plus its tls_domain (no SNI at L4). */
+function tlsCellHtml(s: Stream): string {
+    if (!s.tls || s.tls === 'off') return cellMuted('off')
+    const chip = cellBadge(
+        `TLS ${s.tls}`,
+        s.tls === 'required' ? 'success' : 'info',
+        s.tls === 'auto'
+            ? 'Terminates TLS when a cert exists; plain TCP otherwise.'
+            : 'Hard-fails the listener until a cert is present.',
+    )
+    return s.tls_domain ? `${chip} ${cellMono(s.tls_domain)}` : chip
+}
+
+/** Tuning chips: proxy_protocol plus the connect/proxy timeouts. */
+function tuningCellHtml(s: Stream): string {
+    const chips: string[] = []
+    if (s.proxy_protocol) chips.push(cellBadge('proxy_protocol'))
+    const timeouts = [
+        s.connect_timeout && `connect ${s.connect_timeout}`,
+        s.timeout && `timeout ${s.timeout}`,
+    ].filter(Boolean) as string[]
+    if (timeouts.length) chips.push(cellMuted(timeouts.join(' · ')))
+    return cellJoin(chips)
 }
 
 /** Everything the stream form holds — one draft object; the modal resets by remount. */
@@ -289,7 +321,17 @@ function StreamsManager({
         () =>
             streams.map((s) => ({
                 name: s.name,
-                hint: `${s.protocol ?? 'tcp'} :${s.listen} ${describeTarget(s)}${s.tls ? ` · TLS ${s.tls}` : ''}`,
+                cells: {
+                    protocol: cellBadge(s.protocol ?? 'tcp', s.protocol === 'udp' ? 'info' : 'secondary'),
+                    listen: cellMono(`:${s.listen}`),
+                    target: s.upstream
+                        ? `${cellMono(`→ ${s.upstream}`)} ${cellMuted('pool')}`
+                        : s.pass
+                          ? cellMono(`→ ${s.pass}`)
+                          : cellMuted('—'),
+                    tls: tlsCellHtml(s),
+                    tuning: tuningCellHtml(s),
+                },
                 stateChip: resourceStates.get(s.name)?.state,
                 stateReason: resourceStates.get(s.name)?.reason,
             })),
@@ -339,7 +381,13 @@ function StreamsManager({
                     {streams.length === 0 ? (
                         <tc-empty-state icon="cable">No streams yet.</tc-empty-state>
                     ) : (
-                        <RoutingListTable items={items} busy={busy} onEdit={startEdit} onRemove={setPending} />
+                        <RoutingListTable
+                            columns={STREAM_COLUMNS}
+                            items={items}
+                            busy={busy}
+                            onEdit={startEdit}
+                            onRemove={setPending}
+                        />
                     )}
                 </div>
             </tc-section-card>

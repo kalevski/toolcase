@@ -321,6 +321,21 @@ const MIGRATIONS: string[] = [
     DROP TABLE IF EXISTS sponsorship;
     DROP TABLE IF EXISTS plan_tier;
     `,
+    // v14 — durable GitHub credential (private-repo support). The user's OAuth access
+    // token, AES-256-GCM-encrypted with the realm cipher keyring (never plaintext at
+    // rest, never sent to the client). Replaces the 10-minute `perch_gh_token` cookie
+    // as the wizard's repo/branch-listing credential, and is pushed to nginxpilot's
+    // git-credentials store so private sites keep syncing on interval. Plus a
+    // `repo_private` flag on `site` so redeploys know to re-emit the fragment's
+    // `auth` block without a GitHub round-trip.
+    `
+    CREATE TABLE user_github_token (
+        github_id  INTEGER PRIMARY KEY REFERENCES app_user(github_id) ON DELETE CASCADE,
+        token_enc  TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+    );
+    ALTER TABLE site ADD COLUMN repo_private INTEGER NOT NULL DEFAULT 0;
+    `,
 ]
 
 function migrate(db: DatabaseSync): void {

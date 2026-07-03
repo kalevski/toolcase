@@ -91,7 +91,9 @@ tc-theme[name='dungeon'],
         border-color: var(--fg-gold-bright);
         outline: 2px solid var(--fg-gold-bright);
         outline-offset: 0;
-        box-shadow: 0 0 0 1px #000, 0 0 12px var(--fg-gold-bright);
+        box-shadow:
+            0 0 0 1px #000,
+            0 0 12px var(--fg-gold-bright);
     }
 
     // Qty badge in mono with an ink shadow.

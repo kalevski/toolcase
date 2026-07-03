@@ -13,6 +13,7 @@ function site(ownerId: number): Site {
         ownerId,
         repoOwner: 'alice',
         repoName: 'portfolio',
+        repoPrivate: false,
         branch: 'gh-pages',
         hostname: 'alice.perch.dev',
         hostKind: 'subdomain',

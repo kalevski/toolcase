@@ -2,50 +2,53 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Custom-property re-map ────────────────────────────────────────────────
     // Re-point every --bs-markdown-editor-* var to blueprint tokens first;
     // element rules below handle the few things without a backing var.
 
     tc-markdown-editor {
         // Shell frame: white paper + default hairline + soft violet shadow
-        --bs-markdown-editor-border:          1px solid var(--bp-border);
-        --bs-markdown-editor-surface:         var(--bp-paper);
+        --bs-markdown-editor-border: 1px solid var(--bp-border);
+        --bs-markdown-editor-surface: var(--bp-paper);
         // Hairline between tab-strip / toolbar / body — use faint, not raw slate
-        --bs-markdown-editor-hairline:        1px solid var(--bp-border-faint);
+        --bs-markdown-editor-hairline: 1px solid var(--bp-border-faint);
 
         // Label: body font, soft ink
-        --bs-markdown-editor-label-color:     var(--bp-text-soft);
+        --bs-markdown-editor-label-color: var(--bp-text-soft);
 
         // Tabs: muted → primary text; active underline in teal (everyday action)
-        --bs-markdown-editor-tab-color:       var(--bp-text-faint);
+        --bs-markdown-editor-tab-color: var(--bp-text-faint);
         --bs-markdown-editor-tab-color-hover: var(--bp-text);
         --bs-markdown-editor-tab-color-active: var(--bp-text-soft);
-        --bs-markdown-editor-tab-underline:   2px solid var(--bp-teal);
+        --bs-markdown-editor-tab-underline: 2px solid var(--bp-teal);
 
         // Toolbar buttons: faint icon → teal hover well → pink active fill
         // (pink = primary/CTA in the arcade accent rotation)
-        --bs-markdown-editor-toolbar-btn-color:        var(--bp-text-faint);
-        --bs-markdown-editor-toolbar-btn-hover-bg:     var(--bp-teal-soft);
-        --bs-markdown-editor-toolbar-btn-hover-color:  var(--bp-teal-fg);
-        --bs-markdown-editor-toolbar-btn-active-bg:    var(--bp-pink);
+        --bs-markdown-editor-toolbar-btn-color: var(--bp-text-faint);
+        --bs-markdown-editor-toolbar-btn-hover-bg: var(--bp-teal-soft);
+        --bs-markdown-editor-toolbar-btn-hover-color: var(--bp-teal-fg);
+        --bs-markdown-editor-toolbar-btn-active-bg: var(--bp-pink);
         --bs-markdown-editor-toolbar-btn-active-color: var(--bp-pink-ink);
 
         // Body / textarea: primary ink on paper, mono-weight editing feel
-        --bs-markdown-editor-body-color:      var(--bp-text);
+        --bs-markdown-editor-body-color: var(--bp-text);
 
         // Focus ring: replace the hardcoded rgba(30,41,59,0.5) slate literal
         // with the blueprint violet-tinted border token
         --bs-markdown-editor-textarea-focus-border: var(--bp-border-strong);
 
         // Preview prose surfaces
-        --bs-markdown-editor-code-bg:           var(--bp-paper-tint-2);
-        --bs-markdown-editor-code-color:        var(--bp-violet-fg);    // violet for inline code — supporting accent
-        --bs-markdown-editor-codeblock-bg:      var(--bp-emphasis);     // near-black (#0f0e22) — the --tc-ink equivalent in blueprint
-        --bs-markdown-editor-codeblock-color:   #f4f3fb;                // --bp-bg-2 hex — light lavender text on the dark block
-        --bs-markdown-editor-quote-border:      3px solid var(--bp-teal-line, var(--bp-border-strong));
-        --bs-markdown-editor-quote-color:       var(--bp-text-muted);
-        --bs-markdown-editor-link-color:        var(--bp-violet-fg);    // violet links — readable AA on white
+        --bs-markdown-editor-code-bg: var(--bp-paper-tint-2);
+        --bs-markdown-editor-code-color: var(
+            --bp-violet-fg
+        ); // violet for inline code — supporting accent
+        --bs-markdown-editor-codeblock-bg: var(
+            --bp-emphasis
+        ); // near-black (#0f0e22) — the --tc-ink equivalent in blueprint
+        --bs-markdown-editor-codeblock-color: #f4f3fb; // --bp-bg-2 hex — light lavender text on the dark block
+        --bs-markdown-editor-quote-border: 3px solid var(--bp-teal-line, var(--bp-border-strong));
+        --bs-markdown-editor-quote-color: var(--bp-text-muted);
+        --bs-markdown-editor-link-color: var(--bp-violet-fg); // violet links — readable AA on white
     }
 
     // ── Shell ─────────────────────────────────────────────────────────────────
@@ -64,7 +67,7 @@ tc-theme[name='blueprint'],
         font-family: var(--bp-mono);
         font-size: 10px;
         font-weight: 500;
-        letter-spacing: .10em;
+        letter-spacing: 0.1em;
         text-transform: uppercase;
         color: var(--bs-markdown-editor-label-color);
     }
@@ -80,7 +83,7 @@ tc-theme[name='blueprint'],
     .tc-markdown-editor-tab {
         font-family: var(--bp-mono);
         font-size: 10px;
-        letter-spacing: .10em;
+        letter-spacing: 0.1em;
         text-transform: uppercase;
         color: var(--bs-markdown-editor-tab-color);
         transition: color var(--bp-ease, 0.18s ease);
@@ -108,8 +111,9 @@ tc-theme[name='blueprint'],
 
     .tc-markdown-editor-toolbar-btn {
         color: var(--bs-markdown-editor-toolbar-btn-color);
-        transition: background var(--bp-ease, 0.18s ease),
-                    color var(--bp-ease, 0.18s ease);
+        transition:
+            background var(--bp-ease, 0.18s ease),
+            color var(--bp-ease, 0.18s ease);
 
         &:hover {
             background: var(--bs-markdown-editor-toolbar-btn-hover-bg);
@@ -139,7 +143,7 @@ tc-theme[name='blueprint'],
             box-shadow:
                 inset 0 0 0 1px var(--bs-markdown-editor-textarea-focus-border),
                 inset var(--bs-markdown-editor-textarea-focus-ring);
-            background: var(--bp-paper);   // lift to paper on focus
+            background: var(--bp-paper); // lift to paper on focus
         }
     }
 
@@ -149,11 +153,16 @@ tc-theme[name='blueprint'],
         color: var(--bs-markdown-editor-body-color);
         font-family: var(--bp-body);
 
-        h1, h2, h3, h4, h5, h6 {
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
             // Display face for preview headings — blueprint heading treatment
             font-family: var(--bp-display);
             font-weight: 700;
-            letter-spacing: -.01em;
+            letter-spacing: -0.01em;
             color: var(--bp-emphasis);
         }
 
@@ -199,10 +208,10 @@ tc-theme[name='blueprint'],
     .tc-markdown-editor-empty {
         font-family: var(--bp-mono);
         font-size: 11px;
-        letter-spacing: .08em;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
         color: var(--bp-text-faint);
-        font-style: normal;   // override the base italic — mono + uppercase reads better flat
+        font-style: normal; // override the base italic — mono + uppercase reads better flat
     }
 
     // ── Reduced motion ────────────────────────────────────────────────────────

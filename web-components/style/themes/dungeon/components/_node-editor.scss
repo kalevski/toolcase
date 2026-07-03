@@ -8,10 +8,13 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // Token swap on the host — kills hardcoded cold values and warms the ports.
     tc-node-editor {
-        --bs-node-editor-selected-header-bg: linear-gradient(135deg, var(--fg-gold), var(--fg-gold-shadow));
+        --bs-node-editor-selected-header-bg: linear-gradient(
+            135deg,
+            var(--fg-gold),
+            var(--fg-gold-shadow)
+        );
         --bs-node-editor-selected-header-text: var(--fg-ink);
         --bs-node-editor-header-bg: linear-gradient(135deg, var(--fg-leather-2), var(--fg-leather));
         --bs-node-editor-port-hover-bg: var(--fg-gold-bright);

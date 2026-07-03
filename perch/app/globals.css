@@ -933,6 +933,20 @@ body {
     margin-bottom: 1.5rem;
 }
 
+/* Test config / Reload config button row (routing nginx -t dry run, Phase E). */
+.perch-routing-test-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Row-action button cluster injected into the routing tc-advanced-table cells. */
+.perch-routing-actions {
+    display: inline-flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
 /* ── Reconcile status card (routing health strip, impl §1) ─────────────────────── */
 
 /* One-line summary of the daemon's reconcile loop: policy chip, cadence, last run.
@@ -1348,26 +1362,6 @@ body {
 
 .perch-breadcrumbs {
     margin-bottom: 1rem;
-}
-
-/* Admin landing hub (P2) — a tc-feature-card per admin area, laid out by tc-grid.
-   The cards are clickable links (router push), so add the affordances tc-feature-card
-   doesn't carry on its own. */
-.perch-admin-hub-card {
-    cursor: pointer;
-    transition:
-        border-color 0.12s ease,
-        box-shadow 0.12s ease;
-}
-
-.perch-admin-hub-card:hover {
-    border-color: var(--perch-accent);
-    box-shadow: var(--tc-shadow-sm);
-}
-
-.perch-admin-hub-card:focus-visible {
-    outline: 2px solid var(--perch-accent);
-    outline-offset: 2px;
 }
 
 /* Wharf-style sub-navigation tab bar above admin/routing page bodies (P5). */

@@ -7,11 +7,17 @@ tc-theme[name='blueprint'],
         // The map canvas intentionally stays dark (it is a game HUD element, not a card surface);
         // the outer frame is white paper so it integrates cleanly with the light page.
         --bs-minimap-surface: var(--bp-paper);
-        --bs-minimap-border-color: var(--bp-teal);         // teal HUD frame — marks this as a live action element
-        --bs-minimap-bg-color: var(--bp-emphasis);         // #0f0e22 deep violet-navy — replaces dark slate literal
-        --bs-minimap-grid-color: var(--bp-border-soft);    // subtle violet hairlines on the dark canvas
-        --bs-minimap-marker-color: var(--bp-teal);         // entity markers → teal (action accent)
-        --bs-minimap-player-color: var(--bp-pink);         // player dot → pink (primary/CTA accent)
+        --bs-minimap-border-color: var(
+            --bp-teal
+        ); // teal HUD frame — marks this as a live action element
+        --bs-minimap-bg-color: var(
+            --bp-emphasis
+        ); // #0f0e22 deep violet-navy — replaces dark slate literal
+        --bs-minimap-grid-color: var(
+            --bp-border-soft
+        ); // subtle violet hairlines on the dark canvas
+        --bs-minimap-marker-color: var(--bp-teal); // entity markers → teal (action accent)
+        --bs-minimap-player-color: var(--bp-pink); // player dot → pink (primary/CTA accent)
 
         // Two-sided border: teal top/left read as the "active scan" edges; hairline on other sides
         border-color: var(--bs-minimap-border-color);

@@ -6,11 +6,11 @@ tc-theme[name='blueprint'],
     // Transparent at rest; hover shows --bp-bg-2 recessed well + --bp-border hairline.
     tc-social-links,
     .tc-social-links {
-        --bs-social-links-color:        var(--bp-text-muted);
-        --bs-social-links-bg:           transparent;
-        --bs-social-links-border:       transparent;
-        --bs-social-links-hover-color:  var(--bp-text);
-        --bs-social-links-hover-bg:     var(--bp-bg-2);
+        --bs-social-links-color: var(--bp-text-muted);
+        --bs-social-links-bg: transparent;
+        --bs-social-links-border: transparent;
+        --bs-social-links-hover-color: var(--bp-text);
+        --bs-social-links-hover-bg: var(--bp-bg-2);
         --bs-social-links-hover-border: var(--bp-border);
         --bs-social-links-hover-shadow: none;
         --bs-social-links-hover-translate: -1px;
@@ -18,11 +18,11 @@ tc-theme[name='blueprint'],
 
     // ── Ghost explicit class (matches .tc-social-links-ghost rendered by component) ──
     .tc-social-links-ghost {
-        --bs-social-links-color:        var(--bp-text-muted);
-        --bs-social-links-bg:           transparent;
-        --bs-social-links-border:       transparent;
-        --bs-social-links-hover-color:  var(--bp-teal-fg);       // teal action accent on hover
-        --bs-social-links-hover-bg:     var(--bp-teal-soft);     // teal soft tint well
+        --bs-social-links-color: var(--bp-text-muted);
+        --bs-social-links-bg: transparent;
+        --bs-social-links-border: transparent;
+        --bs-social-links-hover-color: var(--bp-teal-fg); // teal action accent on hover
+        --bs-social-links-hover-bg: var(--bp-teal-soft); // teal soft tint well
         --bs-social-links-hover-border: var(--bp-teal-line);
         --bs-social-links-hover-shadow: none;
         --bs-social-links-hover-translate: -1px;
@@ -31,13 +31,13 @@ tc-theme[name='blueprint'],
     // ── Filled variant ─────────────────────────────────────────────────────────
     // Paper-tint surface at rest; lifts 1px on hover with stronger border + shadow.
     .tc-social-links-filled {
-        --bs-social-links-color:        var(--bp-text-muted);
-        --bs-social-links-bg:           var(--bp-paper-tint);
-        --bs-social-links-border:       var(--bp-border);
-        --bs-social-links-hover-color:  var(--bp-teal-fg);       // teal action: everyday interactive
-        --bs-social-links-hover-bg:     var(--bp-paper-tint-2);
+        --bs-social-links-color: var(--bp-text-muted);
+        --bs-social-links-bg: var(--bp-paper-tint);
+        --bs-social-links-border: var(--bp-border);
+        --bs-social-links-hover-color: var(--bp-teal-fg); // teal action: everyday interactive
+        --bs-social-links-hover-bg: var(--bp-paper-tint-2);
         --bs-social-links-hover-border: var(--bp-border-strong);
-        --bs-social-links-hover-shadow: var(--tc-shadow-sm);     // violet-tinted shadow lift
+        --bs-social-links-hover-shadow: var(--tc-shadow-sm); // violet-tinted shadow lift
         --bs-social-links-hover-translate: -1px;
     }
 

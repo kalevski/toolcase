@@ -2,16 +2,15 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-circular-progress {
         // Track: use the blueprint hairline border token instead of the default --tc-border
         // (which maps to a slate ramp that leaks into light themes as wrong tone).
-        --bs-circular-progress-track:  var(--bp-border);
+        --bs-circular-progress-track: var(--bp-border);
 
         // Fill: pink is the blueprint primary/CTA accent (arcade accent rotation:
         // pink=primary). Replaces the default --tc-app-accent which may resolve to
         // a cyan/teal that clashes with the blueprint palette.
-        --bs-circular-progress-fill:   var(--bp-pink);
+        --bs-circular-progress-fill: var(--bp-pink);
 
         // Label: primary ink on the light canvas.
         --bs-circular-progress-text-color: var(--bp-text);
@@ -24,7 +23,7 @@ tc-theme[name='blueprint'],
         font-family: var(--bp-mono);
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: .06em;
+        letter-spacing: 0.06em;
         color: var(--bp-text-soft); // slightly lighter than --bp-text for the inset label
     }
 

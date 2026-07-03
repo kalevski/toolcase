@@ -2,21 +2,20 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-lore-text {
         // Left-rule: primary pink accent — lore/flavor text is a primary narrative element.
         --bs-lore-text-border-color: var(--bp-pink);
         --bs-lore-text-border-width: 3px;
 
         // Soft pink-tinted surface behind the prose block.
-        --bs-lore-text-bg:           var(--bp-pink-surface);
+        --bs-lore-text-bg: var(--bp-pink-surface);
 
         // Prose: Space Grotesk body font, muted violet-tinted ink, keep italic.
-        --bs-lore-text-color:        var(--bp-text-muted);
-        --bs-lore-text-font-style:   italic;
-        --bs-lore-text-font-size:    0.925rem;
-        --bs-lore-text-font-weight:  400;
-        --bs-lore-text-line-height:  1.75;
+        --bs-lore-text-color: var(--bp-text-muted);
+        --bs-lore-text-font-style: italic;
+        --bs-lore-text-font-size: 0.925rem;
+        --bs-lore-text-font-weight: 400;
+        --bs-lore-text-line-height: 1.75;
     }
 
     .tc-lore-text {

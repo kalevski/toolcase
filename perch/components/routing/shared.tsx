@@ -2,12 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
-import type { TableColumn } from '@toolcase/web-components'
+import type { AdvancedTableColumn } from '@toolcase/web-components'
 import { ROLE_RANK } from '@/server/domain/types'
-import type { HstsOptions } from '@/server/domain/routing'
+import { hstsEnabled, type HstsOptions, type TlsMode } from '@/server/domain/routing'
 import { useMe } from '@/lib/me-context'
 import { LoadingState, ErrorState } from '@/components/states'
-import { DataTable } from '@/components/DataTable'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { SwitchField, TextField } from '@/components/fields'
 import { escapeHtml, useTc } from '@/lib/tc'
@@ -717,20 +716,22 @@ function RoutingTestButton() {
 
     return (
         <div className="perch-routing-test">
-            <tc-button variant="secondary" outline size="sm" onClick={run} disabled={busy || undefined}>
-                {busy ? 'Testing…' : 'Test config'}
-            </tc-button>
-            {me.role === 'owner' && (
-                <tc-button
-                    variant="secondary"
-                    outline
-                    size="sm"
-                    onClick={() => setConfirmReload(true)}
-                    disabled={busy || undefined}
-                >
-                    Reload config
+            <div className="perch-routing-test-buttons">
+                <tc-button variant="secondary" outline size="sm" onClick={run} disabled={busy || undefined}>
+                    {busy ? 'Testing…' : 'Test config'}
                 </tc-button>
-            )}
+                {me.role === 'owner' && (
+                    <tc-button
+                        variant="secondary"
+                        outline
+                        size="sm"
+                        onClick={() => setConfirmReload(true)}
+                        disabled={busy || undefined}
+                    >
+                        Reload config
+                    </tc-button>
+                )}
+            </div>
             {reloadNote && (
                 <tc-banner variant={reloadNote.ok ? 'success' : 'danger'}>{reloadNote.text}</tc-banner>
             )}
@@ -830,20 +831,28 @@ export function VhostPreviewModal({ domain, onClose }: { domain: string | null; 
 }
 
 /**
- * Relocation-safe `tc-table` listing for the four routing surfaces (proxies,
- * upstreams, streams, stream upstreams) — each is a "mono name · descriptive hint
- * · [Edit ·] Remove" row. The table renders the whole listing from its
- * `columns`/`data` properties (no slotted children); the action buttons are
- * delegated `<button>`s.
+ * Relocation-safe `tc-advanced-table` listing for the routing surfaces (proxies,
+ * redirects, dead hosts, access lists, streams, upstream pools). The header row is
+ * driven by the element's `columns` property and the body rows are injected as an
+ * escaped-HTML string into the projected `<tbody>` (the canonical tc-advanced-table
+ * pattern — see /admin/sites), NEVER as slotted React `<tr>` children: a `<tr>`
+ * outside a `<table>` is invalid HTML, so the browser parser hoists it during SSR
+ * and Next.js hydration fails.
  *
- * @param items   the rows; each yields a stable `name` (the delete key) and a `hint`.
- * @param onEdit  when provided, each row also gets an Edit button invoking it with the row's `name`.
- * @param onToggle when provided, a row with a `toggleLabel` also gets that button (enable/disable).
- * @param onRemove invoked with the row's `name` when its Remove button is clicked.
+ * Each page owns its column set: `columns` describes the data columns between the
+ * built-in leading name column and the trailing action column, and every item
+ * carries pre-escaped cell HTML keyed by column key. Build cells with the `cell*`
+ * helpers below — anything interpolated from user data MUST go through
+ * {@link escapeHtml}. Action buttons are plain `<button>`s carrying
+ * `data-action`/`data-name`; clicks are caught by one delegated listener on the
+ * table host.
  */
-export interface RoutingListItem extends Record<string, unknown> {
+export interface RoutingListItem {
     name: string
-    hint: string
+    /** Pre-escaped cell HTML per data-column key (see {@link RoutingListTable}'s `columns`). */
+    cells: Record<string, string>
+    /** Extra pre-escaped HTML appended after the name (e.g. a wildcard chip). */
+    nameExtraHtml?: string
     /** Label for the row's toggle button (e.g. "Disable"/"Enable"); omit for no toggle. */
     toggleLabel?: string
     /** Live daemon verdict for the row (B1): `at_risk` = warning chip, `disabled` = danger chip. */
@@ -851,6 +860,55 @@ export interface RoutingListItem extends Record<string, unknown> {
     /** Tooltip for the state chip (the daemon's nginx -t reason). */
     stateReason?: string
 }
+
+// ── pre-escaped cell fragments (compose per-page cells from these) ──────────────
+
+/** Monospace cell fragment (names, targets, ports). */
+export const cellMono = (v: unknown): string => `<span class="perch-admin-mono">${escapeHtml(v)}</span>`
+
+/** Muted hint cell fragment (defaults, counts, placeholders). */
+export const cellMuted = (v: unknown): string => `<span class="perch-admin-hint">${escapeHtml(v)}</span>`
+
+/** Badge chip fragment; `title` becomes the hover tooltip. */
+export function cellBadge(label: string, variant = 'secondary', title?: string): string {
+    const t = title ? ` title="${escapeHtml(title)}"` : ''
+    return `<span class="badge text-bg-${variant}"${t}>${escapeHtml(label)}</span>`
+}
+
+/** Join prebuilt fragments with spacing; an em-dash placeholder when empty. */
+export const cellJoin = (parts: string[]): string => (parts.length ? parts.join(' ') : cellMuted('—'))
+
+/** Enabled/disabled status chip (resources carrying an `enabled` flag). */
+export const cellEnabled = (enabled: boolean): string =>
+    enabled
+        ? cellBadge('enabled', 'success')
+        : cellBadge('disabled', 'secondary', 'Configured, but rendering no nginx block.')
+
+/** The shared TLS summary cell (proxies / redirects / dead hosts). */
+export function cellTls(x: {
+    tls?: TlsMode
+    force_ssl?: boolean
+    http2?: boolean
+    hsts?: boolean | HstsOptions
+}): string {
+    if (!x.tls || x.tls === 'off') return cellMuted('off')
+    const chips = [
+        cellBadge(
+            `TLS ${x.tls}`,
+            x.tls === 'required' ? 'success' : 'info',
+            x.tls === 'auto'
+                ? 'Serves HTTPS when a cert exists; degrades to HTTP otherwise.'
+                : 'Hard-fails the block until a cert is present.',
+        ),
+    ]
+    if (x.force_ssl) chips.push(cellBadge('force HTTPS', 'secondary', '80 → 301 https redirect'))
+    if (x.http2) chips.push(cellBadge('HTTP/2'))
+    if (hstsEnabled(x.hsts)) chips.push(cellBadge('HSTS'))
+    return chips.join(' ')
+}
+
+/** Access-list reference cell — the named policy, or "open" when unguarded. */
+export const cellAccessList = (name?: string): string => (name ? cellMono(name) : cellMuted('open'))
 
 /** The row's state chip HTML (B1) — empty for a healthy resource. */
 function stateChipHtml(row: RoutingListItem): string {
@@ -861,16 +919,56 @@ function stateChipHtml(row: RoutingListItem): string {
     return ` <span class="badge text-bg-${variant}"${title}>${label}</span>`
 }
 
+/** The injected `<tbody>` HTML — every interpolated value is escaped. */
+function routingRowsHtml(
+    items: RoutingListItem[],
+    columns: AdvancedTableColumn[],
+    opts: { busy: boolean; hasEdit: boolean; hasToggle: boolean; hasView: boolean; colSpan: number },
+): string {
+    if (items.length === 0) {
+        return `<tr><td colspan="${opts.colSpan}" class="perch-admin-empty-cell">Nothing here yet.</td></tr>`
+    }
+    const disabled = opts.busy ? ' disabled' : ''
+    const btn = (action: string, name: string, label: string, danger = false) =>
+        `<button type="button" class="btn btn-sm btn-outline-${danger ? 'danger' : 'secondary'}" ` +
+        `data-action="${action}" data-name="${escapeHtml(name)}"${disabled}>${escapeHtml(label)}</button>`
+    return items
+        .map((row) => {
+            const actions: string[] = []
+            if (opts.hasView) actions.push(btn('view', row.name, 'Config'))
+            if (opts.hasToggle && row.toggleLabel) actions.push(btn('toggle', row.name, row.toggleLabel))
+            if (opts.hasEdit) actions.push(btn('edit', row.name, 'Edit'))
+            actions.push(btn('remove', row.name, 'Remove', true))
+            const cells = columns
+                .map((c) => `<td${c.align ? ` style="text-align:${c.align}"` : ''}>${row.cells[c.key] ?? ''}</td>`)
+                .join('')
+            return (
+                `<tr>` +
+                `<td><span class="perch-admin-mono">${escapeHtml(row.name)}</span>${row.nameExtraHtml ?? ''}${stateChipHtml(row)}</td>` +
+                cells +
+                `<td style="text-align:right"><span class="perch-routing-actions">${actions.join('')}</span></td>` +
+                `</tr>`
+            )
+        })
+        .join('')
+}
+
 export function RoutingListTable({
+    columns,
     items,
     busy,
+    nameLabel = 'Name',
     onEdit,
     onToggle,
     onView,
     onRemove,
 }: {
+    /** Data columns rendered between the built-in name column and the trailing action column. */
+    columns: AdvancedTableColumn[]
     items: RoutingListItem[]
     busy: boolean
+    /** Header label for the leading name column (e.g. "Domain"). */
+    nameLabel?: string
     onEdit?: (name: string) => void
     onToggle?: (name: string) => void
     /** When provided, each row gets a "Config" button opening the rendered-vhost preview (impl §5). */
@@ -880,53 +978,61 @@ export function RoutingListTable({
     const hasEdit = !!onEdit
     const hasToggle = !!onToggle
     const hasView = !!onView
-    const columns = useMemo<TableColumn[]>(
-        () => [
-            {
-                key: 'name',
-                header: 'Name',
-                render: (row: RoutingListItem) =>
-                    `<span class="perch-admin-mono">${escapeHtml(row.name)}</span>${stateChipHtml(row)} ` +
-                    `<span class="perch-admin-hint">${escapeHtml(row.hint)}</span>`,
-            },
-            {
-                key: 'action',
-                header: '',
-                align: 'right',
-                render: (row: RoutingListItem) =>
-                    (hasView
-                        ? `<button type="button" class="btn btn-sm btn-outline-secondary" data-action="view"` +
-                          ` data-name="${escapeHtml(row.name)}"${busy ? ' disabled' : ''}>Config</button> `
-                        : '') +
-                    (hasToggle && row.toggleLabel
-                        ? `<button type="button" class="btn btn-sm btn-outline-secondary" data-action="toggle"` +
-                          ` data-name="${escapeHtml(row.name)}"${busy ? ' disabled' : ''}>${escapeHtml(row.toggleLabel)}</button> `
-                        : '') +
-                    (hasEdit
-                        ? `<button type="button" class="btn btn-sm btn-outline-secondary" data-action="edit"` +
-                          ` data-name="${escapeHtml(row.name)}"${busy ? ' disabled' : ''}>Edit</button> `
-                        : '') +
-                    `<button type="button" class="btn btn-sm btn-outline-danger" data-action="remove"` +
-                    ` data-name="${escapeHtml(row.name)}"${busy ? ' disabled' : ''}>Remove</button>`,
-            },
-        ],
-        [busy, hasEdit, hasToggle, hasView],
+
+    const allColumns = useMemo<AdvancedTableColumn[]>(
+        () => [{ key: 'name', label: nameLabel }, ...columns, { key: 'action', label: '', align: 'right' }],
+        [columns, nameLabel],
     )
-    const onAction = useCallback(
-        (action: string, dataset: DOMStringMap) => {
-            if (action === 'toggle' && dataset.name) onToggle?.(dataset.name)
-            if (action === 'edit' && dataset.name) onEdit?.(dataset.name)
-            if (action === 'view' && dataset.name) onView?.(dataset.name)
-            if (action === 'remove' && dataset.name) onRemove(dataset.name)
+
+    // Route the delegated action-button clicks back to the callbacks (the buttons
+    // live in the injected tbody HTML, so a host-level listener is the only way to
+    // reach them). useTc reads handlers live, so identity churn here is harmless.
+    const onTableClick = useCallback(
+        (event: Event) => {
+            const el = (event.target as HTMLElement)?.closest?.('[data-action]') as HTMLElement | null
+            if (!el) return
+            const name = el.getAttribute('data-name')
+            if (name === null) return
+            switch (el.getAttribute('data-action')) {
+                case 'view':
+                    onView?.(name)
+                    break
+                case 'toggle':
+                    onToggle?.(name)
+                    break
+                case 'edit':
+                    onEdit?.(name)
+                    break
+                case 'remove':
+                    onRemove(name)
+                    break
+            }
         },
-        [onEdit, onToggle, onView, onRemove],
+        [onView, onToggle, onEdit, onRemove],
     )
-    return (
-        <DataTable<RoutingListItem>
-            columns={columns}
-            rows={items}
-            rowKey={(row) => row.name}
-            onAction={onAction}
-        />
+
+    const tableProps = useMemo(
+        () => ({ columns: allColumns, total: items.length, limit: Math.max(items.length, 1), offset: 0 }),
+        [allColumns, items.length],
     )
+    const tableRef = useTc<HTMLElement>(tableProps, { click: onTableClick })
+
+    // Inject the body rows after the element has rendered its <tbody>; re-runs when
+    // the rows or the busy flag (button disabling) change.
+    useEffect(() => {
+        const el = tableRef.current
+        if (!el) return
+        const body = el.querySelector('.tc-advanced-table-body')
+        if (body) {
+            body.innerHTML = routingRowsHtml(items, columns, {
+                busy,
+                hasEdit,
+                hasToggle,
+                hasView,
+                colSpan: allColumns.length,
+            })
+        }
+    }, [items, columns, busy, hasEdit, hasToggle, hasView, allColumns.length, tableRef])
+
+    return <tc-advanced-table ref={tableRef} />
 }

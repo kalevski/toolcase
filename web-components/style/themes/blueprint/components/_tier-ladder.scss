@@ -2,21 +2,20 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-tier-ladder {
         // Title: display face, tight tracking — section heading treatment
-        --bs-tier-ladder-title-color:       var(--bp-text);
-        --bs-tier-ladder-title-font-size:   0.925rem;
+        --bs-tier-ladder-title-color: var(--bp-text);
+        --bs-tier-ladder-title-font-size: 0.925rem;
         --bs-tier-ladder-title-font-weight: 700;
 
         // Container border → blueprint hairline
-        --bs-tier-ladder-border:            var(--bp-border);
+        --bs-tier-ladder-border: var(--bp-border);
 
         // Row separators → faint dividers (never raw slate)
-        --bs-tier-ladder-row-separator:     var(--bp-border-faint);
+        --bs-tier-ladder-row-separator: var(--bp-border-faint);
 
         // Row hover → lavender page tint, not a flat grey
-        --bs-tier-ladder-row-hover-bg:      var(--bp-bg);
+        --bs-tier-ladder-row-hover-bg: var(--bp-bg);
 
         // Dot palette — map each semantic slot to the blueprint accent rotation:
         //   gray  → text-faint  (inactive / unranked)
@@ -24,26 +23,26 @@ tc-theme[name='blueprint'],
         //   yellow→ amber       (supporting warm accent)
         //   pink  → pink        (primary / rare / top-tier)
         //   red   → danger      (real-red, not pink)
-        --bs-tier-ladder-dot-gray:          var(--bp-text-faint);
-        --bs-tier-ladder-dot-cyan:          var(--bp-teal);
-        --bs-tier-ladder-dot-yellow:        var(--bp-amber);
-        --bs-tier-ladder-dot-pink:          var(--bp-pink);
-        --bs-tier-ladder-dot-red:           var(--bp-danger);
+        --bs-tier-ladder-dot-gray: var(--bp-text-faint);
+        --bs-tier-ladder-dot-cyan: var(--bp-teal);
+        --bs-tier-ladder-dot-yellow: var(--bp-amber);
+        --bs-tier-ladder-dot-pink: var(--bp-pink);
+        --bs-tier-ladder-dot-red: var(--bp-danger);
 
         // Tier name + range
-        --bs-tier-ladder-name-color:        var(--bp-text);
-        --bs-tier-ladder-range-color:       var(--bp-text-muted);
+        --bs-tier-ladder-name-color: var(--bp-text);
+        --bs-tier-ladder-range-color: var(--bp-text-muted);
 
         // Current tier: pink is the primary/selected slot in the accent rotation.
         // Replaces the baked dark-slate rgba(30,41,59,0.04) literal.
-        --bs-tier-ladder-current-border:    var(--bp-pink);
-        --bs-tier-ladder-current-bg:        var(--bp-pink-surface);
-        --bs-tier-ladder-current-name-color:      var(--bp-pink);
+        --bs-tier-ladder-current-border: var(--bp-pink);
+        --bs-tier-ladder-current-bg: var(--bp-pink-surface);
+        --bs-tier-ladder-current-name-color: var(--bp-pink);
         --bs-tier-ladder-current-indicator-color: var(--bp-pink);
 
         // Summary + empty → faint, mono
-        --bs-tier-ladder-summary-color:     var(--bp-text-faint);
-        --bs-tier-ladder-empty-color:       var(--bp-text-faint);
+        --bs-tier-ladder-summary-color: var(--bp-text-faint);
+        --bs-tier-ladder-empty-color: var(--bp-text-faint);
     }
 
     // Paper surface + blueprint hairline on the list container

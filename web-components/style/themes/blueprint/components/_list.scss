@@ -2,32 +2,31 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Token remaps on the host element ──────────────────────────────────────
     // Drive all cosmetics through the existing --bs-list-* API so no selectors
     // need specificity battles with the base partial.
 
     tc-list {
         // Container surface: raised white card on the lavender page
-        --bs-list-bg:            var(--bp-paper);
-        --bs-list-border-color:  var(--bp-border);
+        --bs-list-bg: var(--bp-paper);
+        --bs-list-border-color: var(--bp-border);
 
         // Row dividers: one step lighter than the outer frame hairline
         --bs-list-row-border-color: var(--bp-border-faint);
 
         // Icon: muted violet-slate default
-        --bs-list-icon-color:    var(--bp-text-faint);
+        --bs-list-icon-color: var(--bp-text-faint);
 
         // Label: primary ink
-        --bs-list-label-color:   var(--bp-text);
+        --bs-list-label-color: var(--bp-text);
 
         // Meta: mono face, teal for secondary data (set via font override below)
-        --bs-list-meta-color:    var(--bp-teal-fg);
+        --bs-list-meta-color: var(--bp-teal-fg);
 
         // Selected: pink primary accent — rail + fill + label + icon
-        --bs-list-selected-bg:           var(--bp-pink-surface);
-        --bs-list-selected-label-color:  var(--bp-pink);
-        --bs-list-selected-icon-color:   var(--bp-pink);
+        --bs-list-selected-bg: var(--bp-pink-surface);
+        --bs-list-selected-label-color: var(--bp-pink);
+        --bs-list-selected-icon-color: var(--bp-pink);
         --bs-list-selected-border-color: var(--bp-pink);
 
         // Focus ring: pink, consistent with blueprint interactive elements
@@ -58,7 +57,9 @@ tc-theme[name='blueprint'],
     // as a primary-accent pick (arcade convention: pink = selected/primary).
 
     .tc-list-item--selected {
-        box-shadow: inset 3px 0 0 var(--bp-pink), var(--bp-glow-pink);
+        box-shadow:
+            inset 3px 0 0 var(--bp-pink),
+            var(--bp-glow-pink);
     }
 
     // ── Meta: mono face + uppercase tracking ──────────────────────────────────
@@ -66,10 +67,10 @@ tc-theme[name='blueprint'],
     // uppercase, wide tracking. The color token is already wired above (teal-fg).
 
     .tc-list-item-meta {
-        font-family:     var(--bp-mono);
-        text-transform:  uppercase;
-        letter-spacing:  0.07em;
-        font-size:       0.75rem; // slightly tighter than base 0.8125rem at mono weight
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        font-size: 0.75rem; // slightly tighter than base 0.8125rem at mono weight
     }
 
     // ── Label: body face ──────────────────────────────────────────────────────
@@ -83,9 +84,9 @@ tc-theme[name='blueprint'],
     // chosen entry reads as a named section title, not just a highlighted row.
 
     .tc-list-item--selected .tc-list-item-label {
-        font-family:    var(--bp-display);
+        font-family: var(--bp-display);
         letter-spacing: -0.01em;
-        font-weight:    600;
+        font-weight: 600;
     }
 
     // ── Reduced motion ────────────────────────────────────────────────────────

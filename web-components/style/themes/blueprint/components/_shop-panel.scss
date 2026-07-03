@@ -2,67 +2,66 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Token overrides via --bs-shop-panel-* ──────────────────────────────────
 
     tc-shop-panel {
         // Panel shell — white paper card, blueprint hairline, violet-tinted shadow
-        --bs-shop-panel-bg:                    var(--bp-paper);
-        --bs-shop-panel-border:                1px solid var(--bp-border);
+        --bs-shop-panel-bg: var(--bp-paper);
+        --bs-shop-panel-border: 1px solid var(--bp-border);
 
         // Header — recessed well behind the mode label + currency chip
-        --bs-shop-panel-header-bg:             var(--bp-bg-2);
-        --bs-shop-panel-header-border:         1px solid var(--bp-border-faint);
+        --bs-shop-panel-header-bg: var(--bp-bg-2);
+        --bs-shop-panel-header-border: 1px solid var(--bp-border-faint);
 
         // Mode label — mono HUD kicker (color set via direct rule below)
-        --bs-shop-panel-mode-label-color:      var(--bp-teal-fg);
-        --bs-shop-panel-mode-label-font-size:  0.6875rem;
+        --bs-shop-panel-mode-label-color: var(--bp-teal-fg);
+        --bs-shop-panel-mode-label-font-size: 0.6875rem;
 
         // Currency chip — teal-tinted surface so it reads as a live HUD value
-        --bs-shop-panel-currency-bg:           var(--bp-teal-soft);
-        --bs-shop-panel-currency-border:       1px solid var(--bp-teal-line);
-        --bs-shop-panel-currency-color:        var(--bp-teal-fg);
-        --bs-shop-panel-currency-font-size:    0.75rem;
+        --bs-shop-panel-currency-bg: var(--bp-teal-soft);
+        --bs-shop-panel-currency-border: 1px solid var(--bp-teal-line);
+        --bs-shop-panel-currency-color: var(--bp-teal-fg);
+        --bs-shop-panel-currency-font-size: 0.75rem;
 
         // Row dividers + hover
-        --bs-shop-panel-row-border:            1px solid var(--bp-border-faint);
-        --bs-shop-panel-row-hover-bg:          var(--bp-paper-tint);
+        --bs-shop-panel-row-border: 1px solid var(--bp-border-faint);
+        --bs-shop-panel-row-hover-bg: var(--bp-paper-tint);
 
         // State opacities — keep base values
-        --bs-shop-panel-sold-out-opacity:      0.4;
-        --bs-shop-panel-unaffordable-opacity:  0.48;
+        --bs-shop-panel-sold-out-opacity: 0.4;
+        --bs-shop-panel-unaffordable-opacity: 0.48;
 
         // Row icon
-        --bs-shop-panel-icon-color:            var(--bp-teal-fg);
-        --bs-shop-panel-icon-font-size:        0.875rem;
+        --bs-shop-panel-icon-color: var(--bp-teal-fg);
+        --bs-shop-panel-icon-font-size: 0.875rem;
 
         // Item name
-        --bs-shop-panel-name-color:            var(--bp-text);
-        --bs-shop-panel-name-font-size:        0.8125rem;
+        --bs-shop-panel-name-color: var(--bp-text);
+        --bs-shop-panel-name-font-size: 0.8125rem;
 
         // Price — base value uses --tc-text; route to soft ink
-        --bs-shop-panel-price-color:           var(--bp-text-soft);
-        --bs-shop-panel-price-font-size:       0.75rem;
-        --bs-shop-panel-price-old-color:       var(--bp-text-faint);
+        --bs-shop-panel-price-color: var(--bp-text-soft);
+        --bs-shop-panel-price-font-size: 0.75rem;
+        --bs-shop-panel-price-old-color: var(--bp-text-faint);
 
         // Discount badge — replace baked #dcfce7 / #22c55e with teal tint (success = teal)
-        --bs-shop-panel-discount-bg:           var(--bp-teal-soft);
-        --bs-shop-panel-discount-color:        var(--bp-teal-fg);
-        --bs-shop-panel-discount-font-size:    0.6875rem;
+        --bs-shop-panel-discount-bg: var(--bp-success-soft);
+        --bs-shop-panel-discount-color: var(--bp-success-fg);
+        --bs-shop-panel-discount-font-size: 0.6875rem;
 
         // Action button — pink = primary CTA in blueprint arcade rotation
-        --bs-shop-panel-btn-bg:                var(--bp-pink);
-        --bs-shop-panel-btn-color:             var(--bp-pink-ink);
-        --bs-shop-panel-btn-border:            1px solid var(--bp-pink);
-        --bs-shop-panel-btn-hover-bg:          var(--bp-paper);
-        --bs-shop-panel-btn-hover-color:       var(--bp-pink);
-        --bs-shop-panel-btn-hover-border:      1px solid var(--bp-pink-line);
-        --bs-shop-panel-btn-font-size:         0.6875rem;
-        --bs-shop-panel-btn-min-height:        1.75rem;
-        --bs-shop-panel-btn-disabled-opacity:  0.4;
+        --bs-shop-panel-btn-bg: var(--bp-pink);
+        --bs-shop-panel-btn-color: var(--bp-pink-ink);
+        --bs-shop-panel-btn-border: 1px solid var(--bp-pink);
+        --bs-shop-panel-btn-hover-bg: var(--bp-paper);
+        --bs-shop-panel-btn-hover-color: var(--bp-pink);
+        --bs-shop-panel-btn-hover-border: 1px solid var(--bp-pink-line);
+        --bs-shop-panel-btn-font-size: 0.6875rem;
+        --bs-shop-panel-btn-min-height: 1.75rem;
+        --bs-shop-panel-btn-disabled-opacity: 0.4;
 
         // Empty state
-        --bs-shop-panel-empty-color:           var(--bp-text-faint);
+        --bs-shop-panel-empty-color: var(--bp-text-faint);
     }
 
     // ── Panel shell ────────────────────────────────────────────────────────────

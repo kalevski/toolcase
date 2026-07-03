@@ -12,7 +12,11 @@ tc-theme[name='dungeon'],
         --bs-asset-bundle-bg: var(--fg-panel-bg);
 
         // Replace the slate-toned header wash with a warm gold wash.
-        --bs-asset-bundle-header-cap: linear-gradient(180deg, rgba(201, 169, 97, 0.06), transparent);
+        --bs-asset-bundle-header-cap: linear-gradient(
+            180deg,
+            rgba(201, 169, 97, 0.06),
+            transparent
+        );
 
         // Replace literal product-green border with stamina-green tint.
         --bs-asset-bundle-tag-included-border: rgba(111, 159, 58, 0.35);

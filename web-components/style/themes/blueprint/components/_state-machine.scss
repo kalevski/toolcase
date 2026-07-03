@@ -33,8 +33,8 @@ tc-theme[name='blueprint'],
 
     // Done — solid teal fill; status=success maps to teal in the arcade palette.
     .tc-state-machine-marker-done {
-        background: var(--bp-teal);
-        color: var(--bp-teal-ink);
+        background: var(--bp-success);
+        color: var(--bp-success-ink);
     }
 
     // Active — pink primary fill; pulse halo uses --bp-glow-pink instead of

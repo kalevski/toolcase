@@ -32,6 +32,8 @@ import {
     enforceBytes,
 } from '@/server/services/quota'
 import { resolveLimits } from '@/server/services/plan'
+import { getGithubTokenFor } from '@/server/services/auth'
+import { gitCredentialName } from '@/server/domain/nginxpilot-fragment'
 import * as github from '@/server/infrastructure/github'
 import { GithubError } from '@/server/infrastructure/github'
 import { NginxpilotError, type NginxpilotSiteStatus } from '@/server/infrastructure/nginxpilot'
@@ -216,15 +218,20 @@ export async function createSite(viewer: SiteViewer, body: CreateSiteRequest, to
     // Hard, pre-emptive count gate (§11 point 1) before we touch the namespace.
     assertCanCreateSite(owner.login)
 
-    // Private-repo plan gate (C2): only the free tier is restricted, so skip the GitHub
-    // round-trip for plans that already allow private repos. Re-read the repo's `private`
-    // flag from authoritative GitHub metadata — never a client-supplied flag.
-    if (!resolveLimits(owner.login).privateRepos) {
-        if (!token) {
-            throw new SiteError('GitHub authentication required to create a site', 'github_token_missing', 401)
-        }
+    // Re-read the repo's `private` flag from authoritative GitHub metadata — never a
+    // client-supplied flag (C2). The flag is both the plan gate (private repos are a
+    // granted capability) and a persisted fact on the row: a private site's fragment
+    // needs an `auth` block on every future re-render (deploy/update/redeploy), which
+    // must not cost a GitHub round-trip each time. Without a token we can't determine
+    // privacy — allow it only for plans that permit private repos anyway (the clone
+    // simply runs unauthenticated and only succeeds for a public repo).
+    let repoPrivate = false
+    if (token) {
         const meta = await github.getRepo(token, repoOwner, repoName)
+        repoPrivate = meta.private
         if (meta.private) assertCanUsePrivateRepo(owner.login)
+    } else if (!resolveLimits(owner.login).privateRepos) {
+        throw new SiteError('GitHub authentication required to create a site', 'github_token_missing', 401)
     }
 
     // Pick the target realm (multiple_realms.md §D.2): the active realm (the owner's
@@ -239,6 +246,7 @@ export async function createSite(viewer: SiteViewer, body: CreateSiteRequest, to
         ownerId: owner.githubId,
         repoOwner,
         repoName,
+        repoPrivate,
         branch,
         subdir,
         hostname,
@@ -363,6 +371,32 @@ export async function deleteSite(viewer: SiteViewer, id: string): Promise<void> 
         })
         siteRepo.remove(site.id)
         audit('site.remove', ownerOf(site), site, 'forced row removal after teardown failure')
+    }
+}
+
+// ── clone-credential refresh (private repos) ──────────────────────────────────────
+
+/**
+ * Re-push a user's (freshly stored) GitHub token to the git-credentials store of every
+ * realm their private sites deploy to. Called fire-and-forget from the OAuth callback:
+ * a re-login is exactly when a rotated/revoked token gets replaced, and nginxpilot
+ * re-reads the credential file at each fetch — so stalled interval pulls heal without
+ * a redeploy. Failures are logged per site, never surfaced to the login flow.
+ */
+export function refreshGithubCredentials(githubId: number): void {
+    const token = getGithubTokenFor(githubId)
+    if (!token) return
+    for (const site of siteRepo.listByOwner(githubId)) {
+        if (!site.repoPrivate) continue
+        void realms
+            .clientForSite(site)
+            .putGitCredential(gitCredentialName(site.id), token)
+            .catch((err) =>
+                slog('warn', 'sites', 'failed to refresh git credential on login', {
+                    site: site.id,
+                    error: String(err),
+                }),
+            )
     }
 }
 

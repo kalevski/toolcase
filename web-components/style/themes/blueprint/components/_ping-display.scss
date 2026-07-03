@@ -2,17 +2,16 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-ping-display {
         // ── Tier colour remap ─────────────────────────────────────────────────────
         // unknown: faint text token (replaces slate fallback #94a3b8)
         --bs-ping-display-color-unknown: var(--bp-text-faint);
         // success: teal — matches blueprint "status: success" convention
-        --bs-ping-display-color-success: var(--bp-teal);
+        --bs-ping-display-color-success: var(--bp-success);
         // warning: amber — matches blueprint "status: warning" convention
         --bs-ping-display-color-warning: var(--bp-amber);
         // danger: real red — matches blueprint "status: danger" convention (NOT pink, which is CTA)
-        --bs-ping-display-color-danger:  var(--bp-danger);
+        --bs-ping-display-color-danger: var(--bp-danger);
 
         // ── Mono eyebrow voice ────────────────────────────────────────────────────
         // Bump letter-spacing to the blueprint micro-label spec (.08em)
@@ -31,7 +30,7 @@ tc-theme[name='blueprint'],
     // ── Success pip: live halo ring ────────────────────────────────────────────────
     // Good ping reads as "connected / live" — give the success pip a teal halo per
     // the blueprint live/pulse-dot recipe (box-shadow 0 0 0 .2em --bp-teal-soft).
-    tc-ping-display[data-tier="success"] .tc-ping-display-pip {
-        box-shadow: 0 0 0 0.2em var(--bp-teal-soft);
+    tc-ping-display[data-tier='success'] .tc-ping-display-pip {
+        box-shadow: 0 0 0 0.2em var(--bp-success-soft);
     }
 }

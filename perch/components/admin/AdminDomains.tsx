@@ -1,12 +1,11 @@
 'use client'
 
 import { useCallback, useMemo, useState } from 'react'
-import type { TableColumn } from '@toolcase/web-components'
+import type { AdvancedTableColumn } from '@toolcase/web-components'
 import { escapeHtml } from '@/lib/tc'
 import { BASE_DOMAIN_TIERS, type BaseDomain, type BaseDomainTier, type BaseDomainTls } from '@/server/domain/types'
 import { AdminPage, json, useOwnerData } from './shared'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
-import { DataTable } from '@/components/DataTable'
 import { FormModal, FormGroup } from '@/components/FormModal'
 import { SelectField, TextField, type SelectOption } from '@/components/fields'
 
@@ -34,41 +33,25 @@ const TLS_OPTIONS: { value: BaseDomainTls; label: string }[] = [
     { value: 'off', label: 'HTTP only' },
 ]
 
-// One DataTable row per base domain. Domain auto-escapes (no render); TLS is a
-// native Bootstrap-compatible <select> (painted by tc-* style.css) and Remove a
-// danger button — both carry data-action + data-domain for the delegated handler.
-interface DomainRow extends Record<string, unknown> {
+interface DomainRow {
     domain: string
     tls: BaseDomainTls
 }
 
-const DOMAIN_COLUMNS = (busy: boolean): TableColumn[] => [
+const DOMAIN_COLUMNS: AdvancedTableColumn[] = [
     {
         key: 'domain',
-        header: 'Domain',
-        render: (row: DomainRow) => `<span class="perch-admin-mono">${escapeHtml(row.domain)}</span>`,
+        label: 'Domain',
     },
     {
         key: 'tls',
-        header: 'Subdomain TLS',
+        label: 'Subdomain TLS',
         width: '12rem',
-        render: (row: DomainRow) => {
-            const opts = TLS_OPTIONS.map(
-                (o) =>
-                    `<option value="${o.value}"${o.value === row.tls ? ' selected' : ''}>${escapeHtml(o.label)}</option>`,
-            ).join('')
-            return (
-                `<select class="form-select form-select-sm" data-action="tls" data-domain="${escapeHtml(row.domain)}"` +
-                ` aria-label="Subdomain HTTPS for ${escapeHtml(row.domain)}"${busy ? ' disabled' : ''}>${opts}</select>`
-            )
-        },
     },
     {
         key: 'action',
-        header: '',
+        label: '',
         align: 'right',
-        render: (row: DomainRow) =>
-            `<button type="button" class="btn btn-sm btn-outline-danger" data-action="remove" data-domain="${escapeHtml(row.domain)}"${busy ? ' disabled' : ''}>Remove</button>`,
     },
 ]
 
@@ -219,23 +202,10 @@ function BaseDomainsForm({
         }
     }, [pending, busy, onChanged])
 
-    // One delegated handler for every base-domain row control across all tier
-    // tables: a TLS <select> change PATCHes in place; a Remove click opens the
-    // confirm dialog (the actual DELETE runs on confirm).
-    const onRowAction = useCallback(
-        (action: string, dataset: DOMStringMap, event: Event) => {
-            const domain = dataset.domain
-            if (!domain) return
-            if (action === 'tls') {
-                void setTls(domain, (event.target as HTMLSelectElement).value as BaseDomainTls)
-            } else if (action === 'remove') {
-                setPending(domain)
-            }
-        },
-        [setTls],
-    )
 
-    const columns = useMemo(() => DOMAIN_COLUMNS(busy), [busy])
+    const setTableColumns = useCallback((el: any) => {
+        if (el) (el as any).columns = DOMAIN_COLUMNS
+    }, [])
 
     return (
         <>
@@ -265,12 +235,43 @@ function BaseDomainsForm({
                                         {TIER_META[t].label}
                                         <span className="perch-admin-hint"> — {TIER_META[t].note}</span>
                                     </h4>
-                                    <DataTable<DomainRow>
-                                        columns={columns}
-                                        rows={rows}
-                                        rowKey={(row) => row.domain}
-                                        onAction={onRowAction}
-                                    />
+                                    <tc-advanced-table
+                                        ref={setTableColumns}
+                                        limit={String(rows.length || 10)}
+                                        offset="0"
+                                        total={String(rows.length)}
+                                    >
+                                        {rows.map((row) => (
+                                            <tr key={row.domain}>
+                                                <td className="perch-admin-mono">{row.domain}</td>
+                                                <td>
+                                                    <select
+                                                        className="form-select form-select-sm"
+                                                        value={row.tls}
+                                                        onChange={(e) => void setTls(row.domain, e.currentTarget.value as BaseDomainTls)}
+                                                        disabled={busy}
+                                                        aria-label={`Subdomain HTTPS for ${row.domain}`}
+                                                    >
+                                                        {TLS_OPTIONS.map((o) => (
+                                                            <option key={o.value} value={o.value}>
+                                                                {o.label}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </td>
+                                                <td className="text-end">
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-sm btn-outline-danger"
+                                                        onClick={() => setPending(row.domain)}
+                                                        disabled={busy}
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tc-advanced-table>
                                 </div>
                             )
                         })

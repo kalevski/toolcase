@@ -9,15 +9,15 @@ tc-theme[name='dungeon'],
     // ── Token swap: the one off-palette literal + header colour ─────────────────
     tc-table {
         --bs-table-row-hairline: 1px solid rgba(201, 169, 97, 0.15);
-        --bs-table-th-color:     var(--fg-gold);
+        --bs-table-th-color: var(--fg-gold);
     }
 
     // ── Header: gilded display caps (engraved ledger read) ───────────────────────
     .tc-table-th {
-        font-family:     var(--fg-display);
-        letter-spacing:  0.1em;
-        text-transform:  uppercase;
-        font-weight:     600;
+        font-family: var(--fg-display);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        font-weight: 600;
     }
 
     // Sort button hover lifts to gold-bright instead of plain text.

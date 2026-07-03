@@ -8,13 +8,12 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // ── Token swap on the host ──────────────────────────────────────────────────
     tc-image-crop {
-        --bs-image-crop-scrim:              rgba(10, 7, 4, 0.6);
-        --bs-image-crop-btn-primary-bg:     var(--fg-gold-edge);
-        --bs-image-crop-btn-primary-color:  var(--fg-ink);
-        --bs-image-crop-btn-primary-lift:   0 4px 15px rgba(0, 0, 0, 0.6);
+        --bs-image-crop-scrim: rgba(10, 7, 4, 0.6);
+        --bs-image-crop-btn-primary-bg: var(--fg-gold-edge);
+        --bs-image-crop-btn-primary-color: var(--fg-ink);
+        --bs-image-crop-btn-primary-lift: 0 4px 15px rgba(0, 0, 0, 0.6);
     }
 
     // ── Gilded crop stage — inset bevel top highlight ───────────────────────────

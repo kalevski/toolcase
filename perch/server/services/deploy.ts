@@ -14,8 +14,15 @@ import * as baseDomainRepo from '@/server/data/repositories/base-domain-repo'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
 import * as realms from '@/server/services/realms'
 import { resolveLimits } from '@/server/services/plan'
+import { getGithubTokenFor } from '@/server/services/auth'
+import { slog } from '@/server/infrastructure/server-log'
+import type { NginxpilotClient } from '@/server/infrastructure/nginxpilot'
 import { STANDARD_LIMITS, type Site } from '@/server/domain/types'
-import type { FragmentOptions, SiteWebOptions } from '@/server/domain/nginxpilot-fragment'
+import {
+    gitCredentialName,
+    type FragmentOptions,
+    type SiteWebOptions,
+} from '@/server/domain/nginxpilot-fragment'
 import * as machine from '@/server/domain/deploy-machine'
 import type { DeployDeps, SiteSourceChanges, TrackOptions } from '@/server/domain/deploy-machine'
 
@@ -53,14 +60,42 @@ function resolveWebOptions(site: Site): SiteWebOptions | undefined {
 /**
  * Render options for a site's fragment: the poll interval is the owner's effective
  * `PlanLimits.minIntervalSec` (the baseline polls slowly; raised accounts near-real-time, §11/§15).
- * v1 deploys public repos only, so no `auth` block is emitted (zero stored secrets,
- * §9); the renderer's `require_file` + `exclude` defaults cover the rest. Managed-mode
- * TLS options are resolved from the base domain for subdomains (§0/Phase D).
+ * Public repos emit no `auth` block; a private site's fragment gains one in
+ * `writeFragmentWithAuth` below, after the clone token is pushed to the realm's
+ * git-credentials store. Managed-mode TLS options are resolved from the base domain
+ * for subdomains (§0/Phase D).
  */
 function fragmentOptions(site: Site): FragmentOptions {
     const owner = userRepo.get(site.ownerId)
     const limits = owner ? resolveLimits(owner.login) : STANDARD_LIMITS
     return { intervalSec: limits.minIntervalSec, web: resolveWebOptions(site) }
+}
+
+/**
+ * Fragment write with the private-repo credential seam: for a private site, push the
+ * owner's stored GitHub token to the realm's git-credentials store first (idempotent
+ * PUT; the daemon answers with the 0600 file's path), then emit the fragment with
+ * `auth.token_file` referencing it. nginxpilot re-reads the file at every fetch, so a
+ * later re-push (a rotated token on re-login) heals interval pulls without a reload.
+ * A private site whose owner has no stored token yet gets no `auth` block — the sync
+ * then fails with a clear auth error in `/status` and heals on the owner's next login.
+ */
+async function writeFragmentWithAuth(
+    client: NginxpilotClient,
+    site: Site,
+    options: FragmentOptions,
+): Promise<string> {
+    if (!site.repoPrivate) return client.writeFragment(site, options)
+    const token = getGithubTokenFor(site.ownerId)
+    if (!token) {
+        slog('warn', 'deploy', 'private site has no stored GitHub token; writing fragment without auth', {
+            site: site.id,
+            hostname: site.hostname,
+        })
+        return client.writeFragment(site, options)
+    }
+    const cred = await client.putGitCredential(gitCredentialName(site.id), token)
+    return client.writeFragment(site, { ...options, auth: { tokenFile: cred.path } })
 }
 
 /** Append an audit entry for a lifecycle transition, attributed to the site owner. */
@@ -84,7 +119,7 @@ function deps(site: Site): DeployDeps {
     const client = realms.clientForSite(site)
     return {
         client: {
-            writeFragment: client.writeFragment,
+            writeFragment: (s, options) => writeFragmentWithAuth(client, s, options),
             removeFragment: client.removeFragment,
             reload: client.reload,
             sync: client.sync,
@@ -126,8 +161,21 @@ export function update(site: Site, changes: SiteSourceChanges): Promise<Site> {
 }
 
 /** Remove the fragment, reload, and delete the row (§9 step 7). */
-export function remove(site: Site): Promise<void> {
-    return machine.remove(deps(site), site)
+export async function remove(site: Site): Promise<void> {
+    await machine.remove(deps(site), site)
+    // Best-effort credential cleanup: the site is gone, so its clone token has no
+    // readers. A failure here leaves an orphaned 0600 file on the daemon — log it,
+    // never fail the (already-completed) removal for it.
+    if (site.repoPrivate) {
+        try {
+            await realms.clientForSite(site).deleteGitCredential(gitCredentialName(site.id))
+        } catch (err) {
+            slog('warn', 'deploy', 'failed to remove git credential after site delete', {
+                site: site.id,
+                error: (err as Error).message,
+            })
+        }
+    }
 }
 
 /**

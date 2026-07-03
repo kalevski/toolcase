@@ -126,7 +126,7 @@ export function DashboardHome() {
         : 'Publish a branch of one of your GitHub repositories as a static website. Pick the repository and branch, choose a hostname, and Perch deploys it.'
 
     return (
-        <section className={`perch-home${hasSites ? ' perch-home--wide' : ''}`}>
+        <section className="perch-home perch-home--wide">
             {/* Keyed per mode so the empty → has-sites transition mounts a FRESH
                 header (the action button is present from connect, so the slot capture
                 runs cleanly). Within a mode the title is constant and the action

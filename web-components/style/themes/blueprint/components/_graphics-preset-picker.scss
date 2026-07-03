@@ -2,11 +2,10 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-graphics-preset-picker {
         // Typography: blueprint mono for machine-facing uppercase labels.
         --bs-graphics-preset-picker-font: var(--bp-mono);
-        --bs-graphics-preset-picker-letter-spacing: 0.10em;
+        --bs-graphics-preset-picker-letter-spacing: 0.1em;
 
         // Frame + separator hairlines → blueprint border token (no raw slate refs).
         --bs-graphics-preset-picker-border-color: var(--bp-border);

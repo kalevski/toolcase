@@ -56,9 +56,9 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
                 { key: 'streams', label: 'Streams', icon: 'cable', href: '/streams' },
             ].map((item) => ({ ...item, active: pathname.startsWith(item.href) })),
         }
-        // Every admin area is its own sidebar entry (Overview, Sites, Users, Realms,
-        // Domains, Certificates, Plans, Settings, Audit) — one route per page, no
-        // intra-section tab bar. ADMIN_TABS is the single source for the list.
+        // Every admin area is its own sidebar entry (Sites, Users, Realms, Domains,
+        // Certificates, Settings, Audit) — one route per page, no intra-section tab
+        // bar. ADMIN_TABS is the single source for the list.
         const admin: SideNavSection = {
             key: 'admin',
             title: 'Admin',
@@ -67,12 +67,7 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
                 label: tab.label,
                 icon: tab.icon,
                 href: tab.href,
-                // Overview owns the exact /admin path; every other area owns its own
-                // subtree, so /admin/sites highlights Sites rather than Overview.
-                active:
-                    tab.href === '/admin'
-                        ? pathname === '/admin'
-                        : pathname === tab.href || pathname.startsWith(`${tab.href}/`),
+                active: pathname === tab.href || pathname.startsWith(`${tab.href}/`),
             })),
         }
         const rank = ROLE_RANK[me.role]

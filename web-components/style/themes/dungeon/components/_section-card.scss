@@ -5,12 +5,15 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // ── Token swap on host ─────────────────────────────────────────────────────
 
     tc-section-card {
         // Replace the near-invisible slate ink-cap with a visible gold/ink cap.
-        --bs-section-card-header-bg: linear-gradient(180deg, rgba(201, 169, 97, 0.06), rgba(0, 0, 0, 0));
+        --bs-section-card-header-bg: linear-gradient(
+            180deg,
+            rgba(201, 169, 97, 0.06),
+            rgba(0, 0, 0, 0)
+        );
 
         // Wood-gradient surface instead of flat --tc-surface.
         --bs-section-card-bg: var(--fg-panel-bg);
@@ -22,7 +25,11 @@ tc-theme[name='dungeon'],
 
         // Blood accent for the 4px left border and header hairline.
         --bs-section-card-danger-border-color: var(--fg-blood);
-        --bs-section-card-danger-header-bg: linear-gradient(135deg, rgba(168, 48, 42, 0.18), rgba(168, 48, 42, 0.04));
+        --bs-section-card-danger-header-bg: linear-gradient(
+            135deg,
+            rgba(168, 48, 42, 0.18),
+            rgba(168, 48, 42, 0.04)
+        );
         --bs-section-card-danger-header-border-color: rgba(168, 48, 42, 0.4);
 
         // Title and chip — Sass map.get literals, must be overridden here.

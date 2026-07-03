@@ -2,42 +2,41 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-quest-tracker {
         // Panel shell — white raised card with blueprint hairline
-        --bs-quest-tracker-bg:     var(--bp-paper);
+        --bs-quest-tracker-bg: var(--bp-paper);
         --bs-quest-tracker-border: 1px solid var(--bp-border);
 
         // Header — recessed well, mono eyebrow title in teal
-        --bs-quest-tracker-header-bg:         var(--bp-bg-2);
-        --bs-quest-tracker-header-border:     1px solid var(--bp-border);
-        --bs-quest-tracker-title-color:       var(--bp-teal-fg);
-        --bs-quest-tracker-title-font-size:   0.6875rem;
+        --bs-quest-tracker-header-bg: var(--bp-bg-2);
+        --bs-quest-tracker-header-border: 1px solid var(--bp-border);
+        --bs-quest-tracker-title-color: var(--bp-teal-fg);
+        --bs-quest-tracker-title-font-size: 0.6875rem;
 
         // Quest name — display font, strong ink
-        --bs-quest-tracker-quest-border:          1px solid var(--bp-border-faint);
-        --bs-quest-tracker-quest-name-color:      var(--bp-text);
-        --bs-quest-tracker-quest-name-font-size:  0.8125rem;
+        --bs-quest-tracker-quest-border: 1px solid var(--bp-border-faint);
+        --bs-quest-tracker-quest-name-color: var(--bp-text);
+        --bs-quest-tracker-quest-name-font-size: 0.8125rem;
 
         // Objectives — body ink; completed → faint muted; optional → violet supporting
-        --bs-quest-tracker-objective-label-color:     var(--bp-text-soft);
+        --bs-quest-tracker-objective-label-color: var(--bp-text-soft);
         --bs-quest-tracker-objective-label-font-size: 0.8125rem;
         --bs-quest-tracker-objective-completed-color: var(--bp-text-faint);
-        --bs-quest-tracker-objective-optional-color:  var(--bp-violet-fg);
+        --bs-quest-tracker-objective-optional-color: var(--bp-violet-fg);
         --bs-quest-tracker-objective-optional-font-size: 0.6875rem;
 
         // Check indicator — empty=border hairline, done=teal fill (success)
-        --bs-quest-tracker-check-size:       0.625rem;
-        --bs-quest-tracker-check-color:      var(--bp-border-strong);
-        --bs-quest-tracker-check-done-color: var(--bp-teal);
+        --bs-quest-tracker-check-size: 0.625rem;
+        --bs-quest-tracker-check-color: var(--bp-border-strong);
+        --bs-quest-tracker-check-done-color: var(--bp-success);
 
         // Progress count — mono HUD label, muted ink
-        --bs-quest-tracker-count-color:     var(--bp-text-muted);
+        --bs-quest-tracker-count-color: var(--bp-text-muted);
         --bs-quest-tracker-count-font-size: 0.75rem;
 
         // Progress bar — faint track, pink primary fill
-        --bs-quest-tracker-bar-bg:     var(--bp-border-faint);
-        --bs-quest-tracker-bar-fill:   var(--bp-pink);
+        --bs-quest-tracker-bar-bg: var(--bp-border-faint);
+        --bs-quest-tracker-bar-fill: var(--bp-pink);
         --bs-quest-tracker-bar-height: 3px;
 
         // Empty state
@@ -102,13 +101,15 @@ tc-theme[name='blueprint'],
 
     .tc-quest-tracker-objective-check {
         border-color: var(--bs-quest-tracker-check-color);
-        transition: background var(--bp-ease, 0.18s ease), border-color var(--bp-ease, 0.18s ease);
+        transition:
+            background var(--bp-ease, 0.18s ease),
+            border-color var(--bp-ease, 0.18s ease);
 
         &--done {
             border-color: var(--bs-quest-tracker-check-done-color);
             background: var(--bs-quest-tracker-check-done-color);
             // Soft teal glow on completed objectives
-            box-shadow: 0 0 0 0.15em var(--bp-teal-soft);
+            box-shadow: 0 0 0 0.15em var(--bp-success-soft);
         }
     }
 

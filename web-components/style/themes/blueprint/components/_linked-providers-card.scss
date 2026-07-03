@@ -2,42 +2,41 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-linked-providers-card {
         // ── Theming contract re-points ──────────────────────────────────────────
 
         // Row separators: blueprint faint lavender hairline (replaces raw rgba(148,163,184,.35)).
-        --bs-linked-providers-card-row-separator:    var(--bp-border-faint);
+        --bs-linked-providers-card-row-separator: var(--bp-border-faint);
 
         // Row hover: lavender recessed well instead of slate-50.
-        --bs-linked-providers-card-row-hover-bg:     var(--bp-bg-2);
+        --bs-linked-providers-card-row-hover-bg: var(--bp-bg-2);
 
         // Label: blueprint primary ink.
-        --bs-linked-providers-card-label-color:      var(--bp-text);
+        --bs-linked-providers-card-label-color: var(--bp-text);
 
         // Account / sub-label: muted ink.
-        --bs-linked-providers-card-account-color:    var(--bp-text-muted);
+        --bs-linked-providers-card-account-color: var(--bp-text-muted);
 
         // Icon tile: lavender recessed bg + lilac hairline border.
-        --bs-linked-providers-card-tile-bg:          var(--bp-bg-2);
+        --bs-linked-providers-card-tile-bg: var(--bp-bg-2);
         --bs-linked-providers-card-tile-border-color: var(--bp-border);
 
         // Default icon glyph color (when no brand inline color is applied).
         --bs-linked-providers-card-icon-default-color: var(--bp-teal-fg);
 
         // Action button (unlink): muted ink at rest, pink on hover — pink = primary/destructive action.
-        --bs-linked-providers-card-btn-color:        var(--bp-text-faint);
-        --bs-linked-providers-card-btn-hover-color:  var(--bp-pink);
-        --bs-linked-providers-card-btn-hover-bg:     var(--bp-pink-soft);
+        --bs-linked-providers-card-btn-color: var(--bp-text-faint);
+        --bs-linked-providers-card-btn-hover-color: var(--bp-pink);
+        --bs-linked-providers-card-btn-hover-bg: var(--bp-pink-soft);
 
         // Connected status dot: teal = success/live in blueprint.
-        --bs-linked-providers-card-connected-dot-color: var(--bp-teal);
+        --bs-linked-providers-card-connected-dot-color: var(--bp-success);
 
         // Empty state copy: faint muted ink.
-        --bs-linked-providers-card-empty-color:      var(--bp-text-faint);
+        --bs-linked-providers-card-empty-color: var(--bp-text-faint);
 
         // Title: blueprint primary ink (display font applied below).
-        --bs-linked-providers-card-title-color:      var(--bp-emphasis);
+        --bs-linked-providers-card-title-color: var(--bp-emphasis);
     }
 
     // ── Outer card frame ────────────────────────────────────────────────────────

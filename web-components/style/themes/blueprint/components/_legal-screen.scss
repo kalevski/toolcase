@@ -3,15 +3,14 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-legal-screen {
         // ── Surface ───────────────────────────────────────────────────────────
-        --bs-legal-screen-bg:           var(--bp-paper);
+        --bs-legal-screen-bg: var(--bp-paper);
         --bs-legal-screen-border-color: var(--bp-border);
-        --bs-legal-screen-shadow:       var(--tc-shadow-md);
+        --bs-legal-screen-shadow: var(--tc-shadow-md);
 
         // ── Header ────────────────────────────────────────────────────────────
-        --bs-legal-screen-header-bg:     var(--bp-paper-tint);
+        --bs-legal-screen-header-bg: var(--bp-paper-tint);
         --bs-legal-screen-header-border: var(--bp-border);
 
         // ── Eyebrow — mono micro-label ────────────────────────────────────────
@@ -24,22 +23,22 @@ tc-theme[name='blueprint'],
 
         // ── Sidebar nav ───────────────────────────────────────────────────────
         // Recessed well signals it is structural chrome, not content.
-        --bs-legal-screen-nav-bg:             var(--bp-bg-2);
-        --bs-legal-screen-nav-border:         var(--bp-border);
-        --bs-legal-screen-nav-item-color:     var(--bp-text-muted);
-        --bs-legal-screen-nav-item-hover-bg:  var(--bp-paper-tint-2);
+        --bs-legal-screen-nav-bg: var(--bp-bg-2);
+        --bs-legal-screen-nav-border: var(--bp-border);
+        --bs-legal-screen-nav-item-color: var(--bp-text-muted);
+        --bs-legal-screen-nav-item-hover-bg: var(--bp-paper-tint-2);
         // Active nav item → pink primary; white ink label.
-        --bs-legal-screen-nav-active-bg:      var(--bp-pink);
-        --bs-legal-screen-nav-active-color:   var(--bp-pink-ink);
+        --bs-legal-screen-nav-active-bg: var(--bp-pink);
+        --bs-legal-screen-nav-active-color: var(--bp-pink-ink);
 
         // ── Body panel ────────────────────────────────────────────────────────
-        --bs-legal-screen-body-bg:             var(--bp-paper);
-        --bs-legal-screen-section-eye-color:   var(--bp-teal-fg);
+        --bs-legal-screen-body-bg: var(--bp-paper);
+        --bs-legal-screen-section-eye-color: var(--bp-teal-fg);
         --bs-legal-screen-section-title-color: var(--bp-text);
-        --bs-legal-screen-section-body-color:  var(--bp-text-muted);
+        --bs-legal-screen-section-body-color: var(--bp-text-muted);
 
         // ── Footer ────────────────────────────────────────────────────────────
-        --bs-legal-screen-footer-bg:     var(--bp-paper-tint);
+        --bs-legal-screen-footer-bg: var(--bp-paper-tint);
         --bs-legal-screen-footer-border: var(--bp-border);
     }
 
@@ -79,7 +78,9 @@ tc-theme[name='blueprint'],
     // ── Close button ─────────────────────────────────────────────────────────
     .tc-legal-screen__close {
         color: var(--bp-text-faint);
-        transition: background-color var(--bp-ease), color var(--bp-ease);
+        transition:
+            background-color var(--bp-ease),
+            color var(--bp-ease);
 
         &:hover {
             background: var(--bp-paper-tint-2);
@@ -105,7 +106,9 @@ tc-theme[name='blueprint'],
     .tc-legal-screen__nav-item {
         font-family: var(--bp-body);
         color: var(--bs-legal-screen-nav-item-color);
-        transition: background-color var(--bp-ease), color var(--bp-ease);
+        transition:
+            background-color var(--bp-ease),
+            color var(--bp-ease);
 
         &:hover {
             background: var(--bs-legal-screen-nav-item-hover-bg);
@@ -179,7 +182,9 @@ tc-theme[name='blueprint'],
         text-transform: uppercase;
         background: var(--bp-pink-grad);
         color: var(--bp-pink-ink);
-        transition: transform var(--bp-ease), box-shadow var(--bp-ease);
+        transition:
+            transform var(--bp-ease),
+            box-shadow var(--bp-ease);
 
         &:hover {
             transform: translateY(-2px);

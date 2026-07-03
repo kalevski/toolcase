@@ -3,48 +3,45 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-form-wizard {
         // ── Host shell ────────────────────────────────────────────────────────────
         // Raise to paper, swap the generic surface/border tokens for bp equivalents.
-        --bs-form-wizard-body-bg:     var(--bp-paper);
+        --bs-form-wizard-body-bg: var(--bp-paper);
         --bs-form-wizard-body-border: 1px solid var(--bp-border);
 
         // Footer/header wells sit one step recessed from the main body.
-        --bs-form-wizard-footer-bg:     var(--bp-bg-2);
+        --bs-form-wizard-footer-bg: var(--bp-bg-2);
         --bs-form-wizard-footer-border: 1px solid var(--bp-border-faint);
 
         // Smooth transitions ride the theme ease curve.
         --bs-form-wizard-marker-transition:
-            background var(--bp-ease),
-            border-color var(--bp-ease),
-            color var(--bp-ease);
+            background var(--bp-ease), border-color var(--bp-ease), color var(--bp-ease);
 
         // ── State: done — teal (success / completed action) ───────────────────────
-        --bs-form-wizard-done-bg:     var(--bp-teal);
-        --bs-form-wizard-done-border: var(--bp-teal);
-        --bs-form-wizard-done-color:  var(--bp-teal-ink);
+        --bs-form-wizard-done-bg: var(--bp-success);
+        --bs-form-wizard-done-border: var(--bp-success);
+        --bs-form-wizard-done-color: var(--bp-success-ink);
 
         // ── State: current — pink (primary / CTA) ────────────────────────────────
-        --bs-form-wizard-current-bg:        var(--bp-pink);
-        --bs-form-wizard-current-border:    var(--bp-pink);
-        --bs-form-wizard-current-color:     var(--bp-pink-ink);
+        --bs-form-wizard-current-bg: var(--bp-pink);
+        --bs-form-wizard-current-border: var(--bp-pink);
+        --bs-form-wizard-current-color: var(--bp-pink-ink);
         --bs-form-wizard-current-underline: var(--bp-pink);
 
         // ── State: upcoming — faint border, muted ink ─────────────────────────────
         // Route away from raw tc-slate-* refs; use bp border/text tokens.
         --bs-form-wizard-upcoming-border: var(--bp-border-strong);
-        --bs-form-wizard-upcoming-color:  var(--bp-text-faint);
+        --bs-form-wizard-upcoming-color: var(--bp-text-faint);
 
         // ── Connectors ────────────────────────────────────────────────────────────
         // Idle connector → faint divider track; done connector → teal to match marker.
-        --bs-form-wizard-connector-color:      var(--bp-border-faint);
-        --bs-form-wizard-connector-done-color: var(--bp-teal);
+        --bs-form-wizard-connector-color: var(--bp-border-faint);
+        --bs-form-wizard-connector-done-color: var(--bp-success);
 
         // ── Labels ────────────────────────────────────────────────────────────────
-        --bs-form-wizard-label-color:               var(--bp-text-faint);
-        --bs-form-wizard-label-done-color:          var(--bp-teal-fg);
-        --bs-form-wizard-label-current-color:       var(--bp-text);
+        --bs-form-wizard-label-color: var(--bp-text-faint);
+        --bs-form-wizard-label-done-color: var(--bp-success-fg);
+        --bs-form-wizard-label-current-color: var(--bp-text);
         --bs-form-wizard-label-current-font-weight: 700;
     }
 
@@ -68,13 +65,13 @@ tc-theme[name='blueprint'],
     .tc-form-wizard-tab-label {
         font-family: var(--bp-mono);
         text-transform: uppercase;
-        letter-spacing: .07em;
+        letter-spacing: 0.07em;
         font-size: 0.6875rem; // slightly tighter than base 0.8125rem for mono caps
     }
 
     // Done label gets teal-fg so it reads as a positive completed state at AA contrast.
     .tc-form-wizard-tab--done .tc-form-wizard-tab-label {
-        color: var(--bp-teal-fg);
+        color: var(--bp-success-fg);
     }
 
     // Current label uses primary ink + a soft pink glow on its underline strip.
@@ -86,11 +83,11 @@ tc-theme[name='blueprint'],
     .tc-form-wizard-tab--done {
         &:hover .tc-form-wizard-tab-marker {
             opacity: 1; // override base 0.85 fade; use a glow instead
-            box-shadow: var(--bp-glow-teal);
+            box-shadow: var(--bp-glow-success);
         }
 
         &:focus-visible {
-            outline-color: var(--bp-teal);
+            outline-color: var(--bp-success);
         }
     }
 

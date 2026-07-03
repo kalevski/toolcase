@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-changelog {
         // Rail: faint lavender hairline (divider token)
         --bs-changelog-rail-color: var(--bp-border-faint);
@@ -102,5 +101,4 @@ tc-theme[name='blueprint'],
     .tc-changelog-dot--skeleton {
         box-shadow: none;
     }
-
 }

@@ -140,8 +140,16 @@ export function CreateSiteWizard() {
             .then((list) => {
                 if (!cancelled) setRepos(list)
             })
-            .catch(() => {
-                if (!cancelled) setError("Couldn't load your repositories from GitHub. Try refreshing.")
+            .catch((res: unknown) => {
+                if (cancelled) return
+                // 401 = no usable GitHub credential on the server (a session from
+                // before token persistence, or a revoked token) — only a fresh
+                // sign-in mints a new one. Anything else is transient.
+                if (res instanceof Response && res.status === 401) {
+                    setError('Your GitHub connection needs a refresh. Sign out and sign back in, then try again.')
+                } else {
+                    setError("Couldn't load your repositories from GitHub. Try refreshing.")
+                }
             })
             .finally(() => {
                 if (!cancelled) setReposLoading(false)

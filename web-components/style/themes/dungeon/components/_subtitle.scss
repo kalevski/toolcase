@@ -14,7 +14,10 @@ tc-theme[name='dungeon'],
     .tc-subtitle__text {
         font-family: var(--fg-body);
         font-style: italic;
-        text-shadow: 0 1px 0 #000, 0 0 8px #000, 0 0 16px #000;
+        text-shadow:
+            0 1px 0 #000,
+            0 0 8px #000,
+            0 0 16px #000;
     }
 
     .tc-subtitle__speaker {
@@ -25,7 +28,9 @@ tc-theme[name='dungeon'],
     }
 
     .tc-subtitle--boxed {
-        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(232, 200, 120, 0.12);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+            inset 0 1px 0 rgba(232, 200, 120, 0.12);
     }
 
     .tc-subtitle--boxed .tc-subtitle__text {

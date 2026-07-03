@@ -6,7 +6,7 @@
 // orchestration live in `services/sites.ts` (§13). See §9, §13.
 
 import { NextResponse } from 'next/server'
-import { authorize, getGithubToken } from '@/server/services/auth'
+import { authorize, getGithubTokenFor } from '@/server/services/auth'
 import * as sites from '@/server/services/sites'
 
 export const runtime = 'nodejs'
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     }
 
     try {
-        const token = await getGithubToken()
+        const token = getGithubTokenFor(authz.session.sub)
         const site = await sites.createSite({ sub: authz.session.sub, role: authz.role }, body, token)
         return NextResponse.json(site, { status: 201 })
     } catch (err) {

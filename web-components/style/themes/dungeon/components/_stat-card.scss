@@ -7,14 +7,13 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // ── 1. Token swap on host element ────────────────────────────────────────
 
     tc-stat-card {
-        --bs-stat-card-bg:               var(--fg-panel-bg);
-        --bs-stat-card-border-color:     var(--fg-gold);
-        --bs-stat-card-value-color:      var(--fg-gold-bright);
-        --bs-stat-card-icon-tile-bg:     var(--fg-slot-bg);
+        --bs-stat-card-bg: var(--fg-panel-bg);
+        --bs-stat-card-border-color: var(--fg-gold);
+        --bs-stat-card-value-color: var(--fg-gold-bright);
+        --bs-stat-card-icon-tile-bg: var(--fg-slot-bg);
         --bs-stat-card-skeleton-shimmer: rgba(240, 210, 122, 0.25);
     }
 

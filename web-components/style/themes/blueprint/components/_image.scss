@@ -2,17 +2,22 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // Re-point the --bs-image-* knobs to blueprint tokens.
     // The shimmer gradient uses base → shine → shade; map those to the
     // lavender page ramp so the sweep reads as a blueprint-tinted pulse
     // rather than the default slate sweep.
     tc-image {
-        --bs-image-bg:               var(--bp-bg-2);            // recessed well; sits behind the loaded image
-        --bs-image-shimmer-base:     var(--bp-bg-2);            // shimmer ground — faint lavender well
-        --bs-image-shimmer-shine:    var(--bp-paper-tint);      // sweep highlight — near-white with violet undertone
-        --bs-image-shimmer-shade:    var(--bp-border-faint);    // trailing edge — hairline lavender; replaces slate --tc-border
-        --bs-image-fallback-color:   var(--bp-text-faint);      // broken-image icon + any text in the fallback slot
+        --bs-image-bg: var(--bp-bg-2); // recessed well; sits behind the loaded image
+        --bs-image-shimmer-base: var(--bp-bg-2); // shimmer ground — faint lavender well
+        --bs-image-shimmer-shine: var(
+            --bp-paper-tint
+        ); // sweep highlight — near-white with violet undertone
+        --bs-image-shimmer-shade: var(
+            --bp-border-faint
+        ); // trailing edge — hairline lavender; replaces slate --tc-border
+        --bs-image-fallback-color: var(
+            --bp-text-faint
+        ); // broken-image icon + any text in the fallback slot
     }
 
     // Fallback panel: paint the surface explicitly so it stays on the
@@ -24,8 +29,8 @@ tc-theme[name='blueprint'],
         // Mono micro-label style for any text child inside the fallback slot
         // (e.g. an alt caption or "Image unavailable" string).
         font-family: var(--bp-mono);
-        font-size: .6875rem;
-        letter-spacing: .08em;
+        font-size: 0.6875rem;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
     }
 }

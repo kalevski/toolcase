@@ -2,48 +2,47 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── token overrides via --bs-gantt-chart-* API ─────────────────────────
 
     tc-gantt-chart {
         // Card frame: white paper raised over lavender page, violet-tinted hairline
-        --bs-gantt-chart-bg:                  var(--bp-paper);
-        --bs-gantt-chart-border:              1px solid var(--bp-border);
-        --bs-gantt-chart-shadow:              var(--tc-shadow-sm);
+        --bs-gantt-chart-bg: var(--bp-paper);
+        --bs-gantt-chart-border: 1px solid var(--bp-border);
+        --bs-gantt-chart-shadow: var(--tc-shadow-sm);
 
         // Header ink
-        --bs-gantt-chart-title-color:         var(--bp-text);
-        --bs-gantt-chart-subtitle-color:      var(--bp-text-muted);
+        --bs-gantt-chart-title-color: var(--bp-text);
+        --bs-gantt-chart-subtitle-color: var(--bp-text-muted);
 
         // Axis: faint lavender well, teal-fg ticks, border-faint hairline
-        --bs-gantt-chart-axis-bg:             var(--bp-bg-2);
-        --bs-gantt-chart-tick-color:          var(--bp-teal-fg);
-        --bs-gantt-chart-gridline-color:      var(--bp-border-faint);
+        --bs-gantt-chart-axis-bg: var(--bp-bg-2);
+        --bs-gantt-chart-tick-color: var(--bp-teal-fg);
+        --bs-gantt-chart-gridline-color: var(--bp-border-faint);
 
         // Row separators: lightest divider — not raw slate-100
-        --bs-gantt-chart-row-separator:       var(--bp-border-faint);
+        --bs-gantt-chart-row-separator: var(--bp-border-faint);
 
         // Label column text
-        --bs-gantt-chart-label-color:         var(--bp-text-soft);
+        --bs-gantt-chart-label-color: var(--bp-text-soft);
 
         // Bars: soft violet tint for the empty track; pink for progress (primary CTA accent)
-        --bs-gantt-chart-bar-bg:              var(--bp-violet-soft);
-        --bs-gantt-chart-progress-fill:       var(--bp-pink);
-        --bs-gantt-chart-bar-color:           var(--bp-pink);
+        --bs-gantt-chart-bar-bg: var(--bp-violet-soft);
+        --bs-gantt-chart-progress-fill: var(--bp-pink);
+        --bs-gantt-chart-bar-color: var(--bp-pink);
 
         // Hover outline: strong border token (visible but not a new hue)
-        --bs-gantt-chart-bar-hover-outline:   var(--bp-border-strong);
+        --bs-gantt-chart-bar-hover-outline: var(--bp-border-strong);
 
         // Focus ring: teal (everyday action accent)
-        --bs-gantt-chart-focus-ring:          var(--bp-teal);
+        --bs-gantt-chart-focus-ring: var(--bp-teal);
 
         // Tooltip: paper surface + strong border hairline (blueprint is light-theme)
-        --bs-gantt-chart-tooltip-bg:          var(--bp-paper);
-        --bs-gantt-chart-tooltip-color:       var(--bp-text);
-        --bs-gantt-chart-tooltip-shadow:      var(--tc-shadow-md);
+        --bs-gantt-chart-tooltip-bg: var(--bp-paper);
+        --bs-gantt-chart-tooltip-color: var(--bp-text);
+        --bs-gantt-chart-tooltip-shadow: var(--tc-shadow-md);
 
         // Skeleton shimmer: lavender well, animated over paper-tint
-        --bs-gantt-chart-skeleton-bg:         var(--bp-bg-2);
+        --bs-gantt-chart-skeleton-bg: var(--bp-bg-2);
     }
 
     // ── title typography: display face, tight tracking ──────────────────────

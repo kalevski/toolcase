@@ -20,7 +20,9 @@ tc-theme[name='dungeon'],
 
     // Step 3: drag-active state — gold-bright border (free via token) + rune glow.
     .tc-file-dropzone--active .tc-file-dropzone__area {
-        box-shadow: 0 0 0 1px var(--fg-gold-bright), 0 0 18px rgba(240, 210, 122, 0.25);
+        box-shadow:
+            0 0 0 1px var(--fg-gold-bright),
+            0 0 18px rgba(240, 210, 122, 0.25);
     }
 
     // Step 4: icon tinted gilt at rest so it reads as a rune glyph.

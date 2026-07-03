@@ -2,42 +2,41 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Component token overrides ───────────────────────────────────────────
     tc-stat-card {
         // Surface: white raised card on the lavender canvas.
-        --bs-stat-card-bg:                var(--bp-paper);
-        --bs-stat-card-border-color:      var(--bp-border);
-        --bs-stat-card-shadow:            var(--tc-shadow-sm);
+        --bs-stat-card-bg: var(--bp-paper);
+        --bs-stat-card-border-color: var(--bp-border);
+        --bs-stat-card-shadow: var(--tc-shadow-sm);
 
         // Icon tile: recessed well tinted with teal action color.
-        --bs-stat-card-icon-tile-bg:      var(--bp-teal-soft);
-        --bs-stat-card-icon-color:        var(--bp-teal-fg);
+        --bs-stat-card-icon-tile-bg: var(--bp-teal-soft);
+        --bs-stat-card-icon-color: var(--bp-teal-fg);
 
         // Label: mono eyebrow — uppercase, loose tracking, muted ink.
-        --bs-stat-card-label-color:       var(--bp-text-muted);
-        --bs-stat-card-label-font-size:   0.6875rem;
+        --bs-stat-card-label-color: var(--bp-text-muted);
+        --bs-stat-card-label-font-size: 0.6875rem;
         --bs-stat-card-label-letter-spacing: 0.12em;
 
         // Value: strong primary ink (Chakra Petch applied on the element below).
-        --bs-stat-card-value-color:       var(--bp-emphasis);
-        --bs-stat-card-value-font-size:   1.75rem;
+        --bs-stat-card-value-color: var(--bp-emphasis);
+        --bs-stat-card-value-font-size: 1.75rem;
         --bs-stat-card-value-font-weight: 700;
 
         // Unit: faint muted suffix.
-        --bs-stat-card-unit-color:        var(--bp-text-faint);
+        --bs-stat-card-unit-color: var(--bp-text-faint);
 
         // Helper: faint body copy.
-        --bs-stat-card-helper-color:      var(--bp-text-faint);
+        --bs-stat-card-helper-color: var(--bp-text-faint);
 
         // Footer: recessed well background separated by a faint divider.
-        --bs-stat-card-footer-bg:         var(--bp-bg-2);
+        --bs-stat-card-footer-bg: var(--bp-bg-2);
         --bs-stat-card-footer-border-color: var(--bp-border-faint);
-        --bs-stat-card-footer-color:      var(--bp-text-muted);
+        --bs-stat-card-footer-color: var(--bp-text-muted);
 
         // Skeleton: lavender well shimmer on the paper surface.
-        --bs-stat-card-skeleton-bg:       var(--bp-paper-tint-2);
-        --bs-stat-card-skeleton-shimmer:  rgba(255, 255, 255, 0.7);
+        --bs-stat-card-skeleton-bg: var(--bp-paper-tint-2);
+        --bs-stat-card-skeleton-shimmer: rgba(255, 255, 255, 0.7);
     }
 
     // ── Value headline: Chakra Petch display font ───────────────────────────
@@ -82,9 +81,9 @@ tc-theme[name='blueprint'],
     }
 
     .tc-stat-card-delta--up {
-        background-color: var(--bp-teal-soft);
-        color: var(--bp-teal-fg);           // teal text on white clears AA
-        border-color: var(--bp-teal-line);
+        background-color: var(--bp-success-soft);
+        color: var(--bp-success-fg); // teal text on white clears AA
+        border-color: var(--bp-success-line);
     }
 
     .tc-stat-card-delta--down {

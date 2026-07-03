@@ -10,16 +10,16 @@ tc-theme[name='dungeon'],
 
     tc-advanced-table {
         // Wood gradient surface (replaces plain --tc-surface).
-        --bs-advanced-table-bg:             var(--fg-panel-bg);
+        --bs-advanced-table-bg: var(--fg-panel-bg);
 
         // Ledger-line hairlines: faint gold-shadow instead of pale slate.
-        --bs-advanced-table-row-hairline:   1px solid var(--fg-gold-shadow);
+        --bs-advanced-table-row-hairline: 1px solid var(--fg-gold-shadow);
 
         // Dark ink veil instead of the bright white scrim.
-        --bs-advanced-table-overlay-scrim:  rgba(13, 10, 6, 0.6);
+        --bs-advanced-table-overlay-scrim: rgba(13, 10, 6, 0.6);
 
         // Gold spinner stays legible against the now-dark scrim.
-        --bs-advanced-table-spinner-color:  var(--fg-gold);
+        --bs-advanced-table-spinner-color: var(--fg-gold);
     }
 
     // ── Body wrap: gilded ledger frame ────────────────────────────────────────

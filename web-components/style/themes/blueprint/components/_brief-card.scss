@@ -108,8 +108,8 @@ tc-theme[name='blueprint'],
 
     // Easy / low: success → teal soft tint + teal text.
     .tc-brief-card__diff-badge--success {
-        background-color: var(--bp-teal-soft);
-        color: var(--bp-teal-fg);
+        background-color: var(--bp-success-soft);
+        color: var(--bp-success-fg);
         font-family: var(--bp-mono);
         letter-spacing: 0.08em;
     }

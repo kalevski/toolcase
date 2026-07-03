@@ -113,7 +113,12 @@ tc-theme[name='neon'],
     --nd-accent-grad: linear-gradient(135deg, var(--nd-accent), var(--nd-accent-2));
     // The DUAL magenta→cyan gradient — for clipped neon display TEXT only
     // (headings / hero / brand wordmark), never behind dark-ink labels.
-    --nd-accent-grad-text: linear-gradient(120deg, var(--nd-accent) 0%, #ff88e6 45%, var(--nd-cyan) 100%);
+    --nd-accent-grad-text: linear-gradient(
+        120deg,
+        var(--nd-accent) 0%,
+        #ff88e6 45%,
+        var(--nd-cyan) 100%
+    );
     // Soft top-down surface gradient for cards / panels.
     --nd-surface-grad: linear-gradient(180deg, var(--nd-surface-2), var(--nd-surface));
     // Magenta neon glow for raised primary elements (lit ring + depth shadow).

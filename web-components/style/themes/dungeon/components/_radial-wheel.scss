@@ -9,7 +9,11 @@ tc-theme[name='dungeon'],
         --bs-radial-wheel-backdrop-bg: #000;
         --bs-radial-wheel-backdrop-opacity: 0.6;
 
-        --bs-radial-wheel-disc-bg: radial-gradient(60% 60% at 50% 50%, rgba(201, 169, 97, 0.05), transparent);
+        --bs-radial-wheel-disc-bg: radial-gradient(
+            60% 60% at 50% 50%,
+            rgba(201, 169, 97, 0.05),
+            transparent
+        );
         --bs-radial-wheel-disc-border: transparent;
         --bs-radial-wheel-disc-shadow: none;
 

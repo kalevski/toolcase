@@ -3,23 +3,22 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Base defaults (info → violet) ────────────────────────────────────────
 
     .tc-banner {
         // Surface: white paper ground with a faint border-faint top/right/bottom
         // framing so the banner reads as a lifted slab on the lavender canvas.
-        --bs-banner-bg:          var(--bp-paper);
+        --bs-banner-bg: var(--bp-paper);
         --bs-banner-border-color: var(--bp-violet);
-        --bs-banner-color:        var(--bp-text);
+        --bs-banner-color: var(--bp-text);
 
         // Body copy through Space Grotesk for crisp legibility at .9rem.
-        font-family:  var(--bp-body);
+        font-family: var(--bp-body);
 
         // Wrap the left accent stripe with faint surrounding hairlines so the
         // panel reads as a complete bounded surface (not just a left rule).
-        border-top:    1px solid var(--bp-border-faint);
-        border-right:  1px solid var(--bp-border-faint);
+        border-top: 1px solid var(--bp-border-faint);
+        border-right: 1px solid var(--bp-border-faint);
         border-bottom: 1px solid var(--bp-border-faint);
 
         // Subtle violet-tinted shadow lifts the panel off the canvas.
@@ -38,10 +37,10 @@ tc-theme[name='blueprint'],
         --bs-banner-cta-color: var(--bp-violet-fg);
 
         font-family: var(--bp-mono);
-        font-size:   0.78rem;
+        font-size: 0.78rem;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: .08em;
+        letter-spacing: 0.08em;
 
         &:focus-visible {
             // Pink for primary focus ring — blueprint CTA focus convention.
@@ -55,8 +54,8 @@ tc-theme[name='blueprint'],
         color: var(--bp-text-faint);
 
         &:hover {
-            color:            var(--bp-text);
-            background-color: var(--bp-bg-2);    // recessed well tint — not raw slate
+            color: var(--bp-text);
+            background-color: var(--bp-bg-2); // recessed well tint — not raw slate
         }
 
         &:focus-visible {
@@ -69,8 +68,8 @@ tc-theme[name='blueprint'],
     // INFO — violet (supporting accent)
     .tc-banner-info {
         --bs-banner-border-color: var(--bp-violet);
-        --bs-banner-bg:           var(--bp-paper);
-        --bs-banner-color:        var(--bp-text);
+        --bs-banner-bg: var(--bp-paper);
+        --bs-banner-color: var(--bp-text);
 
         .tc-banner-cta {
             --bs-banner-cta-color: var(--bp-violet-fg);
@@ -81,9 +80,9 @@ tc-theme[name='blueprint'],
     .tc-banner-warning {
         --bs-banner-border-color: var(--bp-amber);
         // Amber-soft fill: a warm tinted paper rather than a harsh gradient.
-        --bs-banner-bg:           var(--bp-amber-soft);
+        --bs-banner-bg: var(--bp-amber-soft);
         // amber-fg is the darker amber shade that clears AA on white/near-white.
-        --bs-banner-color:        var(--bp-amber-fg);
+        --bs-banner-color: var(--bp-amber-fg);
 
         .tc-banner-cta {
             --bs-banner-cta-color: var(--bp-amber-fg);
@@ -97,20 +96,20 @@ tc-theme[name='blueprint'],
         }
     }
 
-    // SUCCESS — teal (everyday action colour)
+    // SUCCESS — pinned success family (base teal; stays put under accent variants)
     .tc-banner-success {
-        --bs-banner-border-color: var(--bp-teal);
-        --bs-banner-bg:           var(--bp-teal-soft);
+        --bs-banner-border-color: var(--bp-success);
+        --bs-banner-bg: var(--bp-success-soft);
         // teal-fg is the darker teal that clears AA on teal-soft backgrounds.
-        --bs-banner-color:        var(--bp-teal-fg);
+        --bs-banner-color: var(--bp-success-fg);
 
         .tc-banner-cta {
-            --bs-banner-cta-color: var(--bp-teal-fg);
+            --bs-banner-cta-color: var(--bp-success-fg);
         }
 
         .tc-banner-close {
             &:hover {
-                background-color: color-mix(in srgb, var(--bp-teal-soft) 60%, var(--bp-bg-2));
+                background-color: color-mix(in srgb, var(--bp-success-soft) 60%, var(--bp-bg-2));
             }
         }
     }
@@ -118,8 +117,8 @@ tc-theme[name='blueprint'],
     // ERROR — real danger red (never repurpose pink for errors)
     .tc-banner-error {
         --bs-banner-border-color: var(--bp-danger);
-        --bs-banner-bg:           var(--bp-danger-soft);
-        --bs-banner-color:        var(--bp-danger);
+        --bs-banner-bg: var(--bp-danger-soft);
+        --bs-banner-color: var(--bp-danger);
 
         .tc-banner-cta {
             --bs-banner-cta-color: var(--bp-danger);
@@ -136,11 +135,11 @@ tc-theme[name='blueprint'],
     // Uses the pink-surface gradient so the stripe + fill share the same hue family.
     .tc-banner-announce {
         --bs-banner-border-color: var(--bp-pink);
-        --bs-banner-bg:           var(--bp-pink-surface);
+        --bs-banner-bg: var(--bp-pink-surface);
         // Pink text on the very-light pink-surface still needs the full ink shade
         // for legibility; --bp-pink itself is vivid enough to clear AA here.
-        --bs-banner-color:        var(--bp-text);
-        --bs-banner-cta-color:    var(--bp-pink);
+        --bs-banner-color: var(--bp-text);
+        --bs-banner-cta-color: var(--bp-pink);
 
         .tc-banner-cta {
             --bs-banner-cta-color: var(--bp-pink);
@@ -151,7 +150,9 @@ tc-theme[name='blueprint'],
         }
 
         // Subtle pink glow reinforces the brand-announcement intent.
-        box-shadow: var(--tc-shadow-sm), 0 0 0 1px var(--bp-pink-line);
+        box-shadow:
+            var(--tc-shadow-sm),
+            0 0 0 1px var(--bp-pink-line);
     }
 
     // ── tc-announcement-bar preset ───────────────────────────────────────────
@@ -161,11 +162,10 @@ tc-theme[name='blueprint'],
 
     tc-announcement-bar.tc-banner {
         .tc-banner-content {
-            font-family:    var(--bp-mono);
-            font-size:      0.8rem;
+            font-family: var(--bp-mono);
+            font-size: 0.8rem;
             text-transform: uppercase;
-            letter-spacing: .06em;
+            letter-spacing: 0.06em;
         }
     }
-
 }

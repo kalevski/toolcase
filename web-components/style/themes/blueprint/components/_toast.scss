@@ -3,20 +3,19 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Base surface ──────────────────────────────────────────────────────────
     // The default theme bakes dark --tc-ink; blueprint is light, so flip to
     // white paper with a violet-tinted hairline border and a soft shadow.
     .toast {
-        --bs-toast-color:                var(--bp-text);
-        --bs-toast-bg:                   var(--bp-paper);
-        --bs-toast-border-width:         1px;
-        --bs-toast-border-color:         var(--bp-border);
-        --bs-toast-box-shadow:           var(--tc-shadow-md);
-        --bs-toast-header-color:         var(--bp-text);
-        --bs-toast-header-bg:            transparent;
-        --bs-toast-header-border-color:  var(--bp-border-faint);
-        --bs-toast-font-size:            0.8125rem;
+        --bs-toast-color: var(--bp-text);
+        --bs-toast-bg: var(--bp-paper);
+        --bs-toast-border-width: 1px;
+        --bs-toast-border-color: var(--bp-border);
+        --bs-toast-box-shadow: var(--tc-shadow-md);
+        --bs-toast-header-color: var(--bp-text);
+        --bs-toast-header-bg: transparent;
+        --bs-toast-header-border-color: var(--bp-border-faint);
+        --bs-toast-font-size: 0.8125rem;
     }
 
     // ── Header ────────────────────────────────────────────────────────────────
@@ -57,16 +56,16 @@ tc-theme[name='blueprint'],
     // overrides the fill back to paper and lets only the 3px stripe carry color.
     // Specificity is matched: same compound selector as the base rule.
     .toast[class*='text-bg-'] {
-        --bs-toast-bg:                   var(--bp-paper) !important;  // override base's !important fill
-        --bs-toast-color:                var(--bp-text) !important;
-        --bs-toast-header-color:         var(--bp-text) !important;
-        --bs-toast-header-bg:            transparent !important;
-        --bs-toast-header-border-color:  var(--bp-border-faint) !important;
-        --bs-toast-border-color:         var(--bp-border) !important;
+        --bs-toast-bg: var(--bp-paper) !important; // override base's !important fill
+        --bs-toast-color: var(--bp-text) !important;
+        --bs-toast-header-color: var(--bp-text) !important;
+        --bs-toast-header-bg: transparent !important;
+        --bs-toast-header-border-color: var(--bp-border-faint) !important;
+        --bs-toast-border-color: var(--bp-border) !important;
 
         // Make sure the Bootstrap utility !important fill is suppressed.
-        color:            var(--bs-toast-color) !important;
-        background-color: var(--bs-toast-bg)    !important;
+        color: var(--bs-toast-color) !important;
+        background-color: var(--bs-toast-bg) !important;
 
         // Default stripe for any unrecognised text-bg-* variant.
         border-left: 3px solid var(--bp-border-strong);
@@ -75,22 +74,22 @@ tc-theme[name='blueprint'],
     // Accent rotation: pink=primary, teal=success/action, violet=info,
     // amber=warning, real red=danger.
     .toast.text-bg-success {
-        border-left-color: var(--bp-teal);       // status success → teal
+        border-left-color: var(--bp-success); // status success → teal
     }
 
     .toast.text-bg-danger {
-        border-left-color: var(--bp-danger);     // real red, not pink
+        border-left-color: var(--bp-danger); // real red, not pink
     }
 
     .toast.text-bg-warning {
-        border-left-color: var(--bp-amber);      // amber for caution
+        border-left-color: var(--bp-amber); // amber for caution
     }
 
     .toast.text-bg-info {
-        border-left-color: var(--bp-violet);     // violet for informational
+        border-left-color: var(--bp-violet); // violet for informational
     }
 
     .toast.text-bg-primary {
-        border-left-color: var(--bp-pink);       // pink = primary / CTA accent
+        border-left-color: var(--bp-pink); // pink = primary / CTA accent
     }
 }

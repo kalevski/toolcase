@@ -4,18 +4,19 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-funnel-chart {
         // --- segment fill ramp ---
         // Series rotate through the accent stack: pink (primary) leads the widest
         // stage; teal carries the action tier; violet + amber fill supporting slots.
         // All fills are dark enough to keep white --bp-*-ink labels legible.
-        --bs-funnel-chart-series-1: var(--bp-pink);          // widest — primary CTA tier
-        --bs-funnel-chart-series-2: var(--bp-teal);          // action tier
-        --bs-funnel-chart-series-3: var(--bp-violet);        // support tier
-        --bs-funnel-chart-series-4: var(--bp-amber);         // support tier
-        --bs-funnel-chart-series-5: var(--bp-teal-fg);       // deeper teal (on white — passes AA; on fill → white label OK)
-        --bs-funnel-chart-series-6: var(--bp-violet-fg);     // deeper violet
+        --bs-funnel-chart-series-1: var(--bp-pink); // widest — primary CTA tier
+        --bs-funnel-chart-series-2: var(--bp-teal); // action tier
+        --bs-funnel-chart-series-3: var(--bp-violet); // support tier
+        --bs-funnel-chart-series-4: var(--bp-amber); // support tier
+        --bs-funnel-chart-series-5: var(
+            --bp-teal-fg
+        ); // deeper teal (on white — passes AA; on fill → white label OK)
+        --bs-funnel-chart-series-6: var(--bp-violet-fg); // deeper violet
 
         // --- card frame ---
         --bs-funnel-chart-bg: var(--bp-paper);

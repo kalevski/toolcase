@@ -2,7 +2,7 @@
 //
 // The left-border stripe maps to the blueprint accent rotation:
 //   primary  → pink  (--bp-pink)
-//   success  → teal  (--bp-teal)
+//   success  → teal  (--bp-success)
 //   info     → violet (--bp-violet)
 //   warning  → amber (--bp-amber)
 //   danger   → real red (--bp-danger)
@@ -11,13 +11,12 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Base alert shell ───────────────────────────────────────────────────────
     .alert {
-        --bs-alert-bg: var(--bp-paper-tint);           // soft off-white ground
+        --bs-alert-bg: var(--bp-paper-tint); // soft off-white ground
         --bs-alert-color: var(--bp-text);
-        --bs-alert-border-color: var(--bp-border);     // default: no-variant hairline stripe
-        --bs-alert-link-color: var(--bp-violet-fg);    // violet for in-body links
+        --bs-alert-border-color: var(--bp-border); // default: no-variant hairline stripe
+        --bs-alert-link-color: var(--bp-violet-fg); // violet for in-body links
 
         background: var(--bs-alert-bg);
         color: var(--bs-alert-color);
@@ -45,7 +44,7 @@ tc-theme[name='blueprint'],
 
     // PRIMARY — pink (brand/CTA severity). Replaces the dark slate gradient wash.
     .alert-primary {
-        --bs-alert-bg: var(--bp-pink-surface);         // pink surface gradient from foundation
+        --bs-alert-bg: var(--bp-pink-surface); // pink surface gradient from foundation
         --bs-alert-color: var(--bp-text-soft);
         --bs-alert-border-color: var(--bp-pink);
         --bs-alert-link-color: var(--bp-pink);
@@ -61,13 +60,13 @@ tc-theme[name='blueprint'],
 
     // SUCCESS — teal (status: success maps to teal in blueprint)
     .alert-success {
-        --bs-alert-bg: var(--bp-teal-soft);
-        --bs-alert-color: var(--bp-teal-fg);
-        --bs-alert-border-color: var(--bp-teal);
-        --bs-alert-link-color: var(--bp-teal-fg);
+        --bs-alert-bg: var(--bp-success-soft);
+        --bs-alert-color: var(--bp-success-fg);
+        --bs-alert-border-color: var(--bp-success);
+        --bs-alert-link-color: var(--bp-success-fg);
 
         .alert-heading {
-            color: var(--bp-teal-fg);
+            color: var(--bp-success-fg);
         }
     }
 
@@ -109,7 +108,7 @@ tc-theme[name='blueprint'],
 
     // LIGHT — replaces $slate-50 / $slate-300 literals with blueprint tokens
     .alert-light {
-        --bs-alert-bg: var(--bp-bg);                   // lavender page tint
+        --bs-alert-bg: var(--bp-bg); // lavender page tint
         --bs-alert-color: var(--bp-text-muted);
         --bs-alert-border-color: var(--bp-border-strong);
         --bs-alert-link-color: var(--bp-text-soft);
@@ -117,7 +116,7 @@ tc-theme[name='blueprint'],
 
     // DARK — replaces the dark slate rgba gradient with a blueprint violet-tinted wash
     .alert-dark {
-        --bs-alert-bg: var(--bp-paper-tint-2);         // deepest tinted paper (no dark-on-dark)
+        --bs-alert-bg: var(--bp-paper-tint-2); // deepest tinted paper (no dark-on-dark)
         --bs-alert-color: var(--bp-text);
         --bs-alert-border-color: var(--bp-border-strong);
         --bs-alert-link-color: var(--bp-text-soft);

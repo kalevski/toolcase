@@ -80,6 +80,10 @@ var operationDocs = map[string]operationDoc{
 	"GET /acme/credentials":               {summary: "List stored ACME DNS-provider credentials (metadata only).", responseRef: "AcmeCredentialList"},
 	"PUT /acme/credentials/{provider}":    {summary: "Store (or replace) a provider's DNS credential.", requestRef: "AcmeCredentialRequest", responseRef: "AcmeCredentialResult"},
 	"DELETE /acme/credentials/{provider}": {summary: "Remove a provider's stored credential."},
+
+	"GET /git-credentials":           {summary: "List stored git source credentials (metadata only, never tokens).", responseRef: "GitCredentialList"},
+	"PUT /git-credentials/{name}":    {summary: "Store (or replace) a private git source's access token as a daemon-owned 0600 file; reference the returned path via auth.token_file.", requestRef: "GitCredentialRequest", responseRef: "GitCredentialResult"},
+	"DELETE /git-credentials/{name}": {summary: "Remove a stored git source credential."},
 }
 
 // buildOpenAPI assembles the document from the endpoint table + operationDocs.

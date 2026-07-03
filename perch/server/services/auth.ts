@@ -13,6 +13,8 @@ import { config } from '@/server/config'
 import * as userRepo from '@/server/data/repositories/user-repo'
 import * as realmRepo from '@/server/data/repositories/realm-repo'
 import * as userRealmRepo from '@/server/data/repositories/user-realm-repo'
+import * as ghTokenRepo from '@/server/data/repositories/github-token-repo'
+import { encrypt, decrypt } from '@/server/infrastructure/cipher'
 import { tx } from '@/server/data/db'
 import { type AppUser, type Role, type SessionPayload } from '@/server/domain/types'
 import { meetsMinRole } from '@/server/domain/admin'
@@ -24,11 +26,11 @@ export const STATE_COOKIE = 'perch_oauth_state'
 // *hint* by `resolveActiveRealm` (always re-validated against the DB). Non-owners never
 // set or use it: they're pinned to their owner-assigned default realm (§0.6).
 export const REALM_COOKIE = 'perch_realm'
-// The GitHub access token is kept OUT of the session payload (§7) but the
-// create-site wizard needs it to call the GitHub REST API on the user's behalf
-// (§9 step 1, §13). It lives in its own short-lived `httpOnly` cookie — never in
-// the session token, never in the database, and never handed to nginxpilot (which
-// keeps §9's "don't persist a credential for nginxpilot" intact).
+// Legacy cookie name for the GitHub access token. The token now lives encrypted in
+// the `user_github_token` table (see `saveGithubToken` below) — it must outlive any
+// cookie so nginxpilot can keep pulling private repos on interval, and so the wizard's
+// repo listing doesn't die 10 minutes after login. The constant remains only so
+// logout keeps clearing the stale cookie on browsers that still carry it.
 export const GH_TOKEN_COOKIE = 'perch_gh_token'
 
 /** A GitHub identity, normalized from the `/user` profile response. */
@@ -114,22 +116,34 @@ export function stateCookieOptions() {
     return { httpOnly: true, sameSite: 'lax' as const, path: '/', secure: isSecure(), maxAge: 600 }
 }
 
-/**
- * Cookie options for the GitHub access token (S4). The token is only needed during the
- * create-site wizard's repo/branch listing, so it gets a short maxAge (10 min) rather
- * than the full session lifetime — keeping a `read:user`/private-repo-scoped credential
- * resident only as long as the wizard plausibly runs, shrinking the token-theft blast
- * radius. `secure` is forced in production by `isSecure()`.
- */
-export const GH_TOKEN_MAX_AGE_SEC = 600
+// ── GitHub access token at rest (private-repo support) ───────────────────────
+//
+// The token is kept OUT of the session payload (§7) but must survive beyond the
+// login request: the create-site wizard lists repos/branches with it for the whole
+// session (not just 10 minutes), and nginxpilot needs a valid clone credential for
+// private repos on every poll. It is stored AES-256-GCM-encrypted (the realm cipher
+// keyring) in `user_github_token`, refreshed on each login, and never sent to the
+// client. nginxpilot receives it only via its git-credentials store (0600 files),
+// referenced from fragments by path — never inlined in YAML.
 
-export function ghTokenCookieOptions() {
-    return { httpOnly: true, sameSite: 'lax' as const, path: '/', secure: isSecure(), maxAge: GH_TOKEN_MAX_AGE_SEC }
+/** Seal + upsert a user's GitHub token (called from the OAuth callback). */
+export function saveGithubToken(githubId: number, token: string): void {
+    ghTokenRepo.set(githubId, encrypt(token), new Date().toISOString())
 }
 
-/** Read the caller's GitHub access token from its `httpOnly` cookie (null if absent). */
-export async function getGithubToken(): Promise<string | null> {
-    return (await cookies()).get(GH_TOKEN_COOKIE)?.value ?? null
+/**
+ * The stored GitHub token for a user, decrypted — null when the user has never
+ * logged in since token persistence landed, or when the ciphertext no longer
+ * opens (a rotated-out cipher key); both heal on the user's next login.
+ */
+export function getGithubTokenFor(githubId: number): string | null {
+    const sealed = ghTokenRepo.get(githubId)
+    if (!sealed) return null
+    try {
+        return decrypt(sealed)
+    } catch {
+        return null
+    }
 }
 
 // ── active-realm cookie (owner switcher, multiple_realms.md Phase E) ────────────
@@ -224,9 +238,11 @@ export function verifyStateToken(token: string | undefined): boolean {
 // ── OAuth flow ────────────────────────────────────────────────────────────────
 
 export function buildAuthorizeUrl(state: string): string {
-    // `read:user` is enough to identify the user and list the repos the token can
-    // see (§7). An org gate, if configured, additionally needs `read:org`.
-    const scope = config.allowedOrg ? 'read:user read:org' : 'read:user'
+    // `read:user` identifies the user; `repo` lets the token list AND clone private
+    // repositories (OAuth apps have no finer-grained private-repo scope — `repo` is
+    // the smallest one that covers both the wizard's repo listing and nginxpilot's
+    // interval pulls). An org gate, if configured, additionally needs `read:org`.
+    const scope = config.allowedOrg ? 'read:user repo read:org' : 'read:user repo'
     const params = new URLSearchParams({
         client_id: config.githubClientId,
         redirect_uri: config.oauthRedirectUri,

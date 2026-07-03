@@ -3,7 +3,7 @@
 // the GitHub REST helper with the caller's access token.
 
 import { NextResponse } from 'next/server'
-import { authorize, getGithubToken } from '@/server/services/auth'
+import { authorize, getGithubTokenFor } from '@/server/services/auth'
 import { GithubError, listBranches } from '@/server/infrastructure/github'
 
 export const runtime = 'nodejs'
@@ -13,7 +13,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ owner: string;
     const authz = await authorize('standard')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
-    const token = await getGithubToken()
+    const token = getGithubTokenFor(authz.session.sub)
     if (!token) return NextResponse.json({ error: 'github_token_missing' }, { status: 401 })
 
     const { owner, repo } = await ctx.params

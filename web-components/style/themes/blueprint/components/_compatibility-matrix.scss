@@ -2,65 +2,64 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Frame ─────────────────────────────────────────────────────────────────
     tc-compatibility-matrix {
-        --bs-compatibility-matrix-border:        1px solid var(--bp-border);
-        --bs-compatibility-matrix-inner-border:  1px solid var(--bp-border-faint);
-        --bs-compatibility-matrix-bg:            var(--bp-paper);
+        --bs-compatibility-matrix-border: 1px solid var(--bp-border);
+        --bs-compatibility-matrix-inner-border: 1px solid var(--bp-border-faint);
+        --bs-compatibility-matrix-bg: var(--bp-paper);
 
         // ── Header (optional title) ───────────────────────────────────────────
         // Recessed well — gives the title a HUD shelf feel above the grid.
-        --bs-compatibility-matrix-header-bg:           var(--bp-bg-2);
-        --bs-compatibility-matrix-header-padding-y:    0.875rem;
-        --bs-compatibility-matrix-header-padding-x:    1.25rem;
-        --bs-compatibility-matrix-title-font-size:     0.9375rem;
-        --bs-compatibility-matrix-title-font-weight:   700;
-        --bs-compatibility-matrix-title-color:         var(--bp-text);
+        --bs-compatibility-matrix-header-bg: var(--bp-bg-2);
+        --bs-compatibility-matrix-header-padding-y: 0.875rem;
+        --bs-compatibility-matrix-header-padding-x: 1.25rem;
+        --bs-compatibility-matrix-title-font-size: 0.9375rem;
+        --bs-compatibility-matrix-title-font-weight: 700;
+        --bs-compatibility-matrix-title-color: var(--bp-text);
 
         // ── Platform header row ───────────────────────────────────────────────
         // Slightly darker recessed shelf for column labels.
-        --bs-compatibility-matrix-head-bg:                     var(--bp-bg-2);
-        --bs-compatibility-matrix-head-padding-y:              0.625rem;
-        --bs-compatibility-matrix-head-padding-x:              1rem;
-        --bs-compatibility-matrix-platform-label-font-size:    0.625rem;
+        --bs-compatibility-matrix-head-bg: var(--bp-bg-2);
+        --bs-compatibility-matrix-head-padding-y: 0.625rem;
+        --bs-compatibility-matrix-head-padding-x: 1rem;
+        --bs-compatibility-matrix-platform-label-font-size: 0.625rem;
         // Teal-fg keeps AA contrast on white/lavender; reads as active-system ink.
-        --bs-compatibility-matrix-platform-label-color:        var(--bp-teal-fg);
+        --bs-compatibility-matrix-platform-label-color: var(--bp-teal-fg);
         --bs-compatibility-matrix-platform-label-letter-spacing: 0.12em;
 
         // ── Version column (sticky first column) ─────────────────────────────
-        --bs-compatibility-matrix-version-bg:                  var(--bp-bg-2);
-        --bs-compatibility-matrix-version-padding-y:           0.625rem;
-        --bs-compatibility-matrix-version-padding-x:           1rem;
-        --bs-compatibility-matrix-version-label-font-size:     0.625rem;
-        --bs-compatibility-matrix-version-label-color:         var(--bp-text-muted);
+        --bs-compatibility-matrix-version-bg: var(--bp-bg-2);
+        --bs-compatibility-matrix-version-padding-y: 0.625rem;
+        --bs-compatibility-matrix-version-padding-x: 1rem;
+        --bs-compatibility-matrix-version-label-font-size: 0.625rem;
+        --bs-compatibility-matrix-version-label-color: var(--bp-text-muted);
         --bs-compatibility-matrix-version-label-letter-spacing: 0.1em;
-        --bs-compatibility-matrix-version-min-width:           7rem;
+        --bs-compatibility-matrix-version-min-width: 7rem;
 
         // ── Status cells ──────────────────────────────────────────────────────
-        --bs-compatibility-matrix-cell-padding-y:   0.625rem;
-        --bs-compatibility-matrix-cell-padding-x:   1rem;
-        --bs-compatibility-matrix-indicator-size:   1rem;
+        --bs-compatibility-matrix-cell-padding-y: 0.625rem;
+        --bs-compatibility-matrix-cell-padding-x: 1rem;
+        --bs-compatibility-matrix-indicator-size: 1rem;
 
         // ── Status colors — blueprint accent rotation ─────────────────────────
         // yes   → teal  (action/success — see blueprint_theme.md status mapping)
         // no    → real danger red (NOT pink; pink is primary CTA only)
         // partial → amber (supporting/warning)
         // unknown → faint text
-        --bs-compatibility-matrix-yes-color:      var(--bp-teal-fg);
-        --bs-compatibility-matrix-no-color:       var(--bp-danger);
-        --bs-compatibility-matrix-partial-color:  var(--bp-amber-fg);
-        --bs-compatibility-matrix-unknown-color:  var(--bp-text-faint);
+        --bs-compatibility-matrix-yes-color: var(--bp-success-fg);
+        --bs-compatibility-matrix-no-color: var(--bp-danger);
+        --bs-compatibility-matrix-partial-color: var(--bp-amber-fg);
+        --bs-compatibility-matrix-unknown-color: var(--bp-text-faint);
 
         // ── Legend ────────────────────────────────────────────────────────────
-        --bs-compatibility-matrix-legend-bg:             var(--bp-bg-2);
-        --bs-compatibility-matrix-legend-border:         1px solid var(--bp-border-faint);
-        --bs-compatibility-matrix-legend-padding-y:      0.625rem;
-        --bs-compatibility-matrix-legend-padding-x:      1.25rem;
+        --bs-compatibility-matrix-legend-bg: var(--bp-bg-2);
+        --bs-compatibility-matrix-legend-border: 1px solid var(--bp-border-faint);
+        --bs-compatibility-matrix-legend-padding-y: 0.625rem;
+        --bs-compatibility-matrix-legend-padding-x: 1.25rem;
         --bs-compatibility-matrix-legend-label-font-size: 0.6875rem;
-        --bs-compatibility-matrix-legend-label-color:    var(--bp-text-muted);
-        --bs-compatibility-matrix-legend-gap:            1.25rem;
-        --bs-compatibility-matrix-legend-item-gap:       0.375rem;
+        --bs-compatibility-matrix-legend-label-color: var(--bp-text-muted);
+        --bs-compatibility-matrix-legend-gap: 1.25rem;
+        --bs-compatibility-matrix-legend-item-gap: 0.375rem;
     }
 
     // ── Outer frame ───────────────────────────────────────────────────────────

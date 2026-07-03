@@ -8,7 +8,7 @@ tc-theme[name='blueprint'],
 
         // Blueprint status rotation: success→teal, warning→amber, danger→real red.
         // *-fg variants are darkened for AA contrast on the --bp-paper white ground.
-        --bs-helper-text-success-color: var(--bp-teal-fg);
+        --bs-helper-text-success-color: var(--bp-success-fg);
         --bs-helper-text-warning-color: var(--bp-amber-fg);
         --bs-helper-text-error-color: var(--bp-danger);
     }

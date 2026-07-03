@@ -2,57 +2,56 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-heatmap {
         // ── Surface tokens ──────────────────────────────────────────────────
         // Grid gap becomes the hairline "gridline" visible between cells;
         // route to --bp-border instead of the leaked var(--tc-slate-100).
-        --bs-heatmap-gap-color:         var(--bp-border);
+        --bs-heatmap-gap-color: var(--bp-border);
 
         // Frame border around the entire grid.
-        --bs-heatmap-frame-border:      1px solid var(--bp-border-strong);
+        --bs-heatmap-frame-border: 1px solid var(--bp-border-strong);
 
         // Empty/null cells sit on the recessed well tone to stay readable
         // against the lighter paper background used for axis labels.
-        --bs-heatmap-empty-bg:          var(--bp-bg-2);
+        --bs-heatmap-empty-bg: var(--bp-bg-2);
 
         // Hover outline: pink primary accent with a hairline inset ring.
-        --bs-heatmap-hover-outline:     var(--bp-pink);
+        --bs-heatmap-hover-outline: var(--bp-pink);
 
         // ── Typography ──────────────────────────────────────────────────────
         // Title → display face (Chakra Petch), tight tracking.
-        --bs-heatmap-title-color:       var(--bp-text);
-        --bs-heatmap-title-font-size:   0.9375rem;
+        --bs-heatmap-title-color: var(--bp-text);
+        --bs-heatmap-title-font-size: 0.9375rem;
         --bs-heatmap-title-font-weight: 700; // heavier for display face
 
         // Subtitle → body text, muted.
-        --bs-heatmap-subtitle-color:    var(--bp-text-muted);
+        --bs-heatmap-subtitle-color: var(--bp-text-muted);
         --bs-heatmap-subtitle-font-size: 0.8125rem;
 
         // Axis micro-labels → mono, muted.
-        --bs-heatmap-label-color:       var(--bp-text-muted);
-        --bs-heatmap-label-font-size:   0.625rem;
+        --bs-heatmap-label-color: var(--bp-text-muted);
+        --bs-heatmap-label-font-size: 0.625rem;
         --bs-heatmap-label-letter-spacing: 0.08em;
 
         // ── Tooltip ─────────────────────────────────────────────────────────
         // Blueprint tooltips sit on dark --bp-emphasis ink surface; white text
         // stays legible. Replace the raw --tc-ink literal with the bp emphasis
         // tone so the pill reads consistent with the rest of the theme.
-        --bs-heatmap-tooltip-bg:        var(--bp-emphasis);
-        --bs-heatmap-tooltip-color:     #fff; // white on dark emphasis — AA safe
-        --bs-heatmap-tooltip-shadow:    var(--tc-shadow-md);
+        --bs-heatmap-tooltip-bg: var(--bp-emphasis);
+        --bs-heatmap-tooltip-color: #fff; // white on dark emphasis — AA safe
+        --bs-heatmap-tooltip-shadow: var(--tc-shadow-md);
         --bs-heatmap-tooltip-font-size: 0.625rem;
 
         // ── Legend ──────────────────────────────────────────────────────────
         --bs-heatmap-legend-label-color: var(--bp-text-faint);
         --bs-heatmap-legend-label-font-size: 0.625rem;
-        --bs-heatmap-legend-bar-width:  7rem;
+        --bs-heatmap-legend-bar-width: 7rem;
         --bs-heatmap-legend-bar-height: 0.375rem;
 
         // ── Skeleton shimmer ────────────────────────────────────────────────
         // Replace slate-based shimmer with lavender-paper tones.
-        --bs-heatmap-skeleton-bg:       var(--bp-bg-2);
-        --bs-heatmap-skeleton-shimmer:  rgba(255, 255, 255, 0.7); // paper flash
+        --bs-heatmap-skeleton-bg: var(--bp-bg-2);
+        --bs-heatmap-skeleton-shimmer: rgba(255, 255, 255, 0.7); // paper flash
     }
 
     // ── Wrapper ──────────────────────────────────────────────────────────────
@@ -88,7 +87,7 @@ tc-theme[name='blueprint'],
         letter-spacing: var(--bs-heatmap-label-letter-spacing);
         font-size: var(--bs-heatmap-label-font-size);
         color: var(--bs-heatmap-label-color);
-        background: var(--bp-paper-tint);  // replace baked var(--tc-surface)
+        background: var(--bp-paper-tint); // replace baked var(--tc-surface)
         text-transform: uppercase;
     }
 

@@ -19,7 +19,7 @@ tc-theme[name='dungeon'],
         --bs-lightbox-caption-color: var(--fg-parch-dim);
 
         // Thumbnails: white-15 border → gold tint; active → gold-bright.
-        --bs-lightbox-thumb-border:        rgba(201, 169, 97, 0.3);
+        --bs-lightbox-thumb-border: rgba(201, 169, 97, 0.3);
         --bs-lightbox-thumb-active-border: var(--fg-gold-bright);
 
         // Stage surface: already remapped to ink; make it explicit.

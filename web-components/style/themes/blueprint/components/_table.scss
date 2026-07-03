@@ -3,7 +3,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Custom-property re-skin ──────────────────────────────────────────────
     // Drive all cosmetics through the --bs-table-* API; only fall back to
     // element rules for things with no matching var (sort-icon colour,
@@ -11,29 +10,29 @@ tc-theme[name='blueprint'],
 
     tc-table {
         // Surface & frame
-        --bs-table-bg:               var(--bp-paper);
-        --bs-table-border:           1px solid var(--bp-border);
+        --bs-table-bg: var(--bp-paper);
+        --bs-table-border: 1px solid var(--bp-border);
 
         // Header cap — slight lavender recess to lift the mono labels off the
         // data rows without resorting to colour.
-        --bs-table-head-bg:          var(--bp-bg);
-        --bs-table-head-border:      1px solid var(--bp-border-strong);
+        --bs-table-head-bg: var(--bp-bg);
+        --bs-table-head-border: 1px solid var(--bp-border-strong);
 
         // Row hairlines — fixes the raw var(--tc-slate-100, #f1f5f9) slate leak.
-        --bs-table-row-hairline:     1px solid var(--bp-border-faint);
+        --bs-table-row-hairline: 1px solid var(--bp-border-faint);
 
         // Ink
-        --bs-table-th-color:         var(--bp-text-muted);
-        --bs-table-td-color:         var(--bp-text);
+        --bs-table-th-color: var(--bp-text-muted);
+        --bs-table-td-color: var(--bp-text);
 
         // Stripe / hover / active rows — step through lavender tints so each
         // state reads distinctly without harsh contrast.
-        --bs-table-stripe-bg:        var(--bp-paper-tint);
-        --bs-table-row-hover-bg:     var(--bp-paper-tint);
-        --bs-table-row-active-bg:    var(--bp-paper-tint-2);
+        --bs-table-stripe-bg: var(--bp-paper-tint);
+        --bs-table-row-hover-bg: var(--bp-paper-tint);
+        --bs-table-row-active-bg: var(--bp-paper-tint-2);
 
         // Empty state
-        --bs-table-empty-color:      var(--bp-text-faint);
+        --bs-table-empty-color: var(--bp-text-faint);
     }
 
     // ── Wrap / outer frame ───────────────────────────────────────────────────
@@ -77,7 +76,7 @@ tc-theme[name='blueprint'],
 
     .tc-table-th[aria-sort='ascending'] .tc-table-sort-icon,
     .tc-table-th[aria-sort='descending'] .tc-table-sort-icon {
-        color: var(--bp-teal-fg);  // teal text on white — clears AA
+        color: var(--bp-teal-fg); // teal text on white — clears AA
     }
 
     // Active-sort column label also picks up teal so the entire header cell

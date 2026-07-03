@@ -2,32 +2,32 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Custom-property overrides (cleanest re-skin path) ───────────────────
     tc-simple-file {
         // Icon tile: recessed well with hairline border
-        --bs-simple-file-icon-bg:    var(--bp-bg-2);
+        --bs-simple-file-icon-bg: var(--bp-bg-2);
         --bs-simple-file-icon-color: var(--bp-teal-fg); // teal default — AA on --bp-bg-2
 
         // Filename: blueprint body ink
         --bs-simple-file-name-color: var(--bp-text);
 
         // Extension kicker: faint muted ink — overridden per-format below
-        --bs-simple-file-ext-color:  var(--bp-text-faint);
+        --bs-simple-file-ext-color: var(--bp-text-faint);
     }
 
     // ── Icon tile: hairline border ──────────────────────────────────────────
     .tc-simple-file-icon {
         border: 1px solid var(--bp-border);
         box-shadow: var(--tc-shadow-sm);
-        transition: background-color 0.18s var(--bp-ease, ease),
-                    border-color     0.18s var(--bp-ease, ease);
+        transition:
+            background-color 0.18s var(--bp-ease, ease),
+            border-color 0.18s var(--bp-ease, ease);
     }
 
     // ── Filename: blueprint body face ──────────────────────────────────────
     .tc-simple-file-name {
         font-family: var(--bp-body);
-        color:       var(--bp-text);
+        color: var(--bp-text);
         font-weight: 500;
     }
 
@@ -35,14 +35,14 @@ tc-theme[name='blueprint'],
     // Already uppercase+letter-spaced in the base; just re-point the font family and color.
     .tc-simple-file-ext {
         font-family: var(--bp-mono);
-        color:       var(--bp-text-faint);
+        color: var(--bp-text-faint);
     }
 
     // ── Per-format accent rotation ──────────────────────────────────────────
     // image → violet (supporting accent)
     .tc-simple-file-image {
         --bs-simple-file-icon-color: var(--bp-violet-fg);
-        --bs-simple-file-ext-color:  var(--bp-violet-fg);
+        --bs-simple-file-ext-color: var(--bp-violet-fg);
 
         .tc-simple-file-icon {
             border-color: var(--bp-border-strong);
@@ -52,13 +52,13 @@ tc-theme[name='blueprint'],
     // audio → teal (everyday action accent) — already the default, reinforce explicitly
     .tc-simple-file-audio {
         --bs-simple-file-icon-color: var(--bp-teal-fg);
-        --bs-simple-file-ext-color:  var(--bp-teal-fg);
+        --bs-simple-file-ext-color: var(--bp-teal-fg);
     }
 
     // binary → amber (supporting accent)
     .tc-simple-file-binary {
         --bs-simple-file-icon-color: var(--bp-amber-fg);
-        --bs-simple-file-ext-color:  var(--bp-amber-fg);
+        --bs-simple-file-ext-color: var(--bp-amber-fg);
 
         .tc-simple-file-icon {
             border-color: var(--bp-border-strong);

@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-resizable-panel {
         // Pane background: raised white paper surface (consistent with blueprint card/panel surfaces).
         --bs-resizable-panel-pane-bg: var(--bp-paper);
@@ -18,7 +17,9 @@ tc-theme[name='blueprint'],
 
         // Grip dots: muted border-strong at rest; swap to white on teal/pink divider backgrounds.
         --bs-resizable-panel-grip-color: var(--bp-border-strong);
-        --bs-resizable-panel-grip-hover-color: var(--bp-pink-ink); // white — readable on both teal and pink fills
+        --bs-resizable-panel-grip-hover-color: var(
+            --bp-pink-ink
+        ); // white — readable on both teal and pink fills
     }
 
     // ── Divider ────────────────────────────────────────────────────────────────────

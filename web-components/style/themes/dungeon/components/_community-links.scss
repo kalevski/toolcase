@@ -19,7 +19,9 @@ tc-theme[name='dungeon'],
     // reads clearly against the dark wood grid surface.
     .tc-community-links-item:hover,
     .tc-community-links-item:focus {
-        box-shadow: inset 0 0 0 1px var(--fg-gold), var(--tc-shadow-md);
+        box-shadow:
+            inset 0 0 0 1px var(--fg-gold),
+            var(--tc-shadow-md);
     }
 
     // Display-caps heading — base hardcodes font-family on the element itself,

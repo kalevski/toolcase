@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-switch {
         // Off-track: recessed lavender well with a hairline border
         --bs-switch-track-bg: var(--bp-bg-2);
@@ -45,8 +44,7 @@ tc-theme[name='blueprint'],
 
         &--valid {
             // Success = teal in the blueprint accent rotation
-            border-color: var(--bp-teal);
+            border-color: var(--bp-success);
         }
     }
-
 }

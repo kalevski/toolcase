@@ -7,7 +7,6 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // ── 1. Token swap — host element ────────────────────────────────────────────
     tc-welcome-guide {
         // Hero panel: title must be parch/gold-bright, NOT ink-on-black.
@@ -58,8 +57,8 @@ tc-theme[name='dungeon'],
     // by selector; the filter:blur(60px) and z-index:-2 are preserved.
     .tc-welcome-guide__left::before {
         background:
-            radial-gradient(circle at 22% 20%, rgba(201, 169, 97, 0.30), transparent 50%),
-            radial-gradient(circle at 82% 80%, rgba(138, 78, 201, 0.30), transparent 50%);
+            radial-gradient(circle at 22% 20%, rgba(201, 169, 97, 0.3), transparent 50%),
+            radial-gradient(circle at 82% 80%, rgba(138, 78, 201, 0.3), transparent 50%);
     }
 
     // ── 4. Grid overlay — replace hardcoded white lines with faint gold lines ───

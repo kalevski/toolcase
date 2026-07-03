@@ -9,7 +9,7 @@ tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
     // Repoint hardcoded tier literals → fantasy metal ramp.
     tc-rank-cell {
-        --bs-rank-cell-gold:   var(--fg-legendary);
+        --bs-rank-cell-gold: var(--fg-legendary);
         --bs-rank-cell-silver: var(--fg-silver);
         --bs-rank-cell-bronze: var(--fg-copper);
     }

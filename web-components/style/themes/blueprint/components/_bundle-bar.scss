@@ -5,25 +5,25 @@ tc-theme[name='blueprint'],
     tc-bundle-bar {
         // Segment track: unfilled cells use the recessed-well bg with a faint
         // hairline so the empty track reads as a measured grid, not blank space.
-        --bs-bundle-bar-segment-bg:          var(--bp-bg-2);
+        --bs-bundle-bar-segment-bg: var(--bp-bg-2);
         // Filled segments: solid teal action fill — teal = "progress / action"
         // in the arcade accent rotation; pink is reserved for primary CTA.
-        --bs-bundle-bar-segment-filled-bg:   var(--bp-teal);
+        --bs-bundle-bar-segment-filled-bg: var(--bp-teal);
         // Gap between segments doubles as hairline dividers; use the border token
         // so it inherits any theme-wide hairline adjustments.
-        --bs-bundle-bar-segment-gap:         1px;
+        --bs-bundle-bar-segment-gap: 1px;
 
         // Header text: name gets the display face (component title register);
         // meta gets mono treatment (sensor / HUD reading register).
-        --bs-bundle-bar-name-color:          var(--bp-text);
-        --bs-bundle-bar-meta-color:          var(--bp-teal-fg);
+        --bs-bundle-bar-name-color: var(--bp-text);
+        --bs-bundle-bar-meta-color: var(--bp-teal-fg);
 
         // Chips: paper-tint fill + chip-border hairline; value swatch inherits
         // per-chip accent via --bs-bundle-bar-chip-accent (set inline by component).
-        --bs-bundle-bar-chip-bg:             var(--bp-paper-tint);
-        --bs-bundle-bar-chip-border-color:   var(--bp-border-chip);
-        --bs-bundle-bar-chip-text-color:     var(--bp-text-muted);
-        --bs-bundle-bar-chip-font-size:      0.6875rem;
+        --bs-bundle-bar-chip-bg: var(--bp-paper-tint);
+        --bs-bundle-bar-chip-border-color: var(--bp-border-chip);
+        --bs-bundle-bar-chip-text-color: var(--bp-text-muted);
+        --bs-bundle-bar-chip-font-size: 0.6875rem;
     }
 
     // ── Name: display face — title register, tight tracking ─────────────────

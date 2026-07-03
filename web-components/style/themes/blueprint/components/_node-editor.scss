@@ -3,52 +3,51 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-node-editor {
         // Canvas ground — recessed well so the node cards read as lifted off the surface.
         --bs-node-editor-canvas-bg: var(--bp-bg-2);
-        --bs-node-editor-surface:   var(--bp-paper);
+        --bs-node-editor-surface: var(--bp-paper);
 
         // Hairlines — route away from any raw tc-slate-* that may back --tc-border
         // in other themes; use the explicit blueprint border tokens throughout.
-        --bs-node-editor-border:        var(--bp-border);
+        --bs-node-editor-border: var(--bp-border);
         --bs-node-editor-border-strong: var(--bp-border-strong);
 
         // Ink.
-        --bs-node-editor-text:  var(--bp-text);
+        --bs-node-editor-text: var(--bp-text);
         --bs-node-editor-muted: var(--bp-text-faint);
 
         // Drafting grid — faint lavender lines, slightly larger pitch than the default
         // 24px to evoke an engineering grid sheet rather than a pixel grid.
         --bs-node-editor-grid-color: var(--bp-border-faint);
-        --bs-node-editor-grid-size:  28px;
+        --bs-node-editor-grid-size: 28px;
 
         // Node boxes — white cards, violet-tinted shadow.
-        --bs-node-editor-node-bg:       var(--bp-paper);
-        --bs-node-editor-node-border:   var(--bp-border);
-        --bs-node-editor-node-shadow:   var(--tc-shadow-sm);
+        --bs-node-editor-node-bg: var(--bp-paper);
+        --bs-node-editor-node-border: var(--bp-border);
+        --bs-node-editor-node-shadow: var(--tc-shadow-sm);
         // Hover: step to the light paper-tint rather than a full surface-muted jump.
         --bs-node-editor-node-hover-bg: var(--bp-paper-tint);
 
         // Node header — blueprint frame gradient cap (deep violet-navy → mid canvas).
         // This gives the node a "printed circuit board component" cap feeling.
-        --bs-node-editor-header-bg:     var(--bp-frame-grad);
-        --bs-node-editor-header-text:   #fff;             // white ink on the dark gradient cap
+        --bs-node-editor-header-bg: var(--bp-frame-grad);
+        --bs-node-editor-header-text: #fff; // white ink on the dark gradient cap
         --bs-node-editor-header-border: var(--bp-border-strong);
 
         // Selected = pink primary (pink = primary/CTA in the blueprint accent rotation).
-        --bs-node-editor-selected-border:      var(--bp-pink);
-        --bs-node-editor-selected-header-bg:   var(--bp-pink-grad);
+        --bs-node-editor-selected-border: var(--bp-pink);
+        --bs-node-editor-selected-header-bg: var(--bp-pink-grad);
         --bs-node-editor-selected-header-text: var(--bp-pink-ink); // #fff — already white
 
         // Ports — sanctioned circles; teal on hover (teal = action/connect).
-        --bs-node-editor-port-bg:       var(--bp-paper);
-        --bs-node-editor-port-border:   var(--bp-border-strong);
+        --bs-node-editor-port-bg: var(--bp-paper);
+        --bs-node-editor-port-border: var(--bp-border-strong);
         --bs-node-editor-port-hover-bg: var(--bp-teal);
 
         // Edges — blueprint border ink for drawn wires; teal for the live preview
         // (replaces the default cyan accent, which would clash on this light ground).
-        --bs-node-editor-edge-color:         var(--bp-border-strong);
+        --bs-node-editor-edge-color: var(--bp-border-strong);
         --bs-node-editor-edge-preview-color: var(--bp-teal);
 
         // Mono — point at the blueprint JetBrains Mono stack.
@@ -69,9 +68,9 @@ tc-theme[name='blueprint'],
     // Port labels — mono uppercase micro-label treatment.
     .tc-node-editor-port-label {
         font-family: var(--bp-mono);
-        font-size:   0.625rem;          // 10px — tight HUD scale
+        font-size: 0.625rem; // 10px — tight HUD scale
         text-transform: uppercase;
-        letter-spacing: .06em;
+        letter-spacing: 0.06em;
         color: var(--bp-text-faint);
     }
 

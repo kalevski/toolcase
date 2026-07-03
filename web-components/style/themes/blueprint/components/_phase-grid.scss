@@ -2,19 +2,18 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Custom-property overrides ─────────────────────────────────────────────
     // Re-point every --bs-phase-grid-* token to blueprint equivalents.
     // The 1px-gap grid background (card border) becomes the blueprint hairline.
 
     tc-phase-grid {
         // Card surface — raised white paper, blueprint hairline as gap colour
-        --bs-phase-grid-card-bg:    var(--bp-paper);
+        --bs-phase-grid-card-bg: var(--bp-paper);
         --bs-phase-grid-card-border: var(--bp-border);
 
         // Title — display face (Chakra Petch), tight tracking, strong ink
-        --bs-phase-grid-title-color:       var(--bp-text);
-        --bs-phase-grid-title-font-size:   0.9375rem;
+        --bs-phase-grid-title-color: var(--bp-text);
+        --bs-phase-grid-title-font-size: 0.9375rem;
         --bs-phase-grid-title-font-weight: 600;
 
         // Description — muted body copy
@@ -28,18 +27,18 @@ tc-theme[name='blueprint'],
         //   active    → pink   (primary/running — the most important state)
         //   upcoming  → faint  (neutral, not yet started)
         //   blocked   → danger (real red, not pink)
-        --bs-phase-grid-complete-color: var(--bp-teal);
-        --bs-phase-grid-active-color:   var(--bp-pink);
+        --bs-phase-grid-complete-color: var(--bp-success);
+        --bs-phase-grid-active-color: var(--bp-pink);
         --bs-phase-grid-upcoming-color: var(--bp-text-faint);
-        --bs-phase-grid-blocked-color:  var(--bp-danger);
+        --bs-phase-grid-blocked-color: var(--bp-danger);
 
         // Tag chips — violet-soft fill + violet-fg text (supporting accent for metadata)
-        --bs-phase-grid-tag-bg:     var(--bp-violet-soft);
-        --bs-phase-grid-tag-color:  var(--bp-violet-fg);
+        --bs-phase-grid-tag-bg: var(--bp-violet-soft);
+        --bs-phase-grid-tag-color: var(--bp-violet-fg);
         --bs-phase-grid-tag-border: transparent;
 
         // Command block — near-black ink ground, teal code text (HUD/terminal aesthetic)
-        --bs-phase-grid-command-bg:    var(--bp-emphasis);
+        --bs-phase-grid-command-bg: var(--bp-emphasis);
         --bs-phase-grid-command-color: var(--bp-teal);
     }
 
@@ -76,7 +75,9 @@ tc-theme[name='blueprint'],
         }
 
         // Subtle lift on hover — signals interactivity
-        transition: transform 0.18s var(--bp-ease), box-shadow 0.18s var(--bp-ease);
+        transition:
+            transform 0.18s var(--bp-ease),
+            box-shadow 0.18s var(--bp-ease);
 
         &:hover {
             transform: translateY(-2px);
@@ -91,7 +92,7 @@ tc-theme[name='blueprint'],
 
         // Complete card gets a faint teal surface wash
         &--complete {
-            background: var(--bp-teal-soft);
+            background: var(--bp-success-soft);
         }
     }
 
@@ -117,7 +118,7 @@ tc-theme[name='blueprint'],
 
     .tc-phase-grid-item-status {
         font-family: var(--bp-mono);
-        letter-spacing: 0.10em;
+        letter-spacing: 0.1em;
 
         // Status label colour inherits from the --bs-phase-grid-*-color tokens above;
         // no need to re-declare per-modifier here unless overriding specifics.
@@ -129,7 +130,7 @@ tc-theme[name='blueprint'],
 
         // Complete: teal
         &--complete {
-            color: var(--bp-teal-fg); // teal-fg passes AA on white; teal itself can fail
+            color: var(--bp-success-fg); // teal-fg passes AA on white; teal itself can fail
         }
 
         // Upcoming: faint

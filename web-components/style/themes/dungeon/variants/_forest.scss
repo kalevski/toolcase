@@ -1,0 +1,55 @@
+// Dungeon Forest variant — mossy green primary, lichen lime secondary.
+//
+// Swaps ONLY the primary (CTA / brand) and secondary accent families onto a
+// muted, antiqued forest palette. Everything else — the ink / leather canvas,
+// parchment text ramp, gilded gold frames / bevels / rules, semantic status
+// colors, fonts, shadows and textures — stays identical to the base dungeon
+// foundation (which is why the --fg-gold* palette vars are NOT touched here).
+// Use with: <tc-theme name="dungeon" variant="forest"> … </tc-theme>
+// (or any element with [data-tc-theme="dungeon"][data-tc-variant="forest"]).
+
+@use './accent-roles' as roles;
+
+tc-theme[name='dungeon'][variant='forest'],
+[data-tc-theme='dungeon'][data-tc-variant='forest'] {
+    // ── Variant accent ladder (mirrors the base --fg-gold scale) ─────────────
+    --fg-forest-primary: #53a87d; // ≈ --fg-gold (base fill)
+    --fg-forest-primary-bright: #72c69c; // ≈ --fg-gold-bright (hover / link / focus)
+    --fg-forest-primary-deep: #37634d; // ≈ --fg-gold-deep (gradient dark stop)
+    --fg-forest-secondary: #95af46; // secondary base (≈ --fg-copper slot)
+    --fg-forest-secondary-bright: #b2cb67;
+
+    // Primary accent (CTA / brand). --tc-app-accent-contrast keeps the base
+    // ink-on-fill convention (var(--fg-ink)) — no override needed.
+    --tc-app-accent: var(--fg-forest-primary);
+    --tc-app-accent-hover: var(--fg-forest-primary-bright);
+    --tc-app-accent-gradient: linear-gradient(
+        135deg,
+        var(--fg-forest-primary-bright),
+        var(--fg-forest-primary-deep)
+    );
+
+    // Secondary accent
+    --tc-accent: var(--fg-forest-secondary-bright);
+    --tc-accent-fg: var(--fg-forest-secondary);
+    --tc-accent-soft: rgba(149, 175, 70, 0.16);
+    --tc-accent-hex: #95af46;
+
+    --tc-focus-ring: 0 0 0 2px var(--fg-forest-primary-bright);
+
+    // ── Bootstrap-compatible contract (--bs-*) ───────────────────────────────
+    --bs-primary: var(--fg-forest-primary);
+    --bs-primary-rgb: 83, 168, 125;
+    --bs-secondary: var(--fg-forest-secondary);
+    --bs-secondary-rgb: 149, 175, 70;
+
+    --bs-link-color: var(--fg-forest-primary-bright);
+    --bs-link-hover-color: var(--fg-forest-primary);
+
+    --bs-focus-ring-color: rgba(114, 198, 156, 0.4);
+
+    // ── Hardwired accent-role sweep (see _accent-roles.scss) ─────────────────
+    // Component partials pin gold onto element-scoped --bs-* props that beat
+    // the inherited tokens above; re-target the accent-role subset.
+    @include roles.accent-roles(#53a87d, #72c69c, #37634d, #95af46, #b2cb67);
+}

@@ -2,28 +2,27 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Token re-map ────────────────────────────────────────────────────────
     tc-combo-counter {
         // Surface: white paper, blueprint hairline, soft violet-tinted shadow.
-        --bs-combo-counter-bg:           var(--bp-paper);
+        --bs-combo-counter-bg: var(--bp-paper);
         --bs-combo-counter-border-color: var(--bp-border);
-        --bs-combo-counter-shadow:       var(--tc-shadow-sm);
+        --bs-combo-counter-shadow: var(--tc-shadow-sm);
 
         // Eyebrow: --bp-mono (JetBrains Mono) lettered in teal — mono labels = teal in blueprint.
-        --bs-combo-counter-eyebrow-color:          var(--bp-teal-fg);
-        --bs-combo-counter-eyebrow-font-size:      0.6875rem;
+        --bs-combo-counter-eyebrow-color: var(--bp-teal-fg);
+        --bs-combo-counter-eyebrow-font-size: 0.6875rem;
         --bs-combo-counter-eyebrow-letter-spacing: 0.14em;
 
         // Value figure: pink — the primary/active accent in blueprint's arcade rotation.
-        --bs-combo-counter-value-color:  var(--bp-pink);
-        --bs-combo-counter-value-size:   36px;
+        --bs-combo-counter-value-color: var(--bp-pink);
+        --bs-combo-counter-value-size: 36px;
         --bs-combo-counter-value-weight: 700;
 
         // Timer bar: recessed well track + pink fill to echo the value.
-        --bs-combo-counter-bar-track:  var(--bp-bg-2);
+        --bs-combo-counter-bar-track: var(--bp-bg-2);
         --bs-combo-counter-bar-border: var(--bp-border-faint);
-        --bs-combo-counter-bar-fill:   var(--bp-pink);
+        --bs-combo-counter-bar-fill: var(--bp-pink);
     }
 
     // ── Eyebrow — force font family to the blueprint mono token ─────────────
@@ -51,7 +50,7 @@ tc-theme[name='blueprint'],
             left: 7px;
             width: 11px;
             height: 11px;
-            border-top:  2px solid var(--bp-teal);
+            border-top: 2px solid var(--bp-teal);
             border-left: 2px solid var(--bp-teal);
             pointer-events: none;
         }
@@ -66,5 +65,4 @@ tc-theme[name='blueprint'],
     .tc-combo-counter-bar-fill {
         box-shadow: 2px 0 6px 0 var(--bp-pink-glow);
     }
-
 }

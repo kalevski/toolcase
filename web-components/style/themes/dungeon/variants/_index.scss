@@ -1,0 +1,18 @@
+// Dungeon theme variants — alternate accent palettes on the base dungeon skin.
+//
+// Each variant swaps ONLY the primary (CTA / brand) and secondary accent
+// families; the ink / leather canvas, parchment text ramp, gilded gold frames,
+// semantic status colors, fonts, shadows and textures all stay identical to
+// the base foundation. Hues are muted ~15% to keep the antiqued, gilded-
+// fantasy character.
+//
+// Available variants:
+// - ocean:  abyssal blue primary, sea-glass cyan secondary
+// - forest: mossy green primary, lichen lime secondary
+// - ember:  smoldering orange primary, old-gold secondary
+// - royal:  arcane violet primary, courtly magenta secondary
+
+@use './ocean';
+@use './forest';
+@use './ember';
+@use './royal';

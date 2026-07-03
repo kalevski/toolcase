@@ -5,42 +5,46 @@ tc-theme[name='blueprint'],
     tc-player-card {
         // ── Surface ───────────────────────────────────────────────────────────
         // White paper card, lilac hairline, soft violet-tinted shadow.
-        --bs-player-card-bg:             var(--bp-paper);
-        --bs-player-card-border:         var(--bp-border);
+        --bs-player-card-bg: var(--bp-paper);
+        --bs-player-card-border: var(--bp-border);
 
         // ── Header ────────────────────────────────────────────────────────────
         // Faint violet gradient cap — matches the blueprint card-header convention.
-        --bs-player-card-header-bg:      linear-gradient(135deg, rgba(91, 61, 242, 0.04), rgba(91, 61, 242, 0.01));
-        --bs-player-card-header-border:  var(--bp-border-faint);
+        --bs-player-card-header-bg: linear-gradient(
+            135deg,
+            rgba(91, 61, 242, 0.04),
+            rgba(91, 61, 242, 0.01)
+        );
+        --bs-player-card-header-border: var(--bp-border-faint);
 
         // ── Identity text ─────────────────────────────────────────────────────
         // Name → display font, emphasis ink (applied via element rule below).
         // Card-title → mono micro-label, faint ink (applied below).
-        --bs-player-card-name-color:     var(--bp-emphasis);
-        --bs-player-card-title-color:    var(--bp-text-faint);
+        --bs-player-card-name-color: var(--bp-emphasis);
+        --bs-player-card-title-color: var(--bp-text-faint);
 
         // ── Presence pip + label ──────────────────────────────────────────────
         // Status → teal (success), away → amber, busy → real danger red,
         // in-game → pink (primary CTA accent), offline → faint text.
-        --bs-player-card-pip-online:     var(--bp-teal);
-        --bs-player-card-pip-away:       var(--bp-amber);
-        --bs-player-card-pip-busy:       var(--bp-danger);
-        --bs-player-card-pip-in-game:    var(--bp-pink);
-        --bs-player-card-pip-offline:    var(--bp-text-faint);
-        --bs-player-card-status-color:   var(--bp-text-muted);
+        --bs-player-card-pip-online: var(--bp-success);
+        --bs-player-card-pip-away: var(--bp-amber);
+        --bs-player-card-pip-busy: var(--bp-danger);
+        --bs-player-card-pip-in-game: var(--bp-pink);
+        --bs-player-card-pip-offline: var(--bp-text-faint);
+        --bs-player-card-status-color: var(--bp-text-muted);
 
         // ── Meta row (rank + level) ───────────────────────────────────────────
-        --bs-player-card-meta-bg:        var(--bp-paper);
-        --bs-player-card-meta-border:    var(--bp-border-faint);
+        --bs-player-card-meta-bg: var(--bp-paper);
+        --bs-player-card-meta-border: var(--bp-border-faint);
         // Rank chip → teal soft tint (action chip, everyday accent rotation).
-        --bs-player-card-rank-bg:        var(--bp-teal-soft);
-        --bs-player-card-rank-color:     var(--bp-teal-fg);
+        --bs-player-card-rank-bg: var(--bp-teal-soft);
+        --bs-player-card-rank-color: var(--bp-teal-fg);
         // Level → violet supporting accent (applied via element rule below).
-        --bs-player-card-level-color:    var(--bp-violet-fg);
+        --bs-player-card-level-color: var(--bp-violet-fg);
 
         // ── Stats grid ────────────────────────────────────────────────────────
-        --bs-player-card-stats-bg:       var(--bp-paper);
-        --bs-player-card-stats-border:   var(--bp-border-faint);
+        --bs-player-card-stats-bg: var(--bp-paper);
+        --bs-player-card-stats-border: var(--bp-border-faint);
         // Stat labels → mono micro-label faint ink (applied below).
         --bs-player-card-stat-label-color: var(--bp-text-faint);
         // Stat values → display font, emphasis ink (applied below).
@@ -48,19 +52,19 @@ tc-theme[name='blueprint'],
 
         // ── Action buttons ────────────────────────────────────────────────────
         // Footer tray → recessed well, hairline separator.
-        --bs-player-card-actions-bg:     var(--bp-bg-2);
+        --bs-player-card-actions-bg: var(--bp-bg-2);
         --bs-player-card-actions-border: var(--bp-border-faint);
         // Default action button → body text ink, paper fill, border hairline.
-        --bs-player-card-btn-color:      var(--bp-text);
-        --bs-player-card-btn-bg:         var(--bp-paper);
-        --bs-player-card-btn-border:     var(--bp-border);
+        --bs-player-card-btn-color: var(--bp-text);
+        --bs-player-card-btn-bg: var(--bp-paper);
+        --bs-player-card-btn-border: var(--bp-border);
         // Hover → teal surface tint (everyday action accent).
-        --bs-player-card-btn-hover-bg:   var(--bp-teal-soft);
-        --bs-player-card-btn-hover-color:var(--bp-teal-fg);
+        --bs-player-card-btn-hover-bg: var(--bp-teal-soft);
+        --bs-player-card-btn-hover-color: var(--bp-teal-fg);
         // Danger variant → real danger red (not pink — pink is primary CTA).
-        --bs-player-card-btn-danger-color:        var(--bp-danger);
-        --bs-player-card-btn-danger-hover-bg:      var(--bp-danger);
-        --bs-player-card-btn-danger-hover-color:   #fff;
+        --bs-player-card-btn-danger-color: var(--bp-danger);
+        --bs-player-card-btn-danger-hover-bg: var(--bp-danger);
+        --bs-player-card-btn-danger-hover-color: #fff;
     }
 
     // ── Card shell ────────────────────────────────────────────────────────────
@@ -133,11 +137,11 @@ tc-theme[name='blueprint'],
     // ── Presence pip ──────────────────────────────────────────────────────────
     // Online status gets a soft teal halo ring — live/pulse dot treatment.
     .tc-player-card-pip {
-        .tc-player-card-presence[data-status="online"] & {
-            box-shadow: 0 0 0 0.2em var(--bp-teal-soft);
+        .tc-player-card-presence[data-status='online'] & {
+            box-shadow: 0 0 0 0.2em var(--bp-success-soft);
         }
         // In-game → pink halo (primary accent pulse).
-        .tc-player-card-presence[data-status="in-game"] & {
+        .tc-player-card-presence[data-status='in-game'] & {
             box-shadow: 0 0 0 0.2em var(--bp-pink-soft);
         }
     }

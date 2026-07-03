@@ -2,20 +2,19 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Token remaps ─────────────────────────────────────────────────────────
     tc-card-options {
         // Surface: raised white paper with blueprint hairline
-        --bs-card-options-bg:               var(--bp-paper);
-        --bs-card-options-border-color:     var(--bp-border);
+        --bs-card-options-bg: var(--bp-paper);
+        --bs-card-options-border-color: var(--bp-border);
         // Hover: lightest tinted well
-        --bs-card-options-hover-bg:         var(--bp-paper-tint);
+        --bs-card-options-hover-bg: var(--bp-paper-tint);
         // Selected accent → pink (primary / CTA in the arcade rotation)
-        --bs-card-options-selected-accent:  var(--bp-pink);
+        --bs-card-options-selected-accent: var(--bp-pink);
         // Label: primary ink
-        --bs-card-options-label-color:      var(--bp-text);
+        --bs-card-options-label-color: var(--bp-text);
         // Description: muted ink
-        --bs-card-options-desc-color:       var(--bp-text-muted);
+        --bs-card-options-desc-color: var(--bp-text-muted);
     }
 
     // ── Card tile ─────────────────────────────────────────────────────────────
@@ -23,10 +22,11 @@ tc-theme[name='blueprint'],
         background: var(--bs-card-options-bg);
         border-color: var(--bs-card-options-border-color);
         box-shadow: var(--tc-shadow-sm);
-        transition: border-color 0.18s var(--bp-ease),
-                    background-color 0.18s var(--bp-ease),
-                    box-shadow 0.18s var(--bp-ease),
-                    transform 0.18s var(--bp-ease);
+        transition:
+            border-color 0.18s var(--bp-ease),
+            background-color 0.18s var(--bp-ease),
+            box-shadow 0.18s var(--bp-ease),
+            transform 0.18s var(--bp-ease);
         // HUD corner bracket: teal top-left bracket marks each card as an interactive tile.
         position: relative;
         overflow: visible; // allow the bracket to breathe

@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-ecosystem-map {
         // Core disc — pink primary focal point (replaces generic --tc-app-accent)
         --bs-ecosystem-map-core-fill: var(--bp-pink);
@@ -26,7 +25,9 @@ tc-theme[name='blueprint'],
         // List fallback chips
         --bs-ecosystem-map-list-bg: var(--bp-paper);
         --bs-ecosystem-map-list-border: var(--bp-border-chip);
-        --bs-ecosystem-map-list-label-color: var(--bp-teal-fg); // teal = action/structure labels (mono eyebrow)
+        --bs-ecosystem-map-list-label-color: var(
+            --bp-teal-fg
+        ); // teal = action/structure labels (mono eyebrow)
     }
 
     // Title — display font, tight tracking
@@ -109,7 +110,9 @@ tc-theme[name='blueprint'],
         color: var(--bp-text);
         letter-spacing: 0.04em;
         box-shadow: var(--tc-shadow-sm);
-        transition: border-color var(--bp-ease), box-shadow var(--bp-ease);
+        transition:
+            border-color var(--bp-ease),
+            box-shadow var(--bp-ease);
 
         &:hover,
         &:focus {

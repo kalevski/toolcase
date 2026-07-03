@@ -31,7 +31,7 @@ tc-theme[name='blueprint'],
     .tc-testimonial-carousel-slide {
         background: var(--bp-paper);
         border-color: var(--bp-border);
-        border-top: 2px solid var(--bp-teal);   // teal top-edge marks the active slide region
+        border-top: 2px solid var(--bp-teal); // teal top-edge marks the active slide region
         box-shadow: var(--tc-shadow-sm);
         transition: box-shadow var(--bp-ease);
 
@@ -65,7 +65,7 @@ tc-theme[name='blueprint'],
         font-size: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 0.08em;
-        color: var(--bp-teal-fg);   // teal-fg clears AA contrast on white paper
+        color: var(--bp-teal-fg); // teal-fg clears AA contrast on white paper
     }
 
     // ── Prev / Next controls — teal border + teal hover tint ─────────────────────
@@ -75,7 +75,10 @@ tc-theme[name='blueprint'],
         border-color: var(--bp-border);
         color: var(--bp-teal-fg);
         background: var(--bp-paper);
-        transition: background-color var(--bp-ease), border-color var(--bp-ease), box-shadow var(--bp-ease);
+        transition:
+            background-color var(--bp-ease),
+            border-color var(--bp-ease),
+            box-shadow var(--bp-ease);
 
         &:hover {
             background: var(--bp-teal-soft);
@@ -94,7 +97,10 @@ tc-theme[name='blueprint'],
     .tc-testimonial-carousel-dot {
         border-color: var(--bp-border-strong);
         background: transparent;
-        transition: background-color var(--bp-ease), border-color var(--bp-ease), width var(--bp-ease);
+        transition:
+            background-color var(--bp-ease),
+            border-color var(--bp-ease),
+            width var(--bp-ease);
 
         &:focus-visible {
             outline: 2px solid var(--bp-pink);

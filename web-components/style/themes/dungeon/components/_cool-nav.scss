@@ -4,7 +4,6 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // ── Host token swap ───────────────────────────────────────────────────────
 
     tc-cool-nav {
@@ -41,7 +40,9 @@ tc-theme[name='dungeon'],
 
     .tc-cool-nav-inner {
         border-bottom: none;
-        box-shadow: var(--fg-bevel-top), 0 1px 0 0 var(--fg-gold-deep);
+        box-shadow:
+            var(--fg-bevel-top),
+            0 1px 0 0 var(--fg-gold-deep);
     }
 
     // ── Brand — switch mono to display caps ───────────────────────────────────

@@ -1,10 +1,13 @@
 'use client'
 
 import { useCallback, useMemo, useState } from 'react'
+import type { AdvancedTableColumn } from '@toolcase/web-components'
 import type { BalancerMethod, Upstream, UpstreamServer } from '@/server/domain/routing'
 import {
     RoutingListTable,
     SaveWarningsBanner,
+    cellMono,
+    cellMuted,
     saveErrorMessage,
     saveRouting,
     useResourceStates,
@@ -25,6 +28,27 @@ import { SelectField, SwitchField, TextField, type SelectOption } from '@/compon
 const BALANCERS: (BalancerMethod | '')[] = ['', 'least_conn', 'ip_hash']
 const balancerLabel = (b?: BalancerMethod | '') => (b ? b : 'round_robin')
 const BALANCER_OPTIONS: SelectOption[] = BALANCERS.map((b) => ({ value: b, label: balancerLabel(b) }))
+
+// List columns (between the built-in Name column and the actions).
+const UPSTREAM_COLUMNS: AdvancedTableColumn[] = [
+    { key: 'balancer', label: 'Balancer' },
+    { key: 'keepalive', label: 'Keepalive' },
+    { key: 'servers', label: 'Servers' },
+]
+
+/** Servers cell: count plus every backend with its weight/backup/down markers. */
+function serversCellHtml(servers: UpstreamServer[]): string {
+    const detail = servers
+        .map(
+            (s) =>
+                s.address +
+                (s.weight != null ? ` w${s.weight}` : '') +
+                (s.backup ? ' [backup]' : '') +
+                (s.down ? ' [down]' : ''),
+        )
+        .join(', ')
+    return `${cellMuted(`${servers.length} ·`)} ${cellMono(detail)}`
+}
 
 interface ServerDraft {
     address: string
@@ -223,7 +247,11 @@ export function UpstreamsManager({ upstreams, onChanged }: { upstreams: Upstream
         () =>
             upstreams.map((u) => ({
                 name: u.name,
-                hint: `${balancerLabel(u.balancer)} · ${u.servers.length} server${u.servers.length === 1 ? '' : 's'} (${u.servers.map((s) => s.address).join(', ')})`,
+                cells: {
+                    balancer: cellMono(balancerLabel(u.balancer)),
+                    keepalive: u.keepalive != null ? cellMono(u.keepalive) : cellMuted('—'),
+                    servers: serversCellHtml(u.servers),
+                },
                 stateChip: resourceStates.get(u.name)?.state,
                 stateReason: resourceStates.get(u.name)?.reason,
             })),
@@ -251,7 +279,13 @@ export function UpstreamsManager({ upstreams, onChanged }: { upstreams: Upstream
                     {upstreams.length === 0 ? (
                         <tc-empty-state icon="server">No upstreams yet.</tc-empty-state>
                     ) : (
-                        <RoutingListTable items={items} busy={busy} onEdit={startEdit} onRemove={setPending} />
+                        <RoutingListTable
+                            columns={UPSTREAM_COLUMNS}
+                            items={items}
+                            busy={busy}
+                            onEdit={startEdit}
+                            onRemove={setPending}
+                        />
                     )}
                 </div>
             </tc-section-card>

@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Custom-property overrides ──────────────────────────────────────────
     // Re-point every --bs-result-screen-* var to blueprint tokens so the
     // base partial's structural rules pick up the new skin automatically.
@@ -11,35 +10,37 @@ tc-theme[name='blueprint'],
     tc-game-over-screen,
     tc-victory-screen {
         // Card surface
-        --bs-result-screen-bg:                var(--bp-paper);
-        --bs-result-screen-border-color:      var(--bp-border);
-        --bs-result-screen-shadow:            var(--tc-shadow-md); // elevated — this is a modal-weight overlay
+        --bs-result-screen-bg: var(--bp-paper);
+        --bs-result-screen-border-color: var(--bp-border);
+        --bs-result-screen-shadow: var(--tc-shadow-md); // elevated — this is a modal-weight overlay
 
         // Eyebrow (teal mono label — "MATCH RESULT", "ROUND OVER", etc.)
-        --bs-result-screen-eyebrow-color:     var(--bp-teal-fg);
-        --bs-result-screen-eyebrow-spacing:   0.14em;
+        --bs-result-screen-eyebrow-color: var(--bp-teal-fg);
+        --bs-result-screen-eyebrow-spacing: 0.14em;
 
         // Title — default maps to amber (the "gold / trophy" outcome tone)
-        --bs-result-screen-title-color:       var(--bp-amber);
+        --bs-result-screen-title-color: var(--bp-amber);
 
         // Divider — use strong hairline so it reads as a structural break
-        --bs-result-screen-divider-color:     var(--bp-border-strong);
-        --bs-result-screen-divider-width:     3rem;
+        --bs-result-screen-divider-color: var(--bp-border-strong);
+        --bs-result-screen-divider-width: 3rem;
 
         // Subtitle body copy
-        --bs-result-screen-subtitle-color:    var(--bp-text-muted);
+        --bs-result-screen-subtitle-color: var(--bp-text-muted);
 
         // Stat rows
         --bs-result-screen-stat-border-color: var(--bp-border-faint);
-        --bs-result-screen-stat-label-color:  var(--bp-text-faint);
-        --bs-result-screen-stat-value-color:  var(--bp-text-soft);
+        --bs-result-screen-stat-label-color: var(--bp-text-faint);
+        --bs-result-screen-stat-value-color: var(--bp-text-soft);
 
         // Rewards strip
-        --bs-result-screen-rewards-bg:         var(--bp-paper-tint-2);   // soft violet-tinted well
+        --bs-result-screen-rewards-bg: var(--bp-paper-tint-2); // soft violet-tinted well
         --bs-result-screen-rewards-border-color: var(--bp-border-chip);
         --bs-result-screen-reward-label-color: var(--bp-text-muted);
-        --bs-result-screen-reward-amount-color: var(--bp-violet-fg);     // violet for numeric emphasis (supporting accent)
-        --bs-result-screen-reward-glyph-color: var(--bp-teal-fg);        // teal for action glyphs
+        --bs-result-screen-reward-amount-color: var(
+            --bp-violet-fg
+        ); // violet for numeric emphasis (supporting accent)
+        --bs-result-screen-reward-glyph-color: var(--bp-teal-fg); // teal for action glyphs
     }
 
     // ── Root card ──────────────────────────────────────────────────────────

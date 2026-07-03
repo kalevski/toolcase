@@ -15,7 +15,7 @@ tc-theme[name='blueprint'],
 
     .tc-trend-indicator--up {
         // Teal replaces the default --tc-success green; -fg is darker to hold contrast on the lavender ground.
-        --bs-trend-indicator-color: var(--bp-teal-fg);
+        --bs-trend-indicator-color: var(--bp-success-fg);
     }
 
     .tc-trend-indicator--down {

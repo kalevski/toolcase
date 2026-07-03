@@ -3,12 +3,11 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-report-dialog {
         // ── Surface + chrome ──────────────────────────────────────────────────
-        --bs-report-dialog-bg:           var(--bp-paper);
+        --bs-report-dialog-bg: var(--bp-paper);
         --bs-report-dialog-border-color: var(--bp-border-pink);
-        --bs-report-dialog-shadow:       var(--tc-shadow-lg);
+        --bs-report-dialog-shadow: var(--tc-shadow-lg);
 
         // ── Eyebrow — teal mono micro-label ──────────────────────────────────
         // Teal reads as "action register" — consistent with mono eyebrows across
@@ -19,49 +18,49 @@ tc-theme[name='blueprint'],
         --bs-report-dialog-title-color: var(--bp-text);
 
         // ── Backdrop — violet-ink scrim, replaces the #0f172a slate literal ──
-        --bs-report-dialog-backdrop-bg:      rgba(26, 24, 48, 1);
+        --bs-report-dialog-backdrop-bg: rgba(26, 24, 48, 1);
         --bs-report-dialog-backdrop-opacity: 0.55;
 
         // ── Message ───────────────────────────────────────────────────────────
         --bs-report-dialog-message-color: var(--bp-text-muted);
 
         // ── Reason rows ───────────────────────────────────────────────────────
-        --bs-report-dialog-reason-color:        var(--bp-text);
-        --bs-report-dialog-reason-hover-bg:     var(--bp-paper-tint);
+        --bs-report-dialog-reason-color: var(--bp-text);
+        --bs-report-dialog-reason-hover-bg: var(--bp-paper-tint);
         // Checked row: teal soft-tint fill + border matches the panel hairline.
-        --bs-report-dialog-reason-checked-bg:   var(--bp-teal-soft);
+        --bs-report-dialog-reason-checked-bg: var(--bp-teal-soft);
         --bs-report-dialog-reason-checked-color: var(--bp-teal-fg);
 
         // ── Radio indicator ───────────────────────────────────────────────────
-        --bs-report-dialog-radio-border:         1px solid var(--bp-border-strong);
+        --bs-report-dialog-radio-border: 1px solid var(--bp-border-strong);
         // Teal as the "everyday action" accent — accent rotation: pink=primary,
         // teal=action/selection, violet+amber=support.
-        --bs-report-dialog-radio-checked-bg:     var(--bp-teal);
+        --bs-report-dialog-radio-checked-bg: var(--bp-teal);
         --bs-report-dialog-radio-checked-border: var(--bp-teal);
 
         // ── Textarea ──────────────────────────────────────────────────────────
-        --bs-report-dialog-textarea-bg:     var(--bp-bg-2);
+        --bs-report-dialog-textarea-bg: var(--bp-bg-2);
         --bs-report-dialog-textarea-border: 1px solid var(--bp-border);
-        --bs-report-dialog-textarea-color:  var(--bp-text);
+        --bs-report-dialog-textarea-color: var(--bp-text);
 
         // ── Action buttons ────────────────────────────────────────────────────
         // Cancel — secondary/ghost treatment on bp-paper ground.
-        --bs-report-dialog-btn-bg:         var(--bp-paper);
-        --bs-report-dialog-btn-color:      var(--bp-text-soft);
-        --bs-report-dialog-btn-border:     1px solid var(--bp-border-soft);
-        --bs-report-dialog-btn-hover-bg:   var(--bp-paper-tint-2);
+        --bs-report-dialog-btn-bg: var(--bp-paper);
+        --bs-report-dialog-btn-color: var(--bp-text-soft);
+        --bs-report-dialog-btn-border: 1px solid var(--bp-border-soft);
+        --bs-report-dialog-btn-hover-bg: var(--bp-paper-tint-2);
         --bs-report-dialog-btn-hover-color: var(--bp-text);
 
         // Submit — real danger (not pink, which is the CTA brand color).
-        --bs-report-dialog-btn-submit-bg:         var(--bp-danger);
-        --bs-report-dialog-btn-submit-color:      #fff;
-        --bs-report-dialog-btn-submit-hover-bg:   color-mix(in srgb, var(--bp-danger) 85%, #000);
+        --bs-report-dialog-btn-submit-bg: var(--bp-danger);
+        --bs-report-dialog-btn-submit-color: #fff;
+        --bs-report-dialog-btn-submit-hover-bg: color-mix(in srgb, var(--bp-danger) 85%, #000);
         --bs-report-dialog-btn-submit-hover-color: #fff;
 
         // ── Close button ──────────────────────────────────────────────────────
-        --bs-report-dialog-close-color:       var(--bp-text-faint);
+        --bs-report-dialog-close-color: var(--bp-text-faint);
         --bs-report-dialog-close-hover-color: var(--bp-text);
-        --bs-report-dialog-close-hover-bg:    var(--bp-paper-tint);
+        --bs-report-dialog-close-hover-bg: var(--bp-paper-tint);
     }
 
     // ── Panel — pink inset top stripe + violet-tinted shadow ─────────────────

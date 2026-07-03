@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-buff-icon {
         // Surface: white raised paper tile with a violet-tinted hairline.
         --bs-buff-icon-bg: var(--bp-paper);
@@ -22,7 +21,7 @@ tc-theme[name='blueprint'],
 
     // Buff (positive status) → teal accent stripe (action / success in blueprint).
     tc-buff-icon[data-kind='buff'] {
-        --bs-buff-icon-accent: var(--bp-teal);
+        --bs-buff-icon-accent: var(--bp-success);
     }
 
     // Debuff (negative status) → real danger red, not pink (pink = primary CTA).

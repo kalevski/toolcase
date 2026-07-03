@@ -2,28 +2,27 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Custom-property re-skin ─────────────────────────────────────────────
     // Drive all cosmetics through the component's --bs-score-display-* API so
     // the base structural rules pick up the blueprint palette automatically.
 
     tc-score-display {
         // Surface: white raised card, blueprint hairline, soft violet-tinted shadow.
-        --bs-score-display-bg:           var(--bp-paper);
+        --bs-score-display-bg: var(--bp-paper);
         --bs-score-display-border-color: var(--bp-border);
-        --bs-score-display-shadow:       var(--tc-shadow-sm);
+        --bs-score-display-shadow: var(--tc-shadow-sm);
 
         // Label: teal-fg so it reads as a live HUD channel identifier (mono already set in base).
-        --bs-score-display-label-color:       var(--bp-teal-fg);
-        --bs-score-display-label-font-size:   0.6875rem;
+        --bs-score-display-label-color: var(--bp-teal-fg);
+        --bs-score-display-label-font-size: 0.6875rem;
         --bs-score-display-label-letter-spacing: 0.14em;
 
         // Value: emphasis ink — the score number is the most important thing on this tile.
-        --bs-score-display-value-color:       var(--bp-emphasis);
+        --bs-score-display-value-color: var(--bp-emphasis);
         --bs-score-display-value-font-weight: 700;
 
         // Multiplier: pink — active modifier reads as the primary accent state.
-        --bs-score-display-multiplier-color:     var(--bp-pink);
+        --bs-score-display-multiplier-color: var(--bp-pink);
         --bs-score-display-multiplier-font-size: 1rem;
     }
 
@@ -67,13 +66,13 @@ tc-theme[name='blueprint'],
         position: relative;
 
         &::before {
-            content:      '';
-            position:     absolute;
-            top:          7px;
-            right:        7px;
-            width:        11px;
-            height:       11px;
-            border-top:   2px solid var(--bp-teal);
+            content: '';
+            position: absolute;
+            top: 7px;
+            right: 7px;
+            width: 11px;
+            height: 11px;
+            border-top: 2px solid var(--bp-teal);
             border-right: 2px solid var(--bp-teal);
             pointer-events: none;
         }

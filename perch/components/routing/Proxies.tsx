@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useMemo, useState } from 'react'
-import type { TabBarItem } from '@toolcase/web-components'
+import type { AdvancedTableColumn, TabBarItem } from '@toolcase/web-components'
 import { useTc } from '@/lib/tc'
 import { hstsEnabled, type Proxy, type ProxyLocation, type TlsMode, type Upstream } from '@/server/domain/routing'
 import type { AccessList } from '@/server/domain/access-list'
@@ -11,6 +11,13 @@ import {
     RoutingListTable,
     SaveWarningsBanner,
     VhostPreviewModal,
+    cellAccessList,
+    cellBadge,
+    cellEnabled,
+    cellJoin,
+    cellMono,
+    cellMuted,
+    cellTls,
     defaultHstsDraft,
     hstsDraftFrom,
     hstsPayload,
@@ -144,11 +151,42 @@ const TLS_OPTIONS: SelectOption[] = [
     { value: 'required', label: 'required' },
 ]
 
-function describeTarget(p: Proxy): string {
-    if (p.upstream) return `→ ${p.upstream}`
-    if (p.pass) return `→ ${p.pass}`
-    if (p.locations?.length) return `${p.locations.length} location${p.locations.length === 1 ? '' : 's'}`
-    return '—'
+// List columns (between the built-in Domain column and the actions).
+const PROXY_COLUMNS: AdvancedTableColumn[] = [
+    { key: 'target', label: 'Target' },
+    { key: 'listen', label: 'Listen' },
+    { key: 'tls', label: 'TLS' },
+    { key: 'access', label: 'Access' },
+    { key: 'options', label: 'Options' },
+    { key: 'status', label: 'Status' },
+]
+
+/** Target cell: the default upstream/pass target plus the per-path location count. */
+function targetCellHtml(p: Proxy): string {
+    const parts: string[] = []
+    if (p.upstream) parts.push(cellMono(`→ ${p.upstream}`))
+    else if (p.pass) parts.push(cellMono(`→ ${p.pass}`))
+    const locs = p.locations?.length ?? 0
+    if (locs) parts.push(cellMuted(`${locs} location${locs === 1 ? '' : 's'}`))
+    return cellJoin(parts)
+}
+
+/** Option chips beyond TLS: websocket/gzip/cache/exploit blocking, limits, timeouts. */
+function optionsCellHtml(p: Proxy): string {
+    const chips: string[] = []
+    if (p.websocket) chips.push(cellBadge('websocket'))
+    if (p.gzip) chips.push(cellBadge('gzip'))
+    if (p.cache?.enabled) chips.push(cellBadge('cache', 'secondary', p.cache.valid?.join(', ')))
+    if (p.block_exploits) chips.push(cellBadge('block exploits'))
+    if (p.client_max_body_size) chips.push(cellBadge(`body ≤ ${p.client_max_body_size}`))
+    const timeouts = [
+        p.connect_timeout && `connect ${p.connect_timeout}`,
+        p.read_timeout && `read ${p.read_timeout}`,
+        p.send_timeout && `send ${p.send_timeout}`,
+    ].filter(Boolean) as string[]
+    if (timeouts.length) chips.push(cellMuted(timeouts.join(' · ')))
+    if (p.advanced) chips.push(cellBadge('raw nginx', 'secondary', 'Carries a raw nginx passthrough snippet.'))
+    return cellJoin(chips)
 }
 
 /** Everything the proxy form holds — one draft object; the modal resets by remount. */
@@ -499,9 +537,17 @@ export function ProxiesManager({
         () =>
             proxies.map((p) => ({
                 name: p.domain,
-                hint: `:${p.listen ?? 80} ${describeTarget(p)}${p.domain.startsWith('*.') ? ' · wildcard' : ''}${
-                    p.tls ? ` · TLS ${p.tls}` : ''
-                }${p.enabled === false ? ' · disabled' : ''}`,
+                nameExtraHtml: p.domain.startsWith('*.')
+                    ? ` ${cellBadge('wildcard', 'info', 'Needs a DNS-01 wildcard cert (Certificates, challenge: dns).')}`
+                    : undefined,
+                cells: {
+                    target: targetCellHtml(p),
+                    listen: cellMono(`:${p.listen ?? 80}`),
+                    tls: cellTls(p),
+                    access: cellAccessList(p.access_list),
+                    options: optionsCellHtml(p),
+                    status: cellEnabled(p.enabled !== false),
+                },
                 toggleLabel: p.enabled === false ? 'Enable' : 'Disable',
                 stateChip: resourceStates.get(p.domain)?.state,
                 stateReason: resourceStates.get(p.domain)?.reason,
@@ -559,6 +605,8 @@ export function ProxiesManager({
                         <tc-empty-state icon="globe">No proxies yet.</tc-empty-state>
                     ) : (
                         <RoutingListTable
+                            columns={PROXY_COLUMNS}
+                            nameLabel="Domain"
                             items={items}
                             busy={busy}
                             onEdit={startEdit}

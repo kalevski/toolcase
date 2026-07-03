@@ -22,7 +22,9 @@ tc-theme[name='blueprint'],
 
         // Soft ink-bleed glow — mimics a freshly pressed rubber stamp under the
         // blueprint light. Uses a spread-only shadow so it doesn't fight the tilt.
-        box-shadow: 0 0 0 2px var(--bp-teal-soft), var(--bp-glow-teal);
+        box-shadow:
+            0 0 0 2px var(--bp-teal-soft),
+            var(--bp-glow-teal);
     }
 
     // ── Color variants — arcade accent rotation ──────────────────────────────
@@ -32,7 +34,9 @@ tc-theme[name='blueprint'],
         --bs-stamp-color: var(--bp-pink-ink);
         --bs-stamp-bg: var(--bp-pink);
 
-        box-shadow: 0 0 0 2px var(--bp-pink-soft), var(--bp-glow-pink);
+        box-shadow:
+            0 0 0 2px var(--bp-pink-soft),
+            var(--bp-glow-pink);
     }
 
     // Secondary — teal-soft tint; teal-fg text (matches the default but
@@ -41,15 +45,19 @@ tc-theme[name='blueprint'],
         --bs-stamp-color: var(--bp-teal-fg);
         --bs-stamp-bg: var(--bp-teal-soft);
 
-        box-shadow: 0 0 0 2px var(--bp-teal-soft), var(--bp-glow-teal);
+        box-shadow:
+            0 0 0 2px var(--bp-teal-soft),
+            var(--bp-glow-teal);
     }
 
     // Success — solid teal action fill; white ink.
     .tc-stamp-success {
-        --bs-stamp-color: var(--bp-teal-ink);
-        --bs-stamp-bg: var(--bp-teal);
+        --bs-stamp-color: var(--bp-success-ink);
+        --bs-stamp-bg: var(--bp-success);
 
-        box-shadow: 0 0 0 2px var(--bp-teal-soft), var(--bp-glow-teal);
+        box-shadow:
+            0 0 0 2px var(--bp-success-soft),
+            var(--bp-glow-success);
     }
 
     // Danger — real red (not pink); white ink; no glow to keep urgency flat.

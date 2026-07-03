@@ -4,21 +4,20 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Board-level custom properties ─────────────────────────────────────────
     tc-roadmap {
         // Board surfaces — white paper separated by blueprint hairlines
         --bs-roadmap-surface: var(--bp-paper);
-        --bs-roadmap-border:  var(--bp-border);
+        --bs-roadmap-border: var(--bp-border);
 
         // Board title — Chakra Petch display heading
-        --bs-roadmap-title-color:       var(--bp-text);
-        --bs-roadmap-title-font-size:   1.125rem;
+        --bs-roadmap-title-color: var(--bp-text);
+        --bs-roadmap-title-font-size: 1.125rem;
         --bs-roadmap-title-font-weight: 700;
 
         // Column header text — mono eyebrow treatment
-        --bs-roadmap-heading-color:       var(--bp-text-soft);
-        --bs-roadmap-heading-font-size:   0.6875rem;
+        --bs-roadmap-heading-color: var(--bp-text-soft);
+        --bs-roadmap-heading-font-size: 0.6875rem;
         --bs-roadmap-heading-font-weight: 700;
 
         // Status tag — mono micro-label
@@ -28,19 +27,19 @@ tc-theme[name='blueprint'],
         --bs-roadmap-count-font-size: 0.625rem;
 
         // Item card surfaces
-        --bs-roadmap-item-bg:           var(--bp-paper);
-        --bs-roadmap-item-border:       var(--bp-border);
-        --bs-roadmap-item-shadow:       var(--tc-shadow-sm);
-        --bs-roadmap-item-hover-bg:     var(--bp-paper-tint);
+        --bs-roadmap-item-bg: var(--bp-paper);
+        --bs-roadmap-item-border: var(--bp-border);
+        --bs-roadmap-item-shadow: var(--tc-shadow-sm);
+        --bs-roadmap-item-hover-bg: var(--bp-paper-tint);
         --bs-roadmap-item-hover-shadow: var(--tc-shadow-hover);
 
         // Item card text
-        --bs-roadmap-item-title-color:    var(--bp-text);
-        --bs-roadmap-item-desc-color:     var(--bp-text-muted);
+        --bs-roadmap-item-title-color: var(--bp-text);
+        --bs-roadmap-item-desc-color: var(--bp-text-muted);
 
         // Tag chips — faint tint + chip border
-        --bs-roadmap-tag-bg:     var(--bp-bg-2);
-        --bs-roadmap-tag-color:  var(--bp-text-faint);
+        --bs-roadmap-tag-bg: var(--bp-bg-2);
+        --bs-roadmap-tag-color: var(--bp-text-faint);
         --bs-roadmap-tag-border: var(--bp-border-chip);
     }
 
@@ -53,7 +52,7 @@ tc-theme[name='blueprint'],
 
     // ── Board wrapper — hairline grid seams on blueprint paper ───────────────
     .tc-roadmap {
-        background: var(--bp-border);           // seam color bleeds through 1px gaps
+        background: var(--bp-border); // seam color bleeds through 1px gaps
         border-color: var(--bp-border);
         box-shadow: var(--tc-shadow-sm);
     }
@@ -65,26 +64,26 @@ tc-theme[name='blueprint'],
     // Considering → amber (caution/backlog)
 
     .tc-roadmap-column {
-        background: var(--bp-paper);            // each column is a paper surface
+        background: var(--bp-paper); // each column is a paper surface
 
         &--shipped {
-            --bs-roadmap-accent:    var(--bp-teal);
-            --bs-roadmap-accent-bg: var(--bp-teal-soft);
+            --bs-roadmap-accent: var(--bp-success);
+            --bs-roadmap-accent-bg: var(--bp-success-soft);
         }
 
         &--in-progress {
-            --bs-roadmap-accent:    var(--bp-violet);
+            --bs-roadmap-accent: var(--bp-violet);
             --bs-roadmap-accent-bg: var(--bp-violet-soft);
         }
 
         &--planned {
             // neutral — keep muted text but route through bp tokens
-            --bs-roadmap-accent:    var(--bp-text-faint);
+            --bs-roadmap-accent: var(--bp-text-faint);
             --bs-roadmap-accent-bg: var(--bp-bg-2);
         }
 
         &--considering {
-            --bs-roadmap-accent:    var(--bp-amber);
+            --bs-roadmap-accent: var(--bp-amber);
             --bs-roadmap-accent-bg: var(--bp-amber-soft);
         }
     }
@@ -98,7 +97,7 @@ tc-theme[name='blueprint'],
         text-transform: uppercase;
         color: var(--bs-roadmap-heading-color);
         border-bottom-color: var(--bp-border-faint);
-        background: var(--bp-paper-tint);       // ever-so-slight tint lifts the header from body
+        background: var(--bp-paper-tint); // ever-so-slight tint lifts the header from body
     }
 
     // ── Status dot — keep circle, tint via accent (already hooked up in base) ─
@@ -132,10 +131,10 @@ tc-theme[name='blueprint'],
         box-shadow: var(--bs-roadmap-item-shadow);
         transition:
             background-color var(--bp-ease),
-            border-color     var(--bp-ease),
-            box-shadow       var(--bp-ease),
-            transform        var(--bp-ease);
-        position: relative;                     // anchor for HUD bracket ::before
+            border-color var(--bp-ease),
+            box-shadow var(--bp-ease),
+            transform var(--bp-ease);
+        position: relative; // anchor for HUD bracket ::before
 
         // HUD corner-bracket — teal 12×12 bracket top-left; appears on hover
         &::before {
@@ -198,14 +197,14 @@ tc-theme[name='blueprint'],
         .tc-roadmap-item {
             transition:
                 background-color var(--bp-ease),
-                border-color     var(--bp-ease),
-                box-shadow       var(--bp-ease);
+                border-color var(--bp-ease),
+                box-shadow var(--bp-ease);
 
             &:hover {
                 transform: none;
 
                 &::before {
-                    opacity: 1;        // bracket still appears, just no motion
+                    opacity: 1; // bracket still appears, just no motion
                 }
             }
         }

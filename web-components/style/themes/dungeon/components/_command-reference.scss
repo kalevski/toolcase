@@ -7,21 +7,20 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // ── Token swap ────────────────────────────────────────────────────────────
     // Vars live on the host element `tc-command-reference` in the base sheet.
 
     tc-command-reference {
         // Slate-hairline repoints — foundation does not remap --tc-slate-100.
-        --bs-command-reference-item-border:       1px solid var(--fg-gold-shadow);
-        --bs-command-reference-alias-border:      1px solid var(--fg-gold-deep);
-        --bs-command-reference-flags-border-top:  1px solid var(--fg-gold-shadow);
+        --bs-command-reference-item-border: 1px solid var(--fg-gold-shadow);
+        --bs-command-reference-alias-border: 1px solid var(--fg-gold-deep);
+        --bs-command-reference-flags-border-top: 1px solid var(--fg-gold-shadow);
 
         // Gilded title text.
-        --bs-command-reference-title-color:       var(--fg-gold-bright);
+        --bs-command-reference-title-color: var(--fg-gold-bright);
 
         // Alias chip background — leather plate to match the dungeon palette.
-        --bs-command-reference-alias-bg:          var(--fg-leather);
+        --bs-command-reference-alias-bg: var(--fg-leather);
     }
 
     // ── Gilded frame bevel ────────────────────────────────────────────────────

@@ -2,7 +2,7 @@ const TAG_NAME = 'tc-theme'
 
 export class Theme extends HTMLElement {
     static get observedAttributes(): string[] {
-        return ['name']
+        return ['name', 'variant']
     }
 
     get name(): string {
@@ -12,6 +12,15 @@ export class Theme extends HTMLElement {
     set name(v: string) {
         if (v) this.setAttribute('name', v)
         else this.removeAttribute('name')
+    }
+
+    get variant(): string {
+        return this.getAttribute('variant') ?? ''
+    }
+
+    set variant(v: string) {
+        if (v) this.setAttribute('variant', v)
+        else this.removeAttribute('variant')
     }
 }
 

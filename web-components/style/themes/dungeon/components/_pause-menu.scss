@@ -100,7 +100,9 @@ tc-theme[name='dungeon'],
         font-family: var(--fg-display);
         text-transform: uppercase;
         letter-spacing: 0.16em;
-        text-shadow: 0 2px 0 #000, 0 0 22px rgba(232, 200, 120, 0.35);
+        text-shadow:
+            0 2px 0 #000,
+            0 0 22px rgba(232, 200, 120, 0.35);
     }
 
     // Menu rows: display caps + gold left marker.

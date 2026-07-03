@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Token overrides ──────────────────────────────────────────────────────────
 
     tc-quick-start {
@@ -61,9 +60,10 @@ tc-theme[name='blueprint'],
         letter-spacing: 0.04em;
         text-transform: uppercase;
         // border-radius kept 50% from base; radius sweep does not affect circles
-        transition: background-color 0.15s var(--bp-ease),
-                    border-color 0.15s var(--bp-ease),
-                    box-shadow 0.15s var(--bp-ease);
+        transition:
+            background-color 0.15s var(--bp-ease),
+            border-color 0.15s var(--bp-ease),
+            box-shadow 0.15s var(--bp-ease);
     }
 
     // Active/last-in-flow marker gets a gentle teal glow to mark the live step.
@@ -110,8 +110,9 @@ tc-theme[name='blueprint'],
     // ── Copy button ──────────────────────────────────────────────────────────────
 
     .tc-quick-start-copy {
-        transition: background-color 0.15s var(--bp-ease),
-                    color 0.15s var(--bp-ease);
+        transition:
+            background-color 0.15s var(--bp-ease),
+            color 0.15s var(--bp-ease);
 
         &:hover {
             background: var(--bs-quick-start-copy-hover-bg);

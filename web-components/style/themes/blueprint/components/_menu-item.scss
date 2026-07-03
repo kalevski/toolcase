@@ -29,7 +29,7 @@ tc-theme[name='blueprint'],
         // ── Hotkey badge: mono font, blueprint surface ─────────────────────────────
         --bs-menu-item-hotkey-font-family: var(--bp-mono);
         --bs-menu-item-hotkey-color: var(--bp-text-faint);
-        --bs-menu-item-hotkey-bg: var(--bp-bg-2);             // recessed well tint
+        --bs-menu-item-hotkey-bg: var(--bp-bg-2); // recessed well tint
         --bs-menu-item-hotkey-border: 1px solid var(--bp-border-chip);
 
         // Hotkey on selected row: white ink on a semi-transparent overlay.

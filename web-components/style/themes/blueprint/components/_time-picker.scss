@@ -2,19 +2,18 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Trigger surface ────────────────────────────────────────────────────────
     // Re-point the three trigger vars to blueprint paper/hairline/ink tokens.
     // Removes any residual --tc-surface (dark-slate-ramp) inheritance.
 
     .tc-time-picker-trigger {
-        --bs-time-picker-trigger-bg:     var(--bp-paper);
+        --bs-time-picker-trigger-bg: var(--bp-paper);
         --bs-time-picker-trigger-border: var(--bp-border-strong);
-        --bs-time-picker-trigger-color:  var(--bp-text);
+        --bs-time-picker-trigger-color: var(--bp-text);
 
         transition:
             border-color 150ms var(--bp-ease),
-            box-shadow   150ms var(--bp-ease);
+            box-shadow 150ms var(--bp-ease);
 
         &:focus-visible {
             border-color: var(--bp-teal);
@@ -70,7 +69,7 @@ tc-theme[name='blueprint'],
     .tc-time-picker-clear {
         color: var(--bp-text-faint);
         transition:
-            color            120ms var(--bp-ease),
+            color 120ms var(--bp-ease),
             background-color 120ms var(--bp-ease);
 
         &:hover {
@@ -89,7 +88,7 @@ tc-theme[name='blueprint'],
     // dropdown and context-menu panels in the blueprint theme.
 
     .tc-time-picker-panel {
-        --bs-time-picker-panel-bg:     var(--bp-paper);
+        --bs-time-picker-panel-bg: var(--bp-paper);
         --bs-time-picker-panel-border: var(--bp-border);
         --bs-time-picker-panel-shadow: var(--tc-shadow-md);
     }
@@ -119,14 +118,14 @@ tc-theme[name='blueprint'],
     // white ink — pink is the primary/selected accent in the blueprint rotation.
 
     .tc-time-picker-option {
-        --bs-time-picker-option-color:     var(--bp-text);
-        --bs-time-picker-option-hover-bg:  var(--bp-teal-soft);
+        --bs-time-picker-option-color: var(--bp-text);
+        --bs-time-picker-option-hover-bg: var(--bp-teal-soft);
         --bs-time-picker-option-active-bg: var(--bp-pink);
 
         font-family: var(--bp-mono);
         transition:
             background-color 100ms var(--bp-ease),
-            color            100ms var(--bp-ease);
+            color 100ms var(--bp-ease);
 
         &:hover {
             color: var(--bp-teal-fg);

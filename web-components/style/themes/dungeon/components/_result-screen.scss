@@ -56,11 +56,15 @@ tc-theme[name='dungeon'],
         font-family: var(--fg-display);
         text-transform: uppercase;
         letter-spacing: 0.08em;
-        text-shadow: 0 2px 0 #000, 0 0 22px rgba(232, 200, 120, 0.35);
+        text-shadow:
+            0 2px 0 #000,
+            0 0 22px rgba(232, 200, 120, 0.35);
     }
 
     .tc-result-screen-root[data-title-color='danger'] .tc-result-screen-title {
-        text-shadow: 0 2px 0 #000, 0 0 22px rgba(212, 74, 58, 0.45);
+        text-shadow:
+            0 2px 0 #000,
+            0 0 22px rgba(212, 74, 58, 0.45);
     }
 
     // Divider: gilded gradient rule flanked by a rotated diamond glyph.
@@ -80,7 +84,14 @@ tc-theme[name='dungeon'],
     .tc-result-screen-rule {
         flex: 1 1 auto;
         height: 1px;
-        background: linear-gradient(90deg, transparent, var(--fg-gold-deep) 30%, var(--fg-gold) 50%, var(--fg-gold-deep) 70%, transparent);
+        background: linear-gradient(
+            90deg,
+            transparent,
+            var(--fg-gold-deep) 30%,
+            var(--fg-gold) 50%,
+            var(--fg-gold-deep) 70%,
+            transparent
+        );
     }
 
     // Sanctioned diamond glyph — 8px rotated square with gold gradient + glow.
@@ -98,7 +109,14 @@ tc-theme[name='dungeon'],
     .tc-result-screen-divider:not(:has(.tc-result-screen-rule)) {
         width: var(--bs-result-screen-divider-width, 2.5rem);
         height: 1px;
-        background: linear-gradient(90deg, transparent, var(--fg-gold-deep) 30%, var(--fg-gold) 50%, var(--fg-gold-deep) 70%, transparent);
+        background: linear-gradient(
+            90deg,
+            transparent,
+            var(--fg-gold-deep) 30%,
+            var(--fg-gold) 50%,
+            var(--fg-gold-deep) 70%,
+            transparent
+        );
     }
 
     // Subtitle: italic body serif.

@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-rating {
         // Empty star glyph uses the violet-tinted border ramp — reads as a
         // considered neutral rather than a raw grey.
@@ -32,5 +31,4 @@ tc-theme[name='blueprint'],
         // Swap the transition easing to the blueprint curve.
         transition-timing-function: var(--bp-ease);
     }
-
 }

@@ -18,6 +18,7 @@ import (
 	"github.com/kalevski/toolcase/nginxpilot/internal/config"
 	"github.com/kalevski/toolcase/nginxpilot/internal/credstore"
 	"github.com/kalevski/toolcase/nginxpilot/internal/deploy"
+	"github.com/kalevski/toolcase/nginxpilot/internal/gitcreds"
 	"github.com/kalevski/toolcase/nginxpilot/internal/nginxctl"
 	gitsource "github.com/kalevski/toolcase/nginxpilot/internal/source/git"
 	"github.com/kalevski/toolcase/nginxpilot/internal/state"
@@ -57,6 +58,11 @@ type Manager struct {
 	acme   *acme.Client
 	creds  *credstore.Store
 	acmeMu sync.Mutex
+
+	// Git source credentials store (git-credentials admin API) — always
+	// present, so a control plane can save a repo token before (or while)
+	// writing the site fragment that references it via auth.token_file.
+	gitCreds *gitcreds.Store
 
 	// Renewal scheduler state (renewal.go). renewMu guards both fields.
 	renewMu   sync.Mutex
@@ -135,6 +141,7 @@ func New(cfg *config.Config, store *state.Store, log *slog.Logger) *Manager {
 
 	// Credentials store is always available (save creds before enabling ACME).
 	m.creds = credstore.New(filepath.Join(cfg.DataDir, "acme", "credentials"))
+	m.gitCreds = gitcreds.New(filepath.Join(cfg.DataDir, "git-credentials"))
 	if cfg.Acme.Enabled {
 		m.acme = acme.New(cfg.Acme, m.creds, cfg.DataDir, log)
 		warnAcmeMismatches(cfg, log)

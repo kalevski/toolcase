@@ -7,18 +7,18 @@ tc-theme[name='blueprint'],
         // Re-point all cosmetic custom properties to blueprint tokens.
         // The border / bg / text follow the paper surface convention;
         // steppers use teal as the everyday action accent.
-        --bs-number-input-border-color:        var(--bp-border);
-        --bs-number-input-bg:                  var(--bp-paper);
-        --bs-number-input-color:               var(--bp-text);
-        --bs-number-input-addon-bg:            var(--bp-bg-2);
-        --bs-number-input-addon-color:         var(--bp-text-muted);
-        --bs-number-input-stepper-bg:          var(--bp-bg-2);
-        --bs-number-input-stepper-hover-bg:    var(--bp-teal-soft);
+        --bs-number-input-border-color: var(--bp-border);
+        --bs-number-input-bg: var(--bp-paper);
+        --bs-number-input-color: var(--bp-text);
+        --bs-number-input-addon-bg: var(--bp-bg-2);
+        --bs-number-input-addon-color: var(--bp-text-muted);
+        --bs-number-input-stepper-bg: var(--bp-bg-2);
+        --bs-number-input-stepper-hover-bg: var(--bp-teal-soft);
         --bs-number-input-stepper-disabled-opacity: 0.35;
-        --bs-number-input-error-color:         var(--bp-danger);
-        --bs-number-input-error-border-color:  var(--bp-danger);
+        --bs-number-input-error-color: var(--bp-danger);
+        --bs-number-input-error-border-color: var(--bp-danger);
         // Pink focus ring — matches the other blueprint form controls
-        --bs-number-input-focus-ring:          0 0 0 0.2rem var(--bp-pink-glow);
+        --bs-number-input-focus-ring: 0 0 0 0.2rem var(--bp-pink-glow);
     }
 
     // ── Label ─────────────────────────────────────────────────────────────────
@@ -28,7 +28,7 @@ tc-theme[name='blueprint'],
         font-family: var(--bp-mono);
         font-size: 0.6875rem;
         font-weight: 600;
-        letter-spacing: .09em;
+        letter-spacing: 0.09em;
         text-transform: uppercase;
         color: var(--bp-text-muted);
     }
@@ -67,7 +67,7 @@ tc-theme[name='blueprint'],
         color: var(--bs-number-input-addon-color);
         font-family: var(--bp-mono);
         font-size: 0.75rem;
-        letter-spacing: .04em;
+        letter-spacing: 0.04em;
         border-left-color: var(--bp-border);
         border-right-color: var(--bp-border);
     }
@@ -114,7 +114,7 @@ tc-theme[name='blueprint'],
         @media (prefers-reduced-motion: no-preference) {
             transition:
                 background-color 140ms var(--bp-ease),
-                color             140ms var(--bp-ease);
+                color 140ms var(--bp-ease);
         }
 
         &:hover:not([disabled]) {

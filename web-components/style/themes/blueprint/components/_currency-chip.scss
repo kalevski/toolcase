@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-currency-chip {
         // Default glyph tint: teal-fg is the AA-safe teal for text on white.
         // Overridden when the `color` attribute sets --bs-currency-chip-color inline.
@@ -11,7 +10,7 @@ tc-theme[name='blueprint'],
 
     .tc-currency-chip {
         // Surface: raised white paper, chip-specific hairline, subtle violet shadow.
-        --bs-currency-chip-bg:           var(--bp-paper);
+        --bs-currency-chip-bg: var(--bp-paper);
         --bs-currency-chip-border-color: var(--bp-border-chip);
 
         // Amount ink: primary dark text for legibility.
@@ -26,7 +25,7 @@ tc-theme[name='blueprint'],
     // Glyph: mono face (inherited from .tc-currency-chip), uppercase micro-label style
     // with a touch of tracking — reads as a currency code / HUD indicator.
     .tc-currency-chip-glyph {
-        font-family:    var(--bp-mono);
+        font-family: var(--bp-mono);
         text-transform: uppercase;
         letter-spacing: 0.06em;
         // color is driven by --bs-currency-chip-color on the host — no override needed.

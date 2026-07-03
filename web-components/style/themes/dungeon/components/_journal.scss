@@ -78,13 +78,19 @@ tc-theme[name='dungeon'],
         box-shadow: 0 0 0 1px #000;
     }
     .tc-journal-row--active .tc-journal-row-pip {
-        box-shadow: 0 0 0 1px #000, 0 0 6px var(--fg-gold-bright);
+        box-shadow:
+            0 0 0 1px #000,
+            0 0 6px var(--fg-gold-bright);
     }
     .tc-journal-row--completed .tc-journal-row-pip {
-        box-shadow: 0 0 0 1px #000, 0 0 6px var(--fg-stamina-bright);
+        box-shadow:
+            0 0 0 1px #000,
+            0 0 6px var(--fg-stamina-bright);
     }
     .tc-journal-row--failed .tc-journal-row-pip {
-        box-shadow: 0 0 0 1px #000, 0 0 6px var(--fg-blood-bright);
+        box-shadow:
+            0 0 0 1px #000,
+            0 0 6px var(--fg-blood-bright);
     }
 
     // Detail title reads as gilded display caps.

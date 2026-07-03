@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Shell ──────────────────────────────────────────────────────────────────
     // White raised card surface, lilac hairline, soft violet-tinted shadow.
     tc-cdn-map {
@@ -33,7 +32,6 @@ tc-theme[name='blueprint'],
     // ── Node dots ─────────────────────────────────────────────────────────────
 
     .tc-cdn-map__node-dot {
-
         // PRIMARY dot — pink glow replaces the hardcoded rgba(30,41,59,0.14)
         // dark-slate radial. Pink-soft is the matching semi-transparent tint.
         .is-primary & {

@@ -151,6 +151,9 @@ func endpoints() []endpoint {
 		{"GET", "/acme/credentials", true, func(s *Server) http.HandlerFunc { return s.handleListCreds }},
 		{"PUT", "/acme/credentials/{provider}", true, func(s *Server) http.HandlerFunc { return s.handleSetCreds }},
 		{"DELETE", "/acme/credentials/{provider}", true, func(s *Server) http.HandlerFunc { return s.handleDeleteCreds }},
+		{"GET", "/git-credentials", true, func(s *Server) http.HandlerFunc { return s.handleListGitCreds }},
+		{"PUT", "/git-credentials/{name}", true, func(s *Server) http.HandlerFunc { return s.handleSetGitCred }},
+		{"DELETE", "/git-credentials/{name}", true, func(s *Server) http.HandlerFunc { return s.handleDeleteGitCred }},
 	}
 }
 

@@ -63,7 +63,9 @@ tc-theme[name='blueprint'],
             background-color: var(--bs-mouse-sensitivity-thumb-bg);
             border-color: var(--bs-mouse-sensitivity-thumb-border);
             // On hover, shift thumb bg to a very soft teal tint for discoverability
-            transition: background-color var(--bp-ease, 150ms ease), box-shadow var(--bp-ease, 150ms ease);
+            transition:
+                background-color var(--bp-ease, 150ms ease),
+                box-shadow var(--bp-ease, 150ms ease);
 
             &:hover {
                 background-color: var(--bp-teal-soft);
@@ -94,7 +96,9 @@ tc-theme[name='blueprint'],
         &::-moz-range-thumb {
             background-color: var(--bs-mouse-sensitivity-thumb-bg);
             border-color: var(--bs-mouse-sensitivity-thumb-border);
-            transition: background-color var(--bp-ease, 150ms ease), box-shadow var(--bp-ease, 150ms ease);
+            transition:
+                background-color var(--bp-ease, 150ms ease),
+                box-shadow var(--bp-ease, 150ms ease);
 
             &:hover {
                 background-color: var(--bp-teal-soft);

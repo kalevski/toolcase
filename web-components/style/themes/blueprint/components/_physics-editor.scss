@@ -4,34 +4,33 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-physics-editor {
         // Outer wrapper — raised white card on the lavender canvas.
-        --bs-physics-editor-surface:       var(--bp-paper);
-        --bs-physics-editor-border:        var(--bp-border);
+        --bs-physics-editor-surface: var(--bp-paper);
+        --bs-physics-editor-border: var(--bp-border);
         --bs-physics-editor-border-strong: var(--bp-border-strong);
-        --bs-physics-editor-text:          var(--bp-text);
+        --bs-physics-editor-text: var(--bp-text);
 
         // Toolbar — recessed lavender well so icon-buttons lift against it.
-        --bs-physics-editor-toolbar-bg:     var(--bp-bg-2);
+        --bs-physics-editor-toolbar-bg: var(--bp-bg-2);
         --bs-physics-editor-toolbar-border: var(--bp-border-faint);
 
         // Icon-button state ladder:
         //   rest    = muted ink on transparent
         //   hover   = paper-tint well (subtle lift)
         //   active  = pink primary (pink = primary/CTA in blueprint accent rotation)
-        --bs-physics-editor-tool-color:        var(--bp-text-muted);
-        --bs-physics-editor-tool-hover-bg:     var(--bp-paper-tint);
-        --bs-physics-editor-tool-active-bg:    var(--bp-pink);
+        --bs-physics-editor-tool-color: var(--bp-text-muted);
+        --bs-physics-editor-tool-hover-bg: var(--bp-paper-tint);
+        --bs-physics-editor-tool-active-bg: var(--bp-pink);
         --bs-physics-editor-tool-active-color: var(--bp-pink-ink); // #fff on pink
 
         // Stage — recessed well with a strong hairline frame.
         // Checker base colour: replace raw var(--tc-slate-200, #e2e8f0) with the
         // blueprint border-faint token so the transparency grid reads on the
         // lavender paper ground without the slate-ramp leak.
-        --bs-physics-editor-stage-bg:      var(--bp-bg-2);
-        --bs-physics-editor-stage-border:  var(--bp-border-strong);
-        --bs-physics-editor-checker:       var(--bp-border-faint);
+        --bs-physics-editor-stage-bg: var(--bp-bg-2);
+        --bs-physics-editor-stage-border: var(--bp-border-strong);
+        --bs-physics-editor-checker: var(--bp-border-faint);
 
         // Canvas-drawn shape colours (read via getComputedStyle in JS):
         //   shape-stroke  → blueprint hairline (unselected polygon/circle outline)
@@ -41,13 +40,13 @@ tc-theme[name='blueprint'],
         //   handle-bg     → paper (white handle dot on the canvas)
         //   handle-border → pink (matches selected-stroke — consistent selection accent)
         //   preview-stroke → teal (live drawing preview — teal = action; replaces cyan --tc-accent)
-        --bs-physics-editor-shape-stroke:    var(--bp-border-strong);
-        --bs-physics-editor-shape-fill:      var(--bp-violet-soft);
+        --bs-physics-editor-shape-stroke: var(--bp-border-strong);
+        --bs-physics-editor-shape-fill: var(--bp-violet-soft);
         --bs-physics-editor-selected-stroke: var(--bp-pink);
-        --bs-physics-editor-selected-fill:   var(--bp-pink-soft);
-        --bs-physics-editor-handle-bg:       var(--bp-paper);
-        --bs-physics-editor-handle-border:   var(--bp-pink);
-        --bs-physics-editor-preview-stroke:  var(--bp-teal);
+        --bs-physics-editor-selected-fill: var(--bp-pink-soft);
+        --bs-physics-editor-handle-bg: var(--bp-paper);
+        --bs-physics-editor-handle-border: var(--bp-pink);
+        --bs-physics-editor-preview-stroke: var(--bp-teal);
 
         // Focus ring — pink primary per blueprint focus pattern.
         --bs-physics-editor-focus-ring: var(--bp-pink);
@@ -66,8 +65,8 @@ tc-theme[name='blueprint'],
     .tc-physics-editor-action {
         transition:
             background-color var(--bp-ease),
-            color            var(--bp-ease),
-            box-shadow       var(--bp-ease);
+            color var(--bp-ease),
+            box-shadow var(--bp-ease);
 
         // Active tool: add a bottom teal underline stripe to reinforce selection
         // beyond colour alone (colour-blind-safe secondary cue).
@@ -80,13 +79,13 @@ tc-theme[name='blueprint'],
     // override above; reinforce with glow so it reads on the busy canvas surface.
     .tc-physics-editor-canvas:focus-visible {
         outline-color: var(--bp-pink);
-        box-shadow:    var(--bp-glow-pink);
+        box-shadow: var(--bp-glow-pink);
     }
 
     // Focus ring on toolbar buttons.
     .tc-physics-editor-tool:focus-visible,
     .tc-physics-editor-action:focus-visible {
         outline-color: var(--bp-pink);
-        box-shadow:    var(--bp-glow-pink);
+        box-shadow: var(--bp-glow-pink);
     }
 }

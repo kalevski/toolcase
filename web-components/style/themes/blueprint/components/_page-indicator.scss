@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-page-indicator {
         // Inactive dot: teal hairline ring, no fill — maps to the everyday-action (teal) tier.
         --bs-page-indicator-color: var(--bp-teal-line);
@@ -14,7 +13,10 @@ tc-theme[name='blueprint'],
     .tc-page-indicator-dot {
         // Inactive dot ring uses teal hairline; fill stays transparent (base handles it).
         border-color: var(--bp-teal-line);
-        transition: background-color var(--bp-ease), border-color var(--bp-ease), box-shadow var(--bp-ease);
+        transition:
+            background-color var(--bp-ease),
+            border-color var(--bp-ease),
+            box-shadow var(--bp-ease);
 
         &:hover {
             // Teal soft tint on hover — keeps the everyday-action identity.

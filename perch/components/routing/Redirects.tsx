@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useMemo, useState } from 'react'
+import type { AdvancedTableColumn } from '@toolcase/web-components'
 import { hstsEnabled, type Redirect, type RedirectCode, type RedirectScheme, type TlsMode } from '@/server/domain/routing'
 import type { AccessList } from '@/server/domain/access-list'
 import {
@@ -9,6 +10,13 @@ import {
     RoutingListTable,
     SaveWarningsBanner,
     VhostPreviewModal,
+    cellAccessList,
+    cellBadge,
+    cellEnabled,
+    cellJoin,
+    cellMono,
+    cellMuted,
+    cellTls,
     defaultHstsDraft,
     hstsDraftFrom,
     hstsPayload,
@@ -94,12 +102,42 @@ export function Redirects() {
     )
 }
 
-function describeRedirect(r: Redirect): string {
-    const code = r.code ?? 301
-    const scheme = r.scheme ?? 'auto'
-    return `→ ${r.to} · ${code} ${scheme}${r.preserve_path === false ? ' · path dropped' : ''}${
-        r.tls ? ` · TLS ${r.tls}` : ''
-    }${r.enabled === false ? ' · disabled' : ''}`
+// List columns (between the built-in Domain column and the actions).
+const REDIRECT_COLUMNS: AdvancedTableColumn[] = [
+    { key: 'target', label: 'Target' },
+    { key: 'code', label: 'Code' },
+    { key: 'path', label: 'Path' },
+    { key: 'listen', label: 'Listen' },
+    { key: 'tls', label: 'TLS' },
+    { key: 'access', label: 'Access' },
+    { key: 'options', label: 'Options' },
+    { key: 'status', label: 'Status' },
+]
+
+const CODE_HINTS: Record<number, string> = {
+    301: 'permanent',
+    302: 'found (temporary)',
+    303: 'see other',
+    307: 'temporary (method kept)',
+    308: 'permanent (method kept)',
+}
+
+/** Target cell: the destination host plus a forced-scheme chip when set. */
+function targetCellHtml(r: Redirect): string {
+    const parts = [cellMono(`→ ${r.to}`)]
+    if (r.scheme && r.scheme !== 'auto') {
+        parts.push(cellBadge(r.scheme, 'secondary', 'Forces the target scheme (auto keeps the client’s).'))
+    }
+    return cellJoin(parts)
+}
+
+/** Option chips beyond TLS: exploit blocking, gzip, raw nginx. */
+function optionsCellHtml(r: Redirect): string {
+    const chips: string[] = []
+    if (r.block_exploits) chips.push(cellBadge('block exploits'))
+    if (r.gzip) chips.push(cellBadge('gzip'))
+    if (r.advanced) chips.push(cellBadge('raw nginx', 'secondary', 'Carries a raw nginx passthrough snippet.'))
+    return cellJoin(chips)
 }
 
 /** Everything the redirect form holds — one draft object; the modal resets by remount. */
@@ -312,13 +350,30 @@ function RedirectsManager({
     const resourceStates = useResourceStates('redirect')
     const items = useMemo<RoutingListItem[]>(
         () =>
-            redirects.map((r) => ({
-                name: r.domain,
-                hint: describeRedirect(r),
-                toggleLabel: r.enabled === false ? 'Enable' : 'Disable',
-                stateChip: resourceStates.get(r.domain)?.state,
-                stateReason: resourceStates.get(r.domain)?.reason,
-            })),
+            redirects.map((r) => {
+                const code = r.code ?? 301
+                return {
+                    name: r.domain,
+                    nameExtraHtml: r.domain.startsWith('*.')
+                        ? ` ${cellBadge('wildcard', 'info', 'Needs a DNS-01 wildcard cert (Certificates, challenge: dns).')}`
+                        : undefined,
+                    cells: {
+                        target: targetCellHtml(r),
+                        code: cellBadge(String(code), 'secondary', CODE_HINTS[code]),
+                        path: r.preserve_path !== false
+                            ? cellMuted('kept')
+                            : cellBadge('dropped', 'secondary', 'The original path + query are not appended to the target.'),
+                        listen: cellMono(`:${r.listen ?? 80}`),
+                        tls: cellTls(r),
+                        access: cellAccessList(r.access_list),
+                        options: optionsCellHtml(r),
+                        status: cellEnabled(r.enabled !== false),
+                    },
+                    toggleLabel: r.enabled === false ? 'Enable' : 'Disable',
+                    stateChip: resourceStates.get(r.domain)?.state,
+                    stateReason: resourceStates.get(r.domain)?.reason,
+                }
+            }),
         [redirects, resourceStates],
     )
 
@@ -347,6 +402,8 @@ function RedirectsManager({
                         <tc-empty-state icon="corner-up-right">No redirects yet.</tc-empty-state>
                     ) : (
                         <RoutingListTable
+                            columns={REDIRECT_COLUMNS}
+                            nameLabel="Domain"
                             items={items}
                             busy={busy}
                             onEdit={startEdit}

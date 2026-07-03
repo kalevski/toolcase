@@ -4,50 +4,49 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-normal-map-generator {
         // ── Surface & structure ────────────────────────────────────────────────
         // Replace slate surface tokens with blueprint paper/bg tokens.
-        --bs-normal-map-generator-surface:        var(--bp-paper);
-        --bs-normal-map-generator-surface-muted:  var(--bp-bg-2);
-        --bs-normal-map-generator-border:         var(--bp-border);
-        --bs-normal-map-generator-border-strong:  var(--bp-border-strong);
+        --bs-normal-map-generator-surface: var(--bp-paper);
+        --bs-normal-map-generator-surface-muted: var(--bp-bg-2);
+        --bs-normal-map-generator-border: var(--bp-border);
+        --bs-normal-map-generator-border-strong: var(--bp-border-strong);
 
         // ── Ink / type ─────────────────────────────────────────────────────────
-        --bs-normal-map-generator-text:           var(--bp-text);
-        --bs-normal-map-generator-muted:          var(--bp-text-muted);
+        --bs-normal-map-generator-text: var(--bp-text);
+        --bs-normal-map-generator-muted: var(--bp-text-muted);
         // Carry in JetBrains Mono via the blueprint mono token so slider
         // labels and segment tabs render in the correct HUD face.
-        --bs-normal-map-generator-mono:           var(--bp-mono);
+        --bs-normal-map-generator-mono: var(--bp-mono);
 
         // ── Toolbar ────────────────────────────────────────────────────────────
         // Recessed tint so the toolbar reads as a panel header, not a card.
-        --bs-normal-map-generator-toolbar-bg:     var(--bp-paper-tint);
+        --bs-normal-map-generator-toolbar-bg: var(--bp-paper-tint);
         --bs-normal-map-generator-toolbar-border: var(--bp-border-faint);
 
         // ── Tool icon-buttons: teal hover, pink active ─────────────────────────
         // Teal = everyday action; pink = primary/selected (accent rotation).
-        --bs-normal-map-generator-tool-color:      var(--bp-text-muted);
-        --bs-normal-map-generator-tool-hover-bg:   var(--bp-teal-soft);
-        --bs-normal-map-generator-tool-active-bg:  var(--bp-pink);
+        --bs-normal-map-generator-tool-color: var(--bp-text-muted);
+        --bs-normal-map-generator-tool-hover-bg: var(--bp-teal-soft);
+        --bs-normal-map-generator-tool-active-bg: var(--bp-pink);
         --bs-normal-map-generator-tool-active-color: var(--bp-pink-ink);
 
         // ── Segmented preview control ──────────────────────────────────────────
-        --bs-normal-map-generator-seg-bg:           var(--bp-paper);
-        --bs-normal-map-generator-seg-border:       var(--bp-border-strong);
-        --bs-normal-map-generator-seg-color:        var(--bp-text-muted);
-        --bs-normal-map-generator-seg-hover-bg:     var(--bp-teal-soft);
+        --bs-normal-map-generator-seg-bg: var(--bp-paper);
+        --bs-normal-map-generator-seg-border: var(--bp-border-strong);
+        --bs-normal-map-generator-seg-color: var(--bp-text-muted);
+        --bs-normal-map-generator-seg-hover-bg: var(--bp-teal-soft);
         // Active segment → pink (primary selected state in the accent rotation).
-        --bs-normal-map-generator-seg-active-bg:    var(--bp-pink);
+        --bs-normal-map-generator-seg-active-bg: var(--bp-pink);
         --bs-normal-map-generator-seg-active-color: var(--bp-pink-ink);
 
         // ── Stage / checkerboard ───────────────────────────────────────────────
         // Replace var(--tc-slate-200, #e2e8f0) checker square with the blueprint
         // border-strong token — keeps the checkerboard legible on the paper base
         // without leaking raw slate values.
-        --bs-normal-map-generator-stage-bg:       var(--bp-bg-2);
-        --bs-normal-map-generator-stage-border:   var(--bp-border-strong);
-        --bs-normal-map-generator-checker:        var(--bp-border);
+        --bs-normal-map-generator-stage-bg: var(--bp-bg-2);
+        --bs-normal-map-generator-stage-border: var(--bp-border-strong);
+        --bs-normal-map-generator-checker: var(--bp-border);
 
         // ── Sliders ────────────────────────────────────────────────────────────
         --bs-normal-map-generator-range-track: var(--bp-border-strong);
@@ -150,7 +149,7 @@ tc-theme[name='blueprint'],
         font-family: var(--bp-mono);
         font-size: 0.75rem;
         letter-spacing: 0.06em;
-        color: var(--bp-teal-fg);    // Teal numeric readout = data/HUD accent
+        color: var(--bp-teal-fg); // Teal numeric readout = data/HUD accent
     }
 
     // Range thumb accent → teal (consistent with the variable token above).

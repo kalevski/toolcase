@@ -3,35 +3,34 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-ammo-counter {
         // Surface — white card, hairline border, soft shadow.
-        --bs-ammo-counter-bg:           var(--bp-paper);
+        --bs-ammo-counter-bg: var(--bp-paper);
         --bs-ammo-counter-border-color: var(--bp-border);
-        --bs-ammo-counter-shadow:       var(--tc-shadow-sm);
+        --bs-ammo-counter-shadow: var(--tc-shadow-sm);
 
         // Weapon name eyebrow — teal-fg ink, mono font already applied by the base partial.
-        --bs-ammo-counter-weapon-color:          var(--bp-teal-fg);
-        --bs-ammo-counter-weapon-font-size:      0.625rem;
+        --bs-ammo-counter-weapon-color: var(--bp-teal-fg);
+        --bs-ammo-counter-weapon-font-size: 0.625rem;
         --bs-ammo-counter-weapon-letter-spacing: 0.14em;
 
         // Mag count — primary display number, emphasis ink so it reads at a glance.
-        --bs-ammo-counter-mag-color:       var(--bp-emphasis);
-        --bs-ammo-counter-mag-font-size:   1.875rem;
+        --bs-ammo-counter-mag-color: var(--bp-emphasis);
+        --bs-ammo-counter-mag-font-size: 1.875rem;
         --bs-ammo-counter-mag-font-weight: 700;
 
         // Separator and max — faint / muted so the live count gets all the visual weight.
-        --bs-ammo-counter-sep-color:       var(--bp-text-faint);
-        --bs-ammo-counter-max-color:       var(--bp-text-muted);
+        --bs-ammo-counter-sep-color: var(--bp-text-faint);
+        --bs-ammo-counter-max-color: var(--bp-text-muted);
         --bs-ammo-counter-secondary-font-size: 1rem;
 
         // Reserve — soft muted, slightly tighter than base.
-        --bs-ammo-counter-reserve-color:     var(--bp-text-faint);
+        --bs-ammo-counter-reserve-color: var(--bp-text-faint);
         --bs-ammo-counter-reserve-font-size: 0.75rem;
 
         // State label — reloading text in teal, sized to match weapon eyebrow.
-        --bs-ammo-counter-state-color:          var(--bp-teal-fg);
-        --bs-ammo-counter-state-font-size:      0.625rem;
+        --bs-ammo-counter-state-color: var(--bp-teal-fg);
+        --bs-ammo-counter-state-font-size: 0.625rem;
         --bs-ammo-counter-state-letter-spacing: 0.14em;
 
         // Low-ammo danger ink — real red, NOT pink (pink is primary CTA, not danger).
@@ -101,7 +100,12 @@ tc-theme[name='blueprint'],
     }
 
     @keyframes bp-ammo-reload-blink {
-        0%, 100% { opacity: 1; }
-        50%       { opacity: 0.4; }
+        0%,
+        100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.4;
+        }
     }
 }

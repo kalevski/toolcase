@@ -70,7 +70,8 @@ tc-theme[name='blueprint'],
     }
 
     @keyframes bp-tab-skeleton-pulse {
-        0%, 100% {
+        0%,
+        100% {
             background-color: var(--bp-border-faint);
         }
         50% {

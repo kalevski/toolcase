@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-login {
         // ── Column divider ───────────────────────────────────────────────────────
         --bs-login-column-divider: 1px solid var(--bp-border);
@@ -111,9 +110,9 @@ tc-theme[name='blueprint'],
         text-transform: uppercase;
         transition:
             background-color 0.18s var(--bp-ease),
-            border-color     0.18s var(--bp-ease),
-            box-shadow       0.18s var(--bp-ease),
-            transform        0.18s var(--bp-ease);
+            border-color 0.18s var(--bp-ease),
+            box-shadow 0.18s var(--bp-ease),
+            transform 0.18s var(--bp-ease);
 
         &:hover:not(:disabled) {
             transform: translateY(-2px);

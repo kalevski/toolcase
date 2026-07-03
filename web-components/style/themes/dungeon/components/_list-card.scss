@@ -9,34 +9,34 @@ tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
     tc-list-card {
         // ── Surface ───────────────────────────────────────────────────────────
-        --bs-list-card-bg:                  var(--fg-panel-bg);
-        --bs-list-card-border-color:        var(--fg-gold-deep);
-        --bs-list-card-shadow:              var(--fg-panel-shadow);
+        --bs-list-card-bg: var(--fg-panel-bg);
+        --bs-list-card-border-color: var(--fg-gold-deep);
+        --bs-list-card-shadow: var(--fg-panel-shadow);
 
         // ── Header ────────────────────────────────────────────────────────────
         // Overrides the near-invisible slate wash (rgba(30,41,59,…)).
-        --bs-list-card-header-bg:           var(--fg-ink-2);
+        --bs-list-card-header-bg: var(--fg-ink-2);
         --bs-list-card-header-border-color: var(--fg-gold-deep);
 
         // ── Title ─────────────────────────────────────────────────────────────
-        --bs-list-card-title-color:         var(--fg-gold-bright);
+        --bs-list-card-title-color: var(--fg-gold-bright);
 
         // ── Row separators ────────────────────────────────────────────────────
         // Overrides the slate fallback (rgba(148,163,184,.35)).
         --bs-list-card-row-separator-color: rgba(201, 169, 97, 0.15);
 
         // ── Rank chip ─────────────────────────────────────────────────────────
-        --bs-list-card-rank-bg:             var(--fg-slot-bg);
-        --bs-list-card-rank-color:          var(--fg-gold);
+        --bs-list-card-rank-bg: var(--fg-slot-bg);
+        --bs-list-card-rank-color: var(--fg-gold);
 
         // ── Label / value / icon ──────────────────────────────────────────────
-        --bs-list-card-label-color:         var(--fg-parch);
-        --bs-list-card-value-color:         var(--fg-parch-2);
-        --bs-list-card-icon-color:          var(--fg-gold);
+        --bs-list-card-label-color: var(--fg-parch);
+        --bs-list-card-value-color: var(--fg-parch-2);
+        --bs-list-card-icon-color: var(--fg-gold);
 
         // ── Skeleton shimmer ──────────────────────────────────────────────────
         // Overrides the white shimmer (rgba(255,255,255,.6)).
-        --bs-list-card-skeleton-shimmer:    rgba(232, 220, 196, 0.5);
+        --bs-list-card-skeleton-shimmer: rgba(232, 220, 196, 0.5);
     }
 
     // ── Card shell — gilded bevel + corner notches ────────────────────────────

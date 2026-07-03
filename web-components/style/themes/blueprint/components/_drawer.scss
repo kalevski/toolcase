@@ -2,15 +2,14 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-drawer {
         // Surface — white paper panel, blueprint hairline border, violet-tinted shadow.
-        --bs-drawer-bg:           var(--bp-paper);
+        --bs-drawer-bg: var(--bp-paper);
         --bs-drawer-border-color: var(--bp-border-strong);
-        --bs-drawer-shadow:       var(--tc-shadow-lg);
+        --bs-drawer-shadow: var(--tc-shadow-lg);
 
         // Backdrop — dark navy base replaced with blueprint emphasis ink for a light-theme-coherent scrim.
-        --bs-drawer-backdrop-bg:      #1a1830; // --bp-emphasis (darkest ink) — scrim stays dark by design
+        --bs-drawer-backdrop-bg: #1a1830; // --bp-emphasis (darkest ink) — scrim stays dark by design
         --bs-drawer-backdrop-opacity: 0.45;
     }
 
@@ -21,10 +20,18 @@ tc-theme[name='blueprint'],
         border-color: var(--bp-border-strong);
 
         // Side edge borders — re-point to blueprint hairline token.
-        &.tc-drawer__panel--right  { border-left-color:   var(--bp-border-strong); }
-        &.tc-drawer__panel--left   { border-right-color:  var(--bp-border-strong); }
-        &.tc-drawer__panel--top    { border-bottom-color: var(--bp-border-strong); }
-        &.tc-drawer__panel--bottom { border-top-color:    var(--bp-border-strong); }
+        &.tc-drawer__panel--right {
+            border-left-color: var(--bp-border-strong);
+        }
+        &.tc-drawer__panel--left {
+            border-right-color: var(--bp-border-strong);
+        }
+        &.tc-drawer__panel--top {
+            border-bottom-color: var(--bp-border-strong);
+        }
+        &.tc-drawer__panel--bottom {
+            border-top-color: var(--bp-border-strong);
+        }
     }
 
     // ── Header ─────────────────────────────────────────────────────────────────
@@ -51,11 +58,11 @@ tc-theme[name='blueprint'],
 
     .tc-drawer__title {
         font-family: var(--bp-mono);
-        font-size: 0.6875rem;         // 11px — mono eyebrow scale
+        font-size: 0.6875rem; // 11px — mono eyebrow scale
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: .10em;
-        color: var(--bp-text-soft);   // readable dark-violet, not flat black
+        letter-spacing: 0.1em;
+        color: var(--bp-text-soft); // readable dark-violet, not flat black
     }
 
     // ── Close button ───────────────────────────────────────────────────────────

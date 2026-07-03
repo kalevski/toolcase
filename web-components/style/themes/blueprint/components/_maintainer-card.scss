@@ -2,34 +2,33 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-maintainer-card {
         // Surface: white raised card, violet-tinted hairline, soft shadow.
-        --bs-maintainer-card-bg:                var(--bp-paper);
-        --bs-maintainer-card-border:            var(--bp-border);
-        --bs-maintainer-card-shadow:            var(--tc-shadow-sm);
-        --bs-maintainer-card-shadow-hover:      var(--tc-shadow-hover);
+        --bs-maintainer-card-bg: var(--bp-paper);
+        --bs-maintainer-card-border: var(--bp-border);
+        --bs-maintainer-card-shadow: var(--tc-shadow-sm);
+        --bs-maintainer-card-shadow-hover: var(--tc-shadow-hover);
 
         // Name: display typeface, strong ink.
-        --bs-maintainer-card-name-color:        var(--bp-emphasis);
-        --bs-maintainer-card-name-size:         1.0625rem;
+        --bs-maintainer-card-name-color: var(--bp-emphasis);
+        --bs-maintainer-card-name-size: 1.0625rem;
 
         // Role + location + bio: muted ink.
-        --bs-maintainer-card-role-color:        var(--bp-text-muted);
-        --bs-maintainer-card-role-size:         0.8125rem;
-        --bs-maintainer-card-location-color:    var(--bp-text-faint);
-        --bs-maintainer-card-location-size:     0.8125rem;
-        --bs-maintainer-card-bio-color:         var(--bp-text-muted);
-        --bs-maintainer-card-bio-size:          0.875rem;
+        --bs-maintainer-card-role-color: var(--bp-text-muted);
+        --bs-maintainer-card-role-size: 0.8125rem;
+        --bs-maintainer-card-location-color: var(--bp-text-faint);
+        --bs-maintainer-card-location-size: 0.8125rem;
+        --bs-maintainer-card-bio-color: var(--bp-text-muted);
+        --bs-maintainer-card-bio-size: 0.875rem;
 
         // Social links: faint ink → teal on hover.
-        --bs-maintainer-card-link-color:        var(--bp-text-faint);
-        --bs-maintainer-card-link-hover-bg:     var(--bp-teal-soft);
-        --bs-maintainer-card-link-hover-color:  var(--bp-teal-fg);
+        --bs-maintainer-card-link-color: var(--bp-text-faint);
+        --bs-maintainer-card-link-hover-bg: var(--bp-teal-soft);
+        --bs-maintainer-card-link-hover-color: var(--bp-teal-fg);
 
         // Sponsor CTA: pink primary (arcade accent rotation — pink = primary/CTA).
-        --bs-maintainer-card-sponsor-bg:        var(--bp-pink);
-        --bs-maintainer-card-sponsor-color:     var(--bp-pink-ink);
+        --bs-maintainer-card-sponsor-bg: var(--bp-pink);
+        --bs-maintainer-card-sponsor-color: var(--bp-pink-ink);
         // hover-bg has no --bs-* var; overridden directly on the element below.
     }
 
@@ -72,7 +71,9 @@ tc-theme[name='blueprint'],
 
     @media (prefers-reduced-motion: reduce) {
         .tc-maintainer-card {
-            transition: box-shadow var(--bp-ease), border-color var(--bp-ease);
+            transition:
+                box-shadow var(--bp-ease),
+                border-color var(--bp-ease);
 
             &:hover {
                 transform: none;
@@ -163,5 +164,4 @@ tc-theme[name='blueprint'],
             outline-offset: 2px;
         }
     }
-
 }

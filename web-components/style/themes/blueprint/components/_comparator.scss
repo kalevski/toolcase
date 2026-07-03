@@ -2,51 +2,50 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-comparator {
         // ── Layout ──────────────────────────────────────────────────────────────
-        --bs-comparator-border:       1px solid var(--bp-border);
+        --bs-comparator-border: 1px solid var(--bp-border);
         --bs-comparator-inner-border: 1px solid var(--bp-border-faint);
-        --bs-comparator-bg:           var(--bp-paper);
+        --bs-comparator-bg: var(--bp-paper);
 
         // ── Header ──────────────────────────────────────────────────────────────
         // Recessed header well: --bp-bg-2 with a bottom hairline
-        --bs-comparator-header-bg:          var(--bp-bg-2);
-        --bs-comparator-title-font-size:    1.0625rem;
-        --bs-comparator-title-font-weight:  700;
-        --bs-comparator-title-color:        var(--bp-emphasis);
-        --bs-comparator-desc-font-size:     0.875rem;
-        --bs-comparator-desc-color:         var(--bp-text-muted);
+        --bs-comparator-header-bg: var(--bp-bg-2);
+        --bs-comparator-title-font-size: 1.0625rem;
+        --bs-comparator-title-font-weight: 700;
+        --bs-comparator-title-color: var(--bp-emphasis);
+        --bs-comparator-desc-font-size: 0.875rem;
+        --bs-comparator-desc-color: var(--bp-text-muted);
 
         // ── Tech header row ──────────────────────────────────────────────────────
-        --bs-comparator-tech-head-bg:              var(--bp-bg-2);
-        --bs-comparator-tech-name-color:           var(--bp-text-soft);
-        --bs-comparator-tech-name-font-weight:     700;
-        --bs-comparator-tech-label-color:          var(--bp-teal-fg);  // teal eyebrow on white → clears AA
+        --bs-comparator-tech-head-bg: var(--bp-bg-2);
+        --bs-comparator-tech-name-color: var(--bp-text-soft);
+        --bs-comparator-tech-name-font-weight: 700;
+        --bs-comparator-tech-label-color: var(--bp-teal-fg); // teal eyebrow on white → clears AA
         --bs-comparator-tech-label-letter-spacing: 0.1em;
-        --bs-comparator-tech-icon-color:           var(--bp-text-faint);
+        --bs-comparator-tech-icon-color: var(--bp-text-faint);
 
         // ── Feature rows ─────────────────────────────────────────────────────────
         --bs-comparator-feature-label-color: var(--bp-text);
-        --bs-comparator-feature-desc-color:  var(--bp-text-faint);
+        --bs-comparator-feature-desc-color: var(--bp-text-faint);
 
         // ── Status indicators ────────────────────────────────────────────────────
         // yes → teal (success token), no → faint text (not a hard red — absence)
-        --bs-comparator-yes-color: var(--bp-teal);
-        --bs-comparator-no-color:  var(--bp-text-faint);
+        --bs-comparator-yes-color: var(--bp-success);
+        --bs-comparator-no-color: var(--bp-text-faint);
 
         // ── Winner highlight ─────────────────────────────────────────────────────
         // Pink-surface soft gradient tint on the winning column; yes-indicator
         // stays teal (readable on the tinted ground)
-        --bs-comparator-winner-bg:                  var(--bp-paper-tint-2);
-        --bs-comparator-winner-indicator-yes-color: var(--bp-teal);
+        --bs-comparator-winner-bg: var(--bp-paper-tint-2);
+        --bs-comparator-winner-indicator-yes-color: var(--bp-success);
 
         // ── Summary row ──────────────────────────────────────────────────────────
-        --bs-comparator-summary-bg:           var(--bp-bg-2);
-        --bs-comparator-summary-border:       1px solid var(--bp-border);
-        --bs-comparator-tally-color:          var(--bp-text-soft);
+        --bs-comparator-summary-bg: var(--bp-bg-2);
+        --bs-comparator-summary-border: 1px solid var(--bp-border);
+        --bs-comparator-tally-color: var(--bp-text-soft);
         --bs-comparator-tally-letter-spacing: 0.08em;
-        --bs-comparator-tally-label-color:    var(--bp-text-faint);
+        --bs-comparator-tally-label-color: var(--bp-text-faint);
 
         // ── Skeleton ─────────────────────────────────────────────────────────────
         --bs-comparator-skel-bg: var(--bp-border-faint);

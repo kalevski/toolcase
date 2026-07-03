@@ -13,8 +13,6 @@
 //
 // 172 literal LG surfaces, 489 literal MD surfaces, 24 var-driven re-points.
 
-
-
 // ── Big framed surfaces → 8px (LG) ─────────────────────────────────────────
 [data-tc-theme='blueprint'] .tc-ability-card,
 tc-theme[name='blueprint'] .tc-ability-card,
@@ -210,10 +208,10 @@ tc-theme[name='blueprint'] .tc-maintainer-card__sponsor,
 tc-theme[name='blueprint'] .tc-metric-card-icon-chip,
 [data-tc-theme='blueprint'] .tc-metric-card-skeleton,
 tc-theme[name='blueprint'] .tc-metric-card-skeleton,
-[data-tc-theme='blueprint'] .tc-metric-grid>.tc-metric-tile,
-tc-theme[name='blueprint'] .tc-metric-grid>.tc-metric-tile,
-[data-tc-theme='blueprint'] .tc-metric-grid>[class~=tc-metric-tile],
-tc-theme[name='blueprint'] .tc-metric-grid>[class~=tc-metric-tile],
+[data-tc-theme='blueprint'] .tc-metric-grid > .tc-metric-tile,
+tc-theme[name='blueprint'] .tc-metric-grid > .tc-metric-tile,
+[data-tc-theme='blueprint'] .tc-metric-grid > [class~='tc-metric-tile'],
+tc-theme[name='blueprint'] .tc-metric-grid > [class~='tc-metric-tile'],
 [data-tc-theme='blueprint'] .tc-metric-tile,
 tc-theme[name='blueprint'] .tc-metric-tile,
 [data-tc-theme='blueprint'] .tc-multi-card-select,
@@ -364,8 +362,8 @@ tc-theme[name='blueprint'] tc-item-tooltip {
 }
 
 // ── Controls / small surfaces → 5px (MD) ───────────────────────────────────
-[data-tc-theme='blueprint'] .form-check-input[type=checkbox],
-tc-theme[name='blueprint'] .form-check-input[type=checkbox],
+[data-tc-theme='blueprint'] .form-check-input[type='checkbox'],
+tc-theme[name='blueprint'] .form-check-input[type='checkbox'],
 [data-tc-theme='blueprint'] .form-control,
 tc-theme[name='blueprint'] .form-control,
 [data-tc-theme='blueprint'] .form-select,
@@ -634,8 +632,8 @@ tc-theme[name='blueprint'] .tc-dashboard-sidebar,
 tc-theme[name='blueprint'] .tc-data-list,
 [data-tc-theme='blueprint'] .tc-data-list__action,
 tc-theme[name='blueprint'] .tc-data-list__action,
-[data-tc-theme='blueprint'] .tc-date-picker input[type=date].form-control,
-tc-theme[name='blueprint'] .tc-date-picker input[type=date].form-control,
+[data-tc-theme='blueprint'] .tc-date-picker input[type='date'].form-control,
+tc-theme[name='blueprint'] .tc-date-picker input[type='date'].form-control,
 [data-tc-theme='blueprint'] .tc-diff-viewer,
 tc-theme[name='blueprint'] .tc-diff-viewer,
 [data-tc-theme='blueprint'] .tc-diff-viewer__code,

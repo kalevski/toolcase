@@ -4,7 +4,9 @@
 //   <tc-theme name="dungeon"> … your tc-* components … </tc-theme>
 //
 // Load order: foundation (token remap) first so component partials override on
-// top of the already-fantasy --tc-* / --bs-* tokens.
+// top of the already-fantasy --tc-* / --bs-* tokens; variants extend the
+// foundation with alternate primary / secondary accent palettes.
 
 @use 'foundation';
+@use 'variants';
 @use 'components';

@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-damage-number {
         // Default hit: amber — warm, readable, distinct from teal success and pink crit.
         --bs-damage-number-color: var(--bp-amber-fg);
@@ -17,7 +16,7 @@ tc-theme[name='blueprint'],
         --bs-damage-number-crit-color: var(--bp-pink);
 
         // Heal: teal success register — matches status convention.
-        --bs-damage-number-heal-color: var(--bp-teal-fg);
+        --bs-damage-number-heal-color: var(--bp-success-fg);
 
         // Miss: faint — it's non-information; quiet it down.
         --bs-damage-number-miss-color: var(--bp-text-faint);

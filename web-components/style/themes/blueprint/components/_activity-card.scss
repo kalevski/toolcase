@@ -9,7 +9,11 @@ tc-theme[name='blueprint'],
         --bs-activity-card-shadow: var(--tc-shadow-sm);
 
         // Header cap: faint violet gradient (matches .card cap).
-        --bs-activity-card-header-bg: linear-gradient(135deg, rgba(91, 61, 242, 0.04), rgba(91, 61, 242, 0.01));
+        --bs-activity-card-header-bg: linear-gradient(
+            135deg,
+            rgba(91, 61, 242, 0.04),
+            rgba(91, 61, 242, 0.01)
+        );
         --bs-activity-card-header-border-color: var(--bp-border-faint);
 
         // Card title: display font, blueprint primary ink.

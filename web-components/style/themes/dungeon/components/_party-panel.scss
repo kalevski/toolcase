@@ -6,7 +6,8 @@
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
     tc-party-panel {
-        --bs-party-panel-bg: linear-gradient(180deg, rgba(232, 220, 196, 0.04), rgba(0, 0, 0, 0.18)),
+        --bs-party-panel-bg:
+            linear-gradient(180deg, rgba(232, 220, 196, 0.04), rgba(0, 0, 0, 0.18)),
             radial-gradient(120% 80% at 50% 0%, #2e2418 0%, #1a130c 70%);
         --bs-party-panel-border: var(--fg-gold-deep);
         --bs-party-panel-header-bg: rgba(0, 0, 0, 0.3);
@@ -17,12 +18,24 @@ tc-theme[name='dungeon'],
         // Slots — translucent black with a gold edge.
         --bs-party-panel-slot-bg: rgba(0, 0, 0, 0.3);
         --bs-party-panel-slot-border: var(--fg-gold-deep);
-        --bs-party-panel-slot-empty-bg: linear-gradient(180deg, rgba(10, 6, 4, 0.5), rgba(26, 18, 10, 0.4));
+        --bs-party-panel-slot-empty-bg: linear-gradient(
+            180deg,
+            rgba(10, 6, 4, 0.5),
+            rgba(26, 18, 10, 0.4)
+        );
         --bs-party-panel-slot-empty-color: var(--fg-parch-3);
-        --bs-party-panel-slot-empty-hover-bg: linear-gradient(180deg, rgba(10, 6, 4, 0.5), rgba(26, 18, 10, 0.4));
+        --bs-party-panel-slot-empty-hover-bg: linear-gradient(
+            180deg,
+            rgba(10, 6, 4, 0.5),
+            rgba(26, 18, 10, 0.4)
+        );
         --bs-party-panel-slot-filled-bg: rgba(0, 0, 0, 0.3);
         // Ready slot — stamina-green wash.
-        --bs-party-panel-slot-ready-bg: linear-gradient(90deg, rgba(111, 159, 58, 0.18), rgba(0, 0, 0, 0.3));
+        --bs-party-panel-slot-ready-bg: linear-gradient(
+            90deg,
+            rgba(111, 159, 58, 0.18),
+            rgba(0, 0, 0, 0.3)
+        );
 
         --bs-party-panel-member-name-color: var(--fg-parch);
         --bs-party-panel-role-bg: transparent;

@@ -5,7 +5,6 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // ── Token swap on host element ────────────────────────────────────────────
     // Fixes the critical --tc-slate-200 undefined-token track bug and repoints
     // the slate-blue title gradient + white text to dungeon palette values.

@@ -2,23 +2,26 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-benchmark-chart {
         // Surface: render against the page background with no chrome of its own.
         // Individual containers or cards above this element supply the paper/border.
-        --bs-benchmark-chart-track-bg:   var(--bp-bg-2);       // recessed well — matches page indented surfaces
-        --bs-benchmark-chart-bar-fill:   var(--bp-teal);       // teal = everyday action/data, not a CTA
+        --bs-benchmark-chart-track-bg: var(
+            --bp-bg-2
+        ); // recessed well — matches page indented surfaces
+        --bs-benchmark-chart-bar-fill: var(--bp-teal); // teal = everyday action/data, not a CTA
         // Leader gradient: replace dark-slate stop (#2b3a51) with blueprint violet.
         // The gradient runs via SVG linearGradient stops (--from / --to).
-        --bs-benchmark-chart-leader-from: var(--bp-pink);      // pink = primary emphasis
-        --bs-benchmark-chart-leader-to:   var(--bp-violet);    // violet = supporting accent, replaces slate dark stop
-        --bs-benchmark-chart-sep-color:  var(--bp-border-faint);
+        --bs-benchmark-chart-leader-from: var(--bp-pink); // pink = primary emphasis
+        --bs-benchmark-chart-leader-to: var(
+            --bp-violet
+        ); // violet = supporting accent, replaces slate dark stop
+        --bs-benchmark-chart-sep-color: var(--bp-border-faint);
         --bs-benchmark-chart-label-color: var(--bp-text);
         --bs-benchmark-chart-value-color: var(--bp-text-soft);
-        --bs-benchmark-chart-unit-color:  var(--bp-text-faint);
+        --bs-benchmark-chart-unit-color: var(--bp-text-faint);
         --bs-benchmark-chart-title-color: var(--bp-text);
         --bs-benchmark-chart-caption-color: var(--bp-text-faint);
-        --bs-benchmark-chart-hover-bg:   var(--bp-paper-tint);
+        --bs-benchmark-chart-hover-bg: var(--bp-paper-tint);
     }
 
     // Title: display face, tight — section heading treatment

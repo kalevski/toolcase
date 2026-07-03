@@ -5,14 +5,13 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // ── Token swap — host element carries all --bs-drawer-* defaults ──────────
 
     tc-drawer {
-        --bs-drawer-bg:              var(--fg-panel-bg);
-        --bs-drawer-border-color:    var(--fg-gold-deep);
+        --bs-drawer-bg: var(--fg-panel-bg);
+        --bs-drawer-border-color: var(--fg-gold-deep);
         // Replace the hardcoded slate-900 scrim with dungeon ink-black.
-        --bs-drawer-backdrop-bg:     var(--fg-ink);
+        --bs-drawer-backdrop-bg: var(--fg-ink);
         --bs-drawer-backdrop-opacity: 0.65;
     }
 

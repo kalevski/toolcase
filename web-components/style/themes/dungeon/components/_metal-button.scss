@@ -91,7 +91,9 @@ tc-theme[name='dungeon'],
     // Drop the slate primary-hover glow from the default theme; keep dungeon bevel intact.
     // Improvement 4: faint gold aura on primary hover text, plus bevel-top token.
     tc-metal-button[variant='primary'] .tc-metal-button__btn {
-        text-shadow: 0 1px 0 #000, 0 0 10px rgba(232, 200, 120, 0.3);
+        text-shadow:
+            0 1px 0 #000,
+            0 0 10px rgba(232, 200, 120, 0.3);
     }
 
     tc-metal-button[variant='primary'] .tc-metal-button__btn:hover {

@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // Re-skin via Bootstrap-compatible custom properties where they exist.
     // The chevron SVG stroke color is baked into the data URI; we swap the
     // slate %2364748b for --bp-teal (%230aa89a) to stay on-theme.

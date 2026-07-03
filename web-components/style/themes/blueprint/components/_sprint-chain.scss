@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-sprint-chain {
         // Connector — replace raw tc-border with blueprint faint hairline
         --bs-sprint-chain-connector-color: var(--bp-border-faint);
@@ -22,8 +21,8 @@ tc-theme[name='blueprint'],
         --bs-sprint-chain-header-color: var(--bp-text-soft);
 
         // State: past — teal-line fill (done/success = teal in blueprint)
-        --bs-sprint-chain-past-node-bg: var(--bp-teal);
-        --bs-sprint-chain-past-node-border: var(--bp-teal);
+        --bs-sprint-chain-past-node-bg: var(--bp-success);
+        --bs-sprint-chain-past-node-border: var(--bp-success);
         --bs-sprint-chain-past-label-color: var(--bp-text-faint);
 
         // State: now — pink fill (primary CTA = pink in blueprint)
@@ -73,7 +72,6 @@ tc-theme[name='blueprint'],
     // ── State: past (complete) ─────────────────────────────────────────────────
     // Teal fill + soft halo; connector up to this node sharpens to teal-line
     .tc-sprint-chain-item-past {
-
         .tc-sprint-chain-node {
             background: var(--bp-teal);
             border-color: var(--bp-teal);
@@ -98,7 +96,6 @@ tc-theme[name='blueprint'],
     // ── State: now (current sprint) ───────────────────────────────────────────
     // Pink fill + pink glow; bold mono label; live pulse dot inside node via inner ring
     .tc-sprint-chain-item-now {
-
         .tc-sprint-chain-node {
             background: var(--bp-pink);
             border-color: var(--bp-pink);
@@ -134,7 +131,6 @@ tc-theme[name='blueprint'],
     // ── State: future ─────────────────────────────────────────────────────────
     // Hollow paper ring — quiet, placeholder feel
     .tc-sprint-chain-item-future {
-
         .tc-sprint-chain-node {
             background: var(--bp-paper);
             border-color: var(--bp-border-strong);
@@ -145,5 +141,4 @@ tc-theme[name='blueprint'],
             color: var(--bp-text-faint);
         }
     }
-
 }

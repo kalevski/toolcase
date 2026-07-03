@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useMemo, useState } from 'react'
+import type { AdvancedTableColumn } from '@toolcase/web-components'
 import { hstsEnabled, type DeadHost, type DeadHostCode, type TlsMode } from '@/server/domain/routing'
 import type { AccessList } from '@/server/domain/access-list'
 import {
@@ -9,6 +10,12 @@ import {
     RoutingListTable,
     SaveWarningsBanner,
     VhostPreviewModal,
+    cellAccessList,
+    cellBadge,
+    cellEnabled,
+    cellJoin,
+    cellMono,
+    cellTls,
     defaultHstsDraft,
     hstsDraftFrom,
     hstsPayload,
@@ -92,10 +99,30 @@ export function DeadHosts() {
     )
 }
 
-function describeDeadHost(d: DeadHost): string {
-    return `${codeLabel(d.code ?? 404)}${d.tls ? ` · TLS ${d.tls}` : ''}${
-        d.enabled === false ? ' · disabled' : ''
-    }`
+// List columns (between the built-in Domain column and the actions).
+const DEAD_HOST_COLUMNS: AdvancedTableColumn[] = [
+    { key: 'code', label: 'Answers' },
+    { key: 'listen', label: 'Listen' },
+    { key: 'tls', label: 'TLS' },
+    { key: 'access', label: 'Access' },
+    { key: 'options', label: 'Options' },
+    { key: 'status', label: 'Status' },
+]
+
+const CODE_HINTS: Record<number, string> = {
+    404: 'not found',
+    410: 'gone',
+    444: 'nginx closes the connection — no status line reaches the client',
+    503: 'service unavailable',
+}
+
+/** Option chips beyond TLS: exploit blocking, gzip, raw nginx. */
+function optionsCellHtml(d: DeadHost): string {
+    const chips: string[] = []
+    if (d.block_exploits) chips.push(cellBadge('block exploits'))
+    if (d.gzip) chips.push(cellBadge('gzip'))
+    if (d.advanced) chips.push(cellBadge('raw nginx', 'secondary', 'Carries a raw nginx passthrough snippet.'))
+    return cellJoin(chips)
 }
 
 /** Everything the dead-host form holds — one draft object; the modal resets by remount. */
@@ -297,13 +324,26 @@ function DeadHostsManager({
     const resourceStates = useResourceStates('dead-host')
     const items = useMemo<RoutingListItem[]>(
         () =>
-            deadHosts.map((d) => ({
-                name: d.domain,
-                hint: describeDeadHost(d),
-                toggleLabel: d.enabled === false ? 'Enable' : 'Disable',
-                stateChip: resourceStates.get(d.domain)?.state,
-                stateReason: resourceStates.get(d.domain)?.reason,
-            })),
+            deadHosts.map((d) => {
+                const code = d.code ?? 404
+                return {
+                    name: d.domain,
+                    nameExtraHtml: d.domain.startsWith('*.')
+                        ? ` ${cellBadge('wildcard', 'info', 'Needs a DNS-01 wildcard cert (Certificates, challenge: dns).')}`
+                        : undefined,
+                    cells: {
+                        code: cellBadge(codeLabel(code), code === 444 ? 'warning' : 'secondary', CODE_HINTS[code]),
+                        listen: cellMono(`:${d.listen ?? 80}`),
+                        tls: cellTls(d),
+                        access: cellAccessList(d.access_list),
+                        options: optionsCellHtml(d),
+                        status: cellEnabled(d.enabled !== false),
+                    },
+                    toggleLabel: d.enabled === false ? 'Enable' : 'Disable',
+                    stateChip: resourceStates.get(d.domain)?.state,
+                    stateReason: resourceStates.get(d.domain)?.reason,
+                }
+            }),
         [deadHosts, resourceStates],
     )
 
@@ -332,6 +372,8 @@ function DeadHostsManager({
                         <tc-empty-state icon="ban">No dead hosts yet.</tc-empty-state>
                     ) : (
                         <RoutingListTable
+                            columns={DEAD_HOST_COLUMNS}
+                            nameLabel="Domain"
                             items={items}
                             busy={busy}
                             onEdit={startEdit}

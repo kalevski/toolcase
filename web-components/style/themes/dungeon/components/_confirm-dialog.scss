@@ -6,7 +6,11 @@
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
     tc-confirm-dialog {
-        --bs-confirm-dialog-bg: linear-gradient(180deg, rgba(20, 12, 8, 0.96), rgba(10, 6, 4, 0.96));
+        --bs-confirm-dialog-bg: linear-gradient(
+            180deg,
+            rgba(20, 12, 8, 0.96),
+            rgba(10, 6, 4, 0.96)
+        );
         --bs-confirm-dialog-color: var(--fg-parch);
         --bs-confirm-dialog-border-color: var(--fg-gold-deep);
         --bs-confirm-dialog-eyebrow-color: var(--fg-parch-dim);

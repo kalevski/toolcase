@@ -13,6 +13,7 @@ interface Raw {
     owner_id: number
     repo_owner: string
     repo_name: string
+    repo_private: number
     branch: string
     subdir: string | null
     hostname: string
@@ -32,6 +33,7 @@ function map(r: Raw): Site {
         ownerId: r.owner_id,
         repoOwner: r.repo_owner,
         repoName: r.repo_name,
+        repoPrivate: !!r.repo_private,
         branch: r.branch,
         subdir: r.subdir ?? undefined,
         hostname: r.hostname,
@@ -51,15 +53,16 @@ function map(r: Raw): Site {
 export function create(site: Site): void {
     prep(
         `INSERT INTO site (
-            id, owner_id, repo_owner, repo_name, branch, subdir,
+            id, owner_id, repo_owner, repo_name, repo_private, branch, subdir,
             hostname, host_kind, status, bytes, last_ref, last_error,
             realm_id, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ).run(
         site.id,
         site.ownerId,
         site.repoOwner,
         site.repoName,
+        site.repoPrivate ? 1 : 0,
         site.branch,
         site.subdir ?? null,
         site.hostname,

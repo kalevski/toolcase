@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Host custom-property overrides ────────────────────────────────────────
     // Drive all cosmetics through the --bs-chat-window-* theming contract.
     // Element-level rules below handle the two literals that escape the vars.
@@ -53,7 +52,9 @@ tc-theme[name='blueprint'],
         font-family: var(--bp-mono);
         text-transform: uppercase;
         letter-spacing: 0.08em;
-        transition: transform var(--bp-ease), box-shadow var(--bp-ease);
+        transition:
+            transform var(--bp-ease),
+            box-shadow var(--bp-ease);
 
         &:hover {
             box-shadow: var(--bp-glow-teal);

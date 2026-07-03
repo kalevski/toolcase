@@ -4,32 +4,31 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     .tc-version-picker {
         // Re-point all base --bs-version-picker-* vars to blueprint tokens.
         // The base partial drives every cosmetic through these vars, so
         // overriding them here is the cleanest path — no class duplication.
 
         // Frame + surface
-        --bs-version-picker-border:       var(--bp-border-strong);
-        --bs-version-picker-surface:      var(--bp-paper);
+        --bs-version-picker-border: var(--bp-border-strong);
+        --bs-version-picker-surface: var(--bp-paper);
 
         // Text
-        --bs-version-picker-color:        var(--bp-text);
-        --bs-version-picker-muted:        var(--bp-text-muted);
+        --bs-version-picker-color: var(--bp-text);
+        --bs-version-picker-muted: var(--bp-text-muted);
 
         // Hover well — recessed well tint
-        --bs-version-picker-hover-bg:     var(--bp-bg-2);
+        --bs-version-picker-hover-bg: var(--bp-bg-2);
 
         // Active / selected segment — pink primary (arcade CTA rotation)
-        --bs-version-picker-active-bg:    var(--bp-pink);
+        --bs-version-picker-active-bg: var(--bp-pink);
         --bs-version-picker-active-color: var(--bp-pink-ink);
 
         // Tag tints: success → teal, info → violet
-        --bs-version-picker-tag-success:    var(--bp-teal-fg);
-        --bs-version-picker-tag-success-bg: var(--bp-teal-soft);
-        --bs-version-picker-tag-info:       var(--bp-violet-fg);
-        --bs-version-picker-tag-info-bg:    var(--bp-violet-soft);
+        --bs-version-picker-tag-success: var(--bp-success-fg);
+        --bs-version-picker-tag-success-bg: var(--bp-success-soft);
+        --bs-version-picker-tag-info: var(--bp-violet-fg);
+        --bs-version-picker-tag-info-bg: var(--bp-violet-soft);
     }
 
     // ── Segmented frame ──────────────────────────────────────────────────────

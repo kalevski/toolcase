@@ -205,6 +205,12 @@ export interface Site {
     ownerId: number
     repoOwner: string
     repoName: string
+    /**
+     * Whether the source repo was private at create time (re-read from GitHub, never
+     * client-trusted). Drives the fragment's `auth` block: private sites reference a
+     * clone token pushed to nginxpilot's git-credentials store.
+     */
+    repoPrivate: boolean
     branch: string
     /** Optional build output subdirectory (e.g. `dist/`). */
     subdir?: string

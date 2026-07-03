@@ -2,25 +2,24 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Custom-property overrides ─────────────────────────────────────────────
     // Drive through the Bootstrap-compatible API that .form-check declares so
     // the cascade stays clean and state rules stay minimal.
 
     .form-check {
         // Unchecked surface: white paper + strong hairline
-        --bs-form-check-bg:                  var(--bp-paper);
-        --bs-form-check-border-color:        var(--bp-border-strong);
+        --bs-form-check-bg: var(--bp-paper);
+        --bs-form-check-border-color: var(--bp-border-strong);
 
         // Checked: pink (primary) fill + matching border
-        --bs-form-check-checked-bg:          var(--bp-pink);
+        --bs-form-check-checked-bg: var(--bp-pink);
         --bs-form-check-checked-border-color: var(--bp-pink);
     }
 
     // ── Label — replace hardcoded #334155 slate literal ──────────────────────
     .form-check-label {
-        font-family:  var(--bp-body);
-        color:        var(--bp-text);
+        font-family: var(--bp-body);
+        color: var(--bp-text);
     }
 
     // ── Input states ──────────────────────────────────────────────────────────
@@ -28,13 +27,13 @@ tc-theme[name='blueprint'],
         // Transition rides the --bp-ease curve
         transition:
             background-color 150ms var(--bp-ease),
-            border-color     150ms var(--bp-ease),
-            box-shadow       150ms var(--bp-ease);
+            border-color 150ms var(--bp-ease),
+            box-shadow 150ms var(--bp-ease);
 
         // Focus ring: teal glow (replaces hardcoded rgba(30,41,59,…) slate ring)
         &:focus-visible {
             border-color: var(--bp-teal);
-            box-shadow:   var(--bp-glow-teal);
+            box-shadow: var(--bp-glow-teal);
         }
 
         // Hover (unchecked): nudge border toward strong to signal interactivity

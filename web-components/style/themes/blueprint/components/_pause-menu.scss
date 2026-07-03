@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Custom-property re-skin (tc-pause-menu + tc-pause-screen) ────────────
     // Both tags render the same tc-pause-menu__* BEM structure — one re-skin
     // covers both. Drive cosmetics through the component's --bs-pause-menu-*
@@ -11,44 +10,49 @@ tc-theme[name='blueprint'],
     tc-pause-menu,
     tc-pause-screen {
         // Surface: raised white card, pink hairline border (signal: paused = CTA tier).
-        --bs-pause-menu-bg:           var(--bp-paper);
+        --bs-pause-menu-bg: var(--bp-paper);
         --bs-pause-menu-border-color: var(--bp-border-pink);
-        --bs-pause-menu-shadow:       var(--tc-shadow-lg);
+        --bs-pause-menu-shadow: var(--tc-shadow-lg);
 
         // Backdrop: replace the hardcoded #0f172a slate literal with a
         // deep violet-navy scrim (--bp-emphasis hue) so the light blueprint
         // page doesn't flash a foreign dark palette.
-        --bs-pause-menu-backdrop-bg:      rgba(26, 24, 48, 1); // matches --bp-emphasis without opacity stacking
+        --bs-pause-menu-backdrop-bg: rgba(
+            26,
+            24,
+            48,
+            1
+        ); // matches --bp-emphasis without opacity stacking
         --bs-pause-menu-backdrop-opacity: 0.55;
 
         // Header typography.
         // Teal eyebrow = HUD / action-register voice (clears AA on --bp-bg-2 header well).
         // --bp-emphasis for the title = strongest ink, consistent with panel headers.
         --bs-pause-menu-eyebrow-color: var(--bp-teal-fg);
-        --bs-pause-menu-title-color:   var(--bp-emphasis);
+        --bs-pause-menu-title-color: var(--bp-emphasis);
 
         // Item rows: faint hairline dividers — full --bp-border weight is too
         // heavy between rows; faint keeps the list airy.
-        --bs-pause-menu-item-color:      var(--bp-text);
-        --bs-pause-menu-item-border:     var(--bp-border-faint);
+        --bs-pause-menu-item-color: var(--bp-text);
+        --bs-pause-menu-item-border: var(--bp-border-faint);
 
         // Hover: teal-soft fill — teal is the everyday action accent; no ink flip needed.
-        --bs-pause-menu-item-hover-bg:   var(--bp-teal-soft);
+        --bs-pause-menu-item-hover-bg: var(--bp-teal-soft);
 
         // Disabled rows: faintest ink tone.
         --bs-pause-menu-item-disabled-color: var(--bp-text-faint);
 
         // Badge chip: recessed lavender well.
-        --bs-pause-menu-badge-bg:    var(--bp-bg-2);
+        --bs-pause-menu-badge-bg: var(--bp-bg-2);
         --bs-pause-menu-badge-color: var(--bp-text-muted);
 
         // Resume button: pink = primary/CTA accent in the blueprint rotation.
         // --bp-pink-ink (#fff) is the legible label on the pink fill.
-        --bs-pause-menu-resume-bg:         var(--bp-pink);
-        --bs-pause-menu-resume-color:      var(--bp-pink-ink);
+        --bs-pause-menu-resume-bg: var(--bp-pink);
+        --bs-pause-menu-resume-color: var(--bp-pink-ink);
         // On hover: gradient CTA with a subtle lift; base hover-bg becomes the
         // gradient via the element rule below.
-        --bs-pause-menu-resume-hover-bg:   var(--bp-pink-hover);
+        --bs-pause-menu-resume-hover-bg: var(--bp-pink-hover);
         --bs-pause-menu-resume-hover-color: var(--bp-pink-ink);
     }
 
@@ -73,7 +77,7 @@ tc-theme[name='blueprint'],
     // Distinguish the header zone from the item list with the recessed lavender
     // canvas colour; the base uses --tc-surface-muted which maps to generic grey.
     .tc-pause-menu__header {
-        background:    var(--bp-bg-2);
+        background: var(--bp-bg-2);
         border-bottom-color: var(--bp-border-faint); // softer than the panel hairline
     }
 
@@ -82,7 +86,7 @@ tc-theme[name='blueprint'],
     // set by the base partial; we reinforce font-family and tune spacing to the
     // blueprint eyebrow standard.
     .tc-pause-menu__eyebrow {
-        font-family:    var(--bp-mono);
+        font-family: var(--bp-mono);
         letter-spacing: 0.12em; // slightly wider than base 0.1em — blueprint eyebrow voice
         color: var(--bs-pause-menu-eyebrow-color);
     }
@@ -91,8 +95,8 @@ tc-theme[name='blueprint'],
     // Panel headings always use the Chakra Petch display face in the blueprint
     // system. Tight tracking for the compact overlay context.
     .tc-pause-menu__title {
-        font-family:    var(--bp-display);
-        font-weight:    700;
+        font-family: var(--bp-display);
+        font-weight: 700;
         letter-spacing: -0.01em;
         color: var(--bs-pause-menu-title-color);
     }
@@ -102,14 +106,14 @@ tc-theme[name='blueprint'],
     // legible at a glance without a full background wash; the 2px is absorbed
     // into the existing horizontal padding so layout doesn't shift.
     .tc-pause-menu__item {
-        font-family:  var(--bp-body);
-        border-left:  2px solid transparent;
+        font-family: var(--bp-body);
+        border-left: 2px solid transparent;
         padding-left: calc(var(--bs-pause-menu-padding) - 2px); // absorb the 2px
 
         transition:
             background-color 0.18s var(--bp-ease),
-            border-color     0.18s var(--bp-ease),
-            color             0.18s var(--bp-ease);
+            border-color 0.18s var(--bp-ease),
+            color 0.18s var(--bp-ease);
 
         &:hover:not(.tc-pause-menu__item--disabled),
         &:focus-visible:not(.tc-pause-menu__item--disabled) {
@@ -127,8 +131,8 @@ tc-theme[name='blueprint'],
     // (not all-caps — the label text is user-supplied). Slight tracking tightens
     // the HUD read without forcing caps.
     .tc-pause-menu__item-label {
-        font-family:    var(--bp-mono);
-        font-weight:    500;
+        font-family: var(--bp-mono);
+        font-weight: 500;
         letter-spacing: 0.02em;
     }
 
@@ -136,20 +140,20 @@ tc-theme[name='blueprint'],
     // Blueprint chip treatment: recessed lavender well, hairline border, mono
     // face, uppercase + loose tracking (same pattern as _main-menu badge).
     .tc-pause-menu__item-badge {
-        font-family:    var(--bp-mono);
-        font-weight:    600;
+        font-family: var(--bp-mono);
+        font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.07em;
         border: 1px solid var(--bp-border-chip);
         background: var(--bs-pause-menu-badge-bg);
-        color:      var(--bs-pause-menu-badge-color);
+        color: var(--bs-pause-menu-badge-color);
     }
 
     // ── Footer ────────────────────────────────────────────────────────────────
     // Recessed tint beneath the resume button mirrors the header well treatment
     // and visually closes the panel sandwich.
     .tc-pause-menu__footer {
-        background:    var(--bp-bg-2);
+        background: var(--bp-bg-2);
         border-top-color: var(--bp-border-faint);
     }
 
@@ -157,22 +161,22 @@ tc-theme[name='blueprint'],
     // Primary/CTA tier in the blueprint accent rotation; pink gradient fill +
     // glow on hover signals the "return to game" action as the dominant choice.
     .tc-pause-menu__resume {
-        font-family:    var(--bp-mono);
-        font-weight:    600;
+        font-family: var(--bp-mono);
+        font-weight: 600;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        background:     var(--bs-pause-menu-resume-bg);
-        color:          var(--bs-pause-menu-resume-color);
+        background: var(--bs-pause-menu-resume-bg);
+        color: var(--bs-pause-menu-resume-color);
 
         &:hover {
-            background:  var(--bp-pink-grad); // full gradient on hover
-            color:       var(--bp-pink-ink);
-            box-shadow:  var(--bp-glow-pink);
+            background: var(--bp-pink-grad); // full gradient on hover
+            color: var(--bp-pink-ink);
+            box-shadow: var(--bp-glow-pink);
         }
 
         &:focus-visible {
             outline-color: var(--bp-pink);
-            box-shadow:    var(--bp-glow-pink);
+            box-shadow: var(--bp-glow-pink);
         }
     }
 }

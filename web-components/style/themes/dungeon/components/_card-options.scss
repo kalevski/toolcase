@@ -15,7 +15,9 @@ tc-theme[name='dungeon'],
     // Each option reads as a recessed gilded slot: inner shadow darkens the
     // well, bevel-top band lights the top edge — matching item-slot / perk-pick voice.
     .tc-card-options-card {
-        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .5), var(--fg-bevel-top);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.5),
+            var(--fg-bevel-top);
     }
 
     // Selected: gilded double-frame (tight gold-bright hairline + deeper
@@ -24,7 +26,7 @@ tc-theme[name='dungeon'],
         box-shadow:
             inset 0 0 0 1px var(--fg-gold-bright),
             inset 0 0 0 3px var(--fg-gold-shadow),
-            0 0 12px rgba(240, 210, 122, .25);
+            0 0 12px rgba(240, 210, 122, 0.25);
     }
 
     // Labels as display caps — base hardcodes font-family on the element,

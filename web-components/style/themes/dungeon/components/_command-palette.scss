@@ -5,11 +5,10 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // ── Token swap — host element carries the var defaults ────────────────────
 
     tc-command-palette {
-        --bs-command-palette-bg:          var(--fg-panel-bg);
+        --bs-command-palette-bg: var(--fg-panel-bg);
         // Backdrop scrim is hardcoded rgba(15,23,42,0.5) in base — override to
         // dungeon ink tone.
         --bs-command-palette-backdrop-bg: rgba(10, 7, 4, 0.7);

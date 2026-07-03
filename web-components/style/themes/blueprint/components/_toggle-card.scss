@@ -4,22 +4,22 @@ tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
     tc-toggle-card {
         // Surface & hairline
-        --bs-toggle-card-bg:                var(--bp-paper);
-        --bs-toggle-card-border-color:      var(--bp-border);
-        --bs-toggle-card-hover-bg:          var(--bp-paper-tint);
+        --bs-toggle-card-bg: var(--bp-paper);
+        --bs-toggle-card-border-color: var(--bp-border);
+        --bs-toggle-card-hover-bg: var(--bp-paper-tint);
         --bs-toggle-card-hover-border-color: var(--bp-border-strong);
 
         // Active accent → pink (blueprint primary)
-        --bs-toggle-card-on-accent:         var(--bp-pink);
+        --bs-toggle-card-on-accent: var(--bp-pink);
 
         // Ink
-        --bs-toggle-card-label-color:       var(--bp-text);
-        --bs-toggle-card-icon-color:        var(--bp-text-faint);
-        --bs-toggle-card-hint-color:        var(--bp-text-muted);
+        --bs-toggle-card-label-color: var(--bp-text);
+        --bs-toggle-card-icon-color: var(--bp-text-faint);
+        --bs-toggle-card-hint-color: var(--bp-text-muted);
 
         // Switch track idle → teal border token (muted, not full teal fill)
-        --bs-toggle-card-switch-track-off:  var(--bp-border-strong);
-        --bs-toggle-card-switch-knob:       #ffffff;
+        --bs-toggle-card-switch-track-off: var(--bp-border-strong);
+        --bs-toggle-card-switch-knob: #ffffff;
     }
 
     .tc-toggle-card {
@@ -112,7 +112,7 @@ tc-theme[name='blueprint'],
     // Badge: mono face — already correct via --tc-font-mono; reroute colors to bp tokens
     .tc-toggle-card-badge {
         font-family: var(--bp-mono);
-        color: var(--bp-teal-fg);               // teal text on white for AA contrast
+        color: var(--bp-teal-fg); // teal text on white for AA contrast
         background: var(--bp-teal-soft);
         border-color: var(--bp-teal-line);
         letter-spacing: 0.08em;

@@ -2,17 +2,16 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-pie-chart {
         // --- slice fill ramp: arcade accent rotation (pink=primary, teal=action, violet+amber=support, then repeating soft variants) ---
         --bs-pie-chart-slice-1: var(--bp-pink);
         --bs-pie-chart-slice-2: var(--bp-teal);
         --bs-pie-chart-slice-3: var(--bp-violet);
         --bs-pie-chart-slice-4: var(--bp-amber);
-        --bs-pie-chart-slice-5: var(--bp-pink-hover);       // lighter pink — second pink series
-        --bs-pie-chart-slice-6: var(--bp-teal-hover);       // lighter teal — second teal series
-        --bs-pie-chart-slice-7: var(--bp-danger);           // real red for 7th data series
-        --bs-pie-chart-slice-8: var(--bp-text-faint);       // muted violet-grey for trailing series
+        --bs-pie-chart-slice-5: var(--bp-pink-hover); // lighter pink — second pink series
+        --bs-pie-chart-slice-6: var(--bp-teal-hover); // lighter teal — second teal series
+        --bs-pie-chart-slice-7: var(--bp-danger); // real red for 7th data series
+        --bs-pie-chart-slice-8: var(--bp-text-faint); // muted violet-grey for trailing series
 
         // --- card surface ---
         --bs-pie-chart-bg: var(--bp-paper);
@@ -67,7 +66,7 @@ tc-theme[name='blueprint'],
         font-size: 0.6875rem;
         text-transform: uppercase;
         letter-spacing: 0.08em;
-        color: var(--bp-teal-fg);           // teal eyebrow — action/label register
+        color: var(--bp-teal-fg); // teal eyebrow — action/label register
     }
 
     // --- centre donut label: mono sub-value ---
@@ -103,20 +102,21 @@ tc-theme[name='blueprint'],
 
     .tc-pie-chart-tooltip-pct {
         font-family: var(--bp-mono);
-        color: var(--bp-teal-hover);        // teal accent on ink for percentage readout
-        opacity: 1;                          // override base 0.75 — teal is already muted enough
+        color: var(--bp-teal-hover); // teal accent on ink for percentage readout
+        opacity: 1; // override base 0.75 — teal is already muted enough
     }
 
     // --- legend ---
     .tc-pie-chart-legend-item {
         font-family: var(--bp-body);
         color: var(--bs-pie-chart-legend-color);
-        transition: background-color var(--bp-ease, 0.15s ease),
-                    opacity var(--bp-ease, 0.15s ease);
+        transition:
+            background-color var(--bp-ease, 0.15s ease),
+            opacity var(--bp-ease, 0.15s ease);
 
         &:hover,
         &.tc-pie-chart-legend-item--active {
-            background: var(--bp-bg-2);     // recessed lavender well on hover/active
+            background: var(--bp-bg-2); // recessed lavender well on hover/active
         }
 
         &:focus-visible {

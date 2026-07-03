@@ -2,64 +2,63 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Token overrides via the component's own custom-property API ──────────
 
     tc-countdown-timer {
         // Unit cell surface and hairline
-        --bs-countdown-timer-unit-bg:            var(--bp-paper);
-        --bs-countdown-timer-unit-border:        var(--bp-border);
+        --bs-countdown-timer-unit-bg: var(--bp-paper);
+        --bs-countdown-timer-unit-border: var(--bp-border);
 
         // Value numerals — Chakra Petch (display) for the dramatic HUD read
-        --bs-countdown-timer-value-color:        var(--bp-violet-fg);
-        --bs-countdown-timer-value-font-size:    2rem;
-        --bs-countdown-timer-value-font-weight:  700;
+        --bs-countdown-timer-value-color: var(--bp-violet-fg);
+        --bs-countdown-timer-value-font-size: 2rem;
+        --bs-countdown-timer-value-font-weight: 700;
 
         // Unit micro-labels (DAYS / HRS / MIN / SEC) — teal action accent
-        --bs-countdown-timer-unit-label-color:   var(--bp-teal-fg);
+        --bs-countdown-timer-unit-label-color: var(--bp-teal-fg);
         --bs-countdown-timer-unit-label-font-size: 0.5625rem;
         --bs-countdown-timer-unit-label-letter-spacing: 0.13em;
 
         // Eyebrow / kicker label above the units
-        --bs-countdown-timer-label-color:        var(--bp-text-muted);
-        --bs-countdown-timer-label-font-size:    0.6875rem;
+        --bs-countdown-timer-label-color: var(--bp-text-muted);
+        --bs-countdown-timer-label-font-size: 0.6875rem;
         --bs-countdown-timer-label-letter-spacing: 0.12em;
 
         // Sub-label below the units
-        --bs-countdown-timer-sub-color:          var(--bp-text-faint);
-        --bs-countdown-timer-sub-font-size:      0.75rem;
+        --bs-countdown-timer-sub-color: var(--bp-text-faint);
+        --bs-countdown-timer-sub-font-size: 0.75rem;
 
         // Compact mode: colon separator gets the primary pink accent
-        --bs-countdown-timer-sep-color:          var(--bp-pink);
+        --bs-countdown-timer-sep-color: var(--bp-pink);
 
         // Compact value numerals — same face, slightly smaller
         --bs-countdown-timer-compact-value-font-size: 1.25rem;
 
         // Gap between unit cells
-        --bs-countdown-timer-gap:                0.5rem;
+        --bs-countdown-timer-gap: 0.5rem;
     }
 
     // ── Eyebrow label — mono, uppercase, muted ───────────────────────────────
 
     .tc-countdown-label {
         font-family: var(--bp-mono);
-        color:       var(--bs-countdown-timer-label-color);
+        color: var(--bs-countdown-timer-label-color);
         letter-spacing: var(--bs-countdown-timer-label-letter-spacing);
     }
 
     // ── Individual unit cell — white paper tile with hairline + subtle shadow ─
 
     .tc-countdown-unit {
-        background:  var(--bs-countdown-timer-unit-bg);
-        border:      1px solid var(--bs-countdown-timer-unit-border);
-        box-shadow:  var(--tc-shadow-sm);
+        background: var(--bs-countdown-timer-unit-bg);
+        border: 1px solid var(--bs-countdown-timer-unit-border);
+        box-shadow: var(--tc-shadow-sm);
     }
 
     // ── Value numeral — Chakra Petch display face, violet ink ─────────────────
 
     .tc-countdown-value {
         font-family: var(--bp-display);
-        color:       var(--bs-countdown-timer-value-color);
+        color: var(--bs-countdown-timer-value-color);
         font-weight: var(--bs-countdown-timer-value-font-weight);
         // Tight tracking suits display numerals at HUD scale
         letter-spacing: -0.01em;
@@ -69,8 +68,8 @@ tc-theme[name='blueprint'],
 
     .tc-countdown-unit-label {
         font-family: var(--bp-mono);
-        color:       var(--bs-countdown-timer-unit-label-color);
-        font-size:   var(--bs-countdown-timer-unit-label-font-size);
+        color: var(--bs-countdown-timer-unit-label-color);
+        font-size: var(--bs-countdown-timer-unit-label-font-size);
         letter-spacing: var(--bs-countdown-timer-unit-label-letter-spacing);
     }
 
@@ -78,23 +77,22 @@ tc-theme[name='blueprint'],
 
     .tc-countdown-sub {
         font-family: var(--bp-body);
-        color:       var(--bs-countdown-timer-sub-color);
+        color: var(--bs-countdown-timer-sub-color);
     }
 
     // ── Compact mode — display face on inline values, pink colon separators ──
 
     .tc-countdown--compact {
-
         .tc-countdown-value {
             font-family: var(--bp-display);
-            color:       var(--bs-countdown-timer-value-color);
+            color: var(--bs-countdown-timer-value-color);
             letter-spacing: -0.01em;
         }
 
         // The colon is the only punctuation here; give it the primary pink hit
         .tc-countdown-sep {
             font-family: var(--bp-display);
-            color:       var(--bs-countdown-timer-sep-color);
+            color: var(--bs-countdown-timer-sep-color);
             // Slightly lighter weight so the pink punctuation recedes behind numerals
             font-weight: 500;
         }

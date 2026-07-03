@@ -4,42 +4,41 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Custom-property overrides ─────────────────────────────────────────────
     // Drive cosmetics through the component's --bs-guild-panel-* contract.
     // Prefer token-level re-points so element rules stay minimal.
 
     tc-guild-panel {
         // Surface
-        --bs-guild-panel-bg:                  var(--bp-paper);
-        --bs-guild-panel-border:              var(--bp-border);
-        --bs-guild-panel-separator:           var(--bp-border-faint);
+        --bs-guild-panel-bg: var(--bp-paper);
+        --bs-guild-panel-border: var(--bp-border);
+        --bs-guild-panel-separator: var(--bp-border-faint);
 
         // Header text
         // Eyebrow + stat labels get teal-fg (darker teal that clears AA on white).
-        --bs-guild-panel-eyebrow-color:       var(--bp-teal-fg);
-        --bs-guild-panel-name-color:          var(--bp-emphasis);
-        --bs-guild-panel-tag-color:           var(--bp-text-muted);
-        --bs-guild-panel-motto-color:         var(--bp-text-muted);
+        --bs-guild-panel-eyebrow-color: var(--bp-teal-fg);
+        --bs-guild-panel-name-color: var(--bp-emphasis);
+        --bs-guild-panel-tag-color: var(--bp-text-muted);
+        --bs-guild-panel-motto-color: var(--bp-text-muted);
 
         // Stats strip — recessed well separates it from the header/roster.
-        --bs-guild-panel-stats-bg:            var(--bp-bg-2);
-        --bs-guild-panel-stat-label-color:    var(--bp-teal-fg);
+        --bs-guild-panel-stats-bg: var(--bp-bg-2);
+        --bs-guild-panel-stat-label-color: var(--bp-teal-fg);
         // Stat values use violet-fg: violet is the supporting numeric-HUD accent in
         // the arcade rotation (pink=CTA, teal=action, violet+amber=support).
-        --bs-guild-panel-stat-value-color:    var(--bp-violet-fg);
+        --bs-guild-panel-stat-value-color: var(--bp-violet-fg);
 
         // Roster
-        --bs-guild-panel-row-hover-bg:        var(--bp-paper-tint);
-        --bs-guild-panel-member-name-color:   var(--bp-text);
+        --bs-guild-panel-row-hover-bg: var(--bp-paper-tint);
+        --bs-guild-panel-member-name-color: var(--bp-text);
         // Rank chip — violet-soft fill + violet-fg ink (soft tint recipe).
-        --bs-guild-panel-member-rank-bg:      var(--bp-violet-soft);
-        --bs-guild-panel-member-rank-color:   var(--bp-violet-fg);
+        --bs-guild-panel-member-rank-bg: var(--bp-violet-soft);
+        --bs-guild-panel-member-rank-color: var(--bp-violet-fg);
         --bs-guild-panel-member-contribution-color: var(--bp-text-muted);
 
         // Pips
-        --bs-guild-panel-pip-online:          var(--bp-teal);
-        --bs-guild-panel-pip-offline:         var(--bp-text-faint);
+        --bs-guild-panel-pip-online: var(--bp-success);
+        --bs-guild-panel-pip-offline: var(--bp-text-faint);
     }
 
     // ── Panel shell ───────────────────────────────────────────────────────────
@@ -160,8 +159,8 @@ tc-theme[name='blueprint'],
         background: var(--bp-pip-offline, var(--bp-text-faint));
 
         .tc-guild-panel-member--online & {
-            background: var(--bp-teal);
-            box-shadow: 0 0 0 0.2em var(--bp-teal-soft);
+            background: var(--bp-success);
+            box-shadow: 0 0 0 0.2em var(--bp-success-soft);
         }
     }
 

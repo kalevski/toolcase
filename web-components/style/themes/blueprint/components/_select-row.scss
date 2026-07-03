@@ -3,42 +3,41 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Row scaffold (setting-row tokens scoped to tc-select-row context) ──────────────────────
     tc-select-row {
         // Replace the raw tc-border divider with the blueprint faint separator token.
-        --bs-setting-row-border:            1px solid var(--bp-border-faint);
+        --bs-setting-row-border: 1px solid var(--bp-border-faint);
 
         // Label: primary ink, body weight — no change to size/weight, just reroute color.
-        --bs-setting-row-label-color:       var(--bp-text);
+        --bs-setting-row-label-color: var(--bp-text);
 
         // Description: muted ink; typography override below promotes it to mono eyebrow style.
         --bs-setting-row-description-color: var(--bp-text-muted);
 
         // ── Select control tokens ─────────────────────────────────────────────────────────────
-        --bs-select-row-font:               var(--bp-body);
-        --bs-select-row-color:              var(--bp-text);
-        --bs-select-row-bg:                 var(--bp-paper);
-        --bs-select-row-border-color:       var(--bp-border);
+        --bs-select-row-font: var(--bp-body);
+        --bs-select-row-color: var(--bp-text);
+        --bs-select-row-bg: var(--bp-paper);
+        --bs-select-row-border-color: var(--bp-border);
 
         // Teal everyday-action focus — replaces the baked dark-slate rgba(30,41,59,*) literals.
         --bs-select-row-focus-border-color: var(--bp-teal);
-        --bs-select-row-focus-ring:         var(--bp-glow-teal);
+        --bs-select-row-focus-ring: var(--bp-glow-teal);
 
         // Disabled state: faint ink on recessed well.
-        --bs-select-row-disabled-color:     var(--bp-text-faint);
-        --bs-select-row-disabled-bg:        var(--bp-bg-2);
+        --bs-select-row-disabled-color: var(--bp-text-faint);
+        --bs-select-row-disabled-bg: var(--bp-bg-2);
     }
 
     // ── Description eyebrow treatment ────────────────────────────────────────────────────────
     // Promote the helper description to a mono micro-label so it reads as an eyebrow beneath
     // the primary label, consistent with the blueprint HUD / settings-screen language.
     tc-select-row .tc-setting-row__description {
-        font-family:    var(--bp-mono);
-        font-size:      0.6875rem;     // 11 px — tighter than base 0.75 rem, fitting mono caps
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem; // 11 px — tighter than base 0.75 rem, fitting mono caps
         text-transform: uppercase;
         letter-spacing: 0.07em;
-        color:          var(--bp-text-faint); // one step softer than muted for eyebrow hierarchy
+        color: var(--bp-text-faint); // one step softer than muted for eyebrow hierarchy
     }
 
     // ── Select element additional chrome ─────────────────────────────────────────────────────
@@ -47,8 +46,9 @@ tc-theme[name='blueprint'],
     // for properties with no var hook.
     tc-select-row .tc-select-row__select {
         border-color: var(--bp-border);
-        transition:   border-color 0.15s var(--bp-ease),
-                      box-shadow   0.15s var(--bp-ease);
+        transition:
+            border-color 0.15s var(--bp-ease),
+            box-shadow 0.15s var(--bp-ease);
 
         &:hover:not(:disabled) {
             // Lift border one notch on hover for tactile feedback.

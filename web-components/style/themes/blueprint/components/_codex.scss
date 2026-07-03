@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-codex {
         // ── Entry list ──────────────────────────────────────────────────────────
         --bs-codex-list-bg: var(--bp-paper);
@@ -41,7 +40,9 @@ tc-theme[name='blueprint'],
 
     // ── Entry row refinements ───────────────────────────────────────────────────
     .tc-codex-row {
-        transition: background-color 0.15s var(--bp-ease), color 0.15s var(--bp-ease);
+        transition:
+            background-color 0.15s var(--bp-ease),
+            color 0.15s var(--bp-ease);
 
         &:focus-visible {
             // Pink glow for focus ring to match selected-state accent

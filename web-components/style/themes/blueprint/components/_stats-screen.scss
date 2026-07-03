@@ -2,40 +2,39 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-stats-screen {
         // ── Panel surface ──────────────────────────────────────────────────────
         // Raised white card on the lavender page; violet-tinted hairline border.
-        --bs-stats-screen-bg:               var(--bp-paper);
-        --bs-stats-screen-border:           var(--bp-border);
+        --bs-stats-screen-bg: var(--bp-paper);
+        --bs-stats-screen-border: var(--bp-border);
 
         // ── Header ─────────────────────────────────────────────────────────────
         // Recessed well differentiates the header from the body rows.
-        --bs-stats-screen-header-bg:        var(--bp-bg-2);
-        --bs-stats-screen-header-border:    var(--bp-border);
+        --bs-stats-screen-header-bg: var(--bp-bg-2);
+        --bs-stats-screen-header-border: var(--bp-border);
 
         // Eyebrow — mono HUD label in teal-fg (clears AA contrast on --bp-bg-2).
-        --bs-stats-screen-eyebrow-color:    var(--bp-teal-fg);
+        --bs-stats-screen-eyebrow-color: var(--bp-teal-fg);
 
         // Title — primary ink; element-level rule applies display font below.
-        --bs-stats-screen-title-color:      var(--bp-text);
+        --bs-stats-screen-title-color: var(--bp-text);
 
         // Summary prose — muted body ink.
-        --bs-stats-screen-summary-color:    var(--bp-text-muted);
+        --bs-stats-screen-summary-color: var(--bp-text-muted);
 
         // Separator — pink brand rule (short 3rem hairline; reads as an accent tick).
-        --bs-stats-screen-separator-color:  var(--bp-pink);
+        --bs-stats-screen-separator-color: var(--bp-pink);
 
         // ── Sections ───────────────────────────────────────────────────────────
         // Section borders — faint lavender dividers between groups.
-        --bs-stats-screen-section-border:   var(--bp-border-faint);
+        --bs-stats-screen-section-border: var(--bp-border-faint);
 
         // Section title label — faintest mono ink; less prominent than the eyebrow.
         --bs-stats-screen-section-title-color: var(--bp-text-faint);
 
         // ── Stat rows ──────────────────────────────────────────────────────────
         // Row hairlines — one step lighter than section dividers.
-        --bs-stats-screen-stat-border:      var(--bp-border-faint);
+        --bs-stats-screen-stat-border: var(--bp-border-faint);
 
         // Stat label — body muted ink; keeps the value dominant.
         --bs-stats-screen-stat-label-color: var(--bp-text-muted);

@@ -19,7 +19,10 @@ tc-theme[name='blueprint'],
         --bs-list-row-accent: var(--bp-pink);
 
         // Soft lavender tint for selected row background.
-        --bs-list-row-selected-bg: var(--bp-pink-surface, color-mix(in srgb, var(--bp-pink) 6%, var(--bp-paper)));
+        --bs-list-row-selected-bg: var(
+            --bp-pink-surface,
+            color-mix(in srgb, var(--bp-pink) 6%, var(--bp-paper))
+        );
 
         // Pink focus ring.
         --bs-list-row-focus-outline: 2px solid var(--bp-pink);

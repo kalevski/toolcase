@@ -1,12 +1,11 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { TableColumn } from '@toolcase/web-components'
+import type { AdvancedTableColumn } from '@toolcase/web-components'
 import { escapeHtml } from '@/lib/tc'
 import type { Realm } from '@/server/domain/types'
 import { AdminPage, json, useOwnerData } from './shared'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
-import { DataTable } from '@/components/DataTable'
 import { FormModal, FormGroup } from '@/components/FormModal'
 import { TextField } from '@/components/fields'
 import { useToast } from '@/components/Toast'
@@ -102,27 +101,9 @@ function realmIdentityHtml(row: RealmRow): string {
     )
 }
 
-function realmActionsHtml(row: RealmRow, busy: boolean): string {
-    const { realm: r } = row
-    const id = escapeHtml(r.id)
-    const btn = (action: string, label: string, danger = false) =>
-        `<button type="button" class="btn btn-sm btn-outline-${danger ? 'danger' : 'secondary'}" ` +
-        `data-action="${action}" data-id="${id}"${busy && danger ? ' disabled' : ''}>${escapeHtml(label)}</button>`
-    const parts = [btn('test', 'Test')]
-    if (!r.isDefault) parts.push(btn('default', 'Set default'))
-    parts.push(btn('rotate', 'Rotate token'))
-    parts.push(btn('remove', 'Remove', true))
-    return `<span class="perch-admin-domain-controls">${parts.join('')}</span>`
-}
-
-const REALM_COLUMNS = (busy: boolean): TableColumn[] => [
-    { key: 'identity', header: 'Realm', render: (row: RealmRow) => realmIdentityHtml(row) },
-    {
-        key: 'actions',
-        header: '',
-        align: 'right',
-        render: (row: RealmRow) => realmActionsHtml(row, busy),
-    },
+const REALM_COLUMNS: AdvancedTableColumn[] = [
+    { key: 'identity', label: 'Realm' },
+    { key: 'actions', label: '', align: 'right' },
 ]
 
 export function AdminRealms() {
@@ -314,23 +295,10 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
         }
     }, [pending, busy, onChanged, toast])
 
-    // One delegated handler for every realm-row control: Test / Set default /
-    // Rotate (open the rotate-token modal) / Remove (open the confirm dialog).
-    const onRowAction = useCallback(
-        (action: string, dataset: DOMStringMap) => {
-            const id = dataset.id
-            if (!id) return
-            const realm = realms.find((r) => r.id === id)
-            if (!realm) return
-            if (action === 'test') void runTest(id)
-            else if (action === 'default') void setDefault(realm)
-            else if (action === 'rotate') setRotating(id)
-            else if (action === 'remove') setPending(realm)
-        },
-        [realms, runTest, setDefault],
-    )
+    const setTableColumns = useCallback((el: any) => {
+        if (el) el.columns = REALM_COLUMNS
+    }, [])
 
-    const columns = useMemo(() => REALM_COLUMNS(busy), [busy])
     const rows = useMemo<RealmRow[]>(
         () => realms.map((r) => ({ realm: r, test: tests[r.id] })),
         [realms, tests],
@@ -357,12 +325,58 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
                     {realms.length === 0 ? (
                         <tc-empty-state icon="server">No realms registered.</tc-empty-state>
                     ) : (
-                        <DataTable<RealmRow>
-                            columns={columns}
-                            rows={rows}
-                            rowKey={(row) => row.realm.id}
-                            onAction={onRowAction}
-                        />
+                        <tc-advanced-table
+                            ref={setTableColumns}
+                            limit={String(rows.length || 10)}
+                            offset="0"
+                            total={String(rows.length)}
+                        >
+                            {rows.map((row) => {
+                                const { realm: r, test } = row
+                                const { cls, title } = healthDotMeta(test)
+
+                                return (
+                                    <tr key={r.id}>
+                                        <td>
+                                            <span className="perch-admin-realm-id">
+                                                <span className={`perch-realm-dot ${cls}`} title={title} aria-label={title} />
+                                                <span className="perch-admin-realm-name">{r.name}</span>
+                                                <span className="perch-admin-mono perch-admin-hint">{r.adminUrl}</span>
+                                                <span className="perch-admin-badges">
+                                                    {r.isDefault && <span className="badge text-bg-primary">default</span>}
+                                                    <span className={`badge text-bg-${r.hasToken ? 'light' : 'secondary'}`}>
+                                                        {r.hasToken ? 'token set' : 'no token'}
+                                                    </span>
+                                                    {test && test !== 'loading' && test.managed && <span className="badge text-bg-info">managed</span>}
+                                                    {test && test !== 'loading' && test.apiVersion && <span className="badge text-bg-light">{`api v${test.apiVersion}`}</span>}
+                                                    {test && test !== 'loading' && test.ok && (test.disabled ?? 0) > 0 && <span className="badge text-bg-danger">{`${test.disabled} quarantined`}</span>}
+                                                    {test && test !== 'loading' && test.ok && (test.atRisk ?? 0) > 0 && <span className="badge text-bg-warning">{`${test.atRisk} at risk`}</span>}
+                                                    {test && test !== 'loading' && !test.ok && <span className="badge text-bg-danger">{test.error ?? 'unreachable'}</span>}
+                                                </span>
+                                            </span>
+                                        </td>
+                                        <td className="text-end">
+                                            <span className="perch-admin-domain-controls">
+                                                <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => void runTest(r.id)}>
+                                                    Test
+                                                </button>
+                                                {!r.isDefault && (
+                                                    <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => void setDefault(r)}>
+                                                        Set default
+                                                    </button>
+                                                )}
+                                                <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => setRotating(r.id)}>
+                                                    Rotate token
+                                                </button>
+                                                <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => setPending(r)} disabled={busy}>
+                                                    Remove
+                                                </button>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                )
+                            })}
+                        </tc-advanced-table>
                     )}
                 </div>
             </tc-section-card>

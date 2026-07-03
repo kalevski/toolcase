@@ -2,31 +2,30 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Token remaps ──────────────────────────────────────────────────────────────
     // Route all --bs-virtual-list-* vars to blueprint palette tokens so the base
     // partial's rules pick them up automatically.
 
     tc-virtual-list {
         // Surface: raised white card with blueprint border hairline.
-        --bs-virtual-list-bg:            var(--bp-paper);
-        --bs-virtual-list-border:        var(--bp-border);
+        --bs-virtual-list-bg: var(--bp-paper);
+        --bs-virtual-list-border: var(--bp-border);
 
         // Row separators: faint lavender dividers (fainter than the outer frame).
         --bs-virtual-list-row-separator: var(--bp-border-faint);
 
         // Row hover: paper tint — soft lavender well so hover reads without colour clash.
-        --bs-virtual-list-row-hover-bg:  var(--bp-paper-tint-2);
+        --bs-virtual-list-row-hover-bg: var(--bp-paper-tint-2);
 
         // Row ink: primary blueprint text.
-        --bs-virtual-list-row-color:     var(--bp-text);
+        --bs-virtual-list-row-color: var(--bp-text);
 
         // Row typography: Space Grotesk body, 0.875 rem (unchanged size).
         --bs-virtual-list-row-font-size: 0.875rem;
 
         // Scrollbar: teal thumb over faint lavender track for blueprint chrome.
-        --bs-virtual-list-thumb-color:   var(--bp-teal);
-        --bs-virtual-list-track-color:   var(--bp-border-faint);
+        --bs-virtual-list-thumb-color: var(--bp-teal);
+        --bs-virtual-list-track-color: var(--bp-border-faint);
     }
 
     // ── Scroll viewport ───────────────────────────────────────────────────────────
@@ -59,19 +58,19 @@ tc-theme[name='blueprint'],
         // descendant rule below so we don't touch primary text.
         & [data-label],
         & .tc-virtual-list-label {
-            font-family:    var(--bp-mono);
-            font-size:      0.6875rem;
+            font-family: var(--bp-mono);
+            font-size: 0.6875rem;
             text-transform: uppercase;
             letter-spacing: 0.08em;
-            color:          var(--bp-text-faint);
+            color: var(--bp-text-faint);
         }
 
         // Accent values / primary data cells inside a row: Space Grotesk body weight.
         & [data-value],
         & .tc-virtual-list-value {
             font-family: var(--bp-body);
-            color:        var(--bp-text);
-            font-weight:  600;
+            color: var(--bp-text);
+            font-weight: 600;
         }
     }
 }

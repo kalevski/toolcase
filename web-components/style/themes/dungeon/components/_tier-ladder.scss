@@ -5,18 +5,13 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // ------------------------------------------------------------------ //
     // Token overrides on the host element
     // ------------------------------------------------------------------ //
     tc-tier-ladder {
         // Current row: replace the hardcoded slate rgba that the foundation
         // remap cannot reach — this is the only literal in the base.
-        --bs-tier-ladder-current-bg: linear-gradient(
-            90deg,
-            rgba(201, 169, 97, 0.18),
-            transparent
-        );
+        --bs-tier-ladder-current-bg: linear-gradient(90deg, rgba(201, 169, 97, 0.18), transparent);
 
         // Gold hairline row separators (stronger fantasy read than leather).
         --bs-tier-ladder-row-separator: rgba(201, 169, 97, 0.15);
@@ -27,10 +22,10 @@ tc-theme[name='dungeon'],
         --bs-tier-ladder-current-indicator-color: var(--fg-gold-bright);
 
         // Rarity ramp for identity dots.
-        --bs-tier-ladder-dot-cyan:   var(--fg-rare);
+        --bs-tier-ladder-dot-cyan: var(--fg-rare);
         --bs-tier-ladder-dot-yellow: var(--fg-legendary);
-        --bs-tier-ladder-dot-pink:   var(--fg-mythic);
-        --bs-tier-ladder-dot-red:    var(--fg-blood);
+        --bs-tier-ladder-dot-pink: var(--fg-mythic);
+        --bs-tier-ladder-dot-red: var(--fg-blood);
     }
 
     // ------------------------------------------------------------------ //

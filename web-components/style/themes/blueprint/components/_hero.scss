@@ -3,25 +3,24 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-hero {
         // ── Section surface ───────────────────────────────────────────────────
         // Hero sits on the lavender page canvas; a faint-border bottom edge
         // separates it from the next section without a heavy rule.
-        --bs-hero-bg:           var(--bp-bg);
+        --bs-hero-bg: var(--bp-bg);
         --bs-hero-border-color: var(--bp-border-faint);
 
         // ── Eyebrow ───────────────────────────────────────────────────────────
         // Mono face, teal-fg for AA contrast on the lavender canvas. Matches
         // the blueprint HUD kicker / status-label convention.
-        --bs-hero-eyebrow-color:          var(--bp-teal-fg);
-        --bs-hero-eyebrow-font-size:      0.6875rem;
+        --bs-hero-eyebrow-color: var(--bp-teal-fg);
+        --bs-hero-eyebrow-font-size: 0.6875rem;
         --bs-hero-eyebrow-letter-spacing: 0.14em;
 
         // ── Title ─────────────────────────────────────────────────────────────
         // Display face (Chakra Petch) — blueprint's heading voice.
         // Strongest ink for maximum contrast on the light canvas.
-        --bs-hero-title-color:       var(--bp-emphasis);
+        --bs-hero-title-color: var(--bp-emphasis);
         --bs-hero-title-font-weight: 700;
 
         // ── Description ───────────────────────────────────────────────────────
@@ -30,7 +29,7 @@ tc-theme[name='blueprint'],
         // ── Stat cards ────────────────────────────────────────────────────────
         // Raised white paper cards with a standard hairline — they read as
         // data panels against the lavender bg.
-        --bs-hero-stat-card-bg:     var(--bp-paper);
+        --bs-hero-stat-card-bg: var(--bp-paper);
         --bs-hero-stat-card-border: var(--bp-border);
 
         // Stat value: violet-fg for distinction from plain --bp-text; mono face
@@ -48,8 +47,8 @@ tc-theme[name='blueprint'],
         // ── Background icons ──────────────────────────────────────────────────
         // Teal-colored; slightly higher opacity than default (0.06) so the
         // blueprint grid-field motif stays visible on the lighter canvas.
-        --bs-hero-bg-icon-color:    var(--bp-teal);
-        --bs-hero-bg-icon-opacity:  0.07;
+        --bs-hero-bg-icon-color: var(--bp-teal);
+        --bs-hero-bg-icon-opacity: 0.07;
     }
 
     // ── Section shell ─────────────────────────────────────────────────────────
@@ -87,16 +86,16 @@ tc-theme[name='blueprint'],
     // ── Title ─────────────────────────────────────────────────────────────────
 
     .tc-hero-title {
-        font-family:    var(--bp-display);
+        font-family: var(--bp-display);
         letter-spacing: -0.01em; // Chakra Petch reads tighter than a neutral grotesque
-        text-wrap:      balance;
+        text-wrap: balance;
     }
 
     // ── Description ───────────────────────────────────────────────────────────
 
     .tc-hero-description {
         font-family: var(--bp-body);
-        line-height:  1.65;
+        line-height: 1.65;
     }
 
     // ── Stat cards ────────────────────────────────────────────────────────────
@@ -105,28 +104,30 @@ tc-theme[name='blueprint'],
 
     .tc-hero-stat-card {
         background: var(--bs-hero-stat-card-bg);
-        border:     1px solid var(--bs-hero-stat-card-border);
+        border: 1px solid var(--bs-hero-stat-card-border);
         box-shadow: var(--tc-shadow-sm);
         // Pink top rule signals a "live stat" readout — blueprint primary accent.
         border-top: 2px solid var(--bp-pink);
         position: relative;
-        transition: box-shadow var(--bp-ease), transform var(--bp-ease);
+        transition:
+            box-shadow var(--bp-ease),
+            transform var(--bp-ease);
 
         &:hover {
             box-shadow: var(--tc-shadow-md);
-            transform:  translateY(-2px);
+            transform: translateY(-2px);
         }
     }
 
     .tc-hero-stat-value {
         font-family: var(--bp-mono);
-        color:       var(--bs-hero-stat-value-color); // --bp-violet-fg
+        color: var(--bs-hero-stat-value-color); // --bp-violet-fg
         font-variant-numeric: tabular-nums;
     }
 
     .tc-hero-stat-label {
         font-family: var(--bp-mono);
-        color:       var(--bs-hero-stat-label-color); // --bp-text-faint
+        color: var(--bs-hero-stat-label-color); // --bp-text-faint
     }
 
     // ── Separator ─────────────────────────────────────────────────────────────
@@ -150,14 +151,14 @@ tc-theme[name='blueprint'],
 
     .tc-hero-metric::before {
         background: var(--bp-pink);
-        opacity:    1;
-        height:     2px;
-        width:      2rem; // slightly tighter than default 2.5rem — more precise feel
+        opacity: 1;
+        height: 2px;
+        width: 2rem; // slightly tighter than default 2.5rem — more precise feel
     }
 
     .tc-hero-metric-value {
         font-family: var(--bp-mono);
-        color:       var(--bs-hero-metric-value-color); // --bp-text
+        color: var(--bs-hero-metric-value-color); // --bp-text
         font-variant-numeric: tabular-nums;
     }
 
@@ -172,10 +173,9 @@ tc-theme[name='blueprint'],
             transition: none;
 
             &:hover {
-                transform:  none;
+                transform: none;
                 box-shadow: var(--tc-shadow-sm);
             }
         }
     }
-
 }

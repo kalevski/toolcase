@@ -8,18 +8,18 @@ tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
     tc-metric-card {
         // ── Surface & frame ───────────────────────────────────────────────
-        --bs-metric-card-bg:           var(--fg-panel-bg);
+        --bs-metric-card-bg: var(--fg-panel-bg);
         --bs-metric-card-border-color: var(--fg-gold-deep);
-        --bs-metric-card-shadow:       var(--fg-panel-shadow);
+        --bs-metric-card-shadow: var(--fg-panel-shadow);
 
         // ── Text colours ─────────────────────────────────────────────────
-        --bs-metric-card-title-color:    var(--fg-gold);
-        --bs-metric-card-value-color:    var(--fg-parch);
+        --bs-metric-card-title-color: var(--fg-gold);
+        --bs-metric-card-value-color: var(--fg-parch);
         --bs-metric-card-subtitle-color: var(--fg-parch-dim);
 
         // ── Icon chip ────────────────────────────────────────────────────
         --bs-metric-card-icon-chip-bg: var(--fg-slot-bg);
-        --bs-metric-card-icon-color:   var(--fg-gold);
+        --bs-metric-card-icon-color: var(--fg-gold);
 
         // ── Sparkline trend default ───────────────────────────────────────
         // Inline trend-color attribute still overrides this per element.

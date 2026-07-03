@@ -7,7 +7,6 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // 1. Token swap — host element carries all --bs-rich-page-header-* defaults.
     tc-rich-page-header {
         --bs-rich-page-header-bg: var(--fg-panel-bg);
@@ -26,7 +25,9 @@ tc-theme[name='dungeon'],
 
     // 3. Icon tile — gilded sigil plate with inset bevel.
     .tc-rich-page-header-icon {
-        box-shadow: var(--fg-bevel-top), inset 0 0 0 1px var(--fg-gold-shadow);
+        box-shadow:
+            var(--fg-bevel-top),
+            inset 0 0 0 1px var(--fg-gold-shadow);
     }
 
     // 4. Bottom rule — gold-gradient hairline (replaces the flat border-color).

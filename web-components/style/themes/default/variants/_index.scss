@@ -1,0 +1,18 @@
+// Default theme variants — alternate accent palettes on the stock foundation.
+//
+// Each variant swaps ONLY the primary (CTA) and secondary (informational)
+// accent families plus their derived literals; surfaces, borders, the text
+// ramp, semantic status colors, fonts and shadows stay the base default-theme
+// values. Semantic status tokens are pinned literals in the foundation (they
+// never route through the accents), so no re-pins are needed here.
+//
+// Available variants:
+// - ocean:  blue primary / cyan secondary
+// - forest: green primary / lime secondary
+// - ember:  orange primary / gold secondary
+// - royal:  violet primary / magenta secondary
+
+@use './ocean';
+@use './forest';
+@use './ember';
+@use './royal';

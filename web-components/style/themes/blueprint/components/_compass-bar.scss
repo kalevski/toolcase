@@ -4,18 +4,18 @@ tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
     tc-compass-bar {
         // Track surface: recessed well so the strip reads as an inset viewport.
-        --bs-compass-bar-track-bg:    var(--bp-bg-2);
+        --bs-compass-bar-track-bg: var(--bp-bg-2);
         --bs-compass-bar-track-border: 1px solid var(--bp-border);
 
         // Cardinal direction labels: blueprint mono eyebrow style.
-        --bs-compass-bar-cardinal-color:   var(--bp-text-faint);
+        --bs-compass-bar-cardinal-color: var(--bp-text-faint);
 
         // Centre axis + pointer: pink = primary "you are here" reference.
-        --bs-compass-bar-center-color:  var(--bp-pink);
+        --bs-compass-bar-center-color: var(--bp-pink);
         --bs-compass-bar-pointer-color: var(--bp-pink);
 
         // Markers: teal = action/everyday accent.
-        --bs-compass-bar-marker-color:       var(--bp-teal);
+        --bs-compass-bar-marker-color: var(--bp-teal);
         --bs-compass-bar-marker-label-color: var(--bp-text-faint);
 
         // Heading readout below the track.

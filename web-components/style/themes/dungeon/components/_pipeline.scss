@@ -8,7 +8,6 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // 1. Token swap — sharpen the live accent to bright gold.
     tc-pipeline {
         --bs-pipeline-live-color: var(--fg-gold-bright);

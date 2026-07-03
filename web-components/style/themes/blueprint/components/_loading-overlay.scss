@@ -2,14 +2,13 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-loading-overlay {
         // Backdrop: soft lavender wash instead of dark slate-900 scrim — keeps
         // the blueprint light-theme feel while still dimming the page.
         --bs-loading-overlay-backdrop-bg: rgba(90, 80, 160, 0.18);
 
         // Panel: raised white card with blueprint hairline and violet-tinted shadow.
-        --bs-loading-overlay-panel-bg:     var(--bp-paper);
+        --bs-loading-overlay-panel-bg: var(--bp-paper);
         --bs-loading-overlay-panel-border: 1px solid var(--bp-border);
         --bs-loading-overlay-panel-shadow: var(--tc-shadow-lg);
 
@@ -36,7 +35,7 @@ tc-theme[name='blueprint'],
     // Spinner track: use the blueprint border token instead of tc-border-strong
     // so it harmonises with the lavender hairline family.
     .tc-loading-overlay-spinner-ring {
-        border-color:     var(--bp-border-strong);
+        border-color: var(--bp-border-strong);
         border-top-color: currentcolor; // arc colour driven by --bs-loading-overlay-spinner-color above
     }
 

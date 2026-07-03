@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-rune-corner {
         // Reroute the fill from --tc-app-accent (which may carry a dark-theme or
         // non-blueprint accent) to the blueprint teal — the everyday "action" token.

@@ -8,7 +8,6 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // Beacon glow — colour is pulled from the live state token so all four states
     // (stamina green, blood red, legendary amber, parch-dim grey) get appropriate glow.
     .tc-status-dot-marker {

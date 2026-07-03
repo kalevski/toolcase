@@ -4,33 +4,32 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-json-schema-def {
         // ── Component-level token remaps ─────────────────────────────────────
-        --bs-json-schema-def-bg:              var(--bp-paper);
-        --bs-json-schema-def-border-color:    var(--bp-border);
-        --bs-json-schema-def-row-border:      var(--bp-border-faint);
-        --bs-json-schema-def-row-hover-bg:    var(--bp-paper-tint);
-        --bs-json-schema-def-header-bg:       var(--bp-bg-2);
+        --bs-json-schema-def-bg: var(--bp-paper);
+        --bs-json-schema-def-border-color: var(--bp-border);
+        --bs-json-schema-def-row-border: var(--bp-border-faint);
+        --bs-json-schema-def-row-hover-bg: var(--bp-paper-tint);
+        --bs-json-schema-def-header-bg: var(--bp-bg-2);
 
         // Ink — primary text and muted text
-        --bs-json-schema-def-label-color:     var(--bp-text);
+        --bs-json-schema-def-label-color: var(--bp-text);
         // Property-name label (eyebrow above the schema name input) → mono micro-label
         --bs-json-schema-def-name-label-color: var(--bp-text-muted);
         // Property key cells render mono; teal-fg clears AA on white
-        --bs-json-schema-def-key-color:        var(--bp-teal-fg);
-        --bs-json-schema-def-muted-color:      var(--bp-text-faint);
+        --bs-json-schema-def-key-color: var(--bp-teal-fg);
+        --bs-json-schema-def-muted-color: var(--bp-text-faint);
 
         // Icon ghost buttons
-        --bs-json-schema-def-icon-color:       var(--bp-text-faint);
-        --bs-json-schema-def-icon-hover-bg:    var(--bp-teal-soft);
+        --bs-json-schema-def-icon-color: var(--bp-text-faint);
+        --bs-json-schema-def-icon-hover-bg: var(--bp-teal-soft);
         --bs-json-schema-def-icon-hover-color: var(--bp-teal-fg);
 
         // Validation error — real red, not pink
-        --bs-json-schema-def-error-color:      var(--bp-danger);
+        --bs-json-schema-def-error-color: var(--bp-danger);
 
         // Mono family → blueprint mono token
-        --bs-json-schema-def-mono:             var(--bp-mono);
+        --bs-json-schema-def-mono: var(--bp-mono);
     }
 
     // ── Outer panel ──────────────────────────────────────────────────────────
@@ -52,7 +51,7 @@ tc-theme[name='blueprint'],
     // Follows the blueprint mono eyebrow pattern: uppercase, tight spacing.
     .tc-json-schema-def-name-label {
         font-family: var(--bp-mono);
-        font-size: 0.625rem;   // tighter than the base 0.6875rem for HUD feel
+        font-size: 0.625rem; // tighter than the base 0.6875rem for HUD feel
         letter-spacing: 0.12em;
         text-transform: uppercase;
         color: var(--bs-json-schema-def-name-label-color);
@@ -97,18 +96,19 @@ tc-theme[name='blueprint'],
     .tc-json-schema-def-icon-btn {
         color: var(--bs-json-schema-def-icon-color);
         background: transparent;
-        transition: background var(--bp-ease, 0.15s ease),
-                    color    var(--bp-ease, 0.15s ease);
+        transition:
+            background var(--bp-ease, 0.15s ease),
+            color var(--bp-ease, 0.15s ease);
 
         &:hover {
             background: var(--bs-json-schema-def-icon-hover-bg);
-            color:      var(--bs-json-schema-def-icon-hover-color);
+            color: var(--bs-json-schema-def-icon-hover-color);
         }
 
         &:active {
             // Slightly stronger teal tint on press
             background: var(--bp-teal-soft);
-            color:      var(--bp-teal-fg);
+            color: var(--bp-teal-fg);
         }
 
         &:focus-visible {
@@ -132,17 +132,18 @@ tc-theme[name='blueprint'],
     .tc-json-schema-def-add {
         // Border becomes a pink hairline at rest; fills pink on hover
         border-color: var(--bp-pink-line, var(--bp-pink));
-        color:        var(--bp-pink);
-        font-family:  var(--bp-mono);
-        font-size:    0.6875rem;
-        font-weight:  600;
+        color: var(--bp-pink);
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem;
+        font-weight: 600;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        background:   transparent;
-        transition: background var(--bp-ease, 0.15s ease),
-                    color      var(--bp-ease, 0.15s ease),
-                    border-color var(--bp-ease, 0.15s ease),
-                    box-shadow   var(--bp-ease, 0.15s ease);
+        background: transparent;
+        transition:
+            background var(--bp-ease, 0.15s ease),
+            color var(--bp-ease, 0.15s ease),
+            border-color var(--bp-ease, 0.15s ease),
+            box-shadow var(--bp-ease, 0.15s ease);
 
         svg {
             // Icon inherits currentColor, which is pink
@@ -150,16 +151,16 @@ tc-theme[name='blueprint'],
         }
 
         &:hover {
-            background:   var(--bp-pink);
-            color:        var(--bp-pink-ink); // #fff
+            background: var(--bp-pink);
+            color: var(--bp-pink-ink); // #fff
             border-color: var(--bp-pink);
-            box-shadow:   var(--bp-glow-pink);
+            box-shadow: var(--bp-glow-pink);
         }
 
         &:active {
-            background:   var(--bp-pink-hover);
+            background: var(--bp-pink-hover);
             border-color: var(--bp-pink-hover);
-            box-shadow:   var(--bp-glow-pink-strong);
+            box-shadow: var(--bp-glow-pink-strong);
         }
 
         &:focus-visible {
@@ -172,7 +173,7 @@ tc-theme[name='blueprint'],
 
     .tc-json-schema-def-empty {
         font-family: var(--bp-mono);
-        font-size:   0.6875rem;
+        font-size: 0.6875rem;
         letter-spacing: 0.06em;
         text-transform: uppercase;
         color: var(--bp-text-faint);
@@ -194,9 +195,9 @@ tc-theme[name='blueprint'],
         // (slightly lighter) — all within the light lavender palette.
         background: linear-gradient(
             90deg,
-            var(--bp-bg-2)         25%,
-            var(--bp-paper-tint)   37%,
-            var(--bp-bg-2)         63%
+            var(--bp-bg-2) 25%,
+            var(--bp-paper-tint) 37%,
+            var(--bp-bg-2) 63%
         );
         background-size: 200% 100%;
     }

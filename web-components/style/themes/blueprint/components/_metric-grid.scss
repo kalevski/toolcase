@@ -2,13 +2,12 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Grid container ──────────────────────────────────────────────────────
     // The 1px gap background IS the hairline separator — point it at the
     // blueprint border token so dividers match the rest of the theme.
     tc-metric-grid {
-        --bs-metric-grid-border-color: var(--bp-border);       // hairline gap fill
-        --bs-metric-grid-bg:           var(--bp-paper);        // tile fill (raised card)
+        --bs-metric-grid-border-color: var(--bp-border); // hairline gap fill
+        --bs-metric-grid-bg: var(--bp-paper); // tile fill (raised card)
         --bs-metric-grid-outer-border: 1px solid var(--bp-border-strong); // outer frame
     }
 
@@ -18,26 +17,26 @@ tc-theme[name='blueprint'],
     .tc-metric-grid > .tc-metric-tile,
     .tc-metric-grid > [class~='tc-metric-tile'] {
         // Surface — white paper, no individual border (grid gap = hairline).
-        --bs-metric-tile-bg:           var(--bp-paper);
+        --bs-metric-tile-bg: var(--bp-paper);
         --bs-metric-tile-border-color: transparent; // grid gap handles separation
-        --bs-metric-tile-shadow:       none;        // flat, no per-tile shadow
+        --bs-metric-tile-shadow: none; // flat, no per-tile shadow
 
         // Icon — teal action accent (secondary/everyday colour in the arcade rotation).
-        --bs-metric-tile-icon-color:   var(--bp-teal-fg);
+        --bs-metric-tile-icon-color: var(--bp-teal-fg);
 
         // Label — mono eyebrow micro-label; muted violet-ink.
-        --bs-metric-tile-label-color:  var(--bp-text-muted);
+        --bs-metric-tile-label-color: var(--bp-text-muted);
         // Font is already JetBrains Mono in the base — the --bp-mono var matches.
         // letter-spacing stays at the base 0.08em (fits mono eyebrow convention).
 
         // Value figure — use the display font for maximum blueprint character.
-        --bs-metric-tile-value-color:  var(--bp-emphasis);     // strongest ink
+        --bs-metric-tile-value-color: var(--bp-emphasis); // strongest ink
 
         // Unit suffix — muted, lightweight.
-        --bs-metric-tile-unit-color:   var(--bp-text-faint);
+        --bs-metric-tile-unit-color: var(--bp-text-faint);
 
         // Hint line — faint supporting text.
-        --bs-metric-tile-hint-color:   var(--bp-text-faint);
+        --bs-metric-tile-hint-color: var(--bp-text-faint);
 
         // Override value typography to Chakra Petch (display) for the number figure.
         .tc-metric-tile-value {

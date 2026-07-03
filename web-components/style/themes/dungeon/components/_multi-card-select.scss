@@ -8,7 +8,6 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // 1. Critical contrast fix — hardcoded #fff → ink so text is legible on gold fill.
     tc-multi-card-select {
         --bs-multi-card-select-selected-text: var(--fg-ink);
@@ -24,7 +23,9 @@ tc-theme[name='dungeon'],
     .tc-multi-card-select-card.is-selected {
         background-image: var(--fg-gold-edge);
         border-color: var(--fg-gold);
-        box-shadow: var(--fg-bevel-top), 0 2px 8px rgba(0, 0, 0, 0.5);
+        box-shadow:
+            var(--fg-bevel-top),
+            0 2px 8px rgba(0, 0, 0, 0.5);
     }
 
     // 4. Ink description text on gold (base hardcodes rgba(255,255,255,0.75)).

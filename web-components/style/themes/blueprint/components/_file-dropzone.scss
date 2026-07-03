@@ -2,37 +2,35 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Custom-property re-skin ───────────────────────────────────────────────
     // Drive everything through the component's own --bs-file-dropzone-* API.
     // Base uses --tc-accent (cyan) for the active border — repoint to teal here.
 
     tc-file-dropzone {
         // Surface: raised white card, teal-tinted dashed perimeter
-        --bs-file-dropzone-bg:                var(--bp-paper);
-        --bs-file-dropzone-border-color:      var(--bp-border-strong);
-        --bs-file-dropzone-border-style:      dashed;
-        --bs-file-dropzone-border-width:      1.5px;
+        --bs-file-dropzone-bg: var(--bp-paper);
+        --bs-file-dropzone-border-color: var(--bp-border-strong);
+        --bs-file-dropzone-border-style: dashed;
+        --bs-file-dropzone-border-width: 1.5px;
 
         // Drag-active: teal wash + teal border (teal = everyday action)
-        --bs-file-dropzone-active-bg:         var(--bp-teal-soft);
+        --bs-file-dropzone-active-bg: var(--bp-teal-soft);
         --bs-file-dropzone-active-border-color: var(--bp-teal);
 
         // Upload icon: teal so it reads as interactive affordance
-        --bs-file-dropzone-icon-color:        var(--bp-teal-fg);
+        --bs-file-dropzone-icon-color: var(--bp-teal-fg);
 
         // Prompt: body font at muted ink — readable but subordinate
-        --bs-file-dropzone-prompt-color:      var(--bp-text-muted);
+        --bs-file-dropzone-prompt-color: var(--bp-text-muted);
 
         // Format chips: mono eyebrow style — faint chip border, faint ink
-        --bs-file-dropzone-chip-color:        var(--bp-text-faint);
+        --bs-file-dropzone-chip-color: var(--bp-text-faint);
         --bs-file-dropzone-chip-border-color: var(--bp-border-chip);
 
         // Smooth transition using the blueprint ease curve
         --bs-file-dropzone-transition:
-            background-color 180ms var(--bp-ease),
-            border-color     180ms var(--bp-ease),
-            box-shadow       180ms var(--bp-ease);
+            background-color 180ms var(--bp-ease), border-color 180ms var(--bp-ease),
+            box-shadow 180ms var(--bp-ease);
     }
 
     // ── Area wrapper: recessed well bg, soft shadow ───────────────────────────

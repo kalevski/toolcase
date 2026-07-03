@@ -12,6 +12,7 @@ function site(over: Partial<Site>): Site {
         ownerId: 1,
         repoOwner: 'alice',
         repoName: 'portfolio',
+        repoPrivate: false,
         branch: 'gh-pages',
         hostname: 'alice.perch.dev',
         hostKind: 'subdomain',

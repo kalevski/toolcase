@@ -6,7 +6,6 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // ── Host element token-swap ────────────────────────────────────────────────
 
     tc-markdown-editor {
@@ -77,7 +76,12 @@ tc-theme[name='dungeon'],
     .tc-markdown-editor-preview {
         font-family: var(--fg-body);
 
-        h1, h2, h3, h4, h5, h6 {
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
             font-family: var(--fg-display);
             letter-spacing: 0.04em;
         }

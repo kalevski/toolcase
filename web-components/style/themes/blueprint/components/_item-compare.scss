@@ -3,32 +3,31 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-item-compare {
         // Surface — white raised card, blueprint border, soft violet-tinted shadow.
-        --bs-item-compare-surface:         var(--bp-paper);
-        --bs-item-compare-border-color:    var(--bp-border);
+        --bs-item-compare-surface: var(--bp-paper);
+        --bs-item-compare-border-color: var(--bp-border);
         // Internal separator is a faint divider, not the full border weight.
         --bs-item-compare-separator-color: var(--bp-border-faint);
 
         // Name — display face for the item title, blueprint ink.
-        --bs-item-compare-name-color:       var(--bp-text);
-        --bs-item-compare-name-font-size:   0.9375rem;
+        --bs-item-compare-name-color: var(--bp-text);
+        --bs-item-compare-name-font-size: 0.9375rem;
         --bs-item-compare-name-font-weight: 600;
 
         // Stat labels — muted blueprint prose; values — primary ink.
         --bs-item-compare-stat-label-color: var(--bp-text-muted);
         --bs-item-compare-stat-value-color: var(--bp-text);
-        --bs-item-compare-stat-font-size:   0.8125rem;
+        --bs-item-compare-stat-font-size: 0.8125rem;
 
         // Empty placeholder — faintest blueprint ink.
         --bs-item-compare-empty-color: var(--bp-text-faint);
 
         // Delta colors: up → teal (positive action), down → real danger red.
-        --bs-item-compare-delta-up-color:    var(--bp-teal);
-        --bs-item-compare-delta-down-color:  var(--bp-danger);
+        --bs-item-compare-delta-up-color: var(--bp-success);
+        --bs-item-compare-delta-down-color: var(--bp-danger);
         --bs-item-compare-delta-label-color: var(--bp-text-muted);
-        --bs-item-compare-delta-font-size:   0.8125rem;
+        --bs-item-compare-delta-font-size: 0.8125rem;
     }
 
     // Grid frame — paper ground, soft shadow lift, teal HUD corner bracket.

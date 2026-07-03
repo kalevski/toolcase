@@ -9,6 +9,7 @@ import {
     assertSafeSiteId,
     formatInterval,
     fragmentFilename,
+    gitCredentialName,
     renderFragment,
     tokenEnvVarName,
 } from './nginxpilot-fragment'
@@ -20,6 +21,7 @@ function aliceSite(overrides: Partial<Site> = {}): Site {
         ownerId: 1,
         repoOwner: 'alice',
         repoName: 'portfolio',
+        repoPrivate: false,
         branch: 'gh-pages',
         subdir: 'dist/',
         hostname: 'alice.perch.dev',
@@ -60,6 +62,23 @@ sites:
     exclude: ["*.map"]
 `,
         )
+    })
+
+    it('emits token_file auth for a private repo (git-credentials store path)', () => {
+        const yaml = renderFragment(aliceSite(), {
+            intervalSec: 900,
+            auth: { tokenFile: '/var/lib/nginxpilot/git-credentials/perch-abc123.token' },
+        })
+        expect(yaml).toContain('      auth:\n        method: github-token\n')
+        // A leading `/` isn't plain-scalar-safe under the emitter's conservative rule,
+        // so the absolute path comes out double-quoted — still valid YAML.
+        expect(yaml).toContain('        token_file: "/var/lib/nginxpilot/git-credentials/perch-abc123.token"')
+        expect(yaml).not.toContain('token_env')
+    })
+
+    it('omits the auth block when neither token ref is set', () => {
+        const yaml = renderFragment(aliceSite(), { intervalSec: 900, auth: {} })
+        expect(yaml).not.toContain('auth:')
     })
 
     it('omits the auth block for a public repo (v1 free tier — zero secrets)', () => {
@@ -135,6 +154,12 @@ describe('fragmentFilename / tokenEnvVarName', () => {
         // Hyphens are legal in filenames but folded to `_` for the env-var name.
         expect(fragmentFilename('a-b')).toBe('perch-a-b.yml')
         expect(tokenEnvVarName('a-b')).toBe('PERCH_GH_TOKEN_A_B')
+    })
+
+    it('derives the git-credentials store name for a site', () => {
+        expect(gitCredentialName('abc123')).toBe('perch-abc123')
+        expect(gitCredentialName('a-b_C9')).toBe('perch-a-b_C9')
+        expect(() => gitCredentialName('../evil')).toThrow()
     })
 
     it('rejects unsafe ids that could escape the fragment path (§16)', () => {

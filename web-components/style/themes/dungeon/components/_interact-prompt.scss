@@ -6,7 +6,11 @@
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
     tc-interact-prompt {
-        --bs-interact-prompt-bg: linear-gradient(180deg, rgba(20, 12, 8, 0.92), rgba(10, 6, 4, 0.92));
+        --bs-interact-prompt-bg: linear-gradient(
+            180deg,
+            rgba(20, 12, 8, 0.92),
+            rgba(10, 6, 4, 0.92)
+        );
         --bs-interact-prompt-color: var(--fg-parch);
         --bs-interact-prompt-border-color: var(--fg-gold-deep);
 
@@ -21,7 +25,12 @@ tc-theme[name='dungeon'],
 
         --bs-interact-prompt-hold-track-bg: linear-gradient(180deg, #0e0905, #1a120a);
         --bs-interact-prompt-hold-track-border-color: var(--fg-gold-deep);
-        --bs-interact-prompt-hold-fill-bg: linear-gradient(90deg, var(--fg-gold-deep), var(--fg-gold-bright), var(--fg-gold-deep));
+        --bs-interact-prompt-hold-fill-bg: linear-gradient(
+            90deg,
+            var(--fg-gold-deep),
+            var(--fg-gold-bright),
+            var(--fg-gold-deep)
+        );
 
         // Gilded bevel stack — upgraded with inner gold ring for double-frame depth.
         box-shadow:

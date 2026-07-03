@@ -2,22 +2,21 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-cycle-wheel {
         // Active/selected accent → pink (primary in blueprint's accent rotation).
         // Muted ring labels, ticks, and tracks use border/faint tokens — no raw slate refs.
-        --bs-cycle-wheel-accent:      var(--bp-pink);
-        --bs-cycle-wheel-value:       var(--bp-text);
-        --bs-cycle-wheel-bg:          var(--bp-paper);
-        --bs-cycle-wheel-muted:       var(--bp-text-faint);
-        --bs-cycle-wheel-border:      var(--bp-border);
+        --bs-cycle-wheel-accent: var(--bp-pink);
+        --bs-cycle-wheel-value: var(--bp-text);
+        --bs-cycle-wheel-bg: var(--bp-paper);
+        --bs-cycle-wheel-muted: var(--bp-text-faint);
+        --bs-cycle-wheel-border: var(--bp-border);
         // Tracks: teal-line gives the blueprint "schematic circuit" read on dashed SVG strokes.
-        --bs-cycle-wheel-track:       var(--bp-teal-line);
+        --bs-cycle-wheel-track: var(--bp-teal-line);
         // Tick hairlines: faint divider token, clearly lighter than the track.
-        --bs-cycle-wheel-tick:        var(--bp-border-faint);
+        --bs-cycle-wheel-tick: var(--bp-border-faint);
         // Pill: teal-soft fill + teal-fg text (success = teal in blueprint).
-        --bs-cycle-wheel-pill-bg:     var(--bp-teal-soft);
-        --bs-cycle-wheel-pill-color:  var(--bp-teal-fg);
+        --bs-cycle-wheel-pill-bg: var(--bp-success-soft);
+        --bs-cycle-wheel-pill-color: var(--bp-success-fg);
         // Mono micro-label sizing preserved; letter-spacing lifted slightly for the mono voice.
         --bs-cycle-wheel-label-letter-spacing: 0.15em;
     }
@@ -55,7 +54,9 @@ tc-theme[name='blueprint'],
     .tc-cycle-wheel__core {
         border-color: var(--bp-border);
         background: var(--bp-paper);
-        box-shadow: var(--tc-shadow-sm), 0 0 0 3px var(--bp-bg-2);
+        box-shadow:
+            var(--tc-shadow-sm),
+            0 0 0 3px var(--bp-bg-2);
         // The outer ring of --bp-bg-2 acts as a subtle "inset well" gap,
         // separating the white core from the rotating SVG ring cleanly.
     }

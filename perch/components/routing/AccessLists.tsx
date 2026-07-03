@@ -1,10 +1,14 @@
 'use client'
 
 import { useCallback, useMemo, useState } from 'react'
+import type { AdvancedTableColumn } from '@toolcase/web-components'
 import type { AccessList, AccessRule, SatisfyMode } from '@/server/domain/access-list'
 import {
     RoutingPage,
     RoutingListTable,
+    cellBadge,
+    cellMono,
+    cellMuted,
     json,
     saveErrorMessage,
     saveRouting,
@@ -79,12 +83,36 @@ interface RuleDraft {
 const emptyUser = (): UserDraft => ({ username: '', password: '', hasPassword: false })
 const emptyRule = (): RuleDraft => ({ kind: 'allow', value: '' })
 
-function describeList(l: AccessList): string {
-    const users = l.users?.length ?? 0
-    const rules = l.rules?.length ?? 0
-    return `satisfy ${l.satisfy ?? 'all'} · ${users} user${users === 1 ? '' : 's'} · ${rules} rule${
-        rules === 1 ? '' : 's'
-    }${l.pass_auth ? ' · passes auth upstream' : ''}`
+// List columns (between the built-in Name column and the actions).
+const ACCESS_LIST_COLUMNS: AdvancedTableColumn[] = [
+    { key: 'satisfy', label: 'Satisfy' },
+    { key: 'users', label: 'Basic-auth users' },
+    { key: 'rules', label: 'IP rules' },
+    { key: 'auth', label: 'Auth header' },
+]
+
+/** Users cell: count plus the usernames, flagging accounts still missing a password. */
+function usersCellHtml(l: AccessList): string {
+    const users = l.users ?? []
+    if (users.length === 0) return cellMuted('none')
+    const names = users
+        .slice(0, 4)
+        .map((u) => u.username + (u.has_password ? '' : ' (no password)'))
+        .join(', ')
+    const more = users.length > 4 ? ` +${users.length - 4} more` : ''
+    return `${cellMuted(`${users.length} ·`)} ${cellMono(names + more)}`
+}
+
+/** Rules cell: count plus the first ordered allow/deny entries. */
+function rulesCellHtml(l: AccessList): string {
+    const rules = l.rules ?? []
+    if (rules.length === 0) return cellMuted('none')
+    const summary = rules
+        .slice(0, 3)
+        .map((r) => (r.allow !== undefined ? `allow ${r.allow}` : `deny ${r.deny}`))
+        .join('; ')
+    const more = rules.length > 3 ? ' …' : ''
+    return `${cellMuted(`${rules.length} ·`)} ${cellMono(summary + more)}`
 }
 
 /** Everything the access-list form holds — one draft object; the modal resets by remount. */
@@ -292,7 +320,24 @@ function AccessListsManager({ lists, onChanged }: { lists: AccessList[]; onChang
         () =>
             lists.map((l) => ({
                 name: l.name,
-                hint: describeList(l),
+                cells: {
+                    satisfy: cellBadge(
+                        `satisfy ${l.satisfy ?? 'all'}`,
+                        'secondary',
+                        (l.satisfy ?? 'all') === 'all'
+                            ? 'IP rules AND basic auth must both pass.'
+                            : 'Either the IP rules or basic auth grants access.',
+                    ),
+                    users: usersCellHtml(l),
+                    rules: rulesCellHtml(l),
+                    auth: l.pass_auth
+                        ? cellBadge(
+                              'passed upstream',
+                              'info',
+                              'The Authorization header is forwarded to the upstream after auth.',
+                          )
+                        : cellMuted('consumed'),
+                },
             })),
         [lists],
     )
@@ -320,7 +365,13 @@ function AccessListsManager({ lists, onChanged }: { lists: AccessList[]; onChang
                     {lists.length === 0 ? (
                         <tc-empty-state icon="lock">No access lists yet.</tc-empty-state>
                     ) : (
-                        <RoutingListTable items={items} busy={busy} onEdit={startEdit} onRemove={setPending} />
+                        <RoutingListTable
+                            columns={ACCESS_LIST_COLUMNS}
+                            items={items}
+                            busy={busy}
+                            onEdit={startEdit}
+                            onRemove={setPending}
+                        />
                     )}
                 </div>
             </tc-section-card>

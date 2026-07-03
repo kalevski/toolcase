@@ -2,34 +2,33 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Component-level token overrides ─────────────────────────────────────
     // Re-point all --bs-plugin-grid-* vars to blueprint tokens so every
     // cosmetic is driven through the var API — no raw class rules needed for
     // these baseline properties.
     tc-plugin-grid {
         // Card surface: white paper, lilac hairline, soft violet-tinted shadow.
-        --bs-plugin-grid-card-bg:            var(--bp-paper);
-        --bs-plugin-grid-card-border:        1px solid var(--bp-border);
-        --bs-plugin-grid-card-shadow:        var(--tc-shadow-sm);
-        --bs-plugin-grid-card-shadow-hover:  var(--tc-shadow-hover);
+        --bs-plugin-grid-card-bg: var(--bp-paper);
+        --bs-plugin-grid-card-border: 1px solid var(--bp-border);
+        --bs-plugin-grid-card-shadow: var(--tc-shadow-sm);
+        --bs-plugin-grid-card-shadow-hover: var(--tc-shadow-hover);
 
         // Section header — strong blueprint ink.
-        --bs-plugin-grid-header-color:       var(--bp-emphasis);
-        --bs-plugin-grid-name-color:         var(--bp-text);
+        --bs-plugin-grid-header-color: var(--bp-emphasis);
+        --bs-plugin-grid-name-color: var(--bp-text);
 
         // Description — muted violet-inflected prose color.
-        --bs-plugin-grid-desc-color:         var(--bp-text-muted);
+        --bs-plugin-grid-desc-color: var(--bp-text-muted);
 
         // Install chip — recessed lavender well, primary ink.
-        --bs-plugin-grid-install-bg:         var(--bp-bg-2);
-        --bs-plugin-grid-install-color:      var(--bp-text-soft);
+        --bs-plugin-grid-install-bg: var(--bp-bg-2);
+        --bs-plugin-grid-install-color: var(--bp-text-soft);
 
         // Download count — faint supporting readout.
-        --bs-plugin-grid-downloads-color:    var(--bp-text-faint);
+        --bs-plugin-grid-downloads-color: var(--bp-text-faint);
 
         // Copy icon button — muted at rest, teal on hover (set below on class rule).
-        --bs-plugin-grid-copy-color:         var(--bp-text-faint);
+        --bs-plugin-grid-copy-color: var(--bp-text-faint);
     }
 
     // ── Section header ───────────────────────────────────────────────────────

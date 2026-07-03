@@ -17,7 +17,9 @@ tc-theme[name='dungeon'],
     // Centre medallion: gilded bevel stack + faint gold glow.
     // border-radius: 50% is a sanctioned circle — not touched.
     .tc-cycle-wheel__core {
-        box-shadow: var(--fg-panel-shadow), 0 0 16px rgba(240, 210, 122, 0.15);
+        box-shadow:
+            var(--fg-panel-shadow),
+            0 0 16px rgba(240, 210, 122, 0.15);
     }
 
     // Core label: switch from hardcoded sans-serif to display caps.

@@ -3,10 +3,9 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-github-stars-card {
         // ── Card surface ─────────────────────────────────────────────────────
-        --bs-github-stars-card-bg:     var(--bp-paper);
+        --bs-github-stars-card-bg: var(--bp-paper);
         --bs-github-stars-card-border: 1px solid var(--bp-border);
         --bs-github-stars-card-shadow: var(--tc-shadow-sm);
 
@@ -34,8 +33,8 @@ tc-theme[name='blueprint'],
 
         // ── CTA ──────────────────────────────────────────────────────────────
         // Pink gradient = primary CTA in the arcade accent rotation
-        --bs-github-stars-card-cta-bg:         var(--bp-pink-grad);
-        --bs-github-stars-card-cta-color:      var(--bp-pink-ink);
+        --bs-github-stars-card-cta-bg: var(--bp-pink-grad);
+        --bs-github-stars-card-cta-color: var(--bp-pink-ink);
         // Replace the baked rgba(30,41,59,0.3) dark-slate glow with pink glow
         --bs-github-stars-card-cta-hover-shadow: var(--bp-glow-pink);
 
@@ -45,7 +44,7 @@ tc-theme[name='blueprint'],
 
         // ── Skeleton ─────────────────────────────────────────────────────────
         // Recessed well as skeleton base; paper-tint-2 for the shimmer sweep
-        --bs-github-stars-card-skeleton-bg:      var(--bp-bg-2);
+        --bs-github-stars-card-skeleton-bg: var(--bp-bg-2);
         --bs-github-stars-card-skeleton-shimmer: var(--bp-paper-tint-2);
     }
 
@@ -53,7 +52,9 @@ tc-theme[name='blueprint'],
     // This is an interactive tile (CTA inside), so the corner-bracket applies.
     .tc-github-stars-card {
         position: relative;
-        transition: transform var(--bp-ease, 0.18s ease), box-shadow var(--bp-ease, 0.18s ease);
+        transition:
+            transform var(--bp-ease, 0.18s ease),
+            box-shadow var(--bp-ease, 0.18s ease);
 
         // Top-left HUD bracket (teal, 2px, 12×12px)
         &::before {

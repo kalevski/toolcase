@@ -2,32 +2,31 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-group {
         // ── Surface & border ─────────────────────────────────────────────────────
-        --bs-group-bg:               var(--bp-paper);
-        --bs-group-border-color:     var(--bp-border);
+        --bs-group-bg: var(--bp-paper);
+        --bs-group-border-color: var(--bp-border);
 
         // ── Header ───────────────────────────────────────────────────────────────
-        --bs-group-header-bg:        var(--bp-paper);
-        --bs-group-header-hover-bg:  var(--bp-bg-2);      // recessed tint on hover
-        --bs-group-header-color:     var(--bp-text);
+        --bs-group-header-bg: var(--bp-paper);
+        --bs-group-header-hover-bg: var(--bp-bg-2); // recessed tint on hover
+        --bs-group-header-color: var(--bp-text);
 
         // ── Toggle (label row) ───────────────────────────────────────────────────
-        --bs-group-toggle-color:     var(--bp-text-soft);
+        --bs-group-toggle-color: var(--bp-text-soft);
 
         // ── Badge ────────────────────────────────────────────────────────────────
-        --bs-group-badge-bg:         var(--bp-teal-soft);  // soft teal chip fill
-        --bs-group-badge-color:      var(--bp-teal-fg);    // AA-passing teal text on white/soft
-        --bs-group-badge-font-size:  0.6875rem;
+        --bs-group-badge-bg: var(--bp-teal-soft); // soft teal chip fill
+        --bs-group-badge-color: var(--bp-teal-fg); // AA-passing teal text on white/soft
+        --bs-group-badge-font-size: 0.6875rem;
 
         // ── Action button ────────────────────────────────────────────────────────
-        --bs-group-action-color:       var(--bp-text-faint);
-        --bs-group-action-hover-bg:    var(--bp-bg-2);
+        --bs-group-action-color: var(--bp-text-faint);
+        --bs-group-action-hover-bg: var(--bp-bg-2);
         --bs-group-action-active-color: var(--bp-teal-fg);
 
         // ── Body ─────────────────────────────────────────────────────────────────
-        --bs-group-body-bg:          var(--bp-paper);
+        --bs-group-body-bg: var(--bp-paper);
     }
 
     // ── Container ────────────────────────────────────────────────────────────────
@@ -55,7 +54,7 @@ tc-theme[name='blueprint'],
         color: var(--bp-text-soft);
 
         &:focus-visible {
-            outline-color: var(--bp-pink);  // pink primary focus ring
+            outline-color: var(--bp-pink); // pink primary focus ring
         }
 
         // Chevron icon inherits teal accent
@@ -75,7 +74,9 @@ tc-theme[name='blueprint'],
     // ── Action button ────────────────────────────────────────────────────────────
     .tc-group-action {
         color: var(--bp-text-faint);
-        transition: background var(--bp-ease), color var(--bp-ease);
+        transition:
+            background var(--bp-ease),
+            color var(--bp-ease);
 
         &:hover {
             color: var(--bp-teal-fg);
@@ -87,7 +88,7 @@ tc-theme[name='blueprint'],
         }
 
         &:focus-visible {
-            outline-color: var(--bp-pink);  // pink primary focus ring
+            outline-color: var(--bp-pink); // pink primary focus ring
         }
     }
 

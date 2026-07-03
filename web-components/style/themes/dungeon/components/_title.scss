@@ -11,6 +11,8 @@ tc-theme[name='dungeon'],
     .tc-title-content {
         font-family: var(--fg-display);
         text-transform: uppercase;
-        text-shadow: 0 2px 0 #000, 0 0 24px rgba(232, 200, 120, 0.35);
+        text-shadow:
+            0 2px 0 #000,
+            0 0 24px rgba(232, 200, 120, 0.35);
     }
 }

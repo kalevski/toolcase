@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-download-stats {
         // Surface: white raised card with violet-tinted hairline and soft shadow.
         --bs-download-stats-bg: var(--bp-paper);
@@ -47,7 +46,7 @@ tc-theme[name='blueprint'],
     .tc-download-stats__package {
         // Mono font already set in the base; remap to bp-mono token + tighten tracking.
         font-family: var(--bp-mono);
-        letter-spacing: 0.10em;
+        letter-spacing: 0.1em;
         text-transform: uppercase;
         color: var(--bp-violet-fg);
     }

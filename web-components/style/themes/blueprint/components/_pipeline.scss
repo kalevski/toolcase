@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-pipeline {
         // Connector — replace tc-border token with blueprint hairline
         --bs-pipeline-connector-color: var(--bp-border-faint);
@@ -20,7 +19,7 @@ tc-theme[name='blueprint'],
         --bs-pipeline-title-font-weight: 500;
 
         // Complete — success maps to teal in blueprint
-        --bs-pipeline-complete-color: var(--bp-teal);
+        --bs-pipeline-complete-color: var(--bp-success);
         --bs-pipeline-complete-title-color: var(--bp-text-soft);
 
         // Live — primary action maps to pink in blueprint
@@ -48,9 +47,10 @@ tc-theme[name='blueprint'],
         letter-spacing: 0.04em;
         // Subtle paper shadow so marker reads above the connector
         box-shadow: var(--tc-shadow-sm);
-        transition: border-color 0.18s var(--bp-ease),
-                    background 0.18s var(--bp-ease),
-                    box-shadow 0.18s var(--bp-ease);
+        transition:
+            border-color 0.18s var(--bp-ease),
+            background 0.18s var(--bp-ease),
+            box-shadow 0.18s var(--bp-ease);
     }
 
     // Step title: mono eyebrow — uppercase, loose tracking
@@ -65,12 +65,13 @@ tc-theme[name='blueprint'],
 
     // State: complete — teal fill, teal-ink checkmark, connector sharpens
     .tc-pipeline-step--complete {
-
         .tc-pipeline-marker {
-            background: var(--bp-teal);
-            border-color: var(--bp-teal);
-            color: var(--bp-teal-ink);
-            box-shadow: 0 0 0 3px var(--bp-teal-soft), var(--tc-shadow-sm);
+            background: var(--bp-success);
+            border-color: var(--bp-success);
+            color: var(--bp-success-ink);
+            box-shadow:
+                0 0 0 3px var(--bp-success-soft),
+                var(--tc-shadow-sm);
         }
 
         .tc-pipeline-title {
@@ -79,13 +80,12 @@ tc-theme[name='blueprint'],
 
         // Connector trailing out of a complete step sharpens to teal-line
         .tc-pipeline-connector {
-            background: var(--bp-teal-line);
+            background: var(--bp-success-line);
         }
     }
 
     // State: live — pink fill, pink glow pulse ring, bold mono title
     .tc-pipeline-step--live {
-
         .tc-pipeline-marker {
             background: var(--bp-pink);
             border-color: var(--bp-pink);
@@ -106,5 +106,4 @@ tc-theme[name='blueprint'],
     }
 
     // Reduced-motion guard already in base; nothing extra needed here
-
 }

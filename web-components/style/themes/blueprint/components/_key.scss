@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-key {
         // Surface: pale violet-tinted paper, strong blueprint hairline
         --bs-key-font-family: var(--bp-mono);
@@ -20,7 +19,7 @@ tc-theme[name='blueprint'],
     .tc-key {
         // Uppercase mono label — blueprint HUD treatment
         text-transform: uppercase;
-        letter-spacing: .08em;
+        letter-spacing: 0.08em;
         // Thicker bottom edge for keycap depth, recoloured to blueprint teal hairline
         border-bottom-color: var(--bp-teal-line, var(--bp-border-soft));
         border-bottom-width: 2px;

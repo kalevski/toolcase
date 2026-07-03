@@ -3,24 +3,23 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-chip,
     tc-tag {
         // Default surface: white paper, chip-specific hairline, primary ink.
         // Drive all cosmetics through --bs-chip-* so variants below only
         // need to repoint the relevant var.
-        --bs-chip-bg:               var(--bp-paper);
-        --bs-chip-bg-hover:         var(--bp-paper-tint-2);
-        --bs-chip-color:            var(--bp-text-soft);
-        --bs-chip-border-color:     var(--bp-border-chip);
+        --bs-chip-bg: var(--bp-paper);
+        --bs-chip-bg-hover: var(--bp-paper-tint-2);
+        --bs-chip-color: var(--bp-text-soft);
+        --bs-chip-border-color: var(--bp-border-chip);
 
         // Selected (active) → pink primary fill, white ink.
-        --bs-chip-selected-bg:      var(--bp-pink);
-        --bs-chip-selected-color:   var(--bp-pink-ink);
+        --bs-chip-selected-bg: var(--bp-pink);
+        --bs-chip-selected-color: var(--bp-pink-ink);
 
         // Count badge: teal soft tint so it reads as an informational counter.
-        --bs-chip-count-bg:         var(--bp-teal-soft);
-        --bs-chip-count-color:      var(--bp-teal-fg);
+        --bs-chip-count-bg: var(--bp-teal-soft);
+        --bs-chip-count-color: var(--bp-teal-fg);
     }
 
     // ── Chip body ────────────────────────────────────────────────────────────
@@ -32,9 +31,9 @@ tc-theme[name='blueprint'],
 
         transition:
             background-color var(--bp-ease),
-            color            var(--bp-ease),
-            border-color     var(--bp-ease),
-            box-shadow       var(--bp-ease);
+            color var(--bp-ease),
+            border-color var(--bp-ease),
+            box-shadow var(--bp-ease);
 
         &:hover:not([disabled]) {
             border-color: var(--bp-border-strong);
@@ -59,36 +58,36 @@ tc-theme[name='blueprint'],
 
     // primary → pink soft tint + pink-fg text + pink hairline
     .tc-chip--primary:not(.is-selected) {
-        --bs-chip-bg:           var(--bp-pink-soft);
-        --bs-chip-color:        var(--bp-pink);
+        --bs-chip-bg: var(--bp-pink-soft);
+        --bs-chip-color: var(--bp-pink);
         --bs-chip-border-color: var(--bp-pink-line);
     }
 
     // info → violet soft tint
     .tc-chip--info:not(.is-selected) {
-        --bs-chip-bg:           var(--bp-violet-soft);
-        --bs-chip-color:        var(--bp-violet-fg);
+        --bs-chip-bg: var(--bp-violet-soft);
+        --bs-chip-color: var(--bp-violet-fg);
         --bs-chip-border-color: var(--bp-violet);
     }
 
     // success → teal soft tint (status: success = teal in blueprint)
     .tc-chip--success:not(.is-selected) {
-        --bs-chip-bg:           var(--bp-teal-soft);
-        --bs-chip-color:        var(--bp-teal-fg);
-        --bs-chip-border-color: var(--bp-teal);
+        --bs-chip-bg: var(--bp-success-soft);
+        --bs-chip-color: var(--bp-success-fg);
+        --bs-chip-border-color: var(--bp-success);
     }
 
     // warning → amber soft tint
     .tc-chip--warning:not(.is-selected) {
-        --bs-chip-bg:           var(--bp-amber-soft);
-        --bs-chip-color:        var(--bp-amber-fg);
+        --bs-chip-bg: var(--bp-amber-soft);
+        --bs-chip-color: var(--bp-amber-fg);
         --bs-chip-border-color: var(--bp-amber);
     }
 
     // danger → real red (NOT pink — danger is --bp-danger in blueprint)
     .tc-chip--danger:not(.is-selected) {
-        --bs-chip-bg:           var(--bp-danger-soft);
-        --bs-chip-color:        var(--bp-danger);
+        --bs-chip-bg: var(--bp-danger-soft);
+        --bs-chip-color: var(--bp-danger);
         --bs-chip-border-color: var(--bp-danger);
     }
 
@@ -106,7 +105,7 @@ tc-theme[name='blueprint'],
         // Only override transition to match the chip's ease token.
         transition:
             background-color var(--bp-ease),
-            color            var(--bp-ease);
+            color var(--bp-ease);
 
         &:hover:not([disabled]) {
             // Stronger recessed tint on remove hover to signal destructive action.

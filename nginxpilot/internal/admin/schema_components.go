@@ -270,5 +270,18 @@ func componentSchemas() map[string]any {
 			"provider":  str(),
 			"mechanism": str(),
 		}, "status", "provider"),
+
+		"GitCredential": obj(map[string]any{
+			"name":     str(),
+			"path":     str(),
+			"mod_time": str(),
+		}, "name", "path"),
+		"GitCredentialList":    obj(map[string]any{"credentials": arr(ref("GitCredential"))}),
+		"GitCredentialRequest": obj(map[string]any{"token": str()}, "token"),
+		"GitCredentialResult": obj(map[string]any{
+			"status": strEnum("created", "replaced"),
+			"name":   str(),
+			"path":   str(),
+		}, "status", "name", "path"),
 	}
 }

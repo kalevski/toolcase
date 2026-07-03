@@ -4,15 +4,15 @@ tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
     tc-subtitle {
         // Speaker micro-label: route to blueprint mono font + teal-fg ink for AA contrast on white.
-        --bs-subtitle-speaker-color:          var(--bp-teal-fg);
+        --bs-subtitle-speaker-color: var(--bp-teal-fg);
         --bs-subtitle-speaker-letter-spacing: 0.12em;
 
         // Main text: route to blueprint body ink token.
-        --bs-subtitle-color:                  var(--bp-text);
+        --bs-subtitle-color: var(--bp-text);
 
         // Boxed variant: white paper surface, default hairline, subtle violet shadow.
-        --bs-subtitle-bg:                     var(--bp-paper);
-        --bs-subtitle-border-color:           var(--bp-border);
+        --bs-subtitle-bg: var(--bp-paper);
+        --bs-subtitle-border-color: var(--bp-border);
     }
 
     // Speaker is already uppercase in the base; swap the font family to bp-mono.

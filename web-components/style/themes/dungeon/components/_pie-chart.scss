@@ -7,17 +7,18 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // --- token swap: slice fill ramp (gold / rarity / element) ---
     tc-pie-chart {
-        --bs-pie-chart-slice-1: var(--fg-gold);          // was --tc-app-accent (→ gold already, explicit)
-        --bs-pie-chart-slice-2: var(--fg-rare);           // was --tc-slate-500  (undefined → dead grey)
-        --bs-pie-chart-slice-3: var(--fg-mana);           // was --tc-info       (→ mana already, explicit)
-        --bs-pie-chart-slice-4: var(--fg-epic);           // was --tc-slate-700  (undefined → dead grey)
-        --bs-pie-chart-slice-5: var(--fg-stamina);        // was --tc-success    (→ stamina already, explicit)
-        --bs-pie-chart-slice-6: var(--fg-legendary);      // was --tc-slate-400  (undefined → dead grey)
-        --bs-pie-chart-slice-7: var(--fg-fire);           // was --tc-warning    (→ distinct warm hue)
-        --bs-pie-chart-slice-8: var(--fg-arcane);         // was --tc-slate-600  (undefined → dead grey)
+        --bs-pie-chart-slice-1: var(--fg-gold); // was --tc-app-accent (→ gold already, explicit)
+        --bs-pie-chart-slice-2: var(--fg-rare); // was --tc-slate-500  (undefined → dead grey)
+        --bs-pie-chart-slice-3: var(--fg-mana); // was --tc-info       (→ mana already, explicit)
+        --bs-pie-chart-slice-4: var(--fg-epic); // was --tc-slate-700  (undefined → dead grey)
+        --bs-pie-chart-slice-5: var(
+            --fg-stamina
+        ); // was --tc-success    (→ stamina already, explicit)
+        --bs-pie-chart-slice-6: var(--fg-legendary); // was --tc-slate-400  (undefined → dead grey)
+        --bs-pie-chart-slice-7: var(--fg-fire); // was --tc-warning    (→ distinct warm hue)
+        --bs-pie-chart-slice-8: var(--fg-arcane); // was --tc-slate-600  (undefined → dead grey)
 
         // --- token swap: tooltip text (kills literal #fff) ---
         --bs-pie-chart-tooltip-color: var(--fg-parch);

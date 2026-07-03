@@ -30,7 +30,9 @@ tc-theme[name='dungeon'],
         font-family: var(--fg-display);
         text-transform: uppercase;
         letter-spacing: 0.04em;
-        text-shadow: 0 2px 0 #000, 0 0 24px rgba(232, 200, 120, 0.35);
+        text-shadow:
+            0 2px 0 #000,
+            0 0 24px rgba(232, 200, 120, 0.35);
     }
 
     // Divider — gilded gradient rule with a centred diamond ornament.

@@ -2,23 +2,22 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     .tc-marquee {
         // Surface: raised paper strip with top/bottom hairline rules
         background-color: var(--bp-paper);
         border-block: 1px solid var(--bp-border-rule);
 
         // Route item and separator ink to blueprint tokens
-        --bs-marquee-item-color:  var(--bp-text-soft);
-        --bs-marquee-sep-color:   var(--bp-teal-fg);
-        --bs-marquee-sep-gap:     0.75rem;
-        --bs-marquee-padding-y:   0.5rem;
+        --bs-marquee-item-color: var(--bp-text-soft);
+        --bs-marquee-sep-color: var(--bp-teal-fg);
+        --bs-marquee-sep-gap: 0.75rem;
+        --bs-marquee-padding-y: 0.5rem;
     }
 
     .tc-marquee-item {
         // Mono face; uppercase micro-label rhythm matches the HUD aesthetic
         font-family: var(--bp-mono);
-        font-size:   0.6875rem;   // 11 px — keeps it ticker-scale
+        font-size: 0.6875rem; // 11 px — keeps it ticker-scale
         font-weight: 500;
         letter-spacing: 0.08em;
         text-transform: uppercase;

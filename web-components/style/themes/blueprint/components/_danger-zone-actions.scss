@@ -2,28 +2,27 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-danger-zone-actions {
         // Re-point every component token to blueprint palette.
         // The left-border accent and row separators stay danger-red (--bp-danger)
         // to preserve the "this is destructive" signal. The fill is the soft
         // danger tint so the panel reads as a warning surface, not an error state.
-        --bs-danger-zone-actions-border-color:    var(--bp-danger);
-        --bs-danger-zone-actions-bg:              var(--bp-danger-soft);
+        --bs-danger-zone-actions-border-color: var(--bp-danger);
+        --bs-danger-zone-actions-bg: var(--bp-danger-soft);
         // Separators step back to a faint hairline so rows breathe — the strong
         // left rail already anchors the danger signal.
         --bs-danger-zone-actions-separator-color: var(--bp-border-faint);
-        --bs-danger-zone-actions-title-color:     var(--bp-text);
-        --bs-danger-zone-actions-desc-color:      var(--bp-text-muted);
+        --bs-danger-zone-actions-title-color: var(--bp-text);
+        --bs-danger-zone-actions-desc-color: var(--bp-text-muted);
     }
 
     // ── Panel wrapper ─────────────────────────────────────────────────────────
 
     .tc-danger-zone {
-        border-color:      var(--bs-danger-zone-actions-border-color);
+        border-color: var(--bs-danger-zone-actions-border-color);
         border-left-color: var(--bs-danger-zone-actions-border-color);
-        background:        var(--bs-danger-zone-actions-bg);
-        box-shadow:        var(--tc-shadow-sm);
+        background: var(--bs-danger-zone-actions-bg);
+        box-shadow: var(--tc-shadow-sm);
     }
 
     // ── Row ──────────────────────────────────────────────────────────────────
@@ -53,29 +52,33 @@ tc-theme[name='blueprint'],
 
     .tc-danger-zone-btn {
         // Resting: danger-red outline + ink, transparent fill
-        --bs-btn-color:           var(--bp-danger);
-        --bs-btn-border-color:    var(--bp-danger);
-        --bs-btn-bg:              transparent;
+        --bs-btn-color: var(--bp-danger);
+        --bs-btn-border-color: var(--bp-danger);
+        --bs-btn-bg: transparent;
 
         // Hover / active: solid danger fill, white ink
-        --bs-btn-hover-color:        #fff;
-        --bs-btn-hover-bg:           var(--bp-danger);
+        --bs-btn-hover-color: #fff;
+        --bs-btn-hover-bg: var(--bp-danger);
         --bs-btn-hover-border-color: var(--bp-danger);
 
-        --bs-btn-active-color:        #fff;
-        --bs-btn-active-bg:           var(--bp-danger);
+        --bs-btn-active-color: #fff;
+        --bs-btn-active-bg: var(--bp-danger);
         --bs-btn-active-border-color: var(--bp-danger);
 
         // Focus ring
         --bs-btn-focus-shadow-rgb: 220, 38, 38; // matches --bp-danger #dc2626
 
         // Mono label — uppercase micro-label treatment for the button text
-        font-family:     var(--bp-mono);
-        font-size:       0.7rem;
-        text-transform:  uppercase;
-        letter-spacing:  0.08em;
+        font-family: var(--bp-mono);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
 
-        transition: background var(--bp-ease), border-color var(--bp-ease), color var(--bp-ease), box-shadow var(--bp-ease);
+        transition:
+            background var(--bp-ease),
+            border-color var(--bp-ease),
+            color var(--bp-ease),
+            box-shadow var(--bp-ease);
 
         &:hover:not(:disabled):not([disabled]) {
             box-shadow: var(--tc-shadow-hover);

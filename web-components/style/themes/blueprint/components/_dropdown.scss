@@ -69,7 +69,9 @@ tc-theme[name='blueprint'],
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.12em;
-            color: var(--bp-teal-fg); // teal on white clears AA; marks the label as a HUD/nav element
+            color: var(
+                --bp-teal-fg
+            ); // teal on white clears AA; marks the label as a HUD/nav element
         }
     }
 }

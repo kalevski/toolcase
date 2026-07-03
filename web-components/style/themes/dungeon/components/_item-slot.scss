@@ -33,23 +33,33 @@ tc-theme[name='dungeon'],
     // Per-rarity border + inner glow (glow scales with rarity).
     tc-item-slot[data-rarity='uncommon'] {
         --bs-item-slot-border-color: var(--fg-uncommon);
-        box-shadow: inset 0 0 12px rgba(95, 168, 74, 0.25), var(--fg-bevel-top);
+        box-shadow:
+            inset 0 0 12px rgba(95, 168, 74, 0.25),
+            var(--fg-bevel-top);
     }
     tc-item-slot[data-rarity='rare'] {
         --bs-item-slot-border-color: var(--fg-rare);
-        box-shadow: inset 0 0 14px rgba(74, 127, 207, 0.3), var(--fg-bevel-top);
+        box-shadow:
+            inset 0 0 14px rgba(74, 127, 207, 0.3),
+            var(--fg-bevel-top);
     }
     tc-item-slot[data-rarity='epic'] {
         --bs-item-slot-border-color: var(--fg-epic);
-        box-shadow: inset 0 0 16px rgba(164, 77, 208, 0.35), var(--fg-bevel-top);
+        box-shadow:
+            inset 0 0 16px rgba(164, 77, 208, 0.35),
+            var(--fg-bevel-top);
     }
     tc-item-slot[data-rarity='legendary'] {
         --bs-item-slot-border-color: var(--fg-legendary);
-        box-shadow: inset 0 0 18px rgba(232, 162, 58, 0.4), var(--fg-bevel-top);
+        box-shadow:
+            inset 0 0 18px rgba(232, 162, 58, 0.4),
+            var(--fg-bevel-top);
     }
     tc-item-slot[data-rarity='mythic'] {
         --bs-item-slot-border-color: var(--fg-mythic);
-        box-shadow: inset 0 0 18px rgba(224, 77, 106, 0.45), var(--fg-bevel-top);
+        box-shadow:
+            inset 0 0 18px rgba(224, 77, 106, 0.45),
+            var(--fg-bevel-top);
     }
 
     // Selected: gold-bright outline + glow halo, wins over rarity.
@@ -57,7 +67,9 @@ tc-theme[name='dungeon'],
         --bs-item-slot-border-color: var(--fg-gold-bright);
         outline: 2px solid var(--fg-gold-bright);
         outline-offset: 0;
-        box-shadow: 0 0 0 1px #000, 0 0 12px rgba(232, 200, 120, 0.5);
+        box-shadow:
+            0 0 0 1px #000,
+            0 0 12px rgba(232, 200, 120, 0.5);
     }
 
     .tc-item-slot__qty,

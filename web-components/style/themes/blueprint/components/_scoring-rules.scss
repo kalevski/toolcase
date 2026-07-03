@@ -2,24 +2,23 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-scoring-rules {
         // Row divider — route away from raw --tc-border (slate leak)
         --bs-scoring-rules-row-border-color: var(--bp-border-faint);
 
         // Typography
-        --bs-scoring-rules-title-color:  var(--bp-text);
-        --bs-scoring-rules-desc-color:   var(--bp-text-muted);
+        --bs-scoring-rules-title-color: var(--bp-text);
+        --bs-scoring-rules-desc-color: var(--bp-text-muted);
 
         // Points cell — teal-fg clears AA on white paper; mono font applied below
         --bs-scoring-rules-points-color: var(--bp-teal-fg);
 
         // Accent palette — replace slate/cyan literals with blueprint tokens
-        --bs-scoring-rules-accent-pink:   var(--bp-pink);          // primary brand
-        --bs-scoring-rules-accent-yellow: var(--bp-amber);         // amber replaces tc-warning slate
-        --bs-scoring-rules-accent-cyan:   var(--bp-teal);          // teal replaces tc-accent-fg cyan literal
-        --bs-scoring-rules-accent-green:  var(--bp-teal);          // success = teal in blueprint
-        --bs-scoring-rules-accent-red:    var(--bp-danger);        // real red, not pink
+        --bs-scoring-rules-accent-pink: var(--bp-pink); // primary brand
+        --bs-scoring-rules-accent-yellow: var(--bp-amber); // amber replaces tc-warning slate
+        --bs-scoring-rules-accent-cyan: var(--bp-teal); // teal replaces tc-accent-fg cyan literal
+        --bs-scoring-rules-accent-green: var(--bp-success); // success = teal in blueprint
+        --bs-scoring-rules-accent-red: var(--bp-danger); // real red, not pink
     }
 
     // Container: white raised paper, soft shadow — the list reads as a card surface

@@ -15,7 +15,12 @@ tc-theme[name='dungeon'],
 
         --bs-invite-toast-bar-bg: rgba(0, 0, 0, 0.6);
         --bs-invite-toast-bar-border: var(--fg-gold-deep);
-        --bs-invite-toast-bar-fill: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold) 60%, var(--fg-gold-shadow));
+        --bs-invite-toast-bar-fill: linear-gradient(
+            180deg,
+            var(--fg-gold-bright),
+            var(--fg-gold) 60%,
+            var(--fg-gold-shadow)
+        );
     }
 
     // Panel: radial wood fill + gilded bevel stack. Drop the slate left stripe
@@ -74,6 +79,11 @@ tc-theme[name='dungeon'],
     .tc-invite-toast__bar-fill {
         background:
             var(--fg-scanlines),
-            linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold) 60%, var(--fg-gold-shadow));
+            linear-gradient(
+                180deg,
+                var(--fg-gold-bright),
+                var(--fg-gold) 60%,
+                var(--fg-gold-shadow)
+            );
     }
 }

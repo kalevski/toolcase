@@ -33,7 +33,9 @@ tc-theme[name='dungeon'],
     .tc-hit-marker-glyph {
         font-family: var(--fg-display);
         color: var(--fg-blood-bright);
-        text-shadow: 0 0 6px var(--fg-blood-bright), 0 1px 2px #000;
+        text-shadow:
+            0 0 6px var(--fg-blood-bright),
+            0 1px 2px #000;
     }
 
     // Kill glyph — filter glow so the SVG Skull (stroke: currentColor) also glows.

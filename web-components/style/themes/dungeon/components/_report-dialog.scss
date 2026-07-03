@@ -6,7 +6,6 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // ── Token swap on the host element ────────────────────────────────────────
 
     tc-report-dialog {
@@ -17,7 +16,7 @@ tc-theme[name='dungeon'],
         --bs-report-dialog-backdrop-bg: var(--fg-ink);
 
         // Submit danger button → blood ramp (fallback was #dc2626 / hover #b91c1c)
-        --bs-report-dialog-btn-submit-bg:       var(--fg-blood);
+        --bs-report-dialog-btn-submit-bg: var(--fg-blood);
         --bs-report-dialog-btn-submit-hover-bg: var(--fg-blood-bright);
 
         // Textarea well → deep ink pit

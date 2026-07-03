@@ -94,7 +94,9 @@ tc-theme[name='blueprint'],
         font-weight: 600;
         letter-spacing: 0.05em;
         text-transform: uppercase;
-        transition: transform var(--bp-ease), box-shadow var(--bp-ease);
+        transition:
+            transform var(--bp-ease),
+            box-shadow var(--bp-ease);
 
         &:hover {
             transform: translateY(-2px);

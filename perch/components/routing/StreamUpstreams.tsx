@@ -1,10 +1,13 @@
 'use client'
 
 import { useCallback, useMemo, useState } from 'react'
+import type { AdvancedTableColumn } from '@toolcase/web-components'
 import type { StreamBalancer, StreamServer, StreamUpstream } from '@/server/domain/streams'
 import {
     RoutingListTable,
     SaveWarningsBanner,
+    cellMono,
+    cellMuted,
     saveErrorMessage,
     saveRouting,
     useResourceStates,
@@ -26,6 +29,26 @@ import { SelectField, SwitchField, TextField, type SelectOption } from '@/compon
 const BALANCERS: (StreamBalancer | '')[] = ['', 'least_conn', 'hash']
 const balancerLabel = (b?: StreamBalancer | '') => (b ? b : 'round_robin')
 const BALANCER_OPTIONS: SelectOption[] = BALANCERS.map((b) => ({ value: b, label: balancerLabel(b) }))
+
+// List columns (between the built-in Name column and the actions).
+const STREAM_UPSTREAM_COLUMNS: AdvancedTableColumn[] = [
+    { key: 'balancer', label: 'Balancer' },
+    { key: 'servers', label: 'Servers' },
+]
+
+/** Servers cell: count plus every backend with its weight/backup/down markers. */
+function serversCellHtml(servers: StreamServer[]): string {
+    const detail = servers
+        .map(
+            (s) =>
+                s.address +
+                (s.weight != null ? ` w${s.weight}` : '') +
+                (s.backup ? ' [backup]' : '') +
+                (s.down ? ' [down]' : ''),
+        )
+        .join(', ')
+    return `${cellMuted(`${servers.length} ·`)} ${cellMono(detail)}`
+}
 
 interface ServerDraft {
     address: string
@@ -226,7 +249,10 @@ export function StreamUpstreamsManager({
         () =>
             upstreams.map((u) => ({
                 name: u.name,
-                hint: `${balancerLabel(u.balancer)} · ${u.servers.length} server${u.servers.length === 1 ? '' : 's'} (${u.servers.map((s) => s.address).join(', ')})`,
+                cells: {
+                    balancer: cellMono(balancerLabel(u.balancer)),
+                    servers: serversCellHtml(u.servers),
+                },
                 stateChip: resourceStates.get(u.name)?.state,
                 stateReason: resourceStates.get(u.name)?.reason,
             })),
@@ -254,7 +280,13 @@ export function StreamUpstreamsManager({
                     {upstreams.length === 0 ? (
                         <tc-empty-state icon="server">No stream upstreams yet.</tc-empty-state>
                     ) : (
-                        <RoutingListTable items={items} busy={busy} onEdit={startEdit} onRemove={setPending} />
+                        <RoutingListTable
+                            columns={STREAM_UPSTREAM_COLUMNS}
+                            items={items}
+                            busy={busy}
+                            onEdit={startEdit}
+                            onRemove={setPending}
+                        />
                     )}
                 </div>
             </tc-section-card>

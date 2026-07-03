@@ -62,7 +62,7 @@ export interface ToolcaseIntrinsicElements {
     'tc-buff-icon': TcProps<{ 'color'?: string | number; 'glyph'?: string | number; 'kind'?: string | number; 'size'?: string | number; 'time'?: string | number }>
     'tc-build': TcProps<{ 'badge'?: string | number; 'badge-variant'?: string | number; 'date'?: string | number; 'duration'?: string | number; 'loading'?: boolean; 'name'?: string | number; 'size'?: string | number; 'status'?: string | number; onTcClick?: (e: CustomEvent) => void; onTcMenuSelect?: (e: CustomEvent) => void }>
     'tc-bundle-bar': TcProps<{ 'filled-segments'?: string | number; 'meta'?: string | number; 'name'?: string | number; 'segments'?: string | number }>
-    'tc-button': TcProps<{ 'disabled'?: boolean; 'href'?: string | number; 'loading'?: boolean; 'outline'?: boolean; 'size'?: string | number; 'skin'?: string | number; 'type'?: string | number; 'variant'?: string | number }>
+    'tc-button': TcProps<{ 'disabled'?: boolean; 'error'?: string | number; 'field'?: boolean; 'help'?: string | number; 'href'?: string | number; 'loading'?: boolean; 'outline'?: boolean; 'size'?: string | number; 'skin'?: string | number; 'state'?: string | number; 'type'?: string | number; 'variant'?: string | number }>
     'tc-button-group': TcProps<{ 'aria-label'?: string | number; 'size'?: string | number; 'vertical'?: boolean }>
     'tc-callout-quote': TcProps<{ 'attribution'?: string | number; 'quote'?: boolean; 'source'?: string | number; 'source-href'?: string | number }>
     'tc-card': TcProps<{ 'img'?: string | number; 'img-position'?: string | number; 'subtitle'?: string | number; 'title'?: string | number; 'variant'?: string | number }>
@@ -170,7 +170,7 @@ export interface ToolcaseIntrinsicElements {
     'tc-health-bar': TcProps<{ 'ghost'?: string | number; 'label'?: string | number; 'max'?: string | number; 'segments'?: string | number; 'show-text'?: boolean; 'value'?: string | number; 'variant'?: string | number }>
     'tc-heatmap': TcProps<{ 'cell-size'?: string | number; 'loading'?: boolean; 'subtitle'?: string | number; 'title'?: string | number; onTcCellHover?: (e: CustomEvent) => void }>
     'tc-helper-text': TcProps<{ 'class-name'?: string | number; 'icon'?: string | number; 'id'?: string | number; 'text'?: string | number; 'variant'?: string | number }>
-    'tc-hero': TcProps<{ 'background-pattern-src'?: string | number; 'description'?: string | number; 'eyebrow'?: string | number; 'title'?: string | number; 'title-as'?: string | number; onTcAction?: (e: CustomEvent) => void }>
+    'tc-hero': TcProps<{ 'backdrop'?: string | number; 'background-pattern-src'?: string | number; 'description'?: string | number; 'eyebrow'?: string | number; 'media-alt'?: string | number; 'media-caption'?: string | number; 'media-label'?: string | number; 'media-src'?: string | number; 'note'?: string | number; 'preview'?: boolean; 'title'?: string | number; 'title-as'?: string | number; onTcAction?: (e: CustomEvent) => void }>
     'tc-hero-stats-bar': TcProps<{ 'class-name'?: string | number }>
     'tc-hit-marker': TcProps<{ 'crit'?: boolean; 'duration'?: string | number; 'kill'?: boolean; 'show'?: boolean; 'size'?: string | number; onTcDone?: (e: CustomEvent) => void }>
     'tc-hotbar': TcProps<{ 'selected-id'?: string | number; 'slot-size'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
@@ -230,7 +230,7 @@ export interface ToolcaseIntrinsicElements {
     'tc-marquee': TcProps<{ 'direction'?: string | number; 'pause-on-hover'?: boolean; 'separator'?: string | number; 'speed'?: string | number }>
     'tc-matchmaking-screen': TcProps<{ 'elapsed'?: string | number; 'estimated'?: string | number; 'found-label'?: string | number; 'mode'?: string | number; 'region'?: string | number; 'state'?: string | number }>
     'tc-menu-item': TcProps<{ 'disabled'?: boolean; 'hotkey'?: string | number; 'icon'?: string | number; 'label'?: string | number; 'selected'?: boolean; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-metal-button': TcProps<{ 'disabled'?: boolean; 'href'?: string | number; 'loading'?: boolean; 'outline'?: boolean; 'size'?: string | number; 'skin'?: string | number; 'type'?: string | number; 'variant'?: string | number }>
+    'tc-metal-button': TcProps<{ 'disabled'?: boolean; 'error'?: string | number; 'field'?: boolean; 'help'?: string | number; 'href'?: string | number; 'loading'?: boolean; 'outline'?: boolean; 'size'?: string | number; 'skin'?: string | number; 'state'?: string | number; 'type'?: string | number; 'variant'?: string | number }>
     'tc-metric-card': TcProps<{ 'icon'?: string | number; 'loading'?: boolean; 'subtitle'?: string | number; 'title'?: string | number; 'trend-color'?: string | number; 'value'?: string | number }>
     'tc-metric-grid': TcProps<{ 'columns'?: string | number }>
     'tc-metric-tile': TcProps<{ 'hint'?: string | number; 'icon'?: string | number; 'label'?: string | number; 'unit'?: string | number; 'value'?: string | number }>
@@ -352,7 +352,7 @@ export interface ToolcaseIntrinsicElements {
     'tc-testimonial-carousel': TcProps<{ 'autoplay'?: boolean; 'interval'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-text': TcProps<{ 'as'?: string | number; 'size'?: string | number; 'variant'?: string | number }>
     'tc-textarea': TcProps<{ 'autocomplete'?: string | number; 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'inputmode'?: string | number; 'label'?: string | number; 'max'?: string | number; 'maxlength'?: string | number; 'min'?: string | number; 'minlength'?: string | number; 'name'?: string | number; 'pattern'?: string | number; 'placeholder'?: string | number; 'readonly'?: boolean; 'required'?: boolean; 'rows'?: string | number; 'size'?: string | number; 'state'?: string | number; 'step'?: string | number; 'value'?: string | number }>
-    'tc-theme': TcProps<{ 'name'?: string | number }>
+    'tc-theme': TcProps<{ 'name'?: string | number; 'variant'?: string | number }>
     'tc-tier-ladder': TcProps<{ 'current-tier-id'?: string | number; 'summary'?: string | number; 'title'?: string | number }>
     'tc-time-picker': TcProps<{ 'clearable'?: boolean; 'disabled'?: boolean; 'error'?: string | number; 'format'?: string | number; 'help'?: string | number; 'label'?: string | number; 'minute-step'?: string | number; 'name'?: string | number; 'placeholder'?: string | number; 'required'?: boolean; 'show-seconds'?: boolean; 'state'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-timeline': TcProps<{ 'connector'?: string | number; 'loading'?: boolean; 'loading-count'?: string | number; 'overlap'?: string | number; 'variant'?: string | number }>
@@ -367,7 +367,7 @@ export interface ToolcaseIntrinsicElements {
     'tc-tree-view': TcProps<{ 'checkbox-mode'?: boolean; onTcExpandChange?: (e: CustomEvent) => void; onTcSelect?: (e: CustomEvent) => void }>
     'tc-trend-indicator': TcProps<{ 'direction'?: string | number; 'size'?: string | number; 'value'?: string | number }>
     'tc-usage-summary-panel': TcProps<{ 'loading'?: boolean; 'loading-count'?: string | number; 'title'?: string | number }>
-    'tc-user-panel': TcProps<{ 'avatar-src'?: string | number; 'icon'?: string | number; 'icon-label'?: string | number; 'icon-highlighted'?: boolean; 'initials'?: string | number; 'loading'?: boolean; 'plan'?: string | number; 'username'?: string | number; onTcIconClick?: (e: CustomEvent) => void; onTcMenuClick?: (e: CustomEvent) => void }>
+    'tc-user-panel': TcProps<{ 'avatar-src'?: string | number; 'icon'?: string | number; 'icon-highlighted'?: boolean; 'icon-label'?: string | number; 'initials'?: string | number; 'loading'?: boolean; 'plan'?: string | number; 'username'?: string | number; onTcIconClick?: (e: CustomEvent) => void; onTcMenuClick?: (e: CustomEvent) => void }>
     'tc-version-label': TcProps<{ 'branch'?: string | number; 'build'?: string | number; 'version'?: string | number }>
     'tc-version-picker': TcProps<{ 'name'?: string | number; 'value'?: string | number; 'variant'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-vertical-item-list': TcProps<{ 'active-key'?: boolean; 'default-active-key'?: string | number; 'disabled'?: boolean; 'loading'?: boolean; 'loading-count'?: string | number; onTcSelect?: (e: CustomEvent) => void }>

@@ -52,6 +52,7 @@ export {
     renderFragment,
     fragmentFilename,
     tokenEnvVarName,
+    gitCredentialName,
     formatInterval,
     type FragmentOptions,
     type FragmentAuth,
@@ -290,6 +291,17 @@ export interface AcmeCredentialResult {
     status: 'created' | 'replaced'
     provider: string
     mechanism: string
+}
+
+/**
+ * `PUT /git-credentials/{name}` result — created vs replaced, plus the daemon-local
+ * `path` the stored token lives at (the value a site fragment's `auth.token_file`
+ * references). Secret material never crosses back over this wire.
+ */
+export interface GitCredentialResult {
+    status: 'created' | 'replaced'
+    name: string
+    path: string
 }
 
 /** Outcome of `reload()` — always the REST path now that the file-drop fallback is gone. */
@@ -921,6 +933,37 @@ export function nginxpilotClient(conn: RealmConnection) {
         slog('info', 'nginxpilot', 'deleted acme provider credentials via API', { provider })
     }
 
+    // ── Channel A: git source credentials over REST (private-repo clone tokens) ──────
+
+    /**
+     * Store (or replace) a private site's clone token — `PUT /git-credentials/{name}`.
+     * The daemon persists it as a daemon-owned 0600 file and returns the path a site
+     * fragment references via `auth.token_file`. The token is resolved at each fetch,
+     * so a replaced token takes effect on the next sync without a reload. The token is
+     * NEVER logged here and never appears inline in a fragment.
+     */
+    async function putGitCredential(name: string, token: string): Promise<GitCredentialResult> {
+        const res = await adminOk('PUT', `/git-credentials/${encodeURIComponent(name)}`, {
+            body: JSON.stringify({ token }),
+            headers: { 'Content-Type': 'application/json' },
+        })
+        slog('info', 'nginxpilot', 'stored git credential via API', { name })
+        return (await res.json()) as GitCredentialResult
+    }
+
+    /** Remove a stored clone token — `DELETE /git-credentials/{name}` (404 = already gone → success). */
+    async function deleteGitCredential(name: string): Promise<void> {
+        const res = await adminFetch('DELETE', `/git-credentials/${encodeURIComponent(name)}`)
+        if (!res.ok && res.status !== 404) {
+            const detail = await res.text().catch(() => '')
+            throw new NginxpilotError(
+                `nginxpilot DELETE /git-credentials/${name} failed (${res.status})${detail ? `: ${detail.trim()}` : ''}`,
+                res.status,
+            )
+        }
+        slog('info', 'nginxpilot', 'removed git credential via API', { name })
+    }
+
     /**
      * Reload nginxpilot via `POST /reload` (diff-based, the REST equivalent of SIGHUP).
      * Channel A writes already reload on nginxpilot's side, so after a write/remove this
@@ -976,6 +1019,8 @@ export function nginxpilotClient(conn: RealmConnection) {
         listAcmeCredentials,
         setAcmeCredentials,
         deleteAcmeCredentials,
+        putGitCredential,
+        deleteGitCredential,
         reload,
     }
 }

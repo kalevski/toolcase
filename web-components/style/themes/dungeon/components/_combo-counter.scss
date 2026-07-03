@@ -18,7 +18,11 @@ tc-theme[name='dungeon'],
 
         --bs-combo-counter-bar-track: rgba(0, 0, 0, 0.7);
         --bs-combo-counter-bar-border: var(--fg-gold-deep);
-        --bs-combo-counter-bar-fill: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold-deep));
+        --bs-combo-counter-bar-fill: linear-gradient(
+            180deg,
+            var(--fg-gold-bright),
+            var(--fg-gold-deep)
+        );
     }
 
     // Eyebrow reads as a wide-tracked display-caps micro-label.
@@ -31,7 +35,9 @@ tc-theme[name='dungeon'],
     .tc-combo-counter-value {
         font-family: var(--fg-mono);
         letter-spacing: 0.04em;
-        text-shadow: 0 1px 2px #000, 0 0 12px rgba(232, 200, 120, 0.4);
+        text-shadow:
+            0 1px 2px #000,
+            0 0 12px rgba(232, 200, 120, 0.4);
     }
 
     // Dark inset track frame; min-width matches gc-combo-counter reference so

@@ -45,9 +45,24 @@ export function tokenEnvVarName(siteId: string): string {
     return `PERCH_GH_TOKEN_${siteId.toUpperCase().replace(/-/g, '_')}`
 }
 
+/**
+ * The name a private site's clone token is stored under in its realm's
+ * git-credentials store (`PUT /git-credentials/{name}`). Per-site — deletion is
+ * tied to the site's own lifecycle, no cross-site refcounting. Site ids are
+ * already `[A-Za-z0-9_-]`, which nginxpilot's credential-name charset accepts.
+ */
+export function gitCredentialName(siteId: string): string {
+    assertSafeSiteId(siteId)
+    return `perch-${siteId}`
+}
+
 // ── fragment rendering (§4) ───────────────────────────────────────────────────
 
-/** Private-repo credential reference for the fragment `auth` block (§9, §16). */
+/**
+ * Private-repo credential reference for the fragment `auth` block (§9, §16).
+ * Exactly one of `tokenEnv` / `tokenFile` — mirroring nginxpilot's own
+ * exactly-one validation on `token_env` / `token_file`.
+ */
 export interface FragmentAuth {
     /**
      * Name of the env var nginxpilot reads the GitHub token from. NOTE: nginxpilot's
@@ -57,7 +72,15 @@ export interface FragmentAuth {
      * engine-correct key is `token_env`, emitted below. Build it with
      * `tokenEnvVarName(site.id)`.
      */
-    tokenEnv: string
+    tokenEnv?: string
+    /**
+     * Daemon-local path nginxpilot reads the GitHub token from (`token_file`) — the
+     * path returned by `PUT /git-credentials/{name}` on the site's own realm. The
+     * deploy service pushes the owner's token there before writing the fragment;
+     * nginxpilot resolves the file at each fetch, so a rotated token takes effect
+     * on the next sync without a reload.
+     */
+    tokenFile?: string
 }
 
 /**
@@ -137,11 +160,12 @@ export function renderFragment(site: Site, options: FragmentOptions): string {
     ]
     if (site.subdir) lines.push(`      subdir: ${scalar(site.subdir)}`)
     if (requireFile.length > 0) lines.push(`      require_file: ${flowSeq(requireFile)}`)
-    if (options.auth) {
+    if (options.auth && (options.auth.tokenEnv || options.auth.tokenFile)) {
         lines.push('      auth:')
         lines.push('        method: github-token')
-        // Engine-correct key for `github-token` is `token_env` (see FragmentAuth).
-        lines.push(`        token_env: ${scalar(options.auth.tokenEnv)}`)
+        // Engine-correct key for `github-token` is `token_env` / `token_file` (see FragmentAuth).
+        if (options.auth.tokenEnv) lines.push(`        token_env: ${scalar(options.auth.tokenEnv)}`)
+        else if (options.auth.tokenFile) lines.push(`        token_file: ${scalar(options.auth.tokenFile)}`)
     }
     if (exclude.length > 0) lines.push(`    exclude: ${flowSeq(exclude)}`)
 

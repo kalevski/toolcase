@@ -2,14 +2,12 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Track ────────────────────────────────────────────────────────────────
     // Replace the default --tc-border track with the blueprint hairline token.
     // The filled portion (moz only) and the thumb ring both use the pink primary
     // accent, consistent with the blueprint accent rotation (pink = primary action).
 
     .form-range {
-
         // Focus-visible: swap the hard slate rgba() literal for a violet-tinted ring
         // that matches the blueprint shadow vocabulary.
         &:focus-visible {

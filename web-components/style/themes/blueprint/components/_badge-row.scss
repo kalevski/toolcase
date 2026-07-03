@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Sizing vars (unchanged; inherited from base) ──────────────────────────
     // --bs-badge-row-padding-x / -y / -font-size stay as-is; we only restyle cosmetics.
 
@@ -33,7 +32,7 @@ tc-theme[name='blueprint'],
         border: 1px solid var(--bp-border);
         font-family: var(--bp-mono);
         font-weight: 700;
-        letter-spacing: 0.10em;
+        letter-spacing: 0.1em;
         text-transform: uppercase;
     }
 
@@ -73,14 +72,14 @@ tc-theme[name='blueprint'],
     // success → teal
     .tc-badge-row-item--success {
         .tc-badge-row-label {
-            background: var(--bp-teal-soft);
-            color: var(--bp-teal-fg);
-            border-color: var(--bp-teal-line);
+            background: var(--bp-success-soft);
+            color: var(--bp-success-fg);
+            border-color: var(--bp-success-line);
         }
         .tc-badge-row-value {
-            --bs-badge-row-color: var(--bp-teal-soft);
-            color: var(--bp-teal-fg);
-            border-color: var(--bp-teal-line);
+            --bs-badge-row-color: var(--bp-success-soft);
+            color: var(--bp-success-fg);
+            border-color: var(--bp-success-line);
         }
     }
 

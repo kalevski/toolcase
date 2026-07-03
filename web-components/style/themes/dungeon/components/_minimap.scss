@@ -77,7 +77,13 @@ tc-theme[name='dungeon'],
         height: 12px;
         z-index: 3;
         pointer-events: none;
-        background: linear-gradient(135deg, var(--fg-gold-bright), var(--fg-gold) 35%, var(--fg-gold-deep) 60%, #2a1c0e);
+        background: linear-gradient(
+            135deg,
+            var(--fg-gold-bright),
+            var(--fg-gold) 35%,
+            var(--fg-gold-deep) 60%,
+            #2a1c0e
+        );
         clip-path: polygon(0 0, 100% 0, 100% 35%, 65% 35%, 65% 100%, 0 100%);
         // Flip vertically for bottom-left.
         transform: scaleY(-1);
@@ -111,10 +117,18 @@ tc-theme[name='dungeon'],
         height: 12px;
         z-index: 3;
         pointer-events: none;
-        background: linear-gradient(135deg, var(--fg-gold-bright), var(--fg-gold) 35%, var(--fg-gold-deep) 60%, #2a1c0e);
+        background: linear-gradient(
+            135deg,
+            var(--fg-gold-bright),
+            var(--fg-gold) 35%,
+            var(--fg-gold-deep) 60%,
+            #2a1c0e
+        );
         clip-path: polygon(0 0, 100% 0, 100% 35%, 65% 35%, 65% 100%, 0 100%);
     }
-    tc-minimap::before { left: 0; }
+    tc-minimap::before {
+        left: 0;
+    }
     tc-minimap::after {
         right: 0;
         transform: scaleX(-1);
@@ -133,7 +147,13 @@ tc-theme[name='dungeon'],
         height: 12px;
         z-index: 3;
         pointer-events: none;
-        background: linear-gradient(135deg, var(--fg-gold-bright), var(--fg-gold) 35%, var(--fg-gold-deep) 60%, #2a1c0e);
+        background: linear-gradient(
+            135deg,
+            var(--fg-gold-bright),
+            var(--fg-gold) 35%,
+            var(--fg-gold-deep) 60%,
+            #2a1c0e
+        );
         clip-path: polygon(0 0, 100% 0, 100% 35%, 65% 35%, 65% 100%, 0 100%);
         // Flip both axes for bottom-right.
         transform: scale(-1, -1);

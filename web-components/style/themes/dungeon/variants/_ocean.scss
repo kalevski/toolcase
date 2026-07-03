@@ -1,0 +1,55 @@
+// Dungeon Ocean variant — abyssal blue primary, sea-glass cyan secondary.
+//
+// Swaps ONLY the primary (CTA / brand) and secondary accent families onto a
+// muted, antiqued ocean palette. Everything else — the ink / leather canvas,
+// parchment text ramp, gilded gold frames / bevels / rules, semantic status
+// colors, fonts, shadows and textures — stays identical to the base dungeon
+// foundation (which is why the --fg-gold* palette vars are NOT touched here).
+// Use with: <tc-theme name="dungeon" variant="ocean"> … </tc-theme>
+// (or any element with [data-tc-theme="dungeon"][data-tc-variant="ocean"]).
+
+@use './accent-roles' as roles;
+
+tc-theme[name='dungeon'][variant='ocean'],
+[data-tc-theme='dungeon'][data-tc-variant='ocean'] {
+    // ── Variant accent ladder (mirrors the base --fg-gold scale) ─────────────
+    --fg-ocean-primary: #648fcd; // ≈ --fg-gold (base fill)
+    --fg-ocean-primary-bright: #89afe5; // ≈ --fg-gold-bright (hover / link / focus)
+    --fg-ocean-primary-deep: #3b6095; // ≈ --fg-gold-deep (gradient dark stop)
+    --fg-ocean-secondary: #58b1c0; // secondary base (≈ --fg-copper slot)
+    --fg-ocean-secondary-bright: #7fcad6;
+
+    // Primary accent (CTA / brand). --tc-app-accent-contrast keeps the base
+    // ink-on-fill convention (var(--fg-ink)) — no override needed.
+    --tc-app-accent: var(--fg-ocean-primary);
+    --tc-app-accent-hover: var(--fg-ocean-primary-bright);
+    --tc-app-accent-gradient: linear-gradient(
+        135deg,
+        var(--fg-ocean-primary-bright),
+        var(--fg-ocean-primary-deep)
+    );
+
+    // Secondary accent
+    --tc-accent: var(--fg-ocean-secondary-bright);
+    --tc-accent-fg: var(--fg-ocean-secondary);
+    --tc-accent-soft: rgba(88, 177, 192, 0.16);
+    --tc-accent-hex: #58b1c0;
+
+    --tc-focus-ring: 0 0 0 2px var(--fg-ocean-primary-bright);
+
+    // ── Bootstrap-compatible contract (--bs-*) ───────────────────────────────
+    --bs-primary: var(--fg-ocean-primary);
+    --bs-primary-rgb: 100, 143, 205;
+    --bs-secondary: var(--fg-ocean-secondary);
+    --bs-secondary-rgb: 88, 177, 192;
+
+    --bs-link-color: var(--fg-ocean-primary-bright);
+    --bs-link-hover-color: var(--fg-ocean-primary);
+
+    --bs-focus-ring-color: rgba(137, 175, 229, 0.4);
+
+    // ── Hardwired accent-role sweep (see _accent-roles.scss) ─────────────────
+    // Component partials pin gold onto element-scoped --bs-* props that beat
+    // the inherited tokens above; re-target the accent-role subset.
+    @include roles.accent-roles(#648fcd, #89afe5, #3b6095, #58b1c0, #7fcad6);
+}

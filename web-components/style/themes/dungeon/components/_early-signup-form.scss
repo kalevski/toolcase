@@ -6,19 +6,22 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // ── Host-level token swap (light / default variant) ───────────────────────
 
     tc-early-signup-form {
         --bs-early-signup-form-bg: var(--fg-panel-bg);
         --bs-early-signup-form-border: 1px solid var(--fg-gold-deep);
         // Submit: replace the slate-tailed gradient with a pure gold gradient.
-        --bs-early-signup-form-submit-bg: linear-gradient(135deg, var(--fg-gold-bright), var(--fg-gold-deep));
+        --bs-early-signup-form-submit-bg: linear-gradient(
+            135deg,
+            var(--fg-gold-bright),
+            var(--fg-gold-deep)
+        );
         --bs-early-signup-form-submit-color: var(--fg-ink);
         --bs-early-signup-form-submit-border: var(--fg-gold-deep);
         --bs-early-signup-form-input-bg: var(--fg-ink-2);
         // Corner accent repointed to a whisper-gold tint.
-        --bs-early-signup-form-corner: rgba(201, 169, 97, 0.10);
+        --bs-early-signup-form-corner: rgba(201, 169, 97, 0.1);
     }
 
     // ── Dark variant: white literals → parchment/gold ─────────────────────────
@@ -37,10 +40,14 @@ tc-theme[name='dungeon'],
         --bs-early-signup-form-input-color: var(--fg-parch);
         --bs-early-signup-form-input-border: var(--fg-gold-deep);
         --bs-early-signup-form-input-focus-border: var(--fg-gold);
-        --bs-early-signup-form-input-focus-ring: 0 0 0 0.2rem rgba(201, 169, 97, 0.20);
+        --bs-early-signup-form-input-focus-ring: 0 0 0 0.2rem rgba(201, 169, 97, 0.2);
         --bs-early-signup-form-input-placeholder-color: var(--fg-parch-dim);
         --bs-early-signup-form-field-label-color: var(--fg-parch-dim);
-        --bs-early-signup-form-submit-bg: linear-gradient(135deg, var(--fg-gold-bright), var(--fg-gold-deep));
+        --bs-early-signup-form-submit-bg: linear-gradient(
+            135deg,
+            var(--fg-gold-bright),
+            var(--fg-gold-deep)
+        );
         --bs-early-signup-form-submit-color: var(--fg-ink);
         --bs-early-signup-form-submit-border: var(--fg-gold-deep);
         --bs-early-signup-form-benefit-divider: rgba(201, 169, 97, 0.15);

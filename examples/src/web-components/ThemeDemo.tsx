@@ -35,7 +35,12 @@ const Cluster: React.FC = () => (
     </div>
 )
 
+const VARIANTS = ['ocean', 'forest', 'ember', 'royal'] as const
+const VARIANT_THEMES = ['default', 'dungeon', 'aurora', 'sunshine', 'neon', 'blueprint'] as const
+
 const ThemeDemo: React.FC = () => {
+    const [variantTheme, setVariantTheme] =
+        React.useState<(typeof VARIANT_THEMES)[number]>('blueprint')
     return (
         <div className="py-4">
             <div className="container">
@@ -53,8 +58,8 @@ const ThemeDemo: React.FC = () => {
                         <div className="d-flex flex-column gap-4 mt-4">
                             <tc-section-card title="Ambient (default) theme — no wrapper">
                                 <p className="text-muted small mb-3">
-                                    The default toolcase tokens apply globally at <code>:root</code>,
-                                    so components are themed out of the box with no{' '}
+                                    The default toolcase tokens apply globally at <code>:root</code>
+                                    , so components are themed out of the box with no{' '}
                                     <code>tc-theme</code> wrapper.
                                 </p>
                                 <Cluster />
@@ -111,8 +116,9 @@ const ThemeDemo: React.FC = () => {
                                 <p className="text-muted small mb-3">
                                     The warm <code>sunshine</code> skin — a citrus-boutique palette
                                     (cream canvas, olive-green ink, bright lemon accent) ported from
-                                    the nekadnesto.mk storefront — re-skins the same subtree. (Display
-                                    fonts are not bundled — they degrade to system sans-serif.)
+                                    the nekadnesto.mk storefront — re-skins the same subtree.
+                                    (Display fonts are not bundled — they degrade to system
+                                    sans-serif.)
                                 </p>
                                 {/* @ts-ignore */}
                                 <tc-theme name="sunshine">
@@ -122,16 +128,70 @@ const ThemeDemo: React.FC = () => {
 
                             <tc-section-card title='Named theme — name="neon"'>
                                 <p className="text-muted small mb-3">
-                                    The dark <code>neon</code> skin — a synthwave / cyberpunk palette
-                                    (deep navy-purple void, dual hot-magenta + electric-cyan accents,
-                                    glowing outlines) ported from the Neon Drift landing page —
-                                    re-skins the same subtree. (Display fonts are not bundled — they
-                                    degrade to system sans-serif.)
+                                    The dark <code>neon</code> skin — a synthwave / cyberpunk
+                                    palette (deep navy-purple void, dual hot-magenta + electric-cyan
+                                    accents, glowing outlines) ported from the Neon Drift landing
+                                    page — re-skins the same subtree. (Display fonts are not bundled
+                                    — they degrade to system sans-serif.)
                                 </p>
                                 {/* @ts-ignore */}
                                 <tc-theme name="neon">
                                     <Cluster />
                                 </tc-theme>
+                            </tc-section-card>
+
+                            <tc-section-card title='Named theme — name="blueprint"'>
+                                <p className="text-muted small mb-3">
+                                    The light <code>blueprint</code> skin — lavender paper, a faint
+                                    violet grid, four arcade accents (pink · teal · violet · amber)
+                                    and, uniquely, rounded corners.
+                                </p>
+                                {/* @ts-ignore */}
+                                <tc-theme name="blueprint">
+                                    <Cluster />
+                                </tc-theme>
+                            </tc-section-card>
+
+                            <tc-section-card title="Theme variants — name + variant">
+                                <p className="text-muted small mb-3">
+                                    Every bundled theme ships four accent variants selected with the{' '}
+                                    <code>variant</code> attribute:{' '}
+                                    <code>&lt;tc-theme name="blueprint" variant="ocean"&gt;</code>.
+                                    A variant swaps only the primary and secondary accent colours —
+                                    canvas, surfaces, text, status colours and structure all stay
+                                    the base theme's. The four variants are <code>ocean</code> (blue
+                                    / cyan), <code>forest</code> (green / lime), <code>ember</code>{' '}
+                                    (orange / gold) and <code>royal</code> (violet / magenta).
+                                </p>
+                                <div className="d-flex flex-wrap gap-2 mb-3">
+                                    {VARIANT_THEMES.map((t) => (
+                                        <tc-button
+                                            key={t}
+                                            variant={t === variantTheme ? 'primary' : 'secondary'}
+                                            // @ts-ignore
+                                            outline={t !== variantTheme}
+                                            onClick={() => setVariantTheme(t)}
+                                        >
+                                            {t}
+                                        </tc-button>
+                                    ))}
+                                </div>
+                                <div className="d-flex flex-column gap-3">
+                                    {VARIANTS.map((v) => (
+                                        <div key={`${variantTheme}-${v}`}>
+                                            <div className="mb-2">
+                                                <code>
+                                                    name="{variantTheme}" variant="{v}"
+                                                </code>
+                                            </div>
+                                            {/* @ts-ignore */}
+                                            <tc-theme name={variantTheme} variant={v}>
+                                                <Cluster />
+                                                {/* @ts-ignore */}
+                                            </tc-theme>
+                                        </div>
+                                    ))}
+                                </div>
                             </tc-section-card>
                         </div>
                     </div>
