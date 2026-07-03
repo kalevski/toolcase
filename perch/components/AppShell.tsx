@@ -29,17 +29,40 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
     // section is appended for `maintainer` and above; the owner-only Admin section
     // (§6, §13) only for the owner. Both gates mirror the server `authorize(...)`.
     const sections = useMemo<SideNavSection[]>(() => {
+        const rank = ROLE_RANK[me.role]
+        // Resources: everything a user operates on. Static Sites for everyone;
+        // Instances (Config subsystem, move_wharf_to_perch.md §10) and Databases
+        // (perch_database_management.md §9) join for maintainer+ — the same gate
+        // their backing /api routes enforce.
         const main: SideNavSection = {
             key: 'main',
-            title: branding.appName,
+            title: 'Resources',
             items: [
                 {
                     key: 'sites',
-                    label: 'Sites',
+                    label: 'Static Sites',
                     icon: 'layout-dashboard',
                     href: '/',
                     active: pathname === '/',
                 },
+                ...(rank >= ROLE_RANK.maintainer
+                    ? [
+                          {
+                              key: 'instances',
+                              label: 'Variables',
+                              icon: 'server',
+                              href: '/instances',
+                              active: pathname.startsWith('/instances'),
+                          },
+                          {
+                              key: 'db-servers',
+                              label: 'Databases',
+                              icon: 'database',
+                              href: '/databases',
+                              active: pathname.startsWith('/databases'),
+                          },
+                      ]
+                    : []),
             ],
         }
         // Every routing area is its own sidebar entry (like the Admin section) —
@@ -70,12 +93,11 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
                 active: pathname === tab.href || pathname.startsWith(`${tab.href}/`),
             })),
         }
-        const rank = ROLE_RANK[me.role]
         const out: SideNavSection[] = [main]
         if (rank >= ROLE_RANK.maintainer) out.push(routing)
         if (me.role === 'owner') out.push(admin)
         return out
-    }, [pathname, me.role, branding.appName])
+    }, [pathname, me.role])
 
     // Intercept the side-nav anchor click so navigation stays a client-side
     // router push instead of a full page load. preventDefault works because the

@@ -421,3 +421,202 @@ export interface AuditEntry {
     /** JSON snapshot of the written object (B3), secrets stripped at the call site; null when absent. */
     meta: string | null
 }
+
+// ── Config subsystem (move_wharf_to_perch.md) ────────────────────────────────
+//
+// Flat, tag-organized model: two global pools (variables, secrets) plus a flat
+// list of instances. No projects/environments, no override cascade, no
+// interpolation — every env var is a literal or a single reference. See
+// move_wharf_to_perch.md §2, §3.
+
+/** A plain-text, app-wide key/value pair (`global_var` row). Owner-managed. */
+export interface GlobalVar {
+    id: string
+    key: string
+    value: string
+    description?: string
+    createdAt: string
+    updatedAt: string
+}
+
+/** Secret metadata (keys-only surface, `secret` row minus `value_enc`). The
+ *  plaintext value never appears on this type — only the audited reveal
+ *  endpoint / the instance fetch API serve it. */
+export interface SecretMeta {
+    id: string
+    key: string
+    description?: string
+    createdBy: number
+    createdAt: string
+    updatedAt: string
+}
+
+export type SecretGenKind = 'password' | 'token' | 'hex' | 'base64'
+
+/** A flat instance (`instance` row) — no project/environment tiers; tags are
+ *  the only grouping mechanism. */
+export interface Instance {
+    id: string
+    name: string
+    description?: string
+    tags: string[]
+    /** True iff a fetch key has been minted (key_hash present); the hash itself never leaves the server. */
+    hasKey: boolean
+    keySetAt?: string
+    keyExpiresAt?: string
+    /** Last successful fetch-API read (incl. 304); the applied-as-of watermark. */
+    lastFetchAt?: string
+    createdAt: string
+    updatedAt: string
+}
+
+/** How one env var's value is sourced — exactly one per row (`env_var` CHECK). */
+export type EnvVarSource = 'literal' | 'global' | 'secret'
+
+/** One env var row on an instance (`env_var`). */
+export interface EnvVar {
+    id: string
+    instanceId: string
+    key: string
+    source: EnvVarSource
+    /** Literal text (source='literal' only). */
+    value?: string
+    /** Referenced global variable (source='global' only). */
+    globalVarId?: string
+    /** The referenced global variable's key, for display (joined on read). */
+    globalVarKey?: string
+    /** Referenced secret (source='secret' only). */
+    secretId?: string
+    /** The referenced secret's key, for display (joined on read). */
+    secretKey?: string
+    description?: string
+    createdAt: string
+    updatedAt: string
+}
+
+/** A boolean-only feature flag defined directly on an instance (`feature_flag`). */
+export interface FeatureFlag {
+    id: string
+    instanceId: string
+    key: string
+    enabled: boolean
+    description?: string
+    createdAt: string
+    updatedAt: string
+}
+
+/** One resolved key in an instance's config (move_wharf_to_perch.md §4). */
+export interface ResolvedEnvEntry {
+    key: string
+    /** Resolved value, or the masked placeholder `<hidden:KEY>` when unauthorized. */
+    value: string
+    source: EnvVarSource
+    masked: boolean
+    /** True when this row (or its reference) changed after the instance's last_fetch_at. */
+    pending: boolean
+}
+
+/** Full resolver output for an instance (move_wharf_to_perch.md §4). */
+export interface ResolvedConfig {
+    env: ResolvedEnvEntry[]
+    /** Keys whose row/reference changed after the instance's last_fetch_at. */
+    pending: string[]
+}
+
+/** One instance referencing a global var/secret that's about to be deleted
+ *  (the RESTRICT-delete 409 payload, move_wharf_to_perch.md §3). */
+export interface ReferencingInstance {
+    id: string
+    name: string
+}
+
+/** An instance plus the list view's derived "has un-applied changes" flag
+ *  (`GET /api/instances` response row, move_wharf_to_perch.md §4, §10). */
+export interface InstanceListItem extends Instance {
+    pending: boolean
+}
+
+// ── Database management (perch_database_management.md) ───────────────────────
+//
+// The owner registers database servers (like realms: endpoint + encrypted admin
+// credential); maintainers manage the databases, users, and user↔database access
+// on them. Perch mirrors NOTHING — the server's catalogs are the source of truth,
+// so every Db* shape below except `DbServer` is a live read, never a stored row.
+
+/** Supported database engines (§3). MariaDB speaks the mysql protocol. */
+export type DbServerKind = 'postgres' | 'mysql'
+
+export const DB_SERVER_KINDS: readonly DbServerKind[] = ['postgres', 'mysql']
+
+export function isDbServerKind(value: unknown): value is DbServerKind {
+    return value === 'postgres' || value === 'mysql'
+}
+
+/** Registry transport policy: `require` verifies against the system CAs (§10). */
+export type DbServerTls = 'off' | 'require'
+
+export function isDbServerTls(value: unknown): value is DbServerTls {
+    return value === 'off' || value === 'require'
+}
+
+/** Default engine ports, used by the registry form and create-time fallback. */
+export const DB_SERVER_DEFAULT_PORT: Record<DbServerKind, number> = {
+    postgres: 5432,
+    mysql: 3306,
+}
+
+/** Registry row as the client sees it — the admin credential NEVER appears here
+ *  (only on the server, decrypted inside the services; §10). */
+export interface DbServer {
+    id: string
+    name: string
+    kind: DbServerKind
+    host: string
+    port: number
+    tls: DbServerTls
+    adminUser: string
+    /** Health snapshot from the last probe/operation. */
+    lastOkAt?: string
+    lastError?: string
+    createdAt: string
+    updatedAt: string
+}
+
+/** One live database on a server (read from the catalog, never stored). */
+export interface DbDatabase {
+    name: string
+    /** Owning role (postgres); null on mysql (no db-owner concept). */
+    owner: string | null
+    /** Approximate on-disk size in bytes when the engine reports one. */
+    sizeBytes: number | null
+}
+
+/** One live login-capable user/role on a server. */
+export interface DbUser {
+    name: string
+    /** mysql account host part ('%' by default); null for postgres. */
+    host: string | null
+    superuser: boolean
+    /** True for the registry's own admin account — locked from management (§10). */
+    isAdminAccount: boolean
+}
+
+/** Simplified per-user × per-database access levels (§3), lowest first. */
+export type DbAccessLevel = 'none' | 'read' | 'readwrite' | 'owner'
+
+export const DB_ACCESS_LEVELS: readonly DbAccessLevel[] = ['none', 'read', 'readwrite', 'owner']
+
+export function isDbAccessLevel(value: unknown): value is DbAccessLevel {
+    return (
+        value === 'none' || value === 'read' || value === 'readwrite' || value === 'owner'
+    )
+}
+
+/** One cell of the access matrix: a user's classified level on a database.
+ *  `custom` = a live grant set that matches no known level — perch shows it but
+ *  never overwrites it unless a level is explicitly set (§3). */
+export interface DbGrant {
+    user: string
+    database: string
+    level: DbAccessLevel | 'custom'
+}

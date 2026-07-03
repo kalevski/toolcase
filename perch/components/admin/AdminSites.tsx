@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { AdvancedTableColumn } from '@toolcase/web-components'
 import { useTc, escapeHtml } from '@/lib/tc'
 import type { AdminUserRow, Site } from '@/server/domain/types'
+import { iconBtnHtml } from '@/lib/action-icons'
 import { AdminPage, json, useOwnerData } from './shared'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 
@@ -73,7 +74,12 @@ function sitesRowsHtml(sites: Site[], ownerById: Map<number, string>): string {
             const action =
                 s.status === 'suspended'
                     ? `<span class="perch-admin-suspended">Suspended</span>`
-                    : `<button type="button" class="perch-admin-suspend-btn" data-suspend-id="${escapeHtml(s.id)}" data-suspend-host="${escapeHtml(s.hostname)}">Suspend</button>`
+                    : iconBtnHtml({
+                          icon: 'suspend',
+                          label: `Suspend ${s.hostname}`,
+                          danger: true,
+                          data: { 'suspend-id': s.id, 'suspend-host': s.hostname },
+                      })
             return (
                 `<tr>` +
                 `<td>${escapeHtml(s.hostname)}</td>` +

@@ -42,7 +42,7 @@ export function CommandPalette() {
             list.push(
                 { id: 'admin-sites', label: 'Admin · Sites', group: 'Admin', icon: 'layout-dashboard', href: '/admin/sites' },
                 { id: 'admin-users', label: 'Admin · Users', group: 'Admin', icon: 'users', href: '/admin/users' },
-                { id: 'admin-realms', label: 'Admin · Realms', group: 'Admin', icon: 'server', href: '/admin/realms' },
+                { id: 'admin-realms', label: 'Admin · NGINX Servers', group: 'Admin', icon: 'server', href: '/admin/realms' },
                 { id: 'admin-domains', label: 'Admin · Domains', group: 'Admin', icon: 'globe', href: '/admin/domains' },
                 { id: 'admin-certificates', label: 'Admin · Certificates', group: 'Admin', icon: 'shield-check', href: '/admin/certificates' },
                 { id: 'admin-settings', label: 'Admin · Settings', group: 'Admin', icon: 'settings', href: '/admin/settings' },

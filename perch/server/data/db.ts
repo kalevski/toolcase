@@ -336,6 +336,109 @@ const MIGRATIONS: string[] = [
     );
     ALTER TABLE site ADD COLUMN repo_private INTEGER NOT NULL DEFAULT 0;
     `,
+    // v15 — the Config subsystem (move_wharf_to_perch.md §3): wharf's configuration
+    // management, redesigned as a flat, tag-organized model. Two global pools (plain
+    // variables, encrypted secrets) plus a flat list of instances — no
+    // projects/environments, no override cascade, no interpolation. Ships as one
+    // migration (all six tables land together; partial rollout has no value).
+    // Cascade rules: deleting an instance drops its tags/vars/flags; deleting a
+    // referenced global var/secret is blocked (ON DELETE RESTRICT) so a fetch never
+    // silently loses a value.
+    `
+    CREATE TABLE global_var (
+        id          TEXT PRIMARY KEY,
+        key         TEXT NOT NULL UNIQUE,
+        value       TEXT NOT NULL,             -- plaintext by design; secrets go in the secret table
+        description TEXT,
+        created_at  TEXT NOT NULL,
+        updated_at  TEXT NOT NULL
+    );
+
+    CREATE TABLE secret (
+        id          TEXT PRIMARY KEY,
+        key         TEXT NOT NULL UNIQUE,
+        value_enc   TEXT NOT NULL,             -- AES-256-GCM via infrastructure/cipher.ts
+        description TEXT,
+        created_by  INTEGER NOT NULL,          -- app_user.github_id
+        created_at  TEXT NOT NULL,
+        updated_at  TEXT NOT NULL
+    );
+
+    CREATE TABLE instance (
+        id             TEXT PRIMARY KEY,
+        name           TEXT NOT NULL UNIQUE,
+        description    TEXT,
+        key_hash       TEXT,                   -- sha256 of fetch secret; NULL until minted
+        key_set_at     TEXT,
+        key_expires_at TEXT,
+        last_fetch_at  TEXT,                   -- applied-as-of watermark (incl. 304s)
+        created_at     TEXT NOT NULL,
+        updated_at     TEXT NOT NULL
+    );
+
+    CREATE TABLE instance_tag (
+        instance_id TEXT NOT NULL REFERENCES instance(id) ON DELETE CASCADE,
+        tag         TEXT NOT NULL,
+        PRIMARY KEY (instance_id, tag)
+    );
+    CREATE INDEX idx_instance_tag_tag ON instance_tag(tag);
+
+    CREATE TABLE env_var (
+        id            TEXT PRIMARY KEY,
+        instance_id   TEXT NOT NULL REFERENCES instance(id) ON DELETE CASCADE,
+        key           TEXT NOT NULL,
+        source        TEXT NOT NULL,           -- 'literal' | 'global' | 'secret'
+        value         TEXT,                    -- literal text (source='literal')
+        global_var_id TEXT REFERENCES global_var(id) ON DELETE RESTRICT,
+        secret_id     TEXT REFERENCES secret(id)     ON DELETE RESTRICT,
+        description   TEXT,
+        created_at    TEXT NOT NULL,
+        updated_at    TEXT NOT NULL,
+        UNIQUE(instance_id, key),
+        CHECK (
+            (source = 'literal' AND value IS NOT NULL AND global_var_id IS NULL AND secret_id IS NULL) OR
+            (source = 'global'  AND global_var_id IS NOT NULL AND value IS NULL AND secret_id IS NULL) OR
+            (source = 'secret'  AND secret_id IS NOT NULL AND value IS NULL AND global_var_id IS NULL)
+        )
+    );
+    CREATE INDEX idx_env_var_instance ON env_var(instance_id);
+    CREATE INDEX idx_env_var_global   ON env_var(global_var_id);
+    CREATE INDEX idx_env_var_secret   ON env_var(secret_id);
+
+    CREATE TABLE feature_flag (
+        id          TEXT PRIMARY KEY,
+        instance_id TEXT NOT NULL REFERENCES instance(id) ON DELETE CASCADE,
+        key         TEXT NOT NULL,
+        enabled     INTEGER NOT NULL DEFAULT 0,
+        description TEXT,
+        created_at  TEXT NOT NULL,
+        updated_at  TEXT NOT NULL,
+        UNIQUE(instance_id, key)
+    );
+    CREATE INDEX idx_feature_flag_instance ON feature_flag(instance_id);
+    `,
+    // v16 — database-server registry (perch_database_management.md §4). One row per
+    // owner-connected database server. `admin_password_enc` is AES-256-GCM ciphertext
+    // via infrastructure/cipher.ts (same keyring as realm tokens / secrets); the
+    // plaintext never leaves the server. Databases/users/grants are NOT mirrored —
+    // the server's own catalogs are the source of truth (§3), so this is the only
+    // table the subsystem persists.
+    `
+    CREATE TABLE db_server (
+        id                  TEXT PRIMARY KEY,          -- dbsrv_<11 base36>
+        name                TEXT NOT NULL UNIQUE,      -- human label ("prod-pg", "shared-mysql")
+        kind                TEXT NOT NULL,             -- postgres | mysql
+        host                TEXT NOT NULL,
+        port                INTEGER NOT NULL,
+        tls                 TEXT NOT NULL DEFAULT 'off', -- off | require
+        admin_user          TEXT NOT NULL,
+        admin_password_enc  TEXT NOT NULL,             -- AES-256-GCM via cipher.ts
+        last_ok_at          TEXT,                      -- last successful probe/operation
+        last_error          TEXT,                      -- last connection/DDL failure (message only)
+        created_at          TEXT NOT NULL,
+        updated_at          TEXT NOT NULL
+    );
+    `,
 ]
 
 function migrate(db: DatabaseSync): void {

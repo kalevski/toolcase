@@ -14,6 +14,7 @@ import {
     type UserLimitOverride,
 } from '@/server/domain/types'
 import { formatBytes } from '@/server/domain/site-dashboard'
+import { IconBtn } from '@/lib/action-icons'
 import { AdminPage, json, useOwnerData } from './shared'
 import { useToast } from '@/components/Toast'
 import { CheckField, SelectField, TextField, type SelectOption } from '@/components/fields'
@@ -61,57 +62,6 @@ const fmtBytes = (n: number) => (isFinite(n) ? formatBytes(n) : '∞')
 // buttons. The inline LimitsEditor / RealmsEditor panels stay React, rendered
 // BELOW the table keyed off the selected user, so no React subtree is captured.
 
-interface UserTableRow extends Record<string, unknown> {
-    row: AdminUserRow
-}
-
-function badge(variant: string, text: string): string {
-    return `<span class="badge text-bg-${variant}">${escapeHtml(text)}</span>`
-}
-
-function userIdentityHtml(r: AdminUserRow): string {
-    const badges: string[] = [badge(LEVEL_VARIANT[r.level], ACCOUNT_LEVEL_LABEL[r.level])]
-    if (r.customLimits) badges.push(badge('warning', 'custom limits'))
-    const metaPair = (label: string, value: string) =>
-        `<span><dt>${escapeHtml(label)}</dt> <dd>${escapeHtml(value)}</dd></span>`
-    const meta =
-        `<dl class="perch-admin-user-meta">` +
-        metaPair('Sites', `${r.usage.siteCount} / ${fmtCount(r.limits.maxSites)}`) +
-        metaPair('Storage', `${formatBytes(r.usage.totalBytes)} / ${fmtBytes(r.limits.maxBytesTotal)}`) +
-        metaPair('Per-site cap', fmtBytes(r.limits.maxBytesPerSite)) +
-        metaPair('Custom domains', fmtCount(r.limits.customDomains)) +
-        metaPair('Poll floor', `${r.limits.minIntervalSec}s`) +
-        metaPair('Private repos', r.limits.privateRepos ? 'yes' : 'no') +
-        `</dl>`
-    return (
-        `<div class="perch-admin-user-id">` +
-        `<span class="perch-admin-user-name">${escapeHtml(r.user.name || r.user.login)}</span> ` +
-        `<span class="perch-admin-hint">@${escapeHtml(r.user.login)}</span>` +
-        `<span class="perch-admin-badges">${badges.join('')}</span>` +
-        `</div>` +
-        meta
-    )
-}
-
-function roleSelectHtml(r: AdminUserRow, busy: boolean): string {
-    const current = ROLES.includes(r.user.role) ? r.user.role : 'standard'
-    const opts = ROLES.map(
-        (role) => `<option value="${role}"${role === current ? ' selected' : ''}>${escapeHtml(role)}</option>`,
-    ).join('')
-    return (
-        `<select class="form-select form-select-sm perch-admin-role-select" data-action="role" data-id="${r.user.githubId}"` +
-        ` aria-label="Role for ${escapeHtml(r.user.login)}"${busy ? ' disabled' : ''}>${opts}</select>`
-    )
-}
-
-function userActionsHtml(r: AdminUserRow, multiRealm: boolean, editingId: number | null, editingRealmsId: number | null): string {
-    const linkBtn = (action: string, label: string) =>
-        `<button type="button" class="perch-admin-linkbtn" data-action="${action}" data-id="${r.user.githubId}">${escapeHtml(label)}</button>`
-    const parts = [linkBtn('limits', editingId === r.user.githubId ? 'Close' : 'Limits')]
-    if (multiRealm) parts.push(linkBtn('realms', editingRealmsId === r.user.githubId ? 'Close' : 'Realms'))
-    return `<span class="perch-admin-user-actions">${parts.join('')}</span>`
-}
-
 const USER_COLUMNS: AdvancedTableColumn[] = [
     { key: 'user', label: 'User' },
     { key: 'role', label: 'Role', width: '11rem' },
@@ -143,7 +93,7 @@ export function AdminUsers() {
     return (
         <AdminPage
             title="Users"
-            subtitle="Everyone with a Perch account — their level, usage, and limits. Grant roles, realms, or override quotas here. Owner-only."
+            subtitle="Everyone with a Perch account — their level, usage, and limits. Grant roles, NGINX servers, or override quotas here. Owner-only."
             icon="users"
             iconColor="violet"
             state={state}
@@ -225,7 +175,6 @@ function UsersRoster({
     const setTableColumns = useCallback((el: any) => {
         if (el) el.columns = USER_COLUMNS
     }, [])
-    const tableRows = useMemo<UserTableRow[]>(() => filtered.map((row) => ({ row })), [filtered])
     const editingRow = editingId != null ? users.find((u) => u.user.githubId === editingId) : undefined
     const editingRealmsRow =
         editingRealmsId != null ? users.find((u) => u.user.githubId === editingRealmsId) : undefined
@@ -320,27 +269,31 @@ function UsersRoster({
                                 </td>
                                 <td className="text-end">
                                     <span className="perch-admin-user-actions">
-                                        <button
-                                            type="button"
-                                            className="perch-admin-linkbtn"
+                                        <IconBtn
+                                            icon={editingId === row.user.githubId ? 'close' : 'limits'}
+                                            label={
+                                                editingId === row.user.githubId
+                                                    ? `Close limits editor for ${row.user.login}`
+                                                    : `Edit limits for ${row.user.login}`
+                                            }
                                             onClick={() => {
                                                 setEditingId((id) => (id === row.user.githubId ? null : row.user.githubId))
                                                 setEditingRealmsId(null)
                                             }}
-                                        >
-                                            {editingId === row.user.githubId ? 'Close' : 'Limits'}
-                                        </button>
+                                        />
                                         {multiRealm && (
-                                            <button
-                                                type="button"
-                                                className="perch-admin-linkbtn"
+                                            <IconBtn
+                                                icon={editingRealmsId === row.user.githubId ? 'close' : 'realms'}
+                                                label={
+                                                    editingRealmsId === row.user.githubId
+                                                        ? `Close NGINX server grants for ${row.user.login}`
+                                                        : `Edit NGINX server grants for ${row.user.login}`
+                                                }
                                                 onClick={() => {
                                                     setEditingRealmsId((id) => (id === row.user.githubId ? null : row.user.githubId))
                                                     setEditingId(null)
                                                 }}
-                                            >
-                                                {editingRealmsId === row.user.githubId ? 'Close' : 'Realms'}
-                                            </button>
+                                            />
                                         )}
                                     </span>
                                 </td>
@@ -602,8 +555,8 @@ function RealmsEditor({
                 const body = (await res.json().catch(() => null)) as { error?: string } | null
                 setError(
                     body?.error === 'realm_has_user_sites'
-                        ? `Can’t revoke a realm — ${row.user.login} still owns sites there. Delete them first.`
-                        : `Couldn’t save realms${body?.error ? `: ${body.error}` : ` (error ${res.status})`}.`,
+                        ? `Can’t revoke an NGINX server — ${row.user.login} still owns sites there. Delete them first.`
+                        : `Couldn’t save NGINX servers${body?.error ? `: ${body.error}` : ` (error ${res.status})`}.`,
                 )
                 return
             }

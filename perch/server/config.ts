@@ -138,6 +138,14 @@ export const config = {
     ingressIpv6: optional('PERCH_INGRESS_IPV6', ''),
 
     port: num('PORT', 4100),
+
+    // ── Config subsystem: perch-client binary distribution (move_wharf_to_perch.md §9) ──
+    // Where the baked-in cross-compiled perch-client binaries + checksums.txt live
+    // (the Dockerfile's `client` build stage populates this; ported from wharf's
+    // `WHARF_CLIENT_DIR`). Served unauthenticated by `/api/agent/v1/client/[os]/[arch]`.
+    get clientDir() {
+        return optional('PERCH_CLIENT_DIR', `${process.cwd()}/client-bin`)
+    },
 }
 
 export type Config = typeof config

@@ -48,12 +48,12 @@ export function RealmSwitcher() {
         <div className="perch-realm-switcher" slot="sidebar-panel">
             <SelectField
                 size="sm"
-                label="Active realm"
+                label="Active NGINX server"
                 value={me.activeRealm.id}
                 options={options}
                 disabled={busy}
                 onValue={(v) => void switchTo(v)}
-                ariaLabel="Active realm"
+                ariaLabel="Active NGINX server"
             />
         </div>
     )

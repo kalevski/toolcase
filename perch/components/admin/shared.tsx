@@ -22,9 +22,16 @@ export interface AdminNavItem {
 export const ADMIN_TABS: AdminNavItem[] = [
     { id: 'admin-sites', label: 'Sites', icon: 'layout-dashboard', href: '/admin/sites' },
     { id: 'admin-users', label: 'Users', icon: 'users', href: '/admin/users' },
-    { id: 'admin-realms', label: 'Realms', icon: 'server', href: '/admin/realms' },
+    { id: 'admin-realms', label: 'NGINX Servers', icon: 'server', href: '/admin/realms' },
+    // Database-management registry (perch_database_management.md §9): the servers
+    // maintainers manage from /databases; connecting them is owner-only.
+    { id: 'admin-db-servers', label: 'DB Servers', icon: 'database', href: '/admin/db-servers' },
     { id: 'admin-domains', label: 'Domains', icon: 'globe', href: '/admin/domains' },
     { id: 'admin-certificates', label: 'Certificates', icon: 'shield-check', href: '/admin/certificates' },
+    // Config subsystem admin surfaces (move_wharf_to_perch.md §10): the global
+    // variable/secret pools, owner-only.
+    { id: 'admin-global-vars', label: 'Global variables', icon: 'variable', href: '/admin/global-vars' },
+    { id: 'admin-secrets', label: 'Secrets', icon: 'lock', href: '/admin/secrets' },
     { id: 'admin-settings', label: 'Settings', icon: 'settings', href: '/admin/settings' },
     { id: 'admin-audit', label: 'Audit', icon: 'scroll-text', href: '/admin/audit' },
 ]

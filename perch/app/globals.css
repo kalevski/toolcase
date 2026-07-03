@@ -1413,6 +1413,187 @@ body {
     text-decoration: underline;
 }
 
+/* ── Compact icon-only row actions (lib/action-icons.tsx) ──────────────────────
+   Every table's per-row buttons render as a square icon with the action text in
+   `title`/`aria-label`. Sized so a row of three stays tighter than one text
+   button; the SVG inherits currentColor from the Bootstrap outline variant. */
+.perch-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+    line-height: 1;
+}
+
+.perch-icon-btn svg {
+    width: 1rem;
+    height: 1rem;
+    display: block;
+}
+
+@media (pointer: coarse) {
+    .perch-icon-btn {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+/* ── Config instances (components/config/*, move_wharf_to_perch.md §10) ────────── */
+
+/* Detail page frame (/instances/{id}/{variables|flags|settings}): back link,
+   rich header, sub-tabs, then the active tab's card stack — the same width and
+   vertical rhythm as .perch-admin so Config pages read as one surface. */
+.perch-instance {
+    max-width: 72rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* The active tab's cards stack with the admin-standard gap. */
+.perch-instance-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Card toolbar: primary action on one side, a secondary cluster on the other;
+   wraps to stacked rows when narrow. */
+.perch-instance-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.perch-instance-toolbar-group {
+    display: inline-flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* Tag filter (Instances list): every tag is an independent on/off toggle
+   (aria-pressed); no active tag = no filter. */
+.perch-tag-filter {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    flex-wrap: wrap;
+}
+
+/* Feature-flag table (Flags tab): rows injected into a tc-advanced-table; the
+   Flag cell is a tc-switch whose label is the flag key — render it mono so it
+   reads as an identifier, and keep the always-reserved field-message slot from
+   adding phantom height inside the row. */
+.perch-flags-table tc-switch .tc-switch__label {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8125rem;
+}
+
+.perch-flags-table tc-switch .tc-field-message {
+    display: none;
+}
+
+/* Resolved-config preview (Variables tab): key/value rows in a quiet mono
+   panel, long values wrap instead of forcing the page wide. */
+.perch-resolved-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--tc-border-faint, var(--tc-border));
+    background: var(--tc-surface-muted);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8125rem;
+}
+
+.perch-resolved-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding: 0.375rem 0.75rem;
+}
+
+.perch-resolved-row + .perch-resolved-row {
+    border-top: 1px solid var(--tc-border-faint, var(--tc-border));
+}
+
+.perch-resolved-key {
+    flex: 0 0 auto;
+}
+
+.perch-resolved-value {
+    color: var(--tc-text-muted);
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+/* Tag editor (Settings tab): removable chips + the add row. */
+.perch-tag-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.perch-tag-chips {
+    display: flex;
+    gap: 0.375rem;
+    flex-wrap: wrap;
+}
+
+.perch-tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.25rem 0.125rem 0.5rem;
+    border: 1px solid var(--tc-border);
+    background: var(--tc-surface-muted);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8125rem;
+}
+
+.perch-tag-remove {
+    border: 0;
+    background: transparent;
+    padding: 0 0.25rem;
+    cursor: pointer;
+    color: var(--tc-text-muted);
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.perch-tag-remove:hover {
+    color: var(--tc-danger);
+}
+
+.perch-tag-remove:focus-visible {
+    outline: 2px solid var(--perch-accent);
+    outline-offset: 2px;
+}
+
+.perch-tag-add {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+}
+
+/* Danger zone (Settings tab): a red-tinted inset so the destructive card body
+   can't be mistaken for a routine section. */
+.perch-danger-zone {
+    border: 1px solid color-mix(in srgb, var(--tc-danger) 35%, var(--tc-border));
+    background: color-mix(in srgb, var(--tc-danger) 4%, var(--tc-surface));
+    padding: 0.75rem;
+}
+
+/* .env import preview rows (Variables tab modal). */
+.perch-form-import-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 20rem;
+    overflow-y: auto;
+}
+
 /* ── Dark mode (plan WS-1) ─────────────────────────────────────────────────────
    Auto-applied from the OS preference. Remaps the structural @toolcase/web-components
    design tokens (--tc-*) to a dark slate palette; every tc-* component and every

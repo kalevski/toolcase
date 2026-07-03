@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { AdvancedTableColumn } from '@toolcase/web-components'
-import { escapeHtml } from '@/lib/tc'
+import { IconBtn } from '@/lib/action-icons'
 import type { Realm } from '@/server/domain/types'
 import { AdminPage, json, useOwnerData } from './shared'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
@@ -74,35 +74,8 @@ function healthDotMeta(test: RealmTestState): { cls: string; title: string } {
     return { cls: 'perch-realm-dot--unknown', title: 'Health unknown' }
 }
 
-function badge(variant: string, text: string): string {
-    return `<span class="badge text-bg-${variant}">${escapeHtml(text)}</span>`
-}
-
-function realmIdentityHtml(row: RealmRow): string {
-    const { realm: r, test } = row
-    const { cls, title } = healthDotMeta(test)
-    const badges: string[] = []
-    if (r.isDefault) badges.push(badge('primary', 'default'))
-    badges.push(badge(r.hasToken ? 'light' : 'secondary', r.hasToken ? 'token set' : 'no token'))
-    if (test && test !== 'loading' && test.managed) badges.push(badge('info', 'managed'))
-    if (test && test !== 'loading' && test.apiVersion) badges.push(badge('light', `api v${test.apiVersion}`))
-    if (test && test !== 'loading' && test.ok && (test.disabled ?? 0) > 0)
-        badges.push(badge('danger', `${test.disabled} quarantined`))
-    if (test && test !== 'loading' && test.ok && (test.atRisk ?? 0) > 0)
-        badges.push(badge('warning', `${test.atRisk} at risk`))
-    if (test && test !== 'loading' && !test.ok) badges.push(badge('danger', test.error ?? 'unreachable'))
-    return (
-        `<span class="perch-admin-realm-id">` +
-        `<span class="perch-realm-dot ${cls}" title="${escapeHtml(title)}" aria-label="${escapeHtml(title)}"></span>` +
-        `<span class="perch-admin-realm-name">${escapeHtml(r.name)}</span>` +
-        `<span class="perch-admin-mono perch-admin-hint">${escapeHtml(r.adminUrl)}</span>` +
-        `<span class="perch-admin-badges">${badges.join('')}</span>` +
-        `</span>`
-    )
-}
-
 const REALM_COLUMNS: AdvancedTableColumn[] = [
-    { key: 'identity', label: 'Realm' },
+    { key: 'identity', label: 'NGINX server' },
     { key: 'actions', label: '', align: 'right' },
 ]
 
@@ -120,7 +93,7 @@ export function AdminRealms() {
 
     return (
         <AdminPage
-            title="Realms"
+            title="NGINX Servers"
             subtitle="The nginxpilot instances this control plane drives. Add, set a default, rotate credentials, and check health. Owner-only."
             icon="server"
             iconColor="amber"
@@ -196,11 +169,11 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
         const n = form.name.trim()
         const u = form.adminUrl.trim()
         if (!n) {
-            setError('A realm needs a name.')
+            setError('An NGINX server needs a name.')
             return
         }
         if (!u) {
-            setError('A realm needs an admin URL.')
+            setError('An NGINX server needs an admin URL.')
             return
         }
         setBusy(true)
@@ -215,16 +188,16 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
                 const body = (await res.json().catch(() => null)) as { error?: string } | null
                 setError(
                     body?.error
-                        ? `Couldn’t add realm: ${body.error}.`
-                        : `Couldn’t add realm (error ${res.status}).`,
+                        ? `Couldn’t add NGINX server: ${body.error}.`
+                        : `Couldn’t add NGINX server (error ${res.status}).`,
                 )
                 return
             }
-            toast.show(`Realm “${n}” registered.`, { variant: 'success' })
+            toast.show(`NGINX server “${n}” registered.`, { variant: 'success' })
             setForm(null)
             onChanged()
         } catch {
-            setError('Couldn’t add realm — network error.')
+            setError('Couldn’t add NGINX server — network error.')
         } finally {
             setBusy(false)
         }
@@ -259,7 +232,7 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
     const setDefault = useCallback(
         async (realm: Realm) => {
             setError(null)
-            const msg = await patch(realm, { default: true }, `“${realm.name}” is now the default realm.`)
+            const msg = await patch(realm, { default: true }, `“${realm.name}” is now the default NGINX server.`)
             if (msg) setError(msg)
         },
         [patch],
@@ -281,12 +254,12 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
                     b?.error === 'realm_has_sites' || b?.error === 'realm_has_base_domains'
                         ? `Can’t remove ${realm.name} — it still has sites or base domains.`
                         : b?.error === 'realm_is_default'
-                          ? `Set another realm as default before removing ${realm.name}.`
+                          ? `Set another NGINX server as default before removing ${realm.name}.`
                           : `Couldn’t remove ${realm.name} (error ${res.status}).`,
                 )
                 return
             }
-            toast.show(`Realm “${realm.name}” removed.`, { variant: 'success' })
+            toast.show(`NGINX server “${realm.name}” removed.`, { variant: 'success' })
             onChanged()
         } catch {
             setError(`Couldn’t remove ${realm.name} — network error.`)
@@ -307,23 +280,23 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
 
     return (
         <>
-            <tc-section-card title="Realms" icon="server">
+            <tc-section-card title="NGINX Servers" icon="server">
                 <div className="perch-admin-section">
                     <p className="perch-home-lead perch-admin-hint">
-                        Each realm is one nginxpilot instance. Sites, routing, and base domains are
-                        scoped to a realm; the default realm is where new users land. The admin token is
+                        Each NGINX server is one nginxpilot instance. Sites, routing, and base domains are
+                        scoped to an NGINX server; the default server is where new users land. The admin token is
                         encrypted at rest and never shown again.
                     </p>
                     {error && !form && <tc-banner variant="danger">{error}</tc-banner>}
 
                     <div className="perch-list-actions">
                         <tc-button variant="primary" size="sm" onClick={openCreate}>
-                            Add realm
+                            Add NGINX server
                         </tc-button>
                     </div>
 
                     {realms.length === 0 ? (
-                        <tc-empty-state icon="server">No realms registered.</tc-empty-state>
+                        <tc-empty-state icon="server">No NGINX servers registered.</tc-empty-state>
                     ) : (
                         <tc-advanced-table
                             ref={setTableColumns}
@@ -357,20 +330,12 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
                                         </td>
                                         <td className="text-end">
                                             <span className="perch-admin-domain-controls">
-                                                <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => void runTest(r.id)}>
-                                                    Test
-                                                </button>
+                                                <IconBtn icon="test" label={`Test ${r.name}`} onClick={() => void runTest(r.id)} />
                                                 {!r.isDefault && (
-                                                    <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => void setDefault(r)}>
-                                                        Set default
-                                                    </button>
+                                                    <IconBtn icon="default" label={`Set ${r.name} as default`} onClick={() => void setDefault(r)} />
                                                 )}
-                                                <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => setRotating(r.id)}>
-                                                    Rotate token
-                                                </button>
-                                                <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => setPending(r)} disabled={busy}>
-                                                    Remove
-                                                </button>
+                                                <IconBtn icon="rotate" label={`Rotate token for ${r.name}`} onClick={() => setRotating(r.id)} />
+                                                <IconBtn icon="remove" label={`Remove ${r.name}`} danger disabled={busy} onClick={() => setPending(r)} />
                                             </span>
                                         </td>
                                     </tr>
@@ -384,9 +349,9 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
             {form && (
                 <FormModal
                     key="new"
-                    title="Add realm"
+                    title="Add NGINX server"
                     busy={busy}
-                    submitLabel="Add realm"
+                    submitLabel="Add NGINX server"
                     onSubmit={() => void add()}
                     onClose={close}
                 >
@@ -441,7 +406,7 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
 
             <ConfirmDialog
                 open={!!pending}
-                title="Remove realm?"
+                title="Remove NGINX server?"
                 message={
                     pending
                         ? `Remove ${pending.name} (${pending.adminUrl}). Blocked if it still has sites or base domains.`

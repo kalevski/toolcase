@@ -20,6 +20,7 @@ import {
     renderIniCredentials,
 } from '@/server/domain/cert-input'
 import type { AcmeCredentialRequest } from '@/server/domain/cert-input'
+import { iconBtnHtml } from '@/lib/action-icons'
 import { AdminPage, json, useOwnerData } from './shared'
 import { DataTable } from '@/components/DataTable'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
@@ -286,11 +287,10 @@ interface CertRow extends Record<string, unknown> {
 }
 
 function certActionsHtml(domain: string): string {
-    const d = escapeHtml(domain)
     return (
         `<span class="perch-admin-domain-controls">` +
-        `<button type="button" class="btn btn-sm btn-outline-secondary" data-action="renew" data-domain="${d}">Renew</button>` +
-        `<button type="button" class="btn btn-sm btn-outline-danger" data-action="delete" data-domain="${d}">Delete</button>` +
+        iconBtnHtml({ icon: 'renew', label: `Renew ${domain}`, data: { action: 'renew', domain } }) +
+        iconBtnHtml({ icon: 'remove', label: `Delete ${domain}`, danger: true, data: { action: 'delete', domain } }) +
         `</span>`
     )
 }
@@ -553,7 +553,7 @@ const JOB_COLUMNS: TableColumn[] = [
         align: 'right',
         render: (row: JobRow) =>
             row.state === 'pending' || row.state === 'running'
-                ? `<button type="button" class="btn btn-sm btn-outline-secondary" data-action="watch" data-job="${escapeHtml(row.id)}">Watch</button>`
+                ? iconBtnHtml({ icon: 'view', label: `Watch job ${row.id}`, data: { action: 'watch', job: row.id } })
                 : '',
     },
 ]
@@ -987,10 +987,9 @@ interface CredRow extends Record<string, unknown> {
 }
 
 function credActionsHtml(provider: string): string {
-    const p = escapeHtml(provider)
     return (
         `<span class="perch-admin-domain-controls">` +
-        `<button type="button" class="btn btn-sm btn-outline-danger" data-action="delete" data-provider="${p}">Remove</button>` +
+        iconBtnHtml({ icon: 'remove', label: `Remove ${provider} credentials`, danger: true, data: { action: 'delete', provider } }) +
         `</span>`
     )
 }

@@ -10,6 +10,7 @@ import { LoadingState, ErrorState } from '@/components/states'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { SwitchField, TextField } from '@/components/fields'
 import { escapeHtml, useTc } from '@/lib/tc'
+import { iconBtnHtml, type ActionIconName } from '@/lib/action-icons'
 
 // Each routing area is its own sidebar page (AppShell's Routing section) — no
 // intra-section tab bar. Pools live WITH their consumers: the Proxies page
@@ -928,17 +929,15 @@ function routingRowsHtml(
     if (items.length === 0) {
         return `<tr><td colspan="${opts.colSpan}" class="perch-admin-empty-cell">Nothing here yet.</td></tr>`
     }
-    const disabled = opts.busy ? ' disabled' : ''
-    const btn = (action: string, name: string, label: string, danger = false) =>
-        `<button type="button" class="btn btn-sm btn-outline-${danger ? 'danger' : 'secondary'}" ` +
-        `data-action="${action}" data-name="${escapeHtml(name)}"${disabled}>${escapeHtml(label)}</button>`
+    const btn = (icon: ActionIconName, action: string, name: string, label: string, danger = false) =>
+        iconBtnHtml({ icon, label, danger, disabled: opts.busy, data: { action, name } })
     return items
         .map((row) => {
             const actions: string[] = []
-            if (opts.hasView) actions.push(btn('view', row.name, 'Config'))
-            if (opts.hasToggle && row.toggleLabel) actions.push(btn('toggle', row.name, row.toggleLabel))
-            if (opts.hasEdit) actions.push(btn('edit', row.name, 'Edit'))
-            actions.push(btn('remove', row.name, 'Remove', true))
+            if (opts.hasView) actions.push(btn('config', 'view', row.name, 'View rendered config'))
+            if (opts.hasToggle && row.toggleLabel) actions.push(btn('toggle', 'toggle', row.name, row.toggleLabel))
+            if (opts.hasEdit) actions.push(btn('edit', 'edit', row.name, 'Edit'))
+            actions.push(btn('remove', 'remove', row.name, 'Remove', true))
             const cells = columns
                 .map((c) => `<td${c.align ? ` style="text-align:${c.align}"` : ''}>${row.cells[c.key] ?? ''}</td>`)
                 .join('')

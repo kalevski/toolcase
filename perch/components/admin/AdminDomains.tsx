@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react'
 import type { AdvancedTableColumn } from '@toolcase/web-components'
-import { escapeHtml } from '@/lib/tc'
+import { IconBtn } from '@/lib/action-icons'
 import { BASE_DOMAIN_TIERS, type BaseDomain, type BaseDomainTier, type BaseDomainTls } from '@/server/domain/types'
 import { AdminPage, json, useOwnerData } from './shared'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
@@ -260,14 +260,13 @@ function BaseDomainsForm({
                                                     </select>
                                                 </td>
                                                 <td className="text-end">
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-sm btn-outline-danger"
-                                                        onClick={() => setPending(row.domain)}
+                                                    <IconBtn
+                                                        icon="remove"
+                                                        label={`Remove ${row.domain}`}
+                                                        danger
                                                         disabled={busy}
-                                                    >
-                                                        Remove
-                                                    </button>
+                                                        onClick={() => setPending(row.domain)}
+                                                    />
                                                 </td>
                                             </tr>
                                         ))}
