@@ -1,8 +1,10 @@
-// GET /api/admin/audit — read the append-only audit log, newest-first (id DESC, §12).
+// GET /api/admin/audit — read the append-only audit log (§12), paged for the audit table
+// (impl §8): returns `{ entries, total }` where `total` counts every match ignoring paging.
 //
 // Guarded by `authorize('owner')`. Optional query filters mirror the repository's
-// `AuditFilter`: `?login=`, `?site=`, `?action=` (prefix), `?beforeId=` (keyset paging),
-// `?limit=` (clamped to 500 in the repo).
+// `AuditFilter`: `?login=`, `?site=`, `?action=` (prefix), `?key=` (object key),
+// `?beforeId=` (keyset paging, kept for compatibility), `?limit=` (clamped to 500 in the
+// repo), `?offset=` (offset paging), `?order=asc|desc` (id order; default desc).
 
 import { NextResponse } from 'next/server'
 import { authorize } from '@/server/services/auth'
@@ -28,8 +30,11 @@ export async function GET(req: Request) {
         login: q.get('login') ?? undefined,
         site: q.get('site') ?? undefined,
         action: q.get('action') ?? undefined,
+        key: q.get('key') ?? undefined,
         beforeId: intParam(q.get('beforeId')),
         limit: intParam(q.get('limit')),
+        offset: intParam(q.get('offset')),
+        order: q.get('order') === 'asc' ? 'asc' : undefined,
     }
-    return NextResponse.json(admin.listAudit(filter))
+    return NextResponse.json({ entries: admin.listAudit(filter), total: admin.countAudit(filter) })
 }

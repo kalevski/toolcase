@@ -121,7 +121,7 @@ export function DashboardHome() {
     // shared, themed tc-rich-page-header used across every page).
     const lead = hasSites
         ? isFinite(me.limits.maxSites)
-            ? `${sites.length} of ${me.limits.maxSites} site${me.limits.maxSites === 1 ? '' : 's'} on your ${me.plan} plan.`
+            ? `${sites.length} of ${me.limits.maxSites} site${me.limits.maxSites === 1 ? '' : 's'} on your account.`
             : `${sites.length} site${sites.length === 1 ? '' : 's'} — unlimited as the owner.`
         : 'Publish a branch of one of your GitHub repositories as a static website. Pick the repository and branch, choose a hostname, and Perch deploys it.'
 
@@ -212,7 +212,7 @@ function SitesMetrics({ sites }: { sites: Site[] }) {
                 label: 'Sites',
                 value: String(me.usage.siteCount),
                 icon: 'LayoutDashboard',
-                hint: isFinite(maxSites) ? `of ${maxSites} on your ${me.plan} plan` : 'unlimited',
+                hint: isFinite(maxSites) ? `of ${maxSites} on your account` : 'unlimited',
             },
             {
                 key: 'storage',
@@ -229,7 +229,7 @@ function SitesMetrics({ sites }: { sites: Site[] }) {
                 hint: isFinite(maxCustom) ? `of ${maxCustom} allowed` : 'unlimited',
             },
         ]
-    }, [sites, me.usage.siteCount, me.usage.totalBytes, me.limits, me.plan])
+    }, [sites, me.usage.siteCount, me.usage.totalBytes, me.limits])
     const ref = useTcProps<HTMLElement>(useMemo(() => ({ items }), [items]))
     return <tc-metric-grid ref={ref} columns="3" className="perch-sites-metrics" />
 }

@@ -13,9 +13,9 @@ import {
     type SiteDeployStatus,
     type SiteStatusPayload,
 } from './site-dashboard'
-import { PLAN_LIMITS, type Site, type SiteStatus } from './types'
+import { STANDARD_LIMITS, type Site, type SiteStatus } from './types'
 
-const LIMITS = PLAN_LIMITS.free // maxBytesPerSite = 50 MB
+const LIMITS = STANDARD_LIMITS // maxBytesPerSite = 50 MB
 const MB = 1024 * 1024
 
 function site(over: Partial<Site> = {}): Site {
@@ -210,7 +210,7 @@ describe('buildSiteDashboard', () => {
     it('picks GB units for large plan limits', () => {
         const view = buildSiteDashboard(
             payload({ status: 'live', lastRef: 'r1' }, np({ deployed_ref: 'r1', bytes: 512 * MB })),
-            PLAN_LIMITS.silver, // maxBytesPerSite = 1 GB
+            { ...STANDARD_LIMITS, maxBytesPerSite: 1024 * 1024 * 1024 }, // maxBytesPerSite = 1 GB
         )
         const siteBar = view.usage[0]
         expect(siteBar).toMatchObject({ measurementUnit: 'GB', total: 1 })

@@ -156,6 +156,23 @@ func (i *Index) List() []Cert {
 	return out
 }
 
+// ExpiringWithin returns every indexed cert whose leaf expires within d of
+// now (strictly less than the threshold), sorted by domain key. Entries whose
+// cert could not be parsed (zero NotAfter) are skipped — there is nothing to
+// decide a renewal on.
+func (i *Index) ExpiringWithin(now time.Time, d time.Duration) []Cert {
+	out := []Cert{}
+	for _, c := range i.List() {
+		if c.NotAfter.IsZero() {
+			continue
+		}
+		if c.NotAfter.Sub(now) < d {
+			out = append(out, c)
+		}
+	}
+	return out
+}
+
 // Fingerprint is a stable digest of (domain, key-mtime) pairs. It changes when
 // a cert is added, removed, or renewed in place (renewals rewrite the same
 // paths with a fresh mtime), so a watcher can cheaply detect renewals.

@@ -1,32 +1,73 @@
 'use client'
 
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
+import type { TabBarItem } from '@toolcase/web-components'
+import { useTc } from '@/lib/tc'
 import { hstsEnabled, type Proxy, type ProxyLocation, type TlsMode, type Upstream } from '@/server/domain/routing'
-import { RoutingPage, RoutingListTable, json, useMaintainerData, type RoutingListItem } from './shared'
+import type { AccessList } from '@/server/domain/access-list'
+import {
+    HstsOptionsRow,
+    RoutingPage,
+    RoutingListTable,
+    SaveWarningsBanner,
+    VhostPreviewModal,
+    defaultHstsDraft,
+    hstsDraftFrom,
+    hstsPayload,
+    json,
+    saveErrorMessage,
+    saveRouting,
+    useMaintainerData,
+    useResourceStates,
+    type HstsDraft,
+    type RoutingListItem,
+} from './shared'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
-import { CheckField, SelectField, TextAreaField, TextField, type SelectOption } from '@/components/fields'
+import { FormModal, FormGroup } from '@/components/FormModal'
+import { SelectField, SwitchField, TextAreaField, TextField, type SelectOption } from '@/components/fields'
+import { UpstreamsManager } from './Upstreams'
 
-// Maintainer routing surface — reverse-proxy vhosts (nginx `server{}` blocks). List
-// the configured proxies, add one (routing to a named upstream pool or an inline
-// `pass` URL, with optional per-path locations), edit one (the same form, prefilled
-// — the POST endpoint replaces by domain), and remove one. Drives the
-// `/api/routing/proxies` endpoints (`authorize('maintainer')`-gated). Upstreams are
-// fetched alongside to populate the target dropdowns; a proxy that names an unknown
-// upstream is rejected by nginxpilot (400).
+// Maintainer routing surface — reverse-proxy vhosts (nginx `server{}` blocks) AND
+// their upstream pools, on ONE page: list the configured proxies, create/edit one in
+// a FormModal (impl §10 — routing to a named upstream pool or an inline `pass` URL,
+// with optional per-path locations; the POST endpoint replaces by domain), remove
+// one, and manage the `upstream{}` pools those proxies target on the sibling tab.
+// Drives the `/api/routing/proxies` + `/api/routing/upstreams` endpoints
+// (`authorize('maintainer')`-gated). A proxy that names an unknown upstream is
+// rejected by nginxpilot (400) — create the pool first, same page.
 
 interface ProxiesData {
     proxies: Proxy[]
     upstreams: Upstream[]
+    accessLists: AccessList[]
 }
 
+// The page's two surfaces as sibling tabs (a local tc-tab-bar, NOT route
+// navigation — both read the same loaded slice and share one reload).
+type ProxyTab = 'proxies' | 'upstreams'
+
+const PROXY_TABS: TabBarItem[] = [
+    { id: 'proxies', label: 'Proxies', icon: 'globe' },
+    { id: 'upstreams', label: 'Upstreams', icon: 'server' },
+]
+
 export function Proxies() {
+    const [tab, setTab] = useState<ProxyTab>('proxies')
+    const tabRef = useTc<HTMLElement>(
+        useMemo(() => ({ tabs: PROXY_TABS, onChange: (id: string) => setTab(id as ProxyTab) }), []),
+    )
     const fetcher = useCallback(async (): Promise<ProxiesData | null> => {
         try {
             const [proxies, upstreams] = await Promise.all([
                 fetch('/api/routing/proxies', { cache: 'no-store' }).then((r) => json<Proxy[]>(r)),
                 fetch('/api/routing/upstreams', { cache: 'no-store' }).then((r) => json<Upstream[]>(r)),
             ])
-            return { proxies, upstreams }
+            // Access lists are an enrichment (the select) — an older daemon without
+            // them must not error the whole page.
+            const accessLists = await fetch('/api/routing/access-lists', { cache: 'no-store' })
+                .then((r) => json<AccessList[]>(r))
+                .catch(() => [] as AccessList[])
+            return { proxies, upstreams, accessLists }
         } catch {
             return null
         }
@@ -36,14 +77,27 @@ export function Proxies() {
     return (
         <RoutingPage
             title="Proxies"
-            subtitle="Reverse-proxy vhosts routing to upstream pools or inline targets. Maintainer access."
+            subtitle="Reverse-proxy vhosts and the upstream pools they route to. Maintainer access."
             icon="globe"
             iconColor="cyan"
             state={state}
             onRetry={() => void reload()}
         >
             {(data) => (
-                <ProxiesManager proxies={data.proxies} upstreams={data.upstreams} onChanged={() => void reload()} />
+                <>
+                    <tc-tab-bar ref={tabRef} active-id={tab} className="perch-sub-tabs" />
+                    {tab === 'proxies' && (
+                        <ProxiesManager
+                            proxies={data.proxies}
+                            upstreams={data.upstreams}
+                            accessLists={data.accessLists}
+                            onChanged={() => void reload()}
+                        />
+                    )}
+                    {tab === 'upstreams' && (
+                        <UpstreamsManager upstreams={data.upstreams} onChanged={() => void reload()} />
+                    )}
+                </>
             )}
         </RoutingPage>
     )
@@ -57,9 +111,19 @@ interface LocationDraft {
     kind: LocTargetKind
     value: string
     websocket: boolean
+    /** Whether the per-location advanced disclosure is open (A4). */
+    showAdvanced: boolean
+    advanced: string
 }
 
-const emptyLocation = (): LocationDraft => ({ path: '/', kind: 'inherit', value: '', websocket: false })
+const emptyLocation = (): LocationDraft => ({
+    path: '/',
+    kind: 'inherit',
+    value: '',
+    websocket: false,
+    showAdvanced: false,
+    advanced: '',
+})
 
 // Default-target kind (a proxy routes to a named upstream pool or an inline pass URL).
 const KIND_OPTIONS: SelectOption[] = [
@@ -87,70 +151,153 @@ function describeTarget(p: Proxy): string {
     return '—'
 }
 
-function ProxiesManager({
+/** Everything the proxy form holds — one draft object; the modal resets by remount. */
+interface ProxyDraft {
+    domain: string
+    enabled: boolean
+    listen: string
+    targetKind: TargetKind
+    targetValue: string
+    maxBody: string
+    // Proxy HTTP timeouts — parsed and re-rendered by the domain layer; the form
+    // must round-trip them or an edit silently drops values set via the API/YAML.
+    connectTimeout: string
+    readTimeout: string
+    sendTimeout: string
+    locations: LocationDraft[]
+    tls: TlsMode
+    forceSsl: boolean
+    http2: boolean
+    hsts: boolean
+    hstsOpts: HstsDraft
+    blockExploits: boolean
+    websocket: boolean
+    gzip: boolean
+    cacheEnabled: boolean
+    cacheZone: string
+    cacheValid: string
+    accessList: string
+    advanced: string
+}
+
+const emptyDraft = (): ProxyDraft => ({
+    domain: '',
+    enabled: true,
+    listen: '',
+    targetKind: 'upstream',
+    targetValue: '',
+    maxBody: '',
+    connectTimeout: '',
+    readTimeout: '',
+    sendTimeout: '',
+    locations: [],
+    tls: 'off',
+    forceSsl: false,
+    http2: false,
+    hsts: false,
+    hstsOpts: defaultHstsDraft(),
+    blockExploits: false,
+    websocket: false,
+    gzip: false,
+    cacheEnabled: false,
+    cacheZone: '',
+    cacheValid: '',
+    accessList: '',
+    advanced: '',
+})
+
+const draftFrom = (p: Proxy): ProxyDraft => ({
+    domain: p.domain,
+    enabled: p.enabled !== false,
+    listen: p.listen ? String(p.listen) : '',
+    targetKind: p.pass ? 'pass' : 'upstream',
+    targetValue: p.pass ?? p.upstream ?? '',
+    maxBody: p.client_max_body_size ?? '',
+    connectTimeout: p.connect_timeout ?? '',
+    readTimeout: p.read_timeout ?? '',
+    sendTimeout: p.send_timeout ?? '',
+    locations: (p.locations ?? []).map((l) => ({
+        path: l.path,
+        kind: l.upstream ? 'upstream' : l.pass ? 'pass' : 'inherit',
+        value: l.upstream ?? l.pass ?? '',
+        websocket: !!l.websocket,
+        showAdvanced: !!l.advanced,
+        advanced: l.advanced ?? '',
+    })),
+    tls: p.tls ?? 'off',
+    forceSsl: !!p.force_ssl,
+    http2: !!p.http2,
+    hsts: hstsEnabled(p.hsts),
+    hstsOpts: hstsDraftFrom(p.hsts),
+    blockExploits: !!p.block_exploits,
+    websocket: !!p.websocket,
+    gzip: !!p.gzip,
+    cacheEnabled: !!p.cache?.enabled,
+    cacheZone: p.cache?.zone_size ?? '',
+    cacheValid: p.cache?.valid?.join(', ') ?? '',
+    accessList: p.access_list ?? '',
+    advanced: p.advanced ?? '',
+})
+
+export function ProxiesManager({
     proxies,
     upstreams,
+    accessLists,
     onChanged,
 }: {
     proxies: Proxy[]
     upstreams: Upstream[]
+    accessLists: AccessList[]
     onChanged: () => void
 }) {
-    const [domain, setDomain] = useState('')
-    const [enabled, setEnabled] = useState(true)
-    const [listen, setListen] = useState('')
-    const [targetKind, setTargetKind] = useState<TargetKind>('upstream')
-    const [targetValue, setTargetValue] = useState('')
-    const [maxBody, setMaxBody] = useState('')
-    const [locations, setLocations] = useState<LocationDraft[]>([])
-    // TLS & security toggles (Phase B).
-    const [tls, setTls] = useState<TlsMode>('off')
-    const [forceSsl, setForceSsl] = useState(false)
-    const [http2, setHttp2] = useState(false)
-    const [hsts, setHsts] = useState(false)
-    const [blockExploits, setBlockExploits] = useState(false)
-    const [websocket, setWebsocket] = useState(false)
-    const [gzip, setGzip] = useState(false)
-    const [cacheEnabled, setCacheEnabled] = useState(false)
-    const [cacheZone, setCacheZone] = useState('')
-    const [cacheValid, setCacheValid] = useState('')
-    const [advanced, setAdvanced] = useState('')
+    // The open form: null = closed; { editing: null } = create; { editing: domain } = edit.
+    const [form, setForm] = useState<{ editing: string | null; draft: ProxyDraft } | null>(null)
     const [error, setError] = useState<string | null>(null)
+    // Advisory target-check warnings from the last successful save (A5) — dismissible.
+    const [warnings, setWarnings] = useState<string[]>([])
+    // The payload blocked by the daemon's DNS check, held for the "Save anyway" retry.
+    const [dnsRetry, setDnsRetry] = useState<Proxy | null>(null)
     const [busy, setBusy] = useState(false)
     // The proxy awaiting remove confirmation (drives the ConfirmDialog).
     const [pending, setPending] = useState<string | null>(null)
     // The proxy awaiting disable confirmation (disabling stops its traffic).
     const [pendingDisable, setPendingDisable] = useState<string | null>(null)
-    // The domain being edited (null = the form creates a new proxy). Editing keeps
-    // the domain locked — it's the replace key of `POST /api/routing/proxies`.
-    const [editing, setEditing] = useState<string | null>(null)
-    const formCard = useRef<HTMLElement>(null)
+    // The domain whose rendered vhost is being previewed (impl §5).
+    const [viewing, setViewing] = useState<string | null>(null)
 
-    const setLoc = (i: number, patch: Partial<LocationDraft>) =>
-        setLocations((prev) => prev.map((l, idx) => (idx === i ? { ...l, ...patch } : l)))
-    const addLoc = () => setLocations((prev) => [...prev, emptyLocation()])
-    const removeLoc = (i: number) => setLocations((prev) => prev.filter((_, idx) => idx !== i))
+    const patch = (p: Partial<ProxyDraft>) =>
+        setForm((prev) => (prev ? { ...prev, draft: { ...prev.draft, ...p } } : prev))
 
-    const reset = () => {
-        setEditing(null)
-        setDomain('')
-        setEnabled(true)
-        setListen('')
-        setTargetKind('upstream')
-        setTargetValue('')
-        setMaxBody('')
-        setLocations([])
-        setTls('off')
-        setForceSsl(false)
-        setHttp2(false)
-        setHsts(false)
-        setBlockExploits(false)
-        setWebsocket(false)
-        setGzip(false)
-        setCacheEnabled(false)
-        setCacheZone('')
-        setCacheValid('')
-        setAdvanced('')
+    const patchLoc = (i: number, p: Partial<LocationDraft>) =>
+        setForm((prev) =>
+            prev
+                ? {
+                      ...prev,
+                      draft: {
+                          ...prev.draft,
+                          locations: prev.draft.locations.map((l, idx) => (idx === i ? { ...l, ...p } : l)),
+                      },
+                  }
+                : prev,
+        )
+    const addLoc = () =>
+        setForm((prev) =>
+            prev ? { ...prev, draft: { ...prev.draft, locations: [...prev.draft.locations, emptyLocation()] } } : prev,
+        )
+    const removeLoc = (i: number) =>
+        setForm((prev) =>
+            prev
+                ? {
+                      ...prev,
+                      draft: { ...prev.draft, locations: prev.draft.locations.filter((_, idx) => idx !== i) },
+                  }
+                : prev,
+        )
+
+    const openCreate = () => {
+        setError(null)
+        setDnsRetry(null)
+        setForm({ editing: null, draft: emptyDraft() })
     }
 
     // Load an existing proxy into the form (edit mode). Saving POSTs the same
@@ -159,145 +306,135 @@ function ProxiesManager({
         (proxyDomain: string) => {
             const p = proxies.find((x) => x.domain === proxyDomain)
             if (!p) return
-            setEditing(p.domain)
-            setDomain(p.domain)
-            setEnabled(p.enabled !== false)
-            setListen(p.listen ? String(p.listen) : '')
-            if (p.pass) {
-                setTargetKind('pass')
-                setTargetValue(p.pass)
-            } else {
-                setTargetKind('upstream')
-                setTargetValue(p.upstream ?? '')
-            }
-            setMaxBody(p.client_max_body_size ?? '')
-            setLocations(
-                (p.locations ?? []).map((l) => ({
-                    path: l.path,
-                    kind: l.upstream ? 'upstream' : l.pass ? 'pass' : 'inherit',
-                    value: l.upstream ?? l.pass ?? '',
-                    websocket: !!l.websocket,
-                })),
-            )
-            setTls(p.tls ?? 'off')
-            setForceSsl(!!p.force_ssl)
-            setHttp2(!!p.http2)
-            setHsts(hstsEnabled(p.hsts))
-            setBlockExploits(!!p.block_exploits)
-            setWebsocket(!!p.websocket)
-            setGzip(!!p.gzip)
-            setCacheEnabled(!!p.cache?.enabled)
-            setCacheZone(p.cache?.zone_size ?? '')
-            setCacheValid(p.cache?.valid?.join(', ') ?? '')
-            setAdvanced(p.advanced ?? '')
             setError(null)
-            formCard.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            setDnsRetry(null)
+            setForm({ editing: p.domain, draft: draftFrom(p) })
         },
         [proxies],
     )
 
-    const create = useCallback(async () => {
-        if (busy) return
-        const d = domain.trim()
-        if (!d) {
+    const close = useCallback(() => {
+        setForm(null)
+        setError(null)
+        setDnsRetry(null)
+    }, [])
+
+    /** Build the POST payload from the draft, or set an error and return null. */
+    const buildPayload = useCallback((): Proxy | null => {
+        if (!form) return null
+        const d = form.draft
+        const domain = d.domain.trim()
+        if (!domain) {
             setError('A proxy needs a domain.')
-            return
+            return null
         }
-        const payload: Proxy = { domain: d }
-        if (!enabled) payload.enabled = false
-        if (listen.trim()) payload.listen = Number(listen)
-        if (targetValue.trim()) {
-            if (targetKind === 'upstream') payload.upstream = targetValue.trim()
-            else payload.pass = targetValue.trim()
+        const payload: Proxy = { domain }
+        if (!d.enabled) payload.enabled = false
+        if (d.listen.trim()) payload.listen = Number(d.listen)
+        if (d.targetValue.trim()) {
+            if (d.targetKind === 'upstream') payload.upstream = d.targetValue.trim()
+            else payload.pass = d.targetValue.trim()
         }
-        if (maxBody.trim()) payload.client_max_body_size = maxBody.trim()
+        if (d.maxBody.trim()) payload.client_max_body_size = d.maxBody.trim()
+        if (d.connectTimeout.trim()) payload.connect_timeout = d.connectTimeout.trim()
+        if (d.readTimeout.trim()) payload.read_timeout = d.readTimeout.trim()
+        if (d.sendTimeout.trim()) payload.send_timeout = d.sendTimeout.trim()
 
         // TLS & security. Guard the daemon's rule client-side so the user sees it
         // before the round-trip (parseProxy enforces the same).
-        const tlsOn = tls !== 'off'
-        if ((forceSsl || http2 || hsts) && !tlsOn) {
+        const tlsOn = d.tls !== 'off'
+        if ((d.forceSsl || d.http2 || d.hsts) && !tlsOn) {
             setError('Enable TLS first to use Force HTTPS, HTTP/2 or HSTS.')
-            return
+            return null
         }
-        if (tlsOn) payload.tls = tls
-        if (forceSsl) payload.force_ssl = true
-        if (http2) payload.http2 = true
-        if (hsts) payload.hsts = true
-        if (blockExploits) payload.block_exploits = true
-        if (websocket) payload.websocket = true
-        if (gzip) payload.gzip = true
-        if (cacheEnabled) {
-            const valid = cacheValid.split(',').map((s) => s.trim()).filter(Boolean)
+        if (tlsOn) payload.tls = d.tls
+        if (d.forceSsl) payload.force_ssl = true
+        if (d.http2) payload.http2 = true
+        if (d.hsts) {
+            const h = hstsPayload(d.hstsOpts)
+            if ('error' in h) {
+                setError(h.error)
+                return null
+            }
+            payload.hsts = h.value
+        }
+        if (d.blockExploits) payload.block_exploits = true
+        if (d.websocket) payload.websocket = true
+        if (d.gzip) payload.gzip = true
+        if (d.cacheEnabled) {
+            const valid = d.cacheValid.split(',').map((s) => s.trim()).filter(Boolean)
             payload.cache = { enabled: true }
             if (valid.length) payload.cache.valid = valid
-            if (cacheZone.trim()) payload.cache.zone_size = cacheZone.trim()
+            if (d.cacheZone.trim()) payload.cache.zone_size = d.cacheZone.trim()
         }
-        if (advanced.trim()) payload.advanced = advanced
+        if (d.accessList) payload.access_list = d.accessList
+        if (d.advanced.trim()) payload.advanced = d.advanced
 
         const builtLocs: ProxyLocation[] = []
-        for (const l of locations) {
+        for (const l of d.locations) {
             const path = l.path.trim() || '/'
             const loc: ProxyLocation = { path }
             if (l.kind !== 'inherit') {
                 if (!l.value.trim()) {
                     setError(`Location ${path} needs a target value.`)
-                    return
+                    return null
                 }
                 if (l.kind === 'upstream') loc.upstream = l.value.trim()
                 else loc.pass = l.value.trim()
             }
             if (l.websocket) loc.websocket = true
+            if (l.advanced.trim()) loc.advanced = l.advanced
             builtLocs.push(loc)
         }
         if (builtLocs.length) payload.locations = builtLocs
 
         if (!payload.upstream && !payload.pass && builtLocs.length === 0) {
             setError('Set a default target (upstream or pass) or add at least one location.')
-            return
+            return null
         }
+        return payload
+    }, [form])
+
+    const save = useCallback(async () => {
+        if (busy) return
+        const payload = buildPayload()
+        if (!payload) return
 
         setBusy(true)
         setError(null)
-        try {
-            const res = await fetch('/api/routing/proxies', {
-                method: 'POST',
-                headers: { 'content-type': 'application/json' },
-                body: JSON.stringify(payload),
-            })
-            if (!res.ok) {
-                const body = (await res.json().catch(() => null)) as { error?: string } | null
-                setError(body?.error ? `Couldn’t save proxy: ${body.error}.` : `Couldn’t save proxy (error ${res.status}).`)
-                return
-            }
-            reset()
-            onChanged()
-        } catch {
-            setError('Couldn’t save proxy — network error.')
-        } finally {
-            setBusy(false)
+        setWarnings([])
+        setDnsRetry(null)
+        const outcome = await saveRouting('/api/routing/proxies', payload)
+        setBusy(false)
+        if (!outcome.ok) {
+            setError(saveErrorMessage('proxy', outcome))
+            // The daemon's DNS gate — offer its own ?skip_target_checks=true override.
+            if (outcome.dnsBlocked) setDnsRetry(payload)
+            return
         }
-    }, [
-        busy,
-        domain,
-        enabled,
-        listen,
-        targetKind,
-        targetValue,
-        maxBody,
-        locations,
-        tls,
-        forceSsl,
-        http2,
-        hsts,
-        blockExploits,
-        websocket,
-        gzip,
-        cacheEnabled,
-        cacheZone,
-        cacheValid,
-        advanced,
-        onChanged,
-    ])
+        setWarnings(outcome.warnings)
+        close()
+        onChanged()
+    }, [busy, buildPayload, close, onChanged])
+
+    // The "Save anyway" retry for a DNS-blocked save — the daemon's own escape hatch
+    // for a target host whose DNS record lands later (?skip_target_checks=true).
+    const retrySkippingDns = useCallback(async () => {
+        const payload = dnsRetry
+        if (!payload || busy) return
+        setBusy(true)
+        setError(null)
+        const outcome = await saveRouting('/api/routing/proxies', payload, true)
+        setBusy(false)
+        if (!outcome.ok) {
+            setError(saveErrorMessage('proxy', outcome))
+            return
+        }
+        setDnsRetry(null)
+        setWarnings(outcome.warnings)
+        close()
+        onChanged()
+    }, [dnsRetry, busy, close, onChanged])
 
     const doRemove = useCallback(async () => {
         const proxyDomain = pending
@@ -331,27 +468,17 @@ function ProxiesManager({
             setBusy(true)
             setError(null)
             const verb = next ? 'enable' : 'disable'
-            try {
-                const res = await fetch('/api/routing/proxies', {
-                    method: 'POST',
-                    headers: { 'content-type': 'application/json' },
-                    body: JSON.stringify({ ...p, enabled: next ? undefined : false }),
-                })
-                if (!res.ok) {
-                    const body = (await res.json().catch(() => null)) as { error?: string } | null
-                    setError(
-                        body?.error
-                            ? `Couldn’t ${verb} ${proxyDomain}: ${body.error}.`
-                            : `Couldn’t ${verb} ${proxyDomain} (error ${res.status}).`,
-                    )
-                    return
-                }
-                onChanged()
-            } catch {
-                setError(`Couldn’t ${verb} ${proxyDomain} — network error.`)
-            } finally {
-                setBusy(false)
+            const outcome = await saveRouting('/api/routing/proxies', {
+                ...p,
+                enabled: next ? undefined : false,
+            })
+            setBusy(false)
+            if (!outcome.ok) {
+                setError(saveErrorMessage(`${verb} of ${proxyDomain}`, outcome))
+                return
             }
+            setWarnings(outcome.warnings)
+            onChanged()
         },
         [proxies, busy, onChanged],
     )
@@ -367,16 +494,19 @@ function ProxiesManager({
         [proxies, applyEnabled],
     )
 
+    const resourceStates = useResourceStates('proxy')
     const items = useMemo<RoutingListItem[]>(
         () =>
             proxies.map((p) => ({
                 name: p.domain,
-                hint: `:${p.listen ?? 80} ${describeTarget(p)}${p.tls ? ` · TLS ${p.tls}` : ''}${
-                    p.enabled === false ? ' · disabled' : ''
-                }`,
+                hint: `:${p.listen ?? 80} ${describeTarget(p)}${p.domain.startsWith('*.') ? ' · wildcard' : ''}${
+                    p.tls ? ` · TLS ${p.tls}` : ''
+                }${p.enabled === false ? ' · disabled' : ''}`,
                 toggleLabel: p.enabled === false ? 'Enable' : 'Disable',
+                stateChip: resourceStates.get(p.domain)?.state,
+                stateReason: resourceStates.get(p.domain)?.reason,
             })),
-        [proxies],
+        [proxies, resourceStates],
     )
 
     // Upstream-pool options, with a leading clear choice. Rebuilt as the pool set
@@ -386,34 +516,27 @@ function ProxiesManager({
         ...upstreams.map((u) => ({ value: u.name, label: u.name })),
     ]
 
+    // Access-list options (C1): open by default, or one of the named policies.
+    const accessListOptions: SelectOption[] = [
+        { value: '', label: 'open (no access list)' },
+        ...accessLists.map((l) => ({ value: l.name, label: l.name })),
+    ]
+
     // A target value control: an upstream dropdown, or a free-text pass URL.
     const targetControl = (kind: TargetKind | LocTargetKind, value: string, onChange: (v: string) => void) => {
         if (kind === 'upstream') {
-            return (
-                <SelectField
-                    className="perch-admin-field"
-                    size="sm"
-                    label="Target"
-                    value={value}
-                    options={upstreamOptions}
-                    onValue={onChange}
-                />
-            )
+            return <SelectField label="Target" value={value} options={upstreamOptions} onValue={onChange} />
         }
         if (kind === 'pass') {
             return (
-                <TextField
-                    className="perch-admin-field"
-                    size="sm"
-                    label="Target"
-                    placeholder="http://127.0.0.1:9000"
-                    value={value}
-                    onValue={onChange}
-                />
+                <TextField label="Target" placeholder="http://127.0.0.1:9000" value={value} onValue={onChange} />
             )
         }
         return null
     }
+
+    const d = form?.draft
+    const tlsOff = d ? d.tls === 'off' : true
 
     return (
         <>
@@ -423,7 +546,14 @@ function ProxiesManager({
                         {proxies.length} prox{proxies.length === 1 ? 'y' : 'ies'}. Each routes a domain to an upstream
                         pool or an inline target.
                     </p>
-                    {error && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && !form && <tc-banner variant="danger">{error}</tc-banner>}
+                    <SaveWarningsBanner warnings={warnings} onDismiss={() => setWarnings([])} />
+
+                    <div className="perch-list-actions">
+                        <tc-button variant="primary" size="sm" onClick={openCreate}>
+                            New proxy
+                        </tc-button>
+                    </div>
 
                     {proxies.length === 0 ? (
                         <tc-empty-state icon="globe">No proxies yet.</tc-empty-state>
@@ -433,226 +563,259 @@ function ProxiesManager({
                             busy={busy}
                             onEdit={startEdit}
                             onToggle={toggle}
+                            onView={setViewing}
                             onRemove={setPending}
                         />
                     )}
                 </div>
             </tc-section-card>
 
-            <tc-section-card
-                ref={formCard}
-                title={editing ? `Edit proxy — ${editing}` : 'New proxy'}
-                icon={editing ? 'pencil' : 'plus'}
-            >
-                <form
-                    className="perch-admin-section"
-                    onSubmit={(e) => {
-                        e.preventDefault()
-                        void create()
-                    }}
+            {form && d && (
+                <FormModal
+                    key={form.editing ?? 'new'}
+                    title={form.editing ? `Edit proxy — ${form.editing}` : 'New proxy'}
+                    busy={busy}
+                    submitLabel={form.editing ? 'Save changes' : 'Create proxy'}
+                    onSubmit={() => void save()}
+                    onClose={close}
+                    secondary={
+                        dnsRetry
+                            ? { label: 'Save anyway (skip DNS check)', onClick: () => void retrySkippingDns() }
+                            : undefined
+                    }
                 >
-                    <div className="perch-admin-tier-row">
-                        <TextField
-                            className="perch-admin-field"
-                            size="sm"
-                            label="Domain"
-                            placeholder="api.example.com"
-                            value={domain}
-                            disabled={!!editing}
-                            onValue={setDomain}
-                        />
-                        <TextField
-                            className="perch-admin-field"
-                            type="number"
-                            min={1}
-                            max={65535}
-                            size="sm"
-                            label="Listen"
-                            placeholder="80"
-                            value={listen}
-                            onValue={setListen}
-                        />
-                        <TextField
-                            className="perch-admin-field"
-                            size="sm"
-                            label="Max body size"
-                            placeholder="512MiB"
-                            value={maxBody}
-                            onValue={setMaxBody}
-                        />
-                        <CheckField
-                            className="perch-routing-check"
-                            inline
-                            label="Enabled"
-                            checked={enabled}
-                            onChecked={setEnabled}
-                        />
-                    </div>
-
-                    <span className="perch-admin-field-label">Default target (used by locations that don’t set one)</span>
-                    <div className="perch-admin-tier-row">
-                        <SelectField
-                            className="perch-admin-field"
-                            size="sm"
-                            label="Kind"
-                            value={targetKind}
-                            options={KIND_OPTIONS}
-                            onValue={(v) => {
-                                setTargetKind(v as TargetKind)
-                                setTargetValue('')
-                            }}
-                        />
-                        {targetControl(targetKind, targetValue, setTargetValue)}
-                    </div>
-
-                    <span className="perch-admin-field-label">TLS &amp; security</span>
-                    <div className="perch-admin-tier-row">
-                        <SelectField
-                            className="perch-admin-field"
-                            size="sm"
-                            label="TLS"
-                            value={tls}
-                            options={TLS_OPTIONS}
-                            onValue={(v) => {
-                                const mode = v as TlsMode
-                                setTls(mode)
-                                if (mode === 'off') {
-                                    setForceSsl(false)
-                                    setHttp2(false)
-                                    setHsts(false)
-                                }
-                            }}
-                        />
-                        <CheckField
-                            className="perch-routing-check"
-                            inline
-                            label="Force HTTPS"
-                            disabled={tls === 'off'}
-                            checked={forceSsl}
-                            onChecked={setForceSsl}
-                        />
-                        <CheckField
-                            className="perch-routing-check"
-                            inline
-                            label="HTTP/2"
-                            disabled={tls === 'off'}
-                            checked={http2}
-                            onChecked={setHttp2}
-                        />
-                        <CheckField
-                            className="perch-routing-check"
-                            inline
-                            label="HSTS"
-                            disabled={tls === 'off'}
-                            checked={hsts}
-                            onChecked={setHsts}
-                        />
-                        <CheckField
-                            className="perch-routing-check"
-                            inline
-                            label="Block exploits"
-                            checked={blockExploits}
-                            onChecked={setBlockExploits}
-                        />
-                        <CheckField
-                            className="perch-routing-check"
-                            inline
-                            label="WebSocket (all)"
-                            checked={websocket}
-                            onChecked={setWebsocket}
-                        />
-                        <CheckField
-                            className="perch-routing-check"
-                            inline
-                            label="Gzip"
-                            checked={gzip}
-                            onChecked={setGzip}
-                        />
-                        <CheckField
-                            className="perch-routing-check"
-                            inline
-                            label="Cache"
-                            checked={cacheEnabled}
-                            onChecked={setCacheEnabled}
-                        />
-                    </div>
-                    {cacheEnabled && (
-                        <div className="perch-admin-tier-row">
+                    {error && <tc-banner variant="danger">{error}</tc-banner>}
+                    {dnsRetry && (
+                        <tc-banner variant="warning">
+                            The target host doesn’t resolve yet. If its DNS record lands later, you can save anyway
+                            and skip the daemon’s DNS check (the footer button).
+                        </tc-banner>
+                    )}
+                    <FormGroup title="Identity">
+                        <div className="perch-form-grid">
+                            <div className="perch-form-span">
+                                <TextField
+                                    label="Domain"
+                                    placeholder="api.example.com or *.example.com"
+                                    help="A wildcard (*.example.com) needs a DNS-01 wildcard cert — issue via Certificates with challenge: dns."
+                                    value={d.domain}
+                                    disabled={!!form.editing}
+                                    onValue={(v) => patch({ domain: v })}
+                                />
+                            </div>
                             <TextField
-                                className="perch-admin-field"
-                                size="sm"
-                                label="Cache zone size"
-                                placeholder="10m"
-                                value={cacheZone}
-                                onValue={setCacheZone}
+                                type="number"
+                                min={1}
+                                max={65535}
+                                label="Listen"
+                                placeholder="80"
+                                help="Plain-HTTP port. Blank = 80."
+                                value={d.listen}
+                                onValue={(v) => patch({ listen: v })}
                             />
-                            <TextField
-                                className="perch-admin-field"
-                                size="sm"
-                                label="Cache valid (comma-separated)"
-                                placeholder="200 10m, 404 1m"
-                                value={cacheValid}
-                                onValue={setCacheValid}
+                            <SwitchField
+                                label="Enabled"
+                                help="Off keeps the config but renders no server block."
+                                checked={d.enabled}
+                                onChecked={(c) => patch({ enabled: c })}
                             />
                         </div>
-                    )}
-                    <TextAreaField
-                        className="perch-admin-field"
-                        label="Advanced (raw nginx)"
-                        rows={3}
-                        placeholder="add_header X-Frame-Options SAMEORIGIN;"
-                        value={advanced}
-                        onValue={setAdvanced}
-                    />
+                    </FormGroup>
 
-                    <span className="perch-admin-field-label">Locations (optional)</span>
-                    {locations.map((l, i) => (
-                        <div className="perch-admin-tier-row" key={i}>
-                            <TextField
-                                className="perch-admin-field"
-                                size="sm"
-                                label="Path"
-                                placeholder="/api"
-                                value={l.path}
-                                onValue={(v) => setLoc(i, { path: v })}
+                    <FormGroup title="Target">
+                        <div className="perch-form-grid">
+                            <SelectField
+                                label="Kind"
+                                help="Route to a named upstream pool, or straight to a URL."
+                                value={d.targetKind}
+                                options={KIND_OPTIONS}
+                                onValue={(v) => patch({ targetKind: v as TargetKind, targetValue: '' })}
+                            />
+                            {targetControl(d.targetKind, d.targetValue, (v) => patch({ targetValue: v }))}
+                        </div>
+                        {d.locations.map((l, i) => (
+                            <div key={i} className="perch-form-item">
+                                <div className="perch-form-row">
+                                    <TextField
+                                        size="sm"
+                                        label="Path"
+                                        placeholder="/api"
+                                        value={l.path}
+                                        onValue={(v) => patchLoc(i, { path: v })}
+                                    />
+                                    <SelectField
+                                        size="sm"
+                                        label="Kind"
+                                        value={l.kind}
+                                        options={LOC_KIND_OPTIONS}
+                                        onValue={(v) => patchLoc(i, { kind: v as LocTargetKind, value: '' })}
+                                    />
+                                    {l.kind !== 'inherit' &&
+                                        targetControl(l.kind, l.value, (v) => patchLoc(i, { value: v }))}
+                                </div>
+                                <div className="perch-form-switches">
+                                    <SwitchField
+                                        label="WebSocket"
+                                        checked={l.websocket}
+                                        onChecked={(c) => patchLoc(i, { websocket: c })}
+                                    />
+                                    <SwitchField
+                                        label="Advanced (raw nginx)"
+                                        checked={l.showAdvanced}
+                                        onChecked={(c) => patchLoc(i, { showAdvanced: c })}
+                                    />
+                                </div>
+                                {l.showAdvanced && (
+                                    <TextAreaField
+                                        label={`Raw nginx for ${l.path.trim() || '/'}`}
+                                        rows={3}
+                                        placeholder="proxy_set_header X-Location-Scoped 1;"
+                                        help="A bad snippet disables only this proxy via nginx -t."
+                                        value={l.advanced}
+                                        onValue={(v) => patchLoc(i, { advanced: v })}
+                                    />
+                                )}
+                                <div className="perch-list-actions">
+                                    <tc-button variant="danger" size="sm" outline onClick={() => removeLoc(i)}>
+                                        Remove location
+                                    </tc-button>
+                                </div>
+                            </div>
+                        ))}
+                        <div className="perch-form-row">
+                            <tc-button variant="secondary" size="sm" outline onClick={addLoc}>
+                                Add location
+                            </tc-button>
+                        </div>
+                    </FormGroup>
+
+                    <FormGroup title="TLS & security">
+                        <div className="perch-form-grid">
+                            <SelectField
+                                label="TLS"
+                                help="auto degrades to HTTP while no cert exists; required quarantines without one."
+                                value={d.tls}
+                                options={TLS_OPTIONS}
+                                onValue={(v) => {
+                                    const mode = v as TlsMode
+                                    patch(
+                                        mode === 'off'
+                                            ? { tls: mode, forceSsl: false, http2: false, hsts: false }
+                                            : { tls: mode },
+                                    )
+                                }}
                             />
                             <SelectField
-                                className="perch-admin-field"
-                                size="sm"
-                                label="Kind"
-                                value={l.kind}
-                                options={LOC_KIND_OPTIONS}
-                                onValue={(v) => setLoc(i, { kind: v as LocTargetKind, value: '' })}
+                                label="Access list"
+                                help="IP allow/deny + basic auth policy (Routing → Access lists)."
+                                value={d.accessList}
+                                options={accessListOptions}
+                                onValue={(v) => patch({ accessList: v })}
                             />
-                            {l.kind !== 'inherit' && targetControl(l.kind, l.value, (v) => setLoc(i, { value: v }))}
-                            <CheckField
-                                className="perch-routing-check"
-                                inline
-                                label="websocket"
-                                checked={l.websocket}
-                                onChecked={(c) => setLoc(i, { websocket: c })}
-                            />
-                            <tc-button variant="danger" size="sm" outline onClick={() => removeLoc(i)}>
-                                Remove
-                            </tc-button>
                         </div>
-                    ))}
-
-                    <div className="perch-admin-tier-actions">
-                        <tc-button variant="secondary" outline onClick={addLoc}>
-                            Add location
-                        </tc-button>
-                        {editing && (
-                            <tc-button variant="secondary" outline onClick={reset}>
-                                Cancel
-                            </tc-button>
+                        <div className="perch-form-switches">
+                            <SwitchField
+                                label="Force HTTPS"
+                                disabled={tlsOff}
+                                checked={d.forceSsl}
+                                onChecked={(c) => patch({ forceSsl: c })}
+                            />
+                            <SwitchField
+                                label="HTTP/2"
+                                disabled={tlsOff}
+                                checked={d.http2}
+                                onChecked={(c) => patch({ http2: c })}
+                            />
+                            <SwitchField
+                                label="HSTS"
+                                disabled={tlsOff}
+                                checked={d.hsts}
+                                onChecked={(c) => patch({ hsts: c })}
+                            />
+                            <SwitchField
+                                label="Block exploits"
+                                checked={d.blockExploits}
+                                onChecked={(c) => patch({ blockExploits: c })}
+                            />
+                        </div>
+                        {d.hsts && !tlsOff && (
+                            <HstsOptionsRow draft={d.hstsOpts} onDraft={(next) => patch({ hstsOpts: next })} />
                         )}
-                        <tc-button type="submit" variant="primary" loading={busy || undefined}>
-                            {editing ? 'Save changes' : 'Create proxy'}
-                        </tc-button>
-                    </div>
-                </form>
-            </tc-section-card>
+                    </FormGroup>
+
+                    <FormGroup title="Performance">
+                        <div className="perch-form-grid">
+                            <TextField
+                                label="Max body size"
+                                placeholder="512MiB"
+                                value={d.maxBody}
+                                onValue={(v) => patch({ maxBody: v })}
+                            />
+                            <TextField
+                                label="Connect timeout"
+                                placeholder="60s"
+                                help="Blank = nginx default."
+                                value={d.connectTimeout}
+                                onValue={(v) => patch({ connectTimeout: v })}
+                            />
+                            <TextField
+                                label="Read timeout"
+                                placeholder="60s"
+                                value={d.readTimeout}
+                                onValue={(v) => patch({ readTimeout: v })}
+                            />
+                            <TextField
+                                label="Send timeout"
+                                placeholder="60s"
+                                value={d.sendTimeout}
+                                onValue={(v) => patch({ sendTimeout: v })}
+                            />
+                        </div>
+                        <div className="perch-form-switches">
+                            <SwitchField
+                                label="WebSocket (all locations)"
+                                checked={d.websocket}
+                                onChecked={(c) => patch({ websocket: c })}
+                            />
+                            <SwitchField label="Gzip" checked={d.gzip} onChecked={(c) => patch({ gzip: c })} />
+                            <SwitchField
+                                label="Cache"
+                                checked={d.cacheEnabled}
+                                onChecked={(c) => patch({ cacheEnabled: c })}
+                            />
+                        </div>
+                        {d.cacheEnabled && (
+                            <div className="perch-form-grid">
+                                <TextField
+                                    label="Cache zone size"
+                                    placeholder="10m"
+                                    value={d.cacheZone}
+                                    onValue={(v) => patch({ cacheZone: v })}
+                                />
+                                <TextField
+                                    label="Cache valid (comma-separated)"
+                                    placeholder="200 10m, 404 1m"
+                                    value={d.cacheValid}
+                                    onValue={(v) => patch({ cacheValid: v })}
+                                />
+                            </div>
+                        )}
+                    </FormGroup>
+
+                    <FormGroup title="Advanced">
+                        <TextAreaField
+                            label="Raw nginx (server block)"
+                            rows={3}
+                            placeholder="add_header X-Frame-Options SAMEORIGIN;"
+                            help="Rides the daemon's nginx -t gate — a bad snippet quarantines only this proxy."
+                            value={d.advanced}
+                            onValue={(v) => patch({ advanced: v })}
+                        />
+                    </FormGroup>
+                </FormModal>
+            )}
+
+            <VhostPreviewModal domain={viewing} onClose={() => setViewing(null)} />
 
             <ConfirmDialog
                 open={!!pendingDisable}
@@ -665,9 +828,9 @@ function ProxiesManager({
                 confirmLabel="Disable"
                 danger
                 onConfirm={() => {
-                    const d = pendingDisable
+                    const dd = pendingDisable
                     setPendingDisable(null)
-                    if (d) void applyEnabled(d, false)
+                    if (dd) void applyEnabled(dd, false)
                 }}
                 onCancel={() => setPendingDisable(null)}
             />

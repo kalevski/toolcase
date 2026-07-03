@@ -1,0 +1,19 @@
+{
+    "redirects": [
+        {
+            "domain": "old.example.com",
+            "to": "new.example.com",
+            "scheme": "https",
+            "code": 308,
+            "preserve_path": false,
+            "tls": "auto",
+            "hsts": { "enabled": true, "max_age": 31536000, "include_subdomains": true },
+            "http2": true
+        },
+        {
+            "domain": "*.legacy.example.com",
+            "enabled": false,
+            "to": "hub.example.com:8443"
+        }
+    ]
+}

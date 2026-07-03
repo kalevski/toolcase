@@ -95,43 +95,79 @@ func (s *Server) Run(ctx context.Context, listen string) error {
 	}
 }
 
+// endpoint is one admin route. The table below is the single source of truth
+// for the surface: routes() registers it, GET /schema documents it, and a test
+// asserts the two can never drift (every endpoint must carry schema docs).
+type endpoint struct {
+	method  string
+	pattern string // net/http pattern, {param} placeholders included
+	auth    bool
+	handler func(s *Server) http.HandlerFunc
+}
+
+// endpoints returns the full admin surface in registration order.
+func endpoints() []endpoint {
+	return []endpoint{
+		{"GET", "/healthz", false, func(s *Server) http.HandlerFunc { return s.handleHealthz }},
+		{"GET", "/schema", false, func(s *Server) http.HandlerFunc { return s.handleSchema }},
+		{"GET", "/status", true, func(s *Server) http.HandlerFunc { return s.handleStatus }},
+		{"POST", "/sync/{domain}", true, func(s *Server) http.HandlerFunc { return s.handleSync }},
+		{"GET", "/vhost/{domain}", true, func(s *Server) http.HandlerFunc { return s.handleVhost }},
+		{"POST", "/reload", true, func(s *Server) http.HandlerFunc { return s.handleReload }},
+		{"GET", "/sites", true, func(s *Server) http.HandlerFunc { return s.handleListSites }},
+		{"POST", "/sites", true, func(s *Server) http.HandlerFunc { return s.handleCreateSite }},
+		{"DELETE", "/sites/{domain}", true, func(s *Server) http.HandlerFunc { return s.handleDeleteSite }},
+		{"GET", "/upstreams", true, func(s *Server) http.HandlerFunc { return s.handleListUpstreams }},
+		{"POST", "/upstreams", true, func(s *Server) http.HandlerFunc { return s.handleCreateUpstream }},
+		{"DELETE", "/upstreams/{name}", true, func(s *Server) http.HandlerFunc { return s.handleDeleteUpstream }},
+		{"GET", "/proxies", true, func(s *Server) http.HandlerFunc { return s.handleListProxies }},
+		{"POST", "/proxies", true, func(s *Server) http.HandlerFunc { return s.handleCreateProxy }},
+		{"DELETE", "/proxies/{domain}", true, func(s *Server) http.HandlerFunc { return s.handleDeleteProxy }},
+		{"GET", "/redirects", true, func(s *Server) http.HandlerFunc { return s.handleListRedirects }},
+		{"POST", "/redirects", true, func(s *Server) http.HandlerFunc { return s.handleCreateRedirect }},
+		{"DELETE", "/redirects/{domain}", true, func(s *Server) http.HandlerFunc { return s.handleDeleteRedirect }},
+		{"GET", "/dead-hosts", true, func(s *Server) http.HandlerFunc { return s.handleListDeadHosts }},
+		{"POST", "/dead-hosts", true, func(s *Server) http.HandlerFunc { return s.handleCreateDeadHost }},
+		{"DELETE", "/dead-hosts/{domain}", true, func(s *Server) http.HandlerFunc { return s.handleDeleteDeadHost }},
+		{"GET", "/access-lists", true, func(s *Server) http.HandlerFunc { return s.handleListAccessLists }},
+		{"POST", "/access-lists", true, func(s *Server) http.HandlerFunc { return s.handleCreateAccessList }},
+		{"DELETE", "/access-lists/{name}", true, func(s *Server) http.HandlerFunc { return s.handleDeleteAccessList }},
+		{"PUT", "/access-lists/{name}/users/{username}", true, func(s *Server) http.HandlerFunc { return s.handleSetAccessListUser }},
+		{"GET", "/streams", true, func(s *Server) http.HandlerFunc { return s.handleListStreams }},
+		{"POST", "/streams", true, func(s *Server) http.HandlerFunc { return s.handleCreateStream }},
+		{"DELETE", "/streams/{name}", true, func(s *Server) http.HandlerFunc { return s.handleDeleteStream }},
+		{"GET", "/stream-upstreams", true, func(s *Server) http.HandlerFunc { return s.handleListStreamUpstreams }},
+		{"POST", "/stream-upstreams", true, func(s *Server) http.HandlerFunc { return s.handleCreateStreamUpstream }},
+		{"DELETE", "/stream-upstreams/{name}", true, func(s *Server) http.HandlerFunc { return s.handleDeleteStreamUpstream }},
+		{"POST", "/nginx/test", true, func(s *Server) http.HandlerFunc { return s.handleNginxTest }},
+		{"GET", "/certs", true, func(s *Server) http.HandlerFunc { return s.handleListCerts }},
+		{"POST", "/certs", true, func(s *Server) http.HandlerFunc { return s.handleIssueCert }},
+		{"GET", "/certs/jobs", true, func(s *Server) http.HandlerFunc { return s.handleListCertJobs }},
+		{"GET", "/certs/jobs/{id}", true, func(s *Server) http.HandlerFunc { return s.handleCertJob }},
+		{"PUT", "/certs/{domain}", true, func(s *Server) http.HandlerFunc { return s.handleUploadCert }},
+		{"POST", "/certs/renew", true, func(s *Server) http.HandlerFunc { return s.handleRenewDue }},
+		{"POST", "/certs/{domain}/renew", true, func(s *Server) http.HandlerFunc { return s.handleRenewCert }},
+		{"DELETE", "/certs/{domain}", true, func(s *Server) http.HandlerFunc { return s.handleDeleteCert }},
+		{"GET", "/acme/credentials", true, func(s *Server) http.HandlerFunc { return s.handleListCreds }},
+		{"PUT", "/acme/credentials/{provider}", true, func(s *Server) http.HandlerFunc { return s.handleSetCreds }},
+		{"DELETE", "/acme/credentials/{provider}", true, func(s *Server) http.HandlerFunc { return s.handleDeleteCreds }},
+	}
+}
+
+func (s *Server) handleHealthz(w http.ResponseWriter, _ *http.Request) {
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	_, _ = w.Write([]byte("ok\n"))
+}
+
 func (s *Server) routes() http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		_, _ = w.Write([]byte("ok\n"))
-	})
-	mux.HandleFunc("GET /status", s.auth(s.handleStatus))
-	mux.HandleFunc("POST /sync/{domain}", s.auth(s.handleSync))
-	mux.HandleFunc("GET /vhost/{domain}", s.auth(s.handleVhost))
-	mux.HandleFunc("POST /reload", s.auth(s.handleReload))
-	mux.HandleFunc("GET /sites", s.auth(s.handleListSites))
-	mux.HandleFunc("POST /sites", s.auth(s.handleCreateSite))
-	mux.HandleFunc("DELETE /sites/{domain}", s.auth(s.handleDeleteSite))
-	mux.HandleFunc("GET /upstreams", s.auth(s.handleListUpstreams))
-	mux.HandleFunc("POST /upstreams", s.auth(s.handleCreateUpstream))
-	mux.HandleFunc("DELETE /upstreams/{name}", s.auth(s.handleDeleteUpstream))
-	mux.HandleFunc("GET /proxies", s.auth(s.handleListProxies))
-	mux.HandleFunc("POST /proxies", s.auth(s.handleCreateProxy))
-	mux.HandleFunc("DELETE /proxies/{domain}", s.auth(s.handleDeleteProxy))
-	mux.HandleFunc("GET /streams", s.auth(s.handleListStreams))
-	mux.HandleFunc("POST /streams", s.auth(s.handleCreateStream))
-	mux.HandleFunc("DELETE /streams/{name}", s.auth(s.handleDeleteStream))
-	mux.HandleFunc("GET /stream-upstreams", s.auth(s.handleListStreamUpstreams))
-	mux.HandleFunc("POST /stream-upstreams", s.auth(s.handleCreateStreamUpstream))
-	mux.HandleFunc("DELETE /stream-upstreams/{name}", s.auth(s.handleDeleteStreamUpstream))
-	mux.HandleFunc("POST /nginx/test", s.auth(s.handleNginxTest))
-	mux.HandleFunc("GET /certs", s.auth(s.handleListCerts))
-	mux.HandleFunc("POST /certs", s.auth(s.handleIssueCert))
-	mux.HandleFunc("GET /certs/jobs", s.auth(s.handleListCertJobs))
-	mux.HandleFunc("GET /certs/jobs/{id}", s.auth(s.handleCertJob))
-	mux.HandleFunc("PUT /certs/{domain}", s.auth(s.handleUploadCert))
-	mux.HandleFunc("POST /certs/renew", s.auth(s.handleRenewDue))
-	mux.HandleFunc("POST /certs/{domain}/renew", s.auth(s.handleRenewCert))
-	mux.HandleFunc("DELETE /certs/{domain}", s.auth(s.handleDeleteCert))
-	mux.HandleFunc("GET /acme/credentials", s.auth(s.handleListCreds))
-	mux.HandleFunc("PUT /acme/credentials/{provider}", s.auth(s.handleSetCreds))
-	mux.HandleFunc("DELETE /acme/credentials/{provider}", s.auth(s.handleDeleteCreds))
+	for _, e := range endpoints() {
+		handler := e.handler(s)
+		if e.auth {
+			handler = s.auth(handler)
+		}
+		mux.HandleFunc(e.method+" "+e.pattern, handler)
+	}
 	return mux
 }
 
@@ -154,13 +190,16 @@ func (s *Server) handleStatus(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	payload := map[string]any{"sites": s.mgr.Status()}
 	// Managed mode: surface the last apply's per-resource states (active /
-	// disabled with the nginx -t reason) so a control plane sees quarantined
-	// resources.
+	// disabled / at_risk with the nginx -t or pre-flight reason) so a control
+	// plane sees quarantined and at-risk resources.
 	if managed, resources := s.mgr.NginxStatus(); managed {
-		disabled := 0
+		disabled, atRisk := 0, 0
 		for _, r := range resources {
-			if r.State == "disabled" {
+			switch r.State {
+			case nginxctl.StateDisabled:
 				disabled++
+			case nginxctl.StateAtRisk:
+				atRisk++
 			}
 		}
 		if resources == nil {
@@ -170,8 +209,24 @@ func (s *Server) handleStatus(w http.ResponseWriter, _ *http.Request) {
 			"managed":        true,
 			"resources":      resources,
 			"disabled_count": disabled,
+			"at_risk_count":  atRisk,
+			"reconcile":      s.mgr.ReconcileStatus(),
+			"real_ip":        s.mgr.RealIPStatus(),
 		}
 	}
+	// Renewal scheduler summary (present whether or not acme is enabled, so a
+	// control plane can tell "disabled" from "missing").
+	renewal := s.mgr.RenewalStatus()
+	certsRenewal := map[string]any{
+		"enabled":        renewal.Enabled,
+		"check_interval": renewal.CheckInterval.String(),
+		"renew_before":   renewal.RenewBefore.String(),
+	}
+	if !renewal.NextCheck.IsZero() {
+		certsRenewal["next_check"] = renewal.NextCheck
+	}
+	payload["certs_renewal"] = certsRenewal
+
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
 	if err := enc.Encode(payload); err != nil {
@@ -208,13 +263,25 @@ func (s *Server) handleSync(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("sync scheduled\n"))
 		return
 	}
-	// Not a managed site. Distinguish a configured reverse proxy (which has no
-	// content to sync) from a genuinely unknown domain so the caller isn't told
-	// a domain it can see in /vhost is "unknown".
+	// Not a managed site. Distinguish a configured reverse proxy / redirect /
+	// dead host (none of which have content to sync) from a genuinely unknown
+	// domain so the caller isn't told a domain it can see in /vhost is "unknown".
 	cfg := s.mgr.Config()
 	for i := range cfg.Proxies {
 		if cfg.Proxies[i].Domain == domain {
 			http.Error(w, "domain is a reverse proxy, not a synced site", http.StatusBadRequest)
+			return
+		}
+	}
+	for i := range cfg.Redirects {
+		if cfg.Redirects[i].Domain == domain {
+			http.Error(w, "domain is a redirect, not a synced site", http.StatusBadRequest)
+			return
+		}
+	}
+	for i := range cfg.DeadHosts {
+		if cfg.DeadHosts[i].Domain == domain {
+			http.Error(w, "domain is a dead host (parked), not a synced site", http.StatusBadRequest)
 			return
 		}
 	}

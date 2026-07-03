@@ -40,18 +40,16 @@ const LEVEL_OPTIONS: SelectOption[] = [
     { value: 'all', label: 'All levels' },
     { value: 'owner', label: 'Owner' },
     { value: 'maintainer', label: 'Maintainer' },
-    { value: 'paid', label: 'Paid' },
-    { value: 'free', label: 'Free' },
+    { value: 'standard', label: 'Standard' },
 ]
 
 const MB = 1024 * 1024
 
-// tc-badge variant per account level — owner stands out, paid reads positive.
+// tc-badge variant per account level — owner stands out.
 const LEVEL_VARIANT: Record<AccountLevel, string> = {
     owner: 'primary',
     maintainer: 'info',
-    paid: 'success',
-    free: 'secondary',
+    standard: 'secondary',
 }
 
 // ── small formatters (formatBytes returns "0 B" for Infinity; show ∞ instead) ──
@@ -59,7 +57,7 @@ const fmtCount = (n: number) => (isFinite(n) ? String(n) : '∞')
 const fmtBytes = (n: number) => (isFinite(n) ? formatBytes(n) : '∞')
 
 // ── tc-table model (P1/P3) ─────────────────────────────────────────────────────
-// One row per account: an identity cell (name + @login + level/plan/custom badges
+// One row per account: an identity cell (name + @login + level/custom badges
 // + the effective-limits readout), a role <select>, and Limits / Realms toggle
 // buttons. The inline LimitsEditor / RealmsEditor panels stay React, rendered
 // BELOW the table keyed off the selected user, so no React subtree is captured.
@@ -74,7 +72,6 @@ function badge(variant: string, text: string): string {
 
 function userIdentityHtml(r: AdminUserRow): string {
     const badges: string[] = [badge(LEVEL_VARIANT[r.level], ACCOUNT_LEVEL_LABEL[r.level])]
-    if (r.plan !== 'free') badges.push(badge('light', r.plan))
     if (r.customLimits) badges.push(badge('warning', 'custom limits'))
     const metaPair = (label: string, value: string) =>
         `<span><dt>${escapeHtml(label)}</dt> <dd>${escapeHtml(value)}</dd></span>`

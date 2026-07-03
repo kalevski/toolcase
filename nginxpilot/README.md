@@ -202,6 +202,34 @@ proxies:
 
 Generate the nginx config: `nginxpilot print-vhost api.example.com`. The output is **self-contained** — it emits each referenced named upstream `upstream {}` block followed by the `server {}` block. If you share one upstream across several proxies, emit it once and drop the duplicate. Standard forwarding headers (`Host`, `X-Real-IP`, `X-Forwarded-For`, `X-Forwarded-Proto`) are always set; TLS stays a commented certbot hint unless you opt into [managed mode](#managed-mode).
 
+Every location also accepts an `advanced: |` raw passthrough (the location-level twin of the server-level `advanced`), and backend targets are strictly validated — a `pass`/`address` may only be a well-formed `scheme://host[:port][/path]`, `host[:port]` or `unix:/path`; nginx metacharacters (`;`, `{`, `}`, `$`, whitespace) are rejected at validation time.
+
+### Redirection hosts and dead (parked) hosts
+
+Two lightweight host types share the site/proxy domain namespace and the full per-host TLS/HSTS toggles:
+
+```yaml
+redirects:
+  - domain: old.example.com
+    to: new.example.com        # target host (no scheme, optionally :port)
+    scheme: auto               # http | https | auto (default auto → $scheme)
+    code: 301                  # 301 (default) | 302 | 303 | 307 | 308
+    preserve_path: true        # default true → appends $request_uri
+    tls: auto                  # with a cert, https://old.example.com also redirects
+
+dead_hosts:
+  - domain: gone.example.com
+    code: 404                  # 404 (default) | 410 | 444 | 503 (444 closes with no response)
+    tls: auto                  # keeps the cert warm while the service is retired
+    force_ssl: true            # allowed here (NOT on redirects — the redirect IS the redirect)
+```
+
+Self-redirects (`to:` equal to `domain`) and `force_ssl` on a redirect are validation errors. Both types support `enabled: false` (render nothing, keep the config) and wildcard domains.
+
+### Wildcard vhosts
+
+Proxies, redirects and dead hosts accept one leading `*.` label (`*.example.com`); sites do not. Managed files and API fragments use certbot's `_wildcard.` stem on disk (`proxy-_wildcard.example.com.conf`). A wildcard vhost matches a cert whose SANs carry the identical `*.example.com` pattern — issuing one requires `acme.challenge: dns`. A wildcard and an exact vhost (`*.example.com` + `app.example.com`) may coexist; nginx prefers the exact `server_name`.
+
 ## Managed mode
 
 By default nginxpilot is a config **generator** (print-vhost + manual paste). Opt into **managed mode** and it becomes the thing that **writes the live nginx config and reloads nginx** — unlocking TLS termination, per-host toggles and `stream` blocks. The default (`nginx.manage: false`) is unchanged: existing deployments behave exactly as before.
@@ -247,6 +275,53 @@ nginxpilot **consumes** certs (certbot/acme.sh/external issue and renew them) an
 ```
 
 Opt in per resource with `tls:` — `off` (default, HTTP only), `auto` (use a cert if found, else serve HTTP + warn), or `required` (no cert → the resource is disabled rather than silently served plaintext).
+
+### Automatic certificate renewal
+
+With `acme.enabled`, the daemon checks every `check_interval` (plus one catch-up pass ~30 s after startup) and force-renews any certbot-managed cert with less than `renew_before` to expiry, then reloads nginx **once** per batch. Manual flat certs can't be renewed by certbot — they log a warning until re-uploaded.
+
+```yaml
+acme:
+  enabled: true
+  # ...
+  renewal:
+    enabled: true          # default true when acme.enabled
+    check_interval: 1h     # default 1h, min 1m
+    renew_before: 24h      # default 24h — consider raising it (LE recommends 30d);
+                           # <= check_interval leaves zero slack and logs a warning
+```
+
+Per-cert state (`renew_managed`, `last_renew_time`, `last_renew_error`, `expires_in_seconds`) shows in `GET /certs`; the scheduler summary in `GET /status` under `certs_renewal`. `POST /certs/renew` / `POST /certs/{domain}/renew` remain the manual force paths.
+
+### Pre-flight target checks
+
+Backend targets are checked in three tiers: strict lexical validation always runs (the injection guard above); DNS resolution and an optional TCP reachability probe run on admin API writes:
+
+```yaml
+nginx:
+  target_checks:
+    dns: error        # error (default) | warn | off — API-write severity
+    reachability: off # probe | off (default) — always warn-only
+    timeout: 3s       # per-check budget
+```
+
+`dns: error` turns an unresolvable backend host into a `400` at `POST /proxies` time (override for DNS-lands-later bootstraps: `?skip_target_checks=true`); `warn` demotes it to a `warnings` array in the response, as reachability always is. On the apply path DNS failures never block anything — they only replace the raw `nginx -t` stderr of a quarantined resource with a self-explanatory reason. `nginxpilot validate --check-targets` runs the network tiers from the CLI (plain `validate` stays offline).
+
+### Reconciliation loop
+
+In managed mode the daemon re-checks the whole config against `nginx -t` (a staged dry-run, never touching live config) every `interval`:
+
+```yaml
+nginx:
+  reconcile:
+    enabled: true        # default true in managed mode
+    interval: 1m         # default 1m, min 15s
+    on_failure: warn     # warn (default) | disable
+```
+
+- A live resource that starts failing the dry-run (e.g. its backend's DNS record was deleted — nginx caches load-time resolution, so traffic still flows) is marked **`at_risk`** in `GET /status` with a `since` timestamp. **Policy `warn` (default) never touches traffic.**
+- **`on_failure: disable` turns latent failures into immediate route removal**: after 2 consecutive failing ticks the loop triggers an apply whose quarantine pass disables exactly the failing resource.
+- **Auto-recovery is always on**: a quarantined resource that passes 2 consecutive ticks is re-applied (strictly safe — it only ever adds a resource back after the staged `nginx -t` proves the config valid). Flap damping in both directions prevents reload ping-pong; steady state costs zero reloads.
 
 ### Per-host toggles
 
@@ -335,8 +410,14 @@ A control plane (e.g. Perch) drives the **entire** config — sites, upstreams a
 | `POST /upstreams` | one `upstreams:` entry | `upstream-<name>.yml` | `201` / `200` |
 | `DELETE /upstreams/{name}` | — | `upstream-<name>.yml` | `200` / `404`; **`409`** if a proxy still references it (checked before any disk change, so the on-disk config never drifts into a state a restart would reject — repoint or delete the dependent proxy first) |
 | `GET /proxies` | — | — | JSON list of configured reverse proxies |
-| `POST /proxies` | one `proxies:` entry | `proxy-<domain>.yml` | `201` / `200`; a proxy that names an `upstream:` resolves against the upstreams **already** in the running config, so create the upstream first |
+| `POST /proxies` | one `proxies:` entry | `proxy-<domain>.yml` | `201` / `200`; a proxy that names an `upstream:` resolves against the upstreams **already** in the running config, so create the upstream first; unresolvable backend hosts are a `400` under `target_checks.dns: error` (`?skip_target_checks=true` overrides) |
 | `DELETE /proxies/{domain}` | — | `proxy-<domain>.yml` | `200` / `404` |
+| `GET /redirects` | — | — | JSON list of redirection hosts |
+| `POST /redirects` | one `redirects:` entry | `redirect-<domain>.yml` | `201` / `200` |
+| `DELETE /redirects/{domain}` | — | `redirect-<domain>.yml` | `200` / `404` |
+| `GET /dead-hosts` | — | — | JSON list of dead (parked) hosts |
+| `POST /dead-hosts` | one `dead_hosts:` entry | `dead-<domain>.yml` | `201` / `200` |
+| `DELETE /dead-hosts/{domain}` | — | `dead-<domain>.yml` | `200` / `404` |
 | `GET /stream-upstreams` | — | — | JSON list of stream (L4) upstreams |
 | `POST /stream-upstreams` | one `stream_upstreams:` entry | `stream-upstream-<name>.yml` | `201` / `200` |
 | `DELETE /stream-upstreams/{name}` | — | `stream-upstream-<name>.yml` | `200` / `404`; **`409`** if a stream still references it |

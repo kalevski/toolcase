@@ -35,7 +35,6 @@ import { resolveLimits } from '@/server/services/plan'
 import * as github from '@/server/infrastructure/github'
 import { GithubError } from '@/server/infrastructure/github'
 import { NginxpilotError, type NginxpilotSiteStatus } from '@/server/infrastructure/nginxpilot'
-import { NginxError } from '@/server/infrastructure/nginx'
 import { slog } from '@/server/infrastructure/server-log'
 import { resolveSiteAccess, type SiteViewer } from '@/server/domain/site-access'
 import { checkBranch, checkRepoName, checkRepoOwner, checkSubdir } from '@/server/domain/site-input'
@@ -409,10 +408,13 @@ export async function verifyDomain(viewer: SiteViewer, id: string): Promise<Veri
 
 // ── status proxy (§13) ───────────────────────────────────────────────────────────
 
-/** The managed-mode resource state for a domain (§0/Phase A) — null unless managed + present. */
+/** The managed-mode resource state for a domain (§0/Phase A) — null unless managed + present.
+ *  `at_risk` (A7) = still serving, but the reconcile loop says the next apply would fail. */
 export interface SiteNginxResourceState {
-    state: 'active' | 'disabled'
+    state: 'active' | 'disabled' | 'at_risk'
     reason?: string
+    /** ISO timestamp the reconcile loop first saw the resource failing. */
+    since?: string
 }
 
 /** The site's stored row plus the live nginxpilot `/status` entry for its domain (or null). */
@@ -436,7 +438,9 @@ export async function siteStatus(viewer: SiteViewer, id: string): Promise<SiteSt
     const env = await realms.clientForSite(site).status()
     const entry = env.sites.find((s) => s.domain === site.hostname) ?? null
     const resource = env.nginx?.resources.find((r) => r.kind === 'site' && r.key === site.hostname)
-    const nginxResource = resource ? { state: resource.state, reason: resource.reason } : null
+    const nginxResource = resource
+        ? { state: resource.state, reason: resource.reason, since: resource.since }
+        : null
 
     // Interactive enforcement fallback (C1): record the freshly-measured size and run the
     // byte-cap ladder on a status read, so an over-quota site flags/suspends even if the
@@ -473,9 +477,6 @@ export function httpErrorFor(err: unknown): HttpError {
     }
     if (err instanceof NginxpilotError) {
         return { status: 502, code: 'nginxpilot_error' }
-    }
-    if (err instanceof NginxError) {
-        return { status: 502, code: 'nginx_error' }
     }
     return { status: 500, code: 'internal_error' }
 }

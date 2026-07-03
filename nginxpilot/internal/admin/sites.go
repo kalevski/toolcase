@@ -23,6 +23,9 @@ const maxFragmentBytes = 64 << 10
 const (
 	upstreamStemPrefix       = "upstream-"
 	proxyStemPrefix          = "proxy-"
+	redirectStemPrefix       = "redirect-"
+	deadHostStemPrefix       = "dead-"
+	accessListStemPrefix     = "access-"
 	streamStemPrefix         = "stream-"
 	streamUpstreamStemPrefix = "stream-upstream-"
 )
@@ -49,8 +52,8 @@ func (s *Server) handleCreateSite(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("invalid fragment: %v", err), http.StatusBadRequest)
 		return
 	}
-	if len(frag.Sites) != 1 || len(frag.Upstreams) != 0 || len(frag.Proxies) != 0 {
-		http.Error(w, "fragment must declare exactly one site (and no upstreams or proxies)", http.StatusBadRequest)
+	if err := requireExactlyOne(frag, "site"); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -74,7 +77,7 @@ func (s *Server) handleCreateSite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.writeFragmentAndReload(w, target, body, "site", domain)
+	s.writeFragmentAndReload(w, target, body, "site", domain, nil)
 }
 
 // handleDeleteSite removes the deterministic fragment file for a domain and
@@ -137,8 +140,9 @@ func readFragmentBody(w http.ResponseWriter, r *http.Request) ([]byte, bool) {
 // writeFragmentAndReload writes a validated fragment to disk and reloads,
 // rolling the file back if the on-disk reload is rejected. kind/key are used
 // only for logging and the error/status text. Responds 201 (created) or 200
-// (updated an existing fragment).
-func (s *Server) writeFragmentAndReload(w http.ResponseWriter, target string, body []byte, kind, key string) {
+// (updated an existing fragment). When target-check warnings are present the
+// response is JSON ({status, warnings}) instead of the plain-text body.
+func (s *Server) writeFragmentAndReload(w http.ResponseWriter, target string, body []byte, kind, key string, warnings []string) {
 	_, statErr := os.Stat(target)
 	existed := statErr == nil
 	if err := writeFileAtomic(target, body); err != nil {
@@ -159,13 +163,20 @@ func (s *Server) writeFragmentAndReload(w http.ResponseWriter, target string, bo
 	}
 
 	s.log.Info(kind+" fragment written via API", "key", key, "file", target)
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	status := "created"
+	code := http.StatusCreated
 	if existed {
-		_, _ = w.Write([]byte("updated\n"))
+		status, code = "updated", http.StatusOK
+	}
+	if len(warnings) > 0 {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(code)
+		writeJSON(w, map[string]any{"status": status, "warnings": warnings}, s)
 		return
 	}
-	w.WriteHeader(http.StatusCreated)
-	_, _ = w.Write([]byte("created\n"))
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.WriteHeader(code)
+	_, _ = w.Write([]byte(status + "\n"))
 }
 
 // removeFragmentAndReload deletes a deterministic fragment file and reloads.
@@ -224,6 +235,30 @@ func validateCandidate(cfg *config.Config, frag *config.Fragment, target string)
 		}
 	}
 	cand.Proxies = append(proxies, frag.Proxies...)
+
+	redirects := make([]config.Redirect, 0, len(cfg.Redirects)+len(frag.Redirects))
+	for _, rd := range cfg.Redirects {
+		if rd.File != target {
+			redirects = append(redirects, rd)
+		}
+	}
+	cand.Redirects = append(redirects, frag.Redirects...)
+
+	deadHosts := make([]config.DeadHost, 0, len(cfg.DeadHosts)+len(frag.DeadHosts))
+	for _, d := range cfg.DeadHosts {
+		if d.File != target {
+			deadHosts = append(deadHosts, d)
+		}
+	}
+	cand.DeadHosts = append(deadHosts, frag.DeadHosts...)
+
+	accessLists := make([]config.AccessList, 0, len(cfg.AccessLists)+len(frag.AccessLists))
+	for _, a := range cfg.AccessLists {
+		if a.File != target {
+			accessLists = append(accessLists, a)
+		}
+	}
+	cand.AccessLists = append(accessLists, frag.AccessLists...)
 
 	streamUpstreams := make([]config.StreamUpstream, 0, len(cfg.StreamUpstreams)+len(frag.StreamUpstreams))
 	for _, u := range cfg.StreamUpstreams {

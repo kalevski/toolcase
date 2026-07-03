@@ -17,6 +17,10 @@ import {
     mechanismLabel,
     validateCredentialRequest,
     KNOWN_PROVIDERS,
+    INI_TEMPLATE_PROVIDERS,
+    PROVIDER_PATTERN,
+    iniTemplate,
+    renderIniCredentials,
 } from './cert-input'
 
 describe('normalizeCertDomain', () => {
@@ -149,6 +153,58 @@ describe('validateCredentialRequest', () => {
             expect(p.id).toMatch(/^[a-z0-9-]+$/)
             expect(p.label.length).toBeGreaterThan(0)
             expect(['token', 'aws', 'google', 'raw']).toContain(p.shape)
+        }
+    })
+})
+
+// ── raw-INI field templates (perch_better.md C4) ─────────────────────────────────
+
+describe('renderIniCredentials', () => {
+    const ovh = iniTemplate('ovh')!
+
+    it('assembles the plugin-documented INI body from filled fields', () => {
+        expect(
+            renderIniCredentials(ovh, {
+                dns_ovh_endpoint: 'ovh-eu',
+                dns_ovh_application_key: 'appkey',
+                dns_ovh_application_secret: 'appsecret',
+                dns_ovh_consumer_key: 'consumer',
+            }),
+        ).toBe(
+            [
+                'dns_ovh_endpoint = ovh-eu',
+                'dns_ovh_application_key = appkey',
+                'dns_ovh_application_secret = appsecret',
+                'dns_ovh_consumer_key = consumer',
+                '',
+            ].join('\n'),
+        )
+    })
+
+    it('drops a blank optional field but throws on a blank required one', () => {
+        const rfc = iniTemplate('rfc2136')!
+        const body = renderIniCredentials(rfc, {
+            dns_rfc2136_server: '192.0.2.1',
+            dns_rfc2136_name: 'keyname',
+            dns_rfc2136_secret: 's3cret',
+            dns_rfc2136_algorithm: 'HMAC-SHA512',
+        })
+        expect(body).not.toContain('dns_rfc2136_port')
+        expect(() => renderIniCredentials(ovh, { dns_ovh_endpoint: 'ovh-eu' })).toThrow(/required/)
+    })
+
+    it('rejects embedded newlines (INI has no escaping)', () => {
+        const hetzner = iniTemplate('hetzner')!
+        expect(() => renderIniCredentials(hetzner, { dns_hetzner_api_token: "tok\ndns_evil = 1" })).toThrow(
+            /single line/,
+        )
+    })
+
+    it('every template id is a valid certbot plugin name and none collides with a convenience shape', () => {
+        for (const t of INI_TEMPLATE_PROVIDERS) {
+            expect(t.id).toMatch(PROVIDER_PATTERN)
+            expect(providerSpec(t.id)).toBeUndefined()
+            expect(t.fields.length).toBeGreaterThan(0)
         }
     })
 })

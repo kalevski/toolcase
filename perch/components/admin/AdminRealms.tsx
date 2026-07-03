@@ -7,6 +7,7 @@ import type { Realm } from '@/server/domain/types'
 import { AdminPage, json, useOwnerData } from './shared'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { DataTable } from '@/components/DataTable'
+import { FormModal, FormGroup } from '@/components/FormModal'
 import { TextField } from '@/components/fields'
 import { useToast } from '@/components/Toast'
 
@@ -21,14 +22,20 @@ interface RealmTest {
     ok: boolean
     healthz: boolean
     managed: boolean
+    /** Managed-mode resources the reconcile loop flags as at risk (A7). */
+    atRisk?: number
+    /** Managed-mode resources quarantined by nginx -t. */
+    disabled?: number
+    /** Daemon's self-reported API version (impl §6); absent on daemons without /schema. */
+    apiVersion?: string
     error?: string
 }
 
 // ── tc-table model (P1/P3) ─────────────────────────────────────────────────────
 // One row per realm. The identity cell (health dot + name + mono URL + badges) and
 // the action cell (Test / Set default / Rotate / Remove) are rendered as HTML
-// strings; the write-only token-rotate editor stays a React panel BELOW the table
-// (keyed off `rotating`), so no React subtree is captured into a table cell.
+// strings; the write-only token-rotate editor lives in its own FormModal (keyed off
+// `rotating`), so no React subtree is captured into a table cell.
 
 type RealmTestState = RealmTest | 'loading' | undefined
 
@@ -37,16 +44,27 @@ interface RealmRow extends Record<string, unknown> {
     test: RealmTestState
 }
 
-/** Health-dot class + title: green = ok, amber = reachable-but-status-failed,
- *  red = unreachable, grey = unknown/loading. */
+/** Health-dot class + title: green = ok, amber = reachable-but-status-failed OR
+ *  resources at risk / quarantined (A7), red = unreachable, grey = unknown/loading. */
 function healthDotMeta(test: RealmTestState): { cls: string; title: string } {
     if (test === 'loading') return { cls: 'perch-realm-dot--unknown', title: 'Checking…' }
     if (test) {
-        if (test.ok)
+        if (test.ok) {
+            // Amber before anything breaks: at_risk resources are still serving but
+            // would fail the next apply; disabled ones are already quarantined.
+            const atRisk = test.atRisk ?? 0
+            const disabled = test.disabled ?? 0
+            if (atRisk > 0 || disabled > 0) {
+                const parts: string[] = []
+                if (disabled > 0) parts.push(`${disabled} quarantined`)
+                if (atRisk > 0) parts.push(`${atRisk} at risk`)
+                return { cls: 'perch-realm-dot--warn', title: `Healthy, but ${parts.join(', ')}` }
+            }
             return {
                 cls: 'perch-realm-dot--ok',
                 title: test.managed ? 'Healthy (managed mode)' : 'Healthy',
             }
+        }
         if (test.healthz)
             return {
                 cls: 'perch-realm-dot--warn',
@@ -68,6 +86,11 @@ function realmIdentityHtml(row: RealmRow): string {
     if (r.isDefault) badges.push(badge('primary', 'default'))
     badges.push(badge(r.hasToken ? 'light' : 'secondary', r.hasToken ? 'token set' : 'no token'))
     if (test && test !== 'loading' && test.managed) badges.push(badge('info', 'managed'))
+    if (test && test !== 'loading' && test.apiVersion) badges.push(badge('light', `api v${test.apiVersion}`))
+    if (test && test !== 'loading' && test.ok && (test.disabled ?? 0) > 0)
+        badges.push(badge('danger', `${test.disabled} quarantined`))
+    if (test && test !== 'loading' && test.ok && (test.atRisk ?? 0) > 0)
+        badges.push(badge('warning', `${test.atRisk} at risk`))
     if (test && test !== 'loading' && !test.ok) badges.push(badge('danger', test.error ?? 'unreachable'))
     return (
         `<span class="perch-admin-realm-id">` +
@@ -79,7 +102,7 @@ function realmIdentityHtml(row: RealmRow): string {
     )
 }
 
-function realmActionsHtml(row: RealmRow, busy: boolean, rotatingId: string | null): string {
+function realmActionsHtml(row: RealmRow, busy: boolean): string {
     const { realm: r } = row
     const id = escapeHtml(r.id)
     const btn = (action: string, label: string, danger = false) =>
@@ -87,18 +110,18 @@ function realmActionsHtml(row: RealmRow, busy: boolean, rotatingId: string | nul
         `data-action="${action}" data-id="${id}"${busy && danger ? ' disabled' : ''}>${escapeHtml(label)}</button>`
     const parts = [btn('test', 'Test')]
     if (!r.isDefault) parts.push(btn('default', 'Set default'))
-    parts.push(btn('rotate', rotatingId === r.id ? 'Close' : 'Rotate token'))
+    parts.push(btn('rotate', 'Rotate token'))
     parts.push(btn('remove', 'Remove', true))
     return `<span class="perch-admin-domain-controls">${parts.join('')}</span>`
 }
 
-const REALM_COLUMNS = (busy: boolean, rotatingId: string | null): TableColumn[] => [
+const REALM_COLUMNS = (busy: boolean): TableColumn[] => [
     { key: 'identity', header: 'Realm', render: (row: RealmRow) => realmIdentityHtml(row) },
     {
         key: 'actions',
         header: '',
         align: 'right',
-        render: (row: RealmRow) => realmActionsHtml(row, busy, rotatingId),
+        render: (row: RealmRow) => realmActionsHtml(row, busy),
     },
 ]
 
@@ -128,11 +151,20 @@ export function AdminRealms() {
     )
 }
 
+/** Everything the add-realm form holds — one draft object; the modal resets by remount. */
+interface RealmDraft {
+    name: string
+    adminUrl: string
+    token: string
+}
+
+const emptyDraft = (): RealmDraft => ({ name: '', adminUrl: '', token: '' })
+
 function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => void }) {
     const toast = useToast()
-    const [name, setName] = useState('')
-    const [adminUrl, setAdminUrl] = useState('')
-    const [token, setToken] = useState('')
+    // The add-realm form: null = closed; a draft = the modal is open (create-only —
+    // realms have no edit flow; rename/rotate/default go through PATCH row actions).
+    const [form, setForm] = useState<RealmDraft | null>(null)
     const [error, setError] = useState<string | null>(null)
     const [busy, setBusy] = useState(false)
     // The realm awaiting remove confirmation, and the realm whose token is being rotated.
@@ -140,6 +172,18 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
     const [rotating, setRotating] = useState<string | null>(null)
     // Live health results, keyed by realm id (lazily filled by the test effect / button).
     const [tests, setTests] = useState<Record<string, RealmTest | 'loading'>>({})
+
+    const patchDraft = (p: Partial<RealmDraft>) => setForm((prev) => (prev ? { ...prev, ...p } : prev))
+
+    const openCreate = () => {
+        setError(null)
+        setForm(emptyDraft())
+    }
+
+    const close = useCallback(() => {
+        setForm(null)
+        setError(null)
+    }, [])
 
     const runTest = useCallback(async (id: string) => {
         setTests((t) => ({ ...t, [id]: 'loading' }))
@@ -167,16 +211,24 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
     }, [realms.map((r) => r.id).join(','), runTest])
 
     const add = useCallback(async () => {
-        const n = name.trim()
-        const u = adminUrl.trim()
-        if (!n || !u || busy) return
+        if (!form || busy) return
+        const n = form.name.trim()
+        const u = form.adminUrl.trim()
+        if (!n) {
+            setError('A realm needs a name.')
+            return
+        }
+        if (!u) {
+            setError('A realm needs an admin URL.')
+            return
+        }
         setBusy(true)
         setError(null)
         try {
             const res = await fetch('/api/admin/realms', {
                 method: 'POST',
                 headers: { 'content-type': 'application/json' },
-                body: JSON.stringify({ name: n, adminUrl: u, token: token.trim() }),
+                body: JSON.stringify({ name: n, adminUrl: u, token: form.token.trim() }),
             })
             if (!res.ok) {
                 const body = (await res.json().catch(() => null)) as { error?: string } | null
@@ -187,21 +239,20 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
                 )
                 return
             }
-            setName('')
-            setAdminUrl('')
-            setToken('')
             toast.show(`Realm “${n}” registered.`, { variant: 'success' })
+            setForm(null)
             onChanged()
         } catch {
             setError('Couldn’t add realm — network error.')
         } finally {
             setBusy(false)
         }
-    }, [name, adminUrl, token, busy, onChanged, toast])
+    }, [form, busy, onChanged, toast])
 
+    // Shared PATCH runner. Returns null on success (toast + reload fired) or the
+    // error message — the caller decides where it surfaces (page banner vs modal).
     const patch = useCallback(
-        async (realm: Realm, body: Record<string, unknown>, okMsg: string) => {
-            setError(null)
+        async (realm: Realm, body: Record<string, unknown>, okMsg: string): Promise<string | null> => {
             try {
                 const res = await fetch(`/api/admin/realms/${encodeURIComponent(realm.id)}`, {
                     method: 'PATCH',
@@ -210,22 +261,27 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
                 })
                 if (!res.ok) {
                     const b = (await res.json().catch(() => null)) as { error?: string } | null
-                    setError(
-                        b?.error
-                            ? `Couldn’t update ${realm.name}: ${b.error}.`
-                            : `Couldn’t update ${realm.name} (error ${res.status}).`,
-                    )
-                    return false
+                    return b?.error
+                        ? `Couldn’t update ${realm.name}: ${b.error}.`
+                        : `Couldn’t update ${realm.name} (error ${res.status}).`
                 }
                 toast.show(okMsg, { variant: 'success' })
                 onChanged()
-                return true
+                return null
             } catch {
-                setError(`Couldn’t update ${realm.name} — network error.`)
-                return false
+                return `Couldn’t update ${realm.name} — network error.`
             }
         },
         [onChanged, toast],
+    )
+
+    const setDefault = useCallback(
+        async (realm: Realm) => {
+            setError(null)
+            const msg = await patch(realm, { default: true }, `“${realm.name}” is now the default realm.`)
+            if (msg) setError(msg)
+        },
+        [patch],
     )
 
     const doRemove = useCallback(async () => {
@@ -259,7 +315,7 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
     }, [pending, busy, onChanged, toast])
 
     // One delegated handler for every realm-row control: Test / Set default /
-    // Rotate (toggle the below-table editor) / Remove (open the confirm dialog).
+    // Rotate (open the rotate-token modal) / Remove (open the confirm dialog).
     const onRowAction = useCallback(
         (action: string, dataset: DOMStringMap) => {
             const id = dataset.id
@@ -267,15 +323,14 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
             const realm = realms.find((r) => r.id === id)
             if (!realm) return
             if (action === 'test') void runTest(id)
-            else if (action === 'default')
-                void patch(realm, { default: true }, `“${realm.name}” is now the default realm.`)
-            else if (action === 'rotate') setRotating((cur) => (cur === id ? null : id))
+            else if (action === 'default') void setDefault(realm)
+            else if (action === 'rotate') setRotating(id)
             else if (action === 'remove') setPending(realm)
         },
-        [realms, runTest, patch],
+        [realms, runTest, setDefault],
     )
 
-    const columns = useMemo(() => REALM_COLUMNS(busy, rotating), [busy, rotating])
+    const columns = useMemo(() => REALM_COLUMNS(busy), [busy])
     const rows = useMemo<RealmRow[]>(
         () => realms.map((r) => ({ realm: r, test: tests[r.id] })),
         [realms, tests],
@@ -283,79 +338,93 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
     const rotatingRealm = rotating ? realms.find((r) => r.id === rotating) : undefined
 
     return (
-        <tc-section-card title="Realms" icon="server">
-            <div className="perch-admin-section">
-                <p className="perch-home-lead perch-admin-hint">
-                    Each realm is one nginxpilot instance. Sites, routing, and base domains are
-                    scoped to a realm; the default realm is where new users land. The admin token is
-                    encrypted at rest and never shown again.
-                </p>
-                {error && <tc-banner variant="danger">{error}</tc-banner>}
+        <>
+            <tc-section-card title="Realms" icon="server">
+                <div className="perch-admin-section">
+                    <p className="perch-home-lead perch-admin-hint">
+                        Each realm is one nginxpilot instance. Sites, routing, and base domains are
+                        scoped to a realm; the default realm is where new users land. The admin token is
+                        encrypted at rest and never shown again.
+                    </p>
+                    {error && !form && <tc-banner variant="danger">{error}</tc-banner>}
 
-                {realms.length === 0 ? (
-                    <tc-empty-state icon="server">No realms registered.</tc-empty-state>
-                ) : (
-                    <DataTable<RealmRow>
-                        columns={columns}
-                        rows={rows}
-                        rowKey={(row) => row.realm.id}
-                        onAction={onRowAction}
-                    />
-                )}
+                    <div className="perch-list-actions">
+                        <tc-button variant="primary" size="sm" onClick={openCreate}>
+                            Add realm
+                        </tc-button>
+                    </div>
 
-                {/* The write-only token-rotate editor renders below the table (not
-                    inside a cell) so no React subtree is captured by tc-table. */}
-                {rotatingRealm && (
-                    <RotateTokenRow
-                        realm={rotatingRealm}
-                        onDone={async (value) => {
-                            const ok = await patch(
-                                rotatingRealm,
-                                { token: value },
-                                value
-                                    ? `Token rotated for “${rotatingRealm.name}”.`
-                                    : `Token cleared for “${rotatingRealm.name}”.`,
-                            )
-                            if (ok) setRotating(null)
-                        }}
-                    />
-                )}
+                    {realms.length === 0 ? (
+                        <tc-empty-state icon="server">No realms registered.</tc-empty-state>
+                    ) : (
+                        <DataTable<RealmRow>
+                            columns={columns}
+                            rows={rows}
+                            rowKey={(row) => row.realm.id}
+                            onAction={onRowAction}
+                        />
+                    )}
+                </div>
+            </tc-section-card>
 
-                <form
-                    className="perch-admin-add-row"
-                    onSubmit={(e) => {
-                        e.preventDefault()
-                        void add()
-                    }}
+            {form && (
+                <FormModal
+                    key="new"
+                    title="Add realm"
+                    busy={busy}
+                    submitLabel="Add realm"
+                    onSubmit={() => void add()}
+                    onClose={close}
                 >
-                    <TextField
-                        value={name}
-                        onValue={setName}
-                        placeholder="prod-eu"
-                        ariaLabel="Realm name"
-                    />
-                    <TextField
-                        value={adminUrl}
-                        onValue={setAdminUrl}
-                        placeholder="https://nginxpilot.internal:9090"
-                        ariaLabel="Admin URL"
-                    />
-                    <TextField
-                        value={token}
-                        onValue={setToken}
-                        type="password"
-                        placeholder="Bearer token (optional)"
-                        ariaLabel="Admin token"
-                    />
-                    <tc-button
-                        type="submit"
-                        variant="primary"
-                        disabled={!name.trim() || !adminUrl.trim() || busy || undefined}
-                    >
-                        Add realm
-                    </tc-button>
-                </form>
-            </div>
+                    {error && <tc-banner variant="danger">{error}</tc-banner>}
+                    <FormGroup title="Identity">
+                        <TextField
+                            label="Name"
+                            placeholder="prod-eu"
+                            help="A short handle for this nginxpilot instance."
+                            value={form.name}
+                            onValue={(v) => patchDraft({ name: v })}
+                        />
+                    </FormGroup>
+                    <FormGroup title="Connection">
+                        <TextField
+                            label="Admin URL"
+                            placeholder="https://nginxpilot.internal:9090"
+                            help="Base URL of the instance’s admin API."
+                            value={form.adminUrl}
+                            onValue={(v) => patchDraft({ adminUrl: v })}
+                        />
+                        <TextField
+                            type="password"
+                            label="Admin token"
+                            placeholder="Bearer token (optional)"
+                            help="Write-only — encrypted at rest and never shown again. Blank if the instance runs unauthenticated."
+                            value={form.token}
+                            onValue={(v) => patchDraft({ token: v })}
+                        />
+                    </FormGroup>
+                </FormModal>
+            )}
+
+            {/* The write-only token-rotate editor is its own small modal (keyed per realm),
+                so no React subtree is captured by tc-table. */}
+            {rotatingRealm && (
+                <RotateTokenModal
+                    key={rotatingRealm.id}
+                    realm={rotatingRealm}
+                    onSave={(value) =>
+                        patch(
+                            rotatingRealm,
+                            { token: value },
+                            value
+                                ? `Token rotated for “${rotatingRealm.name}”.`
+                                : `Token cleared for “${rotatingRealm.name}”.`,
+                        )
+                    }
+                    onClose={() => setRotating(null)}
+                />
+            )}
+
             <ConfirmDialog
                 open={!!pending}
                 title="Remove realm?"
@@ -369,31 +438,58 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
                 onConfirm={() => void doRemove()}
                 onCancel={() => setPending(null)}
             />
-        </tc-section-card>
+        </>
     )
 }
 
-/** Inline write-only token rotation for one realm. Empty value clears the token (→ unauthenticated). */
-function RotateTokenRow({ realm, onDone }: { realm: Realm; onDone: (value: string) => void }) {
+/** Write-only token rotation for one realm, in a modal. An empty value clears the
+ *  token (→ the instance runs unauthenticated). `onSave` resolves to null on
+ *  success or an error message shown inside the modal (pilot error pattern). */
+function RotateTokenModal({
+    realm,
+    onSave,
+    onClose,
+}: {
+    realm: Realm
+    onSave: (value: string) => Promise<string | null>
+    onClose: () => void
+}) {
     const [value, setValue] = useState('')
+    const [error, setError] = useState<string | null>(null)
+    const [busy, setBusy] = useState(false)
+
+    const submit = async () => {
+        if (busy) return
+        setBusy(true)
+        setError(null)
+        const msg = await onSave(value.trim())
+        setBusy(false)
+        if (msg) {
+            setError(msg)
+            return
+        }
+        onClose()
+    }
+
     return (
-        <div className="perch-admin-limits">
-            <p className="perch-admin-hint">
-                Set a new bearer token for {realm.name}. Leave blank to clear it (the instance then
-                runs unauthenticated). The current token is never shown.
-            </p>
-            <div className="perch-admin-add-row">
+        <FormModal
+            title={`Rotate token — ${realm.name}`}
+            busy={busy}
+            submitLabel="Save token"
+            onSubmit={() => void submit()}
+            onClose={onClose}
+        >
+            {error && <tc-banner variant="danger">{error}</tc-banner>}
+            <FormGroup title="Credentials">
                 <TextField
+                    type="password"
+                    label="New token"
+                    placeholder="New token (blank = clear)"
+                    help={`Leave blank to clear the token — ${realm.name} then runs unauthenticated. The current token is never shown.`}
                     value={value}
                     onValue={setValue}
-                    type="password"
-                    placeholder="New token (blank = clear)"
-                    ariaLabel={`New token for ${realm.name}`}
                 />
-                <tc-button variant="primary" size="sm" onClick={() => onDone(value.trim())}>
-                    Save token
-                </tc-button>
-            </div>
-        </div>
+            </FormGroup>
+        </FormModal>
     )
 }

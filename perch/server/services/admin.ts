@@ -2,12 +2,9 @@
 // all reached only after `authorize('owner')`. It owns the four owner-only surfaces:
 //
 //   1. Subdomain pool   — list / add / remove base domains (`baseDomainRepo`, §10).
-//   2. Plan-tier mapping — read / replace the owner-editable `$ → plan` table
-//      (`planTierRepo`); changes apply to effective plans *immediately* because the
-//      plan is computed (`services/plan.ts`), never stored on the user (§8, §12).
-//   3. Site moderation   — list every site, suspend any one (drop its fragment via the
+//   2. Site moderation   — list every site, suspend any one (drop its fragment via the
 //      deploy service, §727 — the row is kept, so it's reversible) (§11, §13).
-//   4. Audit log         — read the append-only trail, newest-first (`auditRepo`, §12).
+//   3. Audit log         — read the append-only trail, newest-first (`auditRepo`, §12).
 //
 // Every owner MUTATION writes an audit entry attributed to the acting owner (§13,
 // §16) — including the suspend, whose deploy-layer transition is deliberately
@@ -19,16 +16,14 @@
 
 import 'server-only'
 import * as baseDomainRepo from '@/server/data/repositories/base-domain-repo'
-import * as planTierRepo from '@/server/data/repositories/plan-tier-repo'
 import * as siteRepo from '@/server/data/repositories/site-repo'
 import * as userRepo from '@/server/data/repositories/user-repo'
 import * as userLimitRepo from '@/server/data/repositories/user-limit-repo'
 import * as userRealmRepo from '@/server/data/repositories/user-realm-repo'
-import * as sponsorshipRepo from '@/server/data/repositories/sponsorship-repo'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
 import * as deploy from '@/server/services/deploy'
-import { checkBaseDomain, isAssignableRole, parsePlanTiers, parseUserLimits } from '@/server/domain/admin'
-import { resolveLimits, resolvePlan, effectivePlanFor, effectiveLimitsFor } from '@/server/services/plan'
+import { checkBaseDomain, isAssignableRole, parseUserLimits } from '@/server/domain/admin'
+import { resolveLimits, effectiveLimitsFor } from '@/server/services/plan'
 import { summarizeUsage } from '@/server/domain/usage'
 import { NginxpilotError } from '@/server/infrastructure/nginxpilot'
 import { slog } from '@/server/infrastructure/server-log'
@@ -43,7 +38,6 @@ import {
     type BaseDomain,
     type BaseDomainTier,
     type BaseDomainTls,
-    type PlanTier,
     type Role,
     type Site,
     type UserLimitOverride,
@@ -94,14 +88,14 @@ export function listBaseDomains(realmId: string): BaseDomain[] {
 /**
  * The base domains a given user may attach a subdomain under, within `realmId` (the caller's
  * active/assigned realm, multiple_realms.md §E.2), filtered by the tier-visibility rules
- * (§10): a free-plan user sees only `free` domains, a paid (sponsored) user sees `free` +
- * `paid`, and an instance operator (`maintainer`/`owner`) sees every tier including `staff`.
- * Backs the standard, non-owner `GET /api/base-domains` projection the create-site wizard
- * reads. Role is read live (authoritative); the plan is computed from the sponsorship.
+ * (§10): a standard user sees only `free` domains; an instance operator
+ * (`maintainer`/`owner`) sees every tier including `staff`. Backs the standard,
+ * non-owner `GET /api/base-domains` projection the create-site wizard reads. Role is
+ * read live (authoritative).
  */
 export function listBaseDomainsFor(login: string, realmId: string): BaseDomain[] {
     const role: Role = userRepo.getByLogin(login)?.role ?? 'guest'
-    const allowed = new Set(visibleBaseDomainTiers(role, resolvePlan(login)))
+    const allowed = new Set(visibleBaseDomainTiers(role))
     return baseDomainRepo.listByRealm(realmId).filter((b) => allowed.has(b.tier))
 }
 
@@ -188,31 +182,6 @@ export function removeBaseDomain(actor: AdminActor, raw: unknown): void {
     slog('info', 'admin', 'base domain removed', { domain, by: actor.login })
 }
 
-// ── plan-tier mapping (the $ → plan table, §8) ─────────────────────────────────
-
-/** The current `$ → plan` mapping, cheapest-first. */
-export function getPlanTiers(): PlanTier[] {
-    return planTierRepo.list()
-}
-
-/**
- * Replace the whole `$ → plan` mapping (`PUT /api/admin/plan-tiers`): validate +
- * normalize the body (`400` on a malformed mapping), atomically swap the table, and
- * audit. Returns the stored mapping (re-read, cheapest-first). Effective plans update
- * immediately — they're computed from this table per request (§8, §12), never stored —
- * so no migration or backfill is needed for a tier change to take effect.
- */
-export function replacePlanTiers(actor: AdminActor, input: unknown): PlanTier[] {
-    const checked = parsePlanTiers(input)
-    if (!checked.ok) throw new AdminError(checked.message, `plan_tiers_${checked.reason}`, 400)
-
-    planTierRepo.replace(checked.tiers)
-    const detail = checked.tiers.map((t) => `${t.minCents}=${t.plan}`).join(',') || '(empty)'
-    audit(actor, 'admin.plan_tier.replace', { detail })
-    slog('info', 'admin', 'plan tiers replaced', { count: checked.tiers.length, by: actor.login })
-    return planTierRepo.list()
-}
-
 // ── site moderation (§11, §13) ─────────────────────────────────────────────────
 
 /** Every site, newest first — the global owner moderation view. */
@@ -226,19 +195,17 @@ export function listUsers(): AppUser[] {
 }
 
 /**
- * Enrich one user into an {@link AdminUserRow}: their effective plan + unified
- * account level, current usage (count + bytes across their sites), the *effective*
- * limits (role/plan default merged with any override), and the raw custom override.
- * `override` is passed in by {@link listUsersDetailed} from a single batch read; it
- * defaults to a per-user read so the single-row callers (set/clear) stay correct.
+ * Enrich one user into an {@link AdminUserRow}: their unified account level,
+ * current usage (count + bytes across their sites), the *effective* limits (role
+ * default merged with any override), and the raw custom override. `override` is
+ * passed in by {@link listUsersDetailed} from a single batch read; it defaults to
+ * a per-user read so the single-row callers (set/clear) stay correct.
  */
 function enrichUser(user: AppUser, override?: UserLimitOverride | null): AdminUserRow {
-    const plan = resolvePlan(user.login)
     const custom = override !== undefined ? override : (userLimitRepo.get(user.githubId) ?? null)
     return {
         user,
-        plan,
-        level: accountLevel(user.role, plan),
+        level: accountLevel(user.role),
         usage: summarizeUsage(siteRepo.listByOwner(user.githubId)),
         limits: resolveLimits(user.login),
         customLimits: custom,
@@ -247,12 +214,11 @@ function enrichUser(user: AppUser, override?: UserLimitOverride | null): AdminUs
 }
 
 /**
- * The enriched owner roster (`GET /api/admin/users`): every user with their plan,
- * level, usage, effective limits, and custom override. Every per-user input is read
- * in ONE bulk query and zipped in (I1) — overrides, active sponsorships, plan tiers,
- * all sites grouped by owner, and all realm grants grouped by user — so the roster is
- * a fixed handful of queries regardless of user count, not the previous N+1 (which ran
- * resolvePlan + resolveLimits + a per-user site query + a per-user grant query each).
+ * The enriched owner roster (`GET /api/admin/users`): every user with their level,
+ * usage, effective limits, and custom override. Every per-user input is read in ONE
+ * bulk query and zipped in (I1) — overrides, all sites grouped by owner, and all
+ * realm grants grouped by user — so the roster is a fixed handful of queries
+ * regardless of user count, not the previous N+1.
  *
  * Note: this intentionally returns the full roster (no server-side pagination). The
  * admin UI searches/filters the whole set client-side; paginating here would break that
@@ -260,10 +226,8 @@ function enrichUser(user: AppUser, override?: UserLimitOverride | null): AdminUs
  */
 export function listUsersDetailed(): AdminUserRow[] {
     const users = userRepo.list()
-    const tiers = planTierRepo.list()
     const overrides = userLimitRepo.all()
     const grantsByUser = userRealmRepo.allByUser()
-    const sponsorshipsById = new Map(sponsorshipRepo.listActive().map((s) => [s.sponsorId, s] as const))
 
     // All sites in one query, grouped by owner, for per-user usage summaries.
     const sitesByOwner = new Map<number, Site[]>()
@@ -275,13 +239,11 @@ export function listUsersDetailed(): AdminUserRow[] {
 
     return users.map((u) => {
         const override = overrides.get(u.githubId) ?? null
-        const plan = effectivePlanFor(u, sponsorshipsById, tiers)
         return {
             user: u,
-            plan,
-            level: accountLevel(u.role, plan),
+            level: accountLevel(u.role),
             usage: summarizeUsage(sitesByOwner.get(u.githubId) ?? []),
-            limits: effectiveLimitsFor(u, plan, override),
+            limits: effectiveLimitsFor(u, override),
             customLimits: override,
             realmGrants: grantsByUser.get(u.githubId) ?? [],
         }
@@ -384,6 +346,11 @@ export async function suspendSite(actor: AdminActor, id: string): Promise<Site> 
 /** Read the audit trail, newest-first (id DESC), with the repo's optional filters + paging. */
 export function listAudit(filter: AuditFilter = {}): AuditEntry[] {
     return auditRepo.list(filter)
+}
+
+/** Total audit entries matching the filter — the audit table's pager `total` (impl §8). */
+export function countAudit(filter: AuditFilter = {}): number {
+    return auditRepo.count(filter)
 }
 
 // ── error → HTTP mapping (so routes stay thin) ─────────────────────────────────

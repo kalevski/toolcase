@@ -6,20 +6,16 @@
 // Services so far:
 //   - auth.ts — GitHub OAuth code flow, signed httpOnly session cookie,
 //     owner-bootstrap role resolution, and the `authorize(minRole)` guard (§7).
-//   - plan.ts — effective plan + quota limits, computed from a user's
-//     sponsorship row through the owner-editable `plan_tier` mapping (§6, §8, §15).
-//   - sponsors-reconcile.ts — the scheduled GraphQL reconcile ticker that queries
-//     the owner's `sponsorshipsAsMaintainer` and upserts authoritative sponsorship
-//     state, self-healing missed/forged webhooks (§8, §16). The Sponsors webhook
-//     itself lives in `app/api/webhooks/github-sponsors/route.ts`.
+//   - plan.ts — effective quota limits: the single standard baseline (or operator
+//     unlimited), merged with the owner-set per-user override (§6, §11, §15).
 //   - deploy.ts — the site-lifecycle state machine (`draft → provisioning → live →
 //     failed`): provision / track / redeploy / update / remove, driving nginxpilot
 //     (fragment + reload + sync) with last-known-good semantics (§9). Pure logic in
 //     `domain/deploy-machine.ts`; this is the server-only wiring.
 //   - quota.ts — the control-plane quota gates nginxpilot can't provide: pre-create
-//     count + custom-domain gates, the plan-derived fragment refresh interval, and
+//     count + custom-domain gates, the limits-derived fragment refresh interval, and
 //     the post-deploy byte cap (over_quota → grace → suspend, reversible on trim or
-//     upgrade) (§11). Pure decisions in `domain/quota.ts`; this is the server-only wiring.
+//     a raised limit) (§11). Pure decisions in `domain/quota.ts`; this is the server-only wiring.
 //   - sites.ts — the `/api/sites` policy layer: per-site tenant isolation (re-checks
 //     `site.owner_id === session.sub`, owner role bypasses) plus create/update/delete/
 //     redeploy/verify/status orchestration over the quota (§728), domains (§729), and

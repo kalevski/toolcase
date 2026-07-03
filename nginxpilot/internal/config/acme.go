@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"strings"
+	"time"
 )
 
 // Challenge methods (acme.challenge) — how certbot proves domain control.
@@ -45,6 +46,47 @@ type Acme struct {
 	// ConfigDir is certbot's --config-dir (default /etc/letsencrypt). Its live/
 	// subdir should equal tls.cert_dir so issued certs are discovered.
 	ConfigDir string `yaml:"config_dir"`
+
+	// Renewal configures the automatic renewal scheduler: the daemon checks
+	// every check_interval and force-renews any certbot-managed cert whose
+	// NotAfter is closer than renew_before. Manual flat certs only get a
+	// warning (certbot can't renew them).
+	Renewal AcmeRenewal `yaml:"renewal"`
+}
+
+// Renewal scheduler defaults/bounds.
+const (
+	DefaultRenewalCheckInterval = time.Hour
+	DefaultRenewalRenewBefore   = 24 * time.Hour
+	MinRenewalCheckInterval     = time.Minute
+)
+
+// AcmeRenewal tunes the automatic renewal scheduler.
+type AcmeRenewal struct {
+	Enabled       *bool    `yaml:"enabled"`        // nil = enabled (when acme.enabled)
+	CheckInterval Duration `yaml:"check_interval"` // default 1h, min 1m
+	RenewBefore   Duration `yaml:"renew_before"`   // default 24h
+}
+
+// RenewalEnabled reports the effective enabled state (default true).
+func (r AcmeRenewal) RenewalEnabled() bool {
+	return r.Enabled == nil || *r.Enabled
+}
+
+// CheckIntervalOrDefault returns the effective check interval (1h when unset).
+func (r AcmeRenewal) CheckIntervalOrDefault() time.Duration {
+	if r.CheckInterval > 0 {
+		return time.Duration(r.CheckInterval)
+	}
+	return DefaultRenewalCheckInterval
+}
+
+// RenewBeforeOrDefault returns the effective due threshold (24h when unset).
+func (r AcmeRenewal) RenewBeforeOrDefault() time.Duration {
+	if r.RenewBefore > 0 {
+		return time.Duration(r.RenewBefore)
+	}
+	return DefaultRenewalRenewBefore
 }
 
 // AcmeDNS holds DNS-01 settings (challenge: dns).
@@ -128,6 +170,12 @@ func applyAcmeDefaults(cfg *Config) {
 	if a.Challenge == ChallengeHTTP && a.HTTP.Webroot == "" {
 		a.HTTP.Webroot = DefaultAcmeWebroot
 	}
+	if a.Renewal.CheckInterval == 0 {
+		a.Renewal.CheckInterval = Duration(DefaultRenewalCheckInterval)
+	}
+	if a.Renewal.RenewBefore == 0 {
+		a.Renewal.RenewBefore = Duration(DefaultRenewalRenewBefore)
+	}
 }
 
 // validateAcme checks the acme block. Inert when disabled. Soft mismatches
@@ -170,5 +218,15 @@ func validateAcme(cfg *Config) error {
 			return fmt.Errorf("acme.http.webroot is required for challenge: http")
 		}
 	}
+
+	if a.Renewal.CheckInterval > 0 && time.Duration(a.Renewal.CheckInterval) < MinRenewalCheckInterval {
+		return fmt.Errorf("acme.renewal.check_interval %s: minimum is %s", a.Renewal.CheckInterval, MinRenewalCheckInterval)
+	}
+	if a.Renewal.RenewBefore < 0 {
+		return fmt.Errorf("acme.renewal.renew_before must be > 0")
+	}
+	// renew_before <= check_interval leaves zero slack (one missed tick can
+	// mean a served expired cert) — surfaced as a startup warning by the
+	// manager (warnAcmeMismatches pattern), not a hard error here.
 	return nil
 }

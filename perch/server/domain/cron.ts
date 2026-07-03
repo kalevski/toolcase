@@ -1,5 +1,5 @@
 // Pure 5-field cron parser/matcher — no `server-only`, no I/O — so the scheduled
-// reconcile ticker (`services/sponsors-reconcile.ts`) stays thin and the parsing
+// boot tickers (quota sweep, status poll) stay thin and the parsing
 // rules are unit-testable in isolation. Ported from TaskForge's
 // `services/scheduler.ts` cron subset (the §8 "mirror TaskForge's scheduler cron
 // pattern" requirement).

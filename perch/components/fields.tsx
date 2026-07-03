@@ -259,6 +259,41 @@ export function CheckField({ checked, onChecked, label, disabled, inline, classN
     )
 }
 
+export interface SwitchFieldProps {
+    checked: boolean
+    onChecked: (checked: boolean) => void
+    label?: string
+    /** Hint rendered in the reserved message slot below the control. */
+    help?: string
+    /** Error message — forces the invalid state (mirrors tc-select). */
+    error?: string
+    disabled?: boolean
+    className?: string
+}
+
+/**
+ * Toggle switch — tc-switch (impl §10). A switch reads as a *setting* (an on/off
+ * state) where tc-check reads as a *selection*; every boolean in the entity forms
+ * is a setting, so those use this. The reserved field-message slot keeps switch
+ * rows aligned in a grid.
+ */
+export function SwitchField({ checked, onChecked, label, help, error, disabled, className }: SwitchFieldProps) {
+    const ref = useTc<HTMLElement>(undefined, {
+        'tc-change': (event) => onChecked(detailValue<boolean>(event)),
+    })
+    return (
+        <tc-switch
+            ref={ref}
+            checked={checked || undefined}
+            disabled={disabled || undefined}
+            label={label}
+            help={help}
+            error={error}
+            className={className}
+        />
+    )
+}
+
 export interface ColorFieldProps {
     value: string
     onValue: (value: string) => void

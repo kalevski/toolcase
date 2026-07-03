@@ -13,8 +13,16 @@
 // Server-only. Never import from a client component.
 
 import 'server-only'
+import { randomBytes } from 'node:crypto'
+import { resolve4, resolve6 } from 'node:dns/promises'
 import * as realms from '@/server/services/realms'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
+import { getSettings } from '@/server/services/settings'
+import {
+    classifyCertPreflight,
+    wildcardPreflight,
+    type CertPreflightResult,
+} from '@/server/domain/cert-preflight'
 import { slog } from '@/server/infrastructure/server-log'
 import {
     NginxpilotError,
@@ -24,6 +32,7 @@ import {
     type CertJob,
     type CertUploadResult,
     type AcmeCredentialResult,
+    type CertsRenewalStatus,
 } from '@/server/infrastructure/nginxpilot'
 import {
     CertInputError,
@@ -44,8 +53,8 @@ export interface CertContext {
     role: Role
 }
 
-function audit(ctx: CertContext, action: string, detail: string): void {
-    auditRepo.append({ githubId: ctx.githubId, login: ctx.login, action, site: null, detail })
+function audit(ctx: CertContext, action: string, detail: string, meta?: unknown): void {
+    auditRepo.append({ githubId: ctx.githubId, login: ctx.login, action, site: null, detail, meta })
 }
 
 // ── reads ────────────────────────────────────────────────────────────────────────
@@ -60,6 +69,72 @@ export async function listCertificates(ctx: CertContext): Promise<NginxpilotCert
 export async function listCredentials(ctx: CertContext): Promise<AcmeCredentialInfo[]> {
     const client = await realms.clientForActive(ctx.githubId, ctx.role)
     return client.listAcmeCredentials()
+}
+
+/**
+ * The active realm's renewal-scheduler state (A6) — the `certs_renewal` block of
+ * `GET /status`. `null` when the daemon predates the scheduler (older build), which
+ * the UI renders as "renewal scheduler unknown" rather than "off".
+ */
+export async function renewalStatus(ctx: CertContext): Promise<CertsRenewalStatus | null> {
+    const client = await realms.clientForActive(ctx.githubId, ctx.role)
+    const status = await client.status()
+    return status.certs_renewal ?? null
+}
+
+// ── issuance pre-flight (B2 — NPM's testHttpsChallenge, control-plane-side) ────────
+
+/** How long the HTTP-01 path probe waits before calling the domain unreachable. */
+const PREFLIGHT_PROBE_TIMEOUT_MS = 5_000
+
+/**
+ * Pre-flight one domain before issuing (B2): resolve its A/AAAA records, compare them
+ * to this deployment's configured ingress IPs, and probe the HTTP-01 challenge path
+ * (`/.well-known/acme-challenge/<nonce>` — ANY http answer, a webroot 404 included,
+ * means the path is routable; refused/timeout means the challenge would too).
+ * Advisory: it gates nothing, it saves rate-limited ACME attempts. Wildcards
+ * short-circuit to the DNS-01 hint without probing. Pure classification lives in
+ * `domain/cert-preflight.ts`; this gathers the signals.
+ */
+export async function preflight(
+    ctx: CertContext,
+    domainRaw: string,
+): Promise<CertPreflightResult & { domain: string }> {
+    const domain = normalizeCertDomain(domainRaw)
+    if (isWildcard(domain)) {
+        audit(ctx, 'admin.cert.preflight', `${domain}: wildcard_needs_dns`)
+        return { domain, ...wildcardPreflight() }
+    }
+
+    const [a, aaaa] = await Promise.allSettled([resolve4(domain), resolve6(domain)])
+    const resolved = [
+        ...(a.status === 'fulfilled' ? a.value : []),
+        ...(aaaa.status === 'fulfilled' ? aaaa.value : []),
+    ]
+
+    const settings = getSettings()
+    const ingress = [settings.ingressIpv4, settings.ingressIpv6].filter(Boolean)
+
+    // Only probe a domain that resolves — otherwise fetch would just re-report no-DNS.
+    let challenge: 'reachable' | 'unreachable' | 'skipped' = 'skipped'
+    if (resolved.length > 0) {
+        const nonce = randomBytes(8).toString('hex')
+        try {
+            await fetch(`http://${domain}/.well-known/acme-challenge/perch-preflight-${nonce}`, {
+                cache: 'no-store',
+                redirect: 'manual',
+                signal: AbortSignal.timeout(PREFLIGHT_PROBE_TIMEOUT_MS),
+            })
+            challenge = 'reachable'
+        } catch {
+            challenge = 'unreachable'
+        }
+    }
+
+    const result = classifyCertPreflight({ resolved, ingress, challenge })
+    audit(ctx, 'admin.cert.preflight', `${domain}: ${result.verdict}`)
+    slog('info', 'certs', 'issuance pre-flight', { by: ctx.login, domain, verdict: result.verdict })
+    return { domain, ...result }
 }
 
 // ── certificate lifecycle ──────────────────────────────────────────────────────────
@@ -94,6 +169,8 @@ export async function issueCertificate(
         `${certName ?? domains[0]} [${domains.join(', ')}]${provider ? ` via ${provider}` : ''}${
             email ? ` as ${email}` : ''
         }${staging ? ' (staging)' : ''} (job ${accepted.job_id})`,
+        // Snapshot (B3): the full request minus nothing secret — issuance has no secret fields.
+        { domains, cert_name: certName, staging, email, provider, job_id: accepted.job_id },
     )
     slog('info', 'certs', 'started certificate issuance', {
         by: ctx.login,
@@ -109,6 +186,15 @@ export async function issueCertificate(
 export async function getIssueJob(ctx: CertContext, jobId: string): Promise<CertJob> {
     const client = await realms.clientForActive(ctx.githubId, ctx.role)
     return client.getCertJob(jobId)
+}
+
+/**
+ * Recent async issuance jobs on the active realm (`GET /certs/jobs`), newest first.
+ * Ephemeral on the daemon — recent history, not an archive.
+ */
+export async function listIssueJobs(ctx: CertContext): Promise<CertJob[]> {
+    const client = await realms.clientForActive(ctx.githubId, ctx.role)
+    return client.listCertJobs()
 }
 
 /** Upload a manual cert/key pair (no certbot). The key is never logged or audited. */
@@ -129,7 +215,13 @@ export async function uploadCertificate(
     }
     const client = await realms.clientForActive(ctx.githubId, ctx.role)
     const result = await client.uploadCertificate(domain, { cert: input.cert, key: input.key })
-    audit(ctx, 'admin.cert.upload', `${domain} (${result.status})`)
+    // Snapshot (B3): the resulting cert METADATA only — the PEM pair never reaches the log.
+    audit(ctx, 'admin.cert.upload', `${domain} (${result.status})`, {
+        domain,
+        status: result.status,
+        names: result.cert?.names,
+        not_after: result.cert?.not_after,
+    })
     slog('info', 'certs', 'uploaded manual certificate', { by: ctx.login, domain })
     return result
 }

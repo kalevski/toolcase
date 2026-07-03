@@ -5,12 +5,12 @@
 
 import { describe, it, expect } from 'vitest'
 import { canCreateSite, canUseCustomDomain, intervalFor, decideByteQuota } from './quota'
-import { PLAN_LIMITS, type PlanLimits } from './types'
+import { STANDARD_LIMITS, type PlanLimits } from './types'
 
 const MB = 1024 * 1024
 
 function limits(over: Partial<PlanLimits> = {}): PlanLimits {
-    return { ...PLAN_LIMITS.free, ...over }
+    return { ...STANDARD_LIMITS, ...over }
 }
 
 describe('canCreateSite', () => {
@@ -39,9 +39,9 @@ describe('canUseCustomDomain', () => {
 
 describe('intervalFor', () => {
     it("formats each plan's minIntervalSec as an nginxpilot duration", () => {
-        expect(intervalFor(PLAN_LIMITS.free)).toBe('15m') // 900s
-        expect(intervalFor(PLAN_LIMITS.bronze)).toBe('5m') // 300s
-        expect(intervalFor(PLAN_LIMITS.gold)).toBe('1m') // 60s
+        expect(intervalFor(STANDARD_LIMITS)).toBe('15m') // 900s
+        expect(intervalFor(limits({ minIntervalSec: 300 }))).toBe('5m') // 300s
+        expect(intervalFor(limits({ minIntervalSec: 60 }))).toBe('1m') // 60s
     })
 })
 

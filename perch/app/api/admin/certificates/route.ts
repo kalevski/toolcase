@@ -24,7 +24,11 @@ export async function GET() {
 
     try {
         const ctx = { githubId: authz.session.sub, login: authz.session.login, role: authz.role }
-        return NextResponse.json(await certs.listCertificates(ctx))
+        const certificates = await certs.listCertificates(ctx)
+        // The renewal-scheduler summary is best-effort (A6): a daemon hiccup on /status
+        // shouldn't blank the whole cert table, so it degrades to null.
+        const renewal = await certs.renewalStatus(ctx).catch(() => null)
+        return NextResponse.json({ certs: certificates, renewal })
     } catch (err) {
         const { status, code, message } = certs.httpErrorFor(err)
         return NextResponse.json({ error: code, message }, { status })

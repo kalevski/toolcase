@@ -102,21 +102,6 @@ export const config = {
     allowedLogins: csv('PERCH_ALLOWED_LOGINS'),
     allowedOrg: optional('PERCH_ALLOWED_ORG', ''),
 
-    // ── GitHub Sponsors → plan (§8, §16) ──
-    // HMAC secret the Sponsors webhook signs `X-Hub-Signature-256` with. Validated
-    // lazily (a getter) so the rest of the app boots without it — only the webhook
-    // route reads it, and a missing/weak secret must fail loudly there (§16: a
-    // forged/unsigned event can never grant a plan).
-    get sponsorsWebhookSecret(): string {
-        return requiredSecret('PERCH_SPONSORS_WEBHOOK_SECRET', 16)
-    },
-    // Owner PAT the scheduled reconcile uses to read `viewer.sponsorshipsAsMaintainer`
-    // (the source of truth that self-heals missed webhooks). Optional: when unset
-    // the reconcile job no-ops and only the webhook keeps the table fresh.
-    sponsorsReconcileToken: optional('PERCH_SPONSORS_TOKEN', ''),
-    // 5-field cron for the reconcile ticker (mirrors TaskForge's scheduler). Default
-    // every 15 minutes.
-    sponsorsReconcileCron: optional('PERCH_SPONSORS_RECONCILE_CRON', '*/15 * * * *'),
 
     // ── nginxpilot integration seam (§4, §16) ──
     // Base URL of nginxpilot's admin REST API. Perch drives the ENTIRE integration
@@ -151,21 +136,6 @@ export const config = {
     // Public ingress IPv6 handed out in the AAAA-record instructions (optional —
     // empty omits the AAAA line). Same stored-override-then-env path as ingressIpv4.
     ingressIpv6: optional('PERCH_INGRESS_IPV6', ''),
-    // nginx `conf.d/` dir Perch installs per-custom-domain vhosts into. Server-
-    // controlled path; vhost filenames are derived from the validated domain only,
-    // never from raw user input (§16: path traversal).
-    nginxConfDir: optional('PERCH_NGINX_CONF_DIR', '/etc/nginx/conf.d'),
-    // Command (argv, whitespace-split) Perch runs to reload nginx after installing or
-    // dropping a custom-domain vhost. Subdomain sites never trigger this — the
-    // wildcard server block already covers `*.basedomain` (§4, §10).
-    nginxReloadCmd: optional('PERCH_NGINX_RELOAD_CMD', 'nginx -s reload'),
-    // certbot binary + HTTP-01 knobs for obtaining a per-custom-domain cert (§10).
-    certbotBin: optional('PERCH_CERTBOT_BIN', 'certbot'),
-    // ACME registration email; empty registers without an email (lab/dev only).
-    certbotEmail: optional('PERCH_CERTBOT_EMAIL', ''),
-    // Webroot the HTTP-01 challenge files are served from (must be the docroot nginx
-    // exposes at `/.well-known/acme-challenge/` for the domain).
-    certbotWebroot: optional('PERCH_CERTBOT_WEBROOT', '/var/www/certbot'),
 
     port: num('PORT', 4100),
 }

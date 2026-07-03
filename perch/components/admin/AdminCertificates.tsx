@@ -8,13 +8,22 @@ import type {
     AcmeCredentialInfo,
     CertIssueAccepted,
     CertJob,
+    CertsRenewalStatus,
 } from '@/server/infrastructure/nginxpilot'
-import { KNOWN_PROVIDERS, providerSpec, mechanismLabel } from '@/server/domain/cert-input'
+import {
+    CertInputError,
+    INI_TEMPLATE_PROVIDERS,
+    KNOWN_PROVIDERS,
+    iniTemplate,
+    mechanismLabel,
+    providerSpec,
+    renderIniCredentials,
+} from '@/server/domain/cert-input'
 import type { AcmeCredentialRequest } from '@/server/domain/cert-input'
 import { AdminPage, json, useOwnerData } from './shared'
 import { DataTable } from '@/components/DataTable'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
-import { TextField, TextAreaField, SelectField, CheckField } from '@/components/fields'
+import { TextField, TextAreaField, SelectField, SwitchField } from '@/components/fields'
 import { useToast } from '@/components/Toast'
 
 // Owner-only certificate management for the active realm (cert_feature.md). nginxpilot now
@@ -38,6 +47,10 @@ import { useToast } from '@/components/Toast'
 interface CertsData {
     certs: NginxpilotCert[]
     credentials: AcmeCredentialInfo[]
+    /** Renewal-scheduler summary (A6); null when the daemon predates it or /status failed. */
+    renewal: CertsRenewalStatus | null
+    /** Recent async issuance jobs (impl §2) — best-effort; ephemeral on the daemon. */
+    jobs: CertJob[]
 }
 
 interface ApiResult<T = unknown> {
@@ -96,20 +109,70 @@ function fmtDate(iso?: string): string {
     )
 }
 
-// Expiry as a coloured pill + date: danger once past, warning inside the 30-day renewal
-// window, success otherwise. No not_after (an unparseable cert) collapses to a muted dash.
-function expiryCell(notAfter?: string): string {
+/**
+ * Days in a Go duration string ("720h0m0s", "12h", "36h30m") — the shape the daemon's
+ * renewal scheduler reports `renew_before` / `check_interval` in. NaN when unparseable.
+ */
+function goDurationDays(dur?: string): number {
+    if (!dur) return NaN
+    let hours = 0
+    let matched = false
+    for (const m of dur.matchAll(/([0-9]+(?:\.[0-9]+)?)(h|m|s)/g)) {
+        matched = true
+        const n = Number(m[1])
+        if (m[2] === 'h') hours += n
+        else if (m[2] === 'm') hours += n / 60
+        else hours += n / 3600
+    }
+    return matched ? hours / 24 : NaN
+}
+
+// Expiry as a coloured pill + date (A6): danger once past OR already inside the
+// scheduler's renew_before window (renewal should have happened — something is wrong),
+// warning under 30 days, success otherwise. No not_after collapses to a muted dash.
+// The daemon's own expires_in_seconds is preferred over recomputing from not_after —
+// it removes client-clock skew from the pill (impl "minor").
+function expiryCell(
+    notAfter: string | undefined,
+    expiresInSeconds: number | undefined,
+    renewBeforeDays: number,
+): string {
     if (!notAfter) return MUTED
     const d = new Date(notAfter)
     if (Number.isNaN(d.getTime())) return escapeHtml(notAfter)
-    const days = Math.floor((d.getTime() - Date.now()) / 86_400_000)
+    const days =
+        expiresInSeconds !== undefined
+            ? Math.floor(expiresInSeconds / 86_400)
+            : Math.floor((d.getTime() - Date.now()) / 86_400_000)
+    const inRenewWindow = Number.isFinite(renewBeforeDays) && days < renewBeforeDays
     const pill =
         days < 0
             ? badge('danger', 'expired')
-            : days <= 30
-              ? badge('warning', `${days}d left`)
-              : badge('success', `${days}d left`)
+            : inRenewWindow
+              ? badge('danger', `${days}d left`)
+              : days <= 30
+                ? badge('warning', `${days}d left`)
+                : badge('success', `${days}d left`)
     return `${pill} <span class="perch-admin-hint">${fmtDate(notAfter)}</span>`
+}
+
+// Renewal posture (A6): certbot-managed certs renew themselves ("auto-renew"); a
+// manual upload must be re-uploaded before expiry. A sticky scheduler failure shows
+// as a danger pill carrying the daemon's reason in the title.
+function renewalCell(row: CertRow): string {
+    const parts: string[] = [
+        row.renewManaged
+            ? badge('success', 'auto-renew')
+            : badge('secondary', 'manual — re-upload before expiry'),
+    ]
+    if (row.lastRenewError) {
+        parts.push(
+            `<span class="badge text-bg-danger" title="${escapeHtml(row.lastRenewError)}">renew failed</span>`,
+        )
+    } else if (row.lastRenewTime) {
+        parts.push(`<span class="perch-admin-hint">renewed ${fmtDate(row.lastRenewTime)}</span>`)
+    }
+    return parts.join(' ')
 }
 
 // ── page shell ──────────────────────────────────────────────────────────────────────
@@ -133,8 +196,8 @@ export function AdminCertificates() {
         try {
             // Certs are the critical slice — a failure errors the page. The credentials store is
             // best-effort: a daemon with acme off (or an older build) still shows the cert table.
-            const certs = await fetch('/api/admin/certificates', { cache: 'no-store' }).then((r) =>
-                json<NginxpilotCert[]>(r),
+            const listing = await fetch('/api/admin/certificates', { cache: 'no-store' }).then((r) =>
+                json<{ certs: NginxpilotCert[]; renewal: CertsRenewalStatus | null }>(r),
             )
             let credentials: AcmeCredentialInfo[] = []
             try {
@@ -144,7 +207,18 @@ export function AdminCertificates() {
             } catch {
                 credentials = []
             }
-            return { certs, credentials }
+            // Recent issuance jobs are an enrichment — an older daemon without the list
+            // endpoint must not error the page.
+            let jobs: CertJob[] = []
+            try {
+                const body = await fetch('/api/admin/certificates/jobs', { cache: 'no-store' }).then(
+                    (r) => json<{ jobs: CertJob[] }>(r),
+                )
+                jobs = body.jobs ?? []
+            } catch {
+                jobs = []
+            }
+            return { certs: listing.certs ?? [], credentials, renewal: listing.renewal ?? null, jobs }
         } catch {
             return null
         }
@@ -168,11 +242,19 @@ export function AdminCertificates() {
                 <>
                     <tc-tab-bar ref={tabRef} active-id={tab} className="perch-sub-tabs" />
                     {tab === 'list' && (
-                        <CertificatesList certs={data.certs} onChanged={() => void reload()} />
+                        <>
+                            <CertificatesList
+                                certs={data.certs}
+                                renewal={data.renewal}
+                                onChanged={() => void reload()}
+                            />
+                            <IssueJobsCard jobs={data.jobs} onChanged={() => void reload()} />
+                        </>
                     )}
                     {tab === 'issue' && (
                         <IssueCertCard
                             credentials={data.credentials}
+                            jobs={data.jobs}
                             onChanged={() => void reload()}
                         />
                     )}
@@ -196,7 +278,11 @@ interface CertRow extends Record<string, unknown> {
     names: string[]
     issuer?: string
     notAfter?: string
+    expiresInSeconds?: number
     modTime: string
+    renewManaged: boolean
+    lastRenewTime?: string
+    lastRenewError?: string
 }
 
 function certActionsHtml(domain: string): string {
@@ -209,7 +295,7 @@ function certActionsHtml(domain: string): string {
     )
 }
 
-const CERT_COLUMNS: TableColumn[] = [
+const certColumns = (renewBeforeDays: number): TableColumn[] => [
     {
         key: 'domain',
         header: 'Domain',
@@ -231,7 +317,12 @@ const CERT_COLUMNS: TableColumn[] = [
     {
         key: 'notAfter',
         header: 'Expires',
-        render: (row: CertRow) => expiryCell(row.notAfter),
+        render: (row: CertRow) => expiryCell(row.notAfter, row.expiresInSeconds, renewBeforeDays),
+    },
+    {
+        key: 'renewal',
+        header: 'Renewal',
+        render: (row: CertRow) => renewalCell(row),
     },
     {
         key: 'modTime',
@@ -246,7 +337,15 @@ const CERT_COLUMNS: TableColumn[] = [
     },
 ]
 
-function CertificatesList({ certs, onChanged }: { certs: NginxpilotCert[]; onChanged: () => void }) {
+function CertificatesList({
+    certs,
+    renewal,
+    onChanged,
+}: {
+    certs: NginxpilotCert[]
+    renewal: CertsRenewalStatus | null
+    onChanged: () => void
+}) {
     const toast = useToast()
     const [error, setError] = useState<string | null>(null)
     const [busy, setBusy] = useState(false)
@@ -259,10 +358,17 @@ function CertificatesList({ certs, onChanged }: { certs: NginxpilotCert[]; onCha
                 names: c.names,
                 issuer: c.issuer,
                 notAfter: c.not_after,
+                expiresInSeconds: c.expires_in_seconds,
                 modTime: c.mod_time,
+                renewManaged: c.renew_managed,
+                lastRenewTime: c.last_renew_time,
+                lastRenewError: c.last_renew_error,
             })),
         [certs],
     )
+
+    const renewBeforeDays = goDurationDays(renewal?.renew_before)
+    const columns = useMemo(() => certColumns(renewBeforeDays), [renewBeforeDays])
 
     const renewOne = useCallback(
         async (domain: string) => {
@@ -328,6 +434,21 @@ function CertificatesList({ certs, onChanged }: { certs: NginxpilotCert[]; onCha
                     reload. Renew force-renews one cert by name; Delete removes it (certbot-managed or
                     a manual upload).
                 </p>
+                {renewal ? (
+                    renewal.enabled ? (
+                        <tc-banner variant="info">
+                            Automatic renewal is on: the daemon checks every {renewal.check_interval} and renews
+                            certs inside the {renewal.renew_before} window.
+                            {renewal.next_check ? ` Next check: ${fmtDate(renewal.next_check)}.` : ''} Manual Renew
+                            stays available as the force path.
+                        </tc-banner>
+                    ) : (
+                        <tc-banner variant="warning">
+                            The renewal scheduler is off on this realm (acme disabled or renewal not configured) —
+                            certs only renew via the manual Renew buttons here.
+                        </tc-banner>
+                    )
+                ) : null}
                 {error && <tc-banner variant="danger">{error}</tc-banner>}
 
                 {rows.length === 0 ? (
@@ -338,7 +459,7 @@ function CertificatesList({ certs, onChanged }: { certs: NginxpilotCert[]; onCha
                     </tc-empty-state>
                 ) : (
                     <DataTable<CertRow>
-                        columns={CERT_COLUMNS}
+                        columns={columns}
                         rows={rows}
                         rowKey={(row) => row.domain}
                         onAction={onRowAction}
@@ -368,6 +489,163 @@ function CertificatesList({ certs, onChanged }: { certs: NginxpilotCert[]; onCha
     )
 }
 
+// ── recent issuance jobs (impl §2) ────────────────────────────────────────────────────
+
+/** State pill variants for the four job states. */
+function jobStateBadge(state: CertJob['state']): string {
+    const variant =
+        state === 'succeeded' ? 'success' : state === 'failed' ? 'danger' : state === 'running' ? 'info' : 'secondary'
+    return badge(variant, state)
+}
+
+interface JobRow extends Record<string, unknown> {
+    id: string
+    state: CertJob['state']
+    certName: string
+    domains: string[]
+    staging: boolean
+    error?: string
+    createdAt: string
+    updatedAt: string
+}
+
+const JOB_COLUMNS: TableColumn[] = [
+    {
+        key: 'state',
+        header: 'State',
+        render: (row: JobRow) => jobStateBadge(row.state),
+    },
+    {
+        key: 'certName',
+        header: 'Cert name',
+        render: (row: JobRow) =>
+            `<span class="perch-admin-mono">${escapeHtml(row.certName)}</span>${
+                row.staging ? ' <span class="badge text-bg-secondary">staging</span>' : ''
+            }`,
+    },
+    {
+        key: 'domains',
+        header: 'Domains',
+        render: (row: JobRow) =>
+            row.domains.length
+                ? `<span class="perch-admin-mono perch-admin-hint">${escapeHtml(row.domains.join(', '))}</span>`
+                : MUTED,
+    },
+    {
+        key: 'error',
+        header: 'Result',
+        render: (row: JobRow) =>
+            row.error
+                ? `<span class="perch-admin-hint" title="${escapeHtml(row.error)}">${escapeHtml(
+                      row.error.length > 120 ? `${row.error.slice(0, 120)}…` : row.error,
+                  )}</span>`
+                : MUTED,
+    },
+    {
+        key: 'updatedAt',
+        header: 'Updated',
+        align: 'right',
+        render: (row: JobRow) => `<span class="perch-admin-hint">${fmtDate(row.updatedAt)}</span>`,
+    },
+    {
+        key: 'actions',
+        header: '',
+        align: 'right',
+        render: (row: JobRow) =>
+            row.state === 'pending' || row.state === 'running'
+                ? `<button type="button" class="btn btn-sm btn-outline-secondary" data-action="watch" data-job="${escapeHtml(row.id)}">Watch</button>`
+                : '',
+    },
+]
+
+/**
+ * Recent async issuance jobs on the realm (`GET /certs/jobs`) — the daemon-side view
+ * that survives a closed tab, so a second admin sees in-flight and recently failed
+ * issuances. Watch re-enters the poll loop for an in-flight job started elsewhere.
+ */
+function IssueJobsCard({ jobs, onChanged }: { jobs: CertJob[]; onChanged: () => void }) {
+    const toast = useToast()
+    const [watching, setWatching] = useState<string | null>(null)
+    const [error, setError] = useState<string | null>(null)
+
+    const watch = useCallback(
+        async (jobId: string) => {
+            if (watching) return
+            setWatching(jobId)
+            setError(null)
+            const deadline = Date.now() + ISSUE_POLL_MAX_MS
+            while (Date.now() < deadline) {
+                await delay(ISSUE_POLL_INTERVAL_MS)
+                const jr = await callApi<CertJob>(
+                    `/api/admin/certificates/jobs/${encodeURIComponent(jobId)}`,
+                    'GET',
+                )
+                if (!jr.ok) {
+                    setWatching(null)
+                    setError(`Couldn’t check the issuance: ${jr.message}`)
+                    return
+                }
+                const job = jr.data
+                if (!job) continue
+                if (job.state === 'succeeded') {
+                    setWatching(null)
+                    toast.show(`Certificate ${job.cert_name} issued.`, { variant: 'success' })
+                    onChanged()
+                    return
+                }
+                if (job.state === 'failed') {
+                    setWatching(null)
+                    setError(`Issuance of ${job.cert_name} failed: ${job.error ?? 'unknown error'}`)
+                    onChanged()
+                    return
+                }
+            }
+            setWatching(null)
+            setError('The issuance is taking longer than expected — refresh shortly.')
+        },
+        [watching, toast, onChanged],
+    )
+
+    const rows = useMemo<JobRow[]>(
+        () =>
+            jobs.map((j) => ({
+                id: j.id,
+                state: j.state,
+                certName: j.cert_name,
+                domains: j.domains ?? [],
+                staging: j.staging,
+                error: j.error,
+                createdAt: j.created_at,
+                updatedAt: j.updated_at,
+            })),
+        [jobs],
+    )
+
+    const onRowAction = useCallback(
+        (action: string, dataset: DOMStringMap) => {
+            if (action === 'watch' && dataset.job) void watch(dataset.job)
+        },
+        [watch],
+    )
+
+    if (rows.length === 0) return null
+
+    return (
+        <tc-section-card title="Recent issuance jobs" icon="history">
+            <div className="perch-admin-section">
+                <p className="perch-home-lead perch-admin-hint">
+                    Async certbot runs the daemon still remembers (finished jobs are pruned after about an
+                    hour; a daemon restart clears them). An in-flight job started in another tab — or by
+                    another admin — can be picked up with Watch.
+                </p>
+                {error && <tc-banner variant="danger">{error}</tc-banner>}
+                {watching && <tc-banner variant="info">Watching the issuance…</tc-banner>}
+                <DataTable<JobRow> columns={JOB_COLUMNS} rows={rows} rowKey={(row) => row.id} onAction={onRowAction} />
+            </div>
+        </tc-section-card>
+    )
+}
+
 // ── issue a certificate (certbot) ────────────────────────────────────────────────────
 
 // Issuance is async: POST returns 202 + a job id, then we poll the job until it is
@@ -377,11 +655,28 @@ const ISSUE_POLL_INTERVAL_MS = 2000
 const ISSUE_POLL_MAX_MS = 360_000
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
+/** One pre-flight verdict as `POST /api/admin/certificates/preflight` returns it (B2). */
+interface PreflightRow {
+    domain: string
+    verdict: string
+    detail: string
+}
+
+/** Banner tone for a pre-flight verdict — ok is green, wildcard hint is informational. */
+function preflightVariant(verdict: string): string {
+    if (verdict === 'ok') return 'success'
+    if (verdict === 'wildcard_needs_dns') return 'info'
+    return 'warning'
+}
+
 function IssueCertCard({
     credentials,
+    jobs,
     onChanged,
 }: {
     credentials: AcmeCredentialInfo[]
+    /** Recent issuance jobs (impl §2) — used to warn about an already-running issuance. */
+    jobs: CertJob[]
     onChanged: () => void
 }) {
     const toast = useToast()
@@ -393,6 +688,31 @@ function IssueCertCard({
     const [error, setError] = useState<string | null>(null)
     const [progress, setProgress] = useState<string | null>(null)
     const [busy, setBusy] = useState(false)
+    // Advisory pre-flight results (B2) — one row per domain; never gates the submit.
+    const [preflight, setPreflight] = useState<PreflightRow[] | null>(null)
+    const [testing, setTesting] = useState(false)
+
+    const runPreflight = useCallback(async () => {
+        const list = domains.split(/[\s,]+/).filter(Boolean)
+        if (!list.length || testing) return
+        setTesting(true)
+        setPreflight(null)
+        const results: PreflightRow[] = []
+        for (const d of list) {
+            const res = await callApi<PreflightRow>('/api/admin/certificates/preflight', 'POST', { domain: d })
+            results.push(
+                res.ok && res.data
+                    ? res.data
+                    : { domain: d, verdict: 'error', detail: res.message ?? 'check failed' },
+            )
+        }
+        setPreflight(results)
+        setTesting(false)
+    }, [domains, testing])
+
+    // An issuance already in flight on the daemon (any tab, any admin) — warn before a
+    // duplicate run; certbot serializes on its lock anyway, so a second run only queues.
+    const inFlight = useMemo(() => jobs.filter((j) => j.state === 'pending' || j.state === 'running'), [jobs])
 
     // The provider select lists the realm's already-stored DNS credentials; the blank
     // option leaves the daemon's configured acme.dns.provider in charge.
@@ -487,6 +807,18 @@ function IssueCertCard({
                 </p>
                 {error && <tc-banner variant="danger">{error}</tc-banner>}
                 {progress && <tc-banner variant="info">{progress}</tc-banner>}
+                {inFlight.length > 0 && !busy && (
+                    <tc-banner variant="warning">
+                        An issuance is already running on this realm:{' '}
+                        {inFlight.map((j) => j.cert_name).join(', ')}. Watch it from the Certificates
+                        tab before starting another for the same domains.
+                    </tc-banner>
+                )}
+                {preflight?.map((p) => (
+                    <tc-banner key={p.domain} variant={preflightVariant(p.verdict)}>
+                        <span className="perch-admin-mono">{p.domain}</span> — {p.detail}
+                    </tc-banner>
+                ))}
                 <form
                     className="perch-admin-section"
                     onSubmit={(e) => {
@@ -526,12 +858,21 @@ function IssueCertCard({
                         help="Which stored DNS-provider credential certbot uses (DNS-01). Blank uses the daemon’s configured provider."
                         ariaLabel="DNS provider credentials"
                     />
-                    <CheckField
+                    <SwitchField
                         checked={staging}
                         onChecked={setStaging}
                         label="Use the CA staging endpoint (testing)"
+                        help="Avoids the CA's rate limits while testing; staging certs aren't browser-trusted."
                     />
                     <div className="perch-admin-add-row">
+                        <tc-button
+                            variant="secondary"
+                            outline
+                            disabled={!domains.trim() || testing || busy || undefined}
+                            onClick={() => void runPreflight()}
+                        >
+                            {testing ? 'Testing…' : 'Test before issuing'}
+                        </tc-button>
                         <tc-button
                             type="submit"
                             variant="primary"
@@ -702,15 +1043,20 @@ function CredentialsCard({
     const [secretKey, setSecretKey] = useState('')
     const [serviceJson, setServiceJson] = useState('')
     const [raw, setRaw] = useState('')
+    // Values of the per-provider INI template fields (C4), keyed by INI key.
+    const [iniValues, setIniValues] = useState<Record<string, string>>({})
     const [busy, setBusy] = useState(false)
 
     const spec = provider === OTHER ? undefined : providerSpec(provider)
+    // Providers past the five convenience shapes get an INI field template (C4).
+    const template = provider === OTHER ? undefined : iniTemplate(provider)
     // "Other" providers and any provider with the raw toggle on use the raw passthrough body.
     const rawMode = provider === OTHER || useRaw
 
     const providerOptions = useMemo(
         () => [
             ...KNOWN_PROVIDERS.map((p) => ({ value: p.id, label: p.label })),
+            ...INI_TEMPLATE_PROVIDERS.map((p) => ({ value: p.id, label: p.label })),
             { value: OTHER, label: 'Other (raw credentials)' },
         ],
         [],
@@ -732,6 +1078,7 @@ function CredentialsCard({
         setSecretKey('')
         setServiceJson('')
         setRaw('')
+        setIniValues({})
         setCustomProvider('')
     }, [])
 
@@ -742,7 +1089,8 @@ function CredentialsCard({
             setError('A provider name is required.')
             return
         }
-        // Build the request body: raw passthrough, or the convenience fields for the shape.
+        // Build the request body: raw passthrough, the convenience fields for the shape,
+        // or the assembled INI template body (C4).
         let req: AcmeCredentialRequest
         if (rawMode) {
             req = { credentials: raw }
@@ -752,6 +1100,13 @@ function CredentialsCard({
             req = { access_key: accessKey, secret_key: secretKey }
         } else if (spec?.shape === 'google') {
             req = { service_account_json: serviceJson }
+        } else if (template) {
+            try {
+                req = { credentials: renderIniCredentials(template, iniValues) }
+            } catch (err) {
+                setError(err instanceof CertInputError ? err.message : 'The credential fields are incomplete.')
+                return
+            }
         } else {
             req = { credentials: raw }
         }
@@ -777,6 +1132,8 @@ function CredentialsCard({
         customProvider,
         rawMode,
         spec,
+        template,
+        iniValues,
         raw,
         token,
         accessKey,
@@ -856,8 +1213,8 @@ function CredentialsCard({
                             ariaLabel="Custom provider name"
                         />
                     )}
-                    {spec && (
-                        <CheckField
+                    {(spec || template) && (
+                        <SwitchField
                             checked={useRaw}
                             onChecked={setUseRaw}
                             label="Enter the raw credentials body instead"
@@ -910,6 +1267,22 @@ function CredentialsCard({
                             placeholder={'{ "type": "service_account", ... }'}
                             ariaLabel="Google service account JSON"
                         />
+                    ) : template ? (
+                        // C4: one input per INI field — assembled into the plugin's
+                        // documented credentials body on submit; nothing hand-written.
+                        <>
+                            {template.fields.map((f) => (
+                                <TextField
+                                    key={f.key}
+                                    value={iniValues[f.key] ?? ''}
+                                    onValue={(v) => setIniValues((prev) => ({ ...prev, [f.key]: v }))}
+                                    type={f.secret ? 'password' : undefined}
+                                    label={`${f.label}${f.optional ? ' (optional)' : ''}`}
+                                    help={f.key}
+                                    ariaLabel={f.label}
+                                />
+                            ))}
+                        </>
                     ) : null}
 
                     <div className="perch-admin-add-row">

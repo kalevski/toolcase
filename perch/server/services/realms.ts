@@ -463,6 +463,12 @@ export interface RealmTestResult {
     healthz: boolean
     /** Daemon runs in managed mode (the `/status` envelope carried an `nginx` object). */
     managed: boolean
+    /** Managed-mode resources the reconcile loop flags as at risk (A7) — live but failing. */
+    atRisk: number
+    /** Managed-mode resources quarantined by `nginx -t` — configured but not serving. */
+    disabled: number
+    /** The daemon's self-reported API version (`GET /schema` info.version, impl §6); absent on older daemons. */
+    apiVersion?: string
     /** A short error string when the check failed (unreachable / auth rejected). */
     error?: string
 }
@@ -470,23 +476,72 @@ export interface RealmTestResult {
 /**
  * Live-check a realm's URL + credentials (`POST /api/admin/realms/{id}/test`): hit `healthz`
  * and `status` against the instance. Never throws on a connection/auth failure — it folds
- * the failure into `ok: false` + `error` so the UI's health dot can render it.
+ * the failure into `ok: false` + `error` so the UI's health dot can render it. The
+ * `atRisk`/`disabled` counts let the health dot go amber *before* anything breaks (A7).
  */
 export async function testRealm(id: string): Promise<RealmTestResult> {
     const r = realmRepo.byId(id)
     if (!r) throw new RealmError('realm not found', 'realm_not_found', 404)
     const client = nginxpilotClient(connectionOf(r))
     const healthz = await client.healthz()
-    if (!healthz) return { ok: false, healthz: false, managed: false, error: 'unreachable' }
+    if (!healthz) return { ok: false, healthz: false, managed: false, atRisk: 0, disabled: 0, error: 'unreachable' }
+    // Daemon API version — best-effort (impl §6): an older daemon without /schema is
+    // simply reported without one, never as a failed check.
+    let apiVersion: string | undefined
+    try {
+        apiVersion = (await client.schema()).version ?? undefined
+    } catch {
+        apiVersion = undefined
+    }
     try {
         const status = await client.status()
-        return { ok: true, healthz: true, managed: status.nginx?.managed ?? false }
+        return {
+            ok: true,
+            healthz: true,
+            managed: status.nginx?.managed ?? false,
+            atRisk: status.nginx?.at_risk_count ?? 0,
+            disabled: status.nginx?.disabled_count ?? 0,
+            apiVersion,
+        }
     } catch (err) {
         const msg =
             err instanceof NginxpilotError
                 ? `status ${err.status ?? ''}`.trim()
                 : 'status check failed'
-        return { ok: false, healthz: true, managed: false, error: msg }
+        return { ok: false, healthz: true, managed: false, atRisk: 0, disabled: 0, error: msg }
+    }
+}
+
+// ── daemon capability probe (impl §6) ───────────────────────────────────────────
+
+/** One realm's daemon capability set, derived from its self-describing `GET /schema`. */
+export interface RealmCapabilities {
+    /** The daemon's self-reported API version, when it exposes one. */
+    version: string | null
+    /** Every path the daemon's route table declares (e.g. "/redirects", "/certs/jobs"). */
+    paths: string[]
+}
+
+// Schema documents change only on daemon upgrades, so a short in-memory TTL cache
+// keeps the probe off the request path without ever being meaningfully stale.
+const schemaCache = new Map<string, { fetchedAt: number; caps: RealmCapabilities }>()
+const SCHEMA_TTL_MS = 5 * 60_000
+
+/**
+ * The active realm's daemon capabilities, or `null` when the daemon predates
+ * `GET /schema` (or is unreachable) — callers MUST treat `null` as "unknown, assume
+ * everything", never as "no capabilities" (an older daemon still serves most routes).
+ */
+export async function capabilitiesForActive(githubId: number, role: Role): Promise<RealmCapabilities | null> {
+    const realm = await resolveActiveRealm(githubId, role)
+    const hit = schemaCache.get(realm.id)
+    if (hit && Date.now() - hit.fetchedAt < SCHEMA_TTL_MS) return hit.caps
+    try {
+        const caps = await clientFor(realm.id).schema()
+        schemaCache.set(realm.id, { fetchedAt: Date.now(), caps })
+        return caps
+    } catch {
+        return hit?.caps ?? null
     }
 }
 

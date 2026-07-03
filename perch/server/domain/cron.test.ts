@@ -1,4 +1,4 @@
-// Unit coverage for the pure cron parser backing the reconcile ticker (§8). Pins
+// Unit coverage for the pure cron parser backing the boot tickers. Pins
 // the field grammar and the standard dom/dow OR semantics so a malformed env
 // cron is caught, not silently ignored.
 

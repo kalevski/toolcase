@@ -14,7 +14,7 @@ import * as baseDomainRepo from '@/server/data/repositories/base-domain-repo'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
 import * as realms from '@/server/services/realms'
 import { resolveLimits } from '@/server/services/plan'
-import { PLAN_LIMITS, type Site } from '@/server/domain/types'
+import { STANDARD_LIMITS, type Site } from '@/server/domain/types'
 import type { FragmentOptions, SiteWebOptions } from '@/server/domain/nginxpilot-fragment'
 import * as machine from '@/server/domain/deploy-machine'
 import type { DeployDeps, SiteSourceChanges, TrackOptions } from '@/server/domain/deploy-machine'
@@ -34,6 +34,10 @@ import type { DeployDeps, SiteSourceChanges, TrackOptions } from '@/server/domai
  * as before for HTTP-only base domains.
  */
 function resolveWebOptions(site: Site): SiteWebOptions | undefined {
+    // Custom domains terminate TLS on the daemon with their own per-domain cert
+    // (issued through the realm API, impl §7). `auto` — never `required` — so a
+    // not-yet-issued cert degrades to HTTP instead of quarantining the site.
+    if (site.hostKind === 'custom') return { tls: 'auto', force_ssl: true }
     if (site.hostKind !== 'subdomain') return undefined
     const host = site.hostname.toLowerCase()
     // Scope the base-domain lookup to the site's own realm (multiple_realms.md §D.4) — the
@@ -48,14 +52,14 @@ function resolveWebOptions(site: Site): SiteWebOptions | undefined {
 
 /**
  * Render options for a site's fragment: the poll interval is the owner's effective
- * `PlanLimits.minIntervalSec` (free polls slowly, sponsors near-real-time, §11/§15).
+ * `PlanLimits.minIntervalSec` (the baseline polls slowly; raised accounts near-real-time, §11/§15).
  * v1 deploys public repos only, so no `auth` block is emitted (zero stored secrets,
  * §9); the renderer's `require_file` + `exclude` defaults cover the rest. Managed-mode
  * TLS options are resolved from the base domain for subdomains (§0/Phase D).
  */
 function fragmentOptions(site: Site): FragmentOptions {
     const owner = userRepo.get(site.ownerId)
-    const limits = owner ? resolveLimits(owner.login) : PLAN_LIMITS.free
+    const limits = owner ? resolveLimits(owner.login) : STANDARD_LIMITS
     return { intervalSec: limits.minIntervalSec, web: resolveWebOptions(site) }
 }
 

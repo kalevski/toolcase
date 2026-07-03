@@ -1,0 +1,62 @@
+{
+    "sites": [
+        {
+            "domain": "docs.example.com",
+            "source_type": "git",
+            "source_url": "https://github.com/acme/docs.git",
+            "deployed_ref": "4757d62f0b9f4a1d8c3e2b6a5d4c3b2a1f0e9d8c",
+            "last_success": "2026-07-01T10:12:00Z",
+            "failure_streak": 0,
+            "never_synced": false,
+            "syncing": false,
+            "next_sync": "2026-07-01T10:17:00Z",
+            "bytes": 10485760
+        }
+    ],
+    "nginx": {
+        "managed": true,
+        "resources": [
+            { "kind": "site", "key": "docs.example.com", "file": "docs.example.com.yml", "state": "active" },
+            {
+                "kind": "proxy",
+                "key": "api.example.com",
+                "file": "proxy-api.example.com.yml",
+                "state": "at_risk",
+                "reason": "nginx: [emerg] host not found in upstream",
+                "since": "2026-07-01T09:00:00Z",
+                "last_reconcile": "2026-07-01T10:15:00Z"
+            },
+            {
+                "kind": "redirect",
+                "key": "old.example.com",
+                "file": "redirect-old.example.com.yml",
+                "state": "disabled",
+                "reason": "nginx: [emerg] duplicate listen"
+            }
+        ],
+        "disabled_count": 1,
+        "at_risk_count": 1,
+        "reconcile": {
+            "enabled": true,
+            "interval": "15s",
+            "on_failure": "warn",
+            "last_run": "2026-07-01T10:15:00Z",
+            "at_risk_count": 1
+        },
+        "real_ip": {
+            "enabled": true,
+            "header": "CF-Connecting-IP",
+            "recursive": true,
+            "providers": ["cloudflare"],
+            "static_count": 1,
+            "range_count": 22,
+            "last_refresh": "2026-07-01T06:00:00Z"
+        }
+    },
+    "certs_renewal": {
+        "enabled": true,
+        "check_interval": "12h0m0s",
+        "renew_before": "720h0m0s",
+        "next_check": "2026-07-01T22:00:00Z"
+    }
+}

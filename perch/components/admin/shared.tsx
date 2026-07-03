@@ -25,13 +25,12 @@ export const ADMIN_TABS: AdminNavItem[] = [
     { id: 'admin-realms', label: 'Realms', icon: 'server', href: '/admin/realms' },
     { id: 'admin-domains', label: 'Domains', icon: 'globe', href: '/admin/domains' },
     { id: 'admin-certificates', label: 'Certificates', icon: 'shield-check', href: '/admin/certificates' },
-    { id: 'admin-plans', label: 'Plans', icon: 'credit-card', href: '/admin/plans' },
     { id: 'admin-settings', label: 'Settings', icon: 'settings', href: '/admin/settings' },
     { id: 'admin-audit', label: 'Audit', icon: 'scroll-text', href: '/admin/audit' },
 ]
 
 // Shared plumbing for the owner-only admin pages (§13). Each admin surface
-// (Sites, Users, Domains, Plans, Audit) lives at its own route and fetches only
+// (Sites, Users, Domains, Audit) lives at its own route and fetches only
 // its own slice, but they all share the same gate: confirm the owner role first
 // (the AuthGate only guarantees an authenticated user), redirect any non-owner
 // away before requesting admin data, and render a consistent loading/error frame.

@@ -21,7 +21,7 @@ import * as realms from '@/server/services/realms'
 import { resolveLimits } from '@/server/services/plan'
 import { config } from '@/server/config'
 import { slog } from '@/server/infrastructure/server-log'
-import { PLAN_LIMITS, type AppUser, type PlanLimits, type Site } from '@/server/domain/types'
+import { STANDARD_LIMITS, type AppUser, type PlanLimits, type Site } from '@/server/domain/types'
 import { canCreateSite, canUseCustomDomain, decideByteQuota, intervalFor as intervalForLimits } from '@/server/domain/quota'
 
 /**
@@ -66,7 +66,7 @@ export function assertCanUseCustomDomain(login: string): void {
     const limits = resolveLimits(login)
     if (!canUseCustomDomain(limits)) {
         throw new QuotaError(
-            'custom domains require a paid (sponsor) plan',
+            'custom domains are not enabled for this account — ask the owner to raise your limit',
             'custom_domains_not_allowed',
             403,
         )
@@ -75,14 +75,18 @@ export function assertCanUseCustomDomain(login: string): void {
 
 /**
  * Reject deploying a PRIVATE repo when the user's plan doesn't allow it (free tier,
- * §9). The plan boundary (`PLAN_LIMITS.free.privateRepos = false`) was previously
+ * §9). The plan boundary (`STANDARD_LIMITS.privateRepos = false`) was previously
  * advertised but never enforced (C2). Callers must have established the repo is
  * actually private from authoritative GitHub metadata — never the client flag.
  */
 export function assertCanUsePrivateRepo(login: string): void {
     const limits = resolveLimits(login)
     if (!limits.privateRepos) {
-        throw new QuotaError('private repositories require a paid (sponsor) plan', 'private_repos_not_allowed', 403)
+        throw new QuotaError(
+            'private repositories are not enabled for this account — ask the owner to raise your limit',
+            'private_repos_not_allowed',
+            403,
+        )
     }
 }
 
@@ -90,7 +94,7 @@ export function assertCanUsePrivateRepo(login: string): void {
 
 /**
  * The fragment `interval` for a login — its plan's `minIntervalSec` floor as an
- * nginxpilot duration (free polls slowly, sponsors near-real-time). The deploy
+ * nginxpilot duration (the baseline polls slowly; raised accounts near-real-time). The deploy
  * service uses `minIntervalSec` directly when rendering; this is the human-facing
  * string for the wizard/dashboard.
  */
@@ -100,9 +104,9 @@ export function intervalFor(login: string): string {
 
 // ── post-deploy byte cap → grace → suspend (§11 point 2) ─────────────────────
 
-/** Effective per-user limits for a site's owner, falling back to the free tier. */
+/** Effective per-user limits for a site's owner, falling back to the standard baseline. */
 function limitsForOwner(owner: AppUser | undefined): PlanLimits {
-    return owner ? resolveLimits(owner.login) : PLAN_LIMITS.free
+    return owner ? resolveLimits(owner.login) : STANDARD_LIMITS
 }
 
 /** Record one quota event in the audit log (the user-facing notification trail) and the server log. */

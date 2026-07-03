@@ -5,7 +5,16 @@
 // parse.
 
 import { describe, it, expect } from 'vitest'
-import { parseUpstream, parseProxy, renderUpstreamFragment, renderProxyFragment } from './routing'
+import {
+    parseUpstream,
+    parseProxy,
+    parseRedirect,
+    parseDeadHost,
+    renderUpstreamFragment,
+    renderProxyFragment,
+    renderRedirectFragment,
+    renderDeadHostFragment,
+} from './routing'
 
 describe('parseUpstream', () => {
     it('normalizes a valid upstream, dropping empty optionals and round_robin default', () => {
@@ -145,12 +154,28 @@ describe('parseProxy', () => {
         expect(r.value.locations).toEqual([{ path: '/api' }])
     })
 
-    it('rejects a missing domain and a wildcard', () => {
+    it('rejects a missing domain; accepts one leading wildcard label and rejects any other * (A3)', () => {
         expect(parseProxy({ pass: 'http://x:1' })).toMatchObject({ ok: false, reason: 'domain_required' })
-        expect(parseProxy({ domain: '*.example.com', pass: 'http://x:1' })).toMatchObject({
+        const wild = parseProxy({ domain: '*.Example.com', pass: 'http://x:1' })
+        expect(wild.ok).toBe(true)
+        if (wild.ok) expect(wild.value.domain).toBe('*.example.com')
+        expect(parseProxy({ domain: '*', pass: 'http://x:1' })).toMatchObject({ ok: false, reason: 'bad_wildcard' })
+        expect(parseProxy({ domain: 'a.*.example.com', pass: 'http://x:1' })).toMatchObject({
             ok: false,
-            reason: 'wildcard',
+            reason: 'bad_wildcard',
         })
+        expect(parseProxy({ domain: '*.', pass: 'http://x:1' })).toMatchObject({ ok: false, reason: 'bad_wildcard' })
+    })
+
+    it('passes a per-location advanced snippet through trimmed (A4)', () => {
+        const r = parseProxy({
+            domain: 'a.com',
+            upstream: 'pool',
+            locations: [{ path: '/api', advanced: '  proxy_buffering off;  ' }],
+        })
+        expect(r.ok).toBe(true)
+        if (!r.ok) return
+        expect(r.value.locations).toEqual([{ path: '/api', advanced: 'proxy_buffering off;' }])
     })
 
     it('rejects an out-of-range listen port', () => {
@@ -280,7 +305,8 @@ describe('parseProxy', () => {
 
     it('accepts the daemon read-shape: struct hsts and a bare cache: {}', () => {
         // GET /proxies serializes hsts as a struct ({} when off) and a disabled
-        // cache as {} — a proxy read back and POSTed for edit/toggle must survive.
+        // cache as {} — a proxy read back and POSTed for edit/toggle must survive,
+        // with an explicit max_age round-tripping instead of flattening to a bool.
         const r = parseProxy({
             domain: 'a.com',
             upstream: 'p',
@@ -290,7 +316,7 @@ describe('parseProxy', () => {
         })
         expect(r.ok).toBe(true)
         if (!r.ok) return
-        expect(r.value.hsts).toBe(true)
+        expect(r.value.hsts).toEqual({ enabled: true, max_age: 63072000 })
         expect(r.value.cache).toBeUndefined()
 
         const off = parseProxy({ domain: 'a.com', upstream: 'p', hsts: {} })
@@ -298,9 +324,63 @@ describe('parseProxy', () => {
         if (!off.ok) return
         expect(off.value.hsts).toBeUndefined()
     })
+
+    it('normalizes hsts structs: defaults collapse to true, deviations round-trip', () => {
+        // An enabled struct at all daemon defaults is the minimal bool write form.
+        const plain = parseProxy({
+            domain: 'a.com',
+            upstream: 'p',
+            tls: 'auto',
+            hsts: { enabled: true, include_subdomains: true },
+        })
+        expect(plain.ok).toBe(true)
+        if (!plain.ok) return
+        expect(plain.value.hsts).toBe(true)
+
+        // Deviations from the defaults are preserved.
+        const custom = parseProxy({
+            domain: 'a.com',
+            upstream: 'p',
+            tls: 'auto',
+            hsts: { enabled: true, max_age: 31536000, include_subdomains: false, preload: true },
+        })
+        expect(custom.ok).toBe(true)
+        if (!custom.ok) return
+        expect(custom.value.hsts).toEqual({
+            enabled: true,
+            max_age: 31536000,
+            include_subdomains: false,
+            preload: true,
+        })
+
+        // Bad shapes are rejected before the round-trip.
+        expect(
+            parseProxy({ domain: 'a.com', upstream: 'p', tls: 'auto', hsts: { enabled: true, max_age: -5 } }),
+        ).toMatchObject({ ok: false, reason: 'bad_hsts' })
+        expect(parseProxy({ domain: 'a.com', upstream: 'p', tls: 'auto', hsts: 'yes' })).toMatchObject({
+            ok: false,
+            reason: 'bad_hsts',
+        })
+    })
 })
 
 describe('renderProxyFragment', () => {
+    it('emits hsts as a nested mapping when custom options are set', () => {
+        const r = parseProxy({
+            domain: 'a.com',
+            upstream: 'p',
+            tls: 'auto',
+            hsts: { enabled: true, max_age: 31536000, include_subdomains: false, preload: true },
+        })
+        expect(r.ok).toBe(true)
+        if (!r.ok) return
+        expect(renderProxyFragment(r.value)).toContain(
+            ['    hsts:', '      max_age: 31536000', '      include_subdomains: false', '      preload: true'].join(
+                '\n',
+            ),
+        )
+    })
+
     it('emits enabled: false right after the domain for a disabled proxy', () => {
         const r = parseProxy({ domain: 'a.com', pass: 'http://127.0.0.1:9000', enabled: false })
         expect(r.ok).toBe(true)
@@ -391,5 +471,308 @@ describe('renderProxyFragment', () => {
         expect(r.ok).toBe(true)
         if (!r.ok) return
         expect(renderProxyFragment(r.value)).toContain('    advanced: |\n      add_header A 1;\n      add_header B 2;\n')
+    })
+
+    it('emits a per-location advanced block under the location (A4) and quotes a wildcard domain (A3)', () => {
+        const r = parseProxy({
+            domain: '*.example.com',
+            upstream: 'pool',
+            locations: [{ path: '/api', pass: 'http://127.0.0.1:9000', advanced: 'proxy_buffering off;\nproxy_cache off;' }],
+        })
+        expect(r.ok).toBe(true)
+        if (!r.ok) return
+        expect(renderProxyFragment(r.value)).toBe(
+            [
+                '# generated by Perch; managed automatically, do not edit by hand.',
+                'proxies:',
+                '  - domain: "*.example.com"',
+                '    upstream: pool',
+                '    locations:',
+                '      - path: "/api"',
+                '        pass: http://127.0.0.1:9000',
+                '        advanced: |',
+                '          proxy_buffering off;',
+                '          proxy_cache off;',
+                '',
+            ].join('\n'),
+        )
+    })
+})
+
+// ── redirects (better.md §3) ─────────────────────────────────────────────────────
+
+describe('parseRedirect', () => {
+    it('normalizes a valid redirect, dropping the defaults (301 / auto / preserve_path)', () => {
+        const r = parseRedirect({
+            domain: 'Old.Example.com',
+            to: 'new.example.com',
+            code: 301,
+            scheme: 'auto',
+            preserve_path: true,
+            listen: 80,
+        })
+        expect(r).toEqual({ ok: true, value: { domain: 'old.example.com', to: 'new.example.com' } })
+    })
+
+    it('keeps non-default code/scheme/preserve_path/listen and the web toggles', () => {
+        const r = parseRedirect({
+            domain: 'a.example.com',
+            to: 'b.example.com:8443',
+            code: 308,
+            scheme: 'https',
+            preserve_path: false,
+            listen: 8080,
+            enabled: false,
+            tls: 'auto',
+            http2: true,
+            hsts: true,
+            block_exploits: true,
+            gzip: true,
+            advanced: 'add_header X 1;',
+        })
+        expect(r.ok).toBe(true)
+        if (!r.ok) return
+        expect(r.value).toEqual({
+            domain: 'a.example.com',
+            to: 'b.example.com:8443',
+            enabled: false,
+            listen: 8080,
+            scheme: 'https',
+            code: 308,
+            preserve_path: false,
+            tls: 'auto',
+            http2: true,
+            hsts: true,
+            block_exploits: true,
+            gzip: true,
+            advanced: 'add_header X 1;',
+        })
+    })
+
+    it('accepts exactly one leading wildcard label and rejects any other *', () => {
+        expect(parseRedirect({ domain: '*.example.com', to: 'x.example.org' }).ok).toBe(true)
+        expect(parseRedirect({ domain: '*', to: 'x.example.org' })).toMatchObject({ ok: false, reason: 'bad_wildcard' })
+        expect(parseRedirect({ domain: 'a.*.example.com', to: 'x.example.org' })).toMatchObject({
+            ok: false,
+            reason: 'bad_wildcard',
+        })
+        expect(parseRedirect({ domain: '*.', to: 'x.example.org' })).toMatchObject({ ok: false, reason: 'bad_wildcard' })
+    })
+
+    it('requires a host-shaped to (no scheme/path, valid optional port)', () => {
+        expect(parseRedirect({ domain: 'a.example.com' })).toMatchObject({ ok: false, reason: 'to_required' })
+        expect(parseRedirect({ domain: 'a.example.com', to: 'https://b.example.com' })).toMatchObject({
+            ok: false,
+            reason: 'bad_to',
+        })
+        expect(parseRedirect({ domain: 'a.example.com', to: 'b.example.com/path' })).toMatchObject({
+            ok: false,
+            reason: 'bad_to',
+        })
+        expect(parseRedirect({ domain: 'a.example.com', to: 'b.example.com:99999' })).toMatchObject({
+            ok: false,
+            reason: 'bad_to',
+        })
+        expect(parseRedirect({ domain: 'a.example.com', to: ':8080' })).toMatchObject({ ok: false, reason: 'bad_to' })
+    })
+
+    it('rejects a self-redirect (to host equals the domain, any port)', () => {
+        expect(parseRedirect({ domain: 'a.example.com', to: 'a.example.com' })).toMatchObject({
+            ok: false,
+            reason: 'self_redirect',
+        })
+        expect(parseRedirect({ domain: 'a.example.com', to: 'A.example.com:8443' })).toMatchObject({
+            ok: false,
+            reason: 'self_redirect',
+        })
+    })
+
+    it('rejects bad code / scheme enums', () => {
+        expect(parseRedirect({ domain: 'a.example.com', to: 'b.example.com', code: 300 })).toMatchObject({
+            ok: false,
+            reason: 'bad_code',
+        })
+        expect(parseRedirect({ domain: 'a.example.com', to: 'b.example.com', scheme: 'ftp' })).toMatchObject({
+            ok: false,
+            reason: 'bad_scheme',
+        })
+    })
+
+    it('rejects force_ssl outright (the daemon rule, mirrored so the user never round-trips)', () => {
+        expect(parseRedirect({ domain: 'a.example.com', to: 'b.example.com', tls: 'auto', force_ssl: true })).toMatchObject({
+            ok: false,
+            reason: 'force_ssl_on_redirect',
+        })
+    })
+
+    it('requires tls for http2/hsts', () => {
+        expect(parseRedirect({ domain: 'a.example.com', to: 'b.example.com', http2: true })).toMatchObject({
+            ok: false,
+            reason: 'tls_required',
+        })
+    })
+})
+
+describe('renderRedirectFragment', () => {
+    it('emits the minimal fragment for an all-defaults redirect', () => {
+        const r = parseRedirect({ domain: 'old.example.com', to: 'new.example.com' })
+        expect(r.ok).toBe(true)
+        if (!r.ok) return
+        expect(renderRedirectFragment(r.value)).toBe(
+            [
+                '# generated by Perch; managed automatically, do not edit by hand.',
+                'redirects:',
+                '  - domain: old.example.com',
+                '    to: new.example.com',
+                '',
+            ].join('\n'),
+        )
+    })
+
+    it('emits every non-default field in the deterministic order', () => {
+        const r = parseRedirect({
+            domain: '*.example.com',
+            to: 'hub.example.org:8443',
+            enabled: false,
+            listen: 8080,
+            code: 308,
+            scheme: 'https',
+            preserve_path: false,
+            tls: 'required',
+            http2: true,
+            hsts: true,
+            block_exploits: true,
+            gzip: true,
+            advanced: 'add_header A 1;\nadd_header B 2;',
+        })
+        expect(r.ok).toBe(true)
+        if (!r.ok) return
+        expect(renderRedirectFragment(r.value)).toBe(
+            [
+                '# generated by Perch; managed automatically, do not edit by hand.',
+                'redirects:',
+                '  - domain: "*.example.com"',
+                '    enabled: false',
+                '    listen: 8080',
+                '    to: hub.example.org:8443',
+                '    scheme: https',
+                '    code: 308',
+                '    preserve_path: false',
+                '    tls: required',
+                '    http2: true',
+                '    hsts: true',
+                '    block_exploits: true',
+                '    gzip: true',
+                '    advanced: |',
+                '      add_header A 1;',
+                '      add_header B 2;',
+                '',
+            ].join('\n'),
+        )
+    })
+})
+
+// ── dead (parked) hosts (better.md §3) ───────────────────────────────────────────
+
+describe('parseDeadHost', () => {
+    it('normalizes a valid dead host, dropping the 404 default', () => {
+        const r = parseDeadHost({ domain: 'Gone.Example.com', code: 404, listen: 80 })
+        expect(r).toEqual({ ok: true, value: { domain: 'gone.example.com' } })
+    })
+
+    it('keeps a non-default code and the full web toggles including force_ssl', () => {
+        const r = parseDeadHost({
+            domain: 'gone.example.com',
+            code: 444,
+            enabled: false,
+            listen: 8080,
+            tls: 'auto',
+            force_ssl: true,
+            http2: true,
+            hsts: true,
+            block_exploits: true,
+            gzip: true,
+            advanced: 'add_header X 1;',
+        })
+        expect(r.ok).toBe(true)
+        if (!r.ok) return
+        expect(r.value).toEqual({
+            domain: 'gone.example.com',
+            enabled: false,
+            listen: 8080,
+            code: 444,
+            tls: 'auto',
+            force_ssl: true,
+            http2: true,
+            hsts: true,
+            block_exploits: true,
+            gzip: true,
+            advanced: 'add_header X 1;',
+        })
+    })
+
+    it('accepts a wildcard domain and rejects a bad code', () => {
+        expect(parseDeadHost({ domain: '*.example.com' }).ok).toBe(true)
+        expect(parseDeadHost({ domain: 'a.example.com', code: 418 })).toMatchObject({ ok: false, reason: 'bad_code' })
+    })
+
+    it('requires tls for force_ssl/http2/hsts', () => {
+        expect(parseDeadHost({ domain: 'a.example.com', force_ssl: true })).toMatchObject({
+            ok: false,
+            reason: 'tls_required',
+        })
+    })
+})
+
+describe('renderDeadHostFragment', () => {
+    it('emits the minimal fragment for an all-defaults dead host', () => {
+        const r = parseDeadHost({ domain: 'gone.example.com' })
+        expect(r.ok).toBe(true)
+        if (!r.ok) return
+        expect(renderDeadHostFragment(r.value)).toBe(
+            [
+                '# generated by Perch; managed automatically, do not edit by hand.',
+                'dead_hosts:',
+                '  - domain: gone.example.com',
+                '',
+            ].join('\n'),
+        )
+    })
+
+    it('emits every non-default field in the deterministic order', () => {
+        const r = parseDeadHost({
+            domain: '*.example.com',
+            enabled: false,
+            listen: 8443,
+            code: 503,
+            tls: 'required',
+            force_ssl: true,
+            http2: true,
+            hsts: true,
+            block_exploits: true,
+            gzip: true,
+            advanced: 'add_header A 1;',
+        })
+        expect(r.ok).toBe(true)
+        if (!r.ok) return
+        expect(renderDeadHostFragment(r.value)).toBe(
+            [
+                '# generated by Perch; managed automatically, do not edit by hand.',
+                'dead_hosts:',
+                '  - domain: "*.example.com"',
+                '    enabled: false',
+                '    listen: 8443',
+                '    code: 503',
+                '    tls: required',
+                '    force_ssl: true',
+                '    http2: true',
+                '    hsts: true',
+                '    block_exploits: true',
+                '    gzip: true',
+                '    advanced: |',
+                '      add_header A 1;',
+                '',
+            ].join('\n'),
+        )
     })
 })

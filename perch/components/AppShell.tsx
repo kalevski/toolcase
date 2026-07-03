@@ -40,33 +40,21 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
                     href: '/',
                     active: pathname === '/',
                 },
-                {
-                    key: 'plans',
-                    label: 'Plans',
-                    icon: 'credit-card',
-                    href: '/plans',
-                    active: pathname.startsWith('/plans'),
-                },
             ],
         }
-        // The four routing sub-pages still live behind a tc-tab-bar above each page
-        // body (P5, Wharf's project-tab pattern), so the sidebar carries ONE Routing
-        // entry — clicking it lands on the first page and the tab bar handles
-        // intra-section navigation from there.
+        // Every routing area is its own sidebar entry (like the Admin section) —
+        // one route per page, no intra-section tab bar. Pools live WITH their
+        // consumers: Proxies carries the http upstream pools, Streams the L4 ones.
         const routing: SideNavSection = {
             key: 'routing',
             title: 'Routing',
             items: [
-                {
-                    key: 'routing',
-                    label: 'Routing',
-                    icon: 'route',
-                    href: '/proxies',
-                    active: ['/proxies', '/upstreams', '/streams', '/stream-upstreams'].some((p) =>
-                        pathname.startsWith(p),
-                    ),
-                },
-            ],
+                { key: 'proxies', label: 'Proxies', icon: 'globe', href: '/proxies' },
+                { key: 'redirects', label: 'Redirects', icon: 'corner-up-right', href: '/redirects' },
+                { key: 'dead-hosts', label: 'Dead hosts', icon: 'ban', href: '/dead-hosts' },
+                { key: 'access-lists', label: 'Access lists', icon: 'lock', href: '/access-lists' },
+                { key: 'streams', label: 'Streams', icon: 'cable', href: '/streams' },
+            ].map((item) => ({ ...item, active: pathname.startsWith(item.href) })),
         }
         // Every admin area is its own sidebar entry (Overview, Sites, Users, Realms,
         // Domains, Certificates, Plans, Settings, Audit) — one route per page, no

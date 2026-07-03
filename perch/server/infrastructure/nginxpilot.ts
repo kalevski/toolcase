@@ -30,9 +30,14 @@ import { renderFragment, type FragmentOptions } from '@/server/domain/nginxpilot
 import {
     renderUpstreamFragment,
     renderProxyFragment,
+    renderRedirectFragment,
+    renderDeadHostFragment,
     type Upstream,
     type Proxy,
+    type Redirect,
+    type DeadHost,
 } from '@/server/domain/routing'
+import { renderAccessListFragment, type AccessList } from '@/server/domain/access-list'
 import {
     renderStreamFragment,
     renderStreamUpstreamFragment,
@@ -117,11 +122,46 @@ export interface NginxpilotSiteStatus {
  * else) — the same keying Perch uses to match a resource back to one of its entities.
  */
 export interface NginxResource {
-    kind: 'site' | 'proxy' | 'upstream' | 'stream' | 'stream-upstream'
+    /** nginxctl resource kinds — note `dead-host` is hyphenated in /status (unlike the fragment kind). */
+    kind: 'site' | 'proxy' | 'upstream' | 'stream' | 'stream-upstream' | 'redirect' | 'dead-host'
     key: string
     file?: string
-    state: 'active' | 'disabled'
+    state: 'active' | 'disabled' | 'at_risk'
     reason?: string
+    /** ISO timestamp the reconcile loop first saw this resource failing (at_risk/disabled). */
+    since?: string
+    /** ISO timestamp of the reconcile tick that last evaluated this resource. */
+    last_reconcile?: string
+}
+
+/**
+ * The reconcile-loop summary under `status.nginx.reconcile` — the daemon's periodic
+ * dry-run that detects live-but-would-fail resources (`at_risk`, policy `warn`) or
+ * disables them (policy `disable`). `interval` / `last_run` are the loop's cadence.
+ */
+export interface NginxReconcileSummary {
+    enabled: boolean
+    interval: string
+    on_failure: string
+    last_run?: string
+    at_risk_count: number
+}
+
+/**
+ * The real-IP refresh summary under `status.nginx.real_ip` (C2): whether the
+ * daemon restores client IPs behind a CDN, which provider ranges are in effect,
+ * and when they were last refreshed. Config-file-owned on the daemon (`nginx.
+ * real_ip`) — Perch surfaces it read-only.
+ */
+export interface NginxRealIPStatus {
+    enabled: boolean
+    header: string
+    recursive: boolean
+    providers: string[]
+    static_count: number
+    range_count: number
+    last_refresh?: string
+    last_error?: string
 }
 
 /** The `status.nginx` object — present only when the daemon runs in managed mode (§0). */
@@ -129,12 +169,28 @@ export interface NginxManaged {
     managed: boolean
     resources: NginxResource[]
     disabled_count: number
+    at_risk_count: number
+    reconcile?: NginxReconcileSummary
+    real_ip?: NginxRealIPStatus
+}
+
+/**
+ * The renewal-scheduler summary under `status.certs_renewal` — present whether or not
+ * acme is enabled, so a control plane can tell "disabled" from "daemon predates it".
+ * `check_interval` / `renew_before` are Go duration strings ("12h0m0s").
+ */
+export interface CertsRenewalStatus {
+    enabled: boolean
+    check_interval: string
+    renew_before: string
+    next_check?: string
 }
 
 /** The `GET /status` envelope. `nginx` is present only in managed mode. */
 export interface NginxpilotStatus {
     sites: NginxpilotSiteStatus[]
     nginx?: NginxManaged
+    certs_renewal?: CertsRenewalStatus
 }
 
 /** The `POST /nginx/test` dry-run envelope — per-resource pass/fail plus an optional top-level error. */
@@ -164,6 +220,17 @@ export interface NginxpilotCert {
     not_after?: string
     /** Issuer CN (or full DN when no CN); absent when the cert couldn't be parsed. */
     issuer?: string
+    /** Seconds until `not_after`, computed daemon-side at read time (negative = expired). */
+    expires_in_seconds?: number
+    /**
+     * Whether the renewal scheduler can renew this cert itself (a certbot `live/` dir
+     * exists). `false` = a manually-uploaded flat pair the operator must re-upload.
+     */
+    renew_managed: boolean
+    /** ISO timestamp of the scheduler's last successful renewal of this cert. */
+    last_renew_time?: string
+    /** The scheduler's last renewal failure for this cert (sticky until a success). */
+    last_renew_error?: string
 }
 
 /**
@@ -227,6 +294,27 @@ export interface AcmeCredentialResult {
 
 /** Outcome of `reload()` — always the REST path now that the file-drop fallback is gone. */
 export type ReloadResult = { method: 'rest' }
+
+/**
+ * Outcome of a routing-resource write (`POST /proxies|/upstreams|/streams|…`). The
+ * daemon answers plain text (`created`/`updated`) on a clean write, but switches to
+ * JSON `{status, warnings}` when its three-tier target checks produced advisory
+ * warnings (an unreachable backend, a DNS hiccup under `dns: warn`). Warnings never
+ * block the write — the fragment IS live; they exist to be surfaced to the operator.
+ */
+export interface WriteResult {
+    status: string
+    warnings: string[]
+}
+
+/**
+ * Per-write options. `skipTargetChecks` appends `?skip_target_checks=true` — the
+ * daemon's own bootstrap escape hatch for a target host whose DNS record lands later
+ * (an unresolvable host under `dns: error` is otherwise a 400).
+ */
+export interface WriteOptions {
+    skipTargetChecks?: boolean
+}
 
 // ── the client factory ───────────────────────────────────────────────────────────
 
@@ -373,6 +461,30 @@ export function nginxpilotClient(conn: RealmConnection) {
 
     // ── Channel A: routing config over REST (upstreams + proxies) ───────────────
 
+    /**
+     * POST one routing fragment and normalize the daemon's two success shapes into a
+     * {@link WriteResult}: plain text (`created`/`updated`, no warnings) or JSON
+     * `{status, warnings}` when target checks flagged something advisory. A rejected
+     * fragment is still a thrown `NginxpilotError` (400, `.detail` = the daemon's
+     * reason — including the `?skip_target_checks=true` hint for a DNS failure).
+     */
+    async function writeRoutingFragment(
+        apiPath: string,
+        yaml: string,
+        opts?: WriteOptions,
+    ): Promise<WriteResult> {
+        const query = opts?.skipTargetChecks ? '?skip_target_checks=true' : ''
+        const res = await adminOk('POST', `${apiPath}${query}`, {
+            body: yaml,
+            headers: { 'Content-Type': 'application/yaml' },
+        })
+        if ((res.headers.get('content-type') ?? '').includes('application/json')) {
+            const body = (await res.json()) as { status?: string; warnings?: string[] }
+            return { status: body.status ?? 'created', warnings: body.warnings ?? [] }
+        }
+        return { status: (await res.text()).trim() || 'created', warnings: [] }
+    }
+
     /** Every configured upstream from `GET /upstreams`. */
     async function listUpstreams(): Promise<Upstream[]> {
         const res = await adminOk('GET', '/upstreams')
@@ -380,13 +492,10 @@ export function nginxpilotClient(conn: RealmConnection) {
     }
 
     /** Write an upstream's fragment via `POST /upstreams` (validated + reloaded daemon-side). */
-    async function writeUpstream(upstream: Upstream): Promise<void> {
-        const yaml = renderUpstreamFragment(upstream)
-        await adminOk('POST', '/upstreams', {
-            body: yaml,
-            headers: { 'Content-Type': 'application/yaml' },
-        })
+    async function writeUpstream(upstream: Upstream, opts?: WriteOptions): Promise<WriteResult> {
+        const result = await writeRoutingFragment('/upstreams', renderUpstreamFragment(upstream), opts)
         slog('info', 'nginxpilot', 'wrote upstream fragment via API', { name: upstream.name })
+        return result
     }
 
     /** Remove an upstream via `DELETE /upstreams/{name}` (404 = already gone → success; 409 = in use). */
@@ -409,13 +518,10 @@ export function nginxpilotClient(conn: RealmConnection) {
     }
 
     /** Write a proxy's fragment via `POST /proxies` (validated + reloaded daemon-side). */
-    async function writeProxy(proxy: Proxy): Promise<void> {
-        const yaml = renderProxyFragment(proxy)
-        await adminOk('POST', '/proxies', {
-            body: yaml,
-            headers: { 'Content-Type': 'application/yaml' },
-        })
+    async function writeProxy(proxy: Proxy, opts?: WriteOptions): Promise<WriteResult> {
+        const result = await writeRoutingFragment('/proxies', renderProxyFragment(proxy), opts)
         slog('info', 'nginxpilot', 'wrote proxy fragment via API', { domain: proxy.domain })
+        return result
     }
 
     /** Remove a proxy via `DELETE /proxies/{domain}` (404 = already gone → success). */
@@ -431,6 +537,110 @@ export function nginxpilotClient(conn: RealmConnection) {
         slog('info', 'nginxpilot', 'removed proxy fragment via API', { domain })
     }
 
+    // ── Channel A: redirect + dead-host config over REST (better.md §3) ─────────
+
+    /** Every configured redirection host from `GET /redirects`. */
+    async function listRedirects(): Promise<Redirect[]> {
+        const res = await adminOk('GET', '/redirects')
+        return ((await res.json()) as { redirects?: Redirect[] }).redirects ?? []
+    }
+
+    /** Write a redirect's fragment via `POST /redirects` (validated + reloaded daemon-side). */
+    async function writeRedirect(redirect: Redirect, opts?: WriteOptions): Promise<WriteResult> {
+        const result = await writeRoutingFragment('/redirects', renderRedirectFragment(redirect), opts)
+        slog('info', 'nginxpilot', 'wrote redirect fragment via API', { domain: redirect.domain })
+        return result
+    }
+
+    /** Remove a redirect via `DELETE /redirects/{domain}` (404 = already gone → success). */
+    async function removeRedirect(domain: string): Promise<void> {
+        const res = await adminFetch('DELETE', `/redirects/${encodeURIComponent(domain)}`)
+        if (!res.ok && res.status !== 404) {
+            const detail = await res.text().catch(() => '')
+            throw new NginxpilotError(
+                `nginxpilot DELETE /redirects/${domain} failed (${res.status})${detail ? `: ${detail.trim()}` : ''}`,
+                res.status,
+            )
+        }
+        slog('info', 'nginxpilot', 'removed redirect fragment via API', { domain })
+    }
+
+    /** Every configured dead (parked) host from `GET /dead-hosts`. */
+    async function listDeadHosts(): Promise<DeadHost[]> {
+        const res = await adminOk('GET', '/dead-hosts')
+        return ((await res.json()) as { dead_hosts?: DeadHost[] }).dead_hosts ?? []
+    }
+
+    /** Write a dead host's fragment via `POST /dead-hosts` (validated + reloaded daemon-side). */
+    async function writeDeadHost(deadHost: DeadHost, opts?: WriteOptions): Promise<WriteResult> {
+        const result = await writeRoutingFragment('/dead-hosts', renderDeadHostFragment(deadHost), opts)
+        slog('info', 'nginxpilot', 'wrote dead-host fragment via API', { domain: deadHost.domain })
+        return result
+    }
+
+    /** Remove a dead host via `DELETE /dead-hosts/{domain}` (404 = already gone → success). */
+    async function removeDeadHost(domain: string): Promise<void> {
+        const res = await adminFetch('DELETE', `/dead-hosts/${encodeURIComponent(domain)}`)
+        if (!res.ok && res.status !== 404) {
+            const detail = await res.text().catch(() => '')
+            throw new NginxpilotError(
+                `nginxpilot DELETE /dead-hosts/${domain} failed (${res.status})${detail ? `: ${detail.trim()}` : ''}`,
+                res.status,
+            )
+        }
+        slog('info', 'nginxpilot', 'removed dead-host fragment via API', { domain })
+    }
+
+    // ── Channel A: access lists over REST (better.md §1 / C1) ───────────────────
+
+    /** Every configured access list from `GET /access-lists` (hashes masked daemon-side). */
+    async function listAccessLists(): Promise<AccessList[]> {
+        const res = await adminOk('GET', '/access-lists')
+        return ((await res.json()) as { access_lists?: AccessList[] }).access_lists ?? []
+    }
+
+    /**
+     * Write an access list's fragment via `POST /access-lists`. The fragment carries
+     * usernames only — the daemon merges existing password hashes forward on a
+     * replace-by-name write, so an edit never wipes passwords.
+     */
+    async function writeAccessList(list: AccessList, opts?: WriteOptions): Promise<WriteResult> {
+        const result = await writeRoutingFragment('/access-lists', renderAccessListFragment(list), opts)
+        slog('info', 'nginxpilot', 'wrote access-list fragment via API', { name: list.name })
+        return result
+    }
+
+    /** Remove an access list via `DELETE /access-lists/{name}` (404 = gone → success; 409 = referenced). */
+    async function removeAccessList(name: string): Promise<void> {
+        const res = await adminFetch('DELETE', `/access-lists/${encodeURIComponent(name)}`)
+        if (!res.ok && res.status !== 404) {
+            const detail = await res.text().catch(() => '')
+            throw new NginxpilotError(
+                `nginxpilot DELETE /access-lists/${name} failed (${res.status})${detail ? `: ${detail.trim()}` : ''}`,
+                res.status,
+                detail || undefined,
+            )
+        }
+        slog('info', 'nginxpilot', 'removed access-list fragment via API', { name })
+    }
+
+    /**
+     * (Re)set one user's password — `PUT /access-lists/{name}/users/{username}`.
+     * Plaintext goes ONLY here; the daemon hashes it (apr1) server-side. The
+     * password is never logged.
+     */
+    async function setAccessListPassword(name: string, username: string, password: string): Promise<void> {
+        await adminOk(
+            'PUT',
+            `/access-lists/${encodeURIComponent(name)}/users/${encodeURIComponent(username)}`,
+            {
+                body: JSON.stringify({ password }),
+                headers: { 'Content-Type': 'application/json' },
+            },
+        )
+        slog('info', 'nginxpilot', 'set access-list user password via API', { name, username })
+    }
+
     // ── Channel A: L4 stream config over REST (streams + stream-upstreams) ──────
 
     /** Every configured stream from `GET /streams`. */
@@ -440,13 +650,10 @@ export function nginxpilotClient(conn: RealmConnection) {
     }
 
     /** Write a stream's fragment via `POST /streams` (validated + reloaded daemon-side). */
-    async function writeStream(stream: Stream): Promise<void> {
-        const yaml = renderStreamFragment(stream)
-        await adminOk('POST', '/streams', {
-            body: yaml,
-            headers: { 'Content-Type': 'application/yaml' },
-        })
+    async function writeStream(stream: Stream, opts?: WriteOptions): Promise<WriteResult> {
+        const result = await writeRoutingFragment('/streams', renderStreamFragment(stream), opts)
         slog('info', 'nginxpilot', 'wrote stream fragment via API', { name: stream.name })
+        return result
     }
 
     /** Remove a stream via `DELETE /streams/{name}` (404 = already gone → success). */
@@ -471,15 +678,19 @@ export function nginxpilotClient(conn: RealmConnection) {
     }
 
     /** Write a stream upstream's fragment via `POST /stream-upstreams` (validated + reloaded daemon-side). */
-    async function writeStreamUpstream(upstream: StreamUpstream): Promise<void> {
-        const yaml = renderStreamUpstreamFragment(upstream)
-        await adminOk('POST', '/stream-upstreams', {
-            body: yaml,
-            headers: { 'Content-Type': 'application/yaml' },
-        })
+    async function writeStreamUpstream(
+        upstream: StreamUpstream,
+        opts?: WriteOptions,
+    ): Promise<WriteResult> {
+        const result = await writeRoutingFragment(
+            '/stream-upstreams',
+            renderStreamUpstreamFragment(upstream),
+            opts,
+        )
         slog('info', 'nginxpilot', 'wrote stream upstream fragment via API', {
             name: upstream.name,
         })
+        return result
     }
 
     /** Remove a stream upstream via `DELETE /stream-upstreams/{name}` (404 = gone → success; 409 = in use). */
@@ -549,6 +760,19 @@ export function nginxpilotClient(conn: RealmConnection) {
     }
 
     /**
+     * The daemon's self-describing OpenAPI document, reduced to what capability
+     * detection needs — `GET /schema` (impl §6). A daemon-side test guarantees the
+     * document never drifts from the real route table, so "path present" == "endpoint
+     * exists". Throws (via adminOk) on an older daemon without the endpoint — callers
+     * treat that as "capabilities unknown", never as "no capabilities".
+     */
+    async function schema(): Promise<{ version: string | null; paths: string[] }> {
+        const res = await adminOk('GET', '/schema')
+        const doc = (await res.json()) as { info?: { version?: string }; paths?: Record<string, unknown> }
+        return { version: doc.info?.version ?? null, paths: Object.keys(doc.paths ?? {}) }
+    }
+
+    /**
      * Every TLS certificate nginxpilot discovered in its cert dir — `GET /certs`
      * (read-only; drives the admin Certificates page). Metadata only — no key
      * material crosses the wire. An unconfigured/missing cert dir answers `200`
@@ -605,6 +829,17 @@ export function nginxpilotClient(conn: RealmConnection) {
     async function getCertJob(id: string): Promise<CertJob> {
         const res = await adminOk('GET', `/certs/jobs/${encodeURIComponent(id)}`)
         return (await res.json()) as CertJob
+    }
+
+    /**
+     * Every tracked async issuance job, newest first — `GET /certs/jobs`. Ephemeral on the
+     * daemon (finished jobs are pruned after a TTL; a restart drops them all), so this is a
+     * recent-history surface, not an archive.
+     */
+    async function listCertJobs(): Promise<CertJob[]> {
+        const res = await adminOk('GET', '/certs/jobs')
+        const body = (await res.json()) as { jobs?: CertJob[] | null }
+        return body.jobs ?? []
     }
 
     /**
@@ -708,6 +943,16 @@ export function nginxpilotClient(conn: RealmConnection) {
         listProxies,
         writeProxy,
         removeProxy,
+        listRedirects,
+        writeRedirect,
+        removeRedirect,
+        listDeadHosts,
+        writeDeadHost,
+        removeDeadHost,
+        listAccessLists,
+        writeAccessList,
+        removeAccessList,
+        setAccessListPassword,
         listStreams,
         writeStream,
         removeStream,
@@ -719,9 +964,11 @@ export function nginxpilotClient(conn: RealmConnection) {
         nginxTest,
         sync,
         vhost,
+        schema,
         listCertificates,
         issueCertificate,
         getCertJob,
+        listCertJobs,
         uploadCertificate,
         renewDueCertificates,
         renewCertificate,

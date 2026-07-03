@@ -18,6 +18,36 @@ const BlockExploitsFilename = "block-exploits.inc"
 // proxy_cache_path zones for every proxy with cache: enabled.
 const CacheIncludeFilename = "00-nginxpilot-cache.conf"
 
+// RealIPIncludeFilename is the managed http-context include restoring the real
+// client IP behind a CDN/trusted proxy (better.md §8): set_real_ip_from for
+// every trusted range plus real_ip_header / real_ip_recursive.
+const RealIPIncludeFilename = "00-nginxpilot-realip.conf"
+
+// RealIPInclude renders the real-ip include from the config's static CIDRs plus
+// the (cache-loaded, pre-validated) provider ranges. Returns "" when disabled.
+func RealIPInclude(cfg *config.Config, providerRanges []string) string {
+	r := cfg.Nginx.RealIP
+	if !r.Enabled {
+		return ""
+	}
+	var b strings.Builder
+	b.WriteString("# nginxpilot managed real-ip trust list — do not edit.\n")
+	b.WriteString("# Restores the client IP from " + r.HeaderOrDefault() + " for requests arriving via trusted ranges.\n")
+	for _, c := range r.StaticCidrs {
+		b.WriteString("set_real_ip_from " + c + ";\n")
+	}
+	for _, c := range providerRanges {
+		b.WriteString("set_real_ip_from " + c + ";\n")
+	}
+	b.WriteString("real_ip_header " + r.HeaderOrDefault() + ";\n")
+	if r.IsRecursive() {
+		b.WriteString("real_ip_recursive on;\n")
+	} else {
+		b.WriteString("real_ip_recursive off;\n")
+	}
+	return b.String()
+}
+
 // blockExploitsRules returns the deny rules (server-block scoped) mirroring
 // Nginx Proxy Manager's block-exploits: common SQLi / file-injection query
 // patterns and known scanner user-agents. The regexes are intentionally left

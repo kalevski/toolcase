@@ -325,14 +325,10 @@ func (s *Server) certInfoFor(key string) *certInfo {
 	return nil
 }
 
-// issueTimeout bounds a certbot run: DNS-01 waits for propagation, so allow that
-// plus a buffer; the HTTP challenges are quicker.
+// issueTimeout bounds a certbot run — delegated to the manager so the admin
+// handlers and the renewal scheduler share one propagation-aware formula.
 func (s *Server) issueTimeout() time.Duration {
-	a := s.mgr.Config().Acme
-	if a.ChallengeOrDefault() == config.ChallengeDNS {
-		return time.Duration(a.DNS.PropagationSecondsOrDefault())*time.Second + 120*time.Second
-	}
-	return 120 * time.Second
+	return s.mgr.RenewTimeout()
 }
 
 // normalizeCertDomain normalizes a domain, allowing a single leading "*."

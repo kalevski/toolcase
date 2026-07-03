@@ -1,12 +1,14 @@
 'use client'
 
 import { useCallback, useMemo, useState } from 'react'
-import type { ExtendedSelectItem, TableColumn } from '@toolcase/web-components'
-import { useTc, detailValue, targetValue, escapeHtml } from '@/lib/tc'
+import type { TableColumn } from '@toolcase/web-components'
+import { escapeHtml } from '@/lib/tc'
 import { BASE_DOMAIN_TIERS, type BaseDomain, type BaseDomainTier, type BaseDomainTls } from '@/server/domain/types'
 import { AdminPage, json, useOwnerData } from './shared'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { DataTable } from '@/components/DataTable'
+import { FormModal, FormGroup } from '@/components/FormModal'
+import { SelectField, TextField, type SelectOption } from '@/components/fields'
 
 // Owner-only subdomain pool (§10/§13). The owner registers base domains, each one
 // backing `<label>.<domain>` sites, and assigns each to one of three audience
@@ -22,11 +24,11 @@ const TIER_META: Record<BaseDomainTier, { label: string; note: string }> = {
     staff: { label: 'Staff', note: 'Visible only to maintainers and the owner.' },
 }
 
-const TIER_ITEMS: ExtendedSelectItem[] = BASE_DOMAIN_TIERS.map((t) => ({ key: t, label: TIER_META[t].label }))
+const TIER_OPTIONS: SelectOption[] = BASE_DOMAIN_TIERS.map((t) => ({ value: t, label: TIER_META[t].label }))
 
 // Subdomain TLS policy (§0/Phase D) — one wildcard cert per base domain; `auto`
-// degrades to HTTP if the cert isn't issued yet. This per-base-domain select is the
-// only place subdomain TLS is set (never per subdomain).
+// degrades to HTTP if the cert isn't issued yet. Set at add time and per row —
+// always per base domain, never per subdomain.
 const TLS_OPTIONS: { value: BaseDomainTls; label: string }[] = [
     { value: 'auto', label: 'HTTPS (auto)' },
     { value: 'off', label: 'HTTP only' },
@@ -94,6 +96,15 @@ export function AdminDomains() {
     )
 }
 
+/** Everything the add-domain form holds — one draft object; the modal resets by remount. */
+interface DomainDraft {
+    domain: string
+    tier: BaseDomainTier
+    tls: BaseDomainTls
+}
+
+const emptyDraft = (): DomainDraft => ({ domain: '', tier: 'free', tls: 'auto' })
+
 function BaseDomainsForm({
     baseDomains,
     onChanged,
@@ -101,20 +112,25 @@ function BaseDomainsForm({
     baseDomains: BaseDomain[]
     onChanged: () => void
 }) {
-    const [draft, setDraft] = useState('')
-    const [tier, setTier] = useState<BaseDomainTier>('free')
+    // The add-domain form: null = closed; a draft = the modal is open (create-only —
+    // TLS flips happen in place per row, removal via the confirm dialog).
+    const [form, setForm] = useState<DomainDraft | null>(null)
     const [error, setError] = useState<string | null>(null)
     const [busy, setBusy] = useState(false)
     // The domain awaiting remove confirmation (drives the ConfirmDialog).
     const [pending, setPending] = useState<string | null>(null)
 
-    const inputRef = useTc<HTMLElement>(undefined, {
-        input: (event: Event) => setDraft(targetValue(event)),
-    })
-    const tierRef = useTc<HTMLElement>(
-        useMemo(() => ({ items: TIER_ITEMS, value: tier }), [tier]),
-        { 'tc-change': (event: Event) => setTier(detailValue<BaseDomainTier>(event)) },
-    )
+    const patchDraft = (p: Partial<DomainDraft>) => setForm((prev) => (prev ? { ...prev, ...p } : prev))
+
+    const openCreate = () => {
+        setError(null)
+        setForm(emptyDraft())
+    }
+
+    const close = useCallback(() => {
+        setForm(null)
+        setError(null)
+    }, [])
 
     // Bucket the pool by tier for grouped display, in the canonical free→paid→staff
     // order. Each bucket is already a stable DataTable row set (memoised) so the
@@ -127,30 +143,33 @@ function BaseDomainsForm({
     }, [baseDomains])
 
     const add = useCallback(async () => {
-        const domain = draft.trim()
-        if (!domain || busy) return
+        if (!form || busy) return
+        const domain = form.domain.trim()
+        if (!domain) {
+            setError('A base domain needs a domain name.')
+            return
+        }
         setBusy(true)
         setError(null)
         try {
             const res = await fetch('/api/admin/base-domains', {
                 method: 'POST',
                 headers: { 'content-type': 'application/json' },
-                body: JSON.stringify({ domain, tier }),
+                body: JSON.stringify({ domain, tier: form.tier, tls: form.tls }),
             })
             if (!res.ok) {
                 const body = (await res.json().catch(() => null)) as { error?: string } | null
                 setError(body?.error ? `Couldn’t add domain: ${body.error}.` : `Couldn’t add domain (error ${res.status}).`)
                 return
             }
-            setDraft('')
-            if (inputRef.current) (inputRef.current as any).value = ''
+            setForm(null)
             onChanged()
         } catch {
             setError('Couldn’t add domain — network error.')
         } finally {
             setBusy(false)
         }
-    }, [draft, tier, busy, onChanged, inputRef])
+    }, [form, busy, onChanged])
 
     // Flip a base domain's subdomain TLS policy in place (PATCH). Applies to every
     // `<label>.<domain>` site under it on their next deploy (§0/Phase D).
@@ -219,56 +238,86 @@ function BaseDomainsForm({
     const columns = useMemo(() => DOMAIN_COLUMNS(busy), [busy])
 
     return (
-        <tc-section-card title="Base domains" icon="globe">
-            <div className="perch-admin-section">
-                <p className="perch-home-lead perch-admin-hint">
-                    The subdomain pool. Each base domain backs <code>&lt;label&gt;.&lt;domain&gt;</code> sites and is
-                    offered to one audience: free accounts, paid (sponsor) accounts, or staff.
-                </p>
-                {error && <tc-banner variant="danger">{error}</tc-banner>}
+        <>
+            <tc-section-card title="Base domains" icon="globe">
+                <div className="perch-admin-section">
+                    <p className="perch-home-lead perch-admin-hint">
+                        The subdomain pool. Each base domain backs <code>&lt;label&gt;.&lt;domain&gt;</code> sites and is
+                        offered to one audience: free accounts, paid (sponsor) accounts, or staff.
+                    </p>
+                    {error && !form && <tc-banner variant="danger">{error}</tc-banner>}
 
-                {baseDomains.length === 0 ? (
-                    <tc-empty-state icon="globe">No base domains registered.</tc-empty-state>
-                ) : (
-                    BASE_DOMAIN_TIERS.map((t) => {
-                        const rows = byTier.get(t) ?? []
-                        if (rows.length === 0) return null
-                        return (
-                            <div key={t} className="perch-admin-domain-group">
-                                <h4 className="perch-admin-domain-group-title">
-                                    {TIER_META[t].label}
-                                    <span className="perch-admin-hint"> — {TIER_META[t].note}</span>
-                                </h4>
-                                <DataTable<DomainRow>
-                                    columns={columns}
-                                    rows={rows}
-                                    rowKey={(row) => row.domain}
-                                    onAction={onRowAction}
-                                />
-                            </div>
-                        )
-                    })
-                )}
+                    <div className="perch-list-actions">
+                        <tc-button variant="primary" size="sm" onClick={openCreate}>
+                            Add domain
+                        </tc-button>
+                    </div>
 
-                <form
-                    className="perch-admin-add-row"
-                    onSubmit={(e) => {
-                        e.preventDefault()
-                        void add()
-                    }}
+                    {baseDomains.length === 0 ? (
+                        <tc-empty-state icon="globe">No base domains registered.</tc-empty-state>
+                    ) : (
+                        BASE_DOMAIN_TIERS.map((t) => {
+                            const rows = byTier.get(t) ?? []
+                            if (rows.length === 0) return null
+                            return (
+                                <div key={t} className="perch-admin-domain-group">
+                                    <h4 className="perch-admin-domain-group-title">
+                                        {TIER_META[t].label}
+                                        <span className="perch-admin-hint"> — {TIER_META[t].note}</span>
+                                    </h4>
+                                    <DataTable<DomainRow>
+                                        columns={columns}
+                                        rows={rows}
+                                        rowKey={(row) => row.domain}
+                                        onAction={onRowAction}
+                                    />
+                                </div>
+                            )
+                        })
+                    )}
+                </div>
+            </tc-section-card>
+
+            {form && (
+                <FormModal
+                    key="new"
+                    title="Add base domain"
+                    busy={busy}
+                    submitLabel="Add domain"
+                    onSubmit={() => void add()}
+                    onClose={close}
                 >
-                    <tc-input
-                        ref={inputRef}
-                        placeholder="perch.dev"
-                        aria-label="New base domain"
-                        autocomplete="off"
-                    />
-                    <tc-extended-select ref={tierRef} aria-label="Audience tier" placeholder="Tier…" />
-                    <tc-button type="submit" variant="primary" disabled={!draft.trim() || busy || undefined}>
-                        Add domain
-                    </tc-button>
-                </form>
-            </div>
+                    {error && <tc-banner variant="danger">{error}</tc-banner>}
+                    <FormGroup title="Identity">
+                        <TextField
+                            label="Domain"
+                            placeholder="perch.dev"
+                            help="Backs <label>.<domain> tenant sites."
+                            value={form.domain}
+                            onValue={(v) => patchDraft({ domain: v })}
+                        />
+                    </FormGroup>
+                    <FormGroup title="Policy">
+                        <div className="perch-form-grid">
+                            <SelectField
+                                label="Audience tier"
+                                help={TIER_META[form.tier].note}
+                                value={form.tier}
+                                options={TIER_OPTIONS}
+                                onValue={(v) => patchDraft({ tier: v as BaseDomainTier })}
+                            />
+                            <SelectField
+                                label="Subdomain TLS"
+                                help="auto serves HTTPS once the wildcard cert is issued; off keeps subdomains HTTP-only."
+                                value={form.tls}
+                                options={TLS_OPTIONS}
+                                onValue={(v) => patchDraft({ tls: v as BaseDomainTls })}
+                            />
+                        </div>
+                    </FormGroup>
+                </FormModal>
+            )}
+
             <ConfirmDialog
                 open={!!pending}
                 title="Remove base domain?"
@@ -282,6 +331,6 @@ function BaseDomainsForm({
                 onConfirm={() => void doRemove()}
                 onCancel={() => setPending(null)}
             />
-        </tc-section-card>
+        </>
     )
 }

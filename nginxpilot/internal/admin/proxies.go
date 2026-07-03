@@ -30,17 +30,17 @@ func (s *Server) handleCreateProxy(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("invalid fragment: %v", err), http.StatusBadRequest)
 		return
 	}
-	if len(frag.Proxies) != 1 || len(frag.Sites) != 0 || len(frag.Upstreams) != 0 {
-		http.Error(w, "fragment must declare exactly one proxy (and no sites or upstreams)", http.StatusBadRequest)
+	if err := requireExactlyOne(frag, "proxy"); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	domain, err := config.NormalizeDomain(frag.Proxies[0].Domain)
+	domain, err := config.NormalizeWildcardDomain(frag.Proxies[0].Domain)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("invalid domain: %v", err), http.StatusBadRequest)
 		return
 	}
-	target, err := fragmentPath(dir, ext, proxyStemPrefix+domain)
+	target, err := fragmentPath(dir, ext, proxyStemPrefix+config.FileStem(domain))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -55,25 +55,34 @@ func (s *Server) handleCreateProxy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.writeFragmentAndReload(w, target, body, "proxy", domain)
+	// Network target checks (DNS error/warn + optional reachability probe) run
+	// only over the new fragment's backends, after offline validation passed.
+	warnings, err := checkFragmentTargets(r, cfg, frag)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("fragment rejected: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	s.writeFragmentAndReload(w, target, body, "proxy", domain, warnings)
 }
 
 // handleDeleteProxy removes the deterministic proxy-<domain>.yml fragment and
 // reloads. Nothing references a proxy, so removing one is always valid config;
 // a rejected reload (an unrelated invalid file) keeps the running config and is
-// reported as a 500.
+// reported as a 500. Wildcard domains work too (URL-encoded or literal *,
+// resolved to the _wildcard. file stem).
 func (s *Server) handleDeleteProxy(w http.ResponseWriter, r *http.Request) {
 	_, dir, ext, ok := s.fragmentTarget(w)
 	if !ok {
 		return
 	}
 
-	domain, err := config.NormalizeDomain(r.PathValue("domain"))
+	domain, err := config.NormalizeWildcardDomain(r.PathValue("domain"))
 	if err != nil {
 		http.Error(w, fmt.Sprintf("invalid domain: %v", err), http.StatusBadRequest)
 		return
 	}
-	target, err := fragmentPath(dir, ext, proxyStemPrefix+domain)
+	target, err := fragmentPath(dir, ext, proxyStemPrefix+config.FileStem(domain))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

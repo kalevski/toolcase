@@ -24,8 +24,8 @@ export async function GET() {
         const client = await realms.clientForActive(authz.session.sub, authz.role)
         return NextResponse.json(await routing.listProxies(client))
     } catch (err) {
-        const { status, code } = routing.httpErrorFor(err)
-        return NextResponse.json({ error: code }, { status })
+        const { status, code, detail } = routing.httpErrorFor(err)
+        return NextResponse.json({ error: code, detail }, { status })
     }
 }
 
@@ -40,14 +40,17 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'invalid_json' }, { status: 400 })
     }
 
+    // The daemon's bootstrap escape hatch for a DNS record that lands later (A5) —
+    // forwarded verbatim as its own `?skip_target_checks=true`.
+    const skipTargetChecks = new URL(req.url).searchParams.get('skip_target_checks') === 'true'
     try {
         const actor = { githubId: authz.session.sub, login: authz.session.login }
         const client = await realms.clientForActive(authz.session.sub, authz.role)
-        const proxy = await routing.createProxy(client, actor, body)
-        return NextResponse.json(proxy, { status: 201 })
+        const { value, warnings } = await routing.createProxy(client, actor, body, { skipTargetChecks })
+        return NextResponse.json({ ...value, warnings }, { status: 201 })
     } catch (err) {
-        const { status, code } = routing.httpErrorFor(err)
-        return NextResponse.json({ error: code }, { status })
+        const { status, code, detail } = routing.httpErrorFor(err)
+        return NextResponse.json({ error: code, detail }, { status })
     }
 }
 
@@ -62,7 +65,7 @@ export async function DELETE(req: Request) {
         await routing.deleteProxy(client, actor, domain)
         return new NextResponse(null, { status: 204 })
     } catch (err) {
-        const { status, code } = routing.httpErrorFor(err)
-        return NextResponse.json({ error: code }, { status })
+        const { status, code, detail } = routing.httpErrorFor(err)
+        return NextResponse.json({ error: code, detail }, { status })
     }
 }

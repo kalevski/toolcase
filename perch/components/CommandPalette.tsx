@@ -28,20 +28,14 @@ export function CommandPalette() {
     const items = useMemo<CmdItem[]>(() => {
         const list: CmdItem[] = [
             { id: 'sites', label: 'Sites', group: 'Navigate', icon: 'layout-dashboard', href: '/' },
-            { id: 'plans', label: 'Plans', group: 'Navigate', icon: 'credit-card', href: '/plans' },
         ]
         if (ROLE_RANK[me.role] >= ROLE_RANK.maintainer) {
             list.push(
-                { id: 'proxies', label: 'Proxies', group: 'Routing', icon: 'globe', href: '/proxies' },
-                { id: 'upstreams', label: 'Upstreams', group: 'Routing', icon: 'server', href: '/upstreams' },
-                { id: 'streams', label: 'Streams', group: 'Routing', icon: 'cable', href: '/streams' },
-                {
-                    id: 'stream-upstreams',
-                    label: 'Stream upstreams',
-                    group: 'Routing',
-                    icon: 'network',
-                    href: '/stream-upstreams',
-                },
+                { id: 'proxies', label: 'Proxies & upstreams', group: 'Routing', icon: 'globe', href: '/proxies' },
+                { id: 'redirects', label: 'Redirects', group: 'Routing', icon: 'corner-up-right', href: '/redirects' },
+                { id: 'dead-hosts', label: 'Dead hosts', group: 'Routing', icon: 'ban', href: '/dead-hosts' },
+                { id: 'access-lists', label: 'Access lists', group: 'Routing', icon: 'lock', href: '/access-lists' },
+                { id: 'streams', label: 'Streams & stream upstreams', group: 'Routing', icon: 'cable', href: '/streams' },
             )
         }
         if (me.role === 'owner') {
@@ -50,7 +44,8 @@ export function CommandPalette() {
                 { id: 'admin-users', label: 'Admin · Users', group: 'Admin', icon: 'users', href: '/admin/users' },
                 { id: 'admin-realms', label: 'Admin · Realms', group: 'Admin', icon: 'server', href: '/admin/realms' },
                 { id: 'admin-domains', label: 'Admin · Domains', group: 'Admin', icon: 'globe', href: '/admin/domains' },
-                { id: 'admin-plans', label: 'Admin · Plans', group: 'Admin', icon: 'credit-card', href: '/admin/plans' },
+                { id: 'admin-certificates', label: 'Admin · Certificates', group: 'Admin', icon: 'shield-check', href: '/admin/certificates' },
+                { id: 'admin-settings', label: 'Admin · Settings', group: 'Admin', icon: 'settings', href: '/admin/settings' },
                 { id: 'admin-audit', label: 'Admin · Audit', group: 'Admin', icon: 'scroll-text', href: '/admin/audit' },
             )
         }

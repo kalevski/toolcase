@@ -48,6 +48,7 @@ body {
    banner on top, then the tc-login card (or a redirect spinner) filling the rest. */
 .perch-login {
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
 }
@@ -70,6 +71,7 @@ body {
 /* AuthGate loading / error placeholder, centered in the viewport. */
 .perch-gate-status {
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -931,10 +933,197 @@ body {
     margin-bottom: 1.5rem;
 }
 
+/* ── Reconcile status card (routing health strip, impl §1) ─────────────────────── */
+
+/* One-line summary of the daemon's reconcile loop: policy chip, cadence, last run.
+   Deliberately quiet — a hairline box that reads as telemetry, not an alert. */
+.perch-reconcile {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    padding: 0.375rem 0.625rem;
+    border: 1px solid var(--tc-border-faint, var(--tc-border));
+    font-size: 0.8125rem;
+    color: var(--tc-text-muted);
+}
+
+.perch-reconcile-label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--tc-text);
+}
+
+/* Stack the health strip's banners + reconcile card with a consistent rhythm. */
+.perch-routing-health {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.perch-routing-health:empty {
+    display: none;
+}
+
+/* Rendered-vhost preview body (impl §5) — the modal's single stable wrapper child. */
+.perch-vhost-preview {
+    min-height: 6rem;
+}
+
+.perch-vhost-preview tc-code-snippet {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
 /* Role tc-select on the Users roster — sized to the role labels, not the row. */
 .perch-admin-role-select {
     width: auto;
     min-width: 9rem;
+}
+
+/* ── Entity form modals (components/FormModal.tsx, impl §10) ───────────────────── */
+
+/* The modal body form: grouped sections stacked with a consistent rhythm. All
+   cosmetics flow through --tc-* tokens so every theme re-skins the forms. */
+.perch-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* One labelled group: uppercase micro-heading over a hairline, then its fields. */
+.perch-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+}
+
+.perch-form-group-title {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--tc-text-muted);
+    border-bottom: 1px solid var(--tc-border-faint, var(--tc-border));
+    padding-bottom: 0.375rem;
+}
+
+/* Two-column field grid, collapsing to one column on narrow viewports
+   (mobile-first: single column is the base, the split is the enhancement). */
+.perch-form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0 1rem;
+}
+
+@media (min-width: 720px) {
+    .perch-form-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.perch-form-grid > * {
+    min-width: 0;
+    width: 100%;
+}
+
+/* Full-width members of the grid (domain, targets, textareas, nested editors). */
+.perch-form-span {
+    grid-column: 1 / -1;
+}
+
+/* Boolean settings as a grid of switch rows — the tc-switch reserved message
+   slot keeps rows aligned even when only some carry help text. */
+.perch-form-switches {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0 1rem;
+}
+
+@media (min-width: 720px) {
+    .perch-form-switches {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.perch-form-switches > * {
+    min-width: 0;
+}
+
+/* Modal footer: actions right-aligned, primary last. */
+.perch-form-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* Inline sub-row inside a group (e.g. one location's fields). */
+.perch-form-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.perch-form-row > * {
+    min-width: 0;
+}
+
+/* Repeated-item editor (proxy locations, upstream servers, access-list entries):
+   each item is a bordered inset so the rows read as one unit. */
+.perch-form-item {
+    border: 1px solid var(--tc-border-faint, var(--tc-border));
+    padding: 0.625rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* The "New …" affordance row above each list. */
+.perch-list-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+/* ── Audit table (components/admin/AdminAudit.tsx, impl §8) ────────────────────── */
+
+/* Timestamps read as data — mono, no wrapping mid-value. */
+.perch-audit-time {
+    font-family: var(--tc-font-mono, ui-monospace, monospace);
+    font-size: 0.8125rem;
+    white-space: nowrap;
+}
+
+/* Inline object-snapshot disclosure (B3) inside the Snapshot cell. */
+.perch-audit-snapshot summary {
+    cursor: pointer;
+    color: var(--tc-text-muted);
+    font-size: 0.8125rem;
+}
+
+.perch-audit-snapshot[open] summary {
+    color: var(--tc-text);
+}
+
+.perch-audit-snapshot pre {
+    margin: 0.375rem 0 0;
+    padding: 0.5rem;
+    max-width: 32rem;
+    max-height: 16rem;
+    overflow: auto;
+    font-size: 0.75rem;
+    border: 1px solid var(--tc-border-faint, var(--tc-border));
+    background: var(--tc-surface-2, transparent);
+}
+
+.perch-audit-empty-row {
+    text-align: center;
+    padding: 1.5rem 0;
 }
 
 /* ── Users roster (components/admin/AdminUsers.tsx) ────────────────────────────── */
@@ -1190,6 +1379,7 @@ body {
 /* 404 page (app/not-found.tsx). */
 .perch-notfound {
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
     align-items: center;

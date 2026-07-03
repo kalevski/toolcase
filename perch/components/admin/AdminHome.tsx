@@ -35,12 +35,6 @@ const AREAS = [
         desc: 'TLS certificates nginxpilot discovered, with expiry.',
     },
     {
-        href: '/admin/plans',
-        label: 'Plans',
-        icon: 'CreditCard',
-        desc: 'Map monthly sponsorship thresholds to paid plans.',
-    },
-    {
         href: '/admin/settings',
         label: 'Settings',
         icon: 'Settings',

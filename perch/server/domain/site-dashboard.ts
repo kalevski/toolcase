@@ -53,8 +53,10 @@ export interface SiteDeployStatus {
  * with `reason` carrying the daemon's verdict.
  */
 export interface SiteNginxResource {
-    state: 'active' | 'disabled'
+    state: 'active' | 'disabled' | 'at_risk'
     reason?: string
+    /** ISO timestamp the reconcile loop first saw the resource failing (at_risk). */
+    since?: string
 }
 
 /** The `GET /api/sites/{id}/status` response: the stored row + the live entry (or null). */
@@ -325,6 +327,19 @@ export function buildSiteDashboard(
             label: 'TLS / nginx',
             status: 'error',
             detail: nginxResource.reason ?? 'disabled by nginx -t',
+        })
+    }
+
+    // Reconcile at-risk (A7): the site is STILL SERVING (the daemon's default
+    // on_failure: warn policy never removes routes), but its config would fail the
+    // next apply — a warning row, distinct from the disabled error above.
+    if (nginxResource?.state === 'at_risk') {
+        const since = formatUtc(nginxResource.since)
+        statusItems.push({
+            id: 'nginx',
+            label: 'TLS / nginx',
+            status: 'warning',
+            detail: `${nginxResource.reason ?? 'would fail the next apply'}${since ? ` (since ${since})` : ''}`,
         })
     }
 

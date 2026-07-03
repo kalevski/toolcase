@@ -221,6 +221,244 @@ async function main() {
         })
     }
 
+    const authDelete = (path) => fetch(`${BASE}${path}`, { method: 'DELETE', headers: { Cookie: COOKIE } })
+
+    // 14. redirect CRUD round-trips the daemon (perch_better.md A1).
+    {
+        const create = await jsonPost('/api/routing/redirects', {
+            domain: 'old.e2e.test',
+            to: 'new.e2e.test',
+            code: 308,
+            preserve_path: false,
+        })
+        const created = await create.json().catch(() => ({}))
+        const list = await authGet('/api/routing/redirects').then((r) => r.json())
+        const del = await authDelete('/api/routing/redirects?domain=old.e2e.test')
+        const after = await authGet('/api/routing/redirects').then((r) => r.json())
+        ok(
+            'redirect create → list → delete',
+            create.status === 201 &&
+                created.domain === 'old.e2e.test' &&
+                Array.isArray(list) &&
+                list.some((r) => r.domain === 'old.e2e.test' && r.code === 308) &&
+                del.status === 204 &&
+                !after.some((r) => r.domain === 'old.e2e.test'),
+            { create: create.status, created, list, del: del.status },
+        )
+    }
+
+    // 15. the force_ssl-on-redirect rejection is front-run with a stable reason.
+    {
+        const res = await jsonPost('/api/routing/redirects', {
+            domain: 'a.e2e.test',
+            to: 'b.e2e.test',
+            tls: 'auto',
+            force_ssl: true,
+        })
+        const body = await res.json().catch(() => ({}))
+        ok(
+            'redirect force_ssl → 400 redirect_force_ssl_on_redirect',
+            res.status === 400 && body.error === 'redirect_force_ssl_on_redirect',
+            { status: res.status, body },
+        )
+    }
+
+    // 16. dead-host CRUD round-trips the daemon (A2), 444 close-connection included.
+    {
+        const create = await jsonPost('/api/routing/dead-hosts', { domain: 'gone.e2e.test', code: 444 })
+        const list = await authGet('/api/routing/dead-hosts').then((r) => r.json())
+        const del = await authDelete('/api/routing/dead-hosts?domain=gone.e2e.test')
+        ok(
+            'dead host create → list → delete',
+            create.status === 201 &&
+                Array.isArray(list) &&
+                list.some((d) => d.domain === 'gone.e2e.test' && d.code === 444) &&
+                del.status === 204,
+            { create: create.status, list, del: del.status },
+        )
+    }
+
+    // 17. wildcard proxy round-trip, including the %2A-encoded DELETE (A3).
+    {
+        const create = await jsonPost('/api/routing/proxies', {
+            domain: '*.apps.e2e.test',
+            pass: 'http://127.0.0.1:9000',
+        })
+        const list = await authGet('/api/routing/proxies').then((r) => r.json())
+        const del = await authDelete(`/api/routing/proxies?domain=${encodeURIComponent('*.apps.e2e.test')}`)
+        ok(
+            'wildcard proxy create → list → %2A delete',
+            create.status === 201 &&
+                Array.isArray(list) &&
+                list.some((p) => p.domain === '*.apps.e2e.test') &&
+                del.status === 204,
+            { create: create.status, list, del: del.status },
+        )
+    }
+
+    // 18. a reachability-probe failure surfaces as advisory warnings on a 201 (A5).
+    //     127.0.0.1:1 resolves (skips the DNS gate) but nothing listens → probe warns.
+    {
+        const res = await jsonPost('/api/routing/proxies', {
+            domain: 'warns.e2e.test',
+            pass: 'http://127.0.0.1:1',
+        })
+        const body = await res.json().catch(() => ({}))
+        ok(
+            'unreachable backend → 201 with warnings[]',
+            res.status === 201 && Array.isArray(body.warnings) && body.warnings.length > 0,
+            { status: res.status, body },
+        )
+        await authDelete('/api/routing/proxies?domain=warns.e2e.test')
+    }
+
+    // 19. an unresolvable target is a 400 whose detail carries the daemon's skip
+    //     hint, and ?skip_target_checks=true is the working override (A5).
+    {
+        const blocked = await jsonPost('/api/routing/proxies', {
+            domain: 'skip.e2e.test',
+            pass: 'http://no-such-host-e2e.invalid:8080',
+        })
+        const blockedBody = await blocked.json().catch(() => ({}))
+        const skipped = await jsonPost('/api/routing/proxies?skip_target_checks=true', {
+            domain: 'skip.e2e.test',
+            pass: 'http://no-such-host-e2e.invalid:8080',
+        })
+        ok(
+            'DNS-blocked write → 400 + skip hint; skip override → 201',
+            blocked.status === 400 &&
+                typeof blockedBody.detail === 'string' &&
+                blockedBody.detail.includes('skip_target_checks') &&
+                skipped.status === 201,
+            { blocked: blocked.status, blockedBody, skipped: skipped.status },
+        )
+        await authDelete('/api/routing/proxies?domain=skip.e2e.test')
+    }
+
+    // 20. the managed-mode live status reaches Perch: managed flag, resource states,
+    //     and the reconcile summary (A7). With the stubbed nginx everything is
+    //     active; the shape (at_risk_count / reconcile block) is the contract.
+    {
+        const res = await authGet('/api/routing/status')
+        const body = await res.json().catch(() => ({}))
+        ok(
+            'GET /api/routing/status → managed + reconcile block',
+            res.status === 200 &&
+                body.managed === true &&
+                Array.isArray(body.resources) &&
+                typeof body.at_risk_count === 'number' &&
+                body.reconcile &&
+                typeof body.reconcile.enabled === 'boolean' &&
+                typeof body.reconcile.interval === 'string',
+            { status: res.status, body },
+        )
+    }
+
+    // 21. the certificates listing carries the renewal-scheduler summary (A6).
+    {
+        const res = await authGet('/api/admin/certificates')
+        const body = await res.json().catch(() => ({}))
+        ok(
+            'GET /api/admin/certificates → { certs, renewal }',
+            res.status === 200 &&
+                Array.isArray(body.certs) &&
+                body.renewal &&
+                typeof body.renewal.enabled === 'boolean' &&
+                typeof body.renewal.check_interval === 'string',
+            { status: res.status, body },
+        )
+    }
+
+    const authPut = (path, body) =>
+        fetch(`${BASE}${path}`, {
+            method: 'PUT',
+            headers: { 'content-type': 'application/json', Cookie: COOKIE },
+            body: JSON.stringify(body),
+        })
+
+    // 22. access-list lifecycle (C1): create → masked read → password set →
+    //     has_password flips → referenced delete blocks (409) → detach → delete.
+    {
+        const create = await jsonPost('/api/routing/access-lists', {
+            name: 'e2e_office',
+            satisfy: 'any',
+            users: [{ username: 'alice' }],
+            rules: [{ allow: '10.0.0.0/8' }, { deny: 'all' }],
+        })
+        const listed = await authGet('/api/routing/access-lists').then((r) => r.json())
+        const before = listed.find?.((l) => l.name === 'e2e_office')
+        ok(
+            'access list create → masked list (has_password false, no hashes)',
+            create.status === 201 &&
+                before &&
+                before.users?.[0]?.username === 'alice' &&
+                before.users?.[0]?.has_password === false &&
+                !JSON.stringify(listed).includes('password_hash'),
+            { create: create.status, before },
+        )
+
+        const setPw = await authPut('/api/routing/access-lists/e2e_office/users/alice', {
+            password: 'hunter2-e2e',
+        })
+        const after = await authGet('/api/routing/access-lists')
+            .then((r) => r.json())
+            .then((ls) => ls.find?.((l) => l.name === 'e2e_office'))
+        ok(
+            'password PUT → has_password true, hash never echoed',
+            setPw.status === 200 && after?.users?.[0]?.has_password === true,
+            { setPw: setPw.status, after },
+        )
+
+        // Reference it from a proxy → delete must 409 until detached.
+        const proxy = await jsonPost('/api/routing/proxies?skip_target_checks=true', {
+            domain: 'guarded.e2e.test',
+            pass: 'http://127.0.0.1:9000',
+            access_list: 'e2e_office',
+        })
+        const blockedDelete = await authDelete('/api/routing/access-lists?name=e2e_office')
+        const detach = await jsonPost('/api/routing/proxies?skip_target_checks=true', {
+            domain: 'guarded.e2e.test',
+            pass: 'http://127.0.0.1:9000',
+        })
+        const del = await authDelete('/api/routing/access-lists?name=e2e_office')
+        ok(
+            'referenced access list delete → 409; after detach → 204',
+            proxy.status === 201 && blockedDelete.status === 409 && detach.status === 201 && del.status === 204,
+            { proxy: proxy.status, blockedDelete: blockedDelete.status, detach: detach.status, del: del.status },
+        )
+        await authDelete('/api/routing/proxies?domain=guarded.e2e.test')
+    }
+
+    // 23. real-ip summary (C2) reaches Perch's routing status.
+    {
+        const res = await authGet('/api/routing/status')
+        const body = await res.json().catch(() => ({}))
+        ok(
+            'GET /api/routing/status → real_ip block (static trust list)',
+            res.status === 200 &&
+                body.real_ip?.enabled === true &&
+                body.real_ip?.header === 'CF-Connecting-IP' &&
+                body.real_ip?.static_count === 1,
+            { status: res.status, real_ip: body.real_ip },
+        )
+    }
+
+    // 24. the daemon serves its OpenAPI document (C3) covering the new surface.
+    {
+        const np = process.env.PERCH_NGINXPILOT_ADMIN_URL ?? 'http://127.0.0.1:9091'
+        const res = await fetch(`${np}/schema`)
+        const doc = await res.json().catch(() => ({}))
+        ok(
+            'GET /schema → OpenAPI 3.1 with access-lists + password path',
+            res.status === 200 &&
+                doc.openapi === '3.1.0' &&
+                !!doc.paths?.['/access-lists'] &&
+                !!doc.paths?.['/access-lists/{name}/users/{username}']?.put &&
+                !!doc.components?.schemas?.AccessList,
+            { status: res.status, openapi: doc.openapi },
+        )
+    }
+
     console.log(`\n${pass} passed, ${fail} failed`)
     process.exit(fail === 0 ? 0 : 1)
 }

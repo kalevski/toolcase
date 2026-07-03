@@ -128,6 +128,175 @@ export const KNOWN_PROVIDERS: readonly ProviderSpec[] = [
     { id: 'google', label: 'Google Cloud DNS', shape: 'google', hint: 'Service-account JSON key with DNS admin.' },
 ] as const
 
+// ── raw-INI field templates (perch_better.md C4) ─────────────────────────────────
+//
+// The daemon accepts a raw INI body for ANY certbot DNS plugin; these templates let
+// the operator fill named fields instead of hand-writing that INI for the common
+// providers beyond the five convenience shapes above. Client-side only — the
+// assembled body goes through the same raw `credentials` passthrough, so no daemon
+// change is involved. Plugin *installation* stays an image-build concern.
+
+/** One INI field of a provider's credentials file. */
+export interface IniField {
+    /** The exact INI key certbot's plugin reads (e.g. `dns_ovh_application_key`). */
+    key: string
+    label: string
+    /** Render as a password input (token/secret material). */
+    secret?: boolean
+    /** Optional field — omitted from the body when left blank. */
+    optional?: boolean
+}
+
+/** A provider whose credentials form is generated from an INI template. */
+export interface IniTemplateSpec {
+    id: string
+    label: string
+    fields: readonly IniField[]
+}
+
+/**
+ * INI templates for the most common certbot DNS plugins without a convenience shape.
+ * Field names follow each plugin's documented credentials file verbatim.
+ */
+export const INI_TEMPLATE_PROVIDERS: readonly IniTemplateSpec[] = [
+    {
+        id: 'rfc2136',
+        label: 'RFC 2136 (BIND/knot)',
+        fields: [
+            { key: 'dns_rfc2136_server', label: 'DNS server address' },
+            { key: 'dns_rfc2136_port', label: 'Port', optional: true },
+            { key: 'dns_rfc2136_name', label: 'TSIG key name' },
+            { key: 'dns_rfc2136_secret', label: 'TSIG key secret', secret: true },
+            { key: 'dns_rfc2136_algorithm', label: 'TSIG algorithm (e.g. HMAC-SHA512)' },
+        ],
+    },
+    {
+        id: 'ovh',
+        label: 'OVH',
+        fields: [
+            { key: 'dns_ovh_endpoint', label: 'Endpoint (e.g. ovh-eu)' },
+            { key: 'dns_ovh_application_key', label: 'Application key' },
+            { key: 'dns_ovh_application_secret', label: 'Application secret', secret: true },
+            { key: 'dns_ovh_consumer_key', label: 'Consumer key', secret: true },
+        ],
+    },
+    {
+        id: 'dnsimple',
+        label: 'DNSimple',
+        fields: [{ key: 'dns_dnsimple_token', label: 'API token', secret: true }],
+    },
+    {
+        id: 'dnsmadeeasy',
+        label: 'DNS Made Easy',
+        fields: [
+            { key: 'dns_dnsmadeeasy_api_key', label: 'API key' },
+            { key: 'dns_dnsmadeeasy_secret_key', label: 'Secret key', secret: true },
+        ],
+    },
+    {
+        id: 'luadns',
+        label: 'LuaDNS',
+        fields: [
+            { key: 'dns_luadns_email', label: 'Account email' },
+            { key: 'dns_luadns_token', label: 'API token', secret: true },
+        ],
+    },
+    {
+        id: 'nsone',
+        label: 'NS1',
+        fields: [{ key: 'dns_nsone_api_key', label: 'API key', secret: true }],
+    },
+    {
+        id: 'hetzner',
+        label: 'Hetzner DNS',
+        fields: [{ key: 'dns_hetzner_api_token', label: 'API token', secret: true }],
+    },
+    {
+        id: 'porkbun',
+        label: 'Porkbun',
+        fields: [
+            { key: 'dns_porkbun_key', label: 'API key' },
+            { key: 'dns_porkbun_secret', label: 'API secret', secret: true },
+        ],
+    },
+    {
+        id: 'godaddy',
+        label: 'GoDaddy',
+        fields: [
+            { key: 'dns_godaddy_key', label: 'API key' },
+            { key: 'dns_godaddy_secret', label: 'API secret', secret: true },
+        ],
+    },
+    {
+        id: 'namecheap',
+        label: 'Namecheap',
+        fields: [
+            { key: 'dns_namecheap_username', label: 'API username' },
+            { key: 'dns_namecheap_api_key', label: 'API key', secret: true },
+        ],
+    },
+    {
+        id: 'desec',
+        label: 'deSEC',
+        fields: [{ key: 'dns_desec_token', label: 'API token', secret: true }],
+    },
+    {
+        id: 'netcup',
+        label: 'netcup',
+        fields: [
+            { key: 'dns_netcup_customer_id', label: 'Customer id' },
+            { key: 'dns_netcup_api_key', label: 'API key' },
+            { key: 'dns_netcup_api_password', label: 'API password', secret: true },
+        ],
+    },
+    {
+        id: 'gehirn',
+        label: 'Gehirn DNS',
+        fields: [
+            { key: 'dns_gehirn_api_token', label: 'API token' },
+            { key: 'dns_gehirn_api_secret', label: 'API secret', secret: true },
+        ],
+    },
+    {
+        id: 'sakuracloud',
+        label: 'Sakura Cloud',
+        fields: [
+            { key: 'dns_sakuracloud_api_token', label: 'API token' },
+            { key: 'dns_sakuracloud_api_secret', label: 'API secret', secret: true },
+        ],
+    },
+] as const
+
+/** The INI template for a provider id, or undefined. */
+export function iniTemplate(id: string): IniTemplateSpec | undefined {
+    return INI_TEMPLATE_PROVIDERS.find((p) => p.id === id)
+}
+
+/**
+ * Assemble a template's INI credentials body from filled field values. Blank
+ * optional fields drop out; a blank REQUIRED field throws so the form surfaces it
+ * before the round-trip. Values are single-line (INI has no escaping) — embedded
+ * newlines are rejected outright.
+ */
+export function renderIniCredentials(
+    template: IniTemplateSpec,
+    values: Record<string, string>,
+): string {
+    const lines: string[] = []
+    for (const f of template.fields) {
+        const v = (values[f.key] ?? '').trim()
+        if (!v) {
+            if (f.optional) continue
+            throw new CertInputError(`"${f.label}" is required for ${template.label}`, 'credentials_required')
+        }
+        if (/[\r\n]/.test(v)) {
+            throw new CertInputError(`"${f.label}" must be a single line`, 'invalid_credentials')
+        }
+        lines.push(`${f.key} = ${v}`)
+    }
+    return lines.join('\n') + '\n'
+}
+
 /** The certbot DNS-plugin name charset — also guards the on-disk filename (mirrors the daemon). */
 export const PROVIDER_PATTERN = /^[a-z0-9-]+$/
 

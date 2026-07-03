@@ -5,26 +5,31 @@
 //                  work for the user and NO nginx reload: the wildcard `*.basedomain`
 //                  server block + wildcard TLS already cover it (§4), so attaching is
 //                  purely the nginxpilot fragment (handled by the deploy service).
-//   • custom     — a verified custom domain with its own nginx vhost + cert. A
-//                  paid-plan capability (`customDomains > 0`, §728), gated on a
-//                  server-side DNS check that the domain points at our ingress IP
-//                  BEFORE any cert is issued (§16: prevents domain takeover).
+//   • custom     — a verified custom domain with its own cert. A limit-gated
+//                  capability (`customDomains > 0`, §728), gated on a server-side DNS
+//                  check that the domain points at our ingress IP BEFORE any cert is
+//                  issued (§16: prevents domain takeover).
 //
 // All hostnames are strictly validated here before they can reach a YAML fragment or
 // an nginx config (§16: hostname injection). The pure, unit-tested decisions —
 // label/domain shape, the reserved-word blocklist, the DNS-match check — live in
 // `domain/hostname.ts`; this is the `server-only` wiring that binds them to the
-// repositories (uniqueness), the quota service (§728), the nginx/certbot seam, and
-// the nginxpilot vhost renderer.
+// repositories (uniqueness), the quota service (§728), and the site's realm.
+//
+// Custom-domain provisioning is fully API-driven (impl §7): the cert is issued by the
+// site's own nginxpilot realm (`POST /certs`, HTTP-01, async job) and the serving layer
+// is the ordinary managed-mode fragment with `tls: auto` — the old host-local shell-out
+// path (`certbot` + hand-written conf.d vhosts + `nginx -s reload`) is gone, which also
+// makes custom domains work on REMOTE realms.
 //
 // See notes/static-hosting-app-design.md §4, §10, §16.
 
 import 'server-only'
+import { resolve4 } from 'node:dns/promises'
 import * as siteRepo from '@/server/data/repositories/site-repo'
 import * as baseDomainRepo from '@/server/data/repositories/base-domain-repo'
 import * as userRepo from '@/server/data/repositories/user-repo'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
-import * as nginx from '@/server/infrastructure/nginx'
 import * as deploy from '@/server/services/deploy'
 import * as realms from '@/server/services/realms'
 import { assertCanUseCustomDomain } from '@/server/services/quota'
@@ -140,6 +145,22 @@ export function attachSubdomain(site: Site): Promise<Site> {
 
 // ── custom-domain verification (takeover guard, §10 / §16) ─────────────────────
 
+/**
+ * Resolve a domain's A-records via the system resolver — the public lookup behind the
+ * custom-domain "Verify" action (§10). Returns the IPv4 set, or `[]` for NXDOMAIN /
+ * "no A record" / any resolver error, so the caller's verification fails closed (§16)
+ * rather than throwing. Uses `resolve4` (a real DNS query), not `lookup` (which would
+ * consult the local hosts file) — we want the domain's *published* A record.
+ */
+async function resolveIpv4(domain: string): Promise<string[]> {
+    try {
+        return await resolve4(domain)
+    } catch (err) {
+        slog('info', 'domains', 'A-record resolution failed', { domain, error: (err as Error).message })
+        return []
+    }
+}
+
 /** Outcome of {@link verifyCustomDomain} — surfaced to the UI's "Verify" button. */
 export interface DomainVerification {
     /** The normalized domain that was checked. */
@@ -180,7 +201,7 @@ export async function verifyCustomDomain(domain: string): Promise<DomainVerifica
         )
     }
 
-    const resolved = await nginx.resolveIpv4(host)
+    const resolved = await resolveIpv4(host)
     const verified = dnsPointsAt(resolved, expected)
     slog('info', 'domains', verified ? 'custom domain verified' : 'custom domain not yet pointing at ingress', {
         domain: host,
@@ -204,24 +225,79 @@ function audit(action: string, site: Site, detail?: string): void {
     })
 }
 
+// Async-issuance poll budget: the daemon's own per-issue timeout is ~180s for DNS-01
+// propagation; HTTP-01 for a custom domain is much faster, but keep headroom.
+const CERT_POLL_INTERVAL_MS = 2_000
+const CERT_POLL_MAX_MS = 300_000
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
 /**
- * Provision the nginx serving layer for a verified custom-domain site (§10): re-check
- * the plan gate (§728) and the DNS verification (defense in depth — never issue a cert
- * for an unverified domain, §16), render the vhost via nginxpilot's `GET /vhost/{domain}`,
- * install it into `conf.d/`, obtain a cert via certbot HTTP-01, reload nginx, and mark
- * the site `live`. The *content* channel (the nginxpilot fragment that syncs the repo)
- * is the deploy service's job and is provisioned separately; this owns only the nginx
- * vhost + cert layer that a custom domain — unlike a subdomain — requires.
+ * Issue (or refresh) the custom domain's cert through the site's own nginxpilot realm
+ * (impl §7): `POST /certs` (async, HTTP-01) + poll the job until terminal. Throws
+ * `HostnameError` with the certbot reason on failure — provisioning must abort rather
+ * than mark a site live without the cert it asked for. Requires `acme.enabled` on the
+ * realm's daemon (a 501 surfaces as a clear message).
+ */
+async function issueCustomDomainCert(site: Site): Promise<void> {
+    const client = realms.clientForSite(site)
+    let jobId: string
+    try {
+        const accepted = await client.issueCertificate({ domains: [site.hostname] })
+        jobId = accepted.job_id
+    } catch (err) {
+        const status = (err as { status?: number }).status
+        throw new HostnameError(
+            status === 501
+                ? `the site's realm has ACME issuance disabled (acme.enabled: false) — enable it or upload a cert for ${site.hostname} manually`
+                : `couldn't start certificate issuance for ${site.hostname}`,
+            'cert_issue_failed',
+            503,
+        )
+    }
+    const deadline = Date.now() + CERT_POLL_MAX_MS
+    while (Date.now() < deadline) {
+        await sleep(CERT_POLL_INTERVAL_MS)
+        const job = await client.getCertJob(jobId)
+        if (job.state === 'succeeded') {
+            slog('info', 'domains', 'custom-domain cert issued via realm API', {
+                domain: site.hostname,
+                job: jobId,
+            })
+            return
+        }
+        if (job.state === 'failed') {
+            throw new HostnameError(
+                `certificate issuance for ${site.hostname} failed: ${job.error ?? 'unknown certbot error'}`,
+                'cert_issue_failed',
+                503,
+            )
+        }
+    }
+    throw new HostnameError(
+        `certificate issuance for ${site.hostname} is still running — retry Verify shortly`,
+        'cert_issue_timeout',
+        503,
+    )
+}
+
+/**
+ * Provision the serving layer for a verified custom-domain site (§10, impl §7): re-check
+ * the limit gate (§728) and the DNS verification (defense in depth — never issue a cert
+ * for an unverified domain, §16), issue the cert through the site's own nginxpilot realm
+ * (async `POST /certs` job, HTTP-01), then re-provision the managed-mode fragment — which
+ * now carries `tls: auto` for custom domains — so the daemon terminates TLS with the fresh
+ * cert. Everything flows through the daemon's staging + `nginx -t` + rollback pipeline; no
+ * host-local certbot/nginx access is needed, so this works on remote realms.
  *
- * Throws `HostnameError` (plan/verification) or `NginxError` (vhost/cert/reload) on
- * failure, leaving the site un-`live` so a partial provision is never reported as ready.
+ * Throws `HostnameError` (limit/verification/cert) on failure, leaving the site un-`live`
+ * so a partial provision is never reported as ready.
  */
 export async function provisionCustomVhost(site: Site): Promise<Site> {
     const owner = userRepo.get(site.ownerId)
     if (!owner) {
         throw new HostnameError('site owner not found', 'owner_not_found', 409)
     }
-    // Custom domains are a paid-plan capability — delegate the gate to §728.
+    // Custom domains are a limit-gated capability — delegate the gate to §728.
     assertCanUseCustomDomain(owner.login)
 
     // Re-verify right before issuing a cert: the DNS could have changed since the
@@ -236,54 +312,32 @@ export async function provisionCustomVhost(site: Site): Promise<Site> {
         )
     }
 
-    // The vhost is rendered by the site's OWN nginxpilot realm (multiple_realms.md §D.4).
-    const vhostText = await realms.clientForSite(site).vhost(site.hostname)
-    await nginx.installVhost(site.hostname, vhostText)
-    await nginx.obtainCert(site.hostname)
-    await nginx.reload()
+    await issueCustomDomainCert(site)
 
-    const at = new Date().toISOString()
-    siteRepo.updateStatus(site.id, 'live', at)
-    audit('site.custom_domain.live', site, `vhost installed + cert issued for ${site.hostname}`)
-    return { ...site, status: 'live', updatedAt: at }
+    // Re-provision the fragment: with the cert on disk, the custom domain's `tls: auto`
+    // (deploy.ts `resolveWebOptions`) now terminates TLS; the daemon reloads + syncs.
+    const provisioned = await deploy.provision(site)
+    audit('site.custom_domain.live', site, `cert issued via realm API for ${site.hostname}`)
+    return provisioned
 }
 
 /**
- * Tear down a custom domain's nginx serving layer (§10): drop the vhost from `conf.d/`,
- * delete its cert, and reload nginx so it stops serving. Idempotent and best-effort on
- * the cert delete (a missing cert is not an error), so it composes cleanly with the
- * deploy service's `remove` (which drops the nginxpilot fragment + row). Used both on
- * site deletion and when a custom-domain site is suspended.
+ * Tear down a custom domain's serving layer (§10, impl §7): delete its cert on the
+ * site's realm (`DELETE /certs/{domain}`). The fragment removal + daemon reload is the
+ * deploy service's `remove`/`suspend` job — this owns only the cert the custom domain
+ * added. Best-effort and idempotent (a missing cert is not an error), so it composes
+ * cleanly with site deletion and suspension.
  */
 export async function teardownCustomVhost(site: Site): Promise<void> {
-    // Best-effort end-to-end (I3): a teardown that's part of a delete must never strand a
-    // half-deleted site. Each step is independently guarded — a failed vhost remove, cert
-    // drop, or reload is logged and we press on — so the caller can always proceed to remove
-    // the DB row. `removeVhost`/`dropCert` are already idempotent; this also tolerates a
-    // reload failure (which previously threw `NginxError` and blocked the row delete).
     try {
-        await nginx.removeVhost(site.hostname)
+        await realms.clientForSite(site).deleteCertificate(site.hostname)
     } catch (err) {
-        slog('warn', 'domains', 'vhost remove failed during teardown (continuing)', {
+        // Teardown that's part of a delete must never strand a half-deleted site —
+        // log and press on so the caller can always remove the DB row (I3).
+        slog('warn', 'domains', 'cert delete failed during teardown (continuing)', {
             domain: site.hostname,
             error: (err as Error).message,
         })
     }
-    try {
-        await nginx.dropCert(site.hostname)
-    } catch (err) {
-        slog('warn', 'domains', 'cert drop failed during teardown (continuing)', {
-            domain: site.hostname,
-            error: (err as Error).message,
-        })
-    }
-    try {
-        await nginx.reload()
-    } catch (err) {
-        slog('warn', 'domains', 'nginx reload failed during teardown (continuing)', {
-            domain: site.hostname,
-            error: (err as Error).message,
-        })
-    }
-    audit('site.custom_domain.teardown', site, `dropped vhost + cert for ${site.hostname}`)
+    audit('site.custom_domain.teardown', site, `dropped cert for ${site.hostname}`)
 }

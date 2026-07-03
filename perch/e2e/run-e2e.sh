@@ -24,6 +24,11 @@ SCRATCH="${E2E_SCRATCH:-$(mktemp -d)}"
 NP_PORT=9091
 PERCH_PORT=4100
 
+# A survivor from a previous run would answer the health probes with the OLD
+# scratch DB and fail every assertion confusingly — clear the ports first.
+lsof -ti tcp:$PERCH_PORT 2>/dev/null | xargs kill -9 2>/dev/null || true
+lsof -ti tcp:$NP_PORT 2>/dev/null | xargs kill -9 2>/dev/null || true
+
 echo "== Perch e2e =="
 echo "scratch: $SCRATCH"
 echo "node:    $(node -v)  ($(command -v node))"
@@ -57,7 +62,12 @@ echo "-- building nginxpilot…"
 ( cd "$NP" && go build -o "$SCRATCH/nginxpilot" ./cmd/nginxpilot ) || { echo "go build failed"; exit 1; }
 
 # ── 2. nginxpilot config + dirs ─────────────────────────────────────────────────
-mkdir -p "$SCRATCH/np/sites.d" "$SCRATCH/np-data"
+# Managed mode with conf dirs in the scratch prefix and a stubbed nginx (test_cmd/
+# reload_cmd → /usr/bin/true), so the managed pipeline — validate, quarantine,
+# reconcile, /status resource states — runs without a real nginx on the host.
+# target_checks mirrors the impl_plan curl-pass config: DNS failures reject the write
+# (with the skip override), reachability probes demote to response warnings.
+mkdir -p "$SCRATCH/np/sites.d" "$SCRATCH/np-data" "$SCRATCH/np-conf/sites" "$SCRATCH/np-conf/streams" "$SCRATCH/np-conf/managed"
 cat > "$SCRATCH/np/config.yml" <<EOF
 data_dir: $SCRATCH/np-data
 admin:
@@ -65,6 +75,24 @@ admin:
 defaults:
   interval: 5m
   keep_releases: 3
+nginx:
+  manage: true
+  conf_dir: $SCRATCH/np-conf/sites
+  stream_conf_dir: $SCRATCH/np-conf/streams
+  managed_include_dir: $SCRATCH/np-conf/managed
+  test_cmd: ["true"]
+  reload_cmd: ["true"]
+  target_checks:
+    dns: error
+    reachability: probe
+    timeout: 2s
+  reconcile:
+    interval: 15s
+  real_ip:
+    enabled: true
+    header: CF-Connecting-IP
+    static_cidrs:
+      - 203.0.113.0/24
 include:
   - sites.d/*.yml
 EOF

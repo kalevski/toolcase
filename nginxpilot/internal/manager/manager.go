@@ -21,6 +21,7 @@ import (
 	"github.com/kalevski/toolcase/nginxpilot/internal/nginxctl"
 	gitsource "github.com/kalevski/toolcase/nginxpilot/internal/source/git"
 	"github.com/kalevski/toolcase/nginxpilot/internal/state"
+	"github.com/kalevski/toolcase/nginxpilot/internal/targetcheck"
 )
 
 // syncTimeout bounds one sync attempt end-to-end (fetch + extract + swap).
@@ -56,6 +57,24 @@ type Manager struct {
 	acme   *acme.Client
 	creds  *credstore.Store
 	acmeMu sync.Mutex
+
+	// Renewal scheduler state (renewal.go). renewMu guards both fields.
+	renewMu   sync.Mutex
+	renewals  map[string]RenewalState
+	renewNext time.Time
+
+	// Real-IP refresh state (realip.go). realIPMu guards both fields.
+	realIPMu   sync.Mutex
+	realIPLast time.Time
+	realIPErr  string
+
+	// applyGen counts applyManaged runs (guarded by applyMu); the reconcile
+	// loop uses it to discard a dry-run that raced a real apply. reconcile
+	// state lives in reconcile.go, guarded by reconMu.
+	applyGen  uint64
+	reconMu   sync.Mutex
+	reconcile map[reconcileKey]*reconcileEntry
+	reconLast time.Time
 }
 
 type siteLoop struct {
@@ -98,6 +117,13 @@ func New(cfg *config.Config, store *state.Store, log *slog.Logger) *Manager {
 	}
 	if cfg.Nginx.Manage {
 		m.engine = nginxctl.New(cfg, log)
+		// Pre-flight DNS annotations: quarantined resources get "host does not
+		// resolve" instead of raw nginx -t stderr. Off when dns checks are off.
+		if cfg.Nginx.TargetChecks.DNSSeverity() != config.TargetDNSOff {
+			m.engine.SetAnnotator(checkerAnnotator{
+				checker: &targetcheck.Checker{Timeout: cfg.Nginx.TargetChecks.TimeoutOrDefault()},
+			})
+		}
 		dir, err := cfg.Tls.ResolveDir()
 		if err != nil {
 			log.Warn("cert dir not resolvable; TLS resources will fall back to HTTP (or be disabled if required)", "error", err)
@@ -133,6 +159,10 @@ func warnAcmeMismatches(cfg *config.Config, log *slog.Logger) {
 				"challenge", cfg.Acme.ChallengeOrDefault())
 		}
 	}
+	if r := cfg.Acme.Renewal; r.RenewalEnabled() && r.RenewBeforeOrDefault() <= r.CheckIntervalOrDefault() {
+		log.Warn("acme.renewal.renew_before <= check_interval leaves zero slack; one missed check can mean a served expired cert",
+			"renew_before", r.RenewBeforeOrDefault().String(), "check_interval", r.CheckIntervalOrDefault().String())
+	}
 }
 
 // Run starts every site loop and blocks until ctx is cancelled and all
@@ -154,7 +184,17 @@ func (m *Manager) Run(ctx context.Context) {
 	if m.engine != nil {
 		m.applyManaged(ctx)
 		go m.runCertWatch(ctx)
+		go m.runReconcileLoop(ctx)
 	}
+
+	// The renewal scheduler starts unconditionally: Reload can flip
+	// acme.enabled on at runtime and a loop that was never started can't wake
+	// up. Each tick no-ops unless acme + renewal are enabled.
+	go m.runRenewalLoop(ctx)
+
+	// Real-IP provider-range refresh (better.md §8) — same unconditional-start,
+	// per-tick-enablement pattern.
+	go m.runRealIPLoop(ctx)
 
 	<-ctx.Done()
 	m.log.Info("shutting down, waiting for in-flight syncs")

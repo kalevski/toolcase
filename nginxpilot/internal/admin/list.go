@@ -40,6 +40,24 @@ func (s *Server) handleListProxies(w http.ResponseWriter, _ *http.Request) {
 	writeJSON(w, map[string]any{"proxies": proxies}, s)
 }
 
+func (s *Server) handleListRedirects(w http.ResponseWriter, _ *http.Request) {
+	cfg := s.mgr.Config()
+	redirects := cfg.Redirects
+	if redirects == nil {
+		redirects = []config.Redirect{}
+	}
+	writeJSON(w, map[string]any{"redirects": redirects}, s)
+}
+
+func (s *Server) handleListDeadHosts(w http.ResponseWriter, _ *http.Request) {
+	cfg := s.mgr.Config()
+	deadHosts := cfg.DeadHosts
+	if deadHosts == nil {
+		deadHosts = []config.DeadHost{}
+	}
+	writeJSON(w, map[string]any{"dead_hosts": deadHosts}, s)
+}
+
 func (s *Server) handleListStreams(w http.ResponseWriter, _ *http.Request) {
 	cfg := s.mgr.Config()
 	streams := cfg.Streams

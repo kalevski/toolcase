@@ -20,6 +20,7 @@ func (m *Manager) applyManaged(ctx context.Context) {
 	}
 	m.applyMu.Lock()
 	defer m.applyMu.Unlock()
+	m.applyGen++ // reconcile ticks whose dry-run raced this apply discard their result
 
 	idx, err := certs.Load(m.certDir)
 	if err != nil {
@@ -82,14 +83,16 @@ func (m *Manager) CertDir() string {
 }
 
 // NginxStatus returns the managed-mode flag and the last apply's per-resource
-// states for GET /status.
+// states for GET /status, overlaid with the reconcile loop's at_risk state and
+// since/last_reconcile timestamps.
 func (m *Manager) NginxStatus() (managed bool, resources []nginxctl.ResourceResult) {
 	if m.engine == nil {
 		return false, nil
 	}
 	m.applyMu.Lock()
-	defer m.applyMu.Unlock()
-	return true, m.lastApply.Resources
+	res := m.lastApply.Resources
+	m.applyMu.Unlock()
+	return true, m.mergeReconcileState(res)
 }
 
 // NginxTest runs a dry-run apply (render + validate, no swap/reload) for POST

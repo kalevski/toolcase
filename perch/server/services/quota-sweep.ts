@@ -7,7 +7,7 @@
 // the freshly-measured `bytes`, and runs `enforceBytes` (over_quota → grace → suspend).
 //
 // Same globalThis-singleton, dev-hot-reload-safe ticker shape as
-// `services/sponsors-reconcile.ts`. No external cron; the single-process app makes it safe.
+// the other boot tickers. No external cron; the single-process app makes it safe.
 
 import 'server-only'
 import * as siteRepo from '@/server/data/repositories/site-repo'

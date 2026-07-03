@@ -9,7 +9,8 @@
         "start": "next start",
         "lint": "next lint",
         "test": "vitest run",
-        "typecheck": "tsc --noEmit"
+        "typecheck": "tsc --noEmit",
+        "typegen:nginxpilot": "node scripts/generate-nginxpilot-types.mjs"
     },
     "dependencies": {
         "@toolcase/base": "^5.0.0",

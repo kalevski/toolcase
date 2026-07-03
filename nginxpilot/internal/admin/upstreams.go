@@ -29,8 +29,8 @@ func (s *Server) handleCreateUpstream(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("invalid fragment: %v", err), http.StatusBadRequest)
 		return
 	}
-	if len(frag.Upstreams) != 1 || len(frag.Sites) != 0 || len(frag.Proxies) != 0 {
-		http.Error(w, "fragment must declare exactly one upstream (and no sites or proxies)", http.StatusBadRequest)
+	if err := requireExactlyOne(frag, "upstream"); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -49,7 +49,13 @@ func (s *Server) handleCreateUpstream(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.writeFragmentAndReload(w, target, body, "upstream", name)
+	warnings, err := checkFragmentTargets(r, cfg, frag)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("fragment rejected: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	s.writeFragmentAndReload(w, target, body, "upstream", name, warnings)
 }
 
 // handleDeleteUpstream removes the deterministic upstream-<name>.yml fragment

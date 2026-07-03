@@ -5,23 +5,12 @@
 //
 //   • `meetsMinRole`    — the role-rank gate behind `authorize(minRole)` (the
 //                         owner endpoints return 403 to anyone below `owner`).
-//   • `parsePlanTiers`  — validate + normalize an owner-supplied `$ → plan`
-//                         mapping into a sorted, deduped `PlanTier[]` (the PUT
-//                         body), so a replace round-trips against `planTierRepo`'s
-//                         `ORDER BY min_cents` read.
 //   • `checkBaseDomain` — an owner-registered base domain must be a valid FQDN
 //                         (reuses the shared hostname shape check).
 //
 // See notes/static-hosting-app-design.md §6, §8, §12, §13.
 
-import {
-    NUMERIC_LIMIT_KEYS,
-    ROLE_RANK,
-    type PaidPlan,
-    type PlanTier,
-    type Role,
-    type UserLimitOverride,
-} from '@/server/domain/types'
+import { NUMERIC_LIMIT_KEYS, ROLE_RANK, type Role, type UserLimitOverride } from '@/server/domain/types'
 import { checkDomain, type DomainCheck } from '@/server/domain/hostname'
 
 // ── role gate (the owner endpoints' 403, §13) ──────────────────────────────────
@@ -49,59 +38,6 @@ export const ASSIGNABLE_ROLES: ReadonlySet<Role> = new Set<Role>(['owner', 'main
 /** Type guard: a request-supplied value is one of the assignable roles. */
 export function isAssignableRole(value: unknown): value is Role {
     return typeof value === 'string' && (ASSIGNABLE_ROLES as ReadonlySet<string>).has(value)
-}
-
-// ── plan-tier mapping validation (the PUT body, §8) ────────────────────────────
-
-/** The paid plans a sponsorship tier may map to — the free tier is never stored (§8). */
-export const PAID_PLANS: ReadonlySet<PaidPlan> = new Set<PaidPlan>(['bronze', 'silver', 'gold'])
-
-/** Why a plan-tier replacement body was rejected (the service maps it to a 400). */
-export type PlanTiersRejection = 'not_array' | 'bad_row' | 'bad_cents' | 'bad_plan' | 'duplicate_cents'
-
-/** Result of {@link parsePlanTiers}: the normalized mapping, or a typed rejection. */
-export type PlanTiersCheck =
-    | { ok: true; tiers: PlanTier[] }
-    | { ok: false; reason: PlanTiersRejection; message: string }
-
-/**
- * Validate + normalize an owner-supplied `$ → plan` mapping (the `PUT
- * /api/admin/plan-tiers` body) into a sorted, deduped `PlanTier[]`. Enforces:
- *
- *   • the body is an array of `{ minCents, plan }` rows,
- *   • `minCents` is a non-negative integer (it's the primary key / the cents floor),
- *   • `plan` is one of the paid plans (`bronze | silver | gold`),
- *   • no two rows share a `minCents` (it's the PK — a dup would silently drop a row).
- *
- * Returns the rows sorted cheapest-first, matching `planTierRepo.list()`'s
- * `ORDER BY min_cents`, so a replace → read round-trips to an equal array. Pure (no
- * I/O), so the validation and the round-trip ordering are unit-tested directly.
- */
-export function parsePlanTiers(input: unknown): PlanTiersCheck {
-    if (!Array.isArray(input)) {
-        return { ok: false, reason: 'not_array', message: 'plan tiers must be an array of { minCents, plan }' }
-    }
-    const seen = new Set<number>()
-    const tiers: PlanTier[] = []
-    for (const row of input) {
-        if (!row || typeof row !== 'object') {
-            return { ok: false, reason: 'bad_row', message: 'each plan tier must be an object' }
-        }
-        const { minCents, plan } = row as { minCents?: unknown; plan?: unknown }
-        if (typeof minCents !== 'number' || !Number.isInteger(minCents) || minCents < 0) {
-            return { ok: false, reason: 'bad_cents', message: 'minCents must be a non-negative integer' }
-        }
-        if (typeof plan !== 'string' || !PAID_PLANS.has(plan as PaidPlan)) {
-            return { ok: false, reason: 'bad_plan', message: 'plan must be one of: bronze, silver, gold' }
-        }
-        if (seen.has(minCents)) {
-            return { ok: false, reason: 'duplicate_cents', message: `duplicate minCents ${minCents}` }
-        }
-        seen.add(minCents)
-        tiers.push({ minCents, plan: plan as PaidPlan })
-    }
-    tiers.sort((a, b) => a.minCents - b.minCents)
-    return { ok: true, tiers }
 }
 
 // ── per-user limit overrides (the owner's Users editor, §11/§15) ───────────────

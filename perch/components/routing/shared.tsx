@@ -4,20 +4,17 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react
 import { useRouter } from 'next/navigation'
 import type { TableColumn } from '@toolcase/web-components'
 import { ROLE_RANK } from '@/server/domain/types'
+import type { HstsOptions } from '@/server/domain/routing'
 import { useMe } from '@/lib/me-context'
 import { LoadingState, ErrorState } from '@/components/states'
 import { DataTable } from '@/components/DataTable'
-import { SubTabBar, type SubTab } from '@/components/SubTabBar'
-import { escapeHtml } from '@/lib/tc'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
+import { SwitchField, TextField } from '@/components/fields'
+import { escapeHtml, useTc } from '@/lib/tc'
 
-// The four routing sub-pages, surfaced as a Wharf-style tc-tab-bar above the body
-// (P5) instead of four flat sidebar items.
-const ROUTING_TABS: SubTab[] = [
-    { id: 'proxies', label: 'Proxies', icon: 'globe', href: '/proxies' },
-    { id: 'upstreams', label: 'Upstreams', icon: 'server', href: '/upstreams' },
-    { id: 'streams', label: 'Streams', icon: 'cable', href: '/streams' },
-    { id: 'stream-upstreams', label: 'Stream upstreams', icon: 'network', href: '/stream-upstreams' },
-]
+// Each routing area is its own sidebar page (AppShell's Routing section) — no
+// intra-section tab bar. Pools live WITH their consumers: the Proxies page
+// carries the http upstream pools, the Streams page the L4 ones.
 
 // Shared plumbing for the maintainer routing pages (Proxies, Upstreams) — the
 // maintainer counterpart to `components/admin/shared.tsx`. Same gate shape, one
@@ -29,6 +26,169 @@ const ROUTING_TABS: SubTab[] = [
 
 /** Reject a non-OK response so a failed fetch surfaces as the error phase. */
 export const json = <T,>(r: Response): Promise<T> => (r.ok ? (r.json() as Promise<T>) : Promise.reject(r))
+
+// ── save helper: warnings + skip-DNS override (A5) ─────────────────────────────
+
+/**
+ * Outcome of a routing save. A successful write can still carry the daemon's
+ * advisory target-check `warnings` (the resource IS live — "backend not reachable"
+ * is normal mid-deploy). A failed write carries the machine `code` plus the daemon's
+ * operator-facing `detail`; `dnsBlocked` flags the specific "target host does not
+ * resolve" 400 that the daemon's own `?skip_target_checks=true` escape hatch
+ * overrides — the UI offers "Save anyway" for it.
+ */
+export type SaveOutcome =
+    | { ok: true; warnings: string[] }
+    | { ok: false; status: number; code?: string; detail?: string; dnsBlocked: boolean }
+
+/**
+ * POST one routing entity to its `/api/routing/*` endpoint, surfacing warnings and
+ * the daemon's rejection detail (A5). `skipTargetChecks` forwards the daemon's DNS
+ * override for the retry path.
+ */
+export async function saveRouting(url: string, payload: unknown, skipTargetChecks = false): Promise<SaveOutcome> {
+    try {
+        const target = skipTargetChecks ? `${url}?skip_target_checks=true` : url
+        const res = await fetch(target, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(payload),
+        })
+        const body = (await res.json().catch(() => null)) as {
+            warnings?: string[]
+            error?: string
+            detail?: string
+        } | null
+        if (res.ok) return { ok: true, warnings: body?.warnings ?? [] }
+        return {
+            ok: false,
+            status: res.status,
+            code: body?.error,
+            detail: body?.detail,
+            dnsBlocked: res.status === 400 && /does not resolve/i.test(body?.detail ?? ''),
+        }
+    } catch {
+        return { ok: false, status: 0, dnsBlocked: false }
+    }
+}
+
+/** Compose the standard save-failure message from a {@link SaveOutcome}. */
+export function saveErrorMessage(what: string, outcome: Extract<SaveOutcome, { ok: false }>): string {
+    if (outcome.status === 0) return `Couldn’t save ${what} — network error.`
+    if (outcome.detail) return `Couldn’t save ${what}: ${outcome.detail}`
+    if (outcome.code) return `Couldn’t save ${what}: ${outcome.code}.`
+    return `Couldn’t save ${what} (error ${outcome.status}).`
+}
+
+/**
+ * Dismissible banner for the daemon's advisory target-check warnings after a
+ * successful save. Advisory only — the resource is live; a reachability warning is
+ * normal while a backend is still being deployed.
+ */
+export function SaveWarningsBanner({ warnings, onDismiss }: { warnings: string[]; onDismiss: () => void }) {
+    if (!warnings.length) return null
+    return (
+        <tc-banner variant="warning">
+            Saved, with {warnings.length} target-check warning{warnings.length === 1 ? '' : 's'} (advisory — the
+            resource is live):
+            <ul className="perch-admin-list">
+                {warnings.map((w, i) => (
+                    <li key={i}>{w}</li>
+                ))}
+            </ul>
+            <tc-button variant="secondary" size="sm" outline onClick={onDismiss}>
+                Dismiss
+            </tc-button>
+        </tc-banner>
+    )
+}
+
+// ── HSTS custom options (§4) ────────────────────────────────────────────────────
+
+/**
+ * Form draft for the HSTS disclosure, shared by the proxy/redirect/dead-host forms.
+ * Daemon defaults: max-age 2 years, include_subdomains on, preload off — the draft
+ * holds only the deviations, so an untouched disclosure writes the minimal `hsts: true`.
+ */
+export interface HstsDraft {
+    /** Seconds; empty = the daemon's 2-year default. */
+    maxAge: string
+    /** `include_subdomains` (daemon default true). */
+    subdomains: boolean
+    preload: boolean
+}
+
+export const defaultHstsDraft = (): HstsDraft => ({ maxAge: '', subdomains: true, preload: false })
+
+/** Load a stored hsts value (bool write form or the daemon's struct read form) into the draft. */
+export function hstsDraftFrom(h: boolean | HstsOptions | undefined): HstsDraft {
+    if (typeof h !== 'object' || h === null) return defaultHstsDraft()
+    return {
+        maxAge: h.max_age && h.max_age > 0 ? String(h.max_age) : '',
+        subdomains: h.include_subdomains !== false,
+        preload: h.preload === true,
+    }
+}
+
+/**
+ * Build the hsts write value from an enabled disclosure: `true` when everything is
+ * at daemon defaults, else the struct carrying only the deviations.
+ */
+export function hstsPayload(d: HstsDraft): { value: true | HstsOptions } | { error: string } {
+    let maxAge: number | undefined
+    if (d.maxAge.trim()) {
+        const n = Number(d.maxAge)
+        if (!Number.isInteger(n) || n <= 0) {
+            return { error: 'HSTS max-age must be a positive whole number of seconds.' }
+        }
+        maxAge = n
+    }
+    if (maxAge === undefined && d.subdomains && !d.preload) return { value: true }
+    const h: HstsOptions = { enabled: true }
+    if (maxAge !== undefined) h.max_age = maxAge
+    if (!d.subdomains) h.include_subdomains = false
+    if (d.preload) h.preload = true
+    return { value: h }
+}
+
+/** The HSTS custom-options row, revealed while the HSTS toggle is on. */
+export function HstsOptionsRow({
+    draft,
+    onDraft,
+    disabled,
+}: {
+    draft: HstsDraft
+    onDraft: (next: HstsDraft) => void
+    disabled?: boolean
+}) {
+    return (
+        <div className="perch-form-grid perch-form-span">
+            <TextField
+                size="sm"
+                label="HSTS max-age (seconds)"
+                placeholder="63072000 (2 years)"
+                help="Sent as Strict-Transport-Security max-age. Blank keeps the daemon's 2-year default."
+                disabled={disabled}
+                value={draft.maxAge}
+                onValue={(v) => onDraft({ ...draft, maxAge: v })}
+            />
+            <div className="perch-form-switches">
+                <SwitchField
+                    label="Include subdomains"
+                    disabled={disabled}
+                    checked={draft.subdomains}
+                    onChecked={(c) => onDraft({ ...draft, subdomains: c })}
+                />
+                <SwitchField
+                    label="Preload"
+                    disabled={disabled}
+                    checked={draft.preload}
+                    onChecked={(c) => onDraft({ ...draft, preload: c })}
+                />
+            </div>
+        </div>
+    )
+}
 
 export type RoutingDataState<T> =
     | { phase: 'loading' }
@@ -78,12 +238,40 @@ export function useMaintainerData<T>(fetcher: () => Promise<T | null>): {
     return { state, reload }
 }
 
+// ── daemon capability probe (impl §6) ───────────────────────────────────────────
+
+/**
+ * The active realm's daemon capability set (`GET /api/routing/capabilities`), or
+ * null while loading / when the daemon predates `GET /schema`. Null = "unknown,
+ * assume everything" — gating only ever fires on a POSITIVE "this path is absent".
+ */
+function useRealmCapabilities(): { version: string | null; paths: string[] } | null {
+    const [caps, setCaps] = useState<{ version: string | null; paths: string[] } | null>(null)
+    useEffect(() => {
+        let cancelled = false
+        void fetch('/api/routing/capabilities', { cache: 'no-store' })
+            .then((r) => (r.ok ? r.json() : null))
+            .then((body: { capabilities?: { version: string | null; paths: string[] } | null } | null) => {
+                if (!cancelled && body?.capabilities) setCaps(body.capabilities)
+            })
+            .catch(() => undefined)
+        return () => {
+            cancelled = true
+        }
+    }, [])
+    return caps
+}
+
 /**
  * Frame one routing page: a titled header plus the body for the current load
  * phase. `children` renders the ready data; loading/forbidden show shimmer
  * skeletons and error shows a banner with an in-place Retry (plan WS-4). Mirrors
  * `admin/shared.tsx`'s `AdminPage` so the routing pages stay visually consistent
  * with the admin surface (reuses the same `.perch-admin-*` layout classes).
+ *
+ * `requiresPath` names the daemon endpoint this page drives (e.g. "/redirects");
+ * when the realm's schema-declared capability set positively lacks it, a warning
+ * banner explains the daemon is too old instead of every call 404ing raw (impl §6).
  */
 export function RoutingPage<T>({
     title,
@@ -92,6 +280,7 @@ export function RoutingPage<T>({
     iconColor = 'cyan',
     state,
     onRetry,
+    requiresPath,
     children,
 }: {
     title: string
@@ -102,8 +291,12 @@ export function RoutingPage<T>({
     iconColor?: string
     state: RoutingDataState<T>
     onRetry?: () => void
+    /** The daemon path this page needs (capability gate, impl §6). */
+    requiresPath?: string
     children: (data: T) => ReactNode
 }) {
+    const caps = useRealmCapabilities()
+    const unsupported = !!requiresPath && !!caps && !caps.paths.includes(requiresPath)
     let body: ReactNode
     if (state.phase === 'ready') {
         body = children(state.data)
@@ -129,25 +322,342 @@ export function RoutingPage<T>({
                 icon-name={icon}
                 icon-color={iconColor}
             />
-            <SubTabBar tabs={ROUTING_TABS} />
+            {unsupported && (
+                <tc-banner variant="warning">
+                    This realm’s nginxpilot doesn’t support {title.toLowerCase()} (its API declares no{' '}
+                    <span className="perch-admin-mono">{requiresPath}</span> endpoint) — upgrade the daemon to
+                    use this page.
+                </tc-banner>
+            )}
+            <RoutingHealthStrip />
             <RoutingTestButton />
             {body}
         </section>
     )
 }
 
-/** One resource verdict from the managed-mode dry run (`POST /nginx/test`). */
+/**
+ * One resource verdict from the managed-mode dry run (`POST /nginx/test`) or the live
+ * status (`GET /api/routing/status`). `at_risk` only ever appears in the live status —
+ * the reconcile loop's "serving now, but would fail the next apply" overlay (A7).
+ */
 interface NginxTestResource {
     kind: string
     key: string
-    state: 'active' | 'disabled'
+    state: 'active' | 'disabled' | 'at_risk'
     reason?: string
+    /** ISO timestamp the reconcile loop first saw this resource failing. */
+    since?: string
 }
 
 interface NginxTestResponse {
     managed: boolean
     resources?: NginxTestResource[]
     error?: string
+}
+
+/** The `GET /api/routing/status` payload (the daemon's `status.nginx` block, A7). */
+interface RoutingStatusResponse {
+    managed: boolean
+    resources?: NginxTestResource[]
+    disabled_count?: number
+    at_risk_count?: number
+    reconcile?: {
+        enabled: boolean
+        interval: string
+        on_failure: string
+        last_run?: string
+        at_risk_count: number
+    }
+    /** Real-IP trust-list summary (C2) — config-file-owned on the daemon, read-only here. */
+    real_ip?: {
+        enabled: boolean
+        header: string
+        recursive: boolean
+        providers: string[]
+        static_count: number
+        range_count: number
+        last_refresh?: string
+        last_error?: string
+    }
+}
+
+/** Localised date+time for "failing since …" copy; empty for a missing/bad value. */
+function fmtSince(iso?: string): string {
+    if (!iso) return ''
+    const d = new Date(iso)
+    if (Number.isNaN(d.getTime())) return iso
+    return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+}
+
+/** Parse a Go duration string ("1m", "1m30s", "1h5m") into seconds; null when unparseable. */
+function parseGoDuration(s: string): number | null {
+    const m = s.match(/^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+(?:\.\d+)?)s)?$/)
+    if (!m || (!m[1] && !m[2] && !m[3])) return null
+    return Number(m[1] ?? 0) * 3600 + Number(m[2] ?? 0) * 60 + Number(m[3] ?? 0)
+}
+
+/** Short relative "ago" phrasing for the reconcile card; empty for a bad value. */
+function fmtAgo(iso: string): string {
+    const t = new Date(iso).getTime()
+    if (Number.isNaN(t)) return ''
+    const sec = Math.max(0, Math.round((Date.now() - t) / 1000))
+    if (sec < 60) return `${sec}s ago`
+    if (sec < 3600) return `${Math.round(sec / 60)}m ago`
+    if (sec < 86400) return `${Math.round(sec / 3600)}h ago`
+    return `${Math.round(sec / 86400)}d ago`
+}
+
+// ── live per-resource state chips (B1) ──────────────────────────────────────────
+
+/** A non-active live verdict for one resource, keyed for the list-page chips. */
+export interface ResourceStateInfo {
+    state: 'disabled' | 'at_risk'
+    reason?: string
+    since?: string
+}
+
+/**
+ * The active realm's non-active resource states for ONE kind, as a key → info map
+ * (B1's list chips). Fetched once per page load from `GET /api/routing/status`;
+ * empty when the realm isn't managed, everything is healthy, or the call fails
+ * (the chips are an enrichment, never the page's critical path).
+ */
+export function useResourceStates(kind: string): Map<string, ResourceStateInfo> {
+    const [states, setStates] = useState<Map<string, ResourceStateInfo>>(() => new Map())
+
+    useEffect(() => {
+        let cancelled = false
+        void fetch('/api/routing/status', { cache: 'no-store' })
+            .then((r) => (r.ok ? (r.json() as Promise<RoutingStatusResponse>) : null))
+            .then((body) => {
+                if (cancelled || !body?.managed) return
+                const next = new Map<string, ResourceStateInfo>()
+                for (const r of body.resources ?? []) {
+                    if (r.kind !== kind || r.state === 'active') continue
+                    next.set(r.key, { state: r.state, reason: r.reason, since: r.since })
+                }
+                if (next.size) setStates(next)
+            })
+            .catch(() => undefined)
+        return () => {
+            cancelled = true
+        }
+    }, [kind])
+
+    return states
+}
+
+// ── persisted episode history (B1) ──────────────────────────────────────────────
+
+/** One persisted state episode as `GET /api/routing/state-history` returns it. */
+interface ResourceEpisodeDto {
+    id: number
+    kind: string
+    key: string
+    state: string
+    reason: string | null
+    firstSeen: string
+    lastSeen: string
+    clearedAt: string | null
+    actorLogin: string | null
+    actorAt: string | null
+}
+
+/**
+ * Inline episode-history drawer for one resource (B1): the persisted
+ * disabled/at_risk/renew-failure episodes the status poller recorded — surviving
+ * daemon and Perch restarts — with audit attribution ("last changed by @login").
+ */
+export function EpisodeHistory({ kind, resourceKey }: { kind: string; resourceKey: string }) {
+    const [episodes, setEpisodes] = useState<ResourceEpisodeDto[] | 'loading' | 'error'>('loading')
+
+    useEffect(() => {
+        let cancelled = false
+        setEpisodes('loading')
+        void fetch(
+            `/api/routing/state-history?kind=${encodeURIComponent(kind)}&key=${encodeURIComponent(resourceKey)}`,
+            { cache: 'no-store' },
+        )
+            .then((r) => (r.ok ? (r.json() as Promise<{ episodes: ResourceEpisodeDto[] }>) : Promise.reject(r)))
+            .then((body) => {
+                if (!cancelled) setEpisodes(body.episodes)
+            })
+            .catch(() => {
+                if (!cancelled) setEpisodes('error')
+            })
+        return () => {
+            cancelled = true
+        }
+    }, [kind, resourceKey])
+
+    if (episodes === 'loading') return <p className="perch-admin-hint">Loading history…</p>
+    if (episodes === 'error') return <p className="perch-admin-hint">Couldn’t load the state history.</p>
+    if (episodes.length === 0) {
+        return <p className="perch-admin-hint">No recorded episodes — this resource has never been seen failing.</p>
+    }
+    return (
+        <ul className="perch-admin-list">
+            {episodes.map((e) => (
+                <li key={e.id}>
+                    <span className="perch-admin-mono">{e.state}</span> {fmtSince(e.firstSeen)} →{' '}
+                    {e.clearedAt ? fmtSince(e.clearedAt) : 'ongoing'}
+                    {e.reason ? ` — ${e.reason}` : ''}
+                    {e.actorLogin ? (
+                        <span className="perch-admin-hint">
+                            {' '}
+                            · last changed by @{e.actorLogin}
+                            {e.actorAt ? ` (${fmtSince(e.actorAt)})` : ''}
+                        </span>
+                    ) : null}
+                </li>
+            ))}
+        </ul>
+    )
+}
+
+/**
+ * Live managed-mode health strip (A7): fetches `GET /api/routing/status` once per
+ * page load and surfaces the reconcile loop's verdicts — resources that are `at_risk`
+ * (still serving; the daemon's default `on_failure: warn` policy never removes routes)
+ * or `disabled` (quarantined, not serving). Quietly renders nothing when the realm
+ * isn't managed or the status call fails — the dry-run button remains the explicit path.
+ */
+function RoutingHealthStrip() {
+    const [status, setStatus] = useState<RoutingStatusResponse | null>(null)
+    // The resource whose persisted episode history is expanded (B1), or null.
+    const [historyFor, setHistoryFor] = useState<{ kind: string; key: string } | null>(null)
+
+    useEffect(() => {
+        let cancelled = false
+        void fetch('/api/routing/status', { cache: 'no-store' })
+            .then((r) => (r.ok ? (r.json() as Promise<RoutingStatusResponse>) : null))
+            .then((body) => {
+                if (!cancelled && body) setStatus(body)
+            })
+            .catch(() => undefined)
+        return () => {
+            cancelled = true
+        }
+    }, [])
+
+    if (!status?.managed) return null
+    const atRisk = status.resources?.filter((r) => r.state === 'at_risk') ?? []
+    const disabled = status.resources?.filter((r) => r.state === 'disabled') ?? []
+    const realIp = status.real_ip
+    const reconcile = status.reconcile
+    if (
+        atRisk.length === 0 &&
+        disabled.length === 0 &&
+        !realIp?.enabled &&
+        !realIp?.last_error &&
+        !reconcile
+    ) {
+        return null
+    }
+
+    // Stale-loop detection: the loop should tick every `interval`; well past that
+    // (3× + a settle margin) means it's wedged or the daemon restarted.
+    let reconcileStale = false
+    if (reconcile?.enabled && reconcile.last_run) {
+        const intervalSec = parseGoDuration(reconcile.interval) ?? 60
+        const ageSec = (Date.now() - new Date(reconcile.last_run).getTime()) / 1000
+        reconcileStale = Number.isFinite(ageSec) && ageSec > Math.max(intervalSec * 3, intervalSec + 60)
+    }
+
+    const resourceLine = (r: NginxTestResource, sinceLabel: string) => (
+        <li key={`${r.kind}:${r.key}`}>
+            <span className="perch-admin-mono">
+                {r.kind} {r.key}
+            </span>
+            {r.reason ? ` — ${r.reason}` : ''}
+            {r.since ? ` (${sinceLabel} ${fmtSince(r.since)})` : ''}{' '}
+            <tc-button
+                variant="secondary"
+                size="sm"
+                outline
+                onClick={() =>
+                    setHistoryFor((prev) =>
+                        prev && prev.kind === r.kind && prev.key === r.key ? null : { kind: r.kind, key: r.key },
+                    )
+                }
+            >
+                History
+            </tc-button>
+            {historyFor && historyFor.kind === r.kind && historyFor.key === r.key && (
+                <EpisodeHistory kind={r.kind} resourceKey={r.key} />
+            )}
+        </li>
+    )
+
+    return (
+        <div className="perch-routing-health">
+            {reconcile && (
+                <div className="perch-reconcile" role="status">
+                    <span className="perch-reconcile-label">Reconcile</span>
+                    {reconcile.enabled ? (
+                        <>
+                            <span
+                                className={`badge text-bg-${reconcile.on_failure === 'disable' ? 'warning' : 'secondary'}`}
+                                title={
+                                    reconcile.on_failure === 'disable'
+                                        ? 'A resource failing the periodic dry run is automatically disabled (its route is removed) after flap damping.'
+                                        : 'A resource failing the periodic dry run is only marked at risk — traffic is never touched.'
+                                }
+                            >
+                                on failure: {reconcile.on_failure}
+                            </span>
+                            <span className="perch-admin-hint">every {reconcile.interval}</span>
+                            <span className="perch-admin-hint">
+                                {reconcile.last_run ? `checked ${fmtAgo(reconcile.last_run)}` : 'not yet run'}
+                            </span>
+                            {reconcile.at_risk_count > 0 && (
+                                <span className="badge text-bg-warning">
+                                    {reconcile.at_risk_count} at risk
+                                </span>
+                            )}
+                            {reconcileStale && (
+                                <span
+                                    className="badge text-bg-danger"
+                                    title={`The reconcile loop hasn't run for well over its ${reconcile.interval} interval — it may be wedged, or the daemon restarted.`}
+                                >
+                                    stale — last ran {reconcile.last_run ? fmtAgo(reconcile.last_run) : 'never'}
+                                </span>
+                            )}
+                        </>
+                    ) : (
+                        <span className="perch-admin-hint">
+                            off — config is re-checked only on writes and reloads
+                        </span>
+                    )}
+                </div>
+            )}
+            {realIp?.enabled && (
+                <tc-banner variant={realIp.last_error ? 'warning' : 'info'}>
+                    Real-IP restoration is on (header {realIp.header}): {realIp.range_count} provider range
+                    {realIp.range_count === 1 ? '' : 's'}
+                    {realIp.providers.length ? ` from ${realIp.providers.join(', ')}` : ''}, {realIp.static_count}{' '}
+                    static. IP rules in access lists see the real client address.
+                    {realIp.last_refresh ? ` Ranges refreshed ${fmtSince(realIp.last_refresh)}.` : ''}
+                    {realIp.last_error ? ` Last fetch problem: ${realIp.last_error}` : ''}
+                </tc-banner>
+            )}
+            {atRisk.length > 0 && (
+                <tc-banner variant="warning">
+                    {atRisk.length} resource{atRisk.length === 1 ? '' : 's'} at risk — still serving, but would fail
+                    the next apply:
+                    <ul className="perch-admin-list">{atRisk.map((r) => resourceLine(r, 'failing since'))}</ul>
+                </tc-banner>
+            )}
+            {disabled.length > 0 && (
+                <tc-banner variant="danger">
+                    {disabled.length} resource{disabled.length === 1 ? '' : 's'} quarantined by nginx&nbsp;-t (not
+                    serving):
+                    <ul className="perch-admin-list">{disabled.map((r) => resourceLine(r, 'since'))}</ul>
+                </tc-banner>
+            )}
+        </div>
+    )
 }
 
 /**
@@ -158,9 +668,13 @@ interface NginxTestResponse {
  * four routing pages via {@link RoutingPage}.
  */
 function RoutingTestButton() {
+    const me = useMe()
     const [busy, setBusy] = useState(false)
     const [result, setResult] = useState<NginxTestResponse | null>(null)
     const [failed, setFailed] = useState(false)
+    // Owner-only manual reload (impl "minor"): outcome line + pending-confirm flag.
+    const [reloadNote, setReloadNote] = useState<{ ok: boolean; text: string } | null>(null)
+    const [confirmReload, setConfirmReload] = useState(false)
 
     const run = useCallback(async () => {
         setBusy(true)
@@ -181,6 +695,24 @@ function RoutingTestButton() {
         }
     }, [])
 
+    const runReload = useCallback(async () => {
+        setBusy(true)
+        setReloadNote(null)
+        try {
+            const res = await fetch('/api/routing/reload', { method: 'POST' })
+            const body = (await res.json().catch(() => null)) as { detail?: string } | null
+            setReloadNote(
+                res.ok
+                    ? { ok: true, text: 'Config reloaded — the daemon re-applied the full config.' }
+                    : { ok: false, text: `Reload failed${body?.detail ? `: ${body.detail}` : '.'}` },
+            )
+        } catch {
+            setReloadNote({ ok: false, text: 'Reload failed — network error.' })
+        } finally {
+            setBusy(false)
+        }
+    }, [])
+
     const disabled = result?.resources?.filter((r) => r.state === 'disabled') ?? []
 
     return (
@@ -188,6 +720,31 @@ function RoutingTestButton() {
             <tc-button variant="secondary" outline size="sm" onClick={run} disabled={busy || undefined}>
                 {busy ? 'Testing…' : 'Test config'}
             </tc-button>
+            {me.role === 'owner' && (
+                <tc-button
+                    variant="secondary"
+                    outline
+                    size="sm"
+                    onClick={() => setConfirmReload(true)}
+                    disabled={busy || undefined}
+                >
+                    Reload config
+                </tc-button>
+            )}
+            {reloadNote && (
+                <tc-banner variant={reloadNote.ok ? 'success' : 'danger'}>{reloadNote.text}</tc-banner>
+            )}
+            <ConfirmDialog
+                open={confirmReload}
+                title="Reload nginx config?"
+                message="The daemon re-renders the full config, gates it behind nginx -t (rolling back on failure), and reloads nginx. Safe, but it is a live change — long-lived connections may be moved to draining workers."
+                confirmLabel="Reload"
+                onConfirm={() => {
+                    setConfirmReload(false)
+                    void runReload()
+                }}
+                onCancel={() => setConfirmReload(false)}
+            />
             {failed && <tc-banner variant="danger">Couldn’t run the dry run — the deploy engine didn’t answer.</tc-banner>}
             {result && !result.managed && (
                 <tc-banner variant="info">
@@ -217,6 +774,61 @@ function RoutingTestButton() {
     )
 }
 
+// ── rendered-vhost preview (impl §5) ────────────────────────────────────────────
+
+/**
+ * Read-only viewer for the daemon's rendered `server{}` block (`GET /vhost/{domain}`
+ * via `/api/routing/vhost/{domain}`). The daemon renders even disabled resources —
+ * this is a preview, not the live config — so maintainers can see exactly where
+ * their `advanced` lines land before an apply passes judgment.
+ *
+ * tc-modal relocates its children at connect, so the modal mounts fresh per domain
+ * (conditional render + key) with ONE stable wrapper child; the loading/error/code
+ * states all render inside that wrapper.
+ */
+export function VhostPreviewModal({ domain, onClose }: { domain: string | null; onClose: () => void }) {
+    const [state, setState] = useState<{ phase: 'loading' } | { phase: 'error'; detail?: string } | { phase: 'ready'; text: string }>({ phase: 'loading' })
+
+    useEffect(() => {
+        if (!domain) return
+        let cancelled = false
+        setState({ phase: 'loading' })
+        void fetch(`/api/routing/vhost/${encodeURIComponent(domain)}`, { cache: 'no-store' })
+            .then(async (r) => {
+                const body = (await r.json().catch(() => null)) as { vhost?: string; detail?: string } | null
+                if (cancelled) return
+                if (r.ok && typeof body?.vhost === 'string') setState({ phase: 'ready', text: body.vhost })
+                else setState({ phase: 'error', detail: body?.detail })
+            })
+            .catch(() => {
+                if (!cancelled) setState({ phase: 'error' })
+            })
+        return () => {
+            cancelled = true
+        }
+    }, [domain])
+
+    // tc-modal announces every close path (X, Escape, backdrop) via tc-hidden.
+    const ref = useTc<HTMLElement>(undefined, { 'tc-hidden': () => onClose() })
+
+    if (!domain) return null
+    return (
+        <tc-modal key={domain} ref={ref} open title={`nginx config — ${domain}`} size="lg" scrollable centered>
+            <div className="perch-vhost-preview">
+                {state.phase === 'loading' && <p className="perch-admin-hint">Rendering the vhost…</p>}
+                {state.phase === 'error' && (
+                    <tc-banner variant="danger">
+                        Couldn’t render the vhost{state.detail ? `: ${state.detail}` : '.'}
+                    </tc-banner>
+                )}
+                {state.phase === 'ready' && (
+                    <tc-code-snippet code={state.text} language="nginx" show-copy-button="" />
+                )}
+            </div>
+        </tc-modal>
+    )
+}
+
 /**
  * Relocation-safe `tc-table` listing for the four routing surfaces (proxies,
  * upstreams, streams, stream upstreams) — each is a "mono name · descriptive hint
@@ -234,6 +846,19 @@ export interface RoutingListItem extends Record<string, unknown> {
     hint: string
     /** Label for the row's toggle button (e.g. "Disable"/"Enable"); omit for no toggle. */
     toggleLabel?: string
+    /** Live daemon verdict for the row (B1): `at_risk` = warning chip, `disabled` = danger chip. */
+    stateChip?: 'disabled' | 'at_risk'
+    /** Tooltip for the state chip (the daemon's nginx -t reason). */
+    stateReason?: string
+}
+
+/** The row's state chip HTML (B1) — empty for a healthy resource. */
+function stateChipHtml(row: RoutingListItem): string {
+    if (!row.stateChip) return ''
+    const variant = row.stateChip === 'disabled' ? 'danger' : 'warning'
+    const label = row.stateChip === 'disabled' ? 'quarantined' : 'at risk'
+    const title = row.stateReason ? ` title="${escapeHtml(row.stateReason)}"` : ''
+    return ` <span class="badge text-bg-${variant}"${title}>${label}</span>`
 }
 
 export function RoutingListTable({
@@ -241,23 +866,27 @@ export function RoutingListTable({
     busy,
     onEdit,
     onToggle,
+    onView,
     onRemove,
 }: {
     items: RoutingListItem[]
     busy: boolean
     onEdit?: (name: string) => void
     onToggle?: (name: string) => void
+    /** When provided, each row gets a "Config" button opening the rendered-vhost preview (impl §5). */
+    onView?: (name: string) => void
     onRemove: (name: string) => void
 }) {
     const hasEdit = !!onEdit
     const hasToggle = !!onToggle
+    const hasView = !!onView
     const columns = useMemo<TableColumn[]>(
         () => [
             {
                 key: 'name',
                 header: 'Name',
                 render: (row: RoutingListItem) =>
-                    `<span class="perch-admin-mono">${escapeHtml(row.name)}</span> ` +
+                    `<span class="perch-admin-mono">${escapeHtml(row.name)}</span>${stateChipHtml(row)} ` +
                     `<span class="perch-admin-hint">${escapeHtml(row.hint)}</span>`,
             },
             {
@@ -265,6 +894,10 @@ export function RoutingListTable({
                 header: '',
                 align: 'right',
                 render: (row: RoutingListItem) =>
+                    (hasView
+                        ? `<button type="button" class="btn btn-sm btn-outline-secondary" data-action="view"` +
+                          ` data-name="${escapeHtml(row.name)}"${busy ? ' disabled' : ''}>Config</button> `
+                        : '') +
                     (hasToggle && row.toggleLabel
                         ? `<button type="button" class="btn btn-sm btn-outline-secondary" data-action="toggle"` +
                           ` data-name="${escapeHtml(row.name)}"${busy ? ' disabled' : ''}>${escapeHtml(row.toggleLabel)}</button> `
@@ -277,15 +910,16 @@ export function RoutingListTable({
                     ` data-name="${escapeHtml(row.name)}"${busy ? ' disabled' : ''}>Remove</button>`,
             },
         ],
-        [busy, hasEdit, hasToggle],
+        [busy, hasEdit, hasToggle, hasView],
     )
     const onAction = useCallback(
         (action: string, dataset: DOMStringMap) => {
             if (action === 'toggle' && dataset.name) onToggle?.(dataset.name)
             if (action === 'edit' && dataset.name) onEdit?.(dataset.name)
+            if (action === 'view' && dataset.name) onView?.(dataset.name)
             if (action === 'remove' && dataset.name) onRemove(dataset.name)
         },
-        [onEdit, onToggle, onRemove],
+        [onEdit, onToggle, onView, onRemove],
     )
     return (
         <DataTable<RoutingListItem>

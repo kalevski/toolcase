@@ -279,6 +279,48 @@ const MIGRATIONS: string[] = [
     DROP TABLE sponsorship;
     ALTER TABLE sponsorship_new RENAME TO sponsorship;
     `,
+    // v11 — persisted per-resource state history (perch_better.md B1). One row per
+    // non-active EPISODE of a managed-mode resource (disabled / at_risk / a cert
+    // renew failure): opened when the status poller first sees the state, refreshed
+    // while it persists, closed (cleared_at) on recovery. Unlike the daemon's
+    // in-memory view this survives daemon AND perch restarts. The actor_* columns
+    // denormalize "who last touched this resource" from the audit log at episode-open
+    // time, so attribution survives audit pruning.
+    `
+    CREATE TABLE resource_state (
+        id           INTEGER PRIMARY KEY AUTOINCREMENT,
+        realm_id     TEXT NOT NULL,
+        kind         TEXT NOT NULL,          -- site | proxy | redirect | dead_host | upstream | stream | stream-upstream | cert
+        key          TEXT NOT NULL,          -- domain (sites/proxies/…) or name (pools/streams)
+        state        TEXT NOT NULL,          -- disabled | at_risk | renew_failed
+        reason       TEXT,                   -- daemon's nginx -t / renewal error (latest)
+        since        TEXT,                   -- daemon-reported failing-since, when it has one
+        first_seen   TEXT NOT NULL,          -- when the poller opened the episode
+        last_seen    TEXT NOT NULL,          -- last poll that still saw the state
+        cleared_at   TEXT,                   -- NULL = episode still open
+        actor_login  TEXT,                   -- last audit actor for this key at open time
+        actor_action TEXT,
+        actor_at     TEXT
+    );
+    CREATE UNIQUE INDEX idx_resource_state_open ON resource_state(realm_id, kind, key) WHERE cleared_at IS NULL;
+    CREATE INDEX idx_resource_state_history ON resource_state(realm_id, kind, key, id DESC);
+    `,
+    // v12 — audit enrichment (perch_better.md B3): a nullable `meta` JSON column
+    // holding a snapshot of the written object (the parsed entity / request shape,
+    // secrets stripped at the call site — cert keys and credential bodies never pass
+    // through). NULL for entries that predate it or have nothing to snapshot.
+    `
+    ALTER TABLE audit ADD COLUMN meta TEXT;
+    `,
+    // v13 — the multi-plan system is gone (impl §9): every account runs on the single
+    // standard baseline plus its optional per-user `user_limit` override, so the
+    // sponsorship mirror and the $ → plan mapping have no readers. Dropping the tables
+    // (not just the code) keeps the schema honest; the historical audit entries
+    // (`admin.plan_tier.replace`, sponsorship events) remain in the audit log.
+    `
+    DROP TABLE IF EXISTS sponsorship;
+    DROP TABLE IF EXISTS plan_tier;
+    `,
 ]
 
 function migrate(db: DatabaseSync): void {

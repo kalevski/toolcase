@@ -11,6 +11,7 @@ import (
 	"github.com/kalevski/toolcase/nginxpilot/internal/certs"
 	"github.com/kalevski/toolcase/nginxpilot/internal/config"
 	"github.com/kalevski/toolcase/nginxpilot/internal/nginxctl"
+	"github.com/kalevski/toolcase/nginxpilot/internal/targetcheck"
 )
 
 // cmdValidate parses + validates the merged config, checks the git binary
@@ -19,6 +20,7 @@ import (
 func cmdValidate(args []string) int {
 	fs := flag.NewFlagSet("validate", flag.ExitOnError)
 	configPath := fs.String("config", config.DefaultPath, "config file path")
+	checkTargets := fs.Bool("check-targets", false, "also run network target checks (DNS + reachability) over every backend")
 	_ = fs.Parse(args)
 
 	res, err := config.Load(*configPath)
@@ -84,6 +86,15 @@ func cmdValidate(args []string) int {
 		}
 	}
 
+	// Opt-in network tiers (default `validate` stays offline for CI): DNS per
+	// backend host (failure = INVALID under dns: error, warning under warn) and
+	// the reachability probe when enabled (always warning-only).
+	if *checkTargets {
+		if err := runTargetChecks(cfg); err != nil {
+			fail("%v", err)
+		}
+	}
+
 	if failed {
 		return 1
 	}
@@ -103,6 +114,91 @@ func cmdValidate(args []string) int {
 		fmt.Printf("  %-30s %-9s %s\n", p.Domain, "proxy", target)
 	}
 	return 0
+}
+
+// runTargetChecks runs the network target-check tiers over every backend in
+// the config and prints a table. Returns an error (→ non-zero exit) only when
+// nginx.target_checks.dns is "error" (the default) and a host fails to
+// resolve; reachability results are always informational.
+func runTargetChecks(cfg *config.Config) error {
+	tc := cfg.Nginx.TargetChecks
+	checker := &targetcheck.Checker{Timeout: tc.TimeoutOrDefault()}
+	ctx := context.Background()
+
+	type row struct {
+		owner, target, dns, reach string
+		dnsFailed                 bool
+	}
+	var rows []row
+	check := func(owner string, t targetcheck.Target, raw string) {
+		r := row{owner: owner, target: raw, dns: "ok", reach: "-"}
+		if t.IsIP || t.IsUnix {
+			r.dns = "skip"
+		} else if tc.DNSSeverity() != config.TargetDNSOff {
+			if err := checker.CheckDNS(ctx, t); err != nil {
+				r.dns, r.dnsFailed = err.Error(), true
+			}
+		} else {
+			r.dns = "off"
+		}
+		if tc.ReachabilityEnabled() && !r.dnsFailed {
+			if err := checker.CheckReachable(ctx, t); err != nil {
+				r.reach = err.Error()
+			} else {
+				r.reach = "ok"
+			}
+		}
+		rows = append(rows, r)
+	}
+	addPass := func(owner, pass string) {
+		if pass == "" {
+			return
+		}
+		if t, err := targetcheck.ParsePass(pass); err == nil {
+			check(owner, t, pass)
+		}
+	}
+	addAddr := func(owner, addr string) {
+		if addr == "" {
+			return
+		}
+		if t, err := targetcheck.ParseAddr(addr); err == nil {
+			check(owner, t, addr)
+		}
+	}
+	for _, p := range cfg.Proxies {
+		addPass("proxy "+p.Domain, p.Pass)
+		for _, loc := range p.Locations {
+			addPass("proxy "+p.Domain, loc.Pass)
+		}
+	}
+	for _, u := range cfg.Upstreams {
+		for _, s := range u.Servers {
+			addAddr("upstream "+u.Name, s.Address)
+		}
+	}
+	for _, s := range cfg.Streams {
+		addAddr("stream "+s.Name, s.Pass)
+	}
+	for _, u := range cfg.StreamUpstreams {
+		for _, s := range u.Servers {
+			addAddr("stream_upstream "+u.Name, s.Address)
+		}
+	}
+
+	failures := 0
+	fmt.Printf("target checks (%d target(s), dns: %s, reachability: %v):\n",
+		len(rows), tc.DNSSeverity(), tc.ReachabilityEnabled())
+	for _, r := range rows {
+		fmt.Printf("  %-40s %-30s dns=%s reach=%s\n", r.owner, r.target, r.dns, r.reach)
+		if r.dnsFailed {
+			failures++
+		}
+	}
+	if failures > 0 && tc.DNSSeverity() == config.TargetDNSError {
+		return fmt.Errorf("%d backend host(s) do not resolve (target_checks.dns: error)", failures)
+	}
+	return nil
 }
 
 // validateManaged renders the managed config into a temp dir and runs the real

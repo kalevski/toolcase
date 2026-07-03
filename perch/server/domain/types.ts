@@ -38,128 +38,92 @@ export interface SessionPayload {
     exp: number
 }
 
-// ── Plans & limits (sponsor-driven) ──────────────────────────────────────────
-
-export type Plan = 'free' | 'bronze' | 'silver' | 'gold'
+// ── Limits (one standard plan) ────────────────────────────────────────────────
 
 /**
- * Per-plan quota limits. A user's effective plan = max(free, plan derived from
- * their active GitHub sponsorship tier); these defaults are owner-tunable
- * (`plan_tier` table) but ship from the §15 starting values below.
+ * Per-account quota limits. Every non-operator account runs on the single
+ * {@link STANDARD_LIMITS} baseline; the owner raises individual accounts via the
+ * per-user `user_limit` override (§11, §15) — that override is the ONLY way above
+ * baseline now that the sponsorship-driven plan tiers are gone.
  */
 export interface PlanLimits {
-    /** Max number of sites a user may own. Free: 1. */
+    /** Max number of sites a user may own. Standard: 1. */
     maxSites: number
-    /** Byte cap per site; exceeding it marks the site `over_quota`. Free: 50 MB. */
+    /** Byte cap per site; exceeding it marks the site `over_quota`. Standard: 50 MB. */
     maxBytesPerSite: number
-    /** Byte cap across all of a user's sites. Free: == maxBytesPerSite. */
+    /** Byte cap across all of a user's sites. Standard: == maxBytesPerSite. */
     maxBytesTotal: number
-    /** Poll-cadence floor (seconds) written as the fragment `interval`. Free: 900 (15m); Gold: 60. */
+    /** Poll-cadence floor (seconds) written as the fragment `interval`. Standard: 900 (15m). */
     minIntervalSec: number
-    /** How many custom domains the user may attach. Free: 0 (subdomain only); paid: N. */
+    /** How many custom domains the user may attach. Standard: 0 (subdomain only). */
     customDomains: number
-    /** nginxpilot rollback depth (kept releases). Free: 1; paid: 3–5. */
+    /** nginxpilot rollback depth (kept releases). Standard: 1. */
     keepReleases: number
-    /** Whether the plan may deploy private repos (via GitHub App). Free: no. */
+    /** Whether the account may deploy private repos (via GitHub App). Standard: no. */
     privateRepos: boolean
 }
 
 const MB = 1024 * 1024
-const GB = 1024 * MB
 
 /**
- * Default plan → limits table, populated from the §15 starting values. Numbers
- * are deliberately strict on the free tier so paid value is obvious; the owner
- * can override them at runtime. `customDomains: Infinity` = "unlimited".
+ * The single baseline every standard account gets (the former free tier's §15
+ * values). Deliberately strict — the owner lifts individual accounts through the
+ * per-user override, not a global knob.
  */
-export const PLAN_LIMITS: Record<Plan, PlanLimits> = {
-    free: {
-        maxSites: 1,
-        maxBytesPerSite: 50 * MB,
-        maxBytesTotal: 50 * MB,
-        minIntervalSec: 900, // 15 min
-        customDomains: 0,
-        keepReleases: 1,
-        privateRepos: false,
-    },
-    bronze: {
-        maxSites: 3,
-        maxBytesPerSite: 200 * MB,
-        maxBytesTotal: 3 * 200 * MB,
-        minIntervalSec: 300, // 5 min
-        customDomains: 1,
-        keepReleases: 3,
-        privateRepos: true,
-    },
-    silver: {
-        maxSites: 10,
-        maxBytesPerSite: 1 * GB,
-        maxBytesTotal: 10 * GB,
-        minIntervalSec: 120, // 2 min
-        customDomains: 5,
-        keepReleases: 3,
-        privateRepos: true,
-    },
-    gold: {
-        maxSites: 25,
-        maxBytesPerSite: 5 * GB,
-        maxBytesTotal: 25 * 5 * GB,
-        minIntervalSec: 60, // 1 min
-        customDomains: Infinity, // unlimited
-        keepReleases: 5,
-        privateRepos: true,
-    },
+export const STANDARD_LIMITS: PlanLimits = {
+    maxSites: 1,
+    maxBytesPerSite: 50 * MB,
+    maxBytesTotal: 50 * MB,
+    minIntervalSec: 900, // 15 min
+    customDomains: 0,
+    keepReleases: 1,
+    privateRepos: false,
 }
 
 /**
- * Limits for instance operators (§6) — exempt from all tier quotas. The owner
+ * Limits for instance operators (§6) — exempt from quotas entirely. The owner
  * runs the instance and maintainers help operate it, so they create unlimited
- * resources and are never gated or suspended by a plan: `Infinity` caps make
- * every count/byte gate pass, the fastest poll cadence applies, and private
- * repos are allowed. `resolveLimits` returns this for any `owner`- or
- * `maintainer`-role user instead of `PLAN_LIMITS[plan]`.
+ * resources and are never gated or suspended: `Infinity` caps make every
+ * count/byte gate pass, the fastest poll cadence applies, and private repos are
+ * allowed. `resolveLimits` returns this for any `owner`- or `maintainer`-role
+ * user instead of {@link STANDARD_LIMITS}.
  */
 export const UNLIMITED_LIMITS: PlanLimits = {
     maxSites: Infinity,
     maxBytesPerSite: Infinity,
     maxBytesTotal: Infinity,
-    minIntervalSec: PLAN_LIMITS.gold.minIntervalSec,
+    minIntervalSec: 60, // 1 min — the old top-tier cadence
     customDomains: Infinity,
-    keepReleases: PLAN_LIMITS.gold.keepReleases,
+    keepReleases: 5,
     privateRepos: true,
 }
 
-// ── Account level (the unified free/paid/maintainer/owner ladder) ─────────────
+// ── Account level (the unified standard/maintainer/owner ladder) ──────────────
 
 /**
- * A single human-facing "level" for an account, collapsing the two independent
- * axes (the access {@link Role} and the sponsorship-driven {@link Plan}) into one
- * ladder the UI shows everywhere — so an `owner` reads as **owner**, never as the
- * "free" plan they happen to hold for billing. Strictly ordered low → high.
+ * A single human-facing "level" for an account — now purely role-derived (the
+ * sponsorship-driven paid tier is gone). Strictly ordered low → high.
  */
-export type AccountLevel = 'free' | 'paid' | 'maintainer' | 'owner'
+export type AccountLevel = 'standard' | 'maintainer' | 'owner'
 
 /** Every account level, lowest first. */
-export const ACCOUNT_LEVELS: readonly AccountLevel[] = ['free', 'paid', 'maintainer', 'owner']
+export const ACCOUNT_LEVELS: readonly AccountLevel[] = ['standard', 'maintainer', 'owner']
 
 /** Title-case display labels for each level (badges, the user-panel micro-label). */
 export const ACCOUNT_LEVEL_LABEL: Record<AccountLevel, string> = {
-    free: 'Free',
-    paid: 'Paid',
+    standard: 'Standard',
     maintainer: 'Maintainer',
     owner: 'Owner',
 }
 
 /**
- * Collapse a user's role + effective plan into one {@link AccountLevel}. The role
- * wins outright (an instance operator is shown as such regardless of any
- * sponsorship), otherwise a paid (non-free) plan reads as `paid` and everyone
- * else as `free`. Pure, so the user-panel and the admin roster share one rule.
+ * The account level for a role. Pure, so the user-panel and the admin roster
+ * share one rule.
  */
-export function accountLevel(role: Role, plan: Plan): AccountLevel {
+export function accountLevel(role: Role): AccountLevel {
     if (role === 'owner') return 'owner'
     if (role === 'maintainer') return 'maintainer'
-    return plan === 'free' ? 'free' : 'paid'
+    return 'standard'
 }
 
 // ── Per-user custom limit overrides (`user_limit` row) ─────────────────────────
@@ -279,10 +243,10 @@ export interface SiteUsage {
 }
 
 /**
- * The `GET /api/me` response: identity plus the effective plan, its limits, and
- * current usage, so the client can gate UI on role/plan/quota headroom
- * (§7 step 4, §13). `role` is the freshly re-read role; `plan`/`limits` come from
- * `services/plan.ts`; `usage` summarizes the caller's sites.
+ * The `GET /api/me` response: identity plus the effective limits and current
+ * usage, so the client can gate UI on role/quota headroom (§7 step 4, §13).
+ * `role` is the freshly re-read role; `limits` come from `services/plan.ts`;
+ * `usage` summarizes the caller's sites.
  */
 export interface MeResponse {
     githubId: number
@@ -290,8 +254,7 @@ export interface MeResponse {
     name: string
     avatarUrl?: string
     role: Role
-    plan: Plan
-    /** The unified free/paid/maintainer/owner label for the account (see {@link accountLevel}). */
+    /** The unified standard/maintainer/owner label for the account (see {@link accountLevel}). */
     level: AccountLevel
     limits: PlanLimits
     usage: SiteUsage
@@ -313,12 +276,11 @@ export interface MeResponse {
 /**
  * One enriched row of the owner-only admin Users roster (`GET /api/admin/users`).
  * Bundles the stored user with everything the admin page shows per account: the
- * effective plan + level, current usage, the *effective* limits (after any custom
- * override), and the raw `customLimits` override (`null` when none is set).
+ * level, current usage, the *effective* limits (after any custom override), and
+ * the raw `customLimits` override (`null` when none is set).
  */
 export interface AdminUserRow {
     user: AppUser
-    plan: Plan
     level: AccountLevel
     usage: SiteUsage
     /** Effective limits the user gets right now (role/plan default merged with `customLimits`). */
@@ -329,37 +291,16 @@ export interface AdminUserRow {
     realmGrants: UserRealmGrant[]
 }
 
-// ── Sponsorship (`sponsorship` row) ──────────────────────────────────────────
-
-/** Sponsorship lifecycle, from the Sponsors webhook / GraphQL reconcile (§8, §12). */
-export type SponsorshipStatus = 'active' | 'pending_cancel' | 'cancelled'
-
-/** A GitHub sponsorship, linked to a user by login. Mirrors the `sponsorship` table (§12). */
-export interface Sponsorship {
-    /**
-     * Sponsor's immutable numeric GitHub id; the primary key. Linking is by id
-     * (== `app_user.github_id`), NOT login — GitHub usernames are reusable, so a
-     * recycled login must never inherit a stale sponsorship (S3).
-     */
-    sponsorId: number
-    /** Sponsor GitHub login at the time of the event — display only, never the key. */
-    sponsorLogin: string
-    /** Monthly sponsorship amount in cents; bucketed to a plan via `plan_tier`. */
-    tierCents: number
-    status: SponsorshipStatus
-    /** ISO timestamp the current status takes effect. */
-    effectiveAt: string
-    updatedAt: string
-}
-
 // ── Base domains (`base_domain` row) ─────────────────────────────────────────
 
 /**
  * Which audience a base domain is offered to (§10). A strict superset chain of
  * three groups, so a caller who can see a higher tier can see every lower one:
  *
- *   • `free`  — available to everybody, including free-plan accounts.
- *   • `paid`  — reserved for sponsored (paid-plan) accounts and instance operators.
+ *   • `free`  — available to everybody.
+ *   • `paid`  — reserved for instance operators now that paid plans are gone
+ *               (kept as a stored tier so existing rows stay valid; re-tier a
+ *               domain to `free` to open it up).
  *   • `staff` — reserved for instance operators (the `maintainer`/`owner` roles).
  *
  * The visibility a given caller gets is computed by {@link visibleBaseDomainTiers}.
@@ -375,20 +316,17 @@ export function isBaseDomainTier(value: unknown): value is BaseDomainTier {
 }
 
 /**
- * The base-domain tiers a caller may see, keyed off role first, then plan (§10):
+ * The base-domain tiers a caller may see, keyed off role (§10):
  *
  *   • `owner` / `maintainer` (instance operators) → every tier, incl. `staff`.
- *     The role wins outright, so a maintainer on a `free` plan still sees all.
- *   • a paid plan (`bronze | silver | gold`)      → `free` + `paid`.
- *   • the `free` plan                              → `free` only.
+ *   • everyone else                               → `free` only.
  *
  * Pure (no I/O), so the standard `/api/base-domains` projection and the create-site
  * wizard can both gate on it and it's unit-testable directly. The result is always a
  * prefix of {@link BASE_DOMAIN_TIERS} — each step strictly contains the one below.
  */
-export function visibleBaseDomainTiers(role: Role, plan: Plan): BaseDomainTier[] {
+export function visibleBaseDomainTiers(role: Role): BaseDomainTier[] {
     if (role === 'owner' || role === 'maintainer') return ['free', 'paid', 'staff']
-    if (plan !== 'free') return ['free', 'paid']
     return ['free']
 }
 
@@ -456,22 +394,6 @@ export interface UserRealmGrant {
     isDefault: boolean
 }
 
-// ── Plan tiers (`plan_tier` row) ─────────────────────────────────────────────
-
-/** A paid plan a sponsorship tier can map to (the free tier is never stored). */
-export type PaidPlan = Exclude<Plan, 'free'>
-
-/**
- * One owner-editable `$ → plan` mapping row: a sponsorship of at least
- * `minCents` per month grants `plan` (highest matching `minCents` wins).
- * Mirrors the `plan_tier` table (§8, §12).
- */
-export interface PlanTier {
-    /** Inclusive monthly-cents floor for this tier; primary key. */
-    minCents: number
-    plan: PaidPlan
-}
-
 // ── Audit log (`audit` row) ──────────────────────────────────────────────────
 
 /** One append-only audit-log entry. Mirrors the `audit` table (§12, §16). */
@@ -490,4 +412,6 @@ export interface AuditEntry {
     site: string | null
     /** Free-form detail, if any. */
     detail: string | null
+    /** JSON snapshot of the written object (B3), secrets stripped at the call site; null when absent. */
+    meta: string | null
 }

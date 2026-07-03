@@ -8,6 +8,14 @@ const nextConfig = {
     eslint: {
         ignoreDuringBuilds: true,
     },
+    // Pools merged onto their consumers' pages: upstreams live on /proxies,
+    // stream-upstreams on /streams. Config-level 308s keep old bookmarks working.
+    async redirects() {
+        return [
+            { source: '/upstreams', destination: '/proxies', permanent: true },
+            { source: '/stream-upstreams', destination: '/streams', permanent: true },
+        ]
+    },
 }
 
 export default nextConfig
