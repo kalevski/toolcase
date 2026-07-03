@@ -560,10 +560,10 @@ function RealmsEditor({
                 )
                 return
             }
-            toast.show(`Saved realm access for ${row.user.login}.`, { variant: 'success' })
+            toast.show(`Saved NGINX server access for ${row.user.login}.`, { variant: 'success' })
             onSaved()
         } catch {
-            setError('Couldn’t save realms — network error.')
+            setError('Couldn’t save NGINX servers — network error.')
         } finally {
             setBusy(false)
         }
@@ -572,8 +572,8 @@ function RealmsEditor({
     return (
         <div className="perch-admin-limits">
             <p className="perch-admin-hint">
-                Which realms {row.user.login} may use, and which is their operating default. They
-                don’t switch — they always operate on the default realm among their grants.
+                Which NGINX servers {row.user.login} may use, and which is their operating default. They
+                don’t switch — they always operate on the default NGINX server among their grants.
             </p>
             {error && <tc-banner variant="danger">{error}</tc-banner>}
             <div className="perch-admin-realm-grants">
@@ -583,7 +583,7 @@ function RealmsEditor({
                         inline
                         checked={granted.has(r.id)}
                         disabled={busy}
-                        label={r.isDefault ? `${r.name} (default realm)` : r.name}
+                        label={r.isDefault ? `${r.name} (default NGINX server)` : r.name}
                         onChecked={(on) => toggle(r.id, on)}
                     />
                 ))}
@@ -591,7 +591,7 @@ function RealmsEditor({
             <div className="perch-admin-limits-grid">
                 <SelectField
                     size="sm"
-                    label="Their default realm"
+                    label="Their default NGINX server"
                     value={defaultId}
                     options={defaultOptions}
                     disabled={busy || grantedList.length === 0}
@@ -600,7 +600,7 @@ function RealmsEditor({
             </div>
             <div className="perch-admin-tier-actions">
                 <tc-button variant="primary" size="sm" onClick={save} disabled={busy || undefined}>
-                    {busy ? 'Saving…' : 'Save realms'}
+                    {busy ? 'Saving…' : 'Save NGINX servers'}
                 </tc-button>
             </div>
         </div>

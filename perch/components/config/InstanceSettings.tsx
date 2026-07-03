@@ -1,15 +1,16 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import type { Instance } from '@/server/domain/types'
+import { useTc, detailValue } from '@/lib/tc'
 import { callApi } from './shared'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { TextField } from '@/components/fields'
 import { useToast } from '@/components/Toast'
 
-// Instance Settings tab (move_wharf_to_perch.md §10): rename/description, a
-// multi-value tag editor, the fetch-key panel (mint/rotate shows the secret
-// once; revoke), and the danger zone (delete).
+// Instance Settings tab (move_wharf_to_perch.md §10): rename/description/project,
+// a tc-tag-input tag editor, the fetch-key panel (mint/rotate shows the secret
+// once; revoke; how-to-use guide via the Go client), and the danger zone (delete).
 
 export function InstanceSettings({
     instance,
@@ -23,7 +24,7 @@ export function InstanceSettings({
     const toast = useToast()
     const [name, setName] = useState(instance.name)
     const [description, setDescription] = useState(instance.description ?? '')
-    const [tagInput, setTagInput] = useState('')
+    const [project, setProject] = useState(instance.project ?? '')
     const [tags, setTags] = useState<string[]>(instance.tags)
     const [savingDetails, setSavingDetails] = useState(false)
     const [detailsError, setDetailsError] = useState<string | null>(null)
@@ -35,13 +36,19 @@ export function InstanceSettings({
     const [confirmDelete, setConfirmDelete] = useState(false)
     const [deleting, setDeleting] = useState(false)
 
-    const addTag = useCallback(() => {
-        const t = tagInput.trim().toLowerCase()
-        if (t && !tags.includes(t)) setTags((prev) => [...prev, t])
-        setTagInput('')
-    }, [tagInput, tags])
-
-    const removeTag = useCallback((t: string) => setTags((prev) => prev.filter((x) => x !== t)), [])
+    // tc-tag-input in controlled mode: `value` is set as an element *property*
+    // (arrays can't pass through JSX attributes) and every change comes back on
+    // the canonical tc-change event as detail.value. Tags are lowercased here to
+    // match the server's TAG_PATTERN before they ever render as chips.
+    const tagsRef = useTc<HTMLElement>(
+        useMemo(() => ({ value: tags }), [tags]),
+        {
+            'tc-change': (event) => {
+                const next = detailValue<string[]>(event) ?? []
+                setTags([...new Set(next.map((t) => t.trim().toLowerCase()).filter(Boolean))])
+            },
+        },
+    )
 
     const saveDetails = useCallback(async () => {
         if (savingDetails) return
@@ -55,6 +62,7 @@ export function InstanceSettings({
         const res = await callApi<Instance>(`/api/instances/${instance.id}`, 'PATCH', {
             name: trimmedName,
             description: description.trim() || null,
+            project: project.trim() || null,
             tags,
         })
         setSavingDetails(false)
@@ -64,7 +72,7 @@ export function InstanceSettings({
         }
         toast.show('Instance updated.', { variant: 'success' })
         onChanged(res.body)
-    }, [savingDetails, name, description, tags, instance.id, onChanged, toast])
+    }, [savingDetails, name, description, project, tags, instance.id, onChanged, toast])
 
     const mintKey = useCallback(async () => {
         if (keyBusy) return
@@ -108,6 +116,39 @@ export function InstanceSettings({
         onDeleted()
     }, [instance, onDeleted, toast])
 
+    // The fetch-API origin for the usage guide. This tree only renders
+    // client-side (Providers gates on custom-element registration), so
+    // window is always available here.
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://perch.example.com'
+
+    const envSnippet = [
+        `PERCH_URL=${origin}`,
+        `PERCH_INSTANCE=${instance.name}`,
+        `PERCH_SECRET=<the minted secret — from a Docker/orchestrator secret, never baked into the image>`,
+    ].join('\n')
+
+    const entrypointSnippet = [
+        `# Dockerfile — no Perch code baked into the app image; the bootstrap script`,
+        `# downloads the matching perch-client binary at boot and execs your app`,
+        `ENTRYPOINT ["sh", "-c", "wget -qO- \\"$PERCH_URL/api/agent/v1/install.sh\\" | sh -s -- exec -- \\"$@\\"", "sh"]`,
+        `CMD ["./my-app", "--serve"]`,
+    ].join('\n')
+
+    const modesSnippet = [
+        `perch-client exec -- ./app --serve        # fetch once, inject as env, exec (PID-1 handoff)`,
+        `perch-client write --format dotenv --out /app/.env    # materialize to a file`,
+        `perch-client serve --addr 127.0.0.1:9000 --interval 30s   # loopback sidecar: /env /flags /config`,
+    ].join('\n')
+
+    const goSnippet = [
+        `import perch "github.com/kalevski/perch-client"`,
+        ``,
+        `c := perch.New(perch.FromEnv())          // reads PERCH_URL / PERCH_INSTANCE / PERCH_SECRET`,
+        `env, _ := c.FetchEnv(ctx)                // map[string]string, secrets resolved server-side`,
+        `flags, _ := c.FetchFlags(ctx)            // map[string]perch.Flag{ Enabled }`,
+        `c.Watch(ctx, 30*time.Second, func(s perch.Snapshot) { /* fires only on change */ })`,
+    ].join('\n')
+
     return (
         <>
             <tc-section-card title="Details" icon="pencil">
@@ -116,34 +157,21 @@ export function InstanceSettings({
                     <div className="perch-form-grid">
                         <TextField label="Name" value={name} onValue={setName} help="Lowercase letters/digits/hyphens." />
                         <TextField label="Description" value={description} onValue={setDescription} />
+                        <TextField
+                            label="Project"
+                            value={project}
+                            onValue={setProject}
+                            placeholder="acme-shop"
+                            help="Optional label shared across instances — one more way to group/filter."
+                        />
                     </div>
-                    <div className="perch-tag-editor">
-                        <div className="perch-form-group-title">Tags</div>
-                        {tags.length > 0 && (
-                            <div className="perch-tag-chips">
-                                {tags.map((t) => (
-                                    <span key={t} className="perch-tag-chip">
-                                        {t}
-                                        <button
-                                            type="button"
-                                            className="perch-tag-remove"
-                                            aria-label={`Remove ${t}`}
-                                            title={`Remove ${t}`}
-                                            onClick={() => removeTag(t)}
-                                        >
-                                            ×
-                                        </button>
-                                    </span>
-                                ))}
-                            </div>
-                        )}
-                        <div className="perch-tag-add">
-                            <TextField size="sm" label="Add tag" placeholder="production" value={tagInput} onValue={setTagInput} />
-                            <tc-button variant="secondary" outline size="sm" onClick={addTag}>
-                                Add
-                            </tc-button>
-                        </div>
-                    </div>
+                    <tc-tag-input
+                        ref={tagsRef}
+                        label="Tags"
+                        allow-create
+                        placeholder="Add a tag…"
+                        help="Enter or comma adds; Backspace removes the last tag."
+                    />
                     <div className="perch-list-actions">
                         <tc-button
                             variant="primary"
@@ -167,7 +195,7 @@ export function InstanceSettings({
                     {mintedSecret && (
                         <>
                             <tc-banner variant="warning">Copy this now — it will not be shown again.</tc-banner>
-                            <tc-code-snippet code={mintedSecret} language="text" show-copy-button="" />
+                            <tc-code-snippet code={mintedSecret} language="bash" title="Fetch secret" show-copy-button="" />
                         </>
                     )}
                     <div className="perch-list-actions">
@@ -185,6 +213,26 @@ export function InstanceSettings({
                                 Revoke
                             </tc-button>
                         )}
+                    </div>
+
+                    <div className="perch-key-guide">
+                        <div className="perch-form-group-title">Using the key (Go client)</div>
+                        <p className="perch-admin-hint">
+                            The key authenticates <code>perch-client</code> — the standard-library-only Go binary served
+                            by this instance’s fetch API — which pulls the resolved variables/flags at container boot.
+                            Configure the target container with three env vars:
+                        </p>
+                        <tc-code-snippet code={envSnippet} language="bash" title="Environment" show-copy-button="" />
+                        <p className="perch-admin-hint">
+                            Bootstrap it as the container entrypoint (downloads the matching binary from{' '}
+                            <code>/api/agent/v1/client/&lt;os&gt;/&lt;arch&gt;</code>, then execs your app with the
+                            config injected as env — fails closed if the fetch fails):
+                        </p>
+                        <tc-code-snippet code={entrypointSnippet} language="bash" title="Dockerfile" show-copy-button="" />
+                        <p className="perch-admin-hint">Or run one of the three modes directly:</p>
+                        <tc-code-snippet code={modesSnippet} language="bash" title="Modes" show-copy-button="" />
+                        <p className="perch-admin-hint">Or embed it as a library in your Go service:</p>
+                        <tc-code-snippet code={goSnippet} language="bash" title="Go" show-copy-button="" />
                     </div>
                 </div>
             </tc-section-card>

@@ -5,7 +5,7 @@ import { DashboardHome } from '@/components/DashboardHome'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = { title: 'Dashboard' }
+export const metadata: Metadata = { title: 'Static Sites' }
 
 export default function HomePage() {
     // The client AuthGate calls GET /api/me, redirects unauthenticated users to

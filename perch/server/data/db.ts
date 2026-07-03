@@ -439,6 +439,14 @@ const MIGRATIONS: string[] = [
         updated_at          TEXT NOT NULL
     );
     `,
+    // v17 — instances get an optional `project` label: a plain grouping string
+    // shared by many instances (one more way to filter the flat list alongside
+    // tags). Purely organizational — it changes no resolution/fetch behavior.
+    // NULL = unassigned.
+    `
+    ALTER TABLE instance ADD COLUMN project TEXT;
+    CREATE INDEX idx_instance_project ON instance(project);
+    `,
 ]
 
 function migrate(db: DatabaseSync): void {

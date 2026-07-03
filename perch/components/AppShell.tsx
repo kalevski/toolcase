@@ -126,12 +126,20 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
                 Skip to content
             </a>
             <tc-dashboard-layout>
-                <tc-brand
-                    slot="brand"
-                    primary-text={branding.appName}
-                    secondary-text={branding.secondaryText || undefined}
-                    color={branding.brandColor}
-                />
+                {/* The wrapper div (not tc-brand) carries the slot: the layout relocates
+                    `[slot="brand"]` nodes ONCE at connect, so the stamp — which only mounts
+                    after the branding fetch resolves — must appear inside an already-relocated
+                    parent. The wrapper is also the stamp's position:relative anchor. */}
+                <div slot="brand" className="perch-brand-stamp">
+                    <tc-brand
+                        primary-text={branding.appName}
+                        secondary-text={branding.secondaryText || undefined}
+                        color={branding.brandColor}
+                    />
+                    {branding.stampText && (
+                        <tc-stamp label={branding.stampText} color="primary" position="top-right" />
+                    )}
+                </div>
                 <div slot="sidebar-menu" className="perch-sidebar-menu">
                     <tc-side-nav ref={sideNavRef} />
                 </div>

@@ -453,12 +453,14 @@ export interface SecretMeta {
 
 export type SecretGenKind = 'password' | 'token' | 'hex' | 'base64'
 
-/** A flat instance (`instance` row) — no project/environment tiers; tags are
- *  the only grouping mechanism. */
+/** A flat instance (`instance` row). Tags plus an optional `project` label are
+ *  the grouping mechanisms — both purely organizational. */
 export interface Instance {
     id: string
     name: string
     description?: string
+    /** Optional project label shared across instances — grouping/filter only. */
+    project?: string
     tags: string[]
     /** True iff a fetch key has been minted (key_hash present); the hash itself never leaves the server. */
     hasKey: boolean

@@ -27,15 +27,17 @@ export function CommandPalette() {
 
     const items = useMemo<CmdItem[]>(() => {
         const list: CmdItem[] = [
-            { id: 'sites', label: 'Sites', group: 'Navigate', icon: 'layout-dashboard', href: '/' },
+            { id: 'sites', label: 'Static Sites', group: 'Navigate', icon: 'layout-dashboard', href: '/' },
         ]
         if (ROLE_RANK[me.role] >= ROLE_RANK.maintainer) {
             list.push(
-                { id: 'proxies', label: 'Proxies & upstreams', group: 'Routing', icon: 'globe', href: '/proxies' },
+                { id: 'instances', label: 'Variables', group: 'Navigate', icon: 'server', href: '/instances' },
+                { id: 'db-servers', label: 'Databases', group: 'Navigate', icon: 'database', href: '/databases' },
+                { id: 'proxies', label: 'Proxies', group: 'Routing', icon: 'globe', href: '/proxies' },
                 { id: 'redirects', label: 'Redirects', group: 'Routing', icon: 'corner-up-right', href: '/redirects' },
                 { id: 'dead-hosts', label: 'Dead hosts', group: 'Routing', icon: 'ban', href: '/dead-hosts' },
                 { id: 'access-lists', label: 'Access lists', group: 'Routing', icon: 'lock', href: '/access-lists' },
-                { id: 'streams', label: 'Streams & stream upstreams', group: 'Routing', icon: 'cable', href: '/streams' },
+                { id: 'streams', label: 'Streams', group: 'Routing', icon: 'cable', href: '/streams' },
             )
         }
         if (me.role === 'owner') {
@@ -43,8 +45,11 @@ export function CommandPalette() {
                 { id: 'admin-sites', label: 'Admin · Sites', group: 'Admin', icon: 'layout-dashboard', href: '/admin/sites' },
                 { id: 'admin-users', label: 'Admin · Users', group: 'Admin', icon: 'users', href: '/admin/users' },
                 { id: 'admin-realms', label: 'Admin · NGINX Servers', group: 'Admin', icon: 'server', href: '/admin/realms' },
+                { id: 'admin-db-servers', label: 'Admin · DB Servers', group: 'Admin', icon: 'database', href: '/admin/db-servers' },
                 { id: 'admin-domains', label: 'Admin · Domains', group: 'Admin', icon: 'globe', href: '/admin/domains' },
                 { id: 'admin-certificates', label: 'Admin · Certificates', group: 'Admin', icon: 'shield-check', href: '/admin/certificates' },
+                { id: 'admin-global-vars', label: 'Admin · Global variables', group: 'Admin', icon: 'variable', href: '/admin/global-vars' },
+                { id: 'admin-secrets', label: 'Admin · Secrets', group: 'Admin', icon: 'lock', href: '/admin/secrets' },
                 { id: 'admin-settings', label: 'Admin · Settings', group: 'Admin', icon: 'settings', href: '/admin/settings' },
                 { id: 'admin-audit', label: 'Admin · Audit', group: 'Admin', icon: 'scroll-text', href: '/admin/audit' },
             )

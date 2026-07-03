@@ -1,18 +1,52 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
+import type { AdvancedTableColumn } from '@toolcase/web-components'
+import { useTc, escapeHtml } from '@/lib/tc'
 import { useMe } from '@/lib/me-context'
 import type { DbServer } from '@/server/domain/types'
 import { DbPage, json, useDbData } from './shared'
 
 // Maintainer entry page for database management (perch_database_management.md
-// §9): the servers the owner connected, click-through to the per-server detail
-// (databases / users / access). Connecting new servers is owner-only and lives
-// on the DB Servers admin page.
+// §9): the servers the owner connected in one tc-advanced-table, click-through
+// to the per-server detail (databases / users / access). Connecting new servers
+// is owner-only and lives on the DB Servers admin page.
+
+const SERVER_COLUMNS: AdvancedTableColumn[] = [
+    { key: 'name', label: 'Name' },
+    { key: 'kind', label: 'Engine' },
+    { key: 'endpoint', label: 'Endpoint' },
+    { key: 'tls', label: 'TLS' },
+    { key: 'status', label: 'Status' },
+    { key: 'action', label: '', align: 'right' },
+]
+
+// Body rows are injected as an HTML string into the projected <tbody> (the
+// canonical tc-advanced-table pattern — same as /admin/sites), so every
+// interpolated value is escaped. The Manage control is a plain <button> with a
+// data attribute; clicks are caught by delegation on the table host.
+function serversRowsHtml(servers: DbServer[]): string {
+    return servers
+        .map((s) => {
+            const status = s.lastError
+                ? `<span class="badge text-bg-danger" title="${escapeHtml(s.lastError)}">last operation failed</span>`
+                : `<span class="badge text-bg-success">ok</span>`
+            return (
+                `<tr>` +
+                `<td><button type="button" class="btn btn-link p-0" data-manage-id="${escapeHtml(s.id)}">${escapeHtml(s.name)}</button></td>` +
+                `<td><span class="badge text-bg-info">${escapeHtml(s.kind)}</span></td>` +
+                `<td class="perch-admin-mono">${escapeHtml(`${s.host}:${s.port}`)}</td>` +
+                `<td>${s.tls === 'require' ? `<span class="badge text-bg-light">require</span>` : `<span class="perch-admin-hint">off</span>`}</td>` +
+                `<td>${status}</td>` +
+                `<td style="text-align:right"><button type="button" class="btn btn-sm btn-outline-secondary" data-manage-id="${escapeHtml(s.id)}">Manage</button></td>` +
+                `</tr>`
+            )
+        })
+        .join('')
+}
 
 export function DbServersList() {
-    const router = useRouter()
     const me = useMe()
     const fetcher = useCallback(async (): Promise<DbServer[] | null> => {
         try {
@@ -25,7 +59,7 @@ export function DbServersList() {
 
     return (
         <DbPage
-            title="Database servers"
+            title="Databases"
             subtitle="Manage the databases, users, and access on the connected servers. Live reads — the server itself is the source of truth."
             icon="database"
             iconColor="cyan"
@@ -40,43 +74,47 @@ export function DbServersList() {
                             : 'No database servers connected yet — ask the owner to add one.'}
                     </tc-empty-state>
                 ) : (
-                    <div className="perch-admin-section">
-                        {servers.map((s) => (
-                            <tc-section-card key={s.id} title={s.name} icon="database">
-                                <div className="perch-admin-section">
-                                    <p className="perch-admin-hint">
-                                        <span className="badge text-bg-info">{s.kind}</span>{' '}
-                                        <span className="perch-admin-mono">{`${s.host}:${s.port}`}</span>
-                                        {s.tls === 'require' && (
-                                            <>
-                                                {' '}
-                                                <span className="badge text-bg-light">tls</span>
-                                            </>
-                                        )}
-                                        {s.lastError && (
-                                            <>
-                                                {' '}
-                                                <span className="badge text-bg-danger" title={s.lastError}>
-                                                    last operation failed
-                                                </span>
-                                            </>
-                                        )}
-                                    </p>
-                                    <div className="perch-list-actions">
-                                        <tc-button
-                                            variant="primary"
-                                            size="sm"
-                                            onClick={() => router.push(`/databases/${s.id}/databases`)}
-                                        >
-                                            Manage
-                                        </tc-button>
-                                    </div>
-                                </div>
-                            </tc-section-card>
-                        ))}
-                    </div>
+                    <ServersTable servers={servers} />
                 )
             }
         </DbPage>
+    )
+}
+
+function ServersTable({ servers }: { servers: DbServer[] }) {
+    const router = useRouter()
+
+    // Delegate Manage/name clicks on the table host (the buttons live in the
+    // injected tbody HTML, so a host-level listener is the only way to reach them).
+    const onTableClick = useCallback(
+        (event: Event) => {
+            const btn = (event.target as HTMLElement)?.closest?.('[data-manage-id]') as HTMLElement | null
+            const id = btn?.getAttribute('data-manage-id')
+            if (id) router.push(`/databases/${encodeURIComponent(id)}/databases`)
+        },
+        [router],
+    )
+
+    const tableProps = useMemo(
+        () => ({ columns: SERVER_COLUMNS, total: servers.length, limit: Math.max(servers.length, 1), offset: 0 }),
+        [servers.length],
+    )
+    const tableRef = useTc<HTMLElement>(tableProps, { click: onTableClick })
+
+    // Inject the body rows after the element has rendered its <tbody>. Re-runs
+    // whenever the server list changes.
+    useEffect(() => {
+        const el = tableRef.current
+        if (!el) return
+        const body = el.querySelector('.tc-advanced-table-body')
+        if (body) body.innerHTML = serversRowsHtml(servers)
+    }, [servers, tableRef])
+
+    return (
+        <tc-section-card title="Connected servers" icon="database">
+            <div className="perch-admin-section">
+                <tc-advanced-table ref={tableRef} />
+            </div>
+        </tc-section-card>
     )
 }

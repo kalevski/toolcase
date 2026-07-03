@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { isValidKey, isValidInstanceName, isValidTag, normalizeTags } from '@/server/domain/config-input'
+import {
+    isValidKey,
+    isValidInstanceName,
+    isValidProject,
+    isValidTag,
+    normalizeTags,
+} from '@/server/domain/config-input'
 
 describe('isValidKey', () => {
     it('accepts leading letter/underscore then alnum/underscore', () => {
@@ -45,6 +51,21 @@ describe('isValidTag', () => {
         expect(isValidTag('API')).toBe(false)
         expect(isValidTag('a'.repeat(33))).toBe(false)
         expect(isValidTag('a'.repeat(32))).toBe(true)
+    })
+})
+
+describe('isValidProject', () => {
+    it('accepts tag-shaped labels up to 32 chars', () => {
+        expect(isValidProject('acme')).toBe(true)
+        expect(isValidProject('acme-shop_v2')).toBe(true)
+        expect(isValidProject('a'.repeat(32))).toBe(true)
+    })
+
+    it('rejects empty, a leading hyphen/underscore, uppercase, or over-length', () => {
+        expect(isValidProject('')).toBe(false)
+        expect(isValidProject('-acme')).toBe(false)
+        expect(isValidProject('Acme')).toBe(false)
+        expect(isValidProject('a'.repeat(33))).toBe(false)
     })
 })
 

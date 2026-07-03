@@ -44,6 +44,24 @@ body {
     display: block;
 }
 
+/* Brand-slot wrapper (AppShell): stretches across the sidebar header so the
+   optional tc-stamp can pin to its top-right corner (the stamp is absolutely
+   positioned and needs this position:relative anchor). */
+.perch-brand-stamp {
+    position: relative;
+    flex: 1 1 auto;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.perch-brand-stamp tc-stamp {
+    /* Hug the header corner — the default 0.75rem offset would push the stamp
+       into the brand text inside the ~56px-tall header. */
+    --bs-stamp-corner-offset: 0.3rem;
+}
+
 /* Login screen (components/LoginClient.tsx). Full-height column: optional error
    banner on top, then the tc-login card (or a redirect spinner) filling the rest. */
 .perch-login {
@@ -1482,6 +1500,17 @@ body {
     flex-wrap: wrap;
 }
 
+/* Project filter (Instances list): a compact single-select next to the tag
+   toggles. The select's always-reserved field-message slot would add phantom
+   height inside the toolbar row — hide it here. */
+.perch-project-filter {
+    min-width: 11rem;
+}
+
+.perch-project-filter .tc-field-message {
+    display: none;
+}
+
 /* Feature-flag table (Flags tab): rows injected into a tc-advanced-table; the
    Flag cell is a tc-switch whose label is the flag key — render it mono so it
    reads as an identifier, and keep the always-reserved field-message slot from
@@ -1528,53 +1557,15 @@ body {
     overflow-wrap: anywhere;
 }
 
-/* Tag editor (Settings tab): removable chips + the add row. */
-.perch-tag-editor {
+/* Fetch-key usage guide (Settings tab): stacked hint/snippet pairs under the
+   mint/rotate controls, separated from them by a faint rule. */
+.perch-key-guide {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-}
-
-.perch-tag-chips {
-    display: flex;
-    gap: 0.375rem;
-    flex-wrap: wrap;
-}
-
-.perch-tag-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.125rem 0.25rem 0.125rem 0.5rem;
-    border: 1px solid var(--tc-border);
-    background: var(--tc-surface-muted);
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 0.8125rem;
-}
-
-.perch-tag-remove {
-    border: 0;
-    background: transparent;
-    padding: 0 0.25rem;
-    cursor: pointer;
-    color: var(--tc-text-muted);
-    font-size: 1rem;
-    line-height: 1;
-}
-
-.perch-tag-remove:hover {
-    color: var(--tc-danger);
-}
-
-.perch-tag-remove:focus-visible {
-    outline: 2px solid var(--perch-accent);
-    outline-offset: 2px;
-}
-
-.perch-tag-add {
-    display: flex;
-    align-items: flex-end;
-    gap: 0.5rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--tc-border-faint, var(--tc-border));
 }
 
 /* Danger zone (Settings tab): a red-tinted inset so the destructive card body

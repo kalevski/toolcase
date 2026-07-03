@@ -43,14 +43,24 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
 
     // Apply the theme to the document root. `default` is the global `:root` voice, so
     // it carries NO attribute; every other skin is scoped under `[data-tc-theme="…"]`.
+    // The accent variant rides along as `data-tc-variant` — variant partials are
+    // scoped `[data-tc-theme='x'][data-tc-variant='y']`, so the DEFAULT theme's
+    // variants need the theme attribute set explicitly (the bare `:root` voice has
+    // no attribute to pair with).
     useEffect(() => {
         const root = document.documentElement
-        if (settings.theme && settings.theme !== 'default') {
+        const needsThemeAttr = settings.theme !== 'default' || settings.themeVariant !== ''
+        if (settings.theme && needsThemeAttr) {
             root.setAttribute('data-tc-theme', settings.theme)
         } else {
             root.removeAttribute('data-tc-theme')
         }
-    }, [settings.theme])
+        if (settings.themeVariant) {
+            root.setAttribute('data-tc-variant', settings.themeVariant)
+        } else {
+            root.removeAttribute('data-tc-variant')
+        }
+    }, [settings.theme, settings.themeVariant])
 
     return <BrandingContext.Provider value={{ ...settings, refresh }}>{children}</BrandingContext.Provider>
 }

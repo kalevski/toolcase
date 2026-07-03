@@ -12,6 +12,7 @@ interface Raw {
     id: string
     name: string
     description: string | null
+    project: string | null
     key_hash: string | null
     key_set_at: string | null
     key_expires_at: string | null
@@ -25,6 +26,7 @@ function map(r: Raw, tags: string[]): Instance {
         id: r.id,
         name: r.name,
         description: r.description ?? undefined,
+        project: r.project ?? undefined,
         tags,
         hasKey: r.key_hash != null,
         keySetAt: r.key_set_at ?? undefined,
@@ -55,10 +57,16 @@ export function replaceTags(instanceId: string, tags: string[]): void {
 
 // ── instance CRUD ────────────────────────────────────────────────────────────
 
-export function create(row: { id: string; name: string; description?: string; createdAt: string }): void {
+export function create(row: {
+    id: string
+    name: string
+    description?: string
+    project?: string
+    createdAt: string
+}): void {
     prep(
-        `INSERT INTO instance (id, name, description, created_at, updated_at) VALUES (?, ?, ?, ?, ?)`,
-    ).run(row.id, row.name, row.description ?? null, row.createdAt, row.createdAt)
+        `INSERT INTO instance (id, name, description, project, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`,
+    ).run(row.id, row.name, row.description ?? null, row.project ?? null, row.createdAt, row.createdAt)
 }
 
 export function byId(id: string): Instance | undefined {
@@ -92,7 +100,7 @@ export function nameTaken(name: string, excludeId?: string): boolean {
 
 export function update(
     id: string,
-    fields: { name?: string; description?: string | null; updatedAt: string },
+    fields: { name?: string; description?: string | null; project?: string | null; updatedAt: string },
 ): void {
     const sets: string[] = []
     const params: (string | null)[] = []
@@ -103,6 +111,10 @@ export function update(
     if (fields.description !== undefined) {
         sets.push('description = ?')
         params.push(fields.description)
+    }
+    if (fields.project !== undefined) {
+        sets.push('project = ?')
+        params.push(fields.project)
     }
     sets.push('updated_at = ?')
     params.push(fields.updatedAt)

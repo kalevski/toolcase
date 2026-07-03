@@ -42,6 +42,29 @@ export function isThemeName(value: unknown): value is ThemeName {
     return typeof value === 'string' && (THEME_NAMES as readonly string[]).includes(value)
 }
 
+/**
+ * Accent variants — every bundled theme ships all four (see the library's
+ * `style/themes/VARIANTS.md`). A variant swaps only the primary/secondary
+ * accents; `''` means "the theme's base accents". Applied as `data-tc-variant`
+ * next to `data-tc-theme` on the document root.
+ */
+export const THEME_VARIANTS = ['ocean', 'forest', 'ember', 'royal'] as const
+
+export type ThemeVariant = (typeof THEME_VARIANTS)[number]
+
+/** Human labels for the variant half of the theme picker. */
+export const THEME_VARIANT_LABEL: Record<ThemeVariant, string> = {
+    ocean: 'Ocean (blue/cyan)',
+    forest: 'Forest (green/lime)',
+    ember: 'Ember (orange/gold)',
+    royal: 'Royal (violet/magenta)',
+}
+
+/** Type guard: a request-supplied value is a bundled accent variant. */
+export function isThemeVariant(value: unknown): value is ThemeVariant {
+    return typeof value === 'string' && (THEME_VARIANTS as readonly string[]).includes(value)
+}
+
 // ── the settings record ────────────────────────────────────────────────────────
 
 /**
@@ -58,8 +81,12 @@ export interface SiteSettings {
     tagline: string
     /** Optional second brand word shown inline after the app name in `tc-brand`. */
     secondaryText: string
+    /** Optional stamp badge text shown over the sidebar brand (`tc-stamp`; empty = no stamp). */
+    stampText: string
     /** Active theme — drives every `tc-*` component's skin. */
     theme: ThemeName
+    /** Accent variant of the active theme (`''` = the theme's base accents). */
+    themeVariant: ThemeVariant | ''
     /** Brand accent colour (hex) — the `tc-brand` dot / login logo colour. */
     brandColor: string
     /** Public ingress IPv4 a custom domain must point at (the A-record target). */
@@ -73,7 +100,9 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     appName: 'Perch',
     tagline: 'Deploy a branch of your GitHub repository as a static website.',
     secondaryText: '',
+    stampText: '',
     theme: 'default',
+    themeVariant: '',
     brandColor: '#0ea5e9',
     ingressIpv4: '',
     ingressIpv6: '',
@@ -84,7 +113,9 @@ export const SETTING_KEYS: Record<keyof SiteSettings, string> = {
     appName: 'app_name',
     tagline: 'tagline',
     secondaryText: 'secondary_text',
+    stampText: 'stamp_text',
     theme: 'theme',
+    themeVariant: 'theme_variant',
     brandColor: 'brand_color',
     ingressIpv4: 'ingress_ipv4',
     ingressIpv6: 'ingress_ipv6',
@@ -96,6 +127,7 @@ export const SETTING_KEYS: Record<keyof SiteSettings, string> = {
 export const APP_NAME_MAX = 60
 export const TAGLINE_MAX = 160
 export const SECONDARY_TEXT_MAX = 40
+export const STAMP_TEXT_MAX = 24
 
 const IPV4_RE = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/
 // Permissive IPv6 shape check (full, compressed `::`, and IPv4-mapped tails). Not
@@ -129,7 +161,9 @@ export type SettingsRejection =
     | 'app_name'
     | 'tagline'
     | 'secondary_text'
+    | 'stamp_text'
     | 'theme'
+    | 'theme_variant'
     | 'brand_color'
     | 'ingress_ipv4'
     | 'ingress_ipv6'
@@ -183,11 +217,29 @@ export function parseSettingsUpdate(input: unknown): SettingsCheck {
         patch.secondaryText = src.secondaryText.trim()
     }
 
+    if (src.stampText !== undefined) {
+        if (typeof src.stampText !== 'string' || src.stampText.trim().length > STAMP_TEXT_MAX) {
+            return { ok: false, reason: 'stamp_text', message: `stampText must be ≤ ${STAMP_TEXT_MAX} characters` }
+        }
+        patch.stampText = src.stampText.trim()
+    }
+
     if (src.theme !== undefined) {
         if (!isThemeName(src.theme)) {
             return { ok: false, reason: 'theme', message: `theme must be one of: ${THEME_NAMES.join(', ')}` }
         }
         patch.theme = src.theme
+    }
+
+    if (src.themeVariant !== undefined) {
+        if (src.themeVariant !== '' && !isThemeVariant(src.themeVariant)) {
+            return {
+                ok: false,
+                reason: 'theme_variant',
+                message: `themeVariant must be one of: ${THEME_VARIANTS.join(', ')} (or empty for the base accents)`,
+            }
+        }
+        patch.themeVariant = src.themeVariant as ThemeVariant | ''
     }
 
     if (src.brandColor !== undefined) {
@@ -241,8 +293,14 @@ export function decodeStored(map: Record<string, string>): Partial<SiteSettings>
     const secondaryText = map[SETTING_KEYS.secondaryText]
     if (typeof secondaryText === 'string') out.secondaryText = secondaryText
 
+    const stampText = map[SETTING_KEYS.stampText]
+    if (typeof stampText === 'string') out.stampText = stampText
+
     const theme = map[SETTING_KEYS.theme]
     if (isThemeName(theme)) out.theme = theme
+
+    const themeVariant = map[SETTING_KEYS.themeVariant]
+    if (themeVariant === '' || isThemeVariant(themeVariant)) out.themeVariant = themeVariant
 
     const brandColor = map[SETTING_KEYS.brandColor]
     if (typeof brandColor === 'string' && isHexColor(brandColor)) out.brandColor = brandColor

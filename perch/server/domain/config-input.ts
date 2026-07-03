@@ -26,6 +26,15 @@ export function isValidTag(tag: string): boolean {
     return tag.length > 0 && tag.length <= TAG_MAX_LENGTH && TAG_PATTERN.test(tag)
 }
 
+/** A project label: same shape as a tag (lowercase, starts alnum, then
+ *  alnum/hyphen/underscore), max 32 chars. Shared across instances as a plain
+ *  grouping/filter dimension — no functional weight. */
+export const PROJECT_MAX_LENGTH = 32
+
+export function isValidProject(project: string): boolean {
+    return project.length > 0 && project.length <= PROJECT_MAX_LENGTH && TAG_PATTERN.test(project)
+}
+
 /**
  * Normalize a request-supplied tag list: trim, drop empties, validate each,
  * dedupe (case-sensitive — tags are already lowercase-enforced). Returns the

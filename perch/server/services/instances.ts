@@ -11,7 +11,7 @@ import * as flagRepo from '@/server/data/repositories/flag-repo'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
 import { tx } from '@/server/data/db'
 import { ID } from '@/server/infrastructure/ids'
-import { isValidInstanceName, normalizeTags } from '@/server/domain/config-input'
+import { isValidInstanceName, isValidProject, normalizeTags } from '@/server/domain/config-input'
 import type { Instance, InstanceListItem } from '@/server/domain/types'
 
 export class InstanceError extends Error {
@@ -63,6 +63,22 @@ function normalizedName(raw: unknown): string {
     return name
 }
 
+/** Normalize an optional project label: trim/lowercase; empty clears (null). */
+function normalizedProject(raw: unknown): string | null {
+    if (raw == null) return null
+    if (typeof raw !== 'string') throw new InstanceError('"project" must be a string', 'invalid_project', 400)
+    const project = raw.trim().toLowerCase()
+    if (project === '') return null
+    if (!isValidProject(project)) {
+        throw new InstanceError(
+            'project must be lowercase letters/digits/hyphens/underscores, max 32 chars',
+            'invalid_project',
+            400,
+        )
+    }
+    return project
+}
+
 // ── read ─────────────────────────────────────────────────────────────────────
 
 /** All instances, optionally filtered to one tag (§8 `?tag=`). */
@@ -80,6 +96,8 @@ export function getInstance(id: string): Instance {
 export interface CreateInstanceRequest {
     name: string
     description?: string
+    /** Optional project label — grouping/filter only. */
+    project?: string | null
     tags?: unknown
 }
 
@@ -88,13 +106,20 @@ export function createInstance(actor: Actor, body: CreateInstanceRequest): Insta
     if (instanceRepo.nameTaken(name)) {
         throw new InstanceError(`"${name}" is already taken`, 'name_taken', 409)
     }
+    const project = normalizedProject(body.project)
     const tagsResult = normalizeTags(body.tags)
     if (!tagsResult.ok) throw new InstanceError(`invalid tag "${tagsResult.invalid}"`, 'invalid_tag', 400)
 
     const id = ID.instance()
     const now = new Date().toISOString()
     tx(() => {
-        instanceRepo.create({ id, name, description: body.description?.trim() || undefined, createdAt: now })
+        instanceRepo.create({
+            id,
+            name,
+            description: body.description?.trim() || undefined,
+            project: project ?? undefined,
+            createdAt: now,
+        })
         if (tagsResult.tags.length) instanceRepo.replaceTags(id, tagsResult.tags)
     })
     audit(actor, 'instance.create', name)
@@ -104,13 +129,15 @@ export function createInstance(actor: Actor, body: CreateInstanceRequest): Insta
 export interface UpdateInstanceRequest {
     name?: string
     description?: string | null
+    /** Optional project label — empty/null clears it. Omit to leave unchanged. */
+    project?: string | null
     /** Replace-set array (§8) — omit to leave tags unchanged. */
     tags?: unknown
 }
 
 export function updateInstance(actor: Actor, id: string, body: UpdateInstanceRequest): Instance {
     const inst = found(id)
-    const fields: { name?: string; description?: string | null; updatedAt: string } = {
+    const fields: { name?: string; description?: string | null; project?: string | null; updatedAt: string } = {
         updatedAt: new Date().toISOString(),
     }
     if (body.name !== undefined) {
@@ -119,6 +146,7 @@ export function updateInstance(actor: Actor, id: string, body: UpdateInstanceReq
         fields.name = name
     }
     if ('description' in body) fields.description = body.description?.trim() || null
+    if ('project' in body) fields.project = normalizedProject(body.project)
 
     let tags: string[] | undefined
     if (body.tags !== undefined) {
@@ -158,7 +186,7 @@ export function cloneInstance(actor: Actor, srcId: string, newName: string): Ins
     let varCount = 0
     let flagCount = 0
     tx(() => {
-        instanceRepo.create({ id: clonedId, name, description: src.description, createdAt: now })
+        instanceRepo.create({ id: clonedId, name, description: src.description, project: src.project, createdAt: now })
         if (src.tags.length) instanceRepo.replaceTags(clonedId, src.tags)
         for (const v of envVarRepo.listByInstance(srcId)) {
             envVarRepo.insert({

@@ -7,11 +7,13 @@ import {
     DEFAULT_SETTINGS,
     SETTING_KEYS,
     THEME_NAMES,
+    THEME_VARIANTS,
     decodeStored,
     isHexColor,
     isIpv4,
     isIpv6,
     isThemeName,
+    isThemeVariant,
     parseSettingsUpdate,
 } from './settings'
 
@@ -22,6 +24,16 @@ describe('isThemeName (tracks the bundled web-components skins)', () => {
         expect(isThemeName('midnight')).toBe(false)
         expect(isThemeName('')).toBe(false)
         expect(isThemeName(42)).toBe(false)
+    })
+})
+
+describe('isThemeVariant (tracks the bundled accent variants)', () => {
+    it('accepts every bundled variant and rejects anything else', () => {
+        for (const v of THEME_VARIANTS) expect(isThemeVariant(v)).toBe(true)
+        expect(THEME_VARIANTS).toEqual(['ocean', 'forest', 'ember', 'royal'])
+        expect(isThemeVariant('')).toBe(false)
+        expect(isThemeVariant('midnight')).toBe(false)
+        expect(isThemeVariant(42)).toBe(false)
     })
 })
 
@@ -91,8 +103,29 @@ describe('parseSettingsUpdate (the PUT body)', () => {
         if (r.ok) expect(r.patch).toEqual({ ingressIpv4: '', ingressIpv6: '' })
     })
 
+    it('accepts a stamp text (trimmed), including the empty clear, rejects an over-long one', () => {
+        const r = parseSettingsUpdate({ stampText: '  beta  ' })
+        expect(r.ok).toBe(true)
+        if (r.ok) expect(r.patch).toEqual({ stampText: 'beta' })
+        const cleared = parseSettingsUpdate({ stampText: '' })
+        expect(cleared.ok).toBe(true)
+        if (cleared.ok) expect(cleared.patch).toEqual({ stampText: '' })
+        expect((parseSettingsUpdate({ stampText: 'x'.repeat(25) }) as any).reason).toBe('stamp_text')
+        expect((parseSettingsUpdate({ stampText: 42 }) as any).reason).toBe('stamp_text')
+    })
+
+    it('accepts a theme variant, including the empty base-accent clear', () => {
+        const r = parseSettingsUpdate({ theme: 'aurora', themeVariant: 'ember' })
+        expect(r.ok).toBe(true)
+        if (r.ok) expect(r.patch).toEqual({ theme: 'aurora', themeVariant: 'ember' })
+        const cleared = parseSettingsUpdate({ themeVariant: '' })
+        expect(cleared.ok).toBe(true)
+        if (cleared.ok) expect(cleared.patch).toEqual({ themeVariant: '' })
+    })
+
     it('rejects a bad theme / app name / colour / IP with the right reason', () => {
         expect((parseSettingsUpdate({ theme: 'midnight' }) as any).reason).toBe('theme')
+        expect((parseSettingsUpdate({ themeVariant: 'midnight' }) as any).reason).toBe('theme_variant')
         expect((parseSettingsUpdate({ appName: '' }) as any).reason).toBe('app_name')
         expect((parseSettingsUpdate({ appName: 'x'.repeat(61) }) as any).reason).toBe('app_name')
         expect((parseSettingsUpdate({ brandColor: 'blue' }) as any).reason).toBe('brand_color')
@@ -121,6 +154,18 @@ describe('decodeStored', () => {
     it('ignores an invalid stored theme', () => {
         const decoded = decodeStored({ [SETTING_KEYS.theme]: 'removed-skin' })
         expect(decoded.theme).toBeUndefined()
+    })
+
+    it('decodes a stored variant, keeps an empty one, drops an invalid one', () => {
+        expect(decodeStored({ [SETTING_KEYS.themeVariant]: 'royal' }).themeVariant).toBe('royal')
+        expect(decodeStored({ [SETTING_KEYS.themeVariant]: '' }).themeVariant).toBe('')
+        expect(decodeStored({ [SETTING_KEYS.themeVariant]: 'removed' }).themeVariant).toBeUndefined()
+    })
+
+    it('decodes a stored stamp text, keeping an empty one (an explicit clear)', () => {
+        expect(decodeStored({ [SETTING_KEYS.stampText]: 'beta' }).stampText).toBe('beta')
+        expect(decodeStored({ [SETTING_KEYS.stampText]: '' }).stampText).toBe('')
+        expect(decodeStored({}).stampText).toBeUndefined()
     })
 
     it('keeps an empty stored ingress IP (an explicit clear)', () => {

@@ -5,15 +5,44 @@ import { AdminPage, json, useOwnerData } from './shared'
 import { TextField, SelectField, ColorField, type SelectOption } from '@/components/fields'
 import { useToast } from '@/components/Toast'
 import { useBranding } from '@/lib/branding-context'
-import { THEME_NAMES, THEME_LABEL, type SiteSettings } from '@/server/domain/settings'
+import {
+    THEME_NAMES,
+    THEME_LABEL,
+    THEME_VARIANTS,
+    THEME_VARIANT_LABEL,
+    isThemeName,
+    isThemeVariant,
+    type SiteSettings,
+    type ThemeName,
+    type ThemeVariant,
+} from '@/server/domain/settings'
 
 // Owner-only global settings (§13). Two groups: branding (app name, tagline, theme,
 // brand colour) and custom-domain ingress (the server IPv4/IPv6 handed out in the
 // A/AAAA-record instructions and verified against before a cert is issued). Theme
-// covers every bundled @toolcase/web-components skin. Saving PUTs the whole record,
-// re-pulls the public branding so the theme + brand update live, and toasts.
+// covers every bundled @toolcase/web-components skin × every accent variant
+// (base + ocean/forest/ember/royal). Saving PUTs the whole record, re-pulls the
+// public branding so the theme + brand update live, and toasts.
 
-const THEME_OPTIONS: SelectOption[] = THEME_NAMES.map((t) => ({ value: t, label: THEME_LABEL[t] }))
+// One flat dropdown over every theme × variant combo. The option value encodes
+// the pair as `theme` (base accents) or `theme:variant`; encode/decode round-trip
+// through the two stored settings fields.
+const THEME_OPTIONS: SelectOption[] = THEME_NAMES.flatMap((t) => [
+    { value: t, label: THEME_LABEL[t] },
+    ...THEME_VARIANTS.map((v) => ({ value: `${t}:${v}`, label: `${THEME_LABEL[t]} · ${THEME_VARIANT_LABEL[v]}` })),
+])
+
+function encodeTheme(theme: ThemeName, variant: ThemeVariant | ''): string {
+    return variant ? `${theme}:${variant}` : theme
+}
+
+function decodeTheme(value: string): { theme: ThemeName; themeVariant: ThemeVariant | '' } {
+    const [theme, variant] = value.split(':')
+    return {
+        theme: isThemeName(theme) ? theme : 'default',
+        themeVariant: isThemeVariant(variant) ? variant : '',
+    }
+}
 
 // Quick-pick brand swatches (a spread of hues; the default #0ea5e9 leads). The picker's
 // footer hex input still accepts any #rgb/#rrggbb, so this is convenience, not a limit.
@@ -54,7 +83,9 @@ function SettingsForm({ settings, onSaved }: { settings: SiteSettings; onSaved: 
     const [appName, setAppName] = useState(settings.appName)
     const [tagline, setTagline] = useState(settings.tagline)
     const [secondaryText, setSecondaryText] = useState(settings.secondaryText)
-    const [theme, setTheme] = useState<string>(settings.theme)
+    const [stampText, setStampText] = useState(settings.stampText)
+    // Combined `theme:variant` picker value (see encodeTheme/decodeTheme).
+    const [theme, setTheme] = useState<string>(encodeTheme(settings.theme, settings.themeVariant))
     const [brandColor, setBrandColor] = useState(settings.brandColor)
     const [ingressIpv4, setIngressIpv4] = useState(settings.ingressIpv4)
     const [ingressIpv6, setIngressIpv6] = useState(settings.ingressIpv6)
@@ -66,7 +97,8 @@ function SettingsForm({ settings, onSaved }: { settings: SiteSettings; onSaved: 
         setAppName(settings.appName)
         setTagline(settings.tagline)
         setSecondaryText(settings.secondaryText)
-        setTheme(settings.theme)
+        setStampText(settings.stampText)
+        setTheme(encodeTheme(settings.theme, settings.themeVariant))
         setBrandColor(settings.brandColor)
         setIngressIpv4(settings.ingressIpv4)
         setIngressIpv6(settings.ingressIpv6)
@@ -80,7 +112,16 @@ function SettingsForm({ settings, onSaved }: { settings: SiteSettings; onSaved: 
             const res = await fetch('/api/admin/settings', {
                 method: 'PUT',
                 headers: { 'content-type': 'application/json' },
-                body: JSON.stringify({ appName, tagline, secondaryText, theme, brandColor, ingressIpv4, ingressIpv6 }),
+                body: JSON.stringify({
+                    appName,
+                    tagline,
+                    secondaryText,
+                    stampText,
+                    ...decodeTheme(theme),
+                    brandColor,
+                    ingressIpv4,
+                    ingressIpv6,
+                }),
             })
             if (!res.ok) {
                 const body = (await res.json().catch(() => null)) as { error?: string } | null
@@ -97,7 +138,7 @@ function SettingsForm({ settings, onSaved }: { settings: SiteSettings; onSaved: 
         } finally {
             setBusy(false)
         }
-    }, [appName, tagline, secondaryText, theme, brandColor, ingressIpv4, ingressIpv6, busy, branding, onSaved, toast])
+    }, [appName, tagline, secondaryText, stampText, theme, brandColor, ingressIpv4, ingressIpv6, busy, branding, onSaved, toast])
 
     return (
         <form
@@ -125,6 +166,7 @@ function SettingsForm({ settings, onSaved }: { settings: SiteSettings; onSaved: 
                         value={theme}
                         onValue={setTheme}
                         options={THEME_OPTIONS}
+                        help="Every bundled skin × accent variant (base, ocean, forest, ember, royal)."
                         disabled={busy}
                     />
                     <TextField
@@ -141,6 +183,14 @@ function SettingsForm({ settings, onSaved }: { settings: SiteSettings; onSaved: 
                         onValue={setSecondaryText}
                         placeholder="cloud"
                         help="Optional second word shown inline after the app name in the brand. Leave blank for none."
+                        disabled={busy}
+                    />
+                    <TextField
+                        label="Brand stamp text"
+                        value={stampText}
+                        onValue={setStampText}
+                        placeholder="beta"
+                        help="Optional stamp badge pinned over the sidebar brand. Leave blank for none."
                         disabled={busy}
                     />
                     <ColorField
