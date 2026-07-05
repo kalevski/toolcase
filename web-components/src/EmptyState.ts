@@ -1,5 +1,4 @@
-import * as LucideIcons from 'lucide-static'
-import { icon } from './icons'
+import { lucideByName } from './internal/lucide'
 
 const TAG_NAME = 'tc-empty-state'
 
@@ -37,17 +36,12 @@ export class EmptyState extends HTMLElement {
         else this.removeAttribute('icon')
     }
 
-    private _resolveIcon(name: string): string {
-        const svgStr = (LucideIcons as Record<string, string>)[name]
-        if (!svgStr) return ''
-        return icon(svgStr)
-    }
-
     private render(): void {
         const iconName = this.getAttribute('icon')
         let iconHtml = ''
         if (iconName) {
-            const svg = this._resolveIcon(iconName)
+            // lucideByName resolves kebab-case ("folder-git-2") AND PascalCase names.
+            const svg = lucideByName(iconName)
             if (svg) {
                 iconHtml = `<div class="tc-empty-state__icon">${svg}</div>`
             }

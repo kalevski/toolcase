@@ -240,10 +240,16 @@ tc-table {
 // ── Empty state ───────────────────────────────────────────────────────────────
 
 .tc-table-empty {
-    padding: 2.5rem var(--bs-table-cell-padding-x);
+    padding: 0 var(--bs-table-cell-padding-x);
     text-align: center;
     color: var(--bs-table-empty-color);
     font-size: var(--bs-table-td-font-size);
+
+    // The message renders through a nested tc-empty-state; its own generous
+    // padding replaces the cell's old 2.5rem block padding.
+    tc-empty-state {
+        --bs-empty-state-padding-y: 2.5rem;
+    }
 }
 
 // ── Loading skeleton rows ─────────────────────────────────────────────────────

@@ -1,0 +1,1625 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* Quaykeeper-specific brand tokens layered on top of the @toolcase/web-components
+   design tokens (--tc-*). Everything cosmetic in this sheet reads a token so the
+   dark-mode block at the bottom can re-skin the whole app from one place. */
+:root {
+    /* Brand accent — sky blue, distinct from the library's slate + cyan. */
+    --quaykeeper-accent: #0ea5e9;
+    --quaykeeper-accent-strong: #0284c7;
+    /* GitHub-Sponsors brand pink for the sponsor call-to-action. */
+    --quaykeeper-sponsor: #bf3989;
+    --quaykeeper-sponsor-strong: #99316f;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family:
+        system-ui,
+        -apple-system,
+        'Segoe UI',
+        Roboto,
+        sans-serif;
+    line-height: 1.5;
+    color: var(--tc-text);
+    background: var(--tc-surface);
+}
+
+/* Padding for the dashboard-layout content region (the default slot). */
+.quaykeeper-shell-content {
+    padding: 1.5rem;
+}
+
+/* The side-nav fills the sidebar-menu slot. */
+.quaykeeper-sidebar-menu {
+    display: block;
+}
+
+/* Brand-slot wrapper (AppShell): stretches across the sidebar header so the
+   optional tc-stamp can pin to its top-right corner (the stamp is absolutely
+   positioned and needs this position:relative anchor). */
+.quaykeeper-brand-stamp {
+    position: relative;
+    flex: 1 1 auto;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.quaykeeper-brand-stamp tc-stamp {
+    /* Hug the header corner — the default 0.75rem offset would push the stamp
+       into the brand text inside the ~56px-tall header. */
+    --bs-stamp-corner-offset: 0.3rem;
+}
+
+/* Login screen (components/LoginClient.tsx). Full-height column: optional error
+   banner on top, then the tc-login card (or a redirect spinner) filling the rest. */
+.quaykeeper-login {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+}
+
+.quaykeeper-login-body {
+    flex: 1;
+    display: flex;
+}
+
+.quaykeeper-login-redirect {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: var(--tc-text-muted);
+    font-size: 0.9375rem;
+}
+
+/* AuthGate loading / error placeholder, centered in the viewport. */
+.quaykeeper-gate-status {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    color: var(--tc-text-muted);
+    font-size: 0.9375rem;
+}
+
+/* ── Create-site wizard (components/CreateSiteWizard.tsx, §14) ───────────────── */
+
+.quaykeeper-home {
+    max-width: 46rem;
+}
+
+/* Unlike .quaykeeper-admin / .quaykeeper-plans (flex columns), .quaykeeper-home is plain block
+   flow, so space the shared tc-rich-page-header from the body below it. */
+.quaykeeper-home > tc-rich-page-header {
+    display: block;
+    margin-bottom: 1.5rem;
+}
+
+/* Empty state — centre the "Create your first site" call-to-action. */
+.quaykeeper-home-empty {
+    display: flex;
+    justify-content: center;
+    padding: 2.5rem 0;
+}
+
+.quaykeeper-home-lead {
+    margin: 0;
+    color: var(--tc-text-muted);
+}
+
+.quaykeeper-wizard {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Each step's content stack inside the wizard body. */
+.quaykeeper-wizard-step {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+}
+
+.quaykeeper-wizard-heading {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 600;
+}
+
+.quaykeeper-wizard-hint {
+    margin: 0;
+    color: var(--tc-text-muted);
+    font-size: 0.875rem;
+}
+
+.quaykeeper-wizard-hint code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8125em;
+    background: var(--tc-surface-muted);
+    padding: 0.05rem 0.3rem;
+}
+
+.quaykeeper-wizard-field-label,
+.quaykeeper-wizard-host-mode .quaykeeper-wizard-field-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--tc-text);
+}
+
+.quaykeeper-wizard-host-mode {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* label . base-domain row */
+.quaykeeper-wizard-subdomain {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.quaykeeper-wizard-subdomain > tc-input {
+    flex: 1 1 12rem;
+    min-width: 0;
+}
+
+.quaykeeper-wizard-subdomain > tc-extended-select {
+    flex: 1 1 14rem;
+    min-width: 0;
+}
+
+.quaykeeper-wizard-dot {
+    color: var(--tc-text-faint);
+    font-weight: 700;
+}
+
+.quaykeeper-wizard-preview {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--tc-text-muted);
+}
+
+.quaykeeper-wizard-preview strong {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* Review summary grid. */
+.quaykeeper-wizard-review {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.4rem 1rem;
+    margin: 0;
+    font-size: 0.9375rem;
+}
+
+.quaykeeper-wizard-review dt {
+    color: var(--tc-text-muted);
+}
+
+.quaykeeper-wizard-review dd {
+    margin: 0;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+}
+
+/* Inline validation / quota error, surfaced above the wizard. */
+.quaykeeper-wizard-error {
+    padding: 0.75rem 1rem;
+    background: color-mix(in srgb, var(--tc-danger) 12%, var(--tc-surface));
+    color: var(--tc-danger);
+    border: 1px solid color-mix(in srgb, var(--tc-danger) 35%, var(--tc-border));
+    font-size: 0.9375rem;
+}
+
+/* Post-create confirmation. */
+.quaykeeper-wizard-success {
+    max-width: 36rem;
+    padding: 1.5rem;
+    border: 1px solid color-mix(in srgb, var(--tc-success) 35%, var(--tc-border));
+    background: color-mix(in srgb, var(--tc-success) 10%, var(--tc-surface));
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+}
+
+.quaykeeper-wizard-success-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--tc-success);
+}
+
+.quaykeeper-wizard-success-host {
+    margin: 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 1rem;
+    color: var(--tc-success);
+}
+
+.quaykeeper-wizard-success-body {
+    margin: 0 0 0.5rem;
+    color: var(--tc-success);
+    font-size: 0.9375rem;
+}
+
+/* ── Site dashboard (components/SiteDashboard.tsx, §9 §11 §14, task 734) ───────── */
+
+/* The sites view is wider than the single-column create flow. Matches the shared
+   app width (.quaykeeper-admin / .quaykeeper-plans, 72rem) so / lines up with every other page. */
+.quaykeeper-home--wide {
+    max-width: 72rem;
+}
+
+.quaykeeper-site-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* ── Site summary cards (components/SiteCard.tsx, §14) ─────────────────────────── */
+
+/* Responsive grid of scannable cards; each links to its per-site page. */
+.quaykeeper-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+    gap: 1.25rem;
+}
+
+.quaykeeper-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.25rem;
+    border: 1px solid var(--tc-border);
+    background: var(--tc-surface);
+    cursor: pointer;
+    transition:
+        border-color 0.12s ease,
+        box-shadow 0.12s ease,
+        transform 0.12s ease;
+}
+
+.quaykeeper-card:hover {
+    border-color: var(--quaykeeper-accent);
+    box-shadow: var(--tc-shadow-sm);
+}
+
+.quaykeeper-card:focus-visible {
+    outline: 2px solid var(--quaykeeper-accent);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .quaykeeper-card:active {
+        transform: translateY(1px);
+    }
+}
+
+.quaykeeper-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.quaykeeper-card-id {
+    min-width: 0;
+}
+
+.quaykeeper-card-host {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.quaykeeper-card-source {
+    margin: 0.125rem 0 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8125rem;
+    color: var(--tc-text-muted);
+    overflow-wrap: anywhere;
+}
+
+.quaykeeper-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    margin: 0;
+}
+
+.quaykeeper-card-stat {
+    min-width: 0;
+}
+
+.quaykeeper-card-stat dt {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--tc-text-muted);
+}
+
+.quaykeeper-card-stat dd {
+    margin: 0.125rem 0 0;
+    font-size: 0.875rem;
+    color: var(--tc-text);
+}
+
+/* P7: Wharf-style count badges on the site card. */
+.quaykeeper-card-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin-top: auto;
+}
+
+/* P6: account roll-up grid above the site grid. tc-metric-grid owns its own
+   mobile-first column cascade; just space it from the cards below. */
+.quaykeeper-sites-metrics {
+    display: block;
+    margin-bottom: 1.5rem;
+}
+
+/* Back link on the per-site page (components/SiteDetail.tsx). */
+.quaykeeper-back {
+    align-self: flex-start;
+    margin-bottom: 0.5rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--quaykeeper-accent-strong);
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.quaykeeper-back:hover {
+    text-decoration: underline;
+}
+
+.quaykeeper-back:focus-visible {
+    outline: 2px solid var(--quaykeeper-accent);
+    outline-offset: 2px;
+}
+
+/* Per-site page: a toolbar header, a note, a two-column body of self-framed
+   tc-* cards, and a custom-domain section. No outer card frame — the page reads
+   as a resource view and the inner tc-* cards carry the surfaces. */
+.quaykeeper-site {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* Toolbar: status + identity on the left, primary action + overflow on the right,
+   separated from the body by a hairline rule. Wraps the action cluster on narrow. */
+.quaykeeper-site-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--tc-border);
+}
+
+.quaykeeper-site-ident {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.quaykeeper-site-id {
+    min-width: 0;
+}
+
+/* Destructive entry inside the toolbar's "More" overflow menu. */
+.quaykeeper-site-menu .dropdown-item {
+    color: var(--tc-danger);
+}
+
+.quaykeeper-site-host {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.quaykeeper-site-source {
+    margin: 0.125rem 0 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8125rem;
+    color: var(--tc-text-muted);
+    overflow-wrap: anywhere;
+}
+
+.quaykeeper-site-note {
+    margin: 0;
+    padding: 0.625rem 0.875rem;
+    background: var(--tc-surface-hover);
+    border-left: 3px solid var(--quaykeeper-accent);
+    color: var(--tc-text);
+    font-size: 0.875rem;
+}
+
+.quaykeeper-site-loaderror {
+    margin: 0;
+    color: var(--tc-danger);
+    font-size: 0.875rem;
+}
+
+/* Build + status on the left, storage on the right. tc-grid owns the column
+   template + mobile-first collapse (see SiteDashboard); this only keeps the
+   columns top-aligned. */
+.quaykeeper-site-grid {
+    align-items: start;
+}
+
+.quaykeeper-site-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.quaykeeper-site-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.quaykeeper-site-redeploy-msg {
+    color: var(--tc-text-muted);
+    font-size: 0.8125rem;
+}
+
+/* Delete-confirm modal body — paragraph + type-to-confirm field + error stack. */
+.quaykeeper-site-delete-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* Type-to-confirm field: label above the hostname input. */
+.quaykeeper-site-delete-confirm {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+@media (max-width: 48rem) {
+    /* Stack the toolbar: identity on top, full-width action cluster below.
+       (.quaykeeper-site-grid's column collapse is owned by tc-grid's own cascade.) */
+    .quaykeeper-site-toolbar {
+        align-items: stretch;
+    }
+
+    .quaykeeper-site-actions {
+        justify-content: flex-end;
+    }
+}
+
+/* ── Plans & sponsor (components/PlansView.tsx, §11 §14 §15, task 735) ─────────── */
+
+.quaykeeper-plans {
+    max-width: 72rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* The over-quota announcement bar + per-site banners stack above the cards. */
+.quaykeeper-plans-warnings {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* Four equal-height pricing cards. tc-grid owns the responsive column cascade
+   (columns 1 → sm 2 → lg 4); this only keeps the cards stretching to equal
+   height and stops a long feature line from overflowing its 1fr track. */
+.quaykeeper-pricing-grid {
+    align-items: stretch;
+}
+
+.quaykeeper-pricing-grid > tc-pricing-card {
+    min-width: 0;
+}
+
+/* Sponsor section: heading, CTA, then the live sponsor wall. */
+.quaykeeper-sponsor {
+    margin-top: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--tc-border);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.quaykeeper-sponsor-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+/* GitHub-Sponsors heart button — pink to match the Sponsors brand. */
+.quaykeeper-sponsor-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.1rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--quaykeeper-sponsor);
+    text-decoration: none;
+    background: var(--tc-surface);
+    border: 1px solid color-mix(in srgb, var(--quaykeeper-sponsor) 35%, var(--tc-border));
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease,
+        color 0.15s ease;
+}
+
+.quaykeeper-sponsor-cta:hover {
+    background: color-mix(in srgb, var(--quaykeeper-sponsor) 12%, var(--tc-surface));
+    border-color: var(--quaykeeper-sponsor);
+    color: var(--quaykeeper-sponsor-strong);
+}
+
+.quaykeeper-sponsor-cta:focus-visible {
+    outline: 2px solid var(--quaykeeper-sponsor);
+    outline-offset: 2px;
+}
+
+.quaykeeper-sponsor-empty {
+    margin: 0;
+    color: var(--tc-text-muted);
+    font-size: 0.9375rem;
+}
+
+.quaykeeper-sponsor > tc-sponsor-wall {
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .quaykeeper-sponsor-cta {
+        transition: none;
+    }
+}
+
+/* ── Owner admin (components/OwnerAdmin.tsx, §13 §14, task 736) ────────────────── */
+
+.quaykeeper-admin {
+    max-width: 72rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Each admin area's body inside its tc-section-card. */
+.quaykeeper-admin-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+}
+
+.quaykeeper-admin-hint {
+    font-size: 0.875rem;
+}
+
+.quaykeeper-admin-hint code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.85em;
+    background: var(--tc-surface-muted);
+    padding: 0.05rem 0.3rem;
+}
+
+.quaykeeper-admin-busy {
+    margin: 0;
+    color: var(--tc-text-muted);
+    font-size: 0.8125rem;
+}
+
+.quaykeeper-admin-mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8125rem;
+}
+
+/* Database access editor — preset pill row + operation checkbox grid. */
+.quaykeeper-access-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.quaykeeper-access-ops {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.625rem 1rem;
+}
+
+@media (min-width: 640px) {
+    .quaykeeper-access-ops {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.quaykeeper-access-op .quaykeeper-admin-hint {
+    color: var(--tc-text-muted);
+    margin: 0.125rem 0 0 1.75rem;
+}
+
+.quaykeeper-access-op .quaykeeper-admin-hint .quaykeeper-admin-mono {
+    display: block;
+    color: var(--tc-text-faint);
+    font-size: 0.75rem;
+}
+
+/* Operation summary under a Custom matrix cell. */
+.quaykeeper-access-cell-detail {
+    margin-top: 0.25rem;
+    color: var(--tc-text-muted);
+    font-size: 0.75rem;
+    max-width: 14rem;
+}
+
+/* Empty-table cell: the message renders through a nested tc-empty-state, which
+   brings its own generous padding. */
+.quaykeeper-admin-empty-cell {
+    text-align: center;
+    padding: 0;
+}
+
+.quaykeeper-admin-empty-cell tc-empty-state {
+    --bs-empty-state-padding-y: 2rem;
+}
+
+.quaykeeper-admin-status {
+    text-transform: capitalize;
+    font-size: 0.8125rem;
+}
+
+.quaykeeper-admin-status--live {
+    color: var(--tc-success);
+}
+
+.quaykeeper-admin-status--failed,
+.quaykeeper-admin-status--suspended {
+    color: var(--tc-danger);
+}
+
+.quaykeeper-admin-status--over_quota {
+    color: var(--tc-warning);
+}
+
+.quaykeeper-admin-suspend-btn {
+    font: inherit;
+    font-size: 0.8125rem;
+    color: var(--tc-danger);
+    background: var(--tc-surface);
+    border: 1px solid color-mix(in srgb, var(--tc-danger) 35%, var(--tc-border));
+    padding: 0.25rem 0.6rem;
+    cursor: pointer;
+}
+
+.quaykeeper-admin-suspend-btn:hover {
+    background: color-mix(in srgb, var(--tc-danger) 8%, var(--tc-surface));
+    border-color: var(--tc-danger);
+}
+
+.quaykeeper-admin-suspend-btn:focus-visible {
+    outline: 2px solid var(--tc-danger);
+    outline-offset: 2px;
+}
+
+.quaykeeper-admin-suspended {
+    color: var(--tc-text-faint);
+    font-size: 0.8125rem;
+}
+
+/* Base-domain list + add row. */
+.quaykeeper-admin-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--tc-border);
+}
+
+.quaykeeper-admin-list-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--tc-surface-muted);
+}
+
+.quaykeeper-admin-list-row:last-child {
+    border-bottom: none;
+}
+
+.quaykeeper-admin-add-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.quaykeeper-admin-add-row > tc-input {
+    flex: 1 1 14rem;
+    min-width: 0;
+}
+
+.quaykeeper-admin-add-row > tc-extended-select {
+    flex: 0 1 13rem;
+    min-width: 9rem;
+}
+
+/* Admin Settings form — two-column on wide, single-column on mobile (mobile-first). */
+.quaykeeper-admin-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.quaykeeper-admin-settings-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+}
+
+.quaykeeper-admin-settings-full {
+    grid-column: 1 / -1;
+}
+
+.quaykeeper-admin-settings-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+@media (min-width: 640px) {
+    .quaykeeper-admin-settings-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* Custom-domain A-record + Verify card on the site dashboard. */
+.quaykeeper-site-domain {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.quaykeeper-site-verify-result {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+/* ── tc-table admin/routing listings (P1) ──────────────────────────────────────
+   The admin (domains/realms/users) and routing (proxies/upstreams/streams/
+   stream-upstreams) listings now render through tc-table fed escaped-HTML rows
+   (the relocation-safe pattern). These rules style the inline controls injected
+   into table cells so they match the surrounding tc-* form family. */
+
+/* A native <select> rendered inside a table cell (domain TLS, user role) keeps the
+   form-select look but sizes down to the cell. */
+.quaykeeper-admin tc-table .form-select,
+.quaykeeper-admin tc-table .quaykeeper-admin-role-select {
+    max-width: 100%;
+}
+
+/* The user identity cell stacks the name/badges line above the effective-limits
+   readout; the meta <dl> drops to a new line under it. */
+.quaykeeper-admin tc-table .quaykeeper-admin-user-id {
+    margin-bottom: 0.375rem;
+}
+
+/* Right-aligned action clusters inside a cell hug the row end. */
+.quaykeeper-admin tc-table .quaykeeper-admin-domain-controls,
+.quaykeeper-admin tc-table .quaykeeper-admin-user-actions {
+    justify-content: flex-end;
+}
+
+/* Base-domain audience-tier groups. */
+.quaykeeper-admin-domain-group + .quaykeeper-admin-domain-group {
+    margin-top: 1rem;
+}
+
+.quaykeeper-admin-domain-group-title {
+    margin: 0 0 0.375rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--tc-text-muted);
+}
+
+.quaykeeper-admin-domain-group-title > .quaykeeper-admin-hint {
+    text-transform: none;
+    letter-spacing: normal;
+    font-weight: 400;
+}
+
+/* Per-row controls (base domains + realms) — buttons/selects aligned at the row's end. */
+.quaykeeper-admin-domain-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* Realm registry rows (multiple_realms.md §C) — column so the inline token-rotate editor
+   drops below the row, mirroring the Users roster layout. */
+.quaykeeper-admin-realm {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--tc-surface-muted);
+}
+
+.quaykeeper-admin-realm:last-child {
+    border-bottom: none;
+}
+
+.quaykeeper-admin-realm-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.quaykeeper-admin-realm-id {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.quaykeeper-admin-realm-name {
+    font-weight: 600;
+}
+
+/* Realm health dot — a small circular status light fed by the live /test check. The dot is
+   genuinely circular, so border-radius: 50% is allowed (styleguide carve-out). */
+.quaykeeper-realm-dot {
+    display: inline-block;
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: 50%;
+    flex: 0 0 auto;
+    background: var(--tc-text-muted);
+}
+
+.quaykeeper-realm-dot--ok {
+    background: var(--tc-success, #16a34a);
+}
+
+.quaykeeper-realm-dot--warn {
+    background: var(--tc-warning, #d97706);
+}
+
+.quaykeeper-realm-dot--down {
+    background: var(--tc-danger, #dc2626);
+}
+
+.quaykeeper-realm-dot--unknown {
+    background: var(--tc-text-muted);
+}
+
+/* Per-user realm grant checkboxes (multiple_realms.md §F.2). */
+.quaykeeper-admin-realm-grants {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Owner realm switcher in the sidebar panel (multiple_realms.md §E.3). */
+.quaykeeper-realm-switcher {
+    padding: 0.5rem 0.75rem 0;
+}
+
+/* Plan-tier editor rows. */
+.quaykeeper-admin-tiers {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+}
+
+.quaykeeper-admin-tier-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+/* A single tc-* field (tc-input / tc-select) in a horizontal form row, sized
+   like the form-control it replaced. The control + label + reserved message slot
+   are rendered inside the host. */
+.quaykeeper-admin-field {
+    width: 12rem;
+    max-width: 100%;
+}
+
+/* Standalone section sub-label (e.g. "Default target", "Servers"). */
+.quaykeeper-admin-field-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--tc-text);
+}
+
+/* tc-* fields reserve a one-line message slot below the control; lift the row's
+   trailing action button (and inline flag checks) so they align with the input
+   boxes rather than the bottom of that gutter. */
+.quaykeeper-admin-tier-row > tc-button {
+    margin-bottom: 1.5rem;
+}
+
+.quaykeeper-admin-tier-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* Inline checkbox field (routing server/location flags: backup, down, websocket).
+   The tc-check is inline (no message gutter), so lift it to control height. */
+.quaykeeper-routing-check {
+    align-self: flex-end;
+    margin-bottom: 1.5rem;
+}
+
+/* Test config / Reload config button row (routing nginx -t dry run, Phase E). */
+.quaykeeper-routing-test-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Row-action button cluster injected into the routing tc-advanced-table cells. */
+.quaykeeper-routing-actions {
+    display: inline-flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+/* ── Reconcile status card (routing health strip, impl §1) ─────────────────────── */
+
+/* One-line summary of the daemon's reconcile loop: policy chip, cadence, last run.
+   Deliberately quiet — a hairline box that reads as telemetry, not an alert. */
+.quaykeeper-reconcile {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    padding: 0.375rem 0.625rem;
+    border: 1px solid var(--tc-border-faint, var(--tc-border));
+    font-size: 0.8125rem;
+    color: var(--tc-text-muted);
+}
+
+.quaykeeper-reconcile-label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--tc-text);
+}
+
+/* Stack the health strip's banners + reconcile card with a consistent rhythm. */
+.quaykeeper-routing-health {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.quaykeeper-routing-health:empty {
+    display: none;
+}
+
+/* Rendered-vhost preview body (impl §5) — the modal's single stable wrapper child. */
+.quaykeeper-vhost-preview {
+    min-height: 6rem;
+}
+
+.quaykeeper-vhost-preview tc-code-snippet {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+/* Role tc-select on the Users roster — sized to the role labels, not the row. */
+.quaykeeper-admin-role-select {
+    width: auto;
+    min-width: 9rem;
+}
+
+/* ── Entity form modals (components/FormModal.tsx, impl §10) ───────────────────── */
+
+/* The modal body form: grouped sections stacked with a consistent rhythm. All
+   cosmetics flow through --tc-* tokens so every theme re-skins the forms. */
+.quaykeeper-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* One labelled group: uppercase micro-heading over a hairline, then its fields. */
+.quaykeeper-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+}
+
+.quaykeeper-form-group-title {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--tc-text-muted);
+    border-bottom: 1px solid var(--tc-border-faint, var(--tc-border));
+    padding-bottom: 0.375rem;
+}
+
+/* Two-column field grid, collapsing to one column on narrow viewports
+   (mobile-first: single column is the base, the split is the enhancement). */
+.quaykeeper-form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0 1rem;
+}
+
+@media (min-width: 720px) {
+    .quaykeeper-form-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.quaykeeper-form-grid > * {
+    min-width: 0;
+    width: 100%;
+}
+
+/* Full-width members of the grid (domain, targets, textareas, nested editors). */
+.quaykeeper-form-span {
+    grid-column: 1 / -1;
+}
+
+/* Boolean settings as a grid of switch rows — the tc-switch reserved message
+   slot keeps rows aligned even when only some carry help text. */
+.quaykeeper-form-switches {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0 1rem;
+}
+
+@media (min-width: 720px) {
+    .quaykeeper-form-switches {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.quaykeeper-form-switches > * {
+    min-width: 0;
+}
+
+/* Modal footer: actions right-aligned, primary last. */
+.quaykeeper-form-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* Inline sub-row inside a group (e.g. one location's fields). */
+.quaykeeper-form-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.quaykeeper-form-row > * {
+    min-width: 0;
+}
+
+/* Repeated-item editor (proxy locations, upstream servers, access-list entries):
+   each item is a bordered inset so the rows read as one unit. */
+.quaykeeper-form-item {
+    border: 1px solid var(--tc-border-faint, var(--tc-border));
+    padding: 0.625rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* The "New …" affordance row above each list. */
+.quaykeeper-list-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+/* ── Audit table (components/admin/AdminAudit.tsx, impl §8) ────────────────────── */
+
+/* Timestamps read as data — mono, no wrapping mid-value. */
+.quaykeeper-audit-time {
+    font-family: var(--tc-font-mono, ui-monospace, monospace);
+    font-size: 0.8125rem;
+    white-space: nowrap;
+}
+
+/* Inline object-snapshot disclosure (B3) inside the Snapshot cell. */
+.quaykeeper-audit-snapshot summary {
+    cursor: pointer;
+    color: var(--tc-text-muted);
+    font-size: 0.8125rem;
+}
+
+.quaykeeper-audit-snapshot[open] summary {
+    color: var(--tc-text);
+}
+
+.quaykeeper-audit-snapshot pre {
+    margin: 0.375rem 0 0;
+    padding: 0.5rem;
+    max-width: 32rem;
+    max-height: 16rem;
+    overflow: auto;
+    font-size: 0.75rem;
+    border: 1px solid var(--tc-border-faint, var(--tc-border));
+    background: var(--tc-surface-2, transparent);
+}
+
+.quaykeeper-audit-empty-row {
+    text-align: center;
+    padding: 0;
+}
+
+.quaykeeper-audit-empty-row tc-empty-state {
+    --bs-empty-state-padding-y: 2rem;
+}
+
+/* ── Users roster (components/admin/AdminUsers.tsx) ────────────────────────────── */
+
+/* Search + level-filter bar above the roster. */
+.quaykeeper-admin-userbar {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.quaykeeper-admin-search {
+    flex: 1 1 16rem;
+    min-width: 0;
+}
+
+.quaykeeper-admin-level-filter {
+    width: auto;
+    min-width: 9rem;
+    flex: 0 0 auto;
+}
+
+/* Each user is a stacked card row: identity line, meta line, optional editor. */
+.quaykeeper-admin-user {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--tc-surface-muted);
+}
+
+.quaykeeper-admin-user:last-child {
+    border-bottom: none;
+}
+
+.quaykeeper-admin-user-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.quaykeeper-admin-user-id {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    min-width: 0;
+}
+
+.quaykeeper-admin-user-name {
+    font-weight: 600;
+}
+
+.quaykeeper-admin-badges {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    flex-wrap: wrap;
+}
+
+.quaykeeper-admin-user-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* Text-button toggle (Limits / Close) — quiet, matches the admin link affordances. */
+.quaykeeper-admin-linkbtn {
+    font: inherit;
+    font-size: 0.8125rem;
+    color: var(--quaykeeper-accent-strong);
+    background: none;
+    border: none;
+    padding: 0.25rem 0.4rem;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.quaykeeper-admin-linkbtn:hover {
+    color: var(--quaykeeper-accent);
+}
+
+.quaykeeper-admin-linkbtn:focus-visible {
+    outline: 2px solid var(--quaykeeper-accent);
+    outline-offset: 2px;
+}
+
+/* Effective-limits readout — wrapping inline definition pairs. */
+.quaykeeper-admin-user-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.25rem;
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--tc-text-muted);
+}
+
+.quaykeeper-admin-user-meta dt,
+.quaykeeper-admin-user-meta dd {
+    display: inline;
+    margin: 0;
+}
+
+.quaykeeper-admin-user-meta dt {
+    color: var(--tc-text-faint);
+}
+
+.quaykeeper-admin-user-meta dd {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: var(--tc-text);
+}
+
+/* Inline per-user limit override editor. */
+.quaykeeper-admin-limits {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: var(--tc-surface-hover);
+    border: 1px solid var(--tc-border);
+}
+
+.quaykeeper-admin-limits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 0.75rem;
+}
+
+/* ── Toast stack (components/Toast.tsx, plan Phase 1) ──────────────────────────── */
+
+.quaykeeper-toasts {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: var(--tc-z-tooltip);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: min(28rem, calc(100vw - 2rem));
+    pointer-events: none;
+}
+
+.quaykeeper-toasts > tc-toast {
+    pointer-events: auto;
+}
+
+/* ── Shared state kit (components/states.tsx, plan WS-4) ───────────────────────── */
+
+.quaykeeper-loading {
+    display: block;
+}
+
+/* Skeleton list (admin/routing tables, etc.) and detail-view stacks. */
+.quaykeeper-skeleton-rows,
+.quaykeeper-skeleton-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* A skeleton placeholder shaped like a SiteCard. */
+.quaykeeper-skeleton-card {
+    gap: 0.75rem;
+    cursor: default;
+}
+
+.quaykeeper-skeleton-card:hover {
+    border-color: var(--tc-border);
+    box-shadow: none;
+}
+
+/* AuthGate error: centred message + retry, inside .quaykeeper-gate-status. */
+.quaykeeper-gate-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    text-align: center;
+    color: var(--tc-text-muted);
+}
+
+.quaykeeper-gate-error p {
+    margin: 0;
+}
+
+/* EmptyState title + description (children of tc-empty-state). */
+.quaykeeper-empty-title {
+    display: block;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--tc-text);
+}
+
+.quaykeeper-empty-desc {
+    margin: 0.25rem 0 0;
+    color: var(--tc-text-muted);
+    font-size: 0.9375rem;
+}
+
+/* ── Navigation & IA (plan WS-5) ──────────────────────────────────────────────── */
+
+/* Skip-to-content link: off-screen until keyboard-focused. */
+.quaykeeper-skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: var(--tc-z-tooltip);
+    padding: 0.5rem 0.75rem;
+    background: var(--tc-surface);
+    color: var(--quaykeeper-accent-strong);
+    border: 1px solid var(--tc-border);
+    font-size: 0.875rem;
+}
+
+.quaykeeper-skip-link:focus {
+    left: 0.5rem;
+    top: 0.5rem;
+}
+
+.quaykeeper-breadcrumbs {
+    margin-bottom: 1rem;
+}
+
+/* Wharf-style sub-navigation tab bar above admin/routing page bodies (P5). */
+.quaykeeper-sub-tabs {
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+/* 404 page (app/not-found.tsx). */
+.quaykeeper-notfound {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-align: center;
+    padding: 2rem;
+}
+
+.quaykeeper-notfound-code {
+    margin: 0;
+    font-family: var(--tc-font-mono);
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--tc-text-faint);
+}
+
+.quaykeeper-notfound-title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--tc-text);
+}
+
+.quaykeeper-notfound-lead {
+    margin: 0;
+    color: var(--tc-text-muted);
+}
+
+.quaykeeper-notfound-link {
+    margin-top: 0.75rem;
+    color: var(--quaykeeper-accent-strong);
+    text-decoration: none;
+}
+
+.quaykeeper-notfound-link:hover {
+    text-decoration: underline;
+}
+
+/* ── Compact icon-only row actions (lib/action-icons.tsx) ──────────────────────
+   Every table's per-row buttons render as a square icon with the action text in
+   `title`/`aria-label`. Sized so a row of three stays tighter than one text
+   button; the SVG inherits currentColor from the Bootstrap outline variant. */
+.quaykeeper-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+    line-height: 1;
+}
+
+.quaykeeper-icon-btn svg {
+    width: 1rem;
+    height: 1rem;
+    display: block;
+}
+
+@media (pointer: coarse) {
+    .quaykeeper-icon-btn {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+/* ── Config instances (components/config/*, move_wharf_to_perch.md §10) ────────── */
+
+/* Detail page frame (/instances/{id}/{variables|flags|settings}): back link,
+   rich header, sub-tabs, then the active tab's card stack — the same width and
+   vertical rhythm as .quaykeeper-admin so Config pages read as one surface. */
+.quaykeeper-instance {
+    max-width: 72rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* The active tab's cards stack with the admin-standard gap. */
+.quaykeeper-instance-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Card toolbar: primary action on one side, a secondary cluster on the other;
+   wraps to stacked rows when narrow. */
+.quaykeeper-instance-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.quaykeeper-instance-toolbar-group {
+    display: inline-flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* Tag filter (Instances list): every tag is an independent on/off toggle
+   (aria-pressed); no active tag = no filter. */
+.quaykeeper-tag-filter {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    flex-wrap: wrap;
+}
+
+/* Project filter (Instances list): a compact single-select next to the tag
+   toggles. The select's always-reserved field-message slot would add phantom
+   height inside the toolbar row — hide it here. */
+.quaykeeper-project-filter {
+    min-width: 11rem;
+}
+
+.quaykeeper-project-filter .tc-field-message {
+    display: none;
+}
+
+/* Feature-flag table (Flags tab): rows injected into a tc-advanced-table; the
+   Flag cell is a tc-switch whose label is the flag key — render it mono so it
+   reads as an identifier, and keep the always-reserved field-message slot from
+   adding phantom height inside the row. */
+.quaykeeper-flags-table tc-switch .tc-switch__label {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8125rem;
+}
+
+.quaykeeper-flags-table tc-switch .tc-field-message {
+    display: none;
+}
+
+/* Fetch-key usage guide (Settings tab): stacked hint/snippet pairs under the
+   mint/rotate controls, separated from them by a faint rule. */
+.quaykeeper-key-guide {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--tc-border-faint, var(--tc-border));
+}
+
+/* Danger zone (Settings tab): a red-tinted inset so the destructive card body
+   can't be mistaken for a routine section. */
+.quaykeeper-danger-zone {
+    border: 1px solid color-mix(in srgb, var(--tc-danger) 35%, var(--tc-border));
+    background: color-mix(in srgb, var(--tc-danger) 4%, var(--tc-surface));
+    padding: 0.75rem;
+}
+
+/* .env import preview rows (Variables tab modal). */
+.quaykeeper-form-import-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 20rem;
+    overflow-y: auto;
+}
+
+/* ── Dark mode (plan WS-1) ─────────────────────────────────────────────────────
+   Auto-applied from the OS preference. Remaps the structural @toolcase/web-components
+   design tokens (--tc-*) to a dark slate palette; every tc-* component and every
+   .quaykeeper-* rule in this sheet reads those tokens, so the whole surface follows from
+   one place. Status and brand hues keep their identity — their tinted fills are
+   derived from the surface via color-mix, so they invert for free. Some tc-*
+   components still bake light-theme literals upstream and may need follow-up there. */
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+
+        --tc-surface: #0f172a;
+        --tc-surface-muted: #1e293b;
+        --tc-surface-hover: #1a2436;
+        --tc-border: #334155;
+        --tc-border-strong: #475569;
+        --tc-text: #e2e8f0;
+        --tc-text-muted: #94a3b8;
+        --tc-text-faint: #64748b;
+
+        /* Brand reads a touch brighter against dark slate. */
+        --quaykeeper-accent: #38bdf8;
+        --quaykeeper-accent-strong: #7dd3fc;
+    }
+}

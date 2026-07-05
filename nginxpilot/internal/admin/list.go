@@ -9,7 +9,7 @@ import (
 
 // handleListSites, handleListUpstreams and handleListProxies expose the
 // running merged config (main file + all fragments) as JSON so a control plane
-// (Perch) can read current state without re-reading sites.d/ off disk. Secret
+// (Quaykeeper) can read current state without re-reading sites.d/ off disk. Secret
 // material is never present — auth carries only *_env / *_file references — and
 // internal provenance (the File field) is dropped via json:"-". The lists
 // always serialize as an array, never null.

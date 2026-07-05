@@ -34,7 +34,7 @@ type certInfo struct {
 }
 
 // handleListCerts lists the TLS certificates discovered in the configured cert
-// directory (certbot live or flat layout), so a control plane (Perch) can show
+// directory (certbot live or flat layout), so a control plane (Quaykeeper) can show
 // what's available without filesystem access. Read-only and disk-fresh — it
 // loads the dir on each call, so renewals show immediately. Works in both
 // managed and generate-only mode; an unconfigured/missing cert dir yields an

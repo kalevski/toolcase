@@ -1,0 +1,276 @@
+'use client'
+
+import { useCallback, useEffect, useState } from 'react'
+import { AdminPage, json, useOwnerData } from './shared'
+import { TextField, SelectField, ColorField, type SelectOption } from '@/components/fields'
+import { useToast } from '@/components/Toast'
+import { useBranding } from '@/lib/branding-context'
+import {
+    THEME_NAMES,
+    THEME_LABEL,
+    THEME_VARIANTS,
+    THEME_VARIANT_LABEL,
+    isThemeName,
+    isThemeVariant,
+    type SiteSettings,
+    type ThemeName,
+    type ThemeVariant,
+} from '@/server/domain/settings'
+
+// Owner-only global settings (§13). Three groups: branding (app name, tagline,
+// theme, brand colour), public URLs (the Quaykeeper base URL + the agent-server
+// URL the instance-config guides hand out), and custom-domain ingress (the server
+// IPv4/IPv6 handed out in the A/AAAA-record instructions and verified against
+// before a cert is issued). Theme covers every bundled @toolcase/web-components
+// skin × every accent variant (base + ocean/forest/ember/royal). Saving PUTs the
+// whole record, re-pulls the public branding so the theme + brand update live,
+// and toasts.
+
+// One flat dropdown over every theme × variant combo. The option value encodes
+// the pair as `theme` (base accents) or `theme:variant`; encode/decode round-trip
+// through the two stored settings fields.
+const THEME_OPTIONS: SelectOption[] = THEME_NAMES.flatMap((t) => [
+    { value: t, label: THEME_LABEL[t] },
+    ...THEME_VARIANTS.map((v) => ({ value: `${t}:${v}`, label: `${THEME_LABEL[t]} · ${THEME_VARIANT_LABEL[v]}` })),
+])
+
+function encodeTheme(theme: ThemeName, variant: ThemeVariant | ''): string {
+    return variant ? `${theme}:${variant}` : theme
+}
+
+function decodeTheme(value: string): { theme: ThemeName; themeVariant: ThemeVariant | '' } {
+    const [theme, variant] = value.split(':')
+    return {
+        theme: isThemeName(theme) ? theme : 'default',
+        themeVariant: isThemeVariant(variant) ? variant : '',
+    }
+}
+
+// Quick-pick brand swatches (a spread of hues; the default #0ea5e9 leads). The picker's
+// footer hex input still accepts any #rgb/#rrggbb, so this is convenience, not a limit.
+const BRAND_SWATCHES = [
+    '#0ea5e9', '#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#ec4899', '#f43f5e',
+    '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16', '#22c55e', '#10b981', '#14b8a6',
+    '#06b6d4', '#64748b', '#475569', '#111827',
+]
+
+export function AdminSettings() {
+    const fetcher = useCallback(async (): Promise<SiteSettings | null> => {
+        try {
+            return await fetch('/api/admin/settings', { cache: 'no-store' }).then((r) => json<SiteSettings>(r))
+        } catch {
+            return null
+        }
+    }, [])
+    const { state, reload } = useOwnerData(fetcher)
+
+    return (
+        <AdminPage
+            title="Settings"
+            subtitle="Branding and custom-domain ingress for this instance. Owner-only."
+            icon="settings"
+            iconColor="slate"
+            state={state}
+            onRetry={() => void reload()}
+        >
+            {(settings) => <SettingsForm settings={settings} onSaved={() => void reload()} />}
+        </AdminPage>
+    )
+}
+
+function SettingsForm({ settings, onSaved }: { settings: SiteSettings; onSaved: () => void }) {
+    const toast = useToast()
+    const branding = useBranding()
+
+    const [appName, setAppName] = useState(settings.appName)
+    const [tagline, setTagline] = useState(settings.tagline)
+    const [secondaryText, setSecondaryText] = useState(settings.secondaryText)
+    const [stampText, setStampText] = useState(settings.stampText)
+    // Combined `theme:variant` picker value (see encodeTheme/decodeTheme).
+    const [theme, setTheme] = useState<string>(encodeTheme(settings.theme, settings.themeVariant))
+    const [brandColor, setBrandColor] = useState(settings.brandColor)
+    const [ingressIpv4, setIngressIpv4] = useState(settings.ingressIpv4)
+    const [ingressIpv6, setIngressIpv6] = useState(settings.ingressIpv6)
+    const [baseUrl, setBaseUrl] = useState(settings.baseUrl)
+    const [instanceUrl, setInstanceUrl] = useState(settings.instanceUrl)
+    const [error, setError] = useState<string | null>(null)
+    const [busy, setBusy] = useState(false)
+
+    // Re-seed when the persisted record reloads (e.g. after a save round-trip).
+    useEffect(() => {
+        setAppName(settings.appName)
+        setTagline(settings.tagline)
+        setSecondaryText(settings.secondaryText)
+        setStampText(settings.stampText)
+        setTheme(encodeTheme(settings.theme, settings.themeVariant))
+        setBrandColor(settings.brandColor)
+        setIngressIpv4(settings.ingressIpv4)
+        setIngressIpv6(settings.ingressIpv6)
+        setBaseUrl(settings.baseUrl)
+        setInstanceUrl(settings.instanceUrl)
+    }, [settings])
+
+    const save = useCallback(async () => {
+        if (busy) return
+        setBusy(true)
+        setError(null)
+        try {
+            const res = await fetch('/api/admin/settings', {
+                method: 'PUT',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({
+                    appName,
+                    tagline,
+                    secondaryText,
+                    stampText,
+                    ...decodeTheme(theme),
+                    brandColor,
+                    ingressIpv4,
+                    ingressIpv6,
+                    baseUrl,
+                    instanceUrl,
+                }),
+            })
+            if (!res.ok) {
+                const body = (await res.json().catch(() => null)) as { error?: string } | null
+                setError(body?.error ? `Couldn’t save settings: ${body.error}.` : `Couldn’t save settings (error ${res.status}).`)
+                return
+            }
+            // Re-pull the public branding so the theme + brand re-skin live, then
+            // reload the admin form's source of truth.
+            await branding.refresh()
+            onSaved()
+            toast.show('Settings saved.', { variant: 'success' })
+        } catch {
+            setError('Couldn’t save settings — network error.')
+        } finally {
+            setBusy(false)
+        }
+    }, [appName, tagline, secondaryText, stampText, theme, brandColor, ingressIpv4, ingressIpv6, baseUrl, instanceUrl, busy, branding, onSaved, toast])
+
+    return (
+        <form
+            className="quaykeeper-admin-settings"
+            onSubmit={(e) => {
+                e.preventDefault()
+                void save()
+            }}
+        >
+            {error && <tc-banner variant="danger">{error}</tc-banner>}
+
+            <tc-section-card title="Branding" icon="palette">
+                <div className="quaykeeper-admin-section quaykeeper-admin-settings-grid">
+                    <TextField
+                        label="Application name"
+                        value={appName}
+                        onValue={setAppName}
+                        placeholder="Quaykeeper"
+                        help="Shown in the sidebar brand, the login screen, and the browser tab."
+                        disabled={busy}
+                        required
+                    />
+                    <SelectField
+                        label="Theme"
+                        value={theme}
+                        onValue={setTheme}
+                        options={THEME_OPTIONS}
+                        help="Every bundled skin × accent variant (base, ocean, forest, ember, royal)."
+                        disabled={busy}
+                    />
+                    <TextField
+                        label="Tagline"
+                        value={tagline}
+                        onValue={setTagline}
+                        placeholder="Deploy a branch of your GitHub repository as a static website."
+                        help="One line under the brand on the login screen."
+                        disabled={busy}
+                    />
+                    <TextField
+                        label="Secondary brand text"
+                        value={secondaryText}
+                        onValue={setSecondaryText}
+                        placeholder="cloud"
+                        help="Optional second word shown inline after the app name in the brand. Leave blank for none."
+                        disabled={busy}
+                    />
+                    <TextField
+                        label="Brand stamp text"
+                        value={stampText}
+                        onValue={setStampText}
+                        placeholder="beta"
+                        help="Optional stamp badge pinned over the sidebar brand. Leave blank for none."
+                        disabled={busy}
+                    />
+                    <ColorField
+                        label="Brand colour"
+                        value={brandColor}
+                        onValue={setBrandColor}
+                        colors={BRAND_SWATCHES}
+                        help="Brand dot / login logo colour. Pick a swatch or enter a hex (#rgb or #rrggbb)."
+                        disabled={busy}
+                    />
+                </div>
+            </tc-section-card>
+
+            <tc-section-card title="Public URLs" icon="link">
+                <div className="quaykeeper-admin-section quaykeeper-admin-settings-grid">
+                    <p className="quaykeeper-home-lead quaykeeper-admin-hint quaykeeper-admin-settings-full">
+                        Where this deployment is reachable. The base URL is the Quaykeeper UI/API origin; the
+                        instance config URL is the companion agent server (client downloads + the instance-fetch
+                        API on <code>QUAYKEEPER_AGENT_PORT</code>) that the per-instance usage guides hand out
+                        as <code>QUAYKEEPER_URL</code>.
+                    </p>
+                    <TextField
+                        label="Base URL"
+                        value={baseUrl}
+                        onValue={setBaseUrl}
+                        placeholder="https://quaykeeper.example.com"
+                        help="Public origin of this Quaykeeper instance (UI and API)."
+                        disabled={busy}
+                    />
+                    <TextField
+                        label="Instance config URL"
+                        value={instanceUrl}
+                        onValue={setInstanceUrl}
+                        placeholder="https://config.example.com"
+                        help="Public URL of the agent server — used in instance setup guides and install snippets."
+                        disabled={busy}
+                    />
+                </div>
+            </tc-section-card>
+
+            <tc-section-card title="Custom-domain ingress" icon="globe">
+                <div className="quaykeeper-admin-section quaykeeper-admin-settings-grid">
+                    <p className="quaykeeper-home-lead quaykeeper-admin-hint quaykeeper-admin-settings-full">
+                        The public server IP a tenant’s custom domain must point at. Quaykeeper shows it in the A-record
+                        instructions and re-resolves the domain server-side to confirm it points here before issuing a
+                        certificate. Leave blank to fall back to <code>QUAYKEEPER_INGRESS_IPV4</code>; an empty IP disables
+                        custom-domain verification.
+                    </p>
+                    <TextField
+                        label="Server IP (A record, IPv4)"
+                        value={ingressIpv4}
+                        onValue={setIngressIpv4}
+                        placeholder="203.0.113.10"
+                        help="The A-record target shown to tenants adding a custom domain."
+                        disabled={busy}
+                    />
+                    <TextField
+                        label="Server IPv6 (AAAA record, optional)"
+                        value={ingressIpv6}
+                        onValue={setIngressIpv6}
+                        placeholder="2001:db8::10"
+                        help="Optional AAAA-record target. Leave blank to omit it."
+                        disabled={busy}
+                    />
+                </div>
+            </tc-section-card>
+
+            <div className="quaykeeper-admin-settings-actions">
+                <tc-button type="submit" variant="primary" disabled={!appName.trim() || busy || undefined}>
+                    {busy ? 'Saving…' : 'Save settings'}
+                </tc-button>
+            </div>
+        </form>
+    )
+}

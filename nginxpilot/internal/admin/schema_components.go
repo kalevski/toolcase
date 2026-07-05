@@ -3,7 +3,7 @@ package admin
 // componentSchemas holds the hand-kept entity schemas the operations reference.
 // Shapes mirror the Go structs' JSON serialization (internal/config types +
 // the admin DTOs); the reflection-adjacent contract tests on the consumer side
-// (Perch's fixtures) exercise the same shapes end-to-end.
+// (Quaykeeper's fixtures) exercise the same shapes end-to-end.
 func componentSchemas() map[string]any {
 	str := func() map[string]any { return map[string]any{"type": "string"} }
 	boolean := func() map[string]any { return map[string]any{"type": "boolean"} }

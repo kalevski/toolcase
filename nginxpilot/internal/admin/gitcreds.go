@@ -1,7 +1,7 @@
 package admin
 
 // Git source credentials endpoints (PUT/GET/DELETE /git-credentials). A control
-// plane (e.g. Perch) stores a private repo's access token as a daemon-owned
+// plane (e.g. Quaykeeper) stores a private repo's access token as a daemon-owned
 // 0600 file and references it from the site fragment via auth.token_file. The
 // token is write-only over this API — GET returns metadata (name/path/mtime),
 // never the secret material.

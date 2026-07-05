@@ -51,6 +51,7 @@ export class AdvancedTable extends HTMLElement {
     private _sortableColumns: string[] = []
     private _sort: AdvancedTableSort | null = null
     private _columns: AdvancedTableColumn[] = []
+    private _rowsHtml: string | null = null
 
     // Callback mirrors of the dispatched CustomEvents.
     onFilterChange: ((key: string, value: any) => void) | null = null
@@ -66,7 +67,10 @@ export class AdvancedTable extends HTMLElement {
             const slotContent = Array.from(this.childNodes)
             this.render()
             const body = this.querySelector('.tc-advanced-table-body')
-            if (body) slotContent.forEach((n) => body.appendChild(n))
+            if (body) {
+                if (this._rowsHtml != null) body.innerHTML = this._rowsHtml
+                else slotContent.forEach((n) => body.appendChild(n))
+            }
             this._initialised = true
         }
         this.addEventListener('input', this._onInput)
@@ -163,6 +167,22 @@ export class AdvancedTable extends HTMLElement {
         if (this._initialised) this._rerenderWithSlots()
     }
 
+    /**
+     * Body rows as a trusted HTML string of `<tr>` elements — the component owns
+     * the `<tbody>` and re-applies this on every re-render. This is the ONLY
+     * relocation-safe way to feed rows from a framework (React children would be
+     * captured and moved out from under the framework's reconciler; raw `<tr>`
+     * children in static HTML never survive parsing outside a `<table>`).
+     * Interpolated user data MUST be escaped by the caller.
+     */
+    get rows(): string | null {
+        return this._rowsHtml
+    }
+    set rows(v: string | null) {
+        this._rowsHtml = typeof v === 'string' ? v : null
+        if (this._initialised) this._rerenderWithSlots()
+    }
+
     // ── Event delegation ──────────────────────────────────────────────────────
 
     private _onInput = (e: Event): void => {
@@ -191,12 +211,17 @@ export class AdvancedTable extends HTMLElement {
 
     // The nested tc-pagination dispatches tc-page-change with a 1-based { page }.
     // Swallow it (so consumers only ever see this table's own offset-based event)
-    // and forward as an offset jump.
+    // and forward as an offset jump. stopImmediatePropagation — not stopPropagation —
+    // because consumers listen on THIS host element too: plain stopPropagation only
+    // blocks ancestors, so the inner { page } event would still reach a host-level
+    // listener whose handler reads detail.offset (undefined → page resets). This
+    // listener binds in connectedCallback, before any consumer can attach, so it
+    // always intercepts first.
     private _onPaginationPage = (e: Event): void => {
         const target = e.target as HTMLElement
         if (!(target instanceof HTMLElement) || target.tagName.toLowerCase() !== 'tc-pagination')
             return
-        e.stopPropagation()
+        e.stopImmediatePropagation()
         const page = (e as CustomEvent).detail?.page
         if (typeof page !== 'number') return
         this._goToPage(page)
@@ -260,20 +285,24 @@ export class AdvancedTable extends HTMLElement {
 
     // ── Render ────────────────────────────────────────────────────────────────
 
-    // Re-render while preserving slotted body rows and the active filter input's
-    // focus + caret position (a full innerHTML rewrite would otherwise drop both).
+    // Re-render while preserving body rows (the `rows` HTML string when set, else
+    // the slotted nodes) and the active filter input's focus + caret position (a
+    // full innerHTML rewrite would otherwise drop both).
     private _rerenderWithSlots(): void {
         const active = this.querySelector<HTMLElement>('[data-filter-key]:focus')
         const focusKey = active?.dataset.filterKey ?? null
         const caret = active instanceof HTMLInputElement ? active.selectionStart : null
 
         const body = this.querySelector('.tc-advanced-table-body')
-        const rows = body ? Array.from(body.childNodes) : []
+        const rows = this._rowsHtml == null && body ? Array.from(body.childNodes) : []
 
         this.render()
 
         const newBody = this.querySelector('.tc-advanced-table-body')
-        if (newBody) rows.forEach((n) => newBody.appendChild(n))
+        if (newBody) {
+            if (this._rowsHtml != null) newBody.innerHTML = this._rowsHtml
+            else rows.forEach((n) => newBody.appendChild(n))
+        }
 
         if (focusKey) {
             const el = this.querySelector<HTMLElement>(`[data-filter-key="${focusKey}"]`)

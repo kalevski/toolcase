@@ -160,7 +160,8 @@ const AdvancedTableDemo: React.FC = () => {
     }, [])
 
     // Re-derive the filtered / sorted / paginated view and push everything to the
-    // element. Body rows are set imperatively into the projected <tbody>.
+    // element. Body rows go through the `rows` property — the element owns its
+    // <tbody> and re-applies the string on every internal re-render.
     useEffect(() => {
         const el = tableRef.current
         if (!el) return
@@ -201,9 +202,7 @@ const AdvancedTableDemo: React.FC = () => {
         el.limit = LIMIT
         el.offset = offset
         el.total = total
-
-        const body = el.querySelector('.tc-advanced-table-body')
-        if (body) body.innerHTML = rowsHtml(page)
+        el.rows = rowsHtml(page)
     }, [filterValues, sort, offset])
 
     // Static loading-overlay example.
@@ -217,8 +216,7 @@ const AdvancedTableDemo: React.FC = () => {
         el.offset = 0
         el.total = DATA.length
         el.loading = true
-        const body = el.querySelector('.tc-advanced-table-body')
-        if (body) body.innerHTML = rowsHtml(DATA.slice(0, LIMIT))
+        el.rows = rowsHtml(DATA.slice(0, LIMIT))
     }, [])
 
     const matchCount = DATA.filter(
@@ -238,7 +236,7 @@ const AdvancedTableDemo: React.FC = () => {
                     <div className="col-12">
                         <tc-rich-page-header
                             title-text="Advanced Table"
-                            description="Data table with a filter toolbar, sortable headers, a translucent loading overlay, and a paginated footer driven by the shared tc-pagination component. filters / sortableColumns / sort are set via JS properties, body rows are projected as slotted <tbody> rows, and the element emits tc-filter-change, tc-sort-change, and tc-page-change."
+                            description="Data table with a filter toolbar, sortable headers, a translucent loading overlay, and a paginated footer driven by the shared tc-pagination component. filters / sortableColumns / sort are set via JS properties, body rows are fed as an HTML string through the rows property, and the element emits tc-filter-change, tc-sort-change, and tc-page-change."
                         >
                             <tc-badge slot="chips" variant="secondary">
                                 Web Components

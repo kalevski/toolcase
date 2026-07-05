@@ -6,7 +6,7 @@
 //	GET  /vhost/<domain>      generated nginx config for a site or reverse proxy
 //	POST /reload              diff-based config reload (same as SIGHUP)
 //
-// Config management — a control plane (Perch) drives the whole config over
+// Config management — a control plane (Quaykeeper) drives the whole config over
 // REST instead of writing fragment files into sites.d/ by hand:
 //
 //	GET    /sites             list configured sites
@@ -310,7 +310,7 @@ func (s *Server) handleVhost(w http.ResponseWriter, r *http.Request) {
 }
 
 // handleReload runs a diff-based config reload — the REST equivalent of SIGHUP —
-// so a separate process (e.g. Perch) can apply config changes without signalling
+// so a separate process (e.g. Quaykeeper) can apply config changes without signalling
 // the daemon directly. An invalid on-disk config is rejected wholesale and the
 // running config stays active (spec §6).
 func (s *Server) handleReload(w http.ResponseWriter, _ *http.Request) {

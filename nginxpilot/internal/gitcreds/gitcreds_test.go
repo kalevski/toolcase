@@ -9,7 +9,7 @@ import (
 )
 
 func TestValidName(t *testing.T) {
-	valid := []string{"perch-abc123", "site_1", "a", "A.b-c_d", "perch-aB3_x-Y9"}
+	valid := []string{"quaykeeper-abc123", "site_1", "a", "A.b-c_d", "quaykeeper-aB3_x-Y9"}
 	for _, n := range valid {
 		if !ValidName(n) {
 			t.Errorf("ValidName(%q) = false, want true", n)
@@ -30,12 +30,12 @@ func TestStoreSetListDelete(t *testing.T) {
 		t.Fatalf("empty store List() = %v, want []", got)
 	}
 
-	path, err := s.Set("perch-abc", "ghs_secret\n")
+	path, err := s.Set("quaykeeper-abc", "ghs_secret\n")
 	if err != nil {
 		t.Fatalf("Set: %v", err)
 	}
-	if path != s.Path("perch-abc") {
-		t.Errorf("Set path = %q, want %q", path, s.Path("perch-abc"))
+	if path != s.Path("quaykeeper-abc") {
+		t.Errorf("Set path = %q, want %q", path, s.Path("quaykeeper-abc"))
 	}
 
 	// 0600 perms, trimmed content + trailing newline.
@@ -51,12 +51,12 @@ func TestStoreSetListDelete(t *testing.T) {
 		t.Errorf("content = %q, want %q", raw, "ghs_secret\n")
 	}
 
-	if !s.Has("perch-abc") {
+	if !s.Has("quaykeeper-abc") {
 		t.Error("Has = false after Set")
 	}
 
 	// Replace keeps a single entry with new content.
-	if _, err := s.Set("perch-abc", "ghs_rotated"); err != nil {
+	if _, err := s.Set("quaykeeper-abc", "ghs_rotated"); err != nil {
 		t.Fatalf("Set replace: %v", err)
 	}
 	raw, _ = os.ReadFile(path)
@@ -65,14 +65,14 @@ func TestStoreSetListDelete(t *testing.T) {
 	}
 
 	list := s.List()
-	if len(list) != 1 || list[0].Name != "perch-abc" || list[0].Path != path {
+	if len(list) != 1 || list[0].Name != "quaykeeper-abc" || list[0].Path != path {
 		t.Fatalf("List = %+v", list)
 	}
 
-	if err := s.Delete("perch-abc"); err != nil {
+	if err := s.Delete("quaykeeper-abc"); err != nil {
 		t.Fatalf("Delete: %v", err)
 	}
-	if err := s.Delete("perch-abc"); !errors.Is(err, os.ErrNotExist) {
+	if err := s.Delete("quaykeeper-abc"); !errors.Is(err, os.ErrNotExist) {
 		t.Errorf("second Delete err = %v, want os.ErrNotExist", err)
 	}
 }

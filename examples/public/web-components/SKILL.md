@@ -5030,7 +5030,7 @@ Flexible data table with sortable columns, loading skeletons, and optional row-c
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `empty-message` | string | `No data` | Text shown in a full-width cell when `data` is empty and not loading. |
+| `empty-message` | string | `No data` | Text shown when `data` is empty and not loading — rendered through a nested `tc-empty-state` (inbox icon) in a full-width cell. |
 | `striped` | boolean | false | Even body rows take the faint slate well. |
 | `hoverable` | boolean | false | Rows lift to the slate well on hover. |
 | `compact` | boolean | false | Reduces cell padding (`table-sm`). |
@@ -5114,7 +5114,7 @@ table.addEventListener('tc-row-click', e => console.log(e.detail.row))
 
 ### tc-advanced-table
 
-Data table with a built-in filter toolbar, sortable headers, a translucent loading overlay, and a paginated footer. The header row is driven by the `columns` JS property; **body rows are projected as slotted `<tr>` children** of a `<tbody class="tc-advanced-table-body">`, so callers own row markup (and can inject `tc-badge` etc.). Pure slate chrome, sharp corners, JetBrains Mono pagination summary. The element drives its own internal sort direction and offset on click (like `tc-pagination`) and emits a CustomEvent for each interaction.
+Data table with a built-in filter toolbar, sortable headers, a translucent loading overlay, and a paginated footer. The header row is driven by the `columns` JS property; **body rows are fed as an HTML string through the `rows` property** — the element owns its `<tbody>` and re-applies the string on every internal re-render, so callers own row markup (and can inject `tc-badge` etc.) without any relocation hazard. Never render framework children (e.g. React `<tr>`s) inside the element: they would be captured and moved out from under the framework's reconciler. Pure slate chrome, sharp corners, JetBrains Mono pagination summary. The element drives its own internal sort direction and offset on click (like `tc-pagination`) and emits a CustomEvent for each interaction.
 
 **Tag:** `tc-advanced-table`
 
@@ -5131,6 +5131,7 @@ Data table with a built-in filter toolbar, sortable headers, a translucent loadi
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
+| `rows` | `string \| null` | `null` | Body rows as a trusted HTML string of `<tr>` elements. The element re-applies it into its `<tbody>` on every re-render. Interpolated user data MUST be escaped by the caller. |
 | `columns` | `AdvancedTableColumn[]` | `[]` | Header descriptors (see below). Set via the JS property; re-renders. |
 | `filters` | `AdvancedTableFilter[]` | `[]` | Toolbar filter controls. Empty → no toolbar. Set via the JS property. |
 | `filterValues` | `Record<string, any>` | `{}` | Current value bound into each filter control, keyed by filter `key`. |
@@ -5176,7 +5177,7 @@ Data table with a built-in filter toolbar, sortable headers, a translucent loadi
 
 **Slots**
 
-The default slot projects `<tr>` rows into the `<tbody class="tc-advanced-table-body">`. Projected rows are preserved across re-renders.
+None for body rows — feed them through the `rows` property. (Pre-parsed DOM children present at connect time are still moved into the `<tbody>` for plain-JS callers, but `rows` wins when set; note that raw `<tr>` tags in static HTML never survive parsing outside a `<table>`, so static markup callers must also use `rows`.)
 
 **Accessibility**
 
@@ -5187,13 +5188,13 @@ The default slot projects `<tr>` rows into the `<tbody class="tc-advanced-table-
 - Focus is always visible on header and pagination buttons; touch targets ≥ 44px under coarse pointers; `prefers-reduced-motion` slows the spinner rather than hiding it.
 
 ```html
-<tc-advanced-table>
-    <tr><td>Alice</td><td>Maintainer</td><td style="text-align:right">842</td></tr>
-    <tr><td>Bob</td><td>Contributor</td><td style="text-align:right">311</td></tr>
-</tc-advanced-table>
+<tc-advanced-table></tc-advanced-table>
 
 <script>
 const table = document.querySelector('tc-advanced-table')
+table.rows =
+    '<tr><td>Alice</td><td>Maintainer</td><td style="text-align:right">842</td></tr>' +
+    '<tr><td>Bob</td><td>Contributor</td><td style="text-align:right">311</td></tr>'
 table.columns = [
     { key: 'name', label: 'Name' },
     { key: 'role', label: 'Role' },
@@ -12704,7 +12705,7 @@ Centered placeholder shown when data is unavailable. Displays an optional lucide
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `icon` | string | — | Lucide icon name in PascalCase (e.g. `"Inbox"`, `"FolderOpen"`). When set, renders the icon as an inline SVG inside a muted tile above the body. When omitted, no icon is shown. |
+| `icon` | string | — | Lucide icon name in kebab-case or PascalCase (e.g. `"inbox"`, `"folder-open"`, `"FolderOpen"`). When set, renders the icon as an inline SVG inside a muted tile above the body. When omitted (or unknown), no icon is shown. |
 
 **JS Properties**
 

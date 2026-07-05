@@ -255,9 +255,12 @@ export class Table extends HTMLElement {
             const skeletonRow = `<tr class="tc-table-row tc-table-row--skeleton" aria-hidden="true">${rowCells}</tr>`
             tbodyRows = Array.from({ length: this.loadingRows }, () => skeletonRow).join('')
         } else if (this._data.length === 0) {
+            // The empty message renders through the canonical tc-empty-state (the
+            // custom element upgrades inside the injected cell), so every table
+            // shares one empty treatment.
             tbodyRows =
                 `<tr class="tc-table-row"><td class="tc-table-empty" colspan="${colCount}">` +
-                `${esc(this.emptyMessage)}</td></tr>`
+                `<tc-empty-state icon="inbox">${esc(this.emptyMessage)}</tc-empty-state></td></tr>`
         } else {
             tbodyRows = this._sortedRows()
                 .map(({ row, index }) => {
