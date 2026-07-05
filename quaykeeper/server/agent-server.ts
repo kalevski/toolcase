@@ -4,7 +4,7 @@
 // human UI/API port and the agent port can be exposed independently:
 //
 //   • `GET /v1/config`                → { env, flags, version } (ETag/304)
-//   • `GET /v1/env[?format=dotenv]`   → resolved env vars (ETag/304)
+//   • `GET /v1/env[?format=dotenv|shell]` → resolved env vars (ETag/304)
 //   • `GET /v1/flags`                 → { key: { enabled } } (ETag/304)
 //   • `GET /v1/client/{os}/{arch}`    → the static quaykeeper-client binary
 //   • `GET /v1/install.sh`            → bootstrap script (download binary + exec)
@@ -22,6 +22,7 @@ import path from 'node:path'
 import { config } from '@/server/config'
 import { beginAgentFetch } from '@/server/services/agent-fetch'
 import { stringify as dotenvStringify } from '@/server/domain/env-file'
+import { toShellExports } from '@/server/domain/env-export'
 import { slog } from '@/server/infrastructure/server-log'
 
 const INSTALL_SH = `#!/bin/sh
@@ -151,9 +152,17 @@ function handle(req: http.IncomingMessage, res: http.ServerResponse): void {
     if (pathname === '/v1/env') {
         const snapshot = fetchOr(req, res, pathname)
         if (!snapshot) return
-        if (url.searchParams.get('format') === 'dotenv') {
+        const format = url.searchParams.get('format')
+        if (format === 'dotenv') {
             const text = dotenvStringify(Object.entries(snapshot.env).map(([key, value]) => ({ key, value })))
             sendText(res, 200, text, 'text/plain; charset=utf-8', { ETag: snapshot.version })
+            return
+        }
+        if (format === 'shell') {
+            // Sourceable `export KEY='…'` lines (single-quoted, expansion-proof) —
+            // what the docker-run snippets' inline entrypoint consumes at boot.
+            const text = toShellExports(Object.entries(snapshot.env).map(([key, value]) => ({ key, value })))
+            sendText(res, 200, text, 'text/x-shellscript; charset=utf-8', { ETag: snapshot.version })
             return
         }
         sendJson(res, 200, snapshot.env, { ETag: snapshot.version })

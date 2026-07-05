@@ -24,4 +24,5 @@ export const ID = {
     envVar: () => newId('var'),
     flag: () => newId('flag'),
     dbServer: () => newId('dbsrv'),
+    snippet: () => newId('snip'),
 }

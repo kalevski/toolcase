@@ -33,6 +33,7 @@ export function CommandPalette() {
             list.push(
                 { id: 'instances', label: 'Variables', group: 'Navigate', icon: 'server', href: '/instances' },
                 { id: 'db-servers', label: 'Databases', group: 'Navigate', icon: 'database', href: '/databases' },
+                { id: 'snippets', label: 'Docker snippets', group: 'Navigate', icon: 'container', href: '/snippets' },
                 { id: 'proxies', label: 'Proxies', group: 'Routing', icon: 'globe', href: '/proxies' },
                 { id: 'redirects', label: 'Redirects', group: 'Routing', icon: 'corner-up-right', href: '/redirects' },
                 { id: 'dead-hosts', label: 'Dead hosts', group: 'Routing', icon: 'ban', href: '/dead-hosts' },

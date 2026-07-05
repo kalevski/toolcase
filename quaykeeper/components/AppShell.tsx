@@ -61,6 +61,13 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
                               href: '/databases',
                               active: pathname.startsWith('/databases'),
                           },
+                          {
+                              key: 'snippets',
+                              label: 'Docker snippets',
+                              icon: 'container',
+                              href: '/snippets',
+                              active: pathname.startsWith('/snippets'),
+                          },
                       ]
                     : []),
             ],

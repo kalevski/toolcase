@@ -8,10 +8,27 @@
 // secret value is the placeholder string `<hidden:KEY>`, which we render
 // verbatim — this module never resolves or unmasks anything.
 
+import { shQuote } from './docker-run'
+
 /** One key/value pair to export. Local to this module (not a shared domain type). */
 export interface ExportEntry {
     key: string
     value: string
+}
+
+/**
+ * POSIX-shell `export KEY='value'` lines, one per entry, single-quoted via
+ * {@link shQuote} so values NEVER re-expand when sourced (`$`, backticks,
+ * quotes, and newlines all survive verbatim — the failure modes of sourcing a
+ * dotenv file directly). This is what the agent server's `/v1/env?format=shell`
+ * serves and what the docker-run snippets' inline entrypoint sources at boot.
+ */
+export function toShellExports(entries: ExportEntry[]): string {
+    let out = ''
+    for (const { key, value } of entries) {
+        out += `export ${key}=${shQuote(value)}\n`
+    }
+    return out
 }
 
 /**

@@ -447,6 +447,27 @@ const MIGRATIONS: string[] = [
     ALTER TABLE instance ADD COLUMN project TEXT;
     CREATE INDEX idx_instance_project ON instance(project);
     `,
+    // v18 — saved docker-run snippets (the Snippets page). One row per snippet: the
+    // form-built `docker run` recipe is persisted as a JSON `DockerRunSpec` in
+    // `spec` (domain/docker-run.ts owns the shape + validation — SQLite stores it
+    // opaquely, so spec evolution never needs a rebuild). `instance_id` is the
+    // optional Config instance whose resolved variables the generated command
+    // injects at container boot (an inline --entrypoint wrapper against the agent
+    // server); ON DELETE SET NULL so deleting an instance degrades the snippet to
+    // a plain `docker run` instead of deleting it.
+    `
+    CREATE TABLE docker_snippet (
+        id          TEXT PRIMARY KEY,          -- snip_<11 base36>
+        name        TEXT NOT NULL UNIQUE,      -- human label ("redis-cache", "api worker")
+        description TEXT,
+        spec        TEXT NOT NULL,             -- JSON DockerRunSpec (domain/docker-run.ts)
+        instance_id TEXT REFERENCES instance(id) ON DELETE SET NULL,
+        created_by  INTEGER NOT NULL,          -- app_user.github_id
+        created_at  TEXT NOT NULL,
+        updated_at  TEXT NOT NULL
+    );
+    CREATE INDEX idx_docker_snippet_instance ON docker_snippet(instance_id);
+    `,
 ]
 
 function migrate(db: DatabaseSync): void {

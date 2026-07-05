@@ -1,6 +1,9 @@
 // Pure shared domain types for Quaykeeper — safe to import from client AND server, so
 // this file deliberately has NO `import 'server-only'` and performs no I/O. No
-// imports of db or services. See notes/static-hosting-app-design.md §6, §12, §15.
+// imports of db or services (type-only imports from sibling pure domain modules
+// are fine). See notes/static-hosting-app-design.md §6, §12, §15.
+
+import type { DockerRunSpec } from './docker-run'
 
 // ── Auth / roles ─────────────────────────────────────────────────────────────
 
@@ -533,6 +536,33 @@ export interface ReferencingInstance {
  *  (`GET /api/instances` response row, move_wharf_to_perch.md §4, §10). */
 export interface InstanceListItem extends Instance {
     pending: boolean
+}
+
+// ── Docker-run snippets (`docker_snippet` row) ───────────────────────────────
+
+/**
+ * A saved, form-built `docker run` recipe (`docker_snippet` row) as the client
+ * sees it. The recipe itself is the JSON {@link DockerRunSpec}; `instanceId`
+ * optionally points at the Config instance whose resolved variables the rendered
+ * command injects at container boot (inline entrypoint against the agent
+ * server). `instanceName`/`instanceHasKey` are joined on read for display and
+ * the "no fetch key yet" warning — the fetch secret itself never appears here.
+ */
+export interface DockerSnippet {
+    id: string
+    name: string
+    description?: string
+    spec: DockerRunSpec
+    /** Injection target instance; absent = plain docker run (also after the instance is deleted). */
+    instanceId?: string
+    /** Joined instance name (display + command rendering). */
+    instanceName?: string
+    /** Whether the target instance has a fetch key minted (warning banner when not). */
+    instanceHasKey?: boolean
+    /** Creating `app_user.github_id`. */
+    createdBy: number
+    createdAt: string
+    updatedAt: string
 }
 
 // ── Database management (quaykeeper_database_management.md) ───────────────────────

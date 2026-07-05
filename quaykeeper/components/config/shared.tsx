@@ -40,9 +40,9 @@ export async function callApi<T = unknown>(url: string, method: string, payload?
                 parsed = null
             }
         }
-        const obj = (parsed ?? {}) as { error?: string }
+        const obj = (parsed ?? {}) as { error?: string; message?: string }
         if (!res.ok) {
-            return { ok: false, status: res.status, message: obj.error || `error ${res.status}`, body: parsed as T }
+            return { ok: false, status: res.status, message: obj.message || obj.error || `error ${res.status}`, body: parsed as T }
         }
         return { ok: true, status: res.status, body: parsed as T }
     } catch {
