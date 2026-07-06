@@ -25,4 +25,6 @@ export const ID = {
     flag: () => newId('flag'),
     dbServer: () => newId('dbsrv'),
     snippet: () => newId('snip'),
+    job: () => newId('job'),
+    jobRun: () => newId('run'),
 }

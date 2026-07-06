@@ -70,6 +70,19 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
                           },
                       ]
                     : []),
+                // Scheduled tasks run arbitrary scripts on the host — owner-only, so it
+                // gates one rank tighter than the maintainer resources above.
+                ...(me.role === 'owner'
+                    ? [
+                          {
+                              key: 'jobs',
+                              label: 'Scheduled tasks',
+                              icon: 'clock',
+                              href: '/jobs',
+                              active: pathname.startsWith('/jobs'),
+                          },
+                      ]
+                    : []),
             ],
         }
         // Every routing area is its own sidebar entry (like the Admin section) —

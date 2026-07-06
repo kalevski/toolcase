@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
-import { ROLE_RANK } from '@/server/domain/types'
+import { ROLE_RANK, type Role } from '@/server/domain/types'
 import { useMe } from '@/lib/me-context'
 import { LoadingState, ErrorState } from '@/components/states'
 
@@ -57,11 +57,16 @@ export type ConfigDataState<T> =
     | { phase: 'ready'; data: T }
 
 /**
- * Confirm the caller meets the `maintainer` rank, then load a Config dataset
- * via `fetcher`. `fetcher` MUST be stable (wrap in `useCallback`) — it is
+ * Confirm the caller meets `minRole` (default `maintainer`), then load a Config
+ * dataset via `fetcher`. `fetcher` MUST be stable (wrap in `useCallback`) — it is
  * intentionally omitted from the effect deps so confirming the role doesn't loop.
+ * The owner-only surfaces (e.g. Scheduled tasks) pass `minRole: 'owner'`; the
+ * gate is a UX nicety — every backing route re-enforces it server-side.
  */
-export function useConfigData<T>(fetcher: () => Promise<T | null>): {
+export function useConfigData<T>(
+    fetcher: () => Promise<T | null>,
+    minRole: Role = 'maintainer',
+): {
     state: ConfigDataState<T>
     reload: () => Promise<void>
 } {
@@ -70,7 +75,7 @@ export function useConfigData<T>(fetcher: () => Promise<T | null>): {
     const [state, setState] = useState<ConfigDataState<T>>({ phase: 'loading' })
 
     useEffect(() => {
-        if (ROLE_RANK[me.role] < ROLE_RANK.maintainer) {
+        if (ROLE_RANK[me.role] < ROLE_RANK[minRole]) {
             setState({ phase: 'forbidden' })
             router.replace('/')
             return
@@ -84,7 +89,7 @@ export function useConfigData<T>(fetcher: () => Promise<T | null>): {
             cancelled = true
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [me.role, router])
+    }, [me.role, router, minRole])
 
     const reload = useCallback(async () => {
         setState({ phase: 'loading' })

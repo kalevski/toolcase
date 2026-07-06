@@ -28,6 +28,10 @@ touches nginxpilot's filesystem — the two only share a network.
   REST API (see [Certificate management](#certificate-management)).
 - **Multi-realm.** One Quaykeeper can target several nginxpilot daemons ("realms");
   each realm's admin token is encrypted at rest (AES-256-GCM).
+- **Scheduled tasks.** The owner defines shell or JavaScript scripts that run on the
+  Quaykeeper host — on a 5-field cron schedule, on demand ("run now"), or both. Each
+  run's stdout/stderr, exit code, and duration are captured (see
+  [Scheduled tasks](#scheduled-tasks)).
 
 Built on Next.js 16 + React 19, rendered entirely with the `@toolcase/web-components`
 (`tc-*`) UI kit. **Requires Node ≥ 22.5** (built-in `node:sqlite`).
@@ -163,6 +167,7 @@ knobs. Required vars fail fast at boot if missing.
 | `PORT` | `4100` (dev) / `3000` (container) | HTTP listen port (UI/API). |
 | `QUAYKEEPER_AGENT_PORT` | `4101` | Agent-server listen port (instance-fetch API + client download). |
 | `QUAYKEEPER_CLIENT_DIR` | `./client-bin` | Dir holding the cross-compiled `quaykeeper-client` binaries the agent server serves. |
+| `QUAYKEEPER_JOB_SHELL` | `/bin/bash` | Interpreter for a scheduled `shell`-kind job's script. Set to `/bin/sh` on a minimal container. A missing binary surfaces as a failed run, never a crash. |
 
 > Per-site GitHub tokens are stored as generated `QUAYKEEPER_GH_TOKEN_<SITE_ID>` env
 > names handed to nginxpilot fragments — not something you set by hand.
@@ -195,3 +200,37 @@ stores encrypted at rest per realm).
 > custom-domain path under *Custom domains (certbot)*, where Quaykeeper itself shells out to
 > `certbot` and writes a vhost into its own nginx `conf.d/` (the `QUAYKEEPER_CERTBOT_*` /
 > `QUAYKEEPER_NGINX_*` env vars). The two don't interact.
+
+## Scheduled tasks
+
+The **Scheduled tasks** page (`/jobs`) lets the owner define scripts that run **on the
+Quaykeeper host** and see their output. A task is one of:
+
+- **shell** — run with `$QUAYKEEPER_JOB_SHELL` (bash by default).
+- **node** — run as an ES module with the same node binary that serves the app.
+
+Each task carries an optional **5-field cron** schedule (`min hour dom mon dow`,
+supporting `*`, lists, ranges, and `*/n` — the same parser the quota/status tickers
+use). No schedule = a **manual-only** task you run on demand. Every task also has a
+**timeout** (seconds); a run that overruns is killed (its whole process group, so a
+sleeping grandchild can't linger).
+
+| Action | Endpoint | Notes |
+|---|---|---|
+| List / create | `GET` / `POST /api/jobs` | |
+| Read + recent runs | `GET /api/jobs/{id}` | `{ job, runs }`. |
+| Update | `PATCH /api/jobs/{id}` | A lone `{ enabled }` body is the list's quick toggle. |
+| Delete | `DELETE /api/jobs/{id}` | Run history cascades. |
+| Run now | `POST /api/jobs/{id}/run` | Awaits the run; returns it with captured `stdout`/`stderr`, exit code, duration. `409` if the same task is already running. |
+
+The scheduler is an in-process, minute-resolution ticker started at boot
+(`instrumentation.ts` → `services/job-scheduler.ts`), matching the other background
+tickers — no external cron. It fires each enabled, scheduled task at most once per
+matching minute and skips a task whose previous run is still going. Per-run output is
+capped (256 KB per stream) and only the newest 50 runs per task are kept.
+
+> **Owner-only, and it runs arbitrary code on the host.** Every `/api/jobs` route is
+> `authorize('owner')`-gated (the highest role), and every create / update / delete /
+> run is audited. This is the same host-shell trust boundary the custom-domain certbot
+> path already assumes — a scheduled task runs as the Quaykeeper process user, so treat
+> owner access accordingly.

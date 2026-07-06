@@ -25,5 +25,10 @@ export async function register(): Promise<void> {
         // episodes per realm with audit attribution, so state history survives restarts.
         const { ensureStatusPollStarted } = await import('@/server/services/status-poll')
         ensureStatusPollStarted()
+
+        // Scheduled-job cron ticker: fires enabled jobs whose 5-field cron matches the
+        // current minute (the Scheduled tasks page). In-memory, single-process.
+        const { ensureJobSchedulerStarted } = await import('@/server/services/job-scheduler')
+        ensureJobSchedulerStarted()
     }
 }

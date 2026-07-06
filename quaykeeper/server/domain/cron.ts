@@ -83,3 +83,24 @@ export function parseCron(expr: string): CronSpec {
         },
     }
 }
+
+/**
+ * The next minute at or after `from` (exclusive of `from`'s own minute) that the
+ * expression fires — or `null` if none in the search horizon. Pure, so the "next
+ * run" the jobs UI previews is the same computation the scheduler ticker uses.
+ *
+ * Walks minute by minute from the top of the minute after `from`, capped at
+ * `horizonMinutes` (default ~366 days) so an unsatisfiable field combination
+ * (e.g. Feb 30) terminates instead of looping forever. Seconds/millis of the
+ * returned Date are zeroed — cron resolution is one minute.
+ */
+export function nextRun(spec: CronSpec, from: Date, horizonMinutes = 366 * 24 * 60): Date | null {
+    const d = new Date(from.getTime())
+    d.setSeconds(0, 0)
+    d.setMinutes(d.getMinutes() + 1) // strictly after `from`'s minute
+    for (let i = 0; i < horizonMinutes; i++) {
+        if (spec.matches(d)) return new Date(d.getTime())
+        d.setMinutes(d.getMinutes() + 1)
+    }
+    return null
+}

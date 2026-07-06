@@ -1197,6 +1197,41 @@ body {
     gap: 0.75rem;
 }
 
+/* ── Scheduled tasks run history (components/jobs/JobRunsModal.tsx) ────────────── */
+
+.quaykeeper-job-runs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Each run is a <details>; the summary is a single wrapping row of metadata. */
+.quaykeeper-job-run {
+    border: 1px solid var(--tc-border-faint, var(--tc-border));
+    padding: 0.5rem 0.75rem;
+}
+
+.quaykeeper-job-run-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    cursor: pointer;
+}
+
+.quaykeeper-job-run-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.quaykeeper-job-stream {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
 /* ── Audit table (components/admin/AdminAudit.tsx, impl §8) ────────────────────── */
 
 /* Timestamps read as data — mono, no wrapping mid-value. */

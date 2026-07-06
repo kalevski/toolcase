@@ -142,6 +142,13 @@ export const config = {
 
     port: num('PORT', 4100),
 
+    // ── scheduled jobs (the Scheduled tasks page) ──
+    // Interpreter for a `shell`-kind job's script. The script is written to a temp
+    // file and run as `<shell> <file>`. Defaults to bash (present in the node:24-slim
+    // image and on Ubuntu hosts); override to `/bin/sh` for a minimal container. A
+    // missing interpreter surfaces as a failed run (spawn ENOENT), never a crash.
+    jobShell: optional('QUAYKEEPER_JOB_SHELL', '/bin/bash'),
+
     // ── Config subsystem: the companion agent listener (move_wharf_to_perch.md §9) ──
     // Port of the machine-facing agent server (`server/agent-server.ts`): the
     // instance-fetch API (`/v1/config|env|flags`) and quaykeeper-client binary

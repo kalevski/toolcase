@@ -468,6 +468,44 @@ const MIGRATIONS: string[] = [
     );
     CREATE INDEX idx_docker_snippet_instance ON docker_snippet(instance_id);
     `,
+    // v19 — scheduled jobs (the Scheduled tasks page): owner-defined shell / JavaScript
+    // scripts the control-plane host runs on a 5-field cron schedule and/or on demand.
+    // `scheduled_job` is the definition; `job_run` is the append-only execution history
+    // with captured output (ON DELETE CASCADE so deleting a job drops its runs). The
+    // executor + cron ticker live in `services/jobs.ts` / `services/job-scheduler.ts`;
+    // the script is stored opaquely (validated in `domain/job.ts` before it lands).
+    `
+    CREATE TABLE scheduled_job (
+        id           TEXT PRIMARY KEY,          -- job_<11 base36>
+        name         TEXT NOT NULL UNIQUE,      -- human label ("nightly backup")
+        description  TEXT,
+        kind         TEXT NOT NULL,             -- shell | node
+        script       TEXT NOT NULL,             -- the source (opaque; domain/job.ts validates)
+        schedule     TEXT,                      -- 5-field cron; NULL = manual-only (run-now only)
+        enabled      INTEGER NOT NULL DEFAULT 1,
+        timeout_sec  INTEGER NOT NULL,          -- hard wall-clock kill cap
+        created_by   INTEGER NOT NULL,          -- app_user.github_id
+        created_at   TEXT NOT NULL,
+        updated_at   TEXT NOT NULL
+    );
+
+    CREATE TABLE job_run (
+        id                 TEXT PRIMARY KEY,     -- run_<11 base36>
+        job_id             TEXT NOT NULL REFERENCES scheduled_job(id) ON DELETE CASCADE,
+        trigger            TEXT NOT NULL,        -- manual | schedule
+        status             TEXT NOT NULL,        -- success | failed | timeout | error
+        exit_code          INTEGER,              -- NULL when killed by signal / never spawned
+        stdout             TEXT NOT NULL DEFAULT '',
+        stderr             TEXT NOT NULL DEFAULT '',
+        truncated          INTEGER NOT NULL DEFAULT 0,
+        started_at         TEXT NOT NULL,
+        finished_at        TEXT NOT NULL,
+        duration_ms        INTEGER NOT NULL,
+        triggered_by       INTEGER,              -- github_id (manual) / NULL (schedule)
+        triggered_by_login TEXT
+    );
+    CREATE INDEX idx_job_run_job ON job_run(job_id);
+    `,
 ]
 
 function migrate(db: DatabaseSync): void {
