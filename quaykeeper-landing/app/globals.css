@@ -1,0 +1,114 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #0b0f14;
+    color: #e8edf2;
+    font-family:
+        'IBM Plex Sans',
+        system-ui,
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+a {
+    color: #45c8bf;
+    text-decoration: none;
+}
+
+::selection {
+    background: rgba(69, 200, 191, 0.28);
+}
+
+@keyframes qk-pulse {
+    0%,
+    100% {
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(69, 200, 191, 0.5);
+    }
+    50% {
+        opacity: 0.55;
+        box-shadow: 0 0 0 5px rgba(69, 200, 191, 0);
+    }
+}
+
+@keyframes np-pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* hover-affected properties live only in these classes (not inline style) so
+   the CSS cascade can actually apply on :hover */
+
+.qk-navlink {
+    color: var(--muted);
+}
+.qk-navlink:hover {
+    color: var(--tx);
+}
+
+.qk-star-btn {
+    border-color: var(--line);
+    color: var(--muted);
+}
+.qk-star-btn:hover {
+    border-color: var(--line2);
+    color: var(--tx);
+}
+
+.qk-deploy-btn {
+    background: var(--accent);
+    color: #08110f;
+}
+.qk-deploy-btn:hover {
+    background: #6fded6;
+    color: #08110f;
+}
+
+.qk-cta-primary {
+    background: var(--accent);
+    color: #08110f;
+}
+.qk-cta-primary:hover {
+    background: #6fded6;
+}
+
+.qk-cta-secondary {
+    border-color: var(--line2);
+    color: var(--tx);
+}
+.qk-cta-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.qk-feature-card {
+    border-color: var(--line);
+    background: var(--card);
+}
+.qk-feature-card:hover {
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+    background: var(--bg2);
+}
+
+.qk-toc-link {
+    color: var(--muted);
+}
+.qk-toc-link:hover {
+    color: var(--accent);
+}
+
+.qk-guide-cta {
+    background: var(--accent);
+    color: #08110f;
+}
+.qk-guide-cta:hover {
+    background: #eec089;
+}

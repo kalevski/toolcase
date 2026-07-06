@@ -1,22 +1,19 @@
 {
-    "name": "@toolcase/taskforge",
-    "version": "5.0.0",
+    "name": "@toolcase/quaykeeper-landing",
+    "version": "1.0.0",
     "private": true,
-    "description": "TaskForge — self-hosted web control panel that drives the Claude Code CLI over local git repositories.",
+    "description": "Static marketing site for Quaykeeper, exported from the design-doc source in export/.",
     "scripts": {
-        "dev": "next dev -p 4000",
+        "dev": "next dev -p 4500",
         "build": "next build",
         "start": "next start",
         "lint": "next lint",
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {
-        "@toolcase/base": "^5.0.0",
-        "@toolcase/web-components": "^5.0.7",
         "next": "^16.2.9",
         "react": "^19.1.0",
-        "react-dom": "^19.1.0",
-        "server-only": "^0.0.1"
+        "react-dom": "^19.1.0"
     },
     "devDependencies": {
         "@types/node": "^22.5",

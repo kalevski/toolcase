@@ -20,6 +20,7 @@
         "node",
         "taskforge",
         "quaykeeper",
+        "quaykeeper-landing",
         "examples"
     ],
     "devDependencies": {

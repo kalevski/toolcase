@@ -1,0 +1,41 @@
+name: Deploy Quaykeeper Landing to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'quaykeeper-landing/**'
+      - 'package-lock.json'
+      - '.github/workflows/deploy-quaykeeper-landing.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build quaykeeper-landing
+        run: npm -w @toolcase/quaykeeper-landing run build
+
+      - name: Deploy to public branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./quaykeeper-landing/out
+          publish_branch: public
+          destination_dir: quaykeeper
+          keep_files: true
