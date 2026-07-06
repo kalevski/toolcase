@@ -29,7 +29,7 @@ const SELECT = `
 `
 
 function map(r: Raw): DockerSnippet {
-    let parsed: unknown = null
+    let parsed: unknown
     try {
         parsed = JSON.parse(r.spec)
     } catch {

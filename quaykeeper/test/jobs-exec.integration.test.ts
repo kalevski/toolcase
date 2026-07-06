@@ -9,9 +9,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 // `server-only` and read `config` at load — the vitest aliases neutralize the
 // former, and we set the required env BEFORE dynamically importing the modules.
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let jobs: typeof import('@/server/services/jobs')
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let jobRepo: typeof import('@/server/data/repositories/job-repo')
 
 beforeAll(async () => {
