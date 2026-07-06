@@ -3,7 +3,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Element-scoped custom-property overrides ─────────────────────────────────
     // Applied to all four element names (tc-health-bar etc. are aliases that render
     // the same .tc-resource-bar class tree; the vars must land on the host element).
@@ -12,21 +11,21 @@ tc-theme[name='blueprint'],
     tc-mana-bar,
     tc-stamina-bar {
         // Label row — display face for the bar name; HUD identity, not prose.
-        --bs-resource-bar-label-color:       var(--bp-emphasis);
-        --bs-resource-bar-label-font-size:   0.8125rem;
+        --bs-resource-bar-label-color: var(--bp-emphasis);
+        --bs-resource-bar-label-font-size: 0.8125rem;
         --bs-resource-bar-label-font-weight: 700;
 
         // Value readout — mono face, muted. Tabular figures applied below.
-        --bs-resource-bar-value-color:     var(--bp-text-muted);
+        --bs-resource-bar-value-color: var(--bp-text-muted);
         --bs-resource-bar-value-font-size: 0.6875rem;
 
         // Track — recessed well so the fill reads as raised above it.
-        --bs-resource-bar-track-bg:    var(--bp-bg-2);
+        --bs-resource-bar-track-bg: var(--bp-bg-2);
         --bs-resource-bar-track-height: 0.625rem;
 
         // Default fill — pink is the primary accent in the blueprint rotation.
         // Health bars use this; variants override below.
-        --bs-resource-bar-fill-bg:         var(--bp-pink);
+        --bs-resource-bar-fill-bg: var(--bp-pink);
         --bs-resource-bar-fill-transition: width 0.3s var(--bp-ease);
 
         // Ghost band — replaces raw var(--tc-slate-400) which leaks the light-slate

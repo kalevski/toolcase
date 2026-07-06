@@ -57,7 +57,9 @@ tc-theme[name='dungeon'],
         clip-path: var(--fg-notch-clip);
         z-index: 1;
     }
-    .tc-loot-popup__panel::before { left: -1px; }
+    .tc-loot-popup__panel::before {
+        left: -1px;
+    }
     .tc-loot-popup__panel::after {
         right: -1px;
         transform: scaleX(-1);
@@ -81,7 +83,9 @@ tc-theme[name='dungeon'],
         text-transform: uppercase;
         letter-spacing: 0.12em;
         padding-right: 0;
-        text-shadow: 0 1px 0 #000, 0 0 18px rgba(232, 200, 120, 0.35);
+        text-shadow:
+            0 1px 0 #000,
+            0 0 18px rgba(232, 200, 120, 0.35);
     }
 
     // Gilded divider between title and loot list — rule + centred diamond motif.

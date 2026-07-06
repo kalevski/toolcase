@@ -5,7 +5,6 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // ── Top-edge gold rule (replaces flat hairline) ───────────────────────────
     // The base sets border-top: 1px solid on .tc-page-footer. We keep the 1px
     // geometry but replace the flat colour with the gold-gradient border-image.
@@ -45,7 +44,9 @@ tc-theme[name='dungeon'],
 
         &:hover {
             color: var(--fg-ink);
-            box-shadow: 0 0 10px rgba(232, 200, 120, 0.35), var(--fg-bevel-top);
+            box-shadow:
+                0 0 10px rgba(232, 200, 120, 0.35),
+                var(--fg-bevel-top);
             text-decoration: none;
         }
 

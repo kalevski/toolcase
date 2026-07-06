@@ -2,64 +2,63 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Token remaps ──────────────────────────────────────────────────────────
     // Drive all cosmetics through the component's --bs-party-panel-* vars.
     // The radius sweep owns all corners — no border-radius set here.
 
     tc-party-panel {
         // Panel shell
-        --bs-party-panel-bg:                  var(--bp-paper);
-        --bs-party-panel-border:              var(--bp-border);
+        --bs-party-panel-bg: var(--bp-paper);
+        --bs-party-panel-border: var(--bp-border);
 
         // Header strip — recessed well, teal eyebrow for the HUD kicker
-        --bs-party-panel-header-bg:           var(--bp-bg-2);
-        --bs-party-panel-header-border:       var(--bp-border);
-        --bs-party-panel-eyebrow-color:       var(--bp-teal-fg);   // teal mono label = action/HUD
-        --bs-party-panel-count-color:         var(--bp-text-faint);
+        --bs-party-panel-header-bg: var(--bp-bg-2);
+        --bs-party-panel-header-border: var(--bp-border);
+        --bs-party-panel-eyebrow-color: var(--bp-teal-fg); // teal mono label = action/HUD
+        --bs-party-panel-count-color: var(--bp-text-faint);
 
         // Slot defaults
-        --bs-party-panel-slot-bg:             var(--bp-paper);
-        --bs-party-panel-slot-border:         var(--bp-border-faint); // dividers, not tracks
+        --bs-party-panel-slot-bg: var(--bp-paper);
+        --bs-party-panel-slot-border: var(--bp-border-faint); // dividers, not tracks
 
         // Empty slot — teal invite treatment
-        --bs-party-panel-slot-empty-bg:       var(--bp-paper);
-        --bs-party-panel-slot-empty-color:    var(--bp-teal-fg);
+        --bs-party-panel-slot-empty-bg: var(--bp-paper);
+        --bs-party-panel-slot-empty-color: var(--bp-teal-fg);
         --bs-party-panel-slot-empty-hover-bg: var(--bp-teal-soft);
 
         // Filled slot — clean white
-        --bs-party-panel-slot-filled-bg:      var(--bp-paper);
+        --bs-party-panel-slot-filled-bg: var(--bp-paper);
 
         // Ready slot — pink-surface tint (primary "go" state)
-        --bs-party-panel-slot-ready-bg:       var(--bp-pink-surface);
+        --bs-party-panel-slot-ready-bg: var(--bp-pink-surface);
 
         // Member name — display face (arcade-title feel, set in element rule below)
-        --bs-party-panel-member-name-color:   var(--bp-text);
+        --bs-party-panel-member-name-color: var(--bp-text);
 
         // Role chip — violet supporting accent
-        --bs-party-panel-role-bg:             var(--bp-violet-soft);
-        --bs-party-panel-role-color:          var(--bp-violet-fg);
+        --bs-party-panel-role-bg: var(--bp-violet-soft);
+        --bs-party-panel-role-color: var(--bp-violet-fg);
 
         // Host badge — pink primary accent
-        --bs-party-panel-host-badge-color:    var(--bp-pink);
+        --bs-party-panel-host-badge-color: var(--bp-pink);
 
         // Ready / waiting badges
-        --bs-party-panel-ready-color:         var(--bp-teal-fg);
-        --bs-party-panel-waiting-color:       var(--bp-text-faint);
+        --bs-party-panel-ready-color: var(--bp-teal-fg);
+        --bs-party-panel-waiting-color: var(--bp-text-faint);
 
         // Actions footer — recessed well
-        --bs-party-panel-actions-bg:          var(--bp-bg-2);
+        --bs-party-panel-actions-bg: var(--bp-bg-2);
 
         // Default button — paper + border + ink text
-        --bs-party-panel-btn-bg:              var(--bp-paper);
-        --bs-party-panel-btn-color:           var(--bp-text-soft);
-        --bs-party-panel-btn-border:          var(--bp-border-strong);
-        --bs-party-panel-btn-hover-bg:        var(--bp-bg-2);
-        --bs-party-panel-btn-hover-color:     var(--bp-text);
+        --bs-party-panel-btn-bg: var(--bp-paper);
+        --bs-party-panel-btn-color: var(--bp-text-soft);
+        --bs-party-panel-btn-border: var(--bp-border-strong);
+        --bs-party-panel-btn-hover-bg: var(--bp-bg-2);
+        --bs-party-panel-btn-hover-color: var(--bp-text);
 
         // Leave button — danger red (real red, not pink)
-        --bs-party-panel-btn-leave-bg:        var(--bp-danger-soft);
-        --bs-party-panel-btn-leave-color:     var(--bp-danger);
+        --bs-party-panel-btn-leave-bg: var(--bp-danger-soft);
+        --bs-party-panel-btn-leave-color: var(--bp-danger);
     }
 
     // ── Panel shell ──────────────────────────────────────────────────────────

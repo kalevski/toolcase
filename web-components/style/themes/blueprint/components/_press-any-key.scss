@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Token overrides ──────────────────────────────────────────────────────
     // Resting state: teal-fg gives AA contrast on the light --bp-bg canvas.
     // Hover: blueprint primary (pink) snaps the prompt to attention.
@@ -10,31 +9,31 @@ tc-theme[name='blueprint'],
     // cadence — no extra animation is needed.
 
     tc-press-any-key {
-        --bs-press-any-key-color:          var(--bp-teal-fg);
-        --bs-press-any-key-color-hover:    var(--bp-pink);
-        --bs-press-any-key-letter-spacing: 0.14em;   // wider mono tracking → HUD ticker feel
+        --bs-press-any-key-color: var(--bp-teal-fg);
+        --bs-press-any-key-color-hover: var(--bp-pink);
+        --bs-press-any-key-letter-spacing: 0.14em; // wider mono tracking → HUD ticker feel
     }
 
     // ── Text span cosmetics ──────────────────────────────────────────────────
 
     .tc-press-any-key__text {
-        font-family: var(--bp-mono);   // JetBrains Mono — canonical mono label voice
-        color:       var(--bs-press-any-key-color);
+        font-family: var(--bp-mono); // JetBrains Mono — canonical mono label voice
+        color: var(--bs-press-any-key-color);
 
         // Soft teal halo rings the label at rest, mirroring the live-pulse dot idiom.
         // Keeps it obviously interactive without a hard border.
         text-shadow: 0 0 18px var(--bp-teal-soft);
 
         transition:
-            color       0.18s var(--bp-ease),
+            color 0.18s var(--bp-ease),
             text-shadow 0.18s var(--bp-ease);
     }
 
     // ── Hover state ──────────────────────────────────────────────────────────
 
     tc-press-any-key:hover:not([disabled]) .tc-press-any-key__text {
-        color:       var(--bp-pink);          // primary accent on interaction
-        text-shadow: var(--bp-glow-pink);     // pink glow confirms CTA intent
+        color: var(--bp-pink); // primary accent on interaction
+        text-shadow: var(--bp-glow-pink); // pink glow confirms CTA intent
     }
 
     // ── Focus-visible ────────────────────────────────────────────────────────
@@ -42,8 +41,7 @@ tc-theme[name='blueprint'],
     // keyboard users get the same visual punch as pointer hover.
 
     tc-press-any-key:focus-visible .tc-press-any-key__text {
-        color:       var(--bp-pink);
+        color: var(--bp-pink);
         text-shadow: var(--bp-glow-pink);
     }
-
 }

@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Label ─────────────────────────────────────────────────────────────────
     // Match the form-label voice used in _input.scss — muted ink, not full --bp-text.
 
@@ -16,14 +15,14 @@ tc-theme[name='blueprint'],
     // + glow on focus (mirrors the focus pattern from _input.scss).
 
     .tc-color-picker-trigger {
-        --bs-color-picker-trigger-bg:     var(--bp-paper);
+        --bs-color-picker-trigger-bg: var(--bp-paper);
         --bs-color-picker-trigger-border: var(--bp-border-strong);
-        --bs-color-picker-trigger-color:  var(--bp-text);
+        --bs-color-picker-trigger-color: var(--bp-text);
 
         font-family: var(--bp-body);
         transition:
             border-color var(--bp-ease),
-            box-shadow   var(--bp-ease);
+            box-shadow var(--bp-ease);
 
         &:hover:not([disabled]):not(:disabled) {
             --bs-color-picker-trigger-border: var(--bp-border-soft);
@@ -63,7 +62,7 @@ tc-theme[name='blueprint'],
     // tc-dropdown / tc-context-menu surface treatment already established.
 
     .tc-color-picker-panel {
-        --bs-color-picker-panel-bg:     var(--bp-paper);
+        --bs-color-picker-panel-bg: var(--bp-paper);
         --bs-color-picker-panel-border: var(--bp-border-strong);
         --bs-color-picker-panel-shadow: var(--tc-shadow-lg);
     }
@@ -73,7 +72,6 @@ tc-theme[name='blueprint'],
     // lavender canvas and bypass the token system.
 
     .tc-color-picker-swatch {
-
         &:hover {
             // Replace rgba(0,0,0,0.3) inner border → blueprint border token.
             border-color: var(--bp-border-strong);

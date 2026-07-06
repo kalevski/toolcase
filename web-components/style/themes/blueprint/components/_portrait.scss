@@ -2,21 +2,20 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-portrait {
         // Surface: raised white card with lavender hairline
-        --bs-portrait-bg:           var(--bp-paper);
+        --bs-portrait-bg: var(--bp-paper);
         --bs-portrait-border-color: var(--bp-border);
-        --bs-portrait-glyph-color:  var(--bp-text-muted);
+        --bs-portrait-glyph-color: var(--bp-text-muted);
 
         // Ring: transparent by default; callers set --bs-portrait-ring-color to
         // --bp-teal (action) or --bp-pink (primary/selected) as appropriate.
         // We leave the default transparent so the component opt-in is intentional.
-        --bs-portrait-ring-color:   transparent;
+        --bs-portrait-ring-color: transparent;
 
         // Level badge: recessed well bg, teal-fg mono text, faint hairline top
-        --bs-portrait-level-bg:     var(--bp-bg-2);
-        --bs-portrait-level-color:  var(--bp-teal-fg);
+        --bs-portrait-level-bg: var(--bp-bg-2);
+        --bs-portrait-level-color: var(--bp-teal-fg);
         --bs-portrait-level-border: 1px solid var(--bp-border);
     }
 
@@ -24,9 +23,9 @@ tc-theme[name='blueprint'],
     // The base already sets font-family to monospace; we reinforce the bp-mono
     // stack and apply the uppercase + loose-tracking micro-label convention.
     .tc-portrait__level {
-        font-family:    var(--bp-mono);
-        font-size:      0.5rem;
-        font-weight:    700;
+        font-family: var(--bp-mono);
+        font-size: 0.5rem;
+        font-weight: 700;
         letter-spacing: 0.1em;
         text-transform: uppercase;
     }
@@ -36,15 +35,15 @@ tc-theme[name='blueprint'],
     // game/character tile. Use sparingly — the aesthetic fits tc-portrait well
     // because it is always a distinct tappable identity tile, never a layout box.
     .tc-portrait::before {
-        content:      '';
-        position:     absolute;
-        top:          6px;
-        left:         6px;
-        width:        10px;
-        height:       10px;
-        border-top:   2px solid var(--bp-teal);
-        border-left:  2px solid var(--bp-teal);
-        z-index:      1;
+        content: '';
+        position: absolute;
+        top: 6px;
+        left: 6px;
+        width: 10px;
+        height: 10px;
+        border-top: 2px solid var(--bp-teal);
+        border-left: 2px solid var(--bp-teal);
+        z-index: 1;
         pointer-events: none;
         // Suppress on circle variant — bracket reads wrong on a round frame
     }
@@ -62,16 +61,17 @@ tc-theme[name='blueprint'],
     // ── Shadow: soft violet-tinted lift ───────────────────────────────────────
     .tc-portrait {
         box-shadow: var(--tc-shadow-sm);
-        transition: box-shadow var(--bp-ease), transform var(--bp-ease);
+        transition:
+            box-shadow var(--bp-ease),
+            transform var(--bp-ease);
 
         &:where([data-interactive], [role='button'], [tabindex]) {
             cursor: pointer;
 
             &:hover {
                 box-shadow: var(--tc-shadow-hover);
-                transform:  translateY(-2px);
+                transform: translateY(-2px);
             }
         }
     }
-
 }

@@ -4,26 +4,25 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     .tc-action-row-list {
         // ── Surface ───────────────────────────────────────────────────────────
-        --bs-action-row-list-bg:               var(--bp-paper);
-        --bs-action-row-list-border-color:     var(--bp-border);
+        --bs-action-row-list-bg: var(--bp-paper);
+        --bs-action-row-list-border-color: var(--bp-border);
 
         // ── Inner row separators ──────────────────────────────────────────────
         // Base partial bakes #{$slate-100} here — a raw slate literal that leaks
         // the light-slate ramp under dark-adjacent palettes.  Route to the
         // blueprint faint-divider token instead.
-        --bs-action-row-list-separator-color:  var(--bp-border-faint);
+        --bs-action-row-list-separator-color: var(--bp-border-faint);
 
         // ── Hover tint ────────────────────────────────────────────────────────
         // A barely-there lavender wash — visually consistent with the --bp-paper
         // surface family without introducing a second painted background.
-        --bs-action-row-list-hover-bg:         var(--bp-paper-tint);
+        --bs-action-row-list-hover-bg: var(--bp-paper-tint);
 
         // ── Text ──────────────────────────────────────────────────────────────
-        --bs-action-row-list-title-color:      var(--bp-text);
-        --bs-action-row-list-desc-color:       var(--bp-text-muted);
+        --bs-action-row-list-title-color: var(--bp-text);
+        --bs-action-row-list-desc-color: var(--bp-text-muted);
 
         // Outer frame shadow — lifts the list off the page background gently.
         box-shadow: var(--tc-shadow-sm);
@@ -55,7 +54,9 @@ tc-theme[name='blueprint'],
     // action accent, giving the arrow a clear directional affordance.
     .tc-action-row-trailing-icon {
         color: var(--bp-teal);
-        transition: transform 0.18s var(--bp-ease), color 0.18s;
+        transition:
+            transform 0.18s var(--bp-ease),
+            color 0.18s;
     }
 
     // On hover, nudge the trailing icon right for a subtle affordance cue.

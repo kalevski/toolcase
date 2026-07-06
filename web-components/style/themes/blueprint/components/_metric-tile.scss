@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Token overrides via --bs-metric-tile-* API ──────────────────────────────
     // Drives all cosmetics through the component's own custom-property contract
     // so grid tiles (<div class="tc-metric-tile">) and element tiles both restyle.
@@ -10,28 +9,28 @@ tc-theme[name='blueprint'],
     tc-metric-tile,
     .tc-metric-tile {
         // Surface: white raised card, blueprint hairline, soft violet-tinted shadow
-        --bs-metric-tile-bg:               var(--bp-paper);
-        --bs-metric-tile-border-color:     var(--bp-border);
-        --bs-metric-tile-shadow:           var(--tc-shadow-sm);
+        --bs-metric-tile-bg: var(--bp-paper);
+        --bs-metric-tile-border-color: var(--bp-border);
+        --bs-metric-tile-shadow: var(--tc-shadow-sm);
 
         // Label: mono eyebrow — teal-fg so it clears AA on white
-        --bs-metric-tile-label-color:      var(--bp-teal-fg);
-        --bs-metric-tile-label-font-size:  0.6875rem;
+        --bs-metric-tile-label-color: var(--bp-teal-fg);
+        --bs-metric-tile-label-font-size: 0.6875rem;
         --bs-metric-tile-label-letter-spacing: 0.12em;
 
         // Value: blueprint emphasis ink (strongest readable dark)
-        --bs-metric-tile-value-color:      var(--bp-emphasis);
-        --bs-metric-tile-value-font-size:  1.5rem;
+        --bs-metric-tile-value-color: var(--bp-emphasis);
+        --bs-metric-tile-value-font-size: 1.5rem;
         --bs-metric-tile-value-font-weight: 600;
 
         // Unit suffix: muted blueprint ink
-        --bs-metric-tile-unit-color:       var(--bp-text-muted);
+        --bs-metric-tile-unit-color: var(--bp-text-muted);
 
         // Hint: faint secondary info line
-        --bs-metric-tile-hint-color:       var(--bp-text-faint);
+        --bs-metric-tile-hint-color: var(--bp-text-faint);
 
         // Icon: teal accent (action color per blueprint accent rotation)
-        --bs-metric-tile-icon-color:       var(--bp-teal);
+        --bs-metric-tile-icon-color: var(--bp-teal);
     }
 
     // ── Label: switch to --bp-mono for eyebrow typography ───────────────────────
@@ -68,9 +67,10 @@ tc-theme[name='blueprint'],
     // Applies a 2px lift + stronger hairline — telegraphs interactivity for
     // clickable metric tiles without being distracting on static grids.
     .tc-metric-tile {
-        transition: transform 0.18s var(--bp-ease),
-                    box-shadow 0.18s var(--bp-ease),
-                    border-color 0.18s var(--bp-ease);
+        transition:
+            transform 0.18s var(--bp-ease),
+            box-shadow 0.18s var(--bp-ease),
+            border-color 0.18s var(--bp-ease);
 
         &:hover {
             transform: translateY(-2px);

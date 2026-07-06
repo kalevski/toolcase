@@ -100,7 +100,9 @@ tc-theme[name='dungeon'],
         width: 14px;
         height: 14px;
         background: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold-deep));
-        box-shadow: 0 0 0 1px #000, 0 0 6px rgba(232, 200, 120, 0.5);
+        box-shadow:
+            0 0 0 1px #000,
+            0 0 6px rgba(232, 200, 120, 0.5);
         transform: rotate(45deg);
         border-radius: 0;
         cursor: pointer;
@@ -110,7 +112,9 @@ tc-theme[name='dungeon'],
         width: 14px;
         height: 14px;
         background: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold-deep));
-        box-shadow: 0 0 0 1px #000, 0 0 6px rgba(232, 200, 120, 0.5);
+        box-shadow:
+            0 0 0 1px #000,
+            0 0 6px rgba(232, 200, 120, 0.5);
         border: none;
         border-radius: 0;
         cursor: pointer;

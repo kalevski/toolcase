@@ -108,6 +108,8 @@ tc-theme[name='dungeon'],
 
     // Online pip gets the stamina glow.
     .tc-guild-panel-member--online .tc-guild-panel-member-pip {
-        box-shadow: 0 0 0 1px #000, 0 0 6px var(--fg-stamina-bright);
+        box-shadow:
+            0 0 0 1px #000,
+            0 0 6px var(--fg-stamina-bright);
     }
 }

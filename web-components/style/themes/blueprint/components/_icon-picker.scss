@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Label ──────────────────────────────────────────────────────────────────
 
     .tc-icon-picker-label {
@@ -17,15 +16,15 @@ tc-theme[name='blueprint'],
     // ── Trigger button ─────────────────────────────────────────────────────────
 
     .tc-icon-picker-trigger {
-        --bs-icon-picker-trigger-bg:     var(--bp-paper);
+        --bs-icon-picker-trigger-bg: var(--bp-paper);
         --bs-icon-picker-trigger-border: var(--bp-border-strong);
-        --bs-icon-picker-trigger-color:  var(--bp-text);
+        --bs-icon-picker-trigger-color: var(--bp-text);
 
         font-family: var(--bp-body);
         font-size: 0.875rem;
         transition:
             border-color var(--bp-ease),
-            box-shadow   var(--bp-ease);
+            box-shadow var(--bp-ease);
 
         &:hover {
             --bs-icon-picker-trigger-border: var(--bp-border-soft);
@@ -61,14 +60,14 @@ tc-theme[name='blueprint'],
 
     .tc-icon-picker-popup {
         // Raised paper surface: white card, hairline border, violet-tinted shadow
-        --bs-icon-picker-popup-bg:      var(--bp-paper);
-        --bs-icon-picker-popup-border:  var(--bp-border);
-        --bs-icon-picker-popup-shadow:  var(--tc-shadow-lg);
+        --bs-icon-picker-popup-bg: var(--bp-paper);
+        --bs-icon-picker-popup-border: var(--bp-border);
+        --bs-icon-picker-popup-shadow: var(--tc-shadow-lg);
         --bs-icon-picker-popup-padding: 0.5rem;
 
         border-color: var(--bp-border);
-        background:   var(--bp-paper);
-        box-shadow:   var(--tc-shadow-lg);
+        background: var(--bp-paper);
+        box-shadow: var(--tc-shadow-lg);
     }
 
     // ── Search input ───────────────────────────────────────────────────────────
@@ -78,7 +77,7 @@ tc-theme[name='blueprint'],
         font-size: 0.75rem;
         letter-spacing: 0.04em;
         color: var(--bp-text);
-        background: var(--bp-bg-2);         // recessed well inside the popup
+        background: var(--bp-bg-2); // recessed well inside the popup
         border-color: var(--bp-border-strong);
 
         &::placeholder {
@@ -100,10 +99,10 @@ tc-theme[name='blueprint'],
         color: var(--bp-text-soft);
         border-color: transparent;
         transition:
-            background     var(--bp-ease),
-            color          var(--bp-ease),
-            border-color   var(--bp-ease),
-            box-shadow     var(--bp-ease);
+            background var(--bp-ease),
+            color var(--bp-ease),
+            border-color var(--bp-ease),
+            box-shadow var(--bp-ease);
 
         &:hover {
             // Teal soft tint on hover — everyday action accent
@@ -125,23 +124,23 @@ tc-theme[name='blueprint'],
 
         // Selected cell — pink primary fill, white ink
         &--selected {
-            background:   var(--bp-pink);
+            background: var(--bp-pink);
             border-color: var(--bp-pink);
-            color:        var(--bp-pink-ink);
-            box-shadow:   var(--bp-glow-pink);
+            color: var(--bp-pink-ink);
+            box-shadow: var(--bp-glow-pink);
 
             &:hover {
-                background:   var(--bp-pink-hover);
+                background: var(--bp-pink-hover);
                 border-color: var(--bp-pink-hover);
             }
         }
 
         // Selected + keyboard-highlighted
         &--selected#{&}--highlighted {
-            background:   var(--bp-pink);
+            background: var(--bp-pink);
             border-color: var(--bp-pink-line);
-            color:        var(--bp-pink-ink);
-            box-shadow:   var(--bp-glow-pink-strong);
+            color: var(--bp-pink-ink);
+            box-shadow: var(--bp-glow-pink-strong);
         }
     }
 

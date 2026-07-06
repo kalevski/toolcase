@@ -3,55 +3,62 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Token overrides ─────────────────────────────────────────────────────────
 
     tc-asset-bundle {
         // Card shell
-        --bs-asset-bundle-bg:                   var(--bp-paper);
-        --bs-asset-bundle-border-color:          var(--bp-border);
-        --bs-asset-bundle-shadow:                var(--tc-shadow-sm);
+        --bs-asset-bundle-bg: var(--bp-paper);
+        --bs-asset-bundle-border-color: var(--bp-border);
+        --bs-asset-bundle-shadow: var(--tc-shadow-sm);
 
         // Header cap: replace dark slate gradient with a soft violet-tinted wash
         // (matches blueprint "faint ink-gradient" intent without dark slate stops)
-        --bs-asset-bundle-header-cap:
-            linear-gradient(180deg, var(--bp-paper-tint-2) 0%, var(--bp-paper) 100%);
+        --bs-asset-bundle-header-cap: linear-gradient(
+            180deg,
+            var(--bp-paper-tint-2) 0%,
+            var(--bp-paper) 100%
+        );
 
         // Text ink
-        --bs-asset-bundle-name-color:            var(--bp-text);
-        --bs-asset-bundle-target-color:          var(--bp-text-muted);
-        --bs-asset-bundle-section-title-color:   var(--bp-teal-fg);   // teal mono eyebrow
-        --bs-asset-bundle-divider-color:         var(--bp-border-faint);
+        --bs-asset-bundle-name-color: var(--bp-text);
+        --bs-asset-bundle-target-color: var(--bp-text-muted);
+        --bs-asset-bundle-section-title-color: var(--bp-teal-fg); // teal mono eyebrow
+        --bs-asset-bundle-divider-color: var(--bp-border-faint);
 
         // Tag chips — included → teal semantic, excluded → real danger red
-        --bs-asset-bundle-tag-included-bg:       var(--bp-teal-soft);
-        --bs-asset-bundle-tag-included-color:    var(--bp-teal-fg);
-        --bs-asset-bundle-tag-included-border:   var(--bp-teal-line);
-        --bs-asset-bundle-tag-excluded-bg:       var(--bp-danger-soft);
-        --bs-asset-bundle-tag-excluded-color:    var(--bp-danger);
-        --bs-asset-bundle-tag-excluded-border:   rgba(220, 38, 38, 0.25); // no token for danger border; stays near bp-danger
+        --bs-asset-bundle-tag-included-bg: var(--bp-teal-soft);
+        --bs-asset-bundle-tag-included-color: var(--bp-teal-fg);
+        --bs-asset-bundle-tag-included-border: var(--bp-teal-line);
+        --bs-asset-bundle-tag-excluded-bg: var(--bp-danger-soft);
+        --bs-asset-bundle-tag-excluded-color: var(--bp-danger);
+        --bs-asset-bundle-tag-excluded-border: rgba(
+            220,
+            38,
+            38,
+            0.25
+        ); // no token for danger border; stays near bp-danger
 
         // Counts / build refs — recessed well fill, blueprint text
-        --bs-asset-bundle-count-bg:              var(--bp-bg-2);
-        --bs-asset-bundle-count-label-color:     var(--bp-text-muted);
-        --bs-asset-bundle-count-value-color:     var(--bp-text);
-        --bs-asset-bundle-build-ref-color:       var(--bp-text-soft);
-        --bs-asset-bundle-build-ref-bg:          var(--bp-bg-2);
+        --bs-asset-bundle-count-bg: var(--bp-bg-2);
+        --bs-asset-bundle-count-label-color: var(--bp-text-muted);
+        --bs-asset-bundle-count-value-color: var(--bp-text);
+        --bs-asset-bundle-build-ref-color: var(--bp-text-soft);
+        --bs-asset-bundle-build-ref-bg: var(--bp-bg-2);
 
         // Category badge — faint violet chip
-        --bs-asset-bundle-category-bg:          var(--bp-violet-soft);
-        --bs-asset-bundle-category-color:        var(--bp-violet-fg);
+        --bs-asset-bundle-category-bg: var(--bp-violet-soft);
+        --bs-asset-bundle-category-color: var(--bp-violet-fg);
 
         // Controls — muted → hover → active (pink = primary CTA / active)
-        --bs-asset-bundle-control-color:         var(--bp-text-faint);
-        --bs-asset-bundle-control-hover-bg:      var(--bp-bg-2);
-        --bs-asset-bundle-control-hover-color:   var(--bp-text);
-        --bs-asset-bundle-control-active-bg:     var(--bp-pink);
-        --bs-asset-bundle-control-active-color:  var(--bp-pink-ink);
+        --bs-asset-bundle-control-color: var(--bp-text-faint);
+        --bs-asset-bundle-control-hover-bg: var(--bp-bg-2);
+        --bs-asset-bundle-control-hover-color: var(--bp-text);
+        --bs-asset-bundle-control-active-bg: var(--bp-pink);
+        --bs-asset-bundle-control-active-color: var(--bp-pink-ink);
 
         // Skeleton shimmer — paper + light tint sweep
-        --bs-asset-bundle-skeleton-bg:           var(--bp-border-faint);
-        --bs-asset-bundle-skeleton-shimmer:      var(--bp-paper-tint);
+        --bs-asset-bundle-skeleton-bg: var(--bp-border-faint);
+        --bs-asset-bundle-skeleton-shimmer: var(--bp-paper-tint);
     }
 
     // ── Card shell — teal HUD corner bracket on the card ───────────────────────
@@ -62,7 +69,9 @@ tc-theme[name='blueprint'],
         border-color: var(--bs-asset-bundle-border-color);
         box-shadow: var(--bs-asset-bundle-shadow);
         position: relative;
-        transition: box-shadow var(--bp-ease), transform var(--bp-ease);
+        transition:
+            box-shadow var(--bp-ease),
+            transform var(--bp-ease);
 
         &::before {
             content: '';
@@ -221,7 +230,7 @@ tc-theme[name='blueprint'],
         font-size: 0.6875rem;
 
         &--on {
-            color: var(--bp-teal-fg); // teal = success in blueprint
+            color: var(--bp-success-fg); // teal = success in blueprint
         }
 
         &--off {
@@ -302,5 +311,4 @@ tc-theme[name='blueprint'],
         );
         background-size: 200% 100%;
     }
-
 }

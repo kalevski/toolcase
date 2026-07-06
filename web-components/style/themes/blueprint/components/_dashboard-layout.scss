@@ -2,14 +2,13 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Custom-property re-skin ───────────────────────────────────────────────
     // Drive as much as possible through the component's own --bs-dashboard-layout-*
     // API so we stay in the cleanest re-skin path.
 
     tc-dashboard-layout {
         // Navbar: white frosted glass panel, lilac hairline bottom.
-        --bs-dashboard-layout-navbar-bg: rgba(255, 255, 255, 0.90);
+        --bs-dashboard-layout-navbar-bg: rgba(255, 255, 255, 0.9);
         --bs-dashboard-layout-navbar-border: var(--bp-border);
         --bs-dashboard-layout-navbar-color: var(--bp-text);
 

@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Component token overrides ──────────────────────────────────────────────
     // Re-point every --bs-usage-summary-panel-* var to blueprint palette tokens.
     // The base partial drives all cosmetics through these vars; element rules
@@ -10,37 +9,37 @@ tc-theme[name='blueprint'],
 
     tc-usage-summary-panel {
         // Card shell — white paper surface, lavender hairline, ambient shadow
-        --bs-usage-summary-panel-bg:                var(--bp-paper);
-        --bs-usage-summary-panel-border-color:      var(--bp-border);
-        --bs-usage-summary-panel-shadow:            var(--tc-shadow-sm);
+        --bs-usage-summary-panel-bg: var(--bp-paper);
+        --bs-usage-summary-panel-border-color: var(--bp-border);
+        --bs-usage-summary-panel-shadow: var(--tc-shadow-sm);
 
         // Title header — pink-grad fill (brand/primary); bp-pink-ink for legible white text
         // --tc-app-accent-gradient maps to --bp-pink-grad in this theme so no raw hex needed
-        --bs-usage-summary-panel-title-bg:          var(--bp-pink-grad);
-        --bs-usage-summary-panel-title-color:       var(--bp-pink-ink);
+        --bs-usage-summary-panel-title-bg: var(--bp-pink-grad);
+        --bs-usage-summary-panel-title-color: var(--bp-pink-ink);
 
         // Row body text — primary ink / muted mono value
-        --bs-usage-summary-panel-label-color:       var(--bp-text);
-        --bs-usage-summary-panel-value-color:       var(--bp-text-muted);
+        --bs-usage-summary-panel-label-color: var(--bp-text);
+        --bs-usage-summary-panel-value-color: var(--bp-text-muted);
 
         // Row separator — faint divider token (never raw slate)
-        --bs-usage-summary-panel-row-border-color:  var(--bp-border-faint);
+        --bs-usage-summary-panel-row-border-color: var(--bp-border-faint);
 
         // Progress track background — lavender hairline keeps it unobtrusive
-        --bs-usage-summary-panel-bar-bg:            var(--bp-border);
+        --bs-usage-summary-panel-bar-bg: var(--bp-border);
 
         // Normal fill → teal (everyday action color in the arcade rotation)
-        --bs-usage-summary-panel-bar-fill:          var(--bp-teal);
+        --bs-usage-summary-panel-bar-fill: var(--bp-teal);
 
         // Warn fill → amber (blueprint warning accent; maps to --tc-warning)
         // Label stays primary ink (no extra noise); value gets amber-fg for AA on white
-        --bs-usage-summary-panel-warn-fill:         var(--bp-amber);
-        --bs-usage-summary-panel-warn-label-color:  var(--bp-text);
-        --bs-usage-summary-panel-warn-value-color:  var(--bp-amber-fg);
+        --bs-usage-summary-panel-warn-fill: var(--bp-amber);
+        --bs-usage-summary-panel-warn-label-color: var(--bp-text);
+        --bs-usage-summary-panel-warn-value-color: var(--bp-amber-fg);
 
         // Skeleton — paper-tint-2 base + paper shimmer; keeps it on-palette
-        --bs-usage-summary-panel-skeleton-bg:       var(--bp-paper-tint-2);
-        --bs-usage-summary-panel-skeleton-shimmer:  var(--bp-paper);
+        --bs-usage-summary-panel-skeleton-bg: var(--bp-paper-tint-2);
+        --bs-usage-summary-panel-skeleton-shimmer: var(--bp-paper);
     }
 
     // ── Title — blueprint mono eyebrow face ───────────────────────────────────

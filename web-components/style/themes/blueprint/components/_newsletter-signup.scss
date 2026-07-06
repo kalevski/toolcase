@@ -2,43 +2,42 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-newsletter-signup {
         // Surface: raised white card with hairline border
-        --bs-newsletter-signup-bg:                  var(--bp-paper);
-        --bs-newsletter-signup-border:              1px solid var(--bp-border);
+        --bs-newsletter-signup-bg: var(--bp-paper);
+        --bs-newsletter-signup-border: 1px solid var(--bp-border);
 
         // Text
-        --bs-newsletter-signup-color:               var(--bp-text);
-        --bs-newsletter-signup-muted-color:         var(--bp-text-muted);
+        --bs-newsletter-signup-color: var(--bp-text);
+        --bs-newsletter-signup-muted-color: var(--bp-text-muted);
 
         // Title — bump to display family via element override below
-        --bs-newsletter-signup-title-size:          1.25rem;
-        --bs-newsletter-signup-title-weight:        700;
+        --bs-newsletter-signup-title-size: 1.25rem;
+        --bs-newsletter-signup-title-weight: 700;
 
         // Input — white surface, standard hairline, violet focus ring
-        --bs-newsletter-signup-input-bg:            var(--bp-paper);
-        --bs-newsletter-signup-input-color:         var(--bp-text);
-        --bs-newsletter-signup-input-border:        var(--bp-border-strong);
-        --bs-newsletter-signup-input-focus-ring:    0 0 0 3px var(--bp-violet-soft);
+        --bs-newsletter-signup-input-bg: var(--bp-paper);
+        --bs-newsletter-signup-input-color: var(--bp-text);
+        --bs-newsletter-signup-input-border: var(--bp-border-strong);
+        --bs-newsletter-signup-input-focus-ring: 0 0 0 3px var(--bp-violet-soft);
         --bs-newsletter-signup-input-placeholder-color: var(--bp-text-faint);
 
         // Submit CTA — pink primary
-        --bs-newsletter-signup-submit-bg:           var(--bp-pink-grad);
-        --bs-newsletter-signup-submit-color:        var(--bp-pink-ink);
-        --bs-newsletter-signup-submit-border:       var(--bp-pink);
+        --bs-newsletter-signup-submit-bg: var(--bp-pink-grad);
+        --bs-newsletter-signup-submit-color: var(--bp-pink-ink);
+        --bs-newsletter-signup-submit-border: var(--bp-pink);
 
         // Error — real-red danger tokens
-        --bs-newsletter-signup-error-color:         var(--bp-danger);
-        --bs-newsletter-signup-error-bg:            var(--bp-danger-soft);
+        --bs-newsletter-signup-error-color: var(--bp-danger);
+        --bs-newsletter-signup-error-bg: var(--bp-danger-soft);
 
         // Success — teal tokens
-        --bs-newsletter-signup-success-color:       var(--bp-teal-fg);
-        --bs-newsletter-signup-success-bg:          var(--bp-teal-soft);
-        --bs-newsletter-signup-success-border:      var(--bp-teal);
+        --bs-newsletter-signup-success-color: var(--bp-success-fg);
+        --bs-newsletter-signup-success-bg: var(--bp-success-soft);
+        --bs-newsletter-signup-success-border: var(--bp-success);
 
         // Privacy link — faint → muted on hover
-        --bs-newsletter-signup-privacy-color:       var(--bp-text-faint);
+        --bs-newsletter-signup-privacy-color: var(--bp-text-faint);
         --bs-newsletter-signup-privacy-hover-color: var(--bp-teal-fg);
     }
 
@@ -78,7 +77,9 @@ tc-theme[name='blueprint'],
         background-color: var(--bs-newsletter-signup-input-bg);
         border-color: var(--bp-border-strong);
         color: var(--bs-newsletter-signup-input-color);
-        transition: border-color var(--bp-ease), box-shadow var(--bp-ease);
+        transition:
+            border-color var(--bp-ease),
+            box-shadow var(--bp-ease);
 
         &::placeholder {
             color: var(--bp-text-faint);
@@ -105,7 +106,9 @@ tc-theme[name='blueprint'],
         background: var(--bs-newsletter-signup-submit-bg);
         color: var(--bs-newsletter-signup-submit-color);
         border-color: var(--bp-pink);
-        transition: transform var(--bp-ease), box-shadow var(--bp-ease);
+        transition:
+            transform var(--bp-ease),
+            box-shadow var(--bp-ease);
 
         &:hover:not(:disabled) {
             transform: translateY(-2px);
@@ -142,17 +145,17 @@ tc-theme[name='blueprint'],
 
     .tc-newsletter-signup-success {
         background: var(--bs-newsletter-signup-success-bg);
-        border-left-color: var(--bp-teal);
+        border-left-color: var(--bp-success);
     }
 
     .tc-newsletter-signup-success-icon {
-        color: var(--bp-teal-fg);
+        color: var(--bp-success-fg);
     }
 
     .tc-newsletter-signup-success-message {
         font-family: var(--bp-body);
         font-weight: 600;
-        color: var(--bp-teal-fg);
+        color: var(--bp-success-fg);
     }
 
     // ── Privacy link — teal-fg on hover for brand consistency ───────────────────

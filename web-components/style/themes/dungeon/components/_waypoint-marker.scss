@@ -18,8 +18,7 @@ tc-theme[name='dungeon'],
         // Glyph — glow driven by the marker colour so coloured markers
         // (danger, warning, safe) halo their own hue rather than amber.
         &__glyph svg {
-            filter: drop-shadow(0 1px 2px #000)
-                drop-shadow(0 0 8px var(--bs-waypoint-marker-color));
+            filter: drop-shadow(0 1px 2px #000) drop-shadow(0 0 8px var(--bs-waypoint-marker-color));
         }
 
         // Chip — tighter padding to match the fantasy micro-scale.

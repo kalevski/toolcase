@@ -24,7 +24,11 @@ tc-theme[name='dungeon'],
         --bs-lobby-slot-border: var(--fg-gold-deep);
         --bs-lobby-slot-empty-color: var(--fg-parch-dim);
         --bs-lobby-slot-filled-bg: var(--fg-slot-bg);
-        --bs-lobby-slot-ready-bg: linear-gradient(90deg, rgba(111, 159, 58, 0.18), rgba(0, 0, 0, 0.3));
+        --bs-lobby-slot-ready-bg: linear-gradient(
+            90deg,
+            rgba(111, 159, 58, 0.18),
+            rgba(0, 0, 0, 0.3)
+        );
 
         --bs-lobby-player-name-color: var(--fg-parch);
         --bs-lobby-rank-bg: rgba(0, 0, 0, 0.4);

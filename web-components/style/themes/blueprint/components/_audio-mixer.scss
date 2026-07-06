@@ -2,58 +2,57 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-audio-mixer {
         // ── Surface & borders ────────────────────────────────────────────────
-        --bs-audio-mixer-surface:        var(--bp-paper);
-        --bs-audio-mixer-border:         var(--bp-border);
-        --bs-audio-mixer-border-strong:  var(--bp-border-strong);
+        --bs-audio-mixer-surface: var(--bp-paper);
+        --bs-audio-mixer-border: var(--bp-border);
+        --bs-audio-mixer-border-strong: var(--bp-border-strong);
 
         // ── Ink ──────────────────────────────────────────────────────────────
-        --bs-audio-mixer-text:           var(--bp-text);
-        --bs-audio-mixer-muted:          var(--bp-text-muted);
-        --bs-audio-mixer-faint:          var(--bp-text-faint);
+        --bs-audio-mixer-text: var(--bp-text);
+        --bs-audio-mixer-muted: var(--bp-text-muted);
+        --bs-audio-mixer-faint: var(--bp-text-faint);
 
         // ── Toolbar ──────────────────────────────────────────────────────────
-        --bs-audio-mixer-toolbar-bg:     var(--bp-bg-2);
+        --bs-audio-mixer-toolbar-bg: var(--bp-bg-2);
 
         // ── Ruler ────────────────────────────────────────────────────────────
-        --bs-audio-mixer-ruler-bg:       var(--bp-bg-2);
+        --bs-audio-mixer-ruler-bg: var(--bp-bg-2);
 
         // ── Lane field — recessed well, distinct from panel surfaces ─────────
         // Uses bp-bg-2 so the timeline reads as a "working area" within the
         // otherwise white blueprint panels.
-        --bs-audio-mixer-lanes-bg:       var(--bp-bg-2);
-        --bs-audio-mixer-lane-bg:        var(--bp-bg-2);
-        --bs-audio-mixer-lane-alt-bg:    var(--bp-paper-tint);
+        --bs-audio-mixer-lanes-bg: var(--bp-bg-2);
+        --bs-audio-mixer-lane-bg: var(--bp-bg-2);
+        --bs-audio-mixer-lane-alt-bg: var(--bp-paper-tint);
 
         // ── Clips — teal idle / pink selected ────────────────────────────────
         // Idle clips: teal-soft fill + teal border line + darker teal-fg label
         // (teal-fg clears AA on white; teal-soft is the matching surface tint).
-        --bs-audio-mixer-clip-bg:        var(--bp-teal-soft);
-        --bs-audio-mixer-clip-border:    var(--bp-teal-line);
-        --bs-audio-mixer-clip-text:      var(--bp-teal-fg);
+        --bs-audio-mixer-clip-bg: var(--bp-teal-soft);
+        --bs-audio-mixer-clip-border: var(--bp-teal-line);
+        --bs-audio-mixer-clip-text: var(--bp-teal-fg);
 
         // Selected clips: pink brand fill + pink border + white label
-        --bs-audio-mixer-clip-active-bg:   var(--bp-pink-surface);
+        --bs-audio-mixer-clip-active-bg: var(--bp-pink-surface);
         --bs-audio-mixer-clip-active-edge: var(--bp-pink-line);
 
         // ── Playhead — pink primary accent ───────────────────────────────────
         --bs-audio-mixer-playhead-color: var(--bp-pink);
 
         // ── Status signals — danger red / amber warning ───────────────────────
-        --bs-audio-mixer-mute-color:     var(--bp-danger);
-        --bs-audio-mixer-solo-color:     var(--bp-amber);
+        --bs-audio-mixer-mute-color: var(--bp-danger);
+        --bs-audio-mixer-solo-color: var(--bp-amber);
 
         // ── Inspector panel ───────────────────────────────────────────────────
-        --bs-audio-mixer-inspector-bg:   var(--bp-paper);
+        --bs-audio-mixer-inspector-bg: var(--bp-paper);
 
         // ── Mono typeface — JetBrains Mono via blueprint body token ───────────
-        --bs-audio-mixer-mono:           var(--bp-mono);
+        --bs-audio-mixer-mono: var(--bp-mono);
 
         // ── Loading scrim — white-paper overlay ───────────────────────────────
-        --bs-audio-mixer-scrim-bg:       rgba(255, 255, 255, 0.75);
-        --bs-audio-mixer-scrim-shadow:   var(--tc-shadow-lg);
+        --bs-audio-mixer-scrim-bg: rgba(255, 255, 255, 0.75);
+        --bs-audio-mixer-scrim-shadow: var(--tc-shadow-lg);
     }
 
     // ── Outer shell ───────────────────────────────────────────────────────────
@@ -319,7 +318,7 @@ tc-theme[name='blueprint'],
     // Field labels — mono eyebrow style
     .tc-audio-mixer-field-label {
         font-family: var(--bp-mono);
-        letter-spacing: 0.10em;
+        letter-spacing: 0.1em;
         color: var(--bp-text-faint);
     }
 
@@ -383,5 +382,4 @@ tc-theme[name='blueprint'],
             background: var(--bp-bg-2);
         }
     }
-
 }

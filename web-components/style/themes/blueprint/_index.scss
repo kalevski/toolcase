@@ -9,8 +9,10 @@
 // (or any element with [data-tc-theme="blueprint"]).
 //
 // Load order: foundation (token remap) first so the component partials override
-// on top of the already-blueprint --tc-* / --bs-* tokens; the radius sweep
-// (inside components) loads last to re-round every flat-cornered surface.
+// on top of the already-blueprint --tc-* / --bs-* tokens; variants extend the
+// foundation with alternate color palettes; the radius sweep (inside components)
+// loads last to re-round every flat-cornered surface.
 
 @use 'foundation';
+@use 'variants';
 @use 'components';

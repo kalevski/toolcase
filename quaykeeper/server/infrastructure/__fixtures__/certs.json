@@ -1,0 +1,31 @@
+{
+    "cert_dir": "/var/lib/nginxpilot/certs",
+    "certs": [
+        {
+            "domain": "example.com",
+            "names": ["example.com", "www.example.com"],
+            "cert_path": "/var/lib/nginxpilot/certs/live/example.com/fullchain.pem",
+            "key_path": "/var/lib/nginxpilot/certs/live/example.com/privkey.pem",
+            "mod_time": "2026-06-01T00:00:00Z",
+            "not_before": "2026-06-01T00:00:00Z",
+            "not_after": "2026-08-30T00:00:00Z",
+            "issuer": "R11",
+            "expires_in_seconds": 5097600,
+            "renew_managed": true,
+            "last_renew_time": "2026-06-01T00:00:00Z"
+        },
+        {
+            "domain": "manual.example.org",
+            "names": ["manual.example.org"],
+            "cert_path": "/var/lib/nginxpilot/certs/manual.example.org.crt",
+            "key_path": "/var/lib/nginxpilot/certs/manual.example.org.key",
+            "mod_time": "2026-05-15T00:00:00Z",
+            "not_before": "2026-05-15T00:00:00Z",
+            "not_after": "2026-07-10T00:00:00Z",
+            "issuer": "Internal CA",
+            "expires_in_seconds": 604800,
+            "renew_managed": false,
+            "last_renew_error": "manual cert — certbot has no live/ directory for it"
+        }
+    ]
+}

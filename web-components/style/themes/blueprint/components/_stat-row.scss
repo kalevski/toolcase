@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // Re-point all cosmetic tokens to blueprint palette.
     tc-stat-row {
         // Separator hairline → blueprint faint divider rule
@@ -15,7 +14,7 @@ tc-theme[name='blueprint'],
         --bs-stat-row-value-color: var(--bp-emphasis);
 
         // Trend direction: blueprint status rotation — success=teal, danger=real red
-        --bs-stat-row-trend-up-color: var(--bp-teal-fg);
+        --bs-stat-row-trend-up-color: var(--bp-success-fg);
         --bs-stat-row-trend-down-color: var(--bp-danger);
     }
 
@@ -24,8 +23,8 @@ tc-theme[name='blueprint'],
     // and tighten tracking slightly for the telemetry-label aesthetic.
     .tc-stat-row-label {
         font-family: var(--bp-mono);
-        letter-spacing: 0.10em; // slightly wider than base .08em — HUD channel ID feel
-        font-size: 0.625rem;    // one step smaller: dense readout, not a heading
+        letter-spacing: 0.1em; // slightly wider than base .08em — HUD channel ID feel
+        font-size: 0.625rem; // one step smaller: dense readout, not a heading
         font-weight: 600;
         text-transform: uppercase;
         color: var(--bp-teal-fg);

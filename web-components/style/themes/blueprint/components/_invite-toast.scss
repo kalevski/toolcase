@@ -2,27 +2,26 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Token overrides — surface, chrome, accent rotation ──────────────────────
 
     tc-invite-toast {
         // Surface: white raised card, blueprint hairline, elevation shadow.
-        --bs-invite-toast-bg:           var(--bp-paper);
-        --bs-invite-toast-color:        var(--bp-text);
+        --bs-invite-toast-bg: var(--bp-paper);
+        --bs-invite-toast-color: var(--bp-text);
         --bs-invite-toast-border-color: var(--bp-border);
-        --bs-invite-toast-shadow:       var(--tc-shadow-lg);
+        --bs-invite-toast-shadow: var(--tc-shadow-lg);
 
         // Accent stripe (left border on the panel) → teal (everyday action color).
-        --bs-invite-toast-accent:       var(--bp-teal);
+        --bs-invite-toast-accent: var(--bp-teal);
 
         // Eyebrow + countdown: mono micro-label tones.
-        --bs-invite-toast-eyebrow-color:   var(--bp-teal-fg);
+        --bs-invite-toast-eyebrow-color: var(--bp-teal-fg);
         --bs-invite-toast-countdown-color: var(--bp-text-faint);
 
         // Countdown bar: recessed well track, teal fill (depleting = urgency/action).
-        --bs-invite-toast-bar-bg:     var(--bp-bg-2);
+        --bs-invite-toast-bar-bg: var(--bp-bg-2);
         --bs-invite-toast-bar-border: var(--bp-border-faint);
-        --bs-invite-toast-bar-fill:   var(--bp-teal);
+        --bs-invite-toast-bar-fill: var(--bp-teal);
     }
 
     // ── Panel — blueprint raised card ────────────────────────────────────────────
@@ -95,7 +94,10 @@ tc-theme[name='blueprint'],
         font-weight: 700;
         letter-spacing: 0.1em;
         text-transform: uppercase;
-        transition: background var(--bp-ease), border-color var(--bp-ease), box-shadow var(--bp-ease);
+        transition:
+            background var(--bp-ease),
+            border-color var(--bp-ease),
+            box-shadow var(--bp-ease);
 
         &:hover,
         &:focus-visible {
@@ -123,7 +125,10 @@ tc-theme[name='blueprint'],
         font-weight: 700;
         letter-spacing: 0.1em;
         text-transform: uppercase;
-        transition: background var(--bp-ease), border-color var(--bp-ease), color var(--bp-ease);
+        transition:
+            background var(--bp-ease),
+            border-color var(--bp-ease),
+            color var(--bp-ease);
 
         &:hover,
         &:focus-visible {

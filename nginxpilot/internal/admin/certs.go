@@ -22,10 +22,19 @@ type certInfo struct {
 	NotBefore *time.Time `json:"not_before,omitempty"`
 	NotAfter  *time.Time `json:"not_after,omitempty"`
 	Issuer    string     `json:"issuer,omitempty"`
+
+	// Renewal-scheduler enrichment (Feature: automatic renewal).
+	// ExpiresInSeconds is computed from NotAfter at serialization time;
+	// RenewManaged reports whether certbot can renew this cert (a live/ dir
+	// exists) vs a manual flat cert the operator must re-upload.
+	ExpiresInSeconds *int64     `json:"expires_in_seconds,omitempty"`
+	RenewManaged     bool       `json:"renew_managed"`
+	LastRenewTime    *time.Time `json:"last_renew_time,omitempty"`
+	LastRenewError   string     `json:"last_renew_error,omitempty"`
 }
 
 // handleListCerts lists the TLS certificates discovered in the configured cert
-// directory (certbot live or flat layout), so a control plane (Perch) can show
+// directory (certbot live or flat layout), so a control plane (Quaykeeper) can show
 // what's available without filesystem access. Read-only and disk-fresh — it
 // loads the dir on each call, so renewals show immediately. Works in both
 // managed and generate-only mode; an unconfigured/missing cert dir yields an
@@ -38,6 +47,7 @@ func (s *Server) handleListCerts(w http.ResponseWriter, _ *http.Request) {
 		http.Error(w, "cert load failed", http.StatusInternalServerError)
 		return
 	}
+	renewal := s.mgr.RenewalStatus()
 	list := idx.List()
 	out := make([]certInfo, 0, len(list))
 	for _, c := range list {
@@ -45,16 +55,26 @@ func (s *Server) handleListCerts(w http.ResponseWriter, _ *http.Request) {
 		if names == nil {
 			names = []string{}
 		}
-		out = append(out, certInfo{
-			Domain:    c.Domain,
-			Names:     names,
-			CertPath:  c.CertPath,
-			KeyPath:   c.KeyPath,
-			ModTime:   c.ModTime,
-			NotBefore: nonZeroTime(c.NotBefore),
-			NotAfter:  nonZeroTime(c.NotAfter),
-			Issuer:    c.Issuer,
-		})
+		info := certInfo{
+			Domain:       c.Domain,
+			Names:        names,
+			CertPath:     c.CertPath,
+			KeyPath:      c.KeyPath,
+			ModTime:      c.ModTime,
+			NotBefore:    nonZeroTime(c.NotBefore),
+			NotAfter:     nonZeroTime(c.NotAfter),
+			Issuer:       c.Issuer,
+			RenewManaged: s.mgr.RenewManaged(c.Domain),
+		}
+		if !c.NotAfter.IsZero() {
+			secs := int64(time.Until(c.NotAfter).Seconds())
+			info.ExpiresInSeconds = &secs
+		}
+		if st, ok := renewal.States[c.Domain]; ok {
+			info.LastRenewTime = nonZeroTime(st.LastSuccess)
+			info.LastRenewError = st.LastError
+		}
+		out = append(out, info)
 	}
 	writeJSON(w, map[string]any{"cert_dir": dir, "certs": out}, s)
 }

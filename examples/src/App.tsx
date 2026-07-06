@@ -86,15 +86,21 @@ interface ExampleWrapperProps {
     example: DemoEntry
 }
 
+// Theme option values encode "name" or "name:variant" — the wrapper splits the
+// value into data-tc-theme + data-tc-variant on the scope element. Every
+// bundled theme ships the same four accent variants (primary/secondary swap).
+const THEME_NAMES = ['default', 'dungeon', 'aurora', 'sunshine', 'neon', 'blueprint'] as const
+const THEME_VARIANTS = ['ocean', 'forest', 'ember', 'royal'] as const
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
+
 const routeThemes: Record<string, { value: string; label: string }[]> = {
-    'web-components': [
-        { value: 'default', label: 'Default' },
-        { value: 'dungeon', label: 'Dungeon' },
-        { value: 'aurora', label: 'Aurora' },
-        { value: 'sunshine', label: 'Sunshine' },
-        { value: 'neon', label: 'Neon' },
-        { value: 'blueprint', label: 'Blueprint' },
-    ],
+    'web-components': THEME_NAMES.flatMap((name) => [
+        { value: name, label: capitalize(name) },
+        ...THEME_VARIANTS.map((variant) => ({
+            value: `${name}:${variant}`,
+            label: `${capitalize(name)} · ${capitalize(variant)}`,
+        })),
+    ]),
 }
 
 const ExampleWrapper = ({ children, route, example }: ExampleWrapperProps) => {
@@ -105,7 +111,10 @@ const ExampleWrapper = ({ children, route, example }: ExampleWrapperProps) => {
     const [theme, setTheme] = useState(() => {
         if (!themes) return 'default'
         try {
-            return localStorage.getItem(themeStorageKey) ?? 'default'
+            const stored = localStorage.getItem(themeStorageKey)
+            // Drop stale values that no longer match an option (e.g. removed variants).
+            if (stored && themes.some((t) => t.value === stored)) return stored
+            return 'default'
         } catch {
             return 'default'
         }
@@ -141,6 +150,9 @@ const ExampleWrapper = ({ children, route, example }: ExampleWrapperProps) => {
 
     const canvasClass = ['example__canvas', route.canvasClassName].filter(Boolean).join(' ')
 
+    // "blueprint:dark" → theme name + variant; plain values have no variant.
+    const [themeName, themeVariant] = theme.split(':')
+
     return (
         <div className="example">
             <div className="example__bar">
@@ -171,7 +183,13 @@ const ExampleWrapper = ({ children, route, example }: ExampleWrapperProps) => {
             </div>
             <div className={canvasClass}>
                 {route.key === 'web-components' ? (
-                    <div className="wc-theme-scope" data-tc-theme={theme}>{children}</div>
+                    <div
+                        className="wc-theme-scope"
+                        data-tc-theme={themeName}
+                        data-tc-variant={themeVariant}
+                    >
+                        {children}
+                    </div>
                 ) : (
                     children
                 )}

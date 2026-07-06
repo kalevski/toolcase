@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-particle-emitter {
         // Canvas surface: white paper ground so particles pop on the light theme.
         --bs-particle-emitter-bg: var(--bp-paper);
@@ -26,5 +25,4 @@ tc-theme[name='blueprint'],
     .tc-particle-emitter__canvas {
         box-shadow: var(--tc-shadow-sm);
     }
-
 }

@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Custom-property overrides ──────────────────────────────────────────────
     // Re-point every --bs-setting-slider-* var to blueprint tokens.
     // The thumb's border-radius:50% is the one sanctioned circle and is untouched.
@@ -11,35 +10,35 @@ tc-theme[name='blueprint'],
     tc-deadzone-slider,
     tc-fov-slider {
         // Track: a light hairline on the lavender ground
-        --bs-setting-slider-track-color:         var(--bp-border);
+        --bs-setting-slider-track-color: var(--bp-border);
 
         // Fill: teal — everyday action accent (slider is a control, not a CTA)
-        --bs-setting-slider-fill-color:          var(--bp-teal);
+        --bs-setting-slider-fill-color: var(--bp-teal);
 
         // Thumb: white face, teal ring, subtle violet-tinted shadow
-        --bs-setting-slider-thumb-bg:            var(--bp-paper);
-        --bs-setting-slider-thumb-border:        var(--bp-teal);
-        --bs-setting-slider-thumb-active-bg:     var(--bp-teal-soft);
-        --bs-setting-slider-thumb-shadow:        var(--tc-shadow-sm);
+        --bs-setting-slider-thumb-bg: var(--bp-paper);
+        --bs-setting-slider-thumb-border: var(--bp-teal);
+        --bs-setting-slider-thumb-active-bg: var(--bp-teal-soft);
+        --bs-setting-slider-thumb-shadow: var(--tc-shadow-sm);
 
         // Focus ring: teal glow replaces raw slate rgba literal
-        --bs-setting-slider-focus-ring:          var(--bp-glow-teal);
+        --bs-setting-slider-focus-ring: var(--bp-glow-teal);
 
         // Disabled: faint text token
-        --bs-setting-slider-disabled-color:      var(--bp-text-faint);
+        --bs-setting-slider-disabled-color: var(--bp-text-faint);
 
         // Value readout: muted ink, mono already set in base
-        --bs-setting-slider-value-color:         var(--bp-text-muted);
+        --bs-setting-slider-value-color: var(--bp-text-muted);
 
         // Mute button: hairline border, muted icon; active → teal ink fill
-        --bs-setting-slider-mute-border-color:   var(--bp-border);
-        --bs-setting-slider-mute-color:          var(--bp-text-muted);
-        --bs-setting-slider-mute-bg:             transparent;
-        --bs-setting-slider-mute-hover-bg:       var(--bp-teal-soft);
-        --bs-setting-slider-mute-active-bg:      var(--bp-teal);
-        --bs-setting-slider-mute-active-border:  var(--bp-teal);
-        --bs-setting-slider-mute-active-color:   var(--bp-teal-ink);
-        --bs-setting-slider-mute-focus-ring:     var(--bp-glow-teal);
+        --bs-setting-slider-mute-border-color: var(--bp-border);
+        --bs-setting-slider-mute-color: var(--bp-text-muted);
+        --bs-setting-slider-mute-bg: transparent;
+        --bs-setting-slider-mute-hover-bg: var(--bp-teal-soft);
+        --bs-setting-slider-mute-active-bg: var(--bp-teal);
+        --bs-setting-slider-mute-active-border: var(--bp-teal);
+        --bs-setting-slider-mute-active-color: var(--bp-teal-ink);
+        --bs-setting-slider-mute-focus-ring: var(--bp-glow-teal);
     }
 
     // ── Value readout ──────────────────────────────────────────────────────────

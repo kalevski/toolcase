@@ -2,40 +2,39 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-equipment-doll {
         // Canvas surface: crisp white paper on a faint blueprint grid.
         // Grid lines use --bp-border-faint (violet hairlines) in place of the
         // default slate ramp, which would leak the light-slate tone into this theme.
-        --bs-equipment-doll-surface:          var(--bp-paper);
-        --bs-equipment-doll-border-color:     var(--bp-border);
-        --bs-equipment-doll-grid-color:       var(--bp-border-faint);
+        --bs-equipment-doll-surface: var(--bp-paper);
+        --bs-equipment-doll-border-color: var(--bp-border);
+        --bs-equipment-doll-grid-color: var(--bp-border-faint);
 
         // Figure silhouette: routed to --bp-text-faint (violet-grey) so it reads
         // as a ghost outline on the blueprint paper rather than a warm slate fill.
-        --bs-equipment-doll-figure-color:     var(--bp-text-faint);
-        --bs-equipment-doll-figure-opacity:   0.35;
+        --bs-equipment-doll-figure-color: var(--bp-text-faint);
+        --bs-equipment-doll-figure-opacity: 0.35;
 
         // Slot tile cosmetics: white card on a teal-tinged border.
         // Filled slots use --bp-border-strong; empty dashes use --bp-border-soft.
-        --bs-equipment-doll-slot-bg:          var(--bp-paper);
-        --bs-equipment-doll-slot-border:      var(--bp-border-strong);
+        --bs-equipment-doll-slot-bg: var(--bp-paper);
+        --bs-equipment-doll-slot-border: var(--bp-border-strong);
         --bs-equipment-doll-slot-empty-border: var(--bp-border-soft);
-        --bs-equipment-doll-slot-hover-bg:    var(--bp-teal-soft);
-        --bs-equipment-doll-icon-color:       var(--bp-text);
-        --bs-equipment-doll-empty-color:      var(--bp-text-faint);
+        --bs-equipment-doll-slot-hover-bg: var(--bp-teal-soft);
+        --bs-equipment-doll-icon-color: var(--bp-text);
+        --bs-equipment-doll-empty-color: var(--bp-text-faint);
 
         // Active/selected: pink primary (arcade accent rotation — pink = primary/selected).
-        --bs-equipment-doll-selected-bg:      var(--bp-pink);
-        --bs-equipment-doll-selected-color:   var(--bp-pink-ink);
+        --bs-equipment-doll-selected-bg: var(--bp-pink);
+        --bs-equipment-doll-selected-color: var(--bp-pink-ink);
 
         // Slot label: mono micro-label in muted violet-grey ink.
-        --bs-equipment-doll-label-color:      var(--bp-text-muted);
-        --bs-equipment-doll-label-font-size:  0.6875rem;
+        --bs-equipment-doll-label-color: var(--bp-text-muted);
+        --bs-equipment-doll-label-font-size: 0.6875rem;
 
         // Quantity corner pill: teal (everyday action accent, not primary).
-        --bs-equipment-doll-qty-bg:           var(--bp-teal);
-        --bs-equipment-doll-qty-color:        var(--bp-teal-ink);
+        --bs-equipment-doll-qty-bg: var(--bp-teal);
+        --bs-equipment-doll-qty-color: var(--bp-teal-ink);
     }
 
     // ── Canvas ───────────────────────────────────────────────────────────────

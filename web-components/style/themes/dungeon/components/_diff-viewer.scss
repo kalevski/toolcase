@@ -15,7 +15,7 @@ tc-theme[name='dungeon'],
         // Base hardcodes #bbf7d0 / #fecaca — light-theme pastels that invert badly
         // on a dark surface. Replace with alpha-transparent stamina / blood tints.
         --bs-diff-viewer-added-gutter-bg: rgba(111, 159, 58, 0.28);
-        --bs-diff-viewer-removed-gutter-bg: rgba(168, 48, 42, 0.30);
+        --bs-diff-viewer-removed-gutter-bg: rgba(168, 48, 42, 0.3);
 
         // ── Defect fix: row separator → faint gold hairline ───────────────────
         // Base hardcodes rgba(0,0,0,0.04) — invisible on dark rows.

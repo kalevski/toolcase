@@ -2,37 +2,36 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-extended-select {
         // ── Trigger surface ───────────────────────────────────────────────────
-        --bs-extended-select-trigger-bg:             var(--bp-paper);
-        --bs-extended-select-trigger-border:         1px solid var(--bp-border-strong);
-        --bs-extended-select-trigger-color:          var(--bp-text);
+        --bs-extended-select-trigger-bg: var(--bp-paper);
+        --bs-extended-select-trigger-border: 1px solid var(--bp-border-strong);
+        --bs-extended-select-trigger-color: var(--bp-text);
         --bs-extended-select-trigger-placeholder-color: var(--bp-text-faint);
 
         // Teal focus ring — blueprint everyday-action accent
-        --bs-extended-select-trigger-focus-shadow:   0 0 0 0.2rem var(--bp-teal-soft);
+        --bs-extended-select-trigger-focus-shadow: 0 0 0 0.2rem var(--bp-teal-soft);
 
         // ── Menu panel ────────────────────────────────────────────────────────
-        --bs-extended-select-menu-bg:                var(--bp-paper);
-        --bs-extended-select-menu-border:            1px solid var(--bp-border);
-        --bs-extended-select-menu-shadow:            var(--tc-shadow-lg);
+        --bs-extended-select-menu-bg: var(--bp-paper);
+        --bs-extended-select-menu-border: 1px solid var(--bp-border);
+        --bs-extended-select-menu-shadow: var(--tc-shadow-lg);
 
         // ── Search row ────────────────────────────────────────────────────────
-        --bs-extended-select-search-border:          1px solid var(--bp-border-faint);
-        --bs-extended-select-search-icon-color:      var(--bp-text-faint);
+        --bs-extended-select-search-border: 1px solid var(--bp-border-faint);
+        --bs-extended-select-search-icon-color: var(--bp-text-faint);
 
         // ── Options ───────────────────────────────────────────────────────────
-        --bs-extended-select-option-color:           var(--bp-text);
-        --bs-extended-select-option-hover-bg:        var(--bp-teal-soft);
+        --bs-extended-select-option-color: var(--bp-text);
+        --bs-extended-select-option-hover-bg: var(--bp-teal-soft);
         // Pink = primary/selected in the blueprint accent rotation
-        --bs-extended-select-option-selected-bg:     var(--bp-pink);
-        --bs-extended-select-option-selected-color:  var(--bp-pink-ink);
-        --bs-extended-select-option-desc-color:      var(--bp-text-muted);
+        --bs-extended-select-option-selected-bg: var(--bp-pink);
+        --bs-extended-select-option-selected-color: var(--bp-pink-ink);
+        --bs-extended-select-option-desc-color: var(--bp-text-muted);
 
         // ── Misc ──────────────────────────────────────────────────────────────
-        --bs-extended-select-caret-color:            var(--bp-text-faint);
-        --bs-extended-select-no-results-color:       var(--bp-text-faint);
+        --bs-extended-select-caret-color: var(--bp-text-faint);
+        --bs-extended-select-no-results-color: var(--bp-text-faint);
         --bs-extended-select-trigger-invalid-border-color: var(--bp-danger);
     }
 

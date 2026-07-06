@@ -2,14 +2,15 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-label {
         // Typography: mono utility face — labels read as HUD annotations on blueprint forms.
-        --bs-label-font-size: 0.75rem;        // 12px — mono reads slightly large, trim it
+        --bs-label-font-size: 0.75rem; // 12px — mono reads slightly large, trim it
         --bs-label-font-weight: 500;
-        --bs-label-color: var(--bp-teal-fg);  // teal text on white clears AA; gives fields a technical-instrument feel
-        --bs-label-sm-font-size: 0.6875rem;   // 11px
-        --bs-label-lg-font-size: 0.8125rem;   // 13px
+        --bs-label-color: var(
+            --bp-teal-fg
+        ); // teal text on white clears AA; gives fields a technical-instrument feel
+        --bs-label-sm-font-size: 0.6875rem; // 11px
+        --bs-label-lg-font-size: 0.8125rem; // 13px
         --bs-label-gap: 0.3125rem;
 
         // Required marker → pink (primary accent, strong call-to-attention)

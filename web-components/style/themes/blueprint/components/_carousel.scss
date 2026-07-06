@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Controls — teal-tinted chips replace the base translucent-white chips ──
     //
     // Base bakes rgba(255,255,255,0.15/0.30) and color:#fff directly.
@@ -16,7 +15,10 @@ tc-theme[name='blueprint'],
         color: var(--bp-teal-fg);
         background: var(--bp-teal-soft);
         border: 1px solid var(--bp-teal-line);
-        transition: background-color var(--bp-ease), color var(--bp-ease), box-shadow var(--bp-ease);
+        transition:
+            background-color var(--bp-ease),
+            color var(--bp-ease),
+            box-shadow var(--bp-ease);
 
         &:hover,
         &:focus-visible {

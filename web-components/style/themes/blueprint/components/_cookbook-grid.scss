@@ -134,7 +134,9 @@ tc-theme[name='blueprint'],
     // Reduced-motion: no lift, only shadow and border-color transitions.
     @media (prefers-reduced-motion: reduce) {
         .tc-cookbook-grid-item--linked {
-            transition: box-shadow 0.22s, border-color 0.22s;
+            transition:
+                box-shadow 0.22s,
+                border-color 0.22s;
 
             &:hover {
                 transform: none;

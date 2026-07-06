@@ -2,15 +2,19 @@ package nginxctl
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/kalevski/toolcase/nginxpilot/internal/config"
 	"github.com/kalevski/toolcase/nginxpilot/internal/nginxconf"
+	"github.com/kalevski/toolcase/nginxpilot/internal/realip"
 )
 
 // Resource kinds, surfaced in ApplyResult / GET /status.
 const (
 	KindSite           = "site"
 	KindProxy          = "proxy"
+	KindRedirect       = "redirect"
+	KindDeadHost       = "dead-host"
 	KindUpstream       = "upstream"
 	KindStream         = "stream"
 	KindStreamUpstream = "stream-upstream"
@@ -20,6 +24,10 @@ const (
 const (
 	StateActive   = "active"
 	StateDisabled = "disabled"
+	// StateAtRisk marks a live, serving resource that failed the reconcile
+	// loop's dry-run — it would fail the NEXT apply (e.g. DNS rot). Set by the
+	// manager, never by the engine.
+	StateAtRisk = "at_risk"
 )
 
 // nginx context a rendered file belongs to.
@@ -52,6 +60,19 @@ func renderResources(cfg *config.Config, certs nginxconf.CertResolver, includeDi
 		})
 	}
 
+	// Shared real-ip trust include (better.md §8). Provider ranges come from the
+	// on-disk cache the refresh loop maintains — every entry re-validated on
+	// load, so a bad fetch can never break the rendered file.
+	if cfg.Nginx.RealIP.Enabled {
+		ranges := realip.LoadAll(cfg.DataDir, cfg.Nginx.RealIP.Providers)
+		if inc := nginxconf.RealIPInclude(cfg, ranges); inc != "" {
+			baseHTTP = append(baseHTTP, rendered{
+				kind: "realip", key: "realip", filename: nginxconf.RealIPIncludeFilename,
+				content: inc, context: ctxHTTP,
+			})
+		}
+	}
+
 	// http upstreams first — proxies reference them by name.
 	for i := range cfg.Upstreams {
 		u := &cfg.Upstreams[i]
@@ -62,25 +83,68 @@ func renderResources(cfg *config.Config, certs nginxconf.CertResolver, includeDi
 	}
 	for i := range cfg.Sites {
 		s := &cfg.Sites[i]
+		// The filename is built ONCE per resource so the success path and the
+		// render-error disableResult can never disagree (and wildcard domains
+		// go through config.FileStem exactly once).
+		filename := "site-" + config.FileStem(s.Domain) + ".conf"
 		content, err := nginxconf.StaticVhost(cfg, s, opts)
 		if err != nil {
-			disabled = append(disabled, disableResult(KindSite, s.Domain, "site-"+s.Domain+".conf", err))
+			disabled = append(disabled, disableResult(KindSite, s.Domain, filename, err))
 			continue
 		}
 		resources = append(resources, rendered{
-			kind: KindSite, key: s.Domain, filename: "site-" + s.Domain + ".conf",
+			kind: KindSite, key: s.Domain, filename: filename,
 			content: content, context: ctxHTTP,
 		})
 	}
 	for i := range cfg.Proxies {
 		p := &cfg.Proxies[i]
+		// A disabled proxy renders nothing — it keeps its config (and admin API
+		// presence) but nginx stops routing its domain. Not a quarantine, so it
+		// is not reported in `disabled`.
+		if !p.IsEnabled() {
+			continue
+		}
+		filename := "proxy-" + config.FileStem(p.Domain) + ".conf"
 		content, err := nginxconf.ProxyVhost(cfg, p, opts)
 		if err != nil {
-			disabled = append(disabled, disableResult(KindProxy, p.Domain, "proxy-"+p.Domain+".conf", err))
+			disabled = append(disabled, disableResult(KindProxy, p.Domain, filename, err))
 			continue
 		}
 		resources = append(resources, rendered{
-			kind: KindProxy, key: p.Domain, filename: "proxy-" + p.Domain + ".conf",
+			kind: KindProxy, key: p.Domain, filename: filename,
+			content: content, context: ctxHTTP,
+		})
+	}
+	for i := range cfg.Redirects {
+		r := &cfg.Redirects[i]
+		if !r.IsEnabled() {
+			continue
+		}
+		filename := "redirect-" + config.FileStem(r.Domain) + ".conf"
+		content, err := nginxconf.RedirectVhost(cfg, r, opts)
+		if err != nil {
+			disabled = append(disabled, disableResult(KindRedirect, r.Domain, filename, err))
+			continue
+		}
+		resources = append(resources, rendered{
+			kind: KindRedirect, key: r.Domain, filename: filename,
+			content: content, context: ctxHTTP,
+		})
+	}
+	for i := range cfg.DeadHosts {
+		d := &cfg.DeadHosts[i]
+		if !d.IsEnabled() {
+			continue
+		}
+		filename := "dead-" + config.FileStem(d.Domain) + ".conf"
+		content, err := nginxconf.DeadHostVhost(cfg, d, opts)
+		if err != nil {
+			disabled = append(disabled, disableResult(KindDeadHost, d.Domain, filename, err))
+			continue
+		}
+		resources = append(resources, rendered{
+			kind: KindDeadHost, key: d.Domain, filename: filename,
 			content: content, context: ctxHTTP,
 		})
 	}
@@ -109,11 +173,15 @@ func renderResources(cfg *config.Config, certs nginxconf.CertResolver, includeDi
 }
 
 // disableResult builds a ResourceResult for a render-time disable, with a
-// human reason (cert-required gets a clearer message than the raw error).
+// human reason (cert-required gets a clearer message than the raw error, and
+// a wildcard domain gets the DNS-challenge hint).
 func disableResult(kind, key, file string, err error) ResourceResult {
 	reason := err.Error()
 	if errors.Is(err, nginxconf.ErrCertRequired) {
 		reason = "tls: required but no certificate was found for this resource"
+		if strings.HasPrefix(key, "*.") {
+			reason += " (wildcard certs require acme.challenge: dns)"
+		}
 	}
 	return ResourceResult{Kind: kind, Key: key, File: file, State: StateDisabled, Reason: reason}
 }

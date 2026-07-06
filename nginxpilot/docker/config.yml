@@ -1,0 +1,11 @@
+# nginxpilot config for the docker-compose stack (mounted at /etc/nginxpilot/config.yml).
+# admin.listen binds 0.0.0.0 (not loopback) so quaykeeper can reach /status
+# and friends over the shared compose network at http://nginxpilot:9090.
+data_dir: /var/lib/nginxpilot
+admin:
+  listen: 0.0.0.0:9090
+defaults:
+  interval: 5m
+  keep_releases: 3
+include:
+  - sites.d/*.yml

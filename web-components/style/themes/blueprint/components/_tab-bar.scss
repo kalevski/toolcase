@@ -2,28 +2,27 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Token overrides ─────────────────────────────────────────────────────────
     // Drive every cosmetic through the --bs-tab-bar-* contract where possible.
 
     tc-tab-bar {
         // Bottom hairline uses the blueprint border token instead of --tc-border
-        --bs-tab-bar-border:         1px solid var(--bp-border);
+        --bs-tab-bar-border: 1px solid var(--bp-border);
 
         // Tab base ink → muted violet-slate
-        --bs-tab-bar-tab-color:      var(--bp-text-muted);
+        --bs-tab-bar-tab-color: var(--bp-text-muted);
 
         // Hover ink → stronger but not full primary
         --bs-tab-bar-tab-color-hover: var(--bp-text-soft);
 
         // Hover bg stays transparent (bar is open/flat; no pill bg on hover)
-        --bs-tab-bar-tab-bg-hover:   transparent;
+        --bs-tab-bar-tab-bg-hover: transparent;
 
         // Active ink → full primary text
         --bs-tab-bar-tab-color-active: var(--bp-text);
 
         // Active underline → pink (primary/selected per accent rotation)
-        --bs-tab-bar-tab-underline:  2px solid var(--bp-pink);
+        --bs-tab-bar-tab-underline: 2px solid var(--bp-pink);
     }
 
     // ── Tab button typography ────────────────────────────────────────────────────
@@ -31,7 +30,7 @@ tc-theme[name='blueprint'],
 
     .tc-tab-bar-tab {
         font-family: var(--bp-mono);
-        font-size: 0.6875rem;          // slightly smaller to suit tight monospace caps
+        font-size: 0.6875rem; // slightly smaller to suit tight monospace caps
         font-weight: 500;
         letter-spacing: 0.1em;
         text-transform: uppercase;

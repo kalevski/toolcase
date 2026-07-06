@@ -10,7 +10,9 @@
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
     .tc-gamepad-button-prompt {
-        --bs-gamepad-button-prompt-cap-bg: var(--fg-keycap-bg); // recipe token; single source for the leather gradient
+        --bs-gamepad-button-prompt-cap-bg: var(
+            --fg-keycap-bg
+        ); // recipe token; single source for the leather gradient
         --bs-gamepad-button-prompt-cap-color: var(--fg-gold-bright);
         --bs-gamepad-button-prompt-cap-border-color: var(--fg-gold-deep);
         --bs-gamepad-button-prompt-label-color: var(--fg-parch);
@@ -24,7 +26,8 @@ tc-theme[name='dungeon'],
         border-bottom-width: var(--bs-gamepad-button-prompt-cap-border-width);
         border-radius: 50%; // sanctioned circle — round gamepad button
         box-shadow:
-            var(--fg-bevel-top), // recipe token: inset top highlight band
+            var(--fg-bevel-top),
+            // recipe token: inset top highlight band
             0 1px 0 rgba(0, 0, 0, 0.6);
         text-shadow: 0 1px 2px #000;
     }

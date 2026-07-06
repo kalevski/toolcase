@@ -44,8 +44,8 @@ export default tseslint.config(
         },
     },
     {
-        // Standalone Node ESM scripts (e.g. perch/e2e/test.mjs) run under the Node
-        // runtime, not bundled — expose the Node globals they use.
+        // Standalone Node ESM scripts (e2e runners, build scripts) run under the
+        // Node runtime, not bundled — expose the Node globals they use.
         files: ['**/e2e/**', '**/*.mjs'],
         languageOptions: {
             globals: {
@@ -63,7 +63,7 @@ export default tseslint.config(
         // React app workspaces use hooks; register the plugin so the existing
         // `react-hooks/exhaustive-deps` disable directives resolve (and the rule
         // runs as a warning, mirroring eslint-config-next).
-        files: ['perch/**/*.{ts,tsx}', 'wharf/**/*.{ts,tsx}', 'taskforge/**/*.{ts,tsx}'],
+        files: ['quaykeeper/**/*.{ts,tsx}', 'taskforge/**/*.{ts,tsx}'],
         plugins: { 'react-hooks': reactHooks },
         rules: {
             'react-hooks/exhaustive-deps': 'warn',

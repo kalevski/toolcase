@@ -2,29 +2,32 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-perk-picker {
         // ── Card surface tokens ──────────────────────────────────────────────────
-        --bs-perk-picker-card-bg:           var(--bp-paper);
-        --bs-perk-picker-card-border:       var(--bp-border);
-        --bs-perk-picker-card-hover-bg:     var(--bp-paper-tint);
+        --bs-perk-picker-card-bg: var(--bp-paper);
+        --bs-perk-picker-card-border: var(--bp-border);
+        --bs-perk-picker-card-hover-bg: var(--bp-paper-tint);
         --bs-perk-picker-card-hover-border: var(--bp-border-strong);
 
         // ── Selected state → pink CTA fill ──────────────────────────────────────
-        --bs-perk-picker-selected-bg:           var(--bp-pink);
-        --bs-perk-picker-selected-border:       var(--bp-pink);
-        --bs-perk-picker-selected-color:        var(--bp-pink-ink);
-        --bs-perk-picker-selected-desc-color:   color-mix(in srgb, var(--bp-pink-ink) 72%, transparent);
+        --bs-perk-picker-selected-bg: var(--bp-pink);
+        --bs-perk-picker-selected-border: var(--bp-pink);
+        --bs-perk-picker-selected-color: var(--bp-pink-ink);
+        --bs-perk-picker-selected-desc-color: color-mix(
+            in srgb,
+            var(--bp-pink-ink) 72%,
+            transparent
+        );
 
         // ── Icon tile ────────────────────────────────────────────────────────────
         // Teal-tinted well at rest; semi-transparent white when selected (on pink).
-        --bs-perk-picker-icon-bg:              var(--bp-bg-2);
-        --bs-perk-picker-icon-color:           var(--bp-teal-fg);   // teal text on white clears AA
-        --bs-perk-picker-icon-selected-bg:     rgba(255, 255, 255, 0.18);
-        --bs-perk-picker-icon-selected-color:  var(--bp-pink-ink);
+        --bs-perk-picker-icon-bg: var(--bp-bg-2);
+        --bs-perk-picker-icon-color: var(--bp-teal-fg); // teal text on white clears AA
+        --bs-perk-picker-icon-selected-bg: rgba(255, 255, 255, 0.18);
+        --bs-perk-picker-icon-selected-color: var(--bp-pink-ink);
 
         // ── Name / description typography tokens ─────────────────────────────────
-        --bs-perk-picker-name-color:        var(--bp-text);
+        --bs-perk-picker-name-color: var(--bp-text);
         --bs-perk-picker-description-color: var(--bp-text-muted);
     }
 
@@ -35,9 +38,9 @@ tc-theme[name='blueprint'],
         box-shadow: var(--tc-shadow-sm);
         transition:
             background-color 0.18s var(--bp-ease),
-            border-color     0.18s var(--bp-ease),
-            box-shadow       0.18s var(--bp-ease),
-            transform        0.18s var(--bp-ease);
+            border-color 0.18s var(--bp-ease),
+            box-shadow 0.18s var(--bp-ease),
+            transform 0.18s var(--bp-ease);
 
         // HUD corner bracket — teal top-left decoration signals "tappable tile".
         &::before {
@@ -106,7 +109,7 @@ tc-theme[name='blueprint'],
 
             .is-selected & {
                 color: var(--bs-perk-picker-icon-selected-color);
-                letter-spacing: 0.08em;   // keep tracking on pink fill
+                letter-spacing: 0.08em; // keep tracking on pink fill
             }
         }
     }
@@ -118,7 +121,7 @@ tc-theme[name='blueprint'],
         font-weight: 600;
         letter-spacing: -0.01em;
         color: var(--bs-perk-picker-name-color);
-        text-transform: uppercase;   // display font reads best in uppercase for short labels
+        text-transform: uppercase; // display font reads best in uppercase for short labels
 
         .is-selected & {
             color: var(--bs-perk-picker-selected-color);

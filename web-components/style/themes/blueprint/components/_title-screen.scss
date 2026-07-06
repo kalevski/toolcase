@@ -2,16 +2,15 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-title-screen {
         // Full-viewport surface: blueprint lavender canvas, not slate dark
-        --bs-title-screen-bg:            var(--bp-bg);
+        --bs-title-screen-bg: var(--bp-bg);
 
         // Eyebrow: teal mono micro-label (blueprint HUD convention; replaces raw cyan)
         --bs-title-screen-eyebrow-color: var(--bp-teal-fg);
 
         // Title heading: strongest ink, display font applied below
-        --bs-title-screen-title-color:   var(--bp-emphasis);
+        --bs-title-screen-title-color: var(--bp-emphasis);
 
         // Hairline divider: routes to faint blueprint token (never raw tc-border
         // which would leak the light-slate ramp)
@@ -28,9 +27,10 @@ tc-theme[name='blueprint'],
 
     tc-title-screen {
         background:
-            var(--bp-glow-field),   // pink+teal ambient glow (faint, centred)
-            var(--bp-grid-field)    // violet dot-grid tactical overlay
-            var(--bp-bg);           // lavender page fallback
+            var(--bp-glow-field),
+            // pink+teal ambient glow (faint, centred)
+            var(--bp-grid-field) // violet dot-grid tactical overlay
+            var(--bp-bg); // lavender page fallback
     }
 
     // ── Panel: centred content column ────────────────────────────────────────
@@ -40,33 +40,33 @@ tc-theme[name='blueprint'],
 
     .tc-title-screen__panel {
         background: var(--bp-paper);
-        border:     1px solid var(--bp-border);
+        border: 1px solid var(--bp-border);
         box-shadow: var(--tc-shadow-md);
-        position:   relative; // needed for bracket pseudo-elements
+        position: relative; // needed for bracket pseudo-elements
 
         // Top-left HUD corner bracket — teal, primary action register
         &::before {
-            content:      '';
-            position:     absolute;
-            top:          8px;
-            left:         8px;
-            width:        14px;
-            height:       14px;
-            border-top:   2px solid var(--bp-teal);
-            border-left:  2px solid var(--bp-teal);
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 14px;
+            height: 14px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
             pointer-events: none;
         }
 
         // Bottom-right bracket — muted border tone, quiet counterpoint
         &::after {
-            content:       '';
-            position:      absolute;
-            bottom:        8px;
-            right:         8px;
-            width:         14px;
-            height:        14px;
+            content: '';
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            width: 14px;
+            height: 14px;
             border-bottom: 2px solid var(--bp-border-strong);
-            border-right:  2px solid var(--bp-border-strong);
+            border-right: 2px solid var(--bp-border-strong);
             pointer-events: none;
         }
     }
@@ -76,7 +76,7 @@ tc-theme[name='blueprint'],
     // on white. Replaces the base's raw --tc-cyan / #22d3ee literal.
 
     .tc-title-screen__eyebrow {
-        font-family:    var(--bp-mono);
+        font-family: var(--bp-mono);
         letter-spacing: 0.14em;
         // color flows from --bs-title-screen-eyebrow-color → --bp-teal-fg (set above)
     }
@@ -86,7 +86,7 @@ tc-theme[name='blueprint'],
     // Uppercase + tight tracking gives the compressed vector-blueprint silhouette.
 
     .tc-title-screen__title {
-        font-family:    var(--bp-display);
+        font-family: var(--bp-display);
         letter-spacing: -0.02em;
         text-transform: uppercase;
         // color flows from --bs-title-screen-title-color → --bp-emphasis (set above)

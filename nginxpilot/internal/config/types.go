@@ -72,6 +72,18 @@ type Config struct {
 	Upstreams []Upstream `yaml:"upstreams"`
 	Proxies   []Proxy    `yaml:"proxies"`
 
+	// Redirects and DeadHosts are lightweight http vhosts: a redirect answers
+	// every request with a 30x to another host; a dead host parks a domain on a
+	// fixed error code (optionally over TLS, keeping the cert warm). Both share
+	// the site/proxy domain namespace.
+	Redirects []Redirect `yaml:"redirects"`
+	DeadHosts []DeadHost `yaml:"dead_hosts"`
+
+	// AccessLists are named IP allow/deny + basic-auth policies a proxy,
+	// redirect or dead host references via `access_list: <name>` (better.md §1).
+	// Own namespace, independent of upstream names.
+	AccessLists []AccessList `yaml:"access_lists"`
+
 	// StreamUpstreams and Streams are stream-context (L4 TCP/UDP) resources.
 	// nginx `stream {}` is a different top-level context than `http {}`, so
 	// these render into a separate stream_conf_dir and only take effect in
@@ -114,6 +126,10 @@ type UpstreamServer struct {
 // proxy_pass to a named upstream or a single inline target.
 type Proxy struct {
 	Domain string `yaml:"domain" json:"domain"`
+	// Enabled toggles the proxy without deleting it (nil/absent = enabled). A
+	// disabled proxy stays in config and the admin API but renders no nginx
+	// server block, so nginx stops routing its domain.
+	Enabled *bool `yaml:"enabled" json:"enabled,omitempty"`
 	// Listen is the HTTP port (default DefaultProxyListen).
 	Listen int `yaml:"listen" json:"listen,omitempty"`
 	// Upstream / Pass set the default backend for all locations. Exactly one
@@ -132,6 +148,10 @@ type Proxy struct {
 	// WebOptions are the per-host HTTP toggles (TLS, force_ssl, http2, hsts,
 	// block_exploits, gzip, advanced) shared with Site, inlined into the YAML.
 	WebOptions `yaml:",inline"`
+
+	// AccessList names an access_lists entry whose IP rules / basic auth guard
+	// this vhost ("" = open). Unknown names are a validation error.
+	AccessList string `yaml:"access_list" json:"access_list,omitempty"`
 
 	// Websocket applies the Upgrade/Connection/HTTP1.1 block to every location
 	// (not just per-location). A per-location websocket:true still works too.
@@ -155,6 +175,15 @@ type ProxyLocation struct {
 	// Websocket adds the Upgrade/Connection headers + HTTP/1.1 for WebSocket
 	// and other connection-upgrade traffic.
 	Websocket bool `yaml:"websocket" json:"websocket,omitempty"`
+	// Advanced is a raw passthrough inside this location block (escape hatch),
+	// mirroring WebOptions.Advanced at server level. It rides the same
+	// `nginx -t` gate, so a bad snippet only disables this one resource.
+	Advanced string `yaml:"advanced" json:"advanced,omitempty"`
+}
+
+// IsEnabled reports the effective enabled state (default true).
+func (p Proxy) IsEnabled() bool {
+	return p.Enabled == nil || *p.Enabled
 }
 
 // ListenPort returns the effective listen port for the proxy.
@@ -163,6 +192,189 @@ func (p Proxy) ListenPort() int {
 		return p.Listen
 	}
 	return DefaultProxyListen
+}
+
+// Redirect schemes (redirects[].scheme). Auto emits $scheme so the redirect
+// preserves whichever of http/https the client used.
+const (
+	RedirectSchemeAuto  = "auto"
+	RedirectSchemeHTTP  = "http"
+	RedirectSchemeHTTPS = "https"
+)
+
+// DefaultRedirectCode is the status used when redirects[].code is unset.
+const DefaultRedirectCode = 301
+
+// Redirect is a redirection host: an nginx server{} block answering every
+// request with a configurable 30x to another host, with optional path
+// preservation and full WebOptions (TLS/HSTS/http2/...) support.
+type Redirect struct {
+	Domain string `yaml:"domain" json:"domain"`
+	// Enabled toggles the redirect without deleting it (nil/absent = enabled).
+	Enabled *bool `yaml:"enabled" json:"enabled,omitempty"`
+	// Listen is the HTTP port (default DefaultProxyListen).
+	Listen int `yaml:"listen" json:"listen,omitempty"`
+	// To is the target host — no scheme, optionally :port.
+	To string `yaml:"to" json:"to"`
+	// Scheme selects the redirect target scheme: http | https | auto (default
+	// auto → $scheme).
+	Scheme string `yaml:"scheme" json:"scheme,omitempty"`
+	// Code is the redirect status: 301 (default) | 302 | 303 | 307 | 308.
+	Code int `yaml:"code" json:"code,omitempty"`
+	// PreservePath appends $request_uri to the target (default true).
+	PreservePath *bool `yaml:"preserve_path" json:"preserve_path,omitempty"`
+
+	WebOptions `yaml:",inline"`
+
+	// AccessList names an access_lists entry guarding this redirect ("" = open).
+	AccessList string `yaml:"access_list" json:"access_list,omitempty"`
+
+	// File records which config file declared this redirect (provenance).
+	File string `yaml:"-" json:"-"`
+}
+
+// IsEnabled reports the effective enabled state (default true).
+func (r Redirect) IsEnabled() bool { return r.Enabled == nil || *r.Enabled }
+
+// ListenPort returns the effective listen port for the redirect.
+func (r Redirect) ListenPort() int {
+	if r.Listen > 0 {
+		return r.Listen
+	}
+	return DefaultProxyListen
+}
+
+// CodeOrDefault returns the effective redirect status code (301 when unset).
+func (r Redirect) CodeOrDefault() int {
+	if r.Code > 0 {
+		return r.Code
+	}
+	return DefaultRedirectCode
+}
+
+// SchemeOrAuto returns the effective target scheme ("auto" when unset).
+func (r Redirect) SchemeOrAuto() string {
+	if r.Scheme == "" {
+		return RedirectSchemeAuto
+	}
+	return r.Scheme
+}
+
+// PreservesPath reports the effective preserve_path (default true).
+func (r Redirect) PreservesPath() bool {
+	return r.PreservePath == nil || *r.PreservePath
+}
+
+// DefaultDeadHostCode is the status used when dead_hosts[].code is unset.
+const DefaultDeadHostCode = 404
+
+// DeadHost parks a domain: nginx answers every request with a fixed error
+// code, optionally over TLS (keeping the cert warm while a service is
+// retired). code 444 closes the connection without a response.
+type DeadHost struct {
+	Domain string `yaml:"domain" json:"domain"`
+	// Enabled toggles the dead host without deleting it (nil/absent = enabled).
+	Enabled *bool `yaml:"enabled" json:"enabled,omitempty"`
+	// Listen is the HTTP port (default DefaultProxyListen).
+	Listen int `yaml:"listen" json:"listen,omitempty"`
+	// Code is the parked status: 404 (default) | 410 | 444 | 503.
+	Code int `yaml:"code" json:"code,omitempty"`
+
+	WebOptions `yaml:",inline"`
+
+	// AccessList names an access_lists entry guarding this dead host ("" = open).
+	AccessList string `yaml:"access_list" json:"access_list,omitempty"`
+
+	// File records which config file declared this dead host (provenance).
+	File string `yaml:"-" json:"-"`
+}
+
+// IsEnabled reports the effective enabled state (default true).
+func (d DeadHost) IsEnabled() bool { return d.Enabled == nil || *d.Enabled }
+
+// ListenPort returns the effective listen port for the dead host.
+func (d DeadHost) ListenPort() int {
+	if d.Listen > 0 {
+		return d.Listen
+	}
+	return DefaultProxyListen
+}
+
+// CodeOrDefault returns the effective parked status code (404 when unset).
+func (d DeadHost) CodeOrDefault() int {
+	if d.Code > 0 {
+		return d.Code
+	}
+	return DefaultDeadHostCode
+}
+
+// Access-list satisfy modes (access_lists[].satisfy). `all` (the default)
+// requires every enabled mechanism (IP rules AND basic auth) to pass; `any`
+// grants on the first one that does.
+const (
+	SatisfyAll = "all"
+	SatisfyAny = "any"
+)
+
+// AccessList is a named access policy: ordered IP allow/deny rules (rendered
+// then closed with `deny all;`) and/or htpasswd basic-auth users. Referenced
+// from Proxy/Redirect/DeadHost via their `access_list` field; rendered into
+// each referencing server block plus one generated htpasswd file under
+// <data_dir>/access/<name>.htpasswd.
+type AccessList struct {
+	// Name is the identifier ([A-Za-z0-9_]+, its own namespace).
+	Name string `yaml:"name" json:"name"`
+	// Satisfy: all (default) | any — nginx's `satisfy` directive.
+	Satisfy string `yaml:"satisfy" json:"satisfy,omitempty"`
+	// PassAuth forwards the client's Authorization header upstream; false (the
+	// default) consumes it at the proxy so backend auth never sees it.
+	PassAuth bool `yaml:"pass_auth" json:"pass_auth,omitempty"`
+	// Users are htpasswd entries. Passwords are stored as apr1 hashes only —
+	// the admin API hashes plaintext server-side and GET masks the hash.
+	Users []AccessListUser `yaml:"users" json:"users,omitempty"`
+	// Rules are ordered allow/deny entries (IP, CIDR, or "all"); when any are
+	// present the renderer appends a final `deny all;`.
+	Rules []AccessRule `yaml:"rules" json:"rules,omitempty"`
+
+	// File records which config file declared this list (provenance). Never
+	// serialized over the admin API.
+	File string `yaml:"-" json:"-"`
+}
+
+// AccessListUser is one basic-auth account of an access list.
+type AccessListUser struct {
+	Username string `yaml:"username" json:"username"`
+	// PasswordHash is the crypt-format hash ("$apr1$…"). Write-only over the
+	// admin API: fragments store it, GET responses mask it. A user without a
+	// hash is skipped by the htpasswd generator (password pending).
+	PasswordHash string `yaml:"password_hash" json:"password_hash,omitempty"`
+}
+
+// AccessRule is one ordered allow/deny entry. Exactly one of Allow/Deny is
+// set; the value is an IP, a CIDR, or the literal "all".
+type AccessRule struct {
+	Allow string `yaml:"allow" json:"allow,omitempty"`
+	Deny  string `yaml:"deny" json:"deny,omitempty"`
+}
+
+// SatisfyOrAll returns the effective satisfy mode ("all" when unset).
+func (a AccessList) SatisfyOrAll() string {
+	if a.Satisfy == "" {
+		return SatisfyAll
+	}
+	return a.Satisfy
+}
+
+// HasUsers reports whether any user has a usable password hash (drives
+// auth_basic emission — a list whose users are all password-pending renders
+// no auth_basic, or nginx would lock everyone out against an empty file).
+func (a AccessList) HasUsers() bool {
+	for _, u := range a.Users {
+		if u.PasswordHash != "" {
+			return true
+		}
+	}
+	return false
 }
 
 // Admin configures the loopback admin HTTP endpoint.

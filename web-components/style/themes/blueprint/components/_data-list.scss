@@ -4,52 +4,51 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-data-list {
         // ── Surface ───────────────────────────────────────────────────────────
         // White raised card on the lavender page; shadow lifts it off --bp-bg.
-        --bs-data-list-bg:              var(--bp-paper);
-        --bs-data-list-border:          1px solid var(--bp-border);
+        --bs-data-list-bg: var(--bp-paper);
+        --bs-data-list-border: 1px solid var(--bp-border);
 
         // ── Separators ────────────────────────────────────────────────────────
         // Faint dividers — blueprint divider token, not the raw slate literal.
-        --bs-data-list-separator:       1px solid var(--bp-border-faint);
+        --bs-data-list-separator: 1px solid var(--bp-border-faint);
 
         // ── Row states ────────────────────────────────────────────────────────
         // Hover: barely-there lavender paper-tint wash.
         // Selected: stronger paper-tint-2 fill to read clearly at a glance.
-        --bs-data-list-row-hover-bg:    var(--bp-paper-tint);
+        --bs-data-list-row-hover-bg: var(--bp-paper-tint);
         --bs-data-list-row-selected-bg: var(--bp-paper-tint-2);
 
         // ── Header ────────────────────────────────────────────────────────────
         // Recessed well background separates the header from the row body.
-        --bs-data-list-header-bg:       var(--bp-bg-2);
+        --bs-data-list-header-bg: var(--bp-bg-2);
 
         // Title: display font (Chakra Petch) — blueprint's section-name register.
-        --bs-data-list-title-color:     var(--bp-text);
+        --bs-data-list-title-color: var(--bp-text);
         --bs-data-list-title-font-size: 0.8125rem;
 
         // ── Row text ──────────────────────────────────────────────────────────
-        --bs-data-list-primary-color:   var(--bp-text);
+        --bs-data-list-primary-color: var(--bp-text);
         --bs-data-list-primary-font-size: 0.875rem;
         --bs-data-list-secondary-color: var(--bp-text-muted);
         --bs-data-list-secondary-font-size: 0.75rem;
 
         // Trailing meta: faint ink — it's a HUD readout, not a primary label.
-        --bs-data-list-trailing-color:  var(--bp-text-faint);
+        --bs-data-list-trailing-color: var(--bp-text-faint);
         --bs-data-list-trailing-font-size: 0.6875rem;
 
         // ── Action button ─────────────────────────────────────────────────────
         // Default: white paper + primary ink + hairline border (blueprint chip).
         // Hover: pink primary-CTA fill with white ink — arcade accent rotation.
-        --bs-data-list-action-bg:           var(--bp-paper);
-        --bs-data-list-action-color:        var(--bp-text-soft);
-        --bs-data-list-action-border:       1px solid var(--bp-border-soft);
-        --bs-data-list-action-hover-bg:     var(--bp-pink);
-        --bs-data-list-action-hover-color:  var(--bp-pink-ink);
+        --bs-data-list-action-bg: var(--bp-paper);
+        --bs-data-list-action-color: var(--bp-text-soft);
+        --bs-data-list-action-border: 1px solid var(--bp-border-soft);
+        --bs-data-list-action-hover-bg: var(--bp-pink);
+        --bs-data-list-action-hover-color: var(--bp-pink-ink);
 
         // ── Empty state ───────────────────────────────────────────────────────
-        --bs-data-list-empty-color:     var(--bp-text-faint);
+        --bs-data-list-empty-color: var(--bp-text-faint);
 
         // Outer frame shadow — lifts the panel off --bp-bg.
         box-shadow: var(--tc-shadow-sm);

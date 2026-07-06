@@ -2,29 +2,28 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-queued-file {
         // Surface: white paper card with hairline border and soft violet shadow
-        --bs-queued-file-bg:                  var(--bp-paper);
-        --bs-queued-file-border-color:        var(--bp-border);
+        --bs-queued-file-bg: var(--bp-paper);
+        --bs-queued-file-border-color: var(--bp-border);
 
         // Leading icon: teal — reinforces the "action" read of the file glyph
-        --bs-queued-file-icon-color:          var(--bp-teal-fg);
+        --bs-queued-file-icon-color: var(--bp-teal-fg);
 
         // Filename: primary ink, Space Grotesk weight-500 (set via element rule below)
-        --bs-queued-file-name-color:          var(--bp-text);
+        --bs-queued-file-name-color: var(--bp-text);
 
         // Format chip: violet-soft tint + violet-fg text + chip border — mono eyebrow treatment
-        --bs-queued-file-format-bg:           var(--bp-violet-soft);
-        --bs-queued-file-format-color:        var(--bp-violet-fg);
+        --bs-queued-file-format-bg: var(--bp-violet-soft);
+        --bs-queued-file-format-color: var(--bp-violet-fg);
         --bs-queued-file-format-border-color: var(--bp-border-chip);
 
         // Size label: faint muted ink
-        --bs-queued-file-size-color:          var(--bp-text-faint);
+        --bs-queued-file-size-color: var(--bp-text-faint);
 
         // Dismiss button: muted resting, pink on hover (primary action rotation)
-        --bs-queued-file-dismiss-color:       var(--bp-text-faint);
-        --bs-queued-file-dismiss-hover-bg:    var(--bp-pink-soft);
+        --bs-queued-file-dismiss-color: var(--bp-text-faint);
+        --bs-queued-file-dismiss-hover-bg: var(--bp-pink-soft);
         --bs-queued-file-dismiss-hover-color: var(--bp-pink);
     }
 
@@ -58,7 +57,9 @@ tc-theme[name='blueprint'],
 
     .tc-queued-file-dismiss {
         // Smooth transition for pink-accent hover reveal
-        transition: background-color var(--bp-ease), color var(--bp-ease);
+        transition:
+            background-color var(--bp-ease),
+            color var(--bp-ease);
 
         &:focus-visible {
             // Pink focus ring — matches primary accent rotation

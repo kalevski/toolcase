@@ -10,7 +10,8 @@ tc-theme[name='dungeon'],
         --bs-switch-track-checked-gradient: linear-gradient(180deg, #2a1a08, #4a2a0e);
         --bs-switch-track-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
         --bs-switch-knob-bg: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold-deep));
-        --bs-switch-knob-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 1px 2px rgba(0, 0, 0, 0.6);
+        --bs-switch-knob-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 1px 2px rgba(0, 0, 0, 0.6);
         --bs-switch-focus-ring: 0 0 0 0.2rem rgba(240, 210, 122, 0.4);
     }
 

@@ -22,7 +22,12 @@ tc-theme[name='dungeon'],
 
         // Improvement 4: replace literal hex with palette tokens.
         --bs-loading-overlay-bar-bg: linear-gradient(180deg, var(--fg-ink), var(--fg-ink-2));
-        --bs-loading-overlay-bar-fill: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold) 60%, var(--fg-gold-shadow));
+        --bs-loading-overlay-bar-fill: linear-gradient(
+            180deg,
+            var(--fg-gold-bright),
+            var(--fg-gold) 60%,
+            var(--fg-gold-shadow)
+        );
 
         // Improvement 3: thicken bar so gilded groove, scanlines, and gold fill are visible.
         --bs-loading-overlay-bar-height: 10px;

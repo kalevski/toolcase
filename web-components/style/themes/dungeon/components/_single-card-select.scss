@@ -6,20 +6,20 @@
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
     tc-single-card-select {
-        --bs-single-card-select-bg:              var(--fg-slot-bg);
-        --bs-single-card-select-hover-bg:        rgba(201, 169, 97, 0.08);
+        --bs-single-card-select-bg: var(--fg-slot-bg);
+        --bs-single-card-select-hover-bg: rgba(201, 169, 97, 0.08);
         --bs-single-card-select-selected-accent: var(--fg-gold-bright);
-        --bs-single-card-select-title-color:     var(--fg-gold-bright);
-        --bs-single-card-select-desc-color:      var(--fg-parch-3);
-        --bs-single-card-select-skeleton-bg:     var(--fg-leather-2);
+        --bs-single-card-select-title-color: var(--fg-gold-bright);
+        --bs-single-card-select-desc-color: var(--fg-parch-3);
+        --bs-single-card-select-skeleton-bg: var(--fg-leather-2);
     }
 
     // Title promoted to display caps — base inherits body sans, a var swap cannot carry this.
     .tc-single-card-select-title {
-        font-family:     var(--fg-display);
-        text-transform:  uppercase;
-        letter-spacing:  0.06em;
-        font-weight:     600;
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-weight: 600;
     }
 
     // Gilded wash behind the existing 2px gold frame + inset shadow.

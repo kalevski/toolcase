@@ -1,0 +1,51 @@
+// Sunshine Ocean variant — sky-blue lead + ocean-teal secondary on the
+// unchanged citrus base.
+//
+// Accent-only override: the cream canvas, surfaces, olive-ink text ramp,
+// semantic status colours, fonts and warm shadows all stay base-sunshine.
+// Only the two accent families move — the bright LEMON lead becomes a bright
+// SKY BLUE (same brightness class, so the dark on-lead ink convention holds
+// on every fill) and the leaf-green secondary becomes a mid-tone OCEAN TEAL
+// (still dark enough to carry links / focus / eyebrow text on cream). The
+// lead gradient, glow shadows, glow field and link colours all resolve
+// through the --sun-* vars, so they recompute automatically.
+// Use with: <tc-theme name="sunshine" variant="ocean"> … </tc-theme>
+
+@use '../../../foundation/tokens' as *;
+
+tc-theme[name='sunshine'][variant='ocean'],
+[data-tc-theme='sunshine'][data-tc-variant='ocean'] {
+    // ── Lead accent — bright sky blue (dark on-lead ink rides every fill) ────
+    --sun-lead: #38bdf8;
+    --sun-lead-hi: #5ecbff; // hover goes lighter, matching the base direction
+    --sun-lead-lo: #0ea5e9;
+    --sun-lead-tint: rgba(56, 189, 248, 0.16);
+    --sun-lead-line: rgba(56, 189, 248, 0.45);
+    --sun-lead-glow: rgba(56, 189, 248, 0.4);
+    --sun-on-lead: #08283a; // text on sky-coloured fills
+
+    // ── Secondary accent — mid-tone ocean teal (links / focus / eyebrow) ─────
+    --sun-leaf: #0e93ad;
+    --sun-leaf-hi: #17a7c4;
+    --sun-leaf-lo: #0b778c;
+    --sun-leaf-deep: #074553;
+    --sun-leaf-tint: rgba(14, 147, 173, 0.12);
+
+    // ── Recomputed accent-derived literals ───────────────────────────────────
+    --tc-accent-hex: #0e93ad;
+    --tc-focus-ring: 0 0 0 3px rgba(14, 147, 173, 0.34);
+    --bs-focus-ring-color: rgba(14, 147, 173, 0.34);
+    --bs-primary-rgb: 56, 189, 248;
+    --bs-dark-rgb: 7, 69, 83; // --bs-dark / --tc-surface-dark follow --sun-leaf-deep
+
+    // ── Semantic guard — status colours stay the sunshine originals ──────────
+    // In the base foundation success/warning resolve THROUGH the accent vars
+    // (leaf / lead-lo), so without these re-pins they would follow the variant
+    // accents. Danger (coral) and info (plum) are fixed pops — untouched.
+    --tc-success: #5f8a2e;
+    --tc-success-bg: rgba(95, 138, 46, 0.12);
+    --tc-warning: #d49a00;
+    --tc-warning-bg: rgba(242, 183, 5, 0.16);
+    --bs-success: #5f8a2e; // --bs-success-rgb (95, 138, 46) still valid from base
+    --bs-warning: #d49a00; // --bs-warning-rgb (212, 154, 0) still valid from base
+}

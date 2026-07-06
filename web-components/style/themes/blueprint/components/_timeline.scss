@@ -17,8 +17,8 @@ tc-theme[name='blueprint'],
 
         // ── Status node colors ────────────────────────────────────────────
         // completed → teal (success = teal per blueprint accent rotation)
-        --bs-timeline-completed-bg: var(--bp-teal);
-        --bs-timeline-completed-border: var(--bp-teal);
+        --bs-timeline-completed-bg: var(--bp-success);
+        --bs-timeline-completed-border: var(--bp-success);
         // active → pink (primary CTA)
         --bs-timeline-active-bg: var(--bp-pink);
         --bs-timeline-active-border: var(--bp-pink);
@@ -62,7 +62,7 @@ tc-theme[name='blueprint'],
 
         // ── Glass variant surface ─────────────────────────────────────────
         // Lavender-tinted translucent white — consistent with bp-paper family
-        --bs-timeline-glass-bg: rgba(255, 255, 255, 0.80);
+        --bs-timeline-glass-bg: rgba(255, 255, 255, 0.8);
 
         // ── Skeleton ──────────────────────────────────────────────────────
         // Base → recessed well; shimmer → paper white highlight
@@ -84,7 +84,7 @@ tc-theme[name='blueprint'],
 
     // ── Completed node: subtle teal halo ─────────────────────────────────────
     .tc-timeline-node--dot.tc-timeline-node--completed {
-        box-shadow: 0 0 0 0.15em var(--bp-teal-soft);
+        box-shadow: 0 0 0 0.15em var(--bp-success-soft);
     }
 
     // ── Icon node surface ─────────────────────────────────────────────────────

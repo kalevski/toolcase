@@ -4,14 +4,13 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // 1. Token-swap on the host element.
     tc-chart-container {
-        --bs-chart-container-bg:               var(--fg-panel-bg);
-        --bs-chart-container-border-color:     var(--fg-gold-deep);
-        --bs-chart-container-header-bg:        transparent;
+        --bs-chart-container-bg: var(--fg-panel-bg);
+        --bs-chart-container-border-color: var(--fg-gold-deep);
+        --bs-chart-container-header-bg: transparent;
         --bs-chart-container-header-border-color: var(--fg-gold-deep);
-        --bs-chart-container-title-color:      var(--fg-gold-bright);
+        --bs-chart-container-title-color: var(--fg-gold-bright);
         --bs-chart-container-skeleton-shimmer: rgba(232, 220, 196, 0.25);
     }
 
@@ -22,10 +21,10 @@ tc-theme[name='dungeon'],
 
     // 3. Display-caps title — overrides the hardcoded 'Inter' font stack.
     .tc-chart-container-title {
-        font-family:     var(--fg-display);
-        text-transform:  uppercase;
-        letter-spacing:  0.12em;
-        font-weight:     600;
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 600;
     }
 
     // 4. Gold-rule header divider as a gradient strip via ::after.
@@ -35,12 +34,12 @@ tc-theme[name='dungeon'],
         position: relative;
 
         &::after {
-            content:    '';
-            position:   absolute;
-            left:       0;
-            right:      0;
-            bottom:     -1px;
-            height:     1px;
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -1px;
+            height: 1px;
             background: var(--fg-rule);
             pointer-events: none;
         }

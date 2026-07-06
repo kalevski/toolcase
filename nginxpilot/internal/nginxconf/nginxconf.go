@@ -15,6 +15,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/kalevski/toolcase/nginxpilot/internal/config"
 )
@@ -57,7 +58,8 @@ func Vhost(cfg *config.Config, domain string) (string, error) {
 }
 
 // VhostOpts renders one domain with explicit options (used by print-vhost when
-// a cert dir is configured, so the snippet shows real cert paths).
+// a cert dir is configured, so the snippet shows real cert paths). It renders
+// disabled resources too — this is the preview surface, not the live config.
 func VhostOpts(cfg *config.Config, domain string, opts Options) (string, error) {
 	for i := range cfg.Sites {
 		if cfg.Sites[i].Domain == domain {
@@ -67,6 +69,16 @@ func VhostOpts(cfg *config.Config, domain string, opts Options) (string, error) 
 	for i := range cfg.Proxies {
 		if cfg.Proxies[i].Domain == domain {
 			return ProxyVhost(cfg, &cfg.Proxies[i], opts)
+		}
+	}
+	for i := range cfg.Redirects {
+		if cfg.Redirects[i].Domain == domain {
+			return RedirectVhost(cfg, &cfg.Redirects[i], opts)
+		}
+	}
+	for i := range cfg.DeadHosts {
+		if cfg.DeadHosts[i].Domain == domain {
+			return DeadHostVhost(cfg, &cfg.DeadHosts[i], opts)
 		}
 	}
 	return "", fmt.Errorf("%q: %w", domain, ErrUnknownDomain)
@@ -100,10 +112,13 @@ func resolveTLS(mode, domain string, opts Options) (tlsState, error) {
 		return tlsState{}, nil // tls: auto → serve HTTP, the engine warns
 	}
 	// print-vhost: conventional Let's Encrypt paths so the snippet is usable.
+	// certbot stores a wildcard cert under the *.-stripped base name, so the
+	// placeholder must strip it too (a literal live/*.example.com/ never exists).
+	liveName := strings.TrimPrefix(domain, "*.")
 	return tlsState{
 		enabled: true,
-		cert:    filepath.Join("/etc/letsencrypt/live", domain, "fullchain.pem"),
-		key:     filepath.Join("/etc/letsencrypt/live", domain, "privkey.pem"),
+		cert:    filepath.Join("/etc/letsencrypt/live", liveName, "fullchain.pem"),
+		key:     filepath.Join("/etc/letsencrypt/live", liveName, "privkey.pem"),
 		found:   false,
 	}, nil
 }

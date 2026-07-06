@@ -1,0 +1,157 @@
+// Dungeon variant accent-role sweep — shared mixin for the color variants.
+//
+// The dungeon component partials hardwire the gold family onto element-scoped
+// --bs-* custom properties (and a few direct declarations), which beat the
+// inherited theme-root tokens a variant remaps. This mixin re-targets ONLY the
+// hardwired ACCENT-ROLE usages — primary-button chrome, metric-tile icon +
+// label, panel-header icon, active nav / tab indicators, and focus accents on
+// interactive controls — onto the variant palette. Structural gilding (frame
+// borders, bevels, corner notches, dividers, knob metal, gold rules, baked
+// rgba hairlines / glows) intentionally stays gold.
+//
+// Include INSIDE the variant's scoped block so every rule compiles under
+// tc-theme[name='dungeon'][variant='<v>'] / [data-tc-theme='dungeon']
+// [data-tc-variant='<v>'] — the extra attribute out-specifies the partials'
+// single-attribute theme scope regardless of source order.
+
+@use '../../../foundation/tokens' as tokens;
+
+@mixin accent-roles($primary, $primary-bright, $primary-deep, $secondary, $secondary-bright) {
+    // NOTE: $secondary / $secondary-bright are accepted for palette completeness
+    // but currently unused — no dungeon partial hardwires the secondary accent
+    // onto an accent role (copper appears only as structural flavor: bronze
+    // ranks, chart series, stamp variant). Token-level --tc-accent* / --bs-
+    // secondary handle the secondary swap.
+
+    // ── Primary / CTA button (components/_button.scss) ───────────────────────
+    // Gold border + gilded label on the leather fill; the leather bg gradients
+    // and metal bevel stack are structural and stay.
+    .btn {
+        --bs-btn-focus-shadow-rgb: #{tokens.rgb-channels($primary-bright)};
+    }
+
+    .btn-primary {
+        --bs-btn-border-color: #{$primary};
+        --bs-btn-color: #{$primary-bright};
+        --bs-btn-hover-border-color: #{$primary-bright};
+        --bs-btn-hover-color: #{$primary-bright};
+        --bs-btn-active-border-color: #{$primary-deep};
+        --bs-btn-active-color: #{$primary};
+        --bs-btn-disabled-border-color: #{$primary-deep};
+    }
+
+    // ── Metric tile icon + label (components/_metric-tile.scss) ──────────────
+    // Frame border (--bs-metric-tile-border-color: gold-deep) is structural.
+    tc-metric-tile {
+        --bs-metric-tile-icon-color: #{$primary};
+        --bs-metric-tile-label-color: #{$primary};
+    }
+
+    // ── Panel header icon (components/_panel.scss) ───────────────────────────
+    // Header title (gold-bright) is gilded display text and stays, matching
+    // the untouched --tc-emphasis convention.
+    tc-panel-header {
+        --bs-panel-header-icon-color: #{$primary};
+    }
+
+    // ── Active nav / tab indicators ──────────────────────────────────────────
+    .nav-tabs {
+        --bs-nav-tabs-link-active-border-color: #{$primary-bright};
+    }
+
+    .nav-underline {
+        .nav-link.active {
+            border-bottom-color: $primary-bright;
+        }
+
+        &.flex-column .nav-link.active {
+            border-left-color: $primary-bright;
+        }
+    }
+
+    // Pressed-metal pill fill + bevel are structural; only the label recolors.
+    .nav-pills .nav-link.active {
+        color: $primary-bright;
+    }
+
+    .navbar {
+        --bs-navbar-active-accent: #{$primary-bright};
+    }
+
+    // The partial paints the active underline directly (not via the accent var).
+    .navbar .nav-link.active {
+        box-shadow: inset 0 -2px 0 $primary-bright;
+    }
+
+    tc-tab-bar {
+        --bs-tab-bar-tab-color-active: #{$primary-bright};
+        --bs-tab-bar-tab-underline: 2px solid #{$primary-bright};
+    }
+
+    tc-tab-sections {
+        --bs-tab-sections-tab-color-active: #{$primary-bright};
+    }
+
+    tc-side-nav {
+        --bs-side-nav-item-hover-color: #{$primary-bright};
+        --bs-side-nav-item-active-color: #{$primary-bright};
+        --bs-side-nav-marker-color: #{$primary-bright};
+        --bs-side-nav-focus-color: #{$primary};
+    }
+
+    tc-cool-nav {
+        --bs-cool-nav-link-hover-color: #{$primary-bright};
+        --bs-cool-nav-link-active-line: #{$primary};
+    }
+
+    // Dark cool-nav re-pins hover on the modifier scope; match its specificity.
+    tc-cool-nav.tc-cool-nav--dark {
+        --bs-cool-nav-link-hover-color: #{$primary-bright};
+    }
+
+    .breadcrumb {
+        --bs-breadcrumb-item-active-color: #{$primary-bright};
+    }
+
+    // ── Focus accents on interactive controls ────────────────────────────────
+    // Alpha values mirror the partials' gold originals.
+    .form-select {
+        --bs-form-select-focus-border-color: #{$primary};
+        --bs-form-select-focus-box-shadow: 0 0 0 0.2rem #{rgba($primary-bright, 0.35)};
+    }
+
+    tc-fps-cap-select {
+        // Its focus ring already routes through --tc-focus-ring (variant-aware).
+        --bs-fps-cap-select-focus-border-color: #{$primary};
+    }
+
+    tc-select-row {
+        --bs-select-row-focus-border-color: #{$primary};
+        --bs-select-row-focus-ring: 0 0 0 0.2rem #{rgba($primary-bright, 0.35)};
+    }
+
+    tc-editable-text {
+        --bs-editable-text-focus-border: #{$primary-bright};
+    }
+
+    tc-otp-input {
+        --bs-otp-input-focus-border-color: #{$primary-bright};
+    }
+
+    tc-tag-input {
+        --bs-tag-input-focus-border: #{$primary};
+        --bs-tag-input-focus-ring: 0 0 0 0.2rem #{rgba($primary-bright, 0.4)};
+    }
+
+    tc-toggle {
+        --bs-toggle-focus-ring: #{rgba($primary-bright, 0.4)};
+    }
+
+    tc-toggle-row {
+        --bs-toggle-row-focus-ring: 0 0 0 2px #{rgba($primary-bright, 0.4)};
+    }
+
+    tc-list-row {
+        --bs-list-row-focus-outline: 2px solid #{$primary-bright};
+    }
+}

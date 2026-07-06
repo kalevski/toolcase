@@ -2,22 +2,21 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Valid state ───────────────────────────────────────────────────────────
     // The base .form-check-input.is-valid border already picks up --tc-success
-    // (= --bp-teal) via _input.scss. We override only the checked-radio dot
+    // (= --bp-success) via _input.scss. We override only the checked-radio dot
     // so it shows teal fill rather than the default pink dot from _check.scss.
     .form-check-input.is-valid {
         &:checked[type='radio'] {
-            border-color: var(--bp-teal);
-            // Teal dot — success confirmation; %230aa89a = --bp-teal #0aa89a
+            border-color: var(--bp-success);
+            // Teal dot — success confirmation; %230aa89a = --bp-success #0aa89a
             --bs-form-check-bg-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3ccircle r='5' cx='8' cy='8' fill='%230aa89a'/%3e%3c/svg%3e");
         }
 
         // Focus in valid state: teal glow instead of the generic success rgba ring
         &:focus-visible {
-            border-color: var(--bp-teal);
-            box-shadow:   var(--bp-glow-teal);
+            border-color: var(--bp-success);
+            box-shadow: var(--bp-glow-success);
         }
     }
 
@@ -34,7 +33,7 @@ tc-theme[name='blueprint'],
         // Focus in invalid state: danger glow so the ring color matches the border
         &:focus-visible {
             border-color: var(--bp-danger);
-            box-shadow:   0 0 0 0.2rem rgba(220, 38, 38, 0.18); // --bp-danger at low opacity
+            box-shadow: 0 0 0 0.2rem rgba(220, 38, 38, 0.18); // --bp-danger at low opacity
         }
     }
 

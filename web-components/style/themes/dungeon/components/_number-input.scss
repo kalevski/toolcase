@@ -20,7 +20,9 @@ tc-theme[name='dungeon'],
     // ── Outer frame — gilded bevel + depth ───────────────────────────────────
 
     .tc-number-input__group {
-        box-shadow: var(--fg-bevel-top), 0 2px 8px rgba(0, 0, 0, 0.5);
+        box-shadow:
+            var(--fg-bevel-top),
+            0 2px 8px rgba(0, 0, 0, 0.5);
     }
 
     // ── Input — recessed slot channel ────────────────────────────────────────

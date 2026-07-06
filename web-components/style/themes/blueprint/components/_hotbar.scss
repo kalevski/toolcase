@@ -2,35 +2,34 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-hotbar {
         // Surface: crisp raised card, standard blueprint hairline + soft shadow.
-        --bs-hotbar-surface:            var(--bp-paper);
-        --bs-hotbar-border-color:       var(--bp-border);
+        --bs-hotbar-surface: var(--bp-paper);
+        --bs-hotbar-border-color: var(--bp-border);
 
         // Slot fill: paper by default; recessed tint on hover.
-        --bs-hotbar-slot-bg:            var(--bp-paper);
-        --bs-hotbar-slot-border:        var(--bp-border-strong);
-        --bs-hotbar-slot-empty-border:  var(--bp-border-faint);
-        --bs-hotbar-slot-hover-bg:      var(--bp-bg-2);
+        --bs-hotbar-slot-bg: var(--bp-paper);
+        --bs-hotbar-slot-border: var(--bp-border-strong);
+        --bs-hotbar-slot-empty-border: var(--bp-border-faint);
+        --bs-hotbar-slot-hover-bg: var(--bp-bg-2);
 
         // Glyph / empty-placeholder ink.
-        --bs-hotbar-glyph-color:        var(--bp-text);
-        --bs-hotbar-empty-color:        var(--bp-text-faint);
+        --bs-hotbar-glyph-color: var(--bp-text);
+        --bs-hotbar-empty-color: var(--bp-text-faint);
 
         // Active selection → pink (primary/CTA accent in blueprint).
         // Replaces the dark-slate ring (rgba(30,41,59,…)) from the base partial.
-        --bs-hotbar-selected-border:    var(--bp-pink);
-        --bs-hotbar-selected-ring:      var(--bp-glow-pink);
+        --bs-hotbar-selected-border: var(--bp-pink);
+        --bs-hotbar-selected-ring: var(--bp-glow-pink);
 
         // Hotkey badge → teal (everyday action accent); mono micro-label.
-        --bs-hotbar-hotkey-bg:          var(--bp-teal);
-        --bs-hotbar-hotkey-color:       var(--bp-teal-ink);
-        --bs-hotbar-hotkey-font-size:   0.6rem;
+        --bs-hotbar-hotkey-bg: var(--bp-teal);
+        --bs-hotbar-hotkey-color: var(--bp-teal-ink);
+        --bs-hotbar-hotkey-font-size: 0.6rem;
 
         // Quantity badge → teal, same family as hotkey.
-        --bs-hotbar-qty-bg:             var(--bp-teal);
-        --bs-hotbar-qty-color:          var(--bp-teal-ink);
+        --bs-hotbar-qty-bg: var(--bp-teal);
+        --bs-hotbar-qty-color: var(--bp-teal-ink);
 
         box-shadow: var(--tc-shadow-sm);
         transition: box-shadow var(--bp-ease);
@@ -49,15 +48,14 @@ tc-theme[name='blueprint'],
     // Hotkey badge: enforce bp-mono uppercase — the badge is a HUD micro-label,
     // exactly the mono/caps pattern called out in the blueprint spec.
     .tc-hotbar__hotkey {
-        font-family:    var(--bp-mono);
+        font-family: var(--bp-mono);
         text-transform: uppercase;
-        letter-spacing: .06em;
+        letter-spacing: 0.06em;
     }
 
     // Quantity badge: same mono micro-label treatment.
     .tc-hotbar__qty {
-        font-family:    var(--bp-mono);
-        letter-spacing: .04em;
+        font-family: var(--bp-mono);
+        letter-spacing: 0.04em;
     }
-
 }

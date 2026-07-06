@@ -16,6 +16,8 @@ tc-theme[name='dungeon'],
     // Beveled empty-slot border on the icon bubble.
     .tc-empty-state__icon {
         border: 1px solid var(--fg-gold-deep);
-        box-shadow: var(--fg-bevel-top), inset 0 0 0 1px rgba(0, 0, 0, 0.5);
+        box-shadow:
+            var(--fg-bevel-top),
+            inset 0 0 0 1px rgba(0, 0, 0, 0.5);
     }
 }

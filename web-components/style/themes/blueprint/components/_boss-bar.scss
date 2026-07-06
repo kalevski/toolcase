@@ -3,36 +3,35 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-boss-bar {
         // Surface — white card, hairline border, soft shadow. The bar is a full-width
         // HUD panel, so paper + border reads as a framed instrument strip.
-        --bs-boss-bar-bg:           var(--bp-paper);
+        --bs-boss-bar-bg: var(--bp-paper);
         --bs-boss-bar-border-color: var(--bp-border);
-        --bs-boss-bar-shadow:       var(--tc-shadow-sm);
+        --bs-boss-bar-shadow: var(--tc-shadow-sm);
 
         // Boss name — primary ink; font-family pinned below to --bp-display.
         // Boss names are titles, not prose: display type with tight tracking is apt.
-        --bs-boss-bar-name-color:       var(--bp-emphasis);
-        --bs-boss-bar-name-font-size:   1rem;
+        --bs-boss-bar-name-color: var(--bp-emphasis);
+        --bs-boss-bar-name-font-size: 1rem;
         --bs-boss-bar-name-font-weight: 700;
 
         // Epithet — muted body; sits beside the name as a soft subtitle.
-        --bs-boss-bar-epithet-color:     var(--bp-text-muted);
+        --bs-boss-bar-epithet-color: var(--bp-text-muted);
         --bs-boss-bar-epithet-font-size: 0.8125rem;
 
         // Phase tag — teal-fg mono eyebrow (uppercase + tracking handled below).
-        --bs-boss-bar-phase-color:          var(--bp-teal-fg);
-        --bs-boss-bar-phase-font-size:      0.625rem;
+        --bs-boss-bar-phase-color: var(--bp-teal-fg);
+        --bs-boss-bar-phase-font-size: 0.625rem;
         --bs-boss-bar-phase-letter-spacing: 0.16em;
 
         // Track — recessed well so the fill reads as raised above it.
-        --bs-boss-bar-track-bg:    var(--bp-bg-2);
+        --bs-boss-bar-track-bg: var(--bp-bg-2);
         --bs-boss-bar-track-height: 0.75rem; // slightly taller than base — more visible as a HUD strip
 
         // Fill — pink is the primary/highest-stakes accent in the blueprint rotation.
         // A boss health bar is the most consequential live indicator on screen.
-        --bs-boss-bar-fill-bg:         var(--bp-pink);
+        --bs-boss-bar-fill-bg: var(--bp-pink);
         --bs-boss-bar-fill-transition: width 0.3s var(--bp-ease);
 
         // Ghost band — violet-soft marks the residual injury trail (a distinct register
@@ -43,7 +42,7 @@ tc-theme[name='blueprint'],
         --bs-boss-bar-tick-color: var(--bp-paper);
 
         // Numeric readout — muted mono, tabular figures handled below.
-        --bs-boss-bar-numeric-color:     var(--bp-text-muted);
+        --bs-boss-bar-numeric-color: var(--bp-text-muted);
         --bs-boss-bar-numeric-font-size: 0.75rem;
     }
 
@@ -139,7 +138,12 @@ tc-theme[name='blueprint'],
     }
 
     @keyframes bp-boss-bar-alarm {
-        0%, 100% { opacity: 1; }
-        50%       { opacity: 0.35; }
+        0%,
+        100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.35;
+        }
     }
 }

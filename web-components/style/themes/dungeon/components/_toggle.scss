@@ -10,13 +10,13 @@ tc-theme[name='dungeon'],
         --bs-toggle-track-hover-bg: #1a120a;
         --bs-toggle-track-checked-bg: #4a2a0e;
         --bs-toggle-track-checked-gradient: linear-gradient(180deg, #2a1a08, #4a2a0e);
-        --bs-toggle-track-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.7), inset 0 1px 3px rgba(0, 0, 0, 0.8);
+        --bs-toggle-track-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.7), inset 0 1px 3px rgba(0, 0, 0, 0.8);
         --bs-toggle-knob-size: 18px;
         --bs-toggle-knob-inset: 1px;
         --bs-toggle-knob-bg: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold-deep));
         --bs-toggle-knob-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.3),
-            0 1px 2px rgba(0, 0, 0, 0.6);
+            inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 1px 2px rgba(0, 0, 0, 0.6);
         --bs-toggle-focus-ring: rgba(240, 210, 122, 0.4);
     }
 
@@ -31,6 +31,8 @@ tc-theme[name='dungeon'],
     .tc-toggle--on .tc-toggle-track {
         border-color: var(--fg-gold);
         // Keep the recessed well visible in the on state (base clears it to none).
-        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.7), inset 0 1px 3px rgba(0, 0, 0, 0.8);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+            inset 0 1px 3px rgba(0, 0, 0, 0.8);
     }
 }

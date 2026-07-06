@@ -1,0 +1,18 @@
+// Neon theme variants — alternate dual-accent palettes on the base structure.
+//
+// Each variant re-tints ONLY the primary + secondary accent families (and
+// every literal derived from them: rgb triplets, soft/line/glow/shadow rgba
+// tiers, the strong hairline, the display-text gradient and the ambient glow
+// field). The void canvas, surfaces, text ramp, semantic status colours, fonts
+// and shadow structure all inherit from the neon foundation unchanged.
+//
+// Available variants:
+// - ocean:  electric blue + cyan
+// - forest: neon green + lime
+// - ember:  hot orange + electric yellow
+// - royal:  electric violet + hot magenta
+
+@use './ocean';
+@use './forest';
+@use './ember';
+@use './royal';

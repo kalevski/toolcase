@@ -1,0 +1,15 @@
+{
+    "dead_hosts": [
+        {
+            "domain": "gone.example.com",
+            "code": 410,
+            "tls": "auto",
+            "force_ssl": true,
+            "hsts": { "enabled": true }
+        },
+        {
+            "domain": "*.parked.example.com",
+            "code": 444
+        }
+    ]
+}

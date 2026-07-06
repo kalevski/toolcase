@@ -23,7 +23,9 @@ tc-theme[name='dungeon'],
     // Compose the inset bevel highlight with the focus ring so neither overwrites
     // the other. The bevel uses a box-shadow layer beneath the focus ring layer.
     .tc-fps-cap-select__select {
-        box-shadow: var(--fg-bevel-top), inset 0 0 0 1px rgba(0, 0, 0, 0.4);
+        box-shadow:
+            var(--fg-bevel-top),
+            inset 0 0 0 1px rgba(0, 0, 0, 0.4);
         border-radius: 0;
 
         &:focus,

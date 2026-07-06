@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -15,17 +16,29 @@ import (
 // DefaultPath is where the daemon looks for its config unless --config is given.
 const DefaultPath = "/etc/nginxpilot/config.yml"
 
-// Fragment is the shape an included file may have: sites:, upstreams:,
-// proxies:, stream_upstreams: and/or streams: lists. No globals, no nested
-// include:. It is both what `include:` globs pull in from sites.d/ and what the
-// admin write-API accepts, so the file-drop and REST paths parse identically.
+// Fragment is the shape an included file may have: one or more of the resource
+// lists named in FragmentKinds. No globals, no nested include:. It is both what
+// `include:` globs pull in from sites.d/ and what the admin write-API accepts,
+// so the file-drop and REST paths parse identically.
+//
+// Adding a list here requires updating FragmentKinds, the provenance loops in
+// Load/ParseFragment/loadIncludes, and the admin fragment-shape helper — a
+// test (TestFragmentKindsCoverEveryList) enforces the FragmentKinds half.
 type Fragment struct {
 	Sites           []Site           `yaml:"sites"`
 	Upstreams       []Upstream       `yaml:"upstreams"`
 	Proxies         []Proxy          `yaml:"proxies"`
+	Redirects       []Redirect       `yaml:"redirects"`
+	DeadHosts       []DeadHost       `yaml:"dead_hosts"`
+	AccessLists     []AccessList     `yaml:"access_lists"`
 	StreamUpstreams []StreamUpstream `yaml:"stream_upstreams"`
 	Streams         []Stream         `yaml:"streams"`
 }
+
+// FragmentKinds are the yaml list keys a fragment may declare, in Fragment
+// field order. Used for the ParseFragment error text and asserted complete by
+// a reflection test so the message can never go stale again.
+var FragmentKinds = []string{"sites", "upstreams", "proxies", "redirects", "dead_hosts", "access_lists", "stream_upstreams", "streams"}
 
 // LoadResult carries the parsed config plus non-fatal warnings (e.g. an
 // include glob matching zero files).
@@ -58,6 +71,15 @@ func Load(path string) (*LoadResult, error) {
 	}
 	for i := range cfg.Proxies {
 		cfg.Proxies[i].File = abs
+	}
+	for i := range cfg.Redirects {
+		cfg.Redirects[i].File = abs
+	}
+	for i := range cfg.DeadHosts {
+		cfg.DeadHosts[i].File = abs
+	}
+	for i := range cfg.AccessLists {
+		cfg.AccessLists[i].File = abs
 	}
 	for i := range cfg.StreamUpstreams {
 		cfg.StreamUpstreams[i].File = abs
@@ -151,6 +173,9 @@ func loadIncludes(cfg *Config, res *LoadResult) error {
 			cfg.Sites = append(cfg.Sites, frag.Sites...)
 			cfg.Upstreams = append(cfg.Upstreams, frag.Upstreams...)
 			cfg.Proxies = append(cfg.Proxies, frag.Proxies...)
+			cfg.Redirects = append(cfg.Redirects, frag.Redirects...)
+			cfg.DeadHosts = append(cfg.DeadHosts, frag.DeadHosts...)
+			cfg.AccessLists = append(cfg.AccessLists, frag.AccessLists...)
 			cfg.StreamUpstreams = append(cfg.StreamUpstreams, frag.StreamUpstreams...)
 			cfg.Streams = append(cfg.Streams, frag.Streams...)
 		}
@@ -166,7 +191,7 @@ func loadIncludes(cfg *Config, res *LoadResult) error {
 func ParseFragment(raw []byte, file string) (*Fragment, error) {
 	var frag Fragment
 	if err := strictDecode(raw, &frag); err != nil {
-		return nil, fmt.Errorf("%s: %w (fragments may only contain sites:, upstreams: and/or proxies: lists)", file, err)
+		return nil, fmt.Errorf("%s: %w (fragments may only contain these lists: %s:)", file, err, strings.Join(FragmentKinds, ":, "))
 	}
 	for i := range frag.Sites {
 		frag.Sites[i].File = file
@@ -176,6 +201,15 @@ func ParseFragment(raw []byte, file string) (*Fragment, error) {
 	}
 	for i := range frag.Proxies {
 		frag.Proxies[i].File = file
+	}
+	for i := range frag.Redirects {
+		frag.Redirects[i].File = file
+	}
+	for i := range frag.DeadHosts {
+		frag.DeadHosts[i].File = file
+	}
+	for i := range frag.AccessLists {
+		frag.AccessLists[i].File = file
 	}
 	for i := range frag.StreamUpstreams {
 		frag.StreamUpstreams[i].File = file

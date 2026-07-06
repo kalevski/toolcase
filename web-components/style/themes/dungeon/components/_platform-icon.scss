@@ -21,11 +21,25 @@ tc-theme[name='dungeon'],
     }
 
     // Per-platform glyph colours from the fantasy palette.
-    tc-platform-icon[platform='playstation'] { --bs-platform-icon-glyph-color: var(--fg-mana-bright); }
-    tc-platform-icon[platform='xbox'] { --bs-platform-icon-glyph-color: var(--fg-stamina-bright); }
-    tc-platform-icon[platform='nintendo'] { --bs-platform-icon-glyph-color: var(--fg-blood-bright); }
-    tc-platform-icon[platform='steam'] { --bs-platform-icon-glyph-color: var(--fg-silver); }
-    tc-platform-icon[platform='mobile'] { --bs-platform-icon-glyph-color: var(--fg-parch); }
-    tc-platform-icon[platform='web'] { --bs-platform-icon-glyph-color: var(--fg-frost); }
-    tc-platform-icon[platform='pc'] { --bs-platform-icon-glyph-color: var(--fg-gold-bright); }
+    tc-platform-icon[platform='playstation'] {
+        --bs-platform-icon-glyph-color: var(--fg-mana-bright);
+    }
+    tc-platform-icon[platform='xbox'] {
+        --bs-platform-icon-glyph-color: var(--fg-stamina-bright);
+    }
+    tc-platform-icon[platform='nintendo'] {
+        --bs-platform-icon-glyph-color: var(--fg-blood-bright);
+    }
+    tc-platform-icon[platform='steam'] {
+        --bs-platform-icon-glyph-color: var(--fg-silver);
+    }
+    tc-platform-icon[platform='mobile'] {
+        --bs-platform-icon-glyph-color: var(--fg-parch);
+    }
+    tc-platform-icon[platform='web'] {
+        --bs-platform-icon-glyph-color: var(--fg-frost);
+    }
+    tc-platform-icon[platform='pc'] {
+        --bs-platform-icon-glyph-color: var(--fg-gold-bright);
+    }
 }

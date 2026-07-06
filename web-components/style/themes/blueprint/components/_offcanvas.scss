@@ -2,17 +2,16 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Custom-property re-skin ───────────────────────────────────────────────
     // Reroute the --bs-offcanvas-* contract so the Bootstrap scaffold
     // inherits blueprint palette without specificity wrestling.
 
     .offcanvas {
-        --bs-offcanvas-color:        var(--bp-text);
-        --bs-offcanvas-bg:           var(--bp-paper);          // raised white surface
-        --bs-offcanvas-border-color: var(--bp-border-strong);  // firm hairline at the sliding edge
-        --bs-offcanvas-box-shadow:   var(--tc-shadow-lg);      // violet-tinted depth
-        --bs-offcanvas-header-bg:    var(--bp-bg-2);           // recessed well to frame the chrome row
+        --bs-offcanvas-color: var(--bp-text);
+        --bs-offcanvas-bg: var(--bp-paper); // raised white surface
+        --bs-offcanvas-border-color: var(--bp-border-strong); // firm hairline at the sliding edge
+        --bs-offcanvas-box-shadow: var(--tc-shadow-lg); // violet-tinted depth
+        --bs-offcanvas-header-bg: var(--bp-bg-2); // recessed well to frame the chrome row
     }
 
     // ── Panel edge accent — teal rail along the exposed border ────────────────
@@ -55,12 +54,12 @@ tc-theme[name='blueprint'],
     // This signals "system panel" rather than "content heading".
 
     .offcanvas-title {
-        font-family:     var(--bp-mono);
-        font-size:       0.6875rem;     // 11px — eyebrow scale
-        font-weight:     600;
-        text-transform:  uppercase;
-        letter-spacing:  .10em;
-        color:           var(--bp-text-soft);
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem; // 11px — eyebrow scale
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--bp-text-soft);
     }
 
     // ── Body ──────────────────────────────────────────────────────────────────
@@ -70,13 +69,13 @@ tc-theme[name='blueprint'],
 
     .offcanvas-body {
         background: var(--bp-paper);
-        color:       var(--bp-text-muted);
+        color: var(--bp-text-muted);
         font-family: var(--bp-body);
 
         background-image:
             linear-gradient(var(--bp-border-faint) 1px, transparent 1px),
             linear-gradient(90deg, var(--bp-border-faint) 1px, transparent 1px);
-        background-size:     24px 24px;
+        background-size: 24px 24px;
         background-position: top left;
     }
 
@@ -94,5 +93,4 @@ tc-theme[name='blueprint'],
             opacity: 0.45; // slightly lighter than base 0.5 — light page context still reads through
         }
     }
-
 }

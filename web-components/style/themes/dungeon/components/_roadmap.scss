@@ -8,10 +8,10 @@ tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
     // ── Token swap on the host element ────────────────────────────────────────
     tc-roadmap {
-        --bs-roadmap-title-color:      var(--fg-gold-bright);
-        --bs-roadmap-heading-color:    var(--fg-gold-bright);
-        --bs-roadmap-item-bg:          var(--fg-panel-bg);
-        --bs-roadmap-item-hover-bg:    var(--fg-leather-2);
+        --bs-roadmap-title-color: var(--fg-gold-bright);
+        --bs-roadmap-heading-color: var(--fg-gold-bright);
+        --bs-roadmap-item-bg: var(--fg-panel-bg);
+        --bs-roadmap-item-hover-bg: var(--fg-leather-2);
     }
 
     // ── Board wrapper — gilded 1px border + top bevel highlight ──────────────
@@ -26,19 +26,19 @@ tc-theme[name='dungeon'],
     // Base hardcodes font-family: var(--bs-font-sans-serif) on this class;
     // override the class directly to pick up the dungeon serif display face.
     .tc-roadmap-title {
-        font-family:     var(--fg-display);
-        text-transform:  uppercase;
-        letter-spacing:  0.16em;
-        font-weight:     600;
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 600;
     }
 
     // ── Column header — display caps ──────────────────────────────────────────
     // Same hardcoded font-family situation as the board title above.
     .tc-roadmap-column-header {
-        font-family:     var(--fg-display);
-        text-transform:  uppercase;
-        letter-spacing:  0.16em;
-        font-weight:     600;
+        font-family: var(--fg-display);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 600;
     }
 
     // ── Item card — top gold bevel highlight ──────────────────────────────────

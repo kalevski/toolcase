@@ -8,20 +8,20 @@ tc-theme[name='blueprint'],
     // because there is no --bs-popover-* var for per-side border overrides.
 
     .popover {
-        --bs-popover-bg:                var(--bp-paper);
-        --bs-popover-border-color:      var(--bp-border);
-        --bs-popover-box-shadow:        var(--tc-shadow-lg);
-        --bs-popover-font-size:         0.8125rem;
+        --bs-popover-bg: var(--bp-paper);
+        --bs-popover-border-color: var(--bp-border);
+        --bs-popover-box-shadow: var(--tc-shadow-lg);
+        --bs-popover-font-size: 0.8125rem;
 
         // Header cap: recessed lavender well that reads as a title area
-        --bs-popover-header-bg:         var(--bp-bg-2);
-        --bs-popover-header-color:      var(--bp-text-soft);
+        --bs-popover-header-bg: var(--bp-bg-2);
+        --bs-popover-header-color: var(--bp-text-soft);
 
         // Body text: blueprint primary ink
-        --bs-popover-body-color:        var(--bp-text);
+        --bs-popover-body-color: var(--bp-text);
 
         // Arrow border follows panel border; fill faces match their respective surface
-        --bs-popover-arrow-border:      var(--bp-border-strong);
+        --bs-popover-arrow-border: var(--bp-border-strong);
 
         // Teal accent stripe on top — informational overlay maps to teal in the
         // blueprint accent rotation (pink=primary CTA, teal=action/information)
@@ -36,12 +36,12 @@ tc-theme[name='blueprint'],
     // font stack and casing on top.
 
     .popover-header {
-        font-family:     var(--bp-mono);
-        font-size:       0.6875rem;   // slightly smaller — mono reads large at equal size
-        font-weight:     600;
-        letter-spacing:  0.10em;
-        text-transform:  uppercase;
-        color:           var(--bp-teal-fg);   // AA-safe teal text on --bp-bg-2 white/lavender
+        font-family: var(--bp-mono);
+        font-size: 0.6875rem; // slightly smaller — mono reads large at equal size
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--bp-teal-fg); // AA-safe teal text on --bp-bg-2 white/lavender
         border-bottom-color: var(--bp-border);
     }
 

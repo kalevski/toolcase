@@ -2,23 +2,22 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-cooldown-badge {
         // Track: blueprint hairline — replaces the raw --tc-border ref so no slate leak.
-        --bs-cooldown-badge-track:              var(--bp-border);
+        --bs-cooldown-badge-track: var(--bp-border);
 
         // Cooling arc: teal is the "action in progress" token in the blueprint accent rotation.
-        --bs-cooldown-badge-fill:               var(--bp-teal);
+        --bs-cooldown-badge-fill: var(--bp-teal);
 
         // Ready arc: pink is the primary/CTA moment — the ring completing earns the brand accent.
         // Replaces the cyan --tc-accent baked in the base partial.
-        --bs-cooldown-badge-ready-fill:         var(--bp-pink);
+        --bs-cooldown-badge-ready-fill: var(--bp-pink);
 
         // Countdown label: muted ink so it doesn't fight the arc while ticking down.
-        --bs-cooldown-badge-label-color:        var(--bp-text-muted);
+        --bs-cooldown-badge-label-color: var(--bp-text-muted);
 
         // Ready label: echo the pink arc — unified "go" signal.
-        --bs-cooldown-badge-ready-label-color:  var(--bp-pink);
+        --bs-cooldown-badge-ready-label-color: var(--bp-pink);
     }
 
     // Override the label font: blueprint mandates --bp-mono for all HUD readouts / badges.
@@ -26,9 +25,9 @@ tc-theme[name='blueprint'],
     // we re-point it here at the element level since there is no --bs-cooldown-badge-font var.
     .tc-cooldown-badge__label {
         font-family: var(--bp-mono);
-        font-size:   0.6875rem;          // 11px — tight HUD scale
+        font-size: 0.6875rem; // 11px — tight HUD scale
         font-weight: 600;
-        letter-spacing: .06em;
+        letter-spacing: 0.06em;
         text-transform: uppercase;
         color: var(--bs-cooldown-badge-label-color);
     }

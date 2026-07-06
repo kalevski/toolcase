@@ -3,6 +3,9 @@ package config
 import (
 	"fmt"
 	"regexp"
+	"time"
+
+	"github.com/kalevski/toolcase/nginxpilot/internal/targetcheck"
 )
 
 // streamNameRe restricts stream and stream-upstream names to a safe nginx
@@ -10,9 +13,36 @@ import (
 // deterministic stream-<name>.conf filenames are unambiguous.
 var streamNameRe = regexp.MustCompile(`^[A-Za-z0-9_]+$`)
 
-// validateNginx checks the managed-mode block. Inert when manage is false.
+// validateNginx checks the managed-mode block. The path/command requirements
+// are inert when manage is false, but the target_checks / reconcile enums are
+// validated regardless — `nginxpilot validate --check-targets` works in
+// generate-only mode, so a typo'd severity must fail validation there too.
 func validateNginx(cfg *Config) error {
 	n := cfg.Nginx
+	switch n.TargetChecks.DNS {
+	case "", TargetDNSError, TargetDNSWarn, TargetDNSOff:
+	default:
+		return fmt.Errorf("nginx.target_checks.dns %q must be error | warn | off", n.TargetChecks.DNS)
+	}
+	switch n.TargetChecks.Reachability {
+	case "", TargetReachProbe, TargetReachOff:
+	default:
+		return fmt.Errorf("nginx.target_checks.reachability %q must be probe | off", n.TargetChecks.Reachability)
+	}
+	if n.TargetChecks.Timeout < 0 {
+		return fmt.Errorf("nginx.target_checks.timeout must not be negative")
+	}
+	switch n.Reconcile.OnFailure {
+	case "", ReconcileWarn, ReconcileDisable:
+	default:
+		return fmt.Errorf("nginx.reconcile.on_failure %q must be warn | disable", n.Reconcile.OnFailure)
+	}
+	if n.Reconcile.Interval > 0 && time.Duration(n.Reconcile.Interval) < MinReconcileInterval {
+		return fmt.Errorf("nginx.reconcile.interval %s: minimum is %s", n.Reconcile.Interval, MinReconcileInterval)
+	}
+	if err := validateRealIP(n.RealIP); err != nil {
+		return err
+	}
 	if !n.Manage {
 		return nil
 	}
@@ -30,6 +60,34 @@ func validateNginx(cfg *Config) error {
 	}
 	if len(n.ReloadCmd) == 0 {
 		return fmt.Errorf("nginx.reload_cmd must not be empty")
+	}
+	return nil
+}
+
+// headerTokenRe is the RFC 7230 header-name charset subset we accept for
+// real_ip.header — the value lands verbatim in a rendered directive.
+var headerTokenRe = regexp.MustCompile(`^[A-Za-z0-9-]+$`)
+
+// validateRealIP checks the real-IP block (enums + CIDR shapes) regardless of
+// enabled, so a typo is caught before the operator flips it on.
+func validateRealIP(r RealIP) error {
+	if r.Header != "" && !headerTokenRe.MatchString(r.Header) {
+		return fmt.Errorf("nginx.real_ip.header %q must be a header token ([A-Za-z0-9-]+)", r.Header)
+	}
+	for _, p := range r.Providers {
+		switch p {
+		case RealIPProviderCloudflare, RealIPProviderCloudfront:
+		default:
+			return fmt.Errorf("nginx.real_ip.providers: %q must be cloudflare | cloudfront", p)
+		}
+	}
+	for _, c := range r.StaticCidrs {
+		if err := validateRuleAddr(c); err != nil || c == "all" {
+			return fmt.Errorf("nginx.real_ip.static_cidrs: %q is not an IP or CIDR", c)
+		}
+	}
+	if r.RefreshInterval < 0 {
+		return fmt.Errorf("nginx.real_ip.refresh_interval must not be negative")
 	}
 	return nil
 }
@@ -52,7 +110,11 @@ func validateTls(cfg *Config) error {
 	return nil
 }
 
-// anyResourceWantsTLS reports whether any site, proxy or stream opted into TLS.
+// anyResourceWantsTLS reports whether any site, proxy, redirect, dead host or
+// stream opted into TLS. Every TLS-capable resource kind must appear here — a
+// config whose ONLY TLS consumer is missing from this list would validate
+// without a cert dir and then silently serve plain HTTP (auto) or quarantine
+// (required) at apply time.
 func (cfg *Config) anyResourceWantsTLS() bool {
 	for i := range cfg.Sites {
 		if cfg.Sites[i].WantsTLS() {
@@ -61,6 +123,16 @@ func (cfg *Config) anyResourceWantsTLS() bool {
 	}
 	for i := range cfg.Proxies {
 		if cfg.Proxies[i].WantsTLS() {
+			return true
+		}
+	}
+	for i := range cfg.Redirects {
+		if cfg.Redirects[i].WantsTLS() {
+			return true
+		}
+	}
+	for i := range cfg.DeadHosts {
+		if cfg.DeadHosts[i].WantsTLS() {
 			return true
 		}
 	}
@@ -139,6 +211,9 @@ func validateStreamUpstreams(cfg *Config) (map[string]bool, error) {
 			if s.Address == "" {
 				return nil, fmt.Errorf("stream_upstream %q: server[%d].address is required", u.Name, j)
 			}
+			if _, err := targetcheck.ParseAddr(s.Address); err != nil {
+				return nil, fmt.Errorf("stream_upstream %q: server address %q: %v", u.Name, s.Address, err)
+			}
 			if s.Weight < 0 {
 				return nil, fmt.Errorf("stream_upstream %q: server %q weight must be >= 0", u.Name, s.Address)
 			}
@@ -195,7 +270,11 @@ func validateStreams(cfg *Config, streamUpstreams map[string]bool) error {
 				return fmt.Errorf("stream %q: references unknown stream_upstream %q", s.Name, s.Upstream)
 			}
 		case s.Pass != "":
-			// inline host:port — accepted verbatim (validated at apply time by nginx -t)
+			// inline host:port — strict lexical validation (targetcheck Tier 1);
+			// nginx -t remains the semantic gate at apply time.
+			if _, err := targetcheck.ParseAddr(s.Pass); err != nil {
+				return fmt.Errorf("stream %q: pass %q: %v", s.Name, s.Pass, err)
+			}
 		default:
 			return fmt.Errorf("stream %q: upstream or pass is required", s.Name)
 		}

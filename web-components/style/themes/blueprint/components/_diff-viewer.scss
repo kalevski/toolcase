@@ -7,21 +7,23 @@ tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
     tc-diff-viewer {
         // ── Outer shell ─────────────────────────────────────────────────────────
-        --bs-diff-viewer-bg: var(--bp-paper);                          // raised white code surface
-        --bs-diff-viewer-border: 1px solid var(--bp-border);           // lavender hairline outline
+        --bs-diff-viewer-bg: var(--bp-paper); // raised white code surface
+        --bs-diff-viewer-border: 1px solid var(--bp-border); // lavender hairline outline
 
         // ── Header bar ──────────────────────────────────────────────────────────
-        --bs-diff-viewer-header-bg: var(--bp-bg-2);                    // recessed well behind filename/language
-        --bs-diff-viewer-header-border: 1px solid var(--bp-border);    // hairline separator below header
-        --bs-diff-viewer-header-filename-color: var(--bp-text);        // primary ink for the filepath
-        --bs-diff-viewer-header-language-color: var(--bp-teal-fg);     // teal-fg clears AA on white bg for the language eyebrow
+        --bs-diff-viewer-header-bg: var(--bp-bg-2); // recessed well behind filename/language
+        --bs-diff-viewer-header-border: 1px solid var(--bp-border); // hairline separator below header
+        --bs-diff-viewer-header-filename-color: var(--bp-text); // primary ink for the filepath
+        --bs-diff-viewer-header-language-color: var(
+            --bp-teal-fg
+        ); // teal-fg clears AA on white bg for the language eyebrow
 
         // ── Pane separator (split mode) ──────────────────────────────────────────
-        --bs-diff-viewer-sep: 1px solid var(--bp-border-strong);       // slightly heavier divider between before/after
+        --bs-diff-viewer-sep: 1px solid var(--bp-border-strong); // slightly heavier divider between before/after
 
         // ── Gutter column ────────────────────────────────────────────────────────
-        --bs-diff-viewer-gutter-bg: var(--bp-bg-2);                    // recessed well for line numbers
-        --bs-diff-viewer-gutter-color: var(--bp-text-faint);           // de-emphasised line-number ink
+        --bs-diff-viewer-gutter-bg: var(--bp-bg-2); // recessed well for line numbers
+        --bs-diff-viewer-gutter-color: var(--bp-text-faint); // de-emphasised line-number ink
         --bs-diff-viewer-gutter-sep: 1px solid var(--bp-border-faint); // quiet divider between gutter and code
 
         // ── Row separator ────────────────────────────────────────────────────────
@@ -29,20 +31,25 @@ tc-theme[name='blueprint'],
         --bs-diff-viewer-row-separator: 1px solid var(--bp-border-faint);
 
         // ── Added lines (teal = action / success in blueprint) ───────────────────
-        --bs-diff-viewer-added-bg: var(--bp-teal-soft);                // soft teal row fill
-        --bs-diff-viewer-added-gutter-bg: var(--bp-teal-line, color-mix(in srgb, var(--bp-teal) 22%, transparent));
-        // ↑ --bp-teal-line is the hairline-weight teal tint; replaces hardcoded #bbf7d0
-        --bs-diff-viewer-added-color: var(--bp-teal-fg);               // darker teal text that clears AA on the soft bg
+        --bs-diff-viewer-added-bg: var(--bp-success-soft); // soft teal row fill
+        --bs-diff-viewer-added-gutter-bg: var(
+            --bp-success-line,
+            color-mix(in srgb, var(--bp-success) 22%, transparent)
+        );
+        // ↑ --bp-success-line is the hairline-weight teal tint; replaces hardcoded #bbf7d0
+        --bs-diff-viewer-added-color: var(
+            --bp-success-fg
+        ); // darker teal text that clears AA on the soft bg
 
         // ── Removed lines (danger = real red in blueprint, NOT pink) ─────────────
-        --bs-diff-viewer-removed-bg: var(--bp-danger-soft);            // soft red row fill
+        --bs-diff-viewer-removed-bg: var(--bp-danger-soft); // soft red row fill
         --bs-diff-viewer-removed-gutter-bg: #fecaca;
         // ↑ #fecaca is the Tailwind red-200 tint that pairs with --bp-danger; kept as-is (it's already in base)
         // and matches the blueprint danger palette — no clash with any dark-slate literal.
-        --bs-diff-viewer-removed-color: var(--bp-danger);              // real-red gutter + prefix ink
+        --bs-diff-viewer-removed-color: var(--bp-danger); // real-red gutter + prefix ink
 
         // ── Empty placeholder rows (split mode counterpart) ───────────────────────
-        --bs-diff-viewer-empty-bg: var(--bp-bg-2);                     // same recessed tint as gutter/header
+        --bs-diff-viewer-empty-bg: var(--bp-bg-2); // same recessed tint as gutter/header
     }
 
     // ── Header typography ────────────────────────────────────────────────────────
@@ -53,9 +60,9 @@ tc-theme[name='blueprint'],
     }
 
     .tc-diff-viewer__language {
-        font-family: var(--bp-mono);          // mono eyebrow
-        letter-spacing: 0.1em;                // slightly wider tracking than base .06em
-        color: var(--bp-teal-fg);             // teal action accent for language badge text
+        font-family: var(--bp-mono); // mono eyebrow
+        letter-spacing: 0.1em; // slightly wider tracking than base .06em
+        color: var(--bp-teal-fg); // teal action accent for language badge text
         font-weight: 600;
     }
 

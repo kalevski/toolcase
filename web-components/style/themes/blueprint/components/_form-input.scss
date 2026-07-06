@@ -13,7 +13,7 @@ tc-theme[name='blueprint'],
     .tc-form-input-label {
         font-family: var(--bp-mono);
         text-transform: uppercase;
-        letter-spacing: .08em;
+        letter-spacing: 0.08em;
         color: var(--bp-text-muted); // echoes the token above for direct-painted consumers
     }
 
@@ -42,7 +42,7 @@ tc-theme[name='blueprint'],
     }
 
     .tc-form-input-loading-bar {
-        background-color: var(--bp-bg-2);      // recessed-well fill
-        border-color: var(--bp-border-faint);  // gentler than the default --tc-border
+        background-color: var(--bp-bg-2); // recessed-well fill
+        border-color: var(--bp-border-faint); // gentler than the default --tc-border
     }
 }

@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-journal {
         // Frame — white paper card on the lavender canvas
         --bs-journal-bg: var(--bp-paper);
@@ -29,7 +28,7 @@ tc-theme[name='blueprint'],
         //   failed   = real danger red (NOT pink — pink is primary CTA, not error)
         //   inactive  = faint text
         --bs-journal-pip-active: var(--bp-teal);
-        --bs-journal-pip-completed: var(--bp-teal);
+        --bs-journal-pip-completed: var(--bp-success);
         --bs-journal-pip-failed: var(--bp-danger);
         --bs-journal-pip-inactive: var(--bp-text-faint);
 
@@ -52,8 +51,8 @@ tc-theme[name='blueprint'],
         --bs-journal-empty-color: var(--bp-text-faint);
 
         // State eyebrow text palette — mono uppercase, semantic colors
-        --bs-journal-state-active: var(--bp-teal-fg);       // teal text on white clears AA
-        --bs-journal-state-completed: var(--bp-teal-fg);
+        --bs-journal-state-active: var(--bp-teal-fg); // teal text on white clears AA
+        --bs-journal-state-completed: var(--bp-success-fg);
         --bs-journal-state-failed: var(--bp-danger);
         --bs-journal-state-inactive: var(--bp-text-faint);
 
@@ -67,7 +66,7 @@ tc-theme[name='blueprint'],
         // Rewards — recessed bg-2 well; label muted, value in mono teal
         --bs-journal-reward-bg: var(--bp-bg-2);
         --bs-journal-reward-label-color: var(--bp-text-muted);
-        --bs-journal-reward-value-color: var(--bp-teal-fg);  // mono + teal-fg = HUD readout feel
+        --bs-journal-reward-value-color: var(--bp-teal-fg); // mono + teal-fg = HUD readout feel
 
         // Apply box shadow to the frame
         box-shadow: var(--tc-shadow-sm);
@@ -130,7 +129,9 @@ tc-theme[name='blueprint'],
 
     .tc-journal-objective-optional {
         font-family: var(--bp-mono);
-        color: var(--bp-amber-fg);  // amber = supporting accent; distinguishes optional from inactive
+        color: var(
+            --bp-amber-fg
+        ); // amber = supporting accent; distinguishes optional from inactive
         letter-spacing: 0.06em;
     }
 

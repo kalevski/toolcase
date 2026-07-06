@@ -112,7 +112,8 @@ tc-theme[name='sunshine'],
     --sun-surface-grad: linear-gradient(180deg, var(--sun-surface-hi), var(--sun-surface));
     // Warm glow drop-shadow for the raised lemon primary action.
     --sun-lead-shadow: 0 0 0 1px var(--sun-lead-line), 0 12px 28px -10px var(--sun-lead-glow);
-    --sun-lead-shadow-strong: 0 0 0 1px var(--sun-lead-line), 0 18px 38px -10px var(--sun-lead-glow);
+    --sun-lead-shadow-strong:
+        0 0 0 1px var(--sun-lead-line), 0 18px 38px -10px var(--sun-lead-glow);
     // Hairline top highlight — "light catches the top edge" on raised surfaces.
     --sun-bevel-top: inset 0 1px 0 rgba(255, 255, 255, 0.6);
     // Faint citrus-paper texture for full-bleed backdrops (CITRINA body::before).

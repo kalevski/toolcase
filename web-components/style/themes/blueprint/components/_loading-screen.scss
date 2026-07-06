@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-loading-screen {
         // Full-viewport surface: blueprint canvas, not slate
         --bs-loading-screen-bg: var(--bp-bg);
@@ -11,22 +10,22 @@ tc-theme[name='blueprint'],
         --bs-loading-screen-eyebrow-color: var(--bp-teal-fg);
 
         // Title: primary ink, will be set to display font below
-        --bs-loading-screen-title-color:   var(--bp-emphasis);
-        --bs-loading-screen-title-size:    1.25rem;
-        --bs-loading-screen-title-weight:  700;
+        --bs-loading-screen-title-color: var(--bp-emphasis);
+        --bs-loading-screen-title-size: 1.25rem;
+        --bs-loading-screen-title-weight: 700;
 
         // Label row: body ink + muted mono percentage
-        --bs-loading-screen-label-color:   var(--bp-text-soft);
-        --bs-loading-screen-pct-color:     var(--bp-teal-fg);
+        --bs-loading-screen-label-color: var(--bp-text-soft);
+        --bs-loading-screen-pct-color: var(--bp-teal-fg);
 
         // Progress bar: faint hairline track, teal fill (action color)
-        --bs-loading-screen-bar-bg:        var(--bp-border-faint);
-        --bs-loading-screen-bar-fill:      var(--bp-teal);
-        --bs-loading-screen-bar-height:    4px;
+        --bs-loading-screen-bar-bg: var(--bp-border-faint);
+        --bs-loading-screen-bar-fill: var(--bp-teal);
+        --bs-loading-screen-bar-height: 4px;
 
         // Tip section: faint mono label, muted body
         --bs-loading-screen-tip-label-color: var(--bp-text-faint);
-        --bs-loading-screen-tip-body-color:  var(--bp-text-muted);
+        --bs-loading-screen-tip-body-color: var(--bp-text-muted);
     }
 
     // ── Host surface ─────────────────────────────────────────────────────────
@@ -35,8 +34,9 @@ tc-theme[name='blueprint'],
 
     tc-loading-screen {
         background:
-            var(--bp-glow-field),    // pink+teal ambient glow (faint)
-            var(--bp-grid-field)     // violet dot-grid
+            var(--bp-glow-field),
+            // pink+teal ambient glow (faint)
+            var(--bp-grid-field) // violet dot-grid
             var(--bp-bg);
     }
 
@@ -44,39 +44,39 @@ tc-theme[name='blueprint'],
     // Raised white card breaks from the grid field — the panel is the focal point.
 
     .tc-loading-screen-panel {
-        background:    var(--bp-paper);
-        border:        1px solid var(--bp-border);
-        box-shadow:    var(--tc-shadow-md);
-        padding-left:  2.5rem;
+        background: var(--bp-paper);
+        border: 1px solid var(--bp-border);
+        box-shadow: var(--tc-shadow-md);
+        padding-left: 2.5rem;
         padding-right: 2.5rem;
-        padding-top:   2.5rem;
+        padding-top: 2.5rem;
         padding-bottom: 2.5rem;
 
         // HUD corner bracket — teal top-left accent (interactive-card convention)
         position: relative;
 
         &::before {
-            content:      '';
-            position:     absolute;
-            top:          8px;
-            left:         8px;
-            width:        14px;
-            height:       14px;
-            border-top:   2px solid var(--bp-teal);
-            border-left:  2px solid var(--bp-teal);
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 14px;
+            height: 14px;
+            border-top: 2px solid var(--bp-teal);
+            border-left: 2px solid var(--bp-teal);
             pointer-events: none;
         }
 
         // Matching bottom-right bracket for symmetry in a loading context
         &::after {
-            content:       '';
-            position:      absolute;
-            bottom:        8px;
-            right:         8px;
-            width:         14px;
-            height:        14px;
+            content: '';
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            width: 14px;
+            height: 14px;
             border-bottom: 2px solid var(--bp-border-strong);
-            border-right:  2px solid var(--bp-border-strong);
+            border-right: 2px solid var(--bp-border-strong);
             pointer-events: none;
         }
     }
@@ -86,9 +86,9 @@ tc-theme[name='blueprint'],
     // and tighten tracking slightly for blueprint's HUD voice.
 
     .tc-loading-screen-eyebrow {
-        font-family:     var(--bp-mono);
-        letter-spacing:  0.12em;
-        color:           var(--bs-loading-screen-eyebrow-color); // inherits teal-fg from var above
+        font-family: var(--bp-mono);
+        letter-spacing: 0.12em;
+        color: var(--bs-loading-screen-eyebrow-color); // inherits teal-fg from var above
     }
 
     // ── Title ─────────────────────────────────────────────────────────────────
@@ -96,9 +96,9 @@ tc-theme[name='blueprint'],
     // tight tracking keeps it sharp at the modest 1.25rem size.
 
     .tc-loading-screen-title {
-        font-family:     var(--bp-display);
-        letter-spacing:  -0.01em;
-        text-transform:  uppercase; // display headlines in blueprint are uppercased
+        font-family: var(--bp-display);
+        letter-spacing: -0.01em;
+        text-transform: uppercase; // display headlines in blueprint are uppercased
     }
 
     // ── Label row ─────────────────────────────────────────────────────────────
@@ -109,9 +109,9 @@ tc-theme[name='blueprint'],
     }
 
     .tc-loading-screen-pct {
-        font-family:  var(--bp-mono);
+        font-family: var(--bp-mono);
         letter-spacing: 0.04em;
-        color:        var(--bp-teal-fg);
+        color: var(--bp-teal-fg);
     }
 
     // ── Progress bar ──────────────────────────────────────────────────────────
@@ -122,8 +122,8 @@ tc-theme[name='blueprint'],
     }
 
     .tc-loading-screen-bar-fill {
-        background:  var(--bp-teal);
-        box-shadow:  var(--bp-glow-teal);
+        background: var(--bp-teal);
+        box-shadow: var(--bp-glow-teal);
     }
 
     // Indeterminate: swap to pink (primary/CTA) for visual urgency on unknown progress;
@@ -145,14 +145,14 @@ tc-theme[name='blueprint'],
     }
 
     .tc-loading-screen-tip-label {
-        font-family:    var(--bp-mono);
+        font-family: var(--bp-mono);
         letter-spacing: 0.1em;
-        color:          var(--bs-loading-screen-tip-label-color); // --bp-text-faint
+        color: var(--bs-loading-screen-tip-label-color); // --bp-text-faint
     }
 
     .tc-loading-screen-tip-body {
-        font-family:    var(--bp-mono);
-        color:          var(--bs-loading-screen-tip-body-color); // --bp-text-muted
+        font-family: var(--bp-mono);
+        color: var(--bs-loading-screen-tip-body-color); // --bp-text-muted
         letter-spacing: 0.02em;
     }
 }

@@ -5,7 +5,6 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // ── Token swap ─────────────────────────────────────────────────────────
     // Vars sit on .toast (and on .toast[class*='text-bg-'] for the variant
     // block that re-asserts them with !important). Setting them here is enough

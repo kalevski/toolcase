@@ -11,11 +11,7 @@ tc-theme[name='blueprint'],
     .tc-artboard-backdrop--parch {
         // grid lines sit ON TOP of the glow + paper fill (later layers paint last).
         --bs-artboard-backdrop-bg: var(--bp-grid-field), var(--bp-glow-field), var(--bp-bg);
-        background-size:
-            var(--bp-grid-size),
-            var(--bp-grid-size),
-            cover,
-            cover;
+        background-size: var(--bp-grid-size), var(--bp-grid-size), cover, cover;
         --bs-artboard-backdrop-color: var(--bp-text);
         --bs-artboard-backdrop-border-color: transparent;
     }

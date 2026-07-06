@@ -84,11 +84,11 @@ tc-theme[name='dungeon'],
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
     }
 
-    .tc-player-frame__bar[data-kind="mp"] .tc-player-frame__bar-fill {
+    .tc-player-frame__bar[data-kind='mp'] .tc-player-frame__bar-fill {
         background: linear-gradient(180deg, var(--fg-mana-bright), var(--fg-mana));
     }
 
-    .tc-player-frame__bar[data-kind="stamina"] .tc-player-frame__bar-fill {
+    .tc-player-frame__bar[data-kind='stamina'] .tc-player-frame__bar-fill {
         background: linear-gradient(180deg, var(--fg-stamina-bright), var(--fg-stamina));
     }
 }

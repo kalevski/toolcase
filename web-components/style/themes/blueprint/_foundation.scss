@@ -99,6 +99,18 @@ tc-theme[name='blueprint'],
     --bp-teal-line: rgba(10, 168, 154, 0.4);
     --bp-teal-glow: rgba(10, 168, 154, 0.32);
 
+    // Success — the SEMANTIC "positive status" family. Alias of the base teal
+    // above, deliberately pinned as LITERALS (not var(--bp-teal) references) so
+    // the accent variants (./variants/), which override the --bp-teal* family,
+    // never drag success badges / alerts / status dots along with them.
+    --bp-success: #0aa89a;
+    --bp-success-hover: #0bbcab;
+    --bp-success-fg: #097f74; // darker teal so success TEXT clears AA on white
+    --bp-success-ink: #ffffff; // text on success fills
+    --bp-success-soft: rgba(10, 168, 154, 0.08);
+    --bp-success-line: rgba(10, 168, 154, 0.4);
+    --bp-success-glow: rgba(10, 168, 154, 0.32);
+
     // Violet / indigo — grid + supporting accent.
     --bp-violet: #5b3df2;
     --bp-violet-fg: #4b30d6; // darker for violet TEXT on white
@@ -150,6 +162,8 @@ tc-theme[name='blueprint'],
     --bp-glow-pink-strong: 0 10px 28px var(--bp-pink-glow);
     // Teal glow for the action button.
     --bp-glow-teal: 0 4px 14px var(--bp-teal-glow);
+    // Success glow — same recipe pinned to the success family (variant-stable).
+    --bp-glow-success: 0 4px 14px var(--bp-success-glow);
     // Hairline top highlight — "light catches the top edge" on raised surfaces.
     --bp-bevel-top: inset 0 1px 0 rgba(255, 255, 255, 0.7);
     // Blueprint grid field — faint violet 38px ruling for full-bleed backdrops.
@@ -213,7 +227,9 @@ tc-theme[name='blueprint'],
     --tc-accent-hex: #0aa89a;
     --tc-cyan: #0aa89a;
 
-    --tc-success: var(--bp-teal);
+    // Success routes through the pinned --bp-success family (NOT --bp-teal), so
+    // accent variants can restyle the teal action hue without moving success.
+    --tc-success: var(--bp-success);
     --tc-success-bg: rgba(10, 168, 154, 0.12);
     --tc-info: var(--bp-violet);
     --tc-info-bg: var(--bp-violet-soft);
@@ -239,7 +255,7 @@ tc-theme[name='blueprint'],
     --bs-primary-rgb: 224, 17, 114;
     --bs-secondary: var(--bp-text-muted);
     --bs-secondary-rgb: 93, 88, 135;
-    --bs-success: var(--bp-teal);
+    --bs-success: var(--bp-success);
     --bs-success-rgb: 10, 168, 154;
     --bs-danger: var(--bp-danger);
     --bs-danger-rgb: 220, 38, 38;

@@ -14,7 +14,9 @@ tc-theme[name='dungeon'],
         --bs-form-select-focus-box-shadow: 0 0 0 0.2rem rgba(240, 210, 122, 0.35);
 
         // Inset well — carved-into-wood signature (mirrors _check.scss treatment).
-        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6), var(--fg-bevel-top);
+        box-shadow:
+            inset 0 1px 3px rgba(0, 0, 0, 0.6),
+            var(--fg-bevel-top);
 
         &:focus {
             // Re-assert inset well so the gold ring stacks over it, not replaces it.

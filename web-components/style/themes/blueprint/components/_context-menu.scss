@@ -2,29 +2,28 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Floating menu surface ────────────────────────────────────────────────
 
     .tc-context-menu-list {
         // Surface: raised white card, violet-tinted hairline, violet shadow.
-        --bs-context-menu-bg:     var(--bp-paper);
+        --bs-context-menu-bg: var(--bp-paper);
         --bs-context-menu-border: 1px solid var(--bp-border);
         --bs-context-menu-shadow: var(--tc-shadow-md);
 
         // Item typography — mono eyebrow voice at body size keeps the HUD feel
         // without forcing uppercase on prose labels.
-        --bs-context-menu-item-font-size:  0.8125rem; // 13px — unchanged from base
-        --bs-context-menu-item-color:      var(--bp-text);
+        --bs-context-menu-item-font-size: 0.8125rem; // 13px — unchanged from base
+        --bs-context-menu-item-color: var(--bp-text);
 
         // Hover well: faint teal-soft tint so active selection reads as an
         // action accent (teal = everyday action in the blueprint palette).
-        --bs-context-menu-item-hover-bg:   var(--bp-teal-soft);
+        --bs-context-menu-item-hover-bg: var(--bp-teal-soft);
         --bs-context-menu-item-hover-color: var(--bp-text);
 
         // Danger: real-red, not pink — pink is the primary CTA accent; danger
         // must carry genuine severity signal on this light-theme surface.
-        --bs-context-menu-danger-color:     var(--bp-danger);
-        --bs-context-menu-danger-hover-bg:  var(--bp-danger-soft);
+        --bs-context-menu-danger-color: var(--bp-danger);
+        --bs-context-menu-danger-hover-bg: var(--bp-danger-soft);
 
         // Separator: faint violet hairline matches the border family.
         --bs-context-menu-separator-color: var(--bp-border-faint);
@@ -36,7 +35,7 @@ tc-theme[name='blueprint'],
         // Mono font for the item row — the blueprint convention for micro-labels
         // and nav items. Keeps tracking tight (not the uppercase eyebrow variant).
         font-family: var(--bp-mono);
-        font-size:   var(--bs-context-menu-item-font-size);
+        font-size: var(--bs-context-menu-item-font-size);
         font-weight: 500;
         letter-spacing: 0.01em;
         color: var(--bp-text);

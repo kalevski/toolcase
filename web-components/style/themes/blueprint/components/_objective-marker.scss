@@ -25,7 +25,7 @@ tc-theme[name='blueprint'],
     .tc-objective-marker__label {
         font-family: var(--bp-mono);
         color: var(--bp-text);
-        letter-spacing: 0.10em;
+        letter-spacing: 0.1em;
     }
 
     // Distance: mono, teal-fg (AA-clear on white), tight tracking.
@@ -41,7 +41,16 @@ tc-theme[name='blueprint'],
     }
 
     @keyframes tc-objective-marker-pulse {
-        0%, 100% { transform: scale(1);   opacity: 1;    filter: drop-shadow(0 0 2px var(--bp-pink-glow)); }
-        50%       { transform: scale(1.2); opacity: 0.75; filter: drop-shadow(0 0 8px var(--bp-glow-pink)); }
+        0%,
+        100% {
+            transform: scale(1);
+            opacity: 1;
+            filter: drop-shadow(0 0 2px var(--bp-pink-glow));
+        }
+        50% {
+            transform: scale(1.2);
+            opacity: 0.75;
+            filter: drop-shadow(0 0 8px var(--bp-glow-pink));
+        }
     }
 }

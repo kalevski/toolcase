@@ -7,7 +7,11 @@ tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
     tc-bundle-bar {
         --bs-bundle-bar-segment-bg: var(--fg-ink-2);
-        --bs-bundle-bar-segment-filled-bg: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold-deep));
+        --bs-bundle-bar-segment-filled-bg: linear-gradient(
+            180deg,
+            var(--fg-gold-bright),
+            var(--fg-gold-deep)
+        );
     }
 
     // Recessed gilt channel: thin inner stroke seats the gauge track in the surface.

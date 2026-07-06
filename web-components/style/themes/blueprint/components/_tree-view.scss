@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Custom property overrides ─────────────────────────────────────────────────────
     // Re-point every --bs-tree-view-* token; class rules below only handle things
     // that have no var (e.g. the ::before guide hairline, typography on the label).
@@ -76,5 +75,4 @@ tc-theme[name='blueprint'],
     .tc-tree-view--checkbox .tc-tree-view-row--selected .tc-tree-view-label {
         color: var(--bp-text-soft);
     }
-
 }

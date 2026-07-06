@@ -29,7 +29,7 @@ tc-theme[name='blueprint'],
         // good  → teal  (success in the blueprint accent rotation)
         // warn  → amber (supporting warning accent)
         // danger → red  (real danger, not pink which reads as brand)
-        --bs-debug-overlay-fps-good-color: var(--bp-teal);
+        --bs-debug-overlay-fps-good-color: var(--bp-success);
         --bs-debug-overlay-fps-warning-color: var(--bp-amber);
         --bs-debug-overlay-fps-danger-color: var(--bp-danger);
     }

@@ -2,16 +2,17 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-faq-list {
         // Re-point the component's own custom-property API to blueprint tokens.
-        --bs-faq-list-border:           var(--bp-border);
-        --bs-faq-list-separator:        var(--bp-border-faint);   // inner row dividers — lighter than the outer hull
-        --bs-faq-list-bg:               var(--bp-paper);
-        --bs-faq-list-question-color:   var(--bp-text);
-        --bs-faq-list-answer-color:     var(--bp-text-muted);
-        --bs-faq-list-hover-bg:         var(--bp-paper-tint);
-        --bs-faq-list-title-font-size:  0.6875rem;                // keeps it compact as a mono eyebrow
+        --bs-faq-list-border: var(--bp-border);
+        --bs-faq-list-separator: var(
+            --bp-border-faint
+        ); // inner row dividers — lighter than the outer hull
+        --bs-faq-list-bg: var(--bp-paper);
+        --bs-faq-list-question-color: var(--bp-text);
+        --bs-faq-list-answer-color: var(--bp-text-muted);
+        --bs-faq-list-hover-bg: var(--bp-paper-tint);
+        --bs-faq-list-title-font-size: 0.6875rem; // keeps it compact as a mono eyebrow
         --bs-faq-list-title-font-weight: 600;
     }
 
@@ -25,7 +26,7 @@ tc-theme[name='blueprint'],
     // ── Title row ─────────────────────────────────────────────────────────────
     .tc-faq-list-title-row {
         border-bottom: 1px solid var(--bp-border);
-        background-color: var(--bp-bg-2);       // slightly recessed shelf above the items
+        background-color: var(--bp-bg-2); // slightly recessed shelf above the items
     }
 
     .tc-faq-list-title {
@@ -33,8 +34,8 @@ tc-theme[name='blueprint'],
         font-size: var(--bs-faq-list-title-font-size);
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: .10em;
-        color: var(--bp-teal-fg);               // teal-fg satisfies AA contrast on --bp-bg-2
+        letter-spacing: 0.1em;
+        color: var(--bp-teal-fg); // teal-fg satisfies AA contrast on --bp-bg-2
     }
 
     // ── Question button ───────────────────────────────────────────────────────
@@ -58,15 +59,14 @@ tc-theme[name='blueprint'],
 
     // ── Chevron — teal tint, rotates when open ────────────────────────────────
     .tc-faq-list-chevron {
-        color: var(--bp-teal-fg);               // teal glyph for everyday-action affordance
+        color: var(--bp-teal-fg); // teal glyph for everyday-action affordance
         transition: transform var(--bp-ease);
     }
 
     // ── Open state — pink accent on the active question row ───────────────────
     .tc-faq-list-item--open {
-
         .tc-faq-list-question {
-            color: var(--bp-pink);              // pink = primary/selected state
+            color: var(--bp-pink); // pink = primary/selected state
             background-color: var(--bp-pink-surface); // very soft pink tint (gradient var)
         }
 
@@ -75,7 +75,7 @@ tc-theme[name='blueprint'],
         }
 
         .tc-faq-list-chevron {
-            color: var(--bp-pink);              // chevron follows the accent rotation
+            color: var(--bp-pink); // chevron follows the accent rotation
             transform: rotate(180deg);
         }
     }
@@ -93,5 +93,4 @@ tc-theme[name='blueprint'],
         padding-right: var(--bs-faq-list-padding-x);
         padding-bottom: var(--bs-faq-list-padding-y);
     }
-
 }

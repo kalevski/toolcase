@@ -2,31 +2,30 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-live-feed {
         // Surface: white raised card framed by the default hairline
-        --bs-live-feed-bg:             var(--bp-paper);
-        --bs-live-feed-border:         1px solid var(--bp-border);
+        --bs-live-feed-bg: var(--bp-paper);
+        --bs-live-feed-border: 1px solid var(--bp-border);
 
         // Header: recessed well so the body reads as the active surface
-        --bs-live-feed-header-bg:      var(--bp-bg-2);
-        --bs-live-feed-header-border:  1px solid var(--bp-border);
-        --bs-live-feed-header-color:   var(--bp-teal-fg);   // teal = everyday action / live label
+        --bs-live-feed-header-bg: var(--bp-bg-2);
+        --bs-live-feed-header-border: 1px solid var(--bp-border);
+        --bs-live-feed-header-color: var(--bp-teal-fg); // teal = everyday action / live label
         --bs-live-feed-header-font-size: 0.6875rem;
 
         // Row anatomy
-        --bs-live-feed-row-border:     1px solid var(--bp-border-faint);
-        --bs-live-feed-row-hover-bg:   var(--bp-paper-tint);
+        --bs-live-feed-row-border: 1px solid var(--bp-border-faint);
+        --bs-live-feed-row-hover-bg: var(--bp-paper-tint);
 
         // Timestamps — faint mono ink
-        --bs-live-feed-time-color:     var(--bp-text-faint);
+        --bs-live-feed-time-color: var(--bp-text-faint);
         --bs-live-feed-time-font-size: 11.5px;
 
         // Event label copy
         --bs-live-feed-label-font-size: 0.8125rem;
 
         // REC dot: pink (primary brand / alert signal) instead of raw danger
-        --bs-live-feed-rec-dot-color:  var(--bp-pink);
+        --bs-live-feed-rec-dot-color: var(--bp-pink);
         --bs-live-feed-rec-animation-speed: 0.9s;
     }
 
@@ -54,7 +53,8 @@ tc-theme[name='blueprint'],
         // Pink pulse halo: live/presence dot convention from blueprint spec
         background: var(--bp-pink);
         box-shadow: 0 0 0 0 var(--bp-pink-soft);
-        animation: bp-live-feed-rec-pulse var(--bs-live-feed-rec-animation-speed) ease-in-out infinite alternate;
+        animation: bp-live-feed-rec-pulse var(--bs-live-feed-rec-animation-speed) ease-in-out
+            infinite alternate;
     }
 
     .tc-live-feed-rec-label {
@@ -67,8 +67,14 @@ tc-theme[name='blueprint'],
     }
 
     @keyframes bp-live-feed-rec-pulse {
-        0%   { opacity: 1;    box-shadow: 0 0 0 0    var(--bp-pink-soft); }
-        100% { opacity: 0.3;  box-shadow: 0 0 0 4px  transparent; }
+        0% {
+            opacity: 1;
+            box-shadow: 0 0 0 0 var(--bp-pink-soft);
+        }
+        100% {
+            opacity: 0.3;
+            box-shadow: 0 0 0 4px transparent;
+        }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -122,7 +128,7 @@ tc-theme[name='blueprint'],
     }
 
     .tc-live-feed-row--success .tc-live-feed-icon {
-        color: var(--bp-teal-fg);
+        color: var(--bp-success-fg);
     }
 
     .tc-live-feed-row--warning .tc-live-feed-icon {

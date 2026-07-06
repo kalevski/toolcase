@@ -4,26 +4,25 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-cool-nav {
         // Surface — translucent lavender-paper (matches bp-bg tinted slightly white)
-        --bs-cool-nav-bg: rgba(244, 243, 251, 0.88);         // --bp-paper-tint at ~88% opacity
+        --bs-cool-nav-bg: rgba(244, 243, 251, 0.88); // --bp-paper-tint at ~88% opacity
         --bs-cool-nav-color: var(--bp-text);
         --bs-cool-nav-border: var(--bp-border);
 
         // Brand — display font, teal dot as the "live" glyph
         --bs-cool-nav-brand-color: var(--bp-emphasis);
-        --bs-cool-nav-brand-dot: var(--bp-teal);              // signature teal square
+        --bs-cool-nav-brand-dot: var(--bp-teal); // signature teal square
 
         // Links — muted ink, teal hover (everyday action), full ink active
         --bs-cool-nav-link-color: var(--bp-text-muted);
-        --bs-cool-nav-link-hover-color: var(--bp-teal-fg);    // teal-fg clears AA on white
+        --bs-cool-nav-link-hover-color: var(--bp-teal-fg); // teal-fg clears AA on white
         --bs-cool-nav-link-active-color: var(--bp-text);
-        --bs-cool-nav-link-active-line: var(--bp-pink);       // pink underline = primary accent
+        --bs-cool-nav-link-active-line: var(--bp-pink); // pink underline = primary accent
 
         // Toggler & collapse
         --bs-cool-nav-toggler-color: var(--bp-text);
-        --bs-cool-nav-collapse-bg: var(--bp-paper);           // solid white when expanded mobile
+        --bs-cool-nav-collapse-bg: var(--bp-paper); // solid white when expanded mobile
 
         // Scrolled state — use the pre-baked violet-tinted shadow token
         --bs-cool-nav-scrolled-shadow: var(--tc-shadow-sm);

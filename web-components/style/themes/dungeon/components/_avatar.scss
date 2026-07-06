@@ -8,7 +8,6 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // 1. Default avatar — gilded portrait medallion ring.
     .tc-avatar {
         border: 1px solid var(--fg-gold-deep);
@@ -20,27 +19,27 @@ tc-theme[name='dungeon'],
     //    fantasy element/rarity tones so colored avatars read on the dark theme.
 
     .tc-avatar-primary {
-        --bs-avatar-bg: rgba(201, 169, 97, 0.18);   // gold tint
+        --bs-avatar-bg: rgba(201, 169, 97, 0.18); // gold tint
         --bs-avatar-color: var(--fg-gold-bright);
     }
 
     .tc-avatar-success {
-        --bs-avatar-bg: rgba(72, 168, 60, 0.18);    // stamina tint
+        --bs-avatar-bg: rgba(72, 168, 60, 0.18); // stamina tint
         --bs-avatar-color: var(--fg-stamina-bright);
     }
 
     .tc-avatar-danger {
-        --bs-avatar-bg: rgba(168, 48, 42, 0.18);    // blood tint
+        --bs-avatar-bg: rgba(168, 48, 42, 0.18); // blood tint
         --bs-avatar-color: var(--fg-blood-bright);
     }
 
     .tc-avatar-warning {
-        --bs-avatar-bg: rgba(232, 162, 58, 0.18);   // legendary amber tint
+        --bs-avatar-bg: rgba(232, 162, 58, 0.18); // legendary amber tint
         --bs-avatar-color: var(--fg-legendary);
     }
 
     .tc-avatar-info {
-        --bs-avatar-bg: rgba(74, 100, 207, 0.18);   // mana tint
+        --bs-avatar-bg: rgba(74, 100, 207, 0.18); // mana tint
         --bs-avatar-color: var(--fg-mana-bright);
     }
 

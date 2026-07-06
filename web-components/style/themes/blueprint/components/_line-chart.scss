@@ -3,7 +3,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-line-chart {
         // --- series stroke ramp: blueprint accent rotation ---
         // 1 = pink (primary), 2 = teal (action), 3 = violet (support),
@@ -113,9 +112,9 @@ tc-theme[name='blueprint'],
     .tc-line-chart-skeleton {
         background: linear-gradient(
             90deg,
-            var(--bp-bg-2)        25%,
+            var(--bp-bg-2) 25%,
             var(--bp-border-faint) 37%,
-            var(--bp-bg-2)        63%
+            var(--bp-bg-2) 63%
         );
         background-size: 200% 100%;
     }

@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     .btn-close {
         // Remap glyph color to blueprint's muted ink; default opacity is already
         // 1 in the base, so we only need color and focus/hover deltas.

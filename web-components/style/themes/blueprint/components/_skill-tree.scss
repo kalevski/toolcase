@@ -2,55 +2,56 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Token overrides ──────────────────────────────────────────────────────
 
     tc-skill-tree {
         // Canvas: white sheet with hairline border and a soft violet-tinted shadow
-        --bs-skill-tree-bg:                  var(--bp-paper);
-        --bs-skill-tree-border-color:        var(--bp-border);
+        --bs-skill-tree-bg: var(--bp-paper);
+        --bs-skill-tree-border-color: var(--bp-border);
 
         // Edges: faint hairline for locked paths; teal for traversed/unlocked paths
-        --bs-skill-tree-edge-color:          var(--bp-border-strong);
+        --bs-skill-tree-edge-color: var(--bp-border-strong);
         --bs-skill-tree-edge-unlocked-color: var(--bp-teal);
 
         // Node base
-        --bs-skill-tree-node-bg:             var(--bp-paper);
-        --bs-skill-tree-node-border-color:   var(--bp-border-strong);
-        --bs-skill-tree-node-color:          var(--bp-text);
-        --bs-skill-tree-node-transition:     background var(--bp-ease), border-color var(--bp-ease), color var(--bp-ease), box-shadow var(--bp-ease);
+        --bs-skill-tree-node-bg: var(--bp-paper);
+        --bs-skill-tree-node-border-color: var(--bp-border-strong);
+        --bs-skill-tree-node-color: var(--bp-text);
+        --bs-skill-tree-node-transition:
+            background var(--bp-ease), border-color var(--bp-ease), color var(--bp-ease),
+            box-shadow var(--bp-ease);
 
         // Node hover — teal lift signals interactability
-        --bs-skill-tree-node-hover-bg:       var(--bp-bg);
-        --bs-skill-tree-node-hover-border:   var(--bp-teal);
+        --bs-skill-tree-node-hover-bg: var(--bp-bg);
+        --bs-skill-tree-node-hover-border: var(--bp-teal);
 
         // Node selected — pink primary; white label inherits correctly
-        --bs-skill-tree-node-selected-bg:    var(--bp-pink);
+        --bs-skill-tree-node-selected-bg: var(--bp-pink);
         --bs-skill-tree-node-selected-color: var(--bp-pink-ink);
-        --bs-skill-tree-node-selected-border:var(--bp-pink);
+        --bs-skill-tree-node-selected-border: var(--bp-pink);
 
         // Node unlocked (achieved, not active) — teal success state
-        --bs-skill-tree-node-unlocked-bg:    var(--bp-paper);
-        --bs-skill-tree-node-unlocked-color: var(--bp-teal-fg);
-        --bs-skill-tree-node-unlocked-border:var(--bp-teal);
+        --bs-skill-tree-node-unlocked-bg: var(--bp-paper);
+        --bs-skill-tree-node-unlocked-color: var(--bp-success-fg);
+        --bs-skill-tree-node-unlocked-border: var(--bp-success);
 
         // Node locked — recessed well, faint border, opacity preserved
-        --bs-skill-tree-node-locked-bg:      var(--bp-bg-2);
-        --bs-skill-tree-node-locked-color:   var(--bp-text-faint);
-        --bs-skill-tree-node-locked-border:  var(--bp-border-faint);
+        --bs-skill-tree-node-locked-bg: var(--bp-bg-2);
+        --bs-skill-tree-node-locked-color: var(--bp-text-faint);
+        --bs-skill-tree-node-locked-border: var(--bp-border-faint);
         --bs-skill-tree-node-locked-opacity: 0.55;
 
         // Label — inherit mono family; route colors to bp tokens
-        --bs-skill-tree-label-color:         var(--bp-text-muted);
+        --bs-skill-tree-label-color: var(--bp-text-muted);
 
         // Rank counter
-        --bs-skill-tree-rank-color:          var(--bp-text-faint);
+        --bs-skill-tree-rank-color: var(--bp-text-faint);
 
         // Points strip — recessed bg, hairline, teal value
-        --bs-skill-tree-points-bg:           var(--bp-bg-2);
+        --bs-skill-tree-points-bg: var(--bp-bg-2);
         --bs-skill-tree-points-border-color: var(--bp-border);
-        --bs-skill-tree-points-label-color:  var(--bp-text-muted);
-        --bs-skill-tree-points-value-color:  var(--bp-teal-fg);
+        --bs-skill-tree-points-label-color: var(--bp-text-muted);
+        --bs-skill-tree-points-value-color: var(--bp-teal-fg);
     }
 
     // ── Canvas ───────────────────────────────────────────────────────────────
@@ -63,7 +64,7 @@ tc-theme[name='blueprint'],
 
     .tc-skill-tree__edge--unlocked {
         // Teal glow trace on traversed path — readable on the white canvas
-        filter: drop-shadow(0 0 2px var(--bp-teal-soft));
+        filter: drop-shadow(0 0 2px var(--bp-success-soft));
     }
 
     // ── Node hover ───────────────────────────────────────────────────────────

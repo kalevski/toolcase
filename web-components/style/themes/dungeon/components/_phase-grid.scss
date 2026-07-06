@@ -8,9 +8,9 @@ tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
     tc-phase-grid {
         // Brighter element status tokens — punchier than the default --tc-info/success/danger.
-        --bs-phase-grid-active-color:   var(--fg-mana-bright);
+        --bs-phase-grid-active-color: var(--fg-mana-bright);
         --bs-phase-grid-complete-color: var(--fg-stamina-bright);
-        --bs-phase-grid-blocked-color:  var(--fg-blood-bright);
+        --bs-phase-grid-blocked-color: var(--fg-blood-bright);
 
         // Warmer card surface — explicit leather over the generic --tc-surface.
         --bs-phase-grid-card-bg: var(--fg-leather);

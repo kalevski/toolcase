@@ -4,35 +4,34 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Container ──────────────────────────────────────────────────────────────
     // Lift the list off the lavender page ground as a raised paper card.
     tc-team-list {
-        --bs-team-list-bg:            var(--bp-paper);
-        --bs-team-list-border:        var(--bp-border);
-        --bs-team-list-separator:     var(--bp-border-faint);
+        --bs-team-list-bg: var(--bp-paper);
+        --bs-team-list-border: var(--bp-border);
+        --bs-team-list-separator: var(--bp-border-faint);
 
         // Row hover: the recessed well tint — visible but gentle on a light theme.
-        --bs-team-list-row-hover-bg:  var(--bp-bg);
+        --bs-team-list-row-hover-bg: var(--bp-bg);
 
         // ── Name ───────────────────────────────────────────────────────────────
         // Chakra Petch gives each member a named, structured presence.
-        --bs-team-list-name-color:    var(--bp-text);
-        --bs-team-list-name-weight:   600;
+        --bs-team-list-name-color: var(--bp-text);
+        --bs-team-list-name-weight: 600;
 
         // ── Email ──────────────────────────────────────────────────────────────
-        --bs-team-list-email-color:   var(--bp-text-faint);
+        --bs-team-list-email-color: var(--bp-text-faint);
 
         // ── Role chip ──────────────────────────────────────────────────────────
         // Teal-soft fill + teal-fg text — the standard blueprint eyebrow treatment.
-        --bs-team-list-role-bg:       var(--bp-teal-soft);
-        --bs-team-list-role-color:    var(--bp-teal-fg);
+        --bs-team-list-role-bg: var(--bp-teal-soft);
+        --bs-team-list-role-color: var(--bp-teal-fg);
 
         // ── Avatar ─────────────────────────────────────────────────────────────
         // Replace the dark #2b3a51 gradient stop with the blueprint teal gradient.
         // --bp-teal-grad is the canonical two-stop teal sweep for this theme.
         --bs-team-list-avatar-gradient: var(--bp-teal-grad);
-        --bs-team-list-avatar-color:    var(--bp-teal-ink);
+        --bs-team-list-avatar-color: var(--bp-teal-ink);
     }
 
     // ── Card shell ─────────────────────────────────────────────────────────────
@@ -51,11 +50,11 @@ tc-theme[name='blueprint'],
         &::before {
             content: '';
             position: absolute;
-            top:    8px;
-            left:   8px;
-            width:  10px;
+            top: 8px;
+            left: 8px;
+            width: 10px;
             height: 10px;
-            border-top:  2px solid var(--bp-teal);
+            border-top: 2px solid var(--bp-teal);
             border-left: 2px solid var(--bp-teal);
             opacity: 0;
             transition: opacity var(--bp-ease);
@@ -82,18 +81,18 @@ tc-theme[name='blueprint'],
     // ── Role chip ──────────────────────────────────────────────────────────────
     // Mono uppercase micro-label — the blueprint eyebrow / kicker treatment.
     .tc-team-list-role {
-        font-family:     var(--bp-mono);
-        font-size:       0.625rem;
-        font-weight:     600;
-        letter-spacing:  0.1em;
-        text-transform:  uppercase;
+        font-family: var(--bp-mono);
+        font-size: 0.625rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
     }
 
     // ── Avatar default fill ────────────────────────────────────────────────────
     // Non-gradient fallback: use the teal-soft tint so it still feels on-theme.
     .tc-team-list-avatar {
         background: var(--bp-teal-soft);
-        color:      var(--bp-teal-fg);
+        color: var(--bp-teal-fg);
     }
 
     @media (prefers-reduced-motion: reduce) {

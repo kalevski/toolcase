@@ -21,7 +21,9 @@ tc-theme[name='dungeon'],
         font-family: var(--fg-display);
         text-transform: uppercase;
         letter-spacing: 0.12em;
-        text-shadow: 0 1px 2px #000, 0 0 18px rgba(232, 200, 120, 0.35);
+        text-shadow:
+            0 1px 2px #000,
+            0 0 18px rgba(232, 200, 120, 0.35);
     }
 
     .tc-boss-bar__epithet {

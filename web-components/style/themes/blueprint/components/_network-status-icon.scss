@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-network-status-icon {
         // Inactive bars: replace --tc-border-strong (dark slate) with the blueprint hairline token.
         --bs-network-status-icon-inactive-color: var(--bp-border-strong);
@@ -13,10 +12,10 @@ tc-theme[name='blueprint'],
         // Tier accent rotation: offline→faint, bad→danger red, warning→amber, ok→teal, good→teal.
         // ok uses --bp-teal (not the base cyan --tc-accent/#22d3ee) to stay on palette.
         --bs-network-status-icon-color-offline: var(--bp-text-faint);
-        --bs-network-status-icon-color-bad:     var(--bp-danger);
-        --bs-network-status-icon-color-warning:  var(--bp-amber);
-        --bs-network-status-icon-color-ok:       var(--bp-teal);
-        --bs-network-status-icon-color-good:     var(--bp-teal);
+        --bs-network-status-icon-color-bad: var(--bp-danger);
+        --bs-network-status-icon-color-warning: var(--bp-amber);
+        --bs-network-status-icon-color-ok: var(--bp-success);
+        --bs-network-status-icon-color-good: var(--bp-success);
     }
 
     // Label: mono eyebrow treatment — uppercase + loose tracking per blueprint micro-label spec.

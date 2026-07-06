@@ -2,30 +2,30 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-reset-to-defaults {
         // ── Idle reset button — teal outline (everyday action in the accent rotation) ──
         // Transparent fill at rest; teal border signals "actionable but non-destructive".
-        --bs-reset-to-defaults-reset-bg:           transparent;
-        --bs-reset-to-defaults-reset-color:        var(--bp-teal-fg);
-        --bs-reset-to-defaults-reset-border:       1px solid var(--bp-teal-line);
-        --bs-reset-to-defaults-reset-hover-bg:     var(--bp-teal-soft);
+        --bs-reset-to-defaults-reset-bg: transparent;
+        --bs-reset-to-defaults-reset-color: var(--bp-teal-fg);
+        --bs-reset-to-defaults-reset-border: 1px solid var(--bp-teal-line);
+        --bs-reset-to-defaults-reset-hover-bg: var(--bp-teal-soft);
         --bs-reset-to-defaults-reset-hover-border: 1px solid var(--bp-teal);
 
         // ── Confirm reset button — danger red (irreversible destructive action) ──
         // Pink is the blueprint primary CTA, but "Confirm reset" is genuinely
         // destructive, so real danger red (--bp-danger) is the correct signal.
-        --bs-reset-to-defaults-confirm-bg:           var(--bp-danger);
-        --bs-reset-to-defaults-confirm-color:        #fff;
-        --bs-reset-to-defaults-confirm-border:       1px solid var(--bp-danger);
-        --bs-reset-to-defaults-confirm-hover-bg:     color-mix(in srgb, var(--bp-danger) 88%, #000 12%);
-        --bs-reset-to-defaults-confirm-hover-border: 1px solid color-mix(in srgb, var(--bp-danger) 88%, #000 12%);
+        --bs-reset-to-defaults-confirm-bg: var(--bp-danger);
+        --bs-reset-to-defaults-confirm-color: #fff;
+        --bs-reset-to-defaults-confirm-border: 1px solid var(--bp-danger);
+        --bs-reset-to-defaults-confirm-hover-bg: color-mix(in srgb, var(--bp-danger) 88%, #000 12%);
+        --bs-reset-to-defaults-confirm-hover-border: 1px solid
+            color-mix(in srgb, var(--bp-danger) 88%, #000 12%);
 
         // ── Cancel button — ghost treatment, muted ink ────────────────────────────
-        --bs-reset-to-defaults-cancel-bg:           transparent;
-        --bs-reset-to-defaults-cancel-color:        var(--bp-text-muted);
-        --bs-reset-to-defaults-cancel-border:       1px solid transparent;
-        --bs-reset-to-defaults-cancel-hover-bg:     var(--bp-bg-2);
+        --bs-reset-to-defaults-cancel-bg: transparent;
+        --bs-reset-to-defaults-cancel-color: var(--bp-text-muted);
+        --bs-reset-to-defaults-cancel-border: 1px solid transparent;
+        --bs-reset-to-defaults-cancel-hover-bg: var(--bp-bg-2);
         --bs-reset-to-defaults-cancel-hover-border: 1px solid var(--bp-border);
 
         // Disabled opacity unchanged from base (0.45).
@@ -36,16 +36,16 @@ tc-theme[name='blueprint'],
     // "machine UI" feel. Applied to all three variants via the shared class.
 
     .tc-reset-to-defaults__btn {
-        font-family:     var(--bp-mono);
-        text-transform:  uppercase;
-        letter-spacing:  0.08em;
-        font-size:       0.7rem;
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 0.7rem;
         transition:
             background-color var(--bp-ease),
-            color            var(--bp-ease),
-            border-color     var(--bp-ease),
-            transform        var(--bp-ease),
-            box-shadow       var(--bp-ease);
+            color var(--bp-ease),
+            border-color var(--bp-ease),
+            transform var(--bp-ease),
+            box-shadow var(--bp-ease);
 
         &:focus-visible {
             // Teal focus ring — clear on the light paper surface.

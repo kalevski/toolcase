@@ -43,6 +43,15 @@ func New(cfg config.Acme, store *credstore.Store, dataDir string, log *slog.Logg
 	return &Client{cfg: cfg, store: store, dataDir: dataDir, run: defaultRun, log: log}
 }
 
+// NewWithRun builds a Client with an injected RunFunc, so out-of-package tests
+// (e.g. the manager's renewal scheduler) can assert certbot argv without a
+// real certbot binary — the same seam acme's own tests use.
+func NewWithRun(cfg config.Acme, store *credstore.Store, dataDir string, log *slog.Logger, run RunFunc) *Client {
+	c := New(cfg, store, dataDir, log)
+	c.run = run
+	return c
+}
+
 func defaultRun(ctx context.Context, env []string, name string, args ...string) (string, error) {
 	cmd := exec.CommandContext(ctx, name, args...)
 	if len(env) > 0 {

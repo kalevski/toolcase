@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     .tc-setting-row {
         // Divider becomes a blueprint grid rule — faint, not a full border weight.
         --bs-setting-row-border: 1px solid var(--bp-border-faint);
@@ -28,5 +27,4 @@ tc-theme[name='blueprint'],
             letter-spacing: 0;
         }
     }
-
 }

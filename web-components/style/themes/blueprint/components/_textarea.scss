@@ -6,12 +6,12 @@ tc-theme[name='blueprint'],
     // Re-point the Bootstrap form-control custom-property API away from the
     // slate/cyan literals baked in the base partial to blueprint tokens.
     tc-textarea .form-control {
-        --bs-form-control-color:                var(--bp-text);
-        --bs-form-control-bg:                   var(--bp-paper);
-        --bs-form-control-border-color:         var(--bp-border-strong);
-        --bs-form-control-placeholder-color:    var(--bp-text-faint);
-        --bs-form-control-disabled-color:       var(--bp-text-faint);
-        --bs-form-control-disabled-bg:          var(--bp-bg-2);          // recessed well
+        --bs-form-control-color: var(--bp-text);
+        --bs-form-control-bg: var(--bp-paper);
+        --bs-form-control-border-color: var(--bp-border-strong);
+        --bs-form-control-placeholder-color: var(--bp-text-faint);
+        --bs-form-control-disabled-color: var(--bp-text-faint);
+        --bs-form-control-disabled-bg: var(--bp-bg-2); // recessed well
         --bs-form-control-disabled-border-color: var(--bp-border-faint);
 
         font-family: var(--bp-body);
@@ -20,7 +20,7 @@ tc-theme[name='blueprint'],
         resize: vertical;
         transition:
             border-color 0.18s var(--bp-ease),
-            box-shadow   0.18s var(--bp-ease);
+            box-shadow 0.18s var(--bp-ease);
 
         // Placeholder text colour — some engines ignore the custom prop and need
         // a direct pseudo-element rule.
@@ -49,11 +49,11 @@ tc-theme[name='blueprint'],
     // Blueprint status rotation: success→teal, danger→real red.
     // *-fg / teal-line / pink-line used so the glow reads on the white ground.
     tc-textarea .form-control.is-valid {
-        border-color: var(--bp-teal);
+        border-color: var(--bp-success);
 
         &:focus {
-            border-color: var(--bp-teal);
-            box-shadow: var(--bp-glow-teal); // soft teal halo
+            border-color: var(--bp-success);
+            box-shadow: var(--bp-glow-success); // soft teal halo
         }
     }
 
@@ -71,8 +71,8 @@ tc-theme[name='blueprint'],
     // tracked — consistent with tc-form-input and tc-input label treatment.
     tc-textarea .form-label {
         font-family: var(--bp-mono);
-        font-size: 0.6875rem;           // 11 px — mono reads larger at equal size
-        font-weight: 400;               // mono already reads heavy; keep it light
+        font-size: 0.6875rem; // 11 px — mono reads larger at equal size
+        font-weight: 400; // mono already reads heavy; keep it light
         text-transform: uppercase;
         letter-spacing: 0.08em;
         color: var(--bp-text-muted);
@@ -98,7 +98,7 @@ tc-theme[name='blueprint'],
     }
 
     tc-textarea .tc-field-message--valid {
-        --bs-field-message-color: var(--bp-teal-fg); // darker teal for AA contrast on white
+        --bs-field-message-color: var(--bp-success-fg); // darker teal for AA contrast on white
     }
 
     tc-textarea .tc-field-message--invalid {

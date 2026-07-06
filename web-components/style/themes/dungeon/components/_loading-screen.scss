@@ -17,7 +17,12 @@ tc-theme[name='dungeon'],
         --bs-loading-screen-pct-color: var(--fg-gold-bright);
 
         --bs-loading-screen-bar-bg: linear-gradient(180deg, var(--fg-ink), var(--fg-ink-2));
-        --bs-loading-screen-bar-fill: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold) 60%, var(--fg-gold-shadow));
+        --bs-loading-screen-bar-fill: linear-gradient(
+            180deg,
+            var(--fg-gold-bright),
+            var(--fg-gold) 60%,
+            var(--fg-gold-shadow)
+        );
         --bs-loading-screen-bar-height: 12px;
 
         --bs-loading-screen-tip-label-color: var(--fg-parch-dim);

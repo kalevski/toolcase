@@ -2,36 +2,35 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-inventory-grid {
         // Frame surface: raised white card with a blueprint hairline border and a
         // subtle violet-tinted shadow so the grid lifts off the lavender page.
-        --bs-inventory-grid-surface:      var(--bp-paper);
+        --bs-inventory-grid-surface: var(--bp-paper);
         --bs-inventory-grid-border-color: var(--bp-border);
 
         // Slot tile defaults: white fill, teal-weighted strong hairline so each
         // cell reads as a distinct socket against the frame.
-        --bs-inventory-grid-slot-bg:           var(--bp-paper);
-        --bs-inventory-grid-slot-border:       var(--bp-border-strong);
+        --bs-inventory-grid-slot-bg: var(--bp-paper);
+        --bs-inventory-grid-slot-border: var(--bp-border-strong);
 
         // Empty slots: dashed faint border, ghost glyph text.
         --bs-inventory-grid-slot-empty-border: var(--bp-border-faint);
-        --bs-inventory-grid-empty-color:       var(--bp-text-faint);
+        --bs-inventory-grid-empty-color: var(--bp-text-faint);
 
         // Hover: recessed-well tint so the tap target reads as responsive.
-        --bs-inventory-grid-slot-hover-bg:     var(--bp-paper-tint);
+        --bs-inventory-grid-slot-hover-bg: var(--bp-paper-tint);
 
         // Glyph / icon text rendered inside a slot.
-        --bs-inventory-grid-glyph-color:       var(--bp-text);
+        --bs-inventory-grid-glyph-color: var(--bp-text);
 
         // Selection: pink primary accent border + teal glow ring.
         // The teal glow (not pink) keeps the halo legible against the white slot
         // background; the solid pink border carries the "selected" signal.
-        --bs-inventory-grid-selected-border:   var(--bp-pink);
-        --bs-inventory-grid-selected-ring:     var(--bp-glow-teal);
+        --bs-inventory-grid-selected-border: var(--bp-pink);
+        --bs-inventory-grid-selected-ring: var(--bp-glow-teal);
 
         // Quantity badge: teal fill (everyday action accent) with white ink.
-        --bs-inventory-grid-qty-bg:    var(--bp-teal);
+        --bs-inventory-grid-qty-bg: var(--bp-teal);
         --bs-inventory-grid-qty-color: var(--bp-teal-ink);
 
         box-shadow: var(--tc-shadow-sm);
@@ -94,7 +93,7 @@ tc-theme[name='blueprint'],
     // On the selected slot, flip the bracket to pink to reinforce the primary
     // selection signal.
     .tc-inventory-grid__slot--selected:not(:defined)::before {
-        border-top-color:  var(--bp-pink);
+        border-top-color: var(--bp-pink);
         border-left-color: var(--bp-pink);
     }
 }

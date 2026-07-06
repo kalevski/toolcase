@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Track ──────────────────────────────────────────────────────────────
     // Reroute track from the base --tc-border (which leaks raw slate) to the
     // blueprint hairline token. Shadow stays off — bars sit flush in-plane.
@@ -31,8 +30,8 @@ tc-theme[name='blueprint'],
     // Map to blueprint's semantic palette: success→teal (same as default,
     // stated explicitly), info→violet, warning→amber, danger→real red.
     .progress-bar.bg-success {
-        background-color: var(--bp-teal) !important;
-        color: var(--bp-teal-ink);
+        background-color: var(--bp-success) !important;
+        color: var(--bp-success-ink);
     }
 
     .progress-bar.bg-info {
@@ -56,5 +55,4 @@ tc-theme[name='blueprint'],
         background-color: var(--bp-pink) !important;
         color: var(--bp-pink-ink);
     }
-
 }

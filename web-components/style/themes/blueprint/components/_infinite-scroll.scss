@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-infinite-scroll {
         // Loading spinner row: use text-muted mapped to blueprint's muted ink
         --bs-infinite-scroll-loading-color: var(--bp-text-muted);
@@ -15,7 +14,9 @@ tc-theme[name='blueprint'],
     // and apply the teal accent for a subtle HUD "data exhausted" signal
     .tc-infinite-scroll__end-label {
         font-family: var(--bp-mono);
-        color: var(--bp-teal-fg); // teal text on white clears AA (--bp-teal-fg is the darker text-safe variant)
+        color: var(
+            --bp-teal-fg
+        ); // teal text on white clears AA (--bp-teal-fg is the darker text-safe variant)
         letter-spacing: 0.12em;
     }
 

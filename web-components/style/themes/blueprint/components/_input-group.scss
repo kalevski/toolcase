@@ -10,7 +10,9 @@ tc-theme[name='blueprint'],
     .input-group-text {
         background-color: var(--bp-bg-2);
         border-color: var(--bp-border);
-        color: var(--bp-teal-fg); // teal text on white/lavender clears AA per --bp-teal-fg definition
+        color: var(
+            --bp-teal-fg
+        ); // teal text on white/lavender clears AA per --bp-teal-fg definition
         font-family: var(--bp-mono);
         letter-spacing: 0.06em;
         text-transform: uppercase;

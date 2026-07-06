@@ -13,6 +13,7 @@ import (
 
 	"github.com/kalevski/toolcase/nginxpilot/internal/config"
 	"github.com/kalevski/toolcase/nginxpilot/internal/manager"
+	"github.com/kalevski/toolcase/nginxpilot/internal/nginxctl"
 )
 
 // cmdStatus renders a human table from the daemon's /status endpoint;
@@ -67,6 +68,19 @@ func cmdStatus(args []string) int {
 
 	var payload struct {
 		Sites []manager.SiteStatus `json:"sites"`
+		Nginx *struct {
+			Managed       bool                      `json:"managed"`
+			Resources     []nginxctl.ResourceResult `json:"resources"`
+			DisabledCount int                       `json:"disabled_count"`
+			AtRiskCount   int                       `json:"at_risk_count"`
+			Reconcile     *manager.ReconcileSummary `json:"reconcile"`
+		} `json:"nginx"`
+		CertsRenewal *struct {
+			Enabled       bool       `json:"enabled"`
+			CheckInterval string     `json:"check_interval"`
+			RenewBefore   string     `json:"renew_before"`
+			NextCheck     *time.Time `json:"next_check"`
+		} `json:"certs_renewal"`
 	}
 	if err := json.Unmarshal(body, &payload); err != nil {
 		fmt.Fprintf(os.Stderr, "bad /status payload: %v\n", err)
@@ -82,6 +96,35 @@ func cmdStatus(args []string) int {
 			orDash(truncate(s.LastError, 60)))
 	}
 	_ = w.Flush()
+
+	// Managed-mode resource table: only non-active resources are itemized —
+	// the summary line carries the healthy count.
+	if payload.Nginx != nil && payload.Nginx.Managed {
+		n := payload.Nginx
+		fmt.Printf("\nnginx: %d resource(s), %d disabled, %d at risk",
+			len(n.Resources), n.DisabledCount, n.AtRiskCount)
+		if n.Reconcile != nil && n.Reconcile.Enabled {
+			fmt.Printf(" (reconcile every %s, on_failure=%s)", n.Reconcile.IntervalStr, n.Reconcile.OnFailure)
+		}
+		fmt.Println()
+		if n.DisabledCount+n.AtRiskCount > 0 {
+			rw := tabwriter.NewWriter(os.Stdout, 2, 4, 2, ' ', 0)
+			fmt.Fprintln(rw, "KIND\tKEY\tSTATE\tSINCE\tREASON")
+			for _, r := range n.Resources {
+				if r.State == "active" {
+					continue
+				}
+				fmt.Fprintf(rw, "%s\t%s\t%s\t%s\t%s\n",
+					r.Kind, r.Key, r.State, fmtTime(r.Since), orDash(truncate(r.Reason, 80)))
+			}
+			_ = rw.Flush()
+		}
+	}
+
+	if cr := payload.CertsRenewal; cr != nil && cr.Enabled {
+		fmt.Printf("\ncert renewal: every %s, renew when < %s to expiry, next check %s\n",
+			cr.CheckInterval, cr.RenewBefore, fmtTime(cr.NextCheck))
+	}
 	return 0
 }
 

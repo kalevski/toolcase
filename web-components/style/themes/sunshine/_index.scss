@@ -9,7 +9,10 @@
 // (or any element with [data-tc-theme="sunshine"]).
 //
 // Load order: foundation (token remap) first so the component partials override
-// on top of the already-sunshine --tc-* / --bs-* tokens.
+// on top of the already-sunshine --tc-* / --bs-* tokens; variants extend the
+// foundation with alternate accent pairings (token-only overrides — activate
+// via <tc-theme name="sunshine" variant="ocean|forest|ember|royal">).
 
 @use 'foundation';
+@use 'variants';
 @use 'components';

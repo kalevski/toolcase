@@ -3,13 +3,12 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-confirm-dialog {
         // ── Surface + chrome ──────────────────────────────────────────────────
-        --bs-confirm-dialog-bg:           var(--bp-paper);
-        --bs-confirm-dialog-color:        var(--bp-text);
+        --bs-confirm-dialog-bg: var(--bp-paper);
+        --bs-confirm-dialog-color: var(--bp-text);
         --bs-confirm-dialog-border-color: var(--bp-border);
-        --bs-confirm-dialog-shadow:       var(--tc-shadow-lg);
+        --bs-confirm-dialog-shadow: var(--tc-shadow-lg);
 
         // ── Eyebrow ───────────────────────────────────────────────────────────
         // Teal — "action register" read, consistent with mono labels elsewhere.
@@ -17,7 +16,7 @@ tc-theme[name='blueprint'],
 
         // ── Backdrop — violet-ink scrim (not dark slate) ──────────────────────
         // Replace the #0f172a literal with the blueprint dark violet base tint.
-        --bs-confirm-dialog-backdrop-bg:      rgba(26, 24, 48, 1);
+        --bs-confirm-dialog-backdrop-bg: rgba(26, 24, 48, 1);
         --bs-confirm-dialog-backdrop-opacity: 0.5;
     }
 

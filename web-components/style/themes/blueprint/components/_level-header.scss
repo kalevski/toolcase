@@ -2,26 +2,25 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-level-header {
         // Surface — white card with hairline and violet-tinted shadow.
-        --bs-level-header-bg:           var(--bp-paper);
+        --bs-level-header-bg: var(--bp-paper);
         --bs-level-header-border-color: var(--bp-border);
 
         // Badge — pink primary tile (level number is the primary accent).
-        --bs-level-header-badge-bg:    var(--bp-pink);
+        --bs-level-header-badge-bg: var(--bp-pink);
         --bs-level-header-badge-color: var(--bp-pink-ink);
 
         // Title — display face, darkest ink.
         --bs-level-header-title-color: var(--bp-text);
 
         // XP track — recessed well + teal action fill.
-        --bs-level-header-track-bg:    var(--bp-bg-2);
-        --bs-level-header-fill-bg:     var(--bp-teal);
+        --bs-level-header-track-bg: var(--bp-bg-2);
+        --bs-level-header-fill-bg: var(--bp-teal);
 
         // Meta labels — faint and muted blueprint ink.
-        --bs-level-header-xp-color:   var(--bp-text-muted);
-        --bs-level-header-next-color:  var(--bp-text-faint);
+        --bs-level-header-xp-color: var(--bp-text-muted);
+        --bs-level-header-next-color: var(--bp-text-faint);
     }
 
     .tc-level-header {
@@ -43,7 +42,7 @@ tc-theme[name='blueprint'],
             width: 10px;
             height: 10px;
             border-bottom: 2px solid var(--bp-teal);
-            border-right:  2px solid var(--bp-teal);
+            border-right: 2px solid var(--bp-teal);
             pointer-events: none;
         }
     }
@@ -65,7 +64,7 @@ tc-theme[name='blueprint'],
     // Title — display face, tight tracking.
     .tc-level-header__title {
         font-family: var(--bp-display);
-        font-size:   var(--bs-level-header-title-font-size);
+        font-size: var(--bs-level-header-title-font-size);
         letter-spacing: -0.01em;
         color: var(--bp-text);
     }

@@ -2,42 +2,41 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-loot-popup {
         // ── Surface + chrome ───────────────────────────────────────────────────
-        --bs-loot-popup-bg:           var(--bp-paper);
+        --bs-loot-popup-bg: var(--bp-paper);
         --bs-loot-popup-border-color: var(--bp-border);
-        --bs-loot-popup-shadow:       var(--tc-shadow-lg); // already violet-tinted in blueprint
+        --bs-loot-popup-shadow: var(--tc-shadow-lg); // already violet-tinted in blueprint
 
         // ── Header typography ──────────────────────────────────────────────────
         // Eyebrow: mono label voice (teal-fg for AA contrast on white)
         --bs-loot-popup-eyebrow-color: var(--bp-teal-fg);
 
         // Title: display face for reward/loot headings
-        --bs-loot-popup-title-color:   var(--bp-emphasis);
+        --bs-loot-popup-title-color: var(--bp-emphasis);
 
         // ── Backdrop scrim ─────────────────────────────────────────────────────
         // Replace the raw dark-slate literal (#0f172a) with blueprint's deep ink.
-        --bs-loot-popup-backdrop-bg:      var(--bp-emphasis); // #0f0e22 — same dark tone, on-token
-        --bs-loot-popup-backdrop-opacity: 0.55;               // slightly deeper on the light theme
+        --bs-loot-popup-backdrop-bg: var(--bp-emphasis); // #0f0e22 — same dark tone, on-token
+        --bs-loot-popup-backdrop-opacity: 0.55; // slightly deeper on the light theme
 
         // ── Action buttons — secondary (Discard) ──────────────────────────────
-        --bs-loot-popup-btn-bg:             var(--bp-paper);
-        --bs-loot-popup-btn-color:          var(--bp-text);
-        --bs-loot-popup-btn-border:         1px solid var(--bp-border-strong);
-        --bs-loot-popup-btn-hover-bg:       var(--bp-bg-2);
-        --bs-loot-popup-btn-hover-color:    var(--bp-text-soft);
+        --bs-loot-popup-btn-bg: var(--bp-paper);
+        --bs-loot-popup-btn-color: var(--bp-text);
+        --bs-loot-popup-btn-border: 1px solid var(--bp-border-strong);
+        --bs-loot-popup-btn-hover-bg: var(--bp-bg-2);
+        --bs-loot-popup-btn-hover-color: var(--bp-text-soft);
 
         // ── Action buttons — primary (Take All) → pink CTA ────────────────────
-        --bs-loot-popup-btn-primary-bg:          var(--bp-pink);
-        --bs-loot-popup-btn-primary-color:       var(--bp-pink-ink);     // #fff on pink
-        --bs-loot-popup-btn-primary-hover-bg:    var(--bp-pink-hover);
+        --bs-loot-popup-btn-primary-bg: var(--bp-pink);
+        --bs-loot-popup-btn-primary-color: var(--bp-pink-ink); // #fff on pink
+        --bs-loot-popup-btn-primary-hover-bg: var(--bp-pink-hover);
         --bs-loot-popup-btn-primary-hover-color: var(--bp-pink-ink);
 
         // ── Close button ───────────────────────────────────────────────────────
-        --bs-loot-popup-close-color:       var(--bp-text-faint);
+        --bs-loot-popup-close-color: var(--bp-text-faint);
         --bs-loot-popup-close-hover-color: var(--bp-text);
-        --bs-loot-popup-close-hover-bg:    var(--bp-bg-2);
+        --bs-loot-popup-close-hover-bg: var(--bp-bg-2);
     }
 
     // ── Eyebrow — mono display voice ──────────────────────────────────────────

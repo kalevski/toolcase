@@ -18,7 +18,11 @@ tc-theme[name='dungeon'],
         --bs-list-meta-font-family: var(--fg-mono);
 
         // Improvement 4: deepen selected wash so it reads as a struck highlight, not a muddy fade.
-        --bs-list-selected-bg: linear-gradient(90deg, rgba(201, 169, 97, 0.24), rgba(201, 169, 97, 0.04) 80%);
+        --bs-list-selected-bg: linear-gradient(
+            90deg,
+            rgba(201, 169, 97, 0.24),
+            rgba(201, 169, 97, 0.04) 80%
+        );
         --bs-list-selected-label-color: var(--fg-gold-bright);
         --bs-list-selected-icon-color: var(--fg-gold-bright);
         // Improvement 1: rely solely on the base border-left for the selected edge marker;
@@ -28,7 +32,9 @@ tc-theme[name='dungeon'],
 
     // Improvement 3: bevel-top highlight on the container so the frame reads as a gilded panel edge.
     .tc-list {
-        box-shadow: var(--fg-bevel-top), inset 0 0 0 1px rgba(0, 0, 0, 0.4);
+        box-shadow:
+            var(--fg-bevel-top),
+            inset 0 0 0 1px rgba(0, 0, 0, 0.4);
     }
 
     .tc-list-item:hover:not(.tc-list-item--disabled):not(.tc-list-item--selected) {

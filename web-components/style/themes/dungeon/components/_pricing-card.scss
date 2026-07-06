@@ -5,18 +5,17 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // ── Token swap on the host element (vars declared on tc-pricing-card) ──────
     tc-pricing-card {
-        --bs-pricing-card-bg:                  var(--fg-panel-bg);
-        --bs-pricing-card-badge-bg:            var(--fg-gold);
+        --bs-pricing-card-bg: var(--fg-panel-bg);
+        --bs-pricing-card-badge-bg: var(--fg-gold);
         // Override the hardcoded #fff literal — ink text on gold badge
-        --bs-pricing-card-badge-color:         var(--fg-ink);
+        --bs-pricing-card-badge-color: var(--fg-ink);
         // Replace the slate-blue gradient literal with a gold gradient
-        --bs-pricing-card-highlight-cap-bg:    var(--fg-gold-edge);
+        --bs-pricing-card-highlight-cap-bg: var(--fg-gold-edge);
         // Replace the slate rgba(30,41,59,...) glow with the dark panel shadow
-        --bs-pricing-card-highlight-shadow:    var(--fg-panel-shadow);
-        --bs-pricing-card-shadow:              var(--fg-panel-shadow);
+        --bs-pricing-card-highlight-shadow: var(--fg-panel-shadow);
+        --bs-pricing-card-shadow: var(--fg-panel-shadow);
     }
 
     // ── Structural: gilded bevel + corner notches on the card surface ─────────

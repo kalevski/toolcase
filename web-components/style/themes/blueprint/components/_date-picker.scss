@@ -2,16 +2,15 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Token remaps ───────────────────────────────────────────────────────────
     // Route the component's own --bs-date-picker-* vars to blueprint tokens so
     // every cosmetic decision flows through the theme's palette, not the base
     // --tc-* neutrals.
 
     tc-date-picker {
-        --bs-date-picker-bg:           var(--bp-paper);
+        --bs-date-picker-bg: var(--bp-paper);
         --bs-date-picker-border-color: var(--bp-border-strong);
-        --bs-date-picker-label-color:  var(--bp-text-muted);
+        --bs-date-picker-label-color: var(--bp-text-muted);
     }
 
     // ── Label ──────────────────────────────────────────────────────────────────
@@ -29,7 +28,6 @@ tc-theme[name='blueprint'],
     // ── Native date input ──────────────────────────────────────────────────────
 
     .tc-date-picker input[type='date'].form-control {
-
         // Replace the baked slate focus ring (rgba(30,41,59,*) — leaks the
         // dark-slate ramp). Blueprint uses pink border + violet-tinted shadow.
         &:focus {
@@ -53,7 +51,9 @@ tc-theme[name='blueprint'],
             // Shift the neutral grey chevron toward the teal action hue.
             filter: invert(40%) sepia(60%) saturate(400%) hue-rotate(140deg) brightness(0.9);
             cursor: pointer;
-            transition: opacity var(--bp-ease), filter var(--bp-ease);
+            transition:
+                opacity var(--bp-ease),
+                filter var(--bp-ease);
 
             &:hover {
                 opacity: 1;

@@ -36,3 +36,7 @@ taskforge/.claude-accounts
 # misc noise
 **/npm-debug.log*
 **/.DS_Store
+
+# vendored reference repos / unrelated apps — never part of any image
+nginx-proxy-manager
+kalevski-cloud

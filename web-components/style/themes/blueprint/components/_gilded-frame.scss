@@ -2,13 +2,12 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Host default (mirrors dark tone default in base) ─────────────────────
     // Blueprint's "dark" tone: deep emphasis ink fill with near-white text
     // and a teal hairline so the frame reads as a primary panel surface.
     tc-gilded-frame {
-        --bs-gilded-frame-bg:           var(--bp-emphasis);
-        --bs-gilded-frame-color:        var(--bp-paper-tint);
+        --bs-gilded-frame-bg: var(--bp-emphasis);
+        --bs-gilded-frame-color: var(--bp-paper-tint);
         --bs-gilded-frame-border-color: var(--bp-teal-line);
         --bs-gilded-frame-border-width: 1px;
     }
@@ -17,8 +16,8 @@ tc-theme[name='blueprint'],
     // Deep ink panel — primary frame surface in blueprint.
     // Pink top-edge accent glow marks it as the "primary" tier.
     .tc-gilded-frame--tone-dark {
-        --bs-gilded-frame-bg:           var(--bp-emphasis);
-        --bs-gilded-frame-color:        var(--bp-paper-tint);
+        --bs-gilded-frame-bg: var(--bp-emphasis);
+        --bs-gilded-frame-color: var(--bp-paper-tint);
         --bs-gilded-frame-border-color: var(--bp-teal-line);
 
         // Pink top-edge accent line — the frame "gilded" detail
@@ -31,8 +30,8 @@ tc-theme[name='blueprint'],
     // Recessed well — slightly deeper lavender background with a standard
     // hairline border; reads as a secondary / inset panel.
     .tc-gilded-frame--tone-leather {
-        --bs-gilded-frame-bg:           var(--bp-bg-2);
-        --bs-gilded-frame-color:        var(--bp-text);
+        --bs-gilded-frame-bg: var(--bp-bg-2);
+        --bs-gilded-frame-color: var(--bp-text);
         --bs-gilded-frame-border-color: var(--bp-border);
     }
 
@@ -40,8 +39,8 @@ tc-theme[name='blueprint'],
     // Borderless passthrough — inherits color from parent; faint hairline
     // divider so the frame boundary is still readable on the lavender canvas.
     .tc-gilded-frame--tone-transparent {
-        --bs-gilded-frame-bg:           transparent;
-        --bs-gilded-frame-color:        inherit;
+        --bs-gilded-frame-bg: transparent;
+        --bs-gilded-frame-color: inherit;
         --bs-gilded-frame-border-color: var(--bp-border-faint);
     }
 

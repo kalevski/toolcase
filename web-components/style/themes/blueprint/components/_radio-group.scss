@@ -2,26 +2,25 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Group-level custom-property overrides ────────────────────────────────
     // The legend/label track is a micro-label eyebrow: mono, uppercase, loose
     // tracking, teal-fg for hierarchy — signals "field group header" vs prose.
     .tc-radio-group {
-        --bs-radio-group-label-color:  var(--bp-teal-fg);   // eyebrow teal text on white (AA-safe)
-        --bs-radio-group-label-size:   0.6875rem;            // ~11px — HUD-scale eyebrow
+        --bs-radio-group-label-color: var(--bp-teal-fg); // eyebrow teal text on white (AA-safe)
+        --bs-radio-group-label-size: 0.6875rem; // ~11px — HUD-scale eyebrow
         --bs-radio-group-label-weight: 600;
     }
 
     // ── Group label — styled as a blueprint eyebrow ──────────────────────────
     .tc-radio-group-label {
-        font-family:    var(--bp-mono);
+        font-family: var(--bp-mono);
         text-transform: uppercase;
-        letter-spacing: .1em;
-        color:          var(--bs-radio-group-label-color);
+        letter-spacing: 0.1em;
+        color: var(--bs-radio-group-label-color);
         // Thin teal hairline below the label separates it from the options
-        padding-bottom: .35rem;
-        border-bottom:  1px solid var(--bp-teal-line);
-        margin-bottom:  .55rem; // slightly more breathing room after the rule
+        padding-bottom: 0.35rem;
+        border-bottom: 1px solid var(--bp-teal-line);
+        margin-bottom: 0.55rem; // slightly more breathing room after the rule
     }
 
     // ── Option labels — body typeface, primary ink ───────────────────────────

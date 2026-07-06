@@ -2,30 +2,29 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Base tile ──────────────────────────────────────────────────────────────
     tc-item-slot {
-        --bs-item-slot-bg:            var(--bp-paper);
-        --bs-item-slot-border-color:  var(--bp-border-strong);
-        --bs-item-slot-empty-border:  var(--bp-border);
-        --bs-item-slot-hover-bg:      var(--bp-paper-tint);
-        --bs-item-slot-glyph-color:   var(--bp-text);
-        --bs-item-slot-empty-color:   var(--bp-text-faint);
+        --bs-item-slot-bg: var(--bp-paper);
+        --bs-item-slot-border-color: var(--bp-border-strong);
+        --bs-item-slot-empty-border: var(--bp-border);
+        --bs-item-slot-hover-bg: var(--bp-paper-tint);
+        --bs-item-slot-glyph-color: var(--bp-text);
+        --bs-item-slot-empty-color: var(--bp-text-faint);
 
         // Selected: pink primary ring — replaces the dark-slate rgba literal.
         --bs-item-slot-selected-border: var(--bp-pink);
-        --bs-item-slot-selected-ring:   var(--bp-pink-soft);
+        --bs-item-slot-selected-ring: var(--bp-pink-soft);
 
         // Quantity badge (top-left) — teal action; mono font already set in base.
-        --bs-item-slot-qty-bg:    var(--bp-teal);
+        --bs-item-slot-qty-bg: var(--bp-teal);
         --bs-item-slot-qty-color: var(--bp-teal-ink);
 
         // Hotkey badge (bottom-right) — violet support accent.
-        --bs-item-slot-hotkey-bg:    var(--bp-violet);
+        --bs-item-slot-hotkey-bg: var(--bp-violet);
         --bs-item-slot-hotkey-color: var(--bp-violet-ink);
 
         // Equipped marker (top-right) — teal success signal.
-        --bs-item-slot-equipped-bg:    var(--bp-teal);
+        --bs-item-slot-equipped-bg: var(--bp-teal);
         --bs-item-slot-equipped-color: var(--bp-teal-ink);
 
         // Cooldown veil — replaces rgba(15,23,42,.55) dark-slate literal.

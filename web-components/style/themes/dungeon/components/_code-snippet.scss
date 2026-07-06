@@ -5,7 +5,6 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // ── Token swap — host element ─────────────────────────────────────────────
 
     tc-code-snippet {
@@ -18,10 +17,10 @@ tc-theme[name='dungeon'],
         --bs-code-snippet-header-border: 1px solid var(--fg-gold-deep);
 
         // Warm syntax token palette (hardcoded hex in base, must override here)
-        --bs-code-snippet-tok-keyword:  var(--fg-mana-bright);
-        --bs-code-snippet-tok-string:   var(--fg-stamina-bright);
-        --bs-code-snippet-tok-comment:  var(--fg-parch-dim);
-        --bs-code-snippet-tok-number:   var(--fg-legendary);
+        --bs-code-snippet-tok-keyword: var(--fg-mana-bright);
+        --bs-code-snippet-tok-string: var(--fg-stamina-bright);
+        --bs-code-snippet-tok-comment: var(--fg-parch-dim);
+        --bs-code-snippet-tok-number: var(--fg-legendary);
         --bs-code-snippet-tok-variable: var(--fg-arcane-bright);
     }
 

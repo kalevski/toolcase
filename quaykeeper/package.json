@@ -1,0 +1,38 @@
+{
+    "name": "@toolcase/quaykeeper",
+    "version": "5.0.0",
+    "private": true,
+    "description": "Quaykeeper — control plane that deploys a user's GitHub branch as a static site via nginxpilot.",
+    "scripts": {
+        "dev": "next dev -p 4100",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint",
+        "typecheck": "tsc --noEmit",
+        "typegen:nginxpilot": "node scripts/generate-nginxpilot-types.mjs"
+    },
+    "dependencies": {
+        "@toolcase/base": "^5.0.0",
+        "@toolcase/web-components": "^5.0.7",
+        "lucide-static": "^1.22.0",
+        "mysql2": "^3.22.5",
+        "next": "^16.2.9",
+        "pg": "^8.22.0",
+        "react": "^19.1.0",
+        "react-dom": "^19.1.0",
+        "server-only": "^0.0.1"
+    },
+    "devDependencies": {
+        "@types/node": "^22.5",
+        "@types/pg": "^8.20.0",
+        "@types/react": "^19",
+        "@types/react-dom": "^19",
+        "eslint": "^8.57.0",
+        "eslint-config-next": "^14.2.5",
+        "typescript": "^5.5.0"
+    },
+    "engines": {
+        "node": ">=22.5"
+    },
+    "license": "MIT"
+}

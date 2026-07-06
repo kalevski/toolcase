@@ -1302,8 +1302,10 @@ Theming host element — the `--tc-*` token override container. Every `tc-*` com
 
 Two ways to theme a subtree:
 
-1. **Named theme** via the `name` attribute — opt into a bundled skin. `default` is the product (slate) voice applied globally; `dungeon` (gilded fantasy), `aurora` (dark "production-AI"), `sunshine` (warm citrus boutique) and `neon` (dark synthwave / cyberpunk, dual magenta + cyan accents) are opt-in skins that stay inert until a `tc-theme` wrapper requests them. Each named skin is scoped under `tc-theme[name="…"]` (a plain wrapper carrying `[data-tc-theme="…"]` is matched too). The `dungeon`, `aurora`, `sunshine` and `neon` skins reference display fonts (Cinzel / EB Garamond for dungeon; Orbitron / Ubuntu Mono for neon) that are **not** bundled — load them on the host page for the full look; all degrade to system serifs/sans.
+1. **Named theme** via the `name` attribute — opt into a bundled skin. `default` is the product (slate) voice applied globally; `dungeon` (gilded fantasy), `aurora` (dark "production-AI"), `sunshine` (warm citrus boutique), `neon` (dark synthwave / cyberpunk, dual magenta + cyan accents) and `blueprint` (light vector-blueprint, rounded corners) are opt-in skins that stay inert until a `tc-theme` wrapper requests them. Each named skin is scoped under `tc-theme[name="…"]` (a plain wrapper carrying `[data-tc-theme="…"]` is matched too). The `dungeon`, `aurora`, `sunshine`, `neon` and `blueprint` skins reference display fonts (Cinzel / EB Garamond for dungeon; Orbitron / Ubuntu Mono for neon; Space Grotesk / Chakra Petch for blueprint) that are **not** bundled — load them on the host page for the full look; all degrade to system serifs/sans.
 2. **Ad-hoc token overrides** — set `--tc-*` (or the finer-grained `--bs-<component>-*`) custom properties directly on the `tc-theme` element via `style` or a class. Because the tokens inherit through the `display: contents` box, every descendant component picks them up.
+
+Every named theme additionally ships four **accent variants** selected with the `variant` attribute: `ocean` (blue / cyan), `forest` (green / lime), `ember` (orange / gold) and `royal` (violet / magenta). A variant swaps **only the primary and secondary accent colours** (and their derived hovers, soft tints, glows, gradients, focus rings and link colours) — canvas, surfaces, text ramp, semantic status colours and the theme's structure stay untouched: `<tc-theme name="blueprint" variant="ocean">` (or `[data-tc-theme="blueprint"][data-tc-variant="ocean"]` on a plain wrapper).
 
 **Tag:** `tc-theme`
 
@@ -1311,13 +1313,15 @@ Two ways to theme a subtree:
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `name` | `default\|dungeon\|aurora\|sunshine\|neon` | — | Selects a bundled named theme for the wrapped subtree. Absent → the subtree inherits the ambient (global `:root`) theme. Unrecognised values simply match no theme scope, so the subtree keeps the inherited skin. |
+| `name` | `default\|dungeon\|aurora\|sunshine\|neon\|blueprint` | — | Selects a bundled named theme for the wrapped subtree. Absent → the subtree inherits the ambient (global `:root`) theme. Unrecognised values simply match no theme scope, so the subtree keeps the inherited skin. |
+| `variant` | `ocean\|forest\|ember\|royal` | — | Accent variant of the named theme — swaps only the primary and secondary accent colours (plus derived hovers, tints, glows, focus rings and links). Requires `name`; absent → the theme's base accents. |
 
 **JS Properties**
 
 | Property | Type | Description |
 |----------|------|-------------|
 | `name` | `string` | Reflects the `name` attribute. Returns `''` when absent. Setting a truthy value writes the attribute; setting `''`/falsy removes it. |
+| `variant` | `string` | Reflects the `variant` attribute. Returns `''` when absent. Setting a truthy value writes the attribute; setting `''`/falsy removes it. |
 
 **Events**
 
@@ -1340,6 +1344,11 @@ None.
         <tc-panel-header heading="Quest Log"></tc-panel-header>
         <tc-button variant="primary">Accept</tc-button>
     </tc-panel>
+</tc-theme>
+
+<!-- Accent variant — same dungeon skin, blue/cyan accents instead of the base pair -->
+<tc-theme name="dungeon" variant="ocean">
+    <tc-button variant="primary">Accept</tc-button>
 </tc-theme>
 
 <!-- Ad-hoc token overrides — recolour nested components via --tc-* tokens -->
@@ -5021,7 +5030,7 @@ Flexible data table with sortable columns, loading skeletons, and optional row-c
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `empty-message` | string | `No data` | Text shown in a full-width cell when `data` is empty and not loading. |
+| `empty-message` | string | `No data` | Text shown when `data` is empty and not loading — rendered through a nested `tc-empty-state` (inbox icon) in a full-width cell. |
 | `striped` | boolean | false | Even body rows take the faint slate well. |
 | `hoverable` | boolean | false | Rows lift to the slate well on hover. |
 | `compact` | boolean | false | Reduces cell padding (`table-sm`). |
@@ -5105,7 +5114,7 @@ table.addEventListener('tc-row-click', e => console.log(e.detail.row))
 
 ### tc-advanced-table
 
-Data table with a built-in filter toolbar, sortable headers, a translucent loading overlay, and a paginated footer. The header row is driven by the `columns` JS property; **body rows are projected as slotted `<tr>` children** of a `<tbody class="tc-advanced-table-body">`, so callers own row markup (and can inject `tc-badge` etc.). Pure slate chrome, sharp corners, JetBrains Mono pagination summary. The element drives its own internal sort direction and offset on click (like `tc-pagination`) and emits a CustomEvent for each interaction.
+Data table with a built-in filter toolbar, sortable headers, a translucent loading overlay, and a paginated footer. The header row is driven by the `columns` JS property; **body rows are fed as an HTML string through the `rows` property** — the element owns its `<tbody>` and re-applies the string on every internal re-render, so callers own row markup (and can inject `tc-badge` etc.) without any relocation hazard. Never render framework children (e.g. React `<tr>`s) inside the element: they would be captured and moved out from under the framework's reconciler. Pure slate chrome, sharp corners, JetBrains Mono pagination summary. The element drives its own internal sort direction and offset on click (like `tc-pagination`) and emits a CustomEvent for each interaction.
 
 **Tag:** `tc-advanced-table`
 
@@ -5122,6 +5131,7 @@ Data table with a built-in filter toolbar, sortable headers, a translucent loadi
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
+| `rows` | `string \| null` | `null` | Body rows as a trusted HTML string of `<tr>` elements. The element re-applies it into its `<tbody>` on every re-render. Interpolated user data MUST be escaped by the caller. |
 | `columns` | `AdvancedTableColumn[]` | `[]` | Header descriptors (see below). Set via the JS property; re-renders. |
 | `filters` | `AdvancedTableFilter[]` | `[]` | Toolbar filter controls. Empty → no toolbar. Set via the JS property. |
 | `filterValues` | `Record<string, any>` | `{}` | Current value bound into each filter control, keyed by filter `key`. |
@@ -5167,7 +5177,7 @@ Data table with a built-in filter toolbar, sortable headers, a translucent loadi
 
 **Slots**
 
-The default slot projects `<tr>` rows into the `<tbody class="tc-advanced-table-body">`. Projected rows are preserved across re-renders.
+None for body rows — feed them through the `rows` property. (Pre-parsed DOM children present at connect time are still moved into the `<tbody>` for plain-JS callers, but `rows` wins when set; note that raw `<tr>` tags in static HTML never survive parsing outside a `<table>`, so static markup callers must also use `rows`.)
 
 **Accessibility**
 
@@ -5178,13 +5188,13 @@ The default slot projects `<tr>` rows into the `<tbody class="tc-advanced-table-
 - Focus is always visible on header and pagination buttons; touch targets ≥ 44px under coarse pointers; `prefers-reduced-motion` slows the spinner rather than hiding it.
 
 ```html
-<tc-advanced-table>
-    <tr><td>Alice</td><td>Maintainer</td><td style="text-align:right">842</td></tr>
-    <tr><td>Bob</td><td>Contributor</td><td style="text-align:right">311</td></tr>
-</tc-advanced-table>
+<tc-advanced-table></tc-advanced-table>
 
 <script>
 const table = document.querySelector('tc-advanced-table')
+table.rows =
+    '<tr><td>Alice</td><td>Maintainer</td><td style="text-align:right">842</td></tr>' +
+    '<tr><td>Bob</td><td>Contributor</td><td style="text-align:right">311</td></tr>'
 table.columns = [
     { key: 'name', label: 'Name' },
     { key: 'role', label: 'Role' },
@@ -12695,7 +12705,7 @@ Centered placeholder shown when data is unavailable. Displays an optional lucide
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `icon` | string | — | Lucide icon name in PascalCase (e.g. `"Inbox"`, `"FolderOpen"`). When set, renders the icon as an inline SVG inside a muted tile above the body. When omitted, no icon is shown. |
+| `icon` | string | — | Lucide icon name in kebab-case or PascalCase (e.g. `"inbox"`, `"folder-open"`, `"FolderOpen"`). When set, renders the icon as an inline SVG inside a muted tile above the body. When omitted (or unknown), no icon is shown. |
 
 **JS Properties**
 

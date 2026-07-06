@@ -6,7 +6,6 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // ── Token swaps on the host ───────────────────────────────────────────────
     // Fix: --bs-phone-input-option-active-text was hardcoded #fff (white-on-gold
     // is low contrast); swap to --fg-ink. Also richer leather tones for trigger.

@@ -1,1 +1,8 @@
+// Default theme — the stock toolcase skin (token layer applied at :root).
+//
+// Load order: foundation (the :root token layer) first; variants extend it
+// with alternate primary/secondary accent palettes scoped to
+// tc-theme[name='default'][variant='…'] / [data-tc-theme][data-tc-variant].
+
 @forward 'foundation';
+@use 'variants';

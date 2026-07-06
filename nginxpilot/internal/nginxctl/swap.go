@@ -46,6 +46,14 @@ func (e *Engine) swapAndReload(ctx context.Context, httpStaging, streamStaging s
 		return err
 	}
 
+	// The swap replaced the live dirs wholesale; when the shared include dir
+	// IS the conf dir (the default layout) the block-exploits snippet moved to
+	// .bak with the old snapshot — rewrite it so resources referencing it pass
+	// the live nginx -t below.
+	if err := e.writeBlockExploits(); err != nil {
+		e.log.Error("rewrite block-exploits include after swap failed", "error", err)
+	}
+
 	if out, err := e.runConfigured(ctx, e.testCmd); err != nil {
 		e.log.Error("live nginx -t failed after swap; rolling back", "output", oneLine(out))
 		_ = e.rollback(e.confDir)
@@ -88,6 +96,19 @@ func (e *Engine) swap(staging, live string) error {
 		}
 	}
 	if err := os.Rename(staging, live); err != nil {
+		// A concurrent DryRun's eager writeBlockExploits can recreate the live
+		// dir (includeDir == confDir in the default layout) between the
+		// live→bak snapshot above and this rename, making the rename fail with
+		// ENOTEMPTY. The real previous config is already safe in bak and
+		// applies are serialized by the manager, so the recreated dir only
+		// holds the shared snippet — remove it and retry once.
+		if _, statErr := os.Stat(live); statErr == nil {
+			_ = os.RemoveAll(live)
+			if err2 := os.Rename(staging, live); err2 == nil {
+				syncDir(filepath.Dir(live))
+				return nil
+			}
+		}
 		// restore the snapshot on a failed swap
 		if _, statErr := os.Stat(bak); statErr == nil {
 			_ = os.Rename(bak, live)

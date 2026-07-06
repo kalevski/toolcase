@@ -9,7 +9,7 @@ Opinionated blueprint for self-hosted, single-process, full-stack Next.js applic
 
 This **is** Next.js. If you need a statically-prerendered marketing/content site (no server runtime, no auth, no DB) use `next-static-app`. If you need a headless backend with no UI use `node-service`. This skill is for the case where one Next.js process is the whole product.
 
-The reference implementations are **perch** (a static-hosting control plane) and **taskforge** (a Claude Code task runner). They share the same skeleton almost file-for-file — `lib/tc.ts` is byte-identical, `server/data/db.ts` and `server/config.ts` are ported verbatim with only names changed. That shared skeleton is what this skill encodes. Deviation from it is a smell, not a style choice.
+The reference implementations are **quaykeeper** (a static-hosting control plane) and **taskforge** (a Claude Code task runner). They share the same skeleton almost file-for-file — `lib/tc.ts` is byte-identical, `server/data/db.ts` and `server/config.ts` are ported verbatim with only names changed. That shared skeleton is what this skill encodes. Deviation from it is a smell, not a style choice.
 
 Stack baseline:
 
@@ -297,7 +297,7 @@ Cookie + OAuth contract:
 - Token = `<base64url(JSON payload)>.<base64url(HMAC-SHA256(payload, AUTH_SECRET))>`. Verify with `crypto.timingSafeEqual`. Check `exp` on every read.
 - `httpOnly`, `sameSite: 'lax'`, `path: '/'`, `secure` iff the redirect URI is `https://`, `maxAge = sessionTtl`. A separate short-lived (`maxAge: 600`) HMAC state cookie guards the OAuth callback against CSRF.
 - OAuth code flow: `buildAuthorizeUrl(state)` → GitHub → `/api/auth/github/callback` exchanges the code (`exchangeCodeForToken`), fetches the profile (`fetchGithubProfile`), runs the optional allow-list / org-membership gate (`checkAllowlist`), resolves the role, sets the session cookie. The GitHub access token is used during callback only and is **never** put in the session payload or the DB. (If a later flow needs it, give it its own short-lived `httpOnly` cookie — never the session.)
-- **Role is re-read per request from the authoritative source**, not trusted from the cookie payload (which is an advisory hint). The authoritative source is either the `app_user.role` DB column (perch style — fold role resolution into `auth.ts`) or a `roles.json` file read by a separate `services/roles.ts` (taskforge style). Either way: change a role, it applies on the next request without re-login.
+- **Role is re-read per request from the authoritative source**, not trusted from the cookie payload (which is an advisory hint). The authoritative source is either the `app_user.role` DB column (quaykeeper style — fold role resolution into `auth.ts`) or a `roles.json` file read by a separate `services/roles.ts` (taskforge style). Either way: change a role, it applies on the next request without re-login.
 
 ### `roles.ts` (optional) — authoritative role source
 
@@ -362,7 +362,7 @@ export async function requireRole(minRole: Role): Promise<MeResponse> {
 
 A `ReadableStream` that (1) sends a snapshot, (2) replays a ring buffer tagged `replay: true` so late subscribers rebuild scrollback without re-firing toasts, (3) subscribes to a live event emitter, (4) sends a `: ping` heartbeat every ~25 s, and (5) tears down on `cancel()`. Response headers: `Content-Type: text/event-stream`, `Cache-Control: no-cache, no-transform`, `X-Accel-Buffering: no`.
 
-> **Small-app variant:** perch has no `server/web/` directory — its routes call `authorize()` directly and inline the `if (!authz.ok)` check. taskforge factors that into `web/http.ts`'s `guard()`. Prefer `web/` once you have more than a handful of routes; the DRY `guard`/`json`/`error`/`audit` helpers pay off fast.
+> **Small-app variant:** quaykeeper has no `server/web/` directory — its routes call `authorize()` directly and inline the `if (!authz.ok)` check. taskforge factors that into `web/http.ts`'s `guard()`. Prefer `web/` once you have more than a handful of routes; the DRY `guard`/`json`/`error`/`audit` helpers pay off fast.
 
 ---
 

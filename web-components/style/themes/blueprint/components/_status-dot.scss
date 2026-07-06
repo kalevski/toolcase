@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Label typography ──────────────────────────────────────────────────────
     // Re-skin the label as a blueprint mono eyebrow: uppercase, tracked, teal-muted ink.
     .tc-status-dot {
@@ -13,7 +12,7 @@ tc-theme[name='blueprint'],
         font-family: var(--bp-mono);
         font-size: var(--bs-status-dot-label-size);
         text-transform: uppercase;
-        letter-spacing: .08em;
+        letter-spacing: 0.08em;
         color: var(--bs-status-dot-label-color);
     }
 
@@ -25,7 +24,7 @@ tc-theme[name='blueprint'],
 
     // online → teal (blueprint "live" convention: teal circle + soft halo)
     .tc-status-dot-marker.tc-status-dot-online {
-        --bs-status-dot-color: var(--bp-teal);
+        --bs-status-dot-color: var(--bp-success);
     }
 
     // busy → real danger red (NOT pink — pink is CTA/primary, not error/busy)
@@ -49,11 +48,11 @@ tc-theme[name='blueprint'],
     // The base ::after pulse ring is border-only; layer a box-shadow halo
     // on the dot itself for the blueprint glow effect when the marker is online+pulse.
     .tc-status-dot-marker.tc-status-dot-online.tc-status-dot-marker--pulse {
-        box-shadow: 0 0 0 .2em var(--bp-teal-soft);
+        box-shadow: 0 0 0 0.2em var(--bp-teal-soft);
     }
 
     // Danger/busy pulse: matching soft halo in danger-soft
     .tc-status-dot-marker.tc-status-dot-busy.tc-status-dot-marker--pulse {
-        box-shadow: 0 0 0 .2em var(--bp-danger-soft);
+        box-shadow: 0 0 0 0.2em var(--bp-danger-soft);
     }
 }

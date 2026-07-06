@@ -3,25 +3,24 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-file {
         // ── Row surface ──────────────────────────────────────────────────────
-        --bs-file-bg:             var(--bp-paper);
-        --bs-file-border-color:   var(--bp-border);
-        --bs-file-hover-bg:       var(--bp-paper-tint);
+        --bs-file-bg: var(--bp-paper);
+        --bs-file-border-color: var(--bp-border);
+        --bs-file-hover-bg: var(--bp-paper-tint);
 
         // ── File icon — teal so it reads as an "action object" ───────────────
-        --bs-file-icon-color:     var(--bp-teal-fg);
+        --bs-file-icon-color: var(--bp-teal-fg);
 
         // ── Format badge — mono label, teal-soft fill, teal text ─────────────
         // The badge uses uppercase mono already in the base partial; we reinforce
         // it here by routing color through the bp-mono / teal-soft system.
-        --bs-file-format-bg:           var(--bp-teal-soft);
-        --bs-file-format-color:        var(--bp-teal-fg);
+        --bs-file-format-bg: var(--bp-teal-soft);
+        --bs-file-format-color: var(--bp-teal-fg);
         --bs-file-format-border-color: var(--bp-teal-line);
 
         // ── Editable name — primary ink, teal focus underline ───────────────
-        --bs-file-name-color:               var(--bp-text);
+        --bs-file-name-color: var(--bp-text);
         --bs-file-name-focus-outline-color: var(--bp-teal);
 
         // ── Extension label — faint mono ink ────────────────────────────────
@@ -33,34 +32,34 @@ tc-theme[name='blueprint'],
         // ── Tag chips — violet-soft fill + violet-fg text ────────────────────
         // Violet is the "supporting" accent in the arcade rotation; chips are
         // non-actionable taxonomy labels — supporting accent is the right slot.
-        --bs-file-chip-bg:           var(--bp-violet-soft);
+        --bs-file-chip-bg: var(--bp-violet-soft);
         --bs-file-chip-border-color: var(--bp-border-chip);
-        --bs-file-chip-color:        var(--bp-violet-fg);
+        --bs-file-chip-color: var(--bp-violet-fg);
 
         // ── Menu trigger — muted default, pink active (primary CTA slot) ─────
-        --bs-file-menu-color:        var(--bp-text-faint);
-        --bs-file-menu-hover-bg:     var(--bp-paper-tint-2);
-        --bs-file-menu-hover-color:  var(--bp-text-muted);
-        --bs-file-menu-active-bg:    var(--bp-pink);
+        --bs-file-menu-color: var(--bp-text-faint);
+        --bs-file-menu-hover-bg: var(--bp-paper-tint-2);
+        --bs-file-menu-hover-color: var(--bp-text-muted);
+        --bs-file-menu-active-bg: var(--bp-pink);
         --bs-file-menu-active-color: var(--bp-pink-ink);
 
         // ── Dropdown panel — paper surface, hairline border ──────────────────
-        --bs-file-dropdown-bg:           var(--bp-paper);
+        --bs-file-dropdown-bg: var(--bp-paper);
         --bs-file-dropdown-border-color: var(--bp-border-strong);
-        --bs-file-dropdown-shadow:       var(--tc-shadow-md);
+        --bs-file-dropdown-shadow: var(--tc-shadow-md);
 
         // ── Dropdown items ───────────────────────────────────────────────────
-        --bs-file-dropdown-item-color:        var(--bp-text);
-        --bs-file-dropdown-item-hover-bg:     var(--bp-paper-tint-2);
-        --bs-file-dropdown-item-hover-color:  var(--bp-text-soft);
-        --bs-file-dropdown-item-active-bg:    var(--bp-pink);
+        --bs-file-dropdown-item-color: var(--bp-text);
+        --bs-file-dropdown-item-hover-bg: var(--bp-paper-tint-2);
+        --bs-file-dropdown-item-hover-color: var(--bp-text-soft);
+        --bs-file-dropdown-item-active-bg: var(--bp-pink);
         --bs-file-dropdown-item-active-color: var(--bp-pink-ink);
         --bs-file-dropdown-item-disabled-color: var(--bp-text-faint);
 
         // ── Skeleton — lavender base + white shimmer ──────────────────────────
         // Replace the base's rgba(255,255,255,0.6) shimmer with bp-paper-tint
         // so it reads as a blueprint-palette surface, not a raw white flash.
-        --bs-file-skeleton-bg:      var(--bp-bg-2);
+        --bs-file-skeleton-bg: var(--bp-bg-2);
         --bs-file-skeleton-shimmer: var(--bp-paper-tint);
     }
 
@@ -68,7 +67,9 @@ tc-theme[name='blueprint'],
     .tc-file {
         // Subtle left accent stripe on hover to reinforce teal action color
         border-left-color: transparent;
-        transition: background-color var(--bp-ease), border-left-color var(--bp-ease);
+        transition:
+            background-color var(--bp-ease),
+            border-left-color var(--bp-ease);
 
         &:hover {
             border-left-color: var(--bp-teal);

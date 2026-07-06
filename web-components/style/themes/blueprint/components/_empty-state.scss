@@ -2,21 +2,20 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // Re-point the --bs-empty-state-* contract to blueprint tokens.
     // The recessed well sits on --bp-bg-2 so the icon bubble reads as a raised
     // tile against the page; text uses the standard blueprint ink ladder.
     tc-empty-state {
-        --bs-empty-state-color:        var(--bp-text-muted);
-        --bs-empty-state-icon-color:   var(--bp-teal-fg);      // teal = everyday action accent
-        --bs-empty-state-icon-bg:      var(--bp-teal-soft);    // soft teal tint bubble
+        --bs-empty-state-color: var(--bp-text-muted);
+        --bs-empty-state-icon-color: var(--bp-teal-fg); // teal = everyday action accent
+        --bs-empty-state-icon-bg: var(--bp-teal-soft); // soft teal tint bubble
     }
 
     // Wrapper: recessed well so the empty area reads as a distinct zone
     .tc-empty-state {
         background-color: var(--bp-bg-2);
         border: 1px solid var(--bp-border-faint);
-        box-shadow: inset 0 1px 3px rgba(91, 61, 242, 0.04);  // barely-there violet inset
+        box-shadow: inset 0 1px 3px rgba(91, 61, 242, 0.04); // barely-there violet inset
     }
 
     // Icon bubble: teal-soft fill + teal hairline border; glows faintly on hover
@@ -33,11 +32,15 @@ tc-theme[name='blueprint'],
     // Body: headline inside adopts display font; kicker / eyebrow-like labels
     // inherit the mono voice when wrapped in a .tc-eyebrow or [data-eyebrow].
     .tc-empty-state__body {
-
         // First direct heading-like child (h1–h6, .tc-heading, or .tc-title) →
         // display font with tightest tracking. Not forced uppercase so body-copy
         // paragraph siblings stay readable.
-        > h1, > h2, > h3, > h4, > h5, > h6,
+        > h1,
+        > h2,
+        > h3,
+        > h4,
+        > h5,
+        > h6,
         > .tc-heading,
         > .tc-title {
             font-family: var(--bp-display);
@@ -56,9 +59,8 @@ tc-theme[name='blueprint'],
         > [data-eyebrow] {
             font-family: var(--bp-mono);
             text-transform: uppercase;
-            letter-spacing: .1em;
+            letter-spacing: 0.1em;
             color: var(--bp-text-faint);
         }
     }
-
 }

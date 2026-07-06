@@ -4,39 +4,38 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Component token overrides ─────────────────────────────────────────────
 
     tc-controls-rebind-list {
         // Surface — raised white card lifted off the lavender page.
-        --bs-controls-rebind-list-bg:                  var(--bp-paper);
-        --bs-controls-rebind-list-border-color:        var(--bp-border);
+        --bs-controls-rebind-list-bg: var(--bp-paper);
+        --bs-controls-rebind-list-border-color: var(--bp-border);
 
         // Inner separators — faint divider token replaces baked slate-100 literal.
-        --bs-controls-rebind-list-separator-color:     var(--bp-border-faint);
+        --bs-controls-rebind-list-separator-color: var(--bp-border-faint);
 
         // Row hover — barely-there paper-tint wash; the teal left-stripe below
         // carries the affordance signal, so the fill stays very quiet.
-        --bs-controls-rebind-list-row-hover-bg:        var(--bp-paper-tint);
+        --bs-controls-rebind-list-row-hover-bg: var(--bp-paper-tint);
 
         // Action label — primary ink, display typeface weight handled per-element.
-        --bs-controls-rebind-list-action-color:        var(--bp-text);
+        --bs-controls-rebind-list-action-color: var(--bp-text);
 
         // "Unbound" placeholder — faint mono micro-label.
-        --bs-controls-rebind-list-empty-color:         var(--bp-text-faint);
+        --bs-controls-rebind-list-empty-color: var(--bp-text-faint);
 
         // Key-cap — violet soft-fill + violet-fg text.  Violet is the blueprint
         // "support" accent: it reads as a physical keyboard key without competing
         // with the teal action or pink CTA roles.
-        --bs-controls-rebind-list-key-font-family:     var(--bp-mono);
-        --bs-controls-rebind-list-key-color:           var(--bp-violet-fg);
-        --bs-controls-rebind-list-key-bg:              var(--bp-violet-soft);
-        --bs-controls-rebind-list-key-border-color:    var(--bp-border-strong);
+        --bs-controls-rebind-list-key-font-family: var(--bp-mono);
+        --bs-controls-rebind-list-key-color: var(--bp-violet-fg);
+        --bs-controls-rebind-list-key-bg: var(--bp-violet-soft);
+        --bs-controls-rebind-list-key-border-color: var(--bp-border-strong);
 
         // Rebind affordance — faint at rest; teal-fg on reveal (row hover/focus).
         // teal-fg clears AA contrast on white paper (unlike raw --bp-teal).
-        --bs-controls-rebind-list-rebind-color:        var(--bp-text-faint);
-        --bs-controls-rebind-list-rebind-hover-color:  var(--bp-teal-fg);
+        --bs-controls-rebind-list-rebind-color: var(--bp-text-faint);
+        --bs-controls-rebind-list-rebind-hover-color: var(--bp-teal-fg);
     }
 
     // ── Outer frame ───────────────────────────────────────────────────────────

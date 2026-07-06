@@ -2,16 +2,17 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Token remaps ──────────────────────────────────────────────────────────
     // Drive all cosmetics through the --bs-text-* custom-property API so the
     // component's own rules pick them up without selector overrides.
 
     tc-text {
-        --bs-text-color:        var(--bp-text);           // deep indigo-near-black (#1a1830)
-        --bs-text-muted-color:  var(--bp-text-muted);     // medium violet-grey (#5d5887)
-        --bs-text-code-bg:      var(--bp-teal-soft);      // teal wash — code lives in the action register
-        --bs-text-code-color:   var(--bp-teal-fg);        // darker teal (#097f74) clears AA on white/teal-soft
+        --bs-text-color: var(--bp-text); // deep indigo-near-black (#1a1830)
+        --bs-text-muted-color: var(--bp-text-muted); // medium violet-grey (#5d5887)
+        --bs-text-code-bg: var(--bp-teal-soft); // teal wash — code lives in the action register
+        --bs-text-code-color: var(
+            --bp-teal-fg
+        ); // darker teal (#097f74) clears AA on white/teal-soft
     }
 
     // ── Base type face ────────────────────────────────────────────────────────
@@ -27,10 +28,10 @@ tc-theme[name='blueprint'],
     // reads as a kicker / status label rather than plain monospace prose.
 
     .tc-text-mono {
-        font-family:     var(--bp-mono);
-        text-transform:  uppercase;
-        letter-spacing:  0.08em;
-        color:           var(--bp-text-soft);   // slightly lifted from full --bp-text; keeps hierarchy
+        font-family: var(--bp-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--bp-text-soft); // slightly lifted from full --bp-text; keeps hierarchy
     }
 
     // ── Code variant — inline chip ─────────────────────────────────────────────
@@ -40,6 +41,6 @@ tc-theme[name='blueprint'],
 
     .tc-text-code {
         border-left: 1.5px solid var(--bp-teal-line);
-        padding-left: 0.45em;   // compensate for the added border so text sits centred in the chip
+        padding-left: 0.45em; // compensate for the added border so text sits centred in the chip
     }
 }

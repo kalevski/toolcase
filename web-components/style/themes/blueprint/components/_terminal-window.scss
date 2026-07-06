@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-terminal-window {
         // Frame — keep the dark ink ground (terminal exception: dark surfaces
         // stay dark in blueprint). Wire the border to the blueprint hairline
@@ -22,7 +21,7 @@ tc-theme[name='blueprint'],
         //   close  → pink  (primary brand)
         //   minimize → amber (supporting)
         //   full-screen → teal (action)
-        --bs-terminal-window-dot-red:   var(--bp-pink);
+        --bs-terminal-window-dot-red: var(--bp-pink);
         --bs-terminal-window-dot-amber: var(--bp-amber);
         --bs-terminal-window-dot-green: var(--bp-teal);
 

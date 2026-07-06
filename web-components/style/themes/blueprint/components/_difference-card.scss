@@ -5,23 +5,23 @@ tc-theme[name='blueprint'],
     // ── Component token remaps ────────────────────────────────────────────────
     tc-difference-card {
         // Surface: raised white paper with violet hairline + tinted shadow
-        --bs-difference-card-bg:             var(--bp-paper);
-        --bs-difference-card-border-color:   var(--bp-border);
-        --bs-difference-card-shadow:         var(--tc-shadow-sm);
+        --bs-difference-card-bg: var(--bp-paper);
+        --bs-difference-card-border-color: var(--bp-border);
+        --bs-difference-card-shadow: var(--tc-shadow-sm);
 
         // Title label — muted violet-ink
-        --bs-difference-card-title-color:    var(--bp-text-muted);
+        --bs-difference-card-title-color: var(--bp-text-muted);
 
         // Value — primary ink (darkest, legible on white)
-        --bs-difference-card-value-color:    var(--bp-emphasis);
+        --bs-difference-card-value-color: var(--bp-emphasis);
         --bs-difference-card-value-font-size: 1.625rem; // slightly roomier for Chakra Petch
 
         // Period caption — faint muted tone
-        --bs-difference-card-period-color:   var(--bp-text-faint);
+        --bs-difference-card-period-color: var(--bp-text-faint);
 
         // Skeleton shimmer: lavender well + white highlight
-        --bs-difference-card-skeleton-bg:        var(--bp-bg-2);
-        --bs-difference-card-skeleton-shimmer:   rgba(255, 255, 255, 0.72);
+        --bs-difference-card-skeleton-bg: var(--bp-bg-2);
+        --bs-difference-card-skeleton-shimmer: rgba(255, 255, 255, 0.72);
     }
 
     // ── Card wrapper — white paper, violet hairline, violet-tinted shadow ────
@@ -30,7 +30,9 @@ tc-theme[name='blueprint'],
         background-color: var(--bp-paper);
         border: 1px solid var(--bp-border);
         box-shadow: var(--tc-shadow-sm);
-        transition: box-shadow 160ms var(--bp-ease), transform 160ms var(--bp-ease);
+        transition:
+            box-shadow 160ms var(--bp-ease),
+            transform 160ms var(--bp-ease);
 
         // HUD corner bracket — teal top-left accent (interactive tile cue)
         &::before {
@@ -86,8 +88,8 @@ tc-theme[name='blueprint'],
 
     // Positive delta — teal soft tint + teal-fg text (AA on white)
     .tc-difference-card-delta--up {
-        background-color: var(--bp-teal-soft);
-        color: var(--bp-teal-fg);
+        background-color: var(--bp-success-soft);
+        color: var(--bp-success-fg);
         border-color: transparent;
     }
 

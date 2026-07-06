@@ -12,7 +12,11 @@ tc-theme[name='dungeon'],
     tc-activity-card {
         --bs-activity-card-bg: var(--fg-panel-bg);
         // Patch 1: replace the hardcoded cool-slate gradient with a warm gold cap.
-        --bs-activity-card-header-bg: linear-gradient(180deg, rgba(201, 169, 97, 0.06), transparent);
+        --bs-activity-card-header-bg: linear-gradient(
+            180deg,
+            rgba(201, 169, 97, 0.06),
+            transparent
+        );
         // Patch 3: replace the bright-white shimmer with a warm low-alpha gold.
         --bs-activity-card-skeleton-shimmer: rgba(240, 210, 122, 0.18);
     }

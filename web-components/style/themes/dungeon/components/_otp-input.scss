@@ -34,7 +34,9 @@ tc-theme[name='dungeon'],
         // Filled (digit entered) — lit-rune state: gold digit + inset gold ring.
         &.tc-otp-input__cell--filled {
             color: var(--fg-gold-bright);
-            box-shadow: var(--fg-bevel-top), 0 0 0 1px var(--fg-gold) inset;
+            box-shadow:
+                var(--fg-bevel-top),
+                0 0 0 1px var(--fg-gold) inset;
         }
     }
 }

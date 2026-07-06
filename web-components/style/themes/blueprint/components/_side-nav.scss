@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-side-nav {
         // ── Surface tokens ─────────────────────────────────────────────────────
         // Section titles: blueprint mono micro-label voice — --bp-text-faint is
@@ -75,7 +74,6 @@ tc-theme[name='blueprint'],
 
         &.active {
             // Active item gets a pink left-edge glow in addition to the solid bar.
-            box-shadow: inset 2px 0 0 var(--bp-pink), var(--bp-glow-pink);
 
             .tc-side-nav-icon {
                 // Icon tinted to match the active accent.

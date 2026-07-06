@@ -16,7 +16,6 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // -------------------------------------------------------------------------
     // 1. Token swap — host element var overrides (hardcoded slate → gold).
     // -------------------------------------------------------------------------
@@ -40,13 +39,17 @@ tc-theme[name='dungeon'],
     .tc-setting-slider__input {
         &::-webkit-slider-runnable-track {
             background-color: var(--fg-ink);
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8), inset 0 0 1px var(--fg-gold-shadow);
+            box-shadow:
+                inset 0 1px 3px rgba(0, 0, 0, 0.8),
+                inset 0 0 1px var(--fg-gold-shadow);
             border-radius: 0;
         }
 
         &::-moz-range-track {
             background-color: var(--fg-ink);
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8), inset 0 0 1px var(--fg-gold-shadow);
+            box-shadow:
+                inset 0 1px 3px rgba(0, 0, 0, 0.8),
+                inset 0 0 1px var(--fg-gold-shadow);
             border-radius: 0;
         }
 
@@ -62,24 +65,32 @@ tc-theme[name='dungeon'],
         &::-webkit-slider-thumb {
             background: var(--fg-slot-bg);
             border-color: var(--fg-gold);
-            box-shadow: 0 0 4px rgba(240, 210, 122, 0.4), var(--tc-shadow-sm);
+            box-shadow:
+                0 0 4px rgba(240, 210, 122, 0.4),
+                var(--tc-shadow-sm);
             border-radius: 50%;
 
             &:active {
                 border-color: var(--fg-gold-bright);
-                box-shadow: 0 0 6px rgba(240, 210, 122, 0.65), var(--tc-shadow-sm);
+                box-shadow:
+                    0 0 6px rgba(240, 210, 122, 0.65),
+                    var(--tc-shadow-sm);
             }
         }
 
         &::-moz-range-thumb {
             background: var(--fg-slot-bg);
             border-color: var(--fg-gold);
-            box-shadow: 0 0 4px rgba(240, 210, 122, 0.4), var(--tc-shadow-sm);
+            box-shadow:
+                0 0 4px rgba(240, 210, 122, 0.4),
+                var(--tc-shadow-sm);
             border-radius: 50%;
 
             &:active {
                 border-color: var(--fg-gold-bright);
-                box-shadow: 0 0 6px rgba(240, 210, 122, 0.65), var(--tc-shadow-sm);
+                box-shadow:
+                    0 0 6px rgba(240, 210, 122, 0.65),
+                    var(--tc-shadow-sm);
             }
         }
     }

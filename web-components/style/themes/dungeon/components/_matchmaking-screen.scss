@@ -104,12 +104,20 @@ tc-theme[name='dungeon'],
 
     // Bezel spin + counter-spin keyframes (dungeon-namespaced to avoid collisions).
     @keyframes tc-dungeon-ring-spin {
-        from { transform: rotate(0deg); }
-        to   { transform: rotate(360deg); }
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
     }
     @keyframes tc-dungeon-ring-counter-spin {
-        from { transform: rotate(0deg); }
-        to   { transform: rotate(-360deg); }
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(-360deg);
+        }
     }
 
     // Eyebrow — display caps with wide tracking (matches meta-key treatment).
@@ -131,7 +139,9 @@ tc-theme[name='dungeon'],
         font-family: var(--fg-display);
         text-transform: uppercase;
         letter-spacing: 0.1em;
-        text-shadow: 0 1px 0 #000, 0 0 18px rgba(201, 169, 97, 0.35);
+        text-shadow:
+            0 1px 0 #000,
+            0 0 18px rgba(201, 169, 97, 0.35);
     }
 
     // Meta strip — bevel; keys are display caps, values mono gold.

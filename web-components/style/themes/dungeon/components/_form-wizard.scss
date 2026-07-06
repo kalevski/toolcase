@@ -4,7 +4,6 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // ── Token swap on the host ────────────────────────────────────────────────
     // Done/current marker text are literal #fff in the base — repoint to ink
     // so numerals/check read as engraved on the gold seal.
@@ -51,7 +50,9 @@ tc-theme[name='dungeon'],
     // Foundation already routes bg/border through --tc-app-accent → gold.
     // Add a subtle bevel so the circle reads as a struck-gold coin/seal.
     .tc-form-wizard-tab-marker {
-        box-shadow: var(--fg-bevel-top), inset 0 -1px 2px rgba(0, 0, 0, 0.4);
+        box-shadow:
+            var(--fg-bevel-top),
+            inset 0 -1px 2px rgba(0, 0, 0, 0.4);
     }
 
     // ── Step labels: display caps (Cinzel) ────────────────────────────────────

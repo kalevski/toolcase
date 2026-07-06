@@ -2,46 +2,45 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Custom-property re-map ────────────────────────────────────────────────
     // Drive every cosmetic through the --bs-json-editor-* contract so nested
     // components (inputs, switches) inherit correctly without extra overrides.
 
     tc-json-editor {
-        --bs-json-editor-bg:              var(--bp-paper);
-        --bs-json-editor-border-color:    var(--bp-border);
-        --bs-json-editor-row-border:      var(--bp-border-faint);
+        --bs-json-editor-bg: var(--bp-paper);
+        --bs-json-editor-border-color: var(--bp-border);
+        --bs-json-editor-row-border: var(--bp-border-faint);
 
         // Row hover: faint lavender tint rather than the default slate surface-hover
-        --bs-json-editor-row-hover-bg:    var(--bp-bg-2);
+        --bs-json-editor-row-hover-bg: var(--bp-bg-2);
 
         // Key labels → mono, teal-fg so they read as typed identifiers
-        --bs-json-editor-key-color:       var(--bp-teal-fg);
+        --bs-json-editor-key-color: var(--bp-teal-fg);
 
         // Group header: paper-tint-2 to separate from row bg; border uses strong hairline
-        --bs-json-editor-header-bg:       var(--bp-paper-tint-2);
+        --bs-json-editor-header-bg: var(--bp-paper-tint-2);
         --bs-json-editor-header-hover-bg: var(--bp-paper-tint);
-        --bs-json-editor-header-color:    var(--bp-text-soft);
+        --bs-json-editor-header-color: var(--bp-text-soft);
 
         // Left-rail indent line → default hairline token (no raw slate refs)
-        --bs-json-editor-rail-color:      var(--bp-border);
+        --bs-json-editor-rail-color: var(--bp-border);
 
         // Count / index labels → faint mono text
-        --bs-json-editor-count-color:     var(--bp-text-faint);
+        --bs-json-editor-count-color: var(--bp-text-faint);
 
         // Icon buttons: muted icon on paper, teal hover to signal action
-        --bs-json-editor-icon-color:      var(--bp-text-faint);
-        --bs-json-editor-icon-hover-bg:   var(--bp-teal-soft);
+        --bs-json-editor-icon-color: var(--bp-text-faint);
+        --bs-json-editor-icon-hover-bg: var(--bp-teal-soft);
         --bs-json-editor-icon-hover-color: var(--bp-teal-fg);
 
         // Muted (empty / chevron) → faint ink
-        --bs-json-editor-muted-color:     var(--bp-text-faint);
+        --bs-json-editor-muted-color: var(--bp-text-faint);
 
         // Error state → real danger red, not pink
-        --bs-json-editor-error-color:     var(--bp-danger);
+        --bs-json-editor-error-color: var(--bp-danger);
 
         // Mono font → blueprint JetBrains Mono stack
-        --bs-json-editor-mono:            var(--bp-mono);
+        --bs-json-editor-mono: var(--bp-mono);
     }
 
     // ── Outer panel ──────────────────────────────────────────────────────────
@@ -57,7 +56,7 @@ tc-theme[name='blueprint'],
     .tc-json-editor-key {
         font-family: var(--bp-mono);
         font-size: 11px;
-        letter-spacing: .06em;
+        letter-spacing: 0.06em;
         text-transform: uppercase;
         color: var(--bp-teal-fg);
     }
@@ -72,7 +71,7 @@ tc-theme[name='blueprint'],
     .tc-json-editor-toggle {
         font-family: var(--bp-mono);
         font-size: 11px;
-        letter-spacing: .08em;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
         color: var(--bp-text-soft);
 
@@ -93,7 +92,7 @@ tc-theme[name='blueprint'],
     .tc-json-editor-array-index {
         font-family: var(--bp-mono);
         font-size: 10px;
-        letter-spacing: .06em;
+        letter-spacing: 0.06em;
         text-transform: uppercase;
         color: var(--bp-violet-fg);
         background: var(--bp-violet-soft);
@@ -111,8 +110,9 @@ tc-theme[name='blueprint'],
 
     .tc-json-editor-icon-btn {
         color: var(--bp-text-faint);
-        transition: background var(--bp-ease, 0.18s ease),
-                    color var(--bp-ease, 0.18s ease);
+        transition:
+            background var(--bp-ease, 0.18s ease),
+            color var(--bp-ease, 0.18s ease);
 
         &:hover {
             background: var(--bp-teal-soft);
@@ -145,7 +145,7 @@ tc-theme[name='blueprint'],
     .tc-json-editor-empty {
         font-family: var(--bp-mono);
         font-size: 11px;
-        letter-spacing: .06em;
+        letter-spacing: 0.06em;
         text-transform: uppercase;
         color: var(--bp-text-faint);
     }
@@ -166,12 +166,7 @@ tc-theme[name='blueprint'],
 
     .tc-json-editor-skeleton-key,
     .tc-json-editor-skeleton-field {
-        background: linear-gradient(
-            90deg,
-            var(--bp-bg)       25%,
-            var(--bp-bg-2)     37%,
-            var(--bp-bg)       63%
-        );
+        background: linear-gradient(90deg, var(--bp-bg) 25%, var(--bp-bg-2) 37%, var(--bp-bg) 63%);
         background-size: 200% 100%;
     }
 

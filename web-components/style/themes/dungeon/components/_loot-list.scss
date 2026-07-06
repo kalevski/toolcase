@@ -70,12 +70,24 @@ tc-theme[name='dungeon'],
         font-family: var(--fg-mono);
     }
 
-    .tc-loot-list-row--common .tc-loot-list-name { color: var(--fg-common); }
-    .tc-loot-list-row--uncommon .tc-loot-list-name { color: var(--fg-uncommon); }
-    .tc-loot-list-row--rare .tc-loot-list-name { color: var(--fg-rare); }
-    .tc-loot-list-row--epic .tc-loot-list-name { color: var(--fg-epic); }
-    .tc-loot-list-row--legendary .tc-loot-list-name { color: var(--fg-legendary); }
-    .tc-loot-list-row--mythic .tc-loot-list-name { color: var(--fg-mythic); }
+    .tc-loot-list-row--common .tc-loot-list-name {
+        color: var(--fg-common);
+    }
+    .tc-loot-list-row--uncommon .tc-loot-list-name {
+        color: var(--fg-uncommon);
+    }
+    .tc-loot-list-row--rare .tc-loot-list-name {
+        color: var(--fg-rare);
+    }
+    .tc-loot-list-row--epic .tc-loot-list-name {
+        color: var(--fg-epic);
+    }
+    .tc-loot-list-row--legendary .tc-loot-list-name {
+        color: var(--fg-legendary);
+    }
+    .tc-loot-list-row--mythic .tc-loot-list-name {
+        color: var(--fg-mythic);
+    }
 
     // Header gold-rule divider — replaces the faint rgba hairline (improvement 3).
     .tc-loot-list-header {

@@ -85,7 +85,8 @@ tc-theme[name='dungeon'],
     }
 
     // Hover tint — gild the label on hover like the fantasy reference.
-    .tc-main-menu-item:hover:not(.tc-main-menu-item--disabled):not(.tc-main-menu-item--selected) .tc-main-menu-item-label {
+    .tc-main-menu-item:hover:not(.tc-main-menu-item--disabled):not(.tc-main-menu-item--selected)
+        .tc-main-menu-item-label {
         color: var(--fg-gold-bright);
     }
 

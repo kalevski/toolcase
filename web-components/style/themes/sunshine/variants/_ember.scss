@@ -1,0 +1,53 @@
+// Sunshine Ember variant — tangerine lead + amber secondary on the unchanged
+// citrus base.
+//
+// Accent-only override: the cream canvas, surfaces, olive-ink text ramp,
+// semantic status colours, fonts and warm shadows all stay base-sunshine.
+// Only the two accent families move — the bright LEMON lead becomes a bright
+// TANGERINE (same brightness class, so the dark on-lead ink convention holds
+// on every fill) and the leaf-green secondary becomes a mid-tone AMBER
+// (still dark enough to carry links / focus / eyebrow text on cream). The
+// lead gradient, glow shadows, glow field and link colours all resolve
+// through the --sun-* vars, so they recompute automatically.
+// Use with: <tc-theme name="sunshine" variant="ember"> … </tc-theme>
+
+@use '../../../foundation/tokens' as *;
+
+tc-theme[name='sunshine'][variant='ember'],
+[data-tc-theme='sunshine'][data-tc-variant='ember'] {
+    // ── Lead accent — bright tangerine (dark on-lead ink on every fill) ──────
+    --sun-lead: #fb923c;
+    --sun-lead-hi: #ffa85e; // hover goes lighter, matching the base direction
+    --sun-lead-lo: #f97316;
+    --sun-lead-tint: rgba(251, 146, 60, 0.16);
+    --sun-lead-line: rgba(251, 146, 60, 0.45);
+    --sun-lead-glow: rgba(251, 146, 60, 0.4);
+    --sun-on-lead: #331a05; // text on tangerine fills
+
+    // ── Secondary accent — mid-tone amber (links / focus / eyebrow) ──────────
+    --sun-leaf: #ca8a04;
+    --sun-leaf-hi: #e09c10;
+    --sun-leaf-lo: #a47003;
+    --sun-leaf-deep: #614202;
+    --sun-leaf-tint: rgba(202, 138, 4, 0.12);
+
+    // ── Recomputed accent-derived literals ───────────────────────────────────
+    --tc-accent-hex: #ca8a04;
+    --tc-focus-ring: 0 0 0 3px rgba(202, 138, 4, 0.34);
+    --bs-focus-ring-color: rgba(202, 138, 4, 0.34);
+    --bs-primary-rgb: 251, 146, 60;
+    --bs-dark-rgb: 97, 66, 2; // --bs-dark / --tc-surface-dark follow --sun-leaf-deep
+
+    // ── Semantic guard — status colours stay the sunshine originals ──────────
+    // In the base foundation success/warning resolve THROUGH the accent vars
+    // (leaf / lead-lo), so without these re-pins they would follow the variant
+    // accents. Danger (coral) and info (plum) are fixed pops — untouched.
+    // NOTE: ember's amber secondary sits close to the pinned warning amber
+    // (#d49a00) by design — both are warm; warning keeps the base hue exactly.
+    --tc-success: #5f8a2e;
+    --tc-success-bg: rgba(95, 138, 46, 0.12);
+    --tc-warning: #d49a00;
+    --tc-warning-bg: rgba(242, 183, 5, 0.16);
+    --bs-success: #5f8a2e; // --bs-success-rgb (95, 138, 46) still valid from base
+    --bs-warning: #d49a00; // --bs-warning-rgb (212, 154, 0) still valid from base
+}

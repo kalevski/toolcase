@@ -1,0 +1,51 @@
+// Sunshine Royal variant — orchid lead + fuchsia secondary on the unchanged
+// citrus base.
+//
+// Accent-only override: the cream canvas, surfaces, olive-ink text ramp,
+// semantic status colours, fonts and warm shadows all stay base-sunshine.
+// Only the two accent families move — the bright LEMON lead becomes a bright
+// ORCHID (same brightness class, so the dark on-lead ink convention holds on
+// every fill) and the leaf-green secondary becomes a mid-tone FUCHSIA (still
+// dark enough to carry links / focus / eyebrow text on cream). The lead
+// gradient, glow shadows, glow field and link colours all resolve through
+// the --sun-* vars, so they recompute automatically.
+// Use with: <tc-theme name="sunshine" variant="royal"> … </tc-theme>
+
+@use '../../../foundation/tokens' as *;
+
+tc-theme[name='sunshine'][variant='royal'],
+[data-tc-theme='sunshine'][data-tc-variant='royal'] {
+    // ── Lead accent — bright orchid (dark on-lead ink on every fill) ─────────
+    --sun-lead: #c084fc;
+    --sun-lead-hi: #d19dff; // hover goes lighter, matching the base direction
+    --sun-lead-lo: #a855f7;
+    --sun-lead-tint: rgba(192, 132, 252, 0.16);
+    --sun-lead-line: rgba(192, 132, 252, 0.45);
+    --sun-lead-glow: rgba(192, 132, 252, 0.4);
+    --sun-on-lead: #241038; // text on orchid fills
+
+    // ── Secondary accent — mid-tone fuchsia (links / focus / eyebrow) ────────
+    --sun-leaf: #c026d3;
+    --sun-leaf-hi: #d43ee6;
+    --sun-leaf-lo: #9c1fab;
+    --sun-leaf-deep: #5c1265;
+    --sun-leaf-tint: rgba(192, 38, 211, 0.12);
+
+    // ── Recomputed accent-derived literals ───────────────────────────────────
+    --tc-accent-hex: #c026d3;
+    --tc-focus-ring: 0 0 0 3px rgba(192, 38, 211, 0.34);
+    --bs-focus-ring-color: rgba(192, 38, 211, 0.34);
+    --bs-primary-rgb: 192, 132, 252;
+    --bs-dark-rgb: 92, 18, 101; // --bs-dark / --tc-surface-dark follow --sun-leaf-deep
+
+    // ── Semantic guard — status colours stay the sunshine originals ──────────
+    // In the base foundation success/warning resolve THROUGH the accent vars
+    // (leaf / lead-lo), so without these re-pins they would follow the variant
+    // accents. Danger (coral) and info (plum) are fixed pops — untouched.
+    --tc-success: #5f8a2e;
+    --tc-success-bg: rgba(95, 138, 46, 0.12);
+    --tc-warning: #d49a00;
+    --tc-warning-bg: rgba(242, 183, 5, 0.16);
+    --bs-success: #5f8a2e; // --bs-success-rgb (95, 138, 46) still valid from base
+    --bs-warning: #d49a00; // --bs-warning-rgb (212, 154, 0) still valid from base
+}

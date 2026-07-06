@@ -3,25 +3,25 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-video-embed {
         // Reroute the dark-slate defaults to blueprint tokens.
         // --tc-ink (dark slate) → --bp-emphasis (near-black #0f0e22) keeps the
         // cinematic void for the video surface while using a blueprint token.
-        --bs-video-embed-bg:         var(--bp-emphasis);
+        --bs-video-embed-bg: var(--bp-emphasis);
         // --tc-surface-muted (dark muted) → --bp-bg-2 (recessed lavender well)
         // so the loading placeholder reads as a blueprint surface, not a dark slab.
         --bs-video-embed-loading-bg: var(--bp-bg-2);
-        --bs-video-embed-border:     var(--bp-border);
+        --bs-video-embed-border: var(--bp-border);
         // Lift the tile off the page with the tinted blueprint shadow.
-        --bs-video-embed-shadow:     var(--tc-shadow-sm);
+        --bs-video-embed-shadow: var(--tc-shadow-sm);
     }
 
     .tc-video-embed {
         // Pink accent stripe along the top edge — signals this as a primary media surface.
         border-top: 2px solid var(--bp-pink);
-        transition: box-shadow var(--bp-ease, .18s ease),
-                    transform  var(--bp-ease, .18s ease);
+        transition:
+            box-shadow var(--bp-ease, 0.18s ease),
+            transform var(--bp-ease, 0.18s ease);
 
         // HUD corner bracket (teal, top-left) — blueprint tappable-tile marker.
         &::before {
@@ -31,7 +31,7 @@ tc-theme[name='blueprint'],
             left: 8px;
             width: 12px;
             height: 12px;
-            border-top:  2px solid var(--bp-teal);
+            border-top: 2px solid var(--bp-teal);
             border-left: 2px solid var(--bp-teal);
             pointer-events: none;
             z-index: 1;

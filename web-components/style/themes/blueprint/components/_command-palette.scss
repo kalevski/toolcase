@@ -3,32 +3,31 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-command-palette {
         // ── Surface + chrome ──────────────────────────────────────────────────
-        --bs-command-palette-bg:           var(--bp-paper);
+        --bs-command-palette-bg: var(--bp-paper);
         --bs-command-palette-border-color: var(--bp-border);
-        --bs-command-palette-shadow:       var(--tc-shadow-lg);
+        --bs-command-palette-shadow: var(--tc-shadow-lg);
 
         // ── Backdrop — lavender-tinted translucent veil (blueprint, not dark slate) ──
-        --bs-command-palette-backdrop-bg:  rgba(26, 24, 48, 0.45);
+        --bs-command-palette-backdrop-bg: rgba(26, 24, 48, 0.45);
 
         // ── Search header typography ──────────────────────────────────────────
-        --bs-command-palette-input-color:       var(--bp-text);
+        --bs-command-palette-input-color: var(--bp-text);
         --bs-command-palette-placeholder-color: var(--bp-text-faint);
         // Teal search icon — everyday action accent
-        --bs-command-palette-icon-color:        var(--bp-teal-fg);
+        --bs-command-palette-icon-color: var(--bp-teal-fg);
 
         // ── Result rows ───────────────────────────────────────────────────────
-        --bs-command-palette-item-color:        var(--bp-text);
+        --bs-command-palette-item-color: var(--bp-text);
         // Hover: recessed lavender well
-        --bs-command-palette-item-hover-bg:     var(--bp-bg-2);
+        --bs-command-palette-item-hover-bg: var(--bp-bg-2);
         // Active: pink primary fill (arcade accent rotation: pink = selected/primary)
-        --bs-command-palette-item-active-bg:    var(--bp-pink);
+        --bs-command-palette-item-active-bg: var(--bp-pink);
         --bs-command-palette-item-active-color: var(--bp-pink-ink);
 
         // ── Muted text — mono labels, group headings, shortcut text ──────────
-        --bs-command-palette-muted-color:       var(--bp-text-muted);
+        --bs-command-palette-muted-color: var(--bp-text-muted);
     }
 
     // ── Search header ─────────────────────────────────────────────────────────
@@ -53,7 +52,7 @@ tc-theme[name='blueprint'],
     // ── Group headings — mono eyebrow voice ──────────────────────────────────
     .tc-command-palette-group {
         font-family: var(--bp-mono);
-        color: var(--bp-teal-fg);         // teal mono label — action-register
+        color: var(--bp-teal-fg); // teal mono label — action-register
         letter-spacing: 0.1em;
         text-transform: uppercase;
     }
@@ -62,14 +61,18 @@ tc-theme[name='blueprint'],
     .tc-command-palette-item {
         font-family: var(--bp-body);
         color: var(--bp-text);
-        transition: background-color var(--bp-ease), color var(--bp-ease);
+        transition:
+            background-color var(--bp-ease),
+            color var(--bp-ease);
     }
 
     // Active/highlighted row: pink fill + pink glow halo
     .tc-command-palette-item--active {
         background: var(--bp-pink);
         color: var(--bp-pink-ink);
-        box-shadow: inset 0 0 0 1px var(--bp-pink-hover), var(--bp-glow-pink);
+        box-shadow:
+            inset 0 0 0 1px var(--bp-pink-hover),
+            var(--bp-glow-pink);
 
         // Item icon inherits pink-ink on active row (handled by base via var, but
         // icon-color var needs an explicit active override since it still points
@@ -100,12 +103,7 @@ tc-theme[name='blueprint'],
     // ── Skeleton / loading shimmer ────────────────────────────────────────────
     // Replace dark slate gradient stops with blueprint lavender palette tones
     .tc-command-palette-skeleton-bar {
-        background: linear-gradient(
-            90deg,
-            var(--bp-bg)      25%,
-            var(--bp-bg-2)    37%,
-            var(--bp-bg)      63%
-        );
+        background: linear-gradient(90deg, var(--bp-bg) 25%, var(--bp-bg-2) 37%, var(--bp-bg) 63%);
         background-size: 200% 100%;
     }
 

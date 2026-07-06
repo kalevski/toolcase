@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Custom-property re-skin ──────────────────────────────────────────────────
     // Drive all cosmetics through --bs-section-flag-* so the base partial handles
     // layout; we only override visuals here.

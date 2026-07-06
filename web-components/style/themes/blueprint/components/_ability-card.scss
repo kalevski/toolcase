@@ -4,17 +4,16 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Token remap ────────────────────────────────────────────────────────────
     tc-ability-card {
         // Surface
-        --bs-ability-card-bg:           var(--bp-paper);
+        --bs-ability-card-bg: var(--bp-paper);
         --bs-ability-card-border-color: var(--bp-border);
-        --bs-ability-card-shadow:       var(--tc-shadow-sm);
+        --bs-ability-card-shadow: var(--tc-shadow-sm);
         --bs-ability-card-shadow-hover: var(--tc-shadow-hover);
 
         // Icon chip — teal-soft fill so the action glyph reads in the bp accent
-        --bs-ability-card-icon-bg:    var(--bp-teal-soft);
+        --bs-ability-card-icon-bg: var(--bp-teal-soft);
         --bs-ability-card-icon-color: var(--bp-teal-fg);
 
         // Rarity eyebrow — base (common) is faint; tiers override below
@@ -24,15 +23,15 @@ tc-theme[name='blueprint'],
         --bs-ability-card-name-color: var(--bp-text);
 
         // Keybind cap — teal-soft ground, teal-fg text, chip hairline
-        --bs-ability-card-keybind-bg:     var(--bp-teal-soft);
+        --bs-ability-card-keybind-bg: var(--bp-teal-soft);
         --bs-ability-card-keybind-border: var(--bp-teal-line);
-        --bs-ability-card-keybind-color:  var(--bp-teal-fg);
+        --bs-ability-card-keybind-color: var(--bp-teal-fg);
 
         // Description
         --bs-ability-card-desc-color: var(--bp-text-muted);
 
         // Meta dividers
-        --bs-ability-card-meta-border:     var(--bp-border-faint);
+        --bs-ability-card-meta-border: var(--bp-border-faint);
         // Row separators slightly more present than the outer border
         --bs-ability-card-meta-row-border: var(--bp-border-faint);
 
@@ -98,7 +97,7 @@ tc-theme[name='blueprint'],
     // already matches blueprint's .06–.18em label range from the base partial.
     .tc-ability-card-rarity {
         font-family: var(--bp-mono);
-        letter-spacing: 0.10em; // slightly wider than the base .08em — mono labels read tighter
+        letter-spacing: 0.1em; // slightly wider than the base .08em — mono labels read tighter
     }
 
     // ── Ability name — display heading treatment ───────────────────────────────
@@ -129,7 +128,9 @@ tc-theme[name='blueprint'],
     // ── Reduced motion ──────────────────────────────────────────────────────────
     @media (prefers-reduced-motion: reduce) {
         .tc-ability-card {
-            transition: border-color 0.22s, box-shadow 0.22s;
+            transition:
+                border-color 0.22s,
+                box-shadow 0.22s;
 
             &:hover {
                 transform: none;

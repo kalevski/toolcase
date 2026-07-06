@@ -4,13 +4,13 @@ tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
     tc-scroll-text {
         // Surface: raised paper on the lavender canvas, standard hairline.
-        --bs-scroll-text-bg:           var(--bp-paper);
+        --bs-scroll-text-bg: var(--bp-paper);
         --bs-scroll-text-border-color: var(--bp-border);
 
         // Header: blueprint mono HUD label — teal ink, uppercase already set by base.
-        --bs-scroll-text-header-color:          var(--bp-teal-fg);
-        --bs-scroll-text-header-border-color:   var(--bp-border-faint);
-        --bs-scroll-text-header-font-size:      0.6875rem;
+        --bs-scroll-text-header-color: var(--bp-teal-fg);
+        --bs-scroll-text-header-border-color: var(--bp-border-faint);
+        --bs-scroll-text-header-font-size: 0.6875rem;
         --bs-scroll-text-header-letter-spacing: 0.12em; // slightly wider tracking for the HUD feel
 
         // Body: primary text on white, Space Grotesk sizing unchanged.

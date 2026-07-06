@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-dialogue-box {
         // Surface: raised white card with blueprint hairline + violet shadow
         --bs-dialogue-box-bg: var(--bp-paper);
@@ -11,7 +10,7 @@ tc-theme[name='blueprint'],
 
         // Speaker eyebrow: mono uppercase label in teal, hairline below in faint rule
         --bs-dialogue-box-speaker-color: var(--bp-teal-fg);
-        --bs-dialogue-box-speaker-font-size: 0.6875rem;         // tighter than base — HUD micro-label
+        --bs-dialogue-box-speaker-font-size: 0.6875rem; // tighter than base — HUD micro-label
         --bs-dialogue-box-speaker-font-weight: 600;
         --bs-dialogue-box-speaker-letter-spacing: 0.12em;
         --bs-dialogue-box-speaker-border: 1px solid var(--bp-border-faint);

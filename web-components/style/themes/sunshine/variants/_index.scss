@@ -1,0 +1,20 @@
+// Sunshine theme variants — alternate accent pairings on the unchanged citrus base.
+//
+// Each variant swaps ONLY the two accent families — the bright LEMON lead
+// (primary CTAs, always with the dark on-lead ink) and the leaf-green
+// secondary (links / focus / eyebrow text) — plus their derived literals
+// (rgb triplets, tints, lines, glows, focus rings). The cream canvas,
+// surfaces, olive-ink text ramp, semantic status colours, fonts and warm
+// shadows all stay base-sunshine; gradients and glow shadows recompute
+// through the --sun-* vars automatically.
+//
+// Available variants:
+// - ocean:  bright sky-blue lead · ocean-teal secondary
+// - forest: bright spring-green lead · lime-olive secondary
+// - ember:  bright tangerine lead · amber secondary
+// - royal:  bright orchid lead · fuchsia secondary
+
+@use './ocean';
+@use './forest';
+@use './ember';
+@use './royal';

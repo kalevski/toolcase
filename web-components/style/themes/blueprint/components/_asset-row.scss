@@ -3,16 +3,15 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-asset-row {
         // Ground: white paper surface; separator becomes bp faint divider (kills slate leak)
-        --bs-asset-row-name-color:       var(--bp-text);
-        --bs-asset-row-size-color:       var(--bp-text-faint);
-        --bs-asset-row-tag-bg:           var(--bp-teal-soft);
-        --bs-asset-row-tag-color:        var(--bp-teal-fg);
+        --bs-asset-row-name-color: var(--bp-text);
+        --bs-asset-row-size-color: var(--bp-text-faint);
+        --bs-asset-row-tag-bg: var(--bp-teal-soft);
+        --bs-asset-row-tag-color: var(--bp-teal-fg);
         --bs-asset-row-tag-border-color: var(--bp-border-chip);
-        --bs-asset-row-separator-color:  var(--bp-border-faint);
-        --bs-asset-row-hover-bg:         var(--bp-paper-tint);
+        --bs-asset-row-separator-color: var(--bp-border-faint);
+        --bs-asset-row-hover-bg: var(--bp-paper-tint);
 
         background-color: var(--bp-paper);
         transition: background-color var(--bp-ease, 160ms ease);

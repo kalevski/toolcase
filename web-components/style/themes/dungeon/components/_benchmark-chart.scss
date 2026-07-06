@@ -6,7 +6,6 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // --- token swap: leader gradient stops + bar fill + track ---
     tc-benchmark-chart {
         --bs-benchmark-chart-leader-to: var(--fg-gold-shadow);

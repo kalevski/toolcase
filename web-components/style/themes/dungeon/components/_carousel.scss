@@ -8,7 +8,6 @@
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-
     // ── Chevron control chips — warm ink + gilded glyph ──────────────────────
 
     .carousel-control-prev,
@@ -28,7 +27,7 @@ tc-theme[name='dungeon'],
 
     .carousel-indicators {
         [data-bs-slide-to] {
-            background-color: var(--fg-gold-deep);   // replaces cold --tc-slate-300
+            background-color: var(--fg-gold-deep); // replaces cold --tc-slate-300
             // border-radius:50% kept (sanctioned circle — do NOT square dots)
 
             &.active {

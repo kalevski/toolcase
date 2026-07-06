@@ -2,30 +2,33 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Custom-property re-skin ──────────────────────────────────────────────
     tc-multi-card-select {
         // Unselected card: white paper + faint violet hairline
-        --bs-multi-card-select-bg:            var(--bp-paper);
-        --bs-multi-card-select-border-color:  var(--bp-border);
+        --bs-multi-card-select-bg: var(--bp-paper);
+        --bs-multi-card-select-border-color: var(--bp-border);
         // Hover: recessed lavender well
-        --bs-multi-card-select-hover-bg:      var(--bp-paper-tint-2);
+        --bs-multi-card-select-hover-bg: var(--bp-paper-tint-2);
         // Selected: pink CTA fill + white label
-        --bs-multi-card-select-selected-bg:   var(--bp-pink);
+        --bs-multi-card-select-selected-bg: var(--bp-pink);
         --bs-multi-card-select-selected-text: var(--bp-pink-ink);
         // Typography
-        --bs-multi-card-select-label-color:   var(--bp-text);
-        --bs-multi-card-select-desc-color:    var(--bp-text-muted);
+        --bs-multi-card-select-label-color: var(--bp-text);
+        --bs-multi-card-select-desc-color: var(--bp-text-muted);
         // Skeleton shimmer uses the recessed well tint
-        --bs-multi-card-select-skeleton-bg:   var(--bp-bg-2);
+        --bs-multi-card-select-skeleton-bg: var(--bp-bg-2);
     }
 
     // ── Card tile ────────────────────────────────────────────────────────────
     .tc-multi-card-select-card {
         // Violet-tinted shadow lifts the tile off the canvas
         box-shadow: var(--tc-shadow-sm);
-        transition: border-color var(--bp-ease), background-color var(--bp-ease),
-                    color var(--bp-ease), transform var(--bp-ease), box-shadow var(--bp-ease);
+        transition:
+            border-color var(--bp-ease),
+            background-color var(--bp-ease),
+            color var(--bp-ease),
+            transform var(--bp-ease),
+            box-shadow var(--bp-ease);
 
         // HUD corner bracket — top-left teal L-shape (tappable tile indicator)
         &::before {
@@ -99,9 +102,9 @@ tc-theme[name='blueprint'],
     .tc-multi-card-select-card--skeleton {
         background: linear-gradient(
             90deg,
-            var(--bp-bg-2)   0%,
-            var(--bp-paper)  50%,
-            var(--bp-bg-2)   100%
+            var(--bp-bg-2) 0%,
+            var(--bp-paper) 50%,
+            var(--bp-bg-2) 100%
         ) !important; // override the base baked literal gradient
         background-size: 200% 100% !important;
     }

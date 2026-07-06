@@ -27,8 +27,8 @@ func (s *Server) handleCreateStream(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("invalid fragment: %v", err), http.StatusBadRequest)
 		return
 	}
-	if len(frag.Streams) != 1 || len(frag.Sites) != 0 || len(frag.Upstreams) != 0 || len(frag.Proxies) != 0 || len(frag.StreamUpstreams) != 0 {
-		http.Error(w, "fragment must declare exactly one stream (and nothing else)", http.StatusBadRequest)
+	if err := requireExactlyOne(frag, "stream"); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -42,7 +42,12 @@ func (s *Server) handleCreateStream(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("fragment rejected: %v", err), http.StatusBadRequest)
 		return
 	}
-	s.writeFragmentAndReload(w, target, body, "stream", name)
+	warnings, err := checkFragmentTargets(r, cfg, frag)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("fragment rejected: %v", err), http.StatusBadRequest)
+		return
+	}
+	s.writeFragmentAndReload(w, target, body, "stream", name, warnings)
 }
 
 // handleDeleteStream removes the deterministic stream-<name>.yml fragment and
@@ -78,8 +83,8 @@ func (s *Server) handleCreateStreamUpstream(w http.ResponseWriter, r *http.Reque
 		http.Error(w, fmt.Sprintf("invalid fragment: %v", err), http.StatusBadRequest)
 		return
 	}
-	if len(frag.StreamUpstreams) != 1 || len(frag.Sites) != 0 || len(frag.Upstreams) != 0 || len(frag.Proxies) != 0 || len(frag.Streams) != 0 {
-		http.Error(w, "fragment must declare exactly one stream_upstream (and nothing else)", http.StatusBadRequest)
+	if err := requireExactlyOne(frag, "stream_upstream"); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -93,7 +98,12 @@ func (s *Server) handleCreateStreamUpstream(w http.ResponseWriter, r *http.Reque
 		http.Error(w, fmt.Sprintf("fragment rejected: %v", err), http.StatusBadRequest)
 		return
 	}
-	s.writeFragmentAndReload(w, target, body, "stream-upstream", name)
+	warnings, err := checkFragmentTargets(r, cfg, frag)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("fragment rejected: %v", err), http.StatusBadRequest)
+		return
+	}
+	s.writeFragmentAndReload(w, target, body, "stream-upstream", name, warnings)
 }
 
 // handleDeleteStreamUpstream removes the stream-upstream-<name>.yml fragment and

@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-vertical-item-list {
         // ── Surface ────────────────────────────────────────────────────────────
         // The overall wrapper sits on --bp-paper (white raised card) rather than
@@ -66,7 +65,6 @@ tc-theme[name='blueprint'],
 
         &--active {
             // Active item: pink solid inset bar + soft glow to signal selection.
-            box-shadow: inset 2px 0 0 var(--bp-pink), var(--bp-glow-pink);
 
             .tc-vertical-item-list-icon {
                 // Icon tinted pink on the active item.

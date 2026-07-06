@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-toggle-row {
         // Off track: blueprint border tone — a flat, clearly inactive well.
         --bs-toggle-row-track-bg: var(--bp-border);
@@ -17,7 +16,7 @@ tc-theme[name='blueprint'],
 
         // Track inner shadow: replace dark-slate literal with a violet-tinted
         // shadow that reads naturally against the light lavender canvas.
-        --bs-toggle-row-track-shadow: inset 0 1px 2px rgba(91, 61, 242, 0.10);
+        --bs-toggle-row-track-shadow: inset 0 1px 2px rgba(91, 61, 242, 0.1);
 
         // Knob: stays white; border replaces the dark-slate literal with the
         // standard blueprint hairline token so it is themeable.
@@ -31,5 +30,4 @@ tc-theme[name='blueprint'],
         // the broader blueprint primary accent rotation.
         --bs-toggle-row-focus-ring: var(--bp-glow-pink);
     }
-
 }

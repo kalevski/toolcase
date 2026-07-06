@@ -2,47 +2,46 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Custom-property overrides ────────────────────────────────────────────
     // Re-point the component's own --bs-sponsor-wall-* API to blueprint tokens.
     // This is the primary re-skin; element rules below cover what vars can't reach.
 
     tc-sponsor-wall {
         // Title & tier-label text: blueprint mono, teal-fg for AA contrast on --bp-bg
-        --bs-sponsor-wall-title-color:     var(--bp-teal-fg);
-        --bs-sponsor-wall-label-color:     var(--bp-text-faint);
+        --bs-sponsor-wall-title-color: var(--bp-teal-fg);
+        --bs-sponsor-wall-label-color: var(--bp-text-faint);
 
         // Logo grid: paper cells separated by a blueprint hairline
-        --bs-sponsor-wall-cell-bg:         var(--bp-paper);
-        --bs-sponsor-wall-cell-border:     var(--bp-border);
+        --bs-sponsor-wall-cell-bg: var(--bp-paper);
+        --bs-sponsor-wall-cell-border: var(--bp-border);
 
         // Rest state: greyscale + slightly lifted opacity (blueprint is lighter than base)
-        --bs-sponsor-wall-logo-grayscale:  1;
-        --bs-sponsor-wall-logo-opacity:    0.45;
+        --bs-sponsor-wall-logo-grayscale: 1;
+        --bs-sponsor-wall-logo-opacity: 0.45;
 
         // Hover lift: a touch more height than the 1px base default
         --bs-sponsor-wall-hover-translate: -2px;
 
         // Smooth via the blueprint ease curve
-        --bs-sponsor-wall-logo-transition: filter var(--bp-ease) 180ms,
-                                           opacity var(--bp-ease) 180ms,
-                                           transform var(--bp-ease) 120ms;
+        --bs-sponsor-wall-logo-transition:
+            filter var(--bp-ease) 180ms, opacity var(--bp-ease) 180ms,
+            transform var(--bp-ease) 120ms;
     }
 
     // ── Title ────────────────────────────────────────────────────────────────
     // Switch to the blueprint mono stack; the base already does uppercase+tracking
     // but --bs-font-monospace may not resolve to --bp-mono in all contexts.
     .tc-sponsor-wall-title {
-        font-family:     var(--bp-mono);
-        letter-spacing:  0.12em;
-        color:           var(--bs-sponsor-wall-title-color); // already re-pointed above
+        font-family: var(--bp-mono);
+        letter-spacing: 0.12em;
+        color: var(--bs-sponsor-wall-title-color); // already re-pointed above
     }
 
     // ── Tier label ───────────────────────────────────────────────────────────
     .tc-sponsor-tier-label {
-        font-family:    var(--bp-mono);
-        letter-spacing: 0.10em;
-        color:          var(--bs-sponsor-wall-label-color); // already --bp-text-faint
+        font-family: var(--bp-mono);
+        letter-spacing: 0.1em;
+        color: var(--bs-sponsor-wall-label-color); // already --bp-text-faint
     }
 
     // ── Logo grid container ──────────────────────────────────────────────────
@@ -58,8 +57,9 @@ tc-theme[name='blueprint'],
     .tc-sponsor-logo-wrap {
         background: var(--bp-paper);
         // Subtle transition on the cell background so hover feels deliberate
-        transition: transform var(--bp-ease) 120ms,
-                    background var(--bp-ease) 180ms;
+        transition:
+            transform var(--bp-ease) 120ms,
+            background var(--bp-ease) 180ms;
 
         &:hover,
         &:focus-within {

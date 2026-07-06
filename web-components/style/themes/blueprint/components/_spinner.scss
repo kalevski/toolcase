@@ -7,8 +7,8 @@ tc-theme[name='blueprint'],
     // blueprint hairline token so it reads as a deliberate lavender-grey track
     // rather than the inherited light-slate ramp.
     .spinner-border {
-        border-color: var(--bp-border);       // track: blueprint hairline
-        border-top-color: var(--bp-teal);     // arc: teal action accent
+        border-color: var(--bp-border); // track: blueprint hairline
+        border-top-color: var(--bp-teal); // arc: teal action accent
 
         // Slightly crisper timing fits the HUD/technical aesthetic
         --bs-spinner-animation-speed: 0.75s;
@@ -49,8 +49,8 @@ tc-theme[name='blueprint'],
     // a dot on the rim. Give it the teal action colour and a soft glow halo
     // to reinforce the HUD corner-bracket vocabulary.
     .spinner-orbit {
-        border-color: var(--bp-teal);         // dashed orbit ring: teal
-        --bs-spinner-animation-speed: 1.4s;   // slightly crisper than default 1.6s
+        border-color: var(--bp-teal); // dashed orbit ring: teal
+        --bs-spinner-animation-speed: 1.4s; // slightly crisper than default 1.6s
 
         // Soft teal halo around the whole orbit disc — reads as a live-ping dot
         filter: drop-shadow(0 0 4px var(--bp-teal-soft));

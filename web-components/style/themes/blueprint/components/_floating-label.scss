@@ -2,9 +2,7 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     .form-floating {
-
         // Idle label: use the faint ink token so it reads as a ghost placeholder,
         // not competing with filled text. Opacity stays at 1 when floated.
         > label {

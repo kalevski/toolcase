@@ -11,12 +11,14 @@ package nginxctl
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/kalevski/toolcase/nginxpilot/internal/config"
 	"github.com/kalevski/toolcase/nginxpilot/internal/nginxconf"
@@ -36,15 +38,43 @@ type Engine struct {
 	reloadCmd  []string
 	run        RunFunc
 	log        *slog.Logger
+
+	// annotator (optional) pre-checks backend targets before staging so a
+	// quarantined resource gets a self-explanatory reason ("host does not
+	// resolve") instead of raw nginx -t stderr. Nil-safe.
+	annotator TargetAnnotator
 }
+
+// TargetAnnotator pre-checks resource backends (DNS) ahead of nginx -t.
+// Annotate returns kind+"\x00"+key → human reason for every resource whose
+// backend fails a pre-flight check. Best-effort and bounded; an empty map (or
+// nil annotator) changes nothing.
+type TargetAnnotator interface {
+	Annotate(ctx context.Context, cfg *config.Config) map[string]string
+}
+
+// SetAnnotator wires an optional pre-flight target checker into the engine.
+func (e *Engine) SetAnnotator(a TargetAnnotator) { e.annotator = a }
+
+// annotationKey builds the map key an annotator uses for one resource.
+func annotationKey(kind, key string) string { return kind + "\x00" + key }
+
+// AnnotationKey is the exported form for annotator implementations.
+func AnnotationKey(kind, key string) string { return annotationKey(kind, key) }
 
 // ResourceResult is the per-resource outcome of an apply, surfaced in /status.
 type ResourceResult struct {
 	Kind   string `json:"kind"`
 	Key    string `json:"key"`
 	File   string `json:"file"`
-	State  string `json:"state"`            // active | disabled
-	Reason string `json:"reason,omitempty"` // nginx -t stderr when disabled
+	State  string `json:"state"`            // active | disabled | at_risk
+	Reason string `json:"reason,omitempty"` // nginx -t stderr / annotated reason when not active
+
+	// Since / LastReconcile are filled by the manager's reconcile loop (the
+	// engine itself is stateless): when the loop first saw this resource
+	// failing, and when it last evaluated it.
+	Since         *time.Time `json:"since,omitempty"`
+	LastReconcile *time.Time `json:"last_reconcile,omitempty"`
 }
 
 // ApplyResult is the outcome of an Apply call.
@@ -106,6 +136,10 @@ func (e *Engine) Apply(ctx context.Context, cfg *config.Config, certs nginxconf.
 	if err != nil {
 		return ApplyResult{}, err
 	}
+	// A successful swap renames the staging dirs into place; RemoveAll on the
+	// (now absent) temp paths is then a no-op. Any failure leaves them behind,
+	// so always clean up.
+	defer removeStaging(httpStaging, streamStaging)
 	if err := e.swapAndReload(ctx, httpStaging, streamStaging); err != nil {
 		return ApplyResult{Resources: results}, err
 	}
@@ -114,21 +148,55 @@ func (e *Engine) Apply(ctx context.Context, cfg *config.Config, certs nginxconf.
 
 // DryRun renders + validates + quarantines but never swaps or reloads, so a
 // control plane can preview the per-resource pass/fail set before committing
-// (POST /nginx/test). The staged files are discarded.
+// (POST /nginx/test). The staged files are discarded. Staging is per-call
+// (unique temp dirs next to the live dirs), so a DryRun is safe to run
+// concurrently with an in-flight Apply — the reconcile loop relies on that.
 func (e *Engine) DryRun(ctx context.Context, cfg *config.Config, certs nginxconf.CertResolver) (ApplyResult, error) {
 	results, httpStaging, streamStaging, err := e.plan(ctx, cfg, certs)
-	_ = os.RemoveAll(httpStaging)
-	_ = os.RemoveAll(streamStaging)
+	removeStaging(httpStaging, streamStaging)
 	if err != nil {
 		return ApplyResult{}, err
 	}
 	return ApplyResult{Resources: results}, nil
 }
 
+// newStagingDirs creates the per-call staging directories. They live NEXT TO
+// the live dirs (same parent) so the Apply swap stays an atomic rename(2) —
+// a fixed shared path would let a concurrent DryRun delete an in-flight
+// Apply's staged files.
+func (e *Engine) newStagingDirs() (httpStaging, streamStaging string, err error) {
+	if err := ensureDir(filepath.Dir(e.confDir)); err != nil {
+		return "", "", err
+	}
+	if err := ensureDir(filepath.Dir(e.streamDir)); err != nil {
+		return "", "", err
+	}
+	httpStaging, err = os.MkdirTemp(filepath.Dir(e.confDir), ".nginxpilot-staging-http-")
+	if err != nil {
+		return "", "", err
+	}
+	streamStaging, err = os.MkdirTemp(filepath.Dir(e.streamDir), ".nginxpilot-staging-stream-")
+	if err != nil {
+		_ = os.RemoveAll(httpStaging)
+		return "", "", err
+	}
+	return httpStaging, streamStaging, nil
+}
+
+// removeStaging best-effort deletes leftover staging dirs ("" entries skipped).
+func removeStaging(dirs ...string) {
+	for _, d := range dirs {
+		if d != "" {
+			_ = os.RemoveAll(d)
+		}
+	}
+}
+
 // plan renders every resource, validates the whole set, and (on failure) runs
 // the per-resource quarantine pass. It leaves the maximal valid subset staged
 // in httpStaging/streamStaging for the caller to swap (Apply) or discard
-// (DryRun), and returns the per-resource results.
+// (DryRun), and returns the per-resource results. On error the staging dirs
+// are already cleaned up.
 func (e *Engine) plan(ctx context.Context, cfg *config.Config, certs nginxconf.CertResolver) (results []ResourceResult, httpStaging, streamStaging string, err error) {
 	// The static block-exploits snippet must exist at the live include path for
 	// both the isolated test (resources reference it by absolute path) and the
@@ -137,13 +205,34 @@ func (e *Engine) plan(ctx context.Context, cfg *config.Config, certs nginxconf.C
 		return nil, "", "", fmt.Errorf("write block-exploits include: %w", err)
 	}
 
+	// The generated htpasswd files live under data_dir (not the swapped conf
+	// dirs), referenced by absolute auth_basic_user_file paths — regenerate them
+	// from config before staging so a password (re)set lands with this apply.
+	if err := writeAccessFiles(cfg); err != nil {
+		return nil, "", "", fmt.Errorf("write access-list htpasswd files: %w", err)
+	}
+
+	// Pre-flight target annotations (DNS), shared by the whole pass so a
+	// quarantined resource reports "host does not resolve" instead of raw
+	// nginx -t stderr. Best-effort: nil/empty changes nothing.
+	var annotations map[string]string
+	if e.annotator != nil {
+		annotations = e.annotator.Annotate(ctx, cfg)
+	}
+
 	resources, baseHTTP, disabled := renderResources(cfg, certs, e.includeDir)
-	httpStaging = e.confDir + ".staging"
-	streamStaging = e.streamDir + ".staging"
+	httpStaging, streamStaging, err = e.newStagingDirs()
+	if err != nil {
+		return nil, "", "", err
+	}
+	fail := func(ferr error) ([]ResourceResult, string, string, error) {
+		removeStaging(httpStaging, streamStaging)
+		return nil, "", "", ferr
+	}
 
 	// Global test: stage the whole set and validate it in one shot.
 	if err := e.stage(httpStaging, streamStaging, baseHTTP, resources); err != nil {
-		return nil, "", "", err
+		return fail(err)
 	}
 	if out, terr := e.test(ctx, httpStaging, streamStaging); terr == nil {
 		return append(disabled, activeResults(resources)...), httpStaging, streamStaging, nil
@@ -155,7 +244,7 @@ func (e *Engine) plan(ctx context.Context, cfg *config.Config, certs nginxconf.C
 	// dropping any that breaks the test. Yields the maximal valid subset.
 	results = append([]ResourceResult{}, disabled...)
 	if err := e.stage(httpStaging, streamStaging, baseHTTP, nil); err != nil {
-		return nil, "", "", err
+		return fail(err)
 	}
 	for _, r := range resources {
 		dir := httpStaging
@@ -163,7 +252,7 @@ func (e *Engine) plan(ctx context.Context, cfg *config.Config, certs nginxconf.C
 			dir = streamStaging
 		}
 		if err := writeStagedFile(dir, r.filename, r.content); err != nil {
-			return nil, "", "", err
+			return fail(err)
 		}
 		out, terr := e.test(ctx, httpStaging, streamStaging)
 		if terr != nil {
@@ -171,6 +260,14 @@ func (e *Engine) plan(ctx context.Context, cfg *config.Config, certs nginxconf.C
 			reason := oneLine(out)
 			if reason == "" {
 				reason = terr.Error()
+			}
+			// Prefer the pre-flight annotation (e.g. DNS rot) over raw stderr —
+			// nginx stays the arbiter of what is disabled, the annotation is
+			// only ever a better error message.
+			if a := annotations[annotationKey(r.kind, r.key)]; a != "" {
+				e.log.Warn("resource disabled by nginx -t (pre-flight annotated)",
+					"kind", r.kind, "key", r.key, "nginx_output", reason, "annotation", a)
+				reason = a
 			}
 			results = append(results, ResourceResult{Kind: r.kind, Key: r.key, File: r.filename, State: StateDisabled, Reason: reason})
 			e.log.Warn("resource disabled by nginx -t", "kind", r.kind, "key", r.key, "reason", reason)
@@ -182,12 +279,22 @@ func (e *Engine) plan(ctx context.Context, cfg *config.Config, certs nginxconf.C
 }
 
 // writeBlockExploits writes the static managed exploit-blocking snippet into the
-// include dir (idempotent).
+// include dir (idempotent). The include dir is usually the LIVE conf dir, which
+// a concurrent Apply's swap can rename away between the ensureDir and the
+// write — retry a couple of times; the swap path rewrites the snippet itself
+// right after swapping, so the file always converges to present.
 func (e *Engine) writeBlockExploits() error {
-	if err := ensureDir(e.includeDir); err != nil {
-		return err
+	var err error
+	for attempt := 0; attempt < 3; attempt++ {
+		if err = ensureDir(e.includeDir); err != nil {
+			continue
+		}
+		err = writeStagedFile(e.includeDir, nginxconf.BlockExploitsFilename, nginxconf.BlockExploitsSnippet())
+		if err == nil || !errors.Is(err, os.ErrNotExist) {
+			return err
+		}
 	}
-	return writeStagedFile(e.includeDir, nginxconf.BlockExploitsFilename, nginxconf.BlockExploitsSnippet())
+	return err
 }
 
 func activeResults(resources []rendered) []ResourceResult {

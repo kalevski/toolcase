@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-fps-cap-select {
         // Font: reinforce mono so frame-rate presets read as machine/HUD data.
         --bs-fps-cap-select-font: var(--bp-mono);

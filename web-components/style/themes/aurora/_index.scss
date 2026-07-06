@@ -7,7 +7,10 @@
 // (or any element with [data-tc-theme="aurora"]).
 //
 // Load order: foundation (token remap) first so the component partials override
-// on top of the already-aurora --tc-* / --bs-* tokens.
+// on top of the already-aurora --tc-* / --bs-* tokens; variants extend the
+// foundation with alternate primary/secondary accent palettes (ocean · forest ·
+// ember · royal) — everything else stays the base aurora look.
 
 @use 'foundation';
+@use 'variants';
 @use 'components';

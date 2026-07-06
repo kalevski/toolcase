@@ -5,64 +5,63 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-battle-pass {
         // ── Shell tokens ───────────────────────────────────────────────────────
-        --bs-battle-pass-bg:           var(--bp-paper);
+        --bs-battle-pass-bg: var(--bp-paper);
         --bs-battle-pass-border-color: var(--bp-border);
-        --bs-battle-pass-shadow:       var(--tc-shadow-sm);
+        --bs-battle-pass-shadow: var(--tc-shadow-sm);
 
         // ── Header tokens ──────────────────────────────────────────────────────
         // Eyebrow: mono + teal-fg so it reads as a HUD label above the title.
-        --bs-battle-pass-eyebrow-color:      var(--bp-teal-fg);
-        --bs-battle-pass-season-color:       var(--bp-emphasis);
+        --bs-battle-pass-eyebrow-color: var(--bp-teal-fg);
+        --bs-battle-pass-season-color: var(--bp-emphasis);
         // End-date countdown: faint mono — supporting info, not a CTA.
-        --bs-battle-pass-end-color:          var(--bp-text-faint);
+        --bs-battle-pass-end-color: var(--bp-text-faint);
         // Premium badge: pink is the primary/CTA accent in blueprint.
-        --bs-battle-pass-premium-bg:         var(--bp-pink);
-        --bs-battle-pass-premium-color:      var(--bp-pink-ink);
+        --bs-battle-pass-premium-bg: var(--bp-pink);
+        --bs-battle-pass-premium-color: var(--bp-pink-ink);
 
         // ── Progress tokens ────────────────────────────────────────────────────
-        --bs-battle-pass-level-color:    var(--bp-text-soft);
+        --bs-battle-pass-level-color: var(--bp-text-soft);
         // Bar track: border-rule so it reads as a quiet track, not a surface.
-        --bs-battle-pass-bar-bg:         var(--bp-border-rule);
+        --bs-battle-pass-bar-bg: var(--bp-border-rule);
         // Bar fill: pink (primary progress = primary CTA accent).
-        --bs-battle-pass-bar-fill:       var(--bp-pink);
-        --bs-battle-pass-xp-color:       var(--bp-text-faint);
+        --bs-battle-pass-bar-fill: var(--bp-pink);
+        --bs-battle-pass-xp-color: var(--bp-text-faint);
 
         // ── Track label tokens ─────────────────────────────────────────────────
         --bs-battle-pass-track-label-color: var(--bp-teal-fg);
 
         // ── Current-tier tokens ────────────────────────────────────────────────
         // Replace the dark rgba(30,41,59,0.04) literal with the pink surface tint.
-        --bs-battle-pass-tier-current-bg:     var(--bp-pink-surface);
+        --bs-battle-pass-tier-current-bg: var(--bp-pink-surface);
         --bs-battle-pass-tier-current-marker: var(--bp-pink);
 
         // ── Level-marker tokens ────────────────────────────────────────────────
-        --bs-battle-pass-level-marker-bg:           var(--bp-bg-2);
+        --bs-battle-pass-level-marker-bg: var(--bp-bg-2);
         --bs-battle-pass-level-marker-border-color: var(--bp-border);
-        --bs-battle-pass-level-marker-color:        var(--bp-text-muted);
+        --bs-battle-pass-level-marker-color: var(--bp-text-muted);
         // Current tier marker: pink fill — matches the left-bar marker accent.
-        --bs-battle-pass-level-marker-current-bg:    var(--bp-pink);
+        --bs-battle-pass-level-marker-current-bg: var(--bp-pink);
         --bs-battle-pass-level-marker-current-color: var(--bp-pink-ink);
 
         // ── Reward-cell tokens ─────────────────────────────────────────────────
-        --bs-battle-pass-cell-bg:           var(--bp-paper);
+        --bs-battle-pass-cell-bg: var(--bp-paper);
         --bs-battle-pass-cell-border-color: var(--bp-border);
-        --bs-battle-pass-cell-color:        var(--bp-text);
+        --bs-battle-pass-cell-color: var(--bp-text);
 
         // Claimable free cell: teal border (teal = everyday action).
         --bs-battle-pass-cell-claimable-border-color: var(--bp-teal-line);
         // Claimable premium cell: pink border (pink = primary/premium CTA).
-        --bs-battle-pass-cell-premium-border-color:   var(--bp-pink-line);
+        --bs-battle-pass-cell-premium-border-color: var(--bp-pink-line);
 
         // Claimed cell: teal fill — "secured reward" maps to success=teal;
         // replaces the old --tc-app-accent which was cyan.
-        --bs-battle-pass-cell-claimed-bg:    var(--bp-teal);
-        --bs-battle-pass-cell-claimed-color: var(--bp-teal-ink);
+        --bs-battle-pass-cell-claimed-bg: var(--bp-success);
+        --bs-battle-pass-cell-claimed-color: var(--bp-success-ink);
 
         // Empty slot: recessed well, faint dashed border.
-        --bs-battle-pass-cell-empty-bg:           var(--bp-bg-2);
+        --bs-battle-pass-cell-empty-bg: var(--bp-bg-2);
         --bs-battle-pass-cell-empty-border-color: var(--bp-border-faint);
     }
 

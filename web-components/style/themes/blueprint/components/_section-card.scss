@@ -2,7 +2,6 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     // ── Token overrides ───────────────────────────────────────────────────────
     //
     // Re-point every --bs-section-card-* var to blueprint tokens.
@@ -11,40 +10,36 @@ tc-theme[name='blueprint'],
 
     tc-section-card {
         // Card shell
-        --bs-section-card-bg:                    var(--bp-paper);
-        --bs-section-card-border-color:          var(--bp-border);
-        --bs-section-card-shadow:                var(--tc-shadow-sm);
+        --bs-section-card-bg: var(--bp-paper);
+        --bs-section-card-border-color: var(--bp-border);
+        --bs-section-card-shadow: var(--tc-shadow-sm);
 
         // Header — very faint teal wash to signal "panel header" without
         // fighting the body; replaces the slate gradient literals.
-        --bs-section-card-header-bg:             linear-gradient(
-                                                     135deg,
-                                                     var(--bp-teal-soft),
-                                                     transparent 80%
-                                                 );
-        --bs-section-card-header-border-color:   var(--bp-border);
+        --bs-section-card-header-bg: linear-gradient(135deg, var(--bp-teal-soft), transparent 80%);
+        --bs-section-card-header-border-color: var(--bp-border);
 
         // Title — Chakra Petch for section names; blueprint treats titled
         // sections as display-level headings.
-        --bs-section-card-title-color:           var(--bp-text);
+        --bs-section-card-title-color: var(--bp-text);
 
         // Icon chip — paper-tint fill, teal icon so it reads as an action glyph.
-        --bs-section-card-icon-color:            var(--bp-teal-fg);
-        --bs-section-card-icon-chip-bg:          var(--bp-paper-tint);
+        --bs-section-card-icon-color: var(--bp-teal-fg);
+        --bs-section-card-icon-chip-bg: var(--bp-paper-tint);
         --bs-section-card-icon-chip-border-color: var(--bp-border);
 
         // Danger variant — replace slate gradient stops with --bp-danger rgba;
         // use the semantic danger tokens everywhere else.
-        --bs-section-card-danger-border-color:        var(--bp-danger);
-        --bs-section-card-danger-header-bg:           linear-gradient(
-                                                          135deg,
-                                                          rgba(220, 38, 38, 0.06),
-                                                          rgba(220, 38, 38, 0.02) 80%
-                                                      );
+        --bs-section-card-danger-border-color: var(--bp-danger);
+        --bs-section-card-danger-header-bg: linear-gradient(
+            135deg,
+            rgba(220, 38, 38, 0.06),
+            rgba(220, 38, 38, 0.02) 80%
+        );
         --bs-section-card-danger-header-border-color: rgba(220, 38, 38, 0.22);
-        --bs-section-card-danger-title-color:         var(--bp-danger);
-        --bs-section-card-danger-icon-color:          var(--bp-danger);
-        --bs-section-card-danger-icon-chip-bg:        var(--bp-danger-soft);
+        --bs-section-card-danger-title-color: var(--bp-danger);
+        --bs-section-card-danger-icon-color: var(--bp-danger);
+        --bs-section-card-danger-icon-chip-bg: var(--bp-danger-soft);
         --bs-section-card-danger-icon-chip-border-color: rgba(220, 38, 38, 0.22);
     }
 
@@ -68,9 +63,10 @@ tc-theme[name='blueprint'],
         background: var(--bs-section-card-icon-chip-bg);
         border-color: var(--bs-section-card-icon-chip-border-color);
         color: var(--bs-section-card-icon-color);
-        transition: background var(--bp-ease, 0.2s ease),
-                    border-color var(--bp-ease, 0.2s ease),
-                    color var(--bp-ease, 0.2s ease);
+        transition:
+            background var(--bp-ease, 0.2s ease),
+            border-color var(--bp-ease, 0.2s ease),
+            color var(--bp-ease, 0.2s ease);
     }
 
     // ── Header — HUD corner bracket ───────────────────────────────────────────
@@ -121,5 +117,4 @@ tc-theme[name='blueprint'],
     .tc-section-card-body {
         background: var(--bp-bg-2);
     }
-
 }

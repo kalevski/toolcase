@@ -1,0 +1,19 @@
+{
+    "access_lists": [
+        {
+            "name": "office",
+            "satisfy": "any",
+            "pass_auth": false,
+            "users": [
+                { "username": "alice", "has_password": true },
+                { "username": "pending", "has_password": false }
+            ],
+            "rules": [{ "allow": "10.0.0.0/8" }, { "deny": "203.0.113.7" }]
+        },
+        {
+            "name": "rules_only",
+            "users": [],
+            "rules": [{ "allow": "192.0.2.0/24" }, { "deny": "all" }]
+        }
+    ]
+}

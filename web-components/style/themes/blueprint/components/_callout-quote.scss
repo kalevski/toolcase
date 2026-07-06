@@ -2,21 +2,20 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-callout-quote {
         // Left accent bar → pink primary; quote mark echoes it at a soft tint
-        --bs-callout-quote-border-color:       var(--bp-pink);
-        --bs-callout-quote-mark-color:         var(--bp-pink-soft);
+        --bs-callout-quote-border-color: var(--bp-pink);
+        --bs-callout-quote-mark-color: var(--bp-pink-soft);
 
         // Quote body — display face for impact; primary ink
-        --bs-callout-quote-text-color:         var(--bp-text);
+        --bs-callout-quote-text-color: var(--bp-text);
 
         // Caption row — muted for the wrapper, overridden per part below
-        --bs-callout-quote-caption-color:      var(--bp-text-faint);
-        --bs-callout-quote-author-color:       var(--bp-text-soft);
+        --bs-callout-quote-caption-color: var(--bp-text-faint);
+        --bs-callout-quote-author-color: var(--bp-text-soft);
 
         // Source link — teal-fg is AA-safe on white; hover brightens to teal
-        --bs-callout-quote-source-color:       var(--bp-teal-fg);
+        --bs-callout-quote-source-color: var(--bp-teal-fg);
         --bs-callout-quote-source-hover-color: var(--bp-teal);
     }
 
@@ -28,19 +27,19 @@ tc-theme[name='blueprint'],
 
     .tc-callout-quote__author {
         // Mono eyebrow treatment: attribution reads as a HUD label, not running prose
-        font-family:    var(--bp-mono);
-        font-size:      0.7rem;
-        font-weight:    600;
+        font-family: var(--bp-mono);
+        font-size: 0.7rem;
+        font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.1em;
-        color:          var(--bs-callout-quote-author-color);
+        color: var(--bs-callout-quote-author-color);
     }
 
     a.tc-callout-quote__source {
         transition: color 0.15s var(--bp-ease);
 
         &:focus-visible {
-            outline:        2px solid var(--bp-pink);
+            outline: 2px solid var(--bp-pink);
             outline-offset: 2px;
         }
     }

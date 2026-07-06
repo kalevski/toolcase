@@ -1,0 +1,19 @@
+// Aurora theme variants — alternate accent palettes on the aurora foundation.
+//
+// Each variant swaps ONLY the primary (--ah-accent* — the mint/emerald CTA hue)
+// and secondary (--tc-accent* — the everyday highlight hue) accent families plus
+// the accent literals the foundation bakes (--bs-primary-rgb, rgba soft/line/
+// glow/shadow derivatives, --tc-accent-hex, --tc-cyan). The dark slate canvas,
+// surfaces, hairlines, text ramp, semantic status colours, fonts, shadows and
+// glow recipes stay identical to the base theme.
+//
+// Available variants:
+// - ocean:  electric blue primary, cyan secondary
+// - forest: emerald green primary, lime secondary
+// - ember:  warm orange primary, gold secondary
+// - royal:  soft violet primary, magenta secondary
+
+@use './ocean';
+@use './forest';
+@use './ember';
+@use './royal';

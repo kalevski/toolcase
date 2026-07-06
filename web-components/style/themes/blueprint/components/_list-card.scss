@@ -2,23 +2,22 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-
     tc-list-card {
         // ── Card surface ──────────────────────────────────────────────────────
         // White paper panel with a lilac hairline and violet-tinted shadow,
         // consistent with other blueprint dashboard tiles (basic-card, brief-card).
-        --bs-list-card-bg:                  var(--bp-paper);
-        --bs-list-card-border-color:        var(--bp-border);
-        --bs-list-card-shadow:              var(--tc-shadow-sm);
+        --bs-list-card-bg: var(--bp-paper);
+        --bs-list-card-border-color: var(--bp-border);
+        --bs-list-card-shadow: var(--tc-shadow-sm);
 
         // ── Header ────────────────────────────────────────────────────────────
         // Recessed lavender tint replaces the baked dark-slate gradient
         // (rgba(30,41,59,…)) that would read wrong on a light blueprint canvas.
-        --bs-list-card-header-bg:           var(--bp-bg-2);
+        --bs-list-card-header-bg: var(--bp-bg-2);
         --bs-list-card-header-border-color: var(--bp-border-faint);
 
         // Title: emphasis ink — display font applied below.
-        --bs-list-card-title-color:         var(--bp-emphasis);
+        --bs-list-card-title-color: var(--bp-emphasis);
 
         // ── Row separators ─────────────────────────────────────────────────────
         // Base partial uses --tc-border-faint / a raw slate rgba — route to the
@@ -28,22 +27,22 @@ tc-theme[name='blueprint'],
         // ── Rank chip ─────────────────────────────────────────────────────────
         // Recessed lavender well / muted-text digit — the rank is a HUD kicker,
         // not a primary action, so it stays in the neutral register.
-        --bs-list-card-rank-bg:             var(--bp-bg-2);
-        --bs-list-card-rank-color:          var(--bp-text-muted);
+        --bs-list-card-rank-bg: var(--bp-bg-2);
+        --bs-list-card-rank-color: var(--bp-text-muted);
 
         // ── Label + icon ──────────────────────────────────────────────────────
-        --bs-list-card-label-color:         var(--bp-text);
-        --bs-list-card-icon-color:          var(--bp-teal-fg); // teal clears AA on white paper
+        --bs-list-card-label-color: var(--bp-text);
+        --bs-list-card-icon-color: var(--bp-teal-fg); // teal clears AA on white paper
 
         // ── Value readout ──────────────────────────────────────────────────────
         // Muted-faint ink; mono font already in base partial — just reroute color.
-        --bs-list-card-value-color:         var(--bp-text-faint);
+        --bs-list-card-value-color: var(--bp-text-faint);
 
         // ── Skeleton shimmer ──────────────────────────────────────────────────
         // Replace the raw rgba(255,255,255,.6) shimmer with the blueprint surface
         // family so the placeholder reads coherently on the lavender page.
-        --bs-list-card-skeleton-bg:         var(--bp-paper-tint-2);
-        --bs-list-card-skeleton-shimmer:    rgba(255, 255, 255, 0.8);
+        --bs-list-card-skeleton-bg: var(--bp-paper-tint-2);
+        --bs-list-card-skeleton-shimmer: rgba(255, 255, 255, 0.8);
     }
 
     // ── Card shell — HUD tile treatment ───────────────────────────────────────
