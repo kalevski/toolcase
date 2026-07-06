@@ -36,6 +36,4 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./quaykeeper-landing/out
-          publish_branch: public
-          destination_dir: quaykeeper
-          keep_files: true
+          publish_branch: public/quaykeeper
