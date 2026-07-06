@@ -1,7 +1,7 @@
-import { guard, json, error } from '@/server/web/http'
+import { guard, json, error, errorFrom } from '@/server/web/http'
 import { engine } from '@/server/services/execution-manager'
 import { resetErrorTasksToPending } from '@/server/services/projects'
-import { projectExists, UnsafePathError } from '@/server/infrastructure/fs-workspace'
+import { projectExists } from '@/server/infrastructure/fs-workspace'
 import { slog } from '@/server/infrastructure/server-log'
 
 export const runtime = 'nodejs'
@@ -21,7 +21,8 @@ export async function POST(_req: Request, ctx: { params: Promise<{ project: stri
         const { moved, tasks } = await resetErrorTasksToPending(params.project)
         return json({ moved, tasks })
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         slog('error', 'api', `reset-errors failed`, {
             project: params.project,
             error: (e as Error)?.message ?? String(e),

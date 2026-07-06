@@ -4,13 +4,16 @@
 
 // ── Auth / roles ─────────────────────────────────────────────────────────────
 
-export type Role = 'admin' | 'standard' | 'guest'
+// 'owner' is the top role — the first user ever to log in bootstraps as owner.
+// 'guest' is the no-access landing role for every subsequent signup until the
+// owner promotes them.
+export type Role = 'owner' | 'standard' | 'guest'
 
 /** Strict ordering used for `minRole` comparisons. Higher = more access. */
 export const ROLE_RANK: Record<Role, number> = {
     guest: 0,
     standard: 1,
-    admin: 2,
+    owner: 2,
 }
 
 export interface UserRecord {
@@ -234,6 +237,19 @@ export interface AccountSummary {
 }
 
 // ── Git ──────────────────────────────────────────────────────────────────────
+
+/**
+ * A saved git SSH key (deploy key) selectable when cloning a private repo.
+ * Registry metadata only — the private key material lives in an owner-only
+ * `0600` file at `${gitKeysDir}/<alias>` and is never stored in or returned
+ * from the API (write-only on create).
+ */
+export interface GitKey {
+    /** Short kebab-case handle; primary key + key-file name. */
+    alias: string
+    label?: string
+    createdAt: string
+}
 
 export interface GitStatus {
     branch: string

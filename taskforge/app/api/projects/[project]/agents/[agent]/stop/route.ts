@@ -1,6 +1,5 @@
-import { guard, json, error, audit } from '@/server/web/http'
+import { guard, json, error, audit, errorFrom } from '@/server/web/http'
 import { agentSessions, listAgentKinds } from '@/server/services/agent-sessions'
-import { UnsafePathError } from '@/server/infrastructure/fs-workspace'
 import type { AgentKind } from '@/server/domain/types'
 
 export const runtime = 'nodejs'
@@ -16,7 +15,8 @@ export async function POST(_req: Request, ctx: { params: Promise<{ project: stri
         audit(auth, 'agent.stop', params.project, params.agent)
         return json(snap)
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }

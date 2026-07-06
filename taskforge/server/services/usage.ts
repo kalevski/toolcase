@@ -10,7 +10,6 @@ import { config } from '@/server/config'
 import { runAgentOnce } from '@/server/infrastructure/agent'
 import { saveSnapshot, latest as latestSnapshot } from '@/server/data/repositories/usage-repo'
 import { resolveAccount } from '@/server/services/accounts'
-import { ensureImported } from '@/server/services/migrate-fs'
 import type { UsageEntry, UsageSnapshot } from '@/server/domain/types'
 
 // Matches lines like:
@@ -46,7 +45,6 @@ export function parseUsage(raw: string, fetchedAt: string): UsageSnapshot {
  * host login).
  */
 export async function readUsageCache(account: string | null = null): Promise<UsageSnapshot | null> {
-    await ensureImported()
     return latestSnapshot(account)
 }
 

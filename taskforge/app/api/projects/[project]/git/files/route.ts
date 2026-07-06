@@ -1,6 +1,6 @@
-import { guard, json, error } from '@/server/web/http'
-import { statusFiles, GitError } from '@/server/infrastructure/git'
-import { projectExists, UnsafePathError } from '@/server/infrastructure/fs-workspace'
+import { guard, json, error, errorFrom } from '@/server/web/http'
+import { statusFiles } from '@/server/infrastructure/git'
+import { projectExists } from '@/server/infrastructure/fs-workspace'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -14,8 +14,8 @@ export async function GET(_req: Request, ctx: { params: Promise<{ project: strin
         if (!(await projectExists(params.project))) return error('project not found', 404)
         return json(await statusFiles(params.project))
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
-        if (e instanceof GitError) return error(e.message, 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }

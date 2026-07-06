@@ -140,9 +140,12 @@ async function git(
 /**
  * Clone `url` into the project's `repo/` directory. Runs at the project root
  * (which already exists); `repo/` must not yet exist. Uses the token credential
- * helper for private HTTPS clones when `GIT_REMOTE_TOKEN` is set.
+ * helper for private HTTPS clones when `GIT_REMOTE_TOKEN` is set. `sshCommand`
+ * (a resolved saved-key command line — see services/git-keys.ts) rides in as
+ * `GIT_SSH_COMMAND` for SSH clones; the repo doesn't exist yet, so it can't
+ * come from repo config here.
  */
-export async function clone(project: string, url: string, branch?: string): Promise<void> {
+export async function clone(project: string, url: string, branch?: string, sshCommand?: string): Promise<void> {
     assertSafeGitUrl(url)
     const argv = [...tokenCredentialArgs(), 'clone']
     if (branch) {
@@ -152,7 +155,8 @@ export async function clone(project: string, url: string, branch?: string): Prom
         argv.push('--branch', branch)
     }
     argv.push('--', url, projectRepoDir(project))
-    const res = await run(projectPath(project), argv, {}, config.gitRemoteTimeoutMs || undefined)
+    const extraEnv: Record<string, string> = sshCommand ? { GIT_SSH_COMMAND: sshCommand } : {}
+    const res = await run(projectPath(project), argv, extraEnv, config.gitRemoteTimeoutMs || undefined)
     if (res.code !== 0) {
         // Surface git's own fatal line (last stderr line), redacted of any creds,
         // so "exit 128" becomes diagnosable (auth vs not-found vs ssh-key vs net).
@@ -176,6 +180,38 @@ export async function setOriginUrlWithToken(project: string, url: string): Promi
     withToken.username = config.gitRemoteToken
     withToken.password = ''
     await git(project, ['remote', 'set-url', 'origin', withToken.toString()])
+}
+
+/**
+ * Persist the saved-key ssh command into the fresh clone's local config
+ * (`core.sshCommand`). Every later git op in `repo/` — fetch/pull/push from the
+ * app AND anything the agent runs inside the checkout — picks the key up
+ * automatically, so the alias never has to be threaded through each call. The
+ * value is a single argv element (spawn, no shell), so its content is inert here.
+ */
+export async function setRepoSshCommand(project: string, sshCommand: string): Promise<void> {
+    await git(project, ['config', 'core.sshCommand', sshCommand])
+}
+
+/**
+ * The env override for a repo cloned with a saved SSH key: `{ GIT_SSH_COMMAND }`
+ * mirroring its `core.sshCommand`, or `{}` when unset. Remote ops pass this so
+ * the per-project key wins even when the ambient process env carries a global
+ * `GIT_SSH_COMMAND` (e.g. run-docker.sh's host key mount) — the env var takes
+ * precedence over repo config in git, so config alone would be shadowed.
+ */
+async function repoSshEnv(project: string): Promise<Record<string, string>> {
+    try {
+        const cmd = (await git(project, ['config', '--get', 'core.sshCommand'])).trim()
+        return cmd ? { GIT_SSH_COMMAND: cmd } : {}
+    } catch {
+        return {} // unset exits 1
+    }
+}
+
+/** True when the repo carries a per-project ssh command (saved SSH key clone). */
+async function repoSshConfigured(project: string): Promise<boolean> {
+    return (await repoSshEnv(project)).GIT_SSH_COMMAND !== undefined
 }
 
 /** Strip embedded credentials / tokens from git output before surfacing it. */
@@ -235,6 +271,10 @@ export async function status(project: string): Promise<GitStatus> {
         /* none */
     }
 
+    // A repo cloned with a saved SSH key can push even without the global
+    // token / GIT_SSH_CONFIGURED signal — its core.sshCommand carries the key.
+    const pushCredential = canPush() || (await repoSshConfigured(project))
+
     return {
         branch,
         dirty: dirty.length > 0,
@@ -242,7 +282,7 @@ export async function status(project: string): Promise<GitStatus> {
         ahead,
         behind,
         remotes,
-        canPush: canPush() && remotes.length > 0,
+        canPush: pushCredential && remotes.length > 0,
     }
 }
 
@@ -335,14 +375,14 @@ async function currentBranch(project: string): Promise<string> {
 }
 
 export async function push(project: string): Promise<void> {
-    if (!canPush()) {
-        throw new GitError('No push credential configured (GIT_REMOTE_TOKEN or SSH key).', null, '')
+    if (!canPush() && !(await repoSshConfigured(project))) {
+        throw new GitError('No push credential configured (GIT_REMOTE_TOKEN, a saved SSH key, or GIT_SSH_CONFIGURED).', null, '')
     }
     const branch = await currentBranch(project)
     // When an HTTPS token is provided, feed it via a one-shot credential helper
     // so it never touches the argv or the run log.
     const argv = [...tokenCredentialArgs(), 'push', '-u', 'origin', branch]
-    await git(project, argv, undefined, config.gitRemoteTimeoutMs)
+    await git(project, argv, await repoSshEnv(project), config.gitRemoteTimeoutMs)
 }
 
 // ── read-only history (git page) ─────────────────────────────────────────────
@@ -385,12 +425,22 @@ export async function recentCommits(project: string, limit = 15): Promise<GitCom
 
 /** Fetch every remote and prune deleted upstream branches. */
 export async function fetchRemote(project: string): Promise<void> {
-    await git(project, [...tokenCredentialArgs(), 'fetch', '--all', '--prune'], undefined, config.gitRemoteTimeoutMs)
+    await git(
+        project,
+        [...tokenCredentialArgs(), 'fetch', '--all', '--prune'],
+        await repoSshEnv(project),
+        config.gitRemoteTimeoutMs,
+    )
 }
 
 /** Fast-forward-only pull of the current branch's upstream. Refuses to create a merge commit. */
 export async function pull(project: string): Promise<void> {
-    await git(project, [...tokenCredentialArgs(), 'pull', '--ff-only'], undefined, config.gitRemoteTimeoutMs)
+    await git(
+        project,
+        [...tokenCredentialArgs(), 'pull', '--ff-only'],
+        await repoSshEnv(project),
+        config.gitRemoteTimeoutMs,
+    )
 }
 
 /** Hard-reset to HEAD and remove untracked files/dirs — wipes the working tree clean. Destructive. */
@@ -558,7 +608,8 @@ export async function execTerminal(project: string, command: string): Promise<Gi
     const tokens = tokenizeCommand(command)
     if (tokens[0] === 'git') tokens.shift()
     if (tokens.length === 0) throw new GitError('Empty command.', null, '')
-    const argv = REMOTE_SUBCOMMANDS.has(tokens[0]) ? [...tokenCredentialArgs(), ...tokens] : tokens
+    const remote = REMOTE_SUBCOMMANDS.has(tokens[0])
+    const argv = remote ? [...tokenCredentialArgs(), ...tokens] : tokens
     const res = await run(
         projectRepoDir(project),
         argv,
@@ -568,6 +619,9 @@ export async function execTerminal(project: string, command: string): Promise<Gi
             GIT_EDITOR: 'true',
             GIT_SEQUENCE_EDITOR: 'true',
             EDITOR: 'true',
+            // Remote commands re-assert the repo's saved-key ssh command over any
+            // ambient global GIT_SSH_COMMAND (env beats core.sshCommand in git).
+            ...(remote ? await repoSshEnv(project) : {}),
         },
         TERMINAL_TIMEOUT_MS,
     )

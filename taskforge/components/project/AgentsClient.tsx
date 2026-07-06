@@ -3,6 +3,7 @@
 import React, { useCallback, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from '@/lib/toast'
+import { apiFetch, describeApiError } from '@/lib/fetcher'
 import { useTc, useTcEvents } from '@/lib/tc'
 import type { TabBarItem } from '@toolcase/web-components'
 import type { AgentKind } from '@/server/domain/types'
@@ -90,7 +91,7 @@ export function AgentsClient({ isAdmin = false }: { isAdmin?: boolean }) {
         }
         setSavingDef(true)
         try {
-            const res = await fetch('/api/agent-defs', {
+            await apiFetch('/api/agent-defs', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -101,12 +102,10 @@ export function AgentsClient({ isAdmin = false }: { isAdmin?: boolean }) {
                     promptPreamble: defPreamble,
                 }),
             })
-            if (!res.ok) {
-                toast.error((await res.json().catch(() => ({}))).error ?? 'Failed to save agent')
-                return
-            }
             toast.success(`Agent “${kind}” saved — its tab is ready`)
             router.refresh()
+        } catch (e) {
+            toast.error(describeApiError(e))
         } finally {
             setSavingDef(false)
         }
@@ -120,9 +119,10 @@ export function AgentsClient({ isAdmin = false }: { isAdmin?: boolean }) {
             confirmVariant: 'danger',
         })
         if (!ok) return
-        const res = await fetch(`/api/agent-defs/${kind}`, { method: 'DELETE' })
-        if (!res.ok) {
-            toast.error('Failed to delete agent')
+        try {
+            await apiFetch(`/api/agent-defs/${kind}`, { method: 'DELETE' })
+        } catch (e) {
+            toast.error(describeApiError(e))
             return
         }
         toast.success(`Deleted “${kind}”`)

@@ -1,4 +1,4 @@
-// Server-component guards. Re-read the role from roles.json each render so
+// Server-component guards. Re-read the role from the user table each render so
 // promotions/demotions take effect without re-login (§4.1, §5.2).
 
 import 'server-only'

@@ -1,7 +1,7 @@
 // A5 — archive done tasks: GET lists tasks/archive/, POST moves every done task
 // there, PUT restores one back into the active queue.
 
-import { guard, json, error, audit } from '@/server/web/http'
+import { guard, json, error, audit, errorFrom } from '@/server/web/http'
 import {
     archiveDoneTasks,
     listArchivedTaskFiles,
@@ -9,8 +9,6 @@ import {
     restoreArchivedTask,
     extractTitle,
     projectExists,
-    ReorderError,
-    UnsafePathError,
 } from '@/server/infrastructure/fs-workspace'
 import { engine } from '@/server/services/execution-manager'
 import { agentSessionsBusy } from '@/server/services/locks'
@@ -38,7 +36,8 @@ export async function GET(_req: Request, ctx: { params: Promise<{ project: strin
         )
         return json(entries)
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }
@@ -56,7 +55,8 @@ export async function POST(_req: Request, ctx: { params: Promise<{ project: stri
         audit(auth, 'task.archive', params.project, `${moved.length} task(s)`)
         return json({ moved, tasks: await getTasks(params.project) })
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }
@@ -77,8 +77,8 @@ export async function PUT(req: Request, ctx: { params: Promise<{ project: string
         audit(auth, 'task.unarchive', params.project, body.id)
         return json({ tasks: await getTasks(params.project) })
     } catch (e) {
-        if (e instanceof ReorderError) return error(e.message, 409)
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }

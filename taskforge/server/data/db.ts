@@ -60,16 +60,25 @@ function wrap(): DbWrap {
 
 // ── migrations ─────────────────────────────────────────────────────────────
 // Ordered, append-only list of schema SQL. Each entry's index+1 is its version;
-// never reorder or rewrite an applied migration — add a new one.
+// never reorder or rewrite an applied migration — add a new one. The 5.0 fresh
+// start consolidated the historical v1–v10 chain into this single v1 (there are
+// no pre-5.0 databases to upgrade); future schema changes append v2+.
 
 const MIGRATIONS: string[] = [
-    // v1 — initial schema
+    // v1 — full schema.
+    // Secret discipline: `account.api_key_env` holds an env-var NAME (the key is
+    // resolved at spawn time, never stored); `git_key` rows are metadata only —
+    // the private key material is an owner-only 0600 file at
+    // `${gitKeysDir}/<alias>`, referenced by `project.ssh_key_alias`.
+    // (C3 search uses an FTS5 virtual table created lazily by search-repo.ts so
+    //  a runtime without FTS5 degrades to "search unavailable", not a boot failure.)
     `
     CREATE TABLE project (
-        name        TEXT PRIMARY KEY,
-        git_url     TEXT,
-        branch      TEXT,
-        created_at  TEXT NOT NULL
+        name          TEXT PRIMARY KEY,
+        git_url       TEXT,
+        branch        TEXT,
+        ssh_key_alias TEXT,
+        created_at    TEXT NOT NULL
     );
 
     CREATE TABLE task (
@@ -82,91 +91,37 @@ const MIGRATIONS: string[] = [
         last_error    TEXT,
         synced_mtime  INTEGER,
         updated_at    TEXT NOT NULL,
+        model         TEXT,
+        depends       TEXT,
+        account       TEXT,
         PRIMARY KEY (project, id)
     );
     CREATE INDEX idx_task_status ON task(project, status);
 
     CREATE TABLE telemetry (
-        id         INTEGER PRIMARY KEY AUTOINCREMENT,
-        project    TEXT NOT NULL,
-        task       TEXT NOT NULL,
-        status     TEXT NOT NULL,
-        elapsed    REAL NOT NULL,
-        model      TEXT NOT NULL,
-        commit_sha TEXT,
-        error      TEXT,
-        created_at TEXT NOT NULL
+        id          INTEGER PRIMARY KEY AUTOINCREMENT,
+        project     TEXT NOT NULL,
+        task        TEXT NOT NULL,
+        status      TEXT NOT NULL,
+        elapsed     REAL NOT NULL,
+        model       TEXT NOT NULL,
+        commit_sha  TEXT,
+        error       TEXT,
+        created_at  TEXT NOT NULL,
+        tokens_in   INTEGER,
+        tokens_out  INTEGER,
+        cost_usd    REAL,
+        review      TEXT,
+        review_note TEXT
     );
     CREATE INDEX idx_telemetry_latest ON telemetry(project, task, id DESC);
+    CREATE INDEX idx_telemetry_project_created ON telemetry(project, created_at);
 
     CREATE TABLE warm_session (
         project    TEXT PRIMARY KEY,
         session_id TEXT NOT NULL,
         ts         INTEGER NOT NULL
     );
-
-    CREATE TABLE run_event (
-        id         INTEGER PRIMARY KEY AUTOINCREMENT,
-        project    TEXT NOT NULL,
-        type       TEXT NOT NULL,
-        task       TEXT,
-        payload    TEXT,
-        created_at TEXT NOT NULL
-    );
-    CREATE INDEX idx_run_event_project ON run_event(project, id);
-
-    CREATE TABLE app_user (
-        github_id  INTEGER PRIMARY KEY,
-        login      TEXT NOT NULL,
-        name       TEXT NOT NULL,
-        avatar_url TEXT,
-        role       TEXT NOT NULL,
-        added_at   TEXT NOT NULL
-    );
-
-    CREATE TABLE usage_snapshot (
-        id          INTEGER PRIMARY KEY AUTOINCREMENT,
-        fetched_at  TEXT NOT NULL,
-        note        TEXT,
-        raw         TEXT NOT NULL,
-        max_percent INTEGER NOT NULL,
-        entries     TEXT NOT NULL
-    );
-
-    CREATE TABLE meta (
-        key   TEXT PRIMARY KEY,
-        value TEXT NOT NULL
-    );
-    `,
-    // v2 — latest prompt per (project, agent) for the one-shot agent composer
-    `
-    CREATE TABLE agent_prompt (
-        project  TEXT NOT NULL,
-        agent    TEXT NOT NULL,
-        prompt   TEXT NOT NULL,
-        model    TEXT NOT NULL,
-        used_at  TEXT NOT NULL,
-        PRIMARY KEY (project, agent)
-    );
-    `,
-    // v3 — per-task preferred model (mirrors the task file's **Model:** facet)
-    `
-    ALTER TABLE task ADD COLUMN model TEXT;
-    `,
-    // v4 — additional-features batch (additional_features.md):
-    //   B2 token/cost telemetry, B8 reviewer verdict, B1 run history,
-    //   C1 prompt history + templates, B3 schedules, D3 audit log,
-    //   E1 per-project settings, C4 custom agent kinds.
-    // (C3 search uses an FTS5 virtual table created lazily by search-repo.ts so
-    //  a runtime without FTS5 degrades to "search unavailable", not a boot failure.)
-    `
-    ALTER TABLE task ADD COLUMN depends TEXT;
-
-    ALTER TABLE telemetry ADD COLUMN tokens_in INTEGER;
-    ALTER TABLE telemetry ADD COLUMN tokens_out INTEGER;
-    ALTER TABLE telemetry ADD COLUMN cost_usd REAL;
-    ALTER TABLE telemetry ADD COLUMN review TEXT;
-    ALTER TABLE telemetry ADD COLUMN review_note TEXT;
 
     CREATE TABLE run (
         id           INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -184,8 +139,50 @@ const MIGRATIONS: string[] = [
     );
     CREATE INDEX idx_run_project ON run(project, id DESC);
 
-    ALTER TABLE run_event ADD COLUMN run_id INTEGER;
+    CREATE TABLE run_event (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        project    TEXT NOT NULL,
+        type       TEXT NOT NULL,
+        task       TEXT,
+        payload    TEXT,
+        created_at TEXT NOT NULL,
+        run_id     INTEGER
+    );
+    CREATE INDEX idx_run_event_project ON run_event(project, id);
     CREATE INDEX idx_run_event_run ON run_event(run_id, id);
+
+    CREATE TABLE app_user (
+        github_id  INTEGER PRIMARY KEY,
+        login      TEXT NOT NULL,
+        name       TEXT NOT NULL,
+        avatar_url TEXT,
+        role       TEXT NOT NULL,
+        added_at   TEXT NOT NULL
+    );
+
+    CREATE TABLE usage_snapshot (
+        id          INTEGER PRIMARY KEY AUTOINCREMENT,
+        fetched_at  TEXT NOT NULL,
+        note        TEXT,
+        raw         TEXT NOT NULL,
+        max_percent INTEGER NOT NULL,
+        entries     TEXT NOT NULL,
+        account     TEXT
+    );
+
+    CREATE TABLE meta (
+        key   TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+    );
+
+    CREATE TABLE agent_prompt (
+        project  TEXT NOT NULL,
+        agent    TEXT NOT NULL,
+        prompt   TEXT NOT NULL,
+        model    TEXT NOT NULL,
+        used_at  TEXT NOT NULL,
+        PRIMARY KEY (project, agent)
+    );
 
     CREATE TABLE agent_prompt_history (
         id      INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -225,6 +222,7 @@ const MIGRATIONS: string[] = [
         detail    TEXT
     );
     CREATE INDEX idx_audit_id ON audit(id DESC);
+    CREATE INDEX idx_audit_project ON audit(project, id DESC);
 
     CREATE TABLE project_setting (
         project TEXT NOT NULL,
@@ -241,20 +239,7 @@ const MIGRATIONS: string[] = [
         post            TEXT NOT NULL DEFAULT 'none',
         created_at      TEXT NOT NULL
     );
-    `,
-    // v5 — performance: the dashboard summary, per-run costBetween and global
-    // cost-per-day all filter telemetry by (project, created_at range); the
-    // existing idx_telemetry_latest(project, task, id) doesn't serve that. The
-    // audit log filters by project. Both additive (CREATE INDEX), no data change.
-    `
-    CREATE INDEX IF NOT EXISTS idx_telemetry_project_created ON telemetry(project, created_at);
-    CREATE INDEX IF NOT EXISTS idx_audit_project ON audit(project, id DESC);
-    `,
-    // v6 — Claude account registry (multi-account foundation). Maps a short
-    // alias to an isolated config dir + auth method. Registry metadata only —
-    // the API key for `apikey` accounts is referenced by env-var name
-    // (api_key_env) and resolved at spawn time; the key value is never stored.
-    `
+
     CREATE TABLE account (
         alias         TEXT PRIMARY KEY,
         dir           TEXT NOT NULL,
@@ -264,18 +249,12 @@ const MIGRATIONS: string[] = [
         last_used_at  TEXT,
         cooling_until TEXT
     );
-    `,
-    // v7 — per-task Claude identity (mirrors the task file's **Account:** facet).
-    // Pins which account in the registry a task runs under; not wired into
-    // execution yet (parse/store only — see 611-task-account-facet.md).
-    `
-    ALTER TABLE task ADD COLUMN account TEXT;
-    `,
-    // v8 — per-account /usage snapshots. Tags each cached snapshot with the
-    // Claude identity it was fetched under (NULL = the ambient host login) so the
-    // dashboard can present usage across multiple accounts.
-    `
-    ALTER TABLE usage_snapshot ADD COLUMN account TEXT;
+
+    CREATE TABLE git_key (
+        alias      TEXT PRIMARY KEY,
+        label      TEXT,
+        created_at TEXT NOT NULL
+    );
     `,
 ]
 
@@ -286,28 +265,37 @@ function migrate(db: DatabaseSync): void {
             applied_at TEXT NOT NULL
         );`,
     )
-    // DAT-1 — serialize the whole migration sequence behind the SQLite write
-    // lock. `BEGIN IMMEDIATE` grabs the RESERVED lock up front, so if two
-    // processes boot at once only one migrates; the other blocks (busy_timeout)
-    // then sees the migrations already applied. The applied set is re-read
-    // *inside* the lock so we never re-run a migration a peer just committed.
-    db.exec('BEGIN IMMEDIATE')
+    // Foreign keys must be toggled OUTSIDE any transaction (the pragma is a
+    // no-op inside one). Off for the run so a future table-REBUILD migration
+    // (CREATE new → copy → DROP old → RENAME) doesn't trip references; restored
+    // in `finally` so the live connection always ends up enforcing FKs.
+    db.exec('PRAGMA foreign_keys = OFF;')
     try {
-        const rows = db.prepare('SELECT version FROM schema_migrations').all() as unknown as {
-            version: number
-        }[]
-        const applied = new Set(rows.map((r) => r.version))
-        const insert = db.prepare('INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)')
-        for (let i = 0; i < MIGRATIONS.length; i++) {
-            const version = i + 1
-            if (applied.has(version)) continue
-            db.exec(MIGRATIONS[i])
-            insert.run(version, new Date().toISOString())
+        // DAT-1 — serialize the whole migration sequence behind the SQLite write
+        // lock. `BEGIN IMMEDIATE` grabs the RESERVED lock up front, so if two
+        // processes boot at once only one migrates; the other blocks (busy_timeout)
+        // then sees the migrations already applied. The applied set is re-read
+        // *inside* the lock so we never re-run a migration a peer just committed.
+        db.exec('BEGIN IMMEDIATE')
+        try {
+            const rows = db.prepare('SELECT version FROM schema_migrations').all() as unknown as {
+                version: number
+            }[]
+            const applied = new Set(rows.map((r) => r.version))
+            const insert = db.prepare('INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)')
+            for (let i = 0; i < MIGRATIONS.length; i++) {
+                const version = i + 1
+                if (applied.has(version)) continue
+                db.exec(MIGRATIONS[i])
+                insert.run(version, new Date().toISOString())
+            }
+            db.exec('COMMIT')
+        } catch (err) {
+            db.exec('ROLLBACK')
+            throw err
         }
-        db.exec('COMMIT')
-    } catch (err) {
-        db.exec('ROLLBACK')
-        throw err
+    } finally {
+        db.exec('PRAGMA foreign_keys = ON;')
     }
 }
 
@@ -343,9 +331,16 @@ export function exec(sql: string): void {
     wrap().db.exec(sql)
 }
 
-/** Run `fn` inside a transaction (synchronous — DatabaseSync is sync). */
+// DatabaseSync has no nested transactions, so `tx()` is reentrant: an inner
+// call joins the open transaction and only the outermost owns BEGIN/COMMIT/
+// ROLLBACK. Lets a service compose repo helpers that use tx() themselves.
+let txDepth = 0
+
+/** Run `fn` inside a transaction (synchronous — DatabaseSync is sync). Reentrant. */
 export function tx<T>(fn: () => T): T {
     const { db } = wrap()
+    if (txDepth > 0) return fn()
+    txDepth++
     db.exec('BEGIN')
     try {
         const result = fn()
@@ -354,6 +349,8 @@ export function tx<T>(fn: () => T): T {
     } catch (err) {
         db.exec('ROLLBACK')
         throw err
+    } finally {
+        txDepth--
     }
 }
 

@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = { title: 'Accounts' }
 
 export default async function AccountsPage() {
-    const me = await requireRole('admin')
+    const me = await requireRole('owner')
     const projects = await getProjectNav()
     const accounts = listAccountSummaries()
     return (

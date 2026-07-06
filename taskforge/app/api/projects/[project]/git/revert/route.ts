@@ -1,8 +1,7 @@
-import { guard, json, error } from '@/server/web/http'
+import { guard, json, error, errorFrom } from '@/server/web/http'
 import { engine } from '@/server/services/execution-manager'
 import { agentSessions } from '@/server/services/agent-sessions'
-import { revertCommit, status, GitError } from '@/server/infrastructure/git'
-import { UnsafePathError } from '@/server/infrastructure/fs-workspace'
+import { revertCommit, status } from '@/server/infrastructure/git'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -22,8 +21,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ project: strin
         await revertCommit(params.project, body.sha)
         return json(await status(params.project))
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
-        if (e instanceof GitError) return error(e.stderr?.trim() || e.message, 409)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }

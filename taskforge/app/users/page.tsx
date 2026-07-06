@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = { title: 'Users' }
 
 export default async function UsersPage() {
-    const me = await requireRole('admin')
+    const me = await requireRole('owner')
     const [users, projects] = await Promise.all([listUsers(), getProjectNav()])
     return (
         <AppShell me={me} projects={projects}>

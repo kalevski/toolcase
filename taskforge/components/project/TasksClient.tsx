@@ -3,7 +3,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { toast } from '@/lib/toast'
-import { useTc, useTcProps, useTcEvents } from '@/lib/tc'
+import { apiFetch, ApiError, describeApiError } from '@/lib/fetcher'
+import { escapeHtml, useTc, useTcProps, useTcEvents } from '@/lib/tc'
 import type { ChipGroupItem } from '@toolcase/web-components'
 import type { TaskInfo, TaskRuntimeStatus } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
@@ -30,19 +31,97 @@ const STATUS_DOT: Record<TaskRuntimeStatus, 'online' | 'offline' | 'busy' | 'awa
 }
 
 type Filter = 'all' | TaskRuntimeStatus
-// tc-advanced-table header descriptors (string labels — the component renders
-// the <th> from these as a JS property) paired with a body-cell renderer.
-type AdvCol = { key: string; label: string; width?: string; align?: 'left' | 'right' | 'center'; render: (t: TaskInfo) => React.ReactNode }
 
 const MODEL_ALIASES = ['fast', 'mid', 'deep']
 
-// Archived sub-table header descriptors (tc-advanced-table; rows are slotted
-// React <tr> so the per-row Restore button keeps its handler).
+// tc-advanced-table header descriptors (string labels — the component renders
+// the <th> from these as a JS property). Body rows are fed through the `rows`
+// HTML-string property: the component owns its <tbody>, so React <tr> children
+// are forbidden (they'd be relocated out from under the reconciler, and raw
+// <tr> outside a <table> breaks SSR hydration). The first column switches
+// between a row-select checkbox (normal mode) and up/down reorder buttons
+// (reorder mode); all row interactions are delegated data-* events on the host.
+const BASE_COLUMNS = [
+    { key: 'id', label: '#', width: '26%' },
+    { key: 'title', label: 'Title' },
+    { key: 'facets', label: 'Facets' },
+    { key: 'cost', label: 'Last cost', width: '7rem' },
+    { key: 'status', label: 'Status' },
+]
+
+// Archived sub-table header descriptors; the per-row Restore button is a
+// delegated data-action click.
 const ARCHIVE_COLUMNS = [
     { key: 'id', label: '#', width: '30%' },
     { key: 'title', label: 'Title' },
     { key: 'actions', label: '', width: '8rem' },
 ]
+
+/** Main-table tbody HTML — every interpolated value is escaped. */
+function taskRowsHtml(
+    shown: TaskInfo[],
+    opts: { reordering: boolean; selected: Set<string>; statusFilter: Filter; columnCount: number },
+): string {
+    if (shown.length === 0) {
+        const msg =
+            opts.statusFilter === 'all'
+                ? 'No tasks yet — create one, import GitHub issues, or use the task creator on the Agents page.'
+                : `No ${opts.statusFilter} tasks.`
+        return `<tr><td colspan="${opts.columnCount}" style="text-align: center; opacity: 0.6">${escapeHtml(msg)}</td></tr>`
+    }
+    return shown
+        .map((t) => {
+            const first = opts.reordering
+                ? `<td><span style="display: inline-flex; gap: 0.25rem">` +
+                  `<tc-icon-button icon="ArrowUp" label="Move up" size="sm" variant="secondary" outline data-action="up" data-id="${escapeHtml(t.id)}"></tc-icon-button>` +
+                  `<tc-icon-button icon="ArrowDown" label="Move down" size="sm" variant="secondary" outline data-action="down" data-id="${escapeHtml(t.id)}"></tc-icon-button>` +
+                  `</span></td>`
+                : `<td><tc-check data-select="${escapeHtml(t.id)}"${opts.selected.has(t.id) ? ' checked' : ''}></tc-check></td>`
+            const facets = [
+                t.severity ? `<tc-tag static variant="warning">${escapeHtml(t.severity)}</tc-tag>` : '',
+                t.project ? `<tc-tag static variant="info">${escapeHtml(t.project)}</tc-tag>` : '',
+                t.model
+                    ? `<tc-tag static variant="secondary"><tc-icon name="Zap"></tc-icon> ${escapeHtml(t.model)}</tc-tag>`
+                    : '',
+                t.depends && t.depends.length > 0
+                    ? `<tc-tooltip content="${escapeHtml(`Depends on: ${t.depends.join(', ')}`)}">` +
+                      `<tc-tag static variant="secondary"><tc-icon name="Link"></tc-icon> ${escapeHtml(t.depends.join(','))}</tc-tag></tc-tooltip>`
+                    : '',
+            ].join('')
+            const cost =
+                t.costUsd != null
+                    ? `<tc-tooltip content="${escapeHtml(`${(t.tokensIn ?? 0).toLocaleString()} in / ${(t.tokensOut ?? 0).toLocaleString()} out`)}">` +
+                      `<code>$${t.costUsd.toFixed(2)}</code></tc-tooltip>`
+                    : '<span style="opacity: 0.4">—</span>'
+            const status =
+                `<span style="display: inline-flex; align-items: center; gap: 0.4rem">` +
+                `<tc-status-dot status="${STATUS_DOT[t.status]}"${t.status === 'running' ? ' pulse' : ''}></tc-status-dot>` +
+                `<tc-badge variant="${STATUS_BADGE[t.status]}">${escapeHtml(t.status)}</tc-badge></span>`
+            const rowAttrs = opts.reordering
+                ? ''
+                : ` data-open="${escapeHtml(t.id)}" tabindex="0" role="button" aria-label="Open task ${escapeHtml(t.id)}" style="cursor: pointer"`
+            return (
+                `<tr${rowAttrs}>${first}` +
+                `<td><code>${escapeHtml(t.id)}</code></td>` +
+                `<td>${escapeHtml(t.title)}</td>` +
+                `<td><span style="display: inline-flex; gap: 0.3rem; flex-wrap: wrap">${facets}</span></td>` +
+                `<td>${cost}</td>` +
+                `<td>${status}</td></tr>`
+            )
+        })
+        .join('')
+}
+
+/** Archived sub-table tbody HTML. */
+function archiveRowsHtml(archived: { id: string; title: string }[], busy: boolean): string {
+    return archived
+        .map(
+            (a) =>
+                `<tr><td><code>archive/${escapeHtml(a.id)}</code></td><td>${escapeHtml(a.title)}</td>` +
+                `<td><tc-button size="sm" variant="secondary" outline${busy ? ' disabled' : ''} data-action="restore" data-id="${escapeHtml(a.id)}">Restore</tc-button></td></tr>`,
+        )
+        .join('')
+}
 
 // Bare checkbox with its own change listener (React 18 won't fire onChange on tc-check).
 function Chk({ checked, indeterminate, onChange }: { checked: boolean; indeterminate?: boolean; onChange: (c: boolean) => void }) {
@@ -87,7 +166,7 @@ export function TasksClient() {
 
     const loadArchived = useCallback(async () => {
         try {
-            const d = await fetch(`/api/projects/${project}/tasks/archive`).then((r) => (r.ok ? r.json() : null))
+            const d = await apiFetch<{ id: string; title: string }[]>(`/api/projects/${project}/tasks/archive`)
             if (d) setArchived(d)
         } catch {
             /* transient */
@@ -185,24 +264,18 @@ export function TasksClient() {
         }
         setBulkBusy(true)
         try {
-            const res = await fetch(`/api/projects/${project}/tasks/bulk`, {
+            const data = await apiFetch<{ tasks: TaskInfo[]; failed?: string[] }>(`/api/projects/${project}/tasks/bulk`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ op, ids, model }),
             })
-            if (res.status === 409) {
-                toast.error('A run or agent is in progress.')
-                return
-            }
-            if (!res.ok) {
-                toast.error((await res.json().catch(() => ({}))).error ?? 'Bulk operation failed')
-                return
-            }
-            const data = await res.json()
             setTasks(data.tasks)
             setSelected(new Set())
             const label = op === 'delete' ? 'Deleted' : op === 'reset' ? 'Moved to pending' : model ? `Pinned ${model} on` : 'Cleared model on'
             toast.success(`${label} ${ids.length} task(s)${data.failed?.length ? ` · ${data.failed.length} failed` : ''}`)
+        } catch (e) {
+            if (e instanceof ApiError && e.status === 409) toast.error('A run or agent is in progress.')
+            else toast.error(describeApiError(e))
         } finally {
             setBulkBusy(false)
         }
@@ -224,23 +297,19 @@ export function TasksClient() {
 
     const saveOrder = async () => {
         if (!orderIds) return
-        const res = await fetch(`/api/projects/${project}/tasks/reorder`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ids: orderIds }),
-        })
-        if (res.status === 409) {
-            toast.error('A run or agent is in progress.')
-            return
+        try {
+            const data = await apiFetch<{ tasks: TaskInfo[] }>(`/api/projects/${project}/tasks/reorder`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ids: orderIds }),
+            })
+            setTasks(data.tasks)
+            setOrderIds(null)
+            toast.success('Queue order saved')
+        } catch (e) {
+            if (e instanceof ApiError && e.status === 409) toast.error('A run or agent is in progress.')
+            else toast.error(describeApiError(e))
         }
-        if (!res.ok) {
-            toast.error((await res.json().catch(() => ({}))).error ?? 'Reorder failed')
-            return
-        }
-        const data = await res.json()
-        setTasks(data.tasks)
-        setOrderIds(null)
-        toast.success('Queue order saved')
     }
 
     // ── A5 archive ──────────────────────────────────────────────────────────
@@ -253,133 +322,105 @@ export function TasksClient() {
             confirmVariant: 'primary',
         })
         if (!ok) return
-        const res = await fetch(`/api/projects/${project}/tasks/archive`, { method: 'POST' })
-        if (res.status === 409) {
-            toast.error('A run or agent is in progress.')
-            return
+        try {
+            const data = await apiFetch<{ tasks: TaskInfo[]; moved: string[] }>(
+                `/api/projects/${project}/tasks/archive`,
+                { method: 'POST' },
+            )
+            setTasks(data.tasks)
+            toast.success(`Archived ${data.moved.length} task(s)`)
+            void loadArchived()
+        } catch (e) {
+            if (e instanceof ApiError && e.status === 409) toast.error('A run or agent is in progress.')
+            else toast.error(describeApiError(e))
         }
-        if (!res.ok) {
-            toast.error('Archive failed')
-            return
-        }
-        const data = await res.json()
-        setTasks(data.tasks)
-        toast.success(`Archived ${data.moved.length} task(s)`)
-        void loadArchived()
     }
 
     const restore = async (id: string) => {
-        const res = await fetch(`/api/projects/${project}/tasks/archive`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id }),
-        })
-        if (!res.ok) {
-            toast.error((await res.json().catch(() => ({}))).error ?? 'Restore failed')
-            return
+        try {
+            const data = await apiFetch<{ tasks: TaskInfo[] }>(`/api/projects/${project}/tasks/archive`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id }),
+            })
+            setTasks(data.tasks)
+            toast.success(`Restored ${id}`)
+            void loadArchived()
+        } catch (e) {
+            toast.error(describeApiError(e))
         }
-        const data = await res.json()
-        setTasks(data.tasks)
-        toast.success(`Restored ${id}`)
-        void loadArchived()
     }
 
-    // ── columns ─────────────────────────────────────────────────────────────
-    // tc-advanced-table drives its header row from the `columns` JS property
-    // (string labels only). The first column switches between a row-select
-    // checkbox (normal mode) and up/down reorder buttons (reorder mode); the
-    // select-all lives in a toolbar above the table since the component's header
-    // cells can't host a React component.
-    const columns: AdvCol[] = [
-        !reordering
-            ? {
-                  key: 'select',
-                  label: '',
-                  width: '2.5rem',
-                  render: (t: TaskInfo) => (
-                      <span onClick={(e) => e.stopPropagation()}>
-                          <Chk checked={selected.has(t.id)} onChange={(checked) => toggleSelect(t.id, checked)} />
-                      </span>
-                  ),
-              }
-            : {
-                  key: 'move',
-                  label: 'Order',
-                  width: '6rem',
-                  render: (t: TaskInfo) => (
-                      <span style={{ display: 'inline-flex', gap: '0.25rem' }} onClick={(e) => e.stopPropagation()}>
-                          <tc-icon-button icon="ArrowUp" label="Move up" size="sm" variant="secondary" outline onClick={() => move(t.id, -1)} />
-                          <tc-icon-button icon="ArrowDown" label="Move down" size="sm" variant="secondary" outline onClick={() => move(t.id, 1)} />
-                      </span>
-                  ),
-              },
-        { key: 'id', label: '#', width: '26%', render: (t) => <code>{t.id}</code> },
-        { key: 'title', label: 'Title', render: (t) => t.title },
-        {
-            key: 'facets',
-            label: 'Facets',
-            render: (t) => (
-                <span style={{ display: 'inline-flex', gap: '0.3rem', flexWrap: 'wrap' }}>
-                    {t.severity && <tc-tag static variant="warning">{t.severity}</tc-tag>}
-                    {t.project && <tc-tag static variant="info">{t.project}</tc-tag>}
-                    {t.model && <tc-tag static variant="secondary"><tc-icon name="Zap" /> {t.model}</tc-tag>}
-                    {t.depends && t.depends.length > 0 && (
-                        <tc-tooltip content={`Depends on: ${t.depends.join(', ')}`}>
-                            <tc-tag static variant="secondary"><tc-icon name="Link" /> {t.depends.join(',')}</tc-tag>
-                        </tc-tooltip>
-                    )}
-                </span>
-            ),
-        },
-        {
-            key: 'cost',
-            label: 'Last cost',
-            width: '7rem',
-            render: (t) =>
-                t.costUsd != null ? (
-                    <tc-tooltip content={`${(t.tokensIn ?? 0).toLocaleString()} in / ${(t.tokensOut ?? 0).toLocaleString()} out`}>
-                        <code>${t.costUsd.toFixed(2)}</code>
-                    </tc-tooltip>
-                ) : (
-                    <span style={{ opacity: 0.4 }}>—</span>
-                ),
-        },
-        {
-            key: 'status',
-            label: 'Status',
-            render: (t) => (
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <tc-status-dot status={STATUS_DOT[t.status]} pulse={t.status === 'running' || undefined} />
-                    <tc-badge variant={STATUS_BADGE[t.status]}>{t.status}</tc-badge>
-                </span>
-            ),
-        },
-    ]
-
-    // Header descriptors fed to tc-advanced-table as a property (label + width +
-    // align only — body cells are slotted React <tr>). useMemo so identity only
-    // changes when the column SET changes (select ↔ move on reorder toggle),
-    // which is also part of the remount key below.
+    // ── table wiring ────────────────────────────────────────────────────────
+    // The first column switches between the row-select checkbox and the reorder
+    // buttons; the select-all lives in a toolbar above the table since the
+    // component's header cells are string labels only.
     const advColumns = useMemo(
-        () => columns.map(({ key, label, width, align }) => ({ key, label, ...(width ? { width } : {}), ...(align ? { align } : {}) })),
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        () =>
+            reordering
+                ? [{ key: 'move', label: 'Order', width: '6rem' }, ...BASE_COLUMNS]
+                : [{ key: 'select', label: '', width: '2.5rem' }, ...BASE_COLUMNS],
         [reordering],
     )
-    const tasksTableRef = useTcProps<HTMLElement>(useMemo(() => ({ columns: advColumns }), [advColumns]))
 
-    // tc-advanced-table relocates its slotted <tr> children into its own <tbody>
-    // on connect, so React can't safely reorder those moved nodes. Remount the
-    // table with a fresh key whenever the displayed ROWS (order/set) or the
-    // column mode change. Selection toggles deliberately stay OUT of the key:
-    // they only flip a checkbox's `checked` inside an existing row, which React
-    // patches in place — keying on selection would remount (and drop checkbox
-    // focus) on every click. (Same technique as the Dashboard / Users tables.)
-    const tasksTableKey = `${reordering ? 'reorder' : statusFilter}:${shown.map((t) => t.id).join('_')}`
+    // Delegated row interactions: data-action buttons (reorder arrows) win over
+    // row-open; checkbox clicks are handled by the change delegate below and
+    // must not open the drawer.
+    const onTasksClick = (event: Event) => {
+        const target = event.target as HTMLElement
+        const action = target.closest?.('[data-action]') as HTMLElement | null
+        if (action) {
+            const id = action.getAttribute('data-id')
+            const kind = action.getAttribute('data-action')
+            if (id && (kind === 'up' || kind === 'down')) move(id, kind === 'up' ? -1 : 1)
+            return
+        }
+        if (target.closest?.('tc-check[data-select]')) return
+        const row = target.closest?.('tr[data-open]') as HTMLElement | null
+        if (row) setOpenTask(row.getAttribute('data-open'))
+    }
+    const onTasksChange = (event: Event) => {
+        const host = (event.target as HTMLElement)?.closest?.('tc-check[data-select]') as
+            | (HTMLElement & { checked: boolean })
+            | null
+        if (!host) return
+        const id = host.getAttribute('data-select')
+        if (id) toggleSelect(id, host.checked)
+    }
+    const onTasksKeydown = (event: Event) => {
+        const e = event as KeyboardEvent
+        if (e.key !== 'Enter' && e.key !== ' ') return
+        const row = e.target as HTMLElement
+        if (!row.matches?.('tr[data-open]')) return
+        e.preventDefault()
+        setOpenTask(row.getAttribute('data-open'))
+    }
+
+    const tasksTableProps = useMemo(
+        () => ({
+            columns: advColumns,
+            rows: taskRowsHtml(shown, { reordering, selected, statusFilter, columnCount: advColumns.length }),
+        }),
+        [advColumns, shown, reordering, selected, statusFilter],
+    )
+    const tasksTableRef = useTc<HTMLElement>(tasksTableProps, {
+        click: onTasksClick,
+        change: onTasksChange,
+        keydown: onTasksKeydown,
+    })
 
     const selectedCount = selected.size
 
-    const archiveTableKey = archived.map((a) => a.id).join('_')
-    const archiveTableRef = useTc<HTMLElement>({ columns: ARCHIVE_COLUMNS })
+    const onArchiveClick = (event: Event) => {
+        const el = (event.target as HTMLElement)?.closest?.('[data-action="restore"]') as HTMLElement | null
+        const id = el?.getAttribute('data-id')
+        if (id) void restore(id)
+    }
+    const archiveTableProps = useMemo(
+        () => ({ columns: ARCHIVE_COLUMNS, rows: archiveRowsHtml(archived, busy) }),
+        [archived, busy],
+    )
+    const archiveTableRef = useTc<HTMLElement>(archiveTableProps, { click: onArchiveClick })
 
     return (
         <div className="taskforge-page">
@@ -513,68 +554,17 @@ export function TasksClient() {
             )}
 
             {/* T2 — the task table is a tc-advanced-table fed string-label columns
-                (a property) with slotted React <tr> rows, so each row keeps its
-                click→drawer handler and live tc-* cells. The whole table is keyed
-                (tasksTableKey) so it remounts on any row reorder/filter/column-mode
-                change — the component relocates slotted rows into its own tbody,
-                which would otherwise fight React reconciliation on reorder. */}
-            <tc-advanced-table key={tasksTableKey} ref={tasksTableRef}>
-                {shown.length === 0 ? (
-                    <tr>
-                        <td colSpan={columns.length} style={{ textAlign: 'center', opacity: 0.6 }}>
-                            {statusFilter === 'all'
-                                ? 'No tasks yet — create one, import GitHub issues, or use the task creator on the Agents page.'
-                                : `No ${statusFilter} tasks.`}
-                        </td>
-                    </tr>
-                ) : (
-                    shown.map((t) => (
-                        <tr
-                            key={t.id}
-                            style={{ cursor: reordering ? 'default' : 'pointer' }}
-                            tabIndex={reordering ? undefined : 0}
-                            role={reordering ? undefined : 'button'}
-                            aria-label={reordering ? undefined : `Open task ${t.id}`}
-                            onClick={() => !reordering && setOpenTask(t.id)}
-                            onKeyDown={(e) => {
-                                if (!reordering && (e.key === 'Enter' || e.key === ' ')) {
-                                    e.preventDefault()
-                                    setOpenTask(t.id)
-                                }
-                            }}
-                        >
-                            {columns.map((c) => (
-                                <td key={c.key} style={c.align === 'right' ? { textAlign: 'right' } : undefined}>
-                                    {c.render(t)}
-                                </td>
-                            ))}
-                        </tr>
-                    ))
-                )}
-            </tc-advanced-table>
+                and a `rows` HTML string (see taskRowsHtml); row clicks, checkbox
+                changes, and reorder buttons all resolve through the delegated
+                listeners bound on the host. */}
+            <tc-advanced-table ref={tasksTableRef} />
 
             {archived.length > 0 && (
                 <tc-stack gap="0.75rem">
                     <tc-button size="sm" variant="secondary" outline onClick={() => setShowArchived((v) => !v)}>
                         <tc-icon name={showArchived ? 'ChevronDown' : 'ChevronRight'} /> Archived ({archived.length})
                     </tc-button>
-                    {showArchived && (
-                        <tc-advanced-table key={archiveTableKey} ref={archiveTableRef}>
-                            {archived.map((a) => (
-                                <tr key={a.id}>
-                                    <td>
-                                        <code>archive/{a.id}</code>
-                                    </td>
-                                    <td>{a.title}</td>
-                                    <td>
-                                        <tc-button size="sm" variant="secondary" outline disabled={busy || undefined} onClick={() => void restore(a.id)}>
-                                            Restore
-                                        </tc-button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tc-advanced-table>
-                    )}
+                    {showArchived && <tc-advanced-table ref={archiveTableRef} />}
                 </tc-stack>
             )}
 

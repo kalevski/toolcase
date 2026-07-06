@@ -1,9 +1,9 @@
 // B7 — open a GitHub PR for the current branch (manual button on the Git page).
 // Pushes first so the head exists on the remote.
 
-import { guard, json, error, audit } from '@/server/web/http'
-import { projectExists, UnsafePathError } from '@/server/infrastructure/fs-workspace'
-import { parseGithubRepo, createPull, defaultBranch, GithubError } from '@/server/infrastructure/github'
+import { guard, json, error, audit, errorFrom } from '@/server/web/http'
+import { projectExists } from '@/server/infrastructure/fs-workspace'
+import { parseGithubRepo, createPull, defaultBranch } from '@/server/infrastructure/github'
 import { readProjectMeta } from '@/server/services/provision'
 import { engine } from '@/server/services/execution-manager'
 import * as git from '@/server/infrastructure/git'
@@ -47,9 +47,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ project: strin
         audit(auth, 'git.pr', params.project, url)
         return json({ url })
     } catch (e) {
-        if (e instanceof GithubError) return error(e.message, 502)
-        if (e instanceof git.GitError) return error(e.stderr || e.message, 500)
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }

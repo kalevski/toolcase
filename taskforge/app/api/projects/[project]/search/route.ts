@@ -1,7 +1,7 @@
 // C3 — workspace search over tasks / knowledge / notes (FTS5).
 
-import { guard, json, error } from '@/server/web/http'
-import { projectExists, UnsafePathError } from '@/server/infrastructure/fs-workspace'
+import { guard, json, error, errorFrom } from '@/server/web/http'
+import { projectExists } from '@/server/infrastructure/fs-workspace'
 import * as searchRepo from '@/server/data/repositories/search-repo'
 
 export const runtime = 'nodejs'
@@ -20,7 +20,8 @@ export async function GET(req: Request, ctx: { params: Promise<{ project: string
             hits: searchRepo.search(params.project, q),
         })
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }

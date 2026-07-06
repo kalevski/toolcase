@@ -1,7 +1,7 @@
 // C1 — full prompt history for one (project, agent).
 
-import { guard, json, error } from '@/server/web/http'
-import { projectExists, UnsafePathError } from '@/server/infrastructure/fs-workspace'
+import { guard, json, error, errorFrom } from '@/server/web/http'
+import { projectExists } from '@/server/infrastructure/fs-workspace'
 import * as promptHistoryRepo from '@/server/data/repositories/prompt-history-repo'
 
 export const runtime = 'nodejs'
@@ -16,7 +16,8 @@ export async function GET(req: Request, ctx: { params: Promise<{ project: string
         const limit = Number(new URL(req.url).searchParams.get('limit')) || 20
         return json(promptHistoryRepo.history(params.project, params.agent, Math.min(limit, 100)))
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }

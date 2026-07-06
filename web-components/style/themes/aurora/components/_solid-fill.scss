@@ -5,18 +5,20 @@
 // ~1.9–2.8:1, and `secondary` resolves to the pale secondary-TEXT grey which is
 // unreadable as a fill. Flip bright fills to ink and re-skin secondary to a dark
 // surface so any consumer of these helpers clears AA. Per-component partials
-// (badge, toast, card) with higher specificity still win where they re-skin.
+// (badge, card) with higher specificity still win where they re-skin. Toast is
+// excluded outright: its base partial neutralizes the colored fill (ink bg +
+// white text in every theme), so the ink-text flip would land dark-on-dark.
 
 tc-theme[name='aurora'],
 [data-tc-theme='aurora'] {
-    .text-bg-success,
-    .text-bg-warning,
-    .text-bg-info,
-    .text-bg-danger {
+    .text-bg-success:not(.toast),
+    .text-bg-warning:not(.toast),
+    .text-bg-info:not(.toast),
+    .text-bg-danger:not(.toast) {
         color: var(--ah-accent-ink) !important;
     }
 
-    .text-bg-secondary,
+    .text-bg-secondary:not(.toast),
     .bg-secondary {
         background-color: var(--ah-surface-3) !important;
         color: var(--ah-text) !important;

@@ -20,8 +20,8 @@ import {
 } from '@/server/infrastructure/fs-workspace'
 import * as projectRepo from '@/server/data/repositories/project-repo'
 import * as searchRepo from '@/server/data/repositories/search-repo'
+import { sshCommandFor } from '@/server/services/git-keys'
 import { agentSessionsBusy } from '@/server/services/locks'
-import { ensureImported } from '@/server/services/migrate-fs'
 import { PROJECT_CLAUDE_MD } from '@/server/templates/project-claude'
 
 export class ProjectExistsError extends Error {}
@@ -52,22 +52,32 @@ export interface CreateProjectInput {
     name: string
     gitUrl: string
     branch?: string
+    /** Alias of a saved git SSH key to clone (and later fetch/push) with. */
+    sshKey?: string
 }
 
 /**
  * Create a project: clone → scaffold dirs → link skills → CLAUDE.md → metadata.
  * Atomic: any failure after the root dir is created removes the half-built dir.
  */
-export async function createProject({ name, gitUrl, branch }: CreateProjectInput): Promise<void> {
+export async function createProject({ name, gitUrl, branch, sshKey }: CreateProjectInput): Promise<void> {
     const root = projectPath(name) // validates the name (throws UnsafePathError)
     git.assertSafeGitUrl(gitUrl) // validate before any filesystem work
+    // Resolve the saved key up front too (throws UnknownGitKeyError) — before
+    // any filesystem work, and outside the cleanup try so a bad alias can't
+    // wipe anything.
+    const sshCommand = sshKey ? await sshCommandFor(sshKey) : undefined
     if (await projectExists(name)) {
         throw new ProjectExistsError(`Project already exists: ${name}`)
     }
 
     await fs.mkdir(root, { recursive: true })
     try {
-        await git.clone(name, gitUrl, branch) // creates repo/
+        await git.clone(name, gitUrl, branch, sshCommand) // creates repo/
+        // Persist the key into the clone's core.sshCommand so every later
+        // fetch/pull/push — from the app and from the agent inside repo/ —
+        // keeps using it without re-threading the alias.
+        if (sshCommand) await git.setRepoSshCommand(name, sshCommand)
         // Embed the push token in origin's URL so the agent can push/fetch
         // directly from inside repo/ (no-op without GIT_REMOTE_TOKEN / non-HTTPS).
         await git.setOriginUrlWithToken(name, gitUrl)
@@ -83,6 +93,7 @@ export async function createProject({ name, gitUrl, branch }: CreateProjectInput
             name,
             gitUrl,
             branch: branch ?? null,
+            sshKeyAlias: sshKey ?? null,
             createdAt: new Date().toISOString(),
         })
     } catch (err) {
@@ -99,7 +110,6 @@ export interface ProjectMeta {
 
 /** Read a project's metadata from SQLite, or `{}` if unknown. */
 export async function readProjectMeta(name: string): Promise<ProjectMeta> {
-    await ensureImported()
     const row = projectRepo.getProject(name)
     return row ? { gitUrl: row.gitUrl, branch: row.branch, createdAt: row.createdAt } : {}
 }

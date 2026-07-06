@@ -34,14 +34,15 @@ export function LoginClient({ error }: { error?: string }) {
         <div style={{ minHeight: '100vh', display: 'flex' }}>
             <tc-login
                 ref={ref}
-                title="TaskForge"
+                title={branding.primaryText}
                 description="Drive the Claude Code CLI over your local repositories."
             >
                 <tc-brand
                     slot="logo"
-                    primary-text="Task Forge"
+                    primary-text={branding.primaryText}
                     secondary-text={branding.secondaryText || undefined}
-                    color="#6c5ce7"
+                    label={branding.brandLabel || undefined}
+                    color={branding.brandColor}
                 />
             </tc-login>
         </div>

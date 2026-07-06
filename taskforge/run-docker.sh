@@ -29,7 +29,7 @@ PORT="${PORT:-3000}"
 # published on the host (the proxy reaches the container over the network).
 NETWORK="${NETWORK:-}"
 
-# Host workspace — durable state (projects/, skills/, taskforge.db, .auth/).
+# Host workspace — durable state (projects/, skills/, taskforge.db).
 HOST_WORKSPACE="${HOST_WORKSPACE:-$HOME/taskforge-workspace}"
 
 # Host claude CLI. The native installer puts a symlink at ~/.local/bin/claude;

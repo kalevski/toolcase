@@ -945,9 +945,3 @@ export async function writeSkill(name: string, content: string): Promise<void> {
 export async function deleteSkill(name: string): Promise<void> {
     await fs.rm(skillDir(name), { recursive: true, force: true })
 }
-
-// ── auth dir bootstrap ──────────────────────────────────────────────────────
-
-export async function ensureAuthDir(): Promise<void> {
-    await ensureDir(config.authDir)
-}

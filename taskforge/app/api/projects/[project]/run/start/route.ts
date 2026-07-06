@@ -1,6 +1,6 @@
-import { guard, json, error, audit } from '@/server/web/http'
+import { guard, json, error, audit, errorFrom } from '@/server/web/http'
 import { engine, DirtyTreeError, LockHeldError } from '@/server/services/execution-manager'
-import { projectExists, UnsafePathError } from '@/server/infrastructure/fs-workspace'
+import { projectExists } from '@/server/infrastructure/fs-workspace'
 import { effectiveSettings } from '@/server/services/settings'
 import { config } from '@/server/config'
 import type { RunOptions } from '@/server/domain/types'
@@ -56,7 +56,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ project: strin
             return json({ error: 'dirty tree', dirtyFiles: e.files }, 412)
         }
         if (e instanceof LockHeldError) return error('a run is already in progress', 409)
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }

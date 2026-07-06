@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { apiFetch, describeApiError } from '@/lib/fetcher'
 import { useTcProps } from '@/lib/tc'
 import { toTcLines, type TerminalLine } from '@/lib/terminal'
 import type { GitBranchList, GitCommit } from '@/server/domain/types'
@@ -52,7 +53,7 @@ export function GitClient() {
 
     const loadBranches = useCallback(async () => {
         try {
-            const b = await fetch(`/api/projects/${project}/git/branches`).then((r) => (r.ok ? r.json() : null))
+            const b = await apiFetch<GitBranchList>(`/api/projects/${project}/git/branches`)
             if (b) setBranches(b)
         } catch {
             /* transient */
@@ -98,30 +99,32 @@ export function GitClient() {
         setLines((ls) => [...ls, { kind: 'input', text: command }])
         setPending(true)
         try {
-            const res = await fetch(`/api/projects/${project}/git/exec`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ command }),
-            })
-            const data = await res.json().catch(() => ({}))
+            // Arbitrary git command — push/pull/fetch can legitimately exceed the
+            // default 10 s deadline, so opt out of the client-side timeout.
+            const data = await apiFetch<{ code: number | null; stdout?: string; stderr?: string }>(
+                `/api/projects/${project}/git/exec`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command }),
+                    timeoutMs: 0,
+                },
+            )
             const out: TerminalLine[] = []
-            if (!res.ok) {
-                out.push({ kind: 'error', text: data.error ?? `request failed (${res.status})` })
-            } else {
-                const failed = data.code !== 0
-                for (const l of String(data.stdout ?? '').split('\n')) {
-                    if (l.length) out.push({ kind: 'output', text: l })
-                }
-                for (const l of String(data.stderr ?? '').split('\n')) {
-                    if (l.length) out.push({ kind: failed ? 'error' : 'comment', text: l })
-                }
-                if (failed) {
-                    out.push({ kind: 'error', text: data.code === null ? 'killed (timeout)' : `exit ${data.code}` })
-                }
+            const failed = data.code !== 0
+            for (const l of String(data.stdout ?? '').split('\n')) {
+                if (l.length) out.push({ kind: 'output', text: l })
+            }
+            for (const l of String(data.stderr ?? '').split('\n')) {
+                if (l.length) out.push({ kind: failed ? 'error' : 'comment', text: l })
+            }
+            if (failed) {
+                out.push({ kind: 'error', text: data.code === null ? 'killed (timeout)' : `exit ${data.code}` })
             }
             setLines((ls) => [...ls, ...out])
-        } catch {
-            setLines((ls) => [...ls, { kind: 'error', text: 'network error' }])
+        } catch (e) {
+            // Errors land in the terminal log (this page's error channel), not toasts.
+            setLines((ls) => [...ls, { kind: 'error', text: describeApiError(e) }])
         } finally {
             setPending(false)
             void refreshGit()

@@ -1,8 +1,7 @@
-import { guard, json, error, audit } from '@/server/web/http'
+import { guard, json, error, audit, errorFrom } from '@/server/web/http'
 import { engine } from '@/server/services/execution-manager'
 import { agentSessions } from '@/server/services/agent-sessions'
-import { execTerminal, tokenizeCommand, GitError } from '@/server/infrastructure/git'
-import { UnsafePathError } from '@/server/infrastructure/fs-workspace'
+import { execTerminal, tokenizeCommand } from '@/server/infrastructure/git'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -54,7 +53,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ project: strin
     try {
         argv = tokenizeCommand(command)
     } catch (e) {
-        if (e instanceof GitError) return error(e.message, 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
     const rejection = rejectConfigOverrides(argv)
@@ -65,8 +65,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ project: strin
         audit(auth, 'git.terminal', params.project, command.slice(0, 200))
         return json(result)
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
-        if (e instanceof GitError) return error(e.message, 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }

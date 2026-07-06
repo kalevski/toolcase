@@ -5,15 +5,25 @@
 
 import 'server-only'
 
+// Every app-owned variable is namespaced `TASKFORGE_<NAME>`; the bare name is
+// still honored as a fallback so existing deployments keep working. Shared
+// infra knobs (PORT, DB_PATH, WORKSPACE_DIR) conventionally stay bare — the
+// prefixed form simply wins when both are set.
+function raw(name: string): string | undefined {
+    const prefixed = process.env[`TASKFORGE_${name}`]
+    if (prefixed !== undefined && prefixed.trim() !== '') return prefixed
+    return process.env[name]
+}
+
 function required(name: string): string {
-    const value = process.env[name]
+    const value = raw(name)
     if (!value || value.trim() === '') {
         // During `next build` the module graph is imported for tracing; env is
         // not yet provided. Defer the failure to runtime (fail-fast at boot /
         // first request) rather than breaking the build.
         if (process.env.NEXT_PHASE === 'phase-production-build') return ''
         throw new Error(
-            `[taskforge] Missing required environment variable: ${name}. ` +
+            `[taskforge] Missing required environment variable: TASKFORGE_${name} (or ${name}). ` +
                 `See .env.example for the full list.`,
         )
     }
@@ -35,27 +45,27 @@ function requiredSecret(name: string, minLen: number): string {
 }
 
 function optional(name: string, fallback: string): string {
-    const value = process.env[name]
+    const value = raw(name)
     return value && value.trim() !== '' ? value : fallback
 }
 
 function num(name: string, fallback: number): number {
-    const raw = process.env[name]
-    if (!raw || raw.trim() === '') return fallback
-    const parsed = Number(raw)
+    const value = raw(name)
+    if (!value || value.trim() === '') return fallback
+    const parsed = Number(value)
     return Number.isFinite(parsed) ? parsed : fallback
 }
 
 function bool(name: string, fallback: boolean): boolean {
-    const raw = process.env[name]
-    if (raw === undefined || raw.trim() === '') return fallback
-    return raw === '1' || raw.toLowerCase() === 'true'
+    const value = raw(name)
+    if (value === undefined || value.trim() === '') return fallback
+    return value === '1' || value.toLowerCase() === 'true'
 }
 
 function csv(name: string): string[] {
-    const raw = process.env[name]
-    if (!raw) return []
-    return raw.split(',').flatMap((s) => {
+    const value = raw(name)
+    if (!value) return []
+    return value.split(',').flatMap((s) => {
         const trimmed = s.trim()
         return trimmed ? [trimmed] : []
     })
@@ -73,7 +83,7 @@ export const config = {
     // authoritative public URL (GitHub redirects the browser there), so derive
     // the origin from it. Override with PUBLIC_ORIGIN if they differ.
     get publicOrigin(): string {
-        const explicit = process.env.PUBLIC_ORIGIN
+        const explicit = raw('PUBLIC_ORIGIN')
         if (explicit && explicit.trim() !== '') return explicit.trim().replace(/\/+$/, '')
         try {
             return new URL(this.oauthRedirectUri).origin
@@ -91,7 +101,7 @@ export const config = {
     // `claude login` / its own stored credentials). We only spawn the binary.
     // (E4: the half-implemented `cursor` backend stub was removed — `claude`
     //  is the one supported backend; a second one needs a real AgentBackend seam.)
-    agentBin: process.env.CLAUDE_BIN || process.env.AGENT_BIN || 'claude',
+    agentBin: raw('CLAUDE_BIN') || raw('AGENT_BIN') || 'claude',
     // Fallback account alias when a task/project specifies none (multi-account
     // registry). Empty = no default; the parent process's inherited identity is
     // used (current single-account behavior).
@@ -116,9 +126,6 @@ export const config = {
     get projectsDir() {
         return `${this.workspaceDir}/projects`
     },
-    get authDir() {
-        return `${this.workspaceDir}/.auth`
-    },
     /**
      * Root of the per-alias Claude config dirs (multi-account registry). Each
      * account gets an isolated `CLAUDE_CONFIG_DIR` at `${accountsDir}/<alias>`.
@@ -126,11 +133,18 @@ export const config = {
     get accountsDir() {
         return `${this.workspaceDir}/.claude-accounts`
     },
+    /**
+     * Root of the saved git SSH keys (deploy keys). Each key is one owner-only
+     * (`0600`) file at `${gitKeysDir}/<alias>`; the dir also holds the
+     * app-managed `known_hosts`. Key material never enters the database.
+     */
+    get gitKeysDir() {
+        return `${this.workspaceDir}/.git-ssh-keys`
+    },
     /** SQLite database file — system of record for app state (see server/db.ts). */
     get dbPath() {
-        return process.env.DB_PATH && process.env.DB_PATH.trim() !== ''
-            ? process.env.DB_PATH.trim()
-            : `${this.workspaceDir}/taskforge.db`
+        const explicit = raw('DB_PATH')
+        return explicit && explicit.trim() !== '' ? explicit.trim() : `${this.workspaceDir}/taskforge.db`
     },
     skillsDir: optional('SKILLS_DIR', optional('WORKSPACE_DIR', '/workspace') + '/skills'),
     /** Bundled, read-only app-level skills shipped in the image. */
@@ -206,5 +220,5 @@ export type Config = typeof config
 export function canPush(): boolean {
     // HTTPS token OR a mounted SSH key (we can't reliably detect the key file
     // here, so token presence is the explicit signal; SSH users can override).
-    return config.gitRemoteToken !== '' || process.env.GIT_SSH_CONFIGURED === '1'
+    return config.gitRemoteToken !== '' || raw('GIT_SSH_CONFIGURED') === '1'
 }

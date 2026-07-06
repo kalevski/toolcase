@@ -1,7 +1,7 @@
-import { guard, json, error, audit } from '@/server/web/http'
+import { guard, json, error, audit, errorFrom } from '@/server/web/http'
 import { getProjectSummaries } from '@/server/services/projects'
 import { createProject, ProjectExistsError } from '@/server/services/provision'
-import { UnsafePathError } from '@/server/infrastructure/fs-workspace'
+import { UnknownGitKeyError } from '@/server/services/git-keys'
 import { GitError } from '@/server/infrastructure/git'
 
 export const runtime = 'nodejs'
@@ -23,30 +23,34 @@ export async function POST(req: Request) {
         name?: string
         gitUrl?: string
         branch?: string
+        sshKey?: string
     }
     const name = (body.name ?? '').trim()
     const gitUrl = (body.gitUrl ?? '').trim()
     const branch = (body.branch ?? '').trim() || undefined
+    const sshKey = (body.sshKey ?? '').trim() || undefined
     if (!name) return error('name required', 400)
     if (!gitUrl) return error('gitUrl required', 400)
 
     try {
-        await createProject({ name, gitUrl, branch })
-        audit(auth, 'project.create', name, gitUrl)
+        await createProject({ name, gitUrl, branch, sshKey })
+        audit(auth, 'project.create', name, sshKey ? `${gitUrl} (ssh key: ${sshKey})` : gitUrl)
         return json({ name }, 201)
     } catch (e) {
         if (e instanceof ProjectExistsError) return error('project already exists', 409)
-        if (e instanceof UnsafePathError) return error('invalid project name', 400)
+        if (e instanceof UnknownGitKeyError) return error(e.message, 400)
         if (e instanceof GitError) {
             const needsAuth =
                 /could not read Username|Authentication failed|terminal prompts disabled|repository not found|Permission denied|Host key verification/i.test(
                     `${e.stderr} ${e.message}`,
                 )
             const hint = needsAuth
-                ? ' — private repo, wrong URL, or SSH without a key. For private HTTPS repos set GIT_REMOTE_TOKEN (a GitHub PAT with `repo` scope) and restart.'
+                ? ' — private repo, wrong URL, or SSH without a key. For private HTTPS repos set GIT_REMOTE_TOKEN (a GitHub PAT with `repo` scope) and restart; for SSH URLs save an SSH key on the SSH keys page and select it here.'
                 : ''
             return error(`clone failed: ${e.message}${hint}`, 422)
         }
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }

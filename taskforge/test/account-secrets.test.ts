@@ -3,7 +3,7 @@
 // pins the redaction/detection rules directly.
 
 import { describe, it, expect } from 'vitest'
-import { looksLikeApiKey, scrubSecrets, REDACTED } from './account-secrets'
+import { looksLikeApiKey, scrubSecrets, REDACTED } from '../server/domain/account-secrets'
 
 describe('looksLikeApiKey', () => {
     it('rejects env-var names (the legitimate apiKeyEnv values)', () => {

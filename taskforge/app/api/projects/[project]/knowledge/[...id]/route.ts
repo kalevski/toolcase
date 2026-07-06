@@ -1,4 +1,4 @@
-import { guard, json, error, audit } from '@/server/web/http'
+import { guard, json, error, audit, errorFrom } from '@/server/web/http'
 import { engine } from '@/server/services/execution-manager'
 import { removeKnowledge, rebuildIndex } from '@/server/services/knowledge'
 import { getKnowledge } from '@/server/services/projects'
@@ -7,7 +7,6 @@ import {
     readKnowledgeFile,
     writeKnowledgeFile,
     extractTitle,
-    UnsafePathError,
 } from '@/server/infrastructure/fs-workspace'
 
 export const runtime = 'nodejs'
@@ -30,7 +29,8 @@ export async function GET(_req: Request, ctx: { params: Promise<{ project: strin
         const content = await readKnowledgeFile(params.project, id)
         return json({ id, title: extractTitle(content, id), content, isIndex: id.toLowerCase() === 'index.md' })
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         return error('doc not found', 404)
     }
 }
@@ -52,7 +52,8 @@ export async function PUT(req: Request, ctx: { params: Promise<{ project: string
         audit(auth, 'knowledge.edit', params.project, id)
         return json({ id, docs: await getKnowledge(params.project) })
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }
@@ -71,7 +72,8 @@ export async function DELETE(_req: Request, ctx: { params: Promise<{ project: st
         audit(auth, 'knowledge.delete', params.project, id)
         return json({ docs: await getKnowledge(params.project) })
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }

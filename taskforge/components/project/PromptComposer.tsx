@@ -2,6 +2,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react'
 import { toast } from '@/lib/toast'
+import { apiFetch, describeApiError } from '@/lib/fetcher'
 import { useTcEvents } from '@/lib/tc'
 import type { AgentKind, AgentPromptRecord } from '@/server/domain/types'
 import { usePrompt } from '../ConfirmModal'
@@ -104,13 +105,11 @@ export function PromptComposer({
                     // keep a stale cache, so clear it first to force the spinner +
                     // a fresh request every time the panel opens.
                     setHistory(null)
-                    const d = await fetch(`/api/projects/${project}/agents/${agentKind}/prompts`).then((r) =>
-                        r.ok ? r.json() : null,
-                    )
+                    const d = await apiFetch<HistoryEntry[]>(`/api/projects/${project}/agents/${agentKind}/prompts`)
                     if (d) setHistory(d)
                 } else {
-                    const d = await fetch(`/api/prompt-templates?agent=${encodeURIComponent(agentKind)}`).then((r) =>
-                        r.ok ? r.json() : null,
+                    const d = await apiFetch<TemplateEntry[]>(
+                        `/api/prompt-templates?agent=${encodeURIComponent(agentKind)}`,
                     )
                     if (d) setTemplates(d)
                 }
@@ -129,13 +128,14 @@ export function PromptComposer({
             placeholder: 'thorough-bug-batch',
         })
         if (!name) return
-        const res = await fetch('/api/prompt-templates', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, agent: agentKind, prompt: value }),
-        })
-        if (!res.ok) {
-            toast.error('Failed to save template')
+        try {
+            await apiFetch('/api/prompt-templates', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, agent: agentKind, prompt: value }),
+            })
+        } catch (e) {
+            toast.error(describeApiError(e))
             return
         }
         toast.success(`Template “${name}” saved`)
@@ -143,10 +143,12 @@ export function PromptComposer({
     }, [value, agentKind, namePrompt])
 
     const deleteTemplate = useCallback(async (id: number) => {
-        const res = await fetch(`/api/prompt-templates/${id}`, { method: 'DELETE' })
-        if (res.ok) {
+        try {
+            await apiFetch(`/api/prompt-templates/${id}`, { method: 'DELETE' })
             setTemplates((prev) => (prev ? prev.filter((t) => t.id !== id) : prev))
             toast.success('Template deleted')
+        } catch (e) {
+            toast.error(describeApiError(e))
         }
     }, [])
 

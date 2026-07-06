@@ -1,6 +1,6 @@
 // Users / roles repository — all SQL for the `app_user` table.
-// Replaces the on-disk `.auth/roles.json`. Business rules (bootstrap first admin,
-// block last-admin demotion) live in roles.ts, which calls this layer.
+// Business rules (bootstrap first owner, block last-owner demotion) live in
+// roles.ts, which calls this layer.
 
 import 'server-only'
 import { prep, tx, getRow, allRows } from '@/server/data/db'
@@ -35,8 +35,8 @@ export function get(githubId: number): UserRecord | undefined {
     return r ? map(r) : undefined
 }
 
-export function adminCount(): number {
-    const r = getRow<{ n: number }>(`SELECT COUNT(*) AS n FROM app_user WHERE role = 'admin'`)
+export function ownerCount(): number {
+    const r = getRow<{ n: number }>(`SELECT COUNT(*) AS n FROM app_user WHERE role = 'owner'`)
     return r?.n ?? 0
 }
 

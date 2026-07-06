@@ -6,9 +6,10 @@
 // secret: apikey accounts reference an env-var *name* only; the value lives in
 // the host environment and is resolved server-side at spawn time.
 
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { toast } from '@/lib/toast'
-import { useTc, useTcEvents } from '@/lib/tc'
+import { apiFetch, describeApiError } from '@/lib/fetcher'
+import { escapeHtml, useTc, useTcEvents } from '@/lib/tc'
 import { tcIcon } from '@/lib/icons'
 import type { Account, AccountHealth, AccountSummary } from '@/server/domain/types'
 import { useConfirm } from './ConfirmModal'
@@ -16,8 +17,10 @@ import { helpTexts } from './helpTexts'
 
 type AuthMethod = 'oauth' | 'apikey'
 
-// tc-advanced-table header descriptors; body rows stay slotted React <tr> so the
-// per-row Verify/Remove buttons keep their onClick handlers.
+// tc-advanced-table header descriptors. Body rows are fed through the `rows`
+// HTML-string property (the component owns its <tbody>; React <tr> children
+// would be relocated out from under the reconciler and break SSR hydration).
+// The per-row Verify/Remove buttons are delegated data-action clicks.
 const ADV_COLUMNS = [
     { key: 'account', label: 'Account' },
     { key: 'auth', label: 'Auth', width: '8rem' },
@@ -30,6 +33,51 @@ const ADV_COLUMNS = [
 // Live verify state per alias — absent = never run this session, 'pending' =
 // in-flight, otherwise the last AccountHealth outcome.
 type VerifyState = AccountHealth | 'pending'
+
+/** The injected tbody HTML — every interpolated value is escaped. */
+function accountRowsHtml(
+    rows: AccountSummary[],
+    verify: Record<string, VerifyState>,
+    busy: Record<string, boolean>,
+): string {
+    return rows
+        .map((a) => {
+            const v = verify[a.alias]
+            const account =
+                `<strong>${escapeHtml(a.alias)}</strong>` +
+                (a.label ? `<div style="font-size: 0.8rem; opacity: 0.7">${escapeHtml(a.label)}</div>` : '')
+            const auth =
+                `<tc-badge variant="secondary">${escapeHtml(a.auth)}</tc-badge>` +
+                (a.auth === 'apikey' && a.apiKeyEnv
+                    ? `<div style="margin-top: 0.25rem"><code>${escapeHtml(a.apiKeyEnv)}</code></div>`
+                    : '')
+            const lastUsed = a.lastUsedAt
+                ? `<tc-text variant="muted">${escapeHtml(new Date(a.lastUsedAt).toLocaleString())}</tc-text>`
+                : '<span style="opacity: 0.4">never</span>'
+            const state = a.cooling
+                ? `<tc-badge variant="warning">cooling${a.coolingUntil ? escapeHtml(` · ${new Date(a.coolingUntil).toLocaleTimeString()}`) : ''}</tc-badge>`
+                : '<tc-stack inline direction="horizontal" gap="0.4rem" align="center"><tc-status-dot status="online"></tc-status-dot>ready</tc-stack>'
+            let health: string
+            if (v === 'pending') health = '<tc-text variant="muted">checking…</tc-text>'
+            else if (v)
+                health =
+                    `<tc-stack inline direction="horizontal" gap="0.4rem" align="center">` +
+                    `<tc-status-dot status="${v.ok ? 'online' : 'offline'}"></tc-status-dot>` +
+                    `<tc-text${v.ok ? '' : ' variant="muted"'}>${escapeHtml(v.detail)}</tc-text></tc-stack>`
+            else if (a.lastUsedAt)
+                health = `<tc-text variant="muted">last good ${escapeHtml(new Date(a.lastUsedAt).toLocaleDateString())}</tc-text>`
+            else health = '<tc-text variant="muted">unverified</tc-text>'
+            const pending = v === 'pending'
+            const rowBusy = !!busy[a.alias]
+            const actions =
+                `<span style="display: inline-flex; gap: 0.4rem">` +
+                `<tc-button size="sm" variant="secondary" outline${pending ? ' loading disabled' : rowBusy ? ' disabled' : ''} data-action="verify" data-alias="${escapeHtml(a.alias)}">Verify</tc-button>` +
+                `<tc-button size="sm" variant="danger" outline${rowBusy ? ' disabled' : ''} data-action="remove" data-alias="${escapeHtml(a.alias)}">Remove</tc-button>` +
+                `</span>`
+            return `<tr><td>${account}</td><td>${auth}</td><td>${lastUsed}</td><td>${state}</td><td>${health}</td><td>${actions}</td></tr>`
+        })
+        .join('')
+}
 
 function summaryOf(account: Account): AccountSummary {
     return {
@@ -53,15 +101,11 @@ export function AccountsClient({ accounts }: { accounts: AccountSummary[] }) {
     const runVerify = async (alias: string) => {
         setVerify((v) => ({ ...v, [alias]: 'pending' }))
         try {
-            const res = await fetch(`/api/accounts/${alias}/verify`, { method: 'POST' })
-            const data = await res.json().catch(() => ({}))
-            if (!res.ok) {
-                const detail = (data.error as string) ?? 'verify failed'
-                setVerify((v) => ({ ...v, [alias]: { ok: false, detail } }))
-                toast.error(detail)
-                return
-            }
-            const health = data as AccountHealth
+            // Spawns a one-shot claude run on the host — no client deadline.
+            const health = await apiFetch<AccountHealth>(`/api/accounts/${alias}/verify`, {
+                method: 'POST',
+                timeoutMs: 0,
+            })
             setVerify((v) => ({ ...v, [alias]: health }))
             if (health.ok) {
                 // A passing verify stamps lastUsedAt server-side — reflect it.
@@ -70,9 +114,10 @@ export function AccountsClient({ accounts }: { accounts: AccountSummary[] }) {
             } else {
                 toast.error(`${alias}: ${health.detail}`)
             }
-        } catch {
-            setVerify((v) => ({ ...v, [alias]: { ok: false, detail: 'request failed' } }))
-            toast.error('Verify request failed')
+        } catch (e) {
+            const detail = describeApiError(e)
+            setVerify((v) => ({ ...v, [alias]: { ok: false, detail } }))
+            toast.error(detail)
         }
     }
 
@@ -86,18 +131,16 @@ export function AccountsClient({ accounts }: { accounts: AccountSummary[] }) {
         if (!ok) return
         setBusy((b) => ({ ...b, [alias]: true }))
         try {
-            const res = await fetch(`/api/accounts/${alias}`, { method: 'DELETE' })
-            if (res.ok) {
-                setRows((rs) => rs.filter((r) => r.alias !== alias))
-                setVerify((v) => {
-                    const next = { ...v }
-                    delete next[alias]
-                    return next
-                })
-                toast.success(`Removed ${alias}`)
-            } else {
-                toast.error((await res.json().catch(() => ({}))).error ?? 'Remove failed')
-            }
+            await apiFetch(`/api/accounts/${alias}`, { method: 'DELETE' })
+            setRows((rs) => rs.filter((r) => r.alias !== alias))
+            setVerify((v) => {
+                const next = { ...v }
+                delete next[alias]
+                return next
+            })
+            toast.success(`Removed ${alias}`)
+        } catch (e) {
+            toast.error(describeApiError(e))
         } finally {
             setBusy((b) => ({ ...b, [alias]: false }))
         }
@@ -107,11 +150,23 @@ export function AccountsClient({ accounts }: { accounts: AccountSummary[] }) {
         setRows((rs) => [...rs, summaryOf(account)].sort((a, b) => a.alias.localeCompare(b.alias)))
     }
 
-    // tc-advanced-table moves slotted <tr> into its own tbody, so remount with a
-    // fresh key when the account set changes (add/remove). In-place verify-state
-    // updates keep the same key — React patches those cells in place.
-    const tableRef = useTc<HTMLElement>({ columns: ADV_COLUMNS })
-    const tableKey = rows.map((r) => r.alias).join('_')
+    // Row-action buttons live in the injected tbody HTML — one delegated click
+    // listener routes their data-action back to the React handlers.
+    const onDelegated = (event: Event) => {
+        const el = (event.target as HTMLElement)?.closest?.('[data-action]') as HTMLElement | null
+        if (!el) return
+        const alias = el.getAttribute('data-alias')
+        if (!alias) return
+        const action = el.getAttribute('data-action')
+        if (action === 'verify') void runVerify(alias)
+        else if (action === 'remove') void remove(alias)
+    }
+
+    const tableProps = useMemo(
+        () => ({ columns: ADV_COLUMNS, rows: accountRowsHtml(rows, verify, busy) }),
+        [rows, verify, busy],
+    )
+    const tableRef = useTc<HTMLElement>(tableProps, { click: onDelegated })
 
     return (
         <div className="taskforge-page">
@@ -130,83 +185,7 @@ export function AccountsClient({ accounts }: { accounts: AccountSummary[] }) {
                     <p>Register a Claude identity above to let TaskForge dispatch under it.</p>
                 </tc-empty-state>
             ) : (
-                <tc-advanced-table key={tableKey} ref={tableRef}>
-                    {rows.map((a) => {
-                        const v = verify[a.alias]
-                        return (
-                                <tr key={a.alias}>
-                                    <td>
-                                        <strong>{a.alias}</strong>
-                                        {a.label && <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>{a.label}</div>}
-                                    </td>
-                                    <td>
-                                        <tc-badge variant="secondary">{a.auth}</tc-badge>
-                                        {a.auth === 'apikey' && a.apiKeyEnv && (
-                                            <div style={{ marginTop: '0.25rem' }}>
-                                                <code>{a.apiKeyEnv}</code>
-                                            </div>
-                                        )}
-                                    </td>
-                                    <td>
-                                        {a.lastUsedAt ? (
-                                            <tc-text variant="muted">{new Date(a.lastUsedAt).toLocaleString()}</tc-text>
-                                        ) : (
-                                            <span style={{ opacity: 0.4 }}>never</span>
-                                        )}
-                                    </td>
-                                    <td>
-                                        {a.cooling ? (
-                                            <tc-badge variant="warning">
-                                                cooling{a.coolingUntil ? ` · ${new Date(a.coolingUntil).toLocaleTimeString()}` : ''}
-                                            </tc-badge>
-                                        ) : (
-                                            <tc-stack inline direction="horizontal" gap="0.4rem" align="center">
-                                                <tc-status-dot status="online" />
-                                                ready
-                                            </tc-stack>
-                                        )}
-                                    </td>
-                                    <td>
-                                        {v === 'pending' ? (
-                                            <tc-text variant="muted">checking…</tc-text>
-                                        ) : v ? (
-                                            <tc-stack inline direction="horizontal" gap="0.4rem" align="center">
-                                                <tc-status-dot status={v.ok ? 'online' : 'offline'} />
-                                                <tc-text variant={v.ok ? undefined : 'muted'}>{v.detail}</tc-text>
-                                            </tc-stack>
-                                        ) : a.lastUsedAt ? (
-                                            <tc-text variant="muted">last good {new Date(a.lastUsedAt).toLocaleDateString()}</tc-text>
-                                        ) : (
-                                            <tc-text variant="muted">unverified</tc-text>
-                                        )}
-                                    </td>
-                                    <td>
-                                        <span style={{ display: 'inline-flex', gap: '0.4rem' }}>
-                                            <tc-button
-                                                size="sm"
-                                                variant="secondary"
-                                                outline
-                                                loading={v === 'pending' || undefined}
-                                                disabled={v === 'pending' || busy[a.alias] || undefined}
-                                                onClick={() => void runVerify(a.alias)}
-                                            >
-                                                Verify
-                                            </tc-button>
-                                            <tc-button
-                                                size="sm"
-                                                variant="danger"
-                                                outline
-                                                disabled={busy[a.alias] || undefined}
-                                                onClick={() => void remove(a.alias)}
-                                            >
-                                                Remove
-                                            </tc-button>
-                                        </span>
-                                    </td>
-                                </tr>
-                        )
-                    })}
-                </tc-advanced-table>
+                <tc-advanced-table ref={tableRef} />
             )}
         </div>
     )
@@ -241,7 +220,7 @@ function AddAccountForm({ existing, onCreated }: { existing: string[]; onCreated
         if (!valid) return
         setSubmitting(true)
         try {
-            const res = await fetch('/api/accounts', {
+            const data = await apiFetch<{ account: Account; guidance?: string }>('/api/accounts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -251,20 +230,15 @@ function AddAccountForm({ existing, onCreated }: { existing: string[]; onCreated
                     apiKeyEnv: auth === 'apikey' ? apiKeyEnv.trim() : undefined,
                 }),
             })
-            const data = await res.json().catch(() => ({}))
-            if (!res.ok) {
-                toast.error((data.error as string) ?? 'Failed to add account')
-                return
-            }
-            onCreated(data.account as Account)
+            onCreated(data.account)
             toast.success(`Added ${trimmedAlias}`)
-            setGuidance((data.guidance as string) ?? null)
+            setGuidance(data.guidance ?? null)
             // Reset for the next entry; keep the chosen auth method.
             setAlias('')
             setLabel('')
             setApiKeyEnv('')
-        } catch {
-            toast.error('Failed to add account')
+        } catch (e) {
+            toast.error(describeApiError(e))
         } finally {
             setSubmitting(false)
         }

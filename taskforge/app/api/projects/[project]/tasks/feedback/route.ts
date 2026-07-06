@@ -2,7 +2,7 @@
 // error inlined), reset the task to pending, and optionally start a
 // single-task run (reusing the resetTasks + onlyTasks mechanics).
 
-import { guard, json, error, audit } from '@/server/web/http'
+import { guard, json, error, audit, errorFrom } from '@/server/web/http'
 import {
     readTaskFile,
     writeTaskFile,
@@ -11,7 +11,6 @@ import {
     removeCompleted,
     reconcileTasks,
     projectExists,
-    UnsafePathError,
 } from '@/server/infrastructure/fs-workspace'
 import { clearTelemetry } from '@/server/infrastructure/logs'
 import { engine, DirtyTreeError, LockHeldError } from '@/server/services/execution-manager'
@@ -93,7 +92,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ project: strin
 
         return json({ id, started: false, tasks: await getTasks(params.project) })
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }

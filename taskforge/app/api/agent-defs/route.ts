@@ -15,7 +15,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-    const auth = await guard('admin')
+    const auth = await guard('owner')
     if ('res' in auth) return auth.res
     const body = (await req.json().catch(() => ({}))) as Partial<Omit<AgentDef, 'createdAt'>>
     if (!body.kind || !body.label) return error('kind and label required', 400)

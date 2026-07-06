@@ -5,6 +5,7 @@
 import React, { useCallback, useRef, useState } from 'react'
 import { Modal } from '@/lib/modal'
 import { toast } from '@/lib/toast'
+import { apiFetch, ApiError, describeApiError } from '@/lib/fetcher'
 import { useTcEvents, detailValue } from '@/lib/tc'
 import type { TaskInfo } from '@/server/domain/types'
 import { helpTexts } from './helpTexts'
@@ -60,7 +61,7 @@ export function NewTaskModal() {
         }
         setSubmitting(true)
         try {
-            const res = await fetch(`/api/projects/${input.project}/tasks`, {
+            const data = await apiFetch<{ id: string; tasks: TaskInfo[] }>(`/api/projects/${input.project}/tasks`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -74,18 +75,12 @@ export function NewTaskModal() {
                         : undefined,
                 }),
             })
-            if (res.status === 409) {
-                toast.error('A run is in progress.')
-                return
-            }
-            if (!res.ok) {
-                toast.error((await res.json().catch(() => ({}))).error ?? 'Failed to create task')
-                return
-            }
-            const data = await res.json()
             input.onCreated(data.tasks)
             toast.success(`Created ${data.id}`)
             close(true)
+        } catch (e) {
+            if (e instanceof ApiError && e.status === 409) toast.error('A run is in progress.')
+            else toast.error(describeApiError(e))
         } finally {
             setSubmitting(false)
         }

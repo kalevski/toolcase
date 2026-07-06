@@ -1,9 +1,9 @@
 // E2 — import selected GitHub issues as numbered task files
 // (`**Source:** github#<n>` facet; completion comments/closes the issue).
 
-import { guard, json, error, audit } from '@/server/web/http'
-import { projectExists, createTask, UnsafePathError } from '@/server/infrastructure/fs-workspace'
-import { parseGithubRepo, listOpenIssues, GithubError } from '@/server/infrastructure/github'
+import { guard, json, error, audit, errorFrom } from '@/server/web/http'
+import { projectExists, createTask } from '@/server/infrastructure/fs-workspace'
+import { parseGithubRepo, listOpenIssues } from '@/server/infrastructure/github'
 import { readProjectMeta } from '@/server/services/provision'
 import { engine } from '@/server/services/execution-manager'
 import { getTasks } from '@/server/services/projects'
@@ -60,8 +60,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ project: strin
         audit(auth, 'task.import-issues', params.project, `${created.length} issue(s)`)
         return json({ created, missing, tasks: await getTasks(params.project) }, 201)
     } catch (e) {
-        if (e instanceof GithubError) return error(e.message, 502)
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }

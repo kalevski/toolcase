@@ -2,6 +2,7 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from '@/lib/toast'
+import { apiFetch, ApiError, describeApiError } from '@/lib/fetcher'
 import type { TerminalLine } from '@/lib/terminal'
 import type {
     AgentKind,
@@ -301,9 +302,9 @@ export function ProjectProvider({
     const refresh = useCallback(async () => {
         try {
             const [s, t, g] = await Promise.all([
-                fetch(`/api/projects/${project}/status`).then((r) => r.json()),
-                fetch(`/api/projects/${project}/tasks`).then((r) => r.json()),
-                fetch(`/api/projects/${project}/git`).then((r) => (r.ok ? r.json() : null)),
+                apiFetch<RunSnapshot>(`/api/projects/${project}/status`),
+                apiFetch<TaskInfo[]>(`/api/projects/${project}/tasks`),
+                apiFetch<GitStatus>(`/api/projects/${project}/git`).catch(() => null),
             ])
             setSnapshot(s)
             setTasks(t)
@@ -315,7 +316,7 @@ export function ProjectProvider({
 
     const refreshKnowledge = useCallback(async () => {
         try {
-            const docs = await fetch(`/api/projects/${project}/knowledge`).then((r) => (r.ok ? r.json() : null))
+            const docs = await apiFetch<KnowledgeDoc[]>(`/api/projects/${project}/knowledge`)
             if (docs) setKnowledge(docs)
         } catch {
             /* transient */
@@ -324,7 +325,7 @@ export function ProjectProvider({
 
     const refreshNotes = useCallback(async () => {
         try {
-            const docs = await fetch(`/api/projects/${project}/notes`).then((r) => (r.ok ? r.json() : null))
+            const docs = await apiFetch<NoteDoc[]>(`/api/projects/${project}/notes`)
             if (docs) setNotes(docs)
         } catch {
             /* transient */
@@ -333,7 +334,7 @@ export function ProjectProvider({
 
     const refreshGit = useCallback(async () => {
         try {
-            const g = await fetch(`/api/projects/${project}/git`).then((r) => (r.ok ? r.json() : null))
+            const g = await apiFetch<GitStatus>(`/api/projects/${project}/git`)
             if (g) setGit(g)
         } catch {
             /* transient */
@@ -362,7 +363,9 @@ export function ProjectProvider({
 
     const loadCommits = useCallback(async () => {
         try {
-            const data = await fetch(`/api/projects/${project}/git/commits`).then((r) => (r.ok ? r.json() : null))
+            const data = await apiFetch<{ unpushed: GitCommit[]; recent: GitCommit[] }>(
+                `/api/projects/${project}/git/commits`,
+            )
             if (data) setCommits(data)
         } catch {
             /* transient */
@@ -496,47 +499,50 @@ export function ProjectProvider({
     // re-run replace the filter/reset selection without touching the form state.
     const startRun = useCallback(
         async (overrides: Record<string, unknown> = {}) => {
-            const res = await fetch(`/api/projects/${project}/run/start`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model,
-                    warmSession,
-                    commitAfter,
-                    commitMessageMode: commitMode,
-                    commitModel,
-                    filter: filter || undefined,
-                    resumeFrom: resumeFrom || undefined,
-                    severity: severity || undefined,
-                    project: projectFilter || undefined,
-                    reset,
-                    dryRun,
-                    pushAfter,
-                    branchPerRun,
-                    review,
-                    openPr: openPr && branchPerRun && pushAfter ? true : undefined,
-                    ...overrides,
-                }),
-            })
-            if (res.status === 412) {
-                const data = await res.json()
-                setGit((g) => (g ? { ...g, dirty: true, dirtyFiles: data.dirtyFiles ?? g.dirtyFiles } : g))
-                toast.error('Working tree is dirty — clean it before starting.')
+            try {
+                const snap = await apiFetch<RunSnapshot>(`/api/projects/${project}/run/start`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model,
+                        warmSession,
+                        commitAfter,
+                        commitMessageMode: commitMode,
+                        commitModel,
+                        filter: filter || undefined,
+                        resumeFrom: resumeFrom || undefined,
+                        severity: severity || undefined,
+                        project: projectFilter || undefined,
+                        reset,
+                        dryRun,
+                        pushAfter,
+                        branchPerRun,
+                        review,
+                        openPr: openPr && branchPerRun && pushAfter ? true : undefined,
+                        ...overrides,
+                    }),
+                })
+                setLines([])
+                setSnapshot(snap)
+                return true
+            } catch (e) {
+                if (e instanceof ApiError && e.status === 412) {
+                    // apiFetch doesn't expose the 412 body's dirtyFiles list —
+                    // mark dirty right away and let refreshGit fetch the exact files.
+                    setGit((g) => (g ? { ...g, dirty: true } : g))
+                    void refreshGit()
+                    toast.error('Working tree is dirty — clean it before starting.')
+                    return false
+                }
+                if (e instanceof ApiError && e.status === 409) {
+                    toast.error('A run or agent is already in progress.')
+                    return false
+                }
+                toast.error(e instanceof ApiError && e.kind === 'server' ? 'Failed to start run.' : describeApiError(e))
                 return false
             }
-            if (res.status === 409) {
-                toast.error('A run or agent is already in progress.')
-                return false
-            }
-            if (!res.ok) {
-                toast.error('Failed to start run.')
-                return false
-            }
-            setLines([])
-            setSnapshot(await res.json())
-            return true
         },
-        [project, model, warmSession, commitAfter, commitMode, commitModel, filter, resumeFrom, severity, projectFilter, reset, dryRun, pushAfter, branchPerRun, review, openPr],
+        [project, model, warmSession, commitAfter, commitMode, commitModel, filter, resumeFrom, severity, projectFilter, reset, dryRun, pushAfter, branchPerRun, review, openPr, refreshGit],
     )
 
     const onStart = useCallback(async () => {
@@ -594,8 +600,12 @@ export function ProjectProvider({
     )
 
     const onStop = useCallback(async () => {
-        setSnapshot(await fetch(`/api/projects/${project}/run/stop`, { method: 'POST' }).then((r) => r.json()))
-        toast.info('Will stop after the current task.')
+        try {
+            setSnapshot(await apiFetch<RunSnapshot>(`/api/projects/${project}/run/stop`, { method: 'POST' }))
+            toast.info('Will stop after the current task.')
+        } catch (e) {
+            toast.error(describeApiError(e))
+        }
     }, [project])
 
     const onForce = useCallback(async () => {
@@ -606,7 +616,11 @@ export function ProjectProvider({
             confirmVariant: 'danger',
         })
         if (!ok) return
-        setSnapshot(await fetch(`/api/projects/${project}/run/force`, { method: 'POST' }).then((r) => r.json()))
+        try {
+            setSnapshot(await apiFetch<RunSnapshot>(`/api/projects/${project}/run/force`, { method: 'POST' }))
+        } catch (e) {
+            toast.error(describeApiError(e))
+        }
     }, [project, confirm])
 
     const onSkipCurrent = useCallback(async () => {
@@ -618,12 +632,11 @@ export function ProjectProvider({
             confirmVariant: 'warning',
         })
         if (!ok) return
-        const res = await fetch(`/api/projects/${project}/run/skip`, { method: 'POST' })
-        if (res.ok) {
-            setSnapshot(await res.json())
+        try {
+            setSnapshot(await apiFetch<RunSnapshot>(`/api/projects/${project}/run/skip`, { method: 'POST' }))
             toast.info('Skipping current task…')
-        } else {
-            toast.error((await res.json().catch(() => ({}))).error ?? 'Nothing to skip.')
+        } catch (e) {
+            toast.error(describeApiError(e))
         }
     }, [project, snapshot, confirm])
 
@@ -633,24 +646,28 @@ export function ProjectProvider({
         async (kind: AgentKind, opts: { targetNote?: string } = {}) => {
             const draft = drafts[kind]
             if (!draft.prompt.trim()) return false
-            const res = await fetch(`/api/projects/${project}/agents/${kind}/start`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    prompt: draft.prompt,
-                    model: draft.model,
-                    targetNote: opts.targetNote || undefined,
-                }),
-            })
-            if (res.status === 409) {
-                toast.error('Another run or agent is active for this project.')
+            let snap: { startedAt: number | null; model: string | null }
+            try {
+                snap = await apiFetch<{ startedAt: number | null; model: string | null }>(
+                    `/api/projects/${project}/agents/${kind}/start`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            prompt: draft.prompt,
+                            model: draft.model,
+                            targetNote: opts.targetNote || undefined,
+                        }),
+                    },
+                )
+            } catch (e) {
+                if (e instanceof ApiError && e.status === 409) {
+                    toast.error('Another run or agent is active for this project.')
+                    return false
+                }
+                toast.error(describeApiError(e))
                 return false
             }
-            if (!res.ok) {
-                toast.error((await res.json().catch(() => ({}))).error ?? 'Failed to start agent.')
-                return false
-            }
-            const snap = await res.json()
             // The SSE agent:state frame will land too, but reflect it immediately.
             setAgentSessions((prev) => ({
                 ...prev,
@@ -680,7 +697,7 @@ export function ProjectProvider({
                 confirmVariant: 'danger',
             })
             if (!ok) return
-            await fetch(`/api/projects/${project}/agents/${kind}/stop`, { method: 'POST' }).catch(() => {})
+            await apiFetch(`/api/projects/${project}/agents/${kind}/stop`, { method: 'POST' }).catch(() => {})
         },
         [project, confirm, config.agentKinds],
     )
@@ -688,27 +705,32 @@ export function ProjectProvider({
     const onNewBranch = useCallback(async () => {
         const name = await prompt({ title: 'New branch', label: 'Branch name', placeholder: 'feature/my-work' })
         if (!name) return
-        const res = await fetch(`/api/projects/${project}/git/branch`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name }),
-        })
-        if (res.ok) {
-            setGit(await res.json())
+        try {
+            const g = await apiFetch<GitStatus>(`/api/projects/${project}/git/branch`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name }),
+            })
+            setGit(g)
             toast.success(`Switched to ${name}`)
-        } else {
-            toast.error((await res.json().catch(() => ({}))).error ?? 'Branch failed')
+        } catch (e) {
+            toast.error(describeApiError(e))
         }
     }, [project, prompt])
 
     const onPush = useCallback(async () => {
-        const res = await fetch(`/api/projects/${project}/git/push`, { method: 'POST' })
-        if (res.ok) {
-            setGit(await res.json())
+        try {
+            // git push runs synchronously on the server and can outlast 10 s on a
+            // slow remote — no timeout.
+            const g = await apiFetch<GitStatus>(`/api/projects/${project}/git/push`, {
+                method: 'POST',
+                timeoutMs: 0,
+            })
+            setGit(g)
             toast.success('Pushed to origin')
             void loadCommits()
-        } else {
-            toast.error((await res.json().catch(() => ({}))).error ?? 'Push failed')
+        } catch (e) {
+            toast.error(describeApiError(e))
         }
     }, [project, loadCommits])
 
@@ -723,13 +745,15 @@ export function ProjectProvider({
                 })
                 if (!ok) return
             }
-            const res = await fetch(`/api/projects/${project}/git/op`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ op }),
-            })
-            if (res.ok) {
-                setGit(await res.json())
+            try {
+                // fetch/pull hit the remote synchronously — exempt from the 10 s timeout.
+                const g = await apiFetch<GitStatus>(`/api/projects/${project}/git/op`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ op }),
+                    timeoutMs: 0,
+                })
+                setGit(g)
                 const label =
                     op === 'fetch'
                         ? 'Fetched from remote'
@@ -744,8 +768,8 @@ export function ProjectProvider({
                                 : 'Stash dropped'
                 toast.success(label)
                 void loadCommits()
-            } else {
-                toast.error((await res.json().catch(() => ({}))).error ?? `git ${op} failed`)
+            } catch (e) {
+                toast.error(describeApiError(e))
             }
         },
         [project, confirm, loadCommits],
@@ -780,18 +804,20 @@ export function ProjectProvider({
             confirmVariant: 'warning',
         })
         if (!ok) return
-        const res = await fetch(`/api/projects/${project}/tasks/reset-errors`, { method: 'POST' })
-        if (res.status === 409) {
-            toast.error('Cannot move tasks while a run is in progress.')
-            return
+        try {
+            const data = await apiFetch<{ tasks: TaskInfo[]; moved: string[] }>(
+                `/api/projects/${project}/tasks/reset-errors`,
+                { method: 'POST' },
+            )
+            setTasks(data.tasks)
+            toast.success(`Moved ${data.moved.length} task(s) to pending`)
+        } catch (e) {
+            if (e instanceof ApiError && e.status === 409) {
+                toast.error('Cannot move tasks while a run is in progress.')
+                return
+            }
+            toast.error(e instanceof ApiError && e.kind === 'server' ? 'Failed to move errored tasks.' : describeApiError(e))
         }
-        if (!res.ok) {
-            toast.error('Failed to move errored tasks.')
-            return
-        }
-        const data = await res.json()
-        setTasks(data.tasks)
-        toast.success(`Moved ${data.moved.length} task(s) to pending`)
     }, [project, tasks, confirm])
 
     const onRemoveKnowledge = useCallback(
@@ -803,18 +829,19 @@ export function ProjectProvider({
                 confirmVariant: 'danger',
             })
             if (!ok) return
-            const res = await fetch(`/api/projects/${project}/knowledge/${id}`, { method: 'DELETE' })
-            if (res.status === 409) {
-                toast.error('Cannot remove knowledge while a run is in progress.')
-                return
+            try {
+                const data = await apiFetch<{ docs: KnowledgeDoc[] }>(`/api/projects/${project}/knowledge/${id}`, {
+                    method: 'DELETE',
+                })
+                setKnowledge(data.docs)
+                toast.success('Removed knowledge doc')
+            } catch (e) {
+                if (e instanceof ApiError && e.status === 409) {
+                    toast.error('Cannot remove knowledge while a run is in progress.')
+                    return
+                }
+                toast.error(e instanceof ApiError && e.kind === 'server' ? 'Failed to remove knowledge doc.' : describeApiError(e))
             }
-            if (!res.ok) {
-                toast.error('Failed to remove knowledge doc.')
-                return
-            }
-            const data = await res.json()
-            setKnowledge(data.docs)
-            toast.success('Removed knowledge doc')
         },
         [project, confirm],
     )

@@ -5,10 +5,12 @@
 
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from '@/lib/toast'
+import { apiFetch, describeApiError } from '@/lib/fetcher'
 import { useTcEvents, detailValue } from '@/lib/tc'
 import type { AccountSummary, ProjectSettings } from '@/server/domain/types'
 import { NOTIFY_EVENTS } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
+import { ErrorState, LoadingState } from '../states'
 import { helpTexts } from '../helpTexts'
 
 type Tri = '' | 'on' | 'off'
@@ -98,13 +100,13 @@ export function SettingsClient() {
     const load = useCallback(async () => {
         setLoadError(false)
         try {
-            // Account registry is admin-gated — fetch best-effort so non-admins
+            // Account registry is owner-gated — fetch best-effort so non-owners
             // still load settings (they just get an empty account list).
             const [d, accs] = await Promise.all([
-                fetch(`/api/projects/${project}/settings`).then((r) => (r.ok ? r.json() : null)),
-                fetch('/api/accounts')
-                    .then((r) => (r.ok ? r.json() : []))
-                    .catch(() => []),
+                apiFetch<{ overrides: ProjectSettings; effective: Record<string, unknown> }>(
+                    `/api/projects/${project}/settings`,
+                ),
+                apiFetch<AccountSummary[]>('/api/accounts').catch(() => []),
             ])
             if (!d) {
                 setLoadError(true)
@@ -162,39 +164,25 @@ export function SettingsClient() {
                 notifyEvents: notifyOverridden ? [...notifyEvents] : undefined,
                 notifyWebhookUrl: webhookUrl || undefined,
             }
-            const res = await fetch(`/api/projects/${project}/settings`, {
+            const d = await apiFetch<{ effective: Record<string, unknown> }>(`/api/projects/${project}/settings`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),
             })
-            if (!res.ok) {
-                toast.error((await res.json().catch(() => ({}))).error ?? 'Failed to save settings')
-                return
-            }
-            const d = await res.json()
             setEffective(d.effective)
             toast.success('Settings saved — new runs and agents use them immediately')
+        } catch (e) {
+            toast.error(describeApiError(e))
         } finally {
             setSaving(false)
         }
     }
 
     if (!loaded) {
-        return (
-            <div style={{ padding: '2rem', textAlign: 'center' }}>
-                {loadError ? (
-                    <tc-stack gap="0.75rem">
-                        <tc-text variant="muted">Couldn’t load project settings.</tc-text>
-                        <div>
-                            <tc-button size="sm" variant="secondary" outline onClick={() => void load()}>
-                                Retry
-                            </tc-button>
-                        </div>
-                    </tc-stack>
-                ) : (
-                    <tc-spinner />
-                )}
-            </div>
+        return loadError ? (
+            <ErrorState message="Couldn’t load project settings." onRetry={() => void load()} />
+        ) : (
+            <LoadingState />
         )
     }
 

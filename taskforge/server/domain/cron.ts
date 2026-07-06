@@ -1,0 +1,93 @@
+// Pure 5-field cron parsing + matching (§domain). No I/O, no clock — callers
+// pass in the Date. Shared by the B3 scheduler ticker and the schedule route's
+// input validation; unit-tested from test/cron.test.ts.
+//
+// Cron subset: 5 fields `min hour dom mon dow` supporting `*`, numbers, lists
+// `a,b`, ranges `a-b`, and steps `*/n`. dow: 0–6, 0 = Sunday (7 ≡ 0).
+
+export class InvalidCronError extends Error {}
+
+/** Parse one cron field into a matcher over [min, max]. Throws on bad syntax. */
+function fieldMatcher(field: string, min: number, max: number): (v: number) => boolean {
+    const norm = (n: number) => (max === 6 && n === 7 ? 0 : n) // dow: 7 ≡ 0 (Sunday)
+    const parts = field.split(',')
+    const accept = new Set<number>()
+    for (const part of parts) {
+        const step = part.match(/^(\*|\d+-\d+)\/(\d+)$/)
+        if (step) {
+            const n = Number(step[2])
+            if (!Number.isInteger(n) || n < 1) throw new InvalidCronError(`bad step: ${part}`)
+            let lo = min
+            let hi = max
+            if (step[1] !== '*') {
+                const [a, b] = step[1].split('-').map(Number)
+                lo = a
+                hi = b
+            }
+            // COR-4 — dow treats 7 ≡ 0, so a stepped range may reach `max + 1`
+            // for dow (e.g. `0-7/2`), matching the plain-range/bare-number
+            // branches; norm() folds 7 → 0 below.
+            if (lo < min || hi > max + (max === 6 ? 1 : 0) || lo > hi) {
+                throw new InvalidCronError(`out of range: ${part}`)
+            }
+            for (let v = lo; v <= hi; v += n) accept.add(norm(v))
+            continue
+        }
+        if (part === '*') {
+            for (let v = min; v <= max; v++) accept.add(v)
+            continue
+        }
+        const range = part.match(/^(\d+)-(\d+)$/)
+        if (range) {
+            const a = Number(range[1])
+            const b = Number(range[2])
+            if (a < min || b > max + (max === 6 ? 1 : 0) || a > b) throw new InvalidCronError(`out of range: ${part}`)
+            for (let v = a; v <= b; v++) accept.add(norm(v))
+            continue
+        }
+        if (/^\d+$/.test(part)) {
+            const v = Number(part)
+            if (v < min || v > max + (max === 6 ? 1 : 0)) throw new InvalidCronError(`out of range: ${part}`)
+            accept.add(norm(v))
+            continue
+        }
+        throw new InvalidCronError(`bad field part: ${JSON.stringify(part)}`)
+    }
+    return (v) => accept.has(v)
+}
+
+export interface CronSpec {
+    matches: (d: Date) => boolean
+}
+
+/** Parse a 5-field cron expression; throws InvalidCronError on bad input. */
+export function parseCron(expr: string): CronSpec {
+    const fields = expr.trim().split(/\s+/)
+    if (fields.length !== 5) throw new InvalidCronError('cron must have 5 fields: min hour dom mon dow')
+    const [minute, hour, dom, mon, dow] = [
+        fieldMatcher(fields[0], 0, 59),
+        fieldMatcher(fields[1], 0, 23),
+        fieldMatcher(fields[2], 1, 31),
+        fieldMatcher(fields[3], 1, 12),
+        fieldMatcher(fields[4], 0, 6),
+    ]
+    const domIsStar = fields[2] === '*'
+    const dowIsStar = fields[4] === '*'
+    return {
+        matches(d: Date): boolean {
+            if (!minute(d.getMinutes()) || !hour(d.getHours()) || !mon(d.getMonth() + 1)) return false
+            // Standard cron: when both dom and dow are restricted, either may match.
+            const domOk = dom(d.getDate())
+            const dowOk = dow(d.getDay())
+            if (domIsStar && dowIsStar) return true
+            if (domIsStar) return dowOk
+            if (dowIsStar) return domOk
+            return domOk || dowOk
+        },
+    }
+}
+
+/** Minute-resolution key used to dedupe firing within one cron minute. */
+export function minuteKey(d: Date): string {
+    return d.toISOString().slice(0, 16)
+}

@@ -3,6 +3,7 @@
 import React from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import type { SideNavItem, SideNavSection } from '@toolcase/web-components'
+import { apiFetch } from '@/lib/fetcher'
 import { useTcProps } from '@/lib/tc'
 import { tcIcon } from '@/lib/icons'
 import { useBranding } from '@/lib/branding-context'
@@ -28,7 +29,7 @@ const STATE_HAS_BADGE: Record<EngineState, boolean> = {
  *  above the page body (see `ProjectTabs`), matching the Wharf project pattern. */
 function deriveActive(pathname: string): {
     activeProject: string | null
-    section: 'dashboard' | 'skills' | 'users' | 'accounts' | 'audit' | 'health' | 'settings' | null
+    section: 'dashboard' | 'skills' | 'users' | 'accounts' | 'ssh-keys' | 'audit' | 'health' | 'settings' | null
 } {
     const m = pathname.match(/^\/projects\/([^/]+)(?:\/(tasks|knowledge|notes|runs|run|git|agents|settings))?\/?$/)
     if (m) {
@@ -37,6 +38,7 @@ function deriveActive(pathname: string): {
     if (pathname.startsWith('/skills')) return { activeProject: null, section: 'skills' }
     if (pathname.startsWith('/users')) return { activeProject: null, section: 'users' }
     if (pathname.startsWith('/accounts')) return { activeProject: null, section: 'accounts' }
+    if (pathname.startsWith('/ssh-keys')) return { activeProject: null, section: 'ssh-keys' }
     if (pathname.startsWith('/audit')) return { activeProject: null, section: 'audit' }
     if (pathname.startsWith('/health')) return { activeProject: null, section: 'health' }
     if (pathname.startsWith('/settings')) return { activeProject: null, section: 'settings' }
@@ -87,10 +89,11 @@ export function AppShell({
         items: [
             { key: 'dashboard', label: 'Dashboard', icon: tcIcon('grid-1x2'), href: '/', active: section === 'dashboard' },
             { key: 'skills', label: 'Skills', icon: tcIcon('lightbulb'), href: '/skills', active: section === 'skills' },
-            ...(me.role === 'admin'
+            ...(me.role === 'owner'
                 ? [
                       { key: 'users', label: 'Users', icon: tcIcon('people'), href: '/users', active: section === 'users' } as SideNavItem,
                       { key: 'accounts', label: 'Accounts', icon: tcIcon('key'), href: '/accounts', active: section === 'accounts' } as SideNavItem,
+                      { key: 'ssh-keys', label: 'SSH keys', icon: tcIcon('lock'), href: '/ssh-keys', active: section === 'ssh-keys' } as SideNavItem,
                       { key: 'audit', label: 'Audit log', icon: tcIcon('journal-check'), href: '/audit', active: section === 'audit' } as SideNavItem,
                       { key: 'health', label: 'Health', icon: tcIcon('heart-pulse'), href: '/health', active: section === 'health' } as SideNavItem,
                       { key: 'settings', label: 'Settings', icon: tcIcon('gear'), href: '/settings', active: section === 'settings' } as SideNavItem,
@@ -109,7 +112,8 @@ export function AppShell({
     }
 
     const onSignOut = async () => {
-        await fetch('/api/auth/logout', { method: 'POST' })
+        // Best-effort — land on /login even if the logout call fails.
+        await apiFetch('/api/auth/logout', { method: 'POST' }).catch(() => {})
         router.push('/login')
     }
 
@@ -120,9 +124,10 @@ export function AppShell({
         <tc-dashboard-layout>
             <tc-brand
                 slot="brand"
-                primary-text="Task Forge"
+                primary-text={branding.primaryText}
                 secondary-text={branding.secondaryText || undefined}
-                color="#6c5ce7"
+                label={branding.brandLabel || undefined}
+                color={branding.brandColor}
             />
             <div slot="sidebar-menu" className="tf-sidebar-menu">
                 <tc-side-nav ref={sideNavRef} />

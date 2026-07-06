@@ -5,8 +5,11 @@
 
 import React, { useEffect, useState } from 'react'
 import { toast } from '@/lib/toast'
+import { apiFetch, ApiError, describeApiError } from '@/lib/fetcher'
 import { useTc, useTcEvents, detailValue } from '@/lib/tc'
+import type { KnowledgeDoc } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
+import { LoadingState } from '../states'
 import { helpTexts } from '../helpTexts'
 
 export function KnowledgeDrawer({ project, docId, onClose }: { project: string; docId: string | null; onClose: () => void }) {
@@ -31,8 +34,7 @@ export function KnowledgeDrawer({ project, docId, onClose }: { project: string; 
     useEffect(() => {
         if (!docId) return
         let cancelled = false
-        fetch(`/api/projects/${project}/knowledge/${docId}`)
-            .then((r) => (r.ok ? r.json() : Promise.reject()))
+        apiFetch<{ content: string }>(`/api/projects/${project}/knowledge/${docId}`)
             .then((d) => {
                 if (!cancelled) setResult({ id: docId, content: d.content })
             })
@@ -48,24 +50,18 @@ export function KnowledgeDrawer({ project, docId, onClose }: { project: string; 
         if (!docId || editDraft === null) return
         setSaving(true)
         try {
-            const res = await fetch(`/api/projects/${project}/knowledge/${docId}`, {
+            const data = await apiFetch<{ docs: KnowledgeDoc[] }>(`/api/projects/${project}/knowledge/${docId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ content: editDraft }),
             })
-            if (res.status === 409) {
-                toast.error(helpTexts.knowledge.busy)
-                return
-            }
-            if (!res.ok) {
-                toast.error((await res.json().catch(() => ({}))).error ?? 'Failed to save doc')
-                return
-            }
-            const data = await res.json()
             setResult({ id: docId, content: editDraft })
             setEditing(null)
             setKnowledge(data.docs)
             toast.success('Knowledge doc saved — index rebuilt')
+        } catch (e) {
+            if (e instanceof ApiError && e.status === 409) toast.error(helpTexts.knowledge.busy)
+            else toast.error(describeApiError(e))
         } finally {
             setSaving(false)
         }
@@ -90,11 +86,7 @@ export function KnowledgeDrawer({ project, docId, onClose }: { project: string; 
                         </tc-button>
                     )}
                 </tc-stack>
-                {loading && (
-                    <div style={{ padding: '2rem', textAlign: 'center' }}>
-                        <tc-spinner />
-                    </div>
-                )}
+                {loading && <LoadingState />}
                 {editDraft !== null && docId ? (
                     <tc-stack gap="0.75rem">
                         <tc-helper-text text={helpTexts.knowledge.edit} />

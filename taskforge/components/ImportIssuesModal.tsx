@@ -5,9 +5,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Modal } from '@/lib/modal'
 import { toast } from '@/lib/toast'
+import { apiFetch, describeApiError } from '@/lib/fetcher'
 import { useTcEvents } from '@/lib/tc'
 import type { GithubIssue, TaskInfo } from '@/server/domain/types'
 import { helpTexts } from './helpTexts'
+import { LoadingState } from './states'
 
 export interface ImportIssuesInput {
     project: string
@@ -39,13 +41,10 @@ export function ImportIssuesModal() {
         setIssues(null)
         setLoadError(null)
         setPicked(new Set())
-        fetch(`/api/projects/${input.project}/git/issues`)
-            .then(async (r) => {
-                if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error ?? `HTTP ${r.status}`)
-                return r.json()
-            })
+        // GitHub round-trip on the server — can outlast the default deadline.
+        apiFetch<GithubIssue[]>(`/api/projects/${input.project}/git/issues`, { timeoutMs: 0 })
             .then((d) => setIssues(d))
-            .catch((e) => setLoadError(e?.message ?? 'Failed to load issues'))
+            .catch((e) => setLoadError(describeApiError(e)))
     }, [input])
 
     if (!input) return null
@@ -63,19 +62,21 @@ export function ImportIssuesModal() {
         if (!picked.size) return
         setSubmitting(true)
         try {
-            const res = await fetch(`/api/projects/${input.project}/tasks/import-issues`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ numbers: [...picked] }),
-            })
-            if (!res.ok) {
-                toast.error((await res.json().catch(() => ({}))).error ?? 'Import failed')
-                return
-            }
-            const data = await res.json()
+            // GitHub round-trip on the server — can outlast the default deadline.
+            const data = await apiFetch<{ tasks: TaskInfo[]; created: unknown[] }>(
+                `/api/projects/${input.project}/tasks/import-issues`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ numbers: [...picked] }),
+                    timeoutMs: 0,
+                },
+            )
             input.onImported(data.tasks)
             toast.success(`Imported ${data.created.length} issue(s) as tasks`)
             close(true)
+        } catch (e) {
+            toast.error(describeApiError(e))
         } finally {
             setSubmitting(false)
         }
@@ -85,11 +86,7 @@ export function ImportIssuesModal() {
         <Modal.Window size="large" title={`Import from GitHub — ${input.project}`}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
                 <tc-helper-text text={helpTexts.tasks.importIssues} />
-                {issues === null && !loadError && (
-                    <div style={{ padding: '1.5rem', textAlign: 'center' }}>
-                        <tc-spinner />
-                    </div>
-                )}
+                {issues === null && !loadError && <LoadingState label="Loading issues…" />}
                 {loadError && <tc-text style={{ color: 'var(--bs-danger, #c0392b)' }}>{loadError}</tc-text>}
                 {issues !== null && issues.length === 0 && <tc-text variant="muted">No open issues.</tc-text>}
                 {issues !== null && issues.length > 0 && (

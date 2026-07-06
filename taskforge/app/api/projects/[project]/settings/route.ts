@@ -1,8 +1,8 @@
 // E1 — per-project settings: GET returns { overrides, effective }, PUT saves
 // overrides (undefined/null values clear the key back to the env default).
 
-import { guard, json, error, audit } from '@/server/web/http'
-import { projectExists, UnsafePathError } from '@/server/infrastructure/fs-workspace'
+import { guard, json, error, audit, errorFrom } from '@/server/web/http'
+import { projectExists } from '@/server/infrastructure/fs-workspace'
 import {
     getProjectSettings,
     saveProjectSettings,
@@ -25,7 +25,8 @@ export async function GET(_req: Request, ctx: { params: Promise<{ project: strin
             effective: effectiveSettings(params.project),
         })
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }
@@ -43,7 +44,8 @@ export async function PUT(req: Request, ctx: { params: Promise<{ project: string
         return json({ overrides, effective: effectiveSettings(params.project) })
     } catch (e) {
         if (e instanceof InvalidSettingsError) return error(e.message, 400)
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }

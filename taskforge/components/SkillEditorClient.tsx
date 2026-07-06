@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from '@/lib/toast'
+import { apiFetch, describeApiError } from '@/lib/fetcher'
 import { useTcEvents, detailValue } from '@/lib/tc'
 
 function lintFrontmatter(content: string): string | null {
@@ -48,23 +49,23 @@ export function SkillEditorClient({
         }
         setSaving(true)
         try {
-            const res = isNew
-                ? await fetch('/api/skills', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ name, content }),
-                  })
-                : await fetch(`/api/skills/${initialName}`, {
-                      method: 'PUT',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ content }),
-                  })
-            if (res.ok) {
-                toast.success('Saved')
-                router.push('/skills')
+            if (isNew) {
+                await apiFetch('/api/skills', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, content }),
+                })
             } else {
-                toast.error((await res.json().catch(() => ({}))).error ?? 'Save failed')
+                await apiFetch(`/api/skills/${initialName}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content }),
+                })
             }
+            toast.success('Saved')
+            router.push('/skills')
+        } catch (e) {
+            toast.error(describeApiError(e))
         } finally {
             setSaving(false)
         }

@@ -1,5 +1,5 @@
-import { guard, json, error } from '@/server/web/http'
-import { readSkill, writeSkill, deleteSkill, skillExists, UnsafePathError } from '@/server/infrastructure/fs-workspace'
+import { guard, json, error, errorFrom } from '@/server/web/http'
+import { readSkill, writeSkill, deleteSkill, skillExists } from '@/server/infrastructure/fs-workspace'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -12,7 +12,8 @@ export async function GET(_req: Request, ctx: { params: Promise<{ name: string }
         const content = await readSkill(params.name)
         return json({ name: params.name, content })
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         return error('skill not found', 404)
     }
 }
@@ -27,7 +28,8 @@ export async function PUT(req: Request, ctx: { params: Promise<{ name: string }>
         await writeSkill(params.name, body.content)
         return json({ name: params.name })
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }
@@ -41,7 +43,8 @@ export async function DELETE(_req: Request, ctx: { params: Promise<{ name: strin
         await deleteSkill(params.name)
         return json({ ok: true })
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }
