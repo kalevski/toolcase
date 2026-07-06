@@ -38,6 +38,10 @@ func main() {
 		cmdWrite(os.Args[2:])
 	case "serve":
 		cmdServe(os.Args[2:])
+	case "run":
+		cmdRun(os.Args[2:])
+	case "logs":
+		cmdLogs(os.Args[2:])
 	case "version", "--version", "-v":
 		fmt.Println("quaykeeper-client", version)
 	case "help", "--help", "-h":
@@ -56,10 +60,19 @@ Usage:
   quaykeeper-client exec -- <command> [args...]      fetch config, inject as env, exec the process (PID-1 handoff)
   quaykeeper-client write --format json|dotenv --out <path>   materialize config to a file
   quaykeeper-client serve [--addr 127.0.0.1:9000] [--interval 30s]   poll + serve config on a loopback endpoint
+  quaykeeper-client run [--interval 30s] -- <command> [args...]   supervise a process, capture + ship its stdout/stderr
+  quaykeeper-client logs --file <glob>[,<glob>] [--format json|raw] [--state-dir <dir>]   tail files and ship them
   quaykeeper-client version
 
 serve has NO authentication and exposes fully-resolved secrets; it refuses a
 non-loopback --addr unless --allow-remote is set explicitly.
+
+run supervises the child (it does NOT exec-replace like the exec verb): it forwards
+signals, reaps orphaned zombies as PID 1, propagates the exit code, and ships the
+child's stdout/stderr to the destinations in the instance's logs config. Log
+shipping is never load-bearing — if a destination is down the app is unaffected.
+run/logs ship to the destinations delivered in the /v1/config snapshot; set them
+in Quaykeeper (Admin → Log destinations, scope=instance).
 
 Connection (env vars, or via FromEnv):
   QUAYKEEPER_URL        agent-server base URL (the admin "Instance config URL" setting)

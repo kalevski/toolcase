@@ -32,8 +32,8 @@ jobs:
         run: npm -w @toolcase/quaykeeper-landing run build
 
       - name: Deploy to public branch
-        uses: peaceiris/actions-gh-pages@v4
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./quaykeeper-landing/out
-          publish_branch: public/quaykeeper
+          folder: 'quaykeeper-landing/out'
+          branch: public/quaykeeper
+          single-commit: true

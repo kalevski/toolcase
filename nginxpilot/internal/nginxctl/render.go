@@ -52,6 +52,16 @@ type rendered struct {
 func renderResources(cfg *config.Config, certs nginxconf.CertResolver, includeDir string) (resources []rendered, baseHTTP []rendered, disabled []ResourceResult) {
 	opts := nginxconf.Options{Certs: certs, Managed: true, IncludeDir: includeDir}
 
+	// Shared JSON access-log format (logs.access.enabled). The 00- filename
+	// sorts before every vhost file, so the log_format declaration precedes
+	// every access_log reference in glob-ordered includes (G5).
+	if inc := nginxconf.LogFormatInclude(cfg); inc != "" {
+		baseHTTP = append(baseHTTP, rendered{
+			kind: "logformat", key: "logformat", filename: nginxconf.LogFormatIncludeFilename,
+			content: inc, context: ctxHTTP,
+		})
+	}
+
 	// Shared http-context cache zone include (only when a proxy uses caching).
 	if inc := nginxconf.CachePathInclude(cfg); inc != "" {
 		baseHTTP = append(baseHTTP, rendered{

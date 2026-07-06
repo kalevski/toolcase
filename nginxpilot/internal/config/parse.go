@@ -33,12 +33,13 @@ type Fragment struct {
 	AccessLists     []AccessList     `yaml:"access_lists"`
 	StreamUpstreams []StreamUpstream `yaml:"stream_upstreams"`
 	Streams         []Stream         `yaml:"streams"`
+	LogDestinations []LogDestination `yaml:"log_destinations"`
 }
 
 // FragmentKinds are the yaml list keys a fragment may declare, in Fragment
 // field order. Used for the ParseFragment error text and asserted complete by
 // a reflection test so the message can never go stale again.
-var FragmentKinds = []string{"sites", "upstreams", "proxies", "redirects", "dead_hosts", "access_lists", "stream_upstreams", "streams"}
+var FragmentKinds = []string{"sites", "upstreams", "proxies", "redirects", "dead_hosts", "access_lists", "stream_upstreams", "streams", "log_destinations"}
 
 // LoadResult carries the parsed config plus non-fatal warnings (e.g. an
 // include glob matching zero files).
@@ -86,6 +87,9 @@ func Load(path string) (*LoadResult, error) {
 	}
 	for i := range cfg.Streams {
 		cfg.Streams[i].File = abs
+	}
+	for i := range cfg.LogDestinations {
+		cfg.LogDestinations[i].File = abs
 	}
 
 	applyDefaults(&cfg)
@@ -178,6 +182,7 @@ func loadIncludes(cfg *Config, res *LoadResult) error {
 			cfg.AccessLists = append(cfg.AccessLists, frag.AccessLists...)
 			cfg.StreamUpstreams = append(cfg.StreamUpstreams, frag.StreamUpstreams...)
 			cfg.Streams = append(cfg.Streams, frag.Streams...)
+			cfg.LogDestinations = append(cfg.LogDestinations, frag.LogDestinations...)
 		}
 	}
 	return nil
@@ -216,6 +221,9 @@ func ParseFragment(raw []byte, file string) (*Fragment, error) {
 	}
 	for i := range frag.Streams {
 		frag.Streams[i].File = file
+	}
+	for i := range frag.LogDestinations {
+		frag.LogDestinations[i].File = file
 	}
 	return &frag, nil
 }

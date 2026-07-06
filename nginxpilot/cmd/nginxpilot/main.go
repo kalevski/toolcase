@@ -22,6 +22,7 @@ Usage:
   nginxpilot sync <domain> [flags] one-shot sync for one site
   nginxpilot print-vhost <domain>  print an nginx snippet (static site or reverse proxy)
   nginxpilot print-include         print the nginx.conf include snippet for managed mode
+  nginxpilot print-logformat       print the JSON access-log log_format snippet (generate-only setups)
   nginxpilot status [--json]       show per-site status from the daemon
   nginxpilot cert <action>         manage TLS certificates (issue/upload/renew/delete/list, creds)
   nginxpilot version               print build info
@@ -54,6 +55,8 @@ func main() {
 		code = cmdPrintVhost(args)
 	case "print-include":
 		code = cmdPrintInclude(args)
+	case "print-logformat":
+		code = cmdPrintLogFormat(args)
 	case "status":
 		code = cmdStatus(args)
 	case "cert":

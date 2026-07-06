@@ -139,6 +139,12 @@ func endpoints() []endpoint {
 		{"GET", "/stream-upstreams", true, func(s *Server) http.HandlerFunc { return s.handleListStreamUpstreams }},
 		{"POST", "/stream-upstreams", true, func(s *Server) http.HandlerFunc { return s.handleCreateStreamUpstream }},
 		{"DELETE", "/stream-upstreams/{name}", true, func(s *Server) http.HandlerFunc { return s.handleDeleteStreamUpstream }},
+		{"GET", "/log-destinations", true, func(s *Server) http.HandlerFunc { return s.handleListLogDests }},
+		{"POST", "/log-destinations", true, func(s *Server) http.HandlerFunc { return s.handleCreateLogDest }},
+		{"DELETE", "/log-destinations/{name}", true, func(s *Server) http.HandlerFunc { return s.handleDeleteLogDest }},
+		{"POST", "/log-destinations/test", true, func(s *Server) http.HandlerFunc { return s.handleTestLogDest }},
+		{"POST", "/log-destinations/{name}/test", true, func(s *Server) http.HandlerFunc { return s.handleTestSavedLogDest }},
+		{"GET", "/logs/status", true, func(s *Server) http.HandlerFunc { return s.handleLogsStatus }},
 		{"POST", "/nginx/test", true, func(s *Server) http.HandlerFunc { return s.handleNginxTest }},
 		{"GET", "/certs", true, func(s *Server) http.HandlerFunc { return s.handleListCerts }},
 		{"POST", "/certs", true, func(s *Server) http.HandlerFunc { return s.handleIssueCert }},
@@ -229,6 +235,10 @@ func (s *Server) handleStatus(w http.ResponseWriter, _ *http.Request) {
 		certsRenewal["next_check"] = renewal.NextCheck
 	}
 	payload["certs_renewal"] = certsRenewal
+
+	// Log shipping stats (per-destination shipped/dropped/last_error plus
+	// intake health) — same spirit as per-site sync state.
+	payload["logs"] = s.mgr.LogsStatus()
 
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")

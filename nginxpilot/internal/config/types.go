@@ -91,6 +91,14 @@ type Config struct {
 	StreamUpstreams []StreamUpstream `yaml:"stream_upstreams"`
 	Streams         []Stream         `yaml:"streams"`
 
+	// Logs configures JSON access-log emission + intake (log_ides.md §1);
+	// LogDestinations are the shipping targets (§2) — the 8th managed entity
+	// kind, driven over the same fragment REST pattern as everything else.
+	// Stream (L4) resources emit no JSON access logs (G3): the stream context
+	// has its own log_format with a different variable set — out of scope.
+	Logs            Logs             `yaml:"logs"`
+	LogDestinations []LogDestination `yaml:"log_destinations"`
+
 	// Path is the main config file path the config was loaded from.
 	Path string `yaml:"-"`
 }

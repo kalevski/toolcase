@@ -32,6 +32,7 @@ func StaticVhost(cfg *config.Config, site *config.Site, opts Options) (string, e
 	writeListeners(&b, 80, tls, site.WebOptions)
 	fmt.Fprintf(&b, "    server_name %s;\n", site.Domain)
 	writeSSL(&b, tls)
+	writeAccessLog(&b, cfg, opts, site.Domain, LogResourceSite)
 	writeServerToggles(&b, site.WebOptions, opts, tls)
 
 	fmt.Fprintf(&b, "\n    root %s;\n    index index.html;\n", root)
@@ -87,6 +88,7 @@ func ProxyVhost(cfg *config.Config, p *config.Proxy, opts Options) (string, erro
 	writeListeners(&b, httpPort, tls, p.WebOptions)
 	fmt.Fprintf(&b, "    server_name %s;\n", p.Domain)
 	writeSSL(&b, tls)
+	writeAccessLog(&b, cfg, opts, p.Domain, LogResourceProxy)
 	if p.ClientMaxBodySize > 0 {
 		fmt.Fprintf(&b, "    client_max_body_size %s;\n", p.ClientMaxBodySize)
 	}
@@ -129,6 +131,7 @@ func renderSimpleVhost(cfg *config.Config, kind, domain string, listen int, w co
 	writeListeners(&b, listen, tls, w)
 	fmt.Fprintf(&b, "    server_name %s;\n", domain)
 	writeSSL(&b, tls)
+	writeAccessLog(&b, cfg, opts, domain, simpleVhostResourceType(kind))
 	writeServerToggles(&b, w, opts, tls)
 	writeAccessControl(&b, cfg, accessList)
 	body(&b)
