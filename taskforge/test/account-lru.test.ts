@@ -4,8 +4,8 @@
 // and the rotation behaviour without touching SQLite.
 
 import { describe, it, expect } from 'vitest'
-import { selectLru, isEligible, compareLru, type PickOptions } from './account-lru'
-import type { Account } from './types'
+import { selectLru, isEligible, compareLru, type PickOptions } from '../server/domain/account-lru'
+import type { Account } from '../server/domain/types'
 
 function acc(alias: string, fields: Partial<Account> = {}): Account {
     return { alias, dir: `/accounts/${alias}`, auth: 'oauth', ...fields }

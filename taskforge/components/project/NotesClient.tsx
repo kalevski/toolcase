@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { toast } from '@/lib/toast'
-import { useTc, useTcEvents, detailValue } from '@/lib/tc'
+import { apiFetch, ApiError, describeApiError } from '@/lib/fetcher'
+import { escapeHtml, useTc, useTcEvents, detailValue } from '@/lib/tc'
 import type { NoteDoc } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
 import { useConfirm, usePrompt } from '../ConfirmModal'
@@ -11,8 +12,10 @@ import { helpTexts } from '../helpTexts'
 
 const SLUG_RE = /^[a-z0-9][a-z0-9-]*$/
 
-// tc-advanced-table header descriptors; rows stay slotted React <tr> so the
-// per-row Delete button and row-open navigation keep their handlers.
+// tc-advanced-table header descriptors. Body rows are fed through the `rows`
+// HTML-string property (the component owns its <tbody>; React <tr> children
+// would be relocated out from under the reconciler and break SSR hydration).
+// Row-open navigation and the Delete button are delegated data-* events.
 const ADV_COLUMNS = [
     { key: 'id', label: 'File', width: '30%' },
     { key: 'title', label: 'Title' },
@@ -31,7 +34,25 @@ function relativeTime(iso: string): string {
     return `${Math.floor(hours / 24)}d ago`
 }
 
-type Col = { key: string; header: string; width?: string; render: (n: NoteDoc) => React.ReactNode }
+/** The injected tbody HTML — every interpolated value is escaped. */
+function noteRowsHtml(notes: NoteDoc[], agentRunning: boolean): string {
+    if (notes.length === 0) {
+        return (
+            `<tr><td colspan="4" style="text-align: center; opacity: 0.6">` +
+            `No notes yet — create one, or let the notes agent (Agents page) write one.</td></tr>`
+        )
+    }
+    return notes
+        .map(
+            (n) =>
+                `<tr data-open="${escapeHtml(n.id)}" tabindex="0" role="button" aria-label="Open notes/${escapeHtml(n.id)}" style="cursor: pointer">` +
+                `<td><code>notes/${escapeHtml(n.id)}</code></td>` +
+                `<td>${escapeHtml(n.title)}</td>` +
+                `<td><tc-text variant="muted">${escapeHtml(relativeTime(n.updatedAt))}</tc-text></td>` +
+                `<td><tc-button size="sm" variant="danger" outline${agentRunning ? ' disabled' : ''} data-action="delete" data-id="${escapeHtml(n.id)}">Delete</tc-button></td></tr>`,
+        )
+        .join('')
+}
 
 export function NotesClient() {
     const { project, notes, agentSessions, refreshNotes } = useProject()
@@ -57,9 +78,7 @@ export function NotesClient() {
     const loadNote = useCallback(
         async (id: string) => {
             targetRef.current = id
-            const d = await fetch(`/api/projects/${project}/notes/${id}`).then((r) =>
-                r.ok ? r.json() : Promise.reject(),
-            )
+            const d = await apiFetch<{ content: string }>(`/api/projects/${project}/notes/${id}`)
             if (targetRef.current !== id) return // superseded by a newer selection
             setLoaded({ id, content: d.content })
             setEditor(d.content)
@@ -129,13 +148,14 @@ export function NotesClient() {
             toast.error(`${id} already exists.`)
             return
         }
-        const res = await fetch(`/api/projects/${project}/notes/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ content: `# ${slug}\n\n` }),
-        })
-        if (!res.ok) {
-            toast.error((await res.json().catch(() => ({}))).error ?? 'Failed to create note')
+        try {
+            await apiFetch(`/api/projects/${project}/notes/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: `# ${slug}\n\n` }),
+            })
+        } catch (e) {
+            toast.error(describeApiError(e))
             return
         }
         await refreshNotes()
@@ -148,22 +168,17 @@ export function NotesClient() {
         if (!openId) return
         setSaving(true)
         try {
-            const res = await fetch(`/api/projects/${project}/notes/${openId}`, {
+            await apiFetch(`/api/projects/${project}/notes/${openId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ content: editor }),
             })
-            if (res.status === 409) {
-                toast.error(helpTexts.notes.agentRunning)
-                return
-            }
-            if (!res.ok) {
-                toast.error('Failed to save note.')
-                return
-            }
             setLoaded({ id: openId, content: editor })
             toast.success('Note saved')
             void refreshNotes()
+        } catch (e) {
+            if (e instanceof ApiError && e.status === 409) toast.error(helpTexts.notes.agentRunning)
+            else toast.error(describeApiError(e))
         } finally {
             setSaving(false)
         }
@@ -177,13 +192,11 @@ export function NotesClient() {
             confirmVariant: 'danger',
         })
         if (!ok) return
-        const res = await fetch(`/api/projects/${project}/notes/${id}`, { method: 'DELETE' })
-        if (res.status === 409) {
-            toast.error(helpTexts.notes.agentRunning)
-            return
-        }
-        if (!res.ok) {
-            toast.error('Failed to delete note.')
+        try {
+            await apiFetch(`/api/projects/${project}/notes/${id}`, { method: 'DELETE' })
+        } catch (e) {
+            if (e instanceof ApiError && e.status === 409) toast.error(helpTexts.notes.agentRunning)
+            else toast.error(describeApiError(e))
             return
         }
         if (openId === id) {
@@ -194,33 +207,32 @@ export function NotesClient() {
         void refreshNotes()
     }
 
-    const columns: Col[] = [
-        { key: 'id', header: 'File', width: '30%', render: (n) => <code>notes/{n.id}</code> },
-        { key: 'title', header: 'Title', render: (n) => n.title },
-        { key: 'updated', header: 'Updated', width: '9rem', render: (n) => <tc-text variant="muted">{relativeTime(n.updatedAt)}</tc-text> },
-        {
-            key: 'actions',
-            header: '',
-            width: '7rem',
-            render: (n) => (
-                <tc-button
-                    size="sm"
-                    variant="danger"
-                    outline
-                    disabled={noteAgentRunning || undefined}
-                    onClick={(e) => {
-                        e.stopPropagation()
-                        void onDelete(n.id)
-                    }}
-                >
-                    Delete
-                </tc-button>
-            ),
-        },
-    ]
+    // Delegated row interactions: the Delete button wins over row-open.
+    const onTableClick = (event: Event) => {
+        const target = event.target as HTMLElement
+        const action = target.closest?.('[data-action="delete"]') as HTMLElement | null
+        if (action) {
+            const id = action.getAttribute('data-id')
+            if (id) void onDelete(id)
+            return
+        }
+        const row = target.closest?.('tr[data-open]') as HTMLElement | null
+        if (row) void openNote(row.getAttribute('data-open')!)
+    }
+    const onTableKeydown = (event: Event) => {
+        const e = event as KeyboardEvent
+        if (e.key !== 'Enter' && e.key !== ' ') return
+        const row = e.target as HTMLElement
+        if (!row.matches?.('tr[data-open]')) return
+        e.preventDefault()
+        void openNote(row.getAttribute('data-open')!)
+    }
 
-    const tableKey = notes.map((n) => n.id).join('_')
-    const tableRef = useTc<HTMLElement>({ columns: ADV_COLUMNS })
+    const tableProps = useMemo(
+        () => ({ columns: ADV_COLUMNS, rows: noteRowsHtml(notes, noteAgentRunning) }),
+        [notes, noteAgentRunning],
+    )
+    const tableRef = useTc<HTMLElement>(tableProps, { click: onTableClick, keydown: onTableKeydown })
 
     return (
         <div className="taskforge-page">
@@ -231,35 +243,7 @@ export function NotesClient() {
                         <tc-icon name="Plus" /> New note
                     </tc-button>
                 </div>
-                <tc-advanced-table key={tableKey} ref={tableRef}>
-                    {notes.length === 0 && (
-                        <tr>
-                            <td colSpan={4} style={{ textAlign: 'center', opacity: 0.6 }}>
-                                No notes yet — create one, or let the notes agent (Agents page) write one.
-                            </td>
-                        </tr>
-                    )}
-                    {notes.map((n) => (
-                        <tr
-                            key={n.id}
-                            style={{ cursor: 'pointer' }}
-                            tabIndex={0}
-                            role="button"
-                            aria-label={`Open notes/${n.id}`}
-                            onClick={() => void openNote(n.id)}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter' || e.key === ' ') {
-                                    e.preventDefault()
-                                    void openNote(n.id)
-                                }
-                            }}
-                        >
-                            {columns.map((c) => (
-                                <td key={c.key}>{c.render(n)}</td>
-                            ))}
-                        </tr>
-                    ))}
-                </tc-advanced-table>
+                <tc-advanced-table ref={tableRef} />
                 <div className="tf-card-body">
                     <tc-helper-text text={helpTexts.notes.storage} />
                 </div>

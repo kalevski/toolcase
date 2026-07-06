@@ -47,7 +47,6 @@ import { isLimitError, isTransientError, computeLimitSleep } from '@/server/doma
 import { scrubSecrets } from '@/server/domain/account-secrets'
 import { notifyBatch } from '@/server/infrastructure/slack'
 import { refreshUsage } from '@/server/services/usage'
-import { ensureImported } from '@/server/services/migrate-fs'
 import * as runEventRepo from '@/server/data/repositories/run-event-repo'
 import * as runRepo from '@/server/data/repositories/run-repo'
 import * as taskRepo from '@/server/data/repositories/task-repo'
@@ -471,9 +470,8 @@ class ExecutionManager extends EventEmitter {
 
         let reason = 'completed'
         try {
-            // Ensure legacy filesystem state is imported, then mirror the markdown
-            // task files into the DB before reading/mutating their rows.
-            await ensureImported()
+            // Mirror the markdown task files into the DB before reading/mutating
+            // their rows.
             await reconcileTasks(repo)
 
             // §6.7 FORCE / reset

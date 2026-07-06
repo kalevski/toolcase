@@ -4,6 +4,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { toast } from '@/lib/toast'
+import { apiFetch, describeApiError } from '@/lib/fetcher'
 import { useTcEvents, detailValue } from '@/lib/tc'
 import type { ScheduleRecord } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
@@ -57,9 +58,8 @@ export function ScheduleCard() {
 
     useEffect(() => {
         let cancelled = false
-        fetch(`/api/projects/${project}/schedule`)
-            .then((r) => (r.ok ? r.json() : null))
-            .then((s: ScheduleRecord | null) => {
+        apiFetch<ScheduleRecord | null>(`/api/projects/${project}/schedule`)
+            .then((s) => {
                 if (cancelled) return
                 setLoaded(true)
                 if (!s) return
@@ -82,7 +82,7 @@ export function ScheduleCard() {
     const save = async () => {
         setSaving(true)
         try {
-            const res = await fetch(`/api/projects/${project}/schedule`, {
+            await apiFetch(`/api/projects/${project}/schedule`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -97,12 +97,10 @@ export function ScheduleCard() {
                     },
                 }),
             })
-            if (!res.ok) {
-                toast.error((await res.json().catch(() => ({}))).error ?? 'Failed to save schedule')
-                return
-            }
             setExists(true)
             toast.success('Schedule saved')
+        } catch (e) {
+            toast.error(describeApiError(e))
         } finally {
             setSaving(false)
         }
@@ -118,14 +116,12 @@ export function ScheduleCard() {
         if (!ok) return
         setRemoving(true)
         try {
-            const res = await fetch(`/api/projects/${project}/schedule`, { method: 'DELETE' })
-            if (!res.ok) {
-                toast.error('Failed to remove schedule')
-                return
-            }
+            await apiFetch(`/api/projects/${project}/schedule`, { method: 'DELETE' })
             setExists(false)
             setEnabled(true)
             toast.success('Schedule removed')
+        } catch (e) {
+            toast.error(describeApiError(e))
         } finally {
             setRemoving(false)
         }

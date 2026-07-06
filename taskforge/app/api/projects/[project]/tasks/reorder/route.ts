@@ -1,13 +1,8 @@
 // A2 — queue reordering. Takes the full ordered list of pending task ids and
 // renumbers their files (done/error keep their numbers; telemetry re-keys).
 
-import { guard, json, error, audit } from '@/server/web/http'
-import {
-    reorderPendingTasks,
-    projectExists,
-    ReorderError,
-    UnsafePathError,
-} from '@/server/infrastructure/fs-workspace'
+import { guard, json, error, audit, errorFrom } from '@/server/web/http'
+import { reorderPendingTasks, projectExists } from '@/server/infrastructure/fs-workspace'
 import { engine } from '@/server/services/execution-manager'
 import { agentSessionsBusy, withProjectLock } from '@/server/services/locks'
 import { getTasks } from '@/server/services/projects'
@@ -38,8 +33,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ project: strin
         audit(auth, 'task.reorder', params.project, `${Object.keys(mapping).length} renamed`)
         return json({ mapping, tasks: await getTasks(params.project) })
     } catch (e) {
-        if (e instanceof ReorderError) return error(e.message, 400)
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }

@@ -1,7 +1,7 @@
 // D1 — telemetry aggregates for the Overview dashboard.
 
-import { guard, json, error } from '@/server/web/http'
-import { projectExists, UnsafePathError } from '@/server/infrastructure/fs-workspace'
+import { guard, json, error, errorFrom } from '@/server/web/http'
+import { projectExists } from '@/server/infrastructure/fs-workspace'
 import * as telemetryRepo from '@/server/data/repositories/telemetry-repo'
 
 export const runtime = 'nodejs'
@@ -16,7 +16,8 @@ export async function GET(req: Request, ctx: { params: Promise<{ project: string
         const days = Number(new URL(req.url).searchParams.get('days')) || 30
         return json(telemetryRepo.summary(params.project, Math.min(Math.max(days, 1), 365)))
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }

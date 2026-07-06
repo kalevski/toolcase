@@ -4,10 +4,12 @@
 // terminal from the persisted run_event log.
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { apiFetch } from '@/lib/fetcher'
 import { useTc, useTcProps, escapeHtml } from '@/lib/tc'
 import { toTcLines, type TerminalLine } from '@/lib/terminal'
 import type { RunRecord, SseEvent } from '@/server/domain/types'
 import { useProject } from '../ProjectContext'
+import { LoadingState } from '../states'
 import { helpTexts } from '../helpTexts'
 
 const REASON_BADGE: Record<string, 'success' | 'warning' | 'danger' | 'secondary' | 'info'> = {
@@ -148,7 +150,7 @@ export function RunsClient() {
 
     const load = useCallback(async () => {
         try {
-            const d = await fetch(`/api/projects/${project}/runs`).then((r) => (r.ok ? r.json() : null))
+            const d = await apiFetch<RunRecord[]>(`/api/projects/${project}/runs`)
             if (d) setRuns(d)
         } catch {
             /* transient */
@@ -175,8 +177,7 @@ export function RunsClient() {
     useEffect(() => {
         if (openRun === null) return
         let cancelled = false
-        fetch(`/api/projects/${project}/runs/${openRun}`)
-            .then((r) => (r.ok ? r.json() : Promise.reject()))
+        apiFetch<{ run: RunRecord; events: SseEvent[] }>(`/api/projects/${project}/runs/${openRun}`)
             .then((d) => {
                 if (!cancelled) setDetail({ id: openRun, run: d.run, lines: eventsToLines(d.events) })
             })
@@ -208,11 +209,7 @@ export function RunsClient() {
 
             <tc-drawer ref={drawerRef} side="right" size="large" title={`Run #${openRun ?? ''}`}>
                 <tc-stack gap="0.75rem" style={{ padding: '1.25rem' }}>
-                    {openDetail === null && (
-                        <div style={{ padding: '2rem', textAlign: 'center' }}>
-                            <tc-spinner />
-                        </div>
-                    )}
+                    {openDetail === null && <LoadingState />}
                     {openDetail && (
                         <>
                             <div className="tf-kv">

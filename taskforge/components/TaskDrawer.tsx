@@ -2,10 +2,12 @@
 
 import React, { useEffect, useState } from 'react'
 import { toast } from '@/lib/toast'
+import { apiFetch, ApiError, describeApiError } from '@/lib/fetcher'
 import { useTc, useTcEvents, detailValue } from '@/lib/tc'
 import type { TaskInfo, TaskRuntimeStatus } from '@/server/domain/types'
 import { useProject } from './ProjectContext'
 import { useFeedbackModal } from './FeedbackModal'
+import { LoadingState } from './states'
 import { helpTexts } from './helpTexts'
 
 const STATUS_BADGE: Record<TaskRuntimeStatus, 'secondary' | 'info' | 'success' | 'danger' | 'warning'> = {
@@ -58,8 +60,7 @@ export function TaskDrawer({
     useEffect(() => {
         if (!taskId) return
         let cancelled = false
-        fetch(`/api/projects/${project}/tasks/${taskId}`)
-            .then((r) => (r.ok ? r.json() : Promise.reject()))
+        apiFetch<{ content: string }>(`/api/projects/${project}/tasks/${taskId}`)
             .then((d) => {
                 if (!cancelled) setResult({ id: taskId, content: d.content })
             })
@@ -82,26 +83,20 @@ export function TaskDrawer({
         if (!taskId) return
         setSavingModel(true)
         try {
-            const res = await fetch(`/api/projects/${project}/tasks/${taskId}`, {
+            await apiFetch(`/api/projects/${project}/tasks/${taskId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ model: value || null }),
             })
-            if (res.status === 409) {
-                toast.error('Task is currently running.')
-                return
-            }
-            if (!res.ok) {
-                toast.error((await res.json().catch(() => ({}))).error ?? 'Failed to set model')
-                return
-            }
             toast.success(value ? `Model pinned: ${value}` : 'Model cleared — run default applies')
             // refresh the file body shown in the drawer + the queue's facet tags
-            void fetch(`/api/projects/${project}/tasks/${taskId}`)
-                .then((r) => (r.ok ? r.json() : Promise.reject()))
+            void apiFetch<{ content: string }>(`/api/projects/${project}/tasks/${taskId}`)
                 .then((d) => setResult({ id: taskId, content: d.content }))
                 .catch(() => {})
             void refresh()
+        } catch (e) {
+            if (e instanceof ApiError && e.status === 409) toast.error('Task is currently running.')
+            else toast.error(describeApiError(e))
         } finally {
             setSavingModel(false)
         }
@@ -112,24 +107,18 @@ export function TaskDrawer({
         if (!taskId || editDraft === null) return
         setSaving(true)
         try {
-            const res = await fetch(`/api/projects/${project}/tasks/${taskId}`, {
+            const d = await apiFetch<{ content: string }>(`/api/projects/${project}/tasks/${taskId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ content: editDraft }),
             })
-            if (res.status === 409) {
-                toast.error('Task is currently running.')
-                return
-            }
-            if (!res.ok) {
-                toast.error((await res.json().catch(() => ({}))).error ?? 'Failed to save task')
-                return
-            }
-            const d = await res.json()
             setResult({ id: taskId, content: d.content })
             setEditing(null)
             toast.success('Task saved')
             void refresh()
+        } catch (e) {
+            if (e instanceof ApiError && e.status === 409) toast.error('Task is currently running.')
+            else toast.error(e instanceof ApiError && e.message ? e.message : 'Failed to save task')
         } finally {
             setSaving(false)
         }
@@ -145,8 +134,7 @@ export function TaskDrawer({
             onDone: (tasks) => {
                 onTasksChanged?.(tasks)
                 // reload the body (the feedback section was appended)
-                void fetch(`/api/projects/${project}/tasks/${taskId}`)
-                    .then((r) => (r.ok ? r.json() : Promise.reject()))
+                void apiFetch<{ content: string }>(`/api/projects/${project}/tasks/${taskId}`)
                     .then((d) => setResult({ id: taskId, content: d.content }))
                     .catch(() => {})
             },
@@ -275,11 +263,7 @@ export function TaskDrawer({
                     </tc-stack>
                 )}
 
-                {loading && (
-                    <div style={{ padding: '2rem', textAlign: 'center' }}>
-                        <tc-spinner />
-                    </div>
-                )}
+                {loading && <LoadingState label="Loading task…" />}
                 {editDraft !== null && taskId ? (
                     <tc-stack gap="0.75rem">
                         <tc-helper-text text={helpTexts.tasks.editStatusNote} />

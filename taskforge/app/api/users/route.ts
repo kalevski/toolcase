@@ -5,7 +5,7 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-    const auth = await guard('admin')
+    const auth = await guard('owner')
     if ('res' in auth) return auth.res
     return json(await listUsers())
 }

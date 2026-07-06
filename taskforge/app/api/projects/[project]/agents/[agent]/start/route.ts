@@ -1,6 +1,6 @@
-import { guard, json, error, audit } from '@/server/web/http'
+import { guard, json, error, audit, errorFrom } from '@/server/web/http'
 import { agentSessions, AgentBusyError, UnknownAgentError, listAgentKinds } from '@/server/services/agent-sessions'
-import { projectExists, UnsafePathError } from '@/server/infrastructure/fs-workspace'
+import { projectExists } from '@/server/infrastructure/fs-workspace'
 import { config } from '@/server/config'
 import { slog } from '@/server/infrastructure/server-log'
 import type { AgentKind } from '@/server/domain/types'
@@ -46,7 +46,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ project: strin
     } catch (e) {
         if (e instanceof AgentBusyError) return error(e.message, 409)
         if (e instanceof UnknownAgentError) return error('unknown agent', 400)
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }

@@ -1,10 +1,9 @@
-import { guard, json, error, audit } from '@/server/web/http'
+import { guard, json, error, audit, errorFrom } from '@/server/web/http'
 import { getKnowledge } from '@/server/services/projects'
 import {
     projectExists,
     writeKnowledgeFile,
     listKnowledgeFiles,
-    UnsafePathError,
 } from '@/server/infrastructure/fs-workspace'
 import { rebuildIndex } from '@/server/services/knowledge'
 import { engine } from '@/server/services/execution-manager'
@@ -21,7 +20,8 @@ export async function GET(_req: Request, ctx: { params: Promise<{ project: strin
         if (!(await projectExists(params.project))) return error('project not found', 404)
         return json(await getKnowledge(params.project))
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }
@@ -55,7 +55,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ project: strin
         audit(auth, 'knowledge.create', params.project, id)
         return json({ id, docs: await getKnowledge(params.project) }, 201)
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }

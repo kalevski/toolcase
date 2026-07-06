@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(_req: Request, ctx: { params: Promise<{ alias: string }> }) {
     const params = await ctx.params
-    const auth = await guard('admin')
+    const auth = await guard('owner')
     if ('res' in auth) return auth.res
 
     if (!getAccount(params.alias)) return error('account not found', 404)

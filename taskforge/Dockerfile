@@ -9,10 +9,23 @@
 FROM node:22-slim AS builder
 WORKDIR /repo
 
+# Manifests first so the npm-ci layer caches across source-only changes.
+# Root `npm ci` needs EVERY workspace's package.json to satisfy the lockfile.
+COPY package.json package-lock.json ./
+COPY base/package.json base/package.json
+COPY logging/package.json logging/package.json
+COPY serializer/package.json serializer/package.json
+COPY web-components/package.json web-components/package.json
+COPY phaser-plus/package.json phaser-plus/package.json
+COPY node/package.json node/package.json
+COPY taskforge/package.json taskforge/package.json
+COPY quaykeeper/package.json quaykeeper/package.json
+COPY examples/package.json examples/package.json
+RUN npm ci
+
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npm ci \
-    && npm run build -w @toolcase/base -w @toolcase/web-components -w @toolcase/taskforge
+RUN npm run build -w @toolcase/base -w @toolcase/web-components -w @toolcase/taskforge
 
 # ── runtime stage ────────────────────────────────────────────────────────────
 FROM node:22-slim AS runner

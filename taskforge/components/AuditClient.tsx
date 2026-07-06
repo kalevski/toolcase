@@ -3,6 +3,7 @@
 // D3 — admin audit-log table with filters.
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { apiFetch } from '@/lib/fetcher'
 import { useTc, useTcEvents, useTcProps, escapeHtml } from '@/lib/tc'
 import type { TabBarItem, TimelineItem } from '@toolcase/web-components'
 import type { AuditRecord } from '@/server/domain/types'
@@ -65,7 +66,9 @@ export function AuditClient() {
                 if (login) params.set('login', login)
                 if (action) params.set('action', action)
                 if (beforeId) params.set('beforeId', String(beforeId))
-                const d = await fetch(`/api/audit?${params}`).then((r) => (r.ok ? r.json() : null))
+                const d = await apiFetch<{ entries: AuditRecord[]; actions: string[]; total: number }>(
+                    `/api/audit?${params}`,
+                ).catch(() => null)
                 if (d) {
                     setEntries((prev) => (beforeId ? [...prev, ...d.entries] : d.entries))
                     setActions(d.actions)

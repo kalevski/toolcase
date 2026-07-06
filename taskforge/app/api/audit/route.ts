@@ -7,7 +7,7 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: Request) {
-    const auth = await guard('admin')
+    const auth = await guard('owner')
     if ('res' in auth) return auth.res
     const sp = new URL(req.url).searchParams
     return json({

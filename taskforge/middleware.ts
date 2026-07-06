@@ -17,9 +17,9 @@ const SESSION_COOKIE = 'atm_session'
  * redirect into an open redirect. Empty when neither is set.
  */
 function trustedOrigin(): string {
-    const explicit = process.env.PUBLIC_ORIGIN
+    const explicit = process.env.TASKFORGE_PUBLIC_ORIGIN || process.env.PUBLIC_ORIGIN
     if (explicit && explicit.trim() !== '') return explicit.trim().replace(/\/+$/, '')
-    const redirect = process.env.OAUTH_REDIRECT_URI
+    const redirect = process.env.TASKFORGE_OAUTH_REDIRECT_URI || process.env.OAUTH_REDIRECT_URI
     if (redirect) {
         try {
             return new URL(redirect).origin

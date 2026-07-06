@@ -1,20 +1,16 @@
 // Role map (§4.3) — business rules over the user repository (SQLite).
 // All SQL lives in repositories/user-repo.ts; this module holds the policy
-// (bootstrap the first admin, block demoting the last admin) and triggers the
-// one-time filesystem→SQLite import so existing roles.json data is preserved.
+// (bootstrap the first owner, block demoting the last owner).
 
 import 'server-only'
 import * as userRepo from '@/server/data/repositories/user-repo'
-import { ensureImported } from '@/server/services/migrate-fs'
 import type { Role, UserRecord } from '@/server/domain/types'
 
 export async function listUsers(): Promise<UserRecord[]> {
-    await ensureImported()
     return userRepo.list()
 }
 
 export async function getUser(githubId: number): Promise<UserRecord | undefined> {
-    await ensureImported()
     return userRepo.get(githubId)
 }
 
@@ -32,19 +28,18 @@ export interface GithubProfile {
 }
 
 /**
- * Resolve (or create) a user on login. First user when no admin exists becomes
- * `admin` (bootstrap); every subsequent new user lands as `guest`. Returns the
+ * Resolve (or create) a user on login. First user when no owner exists becomes
+ * `owner` (bootstrap); every subsequent new user lands as `guest`. Returns the
  * resolved record (with its role).
  */
 export async function resolveOnLogin(profile: GithubProfile): Promise<UserRecord> {
-    await ensureImported()
     return userRepo.transaction(() => {
         const existing = userRepo.get(profile.githubId)
         if (existing) {
             userRepo.updateProfile(profile.githubId, profile.login, profile.name, profile.avatarUrl)
             return { ...existing, login: profile.login, name: profile.name, avatarUrl: profile.avatarUrl }
         }
-        const role: Role = userRepo.adminCount() === 0 ? 'admin' : 'guest'
+        const role: Role = userRepo.ownerCount() === 0 ? 'owner' : 'guest'
         const record: UserRecord = {
             githubId: profile.githubId,
             login: profile.login,
@@ -58,17 +53,16 @@ export async function resolveOnLogin(profile: GithubProfile): Promise<UserRecord
     })
 }
 
-export class LastAdminError extends Error {}
+export class LastOwnerError extends Error {}
 export class UnknownUserError extends Error {}
 
-/** Admin sets a user's role. Blocks demoting the last remaining admin (§4.3). */
+/** Owner sets a user's role. Blocks demoting the last remaining owner (§4.3). */
 export async function setRole(githubId: number, role: Role): Promise<UserRecord> {
-    await ensureImported()
     return userRepo.transaction(() => {
         const user = userRepo.get(githubId)
         if (!user) throw new UnknownUserError(`Unknown user ${githubId}`)
-        if (user.role === 'admin' && role !== 'admin' && userRepo.adminCount() === 1) {
-            throw new LastAdminError('Cannot demote the last remaining admin')
+        if (user.role === 'owner' && role !== 'owner' && userRepo.ownerCount() === 1) {
+            throw new LastOwnerError('Cannot demote the last remaining owner')
         }
         userRepo.setRole(githubId, role)
         return { ...user, role }

@@ -3,7 +3,8 @@
 import React, { useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from '@/lib/toast'
-import { useTc, useTcProps, useTcEvents } from '@/lib/tc'
+import { apiFetch, describeApiError } from '@/lib/fetcher'
+import { escapeHtml, useTc, useTcProps, useTcEvents } from '@/lib/tc'
 import { tcIcon } from '@/lib/icons'
 import type { AccountSummary, EngineState, ProjectSummary, UsageSnapshot } from '@/server/domain/types'
 import { useNewProject } from './NewProjectModal'
@@ -18,8 +19,7 @@ function GlobalCostSection() {
 
     React.useEffect(() => {
         let cancelled = false
-        fetch('/api/telemetry/global')
-            .then((r) => (r.ok ? r.json() : null))
+        apiFetch<{ date: string; costUsd: number }[]>('/api/telemetry/global')
             .then((d) => {
                 if (!cancelled && d) setDays(d)
             })
@@ -73,14 +73,13 @@ function UsageSection() {
     const [account, setAccount] = React.useState('')
     const [accounts, setAccounts] = React.useState<AccountSummary[]>([])
 
-    // Account registry is admin-gated — fetch best-effort so non-admins still see
+    // Account registry is owner-gated — fetch best-effort so non-owners still see
     // their (ambient) usage; they just get no account picker.
     React.useEffect(() => {
         let cancelled = false
-        fetch('/api/accounts')
-            .then((res) => (res.ok ? res.json() : []))
+        apiFetch<AccountSummary[]>('/api/accounts')
             .then((data) => {
-                if (!cancelled && Array.isArray(data)) setAccounts(data as AccountSummary[])
+                if (!cancelled && Array.isArray(data)) setAccounts(data)
             })
             .catch(() => {})
         return () => {
@@ -92,10 +91,9 @@ function UsageSection() {
     React.useEffect(() => {
         let cancelled = false
         const qs = account ? `?account=${encodeURIComponent(account)}` : ''
-        fetch(`/api/usage${qs}`)
-            .then((res) => (res.ok ? res.json() : null))
+        apiFetch<{ usage?: UsageSnapshot }>(`/api/usage${qs}`)
             .then((data) => {
-                if (!cancelled) setUsage((data?.usage as UsageSnapshot) ?? null)
+                if (!cancelled) setUsage(data?.usage ?? null)
             })
             .catch(() => {
                 if (!cancelled) setUsage(null)
@@ -110,20 +108,21 @@ function UsageSection() {
     const onRefresh = async () => {
         setRefreshing(true)
         try {
-            const res = await fetch('/api/usage', {
+            // Spawns a one-shot /usage subprocess on the host — no client deadline.
+            const data = await apiFetch<{ usage?: UsageSnapshot }>('/api/usage', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ account: account || undefined }),
+                timeoutMs: 0,
             })
-            const data = await res.json().catch(() => ({}))
-            if (res.ok && data.usage) {
-                setUsage(data.usage as UsageSnapshot)
+            if (data?.usage) {
+                setUsage(data.usage)
                 toast.success('Usage refreshed')
             } else {
-                toast.error(data.error ?? 'Failed to refresh usage')
+                toast.error('Failed to refresh usage')
             }
-        } catch {
-            toast.error('Failed to refresh usage')
+        } catch (e) {
+            toast.error(describeApiError(e))
         } finally {
             setRefreshing(false)
         }
@@ -185,12 +184,12 @@ function UsageSection() {
     )
 }
 
-type Col = { key: string; header: string; align?: 'right'; render: (p: ProjectSummary) => React.ReactNode }
-
 type ProjectTrend = { date: string; costUsd: number; runs: number }
 
-// tc-advanced-table header descriptors (the body rows are slotted React <tr>,
-// so they keep their onClick navigation + Delete handler).
+// tc-advanced-table header descriptors. Body rows are fed through the `rows`
+// HTML-string property (the component owns its <tbody>; React <tr> children
+// would be relocated out from under the reconciler and break SSR hydration).
+// Row navigation + the Delete button are delegated data-* clicks on the host.
 const ADV_COLUMNS = [
     { key: 'name', label: 'Project' },
     { key: 'pending', label: 'Pending', align: 'right' as const },
@@ -200,6 +199,45 @@ const ADV_COLUMNS = [
     { key: 'state', label: 'State' },
     { key: 'actions', label: '', align: 'right' as const },
 ]
+
+/** The injected tbody HTML — every interpolated value is escaped. */
+function projectRowsHtml(projects: ProjectSummary[], trends: Record<string, ProjectTrend[]>): string {
+    return projects
+        .map((p) => {
+            const series = trends[p.name] ?? []
+            const data = series.map((d) => Math.round(d.costUsd * 100) / 100)
+            // Need ≥2 points for a meaningful line; otherwise a muted dash. The
+            // data-action="none" wrapper swallows clicks so hovering/clicking the
+            // sparkline never triggers row navigation.
+            let trend = '<span style="opacity: 0.4">—</span>'
+            if (data.filter((v) => v > 0).length >= 2) {
+                const total = series.reduce((s, d) => s + d.costUsd, 0)
+                trend =
+                    `<tc-tooltip content="${escapeHtml(`30-day cost $${total.toFixed(2)} · ${series.length} active day(s)`)}">` +
+                    `<span data-action="none" style="display: inline-block">` +
+                    `<tc-sparkline data="${data.join(',')}" type="line" color="#6366f1" width="96" height="28"></tc-sparkline>` +
+                    `</span></tc-tooltip>`
+            }
+            const idle = p.state === 'IDLE'
+            return (
+                `<tr data-project="${escapeHtml(p.name)}" style="cursor: pointer">` +
+                `<td><strong>${escapeHtml(p.name)}</strong></td>` +
+                `<td style="text-align: right">${p.pending}</td>` +
+                `<td style="text-align: right">${p.done}</td>` +
+                `<td style="text-align: right">${p.error > 0 ? `<tc-badge variant="danger">${p.error}</tc-badge>` : p.error}</td>` +
+                `<td>${trend}</td>` +
+                `<td><span style="display: inline-flex; align-items: center; gap: 0.4rem">` +
+                `<tc-status-dot status="${STATE_DOT[p.state]}"${p.state === 'RUNNING' ? ' pulse' : ''}></tc-status-dot>` +
+                `<tc-badge variant="${STATE_BADGE[p.state]}">${p.state}</tc-badge>` +
+                `</span></td>` +
+                `<td style="text-align: right">` +
+                `<tc-button variant="danger" outline${idle ? '' : ' disabled'} title="${idle ? 'Delete project' : 'Stop the run before deleting'}" data-action="delete" data-project="${escapeHtml(p.name)}">Delete</tc-button>` +
+                `</td>` +
+                `</tr>`
+            )
+        })
+        .join('')
+}
 
 export function DashboardClient({ projects }: { projects: ProjectSummary[] }) {
     const router = useRouter()
@@ -211,10 +249,9 @@ export function DashboardClient({ projects }: { projects: ProjectSummary[] }) {
     const [trends, setTrends] = React.useState<Record<string, ProjectTrend[]>>({})
     React.useEffect(() => {
         let cancelled = false
-        fetch('/api/telemetry/global?by=project')
-            .then((r) => (r.ok ? r.json() : null))
+        apiFetch<Record<string, ProjectTrend[]>>('/api/telemetry/global?by=project')
             .then((d) => {
-                if (!cancelled && d) setTrends(d as Record<string, ProjectTrend[]>)
+                if (!cancelled && d) setTrends(d)
             })
             .catch(() => {})
         return () => {
@@ -235,12 +272,6 @@ export function DashboardClient({ projects }: { projects: ProjectSummary[] }) {
     )
     const metricsRef = useTcProps<HTMLElement>({ items: metrics })
 
-    // tc-advanced-table captures slotted <tr> into its own tbody on connect, so
-    // React can't safely reorder them — remount with a fresh key whenever the
-    // project set changes (router.refresh re-renders with new server data).
-    const tableRef = useTc<HTMLElement>({ columns: ADV_COLUMNS })
-    const tableKey = projects.map((p) => p.name).join('_')
-
     const onNew = async () => {
         const name = await newProject()
         if (name) router.push(`/projects/${name}`)
@@ -254,76 +285,36 @@ export function DashboardClient({ projects }: { projects: ProjectSummary[] }) {
             confirmVariant: 'danger',
         })
         if (!ok) return
-        const res = await fetch(`/api/projects/${name}`, { method: 'DELETE' })
-        if (res.ok) {
+        try {
+            await apiFetch(`/api/projects/${name}`, { method: 'DELETE' })
             toast.success(`Deleted ${name}`)
             router.refresh()
-        } else {
-            const data = await res.json().catch(() => ({}))
-            toast.error(data.error ?? 'Failed to delete project')
+        } catch (e) {
+            toast.error(describeApiError(e))
         }
     }
 
-    const columns: Col[] = [
-        { key: 'name', header: 'Project', render: (p) => <strong>{p.name}</strong> },
-        { key: 'pending', header: 'Pending', align: 'right', render: (p) => p.pending },
-        { key: 'done', header: 'Done', align: 'right', render: (p) => p.done },
-        {
-            key: 'error',
-            header: 'Errors',
-            align: 'right',
-            render: (p) => (p.error > 0 ? <tc-badge variant="danger">{p.error}</tc-badge> : p.error),
-        },
-        {
-            key: 'trend',
-            header: 'Cost trend',
-            render: (p) => {
-                const series = trends[p.name] ?? []
-                const data = series.map((d) => Math.round(d.costUsd * 100) / 100)
-                // Need ≥2 points for a meaningful line; otherwise a muted dash.
-                if (data.filter((v) => v > 0).length < 2) {
-                    return <span style={{ opacity: 0.4 }}>—</span>
-                }
-                const total = series.reduce((s, d) => s + d.costUsd, 0)
-                return (
-                    <tc-tooltip content={`30-day cost $${total.toFixed(2)} · ${series.length} active day(s)`}>
-                        <span onClick={(e) => e.stopPropagation()} style={{ display: 'inline-block' }}>
-                            <tc-sparkline data={data.join(',')} type="line" color="#6366f1" width={96} height={28} />
-                        </span>
-                    </tc-tooltip>
-                )
-            },
-        },
-        {
-            key: 'state',
-            header: 'State',
-            render: (p) => (
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <tc-status-dot status={STATE_DOT[p.state]} pulse={p.state === 'RUNNING' || undefined} />
-                    <tc-badge variant={STATE_BADGE[p.state]}>{p.state}</tc-badge>
-                </span>
-            ),
-        },
-        {
-            key: 'actions',
-            header: '',
-            align: 'right',
-            render: (p) => (
-                <tc-button
-                    variant="danger"
-                    outline
-                    disabled={p.state !== 'IDLE' || undefined}
-                    title={p.state !== 'IDLE' ? 'Stop the run before deleting' : 'Delete project'}
-                    onClick={(e) => {
-                        e.stopPropagation()
-                        void onDelete(p.name)
-                    }}
-                >
-                    Delete
-                </tc-button>
-            ),
-        },
-    ]
+    // One delegated click listener: a data-action hit wins (delete acts, "none"
+    // swallows sparkline clicks), otherwise a row click navigates to the project.
+    const onTableClick = (event: Event) => {
+        const target = event.target as HTMLElement
+        const action = target.closest?.('[data-action]') as HTMLElement | null
+        if (action) {
+            if (action.getAttribute('data-action') === 'delete') {
+                const name = action.getAttribute('data-project')
+                if (name) void onDelete(name)
+            }
+            return
+        }
+        const row = target.closest?.('tr[data-project]') as HTMLElement | null
+        if (row) router.push(`/projects/${row.getAttribute('data-project')}`)
+    }
+
+    const tableProps = useMemo(
+        () => ({ columns: ADV_COLUMNS, rows: projectRowsHtml(projects, trends) }),
+        [projects, trends],
+    )
+    const tableRef = useTc<HTMLElement>(tableProps, { click: onTableClick })
 
     return (
         <div className="taskforge-page">
@@ -354,17 +345,7 @@ export function DashboardClient({ projects }: { projects: ProjectSummary[] }) {
                     </div>
                 </tc-empty-state>
             ) : (
-                <tc-advanced-table key={tableKey} ref={tableRef}>
-                    {projects.map((p) => (
-                        <tr key={p.name} style={{ cursor: 'pointer' }} onClick={() => router.push(`/projects/${p.name}`)}>
-                            {columns.map((c) => (
-                                <td key={c.key} style={c.align === 'right' ? { textAlign: 'right' } : undefined}>
-                                    {c.render(p)}
-                                </td>
-                            ))}
-                        </tr>
-                    ))}
-                </tc-advanced-table>
+                <tc-advanced-table ref={tableRef} />
             )}
         </div>
     )

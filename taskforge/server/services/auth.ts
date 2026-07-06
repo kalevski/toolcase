@@ -64,6 +64,10 @@ export function makeSessionToken(profile: GithubProfile): string {
 }
 
 function isSecure(): boolean {
+    // Force `secure` in production regardless of the redirect URI's scheme —
+    // a production deploy behind a TLS-terminating proxy may still carry an
+    // http:// internal redirect URI, and the cookie must never ride plain HTTP.
+    if (process.env.NODE_ENV === 'production') return true
     return config.oauthRedirectUri.startsWith('https://')
 }
 
@@ -101,6 +105,23 @@ export async function getSession(): Promise<SessionPayload | null> {
 
 // ── OAuth state (CSRF, single-use) ────────────────────────────────────────────
 
+// Consumed-nonce set: a state token verifies at most ONCE, so a replayed
+// callback URL (leaked log line, history sync) can't complete a second login.
+// globalThis so dev hot-reload doesn't reset it; entries self-sweep on expiry.
+declare global {
+    var __taskforgeConsumedStates: Map<string, number> | undefined
+}
+
+function consumedStates(): Map<string, number> {
+    return (globalThis.__taskforgeConsumedStates ??= new Map())
+}
+
+function sweepConsumedStates(now: number): void {
+    for (const [nonce, exp] of consumedStates()) {
+        if (exp * 1000 < now) consumedStates().delete(nonce)
+    }
+}
+
 export function makeStateToken(): string {
     const nonce = crypto.randomBytes(16).toString('hex')
     return signToken({ n: nonce, exp: Math.floor(Date.now() / 1000) + 600 })
@@ -109,7 +130,13 @@ export function makeStateToken(): string {
 export function verifyStateToken(token: string | undefined): boolean {
     const payload = verifyToken<{ n: string; exp: number }>(token)
     if (!payload) return false
-    return typeof payload.exp === 'number' && payload.exp * 1000 >= Date.now()
+    if (typeof payload.exp !== 'number' || payload.exp * 1000 < Date.now()) return false
+    if (typeof payload.n !== 'string' || payload.n === '') return false
+    const now = Date.now()
+    sweepConsumedStates(now)
+    if (consumedStates().has(payload.n)) return false // replay
+    consumedStates().set(payload.n, payload.exp)
+    return true
 }
 
 // ── OAuth flow ────────────────────────────────────────────────────────────────

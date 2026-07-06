@@ -6,6 +6,7 @@
 import React, { useCallback, useRef, useState } from 'react'
 import { Modal } from '@/lib/modal'
 import { toast } from '@/lib/toast'
+import { apiFetch, ApiError, describeApiError } from '@/lib/fetcher'
 import { useTcEvents, detailValue } from '@/lib/tc'
 import type { TaskInfo } from '@/server/domain/types'
 import { helpTexts } from './helpTexts'
@@ -43,29 +44,33 @@ export function FeedbackModal() {
         }
         setSubmitting(true)
         try {
-            const res = await fetch(`/api/projects/${input.project}/tasks/feedback`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: input.taskId, text, rerun }),
-            })
-            const data = await res.json().catch(() => ({}))
-            if (res.status === 409) {
+            const data = await apiFetch<{ started: boolean; tasks: TaskInfo[] }>(
+                `/api/projects/${input.project}/tasks/feedback`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: input.taskId, text, rerun }),
+                },
+            )
+            input.onDone(data.tasks)
+            toast.success(data.started ? 'Feedback saved — task running now' : 'Feedback saved — task is pending again')
+            close(true)
+        } catch (e) {
+            if (e instanceof ApiError && e.status === 409) {
                 toast.error('A run or agent is in progress.')
                 return
             }
-            if (res.status === 412) {
-                if (data.tasks) input.onDone(data.tasks)
+            if (e instanceof ApiError && e.status === 412) {
+                // Feedback WAS saved and the task reset to pending — only the
+                // re-run was blocked. The 412 body's task list isn't surfaced by
+                // apiFetch, so re-pull it (best-effort) to keep the board fresh.
+                const tasks = await apiFetch<TaskInfo[]>(`/api/projects/${input.project}/tasks`).catch(() => null)
+                if (tasks) input.onDone(tasks)
                 toast.error('Feedback saved, but the re-run needs a clean working tree.')
                 close(true)
                 return
             }
-            if (!res.ok) {
-                toast.error(data.error ?? 'Failed to save feedback')
-                return
-            }
-            input.onDone(data.tasks)
-            toast.success(data.started ? 'Feedback saved — task running now' : 'Feedback saved — task is pending again')
-            close(true)
+            toast.error(describeApiError(e))
         } finally {
             setSubmitting(false)
         }

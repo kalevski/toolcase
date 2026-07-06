@@ -1,9 +1,9 @@
-import { guard, json, error } from '@/server/web/http'
+import { guard, json, error, errorFrom } from '@/server/web/http'
 import { engine } from '@/server/services/execution-manager'
 import { agentSessions } from '@/server/services/agent-sessions'
-import { stageAll, stagedDiff, commitAll, GitError } from '@/server/infrastructure/git'
+import { stageAll, stagedDiff, commitAll } from '@/server/infrastructure/git'
 import { aiCommitMessage } from '@/server/services/commit-message'
-import { projectExists, UnsafePathError } from '@/server/infrastructure/fs-workspace'
+import { projectExists } from '@/server/infrastructure/fs-workspace'
 import { config } from '@/server/config'
 import { slog } from '@/server/infrastructure/server-log'
 
@@ -51,8 +51,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ project: strin
         slog('info', 'api', 'manual commit', { project: params.project, sha, mode, by: auth.session.login })
         return json({ sha, message })
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
-        if (e instanceof GitError) return error(e.message, 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }

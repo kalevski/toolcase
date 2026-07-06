@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic'
 
 export async function DELETE(_req: Request, ctx: { params: Promise<{ alias: string }> }) {
     const params = await ctx.params
-    const auth = await guard('admin')
+    const auth = await guard('owner')
     if ('res' in auth) return auth.res
 
     const removed = await removeAccount(params.alias)

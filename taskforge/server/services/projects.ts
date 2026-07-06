@@ -19,12 +19,10 @@ import { engine } from '@/server/services/execution-manager'
 import { agentSessions } from '@/server/services/agent-sessions'
 import { readProjectMeta } from '@/server/services/provision'
 import * as taskRepo from '@/server/data/repositories/task-repo'
-import { ensureImported } from '@/server/services/migrate-fs'
 import { slog } from '@/server/infrastructure/server-log'
 import type { KnowledgeDoc, NoteDoc, ProjectNavItem, ProjectSummary, TaskInfo } from '@/server/domain/types'
 
 export async function getTasks(project: string): Promise<TaskInfo[]> {
-    await ensureImported()
     // Mirror the markdown files into the DB (cheap when nothing changed), then
     // render the queue from a single query + telemetry, with no per-file parse.
     await reconcileTasks(project)

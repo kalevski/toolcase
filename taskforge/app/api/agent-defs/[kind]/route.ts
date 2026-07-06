@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 
 export async function DELETE(_req: Request, ctx: { params: Promise<{ kind: string }> }) {
     const params = await ctx.params
-    const auth = await guard('admin')
+    const auth = await guard('owner')
     if ('res' in auth) return auth.res
     if (!agentDefRepo.get(params.kind)) return error('unknown agent kind', 404)
     agentDefRepo.remove(params.kind)

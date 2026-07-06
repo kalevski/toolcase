@@ -16,7 +16,7 @@ export default async function RepoAgentsPage() {
     // useSearchParams (tab deep-links) requires a Suspense boundary in app router.
     return (
         <Suspense>
-            <AgentsClient isAdmin={me.role === 'admin'} />
+            <AgentsClient isAdmin={me.role === 'owner'} />
         </Suspense>
     )
 }

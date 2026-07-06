@@ -1,8 +1,9 @@
 // B3 — per-project run schedule (one per project): GET / PUT / DELETE.
 
-import { guard, json, error, audit } from '@/server/web/http'
-import { projectExists, UnsafePathError } from '@/server/infrastructure/fs-workspace'
-import { parseCron, InvalidCronError, ensureSchedulerStarted } from '@/server/services/scheduler'
+import { guard, json, error, audit, errorFrom } from '@/server/web/http'
+import { projectExists } from '@/server/infrastructure/fs-workspace'
+import { ensureSchedulerStarted } from '@/server/services/scheduler'
+import { parseCron } from '@/server/domain/cron'
 import { config } from '@/server/config'
 import * as scheduleRepo from '@/server/data/repositories/schedule-repo'
 import type { RunOptions } from '@/server/domain/types'
@@ -18,7 +19,8 @@ export async function GET(_req: Request, ctx: { params: Promise<{ project: strin
         if (!(await projectExists(params.project))) return error('project not found', 404)
         return json(scheduleRepo.get(params.project))
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }
@@ -37,12 +39,7 @@ export async function PUT(req: Request, ctx: { params: Promise<{ project: string
             options?: Partial<RunOptions>
         }
         if (!body.cron?.trim()) return error('cron required', 400)
-        try {
-            parseCron(body.cron)
-        } catch (e) {
-            if (e instanceof InvalidCronError) return error(`invalid cron: ${e.message}`, 400)
-            throw e
-        }
+        parseCron(body.cron) // InvalidCronError → 400 via errorFrom below
         const options = body.options ?? {}
         if (options.model && !config.modelCatalog.includes(options.model)) {
             return error(`model not in catalog: ${options.model}`, 400)
@@ -66,7 +63,8 @@ export async function PUT(req: Request, ctx: { params: Promise<{ project: string
         audit(auth, 'schedule.save', params.project, `${body.cron.trim()}${body.enabled === false ? ' (disabled)' : ''}`)
         return json(scheduleRepo.get(params.project))
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }
@@ -81,7 +79,8 @@ export async function DELETE(_req: Request, ctx: { params: Promise<{ project: st
         audit(auth, 'schedule.delete', params.project)
         return json({ ok: true })
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }

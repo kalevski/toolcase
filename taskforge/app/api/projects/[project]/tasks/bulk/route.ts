@@ -3,7 +3,7 @@
 // single-task primitives; partial failures are reported per id.
 // (Bulk re-run is wired client-side straight to run/start with onlyTasks.)
 
-import { guard, json, error, audit } from '@/server/web/http'
+import { guard, json, error, audit, errorFrom } from '@/server/web/http'
 import {
     deleteTaskFile,
     updateTaskStatus,
@@ -11,7 +11,6 @@ import {
     removeCompleted,
     reconcileTasks,
     projectExists,
-    UnsafePathError,
 } from '@/server/infrastructure/fs-workspace'
 import { clearTelemetry } from '@/server/infrastructure/logs'
 import { engine } from '@/server/services/execution-manager'
@@ -94,7 +93,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ project: strin
         audit(auth, `task.bulk.${body.op}`, params.project, `${ids.length} task(s)`)
         return json({ ok: failed.length === 0, failed, tasks: await getTasks(params.project) })
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }

@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toast } from '@/lib/toast'
+import { apiFetch, describeApiError } from '@/lib/fetcher'
 import { useTcProps, escapeHtml } from '@/lib/tc'
 import { tcIcon } from '@/lib/icons'
 import type { TelemetrySummary } from '@/server/domain/types'
@@ -36,8 +37,7 @@ export function OverviewClient() {
     const [summary, setSummary] = useState<TelemetrySummary | null>(null)
     const fetchSummary = useCallback(() => {
         let cancelled = false
-        fetch(`/api/projects/${project}/telemetry/summary`)
-            .then((r) => (r.ok ? r.json() : null))
+        apiFetch<TelemetrySummary>(`/api/projects/${project}/telemetry/summary`)
             .then((d) => {
                 if (!cancelled && d) setSummary(d)
             })
@@ -77,15 +77,11 @@ export function OverviewClient() {
         if (!ok) return
         setGenerating(true)
         try {
-            const res = await fetch(`/api/projects/${project}/claude-md`, { method: 'POST' })
-            if (!res.ok) {
-                const data = await res.json().catch(() => ({}))
-                toast.error(data.error ?? 'Failed to reset CLAUDE.md')
-                return
-            }
+            // Instant server-side template write (no agent) — default timeout is fine.
+            await apiFetch(`/api/projects/${project}/claude-md`, { method: 'POST' })
             toast.success('CLAUDE.md reset to template')
-        } catch {
-            toast.error('Failed to reset CLAUDE.md')
+        } catch (e) {
+            toast.error(describeApiError(e))
         } finally {
             setGenerating(false)
         }

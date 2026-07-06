@@ -1,4 +1,4 @@
-import { guard, json, error, audit } from '@/server/web/http'
+import { guard, json, error, audit, errorFrom } from '@/server/web/http'
 import {
     readTaskFile,
     parseTask,
@@ -6,7 +6,6 @@ import {
     editTaskContent,
     deleteTaskFile,
     reconcileTasks,
-    UnsafePathError,
 } from '@/server/infrastructure/fs-workspace'
 import { clearTelemetry } from '@/server/infrastructure/logs'
 import { engine } from '@/server/services/execution-manager'
@@ -26,7 +25,8 @@ export async function GET(_req: Request, ctx: { params: Promise<{ project: strin
         const parsed = parseTask(content, id)
         return json({ id, content, ...parsed })
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         return error('task not found', 404)
     }
 }
@@ -71,7 +71,8 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ project: stri
         const content = await readTaskFile(params.project, id)
         return json({ id, content, ...parseTask(content, id) })
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         return error('task not found', 404)
     }
 }
@@ -92,7 +93,8 @@ export async function DELETE(_req: Request, ctx: { params: Promise<{ project: st
         audit(auth, 'task.delete', params.project, id)
         return json({ ok: true })
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }

@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = { title: 'Settings' }
 
 export default async function SettingsPage() {
-    const me = await requireRole('admin')
+    const me = await requireRole('owner')
     const projects = await getProjectNav()
     return (
         <AppShell me={me} projects={projects}>

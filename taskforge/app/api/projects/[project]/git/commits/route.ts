@@ -1,6 +1,6 @@
-import { guard, json, error } from '@/server/web/http'
+import { guard, json, error, errorFrom } from '@/server/web/http'
 import { unpushedCommits, recentCommits } from '@/server/infrastructure/git'
-import { projectExists, UnsafePathError } from '@/server/infrastructure/fs-workspace'
+import { projectExists } from '@/server/infrastructure/fs-workspace'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -19,7 +19,8 @@ export async function GET(req: Request, ctx: { params: Promise<{ project: string
         ])
         return json({ unpushed, recent })
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         return error('git log failed', 500)
     }
 }

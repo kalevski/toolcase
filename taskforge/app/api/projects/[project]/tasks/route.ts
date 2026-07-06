@@ -1,6 +1,6 @@
-import { guard, json, error, audit } from '@/server/web/http'
+import { guard, json, error, audit, errorFrom } from '@/server/web/http'
 import { getTasks } from '@/server/services/projects'
-import { projectExists, createTask, UnsafePathError } from '@/server/infrastructure/fs-workspace'
+import { projectExists, createTask } from '@/server/infrastructure/fs-workspace'
 import { engine } from '@/server/services/execution-manager'
 import { config } from '@/server/config'
 
@@ -15,7 +15,8 @@ export async function GET(_req: Request, ctx: { params: Promise<{ project: strin
         if (!(await projectExists(params.project))) return error('project not found', 404)
         return json(await getTasks(params.project))
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }
@@ -58,7 +59,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ project: strin
         audit(auth, 'task.create', params.project, id)
         return json({ id, tasks: await getTasks(params.project) }, 201)
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }

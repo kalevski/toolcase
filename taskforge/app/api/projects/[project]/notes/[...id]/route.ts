@@ -1,10 +1,9 @@
-import { guard, json, error } from '@/server/web/http'
+import { guard, json, error, errorFrom } from '@/server/web/http'
 import {
     readNoteFile,
     writeNoteFile,
     deleteNoteFile,
     extractTitle,
-    UnsafePathError,
 } from '@/server/infrastructure/fs-workspace'
 import { getNotes } from '@/server/services/projects'
 import { agentSessions } from '@/server/services/agent-sessions'
@@ -28,7 +27,8 @@ export async function GET(_req: Request, ctx: { params: Promise<{ project: strin
         const content = await readNoteFile(params.project, id)
         return json({ id, title: extractTitle(content, id), content })
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         return error('note not found', 404)
     }
 }
@@ -47,7 +47,8 @@ export async function PUT(req: Request, ctx: { params: Promise<{ project: string
         await writeNoteFile(params.project, id, body.content)
         return json({ id, notes: await getNotes(params.project) })
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }
@@ -62,7 +63,8 @@ export async function DELETE(_req: Request, ctx: { params: Promise<{ project: st
         await deleteNoteFile(params.project, id)
         return json({ notes: await getNotes(params.project) })
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }

@@ -3,9 +3,14 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Modal } from '@/lib/modal'
 import { toast } from '@/lib/toast'
+import { apiFetch, describeApiError } from '@/lib/fetcher'
 import { useTcEvents } from '@/lib/tc'
+import type { GitKey } from '@/server/domain/types'
 
 const KEY = 'newProject'
+
+// tc-select needs a non-empty option value; "no key" maps through this sentinel.
+const SSH_KEY_NONE = 'none'
 
 /**
  * Create-project dialog. Rendered once inside the global ModalRender (see
@@ -21,19 +26,29 @@ export function NewProjectModal() {
     const [name, setName] = useState('')
     const [gitUrl, setGitUrl] = useState('')
     const [branch, setBranch] = useState('')
+    const [sshKey, setSshKey] = useState(SSH_KEY_NONE)
+    const [keys, setKeys] = useState<GitKey[]>([])
     const [submitting, setSubmitting] = useState(false)
 
     const nameRef = useTcEvents<HTMLElement>({ input: (e) => setName((e.target as HTMLInputElement).value) })
     const gitRef = useTcEvents<HTMLElement>({ input: (e) => setGitUrl((e.target as HTMLInputElement).value) })
     const branchRef = useTcEvents<HTMLElement>({ input: (e) => setBranch((e.target as HTMLInputElement).value) })
+    const sshKeyRef = useTcEvents<HTMLElement>({
+        change: (e) => setSshKey((e.target as HTMLSelectElement).value || SSH_KEY_NONE),
+    })
 
-    // Reset the form each time the dialog opens.
+    // Reset the form each time the dialog opens; refresh the saved-key list so a
+    // key added on the SSH keys page shows up without a reload.
     useEffect(() => {
         if (open) {
             setName('')
             setGitUrl('')
             setBranch('')
+            setSshKey(SSH_KEY_NONE)
             setSubmitting(false)
+            apiFetch<GitKey[]>('/api/git-keys')
+                .then(setKeys)
+                .catch(() => setKeys([]))
         }
     }, [open])
 
@@ -45,26 +60,23 @@ export function NewProjectModal() {
         if (!valid) return
         setSubmitting(true)
         try {
-            const res = await fetch('/api/projects', {
+            // Clone + scaffold can take a minute (see the helper text below) —
+            // exempt from the default 10 s timeout.
+            const data = await apiFetch<{ name: string }>('/api/projects', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     name: name.trim(),
                     gitUrl: gitUrl.trim(),
                     branch: branch.trim() || undefined,
+                    sshKey: sshKey !== SSH_KEY_NONE ? sshKey : undefined,
                 }),
+                timeoutMs: 0,
             })
-            if (!res.ok) {
-                const data = await res.json().catch(() => ({}))
-                toast.error(data.error ?? 'Failed to create project')
-                setSubmitting(false)
-                return
-            }
-            const data = await res.json()
             toast.success(`Created ${data.name}`)
-            close(data.name as string)
-        } catch {
-            toast.error('Failed to create project')
+            close(data.name)
+        } catch (e) {
+            toast.error(describeApiError(e))
             setSubmitting(false)
         }
     }
@@ -93,6 +105,22 @@ export function NewProjectModal() {
                     value={branch}
                     disabled={submitting || undefined}
                 />
+                {keys.length > 0 && (
+                    <tc-select
+                        ref={sshKeyRef}
+                        label="SSH key (optional)"
+                        value={sshKey}
+                        help="Clone with a saved deploy key — required for private ssh:// / git@ URLs. Keys are managed on the SSH keys page."
+                        disabled={submitting || undefined}
+                    >
+                        <tc-option value={SSH_KEY_NONE}>None (HTTPS / ambient credentials)</tc-option>
+                        {keys.map((k) => (
+                            <tc-option key={k.alias} value={k.alias}>
+                                {k.label ? `${k.alias} — ${k.label}` : k.alias}
+                            </tc-option>
+                        ))}
+                    </tc-select>
+                )}
                 <tc-text variant="muted">
                     Clones the repo into <code>repo/</code> and scaffolds <code>tasks/</code> + <code>knowledge/</code>.
                     This can take a minute. Generate a <code>CLAUDE.md</code> afterward from the project page.

@@ -1,5 +1,4 @@
 // Project metadata repository — all SQL for the `project` table.
-// Replaces the on-disk `project.json` written/read by provision.ts.
 
 import 'server-only'
 import { prep, getRow, allRows } from '@/server/data/db'
@@ -8,6 +7,8 @@ export interface ProjectRow {
     name: string
     gitUrl?: string
     branch?: string | null
+    /** Alias of the saved git SSH key the project was cloned with (if any). */
+    sshKeyAlias?: string | null
     createdAt: string
 }
 
@@ -15,6 +16,7 @@ interface Raw {
     name: string
     git_url: string | null
     branch: string | null
+    ssh_key_alias: string | null
     created_at: string
 }
 
@@ -23,18 +25,27 @@ function map(r: Raw): ProjectRow {
         name: r.name,
         gitUrl: r.git_url ?? undefined,
         branch: r.branch,
+        sshKeyAlias: r.ssh_key_alias,
         createdAt: r.created_at,
     }
 }
 
 export function upsertProject(row: ProjectRow): void {
     prep(
-        `INSERT INTO project (name, git_url, branch, created_at)
-         VALUES (?, ?, ?, ?)
+        `INSERT INTO project (name, git_url, branch, ssh_key_alias, created_at)
+         VALUES (?, ?, ?, ?, ?)
          ON CONFLICT(name) DO UPDATE SET
             git_url = excluded.git_url,
-            branch  = excluded.branch`,
-    ).run(row.name, row.gitUrl ?? null, row.branch ?? null, row.createdAt)
+            branch  = excluded.branch,
+            ssh_key_alias = excluded.ssh_key_alias`,
+    ).run(row.name, row.gitUrl ?? null, row.branch ?? null, row.sshKeyAlias ?? null, row.createdAt)
+}
+
+/** Names of projects cloned with the given saved SSH key (blocks key deletion). */
+export function listProjectsUsingSshKey(alias: string): string[] {
+    return allRows<{ name: string }>('SELECT name FROM project WHERE ssh_key_alias = ? ORDER BY name', alias).map(
+        (r) => r.name,
+    )
 }
 
 export function getProject(name: string): ProjectRow | null {

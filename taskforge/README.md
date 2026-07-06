@@ -7,10 +7,11 @@ repositories. Each repository has a queue of Markdown task files; TaskForge runs
 walls by sleeping until reset, retries transient failures, and can be gracefully
 or forcibly stopped.
 
-It is **database-free** — all durable state lives on the filesystem under
-`WORKSPACE_DIR` (default `/workspace`). Authentication is **GitHub OAuth2**; the
-first user to sign in becomes `admin`, everyone else lands as `guest` until an
-admin promotes them.
+Durable state lives under `WORKSPACE_DIR` (default `/workspace`): a single
+SQLite file (`node:sqlite`) as the system of record, with task/knowledge
+markdown bodies on disk beside it. Authentication is **GitHub OAuth2**; the
+first user to sign in becomes `owner`, everyone else lands as `guest` until the
+owner promotes them.
 
 See [`ai-manager.md`](../ai-manager.md) for the full specification.
 
@@ -20,7 +21,7 @@ The build context is the **monorepo root** (TaskForge's `@toolcase/*` deps are
 `file:../` workspace siblings):
 
 ```bash
-cp taskforge/.env.example taskforge/.env    # fill GITHUB_* + AUTH_SECRET + OAUTH_REDIRECT_URI
+cp taskforge/.env.example taskforge/.env    # fill TASKFORGE_GITHUB_* + TASKFORGE_AUTH_SECRET + TASKFORGE_OAUTH_REDIRECT_URI
 docker build -t taskforge -f taskforge/Dockerfile .
 
 # run — keeps the workspace on the host, reuses the host's logged-in claude CLI
@@ -77,7 +78,7 @@ Clone the repositories you want to manage into the mounted workspace:
 git clone <url> "$HOME/taskforge-workspace/projects/<name>/repo"
 ```
 
-Then open `http://localhost:3000` and sign in with GitHub (first login = admin).
+Then open `http://localhost:3000` and sign in with GitHub (first login = owner).
 
 ## Local development
 
@@ -146,23 +147,30 @@ The `claude` CLI authenticates itself — there is **no API-key env var**. The
 table below is the high-traffic subset; [`.env.example`](./.env.example) is the
 exhaustive, commented list.
 
+Every app-owned variable is namespaced **`TASKFORGE_*`** (e.g.
+`TASKFORGE_GITHUB_CLIENT_ID`); the bare name still works as a fallback for
+existing deployments, and the prefixed form wins when both are set. The tables
+below spell out the prefix for the required/auth vars; the remaining tables use
+the short form — prefix them the same way. Shared infra knobs (`PORT`,
+`DB_PATH`, `WORKSPACE_DIR`) stay bare.
+
 ### Required
 
 | Variable | Description |
 |---|---|
-| `GITHUB_CLIENT_ID` | GitHub OAuth app client ID. |
-| `GITHUB_CLIENT_SECRET` | GitHub OAuth app client secret. |
-| `OAUTH_REDIRECT_URI` | OAuth callback URL — must exactly match the GitHub app. |
-| `AUTH_SECRET` | HMAC key for session + OAuth state. Use a long random string. |
+| `TASKFORGE_GITHUB_CLIENT_ID` | GitHub OAuth app client ID. |
+| `TASKFORGE_GITHUB_CLIENT_SECRET` | GitHub OAuth app client secret. |
+| `TASKFORGE_OAUTH_REDIRECT_URI` | OAuth callback URL — must exactly match the GitHub app. |
+| `TASKFORGE_AUTH_SECRET` | HMAC key for session + OAuth state. Use a long random string. |
 
 ### Auth / workspace
 
 | Variable | Default | Description |
 |---|---|---|
-| `PUBLIC_ORIGIN` | origin of `OAUTH_REDIRECT_URI` | Public scheme+host the browser uses; set only when a proxy strips the path. |
-| `GITHUB_ALLOWED_LOGINS` | _(open)_ | Comma-separated GitHub logins allowed to sign in. |
-| `GITHUB_ALLOWED_ORG` | _(none)_ | Require membership of this GitHub org. |
-| `SESSION_TTL` | `86400` | Session lifetime in seconds. |
+| `TASKFORGE_PUBLIC_ORIGIN` | origin of the redirect URI | Public scheme+host the browser uses; set only when a proxy strips the path. |
+| `TASKFORGE_GITHUB_ALLOWED_LOGINS` | _(open)_ | Comma-separated GitHub logins allowed to sign in. |
+| `TASKFORGE_GITHUB_ALLOWED_ORG` | _(none)_ | Require membership of this GitHub org. |
+| `TASKFORGE_SESSION_TTL` | `86400` | Session lifetime in seconds. |
 | `WORKSPACE_DIR` | `/workspace` | Durable state dir (projects, skills, SQLite). |
 | `DB_PATH` | `$WORKSPACE_DIR/taskforge.db` | SQLite system-of-record path. |
 | `PORT` | `3000` | HTTP listen port. |

@@ -3,11 +3,13 @@
 // D4 — admin health/diagnostics page + E3 backup actions.
 
 import React, { useCallback, useEffect, useState } from 'react'
+import { apiFetch } from '@/lib/fetcher'
 import { useTcEvents } from '@/lib/tc'
 import { tcIcon } from '@/lib/icons'
 import { toast } from '@/lib/toast'
 import type { HealthDetails } from '@/server/domain/types'
 import { helpTexts } from './helpTexts'
+import { LoadingState } from './states'
 
 function bytes(n: number): string {
     if (n >= 1 << 30) return `${(n / (1 << 30)).toFixed(1)} GiB`
@@ -26,7 +28,7 @@ export function HealthClient({ projects }: { projects: string[] }) {
 
     const load = useCallback(async () => {
         try {
-            const d = await fetch('/api/health/details').then((r) => (r.ok ? r.json() : null))
+            const d = await apiFetch<HealthDetails>('/api/health/details')
             if (d) setDetails(d)
         } catch {
             /* transient */
@@ -37,13 +39,7 @@ export function HealthClient({ projects }: { projects: string[] }) {
         void load()
     }, [load])
 
-    if (!details) {
-        return (
-            <div style={{ padding: '2rem', textAlign: 'center' }}>
-                <tc-spinner />
-            </div>
-        )
-    }
+    if (!details) return <LoadingState />
 
     const check = (ok: boolean, okText: string, failText: string) => (
         <tc-stack inline direction="horizontal" gap="0.4rem" align="center">

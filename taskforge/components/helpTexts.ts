@@ -63,7 +63,7 @@ export const helpTexts = {
     agents: {
         taskCreator: 'Splits your description into numbered task files in tasks/ — nothing is executed yet.',
         knowledgeWriter: 'Reads the repo and writes one source-anchored analysis doc into knowledge/.',
-        custom: 'Custom agents are admin-defined: a prompt preamble, a target directory contract, and an optional post-processing hook.',
+        custom: 'Custom agents are owner-defined: a prompt preamble, a target directory contract, and an optional post-processing hook.',
         history: 'Every accepted prompt is kept — reuse one from the history, or save it as a cross-project template.',
     },
     health: {

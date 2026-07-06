@@ -1,7 +1,7 @@
 // B1 — one run's record + its persisted event frames (terminal replay).
 
-import { guard, json, error } from '@/server/web/http'
-import { projectExists, UnsafePathError } from '@/server/infrastructure/fs-workspace'
+import { guard, json, error, errorFrom } from '@/server/web/http'
+import { projectExists } from '@/server/infrastructure/fs-workspace'
 import * as runRepo from '@/server/data/repositories/run-repo'
 
 export const runtime = 'nodejs'
@@ -27,7 +27,8 @@ export async function GET(_req: Request, ctx: { params: Promise<{ project: strin
         })
         return json({ run, events, eventsTruncated: replay.truncated })
     } catch (e) {
-        if (e instanceof UnsafePathError) return error('invalid name', 400)
+        const res = errorFrom(e)
+        if (res) return res
         throw e
     }
 }

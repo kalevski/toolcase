@@ -1,23 +1,42 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from '@/lib/toast'
-import { useTc } from '@/lib/tc'
+import { apiFetch, describeApiError } from '@/lib/fetcher'
+import { escapeHtml, useTc } from '@/lib/tc'
 import { tcIcon } from '@/lib/icons'
 import type { SkillSummary } from '@/server/domain/types'
 import { useConfirm } from './ConfirmModal'
 import { helpTexts } from './helpTexts'
 
-type Col = { key: string; header: string; align?: 'right'; render: (s: SkillSummary) => React.ReactNode }
-
-// tc-advanced-table header descriptors; body rows stay slotted React <tr> so the
-// edit/delete icon buttons keep their onClick handlers.
+// tc-advanced-table header descriptors. Body rows are fed through the `rows`
+// HTML-string property (the component owns its <tbody>; React <tr> children
+// would be relocated out from under the reconciler and break SSR hydration —
+// <tr> can't be parsed outside a <table>). Row actions are data-action buttons
+// resolved by one delegated click listener on the host.
 const ADV_COLUMNS = [
     { key: 'name', label: 'Name' },
     { key: 'description', label: 'Description' },
     { key: 'actions', label: '', align: 'right' as const },
 ]
+
+/** The injected tbody HTML — every interpolated value is escaped. */
+function skillRowsHtml(rows: SkillSummary[]): string {
+    return rows
+        .map(
+            (s) =>
+                `<tr>` +
+                `<td><code>${escapeHtml(s.name)}</code></td>` +
+                `<td>${s.description ? escapeHtml(s.description) : '<em>—</em>'}</td>` +
+                `<td style="text-align: right"><span style="display: inline-flex; gap: 0.4rem">` +
+                `<tc-icon-button icon="${tcIcon('pencil')}" label="Edit" variant="secondary" outline data-action="edit" data-name="${escapeHtml(s.name)}"></tc-icon-button>` +
+                `<tc-icon-button icon="${tcIcon('trash')}" label="Delete" variant="danger" outline data-action="delete" data-name="${escapeHtml(s.name)}"></tc-icon-button>` +
+                `</span></td>` +
+                `</tr>`,
+        )
+        .join('')
+}
 
 export function SkillsClient({ skills }: { skills: SkillSummary[] }) {
     const router = useRouter()
@@ -32,33 +51,27 @@ export function SkillsClient({ skills }: { skills: SkillSummary[] }) {
             confirmVariant: 'danger',
         })
         if (!ok) return
-        const res = await fetch(`/api/skills/${name}`, { method: 'DELETE' })
-        if (res.ok) {
+        try {
+            await apiFetch(`/api/skills/${name}`, { method: 'DELETE' })
             setRows((r) => r.filter((s) => s.name !== name))
             toast.success(`Deleted ${name}`)
-        } else {
-            toast.error('Delete failed')
+        } catch (e) {
+            toast.error(describeApiError(e))
         }
     }
 
-    const tableRef = useTc<HTMLElement>({ columns: ADV_COLUMNS })
-    const tableKey = rows.map((s) => s.name).join('_')
+    const onDelegated = (event: Event) => {
+        const el = (event.target as HTMLElement)?.closest?.('[data-action]') as HTMLElement | null
+        if (!el) return
+        const action = el.getAttribute('data-action')
+        const name = el.getAttribute('data-name')
+        if (!name) return
+        if (action === 'edit') router.push(`/skills/${name}`)
+        else if (action === 'delete') void onDelete(name)
+    }
 
-    const columns: Col[] = [
-        { key: 'name', header: 'Name', render: (s) => <code>{s.name}</code> },
-        { key: 'description', header: 'Description', render: (s) => s.description || <em>—</em> },
-        {
-            key: 'actions',
-            header: '',
-            align: 'right',
-            render: (s) => (
-                <span style={{ display: 'inline-flex', gap: '0.4rem' }}>
-                    <tc-icon-button icon={tcIcon('pencil')} label="Edit" variant="secondary" outline onClick={() => router.push(`/skills/${s.name}`)} />
-                    <tc-icon-button icon={tcIcon('trash')} label="Delete" variant="danger" outline onClick={() => onDelete(s.name)} />
-                </span>
-            ),
-        },
-    ]
+    const tableProps = useMemo(() => ({ columns: ADV_COLUMNS, rows: skillRowsHtml(rows) }), [rows])
+    const tableRef = useTc<HTMLElement>(tableProps, { click: onDelegated })
 
     return (
         <div className="taskforge-page">
@@ -79,17 +92,7 @@ export function SkillsClient({ skills }: { skills: SkillSummary[] }) {
                     <p>Create a user-level skill that Claude will auto-discover while solving tasks.</p>
                 </tc-empty-state>
             ) : (
-                <tc-advanced-table key={tableKey} ref={tableRef}>
-                    {rows.map((s) => (
-                        <tr key={s.name}>
-                            {columns.map((c) => (
-                                <td key={c.key} style={c.align === 'right' ? { textAlign: 'right' } : undefined}>
-                                    {c.render(s)}
-                                </td>
-                            ))}
-                        </tr>
-                    ))}
-                </tc-advanced-table>
+                <tc-advanced-table ref={tableRef} />
             )}
         </div>
     )
