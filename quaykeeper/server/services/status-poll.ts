@@ -17,6 +17,7 @@ import * as realmRepo from '@/server/data/repositories/realm-repo'
 import * as stateRepo from '@/server/data/repositories/resource-state-repo'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
 import * as realms from '@/server/services/realms'
+import * as logDests from '@/server/services/log-destinations'
 import { diffEpisodes, type LiveBadState } from '@/server/domain/resource-state'
 import { tx } from '@/server/data/db'
 import { slog } from '@/server/infrastructure/server-log'
@@ -121,6 +122,19 @@ export async function pollNow(): Promise<{ realms: number; opened: number; close
         } catch (err) {
             failed++
             slog('warn', 'status-poll', 'realm poll failed', { realm: realm.id, error: String(err) })
+        }
+
+        // Log-destination drift reconciliation (G19): re-push global destinations
+        // whose daemon copy is missing or diverged (a redeployed daemon with a wiped
+        // conf dir, a hand-deleted fragment). Separate best-effort block so a shipping
+        // target being unreachable never affects resource-state episodes above.
+        try {
+            const { pushed, removed } = await logDests.reconcile(realms.clientFor(realm.id))
+            if (pushed || removed) {
+                slog('info', 'status-poll', 'log destinations reconciled', { realm: realm.id, pushed, removed })
+            }
+        } catch (err) {
+            slog('warn', 'status-poll', 'log-destination reconcile failed', { realm: realm.id, error: String(err) })
         }
     }
     pruneAudit()

@@ -19,6 +19,7 @@ import (
 	"github.com/kalevski/toolcase/nginxpilot/internal/credstore"
 	"github.com/kalevski/toolcase/nginxpilot/internal/deploy"
 	"github.com/kalevski/toolcase/nginxpilot/internal/gitcreds"
+	"github.com/kalevski/toolcase/nginxpilot/internal/logship"
 	"github.com/kalevski/toolcase/nginxpilot/internal/nginxctl"
 	gitsource "github.com/kalevski/toolcase/nginxpilot/internal/source/git"
 	"github.com/kalevski/toolcase/nginxpilot/internal/state"
@@ -81,6 +82,15 @@ type Manager struct {
 	reconMu   sync.Mutex
 	reconcile map[reconcileKey]*reconcileEntry
 	reconLast time.Time
+
+	// Log shipping (logs.go): the shipper always exists (destinations may be
+	// configured without access-log intake); the intake is the loopback UDP
+	// syslog listener, present only while logs.access.enabled. logsMu guards
+	// intake/intakeErr and serializes reconfiguration.
+	shipper   *logship.Shipper
+	logsMu    sync.Mutex
+	intake    *logship.Intake
+	intakeErr string
 }
 
 type siteLoop struct {
@@ -120,6 +130,7 @@ func New(cfg *config.Config, store *state.Store, log *slog.Logger) *Manager {
 		deployer: deploy.New(cfg.DataDir, log),
 		loops:    map[string]*siteLoop{},
 		syncFn:   SyncSite,
+		shipper:  logship.NewShipper(log),
 	}
 	if cfg.Nginx.Manage {
 		m.engine = nginxctl.New(cfg, log)
@@ -186,6 +197,10 @@ func (m *Manager) Run(ctx context.Context) {
 
 	m.warnOrphans()
 
+	// Log shipping starts BEFORE the managed apply so the syslog intake is
+	// bound before nginx reloads with access_log directives pointing at it (G6).
+	m.startLogship(ctx)
+
 	// Managed mode: write the live nginx config and start watching for cert
 	// renewals. nginx only ever receives config that passed `nginx -t`.
 	if m.engine != nil {
@@ -205,6 +220,7 @@ func (m *Manager) Run(ctx context.Context) {
 
 	<-ctx.Done()
 	m.log.Info("shutting down, waiting for in-flight syncs")
+	m.stopLogship() // flush buffered log batches best-effort
 	m.wg.Wait()
 }
 
@@ -480,6 +496,14 @@ func (m *Manager) Reload(newCfg *config.Config) {
 	}
 
 	go m.warnOrphans()
+
+	// Log shipping reconfigures BEFORE the apply is triggered: destinations
+	// hot-swap without touching nginx, and if logs.access.* changed the intake
+	// must be listening before the re-rendered vhosts reload (G6). ctx may be
+	// nil when Reload runs before Run (tests) — the intake then starts in Run.
+	if ctx := m.ctx; ctx != nil {
+		m.reconfigureLogship(ctx, newCfg)
+	}
 
 	// Managed mode: re-render and reload nginx for the new config (off the lock
 	// path — applyManaged reads m.Config()).

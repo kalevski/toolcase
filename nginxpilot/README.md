@@ -383,6 +383,7 @@ Stream and http upstream names are separate namespaces (the same name in each is
 | `sync <domain>` | One-shot in-process sync, no daemon needed; non-zero exit on failure. |
 | `print-vhost <domain>` | Print a commented nginx snippet — a content-serving block for a static site, or `upstream {}` + `proxy_pass` blocks for a reverse proxy. Honours TLS + toggles. |
 | `print-include` | Print the `nginx.conf` include snippet for managed mode (http include + the top-level `stream {}` block). |
+| `print-logformat` | Print the JSON access-log `log_format` declaration for generate-only setups (managed mode writes the include itself). Pairs with the commented `access_log` lines `print-vhost` emits when `logs.access.enabled` is on. |
 | `status [--json]` | Human table (or raw JSON) from the daemon's `/status` endpoint. |
 | `version` | Build info. |
 
@@ -424,6 +425,12 @@ A control plane (e.g. Quaykeeper) drives the **entire** config — sites, upstre
 | `GET /streams` | — | — | JSON list of stream (L4) resources |
 | `POST /streams` | one `streams:` entry | `stream-<name>.yml` | `201` / `200`; a stream that names an `upstream:` resolves against stream upstreams already in the running config |
 | `DELETE /streams/{name}` | — | `stream-<name>.yml` | `200` / `404` |
+| `GET /log-destinations` | — | — | JSON list of log-shipping destinations (secrets as refs only) |
+| `POST /log-destinations` | one `log_destinations:` entry | `logdest-<name>.yml` | `201` / `200`; hot-reloads the shipper without touching nginx |
+| `DELETE /log-destinations/{name}` | — | `logdest-<name>.yml` | `200` / `404` |
+| `POST /log-destinations/test` | one `log_destinations:` entry | — (nothing persisted) | Test a **candidate** before saving: validate, push one synthetic entry, `200 {ok:true}` / `400` invalid / `502` delivery failed |
+| `POST /log-destinations/{name}/test` | — | — | Same, for a saved destination |
+| `GET /logs/status` | — | — | Per-destination shipping stats (also embedded in `/status` as `logs`) |
 
 Validation errors come back as a precise `400` (bad source, duplicate domain — sites and proxies share one domain namespace —, unknown upstream reference, unknown key, …). If the post-write reload is rejected (e.g. a concurrent edit to another file) the write is rolled back and reported as `500`. The `GET` list endpoints serialize the running merged config (main file + all fragments) as JSON; secret material is never present (auth carries only `*_env` / `*_file` references) and durations/sizes render as their human strings (`"5m"`, `"512MiB"`).
 
@@ -449,6 +456,49 @@ EOF
 curl -fsS $BASE/proxies                 # confirm it landed
 curl -fsS $BASE/vhost/api.example.com   # generate the nginx config to paste
 ```
+
+## Log shipping
+
+Opt-in structured access logs + multi-destination shipping (design: `log_ides.md`). nginxpilot stays out of the request path: nginx writes JSON access logs to a loopback UDP syslog socket the daemon owns; the daemon filters, batches and pushes them — a side channel, exactly like cert watching. Log bytes flow `nginx → nginxpilot → destination` directly; a control plane only distributes the config.
+
+```yaml
+logs:
+  access:
+    enabled: true                  # render the log_format include + per-vhost access_log (managed mode)
+    syslog_listen: 127.0.0.1:5514  # loopback UDP intake (default)
+  redact:
+    # query_params: [token, code]  # override the default deny-list (token, code, secret, password, key, …)
+    anonymize_ip: false            # zero the last IPv4 octet / last 80 IPv6 bits of remote_addr
+
+log_destinations:
+  - name: main-loki
+    type: loki                     # loki | http | file | stdout
+    url: https://loki.example.com/loki/api/v1/push
+    tenant: infra                  # optional X-Scope-OrgID
+    auth: { method: basic, username: loki, password_env: LOKI_PASSWORD }
+    labels:                        # bounded Loki label set (§3 of the design)
+      job: nginx                   # static (default "nginx")
+      host: $resource              # dynamic, whitelisted: $resource | $host | $server_name
+      status_code: $status         # $status (exact) | $status_class ("4xx")
+    filter:                        # AND across fields, OR within a list; omit = everything
+      status: ["4xx", "5xx"]
+      path: ["!/healthz", "!/metrics"]
+
+  - name: audit-file
+    type: file                     # local NDJSON with size-based self-rotation
+    path: /var/log/nginxpilot/access-5xx.ndjson
+    filter: { status: [">=500"] }
+```
+
+Semantics and guardrails:
+
+- **Line format** — one JSON object per request (`ts`, `host`, `method`, `path`, `query`, `status`, `request_time`, `upstream_*`, `user_agent`, …) plus `resource`/`resource_type` (`site|proxy|redirect|dead_host`), the join keys back to nginxpilot's own entities. Everything not a Loki label stays in the line, queryable with LogQL's `| json`.
+- **Crash-proof** — bounded per-destination ring buffers (entry- and byte-capped; full = drop oldest, counted), batch + exponential backoff honouring `Retry-After`, at-least-once delivery. A dead Loki can never block nginx, a sync, or the daemon; a bind failure surfaces in `/status`, never crashes.
+- **Truncation-tolerant** — nginx caps a syslog datagram (~2 KB): unparseable lines ship as `{"raw":"…","parse_error":true}` and are counted, never dropped silently. `mode: file`-style per-resource files were deliberately dropped (nothing rotates them); use a `file` destination.
+- **Redaction at intake** — the query-param deny-list (and optional IP anonymization) run before *any* destination sees a line.
+- **Label cardinality** — dynamic labels are whitelisted to `host`/`status_code`; `$host` is rejected while wildcard vhosts exist (every scanned subdomain would mint a Loki stream) — use `$resource`. An `instance: <hostname>` static label is auto-added so two edges don't interleave streams. Requires Loki ≥ 2.4 (out-of-order window); `oldest_buffered` in `/status` shows backlog age.
+- **Filters** — `host`/`resource`/`user_agent`: exact or `*` glob (crosses `/`); `path`: glob where `*` does **not** cross `/`; leading `!` negates; `\*` `\!` `\\` escape; `status`: exact `404`, class `4xx`, comparison `>=500`; `method`/`scheme`/`resource_type`: exact, case-insensitive. Unknown fields are a `400`.
+- **Stream (L4) resources** are out of scope: nginx's `stream {}` context has its own `log_format` with a different variable set. Requests hitting an unmanaged default server are a known blind spot — only managed vhosts carry the directive.
 
 ## Signals
 

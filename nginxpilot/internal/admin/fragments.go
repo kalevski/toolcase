@@ -23,6 +23,7 @@ func fragmentCounts(f *config.Fragment) map[string]int {
 		"access_list":     len(f.AccessLists),
 		"stream_upstream": len(f.StreamUpstreams),
 		"stream":          len(f.Streams),
+		"log_destination": len(f.LogDestinations),
 	}
 }
 

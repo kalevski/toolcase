@@ -32,6 +32,9 @@ export const ADMIN_TABS: AdminNavItem[] = [
     // variable/secret pools, owner-only.
     { id: 'admin-global-vars', label: 'Global variables', icon: 'variable', href: '/admin/global-vars' },
     { id: 'admin-secrets', label: 'Secrets', icon: 'lock', href: '/admin/secrets' },
+    // Log-shipping destinations (log_ides.md §4): structured access logs → Loki /
+    // generic HTTP / file / stdout, owner-only (URL egress + SSRF surface, G21).
+    { id: 'admin-log-destinations', label: 'Log destinations', icon: 'scroll-text', href: '/admin/log-destinations' },
     { id: 'admin-settings', label: 'Settings', icon: 'settings', href: '/admin/settings' },
     { id: 'admin-audit', label: 'Audit', icon: 'scroll-text', href: '/admin/audit' },
 ]

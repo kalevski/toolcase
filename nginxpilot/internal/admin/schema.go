@@ -68,6 +68,13 @@ var operationDocs = map[string]operationDoc{
 	"POST /stream-upstreams":          {summary: "Write one stream-upstream fragment (validate, persist, reload).", yaml: true, responseRef: "WriteResult"},
 	"DELETE /stream-upstreams/{name}": {summary: "Remove a stream upstream (409 while a stream still references it)."},
 
+	"GET /log-destinations":              {summary: "List configured log-shipping destinations (secrets as env/file refs only).", responseRef: "LogDestinationList"},
+	"POST /log-destinations":             {summary: "Write one log-destination fragment (validate, persist, hot-reload the shipper — nginx untouched).", yaml: true, responseRef: "WriteResult"},
+	"DELETE /log-destinations/{name}":    {summary: "Remove a log destination's fragment and stop its shipper."},
+	"POST /log-destinations/test":        {summary: "Test a CANDIDATE destination before saving: validate it, push one synthetic entry, report the outcome (200/400/502).", yaml: true, responseRef: "LogDestTestResult"},
+	"POST /log-destinations/{name}/test": {summary: "Test a saved destination: push one synthetic entry through it.", responseRef: "LogDestTestResult"},
+	"GET /logs/status":                   {summary: "Per-destination shipping stats (shipped/dropped/failed_batches/buffer/backlog) plus intake health.", responseRef: "LogsStatus"},
+
 	"GET /certs":                 {summary: "List discovered TLS certificates (metadata only, renewal-scheduler enriched).", responseRef: "CertList"},
 	"POST /certs":                {summary: "Start an async certbot issuance (202 + job id).", requestRef: "IssueCertRequest", responseRef: "CertIssueAccepted"},
 	"GET /certs/jobs":            {summary: "List recent async issuance jobs.", responseRef: "CertJobList"},

@@ -11,6 +11,8 @@ import * as configVars from '@/server/services/config-vars'
 import * as flagRepo from '@/server/data/repositories/flag-repo'
 import * as instanceRepo from '@/server/data/repositories/instance-repo'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
+import * as logDestRepo from '@/server/data/repositories/log-destination-repo'
+import type { LogDestination } from '@/server/domain/nginxpilot-logdest-fragment'
 
 /** Deterministic JSON stringify (sorted object keys) for a stable ETag. */
 function canonical(v: unknown): string {
@@ -28,9 +30,16 @@ function canonical(v: unknown): string {
     return JSON.stringify(v)
 }
 
+/** The `logs` section of the snapshot — this instance's opted-in log destinations (§5.1). */
+export interface AgentLogsConfig {
+    destinations: LogDestination[]
+}
+
 export interface AgentSnapshot {
     env: Record<string, string>
     flags: Record<string, { enabled: boolean }>
+    /** Present only when this instance has enabled instance-scoped destinations. */
+    logs?: AgentLogsConfig
     version: string
 }
 
@@ -44,8 +53,25 @@ function buildSnapshot(instanceId: string): AgentSnapshot {
     const flags: Record<string, { enabled: boolean }> = {}
     for (const f of flagRepo.listByInstance(instanceId)) flags[f.key] = { enabled: f.enabled }
 
-    const version = crypto.createHash('sha256').update(canonical({ env, flags })).digest('hex').slice(0, 16)
-    return { env, flags, version }
+    // Instance-scoped log destinations targeting THIS instance only (G28: a
+    // destination's credentials reach only the instances that opted into it). The
+    // stored spec is already the client wire shape (secrets by reference).
+    const destinations = logDestRepo
+        .listByScope('instance')
+        .filter((d) => d.enabled && d.target === instanceId)
+        .map((d) => d.spec)
+    const logs: AgentLogsConfig | undefined = destinations.length ? { destinations } : undefined
+
+    // `logs` folds into the version hash so a destination/filter change bumps the
+    // ETag and every affected client hot-reloads on its next poll. Introducing the
+    // key changes every instance's ETag once (one harmless global re-fetch wave —
+    // G27); thereafter only instances with destination changes re-fetch.
+    const version = crypto
+        .createHash('sha256')
+        .update(canonical({ env, flags, logs: logs ?? null }))
+        .digest('hex')
+        .slice(0, 16)
+    return { env, flags, logs, version }
 }
 
 /** The auth material one fetch carries, parsed from headers by the listener. */

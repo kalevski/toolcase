@@ -27,4 +27,5 @@ export const ID = {
     snippet: () => newId('snip'),
     job: () => newId('job'),
     jobRun: () => newId('run'),
+    logDestination: () => newId('logdest'),
 }

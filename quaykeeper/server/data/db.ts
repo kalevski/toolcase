@@ -506,6 +506,32 @@ const MIGRATIONS: string[] = [
     );
     CREATE INDEX idx_job_run_job ON job_run(job_id);
     `,
+    // v20 — log-shipping destinations (log_ides.md §4: Quaykeeper as the control plane).
+    // One row per destination. Quaykeeper is the source of truth (unlike routing
+    // resources, which live in nginxpilot): it owns `scope` (global destinations are
+    // pushed to nginxpilot over Channel A; instance destinations are delivered to
+    // quaykeeper-client via /v1/config) and drift-reconciles the daemon's set against
+    // these rows (G19). The whole destination is stored as an opaque JSON `spec`
+    // (domain/nginxpilot-logdest-fragment.ts owns the shape + validation — SQLite
+    // stores it opaquely so spec evolution never needs a rebuild). SECRETS BY
+    // REFERENCE ONLY: `spec.auth` carries `*_env`/`*_file` reference names, never
+    // secret bytes — nothing to encrypt (the reference-only v1 model, §4.1). `target`
+    // binds a scoped destination to a site hostname / instance id (NULL for global).
+    `
+    CREATE TABLE log_destination (
+        id          TEXT PRIMARY KEY,          -- logdest_<11 base36>
+        name        TEXT NOT NULL UNIQUE,      -- slug [a-z0-9-]+ — the fragment filename component
+        type        TEXT NOT NULL,             -- loki | http | file | stdout
+        scope       TEXT NOT NULL DEFAULT 'global', -- global | site | instance
+        target      TEXT,                      -- site hostname / instance id for a scoped dest; NULL = global
+        enabled     INTEGER NOT NULL DEFAULT 1,
+        spec        TEXT NOT NULL,             -- JSON LogDestination (refs only; domain/nginxpilot-logdest-fragment.ts)
+        created_by  INTEGER NOT NULL,          -- app_user.github_id
+        created_at  TEXT NOT NULL,
+        updated_at  TEXT NOT NULL
+    );
+    CREATE INDEX idx_log_destination_scope ON log_destination(scope);
+    `,
 ]
 
 function migrate(db: DatabaseSync): void {

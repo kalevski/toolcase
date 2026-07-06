@@ -144,8 +144,10 @@ function handle(req: http.IncomingMessage, res: http.ServerResponse): void {
     if (pathname === '/v1/config') {
         const snapshot = fetchOr(req, res, pathname)
         if (!snapshot) return
-        const { env, flags, version } = snapshot
-        sendJson(res, 200, { env, flags, version }, { ETag: version })
+        const { env, flags, logs, version } = snapshot
+        // `logs` is omitted when the instance has no destinations; the Go client
+        // treats an absent `logs` as "ship nothing" (its zero value).
+        sendJson(res, 200, { env, flags, ...(logs ? { logs } : {}), version }, { ETag: version })
         return
     }
 

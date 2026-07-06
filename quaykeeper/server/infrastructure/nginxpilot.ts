@@ -35,6 +35,7 @@ import {
     type DeadHost,
 } from '@/server/domain/routing'
 import { renderAccessListFragment, type AccessList } from '@/server/domain/access-list'
+import { renderLogDestFragment, type LogDestination } from '@/server/domain/nginxpilot-logdest-fragment'
 import {
     renderStreamFragment,
     renderStreamUpstreamFragment,
@@ -319,6 +320,50 @@ export interface WriteResult {
  */
 export interface WriteOptions {
     skipTargetChecks?: boolean
+}
+
+// ── log-shipping types (GET /logs/status, POST /log-destinations/test) ───────────
+
+/** One destination's shipping state under `GET /logs/status` — mirrors nginxpilot's `logship.DestStatus`. */
+export interface NginxpilotLogDestStatus {
+    name: string
+    type: string
+    shipped: number
+    dropped: number
+    failed_batches: number
+    buffer_len: number
+    buffer_bytes: number
+    last_error?: string
+    last_error_time?: string
+    last_flush?: string
+    /** Age of the oldest buffered entry — backlog signal (Loki out-of-order window, G9). */
+    oldest_buffered?: string
+}
+
+/**
+ * The `logs` object embedded in `GET /status` and served standalone at `GET /logs/status`
+ * — per-destination shipping stats plus intake health. `enabled` is `logs.access.enabled`;
+ * `intake_error` is set when the loopback UDP syslog listener failed to bind.
+ */
+export interface NginxpilotLogsStatus {
+    enabled: boolean
+    syslog_listen: string
+    intake_error?: string
+    received: number
+    parse_errors: number
+    destinations: NginxpilotLogDestStatus[]
+}
+
+/**
+ * Outcome of a `POST /log-destinations/test` (or `/{name}/test`) push. `ok` is delivery
+ * success; `error` is the destination's rejection/transport reason when `ok` is false.
+ * A candidate that fails *validation* (bad shape) is a thrown `NginxpilotError` (400), not
+ * an `ok:false` result — matching the daemon's 200 / 400 / 502 split.
+ */
+export interface LogDestTestResult {
+    ok: boolean
+    name: string
+    error?: string
 }
 
 // ── the client factory ───────────────────────────────────────────────────────────
@@ -957,6 +1002,68 @@ export function nginxpilotClient(conn: RealmConnection) {
         slog('info', 'nginxpilot', 'removed git credential via API', { name })
     }
 
+    // ── Channel A: log-shipping destinations over REST (log_ides.md §2 / §4) ────
+    // The 8th managed entity kind. Global destinations render + push exactly like a
+    // routing resource; the daemon validates the candidate merged config, writes
+    // `logdest-<name>.yml`, and hot-reloads the shipper WITHOUT touching nginx.
+
+    /** Every configured log destination from `GET /log-destinations` (secrets as refs only). */
+    async function listLogDestinations(): Promise<LogDestination[]> {
+        const res = await adminOk('GET', '/log-destinations')
+        return ((await res.json()) as { log_destinations?: LogDestination[] }).log_destinations ?? []
+    }
+
+    /** Write a destination's fragment via `POST /log-destinations` (validated + shipper hot-reloaded daemon-side). */
+    async function writeLogDestination(dest: LogDestination): Promise<WriteResult> {
+        const result = await writeRoutingFragment('/log-destinations', renderLogDestFragment(dest))
+        slog('info', 'nginxpilot', 'wrote log destination via API', { name: dest.name, type: dest.type })
+        return result
+    }
+
+    /** Remove a destination via `DELETE /log-destinations/{name}` (404 = already gone → success). */
+    async function removeLogDestination(name: string): Promise<void> {
+        const res = await adminFetch('DELETE', `/log-destinations/${encodeURIComponent(name)}`)
+        if (!res.ok && res.status !== 404) {
+            const detail = await res.text().catch(() => '')
+            throw new NginxpilotError(
+                `nginxpilot DELETE /log-destinations/${name} failed (${res.status})${detail ? `: ${detail.trim()}` : ''}`,
+                res.status,
+                detail || undefined,
+            )
+        }
+        slog('info', 'nginxpilot', 'removed log destination via API', { name })
+    }
+
+    /**
+     * Test a CANDIDATE destination before saving — `POST /log-destinations/test` (body-based,
+     * G11: the log-pipeline analog of `POST /nginx/test`'s dry run). The daemon validates it,
+     * pushes one synthetic entry, and reports the outcome: `200 {ok:true}`, `502 {ok:false,error}`
+     * (rejected/unreachable), or `400` (bad shape) which propagates as a `NginxpilotError` so the
+     * form can surface the validation reason. Secrets stay by reference — the daemon resolves them.
+     */
+    async function testLogDestination(dest: LogDestination): Promise<LogDestTestResult> {
+        const res = await adminFetch('POST', '/log-destinations/test', {
+            body: renderLogDestFragment(dest),
+            headers: { 'Content-Type': 'application/yaml' },
+        })
+        if (res.ok || res.status === 502) {
+            const body = (await res.json().catch(() => ({}))) as Partial<LogDestTestResult>
+            return { ok: body.ok ?? res.ok, name: body.name ?? dest.name, error: body.error }
+        }
+        const detail = (await res.text().catch(() => '')).trim()
+        throw new NginxpilotError(
+            `nginxpilot POST /log-destinations/test failed (${res.status})${detail ? `: ${detail}` : ''}`,
+            res.status,
+            detail || undefined,
+        )
+    }
+
+    /** Per-destination shipping stats + intake health — `GET /logs/status` (drives the live UI). */
+    async function logsStatus(): Promise<NginxpilotLogsStatus> {
+        const res = await adminOk('GET', '/logs/status')
+        return (await res.json()) as NginxpilotLogsStatus
+    }
+
     /**
      * Reload nginxpilot via `POST /reload` (diff-based, the REST equivalent of SIGHUP).
      * Channel A writes already reload on nginxpilot's side, so after a write/remove this
@@ -1013,6 +1120,11 @@ export function nginxpilotClient(conn: RealmConnection) {
         deleteAcmeCredentials,
         putGitCredential,
         deleteGitCredential,
+        listLogDestinations,
+        writeLogDestination,
+        removeLogDestination,
+        testLogDestination,
+        logsStatus,
         reload,
     }
 }

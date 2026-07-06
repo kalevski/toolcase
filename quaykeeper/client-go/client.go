@@ -20,7 +20,11 @@ type Flag struct {
 type Snapshot struct {
 	Env     map[string]string `json:"env"`
 	Flags   map[string]Flag   `json:"flags"`
-	Version string            `json:"version"`
+	// Logs carries this instance's log-shipping destinations (log_ides.md §5.1).
+	// Absent for old servers / instances with no destinations — the zero value
+	// (no destinations) is the correct "ship nothing" default.
+	Logs    LogsConfig `json:"logs"`
+	Version string     `json:"version"`
 }
 
 // Client talks to a Quaykeeper instance-fetch API for one instance.

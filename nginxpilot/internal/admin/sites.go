@@ -276,6 +276,14 @@ func validateCandidate(cfg *config.Config, frag *config.Fragment, target string)
 	}
 	cand.Streams = append(streams, frag.Streams...)
 
+	logDests := make([]config.LogDestination, 0, len(cfg.LogDestinations)+len(frag.LogDestinations))
+	for _, d := range cfg.LogDestinations {
+		if d.File != target {
+			logDests = append(logDests, d)
+		}
+	}
+	cand.LogDestinations = append(logDests, frag.LogDestinations...)
+
 	return config.Validate(&cand)
 }
 
