@@ -1,0 +1,1372 @@
+---
+name: logging
+description: Use when wiring @toolcase/logging — tiny isomorphic logger with named loggers (scopes), level filtering (silent/error/warning/info/debug/verbose), and pluggable LogReporter sinks (console default, custom transports for remote/file/etc).
+---
+
+# logging — API Reference
+
+Zero-dependency isomorphic logger. Default export is a pre-configured `LoggerFactory` with one `ConsoleLogReporter`.
+
+```ts
+import logging from '@toolcase/logging'
+
+const log = logging.getLogger('boot')
+log.info('starting')
+log.error('crashed', err)
+```
+
+Also exports the factory class + reporter primitives for custom setups:
+
+```ts
+import {
+    logging,                 // default LoggerFactory instance
+    Logger,
+    Level,                   // string-key map of level names
+    LoggerFactory,
+    LogReporter,             // base class for transports
+    ConsoleLogReporter,
+    JSONLineReporter,        // structured JSON-line transport
+    BufferedReporter,        // batching/debounce wrapper for slow sinks
+    isKnownLevel,            // (level: string) => level is LoggerLevel
+    KNOWN_LEVELS,            // LoggerLevel[] — all valid level strings
+    textFormatter,           // LogFormatter — human-readable text line
+    jsonFormatter,           // LogFormatter — JSON record (default for JSONLineReporter)
+    logfmtFormatter,         // LogFormatter — logfmt key=value line
+} from '@toolcase/logging'
+
+// Types:
+import type {
+    LogFormatter,            // (level, scope, time, fields, messages) => string
+    ClockFn,                 // () => number  (epoch ms)
+    JSONLineReporterOptions,
+    JSONLineWriter,
+} from '@toolcase/logging'
+
+// Node-only transports live on the /node subpath (uses fs):
+import { FileLogReporter } from '@toolcase/logging/node'
+```
+
+---
+
+## Levels
+
+```ts
+type LoggerLevel = 'silent' | 'error' | 'warning' | 'info' | 'debug' | 'verbose'
+```
+
+> **Note:** the `LoggerLevel` *type* is **not** re-exported from the package root — `import { LoggerLevel } from '@toolcase/logging'` fails. Only the `Level` value (the string-key constant map) is exported. To type a level, inline the union above, or derive it: `type LoggerLevel = typeof Level[keyof typeof Level]`. The level methods accept these strings directly, so an explicit type annotation is rarely needed.
+
+Order (lowest → highest verbosity):
+
+| Order | Level     |
+|-------|-----------|
+| -1    | `silent`  |
+| 0     | `error`   |
+| 1     | `warning` |
+| 2     | `info`    |
+| 3     | `debug`   |
+| 4     | `verbose` |
+
+A message at level `L` is dispatched only when `factory.level >= L`. Default factory level is `'info'`. `silent` blocks everything.
+
+```ts
+logging.level = 'debug'   // setter
+logging.level             // getter → 'debug'
+
+import { Level } from '@toolcase/logging'
+logging.level = Level.WARNING // 'warning'
+```
+
+`Level` constants: `SILENT ERROR WARNING INFO DEBUG VERBOSE`.
+
+---
+
+## Logger
+
+Named log channel returned by `factory.getLogger(scope)`. Scopes are deduped — same name returns the same instance.
+
+```ts
+class Logger {
+    error(...args: any[]): void
+    warning(...args: any[]): void
+    info(...args: any[]): void
+    debug(...args: any[]): void
+    verbose(...args: any[]): void
+    log(level: LoggerLevel, ...args: any[]): void
+
+    isEnabled(level: LoggerLevel): boolean       // true when the level would be dispatched
+    setLevel(level: LoggerLevel | null): void    // per-logger override; null = inherit factory
+    getLevel(): LoggerLevel | null               // current override, or null
+    withContext(ctx: Record<string, any>): Logger  // child logger that prepends ctx
+}
+```
+
+Each call timestamps with `this.clock()` (defaulting to `Date.now()`) and forwards `(level, scope, time, fields, messages)` to every reporter (gated by per-logger override if set, otherwise factory level). The `time` value is epoch milliseconds; ISO formatting happens inside reporters and formatters, not in the logger itself.
+
+Any arg that is a function is called lazily — the function is invoked only when the level is enabled:
+
+```ts
+log.debug(() => JSON.stringify(heavySnapshot))  // only evaluated when debug is enabled
+log.verbose(() => computeStats(), 'stats')       // mixed: thunk + plain arg
+```
+
+```ts
+const auth = logging.getLogger('auth')
+auth.warning('invalid token', { ip })
+auth.log('debug', 'request payload', payload)
+```
+
+### Per-logger level override (`setLevel`)
+
+`setLevel(level)` overrides the factory threshold for that logger only — and can both **narrow** (drop below-threshold) and **widen** (allow below-factory). `setLevel(null)` clears the override and defers back to the factory.
+
+```ts
+logging.level = 'warning'
+
+const noisy = logging.getLogger('noisy')
+noisy.setLevel('verbose')   // override factory; widens for this scope
+noisy.debug('shown anyway')
+
+const quiet = logging.getLogger('quiet')
+quiet.setLevel('error')     // override factory; narrows for this scope
+quiet.warning('dropped')
+
+quiet.setLevel(null)        // back to factory threshold
+```
+
+The override is per-`Logger` instance — scopes do not share it.
+
+### Structured context binding (`withContext`)
+
+`withContext(ctx)` returns a **new** child `Logger` (the parent is unchanged) that prepends `ctx` as the first message arg on every dispatch. Nested calls merge contexts; later keys win.
+
+```ts
+const log = logging.getLogger('http')
+const req = log.withContext({ requestId: 'r-7', userId: 42 })
+
+req.info('handler.start')
+// → reporter receives messages: [{ requestId: 'r-7', userId: 42 }, 'handler.start']
+
+const route = req.withContext({ route: 'GET /orders' })
+route.warning('slow', { ms: 820 })
+// → messages: [{ requestId: 'r-7', userId: 42, route: 'GET /orders' }, 'slow', { ms: 820 }]
+```
+
+Child loggers inherit the parent's `setLevel` override at creation time. Common pattern: bind a request-scoped context once at the start of the request, pass that logger down.
+
+```ts
+async function handle(req: Request) {
+    const log = logging.getLogger('http').withContext({
+        requestId: req.headers.get('x-request-id'),
+        method: req.method,
+        path: new URL(req.url).pathname
+    })
+    log.info('start')
+    try {
+        const r = await route(req, log)
+        log.info('ok', { status: r.status })
+        return r
+    } catch (e) {
+        log.error('fail', e)
+        throw e
+    }
+}
+```
+
+`JSONLineReporter` will surface the context as the first entry of `messages` — pair with a custom reporter that promotes context keys to top-level fields if you want flat structured logs.
+
+---
+
+## LoggerFactory
+
+```ts
+class LoggerFactory {
+    constructor(reporters?: LogReporter[], clock?: ClockFn)  // clock defaults to Date.now
+    level: LoggerLevel               // get/set; throws RangeError on unknown level
+    getLogger(scope: string = 'default'): Logger
+    addReporter(reporter: LogReporter): void       // append a reporter after construction
+    removeReporter(reporter: LogReporter): void    // detach a reporter by reference
+    flush(): void                                  // synchronously flush all reporters
+    close(): Promise<void>                         // flush + close all reporters (await on shutdown)
+    setLevel(pattern: string, level: LoggerLevel): void  // scope-pattern override (see below)
+    parseEnv(env: Record<string, string | undefined>): void  // reads LOG_LEVEL + DEBUG (see below)
+}
+```
+
+Spawn a separate factory when you want a different reporter set or level threshold without affecting the default singleton:
+
+```ts
+import { LoggerFactory, ConsoleLogReporter } from '@toolcase/logging'
+
+const audit = new LoggerFactory([new ConsoleLogReporter()])
+audit.level = 'verbose'
+audit.getLogger('audit').verbose('login', { userId })
+```
+
+Add or remove reporters after construction with `addReporter` / `removeReporter`. Call `flush()` to synchronously drain all reporters, and `await close()` on shutdown to flush and close every reporter in the factory's list.
+
+---
+
+## LogReporter
+
+Base class. Override `log()` to ship messages to any sink.
+
+```ts
+class LogReporter {
+    log(level: LoggerLevel, scope: string, time: number, fields: Record<string, any>, messages: any[]): void
+    flush(): void
+    close(): void | Promise<void>
+}
+```
+
+`time` is epoch milliseconds (`Date.now()` by default). The default base does nothing — subclass it.
+
+### ConsoleLogReporter
+
+Built-in transport bound to the default factory. Routes `error` → `console.error`, `warning` → `console.warn`, everything else → `console.log`. Default format: `<LEVEL> [<ISO time>] | <scope>: ...messages`.
+
+```
+INFO [2026-05-03T12:00:00.000Z] | boot: starting
+ERROR [2026-05-03T12:00:01.123Z] | auth: invalid token { ip: '1.2.3.4' }
+```
+
+Constructor options (`ConsoleLogReporterOptions`):
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `color` | `boolean` | auto | Force color on/off. Auto-enables on Node TTYs and in browsers; honoured by `NO_COLOR`. |
+| `timestamp` | `boolean` | `true` | Include the ISO timestamp in the default prefix. |
+| `prefix` | `string \| (level, scope, time) => string` | — | Override the prefix entirely (string or function). |
+| `objects` | `'compact' \| 'pretty'` | `'compact'` | `'compact'` passes values to console as-is; `'pretty'` serializes objects/arrays to indented JSON and errors to a string. |
+| `formatter` | `LogFormatter` | — | When set, bypasses the prefix/objects pipeline; calls `formatter(level, scope, time, fields, messages)` and writes the returned string as a single colored line. |
+
+```ts
+new ConsoleLogReporter()                       // auto-detect color, default prefix
+new ConsoleLogReporter({ color: false })       // no color
+new ConsoleLogReporter({ timestamp: false })   // omit time from prefix
+new ConsoleLogReporter({ objects: 'pretty' })  // serialize objects as indented JSON
+new ConsoleLogReporter({
+    prefix: (level, scope) => `[${scope}] ${level.toUpperCase()}`
+})
+```
+
+Color uses ANSI escape codes on Node TTYs and `%c` CSS styling in the browser. Setting `NO_COLOR` in the environment disables auto-detection (explicit `{ color: true }` still overrides it).
+
+### JSONLineReporter
+
+Structured JSON-line transport. Emits one JSON object per log entry. Isomorphic — defaults to `console.log`, but accepts any `write(line)` sink.
+
+```ts
+import { LoggerFactory, JSONLineReporter } from '@toolcase/logging'
+
+const factory = new LoggerFactory([
+    new JSONLineReporter({
+        // optional: where to write each line (default: console.log)
+        write: line => process.stdout.write(line + '\n'),
+        // optional: static fields merged into every record
+        extra: { service: 'api', region: 'eu' },
+        // optional: custom formatter (default: jsonFormatter)
+        // formatter: logfmtFormatter,
+    })
+])
+const log = factory.getLogger('auth')
+log.info('login ok', { userId: 42 })
+// {"service":"api","region":"eu","level":"info","scope":"auth","time":1748950800000,"messages":["login ok",{"userId":42}]}
+```
+
+Errors are serialized to `{ name, message, stack }`. Circular references fall back to `'<unserializable>'`.
+
+### FileLogReporter (Node only)
+
+Writes log lines to a file. Available from `@toolcase/logging/node`.
+
+```ts
+import { LoggerFactory } from '@toolcase/logging'
+import { FileLogReporter } from '@toolcase/logging/node'
+
+const reporter = new FileLogReporter('./app.log', {
+    append: true,                      // false → truncate on open
+    formatter: (level, scope, time, messages) =>
+        `${level.toUpperCase()} [${time}] | ${scope}: ${messages.join(' ')}`
+})
+
+const factory = new LoggerFactory([reporter])
+const log = factory.getLogger('app')
+log.info('boot complete')
+
+// On shutdown, await flush:
+await reporter.close()
+```
+
+Size-based rotation: pass `maxBytes` and `maxFiles` to rotate when the active file exceeds the byte threshold. The current file is renamed to `.1`, older archives shift up, and any archive beyond `maxFiles` is dropped.
+
+```ts
+new FileLogReporter('./logs/app.log', {
+    maxBytes: 10 * 1024 * 1024,  // rotate at 10 MB
+    maxFiles: 5,                  // keep app.log.1 … app.log.5
+})
+```
+
+Combine with `JSONLineReporter` to write JSON lines to disk:
+
+```ts
+import { LoggerFactory, JSONLineReporter } from '@toolcase/logging'
+import { createWriteStream } from 'node:fs'
+
+const file = createWriteStream('./app.jsonl', { flags: 'a' })
+const reporter = new JSONLineReporter({ write: line => file.write(line + '\n') })
+```
+
+### RingBufferReporter
+
+Keeps the last `N` log entries in a fixed-capacity ring buffer backed by a circular array. Oldest entries are silently evicted when the buffer is full. Isomorphic — works in both Node.js and the browser with no I/O. Ideal for crash dumps, debug overlays, and "attach recent logs to this error report" patterns.
+
+```ts
+import { LoggerFactory, RingBufferReporter } from '@toolcase/logging'
+
+const ring = new RingBufferReporter(100)           // keep last 100 entries
+const factory = new LoggerFactory([ring])
+factory.level = 'debug'
+
+const log = factory.getLogger('app')
+log.info('boot complete')
+log.warning('slow query', { ms: 420 })
+log.error('connection lost', err)
+
+// At any time — retrieve all buffered entries (oldest → newest):
+const entries = ring.snapshot()    // LogEntry[]
+
+// On crash:
+reportError({ recentLogs: ring.snapshot() })
+```
+
+API:
+
+```ts
+class RingBufferReporter extends LogReporter {
+    constructor(capacity: number)   // throws if capacity is not a positive integer
+    readonly size: number           // current number of buffered entries (≤ capacity)
+    readonly capacity: number       // fixed maximum entries
+    snapshot(): LogEntry[]          // shallow copy, oldest → newest
+    clear(): void                   // reset buffer (capacity is preserved)
+}
+```
+
+`LogEntry` shape (also exported from `@toolcase/logging`):
+
+```ts
+type LogEntry = {
+    level: LoggerLevel
+    scope: string
+    time: number          // epoch milliseconds
+    fields: Record<string, any>
+    messages: any[]
+}
+```
+
+Compose with `ConsoleLogReporter` to log to console **and** retain the ring for diagnostics:
+
+```ts
+const ring = new RingBufferReporter(200)
+const factory = new LoggerFactory([new ConsoleLogReporter(), ring])
+
+// Later, attach to an error boundary or crash handler:
+window.onerror = () => sendDiagnostics(ring.snapshot())
+```
+
+### BufferedReporter
+
+Batching/debounce wrapper. Buffers entries and flushes them either when `maxSize` is reached or after `flushInterval` ms — whichever comes first. Use it to wrap any slow sink (HTTP, database, filesystem) so per-call cost stays cheap.
+
+```ts
+import { LoggerFactory, BufferedReporter, ConsoleLogReporter } from '@toolcase/logging'
+
+// Wrap an inner reporter — entries are replayed individually on flush.
+const buffered = new BufferedReporter(new ConsoleLogReporter(), {
+    maxSize: 100,           // default 50
+    flushInterval: 2000     // ms; default 1000. 0 disables the timer.
+})
+
+// Or skip the inner reporter and ship a whole batch yourself.
+const remote = new BufferedReporter(null, {
+    maxSize: 50,
+    flushInterval: 1000,
+    onFlush: entries => {
+        // entries: { level, scope, time, messages }[]
+        fetch('/api/logs', {
+            method: 'POST',
+            body: JSON.stringify(entries)
+        }).catch(() => {})
+    }
+})
+
+const factory = new LoggerFactory([remote])
+factory.getLogger('app').info('boot complete')
+
+// On shutdown, flush + clear the timer:
+remote.close()
+```
+
+API:
+
+```ts
+class BufferedReporter extends LogReporter {
+    constructor(
+        inner: LogReporter | null,
+        options?: {
+            maxSize?: number          // default 50
+            flushInterval?: number    // default 1000ms; 0 disables the timer
+            onFlush?: (entries: LogEntry[]) => void
+        }
+    )
+    flush(): void                     // drain buffer immediately
+    close(): void                     // flush + cancel timer (call on shutdown)
+    size(): number                    // current buffered count
+}
+```
+
+Either `inner` or `onFlush` must be provided. When both are present, `onFlush` wins (the inner reporter is bypassed). A throw inside `onFlush` (or the wrapped `inner`) propagates out of `flush()` — but **where** depends on what triggered the flush: a `maxSize`-overflow flush runs synchronously from the `logger.<level>(...)` call, so the throw reaches that call site; a `flushInterval` timer flush runs from a `setTimeout` callback, so the throw becomes an **unhandled exception** (no call-site to catch it). Always wrap your I/O.
+
+Reporters run synchronously in registration order; a throw inside a synchronous reporter bubbles up to the call site of `logger.<level>(...)`. The exception is a reporter that flushes off a timer (e.g. `BufferedReporter`'s `flushInterval` path) — a throw there fires from a `setTimeout` callback and surfaces as an **unhandled exception**, not at the call site. Either way, wrap your I/O. See worked custom-reporter examples below.
+
+### HTTPReporter
+
+Isomorphic HTTP transport. Buffers entries internally (via `BufferedReporter`) and POSTs each batch to a configurable endpoint as a JSON body. Retries on network errors or non-2xx responses using exponential back-off. Works in Node 18+ (native `fetch`) and modern browsers.
+
+```ts
+import { LoggerFactory, HTTPReporter } from '@toolcase/logging'
+
+const reporter = new HTTPReporter({
+    url: 'https://ingest.example.com/logs',
+    headers: { Authorization: 'Bearer my-token' },
+    maxSize: 100,          // flush after 100 entries (default 50)
+    flushInterval: 5000,   // or after 5 s (default 1000 ms)
+    retries: 3,            // retry attempts on failure (default 3)
+    retryMinTimeout: 500,  // base back-off ms, doubles each attempt (default 500)
+})
+
+const factory = new LoggerFactory([reporter])
+factory.getLogger('api').info('boot', { version: '1.0.0' })
+
+// On shutdown:
+reporter.close()
+```
+
+Each POST body is `{ "entries": LogEntry[] }` where each entry carries:
+
+```json
+{
+  "entries": [
+    {
+      "level": "info",
+      "scope": "api",
+      "time": 1767225600000,
+      "fields": {},
+      "messages": ["boot", { "version": "1.0.0" }]
+    }
+  ]
+}
+```
+
+Inject a custom `transport` for testing or for environments with a non-standard fetch:
+
+```ts
+import { HTTPReporter, type HTTPTransport } from '@toolcase/logging'
+
+const transport: HTTPTransport = async (url, body, headers) => {
+    const res = await myCustomFetch(url, { method: 'POST', body, headers })
+    return res.statusCode
+}
+
+const reporter = new HTTPReporter({ url: '...', transport })
+```
+
+API:
+
+```ts
+type HTTPTransport = (url: string, body: string, headers: Record<string, string>) => Promise<number>
+
+interface HTTPReporterOptions {
+    url: string
+    headers?: Record<string, string>      // default {}
+    maxSize?: number                      // default 50
+    flushInterval?: number                // default 1000 ms; 0 disables timer
+    retries?: number                      // default 3
+    retryMinTimeout?: number              // default 500 ms
+    transport?: HTTPTransport             // default: globalThis.fetch
+}
+
+class HTTPReporter extends LogReporter {
+    constructor(options: HTTPReporterOptions)
+    flush(): void    // drain buffer immediately (fire-and-forget POST)
+    close(): void    // flush + cancel timer
+}
+```
+
+### OTLPReporter
+
+OpenTelemetry-compatible HTTP transport. Buffers entries internally and POSTs each batch to an OTLP HTTP endpoint as a `LogsData` JSON body. Bridges `level→severityNumber/severityText` and maps `scope/fields→attributes`. Works in Node 18+ (native `fetch`) and modern browsers.
+
+```ts
+import { LoggerFactory, OTLPReporter } from '@toolcase/logging'
+
+const reporter = new OTLPReporter({
+    url: 'https://otel-collector.example.com/v1/logs',
+    headers: { 'otlp-api-key': 'my-api-key' },
+    resource: { 'service.name': 'api', 'deployment.environment': 'prod' },
+    maxSize: 100,          // flush after 100 entries (default 50)
+    flushInterval: 5000,   // or after 5 s (default 1000 ms)
+    retries: 3,            // retry attempts on failure (default 3)
+    retryMinTimeout: 500,  // base back-off ms, doubles each attempt (default 500)
+})
+
+const factory = new LoggerFactory([reporter])
+const log = factory.getLogger('api').withContext({ requestId: 'r1' })
+log.info('server started', { port: 3000 })
+
+// On shutdown:
+reporter.close()
+```
+
+**Level → severity mapping:**
+
+| `LoggerLevel` | `severityNumber` | `severityText` |
+|---------------|-----------------|----------------|
+| `verbose`     | 1               | `TRACE`        |
+| `debug`       | 5               | `DEBUG`        |
+| `info`        | 9               | `INFO`         |
+| `warning`     | 13              | `WARN`         |
+| `error`       | 17              | `ERROR`        |
+
+**Scope and fields → attributes:** each log record carries a `log.scope` attribute set to the logger's scope string, plus one attribute per `withContext()` field. The logger scope also appears as the OTLP `InstrumentationScope.name`.
+
+The POST body is a `LogsData` JSON object. Inject a custom `transport` for testing:
+
+```ts
+import { OTLPReporter, type OTLPTransport } from '@toolcase/logging'
+
+const transport: OTLPTransport = async (url, body, headers) => {
+    const res = await myFetch(url, { method: 'POST', body, headers })
+    return res.status
+}
+
+const reporter = new OTLPReporter({ url: '...', transport })
+```
+
+API:
+
+```ts
+type OTLPTransport = (url: string, body: string, headers: Record<string, string>) => Promise<number>
+
+interface OTLPReporterOptions {
+    url: string
+    headers?: Record<string, string>        // default {}
+    resource?: Record<string, any>          // resource attributes (e.g. service.name)
+    maxSize?: number                        // default 50
+    flushInterval?: number                  // default 1000 ms; 0 disables timer
+    retries?: number                        // default 3
+    retryMinTimeout?: number                // default 500 ms
+    transport?: OTLPTransport               // default: globalThis.fetch
+}
+
+class OTLPReporter extends LogReporter {
+    constructor(options: OTLPReporterOptions)
+    flush(): void    // drain buffer immediately (fire-and-forget POST)
+    close(): void    // flush + cancel timer
+}
+```
+
+---
+
+## Examples per level
+
+Each level method forwards `...args` to every reporter. Mix strings, objects, errors freely — the reporter decides formatting.
+
+```ts
+import logging from '@toolcase/logging'
+const log = logging.getLogger('checkout')
+
+log.error('payment rejected', new Error('card_declined'), { userId: 17 })
+log.warning('retry budget exhausted', { attempts: 3 })
+log.info('order placed', { orderId: 'o_42', total: 99.5 })
+log.debug('cart snapshot', cart)
+log.verbose('per-line trace', { step: 'reserve_inventory', took: 12 })
+```
+
+`log.log(level, ...args)` is the dynamic form — useful when the level is data-driven:
+
+```ts
+const level = response.ok ? 'info' : 'warning'
+log.log(level, 'http response', { status: response.status, url })
+```
+
+Cap verbosity globally — anything above `factory.level` is silently dropped:
+
+```ts
+logging.level = 'warning'
+log.info('skipped')   // not dispatched
+log.error('shown')    // dispatched
+```
+
+`'silent'` blocks every level (including `error`). Use it for tests where logs should be absent.
+
+---
+
+## Examples — Logger scopes
+
+Scopes give you per-subsystem prefixes without juggling instances. Same name returns the same logger.
+
+```ts
+const a1 = logging.getLogger('auth')
+const a2 = logging.getLogger('auth')
+console.log(a1 === a2) // true
+```
+
+Pattern: one logger per file, scope == module name.
+
+```ts
+// payments.ts
+import logging from '@toolcase/logging'
+const log = logging.getLogger('payments')
+
+export async function charge(card: Card) {
+    log.debug('charge.start', { card: card.last4 })
+    try {
+        const r = await api.charge(card)
+        log.info('charge.ok', { id: r.id })
+        return r
+    } catch (err) {
+        log.error('charge.fail', err)
+        throw err
+    }
+}
+```
+
+Hierarchical scopes — naming convention only, no real nesting in the API:
+
+```ts
+logging.getLogger('http')
+logging.getLogger('http.request')
+logging.getLogger('http.response')
+```
+
+A reporter can branch on `scope` (see "Filter by scope" below) to route or filter by subsystem.
+
+---
+
+## Examples — `LoggerFactory`
+
+### Multiple reporters, fan-out
+
+```ts
+const factory = new LoggerFactory([
+    new ConsoleLogReporter(),  // dev convenience
+    new RemoteReporter(),      // ship to backend
+    new InMemoryRingBuffer()   // surface in dev panel
+])
+factory.level = 'info'
+```
+
+### No console output, just a buffer
+
+```ts
+class RingBuffer extends LogReporter {
+    private events: any[] = []
+    log(level: any, scope: string, time: number, fields: Record<string, any>, messages: any[]) {
+        this.events.push({ level, scope, time, fields, messages })
+        if (this.events.length > 500) this.events.shift()
+    }
+    snapshot() { return this.events.slice() }
+}
+
+const buffer = new RingBuffer()
+const factory = new LoggerFactory([buffer])
+factory.getLogger('app').info('hello')
+buffer.snapshot() // last 500 events
+```
+
+---
+
+## Examples — `LogReporter`
+
+For Node file output, prefer the built-in `FileLogReporter` (or `JSONLineReporter` over `fs.createWriteStream`) shown above — extend `LogReporter` directly only when you need custom routing/filtering/transformation.
+
+### Remote reporter (batched)
+
+For network I/O, wrap a sink with `BufferedReporter` (see API above) — `onFlush` ships the whole batch:
+
+```ts
+new BufferedReporter(null, {
+    maxSize: 50,
+    flushInterval: 500,
+    onFlush: entries => {
+        fetch('/api/logs', { method: 'POST', body: JSON.stringify(entries) }).catch(() => {})
+    }
+})
+```
+
+### Filter by scope
+
+```ts
+class ScopedReporter extends LogReporter {
+    constructor(private prefix: string, private inner: LogReporter) { super() }
+    log(level, scope, time, fields, messages) {
+        if (!scope.startsWith(this.prefix)) return
+        this.inner.log(level, scope, time, fields, messages)
+    }
+}
+
+new LoggerFactory([new ScopedReporter('http.', new ConsoleLogReporter())])
+```
+
+### Browser console with `console.group` per scope
+
+```ts
+class GroupedReporter extends LogReporter {
+    log(level, scope, time, fields, messages) {
+        const fn = level === 'error' ? console.error
+            : level === 'warning' ? console.warn : console.log
+        console.groupCollapsed(`${level.toUpperCase()} ${scope} ${time}`)
+        fn(...messages)
+        console.groupEnd()
+    }
+}
+```
+
+---
+
+## Scope-pattern level control
+
+`setLevel(pattern, level)` overrides the threshold for all scopes matching a glob pattern. The most-specific pattern (fewest wildcards) wins when multiple patterns match; last-registered wins on a tie.
+
+```ts
+const factory = new LoggerFactory([reporter])
+factory.level = 'warning'          // global default
+
+factory.setLevel('db:*', 'debug') // any db:* scope → debug
+factory.setLevel('db:pool', 'info') // exact match is more specific → info for db:pool
+
+factory.getLogger('db:pool').debug('dropped — db:pool exact pattern requires ≥ info')
+factory.getLogger('db:pool').info('shown')
+factory.getLogger('db:query').debug('shown — matched by db:*')
+factory.getLogger('auth').debug('dropped — no pattern, global is warning')
+```
+
+Pattern syntax: `*` matches any sequence of characters (including `:` separators).
+
+```ts
+factory.setLevel('auth*', 'debug')    // auth, auth:login, authentication, …
+factory.setLevel('db:pool:*', 'info') // db:pool:worker, db:pool:idle, …
+factory.setLevel('*', 'debug')        // every scope
+```
+
+Throws `RangeError` for an unknown level string (same as the `level` setter).
+
+### Hierarchical scopes via `child()`
+
+`logger.child(childScope)` returns a new logger whose scope is `parentScope:childScope`. Useful for building nested namespaces without repeating the parent prefix.
+
+```ts
+const db     = factory.getLogger('db')
+const pool   = db.child('pool')           // scope: db:pool
+const worker = pool.child('worker')       // scope: db:pool:worker
+
+// Matches factory.setLevel('db:*', 'debug'):
+pool.debug('shown')
+worker.debug('shown')
+```
+
+The child inherits the parent's `withContext` fields and `setLevel` override at creation time. It dispatches through the same factory reporters.
+
+```ts
+const req = factory.getLogger('http').withContext({ requestId: 'r1' })
+const handler = req.child('orders')   // scope: http:orders, carries requestId context
+handler.info('start')
+```
+
+### Env-driven configuration (`parseEnv`)
+
+`parseEnv(env)` reads `LOG_LEVEL` and `DEBUG` from a plain key-value object (pass `process.env` in Node, `import.meta.env` in Vite, or your own record).
+
+```ts
+factory.parseEnv(process.env)
+// LOG_LEVEL=debug    → factory.level = 'debug'
+// DEBUG=auth*,db:*   → factory.setLevel('auth*', 'debug'); factory.setLevel('db:*', 'debug')
+```
+
+`LOG_LEVEL` must be one of the six known level tokens; unknown values are silently ignored. `DEBUG` is comma-or-space-separated and each token becomes a scope pattern at level `debug`. Unknown `LOG_LEVEL` tokens are silently skipped (the factory level is unchanged).
+
+```ts
+// Node
+import logging from '@toolcase/logging'
+logging.parseEnv(process.env)
+
+// Vite / ESM
+import logging from '@toolcase/logging'
+logging.parseEnv(import.meta.env)
+```
+
+---
+
+## Patterns
+
+**Switch verbosity from env (Node):**
+
+```ts
+import logging from '@toolcase/logging'
+import { env } from '@toolcase/node'
+logging.level = env('LOG_LEVEL', 'info') as any
+```
+
+**Bind once, log error+rethrow helper:**
+
+```ts
+const log = logging.getLogger('jobs')
+
+export function loud<T>(name: string, fn: () => Promise<T>): Promise<T> {
+    log.debug(name + '.start')
+    return fn().then(
+        v => { log.info(name + '.ok'); return v },
+        e => { log.error(name + '.fail', e); throw e }
+    )
+}
+
+await loud('reindex', () => reindexUsers())
+```
+
+**Replace default reporter set:**
+
+The default singleton ships with `ConsoleLogReporter`. To use a different transport, instantiate your own `LoggerFactory` and import that everywhere instead of the default.
+
+---
+
+## Cross-library integration
+
+### With `@toolcase/base` retry
+
+```ts
+import { retry } from '@toolcase/base'
+import logging from '@toolcase/logging'
+const log = logging.getLogger('http')
+
+await retry(async () => {
+    const r = await fetch('/api/data')
+    if (!r.ok) {
+        log.warning('retry.attempt.fail', { status: r.status })
+        throw new Error(`HTTP ${r.status}`)
+    }
+    return r.json()
+}, { retries: 5, factor: 2, minTimeout: 500 })
+```
+
+### With `@toolcase/base` Broadcast
+
+`Broadcast` events are silent by default — pipe them into a logger when debugging:
+
+```ts
+import { Broadcast } from '@toolcase/base'
+
+class Service extends Broadcast {
+    work() { this.emit('done', { ok: true }) }
+}
+
+const log = logging.getLogger('svc')
+const svc = new Service()
+svc.on('done', payload => log.info('done', payload))
+```
+
+### With `@toolcase/phaser-plus` Engine
+
+`Engine.getLogger(scope)` returns a `Logger` — the engine wires its own factory but the public API is identical.
+
+---
+
+## Composable wrapper reporters
+
+Five decorator reporters that each wrap one inner `LogReporter` and forward the single-method SPI. Compose them freely with `FanoutReporter` to build per-sink pipelines.
+
+```ts
+import {
+    LevelFilterReporter, ScopeFilterReporter,
+    RedactionReporter, SamplingReporter,
+    FanoutReporter, MultiReporter,
+} from '@toolcase/logging'
+```
+
+### `LevelFilterReporter`
+
+Forwards only entries whose level is at or above `minLevel`. Lets you attach a stricter threshold to one specific sink without changing the factory's global level.
+
+```ts
+class LevelFilterReporter extends LogReporter {
+    constructor(inner: LogReporter, minLevel: LoggerLevel)
+}
+```
+
+```ts
+// Console receives only errors; the ring buffer still gets everything.
+const factory = new LoggerFactory([
+    new LevelFilterReporter(new ConsoleLogReporter(), 'error'),
+    new RingBufferReporter(200),
+])
+factory.level = 'verbose'
+```
+
+### `ScopeFilterReporter`
+
+Forwards only entries whose scope matches a glob `pattern`. `*` matches any sequence of characters, including `:` separators (same syntax as `factory.setLevel(pattern, level)`).
+
+```ts
+class ScopeFilterReporter extends LogReporter {
+    constructor(inner: LogReporter, pattern: string)
+}
+```
+
+```ts
+// Ship only db:* logs to the audit sink.
+const auditSink = new ScopeFilterReporter(new JSONLineReporter({ write }), 'db:*')
+const factory = new LoggerFactory([new ConsoleLogReporter(), auditSink])
+```
+
+Pattern examples:
+
+```ts
+'db:*'          // db:pool, db:pool:worker, …
+'http*'         // http, http:request, httpClient, …
+'*'             // every scope
+'auth'          // exact match only
+```
+
+### `RedactionReporter`
+
+Walks every entry's `fields` and each element of `messages` and replaces values whose key matches `keys` with the string `'[REDACTED]'`. Handles nested objects, arrays, and circular references. `Error` instances are passed through unchanged.
+
+```ts
+type RedactionKeys = string[] | RegExp
+
+class RedactionReporter extends LogReporter {
+    constructor(inner: LogReporter, keys: RedactionKeys)
+}
+```
+
+```ts
+// Scrub well-known sensitive keys before shipping to a remote sink.
+const safe = new RedactionReporter(new JSONLineReporter({ write }), [
+    'password', 'authorization', 'token', 'secret',
+])
+
+// Or use a regex for broader matching.
+const safe2 = new RedactionReporter(sink, /password|secret|token/i)
+
+const factory = new LoggerFactory([safe])
+factory.getLogger('auth').info('login', { user: 'alice', password: 'hunter2' })
+// → messages: [{ user: 'alice', password: '[REDACTED]' }]
+```
+
+The original messages array is never mutated.
+
+### `SamplingReporter`
+
+Forwards each entry to `inner` with probability `rate` (0–1). Useful for high-throughput trace-level logs where you want a statistical sample rather than every entry.
+
+```ts
+class SamplingReporter extends LogReporter {
+    constructor(inner: LogReporter, rate: number)   // throws RangeError if rate ∉ [0, 1]
+}
+```
+
+```ts
+// Forward ~10 % of verbose traces to the remote sink.
+const sampled = new SamplingReporter(remoteSink, 0.1)
+
+// rate=1 → all entries pass; rate=0 → all entries drop.
+new SamplingReporter(sink, 1)   // equivalent to no sampling
+new SamplingReporter(sink, 0)   // effectively mutes the sink
+```
+
+### `FanoutReporter` / `MultiReporter`
+
+Broadcasts every log entry to a list of inner reporters. Each reporter is called in a try/catch so a throw in one reporter does not skip the others. `flush()` and `close()` are forwarded to all inner reporters (errors isolated individually). `MultiReporter` is an alias.
+
+```ts
+class FanoutReporter extends LogReporter {
+    constructor(reporters: LogReporter[])
+}
+const MultiReporter = FanoutReporter
+```
+
+```ts
+// Per-sink policies via composition.
+const fanout = new FanoutReporter([
+    new LevelFilterReporter(new ConsoleLogReporter(), 'error'),   // errors only to console
+    new ScopeFilterReporter(auditSink, 'audit:*'),                // audit scope to remote
+    new RedactionReporter(jsonSink, ['password', 'token']),       // scrubbed JSON lines
+    new SamplingReporter(traceSink, 0.05),                        // 5 % trace sampling
+])
+
+const factory = new LoggerFactory([fanout])
+factory.level = 'verbose'
+```
+
+Because each wrapper forwards `flush()` and `close()`, calling `factory.close()` drains the entire pipeline correctly.
+
+### `BeaconReporter` (browser only — `@toolcase/logging/browser`)
+
+Buffers entries in memory and flushes them via `navigator.sendBeacon` — a fire-and-forget network call that is guaranteed to complete even during page unload. The underlying `BufferedReporter` installs a `pagehide` listener automatically. Optionally captures global errors via `window.onerror` and `unhandledrejection`.
+
+```ts
+import { BeaconReporter } from '@toolcase/logging/browser'
+import { LoggerFactory } from '@toolcase/logging'
+
+const reporter = new BeaconReporter({
+    url: 'https://telemetry.example.com/logs',
+    maxSize: 50,          // flush when buffer reaches 50 entries (default)
+    flushInterval: 0,     // no timer flush; rely on maxSize + pagehide (default)
+    captureErrors: true,  // auto-capture window.onerror + unhandledrejection
+    errorScope: 'window', // scope label for auto-captured errors (default)
+})
+
+const factory = new LoggerFactory([reporter])
+factory.level = 'warning'
+```
+
+Flushed payload: `JSON.stringify(LogEntry[])` sent as the `sendBeacon` body.
+
+```ts
+interface BeaconReporterOptions {
+    url: string
+    maxSize?: number            // default 50
+    flushInterval?: number      // default 0 (disabled)
+    captureErrors?: boolean     // default false
+    errorScope?: string         // default 'window'
+}
+
+class BeaconReporter extends LogReporter {
+    constructor(options: BeaconReporterOptions)  // throws if navigator.sendBeacon absent
+    log(level, scope, time, fields, messages): void
+    flush(): void
+    close(): void
+}
+```
+
+**Use when:** capturing production errors in a browser SPA with zero setup — especially during navigation-away where `fetch` would be cancelled.
+**Reuses:** `BufferedReporter` (batching, pagehide listener).
+
+### `IndexedDBReporter` (browser only — `@toolcase/logging/browser`)
+
+Persists log entries to an IndexedDB object store so they survive page reloads. Writes are serialized and non-blocking. Call `drain()` on next startup to retrieve and clear the stored entries for upload. Evicts the oldest entries when `maxEntries` is exceeded.
+
+```ts
+import { IndexedDBReporter } from '@toolcase/logging/browser'
+import { LoggerFactory } from '@toolcase/logging'
+
+const reporter = new IndexedDBReporter({
+    dbName: '@toolcase/logging',   // default
+    storeName: 'log-entries',      // default
+    maxEntries: 1000,              // default; oldest evicted when exceeded
+})
+
+const factory = new LoggerFactory([reporter])
+factory.level = 'error'
+
+// On next startup — drain and ship:
+const buffered = await reporter.drain()    // returns LogEntry[], clears the store
+await fetch('/logs', { method: 'POST', body: JSON.stringify(buffered) })
+```
+
+```ts
+interface IndexedDBReporterOptions {
+    dbName?: string        // default '@toolcase/logging'
+    storeName?: string     // default 'log-entries'
+    maxEntries?: number    // default 1000
+}
+
+class IndexedDBReporter extends LogReporter {
+    constructor(options?: IndexedDBReporterOptions)  // throws if indexedDB absent
+    log(level, scope, time, fields, messages): void
+    flush(): Promise<void>             // wait for all pending writes
+    drain(): Promise<LogEntry[]>       // read + clear store; waits for pending writes first
+    close(): Promise<void>             // stop accepting new entries, flush pending
+}
+```
+
+**Use when:** you need crash-resilient log buffering across reloads — e.g., capturing errors before an upload attempt that might itself fail.
+**Reuses:** `LogReporter` (base class). Pairs naturally with `BeaconReporter` or a fetch-based uploader called from `drain()`.
+
+---
+
+### `MemoryReporter`
+
+Non-draining in-memory reporter for unit tests. Retains every entry it receives — `entries()` and `find(level)` never drain the store. Use `clear()` to reset between test cases.
+
+```ts
+import { LoggerFactory, MemoryReporter } from '@toolcase/logging'
+
+const mem = new MemoryReporter()
+const factory = new LoggerFactory([mem])
+factory.level = 'verbose'
+
+const log = factory.getLogger('app')
+log.info('boot complete')
+log.warning('slow query', { ms: 420 })
+log.error('connection lost')
+log.info('reconnected')
+
+// All entries are retained — no draining on read
+mem.entries()          // → LogEntry[] (all 4)
+mem.find('info')       // → LogEntry[] (2 entries at info level)
+mem.find('error')      // → LogEntry[] (1 entry)
+
+// Reset between test cases
+mem.clear()
+mem.entries()          // → []
+```
+
+Pair with a fixed-clock factory for deterministic timestamps:
+
+```ts
+const mem = new MemoryReporter()
+const factory = new LoggerFactory([mem], () => 1_000_000)
+factory.getLogger('svc').info('event')
+
+const [entry] = mem.entries()
+entry.time    // → 1000000  (fixed epoch ms — no Date.now() drift)
+entry.scope   // → 'svc'
+entry.level   // → 'info'
+entry.fields  // → {}  (populated by withContext)
+entry.messages // → ['event']
+```
+
+API:
+
+```ts
+class MemoryReporter extends LogReporter {
+    entries(): LogEntry[]             // all retained entries, oldest → newest (copy)
+    find(level: LoggerLevel): LogEntry[]  // entries filtered by exact level
+    clear(): void                     // reset all entries
+}
+```
+
+**Use when:** writing unit tests that assert on log output without worrying about draining or flush timing.
+
+---
+
+## Formatters
+
+Three ready-made `LogFormatter` implementations are exported. A `LogFormatter` has the signature:
+
+```ts
+type LogFormatter = (level: LoggerLevel, scope: string, time: number, fields: Record<string, any>, messages: any[]) => string
+```
+
+Pass one to `ConsoleLogReporter` or `JSONLineReporter` via the `formatter` option, or call them directly in a custom reporter.
+
+| Export | Output style |
+|--------|-------------|
+| `textFormatter` | `LEVEL [ISO-timestamp] \| scope: msg1 msg2 …` |
+| `jsonFormatter` | JSON object: `{ ...fields, level, scope, time, messages }` (default for `JSONLineReporter`) |
+| `logfmtFormatter` | `level=info scope=auth ts=ISO msg="login ok"` with per-field pairs from `fields` |
+
+```ts
+import { textFormatter, jsonFormatter, logfmtFormatter, ConsoleLogReporter, JSONLineReporter } from '@toolcase/logging'
+
+// Human-readable text via ConsoleLogReporter:
+new ConsoleLogReporter({ formatter: textFormatter })
+
+// logfmt lines via JSONLineReporter:
+new JSONLineReporter({ formatter: logfmtFormatter, write: line => process.stdout.write(line + '\n') })
+
+// Custom formatter:
+const myFmt: LogFormatter = (level, scope, time, fields, messages) =>
+    `[${scope}] ${level}: ${messages.join(' ')}`
+new ConsoleLogReporter({ formatter: myFmt })
+```
+
+---
+
+## Notes
+
+- Package is `sideEffects: false` and zero-dependency.
+- Importing the default export instantiates one `LoggerFactory` + one `ConsoleLogReporter` — safe in both Node and browser.
+- No async / no buffering — every `logger.x()` call dispatches synchronously.
+- Timestamps are epoch milliseconds from `this.clock()` (default `Date.now()`). ISO formatting happens in reporters and formatters, not in the logger.
+
+---
+
+## @toolcase/logging/node
+
+Node-only exports. Uses `node:fs` (write streams) and `node:async_hooks` (`AsyncLocalStorage`). Import from the `/node` subpath:
+
+```ts
+import {
+    StreamReporter,          // writable-stream transport (base of FileLogReporter)
+    FileLogReporter,         // file-backed reporter with rotation
+    defaultStreamFormatter,  // textFormatter alias — default for StreamReporter
+    AsyncContext,            // AsyncLocalStorage wrapper for per-request fields
+    ContextualReporter,      // reporter decorator that injects AsyncContext fields
+} from '@toolcase/logging/node'
+
+// Types:
+import type {
+    StreamLogFormatter,      // alias for LogFormatter
+    StreamReporterOptions,
+    FileLogFormatter,        // alias for StreamLogFormatter
+    FileLogReporterOptions,
+} from '@toolcase/logging/node'
+```
+
+### `StreamReporter`
+
+Base class for writable-stream transports. Writes one formatted line per entry. Supports optional size-based rotation via `maxBytes` — when the accumulated byte count of the current stream exceeds the threshold, new lines are queued while `openRotatedStream()` runs asynchronously, then flushed to the new stream.
+
+```ts
+import { createWriteStream } from 'node:fs'
+import { StreamReporter, defaultStreamFormatter } from '@toolcase/logging/node'
+import { LoggerFactory } from '@toolcase/logging'
+
+const reporter = new StreamReporter(
+    createWriteStream('./app.log', { flags: 'a' }),
+    {
+        formatter: defaultStreamFormatter,  // default; textFormatter output
+        maxBytes: 5 * 1024 * 1024,         // rotate at 5 MB (0 = never rotate)
+        onError: err => console.error('stream error', err),
+    }
+)
+
+const factory = new LoggerFactory([reporter])
+factory.getLogger('boot').info('started')
+
+await reporter.close()   // flushes pending rotation, then ends the stream
+```
+
+API:
+
+```ts
+interface StreamReporterOptions {
+    formatter?: LogFormatter   // default: defaultStreamFormatter (textFormatter)
+    maxBytes?: number          // rotation threshold in bytes; 0 = disabled (default)
+    onError?: (err: Error) => void
+}
+
+type StreamLogFormatter = LogFormatter   // alias
+
+class StreamReporter extends LogReporter {
+    constructor(stream: Writable, options?: StreamReporterOptions)
+    log(level, scope, time, fields, messages): void
+    close(): Promise<void>   // waits for any in-progress rotation, then ends the stream
+}
+```
+
+`defaultStreamFormatter` is the same as `textFormatter` from `@toolcase/logging` — produces `LEVEL [ISO-timestamp] | scope: …messages`.
+
+Subclass `StreamReporter` and override the protected `openRotatedStream(): Promise<void>` hook to swap in a new destination when `maxBytes` is exceeded. `FileLogReporter` uses this hook to rename archive files and open a fresh `createWriteStream`.
+
+### `FileLogReporter`
+
+File-backed reporter that extends `StreamReporter`. Opens `filePath` for writing and rotates when the file grows past `maxBytes`. During rotation the current file is renamed to `filePath.1`, older archives shift up (`filePath.1` → `filePath.2`, …), and any archive numbered above `maxFiles` is deleted.
+
+```ts
+import { FileLogReporter } from '@toolcase/logging/node'
+import { LoggerFactory } from '@toolcase/logging'
+
+const reporter = new FileLogReporter('./logs/app.log', {
+    append: true,              // default — append; false truncates on open
+    maxBytes: 10 * 1024 * 1024,  // rotate at 10 MB
+    maxFiles: 5,               // keep app.log.1 … app.log.5 (default)
+    formatter: defaultStreamFormatter,
+    onError: err => console.error(err),
+})
+
+const factory = new LoggerFactory([reporter])
+factory.getLogger('app').info('boot complete')
+
+await reporter.close()
+```
+
+API:
+
+```ts
+interface FileLogReporterOptions extends StreamReporterOptions {
+    append?: boolean    // default true (append); false → truncate on open
+    maxFiles?: number   // default 5; archives kept are filePath.1 … filePath.maxFiles
+}
+
+type FileLogFormatter = StreamLogFormatter   // alias
+
+class FileLogReporter extends StreamReporter {
+    constructor(filePath: string, options?: FileLogReporterOptions)
+}
+```
+
+Rotation sequence: end current stream → delete `filePath.maxFiles` → rename `filePath.N` → `filePath.N+1` (from highest down) → rename `filePath` → `filePath.1` → open new `filePath` in append mode.
+
+### `AsyncContext`
+
+Thin wrapper around Node.js `AsyncLocalStorage`. Stores a `Record<string, any>` that is visible throughout an `async_hooks` continuation. Each `run()` call merges new fields on top of the parent store — deeper calls extend, not replace.
+
+```ts
+import { AsyncContext } from '@toolcase/logging/node'
+
+const ctx = new AsyncContext()
+
+// Wrap an incoming request handler:
+ctx.run({ requestId: 'r-42', userId: 7 }, async () => {
+    ctx.getFields()                  // → { requestId: 'r-42', userId: 7 }
+
+    // Nested run merges on top:
+    ctx.run({ route: 'POST /orders' }, async () => {
+        ctx.getFields()              // → { requestId: 'r-42', userId: 7, route: 'POST /orders' }
+    })
+})
+
+ctx.getFields()                      // → {} (outside any run)
+```
+
+API:
+
+```ts
+class AsyncContext {
+    constructor()
+    run<T>(fields: Record<string, any>, fn: () => T): T
+    getFields(): Record<string, any>   // current store, or {} when called outside a run
+}
+```
+
+### `ContextualReporter`
+
+Reporter decorator that reads the current `AsyncContext` fields on every log call and merges them into `fields` before forwarding to an inner reporter. Lets you inject per-request or per-task context into log entries without threading a logger through every call site.
+
+```ts
+import { AsyncContext, ContextualReporter } from '@toolcase/logging/node'
+import { LoggerFactory, ConsoleLogReporter } from '@toolcase/logging'
+
+const ctx = new AsyncContext()
+const factory = new LoggerFactory([
+    new ContextualReporter(new ConsoleLogReporter(), ctx),
+])
+factory.level = 'debug'
+
+const log = factory.getLogger('http')
+
+async function handleRequest(req: Request) {
+    await ctx.run({ requestId: req.headers.get('x-request-id'), path: new URL(req.url).pathname }, async () => {
+        log.info('start')        // ConsoleLogReporter receives fields: { requestId, path }
+        await processRequest(req, log)
+        log.info('done')
+    })
+}
+```
+
+API:
+
+```ts
+class ContextualReporter extends LogReporter {
+    constructor(inner: LogReporter, context: AsyncContext)
+    log(level, scope, time, fields, messages): void
+        // merges context.getFields() with fields (own fields win on collision)
+    flush(): void
+    close(): void | Promise<void>
+}
+```
+
+`ContextualReporter` does not buffer — it calls `inner.log()` synchronously. `flush()` and `close()` are forwarded to `inner`.
