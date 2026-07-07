@@ -31,7 +31,7 @@ export function CommandPalette() {
         ]
         if (ROLE_RANK[me.role] >= ROLE_RANK.maintainer) {
             list.push(
-                { id: 'instances', label: 'Variables', group: 'Navigate', icon: 'server', href: '/instances' },
+                { id: 'instances', label: 'Instances', group: 'Navigate', icon: 'server', href: '/instances' },
                 { id: 'db-servers', label: 'Databases', group: 'Navigate', icon: 'database', href: '/databases' },
                 { id: 'snippets', label: 'Docker snippets', group: 'Navigate', icon: 'container', href: '/snippets' },
                 { id: 'proxies', label: 'Proxies', group: 'Routing', icon: 'globe', href: '/proxies' },

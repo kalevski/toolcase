@@ -296,6 +296,81 @@ function parseFilter(input: unknown): Check<Record<string, string[]> | undefined
     return { ok: true, value: Object.keys(out).length ? out : undefined }
 }
 
+/** The push-endpoint field subset shared by `parseLogDestination` and `parseDestinationEndpoint`. */
+interface EndpointFields {
+    url: string
+    tenant?: string
+    allow_insecure?: boolean
+    ca_file?: string
+    insecure_skip_verify?: boolean
+    auth?: LogAuth
+}
+
+/** Validate the shared push-endpoint block (URL/TLS/auth/tenant) for a loki/http destination. */
+function parseEndpointFields(o: Record<string, unknown>, type: 'loki' | 'http'): Check<EndpointFields> {
+    const url = optStr(o.url)
+    if (!url) return reject('url_required', `url is required for type: ${type}`)
+    let parsed: URL
+    try {
+        parsed = new URL(url)
+    } catch {
+        return reject('bad_url', `url ${JSON.stringify(url)} is not a valid URL`)
+    }
+    const allowInsecure = o.allow_insecure === true
+    if (parsed.protocol === 'http:') {
+        if (!allowInsecure) return reject('insecure_url', 'http:// URLs require allow_insecure: true (https:// is the default)')
+    } else if (parsed.protocol !== 'https:') {
+        return reject('bad_scheme', `url ${JSON.stringify(url)}: must be https:// (or http:// with allow_insecure: true)`)
+    }
+    const value: EndpointFields = { url }
+    if (allowInsecure) value.allow_insecure = true
+    const caFile = optStr(o.ca_file)
+    if (caFile) value.ca_file = caFile
+    if (o.insecure_skip_verify === true) {
+        if (!allowInsecure) return reject('skip_verify', 'insecure_skip_verify requires allow_insecure: true')
+        value.insecure_skip_verify = true
+    }
+
+    const auth = parseLogAuth(o.auth)
+    if (!auth.ok) return auth
+    if (auth.value) value.auth = auth.value
+
+    if (type === 'http') {
+        if (optStr(o.tenant)) return reject('http_tenant', 'tenant only applies to type: loki')
+    } else {
+        const tenant = optStr(o.tenant)
+        if (tenant) value.tenant = tenant
+    }
+    return { ok: true, value }
+}
+
+/** The shipping-tunable subset shared by `parseLogDestination` and `parseShaping`. */
+type ShippingTunables = Pick<LogDestination, 'sample' | 'batch_size' | 'flush_interval' | 'max_retries' | 'buffer_size'>
+
+/** Validate the shipping tunables (sample/batch/flush/retries/buffer). */
+function parseTunables(o: Record<string, unknown>): Check<ShippingTunables> {
+    const value: ShippingTunables = {}
+    if (o.sample !== undefined && o.sample !== null && o.sample !== '') {
+        const s = typeof o.sample === 'string' ? Number(o.sample) : o.sample
+        if (typeof s !== 'number' || !Number.isFinite(s) || s <= 0 || s > 1) {
+            return reject('bad_sample', 'sample must be a number in (0, 1]')
+        }
+        value.sample = s
+    }
+    const batchSize = optInt(o.batch_size)
+    if (!batchSize.ok) return reject('bad_batch_size', 'batch_size must be a non-negative integer')
+    if (batchSize.value !== undefined) value.batch_size = batchSize.value
+    const maxRetries = optInt(o.max_retries)
+    if (!maxRetries.ok) return reject('bad_max_retries', 'max_retries must be a non-negative integer')
+    if (maxRetries.value !== undefined) value.max_retries = maxRetries.value
+    const bufferSize = optInt(o.buffer_size)
+    if (!bufferSize.ok) return reject('bad_buffer_size', 'buffer_size must be a non-negative integer')
+    if (bufferSize.value !== undefined) value.buffer_size = bufferSize.value
+    const flushInterval = optStr(o.flush_interval)
+    if (flushInterval) value.flush_interval = flushInterval
+    return { ok: true, value }
+}
+
 /**
  * Validate + normalize a log destination (the write/test body). Mirrors
  * nginxpilot's `validateLogDestination`: type-specific field sanity, secrets by
@@ -321,39 +396,13 @@ export function parseLogDestination(input: unknown): Check<LogDestination> {
     const isPush = type === 'loki' || type === 'http'
 
     if (isPush) {
-        const url = optStr(o.url)
-        if (!url) return reject('url_required', `url is required for type: ${type}`)
-        let parsed: URL
-        try {
-            parsed = new URL(url)
-        } catch {
-            return reject('bad_url', `url ${JSON.stringify(url)} is not a valid URL`)
-        }
-        const allowInsecure = o.allow_insecure === true
-        if (parsed.protocol === 'http:') {
-            if (!allowInsecure) return reject('insecure_url', 'http:// URLs require allow_insecure: true (https:// is the default)')
-        } else if (parsed.protocol !== 'https:') {
-            return reject('bad_scheme', `url ${JSON.stringify(url)}: must be https:// (or http:// with allow_insecure: true)`)
-        }
-        value.url = url
-        if (allowInsecure) value.allow_insecure = true
-        const caFile = optStr(o.ca_file)
-        if (caFile) value.ca_file = caFile
-        if (o.insecure_skip_verify === true) {
-            if (!allowInsecure) return reject('skip_verify', 'insecure_skip_verify requires allow_insecure: true')
-            value.insecure_skip_verify = true
-        }
-
-        const auth = parseLogAuth(o.auth)
-        if (!auth.ok) return auth
-        if (auth.value) value.auth = auth.value
+        const endpoint = parseEndpointFields(o, type as 'loki' | 'http')
+        if (!endpoint.ok) return endpoint
+        Object.assign(value, endpoint.value)
 
         if (type === 'http') {
-            if (optStr(o.tenant)) return reject('http_tenant', 'tenant only applies to type: loki')
             if (asObject(o.labels)) return reject('http_labels', 'labels only apply to type: loki (an http collector receives the full JSON lines)')
         } else {
-            const tenant = optStr(o.tenant)
-            if (tenant) value.tenant = tenant
             const labels = parseLabels(o.labels)
             if (!labels.ok) return labels
             if (labels.value) value.labels = labels.value
@@ -394,27 +443,166 @@ export function parseLogDestination(input: unknown): Check<LogDestination> {
     if (!parse.ok) return parse
     if (parse.value) value.parse = parse.value
 
-    if (o.sample !== undefined && o.sample !== null && o.sample !== '') {
-        const s = typeof o.sample === 'string' ? Number(o.sample) : o.sample
-        if (typeof s !== 'number' || !Number.isFinite(s) || s <= 0 || s > 1) {
-            return reject('bad_sample', 'sample must be a number in (0, 1]')
-        }
-        value.sample = s
-    }
-
-    const batchSize = optInt(o.batch_size)
-    if (!batchSize.ok) return reject('bad_batch_size', 'batch_size must be a non-negative integer')
-    if (batchSize.value !== undefined) value.batch_size = batchSize.value
-    const maxRetries = optInt(o.max_retries)
-    if (!maxRetries.ok) return reject('bad_max_retries', 'max_retries must be a non-negative integer')
-    if (maxRetries.value !== undefined) value.max_retries = maxRetries.value
-    const bufferSize = optInt(o.buffer_size)
-    if (!bufferSize.ok) return reject('bad_buffer_size', 'buffer_size must be a non-negative integer')
-    if (bufferSize.value !== undefined) value.buffer_size = bufferSize.value
-    const flushInterval = optStr(o.flush_interval)
-    if (flushInterval) value.flush_interval = flushInterval
+    const tunables = parseTunables(o)
+    if (!tunables.ok) return tunables
+    Object.assign(value, tunables.value)
 
     return { ok: true, value }
+}
+
+// ── destination endpoint + binding shaping (log destinations redesign) ───────────
+// Quaykeeper stores destinations split in two: a reusable owner-defined *endpoint*
+// (`DestinationEndpoint`, the `log_destination` row) and a per-source *binding*
+// carrying the shaping config (`LogShaping`, the `log_binding` row). The nginxpilot
+// and quaykeeper-client wire contract is untouched — `assembleSpec` reassembles the
+// two halves into the exact `LogDestination` the daemon fragment / agent snapshot
+// always carried.
+
+/** Owner endpoint types — push endpoints only (file/stdout have no URL/CA/auth). */
+export type DestinationEndpointType = 'loki' | 'http'
+
+/**
+ * A reusable, owner-defined push endpoint: identity + connection + auth (by
+ * reference). No scope, no target, no filters, no labels, no shipping tunables —
+ * those live on the binding (`LogShaping`).
+ */
+export interface DestinationEndpoint {
+    /** Identity + fragment-filename component — `[a-z0-9-]+`, immutable, UNIQUE. */
+    name: string
+    type: DestinationEndpointType
+    /** Push endpoint. `https://` required unless `allow_insecure`. */
+    url: string
+    /** Loki `X-Scope-OrgID` tenant (loki only; endpoint identity, D2). */
+    tenant?: string
+    ca_file?: string
+    allow_insecure?: boolean
+    insecure_skip_verify?: boolean
+    /** Reference names only (`*_env` / `*_file`) — never secret bytes. */
+    auth?: LogAuth
+}
+
+/** Where a binding applies: an nginxpilot realm's access logs, or a Config instance's app logs. */
+export type LogBindingScope = 'realm' | 'instance'
+
+/**
+ * The per-source shaping half of a binding: what to ship (filter/sample), how to
+ * label it (loki only), how to structure it (parse — instance scope only), and the
+ * shipping tunables.
+ */
+export interface LogShaping {
+    labels?: Record<string, string>
+    filter?: Record<string, string[]>
+    /** Instance scope only — rejected on realm bindings (edge access logs are already JSON). */
+    parse?: string[]
+    sample?: number
+    batch_size?: number
+    flush_interval?: string
+    max_retries?: number
+    buffer_size?: number
+}
+
+/**
+ * Validate + normalize an owner endpoint (the `/admin/log-destinations` write body).
+ * A strict subset of `parseLogDestination`: name/type/url/tenant/TLS/auth only —
+ * shaping fields are not accepted here (they belong to bindings).
+ */
+export function parseDestinationEndpoint(input: unknown): Check<DestinationEndpoint> {
+    const o = asObject(input)
+    if (!o) return reject('not_object', 'log destination must be an object')
+
+    const name = optStr(o.name)
+    if (!name) return reject('name_required', 'log destination name is required')
+    if (!LOGDEST_NAME.test(name)) return reject('bad_name', 'name must match [a-z0-9-]+ (it becomes the fragment filename)')
+
+    const type = optStr(o.type)
+    if (!type) return reject('type_required', 'type is required (loki | http)')
+    if (type !== 'loki' && type !== 'http') {
+        return reject('bad_type', 'type must be loki | http (push endpoints only)')
+    }
+
+    const endpoint = parseEndpointFields(o, type)
+    if (!endpoint.ok) return endpoint
+    return { ok: true, value: { name, type, ...endpoint.value } }
+}
+
+/**
+ * Validate + normalize a binding's shaping config. Labels are loki-only; parse
+ * templates are instance-scope-only (nginxpilot access logs are already JSON).
+ */
+export function parseShaping(
+    input: unknown,
+    opts: { scope: LogBindingScope; type: DestinationEndpointType },
+): Check<LogShaping> {
+    if (input === undefined || input === null) return { ok: true, value: {} }
+    const o = asObject(input)
+    if (!o) return reject('bad_shaping', 'shaping must be an object')
+
+    const value: LogShaping = {}
+
+    if (opts.type === 'loki') {
+        const labels = parseLabels(o.labels)
+        if (!labels.ok) return labels
+        if (labels.value) value.labels = labels.value
+    } else if (asObject(o.labels)) {
+        return reject('http_labels', 'labels only apply to loki destinations (an http collector receives the full JSON lines)')
+    }
+
+    const filter = parseFilter(o.filter)
+    if (!filter.ok) return filter
+    if (filter.value) value.filter = filter.value
+
+    const parse = parseTemplates(o.parse)
+    if (!parse.ok) return parse
+    if (parse.value) {
+        if (opts.scope === 'realm') {
+            return reject('parse_realm', 'parse templates apply to instance bindings only (nginxpilot access logs are already JSON)')
+        }
+        value.parse = parse.value
+    }
+
+    const tunables = parseTunables(o)
+    if (!tunables.ok) return tunables
+    Object.assign(value, tunables.value)
+
+    return { ok: true, value }
+}
+
+/**
+ * Reassemble a stored endpoint + a binding's shaping into the wire-shape
+ * `LogDestination` nginxpilot / quaykeeper-client consume — then re-run
+ * `parseLogDestination` on the result (defense in depth). `parse` only survives
+ * for instance scope. Throws when the merged spec fails validation (both halves
+ * were validated at write time, so this indicates corrupt stored data).
+ */
+export function assembleSpec(
+    dest: DestinationEndpoint,
+    binding: { scope: LogBindingScope; enabled: boolean; shaping: LogShaping },
+): LogDestination {
+    const s = binding.shaping
+    const merged: Record<string, unknown> = {
+        name: dest.name,
+        type: dest.type,
+        enabled: binding.enabled,
+        url: dest.url,
+        tenant: dest.tenant,
+        ca_file: dest.ca_file,
+        allow_insecure: dest.allow_insecure,
+        insecure_skip_verify: dest.insecure_skip_verify,
+        auth: dest.auth,
+        labels: s.labels,
+        filter: s.filter,
+        parse: binding.scope === 'instance' ? s.parse : undefined,
+        sample: s.sample,
+        batch_size: s.batch_size,
+        flush_interval: s.flush_interval,
+        max_retries: s.max_retries,
+        buffer_size: s.buffer_size,
+    }
+    const checked = parseLogDestination(merged)
+    if (!checked.ok) {
+        throw new Error(`[quaykeeper] assembled log destination "${dest.name}" failed validation: ${checked.message}`)
+    }
+    return checked.value
 }
 
 // ── YAML rendering (the POST body; mirrors domain/streams.ts) ───────────────────

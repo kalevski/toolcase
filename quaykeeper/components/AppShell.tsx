@@ -49,7 +49,7 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
                     ? [
                           {
                               key: 'instances',
-                              label: 'Variables',
+                              label: 'Instances',
                               icon: 'server',
                               href: '/instances',
                               active: pathname.startsWith('/instances'),

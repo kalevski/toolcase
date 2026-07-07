@@ -1,15 +1,16 @@
-// PATCH  /api/admin/log-destinations/{id} — replace a destination (name is immutable;
-//        send the full LogDestination + { scope, target }).
-// DELETE /api/admin/log-destinations/{id} — remove the row and (global scope) retract
-//        its daemon fragment.
+// PATCH  /api/admin/log-destinations/{id} — replace an endpoint (name is immutable;
+//        send the full DestinationEndpoint). Every enabled realm binding referencing
+//        it is re-pushed to its own realm; instance bindings refresh via the
+//        agent-snapshot version bump.
+// DELETE /api/admin/log-destinations/{id} — remove the endpoint. Blocked with 409
+//        `destination_in_use` while any binding references it.
 //
-// Both guarded by `authorize('owner')` (G21). Validation + the daemon push/retract +
-// audit live in `services/log-destinations.ts`.
+// Both guarded by `authorize('owner')` (G21). Validation + the re-push + audit live
+// in `services/log-destinations.ts`.
 
 import { NextResponse } from 'next/server'
 import { authorize } from '@/server/services/auth'
 import * as logDests from '@/server/services/log-destinations'
-import * as realms from '@/server/services/realms'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -30,8 +31,7 @@ export async function PATCH(req: Request, ctx: Ctx) {
     const { id } = await ctx.params
     try {
         const actor = { githubId: authz.session.sub, login: authz.session.login }
-        const client = await realms.clientForActive(authz.session.sub, authz.role)
-        const { value, warnings } = await logDests.update(client, actor, id, body)
+        const { value, warnings } = await logDests.update(actor, id, body)
         return NextResponse.json({ ...value, warnings })
     } catch (err) {
         const { status, code, detail } = logDests.httpErrorFor(err)
@@ -46,8 +46,7 @@ export async function DELETE(_req: Request, ctx: Ctx) {
     const { id } = await ctx.params
     try {
         const actor = { githubId: authz.session.sub, login: authz.session.login }
-        const client = await realms.clientForActive(authz.session.sub, authz.role)
-        await logDests.remove(client, actor, id)
+        logDests.remove(actor, id)
         return new NextResponse(null, { status: 204 })
     } catch (err) {
         const { status, code, detail } = logDests.httpErrorFor(err)

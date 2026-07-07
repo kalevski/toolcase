@@ -1,29 +1,23 @@
-// Log-destination registry repository — all SQL for the `log_destination` table
-// (log_ides.md §4). Quaykeeper is the source of truth for log destinations
-// (unlike routing resources, which live in nginxpilot): this table drives what
-// gets pushed to the daemon (global scope) or delivered to quaykeeper-client
-// (instance scope), and the drift reconciler (G19) diffs the daemon's live set
-// against these rows. The destination `spec` is stored as opaque JSON and carries
+// Log-destination registry repository — all SQL for the `log_destination` table.
+// Since the endpoint/binding split (logs_feature.md) a row is a reusable,
+// owner-defined push *endpoint* (name/url/TLS/auth — the domain
+// `DestinationEndpoint`); where it applies and how the stream is shaped live on
+// `log_binding` rows (log-binding-repo.ts). (Databases created before the
+// migration squash may still carry the pre-split `scope`/`target`/`enabled`
+// columns — DEPRECATED, never read or written here.) The `spec` JSON carries
 // secret material BY REFERENCE ONLY (`*_env`/`*_file`), so no column is encrypted.
 
 import 'server-only'
 import { prep, getRow, allRows } from '@/server/data/db'
-import type { LogDestination } from '@/server/domain/nginxpilot-logdest-fragment'
+import type { DestinationEndpoint } from '@/server/domain/nginxpilot-logdest-fragment'
 
-/** Where a destination applies. `global` pushes to nginxpilot; `instance` is delivered to a client. */
-export type LogDestScope = 'global' | 'site' | 'instance'
-
-/** The stored destination: identity + scope binding + the validated JSON spec. */
+/** The stored destination endpoint: identity + the validated endpoint-only JSON spec. */
 export interface StoredLogDestination {
     id: string
     name: string
     type: string
-    scope: LogDestScope
-    /** Site hostname / instance id for a scoped destination; undefined for global. */
-    target?: string
-    enabled: boolean
-    /** The full destination as `POST /log-destinations` / a `logs:` snapshot entry would carry it. */
-    spec: LogDestination
+    /** Endpoint fields only (url/tenant/TLS/auth) — shaping lives on bindings. */
+    spec: DestinationEndpoint
     createdBy: number
     createdAt: string
     updatedAt: string
@@ -33,9 +27,6 @@ interface Raw {
     id: string
     name: string
     type: string
-    scope: string
-    target: string | null
-    enabled: number
     spec: string
     created_by: number
     created_at: string
@@ -47,10 +38,7 @@ function map(r: Raw): StoredLogDestination {
         id: r.id,
         name: r.name,
         type: r.type,
-        scope: r.scope as LogDestScope,
-        target: r.target ?? undefined,
-        enabled: r.enabled !== 0,
-        spec: JSON.parse(r.spec) as LogDestination,
+        spec: JSON.parse(r.spec) as DestinationEndpoint,
         createdBy: r.created_by,
         createdAt: r.created_at,
         updatedAt: r.updated_at,
@@ -59,10 +47,6 @@ function map(r: Raw): StoredLogDestination {
 
 export function list(): StoredLogDestination[] {
     return allRows<Raw>('SELECT * FROM log_destination ORDER BY name').map(map)
-}
-
-export function listByScope(scope: LogDestScope): StoredLogDestination[] {
-    return allRows<Raw>('SELECT * FROM log_destination WHERE scope = ? ORDER BY name', scope).map(map)
 }
 
 export function byId(id: string): StoredLogDestination | undefined {
@@ -77,15 +61,12 @@ export function byName(name: string): StoredLogDestination | undefined {
 
 export function insert(row: StoredLogDestination): void {
     prep(
-        `INSERT INTO log_destination (id, name, type, scope, target, enabled, spec, created_by, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO log_destination (id, name, type, spec, created_by, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
     ).run(
         row.id,
         row.name,
         row.type,
-        row.scope,
-        row.target ?? null,
-        row.enabled ? 1 : 0,
         JSON.stringify(row.spec),
         row.createdBy,
         row.createdAt,
@@ -98,30 +79,15 @@ export function update(
     id: string,
     fields: {
         type?: string
-        scope?: LogDestScope
-        target?: string | null
-        enabled?: boolean
-        spec?: LogDestination
+        spec?: DestinationEndpoint
         updatedAt: string
     },
 ): void {
     const sets: string[] = []
-    const params: (string | number | null)[] = []
+    const params: (string | number)[] = []
     if (fields.type !== undefined) {
         sets.push('type = ?')
         params.push(fields.type)
-    }
-    if (fields.scope !== undefined) {
-        sets.push('scope = ?')
-        params.push(fields.scope)
-    }
-    if (fields.target !== undefined) {
-        sets.push('target = ?')
-        params.push(fields.target)
-    }
-    if (fields.enabled !== undefined) {
-        sets.push('enabled = ?')
-        params.push(fields.enabled ? 1 : 0)
     }
     if (fields.spec !== undefined) {
         sets.push('spec = ?')

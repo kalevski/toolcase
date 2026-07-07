@@ -27,6 +27,7 @@ import {
     Play,
     Power,
     RefreshCw,
+    ScrollText,
     Server,
     SlidersHorizontal,
     Star,
@@ -58,6 +59,7 @@ export const ACTION_ICONS = {
     rotate: stripSize(KeyRound),
     suspend: stripSize(Ban),
     limits: stripSize(SlidersHorizontal),
+    logs: stripSize(ScrollText),
     realms: stripSize(Server),
     close: stripSize(X),
 } as const
