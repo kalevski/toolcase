@@ -21,6 +21,7 @@ import * as realmRepo from '@/server/data/repositories/realm-repo'
 import * as userRealmRepo from '@/server/data/repositories/user-realm-repo'
 import * as siteRepo from '@/server/data/repositories/site-repo'
 import * as baseDomainRepo from '@/server/data/repositories/base-domain-repo'
+import * as logBindingRepo from '@/server/data/repositories/log-binding-repo'
 import * as userRepo from '@/server/data/repositories/user-repo'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
 import { tx } from '@/server/data/db'
@@ -451,6 +452,10 @@ export function removeRealm(actor: RealmActor, id: string): void {
         )
     }
 
+    // Log bindings cascade rather than block (D5, unlike the sites/base-domains
+    // guards above): the daemon and its fragments die with the realm, so no
+    // removeLogDestination call is needed — just drop the rows.
+    logBindingRepo.removeByTarget('realm', id)
     realmRepo.remove(id)
     audit(actor, 'admin.realm.remove', r.name)
     slog('info', 'realms', 'realm removed', { id, name: r.name, by: actor.login })

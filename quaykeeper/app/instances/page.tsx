@@ -5,7 +5,7 @@ import { Instances } from '@/components/config/Instances'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = { title: 'Variables' }
+export const metadata: Metadata = { title: 'Instances' }
 
 export default function InstancesPage() {
     return (

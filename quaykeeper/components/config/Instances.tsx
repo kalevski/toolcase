@@ -96,7 +96,7 @@ export function Instances() {
 
     return (
         <ConfigPage
-            title="Variables"
+            title="Instances"
             subtitle="Flat list of instances carrying variables and flags, organized by project and tags. Maintainer access."
             icon="server"
             iconColor="cyan"

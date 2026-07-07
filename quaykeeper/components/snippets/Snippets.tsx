@@ -178,7 +178,7 @@ function SnippetsTable({ data, onChanged }: { data: SnippetsData; onChanged: () 
                     <p className="quaykeeper-home-lead quaykeeper-admin-hint">
                         {data.snippets.length} snippet{data.snippets.length === 1 ? '' : 's'}. Each is a reusable{' '}
                         <code>docker run</code> command — click a name to copy it. Attaching a variables instance
-                        rewrites the entrypoint inline so the container pulls its config at boot.
+                        rewrites the entrypoint so the container fetches its config via the quaykeeper-client at boot.
                     </p>
 
                     <div className="quaykeeper-instance-toolbar">
@@ -274,9 +274,10 @@ function CommandModal({
                 <tc-code-snippet code={cmd} language="bash" title="docker run" show-copy-button="" />
                 {injecting && (
                     <p className="quaykeeper-admin-hint">
-                        At boot the container fetches the instance’s resolved variables from the agent server (
-                        <code>{agentUrl}/v1/env?format=shell</code>), exports them, then execs your command. If the fetch
-                        fails the container exits instead of starting half-configured.
+                        At boot the container fetches the bootstrap (<code>{agentUrl}/v1/install.sh</code>), which
+                        downloads the matching <code>quaykeeper-client</code> binary, pulls the instance’s resolved
+                        variables, and execs your command. If the fetch fails the container exits instead of starting
+                        half-configured.
                     </p>
                 )}
             </div>

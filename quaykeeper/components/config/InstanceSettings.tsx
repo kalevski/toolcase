@@ -140,6 +140,18 @@ export function InstanceSettings({
         `CMD ["./my-app", "--serve"]`,
     ].join('\n')
 
+    const dockerRunSnippet = [
+        `# docker run — same bootstrap against a stock image, no Dockerfile: override`,
+        `# the entrypoint to fetch install.sh, which downloads the client and execs your app`,
+        `docker run -d \\`,
+        `    -e QUAYKEEPER_URL=${agentUrl} \\`,
+        `    -e QUAYKEEPER_INSTANCE=${instance.name} \\`,
+        `    -e QUAYKEEPER_SECRET="$QUAYKEEPER_SECRET" \\`,
+        `    --entrypoint /bin/sh \\`,
+        `    my-app:latest \\`,
+        `    -c 'wget -qO- "$QUAYKEEPER_URL/v1/install.sh" | sh -s -- exec -- ./my-app --serve'`,
+    ].join('\n')
+
     const modesSnippet = [
         `quaykeeper-client exec -- ./app --serve        # fetch once, inject as env, exec (PID-1 handoff)`,
         `quaykeeper-client write --format dotenv --out /app/.env    # materialize to a file`,
@@ -235,6 +247,12 @@ export function InstanceSettings({
                             config injected as env — fails closed if the fetch fails):
                         </p>
                         <tc-code-snippet code={entrypointSnippet} language="bash" title="Dockerfile" show-copy-button="" />
+                        <p className="quaykeeper-admin-hint">
+                            Or run a stock image the same way without a custom Dockerfile — override the entrypoint at{' '}
+                            <code>docker run</code> time (export the fetch secret in your shell first so it is never baked
+                            into the image or the command text):
+                        </p>
+                        <tc-code-snippet code={dockerRunSnippet} language="bash" title="docker run" show-copy-button="" />
                         <p className="quaykeeper-admin-hint">Or run one of the three modes directly:</p>
                         <tc-code-snippet code={modesSnippet} language="bash" title="Modes" show-copy-button="" />
                         <p className="quaykeeper-admin-hint">Or embed it as a library in your Go service:</p>

@@ -2,8 +2,8 @@
 // `DockerRunSpec` shape, its normalization + validation, and the `docker run`
 // command renderer — including the optional Quaykeeper-variable injection that
 // rewrites the container entrypoint inline (`--entrypoint /bin/sh … -c '…'`) to
-// pull the instance's resolved env from the agent server at boot and `exec` the
-// real command.
+// run the install.sh bootstrap: fetch the quaykeeper-client binary at boot, pull
+// the instance's resolved env from the agent server, and `exec` the real command.
 //
 // PURE and isomorphic (no `server-only`, no I/O): the client imports it for the
 // live command preview + inline form validation, the service for the
@@ -306,27 +306,29 @@ export interface BuildContext {
 }
 
 /**
- * The inline bootstrap the injecting variant runs as PID 1: fetch the instance's
- * resolved env from the agent server as shell `export` lines (`?format=shell` —
- * single-quoted, so values never re-expand), source it, then `exec` the real
- * command. Fails closed: `set -e` aborts the container if the fetch fails, so an
- * app never boots half-configured.
+ * The inline bootstrap the injecting variant runs as PID 1: fetch the public
+ * `/v1/install.sh` from the agent server, pipe it to `sh`, and hand it
+ * `exec -- <command>`. install.sh downloads the matching `quaykeeper-client`
+ * binary, which pulls the instance's resolved env (authenticated with the three
+ * QUAYKEEPER_* env vars set below) and `exec`s the real command as PID 1. Fails
+ * closed: the client aborts the container if the fetch fails, so an app never
+ * boots half-configured. curl/wget here only fetch the script — install.sh
+ * auto-detects the tool it uses to download the binary. This is the same
+ * bootstrap the instance Settings tab documents as a Dockerfile ENTRYPOINT.
  */
 function injectScript(spec: DockerRunSpec): string {
-    const url = '"$QUAYKEEPER_URL/v1/env?format=shell"'
-    const fetchCmd =
-        spec.inject?.tool === 'wget'
-            ? `wget -q --header "X-Quaykeeper-Instance: $QUAYKEEPER_INSTANCE" --header "Authorization: Bearer $QUAYKEEPER_SECRET" -O "$f" ${url}`
-            : `curl -fsSL -H "X-Quaykeeper-Instance: $QUAYKEEPER_INSTANCE" -H "Authorization: Bearer $QUAYKEEPER_SECRET" -o "$f" ${url}`
-    return `set -e; f=$(mktemp); ${fetchCmd}; . "$f"; rm -f "$f"; exec ${spec.command}`
+    const url = '"$QUAYKEEPER_URL/v1/install.sh"'
+    const fetchCmd = spec.inject?.tool === 'wget' ? `wget -qO- ${url}` : `curl -fsSL ${url}`
+    return `${fetchCmd} | sh -s -- exec -- ${spec.command}`
 }
 
 /**
  * Render the multi-line `docker run` command for a (normalized, valid) spec.
- * With injection, the entrypoint is overridden inline: the three QUAYKEEPER_* env
- * vars point the bootstrap at the agent server, and `QUAYKEEPER_SECRET` is
- * rendered as `"$QUAYKEEPER_SECRET"` — resolved by the OPERATOR'S shell at paste
- * time, so the fetch secret is never stored in the snippet or the command text.
+ * With injection, the entrypoint is overridden inline to run the install.sh
+ * bootstrap ({@link injectScript}): the three QUAYKEEPER_* env vars point the
+ * client at the agent server, and `QUAYKEEPER_SECRET` is rendered as
+ * `"$QUAYKEEPER_SECRET"` — resolved by the OPERATOR'S shell at paste time, so the
+ * fetch secret is never stored in the snippet or the command text.
  */
 export function buildDockerRun(spec: DockerRunSpec, ctx: BuildContext = {}): string {
     const args: string[] = []

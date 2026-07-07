@@ -75,11 +75,24 @@ function wrap(): DbWrap {
 
 // ── migrations ─────────────────────────────────────────────────────────────
 // Ordered, append-only list of schema SQL. Each entry's index+1 is its version;
-// never reorder or rewrite an applied migration — add a new one.
+// never reorder or rewrite an applied migration — add a new one. An entry may
+// also be a function (DDL + row-level backfill in TS) — it runs inside the same
+// per-version transaction as a SQL entry.
 
-const MIGRATIONS: string[] = [
-    // v1 — initial schema (notes/static-hosting-app-design.md §12)
+type Migration = string | ((db: DatabaseSync) => void)
+
+const MIGRATIONS: Migration[] = [
+    // v1 — the complete Quaykeeper schema. Formerly 21 incremental migrations
+    // (initial schema → realms → the Config subsystem → db servers → snippets →
+    // scheduled jobs → log destinations → the log endpoint/binding split),
+    // squashed into this single entry once the split landed. Squashing implies
+    // fresh-database semantics: a database that already ran the old sequence has
+    // version 1 recorded and skips this entry (its schema is equivalent, apart
+    // from log_destination's deprecated scope/target/enabled columns which this
+    // merged DDL drops outright and no code reads); a database stranded mid-way
+    // through the old sequence has no upgrade path and must be recreated.
     `
+    -- Users + roles (static-hosting-app-design.md §12).
     CREATE TABLE app_user (
         github_id  INTEGER PRIMARY KEY,
         login      TEXT NOT NULL,
@@ -89,65 +102,8 @@ const MIGRATIONS: string[] = [
         added_at   TEXT NOT NULL
     );
 
-    CREATE TABLE base_domain (               -- owner-managed subdomain pool
-        domain     TEXT PRIMARY KEY,         -- e.g. quaykeeper.dev
-        created_at TEXT NOT NULL
-    );
-
-    CREATE TABLE site (
-        id          TEXT PRIMARY KEY,        -- short id; also the fragment filename suffix
-        owner_id    INTEGER NOT NULL,        -- app_user.github_id
-        repo_owner  TEXT NOT NULL,
-        repo_name   TEXT NOT NULL,
-        branch      TEXT NOT NULL,
-        subdir      TEXT,
-        hostname    TEXT NOT NULL UNIQUE,    -- alice.quaykeeper.dev | www.example.com
-        host_kind   TEXT NOT NULL,           -- subdomain | custom
-        status      TEXT NOT NULL,           -- draft|provisioning|live|failed|suspended|over_quota
-        bytes       INTEGER,                 -- last measured deployed size
-        last_ref    TEXT,                    -- last live git ref (from /status)
-        last_error  TEXT,
-        created_at  TEXT NOT NULL,
-        updated_at  TEXT NOT NULL
-    );
-    CREATE INDEX idx_site_owner ON site(owner_id);
-
-    CREATE TABLE sponsorship (
-        sponsor_login TEXT PRIMARY KEY,      -- == app_user.login
-        tier_cents    INTEGER NOT NULL,
-        status        TEXT NOT NULL,         -- active | pending_cancel | cancelled
-        effective_at  TEXT NOT NULL,
-        updated_at    TEXT NOT NULL
-    );
-
-    CREATE TABLE plan_tier (                 -- owner-editable $ → plan mapping
-        min_cents INTEGER PRIMARY KEY,
-        plan      TEXT NOT NULL              -- bronze | silver | gold
-    );
-
-    CREATE TABLE audit (                     -- mirror TaskForge audit log
-        id        INTEGER PRIMARY KEY AUTOINCREMENT,
-        at        TEXT NOT NULL,
-        github_id INTEGER,
-        login     TEXT,
-        action    TEXT NOT NULL,
-        site      TEXT,
-        detail    TEXT
-    );
-    CREATE INDEX idx_audit_id ON audit(id DESC);
-    `,
-    // v2 — base-domain audience tiers (§10). Each base domain is offered to one of
-    // three groups: free accounts, paid (sponsored) accounts, or staff (maintainer/
-    // owner). Existing rows default to `free` so nothing a user could already pick
-    // disappears on upgrade.
-    `
-    ALTER TABLE base_domain ADD COLUMN tier TEXT NOT NULL DEFAULT 'free';  -- free | paid | staff
-    `,
-    // v3 — per-user custom limit overrides (§11, §15). An owner can tweak any one
-    // user's quotas above/below their role/plan default. A row exists only when a
-    // user is customised; every column is nullable and a NULL field inherits the
-    // default. Cascades away if the user row is ever deleted.
-    `
+    -- Per-user quota overrides (§11, §15). A row exists only when a user is
+    -- customised; every column is nullable and a NULL field inherits the default.
     CREATE TABLE user_limit (
         github_id          INTEGER PRIMARY KEY REFERENCES app_user(github_id) ON DELETE CASCADE,
         max_sites          INTEGER,        -- NULL = inherit role/plan default
@@ -159,47 +115,32 @@ const MIGRATIONS: string[] = [
         private_repos      INTEGER,        -- 0 | 1 | NULL (inherit)
         updated_at         TEXT NOT NULL
     );
-    `,
-    // v4 — global instance settings (owner-editable branding + custom-domain
-    // ingress). A generic key/value store: one row per setting, value is the raw
-    // string the UI persisted (validated in `domain/settings.ts` before it lands).
-    // A missing key falls through to its built-in default / env fallback, so the
-    // table is empty on a fresh instance and every setting is optional.
-    `
-    CREATE TABLE app_setting (
-        key        TEXT PRIMARY KEY,       -- app_name | tagline | theme | brand_color | ingress_ipv4 | ingress_ipv6
-        value      TEXT NOT NULL,
+
+    -- Durable GitHub credential (private-repo support): the user's OAuth access
+    -- token, AES-256-GCM-encrypted via infrastructure/cipher.ts — never plaintext
+    -- at rest, never sent to the client.
+    CREATE TABLE user_github_token (
+        github_id  INTEGER PRIMARY KEY REFERENCES app_user(github_id) ON DELETE CASCADE,
+        token_enc  TEXT NOT NULL,
         updated_at TEXT NOT NULL
     );
-    `,
-    // v5 — per-base-domain subdomain TLS policy (§0/Phase D). One wildcard cert per base
-    // domain covers every `<label>.<base>` subdomain, so TLS is decided once here, never
-    // per subdomain. `auto` degrades to HTTP when the cert isn't issued yet (so a missing
-    // cert never takes subdomains down); existing rows default to `auto`. Inert unless
-    // nginxpilot runs in managed mode.
-    `
-    ALTER TABLE base_domain ADD COLUMN tls TEXT NOT NULL DEFAULT 'auto';  -- off | auto
-    `,
-    // v6 — realms: registered nginxpilot instances (owner-managed, multiple_realms.md §2.1).
-    // Each realm is one nginxpilot the control plane can drive. `token_enc` is the
-    // AES-256-GCM ciphertext of the bearer token (NULL = unauthenticated instance); the
-    // plaintext token never leaves the server. The partial unique index enforces "exactly
-    // one default realm" at the DB layer — setting a new default is a two-step tx.
-    `
+
+    -- Realms: registered nginxpilot instances (multiple_realms.md §2.1). token_enc
+    -- is the AES-256-GCM ciphertext of the bearer token (NULL = unauthenticated);
+    -- the plaintext never leaves the server. The partial unique index enforces
+    -- "exactly one default realm" at the DB layer.
     CREATE TABLE realm (
         id          TEXT PRIMARY KEY,         -- server-generated short id
         name        TEXT NOT NULL,            -- human label ("prod-eu", "lab")
         admin_url   TEXT NOT NULL,            -- https://nginxpilot.internal:9090 (normalized, no trailing /)
-        token_enc   TEXT,                     -- AES-256-GCM ciphertext of the bearer token; NULL = unauthenticated
+        token_enc   TEXT,                     -- AES-256-GCM ciphertext; NULL = unauthenticated
         is_default  INTEGER NOT NULL DEFAULT 0,
         created_at  TEXT NOT NULL
     );
     CREATE UNIQUE INDEX idx_realm_one_default ON realm(is_default) WHERE is_default = 1;
-    `,
-    // v7 — per-user realm access grants (M:N, multiple_realms.md §2.1). A row = "this user
-    // may use this realm". `is_default` marks the user's own operating realm among their
-    // grants (owner-managed; non-owners never switch, §0.6). Cascades with the user/realm.
-    `
+
+    -- Per-user realm access grants (M:N). is_default marks the user's own operating
+    -- realm among their grants (owner-managed; non-owners never switch, §0.6).
     CREATE TABLE user_realm (
         github_id  INTEGER NOT NULL REFERENCES app_user(github_id) ON DELETE CASCADE,
         realm_id   TEXT    NOT NULL REFERENCES realm(id)           ON DELETE CASCADE,
@@ -207,86 +148,73 @@ const MIGRATIONS: string[] = [
         granted_at TEXT    NOT NULL,
         PRIMARY KEY (github_id, realm_id)
     );
-    `,
-    // v8 — sites belong to a realm (the instance they deploy to, multiple_realms.md §2.1,
-    // §10.2). Hostname uniqueness becomes PER-REALM: two nginx ingresses are independent,
-    // so the same hostname can legitimately exist in each. SQLite can't drop a column-level
-    // UNIQUE in place, so rebuild the table: add `realm_id`, swap the global UNIQUE(hostname)
-    // for UNIQUE(realm_id, hostname). `realm_id` is left NULL here and backfilled to the
-    // seed default realm at boot (`services/realms.ts` ensureSeed), after which app code
-    // treats it as required. This is a CREATE-new / DROP-old / RENAME rebuild, which SQLite
-    // requires `foreign_keys` to be OFF for — the migration runner toggles it OFF around the
-    // whole run and back ON afterwards (D2), so a future inbound FK can't silently corrupt
-    // data on an un-migrated instance. (A `PRAGMA` inside this SQL would be a no-op — it runs
-    // inside the migration's `BEGIN`/`COMMIT`, where SQLite ignores the foreign_keys toggle.)
-    `
-    CREATE TABLE site_new (
-        id          TEXT PRIMARY KEY,
-        owner_id    INTEGER NOT NULL,
-        repo_owner  TEXT NOT NULL,
-        repo_name   TEXT NOT NULL,
-        branch      TEXT NOT NULL,
-        subdir      TEXT,
-        hostname    TEXT NOT NULL,
-        host_kind   TEXT NOT NULL,
-        status      TEXT NOT NULL,
-        bytes       INTEGER,
-        last_ref    TEXT,
-        last_error  TEXT,
-        realm_id    TEXT REFERENCES realm(id),
-        created_at  TEXT NOT NULL,
-        updated_at  TEXT NOT NULL
+
+    -- Owner-managed subdomain pool. Each base domain belongs to one realm (a
+    -- wildcard is served by exactly one instance), is offered to one audience
+    -- tier, and carries the per-base wildcard TLS policy (auto degrades to HTTP
+    -- while the cert isn't issued, so a missing cert never takes subdomains down).
+    CREATE TABLE base_domain (
+        domain     TEXT PRIMARY KEY,              -- e.g. quaykeeper.dev
+        tier       TEXT NOT NULL DEFAULT 'free',  -- free | paid | staff
+        tls        TEXT NOT NULL DEFAULT 'auto',  -- off | auto
+        realm_id   TEXT REFERENCES realm(id),     -- NULL only until the boot backfill assigns the default realm
+        created_at TEXT NOT NULL
     );
-    INSERT INTO site_new (id, owner_id, repo_owner, repo_name, branch, subdir, hostname,
-                          host_kind, status, bytes, last_ref, last_error, realm_id, created_at, updated_at)
-        SELECT id, owner_id, repo_owner, repo_name, branch, subdir, hostname,
-               host_kind, status, bytes, last_ref, last_error, NULL, created_at, updated_at
-        FROM site;
-    DROP TABLE site;
-    ALTER TABLE site_new RENAME TO site;
+
+    -- Sites. Hostname uniqueness is PER-REALM (two nginx ingresses are independent,
+    -- so the same hostname can legitimately exist in each). realm_id is assigned by
+    -- the boot backfill (services/realms.ts ensureSeed), after which app code treats
+    -- it as required.
+    CREATE TABLE site (
+        id           TEXT PRIMARY KEY,        -- short id; also the fragment filename suffix
+        owner_id     INTEGER NOT NULL,        -- app_user.github_id
+        repo_owner   TEXT NOT NULL,
+        repo_name    TEXT NOT NULL,
+        branch       TEXT NOT NULL,
+        subdir       TEXT,
+        hostname     TEXT NOT NULL,           -- alice.quaykeeper.dev | www.example.com
+        host_kind    TEXT NOT NULL,           -- subdomain | custom
+        status       TEXT NOT NULL,           -- draft|provisioning|live|failed|suspended|over_quota
+        bytes        INTEGER,                 -- last measured deployed size
+        last_ref     TEXT,                    -- last live git ref (from /status)
+        last_error   TEXT,
+        repo_private INTEGER NOT NULL DEFAULT 0,  -- redeploys re-emit the fragment auth block without a GitHub round-trip
+        realm_id     TEXT REFERENCES realm(id),
+        created_at   TEXT NOT NULL,
+        updated_at   TEXT NOT NULL
+    );
     CREATE INDEX idx_site_owner ON site(owner_id);
     CREATE UNIQUE INDEX idx_site_realm_hostname ON site(realm_id, hostname);
-    `,
-    // v9 — base-domain pools belong to a realm (multiple_realms.md §2.1, §10.4): a
-    // wildcard is served by exactly one instance. Nullable to survive the ALTER; the seed
-    // backfill assigns the default realm at boot, after which app code treats it as set.
-    `
-    ALTER TABLE base_domain ADD COLUMN realm_id TEXT REFERENCES realm(id);
-    `,
-    // v10 — sponsorships are keyed by the sponsor's IMMUTABLE numeric GitHub id, not
-    // their (reusable) login (S3). A recycled username could otherwise inherit a stale
-    // sponsorship and silently get a paid plan. Rebuild the table: `sponsor_id` becomes
-    // the PK (== app_user.github_id), `sponsor_login` is kept for display only. Existing
-    // rows are backfilled by joining the old login-keyed rows to app_user; rows whose
-    // login has no matching user can't be linked to an id (and granted nothing under
-    // id-based resolution, since plan lookup needs the user row), so they're dropped —
-    // the GraphQL reconcile re-creates any still-valid sponsorship with its id within a
-    // minute. CREATE-new / DROP-old / RENAME rebuild (foreign_keys is toggled OFF around
-    // the whole migration run; see `migrate`).
-    `
-    CREATE TABLE sponsorship_new (
-        sponsor_id    INTEGER PRIMARY KEY,     -- == app_user.github_id (immutable)
-        sponsor_login TEXT NOT NULL,           -- display only; NOT the key
-        tier_cents    INTEGER NOT NULL,
-        status        TEXT NOT NULL,           -- active | pending_cancel | cancelled
-        effective_at  TEXT NOT NULL,
-        updated_at    TEXT NOT NULL
+
+    -- Global instance settings (owner-editable branding + custom-domain ingress).
+    -- Generic key/value; empty on a fresh instance — a missing key falls through
+    -- to its built-in default / env fallback (domain/settings.ts validates writes).
+    CREATE TABLE app_setting (
+        key        TEXT PRIMARY KEY,       -- app_name | tagline | theme | brand_color | ingress_ipv4 | ingress_ipv6
+        value      TEXT NOT NULL,
+        updated_at TEXT NOT NULL
     );
-    INSERT INTO sponsorship_new (sponsor_id, sponsor_login, tier_cents, status, effective_at, updated_at)
-        SELECT u.github_id, s.sponsor_login, s.tier_cents, s.status, s.effective_at, s.updated_at
-        FROM sponsorship s
-        JOIN app_user u ON u.login = s.sponsor_login;
-    DROP TABLE sponsorship;
-    ALTER TABLE sponsorship_new RENAME TO sponsorship;
-    `,
-    // v11 — persisted per-resource state history (quaykeeper_better.md B1). One row per
-    // non-active EPISODE of a managed-mode resource (disabled / at_risk / a cert
-    // renew failure): opened when the status poller first sees the state, refreshed
-    // while it persists, closed (cleared_at) on recovery. Unlike the daemon's
-    // in-memory view this survives daemon AND quaykeeper restarts. The actor_* columns
-    // denormalize "who last touched this resource" from the audit log at episode-open
-    // time, so attribution survives audit pruning.
-    `
+
+    -- Audit log. meta is a nullable JSON snapshot of the written object (secrets
+    -- stripped at the call site — cert keys and credential bodies never pass through).
+    CREATE TABLE audit (
+        id        INTEGER PRIMARY KEY AUTOINCREMENT,
+        at        TEXT NOT NULL,
+        github_id INTEGER,
+        login     TEXT,
+        action    TEXT NOT NULL,
+        site      TEXT,
+        detail    TEXT,
+        meta      TEXT
+    );
+    CREATE INDEX idx_audit_id ON audit(id DESC);
+
+    -- Persisted per-resource state history (quaykeeper_better.md B1). One row per
+    -- non-active EPISODE of a managed-mode resource (disabled / at_risk / a cert
+    -- renew failure): opened when the status poller first sees the state, refreshed
+    -- while it persists, closed (cleared_at) on recovery — survives daemon AND
+    -- quaykeeper restarts. The actor_* columns denormalize "who last touched this
+    -- resource" from the audit log at episode-open time, surviving audit pruning.
     CREATE TABLE resource_state (
         id           INTEGER PRIMARY KEY AUTOINCREMENT,
         realm_id     TEXT NOT NULL,
@@ -304,47 +232,13 @@ const MIGRATIONS: string[] = [
     );
     CREATE UNIQUE INDEX idx_resource_state_open ON resource_state(realm_id, kind, key) WHERE cleared_at IS NULL;
     CREATE INDEX idx_resource_state_history ON resource_state(realm_id, kind, key, id DESC);
-    `,
-    // v12 — audit enrichment (quaykeeper_better.md B3): a nullable `meta` JSON column
-    // holding a snapshot of the written object (the parsed entity / request shape,
-    // secrets stripped at the call site — cert keys and credential bodies never pass
-    // through). NULL for entries that predate it or have nothing to snapshot.
-    `
-    ALTER TABLE audit ADD COLUMN meta TEXT;
-    `,
-    // v13 — the multi-plan system is gone (impl §9): every account runs on the single
-    // standard baseline plus its optional per-user `user_limit` override, so the
-    // sponsorship mirror and the $ → plan mapping have no readers. Dropping the tables
-    // (not just the code) keeps the schema honest; the historical audit entries
-    // (`admin.plan_tier.replace`, sponsorship events) remain in the audit log.
-    `
-    DROP TABLE IF EXISTS sponsorship;
-    DROP TABLE IF EXISTS plan_tier;
-    `,
-    // v14 — durable GitHub credential (private-repo support). The user's OAuth access
-    // token, AES-256-GCM-encrypted with the realm cipher keyring (never plaintext at
-    // rest, never sent to the client). Replaces the 10-minute `quaykeeper_gh_token` cookie
-    // as the wizard's repo/branch-listing credential, and is pushed to nginxpilot's
-    // git-credentials store so private sites keep syncing on interval. Plus a
-    // `repo_private` flag on `site` so redeploys know to re-emit the fragment's
-    // `auth` block without a GitHub round-trip.
-    `
-    CREATE TABLE user_github_token (
-        github_id  INTEGER PRIMARY KEY REFERENCES app_user(github_id) ON DELETE CASCADE,
-        token_enc  TEXT NOT NULL,
-        updated_at TEXT NOT NULL
-    );
-    ALTER TABLE site ADD COLUMN repo_private INTEGER NOT NULL DEFAULT 0;
-    `,
-    // v15 — the Config subsystem (move_wharf_to_perch.md §3): wharf's configuration
-    // management, redesigned as a flat, tag-organized model. Two global pools (plain
-    // variables, encrypted secrets) plus a flat list of instances — no
-    // projects/environments, no override cascade, no interpolation. Ships as one
-    // migration (all six tables land together; partial rollout has no value).
-    // Cascade rules: deleting an instance drops its tags/vars/flags; deleting a
-    // referenced global var/secret is blocked (ON DELETE RESTRICT) so a fetch never
-    // silently loses a value.
-    `
+
+    -- The Config subsystem (move_wharf_to_perch.md §3): two global pools (plain
+    -- variables, encrypted secrets) plus a flat, tag/project-organized instance
+    -- list — no projects/environments, no override cascade, no interpolation.
+    -- Cascade rules: deleting an instance drops its tags/vars/flags; deleting a
+    -- referenced global var/secret is blocked (ON DELETE RESTRICT) so a fetch
+    -- never silently loses a value.
     CREATE TABLE global_var (
         id          TEXT PRIMARY KEY,
         key         TEXT NOT NULL UNIQUE,
@@ -368,6 +262,7 @@ const MIGRATIONS: string[] = [
         id             TEXT PRIMARY KEY,
         name           TEXT NOT NULL UNIQUE,
         description    TEXT,
+        project        TEXT,                   -- plain grouping label; NULL = unassigned
         key_hash       TEXT,                   -- sha256 of fetch secret; NULL until minted
         key_set_at     TEXT,
         key_expires_at TEXT,
@@ -375,6 +270,7 @@ const MIGRATIONS: string[] = [
         created_at     TEXT NOT NULL,
         updated_at     TEXT NOT NULL
     );
+    CREATE INDEX idx_instance_project ON instance(project);
 
     CREATE TABLE instance_tag (
         instance_id TEXT NOT NULL REFERENCES instance(id) ON DELETE CASCADE,
@@ -416,14 +312,11 @@ const MIGRATIONS: string[] = [
         UNIQUE(instance_id, key)
     );
     CREATE INDEX idx_feature_flag_instance ON feature_flag(instance_id);
-    `,
-    // v16 — database-server registry (quaykeeper_database_management.md §4). One row per
-    // owner-connected database server. `admin_password_enc` is AES-256-GCM ciphertext
-    // via infrastructure/cipher.ts (same keyring as realm tokens / secrets); the
-    // plaintext never leaves the server. Databases/users/grants are NOT mirrored —
-    // the server's own catalogs are the source of truth (§3), so this is the only
-    // table the subsystem persists.
-    `
+
+    -- Database-server registry (quaykeeper_database_management.md §4). One row per
+    -- owner-connected server; admin_password_enc is AES-256-GCM ciphertext.
+    -- Databases/users/grants are NOT mirrored — the server's own catalogs are the
+    -- source of truth (§3), so this is the only table the subsystem persists.
     CREATE TABLE db_server (
         id                  TEXT PRIMARY KEY,          -- dbsrv_<11 base36>
         name                TEXT NOT NULL UNIQUE,      -- human label ("prod-pg", "shared-mysql")
@@ -438,24 +331,12 @@ const MIGRATIONS: string[] = [
         created_at          TEXT NOT NULL,
         updated_at          TEXT NOT NULL
     );
-    `,
-    // v17 — instances get an optional `project` label: a plain grouping string
-    // shared by many instances (one more way to filter the flat list alongside
-    // tags). Purely organizational — it changes no resolution/fetch behavior.
-    // NULL = unassigned.
-    `
-    ALTER TABLE instance ADD COLUMN project TEXT;
-    CREATE INDEX idx_instance_project ON instance(project);
-    `,
-    // v18 — saved docker-run snippets (the Snippets page). One row per snippet: the
-    // form-built `docker run` recipe is persisted as a JSON `DockerRunSpec` in
-    // `spec` (domain/docker-run.ts owns the shape + validation — SQLite stores it
-    // opaquely, so spec evolution never needs a rebuild). `instance_id` is the
-    // optional Config instance whose resolved variables the generated command
-    // injects at container boot (an inline --entrypoint wrapper against the agent
-    // server); ON DELETE SET NULL so deleting an instance degrades the snippet to
-    // a plain `docker run` instead of deleting it.
-    `
+
+    -- Saved docker-run snippets (the Snippets page). The form-built recipe is a
+    -- JSON DockerRunSpec (domain/docker-run.ts owns shape + validation); instance_id
+    -- is the optional Config instance whose resolved variables the generated command
+    -- injects at container boot — ON DELETE SET NULL degrades the snippet to a
+    -- plain docker run instead of deleting it.
     CREATE TABLE docker_snippet (
         id          TEXT PRIMARY KEY,          -- snip_<11 base36>
         name        TEXT NOT NULL UNIQUE,      -- human label ("redis-cache", "api worker")
@@ -467,14 +348,11 @@ const MIGRATIONS: string[] = [
         updated_at  TEXT NOT NULL
     );
     CREATE INDEX idx_docker_snippet_instance ON docker_snippet(instance_id);
-    `,
-    // v19 — scheduled jobs (the Scheduled tasks page): owner-defined shell / JavaScript
-    // scripts the control-plane host runs on a 5-field cron schedule and/or on demand.
-    // `scheduled_job` is the definition; `job_run` is the append-only execution history
-    // with captured output (ON DELETE CASCADE so deleting a job drops its runs). The
-    // executor + cron ticker live in `services/jobs.ts` / `services/job-scheduler.ts`;
-    // the script is stored opaquely (validated in `domain/job.ts` before it lands).
-    `
+
+    -- Scheduled jobs: owner-defined shell / JavaScript scripts run on a 5-field
+    -- cron schedule and/or on demand; job_run is the append-only execution history
+    -- (ON DELETE CASCADE). Executor + ticker: services/jobs.ts / job-scheduler.ts;
+    -- the script is stored opaquely (domain/job.ts validates before it lands).
     CREATE TABLE scheduled_job (
         id           TEXT PRIMARY KEY,          -- job_<11 base36>
         name         TEXT NOT NULL UNIQUE,      -- human label ("nightly backup")
@@ -505,32 +383,40 @@ const MIGRATIONS: string[] = [
         triggered_by_login TEXT
     );
     CREATE INDEX idx_job_run_job ON job_run(job_id);
-    `,
-    // v20 — log-shipping destinations (log_ides.md §4: Quaykeeper as the control plane).
-    // One row per destination. Quaykeeper is the source of truth (unlike routing
-    // resources, which live in nginxpilot): it owns `scope` (global destinations are
-    // pushed to nginxpilot over Channel A; instance destinations are delivered to
-    // quaykeeper-client via /v1/config) and drift-reconciles the daemon's set against
-    // these rows (G19). The whole destination is stored as an opaque JSON `spec`
-    // (domain/nginxpilot-logdest-fragment.ts owns the shape + validation — SQLite
-    // stores it opaquely so spec evolution never needs a rebuild). SECRETS BY
-    // REFERENCE ONLY: `spec.auth` carries `*_env`/`*_file` reference names, never
-    // secret bytes — nothing to encrypt (the reference-only v1 model, §4.1). `target`
-    // binds a scoped destination to a site hostname / instance id (NULL for global).
-    `
+
+    -- Log shipping (logs_feature.md): log_destination is the reusable owner-defined
+    -- ENDPOINT (name/url/TLS/auth — SECRETS BY REFERENCE ONLY: spec.auth carries
+    -- *_env/*_file names, never secret bytes, so nothing is encrypted); log_binding
+    -- assigns a destination to a log source — an nginxpilot realm's access logs
+    -- (scope 'realm', pushed as a daemon fragment) or a Config instance's app logs
+    -- (scope 'instance', delivered via the agent snapshot) — and carries the
+    -- per-source shaping JSON (labels/filter/parse/tunables, domain LogShaping).
+    -- No SQL FK binding → destination: referential integrity is service-enforced
+    -- (an in-use destination can't be deleted), matching the repo style.
     CREATE TABLE log_destination (
         id          TEXT PRIMARY KEY,          -- logdest_<11 base36>
         name        TEXT NOT NULL UNIQUE,      -- slug [a-z0-9-]+ — the fragment filename component
-        type        TEXT NOT NULL,             -- loki | http | file | stdout
-        scope       TEXT NOT NULL DEFAULT 'global', -- global | site | instance
-        target      TEXT,                      -- site hostname / instance id for a scoped dest; NULL = global
-        enabled     INTEGER NOT NULL DEFAULT 1,
-        spec        TEXT NOT NULL,             -- JSON LogDestination (refs only; domain/nginxpilot-logdest-fragment.ts)
+        type        TEXT NOT NULL,             -- loki | http (push endpoints only)
+        spec        TEXT NOT NULL,             -- JSON DestinationEndpoint (refs only; domain/nginxpilot-logdest-fragment.ts)
         created_by  INTEGER NOT NULL,          -- app_user.github_id
         created_at  TEXT NOT NULL,
         updated_at  TEXT NOT NULL
     );
-    CREATE INDEX idx_log_destination_scope ON log_destination(scope);
+
+    CREATE TABLE log_binding (
+        id             TEXT PRIMARY KEY,           -- logbind_<11 base36>
+        destination_id TEXT NOT NULL,              -- → log_destination.id (service-enforced)
+        scope          TEXT NOT NULL,              -- realm | instance
+        target         TEXT NOT NULL,              -- realm.id | instance.id
+        enabled        INTEGER NOT NULL DEFAULT 1,
+        shaping        TEXT NOT NULL DEFAULT '{}', -- JSON LogShaping (domain/nginxpilot-logdest-fragment.ts)
+        created_by     INTEGER NOT NULL,           -- app_user.github_id
+        created_at     TEXT NOT NULL,
+        updated_at     TEXT NOT NULL
+    );
+    CREATE UNIQUE INDEX idx_log_binding_unique ON log_binding(scope, target, destination_id);
+    CREATE INDEX idx_log_binding_target ON log_binding(scope, target);
+    CREATE INDEX idx_log_binding_dest ON log_binding(destination_id);
     `,
 ]
 
@@ -547,11 +433,11 @@ function migrate(db: DatabaseSync): void {
     const applied = new Set(rows.map((r) => r.version))
     const insert = db.prepare('INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)')
     // SQLite requires foreign keys OFF during a CREATE-new / DROP-old / RENAME table
-    // rebuild (migrations v8/v10), and the PRAGMA is a no-op *inside* a transaction — so
-    // toggle it here, around the whole migration run, OUTSIDE any `BEGIN` (D2). Today only
-    // the rebuild migrations need this; doing it for the loop is simplest and harmless,
-    // since migrations either don't touch FKs or are run on a freshly-open connection
-    // before any request. It is restored to ON before the connection serves traffic.
+    // rebuild, and the PRAGMA is a no-op *inside* a transaction — so toggle it here,
+    // around the whole migration run, OUTSIDE any `BEGIN` (D2). No current migration
+    // rebuilds a table, but doing it for the loop is simplest and harmless (a future
+    // rebuild migration then just works), and it is restored to ON before the
+    // connection serves traffic.
     db.exec('PRAGMA foreign_keys = OFF;')
     try {
         for (let i = 0; i < MIGRATIONS.length; i++) {
@@ -559,7 +445,9 @@ function migrate(db: DatabaseSync): void {
             if (applied.has(version)) continue
             db.exec('BEGIN')
             try {
-                db.exec(MIGRATIONS[i])
+                const m = MIGRATIONS[i]
+                if (typeof m === 'function') m(db)
+                else db.exec(m)
                 insert.run(version, new Date().toISOString())
                 db.exec('COMMIT')
             } catch (err) {

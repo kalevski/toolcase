@@ -8,13 +8,14 @@ import { ApiError, apiFetch, describeApiError } from '@/lib/fetcher'
 import type { Instance } from '@/server/domain/types'
 import { InstanceVars } from './InstanceVars'
 import { InstanceFlags } from './InstanceFlags'
+import { InstanceLogs } from './InstanceLogs'
 import { InstanceSettings } from './InstanceSettings'
 
-// Per-instance page (`/instances/{id}/{variables|flags|settings}`,
+// Per-instance page (`/instances/{id}/{variables|flags|logs|settings}`,
 // move_wharf_to_perch.md §10). Header via tc-rich-page-header; a route-based
-// SubTabBar (wharf-style sub-nav) switches between the three tabs.
+// SubTabBar (wharf-style sub-nav) switches between the tabs.
 
-export type InstanceTab = 'variables' | 'flags' | 'settings'
+export type InstanceTab = 'variables' | 'flags' | 'logs' | 'settings'
 
 type LoadState =
     | { phase: 'loading' }
@@ -88,6 +89,7 @@ export function InstanceDetail({ instanceId, tab }: { instanceId: string; tab: I
     const tabs: SubTab[] = [
         { id: 'variables', label: 'Variables', icon: 'variable', href: `/instances/${instanceId}/variables` },
         { id: 'flags', label: 'Flags', icon: 'flag', href: `/instances/${instanceId}/flags` },
+        { id: 'logs', label: 'Logs', icon: 'scroll-text', href: `/instances/${instanceId}/logs` },
         { id: 'settings', label: 'Settings', icon: 'settings', href: `/instances/${instanceId}/settings` },
     ]
 
@@ -104,6 +106,7 @@ export function InstanceDetail({ instanceId, tab }: { instanceId: string; tab: I
             <div className="quaykeeper-instance-body">
                 {tab === 'variables' && <InstanceVars instance={instance} />}
                 {tab === 'flags' && <InstanceFlags instanceId={instance.id} />}
+                {tab === 'logs' && <InstanceLogs instanceId={instance.id} />}
                 {tab === 'settings' && (
                     <InstanceSettings
                         instance={instance}

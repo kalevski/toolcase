@@ -12,7 +12,8 @@ import * as flagRepo from '@/server/data/repositories/flag-repo'
 import * as instanceRepo from '@/server/data/repositories/instance-repo'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
 import * as logDestRepo from '@/server/data/repositories/log-destination-repo'
-import type { LogDestination } from '@/server/domain/nginxpilot-logdest-fragment'
+import * as logBindingRepo from '@/server/data/repositories/log-binding-repo'
+import { assembleSpec, type LogDestination } from '@/server/domain/nginxpilot-logdest-fragment'
 
 /** Deterministic JSON stringify (sorted object keys) for a stable ETag. */
 function canonical(v: unknown): string {
@@ -53,13 +54,23 @@ function buildSnapshot(instanceId: string): AgentSnapshot {
     const flags: Record<string, { enabled: boolean }> = {}
     for (const f of flagRepo.listByInstance(instanceId)) flags[f.key] = { enabled: f.enabled }
 
-    // Instance-scoped log destinations targeting THIS instance only (G28: a
-    // destination's credentials reach only the instances that opted into it). The
-    // stored spec is already the client wire shape (secrets by reference).
-    const destinations = logDestRepo
-        .listByScope('instance')
-        .filter((d) => d.enabled && d.target === instanceId)
-        .map((d) => d.spec)
+    // Log bindings targeting THIS instance only (G28: a destination's credentials
+    // reach only the instances that opted into it). The endpoint is read fresh and
+    // reassembled with the binding's shaping into the client wire shape (secrets by
+    // reference), so an endpoint edit reaches instances via the version-hash bump.
+    const destinations = logBindingRepo
+        .listInstance(instanceId)
+        .filter((b) => b.enabled)
+        .map((b) => {
+            const dest = logDestRepo.byId(b.destinationId)
+            if (!dest) return null
+            try {
+                return assembleSpec(dest.spec, b)
+            } catch {
+                return null // corrupt stored halves — skip rather than break the snapshot
+            }
+        })
+        .filter((d): d is LogDestination => d !== null)
     const logs: AgentLogsConfig | undefined = destinations.length ? { destinations } : undefined
 
     // `logs` folds into the version hash so a destination/filter change bumps the

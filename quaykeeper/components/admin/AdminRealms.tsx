@@ -8,7 +8,15 @@ import type { Realm } from '@/server/domain/types'
 import { AdminPage, json, useOwnerData } from './shared'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { FormModal, FormGroup } from '@/components/FormModal'
-import { TextField } from '@/components/fields'
+import { SelectField, SwitchField, TextField } from '@/components/fields'
+import {
+    ShapingFields,
+    buildShapingPayload,
+    emptyShapingDraft,
+    shapingDraftOf,
+    type ShapingDraft,
+} from '@/components/LogShapingFields'
+import type { LogShaping } from '@/server/domain/nginxpilot-logdest-fragment'
 import { useToast } from '@/components/Toast'
 
 // Owner-only realm registry (multiple_realms.md §C). A realm is one registered nginxpilot
@@ -39,9 +47,42 @@ interface RealmTest {
 
 type RealmTestState = RealmTest | 'loading' | undefined
 
+/** One realm log binding as `/api/admin/realms/{id}/log-bindings` returns it. */
+interface LogBindingDto {
+    id: string
+    destinationId: string
+    destinationName: string
+    destinationType: string
+    destinationUrl: string
+    enabled: boolean
+    shaping: LogShaping
+    logql: string
+}
+
+/** Destination options for the binding select (`/api/admin/log-destinations`). */
+interface DestOption {
+    id: string
+    name: string
+    type: string
+    spec: { url: string }
+}
+
+/** One destination's live shipping stats (`/api/admin/log-destinations/status?realm=`). */
+interface LogDestLiveStat {
+    name: string
+    shipped: number
+    dropped: number
+    failed_batches: number
+    buffer_len: number
+    last_error?: string
+    last_flush?: string
+}
+
 interface RealmRow extends Record<string, unknown> {
     realm: Realm
     test: RealmTestState
+    /** The bound destination's name, when this realm ships its access logs somewhere. */
+    logDest: string | undefined
 }
 
 /** Health-dot class + title: green = ok, amber = reachable-but-status-failed OR
@@ -83,7 +124,7 @@ const REALM_COLUMNS: AdvancedTableColumn[] = [
 /** The injected `<tbody>` HTML — every interpolated value is escaped. */
 function realmRowsHtml(rows: RealmRow[], busy: boolean): string {
     return rows
-        .map(({ realm: r, test }) => {
+        .map(({ realm: r, test, logDest }) => {
             const { cls, title } = healthDotMeta(test)
 
             const badges: string[] = []
@@ -91,6 +132,7 @@ function realmRowsHtml(rows: RealmRow[], busy: boolean): string {
             badges.push(
                 `<span class="badge text-bg-${r.hasToken ? 'light' : 'secondary'}">${r.hasToken ? 'token set' : 'no token'}</span>`,
             )
+            if (logDest) badges.push(`<span class="badge text-bg-info">logs → ${escapeHtml(logDest)}</span>`)
             if (test && test !== 'loading') {
                 if (test.managed) badges.push('<span class="badge text-bg-info">managed</span>')
                 if (test.apiVersion)
@@ -115,6 +157,7 @@ function realmRowsHtml(rows: RealmRow[], busy: boolean): string {
                           }),
                       ]),
                 iconBtnHtml({ icon: 'rotate', label: `Rotate token for ${r.name}`, data: { action: 'rotate', id: r.id } }),
+                iconBtnHtml({ icon: 'logs', label: `Log destination for ${r.name}`, data: { action: 'logdest', id: r.id } }),
                 iconBtnHtml({
                     icon: 'remove',
                     label: `Remove ${r.name}`,
@@ -184,8 +227,12 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
     // The realm awaiting remove confirmation, and the realm whose token is being rotated.
     const [pending, setPending] = useState<Realm | null>(null)
     const [rotating, setRotating] = useState<string | null>(null)
+    // The realm whose log binding is being edited (the RealmLogDestModal).
+    const [logDestRealm, setLogDestRealm] = useState<string | null>(null)
     // Live health results, keyed by realm id (lazily filled by the test effect / button).
     const [tests, setTests] = useState<Record<string, RealmTest | 'loading'>>({})
+    // Each realm's log binding(s), keyed by realm id — drives the "logs → dest" badge.
+    const [bindings, setBindings] = useState<Record<string, LogBindingDto[]>>({})
 
     const patchDraft = (p: Partial<RealmDraft>) => setForm((prev) => (prev ? { ...prev, ...p } : prev))
 
@@ -218,11 +265,26 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
         }
     }, [])
 
-    // Auto health-check every realm once on mount / when the set changes.
+    const loadBindings = useCallback(async (id: string) => {
+        try {
+            const res = await fetch(`/api/admin/realms/${encodeURIComponent(id)}/log-bindings`, { cache: 'no-store' })
+            if (!res.ok) return
+            const list = (await res.json()) as LogBindingDto[]
+            setBindings((b) => ({ ...b, [id]: list }))
+        } catch {
+            // best-effort — the row simply renders without the logs badge
+        }
+    }, [])
+
+    // Auto health-check every realm once on mount / when the set changes, and load
+    // its log binding for the "logs → dest" badge.
     useEffect(() => {
-        for (const r of realms) void runTest(r.id)
+        for (const r of realms) {
+            void runTest(r.id)
+            void loadBindings(r.id)
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [realms.map((r) => r.id).join(','), runTest])
+    }, [realms.map((r) => r.id).join(','), runTest, loadBindings])
 
     const add = useCallback(async () => {
         if (!form || busy) return
@@ -329,10 +391,16 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
     }, [pending, busy, onChanged, toast])
 
     const rows = useMemo<RealmRow[]>(
-        () => realms.map((r) => ({ realm: r, test: tests[r.id] })),
-        [realms, tests],
+        () =>
+            realms.map((r) => ({
+                realm: r,
+                test: tests[r.id],
+                logDest: bindings[r.id]?.find((b) => b.enabled)?.destinationName ?? bindings[r.id]?.[0]?.destinationName,
+            })),
+        [realms, tests, bindings],
     )
     const rotatingRealm = rotating ? realms.find((r) => r.id === rotating) : undefined
+    const logDestRealmObj = logDestRealm ? realms.find((r) => r.id === logDestRealm) : undefined
 
     // Row-action buttons live in the injected tbody HTML — one delegated host
     // listener routes their data-action clicks back to the React handlers.
@@ -348,6 +416,7 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
             if (action === 'test') void runTest(id)
             else if (action === 'default') void setDefault(realm)
             else if (action === 'rotate') setRotating(id)
+            else if (action === 'logdest') setLogDestRealm(id)
             else if (action === 'remove') setPending(realm)
         },
         [realms, runTest, setDefault],
@@ -429,6 +498,16 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
                 </FormModal>
             )}
 
+            {/* The per-realm log-destination binding editor (logs_feature.md §11). */}
+            {logDestRealmObj && (
+                <RealmLogDestModal
+                    key={logDestRealmObj.id}
+                    realm={logDestRealmObj}
+                    onSaved={() => void loadBindings(logDestRealmObj.id)}
+                    onClose={() => setLogDestRealm(null)}
+                />
+            )}
+
             {/* The write-only token-rotate editor is its own small modal (keyed per realm),
                 so no React subtree is captured by tc-table. */}
             {rotatingRealm && (
@@ -462,6 +541,183 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
                 onCancel={() => setPending(null)}
             />
         </>
+    )
+}
+
+/** The realm log-binding editor (logs_feature.md §11): pick an owner-defined
+ *  destination (empty = unbound), shape the stream (labels when the destination is
+ *  loki, filter, shipping tunables — no parse: edge access logs are already JSON),
+ *  toggle enabled, and watch that daemon's live per-destination shipping stats.
+ *  Save → PUT the binding (the fragment is pushed to THIS realm's nginxpilot);
+ *  selecting the empty option and saving → DELETE (fragment retracted). */
+function RealmLogDestModal({
+    realm,
+    onSaved,
+    onClose,
+}: {
+    realm: Realm
+    onSaved: () => void
+    onClose: () => void
+}) {
+    const toast = useToast()
+    const [loaded, setLoaded] = useState(false)
+    const [dests, setDests] = useState<DestOption[]>([])
+    const [existing, setExisting] = useState<LogBindingDto | null>(null)
+    const [destinationId, setDestinationId] = useState('')
+    const [enabled, setEnabled] = useState(true)
+    const [shaping, setShaping] = useState<ShapingDraft>(() => emptyShapingDraft('realm'))
+    const [stats, setStats] = useState<Record<string, LogDestLiveStat>>({})
+    const [error, setError] = useState<string | null>(null)
+    const [busy, setBusy] = useState(false)
+
+    // Load the destination options + this realm's existing binding once.
+    useEffect(() => {
+        let cancelled = false
+        void (async () => {
+            try {
+                const [destList, bindingList] = await Promise.all([
+                    fetch('/api/admin/log-destinations', { cache: 'no-store' }).then((r) => json<DestOption[]>(r)),
+                    fetch(`/api/admin/realms/${encodeURIComponent(realm.id)}/log-bindings`, { cache: 'no-store' }).then(
+                        (r) => json<LogBindingDto[]>(r),
+                    ),
+                ])
+                if (cancelled) return
+                setDests(destList)
+                const binding = bindingList[0] ?? null
+                setExisting(binding)
+                if (binding) {
+                    setDestinationId(binding.destinationId)
+                    setEnabled(binding.enabled)
+                    setShaping(shapingDraftOf(binding.shaping))
+                }
+                setLoaded(true)
+            } catch {
+                if (!cancelled) setError('Couldn’t load the destinations — close and retry.')
+            }
+        })()
+        return () => {
+            cancelled = true
+        }
+    }, [realm.id])
+
+    // Live per-destination shipping stats for THIS realm's daemon (D4).
+    useEffect(() => {
+        let cancelled = false
+        const load = async () => {
+            try {
+                const res = await fetch(
+                    `/api/admin/log-destinations/status?realm=${encodeURIComponent(realm.id)}`,
+                    { cache: 'no-store' },
+                )
+                if (!res.ok || cancelled) return
+                const body = (await res.json()) as { destinations?: LogDestLiveStat[] }
+                const byName: Record<string, LogDestLiveStat> = {}
+                for (const s of body.destinations ?? []) byName[s.name] = s
+                if (!cancelled) setStats(byName)
+            } catch {
+                // best-effort — the modal renders without live stats
+            }
+        }
+        void load()
+        const t = setInterval(() => void load(), 5000)
+        return () => {
+            cancelled = true
+            clearInterval(t)
+        }
+    }, [realm.id])
+
+    const patchShaping = (p: Partial<ShapingDraft>) => setShaping((prev) => ({ ...prev, ...p }))
+
+    const chosen = dests.find((d) => d.id === destinationId)
+    const stat = chosen ? stats[chosen.name] : undefined
+
+    const submit = async () => {
+        if (busy || !loaded) return
+        setBusy(true)
+        setError(null)
+        try {
+            if (!destinationId) {
+                // Empty select = unbound: clear the binding (retracts the fragment).
+                if (existing) {
+                    const res = await fetch(`/api/admin/realms/${encodeURIComponent(realm.id)}/log-bindings`, {
+                        method: 'DELETE',
+                    })
+                    if (!res.ok && res.status !== 204) {
+                        setError(`Couldn’t clear the log destination (error ${res.status}).`)
+                        return
+                    }
+                    toast.show(`Log destination cleared for “${realm.name}”.`, { variant: 'success' })
+                }
+                onSaved()
+                onClose()
+                return
+            }
+            const res = await fetch(`/api/admin/realms/${encodeURIComponent(realm.id)}/log-bindings`, {
+                method: 'PUT',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({
+                    destinationId,
+                    enabled,
+                    shaping: buildShapingPayload(shaping, { scope: 'realm', loki: chosen?.type === 'loki' }),
+                }),
+            })
+            if (!res.ok) {
+                const body = (await res.json().catch(() => null)) as { error?: string; detail?: string } | null
+                setError(
+                    body?.detail
+                        ? `Couldn’t save: ${body.detail}`
+                        : body?.error
+                          ? `Couldn’t save the binding: ${body.error}.`
+                          : `Couldn’t save the binding (error ${res.status}).`,
+                )
+                return
+            }
+            toast.show(`“${realm.name}” now ships its access logs to “${chosen?.name}”.`, { variant: 'success' })
+            onSaved()
+            onClose()
+        } catch {
+            setError('Couldn’t save the binding — network error.')
+        } finally {
+            setBusy(false)
+        }
+    }
+
+    return (
+        <FormModal
+            title={`Log destination — ${realm.name}`}
+            busy={busy}
+            submitLabel="Save"
+            onSubmit={() => void submit()}
+            onClose={onClose}
+        >
+            {error && <tc-banner variant="danger">{error}</tc-banner>}
+            <FormGroup title="Destination">
+                <SelectField
+                    label="Destination"
+                    help="An owner-defined endpoint from the Log destinations page. Empty = this server ships nothing."
+                    value={destinationId}
+                    options={[
+                        { value: '', label: 'None (unbound)' },
+                        ...dests.map((d) => ({ value: d.id, label: `${d.name} — ${d.spec.url}` })),
+                    ]}
+                    onValue={setDestinationId}
+                />
+                {destinationId !== '' && (
+                    <SwitchField label="Enabled" checked={enabled} onChecked={setEnabled} />
+                )}
+                {stat && (
+                    <p className="quaykeeper-admin-hint">
+                        Shipping: ↑ {stat.shipped.toLocaleString()} · ✕ {stat.dropped.toLocaleString()} · ⚠{' '}
+                        {stat.failed_batches.toLocaleString()}
+                        {stat.buffer_len ? ` · buf ${stat.buffer_len}` : ''}
+                        {stat.last_error ? ` — ${stat.last_error}` : ''}
+                    </p>
+                )}
+            </FormGroup>
+            {destinationId !== '' && (
+                <ShapingFields draft={shaping} onPatch={patchShaping} scope="realm" loki={chosen?.type === 'loki'} />
+            )}
+        </FormModal>
     )
 }
 

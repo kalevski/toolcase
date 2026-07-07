@@ -28,7 +28,7 @@ const ADMIN_LABELS: Record<string, string> = {
 
 function trailFor(pathname: string): Crumb[] {
     if (pathname.startsWith('/sites/')) return [{ label: 'Static Sites', href: '/' }, { label: 'Site' }]
-    if (pathname.startsWith('/instances/')) return [{ label: 'Variables', href: '/instances' }, { label: 'Instance' }]
+    if (pathname.startsWith('/instances/')) return [{ label: 'Instances', href: '/instances' }, { label: 'Instance' }]
     if (pathname.startsWith('/databases/')) return [{ label: 'Databases', href: '/databases' }, { label: 'Server' }]
     if (pathname.startsWith('/proxies')) return [{ label: 'Routing' }, { label: 'Proxies' }]
     if (pathname.startsWith('/admin')) {

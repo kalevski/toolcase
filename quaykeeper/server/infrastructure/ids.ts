@@ -28,4 +28,5 @@ export const ID = {
     job: () => newId('job'),
     jobRun: () => newId('run'),
     logDestination: () => newId('logdest'),
+    logBinding: () => newId('logbind'),
 }
