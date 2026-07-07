@@ -1305,7 +1305,7 @@ Two ways to theme a subtree:
 1. **Named theme** via the `name` attribute — opt into a bundled skin. `default` is the product (slate) voice applied globally; `dungeon` (gilded fantasy), `aurora` (dark "production-AI"), `sunshine` (warm citrus boutique), `neon` (dark synthwave / cyberpunk, dual magenta + cyan accents) and `blueprint` (light vector-blueprint, rounded corners) are opt-in skins that stay inert until a `tc-theme` wrapper requests them. Each named skin is scoped under `tc-theme[name="…"]` (a plain wrapper carrying `[data-tc-theme="…"]` is matched too). The `dungeon`, `aurora`, `sunshine`, `neon` and `blueprint` skins reference display fonts (Cinzel / EB Garamond for dungeon; Orbitron / Ubuntu Mono for neon; Space Grotesk / Chakra Petch for blueprint) that are **not** bundled — load them on the host page for the full look; all degrade to system serifs/sans.
 2. **Ad-hoc token overrides** — set `--tc-*` (or the finer-grained `--bs-<component>-*`) custom properties directly on the `tc-theme` element via `style` or a class. Because the tokens inherit through the `display: contents` box, every descendant component picks them up.
 
-Every named theme additionally ships four **accent variants** selected with the `variant` attribute: `ocean` (blue / cyan), `forest` (green / lime), `ember` (orange / gold) and `royal` (violet / magenta). A variant swaps **only the primary and secondary accent colours** (and their derived hovers, soft tints, glows, gradients, focus rings and link colours) — canvas, surfaces, text ramp, semantic status colours and the theme's structure stay untouched: `<tc-theme name="blueprint" variant="ocean">` (or `[data-tc-theme="blueprint"][data-tc-variant="ocean"]` on a plain wrapper).
+Every named theme additionally ships nine **accent variants** selected with the `variant` attribute: `ocean` (blue / cyan), `forest` (green / lime), `ember` (orange / gold), `royal` (violet / magenta), `mint` (teal / mint), `rose` (rose / pink), `crimson` (red / coral), `indigo` (indigo / periwinkle) and `slate` (steel / silver). A variant swaps **only the primary and secondary accent colours** (and their derived hovers, soft tints, glows, gradients, focus rings and link colours) — canvas, surfaces, text ramp, semantic status colours and the theme's structure stay untouched: `<tc-theme name="blueprint" variant="ocean">` (or `[data-tc-theme="blueprint"][data-tc-variant="ocean"]` on a plain wrapper).
 
 **Tag:** `tc-theme`
 
@@ -1314,7 +1314,7 @@ Every named theme additionally ships four **accent variants** selected with the 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `name` | `default\|dungeon\|aurora\|sunshine\|neon\|blueprint` | — | Selects a bundled named theme for the wrapped subtree. Absent → the subtree inherits the ambient (global `:root`) theme. Unrecognised values simply match no theme scope, so the subtree keeps the inherited skin. |
-| `variant` | `ocean\|forest\|ember\|royal` | — | Accent variant of the named theme — swaps only the primary and secondary accent colours (plus derived hovers, tints, glows, focus rings and links). Requires `name`; absent → the theme's base accents. |
+| `variant` | `ocean\|forest\|ember\|royal\|mint\|rose\|crimson\|indigo\|slate` | — | Accent variant of the named theme — swaps only the primary and secondary accent colours (plus derived hovers, tints, glows, focus rings and links). Requires `name`; absent → the theme's base accents. |
 
 **JS Properties**
 

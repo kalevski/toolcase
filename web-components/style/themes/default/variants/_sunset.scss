@@ -1,0 +1,40 @@
+// Default Sunset variant — gradient primary (coral → orange) / amber secondary.
+//
+// Unlike the solid-hue variants, this one renders the primary CTA accent as a
+// two-stop gradient — the widely-used "Sunset" combo (coral #ff7e5f → orange
+// #feb47b) — instead of a single flat colour. --tc-app-accent still resolves
+// to a solid representative hex (the gradient's start) for non-gradient
+// contexts (icons, borders, focus rings); --tc-app-accent-gradient carries the
+// actual two-tone sweep and is what CTA buttons paint. Surfaces, borders, the
+// text ramp, semantic status colors, fonts and shadows stay the base
+// default-theme values.
+// Use with: <tc-theme name="default" variant="sunset"> … </tc-theme>
+// (or any element with [data-tc-theme='default'][data-tc-variant='sunset']).
+
+tc-theme[name='default'][variant='sunset'],
+[data-tc-theme='default'][data-tc-variant='sunset'] {
+    // Primary accent — the "Sunset" gradient (coral → orange) is the star here.
+    --tc-app-accent: #ff7e5f;
+    --tc-app-accent-hover: #ff6a4d;
+    --tc-app-accent-contrast: #ffffff;
+    --tc-app-accent-gradient: linear-gradient(135deg, #ff7e5f, #feb47b);
+
+    // Secondary accent — informational amber, spent sparingly (links, focus
+    // tints, highlights, the brand dot)
+    --tc-accent: #ffb020;
+    --tc-accent-fg: #d98a0a;
+    --tc-accent-soft: #fff3e0;
+    --tc-accent-hex: #ffb020;
+
+    // Derived literals — recomputed from the new primary. Redeclared here (not
+    // inherited) because the base resolves its var() refs at :root, baking the
+    // slate accent into the computed value.
+    --bs-primary: #ff7e5f;
+    --bs-primary-rgb: 255, 126, 95;
+    --bs-link-color: var(--tc-app-accent);
+    --bs-link-color-rgb: 255, 126, 95;
+    --bs-link-hover-color: var(--tc-app-accent-hover);
+    --bs-link-hover-color-rgb: 255, 106, 77;
+    --tc-focus-ring: 0 0 0 0.2rem rgba(255, 126, 95, 0.15);
+    --bs-focus-ring-color: rgba(255, 126, 95, 0.15);
+}

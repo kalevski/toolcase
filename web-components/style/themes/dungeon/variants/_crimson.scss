@@ -1,0 +1,55 @@
+// Dungeon Crimson variant — brick-red primary, terracotta secondary.
+//
+// Swaps ONLY the primary (CTA / brand) and secondary accent families onto a
+// muted, antiqued crimson palette. Everything else — the ink / leather canvas,
+// parchment text ramp, gilded gold frames / bevels / rules, semantic status
+// colors, fonts, shadows and textures — stays identical to the base dungeon
+// foundation (which is why the --fg-gold* palette vars are NOT touched here).
+// Use with: <tc-theme name="dungeon" variant="crimson"> … </tc-theme>
+// (or any element with [data-tc-theme="dungeon"][data-tc-variant="crimson"]).
+
+@use './accent-roles' as roles;
+
+tc-theme[name='dungeon'][variant='crimson'],
+[data-tc-theme='dungeon'][data-tc-variant='crimson'] {
+    // ── Variant accent ladder (mirrors the base --fg-gold scale) ─────────────
+    --fg-crimson-primary: #a83232; // ≈ --fg-gold (base fill)
+    --fg-crimson-primary-bright: #c85454; // ≈ --fg-gold-bright (hover / link / focus)
+    --fg-crimson-primary-deep: #6b1f1f; // ≈ --fg-gold-deep (gradient dark stop)
+    --fg-crimson-secondary: #b2624a; // secondary base (≈ --fg-copper slot)
+    --fg-crimson-secondary-bright: #cf8567;
+
+    // Primary accent (CTA / brand). --tc-app-accent-contrast keeps the base
+    // ink-on-fill convention (var(--fg-ink)) — no override needed.
+    --tc-app-accent: var(--fg-crimson-primary);
+    --tc-app-accent-hover: var(--fg-crimson-primary-bright);
+    --tc-app-accent-gradient: linear-gradient(
+        135deg,
+        var(--fg-crimson-primary-bright),
+        var(--fg-crimson-primary-deep)
+    );
+
+    // Secondary accent
+    --tc-accent: var(--fg-crimson-secondary-bright);
+    --tc-accent-fg: var(--fg-crimson-secondary);
+    --tc-accent-soft: rgba(178, 98, 74, 0.16);
+    --tc-accent-hex: #b2624a;
+
+    --tc-focus-ring: 0 0 0 2px var(--fg-crimson-primary-bright);
+
+    // ── Bootstrap-compatible contract (--bs-*) ───────────────────────────────
+    --bs-primary: var(--fg-crimson-primary);
+    --bs-primary-rgb: 168, 50, 50;
+    --bs-secondary: var(--fg-crimson-secondary);
+    --bs-secondary-rgb: 178, 98, 74;
+
+    --bs-link-color: var(--fg-crimson-primary-bright);
+    --bs-link-hover-color: var(--fg-crimson-primary);
+
+    --bs-focus-ring-color: rgba(200, 84, 84, 0.4);
+
+    // ── Hardwired accent-role sweep (see _accent-roles.scss) ─────────────────
+    // Component partials pin gold onto element-scoped --bs-* props that beat
+    // the inherited tokens above; re-target the accent-role subset.
+    @include roles.accent-roles(#a83232, #c85454, #6b1f1f, #b2624a, #cf8567);
+}

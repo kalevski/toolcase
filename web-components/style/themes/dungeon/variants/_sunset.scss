@@ -1,0 +1,63 @@
+// Dungeon Sunset variant — muted coral primary that fades to a dusty orange
+// (a genuine two-tone gradient), amber secondary.
+//
+// Swaps ONLY the primary (CTA / brand) and secondary accent families onto a
+// muted, antiqued sunset palette. Unlike the solid-hue dungeon variants,
+// --fg-sunset-primary-deep is DELIBERATELY a different hue (muted orange, not
+// just a darker coral) — so the standard bright→deep gradient recipe every
+// dungeon variant already uses for --tc-app-accent-gradient becomes a genuine
+// coral→orange sweep here, echoing the widely-used "Sunset" gradient in
+// dungeon's antiqued palette. Everything else — the ink / leather canvas,
+// parchment text ramp, gilded gold frames / bevels / rules, semantic status
+// colors, fonts, shadows and textures — stays identical to the base dungeon
+// foundation (which is why the --fg-gold* palette vars are NOT touched here).
+// Use with: <tc-theme name="dungeon" variant="sunset"> … </tc-theme>
+// (or any element with [data-tc-theme="dungeon"][data-tc-variant="sunset"]).
+
+@use './accent-roles' as roles;
+
+tc-theme[name='dungeon'][variant='sunset'],
+[data-tc-theme='dungeon'][data-tc-variant='sunset'] {
+    // ── Variant accent ladder (mirrors the base --fg-gold scale) ─────────────
+    --fg-sunset-primary: #b8583c; // ≈ --fg-gold (base fill) — muted coral
+    --fg-sunset-primary-bright: #d67a54; // ≈ --fg-gold-bright (hover / link / focus)
+    --fg-sunset-primary-deep: #c9793f; // ≈ --fg-gold-deep — muted orange, ON PURPOSE
+    --fg-sunset-secondary: #c68a3e; // secondary base (≈ --fg-copper slot) — muted amber
+    --fg-sunset-secondary-bright: #dba75e;
+
+    // Primary accent (CTA / brand). --tc-app-accent-contrast keeps the base
+    // ink-on-fill convention (var(--fg-ink)) — no override needed. The
+    // gradient below sweeps bright coral → deep orange, a genuine two-tone
+    // fill rather than the usual single-hue lighten.
+    --tc-app-accent: var(--fg-sunset-primary);
+    --tc-app-accent-hover: var(--fg-sunset-primary-bright);
+    --tc-app-accent-gradient: linear-gradient(
+        135deg,
+        var(--fg-sunset-primary-bright),
+        var(--fg-sunset-primary-deep)
+    );
+
+    // Secondary accent
+    --tc-accent: var(--fg-sunset-secondary-bright);
+    --tc-accent-fg: var(--fg-sunset-secondary);
+    --tc-accent-soft: rgba(198, 138, 62, 0.16);
+    --tc-accent-hex: #c68a3e;
+
+    --tc-focus-ring: 0 0 0 2px var(--fg-sunset-primary-bright);
+
+    // ── Bootstrap-compatible contract (--bs-*) ───────────────────────────────
+    --bs-primary: var(--fg-sunset-primary);
+    --bs-primary-rgb: 184, 88, 60;
+    --bs-secondary: var(--fg-sunset-secondary);
+    --bs-secondary-rgb: 198, 138, 62;
+
+    --bs-link-color: var(--fg-sunset-primary-bright);
+    --bs-link-hover-color: var(--fg-sunset-primary);
+
+    --bs-focus-ring-color: rgba(214, 122, 84, 0.4);
+
+    // ── Hardwired accent-role sweep (see _accent-roles.scss) ─────────────────
+    // Component partials pin gold onto element-scoped --bs-* props that beat
+    // the inherited tokens above; re-target the accent-role subset.
+    @include roles.accent-roles(#b8583c, #d67a54, #c9793f, #c68a3e, #dba75e);
+}

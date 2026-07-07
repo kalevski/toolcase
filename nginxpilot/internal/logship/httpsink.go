@@ -117,7 +117,7 @@ func newHTTPSink(d *Destination) (Sink, error) {
 	return &httpSink{url: d.URL, auth: d.Auth, client: client}, nil
 }
 
-func (s *httpSink) Send(ctx context.Context, batch []Entry) error {
+func (s *httpSink) Send(ctx context.Context, batch []Entry, batchID string) error {
 	var body bytes.Buffer
 	for _, e := range batch {
 		body.Write(e.Raw)
@@ -128,7 +128,7 @@ func (s *httpSink) Send(ctx context.Context, batch []Entry) error {
 		return &sendError{err: err, permanent: true}
 	}
 	req.Header.Set("Content-Type", "application/x-ndjson")
-	req.Header.Set("X-NP-Batch-ID", batchID())
+	req.Header.Set("X-NP-Batch-ID", batchID)
 	if err := applyAuth(req, s.auth); err != nil {
 		return &sendError{err: err}
 	}
@@ -180,7 +180,7 @@ type lokiStream struct {
 	Values [][2]string       `json:"values"`
 }
 
-func (s *lokiSink) Send(ctx context.Context, batch []Entry) error {
+func (s *lokiSink) Send(ctx context.Context, batch []Entry, _ string) error {
 	byLabels := map[string]*lokiStream{}
 	var order []string
 	for i := range batch {

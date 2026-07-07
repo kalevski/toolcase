@@ -35,7 +35,19 @@ const Cluster: React.FC = () => (
     </div>
 )
 
-const VARIANTS = ['ocean', 'forest', 'ember', 'royal'] as const
+const VARIANTS = [
+    'ocean',
+    'forest',
+    'ember',
+    'royal',
+    'mint',
+    'rose',
+    'crimson',
+    'indigo',
+    'slate',
+    'sunset',
+    'twilight',
+] as const
 const VARIANT_THEMES = ['default', 'dungeon', 'aurora', 'sunshine', 'neon', 'blueprint'] as const
 
 const ThemeDemo: React.FC = () => {
@@ -154,14 +166,20 @@ const ThemeDemo: React.FC = () => {
 
                             <tc-section-card title="Theme variants — name + variant">
                                 <p className="text-muted small mb-3">
-                                    Every bundled theme ships four accent variants selected with the{' '}
+                                    Every bundled theme ships eleven accent variants selected with the{' '}
                                     <code>variant</code> attribute:{' '}
                                     <code>&lt;tc-theme name="blueprint" variant="ocean"&gt;</code>.
                                     A variant swaps only the primary and secondary accent colours —
                                     canvas, surfaces, text, status colours and structure all stay
-                                    the base theme's. The four variants are <code>ocean</code> (blue
+                                    the base theme's. The variants are <code>ocean</code> (blue
                                     / cyan), <code>forest</code> (green / lime), <code>ember</code>{' '}
-                                    (orange / gold) and <code>royal</code> (violet / magenta).
+                                    (orange / gold), <code>royal</code> (violet / magenta),{' '}
+                                    <code>mint</code> (teal / mint), <code>rose</code> (rose / pink),{' '}
+                                    <code>crimson</code> (red / coral), <code>indigo</code> (indigo /
+                                    periwinkle), <code>slate</code> (steel / silver), and two{' '}
+                                    <strong>gradient</strong> variants whose primary is a two-tone sweep
+                                    instead of a flat colour: <code>sunset</code> (coral → orange) and{' '}
+                                    <code>twilight</code> (violet → blue).
                                 </p>
                                 <div className="d-flex flex-wrap gap-2 mb-3">
                                     {VARIANT_THEMES.map((t) => (

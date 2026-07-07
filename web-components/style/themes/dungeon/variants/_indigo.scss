@@ -1,0 +1,55 @@
+// Dungeon Indigo variant — arcane indigo primary, periwinkle secondary.
+//
+// Swaps ONLY the primary (CTA / brand) and secondary accent families onto a
+// muted, antiqued indigo palette. Everything else — the ink / leather canvas,
+// parchment text ramp, gilded gold frames / bevels / rules, semantic status
+// colors, fonts, shadows and textures — stays identical to the base dungeon
+// foundation (which is why the --fg-gold* palette vars are NOT touched here).
+// Use with: <tc-theme name="dungeon" variant="indigo"> … </tc-theme>
+// (or any element with [data-tc-theme="dungeon"][data-tc-variant="indigo"]).
+
+@use './accent-roles' as roles;
+
+tc-theme[name='dungeon'][variant='indigo'],
+[data-tc-theme='dungeon'][data-tc-variant='indigo'] {
+    // ── Variant accent ladder (mirrors the base --fg-gold scale) ─────────────
+    --fg-indigo-primary: #5a52a3; // ≈ --fg-gold (base fill)
+    --fg-indigo-primary-bright: #7d74c9; // ≈ --fg-gold-bright (hover / link / focus)
+    --fg-indigo-primary-deep: #3a3468; // ≈ --fg-gold-deep (gradient dark stop)
+    --fg-indigo-secondary: #6f7fc4; // secondary base (≈ --fg-copper slot)
+    --fg-indigo-secondary-bright: #93a1da;
+
+    // Primary accent (CTA / brand). --tc-app-accent-contrast keeps the base
+    // ink-on-fill convention (var(--fg-ink)) — no override needed.
+    --tc-app-accent: var(--fg-indigo-primary);
+    --tc-app-accent-hover: var(--fg-indigo-primary-bright);
+    --tc-app-accent-gradient: linear-gradient(
+        135deg,
+        var(--fg-indigo-primary-bright),
+        var(--fg-indigo-primary-deep)
+    );
+
+    // Secondary accent
+    --tc-accent: var(--fg-indigo-secondary-bright);
+    --tc-accent-fg: var(--fg-indigo-secondary);
+    --tc-accent-soft: rgba(111, 127, 196, 0.16);
+    --tc-accent-hex: #6f7fc4;
+
+    --tc-focus-ring: 0 0 0 2px var(--fg-indigo-primary-bright);
+
+    // ── Bootstrap-compatible contract (--bs-*) ───────────────────────────────
+    --bs-primary: var(--fg-indigo-primary);
+    --bs-primary-rgb: 90, 82, 163;
+    --bs-secondary: var(--fg-indigo-secondary);
+    --bs-secondary-rgb: 111, 127, 196;
+
+    --bs-link-color: var(--fg-indigo-primary-bright);
+    --bs-link-hover-color: var(--fg-indigo-primary);
+
+    --bs-focus-ring-color: rgba(125, 116, 201, 0.4);
+
+    // ── Hardwired accent-role sweep (see _accent-roles.scss) ─────────────────
+    // Component partials pin gold onto element-scoped --bs-* props that beat
+    // the inherited tokens above; re-target the accent-role subset.
+    @include roles.accent-roles(#5a52a3, #7d74c9, #3a3468, #6f7fc4, #93a1da);
+}

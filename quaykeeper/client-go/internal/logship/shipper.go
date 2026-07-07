@@ -63,6 +63,8 @@ func (s *Shipper) Configure(dests []Destination) {
 		if err != nil {
 			s.log.Error("log destination failed to start", "destination", name, "error", err)
 			w = brokenWorker(d, err)
+			s.workers[name] = w
+			continue
 		}
 		s.workers[name] = w
 		s.log.Info("log destination started", "destination", name, "type", d.Type)
@@ -221,6 +223,7 @@ func (w *worker) flushAll(ctx context.Context) {
 }
 
 func (w *worker) deliver(ctx context.Context, batch []Entry) bool {
+	id := batchID() // one ID per batch — every retry attempt must reuse it (G8 dedupe)
 	var lastErr error
 	for attempt := 0; attempt <= w.dest.maxRetries(); attempt++ {
 		if attempt > 0 {
@@ -242,7 +245,7 @@ func (w *worker) deliver(ctx context.Context, batch []Entry) bool {
 			case <-time.After(delay):
 			}
 		}
-		err := w.sink.Send(ctx, batch)
+		err := w.sink.Send(ctx, batch, id)
 		if err == nil {
 			w.mu.Lock()
 			w.shipped += uint64(len(batch))
@@ -253,11 +256,12 @@ func (w *worker) deliver(ctx context.Context, batch []Entry) bool {
 		var se *sendError
 		if errors.As(err, &se) && se.permanent {
 			w.recordFailure(err)
+			w.buf.addDropped(uint64(len(batch)))
 			return true
 		}
 	}
 	w.recordFailure(lastErr)
-	w.buf.requeue(batch)
+	w.buf.requeue(batch) // may itself drop (buffer full) — ring already counts that
 	return false
 }
 

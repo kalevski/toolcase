@@ -82,6 +82,34 @@ describe('job executor', () => {
         expect(reread.lastRunAt).toBeTruthy()
     })
 
+    it('truncates multibyte output byte-accurately without mangling UTF-8 (bug 9)', async () => {
+        // '€' is a 3-byte UTF-8 sequence; printing well past the 256 KB cap
+        // forces at least one write to straddle the boundary. A per-chunk
+        // toString('utf8') (the old bug) would emit U+FFFD there; capping on
+        // UTF-16 .length instead of byte length would also let far more than
+        // 256 KB of bytes through.
+        const job = jobs.createJob(ACTOR, {
+            name: 'multibyte-flood',
+            kind: 'node',
+            script: `process.stdout.write('€'.repeat(150000))`,
+        })
+        const run = await jobs.runJob(job.id, 'manual', ACTOR)
+        expect(run.status).toBe('success')
+        expect(run.truncated).toBe(true)
+
+        // The raw byte cap is exact, but a cut landing mid-character decodes the
+        // incomplete trailing bytes as a single U+FFFD (3 bytes re-encoded), which
+        // can nudge the decoded string's byte length a couple of bytes past the
+        // cap — nowhere near the old bug's ~2x (UTF-16-length-as-bytes) overshoot.
+        const bytes = Buffer.byteLength(run.stdout, 'utf8')
+        expect(bytes).toBeLessThanOrEqual(256 * 1024 + 3)
+        expect(bytes).toBeGreaterThan(256 * 1024 - 4)
+        // The byte cap can land mid-character, which legitimately decodes to a
+        // trailing replacement char — that's fine. What the old per-chunk-decode
+        // bug produced was U+FFFD scattered mid-stream at chunk boundaries.
+        expect(run.stdout.replace(/�+$/, '')).not.toContain('�')
+    })
+
     it('reports a spawn failure as an error run (missing interpreter)', async () => {
         process.env.QUAYKEEPER_JOB_SHELL = '/nonexistent/shell-bin'
         // config was read at import; re-import isn't trivial, so drive the node path

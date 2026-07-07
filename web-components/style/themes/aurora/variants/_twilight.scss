@@ -1,0 +1,38 @@
+// Aurora Twilight variant — gradient primary (violet → blue) with a sky-blue
+// secondary accent.
+//
+// Unlike the solid-hue variants, this one leans into a genuine two-tone CTA
+// gradient: --ah-accent (violet) and --ah-accent-2 (blue) are deliberately
+// DIFFERENT hues — not a lighten of the same colour — so the foundation's own
+// --ah-accent-grad recipe (`linear-gradient(135deg, var(--ah-accent),
+// var(--ah-accent-2))`) renders the widely-used "Deep Blue" gradient
+// (violet #8b3ff0 → blue #3b82f6) everywhere it's consumed (buttons, nav,
+// brand mark, progress). The signature-highlight secondary (--tc-accent) turns
+// sky blue. Canvas, surfaces, hairlines, text ramp, semantic status colours,
+// fonts and shadows are untouched.
+// Use with: <tc-theme name="aurora" variant="twilight"> … </tc-theme>
+
+@use '../../../foundation/tokens' as *;
+
+tc-theme[name='aurora'][variant='twilight'],
+[data-tc-theme='aurora'][data-tc-variant='twilight'] {
+    // ── Primary accent — violet → blue gradient (replaces mint/emerald) ──────
+    --ah-accent: #8b3ff0; // gradient start
+    --ah-accent-2: #3b82f6; // gradient end — a genuinely different hue, not a shade
+    --ah-accent-bright: #c9b3ff; // accent text / link hover / gradient-text end
+    --ah-accent-ink: #1c0a3d; // dark ink (keeps the dark-ink convention)
+    --ah-accent-soft: rgba(139, 63, 240, 0.13);
+    --ah-accent-line: rgba(139, 63, 240, 0.32);
+    --ah-accent-glow: rgba(139, 63, 240, 0.1);
+    --ah-accent-shadow: rgba(139, 63, 240, 0.5);
+
+    // ── Secondary accent — sky blue (signature highlights / eyebrows / brand dot) ─
+    --tc-accent: #38bdf8;
+    --tc-accent-fg: #7dd3fc; // bright tint so accent-coloured TEXT clears the dark surfaces
+    --tc-accent-soft: rgba(56, 189, 248, 0.13);
+    --tc-accent-hex: #38bdf8;
+    --tc-cyan: #38bdf8;
+
+    // ── Foundation literals derived from the old accent hex ──────────────────
+    --bs-primary-rgb: 139, 63, 240;
+}

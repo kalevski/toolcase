@@ -1,0 +1,56 @@
+// Neon "crimson" variant — electric red + coral accent swap.
+//
+// Re-tints ONLY the dual accent of the neon theme: the PRIMARY magenta family
+// becomes electric red (#ff3131) and the SECONDARY cyan signature becomes a
+// bright coral (#ff7a5c). Everything else — the navy-purple void, surfaces,
+// hairlines, text ramp, semantic status colours, fonts, glow structure and
+// shadows — inherits from the neon foundation unchanged; every rgba derivative
+// below keeps the base alpha so glow intensity is identical.
+// Use with: <tc-theme name="neon" variant="crimson"> … </tc-theme>
+// (or any element with [data-tc-theme="neon"][data-tc-variant="crimson"]).
+
+@use '../../../foundation/tokens' as *;
+
+tc-theme[name='neon'][variant='crimson'],
+[data-tc-theme='neon'][data-tc-variant='crimson'] {
+    // ── Primary accent — electric red (was hot magenta #ff2bd6) ──────────────
+    --nd-accent: #ff3131; // rgb(255, 49, 49)
+    --nd-accent-hover: #ff6161;
+    // Coral-leaning second stop for the primary FILL gradient — keeps the
+    // dark-ink label legible across the whole red→coral sweep.
+    --nd-accent-2: #ff5c5c;
+    --nd-accent-bright: #ffabab; // accent-coloured TEXT on the dark surfaces
+    --nd-accent-soft: rgba(255, 49, 49, 0.14);
+    --nd-accent-line: rgba(255, 49, 49, 0.34);
+    --nd-accent-glow: rgba(255, 49, 49, 0.12);
+    --nd-accent-shadow: rgba(255, 49, 49, 0.5);
+
+    // Strong hairline tier is accent-derived in the base — follow the red.
+    --nd-border-strong: rgba(255, 49, 49, 0.34);
+
+    // ── Secondary accent — bright coral (was electric cyan #00e5ff) ──────────
+    --nd-cyan: #ff7a5c; // rgb(255, 122, 92)
+    --nd-cyan-bright: #ffb49f;
+    --nd-cyan-soft: rgba(255, 122, 92, 0.14);
+    --nd-cyan-line: rgba(255, 122, 92, 0.34);
+    --nd-cyan-shadow: rgba(255, 122, 92, 0.5);
+
+    // ── Recipes that bake accent literals in the base ────────────────────────
+    // Clipped neon display TEXT gradient — red → light salmon → coral.
+    --nd-accent-grad-text: linear-gradient(
+        120deg,
+        var(--nd-accent) 0%,
+        #ffabab 45%,
+        var(--nd-cyan) 100%
+    );
+    // Ambient glow field — primary stop follows the accent var; the middle stop
+    // bakes the SECONDARY hue; the violet tertiary stop stays the base's.
+    --nd-glow-field:
+        radial-gradient(820px 520px at 78% -8%, var(--nd-accent-glow), transparent 60%),
+        radial-gradient(700px 600px at 8% 12%, rgba(255, 122, 92, 0.1), transparent 62%),
+        radial-gradient(900px 700px at 50% 120%, rgba(138, 75, 255, 0.14), transparent 55%);
+
+    // ── Accent-derived --tc-* / --bs-* literals ──────────────────────────────
+    --tc-accent-hex: #ff7a5c;
+    --bs-primary-rgb: 255, 49, 49;
+}

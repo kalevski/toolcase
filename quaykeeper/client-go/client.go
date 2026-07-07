@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -27,16 +28,32 @@ type Snapshot struct {
 	Version string     `json:"version"`
 }
 
-// Client talks to a Quaykeeper instance-fetch API for one instance.
+// Client talks to a Quaykeeper instance-fetch API for one instance. Exported
+// as a library, so concurrent FetchConfig calls (e.g. a caller sharing one
+// Client across goroutines) must not race on etag — etagMu guards it.
 type Client struct {
 	cfg  Config
 	http *http.Client
-	etag string // last seen ETag, for conditional Watch/serve polling
+
+	etagMu sync.Mutex
+	etag   string // last seen ETag, for conditional Watch/serve polling
 }
 
 // New builds a Client. A nil-safe default HTTP client with a sane timeout is used.
 func New(cfg Config) *Client {
 	return &Client{cfg: cfg, http: &http.Client{Timeout: 15 * time.Second}}
+}
+
+func (c *Client) getETag() string {
+	c.etagMu.Lock()
+	defer c.etagMu.Unlock()
+	return c.etag
+}
+
+func (c *Client) setETag(tag string) {
+	c.etagMu.Lock()
+	c.etag = tag
+	c.etagMu.Unlock()
 }
 
 func (c *Client) newRequest(ctx context.Context, path string) (*http.Request, error) {
@@ -118,8 +135,8 @@ func (c *Client) FetchConfig(ctx context.Context) (Snapshot, bool, error) {
 	if err != nil {
 		return Snapshot{}, false, err
 	}
-	if c.etag != "" {
-		req.Header.Set("If-None-Match", c.etag)
+	if tag := c.getETag(); tag != "" {
+		req.Header.Set("If-None-Match", tag)
 	}
 	res, err := c.http.Do(req)
 	if err != nil {
@@ -137,25 +154,27 @@ func (c *Client) FetchConfig(ctx context.Context) (Snapshot, bool, error) {
 		return Snapshot{}, false, err
 	}
 	if tag := res.Header.Get("ETag"); tag != "" {
-		c.etag = tag
+		c.setETag(tag)
 	} else {
-		c.etag = snap.Version
+		c.setETag(snap.Version)
 	}
 	return snap, true, nil
 }
 
 // Watch polls FetchConfig every interval and invokes cb only when the resolved
 // config changes. Blocks until ctx is cancelled. The first successful fetch
-// always fires cb.
+// always fires cb. Only misconfiguration (Config.Validate) is a permanent,
+// returned error — a transient failure on the very first fetch (e.g. the
+// control plane blips right as the client boots) is retried on the ticker
+// exactly like a steady-state failure, instead of killing Watch outright.
 func (c *Client) Watch(ctx context.Context, interval time.Duration, cb func(Snapshot)) error {
+	if err := c.cfg.Validate(); err != nil {
+		return err
+	}
 	if interval <= 0 {
 		interval = 30 * time.Second
 	}
-	snap, changed, err := c.FetchConfig(ctx)
-	if err != nil {
-		return err
-	}
-	if changed {
+	if snap, changed, err := c.FetchConfig(ctx); err == nil && changed {
 		cb(snap)
 	}
 	ticker := time.NewTicker(interval)

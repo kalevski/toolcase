@@ -1,0 +1,49 @@
+// Blueprint Sunset variant — gradient primary (coral → orange) / amber
+// secondary.
+//
+// Unlike the solid-hue variants, --bp-pink-hover is DELIBERATELY set to
+// orange rather than a lighter coral — a genuinely different hue — so the
+// foundation's own --bp-pink-grad recipe (`linear-gradient(135deg,
+// var(--bp-pink), var(--bp-pink-hover))`) renders the widely-used "Sunset"
+// gradient (coral #ff7e5f → orange #feb47b) everywhere it's consumed (CTA
+// buttons, cards, and the many blueprint components that key off
+// --bp-pink-grad directly). The hover state for non-gradient uses shifts
+// coral → orange too, which reads as an intentional extension of the sweep.
+// The secondary (--bp-teal*) turns amber. Canvas, paper, neutral hairlines,
+// the text ramp, violet/amber/danger accents, fonts, radii and shadows all
+// stay the base theme's. Success status colours stay pinned to the base teal
+// via the foundation's literal --bp-success family, which variants never
+// touch.
+// Use with: <tc-theme name="blueprint" variant="sunset"> … </tc-theme>
+
+tc-theme[name='blueprint'][variant='sunset'],
+[data-tc-theme='blueprint'][data-tc-variant='sunset'] {
+    // Primary — coral → orange gradient (fills the --bp-pink* contract).
+    --bp-pink: #ff7e5f;
+    --bp-pink-hover: #feb47b; // gradient end — a genuinely different hue, not a shade
+    --bp-pink-ink: #ffffff; // text on coral/orange fills
+    --bp-pink-soft: rgba(255, 126, 95, 0.1);
+    --bp-pink-line: rgba(255, 126, 95, 0.4);
+    --bp-pink-glow: rgba(255, 126, 95, 0.3);
+
+    // Secondary — amber (fills the --bp-teal* contract).
+    --bp-teal: #ffb020;
+    --bp-teal-hover: #ffc94d;
+    --bp-teal-fg: #d98a0a; // darker amber so accent TEXT clears AA on white
+    --bp-teal-ink: #ffffff; // text on amber fills
+    --bp-teal-soft: rgba(255, 176, 32, 0.08);
+    --bp-teal-line: rgba(255, 176, 32, 0.4);
+    --bp-teal-glow: rgba(255, 176, 32, 0.32);
+
+    // Derived literals — recomputed from the new hues (same tints / alphas).
+    --bp-border-pink: #ffe0d1; // primary-tinted spotlight-card hairline
+    --bp-pink-surface: linear-gradient(135deg, #fff1ea, #ffffff);
+    --bp-glow-field:
+        radial-gradient(ellipse at 70% 12%, rgba(255, 126, 95, 0.05), transparent 55%),
+        radial-gradient(ellipse at 12% 70%, rgba(255, 176, 32, 0.06), transparent 55%);
+    --tc-accent-hex: #ffb020;
+    --tc-cyan: #ffb020;
+    --tc-focus-ring: 0 0 0 0.2rem rgba(255, 126, 95, 0.2);
+    --bs-primary-rgb: 255, 126, 95;
+    --bs-focus-ring-color: rgba(255, 126, 95, 0.2);
+}

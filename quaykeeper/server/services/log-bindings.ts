@@ -141,11 +141,12 @@ function parseBindingInput(
 
 /**
  * Set THE realm's log binding (the Servers-page modal is one-destination-per-realm):
- * upsert the row for the chosen destination, retract + drop any binding this realm
- * held on a *different* destination, then push/retract the daemon fragment on that
- * realm's own client. If the daemon rejects the fragment the row change is rolled
- * back, so the DB never holds a realm binding the daemon refused (mirrors the old
- * global-create rollback).
+ * make-before-break — assemble and push the NEW fragment first, and only once the
+ * daemon accepts it do we touch the DB or retract whatever destination this realm
+ * was previously bound to. A daemon rejection therefore leaves both the DB and the
+ * daemon exactly as they were (the old binding, if any, keeps shipping); previously
+ * this retracted + deleted the old binding row up front, so a rejected new fragment
+ * left the realm with no log shipping at all.
  */
 export async function setRealmBinding(
     actor: LogBindingActor,
@@ -157,46 +158,47 @@ export async function setRealmBinding(
     const dest = logDestRepo.byId(destinationId)!
     const client = realms.clientFor(realmId)
 
-    // One binding per realm in the UI: switching destination retracts + drops the old one.
-    for (const other of logBindingRepo.listRealm(realmId)) {
-        if (other.destinationId === destinationId) continue
-        const otherDest = logDestRepo.byId(other.destinationId)
-        if (otherDest) await client.removeLogDestination(otherDest.name).catch(() => undefined)
-        logBindingRepo.remove(other.id)
-    }
-
     const now = new Date().toISOString()
     const previous = logBindingRepo.bySource('realm', realmId, destinationId)
-    let row: StoredLogBinding
-    if (previous) {
-        logBindingRepo.update(previous.id, { enabled, shaping, updatedAt: now })
-        row = { ...previous, enabled, shaping, updatedAt: now }
+    // Snapshot other realm bindings (different destination) BEFORE touching anything —
+    // these only get retracted/dropped once the new fragment is confirmed accepted.
+    const others = logBindingRepo.listRealm(realmId).filter((b) => b.destinationId !== destinationId)
+
+    const row: StoredLogBinding = previous
+        ? { ...previous, enabled, shaping, updatedAt: now }
+        : {
+              id: ID.logBinding(),
+              destinationId,
+              scope: 'realm',
+              target: realmId,
+              enabled,
+              shaping,
+              createdBy: actor.githubId,
+              createdAt: now,
+              updatedAt: now,
+          }
+
+    // Push/retract on the daemon FIRST — a throw here (daemon rejected the new
+    // fragment) exits before any DB mutation or old-binding teardown happens.
+    if (enabled) {
+        await client.writeLogDestination(assembleSpec(dest.spec, row))
     } else {
-        row = {
-            id: ID.logBinding(),
-            destinationId,
-            scope: 'realm',
-            target: realmId,
-            enabled,
-            shaping,
-            createdBy: actor.githubId,
-            createdAt: now,
-            updatedAt: now,
-        }
-        logBindingRepo.insert(row)
+        await client.removeLogDestination(dest.name).catch(() => undefined)
     }
 
-    try {
-        if (enabled) {
-            await client.writeLogDestination(assembleSpec(dest.spec, row))
-        } else {
-            await client.removeLogDestination(dest.name).catch(() => undefined)
-        }
-    } catch (err) {
-        // Roll back — don't persist a binding whose fragment the daemon rejected.
-        if (previous) logBindingRepo.update(previous.id, { enabled: previous.enabled, shaping: previous.shaping, updatedAt: previous.updatedAt })
-        else logBindingRepo.remove(row.id)
-        throw err
+    // Daemon accepted (or nothing needed pushing) — now safe to persist and drop
+    // whatever else this realm was bound to.
+    if (previous) {
+        logBindingRepo.update(previous.id, { enabled, shaping, updatedAt: now })
+    } else {
+        logBindingRepo.insert(row)
+    }
+    for (const other of others) {
+        const otherDest = logDestRepo.byId(other.destinationId)
+        // Best-effort: a failed retract here just leaves a stray fragment for
+        // reconcileRealm to clean up on its next pass — the row is already gone.
+        if (otherDest) await client.removeLogDestination(otherDest.name).catch(() => undefined)
+        logBindingRepo.remove(other.id)
     }
 
     audit(actor, 'logs.binding.set', `realm:${realmId} → ${dest.name}`, {

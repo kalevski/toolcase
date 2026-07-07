@@ -1,0 +1,38 @@
+// Aurora Slate variant — cool steel primary with a silver secondary accent.
+//
+// Swaps ONLY the accent hue families of the aurora foundation: the mint/emerald
+// primary (--ah-accent*) turns cool steel-blue and the signature-highlight
+// secondary (--tc-accent*) turns silver. Canvas, surfaces, hairlines, text
+// ramp, semantic status colours, fonts and shadows are untouched. A muted,
+// desaturated pairing — unlike the other variants, which lean saturated. The
+// variant rule matches the SAME theme root as the foundation, so every
+// var()-built recipe (--ah-accent-grad, --ah-glow*, glow field, focus ring,
+// links, --tc-app-accent*) re-resolves against the new hues automatically —
+// only the literals baked into the foundation (rgba derivatives,
+// --bs-primary-rgb, --tc-accent-hex/--tc-cyan) are re-issued here.
+// Use with: <tc-theme name="aurora" variant="slate"> … </tc-theme>
+
+@use '../../../foundation/tokens' as *;
+
+tc-theme[name='aurora'][variant='slate'],
+[data-tc-theme='aurora'][data-tc-variant='slate'] {
+    // ── Primary accent — cool steel blue (replaces mint/emerald) ─────────────
+    --ah-accent: #94a3b8;
+    --ah-accent-2: #b4c2d4; // hover + gradient second stop
+    --ah-accent-bright: #cfd8e3; // accent text / link hover / gradient-text end
+    --ah-accent-ink: #12181f; // dark slate ink (keeps the dark-ink convention)
+    --ah-accent-soft: rgba(148, 163, 184, 0.13);
+    --ah-accent-line: rgba(148, 163, 184, 0.32);
+    --ah-accent-glow: rgba(148, 163, 184, 0.1);
+    --ah-accent-shadow: rgba(148, 163, 184, 0.5);
+
+    // ── Secondary accent — silver (signature highlights / eyebrows / brand dot) ─
+    --tc-accent: #cbd5e1;
+    --tc-accent-fg: #e2e8f0; // bright tint so accent-coloured TEXT clears the dark surfaces
+    --tc-accent-soft: rgba(203, 213, 225, 0.13);
+    --tc-accent-hex: #cbd5e1;
+    --tc-cyan: #cbd5e1;
+
+    // ── Foundation literals derived from the old accent hex ──────────────────
+    --bs-primary-rgb: 148, 163, 184;
+}

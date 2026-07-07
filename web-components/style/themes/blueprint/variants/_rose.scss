@@ -1,0 +1,45 @@
+// Blueprint Rose variant — rose / pink accent swap.
+//
+// A variant repaints ONLY the two accent families of the blueprint foundation:
+// the primary (--bp-pink*, here a saturated rose) and the secondary
+// (--bp-teal*, here a bright pink), plus the handful of derived tokens that
+// bake those hues as literals (spotlight surface + hairline, ambient glow
+// field, focus ring, --bs-primary-rgb). Canvas, paper, neutral hairlines, the
+// text ramp, violet/amber/danger accents, fonts, radii and shadows all stay
+// the base theme's. Var-chained recipes (--bp-pink-grad, --bp-glow-pink*,
+// --bs-link-color, …) re-resolve against these overrides automatically.
+// Success status colours stay pinned to the base teal via the foundation's
+// literal --bp-success family, which variants never touch.
+// Use with: <tc-theme name="blueprint" variant="rose"> … </tc-theme>
+
+tc-theme[name='blueprint'][variant='rose'],
+[data-tc-theme='blueprint'][data-tc-variant='rose'] {
+    // Primary — rose (fills the --bp-pink* contract).
+    --bp-pink: #e11d48;
+    --bp-pink-hover: #f43f5e;
+    --bp-pink-ink: #ffffff; // text on rose fills
+    --bp-pink-soft: rgba(225, 29, 72, 0.1);
+    --bp-pink-line: rgba(225, 29, 72, 0.4);
+    --bp-pink-glow: rgba(225, 29, 72, 0.3);
+
+    // Secondary — hot pink (fills the --bp-teal* contract).
+    --bp-teal: #db2777;
+    --bp-teal-hover: #ec4899;
+    --bp-teal-fg: #be185d; // darker pink so accent TEXT clears AA on white
+    --bp-teal-ink: #ffffff; // text on pink fills
+    --bp-teal-soft: rgba(219, 39, 119, 0.08);
+    --bp-teal-line: rgba(219, 39, 119, 0.4);
+    --bp-teal-glow: rgba(219, 39, 119, 0.32);
+
+    // Derived literals — recomputed from the new hues (same tints / alphas).
+    --bp-border-pink: #f6c9d3; // primary-tinted spotlight-card hairline
+    --bp-pink-surface: linear-gradient(135deg, #fce8ec, #ffffff);
+    --bp-glow-field:
+        radial-gradient(ellipse at 70% 12%, rgba(225, 29, 72, 0.05), transparent 55%),
+        radial-gradient(ellipse at 12% 70%, rgba(219, 39, 119, 0.06), transparent 55%);
+    --tc-accent-hex: #db2777;
+    --tc-cyan: #db2777;
+    --tc-focus-ring: 0 0 0 0.2rem rgba(225, 29, 72, 0.2);
+    --bs-primary-rgb: 225, 29, 72;
+    --bs-focus-ring-color: rgba(225, 29, 72, 0.2);
+}

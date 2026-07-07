@@ -12,8 +12,11 @@ import (
 
 // Sink delivers one batch to a destination. Send is called by a single worker
 // goroutine per destination; implementations need no internal ordering.
+// batchID is stable across retries of the same batch (the caller generates it
+// once per batch, not per attempt) so a dedupe-capable consumer can recognize
+// a replay.
 type Sink interface {
-	Send(ctx context.Context, batch []Entry) error
+	Send(ctx context.Context, batch []Entry, batchID string) error
 	Close() error
 }
 
@@ -49,7 +52,7 @@ type writerSink struct {
 	w  io.Writer
 }
 
-func (s *writerSink) Send(_ context.Context, batch []Entry) error {
+func (s *writerSink) Send(_ context.Context, batch []Entry, _ string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	for _, e := range batch {
@@ -90,7 +93,7 @@ func newFileSink(d *Destination) (Sink, error) {
 	return &fileSink{path: d.Path, maxSize: maxSize, maxFiles: maxFiles}, nil
 }
 
-func (s *fileSink) Send(_ context.Context, batch []Entry) error {
+func (s *fileSink) Send(_ context.Context, batch []Entry, _ string) error {
 	if err := s.open(); err != nil {
 		return &sendError{err: err}
 	}

@@ -22,9 +22,10 @@ import {
 // URL the instance-config guides hand out), and custom-domain ingress (the server
 // IPv4/IPv6 handed out in the A/AAAA-record instructions and verified against
 // before a cert is issued). Theme covers every bundled @toolcase/web-components
-// skin × every accent variant (base + ocean/forest/ember/royal). Saving PUTs the
+// skin × every accent variant (base + all eleven variants). Saving PUTs the
 // whole record, re-pulls the public branding so the theme + brand update live,
-// and toasts.
+// and toasts. Every skin ships all eleven accent variants (see the library's
+// style/themes/VARIANTS.md).
 
 // One flat dropdown over every theme × variant combo. The option value encodes
 // the pair as `theme` (base accents) or `theme:variant`; encode/decode round-trip
@@ -174,7 +175,7 @@ function SettingsForm({ settings, onSaved }: { settings: SiteSettings; onSaved: 
                         value={theme}
                         onValue={setTheme}
                         options={THEME_OPTIONS}
-                        help="Every bundled skin × accent variant (base, ocean, forest, ember, royal)."
+                        help="Every bundled skin × accent variant (base plus all eleven variants)."
                         disabled={busy}
                     />
                     <TextField

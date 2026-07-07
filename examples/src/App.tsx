@@ -88,9 +88,23 @@ interface ExampleWrapperProps {
 
 // Theme option values encode "name" or "name:variant" — the wrapper splits the
 // value into data-tc-theme + data-tc-variant on the scope element. Every
-// bundled theme ships the same four accent variants (primary/secondary swap).
+// bundled theme ships the same eleven accent variants (primary/secondary
+// swap) — "sunset" and "twilight" render the primary as a two-tone gradient
+// rather than a flat colour.
 const THEME_NAMES = ['default', 'dungeon', 'aurora', 'sunshine', 'neon', 'blueprint'] as const
-const THEME_VARIANTS = ['ocean', 'forest', 'ember', 'royal'] as const
+const THEME_VARIANTS = [
+    'ocean',
+    'forest',
+    'ember',
+    'royal',
+    'mint',
+    'rose',
+    'crimson',
+    'indigo',
+    'slate',
+    'sunset',
+    'twilight',
+] as const
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
 const routeThemes: Record<string, { value: string; label: string }[]> = {

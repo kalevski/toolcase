@@ -1,0 +1,40 @@
+// Aurora Rose variant — soft-rose primary with a pink secondary accent.
+//
+// Swaps ONLY the accent hue families of the aurora foundation: the mint/emerald
+// primary (--ah-accent*) turns soft rose and the signature-highlight
+// secondary (--tc-accent*) turns pink. Canvas, surfaces, hairlines, text ramp,
+// semantic status colours, fonts and shadows are untouched. The variant rule
+// matches the SAME theme root as the foundation, so every var()-built recipe
+// (--ah-accent-grad, --ah-glow*, glow field, focus ring, links, --tc-app-accent*)
+// re-resolves against the new hues automatically — only the literals baked into
+// the foundation (rgba derivatives, --bs-primary-rgb, --tc-accent-hex/--tc-cyan)
+// are re-issued here.
+//
+// NOTE: the primary sits near the semantic danger red; danger badges/alerts
+// keep their own hue but read as cousins under this variant.
+// Use with: <tc-theme name="aurora" variant="rose"> … </tc-theme>
+
+@use '../../../foundation/tokens' as *;
+
+tc-theme[name='aurora'][variant='rose'],
+[data-tc-theme='aurora'][data-tc-variant='rose'] {
+    // ── Primary accent — soft rose (replaces mint/emerald) ───────────────────
+    --ah-accent: #fb7185;
+    --ah-accent-2: #fda4af; // hover + gradient second stop
+    --ah-accent-bright: #fecdd3; // accent text / link hover / gradient-text end
+    --ah-accent-ink: #330711; // dark rose on-fill ink (keeps the dark-ink convention)
+    --ah-accent-soft: rgba(251, 113, 133, 0.13);
+    --ah-accent-line: rgba(251, 113, 133, 0.32);
+    --ah-accent-glow: rgba(251, 113, 133, 0.1);
+    --ah-accent-shadow: rgba(251, 113, 133, 0.5);
+
+    // ── Secondary accent — pink (signature highlights / eyebrows / brand dot) ─
+    --tc-accent: #f472b6;
+    --tc-accent-fg: #f9a8d4; // bright tint so accent-coloured TEXT clears the dark surfaces
+    --tc-accent-soft: rgba(244, 114, 182, 0.13);
+    --tc-accent-hex: #f472b6;
+    --tc-cyan: #f472b6;
+
+    // ── Foundation literals derived from the old accent hex ──────────────────
+    --bs-primary-rgb: 251, 113, 133;
+}

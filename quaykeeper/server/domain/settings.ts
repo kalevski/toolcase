@@ -43,12 +43,25 @@ export function isThemeName(value: unknown): value is ThemeName {
 }
 
 /**
- * Accent variants — every bundled theme ships all four (see the library's
+ * Accent variants — every bundled theme ships all eleven (see the library's
  * `style/themes/VARIANTS.md`). A variant swaps only the primary/secondary
- * accents; `''` means "the theme's base accents". Applied as `data-tc-variant`
- * next to `data-tc-theme` on the document root.
+ * accents; `''` means "the theme's base accents". `sunset` and `twilight` are
+ * gradient variants (two-stop primary). Applied as `data-tc-variant` next to
+ * `data-tc-theme` on the document root.
  */
-export const THEME_VARIANTS = ['ocean', 'forest', 'ember', 'royal'] as const
+export const THEME_VARIANTS = [
+    'ocean',
+    'forest',
+    'ember',
+    'royal',
+    'mint',
+    'rose',
+    'crimson',
+    'indigo',
+    'slate',
+    'sunset',
+    'twilight',
+] as const
 
 export type ThemeVariant = (typeof THEME_VARIANTS)[number]
 
@@ -58,6 +71,13 @@ export const THEME_VARIANT_LABEL: Record<ThemeVariant, string> = {
     forest: 'Forest (green/lime)',
     ember: 'Ember (orange/gold)',
     royal: 'Royal (violet/magenta)',
+    mint: 'Mint (teal/mint)',
+    rose: 'Rose (rose/pink)',
+    crimson: 'Crimson (red/coral)',
+    indigo: 'Indigo (indigo/periwinkle)',
+    slate: 'Slate (steel/silver)',
+    sunset: 'Sunset (coral → orange)',
+    twilight: 'Twilight (violet → blue)',
 }
 
 /** Type guard: a request-supplied value is a bundled accent variant. */

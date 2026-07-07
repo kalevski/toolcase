@@ -1,0 +1,56 @@
+// Neon "mint" variant — electric teal + pastel mint accent swap.
+//
+// Re-tints ONLY the dual accent of the neon theme: the PRIMARY magenta family
+// becomes electric teal (#00e6b8) and the SECONDARY cyan signature becomes a
+// paler neon mint (#6dffc4). Everything else — the navy-purple void, surfaces,
+// hairlines, text ramp, semantic status colours, fonts, glow structure and
+// shadows — inherits from the neon foundation unchanged; every rgba derivative
+// below keeps the base alpha so glow intensity is identical.
+// Use with: <tc-theme name="neon" variant="mint"> … </tc-theme>
+// (or any element with [data-tc-theme="neon"][data-tc-variant="mint"]).
+
+@use '../../../foundation/tokens' as *;
+
+tc-theme[name='neon'][variant='mint'],
+[data-tc-theme='neon'][data-tc-variant='mint'] {
+    // ── Primary accent — electric teal (was hot magenta #ff2bd6) ─────────────
+    --nd-accent: #00e6b8; // rgb(0, 230, 184)
+    --nd-accent-hover: #33ffd0;
+    // Mint-leaning second stop for the primary FILL gradient — keeps the
+    // dark-ink label legible across the whole teal→mint sweep.
+    --nd-accent-2: #4df2c4;
+    --nd-accent-bright: #8afce0; // accent-coloured TEXT on the dark surfaces
+    --nd-accent-soft: rgba(0, 230, 184, 0.14);
+    --nd-accent-line: rgba(0, 230, 184, 0.34);
+    --nd-accent-glow: rgba(0, 230, 184, 0.12);
+    --nd-accent-shadow: rgba(0, 230, 184, 0.5);
+
+    // Strong hairline tier is accent-derived in the base — follow the teal.
+    --nd-border-strong: rgba(0, 230, 184, 0.34);
+
+    // ── Secondary accent — pastel neon mint (was electric cyan #00e5ff) ──────
+    --nd-cyan: #6dffc4; // rgb(109, 255, 196)
+    --nd-cyan-bright: #b3ffe0;
+    --nd-cyan-soft: rgba(109, 255, 196, 0.14);
+    --nd-cyan-line: rgba(109, 255, 196, 0.34);
+    --nd-cyan-shadow: rgba(109, 255, 196, 0.5);
+
+    // ── Recipes that bake accent literals in the base ────────────────────────
+    // Clipped neon display TEXT gradient — teal → light aqua → mint.
+    --nd-accent-grad-text: linear-gradient(
+        120deg,
+        var(--nd-accent) 0%,
+        #8afce0 45%,
+        var(--nd-cyan) 100%
+    );
+    // Ambient glow field — primary stop follows the accent var; the middle stop
+    // bakes the SECONDARY hue; the violet tertiary stop stays the base's.
+    --nd-glow-field:
+        radial-gradient(820px 520px at 78% -8%, var(--nd-accent-glow), transparent 60%),
+        radial-gradient(700px 600px at 8% 12%, rgba(109, 255, 196, 0.1), transparent 62%),
+        radial-gradient(900px 700px at 50% 120%, rgba(138, 75, 255, 0.14), transparent 55%);
+
+    // ── Accent-derived --tc-* / --bs-* literals ──────────────────────────────
+    --tc-accent-hex: #6dffc4;
+    --bs-primary-rgb: 0, 230, 184;
+}

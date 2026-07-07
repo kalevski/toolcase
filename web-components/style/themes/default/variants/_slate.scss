@@ -1,0 +1,38 @@
+// Default Slate variant — steel primary / silver secondary accent swap.
+//
+// Recolors ONLY the accent families of the stock default theme: the primary
+// CTA accent (--tc-app-accent*) and the informational secondary accent
+// (--tc-accent*), plus the literals derived from them (--bs-primary, link rgb
+// triplets, focus ring). Surfaces, borders, the text ramp, semantic status
+// colors, fonts and shadows stay the base default-theme values. A muted,
+// desaturated pairing — unlike the other variants, which lean saturated.
+// Use with: <tc-theme name="default" variant="slate"> … </tc-theme>
+// (or any element with [data-tc-theme='default'][data-tc-variant='slate']).
+
+tc-theme[name='default'][variant='slate'],
+[data-tc-theme='default'][data-tc-variant='slate'] {
+    // Primary accent — CTA steel (hover darkens, matching the base slate-800→900 direction)
+    --tc-app-accent: #475569;
+    --tc-app-accent-hover: #334155;
+    --tc-app-accent-contrast: #ffffff;
+    --tc-app-accent-gradient: linear-gradient(135deg, var(--tc-app-accent), #1e293b);
+
+    // Secondary accent — informational silver, spent sparingly (links, focus
+    // tints, highlights, the brand dot)
+    --tc-accent: #94a3b8;
+    --tc-accent-fg: #64748b;
+    --tc-accent-soft: #eef1f4;
+    --tc-accent-hex: #94a3b8;
+
+    // Derived literals — recomputed from the new primary. Redeclared here (not
+    // inherited) because the base resolves its var() refs at :root, baking the
+    // slate accent into the computed value.
+    --bs-primary: #475569;
+    --bs-primary-rgb: 71, 85, 105;
+    --bs-link-color: var(--tc-app-accent);
+    --bs-link-color-rgb: 71, 85, 105;
+    --bs-link-hover-color: var(--tc-app-accent-hover);
+    --bs-link-hover-color-rgb: 51, 65, 85;
+    --tc-focus-ring: 0 0 0 0.2rem rgba(71, 85, 105, 0.15);
+    --bs-focus-ring-color: rgba(71, 85, 105, 0.15);
+}

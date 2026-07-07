@@ -29,6 +29,23 @@ describe('parseCron', () => {
         expect(spec.matches(new Date('2026-07-05T00:00:00'))).toBe(true)
         expect(spec.matches(new Date('2026-07-07T00:00:00'))).toBe(false)
     })
+
+    it('accepts dow 7 (Sunday) in a step range, same as a plain range (bug 10)', () => {
+        // `5-7` (a plain range) already accepted dow 7 as Sunday; `5-7/2` (a step
+        // range) used to throw "out of range" for the exact same field syntax.
+        expect(() => parseCron('0 0 * * 5-7')).not.toThrow()
+        expect(() => parseCron('0 0 * * 5-7/2')).not.toThrow()
+
+        // 2026-07-03 Fri, 2026-07-04 Sat, 2026-07-05 Sun.
+        const spec = parseCron('0 0 * * 5-7/2') // → {5 (Fri), 0 (Sun, from 7≡0)}
+        expect(spec.matches(new Date('2026-07-03T00:00:00'))).toBe(true) // Friday
+        expect(spec.matches(new Date('2026-07-04T00:00:00'))).toBe(false) // Saturday
+        expect(spec.matches(new Date('2026-07-05T00:00:00'))).toBe(true) // Sunday (via 7≡0)
+
+        const wrap = parseCron('0 0 * * 0-7/7') // → {0} (0 and 7≡0 collapse to the same day)
+        expect(wrap.matches(new Date('2026-07-05T00:00:00'))).toBe(true) // Sunday
+        expect(wrap.matches(new Date('2026-07-06T00:00:00'))).toBe(false) // Monday
+    })
 })
 
 describe('nextRun', () => {

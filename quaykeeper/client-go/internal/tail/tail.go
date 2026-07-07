@@ -41,6 +41,13 @@ type Options struct {
 type fileState struct {
 	Offset int64  `json:"offset"`
 	Path   string `json:"path"` // last-seen path (debugging only; identity is the key)
+
+	// Partial/Truncated carry an in-progress over-long line across polls. They are
+	// in-memory only (not persisted): if the process restarts mid-truncated-line,
+	// the remainder is simply treated as a fresh line, which is an acceptable loss
+	// compared to persisting unbounded partial state.
+	Partial   []byte `json:"-"`
+	Truncated bool   `json:"-"`
 }
 
 // Tailer follows a set of files and calls back with each complete line.
@@ -146,6 +153,10 @@ func (t *Tailer) readOne(path string, onLine func(path string, line []byte)) {
 			start = fi.Size()
 		}
 		st = fileState{Offset: start, Path: path}
+		// Persist immediately: otherwise a file with no new bytes hits the
+		// early-return below without being stored, `seen` still flips firstSight to
+		// false, and the next poll re-derives start=0 — replaying the whole file.
+		t.storeState(key, st, false)
 	}
 	// Truncation (logrotate copytruncate): the file shrank below our offset → reset.
 	if fi.Size() < st.Offset {
@@ -167,21 +178,35 @@ func (t *Tailer) readOne(path string, onLine func(path string, line []byte)) {
 	if _, err := f.Seek(st.Offset, 0); err != nil {
 		return
 	}
-	consumed := scanFrom(f, func(line []byte) { onLine(path, line) })
+	consumed, partial, truncated := scanFrom(f, st.Partial, st.Truncated, func(line []byte) { onLine(path, line) })
 	st.Offset += consumed
 	st.Path = path
+	st.Partial = partial
+	st.Truncated = truncated
 	t.storeState(key, st, false)
 }
 
-// scanFrom reads complete newline-terminated lines from r, invoking onLine for
+// truncatedMarker is appended to a line that exceeded maxLine.
+var truncatedMarker = []byte("…[truncated]")
+
+// scanFrom reads complete newline-terminated lines from f, invoking onLine for
 // each, and returns the number of bytes consumed (up to and including the last
-// newline). A trailing partial line is left unconsumed for the next poll. A line
-// longer than maxLine is truncated with an ellipsis and still emitted.
-func scanFrom(f *os.File, onLine func(line []byte)) int64 {
+// newline), plus any in-progress over-long line carried into the next call.
+// `partial`/`truncated` are the carry from the previous call (zero value if
+// none); a trailing partial line that is *not* over-long is left unconsumed in
+// the file itself (the offset isn't advanced past it) so the next poll simply
+// re-reads it — no carry needed for that case.
+//
+// A line longer than maxLine is capped at maxLine bytes: once the cap is hit,
+// further bytes are discarded (not accumulated) and the offset is still
+// advanced past them, so memory stays bounded regardless of how long the line
+// actually is. The capped prefix plus an ellipsis marker is emitted once the
+// line's terminating newline is finally seen, even if that happens on a later
+// poll.
+func scanFrom(f *os.File, partial []byte, truncated bool, onLine func(line []byte)) (consumed int64, outPartial []byte, outTruncated bool) {
 	buf := make([]byte, 0, 64*1024)
 	tmp := make([]byte, 32*1024)
-	var consumed int64
-	var line []byte
+	line := append([]byte(nil), partial...)
 	for {
 		n, err := f.Read(tmp)
 		if n > 0 {
@@ -194,21 +219,45 @@ func scanFrom(f *os.File, onLine func(line []byte)) int64 {
 				raw := buf[:idx]
 				buf = buf[idx+1:]
 				consumed += int64(idx + 1)
-				emit := raw
-				if len(line) > 0 {
-					emit = append(line, raw...)
-					line = line[:0]
+
+				if !truncated {
+					remaining := maxLine - len(line)
+					take := raw
+					if len(take) > remaining {
+						take = take[:remaining]
+						truncated = true
+					}
+					line = append(line, take...)
 				}
-				if len(emit) > maxLine {
-					emit = append(emit[:maxLine], []byte("…[truncated]")...)
+
+				emit := line
+				if truncated {
+					e := make([]byte, 0, len(line)+len(truncatedMarker))
+					e = append(e, line...)
+					e = append(e, truncatedMarker...)
+					emit = e
 				}
 				out := make([]byte, len(emit))
 				copy(out, emit)
 				onLine(out)
+
+				line = line[:0]
+				truncated = false
 			}
-			// Accumulate an over-long partial so we don't buffer forever.
+			// Cap the accumulator instead of growing it: keep only enough bytes to
+			// fill `line` to maxLine, discard the rest, and mark the line truncated.
+			// The offset still advances past the discarded bytes (they're gone for
+			// good) so buf itself never grows unbounded while waiting for a newline.
 			if len(buf) > maxLine {
-				line = append(line, buf[:maxLine]...)
+				if !truncated {
+					remaining := maxLine - len(line)
+					take := buf
+					if len(take) > remaining {
+						take = take[:remaining]
+					}
+					line = append(line, take...)
+					truncated = true
+				}
 				consumed += int64(len(buf))
 				buf = buf[:0]
 			}
@@ -217,7 +266,9 @@ func scanFrom(f *os.File, onLine func(line []byte)) int64 {
 			break
 		}
 	}
-	return consumed
+	outPartial = append([]byte(nil), line...)
+	outTruncated = truncated
+	return consumed, outPartial, outTruncated
 }
 
 func indexByte(b []byte, c byte) int {

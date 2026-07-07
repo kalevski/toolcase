@@ -1,0 +1,45 @@
+// Blueprint Crimson variant — red / coral accent swap.
+//
+// A variant repaints ONLY the two accent families of the blueprint foundation:
+// the primary (--bp-pink*, here a saturated red) and the secondary
+// (--bp-teal*, here a warm coral), plus the handful of derived tokens that
+// bake those hues as literals (spotlight surface + hairline, ambient glow
+// field, focus ring, --bs-primary-rgb). Canvas, paper, neutral hairlines, the
+// text ramp, violet/amber/danger accents, fonts, radii and shadows all stay
+// the base theme's. Var-chained recipes (--bp-pink-grad, --bp-glow-pink*,
+// --bs-link-color, …) re-resolve against these overrides automatically.
+// Success status colours stay pinned to the base teal via the foundation's
+// literal --bp-success family, which variants never touch.
+// Use with: <tc-theme name="blueprint" variant="crimson"> … </tc-theme>
+
+tc-theme[name='blueprint'][variant='crimson'],
+[data-tc-theme='blueprint'][data-tc-variant='crimson'] {
+    // Primary — red (fills the --bp-pink* contract).
+    --bp-pink: #dc2626;
+    --bp-pink-hover: #ef4444;
+    --bp-pink-ink: #ffffff; // text on red fills
+    --bp-pink-soft: rgba(220, 38, 38, 0.1);
+    --bp-pink-line: rgba(220, 38, 38, 0.4);
+    --bp-pink-glow: rgba(220, 38, 38, 0.3);
+
+    // Secondary — coral (fills the --bp-teal* contract).
+    --bp-teal: #f87171;
+    --bp-teal-hover: #fca5a5;
+    --bp-teal-fg: #ef4444; // darker coral so accent TEXT clears AA on white
+    --bp-teal-ink: #ffffff; // text on coral fills
+    --bp-teal-soft: rgba(248, 113, 113, 0.08);
+    --bp-teal-line: rgba(248, 113, 113, 0.4);
+    --bp-teal-glow: rgba(248, 113, 113, 0.32);
+
+    // Derived literals — recomputed from the new hues (same tints / alphas).
+    --bp-border-pink: #fbd0d0; // primary-tinted spotlight-card hairline
+    --bp-pink-surface: linear-gradient(135deg, #fdeaea, #ffffff);
+    --bp-glow-field:
+        radial-gradient(ellipse at 70% 12%, rgba(220, 38, 38, 0.05), transparent 55%),
+        radial-gradient(ellipse at 12% 70%, rgba(248, 113, 113, 0.06), transparent 55%);
+    --tc-accent-hex: #f87171;
+    --tc-cyan: #f87171;
+    --tc-focus-ring: 0 0 0 0.2rem rgba(220, 38, 38, 0.2);
+    --bs-primary-rgb: 220, 38, 38;
+    --bs-focus-ring-color: rgba(220, 38, 38, 0.2);
+}

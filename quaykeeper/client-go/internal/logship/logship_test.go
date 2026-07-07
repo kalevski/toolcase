@@ -290,11 +290,13 @@ func TestShipperLokiBatchAndFilter(t *testing.T) {
 func TestShipperRetriesOn429(t *testing.T) {
 	var mu sync.Mutex
 	attempts := 0
+	var batchIDs []string
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, _ = io.ReadAll(r.Body)
 		mu.Lock()
 		attempts++
 		n := attempts
+		batchIDs = append(batchIDs, r.Header.Get("X-QK-Batch-ID"))
 		mu.Unlock()
 		if n == 1 {
 			w.Header().Set("Retry-After", "0")
@@ -325,7 +327,54 @@ func TestShipperRetriesOn429(t *testing.T) {
 	mu.Lock()
 	defer mu.Unlock()
 	if attempts < 2 {
-		t.Errorf("expected a retry after 429, got %d attempt(s)", attempts)
+		t.Fatalf("expected a retry after 429, got %d attempt(s)", attempts)
+	}
+	// Bug 3: every attempt for the same batch must carry the same dedupe ID.
+	for i, id := range batchIDs {
+		if id == "" {
+			t.Errorf("attempt %d: missing X-QK-Batch-ID", i)
+		}
+		if id != batchIDs[0] {
+			t.Errorf("attempt %d batch ID %q != attempt 0 ID %q — retries must reuse one ID", i, id, batchIDs[0])
+		}
+	}
+}
+
+// TestShipperCountsPermanentFailureAsDropped is bug 11: a batch that fails
+// permanently (e.g. HTTP 400) must show up in the dropped counter, not vanish
+// from received/shipped/dropped accounting.
+func TestShipperCountsPermanentFailureAsDropped(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.ReadAll(r.Body)
+		w.WriteHeader(http.StatusBadRequest)
+	}))
+	defer srv.Close()
+
+	sh := NewShipper(nil)
+	sh.Configure([]Destination{{
+		Name: "http", Type: DestHTTP, URL: srv.URL, BatchSize: 1, FlushInterval: 20 * time.Millisecond,
+	}})
+	defer sh.Close()
+	sh.Dispatch(ParseLine([]byte("hello"), ParseOptions{}))
+
+	deadline := time.Now().Add(2 * time.Second)
+	var st Status
+	for time.Now().Before(deadline) {
+		st = sh.Status()
+		if len(st.Destinations) == 1 && st.Destinations[0].FailedBatches > 0 {
+			break
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	if len(st.Destinations) != 1 {
+		t.Fatalf("expected 1 destination status, got %d", len(st.Destinations))
+	}
+	d := st.Destinations[0]
+	if d.FailedBatches == 0 {
+		t.Fatal("expected a failed batch to be recorded")
+	}
+	if d.Dropped == 0 {
+		t.Errorf("permanently-failed batch not counted as dropped: %+v", d)
 	}
 }
 

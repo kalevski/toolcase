@@ -1,0 +1,41 @@
+// Default Twilight variant — gradient primary (violet → blue) / sky-blue
+// secondary.
+//
+// Unlike the solid-hue variants, this one renders the primary CTA accent as a
+// two-stop gradient — the widely-used "Deep Blue" combo (violet #6a11cb →
+// blue #2575fc) — instead of a single flat colour. --tc-app-accent still
+// resolves to a solid representative hex (the gradient's start) for
+// non-gradient contexts (icons, borders, focus rings); --tc-app-accent-gradient
+// carries the actual two-tone sweep and is what CTA buttons paint. Surfaces,
+// borders, the text ramp, semantic status colors, fonts and shadows stay the
+// base default-theme values.
+// Use with: <tc-theme name="default" variant="twilight"> … </tc-theme>
+// (or any element with [data-tc-theme='default'][data-tc-variant='twilight']).
+
+tc-theme[name='default'][variant='twilight'],
+[data-tc-theme='default'][data-tc-variant='twilight'] {
+    // Primary accent — the "Deep Blue" gradient (violet → blue) is the star here.
+    --tc-app-accent: #6a11cb;
+    --tc-app-accent-hover: #5b0eae;
+    --tc-app-accent-contrast: #ffffff;
+    --tc-app-accent-gradient: linear-gradient(135deg, #6a11cb, #2575fc);
+
+    // Secondary accent — informational sky blue, spent sparingly (links, focus
+    // tints, highlights, the brand dot)
+    --tc-accent: #38bdf8;
+    --tc-accent-fg: #0ea5e9;
+    --tc-accent-soft: #e6f6fe;
+    --tc-accent-hex: #38bdf8;
+
+    // Derived literals — recomputed from the new primary. Redeclared here (not
+    // inherited) because the base resolves its var() refs at :root, baking the
+    // slate accent into the computed value.
+    --bs-primary: #6a11cb;
+    --bs-primary-rgb: 106, 17, 203;
+    --bs-link-color: var(--tc-app-accent);
+    --bs-link-color-rgb: 106, 17, 203;
+    --bs-link-hover-color: var(--tc-app-accent-hover);
+    --bs-link-hover-color-rgb: 91, 14, 174;
+    --tc-focus-ring: 0 0 0 0.2rem rgba(106, 17, 203, 0.15);
+    --bs-focus-ring-color: rgba(106, 17, 203, 0.15);
+}

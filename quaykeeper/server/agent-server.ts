@@ -18,6 +18,7 @@
 import 'server-only'
 import http from 'node:http'
 import { createReadStream, existsSync, statSync } from 'node:fs'
+import { pipeline } from 'node:stream'
 import path from 'node:path'
 import { config } from '@/server/config'
 import { beginAgentFetch } from '@/server/services/agent-fetch'
@@ -113,7 +114,15 @@ function serveClientBinary(res: http.ServerResponse, os: string, arch: string): 
         'Content-Type': 'application/octet-stream',
         'Content-Length': String(statSync(file).size),
     })
-    createReadStream(file).pipe(res)
+    // pipeline (not .pipe) forwards a source read error into the callback instead
+    // of an unhandled 'error' event — .pipe alone would crash the whole process
+    // if the binary disappears mid-stream (e.g. during a redeploy).
+    pipeline(createReadStream(file), res, (err) => {
+        if (err) {
+            slog('warn', 'agent', 'client binary stream failed', { file, error: String(err) })
+            res.destroy()
+        }
+    })
 }
 
 function handle(req: http.IncomingMessage, res: http.ServerResponse): void {

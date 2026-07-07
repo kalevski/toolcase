@@ -1,0 +1,51 @@
+// Sunshine Rose variant — rose lead + berry-pink secondary on the unchanged
+// citrus base.
+//
+// Accent-only override: the cream canvas, surfaces, olive-ink text ramp,
+// semantic status colours, fonts and warm shadows all stay base-sunshine.
+// Only the two accent families move — the bright LEMON lead becomes a bright
+// ROSE (same brightness class, so the dark on-lead ink convention holds on
+// every fill) and the leaf-green secondary becomes a mid-tone BERRY PINK
+// (still dark enough to carry links / focus / eyebrow text on cream). The
+// lead gradient, glow shadows, glow field and link colours all resolve
+// through the --sun-* vars, so they recompute automatically.
+// Use with: <tc-theme name="sunshine" variant="rose"> … </tc-theme>
+
+@use '../../../foundation/tokens' as *;
+
+tc-theme[name='sunshine'][variant='rose'],
+[data-tc-theme='sunshine'][data-tc-variant='rose'] {
+    // ── Lead accent — bright rose (dark on-lead ink rides every fill) ────────
+    --sun-lead: #fb7185;
+    --sun-lead-hi: #fda4af; // hover goes lighter, matching the base direction
+    --sun-lead-lo: #f43f5e;
+    --sun-lead-tint: rgba(251, 113, 133, 0.16);
+    --sun-lead-line: rgba(251, 113, 133, 0.45);
+    --sun-lead-glow: rgba(251, 113, 133, 0.4);
+    --sun-on-lead: #3f0512; // text on rose-coloured fills
+
+    // ── Secondary accent — mid-tone berry pink (links / focus / eyebrow) ─────
+    --sun-leaf: #be185d;
+    --sun-leaf-hi: #db2777;
+    --sun-leaf-lo: #9d174d;
+    --sun-leaf-deep: #500724;
+    --sun-leaf-tint: rgba(190, 24, 93, 0.12);
+
+    // ── Recomputed accent-derived literals ───────────────────────────────────
+    --tc-accent-hex: #be185d;
+    --tc-focus-ring: 0 0 0 3px rgba(190, 24, 93, 0.34);
+    --bs-focus-ring-color: rgba(190, 24, 93, 0.34);
+    --bs-primary-rgb: 251, 113, 133;
+    --bs-dark-rgb: 80, 7, 36; // --bs-dark / --tc-surface-dark follow --sun-leaf-deep
+
+    // ── Semantic guard — status colours stay the sunshine originals ──────────
+    // In the base foundation success/warning resolve THROUGH the accent vars
+    // (leaf / lead-lo), so without these re-pins they would follow the variant
+    // accents. Danger (coral) and info (plum) are fixed pops — untouched.
+    --tc-success: #5f8a2e;
+    --tc-success-bg: rgba(95, 138, 46, 0.12);
+    --tc-warning: #d49a00;
+    --tc-warning-bg: rgba(242, 183, 5, 0.16);
+    --bs-success: #5f8a2e; // --bs-success-rgb (95, 138, 46) still valid from base
+    --bs-warning: #d49a00; // --bs-warning-rgb (212, 154, 0) still valid from base
+}

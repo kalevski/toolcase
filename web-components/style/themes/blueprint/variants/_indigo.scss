@@ -1,0 +1,45 @@
+// Blueprint Indigo variant — indigo / periwinkle accent swap.
+//
+// A variant repaints ONLY the two accent families of the blueprint foundation:
+// the primary (--bp-pink*, here a deep indigo) and the secondary (--bp-teal*,
+// here a soft periwinkle), plus the handful of derived tokens that bake those
+// hues as literals (spotlight surface + hairline, ambient glow field, focus
+// ring, --bs-primary-rgb). Canvas, paper, neutral hairlines, the text ramp,
+// violet/amber/danger accents, fonts, radii and shadows all stay the base
+// theme's. Var-chained recipes (--bp-pink-grad, --bp-glow-pink*,
+// --bs-link-color, …) re-resolve against these overrides automatically.
+// Success status colours stay pinned to the base teal via the foundation's
+// literal --bp-success family, which variants never touch.
+// Use with: <tc-theme name="blueprint" variant="indigo"> … </tc-theme>
+
+tc-theme[name='blueprint'][variant='indigo'],
+[data-tc-theme='blueprint'][data-tc-variant='indigo'] {
+    // Primary — indigo (fills the --bp-pink* contract).
+    --bp-pink: #4f46e5;
+    --bp-pink-hover: #6366f1;
+    --bp-pink-ink: #ffffff; // text on indigo fills
+    --bp-pink-soft: rgba(79, 70, 229, 0.1);
+    --bp-pink-line: rgba(79, 70, 229, 0.4);
+    --bp-pink-glow: rgba(79, 70, 229, 0.3);
+
+    // Secondary — periwinkle (fills the --bp-teal* contract).
+    --bp-teal: #818cf8;
+    --bp-teal-hover: #a5b4fc;
+    --bp-teal-fg: #6366f1; // darker periwinkle so accent TEXT clears AA on white
+    --bp-teal-ink: #ffffff; // text on periwinkle fills
+    --bp-teal-soft: rgba(129, 140, 248, 0.08);
+    --bp-teal-line: rgba(129, 140, 248, 0.4);
+    --bp-teal-glow: rgba(129, 140, 248, 0.32);
+
+    // Derived literals — recomputed from the new hues (same tints / alphas).
+    --bp-border-pink: #d6d3fb; // primary-tinted spotlight-card hairline
+    --bp-pink-surface: linear-gradient(135deg, #ececfd, #ffffff);
+    --bp-glow-field:
+        radial-gradient(ellipse at 70% 12%, rgba(79, 70, 229, 0.05), transparent 55%),
+        radial-gradient(ellipse at 12% 70%, rgba(129, 140, 248, 0.06), transparent 55%);
+    --tc-accent-hex: #818cf8;
+    --tc-cyan: #818cf8;
+    --tc-focus-ring: 0 0 0 0.2rem rgba(79, 70, 229, 0.2);
+    --bs-primary-rgb: 79, 70, 229;
+    --bs-focus-ring-color: rgba(79, 70, 229, 0.2);
+}

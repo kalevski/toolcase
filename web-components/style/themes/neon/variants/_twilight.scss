@@ -1,0 +1,59 @@
+// Neon "twilight" variant — gradient primary (electric violet → blue) with a
+// sky-blue secondary.
+//
+// Unlike the solid-hue neon variants, --nd-accent-2 is DELIBERATELY set to a
+// bright blue rather than a same-hue lean — a genuinely different hue — so
+// the foundation's own --nd-accent-grad recipe (`linear-gradient(135deg,
+// var(--nd-accent), var(--nd-accent-2))`) renders an electric take on the
+// widely-used "Deep Blue" gradient (violet → blue) everywhere it's consumed
+// (buttons, nav, the accent-fill utility, progress). The SECONDARY cyan
+// signature becomes sky blue. Everything else — the navy-purple void,
+// surfaces, hairlines, text ramp, semantic status colours, fonts, glow
+// structure and shadows — inherits from the neon foundation unchanged; every
+// rgba derivative below keeps the base alpha so glow intensity is identical.
+// Use with: <tc-theme name="neon" variant="twilight"> … </tc-theme>
+// (or any element with [data-tc-theme="neon"][data-tc-variant="twilight"]).
+
+@use '../../../foundation/tokens' as *;
+
+tc-theme[name='neon'][variant='twilight'],
+[data-tc-theme='neon'][data-tc-variant='twilight'] {
+    // ── Primary accent — electric violet → blue (was hot magenta #ff2bd6) ────
+    --nd-accent: #8b3ff0; // rgb(139, 63, 240) — gradient start
+    --nd-accent-hover: #a866ff;
+    --nd-accent-2: #3b82f6; // gradient end — genuinely different hue, not a shade
+    --nd-accent-bright: #c9b3ff; // accent-coloured TEXT on the dark surfaces
+    --nd-accent-soft: rgba(139, 63, 240, 0.14);
+    --nd-accent-line: rgba(139, 63, 240, 0.34);
+    --nd-accent-glow: rgba(139, 63, 240, 0.12);
+    --nd-accent-shadow: rgba(139, 63, 240, 0.5);
+
+    // Strong hairline tier is accent-derived in the base — follow the violet.
+    --nd-border-strong: rgba(139, 63, 240, 0.34);
+
+    // ── Secondary accent — sky blue (was electric cyan #00e5ff) ──────────────
+    --nd-cyan: #38bdf8; // rgb(56, 189, 248)
+    --nd-cyan-bright: #a5e2fb;
+    --nd-cyan-soft: rgba(56, 189, 248, 0.14);
+    --nd-cyan-line: rgba(56, 189, 248, 0.34);
+    --nd-cyan-shadow: rgba(56, 189, 248, 0.5);
+
+    // ── Recipes that bake accent literals in the base ────────────────────────
+    // Clipped neon display TEXT gradient — violet → light lavender → sky blue.
+    --nd-accent-grad-text: linear-gradient(
+        120deg,
+        var(--nd-accent) 0%,
+        #c9b3ff 45%,
+        var(--nd-cyan) 100%
+    );
+    // Ambient glow field — primary stop follows the accent var; the middle stop
+    // bakes the SECONDARY hue; the violet tertiary stop stays the base's.
+    --nd-glow-field:
+        radial-gradient(820px 520px at 78% -8%, var(--nd-accent-glow), transparent 60%),
+        radial-gradient(700px 600px at 8% 12%, rgba(56, 189, 248, 0.1), transparent 62%),
+        radial-gradient(900px 700px at 50% 120%, rgba(138, 75, 255, 0.14), transparent 55%);
+
+    // ── Accent-derived --tc-* / --bs-* literals ──────────────────────────────
+    --tc-accent-hex: #38bdf8;
+    --bs-primary-rgb: 139, 63, 240;
+}

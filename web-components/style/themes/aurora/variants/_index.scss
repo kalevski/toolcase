@@ -12,8 +12,22 @@
 // - forest: emerald green primary, lime secondary
 // - ember:  warm orange primary, gold secondary
 // - royal:  soft violet primary, magenta secondary
+// - rose:   soft rose primary, pink secondary
+// - mint:   lagoon teal primary, mint secondary
+// - crimson: electric red primary, coral secondary
+// - indigo: electric indigo primary, periwinkle secondary
+// - slate:  cool steel primary, silver secondary
+// - sunset: GRADIENT primary (coral → orange), amber secondary
+// - twilight: GRADIENT primary (violet → blue), sky-blue secondary
 
 @use './ocean';
 @use './forest';
 @use './ember';
 @use './royal';
+@use './rose';
+@use './mint';
+@use './crimson';
+@use './indigo';
+@use './slate';
+@use './sunset';
+@use './twilight';

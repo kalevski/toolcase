@@ -1,0 +1,58 @@
+// Neon "slate" variant — steel-blue + silver accent swap.
+//
+// Re-tints ONLY the dual accent of the neon theme: the PRIMARY magenta family
+// becomes a cool steel blue (#7b93b0) and the SECONDARY cyan signature becomes
+// a soft silver (#c3cfdb). Everything else — the navy-purple void, surfaces,
+// hairlines, text ramp, semantic status colours, fonts, glow structure and
+// shadows — inherits from the neon foundation unchanged; every rgba
+// derivative below keeps the base alpha so glow intensity is identical. A
+// deliberately muted, desaturated pairing — the "quiet" variant among neon's
+// otherwise fully electric palette.
+// Use with: <tc-theme name="neon" variant="slate"> … </tc-theme>
+// (or any element with [data-tc-theme="neon"][data-tc-variant="slate"]).
+
+@use '../../../foundation/tokens' as *;
+
+tc-theme[name='neon'][variant='slate'],
+[data-tc-theme='neon'][data-tc-variant='slate'] {
+    // ── Primary accent — steel blue (was hot magenta #ff2bd6) ────────────────
+    --nd-accent: #7b93b0; // rgb(123, 147, 176)
+    --nd-accent-hover: #a0b4c9;
+    // Silver-leaning second stop for the primary FILL gradient — keeps the
+    // dark-ink label legible across the whole steel→silver sweep.
+    --nd-accent-2: #8fa7c0;
+    --nd-accent-bright: #c3d2e0; // accent-coloured TEXT on the dark surfaces
+    --nd-accent-soft: rgba(123, 147, 176, 0.14);
+    --nd-accent-line: rgba(123, 147, 176, 0.34);
+    --nd-accent-glow: rgba(123, 147, 176, 0.12);
+    --nd-accent-shadow: rgba(123, 147, 176, 0.5);
+
+    // Strong hairline tier is accent-derived in the base — follow the steel.
+    --nd-border-strong: rgba(123, 147, 176, 0.34);
+
+    // ── Secondary accent — soft silver (was electric cyan #00e5ff) ───────────
+    --nd-cyan: #c3cfdb; // rgb(195, 207, 219)
+    --nd-cyan-bright: #e2e9ef;
+    --nd-cyan-soft: rgba(195, 207, 219, 0.14);
+    --nd-cyan-line: rgba(195, 207, 219, 0.34);
+    --nd-cyan-shadow: rgba(195, 207, 219, 0.5);
+
+    // ── Recipes that bake accent literals in the base ────────────────────────
+    // Clipped neon display TEXT gradient — steel → light haze → silver.
+    --nd-accent-grad-text: linear-gradient(
+        120deg,
+        var(--nd-accent) 0%,
+        #c3d2e0 45%,
+        var(--nd-cyan) 100%
+    );
+    // Ambient glow field — primary stop follows the accent var; the middle stop
+    // bakes the SECONDARY hue; the violet tertiary stop stays the base's.
+    --nd-glow-field:
+        radial-gradient(820px 520px at 78% -8%, var(--nd-accent-glow), transparent 60%),
+        radial-gradient(700px 600px at 8% 12%, rgba(195, 207, 219, 0.1), transparent 62%),
+        radial-gradient(900px 700px at 50% 120%, rgba(138, 75, 255, 0.14), transparent 55%);
+
+    // ── Accent-derived --tc-* / --bs-* literals ──────────────────────────────
+    --tc-accent-hex: #c3cfdb;
+    --bs-primary-rgb: 123, 147, 176;
+}

@@ -1,0 +1,37 @@
+// Default Mint variant — teal primary / mint secondary accent swap.
+//
+// Recolors ONLY the accent families of the stock default theme: the primary
+// CTA accent (--tc-app-accent*) and the informational secondary accent
+// (--tc-accent*), plus the literals derived from them (--bs-primary, link rgb
+// triplets, focus ring). Surfaces, borders, the text ramp, semantic status
+// colors, fonts and shadows stay the base default-theme values.
+// Use with: <tc-theme name="default" variant="mint"> … </tc-theme>
+// (or any element with [data-tc-theme='default'][data-tc-variant='mint']).
+
+tc-theme[name='default'][variant='mint'],
+[data-tc-theme='default'][data-tc-variant='mint'] {
+    // Primary accent — CTA teal (hover darkens, matching the base slate-800→900 direction)
+    --tc-app-accent: #0d9488;
+    --tc-app-accent-hover: #0f766e;
+    --tc-app-accent-contrast: #ffffff;
+    --tc-app-accent-gradient: linear-gradient(135deg, var(--tc-app-accent), #115e59);
+
+    // Secondary accent — informational mint, spent sparingly (links, focus
+    // tints, highlights, the brand dot)
+    --tc-accent: #10b981;
+    --tc-accent-fg: #059669;
+    --tc-accent-soft: #e2f6ee;
+    --tc-accent-hex: #10b981;
+
+    // Derived literals — recomputed from the new primary. Redeclared here (not
+    // inherited) because the base resolves its var() refs at :root, baking the
+    // slate accent into the computed value.
+    --bs-primary: #0d9488;
+    --bs-primary-rgb: 13, 148, 136;
+    --bs-link-color: var(--tc-app-accent);
+    --bs-link-color-rgb: 13, 148, 136;
+    --bs-link-hover-color: var(--tc-app-accent-hover);
+    --bs-link-hover-color-rgb: 15, 118, 110;
+    --tc-focus-ring: 0 0 0 0.2rem rgba(13, 148, 136, 0.15);
+    --bs-focus-ring-color: rgba(13, 148, 136, 0.15);
+}

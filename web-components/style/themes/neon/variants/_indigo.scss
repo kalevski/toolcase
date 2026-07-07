@@ -1,0 +1,56 @@
+// Neon "indigo" variant — electric indigo + periwinkle accent swap.
+//
+// Re-tints ONLY the dual accent of the neon theme: the PRIMARY magenta family
+// becomes electric indigo (#6f5cff) and the SECONDARY cyan signature becomes
+// periwinkle (#7c8aff). Everything else — the navy-purple void, surfaces,
+// hairlines, text ramp, semantic status colours, fonts, glow structure and
+// shadows — inherits from the neon foundation unchanged; every rgba derivative
+// below keeps the base alpha so glow intensity is identical.
+// Use with: <tc-theme name="neon" variant="indigo"> … </tc-theme>
+// (or any element with [data-tc-theme="neon"][data-tc-variant="indigo"]).
+
+@use '../../../foundation/tokens' as *;
+
+tc-theme[name='neon'][variant='indigo'],
+[data-tc-theme='neon'][data-tc-variant='indigo'] {
+    // ── Primary accent — electric indigo (was hot magenta #ff2bd6) ───────────
+    --nd-accent: #6f5cff; // rgb(111, 92, 255)
+    --nd-accent-hover: #8f7dff;
+    // Periwinkle-leaning second stop for the primary FILL gradient — keeps the
+    // dark-ink label legible across the whole indigo→periwinkle sweep.
+    --nd-accent-2: #7c6bff;
+    --nd-accent-bright: #c3b8ff; // accent-coloured TEXT on the dark surfaces
+    --nd-accent-soft: rgba(111, 92, 255, 0.14);
+    --nd-accent-line: rgba(111, 92, 255, 0.34);
+    --nd-accent-glow: rgba(111, 92, 255, 0.12);
+    --nd-accent-shadow: rgba(111, 92, 255, 0.5);
+
+    // Strong hairline tier is accent-derived in the base — follow the indigo.
+    --nd-border-strong: rgba(111, 92, 255, 0.34);
+
+    // ── Secondary accent — periwinkle (was electric cyan #00e5ff) ────────────
+    --nd-cyan: #7c8aff; // rgb(124, 138, 255)
+    --nd-cyan-bright: #b7c0ff;
+    --nd-cyan-soft: rgba(124, 138, 255, 0.14);
+    --nd-cyan-line: rgba(124, 138, 255, 0.34);
+    --nd-cyan-shadow: rgba(124, 138, 255, 0.5);
+
+    // ── Recipes that bake accent literals in the base ────────────────────────
+    // Clipped neon display TEXT gradient — indigo → light lavender → periwinkle.
+    --nd-accent-grad-text: linear-gradient(
+        120deg,
+        var(--nd-accent) 0%,
+        #c3b8ff 45%,
+        var(--nd-cyan) 100%
+    );
+    // Ambient glow field — primary stop follows the accent var; the middle stop
+    // bakes the SECONDARY hue; the violet tertiary stop stays the base's.
+    --nd-glow-field:
+        radial-gradient(820px 520px at 78% -8%, var(--nd-accent-glow), transparent 60%),
+        radial-gradient(700px 600px at 8% 12%, rgba(124, 138, 255, 0.1), transparent 62%),
+        radial-gradient(900px 700px at 50% 120%, rgba(138, 75, 255, 0.14), transparent 55%);
+
+    // ── Accent-derived --tc-* / --bs-* literals ──────────────────────────────
+    --tc-accent-hex: #7c8aff;
+    --bs-primary-rgb: 111, 92, 255;
+}

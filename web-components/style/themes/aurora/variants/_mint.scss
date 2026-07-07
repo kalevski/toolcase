@@ -1,0 +1,37 @@
+// Aurora Mint variant — lagoon-teal primary with a mint secondary accent.
+//
+// Swaps ONLY the accent hue families of the aurora foundation: the mint/emerald
+// primary (--ah-accent*) turns lagoon teal (bluer than the base spring green)
+// and the signature-highlight secondary (--tc-accent*) turns fresh mint.
+// Canvas, surfaces, hairlines, text ramp, semantic status colours, fonts and
+// shadows are untouched. The variant rule matches the SAME theme root as the
+// foundation, so every var()-built recipe (--ah-accent-grad, --ah-glow*, glow
+// field, focus ring, links, --tc-app-accent*) re-resolves against the new hues
+// automatically — only the literals baked into the foundation (rgba
+// derivatives, --bs-primary-rgb, --tc-accent-hex/--tc-cyan) are re-issued here.
+// Use with: <tc-theme name="aurora" variant="mint"> … </tc-theme>
+
+@use '../../../foundation/tokens' as *;
+
+tc-theme[name='aurora'][variant='mint'],
+[data-tc-theme='aurora'][data-tc-variant='mint'] {
+    // ── Primary accent — lagoon teal (replaces mint/emerald) ─────────────────
+    --ah-accent: #2dd4bf;
+    --ah-accent-2: #5eead4; // hover + gradient second stop
+    --ah-accent-bright: #99f6e4; // accent text / link hover / gradient-text end
+    --ah-accent-ink: #032726; // dark teal on-fill ink (keeps the dark-ink convention)
+    --ah-accent-soft: rgba(45, 212, 191, 0.13);
+    --ah-accent-line: rgba(45, 212, 191, 0.32);
+    --ah-accent-glow: rgba(45, 212, 191, 0.1);
+    --ah-accent-shadow: rgba(45, 212, 191, 0.5);
+
+    // ── Secondary accent — mint (signature highlights / eyebrows / brand dot) ─
+    --tc-accent: #6ee7b7;
+    --tc-accent-fg: #a7f3d0; // bright tint so accent-coloured TEXT clears the dark surfaces
+    --tc-accent-soft: rgba(110, 231, 183, 0.13);
+    --tc-accent-hex: #6ee7b7;
+    --tc-cyan: #6ee7b7;
+
+    // ── Foundation literals derived from the old accent hex ──────────────────
+    --bs-primary-rgb: 45, 212, 191;
+}

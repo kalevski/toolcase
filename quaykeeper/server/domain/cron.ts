@@ -26,7 +26,7 @@ function fieldMatcher(field: string, min: number, max: number): (v: number) => b
                 lo = a
                 hi = b
             }
-            if (lo < min || hi > max || lo > hi) throw new InvalidCronError(`out of range: ${part}`)
+            if (lo < min || hi > max + (max === 6 ? 1 : 0) || lo > hi) throw new InvalidCronError(`out of range: ${part}`)
             for (let v = lo; v <= hi; v += n) accept.add(norm(v))
             continue
         }

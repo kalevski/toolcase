@@ -11,8 +11,22 @@
 // - forest: neon green + lime
 // - ember:  hot orange + electric yellow
 // - royal:  electric violet + hot magenta
+// - mint:   electric teal + pastel mint
+// - rose:   electric rose + hot pink
+// - crimson: electric red + coral
+// - indigo: electric indigo + periwinkle
+// - slate:  steel-blue + silver (muted)
+// - sunset: GRADIENT primary (coral → orange) + gold
+// - twilight: GRADIENT primary (violet → blue) + sky-blue
 
 @use './ocean';
 @use './forest';
 @use './ember';
 @use './royal';
+@use './mint';
+@use './rose';
+@use './crimson';
+@use './indigo';
+@use './slate';
+@use './sunset';
+@use './twilight';

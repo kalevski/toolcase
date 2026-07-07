@@ -228,30 +228,39 @@ function execScript(argv0: string, args: string[], cwd: string, timeoutSec: numb
             return
         }
 
-        let out = ''
-        let errOut = ''
+        // Accumulate raw Buffers (byte-accurate cap) and decode once at the end —
+        // decoding per chunk splits multibyte UTF-8 sequences at chunk boundaries
+        // (U+FFFD garbage), and capping on `.length` after a per-chunk `toString`
+        // counts UTF-16 code units, letting non-ASCII output through well past
+        // the intended byte cap.
+        let outChunks: Buffer[] = []
+        let outBytes = 0
+        let errChunks: Buffer[] = []
+        let errBytes = 0
         let truncated = false
         let timedOut = false
         let settled = false
 
-        const cap = (buf: string, chunk: string): string => {
-            if (buf.length >= OUTPUT_CAP_BYTES) {
+        const cap = (chunks: Buffer[], bytes: number, d: Buffer): number => {
+            if (bytes >= OUTPUT_CAP_BYTES) {
                 truncated = true
-                return buf
+                return bytes
             }
-            const next = buf + chunk
-            if (next.length > OUTPUT_CAP_BYTES) {
+            let chunk = d
+            if (bytes + chunk.length > OUTPUT_CAP_BYTES) {
                 truncated = true
-                return next.slice(0, OUTPUT_CAP_BYTES)
+                chunk = chunk.subarray(0, OUTPUT_CAP_BYTES - bytes)
             }
-            return next
+            chunks.push(chunk)
+            return bytes + chunk.length
         }
+        const decode = (chunks: Buffer[]): string => Buffer.concat(chunks).toString('utf8')
 
         child.stdout?.on('data', (d: Buffer) => {
-            out = cap(out, d.toString('utf8'))
+            outBytes = cap(outChunks, outBytes, d)
         })
         child.stderr?.on('data', (d: Buffer) => {
-            errOut = cap(errOut, d.toString('utf8'))
+            errBytes = cap(errChunks, errBytes, d)
         })
 
         const timer = setTimeout(() => {
@@ -276,7 +285,8 @@ function execScript(argv0: string, args: string[], cwd: string, timeoutSec: numb
 
         child.on('error', (err) => {
             // Interpreter missing / not executable → the job never ran.
-            finish({ status: 'error', exitCode: null, stdout: out, stderr: errOut || String(err), truncated })
+            const errOut = decode(errChunks)
+            finish({ status: 'error', exitCode: null, stdout: decode(outChunks), stderr: errOut || String(err), truncated })
         })
         child.on('close', (code) => {
             const status: JobRunStatus = timedOut
@@ -284,7 +294,7 @@ function execScript(argv0: string, args: string[], cwd: string, timeoutSec: numb
                 : code === 0
                   ? 'success'
                   : 'failed'
-            finish({ status, exitCode: code, stdout: out, stderr: errOut, truncated })
+            finish({ status, exitCode: code, stdout: decode(outChunks), stderr: decode(errChunks), truncated })
         })
     })
 }

@@ -182,6 +182,66 @@ func TestShipperPermanentFailureDropsBatch(t *testing.T) {
 	if !strings.Contains(d.LastError, "400") {
 		t.Errorf("last_error = %q", d.LastError)
 	}
+	// Bug 11: a permanently-dropped batch must still count as dropped, or
+	// received != shipped+dropped and the loss is invisible to operators.
+	if d.Dropped == 0 {
+		t.Errorf("permanently-failed batch not counted as dropped: %+v", d)
+	}
+}
+
+// TestHTTPSinkBatchIDStableAcrossRetries is bug 3: a batch retried after a
+// transient failure must present the same X-NP-Batch-ID on every attempt, or
+// a dedupe-capable consumer can't recognize the replay.
+func TestHTTPSinkBatchIDStableAcrossRetries(t *testing.T) {
+	var mu sync.Mutex
+	var ids []string
+	attempts := 0
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.ReadAll(r.Body)
+		mu.Lock()
+		attempts++
+		n := attempts
+		ids = append(ids, r.Header.Get("X-NP-Batch-ID"))
+		mu.Unlock()
+		if n == 1 {
+			w.Header().Set("Retry-After", "0")
+			w.WriteHeader(http.StatusTooManyRequests)
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer srv.Close()
+
+	s := NewShipper(testLogger())
+	dest := Destination{
+		Name: "http", Type: DestHTTP, URL: srv.URL,
+		FlushInterval: 20 * time.Millisecond,
+		MaxRetries:    3,
+	}
+	dest.SetSpec("v1")
+	s.Configure([]Destination{dest})
+	defer s.Close()
+
+	s.Dispatch(mkEntry("api.example.com", 500, time.Now()))
+	waitFor(t, 2*time.Second, func() bool {
+		mu.Lock()
+		defer mu.Unlock()
+		return attempts >= 2
+	})
+
+	mu.Lock()
+	defer mu.Unlock()
+	if len(ids) < 2 {
+		t.Fatalf("expected a retry, got %d attempt(s)", len(ids))
+	}
+	for i, id := range ids {
+		if id == "" {
+			t.Errorf("attempt %d: missing X-NP-Batch-ID", i)
+		}
+		if id != ids[0] {
+			t.Errorf("attempt %d batch ID %q != attempt 0 ID %q — retries must reuse one ID", i, id, ids[0])
+		}
+	}
 }
 
 func TestShipperBufferDropsOldest(t *testing.T) {
@@ -242,7 +302,7 @@ func TestFileSinkRotation(t *testing.T) {
 
 	line := mkEntry("api.example.com", 200, time.Now())
 	for i := 0; i < 10; i++ {
-		if err := sink.Send(context.Background(), []Entry{line}); err != nil {
+		if err := sink.Send(context.Background(), []Entry{line}, "test-batch"); err != nil {
 			t.Fatal(err)
 		}
 	}

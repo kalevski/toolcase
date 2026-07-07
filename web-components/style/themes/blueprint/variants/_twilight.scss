@@ -1,0 +1,49 @@
+// Blueprint Twilight variant — gradient primary (violet → blue) / sky-blue
+// secondary.
+//
+// Unlike the solid-hue variants, --bp-pink-hover is DELIBERATELY set to blue
+// rather than a lighter violet — a genuinely different hue — so the
+// foundation's own --bp-pink-grad recipe (`linear-gradient(135deg,
+// var(--bp-pink), var(--bp-pink-hover))`) renders the widely-used "Deep Blue"
+// gradient (violet #6a11cb → blue #2575fc) everywhere it's consumed (CTA
+// buttons, cards, and the many blueprint components that key off
+// --bp-pink-grad directly). The hover state for non-gradient uses shifts
+// violet → blue too, which reads as an intentional extension of the sweep.
+// The secondary (--bp-teal*) turns sky blue. Canvas, paper, neutral
+// hairlines, the text ramp, violet/amber/danger accents, fonts, radii and
+// shadows all stay the base theme's. Success status colours stay pinned to
+// the base teal via the foundation's literal --bp-success family, which
+// variants never touch.
+// Use with: <tc-theme name="blueprint" variant="twilight"> … </tc-theme>
+
+tc-theme[name='blueprint'][variant='twilight'],
+[data-tc-theme='blueprint'][data-tc-variant='twilight'] {
+    // Primary — violet → blue gradient (fills the --bp-pink* contract).
+    --bp-pink: #6a11cb;
+    --bp-pink-hover: #2575fc; // gradient end — a genuinely different hue, not a shade
+    --bp-pink-ink: #ffffff; // text on violet/blue fills
+    --bp-pink-soft: rgba(106, 17, 203, 0.1);
+    --bp-pink-line: rgba(106, 17, 203, 0.4);
+    --bp-pink-glow: rgba(106, 17, 203, 0.3);
+
+    // Secondary — sky blue (fills the --bp-teal* contract).
+    --bp-teal: #38bdf8;
+    --bp-teal-hover: #7dd3fc;
+    --bp-teal-fg: #0ea5e9; // darker sky so accent TEXT clears AA on white
+    --bp-teal-ink: #ffffff; // text on sky-blue fills
+    --bp-teal-soft: rgba(56, 189, 248, 0.08);
+    --bp-teal-line: rgba(56, 189, 248, 0.4);
+    --bp-teal-glow: rgba(56, 189, 248, 0.32);
+
+    // Derived literals — recomputed from the new hues (same tints / alphas).
+    --bp-border-pink: #e3d1fb; // primary-tinted spotlight-card hairline
+    --bp-pink-surface: linear-gradient(135deg, #f1e9fd, #ffffff);
+    --bp-glow-field:
+        radial-gradient(ellipse at 70% 12%, rgba(106, 17, 203, 0.05), transparent 55%),
+        radial-gradient(ellipse at 12% 70%, rgba(56, 189, 248, 0.06), transparent 55%);
+    --tc-accent-hex: #38bdf8;
+    --tc-cyan: #38bdf8;
+    --tc-focus-ring: 0 0 0 0.2rem rgba(106, 17, 203, 0.2);
+    --bs-primary-rgb: 106, 17, 203;
+    --bs-focus-ring-color: rgba(106, 17, 203, 0.2);
+}

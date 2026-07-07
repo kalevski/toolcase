@@ -86,6 +86,15 @@ func (r *ring) requeue(batch []Entry) {
 	}
 }
 
+// addDropped records n entries lost outside the ring's own eviction path (e.g.
+// a permanently-failed delivery), so status/dropped reflects all loss, not
+// just buffer-full evictions.
+func (r *ring) addDropped(n uint64) {
+	r.mu.Lock()
+	r.dropped += n
+	r.mu.Unlock()
+}
+
 func (r *ring) stats() (count int, bytes int64, dropped uint64, oldest time.Time) {
 	r.mu.Lock()
 	defer r.mu.Unlock()

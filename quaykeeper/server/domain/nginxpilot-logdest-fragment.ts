@@ -607,7 +607,14 @@ export function assembleSpec(
 
 // ── YAML rendering (the POST body; mirrors domain/streams.ts) ───────────────────
 
-const PLAIN_SCALAR = /^[A-Za-z0-9][A-Za-z0-9._:/-]*$/
+// PLAIN_SCALAR intentionally excludes ':' (a trailing colon, e.g. "foo:", is
+// invalid YAML unquoted) and requires the scalar to both start AND end on an
+// alphanumeric, so nothing YAML-ambiguous slips through unquoted.
+const PLAIN_SCALAR = /^[A-Za-z0-9][A-Za-z0-9._/-]*[A-Za-z0-9]$|^[A-Za-z0-9]$/
+// YAML 1.1 core-schema bool/null words — left plain (unquoted) these parse as
+// bool/null instead of the string quaykeeper/nginxpilot always mean.
+const YAML_AMBIGUOUS = /^(?:true|false|yes|no|on|off|null|~)$/i
+const looksNumeric = (v: string) => /^[0-9.]+$/.test(v)
 
 function quote(value: string): string {
     const escaped = value
@@ -619,8 +626,14 @@ function quote(value: string): string {
     return `"${escaped}"`
 }
 
+// scalar renders a YAML scalar, quoting unless the value is unambiguously a
+// plain string — otherwise a value like "true" or "123" round-trips through
+// yaml.v3 as bool/number and nginxpilot's map[string]string decode rejects it.
 function scalar(value: string): string {
-    return PLAIN_SCALAR.test(value) ? value : quote(value)
+    if (!PLAIN_SCALAR.test(value) || YAML_AMBIGUOUS.test(value) || looksNumeric(value)) {
+        return quote(value)
+    }
+    return value
 }
 
 /**
@@ -695,14 +708,19 @@ export function logDestFragmentFilename(name: string): string {
  * their resolved label name with a `=~".+"` "any value" matcher (the concrete
  * value is per-request); static labels render exact.
  */
+/** Escapes '\' and '"' for interpolation into a LogQL `k="v"` selector value. */
+function escLogql(v: string): string {
+    return v.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+}
+
 export function logqlSelector(d: LogDestination): string {
-    const parts: string[] = [`job="${d.labels?.job ?? 'nginx'}"`]
+    const parts: string[] = [`job="${escLogql(d.labels?.job ?? 'nginx')}"`]
     if (d.labels) {
         for (const k of Object.keys(d.labels).sort()) {
             if (k === 'job') continue
             const v = d.labels[k]
             if (v.startsWith('$')) parts.push(`${k}=~".+"`)
-            else parts.push(`${k}="${v}"`)
+            else parts.push(`${k}="${escLogql(v)}"`)
         }
     }
     return `{${parts.join(', ')}}`

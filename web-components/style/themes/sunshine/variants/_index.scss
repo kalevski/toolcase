@@ -13,8 +13,22 @@
 // - forest: bright spring-green lead · lime-olive secondary
 // - ember:  bright tangerine lead · amber secondary
 // - royal:  bright orchid lead · fuchsia secondary
+// - mint:   bright turquoise lead · emerald secondary
+// - rose:   bright rose lead · berry-pink secondary
+// - crimson: bright red lead · brick secondary
+// - indigo: bright periwinkle lead · indigo secondary
+// - slate:  bright steel lead · charcoal secondary
+// - sunset: GRADIENT lead (coral → orange) · brick secondary
+// - twilight: GRADIENT lead (violet → blue) · indigo secondary
 
 @use './ocean';
 @use './forest';
 @use './ember';
 @use './royal';
+@use './mint';
+@use './rose';
+@use './crimson';
+@use './indigo';
+@use './slate';
+@use './sunset';
+@use './twilight';

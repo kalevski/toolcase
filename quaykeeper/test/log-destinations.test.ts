@@ -157,6 +157,23 @@ describe('renderLogDestFragment', () => {
         expect(renderLogDestFragment(ok({ name: 'a', type: 'stdout' }))).not.toContain('enabled:')
         expect(renderLogDestFragment(ok({ name: 'a', type: 'stdout', enabled: false }))).toContain('    enabled: false')
     })
+
+    it('quotes YAML-ambiguous label values so they decode as strings (bug 5)', () => {
+        const d = ok({
+            name: 'a',
+            type: 'loki',
+            url: 'https://l/x',
+            labels: { job: 'nginx', a: 'true', b: '123', c: '1.5', d: 'no', e: 'foo:' },
+        })
+        const yaml = renderLogDestFragment(d)
+        expect(yaml).toContain('      a: "true"')
+        expect(yaml).toContain('      b: "123"')
+        expect(yaml).toContain('      c: "1.5"')
+        expect(yaml).toContain('      d: "no"')
+        expect(yaml).toContain('      e: "foo:"')
+        // Still unquoted for genuinely plain strings.
+        expect(yaml).toContain('      job: nginx')
+    })
 })
 
 describe('logDestFragmentFilename', () => {
@@ -173,5 +190,9 @@ describe('logqlSelector', () => {
     })
     it('defaults job to nginx', () => {
         expect(logqlSelector(ok({ name: 'x', type: 'loki', url: 'https://l/x' }))).toBe('{job="nginx"}')
+    })
+    it('escapes quotes and backslashes in label values (bug 14)', () => {
+        const d = ok({ name: 'x', type: 'loki', url: 'https://l/x', labels: { job: 'nginx', a: 'has "quotes" and \\backslash' } })
+        expect(logqlSelector(d)).toBe('{job="nginx", a="has \\"quotes\\" and \\\\backslash"}')
     })
 })

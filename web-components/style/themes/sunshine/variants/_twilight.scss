@@ -1,0 +1,58 @@
+// Sunshine Twilight variant — gradient lead (violet → blue) / indigo
+// secondary on the unchanged citrus base.
+//
+// Accent-only override: the cream canvas, surfaces, olive-ink text ramp,
+// semantic status colours, fonts and warm shadows all stay base-sunshine. The
+// lead hues are brightened versions of the popular "Deep Blue" gradient
+// (violet #6a11cb → blue #2575fc becomes #a78bfa → #60a5fa here) so they sit
+// in the same brightness class as the other leads (sky blue, orchid, rose,
+// turquoise) and the dark on-lead ink convention still holds. Unlike the
+// solid-hue sunshine variants, --sun-lead-hi is DELIBERATELY set to blue
+// rather than a lighter violet — a genuinely different hue — so the
+// foundation's own --sun-lead-grad recipe (`linear-gradient(135deg,
+// var(--sun-lead-hi), var(--sun-lead))`) renders the two-tone sweep everywhere
+// it's consumed (CTA buttons, nav, brand mark, progress). The leaf-green
+// secondary becomes a mid-tone INDIGO (still dark enough to carry links /
+// focus / eyebrow text on cream). --sun-lead-lo continues to feed the
+// semantic warning guard below, so repurposing --sun-lead-hi here doesn't
+// touch status colours.
+// Use with: <tc-theme name="sunshine" variant="twilight"> … </tc-theme>
+
+@use '../../../foundation/tokens' as *;
+
+tc-theme[name='sunshine'][variant='twilight'],
+[data-tc-theme='sunshine'][data-tc-variant='twilight'] {
+    // ── Lead accent — violet → blue gradient (dark on-lead ink on every fill) ─
+    --sun-lead: #a78bfa;
+    --sun-lead-hi: #60a5fa; // gradient partner — genuinely different hue, not a shade
+    --sun-lead-lo: #8b5cf6;
+    --sun-lead-tint: rgba(167, 139, 250, 0.16);
+    --sun-lead-line: rgba(167, 139, 250, 0.45);
+    --sun-lead-glow: rgba(167, 139, 250, 0.4);
+    --sun-on-lead: #1e1740; // text on violet/blue-coloured fills
+
+    // ── Secondary accent — mid-tone indigo (links / focus / eyebrow) ─────────
+    --sun-leaf: #4f46e5;
+    --sun-leaf-hi: #6366f1;
+    --sun-leaf-lo: #4338ca;
+    --sun-leaf-deep: #312e81;
+    --sun-leaf-tint: rgba(79, 70, 229, 0.12);
+
+    // ── Recomputed accent-derived literals ───────────────────────────────────
+    --tc-accent-hex: #4f46e5;
+    --tc-focus-ring: 0 0 0 3px rgba(167, 139, 250, 0.34);
+    --bs-focus-ring-color: rgba(167, 139, 250, 0.34);
+    --bs-primary-rgb: 167, 139, 250;
+    --bs-dark-rgb: 49, 46, 129; // --bs-dark / --tc-surface-dark follow --sun-leaf-deep
+
+    // ── Semantic guard — status colours stay the sunshine originals ──────────
+    // In the base foundation success/warning resolve THROUGH the accent vars
+    // (leaf / lead-lo), so without these re-pins they would follow the variant
+    // accents. Danger (coral) and info (plum) are fixed pops — untouched.
+    --tc-success: #5f8a2e;
+    --tc-success-bg: rgba(95, 138, 46, 0.12);
+    --tc-warning: #d49a00;
+    --tc-warning-bg: rgba(242, 183, 5, 0.16);
+    --bs-success: #5f8a2e; // --bs-success-rgb (95, 138, 46) still valid from base
+    --bs-warning: #d49a00; // --bs-warning-rgb (212, 154, 0) still valid from base
+}

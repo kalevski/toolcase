@@ -516,12 +516,24 @@ export function tx<T>(fn: () => T): T {
     }
     db.exec('BEGIN')
     txDepth++
+    let committed = false
     try {
         const result = fn()
         db.exec('COMMIT')
+        committed = true
         return result
     } catch (err) {
-        db.exec('ROLLBACK')
+        // Only roll back a failure that happened BEFORE commit — a failed COMMIT
+        // has already resolved the transaction one way or another, and attempting
+        // ROLLBACK on it throws ("no transaction is active"), which would replace
+        // the original error instead of explaining it.
+        if (!committed) {
+            try {
+                db.exec('ROLLBACK')
+            } catch {
+                // Ignore — the original `err` is what actually explains the failure.
+            }
+        }
         throw err
     } finally {
         txDepth--

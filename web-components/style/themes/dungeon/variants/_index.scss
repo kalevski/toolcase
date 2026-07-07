@@ -11,8 +11,22 @@
 // - forest: mossy green primary, lichen lime secondary
 // - ember:  smoldering orange primary, old-gold secondary
 // - royal:  arcane violet primary, courtly magenta secondary
+// - rose:   heraldic rose primary, courtesan pink secondary
+// - mint:   verdigris teal primary, herbal mint secondary
+// - crimson: brick-red primary, terracotta secondary
+// - indigo: arcane indigo primary, periwinkle secondary
+// - slate:  cold-iron primary, tarnished-silver secondary
+// - sunset: GRADIENT primary (muted coral → dusty orange), amber secondary
+// - twilight: GRADIENT primary (muted violet → dusky blue), periwinkle secondary
 
 @use './ocean';
 @use './forest';
 @use './ember';
 @use './royal';
+@use './rose';
+@use './mint';
+@use './crimson';
+@use './indigo';
+@use './slate';
+@use './sunset';
+@use './twilight';

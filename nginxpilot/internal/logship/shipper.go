@@ -64,6 +64,8 @@ func (s *Shipper) Configure(dests []Destination) {
 		if err != nil {
 			s.log.Error("log destination failed to start", "destination", name, "error", err)
 			w = brokenWorker(d, err)
+			s.workers[name] = w
+			continue
 		}
 		s.workers[name] = w
 		s.log.Info("log destination started", "destination", name, "type", d.Type)
@@ -261,6 +263,7 @@ func (w *worker) flushAll(ctx context.Context) {
 // honouring server Retry-After hints. Returns false when the batch could not
 // be delivered (it is requeued unless the failure was permanent).
 func (w *worker) deliver(ctx context.Context, batch []Entry) bool {
+	id := batchID() // one ID per batch — every retry attempt must reuse it (G8 dedupe)
 	var lastErr error
 	for attempt := 0; attempt <= w.dest.maxRetries(); attempt++ {
 		if attempt > 0 {
@@ -282,7 +285,7 @@ func (w *worker) deliver(ctx context.Context, batch []Entry) bool {
 			case <-time.After(delay):
 			}
 		}
-		err := w.sink.Send(ctx, batch)
+		err := w.sink.Send(ctx, batch, id)
 		if err == nil {
 			w.mu.Lock()
 			w.shipped += uint64(len(batch))
@@ -294,11 +297,12 @@ func (w *worker) deliver(ctx context.Context, batch []Entry) bool {
 		var se *sendError
 		if errors.As(err, &se) && se.permanent {
 			w.recordFailure(err, len(batch), false)
+			w.buf.addDropped(uint64(len(batch)))
 			return true // batch dropped; keep draining
 		}
 	}
 	w.recordFailure(lastErr, len(batch), true)
-	w.buf.requeue(batch)
+	w.buf.requeue(batch) // may itself drop (buffer full) — ring already counts that
 	return false
 }
 
@@ -356,5 +360,5 @@ func TestDestination(ctx context.Context, d *Destination) error {
 	}
 	defer sink.Close()
 	entry := ParseAccessLine([]byte(`{"ts":"`+time.Now().UTC().Format(time.RFC3339)+`","host":"nginxpilot.test","server_name":"nginxpilot.test","remote_addr":"127.0.0.1","method":"GET","path":"/nginxpilot-test","query":"","status":200,"bytes_sent":0,"request_time":0,"scheme":"https","protocol":"HTTP/1.1","referer":"","user_agent":"nginxpilot-test","resource":"nginxpilot.test","resource_type":"proxy","nginxpilot_test":true}`), ParseOptions{})
-	return sink.Send(ctx, []Entry{entry})
+	return sink.Send(ctx, []Entry{entry}, batchID())
 }

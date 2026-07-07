@@ -42,13 +42,22 @@ func (m *Manager) reconfigureLogship(ctx context.Context, cfg *config.Config) {
 	if cfg.Logs.Access.Enabled {
 		wantAddr = cfg.Logs.Access.ListenOrDefault()
 	}
-	if m.intake != nil && (wantAddr == "" || m.intake.Addr() != wantAddr) {
+	wantOpts := cfg.Logs.ParseAccessOptions()
+	if m.intake != nil && (wantAddr == "" || m.intake.Addr() != wantAddr || !logship.EqualParseOptions(m.intake.Options(), wantOpts)) {
 		m.intake.Close()
 		m.intake = nil
 	}
 	m.intakeErr = ""
 	if wantAddr != "" && m.intake == nil {
-		intake := logship.NewIntake(wantAddr, m.shipper, cfg.Logs.ParseAccessOptions(), m.log)
+		intake := logship.NewIntake(wantAddr, m.shipper, wantOpts, m.log)
+		intake.OnError(func(err error) {
+			m.logsMu.Lock()
+			if m.intake == intake {
+				m.intakeErr = err.Error()
+				m.intake = nil
+			}
+			m.logsMu.Unlock()
+		})
 		if err := intake.Start(ctx); err != nil {
 			m.log.Error("log intake bind failed; access-log shipping is down", "addr", wantAddr, "error", err)
 			m.intakeErr = err.Error()

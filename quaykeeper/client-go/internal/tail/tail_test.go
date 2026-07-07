@@ -1,6 +1,7 @@
 package tail
 
 import (
+	"bytes"
 	"context"
 	"os"
 	"path/filepath"
@@ -82,6 +83,175 @@ func TestTailFromStartAndAppend(t *testing.T) {
 		if l == "partial" {
 			t.Error("partial line emitted before its newline arrived")
 		}
+	}
+
+	// Complete the partial line on a later poll — it must be emitted exactly once.
+	f, _ = os.OpenFile(logPath, os.O_APPEND|os.O_WRONLY, 0o644)
+	_, _ = f.WriteString("-done\n")
+	_ = f.Close()
+
+	got = waitFor(t, c, 4)
+	count := 0
+	for _, l := range got {
+		if l == "partial-done" {
+			count++
+		}
+	}
+	if count != 1 {
+		t.Fatalf("partial-done emitted %d times, want exactly 1 (got %v)", count, got)
+	}
+}
+
+// TestTailDoesNotReplayExistingFileOnSecondPoll is bug 1's reproduction: an
+// untracked file with no new bytes must persist its start-at-EOF offset on
+// first sight, or the next poll re-derives start=0 and replays the file.
+func TestTailDoesNotReplayExistingFileOnSecondPoll(t *testing.T) {
+	dir := t.TempDir()
+	logPath := filepath.Join(dir, "app.log")
+	if err := os.WriteFile(logPath, []byte("old1\nold2\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	tailer, err := New(Options{
+		Globs:        []string{filepath.Join(dir, "*.log")},
+		StateDir:     filepath.Join(dir, "state"),
+		FromStart:    false, // start at EOF — pre-existing lines must never ship
+		PollInterval: 20 * time.Millisecond,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := &collector{}
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan struct{})
+	defer func() { cancel(); <-done }()
+	go func() { defer close(done); _ = tailer.Run(ctx, c.add) }()
+
+	// Sit through several poll intervals with no growth — the bug replayed the
+	// whole file starting on the second poll.
+	time.Sleep(200 * time.Millisecond)
+	if got := c.snapshot(); len(got) != 0 {
+		t.Fatalf("existing file replayed: got %v, want none", got)
+	}
+
+	// New content afterward must still ship normally.
+	f, _ := os.OpenFile(logPath, os.O_APPEND|os.O_WRONLY, 0o644)
+	_, _ = f.WriteString("new1\n")
+	_ = f.Close()
+	got := waitFor(t, c, 1)
+	if len(got) != 1 || got[0] != "new1" {
+		t.Fatalf("append after quiet period: got %v, want [new1]", got)
+	}
+}
+
+// TestScanFromTruncatesOverLongLine is bug 2's core case: an over-long line
+// whose terminating newline arrives within the same read is capped at
+// maxLine bytes plus a marker, not accumulated without bound.
+func TestScanFromTruncatesOverLongLine(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "big.log")
+	huge := bytes.Repeat([]byte("x"), maxLine*2+123)
+	content := append(append([]byte{}, huge...), []byte("\nshort\n")...)
+	if err := os.WriteFile(path, content, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	f, err := os.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+
+	var lines [][]byte
+	consumed, partial, truncated := scanFrom(f, nil, false, func(line []byte) {
+		out := make([]byte, len(line))
+		copy(out, line)
+		lines = append(lines, out)
+	})
+	if truncated {
+		t.Fatal("truncated should reset to false once the line's newline is consumed")
+	}
+	if len(partial) != 0 {
+		t.Fatalf("partial should be empty after a complete line, got %d bytes", len(partial))
+	}
+	if consumed != int64(len(content)) {
+		t.Fatalf("consumed = %d, want %d", consumed, len(content))
+	}
+	if len(lines) != 2 {
+		t.Fatalf("got %d lines, want 2", len(lines))
+	}
+	want := append(bytes.Repeat([]byte("x"), maxLine), truncatedMarker...)
+	if !bytes.Equal(lines[0], want) {
+		t.Fatalf("truncated line mismatch: got %d bytes, want %d bytes", len(lines[0]), len(want))
+	}
+	if string(lines[1]) != "short" {
+		t.Fatalf("second line = %q, want short", lines[1])
+	}
+}
+
+// TestScanFromCarriesTruncatedLineAcrossPolls covers the case the original
+// bug dropped entirely: an over-long line whose newline only arrives on a
+// later poll. The partial state must stay bounded (not grow per overflow)
+// and the truncated line must be emitted exactly once, not lost.
+func TestScanFromCarriesTruncatedLineAcrossPolls(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "big2.log")
+	huge := bytes.Repeat([]byte("y"), maxLine*3)
+	if err := os.WriteFile(path, huge, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	f, err := os.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+
+	var lines [][]byte
+	collect := func(line []byte) {
+		out := make([]byte, len(line))
+		copy(out, line)
+		lines = append(lines, out)
+	}
+
+	consumed1, partial1, truncated1 := scanFrom(f, nil, false, collect)
+	if len(lines) != 0 {
+		t.Fatalf("no newline yet — nothing should be emitted, got %d lines", len(lines))
+	}
+	if !truncated1 {
+		t.Fatal("expected truncated=true after exceeding maxLine with no newline")
+	}
+	if cap(partial1) > maxLine+len(truncatedMarker) {
+		t.Fatalf("partial grew unbounded: cap=%d (want <= %d)", cap(partial1), maxLine+len(truncatedMarker))
+	}
+	// Any still-unconsumed sub-cap tail is intentionally left unread (no newline,
+	// under the overflow threshold) — the next poll's Seek(consumed1) re-reads it
+	// from disk, so nothing is lost even though consumed1 < len(huge).
+	if consumed1 <= 0 || consumed1 > int64(len(huge)) {
+		t.Fatalf("consumed1 = %d, want in (0, %d]", consumed1, len(huge))
+	}
+
+	// Next poll: the newline (and a following line) finally arrives.
+	f2, _ := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0o644)
+	_, _ = f2.WriteString("\nnext\n")
+	_ = f2.Close()
+	if _, err := f.Seek(consumed1, 0); err != nil {
+		t.Fatal(err)
+	}
+	_, partial2, truncated2 := scanFrom(f, partial1, truncated1, collect)
+	if truncated2 {
+		t.Fatal("truncated should reset to false once the line's newline is consumed")
+	}
+	if len(partial2) != 0 {
+		t.Fatalf("partial2 should be empty, got %d bytes", len(partial2))
+	}
+	if len(lines) != 2 {
+		t.Fatalf("got %d lines, want 2 (truncated big line + next), got %v", len(lines), lines)
+	}
+	want := append(bytes.Repeat([]byte("y"), maxLine), truncatedMarker...)
+	if !bytes.Equal(lines[0], want) {
+		t.Fatalf("emitted truncated line mismatch (len got=%d want=%d)", len(lines[0]), len(want))
+	}
+	if string(lines[1]) != "next" {
+		t.Fatalf("second line = %q, want next", lines[1])
 	}
 }
 
