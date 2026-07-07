@@ -374,6 +374,17 @@ streams:
 
 Stream and http upstream names are separate namespaces (the same name in each is fine). `print-include` emits the `stream { include …; }` line to add to `nginx.conf`.
 
+### Default catch-all (silent 444)
+
+A request for a host no resource claims normally falls through to nginx's stock welcome page (or whatever `default_server` an operator already declared elsewhere). Opt in and nginxpilot renders its own instead — 444 (connection closed, zero bytes) on port 80, a rejected TLS handshake on 443, HTTP-01 `/.well-known/acme-challenge/` still passed through so a brand-new domain can validate before its own vhost exists — with the **same JSON access log** every other managed vhost gets:
+
+```yaml
+nginx:
+  default_catch_all: true   # opt-in; default false
+```
+
+Off by default: an existing managed deployment may already declare its own `default_server`, and two would collide. Since this goes through the same render pipeline as every other resource, a collision doesn't crash nginx — the crash-proof quarantine pass (above) just disables nginxpilot's own copy, so check `GET /status` if it doesn't seem to be taking effect. The Docker image ships a static, plain-text equivalent (`docker/default.conf`) for generate-only deployments; the entrypoint removes it automatically when both `nginx.manage` and `nginx.default_catch_all` are `true`, so the two never coexist.
+
 ## CLI
 
 | Subcommand | Purpose |

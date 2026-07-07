@@ -55,7 +55,7 @@ export function AccessLists() {
     return (
         <RoutingPage
             title="Access lists"
-            subtitle="Named IP allow/deny + basic-auth policies for proxies, redirects and dead hosts. Maintainer access."
+            subtitle="Named IP allow/deny + basic-auth policies for proxies, redirects and dead hosts."
             icon="lock"
             iconColor="amber"
             requiresPath="/access-lists"

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { ROLE_RANK, type Role } from '@/server/domain/types'
+import type { FeatureKey } from '@/server/domain/features'
 import { useMe } from '@/lib/me-context'
 import { LoadingState, ErrorState } from '@/components/states'
 
@@ -57,15 +58,17 @@ export type ConfigDataState<T> =
     | { phase: 'ready'; data: T }
 
 /**
- * Confirm the caller meets `minRole` (default `maintainer`), then load a Config
- * dataset via `fetcher`. `fetcher` MUST be stable (wrap in `useCallback`) — it is
- * intentionally omitted from the effect deps so confirming the role doesn't loop.
- * The owner-only surfaces (e.g. Scheduled tasks) pass `minRole: 'owner'`; the
- * gate is a UX nicety — every backing route re-enforces it server-side.
+ * Confirm the caller meets `minRole` (default `standard`) and — when `feature` is
+ * given — has that feature enabled (features.ts), then load a Config dataset via
+ * `fetcher`. `fetcher` MUST be stable (wrap in `useCallback`) — it is intentionally
+ * omitted from the effect deps so confirming access doesn't loop. Owner-only
+ * surfaces (e.g. Scheduled tasks) pass `minRole: 'owner'` with no feature; the gate
+ * is a UX nicety — every backing route re-enforces it server-side.
  */
 export function useConfigData<T>(
     fetcher: () => Promise<T | null>,
-    minRole: Role = 'maintainer',
+    minRole: Role = 'standard',
+    feature?: FeatureKey,
 ): {
     state: ConfigDataState<T>
     reload: () => Promise<void>
@@ -74,8 +77,9 @@ export function useConfigData<T>(
     const me = useMe()
     const [state, setState] = useState<ConfigDataState<T>>({ phase: 'loading' })
 
+    const featureOk = feature ? me.features[feature] : true
     useEffect(() => {
-        if (ROLE_RANK[me.role] < ROLE_RANK[minRole]) {
+        if (ROLE_RANK[me.role] < ROLE_RANK[minRole] || !featureOk) {
             setState({ phase: 'forbidden' })
             router.replace('/')
             return
@@ -89,7 +93,7 @@ export function useConfigData<T>(
             cancelled = true
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [me.role, router, minRole])
+    }, [me.role, router, minRole, featureOk])
 
     const reload = useCallback(async () => {
         setState({ phase: 'loading' })

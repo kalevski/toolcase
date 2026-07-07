@@ -7,8 +7,7 @@ import { useTcProps } from '@/lib/tc'
 import { useBranding } from '@/lib/branding-context'
 import { Breadcrumbs } from './Breadcrumbs'
 import { CommandPalette } from './CommandPalette'
-import { RealmSwitcher } from './RealmSwitcher'
-import { ACCOUNT_LEVEL_LABEL, ROLE_RANK, type MeResponse } from '@/server/domain/types'
+import { ACCOUNT_LEVEL_LABEL, type MeResponse } from '@/server/domain/types'
 import { ADMIN_TABS } from './admin/shared'
 
 // The authenticated frame (§14). `tc-dashboard-layout` is the responsive shell:
@@ -25,27 +24,29 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
     const branding = useBranding()
 
     // Navigation is data — `tc-side-nav` takes its sections as a JS property and
-    // reports clicks via `tc-item-click` / the `onItemClick` callback. The Routing
-    // section is appended for `maintainer` and above; the owner-only Admin section
-    // (§6, §13) only for the owner. Both gates mirror the server `authorize(...)`.
+    // reports clicks via `tc-item-click` / the `onItemClick` callback. Each feature
+    // entry is gated by `me.features[...]` (features.ts): the owner-set global flag
+    // AND any per-user override, mirroring the server `authorize(minRole, feature)`
+    // gate. The owner always sees every feature. The Admin section stays owner-only.
     const sections = useMemo<SideNavSection[]>(() => {
-        const rank = ROLE_RANK[me.role]
-        // Resources: everything a user operates on. Static Sites for everyone;
-        // Instances (Config subsystem, move_wharf_to_perch.md §10) and Databases
-        // (quaykeeper_database_management.md §9) join for maintainer+ — the same gate
-        // their backing /api routes enforce.
+        const feat = me.features
+        // Resources: everything a user operates on, each gated by its feature flag.
         const main: SideNavSection = {
             key: 'main',
             title: 'Resources',
             items: [
-                {
-                    key: 'sites',
-                    label: 'Static Sites',
-                    icon: 'layout-dashboard',
-                    href: '/',
-                    active: pathname === '/',
-                },
-                ...(rank >= ROLE_RANK.maintainer
+                ...(feat.static_sites
+                    ? [
+                          {
+                              key: 'sites',
+                              label: 'Static Sites',
+                              icon: 'layout-dashboard',
+                              href: '/',
+                              active: pathname === '/',
+                          },
+                      ]
+                    : []),
+                ...(feat.instances
                     ? [
                           {
                               key: 'instances',
@@ -54,6 +55,10 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
                               href: '/instances',
                               active: pathname.startsWith('/instances'),
                           },
+                      ]
+                    : []),
+                ...(feat.databases
+                    ? [
                           {
                               key: 'db-servers',
                               label: 'Databases',
@@ -61,6 +66,10 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
                               href: '/databases',
                               active: pathname.startsWith('/databases'),
                           },
+                      ]
+                    : []),
+                ...(feat.snippets
+                    ? [
                           {
                               key: 'snippets',
                               label: 'Docker snippets',
@@ -70,9 +79,8 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
                           },
                       ]
                     : []),
-                // Scheduled tasks run arbitrary scripts on the host — owner-only, so it
-                // gates one rank tighter than the maintainer resources above.
-                ...(me.role === 'owner'
+                // Scheduled tasks run arbitrary scripts on the host — owner-only.
+                ...(me.role === 'owner' && feat.jobs
                     ? [
                           {
                               key: 'jobs',
@@ -114,10 +122,10 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
             })),
         }
         const out: SideNavSection[] = [main]
-        if (rank >= ROLE_RANK.maintainer) out.push(routing)
+        if (me.features.routing) out.push(routing)
         if (me.role === 'owner') out.push(admin)
         return out
-    }, [pathname, me.role])
+    }, [pathname, me.role, me.features])
 
     // Intercept the side-nav anchor click so navigation stays a client-side
     // router push instead of a full page load. preventDefault works because the
@@ -163,7 +171,6 @@ export function AppShell({ me, children }: { me: MeResponse; children: ReactNode
                 <div slot="sidebar-menu" className="quaykeeper-sidebar-menu">
                     <tc-side-nav ref={sideNavRef} />
                 </div>
-                <RealmSwitcher />
                 <tc-user-panel
                     slot="sidebar-panel"
                     ref={userRef}

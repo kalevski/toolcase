@@ -218,7 +218,7 @@ func validateManaged(cfg *config.Config) error {
 	managed.Nginx.StreamConfDir = filepath.Join(tmp, "stream.d")
 	managed.Nginx.ManagedIncludeDir = filepath.Join(tmp, "conf.d")
 
-	log := newLogger("logfmt", "error")
+	log := newLogger("json", "error")
 	eng := nginxctl.New(&managed, log)
 
 	var idx *certs.Index

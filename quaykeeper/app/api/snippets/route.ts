@@ -1,7 +1,7 @@
 // GET  /api/snippets — list saved docker-run snippets (maintainer+).
 // POST /api/snippets — create a snippet ({ name, description?, spec, instanceId? }).
 //
-// Guarded by `authorize('maintainer')` — snippets sit at the same level as the
+// Guarded by `authorize('standard', 'snippets')` — snippets sit at the same level as the
 // Config subsystem whose instances they inject.
 
 import { NextResponse } from 'next/server'
@@ -12,14 +12,14 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'snippets')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     return NextResponse.json(snippets.listSnippets())
 }
 
 export async function POST(req: Request) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'snippets')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     let body: snippets.CreateSnippetRequest

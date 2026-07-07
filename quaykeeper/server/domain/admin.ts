@@ -30,10 +30,10 @@ export function meetsMinRole(role: Role, minRole: Role): boolean {
 /**
  * The roles an owner may assign to another account. `guest` is the runtime
  * fallback for a session whose user row is gone (`authorize`), never a stored
- * role, so it is not assignable. `owner` / `maintainer` / `standard` are; the
- * service additionally blocks demoting the *last* owner (instance lock-out).
+ * role, so it is not assignable. `owner` / `standard` are; the service
+ * additionally blocks demoting the *last* owner (instance lock-out).
  */
-export const ASSIGNABLE_ROLES: ReadonlySet<Role> = new Set<Role>(['owner', 'maintainer', 'standard'])
+export const ASSIGNABLE_ROLES: ReadonlySet<Role> = new Set<Role>(['owner', 'standard'])
 
 /** Type guard: a request-supplied value is one of the assignable roles. */
 export function isAssignableRole(value: unknown): value is Role {

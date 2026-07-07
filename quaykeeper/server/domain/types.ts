@@ -4,24 +4,23 @@
 // are fine). See notes/static-hosting-app-design.md §6, §12, §15.
 
 import type { DockerRunSpec } from './docker-run'
+import type { FeatureKey } from './features'
 
 // ── Auth / roles ─────────────────────────────────────────────────────────────
 
-export type Role = 'owner' | 'maintainer' | 'standard' | 'guest'
+export type Role = 'owner' | 'standard' | 'guest'
 
 /**
  * Strict ordering used for `minRole` comparisons. Higher = more access. The
- * hierarchy is linear and a superset chain: a `maintainer` is everything a
- * `standard` is plus the routing surface (proxies/upstreams) and exemption from
- * hosting quotas; an `owner` is everything a `maintainer` is plus the admin
- * surface. So `authorize('maintainer')` admits maintainers *and* owners, while
- * `authorize('owner')` (the admin endpoints) still excludes maintainers.
+ * hierarchy is linear: `standard` is a regular account (features gated by the
+ * owner), `owner` is everything plus the admin surface and control over which
+ * features each user sees. `guest` (rank 0) is the runtime-only fallback for a
+ * session whose user row is gone — never stored or assigned.
  */
 export const ROLE_RANK: Record<Role, number> = {
     guest: 0,
     standard: 1,
-    maintainer: 2,
-    owner: 3,
+    owner: 2,
 }
 
 /**
@@ -84,12 +83,11 @@ export const STANDARD_LIMITS: PlanLimits = {
 }
 
 /**
- * Limits for instance operators (§6) — exempt from quotas entirely. The owner
- * runs the instance and maintainers help operate it, so they create unlimited
- * resources and are never gated or suspended: `Infinity` caps make every
- * count/byte gate pass, the fastest poll cadence applies, and private repos are
- * allowed. `resolveLimits` returns this for any `owner`- or `maintainer`-role
- * user instead of {@link STANDARD_LIMITS}.
+ * Limits for the instance owner (§6) — exempt from quotas entirely. The owner
+ * runs the instance, so they create unlimited resources and are never gated or
+ * suspended: `Infinity` caps make every count/byte gate pass, the fastest poll
+ * cadence applies, and private repos are allowed. `resolveLimits` returns this
+ * for any `owner`-role user instead of {@link STANDARD_LIMITS}.
  */
 export const UNLIMITED_LIMITS: PlanLimits = {
     maxSites: Infinity,
@@ -101,21 +99,20 @@ export const UNLIMITED_LIMITS: PlanLimits = {
     privateRepos: true,
 }
 
-// ── Account level (the unified standard/maintainer/owner ladder) ──────────────
+// ── Account level (the standard/owner ladder) ─────────────────────────────────
 
 /**
- * A single human-facing "level" for an account — now purely role-derived (the
- * sponsorship-driven paid tier is gone). Strictly ordered low → high.
+ * A single human-facing "level" for an account — purely role-derived. Strictly
+ * ordered low → high.
  */
-export type AccountLevel = 'standard' | 'maintainer' | 'owner'
+export type AccountLevel = 'standard' | 'owner'
 
 /** Every account level, lowest first. */
-export const ACCOUNT_LEVELS: readonly AccountLevel[] = ['standard', 'maintainer', 'owner']
+export const ACCOUNT_LEVELS: readonly AccountLevel[] = ['standard', 'owner']
 
 /** Title-case display labels for each level (badges, the user-panel micro-label). */
 export const ACCOUNT_LEVEL_LABEL: Record<AccountLevel, string> = {
     standard: 'Standard',
-    maintainer: 'Maintainer',
     owner: 'Owner',
 }
 
@@ -125,7 +122,6 @@ export const ACCOUNT_LEVEL_LABEL: Record<AccountLevel, string> = {
  */
 export function accountLevel(role: Role): AccountLevel {
     if (role === 'owner') return 'owner'
-    if (role === 'maintainer') return 'maintainer'
     return 'standard'
 }
 
@@ -268,11 +264,18 @@ export interface MeResponse {
     limits: PlanLimits
     usage: SiteUsage
     /**
+     * Effective feature visibility for this caller (features.ts): the app-wide
+     * global flags merged with any owner-set per-user override. The client gates
+     * nav + pages off this; owners always receive every feature enabled.
+     */
+    features: Record<FeatureKey, boolean>
+    /**
      * The realm the caller currently operates on (multiple_realms.md §E.4): the owner's
      * switcher selection, or a non-owner's owner-assigned default. Drives the header label
-     * + which realm realm-selected ops target.
+     * + which realm realm-selected ops target. `null` when no realm is registered yet
+     * (fresh install, or every realm was removed) — the caller has nothing to operate on.
      */
-    activeRealm: Realm
+    activeRealm: Realm | null
     /** Whether this caller may switch realms — `true` only for the owner (§0.6). */
     canSwitchRealms: boolean
     /**
@@ -298,43 +301,15 @@ export interface AdminUserRow {
     customLimits: UserLimitOverride | null
     /** The realms this user is granted, with their own default marked (multiple_realms.md §F.2). */
     realmGrants: UserRealmGrant[]
+    /**
+     * The owner-set per-user feature overrides (features.ts). Only features the owner
+     * has explicitly toggled for this user appear; an absent feature follows the global
+     * default. Owners are never gated, so this is empty/ignored for an owner row.
+     */
+    featureOverrides: Partial<Record<FeatureKey, boolean>>
 }
 
 // ── Base domains (`base_domain` row) ─────────────────────────────────────────
-
-/**
- * Which audience a base domain is offered to (§10). A strict superset chain,
- * so a caller who can see a higher tier can see every lower one:
- *
- *   • `free`  — available to everybody.
- *   • `staff` — reserved for instance operators (the `maintainer`/`owner` roles).
- *
- * The visibility a given caller gets is computed by {@link visibleBaseDomainTiers}.
- */
-export type BaseDomainTier = 'free' | 'staff'
-
-/** Every base-domain tier, lowest-audience first (the superset chain order). */
-export const BASE_DOMAIN_TIERS: readonly BaseDomainTier[] = ['free', 'staff']
-
-/** Type guard: a request-supplied value is one of the base-domain tiers. */
-export function isBaseDomainTier(value: unknown): value is BaseDomainTier {
-    return typeof value === 'string' && (BASE_DOMAIN_TIERS as readonly string[]).includes(value)
-}
-
-/**
- * The base-domain tiers a caller may see, keyed off role (§10):
- *
- *   • `owner` / `maintainer` (instance operators) → every tier, incl. `staff`.
- *   • everyone else                               → `free` only.
- *
- * Pure (no I/O), so the standard `/api/base-domains` projection and the create-site
- * wizard can both gate on it and it's unit-testable directly. The result is always a
- * prefix of {@link BASE_DOMAIN_TIERS} — each step strictly contains the one below.
- */
-export function visibleBaseDomainTiers(role: Role): BaseDomainTier[] {
-    if (role === 'owner' || role === 'maintainer') return ['free', 'staff']
-    return ['free']
-}
 
 /**
  * Subdomain TLS policy for a base domain (§0/Phase D). TLS for subdomains is decided
@@ -357,8 +332,6 @@ export function isBaseDomainTls(value: unknown): value is BaseDomainTls {
 export interface BaseDomain {
     /** Fully-qualified base domain; primary key (e.g. `quaykeeper.dev`). */
     domain: string
-    /** The audience this domain is offered to; gates which users may pick it (§10). */
-    tier: BaseDomainTier
     /** Subdomain TLS policy (§0/Phase D): one wildcard cert per base. Defaults to `auto`. */
     tls: BaseDomainTls
     /**

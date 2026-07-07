@@ -1,7 +1,7 @@
 // PATCH  /api/instances/{id}/flags/{flagId} — toggle/rename ({ enabled?, description? }).
 // DELETE /api/instances/{id}/flags/{flagId} — remove one flag.
 //
-// Guarded by `authorize('maintainer')`.
+// Guarded by `authorize('standard', 'instances')`.
 
 import { NextResponse } from 'next/server'
 import { authorize } from '@/server/services/auth'
@@ -19,7 +19,7 @@ function owned(id: string, flagId: string) {
 }
 
 export async function PATCH(req: Request, ctx: Ctx) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'instances')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     let body: { enabled?: unknown; description?: unknown }
@@ -49,7 +49,7 @@ export async function PATCH(req: Request, ctx: Ctx) {
 }
 
 export async function DELETE(_req: Request, ctx: Ctx) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'instances')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     const { id, flagId } = await ctx.params

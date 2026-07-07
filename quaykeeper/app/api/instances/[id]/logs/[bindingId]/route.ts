@@ -2,7 +2,7 @@
 //        shaping ({ enabled?, shaping? }).
 // DELETE /api/instances/{id}/logs/{bindingId} — unbind the destination.
 //
-// Guarded by `authorize('maintainer')` (D3). Stored only — the agent snapshot's
+// Guarded by `authorize('standard', 'instances')` (D3). Stored only — the agent snapshot's
 // version bump propagates the change to quaykeeper-client on its next poll.
 
 import { NextResponse } from 'next/server'
@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic'
 type Ctx = { params: Promise<{ id: string; bindingId: string }> }
 
 export async function PATCH(req: Request, ctx: Ctx) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'instances')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     let body: { enabled?: unknown; shaping?: unknown }
@@ -37,7 +37,7 @@ export async function PATCH(req: Request, ctx: Ctx) {
 }
 
 export async function DELETE(_req: Request, ctx: Ctx) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'instances')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     const { id, bindingId } = await ctx.params

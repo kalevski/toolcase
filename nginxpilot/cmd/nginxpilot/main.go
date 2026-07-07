@@ -29,7 +29,7 @@ Usage:
 
 Common flags:
   --config PATH        config file (default /etc/nginxpilot/config.yml)
-  --log-format FORMAT  logfmt | json (default logfmt)
+  --log-format FORMAT  logfmt | json (default json)
 
 Run flags:
   --prune-orphans      delete on-disk content for sites no longer in config
@@ -91,8 +91,9 @@ func parseWithPositional(fs *flag.FlagSet, args []string, usage string) (string,
 	return positional, true
 }
 
-// newLogger builds the slog logger: logfmt (TextHandler) by default,
-// JSON for shippers (spec Q25).
+// newLogger builds the slog logger: JSON (JSONHandler) by default so every
+// nginxpilot log line is machine-parseable (spec Q25); logfmt (TextHandler)
+// remains available via --log-format for interactive terminal use.
 func newLogger(format, level string) *slog.Logger {
 	var lvl slog.Level
 	switch level {

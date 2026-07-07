@@ -8,14 +8,7 @@ import type {
 } from '@toolcase/web-components'
 import { useTc, detailValue, targetValue } from '@/lib/tc'
 import { useBranding } from '@/lib/branding-context'
-import type { BaseDomain, BaseDomainTier } from '@/server/domain/types'
-
-// Per-tier badge shown beside a base domain in the picker (§10). Free is the
-// baseline everyone sees, so it carries no badge; staff is a perk.
-const TIER_LABEL: Record<BaseDomainTier, string | undefined> = {
-    free: undefined,
-    staff: 'Staff',
-}
+import type { BaseDomain } from '@/server/domain/types'
 
 // Create-site wizard (§9, §10, §14). A guided three-step flow built on
 // `tc-form-wizard`: pick repo + branch (+ build subdir) → choose hostname →
@@ -76,8 +69,8 @@ const STEPS: FormWizardStep[] = [
 const ERROR_COPY: Record<string, string> = {
     unauthorized: 'Your session expired. Sign in again to continue.',
     account_not_found: 'Your account could not be found. Sign in again.',
-    site_limit_reached: "You've reached your plan's site limit. Delete a site or upgrade your plan.",
-    custom_domains_not_allowed: 'Custom domains require a paid (sponsor) plan. Use a Quaykeeper subdomain instead.',
+    site_limit_reached: "You've reached your site limit. Delete a site or ask an owner to raise your limit.",
+    custom_domains_not_allowed: 'Custom domains aren’t enabled for your account. Use a Quaykeeper subdomain instead, or ask an owner.',
     unknown_base_domain: 'That base domain is no longer available. Pick another.',
     hostname_taken: 'That hostname is already taken. Choose a different one.',
     use_subdomain: "That domain is one of Quaykeeper's — attach it as a subdomain instead.",
@@ -224,10 +217,9 @@ export function CreateSiteWizard() {
         [branches, selectedRepo],
     )
 
-    // Annotate the audience tier so a paid/staff domain reads as a perk, not the
-    // default. Free domains carry no badge (they're the baseline everyone sees).
+    // Every base domain is offered to every user — no audience tier, no badge.
     const baseDomainItems = useMemo<ExtendedSelectItem[]>(
-        () => baseDomains.map((b) => ({ key: b.domain, label: b.domain, description: TIER_LABEL[b.tier] })),
+        () => baseDomains.map((b) => ({ key: b.domain, label: b.domain })),
         [baseDomains],
     )
 
@@ -236,12 +228,12 @@ export function CreateSiteWizard() {
             {
                 key: 'subdomain',
                 title: 'Quaykeeper subdomain',
-                description: 'Instant hosting on a Quaykeeper domain — no DNS setup. Free tier.',
+                description: 'Instant hosting on a Quaykeeper domain — no DNS setup.',
             },
             {
                 key: 'custom',
                 title: 'Custom domain',
-                description: 'Bring your own domain via DNS A-records. Requires a paid (sponsor) plan.',
+                description: 'Bring your own domain via DNS A-records.',
             },
         ],
         [],

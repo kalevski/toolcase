@@ -2,7 +2,7 @@
 // POST   /api/routing/proxies — create/replace a proxy (JSON Proxy body).
 // DELETE /api/routing/proxies?domain=<domain> — remove a proxy.
 //
-// Guarded by `authorize('maintainer')` — owners and maintainers, never a standard
+// Guarded by `authorize('standard', 'routing')` — owners and maintainers, never a standard
 // user. Every op runs against the caller's ACTIVE realm (multiple_realms.md §E.2). A
 // proxy that names an upstream is validated against the upstreams already in that
 // realm's running config, so create the upstream first (an unknown reference comes
@@ -17,7 +17,7 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'routing')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     try {
@@ -30,7 +30,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'routing')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     let body: unknown
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'routing')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     const domain = new URL(req.url).searchParams.get('domain') ?? undefined

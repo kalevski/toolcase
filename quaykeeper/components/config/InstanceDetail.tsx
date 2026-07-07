@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { BackButton } from '@/components/BackButton'
 import { SubTabBar, type SubTab } from '@/components/SubTabBar'
 import { LoadingState, ErrorState, EmptyState } from '@/components/states'
 import { ApiError, apiFetch, describeApiError } from '@/lib/fetcher'
@@ -49,11 +50,7 @@ export function InstanceDetail({ instanceId, tab }: { instanceId: string; tab: I
         return () => ctrl.abort()
     }, [load])
 
-    const back = (
-        <button type="button" className="quaykeeper-back" onClick={() => router.push('/instances')}>
-            ← All instances
-        </button>
-    )
+    const back = <BackButton href="/instances" label="all instances" />
 
     if (state.phase === 'loading') {
         return (

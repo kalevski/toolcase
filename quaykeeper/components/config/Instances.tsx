@@ -15,7 +15,7 @@ import { useToast } from '@/components/Toast'
 
 // Flat instance list (move_wharf_to_perch.md §10) — the Config subsystem's
 // entry page. Filtering by tag reproduces every grouping wharf's
-// project/environment hierarchy provided (§2). Maintainer access.
+// project/environment hierarchy provided (§2).
 
 function badge(variant: string, text: string): string {
     return `<span class="badge text-bg-${variant}">${escapeHtml(text)}</span>`
@@ -92,12 +92,12 @@ export function Instances() {
             return null
         }
     }, [])
-    const { state, reload } = useConfigData(fetcher)
+    const { state, reload } = useConfigData(fetcher, 'standard', 'instances')
 
     return (
         <ConfigPage
             title="Instances"
-            subtitle="Flat list of instances carrying variables and flags, organized by project and tags. Maintainer access."
+            subtitle="Flat list of instances carrying variables and flags, organized by project and tags."
             icon="server"
             iconColor="cyan"
             state={state}

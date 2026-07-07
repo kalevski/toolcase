@@ -4,7 +4,7 @@
 // live config — so a maintainer can see exactly where their `advanced` lines land
 // before the apply/quarantine cycle passes judgment.
 //
-// Guarded by `authorize('maintainer')` — owners and maintainers, never a standard user.
+// Guarded by `authorize('standard', 'routing')` — owners and maintainers, never a standard user.
 
 import { NextResponse } from 'next/server'
 import { authorize } from '@/server/services/auth'
@@ -15,7 +15,7 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function GET(_req: Request, { params }: { params: Promise<{ domain: string }> }) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'routing')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     try {

@@ -1,7 +1,7 @@
 // GET  /api/instances?tag=<t> — list instances (maintainer+), optionally filtered to one tag.
 // POST /api/instances        — create an instance ({ name, description?, tags? }).
 //
-// Guarded by `authorize('maintainer')` — the Config subsystem sits at the same
+// Guarded by `authorize('standard', 'instances')` — the Config subsystem sits at the same
 // level as Routing (move_wharf_to_perch.md §7).
 
 import { NextResponse } from 'next/server'
@@ -12,7 +12,7 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: Request) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'instances')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     const tag = new URL(req.url).searchParams.get('tag') ?? undefined
@@ -20,7 +20,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'instances')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     let body: instances.CreateInstanceRequest

@@ -2,9 +2,10 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { AdminPage, json, useOwnerData } from './shared'
-import { TextField, SelectField, ColorField, type SelectOption } from '@/components/fields'
+import { TextField, SelectField, ColorField, SwitchField, type SelectOption } from '@/components/fields'
 import { useToast } from '@/components/Toast'
 import { useBranding } from '@/lib/branding-context'
+import { FEATURES, type FeatureKey } from '@/server/domain/features'
 import {
     THEME_NAMES,
     THEME_LABEL,
@@ -74,8 +75,97 @@ export function AdminSettings() {
             state={state}
             onRetry={() => void reload()}
         >
-            {(settings) => <SettingsForm settings={settings} onSaved={() => void reload()} />}
+            {(settings) => (
+                <>
+                    <SettingsForm settings={settings} onSaved={() => void reload()} />
+                    <FeatureFlagsCard />
+                </>
+            )}
         </AdminPage>
+    )
+}
+
+// ── global feature flags (§2) ──────────────────────────────────────────────────
+
+/**
+ * App-wide feature master switches (features.ts). Independent of the branding
+ * settings save — reads/writes `/api/admin/features` on its own. Turning a feature
+ * off hides it for every non-owner AND refuses its API; the owner always keeps
+ * access. Per-user overrides (Admin → Users → Features) can flip an individual user
+ * either way on top of these globals.
+ */
+function FeatureFlagsCard() {
+    const toast = useToast()
+    const [flags, setFlags] = useState<Record<FeatureKey, boolean> | null>(null)
+    const [busy, setBusy] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+
+    useEffect(() => {
+        let cancelled = false
+        void fetch('/api/admin/features', { cache: 'no-store' })
+            .then((r) => json<Record<FeatureKey, boolean>>(r))
+            .then((f) => {
+                if (!cancelled) setFlags(f)
+            })
+            .catch(() => {
+                if (!cancelled) setError('Couldn’t load feature flags.')
+            })
+        return () => {
+            cancelled = true
+        }
+    }, [])
+
+    const toggle = useCallback(
+        async (key: FeatureKey, on: boolean) => {
+            if (busy || !flags) return
+            const prev = flags
+            setFlags({ ...flags, [key]: on })
+            setBusy(true)
+            setError(null)
+            try {
+                const res = await fetch('/api/admin/features', {
+                    method: 'PUT',
+                    headers: { 'content-type': 'application/json' },
+                    body: JSON.stringify({ [key]: on }),
+                })
+                if (!res.ok) {
+                    setFlags(prev)
+                    setError(`Couldn’t save feature flags (error ${res.status}).`)
+                    return
+                }
+                setFlags(await json<Record<FeatureKey, boolean>>(res))
+                toast.show('Feature flags saved.', { variant: 'success' })
+            } catch {
+                setFlags(prev)
+                setError('Couldn’t save feature flags — network error.')
+            } finally {
+                setBusy(false)
+            }
+        },
+        [busy, flags, toast],
+    )
+
+    return (
+        <tc-section-card title="Features" icon="toggle-right">
+            <div className="quaykeeper-admin-section quaykeeper-admin-settings-grid">
+                <p className="quaykeeper-home-lead quaykeeper-admin-hint quaykeeper-admin-settings-full">
+                    App-wide feature switches. Disabling a feature hides it for every non-owner and
+                    refuses its API. Fine-tune per user under <strong>Admin → Users → Features</strong>.
+                </p>
+                {error && <tc-banner variant="danger" className="quaykeeper-admin-settings-full">{error}</tc-banner>}
+                {flags &&
+                    FEATURES.map((f) => (
+                        <SwitchField
+                            key={f.key}
+                            label={f.label}
+                            help={f.description}
+                            checked={flags[f.key]}
+                            disabled={busy}
+                            onChecked={(on) => void toggle(f.key, on)}
+                        />
+                    ))}
+            </div>
+        </tc-section-card>
     )
 }
 

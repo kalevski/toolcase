@@ -512,5 +512,7 @@ export function httpErrorFor(err: unknown): HttpError {
     if (err instanceof NginxpilotError) {
         return { status: 502, code: 'nginxpilot_error' }
     }
-    return { status: 500, code: 'internal_error' }
+    // A `RealmError` (e.g. no realm registered) delegates to the shared realm mapping;
+    // anything else collapses to `500`.
+    return realms.httpErrorFor(err)
 }

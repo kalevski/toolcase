@@ -31,6 +31,7 @@ import {
     Server,
     SlidersHorizontal,
     Star,
+    ToggleRight,
     Trash2,
     X,
 } from 'lucide-static'
@@ -61,6 +62,7 @@ export const ACTION_ICONS = {
     limits: stripSize(SlidersHorizontal),
     logs: stripSize(ScrollText),
     realms: stripSize(Server),
+    toggles: stripSize(ToggleRight),
     close: stripSize(X),
 } as const
 

@@ -307,11 +307,13 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
                 body: JSON.stringify({ name: n, adminUrl: u, token: form.token.trim() }),
             })
             if (!res.ok) {
-                const body = (await res.json().catch(() => null)) as { error?: string } | null
+                const body = (await res.json().catch(() => null)) as { error?: string; detail?: string } | null
                 setError(
-                    body?.error
-                        ? `Couldn’t add NGINX server: ${body.error}.`
-                        : `Couldn’t add NGINX server (error ${res.status}).`,
+                    body?.detail
+                        ? `Couldn’t add NGINX server: ${body.detail}`
+                        : body?.error
+                          ? `Couldn’t add NGINX server: ${body.error}.`
+                          : `Couldn’t add NGINX server (error ${res.status}).`,
                 )
                 return
             }
@@ -336,10 +338,12 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
                     body: JSON.stringify(body),
                 })
                 if (!res.ok) {
-                    const b = (await res.json().catch(() => null)) as { error?: string } | null
-                    return b?.error
-                        ? `Couldn’t update ${realm.name}: ${b.error}.`
-                        : `Couldn’t update ${realm.name} (error ${res.status}).`
+                    const b = (await res.json().catch(() => null)) as { error?: string; detail?: string } | null
+                    return b?.detail
+                        ? `Couldn’t update ${realm.name}: ${b.detail}`
+                        : b?.error
+                          ? `Couldn’t update ${realm.name}: ${b.error}.`
+                          : `Couldn’t update ${realm.name} (error ${res.status}).`
                 }
                 toast.show(okMsg, { variant: 'success' })
                 onChanged()
@@ -371,13 +375,11 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
                 method: 'DELETE',
             })
             if (!res.ok && res.status !== 204) {
-                const b = (await res.json().catch(() => null)) as { error?: string } | null
+                const b = (await res.json().catch(() => null)) as { error?: string; detail?: string } | null
                 setError(
-                    b?.error === 'realm_has_sites' || b?.error === 'realm_has_base_domains'
-                        ? `Can’t remove ${realm.name} — it still has sites or base domains.`
-                        : b?.error === 'realm_is_default'
-                          ? `Set another NGINX server as default before removing ${realm.name}.`
-                          : `Couldn’t remove ${realm.name} (error ${res.status}).`,
+                    b?.detail
+                        ? `Couldn’t remove ${realm.name}: ${b.detail}`
+                        : `Couldn’t remove ${realm.name} (error ${res.status}).`,
                 )
                 return
             }

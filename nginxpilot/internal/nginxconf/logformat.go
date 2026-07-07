@@ -25,6 +25,9 @@ const (
 	LogResourceProxy    = "proxy"
 	LogResourceRedirect = "redirect"
 	LogResourceDeadHost = "dead_host"
+	// LogResourceDefault marks the default/catch-all vhost's own access-log
+	// entries (nginx.default_catch_all) — there is no real resource behind it.
+	LogResourceDefault = "default"
 )
 
 // LogFormatInclude renders the managed log_format include (log_ides.md §1.2).

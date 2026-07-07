@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { BackButton } from './BackButton'
 import { SiteDashboard } from './SiteDashboard'
 import { LoadingState, ErrorState, EmptyState } from './states'
 import { useMe } from '@/lib/me-context'
@@ -41,11 +42,7 @@ export function SiteDetail({ siteId }: { siteId: string }) {
         return () => ctrl.abort()
     }, [load])
 
-    const back = (
-        <button type="button" className="quaykeeper-back" onClick={() => router.push('/')}>
-            ← All sites
-        </button>
-    )
+    const back = <BackButton href="/" label="all sites" />
 
     if (state.phase === 'loading') {
         return (

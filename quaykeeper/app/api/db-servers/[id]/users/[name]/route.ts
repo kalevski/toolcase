@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic'
 type Ctx = { params: Promise<{ id: string; name: string }> }
 
 export async function DELETE(_req: Request, ctx: Ctx) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'databases')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     const { id, name } = await ctx.params

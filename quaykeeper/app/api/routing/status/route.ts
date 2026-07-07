@@ -3,7 +3,7 @@
 // what the daemon is *serving right now*, overlaid with the reconcile loop's
 // `at_risk` verdicts — a resource that is live but would fail the next apply, with
 // the `nginx -t` reason and how long it has been failing (`since`). Guarded by
-// `authorize('maintainer')`.
+// `authorize('standard', 'routing')`.
 //
 // Response shape (always 200 unless auth/daemon fails):
 //   { managed: false }                — daemon not in managed mode
@@ -18,7 +18,7 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'routing')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     try {

@@ -2,7 +2,7 @@
 // PATCH  /api/snippets/{id} — rename/description/spec/instanceId.
 // DELETE /api/snippets/{id} — delete a snippet.
 //
-// All guarded by `authorize('maintainer')`.
+// All guarded by `authorize('standard', 'snippets')`.
 
 import { NextResponse } from 'next/server'
 import { authorize } from '@/server/services/auth'
@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic'
 type Ctx = { params: Promise<{ id: string }> }
 
 export async function GET(_req: Request, ctx: Ctx) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'snippets')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     const { id } = await ctx.params
@@ -27,7 +27,7 @@ export async function GET(_req: Request, ctx: Ctx) {
 }
 
 export async function PATCH(req: Request, ctx: Ctx) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'snippets')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     let body: snippets.UpdateSnippetRequest
@@ -48,7 +48,7 @@ export async function PATCH(req: Request, ctx: Ctx) {
 }
 
 export async function DELETE(_req: Request, ctx: Ctx) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'snippets')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     const { id } = await ctx.params

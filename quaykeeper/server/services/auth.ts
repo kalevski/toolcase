@@ -18,6 +18,8 @@ import { encrypt, decrypt } from '@/server/infrastructure/cipher'
 import { tx } from '@/server/data/db'
 import { type AppUser, type Role, type SessionPayload } from '@/server/domain/types'
 import { meetsMinRole } from '@/server/domain/admin'
+import { featureEnabledFor } from '@/server/services/features'
+import type { FeatureKey } from '@/server/domain/features'
 
 export const SESSION_COOKIE = 'quaykeeper_session'
 export const STATE_COOKIE = 'quaykeeper_oauth_state'
@@ -359,15 +361,21 @@ export type AuthzResult =
     | { ok: false; status: 401 | 403 }
 
 /**
- * Authorize the current request against `minRole`. Re-reads the role straight
- * from SQLite (authoritative) so promotions/suspensions take effect without a
- * re-login, falling back to `guest` for a session whose user row is gone (§6,
- * §7). Returns a discriminated result for route handlers to act on.
+ * Authorize the current request against `minRole`, and — when `feature` is given
+ * — additionally require that feature to be visible to the caller (owner-set
+ * global flag on AND no per-user override turning it off; owners always pass).
+ * Re-reads the role straight from SQLite (authoritative) so promotions,
+ * suspensions, and feature toggles take effect without a re-login, falling back
+ * to `guest` for a session whose user row is gone (§6, §7). Returns a
+ * discriminated result for route handlers to act on. A feature that is off for
+ * the caller is a `403` — the same shape a role failure returns, so callers need
+ * no new branch.
  */
-export async function authorize(minRole: Role): Promise<AuthzResult> {
+export async function authorize(minRole: Role, feature?: FeatureKey): Promise<AuthzResult> {
     const session = await getSession()
     if (!session) return { ok: false, status: 401 }
     const role = getRole(session.sub) ?? 'guest'
     if (!meetsMinRole(role, minRole)) return { ok: false, status: 403 }
+    if (feature && !featureEnabledFor(session.sub, role, feature)) return { ok: false, status: 403 }
     return { ok: true, session, role }
 }

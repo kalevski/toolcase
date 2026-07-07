@@ -3,9 +3,8 @@
 // base domains to build a `{ kind: 'subdomain', label, baseDomain }` payload, but
 // the management routes under `/api/admin/base-domains` are owner-only. This is the
 // read-only, standard-accessible projection of that list — guarded by
-// `authorize('standard')` and filtered to the caller's audience tier: a free-plan
-// user sees only `free` domains, a paid user `free` + `paid`, and a maintainer/owner
-// every tier (§10). Never exposes the create/delete management surface.
+// `authorize('standard')`. Every base domain is offered to every user (no audience
+// tier). Never exposes the create/delete management surface.
 
 import { NextResponse } from 'next/server'
 import { authorize } from '@/server/services/auth'
@@ -20,6 +19,11 @@ export async function GET() {
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     // Scope the wizard's base-domain pool to the caller's active/assigned realm (§E.2).
-    const active = await realms.resolveActiveRealm(authz.session.sub, authz.role)
-    return NextResponse.json(admin.listBaseDomainsFor(authz.session.login, active.id))
+    try {
+        const active = await realms.resolveActiveRealm(authz.session.sub, authz.role)
+        return NextResponse.json(admin.listBaseDomainsFor(authz.session.login, active.id))
+    } catch (err) {
+        const { status, code, detail } = realms.httpErrorFor(err)
+        return NextResponse.json({ error: code, detail }, { status })
+    }
 }

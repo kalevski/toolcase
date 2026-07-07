@@ -2,7 +2,7 @@
 // user's password (C1). The plaintext travels this one path only: browser →
 // Quaykeeper → daemon, where it is hashed (apr1) server-side into the list's
 // fragment. Never logged, never audited beyond "password set for user X",
-// never readable back. Guarded by `authorize('maintainer')`.
+// never readable back. Guarded by `authorize('standard', 'routing')`.
 
 import { NextResponse } from 'next/server'
 import { authorize } from '@/server/services/auth'
@@ -13,7 +13,7 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function PUT(req: Request, ctx: { params: Promise<{ name: string; username: string }> }) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'routing')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     let body: { password?: unknown }

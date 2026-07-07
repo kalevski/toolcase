@@ -19,7 +19,7 @@ import (
 func cmdRun(args []string) int {
 	fs := flag.NewFlagSet("run", flag.ExitOnError)
 	configPath := fs.String("config", config.DefaultPath, "config file path")
-	logFormat := fs.String("log-format", "logfmt", "logfmt | json")
+	logFormat := fs.String("log-format", "json", "logfmt | json")
 	pruneOrphans := fs.Bool("prune-orphans", false, "delete on-disk content for sites no longer in config")
 	_ = fs.Parse(args)
 

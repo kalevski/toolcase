@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic'
 type Ctx = { params: Promise<{ id: string }> }
 
 export async function GET(req: Request, ctx: Ctx) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'instances')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     const format = new URL(req.url).searchParams.get('format') ?? 'dotenv'

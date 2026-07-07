@@ -14,6 +14,7 @@
 
 import 'server-only'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
+import * as realms from '@/server/services/realms'
 import {
     NginxpilotError,
     type NginxManaged,
@@ -404,5 +405,7 @@ export function httpErrorFor(err: unknown): HttpError {
                 return { status: 502, code: 'nginxpilot_error' }
         }
     }
-    return { status: 500, code: 'internal_error' }
+    // A `RealmError` (e.g. no realm registered) delegates to the shared realm mapping;
+    // anything else collapses to `500`.
+    return realms.httpErrorFor(err)
 }

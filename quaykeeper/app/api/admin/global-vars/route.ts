@@ -13,7 +13,7 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'instances')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
     return NextResponse.json(configGlobals.listGlobalVars())
 }

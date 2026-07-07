@@ -210,7 +210,21 @@ export function canSwitchRealms(role: Role): boolean {
 const BLOCKED_HOSTS = new Set(['169.254.169.254', 'metadata.google.internal', 'metadata'])
 
 /** Literal hostnames that always resolve to the local machine and must never be a target (S2). */
-const BLOCKED_LITERAL_HOSTS = new Set(['localhost', '0.0.0.0', '::', '[::]'])
+const BLOCKED_LITERAL_HOSTS = new Set(['0.0.0.0', '::', '[::]'])
+
+/**
+ * Whether `host` is the loopback host itself — `localhost`, `127.0.0.0/8`, or `::1`.
+ * Allowed as a realm admin URL target despite the private/loopback block below:
+ * registering a realm is owner-only, and pointing it at the same machine (docker
+ * compose, dev, single-box deployments) is a normal topology. This does NOT relax
+ * `isPrivateOrLoopbackIp` itself — `certs.ts` reuses that for its ACME preflight
+ * probe of an arbitrary site's custom domain, which stays blocked (that path isn't
+ * owner-gated: any site owner picks the domain).
+ */
+function isLoopbackHost(host: string): boolean {
+    if (host === 'localhost' || host === '::1') return true
+    return /^127(\.\d{1,3}){3}$/.test(host)
+}
 
 /**
  * Whether a literal IPv4/IPv6 address is private, loopback, link-local, or otherwise
@@ -298,10 +312,11 @@ export function validateAdminUrl(raw: unknown): string {
                 400,
             )
         }
-    } else {
+    } else if (!isLoopbackHost(host)) {
         // No allowlist: belt-and-suspenders. Block the cloud-metadata hosts AND any literal
-        // private/loopback/link-local IP, plus `localhost`/`0.0.0.0` (S2). A DNS name that
-        // resolves into those ranges is rejected separately by `assertAdminUrlResolvesSafely`.
+        // private/link-local IP, plus `0.0.0.0`/`::` (S2). Loopback (`localhost`/127.0.0.0/8/
+        // `::1`) is allowed — see `isLoopbackHost`. A DNS name that resolves into a blocked
+        // range is rejected separately by `assertAdminUrlResolvesSafely`.
         if (BLOCKED_HOSTS.has(host) || BLOCKED_LITERAL_HOSTS.has(host) || isPrivateOrLoopbackIp(host)) {
             throw new RealmError(`admin URL host "${host}" is blocked`, 'url_blocked', 400)
         }
@@ -327,8 +342,10 @@ export async function assertAdminUrlResolvesSafely(adminUrl: string): Promise<vo
         return
     }
     if (host.startsWith('[') && host.endsWith(']')) host = host.slice(1, -1)
-    // A literal IP was already vetted synchronously; resolving it is a no-op.
-    if (/^\d{1,3}(\.\d{1,3}){3}$/.test(host) || host.includes(':')) return
+    // A literal IP was already vetted synchronously; resolving it is a no-op. Loopback
+    // (`localhost` etc.) was explicitly allowed synchronously too — don't re-block it
+    // once it resolves to 127.0.0.1/::1.
+    if (isLoopbackHost(host) || /^\d{1,3}(\.\d{1,3}){3}$/.test(host) || host.includes(':')) return
     try {
         const addrs = await lookup(host, { all: true })
         for (const { address } of addrs) {
@@ -680,11 +697,15 @@ export function ensureSeed(): void {
 export interface HttpError {
     status: number
     code: string
+    /** `RealmError`'s hand-authored, owner-facing message (e.g. which host was blocked
+     *  and why, which realm still has sites) — always safe to show; never a raw
+     *  daemon/exception message. */
+    detail?: string
 }
 
-/** Map any realm-operation error to its HTTP status + code (messages never forwarded). */
+/** Map any realm-operation error to its HTTP status + code + detail. */
 export function httpErrorFor(err: unknown): HttpError {
-    if (err instanceof RealmError) return { status: err.status, code: err.code }
+    if (err instanceof RealmError) return { status: err.status, code: err.code, detail: err.message }
     if (err instanceof NginxpilotError) return { status: 502, code: 'nginxpilot_error' }
     return { status: 500, code: 'internal_error' }
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { BackButton } from '@/components/BackButton'
 import { SubTabBar, type SubTab } from '@/components/SubTabBar'
 import type { DbServer } from '@/server/domain/types'
 import { DbPage, json, useDbData } from './shared'
@@ -16,7 +16,6 @@ import { AccessTab } from './AccessTab'
 export type DbServerTab = 'databases' | 'users' | 'access'
 
 export function DbServerDetail({ serverId, tab }: { serverId: string; tab: DbServerTab }) {
-    const router = useRouter()
     // The maintainer surface has no per-id server endpoint — the list is tiny and
     // already masked, so resolve the row client-side.
     const fetcher = useCallback(async (): Promise<DbServer | null> => {
@@ -29,7 +28,7 @@ export function DbServerDetail({ serverId, tab }: { serverId: string; tab: DbSer
             return null
         }
     }, [serverId])
-    const { state, reload } = useDbData(fetcher)
+    const { state, reload } = useDbData(fetcher, 'standard', 'databases')
 
     const tabs: SubTab[] = [
         { id: 'databases', label: 'Databases', href: `/databases/${serverId}/databases` },
@@ -48,9 +47,7 @@ export function DbServerDetail({ serverId, tab }: { serverId: string; tab: DbSer
         >
             {(server) => (
                 <>
-                    <button type="button" className="quaykeeper-back" onClick={() => router.push('/databases')}>
-                        ← All servers
-                    </button>
+                    <BackButton href="/databases" label="all servers" />
                     <p className="quaykeeper-admin-hint">
                         <span className="quaykeeper-admin-realm-name">{server.name}</span>{' '}
                         <span className="badge text-bg-info">{server.kind}</span>{' '}

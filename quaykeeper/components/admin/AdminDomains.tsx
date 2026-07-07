@@ -4,26 +4,17 @@ import { useCallback, useMemo, useState } from 'react'
 import type { AdvancedTableColumn } from '@toolcase/web-components'
 import { iconBtnHtml } from '@/lib/action-icons'
 import { escapeHtml, useTc } from '@/lib/tc'
-import { BASE_DOMAIN_TIERS, type BaseDomain, type BaseDomainTier, type BaseDomainTls } from '@/server/domain/types'
+import { type BaseDomain, type BaseDomainTls } from '@/server/domain/types'
 import { AdminPage, json, useOwnerData } from './shared'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { FormModal, FormGroup } from '@/components/FormModal'
-import { SelectField, TextField, type SelectOption } from '@/components/fields'
+import { SelectField, TextField } from '@/components/fields'
 
 // Owner-only subdomain pool (§10/§13). The owner registers base domains, each one
-// backing `<label>.<domain>` sites, and assigns each to an audience tier: `free`
-// (every account) or `staff` (maintainers & owner). The standard `/api/base-domains`
-// projection the wizard reads is filtered by the caller's tier; this owner surface
-// shows the whole pool grouped by tier. Add via POST, remove via DELETE; both
-// append to the audit log server-side.
-
-/** Human labels + a one-line note for each tier, shown in the selector and group headers. */
-const TIER_META: Record<BaseDomainTier, { label: string; note: string }> = {
-    free: { label: 'Free', note: 'Visible to every account, including free plans.' },
-    staff: { label: 'Staff', note: 'Visible only to maintainers and the owner.' },
-}
-
-const TIER_OPTIONS: SelectOption[] = BASE_DOMAIN_TIERS.map((t) => ({ value: t, label: TIER_META[t].label }))
+// backing `<label>.<domain>` sites. Every base domain is offered to every user —
+// there is no audience tier. The pool is per-realm (multiple_realms.md §E.2), so
+// this page carries the active-realm selector. Add via POST, remove via DELETE;
+// both append to the audit log server-side.
 
 // Subdomain TLS policy (§0/Phase D) — one wildcard cert per base domain; `auto`
 // degrades to HTTP if the cert isn't issued yet. Set at add time and per row —
@@ -102,11 +93,12 @@ export function AdminDomains() {
     return (
         <AdminPage
             title="Domains"
-            subtitle="The subdomain pool backing tenant sites, grouped by audience. Owner-only."
+            subtitle="The subdomain pool backing tenant sites, on the active NGINX server. Owner-only."
             icon="globe"
             iconColor="cyan"
             state={state}
             onRetry={() => void reload()}
+            realmScoped
         >
             {(baseDomains) => <BaseDomainsForm baseDomains={baseDomains} onChanged={() => void reload()} />}
         </AdminPage>
@@ -116,11 +108,10 @@ export function AdminDomains() {
 /** Everything the add-domain form holds — one draft object; the modal resets by remount. */
 interface DomainDraft {
     domain: string
-    tier: BaseDomainTier
     tls: BaseDomainTls
 }
 
-const emptyDraft = (): DomainDraft => ({ domain: '', tier: 'free', tls: 'auto' })
+const emptyDraft = (): DomainDraft => ({ domain: '', tls: 'auto' })
 
 function BaseDomainsForm({
     baseDomains,
@@ -149,15 +140,12 @@ function BaseDomainsForm({
         setError(null)
     }, [])
 
-    // Bucket the pool by tier for grouped display, in the canonical free→paid→staff
-    // order. Each bucket is a stable (memoised) row set so each tier table's `rows`
+    // The flat pool as table rows — a stable (memoised) set so the injected `rows`
     // HTML only regenerates when the pool actually changes.
-    const byTier = useMemo(() => {
-        const groups = new Map<BaseDomainTier, DomainRow[]>()
-        for (const t of BASE_DOMAIN_TIERS) groups.set(t, [])
-        for (const b of baseDomains) groups.get(b.tier)?.push({ domain: b.domain, tls: b.tls })
-        return groups
-    }, [baseDomains])
+    const rows = useMemo<DomainRow[]>(
+        () => baseDomains.map((b) => ({ domain: b.domain, tls: b.tls })),
+        [baseDomains],
+    )
 
     const add = useCallback(async () => {
         if (!form || busy) return
@@ -172,7 +160,7 @@ function BaseDomainsForm({
             const res = await fetch('/api/admin/base-domains', {
                 method: 'POST',
                 headers: { 'content-type': 'application/json' },
-                body: JSON.stringify({ domain, tier: form.tier, tls: form.tls }),
+                body: JSON.stringify({ domain, tls: form.tls }),
             })
             if (!res.ok) {
                 const body = (await res.json().catch(() => null)) as { error?: string } | null
@@ -237,8 +225,8 @@ function BaseDomainsForm({
     }, [pending, busy, onChanged])
 
     // Row controls live in the injected tbody HTML — one delegated host listener
-    // (shared by every tier table) routes their data-action events back to the
-    // React handlers: the TLS select's `change` and the remove button's `click`.
+    // routes their data-action events back to the React handlers: the TLS select's
+    // `change` and the remove button's `click`.
     const onDelegated = useCallback(
         (event: Event) => {
             const el = (event.target as HTMLElement)?.closest?.('[data-action]') as HTMLElement | null
@@ -261,7 +249,7 @@ function BaseDomainsForm({
                 <div className="quaykeeper-admin-section">
                     <p className="quaykeeper-home-lead quaykeeper-admin-hint">
                         The subdomain pool. Each base domain backs <code>&lt;label&gt;.&lt;domain&gt;</code> sites and is
-                        offered to one audience: free accounts or staff.
+                        available to every user.
                     </p>
                     {error && !form && <tc-banner variant="danger">{error}</tc-banner>}
 
@@ -274,19 +262,7 @@ function BaseDomainsForm({
                     {baseDomains.length === 0 ? (
                         <tc-empty-state icon="globe">No base domains registered.</tc-empty-state>
                     ) : (
-                        BASE_DOMAIN_TIERS.map((t) => {
-                            const rows = byTier.get(t) ?? []
-                            if (rows.length === 0) return null
-                            return (
-                                <div key={t} className="quaykeeper-admin-domain-group">
-                                    <h4 className="quaykeeper-admin-domain-group-title">
-                                        {TIER_META[t].label}
-                                        <span className="quaykeeper-admin-hint"> — {TIER_META[t].note}</span>
-                                    </h4>
-                                    <DomainTierTable rows={rows} busy={busy} onDelegated={onDelegated} />
-                                </div>
-                            )
-                        })
+                        <DomainTable rows={rows} busy={busy} onDelegated={onDelegated} />
                     )}
                 </div>
             </tc-section-card>
@@ -311,22 +287,13 @@ function BaseDomainsForm({
                         />
                     </FormGroup>
                     <FormGroup title="Policy">
-                        <div className="quaykeeper-form-grid">
-                            <SelectField
-                                label="Audience tier"
-                                help={TIER_META[form.tier].note}
-                                value={form.tier}
-                                options={TIER_OPTIONS}
-                                onValue={(v) => patchDraft({ tier: v as BaseDomainTier })}
-                            />
-                            <SelectField
-                                label="Subdomain TLS"
-                                help="auto serves HTTPS once the wildcard cert is issued; off keeps subdomains HTTP-only."
-                                value={form.tls}
-                                options={TLS_OPTIONS}
-                                onValue={(v) => patchDraft({ tls: v as BaseDomainTls })}
-                            />
-                        </div>
+                        <SelectField
+                            label="Subdomain TLS"
+                            help="auto serves HTTPS once the wildcard cert is issued; off keeps subdomains HTTP-only."
+                            value={form.tls}
+                            options={TLS_OPTIONS}
+                            onValue={(v) => patchDraft({ tls: v as BaseDomainTls })}
+                        />
                     </FormGroup>
                 </FormModal>
             )}
@@ -348,10 +315,10 @@ function BaseDomainsForm({
     )
 }
 
-/** One tier's table — its own component so each tier gets its own `useTc` ref
- *  feeding the element-owned `rows` HTML string (relocation-safe — re-applied by
- *  the component on every internal re-render). */
-function DomainTierTable({
+/** The pool table — its own component so it gets its own `useTc` ref feeding the
+ *  element-owned `rows` HTML string (relocation-safe — re-applied by the component
+ *  on every internal re-render). */
+function DomainTable({
     rows,
     busy,
     onDelegated,

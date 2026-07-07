@@ -41,8 +41,8 @@ export async function PATCH(req: Request, ctx: Ctx) {
         }
         return NextResponse.json(updated)
     } catch (err) {
-        const { status, code } = realms.httpErrorFor(err)
-        return NextResponse.json({ error: code }, { status })
+        const { status, code, detail } = realms.httpErrorFor(err)
+        return NextResponse.json({ error: code, detail }, { status })
     }
 }
 
@@ -56,7 +56,7 @@ export async function DELETE(_req: Request, ctx: Ctx) {
         realms.removeRealm(actor, id)
         return new NextResponse(null, { status: 204 })
     } catch (err) {
-        const { status, code } = realms.httpErrorFor(err)
-        return NextResponse.json({ error: code }, { status })
+        const { status, code, detail } = realms.httpErrorFor(err)
+        return NextResponse.json({ error: code, detail }, { status })
     }
 }

@@ -81,7 +81,7 @@ export function DeadHosts() {
     return (
         <RoutingPage
             title="Dead hosts"
-            subtitle="Parked domains answering a fixed error code — optionally over TLS to keep the cert warm. Maintainer access."
+            subtitle="Parked domains answering a fixed error code — optionally over TLS to keep the cert warm."
             icon="ban"
             iconColor="rose"
             requiresPath="/dead-hosts"

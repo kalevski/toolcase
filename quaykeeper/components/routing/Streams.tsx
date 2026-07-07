@@ -85,7 +85,7 @@ export function Streams() {
     return (
         <RoutingPage
             title="Streams"
-            subtitle="TCP/UDP listeners and the stream-upstream pools they forward to. Maintainer access."
+            subtitle="TCP/UDP listeners and the stream-upstream pools they forward to."
             icon="cable"
             iconColor="cyan"
             requiresPath="/streams"

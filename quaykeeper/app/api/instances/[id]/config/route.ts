@@ -1,5 +1,5 @@
 // GET /api/instances/{id}/config — the resolved config (masked unless owner)
-// plus per-key `pending` flags. Guarded by `authorize('maintainer')`; real
+// plus per-key `pending` flags. Guarded by `authorize('standard', 'instances')`; real
 // secret values only for the owner role (§7).
 
 import { NextResponse } from 'next/server'
@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic'
 type Ctx = { params: Promise<{ id: string }> }
 
 export async function GET(_req: Request, ctx: Ctx) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'instances')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     const { id } = await ctx.params

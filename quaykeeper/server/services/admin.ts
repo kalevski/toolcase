@@ -20,8 +20,10 @@ import * as siteRepo from '@/server/data/repositories/site-repo'
 import * as userRepo from '@/server/data/repositories/user-repo'
 import * as userLimitRepo from '@/server/data/repositories/user-limit-repo'
 import * as userRealmRepo from '@/server/data/repositories/user-realm-repo'
+import * as userFeatureRepo from '@/server/data/repositories/user-feature-repo'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
 import * as deploy from '@/server/services/deploy'
+import * as realms from '@/server/services/realms'
 import { checkBaseDomain, isAssignableRole, parseUserLimits } from '@/server/domain/admin'
 import { resolveLimits, effectiveLimitsFor } from '@/server/services/plan'
 import { summarizeUsage } from '@/server/domain/usage'
@@ -29,14 +31,11 @@ import { NginxpilotError } from '@/server/infrastructure/nginxpilot'
 import { slog } from '@/server/infrastructure/server-log'
 import {
     accountLevel,
-    isBaseDomainTier,
     isBaseDomainTls,
-    visibleBaseDomainTiers,
     type AdminUserRow,
     type AppUser,
     type AuditEntry,
     type BaseDomain,
-    type BaseDomainTier,
     type BaseDomainTls,
     type Role,
     type Site,
@@ -87,28 +86,22 @@ export function listBaseDomains(realmId: string): BaseDomain[] {
 
 /**
  * The base domains a given user may attach a subdomain under, within `realmId` (the caller's
- * active/assigned realm, multiple_realms.md §E.2), filtered by the tier-visibility rules
- * (§10): a standard user sees only `free` domains; an instance operator
- * (`maintainer`/`owner`) sees every tier including `staff`. Backs the standard,
- * non-owner `GET /api/base-domains` projection the create-site wizard reads. Role is
- * read live (authoritative).
+ * active/assigned realm, multiple_realms.md §E.2). Every base domain is offered to every
+ * user — there is no audience tier — so this is the whole realm pool. Backs the standard,
+ * non-owner `GET /api/base-domains` projection the create-site wizard reads.
  */
 export function listBaseDomainsFor(login: string, realmId: string): BaseDomain[] {
-    const role: Role = userRepo.getByLogin(login)?.role ?? 'guest'
-    const allowed = new Set(visibleBaseDomainTiers(role))
-    return baseDomainRepo.listByRealm(realmId).filter((b) => allowed.has(b.tier))
+    return baseDomainRepo.listByRealm(realmId)
 }
 
 /**
- * Register a base domain (`POST /api/admin/base-domains`): validate the FQDN shape, the
- * audience `tier`, and the subdomain TLS policy, reject a duplicate (`409`), persist it,
- * and audit. `tier` defaults to `free`, `tls` to `auto` (§0/Phase D) when omitted.
- * Returns the new row.
+ * Register a base domain (`POST /api/admin/base-domains`): validate the FQDN shape and the
+ * subdomain TLS policy, reject a duplicate (`409`), persist it, and audit. `tls` defaults to
+ * `auto` (§0/Phase D) when omitted. Returns the new row.
  */
 export function addBaseDomain(
     actor: AdminActor,
     raw: unknown,
-    rawTier: unknown = 'free',
     rawTls: unknown = 'auto',
     realmId: string,
 ): BaseDomain {
@@ -116,11 +109,6 @@ export function addBaseDomain(
     const checked = checkBaseDomain(raw)
     if (!checked.ok) throw new AdminError(checked.message, `domain_${checked.reason}`, 400)
     const domain = checked.domain
-
-    const tier: BaseDomainTier = rawTier === undefined || rawTier === null ? 'free' : (rawTier as BaseDomainTier)
-    if (!isBaseDomainTier(tier)) {
-        throw new AdminError('tier must be one of: free, paid, staff', 'invalid_tier', 400)
-    }
 
     const tls: BaseDomainTls = rawTls === undefined || rawTls === null ? 'auto' : (rawTls as BaseDomainTls)
     if (!isBaseDomainTls(tls)) {
@@ -134,10 +122,10 @@ export function addBaseDomain(
     }
 
     const createdAt = new Date().toISOString()
-    baseDomainRepo.add(domain, tier, tls, realmId, createdAt)
-    audit(actor, 'admin.base_domain.add', { detail: `${domain} (${tier}, tls=${tls}, realm=${realmId})` })
-    slog('info', 'admin', 'base domain added', { domain, tier, tls, realmId, by: actor.login })
-    return { domain, tier, tls, realmId, createdAt }
+    baseDomainRepo.add(domain, tls, realmId, createdAt)
+    audit(actor, 'admin.base_domain.add', { detail: `${domain} (tls=${tls}, realm=${realmId})` })
+    slog('info', 'admin', 'base domain added', { domain, tls, realmId, by: actor.login })
+    return { domain, tls, realmId, createdAt }
 }
 
 /**
@@ -210,6 +198,7 @@ function enrichUser(user: AppUser, override?: UserLimitOverride | null): AdminUs
         limits: resolveLimits(user.login),
         customLimits: custom,
         realmGrants: userRealmRepo.listForUser(user.githubId),
+        featureOverrides: userFeatureRepo.get(user.githubId),
     }
 }
 
@@ -246,6 +235,7 @@ export function listUsersDetailed(): AdminUserRow[] {
             limits: effectiveLimitsFor(u, override),
             customLimits: override,
             realmGrants: grantsByUser.get(u.githubId) ?? [],
+            featureOverrides: userFeatureRepo.get(u.githubId),
         }
     })
 }
@@ -295,18 +285,17 @@ function summarizeOverride(o: UserLimitOverride): string {
 
 /**
  * Change a user's role (`PATCH /api/admin/users`) — the owner-only power to grant
- * `maintainer` (routing access + quota exemption, but no admin) or `owner`, or to
- * drop back to `standard`. Validates the target role (`400`), requires the target
- * to exist (`404`), and refuses to demote the *last* `owner` (`409`) so the
- * instance can never be locked out of its admin surface. A no-op (same role)
- * short-circuits without an audit entry. Returns the updated user.
+ * `owner`, or to drop back to `standard`. Validates the target role (`400`),
+ * requires the target to exist (`404`), and refuses to demote the *last* `owner`
+ * (`409`) so the instance can never be locked out of its admin surface. A no-op
+ * (same role) short-circuits without an audit entry. Returns the updated user.
  */
 export function setUserRole(actor: AdminActor, githubId: unknown, rawRole: unknown): AppUser {
     if (typeof githubId !== 'number' || !Number.isInteger(githubId)) {
         throw new AdminError('"githubId" must be an integer', 'invalid_request', 400)
     }
     if (!isAssignableRole(rawRole)) {
-        throw new AdminError('role must be one of: owner, maintainer, standard', 'invalid_role', 400)
+        throw new AdminError('role must be one of: owner, standard', 'invalid_role', 400)
     }
     const role: Role = rawRole
 
@@ -364,6 +353,7 @@ export interface HttpError {
 /**
  * Map any error an admin operation can throw to its HTTP status + code. An `AdminError`
  * carries its own status; an nginxpilot failure during a suspend collapses to `502`;
+ * a `RealmError` (e.g. no realm registered) delegates to the shared realm mapping;
  * anything else is a `500`. Messages are intentionally not forwarded to the client.
  */
 export function httpErrorFor(err: unknown): HttpError {
@@ -373,5 +363,5 @@ export function httpErrorFor(err: unknown): HttpError {
     if (err instanceof NginxpilotError) {
         return { status: 502, code: 'nginxpilot_error' }
     }
-    return { status: 500, code: 'internal_error' }
+    return realms.httpErrorFor(err)
 }

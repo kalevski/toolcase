@@ -11,13 +11,14 @@ import (
 
 // Resource kinds, surfaced in ApplyResult / GET /status.
 const (
-	KindSite           = "site"
-	KindProxy          = "proxy"
-	KindRedirect       = "redirect"
-	KindDeadHost       = "dead-host"
-	KindUpstream       = "upstream"
-	KindStream         = "stream"
-	KindStreamUpstream = "stream-upstream"
+	KindSite            = "site"
+	KindProxy           = "proxy"
+	KindRedirect        = "redirect"
+	KindDeadHost        = "dead-host"
+	KindUpstream        = "upstream"
+	KindStream          = "stream"
+	KindStreamUpstream  = "stream-upstream"
+	KindDefaultCatchAll = "default-catchall"
 )
 
 // Resource states.
@@ -81,6 +82,19 @@ func renderResources(cfg *config.Config, certs nginxconf.CertResolver, includeDi
 				content: inc, context: ctxHTTP,
 			})
 		}
+	}
+
+	// Default/catch-all vhost (nginx.default_catch_all, opt-in — see the config
+	// doc comment for why it isn't unconditional). A quarantinable resource,
+	// not baseHTTP: if it collides with something else claiming default_server
+	// (e.g. the Docker image's static legacy one, or an operator's own), the
+	// crash-proof quarantine pass disables just this copy instead of failing
+	// the whole apply (nginxctl.go's per-resource bisection).
+	if cfg.Nginx.DefaultCatchAll {
+		resources = append(resources, rendered{
+			kind: KindDefaultCatchAll, key: "_", filename: nginxconf.DefaultCatchAllFilename,
+			content: nginxconf.DefaultCatchAllVhost(cfg, opts), context: ctxHTTP,
+		})
 	}
 
 	// http upstreams first — proxies reference them by name.

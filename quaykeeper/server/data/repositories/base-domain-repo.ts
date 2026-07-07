@@ -5,22 +5,20 @@
 
 import 'server-only'
 import { prep, allRows, getRow } from '@/server/data/db'
-import type { BaseDomain, BaseDomainTier, BaseDomainTls } from '@/server/domain/types'
+import type { BaseDomain, BaseDomainTls } from '@/server/domain/types'
 
 interface Raw {
     domain: string
-    tier: string
     tls: string
     realm_id: string
     created_at: string
 }
 
 function map(r: Raw): BaseDomain {
-    // `tier`/`tls` are NOT NULL with column defaults in the schema; the casts narrow the
-    // column text to the unions without a runtime check (the write path validates them).
+    // `tls` is NOT NULL with a column default in the schema; the cast narrows the
+    // column text to the union without a runtime check (the write path validates it).
     return {
         domain: r.domain,
-        tier: r.tier as BaseDomainTier,
         tls: r.tls as BaseDomainTls,
         realmId: r.realm_id,
         createdAt: r.created_at,
@@ -41,21 +39,20 @@ export function listByRealm(realmId: string): BaseDomain[] {
 }
 
 /**
- * Register a base domain in an audience `tier` with a subdomain TLS policy (§10/§0), bound
- * to a realm (the instance whose wildcard serves it, §10.4). `createdAt` defaults to now.
- * Throws on conflict (the domain is the primary key, so registration is idempotent only if
+ * Register a base domain with a subdomain TLS policy (§10/§0), bound to a realm (the
+ * instance whose wildcard serves it, §10.4). `createdAt` defaults to now. Throws on
+ * conflict (the domain is the primary key, so registration is idempotent only if
  * callers dedupe first).
  */
 export function add(
     domain: string,
-    tier: BaseDomainTier,
     tls: BaseDomainTls,
     realmId: string,
     createdAt: string = new Date().toISOString(),
 ): void {
     prep(
-        'INSERT INTO base_domain (domain, tier, tls, realm_id, created_at) VALUES (?, ?, ?, ?, ?)',
-    ).run(domain, tier, tls, realmId, createdAt)
+        'INSERT INTO base_domain (domain, tls, realm_id, created_at) VALUES (?, ?, ?, ?)',
+    ).run(domain, tls, realmId, createdAt)
 }
 
 /** Update a base domain's subdomain TLS policy (§0/Phase D). No-op on an unknown domain. */

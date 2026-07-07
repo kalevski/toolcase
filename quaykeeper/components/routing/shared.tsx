@@ -3,10 +3,10 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import type { AdvancedTableColumn } from '@toolcase/web-components'
-import { ROLE_RANK } from '@/server/domain/types'
 import { hstsEnabled, type HstsOptions, type TlsMode } from '@/server/domain/routing'
 import { useMe } from '@/lib/me-context'
 import { LoadingState, ErrorState } from '@/components/states'
+import { RealmSelect } from '@/components/RealmSelect'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { SwitchField, TextField } from '@/components/fields'
 import { escapeHtml, useTc } from '@/lib/tc'
@@ -197,11 +197,13 @@ export type RoutingDataState<T> =
     | { phase: 'ready'; data: T }
 
 /**
- * Confirm the caller meets the `maintainer` rank, then load a routing dataset via
- * `fetcher`. Anyone below maintainer is redirected to the dashboard and never sees
- * routing data. `reload` re-runs the fetcher and swaps in fresh data (after a
- * mutation, or via the error Retry). `fetcher` MUST be stable (wrap in
- * `useCallback`) — it is intentionally omitted from the effect deps.
+ * Confirm the caller has the `routing` feature enabled (features.ts), then load a
+ * routing dataset via `fetcher`. Anyone without the feature is redirected to the
+ * dashboard and never sees routing data. `reload` re-runs the fetcher and swaps in
+ * fresh data (after a mutation, or via the error Retry). `fetcher` MUST be stable
+ * (wrap in `useCallback`) — it is intentionally omitted from the effect deps. Every
+ * backing `/api/routing/**` route re-enforces the feature server-side, so this is a
+ * UX nicety, not the security boundary.
  */
 export function useMaintainerData<T>(fetcher: () => Promise<T | null>): {
     state: RoutingDataState<T>
@@ -212,7 +214,7 @@ export function useMaintainerData<T>(fetcher: () => Promise<T | null>): {
     const [state, setState] = useState<RoutingDataState<T>>({ phase: 'loading' })
 
     useEffect(() => {
-        if (ROLE_RANK[me.role] < ROLE_RANK.maintainer) {
+        if (!me.features.routing) {
             setState({ phase: 'forbidden' })
             router.replace('/')
             return
@@ -226,7 +228,7 @@ export function useMaintainerData<T>(fetcher: () => Promise<T | null>): {
             cancelled = true
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [me.role, router])
+    }, [me.features.routing, router])
 
     const reload = useCallback(async () => {
         setState({ phase: 'loading' })
@@ -313,7 +315,10 @@ export function RoutingPage<T>({
     }
 
     // Same attribute-driven tc-rich-page-header as the admin frame — keeps the
-    // maintainer routing pages visually consistent with the owner admin surface.
+    // routing pages visually consistent with the owner admin surface. The active
+    // nginxpilot-instance (realm) selector sits in the page header: every routing
+    // page's data is scoped to the active realm, so the picker lives in-context
+    // (it replaces the old sidebar switcher) and persists the choice across features.
     return (
         <section className="quaykeeper-admin">
             <tc-rich-page-header
@@ -322,6 +327,7 @@ export function RoutingPage<T>({
                 icon-name={icon}
                 icon-color={iconColor}
             />
+            <RealmSelect className="quaykeeper-admin-realm-select" />
             {unsupported && (
                 <tc-banner variant="warning">
                     This realm’s nginxpilot doesn’t support {title.toLowerCase()} (its API declares no{' '}

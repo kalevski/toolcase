@@ -52,7 +52,7 @@ function RunItem({ run, open }: { run: JobRun; open: boolean }) {
     return (
         <details className="quaykeeper-job-run" open={open || undefined}>
             <summary className="quaykeeper-job-run-summary">
-                <span className={`badge text-bg-${variant}`}>{run.status}</span>
+                <tc-badge variant={variant}>{run.status}</tc-badge>
                 <span className="quaykeeper-admin-mono">{who}</span>
                 <span className="quaykeeper-admin-hint">{fmtWhen(run.finishedAt)}</span>
                 <span className="quaykeeper-admin-hint">{fmtDuration(run.durationMs)}</span>

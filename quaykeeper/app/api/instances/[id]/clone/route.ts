@@ -1,6 +1,6 @@
 // POST /api/instances/{id}/clone — deep-copy an instance ({ name }): tags,
 // vars (references shared), flags. The fetch key is never copied. Guarded by
-// `authorize('maintainer')`.
+// `authorize('standard', 'instances')`.
 
 import { NextResponse } from 'next/server'
 import { authorize } from '@/server/services/auth'
@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic'
 type Ctx = { params: Promise<{ id: string }> }
 
 export async function POST(req: Request, ctx: Ctx) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'instances')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     let body: { name?: unknown }

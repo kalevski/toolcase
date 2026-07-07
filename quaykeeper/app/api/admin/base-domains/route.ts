@@ -1,6 +1,5 @@
 // GET    /api/admin/base-domains — list the owner-managed subdomain pool (§10).
-// POST   /api/admin/base-domains — register a base domain ({ domain, tier?, tls? }); tier
-//        is one of free|paid|staff (the audience group, §10), defaulting to free; tls is
+// POST   /api/admin/base-domains — register a base domain ({ domain, tls? }); tls is
 //        off|auto (the subdomain wildcard TLS policy, §0/Phase D), defaulting to auto.
 // PATCH  /api/admin/base-domains — update a base domain's TLS policy ({ domain, tls }).
 // DELETE /api/admin/base-domains — remove a base domain (?domain= or { domain }).
@@ -22,17 +21,22 @@ export async function GET() {
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     // Base domains are per-realm (multiple_realms.md §E.2) — show the owner's active realm pool.
-    const active = await realms.resolveActiveRealm(authz.session.sub, authz.role)
-    return NextResponse.json(admin.listBaseDomains(active.id))
+    try {
+        const active = await realms.resolveActiveRealm(authz.session.sub, authz.role)
+        return NextResponse.json(admin.listBaseDomains(active.id))
+    } catch (err) {
+        const { status, code } = admin.httpErrorFor(err)
+        return NextResponse.json({ error: code }, { status })
+    }
 }
 
 export async function POST(req: Request) {
     const authz = await authorize('owner')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
-    let body: { domain?: unknown; tier?: unknown; tls?: unknown }
+    let body: { domain?: unknown; tls?: unknown }
     try {
-        body = (await req.json()) as { domain?: unknown; tier?: unknown; tls?: unknown }
+        body = (await req.json()) as { domain?: unknown; tls?: unknown }
     } catch {
         return NextResponse.json({ error: 'invalid_json' }, { status: 400 })
     }
@@ -40,7 +44,7 @@ export async function POST(req: Request) {
     try {
         const actor = { githubId: authz.session.sub, login: authz.session.login }
         const active = await realms.resolveActiveRealm(authz.session.sub, authz.role)
-        const created = admin.addBaseDomain(actor, body.domain, body.tier, body.tls, active.id)
+        const created = admin.addBaseDomain(actor, body.domain, body.tls, active.id)
         return NextResponse.json(created, { status: 201 })
     } catch (err) {
         const { status, code } = admin.httpErrorFor(err)

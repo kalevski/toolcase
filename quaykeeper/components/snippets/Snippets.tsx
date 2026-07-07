@@ -94,12 +94,12 @@ export function Snippets() {
             return null
         }
     }, [])
-    const { state, reload } = useConfigData(fetcher)
+    const { state, reload } = useConfigData(fetcher, 'standard', 'snippets')
 
     return (
         <ConfigPage
             title="Docker snippets"
-            subtitle="Saved docker run commands, built from a form. Attach a variables instance to inject its config at container boot. Maintainer access."
+            subtitle="Saved docker run commands, built from a form. Attach a variables instance to inject its config at container boot."
             icon="container"
             iconColor="cyan"
             state={state}

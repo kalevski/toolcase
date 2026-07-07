@@ -1,7 +1,7 @@
 // POST /api/routing/nginx-test — managed-mode dry run (Phase E). Previews the
 // per-resource pass/fail set nginxpilot's `nginx -t` gate would apply, WITHOUT
 // committing it, so a maintainer can sanity-check a batch before trusting the live
-// apply. Guarded by `authorize('maintainer')`.
+// apply. Guarded by `authorize('standard', 'routing')`.
 //
 // Response shape (always 200 unless auth/daemon fails):
 //   { managed: false }                                  — daemon not in managed mode (501)
@@ -16,7 +16,7 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function POST() {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'routing')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     try {

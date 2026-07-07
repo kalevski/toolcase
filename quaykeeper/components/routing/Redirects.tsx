@@ -84,7 +84,7 @@ export function Redirects() {
     return (
         <RoutingPage
             title="Redirects"
-            subtitle="Redirection hosts — answer every request with a 30x to another host. Maintainer access."
+            subtitle="Redirection hosts — answer every request with a 30x to another host."
             icon="corner-up-right"
             iconColor="violet"
             requiresPath="/redirects"

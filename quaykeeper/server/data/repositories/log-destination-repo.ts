@@ -2,10 +2,8 @@
 // Since the endpoint/binding split (logs_feature.md) a row is a reusable,
 // owner-defined push *endpoint* (name/url/TLS/auth — the domain
 // `DestinationEndpoint`); where it applies and how the stream is shaped live on
-// `log_binding` rows (log-binding-repo.ts). (Databases created before the
-// migration squash may still carry the pre-split `scope`/`target`/`enabled`
-// columns — DEPRECATED, never read or written here.) The `spec` JSON carries
-// secret material BY REFERENCE ONLY (`*_env`/`*_file`), so no column is encrypted.
+// `log_binding` rows (log-binding-repo.ts). The `spec` JSON carries secret
+// material BY REFERENCE ONLY (`*_env`/`*_file`), so no column is encrypted.
 
 import 'server-only'
 import { prep, getRow, allRows } from '@/server/data/db'

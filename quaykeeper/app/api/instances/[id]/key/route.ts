@@ -1,7 +1,7 @@
 // POST   /api/instances/{id}/key — mint/rotate the fetch key; raw secret returned once.
 // DELETE /api/instances/{id}/key — revoke the fetch key.
 //
-// Guarded by `authorize('maintainer')`.
+// Guarded by `authorize('standard', 'instances')`.
 
 import { NextResponse } from 'next/server'
 import { authorize } from '@/server/services/auth'
@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic'
 type Ctx = { params: Promise<{ id: string }> }
 
 export async function POST(req: Request, ctx: Ctx) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'instances')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     const body = (await req.json().catch(() => ({}))) as { expiresAt?: string | null }
@@ -29,7 +29,7 @@ export async function POST(req: Request, ctx: Ctx) {
 }
 
 export async function DELETE(_req: Request, ctx: Ctx) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'instances')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     const { id } = await ctx.params

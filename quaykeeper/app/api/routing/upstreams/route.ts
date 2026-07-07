@@ -2,7 +2,7 @@
 // POST   /api/routing/upstreams — create/replace an upstream (JSON Upstream body).
 // DELETE /api/routing/upstreams?name=<name> — remove an upstream (409 if still in use).
 //
-// Guarded by `authorize('maintainer')` — owners and maintainers, never a standard
+// Guarded by `authorize('standard', 'routing')` — owners and maintainers, never a standard
 // user. Every op runs against the caller's ACTIVE realm (multiple_realms.md §E.2).
 
 import { NextResponse } from 'next/server'
@@ -14,7 +14,7 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'routing')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     try {
@@ -27,7 +27,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'routing')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     let body: unknown
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'routing')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     const name = new URL(req.url).searchParams.get('name') ?? undefined

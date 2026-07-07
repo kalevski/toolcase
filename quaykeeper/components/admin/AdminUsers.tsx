@@ -13,33 +13,35 @@ import {
     type Role,
     type UserLimitOverride,
 } from '@/server/domain/types'
+import { FEATURES, type FeatureKey } from '@/server/domain/features'
 import { formatBytes } from '@/server/domain/site-dashboard'
 import { iconBtnHtml } from '@/lib/action-icons'
 import { AdminPage, json, useOwnerData } from './shared'
 import { useToast } from '@/components/Toast'
 import { CheckField, SelectField, TextField, type SelectOption } from '@/components/fields'
 
-/** The roster payload: users + the full realm set (for the per-user realm grant editor). */
+/** The roster payload: users, the full realm set (per-user realm grant editor),
+ *  and the app-wide global feature flags (per-user feature editor "inherit" labels). */
 interface RosterData {
     users: AdminUserRow[]
     realms: Realm[]
+    globalFeatures: Record<FeatureKey, boolean>
 }
 
 // Owner-only user roster + management (§6/§13). Every signed-in account, enriched
-// with its unified level (owner/maintainer/paid/free), effective plan, current
-// usage, and resolved limits. The owner can: grant `maintainer`/`owner` or drop to
-// `standard` (PATCH /api/admin/users); and override any user's quotas above/below
-// their role/plan default (PUT/DELETE /api/admin/users/{id}/limits). A search box +
-// level filter keep a long roster scannable. The last owner can't be demoted (409).
+// with its level, effective plan, current usage, and resolved limits. The owner can:
+// grant `owner` or drop to `standard` (PATCH /api/admin/users); override any user's
+// quotas (PUT/DELETE /api/admin/users/{id}/limits); and toggle which features each
+// user sees (PUT /api/admin/users/{id}/features). A search box + level filter keep a
+// long roster scannable. The last owner can't be demoted (409).
 
 // Assignable roles, highest-access first (matches the server's ASSIGNABLE_ROLES).
-const ROLES: Role[] = ['owner', 'maintainer', 'standard']
+const ROLES: Role[] = ['owner', 'standard']
 
 // Level filter for the roster (the 'all' sentinel plus every AccountLevel).
 const LEVEL_OPTIONS: SelectOption[] = [
     { value: 'all', label: 'All levels' },
     { value: 'owner', label: 'Owner' },
-    { value: 'maintainer', label: 'Maintainer' },
     { value: 'standard', label: 'Standard' },
 ]
 
@@ -48,7 +50,6 @@ const MB = 1024 * 1024
 // tc-badge variant per account level — owner stands out.
 const LEVEL_VARIANT: Record<AccountLevel, string> = {
     owner: 'primary',
-    maintainer: 'info',
     standard: 'secondary',
 }
 
@@ -77,9 +78,15 @@ const USER_COLUMNS: AdvancedTableColumn[] = [
  *  via their `data-action` attributes. */
 function userRowsHtml(
     rows: AdminUserRow[],
-    opts: { busy: boolean; editingId: number | null; editingRealmsId: number | null; multiRealm: boolean },
+    opts: {
+        busy: boolean
+        editingId: number | null
+        editingRealmsId: number | null
+        editingFeaturesId: number | null
+        multiRealm: boolean
+    },
 ): string {
-    const { busy, editingId, editingRealmsId, multiRealm } = opts
+    const { busy, editingId, editingRealmsId, editingFeaturesId, multiRealm } = opts
     return rows
         .map((row) => {
             const login = escapeHtml(row.user.login)
@@ -129,6 +136,19 @@ function userRowsHtml(
                     }),
                 )
             }
+            // Per-user feature toggles only apply to non-owners (owners see everything).
+            if (row.user.role !== 'owner') {
+                const featuresOpen = editingFeaturesId === githubId
+                controls.push(
+                    iconBtnHtml({
+                        icon: featuresOpen ? 'close' : 'toggles',
+                        label: featuresOpen
+                            ? `Close feature toggles for ${row.user.login}`
+                            : `Edit feature toggles for ${row.user.login}`,
+                        data: { action: 'features', id: String(githubId) },
+                    }),
+                )
+            }
 
             return (
                 `<tr>` +
@@ -151,18 +171,23 @@ function userRowsHtml(
 export function AdminUsers() {
     const fetcher = useCallback(async (): Promise<RosterData | null> => {
         try {
-            // Fetch the roster and the realm set together — the per-user realm grant editor
-            // needs the full realm list to offer (multiple_realms.md §F.2).
-            const [rows, realms] = await Promise.all([
+            // Fetch the roster, the realm set, and the global feature flags together —
+            // the realm grant editor needs the full realm list (multiple_realms.md §F.2)
+            // and the feature editor needs the global defaults for its "inherit" labels.
+            const [rows, realms, globalFeatures] = await Promise.all([
                 fetch('/api/admin/users', { cache: 'no-store' }).then((r) =>
                     json<AdminUserRow[]>(r),
                 ),
                 fetch('/api/admin/realms', { cache: 'no-store' }).then((r) => json<Realm[]>(r)),
+                fetch('/api/admin/features', { cache: 'no-store' }).then((r) =>
+                    json<Record<FeatureKey, boolean>>(r),
+                ),
             ])
             // Infinity limits arrive as null over JSON — revive so unlimited shows as ∞.
             return {
                 users: rows.map((row) => ({ ...row, limits: reviveLimits(row.limits) })),
                 realms,
+                globalFeatures,
             }
         } catch {
             return null
@@ -183,6 +208,7 @@ export function AdminUsers() {
                 <UsersRoster
                     users={data.users}
                     realms={data.realms}
+                    globalFeatures={data.globalFeatures}
                     onChanged={() => void reload()}
                 />
             )}
@@ -193,10 +219,12 @@ export function AdminUsers() {
 function UsersRoster({
     users,
     realms,
+    globalFeatures,
     onChanged,
 }: {
     users: AdminUserRow[]
     realms: Realm[]
+    globalFeatures: Record<FeatureKey, boolean>
     onChanged: () => void
 }) {
     const toast = useToast()
@@ -204,6 +232,7 @@ function UsersRoster({
     const [busyId, setBusyId] = useState<number | null>(null)
     const [editingId, setEditingId] = useState<number | null>(null)
     const [editingRealmsId, setEditingRealmsId] = useState<number | null>(null)
+    const [editingFeaturesId, setEditingFeaturesId] = useState<number | null>(null)
     const [query, setQuery] = useState('')
     // Multi-realm deployments expose a per-user realm grant editor; a single-realm
     // instance hides it (the one realm is implicit — zero change for that common case).
@@ -270,9 +299,15 @@ function UsersRoster({
             } else if (action === 'limits' && event.type === 'click') {
                 setEditingId((cur) => (cur === githubId ? null : githubId))
                 setEditingRealmsId(null)
+                setEditingFeaturesId(null)
             } else if (action === 'realms' && event.type === 'click') {
                 setEditingRealmsId((cur) => (cur === githubId ? null : githubId))
                 setEditingId(null)
+                setEditingFeaturesId(null)
+            } else if (action === 'features' && event.type === 'click') {
+                setEditingFeaturesId((cur) => (cur === githubId ? null : githubId))
+                setEditingId(null)
+                setEditingRealmsId(null)
             }
         },
         [users, changeRole],
@@ -284,23 +319,32 @@ function UsersRoster({
             total: filtered.length,
             limit: filtered.length || 10,
             offset: 0,
-            rows: userRowsHtml(filtered, { busy: busyId !== null, editingId, editingRealmsId, multiRealm }),
+            rows: userRowsHtml(filtered, {
+                busy: busyId !== null,
+                editingId,
+                editingRealmsId,
+                editingFeaturesId,
+                multiRealm,
+            }),
         }),
-        [filtered, busyId, editingId, editingRealmsId, multiRealm],
+        [filtered, busyId, editingId, editingRealmsId, editingFeaturesId, multiRealm],
     )
     const tableRef = useTc<HTMLElement>(tableProps, { click: onDelegated, change: onDelegated })
 
     const editingRow = editingId != null ? users.find((u) => u.user.githubId === editingId) : undefined
     const editingRealmsRow =
         editingRealmsId != null ? users.find((u) => u.user.githubId === editingRealmsId) : undefined
+    const editingFeaturesRow =
+        editingFeaturesId != null ? users.find((u) => u.user.githubId === editingFeaturesId) : undefined
 
     return (
         <tc-section-card title="Users" icon="users">
             <div className="quaykeeper-admin-section">
                 <p className="quaykeeper-home-lead quaykeeper-admin-hint">
-                    {users.length} account{users.length === 1 ? '' : 's'}. Maintainers get the
-                    Routing surface and skip hosting quotas; owners additionally get this Admin
-                    surface. Override a user’s quotas with <strong>Limits</strong>.
+                    {users.length} account{users.length === 1 ? '' : 's'}. Owners get this Admin
+                    surface and skip hosting quotas; everyone else is a standard user. Toggle which
+                    features a user sees with <strong>Features</strong>, or override their quotas
+                    with <strong>Limits</strong>.
                 </p>
                 {error && <tc-banner variant="danger">{error}</tc-banner>}
 
@@ -356,8 +400,121 @@ function UsersRoster({
                         }}
                     />
                 )}
+
+                {editingFeaturesRow && (
+                    <FeaturesEditor
+                        key={`features-${editingFeaturesRow.user.githubId}`}
+                        row={editingFeaturesRow}
+                        globalFeatures={globalFeatures}
+                        onSaved={() => {
+                            setEditingFeaturesId(null)
+                            onChanged()
+                        }}
+                    />
+                )}
             </div>
         </tc-section-card>
+    )
+}
+
+// ── per-user feature-override editor ───────────────────────────────────────────
+
+/** Tri-state per feature: inherit the global default, or force on/off for this user. */
+type FeatureChoice = 'inherit' | 'on' | 'off'
+
+const FEATURE_OPTIONS = (globalOn: boolean): SelectOption[] => [
+    { value: 'inherit', label: `Inherit (${globalOn ? 'on' : 'off'})` },
+    { value: 'on', label: 'Enabled' },
+    { value: 'off', label: 'Disabled' },
+]
+
+function seedFeatureChoices(overrides: Partial<Record<FeatureKey, boolean>>): Record<FeatureKey, FeatureChoice> {
+    const out = {} as Record<FeatureKey, FeatureChoice>
+    for (const f of FEATURES) {
+        const v = overrides[f.key]
+        out[f.key] = v === undefined ? 'inherit' : v ? 'on' : 'off'
+    }
+    return out
+}
+
+/**
+ * Owner control over which features this user sees (features.ts). Each feature is
+ * inherit / on / off; a global-off feature can still be turned on for one user, and
+ * vice-versa. PUTs the whole override map at once (`null` clears an override).
+ */
+function FeaturesEditor({
+    row,
+    globalFeatures,
+    onSaved,
+}: {
+    row: AdminUserRow
+    globalFeatures: Record<FeatureKey, boolean>
+    onSaved: () => void
+}) {
+    const toast = useToast()
+    const [choices, setChoices] = useState<Record<FeatureKey, FeatureChoice>>(
+        () => seedFeatureChoices(row.featureOverrides),
+    )
+    const [busy, setBusy] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+
+    const featuresUrl = `/api/admin/users/${encodeURIComponent(String(row.user.githubId))}/features`
+
+    const save = useCallback(async () => {
+        setError(null)
+        const body: Record<string, boolean | null> = {}
+        for (const f of FEATURES) {
+            const c = choices[f.key]
+            body[f.key] = c === 'inherit' ? null : c === 'on'
+        }
+        setBusy(true)
+        try {
+            const res = await fetch(featuresUrl, {
+                method: 'PUT',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify(body),
+            })
+            if (!res.ok) {
+                const b = (await res.json().catch(() => null)) as { error?: string } | null
+                setError(`Couldn’t save features${b?.error ? `: ${b.error}` : ` (error ${res.status})`}.`)
+                return
+            }
+            toast.show(`Saved feature access for ${row.user.login}.`, { variant: 'success' })
+            onSaved()
+        } catch {
+            setError('Couldn’t save features — network error.')
+        } finally {
+            setBusy(false)
+        }
+    }, [choices, featuresUrl, onSaved, toast, row.user.login])
+
+    return (
+        <div className="quaykeeper-admin-limits">
+            <p className="quaykeeper-admin-hint">
+                Which features {row.user.login} sees. <strong>Inherit</strong> follows the app-wide
+                default; override to force a feature on or off for this user. Applies immediately.
+            </p>
+            {error && <tc-banner variant="danger">{error}</tc-banner>}
+            <div className="quaykeeper-admin-limits-grid">
+                {FEATURES.map((f) => (
+                    <SelectField
+                        key={f.key}
+                        size="sm"
+                        label={f.label}
+                        help={f.description}
+                        value={choices[f.key]}
+                        options={FEATURE_OPTIONS(globalFeatures[f.key])}
+                        disabled={busy}
+                        onValue={(v) => setChoices((c) => ({ ...c, [f.key]: v as FeatureChoice }))}
+                    />
+                ))}
+            </div>
+            <div className="quaykeeper-admin-tier-actions">
+                <tc-button variant="primary" size="sm" onClick={save} disabled={busy || undefined}>
+                    {busy ? 'Saving…' : 'Save features'}
+                </tc-button>
+            </div>
+        </div>
     )
 }
 

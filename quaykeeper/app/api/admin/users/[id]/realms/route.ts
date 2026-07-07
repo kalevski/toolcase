@@ -62,7 +62,7 @@ export async function PUT(req: Request, ctx: Ctx) {
         )
         return NextResponse.json(grants)
     } catch (err) {
-        const { status, code } = realms.httpErrorFor(err)
-        return NextResponse.json({ error: code }, { status })
+        const { status, code, detail } = realms.httpErrorFor(err)
+        return NextResponse.json({ error: code, detail }, { status })
     }
 }

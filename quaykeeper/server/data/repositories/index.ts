@@ -8,6 +8,7 @@ import 'server-only'
 
 export * as userRepo from './user-repo'
 export * as userLimitRepo from './user-limit-repo'
+export * as userFeatureRepo from './user-feature-repo'
 export * as realmRepo from './realm-repo'
 export * as userRealmRepo from './user-realm-repo'
 export * as baseDomainRepo from './base-domain-repo'

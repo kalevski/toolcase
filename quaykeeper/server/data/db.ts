@@ -82,23 +82,20 @@ function wrap(): DbWrap {
 type Migration = string | ((db: DatabaseSync) => void)
 
 const MIGRATIONS: Migration[] = [
-    // v1 — the complete Quaykeeper schema. Formerly 21 incremental migrations
-    // (initial schema → realms → the Config subsystem → db servers → snippets →
-    // scheduled jobs → log destinations → the log endpoint/binding split),
-    // squashed into this single entry once the split landed. Squashing implies
-    // fresh-database semantics: a database that already ran the old sequence has
-    // version 1 recorded and skips this entry (its schema is equivalent, apart
-    // from log_destination's deprecated scope/target/enabled columns which this
-    // merged DDL drops outright and no code reads); a database stranded mid-way
-    // through the old sequence has no upgrade path and must be recreated.
+    // v1 — the complete Quaykeeper schema, kept as a single squashed entry. The
+    // database is recreated on schema change (pre-release: no live data, no
+    // upgrade path), so new tables/columns are merged into this entry in place
+    // rather than appended as a new migration.
     `
-    -- Users + roles (static-hosting-app-design.md §12).
+    -- Users + roles (static-hosting-app-design.md §12). Two assignable roles:
+    -- owner (full control, manages other users' features) and standard. The guest
+    -- role is a runtime-only fallback for a session whose user row is gone — never stored.
     CREATE TABLE app_user (
         github_id  INTEGER PRIMARY KEY,
         login      TEXT NOT NULL,
         name       TEXT NOT NULL,
         avatar_url TEXT,
-        role       TEXT NOT NULL,            -- owner | standard | guest
+        role       TEXT NOT NULL,            -- owner | standard
         added_at   TEXT NOT NULL
     );
 
@@ -106,7 +103,7 @@ const MIGRATIONS: Migration[] = [
     -- customised; every column is nullable and a NULL field inherits the default.
     CREATE TABLE user_limit (
         github_id          INTEGER PRIMARY KEY REFERENCES app_user(github_id) ON DELETE CASCADE,
-        max_sites          INTEGER,        -- NULL = inherit role/plan default
+        max_sites          INTEGER,        -- NULL = inherit role default
         max_bytes_per_site INTEGER,
         max_bytes_total    INTEGER,
         min_interval_sec   INTEGER,
@@ -114,6 +111,18 @@ const MIGRATIONS: Migration[] = [
         keep_releases      INTEGER,
         private_repos      INTEGER,        -- 0 | 1 | NULL (inherit)
         updated_at         TEXT NOT NULL
+    );
+
+    -- Per-user feature overrides. A row exists only when the owner has explicitly
+    -- toggled a feature for this user; absence = follow the global default. The
+    -- effective visibility is: globalEnabled(feature) && (override ?? true).
+    -- Owners are exempt (they always see every feature to manage it).
+    CREATE TABLE user_feature (
+        github_id   INTEGER NOT NULL REFERENCES app_user(github_id) ON DELETE CASCADE,
+        feature_key TEXT    NOT NULL,
+        enabled     INTEGER NOT NULL,       -- 0 | 1 (row present = explicit override)
+        updated_at  TEXT    NOT NULL,
+        PRIMARY KEY (github_id, feature_key)
     );
 
     -- Durable GitHub credential (private-repo support): the user's OAuth access
@@ -150,12 +159,12 @@ const MIGRATIONS: Migration[] = [
     );
 
     -- Owner-managed subdomain pool. Each base domain belongs to one realm (a
-    -- wildcard is served by exactly one instance), is offered to one audience
-    -- tier, and carries the per-base wildcard TLS policy (auto degrades to HTTP
-    -- while the cert isn't issued, so a missing cert never takes subdomains down).
+    -- wildcard is served by exactly one instance) and carries the per-base
+    -- wildcard TLS policy (auto degrades to HTTP while the cert isn't issued, so
+    -- a missing cert never takes subdomains down). Every base domain is offered
+    -- to all users — there is no audience tier.
     CREATE TABLE base_domain (
         domain     TEXT PRIMARY KEY,              -- e.g. quaykeeper.dev
-        tier       TEXT NOT NULL DEFAULT 'free',  -- free | paid | staff
         tls        TEXT NOT NULL DEFAULT 'auto',  -- off | auto
         realm_id   TEXT REFERENCES realm(id),     -- NULL only until the boot backfill assigns the default realm
         created_at TEXT NOT NULL

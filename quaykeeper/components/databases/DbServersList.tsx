@@ -55,7 +55,7 @@ export function DbServersList() {
             return null
         }
     }, [])
-    const { state, reload } = useDbData(fetcher)
+    const { state, reload } = useDbData(fetcher, 'standard', 'databases')
 
     return (
         <DbPage

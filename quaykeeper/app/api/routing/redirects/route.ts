@@ -2,7 +2,7 @@
 // POST   /api/routing/redirects — create/replace a redirect (JSON Redirect body).
 // DELETE /api/routing/redirects?domain=<domain> — remove a redirect.
 //
-// Guarded by `authorize('maintainer')` — owners and maintainers, never a standard
+// Guarded by `authorize('standard', 'routing')` — owners and maintainers, never a standard
 // user. Every op runs against the caller's ACTIVE realm (multiple_realms.md §E.2).
 // Redirect domains share the site/proxy domain namespace (a duplicate comes back as
 // a 400 `nginxpilot_rejected`); wildcard domains (*.example.com) are supported.
@@ -16,7 +16,7 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'routing')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     try {
@@ -29,7 +29,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'routing')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     let body: unknown
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'routing')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     const domain = new URL(req.url).searchParams.get('domain') ?? undefined

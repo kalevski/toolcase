@@ -2,7 +2,7 @@
 //      omission — the value is simply absent for non-literal rows).
 // POST /api/instances/{id}/vars — create one ({ key, source, value? | globalVarId? | secretId? }).
 //
-// Guarded by `authorize('maintainer')`.
+// Guarded by `authorize('standard', 'instances')`.
 
 import { NextResponse } from 'next/server'
 import { authorize } from '@/server/services/auth'
@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic'
 type Ctx = { params: Promise<{ id: string }> }
 
 export async function GET(_req: Request, ctx: Ctx) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'instances')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     const { id } = await ctx.params
@@ -27,7 +27,7 @@ export async function GET(_req: Request, ctx: Ctx) {
 }
 
 export async function POST(req: Request, ctx: Ctx) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'instances')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     let body: configVars.CreateVarRequest

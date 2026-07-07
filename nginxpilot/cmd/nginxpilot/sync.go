@@ -21,7 +21,7 @@ import (
 func cmdSync(args []string) int {
 	fs := flag.NewFlagSet("sync", flag.ExitOnError)
 	configPath := fs.String("config", config.DefaultPath, "config file path")
-	logFormat := fs.String("log-format", "logfmt", "logfmt | json")
+	logFormat := fs.String("log-format", "json", "logfmt | json")
 	timeout := fs.Duration("timeout", 15*time.Minute, "abort the sync after this duration")
 	domain, ok := parseWithPositional(fs, args, "usage: nginxpilot sync <domain> [flags]")
 	if !ok {

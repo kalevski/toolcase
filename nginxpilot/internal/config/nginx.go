@@ -92,6 +92,16 @@ type Nginx struct {
 	// a managed include with set_real_ip_from for provider-published ranges
 	// (fetched on a ticker, cached on disk) plus static CIDRs.
 	RealIP RealIP `yaml:"real_ip"`
+
+	// DefaultCatchAll opts nginxpilot into owning the default/catch-all vhost
+	// (a request for a host no resource claims gets 444, JSON-logged like every
+	// other managed vhost) instead of relying on an out-of-band static one. Off
+	// by default: an existing managed deployment may already declare its own
+	// default_server elsewhere, and turning this on unconditionally would
+	// collide with it (nginx -t then quarantines nginxpilot's own copy — see
+	// the crash-proof apply pass — so a collision degrades, never crashes, but
+	// the opt-in avoids the surprise/quarantine noise on upgrade).
+	DefaultCatchAll bool `yaml:"default_catch_all"`
 }
 
 // Real-IP range providers (nginx.real_ip.providers).

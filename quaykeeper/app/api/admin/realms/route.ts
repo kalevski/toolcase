@@ -35,7 +35,7 @@ export async function POST(req: Request) {
         const created = await realms.createRealm(actor, body)
         return NextResponse.json(created, { status: 201 })
     } catch (err) {
-        const { status, code } = realms.httpErrorFor(err)
-        return NextResponse.json({ error: code }, { status })
+        const { status, code, detail } = realms.httpErrorFor(err)
+        return NextResponse.json({ error: code, detail }, { status })
     }
 }

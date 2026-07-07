@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { useMe } from '@/lib/me-context'
 import { LoadingState, ErrorState } from '@/components/states'
+import { RealmSelect } from '@/components/RealmSelect'
 
 // The owner admin surface. Each area is its own page reached from a dedicated
 // left-sidebar entry (AppShell builds the Admin nav section from this list), so
@@ -116,6 +117,7 @@ export function AdminPage<T>({
     iconColor = 'slate',
     state,
     onRetry,
+    realmScoped,
     children,
 }: {
     title: string
@@ -126,6 +128,8 @@ export function AdminPage<T>({
     iconColor?: string
     state: OwnerDataState<T>
     onRetry?: () => void
+    /** When true, show the active-realm selector in the header (the page's data is realm-scoped). */
+    realmScoped?: boolean
     children: (data: T) => ReactNode
 }) {
     let body: ReactNode
@@ -154,6 +158,7 @@ export function AdminPage<T>({
                 icon-name={icon}
                 icon-color={iconColor}
             />
+            {realmScoped && <RealmSelect className="quaykeeper-admin-realm-select" />}
             {body}
         </section>
     )

@@ -2,7 +2,7 @@
 // POST   /api/routing/access-lists — create/replace an access list (JSON AccessList body).
 // DELETE /api/routing/access-lists?name=<name> — remove one (409 while referenced).
 //
-// Guarded by `authorize('maintainer')` — owners and maintainers, never a standard
+// Guarded by `authorize('standard', 'routing')` — owners and maintainers, never a standard
 // user. Every op runs against the caller's ACTIVE realm (multiple_realms.md §E.2).
 // Passwords NEVER ride these endpoints — the dedicated
 // PUT /api/routing/access-lists/{name}/users/{username} sets them.
@@ -16,7 +16,7 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'routing')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     try {
@@ -29,7 +29,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'routing')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     let body: unknown
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'routing')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     const name = new URL(req.url).searchParams.get('name') ?? undefined

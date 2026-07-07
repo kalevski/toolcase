@@ -379,26 +379,6 @@ body {
 }
 
 /* Back link on the per-site page (components/SiteDetail.tsx). */
-.quaykeeper-back {
-    align-self: flex-start;
-    margin-bottom: 0.5rem;
-    padding: 0;
-    border: 0;
-    background: none;
-    color: var(--quaykeeper-accent-strong);
-    font-size: 0.875rem;
-    cursor: pointer;
-}
-
-.quaykeeper-back:hover {
-    text-decoration: underline;
-}
-
-.quaykeeper-back:focus-visible {
-    outline: 2px solid var(--quaykeeper-accent);
-    outline-offset: 2px;
-}
-
 /* Per-site page: a toolbar header, a note, a two-column body of self-framed
    tc-* cards, and a custom-domain section. No outer card frame — the page reads
    as a resource view and the inner tc-* cards carry the surfaces. */

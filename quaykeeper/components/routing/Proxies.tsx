@@ -84,7 +84,7 @@ export function Proxies() {
     return (
         <RoutingPage
             title="Proxies"
-            subtitle="Reverse-proxy vhosts and the upstream pools they route to. Maintainer access."
+            subtitle="Reverse-proxy vhosts and the upstream pools they route to."
             icon="globe"
             iconColor="cyan"
             state={state}

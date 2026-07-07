@@ -4,7 +4,7 @@
 // POST /api/instances/{id}/logs — bind a destination to this instance
 //      ({ destinationId, enabled?, shaping? }; upserts on the same destination).
 //
-// Guarded by `authorize('maintainer')` like the other instance routes (D3):
+// Guarded by `authorize('standard', 'instances')` like the other instance routes (D3):
 // maintainers *choose* from owner-defined destinations; only the owner creates
 // endpoints. Stored only — no daemon call; quaykeeper-client picks the change up
 // via the agent snapshot's version bump on its next poll.
@@ -21,7 +21,7 @@ export const dynamic = 'force-dynamic'
 type Ctx = { params: Promise<{ id: string }> }
 
 export async function GET(_req: Request, ctx: Ctx) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'instances')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     const { id } = await ctx.params
@@ -34,7 +34,7 @@ export async function GET(_req: Request, ctx: Ctx) {
 }
 
 export async function POST(req: Request, ctx: Ctx) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'instances')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     let body: { destinationId?: unknown; enabled?: unknown; shaping?: unknown }

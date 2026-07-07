@@ -34,6 +34,18 @@ chown nginxpilot:nginx /etc/nginx/nginxpilot /etc/nginx/nginxpilot/conf.d \
 chmod 0750 /etc/nginx/nginxpilot /etc/nginx/nginxpilot/conf.d /etc/nginx/nginxpilot/stream.d
 chmod 0770 /run/nginxpilot
 
+# nginx.default_catch_all: true makes nginxpilot render its OWN JSON-logged
+# default/catch-all vhost into its managed conf.d — remove the image's static
+# plain-text one first, or both declare `default_server` and nginxpilot's
+# quarantine pass silently disables its copy (never fatal, but the feature
+# would never actually take effect). Coarse grep, not a YAML parse, but both
+# key names are distinctive enough not to false-match.
+if [ -f /etc/nginx/conf.d/00-nginxpilot-default.conf ] && [ -f "$NGINXPILOT_CONFIG" ] \
+    && grep -Eq '^[[:space:]]*manage:[[:space:]]*true[[:space:]]*$' "$NGINXPILOT_CONFIG" \
+    && grep -Eq '^[[:space:]]*default_catch_all:[[:space:]]*true[[:space:]]*$' "$NGINXPILOT_CONFIG"; then
+    rm -f /etc/nginx/conf.d/00-nginxpilot-default.conf
+fi
+
 # The nginx:alpine log symlinks (/var/log/nginx/*.log → /dev/stdout|stderr)
 # reopen the container's std streams. Those pipe inodes belong to root (PID 1
 # is this supervisor), so hand them to the unprivileged children or nginx

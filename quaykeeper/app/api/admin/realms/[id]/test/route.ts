@@ -20,7 +20,7 @@ export async function POST(_req: Request, ctx: Ctx) {
     try {
         return NextResponse.json(await realms.testRealm(id))
     } catch (err) {
-        const { status, code } = realms.httpErrorFor(err)
-        return NextResponse.json({ error: code }, { status })
+        const { status, code, detail } = realms.httpErrorFor(err)
+        return NextResponse.json({ error: code, detail }, { status })
     }
 }

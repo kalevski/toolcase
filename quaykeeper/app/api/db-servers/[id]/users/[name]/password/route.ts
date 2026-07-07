@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic'
 type Ctx = { params: Promise<{ id: string; name: string }> }
 
 export async function POST(req: Request, ctx: Ctx) {
-    const authz = await authorize('maintainer')
+    const authz = await authorize('standard', 'databases')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
     let body: { password?: unknown }

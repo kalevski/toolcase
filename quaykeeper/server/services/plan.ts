@@ -20,22 +20,20 @@ import {
 } from '@/server/domain/types'
 
 /**
- * The quota limits for a login. Instance operators are exempt from quotas
- * entirely — both the bootstrap `owner` and any `maintainer` get
- * `UNLIMITED_LIMITS`, so every quota gate (site count, custom domains, byte cap,
- * interval) passes (§6). Everyone else starts from `STANDARD_LIMITS`. Every gate
- * flows through this one function (`assertCanCreateSite`,
- * `assertCanUseCustomDomain`, byte caps, interval), so the exemption is total and
- * lives in exactly one place.
+ * The quota limits for a login. The instance `owner` is exempt from quotas
+ * entirely — an `owner` gets `UNLIMITED_LIMITS`, so every quota gate (site count,
+ * custom domains, byte cap, interval) passes (§6). Everyone else starts from
+ * `STANDARD_LIMITS`. Every gate flows through this one function
+ * (`assertCanCreateSite`, `assertCanUseCustomDomain`, byte caps, interval), so
+ * the exemption is total and lives in exactly one place.
  *
  * The owner-set per-user override (`user_limit`, §11/§15) is merged on top of
  * that role base — the override's present fields win, so the owner can lift or
- * cap any one account (even an operator) without touching the global defaults.
+ * cap any one account without touching the global defaults.
  */
 export function resolveLimits(login: string): PlanLimits {
     const user = userRepo.getByLogin(login)
-    const base =
-        user && (user.role === 'owner' || user.role === 'maintainer') ? UNLIMITED_LIMITS : STANDARD_LIMITS
+    const base = user && user.role === 'owner' ? UNLIMITED_LIMITS : STANDARD_LIMITS
     const override = user ? userLimitRepo.get(user.githubId) : undefined
     return mergeLimits(base, override)
 }
@@ -43,10 +41,10 @@ export function resolveLimits(login: string): PlanLimits {
 /**
  * Effective limits from an already-loaded user + override — the batch counterpart
  * to {@link resolveLimits} (the admin roster loads overrides in bulk to avoid an
- * N+1 read per user). Operators (owner/maintainer) get `UNLIMITED_LIMITS`; the
- * per-user override is merged on top, exactly as the per-request path.
+ * N+1 read per user). The `owner` gets `UNLIMITED_LIMITS`; the per-user override
+ * is merged on top, exactly as the per-request path.
  */
 export function effectiveLimitsFor(user: AppUser, override: UserLimitOverride | null): PlanLimits {
-    const base = user.role === 'owner' || user.role === 'maintainer' ? UNLIMITED_LIMITS : STANDARD_LIMITS
+    const base = user.role === 'owner' ? UNLIMITED_LIMITS : STANDARD_LIMITS
     return mergeLimits(base, override ?? undefined)
 }

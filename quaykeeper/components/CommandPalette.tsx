@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTc } from '@/lib/tc'
 import { useMe } from '@/lib/me-context'
-import { ROLE_RANK } from '@/server/domain/types'
 
 // Global command palette (plan WS-5). Cmd/Ctrl-K opens a fuzzy jump-to over every
 // page the signed-in user can reach (role-gated, mirroring the side-nav). The
@@ -26,14 +25,22 @@ export function CommandPalette() {
     const [open, setOpen] = useState(false)
 
     const items = useMemo<CmdItem[]>(() => {
-        const list: CmdItem[] = [
-            { id: 'sites', label: 'Static Sites', group: 'Navigate', icon: 'layout-dashboard', href: '/' },
-        ]
-        if (ROLE_RANK[me.role] >= ROLE_RANK.maintainer) {
+        const feat = me.features
+        const list: CmdItem[] = []
+        if (feat.static_sites) {
+            list.push({ id: 'sites', label: 'Static Sites', group: 'Navigate', icon: 'layout-dashboard', href: '/' })
+        }
+        if (feat.instances) {
+            list.push({ id: 'instances', label: 'Instances', group: 'Navigate', icon: 'server', href: '/instances' })
+        }
+        if (feat.databases) {
+            list.push({ id: 'db-servers', label: 'Databases', group: 'Navigate', icon: 'database', href: '/databases' })
+        }
+        if (feat.snippets) {
+            list.push({ id: 'snippets', label: 'Docker snippets', group: 'Navigate', icon: 'container', href: '/snippets' })
+        }
+        if (feat.routing) {
             list.push(
-                { id: 'instances', label: 'Instances', group: 'Navigate', icon: 'server', href: '/instances' },
-                { id: 'db-servers', label: 'Databases', group: 'Navigate', icon: 'database', href: '/databases' },
-                { id: 'snippets', label: 'Docker snippets', group: 'Navigate', icon: 'container', href: '/snippets' },
                 { id: 'proxies', label: 'Proxies', group: 'Routing', icon: 'globe', href: '/proxies' },
                 { id: 'redirects', label: 'Redirects', group: 'Routing', icon: 'corner-up-right', href: '/redirects' },
                 { id: 'dead-hosts', label: 'Dead hosts', group: 'Routing', icon: 'ban', href: '/dead-hosts' },
@@ -56,7 +63,7 @@ export function CommandPalette() {
             )
         }
         return list
-    }, [me.role])
+    }, [me.role, me.features])
 
     // Cmd/Ctrl-K toggles the palette from anywhere.
     useEffect(() => {
