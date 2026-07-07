@@ -233,9 +233,9 @@ function execScript(argv0: string, args: string[], cwd: string, timeoutSec: numb
         // (U+FFFD garbage), and capping on `.length` after a per-chunk `toString`
         // counts UTF-16 code units, letting non-ASCII output through well past
         // the intended byte cap.
-        let outChunks: Buffer[] = []
+        const outChunks: Buffer[] = []
         let outBytes = 0
-        let errChunks: Buffer[] = []
+        const errChunks: Buffer[] = []
         let errBytes = 0
         let truncated = false
         let timedOut = false
