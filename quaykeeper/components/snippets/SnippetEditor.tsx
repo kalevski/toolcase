@@ -428,7 +428,7 @@ export function SnippetEditor({
                     checked={!!spec.inject}
                     onChecked={setInject}
                     label="Inject instance variables at boot"
-                    help="Rewrites the entrypoint inline: the container fetches the instance's resolved variables from the agent server, exports them, then execs your command."
+                    help="Rewrites the entrypoint inline: the container fetches install.sh, downloads the quaykeeper-client binary, pulls the instance's resolved variables, then execs your command."
                 />
                 {spec.inject && (
                     <>
@@ -442,7 +442,7 @@ export function SnippetEditor({
                             />
                             <SelectField
                                 label="Fetch tool"
-                                help="Whichever the image ships."
+                                help="Which tool fetches install.sh — whichever the image ships (it then auto-detects the binary download tool)."
                                 value={spec.inject.tool}
                                 options={TOOL_OPTIONS}
                                 onValue={(v) => patchSpec({ inject: { tool: v as InjectTool } })}
