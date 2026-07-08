@@ -36,7 +36,20 @@ export const THEME_LABEL: Record<ThemeName, string> = {
  * selectors are double-attribute scoped, so the `default` theme needs an explicit
  * `data-tc-theme="default"` when a variant is active (the branding context handles it).
  */
-export const VARIANT_NAMES = ['', 'ocean', 'forest', 'ember', 'royal'] as const
+export const VARIANT_NAMES = [
+    '',
+    'ocean',
+    'forest',
+    'ember',
+    'royal',
+    'mint',
+    'rose',
+    'crimson',
+    'indigo',
+    'slate',
+    'sunset',
+    'twilight',
+] as const
 
 export type VariantName = (typeof VARIANT_NAMES)[number]
 
@@ -47,6 +60,13 @@ export const VARIANT_LABEL: Record<VariantName, string> = {
     forest: 'Forest (green / lime)',
     ember: 'Ember (orange / gold)',
     royal: 'Royal (violet / magenta)',
+    mint: 'Mint (teal / mint)',
+    rose: 'Rose (rose / pink)',
+    crimson: 'Crimson (red / coral)',
+    indigo: 'Indigo (indigo / periwinkle)',
+    slate: 'Slate (steel / silver)',
+    sunset: 'Sunset (coral → orange)',
+    twilight: 'Twilight (violet → blue)',
 }
 
 /** Type guard: a request-supplied value is one of the bundled theme names. */

@@ -1,0 +1,11 @@
+node_modules
+.next
+.git
+.env
+.env*.local
+npm-debug.log*
+README.md
+.workspace
+# Local SQLite store — must never enter the image.
+voxscribe.db
+voxscribe.db-*

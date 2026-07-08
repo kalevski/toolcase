@@ -27,7 +27,20 @@ describe('isThemeName (tracks the bundled web-components skins)', () => {
 describe('isVariantName (tracks the bundled accent variants)', () => {
     it('accepts every variant including the base-accents empty string', () => {
         for (const v of VARIANT_NAMES) expect(isVariantName(v)).toBe(true)
-        expect(VARIANT_NAMES).toEqual(['', 'ocean', 'forest', 'ember', 'royal'])
+        expect(VARIANT_NAMES).toEqual([
+            '',
+            'ocean',
+            'forest',
+            'ember',
+            'royal',
+            'mint',
+            'rose',
+            'crimson',
+            'indigo',
+            'slate',
+            'sunset',
+            'twilight',
+        ])
         expect(isVariantName('pastel')).toBe(false)
         expect(isVariantName(42)).toBe(false)
     })

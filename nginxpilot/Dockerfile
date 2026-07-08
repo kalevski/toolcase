@@ -38,7 +38,7 @@ ARG CERTBOT_DNS_PLUGINS="certbot-dns-digitalocean certbot-dns-cloudflare certbot
 # every pip invocation crashes on `import pyexpat`. Naming libexpat with
 # --upgrade is what actually moves it forward.
 RUN apk add --no-cache --upgrade libexpat git openssh-client ca-certificates \
-    tzdata su-exec libcap certbot py3-pip && \
+    tzdata su-exec libcap certbot py3-pip curl && \
     pip install --break-system-packages certbot-nginx ${CERTBOT_DNS_PLUGINS}
 
 RUN addgroup -S nginxpilot 2>/dev/null; \
