@@ -21,6 +21,7 @@
         "taskforge",
         "quaykeeper",
         "quaykeeper-landing",
+        "voxscribe",
         "examples"
     ],
     "devDependencies": {

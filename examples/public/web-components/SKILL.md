@@ -21161,7 +21161,7 @@ Tag input with autocomplete recommendations and optional create-on-type. A form-
 
 | Event | Detail | Description |
 |-------|--------|-------------|
-| `tc-change` | `{ tags: string[] }` | Dispatched whenever a tag is added or removed. |
+| `tc-change` | `{ value: string[] }` | Dispatched whenever a tag is added or removed; `detail.value` is the updated tags array (canonical field-change shape). |
 
 **Slots:** none.
 
@@ -21190,7 +21190,7 @@ Tag input with autocomplete recommendations and optional create-on-type. A form-
   ti.recommendations = ['TypeScript', 'JavaScript', 'Python', 'Rust', 'Go']
   ti.defaultValue = ['TypeScript']
   ti.addEventListener('tc-change', e => {
-    console.log('tags:', e.detail.tags)
+    console.log('tags:', e.detail.value)
   })
 </script>
 
@@ -21208,7 +21208,7 @@ Tag input with autocomplete recommendations and optional create-on-type. A form-
   ctl.recommendations = ['Go', 'Rust', 'Zig']
   ctl.value = ['Go']
   ctl.addEventListener('tc-change', e => {
-    ctl.value = e.detail.tags // parent owns the state
+    ctl.value = e.detail.value // parent owns the state
   })
 </script>
 

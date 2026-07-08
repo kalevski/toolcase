@@ -41,7 +41,7 @@ ENV QUAYKEEPER_AGENT_PORT=4101
 ENV QUAYKEEPER_CLIENT_DIR=/app/quaykeeper/client-bin
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates \
+    && apt-get install -y --no-install-recommends ca-certificates curl \
     && rm -rf /var/lib/apt/lists/*
 
 # non-root user

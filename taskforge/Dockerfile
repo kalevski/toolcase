@@ -40,7 +40,7 @@ ENV APP_SKILLS_DIR=/app/skills
 # git + openssh-client (git operations / SSH remotes) + the Claude Code CLI
 # (default agent backend)
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends git openssh-client ca-certificates \
+    && apt-get install -y --no-install-recommends git openssh-client ca-certificates wget curl \
     && rm -rf /var/lib/apt/lists/* \
     && npm i -g @anthropic-ai/claude-code \
     && npm cache clean --force

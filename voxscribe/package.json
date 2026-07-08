@@ -1,0 +1,36 @@
+{
+    "name": "@toolcase/voxscribe",
+    "version": "1.0.0",
+    "private": true,
+    "description": "voxscribe — self-hosted audio transcription studio (CPU-only whisper.cpp) with tagged markdown notes.",
+    "scripts": {
+        "dev": "next dev -p 4200",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint",
+        "typecheck": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@toolcase/base": "^5.0.0",
+        "@toolcase/web-components": "^5.0.7",
+        "busboy": "^1.6.0",
+        "lucide-static": "^1.22.0",
+        "next": "^16.2.9",
+        "react": "^19.1.0",
+        "react-dom": "^19.1.0",
+        "server-only": "^0.0.1"
+    },
+    "devDependencies": {
+        "@types/busboy": "^1.5.4",
+        "@types/node": "^22.5",
+        "@types/react": "^19",
+        "@types/react-dom": "^19",
+        "eslint": "^10.1.0",
+        "eslint-config-next": "^16.2.10",
+        "typescript": "^5.5.0"
+    },
+    "engines": {
+        "node": ">=22.5"
+    },
+    "license": "MIT"
+}
