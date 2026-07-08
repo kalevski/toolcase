@@ -3,6 +3,7 @@ lib
 # @/lib/tc web-components interop shim), not build output — keep it tracked.
 !taskforge/lib/
 !quaykeeper/lib/
+!voxscribe/lib/
 node_modules
 .parcel-cache
 .DS_Store
