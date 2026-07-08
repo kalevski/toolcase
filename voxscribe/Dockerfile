@@ -91,6 +91,7 @@ RUN mkdir -p /app/voxscribe/.next/cache && chmod -R 0777 /app/voxscribe/.next/ca
 
 # Durable state (SQLite + media + models + notes) under WORKSPACE_DIR=/workspace.
 RUN mkdir -p /workspace && chown app:app /workspace
+VOLUME ["/workspace"]
 
 USER app
 EXPOSE 4200
