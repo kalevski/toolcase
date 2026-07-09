@@ -1,0 +1,3 @@
+/imagewarden      # built binary
+*.test            # go test -c output
+*.out             # coverage/profile output
