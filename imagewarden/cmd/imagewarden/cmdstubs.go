@@ -2,18 +2,14 @@ package main
 
 import "fmt"
 
-// Temporary stubs for the subcommands implemented by tasks 024-028
-// (cmdRun, cmdValidate, cmdClassify, cmdSchema, cmdHealthcheck). Each
-// sibling task replaces its stub with a real implementation in its own
-// file; remove the corresponding case here once that happens.
+// Temporary stubs for the subcommands implemented by tasks 024, 026-028
+// (cmdRun, cmdClassify, cmdSchema, cmdHealthcheck). cmdValidate moved to
+// validate.go (task 025). Each sibling task replaces its stub with a real
+// implementation in its own file; remove the corresponding case here once
+// that happens.
 
 func cmdRun(args []string) int {
 	fmt.Println("imagewarden run: not implemented")
-	return 0
-}
-
-func cmdValidate(args []string) int {
-	fmt.Println("imagewarden validate: not implemented")
 	return 0
 }
 
