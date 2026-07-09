@@ -125,6 +125,17 @@ real ONNX Runtime shared library to run:
 go test -tags ort ./...
 ```
 
+To verify the built container satisfies the hardened runtime contract
+(distroless, nonroot, boots under `--read-only --cap-drop ALL`, self-probing
+`HEALTHCHECK`, the §5 HTTP shape), run the container smoke test from the repo
+root — it needs only Docker, `jq`, and `curl`:
+
+```bash
+bash imagewarden/tools/smoke.sh
+```
+
+See `tools/README.md` for details; it also runs as the `smoke` CI job.
+
 To regenerate the model artifacts (`model.onnx` + `manifest.yml`) from the
 upstream fp32 weights, see `tools/preparemodel`.
 
@@ -132,4 +143,7 @@ upstream fp32 weights, see `tools/preparemodel`.
 
 Images are classified in memory only. They are never written to disk, never
 logged, and never leave the process — the container runs with a read-only
-filesystem (`--read-only`) because nothing it does requires writing.
+filesystem (`--read-only`) because nothing it does requires writing. This is
+enforced at two levels: in-process privacy tests assert nothing writes or leaks,
+and `tools/smoke.sh` proves the container-level counterpart by booting the image
+under `--read-only --cap-drop ALL` and confirming it stays up.
