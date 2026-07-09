@@ -1,0 +1,7 @@
+name: mobilenetv2-nsfw
+version: 1.2.0
+sha256: 9552a9d588785e027537290b541311a25a6f4d6cad87a1ef76e9a4cbe5e30d91
+input: { name: input_1, layout: NHWC, width: 224, height: 224 }
+normalize: { scale: 255.0, mean: [0, 0, 0], std: [1, 1, 1] }
+labels: [drawings, hentai, neutral, porn, sexy]
+quantization: int8
