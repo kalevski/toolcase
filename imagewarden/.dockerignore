@@ -1,0 +1,10 @@
+.git
+.gitattributes
+testdata/
+tools/
+packaging/
+*.md
+Dockerfile
+.dockerignore
+# NOTE: model/ is deliberately NOT ignored — the Dockerfile copies model.onnx +
+# manifest.yml into the image (spec §4, §9).
