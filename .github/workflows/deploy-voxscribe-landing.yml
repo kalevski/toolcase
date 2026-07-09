@@ -1,0 +1,39 @@
+name: Deploy voxscribe Landing to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'voxscribe-landing/**'
+      - 'package-lock.json'
+      - '.github/workflows/deploy-voxscribe-landing.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build voxscribe-landing
+        run: npm -w @toolcase/voxscribe-landing run build
+
+      - name: Deploy to public branch
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: 'voxscribe-landing/out'
+          branch: public/voxscribe
+          single-commit: true

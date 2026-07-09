@@ -22,6 +22,7 @@
         "quaykeeper",
         "quaykeeper-landing",
         "voxscribe",
+        "voxscribe-landing",
         "examples"
     ],
     "devDependencies": {

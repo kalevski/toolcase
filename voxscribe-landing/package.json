@@ -1,0 +1,30 @@
+{
+    "name": "@toolcase/voxscribe-landing",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Static marketing site for voxscribe.",
+    "scripts": {
+        "dev": "next dev -p 4600",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint",
+        "typecheck": "tsc --noEmit"
+    },
+    "dependencies": {
+        "next": "^16.2.9",
+        "react": "^19.1.0",
+        "react-dom": "^19.1.0"
+    },
+    "devDependencies": {
+        "@types/node": "^22.5",
+        "@types/react": "^19",
+        "@types/react-dom": "^19",
+        "eslint": "^10.1.0",
+        "eslint-config-next": "^16.2.10",
+        "typescript": "^5.5.0"
+    },
+    "engines": {
+        "node": ">=22.5"
+    },
+    "license": "MIT"
+}
