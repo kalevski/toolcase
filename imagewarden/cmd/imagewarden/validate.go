@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	_ "embed"
 	"flag"
 	"fmt"
@@ -8,8 +9,6 @@ import (
 	"os"
 
 	"github.com/kalevski/toolcase/imagewarden/internal/config"
-	"github.com/kalevski/toolcase/imagewarden/internal/imaging"
-	"github.com/kalevski/toolcase/imagewarden/internal/model"
 	"github.com/kalevski/toolcase/imagewarden/internal/policy"
 )
 
@@ -59,23 +58,23 @@ func cmdValidate(args []string) int {
 
 	log := newLogger("json", "error") // quiet during validate, like nginxpilot
 
-	m, err := model.Load(cfg.Model.Dir, cfg.Inference.Threads, log) // manifest + sha256 + warmup
+	// Shared boot spine (config -> model.Load -> classify.New): buildService
+	// verifies the sha256 and warms up the model, then wires the same
+	// classify.Service `run` (task 024) and `classify` (task 026) use, so the CI
+	// gate can never validate limits/policy/concurrency that differ from what a
+	// served request actually runs.
+	m, svc, err := buildService(cfg, log)
 	if err != nil {
 		fail("model load: %v", err)
 	} else {
 		defer m.Close()
 
-		// Self-test: run the embedded PNG through the same
-		// decode -> tensorize -> infer -> decide path a real request takes
-		// (imaging.Prepare -> model.Classify -> policy.Decide), proving the
-		// whole stack end-to-end offline (spec §4, §6, §11).
-		t, perr := imaging.Prepare(onePixelPNG, m.Spec(), cfg.Limits.MaxPixels)
-		if perr != nil {
-			fail("self-test: prepare image: %v", perr)
-		} else if scores, cerr := m.Classify(t); cerr != nil {
-			fail("self-test: inference failed: %v", cerr)
+		// Self-test: run the embedded PNG through svc.Do — the exact
+		// prepare -> gated inference -> policy path a real request takes
+		// (spec §4, §6, §11) — proving the whole stack end-to-end offline.
+		if v, cerr := svc.Do(context.Background(), onePixelPNG); cerr != nil {
+			fail("self-test: %v", cerr)
 		} else {
-			v := policy.Decide(scores, policy.PolicyConfig(cfg.Policy))
 			switch {
 			case len(v.Scores) != len(m.Info().Labels):
 				fail("self-test: got %d scores, manifest declares %d labels", len(v.Scores), len(m.Info().Labels))
