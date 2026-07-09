@@ -20,6 +20,8 @@ type Server struct {
 	token     string      // api.token_env value; empty = loopback dev mode (task 017 auth)
 	state     *state.State
 	model     modelInfoProvider // narrow seam for GET /status (task 020, see status.go)
+	classify  classifyService   // POST /v1/classify pipeline seam (task 019, see classify_handler.go)
+	limits    handlerLimits     // request-size / timeout caps for POST /v1/classify (task 019)
 	startedAt time.Time         // uptime base for GET /status (task 020); New (task 022) sets it to time.Now()
 	log       *slog.Logger      // task 020's encode-error warning; task 022 wires the real logger
 }

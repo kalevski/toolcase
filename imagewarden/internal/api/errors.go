@@ -12,9 +12,9 @@ const (
 	codeBadRequest        = "bad_request"        // 400 generic malformed request
 	codeEmptyBody         = "empty_body"         // 400 zero-length image body (POST /v1/classify)
 	codeUnauthorized      = "unauthorized"       // 401 missing/invalid bearer token
-	codeTooLarge          = "too_large"          // 413 body exceeds limits.max_body_mb
+	codeTooLarge          = "too_large"          // 413 body exceeds max_body_mb, or decoded image exceeds size limit (imaging.ErrTooLarge)
 	codeUnsupportedFormat = "unsupported_format" // 415 undecodable image type
-	codeUnprocessable     = "unprocessable"      // 422 corrupt image / over limits.max_pixels
+	codeUnprocessable     = "unprocessable"      // 422 corrupt image, or header pixel count over limits.max_pixels
 	codeBusy              = "busy"               // 429 inference semaphore full past limits.queue_timeout
 	codeModelUnavailable  = "model_unavailable"  // 503 model not loaded/warmed
 	codeInternal          = "internal"           // 500 unexpected server error
@@ -35,9 +35,10 @@ type errBody struct {
 //	bad_request         400  generic malformed request
 //	empty_body          400  zero-length image body (POST /v1/classify)
 //	unauthorized        401  missing/invalid bearer token
-//	too_large           413  body exceeds limits.max_body_mb (MaxBytesReader trip)
+//	too_large           413  body exceeds limits.max_body_mb (MaxBytesReader trip),
+//	                         or decoded image exceeds size limit (imaging.ErrTooLarge)
 //	unsupported_format  415  imaging.ErrUnsupportedFormat — undecodable image type
-//	unprocessable       422  imaging.ErrCorrupt / over limits.max_pixels (ErrTooLarge)
+//	unprocessable       422  imaging.ErrCorrupt — corrupt image, or header pixel count over limits.max_pixels
 //	busy                429  inference semaphore full past limits.queue_timeout
 //	model_unavailable   503  model not loaded/warmed
 //	internal            500  unexpected server error
