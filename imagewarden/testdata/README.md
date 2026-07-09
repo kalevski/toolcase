@@ -62,10 +62,12 @@ go test ./internal/imaging -run TestTensorGolden -update
 ```
 
 **Status: not present.** `internal/imaging/imaging.go`'s `Prepare` entry point
-now exists (added early, alongside task 025, to unblock `cmd/imagewarden`
-validate's self-test), but `imaging_test.go` (task 007's golden test) does
-not yet. Run the command above once that test exists, then commit
-`testdata/tensor_ok_jpg.golden`.
+and `imaging_test.go` (task 007's golden test) now both exist, but the golden
+itself still needs generating in a Go-capable environment. Run the command
+above and commit `testdata/tensor_ok_jpg.golden`. The test resolves its
+fixtures from this module-root `testdata/` when the package-local
+`internal/imaging/testdata/` is absent, and it `t.Skip`s the golden assertion
+until the file is committed.
 
 ## Environment note
 
