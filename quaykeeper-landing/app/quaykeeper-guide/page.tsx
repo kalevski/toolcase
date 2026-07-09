@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 const ROOT_VARS = {
     '--accent': '#e0a458',
-    '--accent2': '#45c8bf',
+    '--accent2': '#e0a458',
     '--bg': '#0b0f14',
     '--bg2': '#0f151c',
     '--card': '#111a23',
@@ -17,51 +17,48 @@ const TOC = [
     { n: '01', label: 'What it is', href: '#what' },
     { n: '02', label: 'How it fits', href: '#fit' },
     { n: '03', label: 'Install & run', href: '#install' },
-    { n: '04', label: 'The admin API', href: '#api' },
-    { n: '05', label: 'Validation', href: '#validate' },
-    { n: '06', label: 'TLS', href: '#tls' },
-    { n: '07', label: 'Connect', href: '#connect' },
+    { n: '04', label: 'Sign in & roles', href: '#roles' },
+    { n: '05', label: 'What you manage', href: '#surfaces' },
+    { n: '06', label: 'Security model', href: '#principles' },
+    { n: '07', label: 'Connect nginxpilot', href: '#connect' },
 ];
 
 const TRAITS = [
-    { glyph: '⊟', title: 'Owns the mutable config', desc: 'Server blocks, upstreams, redirects and TLS — not your hand-written base.' },
-    { glyph: '⇌', title: 'Declarative in, nginx out', desc: 'You describe intent; it renders and validates the actual config.' },
-    { glyph: '◉', title: 'In the request path', desc: 'This is the piece that actually serves traffic. Quaykeeper is not.' },
+    { glyph: '⌂', title: 'The one thing you open', desc: 'A single GitHub-login console for every server, site and database you run.' },
+    { glyph: '◇', title: 'Never in the request path', desc: 'It orchestrates nginxpilot and your databases — traffic never flows through it.' },
+    { glyph: '▣', title: 'One SQLite file', desc: 'No external database, no message queue. State lives in one file you can cp.' },
 ];
 
-const ENDPOINTS = [
-    { method: 'GET', color: '#45c8bf', path: '/admin/health', desc: 'Liveness, nginx version, config hash.' },
-    { method: 'POST', color: '#9ece6a', path: '/admin/sites', desc: 'Deploy a static site from a git ref.' },
-    { method: 'POST', color: '#9ece6a', path: '/admin/proxies', desc: 'Create a reverse-proxy host + upstream pool.' },
-    { method: 'POST', color: '#9ece6a', path: '/admin/streams', desc: 'L4 TCP/UDP forward, optional TLS termination.' },
-    { method: 'POST', color: '#9ece6a', path: '/admin/certs/issue', desc: 'Run ACME (HTTP-01 or DNS-01) for a hostname.' },
-    { method: 'DELETE', color: '#ff6b6b', path: '/admin/hosts/:id', desc: 'Retire a host and reclaim its config.' },
+const SURFACES = [
+    { idx: '01', title: 'Static sites', desc: 'Pick a repo, a branch, a hostname. Quaykeeper writes the deploy config; nginxpilot fetches and serves it.' },
+    { idx: '02', title: 'Routing', desc: 'Proxies, L4 streams, redirects and access lists — every nginx edit as a validated form sent to nginxpilot.' },
+    { idx: '03', title: 'Certificates', desc: 'ACME via HTTP-01 or DNS-01, wildcards included, or upload your own. Renewal is handled by nginxpilot.' },
+    { idx: '04', title: 'Databases', desc: 'Register a Postgres or MySQL server once; create databases and users, grant with presets or per-operation control.' },
+    { idx: '05', title: 'App config', desc: 'Env vars and feature flags per instance, pulled by your own apps over the agent API with ETag caching.' },
+    { idx: '06', title: 'Docker snippets', desc: 'Save docker run recipes as validated, structured specs with a live command preview.' },
+    { idx: '07', title: 'Scheduled tasks', desc: 'Shell or Node scripts on cron or on demand, with stdout, stderr, exit code and duration captured per run.' },
+    { idx: '08', title: 'Realms', desc: 'Each nginxpilot daemon you connect — a VPS, a homelab box, a client server — with its own encrypted admin token.' },
 ];
 
-const PIPELINE = [
-    { n: '1', title: 'Render', desc: 'The API request is turned into a config fragment from vetted templates — no raw config is ever accepted.' },
-    { n: '2', title: 'Test the whole tree', desc: 'The daemon runs nginx -t against the complete running config, not just the fragment, catching cross-block conflicts.' },
-    { n: '3', title: 'Apply atomically', desc: 'Only on a clean test are files written and the change committed. A failed test leaves the old config untouched.' },
-    { n: '4', title: 'Graceful reload', desc: 'nginx -s reload picks up the change with zero dropped connections.' },
-];
-
-const TLS = [
-    { tag: '[01]', title: 'ACME issuance', desc: 'HTTP-01 for single hosts, DNS-01 for wildcards, via certbot under the hood.' },
-    { tag: '[02]', title: 'Bring your own', desc: 'Upload a cert/key pair directly; the key is write-only and never read back.' },
-    { tag: '[03]', title: 'Auto-renewal', desc: 'The daemon tracks expiry and renews ahead of time, reloading on success.' },
-    { tag: '[04]', title: 'DNS credentials', desc: 'Per-provider tokens (Cloudflare, Route 53, DigitalOcean…) stored encrypted.' },
+const PRINCIPLES = [
+    { key: '[01]', title: 'Never in the request path', desc: 'Quaykeeper can be down; your sites keep serving. It only orchestrates.' },
+    { key: '[02]', title: 'Secrets go one way', desc: 'Tokens, keys and passwords are accepted, encrypted or hashed, and never read back out.' },
+    { key: '[03]', title: 'Fail closed', desc: 'Domain verification, webhook signatures, fragment validation — every gate defaults to no.' },
+    { key: '[04]', title: 'Boring persistence', desc: 'One SQLite file with WAL and ordered migrations. Back it up with cp.' },
+    { key: '[05]', title: 'Owner-gated power', desc: 'Anything touching the host — certs, tasks, realms — needs the highest role and is audited.' },
 ];
 
 const CONNECT = [
-    { n: '1', text: 'In Quaykeeper, open Settings → Realms → Add realm.' },
-    { n: '2', text: 'Give it a name and the internal URL of the daemon (e.g. http://nginxpilot:8090).' },
-    { n: '3', text: 'Paste the ADMIN_TOKEN from install. It is encrypted immediately and never displayed again.' },
-    { n: '4', text: 'Quaykeeper handshakes, reads nginx’s version and current hosts, and the realm goes live.' },
+    { n: '1', text: 'Make sure nginxpilot is already running and reachable — see the nginxpilot guide if it isn’t yet.' },
+    { n: '2', text: 'In Quaykeeper, open Settings → Realms → Add realm.' },
+    { n: '3', text: 'Give it a name and the internal URL of the daemon (e.g. http://nginxpilot:8090).' },
+    { n: '4', text: 'Paste the ADMIN_TOKEN nginxpilot printed on first run. It is encrypted immediately and never displayed again.' },
+    { n: '5', text: 'Quaykeeper handshakes, reads nginx’s version and current hosts, and the realm goes live.' },
 ];
 
-export default function NginxpilotGuidePage() {
+export default function QuaykeeperGuidePage() {
     return (
-        <div data-root="np" style={{ ...ROOT_VARS, minHeight: '100vh', background: 'var(--bg)', color: 'var(--tx)', position: 'relative' }}>
+        <div data-root="qk" style={{ ...ROOT_VARS, minHeight: '100vh', background: 'var(--bg)', color: 'var(--tx)', position: 'relative' }}>
             <div
                 style={{
                     position: 'absolute',
@@ -88,15 +85,15 @@ export default function NginxpilotGuidePage() {
                 }}
             >
                 <Link href="/" className="qk-navlink" style={{ display: 'flex', alignItems: 'center', gap: '11px', color: 'var(--tx)' }}>
-                    <div style={{ width: '24px', height: '24px', transform: 'rotate(45deg)', border: '2px solid var(--accent2)', borderRadius: '5px' }} />
+                    <div style={{ width: '24px', height: '24px', transform: 'rotate(45deg)', border: '2px solid var(--accent)', borderRadius: '5px' }} />
                     <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '18px', letterSpacing: '-.01em' }}>Quaykeeper</span>
                     <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '11px', color: 'var(--faint)', borderLeft: '1px solid var(--line)', paddingLeft: '11px', marginLeft: '3px' }}>
-                        docs / nginxpilot
+                        docs / quaykeeper
                     </span>
                 </Link>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                    <Link href="/quaykeeper-guide/" className="qk-navlink" style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12.5px' }}>
-                        Quaykeeper guide →
+                    <Link href="/nginxpilot-guide/" className="qk-navlink" style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12.5px' }}>
+                        nginxpilot guide →
                     </Link>
                     <Link href="/" className="qk-navlink" style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12.5px' }}>
                         ← back to overview
@@ -122,20 +119,23 @@ export default function NginxpilotGuidePage() {
                         marginBottom: '22px',
                     }}
                 >
-                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--accent)', animation: 'np-pulse 2.4s ease-in-out infinite' }} /> Guide · the
-                    daemon in the request path
+                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--accent)', animation: 'qk-pulse 2.4s ease-in-out infinite' }} /> Guide · the
+                    console you sign into
                 </div>
                 <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '44px', lineHeight: 1.05, letterSpacing: '-.025em', margin: '0 0 18px', maxWidth: '820px' }}>
-                    nginxpilot — the sync daemon that lives beside nginx.
+                    Quaykeeper — the control plane for infrastructure you already run.
                 </h1>
                 <p style={{ fontSize: '17px', lineHeight: 1.6, color: 'var(--muted)', maxWidth: '680px', margin: '0 0 16px' }}>
-                    Quaykeeper is the console; <strong style={{ color: 'var(--tx)', fontWeight: 600 }}>nginxpilot is the hands.</strong> It
-                    runs on the same host as nginx, exposes an admin REST API, and turns declarative requests into validated config — so
-                    Quaykeeper never has to touch the web server&apos;s filesystem.
+                    nginxpilot is the hands; <strong style={{ color: 'var(--tx)', fontWeight: 600 }}>Quaykeeper is the console.</strong> Sign
+                    in with GitHub, connect one or more nginxpilot realms, and drive sites, routing, certificates, databases and config
+                    from forms instead of terminals.
                 </p>
-                <p style={{ fontSize: '14px', lineHeight: 1.6, color: 'var(--accent)', maxWidth: '680px', margin: 0 }}>
-                    Set this up <em style={{ fontStyle: 'normal' }}>before</em> Quaykeeper — Quaykeeper has nothing to manage until at
-                    least one nginxpilot is running and reachable.
+                <p style={{ fontSize: '14px', lineHeight: 1.6, color: 'var(--faint)', maxWidth: '680px', margin: 0 }}>
+                    Start this <em style={{ fontStyle: 'normal', color: 'var(--muted)' }}>after</em> nginxpilot is up — see the{' '}
+                    <Link href="/nginxpilot-guide/" className="qk-navlink" style={{ color: 'var(--tx)' }}>
+                        nginxpilot guide
+                    </Link>{' '}
+                    if you haven&apos;t started it yet.
                 </p>
             </section>
 
@@ -155,7 +155,7 @@ export default function NginxpilotGuidePage() {
                     <div style={{ marginTop: '20px', border: '1px solid var(--line)', borderRadius: '11px', background: 'var(--bg2)', padding: '15px 16px' }}>
                         <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '10.5px', color: 'var(--faint)', marginBottom: '7px' }}>RELATIONSHIP</div>
                         <div style={{ fontSize: '12.5px', lineHeight: 1.55, color: 'var(--muted)' }}>
-                            nginxpilot serves traffic. Quaykeeper only orchestrates it. Either can restart without the other losing state.
+                            Quaykeeper only orchestrates nginxpilot. Either can restart without the other losing state.
                         </div>
                     </div>
                 </aside>
@@ -166,19 +166,19 @@ export default function NginxpilotGuidePage() {
                     <section id="what" style={{ scrollMarginTop: '24px' }}>
                         <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12px', color: 'var(--accent)', marginBottom: '10px' }}>01 · What it is</div>
                         <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '26px', letterSpacing: '-.02em', margin: '0 0 16px' }}>
-                            A thin control surface over a real nginx.
+                            One dashboard instead of five terminals.
                         </h2>
                         <p style={{ fontSize: '15.5px', lineHeight: 1.7, color: 'var(--muted)', margin: '0 0 16px', maxWidth: '720px' }}>
-                            nginxpilot is a small daemon that runs next to (or inside the same container as) your nginx. It owns the parts
-                            of the config that change often — server blocks, upstreams, redirects, TLS — and leaves your hand-written base
-                            config alone. Every change arrives as a structured API call, is validated against the{' '}
-                            <em style={{ color: 'var(--tx)', fontStyle: 'normal' }}>full running config</em>, and is only applied if nginx
-                            would accept it.
+                            Quaykeeper is a small self-hosted app that replaces the SSH sessions, hand-edited configs and cron jobs you&apos;d
+                            otherwise juggle to run your own infrastructure. It doesn&apos;t serve traffic and it doesn&apos;t run a database
+                            server itself — it holds the{' '}
+                            <em style={{ color: 'var(--tx)', fontStyle: 'normal' }}>intent</em>, and delegates the actual work to nginxpilot
+                            (for anything nginx) and to the database servers you register (for anything SQL).
                         </p>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '12px', marginTop: '22px' }}>
                             {TRAITS.map((tr) => (
                                 <div key={tr.title} style={{ border: '1px solid var(--line)', borderRadius: '11px', background: 'var(--card)', padding: '16px 17px' }}>
-                                    <div style={{ fontSize: '16px', color: 'var(--accent2)', marginBottom: '9px' }}>{tr.glyph}</div>
+                                    <div style={{ fontSize: '16px', color: 'var(--accent)', marginBottom: '9px' }}>{tr.glyph}</div>
                                     <div style={{ fontWeight: 600, fontSize: '14.5px', marginBottom: '5px' }}>{tr.title}</div>
                                     <div style={{ fontSize: '12.5px', lineHeight: 1.5, color: 'var(--muted)' }}>{tr.desc}</div>
                                 </div>
@@ -190,7 +190,7 @@ export default function NginxpilotGuidePage() {
                     <section id="fit" style={{ scrollMarginTop: '24px' }}>
                         <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12px', color: 'var(--accent)', marginBottom: '10px' }}>02 · How it fits</div>
                         <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '26px', letterSpacing: '-.02em', margin: '0 0 16px' }}>
-                            One side serves; the other decides.
+                            You decide; the daemons do.
                         </h2>
                         <div
                             style={{
@@ -206,37 +206,35 @@ export default function NginxpilotGuidePage() {
                         >
                             <div style={{ textAlign: 'center' }}>
                                 <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '13px', fontWeight: 600, color: 'var(--tx)', border: '1px solid var(--line2)', borderRadius: '10px', padding: '16px 10px' }}>
+                                    you
+                                </div>
+                                <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '10.5px', color: 'var(--faint)', marginTop: '8px' }}>GitHub login</div>
+                            </div>
+                            <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '10px', color: 'var(--accent)', textAlign: 'center', lineHeight: 1.4 }}>
+                                sign in →
+                            </div>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '13px', fontWeight: 600, color: '#08110f', background: 'var(--accent)', borderRadius: '10px', padding: '16px 10px' }}>
                                     Quaykeeper
                                 </div>
                                 <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '10.5px', color: 'var(--faint)', marginTop: '8px' }}>control plane</div>
                             </div>
-                            <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '10px', color: 'var(--accent)', textAlign: 'center', lineHeight: 1.4 }}>
+                            <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '10px', color: 'var(--accent2)', textAlign: 'center', lineHeight: 1.4 }}>
                                 admin
                                 <br />
                                 REST →
                             </div>
                             <div style={{ textAlign: 'center' }}>
-                                <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '13px', fontWeight: 600, color: '#08110f', background: 'var(--accent)', borderRadius: '10px', padding: '16px 10px' }}>
-                                    nginxpilot
+                                <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '13px', fontWeight: 600, color: 'var(--tx)', border: '1px solid var(--line2)', borderRadius: '10px', padding: '16px 10px' }}>
+                                    nginxpilot + your DBs
                                 </div>
-                                <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '10.5px', color: 'var(--faint)', marginTop: '8px' }}>sync daemon</div>
-                            </div>
-                            <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '10px', color: 'var(--accent2)', textAlign: 'center', lineHeight: 1.4 }}>
-                                writes +
-                                <br />
-                                reloads →
-                            </div>
-                            <div style={{ textAlign: 'center' }}>
-                                <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '13px', fontWeight: 600, color: 'var(--accent2)', border: '1px solid var(--accent2)', borderRadius: '10px', padding: '16px 10px' }}>
-                                    nginx
-                                </div>
-                                <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '10.5px', color: 'var(--faint)', marginTop: '8px' }}>your traffic</div>
+                                <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '10.5px', color: 'var(--faint)', marginTop: '8px' }}>do the actual work</div>
                             </div>
                         </div>
                         <p style={{ fontSize: '14px', lineHeight: 1.65, color: 'var(--muted)', margin: '16px 0 0', maxWidth: '720px' }}>
-                            The two only need to share a network. Quaykeeper holds an admin token for each nginxpilot it manages (each is a{' '}
-                            <em style={{ color: 'var(--tx)', fontStyle: 'normal' }}>realm</em>) and speaks to it over HTTP. nginxpilot holds
-                            no long-term state of its own beyond what nginx needs — the source of truth stays in Quaykeeper.
+                            Every server you connect — an nginxpilot daemon or a Postgres/MySQL instance — is registered once with
+                            credentials that go in and never come back out. From then on you work through Quaykeeper&apos;s forms, and it
+                            translates each action into the right call to the right daemon.
                         </p>
                     </section>
 
@@ -244,11 +242,11 @@ export default function NginxpilotGuidePage() {
                     <section id="install" style={{ scrollMarginTop: '24px' }}>
                         <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12px', color: 'var(--accent)', marginBottom: '10px' }}>03 · Install &amp; run</div>
                         <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '26px', letterSpacing: '-.02em', margin: '0 0 16px' }}>
-                            Bring it up on the nginx host.
+                            Bring it up beside nginxpilot.
                         </h2>
                         <p style={{ fontSize: '15px', lineHeight: 1.65, color: 'var(--muted)', margin: '0 0 18px', maxWidth: '720px' }}>
-                            Run nginxpilot on a shared Docker network so Quaykeeper can reach it. Expose the admin port only on that
-                            internal network — never publish it to the internet.
+                            Run it on the same Docker network as nginxpilot so the two can reach each other, with a GitHub OAuth app
+                            configured for its callback URL.
                         </p>
                         <div
                             style={{
@@ -263,86 +261,55 @@ export default function NginxpilotGuidePage() {
                                 overflowX: 'auto',
                             }}
                         >
+                            <div style={{ color: 'var(--faint)' }}># nginxpilot should already be running on this network — see the nginxpilot guide</div>
+                            <div style={{ height: '12px' }} />
                             <div style={{ color: 'var(--faint)' }}># pull the image</div>
                             <div>
-                                <span style={{ color: 'var(--accent)' }}>docker</span> pull ghcr.io/kalevski/toolcase/nginxpilot:latest
+                                <span style={{ color: 'var(--accent)' }}>docker</span> pull ghcr.io/kalevski/toolcase/quaykeeper:latest
                             </div>
                             <div style={{ height: '12px' }} />
-                            <div style={{ color: 'var(--faint)' }}># shared network for the two containers</div>
+                            <div style={{ color: 'var(--faint)' }}># run it on the same network as nginxpilot</div>
                             <div>
-                                <span style={{ color: 'var(--accent)' }}>docker</span> network create nginxpilot-net
-                            </div>
-                            <div style={{ height: '12px' }} />
-                            <div style={{ color: 'var(--faint)' }}># run the daemon beside nginx</div>
-                            <div>
-                                <span style={{ color: 'var(--accent)' }}>docker</span> run -d --name nginxpilot \
+                                <span style={{ color: 'var(--accent)' }}>docker</span> run -d --name quaykeeper \
                             </div>
                             <div style={{ paddingLeft: '20px' }}>--network nginxpilot-net \</div>
-                            <div style={{ paddingLeft: '20px' }}>-p 80:80 -p 443:443 \</div>
-                            <div style={{ paddingLeft: '20px' }}>-e ADMIN_TOKEN=&quot;$(openssl rand -hex 32)&quot; \</div>
-                            <div style={{ paddingLeft: '20px' }}>-v nginxpilot-data:/data \</div>
-                            <div style={{ paddingLeft: '20px' }}>ghcr.io/kalevski/toolcase/nginxpilot:latest</div>
+                            <div style={{ paddingLeft: '20px' }}>-p 4100:3000 -p 4101:4101 \</div>
+                            <div style={{ paddingLeft: '20px' }}>
+                                -e QUAYKEEPER_GITHUB_CLIENT_ID=&quot;&lt;github-oauth-client-id&gt;&quot; \
+                            </div>
+                            <div style={{ paddingLeft: '20px' }}>
+                                -e QUAYKEEPER_GITHUB_CLIENT_SECRET=&quot;&lt;github-oauth-client-secret&gt;&quot; \
+                            </div>
+                            <div style={{ paddingLeft: '20px' }}>
+                                -e QUAYKEEPER_OAUTH_REDIRECT_URI=&quot;http://localhost:4100/api/auth/github/callback&quot; \
+                            </div>
+                            <div style={{ paddingLeft: '20px' }}>-e QUAYKEEPER_AUTH_SECRET=&quot;$(openssl rand -hex 32)&quot; \</div>
+                            <div style={{ paddingLeft: '20px' }}>-v &quot;$HOME/quaykeeper-workspace:/workspace&quot; \</div>
+                            <div style={{ paddingLeft: '20px' }}>ghcr.io/kalevski/toolcase/quaykeeper:latest</div>
                             <div style={{ height: '12px' }} />
-                            <div style={{ color: 'var(--accent2)' }}>✓ admin API listening on nginxpilot-net:8090</div>
+                            <div style={{ color: 'var(--accent2)' }}>✓ listening on :4100 — open it and sign in with GitHub</div>
                         </div>
                         <p style={{ fontSize: '13px', lineHeight: 1.6, color: 'var(--faint)', margin: '12px 0 0', maxWidth: '720px' }}>
-                            <span style={{ color: 'var(--accent2)' }}>
-                                Keep the <span style={{ fontFamily: "'IBM Plex Mono',monospace" }}>ADMIN_TOKEN</span>.
-                            </span>{' '}
-                            You paste it into Quaykeeper once, where it is encrypted at rest (AES-256-GCM) and never shown again.
+                            Those four are the only vars that fail fast at boot if missing —{' '}
+                            <span style={{ fontFamily: "'IBM Plex Mono',monospace" }}>QUAYKEEPER_GITHUB_CLIENT_ID</span>,{' '}
+                            <span style={{ fontFamily: "'IBM Plex Mono',monospace" }}>_CLIENT_SECRET</span>,{' '}
+                            <span style={{ fontFamily: "'IBM Plex Mono',monospace" }}>_OAUTH_REDIRECT_URI</span> and{' '}
+                            <span style={{ fontFamily: "'IBM Plex Mono',monospace" }}>_AUTH_SECRET</span>. The redirect URI must exactly
+                            match the callback URL on the GitHub OAuth app. Everything else — realms, sites, certs — is configured from
+                            the UI after first login.
                         </p>
                     </section>
 
-                    {/* 04 ADMIN API */}
-                    <section id="api" style={{ scrollMarginTop: '24px' }}>
-                        <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12px', color: 'var(--accent)', marginBottom: '10px' }}>04 · The admin API</div>
+                    {/* 04 SIGN IN & ROLES */}
+                    <section id="roles" style={{ scrollMarginTop: '24px' }}>
+                        <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12px', color: 'var(--accent)', marginBottom: '10px' }}>04 · Sign in &amp; roles</div>
                         <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '26px', letterSpacing: '-.02em', margin: '0 0 16px' }}>
-                            Every object is a REST resource.
+                            The first login becomes the owner.
                         </h2>
-                        <p style={{ fontSize: '15px', lineHeight: 1.65, color: 'var(--muted)', margin: '0 0 20px', maxWidth: '720px' }}>
-                            Auth is a single bearer token per daemon. Resources map one-to-one to the things you&apos;d otherwise write
-                            into nginx by hand. Quaykeeper drives all of these for you — but they&apos;re a plain API you can{' '}
-                            <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '13px', color: 'var(--tx)' }}>curl</span> for
-                            debugging.
+                        <p style={{ fontSize: '15px', lineHeight: 1.65, color: 'var(--muted)', margin: '0 0 18px', maxWidth: '720px' }}>
+                            There&apos;s no separate signup step — whoever authorizes the GitHub OAuth app first is the owner, with full
+                            access to everything. The owner can then invite teammates, who get scoped access without host-level power.
                         </p>
-                        <div style={{ border: '1px solid var(--line)', borderRadius: '12px', overflow: 'hidden' }}>
-                            <div
-                                style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: '88px 1fr 1.2fr',
-                                    fontFamily: "'IBM Plex Mono',monospace",
-                                    fontSize: '11px',
-                                    color: 'var(--faint)',
-                                    background: 'var(--bg2)',
-                                    padding: '10px 18px',
-                                    borderBottom: '1px solid var(--line)',
-                                    letterSpacing: '.06em',
-                                }}
-                            >
-                                <div>METHOD</div>
-                                <div>ENDPOINT</div>
-                                <div>WHAT IT DOES</div>
-                            </div>
-                            {ENDPOINTS.map((e) => (
-                                <div
-                                    key={e.path}
-                                    style={{
-                                        display: 'grid',
-                                        gridTemplateColumns: '88px 1fr 1.2fr',
-                                        gap: '10px',
-                                        alignItems: 'center',
-                                        fontFamily: "'IBM Plex Mono',monospace",
-                                        fontSize: '12.5px',
-                                        padding: '11px 18px',
-                                        borderBottom: '1px solid var(--line)',
-                                    }}
-                                >
-                                    <div style={{ color: e.color, fontWeight: 600 }}>{e.method}</div>
-                                    <div style={{ color: 'var(--tx)' }}>{e.path}</div>
-                                    <div style={{ color: 'var(--muted)', fontFamily: "'IBM Plex Sans',sans-serif", fontSize: '12.5px' }}>{e.desc}</div>
-                                </div>
-                            ))}
-                        </div>
                         <div
                             style={{
                                 border: '1px solid var(--line)',
@@ -354,82 +321,75 @@ export default function NginxpilotGuidePage() {
                                 lineHeight: 1.85,
                                 color: 'var(--muted)',
                                 overflowX: 'auto',
-                                marginTop: '16px',
                             }}
                         >
-                            <div style={{ color: 'var(--faint)' }}># create a reverse proxy host</div>
+                            <div style={{ color: 'var(--faint)' }}># first visit to Quaykeeper</div>
                             <div>
-                                <span style={{ color: 'var(--accent)' }}>curl</span> -X POST https://nginxpilot:8090/admin/proxies \
+                                <span style={{ color: 'var(--accent)' }}>open</span> http://localhost:4100
                             </div>
-                            <div style={{ paddingLeft: '20px' }}>-H &quot;Authorization: Bearer $ADMIN_TOKEN&quot; \</div>
-                            <div style={{ paddingLeft: '20px' }}>-H &quot;Content-Type: application/json&quot; \</div>
-                            <div style={{ paddingLeft: '20px' }}>-d &apos;{'{ "host": "app.example.com", "upstream": "127.0.0.1:3000" }'}&apos;</div>
+                            <div>
+                                <span style={{ color: 'var(--accent)' }}>click</span> &quot;Sign in with GitHub&quot;
+                            </div>
                             <div style={{ height: '10px' }} />
-                            <div style={{ color: 'var(--accent2)' }}>201 Created  ·  {'{ "id": "px_7f3a", "state": "active" }'}</div>
+                            <div style={{ color: 'var(--accent2)' }}>✓ no existing users found — you are now the owner</div>
                         </div>
+                        <p style={{ fontSize: '13.5px', lineHeight: 1.6, color: 'var(--muted)', margin: '16px 0 0', maxWidth: '720px' }}>
+                            Owner-only actions — adding realms, issuing certs, running scheduled tasks, anything that reaches the host —
+                            stay owner-gated and are written to the audit log even for the owner.
+                        </p>
                     </section>
 
-                    {/* 05 VALIDATION */}
-                    <section id="validate" style={{ scrollMarginTop: '24px' }}>
-                        <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12px', color: 'var(--accent)', marginBottom: '10px' }}>05 · Validation &amp; reloads</div>
+                    {/* 05 WHAT YOU MANAGE */}
+                    <section id="surfaces" style={{ scrollMarginTop: '24px' }}>
+                        <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12px', color: 'var(--accent)', marginBottom: '10px' }}>05 · What you manage</div>
                         <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '26px', letterSpacing: '-.02em', margin: '0 0 16px' }}>
-                            A bad fragment is a rejected request, never a broken nginx.
+                            Eight surfaces, all forms.
                         </h2>
                         <p style={{ fontSize: '15px', lineHeight: 1.65, color: 'var(--muted)', margin: '0 0 20px', maxWidth: '720px' }}>
-                            Every mutation runs the same gauntlet before it touches the live server. If any step fails, nothing changes
-                            and the API returns the exact error.
+                            Once at least one nginxpilot realm is connected, these are the things Quaykeeper lets you drive without ever
+                            reaching for SSH.
                         </p>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 0, border: '1px solid var(--line)', borderRadius: '12px', background: 'var(--bg2)', overflow: 'hidden' }}>
-                            {PIPELINE.map((s) => (
-                                <div key={s.n} style={{ display: 'flex', gap: '16px', alignItems: 'flex-start', padding: '16px 20px', borderBottom: '1px solid var(--line)' }}>
-                                    <span
-                                        style={{
-                                            fontFamily: "'IBM Plex Mono',monospace",
-                                            fontSize: '12px',
-                                            color: '#08110f',
-                                            background: 'var(--accent)',
-                                            borderRadius: '6px',
-                                            minWidth: '26px',
-                                            height: '26px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            fontWeight: 600,
-                                        }}
-                                    >
-                                        {s.n}
-                                    </span>
-                                    <div>
-                                        <div style={{ fontWeight: 600, fontSize: '14.5px', marginBottom: '3px' }}>{s.title}</div>
-                                        <div style={{ fontSize: '13px', lineHeight: 1.55, color: 'var(--muted)' }}>{s.desc}</div>
-                                    </div>
+                        <div style={{ border: '1px solid var(--line)', borderRadius: '12px', overflow: 'hidden' }}>
+                            {SURFACES.map((s) => (
+                                <div
+                                    key={s.idx}
+                                    style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: '48px 1fr 2fr',
+                                        gap: '10px',
+                                        alignItems: 'center',
+                                        padding: '13px 18px',
+                                        borderBottom: '1px solid var(--line)',
+                                    }}
+                                >
+                                    <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '11px', color: 'var(--faint)' }}>{s.idx}</div>
+                                    <div style={{ fontWeight: 600, fontSize: '13.5px' }}>{s.title}</div>
+                                    <div style={{ color: 'var(--muted)', fontSize: '12.5px', lineHeight: 1.5 }}>{s.desc}</div>
                                 </div>
                             ))}
                         </div>
-                        <p style={{ fontSize: '13.5px', lineHeight: 1.6, color: 'var(--muted)', margin: '16px 0 0', maxWidth: '720px' }}>
-                            Reloads are graceful (<span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12.5px', color: 'var(--tx)' }}>nginx -s reload</span>) — in-flight
-                            connections are never dropped. Wildcard-covered subdomains need no reload at all.
+                        <p style={{ fontSize: '13px', lineHeight: 1.6, color: 'var(--faint)', margin: '14px 0 0', maxWidth: '720px' }}>
+                            See these in action on the{' '}
+                            <Link href="/screenshots/" className="qk-navlink" style={{ color: 'var(--muted)' }}>
+                                screenshots page
+                            </Link>
+                            .
                         </p>
                     </section>
 
-                    {/* 06 TLS */}
-                    <section id="tls" style={{ scrollMarginTop: '24px' }}>
-                        <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12px', color: 'var(--accent)', marginBottom: '10px' }}>06 · TLS certificates</div>
+                    {/* 06 SECURITY PRINCIPLES */}
+                    <section id="principles" style={{ scrollMarginTop: '24px' }}>
+                        <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12px', color: 'var(--accent)', marginBottom: '10px' }}>06 · Security model</div>
                         <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '26px', letterSpacing: '-.02em', margin: '0 0 16px' }}>
-                            Issuance and renewal, handled daemon-side.
+                            Five rules the whole app follows.
                         </h2>
-                        <p style={{ fontSize: '15px', lineHeight: 1.65, color: 'var(--muted)', margin: '0 0 18px', maxWidth: '720px' }}>
-                            nginxpilot runs the ACME flow itself, installs the vhost, and schedules renewal. Quaykeeper tells it{' '}
-                            <em style={{ color: 'var(--tx)', fontStyle: 'normal' }}>what</em> to secure; nginxpilot does the challenge
-                            dance and the file writes.
-                        </p>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                            {TLS.map((c) => (
-                                <div key={c.tag} style={{ border: '1px solid var(--line)', borderRadius: '11px', background: 'var(--card)', padding: '16px 18px', display: 'flex', gap: '13px' }}>
-                                    <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '11px', color: 'var(--accent)', paddingTop: '1px' }}>{c.tag}</span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 0, border: '1px solid var(--line)', borderRadius: '14px', background: 'var(--bg2)', overflow: 'hidden' }}>
+                            {PRINCIPLES.map((p) => (
+                                <div key={p.key} style={{ display: 'flex', gap: '16px', padding: '18px 22px', borderBottom: '1px solid var(--line)' }}>
+                                    <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '11px', color: 'var(--accent)', whiteSpace: 'nowrap', paddingTop: '2px' }}>{p.key}</span>
                                     <div>
-                                        <div style={{ fontWeight: 600, fontSize: '14px', marginBottom: '4px' }}>{c.title}</div>
-                                        <div style={{ fontSize: '12.5px', lineHeight: 1.5, color: 'var(--muted)' }}>{c.desc}</div>
+                                        <div style={{ fontWeight: 600, fontSize: '15px', marginBottom: '3px' }}>{p.title}</div>
+                                        <div style={{ fontSize: '13.5px', lineHeight: 1.5, color: 'var(--muted)' }}>{p.desc}</div>
                                     </div>
                                 </div>
                             ))}
@@ -438,7 +398,7 @@ export default function NginxpilotGuidePage() {
 
                     {/* 07 CONNECT */}
                     <section id="connect" style={{ scrollMarginTop: '24px' }}>
-                        <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12px', color: 'var(--accent)', marginBottom: '10px' }}>07 · Connect it to Quaykeeper</div>
+                        <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12px', color: 'var(--accent)', marginBottom: '10px' }}>07 · Connect nginxpilot</div>
                         <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '26px', letterSpacing: '-.02em', margin: '0 0 16px' }}>
                             Register the daemon as a realm.
                         </h2>
@@ -451,7 +411,7 @@ export default function NginxpilotGuidePage() {
                                                 fontFamily: "'IBM Plex Mono',monospace",
                                                 fontSize: '12px',
                                                 color: '#08110f',
-                                                background: 'var(--accent2)',
+                                                background: 'var(--accent)',
                                                 borderRadius: '6px',
                                                 minWidth: '24px',
                                                 height: '24px',
@@ -511,10 +471,9 @@ export default function NginxpilotGuidePage() {
                         }}
                     >
                         <div>
-                            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '20px', margin: '0 0 6px' }}>That&apos;s the whole daemon.</h3>
+                            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '20px', margin: '0 0 6px' }}>That&apos;s the whole console.</h3>
                             <p style={{ margin: 0, fontSize: '14px', color: 'var(--muted)', maxWidth: '520px' }}>
-                                Once nginxpilot is running and registered, everything else happens from the Quaykeeper console —
-                                deploys, routing, certs, and databases.
+                                From here it&apos;s deploys, routing, certs and databases — all from the UI you just signed into.
                             </p>
                         </div>
                         <Link href="/#start" className="qk-guide-cta" style={{ fontSize: '14.5px', fontWeight: 600, padding: '12px 20px', borderRadius: '10px', whiteSpace: 'nowrap' }}>
@@ -540,7 +499,7 @@ export default function NginxpilotGuidePage() {
                     gap: '16px',
                 }}
             >
-                <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12.5px', color: 'var(--faint)' }}>nginxpilot · the daemon beside nginx</span>
+                <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12.5px', color: 'var(--faint)' }}>Quaykeeper · the console you sign into</span>
                 <Link href="/" className="qk-navlink" style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12.5px' }}>
                     Quaykeeper overview →
                 </Link>

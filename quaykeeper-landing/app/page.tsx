@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Slideshow } from './Slideshow';
 
 const ROOT_VARS = {
     '--accent': '#e0a458',
@@ -80,6 +81,27 @@ const PRINCIPLES = [
     { key: '[05]', title: 'Owner-gated power', desc: 'Anything touching the host — certs, tasks, realms — needs the highest role and is audited.' },
 ];
 
+const TOUR = [
+    {
+        src: '/screenshots/static-sites.png',
+        label: 'static-sites — live',
+        title: 'Deploy static sites',
+        desc: 'A repo, a branch, a hostname. That’s the whole surface.',
+    },
+    {
+        src: '/screenshots/instances.png',
+        label: 'instances — variables',
+        title: 'Centralized app config',
+        desc: 'Env vars and secrets per instance, pulled by your apps over the agent API.',
+    },
+    {
+        src: '/screenshots/nginx-servers.png',
+        label: 'admin — nginx servers',
+        title: 'Many servers, one console',
+        desc: 'Every nginxpilot realm you drive, switchable from the header.',
+    },
+];
+
 const PERSONAS = [
     { mark: '~/', who: 'Self-hosters', desc: 'One dashboard instead of five terminals, for the homelab you actually run.' },
     { mark: '</>', who: 'Indie developers', desc: 'Ship static sites and side projects straight to your own VPS.' },
@@ -134,39 +156,17 @@ export default function LandingPage() {
                     <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '19px', letterSpacing: '-.01em' }}>Quaykeeper</span>
                 </div>
                 <nav style={{ display: 'flex', alignItems: 'center', gap: '30px', fontSize: '14px' }}>
-                    <a href="#features" className="qk-navlink">
-                        Features
-                    </a>
-                    <a href="#architecture" className="qk-navlink">
-                        Architecture
-                    </a>
-                    <a href="#principles" className="qk-navlink">
-                        Principles
-                    </a>
                     <Link href="/nginxpilot-guide/" className="qk-navlink">
                         nginxpilot guide
                     </Link>
-                    <a href="#start" className="qk-navlink">
-                        Get started
-                    </a>
+                    <Link href="/quaykeeper-guide/" className="qk-navlink">
+                        Quaykeeper guide
+                    </Link>
+                    <Link href="/screenshots/" className="qk-navlink">
+                        Screenshots
+                    </Link>
                 </nav>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <a
-                        href="#start"
-                        className="qk-star-btn"
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            fontFamily: "'IBM Plex Mono',monospace",
-                            fontSize: '12.5px',
-                            border: '1px solid var(--line)',
-                            padding: '8px 13px',
-                            borderRadius: '8px',
-                        }}
-                    >
-                        <span style={{ color: 'var(--accent2)' }}>★</span> Star on GitHub
-                    </a>
                     <a
                         href="#start"
                         className="qk-deploy-btn"
@@ -401,6 +401,72 @@ export default function LandingPage() {
                 </div>
             </section>
 
+            {/* TWO PIECES, IN ORDER */}
+            <section style={{ position: 'relative', zIndex: 2, maxWidth: '1200px', margin: '56px auto 0', padding: '0 40px' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '14px', marginBottom: '22px' }}>
+                    <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12px', color: 'var(--accent)' }}>// new here? start with this</span>
+                    <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '24px', letterSpacing: '-.02em', margin: 0 }}>
+                        Two pieces. Start nginxpilot first, then Quaykeeper.
+                    </h2>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: '18px', alignItems: 'center' }}>
+                    <div style={{ border: '1px solid var(--line)', borderRadius: '14px', background: 'var(--bg2)', padding: '24px 26px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+                            <span
+                                style={{
+                                    fontFamily: "'IBM Plex Mono',monospace",
+                                    fontSize: '12px',
+                                    fontWeight: 600,
+                                    color: '#08110f',
+                                    background: 'var(--accent)',
+                                    borderRadius: '6px',
+                                    padding: '3px 8px',
+                                }}
+                            >
+                                1
+                            </span>
+                            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '18px', margin: 0 }}>nginxpilot</h3>
+                        </div>
+                        <p style={{ margin: '0 0 14px', fontSize: '14px', lineHeight: 1.6, color: 'var(--muted)' }}>
+                            The daemon that actually runs nginx and serves traffic. It has to be up first — Quaykeeper has nothing to
+                            manage until at least one nginxpilot is running.
+                        </p>
+                        <Link href="/nginxpilot-guide/" className="qk-navlink" style={{ fontSize: '13.5px', fontFamily: "'IBM Plex Mono',monospace", color: 'var(--tx)' }}>
+                            Read the nginxpilot guide →
+                        </Link>
+                    </div>
+                    <div style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '20px', color: 'var(--faint)', textAlign: 'center' }}>→</div>
+                    <div style={{ border: '1px solid var(--line)', borderRadius: '14px', background: 'var(--bg2)', padding: '24px 26px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+                            <span
+                                style={{
+                                    fontFamily: "'IBM Plex Mono',monospace",
+                                    fontSize: '12px',
+                                    fontWeight: 600,
+                                    color: '#08110f',
+                                    background: 'var(--accent)',
+                                    borderRadius: '6px',
+                                    padding: '3px 8px',
+                                }}
+                            >
+                                2
+                            </span>
+                            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '18px', margin: 0 }}>Quaykeeper</h3>
+                        </div>
+                        <p style={{ margin: '0 0 14px', fontSize: '14px', lineHeight: 1.6, color: 'var(--muted)' }}>
+                            The console you sign into with GitHub. Point it at the nginxpilot you just started, and drive sites, routing,
+                            certs and databases from here — the first person to sign in becomes the owner.
+                        </p>
+                        <Link href="/quaykeeper-guide/" className="qk-navlink" style={{ fontSize: '13.5px', fontFamily: "'IBM Plex Mono',monospace", color: 'var(--tx)' }}>
+                            Read the Quaykeeper guide →
+                        </Link>
+                    </div>
+                </div>
+                <p style={{ margin: '18px 0 0', fontSize: '13px', color: 'var(--faint)' }}>
+                    Full copy-paste commands for both, in order, are in <a href="#start" className="qk-navlink" style={{ color: 'var(--muted)' }}>Get started</a> below.
+                </p>
+            </section>
+
             {/* PROBLEM STRIP */}
             <section style={{ position: 'relative', zIndex: 2, maxWidth: '1200px', margin: '56px auto 0', padding: '0 40px' }}>
                 <div style={{ border: '1px solid var(--line)', borderRadius: '16px', background: 'var(--bg2)', padding: '36px 38px' }}>
@@ -483,6 +549,34 @@ export default function LandingPage() {
                 </div>
             </section>
 
+            {/* PRODUCT TOUR */}
+            <section style={{ position: 'relative', zIndex: 2, margin: '100px auto 0' }}>
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'baseline',
+                        justifyContent: 'space-between',
+                        gap: '14px',
+                        flexWrap: 'wrap',
+                        maxWidth: '1200px',
+                        margin: '0 auto',
+                        padding: '0 40px',
+                        marginBottom: '26px',
+                    }}
+                >
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '14px' }}>
+                        <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12px', color: 'var(--accent)' }}>// the real thing</span>
+                        <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '30px', letterSpacing: '-.025em', margin: 0 }}>
+                            No mockups. This is the console.
+                        </h2>
+                    </div>
+                    <Link href="/screenshots/" className="qk-navlink" style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '13px' }}>
+                        More screenshots →
+                    </Link>
+                </div>
+                <Slideshow slides={TOUR} progress="dots" autoPlayMs={6000} />
+            </section>
+
             {/* ARCHITECTURE + PRINCIPLES */}
             <section id="architecture" style={{ position: 'relative', zIndex: 2, maxWidth: '1200px', margin: '100px auto 0', padding: '0 40px' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '44px', alignItems: 'start' }}>
@@ -556,19 +650,24 @@ export default function LandingPage() {
                     <div style={{ padding: '44px 42px' }}>
                         <span style={{ fontFamily: "'IBM Plex Mono',monospace", fontSize: '12px', color: 'var(--accent)' }}>// get started</span>
                         <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: '30px', letterSpacing: '-.025em', margin: '12px 0 16px' }}>
-                            One container. One volume. You&apos;re the owner.
+                            Two containers. Started in order. You&apos;re the owner.
                         </h2>
+                        <p style={{ fontSize: '15px', lineHeight: 1.6, color: 'var(--muted)', margin: '0 0 18px' }}>
+                            <strong style={{ color: 'var(--tx)' }}>Step 1</strong> brings up nginxpilot, so there&apos;s something for
+                            Quaykeeper to manage. <strong style={{ color: 'var(--tx)' }}>Step 2</strong> brings up Quaykeeper — point it
+                            at a GitHub OAuth app, sign in, and the first login becomes the owner.
+                        </p>
                         <p style={{ fontSize: '15px', lineHeight: 1.6, color: 'var(--muted)', margin: '0 0 28px' }}>
-                            Point it at a GitHub OAuth app and an nginxpilot daemon, sign in, and the first login becomes the owner. Back
-                            it up with <span style={{ color: 'var(--tx)', fontFamily: "'IBM Plex Mono',monospace", fontSize: '13px' }}>cp</span>.
+                            Both are one SQLite/file-backed container each. Back either up with{' '}
+                            <span style={{ color: 'var(--tx)', fontFamily: "'IBM Plex Mono',monospace", fontSize: '13px' }}>cp</span>.
                         </p>
                         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                            <a href="#start" className="qk-cta-primary" style={{ fontSize: '15px', fontWeight: 600, padding: '12px 22px', borderRadius: '10px' }}>
-                                Read the docs
-                            </a>
-                            <a href="#start" className="qk-cta-secondary" style={{ fontSize: '15px', fontWeight: 500, border: '1px solid var(--line2)', padding: '12px 22px', borderRadius: '10px' }}>
-                                View on GitHub
-                            </a>
+                            <Link href="/nginxpilot-guide/" className="qk-cta-primary" style={{ fontSize: '15px', fontWeight: 600, padding: '12px 22px', borderRadius: '10px' }}>
+                                Step 1 — nginxpilot guide
+                            </Link>
+                            <Link href="/quaykeeper-guide/" className="qk-cta-secondary" style={{ fontSize: '15px', fontWeight: 500, border: '1px solid var(--line2)', padding: '12px 22px', borderRadius: '10px' }}>
+                                Step 2 — Quaykeeper guide
+                            </Link>
                         </div>
                     </div>
                     <div
@@ -583,24 +682,45 @@ export default function LandingPage() {
                             overflowX: 'auto',
                         }}
                     >
-                        <div style={{ color: 'var(--faint)' }}># pull the images</div>
+                        <div style={{ color: 'var(--accent)' }}># step 1 — start nginxpilot first</div>
                         <div>
                             <span style={{ color: 'var(--accent2)' }}>docker</span> pull ghcr.io/kalevski/toolcase/nginxpilot:latest
                         </div>
                         <div>
+                            <span style={{ color: 'var(--accent2)' }}>docker</span> network create nginxpilot-net
+                        </div>
+                        <div>
+                            <span style={{ color: 'var(--accent2)' }}>docker</span> run -d --name nginxpilot \
+                        </div>
+                        <div style={{ paddingLeft: '20px' }}>--network nginxpilot-net \</div>
+                        <div style={{ paddingLeft: '20px' }}>-p 80:80 -p 443:443 \</div>
+                        <div style={{ paddingLeft: '20px' }}>-e ADMIN_TOKEN=&quot;$(openssl rand -hex 32)&quot; \</div>
+                        <div style={{ paddingLeft: '20px' }}>-v nginxpilot-data:/data \</div>
+                        <div style={{ paddingLeft: '20px' }}>ghcr.io/kalevski/toolcase/nginxpilot:latest</div>
+                        <div style={{ height: '14px' }} />
+                        <div style={{ color: 'var(--accent)' }}># step 2 — then start quaykeeper beside it</div>
+                        <div>
                             <span style={{ color: 'var(--accent2)' }}>docker</span> pull ghcr.io/kalevski/toolcase/quaykeeper:latest
                         </div>
-                        <div style={{ height: '12px' }} />
-                        <div style={{ color: 'var(--faint)' }}># run it beside nginxpilot</div>
                         <div>
                             <span style={{ color: 'var(--accent2)' }}>docker</span> run -d --name quaykeeper \
                         </div>
                         <div style={{ paddingLeft: '20px' }}>--network nginxpilot-net \</div>
                         <div style={{ paddingLeft: '20px' }}>-p 4100:3000 -p 4101:4101 \</div>
-                        <div style={{ paddingLeft: '20px' }}>--env-file quaykeeper/.env \</div>
+                        <div style={{ paddingLeft: '20px' }}>
+                            -e QUAYKEEPER_GITHUB_CLIENT_ID=&quot;&lt;github-oauth-client-id&gt;&quot; \
+                        </div>
+                        <div style={{ paddingLeft: '20px' }}>
+                            -e QUAYKEEPER_GITHUB_CLIENT_SECRET=&quot;&lt;github-oauth-client-secret&gt;&quot; \
+                        </div>
+                        <div style={{ paddingLeft: '20px' }}>
+                            -e QUAYKEEPER_OAUTH_REDIRECT_URI=&quot;http://localhost:4100/api/auth/github/callback&quot; \
+                        </div>
+                        <div style={{ paddingLeft: '20px' }}>-e QUAYKEEPER_AUTH_SECRET=&quot;$(openssl rand -hex 32)&quot; \</div>
                         <div style={{ paddingLeft: '20px' }}>-v &quot;$HOME/quaykeeper-workspace:/workspace&quot; \</div>
                         <div style={{ paddingLeft: '20px' }}>ghcr.io/kalevski/toolcase/quaykeeper:latest</div>
                         <div style={{ height: '12px' }} />
+                        <div style={{ color: 'var(--faint)' }}># open Quaykeeper, sign in with GitHub, add the nginxpilot ADMIN_TOKEN as a realm</div>
                         <div style={{ color: 'var(--accent)' }}>✓ signed in — you&apos;re the owner</div>
                     </div>
                 </div>
@@ -635,7 +755,13 @@ export default function LandingPage() {
                         Architecture
                     </a>
                     <Link href="/nginxpilot-guide/" className="qk-navlink">
-                        Guide
+                        nginxpilot guide
+                    </Link>
+                    <Link href="/quaykeeper-guide/" className="qk-navlink">
+                        Quaykeeper guide
+                    </Link>
+                    <Link href="/screenshots/" className="qk-navlink">
+                        Screenshots
                     </Link>
                     <a href="#start" className="qk-navlink">
                         Docs
