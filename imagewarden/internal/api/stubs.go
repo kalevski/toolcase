@@ -1,0 +1,27 @@
+package api
+
+import "net/http"
+
+// Temporary stubs so the package compiles once endpoints() (task 016)
+// references these handlers. Each is replaced by its dedicated task and this
+// file shrinks accordingly, disappearing once 018-021 all land:
+//   - handleSchema:   task 018 (self-describing endpoint list)
+//   - handleClassify: task 019 (POST /v1/classify)
+//   - handleStatus:   task 020 (GET /status)
+//   - handleMetrics:  task 021 (GET /metrics)
+
+func (s *Server) handleSchema(w http.ResponseWriter, _ *http.Request) {
+	writeErr(w, http.StatusNotImplemented, codeInternal, "not implemented (task 018)")
+}
+
+func (s *Server) handleClassify(w http.ResponseWriter, _ *http.Request) {
+	writeErr(w, http.StatusNotImplemented, codeInternal, "not implemented (task 019)")
+}
+
+func (s *Server) handleStatus(w http.ResponseWriter, _ *http.Request) {
+	writeErr(w, http.StatusNotImplemented, codeInternal, "not implemented (task 020)")
+}
+
+func (s *Server) handleMetrics(w http.ResponseWriter, _ *http.Request) {
+	writeErr(w, http.StatusNotImplemented, codeInternal, "not implemented (task 021)")
+}
