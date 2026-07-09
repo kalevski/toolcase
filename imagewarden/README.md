@@ -31,6 +31,19 @@ file itself). `--read-only --cap-drop ALL` works out of the box: the process
 never writes to disk, needs no capabilities, and runs as a non-root user in a
 distroless image.
 
+`classify <file...>` runs the same model and policy as the server with no
+listen socket, printing one JSON verdict per line (JSONL) to stdout — the same
+`decision`/`unsafe_score`/`scores`/`model`/`latency_ms` fields the API returns,
+plus the source `file`. Per-file read/decode failures are printed as
+`{"file","error","detail"}` to stderr and the process exits non-zero if any
+file failed. Because it's line-oriented it pipes cleanly for threshold tuning
+over a labeled sample dir (tune by editing the config's `policy` thresholds and
+re-running):
+
+```bash
+imagewarden classify sample/*.jpg | jq -r '[.file, .decision, .unsafe_score] | @tsv'
+```
+
 ## API surface
 
 | Method & path | Auth | Purpose |

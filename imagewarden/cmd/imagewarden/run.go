@@ -10,10 +10,8 @@ import (
 	"syscall"
 
 	"github.com/kalevski/toolcase/imagewarden/internal/api"
-	"github.com/kalevski/toolcase/imagewarden/internal/classify"
 	"github.com/kalevski/toolcase/imagewarden/internal/config"
 	"github.com/kalevski/toolcase/imagewarden/internal/model"
-	"github.com/kalevski/toolcase/imagewarden/internal/policy"
 	"github.com/kalevski/toolcase/imagewarden/internal/state"
 )
 
@@ -65,9 +63,11 @@ func cmdRun(args []string) int {
 		return 1
 	}
 
-	// Boot fail-fast (spec §10): model.Load verifies the sha256 and runs a
-	// warmup inference; any failure returns non-zero BEFORE the port opens.
-	m, err := model.Load(cfg.Model.Dir, cfg.Inference.Threads, log)
+	// Boot fail-fast (spec §10): buildService runs model.Load (verifies the
+	// sha256 and runs a warmup inference) and wires the classify.Service; any
+	// failure returns non-zero BEFORE the port opens. Shared with `classify`
+	// (task 026) so limits/policy/concurrency can never drift between them.
+	m, svc, err := buildService(cfg, log)
 	if err != nil {
 		log.Error("model bootstrap failed; refusing to start", "error", err)
 		return 1
@@ -78,9 +78,6 @@ func cmdRun(args []string) int {
 	// contract requires (spec §4.1).
 	defer func() { _ = model.Shutdown() }()
 	defer func() { _ = m.Close() }()
-
-	svc := classify.New(m, m.Spec(), policy.PolicyConfig(cfg.Policy),
-		cfg.Inference.Concurrency, cfg.Limits.MaxPixels, cfg.Limits.QueueTimeout.Std())
 
 	st := state.New()
 	srv := api.New(svc, st, token, version, cfg.Limits.MaxBodyMB, cfg.Limits.RequestTimeout.Std(), log)
