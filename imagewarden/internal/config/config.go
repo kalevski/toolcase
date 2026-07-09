@@ -56,10 +56,13 @@ type LimitsConfig struct {
 
 // PolicyConfig configures the score → decision thresholds (spec §4.2).
 //
-// It is defined here rather than imported from internal/policy because that
-// package is not implemented yet (task 012). The YAML shape matches
-// policy.PolicyConfig exactly, so swapping the Config.Policy field to that
-// type once it exists is mechanical.
+// This intentionally duplicates policy.PolicyConfig's shape rather than
+// importing it: internal/config has no app-internal imports (task 041 pins
+// this in the import-boundary test), same as internal/policy itself. The
+// two shapes are kept identical field-for-field so callers that need
+// policy.PolicyConfig (e.g. wiring PolicyConfig into classify.Service) can
+// convert with a plain policy.PolicyConfig(cfg.Policy) — adjust both structs
+// together if either changes.
 type PolicyConfig struct {
 	UnsafeClasses     []string `yaml:"unsafe_classes"`
 	BorderlineClasses []string `yaml:"borderline_classes"`
