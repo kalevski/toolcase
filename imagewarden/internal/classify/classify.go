@@ -65,6 +65,14 @@ func New(m Classifier, spec imaging.TensorSpec, p policy.PolicyConfig,
 	}
 }
 
+// Info forwards the loaded model's descriptive metadata (name/version/
+// quantization/labels). It lets the API's Server hold a single *Service that
+// satisfies both seams it needs — the classify pipeline (Do) and the model
+// descriptor for GET /status and the /v1/classify response's "model" block —
+// so api.New takes one dependency instead of threading a bare model reference
+// alongside the service (see internal/api/status.go's modelInfoProvider).
+func (s *Service) Info() model.ModelInfo { return s.model.Info() }
+
 // Do runs the full classify pipeline for one image: prepare -> gated inference
 // -> policy decision.
 //
