@@ -26,6 +26,15 @@ func endpoints() []endpoint {
 }
 
 // routes builds the mux from the endpoints table above.
+//
+// Wrap order is observe(auth(handler)) for authed routes and observe(handler)
+// for public ones: observe (task 039) is the OUTERMOST layer, outside auth
+// (task 017), on purpose. auth rejects an unauthenticated request before next
+// ever runs, but because observe wraps auth its statusRecorder still sees the
+// 401 auth writes — so a rejected request is logged and counted just like any
+// other. Put auth outside instead and 401s would vanish from the access log
+// and the request/error metrics, defeating spec §8's "the server is
+// observable" requirement.
 func (s *Server) routes() http.Handler {
 	mux := http.NewServeMux()
 	for _, e := range endpoints() {
@@ -33,6 +42,9 @@ func (s *Server) routes() http.Handler {
 		if e.auth {
 			h = s.auth(h) // bearer-token middleware, task 017
 		}
+		// Outermost layer: log + metrics for every request, including the 401s
+		// auth emits (task 039).
+		h = s.observe(h)
 		mux.HandleFunc(e.method+" "+e.pattern, h) // "GET /healthz", "POST /v1/classify", …
 	}
 	return mux
