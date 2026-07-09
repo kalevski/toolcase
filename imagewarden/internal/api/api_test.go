@@ -204,6 +204,38 @@ func TestE2EClassifyHappyPath(t *testing.T) {
 	}
 }
 
+// TestE2ENoImageBytesInLogs is the end-to-end leg of the spec §8 privacy guard
+// (the full matrix lives in privacy_test.go): it drives a marker-bearing image
+// through a server built by the REAL New constructor over a real classify.Service
+// with a buffer-backed logger, and asserts the image bytes never reach the
+// access log. This exercises the production wiring (New + observe middleware +
+// classify pipeline), complementing privacy_test.go's struct-built server.
+func TestE2ENoImageBytesInLogs(t *testing.T) {
+	var buf bytes.Buffer
+	stub := &stubClassifier{scores: model.Scores{"safe": 1}}
+	svc := classify.New(stub, e2eSpec, e2ePolicy, 2, e2eMaxPixels, time.Second)
+	s := New(svc, state.New(), e2eToken, "v9.9.9", 10, time.Second,
+		slog.New(slog.NewJSONHandler(&buf, nil)))
+	s.SetReady(true)
+
+	// A decodable PNG with a recognizable marker appended after IEND: the decoder
+	// ignores the trailing bytes, but they are present in the request the server
+	// handled — so a leak into the log would be visible.
+	marker := []byte("MARKER_7F3A9C2E")
+	body := append(append([]byte{}, testPNG(t)...), marker...)
+
+	rr := serve(s, classifyReq(body, e2eToken))
+	if rr.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body=%s)", rr.Code, rr.Body)
+	}
+	if buf.Len() == 0 {
+		t.Fatal("no access-log line emitted; the leak assertion would be vacuous")
+	}
+	if bytes.Contains(buf.Bytes(), marker) {
+		t.Fatalf("image bytes leaked into the access log:\n%s", buf.Bytes())
+	}
+}
+
 // TestE2EClassifyEmptyBody: a zero-length POST is a 400 empty_body.
 func TestE2EClassifyEmptyBody(t *testing.T) {
 	s, _ := newE2EServer(&stubClassifier{}, 10, 2, 100*time.Millisecond, time.Second)
