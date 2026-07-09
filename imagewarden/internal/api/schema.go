@@ -212,10 +212,17 @@ func componentSchemas() map[string]any {
 		return map[string]any{"type": "object", "additionalProperties": values}
 	}
 
+	array := func(items map[string]any) map[string]any {
+		return map[string]any{"type": "array", "items": items}
+	}
+
+	// "labels" is optional: /v1/classify's ClassifyResult.model (task 019) omits
+	// it, while /status's Model (task 020, model.Info()) always includes it.
 	modelInfo := obj(map[string]any{
 		"name":         str(),
 		"version":      str(),
 		"quantization": str(),
+		"labels":       array(str()),
 	}, "name", "version", "quantization")
 
 	return map[string]any{
@@ -231,17 +238,23 @@ func componentSchemas() map[string]any {
 
 		"ModelInfo": modelInfo,
 
+		// Mirrors statusResp (status.go, task 020) field-for-field.
 		"Status": obj(map[string]any{
+			"uptime_seconds": integer(),
 			"model":          ref("ModelInfo"),
-			"uptime_s":       number(),
-			"requests_total": integer(),
-			"decisions":      mapOf(integer()),
+			"counters": obj(map[string]any{
+				"requests": integer(),
+				"allow":    integer(),
+				"review":   integer(),
+				"block":    integer(),
+			}, "requests", "allow", "review", "block"),
+			"errors_by_code": mapOf(integer()),
 			"latency_ms": obj(map[string]any{
-				"p50": number(),
-				"p95": number(),
-				"p99": number(),
-			}),
-		}, "model", "uptime_s", "requests_total", "decisions", "latency_ms"),
+				"p50": integer(),
+				"p95": integer(),
+				"p99": integer(),
+			}, "p50", "p95", "p99"),
+		}, "uptime_seconds", "model", "counters", "errors_by_code", "latency_ms"),
 
 		"ClassifyRequest": obj(map[string]any{
 			"image": map[string]any{
