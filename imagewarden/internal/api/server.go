@@ -11,4 +11,5 @@ import "sync/atomic"
 type Server struct {
 	version string
 	ready   atomic.Bool // /healthz readiness; flipped true after model load+warmup (task 022)
+	token   string      // api.token_env value; empty = loopback dev mode (task 017 auth)
 }
