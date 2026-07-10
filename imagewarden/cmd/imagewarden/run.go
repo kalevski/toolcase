@@ -41,16 +41,25 @@ func cmdRun(args []string) int {
 		return 1
 	}
 
-	// --log-format is the CLI default source; a format set in the config file
-	// takes precedence (task spec §4, point 3). Level is not a config knob, so
-	// run logs at info.
+	// log.format resolution: the config value (defaults < file < env) applies
+	// unless --log-format was explicitly passed on the command line — an
+	// explicit flag is the operator's most direct intent. Checking fs.Visit
+	// (only visits flags actually set) rather than comparing against the flag
+	// default matters: cfg.Log.Format is always populated (Defaults() sets
+	// "json"), so an ""-means-unset comparison would leave the flag dead.
+	// Level is not a config knob, so run logs at info.
 	format := cfg.Log.Format
-	if format == "" {
-		format = *logFormat
-	}
+	fs.Visit(func(f *flag.Flag) {
+		if f.Name == "log-format" {
+			format = *logFormat
+		}
+	})
 	log := newLogger(format, "info")
 	for _, w := range res.Warnings {
 		log.Warn(w)
+	}
+	for _, o := range res.EnvOverrides {
+		log.Info("config value overridden from environment", "var", o)
 	}
 
 	// Token: read the env var at boot, NEVER from YAML (spec §5). Belt-and-

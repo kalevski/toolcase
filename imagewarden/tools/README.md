@@ -18,8 +18,8 @@ The load-bearing assertion is that the container stays up under `--read-only
 
 ### Running it locally
 
-From the **repo root** (so `imagewarden` is the Docker build context and
-`imagewarden/testdata` is mountable):
+From the **repo root** (so `imagewarden` is the Docker build context and the
+default `TESTIMG` path resolves):
 
 ```bash
 bash imagewarden/tools/smoke.sh
@@ -37,13 +37,14 @@ tokenless one returns `401`, and finally that the container is still running
 under `--read-only`. It tears the container down on every exit path and prints
 `SMOKE OK` / `SMOKE FAIL: …`, exiting non-zero on the first failed assertion.
 
-The test image defaults to `imagewarden/testdata/ok.jpg`; generate the testdata
-fixtures first if it is absent (see `imagewarden/testdata/README.md`).
+The test image defaults to `imagewarden/cmd/imagewarden/onepixel.png` (the
+committed 1×1 PNG that also backs `validate`'s embedded self-test); point
+`TESTIMG` at any other image to exercise a richer sample.
 
 ### In CI
 
 The `smoke` job in `.github/workflows/imagewarden.yml` runs this on
-`ubuntu-latest` (`needs: build`, LFS checkout for the baked model + test image).
+`ubuntu-latest` (`needs: build`, LFS checkout for the baked model).
 It does its own single-arch `docker build`; the multi-arch push stays in the
 `docker` job.
 

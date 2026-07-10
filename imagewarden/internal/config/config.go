@@ -133,45 +133,53 @@ func Defaults() Config {
 }
 
 // Result carries the parsed config plus non-fatal warnings (e.g. falling
-// back to defaults because DefaultPath has no file).
+// back to defaults because DefaultPath has no file) and the names of any
+// IMAGEWARDEN_* environment variables that overrode file/default values —
+// callers log these so an effective config is always reconstructable from
+// the boot output.
 type Result struct {
-	Config   Config
-	Warnings []string
+	Config       Config
+	Warnings     []string
+	EnvOverrides []string
 }
 
 // Load reads path and strict-decodes it onto Defaults(), so any key omitted
-// from the file keeps its default. Unknown keys are an error (KnownFields) —
-// callers get a precise message instead of a silently ignored typo.
+// from the file keeps its default, then applies IMAGEWARDEN_* environment
+// overrides on top (see env.go) — precedence is defaults < file < env.
+// Unknown keys are an error (KnownFields) — callers get a precise message
+// instead of a silently ignored typo.
 //
 // A missing file is only tolerated at DefaultPath (defaults-only is a valid
-// deployment, e.g. local dev); a missing file at an explicitly-passed path
-// is an error. Note that inference.threads: 0 written in the file is
-// indistinguishable from the key being absent — both mean runtime.NumCPU(),
-// by design. Semantic checks (thresholds, limits, listen address) are not
-// performed here; see internal/config's validate.go (task 003).
+// deployment, e.g. local dev, or env-only configuration); a missing file at
+// an explicitly-passed path is an error. Note that inference.threads: 0
+// written in the file is indistinguishable from the key being absent — both
+// mean runtime.NumCPU(), by design. Semantic checks (thresholds, limits,
+// listen address) are not performed here; see internal/config's validate.go
+// (task 003).
 func Load(path string) (Result, error) {
 	cfg := Defaults()
+	var warnings []string
 
 	f, err := os.Open(path)
-	if errors.Is(err, os.ErrNotExist) {
-		if path == DefaultPath {
-			return Result{
-				Config:   cfg,
-				Warnings: []string{fmt.Sprintf("config %s not found; using defaults", path)},
-			}, nil
+	switch {
+	case errors.Is(err, os.ErrNotExist) && path == DefaultPath:
+		// Defaults + env only — still a valid deployment.
+		warnings = append(warnings, fmt.Sprintf("config %s not found; using defaults", path))
+	case err != nil:
+		return Result{}, fmt.Errorf("config %s: %w", path, err)
+	default:
+		defer f.Close()
+		dec := yaml.NewDecoder(f)
+		dec.KnownFields(true) // strict: unknown key -> error
+		if derr := dec.Decode(&cfg); derr != nil && !errors.Is(derr, io.EOF) {
+			return Result{}, fmt.Errorf("config %s: %w", path, derr) // io.EOF = empty file, keep defaults
 		}
-		return Result{}, fmt.Errorf("config %s: %w", path, err)
 	}
+
+	overrides, err := applyEnv(&cfg) // env wins over the file
 	if err != nil {
-		return Result{}, fmt.Errorf("config %s: %w", path, err)
-	}
-	defer f.Close()
-
-	dec := yaml.NewDecoder(f)
-	dec.KnownFields(true) // strict: unknown key -> error
-	if err := dec.Decode(&cfg); err != nil && !errors.Is(err, io.EOF) {
-		return Result{}, fmt.Errorf("config %s: %w", path, err) // io.EOF = empty file, keep defaults
+		return Result{}, err
 	}
 
-	return Result{Config: cfg}, nil
+	return Result{Config: cfg, Warnings: warnings, EnvOverrides: overrides}, nil
 }

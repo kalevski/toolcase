@@ -163,7 +163,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          lfs: true # model baked into the image (§9) + testdata/ok.jpg mounted by classify
+          lfs: true # model baked into the image (§9)
 
       - name: Run container smoke test
         run: bash imagewarden/tools/smoke.sh

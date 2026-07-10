@@ -29,6 +29,7 @@ type Manifest struct {
 	Version      string    `yaml:"version"`
 	SHA256       string    `yaml:"sha256"`
 	Input        Input     `yaml:"input"`
+	Output       Output    `yaml:"output"`
 	Normalize    Normalize `yaml:"normalize"`
 	Labels       []string  `yaml:"labels"`
 	Quantization string    `yaml:"quantization"`
@@ -40,6 +41,15 @@ type Input struct {
 	Layout string `yaml:"layout"` // NHWC | NCHW
 	Width  int    `yaml:"width"`
 	Height int    `yaml:"height"`
+}
+
+// Output describes the ONNX graph's output tensor. Optional in the YAML:
+// when omitted, the name defaults to "output" in LoadManifest, so manifests
+// written before this field existed keep loading unchanged. The real
+// GantMan-lineage graph names its head "prediction"; the binary stays
+// model-agnostic by reading the name here rather than hardcoding either.
+type Output struct {
+	Name string `yaml:"name"`
 }
 
 // Normalize describes the per-channel preprocessing applied after decode
@@ -66,6 +76,9 @@ func LoadManifest(dir string) (Manifest, error) {
 	var m Manifest
 	if err := dec.Decode(&m); err != nil {
 		return Manifest{}, fmt.Errorf("decode manifest: %w", err)
+	}
+	if m.Output.Name == "" {
+		m.Output.Name = "output" // pre-output-field manifests (and the placeholder graph) use this name
 	}
 
 	if err := m.validate(); err != nil {
@@ -109,8 +122,13 @@ func (m Manifest) validate() error {
 	if len(m.Normalize.Std) != 3 {
 		return fmt.Errorf("manifest %s: normalize.std must have 3 elements, got %d", m.Name, len(m.Normalize.Std))
 	}
-	if m.Normalize.Scale == 0 {
-		return fmt.Errorf("manifest %s: normalize.scale must not be 0 (used as a divisor)", m.Name)
+	for i, s := range m.Normalize.Std {
+		if s == 0 {
+			return fmt.Errorf("manifest %s: normalize.std[%d] must not be 0 (used as a divisor)", m.Name, i)
+		}
+	}
+	if m.Normalize.Scale <= 0 {
+		return fmt.Errorf("manifest %s: normalize.scale must be > 0 (used as a divisor), got %v", m.Name, m.Normalize.Scale)
 	}
 	return nil
 }

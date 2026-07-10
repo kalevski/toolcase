@@ -33,7 +33,13 @@ func tensorize(img image.Image, spec TensorSpec) (Tensor, error) {
 	b := img.Bounds()
 	sw, sh := b.Dx(), b.Dy()
 
-	scale := float64(spec.Width) / float64(min(sw, sh))
+	// Scale so the resized image covers the crop in BOTH dimensions. Taking
+	// max of the per-axis ratios (not spec.Width over the shortest side) keeps
+	// this correct for non-square specs too: with the shortest-side formula a
+	// non-square target could yield rw/rh smaller than the crop, SubImage would
+	// silently clip the rect, and the pixel loop below would index past
+	// crop.Pix. For a square spec the two formulas agree exactly.
+	scale := math.Max(float64(spec.Width)/float64(sw), float64(spec.Height)/float64(sh))
 	rw := int(math.Round(float64(sw) * scale))
 	rh := int(math.Round(float64(sh) * scale))
 
@@ -77,7 +83,7 @@ func tensorize(img image.Image, spec TensorSpec) (Tensor, error) {
 			for c := 0; c < 3; c++ {
 				var idx int
 				if spec.Layout == "NHWC" {
-					idx = ((y * W) + x) * 3 + c
+					idx = ((y*W)+x)*3 + c
 				} else {
 					idx = (c*H+y)*W + x
 				}

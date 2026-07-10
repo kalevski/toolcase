@@ -1,6 +1,5 @@
 .git
 .gitattributes
-testdata/
 tools/
 packaging/
 *.md

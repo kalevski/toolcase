@@ -175,6 +175,14 @@ func (s *Server) handleClassify(w http.ResponseWriter, r *http.Request) {
 			// malformed client request (spec §5).
 			writeErr(w, http.StatusServiceUnavailable, codeModelUnavailable,
 				"inference exceeded the request timeout")
+		case errors.Is(err, context.Canceled):
+			// The client went away (r.Context() cancelled mid-pipeline). The
+			// response is written to a dead connection; what matters is that
+			// this is attributed to the client (4xx) and never reaches the
+			// default branch, which would log it error-level and count a 500
+			// for something that is not a server fault.
+			writeErr(w, http.StatusBadRequest, codeBadRequest,
+				"client cancelled the request")
 		default:
 			// Never log the image bytes or decoded pixels (spec §8) — only err.
 			s.log.Error("classify failed", "error", err)

@@ -6,3 +6,4 @@ tf2onnx==1.16.1
 onnxruntime==1.20.1
 tensorflow==2.16.1
 PyYAML==6.0.2
+Pillow==11.1.0   # calibration-image loading for static quantization

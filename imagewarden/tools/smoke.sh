@@ -11,8 +11,8 @@
 # in-process privacy tests (task 040) and proves the no-writable-fs / privacy
 # stance (spec §8) — a handler that started writing to disk would fail here.
 #
-# Usage (from the repo root, so `imagewarden` is the build context and
-# `imagewarden/testdata` is mountable):
+# Usage (from the repo root, so `imagewarden` is the build context and the
+# default TESTIMG path resolves):
 #
 #     bash imagewarden/tools/smoke.sh
 #
@@ -28,7 +28,9 @@ set -euo pipefail
 IMG=${IMG:-imagewarden:smoke}
 TOKEN=${TOKEN:-test}
 PORT=${PORT:-8080}
-TESTIMG=${TESTIMG:-imagewarden/testdata/ok.jpg}
+# Default test image: the committed 1x1 PNG that also backs `validate`'s
+# embedded self-test — always present in the repo, no fixture generation step.
+TESTIMG=${TESTIMG:-imagewarden/cmd/imagewarden/onepixel.png}
 cid=""
 
 # Teardown on every exit path (success, failed assertion, or interrupt).
@@ -42,7 +44,7 @@ fail() { echo "SMOKE FAIL: $*" >&2; exit 1; }
 for bin in docker curl jq; do
   command -v "$bin" >/dev/null 2>&1 || fail "required host tool not found: $bin"
 done
-[ -f "$TESTIMG" ] || fail "test image not found: $TESTIMG (generate testdata fixtures — see imagewarden/testdata/README.md)"
+[ -f "$TESTIMG" ] || fail "test image not found: $TESTIMG (run from the repo root, or point TESTIMG at any image file)"
 
 # 1. Build the image (context = imagewarden/, per spec §9 / task 032). Single
 # arch (host amd64 in CI) — this is a boot test, and QEMU-emulated arm64 is far
@@ -57,7 +59,7 @@ docker run --rm "$IMG" validate || fail "validate exited non-zero"
 
 # 3. One-shot `classify` of a mounted test image → one JSON verdict on stdout.
 # Read-only mount, matching the runtime privacy stance.
-echo "[smoke] classify /in/ok.jpg (one-shot, no server)"
+echo "[smoke] classify /in/${TESTIMG##*/} (one-shot, no server)"
 out=$(docker run --rm -v "$PWD/${TESTIMG%/*}:/in:ro" "$IMG" classify "/in/${TESTIMG##*/}") \
   || fail "classify exited non-zero"
 echo "$out" | jq -e '.decision and .scores' >/dev/null \

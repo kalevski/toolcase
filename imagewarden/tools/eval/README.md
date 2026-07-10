@@ -62,7 +62,7 @@ of the five model labels are ignored with a warning.
 
 The committed `samples/` holds **only tiny synthetic/neutral placeholders**
 (`neutral/solid.png`, `drawings/solid.png` — copies of the repo's real 1×1
-`testdata/onepixel.png`). They exist so the harness plumbing runs end-to-end
+`cmd/imagewarden/onepixel.png`). They exist so the harness plumbing runs end-to-end
 out of the box; they are **not** a meaningful accuracy corpus (two identical
 neutral pixels won't move any metric). **No real unsafe imagery is committed to
 this repository, ever** (spec privacy stance, §8). To grow the built-in

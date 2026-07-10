@@ -1,19 +1,11 @@
 # Model provenance — mobilenetv2-nsfw
 
-## ⚠️ Placeholder notice
-
-**`model.onnx` in this directory is currently a placeholder, not the trained
-classifier.** It is a tiny 295-byte ONNX graph (`ReduceMean` → `MatMul` against
-a fixed weight matrix) with the correct input/output contract — input
-`input_1` float32 `[1,224,224,3]`, output `[1,5]` — so `internal/model.Load`
-and the `//go:build ort` integration test (spec §11) can load and run
-*something* end-to-end while the rest of the pipeline is built. **Its scores
-are meaningless** (a fixed linear projection of the per-channel mean pixel
-value) and must not be used for any real classification decision.
-
-Replace it with the real int8 weights produced by [`tools/preparemodel`](../tools/preparemodel/)
-(task 030) — running that pipeline regenerates `model.onnx` and prints the
-`sha256` to paste into `manifest.yml`.
+`model.onnx` is the real classifier: the GantMan/nsfw_model MobileNetV2
+(224×224, 5 classes), converted to ONNX and statically quantized to int8.
+It is produced end-to-end by [`tools/preparemodel/prepare.py`](../tools/preparemodel/prepare.py)
+— running that pipeline regenerates `model.onnx` and writes the derived
+fields (`sha256`, `input`, `output`, `normalize`, `labels`, `quantization`)
+into `manifest.yml`.
 
 ## Source lineage
 
@@ -21,43 +13,59 @@ Replace it with the real int8 weights produced by [`tools/preparemodel`](../tool
   Keras MobileNetV2 (224×224 input) classifier trained on 5 classes:
   `drawings, hentai, neutral, porn, sexy` (alphabetical, matches
   `manifest.yml`'s `labels` order — output-tensor index → class name).
-- The fp32 weights (`mobilenet_v2_140_224` / `nsfw_mobilenet2.224x224.h5`
-  release artifact) are pinned by `tools/preparemodel/prepare.py` to a specific
-  upstream commit/release tag; see that script for the exact pin in effect.
+- Pinned source: the `1.2.0` release asset `mobilenet_v2_140_224.1.zip`
+  (sha256 `22c0892695929639c16ea302996b8f64df9c52e7a6c1d874c1de1047bfe109f7`),
+  which contains the TF SavedModel this pipeline converts. `prepare.py`
+  verifies the digest before converting.
 
 ## Conversion + quantization pipeline
 
-Automated end-to-end by `tools/preparemodel/prepare.py` (task 030); the
-individual steps it runs:
+Automated end-to-end by `tools/preparemodel/prepare.py`; the steps it runs:
 
-```bash
-# Keras SavedModel/HDF5 -> ONNX (opset 13), input named input_1, NHWC [1,224,224,3]
-python -m tf2onnx.convert --saved-model saved_model \
-    --output model_fp32.onnx --opset 13 \
-    --inputs input_1:0[1,224,224,3]
+1. **tf2onnx** (opset 13) on the SavedModel. The serving signature's own
+   tensor names are kept: input `input` (float32 `[N,224,224,3]` NHWC),
+   output `prediction` (`[N,5]`, softmax).
+2. **Static QDQ per-channel int8 quantization** (`quantize_static`,
+   activations QUInt8 / weights QInt8) calibrated over a directory of
+   representative photos (`--calib-dir`, 30+ recommended).
+   **Dynamic quantization is deliberately not used**: MobileNetV2's
+   depthwise convolutions collapse under per-tensor dynamic weight
+   quantization — measured on real photos, `quantize_dynamic` flipped the
+   argmax vs fp32 on 3 of 6 images (max score drift 0.84), while calibrated
+   static QDQ agreed 6/6 with mean drift ~0.01.
+3. **The classifier head (final Gemm + Softmax) stays fp32**
+   (`nodes_to_exclude`), so the output is an exact softmax distribution
+   summing to 1 rather than scores snapped to ~1/255 quantization steps —
+   full-resolution probabilities for the `policy` thresholds, and no risk of
+   a re-softmax by `internal/model.toProbabilities`' pass-through check.
 
-# dynamic int8 weight quantization
-python -c "from onnxruntime.quantization import quantize_dynamic, QuantType; \
-    quantize_dynamic('model_fp32.onnx', 'model.onnx', weight_type=QuantType.QInt8)"
+`manifest.yml`'s `input`/`output`/`normalize` blocks record the exact tensor
+contract (`input`, NHWC, 224×224, pixel/255 with zero mean / unit std,
+output `prediction`) so `internal/imaging` and `internal/model` never
+hardcode these constants — a future EfficientNet-Lite or CLIP-head swap is a
+`model/` directory swap, not a binary change.
 
-sha256sum model.onnx   # digest goes into manifest.yml's `sha256` field
-```
+## Calibration set (this artifact)
 
-`manifest.yml`'s `input`/`normalize` block records the exact tensor contract
-(`input_1`, NHWC, 224×224, pixel/255 with zero mean / unit std) so
-`internal/imaging` and `internal/model` never hardcode these constants — a
-future EfficientNet-Lite or CLIP-head swap is a `model/` directory swap, not a
-binary change.
+The committed `model.onnx` was calibrated on 30 varied real photographs
+(picsum.photos ids 1, 15, 22, 33, 42, 48, 58, 76, 88, 91, 102, 110, 119,
+128, 133, 145, 152, 160, 169, 175, 183, 190, 201, 211, 219, 225, 231, 244,
+250, 258, fetched at 448×448). Calibration only sets activation ranges —
+any similarly varied photo set reproduces equivalent behavior, but the exact
+sha256 depends on the set used.
 
-## Eval numbers (real model, once `tools/preparemodel` output replaces the placeholder)
+## Measured numbers (this artifact)
 
-- Published baseline (GantMan fp32 model): **~90% top-1** across the 5
-  classes — inside imagewarden's 85–90% accuracy target (spec §3.2).
-- Size: **~24 MB fp32 → ~7–10 MB int8** after dynamic quantization.
-- Latency: **~20–60 ms/inference** on 2–4 CPU cores (ONNX Runtime, int8,
-  single image, warm session).
-- Re-verify with `imagewarden classify <labeled-sample-dir>/*` after swapping
-  in the real weights — that command doubles as the offline accuracy/threshold
+- Size: 17 MB fp32 → **4.9 MB int8**.
+- int8 vs fp32 fidelity: argmax agreement 6/6 on a real-photo spot check,
+  mean max-score drift 0.010, worst 0.045.
+- Latency: **~6 ms/inference** via the served API on an M-series CPU
+  (warm session, int8, single image).
+- Published upstream baseline: ~90% top-1 across the 5 classes (upstream
+  `training_results.txt` shows ~0.91 val accuracy) — inside imagewarden's
+  85–90% accuracy target (spec §3.2).
+- Re-verify with `imagewarden classify <labeled-sample-dir>/*` after any
+  regeneration — that command doubles as the offline accuracy/threshold
   tuning tool (spec §11); don't tune `policy.*_threshold` by feel.
 
 ## Reproducing
@@ -65,9 +73,13 @@ binary change.
 ```bash
 cd tools/preparemodel
 pip install -r requirements.txt
-python prepare.py   # writes model/model.onnx, prints sha256 for manifest.yml
+python prepare.py --calib-dir /path/to/representative-photos
+# writes model/model.onnx, updates model/manifest.yml (sha256 included)
 ```
 
-See `tools/preparemodel/prepare.py` for the exact upstream pin and quantization
-flags in effect at any given time — this document describes the pipeline
-shape, that script is the source of truth for versions.
+The tf2onnx conversion of the pinned source is deterministic in behavior;
+the exact bytes (and therefore the sha256) additionally depend on the
+calibration image set, so keep or document the calibration images used for a
+release build. See `tools/preparemodel/prepare.py` for the exact upstream
+pin and quantization flags in effect — this document describes the pipeline
+shape, that script is the source of truth.

@@ -107,6 +107,15 @@ func (s *Service) Do(ctx context.Context, data []byte) (policy.Verdict, error) {
 		return policy.Verdict{}, ErrQueueTimeout
 	}
 
+	// The select above picks pseudo-randomly among ready cases, so a request
+	// whose deadline fired while it queued can still win the semaphore case.
+	// Model inference is not ctx-aware (an ORT run can't be interrupted), so
+	// this is the last spot the deadline can act — don't burn an inference
+	// slot on a caller that already timed out.
+	if err := ctx.Err(); err != nil {
+		return policy.Verdict{}, err
+	}
+
 	scores, err := s.model.Classify(tensor)
 	if err != nil {
 		return policy.Verdict{}, err // model errors bubble; adapter may wrap ErrModelUnavailable

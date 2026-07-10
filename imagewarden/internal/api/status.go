@@ -61,9 +61,15 @@ func (s *Server) handleStatus(w http.ResponseWriter, _ *http.Request) {
 	resp.Counters.Allow = uint64(snap.Allow)
 	resp.Counters.Review = uint64(snap.Review)
 	resp.Counters.Block = uint64(snap.Block)
+	// Snapshot pre-populates every known code at zero (the hot path never
+	// grows the map); /status shows only codes that actually fired, so a
+	// clean process reports {} instead of a wall of zeros. /metrics keeps
+	// the full zero-valued series — Prometheus wants stable label sets.
 	resp.ErrorsByCode = make(map[string]uint64, len(snap.ErrorsByCode))
 	for code, count := range snap.ErrorsByCode {
-		resp.ErrorsByCode[strconv.Itoa(code)] = uint64(count)
+		if count > 0 {
+			resp.ErrorsByCode[strconv.Itoa(code)] = uint64(count)
+		}
 	}
 	// p50/p95/p99 are reused verbatim from snap so /metrics and /status agree
 	// exactly — percentiles are computed once, in internal/state.

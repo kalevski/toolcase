@@ -20,13 +20,6 @@ const (
 	// where the ONNX Runtime stage unpacks the .so into /usr/lib/.
 	dylibEnv     = "ORT_DYLIB_PATH"
 	defaultDylib = "/usr/lib/libonnxruntime.so"
-
-	// outputName is the resolved name of the classification head's output
-	// tensor. The manifest schema (task 009) only describes the input, and
-	// every MobileNet-lineage graph this project ships — real weights or the
-	// task-029 placeholder — names its head "output", so this stays a
-	// package constant instead of a config knob (kept out of the hot path).
-	outputName = "output"
 )
 
 var (
@@ -118,7 +111,7 @@ func Load(dir string, threads int, log *slog.Logger) (*Model, error) {
 	sess, err := ort.NewDynamicAdvancedSession(
 		onnxPath,
 		[]string{manifest.Input.Name},
-		[]string{outputName},
+		[]string{manifest.Output.Name},
 		opts,
 	)
 	if err != nil {
@@ -232,6 +225,12 @@ func toProbabilities(raw []float32) []float32 {
 	return softmax(raw)
 }
 
+// looksLikeProbabilities reports whether x already forms a probability
+// distribution. The sum tolerance is 1e-2, not tighter: a quantized output
+// head snaps each score to steps of its dequantization scale (~1/255), so a
+// genuine softmax output can sum to 1 ± ~0.01 after int8 rounding — such a
+// distribution must be passed through, not softmaxed a second time (double
+// softmax flattens e.g. [0,0,0.99,0,0] into [0.15,0.15,0.40,0.15,0.15]).
 func looksLikeProbabilities(x []float32) bool {
 	var sum float64
 	for _, v := range x {
@@ -240,7 +239,7 @@ func looksLikeProbabilities(x []float32) bool {
 		}
 		sum += float64(v)
 	}
-	return math.Abs(sum-1) < 1e-3
+	return math.Abs(sum-1) < 1e-2
 }
 
 // softmax is the numerically stable softmax (max-subtraction before exp).

@@ -51,6 +51,10 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("api.token_env must be set when listen (%s) is non-loopback", c.Listen)
 	}
 
+	if c.Log.Format != "logfmt" && c.Log.Format != "json" {
+		return fmt.Errorf("log.format %q not in {logfmt,json}", c.Log.Format)
+	}
+
 	return nil
 }
 

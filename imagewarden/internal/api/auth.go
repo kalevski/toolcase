@@ -13,10 +13,19 @@ func (s *Server) auth(next http.HandlerFunc) http.HandlerFunc {
 		return next // tokenless passthrough
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		got := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
+		// The scheme prefix is required: a header carrying the bare token
+		// without "Bearer " is malformed and must not authenticate, so a
+		// missing prefix yields got = "" rather than the raw header value.
+		// The scheme itself is case-insensitive (RFC 7235 §2.1) — "bearer x"
+		// authenticates — but the token comparison stays exact.
+		const scheme = "Bearer "
+		var got string
+		if h := r.Header.Get("Authorization"); len(h) >= len(scheme) && strings.EqualFold(h[:len(scheme)], scheme) {
+			got = h[len(scheme):]
+		}
 		// ConstantTimeCompare handles differing lengths; run it unconditionally —
-		// no early return on empty/missing header — so timing can't leak whether a
-		// token was sent.
+		// no early return on empty/missing/malformed header — so timing can't
+		// leak whether a token was sent.
 		if subtle.ConstantTimeCompare([]byte(got), []byte(s.token)) != 1 {
 			writeErr(w, http.StatusUnauthorized, codeUnauthorized, "missing or invalid bearer token")
 			return

@@ -21,10 +21,9 @@ package model
 // This is a smoke test, not an accuracy gate: it catches "model won't load /
 // ORT-binding version mismatch (spec §3.4) / labels scrambled", not a fine
 // accuracy regression, so every threshold below is deliberately loose. The
-// argmax/policy assertions run against a committed neutral fixture and are
-// skipped when that fixture is absent (the placeholder graph checked in per
-// task 029 has meaningless scores — see model/MODEL.md), mirroring how
-// internal/imaging's tests skip on not-yet-generated binary fixtures.
+// input is synthesized in-process — no image sample is committed to git
+// (spec §11) — so only the structural softmax/label invariants are asserted,
+// never a specific class.
 
 import (
 	"bytes"
@@ -34,13 +33,9 @@ import (
 	"io"
 	"log/slog"
 	"math"
-	"os"
-	"path/filepath"
 	"testing"
 
-	"github.com/kalevski/toolcase/imagewarden/internal/config"
 	"github.com/kalevski/toolcase/imagewarden/internal/imaging"
-	"github.com/kalevski/toolcase/imagewarden/internal/policy"
 )
 
 // modelDir is the checked-in artifact directory (Git LFS, task 029), resolved
@@ -54,20 +49,6 @@ const maxPixels = 40_000_000
 
 func testLogger() *slog.Logger {
 	return slog.New(slog.NewTextHandler(io.Discard, nil))
-}
-
-// findFixture locates a testdata image, checking both the package-local
-// testdata/ and the module-root ../../testdata/ (the two locations
-// internal/imaging's tests also support). Reports whether one was found so the
-// caller can skip rather than fail when a fixture has not been committed yet.
-func findFixture(name string) (string, bool) {
-	for _, d := range []string{"testdata", filepath.Join("..", "..", "testdata")} {
-		p := filepath.Join(d, name)
-		if _, err := os.Stat(p); err == nil {
-			return p, true
-		}
-	}
-	return "", false
 }
 
 // classify runs the untrusted bytes through the whole stack — imaging.Prepare
@@ -94,79 +75,16 @@ func TestModel_Classify_Golden(t *testing.T) {
 	t.Cleanup(func() { _ = m.Close() })
 	labels := m.Info().Labels
 
-	cases := []struct {
-		name      string
-		wantLabel string // argmax label expected; "" → structural checks only
-		wantAllow bool   // assert policy.Decide → DecisionAllow (only when wantLabel != "")
-		// Source of the image bytes: exactly one of file/gen is set. file is
-		// read from testdata (subtest skipped if absent); gen synthesizes the
-		// bytes in-process so no sample is committed to git.
-		file string
-		gen  func(t *testing.T) []byte
-	}{
-		{
-			// A committed, benign image is expected to classify as neutral on
-			// the real model. Kept as a testdata file (skipped if absent)
-			// rather than synthesized, because a synthetic pattern is
-			// out-of-distribution for a real NSFW classifier and its argmax
-			// can't be relied on.
-			name:      "neutral",
-			file:      "ok.jpg",
-			wantLabel: "neutral",
-			wantAllow: true,
-		},
-		{
-			// A synthetic pattern exercises the full stack a second time
-			// without committing any sensitive sample to git (spec §11). Its
-			// class is not asserted — only the structural softmax/label
-			// invariants — because we make no accuracy claim about synthetic
-			// input.
-			name: "synthetic-pattern",
-			gen:  syntheticPatternJPEG,
-		},
-	}
-
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			var data []byte
-			if c.gen != nil {
-				data = c.gen(t)
-			} else {
-				path, ok := findFixture(c.file)
-				if !ok {
-					t.Skipf("fixture %q not present; commit a benign sample to testdata/ (see testdata/README.md)", c.file)
-				}
-				b, err := os.ReadFile(path)
-				if err != nil {
-					t.Fatal(err)
-				}
-				data = b
-			}
-
-			scores := classify(t, m, data)
-			assertScores(t, labels, scores, c.wantLabel)
-
-			if c.wantLabel != "" {
-				// Tie the accuracy smoke test to the decision path: route the
-				// same scores through policy.Decide with the shipped default
-				// PolicyConfig (converted from config.Defaults, the documented
-				// config→policy conversion) and assert the expected decision.
-				v := policy.Decide(scores, policy.PolicyConfig(config.Defaults().Policy))
-				wantDecision := policy.DecisionBlock
-				if c.wantAllow {
-					wantDecision = policy.DecisionAllow
-				}
-				if v.Decision != wantDecision {
-					t.Errorf("policy.Decide = %q (unsafe=%v), want %q (scores=%v)",
-						v.Decision, v.UnsafeScore, wantDecision, scores)
-				}
-			}
-		})
-	}
+	// A synthetic pattern exercises the full stack — decode, tensorize,
+	// inference — without committing any image sample to git (spec §11). Its
+	// class is not asserted, only the structural softmax/label invariants,
+	// because we make no accuracy claim about synthetic input.
+	scores := classify(t, m, syntheticPatternJPEG(t))
+	assertScores(t, labels, scores)
 }
 
 // assertScores applies the smoke-test invariants with loose thresholds.
-func assertScores(t *testing.T, labels []string, s Scores, want string) {
+func assertScores(t *testing.T, labels []string, s Scores) {
 	t.Helper()
 
 	// 1. softmax sums to ~1.0
@@ -183,21 +101,6 @@ func assertScores(t *testing.T, labels []string, s Scores, want string) {
 		if _, ok := s[l]; !ok {
 			t.Errorf("missing label %q in scores", l)
 		}
-	}
-
-	// 3. argmax matches the expected class (skipped for structural-only cases)
-	if want == "" {
-		return
-	}
-	arg := ""
-	var best float32 = -1
-	for l, v := range s {
-		if v > best {
-			best, arg = v, l
-		}
-	}
-	if arg != want {
-		t.Errorf("argmax = %q, want %q (scores=%v)", arg, want, s)
 	}
 }
 

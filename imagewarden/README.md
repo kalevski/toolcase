@@ -57,7 +57,8 @@ imagewarden classify sample/*.jpg | jq -r '[.file, .decision, .unsafe_score] | @
 
 `POST /v1/classify` accepts raw image bytes (`Content-Type: image/*` is
 advisory only — the format is sniffed) or `multipart/form-data` with an
-`image` field:
+`image` field. Supported formats: JPEG, PNG, GIF (first frame), WebP, BMP,
+and TIFF:
 
 ```bash
 curl -s -H "Authorization: Bearer $IMAGEWARDEN_TOKEN" \
@@ -94,6 +95,41 @@ an empty file is valid. Key sections:
   score thresholds.
 - `log` — `logfmt` or `json`.
 
+Every key can also be set through the environment, so a container can be
+configured with no YAML file at all. Precedence is defaults < config file <
+environment; a variable that is unset or empty leaves the file/default value
+alone. Applied overrides are logged at boot.
+
+| Environment variable | Config key |
+|---|---|
+| `IMAGEWARDEN_LISTEN` | `listen` |
+| `IMAGEWARDEN_API_TOKEN_ENV` | `api.token_env` |
+| `IMAGEWARDEN_MODEL_DIR` | `model.dir` |
+| `IMAGEWARDEN_INFERENCE_THREADS` | `inference.threads` |
+| `IMAGEWARDEN_INFERENCE_CONCURRENCY` | `inference.concurrency` |
+| `IMAGEWARDEN_LIMITS_MAX_BODY_MB` | `limits.max_body_mb` |
+| `IMAGEWARDEN_LIMITS_MAX_PIXELS` | `limits.max_pixels` |
+| `IMAGEWARDEN_LIMITS_QUEUE_TIMEOUT` | `limits.queue_timeout` (e.g. `5s`) |
+| `IMAGEWARDEN_LIMITS_REQUEST_TIMEOUT` | `limits.request_timeout` (e.g. `30s`) |
+| `IMAGEWARDEN_POLICY_UNSAFE_CLASSES` | `policy.unsafe_classes` (comma-separated) |
+| `IMAGEWARDEN_POLICY_BORDERLINE_CLASSES` | `policy.borderline_classes` (comma-separated) |
+| `IMAGEWARDEN_POLICY_BLOCK_THRESHOLD` | `policy.block_threshold` |
+| `IMAGEWARDEN_POLICY_REVIEW_THRESHOLD` | `policy.review_threshold` |
+| `IMAGEWARDEN_LOG_FORMAT` | `log.format` |
+
+Note the distinction: `IMAGEWARDEN_TOKEN` (or whatever `api.token_env` names)
+holds the bearer token *value*; `IMAGEWARDEN_API_TOKEN_ENV` changes which
+variable the token is read from.
+
+```bash
+# Fully env-configured, no config.yml mounted
+docker run --rm --read-only --cap-drop ALL -p 8080:8080 \
+  -e IMAGEWARDEN_TOKEN=secret \
+  -e IMAGEWARDEN_POLICY_BLOCK_THRESHOLD=0.9 \
+  -e IMAGEWARDEN_LIMITS_MAX_BODY_MB=25 \
+  ghcr.io/kalevski/imagewarden run
+```
+
 Run `imagewarden validate` (or `docker run --rm <image> validate`) to parse
 the config, load the model, and run a self-test inference before deploying.
 
@@ -117,6 +153,12 @@ Requires `CGO_ENABLED=1` and a `libonnxruntime.so` on the library path (point
 ```bash
 go build -o imagewarden ./cmd/imagewarden
 ```
+
+For local development the shared library can be taken straight from the
+[onnxruntime release tarball](https://github.com/microsoft/onnxruntime/releases)
+matching the Dockerfile's `ORT_VERSION` (1.20.1) — e.g. on an Apple-silicon
+Mac, `onnxruntime-osx-arm64-1.20.1.tgz`, then
+`export ORT_DYLIB_PATH=/path/to/lib/libonnxruntime.dylib`.
 
 The model-integration test is gated behind the `ort` build tag and needs the
 real ONNX Runtime shared library to run:

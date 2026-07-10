@@ -5,31 +5,38 @@ Offline model pipeline: fp32 NSFW model → ONNX → int8 → `model/` artifacts
 
 ## What it does
 
-`prepare.py` downloads the pinned fp32 source model (GantMan/nsfw_model
-lineage), converts it to ONNX with `tf2onnx` (input `input_1`, shape
-`[1,224,224,3]` NHWC), applies `onnxruntime.quantization.quantize_dynamic` to
-produce an int8 model, and writes `model/model.onnx` + the derived fields of
-`model/manifest.yml` (`sha256`, `input`, `normalize`, `labels`,
-`quantization`). `model/manifest.yml` stays the single source of truth the Go
-binary reads (`internal/model.LoadManifest`) — this script updates it in
-place rather than duplicating any of those constants in Go.
+`prepare.py` downloads the pinned fp32 source archive (GantMan/nsfw_model
+1.2.0 release zip, a TF SavedModel), converts it to ONNX with `tf2onnx`
+(keeping the graph's own tensor names: input `input`, `[N,224,224,3]` NHWC;
+output `prediction`), applies **static QDQ per-channel int8 quantization**
+calibrated on a directory of representative photos, and writes
+`model/model.onnx` + the derived fields of `model/manifest.yml` (`sha256`,
+`input`, `output`, `normalize`, `labels`, `quantization`).
+`model/manifest.yml` stays the single source of truth the Go binary reads
+(`internal/model.LoadManifest`) — this script updates it in place rather
+than duplicating any of those constants in Go.
+
+Dynamic quantization is deliberately not used, and the classifier head
+(final Gemm + Softmax) is excluded from quantization — see
+`model/MODEL.md` for the measured fidelity numbers behind both choices.
 
 ## Running it
 
 ```bash
 cd tools/preparemodel
-python3 -m venv .venv
+python3 -m venv .venv                   # Python 3.9–3.12 (tensorflow 2.16 has no 3.13+ wheels)
 source .venv/bin/activate
 pip install -r requirements.txt
-python prepare.py                       # writes ../../model/{model.onnx,manifest.yml}
+python prepare.py --calib-dir ~/photos # writes ../../model/{model.onnx,manifest.yml}
 ```
 
-`--output-dir` defaults to `../../model` (i.e. `repo/imagewarden/model`) and
-can be overridden; `--opset` defaults to `13`. The script prints the
-`model.onnx` sha256 digest to stdout. Re-running it is idempotent: the
-pinned source archive is re-downloaded only if missing or if its sha256 no
-longer matches, and the same source always reproduces the same digest and
-manifest content.
+`--calib-dir` is required: a directory of 30+ varied real photos
+(jpg/png/webp) used to calibrate activation ranges. `--output-dir` defaults
+to `../../model` (i.e. `repo/imagewarden/model`) and can be overridden;
+`--opset` defaults to `13`. The script prints the `model.onnx` sha256 digest
+to stdout. The pinned source archive is re-downloaded only if missing or if
+its sha256 no longer matches; the output digest depends on the calibration
+set, so keep (or document) the calibration images used for a release build.
 
 ## Where this does NOT run
 

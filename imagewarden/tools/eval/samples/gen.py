@@ -19,7 +19,7 @@ import random
 import struct
 import zlib
 
-SIZE = 16  # tiny, like testdata/gen (only needs to decode + tensorize)
+SIZE = 16  # tiny (only needs to decode + tensorize)
 
 
 def _chunk(typ, data):

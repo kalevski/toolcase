@@ -5,44 +5,59 @@ NEVER runs in the Docker build or at runtime (spec §3.2, §9.1). Dev-machine /
 CI-model-job only — see README.md in this directory.
 
 Pipeline:
-  1. Download the pinned fp32 source model (GantMan/nsfw_model lineage),
-     verifying it against SOURCE_SHA256 before use.
-  2. Convert it to ONNX via tf2onnx, input named `input_1`, shape
-     [1, 224, 224, 3] (NHWC) — matches model/manifest.yml.
-  3. Apply onnxruntime.quantization.quantize_dynamic to produce the int8
-     model (~7-10 MB, spec §3.2).
+  1. Download the pinned fp32 source archive (GantMan/nsfw_model 1.2.0
+     release zip, a TF SavedModel), verifying it against SOURCE_SHA256
+     before use, and unzip it.
+  2. Convert the SavedModel to ONNX via tf2onnx. The graph's own tensor
+     names are kept: input `input` (float32 [N,224,224,3] NHWC), output
+     `prediction` ([N,5], softmax) — matches model/manifest.yml.
+  3. Quantize to int8 with STATIC QDQ per-channel quantization over a
+     calibration image set (--calib-dir). Dynamic quantization must not be
+     used here: MobileNetV2's depthwise convolutions collapse under
+     per-tensor dynamic weight quantization (argmax flips vs fp32 on real
+     photos), while calibrated QDQ stays within ~1% of fp32. The classifier
+     head (final Gemm + Softmax) is excluded so the output scores remain
+     full-resolution fp32 probabilities summing to exactly 1 — a quantized
+     head snaps scores to ~1/255 steps, which both coarsens the policy
+     thresholds and can trip probability-sum checks downstream.
   4. Compute the sha256 of the resulting model.onnx.
   5. Write model/model.onnx and update model/manifest.yml in place — the
      Go binary (internal/model.LoadManifest) treats manifest.yml as the
-     single source of truth for the sha256, input contract, normalization,
-     and labels, so this script writes there rather than anywhere in Go
-     code (spec §6.1).
+     single source of truth for the sha256, input/output contract,
+     normalization, and labels, so this script writes there rather than
+     anywhere in Go code (spec §6.1).
 
 Output (model/model.onnx) is committed via Git LFS (task 029); model/manifest.yml
-is a plain-text diff. Re-running this script with the same pinned source is
-idempotent: it skips the download if the pinned archive is already present
-locally with a matching sha256, and reproduces the same digest and manifest.
+is a plain-text diff. The tf2onnx conversion of the pinned source is
+deterministic; the final digest additionally depends on the calibration set,
+so keep (or document) the calibration images used for a release build.
 """
 import argparse
+import glob
 import hashlib
 import os
 import subprocess
 import sys
 import tempfile
 import urllib.request
+import zipfile
 
 import yaml  # PyYAML
 
-# Pin the upstream fp32 source (GantMan/nsfw_model lineage) by URL + expected
+# Pin the upstream fp32 source (GantMan/nsfw_model 1.2.0 release) by URL +
 # sha256, so the conversion is reproducible and the download is verified
-# before anything downstream touches it.
-SOURCE_URL = "https://github.com/GantMan/nsfw_model/releases/download/1.2.0/nsfw_mobilenet2.224x224.h5"  # PIN
-SOURCE_SHA256 = "<PIN — sha256 of the downloaded fp32 .h5/SavedModel archive>"
+# before anything downstream touches it. The zip contains a TF SavedModel at
+# SAVED_MODEL_SUBDIR (plus tflite/tfjs exports this pipeline ignores).
+SOURCE_URL = "https://github.com/GantMan/nsfw_model/releases/download/1.2.0/mobilenet_v2_140_224.1.zip"  # PIN
+SOURCE_SHA256 = "22c0892695929639c16ea302996b8f64df9c52e7a6c1d874c1de1047bfe109f7"  # PIN
+SAVED_MODEL_SUBDIR = "mobilenet_v2_140_224"
 
-# Must match model/manifest.yml's input/labels blocks (spec §6.1) — this
-# script is the thing that derives those fields, so keep it and the manifest
-# in lockstep by hand whenever either changes.
-INPUT_NAME = "input_1"           # graph input node name
+# Must match model/manifest.yml's input/output/labels blocks (spec §6.1) —
+# this script is the thing that derives those fields, so keep it and the
+# manifest in lockstep by hand whenever either changes. The names are the
+# graph's own (tf2onnx preserves them from the SavedModel signature).
+INPUT_NAME = "input"             # graph input tensor name
+OUTPUT_NAME = "prediction"       # graph output tensor name (softmax head)
 INPUT_SHAPE = [1, 224, 224, 3]   # NHWC, matches manifest.yml input.layout/width/height
 LABELS = ["drawings", "hentai", "neutral", "porn", "sexy"]  # order == output index
 
@@ -85,33 +100,102 @@ def download_source(dest_dir):
     return dest_path
 
 
-def convert_to_onnx(source_path, work_dir, opset):
-    """Run the fp32 source model through tf2onnx, producing model_fp32.onnx.
+def unzip_source(zip_path, work_dir):
+    """Extract the release zip and return the SavedModel directory inside it."""
+    with zipfile.ZipFile(zip_path) as zf:
+        zf.extractall(work_dir)
+    saved_model_dir = os.path.join(work_dir, SAVED_MODEL_SUBDIR)
+    if not os.path.isdir(saved_model_dir):
+        raise SystemExit(f"expected SavedModel dir {SAVED_MODEL_SUBDIR!r} not found in {zip_path}")
+    return saved_model_dir
 
-    The GantMan/nsfw_model release ships as a Keras HDF5 (.h5) file, so this
-    uses tf2onnx's --keras entry point; a SavedModel directory would instead
-    take --saved-model. Both take the same --inputs/--opset shape, and both
-    match the command documented in model/MODEL.md.
+
+def convert_to_onnx(saved_model_dir, work_dir, opset):
+    """Run the SavedModel through tf2onnx, producing model_fp32.onnx.
+
+    No --inputs/--outputs renaming: the serving signature already exposes
+    `input` / `prediction`, and the manifest records those names, so the
+    graph's own names flow through untouched.
     """
     fp32_path = os.path.join(work_dir, "model_fp32.onnx")
-    source_flag = "--keras" if source_path.endswith((".h5", ".keras")) else "--saved-model"
     cmd = [
         sys.executable, "-m", "tf2onnx.convert",
-        source_flag, source_path,
+        "--saved-model", saved_model_dir,
         "--output", fp32_path,
         "--opset", str(opset),
-        "--inputs", f"{INPUT_NAME}:0[{','.join(str(d) for d in INPUT_SHAPE)}]",
     ]
     print("running:", " ".join(cmd))
     subprocess.run(cmd, check=True)
     return fp32_path
 
 
-def quantize(fp32_path, onnx_path):
-    """Dynamic int8 weight quantization: fp32 ONNX graph -> int8 model.onnx."""
-    from onnxruntime.quantization import quantize_dynamic, QuantType
+def head_node_names(fp32_path):
+    """Return the names of the classifier-head nodes to exclude from
+    quantization: the Softmax producing the graph output plus the Gemm/MatMul
+    feeding it. Resolved from the graph rather than hardcoded so a tf2onnx
+    version bump that renames nodes doesn't silently quantize the head."""
+    import onnx
 
-    quantize_dynamic(fp32_path, onnx_path, weight_type=QuantType.QInt8)
+    m = onnx.load(fp32_path)
+    graph_outputs = {o.name for o in m.graph.output}
+    excluded = []
+    for node in m.graph.node:
+        if node.op_type == "Softmax" and set(node.output) & graph_outputs:
+            excluded.append(node.name)
+            feeder_outputs = set(node.input)
+            for prev in m.graph.node:
+                if prev.op_type in ("Gemm", "MatMul") and set(prev.output) & feeder_outputs:
+                    excluded.append(prev.name)
+    if not excluded:
+        raise SystemExit("no output-feeding Softmax found; head exclusion would be a no-op")
+    return excluded
+
+
+def quantize(fp32_path, onnx_path, calib_dir, work_dir):
+    """Static QDQ per-channel int8 quantization calibrated on calib_dir."""
+    import numpy as np
+    from PIL import Image
+    from onnxruntime.quantization import (
+        CalibrationDataReader, QuantFormat, QuantType, quantize_static,
+    )
+    from onnxruntime.quantization.shape_inference import quant_pre_process
+
+    paths = sorted(
+        p for pat in ("*.jpg", "*.jpeg", "*.png", "*.webp")
+        for p in glob.glob(os.path.join(calib_dir, pat))
+    )
+    if len(paths) < 10:
+        raise SystemExit(
+            f"--calib-dir {calib_dir} has {len(paths)} images; need at least 10 "
+            "representative photos for calibration (30+ recommended)."
+        )
+
+    def prep(path):
+        im = Image.open(path).convert("RGB").resize(
+            (INPUT_SHAPE[2], INPUT_SHAPE[1]), Image.BILINEAR)
+        return (np.asarray(im, np.float32) / NORMALIZE_SCALE)[None]
+
+    class Reader(CalibrationDataReader):
+        def __init__(self):
+            self.it = iter([{INPUT_NAME: prep(p)} for p in paths])
+
+        def get_next(self):
+            return next(self.it, None)
+
+    pre_path = os.path.join(work_dir, "model_fp32_pre.onnx")
+    quant_pre_process(fp32_path, pre_path)  # shape inference + optimization first
+
+    quantize_static(
+        pre_path,
+        onnx_path,
+        Reader(),
+        quant_format=QuantFormat.QDQ,
+        activation_type=QuantType.QUInt8,
+        weight_type=QuantType.QInt8,
+        per_channel=True,
+        nodes_to_exclude=head_node_names(pre_path),
+    )
+    print(f"quantized (static QDQ, per-channel, fp32 head) over {len(paths)} calibration images")
 
 
 def write_manifest(manifest_path, digest):
@@ -132,6 +216,7 @@ def write_manifest(manifest_path, digest):
         "width": INPUT_SHAPE[1],
         "height": INPUT_SHAPE[2],
     }
+    manifest["output"] = {"name": OUTPUT_NAME}
     manifest["normalize"] = {
         "scale": NORMALIZE_SCALE,
         "mean": NORMALIZE_MEAN,
@@ -145,6 +230,12 @@ def write_manifest(manifest_path, digest):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument(
+        "--calib-dir",
+        required=True,
+        help="directory of representative photos (jpg/png/webp) used to calibrate "
+             "the static int8 quantization; 30+ varied real images recommended",
+    )
     ap.add_argument(
         "--output-dir",
         default=os.path.join(os.path.dirname(__file__), "..", "..", "model"),
@@ -168,8 +259,9 @@ def main():
     source_path = download_source(args.cache_dir)
 
     with tempfile.TemporaryDirectory(prefix="preparemodel-") as work_dir:
-        fp32_path = convert_to_onnx(source_path, work_dir, args.opset)
-        quantize(fp32_path, onnx_path)
+        saved_model_dir = unzip_source(source_path, work_dir)
+        fp32_path = convert_to_onnx(saved_model_dir, work_dir, args.opset)
+        quantize(fp32_path, onnx_path, args.calib_dir, work_dir)
 
     digest = sha256_file(onnx_path)
     write_manifest(manifest_path, digest)

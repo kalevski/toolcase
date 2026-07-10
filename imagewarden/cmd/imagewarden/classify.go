@@ -96,6 +96,9 @@ func cmdClassify(args []string) int {
 	for _, w := range res.Warnings {
 		fmt.Fprintf(os.Stderr, "warning: %s\n", w)
 	}
+	for _, o := range res.EnvOverrides {
+		fmt.Fprintf(os.Stderr, "env override: %s\n", o)
+	}
 	log := newLogger(*logFormat, "error")
 
 	// Same wiring as `run`: load + verify + warm up the model, build the service.

@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"image"
 
-	_ "image/gif"  // first frame only
+	_ "image/gif" // first frame only
 	_ "image/jpeg"
 	_ "image/png"
 
+	_ "golang.org/x/image/bmp"
+	_ "golang.org/x/image/tiff"
 	_ "golang.org/x/image/webp"
 )
 

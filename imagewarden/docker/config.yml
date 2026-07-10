@@ -1,5 +1,7 @@
 # Default in-container config, copied to /etc/imagewarden/config.yml by the
-# Dockerfile (task 032). Override by mounting your own file at that path.
+# Dockerfile (task 032). Override by mounting your own file at that path, or
+# per-key via IMAGEWARDEN_* environment variables (env wins over this file —
+# see the README's Configuration table).
 listen: 0.0.0.0:8080
 api:
   token_env: IMAGEWARDEN_TOKEN   # token read from this env var at boot, never from YAML

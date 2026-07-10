@@ -20,18 +20,19 @@ FROM debian:bookworm-slim AS ort
 ARG ORT_VERSION=1.20.1
 ARG TARGETARCH
 # GitHub releases name tarballs by ORT's arch spelling: amd64->x64, arm64->aarch64.
-# --checksum pins the tarball (supply-chain pin, spec §9); fill the real sha256 in
-# CI when ORT_VERSION is locked — the .so pin and the Go binding pin move together
-# (spec §3.4). Two ADDs (one per arch) keep --checksum static per line.
+# --checksum pins the tarball (supply-chain pin, spec §9); the sha256 pins below
+# are for ORT_VERSION 1.20.1 — the .so pin and the Go binding pin move together
+# (spec §3.4), so recompute both checksums when bumping ORT_VERSION. Two ADDs
+# (one per arch) keep --checksum static per line.
 RUN case "${TARGETARCH}" in \
       amd64) echo x64 > /tmp/ort_arch ;; \
       arm64) echo aarch64 > /tmp/ort_arch ;; \
       *) echo "unsupported TARGETARCH=${TARGETARCH}" >&2; exit 1 ;; \
     esac
-ADD --checksum=sha256:<FILL IN CI — amd64 tarball> \
+ADD --checksum=sha256:67db4dc1561f1e3fd42e619575c82c601ef89849afc7ea85a003abbac1a1a105 \
     https://github.com/microsoft/onnxruntime/releases/download/v${ORT_VERSION}/onnxruntime-linux-x64-${ORT_VERSION}.tgz \
     /tmp/ort-x64.tgz
-ADD --checksum=sha256:<FILL IN CI — arm64 tarball> \
+ADD --checksum=sha256:ae4fedbdc8c18d688c01306b4b50c63de3445cdf2dbd720e01a2fa3810b8106a \
     https://github.com/microsoft/onnxruntime/releases/download/v${ORT_VERSION}/onnxruntime-linux-aarch64-${ORT_VERSION}.tgz \
     /tmp/ort-aarch64.tgz
 RUN mkdir -p /opt/ort && \

@@ -12,8 +12,8 @@ import (
 	"github.com/kalevski/toolcase/imagewarden/internal/policy"
 )
 
-// onePixelPNG is byte-identical to testdata/onepixel.png (task 037) — go:embed
-// cannot reach a parent directory, so a copy lives beside this file.
+// onePixelPNG is the committed 1x1 self-test fixture, embedded at build time
+// so `validate` needs no filesystem access beyond config + model artifacts.
 //
 //go:embed onepixel.png
 var onePixelPNG []byte
@@ -36,6 +36,9 @@ func cmdValidate(args []string) int {
 	cfg := res.Config
 	for _, w := range res.Warnings {
 		fmt.Printf("warning: %s\n", w)
+	}
+	for _, o := range res.EnvOverrides {
+		fmt.Printf("env override: %s\n", o)
 	}
 
 	failed := false
