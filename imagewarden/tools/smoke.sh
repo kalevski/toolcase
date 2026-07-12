@@ -54,8 +54,11 @@ docker build -t "$IMG" imagewarden
 
 # 2. `validate` via entrypoint passthrough — config parse + model load (sha256)
 # + one self-test inference on the embedded 1x1 image, all offline in-image.
+# The token env must be set: the default config listens on 0.0.0.0 and
+# `validate` deliberately fails a deploy whose token variable doesn't resolve.
 echo "[smoke] validate (entrypoint passthrough)"
-docker run --rm "$IMG" validate || fail "validate exited non-zero"
+docker run --rm -e IMAGEWARDEN_TOKEN="$TOKEN" "$IMG" validate \
+  || fail "validate exited non-zero"
 
 # 3. One-shot `classify` of a mounted test image → one JSON verdict on stdout.
 # Read-only mount, matching the runtime privacy stance.
