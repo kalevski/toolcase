@@ -131,6 +131,7 @@ function deps(site: Site): DeployDeps {
             updateLastRef: siteRepo.updateLastRef,
             updateBytes: siteRepo.updateBytes,
             updateSource: siteRepo.updateSource,
+            updateServing: siteRepo.updateServing,
             remove: siteRepo.remove,
         },
         fragmentOptions,

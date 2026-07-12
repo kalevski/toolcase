@@ -39,9 +39,16 @@ import { GithubError } from '@/server/infrastructure/github'
 import { NginxpilotError, type NginxpilotSiteStatus } from '@/server/infrastructure/nginxpilot'
 import { slog } from '@/server/infrastructure/server-log'
 import { resolveSiteAccess, type SiteViewer } from '@/server/domain/site-access'
-import { checkBranch, checkRepoName, checkRepoOwner, checkSubdir } from '@/server/domain/site-input'
+import {
+    checkBranch,
+    checkNotFound,
+    checkRepoName,
+    checkRepoOwner,
+    checkRouting,
+    checkSubdir,
+} from '@/server/domain/site-input'
 import { checkDomain, checkLabel } from '@/server/domain/hostname'
-import type { AppUser, Site, SiteHostKind } from '@/server/domain/types'
+import type { AppUser, Site, SiteHostKind, SiteRouting } from '@/server/domain/types'
 
 export type { SiteViewer } from '@/server/domain/site-access'
 
@@ -69,20 +76,32 @@ export type HostnameSpec =
     | { kind: 'subdomain'; label: string; baseDomain: string }
     | { kind: 'custom'; domain: string }
 
-/** `POST /api/sites` body — repo coordinates + a hostname spec. */
+/** `POST /api/sites` body — repo coordinates + a hostname spec (+ optional serving settings). */
 export interface CreateSiteRequest {
     repoOwner: string
     repoName: string
     branch: string
     subdir?: string | null
     hostname: HostnameSpec
+    /** Path→file routing: `static` (default) | `spa` | `clean-urls`. */
+    routing?: string | null
+    /** Custom 404 page path (e.g. `/404.html`); static/clean-urls only. */
+    notFound?: string | null
+    /** Immutable Cache-Control for fingerprinted assets. */
+    cacheAssets?: boolean
 }
 
-/** `PATCH /api/sites/{id}` body — any subset of branch / subdir / hostname (§9 step 6). */
+/** `PATCH /api/sites/{id}` body — any subset of source / serving / hostname fields (§9 step 6). */
 export interface UpdateSiteRequest {
     branch?: string
     /** `null` clears the build subdir; omitted leaves it unchanged. */
     subdir?: string | null
+    /** New routing mode (`null`/`"static"` = back to static); omitted leaves it unchanged. */
+    routing?: string | null
+    /** `null` clears the custom 404 page; omitted leaves it unchanged. */
+    notFound?: string | null
+    /** New asset-caching toggle; omitted leaves it unchanged. */
+    cacheAssets?: boolean
     /** A new hostname spec to move the site to; omitted leaves the hostname unchanged. */
     hostname?: HostnameSpec
 }
@@ -104,6 +123,21 @@ function str(value: unknown, field: string): string {
 function field(check: { ok: true; value: string } | { ok: false; reason: string; message: string }): string {
     if (!check.ok) throw new SiteError(check.message, `invalid_${check.reason}`, 400)
     return check.value
+}
+
+/**
+ * Cross-field serving rule (mirrors nginxpilot's own validation, so a bad combination
+ * fails here as a 400 instead of bouncing off the daemon as a 502): SPA routing serves
+ * index.html for every path, so a custom 404 page can never trigger.
+ */
+function assertServingCompatible(routing: SiteRouting | undefined, notFound: string | undefined): void {
+    if (routing === 'spa' && notFound) {
+        throw new SiteError(
+            'a custom 404 page cannot be combined with SPA routing (every path serves index.html)',
+            'routing_conflict',
+            400,
+        )
+    }
 }
 
 /** Resolve + authorize a site by id for this viewer (§13). Throws `SiteError` 404/403. */
@@ -211,6 +245,15 @@ export async function createSite(viewer: SiteViewer, body: CreateSiteRequest, to
     if (!subdirCheck.ok) throw new SiteError(subdirCheck.message, `invalid_${subdirCheck.reason}`, 400)
     const subdir = subdirCheck.value
 
+    const routingCheck = checkRouting(body.routing)
+    if (!routingCheck.ok) throw new SiteError(routingCheck.message, `invalid_${routingCheck.reason}`, 400)
+    const routing = routingCheck.value
+    const notFoundCheck = checkNotFound(body.notFound)
+    if (!notFoundCheck.ok) throw new SiteError(notFoundCheck.message, `invalid_${notFoundCheck.reason}`, 400)
+    const notFound = notFoundCheck.value
+    const cacheAssets = body.cacheAssets === true
+    assertServingCompatible(routing, notFound)
+
     if (!body.hostname || typeof body.hostname !== 'object') {
         throw new SiteError('"hostname" is required', 'invalid_request', 400)
     }
@@ -249,6 +292,9 @@ export async function createSite(viewer: SiteViewer, body: CreateSiteRequest, to
         repoPrivate,
         branch,
         subdir,
+        routing,
+        notFound,
+        cacheAssets,
         hostname,
         hostKind: body.hostname.kind,
         realmId: activeRealm.id,
@@ -288,19 +334,46 @@ export async function updateSite(viewer: SiteViewer, id: string, body: UpdateSit
         subdir = c.value
     }
 
+    // Serving settings (routing / 404 page / asset caching). The spa-conflict rule is
+    // checked against the EFFECTIVE post-merge values, so `routing: spa` on a site with
+    // a stored 404 page (and vice versa) is rejected up front.
+    let routing: SiteRouting | undefined
+    const hasRouting = 'routing' in body
+    if (hasRouting) {
+        const c = checkRouting(body.routing)
+        if (!c.ok) throw new SiteError(c.message, `invalid_${c.reason}`, 400)
+        routing = c.value
+    }
+    let notFound: string | undefined
+    const hasNotFound = 'notFound' in body
+    if (hasNotFound) {
+        const c = checkNotFound(body.notFound)
+        if (!c.ok) throw new SiteError(c.message, `invalid_${c.reason}`, 400)
+        notFound = c.value
+    }
+    const cacheAssets = body.cacheAssets !== undefined ? body.cacheAssets === true : undefined
+    assertServingCompatible(hasRouting ? routing : site.routing, hasNotFound ? notFound : site.notFound)
+
+    const serving = {
+        ...(hasRouting ? { routing } : {}),
+        ...(hasNotFound ? { notFound: notFound ?? null } : {}),
+        ...(cacheAssets !== undefined ? { cacheAssets } : {}),
+    }
+
     // 1) Hostname move (if requested and actually different).
     if (body.hostname && typeof body.hostname === 'object') {
         const candidate = candidateHostname(body.hostname)
         if (candidate !== site.hostname) {
-            site = await changeHostname(site, owner, body.hostname, { branch, subdir, hasSubdir })
+            site = await changeHostname(site, owner, body.hostname, { branch, subdir, hasSubdir, serving })
             return site
         }
     }
 
-    // 2) Source-only change.
+    // 2) Source / serving-only change.
     site = await deploy.update(site, {
         branch,
         ...(hasSubdir ? { subdir: subdir ?? null } : {}),
+        ...serving,
     })
     trackAndEnforce(site)
     return site
@@ -316,7 +389,12 @@ async function changeHostname(
     site: Site,
     owner: AppUser,
     spec: HostnameSpec,
-    source: { branch?: string; subdir?: string; hasSubdir: boolean },
+    source: {
+        branch?: string
+        subdir?: string
+        hasSubdir: boolean
+        serving: { routing?: SiteRouting; notFound?: string | null; cacheAssets?: boolean }
+    },
 ): Promise<Site> {
     // A rehost stays within the site's own realm (multiple_realms.md §D.2).
     const newHostname = resolveHostname(spec, owner, site.realmId)
@@ -333,10 +411,27 @@ async function changeHostname(
     if (branch !== site.branch || subdir !== site.subdir) {
         siteRepo.updateSource(site.id, branch, subdir, at)
     }
+    const serving = source.serving
+    const routing = 'routing' in serving ? serving.routing : site.routing
+    const notFound = 'notFound' in serving ? (serving.notFound ?? undefined) : site.notFound
+    const cacheAssets = serving.cacheAssets ?? site.cacheAssets ?? false
+    if (routing !== site.routing || notFound !== site.notFound || cacheAssets !== (site.cacheAssets ?? false)) {
+        siteRepo.updateServing(site.id, routing, notFound, cacheAssets, at)
+    }
     siteRepo.updateHostname(site.id, newHostname, newKind, at)
     audit('site.rehost', owner, { ...site, hostname: newHostname }, `${site.hostname} → ${newHostname}`)
 
-    const moved: Site = { ...site, branch, subdir, hostname: newHostname, hostKind: newKind, updatedAt: at }
+    const moved: Site = {
+        ...site,
+        branch,
+        subdir,
+        routing,
+        notFound,
+        cacheAssets,
+        hostname: newHostname,
+        hostKind: newKind,
+        updatedAt: at,
+    }
     const provisioned = await deploy.provision(moved)
     trackAndEnforce(provisioned)
     return provisioned

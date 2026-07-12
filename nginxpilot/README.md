@@ -77,9 +77,24 @@ sites:
       subdir: dist/               # serve only this subtree
       require_file: [index.html]  # opt-in post-fetch gate
     exclude: ["*.map"]            # extends defaults: .env*, .htaccess, .DS_Store (.git* always stripped)
+    routing: spa                  # static (default) | spa | clean-urls
+    not_found: /404.html          # custom 404 page (static / clean-urls only)
+    cache_assets: true            # immutable Cache-Control for fingerprinted assets
 ```
 
 Clones are shallow + single-branch through the system `git` binary; the bare cache under `data_dir/cache/git/` is disposable.
+
+### static-site routing
+
+Per-site `routing` selects how request paths map to files (managed mode and `print-vhost` both honor it):
+
+| `routing` | `try_files` | Use when |
+|---|---|---|
+| `static` (default) | `$uri $uri/ =404` | plain files; unknown paths 404 |
+| `spa` | `$uri $uri/ /index.html` | single-page apps with client-side routers (React/Vue/Angular) |
+| `clean-urls` | `$uri $uri.html $uri/ =404` | pre-rendered/exported sites where `/about` should serve `about.html` |
+
+`not_found: /404.html` emits `error_page 404 /404.html;` — rejected with `routing: spa` (no path 404s there). `cache_assets: true` adds a `Cache-Control: public, max-age=31536000, immutable` location for fingerprinted asset extensions (css/js/fonts/images/media); HTML is never long-cached.
 
 **git auth methods** (all over an `https://` URL except `ssh-key`):
 

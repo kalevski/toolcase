@@ -412,11 +412,33 @@ type Defaults struct {
 	KeepReleases int      `yaml:"keep_releases"`
 }
 
+// Routing modes for static sites: how request paths map to files.
+const (
+	// RoutingStatic serves files as-is; unknown paths return 404.
+	RoutingStatic = "static"
+	// RoutingSPA serves /index.html for any path that doesn't match a file,
+	// so client-side routers own the URL space (single-page apps).
+	RoutingSPA = "spa"
+	// RoutingCleanURLs also tries $uri.html, so /about serves /about.html
+	// (pretty URLs for pre-rendered/exported sites); unknown paths return 404.
+	RoutingCleanURLs = "clean-urls"
+)
+
 // Site maps one domain to one content source.
 type Site struct {
 	Domain  string   `yaml:"domain" json:"domain"`
 	Source  Source   `yaml:"source" json:"source"`
 	Exclude []string `yaml:"exclude" json:"exclude,omitempty"`
+
+	// Routing selects the request-path → file strategy: "" / static
+	// (default) | spa | clean-urls.
+	Routing string `yaml:"routing" json:"routing,omitempty"`
+	// NotFound is a site-relative path (e.g. /404.html) served as the custom
+	// 404 page. Incompatible with spa routing, where no path 404s.
+	NotFound string `yaml:"not_found" json:"not_found,omitempty"`
+	// CacheAssets emits a long-lived immutable Cache-Control location for
+	// fingerprinted asset extensions (css/js/fonts/images/media).
+	CacheAssets bool `yaml:"cache_assets" json:"cache_assets,omitempty"`
 
 	// WebOptions are the per-host HTTP toggles (TLS, force_ssl, http2, hsts,
 	// block_exploits, gzip, advanced), inlined into the YAML. Meaningful for a
@@ -426,6 +448,14 @@ type Site struct {
 	// File records which config file declared this site (provenance for
 	// duplicate-domain errors and logs). Never serialized over the admin API.
 	File string `yaml:"-" json:"-"`
+}
+
+// RoutingMode returns the effective routing strategy ("" → static).
+func (s Site) RoutingMode() string {
+	if s.Routing == "" {
+		return RoutingStatic
+	}
+	return s.Routing
 }
 
 // Interval returns the effective poll interval for the site.

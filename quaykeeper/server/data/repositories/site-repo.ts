@@ -6,7 +6,7 @@
 
 import 'server-only'
 import { prep, getRow, allRows } from '@/server/data/db'
-import type { Site, SiteHostKind, SiteStatus } from '@/server/domain/types'
+import type { Site, SiteHostKind, SiteRouting, SiteStatus } from '@/server/domain/types'
 
 interface Raw {
     id: string
@@ -16,6 +16,9 @@ interface Raw {
     repo_private: number
     branch: string
     subdir: string | null
+    routing: string | null
+    not_found: string | null
+    cache_assets: number
     hostname: string
     host_kind: string
     status: string
@@ -36,6 +39,9 @@ function map(r: Raw): Site {
         repoPrivate: !!r.repo_private,
         branch: r.branch,
         subdir: r.subdir ?? undefined,
+        routing: (r.routing as SiteRouting | null) ?? undefined,
+        notFound: r.not_found ?? undefined,
+        cacheAssets: !!r.cache_assets,
         hostname: r.hostname,
         hostKind: r.host_kind as SiteHostKind,
         status: r.status as SiteStatus,
@@ -53,9 +59,10 @@ export function create(site: Site): void {
     prep(
         `INSERT INTO site (
             id, owner_id, repo_owner, repo_name, repo_private, branch, subdir,
+            routing, not_found, cache_assets,
             hostname, host_kind, status, bytes, last_ref, last_error,
             realm_id, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ).run(
         site.id,
         site.ownerId,
@@ -64,6 +71,9 @@ export function create(site: Site): void {
         site.repoPrivate ? 1 : 0,
         site.branch,
         site.subdir ?? null,
+        site.routing ?? null,
+        site.notFound ?? null,
+        site.cacheAssets ? 1 : 0,
         site.hostname,
         site.hostKind,
         site.status,
@@ -191,6 +201,27 @@ export function updateSource(
     prep('UPDATE site SET branch = ?, subdir = ?, updated_at = ? WHERE id = ?').run(
         branch,
         subdir ?? null,
+        at,
+        id,
+    )
+}
+
+/**
+ * Rewrite the static-serving settings (routing / custom 404 / asset caching). Like
+ * `updateSource`, the new fragment + reload + sync are the service's job; this only
+ * persists the row. `routing: undefined` stores NULL (= nginxpilot's `static` default).
+ */
+export function updateServing(
+    id: string,
+    routing: SiteRouting | undefined,
+    notFound: string | undefined,
+    cacheAssets: boolean,
+    at: string = new Date().toISOString(),
+): void {
+    prep('UPDATE site SET routing = ?, not_found = ?, cache_assets = ?, updated_at = ? WHERE id = ?').run(
+        routing ?? null,
+        notFound ?? null,
+        cacheAssets ? 1 : 0,
         at,
         id,
     )
