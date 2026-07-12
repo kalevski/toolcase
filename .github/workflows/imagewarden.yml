@@ -74,10 +74,9 @@ jobs:
       # so they are kept in lockstep by convention: whoever locks ORT_VERSION fills
       # both the Dockerfile checksums and ORT_SHA256 here in the same change.
       ORT_VERSION: "1.20.1"
-      # TODO(032): fill in the real sha256 of onnxruntime-linux-x64-1.20.1.tgz —
-      # it must match the Dockerfile's `ADD --checksum=sha256:...` for the x64
-      # tarball, which is still "<FILL IN CI — amd64 tarball>". Keep both in sync.
-      ORT_SHA256: "<FILL IN CI — amd64 tarball; must match Dockerfile x64 ADD --checksum>"
+      # sha256 of onnxruntime-linux-x64-1.20.1.tgz — must match the Dockerfile's
+      # x64 `ADD --checksum=sha256:...` (imagewarden/Dockerfile). Keep both in sync.
+      ORT_SHA256: "67db4dc1561f1e3fd42e619575c82c601ef89849afc7ea85a003abbac1a1a105"
     steps:
       - uses: actions/checkout@v4 # model/model.onnx (task 029) is a plain git blob; Load verifies its sha256
 
