@@ -62,6 +62,11 @@ jobs:
   ort-test:
     runs-on: ubuntu-latest
     container: golang:1.24-bookworm # glibc + the pinned Go toolchain, matching the build stage
+    defaults:
+      run:
+        # Inside a job container the runner may resolve the default shell to `sh`
+        # (dash on bookworm), which rejects `set -o pipefail`. Pin bash.
+        shell: bash
     env:
       # SINGLE SOURCE OF TRUTH — these MUST equal the Dockerfile's ARG ORT_VERSION
       # and the amd64 (x64) `ADD --checksum` (imagewarden/Dockerfile, task 032).
