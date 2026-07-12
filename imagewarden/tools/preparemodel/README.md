@@ -52,11 +52,11 @@ the Docker build or at container runtime:
   `PyYAML`) is a separate, Python-only dependency set from the Go module —
   it is never installed in the image.
 
-## Output and Git LFS
+## Output
 
 The pipeline's output, `model/model.onnx`, is committed to the repository
-through Git LFS (task 029, `.gitattributes`: `model/*.onnx filter=lfs
-diff=lfs merge=lfs -text`). `model/manifest.yml` and `model/MODEL.md` are
+as a plain git blob (task 029; ~5 MB, well under GitHub's limits).
+`model/manifest.yml` and `model/MODEL.md` are
 plain text and diff normally. After running `prepare.py`, review the
 `manifest.yml` diff and commit both files together so the sha256 in the
 manifest always matches the committed `model.onnx`.

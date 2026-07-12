@@ -44,7 +44,7 @@ committed 1×1 PNG that also backs `validate`'s embedded self-test); point
 ### In CI
 
 The `smoke` job in `.github/workflows/imagewarden.yml` runs this on
-`ubuntu-latest` (`needs: build`, LFS checkout for the baked model).
+`ubuntu-latest` (`needs: build`).
 It does its own single-arch `docker build`; the multi-arch push stays in the
 `docker` job.
 

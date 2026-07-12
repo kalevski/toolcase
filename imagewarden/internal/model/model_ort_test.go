@@ -3,8 +3,9 @@
 package model
 
 // Accuracy smoke test for the real ONNX model, spec §11. It is guarded by the
-// `ort` build tag because it needs cgo + a real libonnxruntime.so; an untagged
-// `go test ./...` never compiles this file, so the normal suite stays CGO-free.
+// `ort` build tag because it needs a real libonnxruntime.so; an untagged
+// `go test ./...` never compiles this file, so the normal suite runs without
+// the shared library present.
 //
 // Running it (this is the CI job that runs inside the build image, spec §11):
 //
@@ -14,9 +15,9 @@ package model
 //
 //	ORT_DYLIB_PATH=/usr/lib/libonnxruntime.so go test -tags ort ./internal/model
 //
-// The model artifacts (model/model.onnx) are stored in Git LFS (spec §9.1), so
-// CI must `actions/checkout` with `lfs: true`; otherwise ../../model/model.onnx
-// is a text LFS pointer, not the real graph, and Load fails the sha256 verify.
+// The model artifacts (model/model.onnx) are committed as plain git blobs
+// (spec §9.1), so a normal `actions/checkout` suffices; Load still verifies
+// the graph against the manifest sha256.
 //
 // This is a smoke test, not an accuracy gate: it catches "model won't load /
 // ORT-binding version mismatch (spec §3.4) / labels scrambled", not a fine
@@ -38,7 +39,7 @@ import (
 	"github.com/kalevski/toolcase/imagewarden/internal/imaging"
 )
 
-// modelDir is the checked-in artifact directory (Git LFS, task 029), resolved
+// modelDir is the checked-in artifact directory (task 029), resolved
 // relative to this package.
 const modelDir = "../../model"
 

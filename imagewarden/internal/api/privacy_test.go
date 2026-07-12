@@ -23,9 +23,9 @@ import (
 // enforces it, so a future change that logs the body on an error path or buffers
 // an upload to a temp file would otherwise ship silently.
 //
-// These tests are CGO-free — they drive real requests through s.routes() backed
-// by a stub classifier (never a real *model.Model), so no libonnxruntime.so is
-// linked. They are complementary to the container smoke test (task 035), which
+// These tests drive real requests through s.routes() backed by a stub
+// classifier (never a real *model.Model), so no libonnxruntime.so is needed at
+// runtime. They are complementary to the container smoke test (task 035), which
 // asserts the same property one level up by booting the image under
 // `--read-only` and proving it never needs a writable filesystem. The two are
 // deliberately redundant: this file catches an in-process leak at unit speed;

@@ -15,25 +15,22 @@ env:
   IMAGE_NAME: ghcr.io/${{ github.repository }}/imagewarden
 
 jobs:
-  # ── Fast lane: CGO-free vet/build/test of the whole tree ───────────────────
-  # Decision (spec §11, §4): this job stays CGO_ENABLED=0 and builds/tests every
-  # package with `./...`, including internal/model. That works — and is the
-  # correct choice — because the ONNX Runtime binding
-  # (github.com/yalue/onnxruntime_go) is compiled CGO-free: model.go dlopens
-  # libonnxruntime.so at runtime via SetSharedLibraryPath, so importing the
-  # `model` package links no ONNX Runtime (see internal/classify/classify.go's
-  # layering note). The real session is only built when a *model.Model is
-  # constructed — which the default suite never does; it stands in a fake
-  # Classifier. So the whole tree compiles and the default suite passes without
-  # libonnxruntime.so present.
+  # ── Fast lane: vet/build/test of the whole tree, no libonnxruntime.so ──────
+  # Decision (spec §11, §4): this job builds/tests every package with `./...`,
+  # including internal/model, with CGO **enabled** (the default; ubuntu-latest
+  # ships gcc). The ONNX Runtime binding (github.com/yalue/onnxruntime_go) is a
+  # cgo package — under CGO_ENABLED=0 build constraints exclude all its Go files
+  # and the whole tree fails to compile, since classify/api/cmd transitively
+  # import internal/model. This matches production: the Dockerfile builds the
+  # binary with CGO_ENABLED=1.
   #
-  # This is why option (b) — `go build $(go list ./... | grep -v /internal/model)`
-  # — is unnecessary here: `model` is a transitive dependency of classify/api/cmd,
-  # so excluding it from `go list` would not stop it from being compiled anyway,
-  # and it does not need excluding because it builds CGO-free. The ONE thing that
-  # needs cgo + the real .so is the `//go:build ort` test (internal/model/
-  # model_ort_test.go), which the untagged suite never compiles — that lives in
-  # the separate ort-test job below.
+  # What keeps this lane "fast" is that no libonnxruntime.so is needed: the
+  # binding vendors the ORT C API header and dlopens the .so only at runtime via
+  # SetSharedLibraryPath, and a real session is only built when a *model.Model
+  # is constructed — which the default suite never does; it stands in a fake
+  # Classifier. The ONE thing that needs the real .so is the `//go:build ort`
+  # test (internal/model/model_ort_test.go), which the untagged suite never
+  # compiles — that lives in the separate ort-test job below.
   build:
     runs-on: ubuntu-latest
     defaults:
@@ -41,8 +38,6 @@ jobs:
         working-directory: imagewarden
     steps:
       - uses: actions/checkout@v4
-        with:
-          lfs: true # model/*.onnx is Git LFS (§9.1); some default tests verify its manifest sha256
 
       - uses: actions/setup-go@v5
         with:
@@ -50,13 +45,13 @@ jobs:
           cache-dependency-path: imagewarden/go.sum
 
       - name: go vet
-        run: CGO_ENABLED=0 go vet ./...
+        run: go vet ./...
 
-      - name: go build (whole tree, CGO-free fast lane)
-        run: CGO_ENABLED=0 go build ./...
+      - name: go build (whole tree)
+        run: go build ./...
 
-      - name: go test (CGO-free default suite; no libonnxruntime.so needed)
-        run: CGO_ENABLED=0 go test ./...
+      - name: go test (default suite; no libonnxruntime.so needed)
+        run: go test ./...
 
   # ── ORT / binding version-mismatch gate (spec §3.4, §11) ───────────────────
   # Runs the `//go:build ort` accuracy smoke test where a real libonnxruntime.so
@@ -79,9 +74,7 @@ jobs:
       # tarball, which is still "<FILL IN CI — amd64 tarball>". Keep both in sync.
       ORT_SHA256: "<FILL IN CI — amd64 tarball; must match Dockerfile x64 ADD --checksum>"
     steps:
-      - uses: actions/checkout@v4
-        with:
-          lfs: true # the real model/model.onnx (task 029) is needed; the LFS pointer would fail Load's sha256 verify
+      - uses: actions/checkout@v4 # model/model.onnx (task 029) is a plain git blob; Load verifies its sha256
 
       - name: Fetch + verify pinned ONNX Runtime
         working-directory: imagewarden
@@ -107,9 +100,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - uses: actions/checkout@v4
-        with:
-          lfs: true # model/ is baked into the image (§9); the LFS pointer must be resolved
+      - uses: actions/checkout@v4 # model/ is baked into the image (§9)
 
       - uses: docker/setup-qemu-action@v3 # arm64 emulation for the multi-arch build
 
@@ -149,8 +140,8 @@ jobs:
   # Verifies the built image actually satisfies the strong runtime claims spec §9
   # makes — distroless (no shell), nonroot, boots under `--read-only --cap-drop
   # ALL`, self-probing HEALTHCHECK, entrypoint-as-CLI passthrough, and the §5 HTTP
-  # response shape. This is the integration counterpart to the CGO-free unit suite
-  # in `build`: it runs the real binary inside the real image (task 035).
+  # response shape. This is the integration counterpart to the unit suite in
+  # `build`: it runs the real binary inside the real image (task 035).
   #
   # smoke.sh does its own single-arch `docker build` (host amd64), so no separate
   # buildx `--load` step is needed here — QEMU-emulated arm64 is far too slow for a
@@ -161,9 +152,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - uses: actions/checkout@v4
-        with:
-          lfs: true # model baked into the image (§9)
+      - uses: actions/checkout@v4 # model baked into the image (§9)
 
       - name: Run container smoke test
         run: bash imagewarden/tools/smoke.sh

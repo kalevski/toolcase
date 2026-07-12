@@ -27,8 +27,8 @@ Pipeline:
      normalization, and labels, so this script writes there rather than
      anywhere in Go code (spec §6.1).
 
-Output (model/model.onnx) is committed via Git LFS (task 029); model/manifest.yml
-is a plain-text diff. The tf2onnx conversion of the pinned source is
+Output (model/model.onnx) is committed as a plain git blob (task 029);
+model/manifest.yml is a plain-text diff. The tf2onnx conversion of the pinned source is
 deterministic; the final digest additionally depends on the calibration set,
 so keep (or document) the calibration images used for a release build.
 """

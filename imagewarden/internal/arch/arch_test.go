@@ -128,7 +128,7 @@ func TestInternalImportBoundaries(t *testing.T) {
 // Runtime binding, is imported by internal/model and nothing else (spec
 // §3.1/§4). Reading metadata rather than building means this holds even though
 // onnxruntime_go is a CGO package and libonnxruntime.so is absent in the
-// default CI lane — the test stays green in the CGO-free build job.
+// default CI lane — the test stays green in the fast-lane build job.
 func TestOnlyModelImportsONNXRuntime(t *testing.T) {
 	const modelPkg = module + "/internal/model"
 	for _, p := range listPackages(t) {
