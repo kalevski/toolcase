@@ -48,9 +48,12 @@ func componentSchemas() map[string]any {
 		}),
 
 		"Site": obj(withWebOptions(map[string]any{
-			"domain":  str(),
-			"source":  map[string]any{"type": "object"},
-			"exclude": arr(str()),
+			"domain":       str(),
+			"source":       map[string]any{"type": "object"},
+			"exclude":      arr(str()),
+			"routing":      strEnum("static", "spa", "clean-urls"),
+			"not_found":    str(),
+			"cache_assets": boolean(),
 		}), "domain"),
 		"SiteList": obj(map[string]any{"sites": arr(ref("Site"))}),
 

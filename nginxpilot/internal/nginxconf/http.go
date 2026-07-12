@@ -36,8 +36,24 @@ func StaticVhost(cfg *config.Config, site *config.Site, opts Options) (string, e
 	writeServerToggles(&b, site.WebOptions, opts, tls)
 
 	fmt.Fprintf(&b, "\n    root %s;\n    index index.html;\n", root)
-	b.WriteString("\n    location / {\n        try_files $uri $uri/ =404;\n")
-	b.WriteString("        # SPA: try_files $uri $uri/ /index.html;\n    }\n")
+	if site.NotFound != "" {
+		fmt.Fprintf(&b, "    error_page 404 %s;\n", site.NotFound)
+	}
+	if site.CacheAssets {
+		b.WriteString("\n    location ~* \\.(?:css|js|mjs|map|woff2?|ttf|otf|eot|ico|gif|jpe?g|png|webp|avif|svg|mp4|webm)$ {\n")
+		b.WriteString("        add_header Cache-Control \"public, max-age=31536000, immutable\";\n")
+		b.WriteString("        try_files $uri =404;\n    }\n")
+	}
+	b.WriteString("\n    location / {\n")
+	switch site.RoutingMode() {
+	case config.RoutingSPA:
+		b.WriteString("        try_files $uri $uri/ /index.html;\n")
+	case config.RoutingCleanURLs:
+		b.WriteString("        try_files $uri $uri.html $uri/ =404;\n")
+	default:
+		b.WriteString("        try_files $uri $uri/ =404;\n")
+	}
+	b.WriteString("    }\n")
 	b.WriteString("    autoindex off;\n")
 	b.WriteString("}\n")
 

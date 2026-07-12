@@ -169,6 +169,12 @@ export function renderFragment(site: Site, options: FragmentOptions): string {
     }
     if (exclude.length > 0) lines.push(`    exclude: ${flowSeq(exclude)}`)
 
+    // Static-serving settings from the site row (routing / custom 404 / asset caching) —
+    // omitted when default, so plain static sites keep their pre-existing fragment bytes.
+    if (site.routing && site.routing !== 'static') lines.push(`    routing: ${scalar(site.routing)}`)
+    if (site.notFound) lines.push(`    not_found: ${scalar(site.notFound)}`)
+    if (site.cacheAssets) lines.push('    cache_assets: true')
+
     // Managed-mode TLS + security options (§0/Phase D), emitted at the site (server-block)
     // level in a deterministic order so the golden tests stay stable. Inert unless the
     // daemon runs in managed mode.

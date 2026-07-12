@@ -1,0 +1,40 @@
+# Bare-metal install path only — NOT copied into the container image
+# (.dockerignore excludes packaging/, task 033). Container deployments run
+# the Dockerfile's ENTRYPOINT/CMD instead.
+[Unit]
+Description=imagewarden — local image safety classifier (REST API)
+Documentation=https://github.com/kalevski/toolcase/tree/main/imagewarden
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+# Type=notify: the binary sends READY=1 / STOPPING=1 via sdNotify (task 024).
+Type=notify
+ExecStart=/usr/local/bin/imagewarden run --config /etc/imagewarden/config.yml
+Restart=on-failure
+RestartSec=5s
+
+User=imagewarden
+Group=imagewarden
+# Or drop User/Group and use DynamicUser=yes for an ephemeral service account.
+UMask=0077
+
+# IMAGEWARDEN_TOKEN lives in a root-owned env file, never in the unit or config.
+# The leading '-' makes it optional (loopback dev may run tokenless, spec §5).
+EnvironmentFile=-/etc/imagewarden/imagewarden.env
+
+# Hardening — imagewarden holds no writable state (images stay in memory, spec §8).
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadOnlyPaths=/
+CapabilityBoundingSet=
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+
+[Install]
+WantedBy=multi-user.target

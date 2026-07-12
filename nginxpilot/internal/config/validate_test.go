@@ -90,6 +90,61 @@ func TestValidateIntervalAtMinimumOK(t *testing.T) {
 	}
 }
 
+// ---- static-site routing options -------------------------------------------
+
+func staticSiteWith(mutate func(*Site)) Config {
+	cfg := minValidConfig()
+	site := Site{
+		Domain: "example.com",
+		Source: Source{Type: SourceHTTPZip, URL: "https://example.com/a.zip"},
+		File:   "test",
+	}
+	mutate(&site)
+	cfg.Sites = []Site{site}
+	return cfg
+}
+
+func TestValidateRoutingModes(t *testing.T) {
+	for _, routing := range []string{"", RoutingStatic, RoutingSPA, RoutingCleanURLs} {
+		cfg := staticSiteWith(func(s *Site) { s.Routing = routing })
+		if err := Validate(&cfg); err != nil {
+			t.Errorf("routing %q: unexpected error: %v", routing, err)
+		}
+	}
+}
+
+func TestValidateRoutingUnknownRejected(t *testing.T) {
+	cfg := staticSiteWith(func(s *Site) { s.Routing = "hybrid" })
+	err := Validate(&cfg)
+	if err == nil || !strings.Contains(err.Error(), "routing") {
+		t.Fatalf("expected routing error, got: %v", err)
+	}
+}
+
+func TestValidateNotFoundWithSPARejected(t *testing.T) {
+	cfg := staticSiteWith(func(s *Site) {
+		s.Routing = RoutingSPA
+		s.NotFound = "/404.html"
+	})
+	err := Validate(&cfg)
+	if err == nil || !strings.Contains(err.Error(), "not_found") {
+		t.Fatalf("expected not_found/spa conflict error, got: %v", err)
+	}
+}
+
+func TestValidateNotFoundMustBeAbsolute(t *testing.T) {
+	for _, bad := range []string{"404.html", "/../404.html", "/errors/../404.html"} {
+		cfg := staticSiteWith(func(s *Site) { s.NotFound = bad })
+		if err := Validate(&cfg); err == nil {
+			t.Errorf("not_found %q: expected error, got nil", bad)
+		}
+	}
+	cfg := staticSiteWith(func(s *Site) { s.NotFound = "/errors/404.html" })
+	if err := Validate(&cfg); err != nil {
+		t.Errorf("not_found /errors/404.html: unexpected error: %v", err)
+	}
+}
+
 // ---- duplicate domains ----------------------------------------------------
 
 func TestValidateDuplicateDomain(t *testing.T) {

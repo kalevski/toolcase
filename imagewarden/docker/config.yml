@@ -1,0 +1,24 @@
+# Default in-container config, copied to /etc/imagewarden/config.yml by the
+# Dockerfile (task 032). Override by mounting your own file at that path, or
+# per-key via IMAGEWARDEN_* environment variables (env wins over this file —
+# see the README's Configuration table).
+listen: 0.0.0.0:8080
+api:
+  token_env: IMAGEWARDEN_TOKEN   # token read from this env var at boot, never from YAML
+model:
+  dir: /usr/share/imagewarden/model   # baked model.onnx + manifest.yml (Dockerfile COPY)
+inference:
+  threads: 0        # 0 = runtime.NumCPU()
+  concurrency: 2    # simultaneous inferences (semaphore)
+limits:
+  max_body_mb: 10
+  max_pixels: 40000000
+  queue_timeout: 5s
+  request_timeout: 30s
+policy:
+  unsafe_classes: [porn, hentai]
+  borderline_classes: [sexy]
+  block_threshold: 0.80
+  review_threshold: 0.50
+log:
+  format: json      # logfmt | json

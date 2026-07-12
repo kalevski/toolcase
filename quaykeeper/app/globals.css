@@ -791,6 +791,14 @@ body {
     gap: 0.75rem;
 }
 
+/* Serving-settings card on the site dashboard (routing / 404 page / caching). */
+.quaykeeper-site-serving {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-width: 34rem;
+}
+
 .quaykeeper-site-verify-result {
     display: flex;
     flex-direction: column;

@@ -28,6 +28,86 @@ func TestVhostStaticSite(t *testing.T) {
 	}
 }
 
+func TestVhostStaticSiteSPARouting(t *testing.T) {
+	cfg := &config.Config{
+		DataDir: "/var/lib/nginxpilot",
+		Sites:   []config.Site{{Domain: "app.example.com", Routing: config.RoutingSPA}},
+	}
+	out, err := Vhost(cfg, "app.example.com")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !strings.Contains(out, "try_files $uri $uri/ /index.html;") {
+		t.Errorf("spa vhost missing index.html fallback\n%s", out)
+	}
+	if strings.Contains(out, "=404") {
+		t.Errorf("spa vhost must not 404 unknown paths\n%s", out)
+	}
+}
+
+func TestVhostStaticSiteCleanURLsRouting(t *testing.T) {
+	cfg := &config.Config{
+		DataDir: "/var/lib/nginxpilot",
+		Sites:   []config.Site{{Domain: "docs.example.com", Routing: config.RoutingCleanURLs}},
+	}
+	out, err := Vhost(cfg, "docs.example.com")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !strings.Contains(out, "try_files $uri $uri.html $uri/ =404;") {
+		t.Errorf("clean-urls vhost missing $uri.html lookup\n%s", out)
+	}
+}
+
+func TestVhostStaticSiteNotFoundPage(t *testing.T) {
+	cfg := &config.Config{
+		DataDir: "/var/lib/nginxpilot",
+		Sites:   []config.Site{{Domain: "example.com", NotFound: "/404.html"}},
+	}
+	out, err := Vhost(cfg, "example.com")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !strings.Contains(out, "error_page 404 /404.html;") {
+		t.Errorf("vhost missing custom error_page\n%s", out)
+	}
+}
+
+func TestVhostStaticSiteCacheAssets(t *testing.T) {
+	cfg := &config.Config{
+		DataDir: "/var/lib/nginxpilot",
+		Sites:   []config.Site{{Domain: "example.com", CacheAssets: true}},
+	}
+	out, err := Vhost(cfg, "example.com")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	for _, want := range []string{
+		"location ~* \\.(?:css|js|mjs|map|woff2?|ttf|otf|eot|ico|gif|jpe?g|png|webp|avif|svg|mp4|webm)$ {",
+		`add_header Cache-Control "public, max-age=31536000, immutable";`,
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("cache_assets vhost missing %q\n%s", want, out)
+		}
+	}
+}
+
+func TestVhostStaticSiteDefaultHasNoExtras(t *testing.T) {
+	cfg := &config.Config{
+		DataDir: "/var/lib/nginxpilot",
+		Sites:   []config.Site{{Domain: "example.com"}},
+	}
+	out, err := Vhost(cfg, "example.com")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	for _, forbidden := range []string{"error_page", "Cache-Control", "/index.html;"} {
+		if strings.Contains(out, forbidden) {
+			t.Errorf("default vhost must not contain %q\n%s", forbidden, out)
+		}
+	}
+}
+
 func TestVhostUnknownDomain(t *testing.T) {
 	cfg := &config.Config{}
 	_, err := Vhost(cfg, "nope.com")

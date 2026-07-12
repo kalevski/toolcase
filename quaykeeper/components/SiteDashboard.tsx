@@ -4,8 +4,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTc, targetValue } from '@/lib/tc'
 import { useToast } from './Toast'
 import { useBranding } from '@/lib/branding-context'
+import { SelectField, SwitchField, TextField } from './fields'
 import { buildSiteDashboard, type SiteStatusPayload } from '@/server/domain/site-dashboard'
-import type { PlanLimits, Site, SiteUsage } from '@/server/domain/types'
+import type { PlanLimits, Site, SiteRouting, SiteUsage } from '@/server/domain/types'
 
 // The custom-domain verification result returned by POST /api/sites/{id}/verify-domain.
 interface VerifyResult {
@@ -59,6 +60,48 @@ function deleteError(code: unknown, status: number): string {
     if (typeof code === 'string' && DELETE_ERROR_COPY[code]) return DELETE_ERROR_COPY[code]
     if (typeof code === 'string' && code) return code
     return `Delete failed (HTTP ${status}).`
+}
+
+const SERVING_ERROR_COPY: Record<string, string> = {
+    unauthorized: 'Your session expired. Sign in again to save these settings.',
+    site_not_found: 'This site no longer exists.',
+    forbidden: 'You do not have access to this site.',
+    invalid_enum: 'Pick one of the offered routing modes.',
+    invalid_traversal: 'The 404 page must be an absolute site path like /404.html, without "..".',
+    invalid_charset: 'The 404 page path contains characters that are not allowed.',
+    invalid_too_long: 'The 404 page path is too long.',
+    routing_conflict:
+        'A custom 404 page can’t be combined with single-page-app routing — the SPA fallback serves index.html for every path.',
+    nginxpilot_error: 'The deploy engine is unavailable right now. Try again shortly.',
+    internal_error: 'Something went wrong saving the settings. Try again.',
+}
+
+function servingError(code: unknown, status: number): string {
+    if (typeof code === 'string' && SERVING_ERROR_COPY[code]) return SERVING_ERROR_COPY[code]
+    if (typeof code === 'string' && code) return code
+    return `Saving failed (HTTP ${status}).`
+}
+
+/** Copy for the routing modes — mirrors the create wizard's select. */
+const ROUTING_OPTIONS: { value: SiteRouting; label: string }[] = [
+    { value: 'static', label: 'Static files (404 for unknown paths)' },
+    { value: 'spa', label: 'Single-page app (fallback to index.html)' },
+    { value: 'clean-urls', label: 'Clean URLs (/about serves about.html)' },
+]
+
+/** The serving settings as form state (routing normalized, 404 page as raw text). */
+interface ServingForm {
+    routing: SiteRouting
+    notFound: string
+    cacheAssets: boolean
+}
+
+function servingFormFrom(site: Site): ServingForm {
+    return {
+        routing: site.routing ?? 'static',
+        notFound: site.notFound ?? '',
+        cacheAssets: !!site.cacheAssets,
+    }
 }
 
 export function SiteDashboard({
@@ -153,6 +196,60 @@ export function SiteDashboard({
             setRedeploying(false)
         }
     }, [site.id, fetchStatus, toast])
+
+    // ── serving settings (routing / 404 page / asset caching) ────────────────────
+    // Form state + the last-saved baseline: `site` is a one-shot prop from the page
+    // loader, so after a successful PATCH the baseline advances to what the server
+    // accepted and the Save button re-disables until the form drifts again.
+    const [serving, setServing] = useState<ServingForm>(() => servingFormFrom(site))
+    const [servingBase, setServingBase] = useState<ServingForm>(() => servingFormFrom(site))
+    const [savingServing, setSavingServing] = useState(false)
+
+    const servingDirty =
+        serving.routing !== servingBase.routing ||
+        serving.notFound.trim() !== servingBase.notFound ||
+        serving.cacheAssets !== servingBase.cacheAssets
+
+    const saveServing = useCallback(async () => {
+        setSavingServing(true)
+        try {
+            // SPA routing serves index.html for every path, so a 404 page can never
+            // trigger — clear it in the same PATCH (the field is hidden in that mode).
+            const notFound = serving.routing === 'spa' ? '' : serving.notFound.trim()
+            const res = await fetch(`/api/sites/${encodeURIComponent(site.id)}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    routing: serving.routing,
+                    notFound: notFound || null,
+                    cacheAssets: serving.cacheAssets,
+                }),
+            })
+            if (!res.ok) {
+                const data = (await res.json().catch(() => ({}))) as { error?: unknown }
+                toast.show(servingError(data.error, res.status), { variant: 'error', title: 'Settings not saved' })
+                return
+            }
+            const updated = (await res.json()) as Site
+            const next = servingFormFrom(updated)
+            setServing(next)
+            setServingBase(next)
+            toast.show('Serving settings saved — redeploying with the new configuration.', { variant: 'success' })
+            // Pull a fresh reading so the status cards flip to "provisioning" promptly.
+            try {
+                setPayload(await fetchStatus())
+            } catch {
+                /* the poll loop will catch up */
+            }
+        } catch {
+            toast.show('Network error saving the settings. Check your connection and try again.', {
+                variant: 'error',
+                title: 'Settings not saved',
+            })
+        } finally {
+            setSavingServing(false)
+        }
+    }, [site.id, serving, fetchStatus, toast])
 
     // The type-to-confirm field; reads its value live into `confirmText`.
     const confirmInputRef = useTc<HTMLElement & { value: string }>(undefined, {
@@ -332,6 +429,45 @@ export function SiteDashboard({
                     <tc-usage-summary-panel ref={usageRef} title="Storage" loading={loading || undefined} />
                 </div>
             </tc-grid>
+
+            {/* Serving settings (routing / 404 page / asset caching). Saving PATCHes the
+                site; the server re-renders the nginxpilot fragment and re-syncs, so the
+                status cards flip to "provisioning" until the new config is live. */}
+            <tc-section-card title="Serving" icon="route">
+                <div className="quaykeeper-site-serving">
+                    <SelectField
+                        label="Routing"
+                        value={serving.routing}
+                        onValue={(value) => setServing((s) => ({ ...s, routing: value as SiteRouting }))}
+                        options={ROUTING_OPTIONS}
+                        help="How request paths map to files. Pick the single-page-app mode for client-side routers; clean URLs suit pre-rendered about.html-style pages."
+                    />
+                    <div hidden={serving.routing === 'spa' || undefined}>
+                        <TextField
+                            label="Custom 404 page (optional)"
+                            value={serving.notFound}
+                            onValue={(value) => setServing((s) => ({ ...s, notFound: value }))}
+                            placeholder="/404.html"
+                            help="A page in the build served for unknown paths instead of the plain nginx 404."
+                        />
+                    </div>
+                    <SwitchField
+                        label="Long-lived asset caching"
+                        checked={serving.cacheAssets}
+                        onChecked={(checked) => setServing((s) => ({ ...s, cacheAssets: checked }))}
+                        help="Serve fingerprinted assets (CSS, JS, fonts, images) with an immutable Cache-Control header. Use when the build hashes its asset filenames."
+                    />
+                    <div className="quaykeeper-site-actions">
+                        <tc-button
+                            variant="primary"
+                            onClick={saveServing}
+                            disabled={savingServing || !servingDirty || undefined}
+                        >
+                            {savingServing ? 'Saving…' : 'Save serving settings'}
+                        </tc-button>
+                    </div>
+                </div>
+            </tc-section-card>
 
             {/* Custom-domain A-record + Verify (§10). Only for custom-domain sites —
                 subdomains are covered by the wildcard server block and need no DNS work. */}

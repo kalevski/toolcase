@@ -11,10 +11,12 @@
 //
 // See notes/static-hosting-app-design.md §9, §16.
 
+import type { SiteRouting } from './types'
+
 // ── shapes ─────────────────────────────────────────────────────────────────────
 
 /** Why a source field was rejected (machine-readable; the service maps it to 400). */
-export type SourceRejection = 'empty' | 'too_long' | 'charset' | 'traversal'
+export type SourceRejection = 'empty' | 'too_long' | 'charset' | 'traversal' | 'enum'
 
 /** Result of a required-field check: the normalized value, or a typed rejection. */
 export type FieldCheck =
@@ -24,6 +26,11 @@ export type FieldCheck =
 /** Result of the optional subdir check: a normalized value (or `undefined` when omitted). */
 export type SubdirCheck =
     | { ok: true; value: string | undefined }
+    | { ok: false; reason: SourceRejection; message: string }
+
+/** Result of the optional routing check: a normalized mode (`undefined` = static default). */
+export type RoutingCheck =
+    | { ok: true; value: SiteRouting | undefined }
     | { ok: false; reason: SourceRejection; message: string }
 
 // ── limits + charsets ───────────────────────────────────────────────────────────
@@ -95,6 +102,55 @@ export function checkBranch(raw: string): FieldCheck {
             ok: false,
             reason: 'charset',
             message: 'branch must be a valid git ref (letters, digits, dots, underscores, hyphens, slashes)',
+        }
+    }
+    return { ok: true, value }
+}
+
+// ── static-serving settings (optional; mirror nginxpilot's per-site validation) ───
+
+const ROUTING_MODES: SiteRouting[] = ['static', 'spa', 'clean-urls']
+
+/**
+ * Validate an optional routing mode. `undefined`/`null`/empty/`static` all normalize
+ * to `undefined` (nginxpilot's default), so a default row stores NULL and the
+ * fragment stays byte-for-byte unchanged for plain static sites.
+ */
+export function checkRouting(raw: string | null | undefined): RoutingCheck {
+    if (raw == null) return { ok: true, value: undefined }
+    const value = raw.trim()
+    if (value === '' || value === 'static') return { ok: true, value: undefined }
+    if (!ROUTING_MODES.includes(value as SiteRouting)) {
+        return { ok: false, reason: 'enum', message: 'routing must be "static", "spa", or "clean-urls"' }
+    }
+    return { ok: true, value: value as SiteRouting }
+}
+
+/**
+ * Validate an optional custom 404 page path (e.g. `/404.html`). Must be an absolute,
+ * clean site path — it is emitted verbatim into the fragment's `not_found` and from
+ * there into an nginx `error_page` directive (§16). Empty/null normalize to "none".
+ * The spa-conflict rule (no 404 page when every path serves index.html) is cross-field,
+ * so it lives in the service, not here.
+ */
+export function checkNotFound(raw: string | null | undefined): SubdirCheck {
+    if (raw == null) return { ok: true, value: undefined }
+    const value = raw.trim()
+    if (value === '') return { ok: true, value: undefined }
+    if (value.length > MAX_REF_LENGTH) {
+        return { ok: false, reason: 'too_long', message: `404 page path must be at most ${MAX_REF_LENGTH} characters` }
+    }
+    if (!value.startsWith('/')) {
+        return { ok: false, reason: 'traversal', message: '404 page must be an absolute site path like "/404.html"' }
+    }
+    if (value.includes('..')) {
+        return { ok: false, reason: 'traversal', message: '404 page path must not contain ".."' }
+    }
+    if (!PATH_PATTERN.test(value.slice(1)) || value.includes('//')) {
+        return {
+            ok: false,
+            reason: 'charset',
+            message: '404 page must be a path of letters, digits, dots, underscores, hyphens, and slashes',
         }
     }
     return { ok: true, value }

@@ -196,6 +196,13 @@ export type SiteStatus = 'draft' | 'provisioning' | 'live' | 'failed' | 'suspend
 /** How a site's hostname is provided: an owner subdomain pool, or a custom domain (§10). */
 export type SiteHostKind = 'subdomain' | 'custom'
 
+/**
+ * How request paths map to files (nginxpilot's per-site `routing`): `static` serves
+ * files as-is (unknown paths 404), `spa` falls back to `/index.html` for client-side
+ * routers, `clean-urls` also tries `$uri.html` so `/about` serves `about.html`.
+ */
+export type SiteRouting = 'static' | 'spa' | 'clean-urls'
+
 /** A deployed (or in-progress) static site. Mirrors the `site` table (§12). */
 export interface Site {
     /** Short server-generated id; also the nginxpilot fragment filename suffix. */
@@ -213,6 +220,12 @@ export interface Site {
     branch: string
     /** Optional build output subdirectory (e.g. `dist/`). */
     subdir?: string
+    /** Path→file routing strategy; omitted = `static` (the nginxpilot default). */
+    routing?: SiteRouting
+    /** Site-relative custom 404 page (e.g. `/404.html`); static/clean-urls only. */
+    notFound?: string
+    /** Emit immutable Cache-Control for fingerprinted assets (css/js/fonts/images). */
+    cacheAssets?: boolean
     /** Fully-qualified hostname; globally unique (`alice.quaykeeper.dev` | `www.example.com`). */
     hostname: string
     hostKind: SiteHostKind

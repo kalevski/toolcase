@@ -181,6 +181,9 @@ const MIGRATIONS: Migration[] = [
         repo_name    TEXT NOT NULL,
         branch       TEXT NOT NULL,
         subdir       TEXT,
+        routing      TEXT,                    -- static (NULL) | spa | clean-urls (nginxpilot per-site routing)
+        not_found    TEXT,                    -- site-relative custom 404 page (/404.html); static/clean-urls only
+        cache_assets INTEGER NOT NULL DEFAULT 0, -- immutable Cache-Control for fingerprinted assets
         hostname     TEXT NOT NULL,           -- alice.quaykeeper.dev | www.example.com
         host_kind    TEXT NOT NULL,           -- subdomain | custom
         status       TEXT NOT NULL,           -- draft|provisioning|live|failed|suspended|over_quota

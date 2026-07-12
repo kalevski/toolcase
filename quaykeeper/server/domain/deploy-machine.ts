@@ -11,7 +11,7 @@
 //
 // See notes/static-hosting-app-design.md §4, §9, §11.
 
-import type { Site, SiteStatus } from './types'
+import type { Site, SiteRouting, SiteStatus } from './types'
 import type { FragmentOptions } from './nginxpilot-fragment'
 // Type-only imports of the nginxpilot client surface — erased at compile, so pulling
 // them in never executes that `server-only` module under vitest.
@@ -40,6 +40,13 @@ export interface DeployStore {
     updateLastRef(id: string, lastRef: string, at?: string): void
     updateBytes(id: string, bytes: number, at?: string): void
     updateSource(id: string, branch: string, subdir: string | undefined, at?: string): void
+    updateServing(
+        id: string,
+        routing: SiteRouting | undefined,
+        notFound: string | undefined,
+        cacheAssets: boolean,
+        at?: string,
+    ): void
     remove(id: string): void
 }
 
@@ -62,6 +69,12 @@ export interface SiteSourceChanges {
     branch?: string
     /** `null`/`undefined` clears the build subdir; absent leaves it unchanged. */
     subdir?: string | null
+    /** New routing mode (`undefined` inside the key = back to static); absent leaves it unchanged. */
+    routing?: SiteRouting
+    /** `null`/`undefined` clears the custom 404 page; absent leaves it unchanged. */
+    notFound?: string | null
+    /** New asset-caching toggle; absent leaves it unchanged. */
+    cacheAssets?: boolean
 }
 
 /** Poll-loop tuning for `track()`. */
@@ -207,23 +220,36 @@ export async function redeploy(deps: DeployDeps, site: Site): Promise<Site> {
 }
 
 /**
- * Update a site's source (§9 step 6): when the branch or subdir changes, persist the
- * new values, rewrite the fragment, reload, and force a sync (back to `provisioning`).
- * A no-op change short-circuits without touching nginxpilot.
+ * Update a site's source (§9 step 6): when the branch, subdir, or a static-serving
+ * setting (routing / 404 page / asset caching) changes, persist the new values, rewrite
+ * the fragment, reload, and force a sync (back to `provisioning`). A no-op change
+ * short-circuits without touching nginxpilot.
  */
 export async function update(deps: DeployDeps, site: Site, changes: SiteSourceChanges): Promise<Site> {
     const branch = changes.branch ?? site.branch
     const subdir = 'subdir' in changes ? (changes.subdir ?? undefined) : site.subdir
-    if (branch === site.branch && subdir === site.subdir) return site
+    const routing = 'routing' in changes ? changes.routing : site.routing
+    const notFound = 'notFound' in changes ? (changes.notFound ?? undefined) : site.notFound
+    const cacheAssets = changes.cacheAssets ?? site.cacheAssets ?? false
+    const sourceChanged = branch !== site.branch || subdir !== site.subdir
+    const servingChanged =
+        routing !== site.routing || notFound !== site.notFound || cacheAssets !== (site.cacheAssets ?? false)
+    if (!sourceChanged && !servingChanged) return site
 
     const at = deps.now()
-    const next: Site = { ...site, branch, subdir, status: 'provisioning', updatedAt: at }
-    deps.store.updateSource(site.id, branch, subdir, at)
+    const next: Site = { ...site, branch, subdir, routing, notFound, cacheAssets, status: 'provisioning', updatedAt: at }
+    if (sourceChanged) deps.store.updateSource(site.id, branch, subdir, at)
+    if (servingChanged) deps.store.updateServing(site.id, routing, notFound, cacheAssets, at)
     await deps.client.writeFragment(next, deps.fragmentOptions(next))
     await deps.client.reload()
     await deps.client.sync(next.hostname)
     deps.store.updateStatus(site.id, 'provisioning', at)
-    deps.audit('site.update', next, `branch=${branch}${subdir ? ` subdir=${subdir}` : ''}`)
+    deps.audit(
+        'site.update',
+        next,
+        `branch=${branch}${subdir ? ` subdir=${subdir}` : ''} routing=${routing ?? 'static'}` +
+            `${notFound ? ` not_found=${notFound}` : ''}${cacheAssets ? ' cache_assets' : ''}`,
+    )
     return next
 }
 

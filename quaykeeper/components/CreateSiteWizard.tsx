@@ -40,12 +40,24 @@ type HostnameSpec =
     | { kind: 'subdomain'; label: string; baseDomain: string }
     | { kind: 'custom'; domain: string }
 
+type SiteRouting = 'static' | 'spa' | 'clean-urls'
+
 interface CreateSiteRequest {
     repoOwner: string
     repoName: string
     branch: string
     subdir?: string | null
     hostname: HostnameSpec
+    routing?: SiteRouting
+    notFound?: string
+    cacheAssets?: boolean
+}
+
+/** Copy for the routing modes, shared by the step-1 select and the review panel. */
+const ROUTING_LABEL: Record<SiteRouting, string> = {
+    static: 'Static files (404 for unknown paths)',
+    spa: 'Single-page app (fallback to index.html)',
+    'clean-urls': 'Clean URLs (/about serves about.html)',
 }
 
 /** The created `Site` row fields the success panel surfaces (POST /api/sites → 201). */
@@ -86,6 +98,8 @@ const ERROR_COPY: Record<string, string> = {
     invalid_traversal: 'The build subdirectory must be a relative path without "..".',
     invalid_too_long: 'One of the fields is too long.',
     invalid_request: 'The request was incomplete. Check your selections and try again.',
+    invalid_enum: 'Pick one of the offered routing modes.',
+    routing_conflict: 'A custom 404 page can’t be combined with single-page-app routing — the SPA fallback serves index.html for every path.',
     github_error: "Couldn't reach GitHub. Try again in a moment.",
     nginxpilot_error: 'The deploy engine is unavailable right now. Try again shortly.',
     nginx_error: 'The serving layer is unavailable right now. Try again shortly.',
@@ -110,6 +124,11 @@ export function CreateSiteWizard() {
     const [branchesLoading, setBranchesLoading] = useState(false)
     const [branch, setBranch] = useState('')
     const [subdir, setSubdir] = useState('')
+
+    // ── step 1: serving settings (routing / 404 page / asset caching) ──
+    const [routing, setRouting] = useState<SiteRouting>('static')
+    const [notFound, setNotFound] = useState('')
+    const [cacheAssets, setCacheAssets] = useState(false)
 
     // ── step 3: hostname ──
     const [baseDomains, setBaseDomains] = useState<BaseDomain[]>([])
@@ -290,6 +309,18 @@ export function CreateSiteWizard() {
         input: (event: Event) => setSubdir(targetValue(event)),
     })
 
+    const routingRef = useTc<HTMLElement>(useMemo(() => ({ value: routing }), [routing]), {
+        'tc-change': (event: Event) => setRouting(detailValue<SiteRouting>(event)),
+    })
+
+    const notFoundRef = useTc<HTMLElement>(undefined, {
+        input: (event: Event) => setNotFound(targetValue(event)),
+    })
+
+    const cacheAssetsRef = useTc<HTMLElement>(useMemo(() => ({ checked: cacheAssets }), [cacheAssets]), {
+        'tc-change': (event: Event) => setCacheAssets(detailValue<boolean>(event)),
+    })
+
     const hostKindRef = useTc<HTMLElement>(
         useMemo(() => ({ options: hostKindOptions, value: hostKind }), [hostKindOptions, hostKind]),
         { 'tc-change': (event: Event) => setHostKind(detailValue<string>(event) as 'subdomain' | 'custom') },
@@ -334,6 +365,11 @@ export function CreateSiteWizard() {
             branch,
             subdir: subdir.trim() || undefined,
             hostname,
+            routing: routing !== 'static' ? routing : undefined,
+            // SPA routing serves index.html for every path — a 404 page can never
+            // trigger there, so it's dropped (the field is hidden in that mode too).
+            notFound: routing !== 'spa' && notFound.trim() ? notFound.trim() : undefined,
+            cacheAssets: cacheAssets || undefined,
         }
 
         setSubmitting(true)
@@ -363,6 +399,9 @@ export function CreateSiteWizard() {
         setSelectedRepo(null)
         setBranch('')
         setSubdir('')
+        setRouting('static')
+        setNotFound('')
+        setCacheAssets(false)
         setLabel('')
         setCustomDomain('')
         setHostKind(baseDomains.length > 0 ? 'subdomain' : 'custom')
@@ -427,6 +466,27 @@ export function CreateSiteWizard() {
                                 placeholder="dist/"
                                 help="The folder inside the branch that holds index.html. Leave blank if the site is at the repo root. Quaykeeper only publishes once an index.html exists (the require_file gate)."
                             />
+                            <tc-select
+                                ref={routingRef}
+                                label="Routing"
+                                help="How request paths map to files. Pick the single-page-app mode for client-side routers (React, Vue, Angular); clean URLs suit pre-rendered sites exporting about.html-style pages."
+                            >
+                                <option value="static">{ROUTING_LABEL.static}</option>
+                                <option value="spa">{ROUTING_LABEL.spa}</option>
+                                <option value="clean-urls">{ROUTING_LABEL['clean-urls']}</option>
+                            </tc-select>
+                            <tc-input
+                                ref={notFoundRef}
+                                label="Custom 404 page (optional)"
+                                placeholder="/404.html"
+                                help="A page in the build served for unknown paths instead of the plain nginx 404."
+                                hidden={routing === 'spa' || undefined}
+                            />
+                            <tc-switch
+                                ref={cacheAssetsRef}
+                                label="Long-lived asset caching"
+                                help="Serve fingerprinted assets (CSS, JS, fonts, images) with an immutable Cache-Control header. Use when the build hashes its asset filenames."
+                            />
                         </>
                     )}
                 </div>
@@ -480,6 +540,12 @@ export function CreateSiteWizard() {
                         <dd>{branch || '—'}</dd>
                         <dt>Build directory</dt>
                         <dd>{subdir.trim() || '(repository root)'}</dd>
+                        <dt>Routing</dt>
+                        <dd>{ROUTING_LABEL[routing]}</dd>
+                        <dt>404 page</dt>
+                        <dd>{routing !== 'spa' && notFound.trim() ? notFound.trim() : '(default)'}</dd>
+                        <dt>Asset caching</dt>
+                        <dd>{cacheAssets ? 'Immutable Cache-Control' : 'Off'}</dd>
                         <dt>Hostname</dt>
                         <dd>{previewHost}</dd>
                     </dl>

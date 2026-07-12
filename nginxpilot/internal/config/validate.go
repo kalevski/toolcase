@@ -539,6 +539,23 @@ func validateSite(site *Site) error {
 		return err
 	}
 
+	switch site.RoutingMode() {
+	case RoutingStatic, RoutingSPA, RoutingCleanURLs:
+	default:
+		return fmt.Errorf("routing %q: must be static | spa | clean-urls", site.Routing)
+	}
+	if site.NotFound != "" {
+		if site.RoutingMode() == RoutingSPA {
+			return fmt.Errorf("not_found cannot be combined with routing: spa (every path serves index.html)")
+		}
+		if !strings.HasPrefix(site.NotFound, "/") {
+			return fmt.Errorf("not_found %q must be an absolute site path like /404.html", site.NotFound)
+		}
+		if cleaned := path.Clean(site.NotFound); cleaned != site.NotFound || strings.Contains(site.NotFound, "..") {
+			return fmt.Errorf("not_found %q must be a clean path without ..", site.NotFound)
+		}
+	}
+
 	if site.Source.Subdir != "" {
 		sub := path.Clean(site.Source.Subdir)
 		if path.IsAbs(sub) || sub == ".." || strings.HasPrefix(sub, "../") {
