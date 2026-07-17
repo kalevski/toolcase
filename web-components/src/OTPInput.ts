@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { msg } from './messages'
 import { fieldMessageHtml } from './internal/field-message'
 import {
     requiredMark,
@@ -228,8 +229,7 @@ export class OTPInput extends HTMLElement {
         reflectFieldValidity(this._internals, {
             invalid,
             valueMissing: requiredEmpty && !error,
-            message:
-                error || (requiredEmpty ? 'This field is required.' : 'Please enter a valid code.'),
+            message: error || (requiredEmpty ? msg('fieldRequired') : msg('invalidCode')),
             anchor: this.querySelector<HTMLInputElement>('.tc-otp-input__cell') ?? undefined,
         })
     }
@@ -499,7 +499,7 @@ export class OTPInput extends HTMLElement {
             state,
             error,
             hint: this.help,
-            invalidText: 'Please enter a valid code.',
+            invalidText: msg('invalidCode'),
             validText: 'Looks good!',
         })
 

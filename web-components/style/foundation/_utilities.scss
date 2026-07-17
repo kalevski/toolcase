@@ -284,3 +284,78 @@
 body.modal-open {
     overflow: hidden;
 }
+
+// ── Responsive column hiding (tc-table / tc-advanced-table hideBelow) ────────
+// hide-BELOW semantics: the column disappears under the named breakpoint and
+// reappears at it, complementing the mobile-first d-*-none ladder above.
+
+@media (max-width: 575.98px) {
+    .tc-col-hide-sm {
+        display: none !important;
+    }
+}
+@media (max-width: 767.98px) {
+    .tc-col-hide-md {
+        display: none !important;
+    }
+}
+@media (max-width: 991.98px) {
+    .tc-col-hide-lg {
+        display: none !important;
+    }
+}
+
+// ── Scroll-edge shadows (horizontal overflow affordance) ─────────────────────
+// A shell wrapping a horizontal scroller; JS (internal/scroll-edges.ts) toggles
+// the --start/--end modifiers from the scroll position. The gradients derive
+// from --tc-text via color-mix so they read on both light and dark themes.
+
+.tc-scroll-shadow {
+    position: relative;
+
+    &::before,
+    &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 16px;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity var(--tc-transition-fast, 0.15s ease);
+        z-index: 2;
+    }
+
+    &::before {
+        left: 0;
+        background: linear-gradient(
+            to right,
+            color-mix(in srgb, var(--tc-text) 16%, transparent),
+            transparent
+        );
+    }
+
+    &::after {
+        right: 0;
+        background: linear-gradient(
+            to left,
+            color-mix(in srgb, var(--tc-text) 16%, transparent),
+            transparent
+        );
+    }
+}
+
+.tc-scroll-shadow--start::before {
+    opacity: 1;
+}
+
+.tc-scroll-shadow--end::after {
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-scroll-shadow::before,
+    .tc-scroll-shadow::after {
+        transition: none;
+    }
+}

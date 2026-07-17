@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { msg } from './messages'
 import { fieldMessageHtml } from './internal/field-message'
 import {
     requiredMark,
@@ -130,9 +131,7 @@ export class TimePicker extends HTMLElement {
         reflectFieldValidity(this._internals, {
             invalid,
             valueMissing: requiredEmpty && !error,
-            message:
-                error ||
-                (requiredEmpty ? 'This field is required.' : 'Please choose a valid time.'),
+            message: error || (requiredEmpty ? msg('fieldRequired') : msg('invalidTime')),
             anchor: this._trigger() ?? undefined,
         })
     }
@@ -684,7 +683,7 @@ export class TimePicker extends HTMLElement {
             state,
             error,
             hint: this.help,
-            invalidText: 'Please choose a valid time.',
+            invalidText: msg('invalidTime'),
             validText: 'Looks good!',
         })
 

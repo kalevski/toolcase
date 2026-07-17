@@ -7,24 +7,24 @@
 // the table chrome itself never uses colour.
 
 tc-table {
-    --bs-table-bg:                 var(--tc-surface);
-    --bs-table-border:             1px solid var(--tc-border);
-    --bs-table-head-bg:            var(--tc-surface-muted);
-    --bs-table-head-border:        1px solid var(--tc-border-strong);
-    --bs-table-row-hairline:       1px solid var(--tc-slate-100, #f1f5f9);
-    --bs-table-th-color:           var(--tc-text-muted);
-    --bs-table-th-font-size:       0.6875rem;
-    --bs-table-td-color:           var(--tc-text);
-    --bs-table-td-font-size:       0.875rem;
-    --bs-table-cell-padding-y:     0.625rem;
-    --bs-table-cell-padding-x:     0.75rem;
-    --bs-table-cell-padding-y-sm:  0.375rem;
-    --bs-table-cell-padding-x-sm:  0.5rem;
-    --bs-table-stripe-bg:          var(--tc-surface-hover);
-    --bs-table-row-hover-bg:       var(--tc-surface-hover);
-    --bs-table-row-active-bg:      var(--tc-surface-muted);
-    --bs-table-empty-color:        var(--tc-text-faint);
-    --bs-table-row-min-height:     44px;
+    --bs-table-bg: var(--tc-surface);
+    --bs-table-border: 1px solid var(--tc-border);
+    --bs-table-head-bg: var(--tc-surface-muted);
+    --bs-table-head-border: 1px solid var(--tc-border-strong);
+    --bs-table-row-hairline: 1px solid var(--tc-slate-100, #f1f5f9);
+    --bs-table-th-color: var(--tc-text-muted);
+    --bs-table-th-font-size: 0.6875rem;
+    --bs-table-td-color: var(--tc-text);
+    --bs-table-td-font-size: 0.875rem;
+    --bs-table-cell-padding-y: 0.625rem;
+    --bs-table-cell-padding-x: 0.75rem;
+    --bs-table-cell-padding-y-sm: 0.375rem;
+    --bs-table-cell-padding-x-sm: 0.5rem;
+    --bs-table-stripe-bg: var(--tc-surface-hover);
+    --bs-table-row-hover-bg: var(--tc-surface-hover);
+    --bs-table-row-active-bg: var(--tc-surface-muted);
+    --bs-table-empty-color: var(--tc-text-faint);
+    --bs-table-row-min-height: var(--tc-min-touch-target, 44px);
 }
 
 // ── Generic Bootstrap-compatible table ──────────────────────────────────────────
@@ -63,6 +63,12 @@ tc-table {
 .table.table-bordered > * > tr > th,
 .table.table-bordered > * > tr > td {
     border: 1px solid var(--tc-border);
+}
+
+// Shell around the scroller — hosts the tc-scroll-shadow edge overlays so they
+// stay pinned while the wrap beneath scrolls.
+.tc-table-shell {
+    width: 100%;
 }
 
 .tc-table-wrap {
@@ -112,8 +118,12 @@ tc-table {
     vertical-align: middle;
 }
 
-.tc-table-th--center { text-align: center; }
-.tc-table-th--right  { text-align: right; }
+.tc-table-th--center {
+    text-align: center;
+}
+.tc-table-th--right {
+    text-align: right;
+}
 
 .tc-table-th-label {
     display: inline;
@@ -146,8 +156,12 @@ tc-table {
     }
 }
 
-.tc-table-th--center .tc-table-sort { justify-content: center; }
-.tc-table-th--right  .tc-table-sort { justify-content: flex-end; }
+.tc-table-th--center .tc-table-sort {
+    justify-content: center;
+}
+.tc-table-th--right .tc-table-sort {
+    justify-content: flex-end;
+}
 
 .tc-table-sort-icon {
     width: 0.875rem;
@@ -171,8 +185,12 @@ tc-table {
     vertical-align: middle;
 }
 
-.tc-table-td--center { text-align: center; }
-.tc-table-td--right  { text-align: right; }
+.tc-table-td--center {
+    text-align: center;
+}
+.tc-table-td--right {
+    text-align: right;
+}
 
 .tc-table-row:last-child > .tc-table-td {
     border-bottom: none;
@@ -249,6 +267,127 @@ tc-table {
     // padding replaces the cell's old 2.5rem block padding.
     tc-empty-state {
         --bs-empty-state-padding-y: 2.5rem;
+    }
+}
+
+// ── Sticky first / last column ────────────────────────────────────────────────
+// Identity (first) and action (last) columns pin while the body scrolls
+// horizontally. Cells need their own paint: they inherit the row background so
+// striped/hover wells carry into the pinned cell.
+
+.tc-table-wrap--sticky-first {
+    .tc-table-th:first-child,
+    .tc-table-td:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 1;
+        background: inherit;
+        box-shadow: 1px 0 0 var(--tc-border-strong);
+    }
+
+    .tc-table-th:first-child {
+        background: var(--bs-table-head-bg);
+    }
+}
+
+.tc-table-wrap--sticky-last {
+    .tc-table-th:last-child,
+    .tc-table-td:last-child {
+        position: sticky;
+        right: 0;
+        z-index: 1;
+        background: inherit;
+        box-shadow: -1px 0 0 var(--tc-border-strong);
+    }
+
+    .tc-table-th:last-child {
+        background: var(--bs-table-head-bg);
+    }
+}
+
+// Sticky rows paint over inherit-transparent cells; give the pinned body cells
+// the surface fill when the row itself has no explicit background.
+.tc-table-wrap--sticky-first .tc-table-row,
+.tc-table-wrap--sticky-last .tc-table-row {
+    background: var(--bs-table-bg);
+}
+
+// Corner cell when the sticky header is also active.
+.tc-table-wrap--sticky.tc-table-wrap--sticky-first .tc-table-head .tc-table-th:first-child,
+.tc-table-wrap--sticky.tc-table-wrap--sticky-last .tc-table-head .tc-table-th:last-child {
+    z-index: calc(var(--tc-z-sticky, 1020) + 1);
+}
+
+// ── collapse="card" — stacked label/value rows under a breakpoint ─────────────
+// The standard mobile answer for admin tables: the header row hides and every
+// row becomes a bordered card of label/value lines, labels sourced from each
+// cell's data-label (the column header).
+
+@mixin tc-table-card-collapse {
+    .tc-table-head {
+        display: none;
+    }
+
+    .tc-table,
+    .tc-table-body {
+        display: block;
+    }
+
+    .tc-table-row {
+        display: block;
+        padding: 0.5rem 0.75rem;
+        border-bottom: 1px solid var(--tc-border);
+
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+
+    .tc-table-td {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0.375rem 0;
+        border-bottom: none;
+        width: auto !important; // neutralise per-column inline widths
+
+        &::before {
+            content: attr(data-label);
+            flex-shrink: 0;
+            font-family: var(--tc-font-mono);
+            font-size: var(--bs-table-th-font-size);
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            text-align: left;
+            color: var(--bs-table-th-color);
+        }
+    }
+
+    // The empty-state / skeleton cells are not label/value pairs.
+    .tc-table-empty {
+        justify-content: center;
+
+        &::before {
+            display: none;
+        }
+    }
+}
+
+@media (max-width: 575.98px) {
+    .tc-table-wrap--card-sm {
+        @include tc-table-card-collapse;
+    }
+}
+@media (max-width: 767.98px) {
+    .tc-table-wrap--card-md {
+        @include tc-table-card-collapse;
+    }
+}
+@media (max-width: 991.98px) {
+    .tc-table-wrap--card-lg {
+        @include tc-table-card-collapse;
     }
 }
 

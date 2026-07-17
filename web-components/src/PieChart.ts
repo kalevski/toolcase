@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { msg } from './messages'
 import { fixedOriginOffset } from './internal/containingBlock'
 const TAG_NAME = 'tc-pie-chart'
 
@@ -200,7 +201,7 @@ export class PieChart extends HTMLElement {
 
         const data = this._data
         if (!data.length) {
-            this.innerHTML = `<div class="tc-pie-chart-inner">${headerHtml}<div class="tc-pie-chart-empty">No data</div></div>`
+            this.innerHTML = `<div class="tc-pie-chart-inner">${headerHtml}<div class="tc-pie-chart-empty">${esc(msg('noData'))}</div></div>`
             this._geo = []
             return
         }
@@ -345,7 +346,7 @@ export class PieChart extends HTMLElement {
             `<li class="tc-pie-chart-legend-row"><div class="tc-pie-chart-skeleton tc-pie-chart-skeleton--legend"></div></li>` +
             `</ul>` +
             `</div>` +
-            `<span class="visually-hidden">Loading…</span>` +
+            `<span class="visually-hidden">${esc(msg('loading'))}</span>` +
             `</div>`
     }
 

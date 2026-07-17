@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { msg } from './messages'
 import { fixedOriginOffset } from './internal/containingBlock'
 const TAG_NAME = 'tc-gantt-chart'
 
@@ -289,7 +290,7 @@ export class GanttChart extends HTMLElement {
             `<div class="tc-gantt-chart">` +
             headHtml +
             `<div class="tc-gantt-chart-skeleton-body">${rows}</div>` +
-            `<span class="visually-hidden">Loading…</span>` +
+            `<span class="visually-hidden">${esc(msg('loading'))}</span>` +
             `</div>`
     }
 

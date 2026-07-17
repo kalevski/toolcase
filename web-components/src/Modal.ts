@@ -1,6 +1,8 @@
 import { Modal as BsModal } from './internal/Modal'
 import { BsOverlay, escapeHtml, type OverlayPlugin } from './internal/bs-overlay'
 import { closeIcon } from './icons'
+import { msg } from './messages'
+import { setHostClass } from './internal/host-class'
 
 const TAG_NAME = 'tc-modal'
 
@@ -9,17 +11,67 @@ const TAG_NAME = 'tc-modal'
  * Modal specifics: the `.modal` dialog markup with size / centered / scrollable /
  * fullscreen options, a `footer` slot, the static-backdrop option, and the
  * `.bs.modal` event namespace.
+ *
+ * `lazy`: the captured body/footer content only enters the DOM on first open —
+ * pages keeping several hidden modals mounted stop leaking their content into
+ * selectors/ids/queries. Independent of `lazy`, a closed modal is `inert`, so
+ * its content never sits in the tab order or accessibility tree while hidden.
  */
 export class Modal extends BsOverlay {
     private _bodyNodes: Node[] = []
     private _footerNodes: Node[] = []
+    // With `lazy`, flips true on first show; content stays mounted afterwards
+    // so open → close → open keeps form state.
+    private _contentMounted = false
 
     static get observedAttributes(): string[] {
-        return ['open', 'title', 'size', 'centered', 'scrollable', 'static-backdrop', 'fullscreen']
+        return [
+            'open',
+            'title',
+            'size',
+            'centered',
+            'scrollable',
+            'static-backdrop',
+            'fullscreen',
+            'lazy',
+        ]
     }
 
     protected get eventNs(): string {
         return 'modal'
+    }
+
+    connectedCallback(): void {
+        super.connectedCallback()
+        this.addEventListener('show.bs.modal', this._onShowMount)
+        this.addEventListener('hidden.bs.modal', this._onHiddenInert)
+        if (!this.open) this.setAttribute('inert', '')
+    }
+
+    disconnectedCallback(): void {
+        super.disconnectedCallback()
+        this.removeEventListener('show.bs.modal', this._onShowMount)
+        this.removeEventListener('hidden.bs.modal', this._onHiddenInert)
+    }
+
+    private _onShowMount = (): void => {
+        this.removeAttribute('inert')
+        if (this.lazy && !this._contentMounted) {
+            this._contentMounted = true
+            this._mountContent()
+        }
+    }
+
+    private _onHiddenInert = (): void => {
+        if (!this.open) this.setAttribute('inert', '')
+    }
+
+    get lazy(): boolean {
+        return this.hasAttribute('lazy')
+    }
+    set lazy(v: boolean) {
+        if (v) this.setAttribute('lazy', '')
+        else this.removeAttribute('lazy')
     }
 
     get title(): string {
@@ -99,7 +151,7 @@ export class Modal extends BsOverlay {
             dialogClasses.push(`modal-fullscreen-${fs}-down`)
         }
 
-        this.className = 'modal fade'
+        setHostClass(this, 'modal fade')
         this.setAttribute('tabindex', '-1')
         if (this.staticBackdrop) {
             this.setAttribute('data-bs-backdrop', 'static')
@@ -116,20 +168,23 @@ export class Modal extends BsOverlay {
             `<div class="modal-content">` +
             `<div class="modal-header">` +
             `<h5 class="modal-title">${titleText}</h5>` +
-            `<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">${closeIcon}</button>` +
+            `<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="${escapeHtml(msg('close'))}">${closeIcon}</button>` +
             `</div>` +
             `<div class="modal-body"></div>` +
             footerHtml +
             `</div>` +
             `</div>`
 
+        // Lazy + never opened: keep the captured content out of the DOM until
+        // the first show.bs.modal (see _onShowMount).
+        if (!this.lazy || this._contentMounted) this._mountContent()
+    }
+
+    private _mountContent(): void {
         const body = this.querySelector('.modal-body')
         if (body) this._bodyNodes.forEach((n) => body.appendChild(n))
-
-        if (hasFooter) {
-            const footer = this.querySelector('.modal-footer')
-            if (footer) this._footerNodes.forEach((n) => footer.appendChild(n))
-        }
+        const footer = this.querySelector('.modal-footer')
+        if (footer) this._footerNodes.forEach((n) => footer.appendChild(n))
     }
 }
 

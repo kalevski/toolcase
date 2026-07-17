@@ -29,6 +29,9 @@ export class DashboardLayout extends HTMLElement {
     private _sidebarPanelNodes: Node[] = []
     private _contentNodes: Node[] = []
     private _keydownHandler: ((e: KeyboardEvent) => void) | null = null
+    // ≥lg the sidebar is a pinned rail (never inert); below it is a drawer.
+    private _desktopMq: MediaQueryList | null = null
+    private _onMqChange = (): void => this._applyOpenClass()
 
     onToggleSidebar: ((open: boolean) => void) | null = null
 
@@ -79,6 +82,14 @@ export class DashboardLayout extends HTMLElement {
 
     private _handleToggle(): void {
         const newOpen = !this.sidebarOpen
+        // Closing while focus sits inside the drawer: hand focus back to the
+        // toggle before the drawer goes inert, or the browser drops it on body.
+        if (!newOpen) {
+            const sidebar = this.querySelector('.tc-dashboard-layout__sidebar')
+            if (sidebar && sidebar.contains(document.activeElement)) {
+                this.querySelector<HTMLButtonElement>('.tc-dashboard-layout__toggle')?.focus()
+            }
+        }
         this.sidebarOpen = newOpen
         this.dispatchEvent(
             new CustomEvent('tc-toggle-sidebar', {
@@ -87,7 +98,19 @@ export class DashboardLayout extends HTMLElement {
                 detail: { open: newOpen },
             }),
         )
+        // Discrete open/close events alongside the toggle event, so consumers
+        // can bind one direction without reading detail.open.
+        this.dispatchEvent(
+            new CustomEvent(newOpen ? 'tc-sidebar-open' : 'tc-sidebar-close', {
+                bubbles: true,
+                composed: true,
+            }),
+        )
         if (typeof this.onToggleSidebar === 'function') this.onToggleSidebar(newOpen)
+    }
+
+    private _isDesktop(): boolean {
+        return this._desktopMq?.matches ?? false
     }
 
     private _applyOpenClass(): void {
@@ -95,6 +118,7 @@ export class DashboardLayout extends HTMLElement {
         const wrapper = this.querySelector('.tc-dashboard-layout__wrapper')
         const toggle = this.querySelector<HTMLButtonElement>('.tc-dashboard-layout__toggle')
         const overlay = this.querySelector('.tc-dashboard-layout__overlay')
+        const sidebar = this.querySelector<HTMLElement>('.tc-dashboard-layout__sidebar')
         if (wrapper) {
             wrapper.classList.toggle('tc-dashboard-layout__wrapper--open', open)
         }
@@ -103,6 +127,15 @@ export class DashboardLayout extends HTMLElement {
         }
         if (overlay) {
             overlay.setAttribute('aria-hidden', open ? 'false' : 'true')
+        }
+        if (sidebar) {
+            // A closed mobile drawer leaves the tab order and the a11y tree —
+            // translateX(-100%) alone keeps its buttons focusable/clickable.
+            // On desktop the rail is pinned open, so it is never inert.
+            const hidden = !open && !this._isDesktop()
+            sidebar.toggleAttribute('inert', hidden)
+            if (hidden) sidebar.setAttribute('aria-hidden', 'true')
+            else sidebar.removeAttribute('aria-hidden')
         }
     }
 
@@ -128,10 +161,18 @@ export class DashboardLayout extends HTMLElement {
                 this._handleToggle()
             } else if (e.key === 'Escape' && this.sidebarOpen) {
                 this._handleToggle()
+            } else if (e.key === 'Tab' && this.sidebarOpen && !this._isDesktop()) {
+                this._trapFocus(e)
             }
         }
         document.addEventListener('keydown', this._keydownHandler)
         this.addEventListener('click', this._onClick)
+        if (typeof window.matchMedia === 'function' && !this._desktopMq) {
+            this._desktopMq = window.matchMedia('(min-width: 992px)')
+        }
+        // Crossing the lg boundary flips the drawer/rail semantics — re-derive inert.
+        this._desktopMq?.addEventListener('change', this._onMqChange)
+        this._applyOpenClass()
     }
 
     private _detachHandlers(): void {
@@ -140,6 +181,36 @@ export class DashboardLayout extends HTMLElement {
             this._keydownHandler = null
         }
         this.removeEventListener('click', this._onClick)
+        this._desktopMq?.removeEventListener('change', this._onMqChange)
+    }
+
+    // While the mobile drawer is open it is a modal surface: Tab cycles within
+    // it instead of escaping into the dimmed content behind the backdrop.
+    private _trapFocus(e: KeyboardEvent): void {
+        const sidebar = this.querySelector<HTMLElement>('.tc-dashboard-layout__sidebar')
+        if (!sidebar) return
+        const focusables = Array.from(
+            sidebar.querySelectorAll<HTMLElement>(
+                'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), ' +
+                    'textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+            ),
+        ).filter((el) => el.offsetParent !== null || el === document.activeElement)
+        if (focusables.length === 0) return
+        const first = focusables[0]
+        const last = focusables[focusables.length - 1]
+        const active = document.activeElement
+        if (!sidebar.contains(active)) {
+            e.preventDefault()
+            first.focus()
+            return
+        }
+        if (e.shiftKey && active === first) {
+            e.preventDefault()
+            last.focus()
+        } else if (!e.shiftKey && active === last) {
+            e.preventDefault()
+            first.focus()
+        }
     }
 
     private _onClick = (e: MouseEvent): void => {

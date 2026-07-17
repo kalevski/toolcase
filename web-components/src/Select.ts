@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { msg } from './messages'
 import { fieldMessageHtml } from './internal/field-message'
 import { requiredMark, reflectFieldValidity, dispatchFieldChange } from './internal/form-field'
 const TAG_NAME = 'tc-select'
@@ -253,9 +254,7 @@ export class Select extends HTMLElement {
         reflectFieldValidity(this._internals, {
             invalid,
             valueMissing: requiredEmpty && !error,
-            message:
-                error ||
-                (requiredEmpty ? 'Please make a selection.' : 'Please provide a valid selection.'),
+            message: error || (requiredEmpty ? msg('selectionRequired') : msg('selectionInvalid')),
             anchor: sel ?? undefined,
         })
     }
@@ -338,7 +337,7 @@ export class Select extends HTMLElement {
             state,
             error,
             hint: this.help,
-            invalidText: 'Please provide a valid selection.',
+            invalidText: msg('selectionInvalid'),
             validText: 'Looks good!',
         })
         const describe = this.help || state ? ` aria-describedby="${this._helpId}"` : ''

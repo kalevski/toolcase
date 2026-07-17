@@ -6,6 +6,7 @@ import {
     reflectFieldValidity,
     dispatchFieldChange,
 } from './internal/form-field'
+import { msg } from './messages'
 const TAG_NAME = 'tc-slider'
 
 let _idCounter = 0
@@ -275,6 +276,10 @@ export class Slider extends HTMLElement {
             thumb.style.left = `${pct}%`
             thumb.setAttribute('aria-valuenow', String(value))
             thumb.setAttribute('aria-valuetext', valueText)
+            // Near the extremes the value chip flips inward instead of
+            // overflowing the container edge (see _slider.scss edge rules).
+            thumb.classList.toggle('tc-slider-thumb--edge-start', pct < 8)
+            thumb.classList.toggle('tc-slider-thumb--edge-end', pct > 92)
             const tooltip = thumb.querySelector<HTMLElement>('.tc-slider-tooltip')
             if (tooltip) tooltip.textContent = valueText
         }
@@ -294,9 +299,7 @@ export class Slider extends HTMLElement {
         reflectFieldValidity(this._internals, {
             invalid,
             valueMissing: requiredEmpty && !error,
-            message:
-                error ||
-                (requiredEmpty ? 'This field is required.' : 'Please choose a valid value.'),
+            message: error || (requiredEmpty ? msg('fieldRequired') : msg('invalidChoice')),
             anchor: this.querySelector<HTMLElement>('.tc-slider-thumb') ?? undefined,
         })
     }
@@ -460,8 +463,10 @@ export class Slider extends HTMLElement {
             return `<div class="tc-slider-ticks" aria-hidden="true">${marks.join('')}</div>`
         })()
 
+        const edgeClass =
+            pct < 8 ? ' tc-slider-thumb--edge-start' : pct > 92 ? ' tc-slider-thumb--edge-end' : ''
         const thumbAttrs = [
-            `class="tc-slider-thumb"`,
+            `class="tc-slider-thumb${edgeClass}"`,
             `role="slider"`,
             `tabindex="${disabled ? -1 : 0}"`,
             `aria-valuemin="${esc(String(min))}"`,
@@ -483,8 +488,7 @@ export class Slider extends HTMLElement {
             state,
             error,
             hint: this.help,
-            invalidText: 'Please choose a valid value.',
-            validText: 'Looks good!',
+            invalidText: msg('invalidChoice'),
         })
 
         this.innerHTML = [

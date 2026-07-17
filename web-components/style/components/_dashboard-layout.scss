@@ -111,8 +111,8 @@ tc-dashboard-layout {
 
 @media (pointer: coarse) {
     .tc-dashboard-layout__toggle {
-        min-width: 44px;
-        min-height: 44px;
+        min-width: var(--tc-min-touch-target, 44px);
+        min-height: var(--tc-min-touch-target, 44px);
     }
 }
 
@@ -154,7 +154,13 @@ tc-dashboard-layout {
     border-radius: 0;
     overflow: hidden;
     transform: translateX(-100%);
-    transition: transform var(--bs-dashboard-layout-transition);
+    // visibility rides the same transition: it stays visible while sliding out
+    // and flips to hidden at the end, removing the closed drawer from paint
+    // and (with the JS-managed inert) from the tab order / a11y tree.
+    visibility: hidden;
+    transition:
+        transform var(--bs-dashboard-layout-transition),
+        visibility var(--bs-dashboard-layout-transition);
     will-change: transform;
 }
 
@@ -215,6 +221,7 @@ tc-dashboard-layout {
 .tc-dashboard-layout__wrapper--open {
     .tc-dashboard-layout__sidebar {
         transform: translateX(0);
+        visibility: visible;
         box-shadow: 0 0 1.5rem rgba(0, 0, 0, 0.25);
     }
 
@@ -255,6 +262,7 @@ tc-dashboard-layout {
         grid-row: 1 / 3;
         max-width: none;
         transform: none;
+        visibility: visible;
         box-shadow: none;
         transition: none;
         z-index: auto;

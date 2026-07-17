@@ -97,7 +97,9 @@ const attrsFor = (localName) => {
     } catch {
         return []
     }
-    const decls = [...src.matchAll(/(?:export\s+)?(?:abstract\s+)?class\s+(\w+)/g)]
+    // Anchored to line start so the word "class" inside comments/strings can't
+    // register as a declaration and truncate the real class's body slice.
+    const decls = [...src.matchAll(/^(?:export\s+)?(?:abstract\s+)?class\s+(\w+)/gm)]
     const i = decls.findIndex(d => d[1] === entry.realName)
     if (i === -1) return []
     const body = src.slice(decls[i].index, i + 1 < decls.length ? decls[i + 1].index : undefined)

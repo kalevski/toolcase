@@ -1,5 +1,7 @@
 import { esc } from './internal/esc'
 import { icon } from './icons'
+import { msg } from './messages'
+import { wireScrollEdges } from './internal/scroll-edges'
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-static'
 
 const TAG_NAME = 'tc-table'
@@ -11,12 +13,21 @@ const chevronsUpDownIcon = icon(ChevronsUpDown, 'tc-table-sort-icon')
 export type TableAlign = 'left' | 'center' | 'right'
 const ALIGNS: TableAlign[] = ['left', 'center', 'right']
 
+export type TableBreakpoint = 'sm' | 'md' | 'lg'
+const BREAKPOINTS: TableBreakpoint[] = ['sm', 'md', 'lg']
+
 export interface TableColumn {
     key: string
     header: string
     sortable?: boolean
     align?: TableAlign
     width?: string
+    /** Hide this column below the given breakpoint (sm 576 / md 768 / lg 992).
+     *  Identity + action columns should omit this so they survive every size. */
+    hideBelow?: TableBreakpoint
+    /** Minimum column width (any CSS length) — keeps the column readable and
+     *  forces horizontal scrolling instead of mid-word clipping. */
+    minWidth?: string
     render?: (row: any, index: number) => string
 }
 
@@ -56,16 +67,37 @@ export class Table extends HTMLElement {
             'compact',
             'borderless',
             'sticky-header',
+            'sticky-first-column',
+            'sticky-last-column',
+            'collapse',
+            'collapse-below',
             'loading',
             'loading-rows',
         ]
     }
 
+    private _unbindEdges: (() => void) | null = null
+
     connectedCallback(): void {
         if (!this._initialised) {
             this.render()
             this._initialised = true
+        } else if (!this._unbindEdges) {
+            // Re-wire after a disconnect/reconnect (React remount) — the DOM
+            // survives but disconnectedCallback dropped the edge listeners.
+            this._wireEdges()
         }
+    }
+
+    disconnectedCallback(): void {
+        this._unbindEdges?.()
+        this._unbindEdges = null
+    }
+
+    private _wireEdges(): void {
+        const shell = this.querySelector<HTMLElement>('.tc-table-shell')
+        const wrap = this.querySelector<HTMLElement>('.tc-table-wrap')
+        this._unbindEdges = shell && wrap ? wireScrollEdges(shell, wrap) : null
     }
 
     attributeChangedCallback(): void {
@@ -102,7 +134,7 @@ export class Table extends HTMLElement {
     // ── Attributes ───────────────────────────────────────────────────────────
 
     get emptyMessage(): string {
-        return this.getAttribute('empty-message') ?? 'No data'
+        return this.getAttribute('empty-message') ?? msg('noData')
     }
     set emptyMessage(v: string) {
         this.setAttribute('empty-message', v)
@@ -146,6 +178,43 @@ export class Table extends HTMLElement {
     set stickyHeader(v: boolean) {
         if (v) this.setAttribute('sticky-header', '')
         else this.removeAttribute('sticky-header')
+    }
+
+    /** Pin the first column (identity) while the body scrolls horizontally. */
+    get stickyFirstColumn(): boolean {
+        return this.hasAttribute('sticky-first-column')
+    }
+    set stickyFirstColumn(v: boolean) {
+        if (v) this.setAttribute('sticky-first-column', '')
+        else this.removeAttribute('sticky-first-column')
+    }
+
+    /** Pin the last column (row actions) while the body scrolls horizontally. */
+    get stickyLastColumn(): boolean {
+        return this.hasAttribute('sticky-last-column')
+    }
+    set stickyLastColumn(v: boolean) {
+        if (v) this.setAttribute('sticky-last-column', '')
+        else this.removeAttribute('sticky-last-column')
+    }
+
+    /** `collapse="card"`: below `collapse-below` each row renders as a stacked
+     *  label/value card (labels from the column headers). */
+    get collapse(): 'card' | null {
+        return this.getAttribute('collapse') === 'card' ? 'card' : null
+    }
+    set collapse(v: 'card' | null) {
+        if (v) this.setAttribute('collapse', v)
+        else this.removeAttribute('collapse')
+    }
+
+    /** Breakpoint under which `collapse="card"` engages. Default `md` (768px). */
+    get collapseBelow(): TableBreakpoint {
+        const v = this.getAttribute('collapse-below') as TableBreakpoint
+        return BREAKPOINTS.includes(v) ? v : 'md'
+    }
+    set collapseBelow(v: TableBreakpoint) {
+        this.setAttribute('collapse-below', v)
     }
 
     get loading(): boolean {
@@ -216,8 +285,15 @@ export class Table extends HTMLElement {
     private _thStyle(col: TableColumn): string {
         const parts: string[] = []
         if (col.width) parts.push(`width: ${esc(col.width)}`)
+        if (col.minWidth) parts.push(`min-width: ${esc(col.minWidth)}`)
         parts.push(`text-align: ${this._align(col)}`)
         return ` style="${parts.join('; ')}"`
+    }
+
+    private _hideClass(col: TableColumn): string {
+        return col.hideBelow && BREAKPOINTS.includes(col.hideBelow)
+            ? ` tc-col-hide-${col.hideBelow}`
+            : ''
     }
 
     private render(): void {
@@ -242,7 +318,7 @@ export class Table extends HTMLElement {
                       this._sortIconFor(col) +
                       `</button>`
                     : `<span class="tc-table-th-label">${esc(col.header)}</span>`
-                return `<th scope="col" class="tc-table-th tc-table-th--${align}"${ariaSortAttr}${this._thStyle(col)}>${inner}</th>`
+                return `<th scope="col" class="tc-table-th tc-table-th--${align}${this._hideClass(col)}"${ariaSortAttr}${this._thStyle(col)}>${inner}</th>`
             })
             .join('')
 
@@ -272,12 +348,14 @@ export class Table extends HTMLElement {
                             const align = this._align(col)
                             const styleParts: string[] = []
                             if (col.width) styleParts.push(`width: ${esc(col.width)}`)
+                            if (col.minWidth) styleParts.push(`min-width: ${esc(col.minWidth)}`)
                             styleParts.push(`text-align: ${align}`)
                             const cellHtml =
                                 typeof col.render === 'function'
                                     ? col.render(row, index)
                                     : esc(String(row[col.key] ?? ''))
-                            return `<td class="tc-table-td tc-table-td--${align}" style="${styleParts.join('; ')}">${cellHtml}</td>`
+                            // data-label feeds the collapse="card" ::before labels.
+                            return `<td class="tc-table-td tc-table-td--${align}${this._hideClass(col)}" data-label="${esc(col.header)}" style="${styleParts.join('; ')}">${cellHtml}</td>`
                         })
                         .join('')
                     return `<tr class="${rowCls}" data-key="${esc(String(keyVal))}"${rowAttrs}>${cells}</tr>`
@@ -296,15 +374,28 @@ export class Table extends HTMLElement {
             .filter(Boolean)
             .join(' ')
 
-        const wrapCls = `tc-table-wrap${this.stickyHeader ? ' tc-table-wrap--sticky' : ''}`
+        const wrapCls = [
+            'tc-table-wrap',
+            this.stickyHeader ? 'tc-table-wrap--sticky' : '',
+            this.stickyFirstColumn ? 'tc-table-wrap--sticky-first' : '',
+            this.stickyLastColumn ? 'tc-table-wrap--sticky-last' : '',
+            this.collapse === 'card' ? `tc-table-wrap--card-${this.collapseBelow}` : '',
+        ]
+            .filter(Boolean)
+            .join(' ')
 
+        this._unbindEdges?.()
         this.innerHTML =
+            `<div class="tc-table-shell tc-scroll-shadow">` +
             `<div class="${wrapCls}">` +
             `<table class="${tableCls}">` +
             `<thead class="tc-table-head"><tr>${theadCells}</tr></thead>` +
             `<tbody class="tc-table-body">${tbodyRows}</tbody>` +
             `</table>` +
+            `</div>` +
             `</div>`
+
+        this._wireEdges()
 
         this._wireEvents()
     }

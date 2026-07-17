@@ -1,18 +1,14 @@
 import { VARIANTS_FULL } from './internal/variants'
+import { setHostClass } from './internal/host-class'
 import { Alert as BsAlert } from './internal/Alert'
 import { closeIcon } from './icons'
+import { esc } from './internal/esc'
+import { msg } from './messages'
 
 const TAG_NAME = 'tc-alert'
 
 export type AlertVariant =
-    | 'primary'
-    | 'secondary'
-    | 'success'
-    | 'danger'
-    | 'warning'
-    | 'info'
-    | 'light'
-    | 'dark'
+    'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
 
 const VARIANTS: AlertVariant[] = [...VARIANTS_FULL]
 
@@ -86,8 +82,11 @@ export class Alert extends HTMLElement {
         const variant = this.variant
         const dismissible = this.dismissible
         this.setAttribute('role', 'alert')
-        this.className = `alert alert-${variant}${dismissible ? ' alert-dismissible fade show' : ''}`
-        this.innerHTML = `<span class="tc-alert-content"></span>${dismissible ? `<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">${closeIcon}</button>` : ''}`
+        setHostClass(
+            this,
+            `alert alert-${variant}${dismissible ? ' alert-dismissible fade show' : ''}`,
+        )
+        this.innerHTML = `<span class="tc-alert-content"></span>${dismissible ? `<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="${esc(msg('close'))}">${closeIcon}</button>` : ''}`
     }
 
     private _initBsAlert(): void {

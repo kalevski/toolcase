@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { msg } from './messages'
 import { chevronDownIcon } from './icons'
 import { fixedContainingBlock } from './internal/containingBlock'
 import { cssLength } from './internal/cssLength'
@@ -143,9 +144,7 @@ export class ComboBox extends HTMLElement {
         reflectFieldValidity(this._internals, {
             invalid,
             valueMissing: requiredEmpty && !error,
-            message:
-                error ||
-                (requiredEmpty ? 'Please make a selection.' : 'Please provide a valid selection.'),
+            message: error || (requiredEmpty ? msg('selectionRequired') : msg('selectionInvalid')),
             anchor: this.querySelector<HTMLButtonElement>('.tc-combo-box__trigger') ?? undefined,
         })
     }
@@ -182,7 +181,7 @@ export class ComboBox extends HTMLElement {
                 state,
                 error,
                 hint: this.help,
-                invalidText: 'Please provide a valid selection.',
+                invalidText: msg('selectionInvalid'),
                 validText: 'Looks good!',
             })
         }
@@ -225,7 +224,7 @@ export class ComboBox extends HTMLElement {
     }
 
     get placeholder(): string {
-        return this.getAttribute('placeholder') ?? 'Select…'
+        return this.getAttribute('placeholder') ?? msg('selectPlaceholder')
     }
     set placeholder(v: string) {
         if (v) this.setAttribute('placeholder', v)
@@ -486,8 +485,8 @@ export class ComboBox extends HTMLElement {
             popoverHtml =
                 `<div class="tc-combo-box__popover">` +
                 `<div class="tc-combo-box__search">` +
-                `<input type="text" class="tc-combo-box__search-input" placeholder="Search…"` +
-                ` autocomplete="off" aria-label="Search options" value="${esc(this._query)}" />` +
+                `<input type="text" class="tc-combo-box__search-input" placeholder="${esc(msg('searchPlaceholder'))}"` +
+                ` autocomplete="off" aria-label="${esc(msg('searchOptionsLabel'))}" value="${esc(this._query)}" />` +
                 `</div>` +
                 `<div class="tc-combo-box__list" role="listbox">${this._buildOptionsHtml()}</div>` +
                 `</div>`
@@ -502,7 +501,7 @@ export class ComboBox extends HTMLElement {
             state,
             error,
             hint: this.help,
-            invalidText: 'Please provide a valid selection.',
+            invalidText: msg('selectionInvalid'),
             validText: 'Looks good!',
         })
 

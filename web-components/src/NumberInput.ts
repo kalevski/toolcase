@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { msg } from './messages'
 import { fieldMessageHtml } from './internal/field-message'
 import {
     requiredMark,
@@ -252,8 +253,7 @@ export class NumberInput extends HTMLElement {
             invalid,
             valueMissing: requiredEmpty && !error,
             message:
-                error ||
-                (requiredEmpty ? 'This field is required.' : 'Please enter a valid number.'),
+                error || (requiredEmpty ? msg('fieldRequired') : 'Please enter a valid number.'),
             anchor: this.querySelector<HTMLInputElement>('input') ?? undefined,
         })
     }

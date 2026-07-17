@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { msg } from './messages'
 import { fieldMessageHtml } from './internal/field-message'
 import {
     requiredMark,
@@ -110,8 +111,7 @@ export class ColorPicker extends HTMLElement {
         reflectFieldValidity(this._internals, {
             invalid,
             valueMissing: requiredEmpty && !error,
-            message:
-                error || (requiredEmpty ? 'This field is required.' : 'Please select a valid color.'),
+            message: error || (requiredEmpty ? msg('fieldRequired') : msg('invalidColor')),
             anchor: this._getTrigger() ?? undefined,
         })
     }
@@ -446,7 +446,7 @@ export class ColorPicker extends HTMLElement {
             state,
             error,
             hint: this.help,
-            invalidText: 'Please select a valid color.',
+            invalidText: msg('invalidColor'),
             validText: 'Looks good!',
         })
 

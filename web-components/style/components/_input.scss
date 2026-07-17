@@ -27,6 +27,9 @@
 
     display: block;
     width: 100%;
+    // Floor the control box so dense line-height/padding combos can't shrink
+    // the field below a comfortable target (44px on coarse pointers, below).
+    min-height: var(--tc-control-height, 2.375rem);
     padding: 0.5rem 0.75rem;
     font-family: var(--tc-font-sans);
     font-size: 0.925rem;
@@ -66,11 +69,21 @@
 .form-control-sm {
     padding: 0.3rem 0.55rem;
     font-size: 0.8125rem;
+    min-height: 2rem;
 }
 
 .form-control-lg {
     padding: 0.7rem 1rem;
     font-size: 1.04rem;
+    min-height: 2.75rem;
+}
+
+// Coarse pointers: every text control meets the touch-target floor.
+@media (pointer: coarse) {
+    .form-control,
+    .form-select {
+        min-height: max(var(--tc-control-height, 2.375rem), var(--tc-min-touch-target, 44px));
+    }
 }
 
 // ── Validation states (shared by .form-control / .form-select / .form-check-input) ──

@@ -1,4 +1,6 @@
 import { esc } from './internal/esc'
+import { setHostClass } from './internal/host-class'
+import { msg } from './messages'
 import { Toast as BsToast } from './internal/Toast'
 import { closeIcon } from './icons'
 
@@ -123,7 +125,7 @@ export class Toast extends HTMLElement {
 
         const classes = ['toast', 'fade']
         if (variant) classes.push(`text-bg-${variant}`)
-        this.className = classes.join(' ')
+        setHostClass(this, classes.join(' '))
 
         const urgent = ['error', 'danger', 'warning'].includes(variant ?? '')
         this.setAttribute('role', urgent ? 'alert' : 'status')
@@ -133,7 +135,7 @@ export class Toast extends HTMLElement {
         const headerHtml = hasTitle
             ? `<div class="toast-header">` +
               `<strong class="me-auto">${titleText}</strong>` +
-              `<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close">${closeIcon}</button>` +
+              `<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="${esc(msg('close'))}">${closeIcon}</button>` +
               `</div>`
             : ''
 

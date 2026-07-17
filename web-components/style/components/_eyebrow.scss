@@ -14,7 +14,8 @@
 
     display: block;
     font-family: var(--bs-eyebrow-font-family);
-    font-size: var(--bs-eyebrow-font-size);
+    // Legibility floor — uppercase mono under 12px turns illegible.
+    font-size: max(var(--tc-font-size-min, 12px), var(--bs-eyebrow-font-size));
     font-weight: var(--bs-eyebrow-font-weight);
     line-height: var(--bs-eyebrow-line-height);
     letter-spacing: var(--bs-eyebrow-letter-spacing);

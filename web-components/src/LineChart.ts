@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { msg } from './messages'
 import { fixedOriginOffset } from './internal/containingBlock'
 const TAG_NAME = 'tc-line-chart'
 
@@ -200,7 +201,7 @@ export class LineChart extends HTMLElement {
 
         const series = this._series
         if (!series.length) {
-            this.innerHTML = `<div class="tc-line-chart-inner">${headerHtml}<div class="tc-line-chart-empty">No data</div></div>`
+            this.innerHTML = `<div class="tc-line-chart-inner">${headerHtml}<div class="tc-line-chart-empty">${esc(msg('noData'))}</div></div>`
             this._anchors = []
             return
         }
@@ -377,7 +378,7 @@ export class LineChart extends HTMLElement {
             `<div class="tc-line-chart-inner">` +
             headHtml +
             `<div class="tc-line-chart-skeleton tc-line-chart-skeleton--plot" aria-hidden="true" style="height:${this.height}px"></div>` +
-            `<span class="visually-hidden">Loading…</span>` +
+            `<span class="visually-hidden">${esc(msg('loading'))}</span>` +
             `</div>`
     }
 

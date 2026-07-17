@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { msg } from './messages'
 import { fixedOriginOffset } from './internal/containingBlock'
 const TAG_NAME = 'tc-funnel-chart'
 
@@ -195,7 +196,7 @@ export class FunnelChart extends HTMLElement {
                 : ''
 
         if (!data.length) {
-            this.innerHTML = `<div class="tc-funnel-chart__inner">${headerHtml}<div class="tc-funnel-chart__empty">No data</div></div>`
+            this.innerHTML = `<div class="tc-funnel-chart__inner">${headerHtml}<div class="tc-funnel-chart__empty">${esc(msg('noData'))}</div></div>`
             this._anchors = []
             return
         }
@@ -303,7 +304,7 @@ export class FunnelChart extends HTMLElement {
             `<div class="tc-funnel-chart__inner">` +
             headHtml +
             `<div class="tc-funnel-chart__skeleton tc-funnel-chart__skeleton--plot" aria-hidden="true" style="height:${this.height}px"></div>` +
-            `<span class="visually-hidden">Loading…</span>` +
+            `<span class="visually-hidden">${esc(msg('loading'))}</span>` +
             `</div>`
     }
 

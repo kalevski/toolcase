@@ -1,4 +1,5 @@
 import { DialogBase, esc } from './internal/dialog-base'
+import { msg } from './messages'
 import { closeIcon } from './icons'
 import type { LootEntry } from './LootList'
 
@@ -209,7 +210,7 @@ export class LootPopup extends DialogBase {
             `<div class="tc-loot-popup__header">` +
             eyebrowHtml +
             `<h2 class="tc-loot-popup__title" id="${labelId}">${esc(titleText)}</h2>` +
-            `<button type="button" class="tc-loot-popup__close" aria-label="Close">${closeIcon}</button>` +
+            `<button type="button" class="tc-loot-popup__close" aria-label="${esc(msg('close'))}">${closeIcon}</button>` +
             `</div>` +
             `<tc-loot-list class="tc-loot-popup__list"></tc-loot-list>` +
             `<div class="tc-loot-popup__actions">` +

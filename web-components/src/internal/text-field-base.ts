@@ -1,6 +1,7 @@
 import { esc as escShared } from './esc'
 import { fieldMessageHtml } from './field-message'
 import { requiredMark, dispatchFieldChange } from './form-field'
+import { msg } from '../messages'
 // Shared scaffold for tc-input and tc-textarea. Both render the same
 // label + form-control + validation-feedback + help-text frame and share an
 // identical accessor set (value/placeholder/label/name/size/disabled/readonly/
@@ -189,8 +190,7 @@ export abstract class TextFieldBase extends HTMLElement {
             state,
             error,
             hint: this.help,
-            invalidText: 'Please provide a valid value.',
-            validText: 'Looks good!',
+            invalidText: msg('fieldInvalid'),
         })
         if (slot) slot.outerHTML = html
 
@@ -376,8 +376,7 @@ export abstract class TextFieldBase extends HTMLElement {
             state,
             error,
             hint: help,
-            invalidText: 'Please provide a valid value.',
-            validText: 'Looks good!',
+            invalidText: msg('fieldInvalid'),
         })
 
         const control = this.renderControl({

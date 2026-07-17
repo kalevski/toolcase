@@ -1,5 +1,7 @@
 import { esc } from './internal/esc'
 import { icon } from './icons'
+import { msg, msgFormat } from './messages'
+import { wireScrollEdges } from './internal/scroll-edges'
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-static'
 
 const TAG_NAME = 'tc-advanced-table'
@@ -33,6 +35,17 @@ export interface AdvancedTableFilter {
     placeholder?: string
 }
 
+export type AdvancedTableBreakpoint = 'sm' | 'md' | 'lg'
+const BREAKPOINTS: AdvancedTableBreakpoint[] = ['sm', 'md', 'lg']
+// max-widths matching the sm/md/lg grid breakpoints (hide-below semantics).
+const BREAKPOINT_MAX: Record<AdvancedTableBreakpoint, string> = {
+    sm: '575.98px',
+    md: '767.98px',
+    lg: '991.98px',
+}
+
+let _uid = 0
+
 // Header descriptors. The React AdvancedTable inherits `columns` from TableProps;
 // here the header row is driven by this JS property while body rows are projected
 // as slotted <tr> children.
@@ -41,10 +54,20 @@ export interface AdvancedTableColumn {
     label: string
     align?: AdvancedTableAlign
     width?: string
+    /** Hide this column below the given breakpoint (sm 576 / md 768 / lg 992).
+     *  Applies to the header AND the projected body cells (matched by cell
+     *  position, so rows must keep one td per declared column). */
+    hideBelow?: AdvancedTableBreakpoint
+    /** Minimum column width (any CSS length) — forces horizontal scrolling
+     *  instead of mid-word clipping. */
+    minWidth?: string
 }
 
 export class AdvancedTable extends HTMLElement {
     private _initialised = false
+    // Per-instance class scoping the generated hide-below column rules.
+    private _instanceClass = `tc-advanced-table--i${++_uid}`
+    private _unbindEdges: (() => void) | null = null
 
     private _filters: AdvancedTableFilter[] = []
     private _filterValues: Record<string, any> = {}
@@ -59,7 +82,7 @@ export class AdvancedTable extends HTMLElement {
     onPageChange: ((offset: number) => void) | null = null
 
     static get observedAttributes(): string[] {
-        return ['limit', 'offset', 'total', 'loading']
+        return ['limit', 'offset', 'total', 'loading', 'sticky-first-column', 'sticky-last-column']
     }
 
     connectedCallback(): void {
@@ -72,6 +95,10 @@ export class AdvancedTable extends HTMLElement {
                 else slotContent.forEach((n) => body.appendChild(n))
             }
             this._initialised = true
+        } else if (!this._unbindEdges) {
+            // Re-wire after a disconnect/reconnect (React remount) — the DOM
+            // survives but disconnectedCallback dropped the edge listeners.
+            this._wireEdges()
         }
         this.addEventListener('input', this._onInput)
         this.addEventListener('change', this._onChange)
@@ -87,6 +114,8 @@ export class AdvancedTable extends HTMLElement {
         this.removeEventListener('change', this._onChange)
         this.removeEventListener('click', this._onClick)
         this.removeEventListener('tc-page-change', this._onPaginationPage)
+        this._unbindEdges?.()
+        this._unbindEdges = null
     }
 
     attributeChangedCallback(): void {
@@ -123,6 +152,24 @@ export class AdvancedTable extends HTMLElement {
     set loading(v: boolean) {
         if (v) this.setAttribute('loading', '')
         else this.removeAttribute('loading')
+    }
+
+    /** Pin the first column (identity) while the body scrolls horizontally. */
+    get stickyFirstColumn(): boolean {
+        return this.hasAttribute('sticky-first-column')
+    }
+    set stickyFirstColumn(v: boolean) {
+        if (v) this.setAttribute('sticky-first-column', '')
+        else this.removeAttribute('sticky-first-column')
+    }
+
+    /** Pin the last column (row actions) while the body scrolls horizontally. */
+    get stickyLastColumn(): boolean {
+        return this.hasAttribute('sticky-last-column')
+    }
+    set stickyLastColumn(v: boolean) {
+        if (v) this.setAttribute('sticky-last-column', '')
+        else this.removeAttribute('sticky-last-column')
     }
 
     // ── JS properties ─────────────────────────────────────────────────────────
@@ -359,7 +406,7 @@ export class AdvancedTable extends HTMLElement {
             })
             .join('')
 
-        return `<div class="tc-advanced-table-toolbar" role="group" aria-label="Filters">${controls}</div>`
+        return `<div class="tc-advanced-table-toolbar" role="group" aria-label="${esc(msg('filtersLabel'))}">${controls}</div>`
     }
 
     private _renderHead(): string {
@@ -374,6 +421,7 @@ export class AdvancedTable extends HTMLElement {
                     col.align && ALIGNS.includes(col.align) ? col.align : 'left'
                 const styleParts: string[] = []
                 if (col.width) styleParts.push(`width: ${esc(col.width)}`)
+                if (col.minWidth) styleParts.push(`min-width: ${esc(col.minWidth)}`)
                 styleParts.push(`text-align: ${align}`)
                 const style = ` style="${styleParts.join('; ')}"`
                 const label = `<span class="tc-advanced-table-th-label">${esc(col.label)}</span>`
@@ -409,7 +457,7 @@ export class AdvancedTable extends HTMLElement {
         return (
             `<div class="tc-advanced-table-overlay" role="status" aria-busy="true">` +
             `<span class="spinner-border tc-advanced-table-spinner" role="status">` +
-            `<span class="visually-hidden">Loading…</span></span></div>`
+            `<span class="visually-hidden">${esc(msg('loading'))}</span></span></div>`
         )
     }
 
@@ -424,7 +472,7 @@ export class AdvancedTable extends HTMLElement {
         const pageCount = Math.max(1, Math.ceil(total / limit))
         const current = Math.min(Math.floor(offset / limit) + 1, pageCount)
 
-        const summary = `<span class="tc-advanced-table-page-summary">${start}–${end} of ${total}</span>`
+        const summary = `<span class="tc-advanced-table-page-summary">${esc(msgFormat('paginationRange', { start, end, total }))}</span>`
         // Reuse the canonical pager — its joined border / mono numerals / ink active
         // page are the shared pagination motif; we only feed it total + current and
         // listen for its tc-page-change (handled in _onPaginationPage).
@@ -436,23 +484,64 @@ export class AdvancedTable extends HTMLElement {
         return `<div class="tc-advanced-table-pagination">${summary}${pager}</div>`
     }
 
+    // hideBelow columns apply to consumer-projected body cells by position, so
+    // the rules are generated per instance (nth-child under the instance class)
+    // rather than baked into the stylesheet.
+    private _renderColumnStyles(): string {
+        const rules: string[] = []
+        this._columns.forEach((col, i) => {
+            if (!col.hideBelow || !BREAKPOINTS.includes(col.hideBelow)) return
+            const n = i + 1
+            const scope = `tc-advanced-table.${this._instanceClass}`
+            rules.push(
+                `@media (max-width: ${BREAKPOINT_MAX[col.hideBelow]}) {` +
+                    `${scope} .tc-advanced-table-head tr > :nth-child(${n}),` +
+                    `${scope} .tc-advanced-table-body > tr > :nth-child(${n})` +
+                    `{ display: none; }}`,
+            )
+        })
+        return rules.length ? `<style>${rules.join('')}</style>` : ''
+    }
+
     private render(): void {
         const loading = this.loading
         if (loading) this.setAttribute('aria-busy', 'true')
         else this.removeAttribute('aria-busy')
+        this.classList.add(this._instanceClass)
 
+        const wrapCls = [
+            'tc-advanced-table-body-wrap',
+            'tc-scroll-shadow',
+            this.stickyFirstColumn ? 'tc-advanced-table-body-wrap--sticky-first' : '',
+            this.stickyLastColumn ? 'tc-advanced-table-body-wrap--sticky-last' : '',
+        ]
+            .filter(Boolean)
+            .join(' ')
+
+        this._unbindEdges?.()
         this.innerHTML =
             `<div class="tc-advanced-table${loading ? ' tc-advanced-table--loading' : ''}">` +
+            this._renderColumnStyles() +
             this._renderToolbar() +
-            `<div class="tc-advanced-table-body-wrap">` +
+            `<div class="${wrapCls}">` +
+            `<div class="tc-advanced-table-scroll">` +
             `<table class="table tc-advanced-table-table">` +
             this._renderHead() +
             `<tbody class="tc-advanced-table-body"></tbody>` +
             `</table>` +
+            `</div>` +
             (loading ? this._renderOverlay() : '') +
             `</div>` +
             this._renderPagination() +
             `</div>`
+
+        this._wireEdges()
+    }
+
+    private _wireEdges(): void {
+        const shell = this.querySelector<HTMLElement>('.tc-advanced-table-body-wrap')
+        const scroller = this.querySelector<HTMLElement>('.tc-advanced-table-scroll')
+        this._unbindEdges = shell && scroller ? wireScrollEdges(shell, scroller) : null
     }
 }
 

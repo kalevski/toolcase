@@ -99,6 +99,16 @@ tc-theme[name='default'] {
 
     --tc-focus-ring: 0 0 0 0.2rem rgba(30, 41, 59, 0.15);
 
+    // Ergonomics floors — every interactive element resolves its coarse-pointer
+    // hit area from --tc-min-touch-target (44px = iOS HIG; Android wants 48dp —
+    // bump it app-side if you target Android strictly). --tc-control-height is
+    // the minimum inner height of text controls; --tc-font-size-min is the
+    // smallest legible size for badges/captions/eyebrows (component partials
+    // clamp with max()).
+    --tc-min-touch-target: 44px;
+    --tc-control-height: 2.375rem;
+    --tc-font-size-min: 12px;
+
     // Z-index — fixed scale, do not add layers.
     --tc-z-sticky: 1020;
     --tc-z-modal-backdrop: 1050;

@@ -28,6 +28,8 @@ useEffect(() => {
 
 Never call `register()` at module top-level in a file that Next.js (or any SSR framework) also renders on the server.
 
+**React `className` merging.** Components that own their host `class` attribute — `tc-modal`, `tc-alert`, `tc-card`, `tc-avatar`, `tc-toast`, `tc-carousel`, `tc-navbar`, `tc-list-group-item`, `tc-portrait`, `tc-offcanvas` — **merge** consumer-authored classes into the classes they render instead of clobbering them: classes present on the tag before the first render (e.g. a React `className`) are captured and re-applied on every subsequent render.
+
 After `register()` you can author markup directly:
 
 ```html
@@ -38,8 +40,69 @@ After `register()` you can author markup directly:
 
 ---
 
+## Internationalization (configureMessages)
+
+Every built-in user-visible default string a `tc-*` component renders (validation copy, placeholders, pagination summaries, aria labels) resolves through a global message registry **at render time**, so a single `configureMessages()` call at app bootstrap localises the whole component set. Defaults stay English. Exported from the package root:
+
+- `configureMessages(overrides: Partial<ToolcaseMessages>)` — merges the overrides into the active catalog (keys set to `undefined` keep their current value) and dispatches a `tc-messages-changed` CustomEvent on `document`.
+- `resetMessages()` — restores the built-in English defaults (also dispatches `tc-messages-changed`).
+- `getMessages(): Readonly<ToolcaseMessages>` — snapshot of the active catalog (for auditing coverage).
+
+```js
+import { configureMessages } from '@toolcase/web-components'
+configureMessages({
+    fieldRequired: 'Ова поле е задолжително',
+    paginationRange: ({ start, end, total }) => `${start}–${end} од ${total}`,
+    selectPlaceholder: 'Изберете…',
+})
+```
+
+**Message catalog**
+
+| Key | Default | Used by |
+|-----|---------|---------|
+| `fieldRequired` | `This field is required` | `tc-form-input` + the pickers/sliders/OTP — required field left empty |
+| `fieldInvalid` | `Please provide a valid value.` | `tc-input`, `tc-textarea`, `tc-tag-input` |
+| `invalidValue` | `Invalid value` | `tc-form-input` + the pickers/sliders/OTP — fallback when a validator returns no message |
+| `selectionRequired` | `Please make a selection.` | `tc-select`, `tc-combo-box`, `tc-extended-select` |
+| `selectionInvalid` | `Please provide a valid selection.` | `tc-select`, `tc-combo-box`, `tc-extended-select` |
+| `selectionMinOne` | `Please select at least one option.` | `tc-checkbox-group` |
+| `invalidChoice` | `Please choose a valid value.` | `tc-slider` |
+| `invalidDate` | `Please provide a valid date.` | date picker |
+| `invalidTime` | `Please provide a valid time.` | time picker |
+| `invalidColor` | `Please select a valid color.` | color picker |
+| `invalidIcon` | `Please select a valid icon.` | icon picker |
+| `invalidCode` | `Please enter a valid code.` | `tc-otp-input` |
+| `selectPlaceholder` | `Select…` | selects (`tc-select`, `tc-combo-box`, `tc-extended-select`) |
+| `searchPlaceholder` | `Search…` | searchable selects |
+| `searchOptionsLabel` | `Search options` | searchable selects (search box aria label) |
+| `loading` | `Loading…` | spinners, skeletons, charts, tables |
+| `noData` | `No data` | `tc-table` empty default + charts |
+| `close` | `Close` | close buttons (modal, offcanvas, toast, alert, drawer, …) |
+| `clear` | `Clear` | reserved |
+| `filtersLabel` | `Filters` | `tc-advanced-table` filter toolbar |
+| `toggleSidebarLabel` | `Toggle sidebar` | reserved |
+| `paginationLabel` | `Page navigation` | `tc-pagination` |
+| `paginationPrevious` | `Previous` | `tc-pagination` |
+| `paginationNext` | `Next` | `tc-pagination` |
+| `paginationRange` | `{start}–{end} of {total}` | `tc-advanced-table` pagination summary |
+| `stepsComplete` | `{completed} of {total} complete` | reserved formatter |
+| `starsRating` | `{value} out of {max} stars` | reserved formatter |
+| `fileDropPrompt` | `Drag & drop files here or click to browse` | `tc-file-dropzone` |
+| `fileDropLabel` | `Upload files — drag and drop or click to browse` | `tc-file-dropzone` |
+| `fileSelectLabel` | `Select files to upload` | `tc-file-dropzone` |
+
+Notes:
+
+- Parameterised keys (`paginationRange`, `stepsComplete`, `starsRating`) accept either a `{token}` template string or a formatter function (`(params) => string`) — functions get full control over pluralisation and word order.
+- Per-instance attributes (`placeholder`, `empty-message`, `error`, `required-message`, …) always win over the registry for one-off cases.
+- Call `configureMessages()` before components render — components read the registry when they render. Changing messages later requires re-rendering the affected components; listen for `tc-messages-changed` on `document` to trigger that.
+
+---
+
 ## Table of Contents
 
+- [Internationalization (configureMessages)](#internationalization-configuremessages)
 - [Layout](#layout)
   - [tc-basic-layout](#tc-basic-layout)
   - [tc-dashboard-layout](#tc-dashboard-layout)
@@ -453,7 +516,7 @@ None. `tc-basic-layout` is a purely presentational layout element.
 
 ### tc-dashboard-layout
 
-Full-height dashboard shell: a full-height sidebar on the left, a glass navbar spanning the content column, and a scrollable content area. **Responsive:** below 992px the sidebar becomes a slide-in drawer over a dimmed backdrop (scoped to the component, not the viewport); at ≥992px it is pinned open as a static left rail and the toggle is hidden. Named slots cover the brand, menu, panel, and both navbar ends; unslotted children land in the main content. On mobile the drawer opens/closes via the toggle button, Ctrl+B (Cmd+B), backdrop tap, Escape, or the `sidebar-open` attribute. Dispatches `tc-toggle-sidebar` on every flip.
+Full-height dashboard shell: a full-height sidebar on the left, a glass navbar spanning the content column, and a scrollable content area. **Responsive:** below 992px the sidebar becomes a slide-in drawer over a dimmed backdrop (scoped to the component, not the viewport); at ≥992px it is pinned open as a static left rail and the toggle is hidden. Named slots cover the brand, menu, panel, and both navbar ends; unslotted children land in the main content. On mobile the drawer opens/closes via the toggle button, Ctrl+B (Cmd+B), backdrop tap, Escape, or the `sidebar-open` attribute. Dispatches `tc-toggle-sidebar` on every flip, plus a discrete `tc-sidebar-open` / `tc-sidebar-close`.
 
 **Tag:** `tc-dashboard-layout`
 
@@ -475,6 +538,8 @@ Full-height dashboard shell: a full-height sidebar on the left, a glass navbar s
 | Event | Detail | Description |
 |-------|--------|-------------|
 | `tc-toggle-sidebar` | `{ open: boolean }` | Fired when the user toggles the sidebar via the button or keyboard shortcut. |
+| `tc-sidebar-open` | — | Fired alongside `tc-toggle-sidebar` when a user-driven toggle opens the sidebar. No detail — bind one direction without reading `detail.open`. |
+| `tc-sidebar-close` | — | Fired alongside `tc-toggle-sidebar` when a user-driven toggle closes the sidebar. No detail. |
 
 **Slots**
 
@@ -495,6 +560,9 @@ Full-height dashboard shell: a full-height sidebar on the left, a glass navbar s
 - The toggle is reachable by Tab; Enter/Space activate it natively.
 - Ctrl+B (Cmd+B) toggles the sidebar and Escape closes it from anywhere on the page; the handler is removed in `disconnectedCallback`.
 - Tapping the dimmed backdrop closes the mobile drawer.
+- A closed mobile drawer is `inert` + `aria-hidden` and goes `visibility: hidden` after the slide-out transition completes — it leaves the tab order and the accessibility tree (a translated-off drawer would otherwise keep its buttons focusable). At ≥992px the pinned rail is never inert.
+- Closing while focus sits inside the drawer hands focus back to the toggle button (instead of dropping it on `body`).
+- While the mobile drawer is open, Tab is trapped inside it — it is a modal surface over the dimmed content.
 - Touch targets: the toggle is `44px × 44px` under `@media (pointer: coarse)`.
 - `prefers-reduced-motion` disables the sidebar slide transition.
 
@@ -1336,6 +1404,14 @@ None.
 **CSS Custom Properties**
 
 `tc-theme` defines no custom properties of its own — it is a passthrough host for the design-system tokens. Override any `--tc-*` token (or `--bs-<component>-*` contract variable) on the element to re-skin its descendants. Common roots: `--tc-surface`, `--tc-surface-muted`, `--tc-border`, `--tc-text`, `--tc-text-muted`, `--tc-accent`, `--tc-app-accent`, `--tc-success`/`--tc-info`/`--tc-warning`/`--tc-danger`, `--tc-font-sans`, `--tc-font-mono`.
+
+Ergonomics floor tokens (defined at `:root`, overridable like any `--tc-*` token):
+
+| Token | Default | Description |
+|-------|---------|-------------|
+| `--tc-min-touch-target` | `44px` | Coarse-pointer hit-area floor — pagination, tables, icon buttons, sliders, form controls, and the dashboard toggle resolve their `@media (pointer: coarse)` hit areas from it (44px = iOS HIG; bump app-side for strict Android 48dp). |
+| `--tc-control-height` | `2.375rem` | Minimum inner height of text controls; `max()`'d with the touch target on coarse pointers. |
+| `--tc-font-size-min` | `12px` | Legibility floor — clamped via `max()` in badge, eyebrow, and side-nav captions. |
 
 ```html
 <!-- Named theme — re-skins the whole subtree to the dungeon palette -->
@@ -5022,7 +5098,7 @@ el.addEventListener('tc-click', () => console.log('tc-click event fired'))
 
 ### tc-table
 
-Flexible data table with sortable columns, loading skeletons, and optional row-click handlers. Renders a real `<table>` (`<thead>`/`<tbody>`) inside a scroll wrapper. Pure slate chrome — colour only appears if a `render` cell injects status (e.g. a `tc-badge`). Sharp corners throughout.
+Flexible data table with sortable columns, loading skeletons, and optional row-click handlers. Renders a real `<table>` (`<thead>`/`<tbody>`) inside a scroll wrapper; the wrapper sits in a shell that paints automatic scroll-edge shadows — gradient hints at whichever edges have clipped content, driven by the scroll position. Pure slate chrome — colour only appears if a `render` cell injects status (e.g. a `tc-badge`). Sharp corners throughout.
 
 **Tag:** `tc-table`
 
@@ -5030,12 +5106,16 @@ Flexible data table with sortable columns, loading skeletons, and optional row-c
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `empty-message` | string | `No data` | Text shown when `data` is empty and not loading — rendered through a nested `tc-empty-state` (inbox icon) in a full-width cell. |
+| `empty-message` | string | `No data` | Text shown when `data` is empty and not loading — rendered through a nested `tc-empty-state` (inbox icon) in a full-width cell. When unset, resolves through the message registry (`noData`). |
 | `striped` | boolean | false | Even body rows take the faint slate well. |
 | `hoverable` | boolean | false | Rows lift to the slate well on hover. |
 | `compact` | boolean | false | Reduces cell padding (`table-sm`). |
 | `borderless` | boolean | false | Drops the internal cell hairlines (keeps the outer frame). |
 | `sticky-header` | boolean | false | Pins `<thead>` to the top of the scroll wrap. Constrain the wrap height (e.g. wrap in `<div style="max-height:320px">`) so it scrolls. |
+| `sticky-first-column` | boolean | false | Pins the first column (identity) while the body scrolls horizontally. |
+| `sticky-last-column` | boolean | false | Pins the last column (row actions) while the body scrolls horizontally. |
+| `collapse` | `card` | — | Below `collapse-below`, each row renders as a stacked label/value card — labels come from the column headers (each cell carries a `data-label`). |
+| `collapse-below` | `sm\|md\|lg` | `md` | Breakpoint under which `collapse="card"` engages (sm 576 / md 768 / lg 992). |
 | `loading` | boolean | false | Renders `loading-rows` skeleton rows (via `tc-skeleton`) instead of data; sets `aria-busy`. |
 | `loading-rows` | number | `5` | Number of skeleton rows while `loading`. |
 
@@ -5057,6 +5137,8 @@ Flexible data table with sortable columns, loading skeletons, and optional row-c
 | `sortable` | `boolean` | Adds a sort button; clicking cycles ascending → descending → none and re-sorts `data` internally (stable). |
 | `align` | `'left' \| 'center' \| 'right'` | Cell + header text alignment (default `left`). |
 | `width` | `string` | CSS width applied to the column's cells. |
+| `hideBelow` | `'sm' \| 'md' \| 'lg'` | Hides the column below that breakpoint (sm 576 / md 768 / lg 992). Omit on identity/action columns so they survive every size. |
+| `minWidth` | `string` | Minimum column width (any CSS length) — keeps the column readable and forces horizontal scrolling instead of mid-word clipping. |
 | `render` | `(row, index) => string` | Returns an HTML string for the cell (e.g. a `tc-badge`). Defaults to `row[key]`. |
 
 **Events**
@@ -5114,7 +5196,7 @@ table.addEventListener('tc-row-click', e => console.log(e.detail.row))
 
 ### tc-advanced-table
 
-Data table with a built-in filter toolbar, sortable headers, a translucent loading overlay, and a paginated footer. The header row is driven by the `columns` JS property; **body rows are fed as an HTML string through the `rows` property** — the element owns its `<tbody>` and re-applies the string on every internal re-render, so callers own row markup (and can inject `tc-badge` etc.) without any relocation hazard. Never render framework children (e.g. React `<tr>`s) inside the element: they would be captured and moved out from under the framework's reconciler. Pure slate chrome, sharp corners, JetBrains Mono pagination summary. The element drives its own internal sort direction and offset on click (like `tc-pagination`) and emits a CustomEvent for each interaction.
+Data table with a built-in filter toolbar, sortable headers, a translucent loading overlay, and a paginated footer. The header row is driven by the `columns` JS property; **body rows are fed as an HTML string through the `rows` property** — the element owns its `<tbody>` and re-applies the string on every internal re-render, so callers own row markup (and can inject `tc-badge` etc.) without any relocation hazard. Never render framework children (e.g. React `<tr>`s) inside the element: they would be captured and moved out from under the framework's reconciler. Pure slate chrome, sharp corners, JetBrains Mono pagination summary (format from the message registry's `paginationRange`, default `{start}–{end} of {total}`). The body wrap paints automatic scroll-edge shadows — gradient hints at whichever edges have clipped content, driven by the scroll position. The element drives its own internal sort direction and offset on click (like `tc-pagination`) and emits a CustomEvent for each interaction.
 
 **Tag:** `tc-advanced-table`
 
@@ -5126,6 +5208,8 @@ Data table with a built-in filter toolbar, sortable headers, a translucent loadi
 | `offset` | number | `0` | Zero-based index of the first row on the current page. Updated internally on prev/next clicks. |
 | `total` | number | `0` | Total row count across all pages. The pagination footer only renders when `total > 0`. |
 | `loading` | boolean | false | Shows a translucent overlay + spinner above the body, sets `aria-busy`, and disables the filter, sort, and pagination controls. |
+| `sticky-first-column` | boolean | false | Pins the first column (identity) while the body scrolls horizontally. |
+| `sticky-last-column` | boolean | false | Pins the last column (row actions) while the body scrolls horizontally. |
 
 **Properties**
 
@@ -5149,6 +5233,8 @@ Data table with a built-in filter toolbar, sortable headers, a translucent loadi
 | `label` | `string` | Header label text. |
 | `align` | `'left' \| 'center' \| 'right'` | Header text alignment (default `left`). |
 | `width` | `string` | CSS width applied to the header cell. |
+| `hideBelow` | `'sm' \| 'md' \| 'lg'` | Hides the column below that breakpoint (sm 576 / md 768 / lg 992). Works **positionally** — `nth-child` rules are generated per instance and applied to the header AND the projected body cells, so `rows` must keep one `<td>` per declared column. |
+| `minWidth` | `string` | Minimum column width (any CSS length) — forces horizontal scrolling instead of mid-word clipping. |
 
 **AdvancedTableFilter shape**
 
@@ -6749,12 +6835,17 @@ Modal dialog.
 | `scrollable` | boolean | false | Scrollable body |
 | `static-backdrop` | boolean | false | Prevent close on backdrop click |
 | `fullscreen` | `true\|sm\|md\|lg\|xl\|xxl` | — | Fullscreen breakpoint |
+| `lazy` | boolean | false | Captured body/footer content enters the DOM on first open only, then stays mounted (open → close → open keeps form state). Prevents hidden mounted modals from leaking their content into selectors, queries, and duplicate ids. |
 
 **Methods:** `show()`, `hide()`, `toggle()`
 
 **Events:** `tc-show`, `tc-shown`, `tc-hide`, `tc-hidden`
 
 **Slots:** default (body), `slot="footer"`
+
+A closed `tc-modal` carries `inert` (independent of `lazy`) — its content sits outside the tab order and accessibility tree while hidden. The close button's `aria-label` resolves through the message registry (`close`).
+
+**Footer conventions:** a labeled primary action plus a labeled cancel. Danger confirms must be a labeled `tc-button variant="danger"` — never icon-only (use `tc-icon-button show-label` if starting from an icon button).
 
 ```html
 <button onclick="document.querySelector('#my-modal').show()">Open</button>
@@ -8238,18 +8329,33 @@ Form wrapper with HTML5 constraint validation.
 | `validated` | boolean | false | Show validation feedback |
 | `novalidate` | boolean | false | Disable native validation UI |
 
+**Methods**
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `validate()` | `boolean` | Submit-time gate mirroring native constraint validation: calls `reportValidity()` on the inner form (every invalid control receives an `invalid` event, flipping toolcase inputs to their submitted state so inline errors render), adds the `was-validated` chrome when invalid, and returns overall validity. Use it to gate programmatic submits (e.g. a modal footer button outside the form). |
+| `resetValidity()` | `void` | Returns every control to its pristine (no visible errors) state without touching values — call when reopening a dialog or after a successful submit. Removes the `was-validated` chrome and invokes `resetValidity()` on each form-associated control that exposes it. |
+
 ```html
 <tc-form novalidate>
     <tc-input label="Name" required></tc-input>
     <tc-button type="submit" variant="primary">Submit</tc-button>
 </tc-form>
+
+<script>
+    // Programmatic gating, e.g. from a modal footer:
+    const form = document.querySelector('tc-form')
+    if (form.validate()) saveAndClose()
+    // Later, when reopening the dialog:
+    form.resetValidity()
+</script>
 ```
 
 ---
 
 ### tc-form-input
 
-Universal form-input dispatcher. The `type` attribute selects which native control to render, with built-in validation, a helper line, a danger-toned error line, and full ARIA wiring. Composes the shared form classes (`.form-control`, `.form-select`, `.form-check`, `.form-range`) so it stays self-contained. On every input/change it reads the control value, coerces it to the right JS type (boolean for checkbox/switch/single-radio, number for number/range, string otherwise), runs each `validate` function, computes the error message (preferring the `error` attribute, then a validator message, then `onErrorMessage`), toggles `is-invalid` + `aria-invalid` + `aria-describedby`, then fires `tc-change` and calls `onChange(value, hasError)`.
+Universal form-input dispatcher. The `type` attribute selects which native control to render, with built-in validation, a helper line, a danger-toned error line, and full ARIA wiring. Composes the shared form classes (`.form-control`, `.form-select`, `.form-check`, `.form-range`) so it stays self-contained. On every input/change it reads the control value, coerces it to the right JS type (boolean for checkbox/switch/single-radio, number for number/range, string otherwise), runs each `validate` function, computes the error message (preferring the `error` attribute, then a validator message, then `onErrorMessage`), then fires `tc-change` and calls `onChange(value, hasError)`. Visible error chrome (`is-invalid` + `aria-invalid` + the error line) is gated by `validate-on` (default `blur` — no errors until the user leaves the field); validity is always reflected into the ElementInternals immediately, so `form.checkValidity()` and submit gating stay accurate from the first render.
 
 **Tag:** `tc-form-input`
 
@@ -8271,6 +8377,8 @@ Universal form-input dispatcher. The `type` attribute selects which native contr
 | `loading` | boolean | false | Renders a spinner placeholder and disables interaction |
 | `min` / `max` / `step` | string | — | Forwarded to number/range/date controls |
 | `rows` | string | — | Forwarded to the `textarea` control |
+| `validate-on` | `blur\|input\|submit\|mount` | `blur` | When validation feedback becomes **visible**: `blur` after the field is touched (focusout), `input` after any edit (or touch), `submit` only after a form submit / `reportValidity()`, `mount` always (the old eager behaviour). Validity is always reflected into the ElementInternals immediately, so form gating works regardless. |
+| `required-message` | string | — | Per-instance override of the message registry's `fieldRequired` copy for the required-empty error. |
 
 **JS Properties**
 
@@ -8283,7 +8391,17 @@ Universal form-input dispatcher. The `type` attribute selects which native contr
 | `onChange` | `((value: unknown, hasError: boolean) => void) \| null` | Optional callback fired alongside `tc-change` |
 | `options` | `{ value: string; label: string; disabled?: boolean }[]` | Options for `dropdown`/`radio` (also accepts slotted `<option>` children) |
 
-**Events:** `tc-change` with `{ detail: { value: unknown, hasError: boolean } }` — fired on input/change after validation.
+**Methods**
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `reportValidity()` | `boolean` | Marks the field submitted, shows any error, and (when invalid) triggers the browser's native report UI. Returns `true` when valid. Mirrors `HTMLInputElement.reportValidity`. |
+| `checkValidity()` | `boolean` | ElementInternals validity check — no visual side effects. |
+| `resetValidity()` | `void` | Returns the field to its pristine state (hides visible errors) without touching the value. |
+
+**Validation lifecycle:** pristine → touched (focusout) → dirty (input) → submitted (form submit, `reportValidity()`, or the element's native `invalid` event). Errors render only after the `validate-on` gate passes; a consumer-set `error` attribute always shows immediately. A native form reset (`formResetCallback`) restores the first-connect value and returns the field to pristine.
+
+**Events:** `tc-change` with `{ detail: { value: unknown } }` — fired on input/change after validation (`hasError` stays available through the `onChange` callback).
 
 **Slots:** `<option>` children are accepted for `dropdown`/`radio` types when the `options` property is not set.
 
@@ -8292,7 +8410,8 @@ Universal form-input dispatcher. The `type` attribute selects which native contr
 <script>
 const el = document.querySelector('tc-form-input')
 el.validate = (v) => /.+@.+\..+/.test(String(v)) ? true : 'Enter a valid email'
-el.addEventListener('tc-change', (e) => console.log(e.detail.value, e.detail.hasError))
+el.addEventListener('tc-change', (e) => console.log(e.detail.value))
+el.onChange = (value, hasError) => console.log(value, hasError)
 
 // Dropdown via the options property
 const country = document.createElement('tc-form-input')
@@ -9130,6 +9249,8 @@ Single-handle range slider with full keyboard navigation, optional tick marks, a
 
 **Keyboard (thumb focused):** Left/Down decrease and Right/Up increase by `step`; PageDown/PageUp by `step × 10`; Home sets `min`; End sets `max`.
 
+**Ergonomics:** the track reserves half a thumb of inline padding so the 0%/100% extremes stay fully visible and grabbable instead of half-cropped at the container edge; the value tooltip flips inward near the extremes instead of overflowing the container; coarse pointers get a 20px thumb and an invisible hit area ≥ 44px (driven by `--tc-min-touch-target`).
+
 **No slots.**
 
 ```html
@@ -9716,7 +9837,7 @@ None. `tc-icon-badge` is attribute-driven.
 
 ## tc-icon-button
 
-Square icon-only button with variant, size, outline, and accessible label. Dispatches `tc-click` on activation.
+Square icon-only button with variant, size, outline, and accessible label. Dispatches `tc-click` on activation. With `show-label` it grows into a labeled button (icon + text).
 
 **Tag:** `tc-icon-button`
 
@@ -9728,8 +9849,11 @@ Square icon-only button with variant, size, outline, and accessible label. Dispa
 | `size` | `small\|default\|large` | `default` | Button size: 28 / 36 / 44 px |
 | `variant` | `primary\|secondary\|info\|success\|warning\|danger` | `secondary` | Color variant |
 | `outline` | boolean | false | Outline style — transparent background, colored border |
-| `label` | string | — | **Required for a11y.** Applied as `aria-label` (visible text is absent) |
+| `label` | string | — | **Required for a11y.** Applied as `aria-label`; also the visible text when `show-label` is set |
+| `show-label` | `''\|always\|coarse` | — | Renders the `label` text beside the icon — the button grows into a labeled button. Empty value or `always`: always visible. `coarse`: the text renders only under `(pointer: coarse)`, so desktop keeps the compact icon and touch gets words. |
 | `disabled` | boolean | false | Disables the button and prevents `tc-click` |
+
+Destructive actions (`variant="danger"`) in modal footers should not be icon-only — use `show-label` or a labeled `tc-button`.
 
 **Events**
 
@@ -9767,6 +9891,12 @@ Square icon-only button with variant, size, outline, and accessible label. Dispa
 
 <!-- Danger outline -->
 <tc-icon-button icon="Trash2" variant="danger" outline label="Delete"></tc-icon-button>
+
+<!-- Visible label — labeled button with a leading icon -->
+<tc-icon-button icon="Trash2" variant="danger" label="Delete" show-label></tc-icon-button>
+
+<!-- Label only on touch devices; compact icon on desktop -->
+<tc-icon-button icon="Pencil" label="Edit" show-label="coarse"></tc-icon-button>
 
 <!-- Large success -->
 <tc-icon-button icon="Check" variant="success" size="large" label="Confirm"></tc-icon-button>
@@ -12697,7 +12827,7 @@ None. `tc-cookbook-grid` is purely presentational. Recipe cards link via `href`.
 
 ### tc-empty-state
 
-Centered placeholder shown when data is unavailable. Displays an optional lucide icon in a sharp slate tile, followed by slotted body content (message text, optional action button).
+Centered placeholder shown when data is unavailable — the canonical empty treatment for tables, tabs, lists, and search results (`tc-table` renders it automatically for its empty state). Composition, all optional: a lucide icon in a sharp slate tile, a short bold `heading`, a muted `description`, slotted body content, and an `action` CTA row.
 
 **Tag:** `tc-empty-state`
 
@@ -12706,12 +12836,16 @@ Centered placeholder shown when data is unavailable. Displays an optional lucide
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `icon` | string | — | Lucide icon name in kebab-case or PascalCase (e.g. `"inbox"`, `"folder-open"`, `"FolderOpen"`). When set, renders the icon as an inline SVG inside a muted tile above the body. When omitted (or unknown), no icon is shown. |
+| `heading` | string | — | Short bold line under the icon (e.g. `"No recipes yet"`). |
+| `description` | string | — | Muted explanation under the heading; wraps at `max-width: 40ch`. |
 
 **JS Properties**
 
 | Property | Type | Description |
 |----------|------|-------------|
 | `icon` | `string \| null` | Reflects the `icon` attribute. |
+| `heading` | `string \| null` | Reflects the `heading` attribute. |
+| `description` | `string \| null` | Reflects the `description` attribute. |
 
 **Events**
 
@@ -12721,7 +12855,8 @@ None. `tc-empty-state` is purely presentational.
 
 | Slot | Description |
 |------|-------------|
-| *(default)* | Message text, headings, and optional action buttons. Rendered inside `.tc-empty-state__body`. Preserved across re-renders when the `icon` attribute changes. |
+| *(default)* | Free-form body content (message text, headings). Rendered inside `.tc-empty-state__body`, below the `heading`/`description`. Preserved across attribute re-renders. Kept for back-compat — unchanged. |
+| `action` | Children with `slot="action"` render as a CTA row under the text (e.g. a `tc-button`). |
 
 **Accessibility**
 
@@ -12745,6 +12880,15 @@ None. `tc-empty-state` is purely presentational.
 ```html
 <!-- Icon + message -->
 <tc-empty-state icon="Inbox">No messages yet</tc-empty-state>
+
+<!-- Heading + description + action row -->
+<tc-empty-state
+    icon="FolderOpen"
+    heading="No files yet"
+    description="Files you upload will show up here."
+>
+    <tc-button slot="action" variant="secondary">Upload a file</tc-button>
+</tc-empty-state>
 
 <!-- Icon + message + action button -->
 <tc-empty-state icon="FolderOpen">

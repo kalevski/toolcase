@@ -1,15 +1,9 @@
 import { VARIANTS_FULL } from './internal/variants'
+import { setHostClass } from './internal/host-class'
 const TAG_NAME = 'tc-card'
 
 export type CardVariant =
-    | 'primary'
-    | 'secondary'
-    | 'success'
-    | 'danger'
-    | 'warning'
-    | 'info'
-    | 'light'
-    | 'dark'
+    'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
 export type CardImgPosition = 'top' | 'bottom'
 
 const VARIANTS: CardVariant[] = [...VARIANTS_FULL]
@@ -92,7 +86,7 @@ export class Card extends HTMLElement {
         const imgPosition = this.imgPosition
         const variant = this.variant
 
-        this.className = `card${variant ? ` text-bg-${variant}` : ''}`
+        setHostClass(this, `card${variant ? ` text-bg-${variant}` : ''}`)
 
         const headerHtml =
             this._headerNodes.length > 0 ? `<div class="card-header tc-card-header"></div>` : ''

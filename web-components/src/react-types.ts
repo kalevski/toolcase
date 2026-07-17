@@ -28,7 +28,7 @@ export interface ToolcaseIntrinsicElements {
     'tc-action-items': TcProps<{ 'label'?: string | number; onTcActionClick?: (e: CustomEvent) => void }>
     'tc-action-row-list': TcProps<{ 'outline'?: boolean; 'trailing-icon'?: string | number; onTcActionClick?: (e: CustomEvent) => void }>
     'tc-activity-card': TcProps<{ 'loading'?: boolean; 'loading-count'?: string | number; 'title'?: string | number }>
-    'tc-advanced-table': TcProps<{ 'limit'?: string | number; 'loading'?: boolean; 'offset'?: string | number; 'total'?: string | number; onTcFilterChange?: (e: CustomEvent) => void; onTcPageChange?: (e: CustomEvent) => void; onTcSortChange?: (e: CustomEvent) => void }>
+    'tc-advanced-table': TcProps<{ 'limit'?: string | number; 'loading'?: boolean; 'offset'?: string | number; 'sticky-first-column'?: boolean; 'sticky-last-column'?: boolean; 'total'?: string | number; onTcFilterChange?: (e: CustomEvent) => void; onTcPageChange?: (e: CustomEvent) => void; onTcSortChange?: (e: CustomEvent) => void }>
     'tc-alert': TcProps<{ 'dismissible'?: boolean; 'variant'?: string | number; onTcClosed?: (e: CustomEvent) => void }>
     'tc-ammo-counter': TcProps<{ 'mag'?: string | number; 'mag-max'?: string | number; 'reloading'?: boolean; 'reserve'?: string | number; 'weapon-name'?: string | number }>
     'tc-anchor': TcProps<{ 'inset'?: string | number; 'position'?: string | number }>
@@ -135,7 +135,7 @@ export interface ToolcaseIntrinsicElements {
     'tc-early-signup-form': TcProps<{ 'cta-label'?: string | number; 'eyebrow'?: string | number; 'field-label'?: string | number; 'helper-text'?: string | number; 'loading'?: boolean; 'placeholder'?: string | number; 'stat'?: string | number; 'subtitle'?: string | number; 'success-message'?: string | number; 'success-title'?: string | number; 'title'?: string | number; 'variant'?: string | number; onTcSubmit?: (e: CustomEvent) => void }>
     'tc-ecosystem-map': TcProps<{ 'size'?: string | number; 'title'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
     'tc-editable-text': TcProps<{ 'aria-label'?: string | number; 'default-value'?: string | number; 'disabled'?: boolean; 'placeholder'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-empty-state': TcProps<{ 'icon'?: string | number }>
+    'tc-empty-state': TcProps<{ 'description'?: string | number; 'heading'?: string | number; 'icon'?: string | number }>
     'tc-entity-cell': TcProps<{ 'clickable'?: boolean; 'color'?: string | number; 'initial'?: string | number; 'name'?: string | number; 'size'?: string | number; 'sub-label'?: string | number; onTcClick?: (e: CustomEvent) => void }>
     'tc-entity-profile-card': TcProps<{ 'loading'?: boolean; 'title'?: string | number }>
     'tc-equipment-doll': TcProps<{ 'height'?: string | number; 'selected-id'?: string | number; 'silhouette'?: string | number; 'slot-size'?: string | number; 'width'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
@@ -149,7 +149,7 @@ export interface ToolcaseIntrinsicElements {
     'tc-file-tags': TcProps<{ 'readonly'?: boolean; onTcChange?: (e: CustomEvent) => void }>
     'tc-floating-label': TcProps<{ 'for'?: string | number; 'label'?: string | number }>
     'tc-form': TcProps<{ 'novalidate'?: boolean; 'validated'?: boolean }>
-    'tc-form-input': TcProps<{ 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'helper'?: string | number; 'id'?: string | number; 'label'?: string | number; 'loading'?: boolean; 'max'?: string | number; 'min'?: string | number; 'name'?: string | number; 'placeholder'?: string | number; 'required'?: boolean; 'rows'?: string | number; 'step'?: string | number; 'type'?: string | number; onTcChange?: (e: CustomEvent) => void }>
+    'tc-form-input': TcProps<{ 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'helper'?: string | number; 'id'?: string | number; 'label'?: string | number; 'loading'?: boolean; 'max'?: string | number; 'min'?: string | number; 'name'?: string | number; 'placeholder'?: string | number; 'required'?: boolean; 'required-message'?: string | number; 'rows'?: string | number; 'step'?: string | number; 'type'?: string | number; 'validate-on'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-form-wizard': TcProps<{ 'complete-icon'?: string | number; 'complete-label'?: string | number; 'loading'?: boolean; onTcComplete?: (e: CustomEvent) => void; onTcStepChange?: (e: CustomEvent) => void }>
     'tc-fov-slider': TcProps<{ 'disabled'?: boolean; 'format'?: string | number; 'max'?: string | number; 'min'?: string | number; 'muted'?: boolean; 'step'?: string | number; 'unit'?: string | number; 'value'?: string | number; 'with-mute'?: boolean; onTcChange?: (e: CustomEvent) => void; onTcToggleMute?: (e: CustomEvent) => void }>
     'tc-fps-cap-select': TcProps<{ 'disabled'?: boolean; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
@@ -176,7 +176,7 @@ export interface ToolcaseIntrinsicElements {
     'tc-hotbar': TcProps<{ 'selected-id'?: string | number; 'slot-size'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
     'tc-icon': TcProps<{ 'as'?: string | number; 'color'?: string | number; 'decorative'?: boolean; 'label'?: string | number; 'name'?: string | number; 'set'?: string | number; 'size'?: string | number }>
     'tc-icon-badge': TcProps<{ 'bg'?: string | number; 'color'?: string | number; 'glyph'?: string | number; 'size'?: string | number }>
-    'tc-icon-button': TcProps<{ 'disabled'?: boolean; 'icon'?: string | number; 'label'?: string | number; 'outline'?: boolean; 'size'?: string | number; 'variant'?: string | number; onTcClick?: (e: CustomEvent) => void }>
+    'tc-icon-button': TcProps<{ 'disabled'?: boolean; 'icon'?: string | number; 'label'?: string | number; 'outline'?: boolean; 'show-label'?: string | number; 'size'?: string | number; 'variant'?: string | number; onTcClick?: (e: CustomEvent) => void }>
     'tc-icon-picker': TcProps<{ 'columns'?: string | number; 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'label'?: string | number; 'loading'?: boolean; 'max-height'?: string | number; 'name'?: string | number; 'required'?: boolean; 'state'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-image': TcProps<{ onTcError?: (e: CustomEvent) => void; onTcLoad?: (e: CustomEvent) => void }>
     'tc-image-crop': TcProps<{ 'aspect-ratio'?: string | number; 'circular'?: boolean; 'src'?: string | number; onTcCrop?: (e: CustomEvent) => void; onTcError?: (e: CustomEvent) => void }>
@@ -236,7 +236,7 @@ export interface ToolcaseIntrinsicElements {
     'tc-metric-tile': TcProps<{ 'hint'?: string | number; 'icon'?: string | number; 'label'?: string | number; 'unit'?: string | number; 'value'?: string | number }>
     'tc-migration-guide': TcProps<{ 'from'?: string | number; 'title'?: string | number; 'to'?: string | number }>
     'tc-minimap': TcProps<{ 'background-image'?: string | number; 'rotation'?: string | number; 'size'?: string | number; 'world-height'?: string | number; 'world-width'?: string | number; 'world-x'?: string | number; 'world-y'?: string | number }>
-    'tc-modal': TcProps<{ 'centered'?: boolean; 'fullscreen'?: string | number; 'open'?: boolean; 'scrollable'?: boolean; 'size'?: string | number; 'static-backdrop'?: boolean; 'title'?: string | number; onTcHidden?: (e: CustomEvent) => void; onTcHide?: (e: CustomEvent) => void; onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void }>
+    'tc-modal': TcProps<{ 'centered'?: boolean; 'fullscreen'?: string | number; 'lazy'?: boolean; 'open'?: boolean; 'scrollable'?: boolean; 'size'?: string | number; 'static-backdrop'?: boolean; 'title'?: string | number; onTcHidden?: (e: CustomEvent) => void; onTcHide?: (e: CustomEvent) => void; onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void }>
     'tc-mouse-sensitivity': TcProps<{ 'ads'?: string | number; 'disabled'?: boolean; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-multi-card-select': TcProps<{ 'columns'?: string | number; 'loading'?: boolean; 'loading-count'?: string | number; 'name'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-nav': TcProps<{ 'fill'?: boolean; 'justified'?: boolean; 'variant'?: string | number; 'vertical'?: boolean }>
@@ -344,7 +344,7 @@ export interface ToolcaseIntrinsicElements {
     'tc-switch': TcProps<{ 'checked'?: boolean; 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'label'?: string | number; 'name'?: string | number; 'required'?: boolean; 'reverse'?: boolean; 'state'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-tab-bar': TcProps<{ 'active-id'?: string | number; 'size'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-tab-sections': TcProps<{ 'active-key'?: boolean; 'default-active-key'?: string | number; 'loading'?: boolean; onTcChange?: (e: CustomEvent) => void }>
-    'tc-table': TcProps<{ 'borderless'?: boolean; 'compact'?: boolean; 'empty-message'?: string | number; 'hoverable'?: boolean; 'loading'?: boolean; 'loading-rows'?: string | number; 'sticky-header'?: boolean; 'striped'?: boolean; onTcRowClick?: (e: CustomEvent) => void }>
+    'tc-table': TcProps<{ 'borderless'?: boolean; 'collapse'?: string | number; 'collapse-below'?: string | number; 'compact'?: boolean; 'empty-message'?: string | number; 'hoverable'?: boolean; 'loading'?: boolean; 'loading-rows'?: string | number; 'sticky-first-column'?: boolean; 'sticky-header'?: boolean; 'sticky-last-column'?: boolean; 'striped'?: boolean; onTcRowClick?: (e: CustomEvent) => void }>
     'tc-tag': TcProps<{ 'count'?: string | number; 'disabled'?: boolean; 'icon'?: string | number; 'removable'?: boolean; 'selected'?: boolean; 'static'?: boolean; 'variant'?: string | number; onTcClick?: (e: CustomEvent) => void; onTcRemove?: (e: CustomEvent) => void }>
     'tc-tag-input': TcProps<{ 'allow-create'?: boolean; 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'label'?: string | number; 'loading'?: boolean; 'max-height'?: string | number; 'max-tags'?: string | number; 'name'?: string | number; 'placeholder'?: string | number; 'required'?: boolean; 'state'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-team-list': TcProps

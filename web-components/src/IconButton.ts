@@ -17,13 +17,18 @@ const VARIANTS: IconButtonVariant[] = [
 ]
 const SIZES: IconButtonSize[] = ['small', 'default', 'large']
 
+/** Visible-label mode: `''`/`always` renders the label text beside the icon;
+ *  `coarse` renders it only for coarse pointers (touch), where there is no
+ *  hover tooltip to reveal what the icon does. */
+export type IconButtonShowLabel = 'always' | 'coarse'
+
 export class IconButton extends HTMLElement {
     private _initialised = false
 
     onClick: (() => void) | null = null
 
     static get observedAttributes(): string[] {
-        return ['icon', 'size', 'variant', 'outline', 'label', 'disabled']
+        return ['icon', 'size', 'variant', 'outline', 'label', 'disabled', 'show-label']
     }
 
     connectedCallback(): void {
@@ -85,6 +90,18 @@ export class IconButton extends HTMLElement {
         else this.removeAttribute('disabled')
     }
 
+    /** `show-label` → 'always'; `show-label="coarse"` → 'coarse'; absent → null. */
+    get showLabel(): IconButtonShowLabel | null {
+        const v = this.getAttribute('show-label')
+        if (v === null) return null
+        return v === 'coarse' ? 'coarse' : 'always'
+    }
+    set showLabel(v: IconButtonShowLabel | null) {
+        if (v === 'coarse') this.setAttribute('show-label', 'coarse')
+        else if (v != null) this.setAttribute('show-label', '')
+        else this.removeAttribute('show-label')
+    }
+
     private _handleClick = (): void => {
         if (this.disabled) return
         this.dispatchEvent(new CustomEvent('tc-click', { bubbles: true, composed: true }))
@@ -104,6 +121,7 @@ export class IconButton extends HTMLElement {
         const outline = this.outline
         const disabled = this.disabled
         const label = this.label
+        const showLabel = this.showLabel
         const iconName = this.getAttribute('icon') ?? ''
 
         const variantClass = outline ? `btn-outline-${variant}` : `btn-${variant}`
@@ -111,7 +129,18 @@ export class IconButton extends HTMLElement {
         const labelAttr = label ? ` aria-label="${esc(label)}"` : ''
         const iconHtml = this._resolveIcon(iconName)
 
-        this.innerHTML = `<button type="button" class="tc-icon-button tc-icon-button--${size} btn ${variantClass}"${labelAttr}${disabledAttr}>${iconHtml}</button>`
+        // Visible label: the button grows into a normal labeled button. In
+        // 'coarse' mode the text is display-gated to (pointer: coarse) by CSS —
+        // desktop keeps the compact icon, touch gets words.
+        const labeled = showLabel != null && label !== ''
+        const labelHtml = labeled ? `<span class="tc-icon-button-label">${esc(label)}</span>` : ''
+        const labeledClass = labeled
+            ? showLabel === 'coarse'
+                ? ' tc-icon-button--labeled-coarse'
+                : ' tc-icon-button--labeled'
+            : ''
+
+        this.innerHTML = `<button type="button" class="tc-icon-button tc-icon-button--${size}${labeledClass} btn ${variantClass}"${labelAttr}${disabledAttr}>${iconHtml}${labelHtml}</button>`
     }
 }
 

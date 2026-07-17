@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { msg } from './messages'
 import { fieldMessageHtml } from './internal/field-message'
 import {
     requiredMark,
@@ -105,9 +106,7 @@ export class DatePicker extends HTMLElement {
         reflectFieldValidity(this._internals, {
             invalid,
             valueMissing: requiredEmpty && !error,
-            message:
-                error ||
-                (requiredEmpty ? 'This field is required.' : 'Please provide a valid date.'),
+            message: error || (requiredEmpty ? msg('fieldRequired') : msg('invalidDate')),
             anchor: this.querySelector<HTMLInputElement>('input') ?? undefined,
         })
     }
@@ -246,7 +245,7 @@ export class DatePicker extends HTMLElement {
             state,
             error,
             hint: this.help,
-            invalidText: 'Please provide a valid date.',
+            invalidText: msg('invalidDate'),
             validText: 'Looks good!',
         })
 

@@ -1,4 +1,5 @@
 import { Carousel as BsCarousel } from './internal/Carousel'
+import { setHostClass } from './internal/host-class'
 import { chevronLeftIcon, chevronRightIcon } from './icons'
 
 const TAG_NAME = 'tc-carousel'
@@ -132,7 +133,7 @@ export class Carousel extends HTMLElement {
     private render(): void {
         const id = this.id || this._carouselId
 
-        this.className = `carousel slide${this.fade ? ' carousel-fade' : ''}`
+        setHostClass(this, `carousel slide${this.fade ? ' carousel-fade' : ''}`)
 
         const indicatorsHtml = this.indicators
             ? `<div class="carousel-indicators">${this._slides

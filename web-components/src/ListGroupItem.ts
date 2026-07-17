@@ -1,15 +1,9 @@
 import { VARIANTS_FULL } from './internal/variants'
+import { setHostClass } from './internal/host-class'
 const TAG_NAME = 'tc-list-group-item'
 
 export type ListGroupItemVariant =
-    | 'primary'
-    | 'secondary'
-    | 'success'
-    | 'danger'
-    | 'warning'
-    | 'info'
-    | 'light'
-    | 'dark'
+    'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
 
 const VARIANTS: ListGroupItemVariant[] = [...VARIANTS_FULL]
 
@@ -98,7 +92,7 @@ export class ListGroupItem extends HTMLElement {
         if (active) classes.push('active')
         if (disabled) classes.push('disabled')
 
-        this.className = classes.join(' ')
+        setHostClass(this, classes.join(' '))
 
         if (active) {
             this.setAttribute('aria-current', 'true')

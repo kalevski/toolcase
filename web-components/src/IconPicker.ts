@@ -1,5 +1,6 @@
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
+import { msg } from './messages'
 import { fieldMessageHtml } from './internal/field-message'
 import {
     requiredMark,
@@ -100,8 +101,7 @@ export class IconPicker extends HTMLElement {
         reflectFieldValidity(this._internals, {
             invalid,
             valueMissing: requiredEmpty && !error,
-            message:
-                error || (requiredEmpty ? 'This field is required.' : 'Please select a valid icon.'),
+            message: error || (requiredEmpty ? msg('fieldRequired') : msg('invalidIcon')),
             anchor: this._getTrigger() ?? undefined,
         })
     }
@@ -419,7 +419,7 @@ export class IconPicker extends HTMLElement {
         const cells = Array.from({ length: count })
             .map(() => `<div class="tc-icon-picker-skeleton-cell" aria-hidden="true"></div>`)
             .join('')
-        return `<div class="tc-icon-picker-popup" role="status" aria-busy="true" aria-label="Loading icons"><div class="tc-icon-picker-grid tc-icon-picker-grid--loading" style="grid-template-columns:repeat(${cols},1fr);">${cells}</div><span class="visually-hidden">Loading…</span></div>`
+        return `<div class="tc-icon-picker-popup" role="status" aria-busy="true" aria-label="Loading icons"><div class="tc-icon-picker-grid tc-icon-picker-grid--loading" style="grid-template-columns:repeat(${cols},1fr);">${cells}</div><span class="visually-hidden">${esc(msg('loading'))}</span></div>`
     }
 
     private _renderGridContent(filtered: IconOption[]): string {
@@ -487,7 +487,7 @@ export class IconPicker extends HTMLElement {
             state,
             error,
             hint: this.help,
-            invalidText: 'Please select a valid icon.',
+            invalidText: msg('invalidIcon'),
             validText: 'Looks good!',
         })
 

@@ -1,4 +1,5 @@
 import { DialogBase, esc } from './internal/dialog-base'
+import { msg } from './messages'
 import { closeIcon } from './icons'
 
 const TAG_NAME = 'tc-drawer'
@@ -115,7 +116,7 @@ export class Drawer extends DialogBase {
             ` tabindex="-1" aria-hidden="${panelAriaHidden}"${hiddenAttr}>` +
             `<div class="tc-drawer__header">` +
             `<span class="tc-drawer__title" id="${labelId}">${titleText}</span>` +
-            `<button type="button" class="tc-drawer__close" aria-label="Close">${closeIcon}</button>` +
+            `<button type="button" class="tc-drawer__close" aria-label="${esc(msg('close'))}">${closeIcon}</button>` +
             `</div>` +
             `<div class="tc-drawer__body"></div>` +
             `</div>`

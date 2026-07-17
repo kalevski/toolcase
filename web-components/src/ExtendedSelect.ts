@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { msg } from './messages'
 import { Search, Check } from 'lucide-static'
 import { icon, chevronDownIcon } from './icons'
 import { fixedContainingBlock } from './internal/containingBlock'
@@ -132,7 +133,7 @@ export class ExtendedSelect extends HTMLElement {
             if (!this.value) this._updateTriggerLabel()
         } else if (name === 'search-placeholder') {
             const si = this.querySelector<HTMLInputElement>('.tc-extended-select__search-input')
-            if (si) si.placeholder = next ?? 'Search…'
+            if (si) si.placeholder = next ?? msg('searchPlaceholder')
         } else if (name === 'no-results-text') {
             const el = this.querySelector('.tc-extended-select__no-results')
             if (el) el.textContent = next ?? 'No results'
@@ -181,9 +182,7 @@ export class ExtendedSelect extends HTMLElement {
         reflectFieldValidity(this._internals, {
             invalid,
             valueMissing: requiredEmpty && !error,
-            message:
-                error ||
-                (requiredEmpty ? 'Please make a selection.' : 'Please provide a valid selection.'),
+            message: error || (requiredEmpty ? msg('selectionRequired') : msg('selectionInvalid')),
             anchor:
                 this.querySelector<HTMLButtonElement>('.tc-extended-select__trigger') ?? undefined,
         })
@@ -217,14 +216,14 @@ export class ExtendedSelect extends HTMLElement {
     }
 
     get placeholder(): string {
-        return this.getAttribute('placeholder') ?? 'Select…'
+        return this.getAttribute('placeholder') ?? msg('selectPlaceholder')
     }
     set placeholder(v: string) {
         this.setAttribute('placeholder', v)
     }
 
     get searchPlaceholder(): string {
-        return this.getAttribute('search-placeholder') ?? 'Search…'
+        return this.getAttribute('search-placeholder') ?? msg('searchPlaceholder')
     }
     set searchPlaceholder(v: string) {
         this.setAttribute('search-placeholder', v)
@@ -420,7 +419,7 @@ export class ExtendedSelect extends HTMLElement {
             state,
             error: this.error,
             hint: this.help,
-            invalidText: 'Please provide a valid selection.',
+            invalidText: msg('selectionInvalid'),
             validText: 'Looks good!',
         })
 
@@ -428,7 +427,7 @@ export class ExtendedSelect extends HTMLElement {
         // but no longer submits — form submission flows through ElementInternals
         // (_syncForm) so the value is not duplicated under `name`. Its `name`
         // attribute is therefore intentionally omitted.
-        this.innerHTML = `${labelHtml}<input type="hidden" value="${esc(currentValue)}" class="tc-extended-select__hidden"><button type="button" class="${triggerCls}" role="combobox" aria-expanded="false" aria-controls="${this._listId}" aria-haspopup="listbox"${describe}${requiredAttr}${disabledAttr}><span class="tc-extended-select__trigger-label">${this._triggerLabelHtml()}</span><span class="tc-extended-select__trigger-spinner" aria-hidden="true"><span class="spinner-border spinner-border-sm"></span></span><span class="tc-extended-select__caret" aria-hidden="true">${chevronDownIcon}</span></button><div class="tc-extended-select__menu"><div class="tc-extended-select__search-wrap">${searchIconHtml}<input type="text" class="tc-extended-select__search-input" placeholder="${esc(this.searchPlaceholder)}" autocomplete="off" aria-label="Search options"></div><ul class="tc-extended-select__list" id="${this._listId}" role="listbox">${this._renderOptions()}</ul><div class="tc-extended-select__loading-indicator" aria-live="polite" aria-label="Loading"><span class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading…</span></span></div></div>${messageHtml}`
+        this.innerHTML = `${labelHtml}<input type="hidden" value="${esc(currentValue)}" class="tc-extended-select__hidden"><button type="button" class="${triggerCls}" role="combobox" aria-expanded="false" aria-controls="${this._listId}" aria-haspopup="listbox"${describe}${requiredAttr}${disabledAttr}><span class="tc-extended-select__trigger-label">${this._triggerLabelHtml()}</span><span class="tc-extended-select__trigger-spinner" aria-hidden="true"><span class="spinner-border spinner-border-sm"></span></span><span class="tc-extended-select__caret" aria-hidden="true">${chevronDownIcon}</span></button><div class="tc-extended-select__menu"><div class="tc-extended-select__search-wrap">${searchIconHtml}<input type="text" class="tc-extended-select__search-input" placeholder="${esc(this.searchPlaceholder)}" autocomplete="off" aria-label="${esc(msg('searchOptionsLabel'))}"></div><ul class="tc-extended-select__list" id="${this._listId}" role="listbox">${this._renderOptions()}</ul><div class="tc-extended-select__loading-indicator" aria-live="polite" aria-label="${esc(msg('loading'))}"><span class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">${esc(msg('loading'))}</span></span></div></div>${messageHtml}`
 
         if (this.loading) this.setAttribute('aria-busy', 'true')
 
@@ -463,7 +462,7 @@ export class ExtendedSelect extends HTMLElement {
                 state,
                 error: this.error,
                 hint: this.help,
-                invalidText: 'Please provide a valid selection.',
+                invalidText: msg('selectionInvalid'),
                 validText: 'Looks good!',
             })
         }

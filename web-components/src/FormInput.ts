@@ -1,6 +1,7 @@
 import { esc } from './internal/esc'
 import { fieldMessageHtml } from './internal/field-message'
 import { setFieldFormValue, reflectFieldValidity, dispatchFieldChange } from './internal/form-field'
+import { msg } from './messages'
 // tc-form-input — universal form-input dispatcher (port of react-components
 // FormInput). A single light-DOM custom element whose `type` attribute selects
 // which native control to render, with built-in validation, helper/error lines,
@@ -58,6 +59,12 @@ const TYPES: FormInputType[] = [
 // Types whose control + label sit on one inline row (form-check motif).
 const INLINE_TYPES: FormInputType[] = ['checkbox', 'switch']
 
+/** When validation feedback becomes visible. Validity itself is always kept
+ *  current on the ElementInternals (so form gating works); this only controls
+ *  the visual error treatment. */
+export type FormInputValidateOn = 'blur' | 'input' | 'submit' | 'mount'
+const VALIDATE_ON: FormInputValidateOn[] = ['blur', 'input', 'submit', 'mount']
+
 export type ValidationResult = boolean | string | { valid: boolean; message?: string }
 
 export type FormInputValidator = (value: unknown) => ValidationResult
@@ -98,6 +105,12 @@ export class FormInput extends HTMLElement {
     private _onErrorMessage: ((result: Exclude<ValidationResult, true>) => string) | null = null
     private _lastSignature: string | null = null
 
+    // Interaction lifecycle: pristine → touched (blur) → dirty (input) →
+    // submitted. Errors only render once the gate for `validate-on` is passed.
+    private _touched = false
+    private _dirty = false
+    private _submitted = false
+
     onChange: ((value: unknown, hasError: boolean) => void) | null = null
 
     static get observedAttributes(): string[] {
@@ -117,6 +130,8 @@ export class FormInput extends HTMLElement {
             'max',
             'step',
             'rows',
+            'validate-on',
+            'required-message',
         ]
     }
 
@@ -145,11 +160,18 @@ export class FormInput extends HTMLElement {
         // reference is a no-op, so this is safe to repeat.
         this.addEventListener('input', this._onControlEvent)
         this.addEventListener('change', this._onControlEvent)
+        this.addEventListener('focusout', this._onFocusout)
+        // Native `invalid` fires on the host (form-associated) and on the inner
+        // controls when a containing form submits/reports — it does not bubble,
+        // so listen in the capture phase to catch both. That is the submit gate.
+        this.addEventListener('invalid', this._onInvalid, true)
     }
 
     disconnectedCallback(): void {
         this.removeEventListener('input', this._onControlEvent)
         this.removeEventListener('change', this._onControlEvent)
+        this.removeEventListener('focusout', this._onFocusout)
+        this.removeEventListener('invalid', this._onInvalid, true)
     }
 
     /** Restore the value captured at first connect when the form resets, then
@@ -157,6 +179,10 @@ export class FormInput extends HTMLElement {
     formResetCallback(): void {
         this._valueExplicit = this._resetValue
         this._currentValue = this._resetValue
+        // A reset field is pristine again — no error chrome until re-interaction.
+        this._touched = false
+        this._dirty = false
+        this._submitted = false
         if (this._initialised) {
             this.render()
             this._runValidation(false)
@@ -255,6 +281,25 @@ export class FormInput extends HTMLElement {
     set loading(v: boolean) {
         if (v) this.setAttribute('loading', '')
         else this.removeAttribute('loading')
+    }
+
+    /** When error feedback becomes visible: 'blur' (default), 'input',
+     *  'submit', or 'mount' (the pre-5.1 eager behaviour). */
+    get validateOn(): FormInputValidateOn {
+        const v = this.getAttribute('validate-on') as FormInputValidateOn
+        return VALIDATE_ON.includes(v) ? v : 'blur'
+    }
+    set validateOn(v: FormInputValidateOn) {
+        this.setAttribute('validate-on', v)
+    }
+
+    /** Per-instance override of the registry's `fieldRequired` message. */
+    get requiredMessage(): string | null {
+        return this.getAttribute('required-message')
+    }
+    set requiredMessage(v: string | null) {
+        if (v != null) this.setAttribute('required-message', v)
+        else this.removeAttribute('required-message')
     }
 
     // ── JS-property props ───────────────────────────────────────────────────
@@ -385,7 +430,7 @@ export class FormInput extends HTMLElement {
         if (typeof result === 'string') return result
         if (result && typeof result === 'object' && typeof result.message === 'string')
             return result.message
-        return 'Invalid value'
+        return msg('invalidValue')
     }
 
     private _computeValidationMessage(value: unknown): string | null {
@@ -408,8 +453,46 @@ export class FormInput extends HTMLElement {
             // result === false
             return this._deriveMessage(result)
         }
-        if (this.required && isEmpty(value)) return 'This field is required'
+        if (this.required && isEmpty(value)) return this.requiredMessage ?? msg('fieldRequired')
         return null
+    }
+
+    /** Whether the current error (if any) should be visually rendered yet.
+     *  A consumer-forced `error` attribute always shows. */
+    private _shouldShowValidation(forced: boolean): boolean {
+        if (forced) return true
+        switch (this.validateOn) {
+            case 'mount':
+                return true
+            case 'submit':
+                return this._submitted
+            case 'input':
+                return this._submitted || this._dirty || this._touched
+            default:
+                return this._submitted || this._touched
+        }
+    }
+
+    /** Mark as submitted, surface any error, and (when invalid) trigger the
+     *  browser's native report UI. Mirrors HTMLInputElement.reportValidity. */
+    reportValidity(): boolean {
+        this._submitted = true
+        const hasError = this._runValidation(false)
+        if (hasError) this._internals.reportValidity()
+        return !hasError
+    }
+
+    checkValidity(): boolean {
+        return this._internals.checkValidity()
+    }
+
+    /** Return the field to its pristine (no visible errors) state without
+     *  touching the value. */
+    resetValidity(): void {
+        this._touched = false
+        this._dirty = false
+        this._submitted = false
+        this._runValidation(false)
     }
 
     private _runValidation(dispatch: boolean): boolean {
@@ -417,7 +500,8 @@ export class FormInput extends HTMLElement {
         const forced = this.getAttribute('error')
         const message = forced && forced.length > 0 ? forced : this._computeValidationMessage(value)
         const hasError = message != null
-        this._applyValidationState(message, hasError)
+        const show = hasError && this._shouldShowValidation(!!forced && forced.length > 0)
+        this._applyValidationState(message, hasError, show)
         if (dispatch) {
             const sig = `${hasError}::${JSON.stringify(value ?? null)}`
             if (sig === this._lastSignature) return hasError
@@ -430,8 +514,11 @@ export class FormInput extends HTMLElement {
         return hasError
     }
 
-    private _applyValidationState(message: string | null, hasError: boolean): void {
-        this.classList.toggle('tc-form-input--error', hasError)
+    private _applyValidationState(message: string | null, hasError: boolean, show: boolean): void {
+        // Visual error chrome is gated on interaction (`show`); the internals
+        // below always carry the real validity so form submission gating and
+        // checkValidity() stay accurate from the first render.
+        this.classList.toggle('tc-form-input--error', show)
 
         // Push the coerced value + validity into the form. _currentValue is already
         // the coerced shape (_getValue: boolean for checkbox/switch/optionless radio,
@@ -442,7 +529,7 @@ export class FormInput extends HTMLElement {
         setFieldFormValue(this._internals, this.name, value == null ? null : value)
         reflectFieldValidity(this._internals, {
             invalid: hasError,
-            message: message ?? 'Invalid value',
+            message: message ?? msg('invalidValue'),
             anchor:
                 this.querySelector<HTMLElement>(
                     '.form-control, .form-select, .form-range, .form-check-input',
@@ -456,19 +543,19 @@ export class FormInput extends HTMLElement {
         if (slot) {
             slot.outerHTML = fieldMessageHtml({
                 id: this._helpId,
-                error: hasError ? (message ?? '') : null,
+                error: show ? (message ?? '') : null,
                 hint: this.help,
             })
         }
 
-        const describedBy = this.help || hasError ? this._helpId : ''
+        const describedBy = this.help || show ? this._helpId : ''
 
         const controls = this.querySelectorAll<HTMLElement>(
             '.form-control, .form-select, .form-range, .form-check-input',
         )
         controls.forEach((ctrl) => {
-            ctrl.classList.toggle('is-invalid', hasError)
-            if (hasError) ctrl.setAttribute('aria-invalid', 'true')
+            ctrl.classList.toggle('is-invalid', show)
+            if (show) ctrl.setAttribute('aria-invalid', 'true')
             else ctrl.removeAttribute('aria-invalid')
             if (describedBy) ctrl.setAttribute('aria-describedby', describedBy)
             else ctrl.removeAttribute('aria-describedby')
@@ -477,8 +564,24 @@ export class FormInput extends HTMLElement {
 
     private _onControlEvent = (): void => {
         if (this.loading) return
+        this._dirty = true
         this._currentValue = this._getValue()
         this._runValidation(true)
+    }
+
+    // Leaving any inner control marks the field touched (the `blur` gate).
+    private _onFocusout = (): void => {
+        if (this.loading || this._touched) return
+        this._touched = true
+        this._runValidation(false)
+    }
+
+    // A form-level submit/reportValidity rejected this field — from now on the
+    // error is visible regardless of the interaction gate.
+    private _onInvalid = (): void => {
+        if (this._submitted) return
+        this._submitted = true
+        this._runValidation(false)
     }
 
     // ── Rendering ───────────────────────────────────────────────────────────
@@ -526,7 +629,7 @@ export class FormInput extends HTMLElement {
             `<span class="spinner-border spinner-border-sm" role="status"></span>`,
             `<span class="tc-form-input-loading-bar"></span>`,
             `</div>`,
-            `<span class="visually-hidden">Loading…</span>`,
+            `<span class="visually-hidden">${esc(msg('loading'))}</span>`,
         ].join('')
     }
 

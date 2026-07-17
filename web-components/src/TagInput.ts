@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { msg } from './messages'
 import { fixedOriginOffset } from './internal/containingBlock'
 import { cssLength } from './internal/cssLength'
 import { X, Check } from 'lucide-static'
@@ -165,8 +166,7 @@ export class TagInput extends HTMLElement {
             invalid,
             valueMissing: requiredEmpty && !error,
             message:
-                error ||
-                (requiredEmpty ? 'Please add at least one tag.' : 'Please provide a valid value.'),
+                error || (requiredEmpty ? 'Please add at least one tag.' : msg('fieldInvalid')),
             anchor: this.querySelector<HTMLInputElement>('.tc-tag-input-field') ?? undefined,
         })
     }
@@ -622,7 +622,7 @@ export class TagInput extends HTMLElement {
                 // Reserve the message line even while loading so the field's
                 // height does not jump when the skeleton resolves.
                 this._messageHtml() +
-                `<span class="visually-hidden">Loading…</span>` +
+                `<span class="visually-hidden">${esc(msg('loading'))}</span>` +
                 `</div>`
             return
         }

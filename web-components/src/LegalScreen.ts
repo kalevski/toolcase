@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { msg } from './messages'
 import { closeIcon } from './icons'
 
 const TAG_NAME = 'tc-legal-screen'
@@ -160,7 +161,7 @@ export class LegalScreen extends HTMLElement {
             `<span class="tc-legal-screen__eyebrow">Legal</span>` +
             `<span class="tc-legal-screen__title">${esc(this.screenTitle)}</span>` +
             `</div>` +
-            `<button type="button" class="tc-legal-screen__close" aria-label="Close">${closeIcon}</button>` +
+            `<button type="button" class="tc-legal-screen__close" aria-label="${esc(msg('close'))}">${closeIcon}</button>` +
             `</header>` +
             `<div class="tc-legal-screen__grid">` +
             `<nav class="tc-legal-screen__nav" aria-label="Legal sections">${navHtml}</nav>` +

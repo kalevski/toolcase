@@ -13,7 +13,9 @@
     display: inline-flex;
     align-items: center;
     padding: var(--bs-badge-padding-y) var(--bs-badge-padding-x);
-    font-size: var(--bs-badge-font-size);
+    // Legibility floor: theme/app overrides can shrink the badge, but never
+    // below --tc-font-size-min.
+    font-size: max(var(--tc-font-size-min, 12px), var(--bs-badge-font-size));
     font-weight: var(--bs-badge-font-weight);
     line-height: 1;
     letter-spacing: 0.025em;

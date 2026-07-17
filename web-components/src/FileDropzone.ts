@@ -1,5 +1,6 @@
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
+import { msg } from './messages'
 
 const TAG_NAME = 'tc-file-dropzone'
 
@@ -60,7 +61,7 @@ export class FileDropzone extends HTMLElement {
                 ? `<p class="tc-file-dropzone__formats">${fmts.map((f) => `<span class="tc-file-dropzone__format-chip">${esc(f.label)}</span>`).join('')}</p>`
                 : ''
 
-        this.innerHTML = `<div class="tc-file-dropzone__area" role="button" tabindex="0" aria-label="Upload files — drag and drop or click to browse"><span class="tc-file-dropzone__icon" aria-hidden="true">${uploadIconHtml}</span><p class="tc-file-dropzone__prompt">Drag &amp; drop files here or click to browse</p>${formatsHtml}</div><input type="file" multiple class="tc-file-dropzone__input" aria-label="Select files to upload" tabindex="-1"${accept ? ` accept="${esc(accept)}"` : ''} />`
+        this.innerHTML = `<div class="tc-file-dropzone__area" role="button" tabindex="0" aria-label="${esc(msg('fileDropLabel'))}"><span class="tc-file-dropzone__icon" aria-hidden="true">${uploadIconHtml}</span><p class="tc-file-dropzone__prompt">${esc(msg('fileDropPrompt'))}</p>${formatsHtml}</div><input type="file" multiple class="tc-file-dropzone__input" aria-label="${esc(msg('fileSelectLabel'))}" tabindex="-1"${accept ? ` accept="${esc(accept)}"` : ''} />`
 
         const area = this.querySelector<HTMLElement>('.tc-file-dropzone__area')
         const input = this.querySelector<HTMLInputElement>('.tc-file-dropzone__input')

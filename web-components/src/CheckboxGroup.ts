@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { msg } from './messages'
 import { fieldMessageHtml } from './internal/field-message'
 import { requiredMark, reflectFieldValidity, dispatchFieldChange } from './internal/form-field'
 const TAG_NAME = 'tc-checkbox-group'
@@ -106,9 +107,7 @@ export class CheckboxGroup extends HTMLElement {
         reflectFieldValidity(this._internals, {
             invalid,
             valueMissing: requiredEmpty && !error,
-            message:
-                error ||
-                (requiredEmpty ? 'Please select at least one option.' : 'Invalid selection.'),
+            message: error || (requiredEmpty ? msg('selectionMinOne') : msg('selectionInvalid')),
             anchor: this.querySelector<HTMLInputElement>('input[type="checkbox"]') ?? undefined,
         })
     }
@@ -218,7 +217,7 @@ export class CheckboxGroup extends HTMLElement {
                 state,
                 error: this.error,
                 hint: this.help,
-                invalidText: 'Please select at least one option.',
+                invalidText: msg('selectionMinOne'),
                 validText: 'Looks good!',
             })
         }
@@ -329,7 +328,7 @@ export class CheckboxGroup extends HTMLElement {
             state,
             error,
             hint: help,
-            invalidText: 'Please select at least one option.',
+            invalidText: msg('selectionMinOne'),
             validText: 'Looks good!',
         })
         // Group has no single input — describe the fieldset itself.

@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { msg } from './messages'
 import { fixedOriginOffset } from './internal/containingBlock'
 const TAG_NAME = 'tc-area-chart'
 
@@ -249,7 +250,7 @@ export class AreaChart extends HTMLElement {
                 : ''
 
         if (!series.length || series.every((s) => !s.points.length)) {
-            this.innerHTML = `<div class="tc-area-chart__inner">${headerHtml}<div class="tc-area-chart__empty">No data</div></div>`
+            this.innerHTML = `<div class="tc-area-chart__inner">${headerHtml}<div class="tc-area-chart__empty">${esc(msg('noData'))}</div></div>`
             this._pointGeom = []
             return
         }
@@ -469,7 +470,7 @@ export class AreaChart extends HTMLElement {
             `<div class="tc-area-chart__inner">` +
             headHtml +
             `<div class="tc-area-chart__skeleton tc-area-chart__skeleton--plot" aria-hidden="true" style="height:${this.height}px"></div>` +
-            `<span class="visually-hidden">Loading…</span>` +
+            `<span class="visually-hidden">${esc(msg('loading'))}</span>` +
             `</div>`
     }
 

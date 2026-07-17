@@ -54,6 +54,9 @@ tc-slider[disabled] {
     border: var(--bs-slider-track-border);
     border-radius: 0;
     margin-block: 20px;
+    // Half a thumb of inline breathing room so the extremes (0% / 100%) stay
+    // fully visible and grabbable instead of half-cropped at the container edge.
+    margin-inline: calc(var(--bs-slider-thumb-size) / 2);
     cursor: pointer;
 }
 
@@ -108,12 +111,19 @@ tc-slider[disabled] {
         transform: translate(-50%, -50%) scale(1.1);
     }
 
-    // 44px coarse-pointer hit area.
+    // Invisible extended hit area up to the touch-target floor.
     &::after {
         content: '';
         position: absolute;
-        inset: -14px;
+        inset: calc((var(--bs-slider-thumb-size) - var(--tc-min-touch-target, 44px)) / 2);
         border-radius: 50%;
+    }
+}
+
+// Coarse pointers: a bigger thumb to grab (hit area above already ≥44px).
+@media (pointer: coarse) {
+    tc-slider {
+        --bs-slider-thumb-size: 20px;
     }
 }
 
@@ -143,6 +153,16 @@ tc-slider[disabled] {
 .tc-slider-thumb:focus-visible .tc-slider-tooltip,
 .tc-slider-thumb--dragging .tc-slider-tooltip {
     opacity: 1;
+}
+
+// Near the track extremes the chip flips inward so it never overflows the
+// component box (the JS toggles the edge modifiers from the value percent).
+.tc-slider-thumb--edge-start .tc-slider-tooltip {
+    transform: translateX(-12%);
+}
+
+.tc-slider-thumb--edge-end .tc-slider-tooltip {
+    transform: translateX(-88%);
 }
 
 // ── Ticks ─────────────────────────────────────────────────────────────────────

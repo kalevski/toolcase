@@ -1,4 +1,5 @@
 import { DialogBase, esc } from './internal/dialog-base'
+import { msg } from './messages'
 import { closeIcon } from './icons'
 
 const TAG_NAME = 'tc-report-dialog'
@@ -151,7 +152,7 @@ export class ReportDialog extends DialogBase {
             `<div class="tc-report-dialog__header">` +
             `<span class="tc-report-dialog__eyebrow">Report Player</span>` +
             `<h2 class="tc-report-dialog__title" id="${labelId}">${playerNameText}</h2>` +
-            `<button type="button" class="tc-report-dialog__close" aria-label="Close">${closeIcon}</button>` +
+            `<button type="button" class="tc-report-dialog__close" aria-label="${esc(msg('close'))}">${closeIcon}</button>` +
             `</div>` +
             `<div class="tc-report-dialog__body">` +
             `<p class="tc-report-dialog__message">Select the reason this player should be reported. Your report stays anonymous.</p>` +

@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { setHostClass } from './internal/host-class'
 const TAG_NAME = 'tc-portrait'
 
 function looksLikeUrl(s: string): boolean {
@@ -90,7 +91,7 @@ export class Portrait extends HTMLElement {
         }
 
         // No slot — host IS the visual; className = is safe here.
-        this.className = `tc-portrait${isCircle ? ' tc-portrait--circle' : ''}`
+        setHostClass(this, `tc-portrait${isCircle ? ' tc-portrait--circle' : ''}`)
         this.setAttribute('role', 'img')
         this.setAttribute('aria-label', glyph || 'Portrait')
 

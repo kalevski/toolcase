@@ -1,5 +1,6 @@
 import { closeIcon } from './icons'
 import { esc } from './internal/esc'
+import { msg } from './messages'
 
 const TAG_NAME = 'tc-close-button'
 
@@ -29,7 +30,7 @@ export class CloseButton extends HTMLElement {
     }
 
     get ariaLabel(): string {
-        return this.getAttribute('aria-label') ?? 'Close'
+        return this.getAttribute('aria-label') ?? msg('close')
     }
     set ariaLabel(v: string) {
         this.setAttribute('aria-label', v)

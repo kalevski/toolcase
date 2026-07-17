@@ -54,6 +54,36 @@ export class Form extends HTMLElement {
         else this.removeAttribute('novalidate')
     }
 
+    /** Submit-time gate mirroring native constraint validation: runs
+     *  `reportValidity()` on the inner form (each invalid control receives an
+     *  `invalid` event, which flips toolcase inputs to their submitted state so
+     *  inline errors render), toggles the `was-validated` chrome, and returns
+     *  overall validity. */
+    validate(): boolean {
+        const form = this._form()
+        if (!form) return true
+        const valid = form.reportValidity()
+        if (!valid) {
+            form.classList.add('was-validated')
+            if (!this.validated) this.setAttribute('validated', '')
+        }
+        return valid
+    }
+
+    /** Return every control to its pristine (no visible errors) state without
+     *  touching values — the counterpart of `validate()` for reopening a
+     *  dialog or after a successful submit. */
+    resetValidity(): void {
+        const form = this._form()
+        form?.classList.remove('was-validated')
+        this.removeAttribute('validated')
+        if (!form) return
+        for (const el of Array.from(form.elements)) {
+            const ctl = el as Element & { resetValidity?: () => void }
+            if (typeof ctl.resetValidity === 'function') ctl.resetValidity()
+        }
+    }
+
     private _form(): HTMLFormElement | null {
         return this.querySelector('form')
     }

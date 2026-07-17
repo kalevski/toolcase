@@ -1,4 +1,14 @@
 export { register } from './register'
+export {
+    configureMessages,
+    resetMessages,
+    getMessages,
+    type ToolcaseMessages,
+    type MessageFormatter,
+    type PaginationRangeParams,
+    type StepsCompleteParams,
+    type StarsRatingParams,
+} from './messages'
 export * from './AmmoCounter'
 export * from './ComboCounter'
 export * from './Anchor'

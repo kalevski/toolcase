@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { msg } from './messages'
 import { fixedOriginOffset } from './internal/containingBlock'
 const TAG_NAME = 'tc-bar-chart'
 
@@ -208,7 +209,7 @@ export class BarChart extends HTMLElement {
                 : ''
 
         if (!data.length) {
-            this.innerHTML = `<div class="tc-bar-chart__inner">${headerHtml}<div class="tc-bar-chart__empty">No data</div></div>`
+            this.innerHTML = `<div class="tc-bar-chart__inner">${headerHtml}<div class="tc-bar-chart__empty">${esc(msg('noData'))}</div></div>`
             this._anchors = []
             return
         }
@@ -352,7 +353,7 @@ export class BarChart extends HTMLElement {
             `<div class="tc-bar-chart__inner">` +
             headHtml +
             `<div class="tc-bar-chart__skeleton tc-bar-chart__skeleton--plot" aria-hidden="true" style="height:${this.height}px"></div>` +
-            `<span class="visually-hidden">Loading…</span>` +
+            `<span class="visually-hidden">${esc(msg('loading'))}</span>` +
             `</div>`
     }
 

@@ -7,30 +7,30 @@
 // from caller-projected row cells.
 
 tc-advanced-table {
-    --bs-advanced-table-bg:               var(--tc-surface);
-    --bs-advanced-table-border:           1px solid var(--tc-border);
-    --bs-advanced-table-head-bg:          var(--tc-surface-muted);
-    --bs-advanced-table-head-border:      1px solid var(--tc-border-strong);
-    --bs-advanced-table-head-hover-bg:    var(--tc-surface-muted);
-    --bs-advanced-table-row-hairline:     1px solid var(--tc-slate-100, #f1f5f9);
-    --bs-advanced-table-th-color:         var(--tc-text-muted);
-    --bs-advanced-table-th-active-color:  var(--tc-text);
-    --bs-advanced-table-th-font-size:     0.6875rem;
-    --bs-advanced-table-td-color:         var(--tc-text);
-    --bs-advanced-table-td-font-size:     0.875rem;
-    --bs-advanced-table-cell-padding-y:   0.625rem;
-    --bs-advanced-table-cell-padding-x:   0.75rem;
+    --bs-advanced-table-bg: var(--tc-surface);
+    --bs-advanced-table-border: 1px solid var(--tc-border);
+    --bs-advanced-table-head-bg: var(--tc-surface-muted);
+    --bs-advanced-table-head-border: 1px solid var(--tc-border-strong);
+    --bs-advanced-table-head-hover-bg: var(--tc-surface-muted);
+    --bs-advanced-table-row-hairline: 1px solid var(--tc-slate-100, #f1f5f9);
+    --bs-advanced-table-th-color: var(--tc-text-muted);
+    --bs-advanced-table-th-active-color: var(--tc-text);
+    --bs-advanced-table-th-font-size: 0.6875rem;
+    --bs-advanced-table-td-color: var(--tc-text);
+    --bs-advanced-table-td-font-size: 0.875rem;
+    --bs-advanced-table-cell-padding-y: 0.625rem;
+    --bs-advanced-table-cell-padding-x: 0.75rem;
 
-    --bs-advanced-table-toolbar-gap:      0.75rem;
+    --bs-advanced-table-toolbar-gap: 0.75rem;
     --bs-advanced-table-filter-label-color: var(--tc-text-muted);
-    --bs-advanced-table-filter-label-size:  0.6875rem;
+    --bs-advanced-table-filter-label-size: 0.6875rem;
 
-    --bs-advanced-table-overlay-scrim:    rgba(255, 255, 255, 0.66);
-    --bs-advanced-table-spinner-color:    var(--tc-text-muted);
+    --bs-advanced-table-overlay-scrim: rgba(255, 255, 255, 0.66);
+    --bs-advanced-table-spinner-color: var(--tc-text-muted);
 
-    --bs-advanced-table-summary-color:    var(--tc-text-muted);
+    --bs-advanced-table-summary-color: var(--tc-text-muted);
 
-    --bs-advanced-table-tap-target:       44px;
+    --bs-advanced-table-tap-target: var(--tc-min-touch-target, 44px);
 }
 
 .tc-advanced-table {
@@ -70,16 +70,22 @@ tc-advanced-table {
     border-radius: 0;
 }
 
-// ── Body wrap (overlay anchor) ────────────────────────────────────────────────
+// ── Body wrap (overlay + edge-shadow anchor) ─────────────────────────────────
+// The wrap is the static shell (loading overlay + tc-scroll-shadow edges pin to
+// it); the inner .tc-advanced-table-scroll is the actual horizontal scroller.
 
 .tc-advanced-table-body-wrap {
     position: relative;
     width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
     border: var(--bs-advanced-table-border);
     background: var(--bs-advanced-table-bg);
     border-radius: 0;
+}
+
+.tc-advanced-table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .tc-advanced-table-table {
@@ -114,8 +120,12 @@ tc-advanced-table {
     vertical-align: middle;
 }
 
-.tc-advanced-table-th--center { text-align: center; }
-.tc-advanced-table-th--right  { text-align: right; }
+.tc-advanced-table-th--center {
+    text-align: center;
+}
+.tc-advanced-table-th--right {
+    text-align: right;
+}
 
 .tc-advanced-table-th-label {
     display: inline;
@@ -154,8 +164,12 @@ tc-advanced-table {
     }
 }
 
-.tc-advanced-table-th--center .tc-advanced-table-sort { justify-content: center; }
-.tc-advanced-table-th--right  .tc-advanced-table-sort { justify-content: flex-end; }
+.tc-advanced-table-th--center .tc-advanced-table-sort {
+    justify-content: center;
+}
+.tc-advanced-table-th--right .tc-advanced-table-sort {
+    justify-content: flex-end;
+}
 
 // Header hover well on the whole sortable cell.
 .tc-advanced-table-th:has(.tc-advanced-table-sort):hover {
@@ -191,6 +205,40 @@ tc-advanced-table {
 .tc-advanced-table-body > tr:last-child > td,
 .tc-advanced-table-body > tr:last-child > th {
     border-bottom: none;
+}
+
+// ── Sticky first / last column ────────────────────────────────────────────────
+// Projected body cells carry unknown consumer backgrounds, so pinned cells get
+// the surface fill explicitly.
+
+.tc-advanced-table-body-wrap--sticky-first {
+    .tc-advanced-table-head tr > :first-child,
+    .tc-advanced-table-body > tr > :first-child {
+        position: sticky;
+        left: 0;
+        z-index: 1;
+        background: var(--bs-advanced-table-bg);
+        box-shadow: 1px 0 0 var(--tc-border-strong);
+    }
+
+    .tc-advanced-table-head tr > :first-child {
+        background: var(--bs-advanced-table-head-bg);
+    }
+}
+
+.tc-advanced-table-body-wrap--sticky-last {
+    .tc-advanced-table-head tr > :last-child,
+    .tc-advanced-table-body > tr > :last-child {
+        position: sticky;
+        right: 0;
+        z-index: 1;
+        background: var(--bs-advanced-table-bg);
+        box-shadow: -1px 0 0 var(--tc-border-strong);
+    }
+
+    .tc-advanced-table-head tr > :last-child {
+        background: var(--bs-advanced-table-head-bg);
+    }
 }
 
 // ── Loading overlay ───────────────────────────────────────────────────────────

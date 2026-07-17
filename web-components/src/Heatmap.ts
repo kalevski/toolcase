@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { msg } from './messages'
 import { fixedOriginOffset } from './internal/containingBlock'
 const TAG_NAME = 'tc-heatmap'
 
@@ -155,7 +156,7 @@ export class Heatmap extends HTMLElement {
                 skelCells +
                 `</div>` +
                 `</div>` +
-                `<span class="visually-hidden">Loading…</span>`
+                `<span class="visually-hidden">${esc(msg('loading'))}</span>`
             return
         }
 

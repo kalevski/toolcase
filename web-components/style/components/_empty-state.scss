@@ -42,11 +42,44 @@ tc-empty-state {
     }
 }
 
+.tc-empty-state__heading {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--tc-text);
+}
+
+.tc-empty-state__description {
+    font-size: 0.875rem;
+    color: var(--bs-empty-state-color);
+    max-width: 40ch;
+}
+
+// Heading + description sit as one text block; the outer gap separates the
+// icon, the text block, the body slot, and the CTA row.
+.tc-empty-state__heading + .tc-empty-state__description {
+    margin-top: calc(var(--bs-empty-state-gap) * -0.625);
+}
+
 .tc-empty-state__body {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 0.75rem;
+
+    &:empty {
+        display: none;
+    }
+}
+
+.tc-empty-state__action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+
+    &:empty {
+        display: none;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {

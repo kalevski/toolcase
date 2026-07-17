@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { setHostClass } from './internal/host-class'
 import { Collapse as BsCollapse } from './internal/Collapse'
 
 const TAG_NAME = 'tc-navbar'
@@ -100,7 +101,7 @@ export class Navbar extends HTMLElement {
         if (fixed) classes.push(`fixed-${fixed}`)
         if (sticky) classes.push(`sticky-${sticky}`)
 
-        this.className = classes.join(' ')
+        setHostClass(this, classes.join(' '))
         if (variant) {
             this.setAttribute('data-bs-theme', variant)
         } else {

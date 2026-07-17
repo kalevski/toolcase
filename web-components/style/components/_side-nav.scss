@@ -57,7 +57,7 @@ tc-side-nav {
 .tc-side-nav-section-title {
     padding: var(--bs-side-nav-section-title-padding-y) var(--bs-side-nav-section-title-padding-x);
     font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
-    font-size: var(--bs-side-nav-section-title-font-size);
+    font-size: max(var(--tc-font-size-min, 12px), var(--bs-side-nav-section-title-font-size));
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: var(--bs-side-nav-section-title-letter-spacing);
@@ -169,7 +169,7 @@ tc-side-nav {
     align-items: center;
     padding: 0.125rem 0.4rem;
     font-family: var(--tc-font-mono, 'JetBrains Mono', monospace);
-    font-size: var(--bs-side-nav-badge-font-size);
+    font-size: max(var(--tc-font-size-min, 12px), var(--bs-side-nav-badge-font-size));
     font-weight: 600;
     line-height: 1;
     color: var(--bs-side-nav-badge-color);
@@ -188,8 +188,12 @@ tc-side-nav {
 // ── Loading skeleton ──────────────────────────────────────────────────────────────
 
 @keyframes tc-side-nav-shimmer {
-    0%   { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
 }
 
 .tc-side-nav-item--skeleton {
@@ -214,7 +218,9 @@ tc-side-nav {
 // Honour prefers-reduced-motion: freeze shimmer + state transitions, keep static fill.
 @media (prefers-reduced-motion: reduce) {
     .tc-side-nav-item {
-        transition: background-color 0s, color 0s;
+        transition:
+            background-color 0s,
+            color 0s;
     }
 
     .tc-side-nav-skeleton {

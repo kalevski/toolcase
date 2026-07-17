@@ -1,5 +1,7 @@
 import { Offcanvas as BsOffcanvas } from './internal/Offcanvas'
+import { setHostClass } from './internal/host-class'
 import { BsOverlay, escapeHtml, type OverlayPlugin } from './internal/bs-overlay'
+import { msg } from './messages'
 import { closeIcon } from './icons'
 
 const TAG_NAME = 'tc-offcanvas'
@@ -80,7 +82,7 @@ export class Offcanvas extends BsOverlay {
         const validPlacements = ['start', 'end', 'top', 'bottom']
         const safePlacement = validPlacements.includes(placement) ? placement : 'start'
 
-        this.className = `offcanvas offcanvas-${safePlacement}`
+        setHostClass(this, `offcanvas offcanvas-${safePlacement}`)
         this.setAttribute('tabindex', '-1')
 
         const titleText = escapeHtml(this.getAttribute('title') ?? '')
@@ -88,7 +90,7 @@ export class Offcanvas extends BsOverlay {
         this.innerHTML =
             `<div class="offcanvas-header">` +
             `<h5 class="offcanvas-title">${titleText}</h5>` +
-            `<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close">${closeIcon}</button>` +
+            `<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="${escapeHtml(msg('close'))}">${closeIcon}</button>` +
             `</div>` +
             `<div class="offcanvas-body"></div>`
 

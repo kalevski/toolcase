@@ -1,4 +1,5 @@
 import { VARIANTS_CORE } from './internal/variants'
+import { setHostClass } from './internal/host-class'
 import { deriveInitials } from './internal/initials'
 import { esc as escapeAttr } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
@@ -107,7 +108,7 @@ export class Avatar extends HTMLElement {
         const status = this.status
 
         // The host element IS the circle — set its class list and accessible role.
-        this.className = `tc-avatar tc-avatar-${size} tc-avatar-${variant}`
+        setHostClass(this, `tc-avatar tc-avatar-${size} tc-avatar-${variant}`)
         this.setAttribute('role', 'img')
         this.setAttribute(
             'aria-label',

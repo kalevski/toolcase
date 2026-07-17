@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { msg } from './messages'
 const TAG_NAME = 'tc-chart-container'
 
 function fillRegion(el: Element, val: string | Node | null | undefined): void {
@@ -126,7 +127,7 @@ export class ChartContainer extends HTMLElement {
         if (loading) {
             bodyHtml = [
                 '<div class="tc-chart-container-body" aria-busy="true">',
-                '<div class="tc-chart-container-skeleton" role="status" aria-label="Loading chart…">',
+                `<div class="tc-chart-container-skeleton" role="status" aria-label="${esc(msg('loading'))}">`,
                 '<div class="tc-chart-container-skeleton-bar"></div>',
                 '<div class="tc-chart-container-skeleton-bar tc-chart-container-skeleton-bar--short"></div>',
                 '</div>',
@@ -171,8 +172,7 @@ export class ChartContainer extends HTMLElement {
                 if (this._emptySlot != null) {
                     fillRegion(emptyEl, this._emptySlot)
                 } else {
-                    emptyEl.innerHTML =
-                        '<span class="tc-chart-container-empty-text">No data available</span>'
+                    emptyEl.innerHTML = `<span class="tc-chart-container-empty-text">${esc(msg('noData'))}</span>`
                 }
             }
             return

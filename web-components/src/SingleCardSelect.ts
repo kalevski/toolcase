@@ -1,5 +1,6 @@
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
+import { msg } from './messages'
 
 const TAG_NAME = 'tc-single-card-select'
 
@@ -200,7 +201,7 @@ export class SingleCardSelect extends HTMLElement {
                 () =>
                     `<div class="tc-single-card-select-option tc-single-card-select-option--skeleton" aria-hidden="true"></div>`,
             ).join('')
-            this.innerHTML = `<span class="visually-hidden">Loading…</span>${skeletons}`
+            this.innerHTML = `<span class="visually-hidden">${esc(msg('loading'))}</span>${skeletons}`
             return
         }
 

@@ -1,3 +1,6 @@
+import { esc } from './internal/esc'
+import { msg } from './messages'
+
 const TAG_NAME = 'tc-pagination'
 
 export type PaginationSize = 'sm' | 'lg'
@@ -137,13 +140,13 @@ export class Pagination extends HTMLElement {
         const ul =
             `<ul class="pagination${sizeClass}">` +
             `<li class="page-item${prevDisabled ? ' disabled' : ''}">` +
-            `<a class="page-link" href="#" data-page="${current - 1}" aria-label="Previous">&laquo;</a></li>` +
+            `<a class="page-link" href="#" data-page="${current - 1}" aria-label="${esc(msg('paginationPrevious'))}">&laquo;</a></li>` +
             pageItems +
             `<li class="page-item${nextDisabled ? ' disabled' : ''}">` +
-            `<a class="page-link" href="#" data-page="${current + 1}" aria-label="Next">&raquo;</a></li>` +
+            `<a class="page-link" href="#" data-page="${current + 1}" aria-label="${esc(msg('paginationNext'))}">&raquo;</a></li>` +
             `</ul>`
 
-        const nav = `<nav aria-label="Page navigation">${ul}</nav>`
+        const nav = `<nav aria-label="${esc(msg('paginationLabel'))}">${ul}</nav>`
 
         if (align) {
             this.innerHTML = `<div class="d-flex justify-content-${align}">${nav}</div>`
