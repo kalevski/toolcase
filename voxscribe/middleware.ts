@@ -74,5 +74,16 @@ export function middleware(req: NextRequest) {
 
 export const config = {
     // Run on everything except Next internals and static assets.
-    matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)'],
+    //
+    // `/api/transcriptions` (exact) is EXCLUDED: it is the streaming multipart
+    // upload endpoint. Any route that passes through middleware has its request
+    // body buffered so middleware can read it, capped at `middlewareClientMaxBodySize`
+    // (10 MB default) — the busboy stream then sees a truncated body and throws
+    // "Unexpected end of form". The upload route already enforces auth itself
+    // (`guard('standard')` — full HMAC + DB role re-read), so the edge cookie
+    // check is redundant here; skipping middleware lets the body stream straight
+    // to disk and preserves the 500 MB RAM budget (spec §7).
+    matcher: [
+        '/((?!_next/static|_next/image|favicon.ico|api/transcriptions$|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
+    ],
 }
