@@ -8,6 +8,7 @@ import type {
 } from '@toolcase/web-components'
 import { useTc, detailValue, targetValue } from '@/lib/tc'
 import { useBranding } from '@/lib/branding-context'
+import { SelectField, SwitchField, TextAreaField, TextField } from './fields'
 import type { BaseDomain } from '@/server/domain/types'
 
 // Create-site wizard (§9, §10, §14). A guided three-step flow built on
@@ -43,14 +44,63 @@ type HostnameSpec =
 type SiteRouting = 'static' | 'spa' | 'clean-urls'
 
 interface CreateSiteRequest {
-    repoOwner: string
-    repoName: string
-    branch: string
+    repoOwner?: string
+    repoName?: string
+    branch?: string
     subdir?: string | null
+    sourceType?: string
+    sourceUrl?: string
+    authMethod?: string
+    authUsername?: string
+    authHeaderName?: string
+    checksumUrl?: string
+    stripComponents?: number
+    allowInsecure?: boolean
+    sourceSecret?: string
     hostname: HostnameSpec
     routing?: SiteRouting
     notFound?: string
     cacheAssets?: boolean
+    gzip?: boolean
+    blockExploits?: boolean
+    requireFile?: string[]
+}
+
+/** Source kinds a site can be created with. */
+const SOURCE_TYPE_OPTIONS = [
+    { value: 'git', label: 'Git repository' },
+    { value: 'http-zip', label: 'Published archive (zip)' },
+]
+
+// Auth methods, labelled for what they are rather than by their engine name. Which set
+// applies depends on the source kind and URL scheme; the server enforces the same rules.
+const GIT_HTTPS_AUTH = [
+    { value: 'none', label: 'None — public repository' },
+    { value: 'github-token', label: 'GitHub token' },
+    { value: 'https-token', label: 'Username + access token' },
+]
+const GIT_SSH_AUTH = [{ value: 'ssh-key', label: 'Deploy key (SSH private key)' }]
+const ARCHIVE_AUTH = [
+    { value: 'none', label: 'None — public archive' },
+    { value: 'bearer', label: 'Bearer token' },
+    { value: 'basic', label: 'Username + password' },
+    { value: 'header', label: 'Custom header' },
+]
+
+/** What a method's secret actually is, for the credential field's label. */
+const SECRET_LABEL: Record<string, string> = {
+    'ssh-key': 'Deploy key (private key)',
+    'https-token': 'Access token',
+    'github-token': 'GitHub token',
+    'bearer': 'Bearer token',
+    'basic': 'Password',
+    'header': 'Header value',
+}
+
+/** Whether a git URL speaks SSH — mirrors `isSshGitUrl` on the server. */
+function looksLikeSsh(url: string): boolean {
+    const u = url.trim()
+    return u.startsWith('git@') || u.startsWith('ssh://')
 }
 
 /** Copy for the routing modes, shared by the step-1 select and the review panel. */
@@ -99,6 +149,12 @@ const ERROR_COPY: Record<string, string> = {
     invalid_too_long: 'One of the fields is too long.',
     invalid_request: 'The request was incomplete. Check your selections and try again.',
     invalid_enum: 'Pick one of the offered routing modes.',
+    invalid_count: 'Too many entries in the required-files list.',
+    invalid_type: 'One of the values is the wrong kind.',
+    invalid_range: 'One of the numbers is outside the range your plan allows.',
+    source_secret_required: 'This source needs a credential — paste the deploy key, token, or password.',
+    private_repos_not_allowed:
+        'Deploying a private source isn’t enabled for your account. Use a public source, or ask an owner.',
     routing_conflict: 'A custom 404 page can’t be combined with single-page-app routing — the SPA fallback serves index.html for every path.',
     github_error: "Couldn't reach GitHub. Try again in a moment.",
     nginxpilot_error: 'The deploy engine is unavailable right now. Try again shortly.',
@@ -114,6 +170,21 @@ function errorMessage(code: unknown, status: number): string {
 
 export function CreateSiteWizard() {
     const branding = useBranding()
+    // ── step 1: where the content comes from ──
+    // `github` is the repo picker (the common case); `external` covers every other git
+    // host and the published-archive kind, which have no repo list to browse.
+    const [sourceKind, setSourceKind] = useState<'github' | 'external'>('github')
+    const [sourceType, setSourceType] = useState<'git' | 'http-zip'>('git')
+    const [sourceUrl, setSourceUrl] = useState('')
+    const [externalBranch, setExternalBranch] = useState('main')
+    const [authMethod, setAuthMethod] = useState('none')
+    const [authUsername, setAuthUsername] = useState('')
+    const [authHeaderName, setAuthHeaderName] = useState('')
+    const [sourceSecret, setSourceSecret] = useState('')
+    const [checksumUrl, setChecksumUrl] = useState('')
+    const [stripComponents, setStripComponents] = useState('')
+    const [allowInsecure, setAllowInsecure] = useState(false)
+
     // ── step 1: repository ──
     const [repos, setRepos] = useState<RepoSummary[]>([])
     const [reposLoading, setReposLoading] = useState(true)
@@ -125,10 +196,16 @@ export function CreateSiteWizard() {
     const [branch, setBranch] = useState('')
     const [subdir, setSubdir] = useState('')
 
-    // ── step 1: serving settings (routing / 404 page / asset caching) ──
+    // ── step 1: serving settings (routing / 404 page / caching / compression) ──
     const [routing, setRouting] = useState<SiteRouting>('static')
     const [notFound, setNotFound] = useState('')
     const [cacheAssets, setCacheAssets] = useState(false)
+    const [gzip, setGzip] = useState(true)
+    const [blockExploits, setBlockExploits] = useState(false)
+    // The post-fetch gate. Pre-filled with the default so the field states the rule it
+    // enforces rather than hiding it — a docs or SPA build whose entry point isn't
+    // index.html would otherwise never go live, with nothing on screen explaining why.
+    const [requireFile, setRequireFile] = useState('index.html')
 
     // ── step 3: hostname ──
     const [baseDomains, setBaseDomains] = useState<BaseDomain[]>([])
@@ -242,6 +319,33 @@ export function CreateSiteWizard() {
         [baseDomains],
     )
 
+    // Auth methods legal for the chosen kind + URL scheme. The server enforces the same
+    // pairing, so a stale selection is corrected here rather than rejected on submit.
+    const authOptions = useMemo(() => {
+        if (sourceType !== 'git') return ARCHIVE_AUTH
+        return looksLikeSsh(sourceUrl) ? GIT_SSH_AUTH : GIT_HTTPS_AUTH
+    }, [sourceType, sourceUrl])
+
+    useEffect(() => {
+        if (!authOptions.some((o) => o.value === authMethod)) setAuthMethod(authOptions[0].value)
+    }, [authOptions, authMethod])
+
+    const sourceKindOptions = useMemo<SingleCardSelectOption[]>(
+        () => [
+            {
+                key: 'github',
+                title: 'GitHub repository',
+                description: 'Pick from the repositories your account can see.',
+            },
+            {
+                key: 'external',
+                title: 'Another source',
+                description: 'Any git host by URL, or a published archive built elsewhere.',
+            },
+        ],
+        [],
+    )
+
     const hostKindOptions = useMemo<SingleCardSelectOption[]>(
         () => [
             {
@@ -286,6 +390,13 @@ export function CreateSiteWizard() {
         },
     )
 
+    const sourceKindRef = useTc<HTMLElement>(
+        useMemo(() => ({ options: sourceKindOptions, value: sourceKind }), [sourceKindOptions, sourceKind]),
+        {
+            'tc-change': (event: Event) => setSourceKind(detailValue<string>(event) as 'github' | 'external'),
+        },
+    )
+
     const repoSelectRef = useTc<HTMLElement>(
         useMemo(() => ({ items: repoItems, loading: reposLoading }), [repoItems, reposLoading]),
         {
@@ -321,6 +432,18 @@ export function CreateSiteWizard() {
         'tc-change': (event: Event) => setCacheAssets(detailValue<boolean>(event)),
     })
 
+    const gzipRef = useTc<HTMLElement>(useMemo(() => ({ checked: gzip }), [gzip]), {
+        'tc-change': (event: Event) => setGzip(detailValue<boolean>(event)),
+    })
+
+    const blockExploitsRef = useTc<HTMLElement>(useMemo(() => ({ checked: blockExploits }), [blockExploits]), {
+        'tc-change': (event: Event) => setBlockExploits(detailValue<boolean>(event)),
+    })
+
+    const requireFileRef = useTc<HTMLElement>(useMemo(() => ({ value: requireFile }), [requireFile]), {
+        input: (event: Event) => setRequireFile(targetValue(event)),
+    })
+
     const hostKindRef = useTc<HTMLElement>(
         useMemo(() => ({ options: hostKindOptions, value: hostKind }), [hostKindOptions, hostKind]),
         { 'tc-change': (event: Event) => setHostKind(detailValue<string>(event) as 'subdomain' | 'custom') },
@@ -346,8 +469,19 @@ export function CreateSiteWizard() {
     async function submit() {
         setError(null)
 
-        if (!selectedRepo) return setError('Pick a repository to deploy.')
-        if (!branch) return setError('Pick a branch to deploy.')
+        const external = sourceKind === 'external'
+        if (!external) {
+            if (!selectedRepo) return setError('Pick a repository to deploy.')
+            if (!branch) return setError('Pick a branch to deploy.')
+        } else {
+            if (!sourceUrl.trim()) {
+                return setError(sourceType === 'git' ? 'Enter the repository URL.' : 'Enter the archive URL.')
+            }
+            if (sourceType === 'git' && !externalBranch.trim()) return setError('Enter the branch to deploy.')
+            if (authMethod !== 'none' && !sourceSecret.trim()) {
+                return setError('Paste the credential this source needs, or set authentication to None.')
+            }
+        }
 
         let hostname: HostnameSpec
         if (hostKind === 'subdomain') {
@@ -359,17 +493,42 @@ export function CreateSiteWizard() {
             hostname = { kind: 'custom', domain: customDomain.trim() }
         }
 
+        // Two shapes: the GitHub path sends repo coordinates and no URL (the server
+        // derives it); the external path sends the URL and lets the server derive the
+        // display labels from it.
+        const sourceFields: Partial<CreateSiteRequest> = external
+            ? {
+                  sourceType,
+                  sourceUrl: sourceUrl.trim(),
+                  branch: sourceType === 'git' ? externalBranch.trim() : undefined,
+                  subdir: sourceType === 'git' ? subdir.trim() || undefined : undefined,
+                  authMethod,
+                  authUsername: authUsername.trim() || undefined,
+                  authHeaderName: authMethod === 'header' ? authHeaderName.trim() || undefined : undefined,
+                  sourceSecret: sourceSecret.trim() || undefined,
+                  checksumUrl: sourceType === 'http-zip' ? checksumUrl.trim() || undefined : undefined,
+                  stripComponents:
+                      sourceType === 'http-zip' && stripComponents !== '' ? Number(stripComponents) : undefined,
+                  allowInsecure: sourceType === 'http-zip' && allowInsecure ? true : undefined,
+              }
+            : {
+                  repoOwner: selectedRepo?.owner,
+                  repoName: selectedRepo?.name,
+                  branch,
+                  subdir: subdir.trim() || undefined,
+              }
+
         const payload: CreateSiteRequest = {
-            repoOwner: selectedRepo.owner,
-            repoName: selectedRepo.name,
-            branch,
-            subdir: subdir.trim() || undefined,
+            ...sourceFields,
             hostname,
             routing: routing !== 'static' ? routing : undefined,
             // SPA routing serves index.html for every path — a 404 page can never
             // trigger there, so it's dropped (the field is hidden in that mode too).
             notFound: routing !== 'spa' && notFound.trim() ? notFound.trim() : undefined,
             cacheAssets: cacheAssets || undefined,
+            gzip: gzip || undefined,
+            blockExploits: blockExploits || undefined,
+            requireFile: parseCsv(requireFile),
         }
 
         setSubmitting(true)
@@ -396,12 +555,26 @@ export function CreateSiteWizard() {
     function reset() {
         setCreated(null)
         setError(null)
+        setSourceKind('github')
+        setSourceType('git')
+        setSourceUrl('')
+        setExternalBranch('main')
+        setAuthMethod('none')
+        setAuthUsername('')
+        setAuthHeaderName('')
+        setSourceSecret('')
+        setChecksumUrl('')
+        setStripComponents('')
+        setAllowInsecure(false)
         setSelectedRepo(null)
         setBranch('')
         setSubdir('')
         setRouting('static')
         setNotFound('')
         setCacheAssets(false)
+        setGzip(true)
+        setBlockExploits(false)
+        setRequireFile('index.html')
         setLabel('')
         setCustomDomain('')
         setHostKind(baseDomains.length > 0 ? 'subdomain' : 'custom')
@@ -441,31 +614,137 @@ export function CreateSiteWizard() {
             <tc-form-wizard ref={wizardRef} complete-label="Create site" complete-icon="rocket">
                 {/* Step 1 — repository, branch + build subdir */}
                 <div slot="step-0" className="quaykeeper-wizard-step">
-                    <h3 className="quaykeeper-wizard-heading">Repository &amp; branch</h3>
+                    <h3 className="quaykeeper-wizard-heading">Source</h3>
                     <p className="quaykeeper-wizard-hint">
-                        Quaykeeper deploys pre-built static content — pick a repo whose branch already holds the
-                        built site (e.g. a <code>gh-pages</code> or <code>dist</code> branch).
+                        Quaykeeper deploys pre-built static content — point it at a branch that already holds the
+                        built site (e.g. a <code>gh-pages</code> or <code>dist</code> branch), or at an archive
+                        your build publishes.
                     </p>
-                    <tc-extended-select
-                        ref={repoSelectRef}
-                        placeholder="Select a repository…"
-                        search-placeholder="Search repositories…"
-                        no-results-text="No repositories found"
-                    />
-                    {selectedRepo && (
+                    <tc-single-card-select ref={sourceKindRef} columns="2" aria-label="Source kind" />
+
+                    {/* Sub-modes toggle via `hidden` rather than mounting/unmounting, so the
+                        wizard never has a step child reparented out from under it. */}
+                    <div className="quaykeeper-wizard-host-mode" hidden={sourceKind !== 'external'}>
+                        <SelectField
+                            label="Source type"
+                            value={sourceType}
+                            options={SOURCE_TYPE_OPTIONS}
+                            onValue={(v) => setSourceType(v as 'git' | 'http-zip')}
+                            help="A git repository is cloned and served. An archive is downloaded and unpacked — for content built elsewhere, like a CI-published zip."
+                        />
+                        <TextField
+                            label={sourceType === 'git' ? 'Repository URL' : 'Archive URL'}
+                            value={sourceUrl}
+                            onValue={setSourceUrl}
+                            placeholder={
+                                sourceType === 'git'
+                                    ? 'https://gitlab.com/acme/site.git'
+                                    : 'https://ci.example.com/site.zip'
+                            }
+                            help={
+                                sourceType === 'git'
+                                    ? 'Any git host. Use git@host:owner/repo.git to authenticate with a deploy key.'
+                                    : 'The archive to download and unpack on each check.'
+                            }
+                        />
+                        <div hidden={sourceType !== 'git' || undefined}>
+                            <TextField
+                                label="Branch"
+                                value={externalBranch}
+                                onValue={setExternalBranch}
+                                placeholder="main"
+                                help="The branch whose contents are published."
+                            />
+                        </div>
+                        <div hidden={sourceType !== 'http-zip' || undefined}>
+                            <TextField
+                                label="Checksum URL (optional)"
+                                value={checksumUrl}
+                                onValue={setChecksumUrl}
+                                placeholder="https://ci.example.com/site.zip.sha256"
+                                help="A checksum file the archive is verified against before anything is published. Strongly recommended."
+                            />
+                            <TextField
+                                label="Strip leading folders"
+                                type="number"
+                                min="0"
+                                max="16"
+                                value={stripComponents}
+                                onValue={setStripComponents}
+                                placeholder="0"
+                                help="Set to 1 when the archive wraps everything in a single top-level folder, so that folder isn't part of every URL."
+                            />
+                            <SwitchField
+                                label="Allow an insecure (http://) URL"
+                                checked={allowInsecure}
+                                onChecked={setAllowInsecure}
+                                help="Only for an archive on a trusted internal network. Over plain http the download can be read and altered in transit — pair it with a checksum URL at minimum."
+                            />
+                        </div>
+                        <SelectField
+                            label="Authentication"
+                            value={authMethod}
+                            options={authOptions}
+                            onValue={setAuthMethod}
+                            help="How Quaykeeper proves it may fetch this source. An ssh URL always uses a deploy key."
+                        />
+                        <div hidden={!(authMethod === 'https-token' || authMethod === 'basic') || undefined}>
+                            <TextField
+                                label="Username"
+                                value={authUsername}
+                                onValue={setAuthUsername}
+                                help="The account the token or password belongs to."
+                            />
+                        </div>
+                        <div hidden={authMethod !== 'header' || undefined}>
+                            <TextField
+                                label="Header name"
+                                value={authHeaderName}
+                                onValue={setAuthHeaderName}
+                                placeholder="X-Api-Key"
+                                help="The request header the credential is sent in."
+                            />
+                        </div>
+                        <div hidden={authMethod === 'none' || undefined}>
+                            <TextAreaField
+                                label={SECRET_LABEL[authMethod] ?? 'Credential'}
+                                value={sourceSecret}
+                                onValue={setSourceSecret}
+                                rows={authMethod === 'ssh-key' ? 6 : 2}
+                                placeholder={
+                                    authMethod === 'ssh-key' ? '-----BEGIN OPENSSH PRIVATE KEY-----' : undefined
+                                }
+                                help="Stored encrypted and never shown again. Quaykeeper passes it to the deploy engine as a file it reads at fetch time."
+                            />
+                        </div>
+                    </div>
+
+                    <div className="quaykeeper-wizard-host-mode" hidden={sourceKind !== 'github'}>
+                        <tc-extended-select
+                            ref={repoSelectRef}
+                            placeholder="Select a repository…"
+                            search-placeholder="Search repositories…"
+                            no-results-text="No repositories found"
+                        />
+                    </div>
+                    {(sourceKind === 'external' || selectedRepo) && (
                         <>
-                            <tc-extended-select
-                                ref={branchSelectRef}
-                                placeholder="Select a branch…"
-                                search-placeholder="Search branches…"
-                                no-results-text="No branches found"
-                            />
-                            <tc-input
-                                ref={subdirRef}
-                                label="Build subdirectory (optional)"
-                                placeholder="dist/"
-                                help="The folder inside the branch that holds index.html. Leave blank if the site is at the repo root. Quaykeeper only publishes once an index.html exists (the require_file gate)."
-                            />
+                            <div hidden={sourceKind !== 'github' || undefined}>
+                                <tc-extended-select
+                                    ref={branchSelectRef}
+                                    placeholder="Select a branch…"
+                                    search-placeholder="Search branches…"
+                                    no-results-text="No branches found"
+                                />
+                            </div>
+                            <div hidden={sourceType !== 'git' || undefined}>
+                                <tc-input
+                                    ref={subdirRef}
+                                    label="Build subdirectory (optional)"
+                                    placeholder="dist/"
+                                    help="The folder inside the branch that holds index.html. Leave blank if the site is at the repo root. Quaykeeper only publishes once the required files exist (see below)."
+                                />
+                            </div>
                             <tc-select
                                 ref={routingRef}
                                 label="Routing"
@@ -486,6 +765,22 @@ export function CreateSiteWizard() {
                                 ref={cacheAssetsRef}
                                 label="Long-lived asset caching"
                                 help="Serve fingerprinted assets (CSS, JS, fonts, images) with an immutable Cache-Control header. Use when the build hashes its asset filenames."
+                            />
+                            <tc-switch
+                                ref={gzipRef}
+                                label="Compress responses (gzip)"
+                                help="Gzip text responses (HTML, CSS, JS, JSON) on the way out. Worth having on for almost any static site."
+                            />
+                            <tc-switch
+                                ref={blockExploitsRef}
+                                label="Block common exploit probes"
+                                help="Reject the request patterns automated scanners use (SQL injection, file traversal, known-vulnerable paths) before they reach your files."
+                            />
+                            <tc-input
+                                ref={requireFileRef}
+                                label="Required files"
+                                placeholder="index.html"
+                                help="Comma-separated. A build only goes live once all of them exist, so a broken build leaves the previous release serving. Change it if your entry point isn't index.html; clear it to publish whatever the build produces."
                             />
                         </>
                     )}
@@ -534,18 +829,42 @@ export function CreateSiteWizard() {
                 <div slot="step-2" className="quaykeeper-wizard-step">
                     <h3 className="quaykeeper-wizard-heading">Review</h3>
                     <dl className="quaykeeper-wizard-review">
-                        <dt>Repository</dt>
-                        <dd>{selectedRepo ? `${selectedRepo.owner}/${selectedRepo.name}` : '—'}</dd>
-                        <dt>Branch</dt>
-                        <dd>{branch || '—'}</dd>
-                        <dt>Build directory</dt>
-                        <dd>{subdir.trim() || '(repository root)'}</dd>
+                        <dt>Source</dt>
+                        <dd>
+                            {sourceKind === 'github'
+                                ? selectedRepo
+                                    ? `${selectedRepo.owner}/${selectedRepo.name}`
+                                    : '—'
+                                : sourceUrl.trim() || '—'}
+                        </dd>
+                        {sourceKind === 'external' && (
+                            <>
+                                <dt>Type</dt>
+                                <dd>{sourceType === 'git' ? 'Git repository' : 'Published archive'}</dd>
+                                <dt>Authentication</dt>
+                                <dd>{authOptions.find((o) => o.value === authMethod)?.label ?? authMethod}</dd>
+                            </>
+                        )}
+                        {(sourceKind === 'github' || sourceType === 'git') && (
+                            <>
+                                <dt>Branch</dt>
+                                <dd>{(sourceKind === 'github' ? branch : externalBranch.trim()) || '—'}</dd>
+                                <dt>Build directory</dt>
+                                <dd>{subdir.trim() || '(source root)'}</dd>
+                            </>
+                        )}
                         <dt>Routing</dt>
                         <dd>{ROUTING_LABEL[routing]}</dd>
                         <dt>404 page</dt>
                         <dd>{routing !== 'spa' && notFound.trim() ? notFound.trim() : '(default)'}</dd>
                         <dt>Asset caching</dt>
                         <dd>{cacheAssets ? 'Immutable Cache-Control' : 'Off'}</dd>
+                        <dt>Compression</dt>
+                        <dd>{gzip ? 'gzip' : 'Off'}</dd>
+                        <dt>Exploit blocking</dt>
+                        <dd>{blockExploits ? 'On' : 'Off'}</dd>
+                        <dt>Required files</dt>
+                        <dd>{parseCsv(requireFile).join(', ') || '(publish any build)'}</dd>
                         <dt>Hostname</dt>
                         <dd>{previewHost}</dd>
                     </dl>
@@ -557,6 +876,14 @@ export function CreateSiteWizard() {
             </tc-form-wizard>
         </div>
     )
+}
+
+/** Split a comma- (or newline-) separated field into a trimmed, blank-free list. */
+function parseCsv(text: string): string[] {
+    return text
+        .split(/[,\n]/)
+        .map((part) => part.trim())
+        .filter((part) => part !== '')
 }
 
 // `tc-code-snippet` takes its body via the `code` attribute (a string), but it's

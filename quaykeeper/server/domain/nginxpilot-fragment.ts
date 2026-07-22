@@ -8,7 +8,8 @@
 //
 // See notes/static-hosting-app-design.md §4, §9, §16.
 
-import type { Site } from './types'
+import { STANDARD_LIMITS, type BaseDomain, type PlanLimits, type Site, type SiteAuthMethod } from './types'
+import { MIN_INTERVAL_SEC } from './site-input'
 import type { TlsMode } from './routing'
 
 // ── deterministic, server-generated identifiers (§16: no user input in paths) ──
@@ -59,37 +60,69 @@ export function gitCredentialName(siteId: string): string {
 // ── fragment rendering (§4) ───────────────────────────────────────────────────
 
 /**
- * Private-repo credential reference for the fragment `auth` block (§9, §16).
- * Exactly one of `tokenEnv` / `tokenFile` — mirroring nginxpilot's own
- * exactly-one validation on `token_env` / `token_file`.
+ * Source credential reference for the fragment `auth` block (§9, §16). Secret material
+ * NEVER appears here — only the *name* of an env var, or the daemon-local path of a 0600
+ * file the credential store wrote. Which nginxpilot key that reference lands under
+ * depends on the method (`token_file`, `key_file`, `password_file`, `value_file`), which
+ * is why the caller supplies the method rather than a pre-chosen key.
  */
 export interface FragmentAuth {
+    /**
+     * How to authenticate. Omitted → `github-token`, the original behaviour, since that
+     * was the only method Quaykeeper could express before non-GitHub sources existed.
+     */
+    method?: SiteAuthMethod
     /**
      * Name of the env var nginxpilot reads the GitHub token from. NOTE: nginxpilot's
      * `github-token` method keys the credential as `token_env` (validated in
      * `internal/config/validate.go` — `key_env` belongs to the `ssh-key` method and
-     * is rejected here). The §4 example writes `key_env`, which is a doc slip; the
+     * is rejected there). The §4 example writes `key_env`, which is a doc slip; the
      * engine-correct key is `token_env`, emitted below. Build it with
-     * `tokenEnvVarName(site.id)`.
+     * `tokenEnvVarName(site.id)`. `github-token` only.
      */
     tokenEnv?: string
     /**
-     * Daemon-local path nginxpilot reads the GitHub token from (`token_file`) — the
-     * path returned by `PUT /git-credentials/{name}` on the site's own realm. The
-     * deploy service pushes the owner's token there before writing the fragment;
-     * nginxpilot resolves the file at each fetch, so a rotated token takes effect
-     * on the next sync without a reload.
+     * Daemon-local path nginxpilot reads the secret from — the path returned by
+     * `PUT /git-credentials/{name}` on the site's own realm. The deploy service pushes
+     * the credential there before writing the fragment; nginxpilot resolves the file at
+     * each fetch, so a rotated secret takes effect on the next sync without a reload.
+     * Emitted as `token_file` / `key_file` / `password_file` / `value_file` to match
+     * {@link method}.
      */
     tokenFile?: string
+    /** Username for `https-token` / `basic`. Not secret; emitted inline. */
+    username?: string
+    /** Header name for `header` auth. Not secret; emitted inline. */
+    headerName?: string
+}
+
+/** The nginxpilot `auth` key a method's secret-file reference belongs under. */
+const AUTH_FILE_KEY: Record<SiteAuthMethod, string> = {
+    'none': '',
+    'ssh-key': 'key_file',
+    'https-token': 'token_file',
+    'github-token': 'token_file',
+    'bearer': 'token_file',
+    'basic': 'password_file',
+    'header': 'value_file',
 }
 
 /**
  * Managed-mode TLS + security options for a site's server block (§0/Phase D) — the
  * `WebOptions` subset sites accept (no `websocket`/`cache`; those are proxy-only). The
- * caller (the sites service) resolves the *effective* values: a subdomain inherits its
- * base domain's TLS policy (one wildcard cert per base), a custom domain uses its own
- * per-site setting. Inert unless nginxpilot runs in managed mode. `auto` is preferred
- * over `required` so a not-yet-issued cert degrades to HTTP rather than disabling the site.
+ * caller (`services/deploy.ts` `resolveWebOptions`) resolves the *effective* values,
+ * from two different scopes:
+ *
+ *   • **cert-scoped** (`tls`, `force_ssl`, `http2`, `hsts`) — a subdomain inherits its
+ *     base domain's wildcard policy, because one cert covers every label and browsers
+ *     coalesce siblings onto one connection; a custom domain has a dedicated cert and
+ *     so carries its own {@link Site.tls}.
+ *   • **site-scoped** (`block_exploits`, `gzip`, `advanced`) — plain per-site toggles
+ *     with no cross-host coupling and no TLS requirement.
+ *
+ * Inert unless nginxpilot runs in managed mode. `tls: required` quarantines a site that
+ * has no cert instead of serving it in plaintext, so it is only ever set explicitly by
+ * a custom-domain owner — the default stays `auto`, which degrades to HTTP.
  */
 export interface SiteWebOptions {
     tls?: TlsMode
@@ -109,6 +142,12 @@ export interface FragmentOptions {
      * (free = 900 → `15m`; gold = 60 → `1m`). Formatted to an nginxpilot Go duration.
      */
     intervalSec: number
+    /**
+     * How many prior release directories nginxpilot keeps for rollback
+     * (`source.keep_releases`). Omitted → nginxpilot's own default (5). The caller
+     * resolves it from the site's own setting, capped by the owner's plan.
+     */
+    keepReleases?: number
     /**
      * Post-fetch gate: nginxpilot won't go live unless these files exist, so a broken
      * or empty build keeps the last-known-good release serving. Defaults to
@@ -135,38 +174,153 @@ export interface FragmentOptions {
 const DEFAULT_REQUIRE_FILE = ['index.html']
 const DEFAULT_EXCLUDE = ['*.map']
 
+// ── option resolution (pure policy; the service supplies the inputs) ──────────
+//
+// Turning a stored `Site` row + the owner's effective plan + (for a subdomain) its base
+// domain into the exact `FragmentOptions` a render needs. Kept here, beside the renderer
+// and free of `server-only`, so the rules are unit-testable — `services/deploy.ts` only
+// does the two lookups (the owner's limits, the site's base domain) and hands them in.
+
 /**
- * Render the `sites.d/quaykeeper-<siteId>.yml` fragment for one site, exactly per the
- * §4 schema: `domain`, `source.{type,url,branch,interval,subdir,require_file,auth}`,
- * and `exclude`. The repo URL is derived from the site's `repoOwner`/`repoName`; the
- * interval comes from `options.intervalSec`. Secrets are referenced by env-var name
- * only (`auth.token_env`), never inlined (§16).
+ * The **cert-scoped** web options — the toggles nginxpilot rejects without effective
+ * TLS, and which therefore have to agree across every host sharing a certificate.
+ *
+ *   • Subdomain — TLS, HTTP/2 and HSTS all follow `base`'s wildcard policy (one cert per
+ *     base). `auto` serves HTTPS once the wildcard cert is discoverable and degrades to
+ *     HTTP otherwise, so a pending cert never takes subdomains down; an `off` base (or an
+ *     unregistered one, `base === undefined`) emits no TLS at all. A per-label override is
+ *     deliberately impossible: browsers coalesce siblings sharing a wildcard cert onto one
+ *     connection, and vhosts that then disagree answer `421 Misdirected Request`.
+ *   • Custom domain — has its own dedicated cert, so nothing can coalesce onto its
+ *     connection and it carries its own {@link Site.tls} / {@link Site.hsts}. `auto`
+ *     remains the default; `required` is the explicit "HTTPS or nothing" opt-in, where
+ *     nginxpilot quarantines the site rather than serving it in plaintext.
+ *
+ * Returns `{}` when no TLS applies.
+ */
+export function resolveCertOptions(site: Site, base?: BaseDomain): SiteWebOptions {
+    if (site.hostKind === 'custom') {
+        const mode = site.tls ?? 'auto'
+        if (mode === 'off') return {}
+        return { tls: mode, force_ssl: true, http2: true, hsts: !!site.hsts }
+    }
+    if (site.hostKind !== 'subdomain') return {}
+    if (!base || base.tls !== 'auto') return {}
+    return { tls: 'auto', force_ssl: true, http2: base.http2, hsts: base.hsts }
+}
+
+/**
+ * The full managed-mode web options: the cert-scoped block above plus the
+ * **site-scoped** toggles — `gzip`, `block_exploits` and the raw `advanced` passthrough
+ * — which have no cross-host coupling and no TLS requirement.
+ *
+ * `advanced` is re-gated on every render rather than only at write time, so revoking
+ * {@link PlanLimits.advancedConfig} from an account actually drops the raw directives
+ * from its sites at their next deploy instead of leaving them latched in.
+ *
+ * Returns `undefined` when nothing applies, so a plain HTTP static site emits no web keys.
+ */
+export function resolveWebOptions(
+    site: Site,
+    limits: PlanLimits,
+    base?: BaseDomain,
+): SiteWebOptions | undefined {
+    const web = resolveCertOptions(site, base)
+    if (site.gzip) web.gzip = true
+    if (site.blockExploits) web.block_exploits = true
+    if (site.advanced && limits.advancedConfig) web.advanced = site.advanced
+    return Object.keys(web).length > 0 ? web : undefined
+}
+
+/**
+ * The effective poll cadence. `PlanLimits.minIntervalSec` is a *floor*, not a fixed
+ * value: a site may ask to be polled less often (a quiet marketing page), never more
+ * often, since the floor is what the plan actually guarantees the fleet. nginxpilot's
+ * own 30s hard minimum backstops both.
+ */
+export function resolveIntervalSec(site: Site, limits: PlanLimits): number {
+    return Math.max(MIN_INTERVAL_SEC, limits.minIntervalSec, site.intervalSec ?? 0)
+}
+
+/**
+ * The effective rollback depth: the site's own `keepReleases`, capped by the owner's
+ * plan (deeper history is more disk, which is what the plan sells). Always resolved to a
+ * number, so the plan value applies instead of nginxpilot's built-in default of 5.
+ */
+export function resolveKeepReleases(site: Site, limits: PlanLimits): number {
+    const cap = Number.isFinite(limits.keepReleases) ? limits.keepReleases : STANDARD_LIMITS.keepReleases
+    return Math.max(1, Math.min(site.keepReleases ?? cap, cap))
+}
+
+/**
+ * Everything a render needs that the `Site` row doesn't carry verbatim: the plan-resolved
+ * cadence and rollback depth, the site's own source-tree controls (`undefined` there
+ * leaves the renderer's `['*.map']` / `['index.html']` defaults in place), and the
+ * managed-mode web options. The `auth` block is added separately by the deploy service,
+ * after a private repo's clone token reaches the realm's git-credentials store.
+ */
+export function resolveFragmentOptions(
+    site: Site,
+    limits: PlanLimits,
+    base?: BaseDomain,
+): FragmentOptions {
+    return {
+        intervalSec: resolveIntervalSec(site, limits),
+        keepReleases: resolveKeepReleases(site, limits),
+        requireFile: site.requireFile,
+        exclude: site.exclude,
+        web: resolveWebOptions(site, limits, base),
+    }
+}
+
+/**
+ * The URL nginxpilot fetches a site's content from. An explicit {@link Site.sourceUrl}
+ * wins — that is how a non-GitHub git host (GitLab, Bitbucket, Gitea, an `ssh://` deploy
+ * remote) or an `http-zip` archive is expressed. Without one, the site is a GitHub repo
+ * and the URL is derived from its coordinates, exactly as before.
+ */
+export function sourceUrlFor(site: Site): string {
+    if (site.sourceUrl) return site.sourceUrl
+    return `https://github.com/${site.repoOwner}/${site.repoName}.git`
+}
+
+/**
+ * Render the `sites.d/quaykeeper-<siteId>.yml` fragment for one site, per the §4 schema:
+ * `domain`, the `source` block, `exclude`, the static-serving settings, and the
+ * managed-mode web options.
+ *
+ * The `source` block differs by kind, matching nginxpilot's own validation — a `git`
+ * source carries `branch`/`subdir` and rejects the archive fields, an `http-zip` source
+ * carries `checksum_url`/`strip_components`/`allow_insecure` and rejects `branch`/`subdir`.
+ * Secret material is NEVER inlined (§16): the `auth` block only ever references an env-var
+ * name or a daemon-local 0600 file path.
  */
 export function renderFragment(site: Site, options: FragmentOptions): string {
     assertSafeSiteId(site.id)
     const requireFile = options.requireFile ?? DEFAULT_REQUIRE_FILE
     const exclude = options.exclude ?? DEFAULT_EXCLUDE
-    const url = `https://github.com/${site.repoOwner}/${site.repoName}.git`
+    const type = site.sourceType ?? 'git'
 
     const lines: string[] = [
         `# ${fragmentFilename(site.id)} — generated by Quaykeeper; managed automatically, do not edit by hand.`,
         'sites:',
         `  - domain: ${scalar(site.hostname)}`,
         '    source:',
-        '      type: git',
-        `      url: ${scalar(url)}`,
-        `      branch: ${scalar(site.branch)}`,
-        `      interval: ${scalar(formatInterval(options.intervalSec))}`,
+        `      type: ${type}`,
+        `      url: ${scalar(sourceUrlFor(site))}`,
     ]
-    if (site.subdir) lines.push(`      subdir: ${scalar(site.subdir)}`)
-    if (requireFile.length > 0) lines.push(`      require_file: ${flowSeq(requireFile)}`)
-    if (options.auth && (options.auth.tokenEnv || options.auth.tokenFile)) {
-        lines.push('      auth:')
-        lines.push('        method: github-token')
-        // Engine-correct key for `github-token` is `token_env` / `token_file` (see FragmentAuth).
-        if (options.auth.tokenEnv) lines.push(`        token_env: ${scalar(options.auth.tokenEnv)}`)
-        else if (options.auth.tokenFile) lines.push(`        token_file: ${scalar(options.auth.tokenFile)}`)
+    if (type === 'git') lines.push(`      branch: ${scalar(site.branch)}`)
+    lines.push(`      interval: ${scalar(formatInterval(options.intervalSec))}`)
+    if (options.keepReleases !== undefined) lines.push(`      keep_releases: ${options.keepReleases}`)
+    if (type === 'git') {
+        if (site.subdir) lines.push(`      subdir: ${scalar(site.subdir)}`)
+    } else {
+        if (site.checksumUrl) lines.push(`      checksum_url: ${scalar(site.checksumUrl)}`)
+        if (site.stripComponents !== undefined) lines.push(`      strip_components: ${site.stripComponents}`)
+        if (site.allowInsecure) lines.push('      allow_insecure: true')
     }
+    if (requireFile.length > 0) lines.push(`      require_file: ${flowSeq(requireFile)}`)
+    lines.push(...renderAuth(options.auth))
     if (exclude.length > 0) lines.push(`    exclude: ${flowSeq(exclude)}`)
 
     // Static-serving settings from the site row (routing / custom 404 / asset caching) —
@@ -187,12 +341,48 @@ export function renderFragment(site: Site, options: FragmentOptions): string {
         if (web.block_exploits) lines.push('    block_exploits: true')
         if (web.gzip) lines.push('    gzip: true')
         if (web.advanced && web.advanced.trim()) {
+            // A literal block scalar: every line is content, so nothing inside can
+            // close the block or introduce a sibling key. `trim()` guarantees the
+            // first line carries no leading whitespace, which is what lets YAML
+            // auto-detect the six-space indent (no explicit indicator needed). CR is
+            // normalized away so a Windows-pasted snippet can't leave stray \r in the
+            // emitted nginx directives.
             lines.push('    advanced: |')
-            for (const line of web.advanced.trim().split('\n')) lines.push(line ? `      ${line}` : '')
+            for (const line of web.advanced.replace(/\r\n?/g, '\n').trim().split('\n')) {
+                lines.push(line.trim() ? `      ${line}` : '')
+            }
         }
     }
 
     return lines.join('\n') + '\n'
+}
+
+/**
+ * The `source.auth` block, or nothing when the source is public. Emits the credential
+ * *reference* only — an env-var name or the daemon-local path of a 0600 file — under the
+ * key nginxpilot expects for the method ({@link AUTH_FILE_KEY}). An `auth` block with no
+ * reference at all is omitted rather than written empty: nginxpilot rejects a method that
+ * names no credential, and a rejected fragment would take the whole site down, whereas
+ * omitting it degrades to an unauthenticated fetch that fails loudly in `/status`.
+ */
+function renderAuth(auth: FragmentAuth | undefined): string[] {
+    if (!auth) return []
+    const method = auth.method ?? 'github-token'
+    if (method === 'none') return []
+    const hasRef = !!(auth.tokenEnv || auth.tokenFile)
+    if (!hasRef) return []
+
+    const lines = ['      auth:', `        method: ${method}`]
+    if (auth.username) lines.push(`        username: ${scalar(auth.username)}`)
+    if (method === 'header' && auth.headerName) lines.push(`        name: ${scalar(auth.headerName)}`)
+    if (auth.tokenEnv) {
+        // Env-var references only exist for `github-token` (see FragmentAuth.tokenEnv);
+        // every other method resolves its secret through the credential store's file.
+        lines.push(`        token_env: ${scalar(auth.tokenEnv)}`)
+    } else if (auth.tokenFile) {
+        lines.push(`        ${AUTH_FILE_KEY[method]}: ${scalar(auth.tokenFile)}`)
+    }
+    return lines
 }
 
 /**

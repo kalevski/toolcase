@@ -58,7 +58,7 @@ export type UserLimitsCheck =
  *   • each numeric quota (`maxSites`, byte caps, `minIntervalSec`, `customDomains`,
  *     `keepReleases`) — when present and not null — is a finite, non-negative
  *     integer (no `Infinity`: JSON can't carry it, so "unlimited" = leave it out),
- *   • `privateRepos` — when present — is a boolean.
+ *   • each capability flag (`privateRepos`, `advancedConfig`) — when present — is a boolean.
  *
  * `null`/`undefined` fields are treated as "inherit" and dropped from the result,
  * so a partly-filled editor that blanks a field clears just that one override. Pure
@@ -80,12 +80,13 @@ export function parseUserLimits(input: unknown): UserLimitsCheck {
         override[key] = v
     }
 
-    const repos = src.privateRepos
-    if (repos !== undefined && repos !== null) {
-        if (typeof repos !== 'boolean') {
-            return { ok: false, reason: 'bad_flag', message: 'privateRepos must be a boolean' }
+    for (const key of ['privateRepos', 'advancedConfig'] as const) {
+        const v = src[key]
+        if (v === undefined || v === null) continue
+        if (typeof v !== 'boolean') {
+            return { ok: false, reason: 'bad_flag', message: `${key} must be a boolean` }
         }
-        override.privateRepos = repos
+        override[key] = v
     }
 
     return { ok: true, override }

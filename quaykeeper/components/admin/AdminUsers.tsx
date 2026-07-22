@@ -104,6 +104,7 @@ function userRowsHtml(
                 `<div><dt>Custom domains</dt> <dd>${escapeHtml(fmtCount(row.limits.customDomains))}</dd></div>`,
                 `<div><dt>Poll floor</dt> <dd>${row.limits.minIntervalSec}s</dd></div>`,
                 `<div><dt>Private repos</dt> <dd>${row.limits.privateRepos ? 'yes' : 'no'}</dd></div>`,
+                `<div><dt>Raw nginx</dt> <dd>${row.limits.advancedConfig ? 'yes' : 'no'}</dd></div>`,
             ].join('')
 
             const roleValue = ROLES.includes(row.user.role) ? row.user.role : 'standard'
@@ -532,15 +533,21 @@ const NUM_FIELDS: { key: keyof PlanLimits; label: string; mb?: boolean }[] = [
 ]
 
 type Draft = Record<string, string>
-type ReposChoice = 'inherit' | 'allow' | 'deny'
+type FlagChoice = 'inherit' | 'allow' | 'deny'
 
-// Private-repo override choices. The inherit label spells out the resolved
-// default so the owner sees what "inherit" means for this user.
-const REPOS_OPTIONS = (inheritedAllows: boolean): SelectOption[] => [
+// Capability-override choices (private repos, raw nginx). The inherit label spells
+// out the resolved default so the owner sees what "inherit" means for this user.
+const FLAG_OPTIONS = (inheritedAllows: boolean): SelectOption[] => [
     { value: 'inherit', label: `Inherit (${inheritedAllows ? 'yes' : 'no'})` },
     { value: 'allow', label: 'Allow' },
     { value: 'deny', label: 'Deny' },
 ]
+
+/** The stored override for one capability flag, as an editor choice. */
+function flagChoice(value: boolean | undefined): FlagChoice {
+    if (value === undefined) return 'inherit'
+    return value ? 'allow' : 'deny'
+}
 
 /** Seed the editor inputs from the stored override (blank field = inherit default). */
 function seedDraft(custom: UserLimitOverride | null): Draft {
@@ -555,13 +562,8 @@ function seedDraft(custom: UserLimitOverride | null): Draft {
 function LimitsEditor({ row, onSaved }: { row: AdminUserRow; onSaved: () => void }) {
     const toast = useToast()
     const [draft, setDraft] = useState<Draft>(() => seedDraft(row.customLimits))
-    const [repos, setRepos] = useState<ReposChoice>(
-        row.customLimits?.privateRepos === undefined
-            ? 'inherit'
-            : row.customLimits.privateRepos
-              ? 'allow'
-              : 'deny',
-    )
+    const [repos, setRepos] = useState<FlagChoice>(() => flagChoice(row.customLimits?.privateRepos))
+    const [advanced, setAdvanced] = useState<FlagChoice>(() => flagChoice(row.customLimits?.advancedConfig))
     const [busy, setBusy] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
@@ -581,6 +583,7 @@ function LimitsEditor({ row, onSaved }: { row: AdminUserRow; onSaved: () => void
             ;(override[f.key] as number) = f.mb ? Math.round(n * MB) : n
         }
         if (repos !== 'inherit') override.privateRepos = repos === 'allow'
+        if (advanced !== 'inherit') override.advancedConfig = advanced === 'allow'
 
         setBusy(true)
         try {
@@ -603,7 +606,7 @@ function LimitsEditor({ row, onSaved }: { row: AdminUserRow; onSaved: () => void
         } finally {
             setBusy(false)
         }
-    }, [draft, repos, limitsUrl, onSaved, toast, row.user.login])
+    }, [draft, repos, advanced, limitsUrl, onSaved, toast, row.user.login])
 
     const clear = useCallback(async () => {
         setError(null)
@@ -656,9 +659,17 @@ function LimitsEditor({ row, onSaved }: { row: AdminUserRow; onSaved: () => void
                     size="sm"
                     label="Private repos"
                     value={repos}
-                    options={REPOS_OPTIONS(row.limits.privateRepos)}
+                    options={FLAG_OPTIONS(row.limits.privateRepos)}
                     disabled={busy}
-                    onValue={(v) => setRepos(v as ReposChoice)}
+                    onValue={(v) => setRepos(v as FlagChoice)}
+                />
+                <SelectField
+                    size="sm"
+                    label="Raw nginx config"
+                    value={advanced}
+                    options={FLAG_OPTIONS(row.limits.advancedConfig)}
+                    disabled={busy}
+                    onValue={(v) => setAdvanced(v as FlagChoice)}
                 />
             </div>
             <div className="quaykeeper-admin-tier-actions">

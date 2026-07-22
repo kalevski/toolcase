@@ -63,6 +63,13 @@ export interface PlanLimits {
     keepReleases: number
     /** Whether the account may deploy private repos (via GitHub App). Standard: no. */
     privateRepos: boolean
+    /**
+     * Whether the account may set a site's raw nginx `advanced` block (`Site.advanced`).
+     * Standard: no. This writes arbitrary directives into the site's `server{}` — a
+     * tenant who has it can set headers, rewrite, proxy, or read paths beyond their
+     * own root, so it is opt-in per account exactly like {@link privateRepos}.
+     */
+    advancedConfig: boolean
 }
 
 const MB = 1024 * 1024
@@ -80,6 +87,7 @@ export const STANDARD_LIMITS: PlanLimits = {
     customDomains: 0,
     keepReleases: 1,
     privateRepos: false,
+    advancedConfig: false,
 }
 
 /**
@@ -97,6 +105,7 @@ export const UNLIMITED_LIMITS: PlanLimits = {
     customDomains: Infinity,
     keepReleases: 5,
     privateRepos: true,
+    advancedConfig: true,
 }
 
 // ── Account level (the standard/owner ladder) ─────────────────────────────────
@@ -203,6 +212,74 @@ export type SiteHostKind = 'subdomain' | 'custom'
  */
 export type SiteRouting = 'static' | 'spa' | 'clean-urls'
 
+/**
+ * Where a site's content comes from (nginxpilot `source.type`):
+ *
+ *   • `git`      — clone a branch and serve the tree. The default, and the only kind
+ *                  the GitHub repo picker produces.
+ *   • `http-zip` — download a published archive and serve its contents. For content
+ *                  that is *built* elsewhere: a CI-published zip or a release tarball,
+ *                  with no repo to clone and no build step to trust.
+ */
+export type SiteSourceType = 'git' | 'http-zip'
+
+/**
+ * How a site authenticates to its source (nginxpilot `source.auth.method`). Which
+ * methods are legal depends on the source type and URL scheme, and nginxpilot enforces
+ * that too — `domain/site-input.ts` mirrors the rules so a bad combination is a 400 here
+ * rather than a 502 bouncing off the daemon:
+ *
+ *   • git over `git@`/`ssh://` — `ssh-key` (a deploy key).
+ *   • git over `https://`      — `github-token` (token alone) or `https-token`
+ *                                (username + token, for GitLab/Bitbucket/Gitea).
+ *   • http-zip                 — `bearer`, `basic`, or `header` (a custom header, e.g.
+ *                                an artifact registry's API key).
+ *   • `none`                   — a public repo or archive.
+ *
+ * Secret material is never stored in a fragment: whatever the method needs is pushed to
+ * the realm's credential store and referenced by file path (see `FragmentAuth`).
+ */
+export type SiteAuthMethod = 'none' | 'ssh-key' | 'https-token' | 'github-token' | 'bearer' | 'basic' | 'header'
+
+/** Every source type. */
+export const SITE_SOURCE_TYPES: readonly SiteSourceType[] = ['git', 'http-zip']
+
+/** Every auth method. */
+export const SITE_AUTH_METHODS: readonly SiteAuthMethod[] = [
+    'none',
+    'ssh-key',
+    'https-token',
+    'github-token',
+    'bearer',
+    'basic',
+    'header',
+]
+
+/**
+ * Per-site TLS mode — nginxpilot's full tri-state (`WebOptions.TLS`). Only ever
+ * honoured for a **custom domain**, which terminates on its own dedicated cert:
+ *
+ *   • `off`      — plain HTTP, no cert, no redirect.
+ *   • `auto`     — use the cert once it exists, serve plain HTTP until then (the
+ *                  default: a not-yet-issued cert degrades instead of 404-ing).
+ *   • `required` — HTTPS or nothing. Without a cert nginxpilot *quarantines* the
+ *                  site rather than falling back to plaintext. The right choice
+ *                  behind HSTS, where a plaintext gap is worse than an outage.
+ *
+ * A subdomain's TLS is decided by its base domain's wildcard policy
+ * ({@link BaseDomain.tls}) — one cert covers every label, so a per-label override
+ * would be a contradiction. The site service rejects setting this on a subdomain.
+ */
+export type SiteTls = 'off' | 'auto' | 'required'
+
+/** Every per-site TLS mode. */
+export const SITE_TLS: readonly SiteTls[] = ['off', 'auto', 'required']
+
+/** Type guard: a request-supplied value is one of the per-site TLS modes. */
+export function isSiteTls(value: unknown): value is SiteTls {
+    return value === 'off' || value === 'auto' || value === 'required'
+}
+
 /** A deployed (or in-progress) static site. Mirrors the `site` table (§12). */
 export interface Site {
     /** Short server-generated id; also the nginxpilot fragment filename suffix. */
@@ -217,15 +294,102 @@ export interface Site {
      * clone token pushed to nginxpilot's git-credentials store.
      */
     repoPrivate: boolean
+    /**
+     * Where the content comes from; `undefined` = `git` (the original behaviour, and
+     * what the GitHub repo picker creates).
+     */
+    sourceType?: SiteSourceType
+    /**
+     * The source URL, when it isn't the GitHub repo implied by
+     * `repoOwner`/`repoName`. Set for a non-GitHub git host (GitLab, Bitbucket, Gitea,
+     * self-hosted, an `ssh://` deploy-key remote) and always set for `http-zip`.
+     * `undefined` on a git site means "derive `https://github.com/<owner>/<name>.git`".
+     */
+    sourceUrl?: string
+    /** Git ref to deploy. Ignored (and not emitted) for an `http-zip` source. */
     branch: string
-    /** Optional build output subdirectory (e.g. `dist/`). */
+    /**
+     * Optional build output subdirectory (e.g. `dist/`). Git sources only — an archive
+     * uses {@link stripComponents} instead, and nginxpilot rejects `subdir` there.
+     */
     subdir?: string
+    /**
+     * How to authenticate to the source; `undefined` = `github-token` for a private
+     * GitHub repo (the OAuth token path) and `none` otherwise.
+     */
+    authMethod?: SiteAuthMethod
+    /** Username for `https-token` / `basic` auth. Never a secret — the password/token is. */
+    authUsername?: string
+    /** Header name for `header` auth (e.g. `X-Api-Key`); the value is the stored secret. */
+    authHeaderName?: string
+    /** `http-zip`: URL of a checksum file the daemon verifies the archive against. */
+    checksumUrl?: string
+    /** `http-zip`: leading path components to strip from archive entries (an archive with a top-level folder wants 1). */
+    stripComponents?: number
+    /** `http-zip`: permit a plain `http://` archive/checksum URL. Off by default, and rightly noisy in the UI. */
+    allowInsecure?: boolean
     /** Path→file routing strategy; omitted = `static` (the nginxpilot default). */
     routing?: SiteRouting
     /** Site-relative custom 404 page (e.g. `/404.html`); static/clean-urls only. */
     notFound?: string
     /** Emit immutable Cache-Control for fingerprinted assets (css/js/fonts/images). */
     cacheAssets?: boolean
+    /** gzip responses (`WebOptions.Gzip`). No TLS requirement; purely per-site. */
+    gzip?: boolean
+    /**
+     * Include nginxpilot's block-exploits snippet (`WebOptions.BlockExploits`) —
+     * denies common scanner / SQLi / traversal request patterns. Additive and
+     * TLS-independent, so it is a plain per-site toggle.
+     */
+    blockExploits?: boolean
+    /**
+     * TLS mode for a **custom domain** ({@link SiteTls}); `undefined` = `auto`. Never
+     * read for a subdomain, whose TLS comes from its base domain's wildcard policy —
+     * the site service rejects setting it there, and a rehost to a subdomain clears it.
+     */
+    tls?: SiteTls
+    /**
+     * Strict-Transport-Security for a **custom domain**. Scoped exactly like
+     * {@link tls}: a subdomain inherits {@link BaseDomain.hsts} instead, since one
+     * wildcard cert covers every label and `includeSubDomains` binds the whole
+     * registrable domain anyway. Opt-in only — HSTS is sticky in browsers for
+     * `max_age` (nginxpilot defaults to two years) even after the header stops being
+     * sent, so enabling it is close to irreversible for anyone who has already visited.
+     */
+    hsts?: boolean
+    /**
+     * Raw nginx directives injected into this site's `server{}` block
+     * (`WebOptions.Advanced`) — the escape hatch. Gated on
+     * {@link PlanLimits.advancedConfig} because a tenant who can inject arbitrary
+     * directives can set headers, rewrite, proxy, or read paths beyond their root.
+     * nginxpilot's `nginx -t` gate means a bad snippet only quarantines this one site.
+     */
+    advanced?: string
+    /**
+     * Extra deny-list globs layered on nginxpilot's built-in defaults (`.env*`,
+     * `.htaccess`, `.DS_Store`, `.git*`) and Quaykeeper's `*.map`. `undefined` = just
+     * the defaults; an empty array means "defaults only, drop `*.map`".
+     */
+    exclude?: string[]
+    /**
+     * Post-fetch gate files (`source.require_file`): nginxpilot won't cut a release
+     * live unless all of them exist, so a broken build keeps the last-known-good
+     * release serving. `undefined` = the `['index.html']` default; `[]` disables the
+     * gate (for a build whose entry point isn't a file we can name up front).
+     */
+    requireFile?: string[]
+    /**
+     * How many prior release directories nginxpilot retains for rollback
+     * (`source.keep_releases`). `undefined` = the owner's plan value
+     * ({@link PlanLimits.keepReleases}); never above it.
+     */
+    keepReleases?: number
+    /**
+     * Per-site poll cadence in seconds (`source.interval`). `undefined` = the owner's
+     * plan floor ({@link PlanLimits.minIntervalSec}). A site may poll *less* often than
+     * the floor (a quiet marketing page), never more — the floor is the plan's guarantee.
+     */
+    intervalSec?: number
     /** Fully-qualified hostname; globally unique (`alice.quaykeeper.dev` | `www.example.com`). */
     hostname: string
     hostKind: SiteHostKind
@@ -244,6 +408,157 @@ export interface Site {
     lastError?: string
     createdAt: string
     updatedAt: string
+}
+
+/**
+ * A site's deploy *source* — everything that decides where content is fetched from and
+ * how the fetch authenticates. Grouped for the same reason as {@link SiteSettings}: it
+ * travels as one value through the PATCH body, the deploy machine's change detection,
+ * and one `siteRepo.updateSource` write.
+ *
+ * Changing anything in here changes nginxpilot's source *fingerprint*, which makes it
+ * discard stored refs and resync from scratch — so these are deliberately separate from
+ * the settings group, which only re-renders the server block.
+ */
+export const SITE_SOURCE_KEYS = [
+    'sourceType',
+    'sourceUrl',
+    'branch',
+    'subdir',
+    'authMethod',
+    'authUsername',
+    'authHeaderName',
+    'checksumUrl',
+    'stripComponents',
+    'allowInsecure',
+] as const
+
+/** {@link SITE_SOURCE_KEYS} as a value type — a full snapshot of a site's source spec. */
+export type SiteSource = Pick<Site, (typeof SITE_SOURCE_KEYS)[number]>
+
+/** Extract the source group from a site row (the change-detection baseline). */
+export function siteSource(site: Site): SiteSource {
+    return {
+        sourceType: site.sourceType,
+        sourceUrl: site.sourceUrl,
+        branch: site.branch,
+        subdir: site.subdir,
+        authMethod: site.authMethod,
+        authUsername: site.authUsername,
+        authHeaderName: site.authHeaderName,
+        checksumUrl: site.checksumUrl,
+        stripComponents: site.stripComponents,
+        allowInsecure: site.allowInsecure,
+    }
+}
+
+/**
+ * The auth method a site actually fetches with. An explicit {@link Site.authMethod} wins;
+ * otherwise a private GitHub repo authenticates with `github-token` (the original
+ * behaviour, from before other methods existed) and anything else is public.
+ */
+export function effectiveAuthMethod(site: Site): SiteAuthMethod {
+    return site.authMethod ?? (site.repoPrivate ? 'github-token' : 'none')
+}
+
+/**
+ * Whether a site's credential is the owner's **GitHub OAuth token** rather than a
+ * per-site secret they supplied. True only for a private GitHub repo — an explicit
+ * `sourceUrl` means the site fetches from somewhere Quaykeeper's GitHub token has no
+ * standing, even if the method happens to also be called `github-token`.
+ *
+ * Both the deploy path (which secret to push) and the login-time refresh (which sites to
+ * re-push to) branch on this, and they MUST agree: if the refresh were broader, every
+ * sign-in would overwrite a site's stored deploy key with an unrelated GitHub token.
+ */
+export function usesGithubOAuthCredential(site: Site): boolean {
+    return !site.sourceUrl && effectiveAuthMethod(site) === 'github-token'
+}
+
+/** Whether two source snapshots are equivalent (`git` and an absent type are the same). */
+export function siteSourceEqual(a: SiteSource, b: SiteSource): boolean {
+    return (
+        (a.sourceType ?? 'git') === (b.sourceType ?? 'git') &&
+        a.sourceUrl === b.sourceUrl &&
+        a.branch === b.branch &&
+        a.subdir === b.subdir &&
+        a.authMethod === b.authMethod &&
+        a.authUsername === b.authUsername &&
+        a.authHeaderName === b.authHeaderName &&
+        a.checksumUrl === b.checksumUrl &&
+        a.stripComponents === b.stripComponents &&
+        !!a.allowInsecure === !!b.allowInsecure
+    )
+}
+
+/**
+ * The per-site configuration knobs that shape the nginxpilot fragment *other than*
+ * the deploy source coordinates (branch/subdir, which have their own write path).
+ * Grouped so the whole set travels as one value through the PATCH body, the deploy
+ * machine's change detection, and the single `siteRepo.updateSettings` write —
+ * rather than as an ever-growing positional argument list.
+ */
+export const SITE_SETTING_KEYS = [
+    'routing',
+    'notFound',
+    'cacheAssets',
+    'gzip',
+    'blockExploits',
+    'tls',
+    'hsts',
+    'advanced',
+    'exclude',
+    'requireFile',
+    'keepReleases',
+    'intervalSec',
+] as const
+
+/** {@link SITE_SETTING_KEYS} as a value type — a full snapshot of a site's settings. */
+export type SiteSettings = Pick<Site, (typeof SITE_SETTING_KEYS)[number]>
+
+/** Extract the settings group from a site row (the change-detection baseline). */
+export function siteSettings(site: Site): SiteSettings {
+    return {
+        routing: site.routing,
+        notFound: site.notFound,
+        cacheAssets: site.cacheAssets,
+        gzip: site.gzip,
+        blockExploits: site.blockExploits,
+        tls: site.tls,
+        hsts: site.hsts,
+        advanced: site.advanced,
+        exclude: site.exclude,
+        requireFile: site.requireFile,
+        keepReleases: site.keepReleases,
+        intervalSec: site.intervalSec,
+    }
+}
+
+/**
+ * Whether two settings snapshots are equivalent. Booleans compare through
+ * `!!` (an absent flag and a stored `false` are the same site), and the two
+ * array fields compare element-wise — but `undefined` (inherit the default) is
+ * deliberately NOT equal to `[]` (explicitly empty), since they render differently.
+ */
+export function siteSettingsEqual(a: SiteSettings, b: SiteSettings): boolean {
+    const sameList = (x?: string[], y?: string[]): boolean => {
+        if (x === undefined || y === undefined) return x === y
+        return x.length === y.length && x.every((v, i) => v === y[i])
+    }
+    return (
+        a.routing === b.routing &&
+        a.notFound === b.notFound &&
+        !!a.cacheAssets === !!b.cacheAssets &&
+        !!a.gzip === !!b.gzip &&
+        !!a.blockExploits === !!b.blockExploits &&
+        a.tls === b.tls &&
+        !!a.hsts === !!b.hsts &&
+        (a.advanced ?? '') === (b.advanced ?? '') &&
+        sameList(a.exclude, b.exclude) &&
+        sameList(a.requireFile, b.requireFile) &&
+        a.keepReleases === b.keepReleases &&
+        a.intervalSec === b.intervalSec
+    )
 }
 
 // ── Usage & identity (`GET /api/me`) ─────────────────────────────────────────
@@ -347,6 +662,33 @@ export interface BaseDomain {
     domain: string
     /** Subdomain TLS policy (§0/Phase D): one wildcard cert per base. Defaults to `auto`. */
     tls: BaseDomainTls
+    /**
+     * HTTP/2 for every subdomain under this base. Like {@link tls} the knob is
+     * per-base, not per-subdomain, because HTTP/2 is negotiated per *certificate*:
+     * a browser that sees one wildcard cert covering `a.base.dev` and `b.base.dev`
+     * may coalesce both onto a single TLS connection. If the vhosts then disagree
+     * on HTTP/2, nginx answers the coalesced request `421 Misdirected Request`.
+     * Deciding once per base makes every label agree by construction.
+     *
+     * Inert while `tls` is `off` — nginxpilot rejects `http2` without TLS, so
+     * `resolveWebOptions` only emits it alongside `tls: auto`. Defaults to on.
+     */
+    http2: boolean
+    /**
+     * Strict-Transport-Security for every subdomain under this base. Per-base for the
+     * same reason as {@link http2}, plus a stronger one: HSTS with `includeSubDomains`
+     * is declared by ONE host but binds the browser for the whole registrable domain,
+     * so contradictory per-label policies under one wildcard are meaningless — the
+     * strictest declaration wins in the client regardless.
+     *
+     * **Defaults to off, and must stay opt-in.** HSTS is sticky: once sent, a browser
+     * refuses plain HTTP to the domain for `max_age` (nginxpilot's default is 2 years)
+     * even if the header is later withdrawn. Enabling it is close to irreversible for
+     * anyone who has already visited.
+     *
+     * Inert while `tls` is `off` — nginxpilot rejects `hsts` without TLS.
+     */
+    hsts: boolean
     /**
      * The realm (nginxpilot instance) whose wildcard serves this base domain
      * (multiple_realms.md §2.1, §10.4).

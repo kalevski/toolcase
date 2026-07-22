@@ -6,7 +6,17 @@
 
 import 'server-only'
 import { prep, getRow, allRows } from '@/server/data/db'
-import type { Site, SiteHostKind, SiteRouting, SiteStatus } from '@/server/domain/types'
+import type {
+    Site,
+    SiteAuthMethod,
+    SiteHostKind,
+    SiteRouting,
+    SiteSettings,
+    SiteSource,
+    SiteSourceType,
+    SiteStatus,
+    SiteTls,
+} from '@/server/domain/types'
 
 interface Raw {
     id: string
@@ -14,11 +24,28 @@ interface Raw {
     repo_owner: string
     repo_name: string
     repo_private: number
+    source_type: string | null
+    source_url: string | null
     branch: string
     subdir: string | null
+    auth_method: string | null
+    auth_username: string | null
+    auth_header_name: string | null
+    checksum_url: string | null
+    strip_components: number | null
+    allow_insecure: number
     routing: string | null
     not_found: string | null
     cache_assets: number
+    gzip: number
+    block_exploits: number
+    tls: string | null
+    hsts: number
+    advanced: string | null
+    exclude: string | null
+    require_file: string | null
+    keep_releases: number | null
+    interval_sec: number | null
     hostname: string
     host_kind: string
     status: string
@@ -30,6 +57,29 @@ interface Raw {
     updated_at: string
 }
 
+/**
+ * Decode a stored glob/path list. The column holds a JSON array (or NULL for
+ * "inherit the default"), so an empty array — "explicitly none", which renders
+ * differently from the default — survives the round trip. A row written by an
+ * older build, or hand-edited to something that isn't a JSON string array, decodes
+ * to `undefined` (the default) rather than throwing on every read.
+ */
+function decodeList(raw: string | null): string[] | undefined {
+    if (raw === null) return undefined
+    try {
+        const parsed = JSON.parse(raw) as unknown
+        if (Array.isArray(parsed) && parsed.every((v) => typeof v === 'string')) return parsed as string[]
+    } catch {
+        /* fall through to the default */
+    }
+    return undefined
+}
+
+/** Encode a glob/path list for storage; `undefined` (inherit the default) stores NULL. */
+function encodeList(list: string[] | undefined): string | null {
+    return list === undefined ? null : JSON.stringify(list)
+}
+
 function map(r: Raw): Site {
     return {
         id: r.id,
@@ -37,11 +87,28 @@ function map(r: Raw): Site {
         repoOwner: r.repo_owner,
         repoName: r.repo_name,
         repoPrivate: !!r.repo_private,
+        sourceType: (r.source_type as SiteSourceType | null) ?? undefined,
+        sourceUrl: r.source_url ?? undefined,
         branch: r.branch,
         subdir: r.subdir ?? undefined,
+        authMethod: (r.auth_method as SiteAuthMethod | null) ?? undefined,
+        authUsername: r.auth_username ?? undefined,
+        authHeaderName: r.auth_header_name ?? undefined,
+        checksumUrl: r.checksum_url ?? undefined,
+        stripComponents: r.strip_components ?? undefined,
+        allowInsecure: !!r.allow_insecure,
         routing: (r.routing as SiteRouting | null) ?? undefined,
         notFound: r.not_found ?? undefined,
         cacheAssets: !!r.cache_assets,
+        gzip: !!r.gzip,
+        blockExploits: !!r.block_exploits,
+        tls: (r.tls as SiteTls | null) ?? undefined,
+        hsts: !!r.hsts,
+        advanced: r.advanced ?? undefined,
+        exclude: decodeList(r.exclude),
+        requireFile: decodeList(r.require_file),
+        keepReleases: r.keep_releases ?? undefined,
+        intervalSec: r.interval_sec ?? undefined,
         hostname: r.hostname,
         hostKind: r.host_kind as SiteHostKind,
         status: r.status as SiteStatus,
@@ -58,22 +125,43 @@ function map(r: Raw): Site {
 export function create(site: Site): void {
     prep(
         `INSERT INTO site (
-            id, owner_id, repo_owner, repo_name, repo_private, branch, subdir,
-            routing, not_found, cache_assets,
+            id, owner_id, repo_owner, repo_name, repo_private,
+            source_type, source_url, branch, subdir,
+            auth_method, auth_username, auth_header_name,
+            checksum_url, strip_components, allow_insecure,
+            routing, not_found, cache_assets, gzip, block_exploits, tls, hsts, advanced,
+            exclude, require_file, keep_releases, interval_sec,
             hostname, host_kind, status, bytes, last_ref, last_error,
             realm_id, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ).run(
         site.id,
         site.ownerId,
         site.repoOwner,
         site.repoName,
         site.repoPrivate ? 1 : 0,
+        site.sourceType ?? null,
+        site.sourceUrl ?? null,
         site.branch,
         site.subdir ?? null,
+        site.authMethod ?? null,
+        site.authUsername ?? null,
+        site.authHeaderName ?? null,
+        site.checksumUrl ?? null,
+        site.stripComponents ?? null,
+        site.allowInsecure ? 1 : 0,
         site.routing ?? null,
         site.notFound ?? null,
         site.cacheAssets ? 1 : 0,
+        site.gzip ? 1 : 0,
+        site.blockExploits ? 1 : 0,
+        site.tls ?? null,
+        site.hsts ? 1 : 0,
+        site.advanced ?? null,
+        encodeList(site.exclude),
+        encodeList(site.requireFile),
+        site.keepReleases ?? null,
+        site.intervalSec ?? null,
         site.hostname,
         site.hostKind,
         site.status,
@@ -189,39 +277,71 @@ export function updateLastError(
 }
 
 /**
- * Rewrite the source branch/subdir (the deploy service's `update`, §9 step 6). The
- * new fragment + reload + sync are the service's job; this only persists the row.
+ * Rewrite the whole deploy-source group ({@link SiteSource}: kind, URL, branch/subdir,
+ * auth method and its non-secret parameters, and the archive-only knobs). A FULL replace,
+ * not a merge — the caller resolves the merged value first. The credential itself lives
+ * in `site_credential`, never here. The new fragment + reload + sync are the service's
+ * job; this only persists the row.
  */
 export function updateSource(
     id: string,
-    branch: string,
-    subdir: string | undefined,
+    source: SiteSource,
     at: string = new Date().toISOString(),
 ): void {
-    prep('UPDATE site SET branch = ?, subdir = ?, updated_at = ? WHERE id = ?').run(
-        branch,
-        subdir ?? null,
+    prep(
+        `UPDATE site SET
+            source_type = ?, source_url = ?, branch = ?, subdir = ?,
+            auth_method = ?, auth_username = ?, auth_header_name = ?,
+            checksum_url = ?, strip_components = ?, allow_insecure = ?, updated_at = ?
+         WHERE id = ?`,
+    ).run(
+        source.sourceType ?? null,
+        source.sourceUrl ?? null,
+        source.branch,
+        source.subdir ?? null,
+        source.authMethod ?? null,
+        source.authUsername ?? null,
+        source.authHeaderName ?? null,
+        source.checksumUrl ?? null,
+        source.stripComponents ?? null,
+        source.allowInsecure ? 1 : 0,
         at,
         id,
     )
 }
 
 /**
- * Rewrite the static-serving settings (routing / custom 404 / asset caching). Like
- * `updateSource`, the new fragment + reload + sync are the service's job; this only
+ * Rewrite the whole per-site settings group ({@link SiteSettings}: routing, custom 404,
+ * asset caching, gzip, block-exploits, TLS mode, the raw `advanced` block, and the
+ * source-tree controls). A FULL replace, not a merge — the caller resolves the merged
+ * value first, so an omitted field here means "back to the default", never "unchanged".
+ * Like `updateSource`, the new fragment + reload + sync are the service's job; this only
  * persists the row. `routing: undefined` stores NULL (= nginxpilot's `static` default).
  */
-export function updateServing(
+export function updateSettings(
     id: string,
-    routing: SiteRouting | undefined,
-    notFound: string | undefined,
-    cacheAssets: boolean,
+    settings: SiteSettings,
     at: string = new Date().toISOString(),
 ): void {
-    prep('UPDATE site SET routing = ?, not_found = ?, cache_assets = ?, updated_at = ? WHERE id = ?').run(
-        routing ?? null,
-        notFound ?? null,
-        cacheAssets ? 1 : 0,
+    prep(
+        `UPDATE site SET
+            routing = ?, not_found = ?, cache_assets = ?, gzip = ?, block_exploits = ?,
+            tls = ?, hsts = ?, advanced = ?, exclude = ?, require_file = ?, keep_releases = ?,
+            interval_sec = ?, updated_at = ?
+         WHERE id = ?`,
+    ).run(
+        settings.routing ?? null,
+        settings.notFound ?? null,
+        settings.cacheAssets ? 1 : 0,
+        settings.gzip ? 1 : 0,
+        settings.blockExploits ? 1 : 0,
+        settings.tls ?? null,
+        settings.hsts ? 1 : 0,
+        settings.advanced ?? null,
+        encodeList(settings.exclude),
+        encodeList(settings.requireFile),
+        settings.keepReleases ?? null,
+        settings.intervalSec ?? null,
         at,
         id,
     )

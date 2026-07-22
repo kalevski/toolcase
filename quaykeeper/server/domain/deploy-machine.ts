@@ -11,7 +11,16 @@
 //
 // See notes/static-hosting-app-design.md §4, §9, §11.
 
-import type { Site, SiteRouting, SiteStatus } from './types'
+import {
+    siteSettings,
+    siteSettingsEqual,
+    siteSource,
+    siteSourceEqual,
+    type Site,
+    type SiteSettings,
+    type SiteSource,
+    type SiteStatus,
+} from './types'
 import type { FragmentOptions } from './nginxpilot-fragment'
 // Type-only imports of the nginxpilot client surface — erased at compile, so pulling
 // them in never executes that `server-only` module under vitest.
@@ -39,14 +48,10 @@ export interface DeployStore {
     updateLastError(id: string, lastError: string | null, at?: string): void
     updateLastRef(id: string, lastRef: string, at?: string): void
     updateBytes(id: string, bytes: number, at?: string): void
-    updateSource(id: string, branch: string, subdir: string | undefined, at?: string): void
-    updateServing(
-        id: string,
-        routing: SiteRouting | undefined,
-        notFound: string | undefined,
-        cacheAssets: boolean,
-        at?: string,
-    ): void
+    /** Full replace of the deploy-source group (see {@link SiteSource}). */
+    updateSource(id: string, source: SiteSource, at?: string): void
+    /** Full replace of the per-site settings group (see {@link SiteSettings}). */
+    updateSettings(id: string, settings: SiteSettings, at?: string): void
     remove(id: string): void
 }
 
@@ -64,17 +69,19 @@ export interface DeployDeps {
     sleep(ms: number): Promise<void>
 }
 
-/** Editable source fields on `update()` (§9 step 6: branch/subdir changes re-render). */
+/**
+ * Editable fields on `update()` (§9 step 6: a source or settings change re-renders the
+ * fragment and re-syncs).
+ *
+ * Both groups are already-merged FULL replacements rather than sparse patches, because
+ * the service is the layer that knows which fields the PATCH body actually mentioned and
+ * how each one merges. Absent here means "leave that whole group alone".
+ */
 export interface SiteSourceChanges {
-    branch?: string
-    /** `null`/`undefined` clears the build subdir; absent leaves it unchanged. */
-    subdir?: string | null
-    /** New routing mode (`undefined` inside the key = back to static); absent leaves it unchanged. */
-    routing?: SiteRouting
-    /** `null`/`undefined` clears the custom 404 page; absent leaves it unchanged. */
-    notFound?: string | null
-    /** New asset-caching toggle; absent leaves it unchanged. */
-    cacheAssets?: boolean
+    /** The complete new source group; absent leaves the source unchanged. */
+    source?: SiteSource
+    /** The complete new settings group; absent leaves every setting unchanged. */
+    settings?: SiteSettings
 }
 
 /** Poll-loop tuning for `track()`. */
@@ -220,37 +227,49 @@ export async function redeploy(deps: DeployDeps, site: Site): Promise<Site> {
 }
 
 /**
- * Update a site's source (§9 step 6): when the branch, subdir, or a static-serving
- * setting (routing / 404 page / asset caching) changes, persist the new values, rewrite
- * the fragment, reload, and force a sync (back to `provisioning`). A no-op change
- * short-circuits without touching nginxpilot.
+ * Update a site (§9 step 6): when the branch, subdir, or any per-site setting changes,
+ * persist the new values, rewrite the fragment, reload, and force a sync (back to
+ * `provisioning`). A no-op change short-circuits without touching nginxpilot.
  */
 export async function update(deps: DeployDeps, site: Site, changes: SiteSourceChanges): Promise<Site> {
-    const branch = changes.branch ?? site.branch
-    const subdir = 'subdir' in changes ? (changes.subdir ?? undefined) : site.subdir
-    const routing = 'routing' in changes ? changes.routing : site.routing
-    const notFound = 'notFound' in changes ? (changes.notFound ?? undefined) : site.notFound
-    const cacheAssets = changes.cacheAssets ?? site.cacheAssets ?? false
-    const sourceChanged = branch !== site.branch || subdir !== site.subdir
-    const servingChanged =
-        routing !== site.routing || notFound !== site.notFound || cacheAssets !== (site.cacheAssets ?? false)
-    if (!sourceChanged && !servingChanged) return site
+    const source = changes.source ?? siteSource(site)
+    const settings = changes.settings ?? siteSettings(site)
+    const sourceChanged = !siteSourceEqual(source, siteSource(site))
+    const settingsChanged = !siteSettingsEqual(settings, siteSettings(site))
+    if (!sourceChanged && !settingsChanged) return site
 
     const at = deps.now()
-    const next: Site = { ...site, branch, subdir, routing, notFound, cacheAssets, status: 'provisioning', updatedAt: at }
-    if (sourceChanged) deps.store.updateSource(site.id, branch, subdir, at)
-    if (servingChanged) deps.store.updateServing(site.id, routing, notFound, cacheAssets, at)
+    const next: Site = { ...site, ...source, ...settings, status: 'provisioning', updatedAt: at }
+    if (sourceChanged) deps.store.updateSource(site.id, source, at)
+    if (settingsChanged) deps.store.updateSettings(site.id, settings, at)
     await deps.client.writeFragment(next, deps.fragmentOptions(next))
     await deps.client.reload()
     await deps.client.sync(next.hostname)
     deps.store.updateStatus(site.id, 'provisioning', at)
-    deps.audit(
-        'site.update',
-        next,
-        `branch=${branch}${subdir ? ` subdir=${subdir}` : ''} routing=${routing ?? 'static'}` +
-            `${notFound ? ` not_found=${notFound}` : ''}${cacheAssets ? ' cache_assets' : ''}`,
-    )
+    deps.audit('site.update', next, describeUpdate(next))
     return next
+}
+
+/** One-line audit detail for an `update()` — the source plus the non-default settings. */
+function describeUpdate(site: Site): string {
+    const parts: string[] = []
+    if (site.sourceType && site.sourceType !== 'git') parts.push(`type=${site.sourceType}`)
+    if (site.sourceUrl) parts.push(`url=${site.sourceUrl}`)
+    if ((site.sourceType ?? 'git') === 'git') parts.push(`branch=${site.branch}`)
+    if (site.subdir) parts.push(`subdir=${site.subdir}`)
+    if (site.authMethod && site.authMethod !== 'none') parts.push(`auth=${site.authMethod}`)
+    parts.push(`routing=${site.routing ?? 'static'}`)
+    if (site.notFound) parts.push(`not_found=${site.notFound}`)
+    if (site.cacheAssets) parts.push('cache_assets')
+    if (site.gzip) parts.push('gzip')
+    if (site.blockExploits) parts.push('block_exploits')
+    if (site.tls) parts.push(`tls=${site.tls}`)
+    if (site.advanced) parts.push('advanced')
+    if (site.exclude) parts.push(`exclude=[${site.exclude.join(' ')}]`)
+    if (site.requireFile) parts.push(`require_file=[${site.requireFile.join(' ')}]`)
+    if (site.keepReleases !== undefined) parts.push(`keep_releases=${site.keepReleases}`)
+    if (site.intervalSec !== undefined) parts.push(`interval=${site.intervalSec}s`)
+    return parts.join(' ')
 }
 
 /**

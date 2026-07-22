@@ -65,6 +65,13 @@ export interface SiteStatusPayload {
     nginxpilot: SiteDeployStatus | null
     /** Managed-mode resource state for this domain, when nginxpilot runs managed (§0). */
     nginxResource?: SiteNginxResource | null
+    /**
+     * When the site's source credential was last written, or `null` when none is stored.
+     * Presence and timestamp only — the secret itself is write-only and never leaves the
+     * server, so the dashboard can say "a deploy key is stored" without being able to
+     * show it.
+     */
+    sourceSecretSetAt?: string | null
 }
 
 // ── view-model output (string-literal unions match the tc-* prop contracts) ──────

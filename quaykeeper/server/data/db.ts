@@ -110,6 +110,7 @@ const MIGRATIONS: Migration[] = [
         custom_domains     INTEGER,
         keep_releases      INTEGER,
         private_repos      INTEGER,        -- 0 | 1 | NULL (inherit)
+        advanced_config    INTEGER,        -- 0 | 1 | NULL (inherit) — the raw-nginx "advanced" escape hatch
         updated_at         TEXT NOT NULL
     );
 
@@ -161,11 +162,15 @@ const MIGRATIONS: Migration[] = [
     -- Owner-managed subdomain pool. Each base domain belongs to one realm (a
     -- wildcard is served by exactly one instance) and carries the per-base
     -- wildcard TLS policy (auto degrades to HTTP while the cert isn't issued, so
-    -- a missing cert never takes subdomains down). Every base domain is offered
-    -- to all users — there is no audience tier.
+    -- a missing cert never takes subdomains down) plus the per-base HTTP/2 and HSTS
+    -- policies (see BaseDomain.http2 / .hsts — both cert-scoped, so they live here,
+    -- not per subdomain).
+    -- Every base domain is offered to all users — there is no audience tier.
     CREATE TABLE base_domain (
         domain     TEXT PRIMARY KEY,              -- e.g. quaykeeper.dev
         tls        TEXT NOT NULL DEFAULT 'auto',  -- off | auto
+        http2      INTEGER NOT NULL DEFAULT 1,    -- HTTP/2 for every subdomain under the wildcard; inert while tls = off
+        hsts       INTEGER NOT NULL DEFAULT 0,    -- Strict-Transport-Security; opt-in only (sticky in browsers), inert while tls = off
         realm_id   TEXT REFERENCES realm(id),     -- NULL only until the boot backfill assigns the default realm
         created_at TEXT NOT NULL
     );
@@ -179,11 +184,28 @@ const MIGRATIONS: Migration[] = [
         owner_id     INTEGER NOT NULL,        -- app_user.github_id
         repo_owner   TEXT NOT NULL,
         repo_name    TEXT NOT NULL,
-        branch       TEXT NOT NULL,
-        subdir       TEXT,
+        source_type  TEXT,                    -- git (NULL) | http-zip
+        source_url   TEXT,                    -- explicit URL; NULL = derive https://github.com/<owner>/<name>.git
+        branch       TEXT NOT NULL,           -- git only (an http-zip source ignores it)
+        subdir       TEXT,                    -- git only; an archive uses strip_components
+        auth_method  TEXT,                    -- none | ssh-key | https-token | github-token | bearer | basic | header
+        auth_username TEXT,                   -- https-token | basic (not secret)
+        auth_header_name TEXT,                -- header auth (not secret)
+        checksum_url TEXT,                    -- http-zip only
+        strip_components INTEGER,             -- http-zip only
+        allow_insecure INTEGER NOT NULL DEFAULT 0, -- http-zip only: permit a plain http:// archive URL
         routing      TEXT,                    -- static (NULL) | spa | clean-urls (nginxpilot per-site routing)
         not_found    TEXT,                    -- site-relative custom 404 page (/404.html); static/clean-urls only
         cache_assets INTEGER NOT NULL DEFAULT 0, -- immutable Cache-Control for fingerprinted assets
+        gzip         INTEGER NOT NULL DEFAULT 0, -- gzip responses (no TLS requirement)
+        block_exploits INTEGER NOT NULL DEFAULT 0, -- nginxpilot's scanner/SQLi deny snippet
+        tls          TEXT,                    -- off | auto | required — CUSTOM domains only; NULL = auto (subdomains inherit their base)
+        hsts         INTEGER NOT NULL DEFAULT 0, -- Strict-Transport-Security; CUSTOM domains only, opt-in (subdomains inherit their base)
+        advanced     TEXT,                    -- raw nginx server{} directives; plan-gated (PlanLimits.advancedConfig)
+        exclude      TEXT,                    -- JSON string[] of extra deny globs; NULL = Quaykeeper's ['*.map'] default
+        require_file TEXT,                    -- JSON string[] post-fetch gate; NULL = ['index.html'] default, [] = no gate
+        keep_releases INTEGER,                -- rollback depth; NULL = the owner's plan value
+        interval_sec INTEGER,                 -- poll cadence; NULL = the owner's plan floor (never faster than it)
         hostname     TEXT NOT NULL,           -- alice.quaykeeper.dev | www.example.com
         host_kind    TEXT NOT NULL,           -- subdomain | custom
         status       TEXT NOT NULL,           -- draft|provisioning|live|failed|suspended|over_quota
@@ -197,6 +219,17 @@ const MIGRATIONS: Migration[] = [
     );
     CREATE INDEX idx_site_owner ON site(owner_id);
     CREATE UNIQUE INDEX idx_site_realm_hostname ON site(realm_id, hostname);
+
+    -- Per-site source credential: the deploy key / token / password / header value a
+    -- non-GitHub source authenticates with. AES-256-GCM ciphertext via cipher.ts, never
+    -- plaintext at rest and never returned to the client (the API is write-only; reads
+    -- report presence only). A GitHub source needs no row — it reuses the owner's OAuth
+    -- token from user_github_token. Deleted with the site.
+    CREATE TABLE site_credential (
+        site_id    TEXT PRIMARY KEY REFERENCES site(id) ON DELETE CASCADE,
+        secret_enc TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+    );
 
     -- Global instance settings (owner-editable branding + custom-domain ingress).
     -- Generic key/value; empty on a fresh instance — a missing key falls through

@@ -20,6 +20,7 @@ import { randomBytes } from 'node:crypto'
 import * as siteRepo from '@/server/data/repositories/site-repo'
 import * as userRepo from '@/server/data/repositories/user-repo'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
+import * as siteCredentialRepo from '@/server/data/repositories/site-credential-repo'
 import * as deploy from '@/server/services/deploy'
 import * as domains from '@/server/services/domains'
 import * as realms from '@/server/services/realms'
@@ -38,17 +39,48 @@ import * as github from '@/server/infrastructure/github'
 import { GithubError } from '@/server/infrastructure/github'
 import { NginxpilotError, type NginxpilotSiteStatus } from '@/server/infrastructure/nginxpilot'
 import { slog } from '@/server/infrastructure/server-log'
+import { encrypt } from '@/server/infrastructure/cipher'
 import { resolveSiteAccess, type SiteViewer } from '@/server/domain/site-access'
 import {
+    checkAdvanced,
+    checkAuthHeaderName,
+    checkAuthMethod,
+    checkAuthUsername,
     checkBranch,
+    checkChecksumUrl,
+    checkExclude,
+    checkIntervalSec,
+    checkKeepReleases,
     checkNotFound,
     checkRepoName,
     checkRepoOwner,
+    checkRequireFile,
     checkRouting,
+    checkSiteTls,
+    checkSourceSpec,
+    checkSourceType,
+    checkSourceUrl,
+    checkStripComponents,
     checkSubdir,
+    describeSourceUrl,
 } from '@/server/domain/site-input'
 import { checkDomain, checkLabel } from '@/server/domain/hostname'
-import type { AppUser, Site, SiteHostKind, SiteRouting } from '@/server/domain/types'
+import {
+    siteSettings,
+    siteSettingsEqual,
+    siteSource,
+    siteSourceEqual,
+    usesGithubOAuthCredential,
+} from '@/server/domain/types'
+import type {
+    AppUser,
+    PlanLimits,
+    Site,
+    SiteHostKind,
+    SiteRouting,
+    SiteSettings,
+    SiteSource,
+} from '@/server/domain/types'
 
 export type { SiteViewer } from '@/server/domain/site-access'
 
@@ -76,34 +108,87 @@ export type HostnameSpec =
     | { kind: 'subdomain'; label: string; baseDomain: string }
     | { kind: 'custom'; domain: string }
 
-/** `POST /api/sites` body — repo coordinates + a hostname spec (+ optional serving settings). */
-export interface CreateSiteRequest {
-    repoOwner: string
-    repoName: string
-    branch: string
-    subdir?: string | null
-    hostname: HostnameSpec
+/**
+ * The per-site settings a create/update body may carry — the request-side mirror of
+ * {@link SiteSettings}. Every field is optional; on a PATCH, an *absent* key leaves the
+ * stored value alone while an explicit `null` resets that one setting to its default.
+ */
+export interface SiteSettingsRequest {
     /** Path→file routing: `static` (default) | `spa` | `clean-urls`. */
     routing?: string | null
     /** Custom 404 page path (e.g. `/404.html`); static/clean-urls only. */
     notFound?: string | null
     /** Immutable Cache-Control for fingerprinted assets. */
     cacheAssets?: boolean
+    /** gzip responses. */
+    gzip?: boolean
+    /** Include nginxpilot's scanner/SQLi deny snippet. */
+    blockExploits?: boolean
+    /** `off` | `auto` | `required` — custom-domain sites only (a subdomain inherits its base). */
+    tls?: string | null
+    /** Strict-Transport-Security — custom-domain sites only, and sticky once sent. */
+    hsts?: boolean
+    /** Raw nginx directives for the site's `server{}` block; needs `PlanLimits.advancedConfig`. */
+    advanced?: string | null
+    /** Extra deny globs layered on the built-in defaults; `null` restores just the defaults. */
+    exclude?: string[] | null
+    /** Post-fetch gate files; `[]` disables the gate, `null` restores the `index.html` default. */
+    requireFile?: string[] | null
+    /** Rollback depth; capped by the plan. `null` inherits the plan value. */
+    keepReleases?: number | null
+    /** Poll cadence in seconds; never below the plan floor. `null` inherits the floor. */
+    intervalSec?: number | null
 }
 
-/** `PATCH /api/sites/{id}` body — any subset of source / serving / hostname fields (§9 step 6). */
-export interface UpdateSiteRequest {
+/**
+ * The deploy-source fields a create/update body may carry — the request-side mirror of
+ * {@link SiteSource}. Same per-key merge convention as {@link SiteSettingsRequest}.
+ *
+ * A plain GitHub deploy needs none of them beyond `branch`: omit `sourceType` and
+ * `sourceUrl` and the URL is derived from `repoOwner`/`repoName` exactly as before.
+ */
+export interface SiteSourceRequest {
+    /** `git` (default) | `http-zip`. */
+    sourceType?: string | null
+    /** Explicit source URL — a non-GitHub git remote, or the archive URL for `http-zip`. */
+    sourceUrl?: string | null
     branch?: string
-    /** `null` clears the build subdir; omitted leaves it unchanged. */
+    /** `null` clears the build subdir; git sources only. */
     subdir?: string | null
-    /** New routing mode (`null`/`"static"` = back to static); omitted leaves it unchanged. */
-    routing?: string | null
-    /** `null` clears the custom 404 page; omitted leaves it unchanged. */
-    notFound?: string | null
-    /** New asset-caching toggle; omitted leaves it unchanged. */
-    cacheAssets?: boolean
+    /** `none` | `ssh-key` | `https-token` | `github-token` | `bearer` | `basic` | `header`. */
+    authMethod?: string | null
+    /** Username for `https-token` / `basic`. */
+    authUsername?: string | null
+    /** Header name for `header` auth. */
+    authHeaderName?: string | null
+    /** `http-zip`: checksum file URL. */
+    checksumUrl?: string | null
+    /** `http-zip`: leading path components to strip. */
+    stripComponents?: number | null
+    /** `http-zip`: permit a plain `http://` URL. */
+    allowInsecure?: boolean
+}
+
+/** `POST /api/sites` body — repo coordinates + a hostname spec (+ optional source/settings). */
+export interface CreateSiteRequest extends SiteSettingsRequest, SiteSourceRequest {
+    repoOwner?: string
+    repoName?: string
+    branch?: string
+    hostname: HostnameSpec
+    /**
+     * The source credential for a non-GitHub source (a deploy key, token, password, or
+     * header value). Write-only: it is sealed into `site_credential` and never returned.
+     * A GitHub source omits it — the owner's OAuth token authenticates instead.
+     */
+    sourceSecret?: string | null
+}
+
+/** `PATCH /api/sites/{id}` body — any subset of source / settings / hostname fields (§9 step 6). */
+export interface UpdateSiteRequest extends SiteSettingsRequest, SiteSourceRequest {
     /** A new hostname spec to move the site to; omitted leaves the hostname unchanged. */
     hostname?: HostnameSpec
+    /** Replace the stored source credential; `null` deletes it. Omitted leaves it alone. */
+    sourceSecret?: string | null
 }
 
 // ── helpers ──────────────────────────────────────────────────────────────────────
@@ -138,6 +223,168 @@ function assertServingCompatible(routing: SiteRouting | undefined, notFound: str
             400,
         )
     }
+}
+
+/** Read an optional boolean field: absent/null means off; anything non-boolean is a 400. */
+function flag(value: unknown, field: string): boolean {
+    if (value === undefined || value === null) return false
+    if (typeof value !== 'boolean') {
+        throw new SiteError(`"${field}" must be a boolean`, 'invalid_request', 400)
+    }
+    return value
+}
+
+/** Run one pure `check*` and unwrap it, mapping a rejection to its 400. */
+function checked<T>(result: { ok: true; value: T } | { ok: false; reason: string; message: string }): T {
+    if (!result.ok) throw new SiteError(result.message, `invalid_${result.reason}`, 400)
+    return result.value
+}
+
+/**
+ * Merge a request body's settings over a baseline and validate the result (§9, §16).
+ *
+ * The merge convention is per-key presence: a key *absent* from the body leaves the
+ * stored value alone, while an explicit `null` resets that one setting to its default.
+ * That is what lets the dashboard PATCH a single toggle without having to echo back
+ * every other setting it isn't touching.
+ *
+ * Three rules are cross-field and therefore live here rather than in the pure checks:
+ *
+ *   • **spa + custom 404** is contradictory (every path serves index.html), so it's
+ *     rejected against the merged values — catching `routing: spa` on a site that
+ *     already stores a 404 page, and vice versa.
+ *   • **`tls` / `hsts` are cert-scoped.** Only a custom domain, which terminates on its
+ *     own certificate, may carry them; a subdomain's are decided once per base domain.
+ *     Asking for them on a subdomain is an error rather than a silent no-op — and a
+ *     rehost *to* a subdomain clears any values the site carried as a custom domain.
+ *   • **`advanced` is plan-gated** ({@link PlanLimits.advancedConfig}): it writes raw
+ *     directives into the site's `server{}` block, which is far more power than the
+ *     rest of the surface grants.
+ */
+function resolveSettings(
+    body: SiteSettingsRequest,
+    base: SiteSettings,
+    hostKind: SiteHostKind,
+    limits: PlanLimits,
+): SiteSettings {
+    const next: SiteSettings = { ...base }
+
+    if ('routing' in body) next.routing = checked(checkRouting(body.routing))
+    if ('notFound' in body) next.notFound = checked(checkNotFound(body.notFound))
+    if ('cacheAssets' in body) next.cacheAssets = flag(body.cacheAssets, 'cacheAssets')
+    if ('gzip' in body) next.gzip = flag(body.gzip, 'gzip')
+    if ('blockExploits' in body) next.blockExploits = flag(body.blockExploits, 'blockExploits')
+    if ('exclude' in body) next.exclude = checked(checkExclude(body.exclude))
+    if ('requireFile' in body) next.requireFile = checked(checkRequireFile(body.requireFile))
+    if ('keepReleases' in body) {
+        next.keepReleases = checked(checkKeepReleases(body.keepReleases, limits.keepReleases))
+    }
+    if ('intervalSec' in body) {
+        next.intervalSec = checked(checkIntervalSec(body.intervalSec, limits.minIntervalSec))
+    }
+
+    if ('advanced' in body) {
+        const advanced = checked(checkAdvanced(body.advanced))
+        if (advanced !== undefined && !limits.advancedConfig) {
+            throw new SiteError(
+                'raw nginx configuration is not enabled for this account — ask the owner to raise your limit',
+                'advanced_config_not_allowed',
+                403,
+            )
+        }
+        next.advanced = advanced
+    }
+
+    if (hostKind === 'custom') {
+        if ('tls' in body) next.tls = checked(checkSiteTls(body.tls))
+        if ('hsts' in body) next.hsts = flag(body.hsts, 'hsts')
+    } else {
+        // A subdomain shares one wildcard cert with every sibling label, so its TLS and
+        // HSTS are the base domain's to decide. `tls: null` / `hsts: false` are accepted
+        // as no-ops (a client echoing back a full settings object), but asking for a real
+        // value is refused rather than silently dropped.
+        if (body.tls != null) {
+            throw new SiteError(
+                'a subdomain\'s TLS follows its base domain (one wildcard cert covers every label) — it can\'t be set per site',
+                'tls_not_per_site',
+                400,
+            )
+        }
+        if (body.hsts === true) {
+            throw new SiteError(
+                'a subdomain\'s HSTS follows its base domain — ask the owner to enable it there',
+                'hsts_not_per_site',
+                400,
+            )
+        }
+        next.tls = undefined
+        next.hsts = false
+    }
+
+    assertServingCompatible(next.routing, next.notFound)
+    return next
+}
+
+/**
+ * Merge a request body's source fields over a baseline and validate the result.
+ *
+ * Same per-key presence convention as {@link resolveSettings}: an absent key leaves the
+ * stored value alone, an explicit `null` clears that one field. Field shapes come from
+ * the pure `check*` helpers; the cross-field consistency rules — which auth methods a
+ * kind and URL scheme allow, which fields belong to which kind — are `checkSourceSpec`,
+ * which mirrors nginxpilot's own validation so an impossible combination is refused here
+ * rather than bouncing off `POST /sites` as a 502.
+ *
+ * The URL scheme check depends on `allowInsecure`, so that flag is merged first.
+ */
+function resolveSource(body: SiteSourceRequest, base: SiteSource): SiteSource {
+    const next: SiteSource = { ...base }
+
+    if ('allowInsecure' in body) next.allowInsecure = flag(body.allowInsecure, 'allowInsecure')
+    if ('sourceType' in body) next.sourceType = checked(checkSourceType(body.sourceType))
+    const type = next.sourceType ?? 'git'
+
+    if ('sourceUrl' in body) {
+        next.sourceUrl = checked(checkSourceUrl(body.sourceUrl, type, !!next.allowInsecure))
+    }
+    if (body.branch !== undefined) next.branch = field(checkBranch(str(body.branch, 'branch')))
+    if ('subdir' in body) next.subdir = checked(checkSubdir(body.subdir))
+    if ('authMethod' in body) next.authMethod = checked(checkAuthMethod(body.authMethod))
+    if ('authUsername' in body) next.authUsername = checked(checkAuthUsername(body.authUsername))
+    if ('authHeaderName' in body) next.authHeaderName = checked(checkAuthHeaderName(body.authHeaderName))
+    if ('checksumUrl' in body) {
+        next.checksumUrl = checked(checkChecksumUrl(body.checksumUrl, !!next.allowInsecure))
+    }
+    if ('stripComponents' in body) next.stripComponents = checked(checkStripComponents(body.stripComponents))
+
+    // Switching kind leaves the other kind's fields stranded on the row, and
+    // `checkSourceSpec` rightly refuses that combination — so clear them as part of the
+    // switch rather than making the caller send a null for each one it didn't set.
+    if (type === 'git') {
+        next.checksumUrl = undefined
+        next.stripComponents = undefined
+        next.allowInsecure = false
+    } else {
+        next.subdir = undefined
+    }
+
+    const spec = checkSourceSpec(next)
+    if (!spec.ok) throw new SiteError(spec.message, `invalid_${spec.reason}`, 400)
+    return spec.value
+}
+
+/**
+ * Store, replace, or delete a site's source credential. Sealed with the same AES-256-GCM
+ * keyring as every other secret at rest; the plaintext exists only for the length of this
+ * call and is pushed to the realm's credential store by the deploy service at fragment
+ * time. `null` deletes the stored credential.
+ */
+function writeSourceSecret(siteId: string, secret: string | null): void {
+    if (secret === null || secret.trim() === '') {
+        siteCredentialRepo.remove(siteId)
+        return
+    }
+    siteCredentialRepo.set(siteId, encrypt(secret), new Date().toISOString())
 }
 
 /** Resolve + authorize a site by id for this viewer (§13). Throws `SiteError` 404/403. */
@@ -238,25 +485,30 @@ export async function createSite(viewer: SiteViewer, body: CreateSiteRequest, to
     const owner = userRepo.get(viewer.sub)
     if (!owner) throw new SiteError('account not found', 'account_not_found', 401)
 
-    const repoOwner = field(checkRepoOwner(str(body.repoOwner, 'repoOwner')))
-    const repoName = field(checkRepoName(str(body.repoName, 'repoName')))
-    const branch = field(checkBranch(str(body.branch, 'branch')))
-    const subdirCheck = checkSubdir(body.subdir)
-    if (!subdirCheck.ok) throw new SiteError(subdirCheck.message, `invalid_${subdirCheck.reason}`, 400)
-    const subdir = subdirCheck.value
-
-    const routingCheck = checkRouting(body.routing)
-    if (!routingCheck.ok) throw new SiteError(routingCheck.message, `invalid_${routingCheck.reason}`, 400)
-    const routing = routingCheck.value
-    const notFoundCheck = checkNotFound(body.notFound)
-    if (!notFoundCheck.ok) throw new SiteError(notFoundCheck.message, `invalid_${notFoundCheck.reason}`, 400)
-    const notFound = notFoundCheck.value
-    const cacheAssets = body.cacheAssets === true
-    assertServingCompatible(routing, notFound)
-
     if (!body.hostname || typeof body.hostname !== 'object') {
         throw new SiteError('"hostname" is required', 'invalid_request', 400)
     }
+
+    // A site is created one of two ways. The GitHub path supplies repo coordinates and
+    // no URL — the classic flow, and the only one the repo picker produces. The external
+    // path supplies an explicit `sourceUrl` (a non-GitHub git remote, or an archive), in
+    // which case the repo coordinates are only display labels, derived from the URL.
+    const external = !!body.sourceUrl || (body.sourceType != null && body.sourceType !== 'git')
+    const source = resolveSource(body, { branch: external ? (body.branch ?? 'main') : '' })
+    if (!external && !source.branch) {
+        throw new SiteError('"branch" is required', 'invalid_request', 400)
+    }
+
+    const labels = external && source.sourceUrl ? describeSourceUrl(source.sourceUrl) : undefined
+    const repoOwner = labels
+        ? labels.owner
+        : field(checkRepoOwner(str(body.repoOwner, 'repoOwner')))
+    const repoName = labels ? labels.name : field(checkRepoName(str(body.repoName, 'repoName')))
+
+    // The settings group is validated against the hostname kind the site is being
+    // created with, so `tls`/`hsts` on a subdomain is caught before anything is written.
+    const limits = resolveLimits(owner.login)
+    const settings = resolveSettings(body, {}, body.hostname.kind, limits)
 
     // Hard, pre-emptive count gate (§11 point 1) before we touch the namespace.
     assertCanCreateSite(owner.login)
@@ -268,13 +520,29 @@ export async function createSite(viewer: SiteViewer, body: CreateSiteRequest, to
     // must not cost a GitHub round-trip each time. Without a token we can't determine
     // privacy — allow it only for plans that permit private repos anyway (the clone
     // simply runs unauthenticated and only succeeds for a public repo).
+    //
+    // An external source has no GitHub metadata to read: whether it needs credentials is
+    // stated by its own auth method, and a private one is gated on the same capability.
     let repoPrivate = false
-    if (token) {
+    if (external) {
+        repoPrivate = (source.authMethod ?? 'none') !== 'none'
+        if (repoPrivate) assertCanUsePrivateRepo(owner.login)
+    } else if (token) {
         const meta = await github.getRepo(token, repoOwner, repoName)
         repoPrivate = meta.private
         if (meta.private) assertCanUsePrivateRepo(owner.login)
-    } else if (!resolveLimits(owner.login).privateRepos) {
+    } else if (!limits.privateRepos) {
         throw new SiteError('GitHub authentication required to create a site', 'github_token_missing', 401)
+    }
+
+    // An authenticated external source is unusable without its credential, and finding
+    // that out through a failing sync would be a poor first experience.
+    if (external && repoPrivate && !body.sourceSecret) {
+        throw new SiteError(
+            'this source needs a credential (a deploy key, token, password, or header value)',
+            'source_secret_required',
+            400,
+        )
     }
 
     // Pick the target realm (multiple_realms.md §D.2): the active realm (the owner's
@@ -290,11 +558,8 @@ export async function createSite(viewer: SiteViewer, body: CreateSiteRequest, to
         repoOwner,
         repoName,
         repoPrivate,
-        branch,
-        subdir,
-        routing,
-        notFound,
-        cacheAssets,
+        ...source,
+        ...settings,
         hostname,
         hostKind: body.hostname.kind,
         realmId: activeRealm.id,
@@ -303,7 +568,17 @@ export async function createSite(viewer: SiteViewer, body: CreateSiteRequest, to
         updatedAt: now,
     }
     siteRepo.create(site)
-    audit('site.create', owner, site, `${repoOwner}/${repoName}@${branch}${subdir ? ` subdir=${subdir}` : ''}`)
+    // The credential is sealed AFTER the row exists — `site_credential.site_id` is a
+    // foreign key, so there is nothing to attach it to before the insert.
+    if (body.sourceSecret !== undefined) writeSourceSecret(site.id, body.sourceSecret)
+    audit(
+        'site.create',
+        owner,
+        site,
+        source.sourceUrl
+            ? `${source.sourceType ?? 'git'} ${source.sourceUrl}`
+            : `${repoOwner}/${repoName}@${source.branch}${source.subdir ? ` subdir=${source.subdir}` : ''}`,
+    )
 
     const provisioned = await deploy.provision(site)
     trackAndEnforce(provisioned)
@@ -313,8 +588,8 @@ export async function createSite(viewer: SiteViewer, body: CreateSiteRequest, to
 // ── update (§9 step 6) ─────────────────────────────────────────────────────────
 
 /**
- * Update an owned site's branch / subdir / hostname (§13 ownership re-check first). A
- * branch/subdir change re-renders the fragment and re-syncs (`deploy.update`). A hostname
+ * Update an owned site's source / settings / hostname (§13 ownership re-check first). A
+ * source or settings change re-renders the fragment and re-syncs (`deploy.update`). A hostname
  * change re-validates the shared namespace (§729), tears down the old custom vhost when
  * leaving a custom domain, moves the row, and re-provisions the content channel on the new
  * domain — a move *to* a custom domain still needs {@link verifyDomain} to install its
@@ -324,63 +599,44 @@ export async function updateSite(viewer: SiteViewer, id: string, body: UpdateSit
     let site = ownedSite(id, viewer)
     const owner = ownerOf(site)
 
-    // Validate any source changes up front (so a bad branch never reaches deploy).
-    const branch = body.branch !== undefined ? field(checkBranch(str(body.branch, 'branch'))) : undefined
-    let subdir: string | undefined
-    const hasSubdir = 'subdir' in body
-    if (hasSubdir) {
-        const c = checkSubdir(body.subdir)
-        if (!c.ok) throw new SiteError(c.message, `invalid_${c.reason}`, 400)
-        subdir = c.value
-    }
+    // The source group is merged over the stored values and validated as a whole, so a
+    // half-applied change (a new URL without the matching auth method, say) is a 400
+    // instead of a fragment nginxpilot refuses.
+    const source = resolveSource(body, siteSource(site))
+    // A credential replacement is applied before the redeploy below, so the fragment
+    // written by this same request already references the new secret.
+    if (body.sourceSecret !== undefined) writeSourceSecret(site.id, body.sourceSecret)
 
-    // Serving settings (routing / 404 page / asset caching). The spa-conflict rule is
-    // checked against the EFFECTIVE post-merge values, so `routing: spa` on a site with
-    // a stored 404 page (and vice versa) is rejected up front.
-    let routing: SiteRouting | undefined
-    const hasRouting = 'routing' in body
-    if (hasRouting) {
-        const c = checkRouting(body.routing)
-        if (!c.ok) throw new SiteError(c.message, `invalid_${c.reason}`, 400)
-        routing = c.value
-    }
-    let notFound: string | undefined
-    const hasNotFound = 'notFound' in body
-    if (hasNotFound) {
-        const c = checkNotFound(body.notFound)
-        if (!c.ok) throw new SiteError(c.message, `invalid_${c.reason}`, 400)
-        notFound = c.value
-    }
-    const cacheAssets = body.cacheAssets !== undefined ? body.cacheAssets === true : undefined
-    assertServingCompatible(hasRouting ? routing : site.routing, hasNotFound ? notFound : site.notFound)
-
-    const serving = {
-        ...(hasRouting ? { routing } : {}),
-        ...(hasNotFound ? { notFound: notFound ?? null } : {}),
-        ...(cacheAssets !== undefined ? { cacheAssets } : {}),
-    }
+    // The settings group is merged over the stored values and validated as a whole, so
+    // cross-field rules (spa vs a custom 404, cert-scoped TLS/HSTS) see the EFFECTIVE
+    // post-merge state — `routing: spa` on a site that already stores a 404 page is
+    // rejected up front, and so is the reverse.
+    //
+    // Validation runs against the hostname kind the site will have AFTER this request,
+    // so moving a custom-domain site down to a subdomain is what drops its per-site
+    // TLS/HSTS rather than carrying dead values onto a wildcard-covered label.
+    const moving = body.hostname && typeof body.hostname === 'object' ? body.hostname : undefined
+    const targetKind: SiteHostKind =
+        moving && (moving.kind === 'custom' || moving.kind === 'subdomain') ? moving.kind : site.hostKind
+    const settings = resolveSettings(body, siteSettings(site), targetKind, resolveLimits(owner.login))
 
     // 1) Hostname move (if requested and actually different).
-    if (body.hostname && typeof body.hostname === 'object') {
-        const candidate = candidateHostname(body.hostname)
+    if (moving) {
+        const candidate = candidateHostname(moving)
         if (candidate !== site.hostname) {
-            site = await changeHostname(site, owner, body.hostname, { branch, subdir, hasSubdir, serving })
+            site = await changeHostname(site, owner, moving, { source, settings })
             return site
         }
     }
 
-    // 2) Source / serving-only change.
-    site = await deploy.update(site, {
-        branch,
-        ...(hasSubdir ? { subdir: subdir ?? null } : {}),
-        ...serving,
-    })
+    // 2) Source / settings-only change.
+    site = await deploy.update(site, { source, settings })
     trackAndEnforce(site)
     return site
 }
 
 /**
- * Move a site to a new hostname (and optionally apply a branch/subdir change in the same
+ * Move a site to a new hostname (and optionally apply a source/settings change in the same
  * re-provision). Validates the new hostname authoritatively (§729 + §728 for custom), drops
  * the old custom vhost/cert if the site is leaving a custom domain, persists the row, and
  * re-provisions the content channel on the new domain.
@@ -389,11 +645,11 @@ async function changeHostname(
     site: Site,
     owner: AppUser,
     spec: HostnameSpec,
-    source: {
-        branch?: string
-        subdir?: string
-        hasSubdir: boolean
-        serving: { routing?: SiteRouting; notFound?: string | null; cacheAssets?: boolean }
+    changes: {
+        /** The already-merged source group. */
+        source: SiteSource
+        /** The already-merged settings group, resolved against the site's NEW hostname kind. */
+        settings: SiteSettings
     },
 ): Promise<Site> {
     // A rehost stays within the site's own realm (multiple_realms.md §D.2).
@@ -406,28 +662,20 @@ async function changeHostname(
     }
 
     const at = new Date().toISOString()
-    const branch = source.branch ?? site.branch
-    const subdir = source.hasSubdir ? source.subdir : site.subdir
-    if (branch !== site.branch || subdir !== site.subdir) {
-        siteRepo.updateSource(site.id, branch, subdir, at)
+    const { source, settings } = changes
+    if (!siteSourceEqual(source, siteSource(site))) {
+        siteRepo.updateSource(site.id, source, at)
     }
-    const serving = source.serving
-    const routing = 'routing' in serving ? serving.routing : site.routing
-    const notFound = 'notFound' in serving ? (serving.notFound ?? undefined) : site.notFound
-    const cacheAssets = serving.cacheAssets ?? site.cacheAssets ?? false
-    if (routing !== site.routing || notFound !== site.notFound || cacheAssets !== (site.cacheAssets ?? false)) {
-        siteRepo.updateServing(site.id, routing, notFound, cacheAssets, at)
+    if (!siteSettingsEqual(settings, siteSettings(site))) {
+        siteRepo.updateSettings(site.id, settings, at)
     }
     siteRepo.updateHostname(site.id, newHostname, newKind, at)
     audit('site.rehost', owner, { ...site, hostname: newHostname }, `${site.hostname} → ${newHostname}`)
 
     const moved: Site = {
         ...site,
-        branch,
-        subdir,
-        routing,
-        notFound,
-        cacheAssets,
+        ...source,
+        ...settings,
         hostname: newHostname,
         hostKind: newKind,
         updatedAt: at,
@@ -473,16 +721,21 @@ export async function deleteSite(viewer: SiteViewer, id: string): Promise<void> 
 
 /**
  * Re-push a user's (freshly stored) GitHub token to the git-credentials store of every
- * realm their private sites deploy to. Called fire-and-forget from the OAuth callback:
- * a re-login is exactly when a rotated/revoked token gets replaced, and nginxpilot
- * re-reads the credential file at each fetch — so stalled interval pulls heal without
- * a redeploy. Failures are logged per site, never surfaced to the login flow.
+ * realm their private GitHub sites deploy to. Called fire-and-forget from the OAuth
+ * callback: a re-login is exactly when a rotated/revoked token gets replaced, and
+ * nginxpilot re-reads the credential file at each fetch — so stalled interval pulls heal
+ * without a redeploy. Failures are logged per site, never surfaced to the login flow.
+ *
+ * Strictly limited to sites that actually authenticate with the OAuth token
+ * ({@link usesGithubOAuthCredential}). A site on another host stores its own deploy key
+ * or token under the same credential name, and re-pushing a GitHub token over it would
+ * break that site's next fetch — on every single sign-in.
  */
 export function refreshGithubCredentials(githubId: number): void {
     const token = getGithubTokenFor(githubId)
     if (!token) return
     for (const site of siteRepo.listByOwner(githubId)) {
-        if (!site.repoPrivate) continue
+        if (!usesGithubOAuthCredential(site)) continue
         void realms
             .clientForSite(site)
             .putGitCredential(gitCredentialName(site.id), token)
@@ -552,6 +805,12 @@ export interface SiteStatusResult {
     nginxpilot: NginxpilotSiteStatus | null
     /** Managed-mode resource state for this domain (null in unmanaged mode or when unseen). */
     nginxResource: SiteNginxResourceState | null
+    /**
+     * When the site's source credential was last written, or `null` when none is stored.
+     * The secret is write-only — this reports its PRESENCE so the dashboard can show
+     * "a credential is stored" and offer to replace it, never its value.
+     */
+    sourceSecretSetAt: string | null
 }
 
 /**
@@ -581,7 +840,12 @@ export async function siteStatus(viewer: SiteViewer, id: string): Promise<SiteSt
         current = { ...current, bytes: entry.bytes, updatedAt: at }
     }
     current = await enforceBytes(current)
-    return { site: current, nginxpilot: entry, nginxResource }
+    return {
+        site: current,
+        nginxpilot: entry,
+        nginxResource,
+        sourceSecretSetAt: siteCredentialRepo.updatedAt(site.id) ?? null,
+    }
 }
 
 // ── error → HTTP mapping (so routes stay thin) ───────────────────────────────────

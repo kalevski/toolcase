@@ -17,6 +17,7 @@ interface Raw {
     custom_domains: number | null
     keep_releases: number | null
     private_repos: number | null
+    advanced_config: number | null
     updated_at: string
 }
 
@@ -30,12 +31,17 @@ function map(r: Raw): UserLimitOverride {
     if (r.custom_domains !== null) o.customDomains = r.custom_domains
     if (r.keep_releases !== null) o.keepReleases = r.keep_releases
     if (r.private_repos !== null) o.privateRepos = r.private_repos === 1
+    if (r.advanced_config !== null) o.advancedConfig = r.advanced_config === 1
     return o
 }
 
 /** Whether an override carries no fields (so it should be deleted, not stored). */
 function isEmpty(o: UserLimitOverride): boolean {
-    return NUMERIC_LIMIT_KEYS.every((k) => o[k] === undefined) && o.privateRepos === undefined
+    return (
+        NUMERIC_LIMIT_KEYS.every((k) => o[k] === undefined) &&
+        o.privateRepos === undefined &&
+        o.advancedConfig === undefined
+    )
 }
 
 /** The override for one user, or `undefined` when they run on pure role/plan defaults. */
@@ -64,8 +70,9 @@ export function set(githubId: number, override: UserLimitOverride, updatedAt: st
     prep(
         `INSERT INTO user_limit
             (github_id, max_sites, max_bytes_per_site, max_bytes_total,
-             min_interval_sec, custom_domains, keep_releases, private_repos, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+             min_interval_sec, custom_domains, keep_releases, private_repos,
+             advanced_config, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
          ON CONFLICT(github_id) DO UPDATE SET
             max_sites          = excluded.max_sites,
             max_bytes_per_site = excluded.max_bytes_per_site,
@@ -74,6 +81,7 @@ export function set(githubId: number, override: UserLimitOverride, updatedAt: st
             custom_domains     = excluded.custom_domains,
             keep_releases      = excluded.keep_releases,
             private_repos      = excluded.private_repos,
+            advanced_config    = excluded.advanced_config,
             updated_at         = excluded.updated_at`,
     ).run(
         githubId,
@@ -84,6 +92,7 @@ export function set(githubId: number, override: UserLimitOverride, updatedAt: st
         override.customDomains ?? null,
         override.keepReleases ?? null,
         override.privateRepos === undefined ? null : override.privateRepos ? 1 : 0,
+        override.advancedConfig === undefined ? null : override.advancedConfig ? 1 : 0,
         updatedAt,
     )
 }

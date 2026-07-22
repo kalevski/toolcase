@@ -104,6 +104,8 @@ export function addBaseDomain(
     raw: unknown,
     rawTls: unknown = 'auto',
     realmId: string,
+    rawHttp2: unknown = true,
+    rawHsts: unknown = false,
 ): BaseDomain {
     if (typeof raw !== 'string') throw new AdminError('"domain" is required', 'invalid_request', 400)
     const checked = checkBaseDomain(raw)
@@ -115,6 +117,11 @@ export function addBaseDomain(
         throw new AdminError('tls must be one of: off, auto', 'invalid_tls', 400)
     }
 
+    const http2 = checkPolicyFlag(rawHttp2, true, 'http2')
+    // HSTS defaults OFF, unlike http2 — it is sticky in browsers for `max_age` even
+    // after the header stops being sent, so it has to be a deliberate opt-in.
+    const hsts = checkPolicyFlag(rawHsts, false, 'hsts')
+
     // `domain` is the global PK, so a base domain belongs to exactly one realm — reject a
     // re-register anywhere, not just in this realm (multiple_realms.md §10.4).
     if (baseDomainRepo.list().some((b) => b.domain.toLowerCase() === domain)) {
@@ -122,10 +129,26 @@ export function addBaseDomain(
     }
 
     const createdAt = new Date().toISOString()
-    baseDomainRepo.add(domain, tls, realmId, createdAt)
-    audit(actor, 'admin.base_domain.add', { detail: `${domain} (tls=${tls}, realm=${realmId})` })
-    slog('info', 'admin', 'base domain added', { domain, tls, realmId, by: actor.login })
-    return { domain, tls, realmId, createdAt }
+    baseDomainRepo.add(domain, tls, http2, hsts, realmId, createdAt)
+    audit(actor, 'admin.base_domain.add', {
+        detail: `${domain} (tls=${tls}, http2=${http2}, hsts=${hsts}, realm=${realmId})`,
+    })
+    slog('info', 'admin', 'base domain added', { domain, tls, http2, hsts, realmId, by: actor.login })
+    return { domain, tls, http2, hsts, realmId, createdAt }
+}
+
+/**
+ * Narrow a request-supplied wildcard-policy flag to a boolean. Absent
+ * (`undefined`/`null`) falls back to `fallback`; anything other than a real boolean is a
+ * 400 rather than a silent truthiness coercion, so a typo'd `"false"` can't quietly turn
+ * a policy ON.
+ */
+function checkPolicyFlag(raw: unknown, fallback: boolean, field: string): boolean {
+    if (raw === undefined || raw === null) return fallback
+    if (typeof raw !== 'boolean') {
+        throw new AdminError(`${field} must be a boolean`, `invalid_${field}`, 400)
+    }
+    return raw
 }
 
 /**
@@ -152,6 +175,67 @@ export function setBaseDomainTls(actor: AdminActor, raw: unknown, rawTls: unknow
     audit(actor, 'admin.base_domain.tls', { detail: `${domain}: tls=${tls}` })
     slog('info', 'admin', 'base domain tls set', { domain, tls, by: actor.login })
     return { ...existing, tls }
+}
+
+/**
+ * Update an existing base domain's wildcard-wide HTTP/2 policy (`PATCH
+ * /api/admin/base-domains`): validate the FQDN + the `http2` value, require the domain
+ * to exist (`404`), persist, and audit. Returns the updated row. Effective subdomain
+ * fragments pick this up on their next deploy.
+ *
+ * The knob is per-base on purpose — see {@link BaseDomain.http2}. Flipping it moves
+ * every label under the wildcard together, which is what keeps coalesced HTTP/2
+ * connections from hitting `421 Misdirected Request`.
+ */
+export function setBaseDomainHttp2(actor: AdminActor, raw: unknown, rawHttp2: unknown): BaseDomain {
+    if (typeof raw !== 'string') throw new AdminError('"domain" is required', 'invalid_request', 400)
+    const checked = checkBaseDomain(raw)
+    if (!checked.ok) throw new AdminError(checked.message, `domain_${checked.reason}`, 400)
+    const domain = checked.domain
+
+    if (typeof rawHttp2 !== 'boolean') {
+        throw new AdminError('http2 must be a boolean', 'invalid_http2', 400)
+    }
+    const http2 = rawHttp2
+
+    const existing = baseDomainRepo.list().find((b) => b.domain.toLowerCase() === domain)
+    if (!existing) throw new AdminError(`base domain "${domain}" is not registered`, 'base_domain_not_found', 404)
+
+    baseDomainRepo.setHttp2(domain, http2)
+    audit(actor, 'admin.base_domain.http2', { detail: `${domain}: http2=${http2}` })
+    slog('info', 'admin', 'base domain http2 set', { domain, http2, by: actor.login })
+    return { ...existing, http2 }
+}
+
+/**
+ * Update an existing base domain's wildcard-wide HSTS policy (`PATCH
+ * /api/admin/base-domains`): validate the FQDN + the `hsts` value, require the domain to
+ * exist (`404`), persist, and audit. Returns the updated row. Effective subdomain
+ * fragments pick this up on their next deploy.
+ *
+ * Per-base for the reasons in {@link BaseDomain.hsts} — and worth pausing over before
+ * enabling: once a browser has seen the header it refuses plain HTTP to the domain for
+ * `max_age` (nginxpilot's default is two years) even if the policy is turned back off
+ * here, so switching it on is effectively one-way for anyone who has already visited.
+ */
+export function setBaseDomainHsts(actor: AdminActor, raw: unknown, rawHsts: unknown): BaseDomain {
+    if (typeof raw !== 'string') throw new AdminError('"domain" is required', 'invalid_request', 400)
+    const checked = checkBaseDomain(raw)
+    if (!checked.ok) throw new AdminError(checked.message, `domain_${checked.reason}`, 400)
+    const domain = checked.domain
+
+    if (typeof rawHsts !== 'boolean') {
+        throw new AdminError('hsts must be a boolean', 'invalid_hsts', 400)
+    }
+    const hsts = rawHsts
+
+    const existing = baseDomainRepo.list().find((b) => b.domain.toLowerCase() === domain)
+    if (!existing) throw new AdminError(`base domain "${domain}" is not registered`, 'base_domain_not_found', 404)
+
+    baseDomainRepo.setHsts(domain, hsts)
+    audit(actor, 'admin.base_domain.hsts', { detail: `${domain}: hsts=${hsts}` })
+    slog('info', 'admin', 'base domain hsts set', { domain, hsts, by: actor.login })
+    return { ...existing, hsts }
 }
 
 /**

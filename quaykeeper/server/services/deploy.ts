@@ -12,90 +12,139 @@ import * as siteRepo from '@/server/data/repositories/site-repo'
 import * as userRepo from '@/server/data/repositories/user-repo'
 import * as baseDomainRepo from '@/server/data/repositories/base-domain-repo'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
+import * as siteCredentialRepo from '@/server/data/repositories/site-credential-repo'
 import * as realms from '@/server/services/realms'
 import { resolveLimits } from '@/server/services/plan'
 import { getGithubTokenFor } from '@/server/services/auth'
 import { slog } from '@/server/infrastructure/server-log'
+import { decrypt } from '@/server/infrastructure/cipher'
 import type { NginxpilotClient } from '@/server/infrastructure/nginxpilot'
-import { STANDARD_LIMITS, type Site } from '@/server/domain/types'
+import {
+    effectiveAuthMethod,
+    STANDARD_LIMITS,
+    usesGithubOAuthCredential,
+    type BaseDomain,
+    type Site,
+    type SiteAuthMethod,
+} from '@/server/domain/types'
 import {
     gitCredentialName,
+    resolveFragmentOptions,
     type FragmentOptions,
-    type SiteWebOptions,
 } from '@/server/domain/nginxpilot-fragment'
 import * as machine from '@/server/domain/deploy-machine'
 import type { DeployDeps, SiteSourceChanges, TrackOptions } from '@/server/domain/deploy-machine'
 
 /**
- * Resolve the managed-mode TLS/security options for a site's fragment (§0/Phase D).
- *
- *   • Subdomain — TLS follows its **base domain's** policy (one wildcard cert per base,
- *     §0). When that base domain is set to `auto`, the subdomain serves HTTPS (with
- *     `force_ssl`) once the wildcard cert is discoverable, degrading to HTTP otherwise;
- *     an `off` base domain (or an unregistered one) emits no TLS — current behaviour.
- *   • Custom domain — its HTTPS is provisioned by the dedicated nginx vhost + certbot
- *     flow (`services/domains.ts`), NOT the nginxpilot fragment, so no `web` block is
- *     emitted here (it would be a redundant, conflicting second TLS path).
- *
- * Returns `undefined` when no TLS applies, so the fragment stays byte-for-byte the same
- * as before for HTTP-only base domains.
+ * The base domain whose wildcard serves a subdomain site (§0/Phase D) — the source of its
+ * TLS / HTTP/2 / HSTS policy. Scoped to the site's own realm (multiple_realms.md §D.4),
+ * since the wildcard belongs to that one instance, and resolved longest-suffix-first so
+ * a site under `a.b.dev` prefers that base over a registered `b.dev`. `undefined` when
+ * the site is a custom domain or its base domain isn't registered (→ no TLS).
  */
-function resolveWebOptions(site: Site): SiteWebOptions | undefined {
-    // Custom domains terminate TLS on the daemon with their own per-domain cert
-    // (issued through the realm API, impl §7). `auto` — never `required` — so a
-    // not-yet-issued cert degrades to HTTP instead of quarantining the site.
-    if (site.hostKind === 'custom') return { tls: 'auto', force_ssl: true }
+function baseDomainFor(site: Site): BaseDomain | undefined {
     if (site.hostKind !== 'subdomain') return undefined
     const host = site.hostname.toLowerCase()
-    // Scope the base-domain lookup to the site's own realm (multiple_realms.md §D.4) — the
-    // wildcard that serves this subdomain belongs to that one instance.
-    const base = baseDomainRepo
+    return baseDomainRepo
         .listByRealm(site.realmId)
         .filter((b) => host === b.domain.toLowerCase() || host.endsWith(`.${b.domain.toLowerCase()}`))
         .sort((a, b) => b.domain.length - a.domain.length)[0]
-    if (!base || base.tls !== 'auto') return undefined
-    return { tls: 'auto', force_ssl: true }
 }
 
 /**
- * Render options for a site's fragment: the poll interval is the owner's effective
- * `PlanLimits.minIntervalSec` (the baseline polls slowly; raised accounts near-real-time, §11/§15).
- * Public repos emit no `auth` block; a private site's fragment gains one in
- * `writeFragmentWithAuth` below, after the clone token is pushed to the realm's
- * git-credentials store. Managed-mode TLS options are resolved from the base domain
- * for subdomains (§0/Phase D).
+ * Render options for a site's fragment. The two *lookups* live here — the owner's
+ * effective plan and the site's base domain — while every rule applied to them is the
+ * pure `resolveFragmentOptions` in `domain/nginxpilot-fragment.ts`, so the policy stays
+ * unit-testable. Public repos emit no `auth` block; a private site's fragment gains one
+ * in `writeFragmentWithAuth` below, after the clone token is pushed to the realm's
+ * git-credentials store.
  */
 function fragmentOptions(site: Site): FragmentOptions {
     const owner = userRepo.get(site.ownerId)
     const limits = owner ? resolveLimits(owner.login) : STANDARD_LIMITS
-    return { intervalSec: limits.minIntervalSec, web: resolveWebOptions(site) }
+    return resolveFragmentOptions(site, limits, baseDomainFor(site))
 }
 
 /**
- * Fragment write with the private-repo credential seam: for a private site, push the
- * owner's stored GitHub token to the realm's git-credentials store first (idempotent
- * PUT; the daemon answers with the 0600 file's path), then emit the fragment with
- * `auth.token_file` referencing it. nginxpilot re-reads the file at every fetch, so a
- * later re-push (a rotated token on re-login) heals interval pulls without a reload.
- * A private site whose owner has no stored token yet gets no `auth` block — the sync
- * then fails with a clear auth error in `/status` and heals on the owner's next login.
+ * The secret a site's source authenticates with, and the auth method it belongs to.
+ *
+ * Two provenances, because Quaykeeper can mint a credential for exactly one kind of
+ * source and no other:
+ *
+ *   • **GitHub** (`github-token`, the default for a private GitHub repo) — the owner's
+ *     stored OAuth token. Rotated for free on every login, which is what heals a stalled
+ *     private-repo sync without anyone touching the site.
+ *   • **Everything else** (a non-GitHub git host, an archive URL) — the per-site
+ *     credential the user supplied, sealed in `site_credential`. Quaykeeper has no way to
+ *     obtain or refresh it, so it lives and dies with the site.
+ *
+ * Returns `undefined` for a public source, or when the credential is missing — the
+ * fragment is then written without an `auth` block, so the failure surfaces as a clear
+ * auth error in `/status` rather than a rejected fragment that takes the site down.
+ */
+function sourceCredential(site: Site): { method: SiteAuthMethod; secret: string } | undefined {
+    const method = effectiveAuthMethod(site)
+    if (method === 'none') return undefined
+
+    if (usesGithubOAuthCredential(site)) {
+        const token = getGithubTokenFor(site.ownerId)
+        if (!token) {
+            slog('warn', 'deploy', 'private site has no stored GitHub token; writing fragment without auth', {
+                site: site.id,
+                hostname: site.hostname,
+            })
+            return undefined
+        }
+        return { method, secret: token }
+    }
+
+    const sealed = siteCredentialRepo.get(site.id)
+    if (!sealed) {
+        slog('warn', 'deploy', 'site source needs a credential but none is stored; writing fragment without auth', {
+            site: site.id,
+            hostname: site.hostname,
+            method,
+        })
+        return undefined
+    }
+    try {
+        return { method, secret: decrypt(sealed) }
+    } catch (err) {
+        // A key-ring rotation that dropped the sealing key. Log and degrade rather than
+        // failing the deploy outright — the site keeps serving its last release.
+        slog('error', 'deploy', 'could not open the stored source credential', {
+            site: site.id,
+            error: (err as Error).message,
+        })
+        return undefined
+    }
+}
+
+/**
+ * Fragment write with the source-credential seam: push the site's credential to the
+ * realm's git-credentials store first (idempotent PUT; the daemon answers with the 0600
+ * file's path), then emit the fragment with an `auth` block *referencing* that path —
+ * never the secret itself (§16). nginxpilot re-reads the file at every fetch, so a later
+ * re-push (a rotated GitHub token on re-login, or a replaced deploy key) heals interval
+ * pulls without a reload.
  */
 async function writeFragmentWithAuth(
     client: NginxpilotClient,
     site: Site,
     options: FragmentOptions,
 ): Promise<string> {
-    if (!site.repoPrivate) return client.writeFragment(site, options)
-    const token = getGithubTokenFor(site.ownerId)
-    if (!token) {
-        slog('warn', 'deploy', 'private site has no stored GitHub token; writing fragment without auth', {
-            site: site.id,
-            hostname: site.hostname,
-        })
-        return client.writeFragment(site, options)
-    }
-    const cred = await client.putGitCredential(gitCredentialName(site.id), token)
-    return client.writeFragment(site, { ...options, auth: { tokenFile: cred.path } })
+    const credential = sourceCredential(site)
+    if (!credential) return client.writeFragment(site, options)
+    const cred = await client.putGitCredential(gitCredentialName(site.id), credential.secret)
+    return client.writeFragment(site, {
+        ...options,
+        auth: {
+            method: credential.method,
+            tokenFile: cred.path,
+            username: site.authUsername,
+            headerName: site.authHeaderName,
+        },
+    })
 }
 
 /** Append an audit entry for a lifecycle transition, attributed to the site owner. */
@@ -131,7 +180,7 @@ function deps(site: Site): DeployDeps {
             updateLastRef: siteRepo.updateLastRef,
             updateBytes: siteRepo.updateBytes,
             updateSource: siteRepo.updateSource,
-            updateServing: siteRepo.updateServing,
+            updateSettings: siteRepo.updateSettings,
             remove: siteRepo.remove,
         },
         fragmentOptions,
@@ -164,10 +213,11 @@ export function update(site: Site, changes: SiteSourceChanges): Promise<Site> {
 /** Remove the fragment, reload, and delete the row (§9 step 7). */
 export async function remove(site: Site): Promise<void> {
     await machine.remove(deps(site), site)
-    // Best-effort credential cleanup: the site is gone, so its clone token has no
+    // Best-effort credential cleanup: the site is gone, so its stored secret has no
     // readers. A failure here leaves an orphaned 0600 file on the daemon — log it,
-    // never fail the (already-completed) removal for it.
-    if (site.repoPrivate) {
+    // never fail the (already-completed) removal for it. The row in `site_credential`
+    // goes with the site row via its ON DELETE CASCADE.
+    if (effectiveAuthMethod(site) !== 'none') {
         try {
             await realms.clientForSite(site).deleteGitCredential(gitCredentialName(site.id))
         } catch (err) {

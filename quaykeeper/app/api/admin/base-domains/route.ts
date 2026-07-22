@@ -1,7 +1,11 @@
 // GET    /api/admin/base-domains — list the owner-managed subdomain pool (§10).
-// POST   /api/admin/base-domains — register a base domain ({ domain, tls? }); tls is
-//        off|auto (the subdomain wildcard TLS policy, §0/Phase D), defaulting to auto.
-// PATCH  /api/admin/base-domains — update a base domain's TLS policy ({ domain, tls }).
+// POST   /api/admin/base-domains — register a base domain ({ domain, tls?, http2?, hsts? });
+//        tls is off|auto (the subdomain wildcard TLS policy, §0/Phase D), defaulting to
+//        auto; http2 is the wildcard-wide HTTP/2 policy, defaulting to true; hsts is the
+//        wildcard-wide Strict-Transport-Security policy, defaulting to false (it is sticky
+//        in browsers, so it is opt-in only).
+// PATCH  /api/admin/base-domains — update ONE of a base domain's wildcard policies:
+//        { domain, tls } | { domain, http2 } | { domain, hsts }.
 // DELETE /api/admin/base-domains — remove a base domain (?domain= or { domain }).
 //
 // All guarded by `authorize('owner')` — a non-owner session is rejected 401/403 and
@@ -34,9 +38,9 @@ export async function POST(req: Request) {
     const authz = await authorize('owner')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
-    let body: { domain?: unknown; tls?: unknown }
+    let body: { domain?: unknown; tls?: unknown; http2?: unknown; hsts?: unknown }
     try {
-        body = (await req.json()) as { domain?: unknown; tls?: unknown }
+        body = (await req.json()) as { domain?: unknown; tls?: unknown; http2?: unknown; hsts?: unknown }
     } catch {
         return NextResponse.json({ error: 'invalid_json' }, { status: 400 })
     }
@@ -44,7 +48,7 @@ export async function POST(req: Request) {
     try {
         const actor = { githubId: authz.session.sub, login: authz.session.login }
         const active = await realms.resolveActiveRealm(authz.session.sub, authz.role)
-        const created = admin.addBaseDomain(actor, body.domain, body.tls, active.id)
+        const created = admin.addBaseDomain(actor, body.domain, body.tls, active.id, body.http2, body.hsts)
         return NextResponse.json(created, { status: 201 })
     } catch (err) {
         const { status, code } = admin.httpErrorFor(err)
@@ -56,16 +60,23 @@ export async function PATCH(req: Request) {
     const authz = await authorize('owner')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
-    let body: { domain?: unknown; tls?: unknown }
+    let body: { domain?: unknown; tls?: unknown; http2?: unknown; hsts?: unknown }
     try {
-        body = (await req.json()) as { domain?: unknown; tls?: unknown }
+        body = (await req.json()) as { domain?: unknown; tls?: unknown; http2?: unknown; hsts?: unknown }
     } catch {
         return NextResponse.json({ error: 'invalid_json' }, { status: 400 })
     }
 
     try {
         const actor = { githubId: authz.session.sub, login: authz.session.login }
-        const updated = admin.setBaseDomainTls(actor, body.domain, body.tls)
+        // One policy per request — each is routed to its own service call so every
+        // change lands as a distinct audit entry rather than a merged base-domain patch.
+        const updated =
+            body.http2 !== undefined
+                ? admin.setBaseDomainHttp2(actor, body.domain, body.http2)
+                : body.hsts !== undefined
+                  ? admin.setBaseDomainHsts(actor, body.domain, body.hsts)
+                  : admin.setBaseDomainTls(actor, body.domain, body.tls)
         return NextResponse.json(updated)
     } catch (err) {
         const { status, code } = admin.httpErrorFor(err)

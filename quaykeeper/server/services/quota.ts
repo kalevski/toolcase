@@ -18,6 +18,7 @@ import * as siteRepo from '@/server/data/repositories/site-repo'
 import * as userRepo from '@/server/data/repositories/user-repo'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
 import * as realms from '@/server/services/realms'
+import * as deploy from '@/server/services/deploy'
 import { resolveLimits } from '@/server/services/plan'
 import { config } from '@/server/config'
 import { slog } from '@/server/infrastructure/server-log'
@@ -185,13 +186,16 @@ export async function enforceBytes(site: Site): Promise<Site> {
 
         case 'reinstate': {
             if (site.status === 'suspended') {
-                // The fragment was removed at suspension — re-create it and re-deploy.
-                await client.writeFragment(site, { intervalSec: limits.minIntervalSec })
-                await client.reload()
-                await client.sync(site.hostname)
-                siteRepo.updateStatus(site.id, 'provisioning', now)
+                // The fragment was removed at suspension — re-create it and re-deploy
+                // through the SAME path a normal deploy takes (`deploy.provision`), not a
+                // bare `writeFragment`. Rebuilding the fragment by hand here is how a
+                // reinstated site used to come back stripped of its resolved web options
+                // (tls / force_ssl / http2 / hsts — served as plain HTTP until the next
+                // real deploy) and, for a private repo, of its `auth` block, so the very
+                // next interval pull failed on auth.
+                const reinstated = await deploy.provision(site)
                 notify('site.reinstated', site, owner, `within byte quota again (${usage}); re-provisioning`)
-                return { ...site, status: 'provisioning', updatedAt: now }
+                return reinstated
             }
             // Flagged but still serving — just clear the flag.
             siteRepo.updateStatus(site.id, 'live', now)
