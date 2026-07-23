@@ -96,4 +96,169 @@ tc-theme[name='aurora'],
         --bs-shop-panel-discount-bg: var(--tc-success-bg);
         --bs-shop-panel-discount-color: var(--ah-success);
     }
+
+    // skeleton-shimmer — 21 components share the identical loading-shimmer
+    // idiom (a bright rgba(255,255,255,.6) mid-stop sweeping across the
+    // --tc-surface-muted skeleton bar). On the dark canvas that stop flashes
+    // as a solid white bar. Retint to the theme's own next-step-up surface.
+    tc-basic-card,
+    tc-colored-card,
+    tc-activity-card,
+    tc-asset-bundle,
+    tc-build,
+    tc-changelog,
+    tc-chart-container,
+    tc-difference-card,
+    tc-entity-profile-card,
+    tc-file,
+    tc-github-stars-card,
+    tc-list-card,
+    tc-login,
+    tc-metric-card,
+    tc-side-nav,
+    tc-slices-card,
+    tc-stat-card,
+    tc-tag-input,
+    tc-status-card,
+    tc-user-panel,
+    tc-vertical-item-list,
+    tc-usage-summary-panel {
+        --bs-basic-card-skeleton-shimmer: var(--tc-surface-hover);
+        --bs-activity-card-skeleton-shimmer: var(--tc-surface-hover);
+        --bs-asset-bundle-skeleton-shimmer: var(--tc-surface-hover);
+        --bs-build-skeleton-shimmer: var(--tc-surface-hover);
+        --bs-changelog-skeleton-shimmer: var(--tc-surface-hover);
+        --bs-chart-container-skeleton-shimmer: var(--tc-surface-hover);
+        --bs-difference-card-skeleton-shimmer: var(--tc-surface-hover);
+        --bs-entity-profile-card-skeleton-shimmer: var(--tc-surface-hover);
+        --bs-file-skeleton-shimmer: var(--tc-surface-hover);
+        --bs-github-stars-card-skeleton-shimmer: var(--tc-surface-hover);
+        --bs-list-card-skeleton-shimmer: var(--tc-surface-hover);
+        --bs-login-skel-shimmer: var(--tc-surface-hover);
+        --bs-metric-card-skeleton-shimmer: var(--tc-surface-hover);
+        --bs-side-nav-skeleton-shimmer: var(--tc-surface-hover);
+        --bs-slices-card-skeleton-shimmer: var(--tc-surface-hover);
+        --bs-stat-card-skeleton-shimmer: var(--tc-surface-hover);
+        --bs-tag-input-skeleton-shimmer: var(--tc-surface-hover);
+        --bs-status-card-skeleton-shimmer: var(--tc-surface-hover);
+        --bs-user-panel-skeleton-shimmer: var(--tc-surface-hover);
+        --bs-vertical-item-list-skeleton-shimmer: var(--tc-surface-hover);
+        --bs-usage-summary-panel-skeleton-shimmer: var(--tc-surface-hover);
+    }
+
+    // row hairlines / separators / grid gaps — these read `var(--tc-slate-100)`
+    // directly instead of `--tc-border*`; --tc-slate-* is only defined by the
+    // default theme's foundation and is never remapped, so it stays a light
+    // literal and paints a bright line across dark rows.
+    tc-advanced-table,
+    tc-bitmap-font-generator,
+    tc-good-first-issues,
+    tc-leaderboard,
+    tc-loot-list,
+    tc-table,
+    tc-heatmap {
+        --bs-advanced-table-row-hairline: 1px solid var(--tc-border-faint);
+        --bs-bitmap-font-generator-hairline: var(--tc-border-faint);
+        --bs-good-first-issues-separator: var(--tc-border-faint);
+        --bs-leaderboard-row-hairline: 1px solid var(--tc-border-faint);
+        --bs-loot-list-row-border: 1px solid var(--tc-border-faint);
+        --bs-table-row-hairline: 1px solid var(--tc-border-faint);
+        --bs-heatmap-gap-color: var(--tc-border-faint);
+        --bs-heatmap-skeleton-shimmer: var(--tc-surface-hover);
+    }
+
+    // status-card row separator — hardcoded to a Sass literal ($slate-100),
+    // bypassing tokens entirely rather than a var() fallback.
+    tc-status-card {
+        --bs-status-card-item-separator-color: var(--tc-border-faint);
+    }
+
+    // normal-map-generator / physics-editor checker backdrops — alternating-
+    // tile transparency grid seeded from --tc-slate-200 (unmapped, light).
+    tc-normal-map-generator,
+    tc-physics-editor {
+        --bs-normal-map-generator-checker: var(--tc-surface-hover);
+        --bs-physics-editor-checker: var(--tc-surface-hover);
+    }
+
+    // advanced-table / audio-mixer loading overlays — a near-opaque WHITE
+    // scrim laid over the whole component; on the dark canvas it flashes a
+    // bright sheet instead of dimming to a busy/disabled state.
+    tc-advanced-table {
+        --bs-advanced-table-overlay-scrim: rgba(7, 9, 13, 0.72);
+    }
+    tc-audio-mixer {
+        --bs-audio-mixer-scrim-bg: rgba(7, 9, 13, 0.72);
+    }
+
+    // navbar — default (non `variant="dark"`) glass fill is a light frosted
+    // rgba(255,255,255,.85); same defect already fixed for dashboard-layout's
+    // navbar above. Match the same dark glass recipe.
+    .navbar {
+        --bs-navbar-bg: rgba(7, 9, 13, 0.72);
+    }
+
+    // entity-cell — default tile + colour variants are plain `background-color`/
+    // `color` declarations (Sass-compiled pastels, not --tc-* custom
+    // properties), so no token remap can reach them. Re-paint as dark
+    // semantic tints with bright labels, like the rarity-chip pattern.
+    tc-entity-cell,
+    .tc-entity-cell__tile--slate {
+        background-color: var(--ah-surface-2);
+        color: var(--ah-text);
+    }
+    .tc-entity-cell__tile--blue {
+        background-color: var(--tc-info-bg);
+        color: var(--ah-info);
+    }
+    .tc-entity-cell__tile--green {
+        background-color: var(--tc-success-bg);
+        color: var(--ah-success);
+    }
+    .tc-entity-cell__tile--red {
+        background-color: var(--tc-danger-bg);
+        color: var(--ah-danger);
+    }
+    .tc-entity-cell__tile--yellow {
+        background-color: var(--tc-warning-bg);
+        color: var(--ah-warn);
+    }
+    .tc-entity-cell__tile--purple {
+        background-color: var(--ah-accent-soft);
+        color: var(--ah-accent-bright);
+    }
+    .tc-entity-cell__tile--orange {
+        background-color: var(--tc-warning-bg);
+        color: var(--ah-warn);
+    }
+
+    // rich-page-header icon tiles — same "plain literal pastel bg + literal
+    // dark-emphasis fg + literal light border" defect as entity-cell.
+    .tc-rich-page-header-icon--violet {
+        background-color: var(--ah-accent-soft);
+        color: var(--ah-accent-bright);
+        border-color: var(--ah-border-strong);
+    }
+    .tc-rich-page-header-icon--cyan,
+    .tc-rich-page-header-icon--blue {
+        background-color: var(--tc-info-bg);
+        color: var(--ah-info);
+        border-color: var(--ah-border-strong);
+    }
+    .tc-rich-page-header-icon--emerald {
+        background-color: var(--tc-success-bg);
+        color: var(--ah-success);
+        border-color: var(--ah-border-strong);
+    }
+    .tc-rich-page-header-icon--amber {
+        background-color: var(--tc-warning-bg);
+        color: var(--ah-warn);
+        border-color: var(--ah-border-strong);
+    }
+    .tc-rich-page-header-icon--pink,
+    .tc-rich-page-header-icon--rose {
+        background-color: var(--tc-danger-bg);
+        color: var(--ah-danger);
+        border-color: var(--ah-border-strong);
+    }
 }
