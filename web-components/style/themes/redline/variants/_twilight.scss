@@ -1,0 +1,31 @@
+// Redline Twilight variant — gradient primary (violet → blue) with a sky-blue
+// secondary accent.
+//
+// Unlike the solid-hue variants, this one leans into a genuine two-tone CTA
+// gradient: --rl-accent (violet) and --rl-accent-2 (blue) are deliberately
+// DIFFERENT hues — not a lighten of the same colour — so the foundation's own
+// --rl-accent-grad recipe renders the "Deep Blue" gradient (violet #8b3ff0 →
+// blue #3b82f6) everywhere it's consumed. The signature-highlight secondary
+// (--tc-accent) turns sky blue. Canvas, surfaces, hairlines, text ramp, dark
+// chrome, semantic status colours, fonts, shadows and the speed-cut recipe
+// are untouched.
+// Use with: <tc-theme name="redline" variant="twilight"> … </tc-theme>
+
+tc-theme[name='redline'][variant='twilight'],
+[data-tc-theme='redline'][data-tc-variant='twilight'] {
+    --rl-accent: #8b3ff0; // gradient start
+    --rl-accent-2: #3b82f6; // gradient end — a genuinely different hue, not a shade
+    --rl-accent-active: #6f2fc2;
+    --rl-accent-ink: #1c0a3d;
+    --rl-accent-soft: rgba(139, 63, 240, 0.1);
+    --rl-accent-line: rgba(139, 63, 240, 0.32);
+    --rl-accent-glow: rgba(139, 63, 240, 0.35);
+
+    --tc-accent: #38bdf8;
+    --tc-accent-fg: #0369a1; // darkened so accent-coloured TEXT clears AA on light
+    --tc-accent-soft: rgba(56, 189, 248, 0.12);
+    --tc-accent-hex: #38bdf8;
+    --tc-cyan: #38bdf8;
+
+    --bs-primary-rgb: 139, 63, 240;
+}

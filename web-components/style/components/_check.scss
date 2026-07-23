@@ -8,15 +8,32 @@
     --bs-form-check-checked-bg: var(--tc-app-accent);
     --bs-form-check-checked-border-color: var(--tc-app-accent);
 
-    display: block;
-    min-height: 1.5rem;
+    // Flex row centred inside the shared control lane — a standalone check
+    // sits flush with adjacent .form-control fields in a form row. The float
+    // is ignored under flex; the negative margin still pulls the input into
+    // the padding gutter, so the Bootstrap-compat markup contract holds.
+    display: flex;
+    align-items: center;
+    min-height: var(--tc-control-height, 2.625rem);
     padding-left: 1.6em;
-    margin-bottom: 0.35rem;
+    // No outer margin — spacing between form rows belongs to the form layout
+    // (gap utilities), so components align flush when composed.
+    margin-bottom: 0;
 
     .form-check-input {
         float: left;
         margin-left: -1.6em;
+        // The flex row centres the input against the label — the block-layout
+        // first-line offset would double-shift it.
+        margin-top: 0;
     }
+}
+
+// Dense stacks: inside option groups the compact row height wins — the shared
+// control floor is for standalone checks sitting next to text fields.
+.tc-radio-group .form-check,
+.tc-checkbox-group .form-check {
+    min-height: 1.5rem;
 }
 
 .form-check-input {
@@ -91,11 +108,16 @@
 }
 
 .form-check-inline {
-    display: inline-block;
-    margin-right: 1rem;
+    display: inline-flex;
+    // No outer margin — inline gaps come from the surrounding flex/gap layout.
+    margin-right: 0;
 }
 
 .form-check-reverse {
+    // Under the flex row the input stays first in DOM — reverse the direction
+    // so it lands on the right, pulled into the right-hand padding gutter.
+    flex-direction: row-reverse;
+    justify-content: flex-start;
     padding-right: 1.6em;
     padding-left: 0;
     text-align: right;

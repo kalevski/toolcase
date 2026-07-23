@@ -1,0 +1,26 @@
+// Redline › tc-car-listing-card — the theme's flagship component. Adds the
+// speed-cut corner, the crimson wishlist-active state, a mono price readout,
+// and a crimson category chip, matching the source site's vehicle card.
+
+tc-theme[name='redline'],
+[data-tc-theme='redline'] {
+    tc-car-listing-card {
+        --bs-car-listing-card-wishlist-active-color: var(--rl-accent);
+        --bs-car-listing-card-title-hover-color: var(--rl-accent);
+        --bs-car-listing-card-price-color: var(--rl-accent);
+        --bs-car-listing-card-spec-icon-color: var(--rl-blue);
+    }
+
+    .tc-car-listing-card {
+        clip-path: var(--rl-cut);
+    }
+
+    .tc-car-listing-card:hover {
+        border-color: var(--rl-accent-line);
+        box-shadow: var(--rl-glow);
+    }
+
+    .tc-car-listing-card-badge {
+        background: var(--rl-accent) !important;
+    }
+}

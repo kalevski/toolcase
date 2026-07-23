@@ -1,0 +1,28 @@
+// Redline Crimson variant — electric red primary with a coral secondary
+// accent. Named "crimson" for consistency with the shared eleven-variant set
+// across every bundled theme — note this is a distinct, more electric red
+// than the base redline hue (#ee1243).
+//
+// Swaps ONLY the accent hue families of the redline foundation. Canvas,
+// surfaces, hairlines, text ramp, dark chrome, semantic status colours,
+// fonts, shadows and the speed-cut recipe are untouched.
+// Use with: <tc-theme name="redline" variant="crimson"> … </tc-theme>
+
+tc-theme[name='redline'][variant='crimson'],
+[data-tc-theme='redline'][data-tc-variant='crimson'] {
+    --rl-accent: #fb4d4d;
+    --rl-accent-2: #ff7a7a;
+    --rl-accent-active: #e02e2e;
+    --rl-accent-ink: #330a0a;
+    --rl-accent-soft: rgba(251, 77, 77, 0.1);
+    --rl-accent-line: rgba(251, 77, 77, 0.32);
+    --rl-accent-glow: rgba(251, 77, 77, 0.35);
+
+    --tc-accent: #ff8a65;
+    --tc-accent-fg: #9a3412; // darkened so accent-coloured TEXT clears AA on light
+    --tc-accent-soft: rgba(255, 138, 101, 0.12);
+    --tc-accent-hex: #ff8a65;
+    --tc-cyan: #ff8a65;
+
+    --bs-primary-rgb: 251, 77, 77;
+}

@@ -52,7 +52,12 @@ tc-tag {
         color var(--tc-transition-fast),
         border-color var(--tc-transition-fast);
 
-    &:hover:not([disabled]) {
+    // Guard against .is-selected: that state's ink-fill background is paired
+    // with --bs-chip-selected-color (tuned for contrast against the accent
+    // fill specifically). Applying the neutral hover well on top would keep
+    // that same text color over a surface it was never tuned against —
+    // e.g. white-on-white or dark-ink-on-dark in every theme.
+    &:hover:not([disabled]):not(.is-selected) {
         background-color: var(--bs-chip-bg-hover);
     }
 

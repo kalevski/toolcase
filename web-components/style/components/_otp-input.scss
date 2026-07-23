@@ -3,7 +3,9 @@
 // backed by --tc-* tokens.
 
 tc-otp-input {
-    --bs-otp-input-cell-size: 2.75rem;
+    // Shared control floor — square cells at the standard field height so an
+    // OTP row aligns with adjacent .form-control fields.
+    --bs-otp-input-cell-size: var(--tc-control-height, 2.625rem);
     --bs-otp-input-gap: 0.5rem;
     --bs-otp-input-bg: var(--tc-surface);
     --bs-otp-input-color: var(--tc-text);

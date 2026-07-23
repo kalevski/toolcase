@@ -1,0 +1,11 @@
+// Redline › tc-link — the default link is already crimson via the
+// --tc-app-accent remap; the info variant is repointed onto the theme's
+// technical-blue secondary so it reads as a distinct hue from the brand red.
+
+tc-theme[name='redline'],
+[data-tc-theme='redline'] {
+    .tc-link-info {
+        --bs-link-color: var(--rl-blue);
+        --bs-link-hover-color: var(--rl-blue-fg);
+    }
+}

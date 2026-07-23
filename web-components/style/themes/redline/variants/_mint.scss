@@ -1,0 +1,25 @@
+// Redline Mint variant — lagoon-teal primary with a mint secondary accent.
+//
+// Swaps ONLY the accent hue families of the redline foundation. Canvas,
+// surfaces, hairlines, text ramp, dark chrome, semantic status colours,
+// fonts, shadows and the speed-cut recipe are untouched.
+// Use with: <tc-theme name="redline" variant="mint"> … </tc-theme>
+
+tc-theme[name='redline'][variant='mint'],
+[data-tc-theme='redline'][data-tc-variant='mint'] {
+    --rl-accent: #2dd4bf;
+    --rl-accent-2: #5eead4;
+    --rl-accent-active: #17b3a0;
+    --rl-accent-ink: #032726;
+    --rl-accent-soft: rgba(45, 212, 191, 0.1);
+    --rl-accent-line: rgba(45, 212, 191, 0.32);
+    --rl-accent-glow: rgba(45, 212, 191, 0.35);
+
+    --tc-accent: #6ee7b7;
+    --tc-accent-fg: #047857; // darkened so accent-coloured TEXT clears AA on light
+    --tc-accent-soft: rgba(110, 231, 183, 0.12);
+    --tc-accent-hex: #6ee7b7;
+    --tc-cyan: #6ee7b7;
+
+    --bs-primary-rgb: 45, 212, 191;
+}

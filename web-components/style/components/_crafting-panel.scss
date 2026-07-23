@@ -105,23 +105,30 @@ tc-crafting-panel {
         background: var(--bs-crafting-panel-row-hover-bg);
     }
 
-    &:focus-visible {
+    &:focus-visible:not(.is-selected) {
         outline: 2px solid var(--bs-crafting-panel-selected-accent);
         outline-offset: -2px; // inset so the frame is not clipped
         background: var(--bs-crafting-panel-row-hover-bg);
     }
 
-    // Selected = solid ink fill, white text (the standard active state).
+    // Selected = solid ink fill, readable text (the standard active state).
+    // Ink text is var(--tc-app-accent-contrast), not a hardcoded #fff — some
+    // themes' accent is a bright/light fill that needs dark ink instead.
     &.is-selected {
         background: var(--bs-crafting-panel-selected-accent);
 
+        &:focus-visible {
+            outline: 2px solid var(--bs-crafting-panel-selected-accent);
+            outline-offset: -2px;
+        }
+
         .tc-crafting-panel-row-name {
-            color: #fff;
+            color: var(--tc-app-accent-contrast);
         }
 
         .tc-crafting-panel-row-icon {
-            background: rgba(255, 255, 255, 0.16);
-            color: #fff;
+            background: color-mix(in srgb, var(--tc-app-accent-contrast) 16%, transparent);
+            color: var(--tc-app-accent-contrast);
         }
     }
 
@@ -295,7 +302,9 @@ tc-crafting-panel {
     border: 0;
     border-radius: 0; // sharp by mandate
     cursor: pointer;
-    transition: transform var(--tc-transition-base), box-shadow var(--tc-transition-base);
+    transition:
+        transform var(--tc-transition-base),
+        box-shadow var(--tc-transition-base);
 
     // Solid variants never darken on hover — the 1px lift is the feedback.
     &:hover:not(:disabled) {

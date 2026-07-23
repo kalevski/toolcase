@@ -1,0 +1,72 @@
+// tc-emission-badge — compact emissions credential: a 4px colored left
+// stripe encoding the emission class (success/warning/danger by tier — the
+// stripe is the ONLY colored element, the body stays neutral), the category
+// label, an optional NEDC/WLTP mono standard tag, and an optional mono CO₂
+// figure. Sharp corners; hairline box; all cosmetics flow through
+// --bs-emission-badge-* custom properties backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+tc-emission-badge {
+    display: inline-flex;
+
+    --bs-emission-badge-bg: var(--tc-surface);
+    --bs-emission-badge-border-color: var(--tc-border);
+    --bs-emission-badge-stripe-color: var(--tc-border-strong);
+    --bs-emission-badge-label-color: var(--tc-text);
+    --bs-emission-badge-standard-color: var(--tc-text-muted);
+    --bs-emission-badge-standard-border-color: var(--tc-border);
+    --bs-emission-badge-co2-color: var(--tc-text-muted);
+}
+
+.tc-emission-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3125rem 0.625rem 0.3125rem 0.5rem;
+    background: var(--bs-emission-badge-bg);
+    border: 1px solid var(--bs-emission-badge-border-color);
+    // The class-tier stripe — the badge's single allowance of color.
+    border-left: 4px solid var(--bs-emission-badge-stripe-color);
+    border-radius: 0;
+    line-height: 1.2;
+}
+
+.tc-emission-badge--tier-high {
+    --bs-emission-badge-stripe-color: var(--tc-success);
+}
+
+.tc-emission-badge--tier-mid {
+    --bs-emission-badge-stripe-color: var(--tc-warning);
+}
+
+.tc-emission-badge--tier-low {
+    --bs-emission-badge-stripe-color: var(--tc-danger);
+}
+
+.tc-emission-badge-label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--bs-emission-badge-label-color);
+    white-space: nowrap;
+}
+
+// Measurement standard (NEDC/WLTP) — machine-facing, so mono micro-tag.
+.tc-emission-badge-standard {
+    font-family: var(--tc-font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bs-emission-badge-standard-color);
+    border: 1px solid var(--bs-emission-badge-standard-border-color);
+    padding: 0.0625rem 0.3125rem;
+    white-space: nowrap;
+}
+
+.tc-emission-badge-co2 {
+    font-family: var(--tc-font-mono);
+    font-size: 0.78125rem;
+    color: var(--bs-emission-badge-co2-color);
+    white-space: nowrap;
+}

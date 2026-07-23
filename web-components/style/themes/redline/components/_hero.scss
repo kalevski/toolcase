@@ -1,0 +1,48 @@
+// Redline › tc-hero — dark showroom hero, mirroring the source site's
+// full-bleed dark hero slider (crimson accents on near-black, light text).
+// This is one of the theme's deliberate dark-chrome zones; content sections
+// elsewhere stay on the light canvas.
+
+tc-theme[name='redline'],
+[data-tc-theme='redline'] {
+    tc-hero {
+        --bs-hero-bg: var(--rl-ink);
+        --bs-hero-border-color: rgba(255, 255, 255, 0.1);
+
+        --bs-hero-eyebrow-color: var(--rl-accent);
+        --bs-hero-eyebrow-border: rgba(255, 255, 255, 0.14);
+        --bs-hero-eyebrow-bg: rgba(255, 255, 255, 0.06);
+        --bs-hero-eyebrow-dot-color: var(--rl-accent);
+
+        --bs-hero-title-color: #ffffff;
+        --bs-hero-title-font-family: var(--rl-display);
+        --bs-hero-title-font-weight: 600;
+
+        --bs-hero-description-color: rgba(255, 255, 255, 0.68);
+        --bs-hero-note-color: rgba(255, 255, 255, 0.45);
+
+        --bs-hero-panel-bg: var(--rl-ink-2);
+        --bs-hero-panel-border: rgba(255, 255, 255, 0.12);
+        --bs-hero-panel-bar-bg: rgba(255, 255, 255, 0.04);
+        --bs-hero-panel-bar-border: rgba(255, 255, 255, 0.1);
+        --bs-hero-panel-status-color: var(--rl-accent);
+        --bs-hero-panel-caption-color: rgba(255, 255, 255, 0.6);
+        --bs-hero-canvas-bg: rgba(255, 255, 255, 0.04);
+        --bs-hero-grid-line-color: rgba(255, 255, 255, 0.08);
+        --bs-hero-corner-color: var(--rl-accent);
+
+        --bs-hero-stat-card-bg: rgba(255, 255, 255, 0.05);
+        --bs-hero-stat-card-border: rgba(255, 255, 255, 0.12);
+        --bs-hero-stat-value-color: #ffffff;
+        --bs-hero-stat-label-color: rgba(255, 255, 255, 0.55);
+
+        --bs-hero-metric-value-color: #ffffff;
+        --bs-hero-metric-label-color: rgba(255, 255, 255, 0.55);
+
+        --bs-hero-bg-icon-color: #ffffff;
+    }
+
+    .tc-hero-metric::before {
+        background: var(--rl-accent);
+    }
+}

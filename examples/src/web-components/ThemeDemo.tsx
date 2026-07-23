@@ -48,11 +48,20 @@ const VARIANTS = [
     'sunset',
     'twilight',
 ] as const
-const VARIANT_THEMES = ['default', 'dungeon', 'aurora', 'sunshine', 'neon', 'blueprint'] as const
+const VARIANT_THEMES = [
+    'default',
+    'dungeon',
+    'aurora',
+    'sunshine',
+    'neon',
+    'blueprint',
+    'redline',
+] as const
 
 const ThemeDemo: React.FC = () => {
     const [variantTheme, setVariantTheme] =
         React.useState<(typeof VARIANT_THEMES)[number]>('blueprint')
+    const [variant, setVariant] = React.useState<(typeof VARIANTS)[number]>('ocean')
     return (
         <div className="py-4">
             <div className="container">
@@ -164,6 +173,24 @@ const ThemeDemo: React.FC = () => {
                                 </tc-theme>
                             </tc-section-card>
 
+                            <tc-section-card title='Named theme — name="redline"'>
+                                <p className="text-muted small mb-3">
+                                    The light <code>redline</code> skin — a performance-dealership
+                                    palette (showroom canvas, crimson signature accent, technical-blue
+                                    highlight, dark navbar/footer/hero chrome) ported from an
+                                    automotive marketplace template. Its signature is a diagonal
+                                    "speed-cut" corner on cards and panels — a clip-path shear, not a
+                                    curve, so the sharp-corner mandate stays intact. See the{' '}
+                                    <code>tc-car-listing-card</code> demo for the theme's flagship
+                                    component. (Display font is not bundled — it degrades to system
+                                    sans-serif.)
+                                </p>
+                                {/* @ts-ignore */}
+                                <tc-theme name="redline">
+                                    <Cluster />
+                                </tc-theme>
+                            </tc-section-card>
+
                             <tc-section-card title="Theme variants — name + variant">
                                 <p className="text-muted small mb-3">
                                     Every bundled theme ships eleven accent variants selected with the{' '}
@@ -181,34 +208,51 @@ const ThemeDemo: React.FC = () => {
                                     instead of a flat colour: <code>sunset</code> (coral → orange) and{' '}
                                     <code>twilight</code> (violet → blue).
                                 </p>
-                                <div className="d-flex flex-wrap gap-2 mb-3">
-                                    {VARIANT_THEMES.map((t) => (
-                                        <tc-button
-                                            key={t}
-                                            variant={t === variantTheme ? 'primary' : 'secondary'}
-                                            // @ts-ignore
-                                            outline={t !== variantTheme}
-                                            onClick={() => setVariantTheme(t)}
-                                        >
-                                            {t}
-                                        </tc-button>
-                                    ))}
-                                </div>
-                                <div className="d-flex flex-column gap-3">
-                                    {VARIANTS.map((v) => (
-                                        <div key={`${variantTheme}-${v}`}>
-                                            <div className="mb-2">
-                                                <code>
-                                                    name="{variantTheme}" variant="{v}"
-                                                </code>
-                                            </div>
-                                            {/* @ts-ignore */}
-                                            <tc-theme name={variantTheme} variant={v}>
-                                                <Cluster />
-                                                {/* @ts-ignore */}
-                                            </tc-theme>
+                                <div className="d-flex flex-column gap-3 mb-3">
+                                    <div>
+                                        <div className="text-muted small mb-2">Theme</div>
+                                        <div className="d-flex flex-wrap gap-2">
+                                            {VARIANT_THEMES.map((t) => (
+                                                <tc-button
+                                                    key={t}
+                                                    variant={t === variantTheme ? 'primary' : 'secondary'}
+                                                    // @ts-ignore
+                                                    outline={t !== variantTheme}
+                                                    onClick={() => setVariantTheme(t)}
+                                                >
+                                                    {t}
+                                                </tc-button>
+                                            ))}
                                         </div>
-                                    ))}
+                                    </div>
+                                    <div>
+                                        <div className="text-muted small mb-2">Variant</div>
+                                        <div className="d-flex flex-wrap gap-2">
+                                            {VARIANTS.map((v) => (
+                                                <tc-button
+                                                    key={v}
+                                                    variant={v === variant ? 'primary' : 'secondary'}
+                                                    // @ts-ignore
+                                                    outline={v !== variant}
+                                                    onClick={() => setVariant(v)}
+                                                >
+                                                    {v}
+                                                </tc-button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div className="mb-2">
+                                        <code>
+                                            name="{variantTheme}" variant="{variant}"
+                                        </code>
+                                    </div>
+                                    {/* @ts-ignore */}
+                                    <tc-theme name={variantTheme} variant={variant}>
+                                        <Cluster />
+                                        {/* @ts-ignore */}
+                                    </tc-theme>
                                 </div>
                             </tc-section-card>
                         </div>

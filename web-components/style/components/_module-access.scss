@@ -1,0 +1,141 @@
+// tc-module-access — a single role's live permission editor: name, quota
+// limits, and the permission catalog grouped by domain prefix into
+// toggle-chip cards. All cosmetics flow through --bs-module-access-*
+// custom properties backed by --tc-* tokens. No picker, no footer — every
+// edit is live; the host owns persistence and any surrounding chrome.
+
+tc-module-access {
+    --bs-module-access-hairline: var(--tc-border-faint);
+    --bs-module-access-surface-hover: var(--tc-surface-hover);
+    --bs-module-access-text: var(--tc-text);
+    --bs-module-access-text-muted: var(--tc-text-muted);
+    --bs-module-access-text-faint: var(--tc-text-faint);
+
+    display: block;
+}
+
+.module-access {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.module-access--readonly {
+    gap: 0.625rem;
+}
+
+// ── Head ──────────────────────────────────────────────────────────────────
+
+.module-access__head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    .form-control {
+        max-width: 20rem;
+    }
+}
+
+.module-access__name {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--bs-module-access-text);
+}
+
+.module-access__id {
+    font-family: var(--tc-font-mono);
+    font-size: 11.5px;
+    color: var(--bs-module-access-text-faint);
+}
+
+.module-access__owner-note {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--bs-module-access-text-muted);
+}
+
+// ── Limits grid ───────────────────────────────────────────────────────────
+
+.module-access__limits {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border: 1px solid var(--bs-module-access-hairline);
+}
+
+.module-access__limit {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.module-access__limit-label {
+    font-size: 12.5px;
+    color: var(--bs-module-access-text-muted);
+}
+
+// ── Permission groups ─────────────────────────────────────────────────────
+
+.module-access__groups {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+}
+
+.module-access__group {
+    border: 1px solid var(--bs-module-access-hairline);
+}
+
+.module-access__group-head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--bs-module-access-surface-hover);
+    border-bottom: 1px solid var(--bs-module-access-hairline);
+}
+
+.module-access__group-title {
+    flex: 1 1 auto;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--bs-module-access-text);
+}
+
+.module-access__group-count {
+    font-family: var(--tc-font-mono);
+    font-size: 11px;
+    color: var(--bs-module-access-text-faint);
+}
+
+.module-access__group-bulk {
+    padding: 0.15rem 0.5rem;
+    border: 1px solid var(--tc-border);
+    background: var(--tc-surface);
+    color: var(--bs-module-access-text-muted);
+    font: inherit;
+    font-size: 11px;
+    cursor: pointer;
+    transition:
+        background-color var(--tc-transition-fast),
+        color var(--tc-transition-fast);
+
+    &:hover {
+        background: var(--bs-module-access-surface-hover);
+        color: var(--bs-module-access-text);
+    }
+}
+
+.module-access__group-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0.625rem 0.75rem;
+}
+
+.module-access__perm-chip {
+    font-family: var(--tc-font-mono);
+    font-size: 11.5px;
+}

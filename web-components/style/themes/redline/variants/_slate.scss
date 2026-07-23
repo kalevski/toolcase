@@ -1,0 +1,27 @@
+// Redline Slate variant — cool steel primary with a silver secondary accent.
+// A muted, desaturated pairing — unlike the other variants, which lean
+// saturated.
+//
+// Swaps ONLY the accent hue families of the redline foundation. Canvas,
+// surfaces, hairlines, text ramp, dark chrome, semantic status colours,
+// fonts, shadows and the speed-cut recipe are untouched.
+// Use with: <tc-theme name="redline" variant="slate"> … </tc-theme>
+
+tc-theme[name='redline'][variant='slate'],
+[data-tc-theme='redline'][data-tc-variant='slate'] {
+    --rl-accent: #94a3b8;
+    --rl-accent-2: #b4c2d4;
+    --rl-accent-active: #78899e;
+    --rl-accent-ink: #12181f;
+    --rl-accent-soft: rgba(148, 163, 184, 0.1);
+    --rl-accent-line: rgba(148, 163, 184, 0.32);
+    --rl-accent-glow: rgba(148, 163, 184, 0.35);
+
+    --tc-accent: #cbd5e1;
+    --tc-accent-fg: #475569; // darkened so accent-coloured TEXT clears AA on light
+    --tc-accent-soft: rgba(203, 213, 225, 0.12);
+    --tc-accent-hex: #cbd5e1;
+    --tc-cyan: #cbd5e1;
+
+    --bs-primary-rgb: 148, 163, 184;
+}

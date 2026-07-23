@@ -118,7 +118,7 @@ tc-page-footer {
     &:hover {
         transform: translateY(-1px);
         box-shadow: 0 4px 15px rgba(30, 41, 59, 0.3);
-        color: #fff;
+        color: var(--tc-app-accent-contrast);
         text-decoration: none;
     }
 

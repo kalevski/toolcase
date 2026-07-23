@@ -31,7 +31,7 @@ tc-phone-input {
 
 .tc-phone-input-label {
     display: block;
-    margin-bottom: 0.375rem;
+    margin-bottom: 0.4rem; // unified label gap — same control-top offset as tc-input
     font-size: 13px;
     font-weight: 500;
     color: var(--bs-phone-input-text);
@@ -48,6 +48,8 @@ tc-phone-input {
 .tc-phone-input-group {
     display: flex;
     align-items: stretch;
+    // Shared control floor — aligns with .form-control in a form row.
+    min-height: var(--tc-control-height, 2.625rem);
     border: 1px solid var(--bs-phone-input-border);
     background: var(--bs-phone-input-bg);
     transition:

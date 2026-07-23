@@ -1,0 +1,248 @@
+// Redline theme — foundation token layer.
+//
+// An OPT-IN "performance dealership" skin for @toolcase/web-components, ported
+// from the car-web-template reference site: a light, high-contrast showroom
+// canvas lit by a single crimson accent (the tachometer redline), condensed
+// industrial display type, and a technical-blue secondary highlight borrowed
+// from the source site's badge palette. It applies only inside a theme root —
+// either the custom element `<tc-theme name="redline"> … </tc-theme>` or any
+// element carrying `[data-tc-theme="redline"]` (a plain wrapper div, which the
+// examples site uses). Everything outside the root keeps the default toolcase
+// (light / product) voice.
+//
+// HOW IT WORKS — read this before authoring a component override:
+//   Every tc-* component drives its cosmetics through --bs-<component>-* custom
+//   properties whose DEFAULTS resolve to --tc-* design tokens (e.g.
+//   `--bs-panel-bg: var(--tc-surface)`). Re-pointing the --tc-* tokens here, at
+//   the theme root, re-skins the colours / borders / type of ALL components in
+//   one shot. The per-component partials in ./components/ only add the
+//   dealership STRUCTURE a flat token swap can't carry: the crimson gradient +
+//   glow on primary actions, the diagonal "speed-cut" corner on cards/panels
+//   (the theme's signature — see traps below), the dark chrome treatment on
+//   navbar/footer/hero (the rest of the canvas stays light), and the mono
+//   dashboard-digit countdown/rating treatments.
+//
+// AESTHETIC: light showroom canvas (#f7f9fc → #ffffff), one crimson accent
+// (#ee1243, "the redline"), a technical blue secondary highlight (#0061df),
+// dark ink chrome (#0d0c1b) reserved for navbar / footer / hero sections —
+// mirroring the source site's dark-hero-on-light-content structure. Corners
+// stay SHARP by mandate (border-radius: 0) — the signature is a diagonal
+// clip-path cut on the top-right corner of cards/panels/buttons (a speed-cut,
+// not a curve), so the toolcase mandate is honoured, not broken.
+//
+// FONTS: 'Oswald' (display — condensed industrial headline face) and 'Roboto'
+// (body) are NOT bundled — load them on the host page (e.g. Google Fonts) for
+// the full look; both degrade to system sans-serif. 'JetBrains Mono' is shared
+// with the default theme (used for dashboard-style digits: countdown, prices).
+
+@use '../../foundation/tokens' as *;
+
+tc-theme[name='redline'],
+[data-tc-theme='redline'] {
+    color-scheme: light;
+
+    // `tc-theme` is display:contents (no box), so `background` would not paint —
+    // for the redline canvas, wrap content in `tc-artboard-backdrop` or set the
+    // background on your own container. `color` / `font-family` / the custom
+    // properties below all inherit through the contents box to descendants.
+    color: var(--rl-text);
+    font-family: var(--rl-body);
+
+    // ── Redline palette (--rl-*) — the theme's design tokens ─────────────────
+    // Canvas — light showroom surfaces lifted straight from the source site.
+    --rl-bg: #f7f9fc;
+    --rl-bg-2: #f5f5f5;
+    --rl-surface: #ffffff;
+    --rl-surface-muted: #f0f1f5;
+    --rl-surface-hover: #f5f5f7;
+
+    // Dark chrome — reserved for navbar / footer / hero (see traps below); the
+    // bulk of the canvas stays light.
+    --rl-ink: #0d0c1b;
+    --rl-ink-2: #17162a;
+
+    // Hairlines — neutral light-grey, matching the source site's border tokens.
+    --rl-border-faint: #f0efef;
+    --rl-border: #e8e8e8;
+    --rl-border-strong: #d7d5d5;
+
+    // Text ramp — near-ink headings down to the source site's medium grey body.
+    --rl-text: #15131f;
+    --rl-text-muted: #7a7575;
+    --rl-text-faint: #a39d9d;
+    --rl-text-inverse: #ffffff;
+
+    // Primary accent — crimson, "the redline". --rl-accent-2 doubles as the
+    // hover fill AND the gradient second stop (variants repoint both together,
+    // so --rl-accent-grad always renders a genuine two-tone sweep in the new
+    // hue, never a leftover crimson stop). --rl-accent-active is the pressed
+    // state, darker than the base.
+    --rl-accent: #ee1243;
+    --rl-accent-2: #ff5470;
+    --rl-accent-active: #c50d38;
+    --rl-accent-ink: #ffffff;
+    --rl-accent-soft: rgba(238, 18, 67, 0.1);
+    --rl-accent-line: rgba(238, 18, 67, 0.32);
+    --rl-accent-glow: rgba(238, 18, 67, 0.35);
+
+    // Secondary accent — technical blue, lifted from the source site's badge
+    // palette. Used sparingly: links, info highlights, focus companions.
+    --rl-blue: #0061df;
+    --rl-blue-fg: #0052bd; // darkened so accent-coloured TEXT clears AA on light
+    --rl-blue-soft: rgba(0, 97, 223, 0.12);
+
+    // Semantic — kept distinct from the crimson brand accent.
+    --rl-success: #00b67a;
+    --rl-info: #21c4df;
+    --rl-warning: #ffc107;
+    --rl-danger: #eb4c4c;
+
+    // Typography families.
+    --rl-display: 'Oswald', 'Arial Narrow', system-ui, sans-serif;
+    --rl-body: 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --rl-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+    --rl-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+    // ── Reusable signature recipes (referenced by component partials) ────────
+    // The crimson sweep — primary actions, brand underline, active fills.
+    --rl-accent-grad: linear-gradient(135deg, var(--rl-accent), var(--rl-accent-2));
+    // A faint speed-streak wash behind eyebrows / section heads.
+    --rl-streak: linear-gradient(120deg, rgba(238, 18, 67, 0.12), transparent 70%);
+    // Brake-light glow — the hover lift shadow for primary elements.
+    --rl-glow: 0 10px 26px -10px var(--rl-accent-glow);
+    --rl-glow-strong: 0 16px 34px -10px var(--rl-accent-glow);
+    // Soft top-down surface gradient for raised cards.
+    --rl-surface-grad: linear-gradient(180deg, #ffffff, var(--rl-surface-muted));
+    // Dark-chrome frosted glass (navbar over a hero image).
+    --rl-chrome-bg: rgba(13, 12, 27, 0.82);
+    --rl-chrome-blur: saturate(1.2) blur(10px);
+
+    // ── Signature — the diagonal "speed-cut" corner ──────────────────────────
+    // A clip-path (never border-radius) that shears the top-right corner at 45°,
+    // read as a livery panel-cut. Kept as a custom property so component
+    // partials share one definition; NOT applied globally — only on the
+    // signature surfaces (cards, panels, the primary button, pricing cards) via
+    // their own partials, so it stays a deliberate accent instead of theme-wide
+    // noise. Two sizes: the default cut and a smaller one for compact controls.
+    --rl-cut: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
+    --rl-cut-sm: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+
+    // ── Remap toolcase tokens (--tc-*) onto the redline palette ──────────────
+    // This block alone flips every component's colours / borders / type, because
+    // the --bs-<component>-* defaults all resolve through these tokens.
+    --tc-font-sans: var(--rl-body);
+    --tc-font-mono: var(--rl-mono);
+
+    --tc-white: #ffffff;
+    --tc-black: #000000;
+
+    --tc-surface: var(--rl-surface);
+    --tc-surface-muted: var(--rl-surface-muted);
+    --tc-surface-hover: var(--rl-surface-hover);
+    --tc-surface-dark: var(--rl-ink);
+    --tc-border: var(--rl-border);
+    --tc-border-faint: var(--rl-border-faint);
+    --tc-border-strong: var(--rl-border-strong);
+    --tc-text: var(--rl-text);
+    --tc-text-muted: var(--rl-text-muted);
+    --tc-text-faint: var(--rl-text-faint);
+    // text-inverse means "readable text on a dark/ink surface" (the navbar,
+    // footer, hero chrome, code blocks) — NOT on the accent. Keep it light even
+    // though the theme's base canvas is light; the dark-chrome sections still
+    // need light text.
+    --tc-text-inverse: var(--rl-text-inverse);
+    --tc-emphasis: var(--rl-text);
+
+    --tc-ink: var(--rl-ink);
+    --tc-ink-2: var(--rl-ink-2);
+
+    // App accent — primary buttons / links read crimson with white on-fill text.
+    --tc-app-accent: var(--rl-accent);
+    --tc-app-accent-hover: var(--rl-accent-2);
+    --tc-app-accent-contrast: var(--rl-accent-ink);
+    // Primary-action gradient → crimson sweep (no muddy slate stop), so the base
+    // `.btn-primary` and every consumer of --tc-app-accent-gradient (CTA panels,
+    // pricing highlight caps) render the full redline sweep, not accent→slate.
+    --tc-app-accent-gradient: var(--rl-accent-grad);
+
+    // Accent — the technical-blue signature highlight (links, focus companions,
+    // brand dot). accent-fg leans darker so accent-coloured TEXT clears AA on
+    // the light canvas.
+    --tc-accent: var(--rl-blue);
+    --tc-accent-fg: var(--rl-blue-fg);
+    --tc-accent-soft: var(--rl-blue-soft);
+    --tc-accent-hex: var(--rl-blue);
+    --tc-cyan: var(--rl-blue);
+
+    --tc-success: var(--rl-success);
+    --tc-success-bg: rgba(0, 182, 122, 0.14);
+    --tc-info: var(--rl-info);
+    --tc-info-bg: rgba(33, 196, 223, 0.14);
+    --tc-warning: var(--rl-warning);
+    --tc-warning-bg: rgba(255, 193, 7, 0.18);
+    --tc-danger: var(--rl-danger);
+    --tc-danger-bg: rgba(235, 76, 76, 0.14);
+
+    // Shadows lean soft + wide (the source site's "floating card" feel); hover
+    // carries a tinted crimson glow instead of a neutral lift.
+    --tc-shadow-sm: 0 1px 2px rgba(13, 12, 27, 0.06);
+    --tc-shadow-md: 0 8px 24px -8px rgba(13, 12, 27, 0.18);
+    --tc-shadow-lg: 0 24px 60px -20px rgba(13, 12, 27, 0.28);
+    --tc-shadow-hover: var(--rl-glow);
+
+    --tc-transition-fast: 0.16s var(--rl-ease);
+    --tc-transition-base: 0.22s var(--rl-ease);
+
+    // Focus ring — a crimson halo.
+    --tc-focus-ring: 0 0 0 0.2rem rgba(238, 18, 67, 0.22);
+
+    // ── Bootstrap-compatible contract (--bs-*) ───────────────────────────────
+    --bs-primary: var(--rl-accent);
+    --bs-primary-rgb: 238, 18, 67;
+    --bs-secondary: var(--rl-text-muted);
+    --bs-secondary-rgb: 122, 117, 117;
+    --bs-success: var(--rl-success);
+    --bs-success-rgb: 0, 182, 122;
+    --bs-success-contrast: var(--rl-ink); // teal-green — white text fails (~2.6:1)
+    --bs-danger: var(--rl-danger);
+    --bs-danger-rgb: 235, 76, 76;
+    --bs-warning: var(--rl-warning);
+    --bs-warning-rgb: 255, 193, 7;
+    --bs-warning-contrast: var(--rl-ink); // classic bright yellow — white text fails badly (~1.6:1)
+    --bs-info: var(--rl-info);
+    --bs-info-rgb: 33, 196, 223;
+    --bs-info-contrast: var(--rl-ink); // bright cyan — white text fails (~2.1:1)
+    --bs-light: var(--rl-surface-muted);
+    --bs-light-rgb: 240, 241, 245;
+    --bs-dark: var(--rl-ink);
+    --bs-dark-rgb: 13, 12, 27;
+
+    --bs-font-sans-serif: var(--rl-body);
+    --bs-font-monospace: var(--rl-mono);
+    --bs-body-font-family: var(--rl-body);
+    --bs-body-bg: var(--rl-bg);
+    --bs-body-bg-rgb: 247, 249, 252;
+    --bs-body-color: var(--rl-text);
+    --bs-body-color-rgb: 21, 19, 31;
+    --bs-emphasis-color: var(--rl-text);
+    --bs-emphasis-color-rgb: 21, 19, 31;
+
+    --bs-secondary-color: var(--rl-text-muted);
+    --bs-secondary-bg: var(--rl-surface-muted);
+    --bs-tertiary-color: var(--rl-text-faint);
+    --bs-tertiary-bg: var(--rl-bg-2);
+
+    --bs-border-color: var(--rl-border);
+    --bs-border-color-translucent: rgba(13, 12, 27, 0.08);
+    --bs-border-radius: 0;
+
+    --bs-link-color: var(--rl-accent);
+    --bs-link-hover-color: var(--rl-accent-2);
+
+    --bs-box-shadow-sm: var(--tc-shadow-sm);
+    --bs-box-shadow: var(--tc-shadow-md);
+    --bs-box-shadow-lg: var(--tc-shadow-lg);
+
+    --bs-focus-ring-color: rgba(238, 18, 67, 0.22);
+}

@@ -1,0 +1,24 @@
+// Redline › tc-eyebrow — the mono micro-label with a leading crimson dot,
+// wrapped in a faint speed-streak wash (the source site's category-tag voice).
+
+tc-theme[name='redline'],
+[data-tc-theme='redline'] {
+    .tc-eyebrow {
+        --bs-eyebrow-color: var(--rl-accent);
+        --bs-eyebrow-letter-spacing: 0.16em;
+        --bs-eyebrow-font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6em;
+    }
+
+    .tc-eyebrow::before {
+        content: '';
+        flex: none;
+        width: 0.45em;
+        height: 0.45em;
+        border-radius: 50%;
+        background: var(--rl-accent);
+        box-shadow: 0 0 0 0.27em var(--rl-accent-soft);
+    }
+}

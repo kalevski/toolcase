@@ -1,0 +1,25 @@
+// Redline Royal variant — soft-violet primary with a magenta secondary accent.
+//
+// Swaps ONLY the accent hue families of the redline foundation. Canvas,
+// surfaces, hairlines, text ramp, dark chrome, semantic status colours,
+// fonts, shadows and the speed-cut recipe are untouched.
+// Use with: <tc-theme name="redline" variant="royal"> … </tc-theme>
+
+tc-theme[name='redline'][variant='royal'],
+[data-tc-theme='redline'][data-tc-variant='royal'] {
+    --rl-accent: #a78bfa;
+    --rl-accent-2: #bda5ff;
+    --rl-accent-active: #8a67e8;
+    --rl-accent-ink: #170e33;
+    --rl-accent-soft: rgba(167, 139, 250, 0.1);
+    --rl-accent-line: rgba(167, 139, 250, 0.32);
+    --rl-accent-glow: rgba(167, 139, 250, 0.35);
+
+    --tc-accent: #e879f9;
+    --tc-accent-fg: #86198f; // darkened so accent-coloured TEXT clears AA on light
+    --tc-accent-soft: rgba(232, 121, 249, 0.12);
+    --tc-accent-hex: #e879f9;
+    --tc-cyan: #e879f9;
+
+    --bs-primary-rgb: 167, 139, 250;
+}

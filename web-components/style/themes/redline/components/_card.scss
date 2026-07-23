@@ -1,0 +1,40 @@
+// Redline › .card — the signature diagonal speed-cut top-right corner (a
+// clip-path shear, not a curve — the sharp-corner mandate is kept, not
+// broken), a soft top-down surface gradient, and a crimson-tinted hover lift.
+
+tc-theme[name='redline'],
+[data-tc-theme='redline'] {
+    .card {
+        --bs-card-bg: var(--rl-surface-grad);
+        --bs-card-border-color: var(--rl-border);
+        --bs-card-cap-bg: transparent;
+        --bs-card-color: var(--rl-text);
+        position: relative;
+        clip-path: var(--rl-cut);
+        box-shadow: var(--tc-shadow-sm);
+        transition:
+            transform 0.25s var(--rl-ease),
+            border-color 0.25s,
+            box-shadow 0.25s;
+    }
+
+    .card:hover {
+        transform: translateY(-4px);
+        border-color: var(--rl-accent-line);
+        box-shadow: var(--tc-shadow-hover);
+    }
+
+    .card-header {
+        border-bottom-color: var(--rl-border);
+    }
+
+    .card-footer {
+        border-top-color: var(--rl-border);
+    }
+
+    // Solid-variant cards (text-bg-*) keep their fill; drop the hover lift and
+    // the corner cut reads as a livery flag on a bright ground.
+    .card[class*='text-bg-']:hover {
+        transform: none;
+    }
+}

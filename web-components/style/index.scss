@@ -42,3 +42,10 @@
 //       uniquely, ROUNDED corners). Ported from the VECTOR BLUEPRINT landing.
 //       Scoped under `tc-theme[name="blueprint"]`, inert until a wrapper opts in.
 @use './themes/blueprint';
+
+//   (9) Redline theme — opt-in LIGHT "performance dealership" skin (showroom
+//       canvas, crimson signature accent, technical-blue highlight, dark
+//       navbar/footer/hero chrome, diagonal speed-cut corners). Ported from
+//       the car-web-template automotive marketplace site. Scoped under
+//       `tc-theme[name="redline"]`, inert until a wrapper opts in.
+@use './themes/redline';

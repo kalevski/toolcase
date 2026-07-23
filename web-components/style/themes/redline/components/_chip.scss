@@ -1,0 +1,15 @@
+// Redline › tc-chip — selected state reads crimson, matching the app-accent
+// fill used across filter facets (body type, fuel, transmission).
+
+tc-theme[name='redline'],
+[data-tc-theme='redline'] {
+    tc-chip,
+    tc-tag {
+        --bs-chip-selected-bg: var(--rl-accent);
+        --bs-chip-selected-color: #ffffff;
+    }
+
+    .tc-chip:hover {
+        border-color: var(--rl-accent-line);
+    }
+}

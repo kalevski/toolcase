@@ -205,6 +205,7 @@ tc-theme[name='dungeon'],
     --bs-danger-rgb: 168, 48, 42;
     --bs-warning: var(--fg-legendary);
     --bs-warning-rgb: 232, 162, 58;
+    --bs-warning-contrast: var(--fg-ink); // light gold — white text fails (~2.2:1)
     --bs-info: var(--fg-mana);
     --bs-info-rgb: 58, 108, 201;
     --bs-light: var(--fg-parch);

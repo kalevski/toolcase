@@ -1,0 +1,13 @@
+// Redline › .nav — active tab/pill reads crimson, matching the app-accent.
+
+tc-theme[name='redline'],
+[data-tc-theme='redline'] {
+    .nav-link.active {
+        color: var(--rl-accent);
+    }
+
+    .nav-pills .nav-link.active {
+        background: var(--rl-accent);
+        color: #ffffff;
+    }
+}

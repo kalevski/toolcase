@@ -109,7 +109,7 @@ tc-equipment-doll {
             outline-offset: 2px;
         }
 
-        &:hover .tc-equipment-doll__tile {
+        &:hover:not(.is-selected) .tc-equipment-doll__tile {
             background: var(--bs-equipment-doll-slot-hover-bg);
         }
     }

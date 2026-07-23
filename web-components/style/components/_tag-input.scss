@@ -61,7 +61,7 @@ tc-tag-input {
     // Skeleton
     --bs-tag-input-skeleton-bg: var(--tc-surface-muted);
     --bs-tag-input-skeleton-shimmer: rgba(255, 255, 255, 0.6);
-    --bs-tag-input-skeleton-height: 2.5rem;
+    --bs-tag-input-skeleton-height: var(--tc-control-height, 2.625rem);
 }
 
 .tc-tag-input {
@@ -72,7 +72,7 @@ tc-tag-input {
 
 .tc-tag-input-label {
     display: block;
-    margin-bottom: 0.375rem;
+    margin-bottom: 0.4rem; // unified label gap — same control-top offset as tc-input
     font-size: var(--bs-tag-input-label-font-size);
     font-weight: 500;
     color: var(--bs-tag-input-label-color);
@@ -91,7 +91,8 @@ tc-tag-input {
     flex-wrap: wrap;
     align-items: center;
     gap: var(--bs-tag-input-gap);
-    min-height: 2.5rem;
+    // Shared control floor — aligns with .form-control in a form row.
+    min-height: var(--tc-control-height, 2.625rem);
     padding: var(--bs-tag-input-padding-y) var(--bs-tag-input-padding-x);
     background: var(--bs-tag-input-bg);
     border: 1px solid var(--bs-tag-input-border-color);

@@ -1,0 +1,18 @@
+// Redline theme — opt-in "performance dealership" skin for
+// @toolcase/web-components (light showroom canvas, crimson signature accent,
+// technical-blue highlight, dark navbar/footer/hero chrome, diagonal
+// speed-cut corners on signature surfaces). Ported from car-web-template.
+//
+// Activate by wrapping content in the theme root:
+//   <tc-theme name="redline"> … your tc-* components … </tc-theme>
+// (or any element with [data-tc-theme="redline"]).
+//
+// Load order: foundation (token remap) first so the component partials override
+// on top of the already-redline --tc-* / --bs-* tokens; variants extend the
+// foundation with alternate primary/secondary accent palettes (the standard
+// eleven-variant set shared by every bundled theme) — everything else stays
+// the base redline look.
+
+@use 'foundation';
+@use 'variants';
+@use 'components';

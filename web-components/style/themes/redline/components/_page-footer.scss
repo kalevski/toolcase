@@ -1,0 +1,39 @@
+// Redline › tc-page-footer — dark ink chrome, mirroring the source site's
+// dark footer-area. The rest of the canvas stays light; this is the theme's
+// second deliberate dark-chrome zone (the other is tc-navbar).
+
+tc-theme[name='redline'],
+[data-tc-theme='redline'] {
+    tc-page-footer {
+        --bs-page-footer-bg: var(--rl-ink);
+        --bs-page-footer-color: rgba(255, 255, 255, 0.78);
+        --bs-page-footer-border-color: rgba(255, 255, 255, 0.1);
+
+        --bs-page-footer-brand-color: #ffffff;
+        --bs-page-footer-brand-dot-bg: var(--rl-accent);
+
+        --bs-page-footer-tagline-color: #ffffff;
+        --bs-page-footer-description-color: rgba(255, 255, 255, 0.6);
+
+        --bs-page-footer-menu-title-color: rgba(255, 255, 255, 0.85);
+        --bs-page-footer-link-color: rgba(255, 255, 255, 0.6);
+        --bs-page-footer-link-hover-color: var(--rl-accent);
+
+        --bs-page-footer-social-color: rgba(255, 255, 255, 0.6);
+        --bs-page-footer-social-hover-color: #ffffff;
+        --bs-page-footer-social-hover-bg: rgba(255, 255, 255, 0.1);
+
+        --bs-page-footer-legal-color: rgba(255, 255, 255, 0.5);
+        --bs-page-footer-legal-link-color: rgba(255, 255, 255, 0.6);
+        --bs-page-footer-legal-link-hover-color: #ffffff;
+
+        --bs-page-footer-cta-bg: rgba(255, 255, 255, 0.04);
+        --bs-page-footer-cta-border-color: rgba(255, 255, 255, 0.1);
+        --bs-page-footer-cta-heading-color: #ffffff;
+        --bs-page-footer-cta-desc-color: rgba(255, 255, 255, 0.6);
+    }
+
+    .tc-page-footer-cta-btn:hover {
+        box-shadow: var(--rl-glow-strong);
+    }
+}

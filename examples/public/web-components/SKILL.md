@@ -151,6 +151,15 @@ Notes:
   - [tc-button](#tc-button)
   - [tc-button-group](#tc-button-group)
   - [tc-card](#tc-card)
+  - [tc-car-listing-card](#tc-car-listing-card)
+  - [tc-manufacturer-tile](#tc-manufacturer-tile)
+  - [tc-model-family-card](#tc-model-family-card)
+  - [tc-variant-spec-sheet](#tc-variant-spec-sheet)
+  - [tc-engine-spec](#tc-engine-spec)
+  - [tc-tyre-spec](#tc-tyre-spec)
+  - [tc-equipment-tag](#tc-equipment-tag)
+  - [tc-equipment-matrix](#tc-equipment-matrix)
+  - [tc-emission-badge](#tc-emission-badge)
   - [tc-carousel](#tc-carousel)
   - [tc-close-button](#tc-close-button)
   - [tc-collapse](#tc-collapse)
@@ -1370,10 +1379,10 @@ Theming host element — the `--tc-*` token override container. Every `tc-*` com
 
 Two ways to theme a subtree:
 
-1. **Named theme** via the `name` attribute — opt into a bundled skin. `default` is the product (slate) voice applied globally; `dungeon` (gilded fantasy), `aurora` (dark "production-AI"), `sunshine` (warm citrus boutique), `neon` (dark synthwave / cyberpunk, dual magenta + cyan accents) and `blueprint` (light vector-blueprint, rounded corners) are opt-in skins that stay inert until a `tc-theme` wrapper requests them. Each named skin is scoped under `tc-theme[name="…"]` (a plain wrapper carrying `[data-tc-theme="…"]` is matched too). The `dungeon`, `aurora`, `sunshine`, `neon` and `blueprint` skins reference display fonts (Cinzel / EB Garamond for dungeon; Orbitron / Ubuntu Mono for neon; Space Grotesk / Chakra Petch for blueprint) that are **not** bundled — load them on the host page for the full look; all degrade to system serifs/sans.
+1. **Named theme** via the `name` attribute — opt into a bundled skin. `default` is the product (slate) voice applied globally; `dungeon` (gilded fantasy), `aurora` (dark "production-AI"), `sunshine` (warm citrus boutique), `neon` (dark synthwave / cyberpunk, dual magenta + cyan accents), `blueprint` (light vector-blueprint, rounded corners) and `redline` (light performance-dealership skin — showroom canvas, crimson signature accent, technical-blue highlight, dark navbar/footer/hero chrome, diagonal speed-cut corners) are opt-in skins that stay inert until a `tc-theme` wrapper requests them. Each named skin is scoped under `tc-theme[name="…"]` (a plain wrapper carrying `[data-tc-theme="…"]` is matched too). The `dungeon`, `aurora`, `sunshine`, `neon`, `blueprint` and `redline` skins reference display fonts (Cinzel / EB Garamond for dungeon; Orbitron / Ubuntu Mono for neon; Space Grotesk / Chakra Petch for blueprint; Oswald / Roboto for redline) that are **not** bundled — load them on the host page for the full look; all degrade to system serifs/sans.
 2. **Ad-hoc token overrides** — set `--tc-*` (or the finer-grained `--bs-<component>-*`) custom properties directly on the `tc-theme` element via `style` or a class. Because the tokens inherit through the `display: contents` box, every descendant component picks them up.
 
-Every named theme additionally ships nine **accent variants** selected with the `variant` attribute: `ocean` (blue / cyan), `forest` (green / lime), `ember` (orange / gold), `royal` (violet / magenta), `mint` (teal / mint), `rose` (rose / pink), `crimson` (red / coral), `indigo` (indigo / periwinkle) and `slate` (steel / silver). A variant swaps **only the primary and secondary accent colours** (and their derived hovers, soft tints, glows, gradients, focus rings and link colours) — canvas, surfaces, text ramp, semantic status colours and the theme's structure stay untouched: `<tc-theme name="blueprint" variant="ocean">` (or `[data-tc-theme="blueprint"][data-tc-variant="ocean"]` on a plain wrapper).
+Every named theme additionally ships eleven **accent variants** selected with the `variant` attribute: `ocean` (blue / cyan), `forest` (green / lime), `ember` (orange / gold), `royal` (violet / magenta), `mint` (teal / mint), `rose` (rose / pink), `crimson` (red / coral), `indigo` (indigo / periwinkle), `slate` (steel / silver), and two gradient variants whose primary is a two-tone sweep instead of a flat colour: `sunset` (coral → orange) and `twilight` (violet → blue). A variant swaps **only the primary and secondary accent colours** (and their derived hovers, soft tints, glows, gradients, focus rings and link colours) — canvas, surfaces, text ramp, semantic status colours and the theme's structure stay untouched: `<tc-theme name="blueprint" variant="ocean">` (or `[data-tc-theme="blueprint"][data-tc-variant="ocean"]` on a plain wrapper).
 
 **Tag:** `tc-theme`
 
@@ -1381,8 +1390,8 @@ Every named theme additionally ships nine **accent variants** selected with the 
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `name` | `default\|dungeon\|aurora\|sunshine\|neon\|blueprint` | — | Selects a bundled named theme for the wrapped subtree. Absent → the subtree inherits the ambient (global `:root`) theme. Unrecognised values simply match no theme scope, so the subtree keeps the inherited skin. |
-| `variant` | `ocean\|forest\|ember\|royal\|mint\|rose\|crimson\|indigo\|slate` | — | Accent variant of the named theme — swaps only the primary and secondary accent colours (plus derived hovers, tints, glows, focus rings and links). Requires `name`; absent → the theme's base accents. |
+| `name` | `default\|dungeon\|aurora\|sunshine\|neon\|blueprint\|redline` | — | Selects a bundled named theme for the wrapped subtree. Absent → the subtree inherits the ambient (global `:root`) theme. Unrecognised values simply match no theme scope, so the subtree keeps the inherited skin. |
+| `variant` | `ocean\|forest\|ember\|royal\|mint\|rose\|crimson\|indigo\|slate\|sunset\|twilight` | — | Accent variant of the named theme — swaps only the primary and secondary accent colours (plus derived hovers, tints, glows, focus rings and links). Requires `name`; absent → the theme's base accents. |
 
 **JS Properties**
 
@@ -2722,6 +2731,355 @@ Content container with optional header/footer.
     <p>Body content.</p>
     <tc-button slot="footer" variant="primary">Action</tc-button>
 </tc-card>
+```
+
+---
+
+### tc-car-listing-card
+
+Vehicle listing card: image, category chip, wishlist toggle, title, optional
+rating, an icon spec row (mileage/fuel/transmission), current + strikethrough
+old price, and an optional seller mini-row. The flagship component of the
+**Redline** theme (see `tc-theme name="redline"`), but themeable like any
+other `tc-*` element.
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `layout` | `grid\|list` | `grid` | Grid card or horizontal list row |
+| `image-src` / `image-alt` | string | — | Listing photo |
+| `category` | string | — | Category chip (e.g. "Sports Car") |
+| `title-text` | string | — | Listing title |
+| `href` | string | — | Wraps the title in a link when set |
+| `price-text` | string | — | Current price (pre-formatted) |
+| `price-old-text` | string | — | Strikethrough original price |
+| `rating` | number `0-5` | — | Star rating; omit to hide |
+| `rating-count-text` | string | — | Review count shown next to the stars |
+| `seller-name` / `seller-avatar-src` | string | — | Optional seller mini-row |
+| `wishlisted` | boolean | false | Wishlist heart pressed state |
+
+**Properties (JS-only):** `specs: { icon: string; label: string }[]` — the
+icon spec row; `icon` is any lucide icon name (kebab or PascalCase). Set via
+a ref (`el.specs = [...]`) or the `useTc` React hook — arrays can't be passed
+as HTML attributes.
+
+**Events:** `tc-wishlist-toggle` — `detail: { wishlisted: boolean }`. Fired
+when the heart button is clicked; never navigates the card's own link.
+
+```html
+<tc-car-listing-card
+    image-src="/cars/gt-coupe.jpg"
+    category="Sports Car"
+    title-text="2024 Vantage GT Coupe"
+    href="/cars/gt-coupe"
+    price-text="$58,900"
+    price-old-text="$62,400"
+    rating="4.5"
+    rating-count-text="(128)"
+    seller-name="Redline Motors"
+    seller-avatar-src="/dealers/redline.jpg"
+></tc-car-listing-card>
+<script>
+    document.querySelector('tc-car-listing-card').specs = [
+        { icon: 'gauge', label: '12,400 mi' },
+        { icon: 'fuel', label: 'Petrol' },
+        { icon: 'settings-2', label: 'Automatic' },
+    ]
+</script>
+```
+
+---
+
+### tc-manufacturer-tile
+
+Brand tile for manufacturer grids and filter rails (the `manufacturer`
+lookup table of a vehicle catalog). Renders a sharp square brand mark — a
+logo image, or an auto-monogram built from the name's initials when no logo
+is set (deliberately not the circular avatar treatment) — plus an optional
+mono eyebrow, the name and a count line. With `href` the whole tile is a
+link; `active` paints the solid-ink selected-filter state.
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `name` | string | — | Manufacturer name (also feeds the monogram) |
+| `logo-src` | string | — | Logo image; omit for the auto-monogram well |
+| `href` | string | — | Makes the whole tile a link |
+| `count-text` | string | — | Count line, e.g. "128 models" |
+| `eyebrow` | string | — | Mono micro-label above the name, e.g. "Marque" |
+| `active` | boolean | false | Selected-filter state (solid ink) |
+
+```html
+<tc-manufacturer-tile
+    name="Alfa Romeo"
+    href="/manufacturers/alfa-romeo"
+    eyebrow="Marque"
+    count-text="42 models"
+></tc-manufacturer-tile>
+```
+
+---
+
+### tc-model-family-card
+
+Card for one `model_family` row of a vehicle catalog — manufacturer eyebrow,
+range title, a machine-facing mono lineage breadcrumb
+`RANGE / SERIES / GENERATION`, and a meta row with a body-type chip (lucide
+icon + humanized enum label), a mono years span and a variant count. An
+optional photo strip caps the card; `href` links the title. An absent or
+unknown `body-type` renders no chip (unknown is NULL — no sentinel).
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `manufacturer` | string | — | Muted eyebrow above the title |
+| `range` | string | — | Human-readable title (and first lineage part) |
+| `series` | string | — | Second lineage part |
+| `generation` | string | — | Third lineage part |
+| `body-type` | enum | — | `body_type` member (`SUV`, `ESTATE`, `PICKUP_TRUCK`, …) → icon + label chip |
+| `years-text` | string | — | Mono years span, e.g. "2020–2025" |
+| `variant-count-text` | string | — | e.g. "34 variants" |
+| `href` | string | — | Wraps the title in a link |
+| `image-src` / `image-alt` | string | — | Optional photo strip |
+
+```html
+<tc-model-family-card
+    manufacturer="BMW"
+    range="3 Series"
+    series="G20"
+    generation="LCI"
+    body-type="NOTCHBACK"
+    years-text="2022–2025"
+    variant-count-text="34 variants"
+    href="/families/bmw-3-series-g20"
+    image-src="/img/families/g20.jpg"
+></tc-model-family-card>
+```
+
+---
+
+### tc-variant-spec-sheet
+
+The full technical datasheet of one `model_variant` catalog row: a header
+(name, muted version, mono slug, production years), a hero strip of big mono
+dashboard readouts (power PS/kW, 0–100 km/h, top speed, CO₂) in a 1px-gap
+grid, then grouped key-value sections with dotted leader lines — Powertrain,
+Chassis, Dimensions, Consumption & Emissions. Unknown is NULL: absent values
+skip their rows entirely and a section with zero rows disappears (no em-dash
+placeholders). Enum members are humanized (`PLUG_IN_HYBRID` → "Plug-in
+hybrid", `DUAL_CLUTCH` → "Dual-clutch"); `turning_circle_dm` renders in
+metres.
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `name` | string | — | Variant name (e.g. "Golf GTI") |
+| `version` | string | — | Muted version suffix (e.g. "2.0 TSI DSG") |
+| `slug` | string | — | Mono, faint machine-facing identifier |
+| `years-text` | string | — | Production span (e.g. "2020 – 2024") |
+| `dense` | boolean | false | Tighter paddings for comparison layouts |
+
+**Properties (JS-only):** `variant: VariantSpec` — an object mirroring the
+`model_variant` columns in camelCase, all optional: `powertrain`, `fuelType`,
+`gearboxType`, `gears`, `drivetrainType`, `powerPs`, `powerKw`, `seats`,
+`doors`, `frontSuspension`, `rearSuspension`, `frontBrakes`, `rearBrakes`,
+`frontTyre`, `rearTyre`, `fuelCapacityL`, `consumptionL100km`,
+`consumptionCityL100km`, `consumptionHwyL100km`, `emissionStandard`,
+`emissionCategory`, `co2GKm`, `adblueCapacityL`, `lengthMm`, `widthMm`,
+`heightMm`, `wheelbaseMm`, `turningCircleDm`, `trunkVolumeL`, `roofLoadKg`,
+`towingCapacityKg`, `maxSlopePct`, `accelerationS`, `topSpeedKmh`,
+`noiseDb`. Set via a ref (`el.variant = {...}`) or the `useTc` React hook.
+
+```html
+<tc-variant-spec-sheet
+    name="Golf GTI"
+    version="2.0 TSI DSG"
+    slug="vw-golf-8-gti-2-0-tsi-dsg"
+    years-text="2020 – 2024"
+></tc-variant-spec-sheet>
+<script>
+    document.querySelector('tc-variant-spec-sheet').variant = {
+        powertrain: 'GASOLINE',
+        gearboxType: 'DUAL_CLUTCH',
+        gears: 7,
+        powerPs: 245,
+        powerKw: 180,
+        accelerationS: 6.2,
+        topSpeedKmh: 250,
+        co2GKm: 149,
+    }
+</script>
+```
+
+---
+
+### tc-engine-spec
+
+Machined engine ID plate for the vehicle-catalog `engine` table — mono
+stamped engine code, muted manufacturer, a derived CONFIG badge combining
+layout + cylinder count (`V`+8 → **V8**, `SERIES`+6 → **L6**, `BOXER`+4 →
+**B4**, `ROTARY` → **R**, `SINGLE` → **1CYL**), over a hairline key-value
+cell grid (displacement, valvetrain, torque, peak rpm, injection,
+aspiration, emission control). Every attribute is optional — an absent
+attribute (SQL NULL) renders no cell, per the schema's "unknown is always
+NULL" rule.
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `code` | string | — | Engine code, mono "stamped serial" (e.g. `B58B30M1`) |
+| `manufacturer` | string | — | Engine manufacturer name |
+| `layout` | `BOXER\|SERIES\|V\|ROTARY\|SINGLE` | — | Cylinder layout (drives the config badge) |
+| `position` | `FRONT\|REAR\|MID` | — | Engine position |
+| `emission-control` | enum | — | e.g. `SCR_CAT_WITH_DPF` → "SCR cat + DPF" |
+| `fuel-injection` | enum | — | e.g. `COMMON_RAIL` → "Common rail" |
+| `supercharger` | enum | — | e.g. `BI_TURBO` → "Bi-turbo"; omit for naturally aspirated |
+| `displacement-cc` | number | — | Displacement in cc (thousands-formatted) |
+| `cylinders` | number | — | Cylinder count (also feeds the config badge) |
+| `valves` | number | — | Valve count |
+| `torque-nm` | number | — | Peak torque in Nm |
+| `power-at-rpm` | number | — | rpm at peak power |
+| `torque-at-rpm` | number | — | rpm at peak torque |
+| `compact` | boolean | false | Headline cells only (displacement + torque) for listing pages |
+
+Enum members humanize automatically (`SCREAMING_SNAKE` → "Sentence case")
+with hand-tuned labels for the technical ones.
+
+```html
+<tc-engine-spec
+    code="B58B30M1"
+    manufacturer="BMW"
+    layout="SERIES"
+    position="FRONT"
+    cylinders="6"
+    valves="24"
+    displacement-cc="2998"
+    torque-nm="500"
+    power-at-rpm="5000"
+    torque-at-rpm="1900"
+    fuel-injection="DIRECT_INJECTION"
+    supercharger="TURBO"
+    emission-control="OTTO_PARTICULATE_FILTER"
+></tc-engine-spec>
+```
+
+---
+
+### tc-tyre-spec
+
+Tyre sidewall readout for the vehicle-catalog `tyre_size` table. Parses ISO
+metric spec strings (`225/45 R17`, `225/45R17`, optional `91V` load/speed
+suffix) into width / aspect / rim segments rendered as large mono digits
+with micro unit sub-labels, hairline-separated. Two-axle mode renders mono
+FRONT / REAR tags and raises a **STAGGERED** corner flag when the axles
+differ. A spec that doesn't parse renders as the raw mono string (commercial
+sizes like `185 R14C` stay legible — it never crashes).
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `spec` | string | — | Single-axle spec (ignored when `front-spec`/`rear-spec` set) |
+| `front-spec` | string | — | Front axle spec (two-axle mode) |
+| `rear-spec` | string | — | Rear axle spec (two-axle mode) |
+
+```html
+<!-- single axle -->
+<tc-tyre-spec spec="225/45 R17 91V"></tc-tyre-spec>
+
+<!-- staggered fitment — unequal axles show the STAGGERED flag -->
+<tc-tyre-spec front-spec="245/35 R20 95Y" rear-spec="275/30 R20 97Y"></tc-tyre-spec>
+```
+
+---
+
+### tc-equipment-tag
+
+One vehicle-equipment chip (the catalog's `equipment` table), optionally
+carrying its per-variant `feature_flag` (`variant_equipment.flag`). The flag
+is information, rendered as color + a mono suffix: `included` = success edge
++ check glyph, `optional` = neutral + "OPT", `package` = info tint + "PKG".
+Without a flag it is a plain neutral chip. Pair with `tc-equipment-matrix`
+for a variant's full sheet.
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `label` | string | — | Equipment display text |
+| `icon` | string | flag default | Lucide icon name (kebab or PascalCase); overrides the flag's default glyph (check / plus / package) |
+| `flag` | `included\|optional\|package` | — | The `feature_flag` enum value (case-insensitive); omit for a plain chip |
+
+```html
+<tc-equipment-tag label="Adaptive cruise control" flag="included"></tc-equipment-tag>
+<tc-equipment-tag label="Panoramic sunroof" flag="optional"></tc-equipment-tag>
+<tc-equipment-tag label="Winter package" flag="package"></tc-equipment-tag>
+<tc-equipment-tag label="Heated seats" icon="armchair" flag="included"></tc-equipment-tag>
+```
+
+---
+
+### tc-equipment-matrix
+
+The full equipment sheet of one catalog variant (the `variant_equipment`
+link table): items grouped by `feature_flag` into **Standard equipment /
+Optional extras / Packages** sections, each capped by a mono uppercase
+micro-header with an item count. Sections with no items are omitted; items
+without a flag fall into the Standard section. Renders `tc-equipment-tag`
+chips by default.
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `columns` | `chips\|list` | `chips` | `list` renders a dense two-column checklist (single column below 576px) instead of chips |
+| `collapsible` | boolean | false | Sections beyond the first start collapsed behind a chevron toggle |
+
+**Properties (JS-only):** `items: { label: string; icon?: string; flag?:
+'included'|'optional'|'package' }[]` — the variant's equipment rows. Set via
+a ref (`el.items = [...]`) or the `useTc` React hook — arrays can't be
+passed as HTML attributes.
+
+```html
+<tc-equipment-matrix collapsible></tc-equipment-matrix>
+<script>
+    document.querySelector('tc-equipment-matrix').items = [
+        { label: 'Adaptive cruise control', flag: 'included' },
+        { label: 'Matrix LED headlights', flag: 'included' },
+        { label: 'Panoramic sunroof', flag: 'optional' },
+        { label: 'Winter package', flag: 'package' },
+    ]
+</script>
+```
+
+---
+
+### tc-emission-badge
+
+Compact emissions credential for a vehicle catalog row: the emission
+category label behind a 4px colored left stripe encoding the emission class,
+an optional NEDC/WLTP measurement-standard mono tag, and an optional mono
+CO₂ figure. The stripe tier derives from the first digit in `label`
+(6/5 → success, 4/3 → warning, 2/1 → danger, none → neutral) unless pinned
+via `tier`. The stripe is the only colored element — the body stays neutral.
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `label` | string | — | Emission category label (e.g. "Euro 6d-TEMP") |
+| `standard` | `NEDC\|WLTP\|NA` | — | Measurement standard mono tag; `NA` is omitted |
+| `co2-text` | string | — | Pre-formatted CO₂ figure (e.g. "128 g/km", mono) |
+| `tier` | number `1-6` | derived | Explicit stripe tier for labels without a digit |
+
+```html
+<tc-emission-badge label="Euro 6d" standard="WLTP" co2-text="128 g/km"></tc-emission-badge>
+<tc-emission-badge label="EEV" tier="5"></tc-emission-badge>
 ```
 
 ---
@@ -6518,6 +6876,52 @@ Modal command-search overlay with fuzzy/substring filtering, results grouped by 
     document.querySelector('#open-cmd').addEventListener('click', () => cmd.setAttribute('open', ''))
     cmd.addEventListener('tc-select', e => console.log('selected', e.detail.item))
     cmd.addEventListener('tc-close', () => cmd.removeAttribute('open'))
+</script>
+```
+
+---
+
+### tc-module-access
+
+A single role's live permission editor: name, quota limits, and the permission catalog grouped by domain prefix into toggle-chip cards. Presentational — never fetches or persists; feed it `role` / `permissions` / `limitable-resources` as JS properties and it fires `tc-change` with the full draft on every edit. No role picker, no bindings, no filter box, no footer buttons — the host owns which role is being edited, any surrounding navigation, and persistence entirely.
+
+**Tag:** `tc-module-access`
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `owner-role-id` | string | `'owner'` | Id treated as the reserved, read-only "owner" role (full permission catalog, no editable form) |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `roleData` | `ModuleAccessRole \| null` | `{ id, name, builtin?, permissions: string[], limits?: Record<string, number> }`. The role being edited. `null` renders an empty state. (Not named `role` — that collides with the native `HTMLElement.role` ARIA property.) |
+| `permissions` | `string[]` | Full permission-key catalog, e.g. `"project.create"`. Grouped into cards by the text before the first `.` (the "domain"). |
+| `limitableResources` | `ModuleAccessLimitableResource[]` | `{ key, label }[]` — one numeric quota input per entry. |
+| `permissionGroupLabels` | `Record<string, string>` | Optional override for a domain's display label (defaults to the capitalised prefix, e.g. `admin` → `Admin`). |
+
+**Events**
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-change` | `{ role: ModuleAccessRoleDraft }` | Fired on every edit — name input, a limit input, a permission chip toggle, or a group's all/none bulk toggle. `ModuleAccessRoleDraft` is `{ id: string, name: string, permissions: string[], limits: Record<string, number> }`, read live off the form. The host owns when/whether to persist it. |
+
+**Slots:** none — content is driven entirely by the properties above.
+
+```html
+<tc-module-access id="access" owner-role-id="owner"></tc-module-access>
+<script>
+    const el = document.querySelector('#access')
+    el.permissions = ['admin.settings.read', 'admin.settings.write', 'project.create', 'project.read']
+    el.limitableResources = [{ key: 'projects', label: 'Projects' }]
+    el.roleData = { id: 'member', name: 'Member', permissions: ['project.read'], limits: { projects: 5 } }
+
+    el.addEventListener('tc-change', (e) => {
+        // e.detail.role is the current live draft — persist it however/whenever you like
+        console.log(e.detail.role)
+    })
 </script>
 ```
 

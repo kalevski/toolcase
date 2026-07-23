@@ -1,0 +1,11 @@
+// Redline › .form-control — crimson focus border + halo, matching the
+// signature accent used across the theme's interactive controls.
+
+tc-theme[name='redline'],
+[data-tc-theme='redline'] {
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--rl-accent);
+        box-shadow: var(--tc-focus-ring);
+    }
+}

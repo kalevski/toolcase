@@ -22,6 +22,7 @@
 //             Bootstrap variable API remains the public theming contract even
 //             though Bootstrap itself is gone.
 
+@use 'sass:list';
 @use '../../foundation/tokens' as *;
 
 :root,
@@ -106,7 +107,12 @@ tc-theme[name='default'] {
     // smallest legible size for badges/captions/eyebrows (component partials
     // clamp with max()).
     --tc-min-touch-target: 44px;
-    --tc-control-height: 2.375rem;
+    // The ONE height every single-line form control floors to (inputs, selects,
+    // pickers, combo/tag/OTP fields, buttons) so mixed form rows align flush.
+    // 2.625rem = the default .form-control's computed height (0.925rem text ×
+    // 1.6 line-height + 0.5rem × 2 padding + 1px × 2 border) — the floor is set
+    // AT the natural height of the flagship control so nothing has to squeeze.
+    --tc-control-height: 2.625rem;
     --tc-font-size-min: 12px;
 
     // Z-index — fixed scale, do not add layers.
@@ -117,9 +123,21 @@ tc-theme[name='default'] {
     --tc-z-tooltip: 1070;
 
     // ── Bootstrap-compatible root variables (theming contract) ───────────────
+    // --bs-<name>-contrast is the readable text colour for a SOLID fill of
+    // that status colour (.btn-<name>, .text-bg-<name>). Runtime var, not a
+    // Sass constant, because other themes re-point <name>-rgb to a lighter or
+    // more saturated hue where white text would fail contrast — each theme's
+    // foundation overrides just the pairs that need it (see aurora/blueprint/
+    // dungeon/neon/redline/sunshine _foundation.scss).
     @each $name, $value in $theme-colors {
+        $contrast: $white;
+        @if list.index($contrast-dark-variants, $name) {
+            $contrast: $slate-900;
+        }
+
         --bs-#{$name}: #{$value};
         --bs-#{$name}-rgb: #{rgb-channels($value)};
+        --bs-#{$name}-contrast: #{$contrast};
     }
 
     --bs-white: #{$white};

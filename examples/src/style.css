@@ -634,9 +634,6 @@ code, pre, .mono { font-family: var(--font-mono); }
 .example__bar {
     border-bottom: 1px solid var(--line);
     background: var(--bg);
-    position: sticky;
-    top: 61px;
-    z-index: 9;
 }
 .example__bar-inner {
     max-width: var(--container);

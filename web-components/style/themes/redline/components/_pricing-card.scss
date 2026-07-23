@@ -1,0 +1,13 @@
+// Redline › tc-pricing-card — the speed-cut corner on the card surface; the
+// highlight cap already renders the crimson gradient via --tc-app-accent-gradient.
+
+tc-theme[name='redline'],
+[data-tc-theme='redline'] {
+    .tc-pricing-card {
+        clip-path: var(--rl-cut);
+    }
+
+    .tc-pricing-card--highlight {
+        box-shadow: var(--rl-glow), var(--tc-shadow-sm);
+    }
+}

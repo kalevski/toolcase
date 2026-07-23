@@ -1,0 +1,25 @@
+// Redline Forest variant — emerald-green primary with a lime secondary accent.
+//
+// Swaps ONLY the accent hue families of the redline foundation. Canvas,
+// surfaces, hairlines, text ramp, dark chrome, semantic status colours,
+// fonts, shadows and the speed-cut recipe are untouched.
+// Use with: <tc-theme name="redline" variant="forest"> … </tc-theme>
+
+tc-theme[name='redline'][variant='forest'],
+[data-tc-theme='redline'][data-tc-variant='forest'] {
+    --rl-accent: #34d399;
+    --rl-accent-2: #4ade80;
+    --rl-accent-active: #1fae7a;
+    --rl-accent-ink: #03271a;
+    --rl-accent-soft: rgba(52, 211, 153, 0.1);
+    --rl-accent-line: rgba(52, 211, 153, 0.32);
+    --rl-accent-glow: rgba(52, 211, 153, 0.35);
+
+    --tc-accent: #a3e635;
+    --tc-accent-fg: #3f6212; // darkened so accent-coloured TEXT clears AA on light
+    --tc-accent-soft: rgba(163, 230, 53, 0.12);
+    --tc-accent-hex: #a3e635;
+    --tc-cyan: #a3e635;
+
+    --bs-primary-rgb: 52, 211, 153;
+}

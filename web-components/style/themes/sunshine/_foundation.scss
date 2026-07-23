@@ -204,6 +204,7 @@ tc-theme[name='sunshine'],
     --bs-danger-rgb: 242, 96, 75;
     --bs-warning: var(--sun-lead-lo);
     --bs-warning-rgb: 212, 154, 0;
+    --bs-warning-contrast: var(--sun-emphasis); // golden amber — white text fails (~2.5:1)
     --bs-info: var(--sun-plum);
     --bs-info-rgb: 156, 74, 122;
     --bs-light: var(--sun-bg-2);

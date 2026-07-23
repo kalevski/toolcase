@@ -1,3 +1,4 @@
+import { ModuleAccess } from './ModuleAccess'
 import { AmmoCounter } from './AmmoCounter'
 import { ComboCounter } from './ComboCounter'
 import { Anchor } from './Anchor'
@@ -29,6 +30,15 @@ import { BreadcrumbItem } from './BreadcrumbItem'
 import { Button } from './Button'
 import { ButtonGroup } from './ButtonGroup'
 import { Card } from './Card'
+import { CarListingCard } from './CarListingCard'
+import { EmissionBadge } from './EmissionBadge'
+import { EngineSpec } from './EngineSpec'
+import { EquipmentMatrix } from './EquipmentMatrix'
+import { EquipmentTag } from './EquipmentTag'
+import { ManufacturerTile } from './ManufacturerTile'
+import { ModelFamilyCard } from './ModelFamilyCard'
+import { TyreSpec } from './TyreSpec'
+import { VariantSpecSheet } from './VariantSpecSheet'
 import { Carousel } from './Carousel'
 import { CloseButton } from './CloseButton'
 import { Collapse } from './Collapse'
@@ -375,6 +385,15 @@ export function register(): void {
     define('tc-button', Button)
     define('tc-button-group', ButtonGroup)
     define('tc-card', Card)
+    define('tc-car-listing-card', CarListingCard)
+    define('tc-emission-badge', EmissionBadge)
+    define('tc-engine-spec', EngineSpec)
+    define('tc-equipment-matrix', EquipmentMatrix)
+    define('tc-equipment-tag', EquipmentTag)
+    define('tc-manufacturer-tile', ManufacturerTile)
+    define('tc-model-family-card', ModelFamilyCard)
+    define('tc-tyre-spec', TyreSpec)
+    define('tc-variant-spec-sheet', VariantSpecSheet)
     define('tc-carousel', Carousel)
     define('tc-close-button', CloseButton)
     define('tc-collapse', Collapse)
@@ -728,4 +747,5 @@ export function register(): void {
     define('tc-stack', Stack)
     define('tc-stats-screen', StatsScreen)
     define('tc-version-label', VersionLabel)
+    define('tc-module-access', ModuleAccess)
 }

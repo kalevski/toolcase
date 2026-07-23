@@ -1,0 +1,33 @@
+// Redline theme variants — alternate accent palettes on the redline foundation.
+//
+// Each variant swaps ONLY the primary (--rl-accent* — the CTA/gradient hue) and
+// secondary (--tc-accent* — the everyday highlight hue) accent families plus
+// the accent literals the foundation bakes (--bs-primary-rgb). The showroom
+// canvas, surfaces, hairlines, text ramp, dark chrome, semantic status colours,
+// fonts, shadows and the speed-cut recipe stay identical to the base theme —
+// this is the standard eleven-variant set shared by every bundled theme.
+//
+// Available variants:
+// - ocean:  electric blue primary, cyan secondary
+// - forest: emerald green primary, lime secondary
+// - ember:  warm orange primary, gold secondary
+// - royal:  soft violet primary, magenta secondary
+// - rose:   soft rose primary, pink secondary
+// - mint:   lagoon teal primary, mint secondary
+// - crimson: electric red primary, coral secondary
+// - indigo: electric indigo primary, periwinkle secondary
+// - slate:  cool steel primary, silver secondary
+// - sunset: GRADIENT primary (coral → orange), amber secondary
+// - twilight: GRADIENT primary (violet → blue), sky-blue secondary
+
+@use './ocean';
+@use './forest';
+@use './ember';
+@use './royal';
+@use './rose';
+@use './mint';
+@use './crimson';
+@use './indigo';
+@use './slate';
+@use './sunset';
+@use './twilight';

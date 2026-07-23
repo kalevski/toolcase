@@ -43,6 +43,8 @@ tc-number-input[disabled] {
     flex-wrap: nowrap;
     align-items: stretch;
     width: 100%;
+    // Shared control floor — aligns with .form-control in a form row.
+    min-height: var(--tc-control-height, 2.625rem);
     // Outer frame
     border: 1px solid var(--bs-number-input-border-color);
     border-radius: 0;
@@ -90,7 +92,12 @@ tc-number-input[disabled] {
 .tc-number-input__input {
     flex: 1 1 auto;
     min-width: 0;
-    padding: 0.5rem 0.75rem;
+    // The group owns the control height (shared floor): no vertical padding,
+    // and no min-height either — this element also carries .form-control,
+    // whose own floor would otherwise stack on the group's border and push
+    // the row past the shared control height.
+    min-height: 0;
+    padding: 0 0.75rem;
     font-family: var(--tc-font-mono);
     font-size: 0.925rem;
     font-weight: 400;

@@ -1,0 +1,14 @@
+// Redline › tc-range-slider — a bolder gauge-knob handle (solid crimson
+// fill instead of the base white/hairline knob), matching the price-filter
+// dual slider from the source site's inventory pages.
+
+tc-theme[name='redline'],
+[data-tc-theme='redline'] {
+    tc-range-slider {
+        --bs-range-slider-handle-bg: var(--rl-accent);
+        --bs-range-slider-handle-border: 2px solid #ffffff;
+        --bs-range-slider-handle-shadow: 0 0 0 1px var(--rl-border), var(--tc-shadow-sm);
+        --bs-range-slider-handle-active-border-color: #ffffff;
+        --bs-range-slider-tooltip-bg: var(--rl-ink);
+    }
+}

@@ -1,0 +1,11 @@
+// Redline › .pagination — active page reads solid crimson, matching the
+// app-accent used across the theme's interactive controls.
+
+tc-theme[name='redline'],
+[data-tc-theme='redline'] {
+    .pagination {
+        --bs-pagination-active-bg: var(--rl-accent);
+        --bs-pagination-active-border-color: var(--rl-accent);
+        --bs-pagination-hover-color: var(--rl-accent);
+    }
+}

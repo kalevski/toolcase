@@ -22,6 +22,10 @@ tc-date-picker {
         --bs-form-control-border-color: var(--bs-date-picker-border-color);
         --bs-form-control-bg: var(--bs-date-picker-bg);
 
+        // Exact height, not just a floor — the native calendar indicator's
+        // intrinsic size otherwise pushes the box ~2px past the shared
+        // control height and breaks row alignment.
+        height: var(--tc-control-height, 2.625rem);
         border-radius: 0;
         color-scheme: light;
 

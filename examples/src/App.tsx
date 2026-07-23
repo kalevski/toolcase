@@ -91,7 +91,15 @@ interface ExampleWrapperProps {
 // bundled theme ships the same eleven accent variants (primary/secondary
 // swap) — "sunset" and "twilight" render the primary as a two-tone gradient
 // rather than a flat colour.
-const THEME_NAMES = ['default', 'dungeon', 'aurora', 'sunshine', 'neon', 'blueprint'] as const
+const THEME_NAMES = [
+    'default',
+    'dungeon',
+    'aurora',
+    'sunshine',
+    'neon',
+    'blueprint',
+    'redline',
+] as const
 const THEME_VARIANTS = [
     'ocean',
     'forest',
@@ -107,41 +115,58 @@ const THEME_VARIANTS = [
 ] as const
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
-const routeThemes: Record<string, { value: string; label: string }[]> = {
-    'web-components': THEME_NAMES.flatMap((name) => [
-        { value: name, label: capitalize(name) },
-        ...THEME_VARIANTS.map((variant) => ({
-            value: `${name}:${variant}`,
-            label: `${capitalize(name)} · ${capitalize(variant)}`,
-        })),
-    ]),
+const routeThemeNames: Record<string, readonly string[]> = {
+    'web-components': THEME_NAMES,
+}
+const routeThemeVariants: Record<string, readonly string[]> = {
+    'web-components': THEME_VARIANTS,
 }
 
 const ExampleWrapper = ({ children, route, example }: ExampleWrapperProps) => {
     const navigate = useNavigate()
-    const themes = routeThemes[route.key]
-    // Persist the chosen theme per package so it sticks while browsing the section.
+    const themeNames = routeThemeNames[route.key]
+    const themeVariants = routeThemeVariants[route.key]
+    // Persist the chosen theme + variant per package so it sticks while browsing the section.
     const themeStorageKey = `tc-examples-theme:${route.key}`
-    const [theme, setTheme] = useState(() => {
-        if (!themes) return 'default'
+    const variantStorageKey = `tc-examples-theme-variant:${route.key}`
+    const [themeName, setThemeName] = useState(() => {
+        if (!themeNames) return 'default'
         try {
             const stored = localStorage.getItem(themeStorageKey)
-            // Drop stale values that no longer match an option (e.g. removed variants).
-            if (stored && themes.some((t) => t.value === stored)) return stored
+            if (stored && themeNames.includes(stored)) return stored
             return 'default'
         } catch {
             return 'default'
         }
     })
+    const [themeVariant, setThemeVariant] = useState(() => {
+        if (!themeVariants) return ''
+        try {
+            const stored = localStorage.getItem(variantStorageKey)
+            if (stored && (stored === '' || themeVariants.includes(stored))) return stored
+            return ''
+        } catch {
+            return ''
+        }
+    })
 
     useEffect(() => {
-        if (!themes) return
+        if (!themeNames) return
         try {
-            localStorage.setItem(themeStorageKey, theme)
+            localStorage.setItem(themeStorageKey, themeName)
         } catch {
             /* ignore unavailable storage */
         }
-    }, [theme, themes, themeStorageKey])
+    }, [themeName, themeNames, themeStorageKey])
+
+    useEffect(() => {
+        if (!themeVariants) return
+        try {
+            localStorage.setItem(variantStorageKey, themeVariant)
+        } catch {
+            /* ignore unavailable storage */
+        }
+    }, [themeVariant, themeVariants, variantStorageKey])
     const index = route.examples.findIndex((e) => e.key === example.key)
     const prev = index > 0 ? route.examples[index - 1] : null
     const next = index < route.examples.length - 1 ? route.examples[index + 1] : null
@@ -164,9 +189,6 @@ const ExampleWrapper = ({ children, route, example }: ExampleWrapperProps) => {
 
     const canvasClass = ['example__canvas', route.canvasClassName].filter(Boolean).join(' ')
 
-    // "blueprint:dark" → theme name + variant; plain values have no variant.
-    const [themeName, themeVariant] = theme.split(':')
-
     return (
         <div className="example">
             <div className="example__bar">
@@ -178,13 +200,32 @@ const ExampleWrapper = ({ children, route, example }: ExampleWrapperProps) => {
                         {example.title}
                         {example.extraHeader ? <> — {example.extraHeader}</> : null}
                     </span>
-                    {themes ? (
+                    {themeNames ? (
                         <label className="example__theme">
                             theme
-                            <select value={theme} onChange={(e) => setTheme(e.target.value)}>
-                                {themes.map((t) => (
-                                    <option key={t.value} value={t.value}>
-                                        {t.label}
+                            <select
+                                value={themeName}
+                                onChange={(e) => setThemeName(e.target.value)}
+                            >
+                                {themeNames.map((name) => (
+                                    <option key={name} value={name}>
+                                        {capitalize(name)}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+                    ) : null}
+                    {themeVariants ? (
+                        <label className="example__theme">
+                            variant
+                            <select
+                                value={themeVariant}
+                                onChange={(e) => setThemeVariant(e.target.value)}
+                            >
+                                <option value="">Default</option>
+                                {themeVariants.map((variant) => (
+                                    <option key={variant} value={variant}>
+                                        {capitalize(variant)}
                                     </option>
                                 ))}
                             </select>

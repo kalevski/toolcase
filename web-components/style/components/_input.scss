@@ -29,7 +29,7 @@
     width: 100%;
     // Floor the control box so dense line-height/padding combos can't shrink
     // the field below a comfortable target (44px on coarse pointers, below).
-    min-height: var(--tc-control-height, 2.375rem);
+    min-height: var(--tc-control-height, 2.625rem);
     padding: 0.5rem 0.75rem;
     font-family: var(--tc-font-sans);
     font-size: 0.925rem;
@@ -82,7 +82,7 @@
 @media (pointer: coarse) {
     .form-control,
     .form-select {
-        min-height: max(var(--tc-control-height, 2.375rem), var(--tc-min-touch-target, 44px));
+        min-height: max(var(--tc-control-height, 2.625rem), var(--tc-min-touch-target, 44px));
     }
 }
 

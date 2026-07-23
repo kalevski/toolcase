@@ -211,12 +211,16 @@ tc-theme[name='neon'],
     --bs-secondary-rgb: 192, 180, 228;
     --bs-success: var(--nd-success);
     --bs-success-rgb: 60, 232, 143;
+    --bs-success-contrast: var(--nd-accent-ink); // bright mint — white text fails (~1.6:1)
     --bs-danger: var(--nd-danger);
     --bs-danger-rgb: 255, 93, 108;
+    --bs-danger-contrast: var(--nd-accent-ink); // light coral-pink — white text fails (~3:1)
     --bs-warning: var(--nd-warn);
     --bs-warning-rgb: 255, 180, 84;
+    --bs-warning-contrast: var(--nd-accent-ink); // light amber — white text fails (~1.8:1)
     --bs-info: var(--nd-info);
     --bs-info-rgb: 91, 157, 255;
+    --bs-info-contrast: var(--nd-accent-ink); // mid-bright blue — white text fails (~2.7:1)
     --bs-light: var(--nd-text);
     --bs-light-rgb: 243, 233, 255;
     --bs-dark: var(--nd-bg);

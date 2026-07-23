@@ -2,7 +2,6 @@
 // plus the small spacing/display set documented for consumer markup. This is
 // deliberately not Bootstrap's full utility API.
 
-@use 'sass:list';
 @use 'tokens' as *;
 
 // ── Display ───────────────────────────────────────────────────────────────────
@@ -207,11 +206,6 @@
 }
 
 @each $name, $value in $theme-colors {
-    $contrast: $white;
-    @if list.index($contrast-dark-variants, $name) {
-        $contrast: $slate-900;
-    }
-
     .text-#{$name} {
         color: rgba(var(--bs-#{$name}-rgb), 1) !important;
     }
@@ -220,8 +214,12 @@
     }
 
     // Solid fill + readable text in one class (badges, toasts, cards).
+    // Reads the runtime --bs-<name>-contrast var (set per-theme in each
+    // theme's foundation) rather than a Sass constant, since some themes'
+    // <name>-rgb is lighter/more saturated than default's and needs dark
+    // ink instead of white to stay readable.
     .text-bg-#{$name} {
-        color: $contrast !important;
+        color: var(--bs-#{$name}-contrast) !important;
         background-color: rgba(var(--bs-#{$name}-rgb), 1) !important;
     }
 }

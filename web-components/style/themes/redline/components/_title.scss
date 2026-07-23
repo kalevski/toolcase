@@ -1,0 +1,15 @@
+// Redline › tc-title — display-type section title in the condensed Oswald
+// voice, matching tc-heading.
+
+tc-theme[name='redline'],
+[data-tc-theme='redline'] {
+    tc-title {
+        --bs-title-color: var(--rl-text);
+    }
+
+    .tc-title {
+        font-family: var(--rl-display);
+        font-weight: 600;
+        letter-spacing: -0.01em;
+    }
+}

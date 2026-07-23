@@ -1,0 +1,11 @@
+// Redline › .badge — uppercase mono-tracked category tag, matching the
+// source site's "Sports Car" / "Couple Car" listing chips.
+
+tc-theme[name='redline'],
+[data-tc-theme='redline'] {
+    .badge {
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+}

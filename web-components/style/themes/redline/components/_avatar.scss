@@ -1,0 +1,9 @@
+// Redline › tc-avatar — a thin crimson ring frames the dealer/seller avatar,
+// echoing the source site's listing "sold by" mini-profile row.
+
+tc-theme[name='redline'],
+[data-tc-theme='redline'] {
+    .tc-avatar {
+        box-shadow: 0 0 0 2px var(--rl-surface), 0 0 0 3px var(--rl-border);
+    }
+}

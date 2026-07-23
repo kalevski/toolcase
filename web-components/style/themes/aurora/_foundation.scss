@@ -184,12 +184,16 @@ tc-theme[name='aurora'],
     --bs-secondary-rgb: 170, 180, 193;
     --bs-success: var(--ah-success);
     --bs-success-rgb: 53, 208, 127;
+    --bs-success-contrast: var(--ah-accent-ink); // mid-bright green — white text fails (~2:1)
     --bs-danger: var(--ah-danger);
     --bs-danger-rgb: 255, 107, 107;
+    --bs-danger-contrast: var(--ah-accent-ink); // light coral — white text fails (~2.8:1)
     --bs-warning: var(--ah-warn);
     --bs-warning-rgb: 240, 179, 94;
+    --bs-warning-contrast: var(--ah-accent-ink); // light amber — white text fails (~1.9:1)
     --bs-info: var(--ah-info);
     --bs-info-rgb: 91, 157, 255;
+    --bs-info-contrast: var(--ah-accent-ink); // mid-bright blue — white text fails (~2.7:1)
     --bs-light: var(--ah-text);
     --bs-light-rgb: 233, 238, 244;
     --bs-dark: var(--ah-bg);

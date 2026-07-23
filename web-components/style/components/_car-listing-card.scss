@@ -1,0 +1,325 @@
+// tc-car-listing-card — vehicle listing card: image, category chip, wishlist
+// toggle, title, optional rating, an icon spec row (mileage / fuel /
+// transmission), current + strikethrough-old price, and an optional seller
+// mini-row. `--layout="list"` switches to a horizontal arrangement. Sharp
+// corners (border-radius: 0); the avatar and wishlist button hit-area are the
+// only sanctioned circles. All cosmetics flow through
+// --bs-car-listing-card-* custom properties backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+tc-car-listing-card {
+    display: block;
+
+    --bs-car-listing-card-bg: var(--tc-surface);
+    --bs-car-listing-card-border-color: var(--tc-border);
+    --bs-car-listing-card-shadow: var(--tc-shadow-sm);
+    --bs-car-listing-card-img-height: 12rem;
+    --bs-car-listing-card-img-bg: var(--tc-surface-muted);
+    --bs-car-listing-card-wishlist-bg: rgba(255, 255, 255, 0.9);
+    --bs-car-listing-card-wishlist-color: var(--tc-text-muted);
+    --bs-car-listing-card-wishlist-active-color: var(--tc-danger);
+    --bs-car-listing-card-title-color: var(--tc-text);
+    --bs-car-listing-card-title-hover-color: var(--tc-app-accent);
+    --bs-car-listing-card-star-color: var(--tc-warning);
+    --bs-car-listing-card-star-empty-color: var(--tc-border-strong);
+    --bs-car-listing-card-rating-count-color: var(--tc-text-muted);
+    --bs-car-listing-card-spec-color: var(--tc-text-muted);
+    --bs-car-listing-card-spec-icon-color: var(--tc-text-faint);
+    --bs-car-listing-card-price-color: var(--tc-text);
+    --bs-car-listing-card-price-old-color: var(--tc-text-faint);
+    --bs-car-listing-card-seller-name-color: var(--tc-text-muted);
+}
+
+// ── Card shell ────────────────────────────────────────────────────────────────
+
+.tc-car-listing-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--bs-car-listing-card-bg);
+    border: 1px solid var(--bs-car-listing-card-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-car-listing-card-shadow);
+    overflow: hidden;
+    transition:
+        transform var(--tc-transition-base),
+        box-shadow var(--tc-transition-base),
+        border-color var(--tc-transition-base);
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--tc-shadow-hover);
+    }
+}
+
+// ── Media ─────────────────────────────────────────────────────────────────────
+
+.tc-car-listing-card-media {
+    position: relative;
+    flex: none;
+}
+
+.tc-car-listing-card-img {
+    display: block;
+    width: 100%;
+    height: var(--bs-car-listing-card-img-height);
+    object-fit: cover;
+    background: var(--bs-car-listing-card-img-bg);
+}
+
+.tc-car-listing-card-img--placeholder {
+    background: var(--bs-car-listing-card-img-bg);
+}
+
+.tc-car-listing-card-badge {
+    position: absolute;
+    top: 0.625rem;
+    left: 0.625rem;
+}
+
+.tc-car-listing-card-wishlist {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    background: var(--bs-car-listing-card-wishlist-bg);
+    border: 0;
+    border-radius: 50%; // sanctioned circle — an icon-only toggle button
+    color: var(--bs-car-listing-card-wishlist-color);
+    cursor: pointer;
+    transition: color var(--tc-transition-fast);
+
+    svg {
+        width: 1rem;
+        height: 1rem;
+        display: block;
+        stroke: currentColor;
+        fill: none;
+    }
+
+    &:hover {
+        color: var(--bs-car-listing-card-wishlist-active-color);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+
+    &[aria-pressed='true'] {
+        color: var(--bs-car-listing-card-wishlist-active-color);
+    }
+}
+
+.tc-car-listing-card-wishlist-icon--filled {
+    fill: currentColor;
+}
+
+// ── Body ──────────────────────────────────────────────────────────────────────
+
+.tc-car-listing-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.tc-car-listing-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--bs-car-listing-card-title-color);
+    text-decoration: none;
+
+    &:hover {
+        color: var(--bs-car-listing-card-title-hover-color);
+        text-decoration: none;
+    }
+}
+
+// ── Rating ────────────────────────────────────────────────────────────────────
+
+.tc-car-listing-card-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    line-height: 1;
+}
+
+.tc-car-listing-card-rating-star {
+    display: inline-flex;
+    color: var(--bs-car-listing-card-star-empty-color);
+
+    svg {
+        width: 0.875rem;
+        height: 0.875rem;
+        display: block;
+    }
+}
+
+.tc-car-listing-card-rating-star--filled {
+    color: var(--bs-car-listing-card-star-color);
+
+    svg {
+        fill: currentColor;
+    }
+}
+
+.tc-car-listing-card-rating-count {
+    font-size: 0.8125rem;
+    color: var(--bs-car-listing-card-rating-count-color);
+}
+
+// ── Specs row ─────────────────────────────────────────────────────────────────
+
+.tc-car-listing-card-specs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.875rem;
+    list-style: none;
+    margin: 0;
+    padding: 0.625rem 0;
+    border-top: 1px solid var(--tc-border-faint);
+    border-bottom: 1px solid var(--tc-border-faint);
+}
+
+.tc-car-listing-card-spec {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3125rem;
+    font-size: 0.8125rem;
+    color: var(--bs-car-listing-card-spec-color);
+}
+
+.tc-car-listing-card-spec-icon {
+    display: inline-flex;
+    color: var(--bs-car-listing-card-spec-icon-color);
+
+    svg {
+        width: 0.9375rem;
+        height: 0.9375rem;
+        display: block;
+        stroke: currentColor;
+        fill: none;
+    }
+}
+
+// ── Footer: price + seller ───────────────────────────────────────────────────
+
+.tc-car-listing-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: auto;
+}
+
+.tc-car-listing-card-price-block {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.tc-car-listing-card-price {
+    font-family: var(--tc-font-mono);
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--bs-car-listing-card-price-color);
+}
+
+.tc-car-listing-card-price-old {
+    font-family: var(--tc-font-mono);
+    font-size: 0.8125rem;
+    color: var(--bs-car-listing-card-price-old-color);
+    text-decoration: line-through;
+}
+
+.tc-car-listing-card-seller {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-width: 0;
+}
+
+.tc-car-listing-card-seller-avatar {
+    flex: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%; // sanctioned circle
+    object-fit: cover;
+}
+
+.tc-car-listing-card-seller-avatar--placeholder {
+    background: var(--tc-surface-muted);
+}
+
+.tc-car-listing-card-seller-name {
+    font-size: 0.8125rem;
+    color: var(--bs-car-listing-card-seller-name-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+// ── List layout ───────────────────────────────────────────────────────────────
+
+.tc-car-listing-card--list {
+    flex-direction: row;
+
+    .tc-car-listing-card-media {
+        flex: 0 0 12rem;
+    }
+
+    .tc-car-listing-card-img,
+    .tc-car-listing-card-img--placeholder {
+        height: 100%;
+        min-height: 10rem;
+    }
+
+    .tc-car-listing-card-body {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .tc-car-listing-card--list {
+        flex-direction: column;
+
+        .tc-car-listing-card-media {
+            flex: none;
+        }
+
+        .tc-car-listing-card-img,
+        .tc-car-listing-card-img--placeholder {
+            height: var(--bs-car-listing-card-img-height);
+        }
+    }
+}
+
+// ── Reduced motion ────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-car-listing-card {
+        transition: box-shadow var(--tc-transition-fast), border-color var(--tc-transition-fast);
+
+        &:hover {
+            transform: none;
+        }
+    }
+}
+
+// ── Coarse-pointer hit target ─────────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    .tc-car-listing-card-wishlist {
+        width: 2.75rem;
+        height: 2.75rem;
+    }
+}

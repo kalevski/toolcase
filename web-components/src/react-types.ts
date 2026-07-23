@@ -65,6 +65,7 @@ export interface ToolcaseIntrinsicElements {
     'tc-button': TcProps<{ 'disabled'?: boolean; 'error'?: string | number; 'field'?: boolean; 'help'?: string | number; 'href'?: string | number; 'loading'?: boolean; 'outline'?: boolean; 'size'?: string | number; 'skin'?: string | number; 'state'?: string | number; 'type'?: string | number; 'variant'?: string | number }>
     'tc-button-group': TcProps<{ 'aria-label'?: string | number; 'size'?: string | number; 'vertical'?: boolean }>
     'tc-callout-quote': TcProps<{ 'attribution'?: string | number; 'quote'?: boolean; 'source'?: string | number; 'source-href'?: string | number }>
+    'tc-car-listing-card': TcProps<{ 'category'?: string | number; 'href'?: string | number; 'image-alt'?: string | number; 'image-src'?: string | number; 'layout'?: string | number; 'price-old-text'?: string | number; 'price-text'?: string | number; 'rating'?: string | number; 'rating-count-text'?: string | number; 'seller-avatar-src'?: string | number; 'seller-name'?: string | number; 'title-text'?: string | number; 'wishlisted'?: boolean; onTcWishlistToggle?: (e: CustomEvent) => void }>
     'tc-card': TcProps<{ 'img'?: string | number; 'img-position'?: string | number; 'subtitle'?: string | number; 'title'?: string | number; 'variant'?: string | number }>
     'tc-card-options': TcProps<{ 'columns'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-carousel': TcProps<{ 'controls'?: boolean; 'fade'?: boolean; 'indicators'?: boolean; 'interval'?: string | number; 'pause'?: string | number; 'ride'?: string | number; onTcSlid?: (e: CustomEvent) => void; onTcSlide?: (e: CustomEvent) => void }>
@@ -135,10 +136,14 @@ export interface ToolcaseIntrinsicElements {
     'tc-early-signup-form': TcProps<{ 'cta-label'?: string | number; 'eyebrow'?: string | number; 'field-label'?: string | number; 'helper-text'?: string | number; 'loading'?: boolean; 'placeholder'?: string | number; 'stat'?: string | number; 'subtitle'?: string | number; 'success-message'?: string | number; 'success-title'?: string | number; 'title'?: string | number; 'variant'?: string | number; onTcSubmit?: (e: CustomEvent) => void }>
     'tc-ecosystem-map': TcProps<{ 'size'?: string | number; 'title'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
     'tc-editable-text': TcProps<{ 'aria-label'?: string | number; 'default-value'?: string | number; 'disabled'?: boolean; 'placeholder'?: string | number; onTcChange?: (e: CustomEvent) => void }>
+    'tc-emission-badge': TcProps<{ 'co2-text'?: string | number; 'label'?: string | number; 'standard'?: string | number; 'tier'?: string | number }>
     'tc-empty-state': TcProps<{ 'description'?: string | number; 'heading'?: string | number; 'icon'?: string | number }>
+    'tc-engine-spec': TcProps<{ 'code'?: string | number; 'compact'?: boolean; 'cylinders'?: string | number; 'displacement-cc'?: string | number; 'emission-control'?: string | number; 'fuel-injection'?: string | number; 'layout'?: string | number; 'manufacturer'?: string | number; 'position'?: string | number; 'power-at-rpm'?: string | number; 'supercharger'?: string | number; 'torque-at-rpm'?: string | number; 'torque-nm'?: string | number; 'valves'?: string | number }>
     'tc-entity-cell': TcProps<{ 'clickable'?: boolean; 'color'?: string | number; 'initial'?: string | number; 'name'?: string | number; 'size'?: string | number; 'sub-label'?: string | number; onTcClick?: (e: CustomEvent) => void }>
     'tc-entity-profile-card': TcProps<{ 'loading'?: boolean; 'title'?: string | number }>
     'tc-equipment-doll': TcProps<{ 'height'?: string | number; 'selected-id'?: string | number; 'silhouette'?: string | number; 'slot-size'?: string | number; 'width'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
+    'tc-equipment-matrix': TcProps<{ 'collapsible'?: boolean; 'columns'?: string | number }>
+    'tc-equipment-tag': TcProps<{ 'flag'?: string | number; 'icon'?: string | number; 'label'?: string | number }>
     'tc-extended-select': TcProps<{ 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'label'?: string | number; 'loading'?: boolean; 'max-height'?: string | number; 'name'?: string | number; 'no-results-text'?: string | number; 'placeholder'?: string | number; 'required'?: boolean; 'search-placeholder'?: string | number; 'state'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-eyebrow': TcProps
     'tc-faq-list': TcProps<{ 'schema'?: boolean; 'title'?: string | number; onTcToggle?: (e: CustomEvent) => void }>
@@ -226,6 +231,7 @@ export interface ToolcaseIntrinsicElements {
     'tc-main-menu': TcProps<{ 'menu-title'?: string | number; 'selected-id'?: string | number; 'subtitle'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
     'tc-maintainer-card': TcProps<{ 'avatar-url'?: string | number; 'bio'?: string | number; 'location'?: string | number; 'name'?: string | number; 'role'?: string | number; 'sponsor-href'?: string | number; 'sponsor-label'?: string | number }>
     'tc-mana-bar': TcProps<{ 'ghost'?: string | number; 'label'?: string | number; 'max'?: string | number; 'segments'?: string | number; 'show-text'?: boolean; 'value'?: string | number; 'variant'?: string | number }>
+    'tc-manufacturer-tile': TcProps<{ 'active'?: boolean; 'count-text'?: string | number; 'eyebrow'?: string | number; 'href'?: string | number; 'logo-src'?: string | number; 'name'?: string | number }>
     'tc-markdown-editor': TcProps<{ 'disabled'?: boolean; 'height'?: string | number; 'label'?: string | number; 'placeholder'?: string | number; 'toolbar'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-marquee': TcProps<{ 'direction'?: string | number; 'pause-on-hover'?: boolean; 'separator'?: string | number; 'speed'?: string | number }>
     'tc-matchmaking-screen': TcProps<{ 'elapsed'?: string | number; 'estimated'?: string | number; 'found-label'?: string | number; 'mode'?: string | number; 'region'?: string | number; 'state'?: string | number }>
@@ -237,6 +243,8 @@ export interface ToolcaseIntrinsicElements {
     'tc-migration-guide': TcProps<{ 'from'?: string | number; 'title'?: string | number; 'to'?: string | number }>
     'tc-minimap': TcProps<{ 'background-image'?: string | number; 'rotation'?: string | number; 'size'?: string | number; 'world-height'?: string | number; 'world-width'?: string | number; 'world-x'?: string | number; 'world-y'?: string | number }>
     'tc-modal': TcProps<{ 'centered'?: boolean; 'fullscreen'?: string | number; 'lazy'?: boolean; 'open'?: boolean; 'scrollable'?: boolean; 'size'?: string | number; 'static-backdrop'?: boolean; 'title'?: string | number; onTcHidden?: (e: CustomEvent) => void; onTcHide?: (e: CustomEvent) => void; onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void }>
+    'tc-model-family-card': TcProps<{ 'body-type'?: string | number; 'generation'?: string | number; 'href'?: string | number; 'image-alt'?: string | number; 'image-src'?: string | number; 'manufacturer'?: string | number; 'range'?: string | number; 'series'?: string | number; 'variant-count-text'?: string | number; 'years-text'?: string | number }>
+    'tc-module-access': TcProps<{ 'owner-role-id'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-mouse-sensitivity': TcProps<{ 'ads'?: string | number; 'disabled'?: boolean; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-multi-card-select': TcProps<{ 'columns'?: string | number; 'loading'?: boolean; 'loading-count'?: string | number; 'name'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-nav': TcProps<{ 'fill'?: boolean; 'justified'?: boolean; 'variant'?: string | number; 'vertical'?: boolean }>
@@ -366,8 +374,10 @@ export interface ToolcaseIntrinsicElements {
     'tc-transition-wipe': TcProps<{ 'direction'?: string | number; 'duration'?: string | number; 'show'?: boolean; 'wipe-color'?: string | number; onTcComplete?: (e: CustomEvent) => void }>
     'tc-tree-view': TcProps<{ 'checkbox-mode'?: boolean; onTcExpandChange?: (e: CustomEvent) => void; onTcSelect?: (e: CustomEvent) => void }>
     'tc-trend-indicator': TcProps<{ 'direction'?: string | number; 'size'?: string | number; 'value'?: string | number }>
+    'tc-tyre-spec': TcProps<{ 'front-spec'?: string | number; 'rear-spec'?: string | number; 'spec'?: string | number }>
     'tc-usage-summary-panel': TcProps<{ 'loading'?: boolean; 'loading-count'?: string | number; 'title'?: string | number }>
     'tc-user-panel': TcProps<{ 'avatar-src'?: string | number; 'icon'?: string | number; 'icon-highlighted'?: boolean; 'icon-label'?: string | number; 'initials'?: string | number; 'loading'?: boolean; 'plan'?: string | number; 'username'?: string | number; onTcIconClick?: (e: CustomEvent) => void; onTcMenuClick?: (e: CustomEvent) => void }>
+    'tc-variant-spec-sheet': TcProps<{ 'dense'?: boolean; 'name'?: string | number; 'slug'?: string | number; 'version'?: string | number; 'years-text'?: string | number }>
     'tc-version-label': TcProps<{ 'branch'?: string | number; 'build'?: string | number; 'version'?: string | number }>
     'tc-version-picker': TcProps<{ 'name'?: string | number; 'value'?: string | number; 'variant'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-vertical-item-list': TcProps<{ 'active-key'?: boolean; 'default-active-key'?: string | number; 'disabled'?: boolean; 'loading'?: boolean; 'loading-count'?: string | number; onTcSelect?: (e: CustomEvent) => void }>

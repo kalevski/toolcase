@@ -30,6 +30,9 @@ tc-switch {
 .tc-switch__row {
     display: flex;
     align-items: center;
+    // Shared control floor — the pill track stays 22px; the row lane matches
+    // .form-control height so the switch centres next to fields.
+    min-height: var(--tc-control-height, 2.625rem);
     gap: var(--bs-switch-gap);
 
     &--reverse {

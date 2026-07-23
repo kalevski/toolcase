@@ -1,0 +1,21 @@
+// Redline › tc-panel — framed surface with the speed-cut corner and a
+// condensed-display header voice.
+
+tc-theme[name='redline'],
+[data-tc-theme='redline'] {
+    .tc-panel--bordered {
+        clip-path: var(--rl-cut-sm);
+        border-color: var(--rl-border);
+    }
+
+    tc-panel-header {
+        --bs-panel-header-color: var(--rl-text);
+        --bs-panel-header-icon-color: var(--rl-accent);
+    }
+
+    .tc-panel-header {
+        font-family: var(--rl-display);
+        letter-spacing: 0.01em;
+        border-bottom-color: var(--rl-border);
+    }
+}

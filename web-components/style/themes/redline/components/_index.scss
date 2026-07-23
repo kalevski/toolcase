@@ -1,0 +1,35 @@
+// Redline theme — component override partials.
+//
+// The foundation token remap (../_foundation.scss) already re-skins every
+// tc-* component's colours / borders / type / shadows for free. These
+// partials add only the dealership STRUCTURE a flat token swap can't carry:
+// the crimson gradient + glow on primary actions, the diagonal speed-cut
+// corner (the signature — cards, panels, pricing cards, buttons), the dark
+// chrome treatment on navbar / footer / hero, the condensed Oswald display
+// voice, and the flagship tc-car-listing-card recipe.
+
+@use './button';
+@use './card';
+@use './panel';
+@use './eyebrow';
+@use './heading';
+@use './title';
+@use './brand';
+@use './navbar';
+@use './nav';
+@use './artboard-backdrop';
+@use './badge';
+@use './chip';
+@use './alert';
+@use './input';
+@use './link';
+@use './progress';
+@use './avatar';
+@use './pricing-card';
+@use './page-footer';
+@use './pagination';
+@use './testimonial-carousel';
+@use './countdown-timer';
+@use './range-slider';
+@use './hero';
+@use './car-listing-card';

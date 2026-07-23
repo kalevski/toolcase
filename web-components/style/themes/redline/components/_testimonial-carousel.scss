@@ -1,0 +1,9 @@
+// Redline › tc-testimonial-carousel — the speed-cut corner on the slide
+// card; the active dot already reads crimson via the --tc-app-accent remap.
+
+tc-theme[name='redline'],
+[data-tc-theme='redline'] {
+    .tc-testimonial-carousel-slide {
+        clip-path: var(--rl-cut-sm);
+    }
+}

@@ -21,6 +21,11 @@ tc-toggle {
 }
 
 .tc-toggle {
+    // Shared control floor — the 22px pill track stays its size; the host lane
+    // matches .form-control height so the toggle centres next to fields.
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tc-control-height, 2.625rem);
     cursor: pointer;
     user-select: none;
     -webkit-tap-highlight-color: transparent;

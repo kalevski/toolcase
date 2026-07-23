@@ -133,8 +133,8 @@ tc-dropdown {
                 background-color var(--tc-transition-fast),
                 color var(--tc-transition-fast);
 
-            &:hover,
-            &:focus-visible {
+            &:hover:not(.active):not(:active),
+            &:focus-visible:not(.active):not(:active) {
                 color: var(--bs-dropdown-link-hover-color);
                 background-color: var(--bs-dropdown-link-hover-bg);
                 text-decoration: none;

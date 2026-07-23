@@ -1,0 +1,10 @@
+// Redline › .alert — the base is already themed via the --tc-app-accent
+// remap (crimson left edge); this only tints the wash gradient to match the
+// warmer redline surface instead of a neutral slate tint.
+
+tc-theme[name='redline'],
+[data-tc-theme='redline'] {
+    .alert-primary {
+        --bs-alert-bg: linear-gradient(135deg, var(--rl-accent-soft), transparent);
+    }
+}

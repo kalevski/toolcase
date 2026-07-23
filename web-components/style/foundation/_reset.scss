@@ -366,7 +366,14 @@ tc-shop-panel,
 tc-skill-bar,
 tc-skill-tree,
 tc-subtitle,
-tc-title {
+tc-title,
+tc-engine-spec,
+tc-equipment-matrix,
+tc-manufacturer-tile,
+tc-model-family-card,
+tc-tyre-spec,
+tc-variant-spec-sheet,
+tc-module-access {
     display: block;
 }
 
@@ -602,7 +609,9 @@ tc-hit-marker,
 tc-buff-icon,
 tc-gamepad-button-prompt,
 tc-interact-prompt,
-tc-platform-icon {
+tc-platform-icon,
+tc-emission-badge,
+tc-equipment-tag {
     display: inline-flex;
 }
 

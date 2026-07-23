@@ -29,6 +29,15 @@ import BreadcrumbDemo from './BreadcrumbDemo'
 import ButtonDemo from './ButtonDemo'
 import ButtonGroupDemo from './ButtonGroupDemo'
 import CardDemo from './CardDemo'
+import CarListingCardDemo from './CarListingCardDemo'
+import EmissionBadgeDemo from './EmissionBadgeDemo'
+import EngineSpecDemo from './EngineSpecDemo'
+import EquipmentMatrixDemo from './EquipmentMatrixDemo'
+import EquipmentTagDemo from './EquipmentTagDemo'
+import ManufacturerTileDemo from './ManufacturerTileDemo'
+import ModelFamilyCardDemo from './ModelFamilyCardDemo'
+import TyreSpecDemo from './TyreSpecDemo'
+import VariantSpecSheetDemo from './VariantSpecSheetDemo'
 import CarouselDemo from './CarouselDemo'
 import CloseButtonDemo from './CloseButtonDemo'
 import CollapseDemo from './CollapseDemo'
@@ -206,6 +215,7 @@ import ReportDialogDemo from './ReportDialogDemo'
 import InviteToastDemo from './InviteToastDemo'
 import LightboxDemo from './LightboxDemo'
 import CommandPaletteDemo from './CommandPaletteDemo'
+import ModuleAccessDemo from './ModuleAccessDemo'
 import ComboBoxDemo from './ComboBoxDemo'
 import EarlySignupFormDemo from './EarlySignupFormDemo'
 import EcosystemMapDemo from './EcosystemMapDemo'
@@ -381,6 +391,15 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'button', complexity: 'Simple', element: <ButtonDemo /> },
     { key: 'button-group', complexity: 'Primitives', element: <ButtonGroupDemo /> },
     { key: 'card', complexity: 'Simple', element: <CardDemo /> },
+    { key: 'car-listing-card', complexity: 'Composite', element: <CarListingCardDemo /> },
+    { key: 'emission-badge', complexity: 'Primitives', element: <EmissionBadgeDemo /> },
+    { key: 'engine-spec', complexity: 'Composite', element: <EngineSpecDemo /> },
+    { key: 'equipment-matrix', complexity: 'Composite', element: <EquipmentMatrixDemo /> },
+    { key: 'equipment-tag', complexity: 'Primitives', element: <EquipmentTagDemo /> },
+    { key: 'manufacturer-tile', complexity: 'Composite', element: <ManufacturerTileDemo /> },
+    { key: 'model-family-card', complexity: 'Composite', element: <ModelFamilyCardDemo /> },
+    { key: 'tyre-spec', complexity: 'Composite', element: <TyreSpecDemo /> },
+    { key: 'variant-spec-sheet', complexity: 'Composite', element: <VariantSpecSheetDemo /> },
     { key: 'carousel', complexity: 'Composite', element: <CarouselDemo /> },
     { key: 'close-button', complexity: 'Primitives', element: <CloseButtonDemo /> },
     { key: 'collapse', complexity: 'Simple', element: <CollapseDemo /> },
@@ -574,6 +593,7 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'invite-toast', complexity: 'Composite', element: <InviteToastDemo /> },
     { key: 'lightbox', complexity: 'Advanced', element: <LightboxDemo /> },
     { key: 'command-palette', complexity: 'Advanced', element: <CommandPaletteDemo /> },
+    { key: 'module-access', complexity: 'Composite', element: <ModuleAccessDemo /> },
     { key: 'cool-nav', complexity: 'Advanced', element: <CoolNavDemo /> },
     { key: 'countdown-timer', complexity: 'Composite', element: <CountdownTimerDemo /> },
     { key: 'damage-number', complexity: 'Simple', element: <DamageNumberDemo /> },

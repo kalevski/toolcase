@@ -1,0 +1,32 @@
+// Redline Sunset variant — gradient primary (coral → orange) with an amber
+// secondary accent.
+//
+// Unlike the solid-hue variants, this one leans into a genuine two-tone CTA
+// gradient: --rl-accent (coral) and --rl-accent-2 (orange) are deliberately
+// DIFFERENT hues — not a lighten of the same colour — so the foundation's own
+// --rl-accent-grad recipe (`linear-gradient(135deg, var(--rl-accent),
+// var(--rl-accent-2))`) renders the widely-used "Sunset" gradient everywhere
+// it's consumed (buttons, brand underline, pricing-highlight cap). The
+// signature-highlight secondary (--tc-accent) turns amber. Canvas, surfaces,
+// hairlines, text ramp, dark chrome, semantic status colours, fonts, shadows
+// and the speed-cut recipe are untouched.
+// Use with: <tc-theme name="redline" variant="sunset"> … </tc-theme>
+
+tc-theme[name='redline'][variant='sunset'],
+[data-tc-theme='redline'][data-tc-variant='sunset'] {
+    --rl-accent: #ff7e5f; // gradient start
+    --rl-accent-2: #feb47b; // gradient end — a genuinely different hue, not a shade
+    --rl-accent-active: #e85f42;
+    --rl-accent-ink: #3a1408;
+    --rl-accent-soft: rgba(255, 126, 95, 0.1);
+    --rl-accent-line: rgba(255, 126, 95, 0.32);
+    --rl-accent-glow: rgba(255, 126, 95, 0.35);
+
+    --tc-accent: #ffb020;
+    --tc-accent-fg: #92400e; // darkened so accent-coloured TEXT clears AA on light
+    --tc-accent-soft: rgba(255, 176, 32, 0.12);
+    --tc-accent-hex: #ffb020;
+    --tc-cyan: #ffb020;
+
+    --bs-primary-rgb: 255, 126, 95;
+}

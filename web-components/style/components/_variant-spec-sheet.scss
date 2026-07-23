@@ -1,0 +1,206 @@
+// tc-variant-spec-sheet — the technical datasheet of one `model_variant`
+// catalog row: header (name / version / mono slug / years), a 1px-gap hero
+// strip of big mono dashboard readouts (power, 0–100, top speed, CO₂), then
+// grouped key-value sections with dotted leader lines. Sharp corners, hairline
+// borders, mono for every machine-facing figure. All cosmetics flow through
+// --bs-variant-spec-sheet-* custom properties backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+tc-variant-spec-sheet {
+    display: block;
+
+    --bs-variant-spec-sheet-bg: var(--tc-surface);
+    --bs-variant-spec-sheet-border-color: var(--tc-border);
+    // The card-header cap treatment: a faint ink gradient.
+    --bs-variant-spec-sheet-header-bg: linear-gradient(
+        135deg,
+        rgba(30, 41, 59, 0.03),
+        rgba(30, 41, 59, 0.01)
+    );
+    --bs-variant-spec-sheet-name-color: var(--tc-text);
+    --bs-variant-spec-sheet-version-color: var(--tc-text-muted);
+    --bs-variant-spec-sheet-slug-color: var(--tc-text-faint);
+    --bs-variant-spec-sheet-years-color: var(--tc-text-muted);
+    --bs-variant-spec-sheet-hero-gap-color: var(--tc-border);
+    --bs-variant-spec-sheet-hero-cell-bg: var(--tc-surface);
+    --bs-variant-spec-sheet-hero-value-color: var(--tc-text);
+    --bs-variant-spec-sheet-hero-unit-color: var(--tc-text-muted);
+    --bs-variant-spec-sheet-hero-label-color: var(--tc-text-faint);
+    --bs-variant-spec-sheet-hero-sub-color: var(--tc-text-muted);
+    --bs-variant-spec-sheet-section-title-color: var(--tc-text-faint);
+    --bs-variant-spec-sheet-row-label-color: var(--tc-text-muted);
+    --bs-variant-spec-sheet-row-value-color: var(--tc-text);
+    --bs-variant-spec-sheet-leader-color: var(--tc-border-strong);
+    --bs-variant-spec-sheet-padding-y: 1rem;
+    --bs-variant-spec-sheet-padding-x: 1.25rem;
+    --bs-variant-spec-sheet-stat-padding-y: 0.875rem;
+    --bs-variant-spec-sheet-stat-value-size: 1.5rem;
+    --bs-variant-spec-sheet-row-padding-y: 0.3125rem;
+}
+
+// ── Shell ─────────────────────────────────────────────────────────────────────
+
+.tc-variant-spec-sheet {
+    background: var(--bs-variant-spec-sheet-bg);
+    border: 1px solid var(--bs-variant-spec-sheet-border-color);
+    border-radius: 0;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+
+.tc-variant-spec-sheet-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+    padding: var(--bs-variant-spec-sheet-padding-y) var(--bs-variant-spec-sheet-padding-x);
+    background: var(--bs-variant-spec-sheet-header-bg);
+    border-bottom: 1px solid var(--bs-variant-spec-sheet-border-color);
+}
+
+.tc-variant-spec-sheet-heading {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.tc-variant-spec-sheet-name {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--bs-variant-spec-sheet-name-color);
+}
+
+.tc-variant-spec-sheet-version {
+    font-size: 0.8125rem;
+    color: var(--bs-variant-spec-sheet-version-color);
+}
+
+.tc-variant-spec-sheet-meta {
+    display: flex;
+    align-items: baseline;
+    gap: 0.875rem;
+    font-family: var(--tc-font-mono);
+    font-size: 12px;
+}
+
+.tc-variant-spec-sheet-slug {
+    color: var(--bs-variant-spec-sheet-slug-color);
+}
+
+.tc-variant-spec-sheet-years {
+    color: var(--bs-variant-spec-sheet-years-color);
+}
+
+// ── Hero stat strip — 1px-gap grid of dashboard readouts ─────────────────────
+
+.tc-variant-spec-sheet-hero {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+    gap: 1px;
+    background: var(--bs-variant-spec-sheet-hero-gap-color);
+    border-bottom: 1px solid var(--bs-variant-spec-sheet-border-color);
+}
+
+.tc-variant-spec-sheet-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    padding: var(--bs-variant-spec-sheet-stat-padding-y) var(--bs-variant-spec-sheet-padding-x);
+    background: var(--bs-variant-spec-sheet-hero-cell-bg);
+}
+
+.tc-variant-spec-sheet-stat-label {
+    font-family: var(--tc-font-mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bs-variant-spec-sheet-hero-label-color);
+}
+
+.tc-variant-spec-sheet-stat-value {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-variant-spec-sheet-stat-value-size);
+    font-weight: 600;
+    line-height: 1.1;
+    color: var(--bs-variant-spec-sheet-hero-value-color);
+}
+
+.tc-variant-spec-sheet-stat-unit {
+    margin-left: 0.25rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--bs-variant-spec-sheet-hero-unit-color);
+}
+
+.tc-variant-spec-sheet-stat-sub {
+    font-family: var(--tc-font-mono);
+    font-size: 11.5px;
+    color: var(--bs-variant-spec-sheet-hero-sub-color);
+}
+
+// ── Sections ──────────────────────────────────────────────────────────────────
+
+.tc-variant-spec-sheet-body {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+    gap: 1.25rem 2rem;
+    padding: var(--bs-variant-spec-sheet-padding-y) var(--bs-variant-spec-sheet-padding-x);
+}
+
+.tc-variant-spec-sheet-section-title {
+    margin: 0 0 0.375rem;
+    padding-bottom: 0.375rem;
+    border-bottom: 1px solid var(--bs-variant-spec-sheet-border-color);
+    font-family: var(--tc-font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bs-variant-spec-sheet-section-title-color);
+}
+
+.tc-variant-spec-sheet-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: var(--bs-variant-spec-sheet-row-padding-y) 0;
+    font-size: 13px;
+}
+
+.tc-variant-spec-sheet-row-label {
+    color: var(--bs-variant-spec-sheet-row-label-color);
+    white-space: nowrap;
+}
+
+// Dotted leader between label and value — an empty span whose height-0 box
+// puts its bottom border exactly on the text baseline.
+.tc-variant-spec-sheet-row-leader {
+    flex: 1 1 auto;
+    min-width: 1rem;
+    height: 0;
+    border-bottom: 1px dotted var(--bs-variant-spec-sheet-leader-color);
+}
+
+.tc-variant-spec-sheet-row-value {
+    color: var(--bs-variant-spec-sheet-row-value-color);
+    text-align: right;
+}
+
+.tc-variant-spec-sheet-row-value--mono {
+    font-family: var(--tc-font-mono);
+    font-size: 12.5px;
+}
+
+// ── Dense (comparison layouts) ────────────────────────────────────────────────
+
+.tc-variant-spec-sheet--dense {
+    --bs-variant-spec-sheet-padding-y: 0.625rem;
+    --bs-variant-spec-sheet-padding-x: 0.875rem;
+    --bs-variant-spec-sheet-stat-padding-y: 0.5rem;
+    --bs-variant-spec-sheet-stat-value-size: 1.25rem;
+    --bs-variant-spec-sheet-row-padding-y: 0.1875rem;
+}

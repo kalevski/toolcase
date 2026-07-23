@@ -10,7 +10,7 @@ tc-extended-select {
     --bs-extended-select-trigger-color: var(--tc-text);
     --bs-extended-select-trigger-placeholder-color: var(--tc-text-muted);
     --bs-extended-select-trigger-focus-shadow: var(--tc-focus-ring);
-    --bs-extended-select-trigger-height: 2.375rem; // ~38px — matches form-control height
+    --bs-extended-select-trigger-height: var(--tc-control-height, 2.625rem); // shared control floor — matches form-control height
     --bs-extended-select-menu-bg: var(--tc-surface);
     --bs-extended-select-menu-border: 1px solid var(--tc-border);
     --bs-extended-select-menu-shadow: var(--tc-shadow-lg);

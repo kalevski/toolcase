@@ -1,0 +1,20 @@
+// Redline › tc-countdown-timer — a digital-dashboard readout: dark ink unit
+// cells with crimson LED-style digits, matching the source site's
+// coming-soon countdown over a dark hero.
+
+tc-theme[name='redline'],
+[data-tc-theme='redline'] {
+    tc-countdown-timer {
+        --bs-countdown-timer-unit-bg: var(--rl-ink);
+        --bs-countdown-timer-unit-border: var(--rl-ink-2);
+        --bs-countdown-timer-value-color: var(--rl-accent);
+        --bs-countdown-timer-unit-label-color: rgba(255, 255, 255, 0.55);
+        --bs-countdown-timer-label-color: var(--rl-text-muted);
+        --bs-countdown-timer-sub-color: var(--rl-text-muted);
+        --bs-countdown-timer-sep-color: var(--rl-accent);
+    }
+
+    .tc-countdown-unit {
+        clip-path: var(--rl-cut-sm);
+    }
+}

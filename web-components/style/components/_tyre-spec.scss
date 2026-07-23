@@ -1,0 +1,122 @@
+// tc-tyre-spec — tyre sidewall readout: large mono digits with uppercase
+// micro sub-labels, hairline-separated segments, mono FRONT/REAR axle tags,
+// and a corner STAGGERED flag when the axles differ. Sharp corners; all
+// cosmetics flow through --bs-tyre-spec-* custom properties backed by --tc-*
+// tokens. Compact by design so it can sit inside spec sheets.
+
+@use '../foundation/tokens' as *;
+
+tc-tyre-spec {
+    display: block;
+
+    --bs-tyre-spec-bg: var(--tc-surface);
+    --bs-tyre-spec-border-color: var(--tc-border);
+    --bs-tyre-spec-row-line-color: var(--tc-border-faint);
+    --bs-tyre-spec-axle-color: var(--tc-text-faint);
+    --bs-tyre-spec-value-color: var(--tc-text);
+    --bs-tyre-spec-sub-color: var(--tc-text-faint);
+    --bs-tyre-spec-flag-bg: var(--tc-surface-muted);
+    --bs-tyre-spec-flag-color: var(--tc-text-muted);
+}
+
+// ── Shell ─────────────────────────────────────────────────────────────────────
+
+.tc-tyre-spec {
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+    min-width: 0;
+    background: var(--bs-tyre-spec-bg);
+    border: 1px solid var(--bs-tyre-spec-border-color);
+    border-radius: 0;
+}
+
+// Corner fitment flag — machine-facing, so mono + uppercase via CSS.
+.tc-tyre-spec-flag {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0.125rem 0.4375rem;
+    font-family: var(--tc-font-mono);
+    font-size: 9.5px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: var(--bs-tyre-spec-flag-bg);
+    color: var(--bs-tyre-spec-flag-color);
+    border-left: 1px solid var(--bs-tyre-spec-border-color);
+    border-bottom: 1px solid var(--bs-tyre-spec-border-color);
+}
+
+// ── Axle rows ─────────────────────────────────────────────────────────────────
+
+.tc-tyre-spec-row {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.5rem 0.875rem;
+
+    + .tc-tyre-spec-row {
+        border-top: 1px solid var(--bs-tyre-spec-row-line-color);
+    }
+}
+
+.tc-tyre-spec-axle {
+    flex: none;
+    width: 3.25rem;
+    font-family: var(--tc-font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--bs-tyre-spec-axle-color);
+}
+
+// ── Sidewall readout — hairline-separated segments ───────────────────────────
+
+.tc-tyre-spec-readout {
+    display: inline-flex;
+    align-items: stretch;
+}
+
+.tc-tyre-spec-segment {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    padding: 0 0.75rem;
+
+    &:first-child {
+        padding-left: 0;
+    }
+
+    + .tc-tyre-spec-segment {
+        border-left: 1px solid var(--bs-tyre-spec-row-line-color);
+    }
+}
+
+.tc-tyre-spec-value {
+    font-family: var(--tc-font-mono);
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.1;
+    color: var(--bs-tyre-spec-value-color);
+}
+
+.tc-tyre-spec-sub {
+    font-family: var(--tc-font-mono);
+    font-size: 9.5px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bs-tyre-spec-sub-color);
+    white-space: nowrap;
+}
+
+// Unparseable spec — raw sidewall string, still mono, never a crash.
+.tc-tyre-spec-raw {
+    font-family: var(--tc-font-mono);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--bs-tyre-spec-value-color);
+}

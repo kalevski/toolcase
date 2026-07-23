@@ -1,0 +1,25 @@
+// Redline Ember variant — warm-orange primary with a gold secondary accent.
+//
+// Swaps ONLY the accent hue families of the redline foundation. Canvas,
+// surfaces, hairlines, text ramp, dark chrome, semantic status colours,
+// fonts, shadows and the speed-cut recipe are untouched.
+// Use with: <tc-theme name="redline" variant="ember"> … </tc-theme>
+
+tc-theme[name='redline'][variant='ember'],
+[data-tc-theme='redline'][data-tc-variant='ember'] {
+    --rl-accent: #fb923c;
+    --rl-accent-2: #fdac5e;
+    --rl-accent-active: #e2711f;
+    --rl-accent-ink: #2b1603;
+    --rl-accent-soft: rgba(251, 146, 60, 0.1);
+    --rl-accent-line: rgba(251, 146, 60, 0.32);
+    --rl-accent-glow: rgba(251, 146, 60, 0.35);
+
+    --tc-accent: #fbbf24;
+    --tc-accent-fg: #92400e; // darkened so accent-coloured TEXT clears AA on light
+    --tc-accent-soft: rgba(251, 191, 36, 0.12);
+    --tc-accent-hex: #fbbf24;
+    --tc-cyan: #fbbf24;
+
+    --bs-primary-rgb: 251, 146, 60;
+}

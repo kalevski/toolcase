@@ -257,10 +257,12 @@ tc-theme[name='blueprint'],
     --bs-secondary-rgb: 93, 88, 135;
     --bs-success: var(--bp-success);
     --bs-success-rgb: 10, 168, 154;
+    --bs-success-contrast: var(--bp-emphasis); // teal — white text fails (~3:1)
     --bs-danger: var(--bp-danger);
     --bs-danger-rgb: 220, 38, 38;
     --bs-warning: var(--bp-amber);
     --bs-warning-rgb: 217, 138, 20;
+    --bs-warning-contrast: var(--bp-emphasis); // amber — white text fails (~2.8:1)
     --bs-info: var(--bp-violet);
     --bs-info-rgb: 91, 61, 242;
     --bs-light: var(--bp-bg);

@@ -1,0 +1,30 @@
+// Redline Ocean variant — electric-blue primary with a cyan secondary accent.
+//
+// Swaps ONLY the accent hue families of the redline foundation: the crimson
+// primary (--rl-accent*) turns electric blue and the signature-highlight
+// secondary (--tc-accent*) turns cyan. Canvas, surfaces, hairlines, text ramp,
+// dark chrome, semantic status colours, fonts, shadows and the speed-cut
+// recipe are untouched.
+// Use with: <tc-theme name="redline" variant="ocean"> … </tc-theme>
+
+tc-theme[name='redline'][variant='ocean'],
+[data-tc-theme='redline'][data-tc-variant='ocean'] {
+    // ── Primary accent — electric blue (replaces crimson) ────────────────────
+    --rl-accent: #4f8ff7;
+    --rl-accent-2: #6ba3ff; // hover fill + gradient second stop
+    --rl-accent-active: #2f6fe0;
+    --rl-accent-ink: #061a33; // dark navy on-fill ink
+    --rl-accent-soft: rgba(79, 143, 247, 0.1);
+    --rl-accent-line: rgba(79, 143, 247, 0.32);
+    --rl-accent-glow: rgba(79, 143, 247, 0.35);
+
+    // ── Secondary accent — cyan (signature highlights / links / brand dot) ───
+    --tc-accent: #22d3ee;
+    --tc-accent-fg: #0e7490; // darkened so accent-coloured TEXT clears AA on light
+    --tc-accent-soft: rgba(34, 211, 238, 0.12);
+    --tc-accent-hex: #22d3ee;
+    --tc-cyan: #22d3ee;
+
+    // ── Foundation literals derived from the new accent hex ──────────────────
+    --bs-primary-rgb: 79, 143, 247;
+}

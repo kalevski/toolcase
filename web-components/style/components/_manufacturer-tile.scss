@@ -1,0 +1,174 @@
+// tc-manufacturer-tile — brand tile for manufacturer grids / filter rails:
+// square brand mark (logo image or auto-monogram in a sharp square well — NOT
+// the circular avatar treatment; brand marks stay square by mandate), optional
+// mono eyebrow, name, optional count line. `active` paints the solid-ink
+// selected state from the standard state ladder. All cosmetics flow through
+// --bs-manufacturer-tile-* custom properties backed by --tc-* tokens.
+
+@use '../foundation/tokens' as *;
+
+tc-manufacturer-tile {
+    display: block;
+
+    --bs-manufacturer-tile-bg: var(--tc-surface);
+    --bs-manufacturer-tile-border-color: var(--tc-border);
+    --bs-manufacturer-tile-hover-border-color: var(--tc-border-strong);
+    --bs-manufacturer-tile-active-bg: var(--tc-app-accent);
+    --bs-manufacturer-tile-active-color: #fff;
+    --bs-manufacturer-tile-mark-size: 2.5rem;
+    --bs-manufacturer-tile-mark-bg: var(--tc-surface-muted);
+    --bs-manufacturer-tile-mark-color: var(--tc-text-muted);
+    --bs-manufacturer-tile-eyebrow-color: var(--tc-text-faint);
+    --bs-manufacturer-tile-name-color: var(--tc-text);
+    --bs-manufacturer-tile-name-hover-color: var(--tc-app-accent);
+    --bs-manufacturer-tile-count-color: var(--tc-text-muted);
+}
+
+// ── Tile shell ────────────────────────────────────────────────────────────────
+
+.tc-manufacturer-tile {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0.875rem;
+    background: var(--bs-manufacturer-tile-bg);
+    border: 1px solid var(--bs-manufacturer-tile-border-color);
+    border-radius: 0;
+    text-decoration: none;
+    transition:
+        transform var(--tc-transition-base),
+        box-shadow var(--tc-transition-base),
+        border-color var(--tc-transition-base);
+}
+
+a.tc-manufacturer-tile {
+    cursor: pointer;
+
+    &:hover {
+        transform: translateY(-1px);
+        border-color: var(--bs-manufacturer-tile-hover-border-color);
+        box-shadow: var(--tc-shadow-hover);
+        text-decoration: none;
+
+        .tc-manufacturer-tile-name {
+            color: var(--bs-manufacturer-tile-name-hover-color);
+        }
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
+}
+
+// ── Brand mark ────────────────────────────────────────────────────────────────
+
+.tc-manufacturer-tile-mark {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bs-manufacturer-tile-mark-size);
+    height: var(--bs-manufacturer-tile-mark-size);
+    background: var(--bs-manufacturer-tile-mark-bg);
+    border-radius: 0; // sharp square well — brand marks are not avatars
+    overflow: hidden;
+}
+
+.tc-manufacturer-tile-logo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 0.25rem;
+}
+
+.tc-manufacturer-tile-mark--monogram {
+    font-family: var(--tc-font-mono);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--bs-manufacturer-tile-mark-color);
+    user-select: none;
+}
+
+// ── Body ──────────────────────────────────────────────────────────────────────
+
+.tc-manufacturer-tile-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+}
+
+.tc-manufacturer-tile-eyebrow {
+    font-family: var(--tc-font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--bs-manufacturer-tile-eyebrow-color);
+}
+
+.tc-manufacturer-tile-name {
+    font-size: 0.925rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--bs-manufacturer-tile-name-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color var(--tc-transition-fast);
+}
+
+.tc-manufacturer-tile-count {
+    font-size: 12.5px;
+    color: var(--bs-manufacturer-tile-count-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+// ── Active (selected filter) — solid ink, per the state ladder ────────────────
+
+.tc-manufacturer-tile--active {
+    background: var(--bs-manufacturer-tile-active-bg);
+    border-color: var(--bs-manufacturer-tile-active-bg);
+
+    .tc-manufacturer-tile-name,
+    .tc-manufacturer-tile-mark--monogram {
+        color: var(--bs-manufacturer-tile-active-color);
+    }
+
+    .tc-manufacturer-tile-eyebrow,
+    .tc-manufacturer-tile-count {
+        color: color-mix(in srgb, var(--bs-manufacturer-tile-active-color) 70%, transparent);
+    }
+
+    .tc-manufacturer-tile-mark {
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    &:hover .tc-manufacturer-tile-name {
+        color: var(--bs-manufacturer-tile-active-color);
+    }
+}
+
+// ── Reduced motion ────────────────────────────────────────────────────────────
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-manufacturer-tile {
+        transition: border-color var(--tc-transition-fast), box-shadow var(--tc-transition-fast);
+    }
+
+    a.tc-manufacturer-tile:hover {
+        transform: none;
+    }
+}
+
+// ── Coarse-pointer hit target ─────────────────────────────────────────────────
+
+@media (pointer: coarse) {
+    a.tc-manufacturer-tile {
+        min-height: 2.75rem;
+    }
+}

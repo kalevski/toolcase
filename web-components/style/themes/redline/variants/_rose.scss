@@ -1,0 +1,25 @@
+// Redline Rose variant — soft-rose primary with a pink secondary accent.
+//
+// Swaps ONLY the accent hue families of the redline foundation. Canvas,
+// surfaces, hairlines, text ramp, dark chrome, semantic status colours,
+// fonts, shadows and the speed-cut recipe are untouched.
+// Use with: <tc-theme name="redline" variant="rose"> … </tc-theme>
+
+tc-theme[name='redline'][variant='rose'],
+[data-tc-theme='redline'][data-tc-variant='rose'] {
+    --rl-accent: #fb7185;
+    --rl-accent-2: #fda4af;
+    --rl-accent-active: #e14d64;
+    --rl-accent-ink: #330711;
+    --rl-accent-soft: rgba(251, 113, 133, 0.1);
+    --rl-accent-line: rgba(251, 113, 133, 0.32);
+    --rl-accent-glow: rgba(251, 113, 133, 0.35);
+
+    --tc-accent: #f472b6;
+    --tc-accent-fg: #9d174d; // darkened so accent-coloured TEXT clears AA on light
+    --tc-accent-soft: rgba(244, 114, 182, 0.12);
+    --tc-accent-hex: #f472b6;
+    --tc-cyan: #f472b6;
+
+    --bs-primary-rgb: 251, 113, 133;
+}

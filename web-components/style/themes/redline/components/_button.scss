@@ -1,0 +1,69 @@
+// Redline › .btn — crimson sweep primary with a brake-light glow lift, plus
+// the signature diagonal speed-cut on the primary fill (clip-path, not
+// border-radius — the toolcase sharp-corner mandate stays intact).
+
+tc-theme[name='redline'],
+[data-tc-theme='redline'] {
+    .btn {
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        transition:
+            transform 0.16s var(--rl-ease),
+            background 0.2s,
+            border-color 0.2s,
+            box-shadow 0.25s,
+            color 0.2s;
+    }
+
+    // Primary — crimson gradient, white label, the speed-cut corner + glow.
+    .btn-primary {
+        --bs-btn-focus-shadow-rgb: 238, 18, 67;
+        --bs-btn-border-color: transparent;
+        --bs-btn-hover-border-color: transparent;
+        --bs-btn-active-border-color: transparent;
+        clip-path: var(--rl-cut-sm);
+        box-shadow: var(--rl-glow);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--rl-glow-strong);
+    }
+
+    .btn-primary:active,
+    .btn-primary.active {
+        transform: translateY(0);
+        --bs-btn-active-bg: var(--rl-accent-active);
+        box-shadow: var(--rl-glow);
+    }
+
+    // Outline primary picks up the crimson hairline + soft wash on hover.
+    .btn-outline-primary {
+        --bs-btn-color: var(--rl-accent);
+        --bs-btn-border-color: var(--rl-accent-line);
+        --bs-btn-hover-bg: var(--rl-accent-soft);
+        --bs-btn-hover-color: var(--rl-accent-active);
+        --bs-btn-hover-border-color: var(--rl-accent);
+    }
+
+    // Solid semantic fills stay white-on-fill (the base default); only
+    // secondary needs a redline-specific quiet-ink treatment.
+    .btn-secondary {
+        --bs-btn-color: var(--rl-text);
+        --bs-btn-bg: var(--rl-surface-muted);
+        --bs-btn-border-color: var(--rl-border-strong);
+        --bs-btn-hover-color: var(--rl-text);
+        --bs-btn-hover-bg: var(--rl-surface-hover);
+        --bs-btn-hover-border-color: var(--rl-border-strong);
+    }
+
+    .btn-link {
+        clip-path: none;
+        box-shadow: none;
+
+        &:hover {
+            transform: none;
+            box-shadow: none;
+        }
+    }
+}

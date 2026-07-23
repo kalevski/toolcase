@@ -1,0 +1,16 @@
+// Redline › .progress — a faint tachometer tick overlay behind the crimson
+// fill, evoking a rev gauge sweep.
+
+tc-theme[name='redline'],
+[data-tc-theme='redline'] {
+    .progress,
+    .progress-stacked {
+        background-image: repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 11px,
+            rgba(13, 12, 27, 0.06) 11px,
+            rgba(13, 12, 27, 0.06) 12px
+        );
+    }
+}

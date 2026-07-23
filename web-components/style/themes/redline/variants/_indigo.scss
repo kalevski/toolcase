@@ -1,0 +1,26 @@
+// Redline Indigo variant — electric indigo primary with a periwinkle
+// secondary accent.
+//
+// Swaps ONLY the accent hue families of the redline foundation. Canvas,
+// surfaces, hairlines, text ramp, dark chrome, semantic status colours,
+// fonts, shadows and the speed-cut recipe are untouched.
+// Use with: <tc-theme name="redline" variant="indigo"> … </tc-theme>
+
+tc-theme[name='redline'][variant='indigo'],
+[data-tc-theme='redline'][data-tc-variant='indigo'] {
+    --rl-accent: #6d5cff;
+    --rl-accent-2: #8b7dff;
+    --rl-accent-active: #5340e0;
+    --rl-accent-ink: #140e33;
+    --rl-accent-soft: rgba(109, 92, 255, 0.1);
+    --rl-accent-line: rgba(109, 92, 255, 0.32);
+    --rl-accent-glow: rgba(109, 92, 255, 0.35);
+
+    --tc-accent: #93a6ff;
+    --tc-accent-fg: #3730a3; // darkened so accent-coloured TEXT clears AA on light
+    --tc-accent-soft: rgba(147, 166, 255, 0.12);
+    --tc-accent-hex: #93a6ff;
+    --tc-cyan: #93a6ff;
+
+    --bs-primary-rgb: 109, 92, 255;
+}

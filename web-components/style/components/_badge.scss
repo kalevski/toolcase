@@ -35,11 +35,12 @@
 }
 
 // Reference palette: secondary chips read slate-500 (lighter than the button
-// secondary ink), and warning chips keep white text on the amber fill.
+// secondary ink), fixed across themes since --tc-slate-500 isn't remapped —
+// pairs safely with white text (~4.8:1) regardless of theme.
 .badge.text-bg-secondary {
     background-color: var(--tc-slate-500) !important;
 }
 
-.badge.text-bg-warning {
-    color: #fff !important;
-}
+// Warning text color is NOT hardcoded here — .text-bg-warning already reads
+// the theme-aware --bs-warning-contrast var (see foundation/_utilities.scss);
+// a badge-local override here would win on specificity and re-break it.

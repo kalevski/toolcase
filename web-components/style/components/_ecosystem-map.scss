@@ -10,7 +10,7 @@ tc-ecosystem-map {
     --bs-ecosystem-map-ring-stroke: var(--tc-border);
     --bs-ecosystem-map-connector-stroke: var(--tc-border);
     --bs-ecosystem-map-core-fill: var(--tc-app-accent);
-    --bs-ecosystem-map-core-text: #fff;
+    --bs-ecosystem-map-core-text: var(--tc-app-accent-contrast);
     --bs-ecosystem-map-node-fill: var(--tc-surface);
     --bs-ecosystem-map-node-stroke: var(--tc-border);
     --bs-ecosystem-map-node-text: var(--tc-text);
@@ -90,15 +90,16 @@ tc-ecosystem-map {
         fill: var(--bs-ecosystem-map-node-fill);
         stroke: var(--bs-ecosystem-map-node-stroke);
         stroke-width: 1;
-        transition: stroke var(--tc-transition-fast, 0.15s ease), fill var(--tc-transition-fast, 0.15s ease);
+        transition:
+            stroke var(--tc-transition-fast, 0.15s ease),
+            fill var(--tc-transition-fast, 0.15s ease);
     }
 
     &__node-group,
     &__node-link {
         cursor: pointer;
 
-        &:hover .tc-ecosystem-map__node-dot,
-        &:focus .tc-ecosystem-map__node-dot {
+        &:hover .tc-ecosystem-map__node-dot {
             stroke: var(--em-node-accent, var(--tc-border-strong, #94a3b8));
             fill: var(--tc-surface-muted, #f8fafc);
         }
@@ -173,8 +174,7 @@ tc-ecosystem-map {
         white-space: nowrap;
         transition: border-color var(--tc-transition-fast, 0.15s ease);
 
-        &:hover,
-        &:focus {
+        &:hover {
             text-decoration: none;
             border-color: var(--tc-border-strong, #94a3b8);
         }

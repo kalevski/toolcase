@@ -1,6 +1,8 @@
 // tc-textarea — rides on .form-control; only the textarea-specific bits live here.
 
 textarea.form-control {
-    min-height: calc(1.6em + 1rem + var(--bs-border-width) * 2);
+    // Shared control floor — a one-line textarea sits flush with adjacent
+    // single-line fields; it still grows with content / resize.
+    min-height: var(--tc-control-height, 2.625rem);
     resize: vertical;
 }

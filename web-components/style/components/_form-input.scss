@@ -47,7 +47,7 @@
 // Native color swatch — sharp square, hairline border, no inner padding.
 .tc-form-input-color {
     width: 3rem;
-    height: 2.25rem;
+    height: var(--tc-control-height, 2.625rem);
     padding: 0.15rem;
     cursor: pointer;
 
@@ -76,7 +76,7 @@
 
 .tc-form-input-loading-bar {
     flex: 1 1 auto;
-    height: 2.25rem;
+    height: var(--tc-control-height, 2.625rem);
     background-color: var(--tc-surface-muted);
     border: var(--bs-border-width) solid var(--tc-border);
     border-radius: 0;

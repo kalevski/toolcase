@@ -12,7 +12,7 @@ tc-combo-box {
     --bs-combo-box-trigger-border: 1px solid var(--tc-border-strong);
     --bs-combo-box-trigger-placeholder-color: var(--tc-text-muted);
     --bs-combo-box-trigger-focus-shadow: var(--tc-focus-ring);
-    --bs-combo-box-trigger-height: 2.375rem; // ~38px — matches form-control height
+    --bs-combo-box-trigger-height: var(--tc-control-height, 2.625rem); // shared control floor — matches form-control height
     --bs-combo-box-caret-color: var(--tc-text-muted);
     --bs-combo-box-popover-bg: var(--tc-surface);
     --bs-combo-box-popover-border: 1px solid var(--tc-border);

@@ -1,0 +1,17 @@
+// Redline › tc-brand — condensed Oswald wordmark with the crimson gradient
+// underline sweep.
+
+tc-theme[name='redline'],
+[data-tc-theme='redline'] {
+    tc-brand {
+        --bs-brand-primary-color: var(--rl-text);
+        --bs-brand-primary-font: var(--rl-display);
+        --bs-brand-primary-letter-spacing: 0.02em;
+        --bs-brand-label-bg: var(--rl-accent-soft);
+        --bs-brand-label-color: var(--rl-accent);
+    }
+
+    .tc-brand__underline {
+        background: var(--rl-accent-grad);
+    }
+}

@@ -81,8 +81,8 @@
         background-color var(--tc-transition-fast),
         color var(--tc-transition-fast);
 
-    &:hover,
-    &:focus-visible {
+    &:hover:not(.active),
+    &:focus-visible:not(.active) {
         z-index: 1;
         color: var(--bs-list-group-action-hover-color);
         background-color: var(--bs-list-group-action-hover-bg);

@@ -1,0 +1,68 @@
+@font-face {
+  font-family: 'icomoon';
+  src:
+    url('fonts/icomoonf19a.ttf?90wf8b') format('truetype'),
+    url('fonts/icomoonf19a.woff?90wf8b') format('woff'),
+    url('fonts/icomoonf19a.svg?90wf8b#icomoon') format('svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+[class^="ico-"], [class*=" ico-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'icomoon' !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.ico-dollar-mail:before {
+  content: "\e90b";
+}
+.ico-dollar-note:before {
+  content: "\e90c";
+}
+.ico-truck:before {
+  content: "\e90d";
+}
+.ico-car-door:before {
+  content: "\e907";
+}
+.ico-car-seat:before {
+  content: "\e908";
+}
+.ico-gear-shift:before {
+  content: "\e909";
+}
+.ico-travel-luggage:before {
+  content: "\e90a";
+}
+.ico-suv:before {
+  content: "\e902";
+}
+.ico-location:before {
+  content: "\e900";
+}
+.ico-peoples:before {
+  content: "\e901";
+}
+.ico-call-center:before {
+  content: "\e903";
+}
+.ico-car:before {
+  content: "\e904";
+}
+.ico-cogwheel:before {
+  content: "\e905";
+}
+.ico-gauge:before {
+  content: "\e906";
+}

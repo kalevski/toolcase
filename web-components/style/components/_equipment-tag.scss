@@ -1,0 +1,87 @@
+// tc-equipment-tag — one vehicle-equipment chip, optionally flag-coloured per
+// the catalog's feature_flag enum. Color is information: `included` wears a
+// 3px success left edge on the soft success tint, `package` the info pair,
+// `optional` stays neutral with a mono "OPT" suffix. Sharp corners; all
+// cosmetics flow through --bs-equipment-tag-* custom properties.
+
+@use 'sass:map';
+@use '../foundation/tokens' as *;
+
+tc-equipment-tag {
+    --bs-equipment-tag-bg: var(--tc-surface);
+    --bs-equipment-tag-border-color: var(--tc-border);
+    --bs-equipment-tag-edge-color: transparent;
+    --bs-equipment-tag-color: var(--tc-text);
+    --bs-equipment-tag-icon-color: var(--tc-text-faint);
+    --bs-equipment-tag-suffix-color: var(--tc-text-faint);
+    --bs-equipment-tag-suffix-border-color: var(--tc-border);
+    --bs-equipment-tag-font-size: 13px;
+}
+
+.tc-equipment-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.5625rem;
+    font-size: var(--bs-equipment-tag-font-size);
+    line-height: 1.35;
+    color: var(--bs-equipment-tag-color);
+    background: var(--bs-equipment-tag-bg);
+    border: 1px solid var(--bs-equipment-tag-border-color);
+    border-left: 3px solid var(--bs-equipment-tag-edge-color);
+    border-radius: 0;
+}
+
+.tc-equipment-tag-icon {
+    display: inline-flex;
+    color: var(--bs-equipment-tag-icon-color);
+
+    svg {
+        width: 0.875rem;
+        height: 0.875rem;
+        display: block;
+        stroke: currentColor;
+        fill: none;
+    }
+}
+
+.tc-equipment-tag-label {
+    min-width: 0;
+}
+
+.tc-equipment-tag-suffix {
+    font-family: var(--tc-font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--bs-equipment-tag-suffix-color);
+    border: 1px solid var(--bs-equipment-tag-suffix-border-color);
+    padding: 0 0.25rem;
+    line-height: 1.5;
+}
+
+// ── feature_flag variants ────────────────────────────────────────────────────
+// Neutral edge stays transparent so all chips share one box metric — the flag
+// only re-points the custom properties.
+
+tc-equipment-tag[flag='included' i] {
+    --bs-equipment-tag-bg: var(--tc-success-bg);
+    --bs-equipment-tag-border-color: var(--tc-success-bg);
+    --bs-equipment-tag-edge-color: var(--tc-success);
+    --bs-equipment-tag-color: #{map.get($theme-colors-emphasis, 'success')};
+    --bs-equipment-tag-icon-color: var(--tc-success);
+}
+
+tc-equipment-tag[flag='optional' i] {
+    --bs-equipment-tag-icon-color: var(--tc-text-muted);
+}
+
+tc-equipment-tag[flag='package' i] {
+    --bs-equipment-tag-bg: var(--tc-info-bg);
+    --bs-equipment-tag-border-color: var(--tc-info-bg);
+    --bs-equipment-tag-edge-color: var(--tc-info);
+    --bs-equipment-tag-color: #{map.get($theme-colors-emphasis, 'info')};
+    --bs-equipment-tag-icon-color: var(--tc-info);
+    --bs-equipment-tag-suffix-color: #{map.get($theme-colors-emphasis, 'info')};
+    --bs-equipment-tag-suffix-border-color: rgba(2, 132, 199, 0.35);
+}

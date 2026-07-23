@@ -1,0 +1,16 @@
+// Redline › tc-artboard-backdrop — the `dark` tone gets a "headlight beam"
+// radial glow in the crimson accent, evoking a showroom spotlight; `scene` /
+// `parch` stay the plain light surfaces.
+
+tc-theme[name='redline'],
+[data-tc-theme='redline'] {
+    .tc-artboard-backdrop--dark {
+        --bs-artboard-backdrop-bg: var(--rl-ink);
+        --bs-artboard-backdrop-color: var(--rl-text-inverse);
+        background-image: radial-gradient(
+            ellipse 60% 50% at 50% 0%,
+            var(--rl-accent-soft),
+            transparent 70%
+        );
+    }
+}
