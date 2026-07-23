@@ -13,7 +13,7 @@
     },
     "dependencies": {
         "@toolcase/base": "^5.0.0",
-        "@toolcase/web-components": "^5.0.11",
+        "@toolcase/web-components": "^5.0.12",
         "lucide-static": "^1.22.0",
         "mysql2": "^3.22.5",
         "next": "^16.2.9",
