@@ -8,20 +8,23 @@ import { LoadingState, ErrorState } from './states'
 import { useTc, useTcProps } from '@/lib/tc'
 import { useMe } from '@/lib/me-context'
 import { apiFetch, describeApiError } from '@/lib/fetcher'
-import { formatBytes } from '@/server/domain/site-dashboard'
-import { type Site } from '@/server/domain/types'
+import { formatBytes, formatUtc } from '@/server/domain/site-dashboard'
+import type { ExternalSite, Site, SitesOverview } from '@/server/domain/types'
 
 // Dashboard content region (§14). Lists the signed-in user's sites as scannable
 // `SiteCard`s — click one to open its full per-site page (`/sites/{id}`) — with a
 // "New site" button that opens the create-site wizard (733) in a modal whenever
 // the user is below their plan's site limit. A first-time user with no sites gets
 // the same wizard behind a prominent call-to-action. Identity/plan come from
-// `useMe()` (AuthGate already fetched it, plan WS-3); only `/api/sites` is fetched.
+// `useMe()` (AuthGate already fetched it, plan WS-3); only `/api/sites/overview`
+// is fetched — the stored sites plus live per-instance discovery, so sites that
+// exist on a freshly-connected nginxpilot instance show up here too, each labelled
+// with the instance it deploys on.
 
 type LoadState =
     | { phase: 'loading' }
     | { phase: 'error'; message: string }
-    | { phase: 'ready'; sites: Site[] }
+    | { phase: 'ready'; overview: SitesOverview }
 
 export function DashboardHome() {
     const me = useMe()
@@ -39,8 +42,8 @@ export function DashboardHome() {
     // good grid (better than blanking it to an error on a transient blip).
     const load = useCallback(async () => {
         try {
-            const sites = await apiFetch<Site[]>('/api/sites')
-            setState({ phase: 'ready', sites })
+            const overview = await apiFetch<SitesOverview>('/api/sites/overview')
+            setState({ phase: 'ready', overview })
         } catch (err) {
             setState((prev) => (prev.phase === 'ready' ? prev : { phase: 'error', message: describeApiError(err) }))
         }
@@ -112,9 +115,12 @@ export function DashboardHome() {
         )
     }
 
-    const { sites } = state
+    const { sites, realms, external, unreachable } = state.overview
     const canCreate = sites.length < me.limits.maxSites
     const hasSites = sites.length > 0
+    // Label every card with its instance only when there's more than one to tell apart.
+    const realmNames = new Map(realms.map((r) => [r.id, r.name]))
+    const multiRealm = realms.length > 1
 
     // Plain-text lead for the header `description` attribute (the inline <strong> the
     // bespoke header carried isn't expressible as an attribute — a fair trade for the
@@ -160,7 +166,12 @@ export function DashboardHome() {
                     <SitesMetrics sites={sites} />
                     <div className="quaykeeper-card-grid">
                         {sites.map((site) => (
-                            <SiteCard key={site.id} site={site} limits={me.limits} />
+                            <SiteCard
+                                key={site.id}
+                                site={site}
+                                limits={me.limits}
+                                realmName={multiRealm ? realmNames.get(site.realmId) : undefined}
+                            />
                         ))}
                     </div>
                 </>
@@ -173,6 +184,28 @@ export function DashboardHome() {
             ) : (
                 <p className="quaykeeper-home-lead">
                     You’ve reached your plan’s site limit. Delete a site or upgrade your plan.
+                </p>
+            )}
+
+            {external.length > 0 && (
+                <section className="quaykeeper-external-sites" aria-label="Sites found on connected instances">
+                    <h2 className="quaykeeper-external-sites-title">Found on your instances</h2>
+                    <p className="quaykeeper-external-sites-lead">
+                        These sites are deployed on a connected nginxpilot instance but aren’t managed by
+                        Quaykeeper — typically deployed before the instance was added.
+                    </p>
+                    <div className="quaykeeper-card-grid">
+                        {external.map((entry) => (
+                            <ExternalSiteCard key={`${entry.realmId}:${entry.domain}`} entry={entry} />
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {unreachable.length > 0 && (
+                <p className="quaykeeper-external-sites-warning" role="status">
+                    Couldn’t check {unreachable.map((r) => r.realmName).join(', ')} for existing sites —{' '}
+                    {unreachable.length === 1 ? 'the instance is' : 'those instances are'} unreachable right now.
                 </p>
             )}
 
@@ -190,6 +223,40 @@ export function DashboardHome() {
                 </tc-modal>
             )}
         </section>
+    )
+}
+
+/**
+ * Read-only card for a site discovered on a connected nginxpilot instance that
+ * Quaykeeper doesn't manage. Mirrors the SiteCard layout so the grid scans as one
+ * surface, but links nowhere — there's no site row behind it — and says plainly
+ * which instance it lives on.
+ */
+function ExternalSiteCard({ entry }: { entry: ExternalSite }) {
+    const failing = !!entry.lastError
+    const dot = entry.syncing ? 'away' : failing ? 'busy' : entry.neverSynced ? 'offline' : 'online'
+    const label = entry.syncing ? 'Syncing' : failing ? 'Failing' : entry.neverSynced ? 'Never synced' : 'Live'
+    const deployed = formatUtc(entry.lastSuccess)
+    return (
+        <article className="quaykeeper-card quaykeeper-card--external" aria-label={`${entry.domain} on ${entry.realmName}`}>
+            <header className="quaykeeper-card-header">
+                <div className="quaykeeper-card-id">
+                    <h3 className="quaykeeper-card-host">{entry.domain}</h3>
+                    <p className="quaykeeper-card-source">
+                        {entry.sourceType} · {entry.sourceUrl}
+                    </p>
+                </div>
+                <tc-status-dot status={dot} label={label} pulse={entry.syncing || undefined} />
+            </header>
+            <div className="quaykeeper-card-badges">
+                <tc-badge variant="dark">{entry.realmName}</tc-badge>
+                {entry.bytes != null && entry.bytes > 0 && (
+                    <tc-badge variant="info">{formatBytes(entry.bytes)}</tc-badge>
+                )}
+                <tc-badge variant="secondary">Deployed {deployed || '—'}</tc-badge>
+                <tc-badge variant="light">not managed by Quaykeeper</tc-badge>
+            </div>
+        </article>
     )
 }
 

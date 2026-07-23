@@ -23,7 +23,7 @@
 import 'server-only'
 import { slog } from '@/server/infrastructure/server-log'
 import type { Site } from '@/server/domain/types'
-import { renderFragment, type FragmentOptions } from '@/server/domain/nginxpilot-fragment'
+import { renderFragment, type FragmentOptions, type LiveSiteConfig } from '@/server/domain/nginxpilot-fragment'
 import {
     renderUpstreamFragment,
     renderProxyFragment,
@@ -52,8 +52,10 @@ export {
     tokenEnvVarName,
     gitCredentialName,
     formatInterval,
+    fragmentDrifted,
     type FragmentOptions,
     type FragmentAuth,
+    type LiveSiteConfig,
 } from '@/server/domain/nginxpilot-fragment'
 
 export class NginxpilotError extends Error {
@@ -775,6 +777,16 @@ export function nginxpilotClient(conn: RealmConnection) {
     }
 
     /**
+     * Every site in the daemon's live merged config — `GET /sites`. The daemon-side
+     * truth of what `sites.d/` currently declares, read by the drift reconcile to
+     * compare against the stored rows. References only; never secret material.
+     */
+    async function listSites(): Promise<LiveSiteConfig[]> {
+        const res = await adminOk('GET', '/sites')
+        return ((await res.json()) as { sites?: LiveSiteConfig[] }).sites ?? []
+    }
+
+    /**
      * Managed-mode dry run — `POST /nginx/test`. Returns the per-resource pass/fail set
      * the daemon would apply, WITHOUT committing it, so a maintainer can preview a batch
      * before trusting the live apply (Phase E). Returns `null` when managed mode is off
@@ -1103,6 +1115,7 @@ export function nginxpilotClient(conn: RealmConnection) {
         removeStreamUpstream,
         healthz,
         status,
+        listSites,
         nginxTest,
         sync,
         vhost,

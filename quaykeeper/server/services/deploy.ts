@@ -9,6 +9,7 @@
 
 import 'server-only'
 import * as siteRepo from '@/server/data/repositories/site-repo'
+import * as siteRemovalRepo from '@/server/data/repositories/site-removal-repo'
 import * as userRepo from '@/server/data/repositories/user-repo'
 import * as baseDomainRepo from '@/server/data/repositories/base-domain-repo'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
@@ -28,6 +29,7 @@ import {
     type SiteAuthMethod,
 } from '@/server/domain/types'
 import {
+    fragmentDrifted,
     gitCredentialName,
     resolveFragmentOptions,
     type FragmentOptions,
@@ -236,4 +238,127 @@ export async function remove(site: Site): Promise<void> {
  */
 export function suspend(site: Site): Promise<Site> {
     return machine.suspend(deps(site), site)
+}
+
+// ── drift reconciliation (control-plane DB ⇄ daemon `sites.d/`) ────────────────
+//
+// The DB is the source of truth for managed sites, but the daemon's fragment set can
+// diverge from it in both directions: a redeployed/restored daemon loses or resurrects
+// fragments (the row says `live`, the daemon serves nothing — or stale config), and a
+// fragment removal that couldn't be confirmed (forced delete, rehost with the daemon
+// down) leaves an orphan serving a dead site. `reconcileRealmSites` heals both, on the
+// same per-realm cadence (and with the same best-effort posture) as the log-destination
+// reconcile in `services/status-poll.ts`.
+
+/**
+ * Retract a domain's fragment durably: try the daemon now, and when it can't confirm
+ * (unreachable, non-404 error), queue the removal for the status poll's reconcile pass
+ * to retry until it lands. Used wherever a fragment must go but the caller can't fail
+ * on a daemon hiccup — the forced-delete path and the rehost's old-domain retraction.
+ */
+export async function retractFragment(realmId: string, domain: string, reason: 'delete' | 'rehost'): Promise<void> {
+    try {
+        await realms.clientFor(realmId).removeFragment(domain)
+    } catch (err) {
+        siteRemovalRepo.enqueue(realmId, domain, reason, new Date().toISOString())
+        slog('warn', 'deploy', 'fragment retraction queued for retry', {
+            realm: realmId,
+            domain,
+            reason,
+            error: (err as Error).message,
+        })
+    }
+}
+
+/** Counts from one realm's site reconcile pass, for logs/tests. */
+export interface SiteReconcileResult {
+    /** Fragments re-pushed because the daemon was missing them or held drifted config. */
+    repushed: number
+    /** Queued orphan fragments the daemon confirmed removed this pass. */
+    removed: number
+    /** Individual site/removal operations that failed (each retries next pass). */
+    failed: number
+}
+
+/**
+ * Reconcile one realm's fragments against the stored rows (both directions):
+ *
+ *   1. **Re-push** — every `live`/`over_quota` site in this realm whose fragment is
+ *      missing from the daemon's `GET /sites`, or whose live config drifted on the
+ *      verbatim fields (`fragmentDrifted`), gets its fragment rewritten and a sync
+ *      forced. Heals a daemon redeployed with a fresh volume or restored from an old
+ *      backup. Sites mid-deploy (`draft`/`provisioning`), `failed` (needs a user
+ *      action), and `suspended` (fragment intentionally absent) are left alone.
+ *   2. **Retract** — every queued pending removal is retried; the daemon confirming
+ *      (2xx or 404 = already gone) drops the queue row. A row whose domain has since
+ *      been claimed by a NEW site in this realm is dropped WITHOUT retracting — the
+ *      new site's fragment must not be collateral damage.
+ *
+ * Throws only when the daemon's `GET /sites` itself is unreachable (the caller logs it
+ * as a realm-level failure); per-site failures are counted and retried next pass.
+ */
+export async function reconcileRealmSites(realmId: string): Promise<SiteReconcileResult> {
+    const client = realms.clientFor(realmId)
+    const live = await client.listSites()
+    const liveByDomain = new Map(live.map((s) => [s.domain, s]))
+
+    let repushed = 0
+    let failed = 0
+    for (const site of siteRepo.list()) {
+        if (site.realmId !== realmId) continue
+        if (site.status !== 'live' && site.status !== 'over_quota') continue
+        const current = liveByDomain.get(site.hostname)
+        const options = fragmentOptions(site)
+        if (current && !fragmentDrifted(site, current, options.web)) continue
+        try {
+            await writeFragmentWithAuth(client, site, options)
+            await client.sync(site.hostname)
+            repushed++
+            audit('site.reconcile', site, current ? 'drifted fragment re-pushed' : 'missing fragment re-pushed')
+            slog('info', 'deploy', 'site fragment reconciled', {
+                site: site.id,
+                domain: site.hostname,
+                realm: realmId,
+                cause: current ? 'drift' : 'missing',
+            })
+        } catch (err) {
+            failed++
+            slog('warn', 'deploy', 'site fragment reconcile failed', {
+                site: site.id,
+                domain: site.hostname,
+                realm: realmId,
+                error: (err as Error).message,
+            })
+        }
+    }
+
+    let removed = 0
+    for (const pending of siteRemovalRepo.listByRealm(realmId)) {
+        // The domain was re-claimed by a live row (a recreated site, a rehost back):
+        // the removal intent is stale — drop it without touching the daemon.
+        if (siteRepo.getByHostname(pending.domain, realmId)) {
+            siteRemovalRepo.remove(realmId, pending.domain)
+            continue
+        }
+        try {
+            await client.removeFragment(pending.domain)
+            siteRemovalRepo.remove(realmId, pending.domain)
+            removed++
+            slog('info', 'deploy', 'orphaned fragment removed', {
+                domain: pending.domain,
+                realm: realmId,
+                reason: pending.reason,
+            })
+        } catch (err) {
+            failed++
+            siteRemovalRepo.bumpAttempts(realmId, pending.domain, new Date().toISOString())
+            slog('warn', 'deploy', 'orphaned fragment removal failed (will retry)', {
+                domain: pending.domain,
+                realm: realmId,
+                error: (err as Error).message,
+            })
+        }
+    }
+
+    return { repushed, removed, failed }
 }

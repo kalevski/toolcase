@@ -18,6 +18,7 @@
 import 'server-only'
 import { randomBytes } from 'node:crypto'
 import * as siteRepo from '@/server/data/repositories/site-repo'
+import * as siteRemovalRepo from '@/server/data/repositories/site-removal-repo'
 import * as userRepo from '@/server/data/repositories/user-repo'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
 import * as siteCredentialRepo from '@/server/data/repositories/site-credential-repo'
@@ -74,12 +75,15 @@ import {
 } from '@/server/domain/types'
 import type {
     AppUser,
+    ExternalSite,
     PlanLimits,
+    RealmUnreachable,
     Site,
     SiteHostKind,
     SiteRouting,
     SiteSettings,
     SiteSource,
+    SitesOverview,
 } from '@/server/domain/types'
 
 export type { SiteViewer } from '@/server/domain/site-access'
@@ -175,6 +179,13 @@ export interface CreateSiteRequest extends SiteSettingsRequest, SiteSourceReques
     repoName?: string
     branch?: string
     hostname: HostnameSpec
+    /**
+     * The realm (nginxpilot instance) to deploy to — the wizard's instance picker.
+     * Omitted → the caller's active realm, exactly as before. Grant-enforced server-side
+     * (`realms.resolveRequestedRealm`): the owner may target any instance, a non-owner
+     * only one they're granted.
+     */
+    realmId?: string
     /**
      * The source credential for a non-GitHub source (a deploy key, token, password, or
      * header value). Write-only: it is sealed into `site_credential` and never returned.
@@ -448,6 +459,72 @@ export function listSites(viewer: SiteViewer): Site[] {
     return viewer.role === 'owner' ? siteRepo.list() : siteRepo.listByOwner(viewer.sub)
 }
 
+/**
+ * The sites-page overview: the caller's stored sites plus per-instance discovery.
+ *
+ * Every realm the caller may see is asked for its live `GET /status` site list, and any
+ * entry no `site` row claims (matched by hostname within that realm) is surfaced as an
+ * {@link ExternalSite} — that's what makes a freshly-registered instance's pre-existing
+ * sites visible instead of silently absent. Discovery is OWNER-ONLY: an instance's
+ * unmanaged entries belong to no Quaykeeper tenant, so showing them to a standard user
+ * would leak other deployments; a standard caller gets their own rows and realm labels
+ * only. An unreachable instance never fails the page — it's reported in `unreachable`
+ * so the UI can say which instance couldn't be checked.
+ */
+export async function sitesOverview(viewer: SiteViewer): Promise<SitesOverview> {
+    const stored = listSites(viewer)
+    const visible = realms.realmsVisibleTo(viewer.sub, viewer.role)
+    const external: ExternalSite[] = []
+    const unreachable: RealmUnreachable[] = []
+
+    if (viewer.role === 'owner') {
+        await Promise.all(
+            visible.map(async (realm) => {
+                let env
+                try {
+                    env = await realms.clientFor(realm.id).status()
+                } catch (err) {
+                    unreachable.push({
+                        realmId: realm.id,
+                        realmName: realm.name,
+                        error: err instanceof NginxpilotError && err.status
+                            ? `status ${err.status}`
+                            : 'unreachable',
+                    })
+                    return
+                }
+                const managed = new Set(
+                    stored.filter((s) => s.realmId === realm.id).map((s) => s.hostname),
+                )
+                for (const s of env.sites) {
+                    if (managed.has(s.domain)) continue
+                    external.push({
+                        realmId: realm.id,
+                        realmName: realm.name,
+                        domain: s.domain,
+                        sourceType: s.source_type,
+                        sourceUrl: s.source_url,
+                        deployedRef: s.deployed_ref,
+                        lastSuccess: s.last_success,
+                        lastError: s.last_error,
+                        neverSynced: s.never_synced,
+                        syncing: s.syncing,
+                        bytes: s.bytes,
+                    })
+                }
+            }),
+        )
+        external.sort((a, b) => a.domain.localeCompare(b.domain))
+    }
+
+    return {
+        sites: stored,
+        realms: visible.map((r) => ({ id: r.id, name: r.name, isDefault: r.isDefault })),
+        external,
+        unreachable,
+    }
+}
+
 /** Read one owned site (§13 ownership re-check). Throws `SiteError` 404/403. */
 export function getSite(viewer: SiteViewer, id: string): Site {
     return ownedSite(id, viewer)
@@ -545,11 +622,12 @@ export async function createSite(viewer: SiteViewer, body: CreateSiteRequest, to
         )
     }
 
-    // Pick the target realm (multiple_realms.md §D.2): the active realm (the owner's
+    // Pick the target realm (multiple_realms.md §D.2): an explicit `realmId` from the
+    // wizard's instance picker (grant-enforced), else the active realm (the owner's
     // switcher choice; a non-owner's owner-assigned default). The site is bound to it and
     // hostname uniqueness is scoped to it.
-    const activeRealm = await realms.resolveActiveRealm(viewer.sub, viewer.role)
-    const hostname = resolveHostname(body.hostname, owner, activeRealm.id)
+    const targetRealm = await realms.resolveRequestedRealm(viewer.sub, viewer.role, body.realmId)
+    const hostname = resolveHostname(body.hostname, owner, targetRealm.id)
 
     const now = new Date().toISOString()
     const site: Site = {
@@ -562,7 +640,7 @@ export async function createSite(viewer: SiteViewer, body: CreateSiteRequest, to
         ...settings,
         hostname,
         hostKind: body.hostname.kind,
-        realmId: activeRealm.id,
+        realmId: targetRealm.id,
         status: 'draft',
         createdAt: now,
         updatedAt: now,
@@ -661,6 +739,12 @@ async function changeHostname(
         await domains.teardownCustomVhost(site)
     }
 
+    // The daemon keys fragments by DOMAIN, so a rehost must retract the old domain's
+    // fragment — provisioning the new hostname only ADDS one, and the daemon would
+    // keep syncing and serving the old hostname forever. Durable: an unreachable
+    // daemon queues the removal for the status poll's reconcile pass.
+    await deploy.retractFragment(site.realmId, site.hostname, 'rehost')
+
     const at = new Date().toISOString()
     const { source, settings } = changes
     if (!siteSourceEqual(source, siteSource(site))) {
@@ -705,13 +789,15 @@ export async function deleteSite(viewer: SiteViewer, id: string): Promise<void> 
         await deploy.remove(site)
     } catch (err) {
         // `deploy.remove` failed before deleting the row (fragment remove / reload threw).
-        // Log it and delete the row anyway so the dashboard reflects reality; nginxpilot's
-        // periodic sync reconciles the now-orphaned fragment (and the byte sweep skips it).
+        // Log it and delete the row anyway so the dashboard reflects reality — and queue
+        // the fragment removal so the status poll's reconcile pass retries it until the
+        // daemon confirms (an orphaned fragment must not serve a dead site forever).
         slog('warn', 'sites', 'deploy.remove failed during delete (removing row anyway)', {
             site: site.id,
             hostname: site.hostname,
             error: (err as Error).message,
         })
+        siteRemovalRepo.enqueue(site.realmId, site.hostname, 'delete', new Date().toISOString())
         siteRepo.remove(site.id)
         audit('site.remove', ownerOf(site), site, 'forced row removal after teardown failure')
     }

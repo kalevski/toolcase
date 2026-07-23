@@ -385,6 +385,76 @@ function renderAuth(auth: FragmentAuth | undefined): string[] {
     return lines
 }
 
+// ── drift detection (`GET /sites` vs the stored row) ─────────────────────────
+
+/**
+ * One site's live merged config as the daemon's `GET /sites` reports it (the JSON shape
+ * of nginxpilot's `config.Site`, reduced to the fields the drift check reads). Auth
+ * carries references only — secret material never crosses that wire — and internal
+ * provenance is dropped daemon-side, so this is a faithful, comparable echo of the
+ * fragment Quaykeeper last wrote (or whatever else lives in `sites.d/`).
+ */
+export interface LiveSiteConfig {
+    domain: string
+    source?: {
+        type?: string
+        url?: string
+        branch?: string
+        subdir?: string
+        checksum_url?: string
+        strip_components?: number
+        allow_insecure?: boolean
+        require_file?: string[]
+    }
+    routing?: string
+    not_found?: string
+    cache_assets?: boolean
+    tls?: string
+    block_exploits?: boolean
+    gzip?: boolean
+}
+
+/**
+ * Whether the daemon's live config for a domain has drifted from what the stored `Site`
+ * row says the fragment should hold — the trigger for a reconcile re-push (a daemon
+ * restored from an old backup, a hand-edited fragment).
+ *
+ * Deliberately compares only fields the fragment renderer emits VERBATIM from the row
+ * (source coordinates, routing, the serving toggles), so equality is stable across
+ * round-trips and a re-push can never loop. Derived values with daemon-side defaults or
+ * lossy encodings (interval durations, keep_releases, require_file/exclude defaults,
+ * HSTS's union type, the auth block's daemon-local paths) are left out: a mismatch
+ * there is either impossible to detect reliably or harmless until the next real deploy
+ * rewrites the fragment anyway.
+ */
+export function fragmentDrifted(
+    site: Site,
+    live: LiveSiteConfig,
+    web: SiteWebOptions | undefined,
+): boolean {
+    const type = site.sourceType ?? 'git'
+    const src = live.source ?? {}
+    if ((src.type ?? 'git') !== type) return true
+    if (src.url !== sourceUrlFor(site)) return true
+    if (type === 'git') {
+        if ((src.branch ?? '') !== site.branch) return true
+        if ((src.subdir ?? '') !== (site.subdir ?? '')) return true
+    } else {
+        if ((src.checksum_url ?? '') !== (site.checksumUrl ?? '')) return true
+        if ((src.strip_components ?? undefined) !== (site.stripComponents ?? undefined)) return true
+        if ((src.allow_insecure ?? false) !== !!site.allowInsecure) return true
+    }
+    if ((live.routing ?? 'static') !== (site.routing ?? 'static')) return true
+    if ((live.not_found ?? '') !== (site.notFound ?? '')) return true
+    if ((live.cache_assets ?? false) !== !!site.cacheAssets) return true
+    // Serving toggles the renderer emits verbatim from the resolved web options. The
+    // renderer omits `tls: off`, so normalize both sides to 'off'.
+    if ((live.tls ?? 'off') !== (web?.tls ?? 'off')) return true
+    if ((live.gzip ?? false) !== !!web?.gzip) return true
+    if ((live.block_exploits ?? false) !== !!web?.block_exploits) return true
+    return false
+}
+
 /**
  * Format a whole number of seconds as an nginxpilot Go duration: exact hours →
  * `Nh`, exact minutes → `Nm`, else `Ns`. 900 → `15m`, 300 → `5m`, 60 → `1m`,

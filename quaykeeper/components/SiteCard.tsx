@@ -16,7 +16,17 @@ import type { PlanLimits, Site } from '@/server/domain/types'
 const POLL_ACTIVE_MS = 5000
 const POLL_IDLE_MS = 30000
 
-export function SiteCard({ site, limits }: { site: Site; limits: PlanLimits }) {
+export function SiteCard({
+    site,
+    limits,
+    realmName,
+}: {
+    site: Site
+    limits: PlanLimits
+    /** The nginxpilot instance this site deploys to — shown as a badge when the
+     *  deployment spans more than one instance (omitted on single-instance setups). */
+    realmName?: string
+}) {
     const router = useRouter()
     const [payload, setPayload] = useState<SiteStatusPayload | null>(null)
     // Track a fetch failure so a backend outage reads as "Status unavailable"
@@ -109,6 +119,7 @@ export function SiteCard({ site, limits }: { site: Site; limits: PlanLimits }) {
                 </tc-badge>
                 <tc-badge variant="secondary">Deployed {view?.build.date ?? '—'}</tc-badge>
                 <tc-badge variant="light">{site.hostKind === 'custom' ? 'custom domain' : 'subdomain'}</tc-badge>
+                {realmName && <tc-badge variant="dark">{realmName}</tc-badge>}
             </div>
         </article>
     )

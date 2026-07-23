@@ -18,6 +18,7 @@ import * as stateRepo from '@/server/data/repositories/resource-state-repo'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
 import * as realms from '@/server/services/realms'
 import * as logBindings from '@/server/services/log-bindings'
+import * as deploy from '@/server/services/deploy'
 import { diffEpisodes, type LiveBadState } from '@/server/domain/resource-state'
 import { tx } from '@/server/data/db'
 import { slog } from '@/server/infrastructure/server-log'
@@ -135,6 +136,19 @@ export async function pollNow(): Promise<{ realms: number; opened: number; close
             }
         } catch (err) {
             slog('warn', 'status-poll', 'log-destination reconcile failed', { realm: realm.id, error: String(err) })
+        }
+
+        // Site-fragment drift reconciliation: re-push this realm's live sites whose
+        // fragment the daemon lost or holds stale (a redeployed daemon, a restored
+        // backup), and retry queued orphan-fragment removals (forced deletes, rehosts
+        // the daemon missed). Same best-effort posture as the block above.
+        try {
+            const { repushed, removed } = await deploy.reconcileRealmSites(realm.id)
+            if (repushed || removed) {
+                slog('info', 'status-poll', 'site fragments reconciled', { realm: realm.id, repushed, removed })
+            }
+        } catch (err) {
+            slog('warn', 'status-poll', 'site reconcile failed', { realm: realm.id, error: String(err) })
         }
     }
     pruneAudit()

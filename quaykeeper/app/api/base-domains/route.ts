@@ -14,14 +14,16 @@ import * as realms from '@/server/services/realms'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
+export async function GET(req: Request) {
     const authz = await authorize('standard')
     if (!authz.ok) return NextResponse.json({ error: 'unauthorized' }, { status: authz.status })
 
-    // Scope the wizard's base-domain pool to the caller's active/assigned realm (§E.2).
+    // Scope the wizard's base-domain pool to the requested realm (the instance picker's
+    // `?realmId=`, grant-enforced) or, absent one, the caller's active/assigned realm (§E.2).
     try {
-        const active = await realms.resolveActiveRealm(authz.session.sub, authz.role)
-        return NextResponse.json(admin.listBaseDomainsFor(authz.session.login, active.id))
+        const requested = new URL(req.url).searchParams.get('realmId') ?? undefined
+        const realm = await realms.resolveRequestedRealm(authz.session.sub, authz.role, requested)
+        return NextResponse.json(admin.listBaseDomainsFor(authz.session.login, realm.id))
     } catch (err) {
         const { status, code, detail } = realms.httpErrorFor(err)
         return NextResponse.json({ error: code, detail }, { status })

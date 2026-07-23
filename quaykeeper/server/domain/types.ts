@@ -728,6 +728,58 @@ export interface UserRealmGrant {
     isDefault: boolean
 }
 
+/** A realm cut down to what a list needs to label entries with their instance. */
+export interface RealmRef {
+    id: string
+    name: string
+    isDefault: boolean
+}
+
+/**
+ * A static site living on a connected nginxpilot instance that Quaykeeper does NOT
+ * manage — no `site` row references it. Typically a fragment deployed before the
+ * instance was registered as a realm (by hand, or by another control plane). Surfaced
+ * read-only on the sites page so a freshly-added instance's existing sites are visible
+ * instead of silently absent. Field values come straight from the daemon's `GET /status`.
+ */
+export interface ExternalSite {
+    realmId: string
+    realmName: string
+    domain: string
+    sourceType: string
+    sourceUrl: string
+    /** Currently-deployed git ref; absent before the first successful sync. */
+    deployedRef?: string
+    /** ISO timestamp of the last successful sync, if any. */
+    lastSuccess?: string
+    lastError?: string
+    /** True until the site's first successful sync. */
+    neverSynced: boolean
+    syncing: boolean
+    /** Deployed size of the live release in bytes, when the daemon reports it. */
+    bytes?: number
+}
+
+/** A realm that couldn't be reached while discovering its sites. */
+export interface RealmUnreachable {
+    realmId: string
+    realmName: string
+    error: string
+}
+
+/**
+ * `GET /api/sites/overview` — the sites page payload: the caller's stored sites, the
+ * realm labels to attribute each one to its instance, plus every unmanaged site
+ * discovered on the connected instances (owner-only; empty for a standard caller) and
+ * any instance discovery couldn't reach.
+ */
+export interface SitesOverview {
+    sites: Site[]
+    realms: RealmRef[]
+    external: ExternalSite[]
+    unreachable: RealmUnreachable[]
+}
+
 // ── Audit log (`audit` row) ──────────────────────────────────────────────────
 
 /** One append-only audit-log entry. Mirrors the `audit` table (§12, §16). */

@@ -8,6 +8,7 @@ import type {
 } from '@toolcase/web-components'
 import { useTc, detailValue, targetValue } from '@/lib/tc'
 import { useBranding } from '@/lib/branding-context'
+import { useMe } from '@/lib/me-context'
 import { SelectField, SwitchField, TextAreaField, TextField } from './fields'
 import type { BaseDomain } from '@/server/domain/types'
 
@@ -58,6 +59,7 @@ interface CreateSiteRequest {
     allowInsecure?: boolean
     sourceSecret?: string
     hostname: HostnameSpec
+    realmId?: string
     routing?: SiteRouting
     notFound?: string
     cacheAssets?: boolean
@@ -156,6 +158,8 @@ const ERROR_COPY: Record<string, string> = {
     private_repos_not_allowed:
         'Deploying a private source isn’t enabled for your account. Use a public source, or ask an owner.',
     routing_conflict: 'A custom 404 page can’t be combined with single-page-app routing — the SPA fallback serves index.html for every path.',
+    realm_not_found: 'That deploy instance no longer exists. Pick another.',
+    realm_not_granted: 'You aren’t granted that deploy instance. Pick one of yours.',
     github_error: "Couldn't reach GitHub. Try again in a moment.",
     nginxpilot_error: 'The deploy engine is unavailable right now. Try again shortly.',
     nginx_error: 'The serving layer is unavailable right now. Try again shortly.',
@@ -170,6 +174,16 @@ function errorMessage(code: unknown, status: number): string {
 
 export function CreateSiteWizard() {
     const branding = useBranding()
+    const me = useMe()
+
+    // ── deploy target (nginxpilot instance / realm) ──
+    // The full realm list is owner-only (`me.realms`); everyone else deploys to their
+    // assigned realm exactly as before. The picker only appears when there is a real
+    // choice to make, and only then is `realmId` sent with the request — the server
+    // grant-checks it regardless.
+    const realmChoices = useMemo(() => me.realms ?? [], [me.realms])
+    const showRealmPicker = realmChoices.length >= 2
+    const [realmId, setRealmId] = useState(me.activeRealm?.id ?? '')
     // ── step 1: where the content comes from ──
     // `github` is the repo picker (the common case); `external` covers every other git
     // host and the published-archive kind, which have no repo list to browse.
@@ -219,7 +233,7 @@ export function CreateSiteWizard() {
     const [error, setError] = useState<string | null>(null)
     const [created, setCreated] = useState<CreatedSite | null>(null)
 
-    // Repos + the base-domain pool load once on mount.
+    // Repos load once on mount.
     useEffect(() => {
         let cancelled = false
         setReposLoading(true)
@@ -242,15 +256,26 @@ export function CreateSiteWizard() {
             .finally(() => {
                 if (!cancelled) setReposLoading(false)
             })
+        return () => {
+            cancelled = true
+        }
+    }, [])
 
-        fetch('/api/base-domains', { cache: 'no-store' })
+    // The base-domain pool is realm-scoped, so it reloads whenever the deploy target
+    // changes (and once on mount for everyone else — the server falls back to the
+    // caller's active/assigned realm when no `realmId` is passed).
+    useEffect(() => {
+        let cancelled = false
+        const query = showRealmPicker && realmId ? `?realmId=${encodeURIComponent(realmId)}` : ''
+        fetch(`/api/base-domains${query}`, { cache: 'no-store' })
             .then((res) => (res.ok ? (res.json() as Promise<BaseDomain[]>) : Promise.reject(res)))
             .then((list) => {
                 if (cancelled) return
                 setBaseDomains(list)
-                if (list.length > 0) setBaseDomain(list[0].domain)
-                // No subdomain pool configured → default to the custom-domain path.
-                else setHostKind('custom')
+                // Reset the selection to the new pool; no subdomain pool on this
+                // instance → the custom-domain path is the only one left.
+                setBaseDomain(list[0]?.domain ?? '')
+                if (list.length === 0) setHostKind('custom')
             })
             .catch(() => {
                 /* base domains are optional chrome; the custom-domain path still works */
@@ -258,7 +283,7 @@ export function CreateSiteWizard() {
         return () => {
             cancelled = true
         }
-    }, [])
+    }, [showRealmPicker, realmId])
 
     // Branches load whenever the selected repo changes; the repo's default branch
     // is preselected when present.
@@ -345,6 +370,16 @@ export function CreateSiteWizard() {
         ],
         [],
     )
+
+    const realmOptions = useMemo(
+        () =>
+            realmChoices.map((r) => ({
+                value: r.id,
+                label: r.isDefault ? `${r.name} (default)` : r.name,
+            })),
+        [realmChoices],
+    )
+    const realmName = realmChoices.find((r) => r.id === realmId)?.name
 
     const hostKindOptions = useMemo<SingleCardSelectOption[]>(
         () => [
@@ -521,6 +556,7 @@ export function CreateSiteWizard() {
         const payload: CreateSiteRequest = {
             ...sourceFields,
             hostname,
+            realmId: showRealmPicker && realmId ? realmId : undefined,
             routing: routing !== 'static' ? routing : undefined,
             // SPA routing serves index.html for every path — a 404 page can never
             // trigger there, so it's dropped (the field is hidden in that mode too).
@@ -555,6 +591,7 @@ export function CreateSiteWizard() {
     function reset() {
         setCreated(null)
         setError(null)
+        setRealmId(me.activeRealm?.id ?? '')
         setSourceKind('github')
         setSourceType('git')
         setSourceUrl('')
@@ -789,6 +826,20 @@ export function CreateSiteWizard() {
                 {/* Step 2 — hostname */}
                 <div slot="step-1" className="quaykeeper-wizard-step">
                     <h3 className="quaykeeper-wizard-heading">Hostname</h3>
+
+                    {/* Deploy target: only when more than one instance is registered.
+                        Toggled via `hidden` (not mount/unmount) like the other sub-modes
+                        so the wizard never has a step child reparented under it. */}
+                    <div hidden={!showRealmPicker || undefined}>
+                        <SelectField
+                            label="Deploy to instance"
+                            value={realmId}
+                            options={realmOptions}
+                            onValue={setRealmId}
+                            help="The nginxpilot instance this site is deployed to. Available subdomains depend on it."
+                        />
+                    </div>
+
                     <tc-single-card-select ref={hostKindRef} columns="2" aria-label="Hostname type" />
 
                     <div className="quaykeeper-wizard-host-mode" hidden={hostKind !== 'subdomain'}>
@@ -867,6 +918,12 @@ export function CreateSiteWizard() {
                         <dd>{parseCsv(requireFile).join(', ') || '(publish any build)'}</dd>
                         <dt>Hostname</dt>
                         <dd>{previewHost}</dd>
+                        {showRealmPicker && (
+                            <>
+                                <dt>Deploys to</dt>
+                                <dd>{realmName ?? '—'}</dd>
+                            </>
+                        )}
                     </dl>
                     <p className="quaykeeper-wizard-hint">
                         Press <strong>Create site</strong> to provision it. Quaykeeper writes the deploy config and

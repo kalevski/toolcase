@@ -48,7 +48,7 @@ export class RealmError extends Error {
     constructor(
         message: string,
         public code: string,
-        public status: 400 | 404 | 409 | 503,
+        public status: 400 | 403 | 404 | 409 | 503,
     ) {
         super(message)
         this.name = 'RealmError'
@@ -183,6 +183,32 @@ export async function resolveActiveRealm(githubId: number, role: Role): Promise<
         throw new RealmError(`realm seeding failed: ${lastSeedError}`, 'seed_failed', 409)
     }
     throw new RealmError('no realm is configured', 'no_realm', 409)
+}
+
+/**
+ * Resolve the realm a request EXPLICITLY targets (a `realmId` in a body or query —
+ * e.g. the create-site wizard's instance picker), enforcing the caller's grants: the
+ * owner may target any registered realm, a non-owner only one they're granted. An
+ * absent/empty `requested` falls back to {@link resolveActiveRealm}, so callers can
+ * pass the raw optional field straight through.
+ */
+export async function resolveRequestedRealm(
+    githubId: number,
+    role: Role,
+    requested: unknown,
+): Promise<Realm> {
+    if (requested === undefined || requested === null || requested === '') {
+        return resolveActiveRealm(githubId, role)
+    }
+    if (typeof requested !== 'string') {
+        throw new RealmError('"realmId" must be a string', 'invalid_request', 400)
+    }
+    const r = realmRepo.byId(requested)
+    if (!r) throw new RealmError(`realm "${requested}" not found`, 'realm_not_found', 404)
+    if (role !== 'owner' && !userRealmRepo.hasAccess(githubId, requested)) {
+        throw new RealmError('you are not granted this realm', 'realm_not_granted', 403)
+    }
+    return toDto(r)
 }
 
 /**

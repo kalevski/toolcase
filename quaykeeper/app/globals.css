@@ -371,6 +371,40 @@ body {
     margin-top: auto;
 }
 
+/* Discovered-on-instance sites (components/DashboardHome.tsx): read-only entries
+   found live on a connected nginxpilot instance but not managed by Quaykeeper. */
+.quaykeeper-external-sites {
+    margin-top: 2.5rem;
+}
+
+.quaykeeper-external-sites-title {
+    margin: 0 0 0.25rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.quaykeeper-external-sites-lead {
+    margin: 0 0 1.25rem;
+    font-size: 0.9375rem;
+    color: var(--tc-text-muted);
+}
+
+.quaykeeper-external-sites-warning {
+    margin: 1.5rem 0 0;
+    font-size: 0.875rem;
+    color: var(--tc-text-muted);
+}
+
+/* An external card is informational, not a link — strip the interactive affordances. */
+.quaykeeper-card--external {
+    cursor: default;
+}
+
+.quaykeeper-card--external:hover {
+    border-color: var(--tc-border);
+    box-shadow: none;
+}
+
 /* P6: account roll-up grid above the site grid. tc-metric-grid owns its own
    mobile-first column cascade; just space it from the cards below. */
 .quaykeeper-sites-metrics {

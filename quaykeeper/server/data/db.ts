@@ -231,6 +231,21 @@ const MIGRATIONS: Migration[] = [
         updated_at TEXT NOT NULL
     );
 
+    -- Pending fragment removals: a site fragment the daemon should no longer hold but
+    -- whose DELETE couldn't be confirmed (forced site delete with the daemon down, a
+    -- rehost retracting the old domain). Retried by the status poll's reconcile pass
+    -- until the daemon confirms (404 = already gone = success), so an orphaned fragment
+    -- never serves a dead site forever. No FK to site — the row typically outlives it.
+    CREATE TABLE site_removal (
+        realm_id   TEXT NOT NULL,
+        domain     TEXT NOT NULL,
+        reason     TEXT NOT NULL,        -- delete | rehost
+        attempts   INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        PRIMARY KEY (realm_id, domain)
+    );
+
     -- Global instance settings (owner-editable branding + custom-domain ingress).
     -- Generic key/value; empty on a fresh instance — a missing key falls through
     -- to its built-in default / env fallback (domain/settings.ts validates writes).
