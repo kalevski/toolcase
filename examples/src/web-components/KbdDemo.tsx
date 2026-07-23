@@ -1,17 +1,9 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const KbdDemo: React.FC = () => {
-    const comboRef = useRef<any>(null)
-    const customSepRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (comboRef.current) {
-            comboRef.current.keys = ['Ctrl', 'K']
-        }
-        if (customSepRef.current) {
-            customSepRef.current.keys = ['Shift', 'Alt', 'Del']
-        }
-    }, [])
+    const comboRef = useTc<HTMLElement>({ keys: ['Ctrl', 'K'] })
+    const customSepRef = useTc<HTMLElement>({ keys: ['Shift', 'Alt', 'Del'] })
 
     return (
         <div className="py-4">

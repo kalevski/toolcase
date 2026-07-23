@@ -1,20 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTcEvents } from '@toolcase/web-components/react'
 
 const MetalButtonDemo: React.FC = () => {
     const [log, setLog] = useState<string[]>([])
-    const eventsRef = useRef<any>(null)
-
-    useEffect(() => {
-        const el = eventsRef.current
-        if (!el) return
-        const onClick = () => {
+    const eventsRef = useTcEvents<HTMLElement>({
+        click: () => {
             setLog((l) => ['click fired', ...l].slice(0, 6))
-        }
-        el.addEventListener('click', onClick)
-        return () => {
-            el.removeEventListener('click', onClick)
-        }
-    }, [])
+        },
+    })
 
     return (
         <div className="py-4">

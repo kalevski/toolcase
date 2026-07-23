@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useMemo, useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 // Build a small sample sprite (a glyph on a transparent background) as a PNG data
 // URL so the editor has an image to trace shapes over.
@@ -29,30 +30,29 @@ function makeSampleSource(): string {
 
 const TOOLS = ['select', 'polygon', 'circle', 'box'] as const
 
+// Seed shapes applied once via a stable reference so editor mutations are not
+// clobbered on re-render.
+const SEED_SHAPES = [
+    { type: 'box', x: 60, y: 40, w: 220, h: 160 },
+    { type: 'circle', x: 168, y: 124, r: 48 },
+]
+
 const PhysicsEditorDemo: React.FC = () => {
-    const editorRef = useRef<any>(null)
+    // `source` accepts a URL string, File, or Blob — computed once and set as a
+    // JS property. Seed shapes come from a stable module-level reference.
+    const source = useMemo(() => makeSampleSource(), [])
     const [tool, setTool] = useState<(typeof TOOLS)[number]>('box')
-    const [shapesJson, setShapesJson] = useState<string>('[]')
+    const [shapesJson, setShapesJson] = useState<string>(JSON.stringify(SEED_SHAPES, null, 2))
 
-    useEffect(() => {
-        const el = editorRef.current
-        if (!el) return
-        // `source` accepts a URL string, File, or Blob — set it as a JS property.
-        el.source = makeSampleSource()
-        // Seed a couple of shapes through the `shapes` property.
-        el.shapes = [
-            { type: 'box', x: 60, y: 40, w: 220, h: 160 },
-            { type: 'circle', x: 168, y: 124, r: 48 },
-        ]
-        setShapesJson(JSON.stringify(el.shapes, null, 2))
-
-        const onChange = (e: Event) => {
-            const detail = (e as CustomEvent).detail
-            setShapesJson(JSON.stringify(detail.shapes, null, 2))
+    const editorRef = useTc<any>(
+        { source, shapes: SEED_SHAPES },
+        {
+            'tc-change': (e: Event) => {
+                const detail = (e as CustomEvent).detail
+                setShapesJson(JSON.stringify(detail.shapes, null, 2))
+            },
         }
-        el.addEventListener('tc-change', onChange)
-        return () => el.removeEventListener('tc-change', onChange)
-    }, [])
+    )
 
     const pickTool = (next: (typeof TOOLS)[number]) => {
         setTool(next)

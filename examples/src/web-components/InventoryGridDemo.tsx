@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const BACKPACK = [
     { id: 'sword', name: 'Longsword', icon: 'S' },
@@ -25,23 +26,17 @@ const STASH = [
 ]
 
 const InventoryGridDemo: React.FC = () => {
-    const backpackRef = useRef<any>(null)
-    const stashRef = useRef<any>(null)
     const [selected, setSelected] = useState<string>('potion')
 
-    useEffect(() => {
-        const el = backpackRef.current
-        if (!el) return
-        el.items = BACKPACK
-        const onSelect = (e: CustomEvent<{ item: { id: string } | null; index: number }>) =>
-            setSelected(e.detail.item?.id ?? '')
-        el.addEventListener('tc-select', onSelect as EventListener)
-        return () => el.removeEventListener('tc-select', onSelect as EventListener)
-    }, [])
+    const backpackRef = useTc<HTMLElement>(
+        { items: BACKPACK },
+        {
+            'tc-select': (e: CustomEvent) =>
+                setSelected(e.detail.item?.id ?? ''),
+        }
+    )
 
-    useEffect(() => {
-        if (stashRef.current) stashRef.current.items = STASH
-    }, [])
+    const stashRef = useTc<HTMLElement>({ items: STASH })
 
     return (
         <div className="py-4">

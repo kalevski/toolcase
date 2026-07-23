@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const STATS = [
     { label: 'Time', value: '14:32' },
@@ -25,49 +26,25 @@ const VICTORY_ACTIONS = [
 ]
 
 const ResultScreenDemo: React.FC = () => {
-    const fullRef = useRef<any>(null)
-    const victoryRef = useRef<any>(null)
-    const minimalRef = useRef<any>(null)
-    const defeatRef = useRef<any>(null)
-    const winRef = useRef<any>(null)
-
     const [lastAction, setLastAction] = useState<string>('(none yet — click an action)')
 
-    useEffect(() => {
-        const el = fullRef.current
-        if (!el) return
-        el.stats = STATS
-        el.rewards = REWARDS
-        el.actions = ACTIONS
-
-        const onAction = (e: Event) => setLastAction((e as CustomEvent<{ id: string }>).detail.id)
-        el.addEventListener('tc-action', onAction)
-        return () => el.removeEventListener('tc-action', onAction)
-    }, [])
-
-    useEffect(() => {
-        const el = victoryRef.current
-        if (!el) return
-        el.stats = STATS
-        el.rewards = REWARDS
-        el.actions = VICTORY_ACTIONS
-    }, [])
-
-    useEffect(() => {
-        const el = minimalRef.current
-        if (!el) return
-        el.actions = [{ id: 'continue', label: 'Continue', variant: 'primary' }]
-    }, [])
-
-    useEffect(() => {
-        const el = defeatRef.current
-        if (el) el.actions = ACTIONS
-        const win = winRef.current
-        if (win) {
-            win.stats = STATS
-            win.actions = VICTORY_ACTIONS
+    const fullRef = useTc<HTMLElement>(
+        { stats: STATS, rewards: REWARDS, actions: ACTIONS },
+        {
+            'tc-action': (e: Event) =>
+                setLastAction((e as CustomEvent<{ id: string }>).detail.id),
         }
-    }, [])
+    )
+    const victoryRef = useTc<HTMLElement>({
+        stats: STATS,
+        rewards: REWARDS,
+        actions: VICTORY_ACTIONS,
+    })
+    const minimalRef = useTc<HTMLElement>({
+        actions: [{ id: 'continue', label: 'Continue', variant: 'primary' }],
+    })
+    const defeatRef = useTc<HTMLElement>({ actions: ACTIONS })
+    const winRef = useTc<HTMLElement>({ stats: STATS, actions: VICTORY_ACTIONS })
 
     return (
         <div className="py-4">

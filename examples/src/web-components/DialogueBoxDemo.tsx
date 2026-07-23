@@ -1,32 +1,25 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc, useTcEvents } from '@toolcase/web-components/react'
 
 const DialogueBoxDemo: React.FC = () => {
-    const choiceRef = useRef<any>(null)
-    const advanceRef = useRef<any>(null)
     const [lastChoice, setLastChoice] = useState<string>('—')
     const [advanceCount, setAdvanceCount] = useState(0)
 
     // choices is a JS property (array) and tc-choice is a CustomEvent — both need a ref.
-    useEffect(() => {
-        const el = choiceRef.current
-        if (!el) return
-        el.choices = [
-            { id: 'accept', label: 'Accept the quest' },
-            { id: 'decline', label: 'Decline politely' },
-            { id: 'locked', label: 'Ask for more gold', disabled: true },
-        ]
-        const onChoice = (e: any) => setLastChoice(e.detail.id)
-        el.addEventListener('tc-choice', onChoice)
-        return () => el.removeEventListener('tc-choice', onChoice)
-    }, [])
+    const choiceRef = useTc<HTMLElement>(
+        {
+            choices: [
+                { id: 'accept', label: 'Accept the quest' },
+                { id: 'decline', label: 'Decline politely' },
+                { id: 'locked', label: 'Ask for more gold', disabled: true },
+            ],
+        },
+        { 'tc-choice': (e: any) => setLastChoice(e.detail.id) },
+    )
 
-    useEffect(() => {
-        const el = advanceRef.current
-        if (!el) return
-        const onAdvance = () => setAdvanceCount((c) => c + 1)
-        el.addEventListener('tc-advance', onAdvance)
-        return () => el.removeEventListener('tc-advance', onAdvance)
-    }, [])
+    const advanceRef = useTcEvents<HTMLElement>({
+        'tc-advance': () => setAdvanceCount((c) => c + 1),
+    })
 
     return (
         <div className="py-4">

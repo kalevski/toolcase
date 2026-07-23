@@ -1,19 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc, useTcEvents, type TcRef } from '@toolcase/web-components/react'
 
-function useSliderValue(initial: number): [number, React.RefObject<any>] {
+function useSliderValue(initial: number): [number, TcRef<any>] {
     const [value, setValue] = useState<number>(initial)
-    const ref = useRef<any>(null)
-
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        const handler = (e: Event) => {
+    const ref = useTcEvents<any>({
+        'tc-change': (e: Event) => {
             const detail = (e as CustomEvent).detail
             if (typeof detail?.value === 'number') setValue(detail.value as number)
-        }
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-    }, [])
+        },
+    })
 
     return [value, ref]
 }
@@ -24,11 +19,7 @@ const SliderDemo: React.FC = () => {
     const [v3, ref3] = useSliderValue(60)
 
     // formatValue is a function → must be set on the element via a ref.
-    const fmtRef = useRef<any>(null)
-    useEffect(() => {
-        const el = fmtRef.current
-        if (el) el.formatValue = (n: number) => `$${n.toFixed(2)}`
-    }, [])
+    const fmtRef = useTc<any>({ formatValue: (n: number) => `$${n.toFixed(2)}` })
 
     return (
         <div className="py-4">

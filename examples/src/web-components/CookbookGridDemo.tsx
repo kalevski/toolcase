@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const RECIPES_2COL = [
     {
@@ -76,26 +77,10 @@ const RECIPES_3COL = [
 ]
 
 const CookbookGridDemo: React.FC = () => {
-    const twoColRef = useRef<any>(null)
-    const threeColRef = useRef<any>(null)
-    const noTitleRef = useRef<any>(null)
-    const slotTitleRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (twoColRef.current) twoColRef.current.recipes = RECIPES_2COL
-    }, [])
-
-    useEffect(() => {
-        if (threeColRef.current) threeColRef.current.recipes = RECIPES_3COL
-    }, [])
-
-    useEffect(() => {
-        if (noTitleRef.current) noTitleRef.current.recipes = RECIPES_2COL.slice(0, 2)
-    }, [])
-
-    useEffect(() => {
-        if (slotTitleRef.current) slotTitleRef.current.recipes = RECIPES_2COL.slice(0, 2)
-    }, [])
+    const twoColRef = useTc<HTMLElement>({ recipes: RECIPES_2COL })
+    const threeColRef = useTc<HTMLElement>({ recipes: RECIPES_3COL })
+    const noTitleRef = useTc<HTMLElement>({ recipes: RECIPES_2COL.slice(0, 2) })
+    const slotTitleRef = useTc<HTMLElement>({ recipes: RECIPES_2COL.slice(0, 2) })
 
     return (
         <div className="py-4">

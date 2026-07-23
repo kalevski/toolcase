@@ -1,18 +1,14 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const FeatureMatrixDemo: React.FC = () => {
-    const fullRef = useRef<any>(null)
-    const partialRef = useRef<any>(null)
-    const slottedRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (!fullRef.current) return
-        fullRef.current.columns = [
+    const fullRef = useTc<HTMLElement>({
+        columns: [
             { id: 'free', label: 'Free' },
             { id: 'pro', label: 'Pro', highlight: true },
             { id: 'enterprise', label: 'Enterprise', highlight: true },
-        ]
-        fullRef.current.rows = [
+        ],
+        rows: [
             {
                 label: 'Custom domains',
                 hint: 'Bring your own domain',
@@ -40,38 +36,34 @@ const FeatureMatrixDemo: React.FC = () => {
                 label: 'Priority support',
                 values: { free: false, pro: 'partial', enterprise: true },
             },
-        ]
-    }, [])
-
-    useEffect(() => {
-        if (!partialRef.current) return
-        partialRef.current.columns = [
+        ],
+    })
+    const partialRef = useTc<HTMLElement>({
+        columns: [
             { id: 'basic', label: 'Basic' },
             { id: 'standard', label: 'Standard', highlight: true },
             { id: 'advanced', label: 'Advanced' },
-        ]
-        partialRef.current.rows = [
+        ],
+        rows: [
             {
                 label: 'Storage',
                 values: { basic: '5 GB', standard: '50 GB', advanced: 'Unlimited' },
             },
             { label: 'Collaboration', values: { basic: false, standard: true, advanced: true } },
             { label: 'Audit log', values: { basic: false, standard: 'partial', advanced: true } },
-        ]
-    }, [])
-
-    useEffect(() => {
-        if (!slottedRef.current) return
-        slottedRef.current.columns = [
+        ],
+    })
+    const slottedRef = useTc<HTMLElement>({
+        columns: [
             { id: 'oss', label: 'Open Source' },
             { id: 'cloud', label: 'Cloud', highlight: true },
-        ]
-        slottedRef.current.rows = [
+        ],
+        rows: [
             { label: 'Self-hosted', values: { oss: true, cloud: false } },
             { label: 'Managed updates', values: { oss: false, cloud: true } },
             { label: 'Plugin support', values: { oss: true, cloud: 'partial' } },
-        ]
-    }, [])
+        ],
+    })
 
     return (
         <div className="py-4">

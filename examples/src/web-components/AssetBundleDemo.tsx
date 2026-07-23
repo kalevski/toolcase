@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const MENU_ITEMS = [
     { key: 'edit', icon: 'Pencil', label: 'Edit Bundle' },
@@ -10,48 +11,36 @@ const MENU_ITEMS = [
 ]
 
 const AssetBundleDemo: React.FC = () => {
-    const fullRef = useRef<any>(null)
-    const godotRef = useRef<any>(null)
     const [menuKey, setMenuKey] = useState<string | null>(null)
     const [advancedOpen, setAdvancedOpen] = useState<boolean | null>(null)
     const [buildTag, setBuildTag] = useState<string | null>(null)
 
-    useEffect(() => {
-        const el = fullRef.current
-        if (!el) return
-        el.includedTags = ['hud', 'buttons', 'icons']
-        el.excludedTags = ['debug', 'placeholder']
-        el.counts = { textures: 124, fonts: 8, configs: 3 }
-        el.advanced = {
-            compress: true,
-            powerOfTwo: true,
-            trim: false,
-            padding: 2,
-            algorithm: 'maxrects',
-        }
-        el.menuItems = MENU_ITEMS
-
-        const onMenu = (e: CustomEvent) => setMenuKey(e.detail.key)
-        const onToggle = (e: CustomEvent) => setAdvancedOpen(e.detail.open)
-        const onTag = (e: CustomEvent) => setBuildTag(e.detail.tag)
-        el.addEventListener('tc-menu-click', onMenu)
-        el.addEventListener('tc-advanced-toggle', onToggle)
-        el.addEventListener('tc-build-tag-change', onTag)
-        return () => {
-            el.removeEventListener('tc-menu-click', onMenu)
-            el.removeEventListener('tc-advanced-toggle', onToggle)
-            el.removeEventListener('tc-build-tag-change', onTag)
-        }
-    }, [])
-
-    useEffect(() => {
-        const el = godotRef.current
-        if (!el) return
-        el.includedTags = ['hero', 'npc', 'enemy']
-        el.excludedTags = ['wip']
-        el.counts = { textures: 89, animations: 34, sounds: 12 }
-        el.advanced = { compress: false, powerOfTwo: true, trim: true, padding: 0 }
-    }, [])
+    const fullRef = useTc<HTMLElement>(
+        {
+            includedTags: ['hud', 'buttons', 'icons'],
+            excludedTags: ['debug', 'placeholder'],
+            counts: { textures: 124, fonts: 8, configs: 3 },
+            advanced: {
+                compress: true,
+                powerOfTwo: true,
+                trim: false,
+                padding: 2,
+                algorithm: 'maxrects',
+            },
+            menuItems: MENU_ITEMS,
+        },
+        {
+            'tc-menu-click': (e: CustomEvent) => setMenuKey(e.detail.key),
+            'tc-advanced-toggle': (e: CustomEvent) => setAdvancedOpen(e.detail.open),
+            'tc-build-tag-change': (e: CustomEvent) => setBuildTag(e.detail.tag),
+        },
+    )
+    const godotRef = useTc<HTMLElement>({
+        includedTags: ['hero', 'npc', 'enemy'],
+        excludedTags: ['wip'],
+        counts: { textures: 89, animations: 34, sounds: 12 },
+        advanced: { compress: false, powerOfTwo: true, trim: true, padding: 0 },
+    })
 
     return (
         <div className="py-4">

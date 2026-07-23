@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 type Level = 'info' | 'success' | 'warning' | 'danger'
 
@@ -53,19 +54,21 @@ function nextEvent(): DemoEvent {
 }
 
 const LiveFeedDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const recordingRef = useRef<any>(null)
     const autoScrollRef = useRef<any>(null)
     const maxRowsRef = useRef<any>(null)
-    const clickRef = useRef<any>(null)
     const [clickedRow, setClickedRow] = useState<string | null>(null)
 
-    // Set initial events on all feeds
-    useEffect(() => {
-        if (basicRef.current) basicRef.current.events = [...INITIAL_EVENTS]
-        if (recordingRef.current) recordingRef.current.events = [...INITIAL_EVENTS]
-        if (clickRef.current) clickRef.current.events = [...INITIAL_EVENTS]
-    }, [])
+    const basicRef = useTc<HTMLElement>({ events: [...INITIAL_EVENTS] })
+    const recordingRef = useTc<HTMLElement>({ events: [...INITIAL_EVENTS] })
+    const clickRef = useTc<HTMLElement>(
+        { events: [...INITIAL_EVENTS] },
+        {
+            'tc-row-click': (e: CustomEvent) => {
+                const { id, event } = e.detail
+                setClickedRow(`id=${id ?? 'n/a'} label="${event.label}"`)
+            },
+        }
+    )
 
     // auto-scroll feed: seed with more events and keep pushing live ones
     useEffect(() => {
@@ -92,18 +95,6 @@ const LiveFeedDemo: React.FC = () => {
             el.events = [...el.events, nextEvent()]
         }, 2000)
         return () => clearInterval(id)
-    }, [])
-
-    // tc-row-click listener on the click demo
-    useEffect(() => {
-        const el = clickRef.current
-        if (!el) return
-        const handler = (e: CustomEvent) => {
-            const { id, event } = e.detail
-            setClickedRow(`id=${id ?? 'n/a'} label="${event.label}"`)
-        }
-        el.addEventListener('tc-row-click', handler)
-        return () => el.removeEventListener('tc-row-click', handler)
     }, [])
 
     return (

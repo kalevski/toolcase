@@ -1,42 +1,32 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
+
+// Markers shared across the cardinal + marker demos. Most use the default ink
+// accent; one spends the rare cyan highlight for an objective.
+const SHARED_MARKERS = [
+    { id: 'obj', heading: 30, label: 'Objective', color: 'var(--tc-accent)' },
+    { id: 'ally', heading: 75, label: 'Ally' },
+    { id: 'home', heading: 350, label: 'Base', icon: '⌂' },
+]
+const CARDINAL_MARKERS = [{ id: 'waypoint', heading: 120, label: 'Waypoint' }]
+const LIVE_MARKERS = [
+    { id: 'n-marker', heading: 0, label: 'North', color: 'var(--tc-accent)' },
+    { id: 'e-marker', heading: 90, label: 'East' },
+    { id: 's-marker', heading: 180, label: 'South' },
+    { id: 'w-marker', heading: 270, label: 'West' },
+]
 
 const CompassBarDemo: React.FC = () => {
-    const cardinalsRef = useRef<any>(null)
-    const markersRef = useRef<any>(null)
-    const narrowRef = useRef<any>(null)
-    const liveRef = useRef<any>(null)
-
     const [heading, setHeading] = useState(0)
 
-    // Markers shared across the cardinal + marker demos. Most use the default ink
-    // accent; one spends the rare cyan highlight for an objective.
-    useEffect(() => {
-        const markers = [
-            { id: 'obj', heading: 30, label: 'Objective', color: 'var(--tc-accent)' },
-            { id: 'ally', heading: 75, label: 'Ally' },
-            { id: 'home', heading: 350, label: 'Base', icon: '⌂' },
-        ]
-        if (markersRef.current) markersRef.current.markers = markers
-        if (narrowRef.current) narrowRef.current.markers = markers
-    }, [])
-
-    useEffect(() => {
-        if (cardinalsRef.current) {
-            cardinalsRef.current.markers = [{ id: 'waypoint', heading: 120, label: 'Waypoint' }]
-        }
-    }, [])
+    const cardinalsRef = useTc<HTMLElement>({ markers: CARDINAL_MARKERS })
+    const markersRef = useTc<HTMLElement>({ markers: SHARED_MARKERS })
+    const narrowRef = useTc<HTMLElement>({ markers: SHARED_MARKERS })
+    const liveRef = useTc<HTMLElement>({ markers: LIVE_MARKERS })
 
     // A live-tracking strip: slowly sweep the heading so cardinals and markers
     // slide across the field of view.
     useEffect(() => {
-        const el = liveRef.current
-        if (!el) return
-        el.markers = [
-            { id: 'n-marker', heading: 0, label: 'North', color: 'var(--tc-accent)' },
-            { id: 'e-marker', heading: 90, label: 'East' },
-            { id: 's-marker', heading: 180, label: 'South' },
-            { id: 'w-marker', heading: 270, label: 'West' },
-        ]
         const id = window.setInterval(() => {
             setHeading((h) => (h + 2) % 360)
         }, 80)

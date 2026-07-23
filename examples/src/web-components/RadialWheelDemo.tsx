@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const DEFAULT_OPTIONS = [
     { id: 'sword', icon: '⚔', label: 'Sword', color: 'var(--tc-app-accent)' },
@@ -10,15 +11,18 @@ const DEFAULT_OPTIONS = [
 ]
 
 const RadialWheelDemo: React.FC = () => {
-    const wheelRef = useRef<any>(null)
     const [open, setOpen] = useState(false)
     const [last, setLast] = useState<string | null>(null)
-
-    // Set JS-property options on mount.
-    useEffect(() => {
-        if (!wheelRef.current) return
-        wheelRef.current.options = DEFAULT_OPTIONS
-    }, [])
+    const wheelRef = useTc<HTMLElement>(
+        { options: DEFAULT_OPTIONS },
+        {
+            'tc-select': (e: CustomEvent) => {
+                setLast(`tc-select — id: "${e.detail.id}"`)
+                setOpen(false)
+            },
+            'tc-close': () => setOpen(false),
+        }
+    )
 
     // Mirror React state → [open] attribute.
     useEffect(() => {
@@ -26,23 +30,6 @@ const RadialWheelDemo: React.FC = () => {
         if (open) wheelRef.current.setAttribute('open', '')
         else wheelRef.current.removeAttribute('open')
     }, [open])
-
-    // Listen for tc-select and tc-close.
-    useEffect(() => {
-        const el = wheelRef.current
-        if (!el) return
-        const onSelect = (e: CustomEvent) => {
-            setLast(`tc-select — id: "${e.detail.id}"`)
-            setOpen(false)
-        }
-        const onClose = () => setOpen(false)
-        el.addEventListener('tc-select', onSelect)
-        el.addEventListener('tc-close', onClose)
-        return () => {
-            el.removeEventListener('tc-select', onSelect)
-            el.removeEventListener('tc-close', onClose)
-        }
-    }, [])
 
     return (
         <div className="py-4">
@@ -123,41 +110,31 @@ const RadialWheelDemo: React.FC = () => {
 
 /** Secondary demo — smaller wheel, no center label, fewer options. */
 const SmallWheelExample: React.FC = () => {
-    const ref = useRef<any>(null)
     const [open, setOpen] = useState(false)
     const [last, setLast] = useState<string | null>(null)
-
-    useEffect(() => {
-        if (!ref.current) return
-        ref.current.options = [
-            { id: 'fire', icon: '🔥', label: 'Fire' },
-            { id: 'ice', icon: '❄', label: 'Ice' },
-            { id: 'storm', icon: '⚡', label: 'Storm' },
-            { id: 'earth', icon: '🪨', label: 'Earth' },
-        ]
-    }, [])
+    const ref = useTc<HTMLElement>(
+        {
+            options: [
+                { id: 'fire', icon: '🔥', label: 'Fire' },
+                { id: 'ice', icon: '❄', label: 'Ice' },
+                { id: 'storm', icon: '⚡', label: 'Storm' },
+                { id: 'earth', icon: '🪨', label: 'Earth' },
+            ],
+        },
+        {
+            'tc-select': (e: CustomEvent) => {
+                setLast(e.detail.id)
+                setOpen(false)
+            },
+            'tc-close': () => setOpen(false),
+        }
+    )
 
     useEffect(() => {
         if (!ref.current) return
         if (open) ref.current.setAttribute('open', '')
         else ref.current.removeAttribute('open')
     }, [open])
-
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        const onSelect = (e: CustomEvent) => {
-            setLast(e.detail.id)
-            setOpen(false)
-        }
-        const onClose = () => setOpen(false)
-        el.addEventListener('tc-select', onSelect)
-        el.addEventListener('tc-close', onClose)
-        return () => {
-            el.removeEventListener('tc-select', onSelect)
-            el.removeEventListener('tc-close', onClose)
-        }
-    }, [])
 
     return (
         <>
@@ -181,51 +158,41 @@ const SmallWheelExample: React.FC = () => {
 
 /** Pagination demo — 14 options paged 8-at-a-time across two wheels. */
 const PaginatedWheelExample: React.FC = () => {
-    const ref = useRef<any>(null)
     const [open, setOpen] = useState(false)
     const [last, setLast] = useState<string | null>(null)
-
-    useEffect(() => {
-        if (!ref.current) return
-        ref.current.options = [
-            { id: 'sword', icon: '⚔', label: 'Sword' },
-            { id: 'axe', icon: '🪓', label: 'Axe' },
-            { id: 'bow', icon: '🏹', label: 'Bow' },
-            { id: 'staff', icon: '✦', label: 'Staff' },
-            { id: 'shield', icon: '🛡', label: 'Shield' },
-            { id: 'potion', icon: '⚕', label: 'Potion' },
-            { id: 'bomb', icon: '💣', label: 'Bomb' },
-            { id: 'key', icon: '🗝', label: 'Key' },
-            { id: 'map', icon: '🗺', label: 'Map' },
-            { id: 'torch', icon: '🔦', label: 'Torch' },
-            { id: 'rope', icon: '➰', label: 'Rope' },
-            { id: 'scroll', icon: '📜', label: 'Scroll' },
-            { id: 'gem', icon: '💎', label: 'Gem' },
-            { id: 'ring', icon: '💍', label: 'Ring' },
-        ]
-    }, [])
+    const ref = useTc<HTMLElement>(
+        {
+            options: [
+                { id: 'sword', icon: '⚔', label: 'Sword' },
+                { id: 'axe', icon: '🪓', label: 'Axe' },
+                { id: 'bow', icon: '🏹', label: 'Bow' },
+                { id: 'staff', icon: '✦', label: 'Staff' },
+                { id: 'shield', icon: '🛡', label: 'Shield' },
+                { id: 'potion', icon: '⚕', label: 'Potion' },
+                { id: 'bomb', icon: '💣', label: 'Bomb' },
+                { id: 'key', icon: '🗝', label: 'Key' },
+                { id: 'map', icon: '🗺', label: 'Map' },
+                { id: 'torch', icon: '🔦', label: 'Torch' },
+                { id: 'rope', icon: '➰', label: 'Rope' },
+                { id: 'scroll', icon: '📜', label: 'Scroll' },
+                { id: 'gem', icon: '💎', label: 'Gem' },
+                { id: 'ring', icon: '💍', label: 'Ring' },
+            ],
+        },
+        {
+            'tc-select': (e: CustomEvent) => {
+                setLast(e.detail.id)
+                setOpen(false)
+            },
+            'tc-close': () => setOpen(false),
+        }
+    )
 
     useEffect(() => {
         if (!ref.current) return
         if (open) ref.current.setAttribute('open', '')
         else ref.current.removeAttribute('open')
     }, [open])
-
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        const onSelect = (e: CustomEvent) => {
-            setLast(e.detail.id)
-            setOpen(false)
-        }
-        const onClose = () => setOpen(false)
-        el.addEventListener('tc-select', onSelect)
-        el.addEventListener('tc-close', onClose)
-        return () => {
-            el.removeEventListener('tc-select', onSelect)
-            el.removeEventListener('tc-close', onClose)
-        }
-    }, [])
 
     return (
         <>

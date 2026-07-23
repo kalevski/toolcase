@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const LEGENDARY = {
     id: 'dawnbreaker',
@@ -43,21 +44,11 @@ const RARE = {
 }
 
 const ItemTooltipDemo: React.FC = () => {
-    const legendaryRef = useRef<any>(null)
-    const commonRef = useRef<any>(null)
-    const rareRef = useRef<any>(null)
+    const legendaryRef = useTc<HTMLElement>({ item: LEGENDARY })
 
-    useEffect(() => {
-        if (legendaryRef.current) legendaryRef.current.item = LEGENDARY
-    }, [])
+    const commonRef = useTc<HTMLElement>({ item: COMMON })
 
-    useEffect(() => {
-        if (commonRef.current) commonRef.current.item = COMMON
-    }, [])
-
-    useEffect(() => {
-        if (rareRef.current) rareRef.current.item = RARE
-    }, [])
+    const rareRef = useTc<HTMLElement>({ item: RARE })
 
     return (
         <div className="py-4">

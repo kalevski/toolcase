@@ -1,19 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useTcEvents } from '@toolcase/web-components/react'
 
 const ToggleDemo: React.FC = () => {
-    const controlledRef = useRef<any>(null)
     const [isOn, setIsOn] = useState(false)
 
     // Sync the controlled toggle's on state with React state.
-    useEffect(() => {
-        const el = controlledRef.current
-        if (!el) return
-        const handler = (e: Event) => {
+    const controlledRef = useTcEvents<HTMLElement>({
+        'tc-change': (e: Event) => {
             setIsOn((e as CustomEvent<{ on: boolean }>).detail.on)
-        }
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-    }, [])
+        },
+    })
 
     useEffect(() => {
         const el = controlledRef.current

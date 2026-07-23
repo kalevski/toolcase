@@ -1,19 +1,16 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const MarqueeDemo: React.FC = () => {
-    const itemsRef = useRef<any>(null)
-
-    useEffect(() => {
-        const el = itemsRef.current
-        if (!el) return
-        el.items = [
+    const itemsRef = useTc<HTMLElement>({
+        items: [
             '🚀 Launched v3.0',
             '⭐ 12 k GitHub stars',
             '📦 Zero runtime dependencies',
             '🎨 Fully themeable via CSS custom properties',
             '🌍 Used in 40+ countries',
-        ]
-    }, [])
+        ],
+    })
 
     return (
         <div className="py-4">

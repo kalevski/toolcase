@@ -1,19 +1,17 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc, type TcRef } from '@toolcase/web-components/react'
 
-function useSelectRowValue(initial: string): [string, React.RefObject<any>] {
+function useSelectRowValue(initial: string, options: unknown[]): [string, TcRef<HTMLElement>] {
     const [value, setValue] = useState(initial)
-    const ref = useRef<any>(null)
-
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        const handler = (e: Event) => {
-            const detail = (e as CustomEvent<{ value: string }>).detail
-            if (detail) setValue(detail.value)
+    const ref = useTc<HTMLElement>(
+        { options },
+        {
+            'tc-change': (e: Event) => {
+                const detail = (e as CustomEvent<{ value: string }>).detail
+                if (detail) setValue(detail.value)
+            },
         }
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-    }, [])
+    )
 
     return [value, ref]
 }
@@ -39,34 +37,20 @@ const SHADOW_OPTIONS = [
     { value: 'high', label: 'High' },
 ]
 
+const ANISO_OPTIONS = [
+    { value: '1', label: '1 (Minimum)' },
+    { value: '2', label: '2' },
+    { value: '4', label: '4' },
+    { value: '8', label: '8 (Default)' },
+    { value: '16', label: '16 (Maximum)' },
+]
+
 const SelectRowDemo: React.FC = () => {
-    const [v1, ref1] = useSelectRowValue('high')
-    const [v2, ref2] = useSelectRowValue('en')
+    const [v1, ref1] = useSelectRowValue('high', QUALITY_OPTIONS)
+    const [v2, ref2] = useSelectRowValue('en', LANG_OPTIONS)
 
-    // Populate options via JS property (not attribute).
-    useEffect(() => {
-        if (ref1.current) ref1.current.options = QUALITY_OPTIONS
-        if (ref2.current) ref2.current.options = LANG_OPTIONS
-    }, [])
-
-    // Custom options for the third and fourth examples.
-    const ref3 = useRef<any>(null)
-    const ref4 = useRef<any>(null)
-    useEffect(() => {
-        const el = ref3.current
-        if (!el) return
-        el.options = [
-            { value: '1', label: '1 (Minimum)' },
-            { value: '2', label: '2' },
-            { value: '4', label: '4' },
-            { value: '8', label: '8 (Default)' },
-            { value: '16', label: '16 (Maximum)' },
-        ]
-    }, [])
-
-    useEffect(() => {
-        if (ref4.current) ref4.current.options = SHADOW_OPTIONS
-    }, [])
+    const ref3 = useTc<HTMLElement>({ options: ANISO_OPTIONS })
+    const ref4 = useTc<HTMLElement>({ options: SHADOW_OPTIONS })
 
     return (
         <div className="py-4">

@@ -1,11 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const CooldownBadgeDemo: React.FC = () => {
     // Live cooldown: `value` climbs from 0 to `max`, depleting the ring; when it
     // reaches `max` the badge flips to its ready state, then we reset.
-    const liveRef = useRef<any>(null)
     const [value, setValue] = useState(0)
     const MAX = 8
+
+    const liveRef = useTc<HTMLElement>({ value })
 
     useEffect(() => {
         const id = setInterval(() => {
@@ -13,10 +15,6 @@ const CooldownBadgeDemo: React.FC = () => {
         }, 100)
         return () => clearInterval(id)
     }, [])
-
-    useEffect(() => {
-        if (liveRef.current) liveRef.current.value = value
-    }, [value])
 
     return (
         <div className="py-4">

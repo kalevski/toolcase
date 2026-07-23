@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 // Reference lists feeding the conditional `$ref` selectors. `refList` backs the
 // `ref` type, `arrayRefList` the array-item type, `objectRefList` the object type.
@@ -37,38 +38,22 @@ const duplicateValue = JSON.stringify([
 ])
 
 const JSONSchemaDefDemo: React.FC = () => {
-    const editorRef = useRef<any>(null)
-    const dupRef = useRef<any>(null)
-    const disabledRef = useRef<any>(null)
     const [value, setValue] = useState<string>(defaultValue)
     const [schemaName, setSchemaName] = useState<string>('Person')
 
-    useEffect(() => {
-        const el = editorRef.current
-        if (!el) return
-        // Ref lists and defaultValue are JS properties — React can't set them as
-        // attributes, so seed them through the ref.
-        el.refList = refList
-        el.arrayRefList = arrayRefList
-        el.objectRefList = objectRefList
-        const onChange = (e: Event) => setValue((e as CustomEvent).detail.value)
-        const onLabel = (e: Event) => setSchemaName((e as CustomEvent).detail.label)
-        el.addEventListener('tc-change', onChange)
-        el.addEventListener('tc-label-change', onLabel)
-        return () => {
-            el.removeEventListener('tc-change', onChange)
-            el.removeEventListener('tc-label-change', onLabel)
+    // Ref lists and defaultValue are JS properties — React can't set them as
+    // attributes, so seed them through the ref.
+    const editorRef = useTc<HTMLElement>(
+        { refList, arrayRefList, objectRefList },
+        {
+            'tc-change': (e: Event) => setValue((e as CustomEvent).detail.value),
+            'tc-label-change': (e: Event) => setSchemaName((e as CustomEvent).detail.label),
         }
-    }, [])
+    )
 
-    useEffect(() => {
-        if (dupRef.current) dupRef.current.refList = refList
-        if (disabledRef.current) {
-            disabledRef.current.refList = refList
-            disabledRef.current.arrayRefList = arrayRefList
-            disabledRef.current.objectRefList = objectRefList
-        }
-    }, [])
+    const dupRef = useTc<HTMLElement>({ refList })
+
+    const disabledRef = useTc<HTMLElement>({ refList, arrayRefList, objectRefList })
 
     return (
         <div className="py-4">

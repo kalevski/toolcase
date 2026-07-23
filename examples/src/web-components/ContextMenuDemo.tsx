@@ -1,51 +1,52 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const ContextMenuDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const nestedRef = useRef<any>(null)
     const [lastKey, setLastKey] = useState<string | null>(null)
 
-    useEffect(() => {
-        if (!basicRef.current) return
-        basicRef.current.items = [
-            { key: 'copy', label: 'Copy', icon: 'Copy' },
-            { key: 'cut', label: 'Cut', icon: 'Scissors' },
-            { key: 'paste', label: 'Paste', icon: 'Clipboard', disabled: true },
-            { key: 'sep-1', label: '', separator: true },
-            { key: 'delete', label: 'Delete', icon: 'Trash2', danger: true },
-        ]
-        const handler = (e: Event) => {
-            setLastKey((e as CustomEvent<{ key: string }>).detail.key)
-        }
-        basicRef.current.addEventListener('tc-select', handler)
-        return () => basicRef.current?.removeEventListener('tc-select', handler)
-    }, [])
-
-    useEffect(() => {
-        if (!nestedRef.current) return
-        nestedRef.current.items = [
-            { key: 'open', label: 'Open', icon: 'FolderOpen' },
-            {
-                key: 'share',
-                label: 'Share',
-                icon: 'Share2',
-                children: [
-                    { key: 'share-link', label: 'Copy link', icon: 'Link' },
-                    { key: 'share-email', label: 'Send by email', icon: 'Mail' },
-                    { key: 'share-sep', label: '', separator: true },
-                    { key: 'share-export', label: 'Export…', icon: 'Download' },
-                ],
+    const basicRef = useTc<HTMLElement>(
+        {
+            items: [
+                { key: 'copy', label: 'Copy', icon: 'Copy' },
+                { key: 'cut', label: 'Cut', icon: 'Scissors' },
+                { key: 'paste', label: 'Paste', icon: 'Clipboard', disabled: true },
+                { key: 'sep-1', label: '', separator: true },
+                { key: 'delete', label: 'Delete', icon: 'Trash2', danger: true },
+            ],
+        },
+        {
+            'tc-select': (e: Event) => {
+                setLastKey((e as CustomEvent<{ key: string }>).detail.key)
             },
-            { key: 'rename', label: 'Rename', icon: 'Pencil' },
-            { key: 'sep-2', label: '', separator: true },
-            { key: 'remove', label: 'Remove', icon: 'Trash2', danger: true },
-        ]
-        const handler = (e: Event) => {
-            setLastKey((e as CustomEvent<{ key: string }>).detail.key)
         }
-        nestedRef.current.addEventListener('tc-select', handler)
-        return () => nestedRef.current?.removeEventListener('tc-select', handler)
-    }, [])
+    )
+
+    const nestedRef = useTc<HTMLElement>(
+        {
+            items: [
+                { key: 'open', label: 'Open', icon: 'FolderOpen' },
+                {
+                    key: 'share',
+                    label: 'Share',
+                    icon: 'Share2',
+                    children: [
+                        { key: 'share-link', label: 'Copy link', icon: 'Link' },
+                        { key: 'share-email', label: 'Send by email', icon: 'Mail' },
+                        { key: 'share-sep', label: '', separator: true },
+                        { key: 'share-export', label: 'Export…', icon: 'Download' },
+                    ],
+                },
+                { key: 'rename', label: 'Rename', icon: 'Pencil' },
+                { key: 'sep-2', label: '', separator: true },
+                { key: 'remove', label: 'Remove', icon: 'Trash2', danger: true },
+            ],
+        },
+        {
+            'tc-select': (e: Event) => {
+                setLastKey((e as CustomEvent<{ key: string }>).detail.key)
+            },
+        }
+    )
 
     return (
         <div className="py-4">

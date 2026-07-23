@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const groupedData = [
     {
@@ -80,17 +81,10 @@ const flatItems = [
 ]
 
 const ApiReferenceTableDemo: React.FC = () => {
-    const groupedRef = useRef<any>(null)
-    const flatRef = useRef<any>(null)
-    const titledRef = useRef<any>(null)
-    const slottedRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (groupedRef.current) groupedRef.current.groups = groupedData
-        if (flatRef.current) flatRef.current.items = flatItems
-        if (titledRef.current) titledRef.current.groups = groupedData
-        if (slottedRef.current) slottedRef.current.items = flatItems
-    }, [])
+    const groupedRef = useTc<HTMLElement>({ groups: groupedData })
+    const flatRef = useTc<HTMLElement>({ items: flatItems })
+    const titledRef = useTc<HTMLElement>({ groups: groupedData })
+    const slottedRef = useTc<HTMLElement>({ items: flatItems })
 
     return (
         <div className="py-4">

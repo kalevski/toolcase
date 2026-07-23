@@ -1,16 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTcEvents, type TcRef } from '@toolcase/web-components/react'
 
-function useResetCount(): [number, React.RefObject<any>] {
+function useResetCount(): [number, TcRef<HTMLElement>] {
     const [count, setCount] = useState(0)
-    const ref = useRef<any>(null)
-
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        const handler = () => setCount((c) => c + 1)
-        el.addEventListener('tc-reset', handler)
-        return () => el.removeEventListener('tc-reset', handler)
-    }, [])
+    const ref = useTcEvents<HTMLElement>({
+        'tc-reset': () => setCount((c) => c + 1),
+    })
 
     return [count, ref]
 }

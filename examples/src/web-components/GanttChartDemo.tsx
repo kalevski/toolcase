@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const roadmap = [
     { id: 'design', label: 'Design system', start: '2026-01-05', end: '2026-01-20', progress: 100 },
@@ -43,24 +44,22 @@ const colored = [
 ]
 
 const GanttChartDemo: React.FC = () => {
-    const mainRef = useRef<any>(null)
-    const coloredRef = useRef<any>(null)
     const [clicked, setClicked] = useState<string | null>(null)
 
-    useEffect(() => {
-        if (coloredRef.current) coloredRef.current.tasks = colored
-
-        const el = mainRef.current
-        if (el) {
-            el.tasks = roadmap
-            const handler = (e: any) =>
-                setClicked(`${e.detail.task.label} (${e.detail.task.start} → ${e.detail.task.end})`)
-            el.addEventListener('tc-task-click', handler)
+    const mainRef = useTc<HTMLElement>(
+        {
+            tasks: roadmap,
             // also exercise the onTaskClick callback property
-            el.onTaskClick = (task: any) => console.log('onTaskClick', task.label)
-            return () => el.removeEventListener('tc-task-click', handler)
-        }
-    }, [])
+            onTaskClick: (task: any) => console.log('onTaskClick', task.label),
+        },
+        {
+            'tc-task-click': (e: any) =>
+                setClicked(
+                    `${e.detail.task.label} (${e.detail.task.start} → ${e.detail.task.end})`,
+                ),
+        },
+    )
+    const coloredRef = useTc<HTMLElement>({ tasks: colored })
 
     return (
         <div className="py-4">

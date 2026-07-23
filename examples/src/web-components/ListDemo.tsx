@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 interface ListItem {
     id: string
@@ -32,52 +33,22 @@ const NO_ICON_ITEMS: ListItem[] = [
 ]
 
 const ListDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const emojiRef = useRef<any>(null)
-    const noIconRef = useRef<any>(null)
-
     const [basicSelected, setBasicSelected] = useState('inbox')
     const [emojiSelected, setEmojiSelected] = useState('sword')
     const [noIconSelected, setNoIconSelected] = useState('stable')
 
-    useEffect(() => {
-        const el = basicRef.current
-        if (el) el.items = BASIC_ITEMS
-    }, [])
-
-    useEffect(() => {
-        const el = emojiRef.current
-        if (el) el.items = EMOJI_ITEMS
-    }, [])
-
-    useEffect(() => {
-        const el = noIconRef.current
-        if (el) el.items = NO_ICON_ITEMS
-    }, [])
-
-    useEffect(() => {
-        const el = basicRef.current
-        if (!el) return
-        const handler = (e: any) => setBasicSelected(e.detail.id)
-        el.addEventListener('tc-select', handler)
-        return () => el.removeEventListener('tc-select', handler)
-    }, [])
-
-    useEffect(() => {
-        const el = emojiRef.current
-        if (!el) return
-        const handler = (e: any) => setEmojiSelected(e.detail.id)
-        el.addEventListener('tc-select', handler)
-        return () => el.removeEventListener('tc-select', handler)
-    }, [])
-
-    useEffect(() => {
-        const el = noIconRef.current
-        if (!el) return
-        const handler = (e: any) => setNoIconSelected(e.detail.id)
-        el.addEventListener('tc-select', handler)
-        return () => el.removeEventListener('tc-select', handler)
-    }, [])
+    const basicRef = useTc<HTMLElement>(
+        { items: BASIC_ITEMS },
+        { 'tc-select': (e: any) => setBasicSelected(e.detail.id) }
+    )
+    const emojiRef = useTc<HTMLElement>(
+        { items: EMOJI_ITEMS },
+        { 'tc-select': (e: any) => setEmojiSelected(e.detail.id) }
+    )
+    const noIconRef = useTc<HTMLElement>(
+        { items: NO_ICON_ITEMS },
+        { 'tc-select': (e: any) => setNoIconSelected(e.detail.id) }
+    )
 
     return (
         <div className="py-4">

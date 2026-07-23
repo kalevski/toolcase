@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const CHARACTERS = [
     {
@@ -50,27 +51,18 @@ const CHARACTERS = [
 ]
 
 const CharacterSelectDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-
     const [selected, setSelected] = useState<string>('aria')
     const [confirmed, setConfirmed] = useState<string>(
         '(none — double-click or use Enter then a confirm flow)',
     )
 
-    useEffect(() => {
-        const el = basicRef.current
-        if (!el) return
-        el.characters = CHARACTERS
-
-        const onSelect = (e: Event) => setSelected((e as CustomEvent<{ id: string }>).detail.id)
-        const onConfirm = (e: Event) => setConfirmed((e as CustomEvent<{ id: string }>).detail.id)
-        el.addEventListener('tc-select', onSelect)
-        el.addEventListener('tc-confirm', onConfirm)
-        return () => {
-            el.removeEventListener('tc-select', onSelect)
-            el.removeEventListener('tc-confirm', onConfirm)
+    const basicRef = useTc<HTMLElement>(
+        { characters: CHARACTERS },
+        {
+            'tc-select': (e: Event) => setSelected((e as CustomEvent<{ id: string }>).detail.id),
+            'tc-confirm': (e: Event) => setConfirmed((e as CustomEvent<{ id: string }>).detail.id),
         }
-    }, [])
+    )
 
     return (
         <div className="py-4">

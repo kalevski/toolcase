@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const ICON_OPTIONS = [
     { value: 'star', label: 'Star' },
@@ -67,41 +68,18 @@ const ICON_OPTIONS = [
 ]
 
 const IconPickerDemo: React.FC = () => {
-    const pickerRef = useRef<any>(null)
-    const columnsRef = useRef<any>(null)
-    const nolabelRef = useRef<any>(null)
-    const loadingRef = useRef<any>(null)
-
     const [selectedValue, setSelectedValue] = useState('star')
 
-    useEffect(() => {
-        const el = pickerRef.current
-        if (!el) return
-        el.icons = ICON_OPTIONS
-        el.value = selectedValue
-        const handler = (e: Event) => setSelectedValue((e as CustomEvent).detail.value)
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-    }, [])
+    const pickerRef = useTc<HTMLElement>(
+        { icons: ICON_OPTIONS, value: selectedValue },
+        { 'tc-change': (e: Event) => setSelectedValue((e as CustomEvent).detail.value) }
+    )
 
-    useEffect(() => {
-        const el = columnsRef.current
-        if (!el) return
-        el.icons = ICON_OPTIONS
-    }, [])
+    const columnsRef = useTc<HTMLElement>({ icons: ICON_OPTIONS })
 
-    useEffect(() => {
-        const el = nolabelRef.current
-        if (!el) return
-        el.icons = ICON_OPTIONS
-        el.value = 'heart'
-    }, [])
+    const nolabelRef = useTc<HTMLElement>({ icons: ICON_OPTIONS, value: 'heart' })
 
-    useEffect(() => {
-        const el = loadingRef.current
-        if (!el) return
-        el.icons = []
-    }, [])
+    const loadingRef = useTc<HTMLElement>({ icons: [] })
 
     return (
         <div className="py-4">

@@ -18,4 +18,4 @@ export type { TcProps, ToolcaseIntrinsicElements } from './react-types'
 
 // Runtime hooks — wire tc-* events and JS-only instance properties.
 export { useTc, useTcEvents, detailValue } from './useTc'
-export type { TcEventHandler, TcEventMap } from './useTc'
+export type { TcEventHandler, TcEventMap, TcRef } from './useTc'

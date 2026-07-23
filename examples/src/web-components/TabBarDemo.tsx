@@ -1,4 +1,5 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const defaultTabs = [
     { id: 'overview', label: 'Overview' },
@@ -15,17 +16,12 @@ const smallTabs = [
 ]
 
 const BasicExample: React.FC = () => {
-    const ref = useRef<any>(null)
     const [lastEvent, setLastEvent] = useState<string | null>(null)
 
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        el.tabs = defaultTabs
-        const onchange = (e: CustomEvent) => setLastEvent(`tc-change: id=${e.detail.id}`)
-        el.addEventListener('tc-change', onchange)
-        return () => el.removeEventListener('tc-change', onchange)
-    }, [])
+    const ref = useTc<HTMLElement>(
+        { tabs: defaultTabs },
+        { 'tc-change': (e: CustomEvent) => setLastEvent(`tc-change: id=${e.detail.id}`) }
+    )
 
     return (
         <>
@@ -41,17 +37,12 @@ const BasicExample: React.FC = () => {
 }
 
 const ControlledExample: React.FC = () => {
-    const ref = useRef<any>(null)
     const [active, setActive] = useState('all')
 
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        el.tabs = smallTabs
-        const onchange = (e: CustomEvent) => setActive(e.detail.id)
-        el.addEventListener('tc-change', onchange)
-        return () => el.removeEventListener('tc-change', onchange)
-    }, [])
+    const ref = useTc<HTMLElement>(
+        { tabs: smallTabs },
+        { 'tc-change': (e: CustomEvent) => setActive(e.detail.id) }
+    )
 
     useEffect(() => {
         const el = ref.current

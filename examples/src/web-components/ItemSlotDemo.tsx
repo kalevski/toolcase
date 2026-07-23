@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic'
 
@@ -28,8 +29,24 @@ const STATE_ITEMS: Record<string, unknown>[] = [
 const ItemSlotDemo: React.FC = () => {
     const rarityRefs = useRef<(HTMLElement | null)[]>([])
     const stateRefs = useRef<(HTMLElement | null)[]>([])
-    const selectableRef = useRef<HTMLElement | null>(null)
     const [lastClicked, setLastClicked] = useState<string>('—')
+
+    const selectableRef = useTc<HTMLElement>(
+        {
+            item: {
+                id: 'sword',
+                name: 'Longsword',
+                icon: 'S',
+                rarity: 'rare',
+            },
+        },
+        {
+            'tc-click': (e: Event) => {
+                const item = (e as CustomEvent<{ item: { name?: string } | null }>).detail.item
+                setLastClicked(item?.name ?? 'empty')
+            },
+        }
+    )
 
     useEffect(() => {
         RARITY_ITEMS.forEach((entry, i) => {
@@ -40,23 +57,6 @@ const ItemSlotDemo: React.FC = () => {
             const el = stateRefs.current[i]
             if (el) (el as unknown as { item: unknown }).item = item
         })
-    }, [])
-
-    useEffect(() => {
-        const el = selectableRef.current
-        if (!el) return
-        ;(el as unknown as { item: unknown }).item = {
-            id: 'sword',
-            name: 'Longsword',
-            icon: 'S',
-            rarity: 'rare',
-        }
-        const onClick = (e: Event) => {
-            const item = (e as CustomEvent<{ item: { name?: string } | null }>).detail.item
-            setLastClicked(item?.name ?? 'empty')
-        }
-        el.addEventListener('tc-click', onClick)
-        return () => el.removeEventListener('tc-click', onClick)
     }, [])
 
     return (

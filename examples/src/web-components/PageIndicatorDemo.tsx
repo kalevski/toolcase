@@ -1,19 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useTcEvents } from '@toolcase/web-components/react'
 
 const PageIndicatorDemo: React.FC = () => {
-    const interactiveRef = useRef<any>(null)
     const [activeIndex, setActiveIndex] = useState(0)
-
-    useEffect(() => {
-        const el = interactiveRef.current
-        if (!el) return
-        const onSelect = (e: Event) => {
+    const interactiveRef = useTcEvents<HTMLElement>({
+        'tc-select': (e: Event) => {
             const ce = e as CustomEvent<{ index: number }>
             setActiveIndex(ce.detail.index)
-        }
-        el.addEventListener('tc-select', onSelect)
-        return () => el.removeEventListener('tc-select', onSelect)
-    }, [])
+        },
+    })
 
     useEffect(() => {
         if (interactiveRef.current) {

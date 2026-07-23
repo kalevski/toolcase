@@ -1,17 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const ComboCounterDemo: React.FC = () => {
-    const liveRef = useRef<any>(null)
     const [combo, setCombo] = useState(3)
     const [timer, setTimer] = useState(1)
 
     // Drive the live readout's combo + draining timer through JS properties.
-    useEffect(() => {
-        const el = liveRef.current
-        if (!el) return
-        el.combo = combo
-        el.timer = timer
-    }, [combo, timer])
+    const liveRef = useTc<HTMLElement>({ combo, timer })
 
     // Drain the timer bar; reset the combo when it empties.
     useEffect(() => {

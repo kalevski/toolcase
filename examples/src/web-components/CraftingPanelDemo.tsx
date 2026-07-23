@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const RECIPES = [
     {
@@ -34,44 +35,31 @@ const RECIPES = [
 ]
 
 const CraftingPanelDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const interactiveRef = useRef<any>(null)
     const [selected, setSelected] = useState<string | null>(null)
     const [crafted, setCrafted] = useState<string | null>(null)
 
-    useEffect(() => {
-        if (basicRef.current) {
-            basicRef.current.recipes = RECIPES
-            basicRef.current.selectedId = 'iron-sword'
-        }
-    }, [])
+    const basicRef = useTc<HTMLElement>({ recipes: RECIPES, selectedId: 'iron-sword' })
 
-    useEffect(() => {
-        const el = interactiveRef.current
-        if (!el) return
-
-        el.recipes = RECIPES
-
-        const onSelect = (e: CustomEvent<{ id: string }>) => {
-            setSelected(e.detail.id)
-            console.log('[tc-crafting-panel] tc-select:', e.detail.id)
+    const interactiveRef = useTc<HTMLElement>(
+        { recipes: RECIPES },
+        {
+            'tc-select': (e: CustomEvent) => {
+                setSelected(e.detail.id)
+                console.log('[tc-crafting-panel] tc-select:', e.detail.id)
+            },
+            'tc-craft': (e: CustomEvent) => {
+                setCrafted(e.detail.id)
+                console.log('[tc-crafting-panel] tc-craft:', e.detail.id)
+                // Simulate a brief crafting cycle.
+                const el = interactiveRef.current as any
+                if (!el) return
+                el.crafting = true
+                window.setTimeout(() => {
+                    el.crafting = false
+                }, 900)
+            },
         }
-        const onCraft = (e: CustomEvent<{ id: string }>) => {
-            setCrafted(e.detail.id)
-            console.log('[tc-crafting-panel] tc-craft:', e.detail.id)
-            // Simulate a brief crafting cycle.
-            el.crafting = true
-            window.setTimeout(() => {
-                el.crafting = false
-            }, 900)
-        }
-        el.addEventListener('tc-select', onSelect as EventListener)
-        el.addEventListener('tc-craft', onCraft as EventListener)
-        return () => {
-            el.removeEventListener('tc-select', onSelect as EventListener)
-            el.removeEventListener('tc-craft', onCraft as EventListener)
-        }
-    }, [])
+    )
 
     return (
         <div className="py-4">

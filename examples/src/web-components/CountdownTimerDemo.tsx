@@ -1,29 +1,22 @@
-import React, { useEffect, useRef, useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const CountdownTimerDemo: React.FC = () => {
     const now = useMemo(() => Date.now(), [])
     const baseTarget = String(now + 5 * 60 * 1000 + 30 * 1000) // 5 min 30 sec from load
 
-    const customRef = useRef<any>(null)
-    const expireRef = useRef<any>(null)
     const [expireFired, setExpireFired] = useState(false)
 
-    useEffect(() => {
-        const el = customRef.current
-        if (!el) return
-        el.units = ['hours', 'minutes', 'seconds']
-        el.target = new Date(now + 2 * 3600 * 1000)
-    }, [])
+    const customUnits = useMemo(() => ['hours', 'minutes', 'seconds'], [])
+    const customTarget = useMemo(() => new Date(now + 2 * 3600 * 1000), [now])
+    // target 3 seconds from mount so the expire event fires quickly in the demo
+    const expireTarget = useMemo(() => new Date(now + 3000), [now])
 
-    useEffect(() => {
-        const el = expireRef.current
-        if (!el) return
-        // target 3 seconds from mount so the expire event fires quickly in the demo
-        el.target = new Date(now + 3000)
-        const handler = () => setExpireFired(true)
-        el.addEventListener('tc-expire', handler)
-        return () => el.removeEventListener('tc-expire', handler)
-    }, [])
+    const customRef = useTc<HTMLElement>({ units: customUnits, target: customTarget })
+    const expireRef = useTc<HTMLElement>(
+        { target: expireTarget },
+        { 'tc-expire': () => setExpireFired(true) }
+    )
 
     return (
         <div className="py-4">

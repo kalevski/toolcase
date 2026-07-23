@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const tiers = Array.from({ length: 8 }, (_, i) => {
     const level = i + 1
@@ -30,22 +31,14 @@ const freeOnly = Array.from({ length: 5 }, (_, i) => {
 })
 
 const BattlePassDemo: React.FC = () => {
-    const premiumRef = useRef<any>(null)
-    const freeRef = useRef<any>(null)
     const [last, setLast] = useState('—')
-
-    useEffect(() => {
-        if (premiumRef.current) premiumRef.current.tiers = tiers
-        if (freeRef.current) freeRef.current.tiers = freeOnly
-    }, [])
-
-    useEffect(() => {
-        const el = premiumRef.current
-        if (!el) return
-        const handler = (e: any) => setLast(`Claimed L${e.detail.level} · ${e.detail.track}`)
-        el.addEventListener('tc-claim', handler)
-        return () => el.removeEventListener('tc-claim', handler)
-    }, [])
+    const premiumRef = useTc<HTMLElement>(
+        { tiers: tiers },
+        {
+            'tc-claim': (e: any) => setLast(`Claimed L${e.detail.level} · ${e.detail.track}`),
+        },
+    )
+    const freeRef = useTc<HTMLElement>({ tiers: freeOnly })
 
     return (
         <div className="py-4">

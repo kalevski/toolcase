@@ -1,20 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTcEvents } from '@toolcase/web-components/react'
 
 const menuItems = ['Dashboard', 'Projects', 'Analytics', 'Team', 'Settings']
 
 const DashboardLayoutDemo: React.FC = () => {
-    const ref = useRef<any>(null)
     const [lastEvent, setLastEvent] = useState<string>('')
-
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        const handler = (e: CustomEvent) => {
+    const ref = useTcEvents<HTMLElement>({
+        'tc-toggle-sidebar': (e: CustomEvent) => {
             setLastEvent(`tc-toggle-sidebar → open: ${e.detail.open}`)
-        }
-        el.addEventListener('tc-toggle-sidebar', handler)
-        return () => el.removeEventListener('tc-toggle-sidebar', handler)
-    }, [])
+        },
+    })
 
     return (
         <div className="py-4">

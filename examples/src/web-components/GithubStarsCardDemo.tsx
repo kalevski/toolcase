@@ -1,42 +1,38 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const GithubStarsCardDemo: React.FC = () => {
-    const staticRef = useRef<any>(null)
-    const liveRef = useRef<any>(null)
-    const fullRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (!staticRef.current) return
-        staticRef.current.stats = {
+    const staticRef = useTc<HTMLElement>({
+        stats: {
             stars: 4800,
             forks: 312,
             contributors: 47,
             version: 'v3.2.1',
-        }
-    }, [])
-
-    useEffect(() => {
-        if (!fullRef.current) return
-        fullRef.current.stats = {
-            stars: 12300,
-            forks: 780,
-            contributors: 93,
-            version: 'v2.0.0',
-        }
-        fullRef.current.addEventListener('tc-stats', (e: CustomEvent) => {
-            console.log('[GithubStarsCard] tc-stats event', e.detail)
-        })
-        fullRef.current.addEventListener('tc-cta-click', (e: CustomEvent) => {
-            console.log('[GithubStarsCard] tc-cta-click event', e.detail)
-        })
-    }, [])
-
-    useEffect(() => {
-        if (!liveRef.current) return
-        liveRef.current.onStats = (stats: unknown) => {
+        },
+    })
+    const liveRef = useTc<HTMLElement>({
+        onStats: (stats: unknown) => {
             console.log('[GithubStarsCard] onStats callback', stats)
-        }
-    }, [])
+        },
+    })
+    const fullRef = useTc<HTMLElement>(
+        {
+            stats: {
+                stars: 12300,
+                forks: 780,
+                contributors: 93,
+                version: 'v2.0.0',
+            },
+        },
+        {
+            'tc-stats': (e: CustomEvent) => {
+                console.log('[GithubStarsCard] tc-stats event', e.detail)
+            },
+            'tc-cta-click': (e: CustomEvent) => {
+                console.log('[GithubStarsCard] tc-cta-click event', e.detail)
+            },
+        },
+    )
 
     return (
         <div className="py-4">

@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const TIPS = [
     'Compiling shaders…',
@@ -14,16 +15,12 @@ const LoadingOverlayDemo: React.FC = () => {
     // ── Determinate with label + progress ────────────────────────────────────
     const [openDet, setOpenDet] = useState(false)
     const [progress, setProgress] = useState(0)
-    const detRef = useRef<any>(null)
-
-    useEffect(() => {
-        const el = detRef.current
-        if (!el) return
-        el.open = openDet
-        el.label = 'Loading assets'
-        el.tip = TIPS[Math.floor(progress * TIPS.length) % TIPS.length]
-        el.progress = progress
-    }, [openDet, progress])
+    const detRef = useTc<HTMLElement>({
+        open: openDet,
+        label: 'Loading assets',
+        tip: TIPS[Math.floor(progress * TIPS.length) % TIPS.length],
+        progress,
+    })
 
     // Simulate progress ticking forward while the overlay is open
     useEffect(() => {

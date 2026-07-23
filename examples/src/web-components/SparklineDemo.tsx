@@ -1,20 +1,9 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const SparklineDemo: React.FC = () => {
-    const barRef = useRef<any>(null)
-    const customColorRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (barRef.current) {
-            barRef.current.data = [12, 40, 28, 55, 38, 70, 45, 62, 80, 55]
-        }
-    }, [])
-
-    useEffect(() => {
-        if (customColorRef.current) {
-            customColorRef.current.data = [5, 30, 20, 60, 45, 75, 50]
-        }
-    }, [])
+    const barRef = useTc<HTMLElement>({ data: [12, 40, 28, 55, 38, 70, 45, 62, 80, 55] })
+    const customColorRef = useTc<HTMLElement>({ data: [5, 30, 20, 60, 45, 75, 50] })
 
     return (
         <div className="py-4">

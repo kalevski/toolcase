@@ -1,26 +1,20 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const SkillBarDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const stateRef = useRef<any>(null)
-    const cdRef = useRef<any>(null)
-    const eventsRef = useRef<any>(null)
-
     const [log, setLog] = useState<string[]>([])
 
-    useEffect(() => {
-        if (!basicRef.current) return
-        basicRef.current.slots = [
+    const basicRef = useTc<HTMLElement>({
+        slots: [
             { id: 'fireball', name: 'Fireball', icon: 'Flame', hotkey: 'Q', cooldown: 8 },
             { id: 'frost-nova', name: 'Frost Nova', icon: 'Snowflake', hotkey: 'W', cooldown: 10 },
             { id: 'blink', name: 'Blink', icon: 'Zap', hotkey: 'E', cooldown: 15 },
             { id: 'meteor', name: 'Meteor', icon: 'Sparkles', hotkey: 'R', cooldown: 120 },
-        ]
-    }, [])
+        ],
+    })
 
-    useEffect(() => {
-        if (!stateRef.current) return
-        stateRef.current.slots = [
+    const stateRef = useTc<HTMLElement>({
+        slots: [
             {
                 id: 'shield',
                 name: 'Shield Wall',
@@ -39,12 +33,11 @@ const SkillBarDemo: React.FC = () => {
                 cooldown: 90,
                 disabled: true,
             },
-        ]
-    }, [])
+        ],
+    })
 
-    useEffect(() => {
-        if (!cdRef.current) return
-        cdRef.current.slots = [
+    const cdRef = useTc<HTMLElement>({
+        slots: [
             {
                 id: 'slash',
                 name: 'Quick Slash',
@@ -70,22 +63,22 @@ const SkillBarDemo: React.FC = () => {
                 cooldown: 90,
                 remaining: 0,
             },
-        ]
-    }, [])
+        ],
+    })
 
-    useEffect(() => {
-        const el = eventsRef.current
-        if (!el) return
-        el.slots = [
-            { id: 'fire', name: 'Fire Bolt', icon: 'Flame', hotkey: '1' },
-            { id: 'ice', name: 'Ice Shard', icon: 'Snowflake', hotkey: '2' },
-            { id: 'thunder', name: 'Thunderclap', icon: 'Zap', hotkey: '3' },
-        ]
-        const onActivate = (e: any) =>
-            setLog((l) => [`tc-activate: "${e.detail.id}"`, ...l].slice(0, 6))
-        el.addEventListener('tc-activate', onActivate)
-        return () => el.removeEventListener('tc-activate', onActivate)
-    }, [])
+    const eventsRef = useTc<HTMLElement>(
+        {
+            slots: [
+                { id: 'fire', name: 'Fire Bolt', icon: 'Flame', hotkey: '1' },
+                { id: 'ice', name: 'Ice Shard', icon: 'Snowflake', hotkey: '2' },
+                { id: 'thunder', name: 'Thunderclap', icon: 'Zap', hotkey: '3' },
+            ],
+        },
+        {
+            'tc-activate': (e: any) =>
+                setLog((l) => [`tc-activate: "${e.detail.id}"`, ...l].slice(0, 6)),
+        }
+    )
 
     return (
         <div className="py-4">

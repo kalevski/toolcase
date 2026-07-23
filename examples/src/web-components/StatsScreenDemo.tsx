@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
 import type { StatsSection } from '@toolcase/web-components'
+import { useTc } from '@toolcase/web-components/react'
 
 const matchSections: StatsSection[] = [
     {
@@ -41,13 +42,8 @@ const minimalSections: StatsSection[] = [
 ]
 
 const StatsScreenDemo: React.FC = () => {
-    const fullRef = useRef<any>(null)
-    const minRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (fullRef.current) fullRef.current.sections = matchSections
-        if (minRef.current) minRef.current.sections = minimalSections
-    }, [])
+    const fullRef = useTc<HTMLElement>({ sections: matchSections })
+    const minRef = useTc<HTMLElement>({ sections: minimalSections })
 
     return (
         <div className="py-4">

@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useRef } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 // Icons resolve through lucide-static by name (kebab → PascalCase). Brand
 // glyphs (Github/Twitter/…) were dropped from lucide-static, so use generic
@@ -12,13 +13,9 @@ const LINKS_FULL = [
 ]
 
 const MaintainerCardDemo: React.FC = () => {
-    const fullRef = useRef<any>(null)
+    const fullRef = useTc<HTMLElement>({ links: LINKS_FULL })
     const noLinksRef = useRef<any>(null)
     const minimalRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (fullRef.current) fullRef.current.links = LINKS_FULL
-    }, [])
 
     return (
         <div className="py-4">

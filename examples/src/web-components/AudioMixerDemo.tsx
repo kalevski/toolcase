@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 interface Effect {
     id: string
@@ -84,86 +85,57 @@ const findTrackOfClip = (doc: MixerDoc, clipId: string): Track | undefined =>
     doc.tracks.find((t) => t.clips.some((c) => c.id === clipId))
 
 const AudioMixerDemo: React.FC = () => {
-    const ref = useRef<any>(null)
     const [doc, setDoc] = useState<MixerDoc>(INITIAL_DOC)
     const [selection, setSelection] = useState<Selection>({ trackId: 'drums', clipId: 'd1' })
     const [currentMs, setCurrentMs] = useState(9000)
 
-    // Keep the element's JS properties in sync with React state (controlled).
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        el.doc = doc
-        el.selection = selection
-    }, [doc, selection])
-
-    // Wire the focused CustomEvents to local-state reducers.
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-
-        const onSeek = (e: Event) => setCurrentMs((e as CustomEvent).detail.ms)
-        const onSelect = (e: Event) => {
-            const { trackId, clipId } = (e as CustomEvent).detail
-            setSelection({ trackId, clipId })
-        }
-        const onClipMove = (e: Event) => {
-            const { clipId, startMs } = (e as CustomEvent).detail
-            setDoc((d) => mapClip(d, clipId, (c) => ({ ...c, startMs })))
-        }
-        const onClipResize = (e: Event) => {
-            const { clipId, lengthMs } = (e as CustomEvent).detail
-            setDoc((d) => mapClip(d, clipId, (c) => ({ ...c, lengthMs })))
-        }
-        const onMute = (e: Event) => {
-            const { trackId, muted } = (e as CustomEvent).detail
-            setDoc((d) => mapTrack(d, trackId, (t) => ({ ...t, muted })))
-        }
-        const onSolo = (e: Event) => {
-            const { trackId, solo } = (e as CustomEvent).detail
-            setDoc((d) => mapTrack(d, trackId, (t) => ({ ...t, solo })))
-        }
-        const onVolume = (e: Event) => {
-            const { trackId, volume } = (e as CustomEvent).detail
-            setDoc((d) => mapTrack(d, trackId, (t) => ({ ...t, volume })))
-        }
-        const onEffectAdd = (e: Event) => {
-            const { clipId, effect } = (e as CustomEvent).detail
-            setDoc((d) =>
-                mapClip(d, clipId, (c) => ({ ...c, effects: [...(c.effects ?? []), effect] })),
-            )
-        }
-        const onEffectRemove = (e: Event) => {
-            const { clipId, effect } = (e as CustomEvent).detail
-            setDoc((d) =>
-                mapClip(d, clipId, (c) => ({
-                    ...c,
-                    effects: (c.effects ?? []).filter((fx) => fx.id !== effect.id),
-                })),
-            )
-        }
-
-        el.addEventListener('tc-seek', onSeek)
-        el.addEventListener('tc-select', onSelect)
-        el.addEventListener('tc-clip-move', onClipMove)
-        el.addEventListener('tc-clip-resize', onClipResize)
-        el.addEventListener('tc-track-mute', onMute)
-        el.addEventListener('tc-track-solo', onSolo)
-        el.addEventListener('tc-volume-change', onVolume)
-        el.addEventListener('tc-effect-add', onEffectAdd)
-        el.addEventListener('tc-effect-remove', onEffectRemove)
-        return () => {
-            el.removeEventListener('tc-seek', onSeek)
-            el.removeEventListener('tc-select', onSelect)
-            el.removeEventListener('tc-clip-move', onClipMove)
-            el.removeEventListener('tc-clip-resize', onClipResize)
-            el.removeEventListener('tc-track-mute', onMute)
-            el.removeEventListener('tc-track-solo', onSolo)
-            el.removeEventListener('tc-volume-change', onVolume)
-            el.removeEventListener('tc-effect-add', onEffectAdd)
-            el.removeEventListener('tc-effect-remove', onEffectRemove)
-        }
-    }, [])
+    // Keep the element's JS properties in sync with React state (controlled) and
+    // wire the focused CustomEvents to local-state reducers.
+    const ref = useTc<HTMLElement>(
+        { doc: doc, selection: selection },
+        {
+            'tc-seek': (e: Event) => setCurrentMs((e as CustomEvent).detail.ms),
+            'tc-select': (e: Event) => {
+                const { trackId, clipId } = (e as CustomEvent).detail
+                setSelection({ trackId, clipId })
+            },
+            'tc-clip-move': (e: Event) => {
+                const { clipId, startMs } = (e as CustomEvent).detail
+                setDoc((d) => mapClip(d, clipId, (c) => ({ ...c, startMs })))
+            },
+            'tc-clip-resize': (e: Event) => {
+                const { clipId, lengthMs } = (e as CustomEvent).detail
+                setDoc((d) => mapClip(d, clipId, (c) => ({ ...c, lengthMs })))
+            },
+            'tc-track-mute': (e: Event) => {
+                const { trackId, muted } = (e as CustomEvent).detail
+                setDoc((d) => mapTrack(d, trackId, (t) => ({ ...t, muted })))
+            },
+            'tc-track-solo': (e: Event) => {
+                const { trackId, solo } = (e as CustomEvent).detail
+                setDoc((d) => mapTrack(d, trackId, (t) => ({ ...t, solo })))
+            },
+            'tc-volume-change': (e: Event) => {
+                const { trackId, volume } = (e as CustomEvent).detail
+                setDoc((d) => mapTrack(d, trackId, (t) => ({ ...t, volume })))
+            },
+            'tc-effect-add': (e: Event) => {
+                const { clipId, effect } = (e as CustomEvent).detail
+                setDoc((d) =>
+                    mapClip(d, clipId, (c) => ({ ...c, effects: [...(c.effects ?? []), effect] })),
+                )
+            },
+            'tc-effect-remove': (e: Event) => {
+                const { clipId, effect } = (e as CustomEvent).detail
+                setDoc((d) =>
+                    mapClip(d, clipId, (c) => ({
+                        ...c,
+                        effects: (c.effects ?? []).filter((fx) => fx.id !== effect.id),
+                    })),
+                )
+            },
+        },
+    )
 
     const selectedTrack = doc.tracks.find((t) => t.id === selection.trackId)
     const selectedClip =
@@ -220,13 +192,10 @@ const AudioMixerDemo: React.FC = () => {
 
 // A static, frozen instance to show the disabled treatment.
 const DisabledMixer: React.FC = () => {
-    const ref = useRef<any>(null)
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        el.doc = INITIAL_DOC
-        el.selection = { trackId: 'lead', clipId: 'l1' }
-    }, [])
+    const ref = useTc<HTMLElement>({
+        doc: INITIAL_DOC,
+        selection: { trackId: 'lead', clipId: 'l1' },
+    })
     // @ts-ignore
     return <tc-audio-mixer ref={ref} disabled current-ms={6000} />
 }

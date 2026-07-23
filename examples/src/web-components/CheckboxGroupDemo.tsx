@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const OPTIONS = [
     { value: 'js', label: 'JavaScript' },
@@ -8,51 +9,30 @@ const OPTIONS = [
 ]
 
 const CheckboxGroupDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const inlineRef = useRef<any>(null)
-    const controlledRef = useRef<any>(null)
-    const requiredRef = useRef<any>(null)
-
     const [selection, setSelection] = useState<string[]>([])
     const [controlledValue, setControlledValue] = useState<string[]>(['js', 'ts'])
 
-    useEffect(() => {
-        const els = [basicRef, inlineRef, requiredRef].map((r) => r.current)
-        els.forEach((el) => {
-            if (el) el.options = OPTIONS
-        })
-    }, [])
-
-    useEffect(() => {
-        const el = basicRef.current
-        if (!el) return
-        const handler = (e: Event) => {
-            const detail = (e as CustomEvent<{ value: string[] }>).detail
-            setSelection(detail.value)
-            console.log('tc-change:', detail.value)
+    const basicRef = useTc<HTMLElement>(
+        { options: OPTIONS },
+        {
+            'tc-change': (e: Event) => {
+                const detail = (e as CustomEvent<{ value: string[] }>).detail
+                setSelection(detail.value)
+                console.log('tc-change:', detail.value)
+            },
         }
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-    }, [])
-
-    useEffect(() => {
-        const el = controlledRef.current
-        if (!el) return
-        el.options = OPTIONS
-        el.value = controlledValue
-
-        const handler = (e: Event) => {
-            const detail = (e as CustomEvent<{ value: string[] }>).detail
-            setControlledValue(detail.value)
+    )
+    const inlineRef = useTc<HTMLElement>({ options: OPTIONS })
+    const controlledRef = useTc<HTMLElement>(
+        { options: OPTIONS, value: controlledValue },
+        {
+            'tc-change': (e: Event) => {
+                const detail = (e as CustomEvent<{ value: string[] }>).detail
+                setControlledValue(detail.value)
+            },
         }
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-    }, [])
-
-    useEffect(() => {
-        const el = controlledRef.current
-        if (el) el.value = controlledValue
-    }, [controlledValue])
+    )
+    const requiredRef = useTc<HTMLElement>({ options: OPTIONS })
 
     return (
         <div className="py-4">

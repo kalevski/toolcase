@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useRef } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const SAMPLE_ISSUES = [
     {
@@ -48,42 +49,23 @@ const SAMPLE_ISSUES = [
 ]
 
 const GoodFirstIssuesDemo: React.FC = () => {
-    const defaultRef = useRef<any>(null)
-    const titledRef = useRef<any>(null)
-    const slottedTitleRef = useRef<any>(null)
     const emptyDefaultRef = useRef<any>(null)
     const emptySlottedRef = useRef<any>(null)
-    const eventRef = useRef<any>(null)
     const lastClickRef = useRef<HTMLSpanElement>(null)
 
-    useEffect(() => {
-        if (defaultRef.current) {
-            defaultRef.current.issues = SAMPLE_ISSUES
-        }
-    }, [])
-
-    useEffect(() => {
-        if (titledRef.current) {
-            titledRef.current.issues = SAMPLE_ISSUES.slice(0, 2)
-        }
-    }, [])
-
-    useEffect(() => {
-        if (slottedTitleRef.current) {
-            slottedTitleRef.current.issues = SAMPLE_ISSUES.slice(0, 2)
-        }
-    }, [])
-
-    useEffect(() => {
-        if (eventRef.current) {
-            eventRef.current.issues = SAMPLE_ISSUES.slice(0, 2)
-            eventRef.current.addEventListener('tc-issue-click', (e: CustomEvent) => {
+    const defaultRef = useTc<HTMLElement>({ issues: SAMPLE_ISSUES })
+    const titledRef = useTc<HTMLElement>({ issues: SAMPLE_ISSUES.slice(0, 2) })
+    const slottedTitleRef = useTc<HTMLElement>({ issues: SAMPLE_ISSUES.slice(0, 2) })
+    const eventRef = useTc<HTMLElement>(
+        { issues: SAMPLE_ISSUES.slice(0, 2) },
+        {
+            'tc-issue-click': (e: CustomEvent) => {
                 if (lastClickRef.current) {
                     lastClickRef.current.textContent = e.detail.issue.title
                 }
-            })
-        }
-    }, [])
+            },
+        },
+    )
 
     return (
         <div className="py-4">

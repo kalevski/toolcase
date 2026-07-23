@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const SECTIONS = [
     {
@@ -49,18 +50,12 @@ const SECTIONS = [
 ]
 
 const SideNavDemo: React.FC = () => {
-    const navRef = useRef<any>(null)
     const [lastClicked, setLastClicked] = useState<string>('—')
 
-    useEffect(() => {
-        const el = navRef.current
-        if (!el) return
-        el.sections = SECTIONS
-
-        const onItemClick = (e: any) => setLastClicked(e.detail.key)
-        el.addEventListener('tc-item-click', onItemClick)
-        return () => el.removeEventListener('tc-item-click', onItemClick)
-    }, [])
+    const navRef = useTc<HTMLElement>(
+        { sections: SECTIONS },
+        { 'tc-item-click': (e: any) => setLastClicked(e.detail.key) }
+    )
 
     return (
         <div className="py-4">

@@ -1,4 +1,5 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const items = [
     { key: 'general', icon: 'settings', text: 'General' },
@@ -20,23 +21,21 @@ const panels: Record<string, string> = {
 }
 
 const UncontrolledExample: React.FC = () => {
-    const ref = useRef<any>(null)
     const [active, setActive] = useState('members')
     const [lastEvent, setLastEvent] = useState<string | null>(null)
 
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        el.items = items
-
-        const onSelect = (e: CustomEvent) => {
-            setActive(e.detail.key)
-            setLastEvent(`tc-select: key=${e.detail.key}`)
+    const ref = useTc<HTMLElement>(
+        {
+            items,
+            onSelect: (key: string) => console.log('[VerticalItemList] onSelect', key),
+        },
+        {
+            'tc-select': (e: CustomEvent) => {
+                setActive(e.detail.key)
+                setLastEvent(`tc-select: key=${e.detail.key}`)
+            },
         }
-        el.onSelect = (key: string) => console.log('[VerticalItemList] onSelect', key)
-        el.addEventListener('tc-select', onSelect)
-        return () => el.removeEventListener('tc-select', onSelect)
-    }, [])
+    )
 
     return (
         <>
@@ -55,12 +54,7 @@ const UncontrolledExample: React.FC = () => {
 }
 
 const DisabledExample: React.FC = () => {
-    const ref = useRef<any>(null)
-
-    useEffect(() => {
-        const el = ref.current
-        if (el) el.items = items
-    }, [])
+    const ref = useTc<HTMLElement>({ items })
 
     return (
         <>
@@ -74,12 +68,7 @@ const DisabledExample: React.FC = () => {
 }
 
 const LoadingExample: React.FC = () => {
-    const ref = useRef<any>(null)
-
-    useEffect(() => {
-        const el = ref.current
-        if (el) el.items = items
-    }, [])
+    const ref = useTc<HTMLElement>({ items })
 
     return (
         <>

@@ -1,64 +1,41 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const BadgeRowDemo: React.FC = () => {
-    const labelOnlyRef = useRef<any>(null)
-    const mdRef = useRef<any>(null)
-    const smRef = useRef<any>(null)
-    const variantRef = useRef<any>(null)
-    const colorRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (labelOnlyRef.current) {
-            labelOnlyRef.current.badges = [
-                { label: 'Region' },
-                { label: 'Production' },
-                { label: 'v2' },
-            ]
-        }
-    }, [])
-
-    useEffect(() => {
-        if (mdRef.current) {
-            mdRef.current.badges = [
-                { label: 'env', value: 'production' },
-                { label: 'region', value: 'eu-west-1' },
-                { label: 'replicas', value: 3 },
-                { label: 'uptime', value: '99.97%' },
-            ]
-        }
-    }, [])
-
-    useEffect(() => {
-        if (smRef.current) {
-            smRef.current.badges = [
-                { label: 'env', value: 'staging' },
-                { label: 'region', value: 'us-east-1' },
-                { label: 'replicas', value: 2 },
-            ]
-        }
-    }, [])
-
-    useEffect(() => {
-        if (variantRef.current) {
-            variantRef.current.badges = [
-                { label: 'status', value: 'healthy', variant: 'success' },
-                { label: 'status', value: 'degraded', variant: 'warning' },
-                { label: 'status', value: 'down', variant: 'danger' },
-                { label: 'tier', value: 'info', variant: 'info' },
-                { label: 'type', value: 'primary', variant: 'primary' },
-            ]
-        }
-    }, [])
-
-    useEffect(() => {
-        if (colorRef.current) {
-            colorRef.current.badges = [
-                { label: 'team', value: 'frontend', color: '#6366f1' },
-                { label: 'team', value: 'backend', color: '#0ea5e9' },
-                { label: 'team', value: 'infra', color: '#f59e0b' },
-            ]
-        }
-    }, [])
+    const labelOnlyRef = useTc<HTMLElement>({
+        badges: [{ label: 'Region' }, { label: 'Production' }, { label: 'v2' }],
+    })
+    const mdRef = useTc<HTMLElement>({
+        badges: [
+            { label: 'env', value: 'production' },
+            { label: 'region', value: 'eu-west-1' },
+            { label: 'replicas', value: 3 },
+            { label: 'uptime', value: '99.97%' },
+        ],
+    })
+    const smRef = useTc<HTMLElement>({
+        badges: [
+            { label: 'env', value: 'staging' },
+            { label: 'region', value: 'us-east-1' },
+            { label: 'replicas', value: 2 },
+        ],
+    })
+    const variantRef = useTc<HTMLElement>({
+        badges: [
+            { label: 'status', value: 'healthy', variant: 'success' },
+            { label: 'status', value: 'degraded', variant: 'warning' },
+            { label: 'status', value: 'down', variant: 'danger' },
+            { label: 'tier', value: 'info', variant: 'info' },
+            { label: 'type', value: 'primary', variant: 'primary' },
+        ],
+    })
+    const colorRef = useTc<HTMLElement>({
+        badges: [
+            { label: 'team', value: 'frontend', color: '#6366f1' },
+            { label: 'team', value: 'backend', color: '#0ea5e9' },
+            { label: 'team', value: 'infra', color: '#f59e0b' },
+        ],
+    })
 
     return (
         <div className="py-4">

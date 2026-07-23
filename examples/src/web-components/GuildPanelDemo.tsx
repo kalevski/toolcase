@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const ROSTER = [
     { id: '1', name: 'Aria Vex', rank: 'Leader', online: true, contribution: 48230 },
@@ -13,13 +14,7 @@ function panelFrame(children: React.ReactNode) {
 }
 
 function FullExample() {
-    const ref = useRef<any>(null)
-
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        el.members = ROSTER
-    }, [])
+    const ref = useTc<HTMLElement>({ members: ROSTER })
 
     return panelFrame(
         /* @ts-ignore */
@@ -35,16 +30,12 @@ function FullExample() {
 }
 
 function MinimalExample() {
-    const ref = useRef<any>(null)
-
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        el.members = [
+    const ref = useTc<HTMLElement>({
+        members: [
             { id: '1', name: 'Aria Vex', online: true },
             { id: '2', name: 'Kestrel', online: false },
-        ]
-    }, [])
+        ],
+    })
 
     return panelFrame(
         /* @ts-ignore */

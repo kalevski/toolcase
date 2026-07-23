@@ -1,50 +1,42 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const NumberInputDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const stepRef = useRef<any>(null)
-    const prefixRef = useRef<any>(null)
     const errorRef = useRef<any>(null)
 
     const [basicValue, setBasicValue] = useState<number | ''>(5)
     const [stepValue, setStepValue] = useState<number | ''>(0)
     const [prefixValue, setPrefixValue] = useState<number | ''>(100)
 
-    useEffect(() => {
-        const el = basicRef.current
-        if (!el) return
-        el.value = 5
-        const handler = (e: Event) => {
-            const detail = (e as CustomEvent<{ value: number | '' }>).detail
-            setBasicValue(detail.value)
+    const basicRef = useTc<HTMLElement>(
+        { value: 5 },
+        {
+            'tc-change': (e: Event) => {
+                const detail = (e as CustomEvent<{ value: number | '' }>).detail
+                setBasicValue(detail.value)
+            },
         }
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-    }, [])
+    )
 
-    useEffect(() => {
-        const el = stepRef.current
-        if (!el) return
-        el.value = 0
-        const handler = (e: Event) => {
-            const detail = (e as CustomEvent<{ value: number | '' }>).detail
-            setStepValue(detail.value)
+    const stepRef = useTc<HTMLElement>(
+        { value: 0 },
+        {
+            'tc-change': (e: Event) => {
+                const detail = (e as CustomEvent<{ value: number | '' }>).detail
+                setStepValue(detail.value)
+            },
         }
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-    }, [])
+    )
 
-    useEffect(() => {
-        const el = prefixRef.current
-        if (!el) return
-        el.value = 100
-        const handler = (e: Event) => {
-            const detail = (e as CustomEvent<{ value: number | '' }>).detail
-            setPrefixValue(detail.value)
+    const prefixRef = useTc<HTMLElement>(
+        { value: 100 },
+        {
+            'tc-change': (e: Event) => {
+                const detail = (e as CustomEvent<{ value: number | '' }>).detail
+                setPrefixValue(detail.value)
+            },
         }
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-    }, [])
+    )
 
     return (
         <div className="py-4">

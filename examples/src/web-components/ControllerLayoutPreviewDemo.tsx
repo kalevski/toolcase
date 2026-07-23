@@ -1,10 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const LAYOUTS = ['generic', 'xbox', 'playstation', 'nintendo'] as const
 
 const ControllerLayoutPreviewDemo: React.FC = () => {
-    const liveRef = useRef<any>(null)
     const [idx, setIdx] = useState(0)
+
+    const liveRef = useTc<HTMLElement>({ layout: LAYOUTS[idx] })
 
     // Cycle through the four layouts so the face-button bindings relabel live.
     useEffect(() => {
@@ -13,10 +15,6 @@ const ControllerLayoutPreviewDemo: React.FC = () => {
         }, 1800)
         return () => window.clearInterval(id)
     }, [])
-
-    useEffect(() => {
-        if (liveRef.current) liveRef.current.layout = LAYOUTS[idx]
-    }, [idx])
 
     return (
         <div className="py-4">

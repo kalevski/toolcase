@@ -1,18 +1,14 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 // Minimal repeating dot SVG data URI for the background-pattern-src demo.
 const DOT_PATTERN =
     "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ccircle cx='20' cy='20' r='1.5' fill='white' fill-opacity='0.18'/%3E%3C/svg%3E"
 
 const LoginDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const fullRef = useRef<any>(null)
-    const loadingRef = useRef<any>(null)
-    const noAsideRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (basicRef.current) {
-            basicRef.current.connect = [
+    const basicRef = useTc<HTMLElement>(
+        {
+            connect: [
                 {
                     key: 'github',
                     label: 'Continue with GitHub',
@@ -25,16 +21,18 @@ const LoginDemo: React.FC = () => {
                     icon: 'mail',
                     variant: 'secondary',
                 },
-            ]
-            basicRef.current.addEventListener('tc-connect', (e: CustomEvent) => {
+            ],
+        },
+        {
+            'tc-connect': (e: CustomEvent) => {
                 console.log('tc-connect', e.detail.key)
-            })
+            },
         }
-    }, [])
+    )
 
-    useEffect(() => {
-        if (fullRef.current) {
-            fullRef.current.connect = [
+    const fullRef = useTc<HTMLElement>(
+        {
+            connect: [
                 {
                     key: 'github',
                     label: 'Continue with GitHub',
@@ -48,30 +46,30 @@ const LoginDemo: React.FC = () => {
                     variant: 'secondary',
                 },
                 { key: 'sso', label: 'Continue with SSO', icon: 'shield', variant: 'secondary' },
-            ]
-            fullRef.current.addEventListener('tc-connect', (e: CustomEvent) => {
+            ],
+        },
+        {
+            'tc-connect': (e: CustomEvent) => {
                 console.log('tc-connect', e.detail.key)
-            })
+            },
         }
-    }, [])
+    )
 
-    useEffect(() => {
-        if (loadingRef.current) {
-            loadingRef.current.connect = [
-                {
-                    key: 'github',
-                    label: 'Continue with GitHub',
-                    icon: 'github',
-                    variant: 'primary',
-                },
-                { key: 'google', label: 'Continue with Google', variant: 'secondary' },
-            ]
-        }
-    }, [])
+    const loadingRef = useTc<HTMLElement>({
+        connect: [
+            {
+                key: 'github',
+                label: 'Continue with GitHub',
+                icon: 'github',
+                variant: 'primary',
+            },
+            { key: 'google', label: 'Continue with Google', variant: 'secondary' },
+        ],
+    })
 
-    useEffect(() => {
-        if (noAsideRef.current) {
-            noAsideRef.current.connect = [
+    const noAsideRef = useTc<HTMLElement>(
+        {
+            connect: [
                 {
                     key: 'github',
                     label: 'Continue with GitHub',
@@ -85,12 +83,14 @@ const LoginDemo: React.FC = () => {
                     variant: 'secondary',
                 },
                 { key: 'apple', label: 'Continue with Apple', icon: 'apple', variant: 'secondary' },
-            ]
-            noAsideRef.current.addEventListener('tc-connect', (e: CustomEvent) => {
+            ],
+        },
+        {
+            'tc-connect': (e: CustomEvent) => {
                 console.log('tc-connect', e.detail.key)
-            })
+            },
         }
-    }, [])
+    )
 
     return (
         <div className="py-4">

@@ -1,4 +1,5 @@
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useState } from 'react'
+import { useTcEvents } from '@toolcase/web-components/react'
 
 type ConfirmVariant = {
     key: string
@@ -45,33 +46,45 @@ const VARIANTS: ConfirmVariant[] = [
     },
 ]
 
+const ConfirmVariantSection: React.FC<{
+    variant: ConfirmVariant
+    open: boolean
+    onOpen: () => void
+    onConfirm: () => void
+    onCancel: () => void
+}> = ({ variant: v, open, onOpen, onConfirm, onCancel }) => {
+    const dialogRef = useTcEvents<HTMLElement>({
+        'tc-confirm': onConfirm,
+        'tc-cancel': onCancel,
+    })
+
+    return (
+        <tc-section-card title={v.sectionTitle}>
+            <p className="text-muted mb-3">{v.description}</p>
+            <button
+                className={`btn ${v.danger ? 'btn-danger' : 'btn-primary'}`}
+                onClick={onOpen}
+            >
+                {v.confirmLabel ?? 'Confirm'}…
+            </button>
+            {/* @ts-ignore */}
+            <tc-confirm-dialog
+                ref={dialogRef}
+                open={open || undefined}
+                dialog-title={v.dialogTitle}
+                eyebrow={v.eyebrow}
+                message={v.message}
+                confirm-label={v.confirmLabel}
+                cancel-label={v.cancelLabel}
+                danger={v.danger || undefined}
+            />
+        </tc-section-card>
+    )
+}
+
 const ConfirmDialogDemo: React.FC = () => {
     const [openKey, setOpenKey] = useState<string | null>(null)
     const [lastResult, setLastResult] = useState<string>('—')
-    const refs = useRef<Record<string, HTMLElement | null>>({})
-
-    useEffect(() => {
-        const cleanups: Array<() => void> = []
-        VARIANTS.forEach((v) => {
-            const el = refs.current[v.key]
-            if (!el) return
-            const onConfirm = () => {
-                setLastResult(`Confirmed: ${v.dialogTitle}`)
-                setOpenKey(null)
-            }
-            const onCancel = () => {
-                setLastResult(`Cancelled: ${v.dialogTitle}`)
-                setOpenKey(null)
-            }
-            el.addEventListener('tc-confirm', onConfirm)
-            el.addEventListener('tc-cancel', onCancel)
-            cleanups.push(() => {
-                el.removeEventListener('tc-confirm', onConfirm)
-                el.removeEventListener('tc-cancel', onCancel)
-            })
-        })
-        return () => cleanups.forEach((fn) => fn())
-    }, [])
 
     return (
         <div className="py-4">
@@ -93,28 +106,20 @@ const ConfirmDialogDemo: React.FC = () => {
                             </tc-section-card>
 
                             {VARIANTS.map((v) => (
-                                <tc-section-card key={v.key} title={v.sectionTitle}>
-                                    <p className="text-muted mb-3">{v.description}</p>
-                                    <button
-                                        className={`btn ${v.danger ? 'btn-danger' : 'btn-primary'}`}
-                                        onClick={() => setOpenKey(v.key)}
-                                    >
-                                        {v.confirmLabel ?? 'Confirm'}…
-                                    </button>
-                                    {/* @ts-ignore */}
-                                    <tc-confirm-dialog
-                                        ref={(el: HTMLElement | null) => {
-                                            refs.current[v.key] = el
-                                        }}
-                                        open={openKey === v.key || undefined}
-                                        dialog-title={v.dialogTitle}
-                                        eyebrow={v.eyebrow}
-                                        message={v.message}
-                                        confirm-label={v.confirmLabel}
-                                        cancel-label={v.cancelLabel}
-                                        danger={v.danger || undefined}
-                                    />
-                                </tc-section-card>
+                                <ConfirmVariantSection
+                                    key={v.key}
+                                    variant={v}
+                                    open={openKey === v.key}
+                                    onOpen={() => setOpenKey(v.key)}
+                                    onConfirm={() => {
+                                        setLastResult(`Confirmed: ${v.dialogTitle}`)
+                                        setOpenKey(null)
+                                    }}
+                                    onCancel={() => {
+                                        setLastResult(`Cancelled: ${v.dialogTitle}`)
+                                        setOpenKey(null)
+                                    }}
+                                />
                             ))}
                         </div>
                     </div>

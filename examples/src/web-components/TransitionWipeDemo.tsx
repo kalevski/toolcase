@@ -1,27 +1,23 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
 import type { TransitionWipeDirection } from '@toolcase/web-components'
+import { useTcEvents } from '@toolcase/web-components/react'
 
 const directions: TransitionWipeDirection[] = ['fade', 'left', 'right', 'up', 'down', 'iris']
 
 const TransitionWipeDemo: React.FC = () => {
     // ── Primary interactive demo ──────────────────────────────────────────────
-    const wipeRef = useRef<any>(null)
     const [completeCount, setCompleteCount] = useState(0)
     const [lastDirection, setLastDirection] = useState<TransitionWipeDirection>('fade')
     const [running, setRunning] = useState(false)
 
-    useEffect(() => {
-        const el = wipeRef.current
-        if (!el) return
-        const onComplete = () => {
+    const wipeRef = useTcEvents<HTMLElement>({
+        'tc-complete': () => {
             setCompleteCount((c) => c + 1)
             setRunning(false)
             // Remove [show] after a brief pause so the fill can animate back out.
-            setTimeout(() => el.removeAttribute('show'), 300)
-        }
-        el.addEventListener('tc-complete', onComplete)
-        return () => el.removeEventListener('tc-complete', onComplete)
-    }, [])
+            setTimeout(() => wipeRef.current?.removeAttribute('show'), 300)
+        },
+    })
 
     const fire = (d: TransitionWipeDirection) => {
         const el = wipeRef.current
@@ -33,34 +29,24 @@ const TransitionWipeDemo: React.FC = () => {
     }
 
     // ── Custom color demo ─────────────────────────────────────────────────────
-    const colorRef = useRef<any>(null)
     const [colorRunning, setColorRunning] = useState(false)
 
-    useEffect(() => {
-        const el = colorRef.current
-        if (!el) return
-        const onComplete = () => {
+    const colorRef = useTcEvents<HTMLElement>({
+        'tc-complete': () => {
             setColorRunning(false)
-            setTimeout(() => el.removeAttribute('show'), 300)
-        }
-        el.addEventListener('tc-complete', onComplete)
-        return () => el.removeEventListener('tc-complete', onComplete)
-    }, [])
+            setTimeout(() => colorRef.current?.removeAttribute('show'), 300)
+        },
+    })
 
     // ── Slow long wipe ────────────────────────────────────────────────────────
-    const slowRef = useRef<any>(null)
     const [slowRunning, setSlowRunning] = useState(false)
 
-    useEffect(() => {
-        const el = slowRef.current
-        if (!el) return
-        const onComplete = () => {
+    const slowRef = useTcEvents<HTMLElement>({
+        'tc-complete': () => {
             setSlowRunning(false)
-            setTimeout(() => el.removeAttribute('show'), 400)
-        }
-        el.addEventListener('tc-complete', onComplete)
-        return () => el.removeEventListener('tc-complete', onComplete)
-    }, [])
+            setTimeout(() => slowRef.current?.removeAttribute('show'), 400)
+        },
+    })
 
     return (
         <div className="py-4">

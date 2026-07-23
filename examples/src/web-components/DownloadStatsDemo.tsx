@@ -1,29 +1,12 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const SPARKLINE_DATA = [12, 18, 15, 24, 20, 32, 28, 40, 35, 48, 42, 55]
 
 const DownloadStatsDemo: React.FC = () => {
-    const npmRef = useRef<any>(null)
-    const pypiRef = useRef<any>(null)
-    const cratesRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (npmRef.current) {
-            npmRef.current.sparkline = SPARKLINE_DATA
-        }
-    }, [])
-
-    useEffect(() => {
-        if (pypiRef.current) {
-            pypiRef.current.sparkline = [8, 10, 9, 14, 12, 18, 16, 22, 20, 28]
-        }
-    }, [])
-
-    useEffect(() => {
-        if (cratesRef.current) {
-            cratesRef.current.sparkline = [3, 5, 4, 7, 6, 9, 8, 12, 11, 15]
-        }
-    }, [])
+    const npmRef = useTc<HTMLElement>({ sparkline: SPARKLINE_DATA })
+    const pypiRef = useTc<HTMLElement>({ sparkline: [8, 10, 9, 14, 12, 18, 16, 22, 20, 28] })
+    const cratesRef = useTc<HTMLElement>({ sparkline: [3, 5, 4, 7, 6, 9, 8, 12, 11, 15] })
 
     return (
         <div className="py-4">

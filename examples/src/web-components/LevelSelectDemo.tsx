@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const SIMPLE_NODES = [
     { id: '1', x: 100, y: 180, label: 'Level 1', completed: true, bestStars: 3, stars: 3 },
@@ -67,42 +68,26 @@ const WIDE_EDGES = [
 ]
 
 const LevelSelectDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const iconRef = useRef<any>(null)
-    const wideRef = useRef<any>(null)
     const [lastSelect, setLastSelect] = useState<string>('—')
     const [lastConfirm, setLastConfirm] = useState<string>('—')
 
-    useEffect(() => {
-        const el = basicRef.current
-        if (!el) return
-        el.nodes = SIMPLE_NODES
-        el.edges = SIMPLE_EDGES
-        el.selectedId = '3'
-
-        const onSelect = (e: Event) => setLastSelect((e as CustomEvent).detail.id)
-        const onConfirm = (e: Event) => setLastConfirm((e as CustomEvent).detail.id)
-        el.addEventListener('tc-select', onSelect)
-        el.addEventListener('tc-confirm', onConfirm)
-        return () => {
-            el.removeEventListener('tc-select', onSelect)
-            el.removeEventListener('tc-confirm', onConfirm)
+    const basicRef = useTc<HTMLElement>(
+        { nodes: SIMPLE_NODES, edges: SIMPLE_EDGES, selectedId: '3' },
+        {
+            'tc-select': (e: Event) => setLastSelect((e as CustomEvent).detail.id),
+            'tc-confirm': (e: Event) => setLastConfirm((e as CustomEvent).detail.id),
         }
-    }, [])
-
-    useEffect(() => {
-        if (!iconRef.current) return
-        iconRef.current.nodes = ICON_NODES
-        iconRef.current.edges = ICON_EDGES
-        iconRef.current.selectedId = 'b'
-    }, [])
-
-    useEffect(() => {
-        if (!wideRef.current) return
-        wideRef.current.nodes = WIDE_NODES
-        wideRef.current.edges = WIDE_EDGES
-        wideRef.current.selectedId = 'w3'
-    }, [])
+    )
+    const iconRef = useTc<HTMLElement>({
+        nodes: ICON_NODES,
+        edges: ICON_EDGES,
+        selectedId: 'b',
+    })
+    const wideRef = useTc<HTMLElement>({
+        nodes: WIDE_NODES,
+        edges: WIDE_EDGES,
+        selectedId: 'w3',
+    })
 
     return (
         <div className="py-4">

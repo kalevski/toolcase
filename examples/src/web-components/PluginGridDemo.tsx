@@ -1,65 +1,55 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const PluginGridDemo: React.FC = () => {
-    const threeColRef = useRef<any>(null)
-    const twoColRef = useRef<any>(null)
-    const fourColRef = useRef<any>(null)
-    const titledRef = useRef<any>(null)
+    const items = [
+        {
+            name: 'tc-auth',
+            description:
+                'Pluggable authentication middleware for Fastify with JWT and session support.',
+            iconName: 'Shield',
+            install: 'npm install @toolcase/tc-auth',
+            downloads: 48200,
+        },
+        {
+            name: 'tc-logger',
+            description: 'Structured logging plugin with OTLP exporter and ring-buffer reporter.',
+            iconName: 'FileText',
+            install: 'npm install @toolcase/tc-logger',
+            downloads: 127000,
+        },
+        {
+            name: 'tc-cache',
+            description: 'In-process LRU cache with optional Redis fallback and TTL support.',
+            iconName: 'Database',
+            install: 'npm install @toolcase/tc-cache',
+            downloads: 3800,
+        },
+    ]
 
-    useEffect(() => {
-        const items = [
+    const threeColRef = useTc<HTMLElement>({ items })
+    const twoColRef = useTc<HTMLElement>({ items: items.slice(0, 2) })
+    const fourColRef = useTc<HTMLElement>({
+        items: [
+            ...items,
             {
-                name: 'tc-auth',
-                description:
-                    'Pluggable authentication middleware for Fastify with JWT and session support.',
-                iconName: 'Shield',
-                install: 'npm install @toolcase/tc-auth',
-                downloads: 48200,
+                name: 'tc-queue',
+                description: 'Lightweight job queue backed by Redis streams.',
+                iconName: 'List',
+                install: 'npm install @toolcase/tc-queue',
+                downloads: 9100,
             },
-            {
-                name: 'tc-logger',
-                description:
-                    'Structured logging plugin with OTLP exporter and ring-buffer reporter.',
-                iconName: 'FileText',
-                install: 'npm install @toolcase/tc-logger',
-                downloads: 127000,
-            },
-            {
-                name: 'tc-cache',
-                description: 'In-process LRU cache with optional Redis fallback and TTL support.',
-                iconName: 'Database',
-                install: 'npm install @toolcase/tc-cache',
-                downloads: 3800,
-            },
-        ]
-
-        if (threeColRef.current) {
-            threeColRef.current.items = items
-        }
-        if (twoColRef.current) {
-            twoColRef.current.items = items.slice(0, 2)
-        }
-        if (fourColRef.current) {
-            fourColRef.current.items = [
-                ...items,
-                {
-                    name: 'tc-queue',
-                    description: 'Lightweight job queue backed by Redis streams.',
-                    iconName: 'List',
-                    install: 'npm install @toolcase/tc-queue',
-                    downloads: 9100,
-                },
-            ]
-        }
-        if (titledRef.current) {
-            titledRef.current.items = items
-
-            titledRef.current.addEventListener('tc-copy', (e: CustomEvent) => {
+        ],
+    })
+    const titledRef = useTc<HTMLElement>(
+        { items },
+        {
+            'tc-copy': (e: CustomEvent) => {
                 // eslint-disable-next-line no-console
                 console.log('tc-copy fired:', e.detail.install)
-            })
+            },
         }
-    }, [])
+    )
 
     return (
         <div className="py-4">

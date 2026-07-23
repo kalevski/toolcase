@@ -1,19 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTcEvents, type TcRef } from '@toolcase/web-components/react'
 
-function useToggleRowValue(initial: boolean): [boolean, React.RefObject<any>] {
+function useToggleRowValue(initial: boolean): [boolean, TcRef<any>] {
     const [value, setValue] = useState(initial)
-    const ref = useRef<any>(null)
-
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        const handler = (e: Event) => {
+    const ref = useTcEvents<any>({
+        'tc-change': (e: Event) => {
             const detail = (e as CustomEvent<{ value: boolean }>).detail
             if (detail) setValue(detail.value)
-        }
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-    }, [])
+        },
+    })
 
     return [value, ref]
 }

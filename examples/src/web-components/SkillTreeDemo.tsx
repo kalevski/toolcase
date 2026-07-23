@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const NODES = [
     {
@@ -91,33 +92,18 @@ const SIMPLE_EDGES = [
 ]
 
 const SkillTreeDemo: React.FC = () => {
-    const fullRef = useRef<any>(null)
-    const simpleRef = useRef<any>(null)
     const [lastSelect, setLastSelect] = useState<string>('—')
     const [lastUnlock, setLastUnlock] = useState<string>('—')
 
-    useEffect(() => {
-        const el = fullRef.current
-        if (!el) return
-        el.nodes = NODES
-        el.edges = EDGES
-
-        const onSelect = (e: Event) => setLastSelect((e as CustomEvent).detail.id)
-        const onUnlock = (e: Event) => setLastUnlock((e as CustomEvent).detail.id)
-        el.addEventListener('tc-select', onSelect)
-        el.addEventListener('tc-unlock', onUnlock)
-        return () => {
-            el.removeEventListener('tc-select', onSelect)
-            el.removeEventListener('tc-unlock', onUnlock)
+    const fullRef = useTc<HTMLElement>(
+        { nodes: NODES, edges: EDGES },
+        {
+            'tc-select': (e: Event) => setLastSelect((e as CustomEvent).detail.id),
+            'tc-unlock': (e: Event) => setLastUnlock((e as CustomEvent).detail.id),
         }
-    }, [])
+    )
 
-    useEffect(() => {
-        const el = simpleRef.current
-        if (!el) return
-        el.nodes = SIMPLE_NODES
-        el.edges = SIMPLE_EDGES
-    }, [])
+    const simpleRef = useTc<HTMLElement>({ nodes: SIMPLE_NODES, edges: SIMPLE_EDGES })
 
     return (
         <div className="py-4">

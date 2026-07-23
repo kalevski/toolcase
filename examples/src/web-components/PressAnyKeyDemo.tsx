@@ -1,30 +1,19 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTcEvents } from '@toolcase/web-components/react'
 
 const PressAnyKeyDemo: React.FC = () => {
-    const defaultRef = useRef<any>(null)
-    const customRef = useRef<any>(null)
-
     const [log, setLog] = useState<string[]>([])
 
     const appendLog = (msg: string) => setLog((l) => [msg, ...l].slice(0, 8))
 
-    useEffect(() => {
-        const el = defaultRef.current
-        if (!el) return
-        const handler = (e: CustomEvent) =>
-            appendLog(`tc-continue — "${e.type}" @ ${new Date().toLocaleTimeString()}`)
-        el.addEventListener('tc-continue', handler as EventListener)
-        return () => el.removeEventListener('tc-continue', handler as EventListener)
-    }, [])
-
-    useEffect(() => {
-        const el = customRef.current
-        if (!el) return
-        const handler = (e: CustomEvent) =>
-            appendLog(`tc-continue (custom text) @ ${new Date().toLocaleTimeString()}`)
-        el.addEventListener('tc-continue', handler as EventListener)
-        return () => el.removeEventListener('tc-continue', handler as EventListener)
-    }, [])
+    const defaultRef = useTcEvents<HTMLElement>({
+        'tc-continue': (e: CustomEvent) =>
+            appendLog(`tc-continue — "${e.type}" @ ${new Date().toLocaleTimeString()}`),
+    })
+    const customRef = useTcEvents<HTMLElement>({
+        'tc-continue': (e: CustomEvent) =>
+            appendLog(`tc-continue (custom text) @ ${new Date().toLocaleTimeString()}`),
+    })
 
     return (
         <div className="py-4">

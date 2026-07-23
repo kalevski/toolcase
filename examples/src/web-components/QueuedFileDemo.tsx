@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 function DismissibleQueue() {
     const [files, setFiles] = useState([
@@ -41,14 +42,8 @@ function DismissibleQueue() {
 }
 
 function CallbackExample() {
-    const ref = useRef<any>(null)
     const [dismissed, setDismissed] = useState(false)
-
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        el.onDismiss = () => setDismissed(true)
-    }, [])
+    const ref = useTc<HTMLElement>({ onDismiss: () => setDismissed(true) })
 
     if (dismissed) {
         return <p className="text-muted small mb-0">File dismissed via onDismiss callback.</p>

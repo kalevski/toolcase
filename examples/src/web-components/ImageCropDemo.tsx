@@ -1,34 +1,34 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { useTcEvents } from '@toolcase/web-components/react'
+import type { TcRef } from '@toolcase/web-components/react'
 
 const DEMO_IMAGE = 'https://picsum.photos/seed/toolcase/800/600'
 
 /** Listen for `tc-crop`, turning each cropped Blob into a preview object URL. */
-function useCropPreview(): [string | null, React.RefObject<any>] {
+function useCropPreview(): [string | null, TcRef<any>] {
     const [url, setUrl] = useState<string | null>(null)
-    const ref = useRef<any>(null)
+    const current = useRef<string | null>(null)
 
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        let current: string | null = null
-        const onCrop = (e: Event) => {
+    const ref = useTcEvents<any>({
+        'tc-crop': (e: Event) => {
             const blob = (e as CustomEvent<{ blob: Blob }>).detail.blob
-            if (current) URL.revokeObjectURL(current)
-            current = URL.createObjectURL(blob)
-            setUrl(current)
-        }
-        const onError = (e: Event) => {
+            if (current.current) URL.revokeObjectURL(current.current)
+            current.current = URL.createObjectURL(blob)
+            setUrl(current.current)
+        },
+        'tc-error': (e: Event) => {
             // eslint-disable-next-line no-console
             console.error((e as CustomEvent<{ error: Error }>).detail.error)
-        }
-        el.addEventListener('tc-crop', onCrop)
-        el.addEventListener('tc-error', onError)
-        return () => {
-            el.removeEventListener('tc-crop', onCrop)
-            el.removeEventListener('tc-error', onError)
-            if (current) URL.revokeObjectURL(current)
-        }
-    }, [])
+        },
+    })
+
+    // Revoke the last object URL when the consumer unmounts.
+    useEffect(
+        () => () => {
+            if (current.current) URL.revokeObjectURL(current.current)
+        },
+        []
+    )
 
     return [url, ref]
 }

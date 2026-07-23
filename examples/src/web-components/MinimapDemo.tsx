@@ -1,46 +1,38 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useRef } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const MinimapDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const rotatedRef = useRef<any>(null)
-    const largeRef = useRef<any>(null)
+    const basicRef = useTc<HTMLElement>({
+        markers: [
+            { id: 'player-a', x: 30, y: 25, color: 'var(--tc-success)', size: 10 },
+            { id: 'enemy-1', x: 60, y: 40, color: 'var(--tc-danger)', size: 8 },
+            { id: 'enemy-2', x: 75, y: 70 },
+            { id: 'objective', x: 50, y: 50, color: 'var(--tc-warning)', size: 12 },
+        ],
+    })
+
+    const rotatedRef = useTc<HTMLElement>({
+        markers: [
+            { id: 'ally-1', x: 20, y: 20, color: 'var(--tc-success)', size: 8 },
+            { id: 'enemy-3', x: 80, y: 80, color: 'var(--tc-danger)', size: 8 },
+            { id: 'enemy-4', x: 65, y: 30, color: 'var(--tc-danger)', size: 8 },
+        ],
+    })
+
+    const largeRef = useTc<HTMLElement>({
+        worldWidth: 200,
+        worldHeight: 200,
+        markers: [
+            { id: 'squad-1', x: 10, y: 10, color: 'var(--tc-success)', size: 10 },
+            { id: 'squad-2', x: 50, y: 80, color: 'var(--tc-success)', size: 10 },
+            { id: 'squad-3', x: 120, y: 30, color: 'var(--tc-success)', size: 10 },
+            { id: 'boss', x: 150, y: 160, color: 'var(--tc-danger)', size: 14 },
+            { id: 'chest', x: 90, y: 90, color: 'var(--tc-warning)', size: 10 },
+            { id: 'portal', x: 180, y: 40, color: 'var(--tc-accent)', size: 12 },
+        ],
+    })
+
     const emptyRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (basicRef.current) {
-            basicRef.current.markers = [
-                { id: 'player-a', x: 30, y: 25, color: 'var(--tc-success)', size: 10 },
-                { id: 'enemy-1', x: 60, y: 40, color: 'var(--tc-danger)', size: 8 },
-                { id: 'enemy-2', x: 75, y: 70 },
-                { id: 'objective', x: 50, y: 50, color: 'var(--tc-warning)', size: 12 },
-            ]
-        }
-    }, [])
-
-    useEffect(() => {
-        if (rotatedRef.current) {
-            rotatedRef.current.markers = [
-                { id: 'ally-1', x: 20, y: 20, color: 'var(--tc-success)', size: 8 },
-                { id: 'enemy-3', x: 80, y: 80, color: 'var(--tc-danger)', size: 8 },
-                { id: 'enemy-4', x: 65, y: 30, color: 'var(--tc-danger)', size: 8 },
-            ]
-        }
-    }, [])
-
-    useEffect(() => {
-        if (largeRef.current) {
-            largeRef.current.worldWidth = 200
-            largeRef.current.worldHeight = 200
-            largeRef.current.markers = [
-                { id: 'squad-1', x: 10, y: 10, color: 'var(--tc-success)', size: 10 },
-                { id: 'squad-2', x: 50, y: 80, color: 'var(--tc-success)', size: 10 },
-                { id: 'squad-3', x: 120, y: 30, color: 'var(--tc-success)', size: 10 },
-                { id: 'boss', x: 150, y: 160, color: 'var(--tc-danger)', size: 14 },
-                { id: 'chest', x: 90, y: 90, color: 'var(--tc-warning)', size: 10 },
-                { id: 'portal', x: 180, y: 40, color: 'var(--tc-accent)', size: 12 },
-            ]
-        }
-    }, [])
 
     return (
         <div className="py-4">

@@ -1,34 +1,27 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const InstallTabsDemo: React.FC = () => {
-    const eventsRef = useRef<any>(null)
     const [lastEvent, setLastEvent] = useState<string | null>(null)
 
-    useEffect(() => {
-        const el = eventsRef.current
-        if (!el) return
-
-        const onCopy = (e: CustomEvent) => {
-            setLastEvent(`tc-copy: manager=${e.detail.manager}, command="${e.detail.command}"`)
+    const eventsRef = useTc<HTMLElement>(
+        {
+            onCopy: (detail: { manager: string; command: string }) => {
+                console.log('[InstallTabs] onCopy callback', detail)
+            },
+            onChange: (detail: { manager: string }) => {
+                console.log('[InstallTabs] onChange callback', detail)
+            },
+        },
+        {
+            'tc-copy': (e: CustomEvent) => {
+                setLastEvent(`tc-copy: manager=${e.detail.manager}, command="${e.detail.command}"`)
+            },
+            'tc-change': (e: CustomEvent) => {
+                setLastEvent(`tc-change: manager=${e.detail.manager}`)
+            },
         }
-        const onChange = (e: CustomEvent) => {
-            setLastEvent(`tc-change: manager=${e.detail.manager}`)
-        }
-
-        el.onCopy = (detail: { manager: string; command: string }) => {
-            console.log('[InstallTabs] onCopy callback', detail)
-        }
-        el.onChange = (detail: { manager: string }) => {
-            console.log('[InstallTabs] onChange callback', detail)
-        }
-
-        el.addEventListener('tc-copy', onCopy)
-        el.addEventListener('tc-change', onChange)
-        return () => {
-            el.removeEventListener('tc-copy', onCopy)
-            el.removeEventListener('tc-change', onChange)
-        }
-    }, [])
+    )
 
     return (
         <div className="py-4">
@@ -80,13 +73,7 @@ const InstallTabsDemo: React.FC = () => {
 }
 
 const LimitedManagersExample: React.FC = () => {
-    const ref = useRef<any>(null)
-
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        el.managers = ['npm', 'pnpm']
-    }, [])
+    const ref = useTc<HTMLElement>({ managers: ['npm', 'pnpm'] })
 
     return (
         /* @ts-ignore */

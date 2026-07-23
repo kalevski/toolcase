@@ -1,4 +1,5 @@
-import React, { useRef, useEffect } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const JS_CODE =
     "function greet(name) {\n  return `Hello, ${name}!`;\n}\n\nconsole.log(greet('World'));"
@@ -8,29 +9,18 @@ const BASH_CODE = 'git clone https://github.com/example/my-app.git\ncd my-app &&
 const STACKED_CODE = 'const a = 1;\nconst b = 2;\nconsole.log(a + b);'
 
 const CodeWithOutputDemo: React.FC = () => {
-    const splitRef = useRef<any>(null)
-    const stackedRef = useRef<any>(null)
-    const errorRef = useRef<any>(null)
-    const bashRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (splitRef.current) {
-            splitRef.current.output = 'Hello, World!'
-        }
-        if (stackedRef.current) {
-            stackedRef.current.output = '3'
-        }
-        if (errorRef.current) {
-            errorRef.current.error =
-                "TypeError: Cannot read properties of undefined (reading 'toUpperCase')\n" +
-                '    at processName (index.ts:2:16)\n' +
-                '    at <anonymous>:5:1'
-        }
-        if (bashRef.current) {
-            bashRef.current.output =
-                "Cloning into 'my-app'...\nremote: Enumerating objects: 42, done.\nadded 312 packages in 8s"
-        }
-    }, [])
+    const splitRef = useTc<HTMLElement>({ output: 'Hello, World!' })
+    const stackedRef = useTc<HTMLElement>({ output: '3' })
+    const errorRef = useTc<HTMLElement>({
+        error:
+            "TypeError: Cannot read properties of undefined (reading 'toUpperCase')\n" +
+            '    at processName (index.ts:2:16)\n' +
+            '    at <anonymous>:5:1',
+    })
+    const bashRef = useTc<HTMLElement>({
+        output:
+            "Cloning into 'my-app'...\nremote: Enumerating objects: 42, done.\nadded 312 packages in 8s",
+    })
 
     return (
         <div className="py-4">

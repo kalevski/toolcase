@@ -1,19 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTcEvents } from '@toolcase/web-components/react'
 
 const EditableTextDemo: React.FC = () => {
     const [committed, setCommitted] = useState('Project Alpha')
-    const listenerRef = useRef<any>(null)
-
-    useEffect(() => {
-        const el = listenerRef.current
-        if (!el) return
-        const handler = (e: Event) => {
+    const listenerRef = useTcEvents<HTMLElement>({
+        'tc-change': (e: Event) => {
             const detail = (e as CustomEvent).detail
             setCommitted(detail.value)
-        }
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-    }, [])
+        },
+    })
 
     return (
         <div className="py-4">

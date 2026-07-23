@@ -1,19 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
+import { useTcEvents } from '@toolcase/web-components/react'
 
 let _counter = 0
 
 const ScreenFlashDemo: React.FC = () => {
     // ── Default white flash ───────────────────────────────────────────────────
-    const defaultRef = useRef<any>(null)
     const [defaultDone, setDefaultDone] = useState<number | null>(null)
-
-    useEffect(() => {
-        const el = defaultRef.current
-        if (!el) return
-        const handler = () => setDefaultDone(Date.now())
-        el.addEventListener('tc-done', handler)
-        return () => el.removeEventListener('tc-done', handler)
-    }, [])
+    const defaultRef = useTcEvents<HTMLElement>({
+        'tc-done': () => setDefaultDone(Date.now()),
+    })
 
     // ── Red damage flash ──────────────────────────────────────────────────────
     const redRef = useRef<any>(null)
@@ -24,7 +19,7 @@ const ScreenFlashDemo: React.FC = () => {
     // ── Imperative flash() API ────────────────────────────────────────────────
     const imperativeRef = useRef<any>(null)
 
-    const triggerFlash = (ref: React.RefObject<any>) => {
+    const triggerFlash = (ref: { current: any }) => {
         const el = ref.current
         if (!el) return
         _counter++

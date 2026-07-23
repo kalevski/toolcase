@@ -1,20 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTcEvents } from '@toolcase/web-components/react'
 
 const DamageNumberDemo: React.FC = () => {
     // The numbers play their rise-and-fade once then sit at opacity 0; bumping
     // this key remounts the elements so the animation can be watched again.
     const [replayKey, setReplayKey] = useState(0)
 
-    const eventRef = useRef<any>(null)
     const [doneCount, setDoneCount] = useState(0)
-
-    useEffect(() => {
-        const el = eventRef.current
-        if (!el) return
-        const handler = () => setDoneCount((c) => c + 1)
-        el.addEventListener('tc-done', handler)
-        return () => el.removeEventListener('tc-done', handler)
-    }, [replayKey])
+    const eventRef = useTcEvents<HTMLElement>({ 'tc-done': () => setDoneCount((c) => c + 1) })
 
     return (
         <div className="py-4">

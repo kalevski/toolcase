@@ -1,27 +1,22 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const CompatibilityMatrixDemo: React.FC = () => {
-    const fullRef = useRef<any>(null)
-    const partialRef = useRef<any>(null)
-    const minimalRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (!fullRef.current) return
-        fullRef.current.versions = ['v1.0', 'v2.0', 'v3.0', 'v4.0']
-        fullRef.current.platforms = ['Chrome', 'Firefox', 'Safari', 'Node.js']
-        fullRef.current.support = {
+    const fullRef = useTc<HTMLElement>({
+        versions: ['v1.0', 'v2.0', 'v3.0', 'v4.0'],
+        platforms: ['Chrome', 'Firefox', 'Safari', 'Node.js'],
+        support: {
             'v1.0': { Chrome: 'yes', Firefox: 'yes', Safari: 'partial', 'Node.js': 'no' },
             'v2.0': { Chrome: 'yes', Firefox: 'yes', Safari: 'yes', 'Node.js': 'partial' },
             'v3.0': { Chrome: 'yes', Firefox: 'yes', Safari: 'yes', 'Node.js': 'yes' },
             'v4.0': { Chrome: 'yes', Firefox: 'partial', Safari: 'unknown', 'Node.js': 'yes' },
-        }
-    }, [])
+        },
+    })
 
-    useEffect(() => {
-        if (!partialRef.current) return
-        partialRef.current.versions = ['v0.8', 'v0.9', 'v1.0']
-        partialRef.current.platforms = ['Windows', 'macOS', 'Linux', 'iOS', 'Android']
-        partialRef.current.support = {
+    const partialRef = useTc<HTMLElement>({
+        versions: ['v0.8', 'v0.9', 'v1.0'],
+        platforms: ['Windows', 'macOS', 'Linux', 'iOS', 'Android'],
+        support: {
             'v0.8': {
                 Windows: 'yes',
                 macOS: 'partial',
@@ -37,18 +32,17 @@ const CompatibilityMatrixDemo: React.FC = () => {
                 iOS: 'partial',
                 Android: 'partial',
             },
-        }
-    }, [])
+        },
+    })
 
-    useEffect(() => {
-        if (!minimalRef.current) return
-        minimalRef.current.versions = ['stable', 'beta']
-        minimalRef.current.platforms = ['x86', 'arm64']
-        minimalRef.current.support = {
+    const minimalRef = useTc<HTMLElement>({
+        versions: ['stable', 'beta'],
+        platforms: ['x86', 'arm64'],
+        support: {
             stable: { x86: 'yes', arm64: 'yes' },
             beta: { x86: 'yes', arm64: 'partial' },
-        }
-    }, [])
+        },
+    })
 
     return (
         <div className="py-4">

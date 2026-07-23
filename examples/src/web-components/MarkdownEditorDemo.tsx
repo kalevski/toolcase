@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const STARTING_MARKDOWN = [
     '# Release notes',
@@ -20,18 +21,13 @@ const STARTING_MARKDOWN = [
 ].join('\n')
 
 const MarkdownEditorDemo: React.FC = () => {
-    const ref = useRef<any>(null)
     const [value, setValue] = useState(STARTING_MARKDOWN)
 
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        // JS-property props (multi-line content) and the tc-change event need a ref.
-        el.value = STARTING_MARKDOWN
-        const handler = (e: Event) => setValue((e as CustomEvent).detail.value)
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-    }, [])
+    // JS-property props (multi-line content) and the tc-change event need a ref.
+    const ref = useTc<HTMLElement>(
+        { value: STARTING_MARKDOWN },
+        { 'tc-change': (e: Event) => setValue((e as CustomEvent).detail.value) }
+    )
 
     return (
         <div className="py-4">

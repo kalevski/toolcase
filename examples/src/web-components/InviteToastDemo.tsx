@@ -1,28 +1,19 @@
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useState } from 'react'
+import { useTcEvents } from '@toolcase/web-components/react'
 
 const InviteToastDemo: React.FC = () => {
     const [open, setOpen] = useState(false)
     const [lastResult, setLastResult] = useState<string>('—')
-    const ref = useRef<HTMLElement | null>(null)
-
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        const onAccept = () => {
+    const ref = useTcEvents<HTMLElement>({
+        'tc-accept': () => {
             setLastResult('Accepted the invite')
             setOpen(false)
-        }
-        const onDecline = () => {
+        },
+        'tc-decline': () => {
             setLastResult('Declined the invite (button or timeout)')
             setOpen(false)
-        }
-        el.addEventListener('tc-accept', onAccept)
-        el.addEventListener('tc-decline', onDecline)
-        return () => {
-            el.removeEventListener('tc-accept', onAccept)
-            el.removeEventListener('tc-decline', onDecline)
-        }
-    }, [])
+        },
+    })
 
     return (
         <div className="py-4">
@@ -63,9 +54,7 @@ const InviteToastDemo: React.FC = () => {
 
                         {/* @ts-ignore */}
                         <tc-invite-toast
-                            ref={(el: HTMLElement | null) => {
-                                ref.current = el
-                            }}
+                            ref={ref}
                             open={open || undefined}
                             inviter="Ada Lovelace"
                             body="Wants to invite you to the Analytical Engine party."

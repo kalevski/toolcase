@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const ENTRIES_BASIC = [
     { key: 'host', value: 'db.internal', comment: 'primary database host' },
@@ -19,21 +20,9 @@ const ENTRIES_SERVICE = [
 ]
 
 const ConfigPreviewDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const liveRef = useRef<any>(null)
-    const slotLabelRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (basicRef.current) basicRef.current.entries = ENTRIES_BASIC
-    }, [])
-
-    useEffect(() => {
-        if (liveRef.current) liveRef.current.entries = ENTRIES_SERVICE
-    }, [])
-
-    useEffect(() => {
-        if (slotLabelRef.current) slotLabelRef.current.entries = ENTRIES_BASIC
-    }, [])
+    const basicRef = useTc<HTMLElement>({ entries: ENTRIES_BASIC })
+    const liveRef = useTc<HTMLElement>({ entries: ENTRIES_SERVICE })
+    const slotLabelRef = useTc<HTMLElement>({ entries: ENTRIES_BASIC })
 
     return (
         <div className="py-4">

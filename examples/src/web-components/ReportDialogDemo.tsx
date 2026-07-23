@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useTc, useTcEvents } from '@toolcase/web-components/react'
 
 const CUSTOM_REASONS = [
     'Exploiting bugs',
@@ -8,10 +9,6 @@ const CUSTOM_REASONS = [
 ]
 
 const ReportDialogDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const customRef = useRef<any>(null)
-    const eventsRef = useRef<any>(null)
-
     const [basicOpen, setBasicOpen] = useState(false)
     const [customOpen, setCustomOpen] = useState(false)
     const [eventsOpen, setEventsOpen] = useState(false)
@@ -19,23 +16,34 @@ const ReportDialogDemo: React.FC = () => {
 
     const appendLog = (msg: string) => setLog((l) => [msg, ...l].slice(0, 10))
 
-    // Basic dialog
-    useEffect(() => {
-        const el = basicRef.current
-        if (!el) return
-        const onCancel = () => setBasicOpen(false)
-        const onSubmit = (e: CustomEvent) => {
+    const basicRef = useTcEvents<HTMLElement>({
+        'tc-cancel': () => setBasicOpen(false),
+        'tc-submit': (e: CustomEvent) => {
             setBasicOpen(false)
             appendLog(`Submitted — reason: "${e.detail.reason}", comment: "${e.detail.comment}"`)
+        },
+    })
+    const customRef = useTc<HTMLElement>(
+        { reasons: CUSTOM_REASONS },
+        {
+            'tc-cancel': () => setCustomOpen(false),
+            'tc-submit': () => setCustomOpen(false),
         }
-        el.addEventListener('tc-cancel', onCancel)
-        el.addEventListener('tc-submit', onSubmit as EventListener)
-        return () => {
-            el.removeEventListener('tc-cancel', onCancel)
-            el.removeEventListener('tc-submit', onSubmit as EventListener)
-        }
-    }, [])
+    )
+    const eventsRef = useTcEvents<HTMLElement>({
+        'tc-cancel': () => {
+            appendLog('tc-cancel fired')
+            setEventsOpen(false)
+        },
+        'tc-submit': (e: CustomEvent) => {
+            appendLog(
+                `tc-submit — reason: "${e.detail.reason}", comment: "${e.detail.comment || '(none)'}"`,
+            )
+            setEventsOpen(false)
+        },
+    })
 
+    // Basic dialog
     useEffect(() => {
         if (!basicRef.current) return
         if (basicOpen) basicRef.current.setAttribute('open', '')
@@ -44,47 +52,12 @@ const ReportDialogDemo: React.FC = () => {
 
     // Custom reasons dialog
     useEffect(() => {
-        const el = customRef.current
-        if (!el) return
-        el.reasons = CUSTOM_REASONS
-        const onCancel = () => setCustomOpen(false)
-        const onSubmit = () => setCustomOpen(false)
-        el.addEventListener('tc-cancel', onCancel)
-        el.addEventListener('tc-submit', onSubmit)
-        return () => {
-            el.removeEventListener('tc-cancel', onCancel)
-            el.removeEventListener('tc-submit', onSubmit)
-        }
-    }, [])
-
-    useEffect(() => {
         if (!customRef.current) return
         if (customOpen) customRef.current.setAttribute('open', '')
         else customRef.current.removeAttribute('open')
     }, [customOpen])
 
     // Events dialog
-    useEffect(() => {
-        const el = eventsRef.current
-        if (!el) return
-        const onCancel = () => {
-            appendLog('tc-cancel fired')
-            setEventsOpen(false)
-        }
-        const onSubmit = (e: CustomEvent) => {
-            appendLog(
-                `tc-submit — reason: "${e.detail.reason}", comment: "${e.detail.comment || '(none)'}"`,
-            )
-            setEventsOpen(false)
-        }
-        el.addEventListener('tc-cancel', onCancel)
-        el.addEventListener('tc-submit', onSubmit as EventListener)
-        return () => {
-            el.removeEventListener('tc-cancel', onCancel)
-            el.removeEventListener('tc-submit', onSubmit as EventListener)
-        }
-    }, [])
-
     useEffect(() => {
         if (!eventsRef.current) return
         if (eventsOpen) eventsRef.current.setAttribute('open', '')

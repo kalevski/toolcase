@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const basicRules = [
     {
@@ -96,15 +97,9 @@ const noIconRules = [
 ]
 
 const ScoringRulesDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const accentRef = useRef<any>(null)
-    const noIconRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (basicRef.current) basicRef.current.rules = basicRules
-        if (accentRef.current) accentRef.current.rules = accentRules
-        if (noIconRef.current) noIconRef.current.rules = noIconRules
-    }, [])
+    const basicRef = useTc<HTMLElement>({ rules: basicRules })
+    const accentRef = useTc<HTMLElement>({ rules: accentRules })
+    const noIconRef = useTc<HTMLElement>({ rules: noIconRules })
 
     return (
         <div className="py-4">

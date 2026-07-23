@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const SAMPLE = [
     {
@@ -29,25 +30,17 @@ const SAMPLE = [
 ]
 
 const TestimonialCarouselDemo: React.FC = () => {
-    const manualRef = useRef<any>(null)
-    const autoplayRef = useRef<any>(null)
     const [lastChange, setLastChange] = useState<string>('—')
 
-    useEffect(() => {
-        const manual = manualRef.current
-        const autoplay = autoplayRef.current
-
-        if (manual) manual.items = SAMPLE
-        if (autoplay) autoplay.items = SAMPLE
-
-        const onChange = (e: any) => {
-            setLastChange(`index ${e.detail.index} (id: ${e.detail.id})`)
+    const manualRef = useTc<HTMLElement>(
+        { items: SAMPLE },
+        {
+            'tc-change': (e: any) => {
+                setLastChange(`index ${e.detail.index} (id: ${e.detail.id})`)
+            },
         }
-        manual?.addEventListener('tc-change', onChange)
-        return () => {
-            manual?.removeEventListener('tc-change', onChange)
-        }
-    }, [])
+    )
+    const autoplayRef = useTc<HTMLElement>({ items: SAMPLE })
 
     return (
         <div className="py-4">

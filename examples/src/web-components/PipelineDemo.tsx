@@ -1,43 +1,32 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const PipelineDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const mixedRef = useRef<any>(null)
-    const completeRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (basicRef.current) {
-            basicRef.current.steps = [
-                { title: 'Source', state: 'complete' },
-                { title: 'Build', state: 'complete' },
-                { title: 'Test', state: 'live' },
-                { title: 'Deploy', state: 'default' },
-            ]
-        }
-    }, [])
-
-    useEffect(() => {
-        if (mixedRef.current) {
-            mixedRef.current.steps = [
-                { title: 'Validate config', state: 'complete' },
-                { title: 'Provision infra', state: 'complete' },
-                { title: 'Deploy service', state: 'live' },
-                { title: 'Run smoke tests', state: 'default' },
-                { title: 'Notify team', state: 'default' },
-            ]
-        }
-    }, [])
-
-    useEffect(() => {
-        if (completeRef.current) {
-            completeRef.current.steps = [
-                { title: 'Checkout', state: 'complete' },
-                { title: 'Install', state: 'complete' },
-                { title: 'Lint', state: 'complete' },
-                { title: 'Test', state: 'complete' },
-            ]
-        }
-    }, [])
+    const basicRef = useTc<HTMLElement>({
+        steps: [
+            { title: 'Source', state: 'complete' },
+            { title: 'Build', state: 'complete' },
+            { title: 'Test', state: 'live' },
+            { title: 'Deploy', state: 'default' },
+        ],
+    })
+    const mixedRef = useTc<HTMLElement>({
+        steps: [
+            { title: 'Validate config', state: 'complete' },
+            { title: 'Provision infra', state: 'complete' },
+            { title: 'Deploy service', state: 'live' },
+            { title: 'Run smoke tests', state: 'default' },
+            { title: 'Notify team', state: 'default' },
+        ],
+    })
+    const completeRef = useTc<HTMLElement>({
+        steps: [
+            { title: 'Checkout', state: 'complete' },
+            { title: 'Install', state: 'complete' },
+            { title: 'Lint', state: 'complete' },
+            { title: 'Test', state: 'complete' },
+        ],
+    })
 
     return (
         <div className="py-4">

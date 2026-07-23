@@ -1,57 +1,43 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const PartyPanelDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const rolesRef = useRef<any>(null)
-    const fullRef = useRef<any>(null)
-    const eventsRef = useRef<any>(null)
-
     const [log, setLog] = useState<string[]>([])
 
-    useEffect(() => {
-        if (!basicRef.current) return
-        basicRef.current.members = [
+    const basicRef = useTc<HTMLElement>({
+        members: [
             { id: '1', name: 'Aldric', host: true, ready: true },
             { id: '2', name: 'Brina', ready: true },
             { id: '3', name: 'Caelum', ready: false },
-        ]
-    }, [])
-
-    useEffect(() => {
-        if (!rolesRef.current) return
-        rolesRef.current.members = [
+        ],
+    })
+    const rolesRef = useTc<HTMLElement>({
+        members: [
             { id: '1', name: 'Aldric', host: true, ready: true, role: 'Tank' },
             { id: '2', name: 'Brina', ready: true, role: 'Healer' },
             { id: '3', name: 'Caelum', ready: false, role: 'DPS' },
-        ]
-    }, [])
-
-    useEffect(() => {
-        if (!fullRef.current) return
-        fullRef.current.members = [
+        ],
+    })
+    const fullRef = useTc<HTMLElement>({
+        members: [
             { id: '1', name: 'Aldric', host: true, ready: true, role: 'Tank' },
             { id: '2', name: 'Brina', ready: true, role: 'Healer' },
             { id: '3', name: 'Caelum', ready: true, role: 'DPS' },
             { id: '4', name: 'Devra', ready: true, role: 'Support' },
-        ]
-    }, [])
-
-    useEffect(() => {
-        const el = eventsRef.current
-        if (!el) return
-        el.members = [
-            { id: '1', name: 'Aldric', host: true, ready: true },
-            { id: '2', name: 'Brina', ready: false },
-        ]
-        const onLeave = () => setLog((l) => ['tc-leave fired', ...l].slice(0, 6))
-        const onInvite = () => setLog((l) => ['tc-invite fired', ...l].slice(0, 6))
-        el.addEventListener('tc-leave', onLeave)
-        el.addEventListener('tc-invite', onInvite)
-        return () => {
-            el.removeEventListener('tc-leave', onLeave)
-            el.removeEventListener('tc-invite', onInvite)
+        ],
+    })
+    const eventsRef = useTc<HTMLElement>(
+        {
+            members: [
+                { id: '1', name: 'Aldric', host: true, ready: true },
+                { id: '2', name: 'Brina', ready: false },
+            ],
+        },
+        {
+            'tc-leave': () => setLog((l) => ['tc-leave fired', ...l].slice(0, 6)),
+            'tc-invite': () => setLog((l) => ['tc-invite fired', ...l].slice(0, 6)),
         }
-    }, [])
+    )
 
     return (
         <div className="py-4">

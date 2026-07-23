@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const RANKED_ITEMS = [
     { id: '1', label: 'React', value: '42,300' },
@@ -16,17 +17,8 @@ const ICON_ITEMS = [
 ]
 
 const ListCardDemo: React.FC = () => {
-    const rankedRef = useRef<any>(null)
-    const iconRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (rankedRef.current) {
-            rankedRef.current.items = RANKED_ITEMS
-        }
-        if (iconRef.current) {
-            iconRef.current.items = ICON_ITEMS
-        }
-    }, [])
+    const rankedRef = useTc<HTMLElement>({ items: RANKED_ITEMS })
+    const iconRef = useTc<HTMLElement>({ items: ICON_ITEMS })
 
     return (
         <div className="py-4">

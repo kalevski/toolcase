@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const FAQ_ITEMS = [
     {
@@ -20,35 +21,19 @@ const FAQ_ITEMS = [
 ]
 
 const FAQListDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const schemaRef = useRef<any>(null)
-    const evtRef = useRef<any>(null)
-    const slotRef = useRef<any>(null)
     const [lastToggle, setLastToggle] = useState<string>('')
 
-    useEffect(() => {
-        if (basicRef.current) basicRef.current.items = FAQ_ITEMS
-    }, [])
-
-    useEffect(() => {
-        if (schemaRef.current) schemaRef.current.items = FAQ_ITEMS
-    }, [])
-
-    useEffect(() => {
-        const el = evtRef.current
-        if (!el) return
-        el.items = FAQ_ITEMS
-        el.defaultOpen = [0, 2]
-        const handler = (e: CustomEvent) => {
-            setLastToggle(`Item ${e.detail.index} ${e.detail.open ? 'opened' : 'closed'}`)
-        }
-        el.addEventListener('tc-toggle', handler)
-        return () => el.removeEventListener('tc-toggle', handler)
-    }, [])
-
-    useEffect(() => {
-        if (slotRef.current) slotRef.current.items = FAQ_ITEMS
-    }, [])
+    const basicRef = useTc<HTMLElement>({ items: FAQ_ITEMS })
+    const schemaRef = useTc<HTMLElement>({ items: FAQ_ITEMS })
+    const evtRef = useTc<HTMLElement>(
+        { items: FAQ_ITEMS, defaultOpen: [0, 2] },
+        {
+            'tc-toggle': (e: CustomEvent) => {
+                setLastToggle(`Item ${e.detail.index} ${e.detail.open ? 'opened' : 'closed'}`)
+            },
+        },
+    )
+    const slotRef = useTc<HTMLElement>({ items: FAQ_ITEMS })
 
     return (
         <div className="py-4">

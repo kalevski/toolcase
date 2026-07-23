@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
 import type { ActionHeaderAction } from '@toolcase/web-components'
+import { useTc } from '@toolcase/web-components/react'
 
 const BASIC_ACTIONS: ActionHeaderAction[] = [
     { key: 'edit', label: 'Edit', icon: 'Pencil' },
@@ -18,37 +19,16 @@ const DISABLED_ACTIONS: ActionHeaderAction[] = [
 ]
 
 const ActionHeaderDemo: React.FC = () => {
-    const basicRef = useRef<HTMLElement>(null)
-    const iconRef = useRef<HTMLElement>(null)
-    const disabledRef = useRef<HTMLElement>(null)
-    const allDisabledRef = useRef<HTMLElement>(null)
-
-    useEffect(() => {
-        if (basicRef.current) {
-            const el = basicRef.current as HTMLElement & {
-                actions: ActionHeaderAction[]
-                onExec: (key: string) => void
-            }
-            el.actions = BASIC_ACTIONS
-            el.onExec = (key: string) => alert(`Exec: ${key}`)
-        }
-        if (iconRef.current) {
-            const el = iconRef.current as HTMLElement & { actions: ActionHeaderAction[] }
-            el.actions = ICON_ONLY_ACTIONS
-        }
-        if (disabledRef.current) {
-            const el = disabledRef.current as HTMLElement & { actions: ActionHeaderAction[] }
-            el.actions = DISABLED_ACTIONS
-        }
-        if (allDisabledRef.current) {
-            const el = allDisabledRef.current as HTMLElement & {
-                actions: ActionHeaderAction[]
-                disabled: boolean
-            }
-            el.actions = BASIC_ACTIONS
-            el.disabled = true
-        }
-    }, [])
+    const basicRef = useTc<HTMLElement>({
+        actions: BASIC_ACTIONS,
+        onExec: (key: string) => alert(`Exec: ${key}`),
+    })
+    const iconRef = useTc<HTMLElement>({ actions: ICON_ONLY_ACTIONS })
+    const disabledRef = useTc<HTMLElement>({ actions: DISABLED_ACTIONS })
+    const allDisabledRef = useTc<HTMLElement>({
+        actions: BASIC_ACTIONS,
+        disabled: true,
+    })
 
     return (
         <div className="py-4">

@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const HUMANOID_SLOTS = [
     { id: 'head', label: 'Head', x: 50, y: 8, item: { id: 'helm', name: 'Iron Helm', icon: 'H' } },
@@ -82,27 +83,14 @@ const COMPACT_SLOTS = [
 ]
 
 const EquipmentDollDemo: React.FC = () => {
-    const mainRef = useRef<any>(null)
-    const compactRef = useRef<any>(null)
-    const customRef = useRef<any>(null)
     const [selected, setSelected] = useState<string>('chest')
 
-    useEffect(() => {
-        const el = mainRef.current
-        if (!el) return
-        el.slots = HUMANOID_SLOTS
-        const onSelect = (e: CustomEvent<{ id: string }>) => setSelected(e.detail.id)
-        el.addEventListener('tc-select', onSelect as EventListener)
-        return () => el.removeEventListener('tc-select', onSelect as EventListener)
-    }, [])
-
-    useEffect(() => {
-        if (compactRef.current) compactRef.current.slots = COMPACT_SLOTS
-    }, [])
-
-    useEffect(() => {
-        if (customRef.current) customRef.current.slots = HUMANOID_SLOTS
-    }, [])
+    const mainRef = useTc<HTMLElement>(
+        { slots: HUMANOID_SLOTS },
+        { 'tc-select': (e: CustomEvent) => setSelected(e.detail.id) },
+    )
+    const compactRef = useTc<HTMLElement>({ slots: COMPACT_SLOTS })
+    const customRef = useTc<HTMLElement>({ slots: HUMANOID_SLOTS })
 
     return (
         <div className="py-4">

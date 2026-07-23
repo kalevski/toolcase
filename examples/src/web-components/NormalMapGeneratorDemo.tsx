@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useMemo, useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 // Builds a small sample sprite (a few embossed glyphs/shapes on transparent bg)
 // as a PNG data URL so the generator has something to turn into a normal map.
@@ -33,29 +34,23 @@ function makeSampleSource(): string {
 }
 
 const NormalMapGeneratorDemo: React.FC = () => {
-    const editorRef = useRef<any>(null)
-    const litRef = useRef<any>(null)
     const [thumb, setThumb] = useState<string | null>(null)
     const [meta, setMeta] = useState<string | null>(null)
+    // `source` accepts a URL string, File, or Blob — set it as a JS property.
+    const sample = useMemo(() => makeSampleSource(), [])
 
-    useEffect(() => {
-        const sample = makeSampleSource()
-
-        const el = editorRef.current
-        if (el) {
-            // `source` accepts a URL string, File, or Blob — set it as a JS property.
-            el.source = sample
+    const editorRef = useTc<HTMLElement>(
+        { source: sample },
+        {
+            'tc-generate': (e: Event) => {
+                const detail = (e as CustomEvent).detail
+                setThumb(detail.dataUrl)
+                setMeta(`${detail.width}×${detail.height}px`)
+            },
         }
-        if (litRef.current) litRef.current.source = sample
+    )
 
-        const onGenerate = (e: Event) => {
-            const detail = (e as CustomEvent).detail
-            setThumb(detail.dataUrl)
-            setMeta(`${detail.width}×${detail.height}px`)
-        }
-        el?.addEventListener('tc-generate', onGenerate)
-        return () => el?.removeEventListener('tc-generate', onGenerate)
-    }, [])
+    const litRef = useTc<HTMLElement>({ source: sample })
 
     return (
         <div className="py-4">

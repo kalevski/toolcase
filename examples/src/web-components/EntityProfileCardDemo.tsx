@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const BASIC_META = [
     { label: 'Location', value: 'San Francisco, CA' },
@@ -17,20 +18,8 @@ const FULL_META = [
 ]
 
 const EntityProfileCardDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const fullRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (basicRef.current) {
-            basicRef.current.meta = BASIC_META
-        }
-    }, [])
-
-    useEffect(() => {
-        if (fullRef.current) {
-            fullRef.current.meta = FULL_META
-        }
-    }, [])
+    const basicRef = useTc<HTMLElement>({ meta: BASIC_META })
+    const fullRef = useTc<HTMLElement>({ meta: FULL_META })
 
     return (
         <div className="py-4">

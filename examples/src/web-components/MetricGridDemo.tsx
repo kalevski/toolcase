@@ -1,47 +1,41 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const MetricGridDemo: React.FC = () => {
-    const itemsRef = useRef<any>(null)
-    const threeColRef = useRef<any>(null)
-    const fourColRef = useRef<any>(null)
-    const twoColRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (itemsRef.current) {
-            itemsRef.current.items = [
-                { label: 'Total Users', value: '12,480', icon: 'Users' },
-                { label: 'Revenue', value: '$24,500', unit: 'USD', icon: 'DollarSign' },
-                {
-                    label: 'Avg Response',
-                    value: '142',
-                    unit: 'ms',
-                    icon: 'Zap',
-                    hint: 'P50 over 24 h',
-                },
-            ]
-        }
-        if (threeColRef.current) {
-            threeColRef.current.items = [
-                { label: 'Requests', value: '3.2M', icon: 'Activity', hint: 'Last 24 hours' },
-                { label: 'Uptime', value: '99.97', unit: '%', icon: 'CheckCircle' },
-                { label: 'Latency P99', value: '320', unit: 'ms', icon: 'Zap' },
-            ]
-        }
-        if (fourColRef.current) {
-            fourColRef.current.items = [
-                { label: 'Requests', value: '3.2M', icon: 'Activity' },
-                { label: 'Uptime', value: '99.97', unit: '%', icon: 'CheckCircle' },
-                { label: 'Latency P99', value: '320', unit: 'ms', icon: 'Zap' },
-                { label: 'Active Sessions', value: '1,804', icon: 'Globe' },
-            ]
-        }
-        if (twoColRef.current) {
-            twoColRef.current.items = [
-                { label: 'Error Rate', value: '0.4', unit: '%', hint: 'Down 0.1% from last week' },
-                { label: 'Deployments', value: '18', hint: 'This month' },
-            ]
-        }
-    }, [])
+    const itemsRef = useTc<HTMLElement>({
+        items: [
+            { label: 'Total Users', value: '12,480', icon: 'Users' },
+            { label: 'Revenue', value: '$24,500', unit: 'USD', icon: 'DollarSign' },
+            {
+                label: 'Avg Response',
+                value: '142',
+                unit: 'ms',
+                icon: 'Zap',
+                hint: 'P50 over 24 h',
+            },
+        ],
+    })
+    const threeColRef = useTc<HTMLElement>({
+        items: [
+            { label: 'Requests', value: '3.2M', icon: 'Activity', hint: 'Last 24 hours' },
+            { label: 'Uptime', value: '99.97', unit: '%', icon: 'CheckCircle' },
+            { label: 'Latency P99', value: '320', unit: 'ms', icon: 'Zap' },
+        ],
+    })
+    const fourColRef = useTc<HTMLElement>({
+        items: [
+            { label: 'Requests', value: '3.2M', icon: 'Activity' },
+            { label: 'Uptime', value: '99.97', unit: '%', icon: 'CheckCircle' },
+            { label: 'Latency P99', value: '320', unit: 'ms', icon: 'Zap' },
+            { label: 'Active Sessions', value: '1,804', icon: 'Globe' },
+        ],
+    })
+    const twoColRef = useTc<HTMLElement>({
+        items: [
+            { label: 'Error Rate', value: '0.4', unit: '%', hint: 'Down 0.1% from last week' },
+            { label: 'Deployments', value: '18', hint: 'This month' },
+        ],
+    })
 
     return (
         <div className="py-4">

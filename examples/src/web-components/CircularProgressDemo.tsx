@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const CircularProgressDemo: React.FC = () => {
     // Live-updating value, set via the JS `value` property on a ref.
-    const liveRef = useRef<any>(null)
     const [value, setValue] = useState(25)
+    const liveRef = useTc<HTMLElement>({ value })
 
     useEffect(() => {
         const id = setInterval(() => {
@@ -11,10 +12,6 @@ const CircularProgressDemo: React.FC = () => {
         }, 600)
         return () => clearInterval(id)
     }, [])
-
-    useEffect(() => {
-        if (liveRef.current) liveRef.current.value = value
-    }, [value])
 
     return (
         <div className="py-4">

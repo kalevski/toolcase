@@ -1,4 +1,5 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const overviewItems = [
     {
@@ -40,19 +41,15 @@ const controlledItems = [
 ]
 
 const UncontrolledExample: React.FC = () => {
-    const ref = useRef<any>(null)
     const [lastEvent, setLastEvent] = useState<string | null>(null)
 
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        el.items = overviewItems
-
-        const onChange = (e: CustomEvent) => setLastEvent(`tc-change: key=${e.detail.key}`)
-        el.onchangetab = (key: string) => console.log('[TabSections] onchangetab', key)
-        el.addEventListener('tc-change', onChange)
-        return () => el.removeEventListener('tc-change', onChange)
-    }, [])
+    const ref = useTc<HTMLElement>(
+        {
+            items: overviewItems,
+            onchangetab: (key: string) => console.log('[TabSections] onchangetab', key),
+        },
+        { 'tc-change': (e: CustomEvent) => setLastEvent(`tc-change: key=${e.detail.key}`) }
+    )
 
     return (
         <>
@@ -68,18 +65,13 @@ const UncontrolledExample: React.FC = () => {
 }
 
 const ControlledExample: React.FC = () => {
-    const ref = useRef<any>(null)
     const [active, setActive] = useState('tab-a')
 
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        el.items = controlledItems
-        // Controlled: the element only emits; the parent decides the active tab.
-        const onChange = (e: CustomEvent) => setActive(e.detail.key)
-        el.addEventListener('tc-change', onChange)
-        return () => el.removeEventListener('tc-change', onChange)
-    }, [])
+    // Controlled: the element only emits; the parent decides the active tab.
+    const ref = useTc<HTMLElement>(
+        { items: controlledItems },
+        { 'tc-change': (e: CustomEvent) => setActive(e.detail.key) }
+    )
 
     useEffect(() => {
         const el = ref.current
@@ -98,12 +90,7 @@ const ControlledExample: React.FC = () => {
 }
 
 const LoadingExample: React.FC = () => {
-    const ref = useRef<any>(null)
-
-    useEffect(() => {
-        const el = ref.current
-        if (el) el.items = overviewItems
-    }, [])
+    const ref = useTc<HTMLElement>({ items: overviewItems })
 
     return (
         /* @ts-ignore */

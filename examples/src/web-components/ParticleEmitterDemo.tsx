@@ -1,27 +1,18 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
+import { useTc, useTcEvents } from '@toolcase/web-components/react'
 
 const ParticleEmitterDemo: React.FC = () => {
-    const defaultRef = useRef<any>(null)
-    const cyanRef = useRef<any>(null)
+    const defaultRef = useTcEvents<HTMLElement>({
+        'tc-burst': () => setBurstCount((n) => n + 1),
+    })
+    const cyanRef = useTc<HTMLElement>({
+        colors: ['#22d3ee', '#06b6d4', '#0e7490', '#cffafe'],
+    })
     const fastRef = useRef<any>(null)
     const heavyRef = useRef<any>(null)
     const [burstCount, setBurstCount] = useState(0)
 
-    useEffect(() => {
-        if (!defaultRef.current) return
-        const el = defaultRef.current
-        const handler = () => setBurstCount((n) => n + 1)
-        el.addEventListener('tc-burst', handler)
-        return () => el.removeEventListener('tc-burst', handler)
-    }, [])
-
-    useEffect(() => {
-        if (cyanRef.current) {
-            cyanRef.current.colors = ['#22d3ee', '#06b6d4', '#0e7490', '#cffafe']
-        }
-    }, [])
-
-    const handleBurst = useCallback((ref: React.MutableRefObject<any>) => {
+    const handleBurst = useCallback((ref: { current: any }) => {
         if (ref.current) ref.current.burst()
     }, [])
 

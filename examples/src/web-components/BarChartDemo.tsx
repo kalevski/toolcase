@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const traffic = [
     { label: 'Jan', value: 1200 },
@@ -32,35 +33,18 @@ const yCompact = (v: number): string => {
 const yPlain = (v: number): string => String(Math.round(v))
 
 const BarChartDemo: React.FC = () => {
-    const verticalRef = useRef<any>(null)
-    const horizontalRef = useRef<any>(null)
-    const statusRef = useRef<any>(null)
     const [clicked, setClicked] = useState<string | null>(null)
-
-    useEffect(() => {
-        if (verticalRef.current) {
-            verticalRef.current.data = traffic
-            verticalRef.current.yFormatter = yCompact
-        }
-        if (horizontalRef.current) {
-            horizontalRef.current.data = languages
-            horizontalRef.current.yFormatter = yCompact
-        }
-        if (statusRef.current) {
-            statusRef.current.data = status
-            statusRef.current.yFormatter = yPlain
-        }
-
-        const el = verticalRef.current
-        if (el) {
-            const handler = (e: any) =>
+    const verticalRef = useTc<HTMLElement>(
+        { data: traffic, yFormatter: yCompact },
+        {
+            'tc-bar-click': (e: any) =>
                 setClicked(
                     `${e.detail.item.label} = ${e.detail.item.value} (index ${e.detail.index})`,
-                )
-            el.addEventListener('tc-bar-click', handler)
-            return () => el.removeEventListener('tc-bar-click', handler)
-        }
-    }, [])
+                ),
+        },
+    )
+    const horizontalRef = useTc<HTMLElement>({ data: languages, yFormatter: yCompact })
+    const statusRef = useTc<HTMLElement>({ data: status, yFormatter: yPlain })
 
     return (
         <div className="py-4">

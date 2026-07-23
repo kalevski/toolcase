@@ -1,71 +1,60 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const MainMenuDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const subtitleRef = useRef<any>(null)
-    const eventsRef = useRef<any>(null)
-    const disabledRef = useRef<any>(null)
-    const badgeRef = useRef<any>(null)
-
     const [log, setLog] = useState<string[]>([])
 
-    useEffect(() => {
-        if (!basicRef.current) return
-        basicRef.current.items = [
+    const basicRef = useTc<HTMLElement>({
+        items: [
             { id: 'play', label: 'Play' },
             { id: 'settings', label: 'Settings' },
             { id: 'credits', label: 'Credits' },
             { id: 'quit', label: 'Quit' },
-        ]
-    }, [])
+        ],
+    })
 
-    useEffect(() => {
-        if (!subtitleRef.current) return
-        subtitleRef.current.items = [
+    const subtitleRef = useTc<HTMLElement>({
+        items: [
             { id: 'continue', label: 'Continue' },
             { id: 'new-game', label: 'New Game' },
             { id: 'load', label: 'Load Game' },
             { id: 'options', label: 'Options' },
-        ]
-    }, [])
+        ],
+    })
 
-    useEffect(() => {
-        if (!disabledRef.current) return
-        disabledRef.current.items = [
+    const disabledRef = useTc<HTMLElement>({
+        items: [
             { id: 'single', label: 'Single Player' },
             { id: 'multi', label: 'Multiplayer', disabled: true },
             { id: 'ranked', label: 'Ranked Match', disabled: true },
             { id: 'settings', label: 'Settings' },
-        ]
-        disabledRef.current.selectedId = 'single'
-    }, [])
+        ],
+        selectedId: 'single',
+    })
 
-    useEffect(() => {
-        if (!badgeRef.current) return
-        badgeRef.current.items = [
+    const badgeRef = useTc<HTMLElement>({
+        items: [
             { id: 'inbox', label: 'Inbox', badge: '3' },
             { id: 'friends', label: 'Friends', badge: '12' },
             { id: 'shop', label: 'Shop', badge: 'NEW' },
             { id: 'achievements', label: 'Achievements' },
-        ]
-    }, [])
+        ],
+    })
 
-    useEffect(() => {
-        const el = eventsRef.current
-        if (!el) return
-        el.items = [
-            { id: 'play', label: 'Play' },
-            { id: 'settings', label: 'Settings' },
-            { id: 'quit', label: 'Quit' },
-        ]
-        const onSelect = (e: CustomEvent) => {
-            setLog((l) => [`tc-select: id="${e.detail.id}"`, ...l].slice(0, 6))
+    const eventsRef = useTc<HTMLElement>(
+        {
+            items: [
+                { id: 'play', label: 'Play' },
+                { id: 'settings', label: 'Settings' },
+                { id: 'quit', label: 'Quit' },
+            ],
+        },
+        {
+            'tc-select': (e: CustomEvent) => {
+                setLog((l) => [`tc-select: id="${e.detail.id}"`, ...l].slice(0, 6))
+            },
         }
-        el.addEventListener('tc-select', onSelect)
-        return () => {
-            el.removeEventListener('tc-select', onSelect)
-        }
-    }, [])
+    )
 
     return (
         <div className="py-4">

@@ -1,33 +1,23 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
+import { useTcEvents } from '@toolcase/web-components/react'
 
 const PhoneInputDemo: React.FC = () => {
-    const defaultRef = useRef<any>(null)
-    const gbRef = useRef<any>(null)
     const errorRef = useRef<any>(null)
     const formRef = useRef<any>(null)
 
     const [defaultValue, setDefaultValue] = useState('')
     const [gbValue, setGbValue] = useState('')
 
-    useEffect(() => {
-        const el = defaultRef.current
-        if (!el) return
-        const handler = (e: Event) => {
+    const defaultRef = useTcEvents<HTMLElement>({
+        'tc-change': (e: Event) => {
             setDefaultValue((e as CustomEvent<{ value: string }>).detail.value)
-        }
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-    }, [])
-
-    useEffect(() => {
-        const el = gbRef.current
-        if (!el) return
-        const handler = (e: Event) => {
+        },
+    })
+    const gbRef = useTcEvents<HTMLElement>({
+        'tc-change': (e: Event) => {
             setGbValue((e as CustomEvent<{ value: string }>).detail.value)
-        }
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-    }, [])
+        },
+    })
 
     return (
         <div className="py-4">

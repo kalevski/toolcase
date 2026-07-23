@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const TAGS = [
     { id: 'design', label: 'Design', color: 'var(--tc-info, #0ea5e9)' },
@@ -15,31 +16,22 @@ const MENU_ITEMS = [
 ]
 
 function EditableExample() {
-    const ref = useRef<any>(null)
     const [log, setLog] = useState<string[]>([])
-
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-
-        el.tags = TAGS
-        el.tagIds = ['design', 'review']
-        el.menuItems = MENU_ITEMS
-
-        const onName = (e: CustomEvent) => {
-            setLog((prev) => [`name changed → "${e.detail.name}"`, ...prev].slice(0, 5))
-        }
-        const onMenu = (e: CustomEvent) => {
-            setLog((prev) => [`menu clicked → "${e.detail.key}"`, ...prev].slice(0, 5))
-        }
-
-        el.addEventListener('tc-name-change', onName)
-        el.addEventListener('tc-menu-item-click', onMenu)
-        return () => {
-            el.removeEventListener('tc-name-change', onName)
-            el.removeEventListener('tc-menu-item-click', onMenu)
-        }
-    }, [])
+    const ref = useTc<HTMLElement>(
+        {
+            tags: TAGS,
+            tagIds: ['design', 'review'],
+            menuItems: MENU_ITEMS,
+        },
+        {
+            'tc-name-change': (e: CustomEvent) => {
+                setLog((prev) => [`name changed → "${e.detail.name}"`, ...prev].slice(0, 5))
+            },
+            'tc-menu-item-click': (e: CustomEvent) => {
+                setLog((prev) => [`menu clicked → "${e.detail.key}"`, ...prev].slice(0, 5))
+            },
+        },
+    )
 
     return (
         <div className="d-flex flex-column gap-3">
@@ -66,14 +58,7 @@ function EditableExample() {
 }
 
 function ReadonlyExample() {
-    const ref = useRef<any>(null)
-
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        el.tags = TAGS
-        el.tagIds = ['approved']
-    }, [])
+    const ref = useTc<HTMLElement>({ tags: TAGS, tagIds: ['approved'] })
 
     return (
         <>
@@ -116,19 +101,15 @@ function LoadingExample() {
 }
 
 function CallbackPropertyExample() {
-    const ref = useRef<any>(null)
     const [lastAction, setLastAction] = useState<string | null>(null)
-
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        el.menuItems = [
+    const ref = useTc<HTMLElement>({
+        menuItems: [
             { key: 'open', label: 'Open', icon: 'FolderOpen' },
             { key: 'share', label: 'Share', icon: 'Share2' },
-        ]
-        el.onMenuItemClick = (key: string) => setLastAction(key)
-        el.onNameChange = (name: string) => setLastAction(`rename → ${name}`)
-    }, [])
+        ],
+        onMenuItemClick: (key: string) => setLastAction(key),
+        onNameChange: (name: string) => setLastAction(`rename → ${name}`),
+    })
 
     return (
         <div className="d-flex flex-column gap-2">

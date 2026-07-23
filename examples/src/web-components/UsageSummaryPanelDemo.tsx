@@ -1,35 +1,30 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useRef } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const UsageSummaryPanelDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const warnRef = useRef<any>(null)
+    const basicRef = useTc<HTMLElement>({
+        usage: [
+            { label: 'Storage', used: 12.4, total: 50, measurementUnit: 'GB' },
+            { label: 'Bandwidth', used: 320, total: 1000, measurementUnit: 'MB' },
+            { label: 'API Calls', used: 4800, total: 10000, measurementUnit: 'req/day' },
+        ],
+    })
+    const warnRef = useTc<HTMLElement>({
+        usage: [
+            { label: 'Storage', used: 45.2, total: 50, measurementUnit: 'GB', warn: true },
+            { label: 'Bandwidth', used: 320, total: 1000, measurementUnit: 'MB' },
+            { label: 'Seats', used: 10, total: 10, measurementUnit: 'users' },
+        ],
+    })
     const loadingRef = useRef<any>(null)
-    const fullRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (basicRef.current) {
-            basicRef.current.usage = [
-                { label: 'Storage', used: 12.4, total: 50, measurementUnit: 'GB' },
-                { label: 'Bandwidth', used: 320, total: 1000, measurementUnit: 'MB' },
-                { label: 'API Calls', used: 4800, total: 10000, measurementUnit: 'req/day' },
-            ]
-        }
-        if (warnRef.current) {
-            warnRef.current.usage = [
-                { label: 'Storage', used: 45.2, total: 50, measurementUnit: 'GB', warn: true },
-                { label: 'Bandwidth', used: 320, total: 1000, measurementUnit: 'MB' },
-                { label: 'Seats', used: 10, total: 10, measurementUnit: 'users' },
-            ]
-        }
-        if (fullRef.current) {
-            fullRef.current.usage = [
-                { label: 'Compute', used: 3.6, total: 8, measurementUnit: 'vCPU' },
-                { label: 'Memory', used: 6.2, total: 16, measurementUnit: 'GB' },
-                { label: 'Storage', used: 180, total: 200, measurementUnit: 'GB', warn: true },
-                { label: 'Egress', used: 95, total: 100, measurementUnit: 'GB', warn: true },
-            ]
-        }
-    }, [])
+    const fullRef = useTc<HTMLElement>({
+        usage: [
+            { label: 'Compute', used: 3.6, total: 8, measurementUnit: 'vCPU' },
+            { label: 'Memory', used: 6.2, total: 16, measurementUnit: 'GB' },
+            { label: 'Storage', used: 180, total: 200, measurementUnit: 'GB', warn: true },
+            { label: 'Egress', used: 95, total: 100, measurementUnit: 'GB', warn: true },
+        ],
+    })
 
     return (
         <div className="py-4">

@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const ITEMS_FULL = [
     {
@@ -40,32 +41,26 @@ const ITEMS_MINIMAL = [
 ]
 
 const PinnedFeatureShowcaseDemo: React.FC = () => {
-    const fullRef = useRef<any>(null)
-    const minimalRef = useRef<any>(null)
-    const noIconRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (fullRef.current) fullRef.current.items = ITEMS_FULL
-        if (minimalRef.current) minimalRef.current.items = ITEMS_MINIMAL
-        if (noIconRef.current) {
-            noIconRef.current.items = [
-                {
-                    title: 'Layered architecture',
-                    description: 'Each concern lives in its own layer — no tangled abstractions.',
-                },
-                {
-                    title: 'Sharp corners',
-                    description:
-                        'The design system intentionally avoids border-radius for a precise, professional look.',
-                },
-                {
-                    title: 'Slate neutrals',
-                    description:
-                        'A consistent palette of slate greys ensures visual harmony across all components.',
-                },
-            ]
-        }
-    }, [])
+    const fullRef = useTc<HTMLElement>({ items: ITEMS_FULL })
+    const minimalRef = useTc<HTMLElement>({ items: ITEMS_MINIMAL })
+    const noIconRef = useTc<HTMLElement>({
+        items: [
+            {
+                title: 'Layered architecture',
+                description: 'Each concern lives in its own layer — no tangled abstractions.',
+            },
+            {
+                title: 'Sharp corners',
+                description:
+                    'The design system intentionally avoids border-radius for a precise, professional look.',
+            },
+            {
+                title: 'Slate neutrals',
+                description:
+                    'A consistent palette of slate greys ensures visual harmony across all components.',
+            },
+        ],
+    })
 
     return (
         <div className="py-4">

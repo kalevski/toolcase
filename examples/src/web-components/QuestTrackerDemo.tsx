@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 interface QuestObjective {
     id: string
@@ -46,21 +47,9 @@ const ALL_COMPLETED: QuestEntry[] = [
 const EMPTY_QUESTS: QuestEntry[] = []
 
 const QuestTrackerDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const completedRef = useRef<any>(null)
-    const emptyRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (basicRef.current) basicRef.current.quests = BASIC_QUESTS
-    }, [])
-
-    useEffect(() => {
-        if (completedRef.current) completedRef.current.quests = ALL_COMPLETED
-    }, [])
-
-    useEffect(() => {
-        if (emptyRef.current) emptyRef.current.quests = EMPTY_QUESTS
-    }, [])
+    const basicRef = useTc<HTMLElement>({ quests: BASIC_QUESTS })
+    const completedRef = useTc<HTMLElement>({ quests: ALL_COMPLETED })
+    const emptyRef = useTc<HTMLElement>({ quests: EMPTY_QUESTS })
 
     return (
         <div className="py-4">

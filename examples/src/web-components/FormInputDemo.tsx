@@ -1,62 +1,50 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc, type TcRef } from '@toolcase/web-components/react'
 
 // Listen for tc-change on a tc-form-input and surface the latest value + error.
-function useFormValue(): [{ value: unknown; hasError: boolean }, React.RefObject<any>] {
+function useFormValue(
+    instanceProps: Record<string, unknown> = {},
+): [{ value: unknown; hasError: boolean }, TcRef<HTMLElement>] {
     const [state, setState] = useState<{ value: unknown; hasError: boolean }>({
         value: '',
         hasError: false,
     })
-    const ref = useRef<any>(null)
-
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        const handler = (e: Event) => {
+    const ref = useTc<HTMLElement>(instanceProps, {
+        'tc-change': (e: Event) => {
             const detail = (e as CustomEvent).detail
             setState({ value: detail.value, hasError: detail.hasError })
-        }
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-    }, [])
+        },
+    })
 
     return [state, ref]
 }
 
 const FormInputDemo: React.FC = () => {
-    const [emailState, emailRef] = useFormValue()
-    const dropdownRef = useRef<any>(null)
-    const radioRef = useRef<any>(null)
-    const disabledRef = useRef<any>(null)
-
     // Wire JS-property props (validate, options) that React can't set as attributes.
-    useEffect(() => {
-        if (emailRef.current) {
-            emailRef.current.validate = (value: unknown) => {
-                const v = String(value ?? '')
-                if (v === '') return true
-                return /.+@.+\..+/.test(v) ? true : 'Enter a valid email address'
-            }
-        }
-        if (dropdownRef.current) {
-            dropdownRef.current.options = [
-                { value: 'us', label: 'United States' },
-                { value: 'gb', label: 'United Kingdom' },
-                { value: 'mk', label: 'North Macedonia' },
-                { value: 'jp', label: 'Japan' },
-            ]
-        }
-        if (radioRef.current) {
-            radioRef.current.options = [
-                { value: 'low', label: 'Low' },
-                { value: 'medium', label: 'Medium' },
-                { value: 'high', label: 'High' },
-            ]
-            radioRef.current.defaultValue = 'medium'
-        }
-        if (disabledRef.current) {
-            disabledRef.current.value = 'Locked value'
-        }
-    }, [])
+    const [emailState, emailRef] = useFormValue({
+        validate: (value: unknown) => {
+            const v = String(value ?? '')
+            if (v === '') return true
+            return /.+@.+\..+/.test(v) ? true : 'Enter a valid email address'
+        },
+    })
+    const dropdownRef = useTc<HTMLElement>({
+        options: [
+            { value: 'us', label: 'United States' },
+            { value: 'gb', label: 'United Kingdom' },
+            { value: 'mk', label: 'North Macedonia' },
+            { value: 'jp', label: 'Japan' },
+        ],
+    })
+    const radioRef = useTc<HTMLElement>({
+        options: [
+            { value: 'low', label: 'Low' },
+            { value: 'medium', label: 'Medium' },
+            { value: 'high', label: 'High' },
+        ],
+        defaultValue: 'medium',
+    })
+    const disabledRef = useTc<HTMLElement>({ value: 'Locked value' })
 
     return (
         <div className="py-4">

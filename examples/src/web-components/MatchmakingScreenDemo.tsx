@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useTcEvents } from '@toolcase/web-components/react'
 
 type State = 'searching' | 'connecting' | 'found' | 'failed' | 'idle'
 
@@ -16,23 +17,14 @@ const MatchmakingScreenDemo: React.FC = () => {
         return () => window.clearInterval(id)
     }, [state])
 
-    const eventRef = useRef<any>(null)
-    useEffect(() => {
-        const el = eventRef.current
-        if (!el) return
-        const onAccept = () => addLog('tc-accept fired')
-        const onCancel = () => {
+    const eventRef = useTcEvents<HTMLElement>({
+        'tc-accept': () => addLog('tc-accept fired'),
+        'tc-cancel': () => {
             addLog('tc-cancel fired')
             setState('idle')
             setElapsed(0)
-        }
-        el.addEventListener('tc-accept', onAccept)
-        el.addEventListener('tc-cancel', onCancel)
-        return () => {
-            el.removeEventListener('tc-accept', onAccept)
-            el.removeEventListener('tc-cancel', onCancel)
-        }
-    }, [])
+        },
+    })
 
     return (
         <div className="py-4">

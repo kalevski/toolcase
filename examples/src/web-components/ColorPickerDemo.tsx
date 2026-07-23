@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const PRESET_HEX = [
     '#0f172a',
@@ -35,45 +36,19 @@ const PRESET_OPTIONS = [
 ]
 
 const ColorPickerDemo: React.FC = () => {
-    const hexRef = useRef<any>(null)
-    const optionsRef = useRef<any>(null)
-    const columnsRef = useRef<any>(null)
-    const loadingRef = useRef<any>(null)
-
     const [hexValue, setHexValue] = useState('#334155')
     const [optionsValue, setOptionsValue] = useState('#dc2626')
 
-    useEffect(() => {
-        const el = hexRef.current
-        if (!el) return
-        el.colors = PRESET_HEX
-        el.value = hexValue
-        const handler = (e: Event) => setHexValue((e as CustomEvent).detail.value)
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-    }, [])
-
-    useEffect(() => {
-        const el = optionsRef.current
-        if (!el) return
-        el.colors = PRESET_OPTIONS
-        el.value = optionsValue
-        const handler = (e: Event) => setOptionsValue((e as CustomEvent).detail.value)
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-    }, [])
-
-    useEffect(() => {
-        const el = columnsRef.current
-        if (!el) return
-        el.colors = PRESET_HEX
-    }, [])
-
-    useEffect(() => {
-        const el = loadingRef.current
-        if (!el) return
-        el.colors = []
-    }, [])
+    const hexRef = useTc<HTMLElement>(
+        { colors: PRESET_HEX, value: hexValue },
+        { 'tc-change': (e: Event) => setHexValue((e as CustomEvent).detail.value) }
+    )
+    const optionsRef = useTc<HTMLElement>(
+        { colors: PRESET_OPTIONS, value: optionsValue },
+        { 'tc-change': (e: Event) => setOptionsValue((e as CustomEvent).detail.value) }
+    )
+    const columnsRef = useTc<HTMLElement>({ colors: PRESET_HEX })
+    const loadingRef = useTc<HTMLElement>({ colors: [] })
 
     return (
         <div className="py-4">

@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const MENU_ITEMS = [
     { key: 'retry', label: 'Retry build' },
@@ -8,25 +9,16 @@ const MENU_ITEMS = [
 ]
 
 const BuildDemo: React.FC = () => {
-    const menuRef = useRef<any>(null)
-    const clickableRef = useRef<any>(null)
     const [menuKey, setMenuKey] = useState<string | null>(null)
     const [clickCount, setClickCount] = useState(0)
 
-    useEffect(() => {
-        const el = menuRef.current
-        if (!el) return
-        el.menuItems = MENU_ITEMS
-        const handler = (e: CustomEvent) => setMenuKey(e.detail.key)
-        el.addEventListener('tc-menu-select', handler)
-        return () => el.removeEventListener('tc-menu-select', handler)
-    }, [])
-
-    useEffect(() => {
-        const el = clickableRef.current
-        if (!el) return
-        el.onClick = () => setClickCount((n) => n + 1)
-    }, [])
+    const menuRef = useTc<HTMLElement>(
+        { menuItems: MENU_ITEMS },
+        { 'tc-menu-select': (e: CustomEvent) => setMenuKey(e.detail.key) }
+    )
+    const clickableRef = useTc<HTMLElement>({
+        onClick: () => setClickCount((n) => n + 1),
+    })
 
     return (
         <div className="py-4">

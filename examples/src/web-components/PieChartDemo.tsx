@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const traffic = [
     { label: 'Direct', value: 4200 },
@@ -16,23 +17,16 @@ const storage = [
 ]
 
 const PieChartDemo: React.FC = () => {
-    const pieRef = useRef<any>(null)
-    const donutRef = useRef<any>(null)
     const [selected, setSelected] = useState<string | null>(null)
 
-    useEffect(() => {
-        if (pieRef.current) {
-            const el = pieRef.current
-            el.data = traffic
-            const handler = (e: any) => setSelected(`${e.detail.slice.label} (#${e.detail.index})`)
-            el.addEventListener('tc-slice-select', handler)
-            return () => el.removeEventListener('tc-slice-select', handler)
+    const pieRef = useTc<HTMLElement>(
+        { data: traffic },
+        {
+            'tc-slice-select': (e: any) =>
+                setSelected(`${e.detail.slice.label} (#${e.detail.index})`),
         }
-    }, [])
-
-    useEffect(() => {
-        if (donutRef.current) donutRef.current.data = storage
-    }, [])
+    )
+    const donutRef = useTc<HTMLElement>({ data: storage })
 
     return (
         <div className="py-4">

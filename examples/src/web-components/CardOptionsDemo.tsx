@@ -1,77 +1,76 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const CardOptionsDemo: React.FC = () => {
-    const iconRef = useRef<any>(null)
-    const descRef = useRef<any>(null)
-    const fourColRef = useRef<any>(null)
-
     const [selectedPlan, setSelectedPlan] = useState('starter')
     const [selectedEnv, setSelectedEnv] = useState('development')
 
-    useEffect(() => {
-        const el = iconRef.current
-        if (!el) return
-        el.options = [
-            { key: 'shield', label: 'Shield', icon: 'Shield' },
-            { key: 'database', label: 'Database', icon: 'Database' },
-            { key: 'cloud', label: 'Cloud', icon: 'Cloud' },
-        ]
-        el.setAttribute('value', 'shield')
-        el.setAttribute('aria-label', 'Select a feature')
-        const handler = (e: Event) => {
-            const key = (e as CustomEvent<{ key: string }>).detail.key
-            console.log('tc-change', key)
-        }
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-    }, [])
-
-    useEffect(() => {
-        const el = descRef.current
-        if (!el) return
-        el.options = [
-            {
-                key: 'starter',
-                label: 'Starter',
-                icon: 'Zap',
-                description: 'Up to 3 projects',
+    const iconRef = useTc<HTMLElement>(
+        {
+            options: [
+                { key: 'shield', label: 'Shield', icon: 'Shield' },
+                { key: 'database', label: 'Database', icon: 'Database' },
+                { key: 'cloud', label: 'Cloud', icon: 'Cloud' },
+            ],
+        },
+        {
+            'tc-change': (e: Event) => {
+                const key = (e as CustomEvent<{ key: string }>).detail.key
+                console.log('tc-change', key)
             },
-            {
-                key: 'pro',
-                label: 'Pro',
-                icon: 'Star',
-                description: 'Unlimited projects',
+        }
+    )
+    const descRef = useTc<HTMLElement>(
+        {
+            options: [
+                {
+                    key: 'starter',
+                    label: 'Starter',
+                    icon: 'Zap',
+                    description: 'Up to 3 projects',
+                },
+                {
+                    key: 'pro',
+                    label: 'Pro',
+                    icon: 'Star',
+                    description: 'Unlimited projects',
+                },
+            ],
+        },
+        {
+            'tc-change': (e: Event) => {
+                const key = (e as CustomEvent<{ key: string }>).detail.key
+                setSelectedPlan(key)
             },
-        ]
-        el.setAttribute('value', 'starter')
-        el.setAttribute('aria-label', 'Select a plan')
-        el.setAttribute('columns', '2')
-        const handler = (e: Event) => {
-            const key = (e as CustomEvent<{ key: string }>).detail.key
-            setSelectedPlan(key)
         }
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-    }, [])
+    )
+    const fourColRef = useTc<HTMLElement>(
+        {
+            options: [
+                { key: 'development', label: 'Development', icon: 'Code' },
+                { key: 'staging', label: 'Staging', icon: 'FlaskConical' },
+                { key: 'preview', label: 'Preview', icon: 'Eye' },
+                { key: 'production', label: 'Production', icon: 'Globe' },
+            ],
+        },
+        {
+            'tc-change': (e: Event) => {
+                const key = (e as CustomEvent<{ key: string }>).detail.key
+                setSelectedEnv(key)
+            },
+        }
+    )
 
+    // Initial value + a11y attributes set imperatively (attributes, not JS props).
     useEffect(() => {
-        const el = fourColRef.current
-        if (!el) return
-        el.options = [
-            { key: 'development', label: 'Development', icon: 'Code' },
-            { key: 'staging', label: 'Staging', icon: 'FlaskConical' },
-            { key: 'preview', label: 'Preview', icon: 'Eye' },
-            { key: 'production', label: 'Production', icon: 'Globe' },
-        ]
-        el.setAttribute('value', 'development')
-        el.setAttribute('aria-label', 'Select an environment')
-        el.setAttribute('columns', '4')
-        const handler = (e: Event) => {
-            const key = (e as CustomEvent<{ key: string }>).detail.key
-            setSelectedEnv(key)
-        }
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
+        iconRef.current?.setAttribute('value', 'shield')
+        iconRef.current?.setAttribute('aria-label', 'Select a feature')
+        descRef.current?.setAttribute('value', 'starter')
+        descRef.current?.setAttribute('aria-label', 'Select a plan')
+        descRef.current?.setAttribute('columns', '2')
+        fourColRef.current?.setAttribute('value', 'development')
+        fourColRef.current?.setAttribute('aria-label', 'Select an environment')
+        fourColRef.current?.setAttribute('columns', '4')
     }, [])
 
     return (

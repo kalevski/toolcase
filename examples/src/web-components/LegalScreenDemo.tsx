@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const SECTIONS = [
     {
@@ -24,29 +25,16 @@ const SECTIONS = [
 ]
 
 const LegalScreenDemo: React.FC = () => {
-    const refReadOnly = useRef<HTMLElement>(null)
-    const refWithAccept = useRef<HTMLElement>(null)
     const [lastEvent, setLastEvent] = useState<string>('—')
 
-    useEffect(() => {
-        const a: any = refReadOnly.current
-        const b: any = refWithAccept.current
-        if (a) a.sections = SECTIONS
-        if (b) b.sections = SECTIONS
-    }, [])
-
-    useEffect(() => {
-        const el = refWithAccept.current
-        if (!el) return
-        const onAccept = () => setLastEvent('tc-accept')
-        const onClose = () => setLastEvent('tc-close')
-        el.addEventListener('tc-accept', onAccept)
-        el.addEventListener('tc-close', onClose)
-        return () => {
-            el.removeEventListener('tc-accept', onAccept)
-            el.removeEventListener('tc-close', onClose)
+    const refReadOnly = useTc<HTMLElement>({ sections: SECTIONS })
+    const refWithAccept = useTc<HTMLElement>(
+        { sections: SECTIONS },
+        {
+            'tc-accept': () => setLastEvent('tc-accept'),
+            'tc-close': () => setLastEvent('tc-close'),
         }
-    }, [])
+    )
 
     return (
         <div className="py-4">

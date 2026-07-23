@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { useTcEvents } from '@toolcase/web-components/react'
 
 type ChipVariant = 'primary' | 'secondary' | 'info' | 'success' | 'warning' | 'danger'
 
@@ -48,15 +49,7 @@ function SelectableChips() {
 
 function RemovableChipExample() {
     const [visible, setVisible] = useState(true)
-    const chipRef = useRef<any>(null)
-
-    useEffect(() => {
-        const el = chipRef.current
-        if (!el) return
-        const handler = () => setVisible(false)
-        el.addEventListener('tc-remove', handler)
-        return () => el.removeEventListener('tc-remove', handler)
-    }, [])
+    const chipRef = useTcEvents<HTMLElement>({ 'tc-remove': () => setVisible(false) })
 
     if (!visible) {
         return (

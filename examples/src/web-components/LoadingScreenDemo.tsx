@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const TIPS = [
     'Compiling shaders…',
@@ -15,15 +16,7 @@ const LoadingScreenDemo: React.FC = () => {
     // ── Determinate with cycling tips ─────────────────────────────────────────
     const [showDet, setShowDet] = useState(false)
     const [progress, setProgress] = useState(0)
-    const detRef = useRef<any>(null)
-
-    // Wire the tips JS property once after the element mounts
-    useEffect(() => {
-        const el = detRef.current
-        if (!el || !showDet) return
-        el.tips = TIPS
-        el.tipInterval = 1500
-    }, [showDet])
+    const detRef = useTc<HTMLElement>({ tips: TIPS, tipInterval: 1500 })
 
     // Simulate progress advancing and auto-close at 100 %
     useEffect(() => {
@@ -46,14 +39,7 @@ const LoadingScreenDemo: React.FC = () => {
 
     // ── Indeterminate with tips only ──────────────────────────────────────────
     const [showTips, setShowTips] = useState(false)
-    const tipsRef = useRef<any>(null)
-
-    useEffect(() => {
-        const el = tipsRef.current
-        if (!el || !showTips) return
-        el.tips = TIPS
-        el.tipInterval = 2000
-    }, [showTips])
+    const tipsRef = useTc<HTMLElement>({ tips: TIPS, tipInterval: 2000 })
 
     return (
         <div className="py-4">

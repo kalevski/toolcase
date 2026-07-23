@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const CATS = [
     { id: 'graphics', label: 'Graphics', icon: 'monitor' },
@@ -16,41 +17,23 @@ const CONTENT: Record<string, string> = {
     account: 'Manage your account, linked providers, and notification preferences.',
 }
 
-const SettingsCategoryListDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const iconsRef = useRef<any>(null)
-    const eventsRef = useRef<any>(null)
+const NO_ICON_CATS = CATS.map((c) => ({ id: c.id, label: c.label }))
 
+const SettingsCategoryListDemo: React.FC = () => {
     const [selected, setSelected] = useState('graphics')
     const [log, setLog] = useState<string[]>([])
 
-    // Basic — lucide icons
-    useEffect(() => {
-        if (basicRef.current) {
-            basicRef.current.categories = CATS
+    const basicRef = useTc<HTMLElement>({ categories: CATS })
+    const iconsRef = useTc<HTMLElement>({ categories: NO_ICON_CATS })
+    const eventsRef = useTc<HTMLElement>(
+        { categories: CATS },
+        {
+            'tc-select': (e: CustomEvent) => {
+                setSelected(e.detail.id)
+                setLog((l) => [`tc-select  id="${e.detail.id}"`, ...l].slice(0, 8))
+            },
         }
-    }, [])
-
-    // No-icon variant
-    useEffect(() => {
-        if (iconsRef.current) {
-            iconsRef.current.categories = CATS.map((c) => ({ id: c.id, label: c.label }))
-        }
-    }, [])
-
-    // Events demo
-    useEffect(() => {
-        const el = eventsRef.current
-        if (!el) return
-        el.categories = CATS
-
-        const handler = (e: CustomEvent) => {
-            setSelected(e.detail.id)
-            setLog((l) => [`tc-select  id="${e.detail.id}"`, ...l].slice(0, 8))
-        }
-        el.addEventListener('tc-select', handler as EventListener)
-        return () => el.removeEventListener('tc-select', handler as EventListener)
-    }, [])
+    )
 
     return (
         <div className="py-4">

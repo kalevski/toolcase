@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const FRAMEWORK_OPTIONS = [
     {
@@ -22,54 +23,41 @@ const SIZE_OPTIONS = [
 ]
 
 const SingleCardSelectDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const columnsRef = useRef<any>(null)
-    const formRef = useRef<any>(null)
     const loadingRef = useRef<any>(null)
 
     const [selected, setSelected] = useState<string | null>(null)
     const [size, setSize] = useState<string | null>('medium')
 
-    useEffect(() => {
-        const el = basicRef.current
-        if (!el) return
-        el.options = FRAMEWORK_OPTIONS
-        el.setAttribute('aria-label', 'Select a framework')
-        const handler = (e: Event) => {
-            setSelected((e as CustomEvent<{ value: string }>).detail.value)
+    const basicRef = useTc<HTMLElement>(
+        { options: FRAMEWORK_OPTIONS, value: selected },
+        {
+            'tc-change': (e: Event) => {
+                setSelected((e as CustomEvent<{ value: string }>).detail.value)
+            },
         }
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
+    )
+
+    const columnsRef = useTc<HTMLElement>(
+        { options: SIZE_OPTIONS, value: size },
+        {
+            'tc-change': (e: Event) => {
+                setSize((e as CustomEvent<{ value: string }>).detail.value)
+            },
+        }
+    )
+
+    const formRef = useTc<HTMLElement>({ options: FRAMEWORK_OPTIONS })
+
+    useEffect(() => {
+        basicRef.current?.setAttribute('aria-label', 'Select a framework')
     }, [])
 
     useEffect(() => {
-        const el = basicRef.current
-        if (el) el.value = selected
-    }, [selected])
-
-    useEffect(() => {
-        const el = columnsRef.current
-        if (!el) return
-        el.options = SIZE_OPTIONS
-        el.value = size
-        el.setAttribute('aria-label', 'Select a size')
-        const handler = (e: Event) => {
-            setSize((e as CustomEvent<{ value: string }>).detail.value)
-        }
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
+        columnsRef.current?.setAttribute('aria-label', 'Select a size')
     }, [])
 
     useEffect(() => {
-        const el = columnsRef.current
-        if (el) el.value = size
-    }, [size])
-
-    useEffect(() => {
-        const el = formRef.current
-        if (!el) return
-        el.options = FRAMEWORK_OPTIONS
-        el.setAttribute('aria-label', 'Select a framework')
+        formRef.current?.setAttribute('aria-label', 'Select a framework')
     }, [])
 
     useEffect(() => {

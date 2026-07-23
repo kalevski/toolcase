@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const SAMPLE_ACTIVITIES = [
     {
@@ -42,21 +43,9 @@ const SAMPLE_SHORT = [
 ]
 
 const ActivityCardDemo: React.FC = () => {
-    const loadedRef = useRef<any>(null)
-    const noTitleRef = useRef<any>(null)
-    const shortRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (loadedRef.current) {
-            loadedRef.current.activities = SAMPLE_ACTIVITIES
-        }
-        if (noTitleRef.current) {
-            noTitleRef.current.activities = SAMPLE_ACTIVITIES
-        }
-        if (shortRef.current) {
-            shortRef.current.activities = SAMPLE_SHORT
-        }
-    }, [])
+    const loadedRef = useTc<HTMLElement>({ activities: SAMPLE_ACTIVITIES })
+    const noTitleRef = useTc<HTMLElement>({ activities: SAMPLE_ACTIVITIES })
+    const shortRef = useTc<HTMLElement>({ activities: SAMPLE_SHORT })
 
     return (
         <div className="py-4">

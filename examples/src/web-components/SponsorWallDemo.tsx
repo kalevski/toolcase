@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 // Logo placeholders via placehold.co (slate-200 bg / slate-500 ink), sized to
 // each tier's logo box. Same source used in CardDemo; via.placeholder.com is
@@ -110,16 +111,8 @@ const TIERS_SINGLE = [
 ]
 
 const SponsorWallDemo: React.FC = () => {
-    const fullRef = useRef<any>(null)
-    const singleRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (fullRef.current) fullRef.current.tiers = TIERS_FULL
-    }, [])
-
-    useEffect(() => {
-        if (singleRef.current) singleRef.current.tiers = TIERS_SINGLE
-    }, [])
+    const fullRef = useTc<HTMLElement>({ tiers: TIERS_FULL })
+    const singleRef = useTc<HTMLElement>({ tiers: TIERS_SINGLE })
 
     return (
         <div className="py-4">

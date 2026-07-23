@@ -1,8 +1,8 @@
 // Runtime bridge for @toolcase/web-components in React.
 // Provides hooks to wire tc-* custom events and set JS-only instance properties
 // (objects/arrays) that React cannot pass as string HTML attributes.
-import { useRef, useEffect } from 'react'
-import type { RefObject } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
+import type { RefCallback } from 'react'
 
 export type TcEventHandler<D = unknown> = (e: CustomEvent<D>) => void
 
@@ -11,15 +11,52 @@ export type TcEventHandler<D = unknown> = (e: CustomEvent<D>) => void
 export type TcEventMap = Record<string, TcEventHandler | EventListener>
 
 /**
+ * Return value of {@link useTc}. It is a callback ref — pass it straight to a
+ * tc-* element's `ref`. It also exposes a live `.current` getter so imperative
+ * code (e.g. clearing a value, focusing) keeps working exactly like the old
+ * `RefObject` return did.
+ */
+export type TcRef<E extends HTMLElement = HTMLElement> = RefCallback<E> & {
+    /** Live element handle for imperative access. Read-only. */
+    readonly current: E | null
+}
+
+/**
  * Wire a custom-element ref with instance props (objects/arrays that React
  * cannot pass as attributes) and/or tc-* event listeners.
  *
+ * The returned value is a callback ref with a `.current` getter, so both
+ * `<tc-list ref={r} />` and `r.current` work.
+ *
+ * Two bugs the naive "assign every prop in a useEffect + attach listeners on
+ * mount" approach has, and how this hook avoids them:
+ *
+ *  - **Focus loss.** Reassigning an instance prop makes the custom element
+ *    re-render its light DOM, destroying a focused `<input>` mid-typing. React
+ *    hands us a brand-new `onChange` closure on every render, so a blind
+ *    reassign nukes focus on every keystroke. This hook assigns a prop only
+ *    when its value actually changed, and wraps function props in a stable
+ *    proxy that always calls the latest closure — so callbacks are assigned
+ *    exactly once and never re-trigger a re-render.
+ *
+ *  - **Dead component after remount.** A `RefObject` never tells us when React
+ *    swaps the underlying DOM node, so listeners attached on first mount are
+ *    lost after a remount. This hook uses a callback ref: it re-attaches
+ *    listeners and re-applies props whenever the element is (re)mounted.
+ *
+ * Field errors: pass a `validate` function as an instance prop, never an
+ * `error` JSX attribute. Flipping the `error` attribute goes through the
+ * component's attributeChangedCallback, which rebuilds its innerHTML and
+ * destroys the focused `<input>` mid-typing; `validate` swaps only the message
+ * slot and is gated by `validate-on`.
+ *
  * @param instanceProps - JS properties set directly on the element after mount
- *   and whenever the values change. Use for arrays, objects, or any value that
- *   React would stringify when passed as a JSX attribute.
- * @param on - Map of event names to handlers. Listeners are attached once on
- *   mount and removed on unmount. Handler functions are always the latest
- *   closure even though the listener itself is stable.
+ *   and whenever a value changes (reference-compared). Use for arrays, objects,
+ *   functions, or any value React would stringify as a JSX attribute.
+ * @param on - Map of event names to handlers. Listeners are attached on mount
+ *   (and re-attached on remount) and removed on unmount. The wrapper always
+ *   calls the latest closure, so handler changes take effect without
+ *   re-registering. Event names are read once per (re)mount — keep them static.
  *
  * @example
  * const ref = useTc<HTMLElement>(
@@ -31,46 +68,88 @@ export type TcEventMap = Record<string, TcEventHandler | EventListener>
 export function useTc<E extends HTMLElement = HTMLElement>(
     instanceProps: Record<string, unknown>,
     on: TcEventMap = {}
-): RefObject<E | null> {
-    const ref = useRef<E>(null)
-
-    // Keep a ref to the latest handlers so wrappers attached on mount always
-    // call the current closure without needing to re-register.
-    const onRef = useRef<TcEventMap>(on)
+): TcRef<E> {
+    const elRef = useRef<E | null>(null)
+    // Values last written to the element, keyed by prop name. Used to skip
+    // no-op reassignments that would otherwise force a DOM re-render.
+    const appliedRef = useRef<Record<string, unknown>>({})
+    // Latest props/handlers, so the stable proxies and listeners always call
+    // through to the current closure without re-registering.
+    const propsRef = useRef(instanceProps)
+    propsRef.current = instanceProps
+    const onRef = useRef(on)
     onRef.current = on
+    // Stable function proxies, created once per prop key, that delegate to the
+    // current closure in propsRef. Assigned to the element exactly once.
+    const stableFnsRef = useRef<Record<string, unknown>>({})
+    const attachedRef = useRef<Array<[string, EventListener]>>([])
 
-    // Attach event listeners once on mount; remove on unmount.
-    // The wrapper delegates to onRef.current so handler changes take effect
-    // immediately without re-attaching.
-    useEffect(() => {
-        const el = ref.current
+    // Apply instance props, skipping any whose value is unchanged since the
+    // last write. Function props are replaced by their stable proxy so a fresh
+    // closure on every render never counts as a change.
+    const applyProps = useCallback(() => {
+        const el = elRef.current
         if (!el) return
-        const eventNames = Object.keys(on)
-        const pairs = eventNames.map((event) => {
-            const fn: EventListener = (e) => {
-                const handler = onRef.current[event]
-                if (handler) handler(e as CustomEvent)
+        for (const [key, value] of Object.entries(propsRef.current)) {
+            let next = value
+            if (typeof value === 'function') {
+                if (!stableFnsRef.current[key]) {
+                    stableFnsRef.current[key] = (...args: unknown[]) =>
+                        (
+                            propsRef.current[key] as
+                                | ((...fnArgs: unknown[]) => unknown)
+                                | undefined
+                        )?.(...args)
+                }
+                next = stableFnsRef.current[key]
             }
-            el.addEventListener(event, fn)
-            return { event, fn }
-        })
-        return () => {
-            pairs.forEach(({ event, fn }) => el.removeEventListener(event, fn))
+            if (appliedRef.current[key] !== next) {
+                ;(el as Record<string, unknown>)[key] = next
+                appliedRef.current[key] = next
+            }
         }
-        // Mount-only: event names are static; handlers stay current via onRef.
     }, [])
 
-    // Apply instance props after every render so the element stays in sync with
-    // React state (arrays/objects that cannot be set as string attributes).
+    // A single stable callback ref, created once, augmented with a `.current`
+    // getter. React calls it on mount, unmount, and whenever the underlying
+    // node changes — which is what lets us re-attach listeners on remount.
+    const tcRef = useRef<TcRef<E> | null>(null)
+    if (!tcRef.current) {
+        const fn = ((el: E | null) => {
+            if (elRef.current === el) return
+            // Detach from the previous node.
+            if (elRef.current) {
+                attachedRef.current.forEach(([event, listener]) =>
+                    elRef.current?.removeEventListener(event, listener)
+                )
+            }
+            attachedRef.current = []
+            appliedRef.current = {}
+            elRef.current = el
+            if (!el) return
+            // (Re)attach listeners. The wrapper reads onRef.current so handler
+            // identity can change between renders without re-registering.
+            for (const event of Object.keys(onRef.current)) {
+                const listener: EventListener = (domEvent) => {
+                    const handler = onRef.current[event]
+                    if (handler) (handler as (e: Event) => void)(domEvent)
+                }
+                el.addEventListener(event, listener)
+                attachedRef.current.push([event, listener])
+            }
+            applyProps()
+        }) as TcRef<E>
+        Object.defineProperty(fn, 'current', { get: () => elRef.current })
+        tcRef.current = fn
+    }
+
+    // Re-apply props after every render so the element stays in sync with
+    // React state; applyProps() diffs, so unchanged values are cheap no-ops.
     useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        Object.entries(instanceProps).forEach(([k, v]) => {
-            ;(el as Record<string, unknown>)[k] = v
-        })
+        applyProps()
     })
 
-    return ref as RefObject<E | null>
+    return tcRef.current
 }
 
 /**
@@ -83,7 +162,7 @@ export function useTc<E extends HTMLElement = HTMLElement>(
  */
 export function useTcEvents<E extends HTMLElement = HTMLElement>(
     on: TcEventMap
-): RefObject<E | null> {
+): TcRef<E> {
     return useTc<E>({}, on)
 }
 

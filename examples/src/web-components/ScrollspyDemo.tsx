@@ -1,18 +1,16 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useRef } from 'react'
+import { useTcEvents, type TcRef } from '@toolcase/web-components/react'
 
 // tc-scrollspy toggles .active on the href-carrying anchor inside the target.
 // For tc-list-group-item that anchor is an internal node, so this hook listens
 // for the tc-activate event and mirrors the state onto the item's `active`
 // attribute, which drives the list-group-item active styling.
-function useListGroupSync(): [React.RefObject<any>, React.RefObject<any>] {
-    const spyRef = useRef<any>(null)
+function useListGroupSync(): [TcRef<HTMLElement>, React.RefObject<any>] {
     const listRef = useRef<any>(null)
-
-    useEffect(() => {
-        const spy = spyRef.current
-        const list = listRef.current
-        if (!spy || !list) return
-        const handler = (event: Event) => {
+    const spyRef = useTcEvents<HTMLElement>({
+        'tc-activate': (event: Event) => {
+            const list = listRef.current
+            if (!list) return
             const link = (event as CustomEvent).detail?.relatedTarget as HTMLElement | null
             const href = link?.getAttribute('href')
             if (!href) return
@@ -20,10 +18,8 @@ function useListGroupSync(): [React.RefObject<any>, React.RefObject<any>] {
                 if (item.getAttribute('href') === href) item.setAttribute('active', '')
                 else item.removeAttribute('active')
             })
-        }
-        spy.addEventListener('tc-activate', handler)
-        return () => spy.removeEventListener('tc-activate', handler)
-    }, [])
+        },
+    })
 
     return [spyRef, listRef]
 }

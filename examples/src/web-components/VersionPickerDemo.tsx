@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const VERSIONS = [
     { label: 'v3.2', value: '3.2', latest: true },
@@ -8,37 +9,25 @@ const VERSIONS = [
 ]
 
 const VersionPickerDemo: React.FC = () => {
-    const segmentedRef = useRef<any>(null)
-    const dropdownRef = useRef<any>(null)
-
     const [selection, setSelection] = useState<string>('3.2')
 
-    useEffect(() => {
-        const seg = segmentedRef.current
-        const dd = dropdownRef.current
-        if (seg) {
-            seg.versions = VERSIONS
-            seg.value = '3.2'
-        }
-        if (dd) {
-            dd.versions = VERSIONS
-            dd.value = '3.2'
-        }
-    }, [])
+    function handleChange(e: Event) {
+        const detail = (e as CustomEvent<{ value: string }>).detail
+        setSelection(detail.value)
+        // Keep both controls in sync so the demo reads as one selection
+        ;[segmentedRef.current, dropdownRef.current].filter(Boolean).forEach((el: any) => {
+            if (el.value !== detail.value) el.value = detail.value
+        })
+    }
 
-    useEffect(() => {
-        const els = [segmentedRef.current, dropdownRef.current].filter(Boolean)
-        const handler = (e: Event) => {
-            const detail = (e as CustomEvent<{ value: string }>).detail
-            setSelection(detail.value)
-            // Keep both controls in sync so the demo reads as one selection
-            els.forEach((el) => {
-                if (el.value !== detail.value) el.value = detail.value
-            })
-        }
-        els.forEach((el) => el.addEventListener('tc-change', handler))
-        return () => els.forEach((el) => el.removeEventListener('tc-change', handler))
-    }, [])
+    const segmentedRef = useTc<HTMLElement>(
+        { versions: VERSIONS, value: '3.2' },
+        { 'tc-change': handleChange }
+    )
+    const dropdownRef = useTc<HTMLElement>(
+        { versions: VERSIONS, value: '3.2' },
+        { 'tc-change': handleChange }
+    )
 
     return (
         <div className="py-4">

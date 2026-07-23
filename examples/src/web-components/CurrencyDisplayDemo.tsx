@@ -1,19 +1,16 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const CurrencyDisplayDemo: React.FC = () => {
-    const displayRef = useRef<any>(null)
-
     // JS-property props (amount as a real number, font-size as a number) need a
     // ref — React can't set them as attributes. Demonstrates the reflected
     // numeric `amount` and `fontSize` properties plus `label`/`currencyIcon`.
-    useEffect(() => {
-        const el = displayRef.current
-        if (!el) return
-        el.label = 'Wallet balance'
-        el.currencyIcon = '◆'
-        el.amount = 1284500
-        el.fontSize = 32
-    }, [])
+    const displayRef = useTc<HTMLElement>({
+        label: 'Wallet balance',
+        currencyIcon: '◆',
+        amount: 1284500,
+        fontSize: 32,
+    })
 
     return (
         <div className="py-4">

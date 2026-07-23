@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const FIELDS = [
     {
@@ -27,39 +28,27 @@ const FIELDS = [
 ]
 
 const CharacterCreateDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const controlledRef = useRef<any>(null)
-
     const [summary, setSummary] = useState<string>('(nothing confirmed yet)')
     const [liveName, setLiveName] = useState<string>('')
 
-    useEffect(() => {
-        const el = basicRef.current
-        if (!el) return
-        el.fields = FIELDS
-
-        const onName = (e: Event) => setLiveName((e as CustomEvent<{ value: string }>).detail.value)
-        const onConfirm = (e: Event) => {
-            const detail = (
-                e as CustomEvent<{ name: string; values: Record<string, string | number> }>
-            ).detail
-            setSummary(JSON.stringify({ name: detail.name, ...detail.values }))
+    const basicRef = useTc<HTMLElement>(
+        { fields: FIELDS },
+        {
+            'tc-name': (e: Event) =>
+                setLiveName((e as CustomEvent<{ value: string }>).detail.value),
+            'tc-confirm': (e: Event) => {
+                const detail = (
+                    e as CustomEvent<{ name: string; values: Record<string, string | number> }>
+                ).detail
+                setSummary(JSON.stringify({ name: detail.name, ...detail.values }))
+            },
         }
-        el.addEventListener('tc-name', onName)
-        el.addEventListener('tc-confirm', onConfirm)
-        return () => {
-            el.removeEventListener('tc-name', onName)
-            el.removeEventListener('tc-confirm', onConfirm)
-        }
-    }, [])
-
-    useEffect(() => {
-        const el = controlledRef.current
-        if (!el) return
-        el.fields = FIELDS
-        el.values = { class: 'mage', hair: 'auburn', age: 31, strength: 14, title: 'the Bold' }
-        el.name = 'Lyra'
-    }, [])
+    )
+    const controlledRef = useTc<HTMLElement>({
+        fields: FIELDS,
+        values: { class: 'mage', hair: 'auburn', age: 31, strength: 14, title: 'the Bold' },
+        name: 'Lyra',
+    })
 
     return (
         <div className="py-4">

@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useMemo } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const HOURS = ['00', '04', '08', '12', '16', '20']
@@ -16,28 +17,18 @@ const buildData = () => {
 }
 
 const HeatmapDemo: React.FC = () => {
-    const defaultRef = useRef<any>(null)
-    const colorRef = useRef<any>(null)
-    const sizeRef = useRef<any>(null)
-    const loadingRef = useRef<any>(null)
+    const data = useMemo(() => buildData(), [])
 
-    useEffect(() => {
-        const data = buildData()
-        for (const ref of [defaultRef, colorRef, sizeRef]) {
-            if (!ref.current) continue
-            ref.current.rows = DAYS
-            ref.current.cols = HOURS
-            ref.current.data = data
-        }
-        // Custom warm→hot colour scale.
-        if (colorRef.current) {
-            colorRef.current.colorScale = ['#f1f5f9', '#fde68a', '#fb923c', '#ef4444', '#991b1b']
-        }
-        if (loadingRef.current) {
-            loadingRef.current.rows = DAYS
-            loadingRef.current.cols = HOURS
-        }
-    }, [])
+    const defaultRef = useTc<HTMLElement>({ rows: DAYS, cols: HOURS, data })
+    // Custom warm→hot colour scale.
+    const colorRef = useTc<HTMLElement>({
+        rows: DAYS,
+        cols: HOURS,
+        data,
+        colorScale: ['#f1f5f9', '#fde68a', '#fb923c', '#ef4444', '#991b1b'],
+    })
+    const sizeRef = useTc<HTMLElement>({ rows: DAYS, cols: HOURS, data })
+    const loadingRef = useTc<HTMLElement>({ rows: DAYS, cols: HOURS })
 
     return (
         <div className="py-4">

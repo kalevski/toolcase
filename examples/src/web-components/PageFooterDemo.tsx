@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const MENUS = [
     {
@@ -51,38 +52,23 @@ const CTA = {
 }
 
 const PageFooterDemo: React.FC = () => {
-    const fullRef = useRef<any>(null)
-    const noCtaRef = useRef<any>(null)
-    const minimalRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (fullRef.current) {
-            const el = fullRef.current
-            el.menus = MENUS
-            el.socialLinks = SOCIAL
-            el.legalLinks = LEGAL_LINKS
-            el.cta = CTA
-        }
-    }, [])
-
-    useEffect(() => {
-        if (noCtaRef.current) {
-            const el = noCtaRef.current
-            el.menus = MENUS.slice(0, 2)
-            el.socialLinks = SOCIAL
-            el.legalLinks = LEGAL_LINKS
-        }
-    }, [])
-
-    useEffect(() => {
-        if (minimalRef.current) {
-            const el = minimalRef.current
-            el.legalLinks = [
-                { label: 'Privacy', href: '#' },
-                { label: 'Terms', href: '#' },
-            ]
-        }
-    }, [])
+    const fullRef = useTc<HTMLElement>({
+        menus: MENUS,
+        socialLinks: SOCIAL,
+        legalLinks: LEGAL_LINKS,
+        cta: CTA,
+    })
+    const noCtaRef = useTc<HTMLElement>({
+        menus: MENUS.slice(0, 2),
+        socialLinks: SOCIAL,
+        legalLinks: LEGAL_LINKS,
+    })
+    const minimalRef = useTc<HTMLElement>({
+        legalLinks: [
+            { label: 'Privacy', href: '#' },
+            { label: 'Terms', href: '#' },
+        ],
+    })
 
     return (
         <div className="py-4">

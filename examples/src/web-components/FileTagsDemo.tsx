@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const ALL_TAGS = [
     { id: 'bug', label: 'bug', color: '#ef4444' },
@@ -11,38 +12,22 @@ const ALL_TAGS = [
 ]
 
 const FileTagsDemo: React.FC = () => {
-    const interactiveRef = useRef<any>(null)
-    const readonlyRef = useRef<any>(null)
-
     const [selectedIds, setSelectedIds] = useState<string[]>(['bug', 'feature'])
 
-    useEffect(() => {
-        const el = interactiveRef.current
-        if (!el) return
-        el.tags = ALL_TAGS
-        el.selectedIds = selectedIds
-
-        const handler = (e: Event) => {
-            const { selectedIds: ids } = (e as CustomEvent<{ selectedIds: string[] }>).detail
-            setSelectedIds(ids)
-            console.log('tc-change:', ids)
-        }
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-    }, [])
-
-    // Keep DOM in sync when React state changes (e.g. after event)
-    useEffect(() => {
-        const el = interactiveRef.current
-        if (el) el.selectedIds = selectedIds
-    }, [selectedIds])
-
-    useEffect(() => {
-        const el = readonlyRef.current
-        if (!el) return
-        el.tags = ALL_TAGS
-        el.selectedIds = ['bug', 'docs', 'test']
-    }, [])
+    const interactiveRef = useTc<HTMLElement>(
+        { tags: ALL_TAGS, selectedIds },
+        {
+            'tc-change': (e: Event) => {
+                const { selectedIds: ids } = (e as CustomEvent<{ selectedIds: string[] }>).detail
+                setSelectedIds(ids)
+                console.log('tc-change:', ids)
+            },
+        },
+    )
+    const readonlyRef = useTc<HTMLElement>({
+        tags: ALL_TAGS,
+        selectedIds: ['bug', 'docs', 'test'],
+    })
 
     return (
         <div className="py-4">

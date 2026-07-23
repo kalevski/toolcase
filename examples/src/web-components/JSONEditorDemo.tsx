@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 // Schema drives the generated fields: mixed primitive types, an enum, a nested
 // object (collapsible group), a primitive array, and an array of objects.
@@ -38,24 +39,16 @@ const initialValue = {
 }
 
 const JSONEditorDemo: React.FC = () => {
-    const editorRef = useRef<any>(null)
-    const disabledRef = useRef<any>(null)
     const [value, setValue] = useState<unknown>(initialValue)
 
-    useEffect(() => {
-        const el = editorRef.current
-        if (!el) return
-        // defaultValue is a JS property (uncontrolled initial value) — React can't
-        // set it as an attribute, so seed it through the ref.
-        el.defaultValue = initialValue
-        const handler = (e: Event) => setValue((e as CustomEvent).detail.value)
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-    }, [])
+    // defaultValue is a JS property (uncontrolled initial value) — React can't
+    // set it as an attribute, so seed it through the ref.
+    const editorRef = useTc<HTMLElement>(
+        { defaultValue: initialValue },
+        { 'tc-change': (e: Event) => setValue((e as CustomEvent).detail.value) }
+    )
 
-    useEffect(() => {
-        if (disabledRef.current) disabledRef.current.value = initialValue
-    }, [])
+    const disabledRef = useTc<HTMLElement>({ value: initialValue })
 
     return (
         <div className="py-4">

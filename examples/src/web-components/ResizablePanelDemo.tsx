@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const paneStyle: React.CSSProperties = {
     padding: '1rem',
@@ -11,20 +12,15 @@ const paneStyle: React.CSSProperties = {
 const ResizablePanelDemo: React.FC = () => {
     const [direction, setDirection] = useState<'horizontal' | 'vertical'>('horizontal')
     const [sizes, setSizes] = useState<[number, number]>([50, 50])
-    const ref = useRef<any>(null)
-
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        el.defaultSizes = [60, 40]
-        const handler = (e: Event) => {
-            const detail = (e as CustomEvent).detail
-            if (detail?.sizes) setSizes(detail.sizes as [number, number])
+    const ref = useTc<HTMLElement>(
+        { defaultSizes: [60, 40] },
+        {
+            'tc-resize': (e: Event) => {
+                const detail = (e as CustomEvent).detail
+                if (detail?.sizes) setSizes(detail.sizes as [number, number])
+            },
         }
-        el.addEventListener('tc-resize', handler)
-        return () => el.removeEventListener('tc-resize', handler)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    )
 
     return (
         <div className="py-4">

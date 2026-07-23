@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const NAV_ITEMS = [
     { label: 'Home', href: '#home', active: true },
@@ -6,51 +7,29 @@ const NAV_ITEMS = [
     { label: 'Examples', href: '#examples' },
     { label: 'Pricing', href: '#pricing' },
 ]
+const NAV_ITEMS_NO_LOGIN = NAV_ITEMS.slice(0, 3)
 
 const CoolNavDemo: React.FC = () => {
     const [lastEvent, setLastEvent] = useState('')
 
-    const basicRef = useRef<any>(null)
-    const darkRef = useRef<any>(null)
-    const stickyRef = useRef<any>(null)
-    const noLoginRef = useRef<any>(null)
-    const customBpRef = useRef<any>(null)
-
-    useEffect(() => {
-        const el = basicRef.current
-        if (!el) return
-        el.items = NAV_ITEMS
-        el.addEventListener('tc-nav-toggle', (e: CustomEvent) => {
-            setLastEvent(`tc-nav-toggle: open=${e.detail.open}`)
-        })
-        el.addEventListener('tc-login', () => {
-            setLastEvent('tc-login fired')
-        })
-    }, [])
-
-    useEffect(() => {
-        if (darkRef.current) {
-            darkRef.current.items = NAV_ITEMS
+    const basicRef = useTc<HTMLElement>(
+        { items: NAV_ITEMS },
+        {
+            'tc-nav-toggle': (e: CustomEvent) => {
+                setLastEvent(`tc-nav-toggle: open=${e.detail.open}`)
+            },
+            'tc-login': () => {
+                setLastEvent('tc-login fired')
+            },
         }
-    }, [])
+    )
+    const darkRef = useTc<HTMLElement>({ items: NAV_ITEMS })
+    const stickyRef = useTc<HTMLElement>({ items: NAV_ITEMS })
+    const noLoginRef = useTc<HTMLElement>({ items: NAV_ITEMS_NO_LOGIN })
+    const customBpRef = useTc<HTMLElement>({ items: NAV_ITEMS })
 
     useEffect(() => {
-        if (stickyRef.current) {
-            stickyRef.current.items = NAV_ITEMS
-            stickyRef.current.classList.add('tc-cool-nav-scrolled')
-        }
-    }, [])
-
-    useEffect(() => {
-        if (noLoginRef.current) {
-            noLoginRef.current.items = NAV_ITEMS.slice(0, 3)
-        }
-    }, [])
-
-    useEffect(() => {
-        if (customBpRef.current) {
-            customBpRef.current.items = NAV_ITEMS
-        }
+        stickyRef.current?.classList.add('tc-cool-nav-scrolled')
     }, [])
 
     return (

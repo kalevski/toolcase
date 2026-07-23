@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug']
 
@@ -42,34 +43,20 @@ const yCompact = (v: number): string => {
 }
 
 const AreaChartDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const stackedRef = useRef<any>(null)
-    const noGridRef = useRef<any>(null)
     const [hover, setHover] = useState<string | null>(null)
-
-    useEffect(() => {
-        if (basicRef.current) {
-            basicRef.current.series = traffic
-            basicRef.current.yFormatter = yCompact
-            basicRef.current.xFormatter = (v: string | number) => String(v)
-        }
-        if (stackedRef.current) {
-            stackedRef.current.series = revenue
-            stackedRef.current.yFormatter = yMoney
-        }
-        if (noGridRef.current) {
-            noGridRef.current.series = traffic
-            noGridRef.current.yFormatter = yCompact
-        }
-
-        const el = basicRef.current
-        if (el) {
-            const handler = (e: any) =>
-                setHover(`${e.detail.series.name}: ${e.detail.point.x} = ${e.detail.point.y}`)
-            el.addEventListener('tc-point-hover', handler)
-            return () => el.removeEventListener('tc-point-hover', handler)
-        }
-    }, [])
+    const basicRef = useTc<HTMLElement>(
+        {
+            series: traffic,
+            yFormatter: yCompact,
+            xFormatter: (v: string | number) => String(v),
+        },
+        {
+            'tc-point-hover': (e: any) =>
+                setHover(`${e.detail.series.name}: ${e.detail.point.x} = ${e.detail.point.y}`),
+        },
+    )
+    const stackedRef = useTc<HTMLElement>({ series: revenue, yFormatter: yMoney })
+    const noGridRef = useTc<HTMLElement>({ series: traffic, yFormatter: yCompact })
 
     return (
         <div className="py-4">

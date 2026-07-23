@@ -1,61 +1,48 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const LobbyDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const hostRef = useRef<any>(null)
-    const eventsRef = useRef<any>(null)
-    const rankedRef = useRef<any>(null)
-
     const [log, setLog] = useState<string[]>([])
 
-    useEffect(() => {
-        if (!basicRef.current) return
-        basicRef.current.players = [
+    const basicRef = useTc<HTMLElement>({
+        players: [
             { id: '1', name: 'Aria', ready: true },
             { id: '2', name: 'Kestrel', ready: false },
             { id: '3', name: 'Vesper', ready: true },
-        ]
-    }, [])
+        ],
+    })
 
-    useEffect(() => {
-        if (!hostRef.current) return
-        hostRef.current.players = [
+    const hostRef = useTc<HTMLElement>({
+        players: [
             { id: '1', name: 'Aria', ready: true, host: true },
             { id: '2', name: 'Kestrel', ready: true },
             { id: '3', name: 'Vesper', ready: true },
             { id: '4', name: 'Onyx', ready: false },
-        ]
-    }, [])
+        ],
+    })
 
-    useEffect(() => {
-        if (!rankedRef.current) return
-        rankedRef.current.players = [
+    const rankedRef = useTc<HTMLElement>({
+        players: [
             { id: '1', name: 'Aria', ready: true, host: true, rank: 'Diamond' },
             { id: '2', name: 'Kestrel', ready: true, rank: 'Platinum' },
             { id: '3', name: 'Vesper', ready: false, rank: 'Gold' },
             { id: '4', name: 'Onyx', ready: false, rank: 'Silver' },
-        ]
-    }, [])
+        ],
+    })
 
-    useEffect(() => {
-        const el = eventsRef.current
-        if (!el) return
-        el.players = [
-            { id: '1', name: 'Aria', ready: false, host: true },
-            { id: '2', name: 'Kestrel', ready: false },
-        ]
-        const onLeave = () => setLog((l) => ['tc-leave fired', ...l].slice(0, 6))
-        const onReady = () => setLog((l) => ['tc-ready fired', ...l].slice(0, 6))
-        const onStart = () => setLog((l) => ['tc-start fired', ...l].slice(0, 6))
-        el.addEventListener('tc-leave', onLeave)
-        el.addEventListener('tc-ready', onReady)
-        el.addEventListener('tc-start', onStart)
-        return () => {
-            el.removeEventListener('tc-leave', onLeave)
-            el.removeEventListener('tc-ready', onReady)
-            el.removeEventListener('tc-start', onStart)
+    const eventsRef = useTc<HTMLElement>(
+        {
+            players: [
+                { id: '1', name: 'Aria', ready: false, host: true },
+                { id: '2', name: 'Kestrel', ready: false },
+            ],
+        },
+        {
+            'tc-leave': () => setLog((l) => ['tc-leave fired', ...l].slice(0, 6)),
+            'tc-ready': () => setLog((l) => ['tc-ready fired', ...l].slice(0, 6)),
+            'tc-start': () => setLog((l) => ['tc-start fired', ...l].slice(0, 6)),
         }
-    }, [])
+    )
 
     return (
         <div className="py-4">

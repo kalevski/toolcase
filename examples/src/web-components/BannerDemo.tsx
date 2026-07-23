@@ -1,19 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTcEvents } from '@toolcase/web-components/react'
 
 const BannerDemo: React.FC = () => {
-    const dismissibleRef = useRef<any>(null)
     const [dismissed, setDismissed] = useState(false)
-
-    useEffect(() => {
-        const el = dismissibleRef.current
-        if (!el) return
-        const handler = () => {
+    const dismissibleRef = useTcEvents<HTMLElement>({
+        'tc-dismiss': () => {
             setDismissed(true)
             console.log('tc-dismiss fired')
-        }
-        el.addEventListener('tc-dismiss', handler)
-        return () => el.removeEventListener('tc-dismiss', handler)
-    }, [])
+        },
+    })
 
     return (
         <div className="py-4">

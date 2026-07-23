@@ -1,28 +1,21 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const BundleBarDemo: React.FC = () => {
-    const chipsRef = useRef<any>(null)
-    const statusRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (chipsRef.current) {
-            chipsRef.current.chips = [
-                { label: 'main', value: '2.4 MB' },
-                { label: 'vendor', value: '1.1 MB' },
-                { label: 'lazy', value: '320 KB' },
-            ]
-        }
-    }, [])
-
-    useEffect(() => {
-        if (statusRef.current) {
-            statusRef.current.chips = [
-                { label: 'passed', value: '142', color: '#16a34a' },
-                { label: 'failed', value: '3', color: '#dc2626' },
-                { label: 'skipped', value: '8' },
-            ]
-        }
-    }, [])
+    const chipsRef = useTc<HTMLElement>({
+        chips: [
+            { label: 'main', value: '2.4 MB' },
+            { label: 'vendor', value: '1.1 MB' },
+            { label: 'lazy', value: '320 KB' },
+        ],
+    })
+    const statusRef = useTc<HTMLElement>({
+        chips: [
+            { label: 'passed', value: '142', color: '#16a34a' },
+            { label: 'failed', value: '3', color: '#dc2626' },
+            { label: 'skipped', value: '8' },
+        ],
+    })
 
     return (
         <div className="py-4">

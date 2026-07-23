@@ -1,17 +1,14 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const ALL_PLATFORMS = ['pc', 'playstation', 'xbox', 'nintendo', 'steam', 'mobile', 'web'] as const
 
 const PlatformIconDemo: React.FC = () => {
-    const sizeRef = useRef<any>(null)
-
-    useEffect(() => {
-        const el = sizeRef.current
-        if (!el) return
-        el.platform = 'steam'
-        el.size = 28
-        el.label = true
-    }, [])
+    const sizeRef = useTc<HTMLElement>({
+        platform: 'steam',
+        size: 28,
+        label: true,
+    })
 
     return (
         <div className="py-4">

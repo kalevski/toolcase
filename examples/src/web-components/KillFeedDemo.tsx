@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 interface KillFeedEntry {
     id: string
@@ -77,34 +78,18 @@ const EXTENDED_ENTRIES: KillFeedEntry[] = [
 ]
 
 const KillFeedDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const noColorRef = useRef<any>(null)
-    const maxVisibleRef = useRef<any>(null)
-    const headshotRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (basicRef.current) basicRef.current.entries = BASE_ENTRIES
-    }, [])
-
-    useEffect(() => {
-        if (noColorRef.current) {
-            noColorRef.current.entries = BASE_ENTRIES.map((e) => ({
-                ...e,
-                killerColor: undefined,
-                victimColor: undefined,
-            }))
-        }
-    }, [])
-
-    useEffect(() => {
-        if (maxVisibleRef.current) maxVisibleRef.current.entries = EXTENDED_ENTRIES
-    }, [])
-
-    useEffect(() => {
-        if (headshotRef.current) {
-            headshotRef.current.entries = BASE_ENTRIES.map((e) => ({ ...e, headshot: true }))
-        }
-    }, [])
+    const basicRef = useTc<HTMLElement>({ entries: BASE_ENTRIES })
+    const noColorRef = useTc<HTMLElement>({
+        entries: BASE_ENTRIES.map((e) => ({
+            ...e,
+            killerColor: undefined,
+            victimColor: undefined,
+        })),
+    })
+    const maxVisibleRef = useTc<HTMLElement>({ entries: EXTENDED_ENTRIES })
+    const headshotRef = useTc<HTMLElement>({
+        entries: BASE_ENTRIES.map((e) => ({ ...e, headshot: true })),
+    })
 
     return (
         <div className="py-4">

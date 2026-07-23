@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 interface Row {
     id: number
@@ -20,37 +21,28 @@ function makeRows(start: number, count: number): Row[] {
 }
 
 const FixedDemo: React.FC = () => {
-    const ref = useRef<any>(null)
-    const countRef = useRef(10000)
     const [count, setCount] = useState(10000)
 
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-
-        el.itemHeight = 36
-        el.items = makeRows(1, countRef.current)
-        el.renderItem = (item: Row, index: number) => {
-            const wrap = document.createElement('div')
-            wrap.style.cssText =
-                'display:flex;align-items:center;gap:0.75rem;width:100%;font-family:var(--tc-font-mono);font-size:0.8125rem'
-            wrap.innerHTML =
-                `<span style="color:var(--tc-text-faint);width:3.5rem">#${index + 1}</span>` +
-                `<span style="color:var(--tc-text);flex:1">${item.name}</span>` +
-                `<span style="color:var(--tc-text-muted)">${item.sha}</span>`
-            return wrap
+    const ref = useTc<HTMLElement>(
+        {
+            itemHeight: 36,
+            items: makeRows(1, count),
+            renderItem: (item: Row, index: number) => {
+                const wrap = document.createElement('div')
+                wrap.style.cssText =
+                    'display:flex;align-items:center;gap:0.75rem;width:100%;font-family:var(--tc-font-mono);font-size:0.8125rem'
+                wrap.innerHTML =
+                    `<span style="color:var(--tc-text-faint);width:3.5rem">#${index + 1}</span>` +
+                    `<span style="color:var(--tc-text);flex:1">${item.name}</span>` +
+                    `<span style="color:var(--tc-text-muted)">${item.sha}</span>`
+                return wrap
+            },
+        },
+        {
+            // Lazy loading: append another page when the bottom is reached.
+            'tc-end-reached': () => setCount((c) => c + 5000),
         }
-
-        // Lazy loading: append another page when the bottom is reached.
-        const onEnd = () => {
-            const next = countRef.current + 5000
-            countRef.current = next
-            el.items = makeRows(1, next)
-            setCount(next)
-        }
-        el.addEventListener('tc-end-reached', onEnd)
-        return () => el.removeEventListener('tc-end-reached', onEnd)
-    }, [])
+    )
 
     return (
         <tc-section-card title="10,000 rows — fixed height, lazy loading on scroll-to-end">
@@ -68,17 +60,11 @@ const FixedDemo: React.FC = () => {
 }
 
 const VariableDemo: React.FC = () => {
-    const ref = useRef<any>(null)
-
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-
-        const items = makeRows(1, 2000)
-        // Variable row heights via a per-index function (cumulative offset table).
-        el.itemHeight = (index: number) => 40 + (index % 4) * 18
-        el.items = items
-        el.renderItem = (item: Row, index: number) => {
+    // Variable row heights via a per-index function (cumulative offset table).
+    const ref = useTc<HTMLElement>({
+        itemHeight: (index: number) => 40 + (index % 4) * 18,
+        items: makeRows(1, 2000),
+        renderItem: (item: Row, index: number) => {
             const lines = (index % 4) + 1
             const wrap = document.createElement('div')
             wrap.style.cssText = 'width:100%'
@@ -92,8 +78,8 @@ const VariableDemo: React.FC = () => {
                 `<div style="font-weight:500;color:var(--tc-text);font-size:0.8125rem">${item.name}</div>` +
                 body
             return wrap
-        }
-    }, [])
+        },
+    })
 
     return (
         <tc-section-card title="Variable row heights (2,000 rows)">

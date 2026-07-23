@@ -1,33 +1,19 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc, type TcRef } from '@toolcase/web-components/react'
 
-function useSliderValue(initial: number): [number, boolean, React.RefObject<any>] {
+function useSliderValue(initial: number): [number, boolean, TcRef<HTMLElement>] {
     const [value, setValue] = useState(initial)
     const [muted, setMuted] = useState(false)
-    const ref = useRef<any>(null)
-
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-
-        const onchange = (e: Event) => {
-            const detail = (e as CustomEvent<{ value: number }>).detail
-            if (detail) setValue(detail.value)
+    const ref = useTc<HTMLElement>(
+        { muted },
+        {
+            'tc-change': (e: Event) => {
+                const detail = (e as CustomEvent<{ value: number }>).detail
+                if (detail) setValue(detail.value)
+            },
+            'tc-toggle-mute': () => setMuted((m) => !m),
         }
-        const ontoggle = () => {
-            setMuted((m) => {
-                const next = !m
-                if (el) el.muted = next
-                return next
-            })
-        }
-
-        el.addEventListener('tc-change', onchange)
-        el.addEventListener('tc-toggle-mute', ontoggle)
-        return () => {
-            el.removeEventListener('tc-change', onchange)
-            el.removeEventListener('tc-toggle-mute', ontoggle)
-        }
-    }, [])
+    )
 
     return [value, muted, ref]
 }

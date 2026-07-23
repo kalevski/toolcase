@@ -1,49 +1,42 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const PlayerCardDemo: React.FC = () => {
-    const statsRef = useRef<any>(null)
-    const actionsRef = useRef<any>(null)
-    const eventsRef = useRef<any>(null)
-
     const [log, setLog] = useState<string[]>([])
 
-    useEffect(() => {
-        if (!statsRef.current) return
-        statsRef.current.stats = [
+    const statsRef = useTc<HTMLElement>({
+        stats: [
             { label: 'KDR', value: 1.84 },
             { label: 'Wins', value: 312 },
             { label: 'Hours', value: 1470 },
             { label: 'Rank Pts', value: 4820 },
-        ]
-    }, [])
-
-    useEffect(() => {
-        if (!actionsRef.current) return
-        actionsRef.current.stats = [
+        ],
+    })
+    const actionsRef = useTc<HTMLElement>({
+        stats: [
             { label: 'KDR', value: 2.1 },
             { label: 'Wins', value: 88 },
-        ]
-        actionsRef.current.actions = [
+        ],
+        actions: [
             { id: 'add-friend', label: 'Add Friend' },
             { id: 'invite', label: 'Invite to Party' },
             { id: 'block', label: 'Block', danger: true },
-        ]
-    }, [])
-
-    useEffect(() => {
-        const el = eventsRef.current
-        if (!el) return
-        el.stats = [{ label: 'Wins', value: 42 }]
-        el.actions = [
-            { id: 'challenge', label: 'Challenge' },
-            { id: 'report', label: 'Report', danger: true },
-        ]
-        const onAction = (e: CustomEvent<{ id: string }>) => {
-            setLog((l) => [`tc-action fired: id="${e.detail.id}"`, ...l].slice(0, 6))
+        ],
+    })
+    const eventsRef = useTc<HTMLElement>(
+        {
+            stats: [{ label: 'Wins', value: 42 }],
+            actions: [
+                { id: 'challenge', label: 'Challenge' },
+                { id: 'report', label: 'Report', danger: true },
+            ],
+        },
+        {
+            'tc-action': (e: CustomEvent) => {
+                setLog((l) => [`tc-action fired: id="${e.detail.id}"`, ...l].slice(0, 6))
+            },
         }
-        el.addEventListener('tc-action', onAction)
-        return () => el.removeEventListener('tc-action', onAction)
-    }, [])
+    )
 
     return (
         <div className="py-4">

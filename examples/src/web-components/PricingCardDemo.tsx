@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const FREE_FEATURES = [
     { label: '5 projects', included: true },
@@ -27,23 +28,15 @@ const ENTERPRISE_FEATURES = [
 ]
 
 const PricingCardDemo: React.FC = () => {
-    const freeRef = useRef<any>(null)
-    const proRef = useRef<any>(null)
-    const enterpriseRef = useRef<any>(null)
     const eventLogRef = useRef<HTMLDivElement>(null)
 
-    useEffect(() => {
-        const el = freeRef.current
-        if (!el) return
-        el.features = FREE_FEATURES
-        el.action = { label: 'Get started free', href: '#free' }
-    }, [])
-
-    useEffect(() => {
-        const el = proRef.current
-        if (!el) return
-        el.features = PRO_FEATURES
-        el.action = {
+    const freeRef = useTc<HTMLElement>({
+        features: FREE_FEATURES,
+        action: { label: 'Get started free', href: '#free' },
+    })
+    const proRef = useTc<HTMLElement>({
+        features: PRO_FEATURES,
+        action: {
             label: 'Start Pro trial',
             onClick: () => {
                 if (eventLogRef.current) {
@@ -53,15 +46,12 @@ const PricingCardDemo: React.FC = () => {
                     eventLogRef.current.prepend(entry)
                 }
             },
-        }
-    }, [])
-
-    useEffect(() => {
-        const el = enterpriseRef.current
-        if (!el) return
-        el.features = ENTERPRISE_FEATURES
-        el.action = { label: 'Contact sales', href: '#enterprise' }
-    }, [])
+        },
+    })
+    const enterpriseRef = useTc<HTMLElement>({
+        features: ENTERPRISE_FEATURES,
+        action: { label: 'Contact sales', href: '#enterprise' },
+    })
 
     useEffect(() => {
         const handler = (e: Event) => {

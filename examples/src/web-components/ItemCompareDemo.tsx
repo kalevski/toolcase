@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const EQUIPPED = {
     id: 'iron-sword',
@@ -26,32 +27,13 @@ const CANDIDATE = {
 }
 
 const ItemCompareDemo: React.FC = () => {
-    const pairRef = useRef<any>(null)
-    const emptyRef = useRef<any>(null)
-    const downgradeRef = useRef<any>(null)
+    const pairRef = useTc<HTMLElement>({ current: EQUIPPED, candidate: CANDIDATE })
 
-    useEffect(() => {
-        if (pairRef.current) {
-            pairRef.current.current = EQUIPPED
-            pairRef.current.candidate = CANDIDATE
-        }
-    }, [])
+    // Only an equipped item — the candidate column shows the empty placeholder.
+    const emptyRef = useTc<HTMLElement>({ current: EQUIPPED, candidate: null })
 
-    useEffect(() => {
-        // Only an equipped item — the candidate column shows the empty placeholder.
-        if (emptyRef.current) {
-            emptyRef.current.current = EQUIPPED
-            emptyRef.current.candidate = null
-        }
-    }, [])
-
-    useEffect(() => {
-        // A strictly worse candidate — deltas trend down (danger red).
-        if (downgradeRef.current) {
-            downgradeRef.current.current = CANDIDATE
-            downgradeRef.current.candidate = EQUIPPED
-        }
-    }, [])
+    // A strictly worse candidate — deltas trend down (danger red).
+    const downgradeRef = useTc<HTMLElement>({ current: CANDIDATE, candidate: EQUIPPED })
 
     return (
         <div className="py-4">

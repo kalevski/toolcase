@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 // ── Static tree data (set via the `.nodes` JS property) ──────────────────────────
 
@@ -78,45 +79,26 @@ const ASYNC_TREE = [
     { key: 'local', label: 'Local cache', icon: 'hard-drive' },
 ]
 
-const TreeViewDemo: React.FC = () => {
-    const singleRef = useRef<any>(null)
-    const checkboxRef = useRef<any>(null)
-    const asyncRef = useRef<any>(null)
+const FILE_TREE_EXPANDED = ['src', 'components']
+const PERMISSIONS_EXPANDED = ['read', 'write']
 
+const TreeViewDemo: React.FC = () => {
     const [selected, setSelected] = useState<string>('—')
     const [checked, setChecked] = useState<string[]>([])
     const [expanded, setExpanded] = useState<string[]>(['src'])
 
-    useEffect(() => {
-        const el = singleRef.current
-        if (!el) return
-        el.nodes = FILE_TREE
-        el.expanded = ['src', 'components']
-        const onSelect = (e: any) => setSelected(e.detail.keys[0] ?? '—')
-        const onExpand = (e: any) => setExpanded(e.detail.keys)
-        el.addEventListener('tc-select', onSelect)
-        el.addEventListener('tc-expand-change', onExpand)
-        return () => {
-            el.removeEventListener('tc-select', onSelect)
-            el.removeEventListener('tc-expand-change', onExpand)
+    const singleRef = useTc<HTMLElement>(
+        { nodes: FILE_TREE, expanded: FILE_TREE_EXPANDED },
+        {
+            'tc-select': (e: any) => setSelected(e.detail.keys[0] ?? '—'),
+            'tc-expand-change': (e: any) => setExpanded(e.detail.keys),
         }
-    }, [])
-
-    useEffect(() => {
-        const el = checkboxRef.current
-        if (!el) return
-        el.nodes = PERMISSIONS
-        el.expanded = ['read', 'write']
-        const onSelect = (e: any) => setChecked(e.detail.keys)
-        el.addEventListener('tc-select', onSelect)
-        return () => el.removeEventListener('tc-select', onSelect)
-    }, [])
-
-    useEffect(() => {
-        const el = asyncRef.current
-        if (!el) return
-        el.nodes = ASYNC_TREE
-    }, [])
+    )
+    const checkboxRef = useTc<HTMLElement>(
+        { nodes: PERMISSIONS, expanded: PERMISSIONS_EXPANDED },
+        { 'tc-select': (e: any) => setChecked(e.detail.keys) }
+    )
+    const asyncRef = useTc<HTMLElement>({ nodes: ASYNC_TREE })
 
     return (
         <div className="py-4">

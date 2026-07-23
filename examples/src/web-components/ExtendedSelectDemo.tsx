@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const FRAMEWORK_ITEMS = [
     {
@@ -33,43 +34,28 @@ const COUNTRY_ITEMS = [
 ]
 
 const ExtendedSelectDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const preselectedRef = useRef<any>(null)
-    const loadingRef = useRef<any>(null)
-    const formRef = useRef<any>(null)
     const [selected, setSelected] = useState<string | null>(null)
     const [preselectedValue, setPreselectedValue] = useState<string>('react')
     const [submitted, setSubmitted] = useState<string | null>(null)
 
-    useEffect(() => {
-        if (!basicRef.current) return
-        basicRef.current.items = FRAMEWORK_ITEMS
-        const handler = (e: Event) => {
-            setSelected((e as CustomEvent<{ value: string }>).detail.value)
-        }
-        basicRef.current.addEventListener('tc-change', handler)
-        return () => basicRef.current?.removeEventListener('tc-change', handler)
-    }, [])
-
-    useEffect(() => {
-        if (!preselectedRef.current) return
-        preselectedRef.current.items = COUNTRY_ITEMS
-        const handler = (e: Event) => {
-            setPreselectedValue((e as CustomEvent<{ value: string }>).detail.value)
-        }
-        preselectedRef.current.addEventListener('tc-change', handler)
-        return () => preselectedRef.current?.removeEventListener('tc-change', handler)
-    }, [])
-
-    useEffect(() => {
-        if (!loadingRef.current) return
-        loadingRef.current.items = FRAMEWORK_ITEMS
-    }, [])
-
-    useEffect(() => {
-        if (!formRef.current) return
-        formRef.current.items = FRAMEWORK_ITEMS
-    }, [])
+    const basicRef = useTc<HTMLElement>(
+        { items: FRAMEWORK_ITEMS },
+        {
+            'tc-change': (e: Event) => {
+                setSelected((e as CustomEvent<{ value: string }>).detail.value)
+            },
+        },
+    )
+    const preselectedRef = useTc<HTMLElement>(
+        { items: COUNTRY_ITEMS },
+        {
+            'tc-change': (e: Event) => {
+                setPreselectedValue((e as CustomEvent<{ value: string }>).detail.value)
+            },
+        },
+    )
+    const loadingRef = useTc<HTMLElement>({ items: FRAMEWORK_ITEMS })
+    const formRef = useTc<HTMLElement>({ items: FRAMEWORK_ITEMS })
 
     return (
         <div className="py-4">

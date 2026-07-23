@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const SECTIONS = [
     { role: 'Direction', names: ['Aldric Vane', 'Brina Storm'] },
@@ -9,24 +10,13 @@ const SECTIONS = [
 ]
 
 const CreditsScrollDemo: React.FC = () => {
-    const ref = useRef<any>(null)
-    const fastRef = useRef<any>(null)
     const [status, setStatus] = useState('scrolling…')
 
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        el.sections = SECTIONS
-        const onComplete = () => setStatus('complete')
-        el.addEventListener('tc-complete', onComplete)
-        return () => el.removeEventListener('tc-complete', onComplete)
-    }, [])
-
-    useEffect(() => {
-        const el = fastRef.current
-        if (!el) return
-        el.sections = SECTIONS
-    }, [])
+    const ref = useTc<HTMLElement>(
+        { sections: SECTIONS },
+        { 'tc-complete': () => setStatus('complete') }
+    )
+    const fastRef = useTc<HTMLElement>({ sections: SECTIONS })
 
     return (
         <div className="py-4">

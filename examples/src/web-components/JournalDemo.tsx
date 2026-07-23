@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const DEMO_ENTRIES = [
     {
@@ -55,29 +56,19 @@ const DEMO_ENTRIES = [
 ]
 
 const JournalDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const completedRef = useRef<any>(null)
-    const emptyRef = useRef<any>(null)
-    const eventsRef = useRef<any>(null)
-
     const [log, setLog] = useState<string[]>([])
 
-    useEffect(() => {
-        if (basicRef.current) basicRef.current.entries = DEMO_ENTRIES
-        if (completedRef.current) completedRef.current.entries = DEMO_ENTRIES
-        if (emptyRef.current) emptyRef.current.entries = []
-    }, [])
+    const basicRef = useTc<HTMLElement>({ entries: DEMO_ENTRIES })
+    const completedRef = useTc<HTMLElement>({ entries: DEMO_ENTRIES })
+    const emptyRef = useTc<HTMLElement>({ entries: [] })
 
-    useEffect(() => {
-        const el = eventsRef.current
-        if (!el) return
-        el.entries = DEMO_ENTRIES
-
-        const onSelect = (e: CustomEvent) =>
-            setLog((l) => [`tc-select  id="${e.detail.id}"`, ...l].slice(0, 8))
-        el.addEventListener('tc-select', onSelect as EventListener)
-        return () => el.removeEventListener('tc-select', onSelect as EventListener)
-    }, [])
+    const eventsRef = useTc<HTMLElement>(
+        { entries: DEMO_ENTRIES },
+        {
+            'tc-select': (e: CustomEvent) =>
+                setLog((l) => [`tc-select  id="${e.detail.id}"`, ...l].slice(0, 8)),
+        }
+    )
 
     return (
         <div className="py-4">

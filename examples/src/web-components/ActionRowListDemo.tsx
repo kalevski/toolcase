@@ -1,51 +1,46 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const ActionRowListDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const outlineRef = useRef<any>(null)
-    const customIconRef = useRef<any>(null)
-    const noIconRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (!basicRef.current) return
-        basicRef.current.actions = [
-            {
-                key: 'profile',
-                title: 'Profile settings',
-                description: 'Manage your account and preferences',
-                label: 'Edit',
+    const basicRef = useTc<HTMLElement>(
+        {
+            actions: [
+                {
+                    key: 'profile',
+                    title: 'Profile settings',
+                    description: 'Manage your account and preferences',
+                    label: 'Edit',
+                },
+                {
+                    key: 'billing',
+                    title: 'Billing',
+                    description: 'Update payment methods and plan',
+                    label: 'Manage',
+                },
+                {
+                    key: 'security',
+                    title: 'Security',
+                    description: 'Two-factor authentication and sessions',
+                    label: 'Configure',
+                },
+                {
+                    key: 'api',
+                    title: 'API access',
+                    description: 'Generate and revoke API tokens',
+                    label: 'View tokens',
+                    disabled: true,
+                },
+            ],
+        },
+        {
+            'tc-action-click': (e: Event) => {
+                const key = (e as CustomEvent<{ key: string }>).detail.key
+                console.log('tc-action-click', key)
             },
-            {
-                key: 'billing',
-                title: 'Billing',
-                description: 'Update payment methods and plan',
-                label: 'Manage',
-            },
-            {
-                key: 'security',
-                title: 'Security',
-                description: 'Two-factor authentication and sessions',
-                label: 'Configure',
-            },
-            {
-                key: 'api',
-                title: 'API access',
-                description: 'Generate and revoke API tokens',
-                label: 'View tokens',
-                disabled: true,
-            },
-        ]
-        const handler = (e: Event) => {
-            const key = (e as CustomEvent<{ key: string }>).detail.key
-            console.log('tc-action-click', key)
-        }
-        basicRef.current.addEventListener('tc-action-click', handler)
-        return () => basicRef.current?.removeEventListener('tc-action-click', handler)
-    }, [])
-
-    useEffect(() => {
-        if (!outlineRef.current) return
-        outlineRef.current.actions = [
+        },
+    )
+    const outlineRef = useTc<HTMLElement>({
+        actions: [
             {
                 key: 'export',
                 title: 'Export data',
@@ -67,15 +62,13 @@ const ActionRowListDemo: React.FC = () => {
                 label: 'Delete',
                 variant: 'danger',
             },
-        ]
-        outlineRef.current.onActionClick = (key: string) => {
+        ],
+        onActionClick: (key: string) => {
             console.log('onActionClick callback', key)
-        }
-    }, [])
-
-    useEffect(() => {
-        if (!customIconRef.current) return
-        customIconRef.current.actions = [
+        },
+    })
+    const customIconRef = useTc<HTMLElement>({
+        actions: [
             {
                 key: 'notify',
                 title: 'Notifications',
@@ -88,12 +81,10 @@ const ActionRowListDemo: React.FC = () => {
                 description: 'Light/dark mode and fonts',
                 label: 'Customize',
             },
-        ]
-    }, [])
-
-    useEffect(() => {
-        if (!noIconRef.current) return
-        noIconRef.current.actions = [
+        ],
+    })
+    const noIconRef = useTc<HTMLElement>({
+        actions: [
             {
                 key: 'downloads',
                 title: 'Downloads',
@@ -106,8 +97,8 @@ const ActionRowListDemo: React.FC = () => {
                 description: 'Recent account activity',
                 label: 'Browse',
             },
-        ]
-    }, [])
+        ],
+    })
 
     return (
         <div className="py-4">

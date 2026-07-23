@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const ALL_STATES_ITEMS = [
     { id: '1', label: 'API Gateway', status: 'ok' as const, detail: 'Healthy' },
@@ -16,17 +17,8 @@ const MIXED_ITEMS = [
 ]
 
 const StatusCardDemo: React.FC = () => {
-    const allStatesRef = useRef<any>(null)
-    const mixedRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (allStatesRef.current) {
-            allStatesRef.current.items = ALL_STATES_ITEMS
-        }
-        if (mixedRef.current) {
-            mixedRef.current.items = MIXED_ITEMS
-        }
-    }, [])
+    const allStatesRef = useTc<HTMLElement>({ items: ALL_STATES_ITEMS })
+    const mixedRef = useTc<HTMLElement>({ items: MIXED_ITEMS })
 
     return (
         <div className="py-4">

@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug']
 
@@ -24,35 +25,27 @@ const traffic = [
 ]
 
 const LineChartDemo: React.FC = () => {
-    const mainRef = useRef<any>(null)
-    const trafficRef = useRef<any>(null)
-    const noGridRef = useRef<any>(null)
     const [hovered, setHovered] = useState<string | null>(null)
 
-    useEffect(() => {
-        if (mainRef.current) {
-            const el = mainRef.current
-            el.series = revenue
+    const mainRef = useTc<HTMLElement>(
+        {
+            series: revenue,
             // currency formatting via JS property
-            el.yFormatter = (v: number) => `$${(v / 1000).toFixed(1)}k`
-            el.xFormatter = (v: string | number) => `${v} '24`
-            const handler = (e: any) =>
-                setHovered(`${e.detail.series.name} @ ${e.detail.point.x} = ${e.detail.point.y}`)
-            el.addEventListener('tc-point-hover', handler)
-            return () => el.removeEventListener('tc-point-hover', handler)
+            yFormatter: (v: number) => `$${(v / 1000).toFixed(1)}k`,
+            xFormatter: (v: string | number) => `${v} '24`,
+        },
+        {
+            'tc-point-hover': (e: any) =>
+                setHovered(`${e.detail.series.name} @ ${e.detail.point.x} = ${e.detail.point.y}`),
         }
-    }, [])
+    )
 
-    useEffect(() => {
-        if (trafficRef.current) {
-            trafficRef.current.series = traffic
-            trafficRef.current.yFormatter = (v: number) => `${v}%`
-        }
-    }, [])
+    const trafficRef = useTc<HTMLElement>({
+        series: traffic,
+        yFormatter: (v: number) => `${v}%`,
+    })
 
-    useEffect(() => {
-        if (noGridRef.current) noGridRef.current.series = revenue
-    }, [])
+    const noGridRef = useTc<HTMLElement>({ series: revenue })
 
     return (
         <div className="py-4">

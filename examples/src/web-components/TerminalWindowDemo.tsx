@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const STATIC_LINES = [
     { type: 'comment', text: '# Install the package' },
@@ -15,16 +16,8 @@ const TYPED_LINES = [
 ]
 
 const TerminalWindowDemo: React.FC = () => {
-    const staticRef = useRef<any>(null)
-    const typedRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (staticRef.current) staticRef.current.lines = STATIC_LINES
-    }, [])
-
-    useEffect(() => {
-        if (typedRef.current) typedRef.current.lines = TYPED_LINES
-    }, [])
+    const staticRef = useTc<HTMLElement>({ lines: STATIC_LINES })
+    const typedRef = useTc<HTMLElement>({ lines: TYPED_LINES })
 
     return (
         <div className="py-4">

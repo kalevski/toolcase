@@ -1,4 +1,5 @@
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 interface CommandPaletteItem {
     id: string
@@ -59,29 +60,20 @@ const CommandPaletteDemo: React.FC = () => {
     const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
     const [lastSelected, setLastSelected] = useState<string | null>(null)
-    const paletteRef = useRef<any>(null)
 
     // JS-property + events must be wired via ref (React can't set object props
     // as attributes, and listens for the tc-* CustomEvents).
-    useEffect(() => {
-        const el = paletteRef.current
-        if (!el) return
-        el.items = ITEMS
-
-        const onSelect = (e: Event) => {
-            const item = (e as CustomEvent).detail.item as CommandPaletteItem
-            setLastSelected(item.label)
-            setOpen(false)
+    const paletteRef = useTc<HTMLElement>(
+        { items: ITEMS },
+        {
+            'tc-select': (e: Event) => {
+                const item = (e as CustomEvent).detail.item as CommandPaletteItem
+                setLastSelected(item.label)
+                setOpen(false)
+            },
+            'tc-close': () => setOpen(false),
         }
-        const onClose = () => setOpen(false)
-
-        el.addEventListener('tc-select', onSelect)
-        el.addEventListener('tc-close', onClose)
-        return () => {
-            el.removeEventListener('tc-select', onSelect)
-            el.removeEventListener('tc-close', onClose)
-        }
-    }, [])
+    )
 
     return (
         <div className="py-4">

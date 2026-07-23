@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc, useTcEvents } from '@toolcase/web-components/react'
 
 const MENU_ITEMS = [
     { key: 'profile', label: 'Profile', icon: 'user' },
@@ -16,16 +17,11 @@ function panelFrame(children: React.ReactNode) {
 }
 
 function IconClickExample() {
-    const ref = useRef<any>(null)
     const [count, setCount] = useState(0)
 
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        const onIcon = () => setCount((c) => c + 1)
-        el.addEventListener('tc-icon-click', onIcon)
-        return () => el.removeEventListener('tc-icon-click', onIcon)
-    }, [])
+    const ref = useTcEvents<HTMLElement>({
+        'tc-icon-click': () => setCount((c) => c + 1),
+    })
 
     return (
         <div className="d-flex flex-column gap-3">
@@ -41,19 +37,16 @@ function IconClickExample() {
 }
 
 function MenuExample() {
-    const ref = useRef<any>(null)
     const [log, setLog] = useState<string[]>([])
 
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        el.menuItems = MENU_ITEMS
-        const onMenu = (e: CustomEvent) => {
-            setLog((prev) => [`menu clicked → "${e.detail.key}"`, ...prev].slice(0, 5))
+    const ref = useTc<HTMLElement>(
+        { menuItems: MENU_ITEMS },
+        {
+            'tc-menu-click': (e: CustomEvent) => {
+                setLog((prev) => [`menu clicked → "${e.detail.key}"`, ...prev].slice(0, 5))
+            },
         }
-        el.addEventListener('tc-menu-click', onMenu)
-        return () => el.removeEventListener('tc-menu-click', onMenu)
-    }, [])
+    )
 
     return (
         <div className="d-flex flex-column gap-3">

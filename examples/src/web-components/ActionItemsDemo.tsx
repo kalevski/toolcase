@@ -1,42 +1,36 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const ActionItemsDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const dangerRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (basicRef.current) {
-            basicRef.current.items = [
+    const basicRef = useTc<HTMLElement>(
+        {
+            items: [
                 { key: 'view', label: 'View details' },
                 { key: 'edit', label: 'Edit' },
                 { key: 'duplicate', label: 'Duplicate' },
                 { key: 'divider-1', label: '', divider: true },
                 { key: 'archive', label: 'Archive', disabled: true },
                 { key: 'delete', label: 'Delete', danger: true },
-            ]
-
-            const handler = (e: Event) => {
+            ],
+        },
+        {
+            'tc-action-click': (e: Event) => {
                 const key = (e as CustomEvent<{ key: string }>).detail.key
                 console.log('tc-action-click', key)
-            }
-            basicRef.current.addEventListener('tc-action-click', handler)
-            return () => basicRef.current?.removeEventListener('tc-action-click', handler)
-        }
-    }, [])
-
-    useEffect(() => {
-        if (dangerRef.current) {
-            dangerRef.current.items = [
-                { key: 'download', label: 'Download', icon: 'Download' },
-                { key: 'share', label: 'Share', icon: 'Share2' },
-                { key: 'divider-2', label: '', divider: true },
-                { key: 'trash', label: 'Delete', icon: 'Trash2', danger: true },
-            ]
-            dangerRef.current.onActionClick = (key: string) => {
-                console.log('onActionClick callback', key)
-            }
-        }
-    }, [])
+            },
+        },
+    )
+    const dangerRef = useTc<HTMLElement>({
+        items: [
+            { key: 'download', label: 'Download', icon: 'Download' },
+            { key: 'share', label: 'Share', icon: 'Share2' },
+            { key: 'divider-2', label: '', divider: true },
+            { key: 'trash', label: 'Delete', icon: 'Trash2', danger: true },
+        ],
+        onActionClick: (key: string) => {
+            console.log('onActionClick callback', key)
+        },
+    })
 
     return (
         <div className="py-4">

@@ -1,54 +1,46 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const SprintChainDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const taggedRef = useRef<any>(null)
-    const columnsRef = useRef<any>(null)
-    const explicitRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (!basicRef.current) return
-        basicRef.current.items = [
+    const basicRef = useTc<HTMLElement>({
+        items: [
             { id: 'sp1', label: 'Sprint 1' },
             { id: 'sp2', label: 'Sprint 2' },
             { id: 'sp3', label: 'Sprint 3' },
             { id: 'sp4', label: 'Sprint 4' },
-        ]
-    }, [])
+        ],
+    })
 
-    useEffect(() => {
-        if (!taggedRef.current) return
-        taggedRef.current.items = [
+    const taggedRef = useTc<HTMLElement>({
+        items: [
             { id: 'sp1', label: 'Sprint 1', tag: 'v1.0.0' },
             { id: 'sp2', label: 'Sprint 2', tag: 'v1.1.0' },
             { id: 'sp3', label: 'Sprint 3', tag: 'v1.2.0' },
             { id: 'sp4', label: 'Sprint 4', tag: 'v2.0.0' },
             { id: 'sp5', label: 'Sprint 5', tag: 'v2.1.0' },
-        ]
-    }, [])
+        ],
+    })
 
-    useEffect(() => {
-        if (!columnsRef.current) return
-        columnsRef.current.items = [
+    const columnsRef = useTc<HTMLElement>({
+        items: [
             { id: 'q1', label: 'Q1 Sprint 1', tag: 'Jan' },
             { id: 'q2', label: 'Q1 Sprint 2', tag: 'Feb' },
             { id: 'q3', label: 'Q1 Sprint 3', tag: 'Mar' },
             { id: 'q4', label: 'Q2 Sprint 1', tag: 'Apr' },
             { id: 'q5', label: 'Q2 Sprint 2', tag: 'May' },
             { id: 'q6', label: 'Q2 Sprint 3', tag: 'Jun' },
-        ]
-    }, [])
+        ],
+    })
 
-    useEffect(() => {
-        if (!explicitRef.current) return
-        explicitRef.current.items = [
+    const explicitRef = useTc<HTMLElement>({
+        items: [
             { id: 'a', label: 'Discovery', state: 'past' },
             { id: 'b', label: 'Design', state: 'past' },
             { id: 'c', label: 'Build', state: 'now' },
             { id: 'd', label: 'Review', state: 'future' },
             { id: 'e', label: 'Ship', state: 'future' },
-        ]
-    }, [])
+        ],
+    })
 
     return (
         <div className="py-4">

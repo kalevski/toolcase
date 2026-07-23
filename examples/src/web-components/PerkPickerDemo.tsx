@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const PERKS_BASIC = [
     {
@@ -34,39 +35,20 @@ const PERKS_EVENTS = [
 ]
 
 const PerkPickerDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const twoColRef = useRef<any>(null)
-    const eventsRef = useRef<any>(null)
-
     const [selectedId, setSelectedId] = useState<string>('swift')
     const [log, setLog] = useState<string[]>([])
 
-    useEffect(() => {
-        if (!basicRef.current) return
-        basicRef.current.perks = PERKS_BASIC
-    }, [])
-
-    useEffect(() => {
-        if (!twoColRef.current) return
-        twoColRef.current.perks = PERKS_BASIC.slice(0, 4)
-    }, [])
-
-    useEffect(() => {
-        const el = eventsRef.current
-        if (!el) return
-        el.perks = PERKS_EVENTS.map((p) => ({ ...p, selected: p.id === selectedId }))
-    }, [selectedId])
-
-    useEffect(() => {
-        const el = eventsRef.current
-        if (!el) return
-        const handler = (e: any) => {
-            setSelectedId(e.detail.id)
-            setLog((l) => [`tc-select — id: "${e.detail.id}"`, ...l].slice(0, 8))
+    const basicRef = useTc<HTMLElement>({ perks: PERKS_BASIC })
+    const twoColRef = useTc<HTMLElement>({ perks: PERKS_BASIC.slice(0, 4) })
+    const eventsRef = useTc<HTMLElement>(
+        { perks: PERKS_EVENTS.map((p) => ({ ...p, selected: p.id === selectedId })) },
+        {
+            'tc-select': (e: any) => {
+                setSelectedId(e.detail.id)
+                setLog((l) => [`tc-select — id: "${e.detail.id}"`, ...l].slice(0, 8))
+            },
         }
-        el.addEventListener('tc-select', handler)
-        return () => el.removeEventListener('tc-select', handler)
-    }, [])
+    )
 
     return (
         <div className="py-4">

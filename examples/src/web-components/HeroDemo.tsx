@@ -1,112 +1,87 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const HeroDemo: React.FC = () => {
-    const blueprintRef = useRef<any>(null)
-    const basicRef = useRef<any>(null)
-    const fullRef = useRef<any>(null)
-    const minimalRef = useRef<any>(null)
-    const statsRef = useRef<any>(null)
-    const metricsRef = useRef<any>(null)
-    const bgIconsRef = useRef<any>(null)
-
     // Blueprint split — two-column hero with a framed preview panel on the right,
     // mirroring the "vector blueprint" landing hero.
-    useEffect(() => {
-        if (blueprintRef.current) {
-            blueprintRef.current.primaryAction = {
-                label: 'Insert coin — start free',
-                icon: 'Zap',
-                href: '#',
-            }
-            blueprintRef.current.secondaryAction = {
-                label: 'Watch tour',
-                icon: 'Play',
-                href: '#',
-            }
-        }
-    }, [])
+    const blueprintRef = useTc<HTMLElement>({
+        primaryAction: {
+            label: 'Insert coin — start free',
+            icon: 'Zap',
+            href: '#',
+        },
+        secondaryAction: {
+            label: 'Watch tour',
+            icon: 'Play',
+            href: '#',
+        },
+    })
 
-    useEffect(() => {
-        if (basicRef.current) {
-            basicRef.current.primaryAction = { label: 'Get Started', href: '#' }
-            basicRef.current.secondaryAction = { label: 'View Docs', href: '#' }
-        }
-    }, [])
+    const basicRef = useTc<HTMLElement>({
+        primaryAction: { label: 'Get Started', href: '#' },
+        secondaryAction: { label: 'View Docs', href: '#' },
+    })
 
     // Mirrors the react Hero demo's "Full Featured" scenario: eyebrow, title,
     // description, both actions, stat cards AND a centered metrics band.
-    useEffect(() => {
-        if (fullRef.current) {
-            fullRef.current.primaryAction = {
+    const fullRef = useTc<HTMLElement>(
+        {
+            primaryAction: {
                 label: 'Get Started Free',
                 onClick: () => console.log('primary action clicked'),
-            }
-            fullRef.current.secondaryAction = {
+            },
+            secondaryAction: {
                 label: 'View Docs',
                 onClick: () => console.log('secondary action clicked'),
-            }
-            fullRef.current.statCards = [
+            },
+            statCards: [
                 { label: 'Active players', value: '12,482' },
                 { label: 'Avg. session time', value: '32m' },
                 { label: 'Retention', value: '91%' },
-            ]
-            fullRef.current.metrics = [
+            ],
+            metrics: [
                 { label: 'studio teams', value: '180+' },
                 { label: 'ms response', value: '28ms' },
                 { label: 'uptime', value: '99.99%' },
-            ]
-            fullRef.current.addEventListener('tc-action', (e: CustomEvent) => {
+            ],
+        },
+        {
+            'tc-action': (e: CustomEvent) => {
                 console.log('tc-action', e.detail)
-            })
+            },
         }
-    }, [])
+    )
 
     // Mirrors the react Hero demo's "Minimal (No Stats)" scenario.
-    useEffect(() => {
-        if (minimalRef.current) {
-            minimalRef.current.primaryAction = { label: 'Start Building', href: '#' }
-        }
-    }, [])
+    const minimalRef = useTc<HTMLElement>({
+        primaryAction: { label: 'Start Building', href: '#' },
+    })
 
-    useEffect(() => {
-        if (statsRef.current) {
-            statsRef.current.primaryAction = { label: 'View Stats', href: '#' }
-            statsRef.current.statCards = [
-                { label: 'Downloads', value: '1.2M' },
-                { label: 'Stars', value: '8.4K' },
-                { label: 'Contributors', value: '142' },
-                { label: 'Releases', value: '38' },
-            ]
-        }
-    }, [])
+    const statsRef = useTc<HTMLElement>({
+        primaryAction: { label: 'View Stats', href: '#' },
+        statCards: [
+            { label: 'Downloads', value: '1.2M' },
+            { label: 'Stars', value: '8.4K' },
+            { label: 'Contributors', value: '142' },
+            { label: 'Releases', value: '38' },
+        ],
+    })
 
-    useEffect(() => {
-        if (metricsRef.current) {
-            metricsRef.current.primaryAction = { label: 'Get Started', href: '#' }
-            metricsRef.current.metrics = [
-                { label: 'Build time', value: '83s' },
-                { label: 'Bundle size', value: '142kb' },
-                { label: 'Coverage', value: '91%' },
-                { label: 'Type errors', value: '0' },
-            ]
-        }
-    }, [])
+    const metricsRef = useTc<HTMLElement>({
+        primaryAction: { label: 'Get Started', href: '#' },
+        metrics: [
+            { label: 'Build time', value: '83s' },
+            { label: 'Bundle size', value: '142kb' },
+            { label: 'Coverage', value: '91%' },
+            { label: 'Type errors', value: '0' },
+        ],
+    })
 
-    useEffect(() => {
-        if (bgIconsRef.current) {
-            bgIconsRef.current.primaryAction = { label: 'Explore', href: '#' }
-            bgIconsRef.current.secondaryAction = { label: 'Learn More', href: '#' }
-            bgIconsRef.current.bgIcons = [
-                'Zap',
-                'Shield',
-                'Code',
-                'Globe',
-                'Package',
-                'Star',
-                'Lock',
-            ]
-        }
-    }, [])
+    const bgIconsRef = useTc<HTMLElement>({
+        primaryAction: { label: 'Explore', href: '#' },
+        secondaryAction: { label: 'Learn More', href: '#' },
+        bgIcons: ['Zap', 'Shield', 'Code', 'Globe', 'Package', 'Star', 'Lock'],
+    })
 
     return (
         <div className="py-4">

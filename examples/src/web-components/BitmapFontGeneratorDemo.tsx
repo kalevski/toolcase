@@ -1,33 +1,31 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const BitmapFontGeneratorDemo: React.FC = () => {
-    const styledRef = useRef<any>(null)
     const [lastOutput, setLastOutput] = useState<string | null>(null)
 
-    useEffect(() => {
-        const el = styledRef.current
-        if (!el) return
-
-        // Complex object props are set as JS properties (not attributes).
-        el.fill = {
-            type: 'gradient',
-            gradientType: 'linear',
-            gradientColors: ['#ff6b6b', '#ffd93d'],
-            gradientAngle: 90,
-        }
-        el.border = { color: '#1e293b', thickness: 3, align: 'center' }
-        el.dropShadow = { color: '#000000', size: 4, offsetX: 2, offsetY: 2, blur: 4 }
-        el.glow = { color: '#22d3ee', size: 6 }
-
-        const onGenerate = (e: Event) => {
-            const detail = (e as CustomEvent).detail
-            setLastOutput(
-                `${detail.format.toUpperCase()} · ${detail.width}×${detail.height}px · ${detail.glyphs.length} glyphs`,
-            )
-        }
-        el.addEventListener('tc-generate', onGenerate)
-        return () => el.removeEventListener('tc-generate', onGenerate)
-    }, [])
+    // Complex object props are set as JS properties (not attributes).
+    const styledRef = useTc<HTMLElement>(
+        {
+            fill: {
+                type: 'gradient',
+                gradientType: 'linear',
+                gradientColors: ['#ff6b6b', '#ffd93d'],
+                gradientAngle: 90,
+            },
+            border: { color: '#1e293b', thickness: 3, align: 'center' },
+            dropShadow: { color: '#000000', size: 4, offsetX: 2, offsetY: 2, blur: 4 },
+            glow: { color: '#22d3ee', size: 6 },
+        },
+        {
+            'tc-generate': (e: Event) => {
+                const detail = (e as CustomEvent).detail
+                setLastOutput(
+                    `${detail.format.toUpperCase()} · ${detail.width}×${detail.height}px · ${detail.glyphs.length} glyphs`,
+                )
+            },
+        },
+    )
 
     return (
         <div className="py-4">

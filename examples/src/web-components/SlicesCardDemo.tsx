@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const coloredSlices = [
     { label: 'JavaScript', value: 4820, color: '#f59e0b' },
@@ -16,17 +17,8 @@ const slateSlices = [
 ]
 
 const SlicesCardDemo: React.FC = () => {
-    const coloredRef = useRef<any>(null)
-    const slateRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (coloredRef.current) {
-            coloredRef.current.slices = coloredSlices
-        }
-        if (slateRef.current) {
-            slateRef.current.slices = slateSlices
-        }
-    }, [])
+    const coloredRef = useTc<HTMLElement>({ slices: coloredSlices })
+    const slateRef = useTc<HTMLElement>({ slices: slateSlices })
 
     return (
         <div className="py-4">

@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const STEPS = [
     { key: 'account', label: 'Account', description: 'Create your account' },
@@ -8,34 +9,21 @@ const STEPS = [
 ]
 
 const StepperDemo: React.FC = () => {
-    const hRef = useRef<any>(null)
-    const vRef = useRef<any>(null)
-    const clickRef = useRef<any>(null)
     const [clickActive, setClickActive] = useState('plan')
 
-    useEffect(() => {
-        if (!hRef.current) return
-        hRef.current.steps = STEPS
-    }, [])
-
-    useEffect(() => {
-        if (!vRef.current) return
-        vRef.current.steps = STEPS
-    }, [])
-
-    useEffect(() => {
-        if (!clickRef.current) return
-        const el = clickRef.current
-        el.steps = STEPS
-        el.setAttribute('active-step', 'plan')
-
-        const handler = (e: CustomEvent<{ key: string }>) => {
-            setClickActive(e.detail.key)
+    const hRef = useTc<HTMLElement>({ steps: STEPS })
+    const vRef = useTc<HTMLElement>({ steps: STEPS })
+    const clickRef = useTc<HTMLElement>(
+        { steps: STEPS },
+        {
+            'tc-step-click': (e: CustomEvent) => {
+                setClickActive(e.detail.key)
+            },
         }
-        el.addEventListener('tc-step-click', handler)
-        return () => {
-            el.removeEventListener('tc-step-click', handler)
-        }
+    )
+
+    useEffect(() => {
+        clickRef.current?.setAttribute('active-step', 'plan')
     }, [])
 
     useEffect(() => {

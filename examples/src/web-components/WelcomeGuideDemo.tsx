@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 type Step = { key: string; label: string; completed: boolean }
 
@@ -22,6 +23,8 @@ const ALL_DONE_STEPS: Step[] = [
     { key: 'c', label: 'Team invited', completed: true },
 ]
 
+const ALL_DONE_MESSAGES = ['You have completed all onboarding steps. Welcome aboard!']
+
 // Inline SVG dot-pattern as a data URI — rides the dark hero as a decorative
 // texture (screen-blended, low opacity), mirroring the react demo's DotPattern.
 const DOT_PATTERN_SRC =
@@ -31,9 +34,6 @@ const DOT_PATTERN_SRC =
     )
 
 const WelcomeGuideDemo: React.FC = () => {
-    const withPatternRef = useRef<any>(null)
-    const withoutPatternRef = useRef<any>(null)
-    const allDoneRef = useRef<any>(null)
     const [steps, setSteps] = useState(INITIAL_STEPS)
     const [showPattern, setShowPattern] = useState(true)
 
@@ -44,30 +44,23 @@ const WelcomeGuideDemo: React.FC = () => {
     }
 
     // Seed messages once and advance the active step when the user clicks it.
-    useEffect(() => {
-        const handler = (e: Event) => {
-            const key = (e as CustomEvent<{ key: string }>).detail.key
-            setSteps((prev) => prev.map((s) => (s.key === key ? { ...s, completed: true } : s)))
-        }
-        const els = [withPatternRef.current, withoutPatternRef.current].filter(Boolean)
-        els.forEach((el) => {
-            el.messages = MESSAGES
-            el.addEventListener('tc-step-click', handler)
-        })
-        return () => els.forEach((el) => el.removeEventListener('tc-step-click', handler))
-    }, [])
+    const onStepClick = (e: Event) => {
+        const key = (e as CustomEvent<{ key: string }>).detail.key
+        setSteps((prev) => prev.map((s) => (s.key === key ? { ...s, completed: true } : s)))
+    }
 
-    // Keep both pattern demos in sync with the toggleable step state.
-    useEffect(() => {
-        if (withPatternRef.current) withPatternRef.current.steps = steps
-        if (withoutPatternRef.current) withoutPatternRef.current.steps = steps
-    }, [steps])
-
-    useEffect(() => {
-        if (!allDoneRef.current) return
-        allDoneRef.current.messages = ['You have completed all onboarding steps. Welcome aboard!']
-        allDoneRef.current.steps = ALL_DONE_STEPS
-    }, [])
+    const withPatternRef = useTc<HTMLElement>(
+        { messages: MESSAGES, steps },
+        { 'tc-step-click': onStepClick }
+    )
+    const withoutPatternRef = useTc<HTMLElement>(
+        { messages: MESSAGES, steps },
+        { 'tc-step-click': onStepClick }
+    )
+    const allDoneRef = useTc<HTMLElement>({
+        messages: ALL_DONE_MESSAGES,
+        steps: ALL_DONE_STEPS,
+    })
 
     return (
         <div className="py-4">

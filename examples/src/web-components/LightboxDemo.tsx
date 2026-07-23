@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 type GalleryImage = {
     src: string
@@ -41,24 +42,12 @@ const GALLERY: GalleryImage[] = [
 ]
 
 const LightboxDemo: React.FC = () => {
-    const lightboxRef = useRef<HTMLElement | null>(null)
     const [open, setOpen] = useState(false)
     const [initial, setInitial] = useState(0)
 
     // Feed the array via the JS `images` property (arrays can't be set as attributes).
-    useEffect(() => {
-        const el = lightboxRef.current as any
-        if (el) el.images = GALLERY
-    }, [])
-
     // Controlled — the host fires tc-close; the consumer flips `open` to false.
-    useEffect(() => {
-        const el = lightboxRef.current
-        if (!el) return
-        const onClose = () => setOpen(false)
-        el.addEventListener('tc-close', onClose)
-        return () => el.removeEventListener('tc-close', onClose)
-    }, [])
+    const lightboxRef = useTc<HTMLElement>({ images: GALLERY }, { 'tc-close': () => setOpen(false) })
 
     const openAt = (i: number) => {
         setInitial(i)
@@ -111,9 +100,7 @@ const LightboxDemo: React.FC = () => {
 
                             {/* @ts-ignore */}
                             <tc-lightbox
-                                ref={(el: HTMLElement | null) => {
-                                    lightboxRef.current = el
-                                }}
+                                ref={lightboxRef}
                                 initial-index={initial}
                                 open={open || undefined}
                             />

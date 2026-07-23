@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
 import type {
     AdvancedTableColumn,
     AdvancedTableFilter,
     AdvancedTableSort,
 } from '@toolcase/web-components'
+import { useTc, useTcEvents } from '@toolcase/web-components/react'
 
 interface Row {
     name: string
@@ -107,10 +108,6 @@ function rowsHtml(rows: Row[]): string {
 }
 
 const AdvancedTableDemo: React.FC = () => {
-    const tableRef = useRef<any>(null)
-    const switchRef = useRef<any>(null)
-    const loadingRef = useRef<any>(null)
-
     const [filterValues, setFilterValues] = useState<Record<string, any>>(INITIAL_FILTERS)
     const [sort, setSort] = useState<AdvancedTableSort | null>({
         column: 'commits',
@@ -118,106 +115,87 @@ const AdvancedTableDemo: React.FC = () => {
     })
     const [offset, setOffset] = useState(0)
 
-    // Wire events once. The element drives its own internal sort/offset and emits
-    // the CustomEvents; we mirror them into React state and push the values back.
-    useEffect(() => {
-        const el = tableRef.current
-        if (!el) return
+    // Re-derive the filtered / sorted / paginated view on every render and push
+    // everything to the element via useTc. Body rows go through the `rows`
+    // property — the element owns its <tbody> and re-applies the string on every
+    // internal re-render.
+    const search = String(filterValues.name ?? '').toLowerCase()
+    const role = String(filterValues.role ?? '')
+    const team = String(filterValues.team ?? '')
+    const minCommits = parseInt(String(filterValues.minCommits ?? ''), 10) || 0
+    const activeOnly = !!filterValues.activeOnly
 
-        const onFilter = (e: Event) => {
-            const { key, value } = (e as CustomEvent).detail
-            setFilterValues((prev) => ({ ...prev, [key]: value }))
-            setOffset(0) // a changed filter resets to the first page
-        }
-        const onSortChange = (e: Event) => {
-            const { column, direction } = (e as CustomEvent).detail
-            setSort(column ? { column, direction } : null)
-        }
-        const onPage = (e: Event) => setOffset((e as CustomEvent).detail.offset)
+    let view = DATA.filter(
+        (r) =>
+            (!search || r.name.toLowerCase().includes(search)) &&
+            (!role || r.role === role) &&
+            (!team || r.team === team) &&
+            r.commits >= minCommits &&
+            (!activeOnly || r.active),
+    )
 
-        el.addEventListener('tc-filter-change', onFilter)
-        el.addEventListener('tc-sort-change', onSortChange)
-        el.addEventListener('tc-page-change', onPage)
-        return () => {
-            el.removeEventListener('tc-filter-change', onFilter)
-            el.removeEventListener('tc-sort-change', onSortChange)
-            el.removeEventListener('tc-page-change', onPage)
-        }
-    }, [])
+    if (sort) {
+        const dir = sort.direction === 'asc' ? 1 : -1
+        view = [...view].sort((a, b) => {
+            const av = (a as any)[sort.column]
+            const bv = (b as any)[sort.column]
+            if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * dir
+            return String(av).localeCompare(String(bv)) * dir
+        })
+    }
+
+    const total = view.length
+    const page = view.slice(offset, offset + LIMIT)
+
+    // The element drives its own internal sort/offset and emits the CustomEvents;
+    // we mirror them into React state and push the values back.
+    const tableRef = useTc<HTMLElement>(
+        {
+            columns: COLUMNS,
+            filters: FILTERS,
+            sortableColumns: SORTABLE,
+            filterValues: filterValues,
+            sort: sort,
+            limit: LIMIT,
+            offset: offset,
+            total: total,
+            rows: rowsHtml(page),
+        },
+        {
+            'tc-filter-change': (e: Event) => {
+                const { key, value } = (e as CustomEvent).detail
+                setFilterValues((prev) => ({ ...prev, [key]: value }))
+                setOffset(0) // a changed filter resets to the first page
+            },
+            'tc-sort-change': (e: Event) => {
+                const { column, direction } = (e as CustomEvent).detail
+                setSort(column ? { column, direction } : null)
+            },
+            'tc-page-change': (e: Event) => setOffset((e as CustomEvent).detail.offset),
+        },
+    )
 
     // The tc-switch toggle ("Active only") is a separate control above the table,
     // wired into the same filterValues state — it filters the same dataset.
-    useEffect(() => {
-        const el = switchRef.current
-        if (!el) return
-        const onToggle = (e: Event) => {
+    const switchRef = useTcEvents<HTMLElement>({
+        'tc-change': (e: Event) => {
             const value = !!(e as CustomEvent).detail.value
             setFilterValues((prev) => ({ ...prev, activeOnly: value }))
             setOffset(0)
-        }
-        el.addEventListener('tc-change', onToggle)
-        return () => el.removeEventListener('tc-change', onToggle)
-    }, [])
-
-    // Re-derive the filtered / sorted / paginated view and push everything to the
-    // element. Body rows go through the `rows` property — the element owns its
-    // <tbody> and re-applies the string on every internal re-render.
-    useEffect(() => {
-        const el = tableRef.current
-        if (!el) return
-
-        const search = String(filterValues.name ?? '').toLowerCase()
-        const role = String(filterValues.role ?? '')
-        const team = String(filterValues.team ?? '')
-        const minCommits = parseInt(String(filterValues.minCommits ?? ''), 10) || 0
-        const activeOnly = !!filterValues.activeOnly
-
-        let view = DATA.filter(
-            (r) =>
-                (!search || r.name.toLowerCase().includes(search)) &&
-                (!role || r.role === role) &&
-                (!team || r.team === team) &&
-                r.commits >= minCommits &&
-                (!activeOnly || r.active),
-        )
-
-        if (sort) {
-            const dir = sort.direction === 'asc' ? 1 : -1
-            view = [...view].sort((a, b) => {
-                const av = (a as any)[sort.column]
-                const bv = (b as any)[sort.column]
-                if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * dir
-                return String(av).localeCompare(String(bv)) * dir
-            })
-        }
-
-        const total = view.length
-        const page = view.slice(offset, offset + LIMIT)
-
-        el.columns = COLUMNS
-        el.filters = FILTERS
-        el.sortableColumns = SORTABLE
-        el.filterValues = filterValues
-        el.sort = sort
-        el.limit = LIMIT
-        el.offset = offset
-        el.total = total
-        el.rows = rowsHtml(page)
-    }, [filterValues, sort, offset])
+        },
+    })
 
     // Static loading-overlay example.
-    useEffect(() => {
-        const el = loadingRef.current
-        if (!el) return
-        el.columns = COLUMNS
-        el.sortableColumns = SORTABLE
-        el.sort = { column: 'commits', direction: 'desc' }
-        el.limit = LIMIT
-        el.offset = 0
-        el.total = DATA.length
-        el.loading = true
-        el.rows = rowsHtml(DATA.slice(0, LIMIT))
-    }, [])
+    const loadingRef = useTc<HTMLElement>({
+        columns: COLUMNS,
+        sortableColumns: SORTABLE,
+        sort: { column: 'commits', direction: 'desc' },
+        limit: LIMIT,
+        offset: 0,
+        total: DATA.length,
+        loading: true,
+        rows: rowsHtml(DATA.slice(0, LIMIT)),
+    })
 
     const matchCount = DATA.filter(
         (r) =>

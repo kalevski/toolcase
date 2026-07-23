@@ -1,9 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
+import { useTcEvents } from '@toolcase/web-components/react'
 
 const OTPInputDemo: React.FC = () => {
-    const numericRef = useRef<any>(null)
-    const alphaRef = useRef<any>(null)
-    const maskedRef = useRef<any>(null)
     const lengthRef = useRef<any>(null)
     const errorRef = useRef<any>(null)
 
@@ -12,48 +10,32 @@ const OTPInputDemo: React.FC = () => {
     const [alphaValue, setAlphaValue] = useState('')
     const [maskedValue, setMaskedValue] = useState('')
 
-    useEffect(() => {
-        const el = numericRef.current
-        if (!el) return
-        const onChange = (e: Event) => {
+    const numericRef = useTcEvents<HTMLElement>({
+        'tc-change': (e: Event) => {
             const detail = (e as CustomEvent<{ value: string }>).detail
             setNumericValue(detail.value)
             setNumericComplete(false)
-        }
-        const onComplete = (e: Event) => {
+        },
+        'tc-complete': (e: Event) => {
             const detail = (e as CustomEvent<{ value: string }>).detail
             setNumericValue(detail.value)
             setNumericComplete(true)
-        }
-        el.addEventListener('tc-change', onChange)
-        el.addEventListener('tc-complete', onComplete)
-        return () => {
-            el.removeEventListener('tc-change', onChange)
-            el.removeEventListener('tc-complete', onComplete)
-        }
-    }, [])
+        },
+    })
 
-    useEffect(() => {
-        const el = alphaRef.current
-        if (!el) return
-        const handler = (e: Event) => {
+    const alphaRef = useTcEvents<HTMLElement>({
+        'tc-change': (e: Event) => {
             const detail = (e as CustomEvent<{ value: string }>).detail
             setAlphaValue(detail.value)
-        }
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-    }, [])
+        },
+    })
 
-    useEffect(() => {
-        const el = maskedRef.current
-        if (!el) return
-        const handler = (e: Event) => {
+    const maskedRef = useTcEvents<HTMLElement>({
+        'tc-change': (e: Event) => {
             const detail = (e as CustomEvent<{ value: string }>).detail
             setMaskedValue(detail.value)
-        }
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-    }, [])
+        },
+    })
 
     return (
         <div className="py-4">

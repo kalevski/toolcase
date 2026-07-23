@@ -1,56 +1,44 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const HeroStatsBarDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const unitsRef = useRef<any>(null)
-    const zeroRef = useRef<any>(null)
-    const manyRef = useRef<any>(null)
+    const basicRef = useTc<HTMLElement>({
+        stats: [
+            { label: 'Total Users', value: 12_847 },
+            { label: 'Active Today', value: 3_201 },
+            { label: 'Requests', value: '1.2M' },
+            { label: 'Error Rate', value: '0.04%' },
+        ],
+    })
 
-    useEffect(() => {
-        if (basicRef.current) {
-            basicRef.current.stats = [
-                { label: 'Total Users', value: 12_847 },
-                { label: 'Active Today', value: 3_201 },
-                { label: 'Requests', value: '1.2M' },
-                { label: 'Error Rate', value: '0.04%' },
-            ]
-        }
-    }, [])
+    const unitsRef = useTc<HTMLElement>({
+        stats: [
+            { label: 'Latency (p50)', value: 42, unit: 'ms' },
+            { label: 'Latency (p99)', value: 198, unit: 'ms' },
+            { label: 'Throughput', value: 4.7, unit: 'k/s' },
+            { label: 'Uptime', value: 99.97, unit: '%' },
+        ],
+    })
 
-    useEffect(() => {
-        if (unitsRef.current) {
-            unitsRef.current.stats = [
-                { label: 'Latency (p50)', value: 42, unit: 'ms' },
-                { label: 'Latency (p99)', value: 198, unit: 'ms' },
-                { label: 'Throughput', value: 4.7, unit: 'k/s' },
-                { label: 'Uptime', value: 99.97, unit: '%' },
-            ]
-        }
-    }, [])
+    const zeroRef = useTc<HTMLElement>({
+        stats: [
+            { label: 'Deployments', value: 7 },
+            { label: 'Failures', value: 0 },
+            { label: 'Rollbacks', value: '0' },
+            { label: 'Alerts', value: '' },
+        ],
+    })
 
-    useEffect(() => {
-        if (zeroRef.current) {
-            zeroRef.current.stats = [
-                { label: 'Deployments', value: 7 },
-                { label: 'Failures', value: 0 },
-                { label: 'Rollbacks', value: '0' },
-                { label: 'Alerts', value: '' },
-            ]
-        }
-    }, [])
-
-    useEffect(() => {
-        if (manyRef.current) {
-            manyRef.current.stats = [
-                { label: 'Build Time', value: 83, unit: 's' },
-                { label: 'Bundle Size', value: 142, unit: 'kb' },
-                { label: 'Coverage', value: '91.4', unit: '%' },
-                { label: 'Lint Errors', value: 0 },
-                { label: 'Type Errors', value: 0 },
-                { label: 'Warnings', value: 3 },
-            ]
-        }
-    }, [])
+    const manyRef = useTc<HTMLElement>({
+        stats: [
+            { label: 'Build Time', value: 83, unit: 's' },
+            { label: 'Bundle Size', value: 142, unit: 'kb' },
+            { label: 'Coverage', value: '91.4', unit: '%' },
+            { label: 'Lint Errors', value: 0 },
+            { label: 'Type Errors', value: 0 },
+            { label: 'Warnings', value: 3 },
+        ],
+    })
 
     return (
         <div className="py-4">

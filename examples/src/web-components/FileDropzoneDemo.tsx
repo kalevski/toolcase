@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc, useTcEvents } from '@toolcase/web-components/react'
 
 const SUPPORTED_FORMATS = [
     { label: 'PNG', mime: 'image/png', extension: '.png' },
@@ -8,36 +9,27 @@ const SUPPORTED_FORMATS = [
 ]
 
 const FileDropzoneDemo: React.FC = () => {
-    const withFormatsRef = useRef<any>(null)
-    const plainRef = useRef<any>(null)
-
     const [droppedFiles, setDroppedFiles] = useState<string[]>([])
 
-    useEffect(() => {
-        const el = withFormatsRef.current
-        if (!el) return
-        el.supported = SUPPORTED_FORMATS
-
-        const handler = (e: Event) => {
-            const { files } = (e as CustomEvent<{ files: File[] }>).detail
-            const names = files.map((f: File) => `${f.name} (${(f.size / 1024).toFixed(1)} KB)`)
-            setDroppedFiles(names)
-            console.log('tc-files:', files)
-        }
-        el.addEventListener('tc-files', handler)
-        return () => el.removeEventListener('tc-files', handler)
-    }, [])
-
-    useEffect(() => {
-        const el = plainRef.current
-        if (!el) return
-        const handler = (e: Event) => {
+    const withFormatsRef = useTc<HTMLElement>(
+        { supported: SUPPORTED_FORMATS },
+        {
+            'tc-files': (e: Event) => {
+                const { files } = (e as CustomEvent<{ files: File[] }>).detail
+                const names = files.map(
+                    (f: File) => `${f.name} (${(f.size / 1024).toFixed(1)} KB)`,
+                )
+                setDroppedFiles(names)
+                console.log('tc-files:', files)
+            },
+        },
+    )
+    const plainRef = useTcEvents<HTMLElement>({
+        'tc-files': (e: Event) => {
             const { files } = (e as CustomEvent<{ files: File[] }>).detail
             console.log('tc-files (plain):', files)
-        }
-        el.addEventListener('tc-files', handler)
-        return () => el.removeEventListener('tc-files', handler)
-    }, [])
+        },
+    })
 
     return (
         <div className="py-4">

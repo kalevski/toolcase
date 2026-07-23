@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const TIERS_FULL = [
     { id: 'diamond', name: 'Diamond', range: '2000–∞', color: 'cyan' },
@@ -17,15 +18,9 @@ const TIERS_DANGER = [
 ]
 
 const TierLadderDemo: React.FC = () => {
-    const fullRef = useRef<any>(null)
-    const rankRef = useRef<any>(null)
-    const emptyRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (fullRef.current) fullRef.current.tiers = TIERS_FULL
-        if (rankRef.current) rankRef.current.tiers = TIERS_DANGER
-        if (emptyRef.current) emptyRef.current.tiers = []
-    }, [])
+    const fullRef = useTc<HTMLElement>({ tiers: TIERS_FULL })
+    const rankRef = useTc<HTMLElement>({ tiers: TIERS_DANGER })
+    const emptyRef = useTc<HTMLElement>({ tiers: [] })
 
     return (
         <div className="py-4">

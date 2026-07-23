@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 interface ChatMessage {
     id: string
@@ -37,60 +38,43 @@ const INITIAL_MESSAGES: ChatMessage[] = [
 let _idCounter = 100
 
 const ChatWindowDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const channelsRef = useRef<any>(null)
-    const eventsRef = useRef<any>(null)
-
     const [lastSend, setLastSend] = useState<string | null>(null)
     const [activeChannel, setActiveChannel] = useState<string>('general')
 
     // Basic feed — messages only, no channels.
-    useEffect(() => {
-        if (basicRef.current) basicRef.current.messages = [...INITIAL_MESSAGES]
-    }, [])
+    const basicRef = useTc<HTMLElement>({ messages: [...INITIAL_MESSAGES] })
 
     // Channels feed — echoes whatever you send back into the log.
-    useEffect(() => {
-        const el = channelsRef.current
-        if (!el) return
-        el.channels = [...CHANNELS]
-        el.messages = [...INITIAL_MESSAGES]
-
-        const onSend = (e: CustomEvent) => {
-            const { channel, text } = e.detail
-            el.messages = [
-                ...el.messages,
-                {
-                    id: `you-${++_idCounter}`,
-                    channel,
-                    sender: 'you',
-                    body: text,
-                    color: 'var(--tc-app-accent)',
-                },
-            ]
+    const channelsRef = useTc<HTMLElement>(
+        { channels: [...CHANNELS], messages: [...INITIAL_MESSAGES] },
+        {
+            'tc-send': (e: CustomEvent) => {
+                const el = e.currentTarget as any
+                const { channel, text } = e.detail
+                el.messages = [
+                    ...el.messages,
+                    {
+                        id: `you-${++_idCounter}`,
+                        channel,
+                        sender: 'you',
+                        body: text,
+                        color: 'var(--tc-app-accent)',
+                    },
+                ]
+            },
         }
-        el.addEventListener('tc-send', onSend)
-        return () => el.removeEventListener('tc-send', onSend)
-    }, [])
+    )
 
     // Events demo — surfaces tc-send and tc-channel-change detail payloads.
-    useEffect(() => {
-        const el = eventsRef.current
-        if (!el) return
-        el.channels = [...CHANNELS]
-        el.messages = [...INITIAL_MESSAGES]
-
-        const onSend = (e: CustomEvent) => {
-            setLastSend(`channel="${e.detail.channel}" text="${e.detail.text}"`)
+    const eventsRef = useTc<HTMLElement>(
+        { channels: [...CHANNELS], messages: [...INITIAL_MESSAGES] },
+        {
+            'tc-send': (e: CustomEvent) => {
+                setLastSend(`channel="${e.detail.channel}" text="${e.detail.text}"`)
+            },
+            'tc-channel-change': (e: CustomEvent) => setActiveChannel(e.detail.id),
         }
-        const onChannel = (e: CustomEvent) => setActiveChannel(e.detail.id)
-        el.addEventListener('tc-send', onSend)
-        el.addEventListener('tc-channel-change', onChannel)
-        return () => {
-            el.removeEventListener('tc-send', onSend)
-            el.removeEventListener('tc-channel-change', onChannel)
-        }
-    }, [])
+    )
 
     return (
         <div className="py-4">

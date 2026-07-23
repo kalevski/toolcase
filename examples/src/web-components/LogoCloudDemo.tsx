@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const LOGOS_BASIC = [
     {
@@ -95,26 +96,10 @@ const LOGOS_3COL = [
 ]
 
 const LogoCloudDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const grayscaleRef = useRef<any>(null)
-    const linkedRef = useRef<any>(null)
-    const threeColRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (basicRef.current) basicRef.current.logos = LOGOS_BASIC
-    }, [])
-
-    useEffect(() => {
-        if (grayscaleRef.current) grayscaleRef.current.logos = LOGOS_BASIC
-    }, [])
-
-    useEffect(() => {
-        if (linkedRef.current) linkedRef.current.logos = LOGOS_LINKED
-    }, [])
-
-    useEffect(() => {
-        if (threeColRef.current) threeColRef.current.logos = LOGOS_3COL
-    }, [])
+    const basicRef = useTc<HTMLElement>({ logos: LOGOS_BASIC })
+    const grayscaleRef = useTc<HTMLElement>({ logos: LOGOS_BASIC })
+    const linkedRef = useTc<HTMLElement>({ logos: LOGOS_LINKED })
+    const threeColRef = useTc<HTMLElement>({ logos: LOGOS_3COL })
 
     return (
         <div className="py-4">

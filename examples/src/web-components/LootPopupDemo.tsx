@@ -1,10 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const LootPopupDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const autoFadeRef = useRef<any>(null)
-    const eventsRef = useRef<any>(null)
-
     const [basicOpen, setBasicOpen] = useState(false)
     const [autoFadeOpen, setAutoFadeOpen] = useState(false)
     const [eventsOpen, setEventsOpen] = useState(false)
@@ -13,18 +10,16 @@ const LootPopupDemo: React.FC = () => {
     const appendLog = (msg: string) => setLog((l) => [msg, ...l].slice(0, 10))
 
     // Basic popup
-    useEffect(() => {
-        const el = basicRef.current
-        if (!el) return
-        el.items = [
-            { item: { id: 'gold', name: 'Gold Coin', icon: '◎', rarity: 'common', qty: 12 } },
-            { item: { id: 'potion', name: 'Health Potion', icon: '⊕', rarity: 'uncommon' } },
-            { item: { id: 'staff', name: 'Frost Staff', icon: '✦', rarity: 'rare' }, qty: 2 },
-        ]
-        const onClose = () => setBasicOpen(false)
-        el.addEventListener('tc-close', onClose)
-        return () => el.removeEventListener('tc-close', onClose)
-    }, [])
+    const basicRef = useTc<HTMLElement>(
+        {
+            items: [
+                { item: { id: 'gold', name: 'Gold Coin', icon: '◎', rarity: 'common', qty: 12 } },
+                { item: { id: 'potion', name: 'Health Potion', icon: '⊕', rarity: 'uncommon' } },
+                { item: { id: 'staff', name: 'Frost Staff', icon: '✦', rarity: 'rare' }, qty: 2 },
+            ],
+        },
+        { 'tc-close': () => setBasicOpen(false) }
+    )
 
     useEffect(() => {
         if (!basicRef.current) return
@@ -33,17 +28,15 @@ const LootPopupDemo: React.FC = () => {
     }, [basicOpen])
 
     // Auto-fade popup
-    useEffect(() => {
-        const el = autoFadeRef.current
-        if (!el) return
-        el.items = [
-            { item: { id: 'chest-key', name: 'Chest Key', icon: '⊗', rarity: 'epic' } },
-            { item: { id: 'dawn-lance', name: 'Dawn Lance', icon: '★', rarity: 'legendary' } },
-        ]
-        const onClose = () => setAutoFadeOpen(false)
-        el.addEventListener('tc-close', onClose)
-        return () => el.removeEventListener('tc-close', onClose)
-    }, [])
+    const autoFadeRef = useTc<HTMLElement>(
+        {
+            items: [
+                { item: { id: 'chest-key', name: 'Chest Key', icon: '⊗', rarity: 'epic' } },
+                { item: { id: 'dawn-lance', name: 'Dawn Lance', icon: '★', rarity: 'legendary' } },
+            ],
+        },
+        { 'tc-close': () => setAutoFadeOpen(false) }
+    )
 
     useEffect(() => {
         if (!autoFadeRef.current) return
@@ -52,35 +45,27 @@ const LootPopupDemo: React.FC = () => {
     }, [autoFadeOpen])
 
     // Events popup
-    useEffect(() => {
-        const el = eventsRef.current
-        if (!el) return
-        el.items = [
-            { item: { id: 'scroll', name: 'Ancient Scroll', icon: '◉', rarity: 'rare' }, qty: 3 },
-            { item: { id: 'gem', name: 'Sapphire Gem', icon: '◈', rarity: 'epic' } },
-            { item: { id: 'void-shard', name: 'Void Shard', icon: '⬡', rarity: 'mythic' } },
-        ]
-        const onTake = (e: CustomEvent) => appendLog(`tc-take — id: "${e.detail.id}"`)
-        const onTakeAll = () => appendLog('tc-take-all fired')
-        const onDiscard = () => {
-            appendLog('tc-discard fired')
-            setEventsOpen(false)
+    const eventsRef = useTc<HTMLElement>(
+        {
+            items: [
+                { item: { id: 'scroll', name: 'Ancient Scroll', icon: '◉', rarity: 'rare' }, qty: 3 },
+                { item: { id: 'gem', name: 'Sapphire Gem', icon: '◈', rarity: 'epic' } },
+                { item: { id: 'void-shard', name: 'Void Shard', icon: '⬡', rarity: 'mythic' } },
+            ],
+        },
+        {
+            'tc-take': (e: CustomEvent) => appendLog(`tc-take — id: "${e.detail.id}"`),
+            'tc-take-all': () => appendLog('tc-take-all fired'),
+            'tc-discard': () => {
+                appendLog('tc-discard fired')
+                setEventsOpen(false)
+            },
+            'tc-close': () => {
+                appendLog('tc-close fired')
+                setEventsOpen(false)
+            },
         }
-        const onClose = () => {
-            appendLog('tc-close fired')
-            setEventsOpen(false)
-        }
-        el.addEventListener('tc-take', onTake as EventListener)
-        el.addEventListener('tc-take-all', onTakeAll)
-        el.addEventListener('tc-discard', onDiscard)
-        el.addEventListener('tc-close', onClose)
-        return () => {
-            el.removeEventListener('tc-take', onTake as EventListener)
-            el.removeEventListener('tc-take-all', onTakeAll)
-            el.removeEventListener('tc-discard', onDiscard)
-            el.removeEventListener('tc-close', onClose)
-        }
-    }, [])
+    )
 
     useEffect(() => {
         if (!eventsRef.current) return

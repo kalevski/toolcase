@@ -1,12 +1,10 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const BossBarDemo: React.FC = () => {
     // phaseTicks is a JS-property array — React can't set it as an attribute, so
-    // reach for the element via a ref and assign it after mount.
-    const ticksRef = useRef<any>(null)
-    useEffect(() => {
-        if (ticksRef.current) ticksRef.current.phaseTicks = [0.25, 0.5, 0.75]
-    }, [])
+    // it goes through useTc, which assigns it to the element after mount.
+    const ticksRef = useTc<HTMLElement>({ phaseTicks: [0.25, 0.5, 0.75] })
 
     return (
         <div className="py-4">

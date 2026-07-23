@@ -1,19 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTcEvents, type TcRef } from '@toolcase/web-components/react'
 
-function useRangeValue(initial: string): [string, React.RefObject<any>] {
+function useRangeValue(initial: string): [string, TcRef<HTMLElement>] {
     const [value, setValue] = useState(initial)
-    const ref = useRef<any>(null)
-
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        const handler = (e: Event) => {
+    const ref = useTcEvents<HTMLElement>({
+        input: (e: Event) => {
             const input = e.target as HTMLInputElement
             if (input.tagName === 'INPUT') setValue(input.value)
-        }
-        el.addEventListener('input', handler)
-        return () => el.removeEventListener('input', handler)
-    }, [])
+        },
+    })
 
     return [value, ref]
 }

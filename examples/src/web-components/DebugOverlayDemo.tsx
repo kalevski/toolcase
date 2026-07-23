@@ -1,19 +1,17 @@
 import React, { useEffect, useRef } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const DebugOverlayDemo: React.FC = () => {
-    const customRef = useRef<any>(null)
     const liveRef = useRef<any>(null)
 
-    useEffect(() => {
-        if (customRef.current) {
-            customRef.current.rows = [
-                { label: 'Entities', value: 1_284 },
-                { label: 'Sprites', value: 642 },
-                { label: 'Audio', value: '12 / 32' },
-                { label: 'Scene', value: 'Level 3' },
-            ]
-        }
-    }, [])
+    const customRef = useTc<HTMLElement>({
+        rows: [
+            { label: 'Entities', value: 1_284 },
+            { label: 'Sprites', value: 642 },
+            { label: 'Audio', value: '12 / 32' },
+            { label: 'Scene', value: 'Level 3' },
+        ],
+    })
 
     // Drive the live panel with a fluctuating fps reading so the status colour
     // transitions (good → warning → danger) are visible.

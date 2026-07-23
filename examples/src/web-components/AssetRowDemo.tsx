@@ -1,18 +1,9 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const AssetRowDemo: React.FC = () => {
-    const withTagsRef = useRef<any>(null)
-    const multiTagsRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (!withTagsRef.current) return
-        withTagsRef.current.tags = ['v1.2.0', 'stable']
-    }, [])
-
-    useEffect(() => {
-        if (!multiTagsRef.current) return
-        multiTagsRef.current.tags = ['ts', 'esm', 'minified']
-    }, [])
+    const withTagsRef = useTc<HTMLElement>({ tags: ['v1.2.0', 'stable'] })
+    const multiTagsRef = useTc<HTMLElement>({ tags: ['ts', 'esm', 'minified'] })
 
     return (
         <div className="py-4">

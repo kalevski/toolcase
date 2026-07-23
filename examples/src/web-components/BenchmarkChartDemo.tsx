@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const throughputBars = [
     { label: '@your/server', value: 124000, unit: 'req/s' },
@@ -28,27 +29,17 @@ const coloredBars = [
 ]
 
 const BenchmarkChartDemo: React.FC = () => {
-    const throughputRef = useRef<any>(null)
-    const latencyRef = useRef<any>(null)
-    const logRef = useRef<any>(null)
-    const interactiveRef = useRef<any>(null)
-    const slotRef = useRef<any>(null)
     const [clicked, setClicked] = useState<string | null>(null)
-
-    useEffect(() => {
-        if (throughputRef.current) throughputRef.current.bars = throughputBars
-        if (latencyRef.current) latencyRef.current.bars = latencyBars
-        if (logRef.current) logRef.current.bars = logBars
-        if (slotRef.current) slotRef.current.bars = throughputBars
-
-        const el = interactiveRef.current
-        if (el) {
-            el.bars = coloredBars
-            const handler = (e: any) => setClicked(`${e.detail.bar.label} (#${e.detail.index})`)
-            el.addEventListener('tc-bar-click', handler)
-            return () => el.removeEventListener('tc-bar-click', handler)
-        }
-    }, [])
+    const throughputRef = useTc<HTMLElement>({ bars: throughputBars })
+    const latencyRef = useTc<HTMLElement>({ bars: latencyBars })
+    const logRef = useTc<HTMLElement>({ bars: logBars })
+    const interactiveRef = useTc<HTMLElement>(
+        { bars: coloredBars },
+        {
+            'tc-bar-click': (e: any) => setClicked(`${e.detail.bar.label} (#${e.detail.index})`),
+        },
+    )
+    const slotRef = useTc<HTMLElement>({ bars: throughputBars })
 
     return (
         <div className="py-4">

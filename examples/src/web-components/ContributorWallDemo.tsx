@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const CONTRIBUTORS_WITH_AVATARS = [
     {
@@ -112,31 +113,11 @@ const CONTRIBUTORS_NO_LINKS = [
 ]
 
 const ContributorWallDemo: React.FC = () => {
-    const avatarsRef = useRef<any>(null)
-    const mixedRef = useRef<any>(null)
-    const overflowRef = useRef<any>(null)
-    const noLinksRef = useRef<any>(null)
-    const slotTitleRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (avatarsRef.current) avatarsRef.current.contributors = CONTRIBUTORS_WITH_AVATARS
-    }, [])
-
-    useEffect(() => {
-        if (mixedRef.current) mixedRef.current.contributors = CONTRIBUTORS_MIXED
-    }, [])
-
-    useEffect(() => {
-        if (overflowRef.current) overflowRef.current.contributors = CONTRIBUTORS_OVERFLOW
-    }, [])
-
-    useEffect(() => {
-        if (noLinksRef.current) noLinksRef.current.contributors = CONTRIBUTORS_NO_LINKS
-    }, [])
-
-    useEffect(() => {
-        if (slotTitleRef.current) slotTitleRef.current.contributors = CONTRIBUTORS_MIXED
-    }, [])
+    const avatarsRef = useTc<HTMLElement>({ contributors: CONTRIBUTORS_WITH_AVATARS })
+    const mixedRef = useTc<HTMLElement>({ contributors: CONTRIBUTORS_MIXED })
+    const overflowRef = useTc<HTMLElement>({ contributors: CONTRIBUTORS_OVERFLOW })
+    const noLinksRef = useTc<HTMLElement>({ contributors: CONTRIBUTORS_NO_LINKS })
+    const slotTitleRef = useTc<HTMLElement>({ contributors: CONTRIBUTORS_MIXED })
 
     return (
         <div className="py-4">

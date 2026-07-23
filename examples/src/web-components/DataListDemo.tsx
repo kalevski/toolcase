@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 // tc-data-list is the generic, data-driven row list. Domain rendering lives at
 // the call site via the `renderRow` hook — the four examples below reproduce the
@@ -211,80 +212,42 @@ const renderSlot = (s: any) => {
 }
 
 const DataListDemo: React.FC = () => {
-    const muteRef = useRef<any>(null)
-    const teamRef = useRef<any>(null)
-    const creditsRef = useRef<any>(null)
-    const achRef = useRef<any>(null)
-    const friendsRef = useRef<any>(null)
-    const slotsRef = useRef<any>(null)
-    const emptyRef = useRef<any>(null)
     const [log, setLog] = useState<string[]>([])
     const [slotLog, setSlotLog] = useState<string[]>([])
 
-    useEffect(() => {
-        if (muteRef.current) {
-            muteRef.current.renderRow = renderMuted
-            muteRef.current.items = MUTED
-            const handler = (e: any) =>
+    const muteRef = useTc<HTMLElement>(
+        { renderRow: renderMuted, items: MUTED },
+        {
+            'tc-action': (e: any) =>
                 setLog((l) =>
                     [`tc-action — action: "${e.detail.action}", id: "${e.detail.id}"`, ...l].slice(
                         0,
                         8,
                     ),
-                )
-            muteRef.current.addEventListener('tc-action', handler)
-            return () => muteRef.current?.removeEventListener('tc-action', handler)
-        }
-    }, [])
+                ),
+        },
+    )
 
-    useEffect(() => {
-        if (teamRef.current) {
-            teamRef.current.renderRow = renderMember
-            teamRef.current.items = TEAM
-        }
-    }, [])
+    const teamRef = useTc<HTMLElement>({ renderRow: renderMember, items: TEAM })
+    const creditsRef = useTc<HTMLElement>({ renderRow: renderCredit, items: CREDITS })
+    const achRef = useTc<HTMLElement>({ renderRow: renderAchievement, items: ACHIEVEMENTS })
 
-    useEffect(() => {
-        if (creditsRef.current) {
-            creditsRef.current.renderRow = renderCredit
-            creditsRef.current.items = CREDITS
-        }
-    }, [])
+    const friendsOnline = FRIENDS.filter((f) => f.status !== 'offline').length
+    const friendsRef = useTc<HTMLElement>({ renderRow: renderFriend, items: FRIENDS })
 
-    useEffect(() => {
-        if (achRef.current) {
-            achRef.current.renderRow = renderAchievement
-            achRef.current.items = ACHIEVEMENTS
-        }
-    }, [])
+    const slotsRef = useTc<HTMLElement>(
+        { renderRow: renderSlot, items: SLOTS },
+        {
+            'tc-action': (e: any) =>
+                setSlotLog((l) =>
+                    [`tc-action — "${e.detail.action}" id="${e.detail.id}"`, ...l].slice(0, 8),
+                ),
+            'tc-select': (e: any) =>
+                setSlotLog((l) => [`tc-select — id="${e.detail.id}"`, ...l].slice(0, 8)),
+        },
+    )
 
-    useEffect(() => {
-        const el = friendsRef.current
-        if (!el) return
-        const online = FRIENDS.filter((f) => f.status !== 'offline').length
-        el.setAttribute('list-title', `Friends · ${online}/${FRIENDS.length}`)
-        el.renderRow = renderFriend
-        el.items = FRIENDS
-    }, [])
-
-    useEffect(() => {
-        const el = slotsRef.current
-        if (!el) return
-        el.renderRow = renderSlot
-        el.items = SLOTS
-        const onAction = (e: any) =>
-            setSlotLog((l) =>
-                [`tc-action — "${e.detail.action}" id="${e.detail.id}"`, ...l].slice(0, 8),
-            )
-        const onSelect = (e: any) =>
-            setSlotLog((l) => [`tc-select — id="${e.detail.id}"`, ...l].slice(0, 8))
-        el.addEventListener('tc-action', onAction)
-        el.addEventListener('tc-select', onSelect)
-        return () => {
-            el.removeEventListener('tc-action', onAction)
-            el.removeEventListener('tc-select', onSelect)
-        }
-    }, [])
+    const emptyRef = useRef<any>(null)
 
     return (
         <div className="py-4">
@@ -345,7 +308,11 @@ const DataListDemo: React.FC = () => {
 
                             <tc-section-card title="Friends roster — status pips, count header, sorted, two actions">
                                 {/* @ts-ignore */}
-                                <tc-data-list ref={friendsRef} style={{ maxWidth: '440px' }} />
+                                <tc-data-list
+                                    ref={friendsRef}
+                                    list-title={`Friends · ${friendsOnline}/${FRIENDS.length}`}
+                                    style={{ maxWidth: '440px' }}
+                                />
                             </tc-section-card>
 
                             <tc-section-card title="Save slots — selectable listbox + per-row actions (tc-select / tc-action)">

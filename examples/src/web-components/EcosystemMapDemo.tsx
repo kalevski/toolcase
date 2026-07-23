@@ -1,13 +1,11 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const EcosystemMapDemo: React.FC = () => {
-    const twoRingsRef = useRef<any>(null)
-    const threeRingsRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (twoRingsRef.current) {
-            twoRingsRef.current.core = { name: '@your/core', label: 'core' }
-            twoRingsRef.current.rings = [
+    const twoRingsRef = useTc<HTMLElement>(
+        {
+            core: { name: '@your/core', label: 'core' },
+            rings: [
                 {
                     label: 'Official',
                     items: [
@@ -28,38 +26,36 @@ const EcosystemMapDemo: React.FC = () => {
                         { name: 'lib-baz' },
                     ],
                 },
-            ]
-            twoRingsRef.current.addEventListener('tc-select', (e: CustomEvent) => {
+            ],
+        },
+        {
+            'tc-select': (e: CustomEvent) => {
                 console.log('[tc-ecosystem-map] tc-select', e.detail)
-            })
-        }
-    }, [])
+            },
+        },
+    )
 
-    useEffect(() => {
-        if (threeRingsRef.current) {
-            threeRingsRef.current.core = { name: 'toolcase', label: 'runtime' }
-            threeRingsRef.current.rings = [
-                {
-                    label: 'Base',
-                    items: [
-                        { name: '@toolcase/base' },
-                        { name: '@toolcase/logging' },
-                        { name: '@toolcase/serializer' },
-                    ],
-                },
-                {
-                    label: 'UI',
-                    items: [
-                        { name: '@toolcase/web-components' },
-                    ],
-                },
-                {
-                    label: 'Integration',
-                    items: [{ name: '@toolcase/phaser-plus' }, { name: '@toolcase/node' }],
-                },
-            ]
-        }
-    }, [])
+    const threeRingsRef = useTc<HTMLElement>({
+        core: { name: 'toolcase', label: 'runtime' },
+        rings: [
+            {
+                label: 'Base',
+                items: [
+                    { name: '@toolcase/base' },
+                    { name: '@toolcase/logging' },
+                    { name: '@toolcase/serializer' },
+                ],
+            },
+            {
+                label: 'UI',
+                items: [{ name: '@toolcase/web-components' }],
+            },
+            {
+                label: 'Integration',
+                items: [{ name: '@toolcase/phaser-plus' }, { name: '@toolcase/node' }],
+            },
+        ],
+    })
 
     return (
         <div className="py-4">

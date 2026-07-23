@@ -1,26 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const CycleWheelDemo: React.FC = () => {
-    const mainRef = useRef<any>(null)
-    const threeRef = useRef<any>(null)
-    const pausedRef = useRef<any>(null)
-
     const phases = ['Roll', 'Build', 'Attest', 'Ship', 'Close']
     const [current, setCurrent] = useState(1)
     const [paused, setPaused] = useState(false)
 
     // phases is a JS property (array of strings) — must be set via ref, not attribute.
-    useEffect(() => {
-        if (mainRef.current) mainRef.current.phases = phases
-    }, [])
-
-    useEffect(() => {
-        if (threeRef.current) threeRef.current.phases = ['Draft', 'Review', 'Ship']
-    }, [])
-
-    useEffect(() => {
-        if (pausedRef.current) pausedRef.current.phases = phases
-    }, [])
+    const mainRef = useTc<HTMLElement>({ phases })
+    const threeRef = useTc<HTMLElement>({ phases: ['Draft', 'Review', 'Ship'] })
+    const pausedRef = useTc<HTMLElement>({ phases })
 
     return (
         <div className="py-4">

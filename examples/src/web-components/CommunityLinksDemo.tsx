@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const LINKS_BASIC = [
     { label: 'GitHub', href: '#', icon: 'github', count: '12.4k' },
@@ -47,26 +48,10 @@ const LINKS_NO_COUNT = [
 ]
 
 const CommunityLinksDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const fullRef = useRef<any>(null)
-    const noCountRef = useRef<any>(null)
-    const slotTitleRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (basicRef.current) basicRef.current.links = LINKS_BASIC
-    }, [])
-
-    useEffect(() => {
-        if (fullRef.current) fullRef.current.links = LINKS_FULL
-    }, [])
-
-    useEffect(() => {
-        if (noCountRef.current) noCountRef.current.links = LINKS_NO_COUNT
-    }, [])
-
-    useEffect(() => {
-        if (slotTitleRef.current) slotTitleRef.current.links = LINKS_BASIC
-    }, [])
+    const basicRef = useTc<HTMLElement>({ links: LINKS_BASIC })
+    const fullRef = useTc<HTMLElement>({ links: LINKS_FULL })
+    const noCountRef = useTc<HTMLElement>({ links: LINKS_NO_COUNT })
+    const slotTitleRef = useTc<HTMLElement>({ links: LINKS_BASIC })
 
     return (
         <div className="py-4">

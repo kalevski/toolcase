@@ -1,91 +1,82 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const MigrationGuideDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const fullRef = useRef<any>(null)
-    const titledRef = useRef<any>(null)
+    const basicRef = useTc<HTMLElement>({
+        steps: [
+            {
+                title: 'Swap the package',
+                description: 'The React library is replaced by framework-free custom elements.',
+                before: `import { Button } from '@toolcase/react-components'`,
+                after: `import { register } from '@toolcase/web-components'`,
+            },
+            {
+                title: 'Register the elements once at startup',
+                description: 'Call register() before the first render so the tc-* tags upgrade.',
+                before: `import '@toolcase/react-components/style.css'`,
+                after: [`import '@toolcase/web-components/style.css'`, ``, `register()`].join('\n'),
+            },
+        ],
+    })
 
-    useEffect(() => {
-        if (basicRef.current) {
-            basicRef.current.steps = [
-                {
-                    title: 'Swap the package',
-                    description: 'The React library is replaced by framework-free custom elements.',
-                    before: `import { Button } from '@toolcase/react-components'`,
-                    after: `import { register } from '@toolcase/web-components'`,
-                },
-                {
-                    title: 'Register the elements once at startup',
-                    description: 'Call register() before the first render so the tc-* tags upgrade.',
-                    before: `import '@toolcase/react-components/style.css'`,
-                    after: [`import '@toolcase/web-components/style.css'`, ``, `register()`].join('\n'),
-                },
-            ]
-        }
-    }, [])
+    const fullRef = useTc<HTMLElement>({
+        steps: [
+            {
+                title: 'Install the new package',
+                description: 'Remove the React library and install the framework-free web components.',
+                before: `npm install @toolcase/react-components`,
+                after: `npm install @toolcase/web-components`,
+                language: 'bash',
+            },
+            {
+                title: 'Register elements + load the stylesheet',
+                before: [
+                    `import { Button, Card } from '@toolcase/react-components'`,
+                    `import '@toolcase/react-components/style.css'`,
+                ].join('\n'),
+                after: [
+                    `import { register } from '@toolcase/web-components'`,
+                    `import '@toolcase/web-components/style.css'`,
+                    ``,
+                    `register()`,
+                ].join('\n'),
+                language: 'typescript',
+            },
+            {
+                title: 'Replace JSX components with custom elements',
+                description:
+                    'Props become attributes; children stay as light-DOM content.',
+                before: `<Button variant="primary">Submit</Button>`,
+                after: `<tc-button variant="primary">Submit</tc-button>`,
+                language: 'tsx',
+            },
+            {
+                title: 'Map handlers to DOM events',
+                description:
+                    'onClick becomes a native listener; richer components emit tc-* CustomEvents.',
+                before: `<Button onClick={save}>Save</Button>`,
+                after: [`<tc-button id="save">Save</tc-button>`, ``, `el.addEventListener('click', save)`].join('\n'),
+                language: 'tsx',
+            },
+        ],
+    })
 
-    useEffect(() => {
-        if (fullRef.current) {
-            fullRef.current.steps = [
-                {
-                    title: 'Install the new package',
-                    description: 'Remove the React library and install the framework-free web components.',
-                    before: `npm install @toolcase/react-components`,
-                    after: `npm install @toolcase/web-components`,
-                    language: 'bash',
-                },
-                {
-                    title: 'Register elements + load the stylesheet',
-                    before: [
-                        `import { Button, Card } from '@toolcase/react-components'`,
-                        `import '@toolcase/react-components/style.css'`,
-                    ].join('\n'),
-                    after: [
-                        `import { register } from '@toolcase/web-components'`,
-                        `import '@toolcase/web-components/style.css'`,
-                        ``,
-                        `register()`,
-                    ].join('\n'),
-                    language: 'typescript',
-                },
-                {
-                    title: 'Replace JSX components with custom elements',
-                    description:
-                        'Props become attributes; children stay as light-DOM content.',
-                    before: `<Button variant="primary">Submit</Button>`,
-                    after: `<tc-button variant="primary">Submit</tc-button>`,
-                    language: 'tsx',
-                },
-                {
-                    title: 'Map handlers to DOM events',
-                    description:
-                        'onClick becomes a native listener; richer components emit tc-* CustomEvents.',
-                    before: `<Button onClick={save}>Save</Button>`,
-                    after: [`<tc-button id="save">Save</tc-button>`, ``, `el.addEventListener('click', save)`].join('\n'),
-                    language: 'tsx',
-                },
-            ]
-        }
-    }, [])
-
-    useEffect(() => {
-        if (titledRef.current) {
-            titledRef.current.steps = [
-                {
-                    title: 'Switch to the new API',
-                    description:
-                        'The `register()` call is now required before using any tc-* elements.',
-                    before: `<script src="web-components.js"></script>`,
-                    after: [
-                        `import { register } from '@toolcase/web-components'`,
-                        `import '@toolcase/web-components/style.css'`,
-                        ``,
-                        `register()`,
-                    ].join('\n'),
-                },
-            ]
-        }
-    }, [])
+    const titledRef = useTc<HTMLElement>({
+        steps: [
+            {
+                title: 'Switch to the new API',
+                description:
+                    'The `register()` call is now required before using any tc-* elements.',
+                before: `<script src="web-components.js"></script>`,
+                after: [
+                    `import { register } from '@toolcase/web-components'`,
+                    `import '@toolcase/web-components/style.css'`,
+                    ``,
+                    `register()`,
+                ].join('\n'),
+            },
+        ],
+    })
 
     return (
         <div className="py-4">

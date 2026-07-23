@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const ENTRIES_FULL = [
     {
@@ -59,13 +60,8 @@ const ENTRIES_SHORT = [
 ]
 
 const ChangelogDemo: React.FC = () => {
-    const fullRef = useRef<any>(null)
-    const truncatedRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (fullRef.current) fullRef.current.entries = ENTRIES_FULL
-        if (truncatedRef.current) truncatedRef.current.entries = ENTRIES_SHORT
-    }, [])
+    const fullRef = useTc<HTMLElement>({ entries: ENTRIES_FULL })
+    const truncatedRef = useTc<HTMLElement>({ entries: ENTRIES_SHORT })
 
     return (
         <div className="py-4">

@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const conversion = [
     { label: 'Visitors', value: 12400 },
@@ -16,29 +17,24 @@ const checkout = [
 ]
 
 const FunnelChartDemo: React.FC = () => {
-    const mainRef = useRef<any>(null)
-    const noLabelsRef = useRef<any>(null)
-    const coloredRef = useRef<any>(null)
     const [selected, setSelected] = useState<string | null>(null)
 
-    useEffect(() => {
-        if (mainRef.current) mainRef.current.data = conversion
-        if (noLabelsRef.current) noLabelsRef.current.data = conversion
-        if (coloredRef.current) coloredRef.current.data = checkout
-
-        const el = mainRef.current
-        if (el) {
-            const handler = (e: any) =>
+    const mainRef = useTc<HTMLElement>(
+        {
+            data: conversion,
+            // also exercise the onSelect callback property
+            onSelect: (step: any, index: number) =>
+                console.log('onSelect', step.label, step.value, index),
+        },
+        {
+            'tc-select': (e: any) =>
                 setSelected(
                     `${e.detail.step.label} = ${e.detail.step.value} (index ${e.detail.index})`,
-                )
-            el.addEventListener('tc-select', handler)
-            // also exercise the onSelect callback property
-            el.onSelect = (step: any, index: number) =>
-                console.log('onSelect', step.label, step.value, index)
-            return () => el.removeEventListener('tc-select', handler)
-        }
-    }, [])
+                ),
+        },
+    )
+    const noLabelsRef = useTc<HTMLElement>({ data: conversion })
+    const coloredRef = useTc<HTMLElement>({ data: checkout })
 
     return (
         <div className="py-4">

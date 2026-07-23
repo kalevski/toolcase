@@ -1,17 +1,12 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTcEvents } from '@toolcase/web-components/react'
 
 const ImageDemo: React.FC = () => {
-    const brokenRef = useRef<any>(null)
-
-    useEffect(() => {
-        const el = brokenRef.current
-        if (!el) return
-        const onErr = () => {
+    const brokenRef = useTcEvents<HTMLElement>({
+        'tc-error': () => {
             // tc-error was dispatched — handled by default fallback slot
-        }
-        el.addEventListener('tc-error', onErr)
-        return () => el.removeEventListener('tc-error', onErr)
-    }, [])
+        },
+    })
 
     return (
         <div className="py-4">

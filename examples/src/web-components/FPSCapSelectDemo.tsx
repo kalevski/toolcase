@@ -1,19 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc, useTcEvents, type TcRef } from '@toolcase/web-components/react'
 
-function useFPSCapValue(initial: string): [string, React.RefObject<any>] {
+function useFPSCapValue(initial: string): [string, TcRef<HTMLElement>] {
     const [value, setValue] = useState(initial)
-    const ref = useRef<any>(null)
-
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        const handler = (e: Event) => {
+    const ref = useTcEvents<HTMLElement>({
+        'tc-change': (e: Event) => {
             const detail = (e as CustomEvent<{ value: string }>).detail
             if (detail) setValue(detail.value)
-        }
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-    }, [])
+        },
+    })
 
     return [value, ref]
 }
@@ -23,17 +18,14 @@ const FPSCapSelectDemo: React.FC = () => {
     const [v2, ref2] = useFPSCapValue('30')
 
     // Custom option set, supplied via the `options` JS property (not an attribute).
-    const ref3 = useRef<any>(null)
-    useEffect(() => {
-        const el = ref3.current
-        if (!el) return
-        el.options = [
+    const ref3 = useTc<HTMLElement>({
+        options: [
             { value: '60', label: '60 FPS' },
             { value: '90', label: '90 FPS' },
             { value: '165', label: '165 FPS' },
             { value: '0', label: 'Uncapped' },
-        ]
-    }, [])
+        ],
+    })
 
     return (
         <div className="py-4">

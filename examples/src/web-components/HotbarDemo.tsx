@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const ACTION_SLOTS = [
     { hotkey: '1', item: { id: 'sword', name: 'Longsword', icon: 'S' } },
@@ -17,28 +18,19 @@ const ABILITY_SLOTS = [
 ]
 
 const HotbarDemo: React.FC = () => {
-    const actionRef = useRef<any>(null)
-    const abilityRef = useRef<any>(null)
-    const compactRef = useRef<any>(null)
     const [selected, setSelected] = useState<string>('sword')
 
-    useEffect(() => {
-        const el = actionRef.current
-        if (!el) return
-        el.slots = ACTION_SLOTS
-        const onSelect = (e: CustomEvent<{ item: { id: string } | null; index: number }>) =>
-            setSelected(e.detail.item?.id ?? '')
-        el.addEventListener('tc-select', onSelect as EventListener)
-        return () => el.removeEventListener('tc-select', onSelect as EventListener)
-    }, [])
+    const actionRef = useTc<HTMLElement>(
+        { slots: ACTION_SLOTS },
+        {
+            'tc-select': (e: CustomEvent) =>
+                setSelected(e.detail.item?.id ?? ''),
+        }
+    )
 
-    useEffect(() => {
-        if (abilityRef.current) abilityRef.current.slots = ABILITY_SLOTS
-    }, [])
+    const abilityRef = useTc<HTMLElement>({ slots: ABILITY_SLOTS })
 
-    useEffect(() => {
-        if (compactRef.current) compactRef.current.slots = ACTION_SLOTS
-    }, [])
+    const compactRef = useTc<HTMLElement>({ slots: ACTION_SLOTS })
 
     return (
         <div className="py-4">

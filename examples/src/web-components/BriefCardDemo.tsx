@@ -1,18 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTcEvents } from '@toolcase/web-components/react'
 
 const BriefCardDemo: React.FC = () => {
     const [lastClicked, setLastClicked] = useState<string | null>(null)
-    const clickableRef = useRef<any>(null)
-
-    useEffect(() => {
-        const el = clickableRef.current
-        if (!el) return
-        const handler = (e: CustomEvent) => {
+    const clickableRef = useTcEvents<HTMLElement>({
+        'tc-click': (e: CustomEvent) => {
             setLastClicked(e.detail.id ?? '(no id)')
-        }
-        el.addEventListener('tc-click', handler)
-        return () => el.removeEventListener('tc-click', handler)
-    }, [])
+        },
+    })
 
     return (
         <div className="py-4">

@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const LINKS_GHOST = [
     { kind: 'github', href: '#', label: 'GitHub' },
@@ -21,36 +22,12 @@ const LINKS_ALL = [
 ]
 
 const SocialLinksDemo: React.FC = () => {
-    const ghostRef = useRef<any>(null)
-    const filledRef = useRef<any>(null)
-    const smRef = useRef<any>(null)
-    const mdRef = useRef<any>(null)
-    const lgRef = useRef<any>(null)
-    const allRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (ghostRef.current) ghostRef.current.links = LINKS_GHOST
-    }, [])
-
-    useEffect(() => {
-        if (filledRef.current) filledRef.current.links = LINKS_GHOST
-    }, [])
-
-    useEffect(() => {
-        if (smRef.current) smRef.current.links = LINKS_GHOST
-    }, [])
-
-    useEffect(() => {
-        if (mdRef.current) mdRef.current.links = LINKS_GHOST
-    }, [])
-
-    useEffect(() => {
-        if (lgRef.current) lgRef.current.links = LINKS_GHOST
-    }, [])
-
-    useEffect(() => {
-        if (allRef.current) allRef.current.links = LINKS_ALL
-    }, [])
+    const ghostRef = useTc<HTMLElement>({ links: LINKS_GHOST })
+    const filledRef = useTc<HTMLElement>({ links: LINKS_GHOST })
+    const smRef = useTc<HTMLElement>({ links: LINKS_GHOST })
+    const mdRef = useTc<HTMLElement>({ links: LINKS_GHOST })
+    const lgRef = useTc<HTMLElement>({ links: LINKS_GHOST })
+    const allRef = useTc<HTMLElement>({ links: LINKS_ALL })
 
     return (
         <div className="py-4">

@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const sampleCommands = [
     {
@@ -89,19 +90,11 @@ const minimalCommands = [
 ]
 
 const CommandReferenceDemo: React.FC = () => {
-    const fullRef = useRef<any>(null)
-    const noSearchRef = useRef<any>(null)
-    const titledRef = useRef<any>(null)
-    const slottedRef = useRef<any>(null)
-    const minimalRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (fullRef.current) fullRef.current.commands = sampleCommands
-        if (noSearchRef.current) noSearchRef.current.commands = sampleCommands
-        if (titledRef.current) titledRef.current.commands = sampleCommands
-        if (slottedRef.current) slottedRef.current.commands = minimalCommands
-        if (minimalRef.current) minimalRef.current.commands = minimalCommands
-    }, [])
+    const fullRef = useTc<HTMLElement>({ commands: sampleCommands })
+    const noSearchRef = useTc<HTMLElement>({ commands: sampleCommands })
+    const titledRef = useTc<HTMLElement>({ commands: sampleCommands })
+    const slottedRef = useTc<HTMLElement>({ commands: minimalCommands })
+    const minimalRef = useTc<HTMLElement>({ commands: minimalCommands })
 
     return (
         <div className="py-4">

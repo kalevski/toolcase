@@ -1,18 +1,15 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const DifferenceCardDemo: React.FC = () => {
-    const formattedRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (formattedRef.current) {
-            formattedRef.current.formatValue = (v: number) =>
-                new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: 'USD',
-                    maximumFractionDigits: 0,
-                }).format(v)
-        }
-    }, [])
+    const formattedRef = useTc<HTMLElement>({
+        formatValue: (v: number) =>
+            new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                maximumFractionDigits: 0,
+            }).format(v),
+    })
 
     return (
         <div className="py-4">

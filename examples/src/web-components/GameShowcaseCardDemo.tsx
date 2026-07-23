@@ -1,44 +1,40 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const GameShowcaseCardDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const fullRef = useRef<any>(null)
-    const clickableRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (!basicRef.current) return
-        basicRef.current.tags = ['RPG', 'Fantasy', 'Multiplayer']
-        basicRef.current.compliance = [
+    const basicRef = useTc<HTMLElement>({
+        tags: ['RPG', 'Fantasy', 'Multiplayer'],
+        compliance: [
             { label: 'PEGI 12', state: 'pass' },
             { label: 'ESRB T', state: 'pass' },
-        ]
-    }, [])
-
-    useEffect(() => {
-        if (!fullRef.current) return
-        fullRef.current.stamps = [
+        ],
+    })
+    const fullRef = useTc<HTMLElement>({
+        stamps: [
             { label: 'New', tone: 'success' },
             { label: 'Featured', icon: 'star' },
-        ]
-        fullRef.current.tags = ['Action', 'Open World', 'Co-op', 'Early Access']
-        fullRef.current.compliance = [
+        ],
+        tags: ['Action', 'Open World', 'Co-op', 'Early Access'],
+        compliance: [
             { label: 'PEGI 18', state: 'fail' },
             { label: 'ESRB M', state: 'warn' },
             { label: 'Accessibility', state: 'pass' },
-        ]
-    }, [])
-
-    useEffect(() => {
-        if (!clickableRef.current) return
-        clickableRef.current.tags = ['Puzzle', 'Indie']
-        clickableRef.current.compliance = [{ label: 'PEGI 3', state: 'pass' }]
-        clickableRef.current.onClick = () => {
-            console.log('[GameShowcaseCard] onClick callback fired')
-        }
-        clickableRef.current.addEventListener('tc-click', (e: CustomEvent) => {
-            console.log('[GameShowcaseCard] tc-click event', e.detail)
-        })
-    }, [])
+        ],
+    })
+    const clickableRef = useTc<HTMLElement>(
+        {
+            tags: ['Puzzle', 'Indie'],
+            compliance: [{ label: 'PEGI 3', state: 'pass' }],
+            onClick: () => {
+                console.log('[GameShowcaseCard] onClick callback fired')
+            },
+        },
+        {
+            'tc-click': (e: CustomEvent) => {
+                console.log('[GameShowcaseCard] tc-click event', e.detail)
+            },
+        },
+    )
 
     return (
         <div className="py-4">

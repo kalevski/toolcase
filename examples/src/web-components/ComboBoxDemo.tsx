@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const FRAMEWORK_OPTIONS = [
     { value: 'react', label: 'React', keywords: ['meta', 'jsx', 'hooks'] },
@@ -19,36 +20,26 @@ const TIMEZONE_OPTIONS = [
 ]
 
 const ComboBoxDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const preselectedRef = useRef<any>(null)
-    const disabledRef = useRef<any>(null)
     const [selected, setSelected] = useState<string | null>(null)
     const [tz, setTz] = useState<string>('cet')
 
-    useEffect(() => {
-        if (!basicRef.current) return
-        basicRef.current.options = FRAMEWORK_OPTIONS
-        const handler = (e: Event) => {
-            setSelected((e as CustomEvent<{ value: string }>).detail.value)
+    const basicRef = useTc<HTMLElement>(
+        { options: FRAMEWORK_OPTIONS },
+        {
+            'tc-change': (e: Event) => {
+                setSelected((e as CustomEvent<{ value: string }>).detail.value)
+            },
         }
-        basicRef.current.addEventListener('tc-change', handler)
-        return () => basicRef.current?.removeEventListener('tc-change', handler)
-    }, [])
-
-    useEffect(() => {
-        if (!preselectedRef.current) return
-        preselectedRef.current.options = TIMEZONE_OPTIONS
-        const handler = (e: Event) => {
-            setTz((e as CustomEvent<{ value: string }>).detail.value)
+    )
+    const preselectedRef = useTc<HTMLElement>(
+        { options: TIMEZONE_OPTIONS },
+        {
+            'tc-change': (e: Event) => {
+                setTz((e as CustomEvent<{ value: string }>).detail.value)
+            },
         }
-        preselectedRef.current.addEventListener('tc-change', handler)
-        return () => preselectedRef.current?.removeEventListener('tc-change', handler)
-    }, [])
-
-    useEffect(() => {
-        if (!disabledRef.current) return
-        disabledRef.current.options = FRAMEWORK_OPTIONS
-    }, [])
+    )
+    const disabledRef = useTc<HTMLElement>({ options: FRAMEWORK_OPTIONS })
 
     return (
         <div className="py-4">

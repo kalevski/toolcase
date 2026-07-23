@@ -1,24 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTcEvents } from '@toolcase/web-components/react'
 
 const KeyBinderDemo: React.FC = () => {
-    const interactiveRef = useRef<any>(null)
     const [lastEvent, setLastEvent] = useState<string>('—')
     const [boundKey, setBoundKey] = useState<string>('W')
 
-    useEffect(() => {
-        const el = interactiveRef.current
-        if (!el) return
-        const onChange = (e: CustomEvent<{ value: string; code: string }>) => {
+    const interactiveRef = useTcEvents<HTMLElement>({
+        'tc-change': (e: CustomEvent) => {
             setLastEvent(`tc-change: ${e.detail.value} (${e.detail.code})`)
-        }
-        const onCancel = () => setLastEvent('tc-cancel')
-        el.addEventListener('tc-change', onChange as EventListener)
-        el.addEventListener('tc-cancel', onCancel)
-        return () => {
-            el.removeEventListener('tc-change', onChange as EventListener)
-            el.removeEventListener('tc-cancel', onCancel)
-        }
-    }, [])
+        },
+        'tc-cancel': () => setLastEvent('tc-cancel'),
+    })
 
     return (
         <div className="py-4">

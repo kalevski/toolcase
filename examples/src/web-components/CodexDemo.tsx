@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const ENTRIES = [
     {
@@ -43,18 +44,11 @@ const ENTRIES = [
 ]
 
 const CodexDemo: React.FC = () => {
-    const ref = useRef<any>(null)
     const [selected, setSelected] = useState<string>('gloomfang')
-
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        el.entries = ENTRIES
-
-        const onSelect = (e: Event) => setSelected((e as CustomEvent<{ id: string }>).detail.id)
-        el.addEventListener('tc-select', onSelect)
-        return () => el.removeEventListener('tc-select', onSelect)
-    }, [])
+    const ref = useTc<HTMLElement>(
+        { entries: ENTRIES },
+        { 'tc-select': (e: Event) => setSelected((e as CustomEvent<{ id: string }>).detail.id) }
+    )
 
     return (
         <div className="py-4">

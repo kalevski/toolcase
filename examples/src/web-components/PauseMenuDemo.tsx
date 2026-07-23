@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useTc, useTcEvents } from '@toolcase/web-components/react'
 
 const BASIC_ITEMS = [
     { id: 'resume', label: 'Resume' },
@@ -16,10 +17,6 @@ const BADGE_ITEMS = [
 ]
 
 const PauseMenuDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const eventsRef = useRef<any>(null)
-    const screenRef = useRef<any>(null)
-
     const [basicOpen, setBasicOpen] = useState(false)
     const [eventsOpen, setEventsOpen] = useState(false)
     const [screenOpen, setScreenOpen] = useState(false)
@@ -28,19 +25,13 @@ const PauseMenuDemo: React.FC = () => {
     const appendLog = (msg: string) => setLog((l) => [msg, ...l].slice(0, 10))
 
     // Basic demo
-    useEffect(() => {
-        const el = basicRef.current
-        if (!el) return
-        el.items = BASIC_ITEMS
-        const onClose = () => setBasicOpen(false)
-        const onResume = () => setBasicOpen(false)
-        el.addEventListener('tc-close', onClose)
-        el.addEventListener('tc-resume', onResume)
-        return () => {
-            el.removeEventListener('tc-close', onClose)
-            el.removeEventListener('tc-resume', onResume)
+    const basicRef = useTc<HTMLElement>(
+        { items: BASIC_ITEMS },
+        {
+            'tc-close': () => setBasicOpen(false),
+            'tc-resume': () => setBasicOpen(false),
         }
-    }, [])
+    )
 
     useEffect(() => {
         if (!basicRef.current) return
@@ -49,28 +40,20 @@ const PauseMenuDemo: React.FC = () => {
     }, [basicOpen])
 
     // Events demo
-    useEffect(() => {
-        const el = eventsRef.current
-        if (!el) return
-        el.items = BADGE_ITEMS
-        const onClose = () => {
-            appendLog('tc-close fired')
-            setEventsOpen(false)
+    const eventsRef = useTc<HTMLElement>(
+        { items: BADGE_ITEMS },
+        {
+            'tc-close': () => {
+                appendLog('tc-close fired')
+                setEventsOpen(false)
+            },
+            'tc-resume': () => {
+                appendLog('tc-resume fired')
+                setEventsOpen(false)
+            },
+            'tc-select': (e: CustomEvent) => appendLog(`tc-select — id: "${e.detail.id}"`),
         }
-        const onResume = () => {
-            appendLog('tc-resume fired')
-            setEventsOpen(false)
-        }
-        const onSelect = (e: CustomEvent) => appendLog(`tc-select — id: "${e.detail.id}"`)
-        el.addEventListener('tc-close', onClose)
-        el.addEventListener('tc-resume', onResume)
-        el.addEventListener('tc-select', onSelect as EventListener)
-        return () => {
-            el.removeEventListener('tc-close', onClose)
-            el.removeEventListener('tc-resume', onResume)
-            el.removeEventListener('tc-select', onSelect as EventListener)
-        }
-    }, [])
+    )
 
     useEffect(() => {
         if (!eventsRef.current) return
@@ -79,33 +62,21 @@ const PauseMenuDemo: React.FC = () => {
     }, [eventsOpen])
 
     // tc-pause-screen preset — default resume/restart/quit items + named events.
-    useEffect(() => {
-        const el = screenRef.current
-        if (!el) return
-        const close = () => setScreenOpen(false)
-        const onResume = () => {
+    const screenRef = useTcEvents<HTMLElement>({
+        'tc-close': () => setScreenOpen(false),
+        'tc-resume': () => {
             appendLog('tc-resume fired')
-            close()
-        }
-        const onRestart = () => {
+            setScreenOpen(false)
+        },
+        'tc-restart': () => {
             appendLog('tc-restart fired')
-            close()
-        }
-        const onQuit = () => {
+            setScreenOpen(false)
+        },
+        'tc-quit': () => {
             appendLog('tc-quit fired')
-            close()
-        }
-        el.addEventListener('tc-close', close)
-        el.addEventListener('tc-resume', onResume)
-        el.addEventListener('tc-restart', onRestart)
-        el.addEventListener('tc-quit', onQuit)
-        return () => {
-            el.removeEventListener('tc-close', close)
-            el.removeEventListener('tc-resume', onResume)
-            el.removeEventListener('tc-restart', onRestart)
-            el.removeEventListener('tc-quit', onQuit)
-        }
-    }, [])
+            setScreenOpen(false)
+        },
+    })
 
     useEffect(() => {
         if (!screenRef.current) return

@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const stageStyle: React.CSSProperties = {
     width: '100%',
@@ -24,13 +25,7 @@ const VignetteOverlayDemo: React.FC = () => {
     const [intensity, setIntensity] = useState(0.6)
     const [active, setActive] = useState(true)
 
-    const customRef = useRef<any>(null)
-
-    useEffect(() => {
-        const el = customRef.current
-        if (!el) return
-        el.intensity = intensity
-    }, [intensity])
+    const customRef = useTc<HTMLElement>({ intensity })
 
     return (
         <div className="py-4">

@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const BENEFITS = [
     'Zero-config setup — drop in a script tag and go',
@@ -8,52 +9,46 @@ const BENEFITS = [
 ]
 
 const EarlySignupFormDemo: React.FC = () => {
-    const lightRef = useRef<any>(null)
-    const darkRef = useRef<any>(null)
-    const loadingRef = useRef<any>(null)
-    const successRef = useRef<any>(null)
     const [lightLog, setLightLog] = useState<string>('')
     const [darkLog, setDarkLog] = useState<string>('')
 
     // Light variant — benefits via JS property, listen to tc-submit
-    useEffect(() => {
-        const el = lightRef.current
-        if (!el) return
-        el.benefits = BENEFITS
-        const handler = (e: CustomEvent) =>
-            setLightLog(`tc-submit fired: ${JSON.stringify(e.detail)}`)
-        el.addEventListener('tc-submit', handler)
-        return () => el.removeEventListener('tc-submit', handler)
-    }, [])
+    const lightRef = useTc<HTMLElement>(
+        { benefits: BENEFITS },
+        {
+            'tc-submit': (e: CustomEvent) =>
+                setLightLog(`tc-submit fired: ${JSON.stringify(e.detail)}`),
+        },
+    )
 
     // Dark variant — benefits via JS property
-    useEffect(() => {
-        const el = darkRef.current
-        if (!el) return
-        el.benefits = [
-            'Priority access to beta features',
-            'Invite 3 teammates for free',
-            'Lifetime 20% discount',
-        ]
-        const handler = (e: CustomEvent) =>
-            setDarkLog(`tc-submit fired: ${JSON.stringify(e.detail)}`)
-        el.addEventListener('tc-submit', handler)
-        return () => el.removeEventListener('tc-submit', handler)
-    }, [])
+    const darkRef = useTc<HTMLElement>(
+        {
+            benefits: [
+                'Priority access to beta features',
+                'Invite 3 teammates for free',
+                'Lifetime 20% discount',
+            ],
+        },
+        {
+            'tc-submit': (e: CustomEvent) =>
+                setDarkLog(`tc-submit fired: ${JSON.stringify(e.detail)}`),
+        },
+    )
 
     // Loading state variant
-    useEffect(() => {
-        const el = loadingRef.current
-        if (!el) return
-        el.benefits = ['Always up to date', 'SLA-backed reliability']
-    }, [])
+    const loadingRef = useTc<HTMLElement>({
+        benefits: ['Always up to date', 'SLA-backed reliability'],
+    })
 
     // Pre-rendered success state — drive the email field + submit the form
     // programmatically so the confirmation state renders on mount.
+    const successRef = useTc<HTMLElement>({
+        benefits: ['Instant access confirmation', 'Personal onboarding call'],
+    })
     useEffect(() => {
         const el = successRef.current
         if (!el) return
-        el.benefits = ['Instant access confirmation', 'Personal onboarding call']
         // Defer a tick so the component has finished its initial render.
         const id = window.setTimeout(() => {
             const input = el.querySelector('input[name="email"]') as HTMLInputElement | null

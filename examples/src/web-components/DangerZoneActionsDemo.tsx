@@ -1,57 +1,50 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const DangerZoneActionsDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const withIconsRef = useRef<any>(null)
-    const withDisabledRef = useRef<any>(null)
+    const basicRef = useTc<HTMLElement>({
+        actions: [
+            {
+                key: 'delete-account',
+                title: 'Delete account',
+                description:
+                    'Permanently remove your account and all associated data. This action cannot be undone.',
+                buttonLabel: 'Delete account',
+            },
+            {
+                key: 'reset-data',
+                title: 'Reset all data',
+                description:
+                    'Wipe all project data and start fresh. Your plan and billing will remain active.',
+                buttonLabel: 'Reset data',
+            },
+        ],
+    })
 
-    useEffect(() => {
-        if (basicRef.current) {
-            basicRef.current.actions = [
-                {
-                    key: 'delete-account',
-                    title: 'Delete account',
-                    description:
-                        'Permanently remove your account and all associated data. This action cannot be undone.',
-                    buttonLabel: 'Delete account',
-                },
-                {
-                    key: 'reset-data',
-                    title: 'Reset all data',
-                    description:
-                        'Wipe all project data and start fresh. Your plan and billing will remain active.',
-                    buttonLabel: 'Reset data',
-                },
-            ]
-        }
-    }, [])
+    const withIconsRef = useTc<HTMLElement>({
+        actions: [
+            {
+                key: 'revoke-tokens',
+                title: 'Revoke all tokens',
+                description:
+                    'Immediately invalidate all active API tokens. Integrations using these tokens will stop working.',
+                buttonLabel: 'Revoke tokens',
+                icon: 'KeyRound',
+            },
+            {
+                key: 'delete-workspace',
+                title: 'Delete workspace',
+                description:
+                    'Remove this workspace and all its members, projects, and resources permanently.',
+                buttonLabel: 'Delete workspace',
+                icon: 'Trash2',
+            },
+        ],
+    })
 
-    useEffect(() => {
-        if (withIconsRef.current) {
-            withIconsRef.current.actions = [
-                {
-                    key: 'revoke-tokens',
-                    title: 'Revoke all tokens',
-                    description:
-                        'Immediately invalidate all active API tokens. Integrations using these tokens will stop working.',
-                    buttonLabel: 'Revoke tokens',
-                    icon: 'KeyRound',
-                },
-                {
-                    key: 'delete-workspace',
-                    title: 'Delete workspace',
-                    description:
-                        'Remove this workspace and all its members, projects, and resources permanently.',
-                    buttonLabel: 'Delete workspace',
-                    icon: 'Trash2',
-                },
-            ]
-        }
-    }, [])
-
-    useEffect(() => {
-        if (withDisabledRef.current) {
-            withDisabledRef.current.actions = [
+    const withDisabledRef = useTc<HTMLElement>(
+        {
+            actions: [
                 {
                     key: 'archive-project',
                     title: 'Archive project',
@@ -69,13 +62,14 @@ const DangerZoneActionsDemo: React.FC = () => {
                     icon: 'Trash2',
                     disabled: true,
                 },
-            ]
-
-            withDisabledRef.current.addEventListener('tc-action-click', (e: CustomEvent) => {
+            ],
+        },
+        {
+            'tc-action-click': (e: CustomEvent) => {
                 console.log('[tc-danger-zone-actions] tc-action-click:', e.detail.key)
-            })
+            },
         }
-    }, [])
+    )
 
     return (
         <div className="py-4">

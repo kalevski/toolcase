@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 import type { LeaderboardEntry } from '@toolcase/web-components'
 
 const FULL_ENTRIES: LeaderboardEntry[] = [
@@ -61,29 +62,25 @@ const FULL_ENTRIES: LeaderboardEntry[] = [
 ]
 
 const LeaderboardDemo: React.FC = () => {
-    const fullRef = useRef<any>(null)
-    const compactRef = useRef<any>(null)
     const [selected, setSelected] = useState<string | null>(null)
 
-    useEffect(() => {
-        if (fullRef.current) {
-            fullRef.current.entries = FULL_ENTRIES
-            fullRef.current.addEventListener('tc-select', (e: CustomEvent) => {
+    const fullRef = useTc<HTMLElement>(
+        { entries: FULL_ENTRIES },
+        {
+            'tc-select': (e: CustomEvent) => {
                 setSelected(e.detail.entry.name)
-            })
+            },
         }
-    }, [])
+    )
 
-    useEffect(() => {
-        if (compactRef.current) {
-            compactRef.current.entries = FULL_ENTRIES
-            compactRef.current.columns = {
-                tier: false,
-                sprints: false,
-                trend: 'Δ 7d',
-            }
-        }
-    }, [])
+    const compactRef = useTc<HTMLElement>({
+        entries: FULL_ENTRIES,
+        columns: {
+            tier: false,
+            sprints: false,
+            trend: 'Δ 7d',
+        },
+    })
 
     return (
         <div className="py-4">

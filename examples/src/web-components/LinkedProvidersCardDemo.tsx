@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const PROVIDERS_MIXED = [
     {
@@ -46,61 +47,47 @@ const BRAND_COLORS: Record<string, string> = {
 }
 
 const LinkedProvidersCardDemo: React.FC = () => {
-    const mixedRef = useRef<any>(null)
-    const connectedRef = useRef<any>(null)
-    const emptyRef = useRef<any>(null)
-    const customIconRef = useRef<any>(null)
-
     const [lastEvent, setLastEvent] = useState<string | null>(null)
 
-    useEffect(() => {
-        if (mixedRef.current) {
-            mixedRef.current.providers = PROVIDERS_MIXED
-            mixedRef.current.brandColors = BRAND_COLORS
-            mixedRef.current.addEventListener('tc-toggle', (e: CustomEvent) => {
+    const mixedRef = useTc<HTMLElement>(
+        { providers: PROVIDERS_MIXED, brandColors: BRAND_COLORS },
+        {
+            'tc-toggle': (e: CustomEvent) => {
                 const { key, connected } = e.detail
                 setLastEvent(
                     `tc-toggle: key="${key}", connected=${connected} → will ${connected ? 'disconnect' : 'connect'}`,
                 )
-            })
+            },
         }
-    }, [])
+    )
 
-    useEffect(() => {
-        if (connectedRef.current) {
-            connectedRef.current.providers = PROVIDERS_CONNECTED
-            connectedRef.current.brandColors = BRAND_COLORS
-        }
-    }, [])
+    const connectedRef = useTc<HTMLElement>({
+        providers: PROVIDERS_CONNECTED,
+        brandColors: BRAND_COLORS,
+    })
 
-    useEffect(() => {
-        if (emptyRef.current) {
-            emptyRef.current.providers = []
-        }
-    }, [])
+    const emptyRef = useTc<HTMLElement>({ providers: [] })
 
-    useEffect(() => {
-        if (customIconRef.current) {
-            customIconRef.current.providers = [
-                { key: 'custom-a', label: 'Custom Provider A', connected: false },
-                {
-                    key: 'custom-b',
-                    label: 'Custom Provider B',
-                    connected: true,
-                    account: 'user@custom.io',
-                },
-            ]
-            customIconRef.current.iconForProvider = (key: string) => {
-                if (key === 'custom-a') return 'Zap'
-                if (key === 'custom-b') return 'Star'
-                return 'Link'
-            }
-            customIconRef.current.brandColors = {
-                'custom-a': '#f59e0b',
-                'custom-b': '#8b5cf6',
-            }
-        }
-    }, [])
+    const customIconRef = useTc<HTMLElement>({
+        providers: [
+            { key: 'custom-a', label: 'Custom Provider A', connected: false },
+            {
+                key: 'custom-b',
+                label: 'Custom Provider B',
+                connected: true,
+                account: 'user@custom.io',
+            },
+        ],
+        iconForProvider: (key: string) => {
+            if (key === 'custom-a') return 'Zap'
+            if (key === 'custom-b') return 'Star'
+            return 'Link'
+        },
+        brandColors: {
+            'custom-a': '#f59e0b',
+            'custom-b': '#8b5cf6',
+        },
+    })
 
     return (
         <div className="py-4">

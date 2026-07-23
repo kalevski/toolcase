@@ -1,47 +1,33 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc, useTcEvents } from '@toolcase/web-components/react'
 
 const CoolButtonDemo: React.FC = () => {
     const [clicked, setClicked] = useState('')
     const [busy, setBusy] = useState(false)
-    const loadingRef = useRef<any>(null)
-    const toggleRef = useRef<any>(null)
-    const addonLeftRef = useRef<any>(null)
-    const addonRightSlotRef = useRef<any>(null)
 
-    useEffect(() => {
-        const el = loadingRef.current
-        if (!el) return
-        el.addEventListener('tc-click', () => setClicked('loading button clicked'))
-    }, [])
+    const loadingRef = useTcEvents<HTMLElement>({
+        'tc-click': () => setClicked('loading button clicked'),
+    })
 
     // Toggle a real loading cycle so the stable-width behaviour is visible:
     // the button must not grow, shrink, or jump when `loading` flips on/off.
-    useEffect(() => {
-        const el = toggleRef.current
-        if (!el) return
-        const handler = () => {
-            setBusy(true)
-            window.setTimeout(() => setBusy(false), 1600)
+    const toggleRef = useTc<HTMLElement>(
+        { loading: busy },
+        {
+            'tc-click': () => {
+                setBusy(true)
+                window.setTimeout(() => setBusy(false), 1600)
+            },
         }
-        el.addEventListener('tc-click', handler)
-        return () => el.removeEventListener('tc-click', handler)
-    }, [])
+    )
 
-    useEffect(() => {
-        if (toggleRef.current) toggleRef.current.loading = busy
-    }, [busy])
+    const addonLeftRef = useTcEvents<HTMLElement>({
+        'tc-click': () => setClicked('addon-left button clicked'),
+    })
 
-    useEffect(() => {
-        const el = addonLeftRef.current
-        if (!el) return
-        el.addEventListener('tc-click', () => setClicked('addon-left button clicked'))
-    }, [])
-
-    useEffect(() => {
-        const el = addonRightSlotRef.current
-        if (!el) return
-        el.addEventListener('tc-click', () => setClicked('addon-right slot button clicked'))
-    }, [])
+    const addonRightSlotRef = useTcEvents<HTMLElement>({
+        'tc-click': () => setClicked('addon-right slot button clicked'),
+    })
 
     return (
         <div className="py-4">

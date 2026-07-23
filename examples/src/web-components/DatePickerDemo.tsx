@@ -1,16 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTcEvents } from '@toolcase/web-components/react'
+import type { TcRef } from '@toolcase/web-components/react'
 
-function useDateValue(initial: string): [string, React.RefObject<any>] {
+function useDateValue(initial: string): [string, TcRef] {
     const [value, setValue] = useState(initial)
-    const ref = useRef<any>(null)
-
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        const handler = (e: CustomEvent) => setValue(e.detail.value)
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-    }, [])
+    const ref = useTcEvents<HTMLElement>({
+        'tc-change': (e: CustomEvent) => setValue(e.detail.value),
+    })
 
     return [value, ref]
 }

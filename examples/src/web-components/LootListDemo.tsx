@@ -1,50 +1,41 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const LootListDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const rarityRef = useRef<any>(null)
-    const eventsRef = useRef<any>(null)
-
     const [log, setLog] = useState<string[]>([])
 
-    useEffect(() => {
-        if (!basicRef.current) return
-        basicRef.current.items = [
+    const basicRef = useTc<HTMLElement>({
+        items: [
             { item: { id: 'gold-coin', name: 'Gold Coin', icon: '◎', qty: 3 } },
             { item: { id: 'health-potion', name: 'Health Potion', icon: '⊕' } },
             { item: { id: 'leather-armor', name: 'Leather Armor', icon: '◈' }, qty: 1 },
-        ]
-    }, [])
+        ],
+    })
 
-    useEffect(() => {
-        if (!rarityRef.current) return
-        rarityRef.current.items = [
+    const rarityRef = useTc<HTMLElement>({
+        items: [
             { item: { id: 'pebble', name: 'Pebble', icon: '○', rarity: 'common' } },
             { item: { id: 'iron-sword', name: 'Iron Sword', icon: '◆', rarity: 'uncommon' } },
             { item: { id: 'frost-staff', name: 'Frost Staff', icon: '✦', rarity: 'rare' } },
             { item: { id: 'shadow-blade', name: 'Shadow Blade', icon: '◇', rarity: 'epic' } },
             { item: { id: 'dawn-lance', name: 'Dawn Lance', icon: '★', rarity: 'legendary' } },
             { item: { id: 'void-shard', name: 'Void Shard', icon: '⬡', rarity: 'mythic' } },
-        ]
-    }, [])
+        ],
+    })
 
-    useEffect(() => {
-        const el = eventsRef.current
-        if (!el) return
-        el.items = [
-            { item: { id: 'scroll', name: 'Ancient Scroll', icon: '◉', rarity: 'rare' }, qty: 2 },
-            { item: { id: 'gem', name: 'Sapphire Gem', icon: '◈', rarity: 'epic' } },
-        ]
-        const onTake = (e: CustomEvent) =>
-            setLog((l) => [`tc-take — id: "${e.detail.id}"`, ...l].slice(0, 8))
-        const onTakeAll = () => setLog((l) => ['tc-take-all fired', ...l].slice(0, 8))
-        el.addEventListener('tc-take', onTake as EventListener)
-        el.addEventListener('tc-take-all', onTakeAll)
-        return () => {
-            el.removeEventListener('tc-take', onTake as EventListener)
-            el.removeEventListener('tc-take-all', onTakeAll)
+    const eventsRef = useTc<HTMLElement>(
+        {
+            items: [
+                { item: { id: 'scroll', name: 'Ancient Scroll', icon: '◉', rarity: 'rare' }, qty: 2 },
+                { item: { id: 'gem', name: 'Sapphire Gem', icon: '◈', rarity: 'epic' } },
+            ],
+        },
+        {
+            'tc-take': (e: CustomEvent) =>
+                setLog((l) => [`tc-take — id: "${e.detail.id}"`, ...l].slice(0, 8)),
+            'tc-take-all': () => setLog((l) => ['tc-take-all fired', ...l].slice(0, 8)),
         }
-    }, [])
+    )
 
     return (
         <div className="py-4">

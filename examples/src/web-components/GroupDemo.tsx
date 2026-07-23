@@ -1,34 +1,22 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc, useTcEvents } from '@toolcase/web-components/react'
 
 const GroupDemo: React.FC = () => {
-    const actionRef = useRef<HTMLElement>(null)
-    const collapsedRef = useRef<HTMLElement>(null)
-    const eventRef = useRef<HTMLElement>(null)
-
-    useEffect(() => {
-        if (actionRef.current) {
-            const el = actionRef.current as HTMLElement & {
-                onActionClick: () => void
-                onToggle: (c: boolean) => void
-            }
-            el.onActionClick = () => alert('Action clicked!')
-            el.onToggle = (collapsed: boolean) =>
-                console.log('tc-group toggled, collapsed:', collapsed)
-        }
-        if (collapsedRef.current) {
-            const el = collapsedRef.current as HTMLElement & { onToggle: (c: boolean) => void }
-            el.onToggle = (collapsed: boolean) =>
-                console.log('default-collapsed group toggled:', collapsed)
-        }
-        if (eventRef.current) {
-            const el = eventRef.current
-            el.addEventListener('tc-action-click', () => alert('tc-action-click event fired!'))
-            el.addEventListener('tc-toggle', (e: Event) => {
-                const { collapsed } = (e as CustomEvent<{ collapsed: boolean }>).detail
-                console.log('tc-toggle event, collapsed:', collapsed)
-            })
-        }
-    }, [])
+    const actionRef = useTc<HTMLElement>({
+        onActionClick: () => alert('Action clicked!'),
+        onToggle: (collapsed: boolean) => console.log('tc-group toggled, collapsed:', collapsed),
+    })
+    const collapsedRef = useTc<HTMLElement>({
+        onToggle: (collapsed: boolean) =>
+            console.log('default-collapsed group toggled:', collapsed),
+    })
+    const eventRef = useTcEvents<HTMLElement>({
+        'tc-action-click': () => alert('tc-action-click event fired!'),
+        'tc-toggle': (e: Event) => {
+            const { collapsed } = (e as CustomEvent<{ collapsed: boolean }>).detail
+            console.log('tc-toggle event, collapsed:', collapsed)
+        },
+    })
 
     return (
         <div className="py-4">

@@ -1,4 +1,5 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const JS_CODE = [
     'async function fetchUser(id) {',
@@ -40,24 +41,21 @@ const BASH_CODE = [
 const SLOT_CODE = ['const greet = (name: string) =>', '  `Hello, ${name}!`'].join('\n')
 
 const CodeSnippetDemo: React.FC = () => {
-    const tsCopyRef = useRef<any>(null)
     const [lastCopied, setLastCopied] = useState<string | null>(null)
 
-    useEffect(() => {
-        const tsEl = tsCopyRef.current
-        if (!tsEl) return
-
-        const handler = (e: CustomEvent<{ code: string }>) => {
-            setLastCopied(e.detail.code.slice(0, 40) + '…')
+    const tsCopyRef = useTc<HTMLElement>(
+        {
+            onCopy: (code: string) => {
+                // JS property callback also fires
+                console.log('[CodeSnippet] onCopy callback, length:', code.length)
+            },
+        },
+        {
+            'tc-copy': (e: CustomEvent) => {
+                setLastCopied(e.detail.code.slice(0, 40) + '…')
+            },
         }
-
-        tsEl.onCopy = (code: string) => {
-            // JS property callback also fires
-            console.log('[CodeSnippet] onCopy callback, length:', code.length)
-        }
-        tsEl.addEventListener('tc-copy', handler)
-        return () => tsEl.removeEventListener('tc-copy', handler)
-    }, [])
+    )
 
     return (
         <div className="py-4">

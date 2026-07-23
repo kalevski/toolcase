@@ -1,16 +1,10 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const CurrencyChipDemo: React.FC = () => {
-    const chipRef = useRef<any>(null)
-
     // JS-property props (amount as a real number) need a ref — React can't set
     // them as attributes. Demonstrates the reflected numeric `amount` property.
-    useEffect(() => {
-        const el = chipRef.current
-        if (!el) return
-        el.glyph = '◆'
-        el.amount = 1250000
-    }, [])
+    const chipRef = useTc<HTMLElement>({ glyph: '◆', amount: 1250000 })
 
     return (
         <div className="py-4">

@@ -1,21 +1,17 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc, type TcRef } from '@toolcase/web-components/react'
 
-function useRangeSliderValue(initial: [number, number]): [[number, number], React.RefObject<any>] {
+function useRangeSliderValue(initial: [number, number]): [[number, number], TcRef<HTMLElement>] {
     const [value, setValue] = useState<[number, number]>(initial)
-    const ref = useRef<any>(null)
-
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        el.value = initial
-        const handler = (e: Event) => {
-            const detail = (e as CustomEvent).detail
-            if (detail?.value) setValue(detail.value as [number, number])
+    const ref = useTc<HTMLElement>(
+        { value },
+        {
+            'tc-change': (e: Event) => {
+                const detail = (e as CustomEvent).detail
+                if (detail?.value) setValue(detail.value as [number, number])
+            },
         }
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    )
 
     return [value, ref]
 }

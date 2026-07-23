@@ -1,16 +1,11 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const ComparatorDemo: React.FC = () => {
-    const fullRef = useRef<any>(null)
-    const noSummaryRef = useRef<any>(null)
-    const valueRef = useRef<any>(null)
-    const minimalRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (!fullRef.current) return
-        fullRef.current.left = { name: 'React', icon: 'layers', label: 'Meta' }
-        fullRef.current.right = { name: 'Vue', icon: 'triangle', label: 'Evan You' }
-        fullRef.current.features = [
+    const fullRef = useTc<HTMLElement>({
+        left: { name: 'React', icon: 'layers', label: 'Meta' },
+        right: { name: 'Vue', icon: 'triangle', label: 'Evan You' },
+        features: [
             { label: 'TypeScript support', left: true, right: true },
             { label: 'SSR support', left: true, right: true },
             { label: 'Server components', left: true, right: false },
@@ -23,43 +18,40 @@ const ComparatorDemo: React.FC = () => {
             { label: 'Two-way data binding', left: false, right: true },
             { label: 'Virtual DOM', left: true, right: true },
             { label: 'Mobile framework', left: false, right: false },
-        ]
-    }, [])
+        ],
+    })
 
-    useEffect(() => {
-        if (!noSummaryRef.current) return
-        noSummaryRef.current.left = { name: 'PostgreSQL', icon: 'database' }
-        noSummaryRef.current.right = { name: 'SQLite', icon: 'hard-drive' }
-        noSummaryRef.current.features = [
+    const noSummaryRef = useTc<HTMLElement>({
+        left: { name: 'PostgreSQL', icon: 'database' },
+        right: { name: 'SQLite', icon: 'hard-drive' },
+        features: [
             { label: 'Full ACID transactions', left: true, right: true },
             { label: 'Multi-user support', left: true, right: false },
             { label: 'Embedded mode', left: false, right: true },
             { label: 'JSON support', left: true, right: true },
-        ]
-    }, [])
+        ],
+    })
 
-    useEffect(() => {
-        if (!valueRef.current) return
-        valueRef.current.left = { name: 'Node.js', icon: 'server' }
-        valueRef.current.right = { name: 'Deno', icon: 'shield' }
-        valueRef.current.features = [
+    const valueRef = useTc<HTMLElement>({
+        left: { name: 'Node.js', icon: 'server' },
+        right: { name: 'Deno', icon: 'shield' },
+        features: [
             { label: 'GitHub stars', left: 105000, right: 93000, description: 'Approximate count' },
             { label: 'npm packages available', left: 2100000, right: 5000 },
             { label: 'Cold start time (ms)', left: 50, right: 30 },
             { label: 'TypeScript native', left: false, right: true },
             { label: 'Built-in permission model', left: false, right: true },
-        ]
-    }, [])
+        ],
+    })
 
-    useEffect(() => {
-        if (!minimalRef.current) return
-        minimalRef.current.left = { name: 'Alpha' }
-        minimalRef.current.right = { name: 'Beta' }
-        minimalRef.current.features = [
+    const minimalRef = useTc<HTMLElement>({
+        left: { name: 'Alpha' },
+        right: { name: 'Beta' },
+        features: [
             { label: 'Speed', left: true, right: false },
             { label: 'Cost', left: false, right: true },
-        ]
-    }, [])
+        ],
+    })
 
     return (
         <div className="py-4">

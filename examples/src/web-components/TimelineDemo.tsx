@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const ITEMS_DEFAULT = [
     {
@@ -95,25 +96,14 @@ const ITEMS_STATUS = [
 ]
 
 const TimelineDemo: React.FC = () => {
-    const defaultRef = useRef<any>(null)
-    const glassRef = useRef<any>(null)
-    const outlinedRef = useRef<any>(null)
-    const elevatedRef = useRef<any>(null)
-    const minimalRef = useRef<any>(null)
-    const solidRef = useRef<any>(null)
-    const dashedRef = useRef<any>(null)
-    const statusRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (defaultRef.current) defaultRef.current.items = ITEMS_DEFAULT
-        if (glassRef.current) glassRef.current.items = ITEMS_VARIANTS
-        if (outlinedRef.current) outlinedRef.current.items = ITEMS_VARIANTS
-        if (elevatedRef.current) elevatedRef.current.items = ITEMS_VARIANTS
-        if (minimalRef.current) minimalRef.current.items = ITEMS_VARIANTS
-        if (solidRef.current) solidRef.current.items = ITEMS_VARIANTS
-        if (dashedRef.current) dashedRef.current.items = ITEMS_VARIANTS
-        if (statusRef.current) statusRef.current.items = ITEMS_STATUS
-    }, [])
+    const defaultRef = useTc<HTMLElement>({ items: ITEMS_DEFAULT })
+    const glassRef = useTc<HTMLElement>({ items: ITEMS_VARIANTS })
+    const outlinedRef = useTc<HTMLElement>({ items: ITEMS_VARIANTS })
+    const elevatedRef = useTc<HTMLElement>({ items: ITEMS_VARIANTS })
+    const minimalRef = useTc<HTMLElement>({ items: ITEMS_VARIANTS })
+    const solidRef = useTc<HTMLElement>({ items: ITEMS_VARIANTS })
+    const dashedRef = useTc<HTMLElement>({ items: ITEMS_VARIANTS })
+    const statusRef = useTc<HTMLElement>({ items: ITEMS_STATUS })
 
     return (
         <div className="py-4">

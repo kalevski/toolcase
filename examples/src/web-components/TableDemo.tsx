@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
 import type { TableColumn } from '@toolcase/web-components'
+import { useTc } from '@toolcase/web-components/react'
 
 interface UserRow {
     id: number
@@ -39,67 +40,32 @@ const COLUMNS: TableColumn[] = [
 const ROW_KEY = (row: UserRow) => row.id
 
 const TableDemo: React.FC = () => {
-    const sortableRef = useRef<any>(null)
-    const compactRef = useRef<any>(null)
-    const stickyRef = useRef<any>(null)
-    const clickRef = useRef<any>(null)
-    const emptyRef = useRef<any>(null)
-    const loadingRef = useRef<any>(null)
     const [clicked, setClicked] = useState<string | null>(null)
 
-    useEffect(() => {
-        if (sortableRef.current) {
-            sortableRef.current.columns = COLUMNS
-            sortableRef.current.data = ROWS
-            sortableRef.current.rowKey = ROW_KEY
-        }
-    }, [])
+    const sortableRef = useTc<HTMLElement>({ columns: COLUMNS, data: ROWS, rowKey: ROW_KEY })
 
-    useEffect(() => {
-        if (compactRef.current) {
-            compactRef.current.columns = COLUMNS
-            compactRef.current.data = ROWS
-            compactRef.current.rowKey = ROW_KEY
-        }
-    }, [])
+    const compactRef = useTc<HTMLElement>({ columns: COLUMNS, data: ROWS, rowKey: ROW_KEY })
 
-    useEffect(() => {
-        if (stickyRef.current) {
-            stickyRef.current.columns = COLUMNS
-            // Repeat the dataset so the box actually scrolls under the pinned header.
-            stickyRef.current.data = [...ROWS, ...ROWS, ...ROWS]
-            stickyRef.current.rowKey = (row: UserRow, i: number) => `${row.id}-${i}`
-        }
-    }, [])
+    const stickyRef = useTc<HTMLElement>({
+        columns: COLUMNS,
+        // Repeat the dataset so the box actually scrolls under the pinned header.
+        data: [...ROWS, ...ROWS, ...ROWS],
+        rowKey: (row: UserRow, i: number) => `${row.id}-${i}`,
+    })
 
-    useEffect(() => {
-        if (clickRef.current) {
-            clickRef.current.columns = COLUMNS
-            clickRef.current.data = ROWS
-            clickRef.current.rowKey = ROW_KEY
-            clickRef.current.onrowclick = (row: UserRow) => setClicked(row.name)
-            const handler = (e: Event) => setClicked((e as CustomEvent).detail.row.name)
-            const el = clickRef.current
-            el.addEventListener('tc-row-click', handler)
-            return () => el.removeEventListener('tc-row-click', handler)
-        }
-    }, [])
+    const clickRef = useTc<HTMLElement>(
+        {
+            columns: COLUMNS,
+            data: ROWS,
+            rowKey: ROW_KEY,
+            onrowclick: (row: UserRow) => setClicked(row.name),
+        },
+        { 'tc-row-click': (e: Event) => setClicked((e as CustomEvent).detail.row.name) }
+    )
 
-    useEffect(() => {
-        if (emptyRef.current) {
-            emptyRef.current.columns = COLUMNS
-            emptyRef.current.data = []
-            emptyRef.current.rowKey = ROW_KEY
-        }
-    }, [])
+    const emptyRef = useTc<HTMLElement>({ columns: COLUMNS, data: [], rowKey: ROW_KEY })
 
-    useEffect(() => {
-        if (loadingRef.current) {
-            loadingRef.current.columns = COLUMNS
-            loadingRef.current.data = []
-            loadingRef.current.rowKey = ROW_KEY
-        }
-    }, [])
+    const loadingRef = useTc<HTMLElement>({ columns: COLUMNS, data: [], rowKey: ROW_KEY })
 
     return (
         <div className="py-4">

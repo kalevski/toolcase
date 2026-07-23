@@ -1,24 +1,18 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const ToggleCardDemo: React.FC = () => {
-    const notificationsRef = useRef<any>(null)
     const [notifications, setNotifications] = useState(true)
 
-    // Wire the controlled card's tc-change event + optional onChange callback.
-    useEffect(() => {
-        const el = notificationsRef.current
-        if (!el) return
-        const handler = (e: Event) => {
-            setNotifications((e as CustomEvent<{ checked: boolean }>).detail.checked)
+    // Wire the controlled card's tc-change event + checked prop sync.
+    const notificationsRef = useTc<HTMLElement>(
+        { checked: notifications },
+        {
+            'tc-change': (e: Event) => {
+                setNotifications((e as CustomEvent<{ checked: boolean }>).detail.checked)
+            },
         }
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-    }, [])
-
-    useEffect(() => {
-        const el = notificationsRef.current
-        if (el) el.checked = notifications
-    }, [notifications])
+    )
 
     return (
         <div className="py-4">

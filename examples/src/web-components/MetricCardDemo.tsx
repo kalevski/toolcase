@@ -1,20 +1,9 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const MetricCardDemo: React.FC = () => {
-    const trendRef = useRef<any>(null)
-    const customColorRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (trendRef.current) {
-            trendRef.current.trend = [12, 28, 20, 45, 35, 60, 50, 72, 65, 88]
-        }
-    }, [])
-
-    useEffect(() => {
-        if (customColorRef.current) {
-            customColorRef.current.trend = [80, 65, 70, 55, 60, 45, 50, 35]
-        }
-    }, [])
+    const trendRef = useTc<HTMLElement>({ trend: [12, 28, 20, 45, 35, 60, 50, 72, 65, 88] })
+    const customColorRef = useTc<HTMLElement>({ trend: [80, 65, 70, 55, 60, 45, 50, 35] })
 
     return (
         <div className="py-4">

@@ -1,18 +1,9 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const AssetRowListDemo: React.FC = () => {
-    const taggedRef = useRef<any>(null)
-    const pkgRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (!taggedRef.current) return
-        taggedRef.current.tags = ['v2.1.0', 'stable']
-    }, [])
-
-    useEffect(() => {
-        if (!pkgRef.current) return
-        pkgRef.current.tags = ['ts', 'esm', 'minified']
-    }, [])
+    const taggedRef = useTc<HTMLElement>({ tags: ['v2.1.0', 'stable'] })
+    const pkgRef = useTc<HTMLElement>({ tags: ['ts', 'esm', 'minified'] })
 
     return (
         <div className="py-4">

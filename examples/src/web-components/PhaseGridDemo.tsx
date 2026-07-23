@@ -1,62 +1,57 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const PhaseGridDemo: React.FC = () => {
-    const threeColRef = useRef<any>(null)
-    const twoColRef = useRef<any>(null)
-    const fourColRef = useRef<any>(null)
-
-    useEffect(() => {
-        if (threeColRef.current) {
-            threeColRef.current.phases = [
-                {
-                    title: 'Project Setup',
-                    description: 'Initialise the repository, CI/CD pipeline, and base tooling.',
-                    status: 'complete',
-                    tags: ['infra', 'ci'],
-                    command: 'npm create toolcase@latest my-app',
-                },
-                {
-                    title: 'Core Features',
-                    description: 'Implement the primary user-facing features and domain logic.',
-                    status: 'active',
-                    tags: ['feature', 'v1'],
-                    command: 'npm run dev',
-                },
-                {
-                    title: 'Testing & QA',
-                    description: 'Full coverage for unit, integration, and end-to-end tests.',
-                    status: 'upcoming',
-                    tags: ['testing', 'e2e'],
-                    command: 'npm test',
-                },
-            ]
-        }
-        if (twoColRef.current) {
-            twoColRef.current.phases = [
-                {
-                    title: 'Database Migration',
-                    description: 'Blocked pending upstream schema approval from the platform team.',
-                    status: 'blocked',
-                    tags: ['database', 'migration'],
-                },
-                {
-                    title: 'Auth Integration',
-                    description: 'OAuth2/OIDC integration with the identity provider.',
-                    status: 'upcoming',
-                    tags: ['auth', 'oauth2'],
-                    command: 'npx auth setup',
-                },
-            ]
-        }
-        if (fourColRef.current) {
-            fourColRef.current.phases = [
-                { title: 'Planning', status: 'complete', tags: ['meta'] },
-                { title: 'Development', status: 'active', command: 'npm run dev' },
-                { title: 'Review', status: 'upcoming' },
-                { title: 'Deploy', status: 'upcoming', command: 'npm run deploy' },
-            ]
-        }
-    }, [])
+    const threeColRef = useTc<HTMLElement>({
+        phases: [
+            {
+                title: 'Project Setup',
+                description: 'Initialise the repository, CI/CD pipeline, and base tooling.',
+                status: 'complete',
+                tags: ['infra', 'ci'],
+                command: 'npm create toolcase@latest my-app',
+            },
+            {
+                title: 'Core Features',
+                description: 'Implement the primary user-facing features and domain logic.',
+                status: 'active',
+                tags: ['feature', 'v1'],
+                command: 'npm run dev',
+            },
+            {
+                title: 'Testing & QA',
+                description: 'Full coverage for unit, integration, and end-to-end tests.',
+                status: 'upcoming',
+                tags: ['testing', 'e2e'],
+                command: 'npm test',
+            },
+        ],
+    })
+    const twoColRef = useTc<HTMLElement>({
+        phases: [
+            {
+                title: 'Database Migration',
+                description: 'Blocked pending upstream schema approval from the platform team.',
+                status: 'blocked',
+                tags: ['database', 'migration'],
+            },
+            {
+                title: 'Auth Integration',
+                description: 'OAuth2/OIDC integration with the identity provider.',
+                status: 'upcoming',
+                tags: ['auth', 'oauth2'],
+                command: 'npx auth setup',
+            },
+        ],
+    })
+    const fourColRef = useTc<HTMLElement>({
+        phases: [
+            { title: 'Planning', status: 'complete', tags: ['meta'] },
+            { title: 'Development', status: 'active', command: 'npm run dev' },
+            { title: 'Review', status: 'upcoming' },
+            { title: 'Deploy', status: 'upcoming', command: 'npm run deploy' },
+        ],
+    })
 
     return (
         <div className="py-4">

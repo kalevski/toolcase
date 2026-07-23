@@ -1,17 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const ShopPanelDemo: React.FC = () => {
-    const buyRef = useRef<any>(null)
-    const sellRef = useRef<any>(null)
-    const discountRef = useRef<any>(null)
-    const eventsRef = useRef<any>(null)
-
     const [log, setLog] = useState<string[]>([])
 
-    useEffect(() => {
-        if (!buyRef.current) return
-        buyRef.current.currency = 500
-        buyRef.current.items = [
+    const buyRef = useTc<HTMLElement>({
+        currency: 500,
+        items: [
             { item: { id: 'health-potion', name: 'Health Potion', icon: '⊕' }, price: 50 },
             { item: { id: 'mana-potion', name: 'Mana Potion', icon: '◉' }, price: 75 },
             { item: { id: 'iron-sword', name: 'Iron Sword', icon: '◆' }, price: 250 },
@@ -20,21 +15,19 @@ const ShopPanelDemo: React.FC = () => {
                 price: 999,
                 soldOut: true,
             },
-        ]
-    }, [])
+        ],
+    })
 
-    useEffect(() => {
-        if (!sellRef.current) return
-        sellRef.current.items = [
+    const sellRef = useTc<HTMLElement>({
+        items: [
             { item: { id: 'old-dagger', name: 'Old Dagger', icon: '◇' }, price: 30 },
             { item: { id: 'leather-boots', name: 'Leather Boots', icon: '◎' }, price: 20 },
-        ]
-    }, [])
+        ],
+    })
 
-    useEffect(() => {
-        if (!discountRef.current) return
-        discountRef.current.currency = 200
-        discountRef.current.items = [
+    const discountRef = useTc<HTMLElement>({
+        currency: 200,
+        items: [
             {
                 item: { id: 'elixir', name: 'Elixir of Power', icon: '✦' },
                 price: 100,
@@ -46,24 +39,22 @@ const ShopPanelDemo: React.FC = () => {
                 discount: 0.5,
             },
             { item: { id: 'rare-gem', name: 'Rare Gem', icon: '◈' }, price: 600, discount: 0.2 },
-        ]
-    }, [])
+        ],
+    })
 
-    useEffect(() => {
-        const el = eventsRef.current
-        if (!el) return
-        el.currency = 300
-        el.items = [
-            { item: { id: 'scroll', name: 'Scroll of Recall', icon: '◉' }, price: 80 },
-            { item: { id: 'boots', name: 'Speed Boots', icon: '★' }, price: 150 },
-        ]
-        const onBuy = (e: CustomEvent) =>
-            setLog((l) => [`tc-buy — id: "${e.detail.id}"`, ...l].slice(0, 8))
-        el.addEventListener('tc-buy', onBuy as EventListener)
-        return () => {
-            el.removeEventListener('tc-buy', onBuy as EventListener)
+    const eventsRef = useTc<HTMLElement>(
+        {
+            currency: 300,
+            items: [
+                { item: { id: 'scroll', name: 'Scroll of Recall', icon: '◉' }, price: 80 },
+                { item: { id: 'boots', name: 'Speed Boots', icon: '★' }, price: 150 },
+            ],
+        },
+        {
+            'tc-buy': (e: CustomEvent) =>
+                setLog((l) => [`tc-buy — id: "${e.detail.id}"`, ...l].slice(0, 8)),
         }
-    }, [])
+    )
 
     return (
         <div className="py-4">

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const FRAMEWORK_OPTIONS = [
     { value: 'react', label: 'React', icon: 'Atom', description: 'UI library' },
@@ -17,51 +18,44 @@ const FEATURE_OPTIONS = [
 ]
 
 const MultiCardSelectDemo: React.FC = () => {
-    const basicRef = useRef<any>(null)
-    const controlledRef = useRef<any>(null)
-    const formRef = useRef<any>(null)
     const loadingRef = useRef<any>(null)
 
     const [selected, setSelected] = useState<string[]>([])
     const [controlledValue, setControlledValue] = useState<string[]>(['react', 'vue'])
 
-    useEffect(() => {
-        const el = basicRef.current
-        if (!el) return
-        el.options = FRAMEWORK_OPTIONS
-        el.setAttribute('aria-label', 'Select frameworks')
-        const handler = (e: Event) => {
-            const detail = (e as CustomEvent<{ value: string[] }>).detail
-            setSelected(detail.value)
+    const basicRef = useTc<HTMLElement>(
+        { options: FRAMEWORK_OPTIONS },
+        {
+            'tc-change': (e: Event) => {
+                const detail = (e as CustomEvent<{ value: string[] }>).detail
+                setSelected(detail.value)
+            },
         }
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
+    )
+    useEffect(() => {
+        basicRef.current?.setAttribute('aria-label', 'Select frameworks')
     }, [])
 
+    const controlledRef = useTc<HTMLElement>(
+        { options: FEATURE_OPTIONS, value: controlledValue },
+        {
+            'tc-change': (e: Event) => {
+                const detail = (e as CustomEvent<{ value: string[] }>).detail
+                setControlledValue(detail.value)
+            },
+        }
+    )
     useEffect(() => {
         const el = controlledRef.current
         if (!el) return
-        el.options = FEATURE_OPTIONS
-        el.value = controlledValue
         el.setAttribute('aria-label', 'Select features')
         el.setAttribute('columns', '3')
-        const handler = (e: Event) => {
-            const detail = (e as CustomEvent<{ value: string[] }>).detail
-            setControlledValue(detail.value)
-        }
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
     }, [])
 
-    useEffect(() => {
-        const el = controlledRef.current
-        if (el) el.value = controlledValue
-    }, [controlledValue])
-
+    const formRef = useTc<HTMLElement>({ options: FRAMEWORK_OPTIONS.slice(0, 3) })
     useEffect(() => {
         const el = formRef.current
         if (!el) return
-        el.options = FRAMEWORK_OPTIONS.slice(0, 3)
         el.setAttribute('aria-label', 'Select frameworks')
         el.setAttribute('columns', '3')
     }, [])

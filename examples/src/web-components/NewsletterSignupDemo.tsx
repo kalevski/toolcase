@@ -1,33 +1,24 @@
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const NewsletterSignupDemo: React.FC = () => {
-    const successRef = useRef<any>(null)
-    const errorRef = useRef<any>(null)
-    const privacyRef = useRef<any>(null)
-
     // Variant that resolves after a 1.5 s delay — shows submitting → success flow
-    useEffect(() => {
-        const el = successRef.current
-        if (!el) return
-        el.onSubmit = (_email: string) => new Promise<void>((resolve) => setTimeout(resolve, 1500))
-    }, [])
+    const successRef = useTc<HTMLElement>({
+        onSubmit: (_email: string) => new Promise<void>((resolve) => setTimeout(resolve, 1500)),
+    })
 
     // Variant that rejects — shows submitting → error flow
-    useEffect(() => {
-        const el = errorRef.current
-        if (!el) return
-        el.onSubmit = (_email: string) =>
+    const errorRef = useTc<HTMLElement>({
+        onSubmit: (_email: string) =>
             new Promise<void>((_, reject) =>
                 setTimeout(() => reject(new Error('This email is already registered.')), 1500),
-            )
-    }, [])
+            ),
+    })
 
     // Variant with privacy link, no async
-    useEffect(() => {
-        const el = privacyRef.current
-        if (!el) return
-        el.onSubmit = () => new Promise<void>((resolve) => setTimeout(resolve, 800))
-    }, [])
+    const privacyRef = useTc<HTMLElement>({
+        onSubmit: () => new Promise<void>((resolve) => setTimeout(resolve, 800)),
+    })
 
     return (
         <div className="py-4">

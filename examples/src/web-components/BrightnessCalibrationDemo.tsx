@@ -1,16 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTcEvents } from '@toolcase/web-components/react'
 
 const BrightnessCalibrationDemo: React.FC = () => {
-    const ref = useRef<any>(null)
     const [value, setValue] = useState(0.5)
-
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        const handler = (e: Event) => setValue((e as CustomEvent).detail.value)
-        el.addEventListener('tc-change', handler)
-        return () => el.removeEventListener('tc-change', handler)
-    }, [])
+    const ref = useTcEvents<HTMLElement>({
+        'tc-change': (e: Event) => setValue((e as CustomEvent).detail.value),
+    })
 
     return (
         <div className="py-4">

@@ -1,16 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTcEvents, type TcRef } from '@toolcase/web-components/react'
 
-function usePaginationPage(initial: number): [number, React.RefObject<any>] {
+function usePaginationPage(initial: number): [number, TcRef<any>] {
     const [current, setCurrent] = useState(initial)
-    const ref = useRef<any>(null)
-
-    useEffect(() => {
-        const el = ref.current
-        if (!el) return
-        const handler = (e: Event) => setCurrent((e as CustomEvent).detail.page)
-        el.addEventListener('tc-page-change', handler)
-        return () => el.removeEventListener('tc-page-change', handler)
-    }, [])
+    const ref = useTcEvents<any>({
+        'tc-page-change': (e: Event) => setCurrent((e as CustomEvent).detail.page),
+    })
 
     return [current, ref]
 }

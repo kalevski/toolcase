@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const COLUMNS = [
     {
@@ -93,22 +94,18 @@ const STACKED_COLUMNS = [
 ]
 
 const RoadmapDemo: React.FC = () => {
-    const kanbanRef = useRef<any>(null)
-    const stackedRef = useRef<any>(null)
     const [selected, setSelected] = useState<string>('—')
 
-    useEffect(() => {
-        if (kanbanRef.current) kanbanRef.current.columns = COLUMNS
-        if (stackedRef.current) stackedRef.current.columns = STACKED_COLUMNS
-
-        const onSelect = (e: Event) => {
-            const detail = (e as CustomEvent).detail
-            setSelected(`${detail.item.title} (${detail.columnStatus})`)
+    const kanbanRef = useTc<HTMLElement>(
+        { columns: COLUMNS },
+        {
+            'tc-select': (e: Event) => {
+                const detail = (e as CustomEvent).detail
+                setSelected(`${detail.item.title} (${detail.columnStatus})`)
+            },
         }
-        const kanban = kanbanRef.current
-        kanban?.addEventListener('tc-select', onSelect)
-        return () => kanban?.removeEventListener('tc-select', onSelect)
-    }, [])
+    )
+    const stackedRef = useTc<HTMLElement>({ columns: STACKED_COLUMNS })
 
     return (
         <div className="py-4">

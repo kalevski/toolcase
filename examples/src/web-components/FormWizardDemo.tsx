@@ -1,87 +1,80 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useTc } from '@toolcase/web-components/react'
 
 const FormWizardDemo: React.FC = () => {
     // ── Basic demo (JS property content) ─────────────────────────────────────
-    const basicRef = useRef<any>(null)
     const [lastEvent, setLastEvent] = useState<string>('—')
 
-    useEffect(() => {
-        const el = basicRef.current
-        if (!el) return
-
-        el.steps = [
-            {
-                label: 'Account',
-                icon: 'user',
-                content:
-                    '<p style="margin:0">Enter your name and email to create your account.</p>',
+    const basicRef = useTc<HTMLElement>(
+        {
+            steps: [
+                {
+                    label: 'Account',
+                    icon: 'user',
+                    content:
+                        '<p style="margin:0">Enter your name and email to create your account.</p>',
+                },
+                {
+                    label: 'Profile',
+                    icon: 'settings',
+                    content:
+                        '<p style="margin:0">Customise your profile: avatar, bio, and preferences.</p>',
+                },
+                {
+                    label: 'Plan',
+                    icon: 'credit-card',
+                    content:
+                        '<p style="margin:0">Choose a subscription plan that fits your needs.</p>',
+                },
+                {
+                    label: 'Confirm',
+                    icon: 'check-circle',
+                    content:
+                        '<p style="margin:0">Review your choices and submit to get started.</p>',
+                },
+            ],
+        },
+        {
+            'tc-step-change': (e: CustomEvent) => {
+                setLastEvent(`tc-step-change → index ${e.detail.index}`)
             },
-            {
-                label: 'Profile',
-                icon: 'settings',
-                content:
-                    '<p style="margin:0">Customise your profile: avatar, bio, and preferences.</p>',
+            'tc-complete': () => {
+                setLastEvent('tc-complete fired')
             },
-            {
-                label: 'Plan',
-                icon: 'credit-card',
-                content: '<p style="margin:0">Choose a subscription plan that fits your needs.</p>',
-            },
-            {
-                label: 'Confirm',
-                icon: 'check-circle',
-                content: '<p style="margin:0">Review your choices and submit to get started.</p>',
-            },
-        ]
-
-        const onStepChange = (e: CustomEvent<{ index: number }>) => {
-            setLastEvent(`tc-step-change → index ${e.detail.index}`)
-        }
-        const onComplete = () => {
-            setLastEvent('tc-complete fired')
-        }
-
-        el.addEventListener('tc-step-change', onStepChange)
-        el.addEventListener('tc-complete', onComplete)
-        return () => {
-            el.removeEventListener('tc-step-change', onStepChange)
-            el.removeEventListener('tc-complete', onComplete)
-        }
-    }, [])
+        },
+    )
 
     // ── Slotted content demo ──────────────────────────────────────────────────
-    const slotRef = useRef<any>(null)
-
-    useEffect(() => {
-        const el = slotRef.current
-        if (!el) return
-        el.steps = [{ label: 'Details' }, { label: 'Address' }, { label: 'Review' }]
-    }, [])
+    const slotRef = useTc<HTMLElement>({
+        steps: [{ label: 'Details' }, { label: 'Address' }, { label: 'Review' }],
+    })
 
     // ── Loading state demo ────────────────────────────────────────────────────
-    const loadingRef = useRef<any>(null)
     const [isLoading, setIsLoading] = useState(false)
+    const loadingRef = useTc<HTMLElement>(
+        {
+            steps: [
+                { label: 'Setup', content: '<p style="margin:0">Configure initial settings.</p>' },
+                {
+                    label: 'Deploy',
+                    content: '<p style="margin:0">Deploy your application to production.</p>',
+                },
+                { label: 'Done', content: '<p style="margin:0">Your app is live!</p>' },
+            ],
+        },
+        {
+            'tc-complete': () => {
+                setIsLoading(true)
+                setTimeout(() => setIsLoading(false), 2000)
+            },
+        },
+    )
 
     useEffect(() => {
         const el = loadingRef.current
         if (!el) return
-        el.steps = [
-            { label: 'Setup', content: '<p style="margin:0">Configure initial settings.</p>' },
-            {
-                label: 'Deploy',
-                content: '<p style="margin:0">Deploy your application to production.</p>',
-            },
-            { label: 'Done', content: '<p style="margin:0">Your app is live!</p>' },
-        ]
         el.setAttribute('complete-label', 'Launch')
         el.setAttribute('complete-icon', 'rocket')
-
-        const onComplete = () => {
-            setIsLoading(true)
-            setTimeout(() => setIsLoading(false), 2000)
-        }
-        el.addEventListener('tc-complete', onComplete)
-        return () => el.removeEventListener('tc-complete', onComplete)
     }, [])
 
     useEffect(() => {
