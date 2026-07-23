@@ -19,6 +19,7 @@ import 'server-only'
 import { randomBytes } from 'node:crypto'
 import * as siteRepo from '@/server/data/repositories/site-repo'
 import * as siteRemovalRepo from '@/server/data/repositories/site-removal-repo'
+import * as baseDomainRepo from '@/server/data/repositories/base-domain-repo'
 import * as userRepo from '@/server/data/repositories/user-repo'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
 import * as siteCredentialRepo from '@/server/data/repositories/site-credential-repo'
@@ -35,7 +36,8 @@ import {
 } from '@/server/services/quota'
 import { resolveLimits } from '@/server/services/plan'
 import { getGithubTokenFor } from '@/server/services/auth'
-import { gitCredentialName } from '@/server/domain/nginxpilot-fragment'
+import { gitCredentialName, sourceUrlFor } from '@/server/domain/nginxpilot-fragment'
+import { adoptedSiteFields, classifyAdoptedHost } from '@/server/domain/site-adopt'
 import * as github from '@/server/infrastructure/github'
 import { GithubError } from '@/server/infrastructure/github'
 import { NginxpilotError, type NginxpilotSiteStatus } from '@/server/infrastructure/nginxpilot'
@@ -90,15 +92,16 @@ export type { SiteViewer } from '@/server/domain/site-access'
 
 /**
  * A site-service refusal that isn't already a quota/hostname error: a malformed request
- * body (`400`), a missing/foreign site (`404`/`403`, from the ownership re-check), or a
- * caller whose account row vanished mid-request (`401`). Carries the machine-readable
- * `code` and HTTP `status` a route returns (mirrors `QuotaError` / `HostnameError`).
+ * body (`400`), a missing/foreign site (`404`/`403`, from the ownership re-check), a
+ * caller whose account row vanished mid-request (`401`), or an adoption conflict
+ * (`409`). Carries the machine-readable `code` and HTTP `status` a route returns
+ * (mirrors `QuotaError` / `HostnameError`).
  */
 export class SiteError extends Error {
     constructor(
         message: string,
         public code: string,
-        public status: 400 | 401 | 403 | 404,
+        public status: 400 | 401 | 403 | 404 | 409,
     ) {
         super(message)
         this.name = 'SiteError'
@@ -528,6 +531,105 @@ export async function sitesOverview(viewer: SiteViewer): Promise<SitesOverview> 
 /** Read one owned site (§13 ownership re-check). Throws `SiteError` 404/403. */
 export function getSite(viewer: SiteViewer, id: string): Site {
     return ownedSite(id, viewer)
+}
+
+// ── adopt (the "Found on your instances" section's takeover action) ─────────────
+
+/** `POST /api/sites/adopt` — which discovered site to take over, by its realm + domain. */
+export interface AdoptSiteRequest {
+    realmId?: unknown
+    domain?: unknown
+}
+
+/**
+ * Adopt a site discovered on a connected instance: create the `site` row that regains
+ * management of a fragment Quaykeeper never wrote (deployed before the instance was
+ * registered, or by another control plane), WITHOUT touching the running config — the
+ * row mirrors the daemon's live config verbatim (`domain/site-adopt.ts`), so the drift
+ * reconcile finds nothing to rewrite and the site keeps serving exactly as it was.
+ *
+ * Owner-only, mirroring discovery itself ({@link sitesOverview}): an unmanaged fragment
+ * belongs to no Quaykeeper tenant, so only the operator may claim one — and it lands on
+ * the operator's own account. The live config is re-read from the daemon here; the
+ * client supplies only the realm + domain identity, never the config.
+ *
+ * An authenticated non-GitHub source adopts WITHOUT its credential (the daemon-side
+ * fragment keeps using its own references) — the caller should re-enter the secret in
+ * the site's settings before making config changes, exactly like any site whose stored
+ * credential is missing.
+ */
+export async function adoptSite(viewer: SiteViewer, body: AdoptSiteRequest): Promise<Site> {
+    if (viewer.role !== 'owner') {
+        throw new SiteError('only the owner may adopt discovered sites', 'forbidden', 403)
+    }
+    const owner = userRepo.get(viewer.sub)
+    if (!owner) throw new SiteError('account not found', 'account_not_found', 401)
+
+    const domain = str(body.domain, 'domain').trim().toLowerCase()
+    if (!domain) throw new SiteError('"domain" is required', 'invalid_request', 400)
+    const realm = await realms.resolveRequestedRealm(viewer.sub, viewer.role, str(body.realmId, 'realmId'))
+
+    if (siteRepo.getByHostname(domain, realm.id)) {
+        throw new SiteError('that site is already managed by Quaykeeper', 'already_managed', 409)
+    }
+
+    const client = realms.clientFor(realm.id)
+    const live = (await client.listSites()).find((s) => s.domain.toLowerCase() === domain)
+    if (!live) {
+        throw new SiteError(`"${domain}" was not found on ${realm.name}`, 'not_found_on_instance', 404)
+    }
+    const srcType = live.source?.type ?? 'git'
+    if (srcType !== 'git' && srcType !== 'http-zip') {
+        throw new SiteError(`unsupported source type "${srcType}"`, 'unsupported_source', 400)
+    }
+
+    // The same plan gates as create — trivially open for the owner today, but adoption
+    // must not become a quota bypass if the policy ever changes.
+    assertCanCreateSite(owner.login)
+    const hostKind = classifyAdoptedHost(
+        domain,
+        baseDomainRepo.listByRealm(realm.id).map((b) => b.domain),
+    )
+    if (hostKind === 'custom') assertCanUseCustomDomain(owner.login)
+    const fields = adoptedSiteFields(live, hostKind)
+    if (fields.repoPrivate) assertCanUsePrivateRepo(owner.login)
+
+    // Runtime snapshot (bytes / deployed ref / last error) so the new card isn't blank
+    // until the next status poll. Best-effort — the config read above already succeeded,
+    // so a /status hiccup shouldn't fail the adoption.
+    let snapshot: NginxpilotSiteStatus | undefined
+    try {
+        snapshot = (await client.status()).sites.find((s) => s.domain.toLowerCase() === domain)
+    } catch {
+        /* runtime detail only */
+    }
+
+    const now = new Date().toISOString()
+    const site: Site = {
+        id: generateSiteId(),
+        ownerId: owner.githubId,
+        ...fields,
+        hostname: domain,
+        hostKind,
+        status: 'live',
+        realmId: realm.id,
+        bytes: snapshot?.bytes,
+        lastRef: snapshot?.deployed_ref,
+        lastError: snapshot?.last_error,
+        createdAt: now,
+        updatedAt: now,
+    }
+    siteRepo.create(site)
+    // A queued fragment retraction for this domain (a forced delete the daemon missed)
+    // must not fire now that a row claims it again.
+    siteRemovalRepo.remove(realm.id, domain)
+    audit(
+        'site.adopt',
+        owner,
+        site,
+        `adopted from ${realm.name} (${fields.sourceType ?? 'git'} ${sourceUrlFor(site)})`,
+    )
+    return site
 }
 
 // ── byte measurement + enforcement (§9 step 5, §11) ────────────────────────────

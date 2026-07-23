@@ -389,10 +389,11 @@ function renderAuth(auth: FragmentAuth | undefined): string[] {
 
 /**
  * One site's live merged config as the daemon's `GET /sites` reports it (the JSON shape
- * of nginxpilot's `config.Site`, reduced to the fields the drift check reads). Auth
- * carries references only — secret material never crosses that wire — and internal
- * provenance is dropped daemon-side, so this is a faithful, comparable echo of the
- * fragment Quaykeeper last wrote (or whatever else lives in `sites.d/`).
+ * of nginxpilot's `config.Site`, reduced to the fields the drift check and the adoption
+ * mapping read — `domain/site-adopt.ts`). Auth carries references only — secret material
+ * never crosses that wire — and internal provenance is dropped daemon-side, so this is a
+ * faithful, comparable echo of the fragment Quaykeeper last wrote (or whatever else
+ * lives in `sites.d/`).
  */
 export interface LiveSiteConfig {
     domain: string
@@ -405,6 +406,11 @@ export interface LiveSiteConfig {
         strip_components?: number
         allow_insecure?: boolean
         require_file?: string[]
+        /** Go-duration string (`"15m0s"`); adoption parses it, the drift check ignores it. */
+        interval?: string
+        keep_releases?: number
+        /** Credential *references* only (method, username, header name) — never a secret. */
+        auth?: { method?: string; username?: string; name?: string }
     }
     routing?: string
     not_found?: string
@@ -412,6 +418,10 @@ export interface LiveSiteConfig {
     tls?: string
     block_exploits?: boolean
     gzip?: boolean
+    /** JSON always carries the struct form (the daemon's `HSTS.MarshalJSON` round-trip). */
+    hsts?: { enabled?: boolean }
+    advanced?: string
+    exclude?: string[]
 }
 
 /**

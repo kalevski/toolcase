@@ -5,6 +5,7 @@ import type { MetricGridItem } from '@toolcase/web-components'
 import { CreateSiteWizard } from './CreateSiteWizard'
 import { SiteCard } from './SiteCard'
 import { LoadingState, ErrorState } from './states'
+import { useToast } from './Toast'
 import { useTc, useTcProps } from '@/lib/tc'
 import { useMe } from '@/lib/me-context'
 import { apiFetch, describeApiError } from '@/lib/fetcher'
@@ -19,7 +20,8 @@ import type { ExternalSite, Site, SitesOverview } from '@/server/domain/types'
 // `useMe()` (AuthGate already fetched it, plan WS-3); only `/api/sites/overview`
 // is fetched — the stored sites plus live per-instance discovery, so sites that
 // exist on a freshly-connected nginxpilot instance show up here too, each labelled
-// with the instance it deploys on.
+// with the instance it deploys on and carrying an "Adopt" action that regains
+// management of it (`POST /api/sites/adopt`) without touching its running config.
 
 type LoadState =
     | { phase: 'loading' }
@@ -36,6 +38,10 @@ export function DashboardHome() {
     // children, then React re-rendered" staleness, since nothing reconciles the
     // modal's subtree while it's up.
     const [creating, setCreating] = useState(false)
+    const toast = useToast()
+    // The `realmId:domain` key of the discovered site being adopted, so only that
+    // card's button shows busy while the takeover request is in flight.
+    const [adopting, setAdopting] = useState<string | null>(null)
 
     // Reload /api/sites. Runs once on mount and again whenever the modal closes, so
     // a freshly created site shows up in the grid. A failed reload keeps the last
@@ -86,6 +92,42 @@ export function DashboardHome() {
         },
     })
     const openModal = useCallback(() => setCreating(true), [])
+
+    // Adopt a discovered site: the server re-reads the live config off the instance and
+    // creates the managing row without rewriting the running fragment. On success the
+    // card moves from "Found on your instances" into the main grid via the reload. An
+    // authenticated non-GitHub source adopts without its credential, so warn that it
+    // must be re-entered before any config change re-renders the fragment.
+    const adoptSite = useCallback(
+        async (entry: ExternalSite) => {
+            const key = `${entry.realmId}:${entry.domain}`
+            setAdopting(key)
+            try {
+                const site = await apiFetch<Site>('/api/sites/adopt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ realmId: entry.realmId, domain: entry.domain }),
+                })
+                if (site.repoPrivate && site.sourceUrl) {
+                    toast.show(
+                        `${entry.domain} is now managed by Quaykeeper. Its source is authenticated — re-enter the credential in the site's settings before changing its configuration.`,
+                        { variant: 'warning', title: 'Site adopted' },
+                    )
+                } else {
+                    toast.show(`${entry.domain} is now managed by Quaykeeper.`, {
+                        variant: 'success',
+                        title: 'Site adopted',
+                    })
+                }
+                await load()
+            } catch (err) {
+                toast.show(describeApiError(err), { variant: 'error', title: `Couldn’t adopt ${entry.domain}` })
+            } finally {
+                setAdopting(null)
+            }
+        },
+        [load, toast],
+    )
 
     if (state.phase === 'loading') {
         return (
@@ -192,11 +234,17 @@ export function DashboardHome() {
                     <h2 className="quaykeeper-external-sites-title">Found on your instances</h2>
                     <p className="quaykeeper-external-sites-lead">
                         These sites are deployed on a connected nginxpilot instance but aren’t managed by
-                        Quaykeeper — typically deployed before the instance was added.
+                        Quaykeeper — typically deployed before the instance was added. Adopting one takes
+                        over its management without touching the running configuration.
                     </p>
                     <div className="quaykeeper-card-grid">
                         {external.map((entry) => (
-                            <ExternalSiteCard key={`${entry.realmId}:${entry.domain}`} entry={entry} />
+                            <ExternalSiteCard
+                                key={`${entry.realmId}:${entry.domain}`}
+                                entry={entry}
+                                busy={adopting === `${entry.realmId}:${entry.domain}`}
+                                onAdopt={adoptSite}
+                            />
                         ))}
                     </div>
                 </section>
@@ -227,12 +275,20 @@ export function DashboardHome() {
 }
 
 /**
- * Read-only card for a site discovered on a connected nginxpilot instance that
- * Quaykeeper doesn't manage. Mirrors the SiteCard layout so the grid scans as one
- * surface, but links nowhere — there's no site row behind it — and says plainly
- * which instance it lives on.
+ * Card for a site discovered on a connected nginxpilot instance that Quaykeeper
+ * doesn't manage. Mirrors the SiteCard layout so the grid scans as one surface, but
+ * links nowhere — there's no site row behind it — and says plainly which instance it
+ * lives on. Its one action is "Adopt": regain management of the site as-is.
  */
-function ExternalSiteCard({ entry }: { entry: ExternalSite }) {
+function ExternalSiteCard({
+    entry,
+    busy,
+    onAdopt,
+}: {
+    entry: ExternalSite
+    busy: boolean
+    onAdopt: (entry: ExternalSite) => void
+}) {
     const failing = !!entry.lastError
     const dot = entry.syncing ? 'away' : failing ? 'busy' : entry.neverSynced ? 'offline' : 'online'
     const label = entry.syncing ? 'Syncing' : failing ? 'Failing' : entry.neverSynced ? 'Never synced' : 'Live'
@@ -255,6 +311,16 @@ function ExternalSiteCard({ entry }: { entry: ExternalSite }) {
                 )}
                 <tc-badge variant="secondary">Deployed {deployed || '—'}</tc-badge>
                 <tc-badge variant="light">not managed by Quaykeeper</tc-badge>
+            </div>
+            <div className="quaykeeper-card-actions">
+                <tc-button
+                    variant="primary"
+                    size="sm"
+                    disabled={busy || undefined}
+                    onClick={() => onAdopt(entry)}
+                >
+                    {busy ? 'Adopting…' : 'Manage with Quaykeeper'}
+                </tc-button>
             </div>
         </article>
     )

@@ -395,9 +395,14 @@ body {
     color: var(--tc-text-muted);
 }
 
-/* An external card is informational, not a link — strip the interactive affordances. */
+/* An external card is informational, not a link — strip the interactive affordances.
+   Its one action lives in the footer row below the badges (the Adopt button). */
 .quaykeeper-card--external {
     cursor: default;
+}
+
+.quaykeeper-card-actions {
+    margin-top: 0.75rem;
 }
 
 .quaykeeper-card--external:hover {

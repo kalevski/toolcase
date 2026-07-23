@@ -739,8 +739,9 @@ export interface RealmRef {
  * A static site living on a connected nginxpilot instance that Quaykeeper does NOT
  * manage — no `site` row references it. Typically a fragment deployed before the
  * instance was registered as a realm (by hand, or by another control plane). Surfaced
- * read-only on the sites page so a freshly-added instance's existing sites are visible
- * instead of silently absent. Field values come straight from the daemon's `GET /status`.
+ * on the sites page so a freshly-added instance's existing sites are visible instead
+ * of silently absent, with an "Adopt" action (`POST /api/sites/adopt`) that regains
+ * management of one. Field values come straight from the daemon's `GET /status`.
  */
 export interface ExternalSite {
     realmId: string
