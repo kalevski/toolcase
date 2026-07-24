@@ -363,7 +363,7 @@ export const complexities: WebComponentComplexity[] = [
     'Advanced',
 ]
 
-export const webComponentExamples: WebComponentDef[] = [
+const demos: WebComponentDef[] = [
     { key: 'avatar', complexity: 'Simple', element: <AvatarDemo /> },
     { key: 'action-header', complexity: 'Simple', element: <ActionHeaderDemo /> },
     { key: 'action-items', complexity: 'Composite', element: <ActionItemsDemo /> },
@@ -733,3 +733,9 @@ export const webComponentExamples: WebComponentDef[] = [
     { key: 'stats-screen', complexity: 'Primitives', element: <StatsScreenDemo /> },
     { key: 'version-label', complexity: 'Primitives', element: <VersionLabelDemo /> },
 ]
+
+// Ordered by complexity group so arrow-key navigation matches the grouped
+// listing on the package page.
+export const webComponentExamples: WebComponentDef[] = complexities.flatMap((complexity) =>
+    demos.filter((demo) => demo.complexity === complexity),
+)
