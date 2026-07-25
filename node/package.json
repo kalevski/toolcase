@@ -30,7 +30,7 @@
         "fastify": "^5.0.0",
         "jose": "^5.10.0",
         "redis": "^5.0.0",
-        "sharp": "^0.33.0"
+        "sharp": "^0.33.0 || ^0.34.0 || ^0.35.0"
     },
     "peerDependenciesMeta": {
         "@fastify/cors": {
@@ -60,7 +60,7 @@
         "fastify": "^5.8.5",
         "jose": "^5.10.0",
         "redis": "^5.12.1",
-        "sharp": "^0.33.5"
+        "sharp": "^0.35.3"
     },
     "author": {
         "name": "Daniel Kalevski",
