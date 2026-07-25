@@ -54,9 +54,16 @@ ENV QUAYKEEPER_CLIENT_DIR=/app/quaykeeper/client-bin
 #
 # Repo suites follow the base image's own codename (node:22-slim = bookworm);
 # override MYSQL_APT_CODENAME when repo.mysql.com lags a newer Debian release.
+#
+# MYSQL_APT_GPG_FILE: Oracle re-publishes the SAME signing key (B7B3B788A8D3785C)
+# under a new year-stamped filename whenever it extends the expiry, and apt
+# hard-fails the repo with EXPKEYSIG once the copy baked into the image lapses.
+# `-2023` expired and broke this build; `-2025` runs to 2027-10-23. When it
+# lapses again, bump this ARG to the next published file.
 ARG PG_CLIENT_MAJOR=18
 ARG MYSQL_APT_SUITE=mysql-8.4-lts
 ARG MYSQL_APT_CODENAME=
+ARG MYSQL_APT_GPG_FILE=RPM-GPG-KEY-mysql-2025
 RUN set -eu; \
     . /etc/os-release; \
     mysql_codename="${MYSQL_APT_CODENAME:-$VERSION_CODENAME}"; \
@@ -67,7 +74,7 @@ RUN set -eu; \
       | gpg --dearmor -o /usr/share/keyrings/pgdg.gpg; \
     echo "deb [signed-by=/usr/share/keyrings/pgdg.gpg] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" \
       > /etc/apt/sources.list.d/pgdg.list; \
-    curl -fsSL https://repo.mysql.com/RPM-GPG-KEY-mysql-2023 \
+    curl -fsSL "https://repo.mysql.com/${MYSQL_APT_GPG_FILE}" \
       | gpg --dearmor -o /usr/share/keyrings/mysql.gpg; \
     echo "deb [signed-by=/usr/share/keyrings/mysql.gpg] https://repo.mysql.com/apt/debian ${mysql_codename} ${MYSQL_APT_SUITE}" \
       > /etc/apt/sources.list.d/mysql.list; \
