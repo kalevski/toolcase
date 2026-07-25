@@ -21,12 +21,13 @@ import {
 import type { StoredDbServer } from '@/server/data/repositories/db-server-repo'
 
 /** A registry refusal, mirroring `RealmError`: bad input (400), unknown id
- *  (404), name conflict (409), or an unreachable/refusing server (502). */
+ *  (404), name conflict (409), a quaykeeper-host misconfiguration (500 — e.g. the
+ *  dump tools are not installed), or an unreachable/refusing server (502). */
 export class DbServerError extends Error {
     constructor(
         message: string,
         public code: string,
-        public status: 400 | 404 | 409 | 502,
+        public status: 400 | 404 | 409 | 500 | 502,
     ) {
         super(message)
         this.name = 'DbServerError'
@@ -298,7 +299,12 @@ export async function testServer(actor: DbActor, id: string): Promise<DbServerTe
  *  here (the one choke point every db-server route funnels through), because
  *  the Next request log only shows the status line. */
 export function httpErrorFor(err: unknown): { status: number; code: string; detail?: string } {
-    if (err instanceof DbServerError) return { status: err.status, code: err.code }
+    if (err instanceof DbServerError) {
+        // A 500 here is a quaykeeper-host problem (missing dump tool, …), not a user
+        // input error — log it like the other 5xx so the code alone is enough.
+        if (err.status >= 500) console.error(`[db-servers] ${err.code}: ${err.message}`)
+        return { status: err.status, code: err.code }
+    }
     if (err instanceof DbDriverError) {
         console.error(`[db-servers] driver error${err.code ? ` (${err.code})` : ''}: ${err.message}`)
         return { status: 502, code: 'db_driver_error', detail: err.message }

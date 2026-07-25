@@ -149,6 +149,24 @@ export const config = {
     // missing interpreter surfaces as a failed run (spawn ENOENT), never a crash.
     jobShell: optional('QUAYKEEPER_JOB_SHELL', '/bin/bash'),
 
+    // ── database export / import (Databases tab → Export / Import database) ──
+    // The native dump tools, resolved on PATH by default — the Dockerfile installs
+    // postgresql-client (PGDG) and mysql-community-client into the runner image.
+    // Point these at absolute paths when developing on a host where they live off
+    // PATH, or where `mysqldump` is MariaDB's: quaykeeper passes MySQL-8 client flags
+    // (`--column-statistics`, `--set-gtid-purged`) that MariaDB's dumper rejects.
+    // A missing binary surfaces as a clear `dump_tool_missing` error, not a crash.
+    pgDumpBin: optional('QUAYKEEPER_PG_DUMP_BIN', 'pg_dump'),
+    psqlBin: optional('QUAYKEEPER_PSQL_BIN', 'psql'),
+    mysqlDumpBin: optional('QUAYKEEPER_MYSQLDUMP_BIN', 'mysqldump'),
+    mysqlBin: optional('QUAYKEEPER_MYSQL_BIN', 'mysql'),
+    // Wall-clock cap for one dump/restore child (ms). A large database legitimately
+    // takes minutes — this only stops a hung tool from pinning a pipe forever.
+    dbDumpTimeoutMs: num('QUAYKEEPER_DB_DUMP_TIMEOUT_MS', 1_800_000),
+    // Hard cap on an uploaded .sql import (bytes). The upload streams straight into
+    // the client's stdin, so this bounds the restore, not quaykeeper's memory.
+    dbImportMaxBytes: num('QUAYKEEPER_DB_IMPORT_MAX_BYTES', 2_147_483_648),
+
     // ── Config subsystem: the companion agent listener (move_wharf_to_perch.md §9) ──
     // Port of the machine-facing agent server (`server/agent-server.ts`): the
     // instance-fetch API (`/v1/config|env|flags`) and quaykeeper-client binary
