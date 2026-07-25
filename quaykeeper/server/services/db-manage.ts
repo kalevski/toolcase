@@ -7,9 +7,17 @@
 
 import 'server-only'
 import { randomBytes } from 'node:crypto'
+import type { Readable } from 'node:stream'
 import * as dbServerRepo from '@/server/data/repositories/db-server-repo'
 import * as auditRepo from '@/server/data/repositories/audit-repo'
 import { driverFor, DbDriverError } from '@/server/infrastructure/db-drivers'
+import {
+    DumpToolMissingError,
+    ImportTooLargeError,
+    runRestore,
+    startDump,
+} from '@/server/infrastructure/db-dump'
+import { dumpFileName } from '@/server/domain/db-dump'
 import {
     DbServerError,
     connInfoOf,
@@ -110,6 +118,114 @@ export async function dropDatabase(actor: DbActor, serverId: string, rawName: un
     const name = requireDbName(server, rawName)
     await withProbe(server, () => driverFor(server.kind).dropDatabase(connInfoOf(server), name))
     audit(actor, 'db.database.drop', server, name, { database: name })
+}
+
+// ── export / import ──────────────────────────────────────────────────────────
+// Moving a database between servers: export streams a `pg_dump`/`mysqldump` SQL
+// script to the browser, import streams one back through `psql`/`mysql` into a
+// database on a DIFFERENT registry server. The dump carries schema + data only —
+// ownership and grants are deliberately excluded (`domain/db-dump.ts`), because
+// roles are per-server and access is quaykeeper's own surface (the Access tab).
+
+/** `true` when `name` is one of the server's live, manageable databases. The
+ *  extra catalog read buys a clean 404 instead of an opaque engine refusal. */
+async function databaseExists(server: StoredDbServer, name: string): Promise<boolean> {
+    const databases = await withProbe(server, () => driverFor(server.kind).listDatabases(connInfoOf(server)))
+    return databases.some((d) => d.name === name)
+}
+
+/** Re-throw a host-side dump failure as a `DbServerError` the routes can map:
+ *  a missing tool or an over-cap upload is not the database server's fault, so
+ *  it must not land in `last_error` as a 502. */
+function rethrowDumpError(err: unknown): never {
+    if (err instanceof DumpToolMissingError) {
+        throw new DbServerError(err.message, 'dump_tool_missing', 500)
+    }
+    if (err instanceof ImportTooLargeError) {
+        throw new DbServerError(err.message, 'import_too_large', 400)
+    }
+    throw err
+}
+
+export interface DatabaseExport {
+    /** Suggested download name — `Content-Disposition` uses it verbatim. */
+    fileName: string
+    /** The dump bytes, still being produced by the tool. */
+    stream: Readable
+}
+
+/**
+ * Start a database export. Resolves as soon as the tool is running, so a missing
+ * binary or an unreachable server is still an HTTP error status; the returned
+ * stream is then piped to the response. Probe bookkeeping happens when the child
+ * exits — long after the route has replied — so it hangs off `finished`.
+ */
+export async function exportDatabase(
+    actor: DbActor,
+    serverId: string,
+    rawName: unknown,
+    opts: { includeData: boolean },
+): Promise<DatabaseExport> {
+    const server = storedServer(serverId)
+    const name = requireDbName(server, rawName)
+    if (!(await databaseExists(server, name))) {
+        throw new DbServerError(`database "${name}" not found on ${server.name}`, 'db_database_not_found', 404)
+    }
+
+    let run: Awaited<ReturnType<typeof startDump>>
+    try {
+        run = await startDump(connInfoOf(server), name, opts)
+    } catch (err) {
+        rethrowDumpError(err)
+    }
+
+    void run.finished.then(
+        () => dbServerRepo.recordProbe(server.id, true),
+        (err: unknown) => {
+            if (err instanceof DbDriverError) dbServerRepo.recordProbe(server.id, false, err.message)
+        },
+    )
+
+    audit(actor, 'db.database.export', server, name, { database: name, includeData: opts.includeData })
+    return { fileName: dumpFileName(server.name, name, new Date()), stream: run.stdout }
+}
+
+/**
+ * Restore an uploaded .sql into `rawName` on this server. `create` allows the
+ * target database to be created first — the usual shape when moving a database
+ * to a server that has never held it. Restoring into a database that already
+ * holds the dumped objects fails inside the client (duplicate object), which is
+ * the safe outcome: nothing is dropped on quaykeeper's initiative.
+ */
+export async function importDatabase(
+    actor: DbActor,
+    serverId: string,
+    rawName: unknown,
+    sql: Readable,
+    opts: { create: boolean },
+): Promise<{ database: string; created: boolean }> {
+    const server = storedServer(serverId)
+    const name = requireDbName(server, rawName)
+
+    let created = false
+    if (!(await databaseExists(server, name))) {
+        if (!opts.create) {
+            throw new DbServerError(`database "${name}" not found on ${server.name}`, 'db_database_not_found', 404)
+        }
+        await withProbe(server, () => driverFor(server.kind).createDatabase(connInfoOf(server), name))
+        created = true
+        audit(actor, 'db.database.create', server, name, { database: name, viaImport: true })
+    }
+
+    try {
+        await withProbe(server, () => runRestore(connInfoOf(server), name, sql))
+    } catch (err) {
+        audit(actor, 'db.database.import_failed', server, name, { database: name, created })
+        rethrowDumpError(err)
+    }
+
+    audit(actor, 'db.database.import', server, name, { database: name, created })
+    return { database: name, created }
 }
 
 // ── users ────────────────────────────────────────────────────────────────────

@@ -57,10 +57,11 @@
     },
     "dependencies": {
         "caveman": "^0.1.6",
-        "next": "16.2.9"
+        "next": "16.2.11"
     },
     "overrides": {
         "postcss": "^8.5.15",
+        "sharp": "^0.35.3",
         "tsup": {
             "esbuild": "^0.28.1"
         }

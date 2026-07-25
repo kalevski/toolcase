@@ -172,6 +172,36 @@ knobs. Required vars fail fast at boot if missing.
 > Per-site GitHub tokens are stored as generated `QUAYKEEPER_GH_TOKEN_<SITE_ID>` env
 > names handed to nginxpilot fragments — not something you set by hand.
 
+### Database export / import
+
+| Variable | Default | Description |
+|---|---|---|
+| `QUAYKEEPER_PG_DUMP_BIN` | `pg_dump` | Binary used to export a PostgreSQL database. |
+| `QUAYKEEPER_PSQL_BIN` | `psql` | Binary used to restore into a PostgreSQL database. |
+| `QUAYKEEPER_MYSQLDUMP_BIN` | `mysqldump` | Binary used to export a MySQL/MariaDB database. |
+| `QUAYKEEPER_MYSQL_BIN` | `mysql` | Binary used to restore into a MySQL/MariaDB database. |
+| `QUAYKEEPER_DB_DUMP_TIMEOUT_MS` | `1800000` | Wall-clock cap for one dump/restore process. |
+| `QUAYKEEPER_DB_IMPORT_MAX_BYTES` | `2147483648` | Hard cap on an uploaded `.sql` import. |
+
+> **Databases → Export / Import database** moves a database between registered
+> servers. Export streams `pg_dump`/`mysqldump` output to the browser as a plain
+> `.sql` script; Import streams an uploaded script back through `psql`/`mysql` into
+> a database of any name on another server (optionally creating it first). The
+> restore stops at the first error — Postgres additionally rolls the whole thing
+> back — so a failed import leaves no half-populated database.
+>
+> The dump carries **schema + data only**: ownership and grants are excluded on
+> purpose, because roles are per-server and access is Quaykeeper's own surface.
+> Re-apply it from the **Access** tab after importing.
+>
+> These are the native clients, so they must exist on the Quaykeeper host. The
+> image installs `postgresql-client` (from PGDG — Debian's is too old, and
+> `pg_dump` refuses a server newer than itself) and Oracle's
+> `mysql-community-client` (MariaDB's dumper rejects the MySQL-8 client flags
+> Quaykeeper passes). For local dev, point the `*_BIN` vars at your own clients. A
+> missing binary surfaces in the UI as "the quaykeeper host has no … installed",
+> never a crash.
+
 ## Certificate management
 
 The **Admin → Certificates** page manages TLS certificates on the **active realm's**

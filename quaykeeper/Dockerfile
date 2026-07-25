@@ -40,9 +40,44 @@ ENV PORT=3000
 ENV QUAYKEEPER_AGENT_PORT=4101
 ENV QUAYKEEPER_CLIENT_DIR=/app/quaykeeper/client-bin
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates curl \
-    && rm -rf /var/lib/apt/lists/*
+# Runtime tools. Beyond ca-certificates/curl, the Databases tab's export/import
+# shells out to the NATIVE dump clients (`server/infrastructure/db-dump.ts`), so
+# both engines' clients must exist in this image:
+#
+#   • postgresql-client from PGDG, not Debian: bookworm ships 15, and pg_dump
+#     REFUSES a server newer than itself. A current client dumps every older
+#     server fine, so pin the newest major and bump PG_CLIENT_MAJOR over time.
+#   • mysql-community-client from Oracle, not Debian's default-mysql-client
+#     (MariaDB): quaykeeper passes MySQL-8 client flags (--column-statistics,
+#     --set-gtid-purged) that MariaDB's dumper rejects. This client dumps MariaDB
+#     servers fine — both flags are client-side.
+#
+# Repo suites follow the base image's own codename (node:22-slim = bookworm);
+# override MYSQL_APT_CODENAME when repo.mysql.com lags a newer Debian release.
+ARG PG_CLIENT_MAJOR=18
+ARG MYSQL_APT_SUITE=mysql-8.4-lts
+ARG MYSQL_APT_CODENAME=
+RUN set -eu; \
+    . /etc/os-release; \
+    mysql_codename="${MYSQL_APT_CODENAME:-$VERSION_CODENAME}"; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends ca-certificates curl gnupg; \
+    install -d -m 0755 /usr/share/keyrings; \
+    curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+      | gpg --dearmor -o /usr/share/keyrings/pgdg.gpg; \
+    echo "deb [signed-by=/usr/share/keyrings/pgdg.gpg] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" \
+      > /etc/apt/sources.list.d/pgdg.list; \
+    curl -fsSL https://repo.mysql.com/RPM-GPG-KEY-mysql-2023 \
+      | gpg --dearmor -o /usr/share/keyrings/mysql.gpg; \
+    echo "deb [signed-by=/usr/share/keyrings/mysql.gpg] https://repo.mysql.com/apt/debian ${mysql_codename} ${MYSQL_APT_SUITE}" \
+      > /etc/apt/sources.list.d/mysql.list; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+      "postgresql-client-${PG_CLIENT_MAJOR}" mysql-community-client; \
+    apt-get purge -y gnupg; \
+    apt-get autoremove -y; \
+    rm -rf /var/lib/apt/lists/*; \
+    pg_dump --version; psql --version; mysqldump --version; mysql --version
 
 # non-root user
 RUN useradd -m -u 10001 app

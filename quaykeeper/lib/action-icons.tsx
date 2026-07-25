@@ -19,6 +19,7 @@ import {
     Activity,
     Ban,
     Copy,
+    Download,
     Eye,
     FileCode,
     History,
@@ -33,6 +34,7 @@ import {
     Star,
     ToggleRight,
     Trash2,
+    Upload,
     X,
 } from 'lucide-static'
 import { escapeHtml } from './tc'
@@ -63,6 +65,8 @@ export const ACTION_ICONS = {
     logs: stripSize(ScrollText),
     realms: stripSize(Server),
     toggles: stripSize(ToggleRight),
+    export: stripSize(Download),
+    import: stripSize(Upload),
     close: stripSize(X),
 } as const
 
