@@ -299,10 +299,11 @@ export class CheckboxGroup extends HTMLElement {
             ? 'tc-checkbox-group-options tc-checkbox-group-options--inline'
             : 'tc-checkbox-group-options'
 
+        const valueSet = new Set(this._value)
         const optionsHtml = this._options
             .map((opt, idx) => {
                 const inputId = `${this._idPrefix}-${idx}`
-                const checkedAttr = this._value.includes(opt.value) ? ' checked' : ''
+                const checkedAttr = valueSet.has(opt.value) ? ' checked' : ''
                 // A group-level `disabled` disables every box; a per-option
                 // `disabled` only that row.
                 const disabledAttr = disabled || opt.disabled ? ' disabled' : ''

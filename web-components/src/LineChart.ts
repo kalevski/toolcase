@@ -291,11 +291,12 @@ export class LineChart extends HTMLElement {
         // --- series lines + point markers ---
         this._anchors = []
         let seriesHtml = ''
+        const xSet = new Set(allX)
         series.forEach((s, si) => {
             if (this._hidden.has(si)) return
             const color = this._seriesColor(si, s.color)
             const pts = seriesPoints(s).filter(
-                (p) => allX.includes(String(p.x)) && typeof p.y === 'number' && !isNaN(p.y),
+                (p) => xSet.has(String(p.x)) && typeof p.y === 'number' && !isNaN(p.y),
             )
             if (!pts.length) return
 

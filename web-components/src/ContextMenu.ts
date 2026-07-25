@@ -316,11 +316,11 @@ export class ContextMenu extends HTMLElement {
         // Close any open siblings at this level
         const parentMenu = target.parentElement
         if (parentMenu) {
-            Array.from(
-                parentMenu.querySelectorAll<HTMLElement>(':scope > .tc-context-menu-item--open'),
-            )
-                .filter((s) => s !== target)
-                .forEach((s) => this._closeSubmenu(s))
+            for (const sibling of parentMenu.querySelectorAll<HTMLElement>(
+                ':scope > .tc-context-menu-item--open',
+            )) {
+                if (sibling !== target) this._closeSubmenu(sibling)
+            }
         }
 
         if (target.classList.contains('tc-context-menu-item--has-children')) {

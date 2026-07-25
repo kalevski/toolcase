@@ -110,7 +110,11 @@ export class ScrollSpy {
         if (!link || !this._targetNav?.contains(link)) return
         const href = link.getAttribute('href')
         if (!href || href.length < 2) return
-        const section = this._element.querySelector<HTMLElement>(href)
+        // href fragments are not guaranteed to be valid CSS selectors —
+        // querySelector throws a DOMException on e.g. `#1numeric` or `#a:b`.
+        const section = this._element.querySelector<HTMLElement>(
+            `#${CSS.escape(href.slice(1))}`
+        )
         if (!section) return
         event.preventDefault()
         this._element.scrollTo({

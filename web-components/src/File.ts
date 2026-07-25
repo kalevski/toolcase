@@ -205,13 +205,12 @@ class TcFile extends HTMLElement {
     private _buildTagsHtml(): string {
         const tagMap = new Map(this._tags.map((t) => [t.id, t]))
         return this._tagIds
-            .map((id) => {
+            .flatMap((id) => {
                 const tag = tagMap.get(id)
-                if (!tag) return ''
+                if (!tag) return []
                 const styleAttr = tag.color ? ` style="--tc-file-chip-color:${esc(tag.color)}"` : ''
-                return `<span class="tc-file-chip"${styleAttr}>${esc(tag.label)}</span>`
+                return [`<span class="tc-file-chip"${styleAttr}>${esc(tag.label)}</span>`]
             })
-            .filter(Boolean)
             .join('')
     }
 

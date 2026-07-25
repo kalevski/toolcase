@@ -83,7 +83,7 @@ function buildDefault(schema: JSONEditorSchemaProperty[]): Record<string, unknow
 }
 
 function clone<T>(v: T): T {
-    return v == null ? v : (JSON.parse(JSON.stringify(v)) as T)
+    return v == null ? v : structuredClone(v)
 }
 
 function getValueAtPath(obj: unknown, path: Path): unknown {

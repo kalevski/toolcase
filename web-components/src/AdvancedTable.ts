@@ -414,6 +414,7 @@ export class AdvancedTable extends HTMLElement {
             return '<thead class="tc-advanced-table-head"></thead>'
         }
         const loading = this.loading
+        const sortableSet = new Set(this._sortableColumns)
 
         const cells = this._columns
             .map((col) => {
@@ -426,7 +427,7 @@ export class AdvancedTable extends HTMLElement {
                 const style = ` style="${styleParts.join('; ')}"`
                 const label = `<span class="tc-advanced-table-th-label">${esc(col.label)}</span>`
 
-                if (!this._sortableColumns.includes(col.key)) {
+                if (!sortableSet.has(col.key)) {
                     return `<th scope="col" class="tc-advanced-table-th tc-advanced-table-th--${align}"${style}>${label}</th>`
                 }
 

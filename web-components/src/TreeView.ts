@@ -160,7 +160,9 @@ export class TreeView extends HTMLElement {
                     indeterminate: false,
                 }
             }
-            const sel = descend.filter((k) => this._selected.includes(k)).length
+            const selectedSet = new Set(this._selected)
+            let sel = 0
+            for (const k of descend) if (selectedSet.has(k)) sel++
             return {
                 checked: sel === descend.length,
                 indeterminate: sel > 0 && sel < descend.length,
@@ -170,7 +172,7 @@ export class TreeView extends HTMLElement {
     }
 
     private _enabledKeys(): string[] {
-        return this._rows.filter((r) => !r.disabled).map((r) => r.key)
+        return this._rows.flatMap((r) => (r.disabled ? [] : [r.key]))
     }
 
     // ── Mutations ────────────────────────────────────────────────────────────────
@@ -223,8 +225,9 @@ export class TreeView extends HTMLElement {
         const own = this._collectSelectable(node)
         if (!own.length) return
         const { checked } = this._checkboxState(node)
+        const ownSet = new Set(own)
         const next = checked
-            ? this._selected.filter((k) => !own.includes(k))
+            ? this._selected.filter((k) => !ownSet.has(k))
             : uniq([...this._selected, ...own])
         this._commitSelected(next)
     }
@@ -440,12 +443,28 @@ export class TreeView extends HTMLElement {
     // ── Render ──────────────────────────────────────────────────────────────────────
 
     private _renderNodes(nodes: TreeNode[], level: number, parentKey: string | null): string {
+        return this._renderNodesWith(
+            nodes,
+            level,
+            parentKey,
+            new Set(this._expanded),
+            new Set(this._selected),
+        )
+    }
+
+    private _renderNodesWith(
+        nodes: TreeNode[],
+        level: number,
+        parentKey: string | null,
+        expandedSet: Set<string>,
+        selectedSet: Set<string>,
+    ): string {
         return nodes
             .map((node) => {
                 const key = node.key
                 const hasChildren = this._hasChildren(node)
-                const isExpanded = this._expanded.includes(key)
-                const isSelected = this._selected.includes(key)
+                const isExpanded = expandedSet.has(key)
+                const isSelected = selectedSet.has(key)
                 const isLoading = this._loading.has(key)
                 const disabled = !!node.disabled
 
@@ -503,7 +522,7 @@ export class TreeView extends HTMLElement {
                 // The guide hairline on a child group aligns with THIS row's chevron column.
                 const childrenHtml =
                     hasChildren && isExpanded
-                        ? `<ul class="tc-tree-view-group" role="group" style="--tc-tree-guide: ${level}">${this._renderNodes(this._getChildren(node), level + 1, key)}</ul>`
+                        ? `<ul class="tc-tree-view-group" role="group" style="--tc-tree-guide: ${level}">${this._renderNodesWith(this._getChildren(node), level + 1, key, expandedSet, selectedSet)}</ul>`
                         : ''
 
                 return `<li class="tc-tree-view-node" role="none">${row}${childrenHtml}</li>`

@@ -469,6 +469,7 @@ export class NormalMapGenerator extends HTMLElement {
         if (typeof src === 'string') {
             url = src
         } else {
+            // oxlint-disable-next-line react-doctor/no-create-object-url-without-revoke -- revoked in both onload and onerror below; static analysis cannot prove callback-based disposal
             url = URL.createObjectURL(src)
             revoke = true
         }

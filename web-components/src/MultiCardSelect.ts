@@ -133,15 +133,14 @@ export class MultiCardSelect extends HTMLElement {
         const name = this.name
         if (name) {
             const validValues = new Set(this._options.map((o) => o.value))
-            this._value
-                .filter((v) => validValues.has(v))
-                .forEach((v) => {
-                    const input = document.createElement('input')
-                    input.type = 'hidden'
-                    input.name = name
-                    input.value = v
-                    this.appendChild(input)
-                })
+            for (const v of this._value) {
+                if (!validValues.has(v)) continue
+                const input = document.createElement('input')
+                input.type = 'hidden'
+                input.name = name
+                input.value = v
+                this.appendChild(input)
+            }
         }
     }
 
@@ -260,8 +259,11 @@ export class MultiCardSelect extends HTMLElement {
         if (name) {
             const validValues = new Set(this._options.map((o) => o.value))
             hiddenInputsHtml = this._value
-                .filter((v) => validValues.has(v))
-                .map((v) => `<input type="hidden" name="${esc(name)}" value="${esc(v)}">`)
+                .flatMap((v) =>
+                    validValues.has(v)
+                        ? [`<input type="hidden" name="${esc(name)}" value="${esc(v)}">`]
+                        : [],
+                )
                 .join('')
         }
 

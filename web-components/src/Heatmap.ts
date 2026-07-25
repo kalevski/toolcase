@@ -168,7 +168,7 @@ export class Heatmap extends HTMLElement {
         const scale = this._colorScale ?? DEFAULT_SCALE
 
         // Value domain across the dataset.
-        const vals = this._data.map((d) => d.value).filter((v) => Number.isFinite(v))
+        const vals = this._data.flatMap((d) => (Number.isFinite(d.value) ? [d.value] : []))
         const minVal = vals.length ? Math.min(...vals) : 0
         const maxVal = vals.length ? Math.max(...vals) : 0
         const range = maxVal - minVal || 1

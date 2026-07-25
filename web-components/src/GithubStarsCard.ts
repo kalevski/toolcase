@@ -132,7 +132,10 @@ export class GithubStarsCard extends HTMLElement {
                 signal: ctrl.signal,
             },
         )
-            .then((r) => r.json())
+            .then((r) => {
+                if (!r.ok) throw new Error(`GitHub API responded ${r.status}`)
+                return r.json()
+            })
             .then((data: Record<string, unknown>) => {
                 if (ctrl.signal.aborted) return
                 this._liveStats = {

@@ -133,8 +133,14 @@ export class GanttChart extends HTMLElement {
         const tasks = this._tasks
         if (!tasks.length) return { resolved: [], markers: [] }
 
-        const starts = tasks.map((t) => new Date(t.start).getTime()).filter((n) => !isNaN(n))
-        const ends = tasks.map((t) => new Date(t.end).getTime()).filter((n) => !isNaN(n))
+        const starts: number[] = []
+        const ends: number[] = []
+        for (const t of tasks) {
+            const s = new Date(t.start).getTime()
+            const e = new Date(t.end).getTime()
+            if (!isNaN(s)) starts.push(s)
+            if (!isNaN(e)) ends.push(e)
+        }
 
         const startAttr = this.startDate ? new Date(this.startDate).getTime() : NaN
         const endAttr = this.endDate ? new Date(this.endDate).getTime() : NaN

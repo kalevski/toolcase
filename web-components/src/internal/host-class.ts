@@ -24,12 +24,14 @@ export function setHostClass(host: ClassHost, classes: string): void {
         authored = Array.from(host.classList)
         AUTHORED.set(host, authored)
     }
-    const merged: string[] = []
+    // Set dedupes while preserving insertion order: component classes first,
+    // then any consumer-authored classes not already present.
+    const merged = new Set<string>()
     for (const c of classes.split(/\s+/)) {
-        if (c && !merged.includes(c)) merged.push(c)
+        if (c) merged.add(c)
     }
     for (const c of authored) {
-        if (!merged.includes(c)) merged.push(c)
+        merged.add(c)
     }
-    host.className = merged.join(' ')
+    host.className = [...merged].join(' ')
 }

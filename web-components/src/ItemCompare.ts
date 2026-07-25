@@ -92,10 +92,19 @@ export class ItemCompare extends HTMLElement {
             ...currentStats.map((s) => s.label),
             ...candidateStats.map((s) => s.label),
         ])
+        // First occurrence wins, matching the previous .find() behaviour on
+        // duplicate labels.
+        const firstByLabel = (stats: typeof currentStats): Map<string, number> => {
+            const byLabel = new Map<string, number>()
+            for (const s of stats) {
+                if (!byLabel.has(s.label)) byLabel.set(s.label, s.value as number)
+            }
+            return byLabel
+        }
+        const currentByLabel = firstByLabel(currentStats)
+        const candidateByLabel = firstByLabel(candidateStats)
         for (const label of allLabels) {
-            const cur = currentStats.find((s) => s.label === label)?.value as number | undefined
-            const cand = candidateStats.find((s) => s.label === label)?.value as number | undefined
-            const diff = (cand ?? 0) - (cur ?? 0)
+            const diff = (candidateByLabel.get(label) ?? 0) - (currentByLabel.get(label) ?? 0)
             if (diff !== 0) map[label] = diff
         }
         return map

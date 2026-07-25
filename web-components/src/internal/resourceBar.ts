@@ -59,8 +59,11 @@ export function renderResourceBarTrack(options: ResourceBarTrackOptions): string
         : ''
 
     const ticks = (options.ticks ?? [])
-        .filter(t => t > 0 && t < 1)
-        .map(t => `<div class="${prefix}__tick" style="left: ${(t * 100).toFixed(2)}%"></div>`)
+        .flatMap(t =>
+            t > 0 && t < 1
+                ? [`<div class="${prefix}__tick" style="left: ${(t * 100).toFixed(2)}%"></div>`]
+                : [],
+        )
         .join('')
 
     const inlineText = options.inlineText

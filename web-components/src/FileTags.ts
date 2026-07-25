@@ -259,18 +259,19 @@ export class FileTags extends HTMLElement {
         const readonly = this.readonly
 
         return this._selectedIds
-            .map((id) => {
+            .flatMap((id) => {
                 const tag = tagMap.get(id)
-                if (!tag) return ''
+                if (!tag) return []
                 const colorStyle = tag.color
                     ? ` style="--bs-file-tags-chip-color:${esc(tag.color)}"`
                     : ''
                 const removeBtn = !readonly
                     ? `<button type="button" class="tc-file-tags-chip-remove" aria-label="Remove ${esc(tag.label)}">${xIconHtml}</button>`
                     : ''
-                return `<span class="tc-file-tags-chip" data-id="${esc(id)}"${colorStyle}>${esc(tag.label)}${removeBtn}</span>`
+                return [
+                    `<span class="tc-file-tags-chip" data-id="${esc(id)}"${colorStyle}>${esc(tag.label)}${removeBtn}</span>`,
+                ]
             })
-            .filter(Boolean)
             .join('')
     }
 

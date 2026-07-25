@@ -488,6 +488,7 @@ export class PhysicsEditor extends HTMLElement {
         if (typeof src === 'string') {
             url = src
         } else {
+            // oxlint-disable-next-line react-doctor/no-create-object-url-without-revoke -- revoked in both onload and onerror below; static analysis cannot prove callback-based disposal
             url = URL.createObjectURL(src)
             revoke = true
         }
@@ -1022,11 +1023,11 @@ export class PhysicsEditor extends HTMLElement {
     }
 
     private _clone(shapes: PhysicsShape[]): PhysicsShape[] {
-        return JSON.parse(JSON.stringify(shapes))
+        return structuredClone(shapes)
     }
 
     private _cloneShape(shape: PhysicsShape): PhysicsShape {
-        return JSON.parse(JSON.stringify(shape))
+        return structuredClone(shape)
     }
 
     private _emitChange(): void {

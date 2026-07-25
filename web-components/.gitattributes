@@ -1,0 +1,3 @@
+# lib/ is build output (tsup + sass) committed nowhere and published as-is;
+# mark it generated so tooling (GitHub diffs, react-doctor) skips it.
+lib/** linguist-generated=true

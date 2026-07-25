@@ -359,7 +359,10 @@ export class AreaChart extends HTMLElement {
             // the x's the series actually has, like the React AreaChart.
             const xsForSeries = stacked
                 ? allX
-                : s.points.map((p) => String(p.x)).filter((xs) => seen.has(xs))
+                : s.points.flatMap((p) => {
+                      const xs = String(p.x)
+                      return seen.has(xs) ? [xs] : []
+                  })
 
             if (!xsForSeries.length) return
 
@@ -479,20 +482,16 @@ export class AreaChart extends HTMLElement {
         allX: string[],
         stacked: boolean,
     ): string {
-        const names = series
-            .map((s) => s.name)
-            .filter(Boolean)
-            .join(', ')
+        const names = series.flatMap((s) => (s.name ? [s.name] : [])).join(', ')
         const kind = stacked ? 'Stacked area chart' : 'Area chart'
         const trend = series
-            .map((s) => {
-                if (s.points.length < 2) return ''
+            .flatMap((s) => {
+                if (s.points.length < 2) return []
                 const first = Number(s.points[0].y) || 0
                 const last = Number(s.points[s.points.length - 1].y) || 0
                 const dir = last > first ? 'rising' : last < first ? 'falling' : 'flat'
-                return `${s.name} ${dir}`
+                return [`${s.name} ${dir}`]
             })
-            .filter(Boolean)
             .join('; ')
         return `${kind} of ${series.length} series (${names}) across ${allX.length} points.${trend ? ` Trend: ${trend}.` : ''}`
     }

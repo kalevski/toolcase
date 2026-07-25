@@ -351,8 +351,8 @@ export class TagInput extends HTMLElement {
 
     private _filtered(): string[] {
         const q = this._input.trim().toLowerCase()
-        const tags = this._getTags()
-        return this._recommendations.filter((r) => r.toLowerCase().includes(q) && !tags.includes(r))
+        const tagSet = new Set(this._getTags())
+        return this._recommendations.filter((r) => r.toLowerCase().includes(q) && !tagSet.has(r))
     }
 
     private _showCreate(): boolean {
@@ -793,10 +793,15 @@ export class TagInput extends HTMLElement {
                     .filter(Boolean)
                 const max = this.maxTags
                 const next = [...this._getTags()]
+                const nextSet = new Set(next)
+                const recommended = new Set(this._recommendations)
                 for (const part of parts) {
-                    if (next.includes(part)) continue
+                    if (nextSet.has(part)) continue
                     if (max > 0 && next.length >= max) break
-                    if (this.allowCreate || this._recommendations.includes(part)) next.push(part)
+                    if (this.allowCreate || recommended.has(part)) {
+                        next.push(part)
+                        nextSet.add(part)
+                    }
                 }
                 this._updateTags(next)
                 this._input = ''
