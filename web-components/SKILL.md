@@ -88,13 +88,14 @@ configureMessages({
 | `paginationRange` | `{start}–{end} of {total}` | `tc-advanced-table` pagination summary |
 | `stepsComplete` | `{completed} of {total} complete` | reserved formatter |
 | `starsRating` | `{value} out of {max} stars` | reserved formatter |
+| `selectedCount` | `{count} selected` | `tc-extended-select[multiple]` — trigger summary past three picks |
 | `fileDropPrompt` | `Drag & drop files here or click to browse` | `tc-file-dropzone` |
 | `fileDropLabel` | `Upload files — drag and drop or click to browse` | `tc-file-dropzone` |
 | `fileSelectLabel` | `Select files to upload` | `tc-file-dropzone` |
 
 Notes:
 
-- Parameterised keys (`paginationRange`, `stepsComplete`, `starsRating`) accept either a `{token}` template string or a formatter function (`(params) => string`) — functions get full control over pluralisation and word order.
+- Parameterised keys (`paginationRange`, `stepsComplete`, `starsRating`, `selectedCount`) accept either a `{token}` template string or a formatter function (`(params) => string`) — functions get full control over pluralisation and word order.
 - Per-instance attributes (`placeholder`, `empty-message`, `error`, `required-message`, …) always win over the registry for one-off cases.
 - Call `configureMessages()` before components render — components read the registry when they render. Changing messages later requires re-rendering the affected components; listen for `tc-messages-changed` on `document` to trigger that.
 
@@ -19417,7 +19418,8 @@ Searchable dropdown with debounced filtering (150 ms), keyboard navigation, opti
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `value` | string | — | Key of the currently selected item |
+| `value` | string | — | Key of the currently selected item. Under `multiple` it is the comma-separated list of selected keys |
+| `multiple` | boolean | false | Multi-select mode: rows render as a checkbox list, the menu stays open while toggling, and the value becomes a comma-separated key list |
 | `name` | string | — | Field name for native form submission (`<input type="hidden">`) |
 | `placeholder` | string | `"Select…"` | Trigger label when nothing is selected |
 | `search-placeholder` | string | `"Search…"` | Placeholder text in the search input |
@@ -19430,7 +19432,9 @@ Searchable dropdown with debounced filtering (150 ms), keyboard navigation, opti
 | Property | Type | Description |
 |----------|------|-------------|
 | `items` | `ExtendedSelectItem[]` | Options list — set via JS property, not attribute |
-| `onChange` | `((value: string) => void) \| null` | Optional callback fired alongside `tc-change` |
+| `values` | `string[]` | Selected keys as an array — the parsed form of `value`. Reading works in both modes; writing joins with commas |
+| `multiple` | `boolean` | Reflects the `multiple` attribute |
+| `onChange` | `((value: string) => void) \| ((value: string[]) => void) \| null` | Optional callback fired alongside `tc-change` — gets the key in single mode, the key array under `multiple` |
 
 Each `ExtendedSelectItem`:
 
@@ -19440,7 +19444,7 @@ Each `ExtendedSelectItem`:
 | `label` | string | Primary display text shown in trigger and option row |
 | `description` | string? | Optional secondary line shown in muted text below the label |
 
-**Events:** `tc-change` with `{ detail: { value: string } }`
+**Events:** `tc-change` with `{ detail: { value: string } }` — `{ detail: { value: string[] } }` under `multiple`
 
 **Slots:** none — the option list is generated from the `items` JS property.
 
@@ -19452,8 +19456,15 @@ Each `ExtendedSelectItem`:
 | `ArrowUp` | Move highlight to previous option (wraps) |
 | `Home` | Jump to first option |
 | `End` | Jump to last option |
-| `Enter` | Select highlighted option |
+| `Enter` | Select highlighted option — toggles it and keeps the menu open under `multiple` |
 | `Escape` | Close menu, return focus to trigger |
+
+**Multi-select notes**
+
+- The trigger lists up to three picked labels; beyond that it collapses to the `selectedCount` message (`"{count} selected"`, overridable via `configureMessages`).
+- Each key is submitted as its own entry under `name`, so read them with `formData.getAll(name)`.
+- `required` is satisfied by one or more picks.
+- Keys must not contain commas — `value` is a comma-separated list in this mode.
 
 ```html
 <tc-extended-select
@@ -19478,6 +19489,25 @@ el.addEventListener('tc-change', e => console.log('selected:', e.detail.value))
 
 <!-- Loading state -->
 <tc-extended-select placeholder="Fetching…" loading></tc-extended-select>
+
+<!-- Multi-select -->
+<tc-extended-select
+  id="fw-multi"
+  multiple
+  name="frameworks"
+  value="react,svelte"
+  placeholder="Choose frameworks…"
+></tc-extended-select>
+<script>
+const multi = document.getElementById('fw-multi')
+multi.items = [
+  { key: 'react',  label: 'React' },
+  { key: 'vue',    label: 'Vue' },
+  { key: 'svelte', label: 'Svelte' },
+]
+multi.addEventListener('tc-change', e => console.log(e.detail.value)) // ['react','svelte']
+console.log(multi.values) // ['react','svelte']
+</script>
 ```
 
 ---
