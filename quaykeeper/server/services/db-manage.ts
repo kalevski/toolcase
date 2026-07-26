@@ -419,3 +419,34 @@ export async function setAccess(
           }
         : { user, database, level: level!, operations: levelOperations(server.kind, level!), extras: [] }
 }
+
+/**
+ * Optional, stronger action than `setAccess(..., { level: 'owner' })`: reassign
+ * real catalog ownership of every table/sequence/view/function/schema/type in
+ * `database` (plus the database itself) to `user`, on engines that track
+ * per-object owners. Mysql has no such concept — `GRANT ALL ON db.*` already
+ * covers every table there, so the driver has no `takeOwnership` and this 400s.
+ */
+export async function takeOwnership(
+    actor: DbActor,
+    serverId: string,
+    input: { user?: unknown; database?: unknown },
+): Promise<DbGrant> {
+    const server = storedServer(serverId)
+    const user = requireUserName(server, input.user)
+    const database = requireDbName(server, input.database)
+    assertNotAdminAccount(server, user)
+
+    const driver = driverFor(server.kind)
+    if (!driver.takeOwnership) {
+        throw new DbServerError(
+            `${server.kind} has no separate object-ownership concept — "Owner" access already grants ALL on every table`,
+            'ownership_not_supported',
+            400,
+        )
+    }
+
+    await withProbe(server, () => driver.takeOwnership!(connInfoOf(server), user, database))
+    audit(actor, 'db.grant.take_ownership', server, `${user} @ ${database}`, { user, database })
+    return { user, database, level: 'owner', operations: levelOperations(server.kind, 'owner'), extras: [] }
+}

@@ -77,4 +77,13 @@ export interface DbDriver {
         database: string,
         operations: readonly DbOperation[],
     ): Promise<void>
+    /**
+     * Optional, stronger action beyond `applyAccess('owner')`: reassign actual
+     * catalog ownership of every object in `database` (tables, sequences, views,
+     * functions, schemas, types — whatever the engine tracks per-object owners
+     * for) plus the database itself, to `user`. Undefined on engines with no
+     * per-object ownership concept (mysql — `GRANT ALL ON db.*` already covers
+     * everything there); callers must check for presence before invoking.
+     */
+    takeOwnership?(conn: DbConnInfo, user: string, database: string): Promise<void>
 }

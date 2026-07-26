@@ -8,6 +8,7 @@ import { LoadingState, ErrorState } from '@/components/states'
 import { useToast } from '@/components/Toast'
 import { FormModal, FormGroup } from '@/components/FormModal'
 import { CheckField } from '@/components/fields'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { callApi, describeDriverError, fmtReadAt } from './shared'
 
 // Access tab (quaykeeper_database_management.md §9): the user × database matrix.
@@ -85,6 +86,8 @@ function AccessEditor({
     const [checked, setChecked] = useState<Set<DbOperation>>(
         () => new Set(grant.level === 'owner' ? DB_OPERATIONS : grant.operations),
     )
+    const [confirmingOwnership, setConfirmingOwnership] = useState(false)
+    const [takingOwnership, setTakingOwnership] = useState(false)
 
     const selection = useMemo(() => DB_OPERATIONS.filter((op) => checked.has(op)), [checked])
     /** The preset the current selection reads back as (drives the active pill). */
@@ -132,6 +135,26 @@ function AccessEditor({
         const summary =
             activePreset !== 'custom' ? LEVEL_LABEL[activePreset].toLowerCase() : opSummary(res.body)
         toast.show(`${grant.user} on ${grant.database}: ${summary}.`, { variant: 'success' })
+        onApplied(res.body)
+    }
+
+    const takeOwnership = async () => {
+        setConfirmingOwnership(false)
+        setTakingOwnership(true)
+        const res = await callApi<DbGrant>(
+            `/api/db-servers/${encodeURIComponent(server.id)}/grants/own`,
+            'POST',
+            { user: grant.user, database: grant.database },
+        )
+        setTakingOwnership(false)
+        if (!res.ok || !res.body) {
+            toast.show(
+                `Couldn’t reassign ownership to ${grant.user} on ${grant.database}: ${describeDriverError(res)}`,
+                { variant: 'error' },
+            )
+            return
+        }
+        toast.show(`${grant.user} now owns every object in ${grant.database}.`, { variant: 'success' })
         onApplied(res.body)
     }
 
@@ -209,6 +232,35 @@ function AccessEditor({
                 {server.kind === 'postgres' &&
                     ' Postgres: tables created later by other roles may need a re-apply (default privileges follow their creator).'}
             </p>
+
+            {server.kind === 'postgres' && (
+                <FormGroup title="Full ownership (optional)">
+                    <p className="quaykeeper-admin-hint">
+                        Beyond Owner access: reassign real catalog ownership of every table, sequence,
+                        view, function, schema and type in {grant.database} — plus the database itself —
+                        to {grant.user}. Whoever owns them now loses that ownership immediately.
+                    </p>
+                    <tc-button
+                        variant="danger"
+                        size="sm"
+                        outline
+                        disabled={busy || takingOwnership}
+                        onClick={() => setConfirmingOwnership(true)}
+                    >
+                        {takingOwnership ? 'Reassigning…' : `Make ${grant.user} own everything`}
+                    </tc-button>
+                </FormGroup>
+            )}
+
+            <ConfirmDialog
+                open={confirmingOwnership}
+                title="Reassign all ownership?"
+                message={`Every table, sequence, view, function, schema and type in “${grant.database}” — plus the database itself — moves to “${grant.user}”. Whoever owns them now loses that ownership immediately. This can't be undone with a re-apply the way grants can.`}
+                confirmLabel="Reassign ownership"
+                danger
+                onConfirm={() => void takeOwnership()}
+                onCancel={() => setConfirmingOwnership(false)}
+            />
         </FormModal>
     )
 }

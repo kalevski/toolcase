@@ -323,4 +323,54 @@ export const postgresDriver: DbDriver = {
     async applyOperations(conn, user, database, operations: readonly DbOperation[]) {
         await runPlan(conn, database, operationGrantPlan('postgres', user, database, operations))
     },
+
+    async takeOwnership(conn, user, database) {
+        // Grants first (CONNECT + default privileges for objects created later
+        // by roles this sweep doesn't touch) — reassignment alone only covers
+        // what's live right now.
+        await runPlan(conn, database, grantPlan('postgres', user, database, 'owner'))
+
+        const u = quoteIdent('postgres', user)
+        const d = quoteIdent('postgres', database)
+
+        // Every distinct role owning a relation, sequence, view, function,
+        // schema, or type inside this database (system catalogs excluded) —
+        // `REASSIGN OWNED BY` takes a role list and moves everything it owns
+        // (of every kind, not just what's enumerated here) to the new owner.
+        const owners = await withClient(conn, database, async (c) => {
+            const res = await c.query(
+                `SELECT DISTINCT pg_get_userbyid(owner) AS name FROM (
+                     SELECT relowner AS owner FROM pg_class
+                     WHERE relnamespace NOT IN (
+                         SELECT oid FROM pg_namespace
+                         WHERE nspname IN ('pg_catalog', 'information_schema')
+                            OR nspname LIKE 'pg\\_toast%' OR nspname LIKE 'pg\\_temp%'
+                     )
+                     UNION ALL
+                     SELECT proowner FROM pg_proc
+                     WHERE pronamespace NOT IN (
+                         SELECT oid FROM pg_namespace WHERE nspname IN ('pg_catalog', 'information_schema')
+                     )
+                     UNION ALL
+                     SELECT nspowner FROM pg_namespace
+                     WHERE nspname NOT IN ('pg_catalog', 'information_schema', 'pg_toast')
+                       AND nspname NOT LIKE 'pg\\_temp%' AND nspname NOT LIKE 'pg\\_toast_temp%'
+                     UNION ALL
+                     SELECT typowner FROM pg_type
+                     WHERE typnamespace NOT IN (
+                         SELECT oid FROM pg_namespace WHERE nspname IN ('pg_catalog', 'information_schema')
+                     )
+                 ) t`,
+            )
+            return [...new Set(res.rows.map((r) => r.name as string).filter(Boolean))].filter(
+                (name) => name !== user,
+            )
+        })
+        if (owners.length > 0) {
+            const list = owners.map((o) => quoteIdent('postgres', o)).join(', ')
+            await withClient(conn, database, (c) => c.query(`REASSIGN OWNED BY ${list} TO ${u}`))
+        }
+
+        await withClient(conn, MAINTENANCE_DB, (c) => c.query(`ALTER DATABASE ${d} OWNER TO ${u}`))
+    },
 }
