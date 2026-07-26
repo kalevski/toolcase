@@ -37,6 +37,8 @@ const ExtendedSelectDemo: React.FC = () => {
     const [selected, setSelected] = useState<string | null>(null)
     const [preselectedValue, setPreselectedValue] = useState<string>('react')
     const [submitted, setSubmitted] = useState<string | null>(null)
+    const [picked, setPicked] = useState<string[]>(['react', 'svelte'])
+    const [multiSubmitted, setMultiSubmitted] = useState<string[] | null>(null)
 
     const basicRef = useTc<HTMLElement>(
         { items: FRAMEWORK_ITEMS },
@@ -56,6 +58,15 @@ const ExtendedSelectDemo: React.FC = () => {
     )
     const loadingRef = useTc<HTMLElement>({ items: FRAMEWORK_ITEMS })
     const formRef = useTc<HTMLElement>({ items: FRAMEWORK_ITEMS })
+    const multiRef = useTc<HTMLElement>(
+        { items: FRAMEWORK_ITEMS },
+        {
+            'tc-change': (e: Event) => {
+                setPicked((e as CustomEvent<{ value: string[] }>).detail.value)
+            },
+        },
+    )
+    const multiFormRef = useTc<HTMLElement>({ items: COUNTRY_ITEMS })
 
     return (
         <div className="py-4">
@@ -113,6 +124,74 @@ const ExtendedSelectDemo: React.FC = () => {
                                 <p className="mt-3 text-muted small">
                                     Current value: <strong>{preselectedValue}</strong>
                                 </p>
+                            </tc-section-card>
+
+                            <tc-section-card title="Multi-select">
+                                <p className="text-muted small mb-3">
+                                    Add the boolean <code>multiple</code> attribute to pick several
+                                    options. Rows become a checkbox list, the menu stays open while
+                                    you toggle, and <code>value</code> holds the comma-separated
+                                    keys (read them as an array via the <code>values</code> JS
+                                    property). <code>tc-change</code> carries{' '}
+                                    <code>detail.value</code> as a <code>string[]</code>. Past three
+                                    picks the trigger collapses to an “N selected” summary.
+                                </p>
+                                <div style={{ maxWidth: 400 }}>
+                                    {/* @ts-ignore */}
+                                    <tc-extended-select
+                                        ref={multiRef}
+                                        multiple
+                                        value={picked.join(',')}
+                                        placeholder="Choose frameworks…"
+                                        search-placeholder="Search frameworks…"
+                                        name="frameworks"
+                                    />
+                                </div>
+                                <p className="mt-3 text-muted small">
+                                    Selected:{' '}
+                                    <strong>{picked.length ? picked.join(', ') : '(none)'}</strong>
+                                </p>
+                            </tc-section-card>
+
+                            <tc-section-card title="Multi-select — form submission">
+                                <p className="text-muted small mb-3">
+                                    In <code>multiple</code> mode every picked key is submitted as a
+                                    separate entry under <code>name</code>, so{' '}
+                                    <code>formData.getAll(name)</code> returns the full list.
+                                </p>
+                                <form
+                                    onSubmit={(e) => {
+                                        e.preventDefault()
+                                        const fd = new FormData(e.currentTarget)
+                                        setMultiSubmitted(fd.getAll('countries').map(String))
+                                    }}
+                                    style={{ maxWidth: 400 }}
+                                >
+                                    {/* @ts-ignore */}
+                                    <tc-extended-select
+                                        ref={multiFormRef}
+                                        multiple
+                                        required
+                                        name="countries"
+                                        label="Shipping regions"
+                                        help="Pick one or more countries."
+                                        placeholder="Choose countries…"
+                                        style={{ marginBottom: '0.75rem' } as React.CSSProperties}
+                                    />
+                                    <button type="submit" className="btn btn-primary btn-sm">
+                                        Submit form
+                                    </button>
+                                </form>
+                                {multiSubmitted !== null && (
+                                    <p className="mt-3 text-muted small">
+                                        Submitted <code>countries</code>:{' '}
+                                        <strong>
+                                            {multiSubmitted.length
+                                                ? multiSubmitted.join(', ')
+                                                : '(empty)'}
+                                        </strong>
+                                    </p>
+                                )}
                             </tc-section-card>
 
                             <tc-section-card title="Loading state">

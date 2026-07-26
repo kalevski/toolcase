@@ -27,6 +27,14 @@ tc-extended-select {
     --bs-extended-select-search-icon-color: var(--tc-text-muted);
     --bs-extended-select-search-icon-size: 1rem; // ~16px — matches input affordances
 
+    // Multi-select row checkbox — square (never rounded), ink-filled when picked.
+    --bs-extended-select-checkbox-size: 1rem;
+    --bs-extended-select-checkbox-border: 1.5px solid var(--tc-border-strong);
+    --bs-extended-select-checkbox-bg: var(--tc-surface);
+    --bs-extended-select-checkbox-checked-bg: var(--tc-app-accent);
+    --bs-extended-select-checkbox-checked-border-color: var(--tc-app-accent);
+    --bs-extended-select-checkbox-checked-color: var(--tc-app-accent-contrast);
+
     --bs-extended-select-no-results-color: var(--tc-text-muted);
     --bs-extended-select-disabled-opacity: 0.55;
     --bs-extended-select-caret-color: var(--tc-text-muted);
@@ -275,6 +283,67 @@ tc-extended-select {
 .tc-extended-select__check {
     display: inline-flex;
     align-items: center;
+}
+
+// ── Multi-select ─────────────────────────────────────────────────────────────
+// Rows read as a checkbox list: the accent lives in the leading box, not in a
+// full-width fill, so a long run of picks stays legible. The box is always in
+// the DOM and only its tick toggles, keeping selection a class flip.
+
+.tc-extended-select__checkbox {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: var(--bs-extended-select-checkbox-size);
+    height: var(--bs-extended-select-checkbox-size);
+    // Square corners — the design system reserves radii for circular shapes.
+    border: var(--bs-extended-select-checkbox-border);
+    background-color: var(--bs-extended-select-checkbox-bg);
+    align-self: center;
+    transition:
+        background-color var(--tc-transition-fast),
+        border-color var(--tc-transition-fast);
+
+    svg {
+        display: block;
+        width: 0.75rem;
+        height: 0.75rem;
+        color: var(--bs-extended-select-checkbox-checked-color);
+        opacity: 0;
+    }
+}
+
+tc-extended-select[multiple] {
+    .tc-extended-select__option--selected {
+        // Keep the plain surface — the tick carries the state.
+        background-color: transparent;
+        color: var(--bs-extended-select-option-color);
+
+        .tc-extended-select__option-desc {
+            color: var(--bs-extended-select-option-desc-color);
+        }
+
+        &:hover,
+        &.tc-extended-select__option--active {
+            background-color: var(--bs-extended-select-option-hover-bg);
+        }
+
+        .tc-extended-select__checkbox {
+            background-color: var(--bs-extended-select-checkbox-checked-bg);
+            border-color: var(--bs-extended-select-checkbox-checked-border-color);
+
+            svg {
+                opacity: 1;
+            }
+        }
+    }
+
+    // The description wraps to its own full-width row; indent it past the box
+    // so it lines up under the label instead of under the checkbox.
+    .tc-extended-select__option-desc {
+        padding-left: calc(var(--bs-extended-select-checkbox-size) + 0.5rem);
+    }
 }
 
 // ── No-results message ───────────────────────────────────────────────────────

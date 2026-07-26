@@ -38,6 +38,10 @@ export interface StarsRatingParams {
     max: number
 }
 
+export interface SelectedCountParams {
+    count: number
+}
+
 export interface ToolcaseMessages {
     // ── Validation copy ──────────────────────────────────────────────────────
     /** Required field left empty. */
@@ -81,6 +85,8 @@ export interface ToolcaseMessages {
     stepsComplete: MessageFormatter<StepsCompleteParams>
     /** Rating summary, e.g. "4 out of 5 stars". */
     starsRating: MessageFormatter<StarsRatingParams>
+    /** Multi-select trigger summary once the picked labels stop fitting, e.g. "4 selected". */
+    selectedCount: MessageFormatter<SelectedCountParams>
 
     // ── File inputs ──────────────────────────────────────────────────────────
     fileDropPrompt: string
@@ -118,6 +124,7 @@ const DEFAULTS: ToolcaseMessages = {
     paginationRange: '{start}–{end} of {total}',
     stepsComplete: '{completed} of {total} complete',
     starsRating: '{value} out of {max} stars',
+    selectedCount: '{count} selected',
 
     fileDropPrompt: 'Drag & drop files here or click to browse',
     fileDropLabel: 'Upload files — drag and drop or click to browse',

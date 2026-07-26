@@ -144,7 +144,7 @@ export interface ToolcaseIntrinsicElements {
     'tc-equipment-doll': TcProps<{ 'height'?: string | number; 'selected-id'?: string | number; 'silhouette'?: string | number; 'slot-size'?: string | number; 'width'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
     'tc-equipment-matrix': TcProps<{ 'collapsible'?: boolean; 'columns'?: string | number }>
     'tc-equipment-tag': TcProps<{ 'flag'?: string | number; 'icon'?: string | number; 'label'?: string | number }>
-    'tc-extended-select': TcProps<{ 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'label'?: string | number; 'loading'?: boolean; 'max-height'?: string | number; 'name'?: string | number; 'no-results-text'?: string | number; 'placeholder'?: string | number; 'required'?: boolean; 'search-placeholder'?: string | number; 'state'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
+    'tc-extended-select': TcProps<{ 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'label'?: string | number; 'loading'?: boolean; 'max-height'?: string | number; 'multiple'?: boolean; 'name'?: string | number; 'no-results-text'?: string | number; 'placeholder'?: string | number; 'required'?: boolean; 'search-placeholder'?: string | number; 'state'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
     'tc-eyebrow': TcProps
     'tc-faq-list': TcProps<{ 'schema'?: boolean; 'title'?: string | number; onTcToggle?: (e: CustomEvent) => void }>
     'tc-feature-card': TcProps<{ 'description'?: string | number; 'eyebrow'?: string | number; 'icon'?: string | number; 'inline'?: boolean; 'size'?: string | number; 'title'?: string | number }>

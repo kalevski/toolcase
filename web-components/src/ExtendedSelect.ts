@@ -1,5 +1,5 @@
 import { esc } from './internal/esc'
-import { msg } from './messages'
+import { msg, msgFormat } from './messages'
 import { Search, Check } from 'lucide-static'
 import { icon, chevronDownIcon } from './icons'
 import { fixedContainingBlock } from './internal/containingBlock'
@@ -30,6 +30,21 @@ export interface ExtendedSelectItem {
     description?: string
 }
 
+// Multi-select: how many picked labels are listed in the trigger before it
+// collapses to the "{count} selected" summary.
+const SUMMARY_THRESHOLD = 3
+
+/** Split the comma-separated `value` attribute into unique, non-empty keys. */
+function parseKeys(raw: string | null): string[] {
+    if (!raw) return []
+    const out: string[] = []
+    for (const part of raw.split(',')) {
+        const key = part.trim()
+        if (key && !out.includes(key)) out.push(key)
+    }
+    return out
+}
+
 export class ExtendedSelect extends HTMLElement {
     // Participates in native <form> submission/validation like every tc-* input.
     static formAssociated = true
@@ -54,11 +69,15 @@ export class ExtendedSelect extends HTMLElement {
     // resolved against this box, not the viewport, when it is non-null.
     private _cbEl: HTMLElement | null = null
 
-    onChange: ((value: string) => void) | null = null
+    // Single mode hands the callback the selected key; `multiple` hands it the
+    // full key array. Declared as a union so existing single-mode handlers keep
+    // type-checking.
+    onChange: ((value: string) => void) | ((value: string[]) => void) | null = null
 
     static get observedAttributes(): string[] {
         return [
             'value',
+            'multiple',
             'name',
             'placeholder',
             'search-placeholder',
@@ -107,6 +126,13 @@ export class ExtendedSelect extends HTMLElement {
         if (!this.isConnected || !this._initialised) return
         if (name === 'value') {
             this._syncValueInDOM(next)
+            this._syncForm()
+        } else if (name === 'multiple') {
+            // The option rows and the trigger summary are shaped by the mode —
+            // rebuild wholesale. An open menu would be left anchored to a
+            // discarded trigger, so it closes first.
+            this._closeMenu(false)
+            this.render()
             this._syncForm()
         } else if (name === 'name') {
             // The hidden input no longer submits (its name is cleared in render),
@@ -174,10 +200,18 @@ export class ExtendedSelect extends HTMLElement {
      * invalid / required-but-empty. Mirrors the shared form-field contract.
      */
     private _syncForm(): void {
+        // Multi mode submits one entry per key under `name` (array branch of
+        // setFieldFormValue); single mode submits the bare key.
+        const multiple = this.multiple
+        const keys = multiple ? this.values : []
         const value = this.value
-        setFieldFormValue(this._internals, this.name || null, value === '' ? null : value)
+        setFieldFormValue(
+            this._internals,
+            this.name || null,
+            multiple ? (keys.length ? keys : null) : value === '' ? null : value,
+        )
         const error = this.error
-        const requiredEmpty = this.required && value === ''
+        const requiredEmpty = this.required && (multiple ? keys.length === 0 : value === '')
         const invalid = !!error || this.state === 'invalid' || requiredEmpty
         reflectFieldValidity(this._internals, {
             invalid,
@@ -199,12 +233,36 @@ export class ExtendedSelect extends HTMLElement {
         else this.style.removeProperty('--bs-extended-select-list-max-height')
     }
 
+    /**
+     * The raw value. In single mode this is the selected key; under `multiple`
+     * it is the comma-separated list of selected keys (use `values` for the
+     * parsed array). Keys must therefore not contain commas in multi mode.
+     */
     get value(): string {
         return this.getAttribute('value') ?? ''
     }
     set value(v: string) {
         if (v) this.setAttribute('value', v)
         else this.removeAttribute('value')
+    }
+
+    /** Selected keys as an array. Writing it is a no-op guard against non-arrays. */
+    get values(): string[] {
+        return parseKeys(this.getAttribute('value'))
+    }
+    set values(v: string[]) {
+        if (!Array.isArray(v)) return
+        this.value = parseKeys(v.join(',')).join(',')
+    }
+
+    /** Toggle multi-selection. The menu stays open while picking and the value
+     *  becomes a comma-separated key list. */
+    get multiple(): boolean {
+        return this.hasAttribute('multiple')
+    }
+    set multiple(v: boolean) {
+        if (v) this.setAttribute('multiple', '')
+        else this.removeAttribute('multiple')
     }
 
     get name(): string {
@@ -315,10 +373,19 @@ export class ExtendedSelect extends HTMLElement {
             const si = this.querySelector<HTMLInputElement>('.tc-extended-select__search-input')
             if (si) si.value = ''
             this._renderList()
+            // Labels for an already-set value only resolve once items land.
+            this._updateTriggerLabel()
         }
     }
 
     // ── Private helpers ──────────────────────────────────────────────────────
+
+    /** Currently selected keys — one entry at most outside `multiple`. */
+    private _selectedKeys(): string[] {
+        if (this.multiple) return this.values
+        const v = this.value
+        return v ? [v] : []
+    }
 
     private _selectedItem(): ExtendedSelectItem | undefined {
         const v = this.value
@@ -326,6 +393,16 @@ export class ExtendedSelect extends HTMLElement {
     }
 
     private _triggerLabelHtml(): string {
+        if (this.multiple) {
+            const keys = this.values
+            if (!keys.length) return esc(this.placeholder)
+            if (keys.length > SUMMARY_THRESHOLD) {
+                return esc(msgFormat('selectedCount', { count: keys.length }))
+            }
+            // Unknown keys (items not loaded yet) fall back to the raw key.
+            const labels = keys.map((k) => this._items.find((i) => i.key === k)?.label ?? k)
+            return esc(labels.join(', '))
+        }
         const sel = this._selectedItem()
         return sel ? esc(sel.label) : esc(this.placeholder)
     }
@@ -335,7 +412,8 @@ export class ExtendedSelect extends HTMLElement {
         if (el) el.innerHTML = this._triggerLabelHtml()
         const trigger = this.querySelector('.tc-extended-select__trigger')
         if (trigger) {
-            trigger.classList.toggle('tc-extended-select__trigger--placeholder', !this.value)
+            const empty = this.multiple ? this.values.length === 0 : !this.value
+            trigger.classList.toggle('tc-extended-select__trigger--placeholder', empty)
         }
     }
 
@@ -343,22 +421,25 @@ export class ExtendedSelect extends HTMLElement {
         const hidden = this.querySelector<HTMLInputElement>('.tc-extended-select__hidden')
         if (hidden) hidden.value = newValue ?? ''
         this._updateTriggerLabel()
+        const selected = this.multiple ? parseKeys(newValue) : newValue ? [newValue] : []
+        const selectedSet = new Set(selected)
         const opts = this.querySelectorAll<HTMLElement>('[role="option"]')
         opts.forEach((opt) => {
-            const isSelected = opt.dataset.key === (newValue ?? '')
-            opt.setAttribute('aria-selected', String(isSelected && !!newValue))
-            opt.classList.toggle('tc-extended-select__option--selected', isSelected && !!newValue)
+            const isSelected = !!opt.dataset.key && selectedSet.has(opt.dataset.key)
+            opt.setAttribute('aria-selected', String(isSelected))
+            opt.classList.toggle('tc-extended-select__option--selected', isSelected)
         })
     }
 
     private _renderOptions(): string {
-        const currentValue = this.value
+        const multiple = this.multiple
+        const selectedSet = new Set(this._selectedKeys())
         if (!this._filteredItems.length) {
             return `<li class="tc-extended-select__no-results" role="presentation">${esc(this.noResultsText)}</li>`
         }
         return this._filteredItems
             .map((item, idx) => {
-                const isSelected = !!currentValue && item.key === currentValue
+                const isSelected = selectedSet.has(item.key)
                 const isActive = idx === this._activeIdx
                 let cls = 'tc-extended-select__option'
                 if (isSelected) cls += ' tc-extended-select__option--selected'
@@ -366,11 +447,18 @@ export class ExtendedSelect extends HTMLElement {
                 const descHtml = item.description
                     ? `<span class="tc-extended-select__option-desc">${esc(item.description)}</span>`
                     : ''
-                const checkHtml = isSelected
-                    ? `<span class="tc-extended-select__check" aria-hidden="true">${checkIconHtml}</span>`
+                // Multi mode carries a persistent leading checkbox (the tick is
+                // revealed by CSS on --selected) so toggling never rewrites the
+                // row; single mode appends the tick only to the chosen row.
+                const boxHtml = multiple
+                    ? `<span class="tc-extended-select__checkbox" aria-hidden="true">${checkIconHtml}</span>`
                     : ''
+                const checkHtml =
+                    !multiple && isSelected
+                        ? `<span class="tc-extended-select__check" aria-hidden="true">${checkIconHtml}</span>`
+                        : ''
                 // check appears before description so it stays on the label's row (flex-wrap layout)
-                return `<li class="${cls}" role="option" aria-selected="${isSelected}" id="${this._idPrefix}-${idx}" data-key="${esc(item.key)}" tabindex="-1"><span class="tc-extended-select__option-label">${esc(item.label)}</span>${checkHtml}${descHtml}</li>`
+                return `<li class="${cls}" role="option" aria-selected="${isSelected}" id="${this._idPrefix}-${idx}" data-key="${esc(item.key)}" tabindex="-1">${boxHtml}<span class="tc-extended-select__option-label">${esc(item.label)}</span>${checkHtml}${descHtml}</li>`
             })
             .join('')
     }
@@ -392,7 +480,8 @@ export class ExtendedSelect extends HTMLElement {
 
     private render(): void {
         const currentValue = this.value
-        const isPlaceholder = !currentValue
+        const multiple = this.multiple
+        const isPlaceholder = multiple ? this.values.length === 0 : !currentValue
         const state = this._effectiveState()
         const invalidCls = state === 'invalid' ? ' tc-extended-select__trigger--invalid' : ''
         const triggerCls = `tc-extended-select__trigger${isPlaceholder ? ' tc-extended-select__trigger--placeholder' : ''}${invalidCls}`
@@ -427,7 +516,7 @@ export class ExtendedSelect extends HTMLElement {
         // but no longer submits — form submission flows through ElementInternals
         // (_syncForm) so the value is not duplicated under `name`. Its `name`
         // attribute is therefore intentionally omitted.
-        this.innerHTML = `${labelHtml}<input type="hidden" value="${esc(currentValue)}" class="tc-extended-select__hidden"><button type="button" class="${triggerCls}" role="combobox" aria-expanded="false" aria-controls="${this._listId}" aria-haspopup="listbox"${describe}${requiredAttr}${disabledAttr}><span class="tc-extended-select__trigger-label">${this._triggerLabelHtml()}</span><span class="tc-extended-select__trigger-spinner" aria-hidden="true"><span class="spinner-border spinner-border-sm"></span></span><span class="tc-extended-select__caret" aria-hidden="true">${chevronDownIcon}</span></button><div class="tc-extended-select__menu"><div class="tc-extended-select__search-wrap">${searchIconHtml}<input type="text" class="tc-extended-select__search-input" placeholder="${esc(this.searchPlaceholder)}" autocomplete="off" aria-label="${esc(msg('searchOptionsLabel'))}"></div><ul class="tc-extended-select__list" id="${this._listId}" role="listbox">${this._renderOptions()}</ul><div class="tc-extended-select__loading-indicator" aria-live="polite" aria-label="${esc(msg('loading'))}"><span class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">${esc(msg('loading'))}</span></span></div></div>${messageHtml}`
+        this.innerHTML = `${labelHtml}<input type="hidden" value="${esc(currentValue)}" class="tc-extended-select__hidden"><button type="button" class="${triggerCls}" role="combobox" aria-expanded="false" aria-controls="${this._listId}" aria-haspopup="listbox"${describe}${requiredAttr}${disabledAttr}><span class="tc-extended-select__trigger-label">${this._triggerLabelHtml()}</span><span class="tc-extended-select__trigger-spinner" aria-hidden="true"><span class="spinner-border spinner-border-sm"></span></span><span class="tc-extended-select__caret" aria-hidden="true">${chevronDownIcon}</span></button><div class="tc-extended-select__menu"><div class="tc-extended-select__search-wrap">${searchIconHtml}<input type="text" class="tc-extended-select__search-input" placeholder="${esc(this.searchPlaceholder)}" autocomplete="off" aria-label="${esc(msg('searchOptionsLabel'))}"></div><ul class="tc-extended-select__list" id="${this._listId}" role="listbox"${multiple ? ' aria-multiselectable="true"' : ''}>${this._renderOptions()}</ul><div class="tc-extended-select__loading-indicator" aria-live="polite" aria-label="${esc(msg('loading'))}"><span class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">${esc(msg('loading'))}</span></span></div></div>${messageHtml}`
 
         if (this.loading) this.setAttribute('aria-busy', 'true')
 
@@ -513,10 +602,10 @@ export class ExtendedSelect extends HTMLElement {
         window.addEventListener('scroll', this._repositionHandler, true)
         window.addEventListener('resize', this._repositionHandler)
 
-        // Pre-highlight selected item
-        const v = this.value
-        if (v) {
-            const idx = this._filteredItems.findIndex((i) => i.key === v)
+        // Pre-highlight the selected item — the first one, under `multiple`.
+        const selected = new Set(this._selectedKeys())
+        if (selected.size) {
+            const idx = this._filteredItems.findIndex((i) => selected.has(i.key))
             if (idx !== -1) {
                 this._activeIdx = idx
                 this._setActiveClass()
@@ -663,14 +752,52 @@ export class ExtendedSelect extends HTMLElement {
     // ── Selection ─────────────────────────────────────────────────────────────
 
     private _selectItem(key: string): void {
+        if (this.multiple) {
+            this._toggleItem(key)
+            return
+        }
         this.value = key
         // Push the new selection into the form before announcing it.
         this._syncForm()
         // Canonical change event — detail is exactly { value }.
         dispatchFieldChange(this, key)
         this.dispatchEvent(new Event('change', { bubbles: true }))
-        if (typeof this.onChange === 'function') this.onChange(key)
+        this._notifyChange(key)
         this._closeMenu()
+    }
+
+    /**
+     * Multi mode: flip one key in/out of the selection. The menu, the search
+     * query and the scroll position all stay put — only the affected rows and
+     * the trigger label are patched — so a run of picks needs one open.
+     */
+    private _toggleItem(key: string): void {
+        const keys = this.values
+        const idx = keys.indexOf(key)
+        if (idx === -1) keys.push(key)
+        else keys.splice(idx, 1)
+
+        this.value = keys.join(',')
+        // Patch rows + trigger directly; the attribute callback covers the same
+        // ground but is skipped while disconnected/uninitialised.
+        this._syncValueInDOM(this.getAttribute('value'))
+        this._syncForm()
+        dispatchFieldChange(this, keys)
+        this.dispatchEvent(new Event('change', { bubbles: true }))
+        this._notifyChange(keys)
+
+        // Clicking a row focuses the <li> (tabindex="-1"); hand focus back so
+        // typing keeps filtering and the key handler keeps its context.
+        if (this._isOpen) {
+            this.querySelector<HTMLInputElement>('.tc-extended-select__search-input')?.focus()
+        }
+    }
+
+    /** onChange is a union of the single/multi signatures — narrow at the call. */
+    private _notifyChange(value: string | string[]): void {
+        if (typeof this.onChange === 'function') {
+            ;(this.onChange as (v: string | string[]) => void)(value)
+        }
     }
 
     // ── Search ────────────────────────────────────────────────────────────────
