@@ -5,8 +5,12 @@
 @use '../foundation/tokens' as *;
 
 @keyframes tc-file-shimmer {
-    0%   { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
 }
 
 tc-file {
@@ -22,9 +26,13 @@ tc-file {
     --bs-file-gap: 0.5rem;
     --bs-file-hover-bg: var(--tc-surface-hover, var(--tc-surface-muted));
 
-    // File icon
-    --bs-file-icon-size: 1rem;
+    // File icon — glyph centred in a quiet square well so the leading edge
+    // reads as a file-type tile, matching the two-line layout height.
+    --bs-file-icon-size: 1.25rem;
     --bs-file-icon-color: var(--tc-text-muted);
+    --bs-file-icon-well-size: 2.5rem;
+    --bs-file-icon-well-bg: var(--tc-surface-muted);
+    --bs-file-icon-well-border-color: var(--tc-border);
 
     // Format badge
     --bs-file-format-bg: var(--tc-surface-muted);
@@ -48,14 +56,22 @@ tc-file {
     --bs-file-meta-font-size: 0.75rem;
     --bs-file-meta-gap: 0.375rem;
 
-    // Tag chips
-    --bs-file-chip-bg: var(--tc-surface-muted);
-    --bs-file-chip-border-color: var(--tc-border);
-    --bs-file-chip-color: var(--tc-text-muted);
-    --bs-file-chip-font-size: 0.6875rem;
-    --bs-file-chip-padding-x: 0.4375rem;
-    --bs-file-chip-padding-y: 0.125rem;
+    // Sub-row (category select + tag chips) — one shared control height so
+    // every element under the name lines up.
+    --bs-file-sub-height: 1.5rem;
+
+    // Tag chips — solid primary fill mirroring .badge.text-bg-primary, so the
+    // chips read as the standard primary badge and re-skin with the theme's
+    // primary remap. One uniform color — tag-specific colors are not rendered.
+    --bs-file-tags-gap: 0.5rem;
+    --bs-file-chip-bg: rgba(var(--bs-primary-rgb, 30, 41, 59), 1);
+    --bs-file-chip-text-color: var(--bs-primary-contrast, #fff);
+    --bs-file-chip-font-size: 0.75rem;
+    --bs-file-chip-padding-x: 0.625rem;
     --bs-file-chip-gap: 0.25rem;
+
+    // Category select (embedded tc-extended-select)
+    --bs-file-category-width: 10rem;
 
     // Menu trigger
     --bs-file-menu-size: 2rem;
@@ -73,7 +89,9 @@ tc-file {
     --bs-file-dropdown-min-width: 160px;
     --bs-file-dropdown-item-padding-x: 0.625rem;
     --bs-file-dropdown-item-padding-y: 0.4375rem;
-    --bs-file-dropdown-item-font-size: 0.8125rem;
+    // Matches --bs-extended-select-option-font-size so the tag dropdown, the
+    // actions menu, and the category menu read as one family.
+    --bs-file-dropdown-item-font-size: 0.875rem;
     --bs-file-dropdown-item-color: var(--tc-text);
     --bs-file-dropdown-item-hover-bg: var(--tc-surface-muted);
     --bs-file-dropdown-item-hover-color: var(--tc-text);
@@ -81,9 +99,10 @@ tc-file {
     --bs-file-dropdown-item-active-color: var(--tc-app-accent-contrast);
     --bs-file-dropdown-item-disabled-color: var(--tc-text-faint);
 
-    // Skeleton
+    // Skeleton — shine flows through the shared hover token so the shimmer
+    // survives dark themes (matches _skeleton.scss / _image.scss).
     --bs-file-skeleton-bg: var(--tc-surface-muted);
-    --bs-file-skeleton-shimmer: rgba(255, 255, 255, 0.6);
+    --bs-file-skeleton-shimmer: var(--tc-surface-hover, rgba(255, 255, 255, 0.6));
 }
 
 // ── Row ────────────────────────────────────────────────────────────────────
@@ -97,10 +116,13 @@ tc-file {
     background-color: var(--bs-file-bg);
     border: 1px solid var(--bs-file-border-color);
     border-radius: 0;
-    transition: background-color var(--tc-transition-fast);
+    transition:
+        background-color var(--tc-transition-fast),
+        border-color var(--tc-transition-fast);
 
     &:hover {
         background-color: var(--bs-file-hover-bg);
+        border-color: var(--tc-border-strong, var(--bs-file-border-color));
     }
 
     &--readonly {
@@ -115,13 +137,55 @@ tc-file {
 .tc-file-icon {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     flex-shrink: 0;
+    width: var(--bs-file-icon-well-size);
+    height: var(--bs-file-icon-well-size);
     color: var(--bs-file-icon-color);
+    background-color: var(--bs-file-icon-well-bg);
+    border: 1px solid var(--bs-file-icon-well-border-color);
+    border-radius: 0;
+    transition: color var(--tc-transition-fast);
 
     svg {
         width: var(--bs-file-icon-size);
         height: var(--bs-file-icon-size);
         display: block;
+    }
+}
+
+// The glyph sharpens to full ink when the row is engaged.
+.tc-file:hover .tc-file-icon {
+    color: var(--tc-text);
+}
+
+// ── Main column (name row + sub-row) ───────────────────────────────────────
+
+.tc-file-main {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.tc-file-name-row {
+    display: flex;
+    align-items: center;
+    gap: var(--bs-file-gap);
+    min-width: 0;
+}
+
+// Category select + tag chips, rendered under the name.
+.tc-file-sub {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    min-width: 0;
+
+    &--hidden {
+        display: none;
     }
 }
 
@@ -170,6 +234,16 @@ tc-file {
         outline: none;
     }
 
+    // Shrink the input to its content so the extension label hugs the name
+    // (two-line layout puts them alone on the top row). Browsers without
+    // field-sizing keep the full-width flex fallback above.
+    @supports (field-sizing: content) {
+        field-sizing: content;
+        flex: 0 1 auto;
+        width: auto;
+        max-width: 100%;
+    }
+
     &--readonly {
         // Static span — read-only state
         flex: 0 1 auto;
@@ -213,8 +287,44 @@ tc-file {
     line-height: 1;
 }
 
-.tc-file-size + .tc-file-items {
-    // Visual separator between size and item count
+// Item count is a button (fires tc-items-click) — subtle until interacted with.
+.tc-file-items {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.375rem;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    cursor: pointer;
+    transition:
+        background-color var(--tc-transition-fast),
+        color var(--tc-transition-fast);
+
+    &:hover {
+        background-color: var(--bs-file-menu-hover-bg);
+        color: var(--bs-file-menu-hover-color);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 1px;
+    }
+}
+
+.tc-file-items-icon {
+    display: inline-flex;
+    align-items: center;
+
+    svg {
+        width: 0.875rem;
+        height: 0.875rem;
+        display: block;
+    }
+}
+
+.tc-file-items + .tc-file-size {
+    // Visual separator between item count and size
     &::before {
         content: '·';
         margin-right: var(--bs-file-meta-gap);
@@ -227,27 +337,177 @@ tc-file {
 .tc-file-tags {
     display: flex;
     align-items: center;
-    gap: var(--bs-file-chip-gap);
+    gap: var(--bs-file-tags-gap);
     flex-wrap: wrap;
     flex-shrink: 0;
 }
 
 .tc-file-chip {
-    --tc-file-chip-color: var(--bs-file-chip-color);
-
     display: inline-flex;
     align-items: center;
-    padding: var(--bs-file-chip-padding-y) var(--bs-file-chip-padding-x);
+    gap: var(--bs-file-chip-gap);
+    height: var(--bs-file-sub-height);
+    padding: 0 var(--bs-file-chip-padding-x);
     font-family: var(--tc-font-sans);
     font-size: var(--bs-file-chip-font-size);
     font-weight: 500;
+    letter-spacing: 0.025em;
     line-height: 1;
-    color: var(--tc-file-chip-color);
+    color: var(--bs-file-chip-text-color);
     background-color: var(--bs-file-chip-bg);
-    border: 1px solid var(--bs-file-chip-border-color);
+    border: none;
     border-radius: 0;
     white-space: nowrap;
     user-select: none;
+}
+
+// ── Editable tags (remove buttons + add dropdown) ──────────────────────────
+
+.tc-file-chip-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 0.125rem;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    line-height: 1;
+    transition: background-color var(--tc-transition-fast);
+
+    svg {
+        width: 0.75rem;
+        height: 0.75rem;
+        display: block;
+        pointer-events: none;
+    }
+
+    // On the solid primary fill: tint with the contrast ink, never a hue of
+    // its own — keeps the chip reading as one badge.
+    &:hover {
+        background-color: color-mix(in srgb, var(--bs-file-chip-text-color) 22%, transparent);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--bs-file-chip-text-color);
+        outline-offset: 1px;
+    }
+}
+
+// The chip list groups the rendered chips; the "+" control next to it is a
+// real tc-extended-select in `multiple` mode, so the add dropdown IS the
+// category dropdown — same menu, search, keyboard handling and theming.
+.tc-file-chip-list {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-file-tags-gap);
+    flex-wrap: wrap;
+    min-width: 0;
+
+    &:empty {
+        display: none;
+    }
+}
+
+tc-extended-select.tc-file-tags-select {
+    flex: 0 0 auto;
+    width: auto;
+
+    --bs-extended-select-trigger-height: var(--bs-file-sub-height);
+    --bs-extended-select-trigger-bg: transparent;
+    --bs-extended-select-trigger-border: 1px solid var(--tc-border);
+
+    // The reserved help/error slot has no role inside the compact sub-row.
+    .tc-field-message {
+        display: none;
+    }
+
+    // Icon-only "+" trigger at chip scale.
+    .tc-extended-select__trigger {
+        height: var(--bs-file-sub-height);
+        min-height: var(--bs-file-sub-height);
+        padding: 0 0.375rem;
+        gap: 0;
+        color: var(--tc-text-muted);
+
+        &:hover {
+            background-color: var(--tc-surface-muted);
+            color: var(--tc-text);
+        }
+    }
+
+    // Selection state reads from the chips beside the trigger; the label text
+    // stays in the tree for assistive tech only.
+    .tc-extended-select__trigger-label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    // The caret slot carries the "+" glyph (swapped in by tc-file) and is the
+    // whole visible trigger — never rotate it on open.
+    .tc-extended-select__caret {
+        margin-left: 0;
+        color: inherit;
+
+        svg {
+            width: 0.875rem;
+            height: 0.875rem;
+        }
+    }
+
+    .tc-extended-select__trigger[aria-expanded='true'] .tc-extended-select__caret {
+        transform: none;
+    }
+
+    // The select pins the menu to its trigger's width — useless at "+" size;
+    // min-width beats the inline width and restores a usable list.
+    .tc-extended-select__menu {
+        min-width: var(--bs-file-dropdown-min-width);
+    }
+}
+
+// ── Category select (embedded tc-extended-select, compact) ─────────────────
+
+tc-extended-select.tc-file-category {
+    flex: 0 0 auto;
+    width: var(--bs-file-category-width);
+
+    // Compact sub-row trigger: shared height, muted surface, standard 1px
+    // hairline (not the strong control border). Deliberately NOT the chip
+    // fill — the select is a control, the chips are labels.
+    --bs-extended-select-trigger-height: var(--bs-file-sub-height);
+    --bs-extended-select-trigger-bg: var(--tc-surface-muted);
+    --bs-extended-select-trigger-border: 1px solid var(--tc-border);
+
+    // The reserved help/error slot has no role inside the compact sub-row.
+    .tc-field-message {
+        display: none;
+    }
+
+    // Chip-scale trigger so it lines up with the tags beside it.
+    .tc-extended-select__trigger {
+        height: var(--bs-file-sub-height);
+        min-height: var(--bs-file-sub-height);
+        padding: 0 var(--bs-file-chip-padding-x);
+        font-size: var(--bs-file-chip-font-size);
+        font-weight: 500;
+        line-height: 1;
+        gap: 0.375rem;
+    }
+
+    .tc-extended-select__caret svg {
+        width: 0.75rem;
+        height: 0.75rem;
+    }
 }
 
 // ── Menu trigger ───────────────────────────────────────────────────────────
@@ -261,7 +521,8 @@ tc-file {
     }
 }
 
-.tc-file-menu {
+.tc-file-menu,
+.tc-file-action {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -274,7 +535,9 @@ tc-file {
     color: var(--bs-file-menu-color);
     cursor: pointer;
     line-height: 1;
-    transition: background-color var(--tc-transition-fast), color var(--tc-transition-fast);
+    transition:
+        background-color var(--tc-transition-fast),
+        color var(--tc-transition-fast);
 
     svg {
         width: var(--bs-file-menu-icon-size);
@@ -301,6 +564,20 @@ tc-file {
 
 // ── Dropdown panel ─────────────────────────────────────────────────────────
 
+// Same entrance pattern as the tag/category dropdowns — one menu family.
+// Keyframes (not a visibility transition) so items are focusable the instant
+// .show lands.
+@keyframes tc-file-dropdown-in {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .tc-file-menu-dropdown {
     position: absolute;
     top: calc(100% + 2px);
@@ -308,7 +585,7 @@ tc-file {
     z-index: var(--tc-z-dropdown, 1060);
     display: none;
     min-width: var(--bs-file-dropdown-min-width);
-    padding: 0.25rem;
+    padding: 0.25rem 0;
     background-color: var(--bs-file-dropdown-bg);
     border: 1px solid var(--bs-file-dropdown-border-color);
     border-radius: 0;
@@ -316,6 +593,7 @@ tc-file {
 
     &.show {
         display: block;
+        animation: tc-file-dropdown-in var(--tc-transition-base, 0.15s) ease-out;
     }
 }
 
@@ -335,7 +613,9 @@ tc-file {
     border: none;
     border-radius: 0;
     cursor: pointer;
-    transition: background-color var(--tc-transition-fast), color var(--tc-transition-fast);
+    transition:
+        background-color var(--tc-transition-fast),
+        color var(--tc-transition-fast);
 
     &:hover,
     &:focus-visible {
@@ -370,6 +650,11 @@ tc-file {
     flex-shrink: 0;
 }
 
+// Standalone trailing action button (not inside the menu wrap)
+.tc-file-action {
+    flex-shrink: 0;
+}
+
 // ── Loading skeleton ───────────────────────────────────────────────────────
 
 .tc-file-skeleton {
@@ -386,8 +671,9 @@ tc-file {
     animation: tc-file-shimmer 1.5s infinite linear;
 
     &--icon {
-        width: 1rem;
-        height: 1rem;
+        // Matches the loaded icon well so the row doesn't jump on load.
+        width: var(--bs-file-icon-well-size);
+        height: var(--bs-file-icon-well-size);
     }
 
     &--name {
@@ -405,7 +691,9 @@ tc-file {
 // ── Touch targets ──────────────────────────────────────────────────────────
 
 @media (pointer: coarse) {
-    .tc-file-menu {
+    .tc-file-menu,
+    .tc-file-action,
+    .tc-file-chip-remove {
         min-width: 44px;
         min-height: 44px;
     }
@@ -422,9 +710,15 @@ tc-file {
         transition: none;
     }
 
+    .tc-file-icon,
     .tc-file-menu,
+    .tc-file-action,
     .tc-file-menu-item {
         transition: none;
+    }
+
+    .tc-file-menu-dropdown {
+        animation: none;
     }
 
     .tc-file-skeleton {

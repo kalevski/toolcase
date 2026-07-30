@@ -149,7 +149,7 @@ export interface ToolcaseIntrinsicElements {
     'tc-faq-list': TcProps<{ 'schema'?: boolean; 'title'?: string | number; onTcToggle?: (e: CustomEvent) => void }>
     'tc-feature-card': TcProps<{ 'description'?: string | number; 'eyebrow'?: string | number; 'icon'?: string | number; 'inline'?: boolean; 'size'?: string | number; 'title'?: string | number }>
     'tc-feature-matrix': TcProps<{ 'title'?: string | number }>
-    'tc-file': TcProps<{ onTcMenuItemClick?: (e: CustomEvent) => void; onTcNameChange?: (e: CustomEvent) => void }>
+    'tc-file': TcProps<{ 'action-icon'?: string | number; 'action-label'?: string | number; 'category'?: string | number; 'category-placeholder'?: string | number; 'editable-tags'?: boolean; 'extension'?: string | number; 'format'?: string | number; 'icon'?: string | number; 'items'?: string | number; 'loading'?: boolean; 'name'?: string | number; 'readonly'?: boolean; 'size'?: string | number; onTcAction?: (e: CustomEvent) => void; onTcCategoryChange?: (e: CustomEvent) => void; onTcItemsClick?: (e: CustomEvent) => void; onTcMenuItemClick?: (e: CustomEvent) => void; onTcNameChange?: (e: CustomEvent) => void; onTcTagsChange?: (e: CustomEvent) => void }>
     'tc-file-dropzone': TcProps<{ onTcFiles?: (e: CustomEvent) => void }>
     'tc-file-tags': TcProps<{ 'readonly'?: boolean; onTcChange?: (e: CustomEvent) => void }>
     'tc-floating-label': TcProps<{ 'for'?: string | number; 'label'?: string | number }>
@@ -183,7 +183,7 @@ export interface ToolcaseIntrinsicElements {
     'tc-icon-badge': TcProps<{ 'bg'?: string | number; 'color'?: string | number; 'glyph'?: string | number; 'size'?: string | number }>
     'tc-icon-button': TcProps<{ 'disabled'?: boolean; 'icon'?: string | number; 'label'?: string | number; 'outline'?: boolean; 'show-label'?: string | number; 'size'?: string | number; 'variant'?: string | number; onTcClick?: (e: CustomEvent) => void }>
     'tc-icon-picker': TcProps<{ 'columns'?: string | number; 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'label'?: string | number; 'loading'?: boolean; 'max-height'?: string | number; 'name'?: string | number; 'required'?: boolean; 'state'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-image': TcProps<{ onTcError?: (e: CustomEvent) => void; onTcLoad?: (e: CustomEvent) => void }>
+    'tc-image': TcProps<{ 'alt'?: string | number; 'aspect-ratio'?: string | number; 'object-fit'?: string | number; 'src'?: string | number; onTcError?: (e: CustomEvent) => void; onTcLoad?: (e: CustomEvent) => void }>
     'tc-image-crop': TcProps<{ 'aspect-ratio'?: string | number; 'circular'?: boolean; 'src'?: string | number; onTcCrop?: (e: CustomEvent) => void; onTcError?: (e: CustomEvent) => void }>
     'tc-infinite-scroll': TcProps<{ 'has-more'?: boolean; 'loading'?: boolean; 'root-margin'?: string | number; 'threshold'?: string | number; onTcLoadMore?: (e: CustomEvent) => void }>
     'tc-input': TcProps<{ 'autocomplete'?: string | number; 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'inputmode'?: string | number; 'label'?: string | number; 'max'?: string | number; 'maxlength'?: string | number; 'min'?: string | number; 'minlength'?: string | number; 'name'?: string | number; 'pattern'?: string | number; 'placeholder'?: string | number; 'readonly'?: boolean; 'required'?: boolean; 'size'?: string | number; 'state'?: string | number; 'step'?: string | number; 'type'?: string | number; 'value'?: string | number }>

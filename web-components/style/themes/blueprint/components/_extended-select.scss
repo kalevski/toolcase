@@ -132,6 +132,18 @@ tc-theme[name='blueprint'],
         }
     }
 
+    // Multi mode keeps the plain paper row (the checkbox carries the state, no
+    // pink fill) — restore ink on selected labels/descriptions.
+    tc-extended-select[multiple] .tc-extended-select__option--selected {
+        .tc-extended-select__option-label {
+            color: inherit;
+        }
+
+        .tc-extended-select__option-desc {
+            color: var(--bp-text-muted);
+        }
+    }
+
     // ── No-results message ────────────────────────────────────────────────────
 
     .tc-extended-select__no-results {

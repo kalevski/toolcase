@@ -29,12 +29,8 @@ tc-theme[name='blueprint'],
         // ── Meta (size / item count) — muted mono ink ────────────────────────
         --bs-file-meta-color: var(--bp-text-muted);
 
-        // ── Tag chips — violet-soft fill + violet-fg text ────────────────────
-        // Violet is the "supporting" accent in the arcade rotation; chips are
-        // non-actionable taxonomy labels — supporting accent is the right slot.
-        --bs-file-chip-bg: var(--bp-violet-soft);
-        --bs-file-chip-border-color: var(--bp-border-chip);
-        --bs-file-chip-color: var(--bp-violet-fg);
+        // ── Tag chips — no override: chips mirror .badge.text-bg-primary, so
+        // they pick up blueprint's pink primary via the --bs-primary-rgb remap.
 
         // ── Menu trigger — muted default, pink active (primary CTA slot) ─────
         --bs-file-menu-color: var(--bp-text-faint);

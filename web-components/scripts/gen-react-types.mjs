@@ -37,7 +37,7 @@ const tagToClass = []
 // register.ts wraps registration in a local `define(tag, ctor)` helper, so match
 // both the wrapper calls `define('tc-x', Class)` and bare `customElements.define`.
 for (const m of register.matchAll(
-    /(?:customElements\.)?\bdefine\(\s*'(tc-[a-z0-9-]+)'\s*,\s*(?:class\s+extends\s+([A-Za-z0-9_]+)|([A-Za-z0-9_]+))/g
+    /(?:customElements\.)?\bdefine\(\s*'(tc-[a-z0-9-]+)'\s*,\s*(?:class\s+extends\s+([A-Za-z0-9_]+)|([A-Za-z0-9_]+))/g,
 )) {
     tagToClass.push({ tag: m[1], cls: m[2] || m[3] })
 }
@@ -85,6 +85,19 @@ for (const dir of [srcDir, join(srcDir, 'internal')]) {
     }
 }
 
+// Resolve an exported name to the declared class name, following export aliases
+// like `export { TcFile as File }` (used where the natural class name collides
+// with a DOM global).
+const declaredClassName = (src, exportedName) => {
+    for (const m of src.matchAll(/export\s*\{([^}]+)\}/g)) {
+        for (const spec of m[1].split(',')) {
+            const parts = spec.trim().split(/\s+as\s+/)
+            if (parts.length === 2 && parts[1].trim() === exportedName) return parts[0].trim()
+        }
+    }
+    return exportedName
+}
+
 // Extract a class's observed attributes. Indexes every class declaration in the
 // file, slices the target class's body up to the next declaration, then reads its
 // `observedAttributes` return array.
@@ -97,13 +110,16 @@ const attrsFor = (localName) => {
     } catch {
         return []
     }
+    const className = declaredClassName(src, entry.realName)
     // Anchored to line start so the word "class" inside comments/strings can't
     // register as a declaration and truncate the real class's body slice.
     const decls = [...src.matchAll(/^(?:export\s+)?(?:abstract\s+)?class\s+(\w+)/gm)]
-    const i = decls.findIndex(d => d[1] === entry.realName)
+    const i = decls.findIndex((d) => d[1] === className)
     if (i === -1) return []
     const body = src.slice(decls[i].index, i + 1 < decls.length ? decls[i + 1].index : undefined)
-    const obs = body.match(/observedAttributes\s*\(\s*\)\s*:\s*[^{]*\{[\s\S]*?\breturn\s*(\[[\s\S]*?\])/)
+    const obs = body.match(
+        /observedAttributes\s*\(\s*\)\s*:\s*[^{]*\{[\s\S]*?\breturn\s*(\[[\s\S]*?\])/,
+    )
     if (!obs) return []
     const attrs = []
     for (const s of obs[1].matchAll(/['"]([^'"]+)['"]/g)) attrs.push(s[1])
@@ -118,7 +134,8 @@ const attrsFor = (localName) => {
 
 // Collect tc-* event names from a source string.
 const collectEvents = (src, set) => {
-    for (const m of src.matchAll(/(?:this\.emit|\.emit)\s*\(\s*'(tc-[a-z][a-z0-9-]*)'/g)) set.add(m[1])
+    for (const m of src.matchAll(/(?:this\.emit|\.emit)\s*\(\s*'(tc-[a-z][a-z0-9-]*)'/g))
+        set.add(m[1])
     for (const m of src.matchAll(/new\s+CustomEvent\s*\(\s*'(tc-[a-z][a-z0-9-]*)'/g)) set.add(m[1])
 }
 
@@ -147,7 +164,11 @@ const eventsFor = (localName) => {
 
 // Convert 'tc-foo-bar' -> 'onTcFooBar'
 const eventToProp = (name) =>
-    'on' + name.split('-').map(s => s[0].toUpperCase() + s.slice(1)).join('')
+    'on' +
+    name
+        .split('-')
+        .map((s) => s[0].toUpperCase() + s.slice(1))
+        .join('')
 
 // Identify which observed attributes are boolean (presence-based) for a class.
 // Heuristic: a boolean-attribute getter returns `this.hasAttribute('name')` rather
@@ -174,10 +195,14 @@ const booleanAttrsFor = (localName) => {
         //   1) single-line:        `return … this.hasAttribute('name')`  (no newline crossing)
         //   2) parenthesised body: `return (\n  … ?? this.hasAttribute('name')\n)`
         // A bare `return` is never followed by `(`, so case 2 can't bridge into a later guard.
-        for (const m of text.matchAll(/return\s+[^\n;{}]*?this\.hasAttribute\s*\(\s*['"]([^'"]+)['"]\s*\)/g)) {
+        for (const m of text.matchAll(
+            /return\s+[^\n;{}]*?this\.hasAttribute\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
+        )) {
             boolSet.add(m[1])
         }
-        for (const m of text.matchAll(/return\s*\([^;{}]*?this\.hasAttribute\s*\(\s*['"]([^'"]+)['"]\s*\)/g)) {
+        for (const m of text.matchAll(
+            /return\s*\([^;{}]*?this\.hasAttribute\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
+        )) {
             boolSet.add(m[1])
         }
     }
@@ -189,7 +214,12 @@ const booleanAttrsFor = (localName) => {
 }
 
 const components = tagToClass
-    .map(({ tag, cls }) => ({ tag, attrs: attrsFor(cls), events: eventsFor(cls), boolAttrs: booleanAttrsFor(cls) }))
+    .map(({ tag, cls }) => ({
+        tag,
+        attrs: attrsFor(cls),
+        events: eventsFor(cls),
+        boolAttrs: booleanAttrsFor(cls),
+    }))
     .sort((a, b) => a.tag.localeCompare(b.tag))
 
 const lines = []
@@ -217,7 +247,7 @@ lines.push(`>`)
 lines.push(``)
 lines.push(`export interface ToolcaseIntrinsicElements {`)
 for (const { tag, attrs, events, boolAttrs } of components) {
-    const attrParts = attrs.map(a => {
+    const attrParts = attrs.map((a) => {
         // Boolean (presence-based) attributes must not accept string | number, because
         // React sets the attribute string for any truthy value, so `disabled={false}`
         // would produce `disabled="false"` and keep hasAttribute('disabled') returning true.
@@ -225,7 +255,7 @@ for (const { tag, attrs, events, boolAttrs } of components) {
         const type = boolAttrs.has(a) ? 'boolean' : 'string | number'
         return `'${a}'?: ${type}`
     })
-    const eventParts = events.map(e => `${eventToProp(e)}?: (e: CustomEvent) => void`)
+    const eventParts = events.map((e) => `${eventToProp(e)}?: (e: CustomEvent) => void`)
     const allParts = [...attrParts, ...eventParts]
     if (allParts.length === 0) {
         lines.push(`    '${tag}': TcProps`)

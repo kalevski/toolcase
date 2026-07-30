@@ -15,12 +15,34 @@ const MENU_ITEMS = [
     { key: 'delete', label: 'Delete', icon: 'Trash2' },
 ]
 
+const CATEGORIES = [
+    { key: 'document', label: 'Document', description: 'Reports, contracts, notes' },
+    { key: 'media', label: 'Media', description: 'Images, video, audio' },
+    { key: 'archive', label: 'Archive', description: 'Compressed bundles' },
+    { key: 'source', label: 'Source', description: 'Code and configuration' },
+]
+
+// Stable references — useTc reassigns an instance prop whenever its reference
+// changes, and reassigning tagIds re-renders the chips (discarding in-place
+// edits). Inline array literals here would reset the tags on every React render.
+const INITIAL_TAG_IDS = ['design', 'review']
+
+function downloadDemoFile(name: string) {
+    const blob = new Blob([`toolcase tc-file demo download: ${name}\n`], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${name}.txt`
+    a.click()
+    URL.revokeObjectURL(url)
+}
+
 function EditableExample() {
     const [log, setLog] = useState<string[]>([])
     const ref = useTc<HTMLElement>(
         {
             tags: TAGS,
-            tagIds: ['design', 'review'],
+            tagIds: INITIAL_TAG_IDS,
             menuItems: MENU_ITEMS,
         },
         {
@@ -44,6 +66,88 @@ function EditableExample() {
                 size="2621440"
                 items="12"
             />
+            {log.length > 0 && (
+                <ul className="list-unstyled mb-0 small text-muted">
+                    {log.map((entry, i) => (
+                        <li key={i}>
+                            <code>{entry}</code>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+    )
+}
+
+function FullFeaturedExample() {
+    // Controlled state: tags and category live in React and flow back into the
+    // element via useTc, so the demo survives re-renders without losing edits.
+    const [tagIds, setTagIds] = useState<string[]>(['design'])
+    const [category, setCategory] = useState('media')
+    const [name, setName] = useState('brand-assets')
+    const [log, setLog] = useState<string[]>([])
+    const push = (entry: string) => setLog((prev) => [entry, ...prev].slice(0, 5))
+    const ref = useTc<HTMLElement>(
+        {
+            tags: TAGS,
+            tagIds,
+            categories: CATEGORIES,
+            menuItems: MENU_ITEMS,
+        },
+        {
+            'tc-tags-change': (e: CustomEvent) => {
+                setTagIds(e.detail.tagIds)
+                push(`tags → [${e.detail.tagIds.join(', ')}]`)
+            },
+            'tc-category-change': (e: CustomEvent) => {
+                setCategory(e.detail.category)
+                push(`category → "${e.detail.category}"`)
+            },
+            'tc-name-change': (e: CustomEvent) => {
+                setName(e.detail.name)
+                push(`renamed → "${e.detail.name}"`)
+            },
+            'tc-menu-item-click': (e: CustomEvent) => {
+                push(`menu → "${e.detail.key}"`)
+            },
+            'tc-items-click': (e: CustomEvent) => {
+                push(`items clicked → ${e.detail.items} child files`)
+            },
+            'tc-action': () => {
+                downloadDemoFile('brand-assets')
+                push('download started (demo text file)')
+            },
+        },
+    )
+
+    const categoryLabel = CATEGORIES.find((c) => c.key === category)?.label ?? category
+    const tagLabels = tagIds.map((id) => TAGS.find((t) => t.id === id)?.label ?? id)
+
+    return (
+        <div className="d-flex flex-column gap-3">
+            {/* @ts-ignore */}
+            <tc-file
+                ref={ref}
+                name="brand-assets"
+                extension=".zip"
+                format="ZIP"
+                size="15728640"
+                items="48"
+                editable-tags
+                category={category}
+                category-placeholder="Category"
+                action-icon="download"
+                action-label="Download"
+            />
+            <p className="small text-muted mb-0">
+                Extension-derived leading icon; name on top with compact category select and
+                editable tag chips (× to remove, + to add) underneath; clickable child-file count,
+                size, menu, and a trailing download button (downloads a small demo text file).
+            </p>
+            <p className="small mb-0">
+                React state: <code>name = {name}</code> · <code>category = {categoryLabel}</code> ·{' '}
+                <code>tags = [{tagLabels.join(', ')}]</code>
+            </p>
             {log.length > 0 && (
                 <ul className="list-unstyled mb-0 small text-muted">
                     {log.map((entry, i) => (
@@ -141,6 +245,10 @@ const FileDemo: React.FC = () => (
                     <div className="d-flex flex-column gap-4 mt-4">
                         <tc-section-card title="Editable file (with tags and menu)">
                             <EditableExample />
+                        </tc-section-card>
+
+                        <tc-section-card title="Full-featured (editable tags, category, action button)">
+                            <FullFeaturedExample />
                         </tc-section-card>
 
                         <tc-section-card title="Readonly variant">
