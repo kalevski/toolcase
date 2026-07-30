@@ -15765,7 +15765,7 @@ None. All content is driven by attributes and JS properties.
 
 ### tc-file
 
-Full-featured file entry row with an inline-editable name, format badge, human-formatted byte size, nested item count, tag chips, and an action menu. Sharp corners (`border-radius: 0`); slate neutrals throughout. All content is driven by attributes and JS properties — no slots.
+Full-featured file entry row. Layout: an extension-aware leading icon on the far left; a two-line main column — inline-editable name (with format badge) on top, a compact embedded category select (`tc-extended-select`) and tag chips (optionally editable in place) underneath; then on the right a clickable folder-icon child-file count, human-formatted byte size, an action menu, and an optional trailing action button. Every feature is optional — omit its attribute/property and it does not render (the sub-row collapses when there is no category and no tags). Sharp corners (`border-radius: 0`); slate neutrals throughout. All content is driven by attributes and JS properties — no slots.
 
 **Tag:** `tc-file`
 
@@ -15774,31 +15774,44 @@ Full-featured file entry row with an inline-editable name, format badge, human-f
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `name` | string | — | Base filename (editable inline when not `readonly`) |
-| `extension` | string | — | File extension with optional leading dot, e.g. `".pdf"` or `"pdf"`. Displayed as a mono label beside the name |
+| `extension` | string | — | File extension with optional leading dot, e.g. `".pdf"` or `"pdf"`. Displayed as a mono label beside the name; also drives the leading icon (image/video/audio/archive/code/document/spreadsheet/… extensions map to matching lucide icons; unknown extensions fall back to the generic file icon) |
 | `format` | string | — | Format label for the badge chip, e.g. `"PDF"`. Rendered uppercase in monospace |
-| `size` | number (string attr) | `0` | File size in bytes — rendered human-friendly (e.g. `1.2 MB`). `0` hides the size |
-| `items` | number (string attr) | `0` | Nested item count. `0` hides the items label |
-| `readonly` | boolean | `false` | Disables name editing and hides the action menu |
+| `size` | number (string attr) | `0` | File size in bytes — rendered human-friendly (e.g. `1.2 MB`) on the right side of the row. `0` hides the size |
+| `items` | number (string attr) | `0` | Nested item count — rendered as a clickable folder icon + number (fires `tc-items-click`, works in `readonly` too). `0` hides it |
+| `icon` | string | — | Explicit lucide icon name for the leading icon. Overrides the extension-derived icon |
+| `editable-tags` | boolean | `false` | Enables in-place tag editing: each chip gets a × remove button and a compact "+" trigger opens an embedded multi-mode `tc-extended-select` over the `tags` definitions — the same searchable dropdown as the category select (checkbox rows, menu stays open while picking). Ignored under `readonly` |
+| `category` | string | — | Selected category key, resolved against the `categories` items. Reflected when the user picks in the embedded select |
+| `category-placeholder` | string | `Category` | Placeholder for the embedded category select |
+| `action-icon` | string | — | Lucide icon name for a single trailing action button at the far right of the row. Absent → no button. Stays functional under `readonly` (view-level action) |
+| `action-label` | string | `Action` | Accessible label (`aria-label`) for the trailing action button |
+| `readonly` | boolean | `false` | Disables name editing, tag editing and the category select, and hides the action menu |
 | `loading` | boolean | `false` | Shows animated skeleton placeholder rows instead of content |
 
 **JS Properties**
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `tags` | `FileTag[]` | `[]` | Tag definitions — each `{ id: string, label: string, color?: string }`. Used to resolve `tagIds` to visible chips |
+| `tags` | `FileTag[]` | `[]` | Tag definitions — each `{ id: string, label: string, color?: string }`. Used to resolve `tagIds` to visible chips and as the pool for the `editable-tags` add dropdown. `color` is accepted for API compatibility but not rendered — chips always use the uniform primary-badge fill |
 | `tagIds` | `string[]` | `[]` | IDs of the tags to render as chips (resolved against `tags`) |
 | `menuItems` | `ActionItem[]` | `[]` | Action menu items — each `{ key: string, label: string, icon?: string, disabled?: boolean }`. Empty array hides the menu button |
+| `categories` | `ExtendedSelectItem[]` | `[]` | Category options — each `{ key: string, label: string, description?: string }`. Non-empty renders an embedded single-select `tc-extended-select` in the row; empty hides it |
 | `onNameChange` | `(name: string) => void \| null` | `null` | Callback invoked alongside `tc-name-change` when the user commits a rename |
-| `onTagsChange` | `(tagIds: string[]) => void \| null` | `null` | Callback invoked alongside `tc-tags-change` |
+| `onTagsChange` | `(tagIds: string[]) => void \| null` | `null` | Callback invoked alongside `tc-tags-change` when tags are added/removed in place |
 | `onMenuItemClick` | `(key: string) => void \| null` | `null` | Callback invoked alongside `tc-menu-item-click` when a menu item is activated |
+| `onCategoryChange` | `(category: string) => void \| null` | `null` | Callback invoked alongside `tc-category-change` when a category is picked |
+| `onAction` | `(() => void) \| null` | `null` | Callback invoked alongside `tc-action` when the trailing action button is clicked |
+| `onItemsClick` | `(items: number) => void \| null` | `null` | Callback invoked alongside `tc-items-click` when the child-file count button is clicked |
 
 **Events**
 
 | Event | Detail | Description |
 |-------|--------|-------------|
 | `tc-name-change` | `{ name: string }` | Fired (bubbles, composed) when the user commits a filename edit via Enter or blur. Escape cancels without firing |
-| `tc-tags-change` | `{ tagIds: string[] }` | Fired (bubbles, composed) when the selected tag set changes |
+| `tc-tags-change` | `{ tagIds: string[] }` | Fired (bubbles, composed) when the user adds or removes a tag via the editable-tags UI |
 | `tc-menu-item-click` | `{ key: string }` | Fired (bubbles, composed) when a menu item is clicked or activated via keyboard |
+| `tc-category-change` | `{ category: string }` | Fired (bubbles, composed) when the user picks a category in the embedded select |
+| `tc-action` | `{}` | Fired (bubbles, composed) when the trailing action button is clicked |
+| `tc-items-click` | `{ items: number }` | Fired (bubbles, composed) when the child-file count button is clicked |
 
 **Slots**
 
@@ -15814,8 +15827,11 @@ None. All content is driven by attributes and JS properties.
 | `--bs-file-padding-y` | `0.625rem` | Vertical row padding |
 | `--bs-file-gap` | `0.5rem` | Gap between row children |
 | `--bs-file-hover-bg` | `var(--tc-surface-hover)` | Row hover fill |
-| `--bs-file-icon-size` | `1rem` | Leading file icon size |
+| `--bs-file-icon-size` | `1.25rem` | Leading file icon glyph size |
 | `--bs-file-icon-color` | `var(--tc-text-muted)` | Leading file icon color |
+| `--bs-file-icon-well-size` | `2.5rem` | Square well behind the leading icon |
+| `--bs-file-icon-well-bg` | `var(--tc-surface-muted)` | Icon well fill |
+| `--bs-file-icon-well-border-color` | `var(--tc-border)` | Icon well hairline |
 | `--bs-file-format-bg` | `var(--tc-surface-muted)` | Format badge fill |
 | `--bs-file-format-color` | `var(--tc-text)` | Format badge text color |
 | `--bs-file-format-border-color` | `var(--tc-border)` | Format badge hairline |
@@ -15826,8 +15842,11 @@ None. All content is driven by attributes and JS properties.
 | `--bs-file-ext-font-size` | `0.75rem` | Extension label font size |
 | `--bs-file-meta-color` | `var(--tc-text-muted)` | Size/items meta text color |
 | `--bs-file-meta-font-size` | `0.75rem` | Size/items meta font size |
-| `--bs-file-chip-bg` | `var(--tc-surface-muted)` | Tag chip background |
-| `--bs-file-chip-color` | `var(--tc-text-muted)` | Tag chip text/border color (overridden per-chip via `--tc-file-chip-color`) |
+| `--bs-file-chip-bg` | `rgba(var(--bs-primary-rgb), 1)` | Tag chip fill — mirrors `.badge.text-bg-primary` |
+| `--bs-file-sub-height` | `1.5rem` | Shared height of the sub-row controls (tag chips, add button, category trigger) |
+| `--bs-file-chip-text-color` | `var(--bs-primary-contrast)` | Tag chip text color |
+| `--bs-file-tags-gap` | `0.5rem` | Gap between tag chips |
+| `--bs-file-category-width` | `10rem` | Width of the embedded category select |
 | `--bs-file-menu-size` | `2rem` | Menu trigger button square size |
 | `--bs-file-menu-color` | `var(--tc-text-muted)` | Menu icon color |
 | `--bs-file-menu-hover-bg` | `var(--tc-surface-muted)` | Menu trigger hover fill |
@@ -15839,8 +15858,8 @@ None. All content is driven by attributes and JS properties.
 <script>
   const el = document.querySelector('tc-file')
   el.tags = [
-    { id: 'design', label: 'Design', color: '#0ea5e9' },
-    { id: 'review', label: 'Review', color: '#f59e0b' },
+    { id: 'design', label: 'Design' },
+    { id: 'review', label: 'Review' },
   ]
   el.tagIds = ['design', 'review']
   el.menuItems = [
@@ -15849,6 +15868,29 @@ None. All content is driven by attributes and JS properties.
   ]
   el.addEventListener('tc-name-change', e => console.log('rename:', e.detail.name))
   el.addEventListener('tc-menu-item-click', e => console.log('menu:', e.detail.key))
+</script>
+
+<!-- Full-featured: editable tags, category select, item count, trailing action button -->
+<tc-file
+  name="brand-assets" extension=".zip" format="ZIP" size="15728640" items="48"
+  editable-tags category="media" category-placeholder="Category"
+  action-icon="download" action-label="Download"
+></tc-file>
+<script>
+  const full = document.querySelector('tc-file')
+  full.tags = [
+    { id: 'design', label: 'Design', color: '#0ea5e9' },
+    { id: 'review', label: 'Review', color: '#f59e0b' },
+  ]
+  full.tagIds = ['design']
+  full.categories = [
+    { key: 'document', label: 'Document' },
+    { key: 'media', label: 'Media' },
+    { key: 'archive', label: 'Archive' },
+  ]
+  full.addEventListener('tc-tags-change', e => console.log('tags:', e.detail.tagIds))
+  full.addEventListener('tc-category-change', e => console.log('category:', e.detail.category))
+  full.addEventListener('tc-action', () => console.log('download clicked'))
 </script>
 
 <!-- Readonly variant -->
