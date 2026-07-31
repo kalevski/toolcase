@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, DashboardContent, DashboardSidebar, Login, Container, Row, Col, Spacer, Stack), content (Accordion, AccordionItem, ActionHeader, ActionItems, ActionRowList, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, Leaderboard, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EcosystemMap, EmptyState, GameShowcaseCard, GithubStarsCard, GoodFirstIssues, Group, Hero, HeroStatsBar, Heading, Image, InfiniteScroll, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, Marquee, MetricTile, MetricGrid, MigrationGuide, PageFooter, Panel, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, File, UserPanel, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, ScoreDisplay, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, DataList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, FAQList, FeatureMatrix, Text, VersionLabel, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, DebugOverlay, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, IconPicker, DatePicker, EarlySignupForm, EditableText, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, MultiCardSelect, NewsletterSignup, Option, Radio, RadioGroup, Range, RangeSlider, DeadzoneSlider, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, MobileShell, AppBar, SwipePager, StepPager, DashboardContent, DashboardSidebar, Login, Container, Row, Col, Spacer, Stack), content (Accordion, AccordionItem, ActionHeader, ActionItems, ActionRowList, AddSlot, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, Leaderboard, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EcosystemMap, EmptyState, GameShowcaseCard, GithubStarsCard, GoodFirstIssues, Group, Hero, HeroStatsBar, Heading, Image, InfiniteScroll, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, Marquee, MetricTile, MetricGrid, MigrationGuide, PageFooter, Panel, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, File, UserPanel, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, ScoreDisplay, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, DataList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, FAQList, FeatureMatrix, Text, VersionLabel, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, PageTabs, TabDock, DayStrip, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, DebugOverlay, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, IconPicker, DatePicker, EarlySignupForm, EditableText, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, MultiCardSelect, NewsletterSignup, Option, Radio, RadioGroup, Range, RangeSlider, DeadzoneSlider, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -79,6 +79,11 @@ configureMessages({
 | `loading` | `Loading…` | spinners, skeletons, charts, tables |
 | `noData` | `No data` | `tc-table` empty default + charts |
 | `close` | `Close` | close buttons (modal, offcanvas, toast, alert, drawer, …) |
+| `back` | `Back` | back affordances — `tc-app-bar`'s chevron, `tc-nav-button kind="back"` |
+| `next` | `Next` | `tc-step-pager`'s advance button |
+| `done` | `Done` | `tc-step-pager`'s advance button on the last step |
+| `tip` | `Tip` | `tc-step-pager`'s hint eyebrow |
+| `screenAwake` | `Screen stays awake` | `tc-step-pager`'s wake-lock chip |
 | `clear` | `Clear` | reserved |
 | `filtersLabel` | `Filters` | `tc-advanced-table` filter toolbar |
 | `toggleSidebarLabel` | `Toggle sidebar` | reserved |
@@ -87,15 +92,22 @@ configureMessages({
 | `paginationNext` | `Next` | `tc-pagination` |
 | `paginationRange` | `{start}–{end} of {total}` | `tc-advanced-table` pagination summary |
 | `stepsComplete` | `{completed} of {total} complete` | reserved formatter |
+| `stepOfTotal` | `Step {current} of {total}` | `tc-step-pager`'s live position announcer |
 | `starsRating` | `{value} out of {max} stars` | reserved formatter |
 | `selectedCount` | `{count} selected` | `tc-extended-select[multiple]` — trigger summary past three picks |
+| `dayStateEmpty` | `Nothing planned` | `tc-day-strip` — the `empty` state, in the day's accessible name |
+| `dayStatePlanned` | `Planned` | `tc-day-strip` — the `planned` state |
+| `dayStatePartial` | `Partly planned` | `tc-day-strip` — the `partial` state |
+| `dayStateToday` | `Today` | `tc-day-strip` — the `today` state |
+| `dayStateOver` | `Over target` | `tc-day-strip` — the `over` state |
 | `fileDropPrompt` | `Drag & drop files here or click to browse` | `tc-file-dropzone` |
 | `fileDropLabel` | `Upload files — drag and drop or click to browse` | `tc-file-dropzone` |
 | `fileSelectLabel` | `Select files to upload` | `tc-file-dropzone` |
 
 Notes:
 
-- Parameterised keys (`paginationRange`, `stepsComplete`, `starsRating`, `selectedCount`) accept either a `{token}` template string or a formatter function (`(params) => string`) — functions get full control over pluralisation and word order.
+- Parameterised keys (`paginationRange`, `stepsComplete`, `stepOfTotal`, `starsRating`, `selectedCount`) accept either a `{token}` template string or a formatter function (`(params) => string`) — functions get full control over pluralisation and word order.
+- The five `dayState*` keys are **a11y strings, not cosmetic copy**: `tc-day-strip` encodes each day's status as a fill colour, and „over target" (red) against „planned" (green) is exactly the confusable pair — the word is what a colour-blind user gets instead. Localise them or that element says nothing.
 - Per-instance attributes (`placeholder`, `empty-message`, `error`, `required-message`, …) always win over the registry for one-off cases.
 - Call `configureMessages()` before components render — components read the registry when they render. Changing messages later requires re-rendering the affected components; listen for `tc-messages-changed` on `document` to trigger that.
 
@@ -107,6 +119,12 @@ Notes:
 - [Layout](#layout)
   - [tc-basic-layout](#tc-basic-layout)
   - [tc-dashboard-layout](#tc-dashboard-layout)
+  - [tc-mobile-shell](#tc-mobile-shell)
+  - [tc-app-bar](#tc-app-bar)
+  - [tc-action-bar](#tc-action-bar)
+  - [tc-fab](#tc-fab)
+  - [tc-swipe-pager](#tc-swipe-pager)
+  - [tc-step-pager](#tc-step-pager)
   - [tc-dashboard-content](#tc-dashboard-content)
   - [tc-dashboard-sidebar](#tc-dashboard-sidebar)
   - [tc-login](#tc-login)
@@ -132,6 +150,14 @@ Notes:
   - [tc-action-row-list](#tc-action-row-list)
   - [tc-alert](#tc-alert)
   - [tc-banner](#tc-banner)
+  - [tc-notice](#tc-notice)
+  - [tc-list-section](#tc-list-section)
+  - [tc-add-slot](#tc-add-slot)
+  - [tc-taxonomy-card](#tc-taxonomy-card)
+  - [tc-stat-tile](#tc-stat-tile)
+  - [tc-macro-grid](#tc-macro-grid)
+  - [tc-quota-meter](#tc-quota-meter)
+  - [tc-trend-spark](#tc-trend-spark)
   - [tc-avatar](#tc-avatar)
   - [tc-audio-mixer](#tc-audio-mixer)
   - [tc-node-editor](#tc-node-editor)
@@ -377,10 +403,14 @@ Notes:
   - [tc-social-links](#tc-social-links)
   - [tc-stepper](#tc-stepper)
   - [tc-tab-bar](#tc-tab-bar)
+  - [tc-page-tabs](#tc-page-tabs)
+  - [tc-tab-dock](#tc-tab-dock)
+  - [tc-day-strip](#tc-day-strip)
   - [tc-tab-sections](#tc-tab-sections)
   - [tc-vertical-item-list](#tc-vertical-item-list)
 - [Overlays & Feedback](#overlays--feedback)
   - [tc-blur-overlay](#tc-blur-overlay)
+  - [tc-bottom-sheet](#tc-bottom-sheet)
   - [tc-command-palette](#tc-command-palette)
   - [tc-confirm-dialog](#tc-confirm-dialog)
   - [tc-context-menu](#tc-context-menu)
@@ -408,6 +438,7 @@ Notes:
   - [tc-character-select](#tc-character-select)
   - [tc-check](#tc-check)
   - [tc-checkbox-group](#tc-checkbox-group)
+  - [tc-check-row](#tc-check-row)
   - [tc-chip](#tc-chip)
   - [tc-chip-group](#tc-chip-group)
   - [tc-color-picker](#tc-color-picker)
@@ -629,6 +660,881 @@ Full-height dashboard shell: a full-height sidebar on the left, a glass navbar s
     console.log('sidebar is now', e.detail.open ? 'open' : 'closed')
   })
 </script>
+```
+
+---
+
+### tc-mobile-shell
+
+The phone app frame: a fixed top region, **exactly one** scrolling pane, optional bottom chrome, and an absolutely-positioned layer for sheets / FABs / toasts. The mobile counterpart to `tc-dashboard-layout` — same job (own the frame so no page re-derives it), opposite shape. Sized with `var(--tc-vh)` (`100dvh`) so it follows the mobile-Safari toolbar in and out, `overflow: hidden` so the document never scrolls, and it pays both hardware safe-area insets out of its own padding box.
+
+**It renders no markup.** The five regions are the host's own direct children, ordered and sized by CSS off their `slot` attribute; the element only reads them. That is deliberate: an element that re-parents slotted children breaks any framework that later removes one, because react-dom calls `parentInstance.removeChild(child)` against the parent it believes the child has. Route changes swap the pane and conditional bars come and go, so nothing here moves. It also means `tc-mobile-shell` never hoists a nested `[slot="…"]` out of a component inside it — its lookups are all `:scope > …`.
+
+**Tag:** `tc-mobile-shell`
+
+**Structure**
+
+```
+tc-mobile-shell                          display:flex; flex-direction:column; height:var(--tc-vh)
+  ├─ [slot="header"]   order 1, flex:none    app bar / back bar
+  ├─ :not([slot])      order 2, flex:1       THE scroll pane
+  ├─ [slot="action"]   order 3, flex:none    sticky action bar
+  ├─ [slot="dock"]     order 4, flex:none    bottom tab dock
+  └─ [slot="overlay"]  position:absolute     sheets, FAB, toasts
+```
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `data-key` | string | *(unset)* | Identity for scroll restoration — pass the route path. With no key nothing is stored and the pane always starts at 0. |
+| `scroll-restore` | `auto` \| `manual` | `auto` | `auto` stores the pane's `scrollTop` per `data-key` and restores it when that key comes back, which is what makes tab switching feel native. `manual` hands the offset to the consumer: the shell neither restores nor resets it on a key change. |
+| `edge` | `top` \| `bottom` \| `both` | `both` | Which hardware safe areas to honour. `bottom` lets a full-bleed screen (a login canvas, a cooking mode) draw to the top edge while still clearing the home indicator. |
+| `pane-bg` | CSS colour | *(unset)* | Shorthand for setting `--bs-mobile-shell-bg` on the host. Written through `CSSStyleDeclaration.setProperty`, so a malformed value is dropped rather than reaching the stylesheet. |
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `pane` | `HTMLElement \| null` | The scrolling element — the one direct child with no `slot` attribute. `null` before that child exists. Read it to scroll the pane yourself. |
+| `scrolled` | `boolean` | `true` once `pane.scrollTop > 4`. The 4px floor keeps a rubber-band or a scroll-anchoring nudge from flipping the app bar's separator on. |
+| `scrollRestore` | `'auto' \| 'manual'` | Reflects the `scroll-restore` attribute. |
+| `onScrollStateChange` | `((scrolled: boolean) => void) \| null` | Called when `scrolled` flips (not on every scroll). Default `null`. |
+
+**Methods**
+
+| Method | Description |
+|--------|-------------|
+| `scrollToTop(smooth?: boolean)` | Scrolls the pane back to the top. `smooth` is ignored under `prefers-reduced-motion: reduce`. |
+
+**Events**
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-shell-scroll` | `{ scrolled: boolean, top: number }` | Fired at most **once per animation frame** while the pane scrolls, so an app bar or a FAB can follow the position without a listener on every scroll event. Measured under a continuous flick: 61 events across 61 frames; 20 `scrollTop` writes inside one frame produce one event. |
+
+**State**
+
+| Selector | When |
+|----------|------|
+| `[data-scrolled]` | **Select on this one.** An attribute on the host while `scrolled` is true, so slotted chrome can react in CSS alone — `tc-mobile-shell[data-scrolled] .my-bar { … }` — with no JS. |
+| `.tc-mobile-shell--scrolled` | The same state as a class, kept for back-compat. Do **not** rely on it from React: react-dom rewrites the whole `className` string whenever that prop changes, so a shell with a computed `className` loses the class until the next scroll frame. That is why the attribute exists. |
+
+**Custom properties written by the element**
+
+| Property | Description |
+|----------|-------------|
+| `--tc-keyboard-inset` | How much of the frame's bottom the software keyboard covers, in px, or `0px`. Folded into the host's `padding-bottom` as `max(safe-bottom, keyboard-inset)`, so the action bar lifts above the keyboard instead of hiding behind it. Read it to lift chrome of your own. |
+
+Derived from `window.visualViewport` (guarded — absent means a flat `0px`) as `documentElement.clientHeight − visualViewport.height − visualViewport.offsetTop`, but **only while a text-entry field inside the shell has focus**. That gate is not optional: on iOS the layout viewport is the *large* viewport, so the same subtraction also measures the collapsing browser toolbar and would report a permanent phantom keyboard ~60px tall. A `<select>` (native picker), checkbox, radio, range and button do not count as text entry; `<input type=text …>`, `<textarea>` and `contenteditable` do. Values under 80px are treated as toolbar noise and discarded.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-mobile-shell-bg` | `var(--tc-surface-hover)` | The scroll pane's background — the app canvas. Also what `pane-bg` sets. |
+| `--bs-mobile-shell-header-bg` | `var(--tc-surface)` | Header region background. |
+| `--bs-mobile-shell-action-bg` | `var(--tc-surface)` | Action-bar region background. |
+| `--bs-mobile-shell-dock-bg` | `var(--tc-surface)` | Dock region background. |
+| `--bs-mobile-shell-edge-bg` | `var(--tc-surface)` | The host's own background, which shows in exactly one place: the hardware inset strips the shell pays for. Set it to the canvas colour on a full-bleed screen. |
+| `--bs-mobile-shell-action-shadow` | `var(--m-shadow-actionbar)` | Lift-off shadow, applied **only when no dock follows the action bar**. Two stacked bars each casting one reads as grime rather than elevation. Set it to `none` for a bottom-most action bar that draws no elevation of its own — a profile CTA pair (design screen `1k`) or a cooking-mode step-advance row (`1e`) are both that shape, and neither has a shadow in the canvas. A slotted bar declaring its own `box-shadow` also wins outright. |
+| `--bs-mobile-shell-header-shadow` | `none` | Separator under the **last** header child, drawn only while the host carries `[data-scrolled]`. Off by default because every header-bearing screen in the design already draws its own 1px rule at that boundary and a second one doubles it. Opt in with `inset 0 -1px 0 var(--tc-border)` on a header that has none. An inset shadow rather than a border, so switching it on mid-scroll costs no 1px reflow. |
+| `--bs-mobile-shell-inset-top` | `var(--tc-safe-top, 0px)` | Top hardware inset. Zeroed by `edge="bottom"`; override directly for a desktop preview frame that draws its own bezel. |
+| `--bs-mobile-shell-inset-bottom` | `var(--tc-safe-bottom, 0px)` | Bottom hardware inset. Zeroed by `edge="top"`. |
+| `--bs-mobile-shell-max-width` | `480px` | At ≥768px the shell centres itself at this width rather than stretching to a column no phone screen was drawn for. `none` turns the framing off — **set it on the element**, see below. |
+| `--bs-mobile-shell-frame-line` | `var(--tc-border)` | The side hairlines that go with the centred framing. `transparent` removes them — **set it on the element**, see below. |
+
+**Where to set a `--bs-mobile-shell-*` override.** On the element (an inline `style`, or a
+`tc-mobile-shell { … }` rule loaded after `@toolcase/web-components/style.css`) — **not at
+`:root`**. The component declares its own defaults on the `tc-mobile-shell` type selector, and a
+declaration on the element beats a value inherited from an ancestor, so `:root
+{ --bs-mobile-shell-max-width: none }` provably does nothing (measured at 1024px: still 480px
+wide, side hairlines still drawn). This is the opposite of `--tc-safe-top` / `--tc-safe-bottom`,
+which the shell only *reads* — those inherit, so overriding them at `:root` **is** the sanctioned
+way to fake or zero the hardware insets.
+
+**Accessibility**
+
+- The pane gets `role="main"` **only** when the consumer has not spoken for it — a `<main>` element, an explicit `role` on the pane, or a `role` on the host all suppress it.
+- No role is imposed on the header or the dock. A bare `<header>` element outside `article`/`aside`/`nav`/`section` would pick up an implicit `role="banner"`, which is wrong for an in-app bar, so the regions are the consumer's own elements and the roles are theirs to choose.
+- `scrollToTop(true)` degrades to an instant jump under `prefers-reduced-motion: reduce`.
+- The overlay layer is `pointer-events: none` with each child opting back in, so it never blocks the pane behind it.
+- The dock's box genuinely **ends above** the home indicator, because the inset is the host's padding — its bottom 34px cannot swallow a tap. (Verified by hit-testing the bottom row of pixels with a 34px inset forced: the element there is the host, not the dock.)
+- **A pane of pure prose needs `tabindex="0"` on it.** The pane is the frame's only scroller and the host is `overflow: hidden`, so there is no document scroller to fall back to — and a `<div>` with `overflow-y: auto` is not focusable in Chrome or Safari, so a keyboard user cannot arrow-scroll it (axe `scrollable-region-focusable`, serious). Any screen whose pane contains a link, button or field passes on that content; a screen that is prose only (a recipe body, a cooking-mode step) must add `tabindex="0"` to its pane element. The shell does not add it, because "does this pane contain something focusable?" is only answerable at a moment in time and content arrives after the mount. The library's global `:focus-visible` rule supplies the ring.
+
+**Consumer contract — four things to get right**
+
+1. **Exactly one unslotted element child.** That child *is* the pane; wrap page content in a single element. Two unslotted children means two scrollers. `<template>`, `<style>` and `<script>` are ignored.
+2. **Do not set `overflow` or `height` on the pane.** The shell owns both. It does not write a class onto the pane (a framework would clobber it on the next render), so the pane's five scroll declarations come from a `tc-mobile-shell > :not([slot])` rule at specificity `0-1-1` — enough to beat an app class, so an app that wants a different pane background uses `--bs-mobile-shell-bg`, not `.my-page { background: … }`.
+3. **Slotted chrome keeps its own `padding`, `background` and `box-shadow`.** The shell states `order` and `flex` on the header / action / dock regions at full specificity — the frame's geometry is its own — but paints them from `:where()` rules at specificity `0-0-0`, and pays both hardware insets on the host rather than on the regions. So a bar that declares `background-color: var(--bs-my-bar-bg)` on its own host tag wins, a bar that draws its own separator or elevation wins, and no `padding` shorthand is silently half-overridden. The pane is the one deliberate exception (point 2).
+4. **Keep one shell instance mounted above the router outlet.** Scroll restoration is keyed on `data-key` and stored at module scope, so it survives the pane being replaced — but not the shell being re-created on every navigation.
+
+Scroll restoration retries for up to 30 frames while the pane cannot yet scroll far enough, which covers content arriving after the mount (a fetch, webfont metrics, images). Any `pointerdown`, `wheel` or `keydown` on the pane cancels an in-flight restore rather than fighting the user.
+
+The `viewport-fit=cover` meta tag is the document's job — without it the UA insets the viewport itself and `env(safe-area-inset-*)` has nothing left to report:
+
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+```
+
+Every region is the consumer's own element, so the examples below use plain `<div slot="…">` and
+run as-is. Drop a bar, a dock or a FAB component in as that element's content — or make the
+component itself the region by putting `slot="…"` on its tag.
+
+```html
+<!-- List screen: header, one scrolling pane, bottom dock, a floating button in the overlay -->
+<tc-mobile-shell data-key="/recipes">
+  <div slot="header" style="padding: 2px 16px 0">
+    <h1>Рецепти</h1>
+  </div>
+
+  <div>
+    <!-- the one scroll pane: 200 rows scroll here, the document never does -->
+    <tc-list-card>…</tc-list-card>
+  </div>
+
+  <nav slot="dock" aria-label="Главна навигација">…</nav>
+
+  <div slot="overlay">
+    <!-- keeps the design's coordinate verbatim: the overlay spans the whole frame,
+         hardware inset strips included -->
+    <button type="button" style="position: absolute; right: 20px; bottom: 104px">+</button>
+  </div>
+</tc-mobile-shell>
+
+<!-- Detail screen: no dock, so the action bar pays the bottom inset and gets the shadow -->
+<tc-mobile-shell data-key="/recipes/42">
+  <div slot="header">…</div>
+  <div>…</div>
+  <div slot="action">
+    <tc-button variant="primary">Готви</tc-button>
+  </div>
+</tc-mobile-shell>
+
+<!-- Full-bleed screen: no chrome at all, top inset opted out, own canvas colour.
+     `tabindex="0"` because this pane is prose — nothing in it is focusable. -->
+<tc-mobile-shell edge="bottom" pane-bg="#17110d"
+                 style="--bs-mobile-shell-edge-bg:#17110d">
+  <div tabindex="0">…</div>
+</tc-mobile-shell>
+
+<script>
+  const shell = document.querySelector('tc-mobile-shell')
+
+  // Once per frame while scrolling — drive a header hairline, hide a FAB, …
+  shell.addEventListener('tc-shell-scroll', e => {
+    console.log(e.detail.scrolled, e.detail.top)
+  })
+
+  // …or in CSS alone, with no listener:
+  //   tc-mobile-shell[data-scrolled] [slot='header'] { box-shadow: var(--tc-shadow-sm) }
+
+  shell.scrollToTop(true)          // instant under prefers-reduced-motion
+  shell.pane.scrollTop = 0         // or drive the pane directly
+</script>
+```
+
+In React, the tag and its props are typed by `@toolcase/web-components/react`; the event arrives as `onTcShellScroll`, and `data-key` should be the route path so one shell above the outlet restores per route:
+
+```tsx
+const shell = useTcEvents<HTMLElement>({
+    'tc-shell-scroll': (e: CustomEvent) => setScrolled(e.detail.scrolled),
+})
+
+<tc-mobile-shell ref={shell} data-key={pathname}>
+    <AppBar slot="header" />
+    <div><Outlet /></div>
+    {dirty && <ActionBar slot="action" />}
+    <TabDock slot="dock" />
+</tc-mobile-shell>
+```
+
+---
+
+### tc-app-bar
+
+The phone top bar, in the three shapes a mobile app uses. Not a variant of `tc-navbar`: that is a desktop horizontal nav with a brand/links/actions model, it has no back affordance and no two-line title, and its themed background is a translucent blur a phone bar does not use.
+
+| `variant` | Contents |
+|---|---|
+| `brand` | Wordmark (`JADI` + `.mk` + an accent dash) then trailing actions — an app's home/dashboard root. |
+| `title` (default) | A page title and a muted subtitle on one baseline, with a `below` region under them for a `tc-page-tabs` rail. |
+| `back` | A back chevron, a title (plus an optional second line), and trailing actions. |
+
+**It renders exactly one child of its own** — `.tc-app-bar__main`, the toolbar's leading block — and never touches a consumer's children. The three slotted regions are the host's own children, positioned by CSS off their `slot` attribute. That is deliberate: an element that re-parents slotted children breaks any framework that later removes one, because react-dom calls `parentInstance.removeChild(child)` against the parent it believes the child has, and a conditional trailing action (`{dirty && <button slot="actions"/>}`) is exactly that case. Verified: four attribute changes in a row leave a slotted child in place, and `bar.removeChild(action)` does not throw.
+
+**Text is patched in place; only a change of SHAPE rebuilds.** `heading` and `subheading` are written with `textContent`, so a live title — screen 1h's „N од 7 купено" counter changes on every tick-off — leaves the back `<button>` alone. Rewriting the block on every text change instead dropped keyboard focus to `<body>`, staled the `backButton` getter and dropped any listener bound straight to the button. Changing `variant` or `heading-level` does rebuild, because the elements themselves differ.
+
+**Tag:** `tc-app-bar`
+
+**Structure**
+
+```
+tc-app-bar                       display:flex; flex-wrap:wrap
+  ├─ .tc-app-bar__main           order 1, flex:1 1 0   rendered by the element
+  ├─ [slot="brand"]              order 1, flex:1 1 0   REPLACES __main
+  ├─ [slot="actions"]            order 2, flex:none    trailing controls
+  └─ [slot="below"]              order 3, flex:0 0 100%  a tc-page-tabs rail
+```
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `variant` | `brand` \| `title` \| `back` | `title` | See the table above. An unknown value — or none at all — falls back to `title`, in the CSS as well as in JS (every variant selector is paired with `:not([variant])`), so the bare tag is a title bar rather than a half-dressed back bar. **Each variant carries the gutter and gap its own screen in the design uses**, so none of the three needs a style override to match the canvas. |
+| `heading` | string | *(empty)* | The main title. In the `brand` variant it is the wordmark's **name** (`JADI`). |
+| `heading-level` | `1`–`6` | *(none — a `<div>`)* | Renders the heading as that `<hN>`. Off by default: on most of the design's screens the page's real heading lives in the content pane (a serif recipe title, a serif profile name) and a second `<h1>` in the chrome would compete with it. Set it on a screen whose only heading **is** the bar's title (a list page under a tab rail). Styling is identical either way. |
+| `subheading` | string | *(empty)* | Muted. Shares the heading's baseline in `title`, sits under it in `back`, and is the wordmark's **suffix** (`.mk`) in `brand`. Empty means the element is `display: none`, so it never reserves a line. |
+| `back-label` | string | the `back` message (`Back`) | Accessible name for the chevron. Localise it per-instance with this attribute, or globally with `configureMessages({ back: 'Назад' })`. |
+| `elevated` | boolean | absent | Adds a faint drop shadow — and, in the `title` variant, the bottom hairline it does not draw at rest. Bind it to a scroll position. |
+| `elevate-on-scroll` | boolean | absent | The bar binds `elevated` itself, by listening for a bubbling `tc-shell-scroll` from an ancestor that contains it (i.e. `tc-mobile-shell`). Opt-in — see the note below. |
+| `truncate` | boolean | absent | Single-line ellipsis on the heading. Always on in the `back` variant, whatever this says. |
+
+**JS Properties**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `variant` / `heading` / `headingLevel` / `subheading` / `backLabel` / `elevated` / `elevateOnScroll` / `truncate` | — | — | Reflect the attributes above. `backLabel` reads through the message registry when the attribute is absent; `headingLevel` is a number, `0` when no level is set. |
+| `backButton` | `HTMLButtonElement \| null` | — | The chevron, or `null` outside the `back` variant. |
+| `onBack` | `(() => void) \| null` | `null` | Called when the chevron is pressed, alongside the event. |
+
+**Events**
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-app-bar-back` | *(none)* | Bubbling and composed; fired on click, Enter or Space on the chevron. |
+
+**Slots**
+
+| Slot | Description |
+|------|-------------|
+| `brand` | Replaces the whole **leading block** — not just the wordmark: the element hides `.tc-app-bar__main` via `:has`, in every variant, so a slotted brand also replaces a `title`/`back` bar's title pair (and a `back` bar's chevron with it). Use it to slot a `tc-brand`, a logo `<img>` or a link. To keep the title layout **and** mark up the title as a real heading, use `heading-level` instead. |
+| `actions` | Trailing controls. **No `display` is written onto this element**, because it is routinely a single component whose own layout must not be overridden — so two or more actions each become their own flex item of the bar, spaced by `--bs-app-bar-gap`. |
+| `below` | Anything that must sit inside the bar's background, under the toolbar row: a `tc-page-tabs` rail is what this exists for. It always takes a line of its own (`flex: 0 0 100%`). A band with its own background and rule — a search field row, an offline banner — is **not** this; it is a second sibling region (in a `tc-mobile-shell`, a second `[slot="header"]` child), which is how the design draws them. |
+
+**Which variant draws the bottom hairline, and why it matters**
+
+Every screen of the JADI.mk phone design draws **exactly one** 1px rule at the bar/pane boundary, and ownership splits by variant:
+
+- `brand` and `back` → the bar's own `border-bottom`.
+- `title` → **not the bar.** Something under it owns the rule: a search band, a day strip, or the content pane's own `border-top`. So the `title` variant ships `--bs-app-bar-border: 0 none`; a second rule from the bar would render that hairline 2px thick.
+
+`tc-mobile-shell`'s own `--bs-mobile-shell-header-shadow` defaults to `none` for the same reason, so the two never double up.
+
+**Elevation is opt-in, and that is not laziness**
+
+On the four `title` screens the bar is *not* the last thing above the pane, so a separator switched on by scroll would draw a hairline between the bar and the band below it — where the design has none. `elevate-on-scroll` therefore does nothing unless you ask for it, and you ask for it only on a screen whose bar **is** the bottom-most piece of chrome. The separator is a `box-shadow`, never a border: switching a border on mid-scroll reflows the pane by 1px at the exact moment the user is watching content move. Measured: the bar is 36px at rest and 36px scrolled.
+
+Either mechanism works — `elevate-on-scroll` (no JS in the app), or binding the `elevated` attribute to `tc-mobile-shell`'s `scrolled` yourself. Do not use both.
+
+**The chevron's touch target**
+
+The design's back bar is 36px tall and puts the 22px glyph flush against the bar's gutter. A 44px touch box *inside* that flow would make the bar 57px and push the glyph and the title 11px right. So the box is grown by **padding** and the padding is cancelled again by an equal negative **margin**: the margin box measures the 22px glyph — the bar keeps its height and every other item keeps its position — while the border box, the thing that is hit-tested, is 44px wide and as tall as the bar. Measured at 390px: glyph at x=12..34 and title at x=42, i.e. the canvas's coordinates, inside a target that runs from the bar's top edge to 1px above its rule and out to 1px from the frame's left edge.
+
+**It is 44x35 without a safe-area inset and 44x44 with one, and that is the honest number.** The first version set a flat 44x44 box with `margin: -11px`, which put 9px of the target *above* the bar — fine on a notched phone, clipped away everywhere else, because `tc-mobile-shell` pays the inset as `padding-top` and clips its children with `overflow: hidden`. Measured in a real shell with `padding-top: 0`: 44x44 on paper, 44x35 to `elementFromPoint`. So `--bs-app-bar-back-hit-top` asks for exactly what the frame can give — `min(11px, 2px + env(safe-area-inset-top, 0px))` — and the remaining 9px are spent upward only when there is a strip to spend them in (verified: forcing `11px` in a shell with a 47px inset hit-tests the full 44px, 9px of it above the bar). Spending them downward instead would overlap the content pane and swallow its taps. 44x35 clears WCAG 2.5.8 Target Size (Minimum, AA — 24x24) and not 2.5.5 (AAA), the same call the tab rail makes. `--bs-app-bar-back-bleed: 0px` drops the sideways reach; `--bs-app-bar-back-hit-top: 11px` forces the full height on a surface that knows it has the room.
+
+**Trailing actions are yours to size.** The bar gives `actions` no touch floor, because it does not know what is in there. Wrap a bare glyph in `.tc-touch-target` or use a `tc-icon-button`.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-app-bar-bg` | `var(--tc-surface)` | Bar background. Set it to `transparent` for chrome that sits on the bare canvas. |
+| `--bs-app-bar-padding` | per variant | `title` (and no variant) `var(--m-pad-appbar)` = `2px 16px 0`; `back` `2px 12px 11px`; `brand` `2px 16px 12px`. Each is its screen's value in the design. The one screen that differs is the **two-line** back bar, which is 14px-guttered — i.e. `var(--m-pad-navbar)`, the base value; set it back explicitly there. |
+| `--bs-app-bar-gap` | per variant | Column gap between the regions **and** inside the leading block. `title` `9px`, `back` `var(--m-gap-inline)` = `8px`, `brand` `12px`. The two-line back bar uses `10px`. |
+| `--bs-app-bar-row-gap` | `10px` | Between the toolbar row and the `below` rail. |
+| `--bs-app-bar-border` | `1px solid var(--tc-border)` | `0 none` in the `title` variant. |
+| `--bs-app-bar-shadow` | `none` | Set by `[elevated]`; override for a different lift. |
+| `--bs-app-bar-heading-font` | `var(--m-font-nav-title)` (`700 14px`) | `title` overrides to `var(--m-font-page-title)` (`700 17px`). A two-line back bar reads better at `var(--m-font-title-sm)` (`700 15px`), which is what the design does. |
+| `--bs-app-bar-heading-color` | `var(--tc-emphasis)` | |
+| `--bs-app-bar-subheading-font` | `var(--m-font-meta)` (`400 11px`) | `title` overrides to `var(--m-font-body-sm)` (`400 12px`); `back` to a literal `400 11.5px`. That half pixel is the canvas's and it is load-bearing: at `line-height: normal` 11px measures a 15px line box against 11.5px's 17px, i.e. a 50px bar where the design draws 52px. `--m-font-meta` rounded it away because 17 of its other uses are 11px. |
+| `--bs-app-bar-subheading-color` | `var(--tc-text-faint)` | |
+| `--bs-app-bar-heading-numeric` | `normal` | `font-variant-numeric` for the heading. Declared as its own property because the `font:` shorthand **resets** it — setting `font-variant-numeric` on the host cannot reach the heading. Set `tabular-nums` on any bar whose title carries a number that changes. |
+| `--bs-app-bar-subheading-numeric` | `normal`, `tabular-nums` under `back` | Same for the second line. `back` defaults to tabular figures because the design's one two-line bar is a „N од 7 купено" counter, and a proportional `1` would make the line twitch as it counts. |
+| `--bs-app-bar-icon-size` | `22px` | The chevron glyph. Also the input to the bleed calc. |
+| `--bs-app-bar-icon-stroke` | `1.8` | A CSS declaration, so it beats lucide's own `stroke-width` attribute. |
+| `--bs-app-bar-icon-color` | `var(--tc-text-muted)` | Sunshine re-points this to `--sun-ink-2` (`#44503a`), the design's value — that rung of the ink ladder has no `--tc-*` name of its own. |
+| `--bs-app-bar-back-bleed` | `calc((icon-size − min-touch-target) / 2)` (`−11px`) | How far the chevron's hit box reaches **sideways** past its 22px glyph, per side. `0px` keeps the same 44px-wide box *inside* the flow instead, which moves the glyph and the title 11px right. |
+| `--bs-app-bar-back-hit-top` | `min(11px, 2px + env(safe-area-inset-top, 0px))` | How far it reaches **up**: the bar's own top padding, plus a safe-area strip when the frame has one, capped at a 44px box. See the touch-target note. |
+| `--bs-app-bar-back-hit-bottom` | `11px` | …and **down**: the bar's bottom padding, stopping 1px short of its rule so it can never swallow a tap meant for the pane. |
+| `--bs-app-bar-brand-size` | `16px` | **Drives the whole wordmark**: the dash and its offsets are em-relative, so a login screen scales the mark with this property alone. |
+| `--bs-app-bar-brand-color` | `var(--tc-emphasis)` | The name. |
+| `--bs-app-bar-brand-suffix-color` | `var(--tc-text-faint)` | The suffix. |
+| `--bs-app-bar-brand-dash-color` | `var(--tc-app-accent)` | The accent dash. |
+| `--bs-app-bar-brand-dash-width` | `1.25em` | `20px` at the default size. Set a length for a mark that needs the dash at an exact width. |
+| `--bs-app-bar-brand-dash-height` | `3px` | |
+
+**Why the wordmark is not a `tc-brand`.** `tc-brand`'s underline is a full-width bar *under* the whole mark (`display: block; width: 100%`), themed to sunshine's display face, and neither its layout nor its size is reachable through `--bs-brand-*`. This mark is a `1.25em` dash *beside* the suffix, baseline-aligned. `tc-brand` also re-parents its slotted children on every attribute change, which is the react-dom hazard above. Slot it into `brand` if you want it; the rendered mark is what the phone design draws.
+
+**Nesting hazard — light-DOM slot names are global to a subtree.** `brand` and `actions` are also distributed by other components with a *subtree-wide* `querySelectorAll('[slot="…"]')`, so nesting a `tc-app-bar` inside one lets it steal this bar's slotted children. Measured: `tc-dashboard-layout` and `tc-basic-layout` hoist a nested bar's `[slot="brand"]`; `tc-rich-page-header` hoists `[slot="actions"]` (and destroys the bar outright, since it wipes unslotted content). `tc-section-card` is **safe** — it distributes `action`, singular. None of those nestings is a sensible composition, and narrowing another component's lookup is a behaviour change for its own consumers, so this is documented rather than worked around. `tc-app-bar`'s own lookups are all `:scope > …`, so it can never do this to anything nested inside it.
+
+**Accessibility**
+
+- The chevron is a real `<button type="button">` with an `aria-label`, so it is reachable by keyboard and named for a screen reader; Enter and Space both fire `tc-app-bar-back`.
+- Its focus ring is inset (`outline-offset: -2px`) because the bar is 36px tall and the design leaves the glyph no room above or below — the library's global 2px/2px-offset ring would be drawn over the status strip and the pane instead of around the control.
+- **The heading is not a document heading by default** — it is a `<div>`, because on the design's own screens the page's real heading lives in the content pane (a serif recipe title, a serif profile name) and a second `<h1>` in the chrome would compete with it. A screen whose only heading is the bar's title sets `heading-level="1"` (or 2–6) and gets a real `<hN>` with the same styling. Do not reach for a slot for this.
+- `[slot="below"]` follows the toolbar row in the DOM as well as visually, so sequential focus order matches reading order; `.tc-app-bar__main` is inserted first for the same reason, ahead of the trailing actions.
+
+```html
+<!-- brand root — no style overrides: the variant ships 1b's geometry -->
+<tc-app-bar variant="brand" heading="JADI" subheading=".mk">
+  <button slot="actions" class="tc-touch-target" aria-label="Известувања">🔔</button>
+</tc-app-bar>
+
+<!-- page title with a scrolling tab rail under it; here the bar IS the page heading -->
+<tc-app-bar variant="title" heading="Рецепти" subheading="вашиот личен готвач" heading-level="1">
+  <tc-page-tabs id="rail" slot="below" active-id="recipes"></tc-page-tabs>
+</tc-app-bar>
+
+<!-- detail screen, inside the phone frame: the bar is the last header child, so it
+     may elevate on scroll -->
+<tc-mobile-shell data-key="/recipes/42">
+  <tc-app-bar slot="header" variant="back" heading="Тавче гравче" back-label="Назад"
+              elevate-on-scroll>
+    <tc-icon slot="actions" name="more-horizontal" size="22"></tc-icon>
+  </tc-app-bar>
+  <div><!-- the one scroll pane --></div>
+</tc-mobile-shell>
+
+<!-- the two-line bar (a live counter): the design's one 14px-guttered back bar -->
+<tc-app-bar variant="back" heading="Пазар за среда" subheading="4 од 7 купено" back-label="Назад"
+            style="--bs-app-bar-padding: var(--m-pad-navbar); --bs-app-bar-gap: 10px;
+                   --bs-app-bar-heading-font: var(--m-font-title-sm)">
+  <tc-icon slot="actions" name="download" size="20"></tc-icon>
+</tc-app-bar>
+
+<script>
+  document.querySelector('tc-app-bar[variant="back"]')
+      .addEventListener('tc-app-bar-back', () => history.back())
+</script>
+```
+
+In React the tag and its props are typed by `@toolcase/web-components/react`, and the event arrives as `onTcAppBarBack`:
+
+```tsx
+const bar = useTcEvents<HTMLElement>({ 'tc-app-bar-back': () => navigate(-1) })
+
+<tc-app-bar ref={bar} slot="header" variant="back" heading={recipe.title} back-label={t.common.back}>
+    {canEdit && <MoreMenu slot="actions" />}
+</tc-app-bar>
+```
+
+---
+
+### tc-action-bar
+
+The sticky bottom action bar: a **detail** screen's primary action, parked in the thumb zone.
+
+**Two ways a phone exposes a primary action, and they are alternatives**
+
+| Element | Role |
+|---|---|
+| `tc-fab` | A **list** screen's primary action, floating over the content. |
+| `tc-action-bar` | A **detail** screen's, in a bar across the bottom. |
+
+**Never both on one screen.** Two primary actions in the same corner is an ambiguity, and in the sunshine design both are amber — a palette that allows amber on at most two elements per screen. Neither element can see the other's screen, so this is a convention, not something enforced in code.
+
+**It renders nothing.** Its children are your buttons, and a bar's actions are the most conditionally-rendered thing on a screen (`{dirty && <tc-button/>}`). An element that re-parented them would throw `NotFoundError` under react-dom, which removes a child with `parentInstance.removeChild(child)` against the parent it *believes* the child has. So the element exists in JS only for its `elevate-on-scroll` wiring and its typed attributes; the layout is all CSS. It also means `tc-action-bar` can never hoist a nested `[slot="…"]` out of anything inside it.
+
+**Tag:** `tc-action-bar`
+
+```
+tc-action-bar                    display:flex; gap:8px
+  ├─ > *                         flex:1 1 0             a FLUID track
+  └─ > .tc-action-bar-compact    flex:none; width:52px  an ICON track
+```
+
+**Five arrangements, one container.** There is no `variant` attribute. Two track kinds and `stack` cover every shape the mobile design draws:
+
+| Screen | Shape | Markup |
+|---|---|---|
+| `1d` | primary + two icon buttons | fluid, compact, compact |
+| `1h` | icon button + primary | compact, fluid |
+| `1j` | two equal buttons, 44px | fluid, fluid |
+| `1k` | two equal buttons, 46px | fluid, fluid |
+| `1l` | primary over a borderless escape | `stack`, fluid, fluid |
+
+A track is `flex: 1 1 0`, **not** `flex-grow: 1`. With `flex-basis: auto` an item's base size is its content, so `1j`'s two buttons would come out proportional to their Cyrillic label lengths instead of equal. A zero basis is also what the design's own inline `flex:1` resolves to (`1 1 0%`).
+
+**It imposes no button styling.** Height, fill, radius and type are the child's — the design's own heights differ per screen (46px on `1d`/`1h`/`1k`, 44px on `1j`, 48px on `1l`), so a bar that imposed one would be wrong on two screens out of five. Use `tc-button`'s `block` attribute and size scale. The bar owns the four things a child cannot see: the surface, the safe-area padding, the elevation and the software-keyboard inset.
+
+What it *does* reach one level down for is `width: 100%; height: 100%` on the control inside each track (`tc-action-bar > * > :is(button, a, .btn)`). Every control in this library is a wrapper — `tc-button` renders an inner `<button class="btn">` — so without it the item widens and the button inside stays at content width, and the bar's `align-items: stretch` (which is what puts a row on one height) would be invisible. It sets those two properties and nothing else.
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `stack` | boolean | absent | Vertical arrangement — the `1l` case. Children become `flex: none` (in a column `flex: 1 1 0` would make them share the bar's *height*) and the gap becomes `--bs-action-bar-stack-gap` (14px). |
+| `elevated` | boolean | absent | Draw the lift-off shadow. |
+| `flat` | boolean | absent | Force the shadow **off**. Wins over `elevated` when both are set. |
+| `elevate-on-scroll` | boolean | absent | The bar binds `elevated` itself from a bubbling `tc-shell-scroll`. Opt-in — see below. |
+
+**JS Properties:** `stack`, `elevated`, `flat`, `elevateOnScroll` — all boolean, all reflecting their attribute.
+
+**Events:** none. Listen on your own buttons.
+
+**Slots:** none — the bar renders nothing, so its children are simply its children. Set `.tc-action-bar-compact` on the ones that should be a fixed 52px icon track.
+
+**Elevation: neither attribute is the common case**
+
+With **no** `elevated` and **no** `flat`, this element declares no `box-shadow` at all, which lets `tc-mobile-shell`'s own context-aware rule through — `:where(tc-mobile-shell:not(:has(> [slot='dock']))) > [slot='action']`, i.e. a shadow when the bar is the bottom-most chrome (`1d`) and none when a dock sits below it (`1h`, `1j`). That is the design, so most screens set neither.
+
+The design is not fully consistent about it: `1k` is bottom-most and draws no shadow. `flat` is for exactly that.
+
+`elevate-on-scroll` is the honest version — with nothing scrolled under the bar there is nothing for it to lift off — and it is opt-in because a pane too short to scroll never fires the event, while the design's `1d` bar carries its shadow at rest. Same wiring as `tc-app-bar`'s: the element listens on `document` for a bubbling `tc-shell-scroll` from a scroller that **contains** it, so anything emitting that event drives it and two shells on one page never cross-drive.
+
+**Safe area and the keyboard**
+
+The bar is the last thing above the bottom edge, so its bottom padding is a `max()` of three claims on that space: its own 10px, the home-indicator strip, and the software keyboard.
+
+| Where | Bottom padding |
+|---|---|
+| Standing alone, no insets | `10px` |
+| Standing alone, 34px inset | `34px` |
+| Standing alone, keyboard up (291px) | `291px` |
+| Inside a `tc-mobile-shell` | `10px` **always** |
+
+Inside a shell the insets are already paid: the shell takes `max(--tc-safe-bottom, --tc-keyboard-inset)` out of its own padding box and the bar sits in that flow as `[slot="action"]`, so a `:where(tc-mobile-shell) tc-action-bar` rule zeroes both terms. Paying either again would double it — the whole keyboard height twice over on a focused form. Verified by forcing both tokens; `env(safe-area-inset-*)` always reads `0px` in a desktop browser and there is no software keyboard to raise, which is why both are consumed as **tokens** rather than read from `env()`.
+
+A bar in the shell's **overlay** layer is the one case this gets wrong — that layer spans the padding box, so a bar in there does need the insets. Nothing in the design puts one there (an overlay's action row is a `tc-bottom-sheet` footer, which pays its own), so it is documented rather than special-cased.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-action-bar-bg` | `var(--tc-surface)` | `#fffdf7` under `sunshine`. |
+| `--bs-action-bar-border` | `1px solid var(--tc-border)` | The top hairline. The bar owns its own edges; `tc-mobile-shell` deliberately draws none. |
+| `--bs-action-bar-shadow` | `var(--m-shadow-actionbar)` | `0 -8px 22px -14px` of the theme's warm tint. Applied only under `[elevated]`. |
+| `--bs-action-bar-padding-top` | `10px` | Also the **floor** for the bottom padding. |
+| `--bs-action-bar-padding-inline` | `var(--m-pad-page)` (`14px`) | |
+| `--bs-action-bar-gap` | `var(--m-gap-inline)` (`8px`) | Between tracks in a row. |
+| `--bs-action-bar-stack-gap` | `14px` | Between tracks under `[stack]`. The design's own value: `1l`'s pair is drawn inside a sheet at its 14px column gap. At `0` the borderless escape reads as attached to the button above it. |
+| `--bs-action-bar-compact-width` | `52px` | The icon track. 52×46 clears the 44px touch floor on both axes. |
+| `--bs-action-bar-safe-bottom` | `var(--tc-safe-bottom)`, forced to `0px` inside a `tc-mobile-shell` | |
+| `--bs-action-bar-keyboard-inset` | `var(--tc-keyboard-inset)`, forced to `0px` inside a `tc-mobile-shell` | Written by `tc-mobile-shell` from `window.visualViewport`. |
+| `--bs-action-bar-pad-bottom` | `max(padding-top, safe-bottom, keyboard-inset)` | Overriding **this** wins over the shell rule above. |
+
+**Accessibility**
+
+- The bar is a plain container with **no role and no accessible name**, on purpose: it is a visual grouping of controls that are already named. If a screen's bar is a genuine landmark, put a `role`/`aria-label` on it yourself.
+- **An icon-only compact button needs an `aria-label`.** The bar cannot supply one — it does not know what the glyph means.
+- Focus order is DOM order, and the bar moves nothing, so the reading order and the tab order are whatever you wrote.
+- The 52px compact track and the design's 44–48px heights all clear WCAG 2.5.5 Target Size (AAA, 44×44).
+
+```html
+<!-- 1d: primary + two icon buttons, bottom-most chrome so the shell adds the shadow -->
+<tc-mobile-shell data-key="/recipes/42">
+    <tc-app-bar slot="header" variant="back" heading="Тавче гравче"></tc-app-bar>
+    <div><!-- the recipe --></div>
+    <tc-action-bar slot="action">
+        <tc-button variant="primary" block>Готви</tc-button>
+        <tc-button class="tc-action-bar-compact" outline aria-label="Додај во листа">…</tc-button>
+        <tc-button class="tc-action-bar-compact" outline aria-label="Печати">…</tc-button>
+    </tc-action-bar>
+</tc-mobile-shell>
+
+<!-- 1j: two equal tracks. A dock follows, so no shadow — the shell decides. -->
+<tc-action-bar slot="action">
+    <tc-button outline block>Преглед на неделата</tc-button>
+    <tc-button variant="primary" block>Предложи диета</tc-button>
+</tc-action-bar>
+
+<!-- 1l: stacked, and flat because the design draws no shadow there -->
+<tc-action-bar stack flat>
+    <tc-button variant="primary" block>Контактирајте нѐ</tc-button>
+    <tc-button variant="ghost" block>Не сега</tc-button>
+</tc-action-bar>
+
+<!-- the shadow only once content has moved under the bar -->
+<tc-action-bar slot="action" elevate-on-scroll>…</tc-action-bar>
+```
+
+---
+
+### tc-fab
+
+The floating action button: a **list** screen's primary action, over the content in the thumb zone. See `tc-action-bar` above for the pair, and for why a screen must never show both.
+
+**It is a squircle, not a circle.** 56×56 at `border-radius: 16px`, verbatim from screen `1c`. Small corners are a stated principle of the design this comes from — 6px on controls, 10px on cards, pills for chips only — and a 999px FAB is the one element that would break it while looking, in isolation, like the conventional choice. The `extended` variant keeps the same 16px rather than becoming a true pill.
+
+**It renders one child of its own** — a real `<button>` — and never touches yours. The icon and label come from attributes, so there is nothing to re-parent, and it can never hoist a nested `[slot="…"]`.
+
+**Tag:** `tc-fab`
+
+```
+tc-fab                     position:absolute; display:inline-flex
+  └─ .tc-fab-button        56x56, radius 16, amber, the whole hit box
+       ├─ .tc-fab-glyph      the lucide svg, 26px / stroke 2.2
+       └─ .tc-fab-label      `extended` variant only
+```
+
+**Where it goes:** `tc-mobile-shell`'s `overlay` slot. That layer is already transparent to taps with each child opting back in, and it is `position:absolute; inset:0` against the shell's **padding** box — see the offset note below.
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `icon` | lucide name (kebab or Pascal) | — | **Required.** Drawn at 26px, stroke 2.2. |
+| `label` | string | — | **Required.** The action's name. In the `icon` variant it is the button's whole accessible name; in `extended` it is rendered as visible text instead. |
+| `variant` | `icon` \| `extended` | `icon` | `extended` puts the label beside the glyph and grows the width. The **height stays 56px**, so the offset maths below is unaffected. |
+| `position` | `bottom-right` \| `bottom-left` \| `bottom-center` \| `static` | `bottom-right` | `static` drops every offset declaration and places the FAB in the flow. |
+| `offset` | length | `104px` | Distance from the frame's bottom edge, **before** the safe-area inset. |
+| `auto-hide` | boolean | absent | Retract on scroll-down, return on scroll-up, driven by `tc-shell-scroll`. **Off by default — see below.** |
+
+**JS Properties**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `icon` / `label` / `variant` / `position` / `offset` / `autoHide` | | | Reflect the attributes above. |
+| `hiddenByScroll` | boolean (readonly) | `false` | True while `auto-hide` has the FAB retracted. |
+| `button` | `HTMLButtonElement \| null` (readonly) | | The `<button>`. |
+
+**Methods:** `reveal()` — bring a retracted FAB back. Call it on navigation, so a new page never starts with the primary action off-screen.
+
+**Events:** none of its own. The `<button>`'s `click` bubbles to the host, and the host contains exactly one control, so `click` is unambiguous — a bespoke event would be noise. (`tc-app-bar` has `tc-app-bar-back` because its chevron is one of several things in the bar.)
+
+**The offset, and why it adds the inset**
+
+`bottom: calc(var(--bs-fab-offset) + var(--tc-safe-bottom))`. The default `104px` is the design's 78px of dock reserve plus 26px of clearance; a screen with no dock sets `offset="24px"`.
+
+The inset is in the sum because the shell's `overlay` layer spans the shell's whole padding box, hardware inset strips and all — so the shell's own `padding-bottom` does **not** lift anything in there. (`tc-bottom-sheet` pays `--tc-safe-bottom` itself in the same layer, for the same reason.) Measured at 390×844 with a 34px inset and the real dock:
+
+| `bottom` | FAB → dock clearance, flat | notched |
+|---|---|---|
+| `104px` | 43px | **7px** |
+| `calc(104px + inset)` | 43px | **43px** |
+
+Constant clearance is the intent, so the inset stays in the sum. `env(safe-area-inset-*)` cannot be synthesised in a desktop browser — it always reads `0px` — which is why this reads `--tc-safe-bottom` and never `env()` directly: forcing the token proves the behaviour without the hardware.
+
+**There is no `position: fixed` version.** Fixed anchors to the *window*, which on a wide viewport puts the FAB in the screen's corner while the app sits in a centred 480px column. `absolute` inside the overlay layer anchors it to the frame, and the shell's `overflow: hidden` clips it there.
+
+**The scroll pane has to pay for the FAB.** At `bottom: 104px` the button covers part of the last card in a list. The design accepts that, but the pane must add `offset + 56px + 16px` of bottom padding so the final card can still be read. That is the consumer's, not the FAB's — the FAB has no idea what is under it.
+
+**Auto-hide is off by default, deliberately** — the same call `tc-tab-dock` makes. The design never draws the FAB hidden, and a primary action that vanishes while you read costs more than the 56px of list it uncovers. Turn it on for a long feed where the content is the point.
+
+Mechanically: the element listens on `document` for a bubbling `tc-shell-scroll` from a scroller that **contains** it, seeds its baseline on the first event (so turning `auto-hide` on halfway down a pane is not read as a several-hundred-pixel scroll), retracts past 24px of offset on a step of 8px or more, and always returns within 24px of the top.
+
+Retracting is `opacity: 0; visibility: hidden; transform: scale(0.8); pointer-events: none` — **shrink and fade, not translate off-screen.** A translate would have to travel `offset + inset + 100%` (it would need to know the offset) and only actually disappears inside a clipping ancestor. `visibility` is the load-bearing property, not the opacity: a 0-opacity button is still focusable, so `Tab` would land on an invisible control.
+
+**`auto-hide` is ignored under `prefers-reduced-motion: reduce`.** The movement *is* the feature, so the honest response to "no movement" is to keep the button rather than snap it in and out of existence. Gated in JS rather than CSS, so `hiddenByScroll` never reports a state the FAB is not in.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-fab-offset` | `104px` | Set it through the `offset` attribute per instance, or here for every FAB at once. |
+| `--bs-fab-inline` | `20px` | Distance from the left/right edge (`1c`'s value). |
+| `--bs-fab-safe-bottom` | `var(--tc-safe-bottom)` | Override for a frame that draws its own bezel. |
+| `--bs-fab-zindex` | `var(--tc-z-sticky)` (`1020`) | Only matters outside the overlay layer, which is its own stacking context. Sticky, not modal — a sheet must cover the FAB. |
+| `--bs-fab-size` | `var(--m-size-fab)` (`56px`) | The whole hit box, so no touch-target padding is needed. |
+| `--bs-fab-radius` | `16px` | **The squircle.** Not `999px`. |
+| `--bs-fab-bg` / `--bs-fab-color` | `var(--tc-app-accent)` / `var(--tc-app-accent-contrast)` | `#f2b705` on `#2e2400` under `sunshine` — never white on amber. |
+| `--bs-fab-shadow` | `var(--m-shadow-amber-ring)` | A 1px ring plus a wide glow **in the fill's own hue**, so the button reads as lit from itself. The fallback keeps the shape and goes neutral: an amber literal would put an amber glow under a non-amber fill on every other theme. |
+| `--bs-fab-shadow-active` | `0 0 0 1px …45, 0 5px 12px -6px …5` | Pressed. **Derived, not measured** — the design canvas is a static export with no interactive states. The glow is pulled in from 14/30 to 5/12 so the button appears to settle onto the surface as it moves down. |
+| `--bs-fab-icon-size` / `-icon-stroke` | `26px` / `2.2` | The stroke is a CSS declaration, so it beats lucide's own presentation attribute. |
+| `--bs-fab-padding-inline` / `--bs-fab-gap` | `20px` / `var(--m-gap-inline)` (`8px`) | `extended` only. |
+| `--bs-fab-label-font` | `var(--m-font-btn)` (`600 14px`) | `extended` only. Ellipsised, never wrapped — a second line would deepen the button past 56px and break the offset maths. |
+| `--bs-fab-focus-color` | `var(--tc-accent)` | `#5f8a2e` under `sunshine`. **Not** the library's global focus hue: that is `--tc-app-accent`, i.e. the FAB's own fill, which is invisible 2px off an amber square. |
+| `--bs-fab-duration` / `--bs-fab-ease` | `var(--m-dur-press)` / `var(--m-ease)` | |
+
+**Press and hover**
+
+`translateY(1px)` with the glow tightening on `:active`, `.14s`. The `-2px` hover lift is inside a `@media (pointer: fine) and (hover: hover)` block: on a touch screen `:hover` sticks to the last-tapped element, so a lifted FAB stays lifted after the tap and reads as a rendering fault. The retract animation lives on the **host** and press/hover on the **button**, so the two transforms can never fight over one property.
+
+**Accessibility**
+
+- The FAB is a real `<button type="button">`, so it is reachable by keyboard and `Enter`/`Space` both activate it.
+- **`label` is required.** In the `icon` variant it becomes the `aria-label` — an icon-only control with no name is an a11y failure, not a cosmetic omission. In `extended` the visible text *is* the name and no `aria-label` is written, so voice control matches what the user can read (WCAG 2.5.3, Label in Name).
+- 56×56 clears WCAG 2.5.5 Target Size (AAA, 44×44) with room to spare.
+- A retracted FAB is `visibility: hidden`, so it leaves the tab order and the accessibility tree rather than lurking invisibly in both.
+- The focus ring is the theme's secondary accent, not the global one — see `--bs-fab-focus-color`.
+
+```html
+<tc-mobile-shell data-key="/recipes">
+    <tc-app-bar slot="header" variant="title" heading="Рецепти"></tc-app-bar>
+    <!-- offset + size + 16px, so the last card is still readable under the FAB -->
+    <div style="padding-bottom: calc(104px + 56px + 16px)"><!-- the list --></div>
+    <tc-tab-dock slot="dock" active-id="recipes"></tc-tab-dock>
+    <div slot="overlay">
+        <tc-fab icon="plus" label="Нов рецепт"></tc-fab>
+    </div>
+</tc-mobile-shell>
+
+<!-- no dock below: 24px of clearance instead of 104 -->
+<tc-fab icon="plus" label="Нов рецепт" offset="24px"></tc-fab>
+
+<!-- named action, and a long reading surface where the nav is worth hiding -->
+<tc-fab icon="plus" label="Нов рецепт" variant="extended" auto-hide></tc-fab>
+```
+
+```tsx
+const fab = useRef<HTMLElement>(null)
+useEffect(() => {
+    // reveal() on navigation — a new page must never start with the action off-screen
+    ;(fab.current as any)?.reveal()
+}, [pathname])
+
+<tc-fab ref={fab} icon="plus" label={t.recipes.create} onClick={() => open('recipe-create')} />
+```
+
+---
+
+### tc-swipe-pager
+
+Discrete horizontal paging: one page fills the box, movement is committed, and the current index is application state. The phone gesture — swipe to the next day, the next step, the next week.
+
+**Not `tc-carousel`.** That element is a marketing carousel: auto-play, dot indicators, a peek at its neighbours, and no notion of an index a router or a store owns. Use it for a hero slideshow; use this for a pager whose position is data.
+
+**Tag:** `tc-swipe-pager`
+
+```
+tc-swipe-pager        display:flex; THE scroll container; scroll-snap-type:x mandatory
+  └─ > *              one page — flex:0 0 100%, snap-align:start, snap-stop:always
+```
+
+**CSS scroll-snap, not a JS transform pager.** The host is the scroll container and the browser owns the animation, which buys native momentum, correct rubber-banding at both ends, and no jank — nothing is animated from JS on the main thread. The element only reads the scroll position back. Reach for a transform pager only for something snap cannot serve (an infinite or virtualised pager).
+
+**The pages are your own direct children and are never re-parented.** There is no inner track div: an element that re-parents slotted children breaks under react-dom, which removes a child with `parentInstance.removeChild(child)` against the parent it *believes* the child has — and a pager's pages are conditionally rendered (`{days.map(…)}`) as a matter of course. So this element has no slots, can never hoist a nested `[slot="…"]`, and can never be hoisted from.
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `index` | number | `0` | The current page, **reflected**. Writing it pages there (animated, unless reduced motion); the element writes it back on every settled change. Out-of-range values are clamped. |
+| `loop` | boolean | absent | Wrap at the ends — **for `next()` / `prev()` only**, see below. |
+| `lazy` | boolean | absent | Render only `index-1 … index+1`. |
+| `gesture` | `swipe` \| `none` | `swipe` | `none` leaves programmatic paging and the keyboard, and turns the drag off (`overflow-x: hidden`) — for a surface where a horizontal drag already means something else. |
+| `role` | string | `group` | Set by the element **only if you have not**. |
+| `tabindex` | string | `0` | Same — the pager has to be reachable by keyboard. |
+
+**JS Properties**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `index` | number | `0` | Reflects `index`. Assigning it **animates**; call `goTo(i, false)` to jump. |
+| `count` | number (readonly) | — | How many pages there are. It is the child count. |
+| `pages` | `HTMLElement[]` (readonly) | — | The page elements in DOM order (`<template>`/`<style>`/`<script>`/`<link>` are not pages). |
+| `loop` / `lazy` | boolean | `false` | Reflect their attributes. |
+| `gesture` | `'swipe' \| 'none'` | `'swipe'` | Reflects `gesture`. |
+| `onIndexChange` | `((index: number) => void) \| null` | `null` | Called on a settled change, alongside the event. |
+
+**Methods**
+
+| Method | Description |
+|--------|-------------|
+| `next()` / `prev()` | One page. At an end they do nothing — or wrap, with `loop`. |
+| `goTo(index, animate = true)` | Page to `index`, clamped. `animate` is ignored under `prefers-reduced-motion: reduce`. |
+
+**Events**
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-pager-change` | `{ index: number, count: number }` | Fired **once per settled page**, never mid-drag — so a handler may safely fetch that page's data. Bubbling and composed, not cancelable. Fired for a swipe, `next()`/`prev()`/`goTo()`; **not** when you write the `index` attribute yourself, because echoing your own write back is how a controlled component ends up in a loop. |
+
+**The settled index, and `scrollend`**
+
+`scrollend` is the right signal but Safari only shipped it in 18, so a **120ms debounce** on `scroll` runs alongside it. Both call the same idempotent settle, which emits only when the index actually changed — so the two can never double-fire, and on a browser with `scrollend` the change lands immediately. The index itself is read by finding the page whose **left edge** is nearest the container's, not by `Math.round(scrollLeft / clientWidth)`: the division is exact only while every page is precisely one viewport wide with no gap.
+
+**`loop` wraps `next()`/`prev()`, not the gesture.** A native snap scroller cannot rubber-band past its last page into its first, and faking it would mean re-implementing the scroller in JS. The wrap is also always **instant**, even when motion is allowed: smooth-scrolling from the last page to the first animates *through* every page between them, which reads as a fast-forward rather than a wrap.
+
+**`lazy` skips rendering, it does not remove nodes.** Every page outside `index-1 … index+1` gets a `data-pager-far` attribute and `content-visibility: hidden`, so the box — and therefore the scroll width, every snap point and the current offset — is unchanged while the subtree's layout, paint and accessibility work is skipped. The nodes stay put because they are yours. The trade: a skipped page is out of the tab order and out of find-in-page while it is skipped. `data-pager-far` is public; style it if you want a placeholder.
+
+**It is a scroll container on both axes.** `overflow-x: auto` forces the used value of `overflow-y` to `auto`, so this surprises people exactly once: give the pager a **definite height** and its pages scroll inside it (a cooking mode); leave the height auto and the tallest page sizes the pager, so the surrounding pane scrolls instead (a day planner). Both are supported; pick deliberately.
+
+**There is deliberately no `touch-action`.** `pan-y` looks like the fix for "a mostly-vertical drag should scroll the page, not page the pager" and is the opposite of one: it allows *only* vertical panning and so disables the horizontal swipe. It is also intersected down the ancestor chain, which would take a horizontal rail nested inside a page with it. Axis locking for a horizontal scroller inside a vertical one is already native.
+
+**Keyboard**
+
+| Key | Effect |
+|-----|--------|
+| `ArrowLeft` / `ArrowRight` | One page (wrapping only with `loop`). |
+| `Home` / `End` | First / last page. |
+
+Only while the **pager itself** has focus — a page's content is full of arrow-key consumers, and taking the key from a text field inside a page would be worse than not having the shortcut. All four keys are `preventDefault`ed (so the browser's own ~40px arrow-key scroll cannot land the pager between two snap points) **and `stopPropagation`ed**: the pager consumed the key, and `ArrowRight` is a popular window-level shortcut.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-swipe-pager-page-basis` | `100%` | The page's flex basis. A knob only so a preview surface can show a peek of the next page (`85%`); anything below 100% leaves `scroll-snap-align: start` landing pages against the left edge rather than centred, which is the honest behaviour for a start-aligned pager. |
+
+**Accessibility**
+
+- `role="group"` and **not** `aria-roledescription="carousel"`: a carousel is a rotating set of equivalent promos, this is a sequence whose position is meaningful, and the roledescription would have a screen reader announce the wrong widget.
+- **Supply your own `aria-label` and your own live announcer** — a visually hidden `aria-live="polite"` region reading „Чекор 2 од 4". This element cannot know how to phrase yours. (`tc-step-pager` does supply one, because there the phrasing belongs to the component.)
+- The focus ring is inset (`outline-offset: -2px`): a scroll container clips both axes, so an outset ring on a full-bleed pager is clipped on all four sides.
+- `overscroll-behavior-x: contain` is load-bearing, not hygiene — without it a swipe past the last page chains out to the document, where on iOS it is the back-navigation gesture.
+- `prefers-reduced-motion: reduce` makes every `goTo` jump. The element checks the query itself, because the library reset flattens transitions and animations but cannot reach `scroll-behavior`.
+
+```html
+<tc-swipe-pager id="days" aria-label="Дни во неделата">
+  <div>Понеделник…</div>
+  <div>Вторник…</div>
+  <div>Среда…</div>
+</tc-swipe-pager>
+<script>
+  const pager = document.getElementById('days')
+  pager.addEventListener('tc-pager-change', e => loadDay(e.detail.index)) // once per page
+</script>
+```
+
+```tsx
+const pager = useTc<HTMLElement>(
+    {},
+    { 'tc-pager-change': (e: CustomEvent) => setDay(e.detail.index) },
+)
+
+<tc-swipe-pager ref={pager} lazy index={day} aria-label={t.planner.days}>
+    {days.map((d) => <DayPane key={d.iso} day={d} />)}
+</tc-swipe-pager>
+```
+
+---
+
+### tc-step-pager
+
+The full-screen guided-step surface: a segmented progress rule, one step per swipe, a `96px` back button and a full-width advance button in the thumb zone — screen `1e` („Готви", cooking mode) of the JADI.mk phone design.
+
+It **composes `tc-swipe-pager`**: the gesture, the snap geometry, the settled-index debounce and the keyboard are all that element's, and this one adds the chrome. Everything below the pager is patched from one settled index, so swiping and pressing the buttons can never disagree.
+
+**Tag:** `tc-step-pager`
+
+```
+tc-step-pager                        display:flex; flex-direction:column
+  ├─ .tc-step-pager-top              ✕ · context title · wake chip
+  ├─ .tc-step-pager-progress         N segments, 4px tall, gap 4px, aria-hidden
+  ├─ .tc-step-pager-pages            the tc-swipe-pager — flex:1
+  │    └─ .tc-step-pager-step        one page, 26px gutter, scrolls if it must
+  │         └─ .tc-step-pager-body   auto-margin centred
+  │              ├─ .tc-step-pager-no       mono step number, amber
+  │              ├─ .tc-step-pager-text     serif instruction
+  │              └─ .tc-step-pager-hint     left-flush terracotta notice
+  ├─ .tc-step-pager-caption          „Повлечете лево или десно за следниот чекор"
+  ├─ .tc-step-pager-controls         96px back + flex:1 amber advance
+  └─ .tc-step-pager-announcer        visually hidden, aria-live="polite"
+```
+
+**Steps are a property, not slots.** `steps` takes `{ no?, text, hint? }` objects **or bare strings** — which is what a recipe's instructions actually are. A slotted API would make every consumer duplicate this markup in their own template and then keep it in step with the library. As a consequence the element owns its entire subtree, has **no slots**, and **takes no children** (anything you put inside is overwritten).
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `index` | number | `0` | The current step, **reflected**. Writing it pages there; the element writes it back on every settled change. |
+| `heading` | string | *(unset)* | The muted `12.5px` context title — the recipe's name. Also becomes the inner pager's `aria-label`, so that focusable group is not announced as a bare „group". |
+| `next-label` | string | `next` message (`Next`) | The advance button's label on every step but the last. |
+| `done-label` | string | `done` message (`Done`) | Its label on the **last** step — the design's „Готово". |
+| `hint-label` | string | `tip` message (`Tip`) | The eyebrow above a step's hint block, rendered uppercase. `hint-label=""` hides the eyebrow and keeps the block. |
+| `back-label` | string | `back` message | Accessible name for the back chevron. |
+| `close-label` | string | `close` message | Accessible name for the ✕. |
+| `swipe-hint` | string | *(unset)* | The centred caption above the controls. **Absent ⇒ no caption row at all**, not an empty one. |
+| `keep-awake` | boolean | absent | Ask the OS to keep the screen on while mounted and visible. See below. |
+| `wake-label` | string | `screenAwake` message | The wake chip's label — „Екранот е буден". |
+| `data-wake` | — | — | **Written by the element**, never by you: present only while a screen wake lock is genuinely held. It is what shows the chip. |
+
+**JS Properties**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `steps` | `(string \| StepPagerStep)[]` | `[]` | The steps. Set via JS; not an attribute. |
+| `index` | number | `0` | Reflects `index`; assigning it animates. |
+| `count` | number (readonly) | `0` | `steps.length`. |
+| `wake` | boolean (readonly) | `false` | Whether a lock is **actually held** — not whether one was asked for. |
+| `nextLabel` / `doneLabel` / `hintLabel` / `backLabel` / `closeLabel` / `wakeLabel` | string | *(message)* | Resolve the attribute, falling back to the message registry. |
+| `heading` / `swipeHint` | `string \| null` | `null` | Reflect their attributes. |
+| `keepAwake` | boolean | `false` | Reflects `keep-awake`. |
+| `onIndexChange` / `onDone` / `onClose` | callbacks | `null` | Alongside the three events. |
+
+**Methods:** `goTo(index, animate = true)`, `next()`, `prev()` — all routed through the inner pager, so there is one place a step change is committed.
+
+```ts
+interface StepPagerStep {
+    no?: string     // the number as DRAWN; omit for zero-padded 01…0N
+    text: string
+    hint?: string   // omit and no notice block is rendered for that step
+}
+```
+
+**Events**
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-step-pager-change` | `{ index: number, count: number, last: boolean }` | A settled step change, from a swipe or from either button. `last` is what tells you the advance button now reads `done-label`. Bubbling, composed. Not fired when you write `index` yourself. |
+| `tc-step-pager-done` | — | The advance button was pressed **on the last step**. It does not advance; this is the "finished cooking" signal. |
+| `tc-step-pager-close` | — | The ✕ was pressed. |
+
+The inner pager's `tc-pager-change` also **bubbles past** this element, since it is composed and bubbling. Listen to one or the other, not both.
+
+**Progress segments fill up to *and including* the current index** — the design's own rule, so step 1 of 4 already shows a quarter filled rather than nothing. Each is a `flex: 1` 4px bar with a `.18s` colour transition, marked `aria-hidden` because the announcer states the same position in words.
+
+**The back button stays enabled on the first step.** The design draws it in its normal state at step 1 and its own logic clamps rather than disabling, so the button keeps every pixel and does nothing — with `aria-disabled="true"`, which is the only part of "pressing this does nothing" a screen reader could otherwise not know. Style `[aria-disabled]` yourself if you want the visual too.
+
+**`keep-awake` is driven off the real lock, never off the attribute.** `navigator.wakeLock.request('screen')` needs a secure context and a **visible** document, rejects outright on engines that do not implement it (Firefox, Safari < 16.4), and is released by the UA — not by you — the moment the tab hides. So:
+
+- the request is always `try`/`catch`ed and **never surfaces an error**; a refusal simply means the chip does not appear;
+- it is re-requested on `visibilitychange` → visible, because the UA does not restore the lock on return;
+- the lock is released on unmount, and on removing the attribute;
+- `[data-wake]` and the `wake` property come from the sentinel and from its own `release` event — a chip bound to the attribute's *intent* would be a lie on Firefox, over plain `http://`, and every time the user takes a phone call mid-recipe.
+
+**Height, and the clamp**
+
+The surface needs a definite height from somewhere — it is `flex: 1 1 auto; height: 100%`, so a `tc-mobile-shell` pane, a `position: fixed; inset: 0` overlay, or any parent with a height all work. `1e` is composed at 390x844 and its fixed type does not fit a 667px phone, so the two display sizes are `clamp()`ed against **viewport height**, calibrated so the middle term is exactly the canvas value at 844px:
+
+| | 844px | 667px | ≤ ~600px |
+|---|---|---|---|
+| step number `clamp(38px, 6.2vh, 52px)` | 52px | 41px | 38px |
+| step text `clamp(22px, 3.55vh, 30px)` | 30px | 24px | 22px |
+
+`vh` and not `cqh`: a container query would need `container-type: size` on the page, whose size containment would stop the step body sizing from its own content — which is what the auto-margin centring depends on. Anything still left over after the clamp is absorbed by the **step** scrolling, so the hint block is what goes below the fold, never the number or the instruction. Embedded in something shorter than the viewport, override `--bs-step-pager-no-size` / `-text-size` (and the two gap knobs).
+
+**Auto margins, not `justify-content: center`.** Centred flex content that overflows its container overflows in *both* directions and the part above the top edge is unreachable — no scroll position shows it. `margin-block: auto` collapses to 0 when there is no free space, so a tall step scrolls normally and a short one is centred.
+
+**Safe areas.** Standing alone the element pays `--tc-safe-top` as its own `padding-top` and folds `--tc-safe-bottom` into the control row's `max(14px, inset)`. Inside a `tc-mobile-shell` both are zeroed by a `:where(tc-mobile-shell)` rule, because the shell already pays them out of its own padding box — counting them twice is the classic double-inset bug.
+
+**CSS Custom Properties** — every region is knobbed; the ones worth knowing:
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-step-pager-bg` | `var(--tc-surface-muted)`; `--sun-bg` (`#f6ecd8`) under `sunshine` | The canvas. |
+| `--bs-step-pager-gutter` | `var(--m-pad-page-wide)` (`18px`) | Chrome gutter — top row, progress, caption, controls. |
+| `--bs-step-pager-step-gutter` | `26px` | The step body's own, wider gutter — the design's widest, so a 30px serif setting has somewhere to wrap. |
+| `--bs-step-pager-icon-color` | `var(--tc-text-muted)`; `--sun-ink-2` (`#44503a`) under `sunshine` | The ✕, the context title and the back chevron. |
+| `--bs-step-pager-seg-bg` / `-seg-bg-filled` | `var(--tc-border)` / `var(--tc-app-accent)` | Progress segments. |
+| `--bs-step-pager-no-size` / `-text-size` | the two `clamp()`s above | Override together with `-no-gap` / `-text-gap`. |
+| `--bs-step-pager-hint-accent` / `-hint-bg` | `var(--m-notice-accent)` / `var(--m-notice-bg)` — terracotta `#a4472f` at 7% under `sunshine` | The left-flush notice. **Terracotta and not amber**: amber is the CTA colour under a two-per-screen budget, and `1e` already spends both on the step number and the advance button. |
+| `--bs-step-pager-control-height` | `var(--m-h-button-lg)` (`66px`) | Both control buttons. |
+| `--bs-step-pager-back-width` | `96px` | Wide enough for a thumb, narrow enough that the advance button still reads as primary. |
+| `--bs-step-pager-advance-bg` / `-advance-color` | `var(--tc-app-accent)` / `var(--tc-app-accent-contrast)` | Amber with `#2e2400` ink — never white on amber. |
+| `--bs-step-pager-advance-shadow` | `var(--m-shadow-amber)`; `0 14px 30px -12px rgba(242,183,5,.55)` under `sunshine` | Amber-on-amber, so the glow is the same hue as the fill. |
+| `--bs-step-pager-pad-bottom` | `max(14px, var(--bs-step-pager-safe-bottom))` | The control row's bottom padding. |
+
+**Accessibility**
+
+- A visually hidden `aria-live="polite"` announcer carries „Step 2 of 4" from the `stepOfTotal` message, rewritten only when it actually changes so a screen-reader read is never interrupted mid-sentence.
+- The ✕'s hit box is 44px wide and as tall as the frame allows: the canvas draws a bare 22px glyph, so the box is grown by **padding** and the padding cancelled by an equal negative **margin** — the row keeps the design's 34px height and the glyph its 18px gutter, while the hit-tested border box is 44x44 with a top inset and 44x33 without one. Spending the difference downward instead would put the target over the progress rule.
+- The advance button's focus ring is the on-accent ink, drawn **inside** the fill: the library's global amber ring is invisible on an amber button.
+- Both control buttons are 66px tall, well clear of every target-size floor.
+
+```tsx
+const cooking = useTc<HTMLElement>(
+    { steps: recipe.steps },              // a string[] straight off the recipe
+    {
+        'tc-step-pager-change': (e: CustomEvent) => setStep(e.detail.index),
+        'tc-step-pager-done': () => finishCooking(),
+        'tc-step-pager-close': () => closeCookingMode(),
+    },
+)
+
+<tc-step-pager
+    ref={cooking}
+    heading={recipe.title}
+    next-label={t.cooking.next}
+    done-label={t.cooking.done}
+    hint-label={t.cooking.tip}
+    swipe-hint={t.cooking.swipeHint}
+    wake-label={t.cooking.screenAwake}
+    keep-awake
+/>
 ```
 
 ---
@@ -1670,6 +2576,8 @@ Vertical list of action rows, each with a title, optional description, and a CTA
 
 Contextual feedback message.
 
+**Not `tc-notice`.** An alert **announces** something that just happened and is meant to be read and closed — it has a heading, a dismiss button and a lifecycle. `tc-notice` is an **aside**: permanent explanatory prose belonging to the surface it sits on, with no heading, no dismiss and no state. If it can be closed, it is an alert. See the comparison table under [tc-notice](#tc-notice).
+
 **Attributes**
 
 | Attribute | Type | Default | Description |
@@ -1690,6 +2598,8 @@ Contextual feedback message.
 ### tc-banner
 
 Status banner with a leading icon, body content, an optional action slot or CTA link, and optional localStorage-backed dismissal. Emits `tc-dismiss` when closed. Uses `role="status"` (or `role="alert"` for the error variant) for screen reader announcements.
+
+**Not `tc-notice`.** A banner is a *persistent announcement* — it always carries a live or landmark role, and it can be dismissed and remember that. `tc-notice` is a static aside with a `note` role and no dismissal, whose flat per-tone washes and `muted` / `accent` tones this element's gradient fills and build-time colour maps cannot express. See the comparison table under [tc-notice](#tc-notice).
 
 **Tag:** `tc-banner`
 
@@ -1770,6 +2680,669 @@ Status banner with a leading icon, body content, an optional action slot or CTA 
   cta-label="Learn more" cta-href="/changelog">
   Toolcase v3 is now open-source.
 </tc-announcement-bar>
+```
+
+---
+
+### tc-notice
+
+The **inline aside**: a 3px coloured rule down the left edge, a flat wash of the same hue behind it, an optional uppercase eyebrow and an optional leading icon. The single most repeated non-trivial block in the JADI.mk phone design — five of its twelve screens carry one (`1e`'s cooking tip, `1f`'s moderation notice, `1i`'s medical disclaimer, two on `1k`), and a sixth shape, `variant="banner"`, is `1h`'s offline strip.
+
+**Tag:** `tc-notice`
+
+```
+tc-notice                      display:flex — 3px rule · wash · 0 8px 8px 0
+  ├─ svg.tc-notice-icon        15px, tone colour, optional
+  └─ span.tc-notice-body       flex:1 1 0
+       ├─ .tc-notice-label     eyebrow, tone colour, optional
+       └─ .tc-notice-text      the prose
+```
+
+**THREE ASIDE-ISH ELEMENTS, and they are not interchangeable.** Pick by whether the block *announces* or *explains*:
+
+| | What it is | Has | Role |
+|---|---|---|---|
+| `tc-alert` | An **announcement** of something that just happened („Зачувано") | heading, dismiss button, `close()`, `tc-closed` | alert family |
+| `tc-banner` | A **persistent announcement** — a status strip with a CTA and localStorage-backed dismissal | leading icon (per-variant default), action slot, CTA link, dismiss, `storage-key` | `status` / `alert` / `region` |
+| `tc-notice` | An **aside**: permanent explanatory prose belonging to the surface it sits on | tone, eyebrow, optional icon | `note` (or `status` with `live`) |
+
+If it can be closed, it is an alert or a banner. If it is still true tomorrow, it is a notice. Three concrete reasons `tc-notice` is not a `tc-banner` variant, rather than a matter of taste: `tc-banner`'s fill is a 135° **gradient** composed from Bootstrap `--bs-*-rgb` triplets and its text colour comes from a build-time Sass map, so neither the design's flat 7–14% washes nor its `muted` / `accent` tones are reachable; and `tc-banner` always carries a live or landmark role, which for four static disclaimers means four spurious live regions per page.
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `tone` | `info\|muted\|warning\|accent\|success\|danger` | `muted` | Rule colour, wash alpha and text colour, as one choice. See the table below. |
+| `variant` | `bar\|banner` | `bar` | `bar` is the left-flush aside. `banner` drops the rule and the radius and becomes a full-bleed strip with a bottom hairline. Place it as a **sibling** of the app bar — see below. |
+| `size` | `md\|lg` | `md` | `md` is the 11.5px/1.45 aside; `lg` is `1e`'s 13px/1.5 cooking tip, at 11px 14px padding. |
+| `text` | string | `''` | The prose. **Escaped** — plain text only, see below. |
+| `label` | string | *(unset)* | The uppercase eyebrow above the text — `1e`'s „Совет". Absent ⇒ no eyebrow row at all. |
+| `icon` | string | *(unset)* | A lucide icon name (kebab or Pascal), rendered at 15px in the tone colour. Unknown names render nothing. |
+| `live` | boolean | absent | Make it `role="status"` instead of `role="note"`, so it is announced when it appears. |
+
+**JS Properties:** `tone`, `variant`, `size`, `text`, `label`, `icon`, `live` — all reflect their attributes. No methods, no events: a notice has no state.
+
+**Tones.** Every wash is `color-mix(in srgb, <tone> N%, transparent)`, which *is* the hue at alpha `N` — so each fill below is bit-exact against the design's own `rgba()` while still being one value away from a re-skin. The alphas are genuinely per-tone (they compensate for how dark each pigment reads on cream), not noise.
+
+| Tone | Rule | Wash | Text | Drawn in |
+|---|---|---|---|---|
+| `info` | `#9c4a7a` plum | `rgba(156,74,122,.08)` | `#44503a` | `1f` — comments held for moderation |
+| `muted` | `#9aa189` ink-4 | `rgba(154,161,137,.12)` | `#6b6459` | `1i`, `1k` — the disclaimers |
+| `warning` | `#d49a00` ochre | `rgba(212,154,0,.12)` | `#8a6d2f` | `1k` — the payment notice |
+| `accent` | `#a4472f` terracotta | `rgba(164,71,47,.07)` | `#6b6459` | `1e` — the cooking tip |
+| `success` | `#5f8a2e` leaf | `rgba(95,138,46,.12)` | `#4c7122` | — completed from the system's semantics |
+| `danger` | `#f2604b` coral | `rgba(242,96,75,.14)` | `#b3261e` | — |
+
+Those are the values under the **sunshine** theme. Un-themed, each tone resolves to the nearest `--tc-*` rung (`--tc-info`, `--tc-text-faint`, `--tc-warning`, `--tc-app-accent`, `--tc-success`, `--tc-danger`) and the geometry is identical.
+
+**`accent` is terracotta and not amber.** Amber `#f2b705` is this design's CTA colour under a two-elements-per-screen budget, and `1e` has already spent both on the step number and the advance button.
+
+**The banner has a bottom hairline only.** `1h` draws `border-bottom: 1px solid rgba(212,154,0,.3)` and no top rule, because the app bar above it already ends in one and two hairlines 1px apart read as a rendering fault. The hairline is 30% of the tone and the fill 14%, which for `warning` is exactly the design's pair. `--bs-notice-banner-border-top` exists for a banner that floats free of a bar.
+
+**Put the banner beside `tc-app-bar`, not inside it.** `1h` draws it as its own row after the bar, and full-bleed is the point of the variant: `tc-app-bar`'s `below` region is a `flex: 0 0 100%` of the bar's *content* box, so a banner slotted there is inset by the bar's 14px gutter and sits above the bar's bottom rule rather than below it. The bar's gutter lives inside a `padding` shorthand and is not separately addressable, so there is deliberately no bleed-back rule here — one would be a magic number coupled to another component's internals.
+
+**`live` is off by default, deliberately.** Four of the design's five notices are permanent text already on the page at load, and a live region that fires on mount interrupts whatever the user was reading for nothing. Turn it on for a notice that *appears* in response to a state change — `1h`'s offline strip is exactly that, and a screen-reader user who cannot see the strip appear is the one who most needs to be told the app went offline.
+
+**It takes no children.** The text is an attribute because slot distribution means re-parenting the consumer's nodes into a rendered skeleton, which throws `NotFoundError` under react-dom (see `tc-app-bar`). This element owns its subtree — anything you put inside is overwritten. The design's five notices are all plain prose; prose with markup in it is an announcement or a body paragraph, so reach for `tc-alert` or a plain block carrying the same tokens.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-notice-tone` | per `tone` | The hue. Drives the rule, the icon, the eyebrow, and both wash derivations. |
+| `--bs-notice-bg-alpha` | per `tone` (7–14%) | How much of the hue the wash carries. |
+| `--bs-notice-bg` | `color-mix(…)` of the two above | Override for a fill that is not a tint of the rule. |
+| `--bs-notice-color` | per `tone` | Prose colour. |
+| `--bs-notice-rule` | `var(--m-bar-accent)` (`3px`) | Left rule width. |
+| `--bs-notice-radius` | `var(--m-radius-notice)` (`0 8px 8px 0`) | Square against the rule, rounded away from it. |
+| `--bs-notice-padding` | `10px 13px`; `11px 14px` at `size="lg"` | The design spends 9/10/11 × 12/13/14 across its five instances with no pattern; this is the middle. |
+| `--bs-notice-font` | `400 11.5px/1.45`; `400 13px/1.5` at `size="lg"` | |
+| `--bs-notice-icon-size` / `-icon-stroke` | `15px` / `1.9` | |
+| `--bs-notice-banner-bg` / `-banner-border-color` | 14% / 30% of the tone | |
+| `--bs-notice-banner-border-top` / `-banner-border-bottom` | `0` / `1px solid` | |
+| `--bs-notice-banner-font` | `600 11.5px/1.45` | 600, not 400: a strip this thin has to hold its own against the bar above it. |
+
+```tsx
+{/* 1e — the cooking tip */}
+<tc-notice tone="accent" size="lg" label={t.cooking.tip} text={step.hint} />
+
+{/* 1i — the medical disclaimer */}
+<tc-notice tone="muted" text={t.diet.estimateDisclaimer} />
+
+{/* 1h — the offline strip, a SIBLING of the app bar */}
+<tc-app-bar variant="back" heading={list.name} subheading={boughtLabel} elevated />
+{offline && (
+    <tc-notice
+        tone="warning"
+        variant="banner"
+        live
+        icon="wifi-off"
+        text={t.shopping.offline}
+    />
+)}
+```
+
+---
+
+### tc-list-section
+
+A **titled group of rows**: a tinted header band carrying an icon, an eyebrow label and a right-aligned figure, over rows separated by hairlines, inside one clipped rounded frame. Screen `1j` („Планер") draws three per day — појадок / ручек / вечера, each tinted with the meal's own hue.
+
+**Tag:** `tc-list-section`
+
+```
+tc-list-section                    display:flex; flex-direction:column
+  ├─ .tc-list-section-header       tinted band — icon · eyebrow · figure
+  │    ├─ svg.tc-list-section-icon 14px, tone colour
+  │    ├─ .tc-list-section-heading eyebrow, tone colour, flex:1 1 0
+  │    └─ .tc-list-section-meta    right-aligned figure, tabular-nums
+  ├─ (your rows)                   padded, hairline-separated
+  └─ [slot="footer"]               ordered last, whatever position it was authored in
+```
+
+**Not `tc-panel` / `tc-card`, and not for want of trying.** `tc-panel`'s frame is `border-radius: 0` with no `overflow`, and neither is reachable through a `--bs-*` knob — but this band is a filled strip that has to be *clipped* by a 10px corner, so making `tc-panel` do it means overriding two hardcoded properties on every `tc-panel` in every app on the theme. `tc-panel-header`'s heading is `font-weight: 500` with no tracking and no transform (a third override), and its only trailing region is a re-parented `action` **slot**. `tc-card`'s `.card-header` is a gradient cap sized for desktop. And the row rhythm — `11px 12px`, `1px dashed` between rows and never after the last — is not expressible in either at all.
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `heading` | string | `''` | The eyebrow, rendered uppercase and tracked. Also names the group via `aria-labelledby`. |
+| `icon` | string | *(unset)* | A lucide icon name (kebab or Pascal), 14px, in the tone colour. Unknown names render nothing. |
+| `meta` | string | *(unset)* | The right-aligned figure — „628 ккал". `tabular-nums`, so a live total does not shift the band's right edge. |
+
+**JS Properties:** `heading`, `icon`, `meta` — all reflect their attributes. No methods, no events.
+
+**With no `heading`, no `icon` and no `meta`, the band is not rendered at all** — an empty 34px strip is worse than no strip. The frame and the row rhythm are still worth having on their own.
+
+**The hue is a CSS property, not a `tone` attribute.** The header's icon and label share one colour, and which colour is domain knowledge the library does not have: `1j`'s three hues are the app's meal-time map (појадок `#8a6d2f`, ручек `#a4472f`, вечера `#3c5d6b`) and there is no enumerable set to name. So it is `--bs-list-section-tone`, set per instance — the same split `tc-taxonomy-card` uses for its category accent. An attribute whose value set is open-ended and whose only effect is a colour is strictly worse than the colour.
+
+**The hairline is a `border-top` on every row after the first**, not a `border-bottom` on every row but the last. `:last-child` is wrong because a footer may *be* the last child, and `:last-of-type` is per-element-type so it breaks the moment a group mixes a `tc-check-row` with a plain `div`. `row + row` asks the question that matters — "is something above me?" — and needs no knowledge of what comes after.
+
+**A `tc-check-row` child gets the group's rhythm.** Inside a `tc-list-section` a check row takes `--bs-list-section-row-padding` into its own padding knob and drops its own divider, so the group owns row separation and the last row draws no hairline against the frame's bottom edge. That rule is `0-0-2`; override with `tc-list-section > tc-check-row { … }`.
+
+**Rows are your children, styled where they sit** — nothing is ever re-parented (which is what breaks under react-dom, and a planner whose rows change with the selected day is exactly that case). The consequence is that the selectors have to exclude the two children that are not rows: the band this element renders and a slotted footer. Everything else is a row.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-list-section-tone` | `var(--tc-app-accent)`; `#a4472f` under `sunshine` | **The domain knob.** Colours the icon and the eyebrow together. |
+| `--bs-list-section-bg` | `var(--tc-surface)` | The frame. |
+| `--bs-list-section-border-color` | `var(--tc-border)`; `#e5e2dc` under `sunshine` | Frame border and the band's bottom rule. |
+| `--bs-list-section-radius` | `var(--m-radius-card)` (`10px`) | |
+| `--bs-list-section-header-bg` | `var(--tc-surface-muted)`; `#f4f1ea` under `sunshine` | |
+| `--bs-list-section-header-padding` / `-header-gap` | `9px 12px` / `7px` | |
+| `--bs-list-section-icon-size` / `-icon-stroke` | `14px` / `1.8` | |
+| `--bs-list-section-heading-font` / `-heading-track` | `var(--m-font-eyebrow)` / `var(--m-track-eyebrow)` | `700 9.5px` at `.13em` — the design's most repeated value. |
+| `--bs-list-section-meta-font` / `-meta-color` | `var(--m-font-meta-strong)` / `#998f80` under `sunshine` | |
+| `--bs-list-section-row-padding` | `11px 12px` | Applied to plain rows, and passed into a `tc-check-row` child's own knob. |
+| `--bs-list-section-divider` | `1px dashed var(--m-rule-dashed)` (`#e5ddd0`) | |
+
+**Accessibility.** The host takes `role="group"` (unless you set a role yourself) and `aria-labelledby` pointing at the heading — not `aria-label`, which would have a screen reader read the heading twice, once as the group's name and once as its first content.
+
+```tsx
+<tc-list-section
+    heading={meal.label}
+    icon={meal.icon}
+    meta={`${meal.kcal} ккал`}
+    style={{ '--bs-list-section-tone': MEAL_HUE[meal.time] } as React.CSSProperties}
+>
+    {meal.entries.map((entry) => (
+        <tc-check-row
+            key={entry.id}
+            shape="circle"
+            tone="success"
+            no-strike
+            no-dim
+            label={entry.title}
+            hint={`${entry.servings} порција · ${entry.kcal} ккал`}
+            checked={entry.eaten || undefined}
+        />
+    ))}
+    <div slot="footer">{t.planner.addEntry}</div>
+</tc-list-section>
+```
+
+---
+
+### tc-add-slot
+
+The dashed **„one more could go here"** tap target: an icon and a label centred inside a dashed rounded frame, sized like the card it would become. Screen `1j` („Планер") draws one for ужина, the meal the day has no entries for; the shape recurs well beyond the planner — adding a week to a plan, an ingredient line in the recipe wizard, a pantry item.
+
+**Tag:** `tc-add-slot`
+
+```
+tc-add-slot                        display:flex — the host is only the track
+  └─ button.tc-add-slot-button     THE HIT TARGET — dashed frame, icon + label
+       ├─ svg.tc-add-slot-glyph    16px, stroke 2
+       └─ .tc-add-slot-label       600 12.5px
+```
+
+**Not `tc-empty-state`, and the difference is structural.** `tc-empty-state` fills a region that has nothing in it: a glyph, a heading, a sentence and an optional action, centred where a list would be. This fills **one missing item** in a list that already has others — same size and shape as its filled siblings, with the dashed border as the whole message. One says „nothing here yet", the other „one more could go here".
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `label` | string | `''` | What would go here — „Ужина", „Состојка". **Required**: it is the visible text *and* the accessible name. |
+| `icon` | string | `plus` | A lucide icon name (kebab or Pascal), 16px, stroke 2. Unknown names render no glyph. |
+| `tone` | `muted` \| `accent` | `muted` | |
+| `disabled` | boolean | absent | Forwarded to the real `<button>`. |
+
+**JS Properties:** `label`, `icon`, `tone`, `disabled`, and `button` (the `<button>`, read-only). No events of its own — listen for `click`, it bubbles.
+
+**It is a real `<button>`,** not a div with a click handler: keyboard-activatable, in the tab order, with a focus ring, and `disabled` honoured by the platform (out of the tab order) rather than simulated with `pointer-events`. All of which matter for an affordance whose only visual cue is a border style.
+
+**The frame is on the button, not on the host.** The dashed rectangle *is* the target, so the two have to be the same box — a frame on the host with a button inside it would let a tap land on the border and do nothing. The host contributes only the track it occupies.
+
+**`tone="accent"`** is for a slot that *is* its section's primary action because the section is otherwise empty. It resolves through `--tc-accent` — leaf green under `sunshine` — and deliberately **not** `--tc-app-accent`, which is the amber CTA colour: unreadable as 12.5px text on cream, and budgeted at two elements per screen.
+
+**It renders 44px, and the canvas draws 42px.** `1j` is `padding:12px` around a 16px glyph; `--tc-min-touch-target` floors it at 44. That is the one deliberate departure from the canvas in this element — the alternative is shipping a control two pixels under the guideline it exists to satisfy.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-add-slot-padding` / `-gap` | `12px` / `7px` | |
+| `--bs-add-slot-radius` | `var(--m-radius-card)` (`10px`) | Matches the card the slot stands in for. |
+| `--bs-add-slot-min-height` | `var(--tc-min-touch-target)` (`44px`) | |
+| `--bs-add-slot-border-width` / `-border-style` / `-border-color` | `1px` / `dashed` / `var(--tc-border-strong)`; `#d8cfbd` under `sunshine` | The „dashed borders" rung — one step deeper than the `#e5ddd0` used for dashed row *separators*. |
+| `--bs-add-slot-bg` | `transparent` | |
+| `--bs-add-slot-color` | `var(--tc-text-faint)`; `#9aa189` under `sunshine` | Label and glyph. |
+| `--bs-add-slot-accent-color` | `var(--tc-accent)` | The `accent` tone's single hue, and the hover colour. |
+| `--bs-add-slot-focus-ring` | `var(--tc-app-accent)`; `#a4472f` under `sunshine` | 2px at 2px offset, outside the dashed frame. |
+| `--bs-add-slot-glyph-size` / `-glyph-stroke` | `16px` / `2` | |
+| `--bs-add-slot-font` | `var(--m-font-btn-sm)` (`600 12.5px`) | |
+
+**Accessibility.** The visible label *is* the accessible name — no `aria-label`, so voice control („tap Ужина") matches what the user can read and WCAG 2.5.3 Label in Name holds. A label too long for the slot ellipsises rather than wrapping, which would make the slot taller than the card it stands in for. The hover state exists for a trackpad on a tablet and is not hover-*only*: the affordance is fully legible at rest.
+
+```tsx
+<tc-add-slot label={t.planner.addSnack} onClick={() => openEntrySheet('snack')} />
+<tc-add-slot label={t.wizard.addIngredient} icon="carrot" tone="accent" onClick={addLine} />
+```
+
+---
+
+### tc-taxonomy-card
+
+The card whose whole visual identity comes from **one accent hue** — a 3px rule of it across the top, a 3% tint of it as the surface, an eyebrow and a floated metric figure in it, a serif title, and slotted rows under. The most repeated surface in the JADI.mk phone design: `1b`'s „Рецепт на неделата" hero, `1c`'s three cookbook cards, `1f`'s two community cards with a social strip, and `1g`'s three blurred skeletons.
+
+**Tag:** `tc-taxonomy-card`
+
+```
+tc-taxonomy-card                        display:flex column — the host IS the card
+  ├─ [slot="media"]                     order -1  leading image strip
+  ├─ div.tc-taxonomy-card-main          order 0   the element's OWN node
+  │    ├─ .tc-taxonomy-card-metric      float:right — the kcal box
+  │    │    ├─ .tc-taxonomy-card-metric-value   tabular
+  │    │    └─ .tc-taxonomy-card-metric-unit    tracked uppercase
+  │    ├─ .tc-taxonomy-card-eyebrow     tracked uppercase, in the accent
+  │    ├─ .tc-taxonomy-card-heading     serif; an <hN> when `heading-level`
+  │    │    └─ a|button.tc-taxonomy-card-link   THE activation region
+  │    ├─ .tc-taxonomy-card-subheading  small muted line
+  │    └─ p.tc-taxonomy-card-desc       clamped body copy
+  ├─ [slot="chips"]                     order 1   the meta row
+  ├─ [slot="social"]                    order 2   counters + trailing action
+  └─ [slot="actions"]                   order 3   the „Отвори"/„Избриши" pair
+```
+
+**Not a `tc-card` / `tc-basic-card` / `tc-section-card` variant.** Those are containers: a surface, a padding, an optional header and footer, and whatever you put inside. This one **owns its content model** — eyebrow, serif title, subheading, clamped description and a floated metric — because that composition is the thing being repeated, and because the accent hue has to reach five separate surfaces (top rule, surface tint, eyebrow, metric figure, metric border) that a consumer would otherwise wire up by hand on every instance.
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `accent` | CSS colour | `#55524c` under `sunshine` | The card's hue. Written onto the host as `--bs-taxonomy-card-accent`. |
+| `eyebrow` | string | `''` | The tracked uppercase overline — „ГЛАВНО ЈАДЕЊЕ", or `1f`'s „Супа · Марија П.". |
+| `heading` | string | `''` | The serif title, and the activation region's accessible name. |
+| `heading-level` | `0`–`6` | `0` | `1`–`6` render the heading as that `<hN>`; `0` keeps a `<div>`. |
+| `subheading` | string | `''` | A small muted line under the title — the source bundle, the author, a date. |
+| `description` | string | `''` | Body copy, clamped. Absent ⇒ the run collapses, gap included. |
+| `clamp` | `0`–`8` | `2` | Lines the description is clamped to. `0` ⇒ no clamp. Pure CSS state — changing it does not re-render. |
+| `metric-value` | string | `''` | The floated figure — „486". |
+| `metric-unit` | string | `''` | The unit under it — pass „ккал"; the partial uppercases and tracks it. |
+| `metric-spoken` | string | *(unset)* | How the metric box is SPOKEN. See below. Omit `metric-value` **and** `metric-unit` ⇒ no box. |
+| `spoken` | string | *(unset)* | The activation region's accessible name, when the title alone is not enough. |
+| `href` | string | *(unset)* | Renders the activation region as a real `<a href>`. Absent ⇒ a `<button type="button">`. |
+| `static` | boolean | absent | Presence ⇒ a static panel: no activation region, no overlay, no press or hover. |
+
+**JS Properties:** `accent`, `eyebrow`, `heading`, `headingLevel`, `subheading`, `description`, `clamp`, `metricValue`, `metricUnit`, `metricSpoken`, `spoken`, `href`, `isStatic`, plus `interactive` (the inverse of `static`) and `activationElement` (the `<a>`/`<button>`, read-only). `onActivate` is the callback form of the event.
+
+**Events:** `tc-taxonomy-card-activate` — bubbles, composed, **cancelable**, `detail: { href: string | null }`. Cancelling it suppresses the anchor's own navigation, which is how an SPA router adopts these cards.
+
+**`static` is the attribute; `interactive` is the property.** Interactive is the default — six of the design's nine cards are tappable — and an HTML boolean attribute cannot express „true unless you say otherwise", since presence is the only signal it has. So the opt-out is the presence attribute, named after `tc-chip`/`tc-tag`'s existing `static`, and the positive sense stays a JS property. This also keeps the generated React typings honest: `scripts/gen-react-types.mjs` types an attribute as `boolean` only when its getter returns `hasAttribute`, so an `interactive` attribute would have been typed `string | number` and `interactive={false}` would not have type-checked.
+
+**A TAPPABLE CARD THAT CONTAINS A BUTTON — which is the whole design problem here.** `1f`'s card is tappable *and* carries a „Додади" button, and a `<button>` inside a `<button>` is invalid HTML that behaves unpredictably. So the card is not a button:
+
+* the **activation region is the title** — a real `<a href>` (or a `<button>` without one) wrapping the heading text. One tab stop, one accessible name, Enter/Space for free, and a long-press on a link gives the OS context menu;
+* its `::after` is **stretched** over the host's padding box at `z-index: 1`, so every pixel of the card except its border activates;
+* **every focusable thing inside a slotted region is raised to `z-index: 2`** — not the region itself, because raising the whole row would make its empty space (most of a 330px social strip) dead to a thumb aiming at the card. So a tap on „Додади" hits the button while a tap on the gap beside it still opens the card. The host is `isolation: isolate`, so those z-indexes stay local to the card.
+
+Verified on a touch emulator at 390px: tapping the button fires only the button; tapping the strip's empty space, the description, or the chip row fires only the card.
+
+**The metric box FLOATS, and that is not legacy CSS.** `float: right` shortens only the LINE BOXES beside it, so a long Cyrillic title („Американски палачинки со нутела и вишни") wraps *around* the kcal figure and then runs full width underneath. A flex row of `[text | kcal]` squeezes that title into a ~270px column for its whole height and costs it a line. The design uses the float; do not "modernise" it.
+
+**`clear: both` is not needed, though the design writes it.** In the design the chip and social rows are siblings of the float in one normal flow. Here `main` is a **flex item**, which establishes its own block formatting context and therefore contains its own float — main's height already includes the kcal box, and every slotted row is below it. One consequence worth knowing: the description is `display: -webkit-box` (the clamp), which is also a BFC root, so where it *does* overlap the float it narrows for its whole height instead of notching only its first line. Measured against the design at 390px this changes nothing — `1c`'s description clears the float by 0.4px by construction, and `1b`'s single line is identical either way.
+
+**The vertical rhythm is `margin-top`, not `margin-bottom`.** The design writes it downward (eyebrow 4, title 6, description 10 before chips / 11 before the social row), which only works because every one of its cards ends on the run whose margin happens to be 0. Here every run is optional and any can be last, so each gap is declared on the LOWER run and guarded by `:not([hidden])` on the upper one, with the **general** sibling combinator — `[hidden]` runs stay in the DOM, so `+` would be defeated by a collapsed run in between. Same pixels; a card with no eyebrow or no description collapses with no trailing space.
+
+**The 3% tint is a `@supports` query, not a `var()` fallback.** A custom property's value is not validated at parse time, so a `color-mix()` the engine cannot compute is still stored — the `var()` fallback never fires and the declaration fails at *computed-value* time, which for `background-color` means transparent. The flat `#fdfaf4` is therefore unconditional and the mix is layered on inside the query. Baseline is Chrome 111 / Safari 16.2 / Firefox 113; the fallback exists because a phone audience has a longer browser tail than a desktop one and an invisible card is not an acceptable degradation.
+
+**`metric-spoken` is how the kcal box gets an accessible name.** Present ⇒ the box becomes one `role="img"` node carrying that string, so the figure and unit inside are not announced twice. Absent ⇒ the glyphs are read as text, and „ККАЛ" is an abbreviation every screen reader mangles — only the app knows the spoken Macedonian form. Same knob as `tc-stat-tile`'s `spoken`. The metric's unit is uppercased by CSS, not by the string, so the lowercase „ккал" you pass is what gets read.
+
+**The trailing action in `social` is pushed right with `.ms-auto`,** not by a `:last-child { margin-left: auto }` in the partial: a strip whose last child is a *counter* (a card with no action) must not have that counter shoved to the far edge.
+
+**Press is a squeeze, hover is a lift, and they are asked for separately.** Under `pointer: coarse` the press state is `scale(.995)` + `brightness(.99)` — a lift under a finger is hidden by the finger. Under `pointer: fine and hover: hover` the hover state is `translateY(-3px)` plus a shadow mixed from the card's own hue, which is what makes a list read as colour-coded rather than decorated. Hover is a **pointer capability** question and is deliberately not gated on width. Both selectors are `:has(.tc-taxonomy-card-link…)` rather than `:active`/`:hover` on the host, because the host is `:active` while any descendant is pressed and „Додади" would otherwise squeeze the whole card. `prefers-reduced-motion` drops both transforms and lets the shadow carry the state.
+
+**Slot-hoisting hazard.** `actions` is also distributed by `tc-rich-page-header` with a subtree-wide `querySelectorAll('[slot="actions"]')`, so a `tc-taxonomy-card` nested inside one loses its action row to the header. Documented rather than worked around — narrowing another component's lookup is a behaviour change for its own consumers. `chips`, `social` and `media` are not claimed by anything in the library.
+
+**It renders its own text.** The five text runs are attributes, built once and afterwards patched with a `textContent` compare — a feed rewrites them on every filter change, and rebuilding the subtree would destroy the focused link each time. The four slots stay children of the HOST and are placed by CSS off their `slot` attribute; nothing is re-parented, so a conditionally-rendered „Додади" cannot go stale under react-dom.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-taxonomy-card-accent` | `var(--tc-text-muted)`; `#55524c` under `sunshine` | The hue. Drives the top rule, the tint, the eyebrow, the metric figure and the metric border. |
+| `--bs-taxonomy-card-tint` / `-metric-tint` | `3%` / `30%` | How much accent goes into the surface and into the metric border. `0%` gives a flat card (`1g`). |
+| `--bs-taxonomy-card-bg` | `var(--tc-surface)`; `#fdfaf4` under `sunshine` | The surface BEFORE the tint, and the flat fallback where `color-mix` is missing. |
+| `--bs-taxonomy-card-border-color` | `var(--tc-border)`; `#e5e2dc` under `sunshine` | |
+| `--bs-taxonomy-card-radius` / `-padding` / `-bar` | `10px` / `14px 15px 11px` / `3px` | `1b`'s hero card re-points the padding to `13px 14px 11px`. |
+| `--bs-taxonomy-card-shadow` | `var(--m-shadow-card)` | The drop shadow **plus the top bevel**. `1b` drops the shadow and keeps `var(--m-bevel-top)`. |
+| `--bs-taxonomy-card-metric-bg` / `-metric-border-color` / `-metric-radius` / `-metric-padding` | `#fff` under `sunshine` / accent 30% mix / `8px` / `5px 9px` | |
+| `--bs-taxonomy-card-metric-value-font` / `-metric-unit-font` / `-metric-unit-track` / `-metric-unit-color` | `var(--m-font-kcal-num)` (`700 17px`) / `var(--m-font-kcal-unit)` (`700 8px`) / `0.1em` / `#998f80` | The figure is `tabular-nums`, declared after the `font` shorthand which resets it. |
+| `--bs-taxonomy-card-metric-gap` / `-metric-gap-block` | `10px` / `6px` | The float's margins: to the text beside it, and to whatever runs underneath. |
+| `--bs-taxonomy-card-eyebrow-font` / `-eyebrow-track` / `-eyebrow-gap` | `var(--m-font-eyebrow)` (`700 9.5px`) / `0.13em` / `4px` | |
+| `--bs-taxonomy-card-heading-font` / `-heading-color` | `var(--m-font-card-title)` (`600 20px/1.12`) / `#26211b` under `sunshine` | `1.35rem` at `min-width: 768px`. |
+| `--bs-taxonomy-card-subheading-font` / `-subheading-color` / `-subheading-gap` | `var(--m-font-meta)` / `#998f80` / `3px` | |
+| `--bs-taxonomy-card-desc-font` / `-desc-color` / `-desc-gap` | `var(--m-font-body-sm)` (`400 12px/1.45`) / `#6b6459` / `6px` | |
+| `--bs-taxonomy-card-clamp` | `2` | Set by the `clamp` attribute; overridable per surface. |
+| `--bs-taxonomy-card-chips-gap` / `-chips-offset` | `5px` / `10px` | The chip row's own gap, and its gap to the text. |
+| `--bs-taxonomy-card-footer-gap` / `-footer-offset` / `-footer-pad` / `-footer-border-color` | `14px` / `11px` / `10px` / the card border | The `social`/`actions` rows. |
+| `--bs-taxonomy-card-media-gap` | `10px` | |
+| `--bs-taxonomy-card-press-scale` / `-press-brightness` / `-hover-lift` | `0.995` / `0.99` / `-3px` | |
+| `--bs-taxonomy-card-hover-shadow-base` / `-hover-shadow-fallback` | `#4a3428` / `var(--tc-shadow-hover)` | What the hover shadow's accent is mixed into, and the neutral shadow used where `color-mix` is missing. |
+| `--bs-taxonomy-card-focus-ring` | `var(--tc-app-accent)`; `#a4472f` under `sunshine` | 2px at 2px offset, around the TITLE — an outline on the stretched overlay would be drawn 15px inside the card's border and read as a box in a box. |
+| `--bs-taxonomy-card-duration` / `-ease` | `var(--m-dur-press)` (`0.14s`) / `var(--m-ease)` | |
+
+**Widening.** One `min-width: 768px` query restates the values the app's desktop recipe card shipped at — `1.35rem` serif title, `1.15rem 1.25rem 1rem` padding, `0.84rem/1.5` body, a `3.6rem`-wide metric box — so a list of these is the existing desktop card on a tablet and the design's phone card below it.
+
+```tsx
+{/* 1c — a cookbook row. The hue comes from the app's own CATEGORY_ACCENT map. */}
+<tc-taxonomy-card
+    accent={CATEGORY_ACCENT[recipe.category] ?? undefined}
+    eyebrow={recipe.category}
+    heading={recipe.title}
+    heading-level={3}
+    description={recipe.description}
+    metric-value={fmt(kcal)}
+    metric-unit={t.nutrition.kcal}
+    metric-spoken={t.stats.kcalPerServingSpoken(kcal)}
+    href={`/recipes/${recipe.id}`}
+>
+    <div slot="chips">{chips}</div>
+</tc-taxonomy-card>
+
+{/* 1f — the same card with a social strip and a nested action */}
+<tc-taxonomy-card accent={hue} eyebrow={`${recipe.category} · ${author}`} heading={recipe.title} href={href}>
+    <div slot="social">
+        {counters}
+        <tc-button className="ms-auto" variant="primary" size="small" onClick={importRecipe}>{t.recipes.importRecipe}</tc-button>
+    </div>
+</tc-taxonomy-card>
+
+{/* 1g — a skeleton behind the filter sheet */}
+<tc-taxonomy-card static accent={hue} style={{ height: '112px', '--bs-taxonomy-card-tint': '0%' }} />
+```
+
+---
+
+### tc-stat-tile
+
+One number, its label, and nothing else — the atom of every numeric display in the JADI.mk phone design: `1k`'s three server-computed stats, `1i`'s 38px daily kcal target, and (through `tc-macro-grid`) `1d`'s 4-up per-serving row and `1i`'s three tinted macro tiles.
+
+**Tag:** `tc-stat-tile`
+
+```
+tc-stat-tile                         display:flex — the host IS the tile box
+  ├─ div.tc-stat-tile-main           flex:1 1 0 — the text stack
+  │    ├─ span.tc-stat-tile-figure   baseline row
+  │    │    ├─ .tc-stat-tile-value   the number, tabular
+  │    │    └─ .tc-stat-tile-unit    „ккал / ден", optional
+  │    ├─ span.tc-stat-tile-label    the muted caption
+  │    └─ span.tc-stat-tile-hint     optional third line
+  └─ [slot="trailing"]               optional consumer icon / delta chip
+```
+
+**FOUR NUMBER-TILE ELEMENTS, and they are not interchangeable.** Pick by how much furniture the number needs:
+
+| | What it is | Has |
+|---|---|---|
+| `tc-stat-card` | A **KPI card** — it is the whole panel | title, icon, delta chip with a trend arrow, footer |
+| `tc-metric-tile` | A **dashboard KPI** | leading icon, unit inside the figure, hint slot |
+| `tc-stat-row` | A **label/value row**, horizontal | trend arrow |
+| `tc-stat-tile` | A **tile**: a figure over a label | 3 box variants, 3 sizes, 7 tones, an arbitrary figure colour |
+
+Two concrete reasons this is not a `tc-metric-tile` variant rather than a matter of taste: `tc-metric-tile` distributes its slotted children by **re-parenting** them into a rendered skeleton, which throws `NotFoundError` under react-dom (see `tc-app-bar`); and it rewrites its whole subtree on every attribute write, while `1d`'s four figures are driven by the serving scaler and change on every tap of the stepper.
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `value` | string | `''` | The figure — „1 900", „4.8", „128 г". Written as text, never parsed. |
+| `unit` | string | *(unset)* | A unit BESIDE the figure, on its baseline — `1i`'s „ккал / ден". Absent ⇒ no unit run. |
+| `label` | string | `''` | The muted caption under the figure. |
+| `hint` | string | *(unset)* | A third line — the admin overview's „+8 во последните 30 дена". |
+| `variant` | `card\|well\|bare` | `card` | `card` is `1k`'s bordered tile · `well` is `1i`'s #f4f1ea inner tile at 8px radius · `bare` drops the box and the padding entirely (`1d`, and `1i`'s big figure). |
+| `size` | `sm\|md\|lg` | `md` | Figure size: 16px (`1i` macros) / 20px (`1d`, `1k`) / 38px (`1i`'s target). |
+| `tone` | `ink\|accent\|lead\|success\|warning\|danger\|info` | `ink` | Colours the FIGURE and nothing else. |
+| `color` | CSS colour | *(unset)* | An arbitrary figure colour, for a hue that is DATA rather than a tone. Beats `tone`. |
+| `align` | `center\|start` | `center` | `1d`/`1k` centre; `1i` aligns to the start. |
+| `spoken` | string | *(unset)* | The tile's accessible name, spoken. See below. |
+
+**JS Properties:** `value`, `unit`, `label`, `hint`, `variant`, `size`, `tone`, `color`, `align`, `spoken` — all reflect their attributes. No methods, no events: a tile is a display.
+
+**`tone` vs `color`.** A tone is a system decision and a colour is a fact about the data. `1i`'s per-macro pigments — белковини `#4e6b3c`, масти `#8a6d2f`, јаглехидрати `#3c5d6b` — mean something in this product and belong to the app, so they come in through `color`; the theme never gets to re-point them. Everything a theme *should* own is a tone.
+
+**`accent` is terracotta and `lead` is amber.** Two tones, one mechanism, because they are not the same decision: `#a4472f` is the app's signature hue (~100 uses — `1d`'s kcal figure), while amber `#f2b705` is the CTA colour on a two-elements-per-screen budget (`1k`'s rating). Naming the amber one `lead` is what makes spending one of the two visible in the markup.
+
+**Every figure is `tabular-nums`, and the order of two declarations is why.** `--m-font-stat` and its siblings are `font` SHORTHANDS, and the shorthand **resets** `font-variant-numeric` and `line-height` — so the partial declares both AFTER it. Reverse them and the reset silently wins: `1d`'s four columns then twitch on every tap of the serving stepper, because a proportional „1" is narrower than a „9".
+
+**`md` is 20px, and the design draws 21px on `1k`.** `--m-font-stat` is the shipped rung for both (its own comment records the 1px as measurement drift), so consuming the token keeps `1d` and `1k` on one size. A surface that genuinely needs 21px sets `--bs-stat-tile-value-font`.
+
+**`spoken` is how a number gets an accessible name.** Present ⇒ the tile becomes one `role="img"` node carrying that string, so a screen reader announces the fact instead of the glyphs, and the figure is not read a second time (`role="img"` makes the element a leaf — no `aria-hidden` is written, so removing `spoken` restores plain text). Absent ⇒ no ARIA at all, which is right for a figure whose label is already a word. It exists because this design's units are **abbreviations** — „ккал", „г", „мг", „ч" — and every screen reader mangles them; only the app knows the spoken Macedonian form, so the library cannot derive it. Same knob on `tc-quota-meter` and `tc-trend-spark`.
+
+**It renders its own text.** `value`/`unit`/`label`/`hint` are attributes, and the structure is built ONCE — every subsequent write is a `textContent` compare, so a figure that ticks does not rebuild four text nodes and interrupt an in-progress screen-reader read. The one slot is `trailing`, which stays a child of the HOST and is positioned by CSS off its `slot` attribute; nothing is re-parented, so a conditionally-rendered delta chip cannot go stale under react-dom.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-stat-tile-bg` / `-border-color` / `-border-width` / `-radius` / `-padding` | `--tc-surface` / `#e5e2dc` / `1px` / `10px` / `11px` | The box. The three variants re-point exactly these. |
+| `--bs-stat-tile-value-font` | `var(--m-font-stat)` (`700 20px`) | Per `size`: `--m-font-stat-sm` / `--m-font-stat` / `--m-font-stat-xl`. |
+| `--bs-stat-tile-value-leading` | `1.1`; `1` at `size="lg"` | Declared after the `font` shorthand, which resets it. |
+| `--bs-stat-tile-value-color` | per `tone` | |
+| `--bs-stat-tile-unit-font` / `-unit-color` / `-unit-gap` | `400 13px` / label colour / `8px` | |
+| `--bs-stat-tile-label-font` / `-label-color` / `-label-gap` | `400 10px` / `#998f80` / `0` | `9.5px` inside a bare `tc-macro-grid`. |
+| `--bs-stat-tile-hint-font` / `-hint-color` / `-hint-gap` | `var(--m-font-meta)` / label colour / `2px` | |
+| `--bs-stat-tile-well-bg` | `#f4f1ea` (sunshine) | The `well` tint, shared with `tc-macro-grid[variant="tiled"]`. |
+| `--bs-stat-tile-gap` | `8px` | Host → slotted trailing content. |
+
+```tsx
+{/* 1k — three server-computed stats */}
+<tc-stat-tile value={fmt(n.rating)} label={t.market.ratings(n.ratingCount)} tone="lead" spoken={t.market.ratingSpoken(n.rating)} />
+
+{/* 1i — the daily target */}
+<tc-stat-tile variant="bare" size="lg" align="start" value={fmt(targets.dailyKcal)} unit={t.diet.kcalPerDay} spoken={t.diet.kcalPerDaySpoken(targets.dailyKcal)} />
+
+{/* 1i — one macro tile; the hue is app data */}
+<tc-stat-tile variant="well" size="sm" align="start" value={`${targets.proteinG} г`} label={t.nutrition.protein} color={MACRO_HUE.protein} />
+```
+
+---
+
+### tc-macro-grid
+
+The **row of numbers**, in the design's two arrangements: `1d`'s 4-up per-serving row (`ккал · белк. г · јагл. г · масти г`, un-boxed, with a dashed footer rule) and `1i`'s 3-up macro tiles (each on a tinted well in its own hue).
+
+**Tag:** `tc-macro-grid`
+
+```
+tc-macro-grid                  display:grid — N equal tracks
+  ├─ tc-stat-tile × N          the consumer's cells
+  └─ [slot="footer"]           optional dashed footer row, spanning every track
+```
+
+**Not `tc-metric-grid`.** That one distributes its children by re-parenting them into a rendered wrapper div — `NotFoundError` under react-dom — and imposes `tc-metric-tile`'s icon-led KPI shape on every cell. This element **renders nothing**: it owns the tracks and the gaps, and re-points its children's `--bs-stat-tile-*` knobs so a row is one decision instead of N.
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `columns` | `2\|3\|4` | `4` | Equal tracks. Not open-ended — see below. |
+| `variant` | `bare\|tiled` | `bare` | `bare` is `1d`'s un-boxed row (8px column gap, 9.5px labels, 20px figures); `tiled` is `1i`'s (#f4f1ea wells at 8px radius, 9px gap, 16px figures, start-aligned). |
+
+**JS Properties:** `columns`, `variant`. No methods, no events.
+
+**There is no `items` property, and that is the API.** An array of `{ value, label, color }` would have to become tiles this element created and owned, sitting as siblings of children React believes it owns. The tiles ARE the API; `columns` and `variant` are the only two things the row knows that a tile cannot. Same call `tc-action-bar` and `tc-mobile-shell` make.
+
+**The grid's variant beats a tile's own.** `tc-macro-grid[variant='…'] > tc-stat-tile` is `0-2-1`, one attribute more specific than `tc-stat-tile[variant='…']` at `0-1-1`, so a tile inside a grid takes the ROW's shape even if it carries its own `variant`. Deliberate: the design has no row of mismatched tiles, and one card-shaped cell in a bare row reads as a rendering fault. Re-point `--bs-stat-tile-*` on the one child if you genuinely need it.
+
+**`row-gap` IS the footer gap.** The design never wraps a macro row to a second line — four cells at 390px, and the narrowest cell at 320px is still 60px — so the row gap is spent on the one second row that exists: the footer. That is what makes `1d`'s 11px offset and `1i`'s 12px exact, instead of a footer margin that would have the column gap subtracted out of it. A row that *does* wrap gets the footer's gap between its lines; set `--bs-macro-grid-row-gap` if that ever matters.
+
+**`columns` stops at 4** because five 700-weight figures do not fit across 390px minus a 14px gutter and a card's padding. Anything wider is a grid, not a macro row — use `tc-grid`.
+
+**The footer is a slot, not a built-in.** `1d`'s footer is a muted note beside a green action („Проценето од 8 од 11 состојки" / „Целосно ⌄") and `1i`'s is one green sentence beside a chevron; the element provides the rule, the gap and the flex row, and the content styles itself. It is `order: 1` and `grid-column: 1 / -1`, so it can be authored anywhere among the cells.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-macro-grid-columns` | `4` | Written by the `columns` attribute; addressable for a track count outside 2–4. |
+| `--bs-macro-grid-gap` | `8px`; `9px` when `tiled` | Column gap. |
+| `--bs-macro-grid-row-gap` | `11px`; `12px` when `tiled` | Row gap = the footer's offset. |
+| `--bs-macro-grid-footer-pad` | `10px`; `11px` when `tiled` | Padding under the footer rule. |
+| `--bs-macro-grid-footer-rule` | `1px dashed var(--m-rule-dashed)` | `#e5ddd0` under sunshine. |
+| `--bs-macro-grid-footer-font` / `-footer-color` / `-footer-gap` | `400 10.5px` / `#998f80` / `8px` | The resting state of a footer that only carries a note. |
+
+```tsx
+{/* 1d — the per-serving row, under the serving scaler */}
+<tc-macro-grid columns="4" variant="bare">
+    <tc-stat-tile value={fmt(per.calories)} label={t.nutrition.kcal} tone="accent" />
+    <tc-stat-tile value={fmt(per.protein)} label={t.nutrition.proteinShort} />
+    <tc-stat-tile value={fmt(per.carbs)} label={t.nutrition.carbsShort} />
+    <tc-stat-tile value={fmt(per.fat)} label={t.nutrition.fatShort} />
+    <div slot="footer">
+        <span>{t.stats.matched(stats.matchedIngredients, stats.totalIngredients)}</span>
+        <button className="btn btn-link btn-sm" onClick={openFull}>{t.stats.full}</button>
+    </div>
+</tc-macro-grid>
+```
+
+---
+
+### tc-quota-meter
+
+„How much of your allowance is gone", as a hairline track with a figure beside it: `1c`'s 78×5 amber meter + „12/30", and `1h`'s full-width 6px progress rail.
+
+**Tag:** `tc-quota-meter`
+
+```
+tc-quota-meter                     display:flex — track beside figure
+  ├─ div.tc-quota-meter-track      role=progressbar, overflow:hidden
+  │    └─ div.tc-quota-meter-fill  width: used/total, transitioned
+  └─ span.tc-quota-meter-label     „12/30", tabular
+```
+
+**THREE PROGRESS-ISH ELEMENTS, and they are not interchangeable.** Pick by whether you are measuring a task or an allowance:
+
+| | What it measures | Has |
+|---|---|---|
+| `tc-progress` / `tc-progress-bar` | A **task** | 8 named variants, striped + animated modes, a numeral INSIDE the bar, stacked segments |
+| `tc-circular-progress` | A **task**, as a ring | size, thickness, reverse |
+| `tc-quota-meter` | An **allowance** | two numbers, a figure OUTSIDE the track, and one rule about colour |
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `used` | number | `0` | |
+| `total` | number | `0` | The allowance. `0` or absent ⇒ no cap: the track renders empty and reports nothing. |
+| `variant` | `inline\|bar` | `inline` | `inline` is `1c`'s 78×5 track beside a figure; `bar` is `1h`'s full-width 6px rail (`flex: 1 1 0`, no figure by default). |
+| `label-format` | `fraction\|percent\|remaining\|none` | `fraction`; `none` when `bar` | „12/30" · „40%" · „18" · nothing. |
+| `suffix` | string | *(unset)* | A word after the figure — „планови". The library ships no copy. |
+| `warn-at` | number (%) | `90` | Where the fill turns ochre. |
+| `tone` | `lead\|accent\|success` | `lead` | The base fill, BEFORE the approach states override it. |
+| `width` | length \| number | `78px` | Inline track length; a bare number is read as px. Ignored by `bar`. |
+| `spoken` | string | *(unset)* | The progressbar's accessible name, spoken. |
+
+**JS Properties:** `used`, `total`, `variant`, `labelFormat`, `suffix`, `warnAt`, `tone`, `width`, `spoken`, plus read-only `percent` (un-clamped: 32/30 reports `106.7`), `state` and `labelText`. No methods, no events.
+
+**The colour-on-approach rule lives here.** At `warn-at` the fill turns ochre `#d49a00`, at 100% coral `#f2604b`. That is not decoration — a quota-limited plan is what the app sells against, and „you are nearly out" has to be visible before the creation button starts refusing. It is a rule about the DATA, so it belongs to the component holding the data instead of being re-derived by every caller. The app's `LimitMeter.tsx` had it as `used >= limit - 1`, which is a *different* rule from 90% and is exactly what `warn-at` expresses: `warn-at={((limit - 1) / limit) * 100}`.
+
+**Colour is never the only carrier.** The figure („29/30") is the same information as text, the track is a `role="progressbar"` reporting `29` of `30`, and `data-state="ok|near|full"` is reflected onto the host for a caller that wants to say more.
+
+**The state is computed in JS, not in CSS.** „Is this percentage past a threshold?" is a comparison, and CSS cannot make one against a custom property. The element writes `data-state` and the partial colours the fill off it — which is also what makes the state greppable instead of living inside a colour.
+
+**The fill is clamped; the report is not.** 32/30 renders at 100% width (a 106%-wide fill would overflow the track's radius) while `percent` and the figure keep reporting the truth. Over-limit is a real state: the app's caps gate creation only, so a lapsed member keeps every plan they already have.
+
+**No total ⇒ no ARIA.** With `total <= 0` every value attribute comes off the track and it goes `aria-hidden`, because `aria-valuemax="0"` is invalid and some screen readers announce it as „0 percent" — the opposite of what an uncapped allowance means. Hide the element rather than rendering it uncapped. The figure degenerates with it: every format would read wrong („5/0", „Infinity%"), so an uncapped meter shows the bare count.
+
+**The track clips the fill; the fill is not rounded.** `overflow: hidden` on a pill-radius track, verbatim from `1c` and `1h`. A rounded FILL would round its right edge too, which at 5px tall and 8% used renders a 4px lozenge floating in the trough instead of a sliver at its left end.
+
+**The width transition is the one the design specifies** — `width .18s cubic-bezier(.2,.9,.25,1)`, the only transition in the whole design canvas (`1h`'s progress bar). Width and not `transform: scaleX()`: at 5px tall the sub-pixel edge of a scaled box shimmers where a width animation does not. No `prefers-reduced-motion` block is needed — `foundation/_reset.scss` already flattens every transition under `reduce`.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-quota-meter-track-width` | `78px` (`1c`) | Inline variant only. |
+| `--bs-quota-meter-track-height` | `var(--m-h-track)` (`5px`); `6px` when `bar` | |
+| `--bs-quota-meter-track-bg` / `-track-shadow` / `-track-radius` | `--tc-surface-muted` (`#f1e6ce`) / `var(--m-shadow-track-inset)` / `999px` | |
+| `--bs-quota-meter-fill` | per `tone` (amber) | |
+| `--bs-quota-meter-fill-near` / `-fill-full` | `--tc-warning` (`#d49a00`) / `--tc-danger` (`#f2604b`) | The approach states. |
+| `--bs-quota-meter-fill-radius` | `0` | The track clips instead — see above. |
+| `--bs-quota-meter-duration` / `-ease` | `var(--m-dur-state)` / `var(--m-ease)` | |
+| `--bs-quota-meter-label-font` / `-label-color` | `var(--m-font-meta-strong)` (`600 11px`) / `#998f80` | |
+| `--bs-quota-meter-gap` | `7px` | Track → figure. |
+
+```tsx
+{/* 1c — the cookbook quota */}
+<tc-quota-meter used={count} total={quota} spoken={t.recipes.quotaSpoken} />
+
+{/* the app's own „last slot" rule */}
+<tc-quota-meter used={used} total={limit} warn-at={((limit - 1) / limit) * 100} suffix={noun} />
+
+{/* 1h — the tick-off rail */}
+<tc-quota-meter variant="bar" used={bought} total={items.length} />
+```
+
+---
+
+### tc-trend-spark
+
+`1i`'s weight trend: a **330×72 area sparkline** with an end dot and two captions. A shape, not a chart.
+
+**Tag:** `tc-trend-spark`
+
+```
+tc-trend-spark                      display:grid — 1fr auto
+  ├─ svg.tc-trend-spark-canvas      row 1, spanning both tracks
+  │    ├─ path.tc-trend-spark-area  the fill, closed to the baseline
+  │    ├─ polyline.tc-trend-spark-line
+  │    └─ path.tc-trend-spark-dot   zero-length + round cap = a circle
+  ├─ [slot="caption-start"]         row 2, track 1, „1 мај"
+  └─ [slot="caption-end"]           row 2, track 2, „денес · 68.0 кг"
+```
+
+**Not `tc-sparkline`.** That one is a 120×32 desktop micro-graphic — line or **bar**, a 2.5px dot, a fixed pixel box, no fill, no captions — made to sit in a table cell. This is a fluid panel graphic with an area fill, a 4px end dot, a caption row and a clampable domain.
+
+**And it is not a chart.** No axes, no gridlines, no tooltips, no legend, no interaction, no library. The two captions carry the only two readings the design exposes, because the point of the graphic is the SHAPE of the trend and the point of the text is the numbers. If a surface needs a readable value at every point, that is a chart — `tc-line-chart` / `tc-area-chart` exist, and a real charting layer is the honest answer beyond them.
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `points` | number list | `''` | The series, oldest first. Comma- or space-separated, so the attribute form works in plain HTML and in JSX without a ref. |
+| `min` / `max` | number | *(unset)* | Domain clamp. Absent ⇒ the series' own extremes. |
+| `no-dot` | boolean | absent | Drop the end dot. |
+| `no-fill` | boolean | absent | Drop the area, leave the bare line. |
+| `tone` | `accent\|lead\|success\|info\|danger\|ink` | `accent` | One hue drives the line, the fill and the dot. |
+| `spoken` | string | *(unset)* | Accessible name. Absent ⇒ the SVG is `aria-hidden` — see below. |
+
+**JS Properties:** `points` (accepts `number[]` or a string; the property wins over the attribute once written), `min`, `max`, `noDot`, `noFill`, `tone`, `spoken`. No methods, no events.
+
+**Geometry is verbatim from `1i`.** viewBox `0 0 330 72`; the polyline runs x 4→326 and y 10→50; the area closes to y=72. So: 4px of horizontal inset (the dot's radius — without it the last dot is clipped), a 40px plot band starting 10px down, and 22px of air below the lowest point so the fill reads as an AREA rather than as a thick line.
+
+**`preserveAspectRatio="none"`, and the strokes are pinned instead.** Inside a 14px gutter and a card's 14px padding the available width is 334px at a 390px viewport and 264px at 320px. Left at the default (`xMidYMid meet`) the drawing would **letterbox** — scaled to 0.8 and floated in its 72px box with 7px of dead space above and below. So the aspect ratio is released, and the two things that must not stretch with it carry `vector-effect="non-scaling-stroke"`: the line (2.2px stays 2.2px instead of becoming 1.76 × 2.2) and the dot. The area fill needs neither — it has no stroke, and stretching a filled shape is exactly what should happen to it.
+
+**The dot is a stroke, not a `<circle>`.** A zero-length subpath (`M x y L x y`) with `stroke-linecap: round` renders a dot of exactly `stroke-width` diameter, in device pixels, at any scale — so `stroke-width: 8` is the design's `r=4`. A `<circle>` cannot be pinned by `vector-effect` and comes out as a 3.2 × 4 ellipse at 320px.
+
+**A flat series is drawn through the middle of the band.** Normalising a series whose min equals its max divides by zero, and the naive fallback („treat the range as 1") puts a flat week at the very top — which reads as „at your ceiling" rather than „unchanged". `min`/`max` are the other half of the same problem: a 68.0→67.9 kg week is a 0.1kg change that otherwise fills the band edge to edge and looks like a cliff. One point renders just the dot, at the right edge where „now" is. An empty series renders an empty box, so the panel does not collapse while the first measurement saves.
+
+**`spoken` absent means `aria-hidden`, deliberately.** The captions beside the graphic are real text carrying the same two readings, so an un-named graphic would make a screen reader announce „image" for content already on the page. Set `spoken` where the shape says more than its endpoints do.
+
+**The captions are the consumer's children.** Wrapping them in a flex row would mean re-parenting them — `NotFoundError` under react-dom — so the host is a two-track grid (`1fr auto`) and each caption is placed by CSS off its `slot` attribute.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-trend-spark-height` | `72px` | The width is fluid; the viewBox maps 1:1 onto this height at the design's own size. |
+| `--bs-trend-spark-tone` | `#a4472f` (sunshine) | Line, fill and dot, as one hue. |
+| `--bs-trend-spark-stroke` | `2.2` | A CSS declaration beats the markup's presentation attribute. |
+| `--bs-trend-spark-fill-alpha` / `-fill` | `9%` / `color-mix(…)` of the tone | `color-mix(in srgb, C 9%, transparent)` IS `C` at alpha `.09`, so the fill is bit-exact against the design's `rgba(164,71,47,.09)` and still one value from a re-skin. |
+| `--bs-trend-spark-dot-size` | `8` | The round cap's diameter = 2 × the design's `r`. |
+| `--bs-trend-spark-caption-font` / `-caption-color` / `-caption-gap` | `400 10px` / `--tc-text-faint` (`#9aa189`) / `6px` | |
+
+```tsx
+{/* 1i — the weight card */}
+<tc-trend-spark
+    points={measurements.map((m) => m.weightKg).join(',')}
+    spoken={t.diet.weightTrendSpoken(first, last)}
+>
+    <span slot="caption-start">{fmtDate(measurements[0].date)}</span>
+    <span slot="caption-end">{t.diet.today} · {last} кг</span>
+</tc-trend-spark>
 ```
 
 ---
@@ -1961,6 +3534,9 @@ Canvas-only height→normal map generator. Loads a source image, computes a tang
 |-----------|------|---------|-------------|
 | `source` | string (URL) | — | Source image URL (string case of the `source` property) |
 | `max-dim` | number | `256` | Working-resolution cap (longest edge, px); changing it re-rasterises the image |
+| `canvas-width` | CSS length | `100%` | Preview-canvas width (bare numbers are px, e.g. `480`; `%` / `vw` / `calc()` pass through) |
+| `canvas-height` | CSS length | `280px` | Preview-canvas height (bare numbers are px). Under `fit-parent` it becomes the minimum height |
+| `fit-parent` | boolean | `false` | Auto-scale: the element and canvas stretch to fill the parent box instead of using `canvas-height`. Give the parent a definite height (`height`, grid/flex track, `aspect-ratio`); where it has none, `canvas-height` is the floor |
 | `strength` | number | `1` | Scales the normal-gradient intensity; recomputes on change |
 | `emboss-height` | number | `2` | Luminance-emboss height contribution; recomputes on change |
 | `bevel-width` | number | `0` | Alpha-bevel reach in px (also softens the surface); recomputes on change |
@@ -1993,7 +3569,7 @@ Canvas-only height→normal map generator. Loads a source image, computes a tang
 | `panX` / `panY` | `number` | Current view offset in CSS px |
 | `onGenerate` | `(output: NormalMapOutput) => void \| null` | Optional callback fired alongside `tc-generate` |
 
-Every attribute above also has a matching camelCase property (`strength`, `embossHeight`, `bevelWidth`, `blurRadius`, `invertX`, `invertY`, `maxDim`, `editable`, `tool`, `brushSize`, `brushStrength`, `brushFalloff`, `maskColor`, `maskOpacity`, `previewMode`, `lightTracking`, `ambient`, `zoom`, `placeholder`, `disabled`).
+Every attribute above also has a matching camelCase property (`strength`, `embossHeight`, `bevelWidth`, `blurRadius`, `invertX`, `invertY`, `maxDim`, `canvasWidth`, `canvasHeight`, `fitParent`, `editable`, `tool`, `brushSize`, `brushStrength`, `brushFalloff`, `maskColor`, `maskOpacity`, `previewMode`, `lightTracking`, `ambient`, `zoom`, `placeholder`, `disabled`).
 
 **Methods**
 
@@ -2026,6 +3602,13 @@ Every attribute above also has a matching camelCase property (`strength`, `embos
     light-x="0.2" light-y="0.15" light-tracking="off"
 ></tc-normal-map-generator>
 
+<!-- fixed canvas box, then auto-scaled to a sized parent -->
+<tc-normal-map-generator canvas-width="480" canvas-height="360"></tc-normal-map-generator>
+
+<div style="height: 60vh">
+    <tc-normal-map-generator fit-parent canvas-height="200"></tc-normal-map-generator>
+</div>
+
 <script>
   const gen = document.querySelector('tc-normal-map-generator')
   gen.source = 'sprite.png' // or a File / Blob
@@ -2053,6 +3636,9 @@ Canvas-only physics shape editor for polygons / circles / boxes drawn over an im
 | `source` | string (URL) | — | Background image URL (string case of the `source` property) |
 | `shapes` | JSON string | — | Initial shapes model as a JSON array (input only — it is never written back; read the model via the property/event) |
 | `tool` | `select\|polygon\|circle\|box\|none` | `select` | Active drawing tool |
+| `canvas-width` | CSS length | `100%` | Drawing-canvas width (bare numbers are px, e.g. `480`; `%` / `vw` / `calc()` pass through) |
+| `canvas-height` | CSS length | `320px` | Drawing-canvas height (bare numbers are px). Under `fit-parent` it becomes the minimum height |
+| `fit-parent` | boolean | `false` | Auto-scale: the element and canvas stretch to fill the parent box instead of using `canvas-height`. Give the parent a definite height (`height`, grid/flex track, `aspect-ratio`); where it has none, `canvas-height` is the floor |
 | `handle-size` | number | `8` | Drawn vertex/resize handle size in CSS px |
 | `handle-hit` | number | `9` | Pointer grab radius for handles in CSS px |
 | `min-size` | number | `4` | Smallest accepted extent (image px) for a freshly drawn circle/box |
@@ -2077,7 +3663,7 @@ Canvas-only physics shape editor for polygons / circles / boxes drawn over an im
 | `canUndo` / `canRedo` / `canAutoFit` | `boolean` (read-only) | State for driving your own toolbar buttons |
 | `onChange` | `(shapes: PhysicsShape[]) => void \| null` | Optional callback fired alongside `tc-change` |
 
-Every attribute above also has a matching camelCase property (`tool`, `handleSize`, `handleHit`, `minSize`, `snap`, `handles`, `shortcuts`, `historyLimit`, `alphaThreshold`, `simplifyTolerance`, `maxAlphaDim`, `autoFitOnLoad`, `readonly`, `disabled`).
+Every attribute above also has a matching camelCase property (`tool`, `canvasWidth`, `canvasHeight`, `fitParent`, `handleSize`, `handleHit`, `minSize`, `snap`, `handles`, `shortcuts`, `historyLimit`, `alphaThreshold`, `simplifyTolerance`, `maxAlphaDim`, `autoFitOnLoad`, `readonly`, `disabled`).
 
 **Methods:** `undo()`, `redo()`, `deleteSelected()`, `clear()`, `cancelDrawing()`, `autoFit()`.
 
@@ -2110,6 +3696,13 @@ Every attribute above also has a matching camelCase property (`tool`, `handleSiz
 
 <!-- read-only view of a stored model -->
 <tc-physics-editor readonly handles="off" shapes='[{"type":"circle","x":80,"y":80,"r":40}]'></tc-physics-editor>
+
+<!-- fixed canvas box, then auto-scaled to a sized parent -->
+<tc-physics-editor canvas-width="520" canvas-height="400"></tc-physics-editor>
+
+<div style="height: 70vh">
+    <tc-physics-editor fit-parent canvas-height="240"></tc-physics-editor>
+</div>
 ```
 
 ---
@@ -2712,6 +4305,9 @@ Canvas-only bitmap-font atlas generator. **The element renders no controls** —
 | `preview-line-gap` | number | `8` | Extra px between wrapped preview lines |
 | `preview-scale` | number | `1` | Scales the preview geometry only (export uses `scale`) |
 | `preview-align` | `start\|center\|end` | `start` | Horizontal alignment of each preview line |
+| `canvas-width` | CSS length | `100%` | Preview-canvas width (bare numbers are px, e.g. `480`; `%` / `vw` / `calc()` pass through) |
+| `canvas-height` | CSS length | `240px` | Preview-canvas height (bare numbers are px). Under `fit-parent` it becomes the minimum height |
+| `fit-parent` | boolean | `false` | Auto-scale: the element and canvas stretch to fill the parent box instead of using `canvas-height`. Give the parent a definite height (`height`, grid/flex track, `aspect-ratio`); where it has none, `canvas-height` is the floor. Preview-only — the exported atlas is unaffected |
 | `disabled` | boolean | `false` | Blocks `generate()` and dims the canvas |
 
 **Properties**
@@ -2726,7 +4322,7 @@ Canvas-only bitmap-font atlas generator. **The element renders no controls** —
 | `output` | `BitmapFontOutput \| null` (read-only) | The most recent `generate()` result |
 | `onGenerate` | `(output: BitmapFontOutput) => void \| null` | Optional callback fired alongside `tc-generate` |
 
-Every attribute above also has a matching camelCase property (`fontFamily`, `fontSize`, `glyphs`, `text`, `letterSpacing`, `padding`, `glyphsPerRow`, `lineHeight`, `powerOfTwo`, `scale`, `background`, `exportFormat`, `autoGenerate`, `previewBackground`, `previewPadding`, `previewLineGap`, `previewScale`, `previewAlign`, `disabled`).
+Every attribute above also has a matching camelCase property (`fontFamily`, `fontSize`, `glyphs`, `text`, `letterSpacing`, `padding`, `glyphsPerRow`, `lineHeight`, `powerOfTwo`, `scale`, `background`, `exportFormat`, `autoGenerate`, `previewBackground`, `previewPadding`, `previewLineGap`, `previewScale`, `previewAlign`, `canvasWidth`, `canvasHeight`, `fitParent`, `disabled`).
 
 **Methods**
 
@@ -2759,6 +4355,13 @@ Every attribute above also has a matching camelCase property (`fontFamily`, `fon
     preview-align="center"
     export-format="xml"
 ></tc-bitmap-font-generator>
+
+<!-- fixed preview box, then auto-scaled to a sized parent -->
+<tc-bitmap-font-generator canvas-width="100%" canvas-height="320"></tc-bitmap-font-generator>
+
+<div style="height: 50vh">
+    <tc-bitmap-font-generator fit-parent canvas-height="180"></tc-bitmap-font-generator>
+</div>
 
 <script>
   const gen = document.querySelector('tc-bitmap-font-generator')
@@ -6725,6 +8328,413 @@ Horizontal tab switcher bar. Tabs are set via the `tabs` JS property (array of `
 
 ---
 
+### tc-page-tabs
+
+The phone page rail: a horizontal underline tab strip that **never wraps**. It scrolls instead, with the scrollbar hidden, and keeps the active tab in view.
+
+**Three tab-like elements, and they are not interchangeable:**
+
+| Element | Role |
+|---|---|
+| `tc-tab-bar` | The desktop panel switcher. **Wraps** to a second line when it runs out of width, and sits on its own hairline. |
+| `tc-page-tabs` | This one. Never wraps. It lives in `tc-app-bar`'s `below` region, at the top of the page. |
+| `tc-tab-dock` | The fixed 5-tab bottom dock. |
+
+Wrapping is the whole difference and it is not cosmetic: this rail sits above the page, so a second line moves every pixel below it. A six-tab surface (`/admin`: „Преглед · Корисници · Состојки · Пристап и лимити · Клучеви · Поставки" ≈ 470px of labels) would jump a full line on first paint at 320px. Measured at 320/375/390/430: one line at every width, scrollbar 0px, active tab in view.
+
+**Tag:** `tc-page-tabs`
+
+**Link or switcher — one rule, three behaviours**
+
+A tab **with `href`** is a link. The page it names is a route, so the URL is the source of truth:
+
+- the element **never writes `active-id`** — you pass it, derived from the URL;
+- the arrow keys move focus **without** activating (automatic activation across links would push one history entry per arrow press);
+- clicking follows the `href` unless you cancel it.
+
+A tab **without `href`** is a switcher over panels already in the DOM:
+
+- the element owns `active-id` and sets it on activation;
+- the arrow keys activate as they move, which is what `tc-tab-bar` does.
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `active-id` | string | `''` | The `id` of the active tab. Setting it patches `aria-selected`, the roving `tabindex` and the active class in place (no re-render), then scrolls that tab into view. |
+| `role` | string | `tablist` | Set by the element **only if you have not**. A rail of route links is arguably a `nav`; that is your call to make. |
+
+**JS Properties**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `tabs` | `PageTabsItem[]` | `[]` | `{ id: string; label: string; href?: string; count?: number; disabled?: boolean }`. Set via JS; not reflected as an attribute. |
+| `activeId` | string | `''` | Reflects `active-id`. |
+| `onChange` | `((id: string) => void) \| null` | `null` | Called on activation, alongside the event. |
+
+**Events**
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-change` | `{ id: string, href: string \| null }` | Bubbling, composed and **cancelable**. Fired **exactly once per activation** — by pointer, `Enter` or `Space`, on a link tab as on a button tab. (`Enter`/`Space` cancel the native activation and re-dispatch one synthetic click, so the click handler stays the only place that notifies; notifying from both fired it twice on a link.) `preventDefault()` on it (or on the click) suppresses the anchor's navigation — that is how a client-side router takes over, while a no-JS load still follows the link. |
+
+**Slots:** none — tabs come from the `tabs` property.
+
+**Rendered shapes.** A tab is an `<a href>` when it has an `href`, a `<button type="button">` when it does not, and an inert `<span aria-disabled="true">` when it is disabled (`<a>` has no `disabled`, so a disabled tab is never a link). All three carry `role="tab"`, `aria-selected` and a roving `tabindex`, so the whole rail is one tab stop.
+
+**`count` is a suffix, not a badge.** It renders inside the label as `Рецепти (12)`. A badge here would compete with the amber underline for the same 2px of attention. `count: 0` renders `(0)`; omit the key to render nothing.
+
+**Keeping the active tab in view.** Deliberately **not** `Element.scrollIntoView({ inline: 'center' })`: that walks every scrollable ancestor, so on a rail that does not overflow it would still scroll the page (or the shell's content pane) to bring a tab "into view" that was never out of it. The element sets its own `scrollLeft` and nothing else, measured from bounding rects so the host need not be an `offsetParent`, and it no-ops entirely when `scrollWidth <= clientWidth`. Smooth, unless `prefers-reduced-motion: reduce`.
+
+**Keyboard**
+
+| Key | Effect |
+|-----|--------|
+| `ArrowLeft` / `ArrowRight` | Move focus, wrapping. Activates too **only** on a switcher rail (no `href`). The focused tab is scrolled into view. |
+| `Home` / `End` | First / last enabled tab. |
+| `Enter` / `Space` | Activate the focused tab — one `tc-change`, and one navigation on a link tab. |
+
+Disabled tabs are skipped by all of it.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-page-tabs-gap` | `20px` | Between tabs. The design uses `20px` on its list screens and `18px` on the diet screens. |
+| `--bs-page-tabs-tab-pad-bottom` | `9px` | Label to underline. This *is* the rail's height above the label — the design gives the rail no other padding, so the active tab's rule is the bar's bottom edge. |
+| `--bs-page-tabs-tab-font` | `var(--m-font-body)` (`400 13px`) | Resting tab. `line-height` is forced to `normal` after it: the token carries a `/1.45` prose leading that would make the rail ~3px taller than the canvas. |
+| `--bs-page-tabs-tab-color` | `var(--tc-text-faint)` | Resting tab. |
+| `--bs-page-tabs-tab-font-active` | `var(--m-font-section)` (`700 13px`) | Active tab. Weight carries as much of the state as colour does, which survives colour-blindness and a greyscale screenshot. |
+| `--bs-page-tabs-tab-color-active` | `var(--tc-text)` | Active tab. |
+| `--bs-page-tabs-underline-width` | `var(--m-bar-tab)` (`2px`) | Drawn `transparent` on resting tabs, so the rail's height never changes with the selection. |
+| `--bs-page-tabs-underline-color` | `var(--tc-app-accent)` | The active rule. |
+
+**Accessibility**
+
+- One tab stop for the whole rail (roving `tabindex`), so `Tab` enters and leaves it once instead of stepping through six.
+- `aria-selected` and the active class track `active-id`, whoever set it.
+- **`aria-controls` is yours.** The element cannot know the panel's id, and a route rail has no panel at all. Add it when the panel is a sibling in the same document.
+- The focus ring is inset (`outline-offset: -2px`). A scroll container clips both axes — `overflow-x: auto` forces `overflow-y` to `auto` too — and the design leaves the rail no padding, so the library's global 2px/2px-offset ring would be clipped away on all four sides.
+- **The rail is ~29px tall, which is the design's height and below the 44px touch floor.** It clears WCAG 2.5.8 Target Size (Minimum, AA — 24x24 CSS px) and does not clear 2.5.5 (AAA, 44x44). The floor is not raised by default because the four screens that carry a rail would each grow by ~15px against the canvas, and the design gives the rail nowhere to put that height. Raise it per-surface with `--bs-page-tabs-tab-pad-bottom` (and `--bs-page-tabs-gap` for the horizontal reach) where the extra height is acceptable.
+
+```html
+<tc-page-tabs id="rail" active-id="recipes"></tc-page-tabs>
+<script>
+  const rail = document.getElementById('rail')
+  rail.tabs = [
+    { id: 'recipes', label: 'Рецепти', href: '/recipes', count: 12 },
+    { id: 'bundles', label: 'Папки',   href: '/recipes/bundles' },
+  ]
+  // client-side routing: cancel the anchor, then route yourself
+  rail.addEventListener('tc-change', e => {
+    e.preventDefault()
+    router.push(e.detail.href)
+  })
+</script>
+```
+
+In React, `active-id` comes from the URL and the element never writes it:
+
+```tsx
+const rail = useTc<HTMLElement>(
+    { tabs },
+    { 'tc-change': (e: CustomEvent) => { e.preventDefault(); navigate(e.detail.href) } },
+)
+
+<tc-app-bar variant="title" heading={t.recipes.title} subheading={subtitle}>
+    <tc-page-tabs ref={rail} slot="below" active-id={tabFromUrl} />
+</tc-app-bar>
+```
+
+---
+
+### tc-tab-dock
+
+The fixed bottom navigation dock: icon over a 10px label, amber count badges, safe-area padding, and equal columns at any item count.
+
+**Three tab-like elements, and they are not interchangeable:**
+
+| Element | Role |
+|---|---|
+| `tc-tab-bar` | The desktop panel switcher. **Wraps** to a second line when it runs out of width, and sits on its own hairline. |
+| `tc-page-tabs` | The phone page rail — a horizontal underline strip that never wraps. Lives in `tc-app-bar`'s `below` region. |
+| `tc-tab-dock` | This one. A **grid**, not a row: every destination gets an equal share of the width, the icon sits **above** the label, and the whole thing is chrome pinned to the bottom edge. |
+
+Not a variant of `tc-tab-bar`: that element is a text switcher with an optional leading icon, a 2px underline on the active tab and a wrapping row. Making one element do both would mean a flag that changes nearly every declaration.
+
+**Tag:** `tc-tab-dock`
+
+```
+tc-tab-dock                    display:grid; auto-flow column; minmax(0,1fr) tracks
+  └─ .tc-tab-dock-tab          <a> | <button> | inert <span>, role="tab"
+       ├─ .tc-tab-dock-icon      21x21, position:relative
+       │    ├─ .tc-tab-dock-glyph   the lucide svg
+       │    └─ .tc-tab-dock-badge   amber pill, over the icon's top-right corner
+       └─ .tc-tab-dock-label     10px, 400 idle / 700 active, single line
+```
+
+**The columns are implicit grid tracks**, `grid-auto-flow: column` + `grid-auto-columns: minmax(0, 1fr)`. Three destinations and five each get equal columns with no count passed in and no inline style for a framework to clobber. `minmax(0, …)` rather than a bare `1fr`, whose auto minimum is the track's content size — one long Cyrillic label would otherwise make its own column wider than its neighbours'.
+
+**Link or switcher — one rule, three behaviours** (the same rule `tc-page-tabs` uses)
+
+A tab **with `href`** is a link. The page it names is a route, so the URL is the source of truth: the element never writes `active-id`, the arrow keys move focus **without** activating, and clicking follows the `href` unless you cancel it. A tab **without `href`** switches a pane already in the DOM: the element owns `active-id`, and the arrow keys activate as they move.
+
+**Re-tapping the active tab is not a change.** Native bottom navs treat it as a third gesture — tap the active tab and its pane scrolls to top, tap again and it pops to that tab's root — and a change event that never fires cannot be acted on. So it gets its own event, `tc-tab-dock-reselect`. Both events are cancelable, so a router can suppress the anchor's navigation either way.
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `active-id` | string | `''` | The `id` of the active tab. Setting it patches `aria-selected`, the roving `tabindex` and the active class **in place** — no re-render, so keyboard focus and any listener bound to a tab node survive. An id no tab in the current set carries selects nothing and hands the tab stop to the first enabled tab, which is the normal case for a role-dependent tab set. |
+| `auto-hide` | boolean | absent | Slide the dock out on scroll-down and back on scroll-up, driven by `tc-shell-scroll`. **Off by default — see below.** |
+| `role` | string | `tablist` | Set by the element **only if you have not**. |
+
+**JS Properties**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `tabs` | `TabDockItem[]` | `[]` | See the shape below. Set via JS; not reflected as an attribute. |
+| `activeId` | string | `''` | Reflects `active-id`. |
+| `autoHide` | boolean | `false` | Reflects `auto-hide`. |
+| `hiddenByScroll` | boolean (readonly) | `false` | True while `auto-hide` has the dock translated off the bottom edge. |
+| `onChange` | `((id: string) => void) \| null` | `null` | Called when a **different** tab is activated, alongside the event. |
+| `onReselect` | `((id: string) => void) \| null` | `null` | Called when the **already-active** tab is activated. |
+
+**Methods**
+
+| Method | Description |
+|--------|-------------|
+| `reveal()` | Bring an auto-hidden dock back. Call it on navigation, so a new page never starts with the nav off-screen. |
+
+```ts
+interface TabDockItem {
+    id: string
+    label: string           // 10px; the design's labels are ~8 characters
+    icon: string            // a lucide name (kebab or Pascal), drawn at 21px / stroke 1.6
+    href?: string           // renders an <a>, so tabs are real links
+    badge?: number | string | null
+    badgeLabel?: string     // how the badge is SPOKEN — see Accessibility
+    disabled?: boolean
+}
+```
+
+**Events**
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-tab-dock-change` | `{ id: string, href: string \| null }` | A **different** tab was activated. Bubbling, composed, **cancelable** — `preventDefault()` suppresses the anchor's navigation, which is how a client-side router takes over while a no-JS load still follows the link. Fires **exactly once** per activation, by pointer, `Enter` or `Space`. |
+| `tc-tab-dock-reselect` | `{ id: string, href: string \| null }` | The tab that was **already** `active-id` was activated. Same shape, same guarantees. `tc-tab-dock-change` does **not** also fire. |
+
+**Slots:** none — the tabs come from the `tabs` property, so this element has nothing of yours to move and can never be hoisted from or hoist anything.
+
+**Badges**
+
+`0`, `''`, `null` and `undefined` all render **nothing** — a zero badge is noise, not information. A number above `99` renders `99+`, and so does a numeric *string* above 99; any other string renders verbatim (`'NEW'`). The pill is anchored to the **icon**, not to the column, so it stays on the glyph's corner when the item count changes the column width. Values from the design: `top: 2px; right: 14px|16px` against a 71px column, i.e. 3px above the icon's top and ~10px past its right edge — which is what `--bs-tab-dock-badge-top` / `-right` default to.
+
+**Height, and the home indicator**
+
+The dock is `1px rule + 8px top padding + 47px tab grid` = **56px** of real chrome, plus its bottom padding:
+
+| Where | Bottom padding | Dock height |
+|---|---|---|
+| Free-standing, no safe-area inset | `7px` | **63px** |
+| Free-standing, 34px inset | `34px` | **90px** |
+| Inside a `tc-mobile-shell` | `7px` always | **63px**, and the shell adds the inset outside it |
+
+**Do not render a home-indicator pill.** A design canvas draws one because a canvas has no OS; on a device that strip is the system's, and the dock pays for it as padding. Inside a `tc-mobile-shell` the inset is paid by the shell's own `padding-bottom` (so the dock's box genuinely *ends* above the indicator and its bottom pixels cannot swallow a tap), and a `:where(tc-mobile-shell) tc-tab-dock` rule zeroes `--bs-tab-dock-safe-bottom` so it is not counted twice. Never size anything as `--m-h-dock + an inset`: that token is the design canvas's 78px **reserve**, for positioning *against* the canvas (`1c`'s FAB at `bottom: 104px` = 78 + 26), not a height to build from.
+
+**Auto-hide is off by default, deliberately.** The design never shows the dock hidden, and a primary nav that disappears while you read is a usability regression — you cannot navigate to what you cannot see. Turn it on for a reading surface (a recipe body, a cooking step) where 63px of content is worth more than the nav, and call `reveal()` on navigation. Mechanically: the element listens on `document` for a bubbling `tc-shell-scroll` from a scroller that **contains** it, hides past 24px of offset on a scroll step of 8px or more, always reveals within 24px of the top, and translates by `translateY(100%)` with `pointer-events: none` so a dock that is off-screen cannot be tapped where it now sits.
+
+**Keyboard**
+
+| Key | Effect |
+|-----|--------|
+| `ArrowLeft` / `ArrowRight` | Move focus, wrapping. Activates too **only** on a switcher dock (no `href`). |
+| `Home` / `End` | First / last enabled tab. |
+| `Enter` / `Space` | Activate the focused tab — one event, and one navigation on a link tab. |
+
+Disabled tabs are skipped by all of it.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-tab-dock-bg` | `var(--m-dock-bg)` → `--tc-surface` | Dock surface. |
+| `--bs-tab-dock-border` | `1px solid var(--m-dock-border)` → `--tc-border` | The top hairline. The dock owns its own edges; `tc-mobile-shell` deliberately draws none. |
+| `--bs-tab-dock-shadow` | `var(--m-shadow-dock)` | `0 -6px 18px -12px` of the theme's warm tint. |
+| `--bs-tab-dock-padding-top` / `-padding-inline` | `8px` / `6px` | |
+| `--bs-tab-dock-safe-bottom` | `var(--tc-safe-bottom)`, forced to `0px` inside a `tc-mobile-shell` | The hardware strip the dock pays for. Override it on the element (not at `:root`) if a frame draws its own bezel. |
+| `--bs-tab-dock-pad-bottom` | `max(7px, var(--bs-tab-dock-safe-bottom))` | The whole bottom padding. Overriding **this** wins over the shell rule above. |
+| `--bs-tab-dock-gap` | `2px` | Between columns. |
+| `--bs-tab-dock-tab-padding` | `5px 0 3px` | |
+| `--bs-tab-dock-tab-gap` | `4px` | Icon to label. |
+| `--bs-tab-dock-tab-min-height` | `var(--tc-min-touch-target)` (`44px`) | A **floor**. The design's tab already measures 47px, so this changes nothing on the canvas and protects the target if you shrink the icon or drop the label. |
+| `--bs-tab-dock-icon-size` / `-icon-stroke` | `21px` / `1.6` | The stroke is a CSS declaration, so it beats lucide's own presentation attribute. |
+| `--bs-tab-dock-color` | `var(--m-dock-idle)` → `--tc-text-faint` | Resting icon + label. |
+| `--bs-tab-dock-color-active` | `var(--m-dock-active)` → `--tc-accent` | **"You are here".** This is the one value an app is expected to re-point: it is deliberately **not** `--tc-app-accent`, because in the JADI.mk design amber is the CTA colour *and* the badge fill, and a third amber element on every screen breaks that design's own two-per-screen rule. JADI.mk sets `--m-dock-active: #a4472f` (terracotta) at its theme root. |
+| `--bs-tab-dock-label-font` / `-label-font-active` | `var(--m-font-tab)` / `var(--m-font-tab-active)` (`400 10px` / `700 10px`) | `line-height` is forced to `normal` after each: the label is a single 14px line box and prose leading would deepen the whole dock. |
+| `--bs-tab-dock-badge-bg` / `-badge-color` | `var(--tc-app-accent)` / `var(--tc-app-accent-contrast)` | Amber pill, `#2e2400` text under `sunshine`. |
+| `--bs-tab-dock-badge-size` | `var(--m-size-badge)` (`16px`) | `min-width` and height, so one digit is a circle and `99+` grows into a pill. |
+| `--bs-tab-dock-badge-font` | `700 9.5px var(--m-body)` | A literal, because the half pixel changes the pill's width at two digits; only the family is the theme's. Carries `tabular-nums`. |
+| `--bs-tab-dock-badge-top` / `-badge-right` | `-3px` / `-10px` | Measured from the **icon** box, right-anchored as the canvas is — so a wide badge grows leftward over the icon rather than toward the next tab. |
+
+**Accessibility**
+
+- The host is `role="tablist"` (unless you set a `role`) and the items are `role="tab"` with `aria-selected`. **The items keep `role="tab"` even if you re-role the host**, so if you make it a `nav` you own making the children consistent.
+- One tab stop for the whole dock (roving `tabindex`), so `Tab` enters and leaves it once instead of stepping through five.
+- **The badge is part of the item's accessible name, not a loose number.** Pass `badgeLabel` and the name becomes „Рецепти, 12 нови"; without it you get „Рецепти, 12", which a screen reader reads out of context. The pill itself is `aria-hidden`. The visible label is always a prefix of the name, so WCAG 2.5.3 (Label in Name) holds and voice control still finds the tab by its label.
+- **`aria-label` on the host is yours** — „Главна навигација". The element does not invent one.
+- The focus ring is inset (`outline-offset: -2px`). The dock's top edge is a 1px rule with the content pane immediately above it and the hardware edge below, so the library's global 2px/2px-offset ring would be drawn over both.
+- Every tab's hit box is **47px tall** at the design's geometry and as wide as its column — 74px at 390px with five tabs, 60px at 320px — so it clears WCAG 2.5.5 Target Size (AAA, 44x44) at every phone width. The one place in this phone design where the touch floor and the canvas agree.
+- `prefers-reduced-motion: reduce` flattens both the colour fade and the hide slide; the library reset does it globally.
+
+```html
+<tc-tab-dock id="dock" active-id="recipes" aria-label="Главна навигација"></tc-tab-dock>
+<script>
+  const dock = document.getElementById('dock')
+  dock.tabs = [
+    { id: 'home',     label: 'Дома',    icon: 'house',           href: '/' },
+    { id: 'recipes',  label: 'Рецепти', icon: 'book-open',       href: '/recipes', badge: 12, badgeLabel: '12 нови' },
+    { id: 'shopping', label: 'Листи',   icon: 'shopping-basket', href: '/shopping' },
+    { id: 'diet',     label: 'Исхрана', icon: 'leaf',            href: '/diet' },
+    { id: 'more',     label: 'Повеќе',  icon: 'ellipsis',        href: '/more' },
+  ]
+  // client-side routing: cancel the anchor, then route yourself
+  dock.addEventListener('tc-tab-dock-change', e => {
+    e.preventDefault()
+    router.push(e.detail.href)
+  })
+  // the native third gesture: scroll to top, then pop to the tab's root
+  dock.addEventListener('tc-tab-dock-reselect', e => {
+    e.preventDefault()
+    if (pane.scrollTop > 0) pane.scrollTo({ top: 0, behavior: 'smooth' })
+    else router.push(rootOf(e.detail.id))
+  })
+</script>
+```
+
+In React, `active-id` comes from the URL and the element never writes it:
+
+```tsx
+const dock = useTc<HTMLElement>(
+    { tabs },
+    {
+        'tc-tab-dock-change': (e: CustomEvent) => { e.preventDefault(); navigate(e.detail.href) },
+        'tc-tab-dock-reselect': (e: CustomEvent) => { e.preventDefault(); scrollToTopOrPop(e.detail.id) },
+    },
+)
+
+<tc-mobile-shell data-key={pathname}>
+    <tc-app-bar slot="header" variant="title" heading={t.recipes.title} />
+    <div>{children}</div>
+    <tc-tab-dock ref={dock} slot="dock" active-id={tabFromUrl} aria-label={t.nav.primary} />
+</tc-mobile-shell>
+```
+
+---
+
+### tc-day-strip
+
+A **week at a glance**: N equal columns of weekday-letter-over-coloured-cell, where the cell's fill encodes that day's *state* and the selection is a ring. Screen `1j` („Планер") draws seven under the page rail — it is the navigation and the status display at once, and it is how you see „Thursday is over target" without opening Thursday.
+
+**Tag:** `tc-day-strip`
+
+```
+tc-day-strip                       display:grid; repeat(7, 1fr); gap 5px
+  └─ button.tc-day-strip-day       flex column — THE HIT TARGET, ≥44px tall
+       ├─ .tc-day-strip-weekday    the letter, 400 10px (selected: 700, terracotta)
+       └─ .tc-day-strip-cell       30px box, radius 6, the STATE fill
+```
+
+**Four tab-like elements now, and they are not interchangeable.** `tc-tab-bar` is the desktop panel switcher (it *wraps*). `tc-page-tabs` is the phone page rail (it never wraps — it scrolls). `tc-tab-dock` is the fixed bottom dock. This one is also N equal columns, but **each column carries a state of its own**: a dock tab is either where you are or where you are not, whereas a day is „planned", „over target", „today" or „empty" whether or not you are looking at it.
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `active-id` | string | `''` | The selected day's `id`. The element owns it — days are a switcher, never links. |
+| `columns` | number | `7` | Grid **columns**, not days. See below. |
+
+**JS Properties:** `days: DayStripItem[]` (required — there is no attribute form), `activeId`, `columns`, `onChange: (id) => void`.
+
+**Events:** `tc-day-strip-change` — `detail: { id, state }`, bubbles, composed, cancelable.
+
+```ts
+interface DayStripItem {
+    id: string
+    short: string       // 'П' 'В' 'С' 'Ч' 'П' 'С' 'Н' — supplied by the app
+    label: string       // '1' … '7', or a date number
+    state?: 'empty' | 'planned' | 'partial' | 'today' | 'over'   // default 'empty'
+    a11yLabel?: string  // 'Среда 3 септември, 1 840 од 1 900 килокалории'
+    stateLabel?: string // overrides the catalog's status word; '' suppresses it
+    disabled?: boolean  // a day outside the plan
+}
+```
+
+**Selection and state are orthogonal, and conflating them is the one bug this element exists to prevent.** On the canvas the selected day *happens* to also be today, so a naive reading has `today` mean „selected" and ships a strip where a selected Thursday is pixel-identical to a Thursday that merely *is* Thursday. So selection has two signals of its own, both independent of the state fill:
+
+- the weekday letter goes `400` faint → `700` terracotta. That is the canvas's own marker (day 3's „С" is `700 10px #a4472f` against its neighbours' `400 10px #9aa189`), and the **weight** change survives greyscale and colour blindness by itself;
+- the cell takes a 2px ring — an addition, because a 10px letter is thin signal for a 30px target.
+
+**The ring is terracotta, not `--tc-app-accent`.** Under `sunshine` the app accent is the amber CTA colour: a ring in it around the amber `today` fill is invisible, and this design allows amber on at most two elements per screen. `#a4472f` is also what the canvas colours the selected day's letter, so the ring and the letter are one signal in one hue. **The ring is suppressed on `today`** — there the amber fill already owns the row, and the canvas draws day 3 (today *and* selected) with no ring at all. All four combinations stay distinct: selected+today is amber with a bold terracotta letter, today alone is amber with a faint one.
+
+**`partial` is an addition, not a design value.** The canvas shows four states; a real week has a fifth — „some meals planned, not all". It reuses `planned`'s fill with a 1px **inset** outline in `planned`'s ink, so it reads as a variation of planned rather than as a fifth hue nobody can name. Inset and not a border: a border would eat 2px of a 30px box's inner height, and the ring already owns the outward direction.
+
+**`columns` is a column count, not a day count.** That is what makes a 14-day strip two rows of seven rather than fourteen 26px slivers. A five-day work week sets `columns="5"`; leaving it at `7` with five days renders five narrower cells and two empty tracks.
+
+**The padding is on the column, never on the box.** The coloured box is 30px, which is not a tap target — the `<button>` wrapping it is, at `min-height: --tc-min-touch-target` (44px) plus the letter above, i.e. ~48px on the design's values. Growing the *box* would have broken the design at its most recognisable measurement.
+
+**Seven columns at 320px is ~37px wide** (320 − 28px of gutter − 6 × 5px of gap, over 7), which is under the 44px guideline **horizontally**. Accepted and recorded: a week is seven days whatever the viewport, the design's own strip is the same, and a scrolling strip would cost the „whole week at a glance" that is the entire point. The vertical axis compensates, and the labels are 12px numerals with room to spare.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-day-strip-bg` / `-border-color` / `-border-width` | `var(--tc-surface)` / `var(--tc-border)` / `1px` | The strip is a **band**: on `1j` it carries its own surface and the hairline under it. Zero these three to drop it into a panel. |
+| `--bs-day-strip-padding` | `10px 14px 12px` | |
+| `--bs-day-strip-gap` / `-day-gap` | `var(--m-gap-tight)` (`5px`) both | Between columns / between letter and cell. |
+| `--bs-day-strip-columns` | `7` | Re-pointed per instance by the `columns` attribute. |
+| `--bs-day-strip-day-min-height` | `var(--tc-min-touch-target)` (`44px`) | |
+| `--bs-day-strip-weekday-font` / `-color` | `var(--m-font-tab)` / `var(--tc-text-faint)` | `400 10px` |
+| `--bs-day-strip-weekday-font-selected` / `-color-selected` | `var(--m-font-tab-active)` / the ring colour | `700 10px` |
+| `--bs-day-strip-cell-height` / `-cell-radius` | `30px` / `var(--m-radius-control)` (`6px`) | |
+| `--bs-day-strip-cell-font` / `-cell-font-quiet` / `-cell-font-loud` | `600` / `400` / `700` `12px` | Per state; `tabular-nums` applied after the shorthand. |
+| `--bs-day-strip-empty-bg` / `-empty-color` | `var(--tc-surface-muted)` / `var(--tc-text-faint)` | `#f1e6ce` / `#9aa189` under `sunshine`. |
+| `--bs-day-strip-planned-bg` / `-planned-color` | `var(--tc-success-bg)` / `var(--tc-success)` | `rgba(94,138,46,.16)` / `#4c7122` under `sunshine`. Also `partial`'s fill and outline. |
+| `--bs-day-strip-today-bg` / `-today-color` | `var(--tc-app-accent)` / `var(--tc-app-accent-contrast)` | `#f2b705` / `#2e2400`. |
+| `--bs-day-strip-over-bg` / `-over-color` | `var(--tc-danger-bg)` / `var(--tc-danger)` | `rgba(242,96,75,.16)` / `#c0392b` under `sunshine`. |
+| `--bs-day-strip-partial-outline-width` | `1px` | |
+| `--bs-day-strip-ring-width` / `-ring-color` | `2px` / `var(--tc-app-accent)`; `#a4472f` under `sunshine` | |
+
+Knobs go **on the host**. The state values resolve through per-day locals declared on `.tc-day-strip-day`, so a knob re-pointed on the host reaches them and one re-pointed on the cell does not.
+
+**Accessibility — a real requirement here, not boilerplate.**
+
+- The host is `role="tablist"` (unless you set a `role`) and the days are `role="tab"` with `aria-selected`. The days keep `role="tab"` even if you re-role the host.
+- **Every day's accessible name ends with its status in words.** `over` (red) against `planned` (green) is the confusable pair, and that pair is the whole point of the strip — with the words removed a colour-blind user gets *nothing* from this element. The word comes from the message catalog (`dayStateEmpty` / `dayStatePlanned` / `dayStatePartial` / `dayStateToday` / `dayStateOver`, English by default — `configureMessages` them), or from the item's own `stateLabel`. Set `stateLabel: ''` to suppress it when `a11yLabel` already says the status.
+- **Pass `a11yLabel`.** Without it the name falls back to „<short> <label>" — „С 3" — which is two glyphs and no information. Include the date in it so the visible label stays part of the name (WCAG 2.5.3).
+- The `today` day also carries `aria-current="date"` — the machine-readable half of „this is today", which no amount of fill colour can carry.
+- One tab stop for the whole strip (roving `tabindex`). `ArrowLeft`/`ArrowRight` move **and activate** (showing the day's meals is free, which is the case the ARIA tabs pattern prefers automatic activation for); `Home`/`End` jump to the ends; `Enter`/`Space` activate through the click path, so the event fires once.
+- The focus ring is **inset** (`outline-offset: -2px`) — the band leaves no room for a positive offset — which also keeps it distinguishable from the selection ring: focus is a rectangle around the whole column, selection hugs the 30px box.
+- `aria-label` on the host is yours („Недела 3"). The element does not invent one.
+
+```tsx
+const strip = useTc<HTMLElement>(
+    { days: week.map((d) => ({
+        id: d.date,
+        short: WEEKDAY_LETTER[d.weekday],
+        label: String(d.dayOfMonth),
+        state: dayState(d),   // the APP's rule: empty / partial / planned / today / over
+        a11yLabel: `${WEEKDAY[d.weekday]} ${d.dayOfMonth}, ${d.kcal} од ${d.target} ккал`,
+    })) },
+    { 'tc-day-strip-change': (e: CustomEvent) => setSelectedDay(e.detail.id) },
+)
+
+<tc-day-strip ref={strip} active-id={selectedDay} aria-label={t.planner.weekLabel} />
+```
+
+---
+
 ### tc-tab-sections
 
 Tabbed interface with switchable content sections and an optional loading skeleton. Underline tab nav — the only chrome is a 2px ink underline under the active tab. Tabs are set via the `items` JS property (array of `TabSectionItem`). Supports uncontrolled mode (`default-active-key`) and controlled mode (`active-key` — the active tab is driven by the attribute and the element only emits on click). Full ARIA tabs pattern with roving tabindex: Left/Right (and Home/End) move and activate, Enter/Space activate, disabled tabs are skipped. Only the active panel is shown; others are hidden. No shadow DOM.
@@ -6937,6 +8947,178 @@ None. `tc-blur-overlay` is a passive scrim — the consumer mounts/unmounts it a
 ```
 
 ---
+
+### tc-bottom-sheet
+
+The phone-native modal surface: content enters from the thumb side, a grab handle is the dismiss affordance, and a drag beats a small target. Drag-to-dismiss with real physics, snap points, a focus trap, a scroll lock that knows whether it is inside an app shell, and a **warm cream** scrim over a blurred page.
+
+**Not a variant of `tc-modal`.** That element is centre-anchored with a corner ✕: on a 390×844 screen a centred dialog either floats awkwardly mid-screen or effectively becomes full-screen, with its only dismiss control in the hardest place on the device for a thumb to reach. Every mobile OS answered that with the bottom sheet, and the two shapes disagree on nearly every declaration.
+
+**Tag:** `tc-bottom-sheet`
+
+```
+tc-bottom-sheet                display:none until open, then a flex column
+  ├─ ::before                  the 40x4 grab handle — a pseudo-element, no DOM
+  ├─ [slot="header"]           order 1, flex:none   title + optional text action
+  ├─ :not([slot])              order 2, flex:1      THE scrolling body
+  └─ [slot="footer"]           order 3, flex:none   the split action row
+
+.tc-bottom-sheet-scrim         ONE element for the whole stack, created by the element
+```
+
+**The host IS the panel.** The element renders no wrapper, because a wrapper means re-parenting your slotted children, and a re-parented child throws `NotFoundError` the moment react-dom unmounts it (`parentInstance.removeChild(child)` runs against the parent it *believes* the child has). A sheet's children are the most conditionally-rendered content in an app, so that is not a hypothetical. Consequences worth knowing: the four regions are **your own direct children**, ordered by CSS off their `slot` attribute; `tc-bottom-sheet` never hoists a nested `[slot="…"]` out of a component inside it (its own lookups are all `:scope > …`); and the only node it ever creates inside itself is the optional heading, which is **prepended**, never moved.
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `open` | boolean (presence) | absent | Adding it animates the sheet in, removing it animates it out. Also a property — `open={cond}` from React works. |
+| `heading` | string | `''` | Shorthand for a header slot holding just a title. A consumer-supplied `[slot="header"]` always wins, because the design's own sheet header is a *row* (title + a text action) and only you can build that. |
+| `snap` | `auto` \| `full` \| CSS-free list e.g. `40,90` | `auto` | Percentages of the sheet's containing block, in any order (they are sorted and de-duplicated, and clamped to 10–100). `auto` is content height. |
+| `initial-snap` | index | `0` | Which snap the sheet opens at. Clamped to the list. |
+| `dismissible` | `"false"` to turn off | on | When off: no drag-to-dismiss, no scrim tap, no `Escape`. A drag past the rest position then *resists* at a third of the finger's distance — how the surface says "not this way" without a message. |
+| `scrim` | `warm` \| `dark` \| `none` | `warm` | `warm` is the design's cream wash. `none` draws nothing **and lets taps through** to the page. |
+| `blur-behind` | `"false"` to turn off | on | Blur + fade the shell's content pane behind the wash. |
+| `handle` | `"false"` to turn off | on | The grab handle. |
+| `role` | string | `dialog` | Set by the element only if you have not. |
+| `tabindex` | string | `-1` | Same — the sheet is the initial focus target, so it has to be programmatically focusable. |
+
+**The three `"false"` attributes are tri-state, not presence-based**, because they default to *on*. Write `dismissible="false"` / `dismissible={false}`; both work, and so does `handle={cond || undefined}` (undefined means "omitted", i.e. the default). This matters more than it looks: react-dom writes a custom element's props as **properties** when they exist as such, so JSX `dismissible="false"` reaches the setter as the *string* `'false'` — which is truthy. The setters coerce it. Yours should too if you wrap this element.
+
+**JS Properties**
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `open` | boolean | `false` | Reflects `open`. |
+| `heading` / `snap` / `initialSnap` | string / string / number | | Reflect their attributes. |
+| `dismissible` / `blurBehind` / `handle` | boolean | `true` | Reflect the tri-state attributes. |
+| `scrim` | `'warm' \| 'dark' \| 'none'` | `'warm'` | |
+| `snapIndex` | number (readonly) | `0` | Current index into the parsed `snap` list. |
+| `lockTarget` | `'pane' \| 'body' \| 'none'` (readonly) | `'none'` | **Which scroll lock ran** while this sheet is open — see below. Diagnostic: "why is the page behind still scrolling" is otherwise unanswerable from outside. |
+| `onOpenChange` | `((open: boolean, reason?: string) => void) \| null` | `null` | Called on every open and close, alongside the events. |
+
+**Methods**
+
+| Method | Description |
+|--------|-------------|
+| `show()` | Returns a promise that resolves **after the entry animation**. |
+| `hide(reason?)` | Returns a promise that resolves **after the exit animation**, so a caller can unmount safely. `reason` defaults to `'action'`. |
+| `snapTo(index)` | Move to a snap. No-op for `snap="auto"`, which has one rest position. |
+
+**Events** — all bubbling and composed.
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-sheet-open` | — | The sheet has begun entering (fired on the same tick it opens, not after the animation). |
+| `tc-sheet-close` | `{ reason: 'scrim' \| 'drag' \| 'escape' \| 'action' }` | Fired as the exit **starts**, so a consumer can sync its own state while the animation runs. `'action'` covers both `hide()` and an external removal of `open`. |
+| `tc-sheet-snap` | `{ index: number, snap: number }` | The rest position changed. Also fired once on open for a snapped sheet. |
+
+**Drag physics**
+
+Pointer events, not touch-only, so a stylus and a mouse work. The surface follows the finger 1:1 (no transition while dragging), and on release:
+
+| Gesture | Result |
+|---|---|
+| Flick down faster than **0.5 px/ms** | One snap down, or dismiss from the lowest snap. Distance is irrelevant. |
+| Flick up faster than 0.5 px/ms | One snap up. |
+| Dragged past **35 %** of the sheet's height below its lowest snap | Dismiss. |
+| Anything else | Animate to the nearest snap. |
+
+Velocity is measured over the last ~120 ms of the gesture, not the whole of it. Only `transform: translate3d(0, y, 0)` is animated — never `height` or `top`, both of which relayout the sheet's content on every frame. A press on an `input`, `textarea`, `select`, `[contenteditable]` or `[data-no-drag]` is never a drag: the design's own filter sheet carries a range slider, and a vertical drag on a slider thumb has to reach the slider.
+
+**Nested scrolling.** The body slot scrolls; the sheet drags. A gesture that starts in the body belongs to the **body** unless the body is already scrolled to its top *and* the finger is heading down — which is the one case the sheet claims. Mechanically it takes a non-passive `touchmove` listener to claim it, because `preventDefault()` on the first touchmove is the only way to stop the browser starting a native pan, and only the first one is cancelable. Pointer capture is taken **when the drag starts**, not at pointerdown: capturing early retargets the whole compatibility mouse sequence (`mousedown`/`mouseup`, therefore `click`) onto the sheet, which silently kills every button, chip and link inside it.
+
+**Scroll lock — there are two paths, and `lockTarget` tells you which ran**
+
+| Where the sheet is | Path | What happens |
+|---|---|---|
+| Inside a `tc-mobile-shell`, and **not** inside its pane | `'pane'` | `overflow-y: hidden` on the shell's pane, via a `data-tc-sheet-lock` attribute the element writes on the **shell**. The document never scrolls inside a shell, so this is the whole job. `scrollTop` is recorded and written back on close (twice — see below). |
+| No shell (or the sheet is inside the pane) | `'body'` | The classic: record `window.scrollY`, pin `<body>` with `position:fixed; top:-Ypx`, restore and `scrollTo` on close. iOS needs this; `overflow:hidden` on `body` alone is not enough there. |
+
+On a platform with **classic** scrollbars the pane lock changes the pane's width by the scrollbar's, its content reflows, and the browser's scroll anchoring then nudges the offset — so the offset is written back once more on the next frame. On a phone (overlay scrollbars) there is no reflow and the second write is a no-op.
+
+**The lock is released in a `finally`.** A consumer's `tc-sheet-close` listener that throws would otherwise leave the pane locked, the page blurred and a cream wash over content nobody can reach — an app that looks frozen. Both the release and the teardown are idempotent, and `disconnectedCallback` runs them too, so unmounting an open sheet (a route change under it, an error boundary) cannot leak any of it.
+
+**`blur-behind`** applies `filter: blur(1.5px)` + `opacity: .6` to the shell's **pane** — one compositing layer, never per-card, which would cost a repaint each. It is skipped entirely when the sheet is *inside* the pane: nothing can blur its own ancestor, and `filter` there would make the pane the containing block for the sheet's own fixed positioning. Mount your sheets in the shell's `[slot="overlay"]` (or at the app root) and this is moot. Turn it off on a low-end device where a 1.5px blur over a long list drops frames.
+
+**Two sheets, and no more.** A filters sheet opening a sort sub-sheet is the sanctioned shape. The stack is capped at 2 and warns in the console beyond it — a third level is a flow that should be a page: nothing below the top sheet is readable and the back stack stops being predictable. There is exactly **one** scrim element for the whole stack, refcounted, so the wash cannot double-darken; `Escape` and a scrim tap reach the **topmost** sheet only (checked against both the sheet stack and the library's shared overlay stack, so a `tc-lightbox` opened on top of a sheet still wins Escape); and the second sheet sits at `--tc-z-modal + 1`, still inside the modal band.
+
+**Focus**
+
+On open, focus moves to the **sheet itself** — not to the first field, because focusing an input raises the software keyboard and a filter sheet that opens with the keyboard up has just hidden half of itself. Put **`data-autofocus`** on a control to override that (a search sheet wants it). `autofocus` is honoured too, for plain-HTML consumers — but react-dom does **not** render `autoFocus` as an attribute: it calls `.focus()` itself at mount, which for a sheet means focusing something inside a `display: none` subtree and silently doing nothing. In React, use the `data-` form. `Tab` is trapped, `aria-modal="true"` and `aria-labelledby` are wired to the heading, and focus returns to whatever opened the sheet on close.
+
+Both focus moves are deferred by a **microtask**, and that is load-bearing rather than defensive: opening from React means the reaction runs inside React's commit, and react-dom brackets every commit with a save/restore of the focused element (its selection restoration, there so a re-render cannot drop the caret out of an input). A `focus()` called mid-commit is undone a moment later. A microtask lands after React's synchronous flush and is not a frame, so nothing is visible.
+
+**The scrim is a warm cream wash, not a black overlay.** `rgba(253,248,236,.6)` over a blurred page. This is a signature of the JADI.mk design and the easiest thing here to get wrong: black turns a cream canvas grey and breaks the printed-paper read the whole system depends on. `scrim="dark"` (`#0f172a` at .5, `.modal-backdrop`'s own colour) exists for a dark canvas.
+
+**Reduced motion.** Enter and exit drop the translate entirely and become a plain appearance — the reset already flattens every duration, so what is left to remove is the 100 %→0 jump, which is exactly the vestibular trigger. Drag-to-dismiss is untouched: it is direct manipulation, not animation, and a surface that refuses to follow the finger is broken rather than considerate.
+
+**Content classes** — hand-written in your markup, so they are `tc-sheet-*` rather than `tc-bottom-sheet-*`.
+
+| Class | What it is |
+|---|---|
+| `.tc-sheet-title` | `700 17px` of the theme's display face at `--tc-emphasis`. Also what `heading` renders. |
+| `.tc-sheet-action` | The header's optional text action („Исчисти"). Defaults to `--tc-accent`; re-point `--bs-sheet-action-color` for a brand hue. Carries a 44×44 hit box built from padding plus a matching negative margin, so the header row keeps its ~23px height. |
+| `.tc-sheet-section` | Eyebrow label over a stack, `9px` gap (`--bs-sheet-section-gap`). Sections are separated by the body's own `18px`. |
+| `.tc-sheet-section-label` | The eyebrow: `700 9.5px`, `.13em`, uppercase, `--tc-text-faint` (`--bs-sheet-label-color`). |
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-bottom-sheet-bg` | `var(--tc-surface)` | The panel. |
+| `--bs-bottom-sheet-radius` | `var(--m-radius-sheet)` → `18px 18px 0 0` | Top corners only. |
+| `--bs-bottom-sheet-shadow` | `var(--m-shadow-sheet)` | `0 -28px 64px -16px` of the theme's warm tint. |
+| `--bs-bottom-sheet-space` | `var(--tc-vh)`, forced to `100%` inside a shell's overlay layer | What a percentage snap is measured against. Never `100vh`. |
+| `--bs-bottom-sheet-inset-top` | `32px` | The strip of scrim an `auto` sheet always leaves tappable. Ignored for an explicit snap. |
+| `--bs-bottom-sheet-pad-bottom` | `max(9px, var(--tc-safe-bottom), var(--tc-keyboard-inset))` | The hardware strip under the footer. `--tc-keyboard-inset` is in the `max()` because the shell's overlay layer spans its whole padding box, so the shell's own keyboard padding does not lift a sheet — most modals contain a text field, and a footer under the keyboard is a dead footer. |
+| `--bs-bottom-sheet-handle-w` / `-handle-h` / `-handle-bg` / `-handle-margin` | `40px` / `4px` / `var(--m-grabber-bg)` / `9px auto 4px` | |
+| `--bs-bottom-sheet-header-padding` | `8px 18px 0` | |
+| `--bs-bottom-sheet-body-padding` / `-body-gap` | `16px 18px 0` / `18px` | Both applied through `:where()`, so your own rule wins with no fight. |
+| `--bs-bottom-sheet-footer-padding` / `-footer-gap` | `20px 18px 0` / `9px` | |
+| `--bs-bottom-sheet-duration` / `-ease` | `var(--m-dur-sheet)` → `.22s` / `var(--m-ease)` | |
+| `--bs-bottom-sheet-zindex` | `var(--tc-z-modal)` → `1055` | The second sheet is this `+ 1`. |
+
+**Gotchas**
+
+1. **There is no `overflow: hidden` on the host, deliberately.** It would clip the corners neatly and clip every dropdown, select popup and tooltip inside the sheet with them. Keep content off the corners with padding, as the design does.
+2. **The scrim is mounted as the sheet's own sibling**, not at `document.body`. Painting order between two elements is only defined inside one stacking context, and a shell's overlay layer is one — a scrim at `body` would paint *above* a sheet inside that layer and swallow every tap. It follows that the sheet's parent should not have a `transform`/`filter`, which would contain both of them.
+3. **A closed sheet is `display: none`**, so its content is out of the tab order and out of the accessibility tree with no `inert` needed — and its form state is gone if you unmount it. Keep the element mounted and toggle `open`.
+4. **The body region must be the one unslotted child.** A second unslotted child is not a second body; it is a second copy of the same rules. Wrap your content in one element.
+5. **`aria-modal` is set while open, but background content is not marked `inert`.** The scrim blocks pointers and the trap blocks `Tab`, which is the practical equivalent; if you need `inert` semantics for a specific screen, set it yourself on the regions you own.
+
+```html
+<!-- inside a tc-mobile-shell -->
+<div slot="overlay">
+    <tc-bottom-sheet id="filters">
+        <div slot="header">
+            <h2 class="tc-sheet-title">Филтри</h2>
+            <button type="button" class="tc-sheet-action">Исчисти</button>
+        </div>
+        <div>
+            <div class="tc-sheet-section">
+                <span class="tc-sheet-section-label">Папка</span>
+                <!-- chips -->
+            </div>
+        </div>
+        <div slot="footer">
+            <button style="width: 104px">Откажи</button>
+            <button style="flex: 1">Примени (3)</button>
+        </div>
+    </tc-bottom-sheet>
+</div>
+```
+
+```ts
+const sheet = document.getElementById('filters') as HTMLElementTagNameMap['tc-bottom-sheet']
+await sheet.show()
+sheet.addEventListener('tc-sheet-close', (e) => {
+    if ((e as CustomEvent).detail.reason === 'drag') keepDraftFilters()
+})
+// resolves after the exit animation, so this is safe
+await sheet.hide('action')
+unmount()
+```
 
 ### tc-command-palette
 
@@ -8334,6 +10516,133 @@ el.options = [
 el.value = ['js'] // pre-select
 el.addEventListener('tc-change', e => console.log('selected:', e.detail.value))
 </script>
+```
+
+---
+
+### tc-check-row
+
+The **tick-off list row**: a drawn checkbox, a name, an optional hint and an optional right-aligned figure, where **the whole row is the target**. Screen `1h` („Листа", the offline shopping list) is the reference; the same row reappears as `1j`'s meal done-toggle and `1b`'s onboarding tick.
+
+**Tag:** `tc-check-row`
+
+```
+tc-check-row                       display:flex — the host carries the divider
+  ├─ label.tc-check-row-main       flex:1 1 0 — THE HIT TARGET, ≥48px tall
+  │    ├─ input.tc-check-row-input .visually-hidden, still focusable
+  │    ├─ span.tc-check-row-box    24px square / 30px circle + the tick
+  │    ├─ span.tc-check-row-body   label over hint
+  │    └─ span.tc-check-row-trailing  the amount, tabular-nums
+  └─ [slot="trailing"]             optional control, OUTSIDE the label
+```
+
+**THREE CHECKBOX-ISH ELEMENTS, and they are not interchangeable:**
+
+| | What it is |
+|---|---|
+| `tc-check` | A **form field**. A 17px control in the shared `.form-control` lane, form-associated via `ElementInternals`, with `help` / `error` / `required` / `indeterminate` / validity. Use it in a form. |
+| `tc-checkbox-group` | N `tc-check`es under one group label and one validation message. |
+| `tc-check-row` | This one. A **list row**: no field furniture, a 24–30px drawn box, a two-line body, a trailing figure, and a hit box that covers the entire row rather than the control. |
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `checked` | boolean | absent | **Reflected.** The initial state; after that the control owns it and this mirrors it. |
+| `disabled` | boolean | absent | Disables the control, so label activation does nothing. |
+| `label` | string | `''` | The row's name. |
+| `hint` | string | *(unset)* | The muted second line — „во фрижидер: 120 г". Absent or empty ⇒ no second line at all. |
+| `trailing` | string | *(unset)* | The right-aligned figure — „500 г". `tabular-nums`. Absent or empty ⇒ no trailing slot. |
+| `shape` | `square\|circle` | `square` | `square` is 24px at a 6px radius (`1h`); `circle` is 30px (`1j`). For `1b`'s 22px tick set `--bs-check-row-box-size`. |
+| `tone` | `accent\|success` | `accent` | `accent` is the amber fill with a dark-ink tick; `success` is the green fill with a white tick (`1b`, `1j`). |
+| `divider` | `dashed\|solid\|none` | `dashed` | The row's own bottom hairline. Every row on `1h` has one, including the last. |
+| `no-strike` | boolean | absent | Keep the label un-struck when checked. |
+| `no-dim` | boolean | absent | Keep the row at full opacity when checked. |
+| `name` | string | *(unset)* | The input's name — submitted in a `<form>`, and echoed in the change detail. |
+| `value` | string | `on` | Submitted when checked. |
+
+`no-strike` / `no-dim` are **negated** because a boolean attribute cannot default to true: `strike="false"` is still a present attribute, and HTML has no way to spell "absent means on". `1h` wants both treatments; `1j`'s meal toggle wants neither.
+
+**JS Properties**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `checked` | boolean | Reads the **live** control state once rendered, so a tap is visible here in the same turn it happened. Writing it sets the control and reflects the attribute. |
+| `input` | `HTMLInputElement \| null` | The real control. `null` before the first render. |
+| `disabled` / `label` / `hint` / `trailing` / `shape` / `tone` / `divider` / `noStrike` / `noDim` / `name` / `value` | | Reflect their attributes. |
+| `onChange` | `((checked: boolean) => void) \| null` | Alongside the event. |
+
+**Methods:** `toggle()` — flips the row and notifies, exactly as a tap would (it routes through `input.click()`, so `change` fires and there is one place a toggle is reported).
+
+**Events**
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `tc-check-row-change` | `{ checked: boolean, name: string \| null, value: string }` | Bubbling, composed, **not cancelable**. |
+
+Not cancelable on purpose: by the time it fires the control has already flipped and the row has already repainted, so a consumer that "cancelled" it would leave the two disagreeing. Reject by writing `checked` back instead. The input's native `change` also bubbles out of the host, as it does for every `tc-*` field — listen to one or the other, not both.
+
+**Why a real `<input type="checkbox">` inside a real `<label>`.** Keyboard operation (Space), `:checked`, form submission and the state a screen reader reports are all things the platform already does; `role="checkbox"` means reimplementing all four, and the fourth is the one that gets missed — the design conveys "bought" with a `line-through`, and `text-decoration` is invisible to assistive tech, so the state has to come from the control. The input is `.visually-hidden` (clipped, 1×1, still in the layout) and **not** `display: none`, which would remove it from the tab order and from the form. The `<label>` is what makes the whole padded row toggle it, on every input modality, with no JS and no synthetic click to double-fire.
+
+**No JavaScript is involved in the visual state.** Every checked style is a sibling selector off `.tc-check-row-input:checked`, so the box fills, the tick appears and the label strikes through in the same frame the browser flips the control — before any listener runs, with nothing to await. That is the one hard requirement of a shopping list used with no signal. The reflected `[checked]` attribute exists for consumers to read and write; nothing in the stylesheet reads it. Rapid toggling stays consistent because the input is the single source of truth and the attribute only ever mirrors it.
+
+**The consequence: this element is uncontrolled.** A React consumer that renders `checked={fromServer}` will see the box flip before the server agrees. That is the intended behaviour — mirror the flip into your own state, and write `checked` again only if you need to *reject* it.
+
+**The hit box.** `--bs-check-row-min-height` is `48px`, not `--tc-min-touch-target` (44px): 44 is the WCAG 2.5.5 floor for a control you aim at, and this is a control you tick seven of while holding a shopping basket in the other hand. `1h`'s own rows measure ~60px so the floor never binds there — it exists for the hintless single-line row, which would otherwise come out at 44px.
+
+**Slotted trailing content sits outside the `<label>`.** `<button slot="trailing">` is a child of the host, ordered after the label by CSS — inside it, pressing it would toggle the row. It is also after the control in DOM order, so tab order runs box → button.
+
+**No hover under a coarse pointer.** The hover wash is inside `@media (pointer: fine) and (hover: hover)`: on a touch screen `:hover` sticks after a tap, which would leave the last-ticked row highlighted for as long as the list is open and read as a selection the user did not make.
+
+**Accessibility**
+
+- The focus ring is drawn on the **label**, not the box — the label is the target, and a ring around the 24px box would indicate something far smaller than what a press hits. It is inset, because a full-width row's outset ring is clipped by the scroll pane's edge. Engines without `:has()` (Safari < 15.4, Firefox < 121) fall back to a ring on the box: smaller, never absent.
+- The dim does **not** cover the focus ring. The design fades a ticked row to `opacity:.45`; applied to the host that would fade the ring with it, and a checked row is exactly the row a keyboard user is most likely to be standing on. So the fade is applied to the three content pieces and the ring rides on the label.
+- `disabled` is **deliberately not dimmed** — `--bs-check-row-disabled-opacity` defaults to `1`. The row already spends opacity on "done"; a second, similar-looking faded state would be ambiguous, and a checked+disabled row (`1b`'s completed onboarding steps) would multiply the two into near-invisible. Set the knob where a row is genuinely unavailable rather than merely not tickable.
+
+**CSS Custom Properties**
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--bs-check-row-padding` | `13px 4px` | On the label, so the padding is part of the hit box. The 4px inline value puts the box 18px from the frame inside a 14px page gutter. |
+| `--bs-check-row-gap` | `12px` | |
+| `--bs-check-row-min-height` | `48px` | The hit-box floor. |
+| `--bs-check-row-align` | `flex-start` | Verbatim from `1h`: the box aligns to the FIRST line of a two-line body. Set `center` for a single-line list. |
+| `--bs-check-row-box-offset` | `1px` | The nudge that goes with `flex-start`. |
+| `--bs-check-row-box-size` | `var(--m-size-check)` (`24px`); `30px` at `shape="circle"` | `1b`'s tick is `var(--m-size-check-sm)` (22px). |
+| `--bs-check-row-box-radius` | `var(--m-radius-control)` (`6px`); `999px` at `shape="circle"` | |
+| `--bs-check-row-box-border-width` / `-box-border-color` | `var(--m-border-toggle)` (`2px`) / `#e5ddd0`, `#d8cfbd` for `shape="square"` under `sunshine` | The square is 24px against a 30px circle, so its border encloses less area and needs more contrast to read as „not yet". |
+| `--bs-check-row-fill` / `-fill-border` | `var(--tc-app-accent)`; `var(--tc-success)` at `tone="success"` | |
+| `--bs-check-row-tick-color` | `var(--tc-app-accent-contrast)` (`#2e2400`); `#fff` at `tone="success"` | Never white on amber. |
+| `--bs-check-row-tick-size` / `-tick-stroke` | `14px` / `3.2`; `15px` / `3` at `shape="circle"` | Set both when you change the box size. |
+| `--bs-check-row-strike` | `line-through`; `none` with `no-strike` | |
+| `--bs-check-row-dim` | `0.45`; `1` with `no-dim` | |
+| `--bs-check-row-label-font` / `-label-color` | `600 14.5px`; `#2c2620` under `sunshine` | `1j` sets 14px, `1b` 13px. |
+| `--bs-check-row-hint-font` / `-hint-color` / `-hint-gap` | `400 11.5px` / `#998f80` under `sunshine` / `2px` | |
+| `--bs-check-row-trailing-font` / `-trailing-color` | `700 14px` / `#a4472f` terracotta under `sunshine` | |
+| `--bs-check-row-divider-width` / `-divider-style` / `-divider-color` | `1px` / `dashed` / `var(--m-rule-dashed)` (`#e5ddd0`) | Zeroed inside a `tc-list-section`. |
+| `--bs-check-row-hover-bg` | `var(--tc-surface-hover)` | Fine pointers only. |
+| `--bs-check-row-disabled-opacity` | `1` | See above. |
+| `--bs-check-row-focus-ring` | `var(--tc-app-accent)`; `#a4472f` under `sunshine` | Terracotta, because an amber ring around an amber-ticked box is invisible. |
+
+```tsx
+// One listener on the container, not seven on the rows: the event bubbles.
+const list = useTcEvents<HTMLDivElement>({
+    'tc-check-row-change': (e: CustomEvent) => queueTick(e.detail.name, e.detail.checked),
+})
+
+<div ref={list}>
+    {items.map((item) => (
+        <tc-check-row
+            key={item.id}
+            name={item.id}
+            label={item.name}
+            hint={item.note || (item.bought ? t.shopping.bought : t.shopping.remaining)}
+            trailing={item.amount || '—'}
+            checked={item.bought || undefined}
+        />
+    ))}
+</div>
 ```
 
 ---
