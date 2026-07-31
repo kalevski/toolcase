@@ -87,6 +87,12 @@ tc-theme[name='blueprint'],
             letter-spacing: 0.08em;
         }
 
+        // Restates the component's 16px coarse floor, which this theme's own
+        // font-size out-specifies. See style/foundation/README.md.
+        @media (pointer: coarse) {
+            font-size: max(16px, 0.75rem);
+        }
+
         &:focus {
             border-color: var(--bp-teal);
             box-shadow: var(--bp-glow-teal);

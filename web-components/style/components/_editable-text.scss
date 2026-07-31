@@ -30,9 +30,13 @@ tc-editable-text {
         border-color var(--tc-transition-fast),
         box-shadow var(--tc-transition-fast);
 
-    // Coarse touch target
+    // Coarse touch target. The 16px font floor rides along: "looks like the text
+    // it replaces" is the point of this control, so the 3px jump on touch is a
+    // real cost — but an inline editor that zooms the viewport on focus and never
+    // zooms back is worse. See style/foundation/_reset.scss.
     @media (pointer: coarse) {
         min-height: 44px;
+        font-size: max(16px, 13px);
     }
 
     &::placeholder {

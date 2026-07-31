@@ -1,0 +1,557 @@
+// tc-taxonomy-card — the card whose whole identity is ONE accent hue (screens `1b`,
+// `1c` x3, `1f` x2, `1g` x3). Mobile-first by construction: the only media queries in
+// this file WIDEN it (768px) or ask what the pointer is.
+//
+//     tc-taxonomy-card                       display:flex; column — the host IS the card
+//       ├─ [slot="media"]                    order -1  leading image strip
+//       ├─ div.tc-taxonomy-card-main         order 0   the element's OWN node
+//       │    ├─ .tc-taxonomy-card-metric     float:right — the kcal box
+//       │    │    ├─ .tc-taxonomy-card-metric-value   tabular
+//       │    │    └─ .tc-taxonomy-card-metric-unit    tracked uppercase
+//       │    ├─ .tc-taxonomy-card-eyebrow    tracked uppercase, in the accent
+//       │    ├─ .tc-taxonomy-card-heading    serif; hN when `heading-level`
+//       │    │    └─ a|button.tc-taxonomy-card-link   THE activation region
+//       │    ├─ .tc-taxonomy-card-subheading small muted line
+//       │    └─ p.tc-taxonomy-card-desc      clamped body copy
+//       ├─ [slot="chips"]                    order 1   the meta row
+//       ├─ [slot="social"]                   order 2   counters + trailing action
+//       └─ [slot="actions"]                  order 3   the „Отвори"/„Избриши" pair
+//
+// THE FLOAT IS DELIBERATE — see the header comment in src/TaxonomyCard.ts. A floated
+// metric box shortens only the LINE BOXES beside it, so a long Cyrillic title wraps
+// around the kcal figure and then runs full width underneath; a flex row would squeeze
+// that title into a 270px column for its whole height and cost a line.
+//
+// AND `clear: both` IS NOT NEEDED, BECAUSE OF THE FLEX COLUMN.
+//   The design writes `clear:both` on the chip and social rows because there they are
+//   siblings of the float in one normal flow. Here `main` is a FLEX ITEM, which
+//   establishes its own block formatting context and therefore contains its own float
+//   — so main's height already includes the kcal box and every slotted row is below
+//   it. Same rendering, one fewer declaration, and it cannot be defeated by a
+//   consumer's row that happens to set `display: flow-root`.
+//
+// THE VERTICAL RHYTHM IS margin-TOP, NOT margin-bottom.
+//   The design writes it as margin-bottom (eyebrow 4, title 6, desc 10 before chips /
+//   11 before the social row), which only works because every one of its cards happens
+//   to end on the run whose margin is 0. Here every run is optional and any of them can
+//   be the last, so each gap is declared on the LOWER run and guarded by
+//   `:not([hidden])` on the upper one. Same pixels, and a card with no description or
+//   no eyebrow collapses with no trailing space.
+//
+// SLOT-HOISTING HAZARD. `actions` is also distributed by tc-rich-page-header with a
+// SUBTREE-WIDE `querySelectorAll('[slot="actions"]')`, so a tc-taxonomy-card nested
+// inside one loses its action row to the header. Documented rather than worked around
+// — narrowing another component's lookup is a behaviour change for its own consumers.
+// (`chips`, `social` and `media` are not claimed by anything in the library.)
+
+@use '../foundation/tokens' as *;
+
+tc-taxonomy-card {
+    // ── The hue ──────────────────────────────────────────────────────────────
+    // THE ONE KNOB THAT MATTERS. The consumer supplies it (the `accent` attribute, or
+    // this property directly); the library never learns what a „Салата" is. The generic
+    // default is the muted ink, so an accent-less card reads as a plain card rather
+    // than spending the theme's CTA colour on a list item.
+    --bs-taxonomy-card-accent: var(--tc-text-muted);
+    // How much of the accent tints the surface. 3% is the design's, on every card.
+    --bs-taxonomy-card-tint: 3%;
+    // …and how much of it tints the metric box's border.
+    --bs-taxonomy-card-metric-tint: 30%;
+
+    // ── Box ──────────────────────────────────────────────────────────────────
+    // Every `--m-*` read carries a fallback: those tokens are declared by a THEME
+    // (style/themes/sunshine/_mobile.scss), so an un-themed page would otherwise
+    // substitute an empty value and drop the whole declaration.
+    //
+    // `-bg` is the surface BEFORE the tint — the @supports block below mixes the
+    // accent into it, and it is also the flat fallback where color-mix is missing.
+    --bs-taxonomy-card-bg: var(--tc-surface);
+    --bs-taxonomy-card-border-color: var(--tc-border);
+    --bs-taxonomy-card-border-width: 1px;
+    --bs-taxonomy-card-radius: var(--m-radius-card, 10px);
+    --bs-taxonomy-card-padding: var(--m-pad-card, 14px 15px 11px);
+    // The accent's 3px rule across the top. It REPLACES the border on that edge rather
+    // than sitting under it, exactly as the design does — a 1px hairline plus a 3px
+    // rule reads as 4px of chrome and loses the card's top corner radius.
+    --bs-taxonomy-card-bar: var(--m-bar-accent, 3px);
+    // 0 1px 2px rgba(54,44,18,.05) + the top bevel, verbatim. THE BEVEL IS NOT
+    // DECORATION: it is what keeps a flat cream card from reading as a flat cream
+    // rectangle, and it survives the accent bar because the bar is a BORDER — an inset
+    // shadow paints inside the padding box, i.e. under the border, so the two occupy
+    // different pixels and both are visible. Check both after touching either.
+    --bs-taxonomy-card-shadow: var(--m-shadow-card, 0 1px 2px rgba(0, 0, 0, 0.05));
+
+    // ── Metric box ───────────────────────────────────────────────────────────
+    --bs-taxonomy-card-metric-bg: var(--tc-surface);
+    // Re-pointed to the accent mix inside the @supports block below, so the order of
+    // these rules can never matter (a later `border:` shorthand would have won).
+    --bs-taxonomy-card-metric-border-color: var(--bs-taxonomy-card-border-color);
+    --bs-taxonomy-card-metric-radius: var(--m-radius-tile, 8px);
+    --bs-taxonomy-card-metric-padding: 5px 9px;
+    // 10px to the text beside it, 6px to whatever runs underneath (`1b`, `1c`, `1f`).
+    --bs-taxonomy-card-metric-gap: 10px;
+    --bs-taxonomy-card-metric-gap-block: 6px;
+    --bs-taxonomy-card-metric-value-font: var(--m-font-kcal-num, 700 1.0625rem var(--tc-font-sans));
+    --bs-taxonomy-card-metric-unit-font: var(--m-font-kcal-unit, 700 0.5rem var(--tc-font-sans));
+    --bs-taxonomy-card-metric-unit-track: var(--m-track-unit, 0.1em);
+    --bs-taxonomy-card-metric-unit-color: var(--tc-text-faint);
+
+    // ── Type ─────────────────────────────────────────────────────────────────
+    --bs-taxonomy-card-eyebrow-font: var(--m-font-eyebrow, 700 0.59375rem var(--tc-font-sans));
+    --bs-taxonomy-card-eyebrow-track: var(--m-track-eyebrow, 0.13em);
+    --bs-taxonomy-card-eyebrow-gap: 4px;
+    // 600 20px/1.12 Playfair Display. `1b`'s hero card draws 19px — one instance, so it
+    // re-points this property rather than earning a variant of its own.
+    --bs-taxonomy-card-heading-font: var(
+        --m-font-card-title,
+        600 1.25rem/1.12 var(--m-display, Georgia, serif)
+    );
+    --bs-taxonomy-card-heading-color: var(--tc-text);
+    --bs-taxonomy-card-heading-gap: 6px;
+    --bs-taxonomy-card-subheading-font: var(--m-font-meta, 400 0.6875rem var(--tc-font-sans));
+    --bs-taxonomy-card-subheading-color: var(--tc-text-faint);
+    --bs-taxonomy-card-subheading-gap: 3px;
+    --bs-taxonomy-card-desc-font: var(--m-font-body-sm, 400 0.75rem/1.45 var(--tc-font-sans));
+    --bs-taxonomy-card-desc-color: var(--tc-text-muted);
+    --bs-taxonomy-card-desc-gap: 6px;
+    // Lines the description is clamped to. Driven by the `clamp` attribute through the
+    // ladder below; `clamp="0"` turns the clamp off entirely.
+    --bs-taxonomy-card-clamp: 2;
+
+    // ── Slotted rows ─────────────────────────────────────────────────────────
+    --bs-taxonomy-card-chips-gap: var(--m-gap-tight, 5px);
+    --bs-taxonomy-card-chips-offset: 10px; // desc → chip row (1c)
+    --bs-taxonomy-card-footer-gap: 14px; // between the social counters (1f)
+    --bs-taxonomy-card-footer-offset: 11px; // desc → social row (1f draws 11px, not 10px)
+    --bs-taxonomy-card-footer-pad: 10px; // …and its own top padding, over the rule
+    --bs-taxonomy-card-footer-border-color: var(--bs-taxonomy-card-border-color);
+    --bs-taxonomy-card-media-gap: 10px;
+
+    // ── Feedback ─────────────────────────────────────────────────────────────
+    // Press is a 0.5% squeeze plus a hair of brightness, not a lift: a lift under a
+    // finger is hidden by the finger. Hover IS the lift, and only where there is a
+    // pointer that can hover — see the two queries near the bottom of this file.
+    --bs-taxonomy-card-press-scale: 0.995;
+    --bs-taxonomy-card-press-brightness: 0.99;
+    --bs-taxonomy-card-hover-lift: -3px;
+    // What the hover shadow's accent is mixed INTO. A warm near-black, because a
+    // neutral one under a cream card reads as dirt rather than as light.
+    --bs-taxonomy-card-hover-shadow-base: #4a3428;
+    --bs-taxonomy-card-hover-shadow-fallback: var(--tc-shadow-hover);
+    --bs-taxonomy-card-duration: var(--m-dur-press, 0.14s);
+    --bs-taxonomy-card-ease: var(--m-ease, cubic-bezier(0.2, 0.9, 0.25, 1));
+    // The whole app's ring is terracotta at 2px/2px (design-reference.md §4). The
+    // library's global ring resolves through `--tc-app-accent`, which under sunshine is
+    // the amber CTA colour — the weakest 2px ring in the system against cream, and one
+    // that spends an amber slot on a card in a list. Pinned in the sunshine partial, the
+    // way tc-add-slot already does.
+    --bs-taxonomy-card-focus-ring: var(--tc-app-accent);
+
+    // A FLEX COLUMN, so the four slotted regions can be ordered by CSS off their
+    // `slot` attribute and nothing is ever re-parented (the react-dom hazard — see
+    // src/MobileShell.ts). Also in foundation/_reset.scss: a custom element is inline.
+    display: flex;
+    flex-direction: column;
+    // The activation overlay is absolutely positioned against this box…
+    position: relative;
+    // …and `isolate` makes the host a stacking context, so the overlay's z-index and
+    // the raised slotted controls' z-index stay LOCAL to this card and cannot paint
+    // over a sibling card or under a page's sticky chrome.
+    isolation: isolate;
+    padding: var(--bs-taxonomy-card-padding);
+    background-color: var(--bs-taxonomy-card-bg);
+    border: var(--bs-taxonomy-card-border-width) solid var(--bs-taxonomy-card-border-color);
+    border-top: var(--bs-taxonomy-card-bar) solid var(--bs-taxonomy-card-accent);
+    border-radius: var(--bs-taxonomy-card-radius);
+    box-shadow: var(--bs-taxonomy-card-shadow);
+    transition:
+        transform var(--bs-taxonomy-card-duration) var(--bs-taxonomy-card-ease),
+        box-shadow var(--bs-taxonomy-card-duration) var(--bs-taxonomy-card-ease),
+        border-color var(--bs-taxonomy-card-duration) var(--bs-taxonomy-card-ease),
+        filter var(--bs-taxonomy-card-duration) var(--bs-taxonomy-card-ease);
+}
+
+// THE TINT, AND WHY IT IS A FEATURE QUERY RATHER THAN A var() FALLBACK.
+//   A custom property's value is not validated at parse time, so a `color-mix()` a
+//   browser cannot compute is still STORED — the var() fallback never fires, and the
+//   declaration fails at computed-value time instead, which for `background-color`
+//   means transparent. So the flat colour is declared unconditionally above and the mix
+//   is added here, where the engine has told us it can do it.
+//
+//   Baseline: Chrome 111, Safari 16.2, Firefox 113. The app already ships color-mix in
+//   _recipe-card.scss, but a phone audience has a longer browser tail than a desktop
+//   one, and a card with a transparent background on the same cream canvas is
+//   invisible — this is the one failure worth a query.
+@supports (background: color-mix(in srgb, red 3%, white)) {
+    tc-taxonomy-card {
+        background-color: color-mix(
+            in srgb,
+            var(--bs-taxonomy-card-accent) var(--bs-taxonomy-card-tint),
+            var(--bs-taxonomy-card-bg)
+        );
+        --bs-taxonomy-card-metric-border-color: color-mix(
+            in srgb,
+            var(--bs-taxonomy-card-accent) var(--bs-taxonomy-card-metric-tint),
+            var(--bs-taxonomy-card-border-color)
+        );
+    }
+}
+
+// ── The element's own block ───────────────────────────────────────────────────
+
+// A flex item, therefore a block formatting context, therefore the float's container.
+// `0 1 auto` and not `1 1 0`: this is a COLUMN, so the basis is the HEIGHT — a zero
+// basis would collapse the text block, and growing it would stretch the card.
+.tc-taxonomy-card-main {
+    flex: 0 1 auto;
+    min-width: 0;
+
+    &[hidden] {
+        display: none;
+    }
+}
+
+// ── Metric box ────────────────────────────────────────────────────────────────
+
+// FIRST in the DOM, because a float is placed against the line box it starts on.
+// `margin: 0 0 6px 10px` — 10px to the title beside it, 6px to whatever the text stack
+// runs into underneath. The design's own values, and they are tuned: on `1c` the
+// description's top lands 0.4px BELOW this box's margin edge, which is what makes its
+// first line run full width instead of being notched.
+.tc-taxonomy-card-metric {
+    float: right;
+    margin: 0 0 var(--bs-taxonomy-card-metric-gap-block) var(--bs-taxonomy-card-metric-gap);
+    padding: var(--bs-taxonomy-card-metric-padding);
+    background-color: var(--bs-taxonomy-card-metric-bg);
+    border: 1px solid var(--bs-taxonomy-card-metric-border-color);
+    border-radius: var(--bs-taxonomy-card-metric-radius);
+    text-align: center;
+
+    &[hidden] {
+        display: none;
+    }
+}
+
+.tc-taxonomy-card-metric-value {
+    display: block;
+    font: var(--bs-taxonomy-card-metric-value-font);
+    // BOTH after the shorthand, which resets them: `--m-font-kcal-num` is a `font`
+    // shorthand and it wipes font-variant-numeric AND line-height. A kcal figure moves
+    // with the serving scaler, so proportional digits would resize the box.
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    color: var(--bs-taxonomy-card-accent);
+
+    &[hidden] {
+        display: none;
+    }
+}
+
+.tc-taxonomy-card-metric-unit {
+    display: block;
+    font: var(--bs-taxonomy-card-metric-unit-font);
+    letter-spacing: var(--bs-taxonomy-card-metric-unit-track);
+    // Uppercased by CSS, not by the string: the app passes „ккал", and that lowercase
+    // string is what a screen reader reads when `metric-spoken` is absent.
+    text-transform: uppercase;
+    color: var(--bs-taxonomy-card-metric-unit-color);
+
+    &[hidden] {
+        display: none;
+    }
+}
+
+// ── Text runs ─────────────────────────────────────────────────────────────────
+
+.tc-taxonomy-card-eyebrow {
+    font: var(--bs-taxonomy-card-eyebrow-font);
+    letter-spacing: var(--bs-taxonomy-card-eyebrow-track);
+    text-transform: uppercase;
+    color: var(--bs-taxonomy-card-accent);
+}
+
+.tc-taxonomy-card-heading {
+    // The heading can be an <hN> (`heading-level`), which the reset gives a margin.
+    margin: 0;
+    font: var(--bs-taxonomy-card-heading-font);
+    color: var(--bs-taxonomy-card-heading-color);
+}
+
+.tc-taxonomy-card-subheading {
+    font: var(--bs-taxonomy-card-subheading-font);
+    color: var(--bs-taxonomy-card-subheading-color);
+}
+
+.tc-taxonomy-card-desc {
+    margin: 0;
+    font: var(--bs-taxonomy-card-desc-font);
+    color: var(--bs-taxonomy-card-desc-color);
+    // The clamp. `-webkit-box` is still the only interoperable way to get an
+    // ellipsised N-line block; it is prefixed, and it is not going away.
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: var(--bs-taxonomy-card-clamp);
+    overflow: hidden;
+}
+
+.tc-taxonomy-card-eyebrow[hidden],
+.tc-taxonomy-card-heading[hidden],
+.tc-taxonomy-card-subheading[hidden],
+.tc-taxonomy-card-desc[hidden] {
+    display: none;
+}
+
+// The `clamp` attribute, as a ladder rather than as a JS write: the value is pure CSS
+// state, so the element does not re-render when it changes and a stylesheet can still
+// override --bs-taxonomy-card-clamp per surface. Eight rungs covers every real case —
+// past that the clamp is not doing anything a `max-height` would not.
+@for $lines from 1 through 8 {
+    tc-taxonomy-card[clamp='#{$lines}'] {
+        --bs-taxonomy-card-clamp: #{$lines};
+    }
+}
+
+// `clamp="0"` — the whole description, however long. For a card that is the page's only
+// summary of the thing rather than one row in a list.
+tc-taxonomy-card[clamp='0'] .tc-taxonomy-card-desc {
+    display: block;
+    -webkit-line-clamp: none;
+}
+
+// ── Vertical rhythm ───────────────────────────────────────────────────────────
+//
+// Each gap is declared on the LOWER run and guarded by `:not([hidden])` on the upper
+// one, using the GENERAL sibling combinator: `[hidden]` runs stay in the DOM, so `+`
+// would be defeated by a collapsed run between the two. See the header comment.
+
+.tc-taxonomy-card-eyebrow:not([hidden]) ~ .tc-taxonomy-card-heading {
+    margin-top: var(--bs-taxonomy-card-eyebrow-gap);
+}
+
+.tc-taxonomy-card-heading:not([hidden]) ~ .tc-taxonomy-card-subheading {
+    margin-top: var(--bs-taxonomy-card-subheading-gap);
+}
+
+:is(.tc-taxonomy-card-eyebrow, .tc-taxonomy-card-heading, .tc-taxonomy-card-subheading):not(
+        [hidden]
+    )
+    ~ .tc-taxonomy-card-desc {
+    margin-top: var(--bs-taxonomy-card-desc-gap);
+}
+
+// ── Slotted regions ───────────────────────────────────────────────────────────
+//
+// Ordered by CSS off the `slot` attribute; the children themselves are never moved.
+// No `display` is written on `media` or `actions`: those are the consumer's elements and
+// are routinely a single one (an <img>, a tc-button), where forcing `flex` would change
+// how that component lays its own insides out. `chips` and `social` DO get a row,
+// because "a wrapping row of chips" and "counters with a trailing action" are what those
+// regions ARE, not what a consumer happens to put in them.
+
+tc-taxonomy-card > [slot='media'] {
+    order: -1;
+    margin-bottom: var(--bs-taxonomy-card-media-gap);
+    // Inset, not bled to the card's edges: the padding is one asymmetric shorthand
+    // (`14px 15px 11px`) and cannot be negated per side without splitting it into three
+    // knobs. A full-bleed strip is a later variant, not a silent half-measure.
+    border-radius: var(--bs-taxonomy-card-metric-radius);
+    overflow: hidden;
+}
+
+tc-taxonomy-card > [slot='chips'] {
+    order: 1;
+    margin-top: var(--bs-taxonomy-card-chips-offset);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--bs-taxonomy-card-chips-gap);
+}
+
+// The trailing action („Додади") is pushed right with the `.ms-auto` utility rather than
+// by `:last-child { margin-left: auto }` here — a social strip whose last child is a
+// COUNTER (a card with no action) must not have that counter shoved to the far edge.
+tc-taxonomy-card > [slot='social'] {
+    order: 2;
+    margin-top: var(--bs-taxonomy-card-footer-offset);
+    padding-top: var(--bs-taxonomy-card-footer-pad);
+    border-top: 1px solid var(--bs-taxonomy-card-footer-border-color);
+    display: flex;
+    align-items: center;
+    gap: var(--bs-taxonomy-card-footer-gap);
+}
+
+tc-taxonomy-card > [slot='actions'] {
+    order: 3;
+    margin-top: var(--bs-taxonomy-card-footer-offset);
+    padding-top: var(--bs-taxonomy-card-footer-pad);
+    border-top: 1px solid var(--bs-taxonomy-card-footer-border-color);
+}
+
+// One footer rule, not two. A card with both a social strip and an action row would
+// otherwise draw a hairline above each, which reads as a table; the action row is a
+// continuation of the strip above it.
+tc-taxonomy-card > [slot='social'] ~ [slot='actions'] {
+    margin-top: var(--bs-taxonomy-card-chips-gap);
+    padding-top: 0;
+    border-top: 0 none;
+}
+
+// ── Activation ────────────────────────────────────────────────────────────────
+
+// The title IS the link (or the button), and it inherits the heading's type completely
+// — a card title dressed as a link would fight the serif, and the whole card is the
+// affordance anyway.
+.tc-taxonomy-card-link {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    text-align: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    // iOS paints a translucent block over the whole stretched target on tap, which on a
+    // 362x142 card is a full-card grey flash. The press feedback below replaces it.
+    //
+    // NOT `.tc-no-tap-highlight`: that utility also sets `-webkit-touch-callout: none`,
+    // which kills the long-press context menu — and "long-press a card that is a real
+    // link and get the OS menu" is one of the reasons `href` exists here.
+    -webkit-tap-highlight-color: transparent;
+
+    // THE STRETCHED HIT TARGET. Covers the host's PADDING box (which is what `inset: 0`
+    // resolves to against a positioned ancestor), so every pixel of the card except its
+    // border activates. `z-index: 1` puts it over the card's own content and under the
+    // slotted controls raised to 2 below — which is the whole answer to "a tappable card
+    // containing a button" without nesting one interactive element inside another.
+    &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        // A transparent background, not none: some engines skip hit-testing a
+        // pseudo-element that paints nothing at all.
+        background-color: transparent;
+        border-radius: inherit;
+    }
+
+    // The ring goes round the TITLE, not round the card: an outline on the stretched
+    // overlay would be drawn on the card's padding edge, i.e. 15px inside its border,
+    // which reads as a box inside a box. The title is also the right thing to point at
+    // — it is what is being activated.
+    &:focus-visible {
+        outline: 2px solid var(--bs-taxonomy-card-focus-ring);
+        outline-offset: 2px;
+        border-radius: 2px;
+    }
+}
+
+// EVERY FOCUSABLE THING IN A SLOTTED REGION IS RAISED ABOVE THE OVERLAY.
+//
+// Not the region itself: raising the whole row would make its empty space — most of a
+// 330px-wide social strip — dead to a thumb aiming at the card. Raising only the
+// controls means a tap on „Додади" hits the button while a tap on the gap beside it
+// still opens the card. Verified on a touch emulator at 390px.
+//
+// `position: relative` is required for z-index to apply and is otherwise inert; a
+// consumer who needs `absolute` on one of these sets it from their own stylesheet and
+// wins on specificity.
+tc-taxonomy-card > :is(a[href], button, input, select, textarea, summary, [tabindex])[slot],
+tc-taxonomy-card > [slot] :is(a[href], button, input, select, textarea, summary, [tabindex]) {
+    position: relative;
+    z-index: 2;
+}
+
+// ── Feedback ──────────────────────────────────────────────────────────────────
+//
+// A `static` card has no overlay, no press and no hover — every rule here is keyed on
+// `.tc-taxonomy-card-link`, which a static card does not render. There is nothing to
+// switch off; recorded because the absence of a `[static]` selector looks like an
+// omission.
+
+@include coarse-pointer {
+    // `:has()` and not `:active` on the host: the host is `:active` while ANY descendant
+    // is pressed, so „Додади" would squeeze the whole card. This asks the precise
+    // question — is the ACTIVATION REGION being pressed.
+    tc-taxonomy-card:has(.tc-taxonomy-card-link:active) {
+        transform: scale(var(--bs-taxonomy-card-press-scale));
+        filter: brightness(var(--bs-taxonomy-card-press-brightness));
+    }
+}
+
+// Hover is a POINTER capability question, not a width question — a mouse on a 390px
+// window still wants the lift, and a finger on a 1024px tablet still does not. So this
+// is NOT inside the 768px block below, even though the lift is the desktop card's
+// signature. `hover: hover` alongside `pointer: fine` because a stylus reports fine and
+// cannot hover.
+@include fine-pointer {
+    tc-taxonomy-card:has(.tc-taxonomy-card-link):hover {
+        transform: translateY(var(--bs-taxonomy-card-hover-lift));
+        box-shadow: var(--bs-taxonomy-card-hover-shadow-fallback);
+    }
+
+    // The lift's shadow is the card's OWN hue, which is what makes a list of cards read
+    // as colour-coded rather than as decorated. Same feature query as the surface tint,
+    // and the same reasoning: a color-mix a browser cannot compute would fail at
+    // computed-value time and drop the shadow, so the neutral one above stands in.
+    @supports (box-shadow: 0 0 0 color-mix(in srgb, red 55%, white)) {
+        tc-taxonomy-card:has(.tc-taxonomy-card-link):hover {
+            border-color: color-mix(
+                in srgb,
+                var(--bs-taxonomy-card-accent) 30%,
+                var(--bs-taxonomy-card-border-color)
+            );
+            box-shadow:
+                0 12px 26px -16px
+                    color-mix(
+                        in srgb,
+                        var(--bs-taxonomy-card-accent) 55%,
+                        var(--bs-taxonomy-card-hover-shadow-base)
+                    ),
+                var(--m-bevel-top, inset 0 1px 0 rgba(255, 255, 255, 0.6));
+        }
+    }
+}
+
+// The reset flattens every transition under `reduce`, so the states above would still
+// SNAP into place. A 3px jump on hover is exactly the movement the preference is asking
+// us not to make, so the transforms go entirely and the shadow and border carry the
+// state on their own.
+@include reduced-motion {
+    tc-taxonomy-card:has(.tc-taxonomy-card-link:active),
+    tc-taxonomy-card:has(.tc-taxonomy-card-link):hover {
+        transform: none;
+    }
+}
+
+// ── Widening ──────────────────────────────────────────────────────────────────
+//
+// The desktop card, reached by widening the phone one — the ONLY size query in this
+// file. It restates the values the app's own `.component-recipe-card` shipped at
+// (web/src/styles/components/_recipe-card.scss), so the existing /recipes list is
+// unchanged when it moves onto this element: 1.35rem serif title, 1.15rem/1.25rem/1rem
+// padding, 0.84rem/1.5 body, a 3.6rem-wide kcal box.
+@include up(768px) {
+    tc-taxonomy-card {
+        --bs-taxonomy-card-padding: 1.15rem 1.25rem 1rem;
+        --bs-taxonomy-card-heading-font: 600 1.35rem/1.12 var(--m-display, Georgia, serif);
+        --bs-taxonomy-card-desc-font: 400 0.84rem/1.5 var(--m-body, var(--tc-font-sans));
+        --bs-taxonomy-card-subheading-font: 400 0.74rem var(--m-body, var(--tc-font-sans));
+        --bs-taxonomy-card-eyebrow-font: 700 0.75rem var(--m-body, var(--tc-font-sans));
+        --bs-taxonomy-card-metric-value-font: 700 1.1rem var(--m-body, var(--tc-font-sans));
+        --bs-taxonomy-card-metric-unit-font: 600 0.75rem var(--m-body, var(--tc-font-sans));
+        --bs-taxonomy-card-metric-unit-track: 0.06em;
+        --bs-taxonomy-card-metric-padding: 0.4rem 0.55rem;
+        --bs-taxonomy-card-chips-gap: 0.4rem;
+        --bs-taxonomy-card-chips-offset: 0.8rem;
+        --bs-taxonomy-card-footer-offset: 0.8rem;
+        --bs-taxonomy-card-footer-pad: 0.75rem;
+    }
+
+    // 3.6rem, so „64" and „486" line up down a list once the column is wide enough for
+    // the extra glyph to be free.
+    .tc-taxonomy-card-metric {
+        min-width: 3.6rem;
+    }
+}

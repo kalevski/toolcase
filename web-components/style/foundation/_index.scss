@@ -1,7 +1,14 @@
 // Foundation layer — tokens, base element styles, grid, utilities.
 // Loads before the component partials so they sit later in the cascade.
 
+// Re-exports the compile-time layer: the Sass maps/palette AND the media mixins
+// (`up`, `media-up`, `coarse-pointer`, `fine-pointer`, `motion-ok`,
+// `reduced-motion`). There is no `down()` — see the note in _tokens.scss.
 @forward 'tokens';
 @use 'reset';
 @use 'grid';
 @use 'utilities';
+
+// Mobile scale (--m-*) — loaded last in the foundation so a theme's own mobile
+// partial, which lands later still, can re-point any of it.
+@use 'mobile-tokens';

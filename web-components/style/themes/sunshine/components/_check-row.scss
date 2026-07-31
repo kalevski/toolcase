@@ -1,0 +1,44 @@
+// Sunshine › tc-check-row — the four warm neutrals the tick-off row is drawn in that
+// have no `--tc-*` mapping of their own.
+//
+// Screen `1h` („Листа") is the reference. The mechanism is the one tc-app-bar and
+// tc-input already use: the generic partial names the nearest `--tc-*` rung so an
+// un-themed page is sane, and this file pins the design's actual value.
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    tc-check-row {
+        // #2c2620 — the app's warm near-black for row names (design-reference.md §2.3,
+        // ~1 in 3 of every text colour in the app). `--tc-text` is `--sun-ink-1`
+        // (#20301a), a shade greener and a shade darker.
+        --bs-check-row-label-color: #2c2620;
+        // #998f80 — the muted label ink, ~60 uses. `--tc-text-faint` is ink-4
+        // (#9aa189), which is cooler and lighter.
+        --bs-check-row-hint-color: #998f80;
+        // #a4472f terracotta — the app's signature hue (~100 uses) and the colour every
+        // amount in `1h` is set in. No `--sun-*` rung exists for it; it is a literal
+        // here for the same reason `--m-notice-accent` is one.
+        --bs-check-row-trailing-color: #a4472f;
+        // The focus ring for the whole app is terracotta at 2px/2px offset
+        // (design-reference.md §4), and on an amber-ticked row the theme's own amber
+        // ring would be invisible against the box it surrounds.
+        --bs-check-row-focus-ring: #a4472f;
+
+        // 1h's square box outlines in #d8cfbd, one step deeper than the #e5ddd0 that
+        // every ROUND toggle uses (1b, 1j) and that `--m-toggle-idle` carries. Not a
+        // measurement slip: the square is 24px against a 30px circle, so its 2px border
+        // encloses less area and needs more contrast to read as „not yet" rather than as
+        // a shadow.
+        //
+        // DECLARED ON THE HOST AND UNDONE FOR THE CIRCLE, not selected with
+        // `[shape='square']`: square is the DEFAULT shape, so most consumers never write
+        // the attribute and an attribute selector would silently miss every one of them.
+        // (It did — caught by reading the value back off a live row rather than off the
+        // SCSS.)
+        --bs-check-row-box-border-color: #d8cfbd;
+    }
+
+    tc-check-row[shape='circle'] {
+        --bs-check-row-box-border-color: var(--m-toggle-idle); // #e5ddd0
+    }
+}

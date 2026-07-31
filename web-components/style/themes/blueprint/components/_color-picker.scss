@@ -125,5 +125,11 @@ tc-theme[name='blueprint'],
         &::placeholder {
             color: var(--bp-text-faint);
         }
+
+        // Restates the component's 16px coarse floor, which this theme's own
+        // font-size out-specifies. See style/foundation/README.md.
+        @media (pointer: coarse) {
+            font-size: max(16px, 0.75rem);
+        }
     }
 }

@@ -14,6 +14,8 @@
 @use './eyebrow';
 @use './brand';
 @use './navbar';
+@use './app-bar';
+@use './step-pager';
 @use './nav';
 @use './artboard-backdrop';
 @use './progress';
@@ -27,3 +29,10 @@
 @use './alert';
 @use './heading';
 @use './title';
+@use './check-row';
+@use './list-section';
+@use './notice';
+@use './stat-tile';
+@use './day-strip';
+@use './add-slot';
+@use './taxonomy-card';

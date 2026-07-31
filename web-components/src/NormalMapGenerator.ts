@@ -1,3 +1,5 @@
+import { cssLength } from './internal/cssLength'
+
 const TAG_NAME = 'tc-normal-map-generator'
 
 // ── Public type surface (mirrors @toolcase/react-components NormalMapGenerator) ──
@@ -384,6 +386,10 @@ export class NormalMapGenerator extends HTMLElement {
         return [
             'source',
             'max-dim',
+            // Canvas box
+            'canvas-width',
+            'canvas-height',
+            'fit-parent',
             // Height → normal pipeline
             'strength',
             'emboss-height',
@@ -418,6 +424,7 @@ export class NormalMapGenerator extends HTMLElement {
         if (!this._initialised) {
             this.render()
             this._initialised = true
+            this._applyCanvasSize()
             this._panX = numAttr(this, 'pan-x', 0)
             this._panY = numAttr(this, 'pan-y', 0)
             this._syncLightFromAttributes()
@@ -449,6 +456,12 @@ export class NormalMapGenerator extends HTMLElement {
             case 'max-dim':
                 // Re-rasterise the loaded image at the new working resolution.
                 if (this._img) this._ingest(this._img)
+                break
+            case 'canvas-width':
+            case 'canvas-height':
+            case 'fit-parent':
+                this._applyCanvasSize()
+                this._renderPreview()
                 break
             case 'strength':
             case 'emboss-height':
@@ -543,6 +556,52 @@ export class NormalMapGenerator extends HTMLElement {
     }
     set maxDim(v: number) {
         this.setAttribute('max-dim', String(v))
+    }
+
+    // ── Canvas box attributes ───────────────────────────────────────────────────
+
+    /** CSS width of the preview canvas (bare numbers are px); `''` = stylesheet default. */
+    get canvasWidth(): string {
+        return this.getAttribute('canvas-width') ?? ''
+    }
+    set canvasWidth(v: string) {
+        if (v) this.setAttribute('canvas-width', v)
+        else this.removeAttribute('canvas-width')
+    }
+
+    /**
+     * CSS height of the preview canvas (bare numbers are px); `''` = stylesheet
+     * default. Under `fit-parent` it acts as the minimum height instead.
+     */
+    get canvasHeight(): string {
+        return this.getAttribute('canvas-height') ?? ''
+    }
+    set canvasHeight(v: string) {
+        if (v) this.setAttribute('canvas-height', v)
+        else this.removeAttribute('canvas-height')
+    }
+
+    /**
+     * Stretch the element and its canvas to fill the parent box, so the preview
+     * auto-scales with the layout instead of using a fixed canvas height. The
+     * parent needs a definite height; `canvas-height` is the floor when it hasn't.
+     */
+    get fitParent(): boolean {
+        return this.hasAttribute('fit-parent')
+    }
+    set fitParent(v: boolean) {
+        if (v) this.setAttribute('fit-parent', '')
+        else this.removeAttribute('fit-parent')
+    }
+
+    /** Mirrors the canvas-box attributes onto the --bs-* custom properties. */
+    private _applyCanvasSize(): void {
+        const w = cssLength(this.getAttribute('canvas-width'))
+        if (w) this.style.setProperty('--bs-normal-map-generator-canvas-width', w)
+        else this.style.removeProperty('--bs-normal-map-generator-canvas-width')
+        const h = cssLength(this.getAttribute('canvas-height'))
+        if (h) this.style.setProperty('--bs-normal-map-generator-canvas-height', h)
+        else this.style.removeProperty('--bs-normal-map-generator-canvas-height')
     }
 
     // ── Painting attributes ─────────────────────────────────────────────────────

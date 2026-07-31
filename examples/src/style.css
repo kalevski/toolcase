@@ -1,5 +1,9 @@
 /* @toolcase examples — site shell, ported from @toolcase website */
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Cinzel:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Orbitron:wght@500;600;700;800;900&family=Ubuntu+Mono:wght@400;700&display=swap');
+/* Playfair Display + Source Sans 3 are the sunshine MOBILE scale's pairing
+   (--m-display / --m-body in style/themes/sunshine/_mobile.scss). Without them the
+   phone demos fall back to Georgia / system-ui, whose line boxes are 1-2px off — which
+   is enough to make a screenshot comparison against the 390x844 design canvas wrong. */
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Cinzel:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Orbitron:wght@500;600;700;800;900&family=Playfair+Display:wght@600;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=Ubuntu+Mono:wght@400;700&display=swap');
 
 :root {
     --bg: oklch(0.985 0.003 95);

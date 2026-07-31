@@ -1,0 +1,198 @@
+// tc-action-bar — the sticky bottom action bar. Mobile-first by construction: there
+// is no media query in this file. It is chrome for one column and it is the same
+// shape at 320px as at 430px.
+//
+//     tc-action-bar                    display:flex; gap:8px
+//       ├─ > *                         flex:1 1 0            a FLUID track
+//       └─ > .tc-action-bar-compact    flex:none; width:52px an ICON track
+//
+// FIVE ARRANGEMENTS, ONE CONTAINER. The design draws four rows and one column, and
+// all five fall out of the two track kinds above plus `stack`:
+//
+//   1d  fluid „Готви" + compact + compact           row
+//   1h  compact + fluid „Заврши и стави…"           row
+//   1j  fluid | fluid, equal                        row
+//   1k  fluid | fluid, equal                        row
+//   1l  fluid over fluid, borderless secondary      column (`stack`)
+//
+// `flex: 1 1 0` and NOT `flex-grow: 1`. A flex item's base size with
+// `flex-basis: auto` is its content, so two buttons would end up proportional to
+// their Cyrillic label lengths — „Преглед на неделата" wider than „Предложи диета"
+// on 1j, where the design draws them equal. A zero basis is also what the design's
+// own inline `flex:1` resolves to (`1 1 0%`).
+//
+// WHAT THE BAR DOES NOT DO: height, fill, radius, type. Those are the child
+// control's, and the design's own heights differ per screen (46px on 1d/1h/1k,
+// 44px on 1j, 48px on 1l) — a bar that imposed one would be wrong on two screens
+// out of five. The bar owns the four things a child cannot see: the surface, the
+// safe-area padding, the elevation and the software-keyboard inset.
+
+@use '../foundation/tokens' as *;
+
+tc-action-bar {
+    // ── Surface ──────────────────────────────────────────────────────────────
+    --bs-action-bar-bg: var(--tc-surface);
+    --bs-action-bar-border: 1px solid var(--tc-border);
+    --bs-action-bar-shadow: var(--m-shadow-actionbar, 0 -8px 22px -14px rgba(0, 0, 0, 0.3));
+
+    // ── Geometry ─────────────────────────────────────────────────────────────
+    // The token layer's --m-pad-actionbar is `10px 14px` (1d/1h/1j/1k, 4 uses).
+    // Decomposed here rather than consumed whole, because the bottom side has to
+    // become a max() against two insets — and a knob a consumer can only set as a
+    // shorthand is a knob they cannot change one side of.
+    --bs-action-bar-padding-top: 10px;
+    --bs-action-bar-padding-inline: var(--m-pad-page, 14px);
+    --bs-action-bar-gap: var(--m-gap-inline, 8px);
+    // 52px, the width of every icon button in the design's action bars (1d, 1h).
+    // 52x46 clears the 44px touch floor on both axes.
+    --bs-action-bar-compact-width: 52px;
+    // 1l stacks „Контактирајте нѐ" over „Не сега" with 14px between them — the
+    // sheet's own column gap, since that pair is drawn inside a sheet rather than in
+    // a bar. Kept as the design's number rather than collapsed to 0: at 0 the
+    // borderless escape reads as attached to the button above it.
+    --bs-action-bar-stack-gap: 14px;
+
+    // ── Hardware and keyboard ────────────────────────────────────────────────
+    //
+    // The bar is the last thing above the bottom edge, so its bottom padding is a
+    // max() of three claims on that space: its own 10px, the home-indicator strip,
+    // and the software keyboard. Same shape as --bs-tab-dock-pad-bottom and
+    // --bs-bottom-sheet-pad-bottom.
+    //
+    // --tc-keyboard-inset is written by tc-mobile-shell from window.visualViewport
+    // and inherits down. It is in this sum for the STANDALONE case only — inside a
+    // shell both terms are zeroed (see the rule below) because the shell already
+    // pays them out of its own padding box, and the bar is in the shell's flow.
+    --bs-action-bar-safe-bottom: var(--tc-safe-bottom, 0px);
+    --bs-action-bar-keyboard-inset: var(--tc-keyboard-inset, 0px);
+    --bs-action-bar-pad-bottom: max(
+        var(--bs-action-bar-padding-top),
+        var(--bs-action-bar-safe-bottom),
+        var(--bs-action-bar-keyboard-inset)
+    );
+
+    display: flex; // also in foundation/_reset.scss — a custom element is inline
+    flex: none; // the design's action bar is `flex:none` in the phone frame's column
+    gap: var(--bs-action-bar-gap);
+    padding: var(--bs-action-bar-padding-top) var(--bs-action-bar-padding-inline)
+        var(--bs-action-bar-pad-bottom);
+    border-top: var(--bs-action-bar-border);
+    border-radius: 0;
+    background-color: var(--bs-action-bar-bg);
+}
+
+// INSIDE A tc-mobile-shell BOTH INSETS ARE ALREADY PAID.
+//
+// The shell takes `max(--tc-safe-bottom, --tc-keyboard-inset)` out of its OWN
+// padding box rather than pushing it onto the chrome that sits against the edge
+// (src/MobileShell.ts, deviation 2), and this bar sits in that flow as
+// `[slot="action"]`. Paying either again would double it — 68px of bar on a notched
+// phone against the design's 66px, and the whole keyboard height twice over on a
+// focused form. Only the flat 10px is the bar's.
+//
+// `:where()` drops the ancestor to zero specificity, so the whole selector is
+// 0-0-1 — the same as the block above, winning on source order alone. An app rule
+// `tc-action-bar { --bs-action-bar-safe-bottom: … }` loaded after style.css
+// therefore still wins, which a plain `tc-mobile-shell tc-action-bar` (0-0-2) would
+// have silently beaten.
+//
+// A bar in the shell's OVERLAY layer is the one case this gets wrong: that layer
+// spans the padding box, so a bar in there does need the insets. Nothing in the
+// design puts one there (an overlay's action row is a tc-bottom-sheet footer, which
+// pays its own), so this is documented rather than special-cased.
+:where(tc-mobile-shell) tc-action-bar {
+    --bs-action-bar-safe-bottom: 0px;
+    --bs-action-bar-keyboard-inset: 0px;
+}
+
+// ── Elevation ─────────────────────────────────────────────────────────────────
+
+// NEITHER ATTRIBUTE IS THE COMMON CASE. With no `elevated` and no `flat` this
+// element declares no `box-shadow` at all, which lets tc-mobile-shell's own rule
+// through — `:where(tc-mobile-shell:not(:has(> [slot='dock']))) > [slot='action']`,
+// i.e. a shadow when the bar is the bottom-most chrome (1d) and none when a dock
+// sits below it (1h, 1j). That IS the design, so most screens set neither.
+//
+// The design is not fully consistent about it — 1k is bottom-most and draws no
+// shadow — which is what `flat` is for.
+tc-action-bar[elevated] {
+    box-shadow: var(--bs-action-bar-shadow);
+}
+
+// After [elevated] on purpose: both are 0-1-1, so a bar carrying both (an
+// `elevate-on-scroll` bar on a screen that has decided it wants none) resolves to
+// flat on source order.
+tc-action-bar[flat] {
+    box-shadow: none;
+}
+
+// ── Tracks ────────────────────────────────────────────────────────────────────
+
+// `min-width: 0` lets a track shrink below its content so a long label ellipsises
+// instead of pushing the row wider than the bar.
+tc-action-bar > * {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+// The 52px icon track. A CLASS, not an attribute: it is set by the CONSUMER on
+// their own child, and a class on your own element is something you control — the
+// react-dom className-clobbering hazard only applies to classes an ELEMENT writes
+// onto a node it does not own.
+tc-action-bar > .tc-action-bar-compact {
+    flex: none;
+    width: var(--bs-action-bar-compact-width);
+}
+
+// FILL THE TRACK, IN BOTH AXES.
+//
+// Every control in this library is a WRAPPER — `tc-button` renders an inner
+// `<button class="btn">` — so sizing the flex item leaves the actual button at
+// content size inside a track the bar just sized. Both declarations exist to make
+// the bar's own layout mean something:
+//   * `width` — otherwise `flex: 1 1 0` widens an empty box and leaves the button
+//     content-width and left-aligned in it.
+//   * `height` — the bar's `align-items: stretch` (the flex default) already puts
+//     every item on ONE height, which is what all four of the design's rows draw
+//     (46/46/46 on 1d, 44/44 on 1j). Without this the item stretches and the button
+//     in it does not, so that default is invisible. Against a track of `height:
+//     auto` a percentage resolves to `auto`, so it costs nothing when nothing set a
+//     height.
+//
+// This is the arrangement reaching one level down, not styling: which height, fill,
+// radius and type are the control's, and go on the child (`tc-button`'s own `block`
+// attribute and size scale, task 13). The bar only says "fill your track".
+//
+// `:is(button, a, .btn)` — the three shapes a control renders as — rather than
+// `> *`, which would also stretch a `.tc-field-message` gutter or a label span.
+// `:is()` takes its most specific argument, so the selector is 0-1-1 and beats
+// `.btn`; verified off a live element rather than by reading this file.
+tc-action-bar > * > :is(button, a, .btn) {
+    width: 100%;
+    height: 100%;
+}
+
+// ── Stack (1l) ────────────────────────────────────────────────────────────────
+
+// A primary action over its escape hatch. `flex: none` on the children because in a
+// column `flex: 1 1 0` would make them share the bar's HEIGHT instead of keeping
+// their own; `align-items: stretch` (the default) is what makes both full width.
+//
+// The secondary action is borderless in the design. That is the CHILD'S variant
+// (`tc-button variant="ghost"`), not something this bar imposes — see the note at
+// the top of this file about the bar owning no button styling.
+tc-action-bar[stack] {
+    flex-direction: column;
+    gap: var(--bs-action-bar-stack-gap);
+}
+
+tc-action-bar[stack] > * {
+    flex: none;
+}
+
+// A compact track has no meaning in a column — its 52px width would make one button
+// narrower than the other for no reason the design ever draws. Reset rather than
+// silently honoured.
+tc-action-bar[stack] > .tc-action-bar-compact {
+    width: auto;
+}

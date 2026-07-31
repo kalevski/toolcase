@@ -1,0 +1,227 @@
+// tc-stat-tile — one number over its label (screens `1k`, `1i`, and via tc-macro-grid
+// `1d`). Mobile-first by construction: there is no media query in this file at all.
+//
+//     tc-stat-tile                      display:flex — the host IS the tile box
+//       ├─ div.tc-stat-tile-main        flex:1 1 0 — the text stack
+//       │    ├─ span.tc-stat-tile-figure  baseline row: value + optional unit
+//       │    │    ├─ .tc-stat-tile-value  the number, tabular
+//       │    │    └─ .tc-stat-tile-unit   „ккал / ден", optional
+//       │    ├─ span.tc-stat-tile-label   the muted caption
+//       │    └─ span.tc-stat-tile-hint    optional third line
+//       └─ [slot="trailing"]            optional consumer icon / delta chip
+//
+// THE `font` SHORTHAND RESETS font-variant-numeric AND line-height.
+//   `--m-font-stat` and friends are `font` shorthands (they match the design's own
+//   inline style), so both of those properties are declared AFTER the shorthand in
+//   every rule below. Reversing the order silently wipes them, and the failure is
+//   invisible until a number changes: `1d`'s four columns are driven by the serving
+//   scaler and twitch on every tap without tabular figures.
+//
+// THREE VARIANTS, ONE STRUCTURE.
+//   `card` is `1k`'s bordered tile, `well` is `1i`'s tinted inner tile, `bare` is
+//   `1d`'s un-boxed grid cell. They differ in exactly three declarations — surface,
+//   border, padding — so they are attribute selectors re-pointing three knobs rather
+//   than three layouts.
+
+tc-stat-tile {
+    // ── Box (defaults = `card`, 1k) ──────────────────────────────────────────
+    // Every `--m-*` read carries a fallback: those tokens are declared by a THEME
+    // (style/themes/sunshine/_mobile.scss), so an un-themed page would otherwise
+    // substitute an empty value and drop the whole declaration.
+    --bs-stat-tile-bg: var(--tc-surface);
+    --bs-stat-tile-border-width: 1px;
+    // #e5e2dc under sunshine — the app's card border (design-reference.md §2.3, ~60
+    // uses), pinned in the sunshine partial. `--tc-border` is the nearest generic rung.
+    --bs-stat-tile-border-color: var(--tc-border);
+    --bs-stat-tile-radius: var(--m-radius-card, 10px);
+    --bs-stat-tile-padding: 11px;
+
+    // ── Figure ───────────────────────────────────────────────────────────────
+    // 700 20px. The design draws 21px on `1k` and 20px on `1d`; `--m-font-stat` is
+    // the shipped rung for both (its own comment records the 1px as measurement
+    // drift), so consuming the token keeps the two screens on ONE size. A surface
+    // that genuinely needs 21px sets --bs-stat-tile-value-font.
+    --bs-stat-tile-value-font: var(--m-font-stat, 700 1.25rem var(--tc-font-sans));
+    // 1.1 on 1d and 1k; 1 at size="lg", where a 38px figure sits on a baseline row
+    // with its unit and any extra leading opens a visible gap under it.
+    --bs-stat-tile-value-leading: 1.1;
+    --bs-stat-tile-value-color: var(--tc-text);
+    // 400 13px (1i). Only the `lg` size uses a unit run — see the getter in
+    // src/StatTile.ts.
+    --bs-stat-tile-unit-font: var(--m-font-body, 400 0.8125rem var(--tc-font-sans));
+    --bs-stat-tile-unit-color: var(--bs-stat-tile-label-color);
+    --bs-stat-tile-unit-gap: 8px;
+
+    // ── Label / hint ─────────────────────────────────────────────────────────
+    // 400 10px (1i, 1k). 1d's row is 9.5px, re-pointed by tc-macro-grid.
+    --bs-stat-tile-label-font: 400 10px var(--m-body, var(--tc-font-sans));
+    // #998f80 under sunshine — the muted label ink (§2.3, ~60 uses), pinned in the
+    // sunshine partial. `--tc-text-faint` is ink-4 (#9aa189), cooler and lighter.
+    --bs-stat-tile-label-color: var(--tc-text-faint);
+    --bs-stat-tile-label-gap: 0px;
+    // Not in the phone design — the admin overview's „+8 во последните 30 дена".
+    --bs-stat-tile-hint-font: var(--m-font-meta, 400 0.6875rem var(--tc-font-sans));
+    --bs-stat-tile-hint-color: var(--bs-stat-tile-label-color);
+    --bs-stat-tile-hint-gap: 2px;
+
+    --bs-stat-tile-gap: 8px; // host → slotted trailing content
+
+    display: flex; // also in foundation/_reset.scss — a custom element is inline
+    align-items: flex-start;
+    gap: var(--bs-stat-tile-gap);
+    padding: var(--bs-stat-tile-padding);
+    border: var(--bs-stat-tile-border-width) solid var(--bs-stat-tile-border-color);
+    border-radius: var(--bs-stat-tile-radius);
+    background-color: var(--bs-stat-tile-bg);
+}
+
+// ── Variants ──────────────────────────────────────────────────────────────────
+
+// 1i's inner tile: a tinted well, the smaller radius, and asymmetric padding.
+tc-stat-tile[variant='well'] {
+    // #f4f1ea under sunshine (§2.3, „stacked light surfaces"), pinned in the sunshine
+    // partial. No `--sun-*` rung exists for it; `--tc-surface-hover` is the nearest.
+    --bs-stat-tile-bg: var(--tc-surface-hover);
+    --bs-stat-tile-border-width: 0px;
+    --bs-stat-tile-radius: var(--m-radius-tile, 8px);
+    --bs-stat-tile-padding: 9px 10px;
+}
+
+// 1d's grid cell: no box at all. The padding goes with it — the cell's spacing is the
+// grid's gap, and padding here would make a 4-up row wider than its card.
+tc-stat-tile[variant='bare'] {
+    --bs-stat-tile-bg: transparent;
+    --bs-stat-tile-border-width: 0px;
+    --bs-stat-tile-radius: 0px;
+    --bs-stat-tile-padding: 0px;
+}
+
+// ── Sizes ─────────────────────────────────────────────────────────────────────
+
+tc-stat-tile[size='sm'] {
+    --bs-stat-tile-value-font: var(--m-font-stat-sm, 700 1rem var(--tc-font-sans));
+}
+
+tc-stat-tile[size='lg'] {
+    --bs-stat-tile-value-font: var(--m-font-stat-xl, 700 2.375rem var(--tc-font-sans));
+    --bs-stat-tile-value-leading: 1;
+    --bs-stat-tile-label-gap: 2px;
+}
+
+// ── Tones ─────────────────────────────────────────────────────────────────────
+//
+// One declaration each: the tone colours the FIGURE and nothing else. A tinted
+// surface per tone is what tc-notice is for; a tile is a number, and a coloured box
+// around a number in a row of four would read as a selection.
+
+tc-stat-tile[tone='accent'] {
+    // Terracotta #a4472f under sunshine — the app's signature hue, which has no
+    // `--sun-*` rung of its own (§2.3). Pinned in the sunshine partial; `--tc-app-accent`
+    // is the nearest generic rung.
+    --bs-stat-tile-value-color: var(--tc-app-accent);
+}
+
+// Amber #f2b705 — `1k`'s rating. A SEPARATE tone from `accent` because amber is this
+// design's CTA colour on a two-elements-per-screen budget: naming it „lead" is what
+// makes spending one of the two visible in the markup.
+tc-stat-tile[tone='lead'] {
+    --bs-stat-tile-value-color: var(--tc-app-accent);
+}
+
+tc-stat-tile[tone='success'] {
+    --bs-stat-tile-value-color: var(--tc-success);
+}
+
+tc-stat-tile[tone='warning'] {
+    --bs-stat-tile-value-color: var(--tc-warning);
+}
+
+tc-stat-tile[tone='danger'] {
+    --bs-stat-tile-value-color: var(--tc-danger);
+}
+
+tc-stat-tile[tone='info'] {
+    --bs-stat-tile-value-color: var(--tc-info);
+}
+
+// ── Text stack ────────────────────────────────────────────────────────────────
+
+.tc-stat-tile-main {
+    // `1 1 0` and NOT `flex: 1` with an auto basis: a flex item's line-breaking uses
+    // its HYPOTHETICAL main size, so an auto basis on a text block wraps the row at
+    // 320px. (tc-app-bar's toolbar doubled to 68px on exactly this.)
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+.tc-stat-tile-figure {
+    display: flex;
+    // The unit sits on the figure's BASELINE, not centred against it — a 13px word
+    // centred on a 38px numeral floats visibly above its foot.
+    align-items: baseline;
+    justify-content: center;
+    gap: var(--bs-stat-tile-unit-gap);
+    // A long „ккал / ден" beside a big figure wraps rather than widening the tile past
+    // its grid track.
+    flex-wrap: wrap;
+}
+
+.tc-stat-tile-value {
+    font: var(--bs-stat-tile-value-font);
+    // BOTH after the shorthand, which resets them — see the header comment.
+    font-variant-numeric: tabular-nums;
+    line-height: var(--bs-stat-tile-value-leading);
+    color: var(--bs-stat-tile-value-color);
+}
+
+.tc-stat-tile-unit {
+    font: var(--bs-stat-tile-unit-font);
+    color: var(--bs-stat-tile-unit-color);
+}
+
+.tc-stat-tile-label {
+    margin-top: var(--bs-stat-tile-label-gap);
+    font: var(--bs-stat-tile-label-font);
+    color: var(--bs-stat-tile-label-color);
+}
+
+.tc-stat-tile-hint {
+    margin-top: var(--bs-stat-tile-hint-gap);
+    font: var(--bs-stat-tile-hint-font);
+    // The hint is where a delta („+8 во последните 30 дена") goes, and a delta is a
+    // number that changes.
+    font-variant-numeric: tabular-nums;
+    color: var(--bs-stat-tile-hint-color);
+}
+
+// An empty unit / label / hint collapses entirely. Written explicitly because an
+// author rule that set `display` on these would beat the UA sheet's `[hidden]`.
+.tc-stat-tile-unit[hidden],
+.tc-stat-tile-label[hidden],
+.tc-stat-tile-hint[hidden] {
+    display: none;
+}
+
+// ── Alignment ─────────────────────────────────────────────────────────────────
+
+// `1i`'s tiles are left-aligned and `1d`/`1k`'s are centred, which is why `align`
+// exists rather than one being the truth. tc-macro-grid sets it per variant.
+tc-stat-tile[align='start'] .tc-stat-tile-main {
+    text-align: start;
+}
+
+tc-stat-tile[align='start'] .tc-stat-tile-figure {
+    justify-content: flex-start;
+}
+
+// ── Slotted trailing content ──────────────────────────────────────────────────
+
+tc-stat-tile > [slot='trailing'] {
+    flex: none;
+    order: 1;
+    display: flex;
+    align-items: center;
+}

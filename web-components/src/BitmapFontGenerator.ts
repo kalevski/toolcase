@@ -1,3 +1,5 @@
+import { cssLength } from './internal/cssLength'
+
 const TAG_NAME = 'tc-bitmap-font-generator'
 
 // ── Public type surface (mirrors @toolcase/react-components BitmapFontGenerator) ──
@@ -592,6 +594,10 @@ export class BitmapFontGenerator extends HTMLElement {
             'preview-line-gap',
             'preview-scale',
             'preview-align',
+            // Canvas box
+            'canvas-width',
+            'canvas-height',
+            'fit-parent',
             'disabled',
         ]
     }
@@ -600,6 +606,7 @@ export class BitmapFontGenerator extends HTMLElement {
         if (!this._initialised) {
             this.render()
             this._initialised = true
+            this._applyCanvasSize()
         }
         this._attachHandlers()
         this._drawPreview()
@@ -618,6 +625,13 @@ export class BitmapFontGenerator extends HTMLElement {
         if (!this._initialised) return
         if (name === 'disabled') {
             this._updateDisabled()
+            return
+        }
+        // Canvas-box changes only reflow the preview — the atlas output is unaffected,
+        // so they must not trigger an auto-generate pass.
+        if (name === 'canvas-width' || name === 'canvas-height' || name === 'fit-parent') {
+            this._applyCanvasSize()
+            this._drawPreview()
             return
         }
         this._invalidate()
@@ -765,6 +779,50 @@ export class BitmapFontGenerator extends HTMLElement {
     }
     set previewScale(v: number) {
         this.setAttribute('preview-scale', String(v))
+    }
+
+    /** CSS width of the preview canvas (bare numbers are px); `''` = stylesheet default. */
+    get canvasWidth(): string {
+        return this.getAttribute('canvas-width') ?? ''
+    }
+    set canvasWidth(v: string) {
+        if (v) this.setAttribute('canvas-width', v)
+        else this.removeAttribute('canvas-width')
+    }
+
+    /**
+     * CSS height of the preview canvas (bare numbers are px); `''` = stylesheet
+     * default. Under `fit-parent` it acts as the minimum height instead.
+     */
+    get canvasHeight(): string {
+        return this.getAttribute('canvas-height') ?? ''
+    }
+    set canvasHeight(v: string) {
+        if (v) this.setAttribute('canvas-height', v)
+        else this.removeAttribute('canvas-height')
+    }
+
+    /**
+     * Stretch the element and its canvas to fill the parent box, so the preview
+     * auto-scales with the layout instead of using a fixed canvas height. The
+     * parent needs a definite height; `canvas-height` is the floor when it hasn't.
+     */
+    get fitParent(): boolean {
+        return this.hasAttribute('fit-parent')
+    }
+    set fitParent(v: boolean) {
+        if (v) this.setAttribute('fit-parent', '')
+        else this.removeAttribute('fit-parent')
+    }
+
+    /** Mirrors the canvas-box attributes onto the --bs-* custom properties. */
+    private _applyCanvasSize(): void {
+        const w = cssLength(this.getAttribute('canvas-width'))
+        if (w) this.style.setProperty('--bs-bitmap-font-generator-canvas-width', w)
+        else this.style.removeProperty('--bs-bitmap-font-generator-canvas-width')
+        const h = cssLength(this.getAttribute('canvas-height'))
+        if (h) this.style.setProperty('--bs-bitmap-font-generator-canvas-height', h)
+        else this.style.removeProperty('--bs-bitmap-font-generator-canvas-height')
     }
 
     get previewAlign(): BitmapFontPreviewAlign {

@@ -114,9 +114,11 @@ tc-newsletter-signup {
         pointer-events: none;
     }
 
-    // 44px coarse touch target
+    // 44px coarse touch target, and >= 16px so iOS Safari does not zoom the
+    // viewport on focus (see style/foundation/_reset.scss).
     @media (pointer: coarse) {
         min-height: 44px;
+        font-size: max(16px, 0.9375rem);
     }
 }
 

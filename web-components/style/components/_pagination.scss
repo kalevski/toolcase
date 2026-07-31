@@ -109,4 +109,13 @@
         min-height: var(--tc-min-touch-target, 44px);
         min-width: var(--tc-min-touch-target, 44px);
     }
+
+    // .pagination-sm needs its own rule, and this is the whole reason: media
+    // queries add no specificity, so `.pagination-sm .page-link` (0-2-0) beat the
+    // floor above (0-1-0) and the -sm pager stayed 28px on touch. "The rule
+    // exists" is not evidence "the rule wins".
+    .pagination-sm .page-link {
+        min-height: var(--tc-min-touch-target, 44px);
+        min-width: var(--tc-min-touch-target, 44px);
+    }
 }

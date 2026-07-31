@@ -42,6 +42,12 @@ export interface SelectedCountParams {
     count: number
 }
 
+export interface StepOfTotalParams {
+    /** 1-based, so it reads out loud as-is. */
+    current: number
+    total: number
+}
+
 export interface ToolcaseMessages {
     // ── Validation copy ──────────────────────────────────────────────────────
     /** Required field left empty. */
@@ -72,6 +78,16 @@ export interface ToolcaseMessages {
     loading: string
     noData: string
     close: string
+    /** Accessible name for a back affordance — tc-app-bar's chevron, tc-nav-button. */
+    back: string
+    /** Advance a step-by-step surface — `tc-step-pager`'s advance button. */
+    next: string
+    /** Finish a step-by-step surface — `tc-step-pager`'s advance button on the last step. */
+    done: string
+    /** Eyebrow above an advisory note — `tc-step-pager`'s hint block. */
+    tip: string
+    /** `tc-step-pager`'s wake-lock chip, shown only while a screen lock is held. */
+    screenAwake: string
     clear: string
     filtersLabel: string
     searchOptionsLabel: string
@@ -83,10 +99,31 @@ export interface ToolcaseMessages {
     paginationRange: MessageFormatter<PaginationRangeParams>
     /** Progress summary, e.g. "3 of 5 complete". */
     stepsComplete: MessageFormatter<StepsCompleteParams>
+    /** Live position in a step sequence, e.g. "Step 2 of 4" — `tc-step-pager`'s announcer. */
+    stepOfTotal: MessageFormatter<StepOfTotalParams>
     /** Rating summary, e.g. "4 out of 5 stars". */
     starsRating: MessageFormatter<StarsRatingParams>
     /** Multi-select trigger summary once the picked labels stop fitting, e.g. "4 selected". */
     selectedCount: MessageFormatter<SelectedCountParams>
+
+    // ── Day-strip states ─────────────────────────────────────────────────────
+    //
+    // `tc-day-strip` encodes each day's status as a FILL COLOUR, and „over target"
+    // (red) against „planned" (green) is the confusable pair — so every day's
+    // accessible name ends with its status in words, from these five keys. Strip them
+    // and a colour-blind user gets nothing at all from that element, which makes these
+    // a11y strings rather than cosmetic copy. One item can override its own with
+    // `DayStripItem.stateLabel`.
+    /** Nothing planned for the day — the `empty` state. */
+    dayStateEmpty: string
+    /** The day is planned — the `planned` state. */
+    dayStatePlanned: string
+    /** Some of the day is planned — the `partial` state. */
+    dayStatePartial: string
+    /** The day is today — the `today` state. */
+    dayStateToday: string
+    /** The day is over its target — the `over` state. */
+    dayStateOver: string
 
     // ── File inputs ──────────────────────────────────────────────────────────
     fileDropPrompt: string
@@ -114,6 +151,11 @@ const DEFAULTS: ToolcaseMessages = {
     loading: 'Loading…',
     noData: 'No data',
     close: 'Close',
+    back: 'Back',
+    next: 'Next',
+    done: 'Done',
+    tip: 'Tip',
+    screenAwake: 'Screen stays awake',
     clear: 'Clear',
     filtersLabel: 'Filters',
     searchOptionsLabel: 'Search options',
@@ -123,8 +165,15 @@ const DEFAULTS: ToolcaseMessages = {
     paginationNext: 'Next',
     paginationRange: '{start}–{end} of {total}',
     stepsComplete: '{completed} of {total} complete',
+    stepOfTotal: 'Step {current} of {total}',
     starsRating: '{value} out of {max} stars',
     selectedCount: '{count} selected',
+
+    dayStateEmpty: 'Nothing planned',
+    dayStatePlanned: 'Planned',
+    dayStatePartial: 'Partly planned',
+    dayStateToday: 'Today',
+    dayStateOver: 'Over target',
 
     fileDropPrompt: 'Drag & drop files here or click to browse',
     fileDropLabel: 'Upload files — drag and drop or click to browse',

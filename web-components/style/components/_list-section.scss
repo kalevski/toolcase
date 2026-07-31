@@ -1,0 +1,157 @@
+// tc-list-section — the titled row group (screen `1j`, „Планер": a meal card).
+// Mobile-first by construction: no media query in this file.
+//
+//     tc-list-section                    display:flex; flex-direction:column
+//       ├─ .tc-list-section-header       tinted band — icon · eyebrow · figure
+//       │    ├─ svg.tc-list-section-icon 14px, tone colour
+//       │    ├─ .tc-list-section-heading eyebrow, tone colour, flex:1 1 0
+//       │    └─ .tc-list-section-meta    right-aligned figure, tabular
+//       ├─ (consumer rows)               padded, hairline-separated
+//       └─ [slot="footer"]               ordered last, whatever its authored position
+//
+// THE HAIRLINE IS A `border-top` ON EVERY ROW AFTER THE FIRST.
+//   Not a `border-bottom` on every row but the last. `:last-child` is wrong here
+//   because a footer may BE the last child, and `:last-of-type` is per-element-type
+//   so it breaks the moment a group mixes a tc-check-row with a plain div. `row + row`
+//   asks the question that actually matters — "is something above me?" — and needs no
+//   knowledge of what comes after.
+//
+// ROWS ARE THE CONSUMER'S CHILDREN, STYLED WHERE THEY SIT.
+//   So the selectors have to exclude the two children that are not rows: the band
+//   this element renders, and a slotted footer. Everything else is a row, including
+//   a tc-check-row — which gets the group's padding passed into its own knob rather
+//   than a second padding box around it.
+
+tc-list-section {
+    // ── Frame ────────────────────────────────────────────────────────────────
+    // Every `--m-*` read carries a fallback: those tokens are declared by a THEME
+    // (style/themes/sunshine/_mobile.scss), so an un-themed page would otherwise
+    // substitute an empty value and drop the whole declaration.
+    --bs-list-section-bg: var(--tc-surface);
+    // #e5e2dc under sunshine — the app's card border, which has no `--sun-*` rung
+    // (design-reference.md §2.3). `--tc-border` is the nearest generic equivalent.
+    --bs-list-section-border-color: var(--tc-border);
+    --bs-list-section-radius: var(--m-radius-card, 10px);
+
+    // ── Header band ──────────────────────────────────────────────────────────
+    // #f4f1ea under sunshine — one rung down from the card surface. `--tc-surface-muted`
+    // is `--sun-well` (#f1e6ce), a shade deeper.
+    --bs-list-section-header-bg: var(--tc-surface-muted);
+    --bs-list-section-header-padding: 9px 12px;
+    --bs-list-section-header-gap: 7px;
+    // THE DOMAIN KNOB. Set it per instance to the meal's / category's hue; it colours
+    // the icon and the eyebrow together, which is what makes three stacked cards read
+    // as three different meals rather than three copies of one card.
+    --bs-list-section-tone: var(--tc-app-accent);
+    --bs-list-section-icon-size: 14px;
+    --bs-list-section-icon-stroke: 1.8;
+    --bs-list-section-heading-font: var(--m-font-eyebrow, 700 0.59375rem var(--tc-font-sans));
+    --bs-list-section-heading-track: var(--m-track-eyebrow, 0.13em);
+    --bs-list-section-meta-font: var(--m-font-meta-strong, 600 0.6875rem var(--tc-font-sans));
+    // #998f80 under sunshine; `--tc-text-faint` is ink-4 (#9aa189), imperceptibly
+    // different at 11px.
+    --bs-list-section-meta-color: var(--tc-text-faint);
+
+    // ── Rows ─────────────────────────────────────────────────────────────────
+    --bs-list-section-row-padding: 11px 12px;
+    // #e5ddd0 under sunshine — the dashed-separator rung.
+    --bs-list-section-divider: 1px dashed var(--m-rule-dashed, var(--tc-border-faint));
+
+    display: flex; // also in foundation/_reset.scss — a custom element is inline
+    flex-direction: column;
+    background-color: var(--bs-list-section-bg);
+    border: 1px solid var(--bs-list-section-border-color);
+    border-radius: var(--bs-list-section-radius);
+    // LOAD-BEARING. The band is a filled strip flush with the top edge, so without
+    // clipping it squares off the two top corners the frame just rounded.
+    overflow: hidden;
+}
+
+// ── Header band ───────────────────────────────────────────────────────────────
+
+.tc-list-section-header {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: var(--bs-list-section-header-gap);
+    padding: var(--bs-list-section-header-padding);
+    background-color: var(--bs-list-section-header-bg);
+    border-bottom: 1px solid var(--bs-list-section-border-color);
+    color: var(--bs-list-section-tone);
+}
+
+.tc-list-section-icon {
+    display: block;
+    flex: none;
+    width: var(--bs-list-section-icon-size);
+    height: var(--bs-list-section-icon-size);
+    // A CSS declaration beats lucide's own `stroke-width` presentation attribute, so
+    // the design's 1.8 lands without editing the icon source.
+    stroke-width: var(--bs-list-section-icon-stroke);
+}
+
+// `1 1 0` and NOT `flex: 1` with an auto basis: a flex item's line-breaking uses its
+// HYPOTHETICAL main size, so an auto basis on a text block pushes the figure out of
+// the band at 320px. (tc-app-bar's toolbar doubled to 68px on exactly this.)
+.tc-list-section-heading {
+    flex: 1 1 0;
+    min-width: 0;
+    font: var(--bs-list-section-heading-font);
+    letter-spacing: var(--bs-list-section-heading-track);
+    text-transform: uppercase;
+    // Inherited from the band, so one knob colours the icon and the label together.
+    color: inherit;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.tc-list-section-meta {
+    flex: none;
+    font: var(--bs-list-section-meta-font);
+    // AFTER the shorthand, which resets it. A meal's kcal total changes as its rows
+    // are edited, and proportional figures shift the band's right edge as it does.
+    font-variant-numeric: tabular-nums;
+    color: var(--bs-list-section-meta-color);
+}
+
+// ── Rows ──────────────────────────────────────────────────────────────────────
+
+// A tc-check-row brings its own padding (on its inner label, which is the hit
+// target), so it is excluded here and given the group's rhythm through its knob
+// below. Everything else that is neither the band nor the footer is a plain row.
+tc-list-section > *:not(.tc-list-section-header, [slot='footer'], tc-check-row) {
+    padding: var(--bs-list-section-row-padding);
+}
+
+tc-list-section
+    > *:not(.tc-list-section-header, [slot='footer'])
+    + *:not(.tc-list-section-header, [slot='footer']) {
+    border-top: var(--bs-list-section-divider);
+}
+
+// THE GROUP OWNS ROW SEPARATION, so a check row inside one drops its own divider —
+// otherwise the last row of a meal card draws a hairline against the frame's bottom
+// edge, which `1j` does not.
+//
+// Deliberately 0-0-2 and NOT the `:where(ancestor)` construction tc-tab-dock uses:
+// there the zeroed ancestor exists so an app can still re-point a safe-area inset with
+// a bare `tc-tab-dock {}` rule, whereas this is structural — inside a group, row
+// rhythm belongs to the group, whatever source order the two partials end up in. An
+// app that needs to override says `tc-list-section > tc-check-row { … }` as well.
+tc-list-section > tc-check-row {
+    --bs-check-row-divider-width: 0;
+    --bs-check-row-padding: var(--bs-list-section-row-padding);
+}
+
+// ── Footer ────────────────────────────────────────────────────────────────────
+
+// Ordered rather than appended: moving a slotted child is what breaks under
+// react-dom. `order: 1` beats the default 0 of every other child, so the footer sits
+// last regardless of where it was authored.
+tc-list-section > [slot='footer'] {
+    flex: none;
+    order: 1;
+    padding: var(--bs-list-section-row-padding);
+    border-top: var(--bs-list-section-divider);
+}

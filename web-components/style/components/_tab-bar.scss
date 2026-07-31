@@ -1,5 +1,10 @@
-// tc-tab-bar — horizontal tab switcher bar.
+// tc-tab-bar — the DESKTOP horizontal tab switcher.
 // The host IS the tablist (role="tablist"); tab buttons sit directly inside it.
+//
+// One of three tab-like elements, and they are not interchangeable: this one WRAPS
+// to a second line (`flex-wrap: wrap` below), tc-page-tabs never does — it scrolls
+// and is the phone page rail — and tc-tab-dock is the fixed bottom dock (a grid of
+// icon-over-label columns, not a row of text tabs).
 // Only chrome: a 2px ink underline on the active tab and a 1px hairline below
 // the whole bar. All cosmetics flow through --bs-tab-bar-* backed by --tc-* tokens.
 

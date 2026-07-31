@@ -1,0 +1,149 @@
+// tc-add-slot — the dashed „one more could go here" tap target (screen `1j`, „Планер":
+// the ужина slot a day has no entries for). Mobile-first by construction: the only
+// media query in this file is a `pointer` one.
+//
+//     tc-add-slot                        display:flex — the host is just the track
+//       └─ button.tc-add-slot-button     THE HIT TARGET — dashed frame, icon + label
+//            ├─ svg.tc-add-slot-glyph    16px, stroke 2
+//            └─ .tc-add-slot-label       600 12.5px
+//
+// THE DASHED BORDER IS THE MESSAGE. In this design a dashed hairline means „this is
+// not a finished object": it separates rows inside one continuous list (`--m-rule-dashed`)
+// and, at a full border, it outlines a slot that has nothing in it yet. So the frame is
+// the only decoration — no fill, no shadow, no icon tile.
+//
+// THE FRAME IS ON THE BUTTON, NOT ON THE HOST. The dashed rectangle IS the target, so
+// the two have to be the same box: a frame on the host with a button inside it would
+// let a tap land on the border and do nothing. The host contributes nothing but the
+// track it occupies.
+//
+// 44px AND NOT THE CANVAS'S 42px. `1j` draws `padding:12px` around a 16px glyph, i.e.
+// 42px tall. `--tc-min-touch-target` floors it at 44. See the header of src/AddSlot.ts —
+// it is the one deliberate departure from the canvas here.
+
+@use '../foundation/tokens' as *;
+
+tc-add-slot {
+    // Every `--m-*` read carries a fallback: those tokens are declared by a THEME
+    // (style/themes/sunshine/_mobile.scss), so an un-themed page would otherwise
+    // substitute an empty value and drop the whole declaration.
+    --bs-add-slot-padding: 12px;
+    --bs-add-slot-gap: 7px;
+    --bs-add-slot-radius: var(--m-radius-card, 10px);
+    --bs-add-slot-min-height: var(--tc-min-touch-target, 44px);
+    --bs-add-slot-border-width: 1px;
+    --bs-add-slot-border-style: dashed;
+    // #d8cfbd under sunshine — design-reference.md §2.3's „dashed borders" rung, one
+    // step deeper than the `#e5ddd0` used for dashed row SEPARATORS. No `--tc-*`
+    // equivalent; `--tc-border-strong` is the nearest.
+    --bs-add-slot-border-color: var(--tc-border-strong);
+    --bs-add-slot-bg: transparent;
+    --bs-add-slot-color: var(--tc-text-faint);
+    // The `accent` tone's single hue, for both the label and the frame. `--tc-accent`
+    // and NOT `--tc-app-accent`: under sunshine the app accent is the amber CTA colour,
+    // which this design allows on at most two elements per screen and which is
+    // unreadable as 12.5px text on cream. `--tc-accent` is the theme's link/secondary
+    // hue (leaf green, #5f8a2e).
+    --bs-add-slot-accent-color: var(--tc-accent);
+    // Named rather than inherited from the global ring so a theme can re-point it —
+    // the same call tc-check-row makes. Under sunshine the global ring is the amber
+    // CTA colour, and 2px of amber on cream is the weakest ring in the system.
+    --bs-add-slot-focus-ring: var(--tc-app-accent);
+    --bs-add-slot-glyph-size: 16px;
+    --bs-add-slot-glyph-stroke: 2;
+    --bs-add-slot-font: var(--m-font-btn-sm, 600 0.78125rem var(--m-body, var(--tc-font-sans)));
+
+    display: flex; // also in foundation/_reset.scss — a custom element is inline
+    // A flex/grid item's `min-width: auto` is its MIN-CONTENT width, and a long label's
+    // min-content is the whole label — so without this the host grows past its
+    // container and the label's ellipsis never engages. Needed on the host and on the
+    // button, because both are flex items in the chain from the container to the text.
+    min-width: 0;
+    border-radius: 0;
+}
+
+.tc-add-slot-button {
+    // `1 1 auto` and not `1 1 0`: this slot is the same width as the filled cards it
+    // sits among, and the flex base of its own content is a sane floor for a slot
+    // dropped into a row instead of a column.
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0; // see the host's note
+    gap: var(--bs-add-slot-gap);
+    min-height: var(--bs-add-slot-min-height);
+    padding: var(--bs-add-slot-padding);
+    background: var(--bs-add-slot-bg);
+    border: var(--bs-add-slot-border-width) var(--bs-add-slot-border-style)
+        var(--bs-add-slot-border-color);
+    border-radius: var(--bs-add-slot-radius);
+    color: var(--bs-add-slot-color);
+    font: var(--bs-add-slot-font);
+    // The canvas writes the label bare (`font:600 12.5px`), i.e. line-height `normal`.
+    // `--m-font-btn-sm` carries no leading either; restated so a theme that adds one
+    // cannot make the slot taller than the card it stands in for. `font:` first, then
+    // this — the shorthand resets what follows it, never the reverse.
+    line-height: normal;
+    cursor: pointer;
+    transition:
+        border-color var(--m-dur-state, 0.18s) var(--m-ease, ease),
+        color var(--m-dur-state, 0.18s) var(--m-ease, ease);
+
+    // The dashed frame is the affordance, so the ring sits OUTSIDE it at the system's
+    // 2px/2px — an inset ring here would read as a second border and blur the one
+    // signal this control has.
+    &:focus-visible {
+        outline: 2px solid var(--bs-add-slot-focus-ring);
+        outline-offset: 2px;
+    }
+
+    &:disabled {
+        opacity: 0.45;
+        cursor: default;
+    }
+}
+
+.tc-add-slot-glyph {
+    display: block;
+    flex: none;
+    width: var(--bs-add-slot-glyph-size);
+    height: var(--bs-add-slot-glyph-size);
+    // A CSS declaration beats lucide's own `stroke-width` presentation attribute, so
+    // the design's 2 lands without editing the icon source.
+    stroke-width: var(--bs-add-slot-glyph-stroke);
+}
+
+.tc-add-slot-label {
+    // The label inherits the button's font and colour; it exists as an element only so
+    // the icon can be `flex: none` beside it.
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+// ── Tone ──────────────────────────────────────────────────────────────────────
+
+// `accent` — for a slot that IS its section's primary action because the section is
+// otherwise empty. One hue on both the frame and the label, so it reads as one object.
+tc-add-slot[tone='accent'] {
+    --bs-add-slot-border-color: var(--bs-add-slot-accent-color);
+    --bs-add-slot-color: var(--bs-add-slot-accent-color);
+}
+
+// ── Hover ─────────────────────────────────────────────────────────────────────
+
+// The canvas has no hover state — it is a phone export. This exists because the element
+// is also used on a tablet with a trackpad, and a dashed frame that never acknowledges
+// the pointer reads as decoration rather than as a control. Nothing here is
+// hover-ONLY: the affordance is fully legible at rest.
+@include fine-pointer {
+    .tc-add-slot-button:hover:not(:disabled) {
+        border-color: var(--bs-add-slot-accent-color);
+        color: var(--bs-add-slot-accent-color);
+    }
+}
+
+// No `prefers-reduced-motion` block for those transitions: foundation/_reset.scss
+// already flattens every transition-duration under `reduce` with `!important`.

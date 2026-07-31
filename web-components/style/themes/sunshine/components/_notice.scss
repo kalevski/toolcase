@@ -1,0 +1,49 @@
+// Sunshine › tc-notice — the four notice text colours with no rung in either token
+// layer, plus the two tone hues sunshine's semantic tokens do not reach.
+//
+// The washes need nothing here: every one of them is `color-mix(in srgb, <tone> N%,
+// transparent)` in the generic partial, and under sunshine each tone already resolves
+// to the design's exact pigment — so `info` composites to rgba(156,74,122,.08),
+// `muted` to rgba(154,161,137,.12), `success` to rgba(95,138,46,.12) and `danger` to
+// rgba(242,96,75,.14), bit-for-bit against the canvas. Only `warning`'s hue needs
+// re-pointing (see below) and only the TEXT colours are literals.
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    // `1f` — „Коментарите се објавуваат по одобрување од модератор." Plum rule, and the
+    // text is ink-2 rather than the muted ink every other notice uses: an
+    // announcement about YOUR content is the one notice on the screen meant to be read
+    // rather than referred to.
+    tc-notice[tone='info'] {
+        --bs-notice-color: var(--sun-ink-2); // #44503a
+    }
+
+    // `1i`, `1k` — the disclaimers. #6b6459, the app's body copy on cream (§2.3), which
+    // is warmer than ink-3 (#6e775f).
+    tc-notice[tone='muted'],
+    tc-notice[tone='accent'] {
+        --bs-notice-color: #6b6459;
+    }
+
+    // `1k` — the payment notice. Ochre #d49a00 is `--sun-lead-lo`, which `--tc-warning`
+    // maps to, so the RULE is already right; the text is #8a6d2f, the deeper ochre the
+    // app uses for warnings and ingredient accents (§2.3) and which has no rung.
+    // Setting the rule explicitly anyway so the pair reads as one decision.
+    tc-notice[tone='warning'] {
+        --bs-notice-tone: var(--sun-lead-lo); // #d49a00
+        --bs-notice-color: #8a6d2f;
+    }
+
+    // Not drawn in the design; completed from the system's own semantics so the set is
+    // usable. #4c7122 is `--sun-leaf-lo`, the deeper leaf that clears 4.5:1 on its own
+    // 12% wash — `--sun-leaf` itself does not.
+    tc-notice[tone='success'] {
+        --bs-notice-color: var(--sun-leaf-lo); // #4c7122
+    }
+
+    // #b3261e — the app's hard error red (§2.3). `--sun-coral` (#f2604b) is the
+    // DESTRUCTIVE-ACTION hue and is far too light to set 11px prose in.
+    tc-notice[tone='danger'] {
+        --bs-notice-color: #b3261e;
+    }
+}

@@ -12,7 +12,12 @@
 // on top of the already-sunshine --tc-* / --bs-* tokens; variants extend the
 // foundation with alternate accent pairings (token-only overrides — activate
 // via <tc-theme name="sunshine" variant="ocean|forest|ember|royal">).
+//
+// `mobile` lands last: like `variants` it is a token-only layer, so loading it
+// after the component partials means a phone-scale token wins over a component
+// partial that happens to hardcode the same property.
 
 @use 'foundation';
 @use 'variants';
 @use 'components';
+@use 'mobile';

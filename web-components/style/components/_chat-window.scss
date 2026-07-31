@@ -182,6 +182,13 @@ tc-chat-window {
         border-color: var(--bs-chat-window-input-focus-border);
         box-shadow: var(--bs-chat-window-input-focus-ring);
     }
+
+    // >= 16px on touch — iOS zoom on focus (see style/foundation/_reset.scss).
+    // Reads the knob rather than repeating 0.8125rem, so a theme that re-points
+    // the compose size keeps its floor.
+    @media (pointer: coarse) {
+        font-size: max(16px, var(--bs-chat-window-input-font-size));
+    }
 }
 
 .tc-chat-window-send {

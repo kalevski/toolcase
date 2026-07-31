@@ -6,12 +6,14 @@ const formatLabel = (key: string) =>
     key.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
 
 // Demos are grouped by component complexity (derived from the source size of the
-// underlying tc-* element) rather than by domain category.
+// underlying tc-* element), plus one domain group: Mobile collects the phone-app
+// components regardless of their size.
 const complexityBlurb: Record<WebComponentComplexity, string> = {
     Primitives: 'Atomic building blocks — single-element wrappers, layout primitives, and tiny display helpers.',
     Simple: 'Single-purpose styled components with a handful of attributes.',
     Composite: 'Multi-part components that assemble several pieces — cards, lists, rows, and richer controls.',
     Advanced: 'Complex, stateful, or data-driven components — tables, editors, charts, panels, and full screens.',
+    Mobile: 'Phone-app building blocks — the mobile shell, bars, sheets, pagers, and the tiles and rows that fill its screens.',
 }
 
 export const WebComponentsPage = () => {

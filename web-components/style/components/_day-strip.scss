@@ -1,0 +1,257 @@
+// tc-day-strip — a week at a glance (screen `1j`, „Планер"). Mobile-first by
+// construction: there is no media query in this file. Seven columns of `1fr` behave
+// the same at 320px and 1024px; only the cells get wider.
+//
+//     tc-day-strip                       display:grid; repeat(7, 1fr); gap 5px
+//       └─ button.tc-day-strip-day       flex column — THE HIT TARGET, >=44px tall
+//            ├─ .tc-day-strip-weekday    the letter, 400 10px (selected: 700, tone)
+//            └─ .tc-day-strip-cell       30px box, radius 6, the STATE fill
+//
+// STATE AND SELECTION ARE TWO SEPARATE MECHANISMS ON TWO SEPARATE PROPERTIES.
+//   State is `[data-state]` and drives the fill, the ink and the weight. Selection is
+//   `.tc-day-strip-day--selected` and drives a ring plus the weekday letter's weight
+//   and colour. They can never collide, because every state resolves through the
+//   `--day-*` locals below and only ONE rule per local ever wins.
+//
+// THE PADDING IS ON THE COLUMN, NOT ON THE BOX.
+//   The coloured box is 30px, which is not a tap target. The `<button>` wrapping it is
+//   the target: `min-height: --tc-min-touch-target` plus the weekday letter above puts
+//   it at ~48px on the design's own values, and it stays 44px even for a strip with no
+//   letters. Growing the BOX instead would have broken the design at its most
+//   recognisable measurement.
+//
+// HORIZONTAL TRADE-OFF, ACCEPTED AND RECORDED. At 320px seven columns come out ~37px
+// wide (320 - 28px of gutter - 6 x 5px of gap, over 7), which is under the 44px
+// guideline on that axis. The design's own strip is the same, a week is seven days
+// whatever the viewport, and the alternative — a scrolling strip — costs the "whole
+// week at a glance" that is the entire point of the element. The vertical axis
+// compensates; the labels are 12px numerals and fit with room to spare.
+
+tc-day-strip {
+    // ── Band ─────────────────────────────────────────────────────────────────
+    // The strip is a BAND, not content: on `1j` it carries its own surface and the
+    // hairline that separates it from the day below, the same way a search row or an
+    // offline banner does. Zero the three knobs to drop it into a panel instead.
+    //
+    // Every `--m-*` read carries a fallback: those tokens are declared by a THEME
+    // (style/themes/sunshine/_mobile.scss), so an un-themed page would otherwise
+    // substitute an empty value and drop the whole declaration.
+    --bs-day-strip-bg: var(--tc-surface);
+    --bs-day-strip-border-color: var(--tc-border);
+    --bs-day-strip-border-width: 1px;
+    // 10px 14px 12px verbatim from `1j` — the 14px is the page gutter, and the extra
+    // 2px at the bottom is what optically centres the column against the hairline.
+    --bs-day-strip-padding: 10px 14px 12px;
+    --bs-day-strip-gap: var(--m-gap-tight, 5px);
+    // A COLUMN COUNT, so a 14-day strip is two rows of seven rather than fourteen
+    // slivers. Re-pointed per instance by the `columns` attribute.
+    --bs-day-strip-columns: 7;
+
+    // ── Column ───────────────────────────────────────────────────────────────
+    --bs-day-strip-day-gap: var(--m-gap-tight, 5px);
+    // 44px = WCAG 2.5.5 / iOS HIG. Inert on the design's own values (a 13px letter
+    // plus 5px plus a 30px box is ~48px); it exists for a strip rendered without
+    // weekday letters, which would otherwise ship 30px targets.
+    --bs-day-strip-day-min-height: var(--tc-min-touch-target, 44px);
+
+    // ── Weekday letter ───────────────────────────────────────────────────────
+    // `400 10px` / `700 10px` — the dock label's pair, the same values, 21 uses in the
+    // design between them.
+    --bs-day-strip-weekday-font: var(--m-font-tab, 400 0.625rem var(--tc-font-sans));
+    --bs-day-strip-weekday-color: var(--tc-text-faint);
+    // SELECTION, HALF ONE. The canvas draws day 3's letter `700 10px #a4472f` against
+    // its neighbours' `400 10px #9aa189` — so the weight carries the state change on
+    // its own, which is what survives greyscale and colour blindness.
+    --bs-day-strip-weekday-font-selected: var(
+        --m-font-tab-active,
+        700 0.625rem var(--tc-font-sans)
+    );
+    --bs-day-strip-weekday-color-selected: var(--bs-day-strip-ring-color);
+
+    // ── Cell ─────────────────────────────────────────────────────────────────
+    --bs-day-strip-cell-height: 30px; // `1j`, one use — inline by the token layer's own rule
+    --bs-day-strip-cell-radius: var(--m-radius-control, 6px);
+    // No `--m-*` token: 12px at three weights is this element's own scale (the design's
+    // 12px tokens are `400 12px/1.45` prose and `600 12.5px` buttons, neither of which
+    // is a numeral in a 30px box).
+    --bs-day-strip-cell-font: 600 12px var(--m-body, var(--tc-font-sans));
+    --bs-day-strip-cell-font-quiet: 400 12px var(--m-body, var(--tc-font-sans));
+    --bs-day-strip-cell-font-loud: 700 12px var(--m-body, var(--tc-font-sans));
+
+    // ── State fills ──────────────────────────────────────────────────────────
+    // Generic rungs here; the sunshine partial pins the canvas's exact four pairs.
+    --bs-day-strip-empty-bg: var(--tc-surface-muted);
+    --bs-day-strip-empty-color: var(--tc-text-faint);
+    --bs-day-strip-planned-bg: var(--tc-success-bg);
+    --bs-day-strip-planned-color: var(--tc-success);
+    --bs-day-strip-today-bg: var(--tc-app-accent);
+    --bs-day-strip-today-color: var(--tc-app-accent-contrast);
+    --bs-day-strip-over-bg: var(--tc-danger-bg);
+    --bs-day-strip-over-color: var(--tc-danger);
+    // `partial` IS NOT A DESIGN VALUE — see the header of src/DayStrip.ts. It reuses
+    // `planned`'s fill and adds a 1px inset outline in `planned`'s ink, so „planned but
+    // incomplete" reads as a variation of planned rather than as a fifth hue nobody can
+    // name. An inset shadow and not a border: a border would eat 2px of a 30px box's
+    // inner height, and the ring below already owns the outward direction.
+    --bs-day-strip-partial-outline-width: 1px;
+
+    // ── Selection ring ───────────────────────────────────────────────────────
+    // SELECTION, HALF TWO — an addition, because a 10px letter is thin signal for a
+    // 30px target. Terracotta and not `--tc-app-accent` under sunshine (see the theme
+    // partial): amber would be invisible against the amber `today` fill, and this
+    // design spends amber on at most two elements per screen.
+    --bs-day-strip-ring-width: 2px;
+    --bs-day-strip-ring-color: var(--tc-app-accent);
+
+    display: grid; // also in foundation/_reset.scss — a custom element is inline
+    grid-template-columns: repeat(var(--bs-day-strip-columns), 1fr);
+    gap: var(--bs-day-strip-gap);
+    padding: var(--bs-day-strip-padding);
+    background-color: var(--bs-day-strip-bg);
+    border-bottom: var(--bs-day-strip-border-width) solid var(--bs-day-strip-border-color);
+    border-radius: 0;
+}
+
+// ── Column ────────────────────────────────────────────────────────────────────
+
+// One selector for both shapes the element renders — <button> for a day, inert <span>
+// for a disabled one.
+.tc-day-strip-day {
+    // The state locals. Declared HERE and read by the cell below, so every state rule
+    // is one flat `[data-state]` selector that sets values rather than a cascade of
+    // property overrides. (Substitution happens at THIS element, which inherits the
+    // `--bs-*` knobs from the host — so re-pointing a knob on the host still works,
+    // and re-pointing one on the cell does not. Knobs go on the host.)
+    --day-bg: var(--bs-day-strip-empty-bg);
+    --day-fg: var(--bs-day-strip-empty-color);
+    --day-font: var(--bs-day-strip-cell-font-quiet);
+    --day-outline: 0 0 0 0 transparent;
+    --day-ring: 0 0 0 0 transparent;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--bs-day-strip-day-gap);
+    min-height: var(--bs-day-strip-day-min-height);
+    // The whole column is the target, so it owns no padding of its own — the band's
+    // padding is the outer margin and `min-height` is the inner one.
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    cursor: pointer;
+    // Without this the flex column's items resolve against the button's content-based
+    // width in some engines and the cell stops filling its track.
+    width: 100%;
+    min-width: 0;
+
+    &--disabled {
+        opacity: 0.45;
+        pointer-events: none;
+        cursor: default;
+    }
+
+    // The band is 1px of hairline and 10/12px of padding, so a ring at a positive
+    // offset would be clipped at the top and bottom edges. Drawn INSIDE instead, which
+    // also keeps it distinguishable from the selection ring: focus is a detached
+    // rectangle around the whole column, selection hugs the 30px box.
+    &:focus-visible {
+        outline: 2px solid var(--bs-day-strip-ring-color);
+        outline-offset: -2px;
+    }
+}
+
+// ── Weekday letter ────────────────────────────────────────────────────────────
+
+.tc-day-strip-weekday {
+    flex: none;
+    font: var(--bs-day-strip-weekday-font);
+    // The canvas writes it bare (`font:400 10px`), i.e. line-height `normal`. The
+    // `--m-font-tab` token carries no leading either, but restated so a theme that adds
+    // one cannot silently make the band taller. `font:` first, then this — the shorthand
+    // resets what follows it, never the reverse.
+    line-height: normal;
+    color: var(--bs-day-strip-weekday-color);
+}
+
+// ── Cell ──────────────────────────────────────────────────────────────────────
+
+.tc-day-strip-cell {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: var(--bs-day-strip-cell-height);
+    border-radius: var(--bs-day-strip-cell-radius);
+    background-color: var(--day-bg);
+    color: var(--day-fg);
+    font: var(--day-font);
+    line-height: normal;
+    // AFTER the shorthand, which resets it. The labels are date numbers, and at seven
+    // proportional numerals per row the columns visibly disagree about where the digit
+    // sits.
+    font-variant-numeric: tabular-nums;
+    // Selection ring first, `partial`'s inset outline second — one property, two roles,
+    // both resolved from locals so neither rule has to know about the other.
+    box-shadow: var(--day-ring), var(--day-outline);
+    transition:
+        background-color var(--m-dur-state, 0.18s) var(--m-ease, ease),
+        color var(--m-dur-state, 0.18s) var(--m-ease, ease),
+        box-shadow var(--m-dur-state, 0.18s) var(--m-ease, ease);
+}
+
+// ── States ────────────────────────────────────────────────────────────────────
+//
+// Each sets values on the locals and touches no properties, so adding a state cannot
+// disturb selection and vice versa. All four are `0-1-1`, so source order among them
+// is irrelevant — no day carries two states.
+
+.tc-day-strip-day[data-state='planned'] {
+    --day-bg: var(--bs-day-strip-planned-bg);
+    --day-fg: var(--bs-day-strip-planned-color);
+    --day-font: var(--bs-day-strip-cell-font);
+}
+
+.tc-day-strip-day[data-state='partial'] {
+    --day-bg: var(--bs-day-strip-planned-bg);
+    --day-fg: var(--bs-day-strip-planned-color);
+    --day-font: var(--bs-day-strip-cell-font);
+    --day-outline: inset 0 0 0 var(--bs-day-strip-partial-outline-width)
+        var(--bs-day-strip-planned-color);
+}
+
+.tc-day-strip-day[data-state='today'] {
+    --day-bg: var(--bs-day-strip-today-bg);
+    --day-fg: var(--bs-day-strip-today-color);
+    --day-font: var(--bs-day-strip-cell-font-loud);
+}
+
+.tc-day-strip-day[data-state='over'] {
+    --day-bg: var(--bs-day-strip-over-bg);
+    --day-fg: var(--bs-day-strip-over-color);
+    --day-font: var(--bs-day-strip-cell-font);
+}
+
+// ── Selection ─────────────────────────────────────────────────────────────────
+
+// The letter's weight and colour, in EVERY state including `today` — this is the
+// signal that makes „Thursday selected" different from „Thursday is today", and the
+// canvas's own marker for it.
+.tc-day-strip-day--selected > .tc-day-strip-weekday {
+    font: var(--bs-day-strip-weekday-font-selected);
+    line-height: normal;
+    color: var(--bs-day-strip-weekday-color-selected);
+}
+
+// The ring, in every state EXCEPT `today`. Written as `:not()` rather than as a second
+// rule that undoes it, so there is exactly one declaration of `--day-ring` and no
+// source-order dependence. On `today` the amber fill already owns the row and the
+// canvas draws day 3 — which is today AND selected — with no ring at all.
+.tc-day-strip-day--selected:not([data-state='today']) {
+    --day-ring: 0 0 0 var(--bs-day-strip-ring-width) var(--bs-day-strip-ring-color);
+}
+
+// No `prefers-reduced-motion` block for that transition: foundation/_reset.scss already
+// flattens every transition-duration under `reduce` with `!important`.

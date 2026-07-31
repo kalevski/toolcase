@@ -1,0 +1,49 @@
+// Sunshine › tc-day-strip — the four state pairs `1j` actually draws, none of which
+// the `--tc-*` remap lands on exactly, plus the selection ring's hue.
+//
+// The mechanism is the one tc-app-bar, tc-input, tc-check-row and tc-list-section
+// already use: the generic partial names the nearest `--tc-*` rung so an un-themed page
+// is sane, and this file pins the value the design measures.
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    tc-day-strip {
+        // #f1e6ce / #9aa189 — `--tc-surface-muted` and `--tc-text-faint` already give
+        // exactly these (`--sun-well` and `--sun-ink-4`), so `empty` is inherited rather
+        // than restated.
+
+        // rgba(94,138,46,.16) — the leaf tint at the canvas's alpha. `--tc-success-bg` is
+        // `--sun-leaf-tint`, which is the same hue at .12: a third lighter, and at a
+        // 30px cell that is the difference between „planned" reading as a fill and
+        // reading as a smudge.
+        --bs-day-strip-planned-bg: rgba(94, 138, 46, 0.16);
+        // #4c7122 — `--sun-leaf-lo`. `--tc-success` is `--sun-leaf` (#5f8a2e), too light
+        // for 12px type on its own 16%-alpha wash.
+        --bs-day-strip-planned-color: var(--sun-leaf-lo);
+
+        // rgba(242,96,75,.16) — the coral tint at the canvas's alpha; `--tc-danger-bg`
+        // is the same hue at .14.
+        --bs-day-strip-over-bg: rgba(242, 96, 75, 0.16);
+        // #c0392b. NOT `--tc-danger` (`--sun-coral`, #f2604b), which is the bright pop
+        // used for destructive OUTLINES and is unreadable as 12px text on its own tint.
+        // This darker red has no `--sun-*` rung of its own; it is a literal here for the
+        // same reason `--m-notice-accent` is one.
+        --bs-day-strip-over-color: #c0392b;
+
+        // #f2b705 / #2e2400 — `--tc-app-accent` and `--tc-app-accent-contrast` resolve to
+        // `--sun-lead` and `--sun-on-lead`, which are exactly these. Inherited.
+
+        // THE SELECTION RING, and the one place this element departs from what a naive
+        // reading of the canvas would give. Terracotta #a4472f, not the amber
+        // `--tc-app-accent` the generic partial defaults to, for two reasons that both
+        // matter:
+        //   * an amber ring around the amber `today` fill is invisible, and „selected"
+        //     has to be legible on every state;
+        //   * amber is this design's CTA colour under a two-elements-per-screen budget,
+        //     and `1j` has already spent both on „Предложи диета" and the today cell.
+        // #a4472f is the app's signature hue (design-reference.md §2.3, ~100 uses) and is
+        // also what the canvas colours the SELECTED day's weekday letter — so the ring and
+        // the letter are one signal in one colour, which is the whole point.
+        --bs-day-strip-ring-color: #a4472f;
+    }
+}

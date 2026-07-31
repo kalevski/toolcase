@@ -17,6 +17,10 @@
 }
 
 .form-control {
+    // Declared as a --bs-* knob rather than a literal so the coarse-pointer floor
+    // below can read it. Four copies of "0.925rem" across this file and
+    // _select.scss is how a base size and its own 16px floor drift apart.
+    --bs-form-control-font-size: 0.925rem;
     --bs-form-control-color: var(--tc-text);
     --bs-form-control-bg: var(--tc-surface);
     --bs-form-control-border-color: var(--tc-border-strong);
@@ -32,7 +36,7 @@
     min-height: var(--tc-control-height, 2.625rem);
     padding: 0.5rem 0.75rem;
     font-family: var(--tc-font-sans);
-    font-size: 0.925rem;
+    font-size: var(--bs-form-control-font-size);
     font-weight: 400;
     line-height: 1.6;
     color: var(--bs-form-control-color);
@@ -66,22 +70,48 @@
     }
 }
 
+// The size tiers re-point the same knob, which is what lets one coarse-pointer
+// rule floor all three correctly (see below).
 .form-control-sm {
+    --bs-form-control-font-size: 0.8125rem;
+
     padding: 0.3rem 0.55rem;
-    font-size: 0.8125rem;
+    font-size: var(--bs-form-control-font-size);
     min-height: 2rem;
 }
 
 .form-control-lg {
+    --bs-form-control-font-size: 1.04rem;
+
     padding: 0.7rem 1rem;
-    font-size: 1.04rem;
+    font-size: var(--bs-form-control-font-size);
     min-height: 2.75rem;
 }
 
-// Coarse pointers: every text control meets the touch-target floor.
+// Coarse pointers: every text control meets the touch-target floor and clears
+// the 16px threshold below which iOS Safari zooms the viewport on focus and does
+// not zoom back out.
+//
+// .form-select is no longer listed here. _select.scss loads AFTER this file and
+// declares min-height and font-size on .form-select at equal specificity, so the
+// rule here lost on source order and the select's touch floor was silently dead;
+// its copy now lives in _select.scss where it can win.
 @media (pointer: coarse) {
+    // -sm is listed for the case where it is used WITHOUT .form-control (the
+    // library always pairs them, a consumer need not); it re-points the knob, so
+    // the declaration below is the same one either way.
     .form-control,
-    .form-select {
+    .form-control-sm {
+        // max() rather than a flat 16px so the floor can only ever raise a size,
+        // never pull one down — a consumer scaling the root font-size keeps the
+        // larger field it asked for.
+        //
+        // One rule covers all three tiers. The custom property is re-declared by
+        // .form-control-sm / -lg on the same element and later in this file, so it
+        // has already resolved to that tier's size by the time this substitutes;
+        // -lg's 1.04rem (16.64px) therefore survives the max() instead of being
+        // pulled down to 16px, and -sm's 0.8125rem is raised.
+        font-size: max(16px, var(--bs-form-control-font-size));
         min-height: max(var(--tc-control-height, 2.625rem), var(--tc-min-touch-target, 44px));
     }
 }

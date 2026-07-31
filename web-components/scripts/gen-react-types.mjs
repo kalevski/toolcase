@@ -136,7 +136,14 @@ const attrsFor = (localName) => {
 const collectEvents = (src, set) => {
     for (const m of src.matchAll(/(?:this\.emit|\.emit)\s*\(\s*'(tc-[a-z][a-z0-9-]*)'/g))
         set.add(m[1])
-    for (const m of src.matchAll(/new\s+CustomEvent\s*\(\s*'(tc-[a-z][a-z0-9-]*)'/g)) set.add(m[1])
+    // The optional `<Detail>` group is not cosmetic: five components type the
+    // detail at the construction site, and without it their events were silently
+    // absent from the generated props — tc-generate on tc-bitmap-font-generator
+    // and tc-normal-map-generator, tc-continue on tc-press-any-key, tc-step-click
+    // on tc-welcome-guide, tc-shell-scroll on tc-mobile-shell. `[^>]*` suffices;
+    // no detail type in this library is itself generic.
+    for (const m of src.matchAll(/new\s+CustomEvent\s*(?:<[^>]*>)?\s*\(\s*'(tc-[a-z][a-z0-9-]*)'/g))
+        set.add(m[1])
 }
 
 // Extract the tc-* events a component emits. Scans the component's own source

@@ -157,6 +157,11 @@ tc-command-reference {
     &::placeholder {
         color: var(--bs-command-reference-input-placeholder-color);
     }
+
+    // >= 16px on touch — iOS zoom on focus (see style/foundation/_reset.scss).
+    @media (pointer: coarse) {
+        font-size: max(16px, var(--bs-command-reference-input-font-size));
+    }
 }
 
 // ── Results list ──────────────────────────────────────────────────────────────

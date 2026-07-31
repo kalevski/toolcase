@@ -1,0 +1,242 @@
+// tc-fab — the floating action button. Mobile-first by construction: there is no
+// media query in this file except the `fine-pointer` hover block, which ADDS a
+// state a touch screen must not have.
+//
+//     tc-fab                     position:absolute; display:inline-flex
+//       └─ .tc-fab-button        56x56, radius 16, amber, the whole hit box
+//            ├─ .tc-fab-glyph      the lucide svg, 26px / stroke 2.2
+//            └─ .tc-fab-label      `extended` variant only
+//
+// IT IS A SQUIRCLE. `border-radius: 16px` on a 56px square, verbatim from screen
+// 1c. Small corners are a stated principle of this system — 6px on controls, 10px
+// on cards, pills for chips only — and a 999px FAB is the one element that would
+// break it while looking, in isolation, like the conventional choice. The
+// `extended` variant keeps the same 16px rather than becoming a true pill, for the
+// same reason.
+//
+// THE OFFSET, AND WHY IT ADDS THE INSET
+//   The FAB lives in tc-mobile-shell's `overlay` slot: `position:absolute; inset:0`
+//   against the shell's PADDING box, so that layer spans the whole phone frame,
+//   hardware inset strips included. The shell's own `padding-bottom` therefore does
+//   NOT lift anything in there — which is exactly why tc-bottom-sheet pays
+//   --tc-safe-bottom itself in the same layer, and why this does too.
+//
+//   Measured at 390x844 with a 63px tc-tab-dock and a 34px inset forced:
+//     bottom: 104px             FAB bottom at 740, dock top at 747 →  7px of air
+//     bottom: calc(104px + 34)  FAB bottom at 706, dock top at 747 → 41px of air
+//   The second keeps the FAB's relationship to the dock constant across devices
+//   (41px flat and notched); the first collapses it to 7px on a notched phone.
+//   Constant is the design's intent, so the inset is in the sum.
+//
+// THERE IS NO `position: fixed` VERSION. A fixed FAB anchors to the WINDOW, which
+// on a wide viewport puts it in the corner of the screen while the app sits in a
+// centred 480px column. `absolute` inside the shell's overlay layer anchors it to
+// the frame, and `overflow: hidden` on the shell clips it there.
+
+@use '../foundation/tokens' as *;
+
+tc-fab {
+    // ── Placement ────────────────────────────────────────────────────────────
+    // 104px = the design's 78px dock reserve + 26px of clearance (1c). A screen
+    // with no dock under it sets `offset="24px"`.
+    --bs-fab-offset: 104px;
+    // 20px, and 1c is its only use in the design, so it lives here rather than in
+    // the token layer.
+    --bs-fab-inline: 20px;
+    --bs-fab-safe-bottom: var(--tc-safe-bottom, 0px);
+    // Only matters outside a shell's overlay layer, which is its own stacking
+    // context — sticky, not modal: a sheet or a dialog must cover the FAB.
+    --bs-fab-zindex: var(--tc-z-sticky, 1020);
+
+    // ── Surface ──────────────────────────────────────────────────────────────
+    --bs-fab-size: var(--m-size-fab, 56px);
+    --bs-fab-radius: 16px; // 1c — the squircle. Not 999px. See above.
+    --bs-fab-bg: var(--tc-app-accent);
+    --bs-fab-color: var(--tc-app-accent-contrast);
+    // A 1px ring plus a wide glow IN THE FILL'S OWN HUE, so the button reads as lit
+    // from itself rather than pasted onto the canvas. The hue is the theme's:
+    // --m-shadow-amber-ring is sunshine's exact pair from 1c
+    // (`0 0 0 1px rgba(242,183,5,.45), 0 14px 30px -10px rgba(242,183,5,.55)`), and
+    // the fallback keeps the SHAPE while going neutral — an amber literal here would
+    // put an amber glow under a non-amber fill on every other theme.
+    --bs-fab-shadow: var(
+        --m-shadow-amber-ring,
+        0 0 0 1px rgba(0, 0, 0, 0.08),
+        0 14px 30px -10px rgba(0, 0, 0, 0.35)
+    );
+    // Pressed. DERIVED, not measured — the canvas is a static export with no
+    // interactive states. The glow is pulled in from 14/30 to 5/12 so the button
+    // appears to settle onto the surface as it moves down. Amber here rather than a
+    // token because there is no themed "pressed glow" to read; a theme that
+    // re-points --bs-fab-shadow re-points this alongside it.
+    --bs-fab-shadow-active:
+        0 0 0 1px rgba(242, 183, 5, 0.45), 0 5px 12px -6px rgba(242, 183, 5, 0.5);
+
+    // ── Glyph and label ──────────────────────────────────────────────────────
+    --bs-fab-icon-size: 26px;
+    --bs-fab-icon-stroke: 2.2;
+    // `extended` only. 20px of side padding and 8px between glyph and label; the
+    // font is the design's button type, with a fallback because --m-font-* is
+    // declared by a THEME and an un-themed page would drop the declaration.
+    --bs-fab-padding-inline: 20px;
+    --bs-fab-gap: var(--m-gap-inline, 8px);
+    --bs-fab-label-font: var(--m-font-btn, 600 0.875rem var(--tc-font-sans));
+
+    // Amber on cream: the library's global :focus-visible ring is --tc-app-accent,
+    // i.e. THE FAB'S OWN FILL, which is invisible 2px off an amber square. The
+    // theme's secondary accent (leaf green under sunshine) is the contrasting one.
+    --bs-fab-focus-color: var(--tc-accent);
+
+    --bs-fab-duration: var(--m-dur-press, 0.14s);
+    --bs-fab-ease: var(--m-ease, ease);
+
+    position: absolute;
+    z-index: var(--bs-fab-zindex);
+    display: inline-flex; // also in foundation/_reset.scss — a custom element is inline
+    right: var(--bs-fab-inline);
+    bottom: calc(var(--bs-fab-offset) + var(--bs-fab-safe-bottom));
+    // Retract animation lives on the HOST and press/hover on the button, so the two
+    // transforms can never fight over one property.
+    transition:
+        opacity var(--m-dur-state, 0.18s) var(--bs-fab-ease),
+        transform var(--m-dur-state, 0.18s) var(--bs-fab-ease),
+        visibility var(--m-dur-state, 0.18s) var(--bs-fab-ease);
+}
+
+// ── Placement variants ────────────────────────────────────────────────────────
+
+tc-fab[position='bottom-left'] {
+    right: auto;
+    left: var(--bs-fab-inline);
+}
+
+// CENTRED WITHOUT A TRANSFORM. `left:50%; translateX(-50%)` would occupy the one
+// property the retract animation needs. Both insets at 0 plus `width: fit-content`
+// and auto inline margins centres an absolutely positioned box in its containing
+// block and leaves transform free — and the box stays glyph-width, so it cannot
+// swallow taps across the full width of the pane behind it.
+tc-fab[position='bottom-center'] {
+    right: 0;
+    left: 0;
+    width: fit-content;
+    margin-inline: auto;
+}
+
+// In the flow, for a consumer placing it themselves (a settings row, a demo, a
+// desktop toolbar). Every offset declaration above is inert here.
+tc-fab[position='static'] {
+    position: static;
+    right: auto;
+    left: auto;
+    bottom: auto;
+}
+
+// ── The button ────────────────────────────────────────────────────────────────
+
+// 56x56 is the whole hit box, comfortably past the 44px floor, so no
+// `.tc-touch-target` padding is needed anywhere in here.
+.tc-fab-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--bs-fab-gap);
+    width: var(--bs-fab-size);
+    height: var(--bs-fab-size);
+    padding: 0;
+    border: 0;
+    border-radius: var(--bs-fab-radius);
+    background-color: var(--bs-fab-bg);
+    color: var(--bs-fab-color);
+    box-shadow: var(--bs-fab-shadow);
+    cursor: pointer;
+    transition:
+        transform var(--bs-fab-duration) var(--bs-fab-ease),
+        box-shadow var(--bs-fab-duration) var(--bs-fab-ease);
+
+    &:focus-visible {
+        outline: 2px solid var(--bs-fab-focus-color);
+        outline-offset: 2px;
+    }
+
+    // +1px and the glow tightening, the design system's own press signature
+    // (design-reference section 4: primary button -2px hover / +1px press).
+    &:active {
+        transform: translateY(1px);
+        box-shadow: var(--bs-fab-shadow-active);
+    }
+}
+
+// HOVER LIFT ONLY UNDER A FINE POINTER. On a touch screen `:hover` sticks to the
+// last-tapped element until something else is tapped, so a lifted FAB stays lifted
+// after the tap and reads as a rendering fault rather than as feedback. `fine-pointer`
+// tests `hover: hover` alongside `pointer: fine`, so a stylus is excluded too.
+@include fine-pointer {
+    .tc-fab-button:hover {
+        transform: translateY(-2px);
+    }
+
+    // Re-asserted after the hover rule: a pointer that is both hovering and pressing
+    // matches BOTH, and at equal specificity the later declaration wins. Without
+    // this, pressing a hovered FAB would keep the -2px lift.
+    .tc-fab-button:active {
+        transform: translateY(1px);
+    }
+}
+
+// ── Glyph and label ───────────────────────────────────────────────────────────
+
+.tc-fab-glyph {
+    flex: none;
+    display: block;
+    width: var(--bs-fab-icon-size);
+    height: var(--bs-fab-icon-size);
+    // A CSS declaration beats lucide's own stroke-width presentation attribute, so
+    // the design's 2.2 lands without editing the icon source.
+    stroke-width: var(--bs-fab-icon-stroke);
+}
+
+// ── Extended variant ──────────────────────────────────────────────────────────
+
+// Icon + label in one bar. The HEIGHT stays 56px so `--bs-fab-offset` still means
+// what it says and the clearance above the dock is unchanged; only the width grows.
+// `width: auto` beats the square `width` above at 0-1-2 vs 0-1-0.
+tc-fab[variant='extended'] .tc-fab-button {
+    width: auto;
+    min-width: var(--bs-fab-size);
+    padding-inline: var(--bs-fab-padding-inline);
+}
+
+.tc-fab-label {
+    font: var(--bs-fab-label-font);
+    // ELLIPSIS, NOT WRAP. A second line would deepen the button past 56px and break
+    // the offset maths this component's whole placement is built on.
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+// ── Auto-hide ─────────────────────────────────────────────────────────────────
+
+// Retracted, driven by the element from `tc-shell-scroll` (opt-in via `auto-hide`).
+//
+// SHRINK AND FADE rather than translate off-screen. A translate would have to
+// travel `offset + safe-bottom + 100%` — it would need to know the offset — and it
+// only actually disappears inside a clipping ancestor. Shrink-and-fade is correct
+// in any container and at any offset.
+//
+// `visibility: hidden` is the load-bearing line, not the opacity: a 0-opacity
+// button is still focusable, so Tab would land on an invisible control. visibility
+// takes it out of the tab order and the accessibility tree, and it transitions as a
+// discrete step — so it flips at the END of the fade out and at the START of the
+// fade in, which is what makes the animation visible in both directions.
+tc-fab[data-hidden] {
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.8);
+    pointer-events: none;
+}
+
+// No `prefers-reduced-motion` block. foundation/_reset.scss already flattens every
+// transition-duration under `reduce`, and the element additionally refuses to
+// retract at all under that query — see _setHidden in src/Fab.ts. Doing it there
+// rather than here keeps `hiddenByScroll` from reporting a state the FAB is not in.

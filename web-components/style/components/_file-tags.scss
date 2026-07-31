@@ -220,6 +220,11 @@ tc-file-tags {
         box-shadow: 0 1px 0 0 var(--tc-app-accent);
         outline: none;
     }
+
+    // >= 16px on touch — iOS zoom on focus (see style/foundation/_reset.scss).
+    @media (pointer: coarse) {
+        font-size: max(16px, var(--bs-file-tags-search-font-size));
+    }
 }
 
 // ── Options list ───────────────────────────────────────────────────────────

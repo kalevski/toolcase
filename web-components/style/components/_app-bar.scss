@@ -1,0 +1,435 @@
+// tc-app-bar — the phone top bar, in the three shapes the mobile design uses.
+// Mobile-first by construction: there is no media query in this file. The bar is
+// the same shape at 320px and at 1024px, because it is chrome for one column.
+//
+//     tc-app-bar                     display:flex; flex-wrap:wrap
+//       ├─ .tc-app-bar__main         order 1, flex:1   the element's OWN node
+//       ├─ [slot="brand"]            order 1, flex:1   replaces __main entirely
+//       ├─ [slot="actions"]          order 2, flex:none trailing controls
+//       └─ [slot="below"]            order 3, flex:0 0 100%  the tc-page-tabs rail
+//
+// The element renders exactly one child of its own and re-parents nothing (see the
+// header comment in src/AppBar.ts for why), so `below` is placed by giving it a
+// full-width flex basis rather than by moving it into a second row element. The
+// wrap is deterministic: a 100% basis can never share a line.
+//
+// WHAT DRAWS THE HAIRLINE, AND WHERE
+//   Every screen in the design draws EXACTLY ONE 1px rule at the bar/pane boundary,
+//   and which element owns it splits cleanly by variant:
+//     brand (1b) and back (1d, 1h, 1k)  → `border-bottom` on the bar itself
+//     title (1c, 1f, 1i, 1j)            → NOT the bar. Something below it owns the
+//                                          rule: a search band (1c, 1f), a day
+//                                          strip (1j), or the pane's own
+//                                          `border-top` (1i).
+//   So the `title` variant ships with no border. A second rule from the bar would
+//   render that hairline 2px thick, a weight rgba(34,48,26,.14) has nowhere in the
+//   canvas. tc-mobile-shell's own header separator defaults to `none` for the same
+//   reason — the slotted bar owns its edges.
+
+tc-app-bar {
+    // ── Surface ──────────────────────────────────────────────────────────────
+    --bs-app-bar-bg: var(--tc-surface);
+    // Every variant sets its own gutter below — the design gives each of the three
+    // shapes a different one, so a shared "representative" value was wrong for all
+    // of them. --m-pad-navbar (2px 14px 11px) is the base because it is the token
+    // layer's back-bar value and the back bar is the shape with a chevron whose hit
+    // box is measured off this padding.
+    --bs-app-bar-padding: var(--m-pad-navbar, 2px 14px 11px);
+    --bs-app-bar-gap: var(--m-gap-inline, 8px);
+    // 1c/1f/1i/1j put 10px between the title row and the tab rail. Four uses, so it
+    // would earn a global token — but the --m-gap-* ramp was deliberately collapsed
+    // to six steps (5/8/9/11/14/18) and snapping to 9 or 11 loses the canvas by a
+    // pixel on every one of the four. It lives here instead, where it is used.
+    --bs-app-bar-row-gap: 10px;
+    --bs-app-bar-border: 1px solid var(--tc-border);
+    --bs-app-bar-shadow: none;
+
+    // ── Type ─────────────────────────────────────────────────────────────────
+    // Every --m-font-* read carries a fallback: those tokens are declared by a
+    // THEME (style/themes/sunshine/_mobile.scss), so an un-themed page would
+    // otherwise substitute an empty value and drop the whole declaration.
+    --bs-app-bar-heading-font: var(--m-font-nav-title, 700 0.875rem var(--tc-font-sans));
+    --bs-app-bar-heading-color: var(--tc-emphasis);
+    --bs-app-bar-subheading-font: var(--m-font-meta, 400 0.6875rem var(--tc-font-sans));
+    --bs-app-bar-subheading-color: var(--tc-text-faint);
+    // Numerals. `normal` by default because the design writes its titles and most of
+    // its subtitles as prose, and proportional figures set the canvas's widths — but
+    // a bar whose text carries a number that CHANGES needs tabular figures or the
+    // line twitches as it counts (the standing rule in the design system). The
+    // `font:` shorthand RESETS font-variant-numeric, so a consumer cannot supply this
+    // by inheritance from the host; it needs its own property. See the rules below.
+    --bs-app-bar-heading-numeric: normal;
+    --bs-app-bar-subheading-numeric: normal;
+
+    // ── Back chevron ─────────────────────────────────────────────────────────
+    --bs-app-bar-icon-size: 22px;
+    --bs-app-bar-icon-stroke: 1.8;
+    // The design's chevron is #44503a — sunshine's --sun-ink-2, which has no --tc-*
+    // mapping of its own, so the sunshine partial re-points this property. See
+    // style/themes/sunshine/components/_app-bar.scss.
+    --bs-app-bar-icon-color: var(--tc-text-muted);
+    // How far the chevron's hit box bleeds SIDEWAYS past its 22px glyph, per side:
+    // (22 − 44) / 2 = −11px, which makes the box the full 44px wide. See
+    // .tc-app-bar__back. `0px` turns the sideways bleed off.
+    --bs-app-bar-back-bleed: calc(
+        (var(--bs-app-bar-icon-size) - var(--tc-min-touch-target, 44px)) / 2
+    );
+    // …and how far it reaches UP and DOWN, as padding that is cancelled again by an
+    // equal negative margin, so the bar's height never changes. The design's back bar
+    // is `2px 12px 11px` around a 22px glyph, i.e. 35px above its rule — so these two
+    // defaults grow the box to exactly the bar and no further:
+    //   * up: the bar's 2px top padding, PLUS a safe-area strip if the frame has one,
+    //     capped at the 11px that would complete a 44px box. A phone with a notch
+    //     therefore gets the full 44px; a frame with no inset (desktop, Android in a
+    //     normal tab) gets 44x35, because reaching further up would be clipped away
+    //     by tc-mobile-shell's `overflow: hidden` and reaching further DOWN would
+    //     swallow taps meant for the content pane.
+    //   * down: the bar's 11px bottom padding, stopping 1px short of its rule.
+    --bs-app-bar-back-hit-top: min(11px, 2px + env(safe-area-inset-top, 0px));
+    --bs-app-bar-back-hit-bottom: 11px;
+
+    // ── Wordmark ─────────────────────────────────────────────────────────────
+    // One size drives the whole mark: the dash and its offsets are em-relative, so
+    // the login screen's 19px wordmark needs this property and nothing else.
+    --bs-app-bar-brand-size: 16px;
+    --bs-app-bar-brand-color: var(--tc-emphasis);
+    --bs-app-bar-brand-suffix-color: var(--tc-text-faint);
+    --bs-app-bar-brand-dash-color: var(--tc-app-accent);
+    --bs-app-bar-brand-dash-width: 1.25em; // 20px at the default 16px
+    --bs-app-bar-brand-dash-height: 3px;
+
+    display: flex; // also in foundation/_reset.scss — a custom element is inline
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: var(--bs-app-bar-gap);
+    row-gap: var(--bs-app-bar-row-gap);
+    padding: var(--bs-app-bar-padding);
+    border-radius: 0;
+    background-color: var(--bs-app-bar-bg);
+    border-bottom: var(--bs-app-bar-border);
+    box-shadow: var(--bs-app-bar-shadow);
+}
+
+// ── Variants ──────────────────────────────────────────────────────────────────
+//
+// EVERY VARIANT SELECTOR IS PAIRED WITH `:not([variant])`, WHERE THE VARIANT IS THE
+// DEFAULT. `title` is what the element's own getter resolves an absent or unknown
+// `variant` to, so `<tc-app-bar heading="…">` renders a title bar — and CSS keyed on
+// `[variant='title']` alone would then dress it as a BACK bar (14px gutter, its own
+// hairline, 14px title). The two defaults have to be the same shape. `:not([variant])`
+// carries the same specificity as `[variant='title']`, so it changes no ordering.
+
+tc-app-bar[variant='title'],
+tc-app-bar:not([variant]) {
+    --bs-app-bar-padding: var(--m-pad-appbar, 2px 16px 0);
+    // 9px between the page title and its subtitle (1c, 1f, 1i, 1j). --m-gap-grid is
+    // that value; the canvas's 9px gaps all read as "two things that belong to one
+    // line", which is what this is.
+    --bs-app-bar-gap: var(--m-gap-grid, 9px);
+    --bs-app-bar-heading-font: var(--m-font-page-title, 700 1.0625rem var(--tc-font-sans));
+    --bs-app-bar-subheading-font: var(--m-font-body-sm, 400 0.75rem var(--tc-font-sans));
+    // See "what draws the hairline" above: on all four title screens the rule below
+    // this bar belongs to the element under it, not to the bar.
+    --bs-app-bar-border: 0 none;
+}
+
+// 1b:99 — the design's ONE brand bar, verbatim. n=1, so these stay literals here
+// rather than earning tokens (the token layer's rule: a value earns a token at two
+// uses). Without this block the wordmark inherited the back bar's 14px gutter and
+// 8px gap and matched no bar in the design.
+tc-app-bar[variant='brand'] {
+    --bs-app-bar-padding: 2px 16px 12px;
+    --bs-app-bar-gap: 12px;
+}
+
+tc-app-bar[variant='back'] {
+    // 1d:255 and 1k:701, the two single-line back bars. 1h:508 — the two-line one —
+    // is the 14px outlier, which is --m-pad-navbar itself: `--bs-app-bar-padding:
+    // var(--m-pad-navbar)` puts it back. The majority is the default so that the
+    // bare tag lands on the canvas rather than 2px off it on two screens out of three.
+    --bs-app-bar-padding: 2px 12px 11px;
+    // 11.5px, NOT --m-font-meta's 11px. The token layer rounded the canvas's half
+    // pixel away (its own comment records the 11.5px variant), and on this one line it
+    // is load-bearing: at `line-height: normal` 11px measures a 15px line box against
+    // 11.5px's 17px, which makes 1h's bar 50px instead of the design's 52px. The
+    // design gives the `back` variant exactly one subtitle, so this is n=1 too.
+    --bs-app-bar-subheading-font: 400 11.5px var(--m-body, var(--tc-font-sans));
+    // That subtitle is a live counter — 1h:512 is „{{ bought }} од 7 купено", which the
+    // canvas's own script rewrites on every tick-off, and the canvas writes
+    // `font-variant-numeric: tabular-nums` on it for exactly that reason.
+    --bs-app-bar-subheading-numeric: tabular-nums;
+}
+
+// `elevated` is the one state the bar cannot observe for itself — content has moved
+// under it — so it is driven from outside (the `elevated` attribute, or
+// `elevate-on-scroll` reading tc-mobile-shell's `tc-shell-scroll`).
+//
+// A shadow only, because the border above is already drawn on this variant.
+tc-app-bar[elevated] {
+    --bs-app-bar-shadow: var(--tc-shadow-sm);
+}
+
+// The title variant has no border, so its scrolled state has to supply the hairline
+// as well — and as an INSET SHADOW, not by switching the border on: a border would
+// reflow the pane by 1px at the exact moment the user is watching content move.
+// 0-2-1, so it beats both single-attribute rules above regardless of source order.
+tc-app-bar[variant='title'][elevated],
+tc-app-bar:not([variant])[elevated] {
+    --bs-app-bar-shadow: inset 0 -1px 0 var(--tc-border), var(--tc-shadow-sm);
+}
+
+// ── Regions ───────────────────────────────────────────────────────────────────
+
+// `flex: 1 1 0` — a ZERO basis, which is what the canvas writes too (`flex:1` on 1b's
+// brand block and 1d's title). Both halves are load-bearing:
+//
+//   grow 1   pushes the trailing actions to the right edge, as every screen does.
+//   basis 0  is what stops the bar wrapping. Flex breaks lines by comparing the
+//            items' HYPOTHETICAL main sizes — their content widths, before any
+//            shrinking — so with `basis: auto` a heading longer than the bar sends
+//            `actions` onto a second line and the bar silently doubles in height
+//            instead of ellipsising the heading. Measured at 320px with a 41-character
+//            recipe title: 68px against the design's 36px. With a zero basis the
+//            leading block never contributes to the break decision.
+//
+// `min-width: 0` then lets it shrink below its content so the ellipsis can happen at
+// all, and lets the tab rail be narrower than its tabs so it can scroll.
+.tc-app-bar__main {
+    order: 1;
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--bs-app-bar-gap);
+}
+
+// A slotted brand REPLACES the rendered wordmark rather than sitting beside it —
+// they would otherwise both occupy the leading block. Same flex as __main, so a
+// slotted mark is stretched across the leading space and its own content stays
+// left-aligned inside it.
+tc-app-bar > [slot='brand'] {
+    order: 1;
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+tc-app-bar:has(> [slot='brand']) > .tc-app-bar__main {
+    display: none;
+}
+
+// No `display` is written here on purpose. This is the consumer's element, and it
+// is routinely a single control (`<tc-icon-button slot="actions">`); forcing it to
+// `flex` would change how that component lays its own insides out. Two or more
+// actions each become their own flex item of the bar, spaced by --bs-app-bar-gap.
+tc-app-bar > [slot='actions'] {
+    order: 2;
+    flex: none;
+}
+
+// A 100% flex basis can never share a line, so the rail wraps deterministically
+// instead of depending on how wide the title happens to be.
+tc-app-bar > [slot='below'] {
+    order: 3;
+    flex: 0 0 100%;
+    min-width: 0;
+}
+
+// ── Titles ────────────────────────────────────────────────────────────────────
+
+// `overflow: hidden` is the bar's last line of defence, and it is not decoration: a
+// bar is one fixed line of height and its text is arbitrary (a recipe title, a diet
+// plan's name). Without it a long heading pushed its own box past the bar's right
+// edge — measured at 390px, a 66-character plan name reached x=631 and gave the
+// DOCUMENT a horizontal scrollbar, which the mobile shell forbids.
+.tc-app-bar__titles {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+}
+
+// The page title and its subtitle share one baseline (1c, 1f, 1i, 1j) — the subtitle
+// is a continuation of the title, not a second line under it.
+tc-app-bar[variant='title'] .tc-app-bar__titles,
+tc-app-bar:not([variant]) .tc-app-bar__titles {
+    display: flex;
+    align-items: baseline;
+    gap: var(--bs-app-bar-gap);
+}
+
+.tc-app-bar__heading {
+    font: var(--bs-app-bar-heading-font);
+    // After `font:`, never before — the shorthand resets font-variant-numeric, so a
+    // consumer cannot reach this by setting it on the host.
+    font-variant-numeric: var(--bs-app-bar-heading-numeric);
+    // The heading can be an <hN> (`heading-level`), which the reset gives a margin.
+    margin: 0;
+    color: var(--bs-app-bar-heading-color);
+
+    &:empty {
+        display: none;
+    }
+}
+
+.tc-app-bar__subheading {
+    font: var(--bs-app-bar-subheading-font);
+    // The canvas writes every one of these bare (`font:400 12px`), i.e. line-height
+    // `normal`. --m-font-body-sm carries the /1.45 prose leading, which on a
+    // baseline-aligned row deepens the whole toolbar. `font:` first, then this —
+    // the shorthand resets what follows it, never the reverse. Same for the numerals.
+    line-height: normal;
+    font-variant-numeric: var(--bs-app-bar-subheading-numeric);
+    color: var(--bs-app-bar-subheading-color);
+
+    &:empty {
+        display: none;
+    }
+}
+
+// The page title does not shrink — the subtitle beside it absorbs whatever width is
+// missing, because losing the end of „240 рецепти во 18 папки" costs less than losing
+// the end of „Истражи". `max-width` rather than `flex: 0 1 auto` for the last resort:
+// a flex item that refuses to shrink still obeys its max-width, so the subtitle gives
+// up ALL of its width first and only then does the title ellipsise — deterministic,
+// where two competing shrink factors would not be.
+tc-app-bar[variant='title'] .tc-app-bar__heading,
+tc-app-bar:not([variant]) .tc-app-bar__heading {
+    flex: none;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+// …and it truncates whatever `truncate` says: it shares a line with the heading, and
+// a wrapped subtitle would silently make every title-variant bar a row taller than
+// the canvas.
+tc-app-bar[variant='title'] .tc-app-bar__subheading,
+tc-app-bar:not([variant]) .tc-app-bar__subheading {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+// A bar has one fixed line of height, so a heading that does not fit ellipsises
+// rather than wrapping — unconditional on `back` (1d does exactly this, and 1h/1k
+// only get away without it because their titles are short), opt-in elsewhere with
+// the `truncate` attribute. Same declarations as `.tc-truncate-1`; inline here
+// because this is the element's own node and a class would be one more thing to keep
+// in step. Placed last so `truncate` re-enables shrinking on a title-variant
+// heading, which the rule above turns off.
+tc-app-bar[variant='back'] .tc-app-bar__heading,
+tc-app-bar[truncate] .tc-app-bar__heading {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+// ── Back chevron ──────────────────────────────────────────────────────────────
+
+.tc-app-bar__back {
+    flex: none;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--bs-app-bar-icon-color);
+    cursor: pointer;
+
+    // THE HIT BOX, AND WHY IT IS PADDING RATHER THAN A 44px BOX PULLED BACK.
+    //
+    // The design's back bar is 36px tall — 2px of top padding, a 22px glyph, 11px of
+    // bottom padding, 1px of rule — and it sets the glyph flush against the bar's left
+    // gutter with an 8px gap to the title. A 44px touch box INSIDE that flow would
+    // make the bar 57px and push the glyph and the title 11px right.
+    //
+    // So the box is grown by PADDING and the padding is cancelled again by an equal
+    // negative MARGIN: the margin box measures exactly the 22px glyph, so the bar keeps
+    // the design's height and every other item keeps the design's position, while the
+    // border box — the thing that is hit-tested — is 44px wide and as tall as the bar.
+    //
+    // The first shipped version instead set a flat 44x44 box with `margin: -11px`,
+    // which put 9px of the target ABOVE the bar. That is invisible on a notched phone
+    // and broken everywhere else: tc-mobile-shell pays the safe-area inset as
+    // `padding-top` and clips its children with `overflow: hidden`, so with no notch
+    // (desktop, Android in a normal tab) those 9px are clipped away and 44x44 becomes
+    // 44x35 — measured. The padding form asks for exactly what the frame can give:
+    // --bs-app-bar-back-hit-top adds the safe-area strip when there is one (44x44) and
+    // stops at the bar's own top edge when there is not (44x35, which clears WCAG
+    // 2.5.8 AA but not 2.5.5 AAA — the same call the tab rail makes). Spending the
+    // difference downward instead would overlap the content pane and swallow its taps.
+    //
+    // Sideways it reaches to ~1px from the frame's left edge — a back target that runs
+    // to the screen edge is a gain, and it is the corner a thumb reaches first. It
+    // overlaps the first ~3px of the (non-interactive) title.
+    //
+    // .tc-touch-target supplies the 44px WIDTH and centres the glyph; its 44px
+    // min-height is dropped, because here the height is the padding's job. (Foundation
+    // loads before the component partials, so this wins on source order.)
+    min-height: 0;
+    padding: var(--bs-app-bar-back-hit-top) 0 var(--bs-app-bar-back-hit-bottom);
+    margin-inline: var(--bs-app-bar-back-bleed);
+    margin-block: calc(-1 * var(--bs-app-bar-back-hit-top))
+        calc(-1 * var(--bs-app-bar-back-hit-bottom));
+
+    // Inset, because the bar is only 35px tall and the design gives the chevron no
+    // room above or below: the library's global 2px/2px-offset ring would be drawn
+    // over the status strip and the pane rather than around the control.
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: -2px;
+    }
+}
+
+.tc-app-bar__back-icon {
+    width: var(--bs-app-bar-icon-size);
+    height: var(--bs-app-bar-icon-size);
+    // A CSS declaration beats lucide's own stroke-width presentation attribute, so
+    // the design's 1.8 lands without editing the icon source.
+    stroke-width: var(--bs-app-bar-icon-stroke);
+}
+
+// ── Wordmark ──────────────────────────────────────────────────────────────────
+
+.tc-app-bar__brand {
+    display: flex;
+    align-items: baseline;
+    gap: 2px; // 1b — the hairline gap between the name and its suffix
+    min-width: 0;
+    // Everything below is em-relative to this, so --bs-app-bar-brand-size scales the
+    // whole mark. 1a's login wordmark is the same mark at 19px.
+    font-size: var(--bs-app-bar-brand-size);
+    font-family: var(--m-body, var(--tc-font-sans));
+    line-height: normal;
+}
+
+.tc-app-bar__brand-primary {
+    font-size: 1em;
+    font-weight: 700;
+    color: var(--bs-app-bar-brand-color);
+}
+
+.tc-app-bar__brand-secondary {
+    font-size: 1em;
+    font-weight: 400;
+    color: var(--bs-app-bar-brand-suffix-color);
+
+    &:empty {
+        display: none;
+    }
+}
+
+// A 20x3 amber rule sitting BESIDE the suffix at the wordmark's baseline — not an
+// underline under it. `border-radius` is the pill token because at 3px tall the
+// design's 2px radius is already fully rounded, and the library reserves radii for
+// genuinely pill/circular shapes.
+.tc-app-bar__brand-dash {
+    flex: none;
+    align-self: flex-end;
+    width: var(--bs-app-bar-brand-dash-width);
+    height: var(--bs-app-bar-brand-dash-height);
+    margin: 0 0 0.25em 0.375em; // 4px / 6px at 16px (1b)
+    border-radius: var(--m-radius-pill, 999px);
+    background-color: var(--bs-app-bar-brand-dash-color);
+}

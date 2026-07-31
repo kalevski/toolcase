@@ -357,3 +357,160 @@ body.modal-open {
         transition: none;
     }
 }
+
+// ── Mobile foundation ─────────────────────────────────────────────────────────
+// Safe areas, scroll containers, touch targets and clamping. All `tc-`-prefixed
+// and all opt-in, so none of them can collide with or surprise an app's own
+// classes. None carry !important — an app that reaches for one of these owns the
+// element, and !important would only make it harder to specialise.
+//
+// See style/foundation/README.md for the tokens these read and when to use which.
+
+// Hardware insets as padding. Components read --tc-safe-* rather than env()
+// directly so a host can override the inset (a design canvas drawing its own
+// status-bar mock sets it to 0); these classes keep that indirection.
+//
+// Chrome with its own padding should NOT use these — a second padding-* wins over
+// the first and drops it. Add the inset into the existing value instead:
+// `padding-bottom: calc(var(--m-pad-page) + var(--tc-safe-bottom, 0px))`.
+.tc-safe-top {
+    padding-top: var(--tc-safe-top, 0px);
+}
+
+.tc-safe-bottom {
+    padding-bottom: var(--tc-safe-bottom, 0px);
+}
+
+.tc-safe-x {
+    padding-right: var(--tc-safe-right, 0px);
+    padding-left: var(--tc-safe-left, 0px);
+}
+
+// Margin variants, for absolutely/fixed-positioned chrome whose own padding is
+// already spoken for.
+.tc-safe-top-m {
+    margin-top: var(--tc-safe-top, 0px);
+}
+
+.tc-safe-bottom-m {
+    margin-bottom: var(--tc-safe-bottom, 0px);
+}
+
+// The one scrolling pane of an app shell: a flex child that takes the leftover
+// space and scrolls its own content.
+//
+// `min-height: 0` is the load-bearing line. A flex child's automatic minimum size
+// is its content, so without it the pane refuses to shrink below its list and
+// pushes the dock off the bottom of the screen instead of scrolling — the single
+// most common reason a "100dvh shell" still scrolls the document.
+//
+// `overscroll-behavior-y: contain` keeps this pane's scroll from chaining out to
+// the document once it hits an end, while still allowing its own bounce.
+.tc-scroll-y {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+}
+
+// Horizontal rail — chip filters, day strips, card carousels.
+//
+// Deliberately sets no `display` and no `flex`: a rail is laid out by its owner
+// (flex row with `flex: none` children, or a grid) and a `flex: 1` here would
+// stretch it vertically wherever it happens to be a column child.
+//
+// A scroll container clips BOTH axes, so give the rail vertical padding — a child's
+// focus ring is otherwise cut off at the rail's edge.
+.tc-scroll-x {
+    min-width: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+// Snap points on a horizontal rail. `mandatory` is right for a full-width pager
+// (every rest position is a page) and wrong for a chip rail, where it fights the
+// user for a resting place between two chips — leave a chip rail free-scrolling.
+.tc-snap-x {
+    scroll-snap-type: x mandatory;
+
+    > * {
+        scroll-snap-align: start;
+    }
+}
+
+// Suppresses the grey flash iOS paints over a tapped element, and the long-press
+// callout menu. Use it where the element provides its own press feedback; never
+// as a blanket rule, since the flash is the only affordance on chrome that has no
+// pressed state of its own.
+.tc-no-tap-highlight {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+}
+
+// Grows a control to the touch floor without changing its content: the box gets
+// bigger, the glyph stays centred and its own size. This is the blessed way to
+// hit 44px — the reset does NOT apply a blanket button floor, because the library
+// renders plenty of micro-controls as buttons (chart segments, hotbar slots,
+// rating stars, colour swatches) that a global floor would break.
+//
+// `inline-grid`, not `grid`: `min-width` sets a floor, never a ceiling, so a
+// BLOCK-level grid box still fills its container — a `<span>`/`<a>`/`<div>`
+// carrying this class measured 390px wide at phone width, and an invisible
+// full-width tap area beside another tab swallows its taps. `<button>` hid the
+// bug, because a form control's width is fit-content regardless of `display`.
+// A caller that wants a block-level target declares `display: grid` itself.
+.tc-touch-target {
+    display: inline-grid;
+    place-items: center;
+    min-width: var(--tc-min-touch-target, 44px);
+    min-height: var(--tc-min-touch-target, 44px);
+}
+
+// Dense tier — only for a control that sits inside a row alongside others, where
+// the ROW is the primary target. Declared after the base class so the two can be
+// used together.
+.tc-touch-target--dense {
+    min-width: var(--tc-touch-target-dense, 40px);
+    min-height: var(--tc-touch-target-dense, 40px);
+}
+
+// Line clamping. `overflow: hidden` also zeroes the automatic minimum size, which
+// is what lets these truncate inside a flex row rather than widening it — but only
+// once the item can shrink at all, hence the explicit `min-width: 0` for a flex
+// child holding a long unbreakable token.
+//
+// `.tc-text-truncate` (style/components/_text.scss) is the same three declarations
+// plus `display: block`, and is what `tc-text variant="truncate"` renders. Use that
+// one inside a tc-text; this one is for any other element, where forcing `display`
+// would be wrong. Keep the two in step.
+.tc-truncate-1 {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+// The -webkit-* trio is one unit, not a progressive enhancement: -webkit-line-clamp
+// does nothing without the -webkit-box display and vertical orientation. The
+// unprefixed `line-clamp` is listed alongside it for engines that have it.
+//
+// Surprise worth knowing: where unprefixed `line-clamp` IS supported, the engine
+// un-blockifies the legacy display and `display` computes to `flow-root`, not
+// `-webkit-box` (measured in Chromium). That is an improvement — inner inline
+// content lays out normally instead of as box children — but it means you cannot
+// assert on the computed `display` to check the clamp is active. Measure
+// scrollHeight against clientHeight instead.
+.tc-truncate-2 {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+}

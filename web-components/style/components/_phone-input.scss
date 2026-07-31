@@ -149,6 +149,11 @@ tc-phone-input {
     &:focus {
         outline: none;
     }
+
+    // >= 16px on touch — iOS zoom on focus (see style/foundation/_reset.scss).
+    @media (pointer: coarse) {
+        font-size: max(16px, 0.925rem);
+    }
 }
 
 // ── Dropdown overlay ──────────────────────────────────────────────────────────
@@ -203,6 +208,11 @@ tc-phone-input {
         border-color: rgba(30, 41, 59, 0.4);
         box-shadow: 0 0 0 0.15rem rgba(30, 41, 59, 0.1);
         outline: none;
+    }
+
+    // >= 16px on touch — iOS zoom on focus (see style/foundation/_reset.scss).
+    @media (pointer: coarse) {
+        font-size: max(16px, 0.8125rem);
     }
 }
 

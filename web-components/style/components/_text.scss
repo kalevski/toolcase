@@ -73,6 +73,9 @@ div.tc-text {
 
 // truncate: single-line ellipsis. display:block ensures the rule applies even
 // when the inner element is an inline tag (specificity 0-1-0 > browser default).
+//
+// `.tc-truncate-1` (style/foundation/_utilities.scss) is the same rule without the
+// forced `display`, for elements that are not a tc-text. Keep the two in step.
 .tc-text-truncate {
     display: block;
     overflow: hidden;

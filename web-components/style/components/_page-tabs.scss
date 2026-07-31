@@ -1,0 +1,113 @@
+// tc-page-tabs — the phone page rail: a horizontal, SCROLLING, underline tab strip.
+// Mobile-first by construction: no media query in this file. The rail behaves the
+// same at 320px and 1024px; it just stops needing to scroll.
+//
+// THE DIFFERENCE FROM tc-tab-bar IS `flex-wrap`, AND IT IS NOT COSMETIC.
+//   tc-tab-bar wraps to a second line when it runs out of width. That is right on a
+//   desktop panel switcher and wrong here: the rail sits at the top of the page, so
+//   wrapping moves every pixel below it. /admin carries six tabs
+//   („Преглед · Корисници · Состојки · Пристап и лимити · Клучеви · Поставки") which
+//   is ~475px of content — at 320px that is two full lines of jump on first paint.
+//   So this rail never wraps: it scrolls, with the scrollbar hidden, and the element
+//   keeps the active tab in view.
+//
+// The host IS the tablist and the tabs are its direct children, so the host has to
+// be the scroll container too — an intervening scroller div would break the
+// tablist→tab ownership that the ARIA roles depend on.
+
+tc-page-tabs {
+    // 20px on 1c/1f, 18px on 1i/1j. Two uses each; the wider one is the default
+    // because it is also the kinder tap spacing.
+    --bs-page-tabs-gap: 20px;
+    // The design's tab is `padding-bottom:9px` with the text sitting at the top of
+    // the box — the 9px is the distance from the label to the amber rule.
+    --bs-page-tabs-tab-pad-bottom: 9px;
+    // Every --m-font-* read carries a fallback: those tokens are declared by a THEME
+    // (style/themes/sunshine/_mobile.scss), so an un-themed page would otherwise
+    // substitute an empty value and drop the declaration entirely.
+    --bs-page-tabs-tab-font: var(--m-font-body, 400 0.8125rem var(--tc-font-sans));
+    --bs-page-tabs-tab-color: var(--tc-text-faint);
+    --bs-page-tabs-tab-font-active: var(--m-font-section, 700 0.8125rem var(--tc-font-sans));
+    --bs-page-tabs-tab-color-active: var(--tc-text);
+    --bs-page-tabs-underline-width: var(--m-bar-tab, 2px);
+    --bs-page-tabs-underline-color: var(--tc-app-accent);
+
+    display: flex; // also in foundation/_reset.scss — a custom element is inline
+    // The whole point of this element. Never `wrap`.
+    flex-wrap: nowrap;
+    gap: var(--bs-page-tabs-gap);
+    border-radius: 0;
+
+    // `.tc-scroll-x` from foundation/_utilities.scss, restated rather than applied
+    // as a class: the host's `class` attribute belongs to the consumer (react-dom
+    // rewrites the whole string whenever a `className` prop changes value), so a
+    // class written from JS would not survive. KEEP THE TWO IN STEP — the utility is
+    // the definition, this is the second sanctioned copy after tc-mobile-shell's
+    // pane. See style/foundation/README.md.
+    min-width: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+// ── Tab ───────────────────────────────────────────────────────────────────────
+
+// One selector for all three shapes the element renders — <a> when the tab is a
+// route, <button> when it switches a panel, inert <span> when it is disabled.
+.tc-page-tabs-tab {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 0 var(--bs-page-tabs-tab-pad-bottom);
+    border: 0;
+    // Transparent on the resting tab rather than absent, so the active tab is not
+    // 2px taller than its neighbours and the rail's height never changes with the
+    // selection. (The canvas gets the same result for free: its row is
+    // `align-items: stretch`, so the tallest tab sets the height for all of them.)
+    border-bottom: var(--bs-page-tabs-underline-width) solid transparent;
+    border-radius: 0;
+    background: transparent;
+    font: var(--bs-page-tabs-tab-font);
+    // The canvas writes the tab bare (`font:400 13px`), i.e. line-height `normal`.
+    // --m-font-body carries the /1.45 prose leading, which would make the rail ~3px
+    // taller than the design on every screen that has one. `font:` first, then this
+    // — the shorthand resets what follows it, never the reverse.
+    line-height: normal;
+    color: var(--bs-page-tabs-tab-color);
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color var(--m-dur-state, 0.18s) var(--m-ease, ease);
+
+    &--active {
+        font: var(--bs-page-tabs-tab-font-active);
+        line-height: normal;
+        color: var(--bs-page-tabs-tab-color-active);
+        border-bottom-color: var(--bs-page-tabs-underline-color);
+    }
+
+    // Inset ring. A scroll container clips BOTH axes (`overflow-x: auto` forces the
+    // used value of `overflow-y` to `auto` too), and the design leaves the rail no
+    // padding at all — the active tab's rule IS the bar's bottom edge — so the
+    // library's global 2px/2px-offset ring would be clipped away on all four sides.
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: -2px;
+    }
+
+    &[aria-disabled='true'] {
+        opacity: 0.5;
+        pointer-events: none;
+        cursor: default;
+    }
+}
+
+// No `prefers-reduced-motion` block for that transition: foundation/_reset.scss
+// already flattens every transition-duration under `reduce` with `!important`. What
+// the reset CANNOT reach is scroll-behavior, so the element checks the query itself
+// before scrolling the active tab into view smoothly.

@@ -131,6 +131,13 @@ tc-number-input[disabled] {
         color: var(--tc-text-faint);
         opacity: 1;
     }
+
+    // >= 16px on touch — iOS zoom on focus (see style/foundation/_reset.scss).
+    // This element carries .form-control, but this partial loads after
+    // _input.scss so the 0.925rem above wins and the floor has to be repeated.
+    @media (pointer: coarse) {
+        font-size: max(16px, 0.925rem);
+    }
 }
 
 // ── Stepper (stacked up/down) ───────────────────────────────────────────────

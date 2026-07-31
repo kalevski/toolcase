@@ -17,6 +17,7 @@ tc-bitmap-font-generator {
     --bs-bitmap-font-generator-canvas-bg: var(--tc-surface-muted);
     --bs-bitmap-font-generator-checker: var(--tc-border-faint, #f1f5f9);
     --bs-bitmap-font-generator-checker-size: 12px;
+    --bs-bitmap-font-generator-canvas-width: 100%;
     --bs-bitmap-font-generator-canvas-height: 240px;
     --bs-bitmap-font-generator-padding: 0.75rem;
 
@@ -43,7 +44,7 @@ tc-bitmap-font-generator[disabled] {
 
 .tc-bfg-canvas {
     display: block;
-    width: 100%;
+    width: var(--bs-bitmap-font-generator-canvas-width);
     height: var(--bs-bitmap-font-generator-canvas-height);
     border: 1px solid var(--bs-bitmap-font-generator-border-strong);
     border-radius: 0;
@@ -60,4 +61,27 @@ tc-bitmap-font-generator[disabled] {
         0 var(--bs-bitmap-font-generator-checker-size),
         var(--bs-bitmap-font-generator-checker-size) calc(-1 * var(--bs-bitmap-font-generator-checker-size)),
         calc(-1 * var(--bs-bitmap-font-generator-checker-size)) 0;
+}
+
+// ── fit-parent: preview auto-scales to the parent box ───────────────────────
+// The element, its root, and the canvas all stretch to fill the parent instead of
+// using the fixed canvas height, so the preview scales with the layout. The parent
+// needs a definite height; where it doesn't, --bs-*-canvas-height is the floor
+// (clipped by the root so a short parent never spills).
+
+tc-bitmap-font-generator[fit-parent] {
+    height: 100%;
+}
+
+tc-bitmap-font-generator[fit-parent] .tc-bfg {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+tc-bitmap-font-generator[fit-parent] .tc-bfg-canvas {
+    flex: 1 1 auto;
+    height: 100%;
+    min-height: var(--bs-bitmap-font-generator-canvas-height);
 }

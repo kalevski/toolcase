@@ -75,6 +75,11 @@ tc-json-schema-def[disabled] .tc-json-schema-def,
     font-weight: 500;
     line-height: var(--bs-json-schema-def-input-line-height);
     color: var(--bs-json-schema-def-label-color);
+
+    // >= 16px on touch — iOS zoom on focus (see style/foundation/_reset.scss).
+    @media (pointer: coarse) {
+        font-size: max(16px, 13px);
+    }
 }
 
 // ── Property rows ────────────────────────────────────────────────────────────
@@ -109,6 +114,13 @@ tc-json-schema-def[disabled] .tc-json-schema-def,
     padding: var(--bs-json-schema-def-input-padding-y) var(--bs-json-schema-def-input-padding-x);
     font-size: var(--bs-json-schema-def-input-font-size);
     line-height: var(--bs-json-schema-def-input-line-height);
+
+    // >= 16px on touch — iOS zoom on focus (see style/foundation/_reset.scss).
+    // All four are real inputs/selects and all four carry .form-control or
+    // .form-select, but this partial loads after both so the dense 13px wins.
+    @media (pointer: coarse) {
+        font-size: max(16px, var(--bs-json-schema-def-input-font-size));
+    }
 }
 
 // Property-name keys are machine-facing — render mono.
@@ -118,6 +130,12 @@ tc-json-schema-def[disabled] .tc-json-schema-def,
     font-family: var(--bs-json-schema-def-mono);
     font-size: var(--bs-json-schema-def-key-size);
     color: var(--bs-json-schema-def-key-color);
+
+    // Its own floor, because the font-size above is declared LATER in this file
+    // than the group's coarse block and so out-orders it at equal specificity.
+    @media (pointer: coarse) {
+        font-size: max(16px, var(--bs-json-schema-def-key-size));
+    }
 }
 
 .tc-json-schema-def-type {

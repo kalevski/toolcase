@@ -17,6 +17,7 @@ tc-normal-map-generator {
     --bs-normal-map-generator-stage-border: var(--tc-border-strong);
     --bs-normal-map-generator-checker: var(--tc-border-faint, #f1f5f9);
     --bs-normal-map-generator-checker-size: 12px;
+    --bs-normal-map-generator-canvas-width: 100%;
     --bs-normal-map-generator-canvas-height: 280px;
     --bs-normal-map-generator-padding: 0.75rem;
 
@@ -65,10 +66,37 @@ tc-normal-map-generator[disabled] {
 
 .tc-nmg-canvas {
     display: block;
-    width: 100%;
+    width: var(--bs-normal-map-generator-canvas-width);
     height: var(--bs-normal-map-generator-canvas-height);
     border-radius: 0;
     touch-action: none;
+}
+
+// ── fit-parent: stage auto-scales to the parent box ─────────────────────────
+// The element, its root, and the canvas all stretch to fill the parent instead of
+// using the fixed canvas height, so the preview scales with the layout. The parent
+// needs a definite height; where it doesn't, --bs-*-canvas-height is the floor
+// (clipped by the root so a short parent never spills).
+
+tc-normal-map-generator[fit-parent] {
+    height: 100%;
+}
+
+tc-normal-map-generator[fit-parent] .tc-normal-map-generator {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+tc-normal-map-generator[fit-parent] .tc-nmg-stage {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+tc-normal-map-generator[fit-parent] .tc-nmg-canvas {
+    height: 100%;
+    min-height: var(--bs-normal-map-generator-canvas-height);
 }
 
 // Cursor hints the active tool without adding any chrome.

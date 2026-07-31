@@ -10,7 +10,7 @@ tc-report-dialog {
     --bs-report-dialog-shadow:       var(--tc-shadow-lg);
     --bs-report-dialog-width:        460px;
     --bs-report-dialog-max-width:    calc(100vw - 2rem);
-    --bs-report-dialog-max-height:   calc(100dvh - 4rem);
+    --bs-report-dialog-max-height:   calc(var(--tc-vh) - 4rem);
     --bs-report-dialog-padding:      1.25rem;
     --bs-report-dialog-gap:          0.75rem;
 
@@ -338,6 +338,11 @@ tc-report-dialog {
     &:focus {
         border-color: rgba(30, 41, 59, 0.5);
         box-shadow: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
+    }
+
+    // >= 16px on touch — iOS zoom on focus (see style/foundation/_reset.scss).
+    @media (pointer: coarse) {
+        font-size: max(16px, var(--bs-report-dialog-textarea-size));
     }
 }
 

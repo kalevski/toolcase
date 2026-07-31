@@ -203,6 +203,23 @@ import { MetricCard } from './MetricCard'
 import { SlicesCard } from './SlicesCard'
 import { DashboardSidebar } from './DashboardSidebar'
 import { DashboardLayout } from './DashboardLayout'
+import { MobileShell } from './MobileShell'
+import { AppBar } from './AppBar'
+import { BottomSheet } from './BottomSheet'
+import { ActionBar } from './ActionBar'
+import { Fab } from './Fab'
+import { SwipePager } from './SwipePager'
+import { StepPager } from './StepPager'
+import { CheckRow } from './CheckRow'
+import { ListSection } from './ListSection'
+import { Notice } from './Notice'
+import { StatTile } from './StatTile'
+import { TaxonomyCard } from './TaxonomyCard'
+import { MacroGrid } from './MacroGrid'
+import { QuotaMeter } from './QuotaMeter'
+import { TrendSpark } from './TrendSpark'
+import { DayStrip } from './DayStrip'
+import { AddSlot } from './AddSlot'
 import { DatePicker } from './DatePicker'
 import { DiffViewer } from './DiffViewer'
 import { Drawer } from './Drawer'
@@ -259,6 +276,8 @@ import { Roadmap } from './Roadmap'
 import { SideNav } from './SideNav'
 import { SingleCardSelect } from './SingleCardSelect'
 import { TabBar } from './TabBar'
+import { PageTabs } from './PageTabs'
+import { TabDock } from './TabDock'
 import { TabSections } from './TabSections'
 import { Table } from './Table'
 import { TeamList } from './TeamList'
@@ -574,6 +593,23 @@ export function register(): void {
     define('tc-slices-card', SlicesCard)
     define('tc-dashboard-sidebar', DashboardSidebar)
     define('tc-dashboard-layout', DashboardLayout)
+    define('tc-mobile-shell', MobileShell)
+    define('tc-app-bar', AppBar)
+    define('tc-bottom-sheet', BottomSheet)
+    define('tc-action-bar', ActionBar)
+    define('tc-fab', Fab)
+    define('tc-swipe-pager', SwipePager)
+    define('tc-step-pager', StepPager)
+    define('tc-check-row', CheckRow)
+    define('tc-list-section', ListSection)
+    define('tc-notice', Notice)
+    define('tc-stat-tile', StatTile)
+    define('tc-taxonomy-card', TaxonomyCard)
+    define('tc-macro-grid', MacroGrid)
+    define('tc-quota-meter', QuotaMeter)
+    define('tc-trend-spark', TrendSpark)
+    define('tc-day-strip', DayStrip)
+    define('tc-add-slot', AddSlot)
     define('tc-date-picker', DatePicker)
     // tc-diff-viewer intentionally exposes `before`/`after` string properties as its
     // public API (documented + used by demos), which shadow the inherited ChildNode
@@ -634,6 +670,8 @@ export function register(): void {
     define('tc-side-nav', SideNav)
     define('tc-single-card-select', SingleCardSelect)
     define('tc-tab-bar', TabBar)
+    define('tc-page-tabs', PageTabs)
+    define('tc-tab-dock', TabDock)
     define('tc-tab-sections', TabSections)
     define('tc-table', Table)
     define('tc-advanced-table', AdvancedTable)

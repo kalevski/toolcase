@@ -176,6 +176,14 @@ tc-combo-box[disabled] {
     &::placeholder {
         color: var(--bs-combo-box-empty-color);
     }
+
+    // >= 16px on touch, or iOS Safari zooms the viewport on focus and never zooms
+    // back — see the note in style/foundation/_reset.scss. Nested so it lands after
+    // the base size at equal specificity; the reset's element-level floor cannot
+    // reach a class.
+    @media (pointer: coarse) {
+        font-size: max(16px, 0.8125rem);
+    }
 }
 
 // ── Options list ─────────────────────────────────────────────────────────────

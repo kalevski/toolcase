@@ -54,6 +54,9 @@ const PhysicsEditorDemo: React.FC = () => {
         }
     )
 
+    const sizedRef = useTc<HTMLElement>({ source, shapes: SEED_SHAPES })
+    const fitRef = useTc<HTMLElement>({ source, shapes: SEED_SHAPES })
+
     const pickTool = (next: (typeof TOOLS)[number]) => {
         setTool(next)
         if (editorRef.current) editorRef.current.tool = next
@@ -157,6 +160,37 @@ const PhysicsEditorDemo: React.FC = () => {
                                     handles="off"
                                     shapes='[{"type":"box","x":60,"y":40,"w":220,"h":160}]'
                                 />
+                            </tc-section-card>
+
+                            <tc-section-card title="Canvas size — fixed box vs fit-parent auto-scale">
+                                <p className="text-body-secondary">
+                                    <code>canvas-width</code> / <code>canvas-height</code> size the
+                                    canvas (bare numbers are px). <code>fit-parent</code> makes the
+                                    element fill its parent box instead — give the parent a definite
+                                    height; <code>canvas-height</code> is the floor when it has
+                                    none.
+                                </p>
+                                <div className="row g-3">
+                                    <div className="col-12 col-lg-5">
+                                        {/* @ts-ignore */}
+                                        <tc-physics-editor
+                                            ref={sizedRef}
+                                            readonly
+                                            canvas-width="100%"
+                                            canvas-height="200"
+                                        />
+                                    </div>
+                                    <div className="col-12 col-lg-7" style={{ height: 360 }}>
+                                        {/* @ts-ignore */}
+                                        <tc-physics-editor
+                                            ref={fitRef}
+                                            fit-parent
+                                            canvas-height="160"
+                                            tool="select"
+                                            snap="2"
+                                        />
+                                    </div>
+                                </div>
                             </tc-section-card>
 
                             <tc-section-card title="Disabled">

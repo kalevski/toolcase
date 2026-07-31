@@ -19,6 +19,7 @@ tc-physics-editor {
     --bs-physics-editor-stage-border: var(--tc-border-strong);
     --bs-physics-editor-checker: var(--tc-border-faint, #f1f5f9);
     --bs-physics-editor-checker-size: 12px;
+    --bs-physics-editor-canvas-width: 100%;
     --bs-physics-editor-canvas-height: 320px;
     --bs-physics-editor-padding: 0.75rem;
 
@@ -76,11 +77,38 @@ tc-physics-editor[disabled] {
 
 .tc-physics-editor-canvas {
     display: block;
-    width: 100%;
+    width: var(--bs-physics-editor-canvas-width);
     height: var(--bs-physics-editor-canvas-height);
     border-radius: 0;
     touch-action: none;
     cursor: crosshair;
+}
+
+// ── fit-parent: stage auto-scales to the parent box ─────────────────────────
+// The element, its root, and the canvas all stretch to fill the parent instead of
+// using the fixed canvas height, so the stage scales with the layout. The parent
+// needs a definite height; where it doesn't, --bs-*-canvas-height is the floor
+// (clipped by the root so a short parent never spills).
+
+tc-physics-editor[fit-parent] {
+    height: 100%;
+}
+
+tc-physics-editor[fit-parent] .tc-physics-editor {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+tc-physics-editor[fit-parent] .tc-physics-editor-stage {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+tc-physics-editor[fit-parent] .tc-physics-editor-canvas {
+    height: 100%;
+    min-height: var(--bs-physics-editor-canvas-height);
 }
 
 // Non-drawing states drop the crosshair so the cursor reports the real affordance.

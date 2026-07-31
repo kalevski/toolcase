@@ -1,0 +1,159 @@
+// Sunshine › mobile scale — the THEME half of the `--m-*` token layer.
+//
+// The generic half (space, radii, control sizes, shadow geometry, motion) lives
+// in style/foundation/_mobile-tokens.scss. This file supplies what only a theme
+// can: the phone type scale, the warm shadow tint, the scrim, and the dock's
+// resting/active states.
+//
+// FONT BINDING — why --m-display is not --sun-display
+//   Base sunshine's display face is Bricolage Grotesque. The phone design this
+//   scale was extracted from sets a serif (Playfair Display) against a humanist
+//   sans (Source Sans 3), with IBM Plex Mono for step numbers. Re-pointing
+//   --sun-display would re-face every existing sunshine consumer, so the mobile
+//   scale gets its own three family tokens instead. An app that wants a different
+//   pairing overrides --m-display / --m-body / --m-mono at its theme root and the
+//   whole scale below follows.
+//
+// THE `font` SHORTHAND TRAP — read before consuming these
+//   These are `font` shorthands, matching the design's own inline style. The
+//   shorthand RESETS font-variant-numeric to `normal`, so this is wrong:
+//       font-variant-numeric: tabular-nums;
+//       font: var(--m-font-kcal-num);          /* just wiped the line above */
+//   and this is right:
+//       font: var(--m-font-kcal-num);
+//       font-variant-numeric: tabular-nums;
+//   Every number that can change (kcal, macros, amounts, counters, prices,
+//   dates) carries tabular-nums in this design — 36 uses across 11 screens. It
+//   is what stops the layout jittering while the serving scaler runs.
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    // ── Families ─────────────────────────────────────────────────────────────
+    --m-display: 'Playfair Display', Georgia, serif;
+    --m-body: 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --m-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+
+    // ── Display type (serif) ─────────────────────────────────────────────────
+    // Serif names food and people; it never labels a control.
+    --m-font-hero: 700 39px/1.08 var(--m-display); // 1a headline (pair with --m-track-hero)
+    --m-font-h1: 700 27px/1.1 var(--m-display); // 1d recipe title
+    --m-font-h2: 700 25px/1.14 var(--m-display); // 1b greeting
+    --m-font-h3: 700 22px/1.14 var(--m-display); // 1k name, 1l sheet title — 2x
+    --m-font-card-title: 600 20px/1.12 var(--m-display); // 1c/1f card titles — 5x (19px on 1b)
+    --m-font-step: 600 30px/1.28 var(--m-display); // 1e step text
+    --m-font-step-no: 600 52px/1 var(--m-mono); // 1e step number — the only mono in the UI
+
+    // ── Functional type (sans) ───────────────────────────────────────────────
+    // 17px/700 is the busiest size in the design and carries three roles at once:
+    // the page title (1c, 1f, 1i, 1j, 1l), the card's kcal figure (1b, 1c, 1f)
+    // and cooking mode's step-advance label (1e). One value, three names — the
+    // names are what a later task greps for.
+    --m-font-page-title: 700 17px var(--m-body); // 13x
+    --m-font-kcal-num: 700 17px var(--m-body); // + tabular-nums
+    --m-font-step-label: 700 17px var(--m-body); // 1e step-advance button — the third role
+    --m-font-kcal-unit: 700 8px var(--m-body); // "ККАЛ", + --m-track-unit — 6x
+    --m-font-nav-title: 700 14px var(--m-body); // 1d/1h/1k back-bar titles — 3x
+    --m-font-title-sm: 700 15px var(--m-body); // bold inline title / price — 3x
+    --m-font-section: 700 13px var(--m-body); // section heading, active page tab — 8x
+
+    --m-font-body: 400 13px/1.45 var(--m-body); // 18x (mostly written bare, no lh)
+    --m-font-body-sm: 400 12px/1.45 var(--m-body); // card descriptions — 7x
+    --m-font-label: 600 13px var(--m-body); // list row names — 8x (14.5px on 1h)
+    --m-font-meta: 400 11px var(--m-body); // hints, subtitles — 17x (11.5px variant)
+    --m-font-meta-strong: 600 11px var(--m-body); // counters, small kcal figures — 8x
+
+    // Numbers. The design's stat sizes are 16 / 20 / 21 / 38px; 21px (1k) reads
+    // as 20px measurement drift, so --m-font-stat covers both.
+    --m-font-stat: 700 20px var(--m-body); // macro + rating figures — 10x
+    --m-font-stat-sm: 700 16px var(--m-body); // macro grams in the 3-up grid (1i) — 3x
+    --m-font-stat-xl: 700 38px var(--m-body); // 1i daily kcal target
+
+    --m-font-btn: 600 14px var(--m-body); // primary / secondary buttons — 11x
+    --m-font-btn-sm: 600 12.5px var(--m-body); // compact + text actions — 8x
+
+    // Eyebrows. Small, bold, wide-tracked uppercase above a serif title: the
+    // signature move of this system, and at 26 uses the single most repeated
+    // value in the design.
+    --m-font-eyebrow: 700 9.5px var(--m-body); // 26x
+    --m-font-eyebrow-lg: 700 10px var(--m-body); // 1b, 1l — 3x
+
+    --m-font-tab: 400 10px var(--m-body); // dock label, resting — 21x
+    --m-font-tab-active: 700 10px var(--m-body); // dock label, active
+    --m-font-chip: 400 10px var(--m-body); // card chip — pairs with --m-pad-chip
+    --m-font-chip-md: 400 11px var(--m-body); // rail chip (1f)
+    --m-font-chip-lg: 400 12px var(--m-body); // sheet chip (1g)
+
+    // Tracking. Uppercase at 8-10px is unreadable un-tracked; these two values
+    // are the whole reason the eyebrows work.
+    --m-track-eyebrow: 0.13em; // 29x
+    --m-track-unit: 0.1em; // unit labels under a figure — 6x
+    --m-track-hero: -0.015em; // 1a only — display type tightens as it grows
+
+    // ── Elevation tint ───────────────────────────────────────────────────────
+    // Warm brown, never neutral black. Shadows in this system read as sunlight
+    // through a window rather than a drop-shadow filter; a grey shadow on cream
+    // immediately looks like dirt.
+    --m-shadow-tint: 54, 44, 18;
+
+    // Amber glows. These belong to the theme rather than the foundation because
+    // they are the lead accent *as* elevation — the glow is the same hue as the
+    // fill it sits under, which is what keeps a bright button from looking
+    // pasted on.
+    --m-shadow-amber: 0 12px 28px -12px rgba(242, 183, 5, 0.5); // primary buttons — 10x
+    --m-shadow-amber-ring:
+        0 0 0 1px rgba(242, 183, 5, 0.45), 0 14px 30px -10px rgba(242, 183, 5, 0.55); // FAB (1c)
+
+    // ── Scrim ────────────────────────────────────────────────────────────────
+    // A signature, and easy to get wrong: the page behind a sheet is dimmed with
+    // a warm CREAM wash plus a slight blur, not a black overlay. Black would
+    // turn the cream canvas grey and break the "printed paper" read the whole
+    // system depends on.
+    //
+    // The design uses 0.55 (1g) and 0.6 (1l). Collapsed to the stronger of the
+    // two so the sheet always wins the foreground.
+    --m-scrim: rgba(253, 248, 236, 0.6);
+    --m-scrim-blur: blur(1.5px);
+    --m-scrim-opacity: 0.6; // applied to the content behind, under the wash
+    --m-grabber-bg: rgba(34, 48, 26, 0.2);
+    --m-home-indicator-bg: rgba(34, 48, 26, 0.32);
+
+    // ── Dock states ──────────────────────────────────────────────────────────
+    // Weight carries as much of the active state as colour does — the label goes
+    // 400 -> 700, which survives both colour-blindness and a greyscale screenshot.
+    //
+    // Active defaults to the theme accent. The JADI.mk app overrides it to its
+    // own signature terracotta in web/src/styles/_mobile.scss: which hue means
+    // "you are here" is a brand decision, not a library one.
+    --m-dock-active: var(--tc-accent);
+    --m-dock-idle: var(--sun-ink-4); // #9aa189 — the design's exact idle ink
+    --m-dock-bg: var(--sun-surface);
+    --m-dock-border: var(--sun-line);
+
+    // ── Surfaces the mobile scale adds ───────────────────────────────────────
+    // The unchecked outline on every tick and toggle. Warmer and lighter than
+    // --sun-line so an empty checkbox reads as "not yet" rather than "disabled".
+    --m-toggle-idle: #e5ddd0;
+
+    // The left-flush notice bar (1e's cooking hint, 1f, 1i, 1k) — a 3px rule with a
+    // 7%-alpha wash of the same hue, squared against the rule and rounded away from
+    // it (--m-radius-notice). TERRACOTTA and not amber, which is the whole point:
+    // amber is this design's CTA colour under a two-elements-per-screen budget, and
+    // 1e has already spent both on the step number and the advance button.
+    //
+    // #a4472f is the app's signature hue (design-reference.md §2.3, ~100 uses) and
+    // has no --sun-* rung of its own; it is a literal here for the same reason
+    // --m-toggle-idle above is.
+    --m-notice-accent: #a4472f;
+    --m-notice-bg: rgba(164, 71, 47, 0.07);
+
+    // The DASHED separator — the same hex as --m-toggle-idle above and a different
+    // role, which is why it is a second name rather than a reuse. design-reference.md
+    // §2.3 lists the pair „#e5ddd0 / #d8cfbd — dashed separators / dashed borders": in
+    // this design a dashed hairline means „these rows are one continuous list" where a
+    // solid one means „these are separate objects". It separates rows inside a shopping
+    // list (1h), rows inside a meal card (1j), and a card's body from its footer rule
+    // (1i) — three uses, so it earns a token by this scale's own two-use rule.
+    // Anything re-skinning the toggle outline probably wants the rules to follow, but
+    // the two are addressable apart.
+    --m-rule-dashed: #e5ddd0;
+}

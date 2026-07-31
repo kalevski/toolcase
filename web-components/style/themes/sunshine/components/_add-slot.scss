@@ -1,0 +1,32 @@
+// Sunshine › tc-add-slot — the one warm neutral the dashed slot is drawn in that has no
+// `--tc-*` rung.
+//
+// The mechanism is the one tc-app-bar, tc-input and tc-check-row already use: the generic
+// partial names the nearest rung so an un-themed page is sane, and this file pins the
+// value `1j` measures.
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    tc-add-slot {
+        // #d8cfbd — design-reference.md §2.3's „dashed borders" rung, one step deeper than
+        // the #e5ddd0 that dashed row SEPARATORS use (`--m-rule-dashed`). The two are a
+        // deliberate pair, not a measurement slip: a separator sits between rows that are
+        // one continuous list, while this outlines a whole missing object and needs to
+        // read as a frame. `--tc-border-strong` is `--sun-line-strong`
+        // (rgba(34,48,26,.26)) — a translucent green-cast hairline, visibly cooler than
+        // this warm tan over cream.
+        --bs-add-slot-border-color: #d8cfbd;
+
+        // The focus ring for the whole app is terracotta at 2px/2px (design-reference.md
+        // §4). The global ring resolves through `--tc-app-accent`, which under this theme
+        // is the amber CTA colour — the weakest 2px ring in the system against cream, and
+        // one that spends the amber budget on a control that is deliberately quiet.
+        --bs-add-slot-focus-ring: #a4472f;
+
+        // #9aa189 for the label and the glyph — `--tc-text-faint` is `--sun-ink-4`, which
+        // is exactly that. Inherited, not restated.
+        //
+        // The `accent` tone resolves through `--tc-accent` → `--sun-leaf` (#5f8a2e), the
+        // theme's link/secondary green. Deliberately not amber; see the generic partial.
+    }
+}

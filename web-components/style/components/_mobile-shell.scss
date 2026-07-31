@@ -1,0 +1,252 @@
+// tc-mobile-shell — the phone app frame: a fixed top region, EXACTLY ONE
+// scrolling pane, optional bottom chrome, and an absolute layer for sheets.
+// Mobile-first by construction — the phone layout carries no media query and the
+// single `up(md)` block only centres it on a wider viewport.
+//
+// The element renders no markup (see the header comment in src/MobileShell.ts for
+// why), so every selector here targets the CONSUMER'S own direct children by
+// their `slot` attribute. With no shadow root those attributes are inert HTML;
+// they are used here purely as region names, the same way tc-dashboard-layout
+// uses them.
+//
+//     tc-mobile-shell
+//       ├─ [slot="header"]   order 1, flex:none   app bar / back bar
+//       ├─ :not([slot])      order 2, flex:1      THE scroll pane
+//       ├─ [slot="action"]   order 3, flex:none   sticky action bar
+//       ├─ [slot="dock"]     order 4, flex:none   5-tab bottom dock
+//       └─ [slot="overlay"]  absolute             sheets, FAB, toasts
+//
+// DOM order matches paint order for the four in-flow regions, so the action bar's
+// shadow falls over the pane and the dock's over the action bar — which is what
+// the design's stacked chrome does.
+
+@use '../foundation/tokens' as *;
+
+tc-mobile-shell {
+    --bs-mobile-shell-bg: var(--tc-surface-hover); // the pane: canvas
+    --bs-mobile-shell-header-bg: var(--tc-surface);
+    --bs-mobile-shell-action-bg: var(--tc-surface);
+    --bs-mobile-shell-dock-bg: var(--tc-surface);
+    --bs-mobile-shell-action-shadow: var(--m-shadow-actionbar);
+    // OFF by default, and the default is the design. All eight header-bearing
+    // screens already draw exactly one hairline at the header/pane boundary —
+    // seven on the bar itself (`border-bottom:1px solid rgba(34,48,26,.14)`, and
+    // on 1c/1f/1h that bar is the search band, the second header child) and 1i on
+    // the pane's own `border-top`. A rule from the shell lands on top of it, and
+    // rgba(34,48,26,.14) at 2px exists nowhere in the canvas. So the shell offers
+    // the affordance and draws nothing: a header that has NO rule of its own opts
+    // in with `inset 0 -1px 0 var(--tc-border)`.
+    //
+    // An inset shadow rather than a border because it costs no layout: switching a
+    // border on mid-scroll reflows the pane by 1px, visible as a jitter at the
+    // exact moment the user is watching the content move.
+    --bs-mobile-shell-header-shadow: none;
+
+    // The host's own background shows in exactly one place — the hardware inset
+    // strips it pays for out of its padding box — so it is named for that, not
+    // for "the shell". On ten of the twelve design screens the element adjacent
+    // to a hardware edge is chrome (#fffdf7); a full-bleed screen (a dark login,
+    // a cooking mode on the deeper canvas) sets this to its own canvas colour.
+    --bs-mobile-shell-edge-bg: var(--tc-surface);
+
+    // Which hardware edges to honour. `edge="top"` / `edge="bottom"` zero the
+    // other one; overriding either property directly is a third way in, e.g. for
+    // a desktop preview frame that draws its own bezel.
+    --bs-mobile-shell-inset-top: var(--tc-safe-top, 0px);
+    --bs-mobile-shell-inset-bottom: var(--tc-safe-bottom, 0px);
+
+    // Large-viewport framing — see the up(md) block at the foot of this file.
+    --bs-mobile-shell-max-width: 480px;
+    --bs-mobile-shell-frame-line: var(--tc-border);
+
+    // Not a --bs-* cosmetic knob: measured hardware state, written by the element
+    // from window.visualViewport. Declared here so `var()` resolves before any JS
+    // has run, and so a consumer can read it to lift its own chrome.
+    --tc-keyboard-inset: 0px;
+
+    position: relative; // containing block for [slot="overlay"]
+    display: flex;
+    flex-direction: column;
+    // dvh, via the token, so the shell follows the mobile-Safari toolbar in and
+    // out instead of jumping by its height on every change of scroll direction.
+    // Never 100vh — and never a bare 100dvh, which opts out of the token's
+    // @supports fallback (see style/foundation/README.md).
+    height: var(--tc-vh);
+    overflow: hidden;
+    background-color: var(--bs-mobile-shell-edge-bg);
+
+    // Both hardware insets are paid HERE rather than on the chrome that sits
+    // against them. Two reasons, both load-bearing:
+    //   1. A `padding-bottom` on the dock region would beat the dock's own
+    //      `padding` shorthand on specificity and silently drop its value.
+    //   2. Paying it here means the dock's box genuinely ENDS above the home
+    //      indicator, so its bottom 34px cannot swallow a tap — rather than the
+    //      dock merely drawing 34px of empty space it still owns.
+    padding-top: var(--bs-mobile-shell-inset-top);
+    // max(), not a sum: when the keyboard is up it already covers the home
+    // indicator, so adding the two would lift the action bar 34px too far.
+    padding-bottom: max(var(--bs-mobile-shell-inset-bottom), var(--tc-keyboard-inset));
+}
+
+tc-mobile-shell[edge='top'] {
+    --bs-mobile-shell-inset-bottom: 0px;
+}
+
+tc-mobile-shell[edge='bottom'] {
+    --bs-mobile-shell-inset-top: 0px;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+
+tc-mobile-shell > [slot='header'] {
+    order: 1;
+    flex: none;
+}
+
+// WHY EVERY CHROME `background-color` IS WRAPPED IN :where()
+//   A bare `tc-mobile-shell > [slot='header']` rule is specificity 0-1-1, and a
+//   library component paints itself from its own host tag — `tc-app-bar {
+//   background-color: var(--bs-app-bar-bg) }` — which is 0-0-1. The shell would
+//   win and silently kill the bar's own background token, the same specificity
+//   trap deviation 2 avoids for `padding`. :where() drops the whole selector to
+//   0-0-0, so these are defaults for a plain `<div slot="…">` that any slotted
+//   component (or the app) can simply declare over. Screen 1e needs exactly that
+//   escape: its chrome has no background at all, sitting on the bare canvas.
+//   The `order` / `flex` declarations above stay at full specificity — the frame's
+//   geometry is the shell's, not the slotted content's.
+:where(tc-mobile-shell > [slot='header']) {
+    background-color: var(--bs-mobile-shell-header-bg);
+}
+
+// Flat at rest AND flat while scrolled unless the consumer asks otherwise — see
+// the token's comment. Scoped to the LAST header child, because a header is often a
+// stack (1c/1f/1h: bar + search band; 1j: bar + day strip) and a rule between the
+// two draws a hairline the design has nowhere. `:last-child`/`:last-of-type` cannot express
+// that: the header children may be different tags and are followed by the pane and
+// the bottom chrome. What the shell contributes is the state neither the bar nor
+// the app can observe — content has moved under the header — which is the whole
+// reason `scrolled` exists.
+:where(tc-mobile-shell[data-scrolled] > [slot='header']:not(:has(~ [slot='header']))) {
+    box-shadow: var(--bs-mobile-shell-header-shadow);
+}
+
+// ── The one scroll pane ───────────────────────────────────────────────────────
+
+// The single direct child with no `slot` attribute. `<template>`/`<style>`/
+// `<script>` are `display: none`, so these declarations are inert on them and the
+// selector needs no exclusion (the JS side does — it would otherwise pick one up
+// as the pane).
+//
+// These five declarations are `.tc-scroll-y` from foundation/_utilities.scss,
+// restated rather than applied as a class: the pane is the CONSUMER'S element and
+// writing a class onto it would be clobbered the next time the framework
+// re-renders its className. Keep the two in step.
+//
+// This rule is deliberately NOT wrapped in :where() the way the chrome's
+// backgrounds above are. The scroll declarations have to beat an app class — that
+// is the whole reason they are restated — and the pane is a page wrapper rather
+// than a self-painting component, so `--bs-mobile-shell-bg` (or `pane-bg`) is how
+// its canvas is changed, not a `.my-page { background: … }` rule.
+//
+// `min-height: 0` is the load-bearing line. A flex child's automatic minimum size
+// is its content, so without it the pane refuses to shrink below its list and
+// pushes the dock off the bottom of the screen instead of scrolling — the single
+// most common reason a "100dvh shell" still scrolls the document.
+tc-mobile-shell > :not([slot]) {
+    order: 2;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    // `contain` keeps this pane's scroll from chaining out to the document at
+    // either end, while still allowing its own bounce. The reset kills the
+    // document's rubber-band outright under a coarse pointer.
+    overscroll-behavior-y: contain;
+    background-color: var(--bs-mobile-shell-bg);
+}
+
+// ── Bottom chrome ─────────────────────────────────────────────────────────────
+
+tc-mobile-shell > [slot='action'] {
+    order: 3;
+    flex: none;
+}
+
+// The design gives the action bar its lift-off shadow only where it is the
+// bottom-most chrome (1d). Where a dock sits below it (1h, 1j) there is none —
+// two stacked bars each casting a shadow reads as grime rather than as elevation.
+// (1k's CTA pair and 1e's step-advance row are bottom-most with no shadow either —
+// the two shapes this rule disagrees with. `--bs-mobile-shell-action-shadow: none`
+// covers them, as does the bar declaring its own `box-shadow`, which the :where()
+// below deliberately lets win.)
+:where(tc-mobile-shell:not(:has(> [slot='dock'])) > [slot='action']) {
+    box-shadow: var(--bs-mobile-shell-action-shadow);
+}
+
+:where(tc-mobile-shell > [slot='action']) {
+    background-color: var(--bs-mobile-shell-action-bg);
+}
+
+tc-mobile-shell > [slot='dock'] {
+    order: 4;
+    flex: none;
+}
+
+:where(tc-mobile-shell > [slot='dock']) {
+    background-color: var(--bs-mobile-shell-dock-bg);
+}
+
+// Neither bar gets a hairline here. Every action bar and every dock in the design
+// draws its own top rule, and a second one from the shell would double it — the
+// shell owns the frame, the slotted chrome owns its edges.
+
+// ── Overlay layer ─────────────────────────────────────────────────────────────
+
+// Sheets, the FAB, toasts. `inset: 0` resolves against the host's padding box —
+// which INCLUDES the padding, so this layer spans the whole frame, hardware inset
+// strips and all. Measured at 390x844 with a 59px/34px inset forced: the overlay
+// is still 0..844 while the dock's box ends at 810.
+//
+// That is the useful behaviour for a sheet, whose surface can then run to the
+// physical bottom edge with its own content inset. It also means the shell's own
+// `padding-bottom` does NOT lift anything in this layer, so every child that has to
+// clear a hardware edge pays `--tc-safe-bottom` itself: tc-bottom-sheet in its
+// `--bs-bottom-sheet-pad-bottom`, tc-fab in
+// `bottom: calc(var(--bs-fab-offset) + var(--tc-safe-bottom))`.
+//
+// (An earlier version of this comment claimed a FAB could keep screen 1c's
+// `bottom: 104px` verbatim with no inset arithmetic. Measured at 390x844 with a
+// 34px inset and a 63px dock: 104px puts the FAB 7px above the dock and
+// `104px + 34px` puts it 41px above, the same clearance it has on a flat phone.
+// Constant clearance is the design's intent, so the inset is in the sum — see the
+// header comment in style/components/_fab.scss.)
+//
+// `overflow: hidden` on the host clips at the same edge, so nothing in here can
+// escape the frame (verified: a child at `bottom: -60px` is not hit-testable).
+tc-mobile-shell > [slot='overlay'] {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    // Transparent to taps, so the pane behind it stays scrollable. Each child
+    // opts back in; a scrim that wants to swallow taps sets its own
+    // `pointer-events: auto` and is a child like any other.
+    pointer-events: none;
+
+    > * {
+        pointer-events: auto;
+    }
+}
+
+// ── Wide viewport ─────────────────────────────────────────────────────────────
+
+// The only concession to a large screen in this design: show the phone layout
+// centred rather than stretched to a 1440px column no screen was drawn for.
+// A library default an app turns off with `--bs-mobile-shell-max-width: none`
+// (and `--bs-mobile-shell-frame-line: transparent` for the side hairlines).
+@include up(md) {
+    tc-mobile-shell {
+        max-width: var(--bs-mobile-shell-max-width);
+        margin-inline: auto;
+        border-inline: 1px solid var(--bs-mobile-shell-frame-line);
+    }
+}

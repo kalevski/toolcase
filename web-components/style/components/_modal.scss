@@ -144,7 +144,7 @@
     left: 0;
     z-index: var(--bs-backdrop-zindex);
     width: 100vw;
-    height: 100dvh;
+    height: var(--tc-vh);
     background-color: var(--bs-backdrop-bg);
 
     &.fade {

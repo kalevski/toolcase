@@ -1,0 +1,467 @@
+// tc-bottom-sheet — the phone modal surface, plus the `.tc-sheet-*` content
+// classes its slots are built from. Mobile-first by construction: there is no
+// media query in this file. A sheet is the same shape at 320px as at 430px, and on
+// a wide viewport it is framed by tc-mobile-shell rather than by a rule here.
+//
+//     tc-bottom-sheet                display:none until open, then flex column
+//       ├─ ::before                  the 40x4 grab handle — no DOM at all
+//       ├─ [slot="header"]           order 1, flex:none    title + text action row
+//       ├─ :not([slot])              order 2, flex:1       THE scrolling body
+//       └─ [slot="footer"]           order 3, flex:none    the split action row
+//
+//     .tc-bottom-sheet-scrim         one element for the whole stack, made by JS
+//
+// THE HOST IS THE PANEL. The element renders no wrapper, because wrapping the
+// slotted children means re-parenting them, and a re-parented child throws
+// NotFoundError the moment react-dom unmounts it — see the header comment in
+// src/BottomSheet.ts. So every selector below targets either the host itself or
+// the CONSUMER'S own direct children by their `slot` attribute. With no shadow
+// root those attributes are inert HTML, used here purely as region names, the same
+// way tc-mobile-shell and tc-app-bar use them.
+//
+// DELIBERATELY NO `overflow: hidden` ON THE HOST. It would clip the corners
+// neatly, and it would also clip every dropdown, select popup and tooltip inside
+// the sheet — which is most of the 59 app modals migrating onto this element. The
+// design keeps content off the corners with padding instead, and so does this.
+//
+// PROVENANCE. Every number here is from screens `1g` (filters) and `1l` (paywall)
+// of the JADI.mk phone canvas. Values used twice or more across the design already
+// have tokens (style/foundation/_mobile-tokens.scss); the ones that appear only in
+// a sheet stay inline below with the screen id, per that file's policy.
+
+@use '../foundation/tokens' as *;
+
+tc-bottom-sheet {
+    // ── Surface ──────────────────────────────────────────────────────────────
+    --bs-bottom-sheet-bg: var(--tc-surface); // #fffdf7 under sunshine
+    --bs-bottom-sheet-radius: var(--m-radius-sheet, 18px 18px 0 0);
+    --bs-bottom-sheet-shadow: var(--m-shadow-sheet, 0 -28px 64px -16px rgba(0, 0, 0, 0.32));
+
+    // ── Geometry ─────────────────────────────────────────────────────────────
+    // The height a percentage snap is measured against. `--tc-vh` is dvh (never
+    // 100vh — a sheet sized in vh grows past the visible area the moment mobile
+    // Safari's toolbar is showing). Overridden to `100%` inside a shell's overlay
+    // layer, where the frame is the reference rather than the window.
+    --bs-bottom-sheet-space: var(--tc-vh, 100dvh);
+    // The strip of scrim an `auto` sheet always leaves tappable, so a tall sheet
+    // can still be dismissed by tapping outside it. 1g's sheet is ~500px of 844 so
+    // the design never reaches this; it is the floor for a sheet whose content
+    // grew. Zeroed automatically for an explicit snap — see [data-sheet-snapped].
+    --bs-bottom-sheet-inset-top: 32px;
+
+    // The hardware strip under the footer. 9px is what the canvas leaves below its
+    // action row once the home-indicator mock is discounted (1g draws
+    // `padding:14px 0 9px` around a 132x5 pill the OS owns on a real device), and
+    // it is a FLOOR: the device inset wins where there is one. Same shape as
+    // --bs-tab-dock-pad-bottom.
+    //
+    // --tc-keyboard-inset joins the max() because a sheet lives in the shell's
+    // overlay layer, which spans the shell's whole padding box — so the shell's own
+    // keyboard padding does NOT lift it. Most of the 59 modals migrating here
+    // contain a text field, and a footer under the keyboard is a dead footer.
+    --bs-bottom-sheet-pad-bottom: max(
+        9px,
+        var(--tc-safe-bottom, 0px),
+        var(--tc-keyboard-inset, 0px)
+    );
+
+    // ── Handle ───────────────────────────────────────────────────────────────
+    --bs-bottom-sheet-handle-w: var(--m-grabber-w, 40px);
+    --bs-bottom-sheet-handle-h: var(--m-grabber-h, 4px);
+    --bs-bottom-sheet-handle-bg: var(--m-grabber-bg, rgba(0, 0, 0, 0.2));
+    --bs-bottom-sheet-handle-margin: 9px auto 4px; // 1g/1l: padding 9px 0 4px
+
+    // ── Regions ──────────────────────────────────────────────────────────────
+    --bs-bottom-sheet-header-padding: 8px var(--m-pad-page-wide, 18px) 0; // 1g
+    --bs-bottom-sheet-body-padding: 16px var(--m-pad-page-wide, 18px) 0; // 1g
+    --bs-bottom-sheet-body-gap: var(--m-gap-sheet, 18px);
+    --bs-bottom-sheet-footer-padding: 20px var(--m-pad-page-wide, 18px) 0; // 1g
+    --bs-bottom-sheet-footer-gap: 9px; // 1g — --m-gap-grid, restated as the row's own
+
+    --bs-bottom-sheet-duration: var(--m-dur-sheet, 0.22s);
+    --bs-bottom-sheet-ease: var(--m-ease, ease);
+    --bs-bottom-sheet-zindex: var(--tc-z-modal, 1055);
+
+    // CLOSED IS `display: none`, not opacity or visibility. A hidden sheet must be
+    // out of the accessibility tree and out of the tab order without this element
+    // having to write `inert` onto itself; `display:none` does both for free, and
+    // the element only ever paints while it carries [data-sheet-state]. The reset
+    // registers `display: flex` for the tag (a custom element is inline by
+    // default); this narrows it, and the state selector below restores it.
+    display: none;
+
+    // FIXED, so a sheet works anywhere — mounted at the app root, inside a page, in
+    // a plain non-shell document. Inside a tc-mobile-shell's overlay layer it
+    // becomes `absolute` (see below), which is what keeps it inside the phone frame
+    // on a wide viewport instead of spanning the window.
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: var(--bs-bottom-sheet-zindex);
+    flex-direction: column;
+    max-height: calc(var(--bs-bottom-sheet-space) - var(--bs-bottom-sheet-inset-top));
+    padding-bottom: var(--bs-bottom-sheet-pad-bottom);
+    border-radius: var(--bs-bottom-sheet-radius);
+    background-color: var(--bs-bottom-sheet-bg);
+    box-shadow: var(--bs-bottom-sheet-shadow);
+    // TRANSLATE ONLY, and through a custom property so the stylesheet keeps the
+    // whole transform: the entry/exit position is `100%` — the element's own height,
+    // which CSS knows and JS would have to measure. Never `height` or `top`; both
+    // relayout the sheet's content on every frame of a drag.
+    transform: translate3d(0, var(--bs-bottom-sheet-y, 0px), 0);
+    transition: transform var(--bs-bottom-sheet-duration) var(--bs-bottom-sheet-ease);
+    // `pan-x pinch-zoom` rather than `none`: vertical panning has to reach this
+    // element as pointer events (it is the drag), but pinch-to-zoom must keep
+    // working over a sheet — blocking it fails WCAG 1.4.4 for the users most likely
+    // to need it. The body region opts vertical panning back in.
+    touch-action: pan-x pinch-zoom;
+    -webkit-tap-highlight-color: transparent;
+
+    // The sheet is focused on open (see _focusIn), and a 2px ring around the whole
+    // panel is a distracting way to say "the dialog opened". Its children keep
+    // their own rings; this only silences the container's.
+    &:focus {
+        outline: none;
+    }
+}
+
+// INSIDE A SHELL'S OVERLAY LAYER, POSITION AGAINST THE FRAME.
+//
+// That layer is `position:absolute; inset:0; z-index:1` — a stacking context that
+// spans the shell's whole padding box, hardware inset strips and all. Two
+// consequences this rule depends on: `absolute` here means "the phone frame", so a
+// centred 480px shell on a tablet gets a sheet 480px wide rather than one spanning
+// the window; and because the layer covers the inset strips, the sheet pays
+// --tc-safe-bottom itself (the shell's own padding does not lift it).
+//
+// `:where()` drops the ancestor part to zero specificity, so the whole selector is
+// 0-0-1 — the same as the block above, winning on source order alone. An app rule
+// `tc-bottom-sheet { … }` loaded after style.css therefore still wins, which a
+// plain descendant selector (0-0-3) would have silently beaten.
+:where(tc-mobile-shell > [slot='overlay']) tc-bottom-sheet {
+    position: absolute;
+    --bs-bottom-sheet-space: 100%;
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
+
+// Written by the element, never by a consumer: `entering` → `open` → `exiting`,
+// and absent when closed. An attribute rather than a class because react-dom
+// rewrites the whole `className` string whenever that prop's value changes, so a
+// class the element wrote would vanish on the next render — the same call
+// tc-mobile-shell makes for [data-scrolled] and tc-tab-dock for [data-hidden].
+tc-bottom-sheet[data-sheet-state] {
+    display: flex;
+}
+
+// The entry and exit position: the sheet's own height, below the edge. One value
+// for both, so a sheet interrupted mid-entry exits from wherever it is.
+tc-bottom-sheet[data-sheet-state='entering'],
+tc-bottom-sheet[data-sheet-state='exiting'] {
+    --bs-bottom-sheet-y: 100%;
+}
+
+// FOLLOW THE FINGER 1:1 — which means no transition at all while dragging, or the
+// surface lags the touch by the duration and reads as broken. Re-enabled on
+// release, when the spring-back or the snap wants it. 0-1-1, so it wins over the
+// host block above whatever the source order.
+tc-bottom-sheet[data-sheet-dragging] {
+    transition: none;
+}
+
+// A snapped sheet is as tall as its LARGEST snap and reaches the smaller ones by
+// translating down, so a snap change never relayouts its content. max-height goes
+// to the full space: `snap="full"` is ratio 1, and the 32px inset default would
+// otherwise clip it.
+tc-bottom-sheet[data-sheet-snapped] {
+    height: calc(var(--bs-bottom-sheet-space) * var(--bs-bottom-sheet-ratio, 1));
+    max-height: var(--bs-bottom-sheet-space);
+}
+
+// The second sheet in the stack (a filters sheet opening a sort sub-sheet). Only
+// depth 1 exists — the element caps the stack at two and warns beyond it — and it
+// stays inside the modal band, below tc-dropdown's 1060, so no new layer is added.
+tc-bottom-sheet[data-sheet-depth='1'] {
+    z-index: calc(var(--bs-bottom-sheet-zindex) + 1);
+}
+
+// ── Handle ────────────────────────────────────────────────────────────────────
+
+// A PSEUDO-ELEMENT, not a node: the handle is decoration plus a drag hint, it is
+// never a control (the design gives every sheet a real „Откажи" / „Не сега"
+// action, and Escape closes it), so it costs no DOM and cannot end up in the
+// accessibility tree. As the first flex item it occupies exactly the canvas's
+// 17px: 9px above, 4px of pill, 4px below.
+tc-bottom-sheet::before {
+    content: '';
+    display: block;
+    flex: none;
+    width: var(--bs-bottom-sheet-handle-w);
+    height: var(--bs-bottom-sheet-handle-h);
+    margin: var(--bs-bottom-sheet-handle-margin);
+    border-radius: var(--m-radius-pill, 999px);
+    background-color: var(--bs-bottom-sheet-handle-bg);
+}
+
+tc-bottom-sheet[handle='false']::before {
+    display: none;
+}
+
+// ── Regions ───────────────────────────────────────────────────────────────────
+
+// `order` and `flex` stay at full specificity — the frame's geometry belongs to
+// the sheet. The paddings and the body's own display are wrapped in :where()
+// (0-0-0) so a slotted component's or an app's own rule wins without a fight;
+// screen 1l needs exactly that, its content block being `14px 20px 0` with a 14px
+// gap rather than 1g's 16px/18px/18px.
+tc-bottom-sheet > [slot='header'] {
+    order: 1;
+    flex: none;
+}
+
+:where(tc-bottom-sheet > [slot='header']) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--m-gap-inline, 8px);
+    padding: var(--bs-bottom-sheet-header-padding);
+}
+
+// THE BODY: the one direct child with no `slot` attribute, and the only thing in a
+// sheet that scrolls. `<template>`/`<style>`/`<script>` are `display:none`, so
+// these declarations are inert on them and the selector needs no exclusion (the JS
+// side does — querySelector would return one as the body).
+//
+// These scroll declarations are NOT wrapped in :where(): they have to beat an app
+// class, because a migrated modal body usually arrives with one. The `min-height:
+// 0` is the load-bearing line — a flex child's automatic minimum size is its
+// content, so without it a long body refuses to shrink and pushes the footer off
+// the bottom of the sheet instead of scrolling.
+tc-bottom-sheet > :not([slot]) {
+    order: 2;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    // `contain`, so a flick that reaches the end of the body does not chain out to
+    // the page behind the sheet.
+    overscroll-behavior-y: contain;
+    // Opts vertical panning back in over the host's `pan-x pinch-zoom`. The element
+    // then decides per gesture who owns it: at scrollTop 0 a downward drag is the
+    // sheet's and is cancelled through a non-passive touchmove; anything else is
+    // the body's and stays native.
+    touch-action: pan-y pinch-zoom;
+}
+
+:where(tc-bottom-sheet > :not([slot])) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-bottom-sheet-body-gap);
+    padding: var(--bs-bottom-sheet-body-padding);
+}
+
+tc-bottom-sheet > [slot='footer'] {
+    order: 3;
+    flex: none;
+}
+
+// The design's split row: a 104px outline „Откажи" beside a `flex:1` amber
+// „Примени (3)". The widths belong to the buttons (they are the consumer's), the
+// row is this element's.
+:where(tc-bottom-sheet > [slot='footer']) {
+    display: flex;
+    align-items: center;
+    gap: var(--bs-bottom-sheet-footer-gap);
+    padding: var(--bs-bottom-sheet-footer-padding);
+}
+
+// ── Scrim ─────────────────────────────────────────────────────────────────────
+
+// A WARM CREAM WASH, NOT A BLACK OVERLAY. This is a signature of the design and
+// the easiest thing in the component to get wrong: black turns the cream canvas
+// grey and breaks the printed-paper read the whole system depends on. The dark
+// variant exists for a consumer on a dark canvas and is opt-in.
+//
+// One element serves the whole stack (the element refcounts it), which is what
+// makes "two sheets do not double-darken" true by construction.
+.tc-bottom-sheet-scrim {
+    --bs-bottom-sheet-scrim-bg: var(--m-scrim, rgba(253, 248, 236, 0.6));
+    --bs-bottom-sheet-scrim-duration: var(--m-dur-sheet, 0.22s);
+
+    position: fixed;
+    inset: 0;
+    z-index: var(--tc-z-modal-backdrop, 1050);
+    background-color: var(--bs-bottom-sheet-scrim-bg);
+    opacity: 0;
+    transition: opacity var(--bs-bottom-sheet-scrim-duration) var(--m-ease, ease);
+    -webkit-tap-highlight-color: transparent;
+}
+
+// Inside the shell's overlay layer, for the same reason the sheet is: the wash
+// belongs to the phone frame, not to the window around it.
+:where(tc-mobile-shell > [slot='overlay']) > .tc-bottom-sheet-scrim {
+    position: absolute;
+}
+
+.tc-bottom-sheet-scrim[data-shown] {
+    opacity: 1;
+}
+
+// #0f172a at .5 is .modal-backdrop's own colour — the dark scrim in this library
+// already has an answer, and a second one would just be a third dark blue.
+.tc-bottom-sheet-scrim[data-variant='dark'] {
+    --bs-bottom-sheet-scrim-bg: rgba(15, 23, 42, 0.5);
+}
+
+// ── The page behind ───────────────────────────────────────────────────────────
+
+// Written by the element onto the SHELL, not onto the pane: the pane is the
+// consumer's element and react-dom rewrites `className` wholesale on re-render, so
+// a class written there would vanish. Both rules are 0-2-1, which beats the
+// shell's own 0-1-1 pane rule whatever the source order — verified by reading the
+// computed style back off a live pane, not by reading this file.
+//
+// The lock is `overflow-y` only. Inside a shell the document never scrolls (the
+// shell is `height:var(--tc-vh); overflow:hidden`), so locking the pane is the
+// whole job and scrollTop survives it. Outside a shell the element falls back to
+// pinning <body> from JS; see src/BottomSheet.ts.
+tc-mobile-shell[data-tc-sheet-lock] > :not([slot]) {
+    overflow-y: hidden;
+}
+
+// The design blurs and fades the page behind the wash: `filter:blur(1.5px)` with
+// `opacity:.6` on the content, under a cream scrim at .6. Applied to the PANE —
+// one compositing layer — and never to individual cards, which would cost a
+// repaint per card on a long list.
+//
+// No transition: the pane's `filter`/`opacity` are left un-transitioned on
+// purpose. Declaring one here would mean declaring it on the shell's pane
+// unconditionally (a transition only animates if it is present in the base state),
+// which is a behaviour change for every existing consumer of a published
+// component. At 1.5px over a 0.6 cream wash the snap is not perceptible.
+//
+// Two things this deliberately does not do: it does not blur the header or the
+// dock (they are chrome, they stay legible, and the sheet's own shadow separates
+// it), and it never runs when the sheet is INSIDE the pane — nothing can blur its
+// own ancestor, and `filter` there would make the pane the containing block for
+// the sheet's fixed positioning. The element checks and skips; `lockTarget`
+// reports which path ran.
+tc-mobile-shell[data-tc-sheet-blur] > :not([slot]) {
+    filter: var(--m-scrim-blur, blur(1.5px));
+    opacity: var(--m-scrim-opacity, 0.6);
+}
+
+// ── Content classes ───────────────────────────────────────────────────────────
+//
+// A CLASS FAMILY, NOT MORE ELEMENTS. `.tc-sheet-section` is repeated four times in
+// screen 1g alone and is pure layout — a label over a stack — so it ships as a
+// class. A custom element for it would buy nothing and cost a registration, a
+// display rule and a React typing. Named `tc-sheet-*` rather than
+// `tc-bottom-sheet-*`: these are written by hand in app markup (59 modals of it),
+// and the shorter family is the one that will actually be typed correctly.
+
+// 1g: `700 17px 'Playfair Display'` at #18230f. The serif at 17px appears only
+// here in the whole canvas, so the size stays inline per the token policy; the
+// FAMILY comes from the theme (--m-display) so an app that re-pairs its fonts
+// keeps this in step.
+.tc-sheet-title {
+    margin: 0;
+    font: 700 17px var(--m-display, var(--tc-font-sans));
+    color: var(--tc-emphasis);
+}
+
+// The header's optional text action — 1g's „Исчисти". Terracotta on the canvas;
+// the library cannot know that hue (it is the app's signature, not sunshine's), so
+// this defaults to the theme's accent-text colour and the app re-points
+// --bs-sheet-action-color, exactly as it does --m-dock-active for the dock.
+//
+// The padding/negative-margin pair is a 44x44 hit box that costs no layout: the
+// design's header row is ~23px tall, and a 44px-tall action would deepen it.
+// Margins are part of a flex item's outer size, so the negative pair hands the row
+// its 16px back while the touch target stays 44px. Unconditional rather than
+// behind `pointer: coarse` — it changes nothing visually and a hybrid device
+// reports neither pointer reliably.
+.tc-sheet-action {
+    --bs-sheet-action-color: var(--tc-accent);
+
+    display: inline-flex;
+    align-items: center;
+    // min-height AND the padding: the padding alone lands at 43px, because a
+    // 12.5px label's line box is 15px, and 43 is not 44.
+    min-height: var(--tc-min-touch-target, 44px);
+    padding: 14px 8px;
+    margin: -14px -8px;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    font: var(--m-font-btn-sm, 600 0.78rem var(--tc-font-sans));
+    color: var(--bs-sheet-action-color);
+    text-decoration: none;
+    cursor: pointer;
+
+    // The reset gives every anchor the theme's link-hover colour AND an underline
+    // at 0-1-1, which beats this rule's 0-1-0. The design draws no hover state on
+    // a sheet action, and the program forbids hover-only affordances outright — so
+    // this cancels the reset rather than inventing a state.
+    &:hover {
+        color: var(--bs-sheet-action-color);
+        text-decoration: none;
+    }
+
+    // Inset, because the hit box overhangs its own text by 14px: the library's
+    // global 2px/2px-offset ring would draw a rectangle well away from the label.
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: -4px;
+    }
+}
+
+// 1g: label, 9px gap, content — four times over, with 18px between sections
+// (the body's own gap). The design writes 9px twice and 11px once (over the
+// slider, whose 22px thumb overhangs its track); 9px is the default and
+// --bs-sheet-section-gap is the third case.
+.tc-sheet-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-sheet-section-gap, 9px);
+}
+
+// The eyebrow: `700 9.5px`, `.13em`, uppercase — the most repeated value in the
+// whole design (26 uses). The canvas's #998f80 is one of the APP's warm neutrals
+// and has no --tc-* or --sun-* mapping, so this resolves to --tc-text-faint
+// (#9aa189 under sunshine) and the app re-points --bs-sheet-label-color if it
+// wants the exact canvas hue.
+.tc-sheet-section-label {
+    --bs-sheet-label-color: var(--tc-text-faint);
+
+    font: var(--m-font-eyebrow, 700 9.5px var(--tc-font-sans));
+    letter-spacing: var(--m-track-eyebrow, 0.13em);
+    text-transform: uppercase;
+    color: var(--bs-sheet-label-color);
+}
+
+// ── Reduced motion ────────────────────────────────────────────────────────────
+
+// foundation/_reset.scss already flattens every transition-duration under
+// `reduce` with !important, so the slide lands instantly on its own. What it
+// cannot do is remove the TRANSLATE: without this block the sheet would still
+// jump from 100% to 0 in one frame, which is exactly the vestibular trigger the
+// query exists to avoid. So enter and exit become a plain appearance instead.
+//
+// A media query adds no specificity, so this only wins because it is LAST in the
+// file at equal specificity (0-1-1) to the state rules above. Keep it here.
+//
+// Drag-to-dismiss is untouched: it is direct manipulation, not animation, and a
+// surface that refuses to follow the finger is broken rather than considerate.
+@media (prefers-reduced-motion: reduce) {
+    tc-bottom-sheet[data-sheet-state='entering'],
+    tc-bottom-sheet[data-sheet-state='exiting'] {
+        --bs-bottom-sheet-y: 0px;
+        // Deliberately not added to the host's `transition` list. The reset has
+        // already forced every duration to 0.001ms, so a transitioned opacity
+        // would be an instant one anyway — and declaring it would suggest a fade
+        // that cannot happen.
+        opacity: 0;
+    }
+}

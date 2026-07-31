@@ -1,0 +1,135 @@
+// tc-quota-meter — the allowance track (`1c`'s 78x5 inline meter, `1h`'s full-width
+// progress rail). Mobile-first by construction: no media query in this file.
+//
+//     tc-quota-meter                     display:flex — track beside figure
+//       ├─ div.tc-quota-meter-track      role=progressbar, overflow:hidden
+//       │    └─ div.tc-quota-meter-fill  width: used/total, transitioned
+//       └─ span.tc-quota-meter-label     „12/30", tabular
+//
+// THE TRACK CLIPS THE FILL RATHER THAN THE FILL BEING ROUNDED.
+//   `overflow: hidden` on a pill-radius track, verbatim from both screens. A rounded
+//   FILL would round its own right edge too, which at 5px tall and 8% used renders a
+//   4px lozenge floating in the trough instead of a sliver at its left end. `1g` does
+//   round the fill, because there a 22px thumb covers the join.
+//
+// THE WIDTH TRANSITION IS THE ONE THE DESIGN SPECIFIES.
+//   `width .18s cubic-bezier(.2,.9,.25,1)` — the only transition anywhere in the
+//   design canvas, on `1h`'s progress bar. No `prefers-reduced-motion` block is
+//   needed: foundation/_reset.scss already flattens every transition-duration under
+//   `reduce`. Width and not `transform: scaleX()`, deliberately: a scaled fill would
+//   need a 100%-wide element and its own scale origin, and at 5px tall the
+//   sub-pixel edge of a scaled box shimmers where a width animation does not.
+//
+// COLOUR IS NEVER THE ONLY CARRIER.
+//   `data-state` is written by the element (see src/QuotaMeter.ts) and read here. The
+//   same information is in the figure beside the track („29/30") and in the
+//   progressbar's own value, so a user who cannot see the ochre still gets it.
+
+tc-quota-meter {
+    // ── Track ────────────────────────────────────────────────────────────────
+    // 78x5 (1c). The width is `1c`'s single use, so it stays a literal here rather
+    // than in the token layer. Every `--m-*` read carries a fallback: those tokens are
+    // declared by a THEME (style/themes/sunshine/_mobile.scss), so an un-themed page
+    // would otherwise substitute an empty value and drop the declaration.
+    --bs-quota-meter-track-width: 78px;
+    --bs-quota-meter-track-height: var(--m-h-track, 5px);
+    --bs-quota-meter-track-radius: var(--m-radius-pill, 999px);
+    // #f1e6ce under sunshine — the inset well, which `--tc-surface-muted` maps to
+    // exactly.
+    --bs-quota-meter-track-bg: var(--tc-surface-muted);
+    --bs-quota-meter-track-shadow: var(--m-shadow-track-inset, inset 0 1px 2px rgb(0 0 0 / 8%));
+
+    // ── Fill ─────────────────────────────────────────────────────────────────
+    // Amber #f2b705 under sunshine, which `--tc-app-accent` maps to exactly.
+    --bs-quota-meter-fill: var(--tc-app-accent);
+    --bs-quota-meter-fill-radius: 0px;
+    // Ochre #d49a00 = `--sun-lead-lo`, which `--tc-warning` maps to exactly.
+    --bs-quota-meter-fill-near: var(--tc-warning);
+    // Coral #f2604b = `--sun-coral`, which `--tc-danger` maps to exactly.
+    --bs-quota-meter-fill-full: var(--tc-danger);
+    --bs-quota-meter-duration: var(--m-dur-state, 0.18s);
+    --bs-quota-meter-ease: var(--m-ease, ease);
+
+    // ── Figure ───────────────────────────────────────────────────────────────
+    // 600 11px (1c) — `--m-font-meta-strong` is that rung exactly.
+    --bs-quota-meter-label-font: var(--m-font-meta-strong, 600 0.6875rem var(--tc-font-sans));
+    // #998f80 under sunshine, pinned in the sunshine partial. `--tc-text-faint` is
+    // ink-4 (#9aa189), the nearest generic rung.
+    --bs-quota-meter-label-color: var(--tc-text-faint);
+    --bs-quota-meter-gap: 7px;
+
+    display: flex; // also in foundation/_reset.scss — a custom element is inline
+    align-items: center;
+    gap: var(--bs-quota-meter-gap);
+}
+
+.tc-quota-meter-track {
+    flex: none;
+    width: var(--bs-quota-meter-track-width);
+    height: var(--bs-quota-meter-track-height);
+    border-radius: var(--bs-quota-meter-track-radius);
+    background-color: var(--bs-quota-meter-track-bg);
+    box-shadow: var(--bs-quota-meter-track-shadow);
+    overflow: hidden;
+}
+
+.tc-quota-meter-fill {
+    height: 100%;
+    // Width is written inline by the element; 0 is the resting value so a fill that has
+    // not been measured yet does not flash full.
+    width: 0;
+    border-radius: var(--bs-quota-meter-fill-radius);
+    background-color: var(--bs-quota-meter-fill);
+    transition:
+        width var(--bs-quota-meter-duration) var(--bs-quota-meter-ease),
+        background-color var(--bs-quota-meter-duration) var(--bs-quota-meter-ease);
+}
+
+.tc-quota-meter-label {
+    flex: none;
+    font: var(--bs-quota-meter-label-font);
+    // AFTER the shorthand, which resets it. „12/30" becomes „13/30" as the user
+    // creates, and a proportional „1" would move the whole figure.
+    font-variant-numeric: tabular-nums;
+    color: var(--bs-quota-meter-label-color);
+}
+
+.tc-quota-meter-label[hidden] {
+    display: none;
+}
+
+// ── Approach states ───────────────────────────────────────────────────────────
+
+tc-quota-meter[data-state='near'] .tc-quota-meter-fill {
+    background-color: var(--bs-quota-meter-fill-near);
+}
+
+tc-quota-meter[data-state='full'] .tc-quota-meter-fill {
+    background-color: var(--bs-quota-meter-fill-full);
+}
+
+// ── Tones (the base fill, before the approach states) ─────────────────────────
+
+tc-quota-meter[tone='accent'] {
+    // Terracotta #a4472f under sunshine — pinned in the sunshine partial.
+    --bs-quota-meter-fill: var(--tc-app-accent);
+}
+
+tc-quota-meter[tone='success'] {
+    --bs-quota-meter-fill: var(--tc-success);
+}
+
+// ── variant="bar" — 1h's full-width rail, and 1g's range track ────────────────
+
+tc-quota-meter[variant='bar'] {
+    --bs-quota-meter-track-height: var(--m-h-track-lg, 6px);
+}
+
+tc-quota-meter[variant='bar'] .tc-quota-meter-track {
+    // `1 1 0` and NOT `flex: 1` with an auto basis: a flex item's line-breaking uses
+    // its HYPOTHETICAL main size, and an auto basis here is the track's inline width —
+    // which would keep the rail at 78px inside a wider row and, with a figure beside
+    // it, could break the line. (tc-app-bar's toolbar doubled to 68px on exactly this.)
+    flex: 1 1 0;
+    width: auto;
+}

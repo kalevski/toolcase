@@ -1,0 +1,47 @@
+// Sunshine › tc-taxonomy-card — the warm neutrals this card is drawn in that have no
+// `--tc-*` rung of their own.
+//
+// Screens `1b` (the „Рецепт на неделата" hero), `1c` (three cards, one per category
+// hue), `1f` (two cards with a social strip) and `1g` (three flat skeletons) are the
+// references. The mechanism is the one tc-app-bar, tc-input, tc-check-row and
+// tc-stat-tile already use: the generic partial names the nearest `--tc-*` rung so an
+// un-themed page is sane, and this file pins the design's actual value.
+//
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    tc-taxonomy-card {
+        // #fdfaf4 — „the card base before the accent tint" (design-reference.md §2.3).
+        // `--tc-surface` is `--sun-surface` (#fffdf7), which is a shade cooler and a
+        // shade brighter; at a 3% tint that difference is the whole surface.
+        --bs-taxonomy-card-bg: #fdfaf4;
+        // #e5e2dc — the app's card/panel border, ~60 uses. `--tc-border` is `--sun-line`
+        // (rgba(34,48,26,.14)), which composites over the cream canvas at roughly
+        // #dcd8c6 — a shade darker and a shade warmer.
+        --bs-taxonomy-card-border-color: #e5e2dc;
+        // The metric box is pure #fff on every card, one step brighter than the tinted
+        // surface it floats on. That step is what makes it read as a chip rather than as
+        // a hole; `--tc-surface`'s #fffdf7 loses it.
+        --bs-taxonomy-card-metric-bg: #fff;
+        // #26211b — the design's card-title ink. `--tc-text` is `--sun-ink-1` (#20301a),
+        // which is green-cast; the serif title is the one place this design goes warm.
+        --bs-taxonomy-card-heading-color: #26211b;
+        // #6b6459 — body copy on cream (§2.3). `--tc-text-muted` is `--sun-ink-3`
+        // (#6e775f), noticeably greener at 12px.
+        --bs-taxonomy-card-desc-color: #6b6459;
+        // #998f80 — the muted label ink, ~60 uses, for the „ККАЛ" unit and the
+        // subheading. `--tc-text-faint` is ink-4 (#9aa189), cooler and lighter.
+        --bs-taxonomy-card-metric-unit-color: #998f80;
+        --bs-taxonomy-card-subheading-color: #998f80;
+        // #55524c — the app's own fallback hue for a row with no taxonomy
+        // (`CATEGORY_ACCENT`'s default in web/src/components/RecipeCard.tsx). A warm
+        // grey, where `--tc-text-muted` is green-cast: an uncategorised card should read
+        // as neutral, not as a faded olive one.
+        --bs-taxonomy-card-accent: #55524c;
+        // Terracotta, the app's own focus ring (design-reference.md §4 —
+        // `$focus-ring-color: #a4472f`). `--tc-app-accent` is the amber lead here, which
+        // is both the weakest 2px ring against cream and a spend of the two-amber budget
+        // on a list row. tc-add-slot makes the same substitution for the same reason.
+        --bs-taxonomy-card-focus-ring: #a4472f;
+    }
+}

@@ -1,0 +1,28 @@
+// Sunshine › tc-list-section — the three stacked warm surfaces `1j`'s meal card is
+// built from, none of which has a `--tc-*` rung.
+//
+// design-reference.md §2.3 lists `#faf8f4 / #f4f1ea / #efece6` as the app's stacked
+// light surfaces and `#e5e2dc` as its card border, all hardcoded in the app's own SCSS
+// and more frequent there than the tokens they sit beside. This is the same mechanism
+// tc-app-bar and tc-input use: the generic partial names the nearest rung, this file
+// pins the value the design actually draws.
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    tc-list-section {
+        // #e5e2dc — the card/panel border, ~60 uses. `--tc-border` is `--sun-line`
+        // (rgba(34,48,26,.14)), which composites to roughly #dfe0d8 on this canvas:
+        // close, but a translucent border over a tinted row would shift hue with it.
+        --bs-list-section-border-color: #e5e2dc;
+        // #f4f1ea — the middle of the three stacked surfaces. `--tc-surface-muted` is
+        // `--sun-well` (#f1e6ce), the INSET well used for inputs and table heads; a
+        // header band painted in it reads as a form field.
+        --bs-list-section-header-bg: #f4f1ea;
+        // #998f80, the muted label ink (~60 uses) — ink-4 (#9aa189) is cooler.
+        --bs-list-section-meta-color: #998f80;
+        // `1j`'s three meal hues are the APP's map (појадок #8a6d2f, ручек #a4472f,
+        // вечера #3c5d6b) and are passed in per instance. Terracotta is the default
+        // because it is the system's signature accent, not because a meal is lunch.
+        --bs-list-section-tone: #a4472f;
+    }
+}

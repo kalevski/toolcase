@@ -1,0 +1,121 @@
+// tc-swipe-pager — discrete horizontal paging on CSS scroll-snap. Mobile-first by
+// construction: there is no media query in this file. A pager is the same shape at
+// 320px as at 1024px; only how much text fits on a page changes.
+//
+//     tc-swipe-pager        display:flex; the SCROLL CONTAINER; x mandatory snap
+//       └─ > *              one page — flex:0 0 100%, snap-align:start, snap-stop:always
+//
+// THE HOST IS THE SCROLLER, AND THE PAGES ARE ITS OWN CHILDREN.
+//   No inner track div, for the same reason tc-page-tabs has none: the pages belong
+//   to the consumer, so an inner element would have to re-parent them — which is
+//   exactly what breaks under react-dom (see the header of src/SwipePager.ts).
+//   Everything below is therefore a `> *` child selector rather than a class the
+//   element writes onto a page it does not own.
+
+tc-swipe-pager {
+    // The page's flex basis. `100%` is the definition of a pager; it is a knob only
+    // so that a preview surface can show a peek of the next page (`85%`) without
+    // forking the element. Anything other than 100% makes `scroll-snap-align: start`
+    // land the page against the container's left edge rather than centred — that is
+    // the honest behaviour for a start-aligned pager, not a bug to patch.
+    --bs-swipe-pager-page-basis: 100%;
+
+    display: flex; // also in foundation/_reset.scss — a custom element is inline
+    // Never `wrap`. A wrapped pager is a grid of pages stacked down the screen and
+    // every snap point after the first line is wrong.
+    flex-wrap: nowrap;
+    border-radius: 0;
+
+    // `.tc-scroll-x`'s five declarations, restated rather than applied as a class.
+    // The host's `class` attribute belongs to the CONSUMER — react-dom rewrites the
+    // whole string whenever a `className` prop changes value — so a class written
+    // from JS would not survive a re-render. This is the THIRD sanctioned copy of
+    // that utility, after tc-mobile-shell's pane and tc-page-tabs' rail; KEEP THEM
+    // IN STEP, the utility is the definition. See style/foundation/README.md.
+    min-width: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    // Load-bearing, not hygiene: without it a swipe past the last page chains out
+    // to the document, where on iOS it is the back-navigation gesture. A pager whose
+    // last page navigates away is not recoverable by the user.
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    // `overflow-x: auto` forces the USED value of `overflow-y` from `visible` to
+    // `auto`, so this box is a scroll container on BOTH axes whether or not the
+    // second axis is declared. Stated rather than left implicit, because it is the
+    // one thing about this element that surprises people: give the pager a definite
+    // height and its pages scroll INSIDE it; leave the height auto and the tallest
+    // page sizes the pager, so the outer pane scrolls instead. Both are useful —
+    // cooking mode (`1e`) wants the first, the planner (`1j`) wants the second.
+    overflow-y: auto;
+
+    // `.tc-snap-x`'s pair, restated for the same reason as `.tc-scroll-x` above,
+    // plus `scroll-snap-stop`, which that utility deliberately does not carry (a
+    // chip rail must not stop at every chip).
+    scroll-snap-type: x mandatory;
+
+    // DELIBERATELY NO `touch-action`. `pan-y` — the value that looks like the fix
+    // for "a mostly-vertical drag should scroll the page, not page the pager" — is
+    // the opposite: it allows only vertical panning and so disables the horizontal
+    // swipe entirely. touch-action is also intersected down the ancestor chain, so
+    // it would take a nested horizontal rail inside a page with it. Axis locking is
+    // already native for a horizontal scroller inside a vertical one.
+
+    > * {
+        // `0 0 <basis>`, and `min-width: 0` is load-bearing next to it: with
+        // `flex-shrink: 0` the item's automatic minimum size still wins over the
+        // basis, so ONE long unbreakable string inside a page would make that page
+        // wider than the container and put every snap point after it off by that
+        // difference. (This is the same hypothetical-main-size rule that makes
+        // `flex-basis: auto` on a text block break a row at 320px.)
+        flex: 0 0 var(--bs-swipe-pager-page-basis);
+        min-width: 0;
+        scroll-snap-align: start;
+        // One page per flick. Without it a fast flick carries through two or three
+        // snap points, and „swipe for the next step" stops being true.
+        scroll-snap-stop: always;
+    }
+}
+
+// `gesture="none"` — programmatic paging only, for a surface where a horizontal drag
+// already means something else.
+//
+// `overflow-x: hidden` and NOT `touch-action`: a `hidden` box is still a scroll
+// container, so `scrollTo()` and `scrollLeft` keep working (and reduced-motion still
+// resolves through the same code path) while the user cannot drag it. Snap is left
+// on, so a resize still re-lands on a page. The keyboard is untouched — see
+// src/SwipePager.ts.
+tc-swipe-pager[gesture='none'] {
+    overflow-x: hidden;
+}
+
+// `lazy` — the element writes `data-pager-far` on every page outside
+// `index - 1 … index + 1`.
+//
+// `content-visibility: hidden` and not `display: none` / `hidden`: the page KEEPS
+// its box, so the scroll width, every snap point and the current scroll offset are
+// all unchanged — only the subtree's layout, paint and accessibility work is
+// skipped. No `contain-intrinsic-size` is needed for the same reason: the width
+// comes from the flex basis and the height from `align-items: stretch` against the
+// tallest page that is not hidden, so neither depends on the skipped contents.
+tc-swipe-pager > [data-pager-far] {
+    content-visibility: hidden;
+}
+
+// The pager is a tab stop (the element sets `tabindex="0"`), so it needs a visible
+// ring. Inset, because a scroll container clips BOTH axes: an outset 2px ring on a
+// full-bleed pager would be clipped away on all four sides.
+tc-swipe-pager:focus-visible {
+    outline: 2px solid var(--tc-app-accent);
+    outline-offset: -2px;
+}
+
+// No `prefers-reduced-motion` block: this file declares no transition, and the one
+// piece of motion the element does own — the smooth scroll in `goTo` — is not
+// reachable from CSS (foundation/_reset.scss flattens transition and animation
+// durations, never `scroll-behavior`). The element checks the query itself.

@@ -43,9 +43,69 @@ $spacers: (
     5: 3rem,
 ) !default;
 
-@mixin media-up($breakpoint) {
-    $min: map.get($grid-breakpoints, $breakpoint);
+// ── Media mixins ──────────────────────────────────────────────────────────────
+//
+// Every partial already does `@use '../foundation/tokens' as *`, so these are in
+// scope everywhere with no extra import. They live here rather than in
+// _index.scss for that reason — _index.scss is a side-effecting module nothing
+// imports, while this one is the pure compile-time layer.
+//
+// `up()` takes either a named breakpoint (`up(md)`) or a raw length
+// (`up(430px)`); component-level breakpoints rarely land on the grid's five.
+@mixin up($breakpoint) {
+    $min: $breakpoint;
+
+    @if map.has-key($grid-breakpoints, $breakpoint) {
+        $min: map.get($grid-breakpoints, $breakpoint);
+    }
+
     @media (min-width: $min) {
+        @content;
+    }
+}
+
+// The grid and the utility ladder were written against this name; kept as the
+// named-key alias so there is one implementation of the query, not two.
+@mixin media-up($breakpoint) {
+    @include up($breakpoint) {
+        @content;
+    }
+}
+
+// There is deliberately NO `down()` mixin. Components here are authored at phone
+// width with `up()` used to widen; a `down()` mixin is an invitation to write the
+// desktop layout first and shrink it, which is how a component ends up with its
+// mobile case as an afterthought. Apps that must retrofit legacy desktop-first
+// SCSS keep their own.
+
+// Pointer capability. Coarse = finger (touch target floors, no hover-only
+// affordances); fine + hover = mouse (hover lifts, tighter boxes). Test for
+// `hover` alongside `fine` because a stylus reports fine and cannot hover.
+@mixin coarse-pointer {
+    @media (pointer: coarse) {
+        @content;
+    }
+}
+
+@mixin fine-pointer {
+    @media (pointer: fine) and (hover: hover) {
+        @content;
+    }
+}
+
+// Motion. _reset.scss already flattens every transition and animation under
+// `reduce`, so `motion-ok` is not needed to protect those — it is for the
+// motion that reset cannot reach: scroll-behavior, a transform that should be
+// replaced by an instant state change rather than sped up, JS-driven animation
+// reading a duration token.
+@mixin motion-ok {
+    @media (prefers-reduced-motion: no-preference) {
+        @content;
+    }
+}
+
+@mixin reduced-motion {
+    @media (prefers-reduced-motion: reduce) {
         @content;
     }
 }

@@ -1,0 +1,297 @@
+// Mobile scale — the GENERIC half of the phone-first token layer (`--m-*`).
+//
+// Emitted at :root as custom properties so an app can read them, override them
+// per-surface, and see them in DevTools. Every value here is geometry: space,
+// radii, control sizes, elevation *shape*, motion. Nothing in this file names a
+// colour or a typeface — that half is theme work (see
+// style/themes/sunshine/_mobile.scss for the reference implementation).
+//
+// WHY A SECOND SCALE, NAMESPACED `--m-*`
+//   The library's desktop scale is looser than a phone can afford (page gutter
+//   26px vs 14px, card title 21.6px vs 20px). Overloading the existing tokens
+//   would silently re-space every desktop consumer, so the mobile scale gets its
+//   own namespace. A page mixing `--m-*` with the desktop values is then obvious
+//   on sight — which is the point during a phased migration.
+//
+// PROVENANCE
+//   Extracted from the JADI.mk mobile design canvas (12 phone screens at
+//   390x844, all inline-styled) by frequency: a value earned a token only if the
+//   design used it in TWO OR MORE places. Single-use values stay inline in the
+//   component that owns them with a comment citing the screen id — see the
+//   "intentionally not tokenised" list at the bottom of this file. Screen ids
+//   (`1a`-`1l`) in the comments below refer to that canvas.
+
+// Elevation is factored into a mixin because it has to be EMITTED TWICE — see
+// the long comment at the call site below. Everything else is emitted once.
+@mixin elevation {
+    // Shadow *geometry* is generic; shadow *hue* is not. Every shadow in this
+    // system is warm-tinted rather than neutral black, and which warm that is
+    // belongs to the theme — so the tint is a bare rgb triplet a theme
+    // re-points, and the offsets/blurs stay here. The default is a neutral
+    // near-black so an un-themed page still gets sane shadows.
+    --m-shadow-card:
+        0 1px 2px rgba(var(--m-shadow-tint), 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    --m-shadow-dock: 0 -6px 18px -12px rgba(var(--m-shadow-tint), 0.22);
+    --m-shadow-actionbar: 0 -8px 22px -14px rgba(var(--m-shadow-tint), 0.3);
+    --m-shadow-sheet: 0 -28px 64px -16px rgba(var(--m-shadow-tint), 0.32);
+    // Two inset shadows, two roles, both verbatim from the design. The alphas
+    // differ by 0.02 and the difference is barely visible — they are kept apart
+    // anyway so that someone reading the canvas next to these tokens finds the
+    // value they measured, instead of a rounded-off third one.
+    --m-shadow-field-inset: inset 0 1px 2px rgba(var(--m-shadow-tint), 0.06); // inputs, selects
+    --m-shadow-track-inset: inset 0 1px 2px rgba(var(--m-shadow-tint), 0.08); // progress tracks
+}
+
+:root {
+    // ── Safe area & dynamic viewport ─────────────────────────────────────────
+    //
+    // These carry the `--tc-` prefix while everything else in this file is
+    // `--m-`: they describe the HARDWARE, not this design's scale, so every
+    // component — desktop included — should read them.
+    //
+    // Components read these tokens and never `env()` directly, which is what
+    // makes the insets a lie a host can tell: a design canvas drawing its own
+    // 46px status-bar mock, or a desktop frame previewing a phone, sets them to
+    // 0 and every component inside complies.
+    --tc-safe-top: env(safe-area-inset-top, 0px);
+    --tc-safe-right: env(safe-area-inset-right, 0px);
+    --tc-safe-bottom: env(safe-area-inset-bottom, 0px);
+    --tc-safe-left: env(safe-area-inset-left, 0px);
+    //
+    // TWO THINGS THAT BITE:
+    //
+    // 1. The insets stay 0 until the document opts in with
+    //    `<meta name="viewport" content="…, viewport-fit=cover">`. Without it
+    //    the UA insets the viewport itself and env() has nothing left to report
+    //    — so a dock that looks right in every desktop browser still puts its
+    //    bottom 34px under the iOS home indicator, untappable, on a real phone.
+    //    That meta tag is the app's job, not the library's.
+    //
+    // 2. env() is invalid inside a media query: `@media (padding: env(…))` does
+    //    not parse. "Is there a home indicator?" is not a question CSS can ask.
+    //    Express it as arithmetic instead — `padding-bottom: calc(var(--m-pad-page)
+    //    + var(--tc-safe-bottom))` — never as a query. (Do NOT reach for
+    //    `--m-h-dock` in that sum; see the note on that token below.)
+    //
+    // The touch-target floor is deliberately NOT declared here.
+    // `--tc-min-touch-target` (44px) and `--tc-touch-target-dense` (40px) live
+    // together in the runtime token block of style/themes/default/_foundation.scss,
+    // which is applied at :root and loads AFTER this file — a copy here would be
+    // shadowed by it, and two declarations of one floor is how they drift apart.
+    // They are global; read them from anywhere.
+
+    // Viewport height. dvh tracks the CURRENTLY visible height, so a shell sized
+    // with it follows the mobile-Safari toolbar in and out instead of jumping by
+    // the toolbar's height on every change of scroll direction. svh is the small
+    // extreme (toolbar showing) — use it where content must never be clipped,
+    // e.g. a sheet's max-height, because dvh can shrink below it mid-gesture.
+    --tc-vh: 100dvh;
+    --tc-vh-min: 100svh;
+
+    // ── Space ────────────────────────────────────────────────────────────────
+    //
+    // The design's horizontal page gutter is 14px on all nine dock-bearing
+    // screens (1b, 1c, 1f, 1g, 1h, 1i, 1j, 1k, 1l). Its *vertical* opening pad
+    // ranges 12-16px across the same screens with no pattern — export noise, so
+    // one value serves both axes.
+    --m-pad-page: 14px;
+    // The two surfaces that deliberately breathe wider: bottom sheets (1g, 1l)
+    // and cooking mode's step body (1e). 18px, 8 uses.
+    --m-pad-page-wide: 18px;
+
+    // Gaps. The canvas contains a near-continuous 5-18px ramp (5, 6, 7, 8, 9,
+    // 10, 11, 12, 13, 14, 18) because nothing enforced a scale on it. These six
+    // are the load-bearing steps by frequency; 6/7/10/12/13px (37 uses combined)
+    // are noise around them and snap to the nearest role rather than earning
+    // tokens of their own.
+    --m-gap-tight: 5px; // 19x — icon <-> label, chip rows
+    --m-gap-inline: 8px; // 17x — inline control groups, action-bar buttons
+    --m-gap-grid: 9px; // 13x — grid cells (the 3-up stat/macro grids, 1i/1k)
+    --m-gap-stack: 11px; // 6x  — cards in a scrolling list (1c, 1f, 1j, 1l)
+    --m-gap-section: 14px; // 5x  — between sections of a page (1b, 1d, 1f)
+    --m-gap-sheet: 18px; // 3x  — between field groups inside a bottom sheet (1g)
+
+    // Container paddings. Written as full shorthands because each is a distinct
+    // asymmetric recipe the design repeats verbatim — decomposing them into
+    // per-side tokens would triple the count and lose the pairing.
+    --m-pad-card: 14px 15px 11px; // taxonomy card (1c, 1f) — 5x
+    --m-pad-panel: 13px 14px; // plain panel (1d, 1j, 1k, 1l) — 4x
+    --m-pad-appbar: 2px 16px 0; // title + page-tabs bar (1c, 1f, 1i, 1j) — 4x
+    --m-pad-navbar: 2px 14px 11px; // back-bar; 12px gutter on 1d/1k, 14px on 1h, 16px on 1b
+    --m-pad-band: 12px 14px; // search / filter band under the app bar (1c, 1f, 1h) — 5x
+    --m-pad-actionbar: 10px 14px; // sticky bottom action bar (1d, 1h, 1j, 1k) — 4x
+
+    // Chips come in three scales, one per container. All three are used 4+ times,
+    // so all three are tokens; the font sizes that ride them live in the theme.
+    --m-pad-chip: 3px 9px; // on a card (1c, 1d, 1e, 1k) — 14x, the default
+    --m-pad-chip-md: 5px 11px; // on a horizontal rail (1f) — 4x
+    --m-pad-chip-lg: 6px 12px; // inside a bottom sheet, thumb-sized (1g) — 7x
+
+    // ── Radii ────────────────────────────────────────────────────────────────
+    // Small corners are a stated principle of this system, not a shortage of
+    // imagination: 6px on controls, 10px on cards, pills for chips only.
+    --m-radius-control: 6px; // buttons, inputs, selects, day cells — 31x
+    --m-radius-tile: 8px; // inner tiles, the kcal box, icon squares — 12x
+    --m-radius-card: 10px; // cards and panels — 33x
+    --m-radius-hero: 14px; // the one oversized panel: home hero wash (1b) — 2x
+    --m-radius-sheet: 18px 18px 0 0; // bottom sheet, top corners only (1g, 1l)
+    --m-radius-pill: 999px; // chips, badges, tracks, avatars — 57x
+    // Left-flush notice bar: square against its 3px accent rule, rounded away
+    // from it (1e, 1f, 1i, 1k) — 5x.
+    --m-radius-notice: 0 8px 8px 0;
+
+    // ── Control sizes ────────────────────────────────────────────────────────
+    --m-h-control: 40px; // search field, filter button (1c, 1f) — 4x
+    --m-h-button: 46px; // primary / secondary action-bar buttons — 11x
+    --m-h-button-lg: 66px; // cooking mode's step-advance target (1e) — 2x
+    --m-h-stepper-btn: 38px; // serving stepper -/+ (1d) — 2x
+    // 78px is the space every screen RESERVES for the dock
+    // (`<dc-import name="TabBar" hint-size="100%,78px">`, 6 uses) — NOT the height
+    // the component draws. Measured, with Source Sans 3 actually loaded,
+    // TabBar.dc.html renders 73px:
+    //
+    //     1px top rule + 8px top pad + 47px tab grid   = 56px  real chrome
+    //   + 17px indicator row (5px/7px pad, 132x5 pill) = 73px  drawn on the canvas
+    //                                                    78px  reserved by the screen
+    //
+    // MEASURE IT WITH THE WEBFONT LOADED. The tab grid is 45px and the canvas 71px
+    // when the label falls back to system-ui — its 10px line box is 12px there and
+    // 14px in Source Sans 3 — which is how the 54px figure this comment used to
+    // carry got in. Both numbers are real; only the 47/56 pair is what an app that
+    // loads its own fonts renders. Verified against tc-tab-dock, which measures
+    // 63px beside the canvas's 73px minus its 17px mock plus 7px of padding.
+    //
+    // The OS owns that last strip on a device, so a FREE-STANDING dock is
+    // `calc(56px + max(7px, var(--tc-safe-bottom)))` → 63px flat, 90px notched.
+    // NEVER `calc(var(--m-h-dock) + var(--tc-safe-bottom))`: that stacks the mock
+    // strip on top of the real inset and lands at 112px.
+    //
+    // INSIDE A tc-mobile-shell, drop the inset from that sum entirely: the shell
+    // pays `--tc-safe-bottom` as its own `padding-bottom`, so a dock is a flat
+    // `63px` (56 + 7) on every device. Keeping the `max()` there double-counts and
+    // lands at 124px of bottom chrome against the design's 78px. tc-tab-dock does
+    // this for you — see the `:where(tc-mobile-shell)` rule in
+    // style/components/_tab-dock.scss.
+    //
+    // Keep the token at 78px anyway — it is the right number for anything positioned
+    // AGAINST the canvas rather than sized from it, e.g. 1c's FAB at
+    // `bottom: 104px` = 78 + 26.
+    --m-h-dock: 78px; // dock RESERVE incl. the 17px home-indicator mock row
+    --m-h-track: 5px; // quota / progress track (1c, 1h) — 7x
+    --m-h-track-lg: 6px; // slider track, thumb-draggable (1g, 1h) — 2x
+
+    --m-size-fab: 56px; // 1c
+    --m-size-badge: 16px; // dock + app-bar count badges (15px on 1b) — 3x
+    --m-size-avatar: 76px; // 1k
+    // Tick/toggle family. One component, three scales: a list row's square box,
+    // a meal's round done-toggle, and an onboarding step's small round tick.
+    --m-size-check: 24px; // square, radius 6, 2px border (1h)
+    --m-size-check-round: 30px; // circle, 2px border (1j) — 4x
+    --m-size-check-sm: 22px; // circle, 2px border (1b) — 3x
+
+    // Hairline accents. Both are 3px and both are structural (they encode the
+    // category hue), so they are sized here and coloured by the consumer.
+    --m-bar-accent: 3px; // card top rule (1c, 1f, 1g) / notice left rule — 10x
+    --m-bar-tab: 2px; // active page-tab underline (1c, 1f, 1i, 1j) — 4x
+    --m-border-toggle: 2px; // every tick/toggle outline (1b, 1h, 1i, 1j) — 4x
+
+    // ── Sheet and dock furniture ─────────────────────────────────────────────
+    --m-grabber-w: 40px; // sheet drag handle (1g, 1l)
+    --m-grabber-h: 4px;
+    // The OS draws the real home indicator. These exist so a design canvas or a
+    // desktop preview frame can mock it — never render it on a device.
+    --m-home-indicator-w: 132px;
+    --m-home-indicator-h: 5px;
+
+    // ── Elevation ────────────────────────────────────────────────────────────
+    --m-shadow-tint: 0, 0, 0; // neutral default; themes re-point it
+    @include elevation;
+
+    // "Light catches the top edge" — the bevel that keeps a flat cream card from
+    // reading as a flat cream rectangle. 9 standalone uses plus 5 inside
+    // --m-shadow-card. No tint, so it needs no re-emission.
+    --m-bevel-top: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+
+    // ── Motion ───────────────────────────────────────────────────────────────
+    // The canvas is a static export and carries exactly one transition
+    // (`width .18s cubic-bezier(.2,.9,.25,1)`, the 1h progress bar). The other
+    // two durations come from the running app's own scale, which uses the same
+    // curve — see design-reference.md section 4.
+    --m-ease: cubic-bezier(0.2, 0.9, 0.25, 1);
+    --m-dur-press: 0.14s; // press feedback
+    --m-dur-state: 0.18s; // state change (the design's own value)
+    --m-dur-sheet: 0.22s; // sheet entry / exit
+}
+
+// dvh/svh fallback — Safari < 15.4, older Android WebViews.
+//
+// This has to be a feature query and cannot be a `var(--tc-vh, 100vh)` default.
+// Custom-property values are not validated at parse time, so `--tc-vh: 100dvh`
+// is stored verbatim even where dvh means nothing and the var() fallback never
+// fires. The failure surfaces at substitution instead: `height: var(--tc-vh)`
+// becomes invalid-at-computed-value-time and resolves to `height: auto` — a
+// shell that quietly collapses to its content rather than filling the screen,
+// which is the hardest kind of layout bug to attribute.
+//
+// One query covers both tokens: svh and dvh shipped together in every engine.
+@supports not (height: 100dvh) {
+    :root {
+        --tc-vh: 100vh;
+        --tc-vh-min: 100vh;
+    }
+}
+
+// The elevation block, again, at every theme root.
+//
+// NOT redundant, and not a cascade workaround. A custom property's `var()`
+// references are substituted where the property is DECLARED, and descendants
+// inherit the already-substituted result. So `--m-shadow-dock` declared at :root
+// bakes in :root's `--m-shadow-tint` (neutral), and a theme that later re-points
+// the tint on `tc-theme[name="…"]` never reaches it — the dock would render a
+// grey shadow on a warm canvas, which reads as dirt rather than as light.
+//
+// Re-declaring the composed values at the theme root makes them substitute again
+// against that element's own tint; everything inside the theme then inherits the
+// correct warm result. Two selectors, no universal selector, no !important.
+//
+// Consequence worth knowing: `--m-shadow-tint` is a THEME-ROOT knob. Setting it
+// on an arbitrary element does nothing, because nothing re-declares the composed
+// tokens there. If a surface ever needs its own tint, re-emit this mixin at that
+// scope too.
+tc-theme,
+[data-tc-theme] {
+    @include elevation;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Intentionally NOT tokenised
+//
+// Values from the design that appear exactly once. Each stays inline in the
+// component that will own it, with a comment citing its screen id — a token
+// used in one place is indirection with no payoff, and it hides where the value
+// actually came from.
+//
+//   1a  login canvas: 24px gutter · 260/280/220px blur orbs · blur(90px)
+//   1b  hero wash gradient · 34px icon tile · 15px badge · 20px/15px sparklines
+//   1c  FAB placement (right 20px, bottom 104px = dock + 26px) · 78px quota
+//       track · 16px FAB radius
+//   1d  150px media placeholder · 52px icon-button width · 12px media-badge
+//       inset · 4-up macro grid
+//   1e  26px step-body gutter · 96px "back" button width · 52px step number
+//   1f  32px avatar
+//   1g  112px skeleton card · 42px select height · 22px slider thumb ·
+//       46% fill · 104px cancel-button width
+//   1h  24px tick box (one use in the canvas, but every shopping row in the app
+//       gets one — kept as a token above for that reason)
+//   1i  18px radio with its 5px filled border
+//   1j  30px day cell · 7-up day strip
+//   1k  76px avatar · 27px avatar initial
+//   1l  44px amber icon tile at 12px radius · 74px feature row
+//
+// Also deliberately absent:
+//   * `--m-radius-icon-tile` (10-12px in the task's draft table) — the design's
+//     icon squares are 8px (1b) with a single 12px outlier (1l). It collapses
+//     into --m-radius-tile; a third radius token for one screen is sprawl.
+//   * A status-bar height token — the 46px bar is canvas furniture. On a device
+//     that space comes from env(safe-area-inset-top); see task 02.
+// ─────────────────────────────────────────────────────────────────────────────

@@ -221,6 +221,11 @@ tc-markdown-editor {
             inset 0 0 0 1px var(--bs-markdown-editor-textarea-focus-border),
             inset var(--bs-markdown-editor-textarea-focus-ring);
     }
+
+    // >= 16px on touch — iOS zoom on focus (see style/foundation/_reset.scss).
+    @media (pointer: coarse) {
+        font-size: max(16px, var(--bs-markdown-editor-body-font-size));
+    }
 }
 
 // ── Preview prose ──────────────────────────────────────────────────────────────

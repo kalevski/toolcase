@@ -245,6 +245,13 @@ tc-color-picker {
         min-height: 44px;
     }
 
+    // The hex field is a .form-control, but this pair is 0-2-0 and out-specifies
+    // the 16px floor in _input.scss's coarse block. Repeat it here or the field
+    // stays 13px and iOS zooms the viewport on focus.
+    .tc-color-picker-hex.form-control {
+        font-size: max(16px, 0.8125rem);
+    }
+
     .tc-color-picker-swatch {
         --bs-color-picker-swatch-size: 44px;
     }

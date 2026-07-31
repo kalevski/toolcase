@@ -1,0 +1,282 @@
+// tc-tab-dock — the fixed bottom navigation dock. Mobile-first by construction:
+// there is no media query in this file. It is chrome for one column, and it is the
+// same shape at 320px as at 430px.
+//
+//     tc-tab-dock                    display:grid; auto-flow column; 1fr tracks
+//       └─ .tc-tab-dock-tab          <a> | <button> | inert <span>
+//            ├─ .tc-tab-dock-icon      21x21, position:relative
+//            │    ├─ .tc-tab-dock-glyph   the lucide svg
+//            │    └─ .tc-tab-dock-badge   amber pill, over the icon's top-right
+//            └─ .tc-tab-dock-label     10px, 400 idle / 700 active
+//
+// A GRID WITH IMPLICIT COLUMNS, NOT `repeat(5, 1fr)`.
+//   The design draws five tabs, but the app's dock is role-dependent — a moderator
+//   sees fewer destinations than an owner — so the item count changes between
+//   sessions. `grid-auto-flow: column` + `grid-auto-columns: minmax(0, 1fr)` gives
+//   N equal tracks for whatever N is, with no count to pass in and no inline style
+//   for a framework to clobber. `minmax(0, …)` rather than a bare `1fr`: `1fr` is
+//   `minmax(auto, 1fr)`, whose auto minimum is the track's content size, so one long
+//   Cyrillic label would make its column wider than its neighbours.
+//
+// WHY THE DESIGN'S 132x5 HOME-INDICATOR PILL IS NOT HERE.
+//   The canvas draws one because a canvas has no OS. On a device that strip belongs
+//   to the system, so the dock pays for it as padding instead — see
+//   --bs-tab-dock-pad-bottom below. The canvas reserves 78px per screen and draws
+//   71px; the real chrome is 54px (1px rule + 8px top pad + 45px tab grid) and this
+//   element is 54px + its bottom padding: 61px on a flat phone, 88px on a notched one
+//   standing alone, and a flat 61px inside a tc-mobile-shell, which pays the inset
+//   itself. Never size anything from --m-h-dock plus an inset; see the note on that
+//   token in style/foundation/_mobile-tokens.scss.
+
+tc-tab-dock {
+    // ── Surface ──────────────────────────────────────────────────────────────
+    // --m-dock-* are the theme's dock states (style/themes/sunshine/_mobile.scss);
+    // every read carries a --tc-* fallback so an un-themed page still gets sane
+    // chrome instead of dropping the declaration entirely.
+    --bs-tab-dock-bg: var(--m-dock-bg, var(--tc-surface));
+    --bs-tab-dock-border: 1px solid var(--m-dock-border, var(--tc-border));
+    --bs-tab-dock-shadow: var(--m-shadow-dock, 0 -6px 18px -12px rgba(0, 0, 0, 0.22));
+    // 8px 6px, verbatim from TabBar.dc.html. The bottom is its own property.
+    --bs-tab-dock-padding-top: 8px;
+    --bs-tab-dock-padding-inline: 6px;
+    --bs-tab-dock-gap: 2px;
+
+    // The hardware strip under the tabs. 7px is the canvas's own gap between the
+    // tab grid and the home-indicator pill, and it is the floor: on a device the
+    // inset is larger and wins.
+    --bs-tab-dock-safe-bottom: var(--tc-safe-bottom, 0px);
+    --bs-tab-dock-pad-bottom: max(7px, var(--bs-tab-dock-safe-bottom));
+
+    // ── Tab ──────────────────────────────────────────────────────────────────
+    --bs-tab-dock-tab-padding: 5px 0 3px;
+    --bs-tab-dock-tab-gap: 4px; // icon <-> label
+    // A floor, not a height: the design's tab already measures 45px, so this changes
+    // nothing on the canvas and protects the target if a consumer shrinks the icon or
+    // drops the label. At a fifth of 390px each column is ~71px, so the horizontal
+    // reach is never the problem — the vertical one is.
+    --bs-tab-dock-tab-min-height: var(--tc-min-touch-target, 44px);
+    --bs-tab-dock-icon-size: 21px;
+    --bs-tab-dock-icon-stroke: 1.6;
+
+    // Idle and active. `--m-dock-active` is the theme's "you are here" hue and the
+    // one value an app is expected to re-point: JADI.mk sets it to its signature
+    // terracotta (#a4472f) at its own theme root, which is why this is NOT
+    // --tc-app-accent. Amber is that design's CTA colour and its badge fill; using
+    // it here too would put three amber elements on every screen, against the
+    // design's own two-per-screen rule.
+    --bs-tab-dock-color: var(--m-dock-idle, var(--tc-text-faint));
+    --bs-tab-dock-color-active: var(--m-dock-active, var(--tc-accent));
+    --bs-tab-dock-label-font: var(--m-font-tab, 400 0.625rem var(--tc-font-sans));
+    --bs-tab-dock-label-font-active: var(--m-font-tab-active, 700 0.625rem var(--tc-font-sans));
+
+    // ── Badge ────────────────────────────────────────────────────────────────
+    --bs-tab-dock-badge-bg: var(--tc-app-accent);
+    --bs-tab-dock-badge-color: var(--tc-app-accent-contrast);
+    --bs-tab-dock-badge-size: var(--m-size-badge, 16px);
+    --bs-tab-dock-badge-padding: 0 4px;
+    // 700 9.5px, the canvas's value. A literal because the half pixel is real —
+    // rounding to 9px or 10px changes the pill's width at two digits — with only the
+    // FAMILY left to the theme, so an app that re-pairs its fonts keeps this in step.
+    --bs-tab-dock-badge-font: 700 9.5px var(--m-body, var(--tc-font-sans));
+    // Anchored to the ICON, not to the column. The canvas writes `top:2px;
+    // right:14px|16px` against a 71px column, i.e. the badge's right edge lands
+    // 10.9px / 8.9px past the icon's right edge and its top 3px above the icon's top.
+    // Anchoring to the column instead would drift as the item count changes (four
+    // tabs make each column 93px wide and would strand the badge ~11px from its
+    // icon), so these are the midpoint of the canvas's two values, measured from the
+    // icon box. Right-anchored, as the canvas is: a wide badge (`99+`) grows leftward
+    // over the icon rather than toward the neighbouring tab.
+    --bs-tab-dock-badge-top: -3px;
+    --bs-tab-dock-badge-right: -10px;
+
+    display: grid; // also in foundation/_reset.scss — a custom element is inline
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: var(--bs-tab-dock-gap);
+    flex: none; // the design's dock is `flex:none` in the phone frame's column
+    padding: var(--bs-tab-dock-padding-top) var(--bs-tab-dock-padding-inline)
+        var(--bs-tab-dock-pad-bottom);
+    border-radius: 0;
+    background-color: var(--bs-tab-dock-bg);
+    border-top: var(--bs-tab-dock-border);
+    box-shadow: var(--bs-tab-dock-shadow);
+    // The dock is the one piece of chrome a thumb touches every session; the grey
+    // flash of a tap highlight over a 71px column reads as a rendering glitch.
+    -webkit-tap-highlight-color: transparent;
+}
+
+// INSIDE A tc-mobile-shell THE INSET IS ALREADY PAID.
+//
+// The shell takes both hardware insets out of its OWN padding box rather than
+// pushing them onto the chrome that sits against them (src/MobileShell.ts,
+// deviation 2), so a dock that also paid `--tc-safe-bottom` would count the strip
+// twice — 122px of bottom chrome on a notched phone against the design's 78px. Only
+// the 7px floor is the dock's, and it is what the canvas draws.
+//
+// `:where()` drops the ancestor to zero specificity, so this whole selector is
+// 0-0-1 — the same as the defaults above, winning on source order alone. An app
+// rule `tc-tab-dock { --bs-tab-dock-safe-bottom: … }` loaded after style.css
+// therefore still wins, which a plain `tc-mobile-shell tc-tab-dock` (0-0-2) would
+// have silently beaten. Note that `edge="top"` on the shell zeroes its own bottom
+// inset too, which is the consumer saying "this screen does not want it".
+:where(tc-mobile-shell) tc-tab-dock {
+    --bs-tab-dock-safe-bottom: 0px;
+}
+
+// ── Tab ───────────────────────────────────────────────────────────────────────
+
+// One selector for all three shapes the element renders — <a> when the tab is a
+// route, <button> when it switches a pane, inert <span> when it is disabled.
+.tc-tab-dock-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--bs-tab-dock-tab-gap);
+    // `min-width: 0` lets the item shrink inside its track so a long label can
+    // ellipsise instead of widening its column past its neighbours'.
+    min-width: 0;
+    min-height: var(--bs-tab-dock-tab-min-height);
+    padding: var(--bs-tab-dock-tab-padding);
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--bs-tab-dock-color);
+    text-decoration: none;
+    cursor: pointer;
+    // Colour only. The label also goes 400 -> 700, which cannot be interpolated and
+    // must not be faked with opacity — the weight is what carries the active state
+    // through colour-blindness and a greyscale screenshot.
+    transition: color var(--m-dur-press, 0.14s) var(--m-ease, ease);
+
+    &--active {
+        color: var(--bs-tab-dock-color-active);
+    }
+
+    // THE RESET'S LINK HOVER HAS TO BE CANCELLED, NOT INHERITED.
+    // `a:hover` in foundation/_reset.scss gives every anchor the theme's link hover
+    // colour AND an underline, at 0-1-1 — which beats both `.tc-tab-dock-tab` and
+    // `.tc-tab-dock-tab--active` (0-1-0 each). Measured before this rule: hovering a
+    // tab turned it leaf green under sunshine and underlined it. Both are wrong here.
+    // An underline under a 10px label is illegible, and re-colouring a tab on hover
+    // overwrites the only thing this element's colour means — "you are here".
+    //
+    // The design draws NO hover state: the dock is a touch surface, and
+    // tasks/00-README.md forbids hover-only affordances outright. So this cancels the
+    // reset rather than inventing a state. 0-2-0, so it wins whatever the source
+    // order, and the active pair below it re-asserts the active hue at equal
+    // specificity on a later line.
+    &:hover {
+        color: var(--bs-tab-dock-color);
+        text-decoration: none;
+    }
+
+    &--active:hover {
+        color: var(--bs-tab-dock-color-active);
+    }
+
+    // Inset, like the page rail's. The dock's own top edge is a 1px rule with the
+    // content pane immediately above it and the hardware edge below, so the
+    // library's global 2px/2px-offset ring would be drawn over both.
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: -2px;
+    }
+
+    &[aria-disabled='true'] {
+        opacity: 0.5;
+        pointer-events: none;
+        cursor: default;
+    }
+}
+
+// ── Icon and badge ────────────────────────────────────────────────────────────
+
+// A wrapper, so the badge can be positioned against the ICON rather than against
+// the column — see --bs-tab-dock-badge-right. It is exactly the glyph's box, so it
+// costs the layout nothing.
+.tc-tab-dock-icon {
+    position: relative;
+    flex: none;
+    display: block;
+    width: var(--bs-tab-dock-icon-size);
+    height: var(--bs-tab-dock-icon-size);
+}
+
+.tc-tab-dock-glyph {
+    display: block;
+    width: 100%;
+    height: 100%;
+    // A CSS declaration beats lucide's own stroke-width presentation attribute, so
+    // the design's 1.6 lands without editing the icon source.
+    stroke-width: var(--bs-tab-dock-icon-stroke);
+}
+
+.tc-tab-dock-badge {
+    position: absolute;
+    top: var(--bs-tab-dock-badge-top);
+    right: var(--bs-tab-dock-badge-right);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    // min-width, so a single digit is a circle and `99+` grows into a pill.
+    min-width: var(--bs-tab-dock-badge-size);
+    height: var(--bs-tab-dock-badge-size);
+    padding: var(--bs-tab-dock-badge-padding);
+    border-radius: var(--m-radius-pill, 999px);
+    background-color: var(--bs-tab-dock-badge-bg);
+    font: var(--bs-tab-dock-badge-font);
+    // After `font:`, never before — the shorthand resets font-variant-numeric. A
+    // badge is a number that changes, and proportional figures make the pill's width
+    // jump between 1 and 7.
+    font-variant-numeric: tabular-nums;
+    color: var(--bs-tab-dock-badge-color);
+    // The badge overhangs its icon; without this it would be the widest thing in the
+    // column and set the track's size.
+    pointer-events: none;
+}
+
+// ── Label ─────────────────────────────────────────────────────────────────────
+
+// ELLIPSIS, NOT WRAP. A second line would make the label box ~12px taller, which
+// changes the dock's height — and the dock's height is what every screen's bottom
+// spacing and every overlay's coordinate are measured against.
+.tc-tab-dock-label {
+    max-width: 100%;
+    font: var(--bs-tab-dock-label-font);
+    // The canvas writes the label bare (`font:400 10px`), i.e. line-height `normal`,
+    // which measures a 12px line box. --m-font-tab carries no leading either, but
+    // restating it here keeps a consumer's own font token from deepening the row.
+    line-height: normal;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.tc-tab-dock-tab--active .tc-tab-dock-label {
+    font: var(--bs-tab-dock-label-font-active);
+    line-height: normal;
+}
+
+// ── Auto-hide ─────────────────────────────────────────────────────────────────
+
+// Opt-in via the `auto-hide` attribute, driven by the element from
+// `tc-shell-scroll`. `translateY(100%)` is exactly the dock's own height, whatever
+// the inset made it — inside a tc-mobile-shell the frame's `overflow: hidden` then
+// clips it away entirely.
+//
+// `pointer-events: none` is not decoration: outside a clipping container a
+// translated dock is still hit-testable where it now sits, and an invisible strip
+// that swallows taps at the bottom of the screen is worse than a visible dock.
+tc-tab-dock {
+    transition: transform var(--m-dur-state, 0.18s) var(--m-ease, ease);
+}
+
+tc-tab-dock[data-hidden] {
+    transform: translateY(100%);
+    pointer-events: none;
+}
+
+// No `prefers-reduced-motion` block: foundation/_reset.scss already flattens every
+// transition-duration under `reduce` with !important, so both the colour fade and
+// the hide slide land instantly. Verified rather than assumed — see the task file.

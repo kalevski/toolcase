@@ -107,6 +107,13 @@ tc-theme[name='default'] {
     // smallest legible size for badges/captions/eyebrows (component partials
     // clamp with max()).
     --tc-min-touch-target: 44px;
+    // The dense tier, for a control that sits INSIDE a row alongside others
+    // (steppers, chip closes, inline toggles) where a 44px box would push the
+    // row taller than the type it accompanies. It is below the HIG floor, so it
+    // is only defensible when the ROW is the primary target and the control is
+    // one of several within it — never for a standalone action. Reached via
+    // .tc-touch-target--dense.
+    --tc-touch-target-dense: 40px;
     // The ONE height every single-line form control floors to (inputs, selects,
     // pickers, combo/tag/OTP fields, buttons) so mixed form rows align flush.
     // 2.625rem = the default .form-control's computed height (0.925rem text ×

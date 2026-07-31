@@ -1,6 +1,18 @@
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
+// tc-tab-bar — the DESKTOP panel switcher: a horizontal tablist that WRAPS to a
+// second line when it runs out of width, sitting on its own hairline.
+//
+// THREE TAB-LIKE ELEMENTS IN THIS LIBRARY, and they are not interchangeable:
+//   tc-tab-bar    this one. Wrapping is the point: on a wide surface a second row
+//                 of tabs is better than a scroller the user has to discover.
+//   tc-page-tabs  the phone page rail. NEVER wraps — it scrolls horizontally and
+//                 keeps the active tab in view, because it sits at the top of the
+//                 page and wrapping would move everything below it. It also renders
+//                 real anchors when its tabs are routes.
+//   tc-tab-dock   the fixed bottom dock — N equal columns of icon-over-label.
+
 const TAG_NAME = 'tc-tab-bar'
 
 export type TabBarSize = 'sm' | 'md'

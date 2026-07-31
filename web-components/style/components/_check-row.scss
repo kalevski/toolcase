@@ -1,0 +1,316 @@
+// tc-check-row — the tick-off list row (screen `1h`, „Листа"), reused as `1j`'s meal
+// done-toggle and `1b`'s onboarding tick. Mobile-first by construction: there is no
+// `min-width` media query in this file, only a `hover`/`pointer` one.
+//
+//     tc-check-row                       display:flex — the host carries the divider
+//       ├─ label.tc-check-row-main       flex:1 1 0 — THE HIT TARGET, ≥48px
+//       │    ├─ input.tc-check-row-input .visually-hidden, still focusable
+//       │    ├─ span.tc-check-row-box    24px square / 30px circle + the tick
+//       │    ├─ span.tc-check-row-body   label over hint
+//       │    └─ span.tc-check-row-trailing  the amount, tabular
+//       └─ [slot="trailing"]             optional consumer control, outside the label
+//
+// EVERY CHECKED STYLE IS A SIBLING SELECTOR OFF `:checked`.
+//   Not off the host's `[checked]` attribute, and not off a class. The browser flips
+//   `:checked` as part of the activation itself, so the box fills, the tick appears
+//   and the label strikes through in the same frame the tap lands — before any
+//   listener runs, with nothing to await. That is the one hard requirement of a
+//   shopping list used with no signal. The reflected `[checked]` attribute exists
+//   for consumers to read and write; nothing here reads it.
+//   This is also why the input is the FIRST child of the label: `~` and `+` only
+//   reach forward, so the box, the body and the trailing figure all have to follow
+//   it in the DOM.
+//
+// THE DIM DOES NOT COVER THE FOCUS RING.
+//   The design fades the whole ticked row to `opacity:.45`. Applied to the host that
+//   would fade the focus ring with it, and a checked row is exactly the row a
+//   keyboard user is most likely to be standing on. So the fade is applied to the
+//   three CONTENT pieces and the ring is drawn on the label, which is never faded.
+
+@use '../foundation/tokens' as *;
+
+tc-check-row {
+    // ── Row ──────────────────────────────────────────────────────────────────
+    // 13px 4px (1h). The 4px inline padding is what puts the box 18px from the
+    // frame inside a 14px page gutter, and the 13px block padding is most of what
+    // makes the row a thumb target.
+    --bs-check-row-padding: 13px 4px;
+    // 12px on 1h, 10px on 1j/1b. One value; the 2px is invisible next to a 24px box.
+    --bs-check-row-gap: 12px;
+    // The hit-box floor. `1h`'s own rows measure ~60px (two lines of text plus 26px
+    // of padding) so it never binds there — it exists for the hintless single-line
+    // row, which would otherwise come out at 44px.
+    //
+    // 48px and not `--tc-min-touch-target` (44px): 44 is the WCAG 2.5.5 floor for a
+    // control you aim at, and this is a control you tick off seven of while holding
+    // a shopping basket in the other hand.
+    --bs-check-row-min-height: 48px;
+    // `flex-start` and a 1px nudge, verbatim from 1h: the box aligns to the FIRST
+    // line of a two-line body rather than to the block's centre. A list whose rows
+    // are single-line reads better centred — that is what this knob is for.
+    --bs-check-row-align: flex-start;
+    --bs-check-row-box-offset: 1px;
+
+    // ── Divider ──────────────────────────────────────────────────────────────
+    // Every row on 1h carries one, including the last (the design's own loop draws
+    // them identically). Inside a tc-list-section the LIST owns row separation and
+    // this is zeroed — see style/components/_list-section.scss.
+    --bs-check-row-divider-width: 1px;
+    --bs-check-row-divider-style: dashed;
+    // #e5ddd0 under sunshine — the dashed-separator rung. `--tc-border-faint` is the
+    // nearest generic equivalent.
+    --bs-check-row-divider-color: var(--m-rule-dashed, var(--tc-border-faint));
+
+    // ── Box ──────────────────────────────────────────────────────────────────
+    // Every `--m-*` read carries a fallback: those tokens are declared by a THEME
+    // (style/themes/sunshine/_mobile.scss), so an un-themed page would otherwise
+    // substitute an empty value and drop the whole declaration.
+    --bs-check-row-box-size: var(--m-size-check, 24px);
+    --bs-check-row-box-radius: var(--m-radius-control, 6px);
+    --bs-check-row-box-border-width: var(--m-border-toggle, 2px);
+    --bs-check-row-box-bg: transparent;
+    // #e5ddd0 under sunshine (1b, 1j). 1h's square box is a shade deeper (#d8cfbd);
+    // that one difference is re-pointed per shape in the sunshine partial.
+    --bs-check-row-box-border-color: var(--m-toggle-idle, var(--tc-border-strong));
+
+    // ── Checked ──────────────────────────────────────────────────────────────
+    // Amber fill, amber border, dark-ink tick — never white on amber.
+    --bs-check-row-fill: var(--tc-app-accent);
+    --bs-check-row-fill-border: var(--bs-check-row-fill);
+    --bs-check-row-tick-color: var(--tc-app-accent-contrast);
+    --bs-check-row-tick-size: 14px;
+    // A CSS declaration beats lucide's / the markup's own `stroke-width`
+    // presentation attribute, so the design's 3.2 lands without touching the SVG.
+    --bs-check-row-tick-stroke: 3.2;
+
+    // The two "done" treatments, as VALUES rather than as extra selectors: the state
+    // rules below stay at one attribute of specificity, and both become knobs.
+    // `no-strike` / `no-dim` are negated because a boolean attribute cannot default
+    // to true — see the getters in src/CheckRow.ts.
+    --bs-check-row-strike: line-through;
+    --bs-check-row-dim: 0.45;
+
+    // ── Type ─────────────────────────────────────────────────────────────────
+    // 600 14.5px (1h). `--m-font-label` is the same rung at 13px and its own comment
+    // acknowledges the 14.5px variant; written out here so the flagship screen is
+    // exact and 1j's 14px / 1b's 13px are one knob away.
+    --bs-check-row-label-font: 600 14.5px var(--m-body, var(--tc-font-sans));
+    // #2c2620 under sunshine — the app's warm near-black. `--tc-text` (ink-1,
+    // #20301a) is the nearest generic rung.
+    --bs-check-row-label-color: var(--tc-text);
+    --bs-check-row-hint-font: 400 11.5px var(--m-body, var(--tc-font-sans));
+    // #998f80 under sunshine; `--tc-text-faint` is ink-4 (#9aa189), imperceptibly
+    // different at 11.5px.
+    --bs-check-row-hint-color: var(--tc-text-faint);
+    --bs-check-row-hint-gap: 2px;
+    --bs-check-row-trailing-font: 700 14px var(--m-body, var(--tc-font-sans));
+    // Terracotta #a4472f under sunshine — the app's signature hue, which has no
+    // `--sun-*` rung of its own (design-reference.md §2.3).
+    --bs-check-row-trailing-color: var(--tc-app-accent);
+
+    // ── States ───────────────────────────────────────────────────────────────
+    --bs-check-row-hover-bg: var(--tc-surface-hover);
+    // DELIBERATELY NOT DIMMED. This row already spends opacity on "done"; a second,
+    // similar-looking faded state would be ambiguous, and a checked+disabled row
+    // (1b's completed onboarding steps) would multiply the two into near-invisible.
+    // Set it where a row is genuinely unavailable rather than merely not tickable.
+    --bs-check-row-disabled-opacity: 1;
+    --bs-check-row-focus-ring: var(--tc-app-accent);
+
+    display: flex; // also in foundation/_reset.scss — a custom element is inline
+    align-items: stretch;
+    border-bottom: var(--bs-check-row-divider-width) var(--bs-check-row-divider-style)
+        var(--bs-check-row-divider-color);
+}
+
+tc-check-row[shape='circle'] {
+    --bs-check-row-box-size: var(--m-size-check-round, 30px);
+    --bs-check-row-box-radius: var(--m-radius-pill, 999px);
+    --bs-check-row-tick-size: 15px;
+    --bs-check-row-tick-stroke: 3;
+}
+
+// Green fill, white tick — 1b's onboarding ticks and 1j's meal done-toggle.
+tc-check-row[tone='success'] {
+    --bs-check-row-fill: var(--tc-success);
+    // A literal, and the only white in this system's chrome: `--tc-text-inverse`
+    // is cream (#fbf3e2) under sunshine, which on a green fill reads as stained
+    // rather than as a tick.
+    --bs-check-row-tick-color: #fff;
+}
+
+tc-check-row[divider='solid'] {
+    --bs-check-row-divider-style: solid;
+}
+
+tc-check-row[divider='none'] {
+    --bs-check-row-divider-width: 0;
+}
+
+tc-check-row[no-strike] {
+    --bs-check-row-strike: none;
+}
+
+tc-check-row[no-dim] {
+    --bs-check-row-dim: 1;
+}
+
+// ── The row / hit target ──────────────────────────────────────────────────────
+
+.tc-check-row-main {
+    // `1 1 0` and NOT `flex: 1` with an auto basis: a flex item's line-breaking uses
+    // its HYPOTHETICAL main size, so an auto basis on a text block wraps the row at
+    // 320px. (tc-app-bar's toolbar doubled to 68px on exactly this.)
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    align-items: var(--bs-check-row-align);
+    gap: var(--bs-check-row-gap);
+    min-height: var(--bs-check-row-min-height);
+    padding: var(--bs-check-row-padding);
+    cursor: pointer;
+    // LOAD-BEARING, not decoration. `.visually-hidden` positions the input
+    // absolutely; without a positioned ancestor here it would resolve against
+    // whatever is positioned further up the page, and focusing an off-screen 1x1
+    // box makes the browser scroll it into view — a scroll jump on every Tab.
+    position: relative;
+    // No margin: spacing between rows is the divider's job, or the list's.
+    margin: 0;
+}
+
+.tc-check-row-box {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: var(--bs-check-row-box-size);
+    height: var(--bs-check-row-box-size);
+    margin-top: var(--bs-check-row-box-offset);
+    border: var(--bs-check-row-box-border-width) solid var(--bs-check-row-box-border-color);
+    border-radius: var(--bs-check-row-box-radius);
+    background-color: var(--bs-check-row-box-bg);
+    color: var(--bs-check-row-tick-color);
+    // The design's own duration and curve. Never a transform or a size change: the
+    // box sits in a flex row with text beside it, and animating its geometry would
+    // reflow the label on every tick.
+    transition:
+        background-color var(--m-dur-state, 0.18s) var(--m-ease, ease),
+        border-color var(--m-dur-state, 0.18s) var(--m-ease, ease),
+        opacity var(--m-dur-state, 0.18s) var(--m-ease, ease);
+}
+
+.tc-check-row-tick {
+    display: block;
+    width: var(--bs-check-row-tick-size);
+    height: var(--bs-check-row-tick-size);
+    stroke-width: var(--bs-check-row-tick-stroke);
+    opacity: 0;
+    transition: opacity var(--m-dur-state, 0.18s) var(--m-ease, ease);
+}
+
+.tc-check-row-body {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.tc-check-row-label {
+    font: var(--bs-check-row-label-font);
+    color: var(--bs-check-row-label-color);
+    // Strike-through is NOT transitioned. `text-decoration` interpolation is
+    // unreliable across engines and a half-drawn line reads as a rendering fault.
+    text-decoration-thickness: from-font;
+}
+
+.tc-check-row-hint {
+    margin-top: var(--bs-check-row-hint-gap);
+    font: var(--bs-check-row-hint-font);
+    color: var(--bs-check-row-hint-color);
+}
+
+.tc-check-row-trailing {
+    flex: none;
+    font: var(--bs-check-row-trailing-font);
+    // AFTER the shorthand, which resets it. Amounts change as a list is edited and
+    // a serving scaler runs; proportional figures make „500" and „111" different
+    // widths and jitter the right edge of every row above.
+    font-variant-numeric: tabular-nums;
+    color: var(--bs-check-row-trailing-color);
+    text-align: right;
+}
+
+// An empty hint or trailing collapses entirely. Written explicitly because an
+// author rule that set `display` on these would beat the UA sheet's `[hidden]`,
+// and this is the pair most likely to grow one.
+.tc-check-row-hint[hidden],
+.tc-check-row-trailing[hidden] {
+    display: none;
+}
+
+// A slotted control sits outside the <label> — pressing it must not toggle the row —
+// and after it, whatever order it was authored in.
+tc-check-row > [slot='trailing'] {
+    flex: none;
+    order: 1;
+    display: flex;
+    align-items: center;
+}
+
+// ── Checked ───────────────────────────────────────────────────────────────────
+
+.tc-check-row-input:checked + .tc-check-row-box {
+    background-color: var(--bs-check-row-fill);
+    border-color: var(--bs-check-row-fill-border);
+}
+
+.tc-check-row-input:checked + .tc-check-row-box .tc-check-row-tick {
+    opacity: 1;
+}
+
+.tc-check-row-input:checked ~ .tc-check-row-body .tc-check-row-label,
+.tc-check-row-input:checked ~ .tc-check-row-trailing {
+    text-decoration-line: var(--bs-check-row-strike);
+}
+
+.tc-check-row-input:checked ~ .tc-check-row-box,
+.tc-check-row-input:checked ~ .tc-check-row-body,
+.tc-check-row-input:checked ~ .tc-check-row-trailing {
+    opacity: var(--bs-check-row-dim);
+}
+
+// ── Focus ─────────────────────────────────────────────────────────────────────
+
+// On the LABEL, because the label is the target: a ring around the 24px box would
+// indicate something far smaller than what a press actually hits. Inset, because a
+// full-width row's outset ring is clipped by the scroll pane's edge.
+.tc-check-row-main:has(.tc-check-row-input:focus-visible) {
+    outline: 2px solid var(--bs-check-row-focus-ring);
+    outline-offset: -2px;
+}
+
+// Pre-`:has()` engines (Safari < 15.4, Firefox < 121) fall back to a ring on the
+// box. Smaller, but never absent — a focus indicator is not an enhancement.
+@supports not selector(:has(*)) {
+    .tc-check-row-input:focus-visible + .tc-check-row-box {
+        outline: 2px solid var(--bs-check-row-focus-ring);
+        outline-offset: 2px;
+    }
+}
+
+// ── Disabled ──────────────────────────────────────────────────────────────────
+
+tc-check-row[disabled] .tc-check-row-main {
+    cursor: default;
+    opacity: var(--bs-check-row-disabled-opacity);
+}
+
+// ── Hover ─────────────────────────────────────────────────────────────────────
+
+// FINE POINTERS ONLY. On a touch screen `:hover` sticks after a tap, so a
+// touch-eligible hover would leave the last-ticked row highlighted for as long as
+// the list is open — which reads as a selection the user did not make.
+@include fine-pointer {
+    tc-check-row:not([disabled]) .tc-check-row-main:hover {
+        background-color: var(--bs-check-row-hover-bg);
+    }
+}

@@ -1,0 +1,46 @@
+// Sunshine › tc-step-pager — the four values the `--tc-*` remap cannot carry, all
+// taken verbatim from screen `1e` of the JADI.mk phone canvas.
+//
+// 1. The canvas is #f6ecd8 — `--sun-bg`, the DEEPER cream, one rung below the app
+//    base. No `--tc-*` token maps to it: `--tc-surface-muted` is `--sun-well`
+//    (#f1e6ce, the inset-well cream) and `--tc-surface-hover` is `--sun-bg-2`
+//    (#fbf3e2, the app base). The component's generic default lands on the well,
+//    which is visibly darker than the canvas.
+//
+// 2. The ✕, the context title and the back chevron are #44503a — `--sun-ink-2`,
+//    "secondary" ink. That rung has NO `--tc-*` mapping either (`--tc-text` is ink-1,
+//    `--tc-text-muted` is ink-3, `--tc-text-faint` is ink-4), so the component's
+//    default lands on ink-3 (#6e775f) — visibly lighter than the canvas. Exactly the
+//    gap tc-app-bar documents; re-pointed the same way rather than by inventing a
+//    `--tc-text-secondary` that would have to mean something in all seven themes.
+//
+// 3. The wake chip's rgba(94,138,46,·) is one unit off `--sun-leaf` (95,138,46) and
+//    its .14 fill half a step off `--sun-leaf-tint` (.12). Export drift, but there is
+//    no reason to ship the drift when the measured values are right here.
+//
+// 4. The advance button's glow is `0 14px 30px -12px rgba(242,183,5,.55)` — between
+//    `--m-shadow-amber` (0 12px 28px -12px / .5, the general primary-button glow) and
+//    the second layer of `--m-shadow-amber-ring` (−10px spread, the FAB). One use, so
+//    it stays a literal here where the other amber literals live.
+//
+// Everything else resolves without an override: amber through `--tc-app-accent` →
+// `--sun-lead`, the on-amber ink through `--tc-app-accent-contrast` → `--sun-on-lead`
+// (#2e2400), the empty progress segment through `--tc-border` → `--sun-line`, the
+// back button's rule through `--tc-border-strong` → `--sun-line-strong`, the step
+// text through `--tc-emphasis` → `--sun-emphasis` (#18230f), the caption through
+// `--tc-text-faint` → `--sun-ink-4` (#9aa189), and the hint block through
+// `--m-notice-accent` / `--m-notice-bg` in ../_mobile.scss. Stated because those are
+// the things a reader will come here looking for.
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    tc-step-pager {
+        --bs-step-pager-bg: var(--sun-bg);
+        --bs-step-pager-icon-color: var(--sun-ink-2);
+
+        --bs-step-pager-wake-bg: rgba(94, 138, 46, 0.14);
+        --bs-step-pager-wake-border: 1px solid rgba(94, 138, 46, 0.3);
+
+        --bs-step-pager-advance-shadow: 0 14px 30px -12px rgba(242, 183, 5, 0.55);
+    }
+}

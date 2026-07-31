@@ -95,6 +95,13 @@ tc-json-editor[disabled] .tc-json-editor,
     padding: var(--bs-json-editor-input-padding-y) var(--bs-json-editor-input-padding-x);
     font-size: var(--bs-json-editor-input-font-size);
     line-height: var(--bs-json-editor-input-line-height);
+
+    // >= 16px on touch — iOS zoom on focus (see style/foundation/_reset.scss).
+    // These carry .form-control/.form-select too, but this partial loads after
+    // both, so the dense 13px above wins and the floor has to be repeated here.
+    @media (pointer: coarse) {
+        font-size: max(16px, var(--bs-json-editor-input-font-size));
+    }
 }
 
 .tc-json-editor-switch {

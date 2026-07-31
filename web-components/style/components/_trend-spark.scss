@@ -1,0 +1,138 @@
+// tc-trend-spark — `1i`'s weight trend: an area sparkline with an end dot and two
+// captions. Mobile-first by construction: no media query in this file.
+//
+//     tc-trend-spark                      display:grid — 1fr auto
+//       ├─ svg.tc-trend-spark-canvas      row 1, spanning both tracks
+//       │    ├─ path.tc-trend-spark-area  the fill, closed to the baseline
+//       │    ├─ polyline.tc-trend-spark-line
+//       │    └─ path.tc-trend-spark-dot   zero-length + round cap = a circle
+//       ├─ [slot="caption-start"]         row 2, track 1, „1 мај"
+//       └─ [slot="caption-end"]           row 2, track 2, „денес · 68.0 кг"
+//
+// A GRID AND NOT „SVG + A FLEX ROW".
+//   The two captions have to sit at opposite ends of one row, and they are the
+//   CONSUMER's children — so wrapping them in a flex row would mean re-parenting them,
+//   which throws NotFoundError under react-dom (see the header comments in
+//   src/MobileShell.ts and src/AppBar.ts). A two-track grid puts them at the ends
+//   where they are: `1fr auto` with the second track right-aligned.
+//
+// THE SVG'S ASPECT RATIO IS RELEASED, AND THE STROKES ARE PINNED.
+//   `preserveAspectRatio="none"` (written by the element) lets the 330x72 viewBox fill
+//   whatever width the card gives it — 334px at a 390px viewport, 264px at 320px —
+//   instead of letterboxing at 0.8 scale with 7px of dead space above and below. The
+//   line and the dot carry `vector-effect="non-scaling-stroke"` so neither squashes
+//   with it; the area fill has no stroke and stretching a filled shape is exactly what
+//   should happen to it. Full reasoning in src/TrendSpark.ts.
+//
+// THE DOT IS A STROKE, NOT A CIRCLE.
+//   `stroke-width` IS its diameter, so the design's r=4 is `stroke-width: 8`. A
+//   <circle> cannot be pinned by `vector-effect` and comes out as an ellipse
+//   (3.2 x 4 at 320px).
+
+tc-trend-spark {
+    // 330x72 (1i). The width is fluid; only the height is honoured, and the viewBox
+    // maps 1:1 onto it at the design's own height.
+    --bs-trend-spark-height: 72px;
+    // Terracotta #a4472f under sunshine — the app's signature hue, which has no
+    // `--sun-*` rung of its own (design-reference.md §2.3). Pinned in the sunshine
+    // partial; `--tc-app-accent` is the nearest generic rung.
+    --bs-trend-spark-tone: var(--tc-app-accent);
+    --bs-trend-spark-stroke: 2.2;
+    // `color-mix(in srgb, C 9%, transparent)` IS `C` at alpha 0.09, so this is
+    // bit-exact against the design's `rgba(164,71,47,.09)` while still being one value
+    // away from a re-skin. Same mechanism as tc-notice's washes.
+    --bs-trend-spark-fill-alpha: 9%;
+    --bs-trend-spark-fill: color-mix(
+        in srgb,
+        var(--bs-trend-spark-tone) var(--bs-trend-spark-fill-alpha),
+        transparent
+    );
+    // r=4 → an 8px round cap.
+    --bs-trend-spark-dot-size: 8;
+
+    // 400 10px #9aa189 (1i) — ink-4, which `--tc-text-faint` maps to exactly.
+    --bs-trend-spark-caption-font: 400 10px var(--m-body, var(--tc-font-sans));
+    --bs-trend-spark-caption-color: var(--tc-text-faint);
+    --bs-trend-spark-caption-gap: 6px;
+
+    display: grid; // also in foundation/_reset.scss — a custom element is inline
+    grid-template-columns: 1fr auto;
+    row-gap: var(--bs-trend-spark-caption-gap);
+    // The captions are two short runs at opposite ends; a column gap would only push
+    // them apart when they are long enough to meet, which is when they need to wrap
+    // instead.
+    column-gap: var(--bs-trend-spark-caption-gap);
+}
+
+.tc-trend-spark-canvas {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    display: block;
+    width: 100%;
+    height: var(--bs-trend-spark-height);
+}
+
+.tc-trend-spark-area {
+    fill: var(--bs-trend-spark-fill);
+    stroke: none;
+}
+
+.tc-trend-spark-line {
+    fill: none;
+    stroke: var(--bs-trend-spark-tone);
+    // A CSS declaration beats the markup's own presentation attribute, so the design's
+    // 2.2 lands without the element writing geometry it does not own.
+    stroke-width: var(--bs-trend-spark-stroke);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.tc-trend-spark-dot {
+    fill: none;
+    stroke: var(--bs-trend-spark-tone);
+    stroke-width: var(--bs-trend-spark-dot-size);
+    stroke-linecap: round;
+}
+
+// ── Captions ──────────────────────────────────────────────────────────────────
+
+tc-trend-spark > [slot='caption-start'],
+tc-trend-spark > [slot='caption-end'] {
+    grid-row: 2;
+    font: var(--bs-trend-spark-caption-font);
+    // AFTER the shorthand, which resets it: both captions are readings („68.0 кг",
+    // a date), and the end one changes on every new measurement.
+    font-variant-numeric: tabular-nums;
+    color: var(--bs-trend-spark-caption-color);
+}
+
+tc-trend-spark > [slot='caption-start'] {
+    grid-column: 1;
+}
+
+tc-trend-spark > [slot='caption-end'] {
+    grid-column: 2;
+    text-align: right;
+}
+
+// ── Tones ─────────────────────────────────────────────────────────────────────
+
+tc-trend-spark[tone='lead'] {
+    --bs-trend-spark-tone: var(--tc-app-accent);
+}
+
+tc-trend-spark[tone='success'] {
+    --bs-trend-spark-tone: var(--tc-success);
+}
+
+tc-trend-spark[tone='info'] {
+    --bs-trend-spark-tone: var(--tc-info);
+}
+
+tc-trend-spark[tone='danger'] {
+    --bs-trend-spark-tone: var(--tc-danger);
+}
+
+tc-trend-spark[tone='ink'] {
+    --bs-trend-spark-tone: var(--tc-text);
+}

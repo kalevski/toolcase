@@ -10,6 +10,7 @@
 }
 
 html {
+    // Stops iOS inflating text when the device is rotated to landscape.
     -webkit-text-size-adjust: 100%;
 }
 
@@ -113,6 +114,82 @@ button {
 :focus-visible {
     outline: 2px solid var(--tc-app-accent);
     outline-offset: 2px;
+}
+
+// ── Touch defaults ───────────────────────────────────────────────────────────
+
+// Drops the ~300ms "was that the first of a double-tap-to-zoom?" delay before a
+// tap dispatches. Listed selectors rather than `*` on purpose: applied globally
+// it would also disable pinch-zoom inside scrollers, maps and image viewers.
+// :where() keeps specificity at zero so nothing has to out-specify it.
+:where(button, [role='button'], a, label, summary) {
+    touch-action: manipulation;
+}
+
+@include coarse-pointer {
+    // The single most common mobile-web bug: iOS Safari zooms the whole viewport
+    // when a text field under 16px takes focus, and does not zoom back out.
+    //
+    // `max(16px, 1em)` floors it without flattening a deliberately larger field.
+    // `1em` in a font-size resolves against the PARENT's computed size, and the
+    // rule above sets these elements to `font-size: inherit` — so 1em is exactly
+    // the size the control would otherwise have had.
+    //
+    // Element selectors, so this floor reaches only controls that declare no
+    // font-size of their own. Anything with a class-level font-size out-specifies
+    // it (0-1-0 > 0-0-1) and needs the floor repeated in its own partial, in a
+    // coarse block placed after the base declaration so it also wins on source
+    // order. Raising the specificity here instead would not work: the reset loads
+    // before every component partial, so an equal-specificity copy would still
+    // lose, and it would also flatten .form-control-lg's intentionally larger
+    // 1.04rem.
+    //
+    // 28 selectors in this library declare a class-level size below 16px, and all
+    // 28 now carry their own floor: .form-control(-sm), .form-select(-sm),
+    // .tc-chat-window-input, .tc-color-picker-hex, .tc-combo-box__search-input,
+    // .tc-command-palette-input, .tc-command-reference-input,
+    // .tc-early-signup-form__input, .tc-editable-text__input,
+    // .tc-extended-select__search-input, input.tc-file-name, .tc-file-tags-search,
+    // .tc-icon-picker-search, .tc-json-editor-control,
+    // .tc-json-schema-def-{label,key,type,ref,default},
+    // .tc-markdown-editor-textarea, .tc-newsletter-signup-input,
+    // .tc-number-input__input, .tc-phone-input-number, .tc-phone-input-search,
+    // .tc-report-dialog__comment, .tc-tag-input-field.
+    //
+    // A NEW text control with a class-level size below 16px must add one too;
+    // `grep -rn 'max(16px' style/components/` is the live inventory. Measure it on
+    // a live element rather than grepping the SCSS — media queries add no
+    // specificity, so "the rule exists" is not evidence "the rule wins".
+    input,
+    select,
+    textarea {
+        font-size: max(16px, 1em);
+    }
+
+    // Rubber-band on the DOCUMENT is never wanted in an app shell: it peels
+    // fixed chrome away from the hardware edge and, on Android, arms
+    // pull-to-refresh from inside a scrolling pane. The shell's scroll pane opts
+    // back in with `overscroll-behavior-y: contain` (.tc-scroll-y), which stops
+    // its scroll chaining outward while keeping its own bounce.
+    //
+    // Both elements, because which one is the scrolling root varies by engine.
+    // Scoped to coarse pointers because the same declaration on a desktop would
+    // also kill macOS trackpad elastic scroll — right in an app shell, wrong in
+    // a content site. A consumer that wants pull-to-refresh back sets
+    // `html, body { overscroll-behavior-y: auto }`.
+    html,
+    body {
+        overscroll-behavior-y: none;
+    }
+
+    // The >= 44px touch floor for buttons is NOT declared here. It lives with
+    // each control (`.btn` in _button.scss, `.tc-icon-button` in
+    // _icon-button.scss, `.page-link` in _pagination.scss, the form controls in
+    // _input.scss) because a blanket `button, [role="button"]` floor would also
+    // inflate every micro-control the library renders as a button — chart
+    // segments, hotbar slots, rating stars, colour swatches, calendar day cells
+    // — and break those layouts on touch. Opt in per control, or use
+    // `.tc-touch-target`.
 }
 
 // Custom-element hosts that lay out their own light-DOM children must be
@@ -382,10 +459,151 @@ tc-tab-bar {
     display: flex;
 }
 
+// tc-page-tabs is the phone counterpart: also a flex-row tablist, but the host is
+// additionally the horizontal SCROLL container (the tabs have to be its direct
+// children for the tablist→tab ARIA ownership, so no inner scroller is possible).
+tc-page-tabs {
+    display: flex;
+}
+
+// tc-app-bar is the phone top bar's flex row — its regions are the host's own
+// children, ordered by the partial, with the `below` rail wrapping onto a second
+// line via a 100% flex basis. It cannot default to inline.
+tc-app-bar {
+    display: flex;
+}
+
+// tc-tab-dock is the bottom dock: a GRID whose IMPLICIT columns are the tabs, so
+// three destinations and five each get an equal share of the width with no count
+// passed in from JS. `grid`, not `flex` — see style/components/_tab-dock.scss.
+tc-tab-dock {
+    display: grid;
+}
+
 // tc-compass-bar lays out as a vertical flex column (track above the heading
 // readout); the partial owns the flex details but the host must not default
 // to inline.
 tc-compass-bar {
+    display: flex;
+}
+
+// tc-mobile-shell IS the phone frame's flex column — its five regions are the
+// host's own children, laid out by `order` in the partial, so the host cannot
+// default to inline.
+tc-mobile-shell {
+    display: flex;
+}
+
+// tc-action-bar IS the sticky bottom action row — its children are the consumer's
+// buttons, laid out as flex tracks by the partial, so the host cannot default to
+// inline.
+tc-action-bar {
+    display: flex;
+}
+
+// tc-swipe-pager IS the horizontal scroller and its pages are its own direct
+// children, so the host has to be the flex row itself — an inner track div would
+// mean re-parenting the consumer's pages.
+tc-swipe-pager {
+    display: flex;
+}
+
+// tc-step-pager IS the full-screen step surface's flex column (top row, progress
+// rule, pager, caption, controls). Every one of those is a child it renders itself,
+// laid out in source order by the partial.
+tc-step-pager {
+    display: flex;
+}
+
+// tc-check-row IS the tick-off row: the <label> it renders (the hit target) plus an
+// optional slotted trailing control are the host's own children in a flex row, and the
+// host itself carries the divider.
+tc-check-row {
+    display: flex;
+}
+
+// tc-list-section IS the titled group's flex column — the header band it renders, the
+// consumer's rows, and a slotted footer ordered last. It cannot default to inline.
+tc-list-section {
+    display: flex;
+}
+
+// tc-notice is the inline aside's flex row (optional icon beside an eyebrow-over-prose
+// stack). `flex` and not `inline-flex`: an aside occupies the measure of the surface it
+// annotates, and the `banner` variant is full-bleed chrome.
+tc-notice {
+    display: flex;
+}
+
+// tc-stat-tile IS the tile box — its text stack and an optional slotted trailing
+// control are the host's own children in a flex row, and the host itself carries the
+// surface, the border and the padding.
+tc-stat-tile {
+    display: flex;
+}
+
+// tc-macro-grid IS the row of numbers: a GRID whose cells are the consumer's tiles and
+// whose optional footer spans every track. It renders nothing of its own, so the host
+// has to be the grid itself.
+tc-macro-grid {
+    display: grid;
+}
+
+// tc-quota-meter IS the track beside its figure — both are the host's own children in a
+// flex row.
+tc-quota-meter {
+    display: flex;
+}
+
+// tc-trend-spark IS the sparkline over its two captions: a two-track GRID, because the
+// captions are the CONSUMER's children and wrapping them in a flex row would mean
+// re-parenting them.
+tc-trend-spark {
+    display: grid;
+}
+
+// tc-day-strip IS the week's grid — N equal columns of weekday-letter-over-cell, each of
+// which is a day it renders itself. `grid` and not `flex` because the column COUNT is
+// the knob (a 14-day strip is two rows of seven), which a flex row cannot express.
+tc-day-strip {
+    display: grid;
+}
+
+// tc-add-slot wraps exactly one button, and the button carries the dashed frame — so the
+// host is only the track the slot occupies. `flex` and not `inline-flex`: a slot stands in
+// for the full-width card it would become, so it takes the measure of its container.
+tc-add-slot {
+    display: flex;
+}
+
+// tc-taxonomy-card IS the card box — its own text block plus up to four slotted regions
+// are the host's own children, ordered by `order` in the partial. A flex COLUMN and not a
+// plain block for two reasons: that ordering, and the fact that a flex item establishes a
+// block formatting context — which is what makes the text block contain its floated
+// metric box without a `clear` on every row underneath.
+tc-taxonomy-card {
+    display: flex;
+}
+
+// tc-fab wraps exactly one button. The partial makes it `position: absolute`, which
+// blockifies it anyway — `inline-flex` is what makes `position="static"` place
+// sensibly in a flow, and it is what sizes the host to the button in every case.
+tc-fab {
+    display: inline-flex;
+}
+
+// tc-bottom-sheet IS the sheet panel — its four regions (handle pseudo-element,
+// header, scrolling body, footer) are the host's own children, laid out by `order`
+// in the partial, so the host cannot default to inline.
+//
+// The partial NARROWS this to `display: none` and restores the flex column only
+// while the element carries [data-sheet-state], i.e. while it is open: a closed
+// sheet has to be out of the tab order and out of the accessibility tree, and
+// `display: none` does both without the element writing `inert` onto itself. That
+// works because components/ loads after foundation/, so at equal specificity the
+// partial's `none` wins on source order — this declaration is the value the state
+// rule restores, not the value the element renders with.
+tc-bottom-sheet {
     display: flex;
 }
 
@@ -465,8 +683,8 @@ tc-rune-corner {
     display: block;
 }
 
-// Layout wrapper that insets content by env(safe-area-inset-*); the SCSS
-// partial applies the padding calc, but the host must be block so it spans
+// Layout wrapper that insets content by the --tc-safe-* hardware tokens; the
+// SCSS partial applies the padding calc, but the host must be block so it spans
 // its container.
 tc-safe-area {
     display: block;

@@ -1,10 +1,15 @@
-// tc-safe-area — layout wrapper that insets content by env(safe-area-inset-*)
-// plus an optional uniform extra padding controlled by --bs-safe-area-extra.
+// tc-safe-area — layout wrapper that insets content by the hardware safe-area
+// insets plus an optional uniform extra padding controlled by --bs-safe-area-extra.
 // All cosmetics flow through --bs-safe-area-* custom properties.
 //
 // Usage:
-//   <tc-safe-area>                           <!-- env insets only -->
-//   <tc-safe-area extra="16px">              <!-- env insets + 16px on every side -->
+//   <tc-safe-area>                           <!-- insets only -->
+//   <tc-safe-area extra="16px">              <!-- insets + 16px on every side -->
+//
+// This is the ELEMENT form of the --tc-safe-* tokens in
+// style/foundation/_mobile-tokens.scss; .tc-safe-top / .tc-safe-bottom /
+// .tc-safe-x in _utilities.scss are the per-side utility form. All three read the
+// same four tokens — do not add a fourth mechanism.
 
 tc-safe-area {
     // Default extra: 0px — overridden by the element's inline style when the
@@ -12,8 +17,13 @@ tc-safe-area {
     --bs-safe-area-extra: 0px;
 
     box-sizing: border-box;
-    padding-top: calc(env(safe-area-inset-top, 0px) + var(--bs-safe-area-extra));
-    padding-right: calc(env(safe-area-inset-right, 0px) + var(--bs-safe-area-extra));
-    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + var(--bs-safe-area-extra));
-    padding-left: calc(env(safe-area-inset-left, 0px) + var(--bs-safe-area-extra));
+    // var(--tc-safe-*), never env() directly. The tokens resolve to env() at
+    // :root, and going through them is what lets a host lie about the insets — a
+    // design canvas drawing its own status-bar mock, or a desktop frame previewing
+    // a phone, sets them to 0 and everything inside complies. Read env() here and
+    // that override silently does nothing inside this element.
+    padding-top: calc(var(--tc-safe-top, 0px) + var(--bs-safe-area-extra));
+    padding-right: calc(var(--tc-safe-right, 0px) + var(--bs-safe-area-extra));
+    padding-bottom: calc(var(--tc-safe-bottom, 0px) + var(--bs-safe-area-extra));
+    padding-left: calc(var(--tc-safe-left, 0px) + var(--bs-safe-area-extra));
 }

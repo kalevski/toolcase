@@ -57,6 +57,8 @@ const NormalMapGeneratorDemo: React.FC = () => {
     )
 
     const litRef = useTc<HTMLElement>({ source: sample })
+    const sizedRef = useTc<HTMLElement>({ source: sample })
+    const fitRef = useTc<HTMLElement>({ source: sample })
 
     return (
         <div className="py-4">
@@ -172,6 +174,42 @@ const NormalMapGeneratorDemo: React.FC = () => {
                                     invert-y
                                     tool="none"
                                 />
+                            </tc-section-card>
+
+                            <tc-section-card title="Canvas size — fixed box vs fit-parent auto-scale">
+                                <p className="text-body-secondary">
+                                    <code>canvas-width</code> / <code>canvas-height</code> size the
+                                    canvas (bare numbers are px). <code>fit-parent</code> makes the
+                                    element fill its parent box instead — give the parent a definite
+                                    height; <code>canvas-height</code> is the floor when it has
+                                    none.
+                                </p>
+                                <div className="row g-3">
+                                    <div className="col-12 col-lg-5">
+                                        {/* @ts-ignore */}
+                                        <tc-normal-map-generator
+                                            ref={sizedRef}
+                                            preview-mode="normal"
+                                            strength="1.5"
+                                            emboss-height="2"
+                                            canvas-width="100%"
+                                            canvas-height="180"
+                                            tool="none"
+                                        />
+                                    </div>
+                                    <div className="col-12 col-lg-7" style={{ height: 320 }}>
+                                        {/* @ts-ignore */}
+                                        <tc-normal-map-generator
+                                            ref={fitRef}
+                                            fit-parent
+                                            canvas-height="140"
+                                            preview-mode="lit"
+                                            strength="2"
+                                            emboss-height="3"
+                                            tool="none"
+                                        />
+                                    </div>
+                                </div>
                             </tc-section-card>
 
                             <tc-section-card title="Disabled">

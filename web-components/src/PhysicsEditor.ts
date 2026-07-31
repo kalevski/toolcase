@@ -1,3 +1,5 @@
+import { cssLength } from './internal/cssLength'
+
 const TAG_NAME = 'tc-physics-editor'
 
 // ── Public type surface (mirrors @toolcase/react-components PhysicsEditor) ──────
@@ -175,6 +177,10 @@ export class PhysicsEditor extends HTMLElement {
             'source',
             'shapes',
             'tool',
+            // Canvas box
+            'canvas-width',
+            'canvas-height',
+            'fit-parent',
             // Geometry / interaction limits
             'handle-size',
             'handle-hit',
@@ -197,6 +203,7 @@ export class PhysicsEditor extends HTMLElement {
         if (!this._initialised) {
             this.render()
             this._initialised = true
+            this._applyCanvasSize()
             const attrShapes = parseShapesJson(this.getAttribute('shapes'))
             if (attrShapes && this._shapes.length === 0) this._shapes = attrShapes
             const attrSource = this.getAttribute('source')
@@ -243,6 +250,12 @@ export class PhysicsEditor extends HTMLElement {
             case 'min-size':
                 this._scheduleDraw()
                 break
+            case 'canvas-width':
+            case 'canvas-height':
+            case 'fit-parent':
+                this._applyCanvasSize()
+                this._scheduleDraw()
+                break
             case 'max-alpha-dim':
                 // Re-sample the alpha raster at the new resolution cap.
                 if (this._img) this._extractAlpha(this._img)
@@ -269,6 +282,52 @@ export class PhysicsEditor extends HTMLElement {
     }
     set tool(v: PhysicsTool) {
         this.setAttribute('tool', v)
+    }
+
+    // ── Canvas box ────────────────────────────────────────────────────────────
+
+    /** CSS width of the drawing canvas (bare numbers are px); `''` = stylesheet default. */
+    get canvasWidth(): string {
+        return this.getAttribute('canvas-width') ?? ''
+    }
+    set canvasWidth(v: string) {
+        if (v) this.setAttribute('canvas-width', v)
+        else this.removeAttribute('canvas-width')
+    }
+
+    /**
+     * CSS height of the drawing canvas (bare numbers are px); `''` = stylesheet
+     * default. Under `fit-parent` it acts as the minimum height instead.
+     */
+    get canvasHeight(): string {
+        return this.getAttribute('canvas-height') ?? ''
+    }
+    set canvasHeight(v: string) {
+        if (v) this.setAttribute('canvas-height', v)
+        else this.removeAttribute('canvas-height')
+    }
+
+    /**
+     * Stretch the element and its canvas to fill the parent box, so the stage
+     * auto-scales with the layout instead of using a fixed canvas height. The
+     * parent needs a definite height; `canvas-height` is the floor when it hasn't.
+     */
+    get fitParent(): boolean {
+        return this.hasAttribute('fit-parent')
+    }
+    set fitParent(v: boolean) {
+        if (v) this.setAttribute('fit-parent', '')
+        else this.removeAttribute('fit-parent')
+    }
+
+    /** Mirrors the canvas-box attributes onto the --bs-* custom properties. */
+    private _applyCanvasSize(): void {
+        const w = cssLength(this.getAttribute('canvas-width'))
+        if (w) this.style.setProperty('--bs-physics-editor-canvas-width', w)
+        else this.style.removeProperty('--bs-physics-editor-canvas-width')
+        const h = cssLength(this.getAttribute('canvas-height'))
+        if (h) this.style.setProperty('--bs-physics-editor-canvas-height', h)
+        else this.style.removeProperty('--bs-physics-editor-canvas-height')
     }
 
     /** Drawn handle size in CSS px. */

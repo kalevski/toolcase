@@ -1,0 +1,127 @@
+// tc-macro-grid — the row of numbers (`1d`'s 4-up per-serving row, `1i`'s 3-up macro
+// tiles). Mobile-first by construction: no media query in this file.
+//
+//     tc-macro-grid                display:grid — N equal tracks
+//       ├─ tc-stat-tile × N        the consumer's cells
+//       └─ [slot="footer"]         optional dashed footer row, spanning every track
+//
+// IT RENDERS NOTHING. Its children are the consumer's tiles — see the header comment
+// in src/MacroGrid.ts for why (react-dom and re-parenting), and for why there is no
+// `items` property.
+//
+// ROW-GAP IS THE FOOTER GAP.
+//   The design never wraps a macro row to a second line, so the grid's row gap is
+//   spent on the one second row that exists: the footer. That is what makes `1d`'s
+//   11px offset and `1i`'s 12px exact, instead of a footer margin that would have to
+//   have the column gap subtracted out of it.
+//
+// THE GRID'S VARIANT BEATS A TILE'S OWN.
+//   `tc-macro-grid[variant='…'] > tc-stat-tile` is 0-2-1, one attribute more specific
+//   than `tc-stat-tile[variant='…']` at 0-1-1. Deliberate: the design has no row of
+//   mismatched tiles, and one card-shaped cell in a bare row reads as a fault.
+
+tc-macro-grid {
+    --bs-macro-grid-columns: 4;
+    // 8px (1d) / 9px (1i, = --m-gap-grid). Every `--m-*` read carries a fallback:
+    // those tokens are declared by a THEME (style/themes/sunshine/_mobile.scss), so an
+    // un-themed page would otherwise substitute an empty value and drop the
+    // declaration.
+    --bs-macro-grid-gap: 8px;
+    --bs-macro-grid-row-gap: 11px;
+
+    --bs-macro-grid-footer-pad: 10px;
+    --bs-macro-grid-footer-rule: 1px dashed var(--m-rule-dashed, var(--tc-border-faint));
+    // 400 10.5px #998f80 (1d's „Проценето од 8 од 11 состојки"). The footer's own
+    // children override it — `1i`'s footer is 600 12px leaf-green — so this is the
+    // resting state of a row that only carries a note.
+    --bs-macro-grid-footer-font: 400 10.5px var(--m-body, var(--tc-font-sans));
+    --bs-macro-grid-footer-color: var(--tc-text-faint);
+    --bs-macro-grid-footer-gap: 8px;
+
+    display: grid; // also in foundation/_reset.scss — a custom element is inline
+    grid-template-columns: repeat(var(--bs-macro-grid-columns), 1fr);
+    // Row gap first, column gap second — the `gap` shorthand's own order.
+    gap: var(--bs-macro-grid-row-gap) var(--bs-macro-grid-gap);
+    // Cells size to their own content rather than stretching to the tallest: a tiled
+    // cell whose label wraps to two lines must not add 14px of empty tint to the other
+    // two. `1i` draws all three the same height because all three labels are one line.
+    align-items: start;
+}
+
+tc-macro-grid[columns='2'] {
+    --bs-macro-grid-columns: 2;
+}
+
+tc-macro-grid[columns='3'] {
+    --bs-macro-grid-columns: 3;
+}
+
+// A `1fr` track is `minmax(auto, 1fr)`, so a long Cyrillic label („јаглехидрати" in a
+// 60px cell at 320px) would push its own track past its share and squeeze the others.
+// `min-width: 0` lets the label wrap instead of widening the track.
+tc-macro-grid > tc-stat-tile {
+    min-width: 0;
+}
+
+// ── variant="bare" — 1d's un-boxed 4-up row ───────────────────────────────────
+
+tc-macro-grid[variant='bare'] > tc-stat-tile {
+    --bs-stat-tile-bg: transparent;
+    --bs-stat-tile-border-width: 0px;
+    --bs-stat-tile-radius: 0px;
+    --bs-stat-tile-padding: 0px;
+    // 400 9.5px — half a pixel under the 10px `1i`/`1k` use, because four labels have
+    // to fit across 334px and „јагл. г" is the widest of them.
+    --bs-stat-tile-label-font: 400 9.5px var(--m-body, var(--tc-font-sans));
+}
+
+// ── variant="tiled" — 1i's 3-up tinted tiles ──────────────────────────────────
+
+tc-macro-grid[variant='tiled'] {
+    --bs-macro-grid-gap: var(--m-gap-grid, 9px);
+    --bs-macro-grid-row-gap: 12px;
+    --bs-macro-grid-footer-pad: 11px;
+}
+
+tc-macro-grid[variant='tiled'] > tc-stat-tile {
+    // #f4f1ea under sunshine — pinned in the sunshine partial, same as the tile's own
+    // `well` variant.
+    --bs-stat-tile-bg: var(--tc-surface-hover);
+    --bs-stat-tile-border-width: 0px;
+    --bs-stat-tile-radius: var(--m-radius-tile, 8px);
+    --bs-stat-tile-padding: 9px 10px;
+    --bs-stat-tile-value-font: var(--m-font-stat-sm, 700 1rem var(--tc-font-sans));
+}
+
+// Left-aligned, unlike 1d's centred row: a tinted tile has an edge to align to. Set
+// on `.tc-stat-tile-main` rather than on the host because that is where the tile's own
+// `text-align: center` lives, and a host declaration would simply be inherited into it
+// and overridden.
+tc-macro-grid[variant='tiled'] > tc-stat-tile .tc-stat-tile-main {
+    text-align: start;
+}
+
+tc-macro-grid[variant='tiled'] > tc-stat-tile .tc-stat-tile-figure {
+    justify-content: flex-start;
+}
+
+// ── The footer row ────────────────────────────────────────────────────────────
+
+// Spans every track and comes last, whatever order it was authored in — so a
+// consumer can put the footer first in the DOM (which some frameworks find easier)
+// without it appearing above the numbers.
+tc-macro-grid > [slot='footer'] {
+    grid-column: 1 / -1;
+    order: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--bs-macro-grid-footer-gap);
+    padding-top: var(--bs-macro-grid-footer-pad);
+    border-top: var(--bs-macro-grid-footer-rule);
+    font: var(--bs-macro-grid-footer-font);
+    // AFTER the shorthand, which resets it: `1d`'s footer counts matched ingredients
+    // („8 од 11"), and that count changes as a recipe is edited.
+    font-variant-numeric: tabular-nums;
+    color: var(--bs-macro-grid-footer-color);
+}

@@ -1,0 +1,23 @@
+// Sunshine › tc-app-bar / tc-page-tabs — the two values the --tc-* remap cannot
+// carry, both taken verbatim from the JADI.mk phone canvas.
+//
+// 1. The back chevron and every icon action in the bar are #44503a — sunshine's
+//    --sun-ink-2, "secondary" ink. That rung of the ink ladder has NO --tc-* mapping
+//    (--tc-text is ink-1, --tc-text-muted is ink-3, --tc-text-faint is ink-4), so the
+//    component's default lands on ink-3 (#6e775f) — visibly lighter than the canvas.
+//    Re-pointed here rather than by inventing a --tc-text-secondary token, which
+//    would have to be defined in all seven themes to mean anything.
+//
+// 2. The wordmark's suffix and the resting page tab are both ink-4 (#9aa189), which
+//    --tc-text-faint already gives — so those are inherited, not restated.
+//
+// The amber underline and the amber brand dash both resolve through --tc-app-accent
+// → --sun-lead → #f2b705 with no override needed. Stated here because it is the one
+// thing a reader will come to this file looking for.
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    tc-app-bar {
+        --bs-app-bar-icon-color: var(--sun-ink-2);
+    }
+}

@@ -1,0 +1,212 @@
+// tc-notice — the inline aside (screens `1e`, `1f`, `1i`, `1k`) and its full-bleed
+// `banner` variant (`1h`'s offline strip). Mobile-first by construction: no media
+// query in this file.
+//
+//     tc-notice                      display:flex — 3px rule · wash · radius
+//       ├─ svg.tc-notice-icon        15px, tone colour, optional
+//       └─ span.tc-notice-body       flex:1 1 0
+//            ├─ .tc-notice-label     eyebrow, tone colour, optional
+//            └─ .tc-notice-text      the prose
+//
+// ONE HUE PER TONE, AND THE FILLS ARE DERIVED FROM IT.
+//   Each tone declares three things — the rule colour, the alpha of its wash, and the
+//   text colour — and `color-mix(… N%, transparent)` composes the wash. That is not a
+//   convenience: `color-mix(in srgb, C N%, transparent)` IS `C` at alpha `N`, so every
+//   fill below is bit-exact against the design's own rgba() while still being one
+//   value away from re-skinning. The design's alphas are genuinely per-tone (info .08,
+//   accent .07, muted/warning/success .12, danger .14) — they are not noise, they
+//   compensate for how dark each pigment is on cream — so each one is spelled out.
+//
+//   Substitution note: `--bs-notice-bg` is declared on `tc-notice` while
+//   `--bs-notice-tone` is re-declared on `tc-notice[tone='…']`. That is safe because
+//   both land on the SAME element, and a var() in a custom property resolves against
+//   the element's own cascaded values. The trap is composing at :root and re-pointing
+//   the input on a DESCENDANT — see the long comment in foundation/_mobile-tokens.scss.
+//
+// THE BANNER HAS A BOTTOM HAIRLINE ONLY.
+//   `1h` draws `border-bottom: 1px solid rgba(212,154,0,.3)` and no top rule, because
+//   the app bar above it already ends in one and two hairlines 1px apart read as a
+//   rendering fault. `--bs-notice-banner-border-top` exists for a banner that floats
+//   free of a bar.
+
+tc-notice {
+    // ── Tone (defaults = `muted`, the design's most common) ──────────────────
+    // #9aa189 under sunshine — ink-4, the faint rung, which `--tc-text-faint` maps to
+    // exactly.
+    --bs-notice-tone: var(--tc-text-faint);
+    --bs-notice-bg-alpha: 12%;
+    // #6b6459 under sunshine — the app's body copy on cream, which has no `--sun-*`
+    // rung (design-reference.md §2.3). `--tc-text-muted` is ink-3 (#6e775f), the
+    // nearest generic equivalent.
+    --bs-notice-color: var(--tc-text-muted);
+
+    --bs-notice-bg: color-mix(
+        in srgb,
+        var(--bs-notice-tone) var(--bs-notice-bg-alpha),
+        transparent
+    );
+
+    // ── Bar geometry ─────────────────────────────────────────────────────────
+    // Every `--m-*` read carries a fallback: those tokens are declared by a THEME
+    // (style/themes/sunshine/_mobile.scss), so an un-themed page would otherwise
+    // substitute an empty value and drop the whole declaration.
+    --bs-notice-rule: var(--m-bar-accent, 3px);
+    // Square against the rule, rounded away from it — the shape is what makes this
+    // read as a margin note rather than as a card.
+    --bs-notice-radius: var(--m-radius-notice, 0 8px 8px 0);
+    // 10px 13px. The design spends 9/10/11 and 12/13/14 across its five instances with
+    // no pattern; this is the middle, and `--bs-notice-padding` is the escape.
+    --bs-notice-padding: 10px 13px;
+    --bs-notice-gap: 8px;
+
+    // ── Type ─────────────────────────────────────────────────────────────────
+    // 400 11.5px/1.45 — the half-pixel variant of `--m-font-meta` that its own comment
+    // acknowledges, at the prose leading the design uses for every notice.
+    --bs-notice-font: 400 11.5px / 1.45 var(--m-body, var(--tc-font-sans));
+    --bs-notice-label-font: var(--m-font-eyebrow, 700 0.59375rem var(--tc-font-sans));
+    --bs-notice-label-track: var(--m-track-eyebrow, 0.13em);
+    --bs-notice-label-gap: 4px;
+    --bs-notice-icon-size: 15px;
+    --bs-notice-icon-stroke: 1.9;
+
+    display: flex; // also in foundation/_reset.scss — a custom element is inline
+    // `flex-start` and not `center`: an icon beside a three-line disclaimer belongs
+    // against its first line. The banner re-centres it, because there it is one line.
+    align-items: flex-start;
+    gap: var(--bs-notice-gap);
+    padding: var(--bs-notice-padding);
+    border-left: var(--bs-notice-rule) solid var(--bs-notice-tone);
+    border-radius: var(--bs-notice-radius);
+    background-color: var(--bs-notice-bg);
+    color: var(--bs-notice-color);
+}
+
+// ── Tones ─────────────────────────────────────────────────────────────────────
+// Rule / wash / text, verbatim from the design where it draws them. The four text
+// colours with no token in either layer (#44503a, #6b6459, #8a6d2f, #b3261e) are
+// pinned in style/themes/sunshine/components/_notice.scss; these are the nearest
+// generic rungs.
+
+// `1f` — comments held for moderation. #9c4a7a plum at 8%, ink-2 text.
+tc-notice[tone='info'] {
+    --bs-notice-tone: var(--tc-info);
+    --bs-notice-bg-alpha: 8%;
+    --bs-notice-color: var(--tc-text);
+}
+
+// `1i`, `1k` — the disclaimers. Explicit rather than inherited from the block above,
+// so `tone="muted"` is a declaration and not an accident of the defaults.
+tc-notice[tone='muted'] {
+    --bs-notice-tone: var(--tc-text-faint);
+    --bs-notice-bg-alpha: 12%;
+    --bs-notice-color: var(--tc-text-muted);
+}
+
+// `1k` — „плаќањето се договара директно". #d49a00 ochre at 12%, ochre text.
+tc-notice[tone='warning'] {
+    --bs-notice-tone: var(--tc-warning);
+    --bs-notice-bg-alpha: 12%;
+    --bs-notice-color: var(--tc-warning);
+}
+
+// `1e` — the cooking tip. Terracotta at 7%: the LOWEST wash in the set, because the
+// hue is the strongest. TERRACOTTA AND NOT AMBER — amber is this design's CTA colour
+// under a two-elements-per-screen budget, and `1e` has already spent both on the step
+// number and the advance button.
+tc-notice[tone='accent'] {
+    --bs-notice-tone: var(--m-notice-accent, var(--tc-app-accent));
+    --bs-notice-bg-alpha: 7%;
+    --bs-notice-color: var(--tc-text-muted);
+}
+
+tc-notice[tone='success'] {
+    --bs-notice-tone: var(--tc-success);
+    --bs-notice-bg-alpha: 12%;
+    // The deeper leaf rung, so the text clears 4.5:1 on its own 12% wash.
+    --bs-notice-color: var(--tc-accent-fg);
+}
+
+tc-notice[tone='danger'] {
+    --bs-notice-tone: var(--tc-danger);
+    --bs-notice-bg-alpha: 14%;
+    --bs-notice-color: var(--tc-danger);
+}
+
+// ── Size ──────────────────────────────────────────────────────────────────────
+
+// `1e`'s cooking tip: read at arm's length from a kitchen counter, so it is the one
+// notice set at body size. 11px 14px / 400 13px/1.5, verbatim.
+tc-notice[size='lg'] {
+    --bs-notice-padding: 11px 14px;
+    --bs-notice-font: 400 13px / 1.5 var(--m-body, var(--tc-font-sans));
+}
+
+// ── Parts ─────────────────────────────────────────────────────────────────────
+
+.tc-notice-icon {
+    display: block;
+    flex: none;
+    width: var(--bs-notice-icon-size);
+    height: var(--bs-notice-icon-size);
+    // A CSS declaration beats lucide's own `stroke-width` presentation attribute, so
+    // the design's 1.9 lands without editing the icon source.
+    stroke-width: var(--bs-notice-icon-stroke);
+    color: var(--bs-notice-tone);
+}
+
+// `1 1 0` and NOT `flex: 1` with an auto basis: a flex item's line-breaking uses its
+// HYPOTHETICAL main size, so an auto basis on a prose block pushes the icon out of the
+// row at 320px. (tc-app-bar's toolbar doubled to 68px on exactly this.)
+.tc-notice-body {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.tc-notice-label {
+    display: block;
+    margin-bottom: var(--bs-notice-label-gap);
+    font: var(--bs-notice-label-font);
+    letter-spacing: var(--bs-notice-label-track);
+    text-transform: uppercase;
+    color: var(--bs-notice-tone);
+}
+
+.tc-notice-text {
+    display: block;
+    font: var(--bs-notice-font);
+    // The prose can carry a figure („−2.4 кг", „1 900 ккал") that a live surface
+    // updates, and this design puts tabular figures on every number that can change.
+    font-variant-numeric: tabular-nums;
+}
+
+// ── Banner ────────────────────────────────────────────────────────────────────
+
+// `1h`'s offline strip. Full-bleed, no rule, no radius: it belongs to the chrome above
+// the content — it sits in tc-app-bar's `below` region — rather than to the page, and a
+// rounded box with a left rule inside a bar reads as content that escaped its column.
+tc-notice[variant='banner'] {
+    // .14 and .3 of the tone, which for `warning` is exactly the design's
+    // rgba(212,154,0,.14) fill over rgba(212,154,0,.3) hairline.
+    --bs-notice-banner-bg: color-mix(in srgb, var(--bs-notice-tone) 14%, transparent);
+    --bs-notice-banner-border-color: color-mix(in srgb, var(--bs-notice-tone) 30%, transparent);
+    --bs-notice-banner-border-top: 0;
+    --bs-notice-banner-border-bottom: 1px solid var(--bs-notice-banner-border-color);
+    // 600, not 400: a strip this thin has to hold its own against the bar above it,
+    // and the design weights it accordingly.
+    --bs-notice-banner-font: 600 11.5px / 1.45 var(--m-body, var(--tc-font-sans));
+    --bs-notice-padding: 9px var(--m-pad-page, 14px);
+
+    // A single line beside a 15px glyph, so here centring is right.
+    align-items: center;
+    border-left: 0;
+    border-top: var(--bs-notice-banner-border-top);
+    border-bottom: var(--bs-notice-banner-border-bottom);
+    border-radius: 0;
+    background-color: var(--bs-notice-banner-bg);
+}
+
+tc-notice[variant='banner'] .tc-notice-text {
+    font: var(--bs-notice-banner-font);
+    // AFTER the shorthand, which resets it.
+    font-variant-numeric: tabular-nums;
+}

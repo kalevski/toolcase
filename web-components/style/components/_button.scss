@@ -213,9 +213,14 @@
 }
 
 // WCAG 2.5.5 — minimum tappable area on touch devices.
+//
+// Width matters as much as height: an icon-only .btn measured 27-35px wide inside
+// a 44px-tall box, which a thumb still misses. Text buttons are already wider, so
+// the min-width is a no-op for them.
 @media (pointer: coarse) {
     .btn {
-        min-height: 44px;
+        min-width: var(--tc-min-touch-target, 44px);
+        min-height: var(--tc-min-touch-target, 44px);
     }
 }
 

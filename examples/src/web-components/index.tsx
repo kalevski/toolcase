@@ -129,6 +129,23 @@ import StatusCardDemo from './StatusCardDemo'
 import DashboardContentDemo from './DashboardContentDemo'
 import DashboardSidebarDemo from './DashboardSidebarDemo'
 import DashboardLayoutDemo from './DashboardLayoutDemo'
+import MobileShellDemo from './MobileShellDemo'
+import AppBarDemo from './AppBarDemo'
+import BottomSheetDemo from './BottomSheetDemo'
+import ActionBarDemo from './ActionBarDemo'
+import FabDemo from './FabDemo'
+import SwipePagerDemo from './SwipePagerDemo'
+import StepPagerDemo from './StepPagerDemo'
+import CheckRowDemo from './CheckRowDemo'
+import ListSectionDemo from './ListSectionDemo'
+import NoticeDemo from './NoticeDemo'
+import StatTileDemo from './StatTileDemo'
+import TaxonomyCardDemo from './TaxonomyCardDemo'
+import MacroGridDemo from './MacroGridDemo'
+import QuotaMeterDemo from './QuotaMeterDemo'
+import TrendSparkDemo from './TrendSparkDemo'
+import DayStripDemo from './DayStripDemo'
+import AddSlotDemo from './AddSlotDemo'
 import DownloadStatsDemo from './DownloadStatsDemo'
 import EmptyStateDemo from './EmptyStateDemo'
 import EyebrowDemo from './EyebrowDemo'
@@ -289,6 +306,8 @@ import UserPanelDemo from './UserPanelDemo'
 import PhysicsEditorDemo from './PhysicsEditorDemo'
 import SingleCardSelectDemo from './SingleCardSelectDemo'
 import TabBarDemo from './TabBarDemo'
+import PageTabsDemo from './PageTabsDemo'
+import TabDockDemo from './TabDockDemo'
 import TabSectionsDemo from './TabSectionsDemo'
 import TableDemo from './TableDemo'
 import AdvancedTableDemo from './AdvancedTableDemo'
@@ -348,7 +367,7 @@ import ShopPanelDemo from './ShopPanelDemo'
 import StatsScreenDemo from './StatsScreenDemo'
 import VersionLabelDemo from './VersionLabelDemo'
 
-export type WebComponentComplexity = 'Primitives' | 'Simple' | 'Composite' | 'Advanced'
+export type WebComponentComplexity = 'Primitives' | 'Simple' | 'Composite' | 'Advanced' | 'Mobile'
 
 export type WebComponentDef = {
     key: string
@@ -361,6 +380,7 @@ export const complexities: WebComponentComplexity[] = [
     'Simple',
     'Composite',
     'Advanced',
+    'Mobile',
 ]
 
 const demos: WebComponentDef[] = [
@@ -504,6 +524,25 @@ const demos: WebComponentDef[] = [
     { key: 'dashboard-content', complexity: 'Primitives', element: <DashboardContentDemo /> },
     { key: 'dashboard-sidebar', complexity: 'Primitives', element: <DashboardSidebarDemo /> },
     { key: 'dashboard-layout', complexity: 'Simple', element: <DashboardLayoutDemo /> },
+    { key: 'mobile-shell', complexity: 'Mobile', element: <MobileShellDemo /> },
+    { key: 'app-bar', complexity: 'Mobile', element: <AppBarDemo /> },
+    { key: 'bottom-sheet', complexity: 'Mobile', element: <BottomSheetDemo /> },
+    { key: 'action-bar', complexity: 'Mobile', element: <ActionBarDemo /> },
+    { key: 'fab', complexity: 'Mobile', element: <FabDemo /> },
+    { key: 'swipe-pager', complexity: 'Mobile', element: <SwipePagerDemo /> },
+    { key: 'step-pager', complexity: 'Mobile', element: <StepPagerDemo /> },
+    { key: 'check-row', complexity: 'Mobile', element: <CheckRowDemo /> },
+    { key: 'list-section', complexity: 'Mobile', element: <ListSectionDemo /> },
+    { key: 'notice', complexity: 'Mobile', element: <NoticeDemo /> },
+    { key: 'stat-tile', complexity: 'Mobile', element: <StatTileDemo /> },
+    { key: 'macro-grid', complexity: 'Mobile', element: <MacroGridDemo /> },
+    { key: 'quota-meter', complexity: 'Mobile', element: <QuotaMeterDemo /> },
+    { key: 'trend-spark', complexity: 'Mobile', element: <TrendSparkDemo /> },
+    { key: 'day-strip', complexity: 'Mobile', element: <DayStripDemo /> },
+    { key: 'add-slot', complexity: 'Mobile', element: <AddSlotDemo /> },
+    { key: 'taxonomy-card', complexity: 'Mobile', element: <TaxonomyCardDemo /> },
+    { key: 'page-tabs', complexity: 'Mobile', element: <PageTabsDemo /> },
+    { key: 'tab-dock', complexity: 'Mobile', element: <TabDockDemo /> },
     { key: 'download-stats', complexity: 'Composite', element: <DownloadStatsDemo /> },
     { key: 'empty-state', complexity: 'Primitives', element: <EmptyStateDemo /> },
     { key: 'entity-cell', complexity: 'Simple', element: <EntityCellDemo /> },

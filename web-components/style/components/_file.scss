@@ -258,6 +258,16 @@ tc-file {
     }
 }
 
+// >= 16px on touch, or iOS Safari zooms the viewport when the rename field takes
+// focus (see style/foundation/_reset.scss). Qualified with `input` on purpose:
+// .tc-file-name is also the read-only <span>, whose size is a display decision and
+// must not follow the field's keyboard constraint.
+@media (pointer: coarse) {
+    input.tc-file-name {
+        font-size: max(16px, var(--bs-file-name-font-size));
+    }
+}
+
 // ── Extension label ────────────────────────────────────────────────────────
 
 .tc-file-ext {

@@ -7,6 +7,9 @@ tc-option {
 }
 
 .form-select {
+    // A --bs-* knob rather than a literal, so the coarse-pointer floor below reads
+    // the tier's own size instead of repeating it (see _input.scss).
+    --bs-form-select-font-size: 0.925rem;
     --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
     --bs-form-select-border-color: var(--tc-border-strong);
     --bs-form-select-focus-border-color: rgba(30, 41, 59, 0.5);
@@ -19,7 +22,7 @@ tc-option {
     min-height: var(--tc-control-height, 2.625rem);
     padding: 0.5rem 2rem 0.5rem 0.625rem;
     font-family: var(--tc-font-sans);
-    font-size: 0.925rem;
+    font-size: var(--bs-form-select-font-size);
     font-weight: 400;
     line-height: 1.6;
     color: var(--tc-text);
@@ -55,18 +58,51 @@ tc-option {
     }
 }
 
+// The size tiers re-point the same knob, which is what lets one coarse-pointer
+// rule floor all three correctly (see below).
 .form-select-sm {
+    --bs-form-select-font-size: 0.8125rem;
+
     min-height: 2rem;
     padding-top: 0.3rem;
     padding-bottom: 0.3rem;
     padding-left: 0.55rem;
-    font-size: 0.8125rem;
+    font-size: var(--bs-form-select-font-size);
 }
 
 .form-select-lg {
+    --bs-form-select-font-size: 1.04rem;
+
     min-height: 2.75rem;
     padding-top: 0.7rem;
     padding-bottom: 0.7rem;
     padding-left: 1rem;
-    font-size: 1.04rem;
+    font-size: var(--bs-form-select-font-size);
+}
+
+// Coarse pointers: the select meets the touch-target floor and clears the 16px
+// threshold below which iOS Safari zooms the viewport on focus and does not zoom
+// back out.
+//
+// This looks like a duplicate of the shared block in _input.scss and is not.
+// That file loads first, and .form-select above declares both properties at equal
+// specificity — so the shared rule lost on source order and the select had no
+// touch floor at all.
+//
+// One rule covers all three tiers: the -sm/-lg knob is re-declared on the same
+// element and later in this file, so -lg's 1.04rem (16.64px) survives the max()
+// while -sm's 0.8125rem is raised.
+//
+// A CONSEQUENCE WORTH KNOWING: this floors the box at 44px, so the design's 42px
+// sheet select (screen 1g) and 40px search field are not reachable from these
+// classes on touch. That is deliberate for the library default; a mobile surface
+// that wants the design's exact box sets --tc-min-touch-target on its own subtree
+// and makes the hit area up with padding. See style/foundation/README.md.
+@media (pointer: coarse) {
+    // -sm is listed for the case where it is used WITHOUT .form-select.
+    .form-select,
+    .form-select-sm {
+        font-size: max(16px, var(--bs-form-select-font-size));
+        min-height: max(var(--tc-control-height, 2.625rem), var(--tc-min-touch-target, 44px));
+    }
 }

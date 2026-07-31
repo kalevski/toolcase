@@ -125,6 +125,39 @@ const BitmapFontGeneratorDemo: React.FC = () => {
                                 />
                             </tc-section-card>
 
+                            <tc-section-card title="Preview canvas size — fixed box vs fit-parent auto-scale">
+                                <p className="text-body-secondary">
+                                    <code>canvas-width</code> / <code>canvas-height</code> size the
+                                    preview canvas (bare numbers are px). <code>fit-parent</code>{' '}
+                                    makes the element fill its parent box instead — give the parent
+                                    a definite height; <code>canvas-height</code> is the floor when
+                                    it has none. Preview-only: the exported atlas is unaffected.
+                                </p>
+                                <div className="row g-3">
+                                    <div className="col-12 col-lg-5">
+                                        {/* @ts-ignore */}
+                                        <tc-bitmap-font-generator
+                                            font-family="Arial"
+                                            font-size="32"
+                                            text="Fixed box"
+                                            canvas-width="100%"
+                                            canvas-height="160"
+                                        />
+                                    </div>
+                                    <div className="col-12 col-lg-7" style={{ height: 300 }}>
+                                        {/* @ts-ignore */}
+                                        <tc-bitmap-font-generator
+                                            fit-parent
+                                            canvas-height="140"
+                                            font-family="Georgia"
+                                            font-size="44"
+                                            text={'Fit\nparent'}
+                                            preview-align="center"
+                                        />
+                                    </div>
+                                </div>
+                            </tc-section-card>
+
                             <tc-section-card title="Disabled">
                                 {/* @ts-ignore */}
                                 <tc-bitmap-font-generator

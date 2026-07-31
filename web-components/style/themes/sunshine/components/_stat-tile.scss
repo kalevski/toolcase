@@ -1,0 +1,68 @@
+// Sunshine › tc-stat-tile / tc-macro-grid / tc-quota-meter / tc-trend-spark — the warm
+// neutrals the numeric family is drawn in that have no `--tc-*` rung of their own.
+//
+// Screens `1k` (three bordered tiles), `1i` (the 38px target, three tinted macro
+// tiles, the weight spark), `1d` (the 4-up per-serving row) and `1c` (the 78x5 quota
+// meter) are the references. The mechanism is the one tc-app-bar, tc-input and
+// tc-check-row already use: the generic partial names the nearest `--tc-*` rung so an
+// un-themed page is sane, and this file pins the design's actual value.
+//
+// Not restated here, because the `--tc-*` remap already lands them exactly:
+//   #fffdf7 tile surface (`--tc-surface`) · #20301a ink figure (`--tc-text`) ·
+//   #f2b705 amber (`--tc-app-accent`) · #f1e6ce track well (`--tc-surface-muted`) ·
+//   #d49a00 ochre (`--tc-warning`) · #f2604b coral (`--tc-danger`) ·
+//   #9aa189 caption ink (`--tc-text-faint`) · #e5ddd0 dashed rule (`--m-rule-dashed`).
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    tc-stat-tile {
+        // #e5e2dc — the app's card/panel border (design-reference.md §2.3, ~60 uses).
+        // `--tc-border` is `--sun-line` (rgba(34,48,26,.14)), which composites over the
+        // cream canvas at roughly #dcd8c6 — a shade darker and a shade warmer.
+        --bs-stat-tile-border-color: #e5e2dc;
+        // #998f80 — the muted label ink, ~60 uses. `--tc-text-faint` is ink-4 (#9aa189),
+        // which is cooler and lighter.
+        --bs-stat-tile-label-color: #998f80;
+        // #f4f1ea — one of the app's stacked light surfaces (§2.3). No `--sun-*` rung
+        // exists for it; `--tc-surface-hover` is `--sun-bg-2` (#fbf3e2), the page canvas,
+        // which against a #fffdf7 card is almost invisible.
+        --bs-stat-tile-well-bg: #f4f1ea;
+    }
+
+    // Declared on the host above and consumed by both the tile's own `well` variant and
+    // tc-macro-grid's `tiled` row, so the two cannot drift apart.
+    tc-stat-tile[variant='well'] {
+        --bs-stat-tile-bg: var(--bs-stat-tile-well-bg);
+    }
+
+    // Terracotta #a4472f — the app's signature hue (~100 uses) and the colour `1d`'s
+    // kcal figure is set in. No `--sun-*` rung exists for it; `--tc-app-accent` resolves
+    // to the amber lead, which would spend one of the screen's two amber slots on a
+    // number that is not a call to action.
+    tc-stat-tile[tone='accent'] {
+        --bs-stat-tile-value-color: #a4472f;
+    }
+
+    tc-macro-grid {
+        --bs-macro-grid-footer-color: #998f80;
+    }
+
+    // `--bs-stat-tile-well-bg` is declared on `tc-stat-tile` above, i.e. on this very
+    // element, so it resolves — and the tint stays one value for both the tile's own
+    // `well` variant and the grid's `tiled` row.
+    tc-macro-grid[variant='tiled'] > tc-stat-tile {
+        --bs-stat-tile-bg: var(--bs-stat-tile-well-bg);
+    }
+
+    tc-quota-meter {
+        --bs-quota-meter-label-color: #998f80;
+    }
+
+    tc-quota-meter[tone='accent'] {
+        --bs-quota-meter-fill: #a4472f;
+    }
+
+    tc-trend-spark {
+        --bs-trend-spark-tone: #a4472f;
+    }
+}

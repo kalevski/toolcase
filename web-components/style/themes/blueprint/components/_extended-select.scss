@@ -96,6 +96,13 @@ tc-theme[name='blueprint'],
         &::placeholder {
             color: var(--bp-text-faint);
         }
+
+        // A theme that re-declares a field's font-size also out-specifies the
+        // component's 16px coarse floor and has to restate it, or iOS Safari zooms
+        // the viewport on focus. See style/foundation/README.md.
+        @media (pointer: coarse) {
+            font-size: max(16px, 0.875rem);
+        }
     }
 
     // ── Options list ──────────────────────────────────────────────────────────

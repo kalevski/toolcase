@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { msg } from './messages'
 import { chevronLeftIcon, closeIcon } from './icons'
 
 const TAG_NAME = 'tc-nav-button'
@@ -69,7 +70,9 @@ export class NavButton extends HTMLElement {
         if (size !== null) this.style.setProperty('--bs-nav-button-size', `${size}px`)
         else this.style.removeProperty('--bs-nav-button-size')
 
-        const ariaLabel = label || (kind === 'close' ? 'Close' : 'Back')
+        // Through the registry rather than hardcoded, so one configureMessages()
+        // call localises this and tc-app-bar's chevron together.
+        const ariaLabel = label || (kind === 'close' ? msg('close') : msg('back'))
         const kindClass = kind === 'close' ? ' tc-nav-button__btn--close' : ''
         const disabledAttr = disabled ? ' disabled' : ''
         const glyph = kind === 'close' ? closeIcon : chevronLeftIcon

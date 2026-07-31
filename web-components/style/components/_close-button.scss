@@ -63,6 +63,18 @@
     }
 }
 
+// Coarse pointers: the 30px glyph box is well under the 44px floor, and this is
+// the most-tapped chrome in the library (tc-modal, tc-offcanvas, tc-toast and
+// tc-alert all dismiss through it). `min-*` beats the `width`/`height` above, so
+// the hit box grows while the svg keeps its 1rem size and stays centred by the
+// existing inline-flex.
+@media (pointer: coarse) {
+    .btn-close {
+        min-width: var(--tc-min-touch-target, 44px);
+        min-height: var(--tc-min-touch-target, 44px);
+    }
+}
+
 // .text-bg-light keeps the ink glyph (warning is white-text, so it follows
 // the dark-fill rules above).
 .text-bg-light .btn-close {
