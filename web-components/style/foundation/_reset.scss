@@ -569,6 +569,13 @@ tc-day-strip {
     display: grid;
 }
 
+// tc-load-more is the end-of-list control: one full-width button (or, in the terminal
+// state, one line of centred text). `block` and not `inline-flex`, because the button
+// inside it is `width: 100%` and a fit-content host would make that 100% of nothing.
+tc-load-more {
+    display: block;
+}
+
 // tc-add-slot wraps exactly one button, and the button carries the dashed frame — so the
 // host is only the track the slot occupies. `flex` and not `inline-flex`: a slot stands in
 // for the full-width card it would become, so it takes the measure of its container.

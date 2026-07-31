@@ -88,6 +88,57 @@ tc-icon-button[disabled] {
     }
 }
 
+// ── Neutral variants (app chrome, not theme colours) ─────────────────────────
+//
+// `variant="ghost"` and `variant="outline"` carry no `btn-<variant>` class — the
+// element omits it for these two — so everything is declared here through the
+// shared --bs-btn-* knobs.
+//
+// GHOST is the app-bar / nav-bar affordance: transparent at rest, so a row of them
+// reads as icons ON the bar rather than as a row of buttons, and the hover well is
+// the only chrome it ever draws. It is the same recipe as `.btn-secondary
+// .tc-icon-button` below, under a name that says what it is.
+.tc-icon-button--ghost {
+    --bs-btn-color: var(--tc-text-muted);
+    --bs-btn-bg: transparent;
+    --bs-btn-border-color: transparent;
+    --bs-btn-hover-color: var(--tc-text);
+    --bs-btn-hover-bg: var(--tc-surface-muted);
+    --bs-btn-hover-border-color: transparent;
+    --bs-btn-active-color: var(--tc-text);
+    --bs-btn-active-bg: var(--tc-surface-muted);
+    --bs-btn-active-border-color: transparent;
+    --bs-btn-disabled-color: var(--tc-text-faint);
+    --bs-btn-disabled-bg: transparent;
+    --bs-btn-disabled-border-color: transparent;
+}
+
+// OUTLINE is the action-bar affordance — screen `1d`'s three trailing icon buttons
+// beside „Готви", and `1h`'s export button. A NEUTRAL hairline
+// (`rgba(34,48,26,.26)` = --tc-border-strong under sunshine) and not a themed one:
+// these sit next to an amber primary, and any hue of their own competes with it.
+// The design's 52x46 box is the ACTION BAR's geometry, not this component's — see
+// style/components/_action-bar.scss.
+.tc-icon-button--outline {
+    --bs-btn-color: var(--tc-text);
+    --bs-btn-bg: transparent;
+    --bs-btn-border-color: var(--tc-border-strong);
+    --bs-btn-hover-color: var(--tc-text);
+    --bs-btn-hover-bg: var(--tc-surface-muted);
+    --bs-btn-hover-border-color: var(--tc-border-strong);
+    --bs-btn-active-color: var(--tc-text);
+    --bs-btn-active-bg: var(--tc-surface-muted);
+    --bs-btn-active-border-color: var(--tc-border-strong);
+    --bs-btn-disabled-color: var(--tc-text-faint);
+    --bs-btn-disabled-bg: transparent;
+    --bs-btn-disabled-border-color: var(--tc-border);
+    // Radius is a knob everywhere else in this library and 0 by default (the
+    // sharp-corner mandate). The mobile token is read with a 0 fallback so a page
+    // with no mobile scale is unchanged, and screen 1d's 6px arrives for free where
+    // the scale is loaded.
+    --bs-btn-border-radius: var(--m-radius-control, 0);
+}
+
 // ── Secondary — ghost style (subtle default for icon toolbars) ────────────────
 // The solid btn-secondary fill is too heavy for an icon-only control.
 // Ghost: transparent bg, muted icon, hover to slate well.
@@ -116,7 +167,15 @@ tc-icon-button[disabled] {
 }
 
 // ── Touch target — WCAG 2.5.5 ────────────────────────────────────────────────
-
+//
+// THE BOX GROWS, THE GLYPH DOES NOT. `min-width`/`min-height` beat the `width`/
+// `height` the size ladder sets, so a 28px `-small` button occupies 44px of hit
+// area while its icon stays 14px — which is the whole point: an app bar full of
+// 44px *glyphs* would read as a toolbar of buttons rather than as chrome.
+//
+// This is why an app needs no coarse-pointer patch of its own for these. The floor
+// lives on `.tc-icon-button` (the rendered <button>), not on the host, so it is not
+// defeated by a consumer rewriting the host's `class`.
 @media (pointer: coarse) {
     .tc-icon-button {
         min-width: var(--tc-min-touch-target, 44px);

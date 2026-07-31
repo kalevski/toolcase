@@ -95,6 +95,36 @@ const ChipDemo: React.FC = () => (
                             </div>
                         </tc-section-card>
 
+                        <tc-section-card title="Size — one per container">
+                            <p className="text-muted small mb-3">
+                                Three tiers, one per PLACE a chip appears rather than a generic
+                                ramp: <code>sm</code> on a card (10px), <code>md</code> on a
+                                horizontal rail (11px), <code>lg</code> inside a bottom sheet (12px,
+                                thumb-sized). A <code>static</code> chip is exempt from the
+                                coarse-pointer 44px floor — it renders a <code>&lt;span&gt;</code>,
+                                so it is a label and not a target, and the floor would otherwise
+                                inflate a card's „30 мин" chip taller than the card's own title.
+                            </p>
+                            <div className="d-flex flex-wrap align-items-center gap-2">
+                                {/* @ts-ignore */}
+                                <tc-chip size="sm" static>
+                                    30 мин
+                                </tc-chip>
+                                {/* @ts-ignore */}
+                                <tc-chip size="md">Сите</tc-chip>
+                                {/* @ts-ignore */}
+                                <tc-chip size="md" selected>
+                                    Главно јадење
+                                </tc-chip>
+                                {/* @ts-ignore */}
+                                <tc-chip size="lg">Пролет</tc-chip>
+                                {/* @ts-ignore */}
+                                <tc-chip size="lg" selected>
+                                    Лето
+                                </tc-chip>
+                            </div>
+                        </tc-section-card>
+
                         <tc-section-card title="Selected state (click to toggle)">
                             <SelectableChips />
                         </tc-section-card>

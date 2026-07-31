@@ -2,8 +2,32 @@
 // navigation, descriptions, and native form-submission support via a hidden
 // <input>. All cosmetic values flow through --bs-extended-select-* custom
 // properties backed by --tc-* tokens. Sharp corners throughout.
+//
+// Under a coarse pointer the element MOVES its menu into a tc-bottom-sheet — see the
+// sheet section at the bottom of this file, and the header comment in
+// src/ExtendedSelect.ts.
 
-tc-extended-select {
+// THE TOKEN BLOCK IS A MIXIN BECAUSE IT HAS TO BE EMITTED TWICE.
+//
+// Custom properties are inherited, so declaring them on `tc-extended-select` reaches
+// the menu — for exactly as long as the menu is a DESCENDANT of the host. In sheet
+// mode it is not: it lives inside a tc-bottom-sheet mounted at the shell's overlay
+// layer or at the theme root. Every `var(--bs-extended-select-*)` in the menu's own
+// rules then resolves to nothing and the declaration is dropped at
+// computed-value time — measured as a multi-select whose checkboxes had no border and
+// no fill, so a 300-row list showed the ticks and nothing to tick.
+//
+// So the same block is emitted again on a sheet-hosted menu. Scoped to
+// `tc-bottom-sheet > .tc-extended-select__menu` and NOT added as a second selector on
+// the host block: a menu inside the host would then re-declare the base values on
+// itself at 0-1-0 and shadow any `tc-theme[name='…'] tc-extended-select { --bs-… }`
+// override inherited from above. Dropdown mode is left byte-identical.
+//
+// KNOWN LIMIT, recorded rather than worked around: a theme that re-points these knobs
+// on `tc-extended-select` does not reach a sheet-hosted menu either. A theme wanting
+// both writes its override against `.tc-extended-select__menu` (or the host AND the
+// menu). `blueprint` is the only theme that re-points any of them today.
+@mixin extended-select-tokens {
     // ── Public theming contract ──────────────────────────────────────────────
     --bs-extended-select-trigger-border: 1px solid var(--tc-border-strong);
     --bs-extended-select-trigger-bg: var(--tc-surface);
@@ -40,9 +64,18 @@ tc-extended-select {
     --bs-extended-select-caret-color: var(--tc-text-muted);
     // Invalid border/ring reuse the shared danger token (no new prefix).
     --bs-extended-select-trigger-invalid-border-color: var(--tc-danger);
+}
+
+tc-extended-select {
+    @include extended-select-tokens;
 
     display: block;
     position: relative;
+}
+
+// The second emission — see the long note above the mixin.
+tc-bottom-sheet > .tc-extended-select__menu {
+    @include extended-select-tokens;
 }
 
 // Field label above the trigger — shared .form-label cosmetics; only the
@@ -319,7 +352,11 @@ tc-extended-select {
     }
 }
 
-tc-extended-select[multiple] {
+// SCOPED TO THE MENU, not to `tc-extended-select[multiple]`. Under a coarse pointer
+// the element moves the menu into a tc-bottom-sheet, where it is no longer a
+// descendant of the host — a host-scoped selector would quietly stop matching and
+// the multi-select ticks would never appear. The class is written by render().
+.tc-extended-select__menu--multiple {
     .tc-extended-select__option--selected {
         // Keep the plain surface — the tick carries the state.
         background-color: transparent;
@@ -409,13 +446,146 @@ tc-extended-select[loading] {
 
 @media (pointer: coarse) {
     .tc-extended-select__trigger {
-        min-height: 44px;
+        // A token, not a constant: screen 1g's sheet select is 42px, and the surface
+        // that wants it sets `--tc-min-touch-target: 42px` on its own subtree and
+        // makes the missing hit area up with padding on the wrapper. See
+        // style/foundation/README.md §Touch floors.
+        min-height: var(--tc-min-touch-target, 44px);
     }
 
     .tc-extended-select__option {
-        min-height: 44px;
+        min-height: var(--tc-min-touch-target, 44px);
         align-items: center;
     }
+}
+
+// ── Sheet presentation (the phone form) ──────────────────────────────────────
+//
+// Under a coarse pointer below 768px the element MOVES `.tc-extended-select__menu`
+// into a tc-bottom-sheet and opens that instead of anchoring a dropdown — see the
+// header comment in src/ExtendedSelect.ts for why. Nothing about the value or the
+// selection logic changes; these rules re-shape the same markup for its new box.
+//
+// Every selector is scoped by `tc-bottom-sheet`, so a dropdown-mode menu is
+// untouched and a desktop consumer never matches any of it. No media query is
+// needed here at all — the JS decides, and the presence of the sheet ancestor is
+// the switch.
+tc-bottom-sheet > .tc-extended-select__menu {
+    // The sheet's body region already positions and scrolls this box.
+    position: static;
+    z-index: auto;
+    display: flex;
+    flex-direction: column;
+    // Un-does the panel chrome: inside a sheet the SHEET is the panel, and a second
+    // border + shadow inside it reads as a box in a box.
+    background-color: transparent;
+    border: 0;
+    box-shadow: none;
+    // NO `overflow` DECLARATION HERE, deliberately. The base rule's `overflow: hidden`
+    // (0-1-0) is beaten on the y axis by tc-bottom-sheet's own
+    // `tc-bottom-sheet > :not([slot]) { overflow-y: auto }` (0-1-1) — specificity, not
+    // source order — so the menu becomes the sheet's scroller for free, while x stays
+    // clipped. An `overflow: visible` here to "un-do the dropdown's clipping" beats
+    // that 0-1-1 rule instead and takes the scroll away: measured as a 300-row list
+    // running out through the sheet's own footer.
+    // The `--open` class is what reveals a dropdown. In a sheet the sheet's own
+    // open state is the only state that matters, so the resting values are
+    // neutralised rather than toggled.
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+    transition: none;
+    // 0-1-1, beating the sheet's `:where(> :not([slot]))` body padding (0-0-0): the
+    // option rows run edge to edge, which is what makes them full-width targets.
+    padding: 0;
+}
+
+// The search row is PINNED. It is inside the scrolling body (rather than in the
+// sheet's header slot) so that the element keeps one menu subtree in both modes —
+// splitting it across two sheet regions would mean two DOM shapes to maintain and
+// two sets of lookups. `sticky` buys the same result for one declaration.
+tc-bottom-sheet > .tc-extended-select__menu > .tc-extended-select__search-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    gap: var(--m-gap-inline, 8px);
+    padding: 10px var(--m-pad-page-wide, 18px);
+    background-color: var(--tc-surface);
+    border-bottom: var(--bs-extended-select-search-border);
+}
+
+// Hidden below ~12 options — see SHEET_SEARCH_THRESHOLD in src/ExtendedSelect.ts.
+tc-bottom-sheet[data-no-search] > .tc-extended-select__menu > .tc-extended-select__search-wrap {
+    display: none;
+}
+
+// The list stops being its own scroller: the SHEET BODY scrolls, so a 300-option
+// list is one scroll surface instead of a 240px window inside a scrolling page.
+tc-bottom-sheet > .tc-extended-select__menu > .tc-extended-select__list {
+    max-height: none;
+    overflow-y: visible;
+    padding: 4px 0 0;
+}
+
+// Full-width rows at the design's sheet scale. 48px and not 44: this is a LIST of
+// choices rather than a single control, the rows are the only targets on the
+// surface, and 48px is the Android floor as well as what `tc-check-row` uses for
+// the same shape.
+tc-bottom-sheet .tc-extended-select__option {
+    min-height: 48px;
+    align-items: center;
+    gap: 2px var(--m-gap-inline, 8px);
+    padding: 8px var(--m-pad-page-wide, 18px);
+    // 15px, one step up from the dropdown's 14px: a sheet row is read at arm's
+    // length on a phone, not scanned in a menu under the cursor.
+    font-size: 0.9375rem;
+}
+
+// SELECTION IS A TICK, NOT A FILL — in single mode too, which is the one place the
+// sheet deliberately differs from the dropdown. A full-width accent fill across a
+// 48px row is a lot of colour for "this is the current value", and next to a
+// scrim-dimmed page it reads as a hover state that got stuck.
+tc-bottom-sheet .tc-extended-select__option--selected {
+    background-color: transparent;
+    color: var(--bs-extended-select-option-color);
+    font-weight: 600;
+
+    .tc-extended-select__option-desc {
+        color: var(--bs-extended-select-option-desc-color);
+    }
+
+    .tc-extended-select__check {
+        margin-left: auto;
+        flex: none;
+        color: var(--tc-app-accent);
+
+        svg {
+            width: 1.125rem; // 18px — reads at arm's length, unlike the 14px dropdown tick
+            height: 1.125rem;
+        }
+    }
+}
+
+// The row a keyboard user is on still needs a resting wash, selected or not.
+tc-bottom-sheet .tc-extended-select__option--active {
+    background-color: var(--bs-extended-select-option-hover-bg);
+}
+
+tc-bottom-sheet .tc-extended-select__no-results {
+    padding: 24px var(--m-pad-page-wide, 18px);
+}
+
+// The multi-select „Готово" footer. `flex: 1 1 0` and not `flex-grow`: a zero basis
+// is what makes the button take the row's width rather than its label's — the same
+// reason tc-step-pager's advance button uses it.
+.tc-extended-select__sheet-footer:empty {
+    display: none;
+}
+
+.tc-extended-select__sheet-done {
+    flex: 1 1 0;
+    min-width: 0;
 }
 
 // ── Reduced motion ───────────────────────────────────────────────────────────

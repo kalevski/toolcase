@@ -87,6 +87,8 @@ configureMessages({
 | `clear` | `Clear` | reserved |
 | `filtersLabel` | `Filters` | `tc-advanced-table` filter toolbar |
 | `toggleSidebarLabel` | `Toggle sidebar` | reserved |
+| `loadMore` | `Load more` | `tc-load-more` |
+| `allLoaded` | `Nothing more to load` | `tc-load-more` |
 | `paginationLabel` | `Page navigation` | `tc-pagination` |
 | `paginationPrevious` | `Previous` | `tc-pagination` |
 | `paginationNext` | `Next` | `tc-pagination` |
@@ -154,6 +156,7 @@ Notes:
   - [tc-list-section](#tc-list-section)
   - [tc-add-slot](#tc-add-slot)
   - [tc-taxonomy-card](#tc-taxonomy-card)
+  - [tc-load-more](#tc-load-more)
   - [tc-stat-tile](#tc-stat-tile)
   - [tc-macro-grid](#tc-macro-grid)
   - [tc-quota-meter](#tc-quota-meter)
@@ -3056,6 +3059,88 @@ Verified on a touch emulator at 390px: tapping the button fires only the button;
 
 ---
 
+### tc-load-more
+
+The end-of-list control that APPENDS the next page in place — the phone's replacement for
+a numbered pager. One full-width ghost button with three states, the third of which is the
+point.
+
+**Tag:** `tc-load-more`
+
+```
+tc-load-more                       display:block
+  ├─ button.tc-load-more__btn      idle / loading
+  └─ p.tc-load-more__done          exhausted
+```
+
+**Why this and not `tc-pagination`.** A pager REPLACES the list, which on a phone means
+losing your scroll position every time you advance — you are returned to the top of a
+screen you have not read. It also asks „which page?", a question with no answer when the
+whole list is one column of cards. Appending keeps the reader where they were and reduces
+the decision to „more, or done".
+
+**Why a button and not an intersection observer.** Infinite scroll on its own takes the
+END of the list away: the footer becomes unreachable, „how much is left" becomes
+unanswerable, and a screen reader gets content appended under it with no warning. This is
+the explicit control; an app that wants automatic loading can still observe it and call
+`load()`. The difference is that the affordance, the busy state and the terminal state all
+exist and are announced either way.
+
+**Attributes**
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `state` | `idle\|loading\|exhausted` | `idle` | `loading` disables the control and shows a spinner; `exhausted` replaces it with the terminal line. |
+| `label` | string | registry `loadMore` | Idle label. |
+| `loading-label` | string | registry `loading` | Busy label. |
+| `exhausted-label` | string | registry `allLoaded` | Terminal label. |
+| `count` | string | — | How many more the next tap brings, shown as a muted hint („+20"). Not a total and not a page number. |
+| `disabled` | boolean | false | Blocks activation without claiming to be loading. |
+
+**JS Properties / Methods**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `onLoad` | `(() => void) \| null` | Called on activation, alongside the event. |
+| `load()` | `() => void` | Fire the request programmatically. A no-op while loading, exhausted or disabled — so a scroll-triggered caller cannot stack requests either. |
+
+**Events:** `tc-load-more` (bubbles, composed), no detail.
+
+**The exhausted state is NOT a hidden element.** A list that simply stops has told nobody
+that it finished, so the reader keeps flicking at the bottom to check. It renders as quiet
+centred text with real height: an ending, stated once, carrying `role="status"` rather than
+a live region — by the time it renders the reader has already been handed the appended
+items, and announcing the ending on top of that is noise.
+
+**A loading button keeps its pointer events.** `.btn:disabled` sets `pointer-events: none`,
+which also kills the cursor — and on a slow connection the one thing a user does is press
+the button again to check it is alive. The `disabled` attribute already blocks activation
+and `load()` guards the state, so `cursor: progress` costs nothing and answers the
+question.
+
+**A ghost button, not the primary.** This is the least important action on the screen — the
+content above it is the point — and in a palette where the accent is spent on at most two
+elements per screen, a hairline outline says „there is more" without competing with the
+list. `--bs-load-more-*` re-points every colour; `--bs-btn-height` is 46px, comfortably
+over the touch floor, so the control never depends on the coarse-pointer floor to be
+tappable.
+
+```tsx
+const [shown, setShown] = useState(20)
+const [loading, setLoading] = useState(false)
+const state = loading ? 'loading' : shown >= total ? 'exhausted' : 'idle'
+
+<tc-load-more
+    state={state}
+    label={t.common.loadMore}
+    exhausted-label={t.recipes.allLoaded}
+    count={`+${Math.min(20, total - shown)}`}
+    onTcLoadMore={fetchNextPage}
+/>
+```
+
+---
+
 ### tc-stat-tile
 
 One number, its label, and nothing else — the atom of every numeric display in the JADI.mk phone design: `1k`'s three server-computed stats, `1i`'s 38px daily kcal target, and (through `tc-macro-grid`) `1d`'s 4-up per-serving row and `1i`'s three tinted macro tiles.
@@ -3717,11 +3802,35 @@ Small count or label indicator.
 |-----------|------|---------|-------------|
 | `variant` | `primary\|secondary\|success\|danger\|warning\|info\|light\|dark` | `primary` | Color variant |
 | `text` | string | — | Badge text (alternative to slot) |
+| `pill` | boolean | false | 999px radius |
+| `size` | `xs` | — | The phone chip scale: `3px 9px` at `700 10px` |
+| `tone` | `neutral` | — | Drops the variant fill for a surface pill with a hairline border and muted ink |
 
 ```html
 <tc-badge variant="danger">4</tc-badge>
 <tc-badge variant="success" text="New"></tc-badge>
+<tc-badge size="xs" pill tone="neutral" text="30 мин"></tc-badge>
+<tc-badge size="xs" pill variant="danger" text="Ново"></tc-badge>
 ```
+
+**`size="xs"` lowers `--tc-font-size-min` to 10px on its own subtree.** That is the
+mechanism, not a workaround: the base `.badge` floors its size at
+`max(--tc-font-size-min, …)` so a theme cannot shrink a badge into illegibility, and the
+floor is a token precisely so a scale that has earned a smaller size can lower it
+locally instead of out-specifying the floor. The tier also fixes the weight at 700 and
+drops the base `0.025em` tracking — 10px at 400 would not be legible, and the tracking
+is an eyebrow's treatment, not a word's.
+
+**`tone="neutral"` renders no `text-bg-*` class at all.** That utility carries
+`!important` on both `color` and `background-color`, so a tone class layered over it
+could never win.
+
+**Contrast, measured (white label on a solid fill).** A badge's ink is
+`--bs-badge-color`, and white does not clear AA on every hue an app may hand it. Against
+the JADI.mk season palette: Есен `#c24914` 4.93:1 ✓ · Зима `#3e5f8a` 6.54:1 ✓ ·
+Целогодишно `#6e4a7e` 7.13:1 ✓ · Пролет `#4e8a3c` 4.18:1 ✗ · Лето `#dd9a10`
+**2.41:1 ✗**. Dark ink `#2e2400` on Лето is 6.36:1. The neutral tone's `#7d766c` on
+white is 4.49:1 — one hundredth short. Pick the ink per hue; do not assume white.
 
 ---
 
@@ -4387,7 +4496,8 @@ Button.
 |-----------|------|---------|-------------|
 | `variant` | `primary\|secondary\|success\|danger\|warning\|info\|light\|dark` | `primary` | Color variant |
 | `outline` | boolean | false | Outline style |
-| `size` | `sm\|lg` | — | Button size |
+| `size` | `sm\|lg\|xl` | — | Button size. `xl` is the 66px thumb tier — see below |
+| `block` | boolean | false | Full width, content centred — the action-bar / sheet-footer shape |
 | `disabled` | boolean | false | Disabled state |
 | `loading` | boolean | false | Show spinner, disables button |
 | `href` | string | — | Render as `<a>` link button |
@@ -4397,7 +4507,32 @@ Button.
 <tc-button variant="primary">Save</tc-button>
 <tc-button variant="danger" outline>Delete</tc-button>
 <tc-button loading>Saving…</tc-button>
+<tc-button variant="primary" block>Побарај соработка</tc-button>
+<tc-button variant="primary" size="xl" block>Следен чекор</tc-button>
 ```
+
+**`block` needs the width in two places.** The host is `inline-flex`, so a 100%-wide
+`.btn` inside a fit-content host is still fit-content — the attribute sets both. In a
+row of two, each block button is `flex: 1 1 0` (a ZERO basis, so they split the row
+evenly rather than in proportion to their labels; flex line-breaking uses an item's
+hypothetical main size, which is also why an `auto` basis breaks a long Cyrillic label
+onto a second line at 320px).
+
+**`size="xl"` is a new tier, not a taller `-lg`.** 66px is the phone design's
+step-advance target, and it carries the card radius (10px) rather than the control
+radius, because at that height a 6px corner reads as square. `-lg` was left at 44px on
+purpose: it is the CTA size on every landing page consuming this library, and moving it
+would re-space all of them.
+
+**Height is a knob: `--bs-btn-height`.** Each size class re-points it, and the
+coarse-pointer touch floor is `max(--tc-min-touch-target, --bs-btn-height)` — so a
+taller tier survives the floor instead of being clamped to 44px, and a theme can raise
+the whole ladder from one property. Sunshine sets it to 46px under a coarse pointer
+(the design's button height).
+
+**Press feedback flips under a coarse pointer**: the `-1px` hover lift is cancelled
+(sticky hover leaves it latched after a tap, so the button reads as stuck) and `:active`
+moves `+1px` down instead.
 
 ---
 
@@ -5660,10 +5795,34 @@ Loading-state placeholder with a slate shimmer animation and configurable shape.
 | `width` | string \| number | `100%` (text/rect), `height ?? 40px` (circle) | Width of each placeholder. Bare number is treated as px; any CSS length string passes through unchanged |
 | `height` | string \| number | `1em` (text), `width ?? 40px` (circle), `80px` (rect) | Height of each placeholder. Same px/CSS-string resolution as `width` |
 | `count` | number | `1` | Number of placeholder bars to render. When > 1 bars are wrapped in a column flex group |
+| `preset` | `card\|row` | — | A composed placeholder shaped like a real component. Overrides `variant`; `count` still repeats it and `height` still overrides the preset's own |
+
+**The presets reproduce a BOX, not a rectangle.** `card` matches `tc-taxonomy-card` (card
+radius, hairline, the 3px accent top rule, and an eyebrow / serif-title / description
+ladder inside it, 112px minimum). `row` matches `tc-check-row` (48px, dashed divider,
+24px tick box, label over hint).
+
+Why that is worth a preset rather than `variant="rect" height="112"`: a list that loads
+into cards but shimmers as flat bars reflows on arrival — every row changes height and
+the page jumps under the reader's thumb. Matching the real geometry makes the loading
+state a silhouette of the loaded one, so nothing moves when the data lands, which is the
+whole advantage of a skeleton over a spinner. A wrong-shaped skeleton is worse than a
+spinner, because it promises a layout and then breaks it.
+
+The preset's CONTAINER does not shimmer — it is the card's own chrome (surface, hairline,
+radius, accent rule), and animating that reads as the card being a placeholder rather
+than its content. Only the bars inside carry `.tc-skeleton`, so the animation and its
+`prefers-reduced-motion` freeze stay defined in one place.
+
+```html
+<tc-skeleton preset="card" count="3"></tc-skeleton>
+<tc-skeleton preset="row" count="5"></tc-skeleton>
+```
 
 **JS Properties**
 
-All four attributes are reflected as JS properties with the same names (`variant`, `width`, `height`, `count`).
+All five attributes are reflected as JS properties with the same names (`variant`,
+`width`, `height`, `count`, `preset`).
 
 **Events**
 
@@ -7720,6 +7879,15 @@ Responsive navigation bar with built-in collapse behavior. Styled as the toolcas
 ### tc-pagination
 
 Page navigation controls.
+
+> **Desktop-only by design.** Each page link meets the 44px touch floor, but a tappable
+> control is not the same as a usable one: a numbered pager is a row of 44x44 targets
+> 2-3px apart, and „page 7 of 34" is not a question anyone asks with a thumb. Worse, on a
+> phone the pager sits BELOW the list, so reaching it means scrolling past everything you
+> just read and then losing your place when the page changes. The phone answer is
+> [`tc-load-more`](#tc-load-more) — append in place, keep the scroll position — or a
+> scroll-triggered fetch. The touch floor stays because a desktop may be touched, not
+> because a phone layout should reach for this.
 
 **Attributes**
 
@@ -10663,6 +10831,21 @@ Compact interactive chip/tag with optional leading icon, trailing count badge, a
 | `count` | string \| number | — | Count badge text rendered after the label inside `.tc-chip-count`. |
 | `removable` | boolean | false | When set, renders a trailing remove (×) button. The remove affordance also appears when the `onRemove` JS property is assigned. |
 | `disabled` | boolean | false | Disables the chip body button and remove button, reduces opacity, and sets `pointer-events: none` on the host. |
+| `size` | `sm\|md\|lg` | — | One tier per CONTAINER: `sm` on a card (`3px 9px` / 10px), `md` on a horizontal rail (`5px 11px` / 11px), `lg` inside a bottom sheet (`6px 12px` / 12px, thumb-sized). Absent keeps the 13px desktop scale. |
+| `static` | boolean | false | Renders a non-interactive `<span>` root — a label, not a control. `tc-tag` is this by definition. |
+
+**Three tiers and not a generic ramp**, because each is bound to a place: the phone
+design's chip is 10px on a card, 11px on a scrolling rail and 12px inside a sheet, and
+each padding/size pairing recurs four or more times. All three raise `line-height` to
+1.3 — at 10-12px a line box equal to the font size clips Cyrillic descenders („ј", „ц",
+„џ").
+
+**A static chip is exempt from the coarse-pointer 44px floor.** WCAG 2.5.5 sizes
+TARGETS, and a `<span>` label is not one; under the blanket floor a card's „30 мин" meta
+chip inflated from 19px to 44px — taller than the card's own title, and half of every
+chip row on screens `1c`/`1d`/`1f`. The exception is written as
+`.tc-chip:not(.tc-chip--static)` so there is one floor with one hole, rather than a
+floor and a competing un-floor.
 
 **JS Properties**
 
@@ -10785,6 +10968,18 @@ Grouped set of interactive chip buttons with an optional title, subtitle, and ha
 | `title` | string | — | Group title text rendered in `.tc-chip-group-title`. Also settable as a JS property accepting an HTML string or DOM Node. |
 | `subtitle` | string | — | Subtitle text rendered below the title in `.tc-chip-group-subtitle`. Also settable as a JS property accepting an HTML string or DOM Node. |
 | `border` | boolean | false | When present, draws a 1 px `--tc-border` hairline frame with sharp corners (`border-radius: 0`) and slate padding around the group. |
+| `layout` | `wrap\|rail` | `wrap` | `rail` lays the chips out as ONE horizontally scrolling line. |
+| `size` | `sm\|md\|lg` | — | Passed straight to every chip — see `tc-chip`'s `size`. |
+
+**`layout="rail"`** is screen `1f`'s filter rail. A phone fits two or three chips per
+line, so eight wrapping chips become three lines of chrome above the content; scrolling
+keeps it to one and signals that there are more. The element APPLIES `.tc-scroll-x` to
+the items row rather than restating its declarations — that row is the element's own
+node, so the class survives a framework re-render and no fourth copy of the utility is
+needed (see `style/foundation/README.md`). Free-scrolling on purpose: `.tc-snap-x`'s
+`mandatory` fights the user for a resting place between two chips. The 2px block padding
+is not decoration — a scroll container clips both axes, so without it a chip's focus ring
+is sliced off at the rail's edge.
 
 **JS Properties**
 
@@ -10972,7 +11167,38 @@ A trigger button with a filterable dropdown of options. Clicking the trigger ope
 | `value` | string | — | `value` of the currently selected option |
 | `placeholder` | string | `"Select…"` | Trigger label shown when nothing is selected |
 | `disabled` | boolean | false | Dims the trigger and prevents the dropdown from opening |
-| `max-height` | number \| CSS length | `240px` | Caps how tall the option list grows before it scrolls. A bare number is read as px (`max-height="320"`); any CSS length (`50vh`, `20rem`) is honoured as-is |
+| `max-height` | number \| CSS length | `240px` | Caps how tall the option list grows before it scrolls. A bare number is read as px (`max-height="320"`); any CSS length (`50vh`, `20rem`) is honoured as-is. Dropdown mode only — in a sheet the sheet body is the scroller |
+| `mobile` | `auto\|sheet\|dropdown` | `auto` | How the option list is presented. `auto` = a bottom sheet under a coarse pointer below 768px, the dropdown everywhere else |
+
+**Sheet on touch.** Under `(pointer: coarse) and (max-width: 767.98px)` the element MOVES
+`.tc-extended-select__menu` into a `tc-bottom-sheet` and opens that instead of anchoring
+a floating dropdown: full-width rows at 48px, a checkmark on the selected item, a search
+field past ~12 options, and a „Готово" footer for the multi-select case. Escape, the
+scrim, the drag-to-dismiss, the focus trap and the scroll lock are all inherited from
+`tc-bottom-sheet`.
+
+Why: a floating menu is anchored to its trigger, capped at 240px, and positioned against
+a viewport the software keyboard then halves. With a 60-option category filter — never
+mind 300 options — that is a 240px window scrolling inside a page that is itself
+scrolling, somewhere near the middle of the screen, with rows a thumb covers entirely.
+
+**This is a presentation change only.** The value, the selection logic, the search filter,
+the form participation and every event are the same code in both modes — the sheet is a
+different PLACE to put the menu, not a second implementation of it. Four consequences
+worth knowing:
+
+- The sheet mounts in the nearest `tc-mobile-shell`'s `[slot="overlay"]` if there is one
+  (so it is positioned against the phone frame and gets the pane scroll-lock + blur),
+  else the nearest `tc-theme` (custom properties are inherited — a sheet outside the
+  theme wrapper renders in the un-themed palette), else `document.body`.
+- Selection is a TICK in sheet mode, in single mode too. A full-width accent fill across
+  a 48px row is a lot of colour for "this is the current value", and beside a
+  scrim-dimmed page it reads as a hover state that got stuck.
+- The search field is not focused on open. Focusing a text field raises the software
+  keyboard, and a sheet that opens with the keyboard up has covered half of its own list.
+  Arrow-key navigation still works — the key handler is on `document`.
+- If `tc-bottom-sheet` is not registered, the element falls back to the dropdown. It
+  carries no runtime import on it, only a type-only one.
 
 **JS Properties**
 
@@ -11200,6 +11426,39 @@ Universal form-input dispatcher. The `type` attribute selects which native contr
 | `rows` | string | — | Forwarded to the `textarea` control |
 | `validate-on` | `blur\|input\|submit\|mount` | `blur` | When validation feedback becomes **visible**: `blur` after the field is touched (focusout), `input` after any edit (or touch), `submit` only after a form submit / `reportValidity()`, `mount` always (the old eager behaviour). Validity is always reflected into the ElementInternals immediately, so form gating works regardless. |
 | `required-message` | string | — | Per-instance override of the message registry's `fieldRequired` copy for the required-empty error. |
+| `inputmode` | string | derived from `type` | `inputmode` on the rendered control |
+| `enterkeyhint` | string | `search` for `type="search"` | The Enter key's label |
+| `autocomplete` | string | derived from `type` | `autocomplete` on the rendered control |
+| `reserve-message` | boolean | false | Reserve one line of height under the control for the hint / error, so a row of fields stays aligned |
+
+**Keyboard hints are first-class, not "any attribute passes through".** On a phone the
+difference between the right and the wrong on-screen keyboard is the difference between
+typing a weight in two taps and hunting for the decimal point behind a shift layer. `type`
+already implies most of it, so the element supplies the implication and these three
+attributes are the per-field override:
+
+| `type` | `inputmode` | `enterkeyhint` | `autocomplete` |
+|--------|-------------|----------------|----------------|
+| `number` | `decimal` | — | — |
+| `tel` | `tel` | — | `tel` |
+| `email` | `email` | — | `email` |
+| `url` | `url` | — | `url` |
+| `search` | `search` | `search` | `off` |
+
+`decimal` and not `numeric` for numbers: `numeric` is the PIN pad, with no decimal
+separator — wrong for every weight, price and portion. `password` deliberately gets NO
+autocomplete default: `current-password` and `new-password` are opposite instructions to
+a password manager and only the form knows which it is.
+
+**The reserved message gutter is OFF by default** (`reserve-message` turns it back on).
+It cost ~19px of invisible height under every field — a third of a control on a phone —
+and it is why a toolbar containing a `tc-form-input` had to use `align-items: start`:
+centring a field that carries a phantom row below it lifts the field above its
+neighbours. The slot is still always RENDERED (the validation code patches it in place);
+the attribute only controls whether an EMPTY slot keeps its line of height, via
+`.tc-form-input:not([reserve-message]) > .tc-field-message:empty`. Scoped to this
+component — `tc-input`, `tc-select`, `tc-textarea` and the pickers keep the shared
+reservation, since they are the ones that appear in labelled form grids.
 
 **JS Properties**
 

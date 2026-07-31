@@ -1,0 +1,89 @@
+// tc-load-more — the end-of-list control that appends the next page in place.
+//
+//     tc-load-more                 display:block (see foundation/_reset.scss)
+//       ├─ button.tc-load-more__btn        idle / loading
+//       └─ p.tc-load-more__done            exhausted
+//
+// Mobile-first by construction: there is no media query in this file. A full-width
+// ghost button at the foot of a list is the right shape at 320px and still the right
+// shape at 1280px — the alternative (a centred pill) only looks better on a desktop
+// and only because a desktop list is not the whole viewport.
+//
+// See style/components/_pagination.scss for why a numbered pager is not this.
+
+@use '../foundation/tokens' as *;
+
+tc-load-more {
+    --bs-load-more-margin-top: var(--m-gap-stack, 0.75rem);
+    --bs-load-more-color: var(--tc-text-2, var(--tc-text));
+    --bs-load-more-bg: transparent;
+    --bs-load-more-border-color: var(--tc-border-strong);
+    --bs-load-more-hover-bg: var(--tc-surface-muted);
+    --bs-load-more-radius: var(--m-radius-control, 0);
+    --bs-load-more-font: var(--m-font-btn, 600 0.875rem var(--tc-font-sans));
+    --bs-load-more-count-color: var(--tc-text-faint);
+    --bs-load-more-done-color: var(--tc-text-faint);
+    --bs-load-more-done-font: var(--m-font-meta, 400 0.6875rem var(--tc-font-sans));
+
+    margin-top: var(--bs-load-more-margin-top);
+}
+
+// A GHOST BUTTON, not the primary. This is the least important action on the screen —
+// the content above it is the point — and in the JADI palette amber is spent on at
+// most two elements per screen. A hairline outline says "there is more" without
+// competing with the list.
+//
+// `.btn` is composed for the shared control behaviour (touch floor, focus ring, press
+// feedback, disabled handling) and the cosmetics are re-pointed through --bs-btn-*, so
+// there is one button implementation and one place the 44px floor lives.
+.tc-load-more__btn {
+    --bs-btn-color: var(--bs-load-more-color);
+    --bs-btn-bg: var(--bs-load-more-bg);
+    --bs-btn-border-color: var(--bs-load-more-border-color);
+    --bs-btn-hover-color: var(--bs-load-more-color);
+    --bs-btn-hover-bg: var(--bs-load-more-hover-bg);
+    --bs-btn-hover-border-color: var(--bs-load-more-border-color);
+    --bs-btn-active-color: var(--bs-load-more-color);
+    --bs-btn-active-bg: var(--bs-load-more-hover-bg);
+    --bs-btn-active-border-color: var(--bs-load-more-border-color);
+    --bs-btn-disabled-color: var(--bs-load-more-color);
+    --bs-btn-disabled-bg: var(--bs-load-more-bg);
+    --bs-btn-disabled-border-color: var(--bs-load-more-border-color);
+    --bs-btn-border-radius: var(--bs-load-more-radius);
+    // The design's button height (46px), which is also comfortably over the touch
+    // floor — so the control never depends on the coarse-pointer floor to be tappable.
+    --bs-btn-height: var(--m-h-button, 2.875rem);
+
+    width: 100%;
+    gap: var(--m-gap-tight, 0.375rem);
+    font: var(--bs-load-more-font);
+    letter-spacing: 0;
+}
+
+// A LOADING BUTTON KEEPS ITS POINTER EVENTS. `.btn:disabled` sets
+// `pointer-events: none`, which also kills `cursor` and any tooltip — and on a slow
+// connection the one thing a user does is press the button again to check it is
+// alive. The `disabled` attribute already blocks activation, and `load()` guards the
+// state, so restoring the cursor costs nothing and answers the question.
+tc-load-more[state='loading'] .tc-load-more__btn {
+    pointer-events: auto;
+    cursor: progress;
+}
+
+// The "+20" hint. Muted and un-tracked: it is an aside inside the label, not a badge.
+.tc-load-more__count {
+    color: var(--bs-load-more-count-color);
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+}
+
+// The terminal state. Quiet, centred, hairline-separated — an ending, stated once.
+// It occupies real height on purpose: a list that just stops leaves the reader
+// flicking at the bottom to find out whether it did.
+.tc-load-more__done {
+    margin: 0;
+    padding: var(--m-pad-band, 0.75rem 0.875rem);
+    color: var(--bs-load-more-done-color);
+    font: var(--bs-load-more-done-font);
+    text-align: center;
+}

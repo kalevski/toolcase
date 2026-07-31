@@ -44,6 +44,81 @@ tc-skeleton {
     gap: var(--bs-skeleton-group-gap);
 }
 
+// ── Presets ───────────────────────────────────────────────────────────────────
+//
+// `preset="card"` and `preset="row"` reproduce the BOX of tc-taxonomy-card and
+// tc-check-row, so a loading list is a silhouette of the loaded one and nothing moves
+// when the data lands — see the SkeletonPreset doc comment in src/Skeleton.ts.
+//
+// The container is deliberately NOT a `.tc-skeleton`: it is the card's own chrome
+// (surface, hairline, radius, accent rule), and shimmering that would read as the CARD
+// being a placeholder rather than its content. Only the bars inside shimmer, and they
+// carry `.tc-skeleton` — so the animation and its reduced-motion freeze stay defined in
+// exactly one place.
+//
+// Every `--m-*` read carries a literal fallback: those tokens are declared by a theme,
+// so an un-themed page would otherwise substitute an empty value and drop the whole
+// declaration.
+.tc-skeleton-preset {
+    display: flex;
+    background-color: var(--tc-surface);
+    border: 1px solid var(--tc-border);
+}
+
+.tc-skeleton-preset--card {
+    flex-direction: column;
+    gap: 8px;
+    // 112px is the card placeholder the design itself draws behind the filter sheet
+    // (screen 1g) — the one place on the canvas that shows this component's state.
+    min-height: 112px;
+    padding: var(--m-pad-card, 14px 15px 11px);
+    border-radius: var(--m-radius-card, 0);
+    // The accent rule REPLACES the top border rather than sitting under it, exactly as
+    // tc-taxonomy-card does: 1px + 3px reads as 4px of chrome and loses the corner
+    // radius. Neutral, because a skeleton does not know its category yet.
+    border-top: var(--m-bar-accent, 3px) solid var(--tc-border-strong);
+}
+
+.tc-skeleton-preset--row {
+    align-items: center;
+    gap: var(--m-gap-inline, 12px);
+    min-height: 48px; // --bs-check-row-min-height
+    padding: 13px 4px; // --bs-check-row-padding
+    // A row is ONE item in a continuous list, so it carries only the dashed divider —
+    // the box border above would draw a rectangle around every row.
+    border: 0;
+    border-bottom: 1px dashed var(--m-rule-dashed, var(--tc-border));
+    background-color: transparent;
+}
+
+.tc-skeleton-preset__box {
+    flex: none;
+    width: var(--m-size-check, 24px);
+    height: var(--m-size-check, 24px);
+    border-radius: var(--m-radius-control, 0);
+}
+
+.tc-skeleton-preset__lines {
+    display: flex;
+    // `1 1 0` and not `auto`: flex line-breaking uses an item's hypothetical main
+    // size, so an auto basis on a text block breaks the row at 320px.
+    flex: 1 1 0;
+    min-width: 0;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.tc-skeleton-preset__chips {
+    display: flex;
+    gap: 5px;
+}
+
+.tc-skeleton-preset__chip {
+    width: 54px;
+    height: 16px;
+    border-radius: var(--m-radius-pill, 0);
+}
+
 // Freeze shimmer to the static base fill; do not vanish.
 @media (prefers-reduced-motion: reduce) {
     .tc-skeleton {

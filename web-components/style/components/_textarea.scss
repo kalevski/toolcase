@@ -1,8 +1,22 @@
 // tc-textarea — rides on .form-control; only the textarea-specific bits live here.
 
+@use '../foundation/tokens' as *;
+
 textarea.form-control {
     // Shared control floor — a one-line textarea sits flush with adjacent
     // single-line fields; it still grows with content / resize.
     min-height: var(--tc-control-height, 2.625rem);
     resize: vertical;
+}
+
+// THE TOUCH FLOOR HAS TO BE RESTATED HERE, and this is the whole reason:
+// `_input.scss`'s coarse-pointer floor is on `.form-control` (0-1-0) while the rule
+// above is `textarea.form-control` (0-1-1). Specificity, not source order, decides —
+// so the shared floor never reached a textarea and it stayed 42px on touch. Media
+// queries add no specificity; "the rule exists in _input.scss" was not evidence that
+// it wins here. Measured off a live element.
+@include coarse-pointer {
+    textarea.form-control {
+        min-height: max(var(--tc-control-height, 2.625rem), var(--tc-min-touch-target, 44px));
+    }
 }

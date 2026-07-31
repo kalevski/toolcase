@@ -8,12 +8,22 @@ export type ChipVariant = 'primary' | 'secondary' | 'info' | 'success' | 'warnin
 
 const VARIANTS: ChipVariant[] = ['primary', 'secondary', 'info', 'success', 'warning', 'danger']
 
+/**
+ * The three container scales the phone design uses, one per place a chip appears:
+ * `sm` on a card (`3px 9px` / 10px), `md` on a horizontal rail (`5px 11px` / 11px),
+ * `lg` inside a bottom sheet (`6px 12px` / 12px — thumb-sized). Absent keeps the
+ * library's own 13px desktop scale.
+ */
+export type ChipSize = 'sm' | 'md' | 'lg'
+
+const SIZES: ChipSize[] = ['sm', 'md', 'lg']
+
 export class Chip extends HTMLElement {
     private _initialised = false
     private _onRemove: (() => void) | null = null
 
     static get observedAttributes(): string[] {
-        return ['selected', 'variant', 'icon', 'count', 'removable', 'disabled', 'static']
+        return ['selected', 'variant', 'icon', 'count', 'removable', 'disabled', 'static', 'size']
     }
 
     // Static chips render a non-interactive `<span>` root (no tc-click, no
@@ -128,6 +138,15 @@ export class Chip extends HTMLElement {
         if (typeof this._onRemove === 'function') this._onRemove()
     }
 
+    get size(): ChipSize | null {
+        const v = this.getAttribute('size') as ChipSize
+        return SIZES.includes(v) ? v : null
+    }
+    set size(v: ChipSize | null) {
+        if (v != null) this.setAttribute('size', v)
+        else this.removeAttribute('size')
+    }
+
     private render(): void {
         const variant = this.variant
         const selected = this.selected
@@ -138,6 +157,14 @@ export class Chip extends HTMLElement {
         const isStatic = this.isStatic
 
         const selectedClass = selected ? ' is-selected' : ''
+        const size = this.size
+        const sizeClass = size ? ` tc-chip--${size}` : ''
+        // A marker class and not just the host attribute: the coarse-pointer touch
+        // floor in _chip.scss exempts static chips (a label is not a target), and it
+        // has to make that distinction on `.tc-chip` itself — `tc-tag .tc-chip` and
+        // `tc-chip[static] .tc-chip` would be a second, competing floor rather than
+        // one floor with one exception.
+        const staticClass = isStatic ? ' tc-chip--static' : ''
         const disabledAttr = disabled ? ' disabled' : ''
         // A non-interactive span carries neither aria-pressed nor a type attribute.
         const ariaPressedAttr = isStatic ? '' : ` aria-pressed="${selected}"`
@@ -154,7 +181,7 @@ export class Chip extends HTMLElement {
             ? `<button type="button" class="tc-chip-remove" aria-label="Remove"${disabledAttr}>${closeIcon}</button>`
             : ''
 
-        this.innerHTML = `<${rootTag} class="tc-chip tc-chip--${variant}${selectedClass}"${typeAttr}${ariaPressedAttr}${disabledAttr}>${iconHtml}<span class="tc-chip-content"></span>${countHtml}</${rootTag}>${removeHtml}`
+        this.innerHTML = `<${rootTag} class="tc-chip tc-chip--${variant}${sizeClass}${staticClass}${selectedClass}"${typeAttr}${ariaPressedAttr}${disabledAttr}>${iconHtml}<span class="tc-chip-content"></span>${countHtml}</${rootTag}>${removeHtml}`
 
         if (!isStatic) {
             const chipBtn = this.querySelector<HTMLButtonElement>('.tc-chip')

@@ -34,6 +34,59 @@
     border-radius: 999px;
 }
 
+// ── The phone chip scale (`size="xs"`) ───────────────────────────────────────
+//
+// `3px 9px` at `700 10px` — the design's season badge and card meta chip, and by
+// count the most repeated pill on the whole canvas (10+ uses across screens 1c, 1d,
+// 1e, 1f, 1k).
+//
+// `--tc-font-size-min: 10px` IS THE POINT OF THIS RULE, not a workaround. The base
+// `.badge` floors its own size at `max(--tc-font-size-min, …)` so a theme cannot
+// shrink a badge into illegibility — and that floor is a TOKEN precisely so a scale
+// which has EARNED a smaller size lowers it on its own subtree instead of
+// out-specifying the floor or reaching for !important. Same mechanism as
+// `--tc-min-touch-target`; see style/foundation/README.md §Touch floors.
+//
+// 10px at weight 700 on a 3px-padded pill is legible; 10px at 400 is not, which is
+// why the weight is part of the tier rather than left to the caller.
+.badge-xs {
+    --tc-font-size-min: 10px;
+    --bs-badge-padding-x: 9px;
+    --bs-badge-padding-y: 3px;
+    --bs-badge-font-size: 10px;
+    --bs-badge-font-weight: 700;
+
+    // The base badge tracks 0.025em, which is an EYEBROW's treatment. These carry
+    // sentence-case words („Лето", „30 мин"), so the tracking comes off.
+    letter-spacing: 0;
+    line-height: 1.3;
+}
+
+// ── The neutral meta chip (`tone="neutral"`) ─────────────────────────────────
+//
+// White fill, hairline border, muted ink, regular weight. The element omits the
+// `text-bg-*` class for this tone, so the colours are declared here — and they have
+// to be, because that utility carries `!important` on both `color` and
+// `background-color` (foundation/_utilities.scss) and no tone class could win
+// against it.
+//
+// CONTRAST, MEASURED: the design's `#7d766c` on `#ffffff` is 4.49:1 — one hundredth
+// short of AA's 4.5:1 for normal text, and at 10px this is nowhere near "large".
+// `--tc-text-muted` is the knob, so a theme that wants to clear AA darkens one
+// value rather than every chip. Recorded rather than silently changed: which hue
+// carries "meta" is a palette decision.
+.badge-neutral {
+    --bs-badge-font-weight: 400;
+
+    color: var(--tc-text-muted);
+    // `--tc-surface` and not a literal `#fff`: the design's meta chip is white on a
+    // cream canvas, and the token is that same white in every light theme (#fffdf7
+    // under sunshine — a difference of three units, invisible) while staying correct
+    // on a dark one, where a hardcoded white pill would be a hole in the page.
+    background-color: var(--tc-surface);
+    border: 1px solid var(--tc-border);
+}
+
 // Reference palette: secondary chips read slate-500 (lighter than the button
 // secondary ink), fixed across themes since --tc-slate-500 isn't remapped —
 // pairs safely with white text (~4.8:1) regardless of theme.

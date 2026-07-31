@@ -99,6 +99,57 @@ const FormInputDemo: React.FC = () => {
                                 </div>
                             </tc-section-card>
 
+                            <tc-section-card title="Keyboard hints & the message gutter">
+                                <p className="text-muted small mb-3">
+                                    <code>inputmode</code> / <code>enterkeyhint</code> /{' '}
+                                    <code>autocomplete</code> pass through, and <code>type</code>{' '}
+                                    supplies the unambiguous defaults: <code>number</code> →{' '}
+                                    <code>inputmode=&quot;decimal&quot;</code> (the decimal pad, not
+                                    the PIN pad — wrong for every weight and portion),{' '}
+                                    <code>search</code> →{' '}
+                                    <code>enterkeyhint=&quot;search&quot;</code> +{' '}
+                                    <code>autocomplete=&quot;off&quot;</code>, <code>email</code>/
+                                    <code>tel</code>/<code>url</code> → their own pads.{' '}
+                                    <code>password</code> gets no autocomplete default on purpose:{' '}
+                                    <code>current-password</code> and <code>new-password</code> are
+                                    opposite instructions and only the form knows which it is.
+                                </p>
+                                <p className="text-muted small mb-3">
+                                    The reserved one-line message gutter is now OFF by default — it
+                                    cost ~19px of invisible height under every field, which is a
+                                    third of a control on a phone. <code>reserve-message</code>{' '}
+                                    brings it back for a form grid that wants the alignment.
+                                </p>
+                                <div className="d-flex flex-column gap-3" style={{ maxWidth: 420 }}>
+                                    {/* @ts-ignore */}
+                                    <tc-form-input
+                                        type="search"
+                                        label="Барајте рецепт"
+                                        placeholder='Барајте („tavce" → Тавче)'
+                                    />
+                                    {/* @ts-ignore */}
+                                    <tc-form-input
+                                        type="number"
+                                        label="Тежина (г)"
+                                        placeholder="250"
+                                        step="0.1"
+                                    />
+                                    {/* @ts-ignore */}
+                                    <tc-form-input
+                                        type="email"
+                                        label="Е-пошта"
+                                        placeholder="ana@example.mk"
+                                    />
+                                    {/* @ts-ignore */}
+                                    <tc-form-input
+                                        type="text"
+                                        label="With the gutter reserved"
+                                        placeholder="reserve-message"
+                                        reserve-message
+                                    />
+                                </div>
+                            </tc-section-card>
+
                             <tc-section-card title="Checkbox & switch">
                                 <div className="d-flex flex-column gap-3" style={{ maxWidth: 420 }}>
                                     {/* @ts-ignore */}

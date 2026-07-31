@@ -12,6 +12,8 @@ import {
     dispatchFieldChange,
 } from './internal/form-field'
 
+import type { BottomSheet } from './BottomSheet'
+
 const TAG_NAME = 'tc-extended-select'
 
 let _idCounter = 0
@@ -19,6 +21,41 @@ let _idCounter = 0
 export type ExtendedSelectState = 'valid' | 'invalid'
 
 const STATES: ExtendedSelectState[] = ['valid', 'invalid']
+
+/**
+ * How the option list is presented on a touch device.
+ *
+ *   `auto`      — a bottom sheet under a coarse pointer below 768px, the floating
+ *                 dropdown everywhere else. The default.
+ *   `sheet`     — always the sheet.
+ *   `dropdown`  — always the dropdown (the pre-5.2 behaviour).
+ */
+export type ExtendedSelectMobile = 'auto' | 'sheet' | 'dropdown'
+
+const MOBILE_MODES: ExtendedSelectMobile[] = ['auto', 'sheet', 'dropdown']
+
+// WHY A SHEET AND NOT A DROPDOWN ON A PHONE.
+//   A floating menu is anchored to its trigger, capped at 240px, and positioned
+//   against a 844px-tall viewport that the software keyboard then halves. With the
+//   ingredient-category filter's ~60 options — never mind a 300-option list — the
+//   result is a 240px window scrolling inside a page that is itself scrolling,
+//   somewhere near the middle of the screen, with rows a thumb covers entirely.
+//   The bottom sheet is the shape every mobile OS settled on for the same problem:
+//   thumb-side, full-width rows, one scroller, a scrim that cannot be mis-tapped.
+//
+// THIS IS A PRESENTATION CHANGE ONLY. The value, the selection logic, the search
+// filter, the form participation and every event are the same code in both modes —
+// the sheet is a different PLACE to put `.tc-extended-select__menu`, not a second
+// implementation of it.
+const SHEET_MEDIA = '(pointer: coarse) and (max-width: 767.98px)'
+
+/**
+ * Below this many options the sheet hides its search field: a filter that is
+ * slower to read than the list it filters is noise, and on a phone it also costs
+ * the keyboard covering half the sheet. 12 rows is roughly what fits above the
+ * fold of an `auto`-height sheet.
+ */
+const SHEET_SEARCH_THRESHOLD = 12
 
 // Pre-compute at module load — these icons are always in the rendered HTML
 const searchIconHtml = icon(Search, 'tc-extended-select__search-icon')
@@ -68,6 +105,13 @@ export class ExtendedSelect extends HTMLElement {
     // open — see _containingBlock(). Cached on open; the menu's fixed coords are
     // resolved against this box, not the viewport, when it is non-null.
     private _cbEl: HTMLElement | null = null
+    // The sheet that hosts the menu under a coarse pointer. Created on first sheet
+    // open, kept for the element's lifetime (it holds the menu), mounted only while
+    // open. Null in dropdown mode, and null when tc-bottom-sheet is not registered.
+    private _sheet: BottomSheet | null = null
+    // Set while _closeMenu is the one asking the sheet to close, so the sheet's own
+    // `tc-sheet-close` (scrim tap, drag, Escape) does not re-enter it.
+    private _closingSheet = false
 
     // Single mode hands the callback the selected key; `multiple` hands it the
     // full key array. Declared as a union so existing single-mode handlers keep
@@ -90,6 +134,7 @@ export class ExtendedSelect extends HTMLElement {
             'help',
             'error',
             'state',
+            'mobile',
         ]
     }
 
@@ -120,6 +165,10 @@ export class ExtendedSelect extends HTMLElement {
             clearTimeout(this._debounceTimer)
             this._debounceTimer = null
         }
+        // The sheet lives OUTSIDE this element (in the shell's overlay layer, or at
+        // document.body), so nothing removes it when this element goes. Left behind
+        // it would be an orphaned dialog holding this select's option list.
+        this._sheet?.remove()
     }
 
     attributeChangedCallback(name: string, _old: string | null, next: string | null): void {
@@ -158,10 +207,12 @@ export class ExtendedSelect extends HTMLElement {
         } else if (name === 'placeholder') {
             if (!this.value) this._updateTriggerLabel()
         } else if (name === 'search-placeholder') {
-            const si = this.querySelector<HTMLInputElement>('.tc-extended-select__search-input')
+            const si = this._menuRoot().querySelector<HTMLInputElement>(
+                '.tc-extended-select__search-input',
+            )
             if (si) si.placeholder = next ?? msg('searchPlaceholder')
         } else if (name === 'no-results-text') {
-            const el = this.querySelector('.tc-extended-select__no-results')
+            const el = this._menuRoot().querySelector('.tc-extended-select__no-results')
             if (el) el.textContent = next ?? 'No results'
         } else if (name === 'loading') {
             const isLoading = next !== null
@@ -361,6 +412,16 @@ export class ExtendedSelect extends HTMLElement {
         else this.removeAttribute('state')
     }
 
+    /** Presentation of the option list on touch — see `ExtendedSelectMobile`. */
+    get mobile(): ExtendedSelectMobile {
+        const v = this.getAttribute('mobile') as ExtendedSelectMobile
+        return MOBILE_MODES.includes(v) ? v : 'auto'
+    }
+    set mobile(v: ExtendedSelectMobile) {
+        if (v && v !== 'auto') this.setAttribute('mobile', v)
+        else this.removeAttribute('mobile')
+    }
+
     get items(): ExtendedSelectItem[] {
         return this._items
     }
@@ -370,12 +431,171 @@ export class ExtendedSelect extends HTMLElement {
             this._searchQuery = ''
             this._filteredItems = this._items
             this._activeIdx = -1
-            const si = this.querySelector<HTMLInputElement>('.tc-extended-select__search-input')
+            const si = this._menuRoot().querySelector<HTMLInputElement>(
+                '.tc-extended-select__search-input',
+            )
             if (si) si.value = ''
             this._renderList()
             // Labels for an already-set value only resolve once items land.
             this._updateTriggerLabel()
         }
+    }
+
+    // ── Sheet presentation (coarse pointers) ─────────────────────────────────
+
+    /**
+     * Whether this open should use the sheet.
+     *
+     * The tc-bottom-sheet REGISTRATION CHECK is not defensiveness: this element
+     * carries no runtime import on BottomSheet (only a type-only one, which erases),
+     * so a consumer who registers a subset of the library still gets a working
+     * select — it falls back to the dropdown rather than creating an inert
+     * `<tc-bottom-sheet>` that never opens.
+     */
+    private _sheetMode(): boolean {
+        const mode = this.mobile
+        if (mode === 'dropdown') return false
+        if (typeof customElements === 'undefined' || !customElements.get('tc-bottom-sheet')) {
+            return false
+        }
+        if (mode === 'sheet') return true
+        return typeof matchMedia === 'function' && matchMedia(SHEET_MEDIA).matches
+    }
+
+    /**
+     * The node that currently CONTAINS the menu markup — the host in dropdown mode,
+     * the sheet in sheet mode. Every menu-internal lookup goes through this, because
+     * in sheet mode the menu is no longer a descendant of the host. Lookups for the
+     * trigger, the label, the hidden input and the message slot stay on `this`.
+     */
+    private _menuRoot(): ParentNode {
+        // ASKED, not assumed. `render()` rebuilds the host's innerHTML — a fresh menu
+        // in the host, and the sheet holding nothing — so "a sheet exists" is not the
+        // same question as "the sheet has the menu". Answering it by lookup makes this
+        // self-correcting across a re-render, a mode switch and a rotation alike.
+        const sheet = this._sheet
+        if (sheet?.querySelector('.tc-extended-select__menu')) return sheet
+        return this
+    }
+
+    /**
+     * Where the sheet mounts, in preference order.
+     *
+     *   1. The shell's overlay layer. That layer is the frame's own stacking context,
+     *      so a sheet there is positioned against the PHONE FRAME rather than the
+     *      window — which is what keeps it 390px wide on a tablet — and
+     *      tc-bottom-sheet's pane scroll-lock and blur-behind paths only engage for a
+     *      sheet outside the pane.
+     *   2. The nearest `tc-theme`. Custom properties are inherited, so a sheet
+     *      mounted OUTSIDE the theme wrapper loses every `--tc-*` the theme sets and
+     *      renders in the un-themed default palette. `tc-theme` is
+     *      `display: contents`, so it constrains nothing.
+     *   3. `document.body`.
+     */
+    private _sheetMount(): HTMLElement {
+        const shell = this.closest('tc-mobile-shell')
+        const overlay = shell?.querySelector<HTMLElement>(':scope > [slot="overlay"]')
+        if (overlay) return overlay
+        return this.closest<HTMLElement>('tc-theme, [data-tc-theme]') ?? document.body
+    }
+
+    private _ensureSheet(): BottomSheet {
+        if (this._sheet) return this._sheet
+        const sheet = document.createElement('tc-bottom-sheet') as BottomSheet
+        sheet.classList.add('tc-extended-select__sheet')
+        // `auto` height, so a five-option select is a five-row sheet rather than a
+        // half-screen panel; a long list is capped by the sheet's own max-height.
+        sheet.setAttribute('snap', 'auto')
+
+        const header = document.createElement('div')
+        header.setAttribute('slot', 'header')
+        const title = document.createElement('h2')
+        title.className = 'tc-sheet-title tc-extended-select__sheet-title'
+        header.appendChild(title)
+        sheet.appendChild(header)
+
+        const footer = document.createElement('div')
+        footer.setAttribute('slot', 'footer')
+        footer.className = 'tc-extended-select__sheet-footer'
+        sheet.appendChild(footer)
+
+        // A scrim tap, a downward drag and Escape all close the sheet without going
+        // through _closeMenu — so the element's own open state has to follow.
+        sheet.addEventListener('tc-sheet-close', this._onSheetClose)
+        sheet.addEventListener('click', this._onSheetFooterClick)
+
+        this._sheet = sheet
+        return sheet
+    }
+
+    /** Title, search visibility and footer, refreshed on every sheet open. */
+    private _syncSheetChrome(sheet: BottomSheet): void {
+        const title = sheet.querySelector<HTMLElement>('.tc-extended-select__sheet-title')
+        if (title) title.textContent = this.label || this.placeholder
+
+        // Search past ~12 options only — see SHEET_SEARCH_THRESHOLD.
+        if (this._items.length > SHEET_SEARCH_THRESHOLD) sheet.removeAttribute('data-no-search')
+        else sheet.setAttribute('data-no-search', '')
+
+        // Multi-select needs an explicit "I am done picking": every tap toggles a row
+        // and none of them dismisses, so without a footer the only way out is the
+        // scrim — which reads as cancelling.
+        const footer = sheet.querySelector<HTMLElement>('.tc-extended-select__sheet-footer')
+        if (!footer) return
+        if (this.multiple) {
+            if (!footer.firstElementChild) {
+                footer.innerHTML =
+                    `<button type="button" class="btn btn-primary tc-extended-select__sheet-done">` +
+                    `${esc(msg('done'))}</button>`
+            } else {
+                const done = footer.querySelector('.tc-extended-select__sheet-done')
+                if (done) done.textContent = msg('done')
+            }
+        } else {
+            footer.innerHTML = ''
+        }
+    }
+
+    /**
+     * Put the menu back where the current mode wants it. Called on every open, so a
+     * viewport that crossed 768px (or a rotation) between two opens does not leave
+     * the list stranded in a sheet that will never be shown.
+     */
+    private _placeMenu(useSheet: boolean): void {
+        const menu = this._menuRoot().querySelector('.tc-extended-select__menu')
+        if (!menu) return
+        if (useSheet) {
+            const sheet = this._ensureSheet()
+            if (menu.parentElement !== sheet) {
+                // The menu becomes the sheet's BODY — the one unslotted child, which
+                // is what tc-bottom-sheet scrolls and what its nested-drag logic reads
+                // scrollTop from. Inserted before the footer so the DOM order reads the
+                // way the sheet renders. MOVED, not copied: one list, one set of option
+                // ids, one source of truth.
+                //
+                // This is not the re-parenting hazard documented in src/MobileShell.ts
+                // — that one is about moving a CONSUMER's (framework-owned) children.
+                // Every node here was created by this element's own render().
+                const footer = sheet.querySelector('.tc-extended-select__sheet-footer')
+                sheet.insertBefore(menu, footer ?? null)
+            }
+        } else if (menu.parentElement !== this) {
+            // Back to being the trigger's sibling; _positionMenu anchors it again.
+            this.appendChild(menu)
+        }
+    }
+
+    private _onSheetClose = (): void => {
+        if (this._closingSheet) return
+        // Refocus the trigger: the sheet restores focus to whatever had it before it
+        // opened, which IS the trigger — so `false` here, and let the sheet do it.
+        this._closeMenu(false)
+    }
+
+    private _onSheetFooterClick = (e: Event): void => {
+        const target = e.target as HTMLElement | null
+        if (!target?.closest('.tc-extended-select__sheet-done')) return
+        this._closeMenu()
     }
 
     // ── Private helpers ──────────────────────────────────────────────────────
@@ -423,7 +643,7 @@ export class ExtendedSelect extends HTMLElement {
         this._updateTriggerLabel()
         const selected = this.multiple ? parseKeys(newValue) : newValue ? [newValue] : []
         const selectedSet = new Set(selected)
-        const opts = this.querySelectorAll<HTMLElement>('[role="option"]')
+        const opts = this._menuRoot().querySelectorAll<HTMLElement>('[role="option"]')
         opts.forEach((opt) => {
             const isSelected = !!opt.dataset.key && selectedSet.has(opt.dataset.key)
             opt.setAttribute('aria-selected', String(isSelected))
@@ -464,7 +684,7 @@ export class ExtendedSelect extends HTMLElement {
     }
 
     private _renderList(): void {
-        const listEl = this.querySelector('.tc-extended-select__list')
+        const listEl = this._menuRoot().querySelector('.tc-extended-select__list')
         if (!listEl) return
         listEl.innerHTML = this._renderOptions()
         this._updateActiveDescendant()
@@ -516,19 +736,31 @@ export class ExtendedSelect extends HTMLElement {
         // but no longer submits — form submission flows through ElementInternals
         // (_syncForm) so the value is not duplicated under `name`. Its `name`
         // attribute is therefore intentionally omitted.
-        this.innerHTML = `${labelHtml}<input type="hidden" value="${esc(currentValue)}" class="tc-extended-select__hidden"><button type="button" class="${triggerCls}" role="combobox" aria-expanded="false" aria-controls="${this._listId}" aria-haspopup="listbox"${describe}${requiredAttr}${disabledAttr}><span class="tc-extended-select__trigger-label">${this._triggerLabelHtml()}</span><span class="tc-extended-select__trigger-spinner" aria-hidden="true"><span class="spinner-border spinner-border-sm"></span></span><span class="tc-extended-select__caret" aria-hidden="true">${chevronDownIcon}</span></button><div class="tc-extended-select__menu"><div class="tc-extended-select__search-wrap">${searchIconHtml}<input type="text" class="tc-extended-select__search-input" placeholder="${esc(this.searchPlaceholder)}" autocomplete="off" aria-label="${esc(msg('searchOptionsLabel'))}"></div><ul class="tc-extended-select__list" id="${this._listId}" role="listbox"${multiple ? ' aria-multiselectable="true"' : ''}>${this._renderOptions()}</ul><div class="tc-extended-select__loading-indicator" aria-live="polite" aria-label="${esc(msg('loading'))}"><span class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">${esc(msg('loading'))}</span></span></div></div>${messageHtml}`
+        // A full render mints a NEW menu inside the host, so the copy the sheet is
+        // holding is now stale — and `_menuRoot()` would keep answering "the sheet"
+        // and hand every later lookup the dead list. Dropped here, once, at the only
+        // place that invalidates it.
+        this._sheet?.querySelector('.tc-extended-select__menu')?.remove()
+
+        // `--multiple` is on the MENU and not read off `tc-extended-select[multiple]`,
+        // because in sheet mode the menu is not a descendant of the host any more — a
+        // host-scoped selector would silently stop matching and the multi-select ticks
+        // would never appear. One class, correct in both modes.
+        const menuCls = `tc-extended-select__menu${multiple ? ' tc-extended-select__menu--multiple' : ''}`
+
+        this.innerHTML = `${labelHtml}<input type="hidden" value="${esc(currentValue)}" class="tc-extended-select__hidden"><button type="button" class="${triggerCls}" role="combobox" aria-expanded="false" aria-controls="${this._listId}" aria-haspopup="listbox"${describe}${requiredAttr}${disabledAttr}><span class="tc-extended-select__trigger-label">${this._triggerLabelHtml()}</span><span class="tc-extended-select__trigger-spinner" aria-hidden="true"><span class="spinner-border spinner-border-sm"></span></span><span class="tc-extended-select__caret" aria-hidden="true">${chevronDownIcon}</span></button><div class="${menuCls}"><div class="tc-extended-select__search-wrap">${searchIconHtml}<input type="text" class="tc-extended-select__search-input" placeholder="${esc(this.searchPlaceholder)}" autocomplete="off" aria-label="${esc(msg('searchOptionsLabel'))}"></div><ul class="tc-extended-select__list" id="${this._listId}" role="listbox"${multiple ? ' aria-multiselectable="true"' : ''}>${this._renderOptions()}</ul><div class="tc-extended-select__loading-indicator" aria-live="polite" aria-label="${esc(msg('loading'))}"><span class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">${esc(msg('loading'))}</span></span></div></div>${messageHtml}`
 
         if (this.loading) this.setAttribute('aria-busy', 'true')
 
         const trigger = this.querySelector<HTMLButtonElement>('.tc-extended-select__trigger')
         if (trigger) trigger.addEventListener('click', this._onTriggerClick)
 
-        const searchInput = this.querySelector<HTMLInputElement>(
+        const searchInput = this._menuRoot().querySelector<HTMLInputElement>(
             '.tc-extended-select__search-input',
         )
         if (searchInput) searchInput.addEventListener('input', this._onSearchInput)
 
-        const list = this.querySelector<HTMLElement>('.tc-extended-select__list')
+        const list = this._menuRoot().querySelector<HTMLElement>('.tc-extended-select__list')
         if (list) {
             list.addEventListener('click', this._onListClick)
             list.addEventListener('mouseover', this._onListMouseOver)
@@ -585,22 +817,32 @@ export class ExtendedSelect extends HTMLElement {
 
     private _openMenu(): void {
         if (this._isOpen || this.loading || this.disabled) return
+        const useSheet = this._sheetMode()
+        this._placeMenu(useSheet)
         this._isOpen = true
 
-        const menu = this.querySelector('.tc-extended-select__menu')
+        const menu = this._menuRoot().querySelector('.tc-extended-select__menu')
         const trigger = this.querySelector<HTMLButtonElement>('.tc-extended-select__trigger')
 
         if (menu) menu.classList.add('tc-extended-select__menu--open')
         if (trigger) trigger.setAttribute('aria-expanded', 'true')
 
-        // Anchor the fixed-positioned menu to the trigger (escapes overflow
-        // clipping from ancestor scroll containers), then keep it anchored
-        // while the page or an ancestor scrolls/resizes underneath it.
-        this._cbEl = fixedContainingBlock(this)
-        this._positionMenu()
-        this._repositionHandler = () => this._positionMenu()
-        window.addEventListener('scroll', this._repositionHandler, true)
-        window.addEventListener('resize', this._repositionHandler)
+        if (useSheet) {
+            const sheet = this._ensureSheet()
+            this._syncSheetChrome(sheet)
+            const mount = this._sheetMount()
+            if (sheet.parentElement !== mount) mount.appendChild(sheet)
+            sheet.open = true
+        } else {
+            // Anchor the fixed-positioned menu to the trigger (escapes overflow
+            // clipping from ancestor scroll containers), then keep it anchored
+            // while the page or an ancestor scrolls/resizes underneath it.
+            this._cbEl = fixedContainingBlock(this)
+            this._positionMenu()
+            this._repositionHandler = () => this._positionMenu()
+            window.addEventListener('scroll', this._repositionHandler, true)
+            window.addEventListener('resize', this._repositionHandler)
+        }
 
         // Pre-highlight the selected item — the first one, under `multiple`.
         const selected = new Set(this._selectedKeys())
@@ -612,14 +854,26 @@ export class ExtendedSelect extends HTMLElement {
             }
         }
 
-        // Focus search input
-        const si = this.querySelector<HTMLInputElement>('.tc-extended-select__search-input')
-        if (si) si.focus()
+        if (!useSheet) {
+            // Focus search input. NOT in sheet mode: focusing a text field raises the
+            // software keyboard, and a sheet that opens with the keyboard up has just
+            // covered half of its own option list. tc-bottom-sheet focuses the panel
+            // itself for the same reason — see its _focusIn(). The keydown handler
+            // below is on `document`, so arrow-key navigation works either way.
+            const si = this._menuRoot().querySelector<HTMLInputElement>(
+                '.tc-extended-select__search-input',
+            )
+            if (si) si.focus()
 
-        this._outsideHandler = (e: MouseEvent) => {
-            if (!this.contains(e.target as Node)) this._closeMenu()
+            // Outside-click dismissal, and ONLY in dropdown mode. In sheet mode the
+            // menu is not a descendant of this element, so every tap on a sheet row
+            // would read as "outside" and close it before the click landed. The
+            // sheet's scrim is the dismiss surface there.
+            this._outsideHandler = (e: MouseEvent) => {
+                if (!this.contains(e.target as Node)) this._closeMenu()
+            }
+            document.addEventListener('mousedown', this._outsideHandler)
         }
-        document.addEventListener('mousedown', this._outsideHandler)
 
         this._keyHandler = (e: KeyboardEvent) => this._onKeyDown(e)
         document.addEventListener('keydown', this._keyHandler)
@@ -630,7 +884,23 @@ export class ExtendedSelect extends HTMLElement {
         this._isOpen = false
         this._activeIdx = -1
 
-        const menu = this.querySelector('.tc-extended-select__menu')
+        // The sheet, if this open used one. Closed BEFORE the state teardown below so
+        // its exit animation runs against a list that is still rendered; _closingSheet
+        // stops its own `tc-sheet-close` from re-entering here.
+        //
+        // Left MOUNTED once closed — a closed tc-bottom-sheet is `display: none`, and
+        // it is where the menu lives between opens. Removing it would mean moving the
+        // list twice per open for no gain. `disconnectedCallback` is what disposes of
+        // it, and it is the only place that needs to.
+        const sheet = this._sheet
+        if (sheet && sheet.open) {
+            this._closingSheet = true
+            void sheet.hide('action').finally(() => {
+                this._closingSheet = false
+            })
+        }
+
+        const menu = this._menuRoot().querySelector('.tc-extended-select__menu')
         const trigger = this.querySelector<HTMLButtonElement>('.tc-extended-select__trigger')
 
         if (menu) menu.classList.remove('tc-extended-select__menu--open')
@@ -655,7 +925,9 @@ export class ExtendedSelect extends HTMLElement {
         this._cbEl = null
 
         // Clear search and reset list
-        const si = this.querySelector<HTMLInputElement>('.tc-extended-select__search-input')
+        const si = this._menuRoot().querySelector<HTMLInputElement>(
+            '.tc-extended-select__search-input',
+        )
         if (si) si.value = ''
         if (this._debounceTimer !== null) {
             clearTimeout(this._debounceTimer)
@@ -682,9 +954,15 @@ export class ExtendedSelect extends HTMLElement {
      * before being written — otherwise the menu drifts by the ancestor's offset.
      */
     private _positionMenu(): void {
-        const menu = this.querySelector<HTMLElement>('.tc-extended-select__menu')
+        const menu = this._menuRoot().querySelector<HTMLElement>('.tc-extended-select__menu')
         const trigger = this.querySelector<HTMLElement>('.tc-extended-select__trigger')
         if (!menu || !trigger) return
+        // Anchoring is a DROPDOWN concern. Inside a sheet the menu is a static flex
+        // child and the sheet owns its box — writing top/left/width here would leave
+        // inline styles on it that survive into the next dropdown-mode open.
+        // `_renderList()` calls this on every filter keystroke, so the guard is here
+        // rather than at each call site.
+        if (menu.parentElement !== this) return
 
         const gap = 2
         const margin = 4 // keep a small breathing gap from viewport edges
@@ -725,16 +1003,16 @@ export class ExtendedSelect extends HTMLElement {
         this._setActiveClass()
         this._updateActiveDescendant()
         if (idx >= 0) {
-            const opt = this.querySelector(`#${this._idPrefix}-${idx}`)
+            const opt = this._menuRoot().querySelector(`#${this._idPrefix}-${idx}`)
             opt?.scrollIntoView({ block: 'nearest' })
         }
     }
 
     private _setActiveClass(): void {
-        const prev = this.querySelector('.tc-extended-select__option--active')
+        const prev = this._menuRoot().querySelector('.tc-extended-select__option--active')
         if (prev) prev.classList.remove('tc-extended-select__option--active')
         if (this._activeIdx >= 0) {
-            const opt = this.querySelector(`#${this._idPrefix}-${this._activeIdx}`)
+            const opt = this._menuRoot().querySelector(`#${this._idPrefix}-${this._activeIdx}`)
             if (opt) opt.classList.add('tc-extended-select__option--active')
         }
     }
@@ -789,7 +1067,9 @@ export class ExtendedSelect extends HTMLElement {
         // Clicking a row focuses the <li> (tabindex="-1"); hand focus back so
         // typing keeps filtering and the key handler keeps its context.
         if (this._isOpen) {
-            this.querySelector<HTMLInputElement>('.tc-extended-select__search-input')?.focus()
+            this._menuRoot()
+                .querySelector<HTMLInputElement>('.tc-extended-select__search-input')
+                ?.focus()
         }
     }
 
@@ -803,7 +1083,9 @@ export class ExtendedSelect extends HTMLElement {
     // ── Search ────────────────────────────────────────────────────────────────
 
     private _onSearchInput = (): void => {
-        const si = this.querySelector<HTMLInputElement>('.tc-extended-select__search-input')
+        const si = this._menuRoot().querySelector<HTMLInputElement>(
+            '.tc-extended-select__search-input',
+        )
         const query = si?.value ?? ''
         if (this._debounceTimer !== null) clearTimeout(this._debounceTimer)
         this._debounceTimer = setTimeout(() => {

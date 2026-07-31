@@ -4,6 +4,8 @@
 // fill, and the slate focus border + ring, replaced with the leaf accent line
 // and the soft leaf glow (CITRINA's --focus-ring).
 
+@use '../../../foundation/tokens' as *;
+
 tc-theme[name='sunshine'],
 [data-tc-theme='sunshine'] {
     .form-label {
@@ -20,5 +22,42 @@ tc-theme[name='sunshine'],
     .form-select:focus {
         border-color: var(--sun-leaf);
         box-shadow: var(--tc-focus-ring);
+    }
+}
+
+// ── The phone form ───────────────────────────────────────────────────────────
+//
+// Screen 1c's search field, verbatim: `height 40px; radius 6px; background #f1e6ce;
+// border 1px solid rgba(34,48,26,.14); box-shadow inset 0 1px 2px rgba(54,44,18,.06)`
+// with `400 13px` placeholder ink at #9aa189. The fill, the border and the inset are
+// already the sunshine defaults above — what the phone adds is the corner and the
+// placeholder size.
+//
+// THE 13px/16px SPLIT, AND WHY IT IS THE RIGHT ANSWER RATHER THAN A COMPROMISE.
+//   Below 16px iOS Safari zooms the viewport when a text field takes focus and never
+//   zooms back out, so the FIELD'S OWN text can never be 13px — that is settled (see
+//   style/foundation/_reset.scss). But the zoom heuristic reads the input's computed
+//   `font-size`; it does not look at `::placeholder`. And on screen 1c the field is
+//   only ever shown EMPTY, so 13px is the size the canvas actually specifies for the
+//   one state it draws. Sizing the placeholder at 13px and the typed text at 16px
+//   therefore matches the design exactly where the design has an opinion, and is
+//   larger than the design only where the design is silent.
+//   Tested against 1c at 390px: 16px placeholder text overflows „Барајте („tavce" →
+//   Тавче)" — the hint gets clipped mid-word — and reads as an entered value rather
+//   than as a prompt. 13px keeps the full string and the lighter weight the canvas has.
+//
+// The 40px height is NOT set here. It is below the 44px touch floor, so the surface
+// that wants it re-points `--tc-min-touch-target` on its own subtree and makes the
+// hit area up with the band's padding — the pattern in
+// style/foundation/README.md §Touch floors, needed twice by this design (the 40px
+// search band on 1c/1f and the 42px sheet select on 1g).
+@include coarse-pointer {
+    tc-theme[name='sunshine'],
+    [data-tc-theme='sunshine'] {
+        .form-control,
+        .form-select {
+            --bs-form-control-radius: var(--m-radius-control, 6px);
+            --bs-form-control-placeholder-size: 13px;
+        }
     }
 }

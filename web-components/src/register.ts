@@ -215,6 +215,7 @@ import { ListSection } from './ListSection'
 import { Notice } from './Notice'
 import { StatTile } from './StatTile'
 import { TaxonomyCard } from './TaxonomyCard'
+import { LoadMore } from './LoadMore'
 import { MacroGrid } from './MacroGrid'
 import { QuotaMeter } from './QuotaMeter'
 import { TrendSpark } from './TrendSpark'
@@ -605,6 +606,7 @@ export function register(): void {
     define('tc-notice', Notice)
     define('tc-stat-tile', StatTile)
     define('tc-taxonomy-card', TaxonomyCard)
+    define('tc-load-more', LoadMore)
     define('tc-macro-grid', MacroGrid)
     define('tc-quota-meter', QuotaMeter)
     define('tc-trend-spark', TrendSpark)

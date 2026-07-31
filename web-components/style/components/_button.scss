@@ -24,6 +24,12 @@
     --bs-btn-disabled-opacity: 0.65;
     --bs-btn-active-shadow: none;
     --bs-btn-focus-shadow-rgb: 30, 41, 59;
+    // The box height, as a KNOB rather than a literal, for the same reason
+    // --bs-form-control-font-size is one: the coarse-pointer floor at the bottom of
+    // this file has to read the tier's own value. Every size class below re-points
+    // it on the same element, so the floor's max() resolves per tier instead of
+    // clamping all of them to 44px.
+    --bs-btn-height: var(--tc-control-height, 2.625rem);
 
     display: inline-flex;
     align-items: center;
@@ -31,7 +37,7 @@
     gap: 8px;
     // Shared control floor — a default button never falls short of adjacent
     // .form-control fields in a form row.
-    min-height: var(--tc-control-height, 2.625rem);
+    min-height: var(--bs-btn-height);
     padding: var(--bs-btn-padding-y) var(--bs-btn-padding-x);
     font-family: var(--bs-btn-font-family);
     font-size: var(--bs-btn-font-size);
@@ -60,6 +66,23 @@
         background: var(--bs-btn-hover-bg, var(--bs-btn-bg));
         border-color: var(--bs-btn-hover-border-color);
         transform: translateY(-1px);
+    }
+
+    // Sticky hover on touch: a tap leaves :hover latched until the next tap
+    // elsewhere, so the lift stays applied and the button reads as stuck 1px up.
+    // CANCELLED under coarse rather than declared under `fine-pointer`, so an
+    // environment that reports neither pointer (some VMs, some CI browsers) keeps
+    // today's behaviour instead of silently losing the lift.
+    @include coarse-pointer {
+        &:hover:not(.active) {
+            transform: none;
+        }
+
+        // Press feedback moves DOWN on touch — there is no cursor to lift away
+        // from, and 1px of travel under the finger is the whole cue.
+        &:active:not(.disabled):not(:disabled) {
+            transform: translateY(1px);
+        }
     }
 
     &:focus-visible {
@@ -199,17 +222,50 @@
 
 .btn-sm {
     // Matches the -sm control tier (see .form-control-sm), not the default floor.
-    min-height: 2rem;
+    --bs-btn-height: 2rem;
     --bs-btn-padding-y: 0.375rem;
     --bs-btn-padding-x: 0.75rem;
     --bs-btn-font-size: 0.8125rem;
+
+    min-height: var(--bs-btn-height);
 }
 
 .btn-lg {
-    min-height: 2.75rem;
+    --bs-btn-height: 2.75rem;
     --bs-btn-padding-y: 0.75rem;
     --bs-btn-padding-x: 1.5rem;
     --bs-btn-font-size: 1.04rem;
+
+    min-height: var(--bs-btn-height);
+}
+
+// The thumb tier: a target sized to be hit while walking, holding a pan, or
+// looking at the pan instead of the screen. 66px is the phone design's
+// step-advance button (screen `1e`); `--m-h-button-lg` is that value, and the
+// fallback keeps the tier usable on a page with no mobile token layer.
+//
+// A NEW TIER RATHER THAN A TALLER `.btn-lg`. `-lg` is the CTA size on every
+// landing page consuming this library, and pushing it from 44px to 66px would
+// re-space all of them. Nothing uses `xl` today, so it can carry the design's
+// value unconditionally — no media query, no consumer surprise.
+//
+// The CARD radius (10px) and not the 6px control radius, matching
+// tc-step-pager: at 66px tall a 6px corner reads as square.
+.btn-xl {
+    --bs-btn-height: var(--m-h-button-lg, 4.125rem); // 66px
+    --bs-btn-padding-y: 0.75rem;
+    --bs-btn-padding-x: 1.25rem;
+    --bs-btn-font-size: 1.0625rem; // 17px — --m-font-step-label
+    --bs-btn-font-weight: 700;
+    --bs-btn-border-radius: var(--m-radius-card, 0);
+
+    min-height: var(--bs-btn-height);
+    gap: var(--m-gap-tight, 0.3125rem);
+
+    svg {
+        width: 1.5rem; // 24px — 1e's advance chevron
+        height: 1.5rem;
+    }
 }
 
 // WCAG 2.5.5 — minimum tappable area on touch devices.
@@ -220,7 +276,13 @@
 @media (pointer: coarse) {
     .btn {
         min-width: var(--tc-min-touch-target, 44px);
-        min-height: var(--tc-min-touch-target, 44px);
+        // max(), NOT a flat 44px. Media queries add no specificity and this is the
+        // last min-height in the file, so a flat value silently clamped every tier
+        // declared above it — `.btn-xl`'s 66px would have rendered at 44. The knob
+        // is re-declared by each size class on the same element, so it has already
+        // resolved to that tier's height by the time this substitutes. Same shape as
+        // the .form-control floor in _input.scss.
+        min-height: max(var(--tc-min-touch-target, 44px), var(--bs-btn-height));
     }
 }
 
@@ -235,4 +297,41 @@ tc-metal-button:has(> .tc-field-message) {
     flex-direction: column;
     align-items: stretch;
     vertical-align: top;
+}
+
+// ── Block (full-width) ────────────────────────────────────────────────────────
+//
+// The shape of every action-bar and sheet-footer action in the phone design: the
+// button spans its container and centres its content. BOTH the host and the inner
+// control need the width — the host is `inline-flex` (see foundation/_reset.scss),
+// so a 100%-wide `.btn` inside a fit-content host is still fit-content.
+//
+// `flex: 1 1 0` on the host and not `flex-basis: auto`: flex line-breaking uses an
+// item's HYPOTHETICAL main size, so an auto basis makes a long Cyrillic label
+// („Заврши и стави во фрижидер", screen 1h) break the action row onto two lines at
+// 320px instead of shrinking the button.
+//
+// PLACED AFTER the `:has(> .tc-field-message)` rule below on purpose: both are
+// 0-1-1, so whichever comes last wins the `display`. A block button that is also a
+// form field must stack (column), which is why the second selector here restates
+// it rather than relying on the earlier rule.
+tc-button[block],
+tc-metal-button[block] {
+    display: flex;
+    flex: 1 1 0;
+    width: 100%;
+    min-width: 0;
+
+    > .btn,
+    > .tc-metal-button__btn {
+        flex: 1 1 auto;
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+tc-button[block]:has(> .tc-field-message),
+tc-metal-button[block]:has(> .tc-field-message) {
+    flex-direction: column;
+    align-items: stretch;
 }

@@ -28,6 +28,19 @@
     --bs-form-control-disabled-color: var(--tc-text-muted);
     --bs-form-control-disabled-bg: var(--tc-surface-muted);
     --bs-form-control-disabled-border-color: var(--tc-border);
+    // 0 by default — the sharp-corner mandate (styleguide.md §corners). A KNOB and
+    // not a literal, because a design that specifies rounded controls otherwise has
+    // to out-specify this rule from the app and then repeat it for `:focus`,
+    // `.is-invalid` and both size tiers. One property, re-pointed once. `.btn` has
+    // carried the equivalent (--bs-btn-border-radius) since it was written; this is
+    // the field half of the same contract.
+    --bs-form-control-radius: 0;
+    // The placeholder's own size. Separate from --bs-form-control-font-size for one
+    // reason: the coarse floor below raises the FIELD'S text to 16px (iOS zoom), and
+    // a design whose empty field reads at 13px — screens 1c/1f — can then keep that
+    // 13px on the placeholder alone. `inherit` means "the field's size" by default,
+    // so nothing changes for a consumer who never touches it.
+    --bs-form-control-placeholder-size: inherit;
 
     display: block;
     width: 100%;
@@ -44,13 +57,14 @@
     background-color: var(--bs-form-control-bg);
     background-clip: padding-box;
     border: var(--bs-border-width) solid var(--bs-form-control-border-color);
-    border-radius: 0;
+    border-radius: var(--bs-form-control-radius);
     transition:
         border-color var(--tc-transition-fast),
         box-shadow var(--tc-transition-fast);
 
     &::placeholder {
         color: var(--bs-form-control-placeholder-color);
+        font-size: var(--bs-form-control-placeholder-size);
         opacity: 1;
     }
 

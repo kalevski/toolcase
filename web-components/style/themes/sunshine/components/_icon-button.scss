@@ -1,0 +1,20 @@
+// Sunshine › tc-icon-button — the neutral chrome variants in the design's ink.
+//
+// `#44503a` (--sun-ink-2) is the stroke colour of every icon-only control on the
+// canvas: the app bar's bell (1b), the back chevrons (1d/1h/1k) and the action bar's
+// outline buttons (1d/1h). It has no `--tc-*` rung of its own — the toolcase scale runs
+// text / text-muted / text-faint and skips this tier — which is exactly what a sunshine
+// component partial is for.
+//
+// Both variants are neutral by definition (see style/components/_icon-button.scss), so
+// there is no contrast trade-off here: #44503a on the cream surface is 8.0:1.
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    .tc-icon-button--ghost,
+    .tc-icon-button--outline {
+        --bs-btn-color: var(--sun-ink-2);
+        --bs-btn-hover-color: var(--sun-ink-1);
+        --bs-btn-active-color: var(--sun-ink-1);
+    }
+}

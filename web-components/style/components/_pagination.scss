@@ -1,5 +1,17 @@
 // tc-pagination — joined 1px-bordered pager, mono numerals (data register),
 // solid ink active page.
+//
+// DESKTOP-ONLY BY DESIGN. The touch floor below makes each page link tappable, but a
+// tappable control is not the same as a usable one: a numbered pager is a row of
+// 44x44 targets 2-3px apart, which fails WCAG 2.5.8's spacing guidance in practice,
+// and "page 7 of 34" is a question nobody asks with a thumb. Worse, on a phone the
+// pager sits BELOW the list, so reaching it means scrolling past everything you just
+// read and then losing your place when the page changes.
+//
+// The phone answer is `tc-load-more` (append in place, keep the scroll position) or a
+// scroll-triggered fetch. This element keeps its touch floor because a hybrid device
+// exists and a desktop consumer may be touched, not because a phone layout should
+// reach for it. See style/components/_load-more.scss.
 
 .pagination {
     --bs-pagination-padding-x: 0.75rem;

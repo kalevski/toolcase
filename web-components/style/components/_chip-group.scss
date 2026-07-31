@@ -52,6 +52,33 @@ tc-chip-group {
     gap: var(--bs-chip-group-item-gap);
 }
 
+// ── Rail layout (`layout="rail"`) ─────────────────────────────────────────────
+//
+// One horizontally scrolling line instead of a wrapping block — screen `1f`'s filter
+// rail. The scrolling comes from `.tc-scroll-x`, which the element APPLIES to this
+// same node (it renders the node, so the class survives a framework re-render — see
+// the comment at the call site in src/ChipGroup.ts, and foundation/README.md on why
+// there is no fourth copy of that utility). Only what the utility leaves to the
+// owner is declared here.
+//
+// `flex: none` on the children is load-bearing: in a nowrap row eight chips would
+// each give up a few pixels and ellipsise rather than overflow into a scroll.
+//
+// NO scroll-snap. `.tc-snap-x`'s `mandatory` fights the user for a resting place
+// between two chips — a rail is free-scrolling; a pager is what snaps.
+//
+// The 2px block padding is not decoration: a scroll container clips BOTH axes
+// (`overflow-x: auto` forces the used `overflow-y` to `auto` too), so without it a
+// chip's focus ring is sliced off at the rail's edge.
+.tc-chip-group-items--rail {
+    flex-wrap: nowrap;
+    padding-block: 2px;
+
+    > * {
+        flex: none;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     // Chip transitions are suppressed by _chip.scss; nothing to override here.
 }

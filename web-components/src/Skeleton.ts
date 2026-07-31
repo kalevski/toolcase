@@ -4,6 +4,23 @@ export type SkeletonVariant = 'text' | 'circle' | 'rect'
 
 const VARIANTS: SkeletonVariant[] = ['text', 'circle', 'rect']
 
+/**
+ * Composed placeholders that reproduce another component's BOX rather than a bare
+ * rectangle: `card` matches `tc-taxonomy-card` (card radius, hairline, the 3px accent
+ * top rule, and the eyebrow / serif title / description ladder inside it) and `row`
+ * matches `tc-check-row` (48px tall, dashed divider, tick box, label over hint).
+ *
+ * WHY A PRESET AND NOT `variant="rect" height="112"`. A list that loads into cards but
+ * shimmers as flat bars reflows on arrival: every row changes height and the page
+ * jumps under the reader's thumb. Matching the real geometry makes the loading state a
+ * silhouette of the loaded one, so nothing moves when the data lands — which is the
+ * whole advantage of a skeleton over a spinner. A wrong-shaped skeleton is worse than
+ * a spinner, because it promises a layout and then breaks it.
+ */
+export type SkeletonPreset = 'card' | 'row'
+
+const PRESETS: SkeletonPreset[] = ['card', 'row']
+
 // Pure-number string → "Npx"; any other CSS string passes through unchanged.
 function resolveLength(raw: string | null): string | null {
     if (raw === null) return null
@@ -14,7 +31,7 @@ export class Skeleton extends HTMLElement {
     private _initialised = false
 
     static get observedAttributes(): string[] {
-        return ['variant', 'width', 'height', 'count']
+        return ['variant', 'width', 'height', 'count', 'preset']
     }
 
     connectedCallback(): void {
@@ -55,6 +72,18 @@ export class Skeleton extends HTMLElement {
         else this.removeAttribute('height')
     }
 
+    /** A composed placeholder shaped like a real component — see `SkeletonPreset`.
+     *  Overrides `variant`; `count` still repeats it, `height` still overrides the
+     *  preset's own. */
+    get preset(): SkeletonPreset | null {
+        const v = this.getAttribute('preset') as SkeletonPreset
+        return PRESETS.includes(v) ? v : null
+    }
+    set preset(v: SkeletonPreset | null) {
+        if (v != null) this.setAttribute('preset', v)
+        else this.removeAttribute('preset')
+    }
+
     get count(): number {
         return Math.max(1, parseInt(this.getAttribute('count') ?? '1', 10) || 1)
     }
@@ -62,7 +91,46 @@ export class Skeleton extends HTMLElement {
         this.setAttribute('count', String(v))
     }
 
+    /** One preset instance. Every inner bar is a `.tc-skeleton`, so the shimmer (and
+     *  its reduced-motion freeze) comes from the one place that defines it. */
+    private _renderPreset(preset: SkeletonPreset, height: string | null): string {
+        const bar = (w: string, h: string): string =>
+            `<span class="tc-skeleton tc-skeleton-text" style="width:${w};height:${h}"></span>`
+        const styleAttr = height ? ` style="min-height:${height}"` : ''
+
+        if (preset === 'row') {
+            return (
+                `<div class="tc-skeleton-preset tc-skeleton-preset--row"${styleAttr} aria-hidden="true">` +
+                `<span class="tc-skeleton tc-skeleton-preset__box"></span>` +
+                `<span class="tc-skeleton-preset__lines">${bar('62%', '13px')}${bar('34%', '10px')}</span>` +
+                `</div>`
+            )
+        }
+        return (
+            `<div class="tc-skeleton-preset tc-skeleton-preset--card"${styleAttr} aria-hidden="true">` +
+            // eyebrow, serif title, description — the three runs every taxonomy card has
+            bar('34%', '9px') +
+            bar('72%', '20px') +
+            bar('100%', '12px') +
+            `<span class="tc-skeleton-preset__chips">` +
+            `<span class="tc-skeleton tc-skeleton-preset__chip"></span>` +
+            `<span class="tc-skeleton tc-skeleton-preset__chip"></span>` +
+            `</span>` +
+            `</div>`
+        )
+    }
+
     private render(): void {
+        const preset = this.preset
+        if (preset !== null) {
+            const height = resolveLength(this.getAttribute('height'))
+            const count = this.count
+            const one = this._renderPreset(preset, height)
+            this.innerHTML =
+                count > 1 ? `<div class="tc-skeleton__group">${one.repeat(count)}</div>` : one
+            return
+        }
+
         const variant = this.variant
         const count = this.count
         const rawWidth = this.getAttribute('width')

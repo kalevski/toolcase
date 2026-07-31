@@ -12,7 +12,7 @@
     },
     "dependencies": {
         "@toolcase/base": "^5.0.0",
-        "@toolcase/web-components": "^5.0.12",
+        "@toolcase/web-components": "^6.0.0",
         "busboy": "^1.6.0",
         "lucide-static": "^1.22.0",
         "next": "^16.2.9",

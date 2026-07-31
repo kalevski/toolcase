@@ -141,6 +141,7 @@ import ListSectionDemo from './ListSectionDemo'
 import NoticeDemo from './NoticeDemo'
 import StatTileDemo from './StatTileDemo'
 import TaxonomyCardDemo from './TaxonomyCardDemo'
+import LoadMoreDemo from './LoadMoreDemo'
 import MacroGridDemo from './MacroGridDemo'
 import QuotaMeterDemo from './QuotaMeterDemo'
 import TrendSparkDemo from './TrendSparkDemo'
@@ -541,6 +542,7 @@ const demos: WebComponentDef[] = [
     { key: 'day-strip', complexity: 'Mobile', element: <DayStripDemo /> },
     { key: 'add-slot', complexity: 'Mobile', element: <AddSlotDemo /> },
     { key: 'taxonomy-card', complexity: 'Mobile', element: <TaxonomyCardDemo /> },
+    { key: 'load-more', complexity: 'Mobile', element: <LoadMoreDemo /> },
     { key: 'page-tabs', complexity: 'Mobile', element: <PageTabsDemo /> },
     { key: 'tab-dock', complexity: 'Mobile', element: <TabDockDemo /> },
     { key: 'download-stats', complexity: 'Composite', element: <DownloadStatsDemo /> },

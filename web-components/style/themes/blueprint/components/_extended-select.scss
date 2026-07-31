@@ -141,7 +141,10 @@ tc-theme[name='blueprint'],
 
     // Multi mode keeps the plain paper row (the checkbox carries the state, no
     // pink fill) — restore ink on selected labels/descriptions.
-    tc-extended-select[multiple] .tc-extended-select__option--selected {
+    // Scoped to the MENU class rather than `tc-extended-select[multiple]`: under a
+    // coarse pointer the menu moves into a tc-bottom-sheet and stops being a
+    // descendant of the host. See style/components/_extended-select.scss.
+    .tc-extended-select__menu--multiple .tc-extended-select__option--selected {
         .tc-extended-select__option-label {
             color: inherit;
         }

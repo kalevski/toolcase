@@ -5,6 +5,8 @@
 // dark on-lead ink label, and add the signature warm glow + translateY lift
 // (CITRINA's .btn-lead).
 
+@use '../../../foundation/tokens' as *;
+
 tc-theme[name='sunshine'],
 [data-tc-theme='sunshine'] {
     .btn {
@@ -75,6 +77,93 @@ tc-theme[name='sunshine'],
         &:hover {
             transform: none;
             box-shadow: none;
+        }
+    }
+}
+
+// ── The phone form ───────────────────────────────────────────────────────────
+//
+// The JADI.mk canvas draws its buttons at 46px, 6px radius, `600 14px`, with an amber
+// glow tighter than sunshine's desktop one. All of it is inside a coarse-pointer
+// query, which is the whole reason it can be a DEFAULT at all: this library is
+// published and consumed by desktop landing pages, and a media query on the pointer
+// type cannot reach them.
+//
+// (The 40px tier the design uses inside a toolbar is not here. It is BELOW the touch
+// floor, so it is reached by re-pointing `--tc-min-touch-target` on that toolbar's
+// subtree and making the hit area up with the toolbar's own padding — see
+// style/foundation/README.md §Touch floors. A second, shorter button class would be a
+// floor with a hole in it.)
+@include coarse-pointer {
+    tc-theme[name='sunshine'],
+    [data-tc-theme='sunshine'] {
+        // THE TWO AMBER GLOWS, RECONCILED. `--sun-lead-shadow` is sunshine's desktop
+        // recipe (a 1px lead ring plus `0 12px 28px -10px`); `--m-shadow-amber` is the
+        // canvas's own `0 12px 28px -12px rgba(242,183,5,.5)`, with no ring and 2px
+        // tighter. Rather than leaving two values that mean the same thing, the token is
+        // RE-POINTED here — so on a phone there is exactly one amber glow, the design's,
+        // and every rule that already reads --sun-lead-shadow picks it up. Desktop keeps
+        // sunshine's, because re-pointing it unconditionally would re-shadow every
+        // existing consumer's primary button.
+        //
+        // A custom property's var() references are substituted where the property is
+        // DECLARED, so this has to be declared at the theme root (where --m-shadow-amber
+        // lives) and not on the button — see the long note in
+        // style/foundation/_mobile-tokens.scss.
+        --sun-lead-shadow: var(--m-shadow-amber, 0 12px 28px -12px rgba(242, 183, 5, 0.5));
+        --sun-lead-shadow-strong: var(--m-shadow-amber, 0 12px 28px -12px rgba(242, 183, 5, 0.5));
+
+        // Cosmetics every tier shares.
+        .btn {
+            --bs-btn-border-radius: var(--m-radius-control, 6px);
+
+            letter-spacing: 0; // the base tracks .025em; the design's buttons do not
+        }
+
+        // THE `:not()` CHAIN IS LOAD-BEARING. Inside a theme scope `.btn` is 0-2-0,
+        // which beats a size class's own 0-1-0 knob — so a bare `.btn { --bs-btn-height }`
+        // here silently clobbered every tier: `.btn-xl` measured 46px instead of 66px and
+        // 14px instead of 17px, with its padding (declared directly, not through a knob)
+        // still applied, so it looked like a squashed xl rather than a missing one.
+        // Media queries add no specificity; a theme scope adds plenty.
+        //
+        // The height flows through the `max()` floor in style/components/_button.scss, so
+        // 46px is honoured while nothing can fall below 44.
+        .btn:not(.btn-sm):not(.btn-lg):not(.btn-xl) {
+            --bs-btn-height: var(--m-h-button, 46px);
+            --bs-btn-font-size: 0.875rem; // 14px — --m-font-btn
+        }
+
+        // The secondary action tier — „Откажи" (1g), „Прати порака" (1k), „Не сега" (1l),
+        // and the three outline buttons beside „Готви" (1d). The canvas writes it as
+        // #44503a ink on a neutral rgba(34,48,26,.26) hairline; sunshine's desktop
+        // outline-primary is leaf-green, which is the right accent for a link-like action
+        // on a page and the wrong one beside an amber primary in a two-button action bar.
+        // Neutral ink also measures better: #44503a on the cream surface is ~8:1 against
+        // the leaf's ~5:1.
+        .btn-outline-primary {
+            --bs-btn-color: var(--sun-ink-2);
+            --bs-btn-border-color: var(--sun-line-strong);
+            --bs-btn-hover-color: var(--sun-ink-1);
+            --bs-btn-hover-bg: var(--sun-well);
+            --bs-btn-hover-border-color: var(--sun-line-strong);
+            --bs-btn-active-color: var(--sun-ink-1);
+            --bs-btn-active-bg: var(--sun-well);
+            --bs-btn-active-border-color: var(--sun-line-strong);
+        }
+
+        // The step-advance label is `700 17px` (screen 1e). The weight has to be declared
+        // here rather than left to `.btn-xl`'s knob, because sunshine's own `.btn` above
+        // sets `font-weight: 600` as a DIRECT declaration at this same 0-2-0 — a knob
+        // cannot out-run a literal. Same scope, later in source, so this wins.
+        .btn-xl {
+            // The CARD radius (10px) and not the 6px control radius — at 66px tall a 6px
+            // corner reads as square, which is why tc-step-pager makes the same choice.
+            // Restated here for the reason above: the `.btn` block's 6px is 0-2-0 and
+            // beats `.btn-xl`'s own knob.
+            --bs-btn-border-radius: var(--m-radius-card, 10px);
+
+            font-weight: 700;
         }
     }
 }

@@ -89,6 +89,10 @@ export interface ToolcaseMessages {
     /** `tc-step-pager`'s wake-lock chip, shown only while a screen lock is held. */
     screenAwake: string
     clear: string
+    /** `tc-load-more`'s idle label — the tap that appends the next page. */
+    loadMore: string
+    /** `tc-load-more`'s terminal state: there is nothing further to fetch. */
+    allLoaded: string
     filtersLabel: string
     searchOptionsLabel: string
     toggleSidebarLabel: string
@@ -157,6 +161,8 @@ const DEFAULTS: ToolcaseMessages = {
     tip: 'Tip',
     screenAwake: 'Screen stays awake',
     clear: 'Clear',
+    loadMore: 'Load more',
+    allLoaded: 'Nothing more to load',
     filtersLabel: 'Filters',
     searchOptionsLabel: 'Search options',
     toggleSidebarLabel: 'Toggle sidebar',

@@ -96,6 +96,57 @@ tc-chip[static] .tc-chip {
     }
 }
 
+// ── Size tiers ────────────────────────────────────────────────────────────────
+//
+// One per CONTAINER, which is why there are three and not a generic ramp: the
+// phone design's chip is 10px on a card (`1c`, `1d`, `1e`, `1k`), 11px on a
+// horizontal rail (`1f`) and 12px inside a bottom sheet (`1g` — thumb-sized), and
+// each padding/size pairing recurs four or more times. The `--m-pad-chip*` tokens
+// carry the same values; they are written out here rather than read, because a chip
+// tier must not silently collapse to no padding on a page with no mobile scale.
+//
+// `line-height: 1.3` replaces the base `1`: at 10-12px a line box equal to the font
+// size clips Cyrillic descenders („ј", „ц", „џ").
+// The pill radius is part of the tier. Every chip on the canvas is a pill, and a pill
+// is the one shape the sharp-corner mandate exempts (styleguide.md) — so the tiers
+// carry it rather than making every caller add a class. The fallback is 0, so a page
+// with no mobile scale keeps the library's square chip.
+.tc-chip--sm,
+.tc-chip--md,
+.tc-chip--lg {
+    border-radius: var(--m-radius-pill, 0);
+}
+
+.tc-chip--sm {
+    --bs-chip-padding-x: 9px;
+    --bs-chip-padding-y: 3px;
+    --bs-chip-font-size: 10px;
+    --bs-chip-gap: 4px;
+    --bs-chip-icon-size: 11px;
+
+    line-height: 1.3;
+}
+
+.tc-chip--md {
+    --bs-chip-padding-x: 11px;
+    --bs-chip-padding-y: 5px;
+    --bs-chip-font-size: 11px;
+    --bs-chip-gap: 5px;
+    --bs-chip-icon-size: 12px;
+
+    line-height: 1.3;
+}
+
+.tc-chip--lg {
+    --bs-chip-padding-x: 12px;
+    --bs-chip-padding-y: 6px;
+    --bs-chip-font-size: 12px;
+    --bs-chip-gap: 6px;
+    --bs-chip-icon-size: 13px;
+
+    line-height: 1.3;
+}
+
 .tc-chip-icon {
     display: inline-flex;
     align-items: center;
@@ -169,14 +220,31 @@ tc-chip:has(.tc-chip[disabled]) {
 }
 
 // 44 px coarse touch target minimum on the chip body and the remove button.
+//
+// A STATIC CHIP IS EXEMPT, and that is a fix rather than a loophole. `tc-tag` and
+// `tc-chip[static]` render a non-interactive `<span>` — a label, not a control — so
+// there is no tap for a target to serve. Under the blanket floor a card's „30 мин"
+// meta chip inflated from 19px to 44px, which is taller than the card's own title
+// and half of every chip row on screens 1c/1d/1f. WCAG 2.5.5 sizes TARGETS; nothing
+// here is one.
+//
+// Written as `:not()` on the chip rather than as a `tc-tag`-scoped override so there
+// is one floor with one exception, instead of a floor and a competing un-floor.
+//
+// AN INTERACTIVE CHIP IS STILL FLOORED, and that is a real disagreement with the phone
+// design worth naming: `1f`'s filter rail draws its chips at 21px, which no touch
+// guideline accepts. The floor reads `--tc-min-touch-target`, so a surface that decides
+// canvas fidelity wins re-points that token on its own subtree and makes the hit area up
+// with the rail's padding — the pattern in style/foundation/README.md §Touch floors. The
+// library's default is the floor; the exception is the caller's decision to state.
 @media (pointer: coarse) {
-    .tc-chip {
-        min-height: 2.75rem;
+    .tc-chip:not(.tc-chip--static) {
+        min-height: var(--tc-min-touch-target, 2.75rem);
     }
 
     .tc-chip-remove {
-        min-width: 2.75rem;
-        min-height: 2.75rem;
+        min-width: var(--tc-min-touch-target, 2.75rem);
+        min-height: var(--tc-min-touch-target, 2.75rem);
     }
 }
 

@@ -21,3 +21,48 @@ tc-theme[name='sunshine'],
         --bs-chip-border-color: var(--sun-lead-line);
     }
 }
+
+// ── The phone tiers ──────────────────────────────────────────────────────────
+//
+// Scoped to `.tc-chip--sm/--md/--lg` and NOT to `.tc-chip`, deliberately: these tiers
+// are new and opt-in, so the design's chip palette lands on exactly the chips that
+// asked for the phone scale and sunshine's existing chip look is untouched.
+//
+// The canvas draws two chip states and neither is sunshine's default:
+//
+//   resting  #fff fill · #e5e2dc hairline · #7d766c ink · weight 400
+//   active   rgba(242,183,5,.16) fill · rgba(242,183,5,.5) line · #8a6d2f ink · 600
+//
+// AND THE ACTIVE INK IS OCHRE, NOT AMBER. Amber ink on an amber-tint fill is ~1.3:1 —
+// invisible. #8a6d2f is the design's own answer and it has no --sun-* rung (the scale
+// runs lemon / leaf / plum / coral and skips ochre), which is what a sunshine component
+// partial is for. MEASURED: #8a6d2f on the tinted cream is 4.43:1 — a hair under AA's
+// 4.5 at these sizes. Recorded rather than substituted, because it is the value the
+// canvas specifies; darkening it is a palette decision.
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    .tc-chip--sm,
+    .tc-chip--md,
+    .tc-chip--lg {
+        --bs-chip-bg: var(--tc-surface);
+        --bs-chip-bg-hover: var(--sun-well);
+        --bs-chip-border-color: var(--sun-line);
+        --bs-chip-color: var(--sun-ink-3);
+        --bs-chip-font-weight: 400;
+    }
+
+    // `.is-selected` is the class tc-chip renders, and the base rule sets
+    // `background-color` DIRECTLY from --bs-chip-selected-bg rather than through
+    // --bs-chip-bg — so re-pointing the resting fill (as the block above this file's
+    // phone tiers does for `[aria-pressed]`) cannot reach it. These three knobs are the
+    // ones the selected state actually reads.
+    .tc-chip--sm.is-selected,
+    .tc-chip--md.is-selected,
+    .tc-chip--lg.is-selected {
+        --bs-chip-selected-bg: var(--sun-lead-tint);
+        --bs-chip-selected-color: #8a6d2f;
+
+        border-color: var(--sun-lead-line);
+        font-weight: 600;
+    }
+}

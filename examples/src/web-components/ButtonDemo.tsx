@@ -88,6 +88,47 @@ const ButtonDemo: React.FC = () => (
                             </div>
                         </tc-section-card>
 
+                        <tc-section-card title="Block + the thumb tier (xl)">
+                            <p className="text-muted small mb-3">
+                                <code>block</code> makes the button span its container and centre
+                                its content — the shape of every action bar and sheet footer in a
+                                phone layout. <code>size=&quot;xl&quot;</code> is the 66px thumb
+                                tier: a target sized to be hit while looking at the pan instead of
+                                the screen. It is a NEW tier rather than a taller <code>-lg</code>,
+                                because <code>-lg</code> is the CTA size on every landing page
+                                consuming this library.
+                            </p>
+                            <div
+                                style={{
+                                    maxWidth: 390,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '0.5rem',
+                                }}
+                            >
+                                {/* @ts-ignore */}
+                                <tc-button variant="primary" block>
+                                    Побарај соработка
+                                </tc-button>
+                                {/* A two-action row: both are `block`, so `flex: 1 1 0` splits the
+                                    row evenly instead of sizing each to its own label. */}
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    {/* @ts-ignore */}
+                                    <tc-button variant="primary" outline block>
+                                        Откажи
+                                    </tc-button>
+                                    {/* @ts-ignore */}
+                                    <tc-button variant="primary" block>
+                                        Примени (3)
+                                    </tc-button>
+                                </div>
+                                {/* @ts-ignore */}
+                                <tc-button variant="primary" size="xl" block>
+                                    Следен чекор
+                                </tc-button>
+                            </div>
+                        </tc-section-card>
+
                         <tc-section-card title="Loading">
                             <div className="d-flex flex-wrap gap-2">
                                 {/* @ts-ignore */}

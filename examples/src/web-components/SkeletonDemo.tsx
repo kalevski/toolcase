@@ -47,6 +47,31 @@ const SkeletonDemo: React.FC = () => (
                             </div>
                         </tc-section-card>
 
+                        <tc-section-card title="Presets — card & row">
+                            <p className="text-muted small mb-3">
+                                A preset reproduces another component's BOX rather than a rectangle:{' '}
+                                <code>card</code> matches <code>tc-taxonomy-card</code> and{' '}
+                                <code>row</code> matches <code>tc-check-row</code>. A list that
+                                loads into cards but shimmers as flat bars reflows on arrival —
+                                every row changes height and the page jumps. Matching the geometry
+                                makes the loading state a silhouette of the loaded one, so nothing
+                                moves when the data lands.
+                            </p>
+                            <div
+                                style={{
+                                    maxWidth: 390,
+                                    display: 'flex',
+                                    gap: '0.75rem',
+                                    flexDirection: 'column',
+                                }}
+                            >
+                                {/* @ts-ignore */}
+                                <tc-skeleton preset="card" count={3}></tc-skeleton>
+                                {/* @ts-ignore */}
+                                <tc-skeleton preset="row" count={5}></tc-skeleton>
+                            </div>
+                        </tc-section-card>
+
                         <tc-section-card title="Card skeleton (composed)">
                             <div
                                 style={{

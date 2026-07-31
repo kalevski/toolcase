@@ -27,7 +27,7 @@ export class ChipGroup extends HTMLElement {
     }
 
     static get observedAttributes(): string[] {
-        return ['title', 'subtitle', 'border']
+        return ['title', 'subtitle', 'border', 'layout', 'size']
     }
 
     connectedCallback(): void {
@@ -63,6 +63,29 @@ export class ChipGroup extends HTMLElement {
             this.setAttribute('title', String(v ?? ''))
             // attributeChangedCallback handles re-render
         }
+    }
+
+    /**
+     * `rail` lays the chips out as ONE horizontally scrolling line instead of a
+     * wrapping block — screen `1f`'s filter rail. A phone has room for two or three
+     * chips per line, so a wrapping row of eight becomes three lines of chrome above
+     * the content; scrolling keeps it to one and signals "there are more".
+     */
+    get layout(): 'wrap' | 'rail' {
+        return this.getAttribute('layout') === 'rail' ? 'rail' : 'wrap'
+    }
+    set layout(v: 'wrap' | 'rail') {
+        if (v === 'rail') this.setAttribute('layout', 'rail')
+        else this.removeAttribute('layout')
+    }
+
+    /** Passed straight to every chip — see `ChipSize`. */
+    get size(): string {
+        return this.getAttribute('size') ?? ''
+    }
+    set size(v: string) {
+        if (v) this.setAttribute('size', v)
+        else this.removeAttribute('size')
     }
 
     get subtitle(): string {
@@ -141,6 +164,14 @@ export class ChipGroup extends HTMLElement {
         }
 
         const ariaAttr = hasTitle ? ` aria-labelledby="${titleId}"` : ''
+        const size = this.size
+        // `.tc-scroll-x` is APPLIED, not copied. style/foundation/README.md sanctions
+        // exactly three restatements of that utility's declarations (tc-page-tabs,
+        // tc-mobile-shell, tc-swipe-pager) and says a fourth means the utility is the
+        // wrong shape — the rule there is that a copy exists only where the element is
+        // the CONSUMER'S node and a framework would rewrite its className. This div is
+        // rendered by this element, so the class survives and no copy is needed.
+        const railClass = this.layout === 'rail' ? ' tc-chip-group-items--rail tc-scroll-x' : ''
 
         const chipsHtml = this._items
             .map((item) => {
@@ -149,11 +180,12 @@ export class ChipGroup extends HTMLElement {
                 const countAttr = item.count != null ? ` count="${esc(String(item.count))}"` : ''
                 const disabledAttr = item.disabled ? ' disabled' : ''
                 const selectedAttr = item.selected ? ' selected' : ''
-                return `<tc-chip data-cg-id="${esc(item.id)}"${variantAttr}${iconAttr}${countAttr}${disabledAttr}${selectedAttr}>${esc(item.label)}</tc-chip>`
+                const sizeAttr = size ? ` size="${esc(size)}"` : ''
+                return `<tc-chip data-cg-id="${esc(item.id)}"${variantAttr}${sizeAttr}${iconAttr}${countAttr}${disabledAttr}${selectedAttr}>${esc(item.label)}</tc-chip>`
             })
             .join('')
 
-        this.innerHTML = `<div class="tc-chip-group${borderClass}" role="group"${ariaAttr}>${headerHtml}<div class="tc-chip-group-items">${chipsHtml}</div></div>`
+        this.innerHTML = `<div class="tc-chip-group${borderClass}" role="group"${ariaAttr}>${headerHtml}<div class="tc-chip-group-items${railClass}">${chipsHtml}</div></div>`
 
         // Populate title with Node or attribute text
         if (hasTitle) {

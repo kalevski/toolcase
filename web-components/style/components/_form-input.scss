@@ -29,7 +29,29 @@
     color: var(--bs-form-input-required-color);
 }
 
-// Helper / validation text is the shared reserved slot — see _field-message.scss.
+// ── The message gutter ───────────────────────────────────────────────────────
+//
+// Helper / validation text is the shared slot — see _field-message.scss, which
+// reserves one line of height on it unconditionally so a row of fields stays
+// aligned whether or not any of them has a message.
+//
+// tc-form-input OPTS OUT OF THAT RESERVATION BY DEFAULT (`reserve-message` turns it
+// back on). The gutter cost ~19px of invisible height under every field — a third
+// of a control on a phone — and it is why a toolbar containing one has to use
+// `align-items: start`: centring a field that carries a phantom row below it lifts
+// the field above its neighbours. A form that genuinely wants the alignment asks
+// for it; the common case is one field in a bar, where the reservation is pure loss.
+//
+// SCOPED TO THIS COMPONENT. tc-input, tc-select, tc-textarea and the pickers keep
+// the shared reservation — they are the ones that appear in labelled form grids.
+//
+// `:empty` is what makes this safe: the moment the slot has a hint or an error it
+// has children, stops matching, and gets its height back. 0-4-0, so it beats
+// `.tc-field-message` (0-1-0) whatever the source order.
+.tc-form-input:not([reserve-message]) > .tc-field-message:empty {
+    min-height: 0;
+    margin-top: 0;
+}
 
 // Radio-group rows generated for `type="radio"` with options.
 .tc-form-input-radio-group {

@@ -35,6 +35,20 @@ const ChipGroupDemo: React.FC = () => {
             { id: 'chore', label: 'Chore', icon: 'Settings' },
         ],
     })
+    // Eight chips — enough that they wrap onto three lines at 390px, which is what the
+    // rail exists to avoid.
+    const railRef = useTc<HTMLElement>({
+        items: [
+            { id: 'all', label: 'Сите', selected: true },
+            { id: 'main', label: 'Главно јадење' },
+            { id: 'salad', label: 'Салата' },
+            { id: 'soup', label: 'Супа' },
+            { id: 'dessert', label: 'Десерт' },
+            { id: 'side', label: 'Прилог' },
+            { id: 'drink', label: 'Пијалак' },
+            { id: 'preserve', label: 'Зимница' },
+        ],
+    })
     const toggleLogRef = useTc<HTMLElement>({
         items: [
             { id: 'a', label: 'Alpha' },
@@ -79,6 +93,21 @@ const ChipGroupDemo: React.FC = () => {
                                     subtitle="Select one or more labels to filter by"
                                     border
                                 />
+                            </tc-section-card>
+
+                            <tc-section-card title="Rail layout (layout=&quot;rail&quot;)">
+                                <p className="text-muted small mb-3">
+                                    One horizontally scrolling line instead of a wrapping block —
+                                    screen <code>1f</code>'s filter rail. A phone fits two or three
+                                    chips per line, so eight wrapping chips become three lines of
+                                    chrome above the content; scrolling keeps it to one and signals
+                                    that there are more. Free-scrolling on purpose: scroll-snap
+                                    fights the user for a resting place between two chips.
+                                </p>
+                                <div style={{ maxWidth: 390 }}>
+                                    {/* @ts-ignore */}
+                                    <tc-chip-group ref={railRef} layout="rail" size="md" />
+                                </div>
                             </tc-section-card>
 
                             <tc-section-card title="onToggle callback property (logged to console)">

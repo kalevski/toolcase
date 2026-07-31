@@ -13,11 +13,14 @@ export type ButtonVariant =
     | 'info'
     | 'light'
     | 'dark'
-export type ButtonSize = 'sm' | 'lg'
+// `xl` is the 66px thumb tier — the phone design's step-advance target. A NEW tier
+// rather than a taller `lg`, which is the CTA size on every landing page consuming
+// this library; see the note in style/components/_button.scss.
+export type ButtonSize = 'sm' | 'lg' | 'xl'
 export type ButtonType = 'button' | 'submit' | 'reset'
 
 const VARIANTS: ButtonVariant[] = [...VARIANTS_FULL]
-const SIZES: ButtonSize[] = ['sm', 'lg']
+const SIZES: ButtonSize[] = ['sm', 'lg', 'xl']
 
 const WRAPPER_SELECTOR = ':scope > .btn, :scope > .tc-metal-button__btn'
 
@@ -32,6 +35,9 @@ export class Button extends HTMLElement {
     static get observedAttributes(): string[] {
         return [
             'variant', 'outline', 'size', 'disabled', 'loading', 'href', 'type', 'skin',
+            // Full-width mode. Pure CSS state (see _button.scss) — observed only so
+            // scripts/gen-react-types.mjs types it as a JSX prop; it reads this list.
+            'block',
             // Reserved field-message slot (shared form-field contract) — lets a button
             // align with adjacent tc-input/tc-select in a form row.
             'field', 'help', 'error', 'state',
@@ -219,6 +225,16 @@ export class Button extends HTMLElement {
     }
     set type(v: ButtonType) {
         this.setAttribute('type', v)
+    }
+
+    /** Full-width, centred content — the shape of every action-bar and sheet-footer
+     *  action in the phone design. Pure CSS state; no re-render needed. */
+    get block(): boolean {
+        return this.hasAttribute('block')
+    }
+    set block(v: boolean) {
+        if (v) this.setAttribute('block', '')
+        else this.removeAttribute('block')
     }
 
     // ── reserved field-message slot (shared form-field contract) ────────────────

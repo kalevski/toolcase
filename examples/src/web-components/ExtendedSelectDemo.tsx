@@ -33,6 +33,23 @@ const COUNTRY_ITEMS = [
     { key: 'br', label: 'Brazil' },
 ]
 
+// A stress list. The app's ingredient-category filter already runs to dozens of
+// options and its ingredient picker to hundreds — at which point a 240px floating
+// dropdown anchored mid-screen stops being a control.
+const INGREDIENT_ITEMS = Array.from({ length: 300 }, (_, i) => ({
+    key: `ing-${i}`,
+    label: `Состојка ${String(i + 1).padStart(3, '0')}`,
+    description: i % 7 === 0 ? 'со опис' : undefined,
+}))
+
+const SEASON_ITEMS = [
+    { key: 'spring', label: 'Пролет' },
+    { key: 'summer', label: 'Лето' },
+    { key: 'autumn', label: 'Есен' },
+    { key: 'winter', label: 'Зима' },
+    { key: 'all', label: 'Целогодишно' },
+]
+
 const ExtendedSelectDemo: React.FC = () => {
     const [selected, setSelected] = useState<string | null>(null)
     const [preselectedValue, setPreselectedValue] = useState<string>('react')
@@ -56,6 +73,9 @@ const ExtendedSelectDemo: React.FC = () => {
             },
         },
     )
+    const sheetRef = useTc<HTMLElement>({ items: SEASON_ITEMS })
+    const sheetLongRef = useTc<HTMLElement>({ items: INGREDIENT_ITEMS })
+    const sheetMultiRef = useTc<HTMLElement>({ items: INGREDIENT_ITEMS })
     const loadingRef = useTc<HTMLElement>({ items: FRAMEWORK_ITEMS })
     const formRef = useTc<HTMLElement>({ items: FRAMEWORK_ITEMS })
     const multiRef = useTc<HTMLElement>(
@@ -206,6 +226,60 @@ const ExtendedSelectDemo: React.FC = () => {
                                         ref={loadingRef}
                                         placeholder="Fetching options…"
                                         loading
+                                    />
+                                </div>
+                            </tc-section-card>
+
+                            <tc-section-card title='Sheet on touch (mobile="auto")'>
+                                <p className="text-muted small mb-3">
+                                    Under a coarse pointer below 768px the option list opens in a{' '}
+                                    <code>tc-bottom-sheet</code> instead of a floating dropdown:
+                                    full-width rows at 48px, a checkmark on the selected item, a
+                                    search field past ~12 options, and a „Готово" footer for
+                                    multi-select. The value, the selection logic and every event are
+                                    the same code in both modes — only the presentation moves. Force
+                                    it with <code>mobile=&quot;sheet&quot;</code> to see it on a
+                                    desktop; <code>mobile=&quot;dropdown&quot;</code> pins the old
+                                    behaviour.
+                                </p>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: '0.75rem',
+                                        maxWidth: 390,
+                                    }}
+                                >
+                                    {/* Five options — no search field: a filter slower to read
+                                        than the list it filters is noise, and on a phone it also
+                                        costs the keyboard covering half the sheet. */}
+                                    {/* @ts-ignore */}
+                                    <tc-extended-select
+                                        ref={sheetRef}
+                                        mobile="sheet"
+                                        label="Сезона (5 опции — без барање)"
+                                        placeholder="Изберете сезона…"
+                                    />
+                                    {/* 300 options — search appears, and the SHEET BODY is the one
+                                        scroller rather than a 240px window inside a scrolling
+                                        page. */}
+                                    {/* @ts-ignore */}
+                                    <tc-extended-select
+                                        ref={sheetLongRef}
+                                        mobile="sheet"
+                                        label="Состојка (300 опции — со барање)"
+                                        placeholder="Изберете состојка…"
+                                    />
+                                    {/* Multi-select keeps the sheet open while picking, so it needs
+                                        an explicit way out — without the footer the only exit is the
+                                        scrim, which reads as cancelling. */}
+                                    {/* @ts-ignore */}
+                                    <tc-extended-select
+                                        ref={sheetMultiRef}
+                                        mobile="sheet"
+                                        multiple
+                                        label="Состојки (повеќекратен избор)"
+                                        placeholder="Изберете состојки…"
                                     />
                                 </div>
                             </tc-section-card>

@@ -1,16 +1,36 @@
 // tc-empty-state — centered placeholder shown when data is unavailable.
 // All cosmetics flow through --bs-empty-state-* custom properties backed by
 // --tc-* tokens. Sharp tile icon bubble; neutral muted text; no border by default.
+//
+// MOBILE-FIRST, WIDENED AT 768px. The token block below is the phone scale; the
+// `up(md)` block at the bottom of this file restores the previous desktop values
+// verbatim, so a desktop consumer of this library renders exactly as it did.
+//
+// The phone case is what changed, and it needed to: at `3rem` block padding on a
+// `1rem` gap ladder this element occupied ~230px of a 844px screen in order to say
+// „nothing here yet" — a quarter of the viewport, and more than a third of the
+// scrolling pane once the app bar and the dock are subtracted. It is also the
+// most-repeated surface in the app (54 call sites), so that is a lot of screen spent
+// on absence.
+
+@use '../foundation/tokens' as *;
 
 tc-empty-state {
-    --bs-empty-state-padding-y: 3rem;
-    --bs-empty-state-padding-x: 1.5rem;
-    --bs-empty-state-gap: 1rem;
+    --bs-empty-state-padding-y: 1.75rem; // 28px
+    --bs-empty-state-padding-x: 1rem; // 16px
+    --bs-empty-state-gap: 0.75rem; // 12px
     --bs-empty-state-color: var(--tc-text-muted);
     --bs-empty-state-icon-size: 1.25rem;
     --bs-empty-state-icon-color: var(--tc-text-faint);
     --bs-empty-state-icon-bg: var(--tc-surface-muted);
-    --bs-empty-state-icon-padding: 0.75rem;
+    --bs-empty-state-icon-padding: 0.625rem; // 10px → a 40px tile around a 20px glyph
+    // A HARD CEILING on the tile, not a size. A consumer that raises
+    // --bs-empty-state-icon-size for a decorative illustration otherwise gets an
+    // unbounded block in the middle of a phone screen; 44px is the largest icon
+    // square anywhere in the design.
+    --bs-empty-state-icon-max: 44px;
+    --bs-empty-state-heading-size: 0.875rem; // 14px / 600
+    --bs-empty-state-description-size: 0.78125rem; // 12.5px / 400
 }
 
 .tc-empty-state {
@@ -34,6 +54,12 @@ tc-empty-state {
     border-radius: 0;
     color: var(--bs-empty-state-icon-color);
     flex-shrink: 0;
+    // See --bs-empty-state-icon-max. `box-sizing` is border-box globally, so the
+    // ceiling covers the padding too and the tile can never exceed 44px whatever the
+    // glyph size is set to.
+    max-width: var(--bs-empty-state-icon-max);
+    max-height: var(--bs-empty-state-icon-max);
+    overflow: hidden;
 
     svg {
         width: var(--bs-empty-state-icon-size);
@@ -43,15 +69,20 @@ tc-empty-state {
 }
 
 .tc-empty-state__heading {
-    font-size: 0.9375rem;
+    font-size: var(--bs-empty-state-heading-size);
     font-weight: 600;
+    line-height: 1.3;
     color: var(--tc-text);
 }
 
 .tc-empty-state__description {
-    font-size: 0.875rem;
+    font-size: var(--bs-empty-state-description-size);
+    line-height: 1.45;
     color: var(--bs-empty-state-color);
-    max-width: 40ch;
+    // 34ch at the phone size, 40ch from 768px: a measure is a count of characters,
+    // so the SAME 40ch is a wider column at 14px than at 12.5px and overshoots the
+    // 358px of usable width inside a 14px page gutter.
+    max-width: 34ch;
 }
 
 // Heading + description sit as one text block; the outer gap separates the
@@ -71,14 +102,70 @@ tc-empty-state {
     }
 }
 
+// THE ACTION ROW STRETCHES ON A PHONE, so that a `tc-button block` inside it is
+// genuinely full-width. `align-self` and not `width: 100%`: the row is a flex item of
+// a centred column, and a centred item is sized to its content however wide it is
+// allowed to be.
+//
+// Two actions therefore split the row rather than sitting side by side at their own
+// widths — which is the design's action-bar shape (screen 1g's „Откажи" / „Примени"),
+// and the right answer when both are the only things on the screen.
 .tc-empty-state__action {
     display: flex;
+    align-self: stretch;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    gap: var(--m-gap-grid, 0.5rem);
+
+    // `1 1 0` and not `flex-grow: 1`: a zero basis is what makes each action take an
+    // equal share of the row instead of a share proportional to its label — see the
+    // flex line-breaking note in style/components/_button.scss.
+    > tc-button[block],
+    > .btn {
+        flex: 1 1 0;
+        min-width: 0;
+    }
 
     &:empty {
         display: none;
+    }
+}
+
+// ── Wide viewport — the previous desktop scale, restored verbatim ────────────
+//
+// Nothing here is new: these are the values this file shipped before the phone scale
+// above became the default, so `up(md)` and wider is byte-identical to 5.0.x. The
+// action row un-stretches too — on a desktop an empty state's CTA is a button, not a
+// bar.
+@include up(md) {
+    tc-empty-state {
+        --bs-empty-state-padding-y: 3rem;
+        --bs-empty-state-padding-x: 1.5rem;
+        --bs-empty-state-gap: 1rem;
+        --bs-empty-state-icon-padding: 0.75rem;
+        // The ceiling comes OFF at desktop width. At the default sizes it is a no-op
+        // either way (20px glyph + 12px padding = exactly 44px), but a consumer who
+        // raised --bs-empty-state-icon-size for a decorative illustration would
+        // otherwise find it clipped — and that is a regression rather than a phone
+        // constraint. The ceiling exists because a 390px screen cannot afford an
+        // unbounded block in the middle of it; a 1440px one can.
+        --bs-empty-state-icon-max: none;
+        --bs-empty-state-heading-size: 0.9375rem;
+        --bs-empty-state-description-size: 0.875rem;
+    }
+
+    .tc-empty-state__description {
+        max-width: 40ch;
+    }
+
+    .tc-empty-state__action {
+        align-self: center;
+        gap: 0.5rem;
+
+        > tc-button[block],
+        > .btn {
+            flex: 0 1 auto;
+        }
     }
 }
 

@@ -61,6 +61,36 @@ const IconButtonDemo: React.FC = () => (
                             </div>
                         </tc-section-card>
 
+                        <tc-section-card title="Neutral chrome: ghost & outline">
+                            <p className="text-muted small mb-3">
+                                Two variants that are not theme colours. <code>ghost</code> is the
+                                app-bar affordance — transparent at rest, so a row of them reads as
+                                icons ON the bar rather than as a row of buttons.{' '}
+                                <code>outline</code> is the action-bar affordance: a neutral
+                                hairline, because these sit beside a bright primary and any hue of
+                                their own would compete with it. Both keep the 44px touch floor
+                                while the glyph stays its own size.
+                            </p>
+                            <div className="d-flex flex-wrap align-items-center gap-2">
+                                {/* @ts-ignore */}
+                                <tc-icon-button icon="Bell" variant="ghost" label="Известувања" />
+                                {/* @ts-ignore */}
+                                <tc-icon-button icon="Search" variant="ghost" label="Барај" />
+                                {/* @ts-ignore */}
+                                <tc-icon-button icon="ChevronLeft" variant="ghost" label="Назад" />
+                                {/* @ts-ignore */}
+                                <tc-icon-button
+                                    icon="ShoppingBasket"
+                                    variant="outline"
+                                    label="Во листа"
+                                />
+                                {/* @ts-ignore */}
+                                <tc-icon-button icon="Printer" variant="outline" label="Печати" />
+                                {/* @ts-ignore */}
+                                <tc-icon-button icon="Download" variant="outline" label="Извези" />
+                            </div>
+                        </tc-section-card>
+
                         <tc-section-card title="Disabled">
                             <div className="d-flex flex-wrap align-items-center gap-2">
                                 {/* @ts-ignore */}

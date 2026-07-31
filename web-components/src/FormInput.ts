@@ -132,6 +132,12 @@ export class FormInput extends HTMLElement {
             'rows',
             'validate-on',
             'required-message',
+            // Software-keyboard hints, passed through to the native control.
+            'inputmode',
+            'enterkeyhint',
+            'autocomplete',
+            // Opt back in to the reserved one-line message gutter.
+            'reserve-message',
         ]
     }
 
@@ -300,6 +306,65 @@ export class FormInput extends HTMLElement {
     set requiredMessage(v: string | null) {
         if (v != null) this.setAttribute('required-message', v)
         else this.removeAttribute('required-message')
+    }
+
+    // ── Software-keyboard hints ─────────────────────────────────────────────
+    //
+    // WHY THESE ARE FIRST-CLASS AND NOT "just pass any attribute through".
+    // On a phone, the difference between a correct and a wrong on-screen keyboard
+    // is the difference between typing a weight in two taps and hunting for the
+    // decimal point behind a shift layer. `type` already implies most of it, so the
+    // element supplies the implication (see _keyboardAttrs) and these three
+    // attributes are the per-field override.
+
+    /** `inputmode` on the rendered control. Absent → derived from `type`. */
+    get inputMode(): string {
+        return this.getAttribute('inputmode') ?? ''
+    }
+    set inputMode(v: string) {
+        if (v) this.setAttribute('inputmode', v)
+        else this.removeAttribute('inputmode')
+    }
+
+    /** The Enter key's label. Absent → `search` for `type="search"`, else the UA default. */
+    get enterKeyHint(): string {
+        return this.getAttribute('enterkeyhint') ?? ''
+    }
+    set enterKeyHint(v: string) {
+        if (v) this.setAttribute('enterkeyhint', v)
+        else this.removeAttribute('enterkeyhint')
+    }
+
+    /** `autocomplete` on the rendered control. Absent → derived from `type`. */
+    get autocomplete(): string {
+        return this.getAttribute('autocomplete') ?? ''
+    }
+    set autocomplete(v: string) {
+        if (v) this.setAttribute('autocomplete', v)
+        else this.removeAttribute('autocomplete')
+    }
+
+    /**
+     * Reserve one line of height under the control for the hint / error message,
+     * so a row of fields stays aligned whether or not any of them has a message.
+     *
+     * OFF BY DEFAULT — this reverses the pre-5.2 behaviour. The gutter was always
+     * reserved, which cost ~19px of invisible height under every field, and on a
+     * phone that is a third of a control. It also forced every toolbar containing a
+     * tc-form-input to `align-items: start`, because centring a field that carries a
+     * phantom row below it lifts the field above its neighbours.
+     *
+     * The slot is still always RENDERED (the validation code patches it in place);
+     * `reserve-message` only controls whether an EMPTY slot keeps its line of
+     * height. See `.tc-form-input:not([reserve-message]) > .tc-field-message:empty`
+     * in style/components/_form-input.scss.
+     */
+    get reserveMessage(): boolean {
+        return this.hasAttribute('reserve-message')
+    }
+    set reserveMessage(v: boolean) {
+        if (v) this.setAttribute('reserve-message', '')
+        else this.removeAttribute('reserve-message')
     }
 
     // ── JS-property props ───────────────────────────────────────────────────
@@ -604,9 +669,11 @@ export class FormInput extends HTMLElement {
         const type = this.type
         const inline = INLINE_TYPES.includes(type) || (type === 'radio' && !this._hasOptions())
 
-        // One reserved slot below the control; _runValidation() fills it with the
-        // error message when invalid, otherwise it shows the hint (or stays empty
-        // but height-reserved). Always present so the field never changes height.
+        // One message slot below the control; _runValidation() fills it with the
+        // error message when invalid, otherwise it shows the hint. ALWAYS RENDERED —
+        // the validation code patches this node in place, so making it conditional
+        // would mean an error had nowhere to appear. Whether an EMPTY slot keeps a
+        // line of height is the `reserve-message` question, decided in CSS.
         const messageHtml = fieldMessageHtml({ id: this._helpId, hint: this.help })
 
         if (inline) {
@@ -652,6 +719,62 @@ export class FormInput extends HTMLElement {
         return parts.length ? ` ${parts.join(' ')}` : ''
     }
 
+    /**
+     * `inputmode` / `enterkeyhint` / `autocomplete` for the rendered control: the
+     * host's attribute when present, otherwise the one the `type` implies.
+     *
+     * Only unambiguous implications are supplied. `password` deliberately gets NO
+     * autocomplete default — `current-password` and `new-password` are opposite
+     * instructions to a password manager and only the consumer knows which form
+     * this is, so guessing here would be worse than omitting it.
+     */
+    private _keyboardAttrs(): string {
+        const type = this.type
+        const parts: string[] = []
+
+        const explicitMode = this.getAttribute('inputmode')
+        // `decimal` and not `numeric` for numbers: `numeric` is the PIN pad, with no
+        // decimal separator — wrong for every weight, price and portion in a recipe.
+        const impliedMode =
+            type === 'number'
+                ? 'decimal'
+                : type === 'tel'
+                  ? 'tel'
+                  : type === 'email'
+                    ? 'email'
+                    : type === 'url'
+                      ? 'url'
+                      : type === 'search'
+                        ? 'search'
+                        : null
+        const mode = explicitMode ?? impliedMode
+        if (mode) parts.push(`inputmode="${esc(mode)}"`)
+
+        // The Enter key's LABEL, not its behaviour: a search field whose Enter key
+        // reads „go" instead of a newline glyph is the affordance that tells someone
+        // the field submits.
+        const hint = this.getAttribute('enterkeyhint') ?? (type === 'search' ? 'search' : null)
+        if (hint) parts.push(`enterkeyhint="${esc(hint)}"`)
+
+        const explicitAuto = this.getAttribute('autocomplete')
+        const impliedAuto =
+            type === 'email'
+                ? 'email'
+                : type === 'tel'
+                  ? 'tel'
+                  : type === 'url'
+                    ? 'url'
+                    : // A search box has nothing to autofill, and an autofill dropdown
+                      // over a live result list is a fight the results lose.
+                      type === 'search'
+                      ? 'off'
+                      : null
+        const auto = explicitAuto ?? impliedAuto
+        if (auto) parts.push(`autocomplete="${esc(auto)}"`)
+
+        return parts.length ? ` ${parts.join(' ')}` : ''
+    }
+
     private _minMaxStep(): string {
         const parts: string[] = []
         const min = this.getAttribute('min')
@@ -679,7 +802,7 @@ export class FormInput extends HTMLElement {
                 const rows = this.getAttribute('rows')
                 const rowsAttr = rows ? ` rows="${esc(rows)}"` : ''
                 const content = this._currentValue != null ? esc(String(this._currentValue)) : ''
-                return `<textarea id="${id}" class="form-control"${ph}${rowsAttr}${this._commonAttrs()}>${content}</textarea>`
+                return `<textarea id="${id}" class="form-control"${ph}${rowsAttr}${this._keyboardAttrs()}${this._commonAttrs()}>${content}</textarea>`
             }
             case 'dropdown':
             case 'select':
@@ -699,7 +822,7 @@ export class FormInput extends HTMLElement {
                 return `<input id="${id}" type="file" class="form-control"${this._commonAttrs()}>`
             default: {
                 const native = nativeType(type)
-                return `<input id="${id}" type="${native}" class="form-control"${ph}${this._valueAttr()}${this._minMaxStep()}${this._commonAttrs()}>`
+                return `<input id="${id}" type="${native}" class="form-control"${ph}${this._valueAttr()}${this._minMaxStep()}${this._keyboardAttrs()}${this._commonAttrs()}>`
             }
         }
     }

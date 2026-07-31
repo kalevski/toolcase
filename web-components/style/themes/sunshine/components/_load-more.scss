@@ -1,0 +1,21 @@
+// Sunshine › tc-load-more — the design's ink on a neutral outline.
+//
+// The base partial paints this as a hairline ghost button reading `--tc-text-2`, a
+// token this scale does not have. #44503a (--sun-ink-2) is the canvas's secondary
+// action ink — the „Откажи" / „Не сега" tier — and #9aa189 (--sun-ink-4) is the
+// muted line the terminal state belongs to.
+//
+// DELIBERATELY NOT AMBER. Amber is this design's CTA colour under a
+// two-elements-per-screen budget, and "there is more below" is the least important
+// thing on any screen that has content.
+
+tc-theme[name='sunshine'],
+[data-tc-theme='sunshine'] {
+    tc-load-more {
+        --bs-load-more-color: var(--sun-ink-2);
+        --bs-load-more-border-color: var(--sun-line-strong);
+        --bs-load-more-hover-bg: var(--sun-well);
+        --bs-load-more-count-color: var(--sun-ink-4);
+        --bs-load-more-done-color: var(--sun-ink-4);
+    }
+}
