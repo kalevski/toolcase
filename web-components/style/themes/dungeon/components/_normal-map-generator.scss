@@ -1,23 +1,13 @@
-// Dungeon › tc-normal-map-generator — restrained dev-tool chrome.
-// Fixes two #fff active-state literals, the slate-200 checkerboard fallback
-// the foundation cannot reach, and pushes the mono-caps segment voice harder.
-// No notches/display-caps — this is a businesslike tool surface, not a panel.
+// Dungeon › tc-normal-map-generator — restrained dev-tool chrome for the
+// canvas-only element. Fixes the cold checkerboard fallback the foundation cannot
+// reach and adds a single gilded bevel band to the outer frame. No notches or
+// display-caps — this is a businesslike tool surface, not a panel.
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-    // ── Token swap on host ────────────────────────────────────────────────────
-    // Replaces cold literals and the undefined --tc-slate-200 fallback.
-
     tc-normal-map-generator {
-        // Active tool/segment icon & text: ink (not literal #fff) on gold fill.
-        --bs-normal-map-generator-tool-active-color: var(--fg-ink);
-        --bs-normal-map-generator-seg-active-color: var(--fg-ink);
-
-        // Checkerboard: warm-dark leather instead of the slate-200 cold fallback.
+        // Checkerboard: warm-dark leather instead of the cold near-white fallback.
         --bs-normal-map-generator-checker: var(--fg-leather-2);
-
-        // Range thumb: brighter gold over the foundation's accent-gold default.
-        --bs-normal-map-generator-range-thumb: var(--fg-gold-bright);
     }
 
     // ── Gilded top highlight on the outer frame ───────────────────────────────
@@ -26,13 +16,5 @@ tc-theme[name='dungeon'],
 
     .tc-normal-map-generator {
         box-shadow: var(--fg-bevel-top);
-    }
-
-    // ── Segment mono-caps voice ───────────────────────────────────────────────
-    // The base already sets uppercase + 0.06em tracking; bump to 0.1em to lean
-    // into the mono display signature on the one uppercase control.
-
-    .tc-nmg-seg {
-        letter-spacing: 0.1em;
     }
 }

@@ -1951,7 +1951,7 @@ A framework-free canvas node/graph editor. Renders absolutely-positioned node bo
 
 ### tc-normal-map-generator
 
-Interactive height→normal map generator. Loads a source image, computes a tangent-space normal map from a luminance emboss + alpha bevel heightmap (Sobel gradient, all in JS), and renders the result on a layered canvas stage. A slate toolbar carries the editing tools (brush / erase / mask / pan icon-buttons) and a segmented preview-mode control (Normal / Albedo / Lit / Surface); three sliders drive strength, emboss height, and bevel width. When `editable`, pointer-drag paints onto the working buffer with the active tool (brush raises, erase removes, mask selects); the `pan` tool drags the view. Lit modes shade the sprite with a cursor-tracked light. The normal map is recomputed — and a `tc-generate` event fired — whenever the source or any parameter changes (and after each brush/erase stroke). Sharp corners, slate neutrals, checkerboard stage, mono numeric read-outs.
+Canvas-only height→normal map generator. Loads a source image, computes a tangent-space normal map from a luminance emboss + alpha bevel heightmap (Sobel gradient, all in JS), and renders the result on a single layered canvas stage over a checkerboard backdrop. **The element renders no controls at all** — no tool buttons, no preview-mode switcher, no sliders: the whole pipeline (source, strength, emboss, bevel, blur, channel inversion, working resolution, active tool, brush shape, mask overlay, preview mode, light, ambient, zoom, pan) is configured from the outside via attributes/properties. When `editable` and `tool` is a paint tool, pointer-drag paints onto the working buffer (brush raises, erase removes, mask selects); `tool="pan"` drags the view, `tool="none"` makes the canvas inert. Lit modes shade the sprite with a light that follows the cursor unless `light-tracking="off"`. The normal map is recomputed — and a `tc-generate` event fired — whenever the source or any pipeline parameter changes (and after each brush/erase stroke). Sharp corners, slate neutrals, checkerboard stage.
 
 **Tag:** `tc-normal-map-generator`
 
@@ -1960,12 +1960,28 @@ Interactive height→normal map generator. Loads a source image, computes a tang
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `source` | string (URL) | — | Source image URL (string case of the `source` property) |
+| `max-dim` | number | `256` | Working-resolution cap (longest edge, px); changing it re-rasterises the image |
 | `strength` | number | `1` | Scales the normal-gradient intensity; recomputes on change |
 | `emboss-height` | number | `2` | Luminance-emboss height contribution; recomputes on change |
 | `bevel-width` | number | `0` | Alpha-bevel reach in px (also softens the surface); recomputes on change |
+| `blur-radius` | number | — (auto) | Explicit heightmap blur radius; absent = `bevel-width * 0.5` |
+| `invert-x` | boolean | `false` | Flips the red channel (tangent-space handedness) |
+| `invert-y` | boolean | `false` | Flips the green channel (OpenGL ↔ DirectX convention) |
 | `editable` | boolean | `false` | Enables brush / erase / mask painting on the working buffer |
-| `tool` | `brush\|erase\|mask\|pan` | `brush` | Active editing tool |
-| `preview-mode` | `normal\|albedo\|lit\|lit-surface` | `normal` | What the preview canvas renders |
+| `tool` | `brush\|erase\|mask\|pan\|none` | `brush` | Active pointer tool (`none` = inert canvas) |
+| `brush-size` | number | `16` | Brush radius in source px |
+| `brush-strength` | number | `0.6` | Per-stamp weight at the brush centre |
+| `brush-falloff` | number | `1` | Falloff exponent: `1` linear, `>1` softer, `<1` flatter |
+| `mask-color` | string | `#22d3ee` | Colour of the translucent mask overlay |
+| `mask-opacity` | number | `0.63` | Maximum overlay alpha (0–1) |
+| `preview-mode` | `normal\|albedo\|lit\|lit-surface\|height` | `normal` | What the preview canvas renders (`height` = greyscale heightmap) |
+| `light-x` / `light-y` | number | `0.35` / `0.3` | Light position, normalised over the sprite |
+| `light-z` | number | `0.6` | Light distance in front of the sprite |
+| `light-tracking` | `pointer\|off` | `pointer` | Whether the light follows the cursor in lit modes |
+| `ambient` | number | `0.2` | Ambient term added to the Lambert shading |
+| `zoom` | number | `1` | Extra zoom applied on top of the fit-to-stage scale |
+| `pan-x` / `pan-y` | number | `0` | Initial view offset in CSS px (pan tool updates it live) |
+| `placeholder` | string | `No source image` | Text drawn on the canvas when no source is loaded |
 | `disabled` | boolean | `false` | Disables all interaction (opacity + `pointer-events: none`) |
 
 **Properties**
@@ -1973,7 +1989,21 @@ Interactive height→normal map generator. Loads a source image, computes a tang
 | Property | Type | Description |
 |----------|------|-------------|
 | `source` | `string \| File \| Blob \| null` | Source image. URL strings reflect to the `source` attribute; `File`/`Blob` are loaded via `URL.createObjectURL`. Setting it draws to the source canvas and recomputes |
+| `light` | `{ x, y, z }` | Current light position (read/write; writing re-renders the preview) |
+| `panX` / `panY` | `number` | Current view offset in CSS px |
 | `onGenerate` | `(output: NormalMapOutput) => void \| null` | Optional callback fired alongside `tc-generate` |
+
+Every attribute above also has a matching camelCase property (`strength`, `embossHeight`, `bevelWidth`, `blurRadius`, `invertX`, `invertY`, `maxDim`, `editable`, `tool`, `brushSize`, `brushStrength`, `brushFalloff`, `maskColor`, `maskOpacity`, `previewMode`, `lightTracking`, `ambient`, `zoom`, `placeholder`, `disabled`).
+
+**Methods**
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `regenerate()` | `void` | Recomputes the normal map and re-fires `tc-generate` |
+| `clearPaint()` | `void` | Discards painted height offsets and recomputes |
+| `clearMask()` | `void` | Discards the selection-mask overlay |
+| `resetView()` | `void` | Resets pan to the `pan-x` / `pan-y` origin |
+| `toDataURL(type?)` | `string \| null` | Data URL of the computed normal map (`null` before any source loads) |
 
 **Events**
 
@@ -1981,16 +2011,28 @@ Interactive height→normal map generator. Loads a source image, computes a tang
 |-------|--------|-------------|
 | `tc-generate` | `NormalMapOutput` | Fired whenever the normal map is (re)computed — `{ dataUrl: string; width: number; height: number }` (PNG data URL at source resolution) |
 
-**No slots** — the element owns its canvas, toolbar, and controls.
+**No slots, no controls** — the element owns exactly one canvas; build your own UI around it.
 
 ```html
-<tc-normal-map-generator editable tool="brush" preview-mode="normal" strength="1.5" emboss-height="2" bevel-width="4"></tc-normal-map-generator>
+<tc-normal-map-generator
+    editable
+    tool="brush"
+    preview-mode="lit"
+    strength="1.5"
+    emboss-height="2"
+    bevel-width="4"
+    brush-size="20"
+    invert-y
+    light-x="0.2" light-y="0.15" light-tracking="off"
+></tc-normal-map-generator>
 
 <script>
   const gen = document.querySelector('tc-normal-map-generator')
   gen.source = 'sprite.png' // or a File / Blob
+  // Drive tools/modes from your own controls:
+  document.querySelector('#erase').onclick = () => gen.setAttribute('tool', 'erase')
+  document.querySelector('#reset').onclick = () => gen.clearPaint()
   gen.addEventListener('tc-generate', (e) => {
-    console.log(e.detail.width, e.detail.height)
     document.querySelector('#out').src = e.detail.dataUrl
   })
 </script>
@@ -2000,7 +2042,7 @@ Interactive height→normal map generator. Loads a source image, computes a tang
 
 ### tc-physics-editor
 
-Physics shape editor for polygons / circles / boxes drawn over an image background, with full undo/redo history. A slate toolbar carries the drawing tools (select / polygon / circle / box icon-buttons) plus auto-fit, undo, redo, and delete action buttons; below it a checkerboard canvas stage draws the background image (fit + centred) and the shape overlays with draggable vertex/handle markers. The **select** tool clicks a shape to select it and drags it (or its vertices / resize handles) to edit; **polygon** clicks to add vertices and closes on double-click, Enter, or a click on the first vertex; **circle** drags from centre to set the radius; **box** drags out a rectangle. The selected shape is emphasised in ink, live drawing previews in cyan. Keyboard: `Ctrl/Cmd+Z` undo, `Ctrl/Cmd+Shift+Z` (or `Ctrl/Cmd+Y`) redo, `Delete`/`Backspace` removes the selected shape, `Enter` closes a polygon, `Escape` cancels it. The `alpha-threshold` attribute drives a best-effort auto-fit that derives a box from the image's opaque region. Every mutation (add / move / edit / delete / undo / redo / auto-fit) fires `tc-change` with the full shapes array. Sharp corners, slate neutrals, no status colour.
+Canvas-only physics shape editor for polygons / circles / boxes drawn over an image background, with full undo/redo history. **The element renders no chrome** — no tool buttons, no undo/redo/delete/auto-fit buttons: it owns a single checkerboard canvas stage that draws the background image (fit + centred) and the shape overlays with draggable vertex/handle markers. The active tool is the `tool` attribute; the actions are imperative methods. `tool="select"` clicks a shape to select and drag it (or its vertices / resize handles); `tool="polygon"` clicks to add vertices and closes on double-click, Enter, or a click on the first vertex; `tool="circle"` drags from centre to set the radius; `tool="box"` drags out a rectangle; `tool="none"` makes the canvas inert. Drawn/edited points snap to the `snap` grid when set. The selected shape is emphasised in ink, live drawing previews in cyan. Keyboard (unless `shortcuts="off"`): `Ctrl/Cmd+Z` undo, `Ctrl/Cmd+Shift+Z` (or `Ctrl/Cmd+Y`) redo, `Delete`/`Backspace` removes the selected shape, `Enter` closes a polygon, `Escape` cancels it. `autoFit()` traces the image's opaque silhouette into a simplified polygon (`alpha-threshold`, `simplify-tolerance`, `max-alpha-dim`). Every mutation (add / move / edit / delete / clear / undo / redo / auto-fit) fires `tc-change` with the full shapes array. Sharp corners, slate neutrals, no status colour.
 
 **Tag:** `tc-physics-editor`
 
@@ -2009,8 +2051,20 @@ Physics shape editor for polygons / circles / boxes drawn over an image backgrou
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `source` | string (URL) | — | Background image URL (string case of the `source` property) |
-| `tool` | `select\|polygon\|circle\|box` | `select` | Active drawing tool |
-| `alpha-threshold` | number | `1` | Alpha cutoff (0–255) used by the auto-fit helper to detect the opaque region |
+| `shapes` | JSON string | — | Initial shapes model as a JSON array (input only — it is never written back; read the model via the property/event) |
+| `tool` | `select\|polygon\|circle\|box\|none` | `select` | Active drawing tool |
+| `handle-size` | number | `8` | Drawn vertex/resize handle size in CSS px |
+| `handle-hit` | number | `9` | Pointer grab radius for handles in CSS px |
+| `min-size` | number | `4` | Smallest accepted extent (image px) for a freshly drawn circle/box |
+| `snap` | number | `0` | Grid step (image px) that drawn/edited points snap to; `0` disables it |
+| `handles` | `on\|off` | `on` | `off` hides the handles and disables grabbing them |
+| `shortcuts` | `on\|off` | `on` | `off` disables the keyboard bindings |
+| `history-limit` | number | `0` | Maximum undo/redo snapshots kept; `0` = unlimited |
+| `alpha-threshold` | number | `1` | Alpha cutoff (0–255) marking a pixel opaque for `autoFit()` |
+| `simplify-tolerance` | number | `1.5` | Douglas-Peucker tolerance for the auto-fit silhouette trace |
+| `max-alpha-dim` | number | `512` | Resolution cap (longest edge) for the alpha raster used by `autoFit()` |
+| `auto-fit` | boolean | `false` | Runs `autoFit()` once as soon as a source image finishes loading |
+| `readonly` | boolean | `false` | View-only: shapes still render, editing is off, no dimmed look |
 | `disabled` | boolean | `false` | Disables all interaction (opacity + `pointer-events: none`) |
 
 **Properties**
@@ -2019,20 +2073,24 @@ Physics shape editor for polygons / circles / boxes drawn over an image backgrou
 |----------|------|-------------|
 | `source` | `string \| File \| Blob \| null` | Background image. URL strings reflect to the `source` attribute; `File`/`Blob` are loaded via `URL.createObjectURL` |
 | `shapes` | `PhysicsShape[]` | The shapes model (default `[]`). Setting it replaces the model, resets selection + history, and re-renders (no `tc-change`). A `PhysicsShape` is a polygon `{ type: 'polygon', points: { x, y }[] }`, a circle `{ type: 'circle', x, y, r }`, or a box `{ type: 'box', x, y, w, h }` (all coordinates in image pixels) |
+| `selectedIndex` | `number` | Index of the selected shape, or `-1`; writable |
+| `canUndo` / `canRedo` / `canAutoFit` | `boolean` (read-only) | State for driving your own toolbar buttons |
 | `onChange` | `(shapes: PhysicsShape[]) => void \| null` | Optional callback fired alongside `tc-change` |
 
-**Methods:** `undo()`, `redo()`, `deleteSelected()`, `autoFit()`.
+Every attribute above also has a matching camelCase property (`tool`, `handleSize`, `handleHit`, `minSize`, `snap`, `handles`, `shortcuts`, `historyLimit`, `alphaThreshold`, `simplifyTolerance`, `maxAlphaDim`, `autoFitOnLoad`, `readonly`, `disabled`).
+
+**Methods:** `undo()`, `redo()`, `deleteSelected()`, `clear()`, `cancelDrawing()`, `autoFit()`.
 
 **Events**
 
 | Event | Detail | Description |
 |-------|--------|-------------|
-| `tc-change` | `{ shapes: PhysicsShape[] }` | Fired whenever the shapes change — add, move, edit, delete, undo, redo, or auto-fit |
+| `tc-change` | `{ shapes: PhysicsShape[] }` | Fired whenever the shapes change — add, move, edit, delete, clear, undo, redo, or auto-fit |
 
-**No slots** — the element owns its canvas and toolbar.
+**No slots, no controls** — the element owns exactly one canvas; build your own toolbar around it.
 
 ```html
-<tc-physics-editor tool="box" alpha-threshold="8"></tc-physics-editor>
+<tc-physics-editor tool="box" alpha-threshold="8" snap="2" history-limit="50"></tc-physics-editor>
 
 <script>
   const editor = document.querySelector('tc-physics-editor')
@@ -2041,10 +2099,17 @@ Physics shape editor for polygons / circles / boxes drawn over an image backgrou
     { type: 'box', x: 60, y: 40, w: 220, h: 160 },
     { type: 'circle', x: 168, y: 124, r: 48 },
   ]
+  // Your own toolbar drives the element:
+  document.querySelector('#polygon').onclick = () => (editor.tool = 'polygon')
+  document.querySelector('#undo').onclick = () => editor.undo()
+  document.querySelector('#autofit').onclick = () => editor.autoFit()
   editor.addEventListener('tc-change', (e) => {
-    console.log(e.detail.shapes)
+    console.log(e.detail.shapes, editor.canUndo)
   })
 </script>
+
+<!-- read-only view of a stored model -->
+<tc-physics-editor readonly handles="off" shapes='[{"type":"circle","x":80,"y":80,"r":40}]'></tc-physics-editor>
 ```
 
 ---
@@ -2606,7 +2671,7 @@ chart.bars = [
 
 ### tc-bitmap-font-generator
 
-Canvas-based bitmap-font atlas generator. Owns its own control panel (font/fill/effects/layout/content groups), a live preview `<canvas>`, a generate button, and a multi-format export descriptor block with copy/download. Lays glyphs out in a grid of `glyphs-per-row` columns with padding/letter-spacing/line-height, applies a solid or gradient fill, one or more stroke borders, a drop shadow, and a glow, and (optionally) snaps the atlas to the next power of two. Simple scalars are reflected attributes; the complex effect objects are JS properties. Sharp corners, slate neutrals, mono numeric inputs + descriptor block.
+Canvas-only bitmap-font atlas generator. **The element renders no controls** — no input panel, no generate button, no descriptor block: it owns a single live preview `<canvas>` and everything else is configured from the outside. Attributes cover the whole surface (font, content, solid/gradient fill, stacked outlines, drop shadow, glow, atlas layout, power-of-two snapping, export scale/format, and the preview's own backdrop/padding/scale/alignment); the structured effect objects can additionally be set as JS properties, which override the matching attributes until cleared with `null`. Generation, clipboard copy, and download are imperative methods (or set `auto-generate` to re-export on every change). Sharp corners, slate neutrals, checkerboard preview stage.
 
 **Tag:** `tc-bitmap-font-generator`
 
@@ -2617,33 +2682,60 @@ Canvas-based bitmap-font atlas generator. Owns its own control panel (font/fill/
 | `font-family` | string | `Arial` | Font used to rasterise the glyphs |
 | `font-size` | number | `32` | Glyph size in px |
 | `glyphs` | string | full ASCII set | Characters to render into the atlas (duplicates removed) |
-| `text` | string | `Hello World!` | Live-preview text drawn with the current effects |
+| `text` | string | `Hello World!` | Live-preview text drawn with the current effects (`\n` breaks lines) |
+| `fill-type` | `solid\|gradient` | `solid` | Fill mode |
+| `fill-color` | string | `#ffffff` | Solid fill colour (also the gradient fallback) |
+| `gradient-type` | `linear\|radial` | `linear` | Gradient shape |
+| `gradient-colors` | comma list | — | Gradient stops, e.g. `#ff6b6b,#ffd93d,#6bccff` |
+| `gradient-angle` | number | `90` | Linear-gradient angle in degrees |
+| `border-color` | string | `#000000` | Outline colour (its presence implies `border-thickness="2"`) |
+| `border-thickness` | number | `0` | Outline thickness in px; `0` = no outline |
+| `border-align` | `inner\|outer\|center` | `center` | Where the stroke sits relative to the glyph edge |
+| `borders` | JSON string | — | Stacked outlines, e.g. `[{"color":"#000","thickness":3},{"color":"#fff","thickness":6}]`; overrides the single-border attributes |
+| `shadow-color` | string | `#000000` | Drop-shadow colour (its presence implies `shadow-size="4"`) |
+| `shadow-size` | number | `0` | Drop-shadow size in px; `0` = no shadow |
+| `shadow-offset-x` / `shadow-offset-y` | number | `size * 0.5` | Shadow offsets |
+| `shadow-blur` | number | `size` | Shadow blur radius |
+| `glow-color` | string | `#00e5ff` | Glow colour (its presence implies `glow-size="8"`) |
+| `glow-size` | number | `0` | Symmetric outer-glow size in px; `0` = no glow |
 | `letter-spacing` | number | `0` | Extra px added to each glyph cell width |
 | `padding` | number | `2` | Px padding baked around each glyph cell |
 | `glyphs-per-row` | number | `16` | Glyphs packed per atlas row |
 | `line-height` | number | `0` | Reported BMFont lineHeight; `0` = auto (cell height) |
 | `power-of-two` | boolean | `false` | Round atlas dimensions up to the next power of two |
 | `scale` | number | `1` | Multiplies all geometry for a hi-res export atlas |
-| `background` | string | — (transparent) | Atlas/preview background colour; absent = transparent |
+| `background` | string | — (transparent) | Atlas background colour; absent = transparent |
 | `export-format` | `xml\|json\|fnt` | `xml` | Descriptor format returned in `output.text` |
-| `disabled` | boolean | `false` | Controls become non-interactive (opacity + `pointer-events: none`) |
+| `auto-generate` | boolean | `false` | Re-runs `generate()` (debounced) on every config change |
+| `preview-background` | string | falls back to `background` | Preview canvas backdrop; absent = transparent (checkerboard shows) |
+| `preview-padding` | number | `16` | Preview margin in CSS px |
+| `preview-line-gap` | number | `8` | Extra px between wrapped preview lines |
+| `preview-scale` | number | `1` | Scales the preview geometry only (export uses `scale`) |
+| `preview-align` | `start\|center\|end` | `start` | Horizontal alignment of each preview line |
+| `disabled` | boolean | `false` | Blocks `generate()` and dims the canvas |
 
 **Properties**
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `fill` | `BitmapFontFill` | `{ type: 'solid'\|'gradient'; color?; gradientColors?; gradientAngle?; gradientType?: 'linear'\|'radial' }`. Defaults to a white solid fill |
+| `fill` | `BitmapFontFill` | `{ type: 'solid'\|'gradient'; color?; gradientColors?; gradientAngle?; gradientType?: 'linear'\|'radial' }`. Reading returns the attribute-derived value unless an object was assigned; assign `null` to fall back to the attributes |
 | `border` | `BitmapFontBorder \| null` | Single stroke `{ color; thickness; align?: 'inner'\|'outer'\|'center' }`. Ignored when `borders` is non-empty |
-| `borders` | `BitmapFontBorder[]` | Stacked outlines, drawn thickest-first (concentric). Overrides `border` |
+| `borders` | `BitmapFontBorder[]` | Stacked outlines, drawn thickest-first (concentric). Overrides `border` and the border attributes |
 | `dropShadow` | `BitmapFontDropShadow \| null` | `{ color; size; offsetX?; offsetY?; blur? }`. Offsets/blur default off `size` |
 | `glow` | `BitmapFontGlow \| null` | Symmetric outer glow `{ color; size }` |
+| `output` | `BitmapFontOutput \| null` (read-only) | The most recent `generate()` result |
 | `onGenerate` | `(output: BitmapFontOutput) => void \| null` | Optional callback fired alongside `tc-generate` |
+
+Every attribute above also has a matching camelCase property (`fontFamily`, `fontSize`, `glyphs`, `text`, `letterSpacing`, `padding`, `glyphsPerRow`, `lineHeight`, `powerOfTwo`, `scale`, `background`, `exportFormat`, `autoGenerate`, `previewBackground`, `previewPadding`, `previewLineGap`, `previewScale`, `previewAlign`, `disabled`).
 
 **Methods**
 
 | Method | Returns | Description |
 |--------|---------|-------------|
 | `generate()` | `Promise<BitmapFontOutput \| null>` | Rasterises the atlas, fires `tc-generate`/`onGenerate`, resolves the output (or `null` when disabled / already generating) |
+| `copyDescriptor()` | `Promise<boolean>` | Copies the descriptor text to the clipboard (generating first if needed) |
+| `download(baseName?)` | `Promise<boolean>` | Downloads the atlas PNG + descriptor file (generating first if needed) |
+| `refresh()` | `void` | Repaints the preview canvas |
 
 **Events**
 
@@ -2651,16 +2743,31 @@ Canvas-based bitmap-font atlas generator. Owns its own control panel (font/fill/
 |-------|--------|-------------|
 | `tc-generate` | `BitmapFontOutput` | Fired when a generation/export completes — `{ png: Blob; xml; text; format; glyphs; width; height }` |
 
-**No slots** — the element owns its canvas and controls.
+**No slots, no controls** — the element owns exactly one canvas; build your own UI around it.
 
 ```html
-<tc-bitmap-font-generator font-family="Arial" font-size="48" text="Toolcase" export-format="xml"></tc-bitmap-font-generator>
+<tc-bitmap-font-generator
+    font-family="Arial"
+    font-size="48"
+    text="Toolcase"
+    fill-type="gradient"
+    gradient-colors="#38bdf8,#a855f7"
+    gradient-angle="120"
+    border-color="#0f172a" border-thickness="3" border-align="outer"
+    shadow-color="#000" shadow-size="5"
+    glow-color="#22d3ee" glow-size="4"
+    preview-align="center"
+    export-format="xml"
+></tc-bitmap-font-generator>
 
 <script>
   const gen = document.querySelector('tc-bitmap-font-generator')
-  gen.fill = { type: 'gradient', gradientColors: ['#ff6b6b', '#ffd93d'], gradientAngle: 90 }
-  gen.border = { color: '#1e293b', thickness: 3, align: 'center' }
-  gen.glow = { color: '#22d3ee', size: 6 }
+  // Structured objects are still available as properties:
+  gen.borders = [{ color: '#1e293b', thickness: 3 }, { color: '#ffffff', thickness: 6 }]
+  // Your own buttons drive the element:
+  document.querySelector('#generate').onclick = () => gen.generate()
+  document.querySelector('#copy').onclick = () => gen.copyDescriptor()
+  document.querySelector('#save').onclick = () => gen.download('my-font')
   gen.addEventListener('tc-generate', (e) => console.log(e.detail.format, e.detail.width, e.detail.height))
 </script>
 ```

@@ -1,6 +1,7 @@
-// Blueprint › tc-normal-map-generator — white-paper editor panel with teal HUD
-// toolbar labels, pink active/selected states with glow, a recessed checkerboard
-// stage, mono slider labels, and full arc replacement of slate/cyan literals.
+// Blueprint › tc-normal-map-generator — white-paper editor panel wrapping a
+// recessed checkerboard canvas stage. The element is canvas-only (no toolbar, no
+// segmented control, no sliders), so the theme covers the paper card, the well,
+// the checker tint, and the pink focus ring.
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
@@ -8,50 +9,15 @@ tc-theme[name='blueprint'],
         // ── Surface & structure ────────────────────────────────────────────────
         // Replace slate surface tokens with blueprint paper/bg tokens.
         --bs-normal-map-generator-surface: var(--bp-paper);
-        --bs-normal-map-generator-surface-muted: var(--bp-bg-2);
         --bs-normal-map-generator-border: var(--bp-border);
-        --bs-normal-map-generator-border-strong: var(--bp-border-strong);
-
-        // ── Ink / type ─────────────────────────────────────────────────────────
         --bs-normal-map-generator-text: var(--bp-text);
-        --bs-normal-map-generator-muted: var(--bp-text-muted);
-        // Carry in JetBrains Mono via the blueprint mono token so slider
-        // labels and segment tabs render in the correct HUD face.
-        --bs-normal-map-generator-mono: var(--bp-mono);
-
-        // ── Toolbar ────────────────────────────────────────────────────────────
-        // Recessed tint so the toolbar reads as a panel header, not a card.
-        --bs-normal-map-generator-toolbar-bg: var(--bp-paper-tint);
-        --bs-normal-map-generator-toolbar-border: var(--bp-border-faint);
-
-        // ── Tool icon-buttons: teal hover, pink active ─────────────────────────
-        // Teal = everyday action; pink = primary/selected (accent rotation).
-        --bs-normal-map-generator-tool-color: var(--bp-text-muted);
-        --bs-normal-map-generator-tool-hover-bg: var(--bp-teal-soft);
-        --bs-normal-map-generator-tool-active-bg: var(--bp-pink);
-        --bs-normal-map-generator-tool-active-color: var(--bp-pink-ink);
-
-        // ── Segmented preview control ──────────────────────────────────────────
-        --bs-normal-map-generator-seg-bg: var(--bp-paper);
-        --bs-normal-map-generator-seg-border: var(--bp-border-strong);
-        --bs-normal-map-generator-seg-color: var(--bp-text-muted);
-        --bs-normal-map-generator-seg-hover-bg: var(--bp-teal-soft);
-        // Active segment → pink (primary selected state in the accent rotation).
-        --bs-normal-map-generator-seg-active-bg: var(--bp-pink);
-        --bs-normal-map-generator-seg-active-color: var(--bp-pink-ink);
 
         // ── Stage / checkerboard ───────────────────────────────────────────────
-        // Replace var(--tc-slate-200, #e2e8f0) checker square with the blueprint
-        // border-strong token — keeps the checkerboard legible on the paper base
-        // without leaking raw slate values.
+        // Keeps the transparency grid legible on the paper base without leaking
+        // raw slate values.
         --bs-normal-map-generator-stage-bg: var(--bp-bg-2);
         --bs-normal-map-generator-stage-border: var(--bp-border-strong);
         --bs-normal-map-generator-checker: var(--bp-border);
-
-        // ── Sliders ────────────────────────────────────────────────────────────
-        --bs-normal-map-generator-range-track: var(--bp-border-strong);
-        // Range thumb → teal (everyday action accent, not primary CTA pink).
-        --bs-normal-map-generator-range-thumb: var(--bp-teal);
 
         // ── Focus ring ────────────────────────────────────────────────────────
         // Pink focus ring aligns with the primary accent, consistent with other
@@ -68,114 +34,16 @@ tc-theme[name='blueprint'],
         box-shadow: var(--tc-shadow-sm);
     }
 
-    // ── Toolbar ────────────────────────────────────────────────────────────────
-    // Paper-tint surface + faint divider; reads as a recessed HUD band above the
-    // canvas stage, consistent with other blueprint generator toolbars.
-    .tc-nmg-toolbar {
-        background: var(--bp-paper-tint);
-        border-color: var(--bp-border-faint);
-    }
-
-    // ── Tool icon-buttons ──────────────────────────────────────────────────────
-    .tc-nmg-tool {
-        color: var(--bp-text-muted);
-        transition:
-            background-color 0.15s var(--bp-ease),
-            color 0.15s var(--bp-ease);
-    }
-
-    .tc-nmg-tool:hover {
-        background: var(--bp-teal-soft);
-        color: var(--bp-teal-fg);
-    }
-
-    // Active tool: pink fill + white icon — primary selected state.
-    .tc-nmg-tool--active {
-        background: var(--bp-pink);
-        color: var(--bp-pink-ink);
-        // Subtle pink glow marks the selected tool without being overpowering.
-        box-shadow: var(--bp-glow-pink);
-    }
-
-    // ── Segmented preview-mode control ──────────────────────────────────────────
-    // The segment border group itself.
-    .tc-nmg-segmented {
-        border-color: var(--bp-border-strong);
-    }
-
-    // Each segment button: mono uppercase HUD label, teal hover.
-    .tc-nmg-seg {
-        // Mono eyebrow treatment — machine-facing labels read as HUD controls.
-        font-family: var(--bp-mono);
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        background: var(--bp-paper);
-        border-left-color: var(--bp-border-strong);
-        color: var(--bp-text-muted);
-        transition:
-            background-color 0.15s var(--bp-ease),
-            color 0.15s var(--bp-ease);
-    }
-
-    .tc-nmg-seg:hover {
-        background: var(--bp-teal-soft);
-        color: var(--bp-teal-fg);
-    }
-
-    // Active segment: pink fill + white text (primary selected state).
-    .tc-nmg-seg--active {
-        background: var(--bp-pink);
-        color: var(--bp-pink-ink);
-    }
-
     // ── Stage / canvas well ────────────────────────────────────────────────────
-    // Recessed bg-2 well with a strong hairline; the checkerboard transparency
-    // grid now uses --bp-border squares instead of raw slate-200 (#e2e8f0) so no
-    // slate values leak into the blueprint theme.
+    // background-color only — the checkerboard lives in background-image.
     .tc-nmg-stage {
         background-color: var(--bp-bg-2);
         border-color: var(--bp-border-strong);
     }
 
-    // ── Parameter controls ────────────────────────────────────────────────────
-    // Slider labels rendered in muted body text; value readouts in mono so the
-    // numeric HUD data reads as machine output, not inline prose.
-    .tc-nmg-control-label {
-        font-family: var(--bp-body, inherit);
-        color: var(--bp-text-muted);
-    }
-
-    .tc-nmg-control-value {
-        font-family: var(--bp-mono);
-        font-size: 0.75rem;
-        letter-spacing: 0.06em;
-        color: var(--bp-teal-fg); // Teal numeric readout = data/HUD accent
-    }
-
-    // Range thumb accent → teal (consistent with the variable token above).
-    .tc-nmg-range {
-        accent-color: var(--bp-teal);
-    }
-
-    // ── Focus rings ───────────────────────────────────────────────────────────
-    // Pink focus ring on every interactive element for consistent keyboard UX.
-    .tc-nmg-tool:focus-visible,
-    .tc-nmg-seg:focus-visible,
-    .tc-nmg-range:focus-visible,
+    // ── Focus ring ────────────────────────────────────────────────────────────
     .tc-nmg-canvas:focus-visible {
         outline-color: var(--bp-pink);
         box-shadow: var(--bp-glow-pink);
-    }
-
-    // Freeze the active-tool glow under reduced-motion (lift/glow is decorative).
-    @media (prefers-reduced-motion: reduce) {
-        .tc-nmg-tool--active {
-            box-shadow: none;
-        }
-
-        .tc-nmg-tool,
-        .tc-nmg-seg {
-            transition: none;
-        }
     }
 }

@@ -1,14 +1,15 @@
-import { lucideByName } from './internal/lucide'
-
 const TAG_NAME = 'tc-normal-map-generator'
 
 // ── Public type surface (mirrors @toolcase/react-components NormalMapGenerator) ──
 
-export type EditorTool = 'brush' | 'erase' | 'mask' | 'pan'
-const TOOLS: EditorTool[] = ['brush', 'erase', 'mask', 'pan']
+export type EditorTool = 'brush' | 'erase' | 'mask' | 'pan' | 'none'
+const TOOLS: EditorTool[] = ['brush', 'erase', 'mask', 'pan', 'none']
 
-export type PreviewMode = 'normal' | 'albedo' | 'lit' | 'lit-surface'
-const PREVIEW_MODES: PreviewMode[] = ['normal', 'albedo', 'lit', 'lit-surface']
+export type PreviewMode = 'normal' | 'albedo' | 'lit' | 'lit-surface' | 'height'
+const PREVIEW_MODES: PreviewMode[] = ['normal', 'albedo', 'lit', 'lit-surface', 'height']
+
+export type LightTracking = 'pointer' | 'off'
+const LIGHT_TRACKINGS: LightTracking[] = ['pointer', 'off']
 
 /** Output handed to `tc-generate` / `onGenerate` whenever the normal map is recomputed. */
 export interface NormalMapOutput {
@@ -25,26 +26,19 @@ const DEFAULT_BEVEL = 0
 
 // Cap the working resolution — the Sobel + distance-transform passes are O(w·h)
 // and a huge sprite would freeze the main thread.
-const MAX_DIM = 256
+const DEFAULT_MAX_DIM = 256
+
+const DEFAULT_BRUSH_SIZE = 16
+const DEFAULT_BRUSH_STRENGTH = 0.6
+const DEFAULT_BRUSH_FALLOFF = 1
+const DEFAULT_AMBIENT = 0.2
+const DEFAULT_LIGHT = { x: 0.35, y: 0.3, z: 0.6 }
+const DEFAULT_MASK_COLOR = '#22d3ee'
+const DEFAULT_MASK_OPACITY = 0.63 // ≈ 160/255, the previous hard-coded overlay alpha
+const DEFAULT_PLACEHOLDER = 'No source image'
 
 // Flat up-normal fill for transparent source pixels (#8080ff).
 const FLAT_NORMAL: [number, number, number] = [128, 128, 255]
-
-let _idCounter = 0
-
-const TOOL_META: Array<{ tool: EditorTool; label: string; iconHtml: string }> = [
-    { tool: 'brush', label: 'Brush', iconHtml: lucideByName('brush') },
-    { tool: 'erase', label: 'Erase', iconHtml: lucideByName('eraser') },
-    { tool: 'mask', label: 'Mask', iconHtml: lucideByName('square-dashed') },
-    { tool: 'pan', label: 'Pan', iconHtml: lucideByName('move') },
-]
-
-const PREVIEW_META: Array<{ mode: PreviewMode; label: string }> = [
-    { mode: 'normal', label: 'Normal' },
-    { mode: 'albedo', label: 'Albedo' },
-    { mode: 'lit', label: 'Lit' },
-    { mode: 'lit-surface', label: 'Surface' },
-]
 
 // ── Pure height → normal pipeline (ported from the React generate.ts) ──────────
 
@@ -155,9 +149,11 @@ interface HeightOptions {
     embossHeight: number
     /** Alpha-bevel reach in px. Doubles as the post-combine blur radius. */
     bevelWidth: number
+    /** Explicit blur radius; `null` derives it from `bevelWidth` (half the reach). */
+    blurRadius: number | null
 }
 
-/** Combined emboss + alpha-bevel heightmap, blurred by `bevelWidth`. */
+/** Combined emboss + alpha-bevel heightmap, blurred by `blurRadius`/`bevelWidth`. */
 const buildHeightmap = (
     rgba: Uint8ClampedArray,
     w: number,
@@ -171,10 +167,17 @@ const buildHeightmap = (
             const d = Math.min(dist[i], opts.bevelWidth)
             height[i] += d / opts.bevelWidth
         }
-        // The bevel width also softens the surface (blur ≈ half the reach).
-        blurHeightmap(height, w, h, opts.bevelWidth * 0.5)
     }
+    // The bevel width also softens the surface unless a blur is given explicitly.
+    const blur = opts.blurRadius ?? (opts.bevelWidth > 0 ? opts.bevelWidth * 0.5 : 0)
+    if (blur > 0) blurHeightmap(height, w, h, blur)
     return height
+}
+
+interface NormalOptions {
+    strength: number
+    invertX: boolean
+    invertY: boolean
 }
 
 /** Sobel → normal → pack. Transparent source pixels become `FLAT_NORMAL` with `a = 0`. */
@@ -183,9 +186,11 @@ const normalsFromHeight = (
     rgba: Uint8ClampedArray,
     w: number,
     h: number,
-    strength: number,
+    opts: NormalOptions,
 ): Uint8ClampedArray => {
     const out = new Uint8ClampedArray(w * h * 4)
+    const sx = opts.invertX ? -opts.strength : opts.strength
+    const sy = opts.invertY ? -opts.strength : opts.strength
     for (let y = 0; y < h; y++) {
         for (let x = 0; x < w; x++) {
             const o = (y * w + x) * 4
@@ -209,8 +214,8 @@ const normalsFromHeight = (
             const dx = tr + 2 * rr + br - (tl + 2 * l + bl)
             const dy = bl + 2 * bo + br - (tl + 2 * t + tr)
 
-            let nx = -dx * strength
-            let ny = -dy * strength
+            let nx = -dx * sx
+            let ny = -dy * sy
             let nz = 1
             const len = Math.hypot(nx, ny, nz) || 1
             nx /= len
@@ -234,9 +239,9 @@ const shade = (
     h: number,
     light: { x: number; y: number; z: number },
     surfaceOnly: boolean,
+    ambient: number,
 ): Uint8ClampedArray => {
     const out = new Uint8ClampedArray(w * h * 4)
-    const ambient = 0.2
     for (let y = 0; y < h; y++) {
         for (let x = 0; x < w; x++) {
             const o = (y * w + x) * 4
@@ -272,6 +277,59 @@ const shade = (
     return out
 }
 
+/** Greyscale visualisation of the working heightmap (normalised to its range). */
+const heightToRgba = (
+    height: Float32Array,
+    rgba: Uint8ClampedArray,
+    w: number,
+    h: number,
+): Uint8ClampedArray => {
+    const out = new Uint8ClampedArray(w * h * 4)
+    let min = Infinity
+    let max = -Infinity
+    for (let i = 0; i < height.length; i++) {
+        if (height[i] < min) min = height[i]
+        if (height[i] > max) max = height[i]
+    }
+    const span = max - min || 1
+    for (let i = 0; i < height.length; i++) {
+        const o = i * 4
+        const v = ((height[i] - min) / span) * 255
+        out[o] = v
+        out[o + 1] = v
+        out[o + 2] = v
+        out[o + 3] = rgba[o + 3]
+    }
+    return out
+}
+
+// ── Attribute helpers ──────────────────────────────────────────────────────────
+
+const numAttr = (el: HTMLElement, name: string, def: number, min = -Infinity): number => {
+    const v = parseFloat(el.getAttribute(name) ?? '')
+    return Number.isFinite(v) ? Math.max(min, v) : def
+}
+
+let _colorProbe: CanvasRenderingContext2D | null = null
+
+/** CSS colour string → RGB triple (via a 1×1 scratch canvas). */
+const parseColor = (css: string): [number, number, number] => {
+    if (!_colorProbe) {
+        const c = document.createElement('canvas')
+        c.width = 1
+        c.height = 1
+        _colorProbe = c.getContext('2d')
+    }
+    const ctx = _colorProbe
+    if (!ctx) return [34, 211, 238]
+    ctx.clearRect(0, 0, 1, 1)
+    ctx.fillStyle = '#000000'
+    ctx.fillStyle = css
+    ctx.fillRect(0, 0, 1, 1)
+    const d = ctx.getImageData(0, 0, 1, 1).data
+    return [d[0], d[1], d[2]]
+}
+
 // ── The element ────────────────────────────────────────────────────────────────
 
 interface ViewTransform {
@@ -280,18 +338,25 @@ interface ViewTransform {
     offsetY: number
 }
 
+/**
+ * Canvas-only height→normal map generator: the element renders a single preview
+ * canvas and no controls (no tool buttons, no preview-mode switcher, no sliders).
+ * The whole pipeline — source, strength, emboss, bevel, blur, channel inversion,
+ * active tool, brush shape, preview mode, light, and view — is configured from
+ * the outside via attributes/properties.
+ */
 export class NormalMapGenerator extends HTMLElement {
     private _initialised = false
-    private _idPrefix: string
-    private _internalUpdate = false
     private _sourceInternal = false
 
-    // Source/working buffers (native, capped to MAX_DIM).
+    // Source/working buffers (native, capped to `maxDim`).
     private _source: string | File | Blob | null = null
+    private _img: HTMLImageElement | null = null
     private _width = 0
     private _height = 0
     private _albedo: Uint8ClampedArray | null = null
     private _normal: Uint8ClampedArray | null = null
+    private _heightMap: Float32Array | null = null
     private _paint: Float32Array | null = null
     private _mask: Uint8Array | null = null
     private _maskActive = false
@@ -301,37 +366,50 @@ export class NormalMapGenerator extends HTMLElement {
     private _normalCanvas: HTMLCanvasElement | null = null
     private _previewCanvas: HTMLCanvasElement | null = null
     private _view: ViewTransform = { scale: 1, offsetX: 0, offsetY: 0 }
+    private _resizeObserver: ResizeObserver | null = null
 
     // Pan + paint interaction state.
     private _panX = 0
     private _panY = 0
-    private _light = { x: 0.35, y: 0.3, z: 0.6 }
+    private _light = { ...DEFAULT_LIGHT }
     private _painting = false
     private _panStart: { x: number; y: number; px: number; py: number } | null = null
     private _moveHandler: ((e: PointerEvent) => void) | null = null
     private _upHandler: (() => void) | null = null
 
-    // Brush shape.
-    private readonly _brushSize = 16
-    private readonly _brushStrength = 0.6
-
     /** Optional callback mirroring the `tc-generate` event. */
     onGenerate: ((output: NormalMapOutput) => void) | null = null
-
-    constructor() {
-        super()
-        this._idPrefix = `tc-nmg-${++_idCounter}`
-    }
 
     static get observedAttributes(): string[] {
         return [
             'source',
+            'max-dim',
+            // Height → normal pipeline
             'strength',
             'emboss-height',
             'bevel-width',
+            'blur-radius',
+            'invert-x',
+            'invert-y',
+            // Painting
             'editable',
             'tool',
+            'brush-size',
+            'brush-strength',
+            'brush-falloff',
+            'mask-color',
+            'mask-opacity',
+            // Preview
             'preview-mode',
+            'light-x',
+            'light-y',
+            'light-z',
+            'light-tracking',
+            'ambient',
+            'zoom',
+            'pan-x',
+            'pan-y',
+            'placeholder',
             'disabled',
         ]
     }
@@ -340,16 +418,24 @@ export class NormalMapGenerator extends HTMLElement {
         if (!this._initialised) {
             this.render()
             this._initialised = true
+            this._panX = numAttr(this, 'pan-x', 0)
+            this._panY = numAttr(this, 'pan-y', 0)
+            this._syncLightFromAttributes()
             // Load from the URL attribute, if present, after the DOM exists.
             const attrSource = this.getAttribute('source')
             if (this._source != null) this._loadSource(this._source)
             else if (attrSource) this._loadSource(attrSource)
             else this._renderPreview()
         }
+        this._observeResize()
     }
 
     disconnectedCallback(): void {
         this._cleanupDrag()
+        if (this._resizeObserver) {
+            this._resizeObserver.disconnect()
+            this._resizeObserver = null
+        }
     }
 
     attributeChangedCallback(name: string, _old: string | null, value: string | null): void {
@@ -360,22 +446,39 @@ export class NormalMapGenerator extends HTMLElement {
                 this._source = value
                 this._loadSource(value)
                 break
+            case 'max-dim':
+                // Re-rasterise the loaded image at the new working resolution.
+                if (this._img) this._ingest(this._img)
+                break
             case 'strength':
             case 'emboss-height':
             case 'bevel-width':
-                if (this._internalUpdate) return
-                this._syncControls()
+            case 'blur-radius':
+            case 'invert-x':
+            case 'invert-y':
                 this._recompute()
                 break
-            case 'tool':
-                this._updateToolbar()
-                break
-            case 'preview-mode':
-                this._updateSegmented()
+            case 'light-x':
+            case 'light-y':
+            case 'light-z':
+                this._syncLightFromAttributes()
                 this._renderPreview()
                 break
-            case 'editable':
-                this._updateToolbar()
+            case 'preview-mode':
+            case 'ambient':
+            case 'zoom':
+            case 'mask-color':
+            case 'mask-opacity':
+            case 'placeholder':
+                this._renderPreview()
+                break
+            case 'pan-x':
+                this._panX = numAttr(this, 'pan-x', 0)
+                this._renderPreview()
+                break
+            case 'pan-y':
+                this._panY = numAttr(this, 'pan-y', 0)
+                this._renderPreview()
                 break
             case 'disabled':
                 this._updateDisabled()
@@ -383,31 +486,66 @@ export class NormalMapGenerator extends HTMLElement {
         }
     }
 
-    // ── Scalar attributes ───────────────────────────────────────────────────────
+    // ── Pipeline attributes ─────────────────────────────────────────────────────
 
     get strength(): number {
-        const v = parseFloat(this.getAttribute('strength') ?? '')
-        return Number.isFinite(v) ? Math.max(0, v) : DEFAULT_STRENGTH
+        return numAttr(this, 'strength', DEFAULT_STRENGTH, 0)
     }
     set strength(v: number) {
         this.setAttribute('strength', String(v))
     }
 
     get embossHeight(): number {
-        const v = parseFloat(this.getAttribute('emboss-height') ?? '')
-        return Number.isFinite(v) ? Math.max(0, v) : DEFAULT_EMBOSS
+        return numAttr(this, 'emboss-height', DEFAULT_EMBOSS, 0)
     }
     set embossHeight(v: number) {
         this.setAttribute('emboss-height', String(v))
     }
 
     get bevelWidth(): number {
-        const v = parseFloat(this.getAttribute('bevel-width') ?? '')
-        return Number.isFinite(v) ? Math.max(0, v) : DEFAULT_BEVEL
+        return numAttr(this, 'bevel-width', DEFAULT_BEVEL, 0)
     }
     set bevelWidth(v: number) {
         this.setAttribute('bevel-width', String(v))
     }
+
+    /** Explicit heightmap blur radius; `null` = derived from `bevelWidth`. */
+    get blurRadius(): number | null {
+        if (!this.hasAttribute('blur-radius')) return null
+        return numAttr(this, 'blur-radius', 0, 0)
+    }
+    set blurRadius(v: number | null) {
+        if (v != null) this.setAttribute('blur-radius', String(v))
+        else this.removeAttribute('blur-radius')
+    }
+
+    /** Flips the red channel (tangent-space handedness). */
+    get invertX(): boolean {
+        return this.hasAttribute('invert-x')
+    }
+    set invertX(v: boolean) {
+        if (v) this.setAttribute('invert-x', '')
+        else this.removeAttribute('invert-x')
+    }
+
+    /** Flips the green channel (OpenGL ↔ DirectX normal-map convention). */
+    get invertY(): boolean {
+        return this.hasAttribute('invert-y')
+    }
+    set invertY(v: boolean) {
+        if (v) this.setAttribute('invert-y', '')
+        else this.removeAttribute('invert-y')
+    }
+
+    /** Working-resolution cap (longest edge, px). */
+    get maxDim(): number {
+        return Math.max(1, Math.round(numAttr(this, 'max-dim', DEFAULT_MAX_DIM, 1)))
+    }
+    set maxDim(v: number) {
+        this.setAttribute('max-dim', String(v))
+    }
+
+    // ── Painting attributes ─────────────────────────────────────────────────────
 
     get editable(): boolean {
         return this.hasAttribute('editable')
@@ -425,12 +563,110 @@ export class NormalMapGenerator extends HTMLElement {
         this.setAttribute('tool', v)
     }
 
+    /** Brush radius in source px. */
+    get brushSize(): number {
+        return numAttr(this, 'brush-size', DEFAULT_BRUSH_SIZE, 1)
+    }
+    set brushSize(v: number) {
+        this.setAttribute('brush-size', String(v))
+    }
+
+    get brushStrength(): number {
+        return numAttr(this, 'brush-strength', DEFAULT_BRUSH_STRENGTH, 0)
+    }
+    set brushStrength(v: number) {
+        this.setAttribute('brush-strength', String(v))
+    }
+
+    /** Falloff exponent: `1` linear, `>1` softer centre-weighted, `<1` flatter. */
+    get brushFalloff(): number {
+        return numAttr(this, 'brush-falloff', DEFAULT_BRUSH_FALLOFF, 0.01)
+    }
+    set brushFalloff(v: number) {
+        this.setAttribute('brush-falloff', String(v))
+    }
+
+    get maskColor(): string {
+        return this.getAttribute('mask-color') ?? DEFAULT_MASK_COLOR
+    }
+    set maskColor(v: string) {
+        this.setAttribute('mask-color', v)
+    }
+
+    get maskOpacity(): number {
+        return Math.min(1, numAttr(this, 'mask-opacity', DEFAULT_MASK_OPACITY, 0))
+    }
+    set maskOpacity(v: number) {
+        this.setAttribute('mask-opacity', String(v))
+    }
+
+    // ── Preview attributes ──────────────────────────────────────────────────────
+
     get previewMode(): PreviewMode {
         const v = this.getAttribute('preview-mode') as PreviewMode
         return PREVIEW_MODES.includes(v) ? v : 'normal'
     }
     set previewMode(v: PreviewMode) {
         this.setAttribute('preview-mode', v)
+    }
+
+    /** Lambert light position (x/y normalised over the sprite, z in front of it). */
+    get light(): { x: number; y: number; z: number } {
+        return { ...this._light }
+    }
+    set light(v: { x?: number; y?: number; z?: number }) {
+        if (!v || typeof v !== 'object') return
+        if (typeof v.x === 'number') this._light.x = v.x
+        if (typeof v.y === 'number') this._light.y = v.y
+        if (typeof v.z === 'number') this._light.z = v.z
+        this._renderPreview()
+    }
+
+    /** `pointer` (default) tracks the cursor in lit modes; `off` pins the light. */
+    get lightTracking(): LightTracking {
+        const v = this.getAttribute('light-tracking') as LightTracking
+        return LIGHT_TRACKINGS.includes(v) ? v : 'pointer'
+    }
+    set lightTracking(v: LightTracking) {
+        this.setAttribute('light-tracking', v)
+    }
+
+    get ambient(): number {
+        return numAttr(this, 'ambient', DEFAULT_AMBIENT, 0)
+    }
+    set ambient(v: number) {
+        this.setAttribute('ambient', String(v))
+    }
+
+    /** Extra zoom applied on top of the fit-to-stage scale. */
+    get zoom(): number {
+        return numAttr(this, 'zoom', 1, 0.01)
+    }
+    set zoom(v: number) {
+        this.setAttribute('zoom', String(v))
+    }
+
+    get panX(): number {
+        return this._panX
+    }
+    set panX(v: number) {
+        this._panX = Number.isFinite(v) ? v : 0
+        this._renderPreview()
+    }
+
+    get panY(): number {
+        return this._panY
+    }
+    set panY(v: number) {
+        this._panY = Number.isFinite(v) ? v : 0
+        this._renderPreview()
+    }
+
+    get placeholder(): string {
+        return this.getAttribute('placeholder') ?? DEFAULT_PLACEHOLDER
+    }
+    set placeholder(v: string) {
+        this.setAttribute('placeholder', v)
     }
 
     get disabled(): boolean {
@@ -455,10 +691,45 @@ export class NormalMapGenerator extends HTMLElement {
         if (this._initialised) this._loadSource(this._source)
     }
 
+    // ── Public actions ───────────────────────────────────────────────────────────
+
+    /** Recomputes the normal map and re-fires `tc-generate`. */
+    regenerate(): void {
+        this._recompute()
+    }
+
+    /** Discards the painted height offsets and recomputes. */
+    clearPaint(): void {
+        if (this._paint) this._paint.fill(0)
+        this._recompute()
+    }
+
+    /** Discards the selection mask overlay. */
+    clearMask(): void {
+        if (this._mask) this._mask.fill(0)
+        this._maskActive = false
+        this._renderPreview()
+    }
+
+    /** Resets pan to the attribute-provided origin. */
+    resetView(): void {
+        this._panX = numAttr(this, 'pan-x', 0)
+        this._panY = numAttr(this, 'pan-y', 0)
+        this._renderPreview()
+    }
+
+    /** PNG data URL of the computed normal map, or `null` before any source loads. */
+    toDataURL(type = 'image/png'): string | null {
+        const c = this._normalCanvas
+        if (!c || !this._normal) return null
+        return c.toDataURL(type)
+    }
+
     // ── Image loading + ingest ───────────────────────────────────────────────────
 
     private _loadSource(src: string | File | Blob | null): void {
         if (src == null || src === '') {
+            this._img = null
             this._albedo = null
             this._normal = null
             this._renderPreview()
@@ -477,10 +748,12 @@ export class NormalMapGenerator extends HTMLElement {
         img.crossOrigin = 'anonymous'
         img.onload = () => {
             if (revoke) URL.revokeObjectURL(url)
+            this._img = img
             this._ingest(img)
         }
         img.onerror = () => {
             if (revoke) URL.revokeObjectURL(url)
+            this._img = null
             this._albedo = null
             this._normal = null
             this._renderPreview()
@@ -488,12 +761,12 @@ export class NormalMapGenerator extends HTMLElement {
         img.src = url
     }
 
-    /** Rasterise the loaded image (capped to MAX_DIM) into the albedo buffer. */
+    /** Rasterise the loaded image (capped to `maxDim`) into the albedo buffer. */
     private _ingest(img: HTMLImageElement): void {
         const iw = img.naturalWidth || img.width
         const ih = img.naturalHeight || img.height
         if (iw === 0 || ih === 0) return
-        const fit = Math.min(1, MAX_DIM / Math.max(iw, ih))
+        const fit = Math.min(1, this.maxDim / Math.max(iw, ih))
         const w = Math.max(1, Math.round(iw * fit))
         const h = Math.max(1, Math.round(ih * fit))
 
@@ -516,8 +789,6 @@ export class NormalMapGenerator extends HTMLElement {
             this._normalCanvas.width = w
             this._normalCanvas.height = h
         }
-        this._panX = 0
-        this._panY = 0
         this._recompute()
     }
 
@@ -533,11 +804,17 @@ export class NormalMapGenerator extends HTMLElement {
         const height = buildHeightmap(this._albedo, w, h, {
             embossHeight: this.embossHeight,
             bevelWidth: this.bevelWidth,
+            blurRadius: this.blurRadius,
         })
         if (this._paint) {
             for (let i = 0; i < height.length; i++) height[i] += this._paint[i]
         }
-        this._normal = normalsFromHeight(height, this._albedo, w, h, this.strength)
+        this._heightMap = height
+        this._normal = normalsFromHeight(height, this._albedo, w, h, {
+            strength: this.strength,
+            invertX: this.invertX,
+            invertY: this.invertY,
+        })
         this._drawNormalCanvas()
         this._renderPreview()
         this._emitGenerate()
@@ -578,32 +855,54 @@ export class NormalMapGenerator extends HTMLElement {
 
     // ── Preview rendering ────────────────────────────────────────────────────────
 
-    /** Returns the native-resolution canvas/imagedata source for the active preview mode. */
-    private _layerCanvas(): HTMLCanvasElement | null {
-        const mode = this.previewMode
-        if (mode === 'albedo') return this._srcCanvas
-        if (mode === 'normal') return this._normalCanvas
-        // lit / lit-surface — shade into a scratch canvas.
-        if (!this._albedo || !this._normal) return this._normalCanvas
-        const shaded = shade(
-            this._albedo,
-            this._normal,
-            this._width,
-            this._height,
-            this._light,
-            mode === 'lit',
-        )
+    private _syncLightFromAttributes(): void {
+        this._light = {
+            x: numAttr(this, 'light-x', DEFAULT_LIGHT.x),
+            y: numAttr(this, 'light-y', DEFAULT_LIGHT.y),
+            z: numAttr(this, 'light-z', DEFAULT_LIGHT.z),
+        }
+    }
+
+    /** Paints `data` into a scratch canvas at working resolution. */
+    private _scratchFrom(data: Uint8ClampedArray): HTMLCanvasElement {
         const scratch = document.createElement('canvas')
         scratch.width = this._width
         scratch.height = this._height
         const sctx = scratch.getContext('2d')
-        if (sctx)
+        if (sctx) {
             sctx.putImageData(
-                new ImageData(shaded as Uint8ClampedArray<ArrayBuffer>, this._width, this._height),
+                new ImageData(data as Uint8ClampedArray<ArrayBuffer>, this._width, this._height),
                 0,
                 0,
             )
+        }
         return scratch
+    }
+
+    /** Returns the native-resolution canvas source for the active preview mode. */
+    private _layerCanvas(): HTMLCanvasElement | null {
+        const mode = this.previewMode
+        if (mode === 'albedo') return this._srcCanvas
+        if (mode === 'normal') return this._normalCanvas
+        if (!this._albedo || !this._normal) return this._normalCanvas
+        if (mode === 'height') {
+            if (!this._heightMap) return this._normalCanvas
+            return this._scratchFrom(
+                heightToRgba(this._heightMap, this._albedo, this._width, this._height),
+            )
+        }
+        // lit / lit-surface — shade into a scratch canvas.
+        return this._scratchFrom(
+            shade(
+                this._albedo,
+                this._normal,
+                this._width,
+                this._height,
+                this._light,
+                mode === 'lit',
+                this.ambient,
+            ),
+        )
     }
 
     private _renderPreview(): void {
@@ -626,11 +925,11 @@ export class NormalMapGenerator extends HTMLElement {
             ctx.font = '13px system-ui, sans-serif'
             ctx.textAlign = 'center'
             ctx.textBaseline = 'middle'
-            ctx.fillText('No source image', displayW / 2, displayH / 2)
+            ctx.fillText(this.placeholder, displayW / 2, displayH / 2)
             return
         }
 
-        const fit = Math.min(displayW / this._width, displayH / this._height)
+        const fit = Math.min(displayW / this._width, displayH / this._height) * this.zoom
         const drawW = this._width * fit
         const drawH = this._height * fit
         const offsetX = (displayW - drawW) / 2 + this._panX
@@ -658,24 +957,20 @@ export class NormalMapGenerator extends HTMLElement {
     ): void {
         const mask = this._mask
         if (!mask) return
-        const overlay = document.createElement('canvas')
-        overlay.width = this._width
-        overlay.height = this._height
-        const octx = overlay.getContext('2d')
-        if (!octx) return
+        const [mr, mg, mb] = parseColor(this.maskColor)
+        const cap = Math.round(this.maskOpacity * 255)
         const data = new Uint8ClampedArray(this._width * this._height * 4)
         for (let i = 0; i < mask.length; i++) {
             if (mask[i] > 0) {
                 const o = i * 4
-                data[o] = 34
-                data[o + 1] = 211
-                data[o + 2] = 238
-                data[o + 3] = Math.min(160, mask[i])
+                data[o] = mr
+                data[o + 1] = mg
+                data[o + 2] = mb
+                data[o + 3] = Math.min(cap, mask[i])
             }
         }
-        octx.putImageData(new ImageData(data, this._width, this._height), 0, 0)
         ctx.imageSmoothingEnabled = false
-        ctx.drawImage(overlay, ox, oy, dw, dh)
+        ctx.drawImage(this._scratchFrom(data), ox, oy, dw, dh)
     }
 
     // ── Pointer interaction (paint / pan / light) ────────────────────────────────
@@ -683,6 +978,7 @@ export class NormalMapGenerator extends HTMLElement {
     private _onPointerDown = (e: PointerEvent): void => {
         if (this.disabled || !this._albedo) return
         const tool = this.tool
+        if (tool === 'none') return
         if (tool === 'pan') {
             this._panStart = { x: e.clientX, y: e.clientY, px: this._panX, py: this._panY }
         } else {
@@ -735,6 +1031,7 @@ export class NormalMapGenerator extends HTMLElement {
     /** Light tracks the cursor over the preview in lit modes (when not dragging). */
     private _onPointerHover = (e: PointerEvent): void => {
         if (this._painting || this._panStart) return
+        if (this.lightTracking !== 'pointer') return
         const mode = this.previewMode
         if (mode !== 'lit' && mode !== 'lit-surface') return
         if (!this._albedo) return
@@ -758,7 +1055,9 @@ export class NormalMapGenerator extends HTMLElement {
         const p = this._toSource(e)
         const cx = Math.round(p.x)
         const cy = Math.round(p.y)
-        const r = this._brushSize
+        const r = this.brushSize
+        const strength = this.brushStrength
+        const falloffExp = this.brushFalloff
         const tool = this.tool
         const w = this._width
         const h = this._height
@@ -772,8 +1071,8 @@ export class NormalMapGenerator extends HTMLElement {
                 const dy = y - cy
                 const d = Math.hypot(dx, dy)
                 if (d > r) continue
-                const falloff = 1 - d / r
-                const weight = falloff * this._brushStrength
+                const falloff = Math.pow(1 - d / r, falloffExp)
+                const weight = falloff * strength
                 const i = y * w + x
                 if (tool === 'brush' && paint) {
                     paint[i] += weight
@@ -787,78 +1086,14 @@ export class NormalMapGenerator extends HTMLElement {
         }
     }
 
-    // ── Control wiring ───────────────────────────────────────────────────────────
+    // ── Resize / disabled ────────────────────────────────────────────────────────
 
-    private _el<T extends HTMLElement = HTMLElement>(suffix: string): T | null {
-        return this.querySelector<T>(`#${this._idPrefix}-${suffix}`)
-    }
-
-    private _onControlInput = (e: Event): void => {
-        if (this.disabled) return
-        const target = e.target as HTMLInputElement
-        const field = target.getAttribute('data-field')
-        if (!field) return
-        const attr = field // strength | emboss-height | bevel-width
-        this._internalUpdate = true
-        this.setAttribute(attr, target.value)
-        this._internalUpdate = false
-        this._updateControlLabel(field, target.value)
-        this._recompute()
-    }
-
-    private _onToolbarClick = (e: Event): void => {
-        if (this.disabled) return
-        const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-tool]')
-        if (btn) {
-            const tool = btn.getAttribute('data-tool') as EditorTool
-            if (!this.editable && tool !== 'pan') return
-            this.tool = tool
-            return
-        }
-        const seg = (e.target as HTMLElement).closest<HTMLElement>('[data-mode]')
-        if (seg) {
-            this.previewMode = seg.getAttribute('data-mode') as PreviewMode
-        }
-    }
-
-    private _updateControlLabel(field: string, value: string): void {
-        const out = this._el(`${field}-value`)
-        if (out) out.textContent = value
-    }
-
-    private _syncControls(): void {
-        const set = (field: string, value: string) => {
-            const el = this._el<HTMLInputElement>(field)
-            if (el) el.value = value
-            this._updateControlLabel(field, value)
-        }
-        set('strength', String(this.strength))
-        set('emboss-height', String(this.embossHeight))
-        set('bevel-width', String(this.bevelWidth))
-    }
-
-    private _updateToolbar(): void {
-        const tool = this.tool
-        const editable = this.editable
-        this.querySelectorAll<HTMLButtonElement>('[data-tool]').forEach((btn) => {
-            const t = btn.getAttribute('data-tool') as EditorTool
-            const active = t === tool
-            btn.classList.toggle('tc-nmg-tool--active', active)
-            btn.setAttribute('aria-pressed', active ? 'true' : 'false')
-            // Paint tools require `editable`; pan is always available.
-            const enabled = editable || t === 'pan'
-            btn.disabled = !enabled
-        })
-    }
-
-    private _updateSegmented(): void {
-        const mode = this.previewMode
-        this.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((btn) => {
-            const active = btn.getAttribute('data-mode') === mode
-            btn.classList.toggle('tc-nmg-seg--active', active)
-            btn.setAttribute('aria-selected', active ? 'true' : 'false')
-            btn.tabIndex = active ? 0 : -1
-        })
+    private _observeResize(): void {
+        if (this._resizeObserver || typeof ResizeObserver === 'undefined') return
+        const canvas = this._previewCanvas
+        if (!canvas) return
+        this._resizeObserver = new ResizeObserver(() => this._renderPreview())
+        this._resizeObserver.observe(canvas)
     }
 
     private _updateDisabled(): void {
@@ -869,80 +1104,35 @@ export class NormalMapGenerator extends HTMLElement {
             if (disabled) root.setAttribute('aria-disabled', 'true')
             else root.removeAttribute('aria-disabled')
         }
+        if (disabled) {
+            this._painting = false
+            this._panStart = null
+            this._cleanupDrag()
+        }
     }
 
     // ── Markup ───────────────────────────────────────────────────────────────────
-
-    private _toolButtonsHtml(): string {
-        return TOOL_META.map(
-            ({ tool, label, iconHtml }) =>
-                `<button type="button" class="tc-nmg-tool" data-tool="${tool}" aria-label="${label} tool" aria-pressed="false">${iconHtml}</button>`,
-        ).join('')
-    }
-
-    private _segmentsHtml(): string {
-        return PREVIEW_META.map(
-            ({ mode, label }) =>
-                `<button type="button" class="tc-nmg-seg" data-mode="${mode}" role="tab" aria-selected="false" tabindex="-1">${label}</button>`,
-        ).join('')
-    }
-
-    private _sliderHtml(
-        field: string,
-        label: string,
-        min: string,
-        max: string,
-        step: string,
-    ): string {
-        const id = `${this._idPrefix}-${field}`
-        return (
-            `<div class="tc-nmg-control">` +
-            `<label class="tc-nmg-control-label" for="${id}">${label}</label>` +
-            `<input class="tc-nmg-range" type="range" id="${id}" data-field="${field}" min="${min}" max="${max}" step="${step}">` +
-            `<output class="tc-nmg-control-value" id="${id}-value"></output>` +
-            `</div>`
-        )
-    }
 
     private render(): void {
         const disabled = this.disabled
 
         this.innerHTML =
             `<div class="tc-normal-map-generator${disabled ? ' tc-normal-map-generator--disabled' : ''}"${disabled ? ' aria-disabled="true"' : ''}>` +
-            `<div class="tc-nmg-toolbar" role="toolbar" aria-label="Normal map editor tools">` +
-            `<div class="tc-nmg-tools" aria-label="Editing tools">${this._toolButtonsHtml()}</div>` +
-            `<div class="tc-nmg-segmented" role="tablist" aria-label="Preview mode">${this._segmentsHtml()}</div>` +
-            `</div>` +
             `<div class="tc-nmg-stage">` +
-            `<canvas class="tc-nmg-canvas" id="${this._idPrefix}-preview" aria-label="Normal map preview and editing canvas"></canvas>` +
-            `</div>` +
-            `<div class="tc-nmg-params">` +
-            this._sliderHtml('strength', 'Strength', '0', '5', '0.1') +
-            this._sliderHtml('emboss-height', 'Emboss', '0', '5', '0.1') +
-            this._sliderHtml('bevel-width', 'Bevel', '0', '32', '1') +
+            `<canvas class="tc-nmg-canvas" aria-label="Normal map preview and editing canvas"></canvas>` +
             `</div>` +
             `</div>`
 
-        this._previewCanvas = this._el<HTMLCanvasElement>('preview')
+        this._previewCanvas = this.querySelector<HTMLCanvasElement>('.tc-nmg-canvas')
 
         // Off-screen native-resolution canvases (never inserted into the DOM).
         if (!this._srcCanvas) this._srcCanvas = document.createElement('canvas')
         if (!this._normalCanvas) this._normalCanvas = document.createElement('canvas')
 
-        // Delegated listeners on the fresh container (replaced wholesale per render).
-        const root = this.querySelector('.tc-normal-map-generator')
-        if (root) {
-            root.addEventListener('input', this._onControlInput)
-            root.addEventListener('click', this._onToolbarClick)
-        }
         if (this._previewCanvas) {
             this._previewCanvas.addEventListener('pointerdown', this._onPointerDown)
             this._previewCanvas.addEventListener('pointermove', this._onPointerHover)
         }
-
-        this._syncControls()
-        this._updateToolbar()
-        this._updateSegmented()
     }
 }
 

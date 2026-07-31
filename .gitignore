@@ -21,3 +21,9 @@ tasks/logs/*.log
 .claude-accounts/
 taskforge.db
 taskforge.db-*
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/node_modules
+web-components/design-sync.entry.tsx

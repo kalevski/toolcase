@@ -28,7 +28,7 @@ function makeSampleSource(): string {
     return canvas.toDataURL('image/png')
 }
 
-const TOOLS = ['select', 'polygon', 'circle', 'box'] as const
+const TOOLS = ['select', 'polygon', 'circle', 'box', 'none'] as const
 
 // Seed shapes applied once via a stable reference so editor mutations are not
 // clobbered on re-render.
@@ -66,7 +66,7 @@ const PhysicsEditorDemo: React.FC = () => {
                     <div className="col-12">
                         <tc-rich-page-header
                             title-text="PhysicsEditor"
-                            description="Framework-free physics shape editor — draw polygons, circles, and boxes over an image background, drag vertices and handles to edit, and step through undo/redo history. Fires tc-change with the full shapes array on every mutation."
+                            description="Canvas-only physics shape editor — the element renders just the drawing canvas. The active tool, handle sizes, snap grid, history depth, and auto-fit tuning are attributes; undo / redo / delete / clear / auto-fit are imperative methods. Fires tc-change with the full shapes array on every mutation."
                         >
                             <tc-badge slot="chips" variant="secondary">
                                 Web Components
@@ -108,6 +108,20 @@ const PhysicsEditorDemo: React.FC = () => {
                                     >
                                         Auto-fit
                                     </button>
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-outline-secondary"
+                                        onClick={() => editorRef.current?.deleteSelected()}
+                                    >
+                                        Delete
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-outline-secondary"
+                                        onClick={() => editorRef.current?.clear()}
+                                    >
+                                        Clear
+                                    </button>
                                 </div>
 
                                 {/* @ts-ignore */}
@@ -115,6 +129,12 @@ const PhysicsEditorDemo: React.FC = () => {
                                     ref={editorRef}
                                     tool={tool}
                                     alpha-threshold="8"
+                                    simplify-tolerance="1.5"
+                                    handle-size="9"
+                                    handle-hit="10"
+                                    min-size="4"
+                                    snap="2"
+                                    history-limit="50"
                                 />
 
                                 <div className="mt-3">
@@ -128,6 +148,15 @@ const PhysicsEditorDemo: React.FC = () => {
                                         {shapesJson}
                                     </pre>
                                 </div>
+                            </tc-section-card>
+
+                            <tc-section-card title="Read-only — shapes from a JSON attribute, handles hidden">
+                                {/* @ts-ignore */}
+                                <tc-physics-editor
+                                    readonly
+                                    handles="off"
+                                    shapes='[{"type":"box","x":60,"y":40,"w":220,"h":160}]'
+                                />
                             </tc-section-card>
 
                             <tc-section-card title="Disabled">

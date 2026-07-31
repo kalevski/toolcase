@@ -1,6 +1,7 @@
-// Blueprint › tc-physics-editor — lavender paper wrapper, recessed-well toolbar,
-// pink active tool, teal live-preview stroke; replaces raw slate-200 checker tint
-// and baked cyan accent with blueprint tokens throughout.
+// Blueprint › tc-physics-editor — lavender paper wrapper around a recessed
+// checkerboard canvas well, with pink selection and teal live-preview strokes.
+// The element is canvas-only (no toolbar), so the canvas-drawn shape palette and
+// the well are the whole theming surface.
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
@@ -8,26 +9,12 @@ tc-theme[name='blueprint'],
         // Outer wrapper — raised white card on the lavender canvas.
         --bs-physics-editor-surface: var(--bp-paper);
         --bs-physics-editor-border: var(--bp-border);
-        --bs-physics-editor-border-strong: var(--bp-border-strong);
         --bs-physics-editor-text: var(--bp-text);
 
-        // Toolbar — recessed lavender well so icon-buttons lift against it.
-        --bs-physics-editor-toolbar-bg: var(--bp-bg-2);
-        --bs-physics-editor-toolbar-border: var(--bp-border-faint);
-
-        // Icon-button state ladder:
-        //   rest    = muted ink on transparent
-        //   hover   = paper-tint well (subtle lift)
-        //   active  = pink primary (pink = primary/CTA in blueprint accent rotation)
-        --bs-physics-editor-tool-color: var(--bp-text-muted);
-        --bs-physics-editor-tool-hover-bg: var(--bp-paper-tint);
-        --bs-physics-editor-tool-active-bg: var(--bp-pink);
-        --bs-physics-editor-tool-active-color: var(--bp-pink-ink); // #fff on pink
-
         // Stage — recessed well with a strong hairline frame.
-        // Checker base colour: replace raw var(--tc-slate-200, #e2e8f0) with the
-        // blueprint border-faint token so the transparency grid reads on the
-        // lavender paper ground without the slate-ramp leak.
+        // Checker base colour: replace raw slate values with the blueprint
+        // border-faint token so the transparency grid reads on the lavender
+        // paper ground without the slate-ramp leak.
         --bs-physics-editor-stage-bg: var(--bp-bg-2);
         --bs-physics-editor-stage-border: var(--bp-border-strong);
         --bs-physics-editor-checker: var(--bp-border-faint);
@@ -52,39 +39,20 @@ tc-theme[name='blueprint'],
         --bs-physics-editor-focus-ring: var(--bp-pink);
     }
 
-    // Outer card — replace the generic 1px border with the explicit blueprint token
-    // (base already reads it from --bs-physics-editor-border, but the shadow lifts
-    // the card off the lavender page ground).
+    // Outer card — the shadow lifts the card off the lavender page ground.
     .tc-physics-editor {
         box-shadow: var(--tc-shadow-sm);
     }
 
-    // Toolbar — transition driven by the blueprint ease curve so hover wells
-    // snap in at the same pace as the rest of the design system.
-    .tc-physics-editor-tool,
-    .tc-physics-editor-action {
-        transition:
-            background-color var(--bp-ease),
-            color var(--bp-ease),
-            box-shadow var(--bp-ease);
-
-        // Active tool: add a bottom teal underline stripe to reinforce selection
-        // beyond colour alone (colour-blind-safe secondary cue).
-        &.tc-physics-editor-tool--active {
-            box-shadow: inset 0 -2px 0 var(--bp-teal);
-        }
+    // Stage well — background-color only; the checkerboard lives in background-image.
+    .tc-physics-editor-stage {
+        background-color: var(--bp-bg-2);
+        border-color: var(--bp-border-strong);
     }
 
-    // Focus ring on canvas — pink primary, matches the --bs-physics-editor-focus-ring
-    // override above; reinforce with glow so it reads on the busy canvas surface.
+    // Focus ring on the canvas — pink primary, reinforced with glow so it reads
+    // on the busy canvas surface.
     .tc-physics-editor-canvas:focus-visible {
-        outline-color: var(--bp-pink);
-        box-shadow: var(--bp-glow-pink);
-    }
-
-    // Focus ring on toolbar buttons.
-    .tc-physics-editor-tool:focus-visible,
-    .tc-physics-editor-action:focus-visible {
         outline-color: var(--bp-pink);
         box-shadow: var(--bp-glow-pink);
     }

@@ -1,60 +1,20 @@
-// Dungeon › tc-bitmap-font-generator — token-swap + structural overrides.
-// Must-fix bypasses: near-white hairline (#f1f5f9), slate-blue input focus,
-// cold-blue primary button gradient, ink-on-ink code block. Foundation handles
-// the rest (surfaces, borders, text, mono font, checkbox accent, focus rings).
+// Dungeon › tc-bitmap-font-generator — token-swap for the canvas-only element.
+// The foundation handles surface/border/text; the two misses it cannot reach are
+// the preview well (too light) and the checkerboard tint (cold near-white
+// fallback), plus a gilded top bevel on the outer frame.
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
-    // ── 1. Token swap on the host element ──────────────────────────────────
-
     tc-bitmap-font-generator {
-        // Inner row hairlines: slate-100 near-white → quiet bronze separator.
-        --bs-bitmap-font-generator-hairline: var(--fg-gold-shadow);
-
-        // Input focus: slate-blue → gold ring.
-        --bs-bitmap-font-generator-input-focus-border: var(--fg-gold);
-        --bs-bitmap-font-generator-input-focus-ring: 0 0 0 0.2rem rgba(240, 210, 122, 0.25);
-
-        // Active button: accent fill (gold) + ink text (gold fill wants dark text).
-        --bs-bitmap-font-generator-btn-active-color: var(--fg-ink);
-
-        // Primary (Generate) button: dungeon dark-wood fill + parch-gold text.
-        --bs-bitmap-font-generator-btn-primary-bg: linear-gradient(180deg, #5a3a18, #2a1a0a);
-        --bs-bitmap-font-generator-btn-primary-color: var(--fg-gold-bright);
-        --bs-bitmap-font-generator-btn-primary-lift: 0 4px 15px rgba(0, 0, 0, 0.5);
-
-        // Code block: text was remapping to ink-on-ink → fix to parch.
-        --bs-bitmap-font-generator-code-color: var(--fg-parch);
-
         // Preview canvas: deepen the stage background.
         --bs-bitmap-font-generator-canvas-bg: var(--fg-ink-2);
+
+        // Checkerboard: warm-dark leather instead of the cold near-white fallback.
+        --bs-bitmap-font-generator-checker: var(--fg-leather-2);
     }
 
-    // ── 2. Section-head titles → bronze so they read as dungeon category labels ─
-
-    .tc-bfg-group-title,
-    .tc-bfg-output-title {
-        color: var(--fg-gold-deep);
-    }
-
-    // ── 3. Primary button bevel — metal-button inset highlight + deep shadow ──
-
-    .tc-bfg-btn--primary {
-        box-shadow:
-            inset 0 1px 0 rgba(232, 200, 120, 0.25),
-            inset 0 -8px 12px rgba(0, 0, 0, 0.4);
-    }
-
-    // Keep the bevel visible on hover (base re-applies the bg but drops shadow).
-    .tc-bfg-btn--primary:hover {
-        box-shadow:
-            inset 0 1px 0 rgba(232, 200, 120, 0.25),
-            inset 0 -8px 12px rgba(0, 0, 0, 0.4),
-            var(--bs-bitmap-font-generator-btn-primary-lift);
-    }
-
-    // Active press — flatten the bevel.
-    .tc-bfg-btn--primary:active {
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+    // Outer frame: top bevel highlight gives the panel a gilded edge.
+    .tc-bfg {
+        box-shadow: var(--fg-bevel-top);
     }
 }

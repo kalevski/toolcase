@@ -1,5 +1,3 @@
-import { lucideByName } from './internal/lucide'
-
 const TAG_NAME = 'tc-bitmap-font-generator'
 
 // ── Public type surface (mirrors @toolcase/react-components BitmapFontGenerator) ──
@@ -40,6 +38,9 @@ export interface BitmapFontGlow {
 export type BitmapFontExportFormat = 'xml' | 'json' | 'fnt'
 const EXPORT_FORMATS: BitmapFontExportFormat[] = ['xml', 'json', 'fnt']
 
+export type BitmapFontPreviewAlign = 'start' | 'center' | 'end'
+const PREVIEW_ALIGNS: BitmapFontPreviewAlign[] = ['start', 'center', 'end']
+
 export interface BitmapFontGlyph {
     char: string
     x: number
@@ -68,12 +69,14 @@ const DEFAULT_TEXT = 'Hello World!'
 const DEFAULT_GLYPHS =
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 .,!?-+:;\'"()[]{}/@#$%^&*~`<>=_\\|'
 
-let _idCounter = 0
-
-const downloadIconHtml = lucideByName('download')
-const copyIconHtml = lucideByName('copy')
-const checkIconHtml = lucideByName('check')
-const sparklesIconHtml = lucideByName('sparkles')
+const DEFAULT_FILL_COLOR = '#ffffff'
+const DEFAULT_BORDER_COLOR = '#000000'
+const DEFAULT_BORDER_THICKNESS = 2
+const DEFAULT_SHADOW_COLOR = '#000000'
+const DEFAULT_SHADOW_SIZE = 4
+const DEFAULT_GLOW_COLOR = '#00e5ff'
+const DEFAULT_GLOW_SIZE = 8
+const BORDER_ALIGNS: Array<NonNullable<BitmapFontBorder['align']>> = ['inner', 'outer', 'center']
 
 // ── Pure renderer (ported verbatim from the React implementation) ──────────────
 
@@ -181,7 +184,7 @@ const createFillStyle = (
     gh: number,
 ): string | CanvasGradient => {
     if (fill.type === 'solid' || !fill.gradientColors?.length) {
-        return fill.color ?? '#ffffff'
+        return fill.color ?? DEFAULT_FILL_COLOR
     }
     const cx = gx + gw / 2
     const cy = gy + gh / 2
@@ -479,20 +482,65 @@ const generateBitmapFont = (
     return { canvas, glyphs: glyphData, xml, text }
 }
 
+// ── Attribute helpers ──────────────────────────────────────────────────────────
+
+const numAttr = (el: HTMLElement, name: string, def: number, min = -Infinity): number => {
+    const v = parseFloat(el.getAttribute(name) ?? '')
+    return Number.isFinite(v) ? Math.max(min, v) : def
+}
+
+const csvAttr = (el: HTMLElement, name: string): string[] =>
+    (el.getAttribute(name) ?? '')
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+
+/** A `[{ color, thickness, align? }]` JSON attribute → validated border list. */
+const parseBordersJson = (raw: string | null): BitmapFontBorder[] | null => {
+    if (!raw) return null
+    let parsed: unknown
+    try {
+        parsed = JSON.parse(raw)
+    } catch {
+        return null
+    }
+    if (!Array.isArray(parsed)) return null
+    const out: BitmapFontBorder[] = []
+    for (const entry of parsed) {
+        if (!entry || typeof entry !== 'object') continue
+        const b = entry as Partial<BitmapFontBorder>
+        const thickness = typeof b.thickness === 'number' ? b.thickness : DEFAULT_BORDER_THICKNESS
+        if (thickness <= 0) continue
+        out.push({
+            color: typeof b.color === 'string' ? b.color : DEFAULT_BORDER_COLOR,
+            thickness,
+            align: BORDER_ALIGNS.includes(b.align as any) ? b.align : 'center',
+        })
+    }
+    return out
+}
+
 // ── Custom element ─────────────────────────────────────────────────────────────
 
+/**
+ * Headless-by-configuration bitmap-font atlas generator: the element renders a
+ * single preview `<canvas>` and nothing else. Everything is driven from the
+ * outside — attributes for the whole font/effect/layout/export surface, JS
+ * properties for the structured effect objects, and imperative
+ * `generate()` / `download()` / `copyDescriptor()` for output.
+ */
 export class BitmapFontGenerator extends HTMLElement {
     private _initialised = false
-    private _idPrefix: string
-    private _internalUpdate = false
     private _generating = false
     private _lastOutput: BitmapFontOutput | null = null
     private _canvas: HTMLCanvasElement | null = null
+    private _resizeObserver: ResizeObserver | null = null
     private _resizeHandler: (() => void) | null = null
-    private _copyTimer: ReturnType<typeof setTimeout> | null = null
+    private _autoTimer: ReturnType<typeof setTimeout> | null = null
 
-    // Complex object props — JS properties (no attribute), with sensible defaults.
-    private _fill: BitmapFontFill = { type: 'solid', color: '#ffffff' }
+    // Structured effect overrides. `null` (or an empty array) means "derive from
+    // the attributes"; assigning an object pins it until cleared with `null`.
+    private _fill: BitmapFontFill | null = null
     private _border: BitmapFontBorder | null = null
     private _borders: BitmapFontBorder[] = []
     private _dropShadow: BitmapFontDropShadow | null = null
@@ -501,17 +549,34 @@ export class BitmapFontGenerator extends HTMLElement {
     /** Optional callback mirroring the `tc-generate` event. */
     onGenerate: ((output: BitmapFontOutput) => void) | null = null
 
-    constructor() {
-        super()
-        this._idPrefix = `tc-bfg-${++_idCounter}`
-    }
-
     static get observedAttributes(): string[] {
         return [
+            // Font + content
             'font-family',
             'font-size',
             'glyphs',
             'text',
+            // Fill
+            'fill-type',
+            'fill-color',
+            'gradient-type',
+            'gradient-colors',
+            'gradient-angle',
+            // Outline
+            'border-color',
+            'border-thickness',
+            'border-align',
+            'borders',
+            // Drop shadow
+            'shadow-color',
+            'shadow-size',
+            'shadow-offset-x',
+            'shadow-offset-y',
+            'shadow-blur',
+            // Glow
+            'glow-color',
+            'glow-size',
+            // Atlas layout / export
             'letter-spacing',
             'padding',
             'glyphs-per-row',
@@ -520,6 +585,13 @@ export class BitmapFontGenerator extends HTMLElement {
             'scale',
             'background',
             'export-format',
+            'auto-generate',
+            // Preview canvas
+            'preview-background',
+            'preview-padding',
+            'preview-line-gap',
+            'preview-scale',
+            'preview-align',
             'disabled',
         ]
     }
@@ -530,25 +602,28 @@ export class BitmapFontGenerator extends HTMLElement {
             this._initialised = true
         }
         this._attachHandlers()
+        this._drawPreview()
+        if (this.autoGenerate) this._scheduleAutoGenerate()
     }
 
     disconnectedCallback(): void {
         this._detachHandlers()
-        if (this._copyTimer !== null) {
-            clearTimeout(this._copyTimer)
-            this._copyTimer = null
+        if (this._autoTimer !== null) {
+            clearTimeout(this._autoTimer)
+            this._autoTimer = null
         }
     }
 
-    attributeChangedCallback(): void {
-        if (!this.isConnected || !this._initialised) return
-        // Changes that originate from our own controls already updated the DOM +
-        // preview; skip the structural rebuild to keep input focus.
-        if (this._internalUpdate) return
-        this.render()
+    attributeChangedCallback(name: string): void {
+        if (!this._initialised) return
+        if (name === 'disabled') {
+            this._updateDisabled()
+            return
+        }
+        this._invalidate()
     }
 
-    // ── Scalar attributes (reflected) ──────────────────────────────────────────
+    // ── Font + content ─────────────────────────────────────────────────────────
 
     get fontFamily(): string {
         return this.getAttribute('font-family') ?? DEFAULT_FONT
@@ -571,6 +646,7 @@ export class BitmapFontGenerator extends HTMLElement {
         this.setAttribute('glyphs', v)
     }
 
+    /** Preview-only text; the atlas always rasterises `glyphs`. */
     get text(): string {
         return this.getAttribute('text') ?? DEFAULT_TEXT
     }
@@ -578,16 +654,17 @@ export class BitmapFontGenerator extends HTMLElement {
         this.setAttribute('text', v)
     }
 
+    // ── Atlas layout / export ──────────────────────────────────────────────────
+
     get letterSpacing(): number {
-        return parseFloat(this.getAttribute('letter-spacing') ?? '') || 0
+        return numAttr(this, 'letter-spacing', 0)
     }
     set letterSpacing(v: number) {
         this.setAttribute('letter-spacing', String(v))
     }
 
     get padding(): number {
-        const v = parseFloat(this.getAttribute('padding') ?? '')
-        return Number.isFinite(v) ? Math.max(0, v) : 2
+        return numAttr(this, 'padding', 2, 0)
     }
     set padding(v: number) {
         this.setAttribute('padding', String(v))
@@ -602,7 +679,7 @@ export class BitmapFontGenerator extends HTMLElement {
 
     /** Reported BMFont lineHeight; `0` means auto (use the cell height). */
     get lineHeight(): number {
-        return parseFloat(this.getAttribute('line-height') ?? '') || 0
+        return numAttr(this, 'line-height', 0, 0)
     }
     set lineHeight(v: number) {
         this.setAttribute('line-height', String(v))
@@ -640,6 +717,15 @@ export class BitmapFontGenerator extends HTMLElement {
         this.setAttribute('export-format', v)
     }
 
+    /** Regenerate (and fire `tc-generate`) automatically on every config change. */
+    get autoGenerate(): boolean {
+        return this.hasAttribute('auto-generate')
+    }
+    set autoGenerate(v: boolean) {
+        if (v) this.setAttribute('auto-generate', '')
+        else this.removeAttribute('auto-generate')
+    }
+
     get disabled(): boolean {
         return this.hasAttribute('disabled')
     }
@@ -648,69 +734,207 @@ export class BitmapFontGenerator extends HTMLElement {
         else this.removeAttribute('disabled')
     }
 
-    // ── Complex object properties (no attribute) ────────────────────────────────
+    // ── Preview canvas ─────────────────────────────────────────────────────────
+
+    /** Preview backdrop; falls back to `background`, then to a transparent canvas. */
+    get previewBackground(): string | null {
+        return this.getAttribute('preview-background') ?? this.background
+    }
+    set previewBackground(v: string | null) {
+        if (v != null) this.setAttribute('preview-background', v)
+        else this.removeAttribute('preview-background')
+    }
+
+    get previewPadding(): number {
+        return numAttr(this, 'preview-padding', 16, 0)
+    }
+    set previewPadding(v: number) {
+        this.setAttribute('preview-padding', String(v))
+    }
+
+    get previewLineGap(): number {
+        return numAttr(this, 'preview-line-gap', 8)
+    }
+    set previewLineGap(v: number) {
+        this.setAttribute('preview-line-gap', String(v))
+    }
+
+    /** Scales the preview glyph geometry only; the export uses `scale`. */
+    get previewScale(): number {
+        return numAttr(this, 'preview-scale', 1, 0.05)
+    }
+    set previewScale(v: number) {
+        this.setAttribute('preview-scale', String(v))
+    }
+
+    get previewAlign(): BitmapFontPreviewAlign {
+        const v = this.getAttribute('preview-align') as BitmapFontPreviewAlign
+        return PREVIEW_ALIGNS.includes(v) ? v : 'start'
+    }
+    set previewAlign(v: BitmapFontPreviewAlign) {
+        this.setAttribute('preview-align', v)
+    }
+
+    // ── Structured effect properties (attribute-backed, property-overridable) ───
 
     get fill(): BitmapFontFill {
-        return this._fill
+        return this._fill ?? this._attrFill()
     }
-    set fill(v: BitmapFontFill) {
-        this._fill = v && typeof v === 'object' ? v : { type: 'solid', color: '#ffffff' }
-        if (this._initialised) this.render()
+    set fill(v: BitmapFontFill | null) {
+        this._fill = v && typeof v === 'object' ? v : null
+        this._invalidate()
     }
 
     get border(): BitmapFontBorder | null {
-        return this._border
+        return this._border ?? this.borders[0] ?? null
     }
     set border(v: BitmapFontBorder | null) {
         this._border = v && typeof v === 'object' ? v : null
-        if (this._initialised) this.render()
-    }
-
-    get borders(): BitmapFontBorder[] {
-        return this._borders
-    }
-    set borders(v: BitmapFontBorder[]) {
-        this._borders = Array.isArray(v) ? v : []
-        if (this._initialised) this.render()
-    }
-
-    get dropShadow(): BitmapFontDropShadow | null {
-        return this._dropShadow
-    }
-    set dropShadow(v: BitmapFontDropShadow | null) {
-        this._dropShadow = v && typeof v === 'object' ? v : null
-        if (this._initialised) this.render()
-    }
-
-    get glow(): BitmapFontGlow | null {
-        return this._glow
-    }
-    set glow(v: BitmapFontGlow | null) {
-        this._glow = v && typeof v === 'object' ? v : null
-        if (this._initialised) this.render()
+        this._invalidate()
     }
 
     /** Stacked outlines, drawn thickest-first; `borders` overrides `border`. */
-    private _resolveBorders(): BitmapFontBorder[] {
-        return this._borders.length ? this._borders : this._border ? [this._border] : []
+    get borders(): BitmapFontBorder[] {
+        if (this._borders.length) return this._borders
+        if (this._border) return [this._border]
+        return this._attrBorders()
+    }
+    set borders(v: BitmapFontBorder[]) {
+        this._borders = Array.isArray(v) ? v : []
+        this._invalidate()
     }
 
-    // ── Lifecycle helpers ───────────────────────────────────────────────────────
+    get dropShadow(): BitmapFontDropShadow | null {
+        return this._dropShadow ?? this._attrShadow()
+    }
+    set dropShadow(v: BitmapFontDropShadow | null) {
+        this._dropShadow = v && typeof v === 'object' ? v : null
+        this._invalidate()
+    }
+
+    get glow(): BitmapFontGlow | null {
+        return this._glow ?? this._attrGlow()
+    }
+    set glow(v: BitmapFontGlow | null) {
+        this._glow = v && typeof v === 'object' ? v : null
+        this._invalidate()
+    }
+
+    /** The most recent `generate()` result, or `null`. */
+    get output(): BitmapFontOutput | null {
+        return this._lastOutput
+    }
+
+    // ── Attribute → effect resolution ──────────────────────────────────────────
+
+    private _attrFill(): BitmapFontFill {
+        const color = this.getAttribute('fill-color') ?? DEFAULT_FILL_COLOR
+        if (this.getAttribute('fill-type') !== 'gradient') return { type: 'solid', color }
+        return {
+            type: 'gradient',
+            color,
+            gradientType: this.getAttribute('gradient-type') === 'radial' ? 'radial' : 'linear',
+            // An empty list degrades to the solid `color` inside createFillStyle.
+            gradientColors: csvAttr(this, 'gradient-colors'),
+            gradientAngle: numAttr(this, 'gradient-angle', 90),
+        }
+    }
+
+    private _attrBorders(): BitmapFontBorder[] {
+        const json = parseBordersJson(this.getAttribute('borders'))
+        if (json) return json
+        const color = this.getAttribute('border-color')
+        const thickness = numAttr(
+            this,
+            'border-thickness',
+            color != null ? DEFAULT_BORDER_THICKNESS : 0,
+            0,
+        )
+        if (thickness <= 0) return []
+        const align = this.getAttribute('border-align') as BitmapFontBorder['align']
+        return [
+            {
+                color: color ?? DEFAULT_BORDER_COLOR,
+                thickness,
+                align: BORDER_ALIGNS.includes(align as any) ? align : 'center',
+            },
+        ]
+    }
+
+    private _attrShadow(): BitmapFontDropShadow | null {
+        const color = this.getAttribute('shadow-color')
+        const size = numAttr(this, 'shadow-size', color != null ? DEFAULT_SHADOW_SIZE : 0, 0)
+        if (size <= 0) return null
+        const shadow: BitmapFontDropShadow = { color: color ?? DEFAULT_SHADOW_COLOR, size }
+        if (this.hasAttribute('shadow-offset-x')) {
+            shadow.offsetX = numAttr(this, 'shadow-offset-x', size * 0.5)
+        }
+        if (this.hasAttribute('shadow-offset-y')) {
+            shadow.offsetY = numAttr(this, 'shadow-offset-y', size * 0.5)
+        }
+        if (this.hasAttribute('shadow-blur')) {
+            shadow.blur = numAttr(this, 'shadow-blur', size, 0)
+        }
+        return shadow
+    }
+
+    private _attrGlow(): BitmapFontGlow | null {
+        const color = this.getAttribute('glow-color')
+        const size = numAttr(this, 'glow-size', color != null ? DEFAULT_GLOW_SIZE : 0, 0)
+        if (size <= 0) return null
+        return { color: color ?? DEFAULT_GLOW_COLOR, size }
+    }
+
+    // ── Lifecycle helpers ──────────────────────────────────────────────────────
 
     private _attachHandlers(): void {
         this._detachHandlers()
+        if (typeof ResizeObserver !== 'undefined' && this._canvas) {
+            this._resizeObserver = new ResizeObserver(() => this._drawPreview())
+            this._resizeObserver.observe(this._canvas)
+            return
+        }
         this._resizeHandler = () => this._drawPreview()
         window.addEventListener('resize', this._resizeHandler, { passive: true })
     }
 
     private _detachHandlers(): void {
+        if (this._resizeObserver) {
+            this._resizeObserver.disconnect()
+            this._resizeObserver = null
+        }
         if (this._resizeHandler) {
             window.removeEventListener('resize', this._resizeHandler)
             this._resizeHandler = null
         }
     }
 
-    // ── Public API (parity with the React imperative handle) ────────────────────
+    /** Any config change: repaint the preview, and re-export when auto-generating. */
+    private _invalidate(): void {
+        if (!this._initialised) return
+        this._drawPreview()
+        if (this.autoGenerate) this._scheduleAutoGenerate()
+    }
+
+    /** Coalesces bursts of attribute writes into a single generation pass. */
+    private _scheduleAutoGenerate(): void {
+        if (this._autoTimer !== null) clearTimeout(this._autoTimer)
+        this._autoTimer = setTimeout(() => {
+            this._autoTimer = null
+            void this.generate()
+        }, 32)
+    }
+
+    private _updateDisabled(): void {
+        const root = this.querySelector('.tc-bfg')
+        if (!root) return
+        const disabled = this.disabled
+        root.classList.toggle('tc-bfg--disabled', disabled)
+        if (disabled) root.setAttribute('aria-disabled', 'true')
+        else root.removeAttribute('aria-disabled')
+    }
+
+    // ── Public API ─────────────────────────────────────────────────────────────
 
     /**
      * Renders the atlas, fires `tc-generate`/`onGenerate`, and resolves with the
@@ -723,12 +947,12 @@ export class BitmapFontGenerator extends HTMLElement {
             const cfg = resolveConfig({
                 fontFamily: this.fontFamily,
                 fontSize: this.fontSize,
-                fill: this._fill,
+                fill: this.fill,
                 padding: this.padding,
                 letterSpacing: this.letterSpacing,
-                borders: this._resolveBorders(),
-                dropShadow: this._dropShadow ?? undefined,
-                glow: this._glow ?? undefined,
+                borders: this.borders,
+                dropShadow: this.dropShadow ?? undefined,
+                glow: this.glow ?? undefined,
                 scale: this.scale,
             })
 
@@ -763,7 +987,6 @@ export class BitmapFontGenerator extends HTMLElement {
                 height: canvas.height,
             }
             this._lastOutput = output
-            this._renderOutput()
 
             this.dispatchEvent(
                 new CustomEvent<BitmapFontOutput>('tc-generate', {
@@ -779,148 +1002,23 @@ export class BitmapFontGenerator extends HTMLElement {
         }
     }
 
-    // ── Control wiring ──────────────────────────────────────────────────────────
-
-    private _ctl<T extends HTMLElement = HTMLInputElement>(field: string): T | null {
-        return this.querySelector<T>(`#${this._idPrefix}-${field}`)
-    }
-
-    private _num(field: string, def: number): number {
-        const el = this._ctl<HTMLInputElement>(field)
-        if (!el) return def
-        const v = parseFloat(el.value)
-        return Number.isFinite(v) ? v : def
-    }
-
-    private _str(field: string): string {
-        return this._ctl<HTMLInputElement>(field)?.value ?? ''
-    }
-
-    private _checked(field: string): boolean {
-        return this._ctl<HTMLInputElement>(field)?.checked ?? false
-    }
-
-    private _reflectAttr(name: string, value: string | null): void {
-        this._internalUpdate = true
-        if (value === null) this.removeAttribute(name)
-        else this.setAttribute(name, value)
-        this._internalUpdate = false
-    }
-
-    /** Reads every control's current value back into attributes + private fields. */
-    private _collectState(): void {
-        // Scalar attributes
-        this._reflectAttr('font-family', this._str('font-family') || DEFAULT_FONT)
-        this._reflectAttr('font-size', String(this._num('font-size', 32)))
-        this._reflectAttr('text', this._str('text'))
-        this._reflectAttr('glyphs', this._str('glyphs'))
-        this._reflectAttr('letter-spacing', String(this._num('letter-spacing', 0)))
-        this._reflectAttr('padding', String(this._num('padding', 2)))
-        this._reflectAttr('glyphs-per-row', String(this._num('glyphs-per-row', 16)))
-        this._reflectAttr('line-height', String(this._num('line-height', 0)))
-        this._reflectAttr('power-of-two', this._checked('power-of-two') ? '' : null)
-        this._reflectAttr('scale', String(this._num('scale', 1)))
-        this._reflectAttr(
-            'export-format',
-            this._ctl<HTMLSelectElement>('export-format')?.value ?? 'xml',
-        )
-        this._reflectAttr('background', this._checked('bg-enabled') ? this._str('bg-color') : null)
-
-        // Fill
-        const fillType =
-            (this._ctl<HTMLSelectElement>('fill-type')?.value as 'solid' | 'gradient') ?? 'solid'
-        if (fillType === 'solid') {
-            this._fill = { type: 'solid', color: this._str('fill-color') || '#ffffff' }
-        } else {
-            const third = this._checked('grad-third')
-            const colors = [this._str('grad-color1'), this._str('grad-color2')]
-            if (third) colors.push(this._str('grad-color3'))
-            this._fill = {
-                type: 'gradient',
-                gradientType:
-                    (this._ctl<HTMLSelectElement>('grad-type')?.value as 'linear' | 'radial') ??
-                    'linear',
-                gradientColors: colors,
-                gradientAngle: this._num('grad-angle', 90),
-            }
-        }
-
-        // Borders (canonical list; clears the single-border convenience field)
-        const borders: BitmapFontBorder[] = []
-        if (this._checked('border-enabled')) {
-            borders.push({
-                color: this._str('border-color') || '#000000',
-                thickness: this._num('border-thickness', 2),
-                align:
-                    (this._ctl<HTMLSelectElement>('border-align')
-                        ?.value as BitmapFontBorder['align']) ?? 'center',
-            })
-            if (this._checked('border2-enabled')) {
-                borders.push({
-                    color: this._str('border2-color') || '#ffffff',
-                    thickness: this._num('border2-thickness', 5),
-                })
-            }
-        }
-        this._border = null
-        this._borders = borders
-
-        // Drop shadow
-        this._dropShadow = this._checked('shadow-enabled')
-            ? {
-                  color: this._str('shadow-color') || '#000000',
-                  size: this._num('shadow-size', 4),
-                  offsetX: this._num('shadow-offset-x', 2),
-                  offsetY: this._num('shadow-offset-y', 2),
-                  blur: this._num('shadow-blur', 4),
-              }
-            : null
-
-        // Glow
-        this._glow = this._checked('glow-enabled')
-            ? { color: this._str('glow-color') || '#00e5ff', size: this._num('glow-size', 8) }
-            : null
-    }
-
-    private _onInput = (e: Event): void => {
-        if (this.disabled) return
-        const target = e.target as HTMLElement
-        if (!target.hasAttribute('data-field')) return
-        this._collectState()
-        this._drawPreview()
-    }
-
-    private _onClick = (e: Event): void => {
-        const action = (e.target as HTMLElement)
-            .closest<HTMLElement>('[data-action]')
-            ?.getAttribute('data-action')
-        if (!action || this.disabled) return
-        if (action === 'generate') void this.generate()
-        else if (action === 'copy') void this._handleCopy()
-        else if (action === 'download') this._handleDownload()
-    }
-
-    private async _handleCopy(): Promise<void> {
-        if (!this._lastOutput) return
+    /** Copies the descriptor text to the clipboard; generates first if needed. */
+    async copyDescriptor(): Promise<boolean> {
+        const out = this._lastOutput ?? (await this.generate())
+        if (!out) return false
         try {
-            await navigator.clipboard.writeText(this._lastOutput.text)
+            await navigator.clipboard.writeText(out.text)
+            return true
         } catch {
-            return
+            return false
         }
-        const btn = this._ctl<HTMLButtonElement>('copy-btn')
-        if (!btn) return
-        btn.innerHTML = `${checkIconHtml}<span>Copied</span>`
-        if (this._copyTimer !== null) clearTimeout(this._copyTimer)
-        this._copyTimer = setTimeout(() => {
-            btn.innerHTML = `${copyIconHtml}<span>Copy</span>`
-            this._copyTimer = null
-        }, 1500)
     }
 
-    private _handleDownload(): void {
-        const out = this._lastOutput
-        if (!out) return
-        const base = `${this.fontFamily.replace(/\s/g, '_')}_${this.fontSize}`
+    /** Downloads the atlas PNG + descriptor; generates first if needed. */
+    async download(baseName?: string): Promise<boolean> {
+        const out = this._lastOutput ?? (await this.generate())
+        if (!out) return false
+        const base = baseName ?? `${this.fontFamily.replace(/\s/g, '_')}_${this.fontSize}`
         const ext: Record<BitmapFontExportFormat, string> = { xml: 'xml', json: 'json', fnt: 'fnt' }
         const mime: Record<BitmapFontExportFormat, string> = {
             xml: 'text/xml',
@@ -942,9 +1040,15 @@ export class BitmapFontGenerator extends HTMLElement {
         b.download = `${base}.${ext[out.format]}`
         b.click()
         URL.revokeObjectURL(descUrl)
+        return true
     }
 
-    // ── Rendering ───────────────────────────────────────────────────────────────
+    /** Repaints the preview canvas (also called on resize + attribute changes). */
+    refresh(): void {
+        this._drawPreview()
+    }
+
+    // ── Preview rendering ──────────────────────────────────────────────────────
 
     private _drawPreview(): void {
         const canvas = this._canvas
@@ -956,341 +1060,85 @@ export class BitmapFontGenerator extends HTMLElement {
         const displayW = canvas.clientWidth
         const displayH = canvas.clientHeight
         if (displayW <= 0 || displayH <= 0) return
-        canvas.width = displayW * dpr
-        canvas.height = displayH * dpr
-        ctx.scale(dpr, dpr)
-
+        canvas.width = Math.round(displayW * dpr)
+        canvas.height = Math.round(displayH * dpr)
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
         ctx.clearRect(0, 0, displayW, displayH)
-        ctx.fillStyle = this.background ?? '#1a1a2e'
-        ctx.fillRect(0, 0, displayW, displayH)
 
-        // Preview renders at scale 1 (display size), ignoring export `scale`.
+        const bg = this.previewBackground
+        if (bg) {
+            ctx.fillStyle = bg
+            ctx.fillRect(0, 0, displayW, displayH)
+        }
+
+        // The preview has its own scale so the atlas `scale` can stay export-only.
         const cfg = resolveConfig({
             fontFamily: this.fontFamily,
             fontSize: this.fontSize,
-            fill: this._fill,
+            fill: this.fill,
             padding: this.padding,
             letterSpacing: this.letterSpacing,
-            borders: this._resolveBorders(),
-            dropShadow: this._dropShadow ?? undefined,
-            glow: this._glow ?? undefined,
-            scale: 1,
+            borders: this.borders,
+            dropShadow: this.dropShadow ?? undefined,
+            glow: this.glow ?? undefined,
+            scale: this.previewScale,
         })
 
         ctx.font = `${cfg.fontSize}px "${cfg.fontFamily}"`
         ctx.textBaseline = 'top'
 
         const pad = maxBorderThickness(cfg.borders) + cfg.padding
-        const advance = effectExtent(cfg)
-        let x = 16
-        let y = 16
+        const margin = this.previewPadding
+        const maxW = Math.max(1, displayW - margin * 2)
+        const cellH = cfg.fontSize + pad * 2 + effectExtent(cfg)
+        const lineH = cellH + this.previewLineGap
 
+        // Wrap into lines first so alignment can use each line's measured width.
+        const lines: Array<{ chars: string[]; widths: number[]; width: number }> = []
+        let line: { chars: string[]; widths: number[]; width: number } = {
+            chars: [],
+            widths: [],
+            width: 0,
+        }
+        const pushLine = () => {
+            lines.push(line)
+            line = { chars: [], widths: [], width: 0 }
+        }
         for (const ch of this.text) {
-            const m = ctx.measureText(ch)
-            const charW = m.width + pad * 2 + cfg.letterSpacing
-
-            if (x + charW > displayW - 16) {
-                x = 16
-                y += cfg.fontSize + pad * 2 + advance + 8
+            if (ch === '\n') {
+                pushLine()
+                continue
             }
-
-            renderGlyph(ctx, ch, x, y, cfg, cfg.fontSize + 4)
-            x += charW
+            const charW = ctx.measureText(ch).width + pad * 2 + cfg.letterSpacing
+            if (line.chars.length && line.width + charW > maxW) pushLine()
+            line.chars.push(ch)
+            line.widths.push(charW)
+            line.width += charW
         }
+        pushLine()
+
+        const align = this.previewAlign
+        lines.forEach((l, row) => {
+            const slack = Math.max(0, maxW - l.width)
+            let x = margin + (align === 'center' ? slack / 2 : align === 'end' ? slack : 0)
+            const y = margin + row * lineH
+            if (y > displayH) return
+            l.chars.forEach((ch, i) => {
+                renderGlyph(ctx, ch, x, y, cfg, cellH)
+                x += l.widths[i]
+            })
+        })
     }
 
-    private _renderOutput(): void {
-        const out = this._lastOutput
-        const wrap = this._ctl<HTMLElement>('output')
-        if (!wrap) return
-        if (!out) {
-            wrap.hidden = true
-            return
-        }
-        wrap.hidden = false
-        const code = this._ctl<HTMLElement>('code')
-        if (code) code.textContent = out.text
-        const meta = this._ctl<HTMLElement>('meta')
-        if (meta) {
-            meta.textContent = `${out.format.toUpperCase()} · ${out.width}×${out.height}px · ${out.glyphs.length} glyphs`
-        }
-    }
-
-    private _row(field: string, label: string, control: string): string {
-        const id = `${this._idPrefix}-${field}`
-        return `<div class="tc-bfg-row"><label class="tc-bfg-label" for="${id}">${label}</label>${control}</div>`
-    }
-
-    private _input(field: string, type: string, extra = ''): string {
-        const id = `${this._idPrefix}-${field}`
-        const cls = type === 'color' ? 'tc-bfg-color' : 'tc-bfg-input tc-bfg-input--mono'
-        return `<input class="${cls}" type="${type}" id="${id}" data-field="${field}" ${extra}>`
-    }
-
-    private _select(field: string, options: Array<[string, string]>): string {
-        const id = `${this._idPrefix}-${field}`
-        const opts = options.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')
-        return `<select class="tc-bfg-select tc-bfg-input--mono" id="${id}" data-field="${field}">${opts}</select>`
-    }
-
-    private _check(field: string, label: string): string {
-        const id = `${this._idPrefix}-${field}`
-        return `<div class="tc-bfg-check"><input type="checkbox" id="${id}" data-field="${field}"><label class="tc-bfg-label" for="${id}">${label}</label></div>`
-    }
+    // ── Markup ─────────────────────────────────────────────────────────────────
 
     private render(): void {
         const disabled = this.disabled
-
-        const fontGroup =
-            `<div class="tc-bfg-group"><div class="tc-bfg-group-title">Font &amp; Fill</div>` +
-            this._row('font-family', 'Font family', this._input('font-family', 'text')) +
-            this._row(
-                'font-size',
-                'Font size',
-                this._input('font-size', 'number', 'min="8" max="256" step="1"'),
-            ) +
-            this._row(
-                'fill-type',
-                'Fill type',
-                this._select('fill-type', [
-                    ['solid', 'Solid'],
-                    ['gradient', 'Gradient'],
-                ]),
-            ) +
-            this._row('fill-color', 'Fill colour', this._input('fill-color', 'color')) +
-            this._row(
-                'grad-type',
-                'Gradient type',
-                this._select('grad-type', [
-                    ['linear', 'Linear'],
-                    ['radial', 'Radial'],
-                ]),
-            ) +
-            this._row('grad-color1', 'Gradient 1', this._input('grad-color1', 'color')) +
-            this._row('grad-color2', 'Gradient 2', this._input('grad-color2', 'color')) +
-            this._check('grad-third', 'Third gradient stop') +
-            this._row('grad-color3', 'Gradient 3', this._input('grad-color3', 'color')) +
-            this._row(
-                'grad-angle',
-                'Gradient angle',
-                this._input('grad-angle', 'number', 'min="0" max="360" step="1"'),
-            ) +
-            `</div>`
-
-        const effectsGroup =
-            `<div class="tc-bfg-group"><div class="tc-bfg-group-title">Outline &amp; Effects</div>` +
-            this._check('border-enabled', 'Border') +
-            this._row('border-color', 'Border colour', this._input('border-color', 'color')) +
-            this._row(
-                'border-thickness',
-                'Border thickness',
-                this._input('border-thickness', 'number', 'min="0" max="32" step="1"'),
-            ) +
-            this._row(
-                'border-align',
-                'Stroke align',
-                this._select('border-align', [
-                    ['center', 'Center'],
-                    ['outer', 'Outer'],
-                    ['inner', 'Inner'],
-                ]),
-            ) +
-            this._check('border2-enabled', 'Second outline') +
-            this._row('border2-color', 'Outer colour', this._input('border2-color', 'color')) +
-            this._row(
-                'border2-thickness',
-                'Outer thickness',
-                this._input('border2-thickness', 'number', 'min="0" max="40" step="1"'),
-            ) +
-            this._check('shadow-enabled', 'Drop shadow') +
-            this._row('shadow-color', 'Shadow colour', this._input('shadow-color', 'color')) +
-            this._row(
-                'shadow-size',
-                'Shadow size',
-                this._input('shadow-size', 'number', 'min="0" max="40" step="1"'),
-            ) +
-            this._row(
-                'shadow-offset-x',
-                'Offset X',
-                this._input('shadow-offset-x', 'number', 'min="-40" max="40" step="1"'),
-            ) +
-            this._row(
-                'shadow-offset-y',
-                'Offset Y',
-                this._input('shadow-offset-y', 'number', 'min="-40" max="40" step="1"'),
-            ) +
-            this._row(
-                'shadow-blur',
-                'Blur',
-                this._input('shadow-blur', 'number', 'min="0" max="60" step="1"'),
-            ) +
-            this._check('glow-enabled', 'Glow') +
-            this._row('glow-color', 'Glow colour', this._input('glow-color', 'color')) +
-            this._row(
-                'glow-size',
-                'Glow size',
-                this._input('glow-size', 'number', 'min="0" max="60" step="1"'),
-            ) +
-            `</div>`
-
-        const layoutGroup =
-            `<div class="tc-bfg-group"><div class="tc-bfg-group-title">Layout &amp; Export</div>` +
-            this._row(
-                'letter-spacing',
-                'Letter spacing',
-                this._input('letter-spacing', 'number', 'min="-20" max="40" step="1"'),
-            ) +
-            this._row(
-                'padding',
-                'Padding',
-                this._input('padding', 'number', 'min="0" max="32" step="1"'),
-            ) +
-            this._row(
-                'glyphs-per-row',
-                'Glyphs / row',
-                this._input('glyphs-per-row', 'number', 'min="1" max="64" step="1"'),
-            ) +
-            this._row(
-                'line-height',
-                'Line height (0 = auto)',
-                this._input('line-height', 'number', 'min="0" max="400" step="1"'),
-            ) +
-            this._check('power-of-two', 'Power-of-two atlas') +
-            this._row(
-                'scale',
-                'Export scale',
-                this._select('scale', [
-                    ['1', '1×'],
-                    ['2', '2×'],
-                    ['3', '3×'],
-                    ['4', '4×'],
-                ]),
-            ) +
-            this._row(
-                'export-format',
-                'Export format',
-                this._select('export-format', [
-                    ['xml', 'BMFont XML'],
-                    ['json', 'JSON'],
-                    ['fnt', 'BMFont .fnt'],
-                ]),
-            ) +
-            this._check('bg-enabled', 'Atlas background') +
-            this._row('bg-color', 'Background', this._input('bg-color', 'color')) +
-            `</div>`
-
-        const contentGroup =
-            `<div class="tc-bfg-group"><div class="tc-bfg-group-title">Content</div>` +
-            this._row('text', 'Preview text', this._input('text', 'text')) +
-            this._row(
-                'glyphs',
-                'Glyphs',
-                `<textarea class="tc-bfg-input tc-bfg-input--mono tc-bfg-textarea" id="${this._idPrefix}-glyphs" data-field="glyphs" rows="3"></textarea>`,
-            ) +
-            `</div>`
-
         this.innerHTML =
-            `<div class="tc-bfg${disabled ? ' tc-bfg--disabled' : ''}">` +
-            `<div class="tc-bfg-controls"${disabled ? ' aria-disabled="true"' : ''}>` +
-            fontGroup +
-            effectsGroup +
-            layoutGroup +
-            contentGroup +
-            `</div>` +
-            `<div class="tc-bfg-stage">` +
-            `<canvas class="tc-bfg-canvas" id="${this._idPrefix}-canvas" aria-label="Bitmap font live preview"></canvas>` +
-            `<div class="tc-bfg-toolbar">` +
-            `<button type="button" class="tc-bfg-btn tc-bfg-btn--primary" data-action="generate"${disabled ? ' disabled' : ''}>${sparklesIconHtml}<span>Generate</span></button>` +
-            `<span class="tc-bfg-meta" id="${this._idPrefix}-meta" role="status" aria-live="polite"></span>` +
-            `</div>` +
-            `<div class="tc-bfg-output" id="${this._idPrefix}-output" hidden>` +
-            `<div class="tc-bfg-output-head">` +
-            `<span class="tc-bfg-output-title">Descriptor</span>` +
-            `<button type="button" class="tc-bfg-btn" id="${this._idPrefix}-copy-btn" data-action="copy" aria-label="Copy descriptor">${copyIconHtml}<span>Copy</span></button>` +
-            `<button type="button" class="tc-bfg-btn" data-action="download" aria-label="Download PNG and descriptor">${downloadIconHtml}<span>Download</span></button>` +
-            `</div>` +
-            `<pre class="tc-bfg-pre"><code class="tc-bfg-code" id="${this._idPrefix}-code"></code></pre>` +
-            `</div>` +
-            `</div>` +
+            `<div class="tc-bfg${disabled ? ' tc-bfg--disabled' : ''}"${disabled ? ' aria-disabled="true"' : ''}>` +
+            `<canvas class="tc-bfg-canvas" aria-label="Bitmap font live preview"></canvas>` +
             `</div>`
-
-        this._canvas = this._ctl<HTMLCanvasElement>('canvas')
-
-        // Delegated listeners live on the fresh container; replaced wholesale on
-        // every render so old listeners are garbage-collected with the old DOM.
-        const root = this.querySelector('.tc-bfg')
-        if (root) {
-            root.addEventListener('input', this._onInput)
-            root.addEventListener('change', this._onInput)
-            root.addEventListener('click', this._onClick)
-        }
-
-        this._syncControlValues()
-        this._renderOutput()
-        this._drawPreview()
-    }
-
-    /** Pushes current state into the freshly-rendered controls (avoids escaping). */
-    private _syncControlValues(): void {
-        const setVal = (field: string, value: string) => {
-            const el = this._ctl<HTMLInputElement>(field)
-            if (el) el.value = value
-        }
-        const setChk = (field: string, value: boolean) => {
-            const el = this._ctl<HTMLInputElement>(field)
-            if (el) el.checked = value
-        }
-
-        setVal('font-family', this.fontFamily)
-        setVal('font-size', String(this.fontSize))
-        setVal('text', this.text)
-        setVal('glyphs', this.glyphs)
-        setVal('letter-spacing', String(this.letterSpacing))
-        setVal('padding', String(this.padding))
-        setVal('glyphs-per-row', String(this.glyphsPerRow))
-        setVal('line-height', String(this.lineHeight))
-        setChk('power-of-two', this.powerOfTwo)
-        setVal('scale', String(this.scale))
-        setVal('export-format', this.exportFormat)
-        setChk('bg-enabled', this.background != null)
-        setVal('bg-color', this.background ?? '#1a1a2e')
-
-        // Fill
-        const fill = this._fill
-        setVal('fill-type', fill.type)
-        setVal('fill-color', fill.color ?? '#ffffff')
-        setVal('grad-type', fill.gradientType ?? 'linear')
-        const gc = fill.gradientColors ?? []
-        setVal('grad-color1', gc[0] ?? '#ff6b6b')
-        setVal('grad-color2', gc[1] ?? '#ffd93d')
-        setVal('grad-color3', gc[2] ?? '#6bccff')
-        setChk('grad-third', gc.length >= 3)
-        setVal('grad-angle', String(fill.gradientAngle ?? 90))
-
-        // Borders
-        const rb = this._resolveBorders()
-        setChk('border-enabled', rb.length > 0)
-        setVal('border-color', rb[0]?.color ?? '#000000')
-        setVal('border-thickness', String(rb[0]?.thickness ?? 2))
-        setVal('border-align', rb[0]?.align ?? 'center')
-        setChk('border2-enabled', rb.length > 1)
-        setVal('border2-color', rb[1]?.color ?? '#ffffff')
-        setVal('border2-thickness', String(rb[1]?.thickness ?? 5))
-
-        // Drop shadow
-        const ds = this._dropShadow
-        setChk('shadow-enabled', ds != null)
-        setVal('shadow-color', ds?.color ?? '#000000')
-        setVal('shadow-size', String(ds?.size ?? 4))
-        setVal('shadow-offset-x', String(ds?.offsetX ?? 2))
-        setVal('shadow-offset-y', String(ds?.offsetY ?? 2))
-        setVal('shadow-blur', String(ds?.blur ?? 4))
-
-        // Glow
-        const glow = this._glow
-        setChk('glow-enabled', glow != null)
-        setVal('glow-color', glow?.color ?? '#00e5ff')
-        setVal('glow-size', String(glow?.size ?? 8))
+        this._canvas = this.querySelector<HTMLCanvasElement>('.tc-bfg-canvas')
     }
 }
 

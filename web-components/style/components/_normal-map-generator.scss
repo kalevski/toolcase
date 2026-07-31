@@ -1,52 +1,27 @@
-// tc-normal-map-generator — interactive height→normal map editor: a slate toolbar
-// (tool icon-buttons + a segmented preview-mode control), a layered canvas stage
-// on a checkerboard backdrop, and strength/emboss/bevel sliders. Dense,
-// businesslike; sharp corners everywhere (border-radius: 0). Colour is status
-// only — the cyan accent stays rare (a genuine highlight). Every cosmetic value
-// flows through --bs-normal-map-generator-* backed by --tc-* tokens.
+// tc-normal-map-generator — canvas-only height→normal map editor: the element owns
+// a single layered canvas stage on a checkerboard backdrop and nothing else (no
+// tool buttons, no preview-mode switcher, no sliders — all of that is configured
+// from the outside via attributes/properties). Dense, businesslike; sharp corners
+// everywhere (border-radius: 0). Every cosmetic value flows through
+// --bs-normal-map-generator-* backed by --tc-* tokens.
 
 @use '../foundation/tokens' as *;
 
 tc-normal-map-generator {
     --bs-normal-map-generator-surface: var(--tc-surface);
-    --bs-normal-map-generator-surface-muted: var(--tc-surface-muted);
     --bs-normal-map-generator-border: var(--tc-border);
-    --bs-normal-map-generator-border-strong: var(--tc-border-strong);
     --bs-normal-map-generator-text: var(--tc-text);
-    --bs-normal-map-generator-muted: var(--tc-text-muted);
-    --bs-normal-map-generator-mono: var(--tc-font-mono, ui-monospace, 'JetBrains Mono', 'SFMono-Regular', monospace);
-
-    // Toolbar is a slate surface with hairline border.
-    --bs-normal-map-generator-toolbar-bg: var(--tc-surface-muted);
-    --bs-normal-map-generator-toolbar-border: var(--tc-border);
-
-    // Icon-button state ladder: hover = slate well, active = ink fill / white icon.
-    --bs-normal-map-generator-tool-color: var(--tc-text-muted);
-    --bs-normal-map-generator-tool-hover-bg: var(--tc-surface-muted);
-    --bs-normal-map-generator-tool-active-bg: var(--tc-app-accent);
-    --bs-normal-map-generator-tool-active-color: var(--tc-app-accent-contrast);
-
-    // Segmented preview control (ink-active segment).
-    --bs-normal-map-generator-seg-bg: var(--tc-surface);
-    --bs-normal-map-generator-seg-border: var(--tc-border-strong);
-    --bs-normal-map-generator-seg-color: var(--tc-text-muted);
-    --bs-normal-map-generator-seg-hover-bg: var(--tc-surface-muted);
-    --bs-normal-map-generator-seg-active-bg: var(--tc-app-accent);
-    --bs-normal-map-generator-seg-active-color: var(--tc-app-accent-contrast);
 
     // Stage: slate well with a checkerboard so transparency reads.
     --bs-normal-map-generator-stage-bg: var(--tc-surface-muted);
     --bs-normal-map-generator-stage-border: var(--tc-border-strong);
-    --bs-normal-map-generator-checker: var(--tc-slate-200, #e2e8f0);
+    --bs-normal-map-generator-checker: var(--tc-border-faint, #f1f5f9);
     --bs-normal-map-generator-checker-size: 12px;
     --bs-normal-map-generator-canvas-height: 280px;
-
-    --bs-normal-map-generator-range-track: var(--tc-border-strong);
-    --bs-normal-map-generator-range-thumb: var(--tc-app-accent);
+    --bs-normal-map-generator-padding: 0.75rem;
 
     --bs-normal-map-generator-focus-ring: var(--tc-app-accent);
     --bs-normal-map-generator-disabled-opacity: 0.55;
-    --bs-normal-map-generator-icon-size: 1rem;
 }
 
 tc-normal-map-generator[disabled] {
@@ -54,120 +29,17 @@ tc-normal-map-generator[disabled] {
 }
 
 .tc-normal-map-generator {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+    display: block;
     border: 1px solid var(--bs-normal-map-generator-border);
     border-radius: 0;
     background: var(--bs-normal-map-generator-surface);
     color: var(--bs-normal-map-generator-text);
-    padding: 0.75rem;
+    padding: var(--bs-normal-map-generator-padding);
 }
 
 // Disabled = opacity + pointer-events (never colour-only).
 .tc-normal-map-generator--disabled {
     pointer-events: none;
-}
-
-// ── Toolbar ──────────────────────────────────────────────────────────────────
-
-.tc-nmg-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    padding: 0.4rem 0.5rem;
-    background: var(--bs-normal-map-generator-toolbar-bg);
-    border: 1px solid var(--bs-normal-map-generator-toolbar-border);
-    border-radius: 0;
-}
-
-.tc-nmg-tools {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-.tc-nmg-tool {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    padding: 0;
-    color: var(--bs-normal-map-generator-tool-color);
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 0;
-    cursor: pointer;
-    transition:
-        background-color var(--tc-transition-fast, 0.15s ease),
-        color var(--tc-transition-fast, 0.15s ease);
-}
-
-.tc-nmg-tool:hover {
-    // hover well
-    background: var(--bs-normal-map-generator-tool-hover-bg);
-}
-
-.tc-nmg-tool--active {
-    // active tool = ink fill, white icon
-    background: var(--bs-normal-map-generator-tool-active-bg);
-    color: var(--bs-normal-map-generator-tool-active-color);
-}
-
-.tc-nmg-tool svg {
-    width: var(--bs-normal-map-generator-icon-size);
-    height: var(--bs-normal-map-generator-icon-size);
-}
-
-.tc-nmg-tool:disabled {
-    opacity: var(--bs-normal-map-generator-disabled-opacity);
-    pointer-events: none;
-}
-
-// ── Segmented preview-mode control ──────────────────────────────────────────
-
-.tc-nmg-segmented {
-    display: inline-flex;
-    align-items: stretch;
-    // grouped controls collapse borders into one frame
-    border: 1px solid var(--bs-normal-map-generator-seg-border);
-    border-radius: 0;
-    overflow: hidden;
-}
-
-.tc-nmg-seg {
-    padding: 0.3rem 0.6rem;
-    font-family: var(--bs-normal-map-generator-mono);
-    font-size: 0.6875rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--bs-normal-map-generator-seg-color);
-    background: var(--bs-normal-map-generator-seg-bg);
-    border: 0;
-    border-left: 1px solid var(--bs-normal-map-generator-seg-border);
-    border-radius: 0;
-    cursor: pointer;
-    transition:
-        background-color var(--tc-transition-fast, 0.15s ease),
-        color var(--tc-transition-fast, 0.15s ease);
-}
-
-.tc-nmg-seg:first-child {
-    border-left: 0;
-}
-
-.tc-nmg-seg:hover {
-    background: var(--bs-normal-map-generator-seg-hover-bg);
-}
-
-.tc-nmg-seg--active {
-    // active segment = ink fill, white text
-    background: var(--bs-normal-map-generator-seg-active-bg);
-    color: var(--bs-normal-map-generator-seg-active-color);
 }
 
 // ── Stage / canvas ──────────────────────────────────────────────────────────
@@ -199,70 +71,22 @@ tc-normal-map-generator[disabled] {
     touch-action: none;
 }
 
-// ── Parameter sliders ───────────────────────────────────────────────────────
-
-.tc-nmg-params {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 0.5rem 1rem;
+// Cursor hints the active tool without adding any chrome.
+tc-normal-map-generator[editable] .tc-nmg-canvas {
+    cursor: crosshair;
 }
 
-.tc-nmg-control {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
+tc-normal-map-generator[tool='pan'] .tc-nmg-canvas {
+    cursor: grab;
 }
 
-.tc-nmg-control-label {
-    flex: 0 0 auto;
-    min-width: 4rem;
-    font-size: 0.8125rem;
-    color: var(--bs-normal-map-generator-muted);
-}
-
-.tc-nmg-range {
-    flex: 1 1 auto;
-    min-width: 0;
-    accent-color: var(--bs-normal-map-generator-range-thumb);
-}
-
-.tc-nmg-control-value {
-    flex: 0 0 auto;
-    min-width: 2.5rem;
-    text-align: right;
-    font-family: var(--bs-normal-map-generator-mono);
-    font-size: 0.75rem;
-    color: var(--bs-normal-map-generator-text);
+tc-normal-map-generator[tool='none'] .tc-nmg-canvas {
+    cursor: default;
 }
 
 // ── Focus always visible ────────────────────────────────────────────────────
 
-.tc-nmg-tool:focus-visible,
-.tc-nmg-seg:focus-visible,
-.tc-nmg-range:focus-visible,
 .tc-nmg-canvas:focus-visible {
     outline: 2px solid var(--bs-normal-map-generator-focus-ring);
     outline-offset: 2px;
-}
-
-// ── 44px touch targets under coarse pointers ────────────────────────────────
-
-@media (pointer: coarse) {
-    .tc-nmg-tool,
-    .tc-nmg-seg {
-        min-height: 44px;
-    }
-
-    .tc-nmg-tool {
-        min-width: 44px;
-    }
-}
-
-// ── Reduced motion: drop colour transitions (no decorative motion to freeze) ──
-
-@media (prefers-reduced-motion: reduce) {
-    .tc-nmg-tool,
-    .tc-nmg-seg {
-        transition: none;
-    }
 }

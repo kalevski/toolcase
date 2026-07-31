@@ -1,11 +1,9 @@
-import { lucideByName } from './internal/lucide'
-
 const TAG_NAME = 'tc-physics-editor'
 
 // ── Public type surface (mirrors @toolcase/react-components PhysicsEditor) ──────
 
-export type PhysicsTool = 'select' | 'polygon' | 'circle' | 'box'
-const TOOLS: PhysicsTool[] = ['select', 'polygon', 'circle', 'box']
+export type PhysicsTool = 'select' | 'polygon' | 'circle' | 'box' | 'none'
+const TOOLS: PhysicsTool[] = ['select', 'polygon', 'circle', 'box', 'none']
 
 export interface PhysicsPoint {
     x: number
@@ -34,32 +32,20 @@ export type PhysicsShape = PolygonShape | CircleShape | BoxShape
 // auto-fit helper (default 1 → any non-fully-transparent pixel).
 const DEFAULT_ALPHA_THRESHOLD = 1
 // Pointer hit radius (CSS px) for vertex / handle grabbing.
-const HANDLE_HIT = 9
+const DEFAULT_HANDLE_HIT = 9
 // Drawn handle size (CSS px).
-const HANDLE_SIZE = 8
+const DEFAULT_HANDLE_SIZE = 8
 // Smallest drawn extent (image coords) that counts as a real shape — anything
 // smaller on pointer-up is discarded as an accidental click.
-const MIN_SIZE = 4
+const DEFAULT_MIN_SIZE = 4
 // Cap the resolution used to sample alpha for the auto-fit helper — a huge image
 // would make the per-pixel scan slow.
-const MAX_ALPHA_DIM = 512
+const DEFAULT_MAX_ALPHA_DIM = 512
 // Douglas-Peucker tolerance (alpha-raster px) for the auto-fit silhouette trace.
 // Matches the @toolcase/react-components default `simplifyTolerance`.
-const SIMPLIFY_TOLERANCE = 1.5
+const DEFAULT_SIMPLIFY_TOLERANCE = 1.5
 
 let _idCounter = 0
-
-const TOOL_META: Array<{ tool: PhysicsTool; label: string; iconHtml: string }> = [
-    { tool: 'select', label: 'Select / move shapes', iconHtml: lucideByName('mouse-pointer-2') },
-    { tool: 'polygon', label: 'Draw polygon', iconHtml: lucideByName('pen-tool') },
-    { tool: 'circle', label: 'Draw circle', iconHtml: lucideByName('circle') },
-    { tool: 'box', label: 'Draw box', iconHtml: lucideByName('square') },
-]
-
-const undoIconHtml = lucideByName('undo-2')
-const redoIconHtml = lucideByName('redo-2')
-const deleteIconHtml = lucideByName('trash-2')
-const autoFitIconHtml = lucideByName('wand-2')
 
 // Box corners in draw order: 0 top-left, 1 top-right, 2 bottom-right, 3 bottom-left.
 function boxCorners(b: BoxShape): PhysicsPoint[] {
@@ -69,6 +55,40 @@ function boxCorners(b: BoxShape): PhysicsPoint[] {
         { x: b.x + b.w, y: b.y + b.h },
         { x: b.x, y: b.y + b.h },
     ]
+}
+
+const numAttr = (el: HTMLElement, name: string, def: number, min = -Infinity): number => {
+    const v = parseFloat(el.getAttribute(name) ?? '')
+    return Number.isFinite(v) ? Math.max(min, v) : def
+}
+
+/** A `[{ type, ... }]` JSON attribute → validated shape list. */
+const parseShapesJson = (raw: string | null): PhysicsShape[] | null => {
+    if (!raw) return null
+    let parsed: unknown
+    try {
+        parsed = JSON.parse(raw)
+    } catch {
+        return null
+    }
+    if (!Array.isArray(parsed)) return null
+    const num = (v: unknown): number => (typeof v === 'number' && Number.isFinite(v) ? v : 0)
+    const out: PhysicsShape[] = []
+    for (const entry of parsed) {
+        if (!entry || typeof entry !== 'object') continue
+        const s = entry as any
+        if (s.type === 'polygon' && Array.isArray(s.points)) {
+            const points = s.points
+                .filter((p: any) => p && typeof p === 'object')
+                .map((p: any) => ({ x: num(p.x), y: num(p.y) }))
+            if (points.length >= 3) out.push({ type: 'polygon', points })
+        } else if (s.type === 'circle') {
+            out.push({ type: 'circle', x: num(s.x), y: num(s.y), r: num(s.r) })
+        } else if (s.type === 'box') {
+            out.push({ type: 'box', x: num(s.x), y: num(s.y), w: num(s.w), h: num(s.h) })
+        }
+    }
+    return out
 }
 
 interface ViewTransform {
@@ -94,6 +114,13 @@ interface HandleHit {
     index?: number
 }
 
+/**
+ * Canvas-only physics shape editor: the element renders a single drawing canvas
+ * and nothing else (no tool buttons, no undo/redo/delete/auto-fit chrome). The
+ * active tool, geometry limits, handle sizes, snapping, history depth, and the
+ * shapes model are all configured from the outside via attributes/properties;
+ * the actions are exposed as imperative methods.
+ */
 export class PhysicsEditor extends HTMLElement {
     private _initialised = false
     private _idPrefix: string
@@ -144,13 +171,34 @@ export class PhysicsEditor extends HTMLElement {
     }
 
     static get observedAttributes(): string[] {
-        return ['source', 'tool', 'alpha-threshold', 'disabled']
+        return [
+            'source',
+            'shapes',
+            'tool',
+            // Geometry / interaction limits
+            'handle-size',
+            'handle-hit',
+            'min-size',
+            'snap',
+            'handles',
+            'shortcuts',
+            'history-limit',
+            // Auto-fit helper
+            'alpha-threshold',
+            'simplify-tolerance',
+            'max-alpha-dim',
+            'auto-fit',
+            'readonly',
+            'disabled',
+        ]
     }
 
     connectedCallback(): void {
         if (!this._initialised) {
             this.render()
             this._initialised = true
+            const attrShapes = parseShapesJson(this.getAttribute('shapes'))
+            if (attrShapes && this._shapes.length === 0) this._shapes = attrShapes
             const attrSource = this.getAttribute('source')
             if (this._source != null) this._loadSource(this._source)
             else if (attrSource) this._loadSource(attrSource)
@@ -179,16 +227,34 @@ export class PhysicsEditor extends HTMLElement {
                 this._source = value
                 this._loadSource(value)
                 break
+            case 'shapes': {
+                const next = parseShapesJson(value)
+                if (next) this.shapes = next
+                break
+            }
             case 'tool':
                 // Switching tools cancels an in-progress polygon.
                 this._pendingPolygon = null
                 this._pendingCursor = null
-                this._updateToolbar()
                 this._scheduleDraw()
                 break
+            case 'handle-size':
+            case 'handles':
+            case 'min-size':
+                this._scheduleDraw()
+                break
+            case 'max-alpha-dim':
+                // Re-sample the alpha raster at the new resolution cap.
+                if (this._img) this._extractAlpha(this._img)
+                break
+            case 'history-limit':
+                this._trimHistory()
+                break
             case 'alpha-threshold':
+            case 'simplify-tolerance':
                 // Affects only the next auto-fit run; nothing to redraw.
                 break
+            case 'readonly':
             case 'disabled':
                 this._updateDisabled()
                 break
@@ -205,6 +271,62 @@ export class PhysicsEditor extends HTMLElement {
         this.setAttribute('tool', v)
     }
 
+    /** Drawn handle size in CSS px. */
+    get handleSize(): number {
+        return numAttr(this, 'handle-size', DEFAULT_HANDLE_SIZE, 1)
+    }
+    set handleSize(v: number) {
+        this.setAttribute('handle-size', String(v))
+    }
+
+    /** Pointer grab radius for vertices/handles, in CSS px. */
+    get handleHit(): number {
+        return numAttr(this, 'handle-hit', DEFAULT_HANDLE_HIT, 1)
+    }
+    set handleHit(v: number) {
+        this.setAttribute('handle-hit', String(v))
+    }
+
+    /** Smallest accepted extent (image px) for a freshly drawn circle/box. */
+    get minSize(): number {
+        return numAttr(this, 'min-size', DEFAULT_MIN_SIZE, 0)
+    }
+    set minSize(v: number) {
+        this.setAttribute('min-size', String(v))
+    }
+
+    /** Grid step (image px) that drawn/edited points snap to; `0` disables it. */
+    get snap(): number {
+        return numAttr(this, 'snap', 0, 0)
+    }
+    set snap(v: number) {
+        this.setAttribute('snap', String(v))
+    }
+
+    /** `handles="off"` hides the vertex/resize handles and disables grabbing them. */
+    get handles(): boolean {
+        return this.getAttribute('handles') !== 'off'
+    }
+    set handles(v: boolean) {
+        this.setAttribute('handles', v ? 'on' : 'off')
+    }
+
+    /** `shortcuts="off"` disables the undo/redo/delete/close keyboard bindings. */
+    get shortcuts(): boolean {
+        return this.getAttribute('shortcuts') !== 'off'
+    }
+    set shortcuts(v: boolean) {
+        this.setAttribute('shortcuts', v ? 'on' : 'off')
+    }
+
+    /** Maximum undo snapshots kept; `0` = unlimited. */
+    get historyLimit(): number {
+        return Math.round(numAttr(this, 'history-limit', 0, 0))
+    }
+    set historyLimit(v: number) {
+        this.setAttribute('history-limit', String(v))
+    }
+
     get alphaThreshold(): number {
         const v = parseFloat(this.getAttribute('alpha-threshold') ?? '')
         if (!Number.isFinite(v)) return DEFAULT_ALPHA_THRESHOLD
@@ -214,12 +336,51 @@ export class PhysicsEditor extends HTMLElement {
         this.setAttribute('alpha-threshold', String(v))
     }
 
+    /** Douglas-Peucker tolerance for the auto-fit silhouette trace. */
+    get simplifyTolerance(): number {
+        return numAttr(this, 'simplify-tolerance', DEFAULT_SIMPLIFY_TOLERANCE, 0)
+    }
+    set simplifyTolerance(v: number) {
+        this.setAttribute('simplify-tolerance', String(v))
+    }
+
+    /** Resolution cap (longest edge) for the alpha raster used by `autoFit()`. */
+    get maxAlphaDim(): number {
+        return Math.max(1, Math.round(numAttr(this, 'max-alpha-dim', DEFAULT_MAX_ALPHA_DIM, 1)))
+    }
+    set maxAlphaDim(v: number) {
+        this.setAttribute('max-alpha-dim', String(v))
+    }
+
+    /** Runs `autoFit()` once as soon as a source image finishes loading. */
+    get autoFitOnLoad(): boolean {
+        return this.hasAttribute('auto-fit')
+    }
+    set autoFitOnLoad(v: boolean) {
+        if (v) this.setAttribute('auto-fit', '')
+        else this.removeAttribute('auto-fit')
+    }
+
+    /** View-only: shapes render and stay selectable-free, without the dimmed look. */
+    get readonly(): boolean {
+        return this.hasAttribute('readonly')
+    }
+    set readonly(v: boolean) {
+        if (v) this.setAttribute('readonly', '')
+        else this.removeAttribute('readonly')
+    }
+
     get disabled(): boolean {
         return this.hasAttribute('disabled')
     }
     set disabled(v: boolean) {
         if (v) this.setAttribute('disabled', '')
         else this.removeAttribute('disabled')
+    }
+
+    /** No editing at all — `disabled`, `readonly`, or `tool="none"`. */
+    private get _locked(): boolean {
+        return this.disabled || this.readonly || this.tool === 'none'
     }
 
     // ── source (URL string | File | Blob) ───────────────────────────────────────
@@ -236,7 +397,7 @@ export class PhysicsEditor extends HTMLElement {
         if (this._initialised) this._loadSource(this._source)
     }
 
-    // ── shapes (JS property) ─────────────────────────────────────────────────────
+    // ── shapes (JS property; also settable as a JSON attribute) ──────────────────
 
     get shapes(): PhysicsShape[] {
         return this._clone(this._shapes)
@@ -249,10 +410,29 @@ export class PhysicsEditor extends HTMLElement {
         this._redo = []
         this._pendingPolygon = null
         this._pendingCursor = null
-        if (this._initialised) {
-            this._scheduleDraw()
-            this._updateToolbar()
-        }
+        if (this._initialised) this._scheduleDraw()
+    }
+
+    /** Index of the selected shape, or `-1`. */
+    get selectedIndex(): number {
+        return this._selected
+    }
+    set selectedIndex(v: number) {
+        const idx = Number.isFinite(v) && v >= 0 && v < this._shapes.length ? Math.floor(v) : -1
+        this._setSelected(idx)
+    }
+
+    get canUndo(): boolean {
+        return this._undo.length > 0
+    }
+
+    get canRedo(): boolean {
+        return this._redo.length > 0
+    }
+
+    /** Whether `autoFit()` has an alpha raster to trace. */
+    get canAutoFit(): boolean {
+        return this._alphaData != null && this._natW > 0
     }
 
     // ── Public actions ───────────────────────────────────────────────────────────
@@ -266,7 +446,6 @@ export class PhysicsEditor extends HTMLElement {
         this._emitChange()
         this._announce('Undo')
         this._scheduleDraw()
-        this._updateToolbar()
     }
 
     redo(): void {
@@ -278,7 +457,6 @@ export class PhysicsEditor extends HTMLElement {
         this._emitChange()
         this._announce('Redo')
         this._scheduleDraw()
-        this._updateToolbar()
     }
 
     deleteSelected(): void {
@@ -291,6 +469,23 @@ export class PhysicsEditor extends HTMLElement {
         })
         this._setSelected(-1)
         this._announce('Shape deleted')
+    }
+
+    /** Removes every shape (undoable). */
+    clear(): void {
+        if (this.disabled || this._shapes.length === 0) return
+        this._mutate(() => [])
+        this._setSelected(-1)
+        this._announce('All shapes cleared')
+    }
+
+    /** Drops an in-progress polygon without committing it. */
+    cancelDrawing(): void {
+        if (!this._pendingPolygon) return
+        this._pendingPolygon = null
+        this._pendingCursor = null
+        this._announce('Polygon cancelled')
+        this._scheduleDraw()
     }
 
     /**
@@ -317,7 +512,7 @@ export class PhysicsEditor extends HTMLElement {
             this._announce('No opaque region found')
             return
         }
-        const ring = this._simplify(contour, SIMPLIFY_TOLERANCE)
+        const ring = this._simplify(contour, this.simplifyTolerance)
         if (ring.length < 3) {
             this._announce('No opaque region found')
             return
@@ -480,7 +675,6 @@ export class PhysicsEditor extends HTMLElement {
             this._natH = 0
             this._alphaData = null
             this._scheduleDraw()
-            this._updateToolbar()
             return
         }
         let url: string
@@ -501,7 +695,7 @@ export class PhysicsEditor extends HTMLElement {
             this._natH = img.naturalHeight || img.height
             this._extractAlpha(img)
             this._scheduleDraw()
-            this._updateToolbar()
+            if (this.autoFitOnLoad) this.autoFit()
         }
         img.onerror = () => {
             if (revoke) URL.revokeObjectURL(url)
@@ -510,7 +704,6 @@ export class PhysicsEditor extends HTMLElement {
             this._natH = 0
             this._alphaData = null
             this._scheduleDraw()
-            this._updateToolbar()
         }
         img.src = url
     }
@@ -523,7 +716,7 @@ export class PhysicsEditor extends HTMLElement {
             this._alphaData = null
             return
         }
-        const fit = Math.min(1, MAX_ALPHA_DIM / Math.max(iw, ih))
+        const fit = Math.min(1, this.maxAlphaDim / Math.max(iw, ih))
         const w = Math.max(1, Math.round(iw * fit))
         const h = Math.max(1, Math.round(ih * fit))
         const canvas = document.createElement('canvas')
@@ -576,6 +769,13 @@ export class PhysicsEditor extends HTMLElement {
         return { x: (cssX - offsetX) / scale, y: (cssY - offsetY) / scale }
     }
 
+    /** Image-space point snapped to the `snap` grid (identity when snapping is off). */
+    private _snapPoint(p: PhysicsPoint): PhysicsPoint {
+        const step = this.snap
+        if (step <= 0) return p
+        return { x: Math.round(p.x / step) * step, y: Math.round(p.y / step) * step }
+    }
+
     /** Pointer position → canvas CSS px. */
     private _cssPointer(e: { clientX: number; clientY: number }): PhysicsPoint {
         const canvas = this._canvas()!
@@ -592,9 +792,11 @@ export class PhysicsEditor extends HTMLElement {
     // ── Hit testing ──────────────────────────────────────────────────────────────
 
     private _hitHandle(idx: number, cssP: PhysicsPoint): HandleHit | null {
+        if (!this.handles) return null
         const shape = this._shapes[idx]
         if (!shape) return null
-        const near = (p: PhysicsPoint) => Math.hypot(cssP.x - p.x, cssP.y - p.y) <= HANDLE_HIT
+        const hit = this.handleHit
+        const near = (p: PhysicsPoint) => Math.hypot(cssP.x - p.x, cssP.y - p.y) <= hit
         if (shape.type === 'polygon') {
             for (let i = 0; i < shape.points.length; i++) {
                 if (near(this._toCss(shape.points[i]))) return { kind: 'vertex', index: i }
@@ -649,12 +851,12 @@ export class PhysicsEditor extends HTMLElement {
     // ── Pointer interaction (select / draw) ──────────────────────────────────────
 
     private _onPointerDown = (e: PointerEvent): void => {
-        if (this.disabled) return
+        if (this._locked) return
         const canvas = this._canvas()
         if (!canvas) return
         const tool = this.tool
         if (tool === 'polygon') return // handled via click / dblclick
-        const p = this._toImage(e)
+        const p = this._snapPoint(this._toImage(e))
         const cssP = this._cssPointer(e)
 
         if (tool === 'select') {
@@ -743,11 +945,12 @@ export class PhysicsEditor extends HTMLElement {
 
     private _onPointerMove(e: PointerEvent): void {
         if (!this._dragKind) return
-        const p = this._toImage(e)
+        const p = this._snapPoint(this._toImage(e))
         const shape = this._shapes[this._dragIndex]
         const orig = this._dragOrig
         const start = this._dragStart
         if (!shape || !start) return
+        const minSize = this.minSize
         switch (this._dragKind) {
             case 'move':
                 if (orig) this._translateShape(shape, orig, p.x - start.x, p.y - start.y)
@@ -759,7 +962,7 @@ export class PhysicsEditor extends HTMLElement {
                 break
             case 'radius':
                 if (shape.type === 'circle') {
-                    shape.r = Math.max(MIN_SIZE, Math.hypot(p.x - shape.x, p.y - shape.y))
+                    shape.r = Math.max(minSize, Math.hypot(p.x - shape.x, p.y - shape.y))
                 }
                 break
             case 'circle-new':
@@ -791,16 +994,17 @@ export class PhysicsEditor extends HTMLElement {
         if (!kind) return
 
         // Discard accidentally-tiny freshly-drawn shapes.
+        const minSize = this.minSize
         const shape = this._shapes[this._dragIndex]
         let discarded = false
-        if (kind === 'circle-new' && shape && shape.type === 'circle' && shape.r < MIN_SIZE) {
+        if (kind === 'circle-new' && shape && shape.type === 'circle' && shape.r < minSize) {
             this._shapes.splice(this._dragIndex, 1)
             discarded = true
         } else if (
             kind === 'box-new' &&
             shape &&
             shape.type === 'box' &&
-            (shape.w < MIN_SIZE || shape.h < MIN_SIZE)
+            (shape.w < minSize || shape.h < minSize)
         ) {
             this._shapes.splice(this._dragIndex, 1)
             discarded = true
@@ -809,7 +1013,6 @@ export class PhysicsEditor extends HTMLElement {
             this._setSelected(-1)
             this._dragBefore = null
             this._scheduleDraw()
-            this._updateToolbar()
             return
         }
 
@@ -817,12 +1020,12 @@ export class PhysicsEditor extends HTMLElement {
         if (this._dragBefore && JSON.stringify(this._dragBefore) !== JSON.stringify(this._shapes)) {
             this._undo.push(this._dragBefore)
             this._redo = []
+            this._trimHistory()
             this._emitChange()
         }
         this._dragBefore = null
         this._dragOrig = null
         this._scheduleDraw()
-        this._updateToolbar()
     }
 
     private _cleanupDrag(): void {
@@ -864,8 +1067,8 @@ export class PhysicsEditor extends HTMLElement {
     // ── Polygon (click to add vertex, dbl-click / Enter to close) ─────────────────
 
     private _onCanvasClick = (e: MouseEvent): void => {
-        if (this.disabled || this.tool !== 'polygon') return
-        const p = this._toImage(e)
+        if (this._locked || this.tool !== 'polygon') return
+        const p = this._snapPoint(this._toImage(e))
         const cssP = this._cssPointer(e)
         if (!this._pendingPolygon) {
             this._pendingPolygon = [{ x: p.x, y: p.y }]
@@ -877,7 +1080,7 @@ export class PhysicsEditor extends HTMLElement {
         // Click near the first vertex closes the polygon (≥ 3 points).
         if (this._pendingPolygon.length >= 3) {
             const first = this._toCss(this._pendingPolygon[0])
-            if (Math.hypot(cssP.x - first.x, cssP.y - first.y) <= HANDLE_HIT) {
+            if (Math.hypot(cssP.x - first.x, cssP.y - first.y) <= this.handleHit) {
                 this._closePolygon()
                 return
             }
@@ -887,14 +1090,14 @@ export class PhysicsEditor extends HTMLElement {
     }
 
     private _onCanvasDblClick = (e: MouseEvent): void => {
-        if (this.disabled || this.tool !== 'polygon') return
+        if (this._locked || this.tool !== 'polygon') return
         e.preventDefault()
         this._closePolygon()
     }
 
     private _onCanvasHover = (e: PointerEvent): void => {
         if (this.tool !== 'polygon' || !this._pendingPolygon) return
-        this._pendingCursor = this._toImage(e)
+        this._pendingCursor = this._snapPoint(this._toImage(e))
         this._scheduleDraw()
     }
 
@@ -920,7 +1123,7 @@ export class PhysicsEditor extends HTMLElement {
 
     /** Drop consecutive near-duplicate points (covers the dbl-click double add). */
     private _dedupePoints(pts: PhysicsPoint[]): PhysicsPoint[] {
-        const eps = HANDLE_HIT / (this._view.scale || 1)
+        const eps = this.handleHit / (this._view.scale || 1)
         const out: PhysicsPoint[] = []
         for (const pt of pts) {
             const last = out[out.length - 1]
@@ -932,7 +1135,7 @@ export class PhysicsEditor extends HTMLElement {
     // ── Keyboard ──────────────────────────────────────────────────────────────────
 
     private _onKeyDown = (e: KeyboardEvent): void => {
-        if (this.disabled) return
+        if (this.disabled || this.readonly || !this.shortcuts) return
         const meta = e.ctrlKey || e.metaKey
         if (meta && (e.key === 'z' || e.key === 'Z')) {
             e.preventDefault()
@@ -953,12 +1156,7 @@ export class PhysicsEditor extends HTMLElement {
             return
         }
         if (e.key === 'Escape') {
-            if (this._pendingPolygon) {
-                this._pendingPolygon = null
-                this._pendingCursor = null
-                this._announce('Polygon cancelled')
-                this._scheduleDraw()
-            }
+            this.cancelDrawing()
             return
         }
         if (e.key === 'Delete' || e.key === 'Backspace') {
@@ -969,34 +1167,6 @@ export class PhysicsEditor extends HTMLElement {
         }
     }
 
-    // ── Toolbar ────────────────────────────────────────────────────────────────────
-
-    private _onToolbarClick = (e: Event): void => {
-        if (this.disabled) return
-        const target = e.target as HTMLElement
-        const toolBtn = target.closest<HTMLElement>('[data-tool]')
-        if (toolBtn) {
-            this.tool = toolBtn.getAttribute('data-tool') as PhysicsTool
-            return
-        }
-        const actionBtn = target.closest<HTMLElement>('[data-action]')
-        if (!actionBtn || actionBtn.getAttribute('aria-disabled') === 'true') return
-        switch (actionBtn.getAttribute('data-action')) {
-            case 'undo':
-                this.undo()
-                break
-            case 'redo':
-                this.redo()
-                break
-            case 'delete':
-                this.deleteSelected()
-                break
-            case 'autofit':
-                this.autoFit()
-                break
-        }
-    }
-
     // ── History / selection helpers ───────────────────────────────────────────────
 
     private _mutate(producer: () => PhysicsShape[]): void {
@@ -1004,10 +1174,17 @@ export class PhysicsEditor extends HTMLElement {
         const next = producer()
         this._undo.push(before)
         this._redo = []
+        this._trimHistory()
         this._shapes = next
         this._emitChange()
         this._scheduleDraw()
-        this._updateToolbar()
+    }
+
+    private _trimHistory(): void {
+        const limit = this.historyLimit
+        if (limit <= 0) return
+        if (this._undo.length > limit) this._undo.splice(0, this._undo.length - limit)
+        if (this._redo.length > limit) this._redo.splice(0, this._redo.length - limit)
     }
 
     private _setSelected(idx: number): void {
@@ -1015,7 +1192,6 @@ export class PhysicsEditor extends HTMLElement {
         const shape = idx >= 0 ? this._shapes[idx] : null
         if (shape) this._announce(`Selected ${shape.type} shape`)
         this._scheduleDraw()
-        this._updateToolbar()
     }
 
     private _clampSelection(): void {
@@ -1032,6 +1208,8 @@ export class PhysicsEditor extends HTMLElement {
 
     private _emitChange(): void {
         const detail = { shapes: this._clone(this._shapes) }
+        // The `shapes` attribute is input-only — a full JSON snapshot per drag
+        // commit would bloat the DOM; read the model back via the property/event.
         this.dispatchEvent(new CustomEvent('tc-change', { bubbles: true, composed: true, detail }))
         if (typeof this.onChange === 'function') this.onChange(detail.shapes)
     }
@@ -1123,7 +1301,7 @@ export class PhysicsEditor extends HTMLElement {
             ctx.stroke()
         })
 
-        if (this._selected >= 0 && this._shapes[this._selected]) {
+        if (this.handles && this._selected >= 0 && this._shapes[this._selected]) {
             this._drawHandles(ctx, this._shapes[this._selected], pal)
         }
         if (this._pendingPolygon && this._pendingPolygon.length > 0) {
@@ -1150,7 +1328,7 @@ export class PhysicsEditor extends HTMLElement {
     }
 
     private _handleSquare(ctx: CanvasRenderingContext2D, p: PhysicsPoint, pal: Palette): void {
-        const s = HANDLE_SIZE
+        const s = this.handleSize
         ctx.fillStyle = pal.handleBg
         ctx.strokeStyle = pal.handleBorder
         ctx.lineWidth = 1.5
@@ -1160,7 +1338,7 @@ export class PhysicsEditor extends HTMLElement {
 
     private _handleCircle(ctx: CanvasRenderingContext2D, p: PhysicsPoint, pal: Palette): void {
         ctx.beginPath()
-        ctx.arc(p.x, p.y, HANDLE_SIZE / 2, 0, Math.PI * 2)
+        ctx.arc(p.x, p.y, this.handleSize / 2, 0, Math.PI * 2)
         ctx.fillStyle = pal.handleBg
         ctx.strokeStyle = pal.handleBorder
         ctx.lineWidth = 1.5
@@ -1181,6 +1359,7 @@ export class PhysicsEditor extends HTMLElement {
 
     private _drawPending(ctx: CanvasRenderingContext2D, pal: Palette): void {
         const pts = this._pendingPolygon!
+        const handleSize = this.handleSize
         ctx.beginPath()
         pts.forEach((pt, i) => {
             const c = this._toCss(pt)
@@ -1200,7 +1379,7 @@ export class PhysicsEditor extends HTMLElement {
         pts.forEach((pt, i) => {
             const c = this._toCss(pt)
             ctx.beginPath()
-            ctx.arc(c.x, c.y, i === 0 ? HANDLE_SIZE / 2 + 1 : HANDLE_SIZE / 2 - 1, 0, Math.PI * 2)
+            ctx.arc(c.x, c.y, i === 0 ? handleSize / 2 + 1 : handleSize / 2 - 1, 0, Math.PI * 2)
             ctx.fillStyle = pal.preview
             ctx.fill()
         })
@@ -1226,7 +1405,7 @@ export class PhysicsEditor extends HTMLElement {
             if (disabled) root.setAttribute('aria-disabled', 'true')
             else root.removeAttribute('aria-disabled')
         }
-        if (disabled) {
+        if (this._locked) {
             this._pendingPolygon = null
             this._pendingCursor = null
             this._cleanupDrag()
@@ -1235,51 +1414,7 @@ export class PhysicsEditor extends HTMLElement {
         this._scheduleDraw()
     }
 
-    // ── Toolbar state ─────────────────────────────────────────────────────────────
-
-    private _updateToolbar(): void {
-        const tool = this.tool
-        this.querySelectorAll<HTMLButtonElement>('[data-tool]').forEach((btn) => {
-            const active = btn.getAttribute('data-tool') === tool
-            btn.classList.toggle('tc-physics-editor-tool--active', active)
-            btn.setAttribute('aria-pressed', active ? 'true' : 'false')
-        })
-        const setAction = (action: string, enabled: boolean) => {
-            const btn = this.querySelector<HTMLButtonElement>(`[data-action="${action}"]`)
-            if (!btn) return
-            btn.classList.toggle('tc-physics-editor-action--disabled', !enabled)
-            btn.setAttribute('aria-disabled', enabled ? 'false' : 'true')
-        }
-        setAction('autofit', this._alphaData != null && this._natW > 0)
-        setAction('undo', this._undo.length > 0)
-        setAction('redo', this._redo.length > 0)
-        setAction('delete', this._selected >= 0)
-    }
-
     // ── Markup ────────────────────────────────────────────────────────────────────
-
-    private _toolButtonsHtml(): string {
-        const tool = this.tool
-        return TOOL_META.map(({ tool: t, label, iconHtml }) => {
-            const active = t === tool
-            return (
-                `<button type="button" class="tc-physics-editor-tool${active ? ' tc-physics-editor-tool--active' : ''}"` +
-                ` data-tool="${t}" aria-label="${label}" aria-pressed="${active ? 'true' : 'false'}">${iconHtml}</button>`
-            )
-        }).join('')
-    }
-
-    private _actionButtonsHtml(): string {
-        const action = (name: string, label: string, iconHtml: string) =>
-            `<button type="button" class="tc-physics-editor-action tc-physics-editor-action--disabled"` +
-            ` data-action="${name}" aria-label="${label}" aria-disabled="true">${iconHtml}</button>`
-        return (
-            action('autofit', 'Auto-fit shape to image', autoFitIconHtml) +
-            action('undo', 'Undo', undoIconHtml) +
-            action('redo', 'Redo', redoIconHtml) +
-            action('delete', 'Delete selected shape', deleteIconHtml)
-        )
-    }
 
     private render(): void {
         this._paletteCache = null
@@ -1287,20 +1422,14 @@ export class PhysicsEditor extends HTMLElement {
         const canvasId = `${this._idPrefix}-canvas`
         this.innerHTML =
             `<div class="tc-physics-editor${disabled ? ' tc-physics-editor--disabled' : ''}"${disabled ? ' aria-disabled="true"' : ''}>` +
-            `<div class="tc-physics-editor-toolbar" role="toolbar" aria-label="Physics shape editor tools">` +
-            `<div class="tc-physics-editor-tools" role="group" aria-label="Drawing tools">${this._toolButtonsHtml()}</div>` +
-            `<div class="tc-physics-editor-actions" role="group" aria-label="History and actions">${this._actionButtonsHtml()}</div>` +
-            `</div>` +
             `<div class="tc-physics-editor-stage" role="application"` +
-            ` aria-label="Shape canvas. Use the toolbar to pick a tool, then draw or edit shapes. Keyboard: Ctrl/Cmd+Z undo, Ctrl/Cmd+Shift+Z redo, Delete removes the selected shape, Enter closes a polygon, Escape cancels.">` +
+            ` aria-label="Shape canvas. Set the active tool from outside the component, then draw or edit shapes. Keyboard: Ctrl/Cmd+Z undo, Ctrl/Cmd+Shift+Z redo, Delete removes the selected shape, Enter closes a polygon, Escape cancels.">` +
             `<canvas class="tc-physics-editor-canvas" id="${canvasId}" tabindex="0"` +
             ` aria-label="Physics shape drawing canvas"></canvas>` +
             `</div>` +
             `<span class="tc-physics-editor-status visually-hidden" role="status" aria-live="polite"></span>` +
             `</div>`
 
-        const root = this.querySelector('.tc-physics-editor')
-        if (root) root.addEventListener('click', this._onToolbarClick)
         const canvas = this._canvas()
         if (canvas) {
             canvas.addEventListener('pointerdown', this._onPointerDown)
@@ -1309,8 +1438,6 @@ export class PhysicsEditor extends HTMLElement {
             canvas.addEventListener('dblclick', this._onCanvasDblClick)
             canvas.addEventListener('keydown', this._onKeyDown)
         }
-
-        this._updateToolbar()
     }
 }
 
