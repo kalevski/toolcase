@@ -1,6 +1,6 @@
 ---
 name: web-components
-description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, MobileShell, AppBar, SwipePager, StepPager, DashboardContent, DashboardSidebar, Login, Container, Row, Col, Spacer, Stack), content (Accordion, AccordionItem, ActionHeader, ActionItems, ActionRowList, AddSlot, Alert, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendIndicator, Leaderboard, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, ButtonGroup, Card, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EcosystemMap, EmptyState, GameShowcaseCard, GithubStarsCard, GoodFirstIssues, Group, Hero, HeroStatsBar, Heading, Image, InfiniteScroll, Kbd, ListCard, ListGroup, LogoCloud, MaintainerCard, Marquee, MetricTile, MetricGrid, MigrationGuide, PageFooter, Panel, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, File, UserPanel, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, ScoreDisplay, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, DataList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, FAQList, FeatureMatrix, Text, VersionLabel, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, PageTabs, TabDock, DayStrip, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, DebugOverlay, Modal, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckboxGroup, Chip, ChipGroup, ColorPicker, IconPicker, DatePicker, EarlySignupForm, EditableText, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, MultiCardSelect, NewsletterSignup, Option, Radio, RadioGroup, Range, RangeSlider, DeadzoneSlider, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
+description: Use when building UI with @toolcase/web-components — framework-free HTML5 Web Components (`tc-*` custom elements) with from-scratch toolcase styling and a Bootstrap-compatible class API. Covers layout (BasicLayout, DashboardLayout, MobileShell, AppBar, ActionBar, SwipePager, StepPager, DashboardContent, DashboardSidebar, Login, Container, Row, Col, Spacer, Stack), content (Accordion, AccordionItem, ActionHeader, ActionItems, ActionRowList, AddSlot, Alert, Notice, AnnouncementBar, ApiReferenceTable, AssetRow, AssetRowList, Avatar, Badge, BadgeRow, Banner, Brand, Build, BriefCard, BundleBar, CdnMap, CalloutQuote, Changelog, ChartContainer, Sparkline, TrendSpark, TrendIndicator, Leaderboard, LeaderboardTrend, CodeLabelCell, CodeSnippet, CodeWithOutput, CommunityLinks, ConfigPreview, ContributorWall, CookbookGrid, CoolButton, ActivityCard, BasicCard, Button, Fab, ButtonGroup, Card, TaxonomyCard, Carousel, CloseButton, Collapse, Divider, Dropdown, DownloadStats, EcosystemMap, EmptyState, GameShowcaseCard, GithubStarsCard, GoodFirstIssues, Group, Hero, HeroStatsBar, Heading, Image, InfiniteScroll, LoadMore, Kbd, ListCard, ListGroup, ListSection, LogoCloud, MaintainerCard, Marquee, MetricTile, MetricGrid, StatTile, MacroGrid, QuotaMeter, MigrationGuide, PageFooter, Panel, PhaseGrid, Pipeline, PinnedFeatureShowcase, PluginGrid, PricingCard, File, UserPanel, QueuedFile, Placeholder, Progress, PulseIndicator, ScoringRules, ScoreDisplay, SectionCard, SectionFlag, Skeleton, Spinner, SprintChain, Stamp, MetricCard, StatCard, StateMachine, StatusCard, StatusDot, Stepper, Tag, DataList, TierLadder, Timeline, UsageSummaryPanel, WelcomeGuide, CommandReference, Comparator, CompatibilityMatrix, CountdownTimer, FAQList, FeatureMatrix, Text, VersionLabel, VisuallyHidden), navigation (Breadcrumb, CoolNav, Nav, Navbar, PageTabs, TabDock, DayStrip, Pagination, Scrollspy, SocialLinks, Stepper), overlays & feedback (ContextMenu, DebugOverlay, Modal, BottomSheet, Offcanvas, Popover, Toast, Tooltip), and forms (CardOptions, Check, CheckRow, CheckboxGroup, Chip, ChipGroup, ColorPicker, IconPicker, DatePicker, EarlySignupForm, EditableText, FloatingLabel, Form, HelperText, Input, InputGroup, InputGroupText, Label, MultiCardSelect, NewsletterSignup, Option, Radio, RadioGroup, Range, RangeSlider, DeadzoneSlider, Select, Switch, Textarea). Consumable from any stack — React, Vue, Svelte, or plain HTML.
 ---
 
 # web-components — API Reference
@@ -694,6 +694,7 @@ tc-mobile-shell                          display:flex; flex-direction:column; he
 | `scroll-restore` | `auto` \| `manual` | `auto` | `auto` stores the pane's `scrollTop` per `data-key` and restores it when that key comes back, which is what makes tab switching feel native. `manual` hands the offset to the consumer: the shell neither restores nor resets it on a key change. |
 | `edge` | `top` \| `bottom` \| `both` | `both` | Which hardware safe areas to honour. `bottom` lets a full-bleed screen (a login canvas, a cooking mode) draw to the top edge while still clearing the home indicator. |
 | `pane-bg` | CSS colour | *(unset)* | Shorthand for setting `--bs-mobile-shell-bg` on the host. Written through `CSSStyleDeclaration.setProperty`, so a malformed value is dropped rather than reaching the stylesheet. |
+| `desktop` | boolean | *(absent)* | Opt-in desktop layout, inert below 992px. From `lg` up the frame widens to `--bs-mobile-shell-max-width-desktop`, a slotted `tc-tab-dock` becomes a full-height **left rail** (the shell reserves the strip as `padding-left`, only while a dock child exists), `tc-bottom-sheet`s in the overlay layer render as **centred dialogs** with drag-to-dismiss off, `tc-action-bar` centres its content and `tc-fab` drops its dock clearance to 32px. All CSS, all scoped to `tc-mobile-shell[desktop]` — the phone and tablet layout, and every shell without the attribute, are untouched by construction. |
 
 **JS Properties**
 
@@ -746,6 +747,8 @@ Derived from `window.visualViewport` (guarded — absent means a flat `0px`) as 
 | `--bs-mobile-shell-inset-bottom` | `var(--tc-safe-bottom, 0px)` | Bottom hardware inset. Zeroed by `edge="top"`. |
 | `--bs-mobile-shell-max-width` | `480px` | At ≥768px the shell centres itself at this width rather than stretching to a column no phone screen was drawn for. `none` turns the framing off — **set it on the element**, see below. |
 | `--bs-mobile-shell-frame-line` | `var(--tc-border)` | The side hairlines that go with the centred framing. `transparent` removes them — **set it on the element**, see below. |
+| `--bs-mobile-shell-max-width-desktop` | `1280px` | The frame cap the `desktop` attribute switches to at ≥992px (still centred, still hairline-framed). |
+| `--bs-mobile-shell-rail-width` | `88px` | Width of the desktop nav rail. One token feeds both sides — the shell's `padding-left` reservation and the dock's own rail box — so they cannot drift. |
 
 **Where to set a `--bs-mobile-shell-*` override.** On the element (an inline `style`, or a
 `tc-mobile-shell { … }` rule loaded after `@toolcase/web-components/style.css`) — **not at
@@ -1405,7 +1408,10 @@ It **composes `tc-swipe-pager`**: the gesture, the snap geometry, the settled-in
 ```
 tc-step-pager                        display:flex; flex-direction:column
   ├─ .tc-step-pager-top              ✕ · context title · wake chip
-  ├─ .tc-step-pager-progress         N segments, 4px tall, gap 4px, aria-hidden
+  ├─ .tc-step-pager-progress         the rule + counter, aria-hidden
+  │    ├─ .tc-step-pager-track       N segments 4px tall gap 4px — or one bar
+  │    │    └─ .tc-step-pager-bar    the fill, bar mode only
+  │    └─ .tc-step-pager-count       „3/15", bar mode only
   ├─ .tc-step-pager-pages            the tc-swipe-pager — flex:1
   │    └─ .tc-step-pager-step        one page, 26px gutter, scrolls if it must
   │         └─ .tc-step-pager-body   auto-margin centred
@@ -1425,6 +1431,8 @@ tc-step-pager                        display:flex; flex-direction:column
 |-----------|------|---------|-------------|
 | `index` | number | `0` | The current step, **reflected**. Writing it pages there; the element writes it back on every settled change. |
 | `heading` | string | *(unset)* | The muted `12.5px` context title — the recipe's name. Also becomes the inner pager's `aria-label`, so that focusable group is not announced as a bare „group". |
+| `heading-action` | boolean | absent | Make the context title a **button** that fires `tc-step-pager-heading`. See below. |
+| `max-segments` | number | `10` | How many steps still get one progress segment each. Past it the rule becomes a single bar + a „3/15" counter. See below. |
 | `next-label` | string | `next` message (`Next`) | The advance button's label on every step but the last. |
 | `done-label` | string | `done` message (`Done`) | Its label on the **last** step — the design's „Готово". |
 | `hint-label` | string | `tip` message (`Tip`) | The eyebrow above a step's hint block, rendered uppercase. `hint-label=""` hides the eyebrow and keeps the block. |
@@ -1434,6 +1442,7 @@ tc-step-pager                        display:flex; flex-direction:column
 | `keep-awake` | boolean | absent | Ask the OS to keep the screen on while mounted and visible. See below. |
 | `wake-label` | string | `screenAwake` message | The wake chip's label — „Екранот е буден". |
 | `data-wake` | — | — | **Written by the element**, never by you: present only while a screen wake lock is genuinely held. It is what shows the chip. |
+| `data-progress-bar` | — | — | **Written by the element**: present while the progress rule is in bar mode (`count > max-segments`). Style off it if you want more than the two shapes below. |
 
 **JS Properties**
 
@@ -1445,8 +1454,9 @@ tc-step-pager                        display:flex; flex-direction:column
 | `wake` | boolean (readonly) | `false` | Whether a lock is **actually held** — not whether one was asked for. |
 | `nextLabel` / `doneLabel` / `hintLabel` / `backLabel` / `closeLabel` / `wakeLabel` | string | *(message)* | Resolve the attribute, falling back to the message registry. |
 | `heading` / `swipeHint` | `string \| null` | `null` | Reflect their attributes. |
-| `keepAwake` | boolean | `false` | Reflects `keep-awake`. |
-| `onIndexChange` / `onDone` / `onClose` | callbacks | `null` | Alongside the three events. |
+| `keepAwake` / `headingAction` | boolean | `false` | Reflect their attributes. |
+| `maxSegments` | number | `10` | Reflects `max-segments`; a value below 1 or unparseable falls back to the default. |
+| `onIndexChange` / `onDone` / `onClose` / `onHeadingAction` | callbacks | `null` | Alongside the four events. |
 
 **Methods:** `goTo(index, animate = true)`, `next()`, `prev()` — all routed through the inner pager, so there is one place a step change is committed.
 
@@ -1465,12 +1475,30 @@ interface StepPagerStep {
 | `tc-step-pager-change` | `{ index: number, count: number, last: boolean }` | A settled step change, from a swipe or from either button. `last` is what tells you the advance button now reads `done-label`. Bubbling, composed. Not fired when you write `index` yourself. |
 | `tc-step-pager-done` | — | The advance button was pressed **on the last step**. It does not advance; this is the "finished cooking" signal. |
 | `tc-step-pager-close` | — | The ✕ was pressed. |
+| `tc-step-pager-heading` | — | The context title was pressed. Fired **only** with `heading-action`; a plain title is silent. |
 
 The inner pager's `tc-pager-change` also **bubbles past** this element, since it is composed and bubbling. Listen to one or the other, not both.
 
-**Progress segments fill up to *and including* the current index** — the design's own rule, so step 1 of 4 already shows a quarter filled rather than nothing. Each is a `flex: 1` 4px bar with a `.18s` colour transition, marked `aria-hidden` because the announcer states the same position in words.
+**Progress fills up to *and including* the current index** — the design's own rule, so step 1 of 4 already shows a quarter filled rather than nothing. The region is `aria-hidden`, because the announcer states the same position in words.
+
+**It has two shapes, and the step count picks one.**
+
+| | Up to `max-segments` steps | Past it |
+|---|---|---|
+| Rule | N × `flex: 1` 4px segments, 4px gaps, `[data-filled]` up to the index | one 4px bar, `width: (index+1)/count` |
+| Transition | `.18s` **colour** per segment | `.18s` **width** |
+| Beside it | — | `.tc-step-pager-count` reading „3/15" |
+| Host | — | `[data-progress-bar]` |
+
+The default threshold is **10**, and it is a legibility floor rather than a round number: at 390px the 18px gutters leave 354px, so 15 segments are 20px each separated by 4px gaps — a dotted line whose fill boundary the eye cannot find, which is the one thing the rule exists to show. A single bar keeps the quantity readable and the counter states the position in figures. A width transition is right *here* and wrong for segments, for the same reason: a bar is a continuous quantity, a row of ticks is not.
+
+„3/15" is figures and a solidus, so there is no sentence to translate — the words belong to the `stepOfTotal` announcer.
 
 **The back button stays enabled on the first step.** The design draws it in its normal state at step 1 and its own logic clamps rather than disabling, so the button keeps every pixel and does nothing — with `aria-disabled="true"`, which is the only part of "pressing this does nothing" a screen reader could otherwise not know. Style `[aria-disabled]` yourself if you want the visual too.
+
+**`heading-action` swaps the title's tag, it does not fake a button.** With the attribute the heading is a real `<button type="button">` carrying a 14px `chevron-down` and `aria-haspopup="dialog"`; without it, a plain `<div>`. Not "always a button, inert when unused": a `<button>` announces as one whether or not it does anything, and a title that is only text must not claim to be pressable. Its accessible name stays the visible title (replacing it with „Ingredients" would break the visible-label rule) — `aria-haspopup` is what carries "this opens something". The hit box is grown by padding and pulled back by an equal negative margin, exactly as the ✕'s is, so the row keeps the design's 34px height and both targets in it are the same size.
+
+The canvas has no such affordance, and for a self-contained sequence it does not need one. It stops being enough when the sequence has context the reader needs mid-way and the surface has nowhere to put it — cooking mode with the ingredient amounts, which is what JADI.mk opens from here.
 
 **`keep-awake` is driven off the real lock, never off the attribute.** `navigator.wakeLock.request('screen')` needs a secure context and a **visible** document, rejects outright on engines that do not implement it (Firefox, Safari < 16.4), and is released by the UA — not by you — the moment the tab hides. So:
 
@@ -1502,7 +1530,9 @@ The surface needs a definite height from somewhere — it is `flex: 1 1 auto; he
 | `--bs-step-pager-gutter` | `var(--m-pad-page-wide)` (`18px`) | Chrome gutter — top row, progress, caption, controls. |
 | `--bs-step-pager-step-gutter` | `26px` | The step body's own, wider gutter — the design's widest, so a 30px serif setting has somewhere to wrap. |
 | `--bs-step-pager-icon-color` | `var(--tc-text-muted)`; `--sun-ink-2` (`#44503a`) under `sunshine` | The ✕, the context title and the back chevron. |
-| `--bs-step-pager-seg-bg` / `-seg-bg-filled` | `var(--tc-border)` / `var(--tc-app-accent)` | Progress segments. |
+| `--bs-step-pager-seg-bg` / `-seg-bg-filled` | `var(--tc-border)` / `var(--tc-app-accent)` | Progress, both shapes — the empty rail and the fill. |
+| `--bs-step-pager-count-font` / `-count-color` / `-count-gap` | `var(--m-font-meta-strong)` (`600 11px`) / `var(--bs-step-pager-icon-color)` / `8px` | The „3/15" counter. Derived, not on the canvas: `meta-strong` is the token named for counters, and the ink is the ✕'s because it is chrome of the same rank. |
+| `--bs-step-pager-heading-icon-size` / `-heading-gap` | `14px` / `4px` | `heading-action`'s chevron. |
 | `--bs-step-pager-no-size` / `-text-size` | the two `clamp()`s above | Override together with `-no-gap` / `-text-gap`. |
 | `--bs-step-pager-hint-accent` / `-hint-bg` | `var(--m-notice-accent)` / `var(--m-notice-bg)` — terracotta `#a4472f` at 7% under `sunshine` | The left-flush notice. **Terracotta and not amber**: amber is the CTA colour under a two-per-screen budget, and `1e` already spends both on the step number and the advance button. |
 | `--bs-step-pager-control-height` | `var(--m-h-button-lg)` (`66px`) | Both control buttons. |
@@ -1517,6 +1547,7 @@ The surface needs a definite height from somewhere — it is `flex: 1 1 auto; he
 - The ✕'s hit box is 44px wide and as tall as the frame allows: the canvas draws a bare 22px glyph, so the box is grown by **padding** and the padding cancelled by an equal negative **margin** — the row keeps the design's 34px height and the glyph its 18px gutter, while the hit-tested border box is 44x44 with a top inset and 44x33 without one. Spending the difference downward instead would put the target over the progress rule.
 - The advance button's focus ring is the on-accent ink, drawn **inside** the fill: the library's global amber ring is invisible on an amber button.
 - Both control buttons are 66px tall, well clear of every target-size floor.
+- `heading-action`'s button gets the ✕'s exact hit box and the same inset focus ring, plus `aria-haspopup="dialog"`. The progress region — segments, bar and counter alike — stays `aria-hidden`, since the announcer already says the position in words.
 
 ```tsx
 const cooking = useTc<HTMLElement>(
@@ -1525,6 +1556,7 @@ const cooking = useTc<HTMLElement>(
         'tc-step-pager-change': (e: CustomEvent) => setStep(e.detail.index),
         'tc-step-pager-done': () => finishCooking(),
         'tc-step-pager-close': () => closeCookingMode(),
+        'tc-step-pager-heading': () => setIngredientsOpen(true),
     },
 )
 
@@ -1536,6 +1568,7 @@ const cooking = useTc<HTMLElement>(
     hint-label={t.cooking.tip}
     swipe-hint={t.cooking.swipeHint}
     wake-label={t.cooking.screenAwake}
+    heading-action
     keep-awake
 />
 ```
@@ -12804,13 +12837,13 @@ Inline lucide SVG icon glyph. Inherits color from surrounding text by default; a
 
 **Tag:** `tc-icon`
 
-> **Icon set note:** The `set` attribute is accepted but has no effect on name resolution — in `@toolcase/web-components` all names are resolved through the [lucide-static](https://www.npmjs.com/package/lucide-static) map regardless of `set` value.
+> **Icon set note:** The `set` attribute is accepted but has no effect on name resolution — in `@toolcase/web-components` all names are resolved through the [lucide-static](https://www.npmjs.com/package/lucide-static) map regardless of `set` value, via the same kebab-or-Pascal lookup the rest of the library uses.
 
 **Attributes**
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `name` | string | — | **Required.** Lucide icon name in PascalCase (e.g. `"Star"`, `"Trash2"`) |
+| `name` | string | — | **Required.** Lucide icon name, kebab **or** Pascal (`"book-open"` = `"BookOpen"`, `"Star"`, `"Trash2"`) — the same spelling every other icon-bearing element in the library takes, resolved through one shared lookup. An unknown name renders an empty inert wrapper. |
 | `set` | `bi\|tc` | `bi` | Icon set identifier — accepted for parity, always resolves via lucide-static |
 | `as` | string | `span` | HTML tag name for the wrapper element |
 | `size` | string | `1em` | SVG width and height. Plain numbers become `px` (e.g. `"24"` → `24px`); strings with units are passed through (e.g. `"1.5rem"`) |

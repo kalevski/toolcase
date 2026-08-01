@@ -73,6 +73,12 @@ const PANE_SELECTOR = ':scope > :not([slot]):not(template):not(style):not(script
 const NO_DRAG_SELECTOR =
     'input,textarea,select,[contenteditable=""],[contenteditable="true"],[data-no-drag]'
 
+// The width at which a sheet inside `tc-mobile-shell[desktop]`'s overlay layer
+// renders as a centred dialog — the `up(lg)` block in
+// style/components/_bottom-sheet.scss, mirrored here because the JS has to stop
+// offering drag-to-dismiss in that mode (see _dialogMode). Keep the two in step.
+const DESKTOP_DIALOG_MEDIA = '(min-width: 992px)'
+
 const FOCUSABLE_SELECTOR =
     'a[href],area[href],button:not([disabled]),details>summary,[tabindex]:not([tabindex="-1"]),' +
     'input:not([disabled]),select:not([disabled]),textarea:not([disabled])'
@@ -844,6 +850,19 @@ export class BottomSheet extends HTMLElement {
         return this.querySelector<HTMLElement>(BODY_SELECTOR)
     }
 
+    /**
+     * True when the CSS is rendering this sheet as a centred desktop dialog —
+     * the `up(lg)` block in style/components/_bottom-sheet.scss. The condition
+     * restates that block's scope exactly: inside the overlay layer of a
+     * `tc-mobile-shell[desktop]`, at the desktop width.
+     */
+    private _dialogMode(): boolean {
+        if (typeof window.matchMedia !== 'function') return false
+        if (!window.matchMedia(DESKTOP_DIALOG_MEDIA).matches) return false
+        const overlay = this.closest('[slot="overlay"]')
+        return !!overlay?.parentElement?.matches('tc-mobile-shell[desktop]')
+    }
+
     private _onPointerDown = (e: PointerEvent): void => {
         if (this._state !== 'open' || this._dragging) return
         // Stale tracking from a press that ended off this element (so no pointerup
@@ -851,6 +870,11 @@ export class BottomSheet extends HTMLElement {
         // leave the sheet undraggable for the rest of its life.
         if (this._pending) this._endDrag()
         if (!this._draggable) return
+        // As a centred desktop dialog there is no drag: a mouse selecting text in
+        // the body is indistinguishable from a drag-down, and a dialog that slides
+        // away mid-selection is broken. Checked per press, not cached — the same
+        // sheet crosses the boundary when the window is resized while it is open.
+        if (this._dialogMode()) return
         if (e.pointerType === 'mouse' && e.button !== 0) return
         const target = e.target as Element | null
         if (target?.closest?.(NO_DRAG_SELECTOR)) return

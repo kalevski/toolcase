@@ -28,6 +28,8 @@
 //   itself. Never size anything from --m-h-dock plus an inset; see the note on that
 //   token in style/foundation/_mobile-tokens.scss.
 
+@use '../foundation/tokens' as *;
+
 tc-tab-dock {
     // ── Surface ──────────────────────────────────────────────────────────────
     // --m-dock-* are the theme's dock states (style/themes/sunshine/_mobile.scss);
@@ -280,3 +282,92 @@ tc-tab-dock[data-hidden] {
 // No `prefers-reduced-motion` block: foundation/_reset.scss already flattens every
 // transition-duration under `reduce` with !important, so both the colour fade and
 // the hide slide land instantly. Verified rather than assumed — see the task file.
+
+// ── Desktop rail (inside `tc-mobile-shell[desktop]`) ──────────────────────────
+
+// The bottom dock turned 90°: a fixed LEFT RAIL, the standard desktop adaptation
+// of bottom navigation. Same items, same icon-over-label shape, same active hue —
+// only the geometry changes, so the element's own rendering and every consumer
+// binding (tabs, badges, active-id, events) carries over untouched.
+//
+// Scoped to `tc-mobile-shell[desktop]` (the shell's opt-in desktop layout) and
+// `up(lg)`, so a phone, a tablet, and every existing consumer of the published
+// bottom-dock shape are untouched by construction. `:where()` keeps each selector
+// at the same specificity as the phone rules above; being later in the file they
+// win inside the scope and are inert outside it.
+//
+// The rail width is the SHELL'S token (--bs-mobile-shell-rail-width, inherited):
+// the shell reserves exactly this strip as `padding-left`, so the two cannot
+// disagree — see the desktop block in style/components/_mobile-shell.scss.
+@include up(lg) {
+    :where(tc-mobile-shell[desktop]) tc-tab-dock {
+        // Rail knobs. Declared here rather than on the phone block above so the
+        // phone token surface stays exactly what 5.0.19 published.
+        --bs-tab-dock-rail-gap: 6px;
+        --bs-tab-dock-rail-padding: 14px 8px;
+        // The tab's rounded hover/active plate. --m-radius-tile, not -control:
+        // an ~72x54 plate is a tile, and 6px on it reads as barely-not-square.
+        --bs-tab-dock-rail-tab-radius: var(--m-radius-tile, 8px);
+        // Hover is a desktop-only affordance (the phone rules cancel the reset's
+        // link hover and add none — see the long comment above), so it exists
+        // only in this block, and as a SURFACE tint rather than a colour change:
+        // the tab's colour means "you are here" and hover must not counterfeit
+        // it. --tc-surface-hover is the canvas rung under sunshine (#fbf3e2 on
+        // the #fffdf7 rail), the same one-step-down the pane sits on.
+        --bs-tab-dock-rail-hover-bg: var(--tc-surface-hover);
+        // Transparent by default — the active colour alone matches the phone.
+        // An app that wants a Material-style tinted plate re-points this.
+        --bs-tab-dock-rail-active-bg: transparent;
+
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: var(--bs-mobile-shell-rail-width, 88px);
+        // The phone grid flows tabs into COLUMNS; the rail flows the same tabs
+        // into rows. `grid-auto-columns` must be released back to `auto` or the
+        // single column would keep the phone's `minmax(0, 1fr)` and stretch.
+        grid-auto-flow: row;
+        grid-auto-columns: auto;
+        grid-auto-rows: min-content;
+        align-content: start;
+        gap: var(--bs-tab-dock-rail-gap);
+        padding: var(--bs-tab-dock-rail-padding);
+        // The dock's lift-off shadow and top rule belong to a bottom bar. A rail
+        // separates with its trailing hairline and sits flush on the surface.
+        border-top: 0;
+        border-right: var(--bs-tab-dock-border);
+        box-shadow: none;
+    }
+
+    :where(tc-mobile-shell[desktop]) .tc-tab-dock-tab {
+        border-radius: var(--bs-tab-dock-rail-tab-radius);
+        // The phone tab is a 71px-wide column slice and its 5px/3px padding
+        // rides on the dock's own 8px frame. The rail tab is a free-standing
+        // 72px plate; 8px/6px keeps the icon+label pair optically centred in it.
+        padding: 8px 0 6px;
+    }
+
+    // The tint pair. `fine-pointer` INSIDE the width query: a coarse-pointer
+    // desktop (a touch monitor at 1200px) keeps the rail geometry but must not
+    // get a hover state that sticks to the last tap.
+    @include fine-pointer {
+        :where(tc-mobile-shell[desktop]) .tc-tab-dock-tab:hover {
+            background-color: var(--bs-tab-dock-rail-hover-bg);
+        }
+    }
+
+    :where(tc-mobile-shell[desktop]) .tc-tab-dock-tab--active {
+        background-color: var(--bs-tab-dock-rail-active-bg);
+    }
+
+    // Auto-hide is a phone behaviour: it answers "the dock covers content the
+    // user is scrolling toward", which a side rail never does. The element still
+    // toggles [data-hidden] off the shell's scroll (it cannot see layout), so the
+    // CSS neutralises it — `translateY(100%)` would slide a rail into the frame's
+    // bottom edge, and `pointer-events: none` would dead-zone the navigation.
+    :where(tc-mobile-shell[desktop]) tc-tab-dock[data-hidden] {
+        transform: none;
+        pointer-events: auto;
+    }
+}

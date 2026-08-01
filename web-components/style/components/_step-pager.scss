@@ -4,7 +4,9 @@
 //
 //     tc-step-pager                        display:flex; flex-direction:column
 //       ├─ .tc-step-pager-top              ✕ · context title · wake chip
-//       ├─ .tc-step-pager-progress         N segments, 4px tall, gap 4px
+//       ├─ .tc-step-pager-progress         the rule + the optional „3/15" counter
+//       │    ├─ .tc-step-pager-track       N segments, or one bar past max-segments
+//       │    └─ .tc-step-pager-count       „3/15", bar mode only
 //       ├─ .tc-step-pager-pages            the tc-swipe-pager — flex:1
 //       │    └─ .tc-step-pager-step        one page, 26px gutter, scrolls if it must
 //       │         └─ .tc-step-pager-body   auto-margin centred
@@ -15,6 +17,8 @@
 //       ├─ .tc-step-pager-controls         96px back + flex:1 amber advance
 //       └─ .tc-step-pager-announcer        visually hidden, aria-live
 //
+@use '../foundation/tokens' as *;
+
 // THE CLAMP, AND WHY IT IS NOT THE DESIGN'S FIXED SIZES.
 //   `1e` is composed at 390x844. On a 667px-tall phone (iPhone SE, still ~5% of
 //   iOS) its fixed sizes do not fit: 34px of top row + 22px of progress + 52px
@@ -79,6 +83,11 @@ tc-step-pager {
     // under a name meant for compact actions — the VALUE is tokenised, the name is
     // not this role's. Named properly here instead of adding a ninth token.
     --bs-step-pager-heading-font: var(--m-font-btn-sm, 600 0.78125rem var(--tc-font-sans));
+    // `heading-action` only: the chevron that says the title is pressable. 14px is
+    // the smallest lucide size this design draws at (the 1d meta chips), which is as
+    // quiet as an affordance can be and still be seen at arm's length.
+    --bs-step-pager-heading-icon-size: 14px;
+    --bs-step-pager-heading-gap: 4px;
 
     // ── Wake chip ────────────────────────────────────────────────────────────
     // The canvas's rgba(94,138,46,.14) fill / .3 border are one unit off
@@ -105,6 +114,17 @@ tc-step-pager {
     --bs-step-pager-progress-pad-bottom: 18px;
     --bs-step-pager-seg-bg: var(--tc-border);
     --bs-step-pager-seg-bg-filled: var(--tc-app-accent);
+    // The „3/15" counter beside the bar, past `max-segments`. Not on the canvas —
+    // the canvas has four steps — so both values are derived: the counter is a
+    // COUNTER, which is the role `--m-font-meta-strong` (600 11px) is named for, and
+    // it takes the same ink as the ✕ and the title because it is chrome of the same
+    // rank. Amber would be a fourth amber element on a screen already at three.
+    --bs-step-pager-count-font: var(
+        --m-font-meta-strong,
+        600 11px var(--m-body, var(--tc-font-sans))
+    );
+    --bs-step-pager-count-color: var(--bs-step-pager-icon-color);
+    --bs-step-pager-count-gap: 8px;
 
     // ── Step body ────────────────────────────────────────────────────────────
     // 26px, one use (1e) — the canvas's widest gutter, so the 30px serif setting has
@@ -274,14 +294,60 @@ tc-step-pager {
 // HYPOTHETICAL main size, so an auto basis on a text block makes a long recipe title
 // push the wake chip out of the row at 320px. (tc-app-bar's toolbar doubled to 68px
 // on exactly this.)
+//
+// One selector for both tags — the element swaps `div` ⇄ `button` on `heading-action`
+// (see src/StepPager.ts) and the two must be pixel-identical, so the button's UA
+// styles are reset here rather than in a second block that could drift.
 .tc-step-pager-heading {
     flex: 1 1 0;
     min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--bs-step-pager-heading-gap);
+    border: 0;
+    padding: 0;
+    background: transparent;
     font: var(--bs-step-pager-heading-font);
     color: var(--bs-step-pager-icon-color);
+    text-align: start;
+}
+
+// The ellipsis lives on the text, not on the row: with the chevron as a sibling the
+// row is a flex container, and `text-overflow` needs the block that holds the text.
+.tc-step-pager-heading-text {
+    flex: 0 1 auto;
+    min-width: 0;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+}
+
+button.tc-step-pager-heading {
+    // THE HIT BOX — the same padding-out / margin-in trick as the ✕ above, and for the
+    // same reason: the row's height is the 22px close glyph's, so growing this box
+    // would grow the row and move the design's chip and title. Deliberately the same
+    // vertical extent as the ✕, so the two targets in this row are the same height.
+    --bs-step-pager-heading-hit-top: min(11px, var(--bs-step-pager-pad-top));
+    --bs-step-pager-heading-hit-bottom: 11px;
+
+    cursor: pointer;
+    padding: var(--bs-step-pager-heading-hit-top) 0 var(--bs-step-pager-heading-hit-bottom);
+    margin-block: calc(-1 * var(--bs-step-pager-heading-hit-top))
+        calc(-1 * var(--bs-step-pager-heading-hit-bottom));
+
+    // Inset, for the ✕'s reason: there is no room above this row but the hardware
+    // strip, so an offset ring would be drawn over it.
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: -2px;
+    }
+}
+
+.tc-step-pager-heading-icon {
+    display: block;
+    flex: none;
+    width: var(--bs-step-pager-heading-icon-size);
+    height: var(--bs-step-pager-heading-icon-size);
 }
 
 // Hidden until a wake lock is genuinely held — the element writes `[data-wake]` from
@@ -316,8 +382,49 @@ tc-step-pager[data-wake] .tc-step-pager-wake {
 .tc-step-pager-progress {
     flex: none;
     display: flex;
-    gap: var(--bs-step-pager-seg-gap);
+    align-items: center;
+    gap: var(--bs-step-pager-count-gap);
     padding: 0 var(--bs-step-pager-gutter) var(--bs-step-pager-progress-pad-bottom);
+}
+
+// The rule itself. In segment mode it is the flex row of segments; in bar mode it is
+// the 4px rail and the single `.tc-step-pager-bar` inside it is the fill.
+.tc-step-pager-track {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    gap: var(--bs-step-pager-seg-gap);
+}
+
+.tc-step-pager-track[data-bar] {
+    display: block;
+    height: var(--bs-step-pager-seg-height);
+    border-radius: var(--bs-step-pager-seg-radius);
+    background-color: var(--bs-step-pager-seg-bg);
+    // The fill is a child with a percentage width, so the rail has to clip it at the
+    // rounded ends.
+    overflow: hidden;
+}
+
+// A WIDTH transition here, where the segments deliberately have none: a single bar IS
+// a continuous quantity, so interpolating it reads correctly — the thing that reads
+// wrong is interpolating a row of discrete ticks.
+.tc-step-pager-bar {
+    display: block;
+    height: 100%;
+    width: var(--bs-step-pager-fill, 0%);
+    border-radius: inherit;
+    background-color: var(--bs-step-pager-seg-bg-filled);
+    transition: width var(--m-dur-state, 0.18s) var(--m-ease, ease);
+}
+
+.tc-step-pager-count {
+    flex: none;
+    font: var(--bs-step-pager-count-font);
+    // After `font:`, which resets it — „3/15" and „13/15" must not change width.
+    font-variant-numeric: tabular-nums;
+    color: var(--bs-step-pager-count-color);
+    white-space: nowrap;
 }
 
 .tc-step-pager-seg {
@@ -502,3 +609,28 @@ tc-step-pager > .tc-step-pager-pages {
 // transition-duration under `reduce` with `!important`, which covers the segment
 // fill. The one piece of motion CSS cannot reach — the pager's smooth scroll — is
 // checked in JS by tc-swipe-pager.
+
+// ── Desktop ───────────────────────────────────────────────────────────────────
+
+// This surface owns the whole viewport (see the clamp note above), so at
+// desktop width its 30px serif line would set 1200px of measure — three times
+// the ~65ch ceiling. Every row already takes its side padding from one of two
+// gutter tokens, so the fix is one `max()` per token: the gutter grows until
+// the content column caps at --bs-step-pager-desktop-max, centred. `100%` in a
+// padding calc resolves against each row's own (full) width, so all five rows
+// agree on the column. NOT scoped to `tc-mobile-shell[desktop]`: cooking mode
+// is a body-level fixed overlay in the reference consumer, outside any shell.
+// `--bs-step-pager-desktop-max: 100%` turns the cap off.
+@include up(lg) {
+    tc-step-pager {
+        --bs-step-pager-desktop-max: 720px;
+        --bs-step-pager-gutter: max(
+            var(--m-pad-page-wide, 18px),
+            calc((100% - var(--bs-step-pager-desktop-max)) / 2)
+        );
+        --bs-step-pager-step-gutter: max(
+            26px,
+            calc((100% - var(--bs-step-pager-desktop-max)) / 2)
+        );
+    }
+}

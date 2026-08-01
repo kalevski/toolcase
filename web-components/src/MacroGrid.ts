@@ -80,7 +80,15 @@ export class MacroGrid extends HTMLElement {
         return COLUMNS.includes(raw) ? raw : 4
     }
     set columns(v: MacroGridColumns) {
-        this.setAttribute('columns', String(COLUMNS.includes(v) ? v : 4))
+        // Number(v), not v: react-dom writes a JSX prop as a PROPERTY whenever one
+        // exists on the instance, so `columns="3"` — the form this element's own
+        // documentation uses — arrives here as the STRING '3', and
+        // `[2, 3, 4].includes('3')` is false. The row then silently fell back to
+        // four tracks: at 390px a 76px cell instead of a 105px one, which wraps
+        // „јаглехидрати" onto two lines. Measured on screen `1i`. Same coercion
+        // the tri-state boolean setters already do, for the same reason.
+        const parsed = Number(v) as MacroGridColumns
+        this.setAttribute('columns', String(COLUMNS.includes(parsed) ? parsed : 4))
     }
 }
 

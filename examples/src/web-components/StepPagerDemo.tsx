@@ -159,6 +159,71 @@ const PlainExample: React.FC = () => {
     )
 }
 
+// ── past `max-segments`: one bar and a counter instead of a tick row ─────────
+
+const LongExample: React.FC = () => {
+    const long = useTc<HTMLElement>({
+        steps: Array.from(
+            { length: 15 },
+            (_, i) => `Чекор број ${i + 1} од петнаесет — измешајте и оставете да отстои.`,
+        ),
+    })
+    return (
+        <div>
+            <div style={phone(560)}>
+                {/* @ts-ignore */}
+                <tc-step-pager
+                    ref={long}
+                    heading="Спирална пита со сирење"
+                    next-label={MK.next}
+                    done-label={MK.done}
+                />
+            </div>
+            <div style={note}>
+                Fifteen steps. Fifteen segments at 390px are 20px each separated by 4px gaps — a
+                dotted line whose fill boundary the eye cannot find — so past{' '}
+                <code>max-segments</code> (default 10) the same region becomes one continuous bar
+                filled to <code>(index + 1) / count</code> with a „3/15" counter beside it. Same
+                colours, same 4px height; only the encoding changes. Set <code>max-segments</code>{' '}
+                to move the threshold.
+            </div>
+        </div>
+    )
+}
+
+// ── heading-action: the context title as a button ────────────────────────────
+
+const HeadingActionExample: React.FC = () => {
+    const [log, setLog] = useState('—')
+    const acted = useTc<HTMLElement>(
+        { steps: STEPS },
+        { 'tc-step-pager-heading': () => setLog('heading pressed') },
+    )
+    return (
+        <div>
+            <div style={phone(560)}>
+                {/* @ts-ignore */}
+                <tc-step-pager
+                    ref={acted}
+                    heading={MK.heading}
+                    heading-action
+                    next-label={MK.next}
+                    done-label={MK.done}
+                    hint-label={MK.tip}
+                />
+            </div>
+            <div style={note}>
+                With <code>heading-action</code> the title becomes a real <code>button</code> — the
+                element swaps the tag, so a plain title never announces as pressable — carrying a
+                14px chevron and <code>aria-haspopup="dialog"</code>. Its hit box is grown by
+                padding and pulled back by margin exactly as the ✕'s is, so the row keeps the
+                design's 34px height. JADI.mk uses it to open the ingredient amounts mid-cook, which
+                the canvas has no affordance for at all. Last event: <code>{log}</code>
+            </div>
+        </div>
+    )
+}
+
 const StepPagerDemo: React.FC = () => (
     <div className="py-4">
         <div className="container">
@@ -190,6 +255,14 @@ const StepPagerDemo: React.FC = () => (
                         <div>
                             <div style={label}>Bare strings, no hints, no caption</div>
                             <PlainExample />
+                        </div>
+                        <div>
+                            <div style={label}>15 steps — one bar and a „3/15" counter</div>
+                            <LongExample />
+                        </div>
+                        <div>
+                            <div style={label}>heading-action — the title opens something</div>
+                            <HeadingActionExample />
                         </div>
                     </div>
                 </div>

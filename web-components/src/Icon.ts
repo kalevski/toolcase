@@ -1,13 +1,12 @@
 import { esc } from './internal/esc'
-import * as LucideIcons from 'lucide-static'
-import { icon } from './icons'
+import { lucideByName } from './internal/lucide'
 
 const TAG_NAME = 'tc-icon'
 
 // The `set` attribute is kept for API parity with the React Icon component,
 // which supports 'bi' (Bootstrap Icons) and 'tc' (ToolCase) sets. In the
 // web-components package all icons are sourced from lucide-static regardless
-// of the `set` value — the name is looked up directly in the LucideIcons map.
+// of the `set` value.
 export type IconSet = 'bi' | 'tc'
 const SETS: IconSet[] = ['bi', 'tc']
 
@@ -88,10 +87,17 @@ export class Icon extends HTMLElement {
         else this.removeAttribute('decorative')
     }
 
+    // KEBAB AND PASCAL, like every other icon-bearing element in the library.
+    //
+    // This was the one place that indexed `lucide-static` directly, so
+    // `name="book-open"` — the spelling `tc-tab-dock`, `tc-list-section`,
+    // `tc-page-tabs` and `tc-side-nav` all accept — resolved to nothing and
+    // rendered an empty inert wrapper: no icon, no error, nothing in the console.
+    // `internal/lucide` is the library's single kebab→Pascal lookup and is a
+    // strict superset of the old behaviour (a Pascal name splits to itself), so
+    // this only makes previously-dead names work.
     private _resolveIcon(name: string): string {
-        const svgStr = (LucideIcons as Record<string, string>)[name]
-        if (!svgStr) return ''
-        return icon(svgStr, 'tc-icon__svg')
+        return lucideByName(name, 'tc-icon__svg')
     }
 
     private _sizeValue(raw: string | null): string {

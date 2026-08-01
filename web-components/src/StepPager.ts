@@ -38,8 +38,21 @@ import type { SwipePager } from './SwipePager'
 //   hand and cleared from the sentinel's own `release` event. A chip driven off the
 //   attribute's INTENT would be a lie on Firefox, on http://, and every time the
 //   user takes a phone call mid-recipe.
+//
+// THE PROGRESS RULE HAS TWO SHAPES, AND THE STEP COUNT PICKS ONE
+//   `1e` draws four segments and four segments read perfectly. Fifteen do not: at
+//   390px the gutter leaves 354px, so fifteen segments are 20px each separated by
+//   4px gaps — a dotted line whose fill boundary nobody can find, and the thing the
+//   rule exists to communicate (how far through am I) is lost. Past `max-segments`
+//   (default 10) the same region becomes ONE continuous bar filled to
+//   `(index + 1) / count` with a „3/15" counter beside it, which states the position
+//   in figures instead of asking the eye to count ticks. Same data, same colours,
+//   same height — only the encoding changes.
 
 const TAG_NAME = 'tc-step-pager'
+
+/** Segment count past which the progress rule becomes a single bar + a counter. */
+const DEFAULT_MAX_SEGMENTS = 10
 
 /** One step. `no` is the number as DRAWN; omit it for zero-padded `01`…`0N`. */
 export interface StepPagerStep {
@@ -67,16 +80,22 @@ const SHELL =
     `<button type="button" class="tc-step-pager-close tc-touch-target tc-no-tap-highlight">` +
     lucideByName('x', 'tc-step-pager-close-icon') +
     `</button>` +
-    `<div class="tc-step-pager-heading"></div>` +
+    `<div class="tc-step-pager-heading">` +
+    `<span class="tc-step-pager-heading-text"></span>` +
+    `</div>` +
     `<span class="tc-step-pager-wake">` +
     lucideByName('sun', 'tc-step-pager-wake-icon') +
     `<span class="tc-step-pager-wake-label"></span>` +
     `</span>` +
     `</div>` +
-    // aria-hidden: the segments are the VISUAL of a position the announcer below
-    // already states in words. A role="progressbar" here would have a screen reader
-    // read the same fact twice, in two different phrasings.
-    `<div class="tc-step-pager-progress" aria-hidden="true"></div>` +
+    // aria-hidden: the rule is the VISUAL of a position the announcer below already
+    // states in words. A role="progressbar" here would have a screen reader read the
+    // same fact twice, in two different phrasings — and that is just as true of the
+    // „3/15" counter, which is why it lives inside this region rather than beside it.
+    `<div class="tc-step-pager-progress" aria-hidden="true">` +
+    `<div class="tc-step-pager-track"></div>` +
+    `<span class="tc-step-pager-count" hidden></span>` +
+    `</div>` +
     `<tc-swipe-pager class="tc-step-pager-pages"></tc-swipe-pager>` +
     `<div class="tc-step-pager-caption"></div>` +
     `<div class="tc-step-pager-controls">` +
@@ -109,6 +128,8 @@ export class StepPager extends HTMLElement {
     onDone: (() => void) | null = null
     /** Called when the ✕ is pressed. Alongside `tc-step-pager-close`. */
     onClose: (() => void) | null = null
+    /** Called when the context title is pressed — `heading-action` only. Alongside `tc-step-pager-heading`. */
+    onHeadingAction: (() => void) | null = null
 
     static get observedAttributes(): string[] {
         return [
@@ -116,9 +137,11 @@ export class StepPager extends HTMLElement {
             'close-label',
             'done-label',
             'heading',
+            'heading-action',
             'hint-label',
             'index',
             'keep-awake',
+            'max-segments',
             'next-label',
             'swipe-hint',
             'wake-label',
@@ -162,6 +185,18 @@ export class StepPager extends HTMLElement {
             // Deliberately not notified: the consumer wrote this index, so echoing
             // it back is how a controlled component ends up in a loop. Same rule as
             // tc-swipe-pager.
+            return
+        }
+        if (name === 'max-segments') {
+            // The threshold decides which of the two progress shapes is in the DOM,
+            // so this one has to rebuild the rule rather than only patch it.
+            this._buildProgress()
+            this._patch()
+            return
+        }
+        if (name === 'heading-action') {
+            this._syncHeadingTag()
+            this._patch()
             return
         }
         // Everything else is text. Patched, never rebuilt.
@@ -283,6 +318,35 @@ export class StepPager extends HTMLElement {
         else this.removeAttribute('swipe-hint')
     }
 
+    /**
+     * Make the context title a button that fires `tc-step-pager-heading`.
+     *
+     * The canvas draws the title as inert text, and for a self-contained sequence it
+     * is. It stops being enough the moment the sequence has context the reader needs
+     * mid-way and the surface has nowhere else to put it — cooking mode with the
+     * ingredient amounts, which the design has no affordance for at all. This is that
+     * affordance: the row a thumb already knows names the thing, so it is where a tap
+     * looks for more of it, and the chevron says the tap does something.
+     */
+    get headingAction(): boolean {
+        return this.hasAttribute('heading-action')
+    }
+    set headingAction(v: boolean) {
+        this.toggleAttribute('heading-action', v)
+    }
+
+    /**
+     * How many steps still get one progress segment each. Past it the rule is a single
+     * filled bar with a „3/15" counter — see the header comment.
+     */
+    get maxSegments(): number {
+        const raw = Number(this.getAttribute('max-segments'))
+        return Number.isFinite(raw) && raw >= 1 ? Math.trunc(raw) : DEFAULT_MAX_SEGMENTS
+    }
+    set maxSegments(v: number) {
+        this.setAttribute('max-segments', String(v))
+    }
+
     /** Wake-chip label. Falls back to the `screenAwake` message. */
     get wakeLabel(): string {
         return this.getAttribute('wake-label') || msg('screenAwake')
@@ -398,12 +462,22 @@ export class StepPager extends HTMLElement {
         const target = e.target as Element | null
         if (!target?.closest) return
         const button = target.closest<HTMLElement>(
-            '.tc-step-pager-close, .tc-step-pager-back, .tc-step-pager-advance',
+            '.tc-step-pager-close, .tc-step-pager-back, .tc-step-pager-advance, .tc-step-pager-heading',
         )
         // `:scope` is not valid in closest(); scope by containment instead, so a
         // nested tc-step-pager's controls cannot drive this one.
         if (!button || button.closest(TAG_NAME) !== this) return
 
+        if (button.classList.contains('tc-step-pager-heading')) {
+            // A plain title without `heading-action`: still matched by the selector
+            // above (it is the same class), and deliberately silent.
+            if (!this.headingAction) return
+            this.dispatchEvent(
+                new CustomEvent('tc-step-pager-heading', { bubbles: true, composed: true }),
+            )
+            if (typeof this.onHeadingAction === 'function') this.onHeadingAction()
+            return
+        }
         if (button.classList.contains('tc-step-pager-close')) {
             this.dispatchEvent(
                 new CustomEvent('tc-step-pager-close', { bubbles: true, composed: true }),
@@ -456,9 +530,44 @@ export class StepPager extends HTMLElement {
         // React move/remount, or a consumer who wrote children of their own.
         if (!this.querySelector(':scope > .tc-step-pager-top')) {
             this.innerHTML = SHELL
+            this._syncHeadingTag()
             this._buildPages()
         }
         this._patch()
+    }
+
+    /**
+     * Swap the context title between a `div` and a `button`.
+     *
+     * Not "always a button, inert when unused": a `<button>` announces as a button
+     * whether or not it does anything, and a title that is only text must not claim
+     * to be pressable. The node is a leaf between the ✕ and the wake chip, so
+     * replacing it costs nothing the way rebuilding the whole row would.
+     */
+    private _syncHeadingTag(): void {
+        const current = this.querySelector<HTMLElement>(
+            ':scope > .tc-step-pager-top > .tc-step-pager-heading',
+        )
+        if (!current) return
+        const wantButton = this.headingAction
+        if (wantButton === (current.tagName === 'BUTTON')) return
+        const next = document.createElement(wantButton ? 'button' : 'div')
+        next.className = wantButton
+            ? 'tc-step-pager-heading tc-no-tap-highlight'
+            : 'tc-step-pager-heading'
+        if (wantButton) {
+            next.setAttribute('type', 'button')
+            // The button's accessible NAME stays the title — that is its visible label,
+            // and replacing it with „Ingredients" would break the visible-label rule.
+            // What the title cannot say is that pressing it opens something; that is
+            // exactly what `aria-haspopup` is for. `dialog`, because every consumer of
+            // this so far opens a sheet, and a sheet is a dialog.
+            next.setAttribute('aria-haspopup', 'dialog')
+        }
+        next.innerHTML =
+            `<span class="tc-step-pager-heading-text"></span>` +
+            (wantButton ? lucideByName('chevron-down', 'tc-step-pager-heading-icon') : '')
+        current.replaceWith(next)
     }
 
     private _buildPages(): void {
@@ -492,13 +601,32 @@ export class StepPager extends HTMLElement {
             })
             .join('')
 
-        const progress = this.querySelector(':scope > .tc-step-pager-progress')
-        if (progress && progress.childElementCount !== this._steps.length) {
-            progress.innerHTML = `<span class="tc-step-pager-seg"></span>`.repeat(
-                this._steps.length,
-            )
-        }
+        this._buildProgress()
         pager.goTo(this._index, false)
+    }
+
+    /** The progress rule — N segments, or one bar past `max-segments`. */
+    private _buildProgress(): void {
+        const track = this.querySelector<HTMLElement>(
+            ':scope > .tc-step-pager-progress > .tc-step-pager-track',
+        )
+        if (!track) return
+        const count = this._steps.length
+        const bar = count > this.maxSegments
+        this.toggleAttribute('data-progress-bar', bar)
+        if (bar) {
+            if (!track.hasAttribute('data-bar')) {
+                track.setAttribute('data-bar', '')
+                track.innerHTML = `<span class="tc-step-pager-bar"></span>`
+            }
+            return
+        }
+        track.removeAttribute('data-bar')
+        // Rebuilt only when the count changed: the segments carry `[data-filled]`,
+        // and throwing them away on every patch would restart the .18s fill.
+        if (track.childElementCount !== count || track.querySelector('.tc-step-pager-bar')) {
+            track.innerHTML = `<span class="tc-step-pager-seg"></span>`.repeat(count)
+        }
     }
 
     private _patch(): void {
@@ -514,7 +642,7 @@ export class StepPager extends HTMLElement {
             if (el && el.textContent !== text) el.textContent = text
         }
 
-        write('.tc-step-pager-heading', this.heading ?? '')
+        write('.tc-step-pager-heading-text', this.heading ?? '')
         write('.tc-step-pager-wake-label', this.wakeLabel)
         write('.tc-step-pager-advance-label', isLast ? this.doneLabel : this.nextLabel)
 
@@ -538,6 +666,29 @@ export class StepPager extends HTMLElement {
             if (filled !== seg.hasAttribute('data-filled'))
                 seg.toggleAttribute('data-filled', filled)
         })
+
+        // Bar mode. The fill percentage is written on the TRACK and not on the host:
+        // react-dom owns the host's `style` object and clears keys it put there, and a
+        // property the element writes into the same declaration is how tc-mobile-shell
+        // lost its pane background. Nothing but this element touches the track.
+        const bar = this.hasAttribute('data-progress-bar')
+        const fill = this.querySelector<HTMLElement>('.tc-step-pager-track[data-bar]')
+        if (fill) {
+            // Filled through AND INCLUDING the current step, exactly as the segments
+            // are — so a 15-step recipe shows 1/15 of the bar on step 1, not nothing.
+            const percent = count === 0 ? 0 : ((index + 1) / count) * 100
+            fill.style.setProperty('--bs-step-pager-fill', `${percent.toFixed(2)}%`)
+        }
+        const counter = this.querySelector<HTMLElement>(
+            ':scope > .tc-step-pager-progress > .tc-step-pager-count',
+        )
+        if (counter) {
+            // „3/15" — figures and a solidus, so there is no sentence to translate.
+            // The words are the announcer's job (`stepOfTotal`).
+            const text = bar && count > 0 ? `${index + 1}/${count}` : ''
+            if (counter.textContent !== text) counter.textContent = text
+            counter.hidden = text === ''
+        }
 
         this.querySelector('.tc-step-pager-close')?.setAttribute('aria-label', this.closeLabel)
         const back = this.querySelector('.tc-step-pager-back')

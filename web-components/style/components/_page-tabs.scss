@@ -15,6 +15,8 @@
 // be the scroll container too — an intervening scroller div would break the
 // tablist→tab ownership that the ARIA roles depend on.
 
+@use '../foundation/tokens' as *;
+
 tc-page-tabs {
     // 20px on 1c/1f, 18px on 1i/1j. Two uses each; the wider one is the default
     // because it is also the kinder tap spacing.
@@ -104,6 +106,22 @@ tc-page-tabs {
         opacity: 0.5;
         pointer-events: none;
         cursor: default;
+    }
+}
+
+// ── Fine pointer ──────────────────────────────────────────────────────────────
+
+// A resting tab darkens to the ACTIVE INK on hover — a preview of selection —
+// while weight and underline stay the resting tab's, so "you are here" is still
+// only ever said once per rail. Under `fine-pointer` (which requires `hover:
+// hover`), because on a touch screen `:hover` sticks to the last-tapped tab.
+// This also cancels the reset's `a:hover` underline, which a route-tab <a> would
+// otherwise pick up: an underline 9px above the rail's own 2px underline reads
+// as a second, misplaced selection mark. 0-2-0 against the reset's 0-1-1.
+@include fine-pointer {
+    .tc-page-tabs-tab:hover {
+        color: var(--bs-page-tabs-tab-color-active);
+        text-decoration: none;
     }
 }
 

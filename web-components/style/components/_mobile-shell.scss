@@ -59,6 +59,14 @@ tc-mobile-shell {
     --bs-mobile-shell-max-width: 480px;
     --bs-mobile-shell-frame-line: var(--tc-border);
 
+    // Desktop layout (opt-in via the `desktop` attribute) — see the up(lg) block
+    // at the foot of this file. The rail width is declared HERE and not on
+    // tc-tab-dock because two elements have to agree on it: the dock sizes its
+    // rail from it and the shell reserves the same strip as `padding-left`. One
+    // token, inherited into both, cannot drift.
+    --bs-mobile-shell-max-width-desktop: 1280px;
+    --bs-mobile-shell-rail-width: 88px;
+
     // Not a --bs-* cosmetic knob: measured hardware state, written by the element
     // from window.visualViewport. Declared here so `var()` resolves before any JS
     // has run, and so a consumer can read it to lift its own chrome.
@@ -239,14 +247,58 @@ tc-mobile-shell > [slot='overlay'] {
 
 // ── Wide viewport ─────────────────────────────────────────────────────────────
 
-// The only concession to a large screen in this design: show the phone layout
-// centred rather than stretched to a 1440px column no screen was drawn for.
+// The default concession to a large screen: show the phone layout centred
+// rather than stretched to a 1440px column no screen was drawn for.
 // A library default an app turns off with `--bs-mobile-shell-max-width: none`
-// (and `--bs-mobile-shell-frame-line: transparent` for the side hairlines).
+// (and `--bs-mobile-shell-frame-line: transparent` for the side hairlines) —
+// or upgrades to the real desktop layout with the `desktop` attribute below.
 @include up(md) {
     tc-mobile-shell {
         max-width: var(--bs-mobile-shell-max-width);
         margin-inline: auto;
         border-inline: 1px solid var(--bs-mobile-shell-frame-line);
+    }
+}
+
+// ── Desktop layout (opt-in) ───────────────────────────────────────────────────
+
+// `<tc-mobile-shell desktop>` — the phone frame grown into a desktop app frame
+// at `lg`, OPT-IN so the published centred-480px default above cannot change
+// under an existing consumer. Everything below 992px is untouched by
+// construction: every rule sits inside this one `up(lg)` block, so the phone
+// layout stays pixel-identical and the tablet band (768–991px) keeps the
+// centred frame.
+//
+// What changes, and who does it:
+//   * the frame widens to --bs-mobile-shell-max-width-desktop (still centred,
+//     still hairline-framed — the app is a framed canvas, not a stretched page)
+//   * the dock leaves the bottom edge and becomes a LEFT RAIL. The shell's part
+//     is only the geometry reservation: `padding-left` by the rail width, and
+//     only while a dock child exists (`:has`) — a signed-out or gated screen
+//     with no dock gets the full width back. The dock's own rail shape lives in
+//     style/components/_tab-dock.scss, reading the same inherited token.
+//   * sheets become centred dialogs, action bars centre their content, the FAB
+//     drops its dock clearance — each in its own partial, every one scoped to
+//     `tc-mobile-shell[desktop]` so nothing leaks into a phone-only consumer.
+//
+// PADDING, NOT GRID. The natural shape here is a two-column grid, but the
+// header region is one or MORE children (an app bar plus a band is the shipped
+// pattern) and grid auto-placement would give each its own row track beside the
+// rail — there is no way to span "however many header children exist" from the
+// container. The rail as an absolutely positioned strip over reserved padding
+// keeps the flex column exactly as the phone has it, which is also what keeps
+// the pane-resolution JS (`:scope > :not([slot])`) and every existing consumer
+// selector true on desktop.
+//
+// The rail strip sits over the host's PADDING box, so `top: 0` / `bottom: 0`
+// on the dock reach the physical frame edges — the same geometry the overlay
+// layer documents above.
+@include up(lg) {
+    tc-mobile-shell[desktop] {
+        --bs-mobile-shell-max-width: var(--bs-mobile-shell-max-width-desktop);
+    }
+
+    tc-mobile-shell[desktop]:has(> [slot='dock']) {
+        padding-left: var(--bs-mobile-shell-rail-width);
     }
 }

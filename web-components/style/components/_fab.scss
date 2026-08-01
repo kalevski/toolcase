@@ -240,3 +240,17 @@ tc-fab[data-hidden] {
 // transition-duration under `reduce`, and the element additionally refuses to
 // retract at all under that query — see _setHidden in src/Fab.ts. Doing it there
 // rather than here keeps `hiddenByScroll` from reporting a state the FAB is not in.
+
+// ── Desktop (inside `tc-mobile-shell[desktop]`) ───────────────────────────────
+
+// The default 104px offset is the phone's dock-clearance sum (78px reserve +
+// 26px of air). On the shell's desktop layout the dock is a LEFT RAIL, so a FAB
+// still floating 104px up sits in the middle of nothing; 32px restores the
+// bottom-right corner placement with the same 26px-order of air over the frame
+// edge. An explicit `offset` attribute still wins — the element writes it as an
+// inline property (src/Fab.ts), which no stylesheet rule outranks.
+@include up(lg) {
+    :where(tc-mobile-shell[desktop]) tc-fab {
+        --bs-fab-offset: 32px;
+    }
+}

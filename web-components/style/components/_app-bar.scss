@@ -26,6 +26,8 @@
 //   canvas. tc-mobile-shell's own header separator defaults to `none` for the same
 //   reason — the slotted bar owns its edges.
 
+@use '../foundation/tokens' as *;
+
 tc-app-bar {
     // ── Surface ──────────────────────────────────────────────────────────────
     --bs-app-bar-bg: var(--tc-surface);
@@ -432,4 +434,19 @@ tc-app-bar[truncate] .tc-app-bar__heading {
     margin: 0 0 0.25em 0.375em; // 4px / 6px at 16px (1b)
     border-radius: var(--m-radius-pill, 999px);
     background-color: var(--bs-app-bar-brand-dash-color);
+}
+
+// ── Desktop (inside `tc-mobile-shell[desktop]`) ───────────────────────────────
+
+// The bar's shape survives a wide column as-is — leading block, trailing
+// actions, full-basis rail — so the only desktop concession is BREATH: the
+// phone gutters (12–16px) read as cramped against a ~1100px content region.
+// One physical longhand, so every variant keeps its own vertical recipe from
+// the `--bs-app-bar-padding` shorthand and only the inline sides change. An
+// app aligning the bar with a capped content column re-points the token with
+// its own `max()` arithmetic.
+@include up(lg) {
+    :where(tc-mobile-shell[desktop]) tc-app-bar {
+        padding-inline: var(--bs-app-bar-desktop-inline, 24px);
+    }
 }

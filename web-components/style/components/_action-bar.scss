@@ -196,3 +196,23 @@ tc-action-bar[stack] > * {
 tc-action-bar[stack] > .tc-action-bar-compact {
     width: auto;
 }
+
+// ── Desktop (inside `tc-mobile-shell[desktop]`) ───────────────────────────────
+
+// The bar's surface, rule and elevation stay full-width — it is still the
+// frame's bottom chrome — but its CONTENT centres into a column: a fluid track
+// stretched across ~1100px is a door-sized button no design ever draws. The
+// centring is padding, not a max-width on an inner wrapper (the bar has none —
+// its children are the consumer's), and the `max()` keeps the phone gutter as
+// the floor so the rule is inert below the cap. Re-point
+// --bs-action-bar-desktop-max per surface; `100%` disables the centring.
+@include up(lg) {
+    :where(tc-mobile-shell[desktop]) tc-action-bar {
+        --bs-action-bar-desktop-max: 640px;
+
+        padding-inline: max(
+            var(--bs-action-bar-padding-inline),
+            calc((100% - var(--bs-action-bar-desktop-max)) / 2)
+        );
+    }
+}

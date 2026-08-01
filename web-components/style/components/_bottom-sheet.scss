@@ -441,6 +441,89 @@ tc-mobile-shell[data-tc-sheet-blur] > :not([slot]) {
     color: var(--bs-sheet-label-color);
 }
 
+// ── Desktop dialog (inside `tc-mobile-shell[desktop]`) ────────────────────────
+
+// On the shell's opt-in desktop layout a bottom sheet anchored to the bottom of
+// a 1280px frame reads as a browser bug, so the same element becomes a CENTRED
+// DIALOG: same content, same regions, same scrim, same focus trap and Escape —
+// only the anchoring, the corners and the entrance change. Scoped to the shell's
+// overlay layer + `up(lg)`, so phones, tablets, standalone sheets and every
+// existing consumer keep the published bottom-anchored shape by construction.
+//
+// Drag-to-dismiss is OFF in this mode, from the JS (`_dialogMode` in
+// src/BottomSheet.ts checks exactly this scope and width): a mouse selecting
+// text inside the body is indistinguishable from a drag, and a dialog that
+// slides away mid-selection is broken. Scrim tap, Escape and the sheet's own
+// actions remain the dismissal paths. The grab handle goes with it — it is a
+// drag affordance, and an affordance for a gesture that does nothing is a lie.
+//
+// Every selector matches the specificity of the rule it overrides and wins on
+// source order inside the scope — the same contract the overlay-layer rule at
+// the top of this file documents.
+@include up(lg) {
+    :where(tc-mobile-shell[desktop] > [slot='overlay']) tc-bottom-sheet {
+        // All four corners round: the sheet's 18/18/0/0 names a surface fused to
+        // the bottom edge, which this no longer is. 14px is --m-radius-hero, the
+        // design's oversized-panel rung — a 560px floating panel is exactly that.
+        --bs-bottom-sheet-radius: var(--bs-bottom-sheet-desktop-radius, var(--m-radius-hero, 14px));
+        // The sheet's shadow throws UP from the bottom edge (-28px y). A floating
+        // dialog is lit like every other raised surface: downward, soft.
+        --bs-bottom-sheet-shadow: var(
+            --bs-bottom-sheet-desktop-shadow,
+            0 24px 64px -16px rgba(var(--m-shadow-tint, 0, 0, 0), 0.3)
+        );
+        // The hardware floor is meaningless mid-screen; the footer gets the wide
+        // gutter, matching its own inline padding.
+        --bs-bottom-sheet-pad-bottom: var(--m-pad-page-wide, 18px);
+
+        inset: 0;
+        margin: auto;
+        width: min(var(--bs-bottom-sheet-desktop-width, 560px), calc(100% - 96px));
+        height: fit-content;
+        // ≥48px of scrim on every side. Replaces the 32px `inset-top` arithmetic,
+        // which answered a question ("can a tall sheet still be scrim-tapped?")
+        // that centring answers on its own.
+        max-height: calc(100% - 96px);
+    }
+
+    // Centre in the CONTENT column, not the frame: with a rail reserved the
+    // frame's centre sits `rail/2` left of where the eye puts the middle.
+    :where(tc-mobile-shell[desktop]:has(> [slot='dock']) > [slot='overlay']) tc-bottom-sheet {
+        left: var(--bs-mobile-shell-rail-width, 88px);
+    }
+
+    // No handle — see the header note. 0-0-2, same as the phone rule, later wins.
+    :where(tc-mobile-shell[desktop] > [slot='overlay']) tc-bottom-sheet::before {
+        display: none;
+    }
+
+    // A snap is a THUMB-REACH contract — "rest at 90% so the top stays
+    // reachable" — and a centred dialog has no reach problem. Content height,
+    // capped by the host's max-height, replaces every ratio.
+    :where(tc-mobile-shell[desktop] > [slot='overlay']) tc-bottom-sheet[data-sheet-snapped] {
+        height: fit-content;
+        max-height: calc(100% - 96px);
+    }
+
+    // The entrance: a 24px settle + fade instead of the full-height slide — a
+    // dialog materialises, it does not arrive from an edge. One value for enter
+    // and exit, so an interrupted entry exits from where it is (the same call
+    // the phone's 100% makes). The transition list restates the host's transform
+    // entry and adds opacity beside it; [data-sheet-dragging]'s `transition:
+    // none` never fires here because dragging is disabled in this mode.
+    :where(tc-mobile-shell[desktop] > [slot='overlay']) tc-bottom-sheet {
+        transition:
+            transform var(--bs-bottom-sheet-duration) var(--bs-bottom-sheet-ease),
+            opacity var(--bs-bottom-sheet-duration) var(--bs-bottom-sheet-ease);
+    }
+
+    :where(tc-mobile-shell[desktop] > [slot='overlay']) tc-bottom-sheet[data-sheet-state='entering'],
+    :where(tc-mobile-shell[desktop] > [slot='overlay']) tc-bottom-sheet[data-sheet-state='exiting'] {
+        --bs-bottom-sheet-y: 24px;
+        opacity: 0;
+    }
+}
+
 // ── Reduced motion ────────────────────────────────────────────────────────────
 
 // foundation/_reset.scss already flattens every transition-duration under

@@ -92,7 +92,7 @@ export class MobileShell extends HTMLElement {
     onScrollStateChange: ((scrolled: boolean) => void) | null = null
 
     static get observedAttributes(): string[] {
-        return ['data-key', 'edge', 'pane-bg', 'scroll-restore']
+        return ['data-key', 'edge', 'pane-bg', 'scroll-restore', 'desktop']
     }
 
     connectedCallback(): void {
@@ -155,6 +155,21 @@ export class MobileShell extends HTMLElement {
     }
     set scrollRestore(v: MobileShellScrollRestore) {
         this.setAttribute('scroll-restore', v === 'manual' ? 'manual' : 'auto')
+    }
+
+    /**
+     * Opt-in desktop layout. At ≥992px the frame widens, the dock becomes a
+     * left rail and sheets in the overlay layer become centred dialogs — all in
+     * CSS (`tc-mobile-shell[desktop]` blocks across the component partials);
+     * tc-bottom-sheet additionally reads the same scope to switch drag off.
+     * Below 992px the attribute is inert, so the phone layout is untouched.
+     * Observed only so the React typings carry it; no JS reacts to it here.
+     */
+    get desktop(): boolean {
+        return this.hasAttribute('desktop')
+    }
+    set desktop(v: boolean) {
+        this.toggleAttribute('desktop', v)
     }
 
     /** Scroll the pane back to the top. `smooth` is ignored under reduced motion. */

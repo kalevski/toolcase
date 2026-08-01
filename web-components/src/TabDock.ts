@@ -296,8 +296,15 @@ export class TabDock extends HTMLElement {
         if (idx === -1) idx = 0
 
         let next = -1
-        if (e.key === 'ArrowRight') next = (idx + 1) % enabled.length
-        else if (e.key === 'ArrowLeft') next = (idx - 1 + enabled.length) % enabled.length
+        // Down/Up alongside Right/Left, unconditionally: inside a
+        // tc-mobile-shell[desktop] the dock renders as a VERTICAL rail (the
+        // up(lg) block in style/components/_tab-dock.scss), where a tablist is
+        // expected to answer the vertical pair. Answering both pairs in both
+        // orientations costs nothing — neither key scrolls anything while focus
+        // is on a tab — and spares the handler a layout-mirroring media check.
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (idx + 1) % enabled.length
+        else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp')
+            next = (idx - 1 + enabled.length) % enabled.length
         else if (e.key === 'Home') next = 0
         else if (e.key === 'End') next = enabled.length - 1
         if (next === -1) return
