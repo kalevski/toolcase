@@ -68,6 +68,17 @@ structural ones are additionally scoped to a new opt-in.
   `a:hover` underline on route tabs. Unscoped: it is pointer-gated, not
   width-gated.
 
+### Added — `tc-extended-select` items take `keywords`
+
+- **`ExtendedSelectItem.keywords?: string[]`** — extra search terms the menu's
+  search field matches (case-insensitive containment, alongside `label` and
+  `description`) and never renders. Same field and same contract as
+  `ComboOption.keywords`, which the combo box has always honoured; the two
+  elements disagreeing was the bug: a consumer that transliterated its option
+  labels into `keywords` got Latin search inside a `tc-combo-box` and nothing
+  inside a `tc-extended-select`, with no signal that the field was ignored.
+  Additive — items without the field filter exactly as before.
+
 Fixes found while consuming `5.0.19` from the app. Nothing in the list below
 changes an API.
 

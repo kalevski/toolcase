@@ -65,6 +65,12 @@ export interface ExtendedSelectItem {
     key: string
     label: string
     description?: string
+    /** Extra search terms the menu's search field matches but never renders.
+     *  Same contract as `ComboOption.keywords`: the visible label is not always
+     *  the only spelling a user types — a transliteration, an abbreviation, a
+     *  synonym or an English alias belongs here rather than in `description`,
+     *  which is shown under the label. */
+    keywords?: string[]
 }
 
 // Multi-select: how many picked labels are listed in the trigger before it
@@ -1098,7 +1104,8 @@ export class ExtendedSelect extends HTMLElement {
                 this._filteredItems = this._items.filter(
                     (item) =>
                         item.label.toLowerCase().includes(q) ||
-                        (item.description ?? '').toLowerCase().includes(q),
+                        (item.description ?? '').toLowerCase().includes(q) ||
+                        item.keywords?.some((k) => k.toLowerCase().includes(q)) === true,
                 )
             }
             this._activeIdx = -1
