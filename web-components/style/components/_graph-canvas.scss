@@ -32,6 +32,7 @@ tc-graph-canvas {
 }
 
 .tc-graph-canvas__spoke {
+    fill: none;
     stroke: var(--bs-graph-canvas-spoke-color);
     stroke-width: var(--bs-graph-canvas-spoke-width);
 }

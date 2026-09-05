@@ -76,7 +76,7 @@ export function SshKeysClient({ keys }: { keys: GitKey[] }) {
             <tc-rich-page-header
                 title-text="SSH keys"
                 icon-name={tcIcon('lock')}
-                icon-color="green"
+                icon-color="emerald"
                 description="Deploy keys for cloning private repositories over SSH. Pick one in the New-project dialog; the key is stored owner-only on the host and never shown again."
             />
             <AddKeyForm existing={rows.map((r) => r.alias)} onCreated={onCreated} />

@@ -162,7 +162,7 @@ function SitesModeration({
                     Every site across all tenants. Suspending drops the nginxpilot fragment and reloads, so the
                     site stops serving immediately — it’s reversible (the row is kept).
                 </p>
-                {error && <tc-banner variant="danger">{error}</tc-banner>}
+                {error && <tc-banner variant="error">{error}</tc-banner>}
                 {busyId && (
                     <p className="quaykeeper-admin-busy" role="status">
                         Suspending…

@@ -152,7 +152,7 @@ function FeatureFlagsCard() {
                     App-wide feature switches. Disabling a feature hides it for every non-owner and
                     refuses its API. Fine-tune per user under <strong>Admin → Users → Features</strong>.
                 </p>
-                {error && <tc-banner variant="danger" className="quaykeeper-admin-settings-full">{error}</tc-banner>}
+                {error && <tc-banner variant="error" className="quaykeeper-admin-settings-full">{error}</tc-banner>}
                 {flags &&
                     FEATURES.map((f) => (
                         <SwitchField
@@ -247,7 +247,7 @@ function SettingsForm({ settings, onSaved }: { settings: SiteSettings; onSaved: 
                 void save()
             }}
         >
-            {error && <tc-banner variant="danger">{error}</tc-banner>}
+            {error && <tc-banner variant="error">{error}</tc-banner>}
 
             <tc-section-card title="Branding" icon="palette">
                 <div className="quaykeeper-admin-section quaykeeper-admin-settings-grid">

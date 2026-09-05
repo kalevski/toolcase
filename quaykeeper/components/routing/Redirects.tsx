@@ -389,7 +389,7 @@ function RedirectsManager({
                         its domain with a 30x to another host. Wildcard domains (*.example.com) are supported — a
                         wildcard needs a DNS-01 wildcard cert (issue via Certificates with challenge: dns).
                     </p>
-                    {error && !form && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && !form && <tc-banner variant="error">{error}</tc-banner>}
                     <SaveWarningsBanner warnings={warnings} onDismiss={() => setWarnings([])} />
 
                     <div className="quaykeeper-list-actions">
@@ -424,7 +424,7 @@ function RedirectsManager({
                     onSubmit={() => void save()}
                     onClose={close}
                 >
-                    {error && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && <tc-banner variant="error">{error}</tc-banner>}
                     <FormGroup title="Identity">
                         <div className="quaykeeper-form-grid">
                             <div className="quaykeeper-form-span">

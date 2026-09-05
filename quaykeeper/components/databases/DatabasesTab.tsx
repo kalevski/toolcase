@@ -368,7 +368,7 @@ export function DatabasesTab({ server }: { server: DbServer }) {
                     onSubmit={() => void create()}
                     onClose={() => setCreating(false)}
                 >
-                    {error && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && <tc-banner variant="error">{error}</tc-banner>}
                     <FormGroup title="Database">
                         <TextField
                             label="Name"
@@ -390,7 +390,7 @@ export function DatabasesTab({ server }: { server: DbServer }) {
                     onSubmit={() => void runExport()}
                     onClose={() => setExporting(null)}
                 >
-                    {error && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && <tc-banner variant="error">{error}</tc-banner>}
                     <tc-banner variant="info">
                         {`Downloads a plain SQL script you can import into another registered ${server.kind === 'postgres' ? 'PostgreSQL' : 'MySQL'} server. Users, ownership, and grants are NOT included — re-apply access from the Access tab after importing.`}
                     </tc-banner>
@@ -419,7 +419,7 @@ export function DatabasesTab({ server }: { server: DbServer }) {
                     onSubmit={() => void runImport()}
                     onClose={() => setImporting(false)}
                 >
-                    {error && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && <tc-banner variant="error">{error}</tc-banner>}
                     <tc-banner variant="warning">
                         {`Restores a .sql dump exported from a ${server.kind === 'postgres' ? 'PostgreSQL' : 'MySQL'} server into ${server.name}. Restoring into a database that already holds these objects fails — import into an empty or new one. Grants are not part of a dump; re-apply them from the Access tab.`}
                     </tc-banner>

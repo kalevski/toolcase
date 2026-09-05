@@ -445,7 +445,7 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
                         scoped to an NGINX server; the default server is where new users land. The admin token is
                         encrypted at rest and never shown again.
                     </p>
-                    {error && !form && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && !form && <tc-banner variant="error">{error}</tc-banner>}
 
                     <div className="quaykeeper-list-actions">
                         <tc-button variant="primary" size="sm" onClick={openCreate}>
@@ -470,7 +470,7 @@ function RealmsForm({ realms, onChanged }: { realms: Realm[]; onChanged: () => v
                     onSubmit={() => void add()}
                     onClose={close}
                 >
-                    {error && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && <tc-banner variant="error">{error}</tc-banner>}
                     <FormGroup title="Identity">
                         <TextField
                             label="Name"
@@ -692,7 +692,7 @@ function RealmLogDestModal({
             onSubmit={() => void submit()}
             onClose={onClose}
         >
-            {error && <tc-banner variant="danger">{error}</tc-banner>}
+            {error && <tc-banner variant="error">{error}</tc-banner>}
             <FormGroup title="Destination">
                 <SelectField
                     label="Destination"
@@ -760,7 +760,7 @@ function RotateTokenModal({
             onSubmit={() => void submit()}
             onClose={onClose}
         >
-            {error && <tc-banner variant="danger">{error}</tc-banner>}
+            {error && <tc-banner variant="error">{error}</tc-banner>}
             <FormGroup title="Credentials">
                 <TextField
                     type="password"

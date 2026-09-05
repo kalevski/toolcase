@@ -124,7 +124,7 @@ export function JobEditor({
             onSubmit={() => void save()}
             onClose={onClose}
         >
-            {error && <tc-banner variant="danger">{error}</tc-banner>}
+            {error && <tc-banner variant="error">{error}</tc-banner>}
 
             <FormGroup title="Identity">
                 <div className="quaykeeper-form-grid">

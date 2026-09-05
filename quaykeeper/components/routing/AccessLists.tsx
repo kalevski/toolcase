@@ -353,7 +353,7 @@ function AccessListsManager({ lists, onChanged }: { lists: AccessList[]; onChang
                         host via its “Access list” field. Behind a CDN, enable the daemon’s real-ip trust list
                         (nginx.real_ip) first — otherwise IP rules see the CDN’s addresses, not your visitors’.
                     </p>
-                    {error && !form && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && !form && <tc-banner variant="error">{error}</tc-banner>}
                     {notice && <tc-banner variant="success">{notice}</tc-banner>}
 
                     <div className="quaykeeper-list-actions">
@@ -385,7 +385,7 @@ function AccessListsManager({ lists, onChanged }: { lists: AccessList[]; onChang
                     onSubmit={() => void save()}
                     onClose={close}
                 >
-                    {error && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && <tc-banner variant="error">{error}</tc-banner>}
                     <FormGroup title="Identity">
                         <div className="quaykeeper-form-grid">
                             <div className="quaykeeper-form-span">

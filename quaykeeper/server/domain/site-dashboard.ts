@@ -16,6 +16,7 @@
 //
 // See notes/static-hosting-app-design.md §9, §11, §14.
 
+import type { BuildBadgeVariant } from '@toolcase/web-components'
 import type { PlanLimits, Site, SiteStatus, SiteUsage } from './types'
 
 // ── input payload (mirrors `GET /api/sites/{id}/status`, kept local so the client
@@ -114,7 +115,7 @@ export interface DashboardBuild {
     size?: number
     /** Short deployed ref, shown as the card badge. */
     badge?: string
-    badgeVariant: string
+    badgeVariant: BuildBadgeVariant
     ariaLabel: string
 }
 
@@ -282,7 +283,7 @@ export function buildSiteDashboard(
     else if (np?.last_success || ref) buildState = 'pass'
     else buildState = 'queued'
 
-    const badgeVariant: Record<BuildState, string> = {
+    const badgeVariant: Record<BuildState, BuildBadgeVariant> = {
         pass: 'success',
         fail: 'danger',
         running: 'info',

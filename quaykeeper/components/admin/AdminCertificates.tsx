@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useMemo, useState } from 'react'
-import type { TableColumn, TabBarItem } from '@toolcase/web-components'
+import type { TableColumn, TabBarItem, BannerVariant } from '@toolcase/web-components'
 import { escapeHtml, useTc } from '@/lib/tc'
 import type {
     NginxpilotCert,
@@ -449,7 +449,7 @@ function CertificatesList({
                         </tc-banner>
                     )
                 ) : null}
-                {error && <tc-banner variant="danger">{error}</tc-banner>}
+                {error && <tc-banner variant="error">{error}</tc-banner>}
 
                 {rows.length === 0 ? (
                     <tc-empty-state icon="shield-check">
@@ -638,7 +638,7 @@ function IssueJobsCard({ jobs, onChanged }: { jobs: CertJob[]; onChanged: () => 
                     hour; a daemon restart clears them). An in-flight job started in another tab — or by
                     another admin — can be picked up with Watch.
                 </p>
-                {error && <tc-banner variant="danger">{error}</tc-banner>}
+                {error && <tc-banner variant="error">{error}</tc-banner>}
                 {watching && <tc-banner variant="info">Watching the issuance…</tc-banner>}
                 <DataTable<JobRow> columns={JOB_COLUMNS} rows={rows} rowKey={(row) => row.id} onAction={onRowAction} />
             </div>
@@ -663,7 +663,7 @@ interface PreflightRow {
 }
 
 /** Banner tone for a pre-flight verdict — ok is green, wildcard hint is informational. */
-function preflightVariant(verdict: string): string {
+function preflightVariant(verdict: string): BannerVariant {
     if (verdict === 'ok') return 'success'
     if (verdict === 'wildcard_needs_dns') return 'info'
     return 'warning'
@@ -805,7 +805,7 @@ function IssueCertCard({
                     is allowed only when the daemon’s challenge is DNS-01. Use staging while testing
                     to avoid the CA’s rate limits.
                 </p>
-                {error && <tc-banner variant="danger">{error}</tc-banner>}
+                {error && <tc-banner variant="error">{error}</tc-banner>}
                 {progress && <tc-banner variant="info">{progress}</tc-banner>}
                 {inFlight.length > 0 && !busy && (
                     <tc-banner variant="warning">
@@ -931,7 +931,7 @@ function UploadCertCard({ onChanged }: { onChanged: () => void }) {
                     and never echoed back. Works whenever{' '}
                     <span className="quaykeeper-admin-mono">tls.cert_dir</span> is set.
                 </p>
-                {error && <tc-banner variant="danger">{error}</tc-banner>}
+                {error && <tc-banner variant="error">{error}</tc-banner>}
                 <form
                     className="quaykeeper-admin-section"
                     onSubmit={(e) => {
@@ -1171,7 +1171,7 @@ function CredentialsCard({
                     Storing credentials requires <span className="quaykeeper-admin-mono">acme.enabled</span>{' '}
                     on the daemon.
                 </p>
-                {error && <tc-banner variant="danger">{error}</tc-banner>}
+                {error && <tc-banner variant="error">{error}</tc-banner>}
 
                 {rows.length === 0 ? (
                     <tc-empty-state icon="key-round">

@@ -250,7 +250,7 @@ function SecretsManager({ secrets, onChanged }: { secrets: SecretMeta[]; onChang
                         {secrets.length} secret{secrets.length === 1 ? '' : 's'}. Values are encrypted at rest and
                         never listed — reveal is one click, and audited.
                     </p>
-                    {error && !form && !editing && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && !form && !editing && <tc-banner variant="error">{error}</tc-banner>}
                     {referencedBy && (
                         <tc-banner variant="warning">
                             Still referenced by {referencedBy.map((i) => i.name).join(', ')} — remove those references
@@ -279,7 +279,7 @@ function SecretsManager({ secrets, onChanged }: { secrets: SecretMeta[]; onChang
                     onSubmit={() => void create()}
                     onClose={closeForm}
                 >
-                    {error && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && <tc-banner variant="error">{error}</tc-banner>}
                     <FormGroup title="Identity">
                         <TextField
                             label="Key"
@@ -342,7 +342,7 @@ function SecretsManager({ secrets, onChanged }: { secrets: SecretMeta[]; onChang
                         setError(null)
                     }}
                 >
-                    {error && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && <tc-banner variant="error">{error}</tc-banner>}
                     <FormGroup title="Value">
                         <TextField
                             type="password"
@@ -370,7 +370,7 @@ function SecretsManager({ secrets, onChanged }: { secrets: SecretMeta[]; onChang
                     onClose={() => setRevealed(null)}
                 >
                     <tc-banner variant="warning">Audited — this reveal was logged.</tc-banner>
-                    <tc-code-snippet code={revealed.value} language="text" show-copy-button="" />
+                    <tc-code-snippet code={revealed.value} show-copy-button="" />
                 </FormModal>
             )}
 

@@ -24,6 +24,21 @@ import { num } from './internal/tc-element'
 // it at the same size as the centre is what makes a radial graph unreadable at
 // the exact moment it has enough in it to be worth drawing.
 //
+// A CHILD'S SLICE OF THE RING IS WEIGHTED BY ITS OWN SUBTREE, not split evenly
+// among siblings — see `_weight`. A branch that has grown wide gets
+// proportionally more of the circle, so a dense subtree can never crowd into a
+// sparse sibling's territory the way an even split would let it.
+//
+// A GRID'S COLUMNS ARE SIZED FROM WHAT IS ACTUALLY GOING INTO IT — see
+// `_measure`/`_gridFor` — so a stacked block whose members are themselves
+// deeply branching packs wide-and-short instead of running a uniform-cell
+// column off the canvas.
+//
+// LINKS ARE TRIMMED TO THE CARD'S EDGE AND BENT, never drawn centre to centre —
+// see `_drawGuides` — and every child of one parent leaves that parent from the
+// same point, which is what makes the drawing read as a tree rather than a
+// scatter of sticks.
+//
 // The element draws the LAYOUT — the ring guides, the spokes and a positioned box
 // per node — and hands each box back through `--tc-node-*` custom properties. The
 // node's own contents are yours: pass them as children carrying `data-node-id`,
@@ -57,6 +72,23 @@ const RING_CAP = 8
 const LEVEL_SHRINK = 0.82
 
 const RADIAN = Math.PI / 180
+
+const TAU = Math.PI * 2
+
+/** Clearance folded into a ring's circumference formula and a stacked grid's
+ *  per-item padding — kept as named constants so the two pads used across
+ *  `_weight`/`_measure`/`_layout` can't drift apart. */
+const SIBLING_GAP = 24
+const GRID_GAP = 12
+
+/** A hair of clearance so a link's stroke doesn't touch the card's own border. */
+const EDGE_GAP = 3
+
+const CURVE = 0.42
+
+/** The shortest link still gets a readable bend rather than collapsing to a
+ *  straight stub. */
+const MIN_BEND = 16
 
 export class GraphCanvas extends HTMLElement {
     private _built = false
@@ -155,12 +187,89 @@ export class GraphCanvas extends HTMLElement {
         })
     }
 
+    // ── Weighing subtrees ────────────────────────────────────────────────────
+
+    /** How many equivalent-width ring slots one child's subtree needs. A leaf is
+     *  one; an ordinary node sums its own children's weight; a stacked block
+     *  counts as however many standard-width columns its own grid needs. Used
+     *  to size each child's angular slice in `_layout` — a branch that has grown
+     *  wide gets proportionally more of the ring instead of the same slice as a
+     *  one-node sibling, so two subtrees can never crowd into each other. */
+    private _weight(id: string, level: number): number {
+        const children = this._childrenOf(id)
+        if (children.length === 0) return 1
+        if (children.length > RING_CAP) {
+            const scale = LEVEL_SHRINK ** level
+            const grid = this._gridFor(children, level + 1)
+            return Math.max(1, grid.lateral / (this.nodeWidth * scale + SIBLING_GAP))
+        }
+        return children.reduce((sum, child) => sum + this._weight(child.id, level + 1), 0)
+    }
+
+    /** A node's own footprint once its stacked descendants (if any) are folded
+     *  in: how wide (lateral) and how deep (outward) drawing it and everything
+     *  beneath it actually needs. */
+    private _measure(id: string, level: number): { lateral: number; outward: number } {
+        const scale = LEVEL_SHRINK ** level
+        const width = this.nodeWidth * scale + GRID_GAP
+        const height = this.nodeHeight * scale + GRID_GAP
+        const children = this._childrenOf(id)
+        if (children.length === 0) return { lateral: width, outward: height }
+        const grid = this._gridFor(children, level + 1)
+        return {
+            lateral: Math.max(width, grid.lateral),
+            outward: height + this.ringGap * 0.7 + grid.outward + GRID_GAP,
+        }
+    }
+
+    /** Columns sized from the AVERAGE measured footprint of what is actually
+     *  going into the grid, so a block whose members are themselves deeply
+     *  stacked comes out wide-and-short instead of the tall column a plain
+     *  `sqrt(count)` would draw. Column widths and row heights then come from
+     *  the largest item actually in that column/row, not a uniform cell. */
+    private _gridFor(
+        children: GraphCanvasNode[],
+        level: number,
+    ): {
+        columns: number
+        rows: number
+        columnWidths: number[]
+        rowHeights: number[]
+        lateral: number
+        outward: number
+    } {
+        const items = children.map((child) => this._measure(child.id, level))
+        const count = items.length
+        const lateralAvg = items.reduce((sum, box) => sum + box.lateral, 0) / count
+        const outwardAvg = items.reduce((sum, box) => sum + box.outward, 0) / count
+        const columns = Math.max(1, Math.min(count, Math.ceil(Math.sqrt((count * outwardAvg) / lateralAvg))))
+        const rows = Math.ceil(count / columns)
+        const columnWidths: number[] = new Array(columns).fill(0)
+        const rowHeights: number[] = new Array(rows).fill(0)
+
+        items.forEach((box, index) => {
+            const column = Math.floor(index / rows)
+            const row = index % rows
+            columnWidths[column] = Math.max(columnWidths[column], box.lateral)
+            rowHeights[row] = Math.max(rowHeights[row], box.outward)
+        })
+
+        return {
+            columns,
+            rows,
+            columnWidths,
+            rowHeights,
+            lateral: columnWidths.reduce((sum, w) => sum + w, 0),
+            outward: rowHeights.reduce((sum, h) => sum + h, 0),
+        }
+    }
+
+    // ── Layout ───────────────────────────────────────────────────────────────
+
     private _layout(): void {
         const placements: GraphCanvasPlacement[] = []
         const roots = this._childrenOf(null)
         const gap = this.ringGap
-        const width = this.nodeWidth
-        const height = this.nodeHeight
 
         const walk = (
             parents: Array<{ node: GraphCanvasNode; x: number; y: number }>,
@@ -174,33 +283,54 @@ export class GraphCanvas extends HTMLElement {
                 const scale = LEVEL_SHRINK ** level
 
                 if (children.length > RING_CAP) {
-                    // Past the cap the ring becomes a grid under the parent. Columns
-                    // are the square root of the count, so a block of twelve is 4×3
-                    // rather than a column of twelve running off the canvas.
-                    const columns = Math.ceil(Math.sqrt(children.length))
-                    const cellW = width * scale + 12
-                    const cellH = height * scale + 12
-                    const rows = Math.ceil(children.length / columns)
+                    // Past the cap the ring becomes a grid under the parent, sized
+                    // from what each child's own subtree actually needs rather than
+                    // a uniform cell — see `_gridFor` — so a block whose members are
+                    // themselves deeply stacked comes out wide-and-short instead of
+                    // running a column off the canvas.
+                    const grid = this._gridFor(children, level)
+                    const columnLefts: number[] = []
+                    let left = -grid.lateral / 2
+                    for (const columnWidth of grid.columnWidths) {
+                        columnLefts.push(left)
+                        left += columnWidth
+                    }
+                    const rowTops: number[] = []
+                    let top = gap * 0.7
+                    for (const rowHeight of grid.rowHeights) {
+                        rowTops.push(top)
+                        top += rowHeight
+                    }
                     children.forEach((child, index) => {
-                        const column = index % columns
-                        const row = Math.floor(index / columns)
-                        const x = parent.x + (column - (columns - 1) / 2) * cellW
-                        const y = parent.y + gap * 0.7 + (row - (rows - 1) / 2) * cellH
+                        const column = Math.floor(index / grid.rows)
+                        const row = index % grid.rows
+                        const x = parent.x + columnLefts[column] + grid.columnWidths[column] / 2
+                        const y = parent.y + rowTops[row] + (this.nodeHeight * scale) / 2
                         placements.push({ id: child.id, x, y, level, scale })
                         next.push({ node: child, x, y })
                     })
                     continue
                 }
 
-                // The radius grows with the sibling count so the GAP between
-                // siblings stays roughly constant — see the header.
-                const circumference = children.length * (width * scale + 24)
-                const radius = Math.max(
-                    gap * (level === 1 ? 1 : 0.8),
-                    circumference / (2 * Math.PI),
-                )
+                // Each child's slice of the circle is proportional to its own
+                // subtree's weight (see `_weight`), not an even split, so a branch
+                // that has grown wide gets proportionally more of the ring and a
+                // sibling's subtree can never crowd into it. The radius still grows
+                // with the sibling count — sized to whichever child needs the most
+                // room for its (possibly narrower) slice.
+                const weights = children.map((child) => this._weight(child.id, level))
+                const total = weights.reduce((sum, w) => sum + w, 0)
+                const needed = weights.reduce((widest, w) => {
+                    const span = Math.max((TAU * w) / total, 0.0001)
+                    return Math.max(widest, (this.nodeWidth * scale + SIBLING_GAP) / span)
+                }, 0)
+                const radius = Math.max(gap * (level === 1 ? 1 : 0.8), needed)
+
+                let cursor = 0
                 children.forEach((child, index) => {
-                    const angle = (this.startAngle + (360 / children.length) * index) * RADIAN
+                    const span = (360 * weights[index]) / total
+                    const angle = (this.startAngle + cursor + span / 2) * RADIAN
+                    cursor += span
                     const x = parent.x + Math.cos(angle) * radius
                     const y = parent.y + Math.sin(angle) * radius
                     placements.push({ id: child.id, x, y, level, scale })
@@ -256,15 +386,71 @@ export class GraphCanvas extends HTMLElement {
         const svg = this._layer
         if (!svg) return
         const byId = new Map(this._placements.map((p) => [p.id, p]))
+        const ids = new Set(this._nodes.map((n) => n.id))
+        const parentOf = (node: GraphCanvasNode): string | null => {
+            const parent = node.parent ?? null
+            return parent !== null && ids.has(parent) ? parent : null
+        }
+
+        // The direction a node's link leaves ITS PARENT from — away from
+        // wherever that parent was itself reached from — so every child of one
+        // parent exits the same point on its edge instead of scattering around
+        // its perimeter. Falls back to straight up in the degenerate case of a
+        // node sitting exactly on top of its own reference point.
+        const along = (id: string): { x: number; y: number } => {
+            const placement = byId.get(id)
+            if (!placement) return { x: 0, y: -1 }
+            const node = this._nodes.find((n) => n.id === id) ?? null
+            const anchor = node ? byId.get(parentOf(node) ?? '') : null
+            const ox = anchor ? anchor.x : 0
+            const oy = anchor ? anchor.y : 0
+            const dx = placement.x - ox
+            const dy = placement.y - oy
+            const dist = Math.hypot(dx, dy)
+            return dist < 1 ? { x: 0, y: -1 } : { x: dx / dist, y: dy / dist }
+        }
+
+        // Where a ray leaving a card's centre crosses its (rectangular) boundary.
+        const edgeOf = (
+            centre: { x: number; y: number },
+            size: { width: number; height: number },
+            dx: number,
+            dy: number,
+        ) => {
+            const spanX = dx === 0 ? Infinity : size.width / 2 / Math.abs(dx)
+            const spanY = dy === 0 ? Infinity : size.height / 2 / Math.abs(dy)
+            const span = Math.min(spanX, spanY)
+            return { x: centre.x + dx * span, y: centre.y + dy * span }
+        }
+
         const lines = this._nodes
             .map((node) => {
                 const to = byId.get(node.id)
-                const from = node.parent ? byId.get(node.parent) : null
-                if (!to || !from) return ''
+                const parentId = parentOf(node)
+                const from = parentId ? byId.get(parentId) : null
+                if (!to || !from || !parentId) return ''
+
+                const lead = along(parentId)
+                const tail = along(node.id)
+                const fromSize = { width: this.nodeWidth * from.scale, height: this.nodeHeight * from.scale }
+                const toSize = { width: this.nodeWidth * to.scale, height: this.nodeHeight * to.scale }
+
+                const fromEdge = edgeOf(from, fromSize, lead.x, lead.y)
+                const toEdge = edgeOf(to, toSize, -tail.x, -tail.y)
+
+                const reach = Math.hypot(toEdge.x - fromEdge.x, toEdge.y - fromEdge.y)
+                if (reach <= EDGE_GAP * 2) return ''
+
+                const start = { x: fromEdge.x + lead.x * EDGE_GAP, y: fromEdge.y + lead.y * EDGE_GAP }
+                const end = { x: toEdge.x - tail.x * EDGE_GAP, y: toEdge.y - tail.y * EDGE_GAP }
+                const bend = Math.max(MIN_BEND, reach * CURVE)
+                const c1 = { x: start.x + lead.x * bend, y: start.y + lead.y * bend }
+                const c2 = { x: end.x - tail.x * bend, y: end.y - tail.y * bend }
+
                 return (
-                    `<line class="tc-graph-canvas__spoke"` +
-                    ` x1="${from.x.toFixed(2)}" y1="${from.y.toFixed(2)}"` +
-                    ` x2="${to.x.toFixed(2)}" y2="${to.y.toFixed(2)}"/>`
+                    `<path class="tc-graph-canvas__spoke"` +
+                    ` d="M${start.x.toFixed(1)} ${start.y.toFixed(1)}` +
+                    ` C${c1.x.toFixed(1)} ${c1.y.toFixed(1)}, ${c2.x.toFixed(1)} ${c2.y.toFixed(1)}, ${end.x.toFixed(1)} ${end.y.toFixed(1)}"/>`
                 )
             })
             .join('')

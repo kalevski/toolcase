@@ -278,7 +278,7 @@ export function UsersTab({ server }: { server: DbServer }) {
                     onSubmit={() => void create()}
                     onClose={() => setCreating(false)}
                 >
-                    {error && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && <tc-banner variant="error">{error}</tc-banner>}
                     <FormGroup title="User">
                         <TextField
                             label="Name"
@@ -308,7 +308,7 @@ export function UsersTab({ server }: { server: DbServer }) {
                     onSubmit={() => void doReset()}
                     onClose={() => setResetting(null)}
                 >
-                    {error && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && <tc-banner variant="error">{error}</tc-banner>}
                     <FormGroup title="Password">
                         <TextField
                             type="password"

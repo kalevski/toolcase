@@ -199,7 +199,7 @@ function AuditTable({ firstPage }: { firstPage: AuditPage }) {
     return (
         <tc-section-card title="Audit trail" icon="scroll-text">
             <div className="quaykeeper-admin-section">
-                {failed && <tc-banner variant="danger">Couldn’t load that page of the audit log.</tc-banner>}
+                {failed && <tc-banner variant="error">Couldn’t load that page of the audit log.</tc-banner>}
                 {page.total === 0 && !hasFilters && !loading ? (
                     <tc-empty-state icon="scroll-text">No audit entries yet.</tc-empty-state>
                 ) : (

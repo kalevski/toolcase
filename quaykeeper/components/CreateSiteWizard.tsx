@@ -872,7 +872,7 @@ export function CreateSiteWizard() {
                             Add these DNS records at your registrar, then create the site and verify it from its
                             dashboard:
                         </p>
-                        <tc-code-snippet ref={dnsSnippetRef} language="dns" title="DNS records" />
+                        <tc-code-snippet ref={dnsSnippetRef} title="DNS records" />
                     </div>
                 </div>
 

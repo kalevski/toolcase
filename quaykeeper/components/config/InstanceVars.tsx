@@ -396,7 +396,7 @@ function VarsBody({ data, instance, onChanged }: { data: VarsData; instance: Ins
                         {data.vars.length} variable{data.vars.length === 1 ? '' : 's'}. Each is a literal value, or a
                         reference to a global variable or secret.
                     </p>
-                    {error && !form && !importRows && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && !form && !importRows && <tc-banner variant="error">{error}</tc-banner>}
 
                     <div className="quaykeeper-instance-toolbar">
                         <tc-button variant="primary" size="sm" onClick={openCreate}>
@@ -432,7 +432,7 @@ function VarsBody({ data, instance, onChanged }: { data: VarsData; instance: Ins
                     onSubmit={() => void save()}
                     onClose={closeForm}
                 >
-                    {error && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && <tc-banner variant="error">{error}</tc-banner>}
                     <FormGroup title="Identity">
                         <TextField
                             label="Key"
@@ -493,7 +493,7 @@ function VarsBody({ data, instance, onChanged }: { data: VarsData; instance: Ins
                     onSubmit={() => (importRows ? void doImport() : buildPreview())}
                     onClose={closeImport}
                 >
-                    {error && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && <tc-banner variant="error">{error}</tc-banner>}
                     {!importRows ? (
                         <FormGroup title="Paste a .env file">
                             <TextAreaField

@@ -359,7 +359,7 @@ function DeadHostsManager({
                         error code. 444 closes the connection without any response. Keeping TLS on keeps the cert warm
                         for a retired domain, so bringing it back later needs no reissue.
                     </p>
-                    {error && !form && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && !form && <tc-banner variant="error">{error}</tc-banner>}
                     <SaveWarningsBanner warnings={warnings} onDismiss={() => setWarnings([])} />
 
                     <div className="quaykeeper-list-actions">
@@ -394,7 +394,7 @@ function DeadHostsManager({
                     onSubmit={() => void save()}
                     onClose={close}
                 >
-                    {error && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && <tc-banner variant="error">{error}</tc-banner>}
                     <FormGroup title="Identity">
                         <div className="quaykeeper-form-grid">
                             <div className="quaykeeper-form-span">

@@ -4,8 +4,9 @@
 // processing and queue position while pending.
 
 import type { TranscriptionStatus } from '@/server/domain/types'
+import type { BadgeVariant } from '@toolcase/web-components'
 
-const VARIANT: Record<TranscriptionStatus, string> = {
+const VARIANT: Record<TranscriptionStatus, BadgeVariant> = {
     pending: 'secondary',
     processing: 'info',
     done: 'success',

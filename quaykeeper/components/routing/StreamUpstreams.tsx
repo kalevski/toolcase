@@ -268,7 +268,7 @@ export function StreamUpstreamsManager({
                     <p className="quaykeeper-home-lead quaykeeper-admin-hint">
                         {upstreams.length} pool{upstreams.length === 1 ? '' : 's'}. A stream routes to a pool by name.
                     </p>
-                    {error && !form && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && !form && <tc-banner variant="error">{error}</tc-banner>}
                     <SaveWarningsBanner warnings={warnings} onDismiss={() => setWarnings([])} />
 
                     <div className="quaykeeper-list-actions">
@@ -307,7 +307,7 @@ export function StreamUpstreamsManager({
                             : undefined
                     }
                 >
-                    {error && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && <tc-banner variant="error">{error}</tc-banner>}
                     <FormGroup title="Identity">
                         <div className="quaykeeper-form-grid">
                             <div className="quaykeeper-form-span">

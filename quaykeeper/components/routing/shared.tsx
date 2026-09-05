@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
-import type { AdvancedTableColumn } from '@toolcase/web-components'
+import type { AdvancedTableColumn, RichPageHeaderIconColor } from '@toolcase/web-components'
 import { hstsEnabled, type HstsOptions, type TlsMode } from '@/server/domain/routing'
 import { useMe } from '@/lib/me-context'
 import { LoadingState, ErrorState } from '@/components/states'
@@ -290,7 +290,7 @@ export function RoutingPage<T>({
     /** Lucide glyph (kebab-case) for the header icon chip — mirrors the side-nav icon. */
     icon?: string
     /** Header icon chip tint (tc-rich-page-header palette). */
-    iconColor?: string
+    iconColor?: RichPageHeaderIconColor
     state: RoutingDataState<T>
     onRetry?: () => void
     /** The daemon path this page needs (capability gate, impl §6). */
@@ -660,7 +660,7 @@ function RoutingHealthStrip() {
                 </tc-banner>
             )}
             {disabled.length > 0 && (
-                <tc-banner variant="danger">
+                <tc-banner variant="error">
                     {disabled.length} resource{disabled.length === 1 ? '' : 's'} quarantined by nginx&nbsp;-t (not
                     serving):
                     <ul className="quaykeeper-admin-list">{disabled.map((r) => resourceLine(r, 'since'))}</ul>
@@ -744,7 +744,7 @@ function RoutingTestButton() {
                 )}
             </div>
             {reloadNote && (
-                <tc-banner variant={reloadNote.ok ? 'success' : 'danger'}>{reloadNote.text}</tc-banner>
+                <tc-banner variant={reloadNote.ok ? 'success' : 'error'}>{reloadNote.text}</tc-banner>
             )}
             <ConfirmDialog
                 open={confirmReload}
@@ -757,7 +757,7 @@ function RoutingTestButton() {
                 }}
                 onCancel={() => setConfirmReload(false)}
             />
-            {failed && <tc-banner variant="danger">Couldn’t run the dry run — the deploy engine didn’t answer.</tc-banner>}
+            {failed && <tc-banner variant="error">Couldn’t run the dry run — the deploy engine didn’t answer.</tc-banner>}
             {result && !result.managed && (
                 <tc-banner variant="info">
                     Managed mode is off — TLS &amp; security toggles and streams are inert until nginxpilot runs in
@@ -768,7 +768,7 @@ function RoutingTestButton() {
                 <tc-banner variant="success">All resources pass nginx&nbsp;-t.</tc-banner>
             )}
             {result?.managed && disabled.length > 0 && (
-                <tc-banner variant="danger">
+                <tc-banner variant="error">
                     {disabled.length} resource{disabled.length === 1 ? '' : 's'} would be disabled by nginx&nbsp;-t:
                     <ul className="quaykeeper-admin-list">
                         {disabled.map((r) => (
@@ -829,12 +829,12 @@ export function VhostPreviewModal({ domain, onClose }: { domain: string | null; 
             <div className="quaykeeper-vhost-preview">
                 {state.phase === 'loading' && <p className="quaykeeper-admin-hint">Rendering the vhost…</p>}
                 {state.phase === 'error' && (
-                    <tc-banner variant="danger">
+                    <tc-banner variant="error">
                         Couldn’t render the vhost{state.detail ? `: ${state.detail}` : '.'}
                     </tc-banner>
                 )}
                 {state.phase === 'ready' && (
-                    <tc-code-snippet code={state.text} language="nginx" show-copy-button="" />
+                    <tc-code-snippet code={state.text} show-copy-button="" />
                 )}
             </div>
         </tc-modal>

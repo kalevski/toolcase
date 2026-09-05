@@ -319,7 +319,7 @@ function DbServersForm({ servers, onChanged }: { servers: DbServer[]; onChanged:
                         over the engine superuser. It is encrypted at rest and never shown again.
                         Disconnecting only removes the registry entry; the server itself is untouched.
                     </p>
-                    {error && !form && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && !form && <tc-banner variant="error">{error}</tc-banner>}
 
                     <div className="quaykeeper-list-actions">
                         <tc-button variant="primary" size="sm" onClick={() => setForm({ id: null, draft: emptyDraft() })}>
@@ -344,7 +344,7 @@ function DbServersForm({ servers, onChanged }: { servers: DbServer[]; onChanged:
                     onSubmit={() => void submit()}
                     onClose={close}
                 >
-                    {error && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && <tc-banner variant="error">{error}</tc-banner>}
                     <FormGroup title="Identity">
                         <TextField
                             label="Name"

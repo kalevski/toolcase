@@ -219,7 +219,7 @@ export function InstanceFlags({ instanceId }: { instanceId: string }) {
                     <p className="quaykeeper-home-lead quaykeeper-admin-hint">
                         {flags.length} flag{flags.length === 1 ? '' : 's'}. Boolean only — key + enabled + description.
                     </p>
-                    {error && !form && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && !form && <tc-banner variant="error">{error}</tc-banner>}
                     <div className="quaykeeper-instance-toolbar">
                         <tc-button variant="primary" size="sm" onClick={openCreate}>
                             Add flag
@@ -235,7 +235,7 @@ export function InstanceFlags({ instanceId }: { instanceId: string }) {
 
             {form && (
                 <FormModal key="new" title="Add flag" busy={busy} submitLabel="Create flag" onSubmit={() => void create()} onClose={closeForm}>
-                    {error && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && <tc-banner variant="error">{error}</tc-banner>}
                     <FormGroup title="Identity">
                         <TextField
                             label="Key"

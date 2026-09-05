@@ -378,7 +378,7 @@ function BaseDomainsForm({
                         The subdomain pool. Each base domain backs <code>&lt;label&gt;.&lt;domain&gt;</code> sites and is
                         available to every user.
                     </p>
-                    {error && !form && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && !form && <tc-banner variant="error">{error}</tc-banner>}
 
                     <div className="quaykeeper-list-actions">
                         <tc-button variant="primary" size="sm" onClick={openCreate}>
@@ -403,7 +403,7 @@ function BaseDomainsForm({
                     onSubmit={() => void add()}
                     onClose={close}
                 >
-                    {error && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && <tc-banner variant="error">{error}</tc-banner>}
                     <FormGroup title="Identity">
                         <TextField
                             label="Domain"

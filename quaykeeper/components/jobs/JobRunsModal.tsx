@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
+import type { BadgeVariant } from '@toolcase/web-components'
 import type { JobRun, JobRunStatus, ScheduledJob } from '@/server/domain/job'
 import { useTc } from '@/lib/tc'
 import { callApi } from '@/components/config/shared'
@@ -11,7 +12,7 @@ import { callApi } from '@/components/config/shared'
 // expanded on top. A plain `tc-modal` (info, single Close button) — not FormModal,
 // which is submit-shaped.
 
-const STATUS_VARIANT: Record<JobRunStatus, string> = {
+const STATUS_VARIANT: Record<JobRunStatus, BadgeVariant> = {
     success: 'success',
     failed: 'danger',
     timeout: 'warning',
@@ -41,7 +42,7 @@ function Stream({ label, text }: { label: string; text: string }) {
     return (
         <div className="quaykeeper-job-stream">
             <div className="quaykeeper-form-group-title">{label}</div>
-            <tc-code-snippet code={text} language="text" show-copy-button="" />
+            <tc-code-snippet code={text} show-copy-button="" />
         </div>
     )
 }
@@ -97,7 +98,7 @@ export function JobRunsModal({
     if (state === 'loading') {
         body = <p className="quaykeeper-admin-hint">Loading runs…</p>
     } else if (state === 'error') {
-        body = <tc-banner variant="danger">Couldn’t load this job’s runs.</tc-banner>
+        body = <tc-banner variant="error">Couldn’t load this job’s runs.</tc-banner>
     } else if (state.runs.length === 0) {
         body = <p className="quaykeeper-admin-hint">No runs yet. Use “Run now” to execute this job.</p>
     } else {

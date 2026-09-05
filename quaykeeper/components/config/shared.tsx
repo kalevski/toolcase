@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
+import type { RichPageHeaderIconColor } from '@toolcase/web-components'
 import { ROLE_RANK, type Role } from '@/server/domain/types'
 import type { FeatureKey } from '@/server/domain/features'
 import { useMe } from '@/lib/me-context'
@@ -118,7 +119,7 @@ export function ConfigPage<T>({
     title: string
     subtitle?: string
     icon?: string
-    iconColor?: string
+    iconColor?: RichPageHeaderIconColor
     state: ConfigDataState<T>
     onRetry?: () => void
     children: (data: T) => ReactNode

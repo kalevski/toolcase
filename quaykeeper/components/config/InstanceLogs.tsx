@@ -273,7 +273,7 @@ export function InstanceLogs({ instanceId }: { instanceId: string }) {
                         quaykeeper-client; changes are delivered on the next config fetch. Credentials are referenced by
                         env-var / file name — provision them as instance variables.
                     </p>
-                    {error && !form && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && !form && <tc-banner variant="error">{error}</tc-banner>}
                     <div className="quaykeeper-instance-toolbar">
                         <tc-button variant="primary" size="sm" onClick={openCreate} disabled={destinations.length === 0}>
                             Add log destination
@@ -300,7 +300,7 @@ export function InstanceLogs({ instanceId }: { instanceId: string }) {
                     onSubmit={() => void submit()}
                     onClose={closeForm}
                 >
-                    {error && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && <tc-banner variant="error">{error}</tc-banner>}
                     <FormGroup title="Destination">
                         <SelectField
                             label="Destination"

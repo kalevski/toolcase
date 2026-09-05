@@ -171,7 +171,7 @@ export function InstanceSettings({
         <>
             <tc-section-card title="Details" icon="pencil">
                 <div className="quaykeeper-admin-section">
-                    {detailsError && <tc-banner variant="danger">{detailsError}</tc-banner>}
+                    {detailsError && <tc-banner variant="error">{detailsError}</tc-banner>}
                     <div className="quaykeeper-form-grid">
                         <TextField label="Name" value={name} onValue={setName} help="Lowercase letters/digits/hyphens." />
                         <TextField label="Description" value={description} onValue={setDescription} />
@@ -209,7 +209,7 @@ export function InstanceSettings({
                         {instance.hasKey ? 'A fetch key is set.' : 'No fetch key minted yet.'} Minting/rotating shows the
                         secret once — it is never recoverable afterwards.
                     </p>
-                    {keyError && <tc-banner variant="danger">{keyError}</tc-banner>}
+                    {keyError && <tc-banner variant="error">{keyError}</tc-banner>}
                     {mintedSecret && (
                         <>
                             <tc-banner variant="warning">Copy this now — it will not be shown again.</tc-banner>

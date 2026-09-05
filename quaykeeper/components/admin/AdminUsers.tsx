@@ -347,7 +347,7 @@ function UsersRoster({
                     features a user sees with <strong>Features</strong>, or override their quotas
                     with <strong>Limits</strong>.
                 </p>
-                {error && <tc-banner variant="danger">{error}</tc-banner>}
+                {error && <tc-banner variant="error">{error}</tc-banner>}
 
                 <div className="quaykeeper-admin-userbar">
                     <TextField
@@ -495,7 +495,7 @@ function FeaturesEditor({
                 Which features {row.user.login} sees. <strong>Inherit</strong> follows the app-wide
                 default; override to force a feature on or off for this user. Applies immediately.
             </p>
-            {error && <tc-banner variant="danger">{error}</tc-banner>}
+            {error && <tc-banner variant="error">{error}</tc-banner>}
             <div className="quaykeeper-admin-limits-grid">
                 {FEATURES.map((f) => (
                     <SelectField
@@ -635,7 +635,7 @@ function LimitsEditor({ row, onSaved }: { row: AdminUserRow; onSaved: () => void
                 Leave a field blank to inherit the {ACCOUNT_LEVEL_LABEL[row.level].toLowerCase()}{' '}
                 default. Overrides apply immediately.
             </p>
-            {error && <tc-banner variant="danger">{error}</tc-banner>}
+            {error && <tc-banner variant="error">{error}</tc-banner>}
             <div className="quaykeeper-admin-limits-grid">
                 {NUM_FIELDS.map((f) => {
                     const def = row.limits[f.key] as number
@@ -773,7 +773,7 @@ function RealmsEditor({
                 Which NGINX servers {row.user.login} may use, and which is their operating default. They
                 don’t switch — they always operate on the default NGINX server among their grants.
             </p>
-            {error && <tc-banner variant="danger">{error}</tc-banner>}
+            {error && <tc-banner variant="error">{error}</tc-banner>}
             <div className="quaykeeper-admin-realm-grants">
                 {realms.map((r) => (
                     <CheckField

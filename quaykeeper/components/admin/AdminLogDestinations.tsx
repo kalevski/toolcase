@@ -372,7 +372,7 @@ function LogDestForm({ dests, onChanged }: { dests: LogDestDto[]; onChanged: () 
                         or on an instance’s Logs tab for app logs. Credentials are referenced by env-var / file name and
                         provisioned on the shipping host — never stored here.
                     </p>
-                    {error && !form && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && !form && <tc-banner variant="error">{error}</tc-banner>}
 
                     <div className="quaykeeper-list-actions">
                         <tc-button variant="primary" size="sm" onClick={() => setForm({ id: null, draft: emptyDraft() })}>
@@ -397,7 +397,7 @@ function LogDestForm({ dests, onChanged }: { dests: LogDestDto[]; onChanged: () 
                     onSubmit={() => void submit()}
                     onClose={close}
                 >
-                    {error && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && <tc-banner variant="error">{error}</tc-banner>}
 
                     <FormGroup title="Identity">
                         <TextField
@@ -508,7 +508,7 @@ function LogDestForm({ dests, onChanged }: { dests: LogDestDto[]; onChanged: () 
 
                     <FormGroup title="Test connection">
                         {testResult && (
-                            <tc-banner variant={testResult.ok ? 'success' : 'danger'}>{testResult.msg}</tc-banner>
+                            <tc-banner variant={testResult.ok ? 'success' : 'error'}>{testResult.msg}</tc-banner>
                         )}
                         <tc-button variant="secondary" size="sm" onClick={() => void runTest(d)}>
                             Send test entry

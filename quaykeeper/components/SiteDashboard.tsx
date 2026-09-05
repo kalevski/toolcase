@@ -1006,7 +1006,7 @@ export function SiteDashboard({
                             and issues the TLS certificate before going live.
                         </p>
                         {branding.ingressIpv4 ? (
-                            <tc-code-snippet ref={dnsSnippetRef} language="dns" title="DNS records" />
+                            <tc-code-snippet ref={dnsSnippetRef} title="DNS records" />
                         ) : (
                             <tc-banner variant="warning">
                                 No server IP is configured yet — the owner must set it in admin Settings.
@@ -1058,7 +1058,7 @@ export function SiteDashboard({
                         </span>
                         <tc-input ref={confirmInputRef} placeholder={site.hostname} autocomplete="off" />
                     </label>
-                    {deleteMsg && <tc-banner variant="danger">{deleteMsg}</tc-banner>}
+                    {deleteMsg && <tc-banner variant="error">{deleteMsg}</tc-banner>}
                 </div>
                 <tc-button
                     slot="footer"

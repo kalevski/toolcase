@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
+import type { RichPageHeaderIconColor } from '@toolcase/web-components'
 import { useMe } from '@/lib/me-context'
 import { LoadingState, ErrorState } from '@/components/states'
 import { RealmSelect } from '@/components/RealmSelect'
@@ -125,7 +126,7 @@ export function AdminPage<T>({
     /** Lucide glyph (kebab-case) for the header icon chip — mirrors the side-nav icon. */
     icon?: string
     /** Header icon chip tint (tc-rich-page-header palette). */
-    iconColor?: string
+    iconColor?: RichPageHeaderIconColor
     state: OwnerDataState<T>
     onRetry?: () => void
     /** When true, show the active-realm selector in the header (the page's data is realm-scoped). */

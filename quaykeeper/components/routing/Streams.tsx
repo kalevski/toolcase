@@ -354,7 +354,7 @@ function StreamsManager({
                         {streams.length} stream{streams.length === 1 ? '' : 's'}. Each forwards a TCP/UDP port to a pool
                         or an inline target.
                     </p>
-                    {error && !form && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && !form && <tc-banner variant="error">{error}</tc-banner>}
                     {dnsRetry && !form && (
                         <tc-banner variant="warning">
                             The target host doesn’t resolve yet. If its DNS record lands later, you can save anyway
@@ -408,7 +408,7 @@ function StreamsManager({
                             : undefined
                     }
                 >
-                    {error && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && <tc-banner variant="error">{error}</tc-banner>}
                     {dnsRetry && (
                         <tc-banner variant="warning">
                             The target host doesn’t resolve yet. If its DNS record lands later, you can save anyway

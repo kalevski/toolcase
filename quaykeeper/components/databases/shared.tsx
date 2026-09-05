@@ -77,7 +77,7 @@ export function TypeToConfirmModal({
             }}
             onClose={onClose}
         >
-            <tc-banner variant="danger">{message}</tc-banner>
+            <tc-banner variant="error">{message}</tc-banner>
             <FormGroup title="Confirm">
                 <TextField
                     label={`Type “${name}” to confirm`}

@@ -267,7 +267,7 @@ function InstancesTable({ instances, onChanged }: { instances: InstanceListItem[
                         label and tags — e.g. project <code>acme-shop</code>, tags <code>api</code> +{' '}
                         <code>production</code>. Both are filters only.
                     </p>
-                    {error && !form && !cloning && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && !form && !cloning && <tc-banner variant="error">{error}</tc-banner>}
 
                     <div className="quaykeeper-instance-toolbar">
                         {projectOptions.length > 1 && (
@@ -335,7 +335,7 @@ function InstancesTable({ instances, onChanged }: { instances: InstanceListItem[
                     onSubmit={() => void create()}
                     onClose={closeForm}
                 >
-                    {error && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && <tc-banner variant="error">{error}</tc-banner>}
                     <FormGroup title="Identity">
                         <TextField
                             label="Name"
@@ -380,7 +380,7 @@ function InstancesTable({ instances, onChanged }: { instances: InstanceListItem[
                         setError(null)
                     }}
                 >
-                    {error && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && <tc-banner variant="error">{error}</tc-banner>}
                     <FormGroup title="New instance">
                         <TextField
                             label="Name"

@@ -179,7 +179,7 @@ function GlobalVarsManager({ vars, onChanged }: { vars: GlobalVar[]; onChanged: 
                         {vars.length} variable{vars.length === 1 ? '' : 's'}. Plain text — anything sensitive belongs
                         in a secret instead.
                     </p>
-                    {error && !form && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && !form && <tc-banner variant="error">{error}</tc-banner>}
                     {referencedBy && (
                         <tc-banner variant="warning">
                             Still referenced by {referencedBy.map((i) => i.name).join(', ')} — remove those references
@@ -208,7 +208,7 @@ function GlobalVarsManager({ vars, onChanged }: { vars: GlobalVar[]; onChanged: 
                     onSubmit={() => void save()}
                     onClose={closeForm}
                 >
-                    {error && <tc-banner variant="danger">{error}</tc-banner>}
+                    {error && <tc-banner variant="error">{error}</tc-banner>}
                     <FormGroup title="Identity">
                         <TextField
                             label="Key"
