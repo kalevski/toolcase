@@ -1,6 +1,8 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { Tag } from 'lucide-static'
 import { icon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-version-picker'
 
@@ -78,7 +80,7 @@ export class VersionPicker extends HTMLElement {
         return VARIANTS.includes(v) ? v : 'segmented'
     }
     set variant(v: VersionPickerVariant) {
-        this.setAttribute('variant', v)
+        setAttr(this, 'variant', v)
     }
 
     get versions(): VersionOption[] {
@@ -203,17 +205,20 @@ export class VersionPicker extends HTMLElement {
 
             const nameAttr = name != null ? ` name="${esc(name)}"` : ''
 
-            this.innerHTML = [
-                `<div class="tc-version-picker tc-version-picker--dropdown">`,
-                `<label class="tc-version-picker__label">`,
-                tagIconHtml,
-                `<span class="tc-version-picker__label-text">Version</span>`,
-                `<select class="form-select tc-version-picker__select"${nameAttr}>`,
-                optionsHtml,
-                `</select>`,
-                `</label>`,
-                `</div>`,
-            ].join('')
+            patchHtml(
+                this,
+                [
+                    `<div class="tc-version-picker tc-version-picker--dropdown">`,
+                    `<label class="tc-version-picker__label">`,
+                    tagIconHtml,
+                    `<span class="tc-version-picker__label-text">Version</span>`,
+                    `<select class="form-select tc-version-picker__select"${nameAttr}>`,
+                    optionsHtml,
+                    `</select>`,
+                    `</label>`,
+                    `</div>`,
+                ].join(''),
+            )
             return
         }
 
@@ -255,12 +260,15 @@ export class VersionPicker extends HTMLElement {
             })
             .join('')
 
-        this.innerHTML = [
-            `<div class="tc-version-picker tc-version-picker--segmented" role="group" aria-label="Version">`,
-            hiddenHtml,
-            buttonsHtml,
-            `</div>`,
-        ].join('')
+        patchHtml(
+            this,
+            [
+                `<div class="tc-version-picker tc-version-picker--segmented" role="group" aria-label="Version">`,
+                hiddenHtml,
+                buttonsHtml,
+                `</div>`,
+            ].join(''),
+        )
     }
 }
 

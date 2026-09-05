@@ -1,4 +1,6 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-status-dot'
 
 let _uidCounter = 0
@@ -46,7 +48,7 @@ export class StatusDot extends HTMLElement {
         return STATUSES.includes(v) ? v : 'offline'
     }
     set status(v: StatusDotStatus) {
-        this.setAttribute('status', v)
+        setAttr(this, 'status', v)
     }
 
     get size(): StatusDotSize {
@@ -54,7 +56,7 @@ export class StatusDot extends HTMLElement {
         return SIZES.includes(v) ? v : 'default'
     }
     set size(v: StatusDotSize) {
-        this.setAttribute('size', v)
+        setAttr(this, 'size', v)
     }
 
     get label(): string | null {
@@ -92,7 +94,10 @@ export class StatusDot extends HTMLElement {
             markerAttrs = `role="img" aria-label="${esc(STATUS_ARIA_LABELS[status])}"`
         }
 
-        this.innerHTML = `<span class="tc-status-dot tc-status-dot-${size}"><span class="tc-status-dot-marker tc-status-dot-${status}${pulseClass}" ${markerAttrs}></span>${labelHtml}</span>`
+        patchHtml(
+            this,
+            `<span class="tc-status-dot tc-status-dot-${size}"><span class="tc-status-dot-marker tc-status-dot-${status}${pulseClass}" ${markerAttrs}></span>${labelHtml}</span>`,
+        )
     }
 }
 

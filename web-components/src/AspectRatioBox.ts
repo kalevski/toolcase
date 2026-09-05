@@ -1,3 +1,4 @@
+import { setHostClass } from './internal/host-class'
 const TAG_NAME = 'tc-aspect-ratio-box'
 
 export class AspectRatioBox extends HTMLElement {
@@ -9,12 +10,8 @@ export class AspectRatioBox extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            this._contentNodes = Array.from(this.childNodes)
-            this.render()
-            this._reattach()
-            this._initialised = true
-        }
+        this._initialised = true
+        this.render()
         this._applyRatio()
     }
 
@@ -31,9 +28,10 @@ export class AspectRatioBox extends HTMLElement {
         else this.removeAttribute('ratio')
     }
 
+    /** THE HOST IS THE BOX: it carries the ratio and its direct children fill it,
+     *  so nothing the consumer wrote is re-parented into a content div (rule 1). */
     private render(): void {
-        this.classList.add('tc-aspect-ratio-box')
-        this.innerHTML = `<div class="tc-aspect-ratio-box__content"></div>`
+        setHostClass(this, 'tc-aspect-ratio-box')
     }
 
     private _reattach(): void {

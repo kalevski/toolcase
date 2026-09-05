@@ -27,7 +27,12 @@
     --bs-context-menu-item-padding-x: 0.625rem;
     --bs-context-menu-item-padding-y: 0.4375rem;
     --bs-context-menu-item-font-size: 0.8125rem; // 13px (Inter)
-    --bs-context-menu-item-color: var(--tc-slate-700);
+    // --tc-text (not --tc-slate-700): the slate ramp is only defined by the
+    // default theme's foundation and is never remapped by other themes, so a
+    // raw slate literal here would stay light-mode gray and vanish against
+    // dark-theme surfaces (aurora, neon) that have no override for this
+    // component. --tc-text is remapped by every bundled theme.
+    --bs-context-menu-item-color: var(--tc-text);
     --bs-context-menu-item-hover-bg: var(--tc-surface-muted);
     --bs-context-menu-item-hover-color: var(--tc-text);
     --bs-context-menu-item-disabled-opacity: 0.45;

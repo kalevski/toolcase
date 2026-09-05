@@ -703,7 +703,8 @@ tc-extended-select.tc-file-category {
 @media (pointer: coarse) {
     .tc-file-menu,
     .tc-file-action,
-    .tc-file-chip-remove {
+    .tc-file-chip-remove,
+    .tc-file-items {
         min-width: 44px;
         min-height: 44px;
     }

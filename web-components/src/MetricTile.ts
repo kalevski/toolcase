@@ -1,6 +1,9 @@
+import { patchHtml } from './internal/patch-html'
+import { setHostClass } from './internal/host-class'
 import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-metric-tile'
 
@@ -18,66 +21,20 @@ export class MetricTile extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            // Capture named hint-slot children before render() wipes innerHTML.
-            this._hintSlotNodes = Array.from(this.querySelectorAll('[slot="hint"]'))
-            // Capture default slot children (value) — exclude hint-slot nodes.
-            const valueNodes = !this.hasAttribute('value')
-                ? Array.from(this.childNodes).filter(
-                      (n) => !(n instanceof Element && n.getAttribute('slot') === 'hint'),
-                  )
-                : []
-
-            this.render()
-
-            // Distribute default (value) slot into .tc-metric-tile-value when no value attr.
-            if (!this.hasAttribute('value')) {
-                const valueEl = this.querySelector('.tc-metric-tile-value')
-                if (valueEl) valueNodes.forEach((n) => valueEl.appendChild(n))
-            }
-            // Distribute hint-slot nodes into .tc-metric-tile-hint when no hint attr.
-            if (!this.hasAttribute('hint')) {
-                const hintEl = this.querySelector('.tc-metric-tile-hint')
-                if (hintEl) this._hintSlotNodes.forEach((n) => hintEl.appendChild(n))
-            }
-
-            this._initialised = true
-        }
+        this._initialised = true
+        this.render()
     }
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-
-        // Re-capture hint slot nodes from their current inner container.
-        const hintEl = this.querySelector('.tc-metric-tile-hint')
-        if (hintEl) {
-            const inHint = Array.from(hintEl.querySelectorAll('[slot="hint"]'))
-            if (inHint.length > 0) this._hintSlotNodes = inHint
-        }
-
-        // Re-capture value slot nodes from the value element.
-        // When value attr was set, .tc-metric-tile-value holds attr text — capture is benign
-        // (nothing will be redistributed since hasAttribute('value') will be true after).
-        const valueEl = this.querySelector('.tc-metric-tile-value')
-        const valueNodes = valueEl ? Array.from(valueEl.childNodes) : []
-
         this.render()
-
-        if (!this.hasAttribute('value')) {
-            const newValueEl = this.querySelector('.tc-metric-tile-value')
-            if (newValueEl) valueNodes.forEach((n) => newValueEl.appendChild(n))
-        }
-        if (!this.hasAttribute('hint')) {
-            const newHintEl = this.querySelector('.tc-metric-tile-hint')
-            if (newHintEl) this._hintSlotNodes.forEach((n) => newHintEl.appendChild(n))
-        }
     }
 
     get label(): string {
         return this.getAttribute('label') ?? ''
     }
     set label(v: string) {
-        this.setAttribute('label', v)
+        setAttr(this, 'label', v)
     }
 
     get value(): string | null {
@@ -137,22 +94,22 @@ export class MetricTile extends HTMLElement {
             '</div>',
         ].join('')
 
-        // Render hint element if hint attr is set or hint slot nodes were captured.
-        const showHint = hint !== null || this._hintSlotNodes.length > 0
-        const hintHtml = showHint
-            ? `<span class="tc-metric-tile-hint">${hint !== null ? esc(hint) : ''}</span>`
-            : ''
+        const hintHtml =
+            hint !== null ? `<span class="tc-metric-tile-hint">${esc(hint)}</span>` : ''
 
-        this.innerHTML = [
-            '<div class="tc-metric-tile">',
-            iconHtml,
-            '<div class="tc-metric-tile-body">',
-            `<span class="tc-metric-tile-label">${esc(label)}</span>`,
-            valueHtml,
-            hintHtml,
-            '</div>',
-            '</div>',
-        ].join('')
+        // THE HOST IS THE TILE — a two-column grid. The label, value and hint are
+        // element-owned; a rich value or a `slot="hint"` child the consumer wrote
+        // keeps its place in their own markup and is positioned by CSS (rule 1).
+        setHostClass(this, 'tc-metric-tile')
+        patchHtml(
+            this,
+            [
+                iconHtml,
+                `<span class="tc-metric-tile-label">${esc(label)}</span>`,
+                value !== null ? valueHtml : '',
+                hintHtml,
+            ].join(''),
+        )
     }
 }
 

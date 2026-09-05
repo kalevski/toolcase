@@ -152,6 +152,13 @@
         outline: 0;
         box-shadow: 0 0 0 var(--bs-navbar-toggler-focus-width) var(--bs-focus-ring-color);
     }
+
+    // Floor the finger hit area — the 2.25rem (36px) mouse-tuned box sits
+    // under the 44px touch-target minimum (see foundation/README.md).
+    @media (pointer: coarse) {
+        width: max(2.25rem, var(--tc-min-touch-target, 44px));
+        height: max(2.25rem, var(--tc-min-touch-target, 44px));
+    }
 }
 
 .navbar-toggler-icon {

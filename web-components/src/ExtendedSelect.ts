@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { msg, msgFormat } from './messages'
 import { Search, Check } from 'lucide-static'
@@ -13,6 +14,7 @@ import {
 } from './internal/form-field'
 
 import type { BottomSheet } from './BottomSheet'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-extended-select'
 
@@ -334,21 +336,21 @@ export class ExtendedSelect extends HTMLElement {
         return this.getAttribute('placeholder') ?? msg('selectPlaceholder')
     }
     set placeholder(v: string) {
-        this.setAttribute('placeholder', v)
+        setAttr(this, 'placeholder', v)
     }
 
     get searchPlaceholder(): string {
         return this.getAttribute('search-placeholder') ?? msg('searchPlaceholder')
     }
     set searchPlaceholder(v: string) {
-        this.setAttribute('search-placeholder', v)
+        setAttr(this, 'search-placeholder', v)
     }
 
     get noResultsText(): string {
         return this.getAttribute('no-results-text') ?? 'No results'
     }
     set noResultsText(v: string) {
-        this.setAttribute('no-results-text', v)
+        setAttr(this, 'no-results-text', v)
     }
 
     get loading(): boolean {
@@ -527,8 +529,8 @@ export class ExtendedSelect extends HTMLElement {
 
         // A scrim tap, a downward drag and Escape all close the sheet without going
         // through _closeMenu — so the element's own open state has to follow.
-        sheet.addEventListener('tc-sheet-close', this._onSheetClose)
-        sheet.addEventListener('click', this._onSheetFooterClick)
+        bindOnce(sheet, 'tc-sheet-close', this._onSheetClose)
+        bindOnce(sheet, 'click', this._onSheetFooterClick)
 
         this._sheet = sheet
         return sheet
@@ -754,22 +756,25 @@ export class ExtendedSelect extends HTMLElement {
         // would never appear. One class, correct in both modes.
         const menuCls = `tc-extended-select__menu${multiple ? ' tc-extended-select__menu--multiple' : ''}`
 
-        this.innerHTML = `${labelHtml}<input type="hidden" value="${esc(currentValue)}" class="tc-extended-select__hidden"><button type="button" class="${triggerCls}" role="combobox" aria-expanded="false" aria-controls="${this._listId}" aria-haspopup="listbox"${describe}${requiredAttr}${disabledAttr}><span class="tc-extended-select__trigger-label">${this._triggerLabelHtml()}</span><span class="tc-extended-select__trigger-spinner" aria-hidden="true"><span class="spinner-border spinner-border-sm"></span></span><span class="tc-extended-select__caret" aria-hidden="true">${chevronDownIcon}</span></button><div class="${menuCls}"><div class="tc-extended-select__search-wrap">${searchIconHtml}<input type="text" class="tc-extended-select__search-input" placeholder="${esc(this.searchPlaceholder)}" autocomplete="off" aria-label="${esc(msg('searchOptionsLabel'))}"></div><ul class="tc-extended-select__list" id="${this._listId}" role="listbox"${multiple ? ' aria-multiselectable="true"' : ''}>${this._renderOptions()}</ul><div class="tc-extended-select__loading-indicator" aria-live="polite" aria-label="${esc(msg('loading'))}"><span class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">${esc(msg('loading'))}</span></span></div></div>${messageHtml}`
+        patchHtml(
+            this,
+            `${labelHtml}<input type="hidden" value="${esc(currentValue)}" class="tc-extended-select__hidden"><button type="button" class="${triggerCls}" role="combobox" aria-expanded="false" aria-controls="${this._listId}" aria-haspopup="listbox"${describe}${requiredAttr}${disabledAttr}><span class="tc-extended-select__trigger-label">${this._triggerLabelHtml()}</span><span class="tc-extended-select__trigger-spinner" aria-hidden="true"><span class="spinner-border spinner-border-sm"></span></span><span class="tc-extended-select__caret" aria-hidden="true">${chevronDownIcon}</span></button><div class="${menuCls}"><div class="tc-extended-select__search-wrap">${searchIconHtml}<input type="text" class="tc-extended-select__search-input" placeholder="${esc(this.searchPlaceholder)}" autocomplete="off" aria-label="${esc(msg('searchOptionsLabel'))}"></div><ul class="tc-extended-select__list" id="${this._listId}" role="listbox"${multiple ? ' aria-multiselectable="true"' : ''}>${this._renderOptions()}</ul><div class="tc-extended-select__loading-indicator" aria-live="polite" aria-label="${esc(msg('loading'))}"><span class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">${esc(msg('loading'))}</span></span></div></div>${messageHtml}`,
+        )
 
         if (this.loading) this.setAttribute('aria-busy', 'true')
 
         const trigger = this.querySelector<HTMLButtonElement>('.tc-extended-select__trigger')
-        if (trigger) trigger.addEventListener('click', this._onTriggerClick)
+        if (trigger) bindOnce(trigger, 'click', this._onTriggerClick)
 
         const searchInput = this._menuRoot().querySelector<HTMLInputElement>(
             '.tc-extended-select__search-input',
         )
-        if (searchInput) searchInput.addEventListener('input', this._onSearchInput)
+        if (searchInput) bindOnce(searchInput, 'input', this._onSearchInput)
 
         const list = this._menuRoot().querySelector<HTMLElement>('.tc-extended-select__list')
         if (list) {
-            list.addEventListener('click', this._onListClick)
-            list.addEventListener('mouseover', this._onListMouseOver)
+            bindOnce(list, 'click', this._onListClick)
+            bindOnce(list, 'mouseover', this._onListMouseOver)
         }
     }
 

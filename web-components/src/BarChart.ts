@@ -1,6 +1,8 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { msg } from './messages'
 import { fixedOriginOffset } from './internal/containingBlock'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-bar-chart'
 
 // One bar = a category label, a numeric value, and an optional explicit color.
@@ -112,7 +114,7 @@ export class BarChart extends HTMLElement {
         return this.getAttribute('subtitle') ?? ''
     }
     set subtitle(v: string) {
-        this.setAttribute('subtitle', v)
+        setAttr(this, 'subtitle', v)
     }
 
     get orientation(): BarChartOrientation {
@@ -120,7 +122,7 @@ export class BarChart extends HTMLElement {
         return ORIENTATIONS.includes(v) ? v : 'vertical'
     }
     set orientation(v: BarChartOrientation) {
-        this.setAttribute('orientation', v)
+        setAttr(this, 'orientation', v)
     }
 
     get height(): number {
@@ -209,7 +211,10 @@ export class BarChart extends HTMLElement {
                 : ''
 
         if (!data.length) {
-            this.innerHTML = `<div class="tc-bar-chart__inner">${headerHtml}<div class="tc-bar-chart__empty">${esc(msg('noData'))}</div></div>`
+            patchHtml(
+                this,
+                `<div class="tc-bar-chart__inner">${headerHtml}<div class="tc-bar-chart__empty">${esc(msg('noData'))}</div></div>`,
+            )
             this._anchors = []
             return
         }
@@ -321,7 +326,10 @@ export class BarChart extends HTMLElement {
 
         const tooltipHtml = `<div class="tc-bar-chart__tooltip" role="status" aria-live="polite" hidden></div>`
 
-        this.innerHTML = `<div class="tc-bar-chart__inner">${headerHtml}<div class="tc-bar-chart__plot">${svgHtml}${tooltipHtml}</div></div>`
+        patchHtml(
+            this,
+            `<div class="tc-bar-chart__inner">${headerHtml}<div class="tc-bar-chart__plot">${svgHtml}${tooltipHtml}</div></div>`,
+        )
 
         const svg = this.querySelector<SVGSVGElement>('.tc-bar-chart__svg')
         if (svg) {
@@ -335,10 +343,10 @@ export class BarChart extends HTMLElement {
                 this._reconciling = false
                 return
             }
-            svg.addEventListener('pointermove', this._onPointerMove)
-            svg.addEventListener('pointerleave', this._onPointerLeave)
-            svg.addEventListener('click', this._onBarActivate)
-            svg.addEventListener('keydown', this._onBarKeydown)
+            bindOnce(svg, 'pointermove', this._onPointerMove)
+            bindOnce(svg, 'pointerleave', this._onPointerLeave)
+            bindOnce(svg, 'click', this._onBarActivate)
+            bindOnce(svg, 'keydown', this._onBarKeydown)
         }
     }
 
@@ -349,12 +357,14 @@ export class BarChart extends HTMLElement {
         const headHtml = titleAttr
             ? `<div class="tc-bar-chart__header"><div class="tc-bar-chart__skeleton tc-bar-chart__skeleton--title" aria-hidden="true"></div></div>`
             : ''
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-bar-chart__inner">` +
-            headHtml +
-            `<div class="tc-bar-chart__skeleton tc-bar-chart__skeleton--plot" aria-hidden="true" style="height:${this.height}px"></div>` +
-            `<span class="visually-hidden">${esc(msg('loading'))}</span>` +
-            `</div>`
+                headHtml +
+                `<div class="tc-bar-chart__skeleton tc-bar-chart__skeleton--plot" aria-hidden="true" style="height:${this.height}px"></div>` +
+                `<span class="visually-hidden">${esc(msg('loading'))}</span>` +
+                `</div>`,
+        )
     }
 
     private _summary(data: BarChartDataItem[], orientation: BarChartOrientation): string {

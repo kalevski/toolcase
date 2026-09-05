@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { msg } from './messages'
 import { fieldMessageHtml } from './internal/field-message'
@@ -65,6 +66,7 @@ export class ColorPicker extends HTMLElement {
             'help',
             'error',
             'state',
+            'placeholder',
         ]
     }
 
@@ -151,6 +153,16 @@ export class ColorPicker extends HTMLElement {
     set value(v: string | null) {
         if (v != null) this.setAttribute('value', v)
         else this.removeAttribute('value')
+    }
+
+    // Placeholder text shown on the trigger when no color is selected — part of
+    // the shared unified input contract (label/name/value/.../placeholder).
+    get placeholder(): string | null {
+        return this.getAttribute('placeholder')
+    }
+    set placeholder(v: string | null) {
+        if (v != null) this.setAttribute('placeholder', v)
+        else this.removeAttribute('placeholder')
     }
 
     get columns(): number {
@@ -424,7 +436,10 @@ export class ColorPicker extends HTMLElement {
         const requiredAttr = required ? ' aria-required="true"' : ''
 
         const chipStyle = currentValue ? ` style="background:${esc(currentValue)};"` : ''
-        const triggerText = currentValue ? esc(currentValue) : 'Select color'
+        // `placeholder` follows the same shared-attribute + English-fallback
+        // pattern as tc-time-picker's trigger placeholder.
+        const placeholder = this.getAttribute('placeholder') || 'Select color'
+        const triggerText = currentValue ? esc(currentValue) : esc(placeholder)
 
         const labelHtml = labelText
             ? `<label class="tc-color-picker-label form-label" for="tc-cp-trigger-${this._hexInputId}">${esc(labelText)}${requiredMark(required)}</label>`
@@ -450,11 +465,14 @@ export class ColorPicker extends HTMLElement {
             validText: 'Looks good!',
         })
 
-        this.innerHTML = `${labelHtml}<button class="tc-color-picker-trigger${triggerStateClass}" id="tc-cp-trigger-${this._hexInputId}" type="button" aria-haspopup="listbox" aria-expanded="false"${requiredAttr}${describe}${disabledAttr}><span class="tc-color-picker-chip" aria-hidden="true"${chipStyle}></span><span class="tc-color-picker-hex-text">${triggerText}</span></button><div class="tc-color-picker-panel" role="dialog" aria-label="Color picker" aria-modal="false">${gridHtml}<div class="tc-color-picker-footer"><label class="visually-hidden" for="${this._hexInputId}">Hex color value</label><input class="tc-color-picker-hex form-control" id="${this._hexInputId}" type="text" placeholder="#000000" value="${hexValue}" spellcheck="false" autocomplete="off"${disabled ? ' disabled' : ''} /></div></div>${messageHtml}`
+        patchHtml(
+            this,
+            `${labelHtml}<button class="tc-color-picker-trigger${triggerStateClass}" id="tc-cp-trigger-${this._hexInputId}" type="button" aria-haspopup="dialog" aria-expanded="false"${requiredAttr}${describe}${disabledAttr}><span class="tc-color-picker-chip" aria-hidden="true"${chipStyle}></span><span class="tc-color-picker-hex-text">${triggerText}</span></button><div class="tc-color-picker-panel" role="dialog" aria-label="Color picker" aria-modal="false">${gridHtml}<div class="tc-color-picker-footer"><label class="visually-hidden" for="${this._hexInputId}">Hex color value</label><input class="tc-color-picker-hex form-control" id="${this._hexInputId}" type="text" placeholder="#000000" value="${hexValue}" spellcheck="false" autocomplete="off"${disabled ? ' disabled' : ''} /></div></div>${messageHtml}`,
+        )
 
         const trigger = this._getTrigger()
         if (trigger) {
-            trigger.addEventListener('click', () => {
+            bindOnce(trigger, 'click', () => {
                 if (this._isOpen) this._closePanel(false)
                 else this._openPanel()
             })
@@ -462,7 +480,7 @@ export class ColorPicker extends HTMLElement {
 
         const grid = this.querySelector('.tc-color-picker-grid')
         if (grid && !loading) {
-            grid.addEventListener('click', (e: Event) => {
+            bindOnce(grid, 'click', (e: Event) => {
                 const swatch = (e.target as HTMLElement).closest<HTMLButtonElement>(
                     '.tc-color-picker-swatch',
                 )
@@ -475,7 +493,7 @@ export class ColorPicker extends HTMLElement {
 
         const hexInput = this.querySelector<HTMLInputElement>('.tc-color-picker-hex')
         if (hexInput) {
-            hexInput.addEventListener('keydown', (e: KeyboardEvent) => {
+            bindOnce(hexInput, 'keydown', (e: KeyboardEvent) => {
                 if (e.key === 'Enter') {
                     e.preventDefault()
                     const val = hexInput.value.trim()
@@ -484,7 +502,7 @@ export class ColorPicker extends HTMLElement {
                     }
                 }
             })
-            hexInput.addEventListener('blur', () => {
+            bindOnce(hexInput, 'blur', () => {
                 if (!hexInput.isConnected) return
                 const val = hexInput.value.trim()
                 if (isValidHex(val) && val !== (this.value ?? '')) {

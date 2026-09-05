@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -127,12 +128,15 @@ export class WaypointMarker extends HTMLElement {
                </div>`
                 : ''
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <div class="tc-waypoint-marker__glyph" aria-hidden="true">
                 ${iconHtml}
             </div>
             ${textMarkup}
-        `
+        `,
+        )
     }
 }
 

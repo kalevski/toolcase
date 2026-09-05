@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 import { msg } from './messages'
@@ -491,7 +492,10 @@ export class IconPicker extends HTMLElement {
             validText: 'Looks good!',
         })
 
-        this.innerHTML = `${labelHtml}<button class="tc-icon-picker-trigger${triggerStateClass}" type="button" aria-haspopup="listbox" aria-expanded="${expanded}"${requiredAttr}${describe}${disabledAttr}>${triggerInner}</button>${popupHtml}${messageHtml}`
+        patchHtml(
+            this,
+            `${labelHtml}<button class="tc-icon-picker-trigger${triggerStateClass}" type="button" aria-haspopup="listbox" aria-expanded="${expanded}"${requiredAttr}${describe}${disabledAttr}>${triggerInner}</button>${popupHtml}${messageHtml}`,
+        )
 
         if (this._isOpen) {
             const popup = this._getPopup()
@@ -500,7 +504,7 @@ export class IconPicker extends HTMLElement {
 
         const trigger = this._getTrigger()
         if (trigger) {
-            trigger.addEventListener('click', () => {
+            bindOnce(trigger, 'click', () => {
                 if (this._isOpen) this._closePopup(false)
                 else this._openPopup()
             })
@@ -509,7 +513,7 @@ export class IconPicker extends HTMLElement {
         if (!loading) {
             const optionsEl = this.querySelector<HTMLElement>('.tc-icon-picker-options')
             if (optionsEl) {
-                optionsEl.addEventListener('click', (e: Event) => {
+                bindOnce(optionsEl, 'click', (e: Event) => {
                     const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(
                         '.tc-icon-picker-option',
                     )
@@ -522,7 +526,7 @@ export class IconPicker extends HTMLElement {
 
             const searchInput = this._getSearchInput()
             if (searchInput) {
-                searchInput.addEventListener('input', () => {
+                bindOnce(searchInput, 'input', () => {
                     this._searchValue = searchInput.value
                     this._highlightIdx = -1
                     const el = this.querySelector<HTMLElement>('.tc-icon-picker-options')

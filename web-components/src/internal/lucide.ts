@@ -8,7 +8,7 @@ import { icon } from '../icons'
 export function lucideByName(name: string, className?: string): string {
     const pascal = name
         .split('-')
-        .map(p => p.charAt(0).toUpperCase() + p.slice(1))
+        .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
         .join('')
     const svg = (LucideIcons as Record<string, string>)[pascal]
     if (!svg) return ''

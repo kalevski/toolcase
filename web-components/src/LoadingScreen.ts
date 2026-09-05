@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-loading-screen'
 
@@ -185,7 +186,9 @@ export class LoadingScreen extends HTMLElement {
                </div>`
                 : ''
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <div class="tc-loading-screen-panel">
                 <div class="tc-loading-screen-header">
                     <div class="tc-loading-screen-eyebrow">${esc(eyebrow)}</div>
@@ -201,7 +204,8 @@ export class LoadingScreen extends HTMLElement {
                 </div>
                 ${tipMarkup}
             </div>
-        `
+        `,
+        )
     }
 }
 

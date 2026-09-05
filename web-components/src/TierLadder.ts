@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -13,7 +14,7 @@ export interface TierItem {
     color?: TierColor
 }
 
-const checkIconHtml = lucideByName('check')
+const checkIconHtml = lucideByName('check', 'tc-tier-ladder-current-icon')
 
 export class TierLadder extends HTMLElement {
     private _initialised = false
@@ -111,7 +112,7 @@ export class TierLadder extends HTMLElement {
             ? `<div class="tc-tier-ladder-summary">${esc(summaryAttr)}</div>`
             : ''
 
-        this.innerHTML = `${titleHtml}${listHtml}${summaryHtml}`
+        patchHtml(this, `${titleHtml}${listHtml}${summaryHtml}`)
     }
 }
 

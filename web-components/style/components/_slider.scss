@@ -53,7 +53,11 @@ tc-slider[disabled] {
     background: var(--bs-slider-track-bg);
     border: var(--bs-slider-track-border);
     border-radius: 0;
-    margin-block: 20px;
+    // Extra headroom up top: the hover/focus/drag value tooltip sits ~34px
+    // above the track (see tc-range-slider, same thumb/tooltip geometry), so
+    // a smaller top margin let it collide with the field label above.
+    margin-top: 38px;
+    margin-bottom: 20px;
     // Half a thumb of inline breathing room so the extremes (0% / 100%) stay
     // fully visible and grabbable instead of half-cropped at the container edge.
     margin-inline: calc(var(--bs-slider-thumb-size) / 2);

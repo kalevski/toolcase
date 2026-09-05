@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
@@ -140,14 +141,17 @@ export class StatusCard extends HTMLElement {
             bodyHtml = `<ul class="tc-status-card-list" role="list">${rows}</ul>`
         }
 
-        this.innerHTML = [
-            '<div class="tc-status-card-inner">',
-            headerHtml,
-            '<div class="tc-status-card-body">',
-            bodyHtml,
-            '</div>',
-            '</div>',
-        ].join('')
+        patchHtml(
+            this,
+            [
+                '<div class="tc-status-card-inner">',
+                headerHtml,
+                '<div class="tc-status-card-body">',
+                bodyHtml,
+                '</div>',
+                '</div>',
+            ].join(''),
+        )
     }
 }
 

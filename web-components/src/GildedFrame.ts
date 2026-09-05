@@ -1,3 +1,4 @@
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-gilded-frame'
 
 export type GildedFrameTone = 'dark' | 'leather' | 'transparent'
@@ -27,21 +28,14 @@ export class GildedFrame extends HTMLElement {
             if (!this.hasAttribute('tone')) this.setAttribute('tone', DEFAULT_TONE)
             if (!this.hasAttribute('padding')) this.setAttribute('padding', DEFAULT_PADDING)
 
-            const slotContent = Array.from(this.childNodes)
             this.render()
-            const inner = this.querySelector('.tc-gilded-frame-content')
-            if (inner) slotContent.forEach((n) => inner.appendChild(n))
             this._initialised = true
         }
     }
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        const inner = this.querySelector('.tc-gilded-frame-content')
-        const slotContent = inner ? Array.from(inner.childNodes) : []
         this.render()
-        const newInner = this.querySelector('.tc-gilded-frame-content')
-        if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
     }
 
     get tone(): GildedFrameTone {
@@ -49,7 +43,7 @@ export class GildedFrame extends HTMLElement {
         return TONES.includes(v) ? v : DEFAULT_TONE
     }
     set tone(value: GildedFrameTone) {
-        this.setAttribute('tone', value)
+        setAttr(this, 'tone', value)
     }
 
     get padding(): GildedFramePadding {
@@ -57,7 +51,7 @@ export class GildedFrame extends HTMLElement {
         return PADDINGS.includes(v) ? v : DEFAULT_PADDING
     }
     set padding(value: GildedFramePadding) {
-        this.setAttribute('padding', value)
+        setAttr(this, 'padding', value)
     }
 
     private render(): void {
@@ -70,8 +64,7 @@ export class GildedFrame extends HTMLElement {
         PADDINGS.forEach((p) => this.classList.remove(`tc-gilded-frame--pad-${p}`))
         this.classList.add(`tc-gilded-frame--tone-${tone}`)
         this.classList.add(`tc-gilded-frame--pad-${padding}`)
-
-        this.innerHTML = `<div class="tc-gilded-frame-content"></div>`
+        // No content wrapper: the frame IS the host, so slotted children stay put.
     }
 }
 

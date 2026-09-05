@@ -1,5 +1,7 @@
+import { patchHtml } from './internal/patch-html'
 import { VARIANTS_FULL } from './internal/variants'
 import { setHostClass } from './internal/host-class'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-card'
 
 export type CardVariant =
@@ -18,9 +20,6 @@ function escAttr(v: string): string {
 
 export class Card extends HTMLElement {
     private _initialised = false
-    private _headerNodes: Node[] = []
-    private _footerNodes: Node[] = []
-    private _bodyNodes: Node[] = []
 
     static get observedAttributes(): string[] {
         return ['title', 'subtitle', 'img', 'img-position', 'variant']
@@ -31,28 +30,13 @@ export class Card extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            const children = Array.from(this.childNodes)
-            this._headerNodes = children.filter(
-                (n) => (n as Element).getAttribute?.('slot') === 'header',
-            )
-            this._footerNodes = children.filter(
-                (n) => (n as Element).getAttribute?.('slot') === 'footer',
-            )
-            this._bodyNodes = children.filter((n) => {
-                const slot = (n as Element).getAttribute?.('slot')
-                return slot !== 'header' && slot !== 'footer'
-            })
-            this._initialised = true
-        }
+        this._initialised = true
         this.render()
-        this._reattach()
     }
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
         this.render()
-        this._reattach()
     }
 
     get variant(): CardVariant | null {
@@ -76,7 +60,7 @@ export class Card extends HTMLElement {
         return this.getAttribute('img-position') === 'bottom' ? 'bottom' : 'top'
     }
     set imgPosition(v: CardImgPosition) {
-        this.setAttribute('img-position', v)
+        setAttr(this, 'img-position', v)
     }
 
     private render(): void {
@@ -88,10 +72,6 @@ export class Card extends HTMLElement {
 
         setHostClass(this, `card${variant ? ` text-bg-${variant}` : ''}`)
 
-        const headerHtml =
-            this._headerNodes.length > 0 ? `<div class="card-header tc-card-header"></div>` : ''
-        const footerHtml =
-            this._footerNodes.length > 0 ? `<div class="card-footer tc-card-footer"></div>` : ''
         const imgHtml = img
             ? `<img src="${escAttr(img)}" class="card-img-${imgPosition}" alt="">`
             : ''
@@ -100,22 +80,15 @@ export class Card extends HTMLElement {
             ? `<h6 class="card-subtitle mb-2 text-body-secondary">${escAttr(subtitle)}</h6>`
             : ''
 
-        const bodyHtml = `<div class="card-body tc-card-body">${titleHtml}${subtitleHtml}</div>`
-
-        if (imgPosition === 'bottom') {
-            this.innerHTML = `${headerHtml}${bodyHtml}${imgHtml}${footerHtml}`
-        } else {
-            this.innerHTML = `${headerHtml}${imgHtml}${bodyHtml}${footerHtml}`
-        }
-    }
-
-    private _reattach(): void {
-        const headerEl = this.querySelector('.tc-card-header')
-        const bodyEl = this.querySelector('.tc-card-body')
-        const footerEl = this.querySelector('.tc-card-footer')
-        this._headerNodes.forEach((n) => headerEl?.appendChild(n))
-        this._bodyNodes.forEach((n) => bodyEl?.appendChild(n))
-        this._footerNodes.forEach((n) => footerEl?.appendChild(n))
+        // The image, title and subtitle are the element's own; `slot="header"`,
+        // `slot="footer"` and the default children stay exactly where the consumer
+        // wrote them and are placed by CSS `order` (rule 1).
+        const ownHtml = `${imgHtml}${titleHtml}${subtitleHtml}`
+        setHostClass(
+            this,
+            `card${variant ? ` text-bg-${variant}` : ''} tc-card--img-${imgPosition}`,
+        )
+        patchHtml(this, ownHtml)
     }
 }
 

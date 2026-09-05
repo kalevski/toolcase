@@ -15,7 +15,8 @@ npm install @toolcase/web-components
 
 ### Peer dependencies
 
-- `@toolcase/base ^3.x`
+- `@toolcase/base 5.x`
+- `react >= 18` — optional, only for the `./react` and `./react/components` entries
 
 ## Setup
 
@@ -40,7 +41,7 @@ All `tc-*` component classes extend `HTMLElement`, which does not exist in Node.
 import { useEffect } from 'react'
 
 useEffect(() => {
-    void import('@toolcase/web-components').then(m => m.register())
+    void import('@toolcase/web-components').then((m) => m.register())
 }, [])
 ```
 
@@ -54,28 +55,91 @@ The stylesheet import is also unsafe at the top level in RSC — put it in a cli
 <tc-modal title="Confirm" id="confirm-modal">Are you sure?</tc-modal>
 ```
 
+## React
+
+`tc-*` tags work from plain JSX. Import the typings entry once to augment
+`React.JSX.IntrinsicElements`:
+
+```ts
+import '@toolcase/web-components/react'
+```
+
+```tsx
+<tc-form-input
+    label="Email"
+    value={email}
+    error={errors.email}
+    required
+    disabled={saving}
+    ontc-change={(e) => setEmail(e.detail.value)}
+/>
+```
+
+Three things are worth knowing, because React treats custom elements unlike
+anything else in JSX:
+
+- **Event props are hyphenated: `ontc-change`, not `onTcChange`.** react-dom turns
+  an unrecognised `on*` prop on a custom element into
+  `addEventListener(key.slice(2), value)` with no case conversion, so only the
+  hyphenated form reaches the real event name. React's own synthetic events
+  (`onClick`, `onFocus`, …) are unaffected.
+- **`disabled={false}` is safe** — react-dom removes the attribute for a boolean
+  `false`, and the property setter does the same on an upgraded element. No
+  `|| undefined` guard is needed. The exceptions are the tri-state attributes that
+  default to _on_ (`dismissible`, `handle`, `blur-behind`, `autohide`), where the
+  string `"false"` is meaningful; their setters coerce it.
+- **Objects, arrays and callbacks must be assigned, not stringified.** `useTc`
+  does that, and diffs so an unchanged value never re-triggers a render:
+
+    ```tsx
+    import { useTc } from '@toolcase/web-components/react'
+    const ref = useTc<HTMLElement>({ columns, rows }, { 'tc-sort-change': onSort })
+    return <tc-advanced-table ref={ref} />
+    ```
+
+### Wrapper components
+
+`@toolcase/web-components/react/components` ships one typed component per element
+— camelCase attributes and handlers, JS-only props assigned for you, and a `ref`
+typed as the element's own class:
+
+```tsx
+import { TcFormInput } from '@toolcase/web-components/react/components'
+
+;<TcFormInput
+    label="Portions"
+    type="number"
+    value={value}
+    options={options}
+    onTcChange={(e) => setValue(e.detail.value)}
+/>
+```
+
+They are types plus a thin factory — importing one pulls in no element
+implementation, so `register()` is still what defines the elements.
+
 ## Form controls
 
 `tc-input`, `tc-textarea`, `tc-select`, `tc-switch`, `tc-radio-group`, and `tc-checkbox-group` are **form-associated custom elements** — they participate in `<form>` submission, reset, and validation via the [ElementInternals API](https://developer.mozilla.org/en-US/docs/Web/API/ElementInternals).
 
 ```html
 <form id="demo">
-  <tc-input name="username" required></tc-input>
-  <tc-select name="role">
-    <tc-option value="admin">Admin</tc-option>
-    <tc-option value="user">User</tc-option>
-  </tc-select>
-  <button type="submit">Submit</button>
+    <tc-input name="username" required></tc-input>
+    <tc-select name="role">
+        <tc-option value="admin">Admin</tc-option>
+        <tc-option value="user">User</tc-option>
+    </tc-select>
+    <button type="submit">Submit</button>
 </form>
 <script>
-  const form = document.getElementById('demo')
-  form.addEventListener('submit', e => {
-    e.preventDefault()
-    const data = new FormData(form)
-    console.log(data.get('username'), data.get('role'))
-  })
-  // form.reset() clears all tc-* controls back to their initial values
-  // form.checkValidity() / form.reportValidity() honour tc-input[required] etc.
+    const form = document.getElementById('demo')
+    form.addEventListener('submit', (e) => {
+        e.preventDefault()
+        const data = new FormData(form)
+        console.log(data.get('username'), data.get('role'))
+    })
+    // form.reset() clears all tc-* controls back to their initial values
+    // form.checkValidity() / form.reportValidity() honour tc-input[required] etc.
 </script>
 ```
 

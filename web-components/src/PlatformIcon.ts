@@ -1,5 +1,7 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-platform-icon'
 
@@ -51,7 +53,7 @@ export class PlatformIcon extends HTMLElement {
         return PLATFORMS.includes(v) ? v : 'pc'
     }
     set platform(v: Platform) {
-        this.setAttribute('platform', v)
+        setAttr(this, 'platform', v)
     }
 
     get size(): number | null {
@@ -93,9 +95,11 @@ export class PlatformIcon extends HTMLElement {
             ? `<span class="tc-platform-icon__label">${esc(labelText)}</span>`
             : ''
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<span class="tc-platform-icon__glyph" aria-hidden="true">${iconHtml}</span>` +
-            labelHtml
+                labelHtml,
+        )
     }
 }
 

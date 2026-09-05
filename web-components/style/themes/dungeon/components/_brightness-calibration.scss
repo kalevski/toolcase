@@ -62,7 +62,14 @@ tc-theme[name='dungeon'],
     }
 
     // Gilded diamond thumb — webkit.
-    .tc-brightness-calibration__input::-webkit-slider-thumb {
+    // Selector is `.form-range.tc-brightness-calibration__input` (not just the
+    // latter) so specificity beats ./range.scss's theme-wide
+    // `.form-range::-webkit-slider-thumb` rule (same tc-theme scope, same
+    // otherwise-equal specificity) regardless of @forward order — without this,
+    // dungeon/components/_index.scss forwarding `range` after
+    // `brightness-calibration` silently drops this border/background to the
+    // generic gold instead of the intended deep-bronze gilded diamond.
+    .form-range.tc-brightness-calibration__input::-webkit-slider-thumb {
         appearance: none;
         -webkit-appearance: none;
         width: 14px;
@@ -73,8 +80,8 @@ tc-theme[name='dungeon'],
         box-shadow: 0 0 0 1px #000;
     }
 
-    // Gilded diamond thumb — moz.
-    .tc-brightness-calibration__input::-moz-range-thumb {
+    // Gilded diamond thumb — moz. Same specificity-boost rationale as above.
+    .form-range.tc-brightness-calibration__input::-moz-range-thumb {
         width: 14px;
         height: 14px;
         background: linear-gradient(180deg, var(--fg-gold-bright), var(--fg-gold-deep));

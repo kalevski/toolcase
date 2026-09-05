@@ -15,7 +15,7 @@ tc-loot-list {
     --bs-loot-list-title-font-size: 0.6875rem;
 
     // Rows
-    --bs-loot-list-row-border: 1px solid var(--tc-slate-100, #f1f5f9);
+    --bs-loot-list-row-border: 1px solid var(--tc-border-faint);
     --bs-loot-list-row-hover-bg: var(--tc-surface-hover, var(--tc-surface-muted));
 
     // Item parts
@@ -30,7 +30,7 @@ tc-loot-list {
     --bs-loot-list-rarity-common: var(--tc-text-faint, #94a3b8);
     --bs-loot-list-rarity-uncommon: var(--tc-success, #22c55e);
     --bs-loot-list-rarity-rare: var(--tc-info, #38bdf8);
-    --bs-loot-list-rarity-epic: #a855f7;
+    --bs-loot-list-rarity-epic: var(--tc-app-accent);
     --bs-loot-list-rarity-legendary: var(--tc-warning, #f59e0b);
     --bs-loot-list-rarity-mythic: var(--tc-danger, #ef4444);
 

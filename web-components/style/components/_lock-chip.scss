@@ -1,0 +1,63 @@
+// tc-lock-chip — the padlock badge marking a paywalled row.
+//
+// THE HOST IS THE CHIP: the classes are on `tc-lock-chip` itself, so the element
+// never moves a node. The icon and the label are the only children and it creates
+// both, prepended in that order.
+//
+// A chip, not a badge: `.badge` is a solid fill with white ink and reads as a
+// STATE of the row (new, sold, live). A lock is a condition of the READER, and
+// the design's answer to that is a tinted outline — present enough to be seen in
+// a list, quiet enough that a page of locked rows is not a page of alarms.
+
+tc-lock-chip {
+    --bs-lock-chip-padding-y: 0.1875rem; // 3px
+    --bs-lock-chip-padding-x: 0.5rem; // 8px
+    --bs-lock-chip-gap: 0.25rem;
+    --bs-lock-chip-font-size: 0.6875rem; // 11px
+    --bs-lock-chip-font-weight: 600;
+    --bs-lock-chip-icon-size: 0.75rem; // 12px
+    --bs-lock-chip-color: var(--tc-warning, #b45309);
+    --bs-lock-chip-bg: var(--tc-warning-bg, rgba(242, 183, 5, 0.14));
+    --bs-lock-chip-border-color: transparent;
+}
+
+.tc-lock-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-lock-chip-gap);
+    padding: var(--bs-lock-chip-padding-y) var(--bs-lock-chip-padding-x);
+    // Legibility floor, as everywhere else in the set: a theme may shrink the
+    // chip, never below the readable minimum.
+    font-size: max(var(--tc-font-size-min, 11px), var(--bs-lock-chip-font-size));
+    font-weight: var(--bs-lock-chip-font-weight);
+    line-height: 1.2;
+    white-space: nowrap;
+    color: var(--bs-lock-chip-color);
+    background: var(--bs-lock-chip-bg);
+    border: 1px solid var(--bs-lock-chip-border-color);
+    border-radius: 0;
+    vertical-align: middle;
+}
+
+.tc-lock-chip--neutral {
+    --bs-lock-chip-color: var(--tc-text-muted);
+    --bs-lock-chip-bg: var(--tc-surface-muted);
+    --bs-lock-chip-border-color: var(--tc-border);
+}
+
+.tc-lock-chip--accent {
+    --bs-lock-chip-color: var(--tc-app-accent, var(--tc-primary));
+    --bs-lock-chip-bg: transparent;
+    --bs-lock-chip-border-color: currentColor;
+}
+
+.tc-lock-chip__icon {
+    display: inline-flex;
+    flex-shrink: 0;
+
+    svg {
+        width: var(--bs-lock-chip-icon-size);
+        height: var(--bs-lock-chip-icon-size);
+        display: block;
+    }
+}

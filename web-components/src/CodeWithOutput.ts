@@ -1,4 +1,6 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-code-with-output'
 
 export type CodeWithOutputLanguage = 'javascript' | 'typescript' | 'bash'
@@ -42,7 +44,7 @@ export class CodeWithOutput extends HTMLElement {
         return this.getAttribute('code') ?? ''
     }
     set code(v: string) {
-        this.setAttribute('code', v)
+        setAttr(this, 'code', v)
     }
 
     get language(): CodeWithOutputLanguage {
@@ -50,7 +52,7 @@ export class CodeWithOutput extends HTMLElement {
         return LANGUAGES.includes(v) ? v : 'javascript'
     }
     set language(v: CodeWithOutputLanguage) {
-        this.setAttribute('language', v)
+        setAttr(this, 'language', v)
     }
 
     get layout(): CodeWithOutputLayout {
@@ -58,7 +60,7 @@ export class CodeWithOutput extends HTMLElement {
         return LAYOUTS.includes(v) ? v : 'split'
     }
     set layout(v: CodeWithOutputLayout) {
-        this.setAttribute('layout', v)
+        setAttr(this, 'layout', v)
     }
 
     get output(): string {
@@ -132,22 +134,24 @@ export class CodeWithOutput extends HTMLElement {
         const errorClass = hasError ? ' tc-cwo-output-error' : ''
         const alertRole = hasError ? ' role="alert"' : ''
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-cwo ${layoutClass}">` +
-            titleHtml +
-            `<div class="tc-cwo-panes">` +
-            `<div class="tc-cwo-code">` +
-            `<div class="tc-cwo-code-header">` +
-            `<span class="tc-cwo-lang">${esc(language.toUpperCase())}</span>` +
-            `</div>` +
-            `<pre><code class="tc-cwo-code-block">${esc(code)}</code></pre>` +
-            `</div>` +
-            `<div class="tc-cwo-output${errorClass}"${alertRole}>` +
-            `<div class="tc-cwo-output-body tc-cwo-normal-content">${normalBodyHtml}</div>` +
-            `<div class="tc-cwo-output-body tc-cwo-error-content">${errorBodyHtml}</div>` +
-            `</div>` +
-            `</div>` +
-            `</div>`
+                titleHtml +
+                `<div class="tc-cwo-panes">` +
+                `<div class="tc-cwo-code">` +
+                `<div class="tc-cwo-code-header">` +
+                `<span class="tc-cwo-lang">${esc(language.toUpperCase())}</span>` +
+                `</div>` +
+                `<pre><code class="tc-cwo-code-block">${esc(code)}</code></pre>` +
+                `</div>` +
+                `<div class="tc-cwo-output${errorClass}"${alertRole}>` +
+                `<div class="tc-cwo-output-body tc-cwo-normal-content">${normalBodyHtml}</div>` +
+                `<div class="tc-cwo-output-body tc-cwo-error-content">${errorBodyHtml}</div>` +
+                `</div>` +
+                `</div>` +
+                `</div>`,
+        )
     }
 }
 

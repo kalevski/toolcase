@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-matchmaking-screen'
 
@@ -234,7 +235,9 @@ export class MatchmakingScreen extends HTMLElement {
             actionsMarkup = `<button type="button" class="tc-matchmaking-screen-btn tc-matchmaking-screen-btn--cancel" data-action="cancel">${cancelLabel}</button>`
         }
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <div class="tc-matchmaking-screen" data-state="${esc(state)}">
                 ${ringMarkup}
                 <div class="tc-matchmaking-screen-header">
@@ -244,11 +247,12 @@ export class MatchmakingScreen extends HTMLElement {
                 ${metaMarkup}
                 ${actionsMarkup ? `<div class="tc-matchmaking-screen-actions">${actionsMarkup}</div>` : ''}
             </div>
-        `
+        `,
+        )
 
         // Delegate clicks on the fresh actions bar
         const actions = this.querySelector<HTMLElement>('.tc-matchmaking-screen-actions')
-        actions?.addEventListener('click', (e: MouseEvent) => {
+        bindOnce(actions, 'click', (e: MouseEvent) => {
             const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-action]')
             if (!btn || btn.disabled) return
             const action = btn.dataset.action

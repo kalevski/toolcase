@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-entity-profile-card'
 
@@ -114,17 +115,20 @@ export class EntityProfileCard extends HTMLElement {
                     '<div class="tc-entity-profile-card-skeleton tc-entity-profile-card-skeleton--meta-value"></div>' +
                     '</div>',
             ).join('')
-            this.innerHTML = [
-                '<div class="card tc-entity-profile-card" aria-hidden="true">',
-                '<div class="tc-entity-profile-card__hero">',
-                '<div class="tc-entity-profile-card-skeleton tc-entity-profile-card-skeleton--lead"></div>',
-                '<div class="tc-entity-profile-card-skeleton tc-entity-profile-card-skeleton--title"></div>',
-                '<div class="tc-entity-profile-card-skeleton tc-entity-profile-card-skeleton--subtitle"></div>',
-                '</div>',
-                `<dl class="tc-entity-profile-card__meta">${skeletonCells}</dl>`,
-                '</div>',
-                '<span class="visually-hidden">Loading…</span>',
-            ].join('')
+            patchHtml(
+                this,
+                [
+                    '<div class="card tc-entity-profile-card" aria-hidden="true">',
+                    '<div class="tc-entity-profile-card__hero">',
+                    '<div class="tc-entity-profile-card-skeleton tc-entity-profile-card-skeleton--lead"></div>',
+                    '<div class="tc-entity-profile-card-skeleton tc-entity-profile-card-skeleton--title"></div>',
+                    '<div class="tc-entity-profile-card-skeleton tc-entity-profile-card-skeleton--subtitle"></div>',
+                    '</div>',
+                    `<dl class="tc-entity-profile-card__meta">${skeletonCells}</dl>`,
+                    '</div>',
+                    '<span class="visually-hidden">Loading…</span>',
+                ].join(''),
+            )
             return
         }
 
@@ -180,12 +184,10 @@ export class EntityProfileCard extends HTMLElement {
                   '</dl>'
                 : ''
 
-        this.innerHTML = [
-            '<div class="card tc-entity-profile-card">',
-            heroHtml,
-            metaHtml,
-            '</div>',
-        ].join('')
+        patchHtml(
+            this,
+            ['<div class="card tc-entity-profile-card">', heroHtml, metaHtml, '</div>'].join(''),
+        )
     }
 }
 

@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { isImageSrc } from './internal/image'
 import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
@@ -225,15 +226,17 @@ export class ItemSlot extends HTMLElement {
             ? `<span class="tc-item-slot__hotkey" aria-hidden="true">${esc(hotkey)}</span>`
             : ''
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-item-slot__inner">` +
-            glyph +
-            qtyMarkup +
-            equippedMarkup +
-            cooldownMarkup +
-            lockMarkup +
-            hotkeyMarkup +
-            `</div>`
+                glyph +
+                qtyMarkup +
+                equippedMarkup +
+                cooldownMarkup +
+                lockMarkup +
+                hotkeyMarkup +
+                `</div>`,
+        )
     }
 }
 

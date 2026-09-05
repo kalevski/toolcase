@@ -1,5 +1,7 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { lucideByName } from './internal/lucide'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-icon'
 
@@ -37,7 +39,7 @@ export class Icon extends HTMLElement {
         return this.getAttribute('name') ?? ''
     }
     set name(v: string) {
-        this.setAttribute('name', v)
+        setAttr(this, 'name', v)
     }
 
     get set(): IconSet {
@@ -45,14 +47,14 @@ export class Icon extends HTMLElement {
         return SETS.includes(v) ? v : 'bi'
     }
     set set(v: IconSet) {
-        this.setAttribute('set', v)
+        setAttr(this, 'set', v)
     }
 
     get as(): string {
         return this.getAttribute('as') ?? 'span'
     }
     set as(v: string) {
-        this.setAttribute('as', v)
+        setAttr(this, 'as', v)
     }
 
     get size(): string | null {
@@ -114,7 +116,7 @@ export class Icon extends HTMLElement {
 
         if (!svgHtml) {
             // Unknown icon name — render an empty but inert wrapper rather than throwing.
-            this.innerHTML = `<${tag} class="tc-icon" aria-hidden="true"></${tag}>`
+            patchHtml(this, `<${tag} class="tc-icon" aria-hidden="true"></${tag}>`)
             return
         }
 
@@ -134,7 +136,7 @@ export class Icon extends HTMLElement {
             ariaAttrs = ` role="img" aria-label="${esc(labelAttr)}"`
         }
 
-        this.innerHTML = `<${tag} class="tc-icon" style="${style}"${ariaAttrs}>${svgHtml}</${tag}>`
+        patchHtml(this, `<${tag} class="tc-icon" style="${style}"${ariaAttrs}>${svgHtml}</${tag}>`)
     }
 }
 

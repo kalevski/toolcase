@@ -18,7 +18,12 @@ tc-theme[name='dungeon'],
     // ── Panel surface — bevel stack + gilded anchored-edge seam ──────────────
 
     .tc-drawer__panel {
-        position: relative;
+        // NOTE: no `position` override here — the base component already sets
+        // `position: fixed` on .tc-drawer__panel (that's what makes it render as
+        // a viewport-anchored overlay). It already establishes a positioning
+        // context for the ::before/::after corner notches below, so redeclaring
+        // `position: relative` here would silently downgrade the panel to
+        // in-flow layout and break the slide-out overlay entirely.
         box-shadow: var(--fg-panel-shadow), var(--bs-drawer-shadow);
         border-radius: 0;
 

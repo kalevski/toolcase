@@ -1,3 +1,4 @@
+import { classTokens } from './internal/safe-dom'
 const TAG_NAME = 'tc-row'
 
 type Breakpoint = 'sm' | 'md' | 'lg' | 'xl' | 'xxl'
@@ -96,13 +97,23 @@ export class Row extends HTMLElement {
         return classes
     }
 
+    /** `row-cols-*` exists for 0-6 and nothing else, so the attribute is read as
+     *  a column COUNT rather than pasted into a class name. React stringifies
+     *  whatever the author passed — an object arrives as `'[object Object]'` and a
+     *  bare space as `' '` — and both of those, interpolated, are tokens
+     *  `classList.add` rejects with an exception that aborts the render. */
     private resolveColsClasses(): string[] {
+        const count = (raw: string | null): string | null => {
+            if (raw === null) return null
+            const n = Number(raw.trim())
+            return Number.isInteger(n) && n >= 0 && n <= 6 ? String(n) : null
+        }
         const classes: string[] = []
-        const base = this.getAttribute('cols')
-        if (base) classes.push(`row-cols-${base}`)
+        const base = count(this.getAttribute('cols'))
+        if (base !== null) classes.push(`row-cols-${base}`)
         for (const bp of BREAKPOINTS) {
-            const val = this.getAttribute(`cols-${bp}`)
-            if (val) classes.push(`row-cols-${bp}-${val}`)
+            const val = count(this.getAttribute(`cols-${bp}`))
+            if (val !== null) classes.push(`row-cols-${bp}-${val}`)
         }
         return classes
     }
@@ -118,7 +129,11 @@ export class Row extends HTMLElement {
         const justify = this.justify
         if (justify) toAdd.push(`justify-content-${justify}`)
 
-        if (toAdd.length > 0) this.classList.add(...toAdd)
+        // classTokens is the backstop for every value above: DOMTokenList throws
+        // on an empty token or one containing whitespace, and one bad attribute
+        // must not cost the element its whole class list.
+        const tokens = classTokens(...toAdd)
+        if (tokens.length > 0) this.classList.add(...tokens)
     }
 }
 

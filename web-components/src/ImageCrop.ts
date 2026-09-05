@@ -1,5 +1,7 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { Check } from 'lucide-static'
 import { icon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-image-crop'
 
@@ -110,7 +112,7 @@ export class ImageCrop extends HTMLElement {
         return this.getAttribute('src') ?? ''
     }
     set src(v: string) {
-        this.setAttribute('src', v)
+        setAttr(this, 'src', v)
     }
 
     get aspectRatio(): number {
@@ -497,28 +499,31 @@ export class ImageCrop extends HTMLElement {
         this.classList.add('tc-image-crop')
         this.classList.toggle('tc-image-crop--circular', this.circular)
 
-        this.innerHTML = [
-            '<div class="tc-image-crop-stage">',
-            '<canvas class="tc-image-crop-canvas" tabindex="0" role="img"',
-            ' aria-label="Image crop area. Drag to reposition, scroll or use the zoom slider to zoom, arrow keys to pan."></canvas>',
-            '<div class="tc-image-crop-mask" aria-hidden="true"><div class="tc-image-crop-window"></div></div>',
-            '</div>',
-            '<div class="tc-image-crop-error" role="alert" hidden></div>',
-            '<div class="tc-image-crop-toolbar">',
-            '<label class="tc-image-crop-zoom-field">',
-            '<span class="tc-image-crop-zoom-label">Zoom</span>',
-            `<input class="tc-image-crop-zoom" type="range" min="${MIN_SCALE}" max="${MAX_SCALE}" step="0.01"`,
-            ` value="${this._scale}" aria-label="Zoom">`,
-            '</label>',
-            '<div class="tc-image-crop-actions">',
-            '<button type="button" class="tc-image-crop-btn tc-image-crop-btn--ghost tc-image-crop-reset">Reset</button>',
-            '<button type="button" class="tc-image-crop-btn tc-image-crop-btn--primary tc-image-crop-apply">',
-            checkIconHtml,
-            '<span>Apply</span>',
-            '</button>',
-            '</div>',
-            '</div>',
-        ].join('')
+        patchHtml(
+            this,
+            [
+                '<div class="tc-image-crop-stage">',
+                '<canvas class="tc-image-crop-canvas" tabindex="0" role="img"',
+                ' aria-label="Image crop area. Drag to reposition, scroll or use the zoom slider to zoom, arrow keys to pan."></canvas>',
+                '<div class="tc-image-crop-mask" aria-hidden="true"><div class="tc-image-crop-window"></div></div>',
+                '</div>',
+                '<div class="tc-image-crop-error" role="alert" hidden></div>',
+                '<div class="tc-image-crop-toolbar">',
+                '<label class="tc-image-crop-zoom-field">',
+                '<span class="tc-image-crop-zoom-label">Zoom</span>',
+                `<input class="tc-image-crop-zoom" type="range" min="${MIN_SCALE}" max="${MAX_SCALE}" step="0.01"`,
+                ` value="${this._scale}" aria-label="Zoom">`,
+                '</label>',
+                '<div class="tc-image-crop-actions">',
+                '<button type="button" class="tc-image-crop-btn tc-image-crop-btn--ghost tc-image-crop-reset">Reset</button>',
+                '<button type="button" class="tc-image-crop-btn tc-image-crop-btn--primary tc-image-crop-apply">',
+                checkIconHtml,
+                '<span>Apply</span>',
+                '</button>',
+                '</div>',
+                '</div>',
+            ].join(''),
+        )
 
         this._bind()
     }
@@ -527,16 +532,17 @@ export class ImageCrop extends HTMLElement {
     private _bind(): void {
         const canvas = this._canvas()
         if (canvas) {
-            canvas.addEventListener('pointerdown', this._onPointerDown)
-            canvas.addEventListener('wheel', this._onWheel, { passive: false })
-            canvas.addEventListener('keydown', this._onCanvasKeyDown)
+            bindOnce(canvas, 'pointerdown', this._onPointerDown)
+            bindOnce(canvas, 'wheel', this._onWheel, { passive: false })
+            bindOnce(canvas, 'keydown', this._onCanvasKeyDown)
         }
-        this.querySelector<HTMLInputElement>('.tc-image-crop-zoom')?.addEventListener(
+        bindOnce(
+            this.querySelector<HTMLInputElement>('.tc-image-crop-zoom'),
             'input',
             this._onZoomInput,
         )
-        this.querySelector('.tc-image-crop-reset')?.addEventListener('click', this._onReset)
-        this.querySelector('.tc-image-crop-apply')?.addEventListener('click', this._onApply)
+        bindOnce(this.querySelector('.tc-image-crop-reset'), 'click', this._onReset)
+        bindOnce(this.querySelector('.tc-image-crop-apply'), 'click', this._onApply)
     }
 }
 

@@ -19,6 +19,13 @@ tc-pulse-indicator {
     display: inline-flex;
     align-items: center;
     gap: var(--bs-pulse-indicator-gap);
+
+    // Label typography lives on the host so slotted children — which are no longer
+    // moved into `.tc-pulse-indicator-label` — read the same as an attribute label.
+    font-family: var(--bs-body-font-family);
+    font-size: var(--bs-pulse-indicator-label-size);
+    color: var(--bs-pulse-indicator-label-color);
+    line-height: 1;
 }
 
 .tc-pulse-indicator-dot {

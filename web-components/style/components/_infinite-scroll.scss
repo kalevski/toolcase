@@ -60,3 +60,25 @@ tc-infinite-scroll {
         animation-duration: 1.5s;
     }
 }
+
+// The scrolled content is the consumer's own children — `tc-infinite-scroll` no
+// longer moves them into `.tc-infinite-scroll-content` (rule 1). The sentinel,
+// loading row and end row are the element's own and are ordered after them.
+tc-infinite-scroll {
+    display: flex;
+    flex-direction: column;
+}
+
+tc-infinite-scroll > .tc-infinite-scroll-sentinel {
+    order: 8;
+}
+
+tc-infinite-scroll > .tc-infinite-scroll-loading,
+tc-infinite-scroll > [data-slot='loading'] {
+    order: 9;
+}
+
+tc-infinite-scroll > .tc-infinite-scroll-end,
+tc-infinite-scroll > [data-slot='end'] {
+    order: 10;
+}

@@ -1,8 +1,9 @@
-// Dungeon › tc-toggle-row — square gilded switch restoring the fantasy chrome
+// Dungeon › tc-toggle-row — gilded switch restoring the fantasy chrome
 // dropped from the gc-* original. Token-swap repoints every slate literal
 // (most are wired through --bs-toggle-row-* vars, so no orphan overrides).
-// Structure rules re-square the 999px pill track and 50% knob, and add the
-// gold-deep border frame. Label/row chrome is in _setting-row.scss.
+// Keeps the standard pill track + circular knob shape (styleguide mandate
+// for switch controls) and adds the gold-deep border frame. Label/row
+// chrome is in _setting-row.scss.
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
@@ -30,18 +31,12 @@ tc-theme[name='dungeon'],
         --bs-toggle-row-focus-ring: 0 0 0 2px rgba(240, 210, 122, 0.4);
     }
 
-    // Re-square the pill track and add the gold-deep border frame.
+    // Pill track (keeps the base 999px radius) + gold-deep border frame.
     .tc-toggle-row__switch {
         border: 1px solid var(--fg-gold-deep);
-        border-radius: 0;
 
         &[data-checked='true'] {
             border-color: var(--fg-gold);
         }
-    }
-
-    // Re-square the circular knob.
-    .tc-toggle-row__knob {
-        border-radius: 0;
     }
 }

@@ -1,0 +1,18 @@
+// Aurora › tc-date-picker — dark field, mint focus halo, dark calendar UA chrome.
+// Foundation already remaps border/bg/label for free via the --tc-* token
+// cascade. This partial fixes the two defects that swap can't reach because
+// _date-picker.scss carries its own values instead of inheriting the ambient
+// ones: the native calendar indicator rendering light-mode UA chrome on a dark
+// field (color-scheme), and the slate-literal focus ring the component ships
+// as its default, which out-specifies the generic `.form-control:focus` rule
+// in ./input.scss. Both are exposed as --bs-date-picker-* knobs, so this is a
+// value swap, not a specificity fight.
+
+tc-theme[name='aurora'],
+[data-tc-theme='aurora'] {
+    tc-date-picker {
+        --bs-date-picker-color-scheme: dark;
+        --bs-date-picker-focus-border-color: var(--ah-accent);
+        --bs-date-picker-focus-box-shadow: var(--tc-focus-ring);
+    }
+}

@@ -53,8 +53,9 @@ tc-theme[name='blueprint'],
         }
 
         // ── Confirm hover: lift + blueprint-tinted danger glow ───────────────────
-        // The base partial bakes rgba(239,68,68,0.25); replace with --bp-danger-soft
-        // converted to a shadow so it stays within the blueprint token system.
+        // The base partial already derives its glow from --tc-danger; this override
+        // re-derives it from --bp-danger instead so it stays within the blueprint
+        // token system (--bp-danger is themed independently of --tc-danger here).
         &--confirm:hover:not(:disabled) {
             box-shadow: 0 4px 12px color-mix(in srgb, var(--bp-danger) 30%, transparent);
         }

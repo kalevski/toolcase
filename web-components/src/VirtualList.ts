@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 const TAG_NAME = 'tc-virtual-list'
 
 const DEFAULT_HEIGHT = 320
@@ -295,17 +296,19 @@ export class VirtualList extends HTMLElement {
     private render(): void {
         this._detachViewport()
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-virtual-list" role="list" tabindex="0" style="height:${this.height}px">` +
-            `<div class="tc-virtual-list-sizer">` +
-            `<div class="tc-virtual-list-window"></div>` +
-            `</div>` +
-            `</div>`
+                `<div class="tc-virtual-list-sizer">` +
+                `<div class="tc-virtual-list-window"></div>` +
+                `</div>` +
+                `</div>`,
+        )
 
         const viewport = this.querySelector<HTMLElement>('.tc-virtual-list')
         if (viewport) {
             this._viewport = viewport
-            viewport.addEventListener('scroll', this._onScroll, { passive: true })
+            bindOnce(viewport, 'scroll', this._onScroll, { passive: true })
             this._resizeObserver?.observe(viewport)
         }
 

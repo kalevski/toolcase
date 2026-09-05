@@ -46,7 +46,7 @@ tc-theme[name='blueprint'],
         font-family: var(--bp-body);
     }
 
-    // ── Icon tile variants — replace all baked hex literals ────────────────────
+    // ── Icon tile variants — swap to blueprint's own hue tokens ────────────────
     // Each variant re-points the three --bs-rich-page-header-icon-* props only;
     // nothing else changes, matching the base partial's contract.
 

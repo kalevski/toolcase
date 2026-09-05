@@ -1,3 +1,4 @@
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-option'
 
 export class Option extends HTMLElement {
@@ -17,7 +18,7 @@ export class Option extends HTMLElement {
         return this.getAttribute('value') ?? ''
     }
     set value(v: string) {
-        this.setAttribute('value', v)
+        setAttr(this, 'value', v)
     }
 
     get selected(): boolean {

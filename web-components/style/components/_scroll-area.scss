@@ -51,7 +51,8 @@ tc-scroll-area {
     }
 }
 
-.tc-scroll-area-content {
+// No content wrapper — the host scrolls its own children where they stand.
+.tc-scroll-area > * {
     min-width: 0;
     min-height: 0;
 }

@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { msg } from './messages'
 
@@ -299,44 +300,48 @@ export class DayStrip extends HTMLElement {
         const activeId = this.activeId
         const tabbableId = this._tabbableId()
 
-        this.innerHTML = this._days
-            .map((item) => {
-                const state = normaliseState(item.state)
-                const isActive = item.id === activeId
-                const cls =
-                    `tc-day-strip-day${isActive ? ' tc-day-strip-day--selected' : ''}` +
-                    (item.disabled ? ' tc-day-strip-day--disabled' : '')
-                // THE STATUS IN WORDS. `stateLabel` may legitimately be `''`, which
-                // suppresses it — so the fallback is on `== null`, not on falsiness.
-                const word = item.stateLabel == null ? msg(STATE_MESSAGE[state]) : item.stateLabel
-                const identity = item.a11yLabel || `${item.short} ${item.label}`.trim()
-                const spoken = word ? `${identity}, ${word}` : identity
-                const attrs =
-                    ` role="tab" class="${cls}" data-id="${esc(item.id)}"` +
-                    ` data-state="${state}"` +
-                    ` aria-selected="${isActive}"` +
-                    ` tabindex="${item.id === tabbableId ? '0' : '-1'}"` +
-                    ` aria-label="${esc(spoken)}"` +
-                    // The machine-readable half of „this is today", which no amount of
-                    // fill colour can carry. `date` is the token for „the current date
-                    // within a collection" and is exactly this case.
-                    (state === 'today' ? ' aria-current="date"' : '')
+        patchHtml(
+            this,
+            this._days
+                .map((item) => {
+                    const state = normaliseState(item.state)
+                    const isActive = item.id === activeId
+                    const cls =
+                        `tc-day-strip-day${isActive ? ' tc-day-strip-day--selected' : ''}` +
+                        (item.disabled ? ' tc-day-strip-day--disabled' : '')
+                    // THE STATUS IN WORDS. `stateLabel` may legitimately be `''`, which
+                    // suppresses it — so the fallback is on `== null`, not on falsiness.
+                    const word =
+                        item.stateLabel == null ? msg(STATE_MESSAGE[state]) : item.stateLabel
+                    const identity = item.a11yLabel || `${item.short} ${item.label}`.trim()
+                    const spoken = word ? `${identity}, ${word}` : identity
+                    const attrs =
+                        ` role="tab" class="${cls}" data-id="${esc(item.id)}"` +
+                        ` data-state="${state}"` +
+                        ` aria-selected="${isActive}"` +
+                        ` tabindex="${item.id === tabbableId ? '0' : '-1'}"` +
+                        ` aria-label="${esc(spoken)}"` +
+                        // The machine-readable half of „this is today", which no amount of
+                        // fill colour can carry. `date` is the token for „the current date
+                        // within a collection" and is exactly this case.
+                        (state === 'today' ? ' aria-current="date"' : '')
 
-                // aria-hidden on both spans: their text is already in the day's name
-                // above, and read again a screen reader announces „С 3" after the
-                // sentence that said what С and 3 mean.
-                const inner =
-                    `<span class="tc-day-strip-weekday" aria-hidden="true">${esc(item.short)}</span>` +
-                    `<span class="tc-day-strip-cell" aria-hidden="true">${esc(item.label)}</span>`
+                    // aria-hidden on both spans: their text is already in the day's name
+                    // above, and read again a screen reader announces „С 3" after the
+                    // sentence that said what С and 3 mean.
+                    const inner =
+                        `<span class="tc-day-strip-weekday" aria-hidden="true">${esc(item.short)}</span>` +
+                        `<span class="tc-day-strip-cell" aria-hidden="true">${esc(item.label)}</span>`
 
-                if (item.disabled) {
-                    // An inert <span> cannot be clicked or focused into, which is what
-                    // „a day outside the plan" should be.
-                    return `<span${attrs} aria-disabled="true">${inner}</span>`
-                }
-                return `<button type="button"${attrs}>${inner}</button>`
-            })
-            .join('')
+                    if (item.disabled) {
+                        // An inert <span> cannot be clicked or focused into, which is what
+                        // „a day outside the plan" should be.
+                        return `<span${attrs} aria-disabled="true">${inner}</span>`
+                    }
+                    return `<button type="button"${attrs}>${inner}</button>`
+                })
+                .join(''),
+        )
     }
 }
 

@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { msg } from './messages'
 import { fieldMessageHtml } from './internal/field-message'
@@ -609,47 +610,50 @@ export class PhoneInput extends HTMLElement {
 
         const optionsHtml = this._buildOptionsHtml('')
 
-        this.innerHTML = [
-            `<div class="tc-phone-input${isInvalid ? ' tc-phone-input--error' : ''}">`,
-            labelHtml,
-            `<div class="tc-phone-input-wrap">`,
-            `<div class="tc-phone-input-group">`,
-            `<button type="button" class="tc-phone-input-country"`,
-            ` aria-haspopup="listbox" aria-expanded="false"`,
-            disabledAttr,
-            ` aria-label="${esc(triggerAriaLabel)}">`,
-            this._buildTriggerInner(),
-            `</button>`,
-            `<input`,
-            ` id="${this._inputId}"`,
-            ` class="tc-phone-input-number"`,
-            ` type="tel"`,
-            ` inputmode="tel"`,
-            ` placeholder="${esc(placeholder)}"`,
-            ` value="${esc(this._numberValue)}"`,
-            ariaInvalid,
-            ariaRequired,
-            ariaDescribedBy,
-            disabledAttr,
-            `>`,
-            `</div>`,
-            `<div class="tc-phone-input-dropdown" role="listbox" aria-label="Country selector">`,
-            `<div class="tc-phone-input-search-wrap">`,
-            `<input type="text" class="tc-phone-input-search"`,
-            ` placeholder="Search countries…" autocomplete="off" aria-label="Search countries">`,
-            `</div>`,
-            `<div class="tc-phone-input-list">`,
-            optionsHtml,
-            `</div>`,
-            `</div>`,
-            `</div>`,
-            messageHtml,
-            `</div>`,
-        ].join('')
+        patchHtml(
+            this,
+            [
+                `<div class="tc-phone-input${isInvalid ? ' tc-phone-input--error' : ''}">`,
+                labelHtml,
+                `<div class="tc-phone-input-wrap">`,
+                `<div class="tc-phone-input-group">`,
+                `<button type="button" class="tc-phone-input-country"`,
+                ` aria-haspopup="listbox" aria-expanded="false"`,
+                disabledAttr,
+                ` aria-label="${esc(triggerAriaLabel)}">`,
+                this._buildTriggerInner(),
+                `</button>`,
+                `<input`,
+                ` id="${this._inputId}"`,
+                ` class="tc-phone-input-number"`,
+                ` type="tel"`,
+                ` inputmode="tel"`,
+                ` placeholder="${esc(placeholder)}"`,
+                ` value="${esc(this._numberValue)}"`,
+                ariaInvalid,
+                ariaRequired,
+                ariaDescribedBy,
+                disabledAttr,
+                `>`,
+                `</div>`,
+                `<div class="tc-phone-input-dropdown" role="listbox" aria-label="Country selector">`,
+                `<div class="tc-phone-input-search-wrap">`,
+                `<input type="text" class="tc-phone-input-search"`,
+                ` placeholder="Search countries…" autocomplete="off" aria-label="Search countries">`,
+                `</div>`,
+                `<div class="tc-phone-input-list">`,
+                optionsHtml,
+                `</div>`,
+                `</div>`,
+                `</div>`,
+                messageHtml,
+                `</div>`,
+            ].join(''),
+        )
 
         const trigger = this.querySelector<HTMLButtonElement>('.tc-phone-input-country')
         if (trigger) {
-            trigger.addEventListener('click', () => {
+            bindOnce(trigger, 'click', () => {
                 if (this._isOpen) this._closeDropdown(false)
                 else this._openDropdown()
             })
@@ -657,7 +661,7 @@ export class PhoneInput extends HTMLElement {
 
         const numberInput = this.querySelector<HTMLInputElement>('.tc-phone-input-number')
         if (numberInput) {
-            numberInput.addEventListener('input', () => {
+            bindOnce(numberInput, 'input', () => {
                 this._numberValue = numberInput.value
                 this._emitChange()
             })
@@ -665,14 +669,14 @@ export class PhoneInput extends HTMLElement {
 
         const searchInput = this.querySelector<HTMLInputElement>('.tc-phone-input-search')
         if (searchInput) {
-            searchInput.addEventListener('input', () => {
+            bindOnce(searchInput, 'input', () => {
                 this._renderDropdownOptions(searchInput.value)
             })
         }
 
         const listEl = this.querySelector<HTMLElement>('.tc-phone-input-list')
         if (listEl) {
-            listEl.addEventListener('click', (e: MouseEvent) => {
+            bindOnce(listEl, 'click', (e: MouseEvent) => {
                 const opt = (e.target as Element).closest<HTMLElement>('.tc-phone-input-option')
                 if (opt?.dataset.code) this._selectCountry(opt.dataset.code)
             })

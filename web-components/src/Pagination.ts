@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { msg } from './messages'
 
@@ -22,8 +23,10 @@ export class Pagination extends HTMLElement {
             if (!target) return
             e.preventDefault()
 
+            if (target.closest('.page-item.disabled') || target.getAttribute('aria-disabled') === 'true') return
+
             const page = parseInt(target.dataset['page'] ?? '', 10)
-            if (isNaN(page) || page === this.current) return
+            if (isNaN(page) || page < 1 || page > this.total || page === this.current) return
 
             this.setAttribute('current', String(page))
             this.dispatchEvent(
@@ -137,21 +140,24 @@ export class Pagination extends HTMLElement {
             })
             .join('')
 
+        const prevAttrs = prevDisabled ? ' aria-disabled="true" tabindex="-1"' : ''
+        const nextAttrs = nextDisabled ? ' aria-disabled="true" tabindex="-1"' : ''
+
         const ul =
             `<ul class="pagination${sizeClass}">` +
             `<li class="page-item${prevDisabled ? ' disabled' : ''}">` +
-            `<a class="page-link" href="#" data-page="${current - 1}" aria-label="${esc(msg('paginationPrevious'))}">&laquo;</a></li>` +
+            `<a class="page-link" href="#" data-page="${current - 1}" aria-label="${esc(msg('paginationPrevious'))}"${prevAttrs}>&laquo;</a></li>` +
             pageItems +
             `<li class="page-item${nextDisabled ? ' disabled' : ''}">` +
-            `<a class="page-link" href="#" data-page="${current + 1}" aria-label="${esc(msg('paginationNext'))}">&raquo;</a></li>` +
+            `<a class="page-link" href="#" data-page="${current + 1}" aria-label="${esc(msg('paginationNext'))}"${nextAttrs}>&raquo;</a></li>` +
             `</ul>`
 
         const nav = `<nav aria-label="${esc(msg('paginationLabel'))}">${ul}</nav>`
 
         if (align) {
-            this.innerHTML = `<div class="d-flex justify-content-${align}">${nav}</div>`
+            patchHtml(this, `<div class="d-flex justify-content-${align}">${nav}</div>`)
         } else {
-            this.innerHTML = nav
+            patchHtml(this, nav)
         }
     }
 }

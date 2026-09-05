@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { DialogBase, esc } from './internal/dialog-base'
 const TAG_NAME = 'tc-pause-menu'
 
@@ -130,10 +131,17 @@ export class PauseMenu extends DialogBase {
             if (items.length === 0) return
             e.preventDefault()
             const current = items.indexOf(document.activeElement as HTMLElement)
+            // When focus isn't currently on a menu item (e.g. it's on the footer
+            // Resume button), (current - 1 + length) % length under-shoots the
+            // last item by one — land on the natural end for the direction instead.
             const next =
-                e.key === 'ArrowDown'
-                    ? (current + 1) % items.length
-                    : (current - 1 + items.length) % items.length
+                current === -1
+                    ? e.key === 'ArrowDown'
+                        ? 0
+                        : items.length - 1
+                    : e.key === 'ArrowDown'
+                      ? (current + 1) % items.length
+                      : (current - 1 + items.length) % items.length
             items[next].focus()
             return
         }
@@ -281,20 +289,22 @@ export class PauseMenu extends DialogBase {
               `</div>`
             : ''
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-pause-menu__backdrop" aria-hidden="true"${hiddenAttr}></div>` +
-            `<div class="tc-pause-menu__panel" role="dialog" aria-modal="true"` +
-            ` aria-labelledby="${labelId}" tabindex="-1"` +
-            ` aria-hidden="${isOpen ? 'false' : 'true'}"${hiddenAttr}>` +
-            `<div class="tc-pause-menu__header">` +
-            `<span class="tc-pause-menu__eyebrow">${esc(config.eyebrow)}</span>` +
-            `<h2 class="tc-pause-menu__title" id="${labelId}">${esc(titleText)}</h2>` +
-            `</div>` +
-            `<div class="tc-pause-menu__items" role="menu" aria-label="${esc(titleText)}">` +
-            this._buildItemsHtml() +
-            `</div>` +
-            footerHtml +
-            `</div>`
+                `<div class="tc-pause-menu__panel" role="dialog" aria-modal="true"` +
+                ` aria-labelledby="${labelId}" tabindex="-1"` +
+                ` aria-hidden="${isOpen ? 'false' : 'true'}"${hiddenAttr}>` +
+                `<div class="tc-pause-menu__header">` +
+                `<span class="tc-pause-menu__eyebrow">${esc(config.eyebrow)}</span>` +
+                `<h2 class="tc-pause-menu__title" id="${labelId}">${esc(titleText)}</h2>` +
+                `</div>` +
+                `<div class="tc-pause-menu__items" role="menu" aria-label="${esc(titleText)}">` +
+                this._buildItemsHtml() +
+                `</div>` +
+                footerHtml +
+                `</div>`,
+        )
 
         if (isOpen) this.classList.add('tc-pause-menu--open')
         else this.classList.remove('tc-pause-menu--open')

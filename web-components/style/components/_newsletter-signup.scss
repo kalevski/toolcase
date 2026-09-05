@@ -177,8 +177,11 @@ tc-newsletter-signup {
     display: inline-block;
     width: 1rem;
     height: 1rem;
-    border: 2px solid rgba(255, 255, 255, 0.35);
-    border-top-color: #fff;
+    // currentcolor (inherited from --bs-newsletter-signup-submit-color) instead of
+    // a hardcoded white — the submit button's ink flips to a dark color on themes
+    // with a bright accent (e.g. aurora), and a baked-white ring would go illegible.
+    border: 2px solid color-mix(in srgb, currentColor 35%, transparent);
+    border-top-color: currentColor;
     border-radius: 50%;
     animation: tc-newsletter-signup-spin 0.7s linear infinite;
 

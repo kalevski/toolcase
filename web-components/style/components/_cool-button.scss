@@ -47,12 +47,58 @@
     flex-shrink: 0;
 }
 
+// The `label`/`addon` attributes render their text straight into the owned spans
+// above, but a consumer can skip the attribute and pass real children instead —
+// default slotted content for the label ("Slotted label" in the demo), or a
+// `slot="addon"` element ("Addon — slot children"). Rule 1 forbids moving that
+// content into the owned spans (patch-html.ts), so it stays a direct child of the
+// button box, a sibling of the (then-empty) owned span — and still needs that
+// span's box model, given here by selector instead of by wrapping.
+.btn.tc-cool-button
+    > :not(.tc-button-hit):not(.tc-cool-button-content):not(.tc-cool-button-divider):not(
+        .tc-cool-button-addon
+    ):not([slot='addon']) {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: var(--bs-btn-padding-y) var(--bs-btn-padding-x);
+    line-height: var(--bs-btn-line-height);
+}
+
+.btn.tc-cool-button > [slot='addon'] {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: var(--bs-btn-padding-y) calc(var(--bs-btn-padding-x) * 0.8);
+    background: var(--bs-cool-button-addon-bg, var(--tc-surface-muted));
+    color: var(--bs-cool-button-addon-color, var(--tc-text));
+    flex-shrink: 0;
+}
+
+// The owned span for a region only carries visible content when the matching
+// attribute (or the loading spinner) is present — when a consumer node supplies
+// the content instead, the span renders empty, and its own padding would
+// otherwise show up as a phantom gap next to the real content above.
+.tc-cool-button-content:empty,
+.tc-cool-button-addon:empty {
+    padding: 0;
+}
+
 // Icon/glyph content (attribute text or slotted children) is sized to the
 // label's font-size and given a tight line-height so leading and trailing
 // addons sit on the same optical baseline as the label — no overflow, no
 // vertical drift from a glyph's intrinsic metrics.
 .tc-cool-button-content,
-.tc-cool-button-addon {
+.tc-cool-button-addon,
+.btn.tc-cool-button
+    > :not(.tc-button-hit):not(.tc-cool-button-content):not(.tc-cool-button-divider):not(
+        .tc-cool-button-addon
+    ):not([slot='addon']),
+.btn.tc-cool-button > [slot='addon'] {
     font-size: var(--bs-btn-font-size);
 
     > * {

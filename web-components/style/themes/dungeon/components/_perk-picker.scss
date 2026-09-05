@@ -65,15 +65,20 @@ tc-theme[name='dungeon'],
             inset 0 1px 0 rgba(232, 200, 120, 0.18),
             inset 0 -2px 6px rgba(0, 0, 0, 0.6);
         text-shadow: 0 1px 2px #000;
+    }
 
-        .is-selected & {
-            background: radial-gradient(80% 80% at 50% 30%, #2a1f14, #0e0905);
-            border-color: var(--fg-gold-bright);
-            box-shadow:
-                inset 0 0 0 1px rgba(0, 0, 0, 0.7),
-                inset 0 1px 0 rgba(232, 200, 120, 0.3),
-                0 0 12px rgba(232, 200, 120, 0.5);
-        }
+    // Selected: brighten the icon well's border and add a gold glow. Nested
+    // under the card (not `.is-selected &`) so the theme wrapper stays the
+    // outermost ancestor — `.is-selected &` here previously compiled to
+    // `.is-selected [data-tc-theme=dungeon] ...`, which can never match since
+    // the theme root is never a descendant of the card.
+    .tc-perk-picker-card.is-selected .tc-perk-picker-card-icon {
+        background: radial-gradient(80% 80% at 50% 30%, #2a1f14, #0e0905);
+        border-color: var(--fg-gold-bright);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.7),
+            inset 0 1px 0 rgba(232, 200, 120, 0.3),
+            0 0 12px rgba(232, 200, 120, 0.5);
     }
 
     // Perk name: display caps gilded.

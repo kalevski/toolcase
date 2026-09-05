@@ -1,4 +1,6 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-score-display'
 
 export type ScoreDisplayAlign = 'left' | 'right' | 'center'
@@ -57,7 +59,7 @@ export class ScoreDisplay extends HTMLElement {
         return ALIGNS.includes(raw) ? raw : 'left'
     }
     set align(value: ScoreDisplayAlign) {
-        this.setAttribute('align', value)
+        setAttr(this, 'align', value)
     }
 
     get fontSize(): number {
@@ -86,13 +88,16 @@ export class ScoreDisplay extends HTMLElement {
             ? `<span class="tc-score-display-multiplier">×${multiplier}</span>`
             : ''
 
-        this.innerHTML = [
-            labelHtml,
-            '<div class="tc-score-display-row">',
-            `<span class="tc-score-display-value">${score.toLocaleString()}</span>`,
-            multiplierHtml,
-            '</div>',
-        ].join('')
+        patchHtml(
+            this,
+            [
+                labelHtml,
+                '<div class="tc-score-display-row">',
+                `<span class="tc-score-display-value">${score.toLocaleString()}</span>`,
+                multiplierHtml,
+                '</div>',
+            ].join(''),
+        )
     }
 }
 

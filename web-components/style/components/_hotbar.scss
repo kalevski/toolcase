@@ -25,7 +25,11 @@ tc-hotbar {
     --bs-hotbar-empty-color: var(--tc-text-faint);
 
     --bs-hotbar-selected-border: var(--tc-app-accent);
-    --bs-hotbar-selected-ring: rgba(30, 41, 59, 0.12);
+    // Full box-shadow recipe (offsets + color), not a bare color — every theme
+    // foundation defines --tc-focus-ring this way (see e.g. aurora/neon's
+    // accent-soft halo, sunshine's leaf-green ring) so themes with no hotbar
+    // override still get an on-theme selected ring instead of a baked slate one.
+    --bs-hotbar-selected-ring: var(--tc-focus-ring);
 
     --bs-hotbar-hotkey-bg: var(--tc-app-accent);
     --bs-hotbar-hotkey-color: var(--tc-app-accent-contrast);
@@ -88,9 +92,12 @@ tc-hotbar {
 }
 
 // Active = solid-ink border + focus-ring halo (the standard active state).
+// --bs-hotbar-selected-ring already carries its own offsets (see above), so it
+// is used as the whole box-shadow value rather than composed with a literal
+// spread — composing it would double up the offsets and produce invalid CSS.
 .tc-hotbar__slot--selected:not(:defined) {
     border-color: var(--bs-hotbar-selected-border);
-    box-shadow: 0 0 0 0.2rem var(--bs-hotbar-selected-ring);
+    box-shadow: var(--bs-hotbar-selected-ring);
 }
 
 // Item glyph — an <img> source or a short initials/glyph label.

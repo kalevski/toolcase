@@ -1,6 +1,8 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { msg } from './messages'
 import { fixedOriginOffset } from './internal/containingBlock'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-pie-chart'
 
 // One slice = a label, a numeric value and an optional explicit colour. Mirrors
@@ -122,7 +124,7 @@ export class PieChart extends HTMLElement {
         return this.getAttribute('subtitle') ?? ''
     }
     set subtitle(v: string) {
-        this.setAttribute('subtitle', v)
+        setAttr(this, 'subtitle', v)
     }
 
     get donut(): boolean {
@@ -137,7 +139,7 @@ export class PieChart extends HTMLElement {
         return this.getAttribute('center-label') ?? ''
     }
     set centerLabel(v: string) {
-        this.setAttribute('center-label', v)
+        setAttr(this, 'center-label', v)
     }
 
     // show-legend defaults to TRUE — legend renders unless explicitly "false".
@@ -201,7 +203,10 @@ export class PieChart extends HTMLElement {
 
         const data = this._data
         if (!data.length) {
-            this.innerHTML = `<div class="tc-pie-chart-inner">${headerHtml}<div class="tc-pie-chart-empty">${esc(msg('noData'))}</div></div>`
+            patchHtml(
+                this,
+                `<div class="tc-pie-chart-inner">${headerHtml}<div class="tc-pie-chart-empty">${esc(msg('noData'))}</div></div>`,
+            )
             this._geo = []
             return
         }
@@ -296,27 +301,29 @@ export class PieChart extends HTMLElement {
             legendHtml += `</ul>`
         }
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-pie-chart-inner">` +
-            headerHtml +
-            `<div class="tc-pie-chart-body">` +
-            `<div class="tc-pie-chart-plot">${svgHtml}${tooltipHtml}</div>` +
-            legendHtml +
-            `</div>` +
-            `</div>`
+                headerHtml +
+                `<div class="tc-pie-chart-body">` +
+                `<div class="tc-pie-chart-plot">${svgHtml}${tooltipHtml}</div>` +
+                legendHtml +
+                `</div>` +
+                `</div>`,
+        )
 
         // post-render listeners (the fresh nodes get fresh handlers; old ones GC together)
         const slicesGroup = this.querySelector<SVGGElement>('.tc-pie-chart-slices')
         if (slicesGroup) {
-            slicesGroup.addEventListener('pointermove', this._onSlicePointer)
-            slicesGroup.addEventListener('pointerleave', this._onPointerLeave)
-            slicesGroup.addEventListener('click', this._onSliceClick)
+            bindOnce(slicesGroup, 'pointermove', this._onSlicePointer)
+            bindOnce(slicesGroup, 'pointerleave', this._onPointerLeave)
+            bindOnce(slicesGroup, 'click', this._onSliceClick)
         }
         const legend = this.querySelector<HTMLElement>('.tc-pie-chart-legend')
         if (legend) {
-            legend.addEventListener('pointerover', this._onLegendHover)
-            legend.addEventListener('pointerleave', this._onPointerLeave)
-            legend.addEventListener('click', this._onLegendClick)
+            bindOnce(legend, 'pointerover', this._onLegendHover)
+            bindOnce(legend, 'pointerleave', this._onPointerLeave)
+            bindOnce(legend, 'click', this._onLegendClick)
         }
 
         // restore highlight if the active slice is still visible after a re-render
@@ -335,19 +342,21 @@ export class PieChart extends HTMLElement {
             ? `<div class="tc-pie-chart-header"><div class="tc-pie-chart-skeleton tc-pie-chart-skeleton--title" aria-hidden="true"></div></div>`
             : ''
         const size = Math.max(80, this.height)
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-pie-chart-inner">` +
-            headHtml +
-            `<div class="tc-pie-chart-body" aria-hidden="true">` +
-            `<div class="tc-pie-chart-skeleton tc-pie-chart-skeleton--disc" style="width:${size}px;height:${size}px"></div>` +
-            `<ul class="tc-pie-chart-legend">` +
-            `<li class="tc-pie-chart-legend-row"><div class="tc-pie-chart-skeleton tc-pie-chart-skeleton--legend"></div></li>` +
-            `<li class="tc-pie-chart-legend-row"><div class="tc-pie-chart-skeleton tc-pie-chart-skeleton--legend"></div></li>` +
-            `<li class="tc-pie-chart-legend-row"><div class="tc-pie-chart-skeleton tc-pie-chart-skeleton--legend"></div></li>` +
-            `</ul>` +
-            `</div>` +
-            `<span class="visually-hidden">${esc(msg('loading'))}</span>` +
-            `</div>`
+                headHtml +
+                `<div class="tc-pie-chart-body" aria-hidden="true">` +
+                `<div class="tc-pie-chart-skeleton tc-pie-chart-skeleton--disc" style="width:${size}px;height:${size}px"></div>` +
+                `<ul class="tc-pie-chart-legend">` +
+                `<li class="tc-pie-chart-legend-row"><div class="tc-pie-chart-skeleton tc-pie-chart-skeleton--legend"></div></li>` +
+                `<li class="tc-pie-chart-legend-row"><div class="tc-pie-chart-skeleton tc-pie-chart-skeleton--legend"></div></li>` +
+                `<li class="tc-pie-chart-legend-row"><div class="tc-pie-chart-skeleton tc-pie-chart-skeleton--legend"></div></li>` +
+                `</ul>` +
+                `</div>` +
+                `<span class="visually-hidden">${esc(msg('loading'))}</span>` +
+                `</div>`,
+        )
     }
 
     private _summary(data: PieChartSlice[], total: number): string {

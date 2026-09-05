@@ -316,6 +316,11 @@ tc-user-panel {
         min-height: 44px;
     }
 
+    // Only a real touch target when it doubles as the menu trigger.
+    .tc-user-panel-info[role='button'] {
+        min-height: 44px;
+    }
+
     .tc-user-panel-menu-item {
         min-height: 44px;
     }

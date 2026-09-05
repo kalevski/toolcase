@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { DialogBase, esc } from './internal/dialog-base'
 
 const TAG_NAME = 'tc-confirm-dialog'
@@ -145,18 +146,20 @@ export class ConfirmDialog extends DialogBase {
 
         // Panel is role="document" — a presentation wrapper. Naming/modal attrs
         // are on the host (role="dialog") above, not here.
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-confirm-dialog__backdrop" aria-hidden="true"${hiddenAttr}></div>` +
-            `<div class="tc-confirm-dialog__panel" role="document"` +
-            ` tabindex="-1" aria-hidden="${panelAriaHidden}"${hiddenAttr}>` +
-            eyebrowMarkup +
-            `<h2 class="tc-confirm-dialog__title" id="${titleId}">${esc(this.dialogTitle)}</h2>` +
-            messageMarkup +
-            `<div class="tc-confirm-dialog__actions">` +
-            `<button type="button" class="btn btn-outline-secondary tc-confirm-dialog__cancel">${esc(this.cancelLabel)}</button>` +
-            `<button type="button" class="btn ${confirmVariant} tc-confirm-dialog__confirm">${esc(this.confirmLabel)}</button>` +
-            `</div>` +
-            `</div>`
+                `<div class="tc-confirm-dialog__panel" role="document"` +
+                ` tabindex="-1" aria-hidden="${panelAriaHidden}"${hiddenAttr}>` +
+                eyebrowMarkup +
+                `<h2 class="tc-confirm-dialog__title" id="${titleId}">${esc(this.dialogTitle)}</h2>` +
+                messageMarkup +
+                `<div class="tc-confirm-dialog__actions">` +
+                `<button type="button" class="btn btn-outline-secondary tc-confirm-dialog__cancel">${esc(this.cancelLabel)}</button>` +
+                `<button type="button" class="btn ${confirmVariant} tc-confirm-dialog__confirm">${esc(this.confirmLabel)}</button>` +
+                `</div>` +
+                `</div>`,
+        )
 
         if (isOpen) {
             this.classList.add('tc-confirm-dialog--open')

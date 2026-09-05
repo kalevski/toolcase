@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { escapeHtml } from './internal/resourceBar'
 
 const TAG_NAME = 'tc-player-frame'
@@ -196,7 +197,9 @@ export class PlayerFrame extends HTMLElement {
             ? renderBar('stamina', this.stamina, this.staminaMax, 'Stamina')
             : ''
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <div class="tc-player-frame">
                 <div class="tc-player-frame__portrait" aria-hidden="true">
                     ${glyphSpan}
@@ -214,7 +217,8 @@ export class PlayerFrame extends HTMLElement {
                     </div>
                 </div>
             </div>
-        `
+        `,
+        )
     }
 }
 

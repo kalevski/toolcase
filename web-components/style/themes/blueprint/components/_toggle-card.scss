@@ -20,6 +20,10 @@ tc-theme[name='blueprint'],
         // Switch track idle → teal border token (muted, not full teal fill)
         --bs-toggle-card-switch-track-off: var(--bp-border-strong);
         --bs-toggle-card-switch-knob: #ffffff;
+
+        // Replace the baked slate inset shadows with a bp-text-ish tint.
+        --bs-toggle-card-switch-shadow: inset 0 1px 2px rgba(26, 24, 48, 0.07);
+        --bs-toggle-card-knob-shadow: 0 0 0 0.5px rgba(26, 24, 48, 0.08);
     }
 
     .tc-toggle-card {
@@ -119,15 +123,9 @@ tc-theme[name='blueprint'],
     }
 
     // Switch track: idle uses border token; active → pink gradient
-    // Replace the baked slate inset shadow on the idle track
+    // (shadow tint comes from --bs-toggle-card-switch-shadow above)
     .tc-toggle-card-switch {
-        box-shadow: inset 0 1px 2px rgba(26, 24, 48, 0.07); // bp-text-ish tint, not slate
         transition: background-color var(--bp-ease, 150ms ease);
-    }
-
-    // Knob: replace baked slate shadow
-    .tc-toggle-card-knob {
-        box-shadow: 0 0 0 0.5px rgba(26, 24, 48, 0.08);
     }
 
     // ON: switch track → pink gradient; replace --tc-app-accent-gradient with blueprint pink

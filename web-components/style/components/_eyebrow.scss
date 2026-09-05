@@ -33,8 +33,6 @@
     }
 }
 
-// The slot-content wrapper is purely structural — let inline content flow
-// through it so truncation/wrapping rules apply to the text directly.
-.tc-eyebrow-content {
-    display: contents;
-}
+// No inner wrapper: `tc-eyebrow` carries `.tc-eyebrow` on the host itself, so the
+// consumer's own children are the label text and wrapping rules apply to them
+// directly.

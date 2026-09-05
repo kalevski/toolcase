@@ -1,0 +1,50 @@
+// Marker › button — the primary action IS the marker.
+//
+// A yellow fill with dark ink on it (11:1), and nothing else in the set is
+// yellow. That is the whole discipline of this theme: the highlighter marks the
+// few things that matter and leaves everything else as paper and graphite.
+
+[data-tc-theme='marker'],
+tc-theme[name='marker'] {
+    .btn-primary {
+        --bs-btn-color: var(--mk-on-lead);
+        --bs-btn-bg: var(--mk-lead);
+        --bs-btn-border-color: var(--mk-lead);
+        --bs-btn-hover-color: var(--mk-on-lead);
+        --bs-btn-hover-bg: var(--mk-lead-hi);
+        --bs-btn-hover-border-color: var(--mk-lead-hi);
+        --bs-btn-active-bg: var(--mk-lead-lo);
+        --bs-btn-active-border-color: var(--mk-lead-lo);
+        --bs-btn-disabled-color: var(--mk-on-lead);
+        --bs-btn-disabled-bg: var(--mk-lead);
+        --bs-btn-disabled-border-color: var(--mk-lead);
+        box-shadow: var(--mk-lead-shadow);
+    }
+
+    // The outline primary is the one place the yellow becomes a LINE. Its label
+    // stays graphite, because yellow text on paper is ~1.6:1 at any size.
+    .btn-outline-primary {
+        --bs-btn-color: var(--mk-ink-1);
+        --bs-btn-border-color: var(--mk-lead-lo);
+        --bs-btn-hover-color: var(--mk-on-lead);
+        --bs-btn-hover-bg: var(--mk-lead);
+        --bs-btn-hover-border-color: var(--mk-lead);
+    }
+
+    // Warning is the same fill as primary in this palette, so it takes the same
+    // ink — white on it is ~1.9:1 and fails at every size.
+    .btn-warning {
+        --bs-btn-color: var(--mk-on-lead);
+        --bs-btn-hover-color: var(--mk-on-lead);
+        --bs-btn-active-color: var(--mk-on-lead);
+    }
+
+    .btn-secondary {
+        --bs-btn-color: var(--mk-ink-1);
+        --bs-btn-bg: var(--mk-surface);
+        --bs-btn-border-color: var(--mk-line);
+        --bs-btn-hover-bg: var(--mk-bg-2);
+        --bs-btn-hover-border-color: var(--mk-line-strong);
+        --bs-btn-hover-color: var(--mk-ink-1);
+    }
+}

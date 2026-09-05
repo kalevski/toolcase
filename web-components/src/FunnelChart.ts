@@ -1,6 +1,8 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { msg } from './messages'
 import { fixedOriginOffset } from './internal/containingBlock'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-funnel-chart'
 
 // One funnel step = a stage label, a numeric value, and an optional explicit colour.
@@ -94,7 +96,7 @@ export class FunnelChart extends HTMLElement {
         return this.getAttribute('subtitle') ?? ''
     }
     set subtitle(v: string) {
-        this.setAttribute('subtitle', v)
+        setAttr(this, 'subtitle', v)
     }
 
     get height(): number {
@@ -196,7 +198,10 @@ export class FunnelChart extends HTMLElement {
                 : ''
 
         if (!data.length) {
-            this.innerHTML = `<div class="tc-funnel-chart__inner">${headerHtml}<div class="tc-funnel-chart__empty">${esc(msg('noData'))}</div></div>`
+            patchHtml(
+                this,
+                `<div class="tc-funnel-chart__inner">${headerHtml}<div class="tc-funnel-chart__empty">${esc(msg('noData'))}</div></div>`,
+            )
             this._anchors = []
             return
         }
@@ -272,7 +277,10 @@ export class FunnelChart extends HTMLElement {
 
         const tooltipHtml = `<div class="tc-funnel-chart__tooltip" role="status" aria-live="polite" hidden></div>`
 
-        this.innerHTML = `<div class="tc-funnel-chart__inner">${headerHtml}<div class="tc-funnel-chart__plot">${svgHtml}${tooltipHtml}</div></div>`
+        patchHtml(
+            this,
+            `<div class="tc-funnel-chart__inner">${headerHtml}<div class="tc-funnel-chart__plot">${svgHtml}${tooltipHtml}</div></div>`,
+        )
 
         const svg = this.querySelector<SVGSVGElement>('.tc-funnel-chart__svg')
         if (svg) {
@@ -286,10 +294,10 @@ export class FunnelChart extends HTMLElement {
                 this._reconciling = false
                 return
             }
-            svg.addEventListener('pointermove', this._onPointerMove)
-            svg.addEventListener('pointerleave', this._onPointerLeave)
-            svg.addEventListener('click', this._onSegmentActivate)
-            svg.addEventListener('keydown', this._onSegmentKeydown)
+            bindOnce(svg, 'pointermove', this._onPointerMove)
+            bindOnce(svg, 'pointerleave', this._onPointerLeave)
+            bindOnce(svg, 'click', this._onSegmentActivate)
+            bindOnce(svg, 'keydown', this._onSegmentKeydown)
         }
     }
 
@@ -300,12 +308,14 @@ export class FunnelChart extends HTMLElement {
         const headHtml = titleAttr
             ? `<div class="tc-funnel-chart__header"><div class="tc-funnel-chart__skeleton tc-funnel-chart__skeleton--title" aria-hidden="true"></div></div>`
             : ''
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-funnel-chart__inner">` +
-            headHtml +
-            `<div class="tc-funnel-chart__skeleton tc-funnel-chart__skeleton--plot" aria-hidden="true" style="height:${this.height}px"></div>` +
-            `<span class="visually-hidden">${esc(msg('loading'))}</span>` +
-            `</div>`
+                headHtml +
+                `<div class="tc-funnel-chart__skeleton tc-funnel-chart__skeleton--plot" aria-hidden="true" style="height:${this.height}px"></div>` +
+                `<span class="visually-hidden">${esc(msg('loading'))}</span>` +
+                `</div>`,
+        )
     }
 
     private _summary(data: FunnelStep[]): string {

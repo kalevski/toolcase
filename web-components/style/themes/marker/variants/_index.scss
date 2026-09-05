@@ -1,0 +1,32 @@
+// Marker theme variants — alternate marker hues on the paper foundation.
+//
+// Each variant swaps ONLY the marker's own hue family (--mk-lead*, the fill every
+// marked thing takes) and the secondary highlight (--tc-accent*, links and focus),
+// plus the literals the foundation bakes against the old hex. Paper, graphite,
+// hairlines, shadows and type stay identical to the base theme — this is the
+// standard eleven-variant set shared by every bundled theme.
+//
+// Available variants:
+// - ocean: electric blue marker, cyan secondary
+// - forest: emerald marker, lime secondary
+// - ember: warm orange marker, gold secondary
+// - royal: violet marker, magenta secondary
+// - rose: rose marker, pink secondary
+// - mint: lagoon teal marker, mint secondary
+// - crimson: electric red marker, coral secondary
+// - indigo: indigo marker, periwinkle secondary
+// - slate: cool steel marker, silver secondary
+// - sunset: GRADIENT marker (coral → orange), amber secondary
+// - twilight: GRADIENT marker (violet → blue), sky-blue secondary
+
+@use './ocean';
+@use './forest';
+@use './ember';
+@use './royal';
+@use './rose';
+@use './mint';
+@use './crimson';
+@use './indigo';
+@use './slate';
+@use './sunset';
+@use './twilight';

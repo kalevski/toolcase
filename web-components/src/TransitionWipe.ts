@@ -1,3 +1,5 @@
+import { patchHtml } from './internal/patch-html'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-transition-wipe'
 
 export type TransitionWipeDirection = 'fade' | 'left' | 'right' | 'up' | 'down' | 'iris'
@@ -36,7 +38,7 @@ export class TransitionWipe extends HTMLElement {
 
     connectedCallback(): void {
         if (!this._initialised) {
-            this.innerHTML = '<div class="tc-transition-wipe-fill"></div>'
+            patchHtml(this, '<div class="tc-transition-wipe-fill"></div>')
             this._initialised = true
         }
         this._applyState()
@@ -69,7 +71,7 @@ export class TransitionWipe extends HTMLElement {
         return DIRECTIONS.includes(raw) ? raw : 'fade'
     }
     set direction(v: TransitionWipeDirection) {
-        this.setAttribute('direction', v)
+        setAttr(this, 'direction', v)
     }
 
     get duration(): number {
@@ -86,7 +88,7 @@ export class TransitionWipe extends HTMLElement {
         return this.getAttribute('wipe-color') ?? 'var(--tc-ink)'
     }
     set wipeColor(v: string) {
-        this.setAttribute('wipe-color', v)
+        setAttr(this, 'wipe-color', v)
     }
 
     private _clearTimer(): void {

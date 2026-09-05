@@ -40,10 +40,13 @@ tc-resizable-panel {
 }
 
 // ── Panes ───────────────────────────────────────────────────────────────────────
+// The panes are the consumer's own first two children (rule 1), not a
+// component-owned `.tc-resizable-panel-pane` wrapper — so the cosmetics live on
+// the selector that actually matches rendered markup: `.tc-resizable-panel >
+// :not(.tc-resizable-panel-divider)`. This is what lets
+// --bs-resizable-panel-pane-bg (and the flex-basis transition) actually paint.
 
-.tc-resizable-panel-pane {
-    flex-grow: 0;
-    flex-shrink: 1;
+.tc-resizable-panel > :not(.tc-resizable-panel-divider) {
     min-width: 0;
     min-height: 0;
     overflow: auto;
@@ -53,8 +56,22 @@ tc-resizable-panel {
 }
 
 // No transition while dragging — the pointer drives flex-basis directly.
-.tc-resizable-panel--dragging .tc-resizable-panel-pane {
+.tc-resizable-panel--dragging > :not(.tc-resizable-panel-divider) {
     transition: none;
+}
+
+.tc-resizable-panel > :not(.tc-resizable-panel-divider):first-of-type {
+    flex: 0 0 var(--tc-resizable-panel-first, 50%);
+    order: 1;
+}
+
+.tc-resizable-panel > .tc-resizable-panel-divider {
+    order: 2;
+}
+
+.tc-resizable-panel > :not(.tc-resizable-panel-divider):nth-of-type(2) {
+    flex: 0 0 var(--tc-resizable-panel-second, 50%);
+    order: 3;
 }
 
 // ── Divider (drag handle) ───────────────────────────────────────────────────────
@@ -164,7 +181,7 @@ tc-resizable-panel {
 // ── Reduced motion ──────────────────────────────────────────────────────────────
 
 @media (prefers-reduced-motion: reduce) {
-    .tc-resizable-panel-pane {
+    .tc-resizable-panel > :not(.tc-resizable-panel-divider) {
         transition: none;
     }
 }

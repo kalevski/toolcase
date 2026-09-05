@@ -1,4 +1,5 @@
 import { executeAfterTransition, reflow, triggerEvent } from './transition'
+import { queryOne } from './safe-dom'
 
 // Drop-in replacement for Bootstrap's Collapse plugin covering the surface the
 // tc-* components use: show/hide/toggle/dispose, the
@@ -133,9 +134,10 @@ export class Collapse {
 
     private _resolveParent(parent: string | Element | null | undefined): Element | null {
         if (parent instanceof Element) return parent
-        if (typeof parent === 'string') return document.querySelector(parent)
-        const attr = this._element.getAttribute('data-bs-parent')
-        return attr ? document.querySelector(attr) : null
+        // Both spellings are consumer-written selectors — a bad one matches
+        // nothing rather than throwing out of the plugin's constructor.
+        if (typeof parent === 'string') return queryOne(document, parent)
+        return queryOne(document, this._element.getAttribute('data-bs-parent'))
     }
 
     private _findTogglers(): HTMLElement[] {

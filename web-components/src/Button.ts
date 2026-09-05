@@ -1,18 +1,16 @@
+import { patchHtml } from './internal/patch-html'
+import { consumerText, observeContent } from './internal/content-observer'
+import { esc } from './internal/esc'
+import { setHostClass } from './internal/host-class'
 import { VARIANTS_FULL } from './internal/variants'
 import { fieldMessageHtml, type FieldMessageState } from './internal/field-message'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-button'
 
 const has = (v: string | null | undefined): v is string => v != null && v !== ''
 
 export type ButtonVariant =
-    | 'primary'
-    | 'secondary'
-    | 'success'
-    | 'danger'
-    | 'warning'
-    | 'info'
-    | 'light'
-    | 'dark'
+    'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
 // `xl` is the 66px thumb tier — the phone design's step-advance target. A NEW tier
 // rather than a taller `lg`, which is the CTA size on every landing page consuming
 // this library; see the note in style/components/_button.scss.
@@ -22,25 +20,28 @@ export type ButtonType = 'button' | 'submit' | 'reset'
 const VARIANTS: ButtonVariant[] = [...VARIANTS_FULL]
 const SIZES: ButtonSize[] = ['sm', 'lg', 'xl']
 
-const WRAPPER_SELECTOR = ':scope > .btn, :scope > .tc-metal-button__btn'
-
 export class Button extends HTMLElement {
     private _initialised = false
-    // Watches the host's direct children. React renders button text as a single
-    // host text child; when that text changes it does `host.textContent = …`, which
-    // nukes our rendered `.btn` wrapper. The observer detects that reset and
-    // rebuilds the wrapper, re-homing the live content into `.tc-button-content`.
-    private _observer: MutationObserver | null = null
 
     static get observedAttributes(): string[] {
         return [
-            'variant', 'outline', 'size', 'disabled', 'loading', 'href', 'type', 'skin',
+            'variant',
+            'outline',
+            'size',
+            'disabled',
+            'loading',
+            'href',
+            'type',
+            'skin',
             // Full-width mode. Pure CSS state (see _button.scss) — observed only so
             // scripts/gen-react-types.mjs types it as a JSX prop; it reads this list.
             'block',
             // Reserved field-message slot (shared form-field contract) — lets a button
             // align with adjacent tc-input/tc-select in a form row.
-            'field', 'help', 'error', 'state',
+            'field',
+            'help',
+            'error',
+            'state',
         ]
     }
 
@@ -62,112 +63,16 @@ export class Button extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            this._renderWith(Array.from(this.childNodes))
-            this._initialised = true
-            this._observer = new MutationObserver(() => this._resync())
-        }
-        // (Re)start observing on connect / reconnect (React may move the node).
-        this._observer?.observe(this, { childList: true })
-    }
-
-    disconnectedCallback(): void {
-        this._observer?.disconnect()
-    }
-
-    /** Render the wrapper, then move `content` into `.tc-button-content`, with the
-     *  observer paused so our own writes don't re-trigger `_resync`. */
-    private _renderWith(content: Node[]): void {
-        this._observer?.disconnect()
+        this._initialised = true
         this.render()
-        const inner = this.querySelector('.tc-button-content')
-        if (inner) content.forEach((n) => inner.appendChild(n))
-        this._observer?.takeRecords() // discard the mutations we just caused
-        if (this.isConnected) this._observer?.observe(this, { childList: true })
-    }
-
-    /** Called when the host's direct children change from outside (React). If the
-     *  framework wiped our wrapper (e.g. via `textContent`) or dropped a stray node
-     *  beside it, recapture the real content and rebuild. */
-    private _resync(): void {
-        const wrapper = this.querySelector(WRAPPER_SELECTOR)
-        const inner = this.querySelector('.tc-button-content')
-        if (wrapper && inner) {
-            // The reserved `.tc-field-message` slot is a legitimate sibling of the
-            // control — never fold it into the content.
-            const strays = Array.from(this.childNodes).filter(
-                (n) => n !== wrapper && !(n instanceof Element && n.classList.contains('tc-field-message')),
-            )
-            if (!strays.length) return
-            // A child landed directly under the host — fold it into the content slot.
-            this._observer?.disconnect()
-            strays.forEach((n) => inner.appendChild(n))
-            this._observer?.takeRecords()
-            if (this.isConnected) this._observer?.observe(this, { childList: true })
-            return
-        }
-        // Wrapper gone — the current direct children ARE the live content.
-        this._renderWith(Array.from(this.childNodes))
+        // The accessible name is a copy of the consumer's label text, so it has to
+        // follow that text when React rewrites it — see content-observer.ts.
+        observeContent(this, () => this.render())
     }
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        const control = this.firstElementChild as HTMLElement | null
-        const content = this.querySelector('.tc-button-content')
-        const wantAnchor = this.href != null
-        const isAnchor = control?.tagName === 'A'
-
-        // Structural changes (metal skin, or switching between <a> and <button>)
-        // can't be patched in place — fall back to a full re-render, preserving the
-        // slotted content's child nodes across it.
-        if (!control || !content || this.skin === 'metal' || wantAnchor !== isAnchor) {
-            const slotContent = content ? Array.from(content.childNodes) : []
-            this._renderWith(slotContent)
-            return
-        }
-
-        // Cosmetic/state attribute change (variant, outline, size, disabled,
-        // loading, type): patch the existing control IN PLACE. Rewriting innerHTML
-        // here would detach the `.tc-button-content` node — and any framework-managed
-        // children inside it (e.g. React's text/elements) — which then fights the
-        // host's DOM reconciliation and blanks the button on the next render.
-        const variant = this.variant
-        const outline = this.outline
-        const size = this.size
-        const isDisabled = this.disabled || this.loading
-        control.className =
-            `btn ${outline ? `btn-outline-${variant}` : `btn-${variant}`}${size ? ` btn-${size}` : ''}` +
-            (wantAnchor && isDisabled ? ' disabled' : '')
-
-        if (wantAnchor) {
-            control.setAttribute('href', this.href as string)
-            if (isDisabled) {
-                control.setAttribute('aria-disabled', 'true')
-                control.setAttribute('tabindex', '-1')
-            } else {
-                control.removeAttribute('aria-disabled')
-                control.removeAttribute('tabindex')
-            }
-        } else {
-            control.setAttribute('type', this.type)
-            if (isDisabled) control.setAttribute('disabled', '')
-            else control.removeAttribute('disabled')
-        }
-
-        // The loading spinner sits just before `.tc-button-content`.
-        const spinner = control.querySelector(':scope > .spinner-border')
-        if (this.loading && !spinner) {
-            const s = document.createElement('span')
-            s.className = 'spinner-border spinner-border-sm'
-            s.setAttribute('role', 'status')
-            s.setAttribute('aria-hidden', 'true')
-            control.insertBefore(s, content)
-        } else if (!this.loading && spinner) {
-            spinner.remove()
-        }
-
-        // Reserved field-message slot (field / help / error / state changes).
-        this._syncFieldMessage()
+        this.render()
     }
 
     get variant(): ButtonVariant {
@@ -175,7 +80,7 @@ export class Button extends HTMLElement {
         return VARIANTS.includes(v) ? v : 'primary'
     }
     set variant(v: ButtonVariant) {
-        this.setAttribute('variant', v)
+        setAttr(this, 'variant', v)
     }
 
     get outline(): boolean {
@@ -224,7 +129,7 @@ export class Button extends HTMLElement {
         return v === 'submit' || v === 'reset' ? v : 'button'
     }
     set type(v: ButtonType) {
-        this.setAttribute('type', v)
+        setAttr(this, 'type', v)
     }
 
     /** Full-width, centred content — the shape of every action-bar and sheet-footer
@@ -286,21 +191,23 @@ export class Button extends HTMLElement {
         })
     }
 
-    /** Patch the message slot in place (observer paused) on a field-attr change. */
-    private _syncFieldMessage(): void {
-        const desired = this._fieldMessageMarkup()
-        const existing = this.querySelector(':scope > .tc-field-message')
-        this._observer?.disconnect()
-        if (!desired) existing?.remove()
-        else if (existing) existing.outerHTML = desired
-        else this.insertAdjacentHTML('beforeend', desired)
-        this._observer?.takeRecords()
-        if (this.isConnected) this._observer?.observe(this, { childList: true })
-    }
-
+    /**
+     * THE HOST IS THE BUTTON BOX. The real `<button>`/`<a>` is stretched over it as
+     * a hit overlay (`.tc-hit-overlay`) instead of wrapping the consumer's children
+     * — the same shape tc-link, tc-nav-item and tc-list-group-item use. The host
+     * carries the `.btn` chrome, so the label lays out in the host's own flow and
+     * stays exactly where react-dom put it (rule 1).
+     *
+     * The chrome cannot live on the control and the label cannot be overlaid on top
+     * of it: `<tc-button>Save</tc-button>` is a BARE TEXT node, an anonymous box no
+     * selector can reach, so it can never be given the control's grid cell or an
+     * absolute position — it would simply land beside the button.
+     */
     private render(): void {
-        // Metal skin — distinct class scheme; its own variant/size sets. Shares the
-        // `.tc-button-content` slot wrapper so the base slot-capture still works.
+        const label = consumerText(this)
+        const nameAttr = label ? ` aria-label="${esc(label)}"` : ''
+
+        // Metal skin — distinct class scheme; its own variant/size sets.
         if (this.skin === 'metal') {
             const metalVariants = ['default', 'primary', 'danger', 'ghost']
             const rawV = this.getAttribute('variant') ?? ''
@@ -310,35 +217,57 @@ export class Button extends HTMLElement {
             const ms = metalSizes.includes(rawS) ? rawS : 'md'
             const sizeClass = ms !== 'md' ? ` tc-metal-button__btn--${ms}` : ''
             const disabledAttr = this.disabled ? ' disabled' : ''
-            this.innerHTML = `<button type="button" class="tc-metal-button__btn tc-metal-button__btn--${mv}${sizeClass}"${disabledAttr}><span class="tc-button-content"></span></button>${this._fieldMessageMarkup()}`
+            // `disabled` as a CLASS as well as an attribute: the attribute is on the
+            // overlay, but the box that has to dim and stop swallowing the pointer is
+            // the host.
+            const disabledClass = this.disabled ? ' disabled' : ''
+            setHostClass(
+                this,
+                `tc-button-host tc-metal-button__btn tc-metal-button__btn--${mv}${sizeClass}${disabledClass}`,
+            )
+            patchHtml(
+                this,
+                `<button type="button" class="tc-button-hit tc-hit-overlay"${disabledAttr}${nameAttr}></button>`,
+                { region: 'control' },
+            )
+            patchHtml(this, this._fieldMessageMarkup(), { region: 'message', at: 'end' })
             return
         }
 
         const variant = this.variant
         const outline = this.outline
         const size = this.size
-        const disabled = this.disabled
-        const loading = this.loading
+        const isDisabled = this.disabled || this.loading
         const href = this.href
-        const isDisabled = disabled || loading
 
         const variantClass = outline ? `btn-outline-${variant}` : `btn-${variant}`
         const sizeClass = size ? ` btn-${size}` : ''
-        const classes = `btn ${variantClass}${sizeClass}`
+        const disabledClass = isDisabled ? ' disabled' : ''
 
-        const spinnerHtml = loading
+        const spinnerHtml = this.loading
             ? `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>`
             : ''
 
+        setHostClass(this, `tc-button-host btn ${variantClass}${sizeClass}${disabledClass}`)
         if (href != null) {
             const disabledAttr = isDisabled ? ' aria-disabled="true" tabindex="-1"' : ''
-            const disabledClass = isDisabled ? ' disabled' : ''
-            this.innerHTML = `<a href="${href}" class="${classes}${disabledClass}" role="button"${disabledAttr}>${spinnerHtml}<span class="tc-button-content"></span></a>${this._fieldMessageMarkup()}`
+            patchHtml(
+                this,
+                `<a href="${esc(href)}" class="tc-button-hit tc-hit-overlay" role="button"${disabledAttr}${nameAttr}></a>`,
+                { region: 'control' },
+            )
         } else {
             const disabledAttr = isDisabled ? ' disabled' : ''
-            const typeAttr = this.type
-            this.innerHTML = `<button type="${typeAttr}" class="${classes}"${disabledAttr}>${spinnerHtml}<span class="tc-button-content"></span></button>${this._fieldMessageMarkup()}`
+            patchHtml(
+                this,
+                `<button type="${this.type}" class="tc-button-hit tc-hit-overlay"${disabledAttr}${nameAttr}></button>`,
+                { region: 'control' },
+            )
         }
+        // The spinner is the element's own and sits in the host's flow beside the
+        // consumer's label, not inside the overlay.
+        patchHtml(this, spinnerHtml, { region: 'spinner' })
+        patchHtml(this, this._fieldMessageMarkup(), { region: 'message', at: 'end' })
     }
 }
 

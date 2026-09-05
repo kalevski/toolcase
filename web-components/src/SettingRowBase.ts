@@ -1,3 +1,5 @@
+import { patchHtml } from './internal/patch-html'
+import { setAttr } from './internal/tc-element'
 // Shared scaffold for settings-screen rows (tc-setting-slider, tc-toggle-row and
 // the other setting-row ports). Every row is a label/description text block on the left
 // and a control region on the right; subclasses only supply the control markup
@@ -28,14 +30,14 @@ export abstract class SettingRowBase extends HTMLElement {
         return this.getAttribute('row-label') ?? ''
     }
     set rowLabel(v: string) {
-        this.setAttribute('row-label', v)
+        setAttr(this, 'row-label', v)
     }
 
     get description(): string {
         return this.getAttribute('description') ?? ''
     }
     set description(v: string) {
-        this.setAttribute('description', v)
+        setAttr(this, 'description', v)
     }
 
     // The control region differs per setting row — subclasses must implement it.
@@ -65,13 +67,16 @@ export abstract class SettingRowBase extends HTMLElement {
         const descMarkup = description
             ? `<div class="tc-setting-row__description">${this.escape(description)}</div>`
             : ''
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <div class="tc-setting-row__text">
                 <div class="tc-setting-row__label">${this.escape(label)}</div>
                 ${descMarkup}
             </div>
             <div class="tc-setting-row__control">${this.renderControl()}</div>
-        `
+        `,
+        )
         this.bindControl()
     }
 }

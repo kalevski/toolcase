@@ -1,7 +1,9 @@
+import { patchHtml } from './internal/patch-html'
 import { formatCompact } from './internal/format'
 import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-download-stats'
 
@@ -44,7 +46,7 @@ export class DownloadStats extends HTMLElement {
         return this.getAttribute('package-name') ?? ''
     }
     set packageName(v: string) {
-        this.setAttribute('package-name', v)
+        setAttr(this, 'package-name', v)
     }
 
     get weekly(): number | null {
@@ -76,7 +78,7 @@ export class DownloadStats extends HTMLElement {
         return REGISTRIES.includes(v) ? v : 'npm'
     }
     set registry(v: DownloadStatsRegistry) {
-        this.setAttribute('registry', v)
+        setAttr(this, 'registry', v)
     }
 
     get sparkline(): number[] {
@@ -117,7 +119,10 @@ export class DownloadStats extends HTMLElement {
         const sparklineHtml =
             sparklineData.length > 0 ? this._buildSparklineHtml(sparklineData) : ''
 
-        this.innerHTML = `<div class="tc-download-stats">${headerHtml}${cellsHtml}${sparklineHtml}</div>`
+        patchHtml(
+            this,
+            `<div class="tc-download-stats">${headerHtml}${cellsHtml}${sparklineHtml}</div>`,
+        )
     }
 
     private _cell(number: string, period: string): string {

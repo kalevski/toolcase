@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -156,39 +157,43 @@ export class CardOptions extends HTMLElement {
 
         const selectedIdx = this._options.findIndex((o) => o.key === value)
 
-        this.innerHTML = this._options
-            .map((opt, idx) => {
-                const isSelected = opt.key === value
-                const tabindex = isSelected || (selectedIdx < 0 && idx === 0) ? '0' : '-1'
-                const selectedClass = isSelected ? ' is-selected' : ''
+        patchHtml(
+            this,
+            this._options
+                .map((opt, idx) => {
+                    const isSelected = opt.key === value
+                    const tabindex = isSelected || (selectedIdx < 0 && idx === 0) ? '0' : '-1'
+                    const selectedClass = isSelected ? ' is-selected' : ''
 
-                let mediaHtml = ''
-                if (opt.icon) {
-                    const iconSvg = lucideByName(opt.icon)
-                    if (iconSvg) mediaHtml = `<span class="tc-card-options-icon">${iconSvg}</span>`
-                } else if (opt.image) {
-                    mediaHtml = `<img class="tc-card-options-image" src="${esc(opt.image)}" alt="" aria-hidden="true">`
-                }
+                    let mediaHtml = ''
+                    if (opt.icon) {
+                        const iconSvg = lucideByName(opt.icon)
+                        if (iconSvg)
+                            mediaHtml = `<span class="tc-card-options-icon">${iconSvg}</span>`
+                    } else if (opt.image) {
+                        mediaHtml = `<img class="tc-card-options-image" src="${esc(opt.image)}" alt="" aria-hidden="true">`
+                    }
 
-                const descHtml = opt.description
-                    ? `<span class="tc-card-options-desc">${esc(opt.description)}</span>`
-                    : ''
+                    const descHtml = opt.description
+                        ? `<span class="tc-card-options-desc">${esc(opt.description)}</span>`
+                        : ''
 
-                return [
-                    `<div class="tc-card-options-card${selectedClass}"`,
-                    ` role="radio" aria-checked="${isSelected}"`,
-                    ` tabindex="${tabindex}" data-key="${esc(opt.key)}">`,
-                    mediaHtml,
-                    `<span class="tc-card-options-label">${esc(opt.label)}</span>`,
-                    descHtml,
-                    `<span class="tc-card-options-check" aria-hidden="true">${checkIconHtml}</span>`,
-                    `</div>`,
-                ].join('')
-            })
-            .join('')
+                    return [
+                        `<div class="tc-card-options-card${selectedClass}"`,
+                        ` role="radio" aria-checked="${isSelected}"`,
+                        ` tabindex="${tabindex}" data-key="${esc(opt.key)}">`,
+                        mediaHtml,
+                        `<span class="tc-card-options-label">${esc(opt.label)}</span>`,
+                        descHtml,
+                        `<span class="tc-card-options-check" aria-hidden="true">${checkIconHtml}</span>`,
+                        `</div>`,
+                    ].join('')
+                })
+                .join(''),
+        )
 
         Array.from(this.querySelectorAll<HTMLElement>('[role="radio"]')).forEach((card) => {
-            card.addEventListener('click', () => {
+            bindOnce(card, 'click', () => {
                 const key = card.dataset.key
                 if (key == null) return
                 const all = Array.from(this.querySelectorAll<HTMLElement>('[role="radio"]'))

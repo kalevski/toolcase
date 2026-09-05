@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-compass-bar'
 
@@ -155,14 +156,19 @@ export class CompassBar extends HTMLElement {
             })
             .join('')
 
-        const normalized = Math.round(this.normalizeDeg(heading))
+        // Round after normalising, then wrap 360 -> 0: a heading like 359.6
+        // normalises to 359.6 and rounds to 360, which is not a valid 0-359
+        // compass reading.
+        const normalized = Math.round(this.normalizeDeg(heading)) % 360
         const headingLabel = normalized.toString().padStart(3, '0')
 
         this.classList.add('tc-compass-bar')
         this.setAttribute('role', 'img')
         this.setAttribute('aria-label', `Compass — heading ${headingLabel}°`)
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <div class="tc-compass-bar__track">
                 ${cardinalsMarkup}
                 ${markerMarkup}
@@ -170,7 +176,8 @@ export class CompassBar extends HTMLElement {
                 <span class="tc-compass-bar__pointer" aria-hidden="true"></span>
             </div>
             <span class="tc-compass-bar__heading">${headingLabel}°</span>
-        `
+        `,
+        )
     }
 }
 

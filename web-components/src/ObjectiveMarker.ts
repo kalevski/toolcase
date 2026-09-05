@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -125,12 +126,15 @@ export class ObjectiveMarker extends HTMLElement {
                </div>`
                 : ''
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <div class="tc-objective-marker__glyph" aria-hidden="true">
                 ${mapPinIconHtml}
             </div>
             ${textMarkup}
-        `
+        `,
+        )
     }
 }
 

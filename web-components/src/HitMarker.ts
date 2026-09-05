@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { Skull } from 'lucide-static'
 import { icon } from './icons'
 
@@ -119,16 +120,18 @@ export class HitMarker extends HTMLElement {
         // Kill swaps the fantasy ☠ emoji for a slate-skinned lucide Skull glyph.
         const glyph = this.kill ? icon(Skull, 'tc-hit-marker-glyph') : ''
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<span class="tc-hit-marker" data-variant="${variant}">` +
-            `<svg class="tc-hit-marker-svg" viewBox="0 0 24 24" aria-hidden="true">` +
-            `<line class="tc-hit-marker-line" x1="4" y1="4" x2="9" y2="9"></line>` +
-            `<line class="tc-hit-marker-line" x1="20" y1="4" x2="15" y2="9"></line>` +
-            `<line class="tc-hit-marker-line" x1="4" y1="20" x2="9" y2="15"></line>` +
-            `<line class="tc-hit-marker-line" x1="20" y1="20" x2="15" y2="15"></line>` +
-            `</svg>` +
-            glyph +
-            `</span>`
+                `<svg class="tc-hit-marker-svg" viewBox="0 0 24 24" aria-hidden="true">` +
+                `<line class="tc-hit-marker-line" x1="4" y1="4" x2="9" y2="9"></line>` +
+                `<line class="tc-hit-marker-line" x1="20" y1="4" x2="15" y2="9"></line>` +
+                `<line class="tc-hit-marker-line" x1="4" y1="20" x2="9" y2="15"></line>` +
+                `<line class="tc-hit-marker-line" x1="20" y1="20" x2="15" y2="15"></line>` +
+                `</svg>` +
+                glyph +
+                `</span>`,
+        )
     }
 }
 

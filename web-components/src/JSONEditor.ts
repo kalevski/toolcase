@@ -1,6 +1,8 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { icon } from './icons'
 import { ChevronDown, Plus, X } from 'lucide-static'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-json-editor'
 
@@ -190,7 +192,7 @@ export class JSONEditor extends HTMLElement {
         return this.getAttribute('schema') ?? ''
     }
     set schema(v: string) {
-        this.setAttribute('schema', v)
+        setAttr(this, 'schema', v)
     }
 
     get disabled(): boolean {
@@ -356,7 +358,10 @@ export class JSONEditor extends HTMLElement {
                         `<div class="tc-json-editor-skeleton-row" aria-hidden="true"><span class="tc-json-editor-skeleton-key"></span><span class="tc-json-editor-skeleton-field"></span></div>`,
                 )
                 .join('')
-            this.innerHTML = `<div class="tc-json-editor tc-json-editor--loading">${rows}<span class="visually-hidden">Loading…</span></div>`
+            patchHtml(
+                this,
+                `<div class="tc-json-editor tc-json-editor--loading">${rows}<span class="visually-hidden">Loading…</span></div>`,
+            )
             return
         }
         this.removeAttribute('role')
@@ -365,7 +370,10 @@ export class JSONEditor extends HTMLElement {
         const { ok, schema, error } = parseSchema(this.getAttribute('schema') ?? '')
 
         if (!ok) {
-            this.innerHTML = `<div class="tc-json-editor"><div class="tc-json-editor-error" role="alert">${esc(error ?? 'Invalid schema.')}</div></div>`
+            patchHtml(
+                this,
+                `<div class="tc-json-editor"><div class="tc-json-editor-error" role="alert">${esc(error ?? 'Invalid schema.')}</div></div>`,
+            )
             return
         }
 
@@ -375,7 +383,7 @@ export class JSONEditor extends HTMLElement {
                 ? schema.map((prop) => this._renderProperty(prop, [prop.key])).join('')
                 : `<div class="tc-json-editor-empty">No schema properties.</div>`
 
-        this.innerHTML = `<div class="tc-json-editor${disabledClass}">${body}</div>`
+        patchHtml(this, `<div class="tc-json-editor${disabledClass}">${body}</div>`)
     }
 
     private _fieldId(): string {

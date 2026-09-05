@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 
 const TAG_NAME = 'tc-tyre-spec'
@@ -102,11 +103,13 @@ export class TyreSpec extends HTMLElement {
             rowsHtml = this._rowHtml(spec, null)
         }
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-tyre-spec${staggered ? ' tc-tyre-spec--staggered' : ''}">` +
-            (staggered ? `<span class="tc-tyre-spec-flag">Staggered</span>` : '') +
-            rowsHtml +
-            `</div>`
+                (staggered ? `<span class="tc-tyre-spec-flag">Staggered</span>` : '') +
+                rowsHtml +
+                `</div>`,
+        )
     }
 }
 

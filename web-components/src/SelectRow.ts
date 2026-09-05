@@ -1,4 +1,5 @@
 import { SettingRowBase } from './SettingRowBase'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-select-row'
 
@@ -44,7 +45,7 @@ export class SelectRow extends SettingRowBase {
         return this.getAttribute('value') ?? ''
     }
     set value(v: string) {
-        this.setAttribute('value', v)
+        setAttr(this, 'value', v)
     }
 
     get disabled(): boolean {

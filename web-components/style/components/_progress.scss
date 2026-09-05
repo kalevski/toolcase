@@ -37,7 +37,10 @@
     color: var(--bs-progress-bar-color);
     text-align: center;
     white-space: nowrap;
-    background-color: var(--bs-progress-bar-bg);
+    // `background` (not `background-color`) — themes may set
+    // --bs-progress-bar-bg to a gradient (aurora/neon/sunshine); background-color
+    // silently rejects a gradient value and leaves the bar transparent.
+    background: var(--bs-progress-bar-bg);
     transition: var(--bs-progress-bar-transition);
 }
 
@@ -59,7 +62,10 @@
     animation: progress-bar-stripes 1s linear infinite;
 }
 
-.progress-stacked > .progress {
+// Each stacked segment is a <tc-progress-bar> host wrapping its own .progress
+// shell, not a bare .progress — reach through the host so this actually
+// matches (a bare `.progress-stacked > .progress` selector matches nothing).
+.progress-stacked > tc-progress-bar > .progress {
     overflow: visible;
 }
 

@@ -95,7 +95,9 @@ tc-theme[name='blueprint'],
 
     // ── Separator dot between size and items ─────────────────────────────────
     // Route the raw --tc-text-faint baked in the base &::before to a bp token.
-    .tc-file-size + .tc-file-items::before {
+    // Matches the base's rendered order (items always precede size — see
+    // TcFile.render()'s `${itemsHtml}${sizeHtml}` concat).
+    .tc-file-items + .tc-file-size::before {
         color: var(--bp-text-faint);
     }
 

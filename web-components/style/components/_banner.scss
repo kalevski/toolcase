@@ -172,3 +172,43 @@ tc-announcement-bar.tc-banner {
         transition: none;
     }
 }
+
+// Slot placement: `tc-banner` no longer moves the message into `.tc-banner-content`
+// or a `slot="action"` element into `.tc-banner-action` (rule 1). They stay direct
+// children of the host and are ordered here.
+//
+// The message is almost always bare text (every demo example writes it that
+// way), and a flex container wraps contiguous bare text in an anonymous flex
+// item whose properties — `order` included — cannot be selected and stay at
+// their initial values (`order: 0`) no matter what the stylesheet says. Giving
+// the icon `order: 1` put it AFTER that order-0 text: the icon rendered to the
+// right of the message instead of the left. The icon needs an order below the
+// anonymous item's fixed 0, and the message rule has to sit at that same 0 (it
+// only needs to tie-break against the icon by DOM position, which already
+// puts the icon first since it is prepended) rather than above it.
+.tc-banner > .tc-banner-icon,
+.tc-banner > [slot='icon'] {
+    order: -1;
+}
+
+.tc-banner > :not([slot]):not([class^='tc-banner']) {
+    order: 0;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.tc-banner > [slot='action'] {
+    order: 3;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.tc-banner > .tc-banner-cta {
+    order: 4;
+}
+
+.tc-banner > .tc-banner-close {
+    order: 5;
+}

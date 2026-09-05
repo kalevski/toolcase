@@ -48,6 +48,10 @@ tc-migration-guide {
     --bs-migration-guide-diff-before-bg: var(--tc-danger-bg);
     --bs-migration-guide-diff-after-stripe: var(--tc-success);
     --bs-migration-guide-diff-after-bg: var(--tc-success-bg);
+
+    --bs-migration-guide-diff-language-bg: var(--tc-surface-muted);
+    --bs-migration-guide-diff-language-color: var(--tc-text-faint);
+    --bs-migration-guide-diff-language-font-size: 0.6875rem;
 }
 
 .tc-migration-guide {
@@ -164,6 +168,22 @@ tc-migration-guide {
     border: var(--bs-migration-guide-border);
     border-radius: 0;
     overflow: hidden;
+}
+
+.tc-migration-diff__header {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.25rem 0.75rem;
+    background: var(--bs-migration-guide-diff-language-bg);
+    border-bottom: var(--bs-migration-guide-border);
+}
+
+.tc-migration-diff__language {
+    font-family: var(--tc-font-mono);
+    font-size: var(--bs-migration-guide-diff-language-font-size);
+    color: var(--bs-migration-guide-diff-language-color);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
 }
 
 // Shared panel rules: left colored stripe + soft tint frame + dark code surface

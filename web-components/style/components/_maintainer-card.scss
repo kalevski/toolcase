@@ -30,12 +30,24 @@ tc-maintainer-card {
     --bs-maintainer-card-link-icon-size: 1.125rem;
     --bs-maintainer-card-sponsor-bg: var(--tc-danger);
     --bs-maintainer-card-sponsor-color: var(--tc-app-accent-contrast);
-    --bs-maintainer-card-sponsor-hover-bg: #b91c1c;
+    // Themed darken (was the fixed #b91c1c, a remap-bypass literal that stayed
+    // the same dull red no matter which theme's --tc-danger it sat next to —
+    // same class of bug already fixed in _report-dialog.scss).
+    --bs-maintainer-card-sponsor-hover-bg: color-mix(in srgb, var(--tc-danger) 85%, #000);
 }
 
 // .tc-maintainer-card is the inner <div class="card tc-maintainer-card"> — .card supplies
 // the white surface, 1px border, and base shadow; this class adds hover lift.
 .tc-maintainer-card {
+    // Wire Bootstrap card tokens to our component tokens so .card actually reads
+    // them (same convention as _basic-card.scss/_difference-card.scss) — without
+    // this redirect, theming --bs-maintainer-card-bg/-border/-shadow above had no
+    // visible effect: .card only ever reads its own --bs-card-* set, which these
+    // three otherwise never fed into.
+    --bs-card-bg: var(--bs-maintainer-card-bg);
+    --bs-card-border-color: var(--bs-maintainer-card-border);
+    --bs-card-box-shadow: var(--bs-maintainer-card-shadow);
+
     border-radius: 0;
     transition:
         box-shadow var(--tc-transition-base),

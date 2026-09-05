@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -50,7 +51,9 @@ export class DangerZoneActions extends HTMLElement {
             .map((action, idx) => {
                 const disabled = action.disabled === true
                 const disabledAttr = disabled ? ' disabled' : ''
-                const iconHtml = action.icon ? lucideByName(action.icon) : ''
+                const iconHtml = action.icon
+                    ? lucideByName(action.icon, 'tc-danger-zone-icon')
+                    : ''
                 const descHtml =
                     action.description != null
                         ? `<span class="tc-danger-zone-desc">${esc(action.description)}</span>`
@@ -77,11 +80,11 @@ export class DangerZoneActions extends HTMLElement {
             })
             .join('')
 
-        this.innerHTML = `<div class="${wrapperClass}">${items}</div>`
+        patchHtml(this, `<div class="${wrapperClass}">${items}</div>`)
 
         const wrapper = this.querySelector<HTMLElement>('.tc-danger-zone')
         if (wrapper) {
-            wrapper.addEventListener('click', (e: Event) => {
+            bindOnce(wrapper, 'click', (e: Event) => {
                 const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(
                     '.tc-danger-zone-btn',
                 )

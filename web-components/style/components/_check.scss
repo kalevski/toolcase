@@ -113,6 +113,16 @@
     margin-right: 0;
 }
 
+// The host (tc-check) is registered block-level in foundation/_reset.scss so a
+// standalone check sits on its own line. `inline` puts the check next to text
+// or other checks in a horizontal set — the inner .form-check-inline row above
+// only reaches the host's children, so the host itself must also drop out of
+// block flow or every "inline" check still forces a line break and stacks
+// vertically like tc-stack[inline] does for the same reason.
+tc-check[inline] {
+    display: inline-flex;
+}
+
 .form-check-reverse {
     // Under the flex row the input stays first in DOM — reverse the direction
     // so it lands on the right, pulled into the right-hand padding gutter.

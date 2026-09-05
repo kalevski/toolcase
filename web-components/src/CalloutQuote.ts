@@ -1,3 +1,5 @@
+import { patchHtml } from './internal/patch-html'
+import { setHostClass } from './internal/host-class'
 import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
@@ -18,28 +20,13 @@ export class CalloutQuote extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            const hasQuoteAttr = this.hasAttribute('quote')
-            const slotContent = hasQuoteAttr ? [] : Array.from(this.childNodes)
-            this.render()
-            if (!hasQuoteAttr) {
-                const inner = this.querySelector('.tc-callout-quote-content')
-                if (inner) slotContent.forEach((n) => inner.appendChild(n))
-            }
-            this._initialised = true
-        }
+        this._initialised = true
+        this.render()
     }
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        const hasQuoteAttr = this.hasAttribute('quote')
-        const inner = this.querySelector('.tc-callout-quote-content')
-        const slotContent = !hasQuoteAttr && inner ? Array.from(inner.childNodes) : []
         this.render()
-        if (!hasQuoteAttr) {
-            const newInner = this.querySelector('.tc-callout-quote-content')
-            if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
-        }
     }
 
     get quote(): string | null {
@@ -80,9 +67,6 @@ export class CalloutQuote extends HTMLElement {
         const source = this.getAttribute('source')
         const sourceHref = this.getAttribute('source-href')
 
-        const quoteBody =
-            quote != null ? esc(quote) : `<span class="tc-callout-quote-content"></span>`
-
         let captionHtml = ''
         if (attribution || source) {
             const authorHtml = attribution
@@ -99,7 +83,20 @@ export class CalloutQuote extends HTMLElement {
             captionHtml = `<figcaption class="tc-callout-quote__caption">${authorHtml}${sourceHtml}</figcaption>`
         }
 
-        this.innerHTML = `<figure class="tc-callout-quote"><span class="tc-callout-quote__mark" aria-hidden="true">${quoteMarkIcon}</span><blockquote class="tc-callout-quote__text">${quoteBody}</blockquote>${captionHtml}</figure>`
+        // THE HOST IS THE FIGURE: the mark and, when the attribute supplies one, the
+        // quote text are element-owned and prepended; the caption is appended. A
+        // slotted quote stays the consumer's own child between them (rule 1).
+        setHostClass(this, 'tc-callout-quote')
+        this.setAttribute('role', 'figure')
+        patchHtml(
+            this,
+            `<span class="tc-callout-quote__mark" aria-hidden="true">${quoteMarkIcon}</span>` +
+                (quote != null
+                    ? `<blockquote class="tc-callout-quote__text">${esc(quote)}</blockquote>`
+                    : ''),
+            { region: 'lead' },
+        )
+        patchHtml(this, captionHtml, { region: 'caption', at: 'end' })
     }
 }
 

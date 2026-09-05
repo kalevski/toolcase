@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 // tc-lightbox — modal image gallery (overlay tier). Fully custom (no Bootstrap
 // plugin). Port of @toolcase/react-components Lightbox. All cosmetics flow
@@ -137,7 +138,7 @@ export class Lightbox extends HTMLElement {
             )
             this._closeTimerId = setTimeout(() => {
                 this._closeTimerId = null
-                if (!this.open) this.innerHTML = ''
+                if (!this.open) patchHtml(this, '')
             }, delay)
         }
     }
@@ -369,7 +370,7 @@ export class Lightbox extends HTMLElement {
 
     private render(): void {
         if (!this.open || this._images.length === 0) {
-            this.innerHTML = ''
+            patchHtml(this, '')
             return
         }
 
@@ -406,22 +407,24 @@ export class Lightbox extends HTMLElement {
               `</div>`
             : ''
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-lightbox__backdrop" aria-hidden="true"></div>` +
-            `<div class="tc-lightbox__dialog" role="dialog" aria-modal="true"` +
-            ` aria-label="Image gallery" aria-labelledby="${labelId}" tabindex="-1">` +
-            `<button type="button" class="tc-lightbox__close" aria-label="Close lightbox">${closeIcon}</button>` +
-            `<div class="tc-lightbox__counter" id="${labelId}" aria-live="polite">${this._index + 1} / ${count}</div>` +
-            `<div class="tc-lightbox__stage">` +
-            arrowsPrev +
-            `<figure class="tc-lightbox__figure">` +
-            `<img class="tc-lightbox__image" src="${esc(img.src)}" alt="${esc(img.alt ?? `Image ${this._index + 1} of ${count}`)}" />` +
-            `<figcaption class="tc-lightbox__caption"${captionHidden}>${captionText}</figcaption>` +
-            `</figure>` +
-            arrowsNext +
-            `</div>` +
-            thumbsHtml +
-            `</div>`
+                `<div class="tc-lightbox__dialog" role="dialog" aria-modal="true"` +
+                ` aria-label="Image gallery" aria-labelledby="${labelId}" tabindex="-1">` +
+                `<button type="button" class="tc-lightbox__close" aria-label="Close lightbox">${closeIcon}</button>` +
+                `<div class="tc-lightbox__counter" id="${labelId}" aria-live="polite">${this._index + 1} / ${count}</div>` +
+                `<div class="tc-lightbox__stage">` +
+                arrowsPrev +
+                `<figure class="tc-lightbox__figure">` +
+                `<img class="tc-lightbox__image" src="${esc(img.src)}" alt="${esc(img.alt ?? `Image ${this._index + 1} of ${count}`)}" />` +
+                `<figcaption class="tc-lightbox__caption"${captionHidden}>${captionText}</figcaption>` +
+                `</figure>` +
+                arrowsNext +
+                `</div>` +
+                thumbsHtml +
+                `</div>`,
+        )
     }
 }
 

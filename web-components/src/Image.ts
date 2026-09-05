@@ -1,5 +1,8 @@
+import { setHostClass } from './internal/host-class'
+import { bindOnce, patchHtml } from './internal/patch-html'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-image'
 
@@ -19,7 +22,6 @@ class TcImage extends HTMLElement {
     private _initialised = false
     private _state: 'loading' | 'loaded' | 'error' = 'loading'
     private _imgEl: HTMLImageElement | null = null
-    private _fallbackNodes: Node[] = []
 
     private _onImgLoad = (): void => {
         this._state = 'loaded'
@@ -46,10 +48,8 @@ class TcImage extends HTMLElement {
     connectedCallback(): void {
         if (!this._initialised) {
             this._state = 'loading'
-            this._fallbackNodes = Array.from(this.childNodes)
-            this.render()
-            this._distributeFallback()
             this._initialised = true
+            this.render()
         }
         this._wireImg()
     }
@@ -61,10 +61,8 @@ class TcImage extends HTMLElement {
     attributeChangedCallback(name: string): void {
         if (!this.isConnected || !this._initialised) return
         if (name === 'src') this._state = 'loading'
-        this._recaptureFallback()
         this._unwireImg()
         this.render()
-        this._distributeFallback()
         this._wireImg()
     }
 
@@ -97,7 +95,7 @@ class TcImage extends HTMLElement {
         return OBJECT_FITS.includes(v) ? v : 'cover'
     }
     set objectFit(v: ImageObjectFit) {
-        this.setAttribute('object-fit', v)
+        setAttr(this, 'object-fit', v)
     }
 
     private render(): void {
@@ -107,44 +105,40 @@ class TcImage extends HTMLElement {
         const objectFit = this.objectFit
         const state = this._state
 
-        const wrapperStyle = aspectRatio ? ` style="aspect-ratio:${this._esc(aspectRatio)}"` : ''
         const imgStyle = `object-fit:${objectFit}`
         const skeletonRole = state === 'loading' ? ' role="status"' : ''
         // Omit src when null to avoid spurious browser error events for empty src.
         const srcAttr = src != null ? ` src="${this._esc(src)}"` : ''
 
-        this.innerHTML = `<div class="tc-image tc-image--${state}"${wrapperStyle}><div class="tc-image-skeleton" aria-hidden="true"${skeletonRole}></div><img class="tc-image-img"${srcAttr} alt="${this._esc(alt)}" style="${imgStyle}"><div class="tc-image-fallback"><span class="tc-image-fallback-default">${imageOffIconHtml}</span></div></div>`
-    }
-
-    private _distributeFallback(): void {
-        if (this._fallbackNodes.length === 0) return
-        const fallbackEl = this.querySelector('.tc-image-fallback')
-        if (!fallbackEl) return
-        fallbackEl.innerHTML = ''
-        this._fallbackNodes.forEach((n) => fallbackEl.appendChild(n))
-    }
-
-    private _recaptureFallback(): void {
-        const fallbackEl = this.querySelector('.tc-image-fallback')
-        if (!fallbackEl) return
-        const captured = Array.from(fallbackEl.childNodes).filter(
-            (n) => !(n instanceof Element && n.classList.contains('tc-image-fallback-default')),
+        // THE HOST IS THE FRAME. The skeleton, the image and the default fallback
+        // glyph are element-owned and prepended; a fallback the consumer slotted
+        // stays their child and CSS shows it only in the error state (rule 1).
+        setHostClass(this, `tc-image tc-image--${state}`)
+        this.style.aspectRatio = aspectRatio ?? ''
+        patchHtml(
+            this,
+            `<div class="tc-image-skeleton" aria-hidden="true"${skeletonRole}></div>` +
+                `<img class="tc-image-img"${srcAttr} alt="${this._esc(alt)}" style="${imgStyle}">` +
+                `<span class="tc-image-fallback-default">${imageOffIconHtml}</span>`,
         )
-        if (captured.length > 0) this._fallbackNodes = captured
     }
 
     private _patchState(): void {
-        const wrapper = this.querySelector<HTMLElement>('.tc-image')
-        if (!wrapper) return
-        wrapper.classList.remove('tc-image--loading', 'tc-image--loaded', 'tc-image--error')
-        wrapper.classList.add(`tc-image--${this._state}`)
+        // THE HOST IS THE FRAME (see render()): '.tc-image' is a class on `this`,
+        // not a descendant, so querySelector('.tc-image') never matched anything
+        // and this used to be a silent no-op — the loading skeleton stayed put and
+        // the <img> stayed at opacity:0 forever, even after a real load/error.
+        // Go through setHostClass (the same call render() makes) so the host's
+        // state modifier class actually updates and the applied-classes bookkeeping
+        // stays in sync with what render() would compute next time.
+        setHostClass(this, `tc-image tc-image--${this._state}`)
     }
 
     private _wireImg(): void {
         this._imgEl = this.querySelector<HTMLImageElement>('.tc-image-img')
         if (this._imgEl) {
-            this._imgEl.addEventListener('load', this._onImgLoad)
-            this._imgEl.addEventListener('error', this._onImgError)
+            bindOnce(this._imgEl, 'load', this._onImgLoad)
+            bindOnce(this._imgEl, 'error', this._onImgError)
         }
     }
 

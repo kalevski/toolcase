@@ -373,6 +373,10 @@ tc-table {
             display: none;
         }
     }
+
+    .tc-table-row--skeleton .tc-table-td::before {
+        display: none;
+    }
 }
 
 @media (max-width: 575.98px) {

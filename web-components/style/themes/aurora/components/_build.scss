@@ -1,0 +1,15 @@
+// Aurora › tc-build — token-only fix.
+//
+// The base partial bakes --bs-build-menu-item-color to the raw slate ramp
+// (--tc-slate-700, #334155), which is never remapped by this theme's
+// foundation. On Aurora's near-black menu surface that renders as dark
+// slate-blue text with barely any contrast against the dark fill instead of
+// the light text ramp used everywhere else in this theme. Route it to the
+// already-remapped muted-text token like the rest of the surface family.
+
+tc-theme[name='aurora'],
+[data-tc-theme='aurora'] {
+    .tc-build-menu {
+        --bs-build-menu-item-color: var(--tc-text-muted);
+    }
+}

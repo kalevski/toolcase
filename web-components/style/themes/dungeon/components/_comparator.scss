@@ -1,7 +1,7 @@
 // Dungeon › tc-comparator — gilded comparison ledger.
-// Token swap fixes the slate-hairline inner border and the stray skeleton radius;
-// structural rules add the bevel shadow, gilded display-caps title, and champion
-// tech names. Winner column gets a gold-tint wash. No corner notches (wide table).
+// Token swap fixes the slate-hairline inner border; structural rules add the
+// bevel shadow, gilded display-caps title, and champion tech names. Winner
+// column gets a gold-tint wash. No corner notches (wide table).
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
@@ -12,9 +12,6 @@ tc-theme[name='dungeon'],
 
         // Winner column: gold-tint wash instead of plain leather.
         --bs-comparator-winner-bg: var(--tc-accent-soft);
-
-        // Flatten stray 2px skeleton bar rounding.
-        --bs-comparator-skel-radius: 0;
 
         // Gilded table title.
         --bs-comparator-title-color: var(--fg-gold-bright);

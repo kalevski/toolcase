@@ -1,4 +1,5 @@
 import { ScrollSpy as BsScrollSpy } from './internal/ScrollSpy'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-scrollspy'
 
@@ -33,7 +34,7 @@ export class Scrollspy extends HTMLElement {
         return this.getAttribute('target') ?? ''
     }
     set target(v: string) {
-        this.setAttribute('target', v)
+        setAttr(this, 'target', v)
     }
 
     get offset(): number {

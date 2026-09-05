@@ -6,13 +6,21 @@
 
 @keyframes tc-marquee-scroll {
     from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
+    // A percentage here would be relative to each animated element's OWN box,
+    // which breaks as soon as the first copy is more than one element (the
+    // slotted-children path leaves each of the consumer's children as its own
+    // top-level node per rule 1 — see the host rule below). --bs-marquee-distance
+    // is a single pixel distance shared by every child via custom-property
+    // inheritance, so they all travel the same absolute distance regardless of
+    // their own size.
+    to { transform: translateX(calc(-1 * var(--bs-marquee-distance, 0px))); }
 }
 
 .tc-marquee {
     // Defaults — overridden inline by JS after measuring content width
     --bs-marquee-duration: 10s;
     --bs-marquee-direction-value: normal;
+    --bs-marquee-distance: 0px;
 
     // Theming knobs
     --bs-marquee-item-color: var(--tc-text);
@@ -24,18 +32,8 @@
     align-items: center;
     overflow: hidden;
     width: 100%;
-    border-radius: 0;
-}
-
-.tc-marquee-track {
-    display: inline-flex;
-    flex-direction: row;
-    align-items: center;
-    flex-shrink: 0;
     white-space: nowrap;
-    will-change: transform;
-    animation: tc-marquee-scroll var(--bs-marquee-duration) linear infinite;
-    animation-direction: var(--bs-marquee-direction-value);
+    border-radius: 0;
 }
 
 .tc-marquee-copy-1,
@@ -63,8 +61,24 @@
     user-select: none;
 }
 
+// The host is the track: the consumer's own children are the first copy, left
+// exactly where they wrote them, and the element appends a cloned second copy
+// after them (rule 1 — clone, never move). There is no wrapping element to
+// animate as a single unit, so every direct child of the host — however many
+// nodes the first copy happens to be (one wrapper when `items` is used, N raw
+// slotted nodes otherwise) plus the always-single second-copy wrapper — runs
+// the SAME animation, moving by the SAME shared `--bs-marquee-distance`. That
+// keeps the whole first-copy block and the second-copy block moving in lockstep
+// as if they were one track, so they still meet up seamlessly.
+.tc-marquee > * {
+    flex: 0 0 auto;
+    will-change: transform;
+    animation: tc-marquee-scroll var(--bs-marquee-duration) linear infinite;
+    animation-direction: var(--bs-marquee-direction-value);
+}
+
 // Pause animation on hover when the attribute is present
-tc-marquee[pause-on-hover]:hover .tc-marquee-track {
+tc-marquee[pause-on-hover]:hover > * {
     animation-play-state: paused;
 }
 
@@ -75,7 +89,7 @@ tc-marquee[pause-on-hover]:hover .tc-marquee-track {
         overflow-y: hidden;
     }
 
-    .tc-marquee-track {
+    .tc-marquee > * {
         animation: none !important;
     }
 

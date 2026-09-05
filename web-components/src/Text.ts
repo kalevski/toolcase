@@ -1,4 +1,5 @@
-import { SlotWrapBase } from './internal/slot-wrap'
+import { setHostClass } from './internal/host-class'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-text'
 
@@ -11,14 +12,39 @@ const SIZES: TextSize[] = ['small', 'default', 'large']
 const AS_TAGS: TextAs[] = ['p', 'span', 'small', 'div']
 
 /**
- * tc-text — body text in a chosen tag (`p`/`span`/`small`/`div`) with variant +
- * size styling. Built on the shared {@link SlotWrapBase} slot-wrapping scaffold;
- * the `truncate` variant mirrors the clipped content into a `title` via the
- * `afterRender` hook.
+ * tc-text — body text with variant + size styling.
+ *
+ * THE HOST IS THE TEXT. It renders no wrapper and never moves your children.
+ * Before 5.1 it rendered `<p class="tc-text"><span class="tc-text-content">` and
+ * re-appended the consumer's nodes inside — which made react-dom throw
+ * `NotFoundError` from `parentInstance.removeChild(child)` when it removed one of
+ * them individually. `{label}{n > 0 ? ` (${n})` : ''}` is two text children and
+ * `''` is *no child*, so a count falling to zero was enough.
+ *
+ * `as` is now a STYLING switch, not a tag: it selects the host's `display`
+ * (`p`/`div` block, `span`/`small` inline) through the `[as]` rules in
+ * style/components/_text.scss. A custom element cannot become a `<p>`, and the
+ * alternative — keeping the inner tag — is the re-parenting this element was
+ * rewritten to stop doing. Nothing about `<p>` here carried meaning to a screen
+ * reader that the text itself did not.
  */
-export class Text extends SlotWrapBase {
+export class Text extends HTMLElement {
+    private _built = false
+
     static get observedAttributes(): string[] {
-        return ['variant', 'size', 'as']
+        // `class` is observed so the element can re-assert its own classes after
+        // react-dom overwrites `className` wholesale — see setHostClass.
+        return ['variant', 'size', 'as', 'class']
+    }
+
+    connectedCallback(): void {
+        this._built = true
+        this.patch()
+    }
+
+    attributeChangedCallback(): void {
+        if (!this.isConnected || !this._built) return
+        this.patch()
     }
 
     get variant(): TextVariant {
@@ -26,7 +52,7 @@ export class Text extends SlotWrapBase {
         return VARIANTS.includes(v) ? v : 'default'
     }
     set variant(v: TextVariant) {
-        this.setAttribute('variant', v)
+        setAttr(this, 'variant', v)
     }
 
     get size(): TextSize {
@@ -34,7 +60,7 @@ export class Text extends SlotWrapBase {
         return SIZES.includes(v) ? v : 'default'
     }
     set size(v: TextSize) {
-        this.setAttribute('size', v)
+        setAttr(this, 'size', v)
     }
 
     get as(): TextAs {
@@ -42,32 +68,15 @@ export class Text extends SlotWrapBase {
         return AS_TAGS.includes(v) ? v : 'p'
     }
     set as(v: TextAs) {
-        this.setAttribute('as', v)
+        setAttr(this, 'as', v)
     }
 
-    protected getContentEl(): Element | null {
-        return this.querySelector('.tc-text-content')
-    }
-
-    // For truncate variant: expose full text via title so screen readers and
-    // hover tooltips can access content that is visually clipped.
-    protected afterRender(): void {
-        const inner = this.querySelector('.tc-text-content')
-        if (!inner) return
-        const el = inner.parentElement
-        if (!el) return
-        if (this.variant === 'truncate') {
-            el.setAttribute('title', el.textContent ?? '')
-        } else {
-            el.removeAttribute('title')
-        }
-    }
-
-    protected render(): void {
-        const tag = this.as
-        const variant = this.variant
-        const size = this.size
-        this.innerHTML = `<${tag} class="tc-text tc-text-${variant} tc-text-${size}"><span class="tc-text-content"></span></${tag}>`
+    private patch(): void {
+        setHostClass(this, `tc-text tc-text-${this.variant} tc-text-${this.size}`)
+        // For variant="truncate": expose the full text through `title` so a hover
+        // tooltip and a screen reader can still reach what the ellipsis clipped.
+        if (this.variant === 'truncate') this.setAttribute('title', this.textContent ?? '')
+        else this.removeAttribute('title')
     }
 }
 

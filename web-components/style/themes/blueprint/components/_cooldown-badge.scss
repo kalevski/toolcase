@@ -43,4 +43,13 @@ tc-theme[name='blueprint'],
         filter: drop-shadow(0 0 4px var(--bp-pink-glow));
         transition: filter var(--bp-ease);
     }
+
+    // The base partial only freezes the arc's own transition under reduced
+    // motion — this glow fade-in is a transition this theme adds, so it needs
+    // its own guard.
+    @media (prefers-reduced-motion: reduce) {
+        .tc-cooldown-badge--ready {
+            transition: none;
+        }
+    }
 }

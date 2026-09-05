@@ -9,7 +9,13 @@
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
     .form-floating {
-        // Docked (floated) label inherits this via --bs-form-floating-label-color.
-        --bs-form-floating-label-color: var(--fg-gold);
+        // Scoped to the same floated-state selectors the base uses, so idle
+        // labels keep falling through to the foundation's parch/muted color
+        // instead of inheriting gold from `.form-floating` unconditionally.
+        > .form-control:focus ~ label,
+        > .form-control:not(:placeholder-shown) ~ label,
+        > .form-select ~ label {
+            --bs-form-floating-label-color: var(--fg-gold);
+        }
     }
 }

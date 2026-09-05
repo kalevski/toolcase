@@ -241,22 +241,36 @@ tc-early-signup-form.tc-early-signup-form--dark {
     animation: tc-esf-pulse 2s ease-out infinite;
 }
 
+// NOTE: @keyframes cannot be selector-scoped — Sass hoists any @keyframes
+// nested inside a theme selector straight to the stylesheet's top level
+// (verified: it compiles with the wrapping selector stripped entirely), so a
+// per-theme `@keyframes tc-esf-pulse { ... }` redeclaration doesn't scope to
+// that theme, it just clobbers this one for every theme via same-name overwrite
+// (last one in @use order wins, everywhere). Drive the color through the
+// themeable --bs-early-signup-form-success-color custom property instead —
+// themes then only need to override that token (already done for check/success
+// icons), never the keyframes.
 @keyframes tc-esf-pulse {
     0% {
-        box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4);
+        box-shadow: 0 0 0 0 color-mix(in srgb, var(--bs-early-signup-form-success-color) 40%, transparent);
     }
     70% {
-        box-shadow: 0 0 0 6px rgba(22, 163, 74, 0);
+        box-shadow: 0 0 0 6px transparent;
     }
     100% {
-        box-shadow: 0 0 0 0 rgba(22, 163, 74, 0);
+        box-shadow: 0 0 0 0 transparent;
     }
 }
 
 // ── Form zone ─────────────────────────────────────────────────────────────────
 
 .tc-early-signup-form__form-area {
-    flex: 0 1 360px;
+    // Below lg, .tc-early-signup-form__inner is a COLUMN flex container, so a
+    // flex-basis here sizes height, not width — a fixed 360px would force a
+    // tall, mostly-empty box around the compact mobile form. Keep it content-
+    // sized (flex: 1 1 auto) until the row layout kicks in at lg, where the
+    // basis is reinterpreted as the intended column width.
+    flex: 1 1 auto;
     min-width: 0;
     width: 100%;
     display: flex;
@@ -264,6 +278,7 @@ tc-early-signup-form.tc-early-signup-form--dark {
     justify-content: center;
 
     @include media-up(lg) {
+        flex: 0 1 360px;
         width: auto;
         padding: var(--bs-early-signup-form-padding);
         // A faint slate well distinguishes the form zone from the content zone.
@@ -383,6 +398,12 @@ tc-early-signup-form.tc-early-signup-form--dark {
     &:disabled {
         opacity: 0.65;
         pointer-events: none;
+    }
+
+    // 44px coarse touch target — matches the sibling input's own coarse-pointer
+    // floor (and tc-newsletter-signup's identical input+submit pattern).
+    @media (pointer: coarse) {
+        min-height: 44px;
     }
 
     svg {

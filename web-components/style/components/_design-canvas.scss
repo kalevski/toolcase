@@ -1,0 +1,51 @@
+// tc-design-canvas — the pan-and-zoom viewport an artboard sits in.
+//
+// The element writes `--tc-canvas-scale`, `--tc-canvas-x` and `--tc-canvas-y` on
+// itself and applies NOTHING: `tc-artboard` reads them. That is what keeps a
+// wrapper — and therefore a moved node — out of the design entirely.
+
+tc-design-canvas {
+    --bs-design-canvas-bg: var(--tc-surface-muted);
+    // --tc-border-faint is tuned as a hairline against --tc-surface (white in
+    // the default/redline skins), which makes it collide with --tc-surface-muted
+    // — the grid would render but be entirely invisible. --tc-border is the
+    // one token guaranteed to differ from --tc-surface-muted in every bundled
+    // theme, so route the grid lines there instead.
+    --bs-design-canvas-grid-color: var(--tc-border, rgba(0, 0, 0, 0.06));
+    --bs-design-canvas-grid-size: 24px;
+}
+
+.tc-design-canvas {
+    position: relative;
+    display: grid;
+    // The artboard is centred in the viewport and everything else is offset from
+    // there, which is what makes the pan translation symmetric.
+    place-items: center;
+    overflow: hidden;
+    min-height: 0;
+    background:
+        linear-gradient(var(--bs-design-canvas-grid-color) 1px, transparent 1px) 0 0 /
+            var(--bs-design-canvas-grid-size) var(--bs-design-canvas-grid-size),
+        linear-gradient(90deg, var(--bs-design-canvas-grid-color) 1px, transparent 1px) 0 0 /
+            var(--bs-design-canvas-grid-size) var(--bs-design-canvas-grid-size),
+        var(--bs-design-canvas-bg);
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent, var(--tc-primary));
+        outline-offset: -2px;
+    }
+}
+
+// SPACE held is the pan affordance, so the cursor has to say so before the drag
+// starts — a grab cursor that only appears once you are already dragging tells
+// you nothing.
+.tc-design-canvas[data-pannable='true'] {
+    cursor: grab;
+}
+
+.tc-design-canvas[data-panning='true'] {
+    cursor: grabbing;
+    // Selection while panning is what turns a drag into a highlight of the whole
+    // artboard.
+    user-select: none;
+}

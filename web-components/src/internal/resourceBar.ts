@@ -1,4 +1,4 @@
-import { esc } from "./esc"
+import { esc } from './esc'
 // Shared rendering logic for the resource-bar family — tc-boss-bar today, and
 // the HP / mana / stamina bars (game-components' ResourceBarBase) as they land.
 // Centralises the percentage math, HTML escaping, and the track / fill / ghost /
@@ -59,7 +59,7 @@ export function renderResourceBarTrack(options: ResourceBarTrackOptions): string
         : ''
 
     const ticks = (options.ticks ?? [])
-        .flatMap(t =>
+        .flatMap((t) =>
             t > 0 && t < 1
                 ? [`<div class="${prefix}__tick" style="left: ${(t * 100).toFixed(2)}%"></div>`]
                 : [],

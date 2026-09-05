@@ -222,7 +222,7 @@ tc-build {
     --bs-build-menu-item-padding-x: 0.625rem;
     --bs-build-menu-item-padding-y: 0.4375rem;
     --bs-build-menu-item-font-size: 0.8125rem;
-    --bs-build-menu-item-color: #{$slate-700};
+    --bs-build-menu-item-color: var(--tc-slate-700);
     --bs-build-menu-item-hover-color: var(--tc-text);
     --bs-build-menu-item-hover-bg: var(--tc-surface-muted);
     --bs-build-menu-item-active-color: var(--tc-app-accent-contrast);

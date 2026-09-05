@@ -1,7 +1,9 @@
 // Dungeon › tc-vertical-item-list — codex / spellbook side-tabs.
 // Token swap promotes the active marker and badge to gold-bright + ink text;
 // structural rules apply display caps to item labels (mirrors tab-bar treatment)
-// and swap the menu/content hairline for a gold-gradient pseudo-rule.
+// and swap the menu/content hairline for a gold-gradient pseudo-rule. Two more
+// literal overrides are required, matching tc-side-nav's identical skeleton base:
+// skeleton bg (richer leather-2) and skeleton shimmer (white rgba → parchment-dim).
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
@@ -15,6 +17,10 @@ tc-theme[name='dungeon'],
 
         // Badge — ink text on gold fill (fixes the hardcoded #fff default).
         --bs-vertical-item-list-badge-color: var(--fg-ink);
+
+        --bs-vertical-item-list-skeleton-bg: var(--fg-leather-2);
+        // Override the hardcoded white rgba shimmer sweep.
+        --bs-vertical-item-list-skeleton-shimmer: var(--fg-parch-dim);
     }
 
     // ── Display caps on item labels ────────────────────────────────────────────
@@ -28,9 +34,11 @@ tc-theme[name='dungeon'],
     }
 
     // ── Gold-gradient menu/content divider ─────────────────────────────────────
-    // The base uses border-left on .tc-vertical-item-list-content.
-    // Replace it with a gold-gradient pseudo-rule for the dungeon treatment.
-    .tc-vertical-item-list-content {
+    // The base uses border-left on the structural content selector (the panel is
+    // the consumer's own children — there is no `.tc-vertical-item-list-content`
+    // element in the rendered markup to target). Replace it with a gold-gradient
+    // pseudo-rule for the dungeon treatment.
+    .tc-vertical-item-list > :not(.tc-vertical-item-list-menu) {
         position: relative;
         border-left: none;
 

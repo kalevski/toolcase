@@ -49,6 +49,20 @@ tc-theme[name='blueprint'],
         opacity: 1;
     }
 
+    // Reduced motion: this theme's hover lift has higher specificity than the
+    // base component's prefers-reduced-motion freeze, so it must be repeated here.
+    @media (prefers-reduced-motion: reduce) {
+        .tc-feature-card {
+            transition:
+                border-color 0.25s,
+                box-shadow 0.25s;
+
+            &:hover {
+                transform: none;
+            }
+        }
+    }
+
     // Eyebrow reads as a mono uppercase micro-label.
     .tc-feature-card-eyebrow {
         font-family: var(--bp-mono);

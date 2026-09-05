@@ -1,5 +1,7 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-newsletter-signup'
 
@@ -76,21 +78,21 @@ export class NewsletterSignup extends HTMLElement {
         return this.getAttribute('placeholder') ?? 'you@example.com'
     }
     set placeholder(v: string) {
-        this.setAttribute('placeholder', v)
+        setAttr(this, 'placeholder', v)
     }
 
     get ctaLabel(): string {
         return this.getAttribute('cta-label') ?? 'Subscribe'
     }
     set ctaLabel(v: string) {
-        this.setAttribute('cta-label', v)
+        setAttr(this, 'cta-label', v)
     }
 
     get successMessage(): string {
         return this.getAttribute('success-message') ?? 'Thanks for subscribing!'
     }
     set successMessage(v: string) {
-        this.setAttribute('success-message', v)
+        setAttr(this, 'success-message', v)
     }
 
     get privacyHref(): string | null {
@@ -243,12 +245,15 @@ export class NewsletterSignup extends HTMLElement {
                 </form>`
         }
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <div class="tc-newsletter-signup-inner">
                 ${titleHtml}
                 ${descriptionHtml}
                 ${bodyHtml}
-            </div>`
+            </div>`,
+        )
     }
 }
 

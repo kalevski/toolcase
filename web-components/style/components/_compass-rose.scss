@@ -23,7 +23,12 @@ tc-compass-rose {
     --bs-compass-rose-tick-width: 1.5;
 
     --bs-compass-rose-needle-n-color: var(--tc-app-accent);
-    --bs-compass-rose-needle-s-color: var(--tc-slate-300);
+    // Muted counterpart to the accent north needle — routed through the
+    // already-remapped --tc-border-strong (matches --bs-compass-rose-ring-color)
+    // instead of the raw --tc-slate-300 literal, which only the default theme
+    // defines and would otherwise leak a fixed light-grey into every theme with
+    // no override (blueprint/dungeon already worked around this locally).
+    --bs-compass-rose-needle-s-color: var(--tc-border-strong);
     --bs-compass-rose-hub-color: var(--tc-app-accent);
 
     --bs-compass-rose-label-color: var(--tc-text-muted);

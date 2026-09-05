@@ -4,14 +4,22 @@
 @use '../foundation/tokens' as *;
 
 .list-group {
-    --bs-list-group-color: #{$slate-700};
+    // Body/action text and the faint hairlines below were baked as compile-time
+    // $slate-700/$slate-100 literals, which never remap per theme (unlike a
+    // --tc-* custom property). blueprint/dungeon each patch around this in their
+    // own override file, but aurora/neon/sunshine/redline/marker have no
+    // list-group override and silently inherited dark-ink-on-dark-surface text
+    // (illegible on aurora/neon) and a stark near-white divider — routed to the
+    // remapped --tc-text-muted/--tc-border-faint tokens instead so every bundled
+    // theme (including ones with no override file) gets a legible, on-theme value.
+    --bs-list-group-color: var(--tc-text-muted);
     --bs-list-group-bg: var(--tc-surface);
     --bs-list-group-border-color: var(--tc-border);
     --bs-list-group-border-width: var(--bs-border-width);
     --bs-list-group-border-radius: 0;
     --bs-list-group-item-padding-x: 0.8125rem;
     --bs-list-group-item-padding-y: 0.625rem;
-    --bs-list-group-action-color: #{$slate-700};
+    --bs-list-group-action-color: var(--tc-text-muted);
     --bs-list-group-action-hover-color: var(--tc-text);
     --bs-list-group-action-hover-bg: var(--tc-surface-hover);
     --bs-list-group-action-active-color: var(--tc-text);
@@ -20,7 +28,7 @@
     --bs-list-group-disabled-bg: var(--tc-surface-hover);
     --bs-list-group-active-color: var(--tc-app-accent-contrast);
     --bs-list-group-active-bg: var(--tc-app-accent);
-    --bs-list-group-active-border-color: #{$slate-100};
+    --bs-list-group-active-border-color: var(--tc-border-faint);
 
     display: flex;
     flex-direction: column;
@@ -50,8 +58,11 @@
     color: var(--bs-list-group-color);
     text-decoration: none;
     background-color: var(--bs-list-group-bg);
-    // Inner separators are fainter than the outer hairline box.
-    border-bottom: var(--bs-list-group-border-width) solid #{$slate-100};
+    // Inner separators are fainter than the outer hairline box. Uses the
+    // remapped --tc-border-faint (not a raw $slate-100 literal) so themes with
+    // no list-group override (aurora, neon, sunshine, redline, marker) get an
+    // on-theme faint hairline instead of a stark near-white line on a dark bg.
+    border-bottom: var(--bs-list-group-border-width) solid var(--tc-border-faint);
 
     &:last-child {
         border-bottom: 0;
@@ -95,6 +106,12 @@
     }
 }
 
+@media (pointer: coarse) {
+    .list-group-item-action {
+        min-height: 44px;
+    }
+}
+
 .list-group-flush {
     border: 0;
     border-radius: 0;
@@ -114,7 +131,7 @@
 
     > .list-group-item {
         border-bottom: 0;
-        border-right: var(--bs-list-group-border-width) solid #{$slate-100};
+        border-right: var(--bs-list-group-border-width) solid var(--tc-border-faint);
 
         &:last-child {
             border-right: 0;
@@ -173,4 +190,25 @@ tc-list-group-item {
         text-align: inherit;
         font: inherit;
     }
+}
+
+// The interactive affordance of `tc-list-group-item` is an overlay, not a wrapper:
+// it covers the host so the consumer's own children stay where they were written.
+tc-list-group-item {
+    position: relative;
+}
+
+.tc-lgi-hit {
+    position: absolute;
+    inset: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+}
+
+.tc-lgi-hit:disabled,
+.tc-lgi-hit[tabindex='-1'] {
+    cursor: default;
+    pointer-events: none;
 }

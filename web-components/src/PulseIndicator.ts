@@ -1,11 +1,15 @@
 import { esc } from './internal/esc'
+import { setHostClass } from './internal/host-class'
+import { syncOwnedNodes, syncTrailingNodes } from './internal/tc-element'
 const TAG_NAME = 'tc-pulse-indicator'
 
 export class PulseIndicator extends HTMLElement {
     private _initialised = false
 
     static get observedAttributes(): string[] {
-        return ['label', 'color', 'paused']
+        // `class` is observed so the element can re-assert its own classes after
+        // react-dom overwrites `className` wholesale — see setHostClass.
+        return ['label', 'color', 'paused', 'class']
     }
 
     constructor() {
@@ -14,27 +18,13 @@ export class PulseIndicator extends HTMLElement {
 
     connectedCallback(): void {
         this.setAttribute('role', 'status')
-        if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            if (!this.hasAttribute('label')) {
-                const labelEl = this.querySelector('.tc-pulse-indicator-label')
-                if (labelEl) slotContent.forEach((n) => labelEl.appendChild(n))
-            }
-            this._initialised = true
-        }
+        this._initialised = true
+        this.render()
     }
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        const labelEl = this.querySelector('.tc-pulse-indicator-label')
-        const slotContent =
-            !this.hasAttribute('label') && labelEl ? Array.from(labelEl.childNodes) : []
         this.render()
-        if (!this.hasAttribute('label')) {
-            const newLabelEl = this.querySelector('.tc-pulse-indicator-label')
-            if (newLabelEl) slotContent.forEach((n) => newLabelEl.appendChild(n))
-        }
     }
 
     get label(): string | null {
@@ -61,24 +51,28 @@ export class PulseIndicator extends HTMLElement {
         else this.removeAttribute('paused')
     }
 
+    /** THE HOST IS THE INDICATOR: the flex row is the consumer's own tag, the dot
+     *  is prepended and the label — when the `label` attribute supplies one — is
+     *  appended after whatever children the consumer wrote (rule 1). */
     private render(): void {
         const label = this.getAttribute('label')
         const color = this.getAttribute('color')
-        const paused = this.hasAttribute('paused')
-        const pausedClass = paused ? ' tc-pulse-indicator--paused' : ''
+        const pausedClass = this.hasAttribute('paused') ? ' tc-pulse-indicator--paused' : ''
 
-        if (color) {
-            this.style.setProperty('--bs-pulse-indicator-color', color)
-        } else {
-            this.style.removeProperty('--bs-pulse-indicator-color')
-        }
+        if (color) this.style.setProperty('--bs-pulse-indicator-color', color)
+        else this.style.removeProperty('--bs-pulse-indicator-color')
 
-        const dotHtml = `<span class="tc-pulse-indicator-dot" aria-hidden="true"></span>`
-        if (label != null) {
-            this.innerHTML = `<span class="tc-pulse-indicator${pausedClass}">${dotHtml}<span class="tc-pulse-indicator-label">${esc(label)}</span></span>`
-        } else {
-            this.innerHTML = `<span class="tc-pulse-indicator${pausedClass}">${dotHtml}<span class="tc-pulse-indicator-label"></span></span>`
-        }
+        setHostClass(this, `tc-pulse-indicator${pausedClass}`)
+
+        syncOwnedNodes(this, [{ cls: 'tc-pulse-indicator-dot', tag: 'span', html: '' }])
+        this.querySelector(':scope > .tc-pulse-indicator-dot')?.setAttribute('aria-hidden', 'true')
+        syncTrailingNodes(this, [
+            {
+                cls: 'tc-pulse-indicator-label',
+                tag: 'span',
+                html: label != null ? esc(label) : null,
+            },
+        ])
     }
 }
 

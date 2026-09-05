@@ -85,6 +85,14 @@ tc-ecosystem-map {
         user-select: none;
     }
 
+    // Invisible circle under each node dot, sized to match it at rest — grown
+    // under (pointer: coarse) below to widen the tap target without touching
+    // the visible dot/label geometry computed in EcosystemMap.ts.
+    &__node-hit {
+        fill: transparent;
+        pointer-events: all;
+    }
+
     // Node dots — surface fill with hairline border
     &__node-dot {
         fill: var(--bs-ecosystem-map-node-fill);
@@ -204,5 +212,19 @@ tc-ecosystem-map {
 
     .tc-ecosystem-map__node {
         transition: none;
+    }
+}
+
+// ── Touch targets (WCAG 2.5.5 — 44px minimum on coarse pointer) ───────────────
+@media (pointer: coarse) {
+    // 20px visible dot — grow only the invisible hit-circle to a 44px diameter.
+    .tc-ecosystem-map__node-hit {
+        r: 22px;
+    }
+
+    // List-fallback chips (anchors for nodes with an href) — same floor as
+    // every other tappable chip/pill in the system.
+    .tc-ecosystem-map__node {
+        min-height: 44px;
     }
 }

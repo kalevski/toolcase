@@ -17,7 +17,7 @@ tc-game-showcase-card {
 
     // Stamp overlay
     --bs-game-showcase-card-stamp-bg: var(--tc-ink);
-    --bs-game-showcase-card-stamp-color: #fff;
+    --bs-game-showcase-card-stamp-color: var(--tc-text-inverse);
     --bs-game-showcase-card-stamp-font-size: 0.6875rem;
     --bs-game-showcase-card-stamp-padding: 0.1875rem 0.375rem;
     --bs-game-showcase-card-stamp-gap: 0.25rem;

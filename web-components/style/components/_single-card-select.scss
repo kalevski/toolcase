@@ -3,6 +3,8 @@
 // Sharp corners (border-radius: 0); white surfaces with a hairline border at rest;
 // slate well on hover; a 2px --tc-app-accent frame + ink check on the selected card.
 
+@use '../foundation/tokens' as *;
+
 tc-single-card-select {
     --bs-single-card-select-border-color: var(--tc-border);
     --bs-single-card-select-bg: var(--tc-surface);
@@ -20,16 +22,26 @@ tc-single-card-select {
     --bs-single-card-select-skeleton-bg: var(--tc-surface-muted);
 }
 
-// Host IS the grid. When `columns` is set, JS writes --bs-single-card-select-grid-cols
-// to `repeat(N, 1fr)`; otherwise the auto-fill fallback applies (matches the React default).
+// Host IS the grid. Mobile-first: a single column below `sm` regardless of the
+// `columns` attribute, so an author-fixed column count can never crush cards on
+// narrow phones (matches the ladder in the sibling tc-card-options /
+// tc-multi-card-select components). From `sm` up, when `columns` is set JS's
+// --bs-single-card-select-grid-cols override (`repeat(N, 1fr)`) applies; otherwise
+// the auto-fill fallback — already responsive on its own — takes over.
 .tc-single-card-select {
     display: grid;
-    grid-template-columns: var(
-        --bs-single-card-select-grid-cols,
-        repeat(auto-fill, minmax(var(--bs-single-card-select-min-col), 1fr))
-    );
+    grid-template-columns: repeat(1, 1fr);
     gap: var(--bs-single-card-select-gap);
     border-radius: 0;
+}
+
+@include media-up(sm) {
+    .tc-single-card-select {
+        grid-template-columns: var(
+            --bs-single-card-select-grid-cols,
+            repeat(auto-fill, minmax(var(--bs-single-card-select-min-col), 1fr))
+        );
+    }
 }
 
 .tc-single-card-select-option {

@@ -1,6 +1,9 @@
+import { setHostClass } from './internal/host-class'
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-trend-indicator'
 
@@ -49,17 +52,8 @@ export class TrendIndicator extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            // Capture any light-DOM children so they survive the render — used as
-            // the value content when no `value` attribute is set (rich markup).
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            if (!this.hasAttribute('value')) {
-                const inner = this.querySelector('.tc-trend-indicator-value')
-                if (inner) slotContent.forEach((n) => inner.appendChild(n))
-            }
-            this._initialised = true
-        }
+        this._initialised = true
+        this.render()
     }
 
     attributeChangedCallback(): void {
@@ -94,7 +88,7 @@ export class TrendIndicator extends HTMLElement {
         return SIZES.includes(s) ? s : 'default'
     }
     set size(v: TrendSize) {
-        this.setAttribute('size', v)
+        setAttr(this, 'size', v)
     }
 
     private render(): void {
@@ -109,7 +103,18 @@ export class TrendIndicator extends HTMLElement {
         const iconHtml = resolveDirectionIcon(direction)
         const valueHtml = esc(rawValue)
 
-        this.innerHTML = `<span class="tc-trend-indicator tc-trend-indicator--${direction} tc-trend-indicator--${size}">${iconHtml}<span class="tc-trend-indicator-value">${valueHtml}</span></span>`
+        setHostClass(
+            this,
+            `tc-trend-indicator tc-trend-indicator--${direction} tc-trend-indicator--${size}`,
+        )
+        // The arrow, plus the value when the attribute supplies one. Without it the
+        // consumer's own markup is the value and nothing is wrapped (rule 1).
+        patchHtml(
+            this,
+            rawValue
+                ? `${iconHtml}<span class="tc-trend-indicator-value">${valueHtml}</span>`
+                : iconHtml,
+        )
     }
 }
 

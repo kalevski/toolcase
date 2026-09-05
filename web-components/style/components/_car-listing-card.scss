@@ -261,6 +261,8 @@ tc-car-listing-card {
 }
 
 .tc-car-listing-card-seller-name {
+    flex: 1 1 auto;
+    min-width: 0;
     font-size: 0.8125rem;
     color: var(--bs-car-listing-card-seller-name-color);
     white-space: nowrap;

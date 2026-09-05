@@ -1,4 +1,6 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-terminal-window'
 
 export type TerminalLineType = 'command' | 'output' | 'comment'
@@ -71,7 +73,7 @@ export class TerminalWindow extends HTMLElement {
         return this.getAttribute('prompt') ?? '$'
     }
     set prompt(v: string) {
-        this.setAttribute('prompt', v)
+        setAttr(this, 'prompt', v)
     }
 
     get animateTyping(): boolean {
@@ -124,7 +126,7 @@ export class TerminalWindow extends HTMLElement {
 
         // Expose the window title as the region's accessible label.
         const labelAttr = title ? ` role="group" aria-labelledby="${this._titleId}"` : ''
-        this.innerHTML = `<div class="tc-terminal-window"${labelAttr}>${bar}${body}</div>`
+        patchHtml(this, `<div class="tc-terminal-window"${labelAttr}>${bar}${body}</div>`)
     }
 
     // ── Typing animation ─────────────────────────────────────────────────────────

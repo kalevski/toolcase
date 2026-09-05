@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -176,12 +177,15 @@ export class LiveFeed extends HTMLElement {
             .join('')
 
         const ariaLabel = header ? esc(header) : 'Live feed'
-        this.innerHTML = `<div class="tc-live-feed">${headerHtml}<div class="tc-live-feed-body" role="log" aria-live="polite" aria-label="${ariaLabel}">${rowsHtml}</div></div>`
+        patchHtml(
+            this,
+            `<div class="tc-live-feed">${headerHtml}<div class="tc-live-feed-body" role="log" aria-live="polite" aria-label="${ariaLabel}">${rowsHtml}</div></div>`,
+        )
 
         const body = this.querySelector<HTMLElement>('.tc-live-feed-body')
         if (body) {
-            body.addEventListener('click', this._onBodyClick)
-            body.addEventListener('keydown', this._onBodyKeydown)
+            bindOnce(body, 'click', this._onBodyClick)
+            bindOnce(body, 'keydown', this._onBodyKeydown)
         }
     }
 }

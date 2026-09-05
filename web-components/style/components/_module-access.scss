@@ -118,6 +118,10 @@ tc-module-access {
     font: inherit;
     font-size: 11px;
     cursor: pointer;
+    // Safari's native button chrome renders rounded corners even with an
+    // explicit border/background set unless appearance is reset — the sharp-
+    // corners mandate needs this on every bare <button>, not just .tc-button.
+    appearance: none;
     transition:
         background-color var(--tc-transition-fast),
         color var(--tc-transition-fast);
@@ -125,6 +129,15 @@ tc-module-access {
     &:hover {
         background: var(--bs-module-access-surface-hover);
         color: var(--bs-module-access-text);
+    }
+}
+
+// WCAG 2.5.5 — 44px hit area on coarse-pointer devices; the bulk toggle is the
+// only control in this component that isn't already floored by tc-chip/.form-control.
+@media (pointer: coarse) {
+    .module-access__group-bulk {
+        min-width: var(--tc-min-touch-target, 44px);
+        min-height: var(--tc-min-touch-target, 44px);
     }
 }
 

@@ -64,7 +64,9 @@ tc-time-picker {
         border-color: var(--tc-danger);
 
         &:focus-visible {
-            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.18);
+            // Token-relative glow (matches combo-box/extended-select), not a
+            // hardcoded Bootstrap-red literal — themes re-skin via --bs-danger-rgb.
+            box-shadow: 0 0 0 0.2rem rgba(var(--bs-danger-rgb), 0.18);
         }
     }
 
@@ -275,6 +277,12 @@ tc-time-picker[disabled] {
 
     .tc-time-picker-option {
         min-height: 44px;
+    }
+
+    // Box grows, glyph doesn't — matches the .btn-close / close-button pattern.
+    .tc-time-picker-clear {
+        min-width: var(--tc-min-touch-target, 44px);
+        min-height: var(--tc-min-touch-target, 44px);
     }
 }
 

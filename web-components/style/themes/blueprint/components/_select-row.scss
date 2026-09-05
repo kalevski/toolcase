@@ -55,4 +55,16 @@ tc-theme[name='blueprint'],
             border-color: var(--bp-border-strong);
         }
     }
+
+    // The two focus tokens above are dead on their own: ../input.scss's generic
+    // `.form-control:focus, .form-select:focus` rule shares this same
+    // tc-theme-scoped specificity and wins the tie, painting the theme's default
+    // pink instead of this control's teal. Out-specify it with the compound class
+    // so the intended teal action ring (this control's "everyday-action" accent,
+    // matching fps-cap-select/mouse-sensitivity) actually reaches the rendered
+    // focus state.
+    .tc-select-row__select.form-select:focus {
+        border-color: var(--bs-select-row-focus-border-color);
+        box-shadow: var(--bs-select-row-focus-ring);
+    }
 }

@@ -47,9 +47,13 @@ tc-theme[name='dungeon'],
     }
 
     // Rotating surface — central compass rune on the otherwise-empty state.
-    .tc-minimap__surface {
-        position: relative;
-    }
+    // NOTE: the base component already sets `position: absolute; inset: 0;` on
+    // `.tc-minimap__surface`, which both establishes a positioning context for the
+    // ::after rune below AND stretches the surface to fill the host. Do NOT override
+    // `position` here — switching it to `relative` drops the `inset: 0` sizing effect
+    // (all children are absolutely positioned, so the box collapses to 0 height),
+    // which hides the grid background entirely and squashes marker positions to the
+    // top edge (percentage offsets resolve against a 0-height box).
     .tc-minimap__surface::after {
         content: '';
         position: absolute;
@@ -77,14 +81,8 @@ tc-theme[name='dungeon'],
         height: 12px;
         z-index: 3;
         pointer-events: none;
-        background: linear-gradient(
-            135deg,
-            var(--fg-gold-bright),
-            var(--fg-gold) 35%,
-            var(--fg-gold-deep) 60%,
-            #2a1c0e
-        );
-        clip-path: polygon(0 0, 100% 0, 100% 35%, 65% 35%, 65% 100%, 0 100%);
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
         // Flip vertically for bottom-left.
         transform: scaleY(-1);
     }
@@ -117,14 +115,8 @@ tc-theme[name='dungeon'],
         height: 12px;
         z-index: 3;
         pointer-events: none;
-        background: linear-gradient(
-            135deg,
-            var(--fg-gold-bright),
-            var(--fg-gold) 35%,
-            var(--fg-gold-deep) 60%,
-            #2a1c0e
-        );
-        clip-path: polygon(0 0, 100% 0, 100% 35%, 65% 35%, 65% 100%, 0 100%);
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
     }
     tc-minimap::before {
         left: 0;
@@ -147,14 +139,8 @@ tc-theme[name='dungeon'],
         height: 12px;
         z-index: 3;
         pointer-events: none;
-        background: linear-gradient(
-            135deg,
-            var(--fg-gold-bright),
-            var(--fg-gold) 35%,
-            var(--fg-gold-deep) 60%,
-            #2a1c0e
-        );
-        clip-path: polygon(0 0, 100% 0, 100% 35%, 65% 35%, 65% 100%, 0 100%);
+        background: var(--fg-notch-fill);
+        clip-path: var(--fg-notch-clip);
         // Flip both axes for bottom-right.
         transform: scale(-1, -1);
     }

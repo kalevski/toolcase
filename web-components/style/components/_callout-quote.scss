@@ -92,3 +92,14 @@ a.tc-callout-quote__source {
         transition: none;
     }
 }
+
+// A slotted quote is the consumer's own child now (rule 1) — it reads like the
+// attribute-driven `.tc-callout-quote__text`.
+.tc-callout-quote > :not([class^='tc-callout-quote']) {
+    display: block;
+    font-size: var(--bs-callout-quote-text-size);
+    font-weight: 500;
+    font-style: italic;
+    line-height: 1.6;
+    color: var(--bs-callout-quote-text-color);
+}

@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -226,20 +227,22 @@ export class TabSections extends HTMLElement {
         if (this.hasAttribute('loading')) {
             this.setAttribute('role', 'status')
             this.setAttribute('aria-busy', 'true')
-            this.innerHTML =
+            patchHtml(
+                this,
                 `<div class="tc-tab-sections tc-tab-sections--loading placeholder-glow" aria-hidden="true">` +
-                `<div class="tc-tab-sections-nav" role="presentation">` +
-                `<span class="placeholder tc-tab-sections-tab-skeleton"></span>` +
-                `<span class="placeholder tc-tab-sections-tab-skeleton"></span>` +
-                `<span class="placeholder tc-tab-sections-tab-skeleton"></span>` +
-                `</div>` +
-                `<div class="tc-tab-sections-panel">` +
-                `<span class="placeholder tc-tab-sections-line"></span>` +
-                `<span class="placeholder tc-tab-sections-line"></span>` +
-                `<span class="placeholder tc-tab-sections-line tc-tab-sections-line--short"></span>` +
-                `</div>` +
-                `</div>` +
-                `<span class="visually-hidden">Loading…</span>`
+                    `<div class="tc-tab-sections-nav" role="presentation">` +
+                    `<span class="placeholder tc-tab-sections-tab-skeleton"></span>` +
+                    `<span class="placeholder tc-tab-sections-tab-skeleton"></span>` +
+                    `<span class="placeholder tc-tab-sections-tab-skeleton"></span>` +
+                    `</div>` +
+                    `<div class="tc-tab-sections-panel">` +
+                    `<span class="placeholder tc-tab-sections-line"></span>` +
+                    `<span class="placeholder tc-tab-sections-line"></span>` +
+                    `<span class="placeholder tc-tab-sections-line tc-tab-sections-line--short"></span>` +
+                    `</div>` +
+                    `</div>` +
+                    `<span class="visually-hidden">Loading…</span>`,
+            )
             return
         }
 
@@ -255,7 +258,7 @@ export class TabSections extends HTMLElement {
                 const panelId = `${this._idPrefix}-panel-${i}`
                 const isActive = item.key === activeKey
                 const disabled = !!item.disabled
-                const iconHtml = item.icon ? lucideByName(item.icon) : ''
+                const iconHtml = item.icon ? lucideByName(item.icon, 'tc-tab-sections-tab-icon') : ''
                 return (
                     `<button` +
                     ` id="${tabId}"` +
@@ -292,11 +295,13 @@ export class TabSections extends HTMLElement {
             })
             .join('')
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-tab-sections">` +
-            `<div class="tc-tab-sections-nav" role="tablist">${tabsHtml}</div>` +
-            panelsHtml +
-            `</div>`
+                `<div class="tc-tab-sections-nav" role="tablist">${tabsHtml}</div>` +
+                panelsHtml +
+                `</div>`,
+        )
     }
 }
 

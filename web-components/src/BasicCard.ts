@@ -1,6 +1,8 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-basic-card'
 
@@ -34,14 +36,14 @@ export class BasicCard extends HTMLElement {
         return this.getAttribute('text-a') ?? this.getAttribute('value') ?? ''
     }
     set textA(v: string) {
-        this.setAttribute('text-a', v)
+        setAttr(this, 'text-a', v)
     }
 
     get textB(): string {
         return this.getAttribute('text-b') ?? this.getAttribute('text') ?? ''
     }
     set textB(v: string) {
-        this.setAttribute('text-b', v)
+        setAttr(this, 'text-b', v)
     }
 
     get color(): string | null {
@@ -80,18 +82,21 @@ export class BasicCard extends HTMLElement {
 
         if (loading) {
             this.setAttribute('aria-busy', 'true')
-            this.innerHTML = [
-                `<div class="${rootClass}">`,
-                '<div class="card-body tc-basic-card-body">',
-                '<div class="tc-basic-card-icon tc-basic-card-icon--skeleton" aria-hidden="true"></div>',
-                '<div class="tc-basic-card-text">',
-                '<div class="tc-basic-card-skeleton tc-basic-card-skeleton--primary"></div>',
-                '<div class="tc-basic-card-skeleton tc-basic-card-skeleton--secondary"></div>',
-                '</div>',
-                '</div>',
-                '<span class="visually-hidden" role="status">Loading…</span>',
-                '</div>',
-            ].join('')
+            patchHtml(
+                this,
+                [
+                    `<div class="${rootClass}">`,
+                    '<div class="card-body tc-basic-card-body">',
+                    '<div class="tc-basic-card-icon tc-basic-card-icon--skeleton" aria-hidden="true"></div>',
+                    '<div class="tc-basic-card-text">',
+                    '<div class="tc-basic-card-skeleton tc-basic-card-skeleton--primary"></div>',
+                    '<div class="tc-basic-card-skeleton tc-basic-card-skeleton--secondary"></div>',
+                    '</div>',
+                    '</div>',
+                    '<span class="visually-hidden" role="status">Loading…</span>',
+                    '</div>',
+                ].join(''),
+            )
         } else {
             this.removeAttribute('aria-busy')
             const iconName = this.getAttribute('icon')
@@ -100,17 +105,20 @@ export class BasicCard extends HTMLElement {
                 ? `<div class="tc-basic-card-icon" aria-hidden="true">${iconSvg}</div>`
                 : ''
 
-            this.innerHTML = [
-                `<div class="${rootClass}">`,
-                '<div class="card-body tc-basic-card-body">',
-                iconChipHtml,
-                '<div class="tc-basic-card-text">',
-                `<span class="tc-basic-card-primary">${esc(this.textA)}</span>`,
-                `<span class="tc-basic-card-secondary">${esc(this.textB)}</span>`,
-                '</div>',
-                '</div>',
-                '</div>',
-            ].join('')
+            patchHtml(
+                this,
+                [
+                    `<div class="${rootClass}">`,
+                    '<div class="card-body tc-basic-card-body">',
+                    iconChipHtml,
+                    '<div class="tc-basic-card-text">',
+                    `<span class="tc-basic-card-primary">${esc(this.textA)}</span>`,
+                    `<span class="tc-basic-card-secondary">${esc(this.textB)}</span>`,
+                    '</div>',
+                    '</div>',
+                    '</div>',
+                ].join(''),
+            )
         }
     }
 }

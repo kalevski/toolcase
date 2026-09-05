@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -131,7 +132,10 @@ export class Comparator extends HTMLElement {
     }
 
     get loadingCount(): number {
-        return parseInt(this.getAttribute('loading-count') ?? '5', 10) || 5
+        const n = parseInt(this.getAttribute('loading-count') ?? '5', 10)
+        // Guard against 0/negative/NaN: Array.from({ length: n }) throws for a
+        // negative length, and a non-positive count is never a sensible skeleton.
+        return Number.isFinite(n) && n > 0 ? n : 5
     }
     set loadingCount(v: number) {
         this.setAttribute('loading-count', String(v))
@@ -199,15 +203,17 @@ export class Comparator extends HTMLElement {
                     `</tr>`,
             ).join('')
 
-            this.innerHTML =
+            patchHtml(
+                this,
                 `<div class="tc-comparator">${headerHtml}` +
-                `<div class="tc-comparator-table">` +
-                `<table class="tc-comparator__table" aria-busy="true">` +
-                theadHtml +
-                `<tbody>${skeletonRows}</tbody>` +
-                `</table>` +
-                `</div>` +
-                `</div>`
+                    `<div class="tc-comparator-table">` +
+                    `<table class="tc-comparator__table" aria-busy="true">` +
+                    theadHtml +
+                    `<tbody>${skeletonRows}</tbody>` +
+                    `</table>` +
+                    `</div>` +
+                    `</div>`,
+            )
             return
         }
 
@@ -263,15 +269,17 @@ export class Comparator extends HTMLElement {
                   `</tr>`
                 : ''
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-comparator">${headerHtml}` +
-            `<div class="tc-comparator-table">` +
-            `<table class="tc-comparator__table">` +
-            theadHtml +
-            `<tbody>${featureRowsHtml}${summaryHtml}</tbody>` +
-            `</table>` +
-            `</div>` +
-            `</div>`
+                `<div class="tc-comparator-table">` +
+                `<table class="tc-comparator__table">` +
+                theadHtml +
+                `<tbody>${featureRowsHtml}${summaryHtml}</tbody>` +
+                `</table>` +
+                `</div>` +
+                `</div>`,
+        )
     }
 }
 

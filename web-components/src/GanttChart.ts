@@ -1,6 +1,8 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { msg } from './messages'
 import { fixedOriginOffset } from './internal/containingBlock'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-gantt-chart'
 
 // One task bar on the Gantt timeline. `label` is the canonical display field;
@@ -95,7 +97,7 @@ export class GanttChart extends HTMLElement {
         return this.getAttribute('subtitle') ?? ''
     }
     set subtitle(v: string) {
-        this.setAttribute('subtitle', v)
+        setAttr(this, 'subtitle', v)
     }
 
     get startDate(): string | null {
@@ -206,7 +208,10 @@ export class GanttChart extends HTMLElement {
 
         if (!this._tasks.length) {
             this._resolved = []
-            this.innerHTML = `<div class="tc-gantt-chart">${headerHtml}<div class="tc-gantt-chart-empty">No tasks</div></div>`
+            patchHtml(
+                this,
+                `<div class="tc-gantt-chart">${headerHtml}<div class="tc-gantt-chart-empty">No tasks</div></div>`,
+            )
             return
         }
 
@@ -256,24 +261,26 @@ export class GanttChart extends HTMLElement {
 
         const tooltipHtml = `<div class="tc-gantt-chart-tooltip" role="status" aria-live="polite" hidden></div>`
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-gantt-chart">` +
-            headerHtml +
-            `<div class="tc-gantt-chart-scroll" tabindex="0" role="region" aria-label="${esc((titleAttr || 'Gantt chart') + ' timeline, scrollable')}">` +
-            `<div class="tc-gantt-chart-grid" style="min-width:${contentMin}px">` +
-            `<div class="tc-gantt-chart-axis"><div class="tc-gantt-chart-axis-spacer"></div><div class="tc-gantt-chart-axis-track">${ticksHtml}</div></div>` +
-            `<div class="tc-gantt-chart-body"><div class="tc-gantt-chart-gridlines">${gridlinesHtml}</div>${rowsHtml}</div>` +
-            `</div>` +
-            `</div>` +
-            tooltipHtml +
-            `</div>`
+                headerHtml +
+                `<div class="tc-gantt-chart-scroll" tabindex="0" role="region" aria-label="${esc((titleAttr || 'Gantt chart') + ' timeline, scrollable')}">` +
+                `<div class="tc-gantt-chart-grid" style="min-width:${contentMin}px">` +
+                `<div class="tc-gantt-chart-axis"><div class="tc-gantt-chart-axis-spacer"></div><div class="tc-gantt-chart-axis-track">${ticksHtml}</div></div>` +
+                `<div class="tc-gantt-chart-body"><div class="tc-gantt-chart-gridlines">${gridlinesHtml}</div>${rowsHtml}</div>` +
+                `</div>` +
+                `</div>` +
+                tooltipHtml +
+                `</div>`,
+        )
 
         const grid = this.querySelector<HTMLElement>('.tc-gantt-chart-grid')
         if (grid) {
-            grid.addEventListener('pointermove', this._onPointerMove)
-            grid.addEventListener('pointerleave', this._onPointerLeave)
-            grid.addEventListener('click', this._onBarActivate)
-            grid.addEventListener('keydown', this._onBarKeydown)
+            bindOnce(grid, 'pointermove', this._onPointerMove)
+            bindOnce(grid, 'pointerleave', this._onPointerLeave)
+            bindOnce(grid, 'click', this._onBarActivate)
+            bindOnce(grid, 'keydown', this._onBarKeydown)
         }
     }
 
@@ -292,12 +299,14 @@ export class GanttChart extends HTMLElement {
                 `<div class="tc-gantt-chart-skeleton tc-gantt-chart-skeleton--bar"></div>` +
                 `</div>`,
         ).join('')
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-gantt-chart">` +
-            headHtml +
-            `<div class="tc-gantt-chart-skeleton-body">${rows}</div>` +
-            `<span class="visually-hidden">${esc(msg('loading'))}</span>` +
-            `</div>`
+                headHtml +
+                `<div class="tc-gantt-chart-skeleton-body">${rows}</div>` +
+                `<span class="visually-hidden">${esc(msg('loading'))}</span>` +
+                `</div>`,
+        )
     }
 
     // ---- bar lookup ----

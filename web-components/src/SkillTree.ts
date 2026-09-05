@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
@@ -215,7 +216,9 @@ export class SkillTree extends HTMLElement {
                </div>`
                 : ''
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             ${pointsHtml}
             <div class="tc-skill-tree__canvas" style="width:${w}px;height:${h}px;">
                 <svg class="tc-skill-tree__edges"
@@ -225,12 +228,13 @@ export class SkillTree extends HTMLElement {
                      aria-hidden="true">${edgesMarkup}</svg>
                 ${nodesMarkup}
             </div>
-        `
+        `,
+        )
 
         const canvas = this.querySelector<HTMLElement>('.tc-skill-tree__canvas')
         if (!canvas) return
 
-        canvas.addEventListener('click', (e: Event) => {
+        bindOnce(canvas, 'click', (e: Event) => {
             const node = (e.target as Element).closest<HTMLElement>('.tc-skill-tree__node')
             if (!node || node.getAttribute('aria-disabled') === 'true') return
             const id = node.dataset.id ?? ''
@@ -239,7 +243,7 @@ export class SkillTree extends HTMLElement {
             this._fireSelect(id)
         })
 
-        canvas.addEventListener('dblclick', (e: Event) => {
+        bindOnce(canvas, 'dblclick', (e: Event) => {
             const node = (e.target as Element).closest<HTMLElement>('.tc-skill-tree__node')
             if (!node || node.getAttribute('aria-disabled') === 'true') return
             const id = node.dataset.id ?? ''
@@ -248,7 +252,7 @@ export class SkillTree extends HTMLElement {
             this._fireUnlock(id)
         })
 
-        canvas.addEventListener('keydown', (e: KeyboardEvent) => {
+        bindOnce(canvas, 'keydown', (e: KeyboardEvent) => {
             const node = (e.target as Element).closest<HTMLElement>('.tc-skill-tree__node')
             if (!node || node.getAttribute('aria-disabled') === 'true') return
             if (e.key === 'Enter' || e.key === ' ') {

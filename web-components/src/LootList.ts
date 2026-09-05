@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-loot-list'
 
@@ -84,17 +85,20 @@ export class LootList extends HTMLElement {
 
         const allDisabled = this._items.length === 0 ? ' disabled' : ''
 
-        this.innerHTML = `<div class="tc-loot-list">
+        patchHtml(
+            this,
+            `<div class="tc-loot-list">
             <div class="tc-loot-list-header">
                 <span class="tc-loot-list-title">${esc(this.listTitle)}</span>
                 <button type="button" class="tc-loot-list-btn tc-loot-list-take-all" data-action="take-all"${allDisabled}>Take All</button>
             </div>
             <div class="tc-loot-list-rows">${rowsHtml}${emptyHtml}</div>
-        </div>`
+        </div>`,
+        )
 
         const container = this.querySelector<HTMLElement>('.tc-loot-list')
         if (container) {
-            container.addEventListener('click', (e: Event) => {
+            bindOnce(container, 'click', (e: Event) => {
                 const btn = (e.target as Element).closest<HTMLButtonElement>('[data-action]')
                 if (!btn || btn.disabled) return
                 const action = btn.dataset.action

@@ -29,6 +29,13 @@ tc-audio-mixer {
     --bs-audio-mixer-clip-text: #fff;
     --bs-audio-mixer-clip-active-bg: var(--tc-app-accent);
     --bs-audio-mixer-clip-active-edge: var(--tc-accent);
+    // Selected-clip label ink: derived from --tc-app-accent-contrast (not the
+    // idle-clip #fff above) since --bs-audio-mixer-clip-active-bg IS the theme
+    // accent, and several bundled themes (aurora mint, sunshine/marker yellow,
+    // neon pink) require dark ink on that fill — white text there would be
+    // near-illegible. Themes needing a different pairing (e.g. blueprint's
+    // pink-on-pink) still override this directly on .tc-audio-mixer-clip--selected.
+    --bs-audio-mixer-clip-active-text: var(--tc-app-accent-contrast);
 
     --bs-audio-mixer-playhead-color: var(--tc-accent);
     --bs-audio-mixer-mute-color: var(--tc-danger);
@@ -245,6 +252,11 @@ tc-audio-mixer[disabled] {
     accent-color: var(--tc-app-accent);
     cursor: pointer;
 
+    // Coarse pointers get a 44px hit area without changing the visual track.
+    @media (pointer: coarse) {
+        min-height: 44px;
+    }
+
     &:focus-visible {
         outline: 2px solid var(--tc-app-accent);
         outline-offset: 3px;
@@ -341,6 +353,7 @@ tc-audio-mixer[disabled] {
     }
 
     &--selected {
+        color: var(--bs-audio-mixer-clip-active-text);
         background: var(--bs-audio-mixer-clip-active-bg);
         border-color: var(--bs-audio-mixer-clip-active-edge);
         border-width: 2px;
@@ -506,6 +519,11 @@ tc-audio-mixer[disabled] {
     background: var(--bs-audio-mixer-surface);
     border: 1px solid var(--bs-audio-mixer-border-strong);
     border-radius: 0;
+
+    // Coarse pointers get a 44px hit area without resizing the visual control.
+    @media (pointer: coarse) {
+        min-height: 44px;
+    }
 
     &:focus-visible {
         outline: 2px solid var(--tc-app-accent);

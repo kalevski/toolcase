@@ -74,9 +74,11 @@ tc-theme[name='dungeon'],
     }
 
     // -------------------------------------------------------------------------
-    // 6. Body serif copy
+    // 6. Body serif copy — targets the consumer's own children directly: the
+    //    component never wraps them in a `.offcanvas-body` element (rule 1,
+    //    see base _offcanvas.scss), so that class never matches anything here.
     // -------------------------------------------------------------------------
-    .offcanvas-body {
+    .offcanvas > :not(.offcanvas-header) {
         font-family: var(--fg-body);
         color: var(--fg-parch);
     }

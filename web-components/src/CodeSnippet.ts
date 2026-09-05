@@ -1,6 +1,9 @@
+import { patchHtml } from './internal/patch-html'
+import { consumerText, observeContent } from './internal/content-observer'
 import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-code-snippet'
 
@@ -45,10 +48,7 @@ const BASH_TOKEN_SRC =
 // corrupting the entity (it renders as a literal "&#039;"). Keeping quotes raw
 // lets the string-token regexes match '…' / "…" correctly and emits no entity.
 function escCode(value: string): string {
-    return String(value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
+    return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }
 
 function applyHighlight(code: string, language: CodeSnippetLanguage): string {
@@ -91,6 +91,9 @@ const SKEL_WIDTHS = ['60%', '85%', '70%', '45%', '90%', '55%']
 
 export class CodeSnippet extends HTMLElement {
     private _initialised = false
+    /** True when `code` was taken from the consumer's children rather than given
+     *  as an attribute — the only case that should follow them. */
+    private _codeFromContent = false
     private _copied = false
     private _copyTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -110,17 +113,32 @@ export class CodeSnippet extends HTMLElement {
             // Slotted text-content fallback: capture textContent as code when
             // no code attribute is present (e.g. <tc-code-snippet>…</tc-code-snippet>).
             if (!this.hasAttribute('code')) {
-                const text = this.textContent?.trim() ?? ''
-                if (text) this.setAttribute('code', text)
+                const text = consumerText(this)
+                if (text) {
+                    this._codeFromContent = true
+                    this.setAttribute('code', text)
+                }
             }
             this.render()
             this._initialised = true
         }
+        // Code that came from the children is a COPY of them, so it has to be
+        // re-taken when React rewrites them — otherwise the snippet keeps showing
+        // code that is no longer in the tree (see content-observer.ts).
+        observeContent(this, () => this._syncCodeFromContent())
         // Listeners are (re)attached on every connect — disconnectedCallback removes
         // them, and a move/remount (React reconciliation) disconnects then reconnects
         // without re-running the one-time init above. Re-adding the same handler
         // reference is a no-op, so this is safe to repeat.
         this.addEventListener('click', this._onHostClick)
+    }
+
+    /** Re-take the code from the children — only when that is where it came from,
+     *  so an explicit `code` attribute is never overwritten. */
+    private _syncCodeFromContent(): void {
+        if (!this._codeFromContent) return
+        const text = consumerText(this)
+        if (text && text !== this.getAttribute('code')) this.setAttribute('code', text)
     }
 
     disconnectedCallback(): void {
@@ -140,7 +158,7 @@ export class CodeSnippet extends HTMLElement {
         return this.getAttribute('code') ?? ''
     }
     set code(v: string) {
-        this.setAttribute('code', v)
+        setAttr(this, 'code', v)
     }
 
     get language(): CodeSnippetLanguage {
@@ -148,7 +166,7 @@ export class CodeSnippet extends HTMLElement {
         return LANGUAGES.includes(v) ? v : 'javascript'
     }
     set language(v: CodeSnippetLanguage) {
-        this.setAttribute('language', v)
+        setAttr(this, 'language', v)
     }
 
     // title reflects the native HTMLElement.title attribute — no override needed.
@@ -229,14 +247,16 @@ export class CodeSnippet extends HTMLElement {
         const loading = this.hasAttribute('loading')
 
         if (loading) {
-            this.innerHTML =
+            patchHtml(
+                this,
                 `<div class="tc-code-snippet tc-code-snippet--loading" aria-busy="true">` +
-                `<div class="tc-code-snippet-skel">` +
-                SKEL_WIDTHS.map(
-                    (w) => `<div class="tc-code-snippet-skel-line" style="width:${w}"></div>`,
-                ).join('') +
-                `</div>` +
-                `</div>`
+                    `<div class="tc-code-snippet-skel">` +
+                    SKEL_WIDTHS.map(
+                        (w) => `<div class="tc-code-snippet-skel-line" style="width:${w}"></div>`,
+                    ).join('') +
+                    `</div>` +
+                    `</div>`,
+            )
             return
         }
 
@@ -260,12 +280,14 @@ export class CodeSnippet extends HTMLElement {
 
         const highlightedCode = applyHighlight(code, language)
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-code-snippet">` +
-            headerHtml +
-            `<pre class="tc-code-snippet-pre"><code class="tc-code-snippet-code language-${esc(language)}">${highlightedCode}</code></pre>` +
-            `<div class="tc-code-snippet-status" role="status" aria-live="polite"></div>` +
-            `</div>`
+                headerHtml +
+                `<pre class="tc-code-snippet-pre"><code class="tc-code-snippet-code language-${esc(language)}">${highlightedCode}</code></pre>` +
+                `<div class="tc-code-snippet-status" role="status" aria-live="polite"></div>` +
+                `</div>`,
+        )
     }
 }
 

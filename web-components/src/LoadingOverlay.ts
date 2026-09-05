@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-loading-overlay'
 
@@ -89,7 +90,9 @@ export class LoadingOverlay extends HTMLElement {
 
         const tipMarkup = tip ? `<div class="tc-loading-overlay-tip">${esc(tip)}</div>` : ''
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <div class="tc-loading-overlay-backdrop" aria-hidden="true"></div>
             <div class="tc-loading-overlay-panel">
                 <div class="tc-loading-overlay-spinner" aria-hidden="true">
@@ -105,7 +108,8 @@ export class LoadingOverlay extends HTMLElement {
                 </div>
                 ${tipMarkup}
             </div>
-        `
+        `,
+        )
     }
 }
 

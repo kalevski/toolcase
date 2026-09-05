@@ -1,3 +1,5 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
+import { adoptChildren } from './internal/adopt-children'
 import { Menu } from 'lucide-static'
 import { icon } from './icons'
 
@@ -7,6 +9,8 @@ const menuIcon = icon(Menu)
 
 let _uid = 0
 
+// `slot="…"` on a child names the region it belongs in; everything else is page
+// content. The class suffix is the slot name, so one lookup covers all of them.
 const NAMED_SLOTS: string[] = [
     'navbar-left',
     'navbar-right',
@@ -15,19 +19,14 @@ const NAMED_SLOTS: string[] = [
     'sidebar-panel',
 ]
 
-function isNamedSlotNode(n: Node): boolean {
-    return n instanceof Element && NAMED_SLOTS.includes(n.getAttribute('slot') ?? '')
+function slotOf(node: Node): string {
+    const named = node instanceof Element ? (node.getAttribute('slot') ?? '') : ''
+    return NAMED_SLOTS.includes(named) ? named : 'content'
 }
 
 export class DashboardLayout extends HTMLElement {
     private _initialised = false
     private _sidebarId: string
-    private _navbarLeftNodes: Node[] = []
-    private _navbarRightNodes: Node[] = []
-    private _brandNodes: Node[] = []
-    private _sidebarMenuNodes: Node[] = []
-    private _sidebarPanelNodes: Node[] = []
-    private _contentNodes: Node[] = []
     private _keydownHandler: ((e: KeyboardEvent) => void) | null = null
     // ≥lg the sidebar is a pinned rail (never inert); below it is a drawer.
     private _desktopMq: MediaQueryList | null = null
@@ -46,17 +45,12 @@ export class DashboardLayout extends HTMLElement {
 
     connectedCallback(): void {
         if (!this._initialised) {
-            this._navbarLeftNodes = Array.from(this.querySelectorAll('[slot="navbar-left"]'))
-            this._navbarRightNodes = Array.from(this.querySelectorAll('[slot="navbar-right"]'))
-            this._brandNodes = Array.from(this.querySelectorAll('[slot="brand"]'))
-            this._sidebarMenuNodes = Array.from(this.querySelectorAll('[slot="sidebar-menu"]'))
-            this._sidebarPanelNodes = Array.from(this.querySelectorAll('[slot="sidebar-panel"]'))
-            this._contentNodes = Array.from(this.childNodes).filter((n) => !isNamedSlotNode(n))
+            const slotContent = Array.from(this.childNodes)
 
             // Closed by default: on mobile this keeps the drawer hidden; on desktop
             // (≥992px) CSS pins the sidebar open regardless of this attribute.
             this.render()
-            this._distributeSlots()
+            this._distributeSlots(slotContent)
             this._applyOpenClass()
             this._initialised = true
         }
@@ -139,19 +133,18 @@ export class DashboardLayout extends HTMLElement {
         }
     }
 
-    private _distributeSlots(): void {
-        const navLeftEl = this.querySelector('.tc-dashboard-layout__navbar-left')
-        if (navLeftEl) this._navbarLeftNodes.forEach((n) => navLeftEl.appendChild(n))
-        const navRightEl = this.querySelector('.tc-dashboard-layout__navbar-right')
-        if (navRightEl) this._navbarRightNodes.forEach((n) => navRightEl.appendChild(n))
-        const brandEl = this.querySelector('.tc-dashboard-layout__brand')
-        if (brandEl) this._brandNodes.forEach((n) => brandEl.appendChild(n))
-        const sidebarMenuEl = this.querySelector('.tc-dashboard-layout__sidebar-menu')
-        if (sidebarMenuEl) this._sidebarMenuNodes.forEach((n) => sidebarMenuEl.appendChild(n))
-        const sidebarPanelEl = this.querySelector('.tc-dashboard-layout__sidebar-panel')
-        if (sidebarPanelEl) this._sidebarPanelNodes.forEach((n) => sidebarPanelEl.appendChild(n))
-        const contentEl = this.querySelector('.tc-dashboard-layout__content')
-        if (contentEl) this._contentNodes.forEach((n) => contentEl.appendChild(n))
+    /**
+     * Six regions, one route: the consumer's children go where their `slot` says
+     * and the host keeps answering for them — see adopt-children.ts. Routing by
+     * lookup rather than by six snapshots is also what makes a child React adds
+     * LATER land in the right region instead of nowhere.
+     */
+    private _distributeSlots(nodes?: Node[]): void {
+        adoptChildren(
+            this,
+            (node) => this.querySelector(`.tc-dashboard-layout__${slotOf(node)}`),
+            nodes,
+        )
     }
 
     private _attachHandlers(): void {
@@ -171,7 +164,7 @@ export class DashboardLayout extends HTMLElement {
             this._desktopMq = window.matchMedia('(min-width: 992px)')
         }
         // Crossing the lg boundary flips the drawer/rail semantics — re-derive inert.
-        this._desktopMq?.addEventListener('change', this._onMqChange)
+        bindOnce(this._desktopMq, 'change', this._onMqChange)
         this._applyOpenClass()
     }
 
@@ -228,25 +221,27 @@ export class DashboardLayout extends HTMLElement {
     private render(): void {
         const sidebarId = this._sidebarId
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-dashboard-layout">` +
-            `<div class="tc-dashboard-layout__wrapper">` +
-            `<nav class="tc-dashboard-layout__navbar" role="navigation" aria-label="Application navigation">` +
-            `<button class="tc-dashboard-layout__toggle" type="button" aria-label="Toggle sidebar" aria-expanded="false" aria-controls="${sidebarId}">` +
-            menuIcon +
-            `</button>` +
-            `<div class="tc-dashboard-layout__navbar-left"></div>` +
-            `<div class="tc-dashboard-layout__navbar-right"></div>` +
-            `</nav>` +
-            `<div class="tc-dashboard-layout__overlay" aria-hidden="true"></div>` +
-            `<aside class="tc-dashboard-layout__sidebar" id="${sidebarId}" role="navigation" aria-label="Sidebar navigation">` +
-            `<div class="tc-dashboard-layout__brand"></div>` +
-            `<div class="tc-dashboard-layout__sidebar-menu"></div>` +
-            `<div class="tc-dashboard-layout__sidebar-panel"></div>` +
-            `</aside>` +
-            `<main class="tc-dashboard-layout__content"></main>` +
-            `</div>` +
-            `</div>`
+                `<div class="tc-dashboard-layout__wrapper">` +
+                `<nav class="tc-dashboard-layout__navbar" role="navigation" aria-label="Application navigation">` +
+                `<button class="tc-dashboard-layout__toggle" type="button" aria-label="Toggle sidebar" aria-expanded="false" aria-controls="${sidebarId}">` +
+                menuIcon +
+                `</button>` +
+                `<div class="tc-dashboard-layout__navbar-left"></div>` +
+                `<div class="tc-dashboard-layout__navbar-right"></div>` +
+                `</nav>` +
+                `<div class="tc-dashboard-layout__overlay" aria-hidden="true"></div>` +
+                `<aside class="tc-dashboard-layout__sidebar" id="${sidebarId}" role="navigation" aria-label="Sidebar navigation">` +
+                `<div class="tc-dashboard-layout__brand"></div>` +
+                `<div class="tc-dashboard-layout__sidebar-menu"></div>` +
+                `<div class="tc-dashboard-layout__sidebar-panel"></div>` +
+                `</aside>` +
+                `<main class="tc-dashboard-layout__content"></main>` +
+                `</div>` +
+                `</div>`,
+        )
     }
 }
 

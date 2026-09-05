@@ -33,9 +33,14 @@ tc-menu-item {
     --bs-menu-item-hotkey-color: var(--tc-text-muted);
     --bs-menu-item-hotkey-bg: var(--tc-surface-muted);
     --bs-menu-item-hotkey-border: 1px solid var(--tc-border);
-    --bs-menu-item-hotkey-selected-color: rgba(255, 255, 255, 0.85);
-    --bs-menu-item-hotkey-selected-bg: rgba(255, 255, 255, 0.12);
-    --bs-menu-item-hotkey-selected-border: 1px solid rgba(255, 255, 255, 0.2);
+    // Derived from the accent-contrast ink (not a bare white literal): on
+    // themes whose --tc-app-accent-contrast is dark (aurora/sunshine/neon/
+    // marker all pair a bright accent fill with dark ink and ship no
+    // menu-item override), a hardcoded white hotkey badge would sit on top
+    // of the same bright selected-row fill and become unreadable.
+    --bs-menu-item-hotkey-selected-color: color-mix(in srgb, var(--tc-app-accent-contrast) 85%, transparent);
+    --bs-menu-item-hotkey-selected-bg: color-mix(in srgb, var(--tc-app-accent-contrast) 12%, transparent);
+    --bs-menu-item-hotkey-selected-border: 1px solid color-mix(in srgb, var(--tc-app-accent-contrast) 20%, transparent);
 
     // ── Layout ──────────────────────────────────────────────────────────────────
     display: flex;

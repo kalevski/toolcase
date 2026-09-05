@@ -78,6 +78,10 @@ export type MobileShellScrollRestore = 'auto' | 'manual'
 
 export class MobileShell extends HTMLElement {
     private _pane: HTMLElement | null = null
+    /** Pull-to-refresh gesture state. `-1` for "no gesture in progress". */
+    private _pullStartY = -1
+    private _pullDistance = 0
+    private _pullClaimed = false
     private _scrolled = false
     private _emittedTop = -1
     private _scrollRaf = 0
@@ -92,7 +96,15 @@ export class MobileShell extends HTMLElement {
     onScrollStateChange: ((scrolled: boolean) => void) | null = null
 
     static get observedAttributes(): string[] {
-        return ['data-key', 'edge', 'pane-bg', 'scroll-restore', 'desktop']
+        return [
+            'data-key',
+            'edge',
+            'pane-bg',
+            'scroll-restore',
+            'desktop',
+            'pull-to-refresh',
+            'refreshing',
+        ]
     }
 
     connectedCallback(): void {
@@ -197,6 +209,17 @@ export class MobileShell extends HTMLElement {
             next.setAttribute('role', 'main')
         }
         next.addEventListener('scroll', this._onScroll, { passive: true })
+        // Pull-to-refresh. Attached unconditionally and gated inside the handlers
+        // on the attribute, so turning it on mid-session needs no re-attach — and
+        // a passive touchstart costs nothing when the feature is off.
+        next.addEventListener('touchstart', this._onPullStart, { passive: true })
+        // NON-passive, and this is the only reason it is: `preventDefault()` on the
+        // first touchmove is the one way to stop the browser's OWN overscroll
+        // (Chrome's native pull-to-refresh, iOS's rubber band) from answering the
+        // same gesture. Only the first move of a gesture is cancelable.
+        next.addEventListener('touchmove', this._onPullMove, { passive: false })
+        next.addEventListener('touchend', this._onPullEnd, { passive: true })
+        next.addEventListener('touchcancel', this._onPullEnd, { passive: true })
         // Any of these means the user has taken over; an in-flight restore must
         // stop fighting them mid-gesture.
         next.addEventListener('pointerdown', this._onUserIntent, { passive: true })
@@ -208,6 +231,11 @@ export class MobileShell extends HTMLElement {
         const pane = this._pane
         if (!pane) return
         pane.removeEventListener('scroll', this._onScroll)
+        pane.removeEventListener('touchstart', this._onPullStart)
+        pane.removeEventListener('touchmove', this._onPullMove)
+        pane.removeEventListener('touchend', this._onPullEnd)
+        pane.removeEventListener('touchcancel', this._onPullEnd)
+        this._resetPull(pane)
         pane.removeEventListener('pointerdown', this._onUserIntent)
         pane.removeEventListener('wheel', this._onUserIntent)
         pane.removeEventListener('keydown', this._onUserIntent)
@@ -225,6 +253,110 @@ export class MobileShell extends HTMLElement {
             if (this._pane !== before) this._restore()
         })
         this._children.observe(this, { childList: true })
+    }
+
+    // ── Pull to refresh ──────────────────────────────────────────────────────
+    //
+    // From polovni.mk's `usePullToRefresh`, which the report placed INSIDE this
+    // element rather than beside it — and that is the right home for three
+    // reasons the hook could not solve from outside:
+    //
+    //   - the gesture belongs to the pane, and only this element knows which of
+    //     its children the pane is (it changes on every route);
+    //   - `overscroll-behavior-y: none` is already set globally by this library,
+    //     so the browser's own pull-to-refresh is off and something has to give
+    //     the gesture back;
+    //   - the indicator has to sit above the pane's content and below the app
+    //     bar, which is this element's own layout and nobody else's.
+    //
+    // THE GESTURE IS CLAIMED ONLY FROM THE TOP. A pull that starts anywhere but
+    // `scrollTop === 0` is a scroll, and claiming it would make the pane feel
+    // sticky halfway down a long list. It is also only claimed DOWNWARD: an
+    // upward move releases the gesture back to the pane immediately.
+
+    /** Turn the gesture on. Off by default — a surface with nothing to refetch
+     *  should not answer a pull. */
+    get pullToRefresh(): boolean {
+        return this.hasAttribute('pull-to-refresh')
+    }
+    set pullToRefresh(v: boolean) {
+        if (v) this.setAttribute('pull-to-refresh', '')
+        else this.removeAttribute('pull-to-refresh')
+    }
+
+    /** The consumer's own refresh state. The element never sets this: it fires
+     *  `tc-refresh` and the app decides when the work is done, because only the
+     *  app knows what "refreshed" means. */
+    get refreshing(): boolean {
+        return this.hasAttribute('refreshing')
+    }
+    set refreshing(v: boolean) {
+        if (v) this.setAttribute('refreshing', '')
+        else this.removeAttribute('refreshing')
+    }
+
+    /** How far the pane must be pulled before the gesture counts, in px. */
+    private get _pullThreshold(): number {
+        const raw = Number(this.getAttribute('pull-threshold'))
+        return Number.isFinite(raw) && raw > 0 ? raw : 72
+    }
+
+    private _onPullStart = (event: TouchEvent): void => {
+        if (!this.pullToRefresh || this.refreshing) return
+        const pane = this._pane
+        if (!pane || pane.scrollTop > 0) return
+        if (event.touches.length !== 1) return
+        this._pullStartY = event.touches[0].clientY
+        this._pullDistance = 0
+        this._pullClaimed = false
+    }
+
+    private _onPullMove = (event: TouchEvent): void => {
+        if (this._pullStartY < 0) return
+        const pane = this._pane
+        if (!pane) return
+        const delta = event.touches[0].clientY - this._pullStartY
+        if (delta <= 0) {
+            // Upward: this is a scroll after all. Hand it straight back rather than
+            // holding the gesture and making the list feel stuck.
+            this._resetPull(pane)
+            return
+        }
+        // Claimed on the FIRST downward move, which is the only one that can still
+        // be cancelled — after that the browser owns the pan.
+        if (!this._pullClaimed) {
+            if (pane.scrollTop > 0) {
+                this._resetPull(pane)
+                return
+            }
+            this._pullClaimed = true
+        }
+        if (event.cancelable) event.preventDefault()
+        // Resisted, not linear: the pull slows as it goes so the threshold is felt
+        // rather than counted, and a long drag cannot pull the pane off screen.
+        this._pullDistance = Math.min(this._pullThreshold * 1.5, delta * 0.45)
+        this.style.setProperty('--tc-pull-distance', `${this._pullDistance.toFixed(1)}px`)
+        this.setAttribute(
+            'data-pull',
+            this._pullDistance >= this._pullThreshold ? 'ready' : 'pulling',
+        )
+    }
+
+    private _onPullEnd = (): void => {
+        const pane = this._pane
+        const reached = this._pullClaimed && this._pullDistance >= this._pullThreshold
+        if (pane) this._resetPull(pane)
+        if (!reached) return
+        this.dispatchEvent(new CustomEvent('tc-refresh', { bubbles: true, composed: true }))
+    }
+
+    private _resetPull(pane: HTMLElement | null): void {
+        void pane
+        this._pullStartY = -1
+        this._pullDistance = 0
+        this._pullClaimed = false
+        this.style.removeProperty('--tc-pull-distance')
+        this.removeAttribute('data-pull')
     }
 
     // ── Scroll state ─────────────────────────────────────────────────────────

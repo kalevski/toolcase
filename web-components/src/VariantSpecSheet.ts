@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 
 const TAG_NAME = 'tc-variant-spec-sheet'
@@ -226,7 +227,8 @@ export class VariantSpecSheet extends HTMLElement {
     private _powertrainRows(): SpecRow[] {
         const v = this._variant
         const rows: SpecRow[] = []
-        if (has(v.powertrain)) rows.push({ label: 'Powertrain', value: humanize(v.powertrain as string) })
+        if (has(v.powertrain))
+            rows.push({ label: 'Powertrain', value: humanize(v.powertrain as string) })
         if (has(v.fuelType)) rows.push({ label: 'Fuel', value: humanize(v.fuelType as string) })
         if (has(v.gearboxType)) {
             const gearsSuffix = has(v.gears) ? ` · ${v.gears}` : ''
@@ -237,7 +239,9 @@ export class VariantSpecSheet extends HTMLElement {
         if (has(v.drivetrainType)) {
             rows.push({
                 label: 'Drivetrain',
-                value: DRIVETRAIN_LABELS[v.drivetrainType as string] ?? humanize(v.drivetrainType as string),
+                value:
+                    DRIVETRAIN_LABELS[v.drivetrainType as string] ??
+                    humanize(v.drivetrainType as string),
             })
         }
         return rows
@@ -250,10 +254,14 @@ export class VariantSpecSheet extends HTMLElement {
             rows.push({ label: 'Front suspension', value: humanize(v.frontSuspension as string) })
         if (has(v.rearSuspension))
             rows.push({ label: 'Rear suspension', value: humanize(v.rearSuspension as string) })
-        if (has(v.frontBrakes)) rows.push({ label: 'Front brakes', value: humanize(v.frontBrakes as string) })
-        if (has(v.rearBrakes)) rows.push({ label: 'Rear brakes', value: humanize(v.rearBrakes as string) })
-        if (has(v.frontTyre)) rows.push({ label: 'Front tyres', value: v.frontTyre as string, mono: true })
-        if (has(v.rearTyre)) rows.push({ label: 'Rear tyres', value: v.rearTyre as string, mono: true })
+        if (has(v.frontBrakes))
+            rows.push({ label: 'Front brakes', value: humanize(v.frontBrakes as string) })
+        if (has(v.rearBrakes))
+            rows.push({ label: 'Rear brakes', value: humanize(v.rearBrakes as string) })
+        if (has(v.frontTyre))
+            rows.push({ label: 'Front tyres', value: v.frontTyre as string, mono: true })
+        if (has(v.rearTyre))
+            rows.push({ label: 'Rear tyres', value: v.rearTyre as string, mono: true })
         return rows
     }
 
@@ -262,20 +270,30 @@ export class VariantSpecSheet extends HTMLElement {
         const rows: SpecRow[] = []
         if (has(v.seats)) rows.push({ label: 'Seats', value: String(v.seats) })
         if (has(v.doors)) rows.push({ label: 'Doors', value: String(v.doors) })
-        if (has(v.lengthMm)) rows.push({ label: 'Length', value: `${int(v.lengthMm as number)} mm` })
+        if (has(v.lengthMm))
+            rows.push({ label: 'Length', value: `${int(v.lengthMm as number)} mm` })
         if (has(v.widthMm)) rows.push({ label: 'Width', value: `${int(v.widthMm as number)} mm` })
-        if (has(v.heightMm)) rows.push({ label: 'Height', value: `${int(v.heightMm as number)} mm` })
+        if (has(v.heightMm))
+            rows.push({ label: 'Height', value: `${int(v.heightMm as number)} mm` })
         if (has(v.wheelbaseMm))
             rows.push({ label: 'Wheelbase', value: `${int(v.wheelbaseMm as number)} mm` })
         // turning_circle_dm is stored in decimetres — render as metres.
         if (has(v.turningCircleDm))
-            rows.push({ label: 'Turning circle', value: `${dec((v.turningCircleDm as number) / 10)} m` })
+            rows.push({
+                label: 'Turning circle',
+                value: `${dec((v.turningCircleDm as number) / 10)} m`,
+            })
         if (has(v.trunkVolumeL))
             rows.push({ label: 'Trunk volume', value: `${int(v.trunkVolumeL as number)} l` })
-        if (has(v.roofLoadKg)) rows.push({ label: 'Roof load', value: `${int(v.roofLoadKg as number)} kg` })
+        if (has(v.roofLoadKg))
+            rows.push({ label: 'Roof load', value: `${int(v.roofLoadKg as number)} kg` })
         if (has(v.towingCapacityKg))
-            rows.push({ label: 'Towing capacity', value: `${int(v.towingCapacityKg as number)} kg` })
-        if (has(v.maxSlopePct)) rows.push({ label: 'Max slope', value: `${int(v.maxSlopePct as number)}%` })
+            rows.push({
+                label: 'Towing capacity',
+                value: `${int(v.towingCapacityKg as number)} kg`,
+            })
+        if (has(v.maxSlopePct))
+            rows.push({ label: 'Max slope', value: `${int(v.maxSlopePct as number)}%` })
         return rows
     }
 
@@ -287,17 +305,25 @@ export class VariantSpecSheet extends HTMLElement {
         if (has(v.consumptionCityL100km))
             rows.push({ label: 'City', value: `${dec(v.consumptionCityL100km as number)} l/100km` })
         if (has(v.consumptionHwyL100km))
-            rows.push({ label: 'Highway', value: `${dec(v.consumptionHwyL100km as number)} l/100km` })
+            rows.push({
+                label: 'Highway',
+                value: `${dec(v.consumptionHwyL100km as number)} l/100km`,
+            })
         if (has(v.fuelCapacityL))
             rows.push({ label: 'Fuel tank', value: `${dec(v.fuelCapacityL as number)} l` })
         if (has(v.adblueCapacityL))
             rows.push({ label: 'AdBlue tank', value: `${dec(v.adblueCapacityL as number)} l` })
         // NA is the emission_standard enum's explicit "not applicable" — skip it.
         if (has(v.emissionStandard) && v.emissionStandard !== 'NA')
-            rows.push({ label: 'Emission standard', value: v.emissionStandard as string, mono: true })
+            rows.push({
+                label: 'Emission standard',
+                value: v.emissionStandard as string,
+                mono: true,
+            })
         if (has(v.emissionCategory))
             rows.push({ label: 'Emission category', value: v.emissionCategory as string })
-        if (has(v.noiseDb)) rows.push({ label: 'Noise level', value: `${int(v.noiseDb as number)} dB` })
+        if (has(v.noiseDb))
+            rows.push({ label: 'Noise level', value: `${int(v.noiseDb as number)} dB` })
         return rows
     }
 
@@ -307,12 +333,16 @@ export class VariantSpecSheet extends HTMLElement {
             this._sectionHtml('Chassis', this._chassisRows()) +
             this._sectionHtml('Dimensions', this._dimensionRows()) +
             this._sectionHtml('Consumption & Emissions', this._consumptionRows())
-        this.innerHTML =
+        patchHtml(
+            this,
             `<article class="tc-variant-spec-sheet${this.dense ? ' tc-variant-spec-sheet--dense' : ''}">` +
-            this._headerHtml() +
-            this._heroHtml() +
-            (sectionsHtml ? `<div class="tc-variant-spec-sheet-body">${sectionsHtml}</div>` : '') +
-            `</article>`
+                this._headerHtml() +
+                this._heroHtml() +
+                (sectionsHtml
+                    ? `<div class="tc-variant-spec-sheet-body">${sectionsHtml}</div>`
+                    : '') +
+                `</article>`,
+        )
     }
 }
 

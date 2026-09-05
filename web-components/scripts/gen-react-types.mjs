@@ -1,233 +1,84 @@
 // Generates src/react-types.ts — opt-in React JSX typings for every tc-* custom element.
 //
-// Source of truth is src/register.ts: every `customElements.define('tc-...', Class)`
-// call. For each tag we resolve Class -> source file (from register's imports) and
-// read that class's `static get observedAttributes()` to type its attributes.
-// Events are detected by scanning for `this.emit('tc-...')` and
-// `new CustomEvent('tc-...')` calls in the component file and any
-// `./internal/` helpers it imports.
-// Emits a JSX.IntrinsicElements augmentation for both React.JSX (React 17+/19) and
-// the global JSX namespace (React 18).
+// The facts come from scripts/component-manifest.mjs, which is shared with
+// gen-react-components.mjs so the JSX types and the wrapper components can never
+// drift apart. This file only renders them.
+//
+// EVENT PROPS ARE HYPHENATED ON PURPOSE. React routes any unrecognised `on*` prop
+// on a custom element through `addEventListener(key.slice(2), value)` with NO case
+// conversion (react-dom 19.2.7, setPropOnCustomElement). So `onTcChange` listens
+// for an event named `TcChange`, which nothing in this library ever fires, while
+// `'ontc-change'` listens for `tc-change`, which is the real event name. The
+// camelCase form is therefore not emitted at all — a typed prop that compiles and
+// silently does nothing is worse than no prop. (The generated wrapper components
+// in `./react/components` do take camelCase handlers; they call addEventListener
+// themselves, so there the name is theirs to choose.)
 //
 // Run:  npm -w @toolcase/web-components run gen:react-types
-import { readFileSync, writeFileSync, readdirSync } from 'node:fs'
+import { writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { collectComponents } from './component-manifest.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const srcDir = join(here, '..', 'src')
-const register = readFileSync(join(srcDir, 'register.ts'), 'utf8')
 
-// local import name -> { file, realName } — handles `import { A, B as C } from './File'`
-const importMap = new Map()
-for (const m of register.matchAll(/import\s*\{([^}]+)\}\s*from\s*'\.\/([A-Za-z0-9_]+)'/g)) {
-    const file = m[2]
-    for (const spec of m[1].split(',')) {
-        const parts = spec.trim().split(/\s+as\s+/)
-        const realName = parts[0].trim()
-        const local = (parts[1] || parts[0]).trim()
-        if (local) importMap.set(local, { file, realName })
+const components = collectComponents()
+
+// module specifier -> Map<exportedName, localAlias>. Every import is `import type`,
+// so none of this reaches the runtime bundle.
+const typeImports = new Map()
+const importType = (module, name) => {
+    let names = typeImports.get(module)
+    if (!names) {
+        names = new Map()
+        typeImports.set(module, names)
     }
+    // `$`-joined so an alias can never collide with a real export name.
+    if (!names.has(name)) names.set(name, `${module.replace(/[./-]/g, '_')}$${name}`)
+    return names.get(name)
 }
 
-// tag -> class name from every customElements.define(...). Two shapes:
-//   define('tc-x', SomeClass)  /  define('tc-x', SomeClass as unknown as ...)
-//   define('tc-x', class extends BaseClass {})  ← anonymous subclass, inherits attrs
-const tagToClass = []
-// register.ts wraps registration in a local `define(tag, ctor)` helper, so match
-// both the wrapper calls `define('tc-x', Class)` and bare `customElements.define`.
-for (const m of register.matchAll(
-    /(?:customElements\.)?\bdefine\(\s*'(tc-[a-z0-9-]+)'\s*,\s*(?:class\s+extends\s+([A-Za-z0-9_]+)|([A-Za-z0-9_]+))/g,
-)) {
-    tagToClass.push({ tag: m[1], cls: m[2] || m[3] })
+const render = (descriptor) => {
+    if (!descriptor) return null
+    if (descriptor.kind === 'boolean') return 'boolean'
+    if (descriptor.kind === 'raw') return descriptor.text
+    if (descriptor.kind === 'named') return importType(descriptor.module, descriptor.name)
+    // 'expr' — a type expression with one or more named references in it
+    // (`FormInputOption[]`); substitute each with its local import alias.
+    let text = descriptor.text
+    for (const ref of descriptor.refs) {
+        text = text.replace(new RegExp(`\\b${ref.name}\\b`, 'g'), importType(ref.module, ref.name))
+    }
+    return text
 }
 
-const fileCache = new Map()
-const readSrc = (file) => {
-    if (!fileCache.has(file)) fileCache.set(file, readFileSync(join(srcDir, `${file}.ts`), 'utf8'))
-    return fileCache.get(file)
-}
-
-const readInternal = (name) => {
-    try {
-        return readFileSync(join(srcDir, 'internal', `${name}.ts`), 'utf8')
-    } catch {
-        return ''
-    }
-}
-
-// NAME -> [string members] for every `(export) const NAME = [ ... ]` array across
-// all source files. Used to expand `...NAME` spreads inside observedAttributes()
-// (e.g. `return ['type', ...TEXT_FIELD_ATTRIBUTES]`), which the per-class literal
-// scan in attrsFor cannot resolve on its own.
-const constMap = new Map()
-const scanConsts = (src) => {
-    for (const m of src.matchAll(/const\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(\[[\s\S]*?\])/g)) {
-        const members = []
-        for (const s of m[2].matchAll(/['"]([^'"]+)['"]/g)) members.push(s[1])
-        if (members.length) constMap.set(m[1], members)
-    }
-}
-for (const dir of [srcDir, join(srcDir, 'internal')]) {
-    let files
-    try {
-        files = readdirSync(dir)
-    } catch {
-        files = []
-    }
-    for (const f of files) {
-        if (!f.endsWith('.ts')) continue
-        try {
-            scanConsts(readFileSync(join(dir, f), 'utf8'))
-        } catch {
-            // skip unreadable file
-        }
-    }
-}
-
-// Resolve an exported name to the declared class name, following export aliases
-// like `export { TcFile as File }` (used where the natural class name collides
-// with a DOM global).
-const declaredClassName = (src, exportedName) => {
-    for (const m of src.matchAll(/export\s*\{([^}]+)\}/g)) {
-        for (const spec of m[1].split(',')) {
-            const parts = spec.trim().split(/\s+as\s+/)
-            if (parts.length === 2 && parts[1].trim() === exportedName) return parts[0].trim()
-        }
-    }
-    return exportedName
-}
-
-// Extract a class's observed attributes. Indexes every class declaration in the
-// file, slices the target class's body up to the next declaration, then reads its
-// `observedAttributes` return array.
-const attrsFor = (localName) => {
-    const entry = importMap.get(localName)
-    if (!entry) return []
-    let src
-    try {
-        src = readSrc(entry.file)
-    } catch {
-        return []
-    }
-    const className = declaredClassName(src, entry.realName)
-    // Anchored to line start so the word "class" inside comments/strings can't
-    // register as a declaration and truncate the real class's body slice.
-    const decls = [...src.matchAll(/^(?:export\s+)?(?:abstract\s+)?class\s+(\w+)/gm)]
-    const i = decls.findIndex((d) => d[1] === className)
-    if (i === -1) return []
-    const body = src.slice(decls[i].index, i + 1 < decls.length ? decls[i + 1].index : undefined)
-    const obs = body.match(
-        /observedAttributes\s*\(\s*\)\s*:\s*[^{]*\{[\s\S]*?\breturn\s*(\[[\s\S]*?\])/,
-    )
-    if (!obs) return []
-    const attrs = []
-    for (const s of obs[1].matchAll(/['"]([^'"]+)['"]/g)) attrs.push(s[1])
-    // Expand `...CONST` spreads (shared/base-class attribute lists) the literal
-    // scan above can't see, e.g. `return ['type', ...TEXT_FIELD_ATTRIBUTES]`.
-    for (const sp of obs[1].matchAll(/\.\.\.([A-Za-z_][A-Za-z0-9_]*)/g)) {
-        const members = constMap.get(sp[1])
-        if (members) attrs.push(...members)
-    }
-    return [...new Set(attrs)].sort()
-}
-
-// Collect tc-* event names from a source string.
-const collectEvents = (src, set) => {
-    for (const m of src.matchAll(/(?:this\.emit|\.emit)\s*\(\s*'(tc-[a-z][a-z0-9-]*)'/g))
-        set.add(m[1])
-    // The optional `<Detail>` group is not cosmetic: five components type the
-    // detail at the construction site, and without it their events were silently
-    // absent from the generated props — tc-generate on tc-bitmap-font-generator
-    // and tc-normal-map-generator, tc-continue on tc-press-any-key, tc-step-click
-    // on tc-welcome-guide, tc-shell-scroll on tc-mobile-shell. `[^>]*` suffices;
-    // no detail type in this library is itself generic.
-    for (const m of src.matchAll(/new\s+CustomEvent\s*(?:<[^>]*>)?\s*\(\s*'(tc-[a-z][a-z0-9-]*)'/g))
-        set.add(m[1])
-}
-
-// Extract the tc-* events a component emits. Scans the component's own source
-// file plus any ./internal/ files it imports (for inherited base-class events).
-const eventsFor = (localName) => {
-    const entry = importMap.get(localName)
-    if (!entry) return []
-    let src
-    try {
-        src = readSrc(entry.file)
-    } catch {
-        return []
-    }
-    const events = new Set()
-    collectEvents(src, events)
-
-    // Follow ./internal/ imports so that base-class events (e.g. tc-show/tc-hidden
-    // from BsOverlay) are captured for components that extend them.
-    for (const m of src.matchAll(/from\s*['"]\.\/internal\/([A-Za-z0-9_-]+)['"]/g)) {
-        collectEvents(readInternal(m[1]), events)
-    }
-
-    return [...events].sort()
-}
-
-// Convert 'tc-foo-bar' -> 'onTcFooBar'
-const eventToProp = (name) =>
-    'on' +
-    name
-        .split('-')
-        .map((s) => s[0].toUpperCase() + s.slice(1))
-        .join('')
-
-// Identify which observed attributes are boolean (presence-based) for a class.
-// Heuristic: a boolean-attribute getter returns `this.hasAttribute('name')` rather
-// than `this.getAttribute('name')`. Scanning for `return this.hasAttribute(...)` is
-// precise — it matches the getter pattern and avoids false positives like
-// `if (!this.hasAttribute('title'))` guards on value attributes.
-// Also follows ./internal/ imports so that attributes inherited from base helpers
-// (e.g. `open` from bs-overlay, `disabled`/`required` from text-field-base) are
-// detected correctly.
-const booleanAttrsFor = (localName) => {
-    const entry = importMap.get(localName)
-    if (!entry) return new Set()
-    let src
-    try {
-        src = readSrc(entry.file)
-    } catch {
-        return new Set()
-    }
-    const boolSet = new Set()
-    const collectBooleans = (text) => {
-        // A boolean attribute is one whose getter RETURNS `this.hasAttribute('name')`.
-        // Two return shapes occur; both stop at statement boundaries (`;{}`) so guards
-        // like `if (!this.hasAttribute(...))` after a bare `return` don't leak in:
-        //   1) single-line:        `return … this.hasAttribute('name')`  (no newline crossing)
-        //   2) parenthesised body: `return (\n  … ?? this.hasAttribute('name')\n)`
-        // A bare `return` is never followed by `(`, so case 2 can't bridge into a later guard.
-        for (const m of text.matchAll(
-            /return\s+[^\n;{}]*?this\.hasAttribute\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
-        )) {
-            boolSet.add(m[1])
-        }
-        for (const m of text.matchAll(
-            /return\s*\([^;{}]*?this\.hasAttribute\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
-        )) {
-            boolSet.add(m[1])
-        }
-    }
-    collectBooleans(src)
-    for (const m of src.matchAll(/from\s*['"]\.\/internal\/([A-Za-z0-9_-]+)['"]/g)) {
-        collectBooleans(readInternal(m[1]))
-    }
-    return boolSet
-}
-
-const components = tagToClass
-    .map(({ tag, cls }) => ({
-        tag,
-        attrs: attrsFor(cls),
-        events: eventsFor(cls),
-        boolAttrs: booleanAttrsFor(cls),
-    }))
-    .sort((a, b) => a.tag.localeCompare(b.tag))
+const rows = components.map((c) => {
+    const attrParts = c.attrs.map((a) => `'${a.name}'?: ${render(a.type)}`)
+    const eventParts = c.events.map((e) => {
+        const detail = render(e.detail)
+        return `'on${e.name}'?: (e: ${detail ? `CustomEvent<${detail}>` : 'CustomEvent'}) => void`
+    })
+    // JS-only props (arrays, objects, `value` on the form elements) belong in the
+    // JSX types too: react-dom writes a prop as a PROPERTY when the name exists on
+    // the upgraded instance, which is exactly these. `<tc-form-input value={state}>`
+    // is the shape a React author reaches for first and it has to compile.
+    //
+    // The callback FIELDS are the exception. React sends any unrecognised `on*`
+    // prop on a custom element to addEventListener, so `onWishlistToggle={fn}` in
+    // plain JSX listens for an event named `WishlistToggle` and never assigns the
+    // property — typing it here would be another prop that compiles and does
+    // nothing. They are reachable through the ./react/components wrappers, which
+    // assign them, or through useTc.
+    const propParts = c.jsProps
+        .filter((p) => !/^on[A-Z]/.test(p.name))
+        .map((p) => `'${p.name}'?: ${render(p.type)}`)
+    // `ref` is typed with the element's own class so `ref.current?.show()` needs
+    // no cast on the overlay elements.
+    const element = c.file ? importType(`./${c.file}`, c.exportName) : 'HTMLElement'
+    const props = [...attrParts, ...propParts, ...eventParts]
+    return `    '${c.tag}': TcProps<${props.length ? `{ ${props.join('; ')} }` : '{}'}, ${element}>`
+})
 
 const lines = []
 lines.push(`// AUTO-GENERATED by scripts/gen-react-types.mjs — do not edit by hand.`)
@@ -236,41 +87,57 @@ lines.push(`//`)
 lines.push(`// Import via the package's ./react entry point (src/react.ts), which also`)
 lines.push(`// exports the useTc / useTcEvents runtime hooks.`)
 lines.push(`//`)
+lines.push(`// Event props are hyphenated — 'ontc-change', not onTcChange. React turns an`)
+lines.push(`// unrecognised on* prop on a custom element into addEventListener(key.slice(2))`)
+lines.push(`// with no case conversion, so only the hyphenated form reaches the real event.`)
+lines.push(`// The wrapper components in ./react/components take camelCase handlers instead.`)
+lines.push(`//`)
 lines.push(`// Regenerate after adding/removing a component or attribute:`)
-lines.push(`//     npm -w @toolcase/web-components run gen:react-types`)
+lines.push(`//     npm -w @toolcase/web-components run gen:react`)
 lines.push(``)
 lines.push(`import type * as React from 'react'`)
+for (const [module, names] of [...typeImports.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
+    const specs = [...names.entries()]
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([name, alias]) => `${name} as ${alias}`)
+        .join(', ')
+    lines.push(`import type { ${specs} } from '${module}'`)
+}
 lines.push(``)
 lines.push(`/**`)
 lines.push(` * Props for a toolcase custom element: standard HTML attributes (className,`)
 lines.push(` * style, ref, event handlers, …) plus the element's own kebab-case attributes`)
-lines.push(` * in \`T\` for autocomplete. Typos in attribute names are now a TypeScript error.`)
-lines.push(` * Use useTc() to wire the on* event handler props at runtime.`)
+lines.push(` * and \`'ontc-*'\` event props in \`T\`. Typos in attribute names are a TypeScript`)
+lines.push(` * error.`)
+lines.push(` *`)
+lines.push(` * \`ref\` accepts EITHER a ref typed with the element's own class \`E\` — so`)
+lines.push(` * \`ref.current?.show()\` needs no cast on the overlay elements — or a plain`)
+lines.push(` * \`HTMLElement\` ref, which is what \`useTc<HTMLElement>()\` and a hand-written`)
+lines.push(` * \`useRef<HTMLElement>(null)\` produce. Narrowing it to \`E\` alone would have made`)
+lines.push(` * every existing \`useRef<HTMLElement>\` a compile error for no gain.`)
 lines.push(` */`)
-lines.push(`export type TcProps<T = {}> = React.DetailedHTMLProps<`)
-lines.push(`    React.HTMLAttributes<HTMLElement> & T,`)
-lines.push(`    HTMLElement`)
-lines.push(`>`)
+// `E` is deliberately unconstrained. Two components (tc-diff-viewer, tc-offcanvas)
+// declare a member that collides with an HTMLElement method — `after` and `scroll` —
+// so they do not satisfy `E extends HTMLElement`. React's own HTMLAttributes<T> /
+// DetailedHTMLProps<_, T> take an unconstrained T, so nothing is lost by matching them.
+// `keyof T` is omitted from the React base as well as `ref`: several elements own
+// a name React also owns with a different type (tc-form-input's `onChange` is
+// `(value, hasError) => void`, not a FormEventHandler), and an intersection of two
+// different function types is an overload set nothing satisfies.
+lines.push(`export type TcProps<T = {}, E = HTMLElement> = Omit<`)
+lines.push(`    React.DetailedHTMLProps<React.HTMLAttributes<E>, E>,`)
+lines.push(`    'ref' | keyof T`)
+lines.push(`> &`)
+lines.push(`    T & {`)
+// One callable constituent (RefCallback<E>, inside React.Ref<E>) so an inline
+// `ref={el => …}` still gets its parameter contextually typed; the extra
+// RefObject arm is what keeps a plain `useRef<HTMLElement>(null)` assignable,
+// since RefObject — unlike the bivariant RefCallback — is invariant in E.
+lines.push(`        ref?: React.Ref<E> | React.RefObject<HTMLElement | null>`)
+lines.push(`    }`)
 lines.push(``)
 lines.push(`export interface ToolcaseIntrinsicElements {`)
-for (const { tag, attrs, events, boolAttrs } of components) {
-    const attrParts = attrs.map((a) => {
-        // Boolean (presence-based) attributes must not accept string | number, because
-        // React sets the attribute string for any truthy value, so `disabled={false}`
-        // would produce `disabled="false"` and keep hasAttribute('disabled') returning true.
-        // Type them as `boolean` only so that false → omit, true → setAttribute('', '').
-        const type = boolAttrs.has(a) ? 'boolean' : 'string | number'
-        return `'${a}'?: ${type}`
-    })
-    const eventParts = events.map((e) => `${eventToProp(e)}?: (e: CustomEvent) => void`)
-    const allParts = [...attrParts, ...eventParts]
-    if (allParts.length === 0) {
-        lines.push(`    '${tag}': TcProps`)
-    } else {
-        const props = allParts.join('; ')
-        lines.push(`    '${tag}': TcProps<{ ${props} }>`)
-    }
-}
+lines.push(...rows)
 lines.push(`}`)
 lines.push(``)
 lines.push(`// React 17+ automatic runtime / React 19 — IntrinsicElements lives on React.JSX.`)
@@ -291,4 +158,15 @@ lines.push(`export {}`)
 lines.push(``)
 
 writeFileSync(join(srcDir, 'react-types.ts'), lines.join('\n'))
-console.log(`Wrote src/react-types.ts — ${components.length} tc-* elements`)
+
+const eventCount = components.reduce((n, c) => n + c.events.length, 0)
+const detailCount = components.reduce((n, c) => n + c.events.filter((e) => e.detail).length, 0)
+const unionCount = components.reduce(
+    (n, c) => n + c.attrs.filter((a) => a.type.kind === 'named').length,
+    0,
+)
+console.log(
+    `Wrote src/react-types.ts — ${components.length} tc-* elements, ` +
+        `${eventCount} event props (${detailCount} with a typed detail), ` +
+        `${unionCount} attributes typed as a declared union`,
+)

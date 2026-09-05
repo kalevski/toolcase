@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { Check, X } from 'lucide-static'
 import type { InventoryItem, ItemRarity } from './ItemSlot'
@@ -119,7 +120,7 @@ export class ItemTooltip extends HTMLElement {
             // source's empty branch.
             this.dataset.empty = ''
             this.removeAttribute('data-rarity')
-            this.innerHTML = ''
+            patchHtml(this, '')
             return
         }
         delete this.dataset.empty
@@ -139,7 +140,9 @@ export class ItemTooltip extends HTMLElement {
             ? `<div class="tc-item-tooltip__flavor">${esc(item.flavor)}</div>`
             : ''
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <div class="tc-item-tooltip__header">
                 ${typeMarkup}
                 ${nameMarkup}
@@ -148,7 +151,8 @@ export class ItemTooltip extends HTMLElement {
             ${this.renderStats(item)}
             ${this.renderReqs(item)}
             ${flavorMarkup}
-        `
+        `,
+        )
     }
 }
 

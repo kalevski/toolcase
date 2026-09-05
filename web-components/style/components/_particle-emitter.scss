@@ -4,9 +4,9 @@ tc-particle-emitter {
     --bs-particle-emitter-bg: transparent;
     --bs-particle-emitter-border-color: var(--tc-border);
     --bs-particle-emitter-border-width: 1px;
-    // Expose particle color slots so themes can override the JS-property defaults
-    // without imperative code. These are documentation anchors; actual color values
-    // are set via the `colors` JS property.
+    // Particle color slots. Read via getComputedStyle() at burst time whenever
+    // no explicit `colors` JS property override is set, so themes can re-skin
+    // the particle palette purely through CSS.
     --bs-particle-emitter-color-1: #0f172a; // slate-900
     --bs-particle-emitter-color-2: #475569; // slate-600
     --bs-particle-emitter-color-3: #22d3ee; // cyan accent

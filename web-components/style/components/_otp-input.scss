@@ -15,7 +15,11 @@ tc-otp-input {
     --bs-otp-input-filled-border-color: var(--tc-ink);
     --bs-otp-input-error-border-color: var(--tc-danger);
     --bs-otp-input-error-color: var(--tc-danger);
-    --bs-otp-input-error-focus-ring: 0 0 0 0.2rem rgba(239, 68, 68, 0.15);
+    // Derived from --tc-danger (not a fixed literal) so themes with a
+    // different danger hue (aurora, sunshine, neon, marker, redline) that
+    // ship no override file still get a correctly-tinted error glow.
+    --bs-otp-input-error-focus-ring: 0 0 0 0.2rem
+        color-mix(in srgb, var(--tc-danger) 15%, transparent);
 }
 
 // ── Label ──────────────────────────────────────────────────────────────────
@@ -32,7 +36,11 @@ tc-otp-input {
 
 .tc-otp-input__cells {
     display: flex;
-    flex-wrap: nowrap;
+    // `length` can go up to 20 (backup-code use case) — allow wrapping so a
+    // long row degrades to multiple lines on narrow viewports instead of
+    // forcing the page into horizontal scroll. Visual wrap order still
+    // matches DOM order, so keyboard/arrow navigation is unaffected.
+    flex-wrap: wrap;
     gap: var(--bs-otp-input-gap);
 }
 

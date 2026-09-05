@@ -98,11 +98,19 @@ tc-chart-container {
     }
 }
 
-// Body: chart content area.
+// Body: chart content area. In the default (non-loading, non-empty) state the
+// component renders this as an empty div — the chart itself is the consumer's
+// own child, never moved inside it (rule 1) — so it must collapse via :empty
+// like the header/actions/legend regions do, or it shows as a stray padded box
+// below the consumer's chart content.
 .tc-chart-container-body {
     flex: 1 1 auto;
     padding: var(--bs-chart-container-body-padding-y) var(--bs-chart-container-body-padding-x);
     min-height: 0;
+
+    &:empty {
+        display: none;
+    }
 }
 
 // Legend / footer region.
@@ -171,4 +179,35 @@ tc-chart-container {
 .tc-chart-container-empty-text {
     font-size: 0.875rem;
     color: var(--bs-chart-container-empty-color);
+}
+
+// Region order for the flattened card: the chart is the consumer's own children,
+// no longer moved into `.tc-chart-container-body` (rule 1).
+.tc-chart-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.tc-chart-container > .tc-chart-container-header {
+    order: 1;
+}
+
+.tc-chart-container > :not([class^='tc-chart-container']) {
+    order: 2;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.tc-chart-container > .tc-chart-container-body {
+    order: 2;
+}
+
+.tc-chart-container > .tc-chart-container-legend {
+    order: 3;
+}
+
+// While loading or empty, the element's own body covers the chart rows.
+.tc-chart-container:has(> .tc-chart-container-body[aria-busy='true']) > :not([class^='tc-chart-container']),
+.tc-chart-container:has(> .tc-chart-container-body > .tc-chart-container-empty) > :not([class^='tc-chart-container']) {
+    display: none;
 }

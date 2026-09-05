@@ -1,6 +1,8 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { msg } from './messages'
 import { fixedOriginOffset } from './internal/containingBlock'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-area-chart'
 
 // A single data point. `x` is categorical/ordinal (string or number); `y` is
@@ -135,7 +137,7 @@ export class AreaChart extends HTMLElement {
         return this.getAttribute('subtitle') ?? ''
     }
     set subtitle(v: string) {
-        this.setAttribute('subtitle', v)
+        setAttr(this, 'subtitle', v)
     }
 
     get height(): number {
@@ -250,7 +252,10 @@ export class AreaChart extends HTMLElement {
                 : ''
 
         if (!series.length || series.every((s) => !s.points.length)) {
-            this.innerHTML = `<div class="tc-area-chart__inner">${headerHtml}<div class="tc-area-chart__empty">${esc(msg('noData'))}</div></div>`
+            patchHtml(
+                this,
+                `<div class="tc-area-chart__inner">${headerHtml}<div class="tc-area-chart__empty">${esc(msg('noData'))}</div></div>`,
+            )
             this._pointGeom = []
             return
         }
@@ -443,7 +448,10 @@ export class AreaChart extends HTMLElement {
 
         const tooltipHtml = `<div class="tc-area-chart__tooltip" role="status" aria-live="polite" hidden></div>`
 
-        this.innerHTML = `<div class="tc-area-chart__inner">${headerHtml}<div class="tc-area-chart__plot">${svgHtml}${tooltipHtml}</div>${legendHtml}</div>`
+        patchHtml(
+            this,
+            `<div class="tc-area-chart__inner">${headerHtml}<div class="tc-area-chart__plot">${svgHtml}${tooltipHtml}</div>${legendHtml}</div>`,
+        )
 
         const svg = this.querySelector<SVGSVGElement>('.tc-area-chart__svg')
         if (svg) {
@@ -457,8 +465,8 @@ export class AreaChart extends HTMLElement {
                 this._reconciling = false
                 return
             }
-            svg.addEventListener('pointermove', this._onPointerMove)
-            svg.addEventListener('pointerleave', this._onPointerLeave)
+            bindOnce(svg, 'pointermove', this._onPointerMove)
+            bindOnce(svg, 'pointerleave', this._onPointerLeave)
         }
     }
 
@@ -469,12 +477,14 @@ export class AreaChart extends HTMLElement {
         const headHtml = titleAttr
             ? `<div class="tc-area-chart__header"><div class="tc-area-chart__skeleton tc-area-chart__skeleton--title" aria-hidden="true"></div></div>`
             : ''
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-area-chart__inner">` +
-            headHtml +
-            `<div class="tc-area-chart__skeleton tc-area-chart__skeleton--plot" aria-hidden="true" style="height:${this.height}px"></div>` +
-            `<span class="visually-hidden">${esc(msg('loading'))}</span>` +
-            `</div>`
+                headHtml +
+                `<div class="tc-area-chart__skeleton tc-area-chart__skeleton--plot" aria-hidden="true" style="height:${this.height}px"></div>` +
+                `<span class="visually-hidden">${esc(msg('loading'))}</span>` +
+                `</div>`,
+        )
     }
 
     private _summary(

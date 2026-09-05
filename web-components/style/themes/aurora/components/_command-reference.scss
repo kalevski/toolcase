@@ -1,0 +1,17 @@
+// Aurora › tc-command-reference — token-only fix.
+//
+// The base partial bakes the item-separator, alias-chip-border, and
+// flags-top-rule to the raw `var(--tc-slate-100)` literal, which is only
+// defined by the default theme's foundation and is never remapped. On
+// Aurora's near-black surface that paints a bright, near-white hairline
+// instead of the subtle border-faint dividers used everywhere else in this
+// theme. Route all three to --tc-border-faint, like action-row-list/build.
+
+tc-theme[name='aurora'],
+[data-tc-theme='aurora'] {
+    tc-command-reference {
+        --bs-command-reference-item-border: 1px solid var(--tc-border-faint);
+        --bs-command-reference-alias-border: 1px solid var(--tc-border-faint);
+        --bs-command-reference-flags-border-top: 1px solid var(--tc-border-faint);
+    }
+}

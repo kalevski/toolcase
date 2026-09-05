@@ -1,34 +1,40 @@
+import { patchHtml } from './internal/patch-html'
+import { setHostClass } from './internal/host-class'
+import { esc } from './internal/esc'
 const TAG_NAME = 'tc-floating-label'
 
+// THE HOST IS THE BOX. `.form-floating` is a positioning context with two direct
+// children — the control and the label docked over it — and every rule in
+// style/components/_floating-label.scss is written as `> .form-control`,
+// `> label`, `> .form-control:focus ~ label`. That is satisfied just as well by
+// putting the class on the host as by creating a wrapper for it, and the wrapper
+// cost the consumer's control: moving a node react-dom created makes the next
+// `parentInstance.removeChild(child)` throw NotFoundError (rule 1), and building
+// a fresh wrapper on every connect stacked another one on every React remount.
+//
+// So the control stays exactly where the consumer wrote it, and the element
+// creates only the `<label>` — appended after the control, which is what the
+// sibling combinator needs.
+const CONTROL_SELECTOR =
+    ':scope > input, :scope > select, :scope > textarea, :scope > .form-control, :scope > .form-select'
+
 export class FloatingLabel extends HTMLElement {
-    private _control: Element | null = null
     private _initialised = false
 
     static get observedAttributes(): string[] {
-        return ['label', 'for']
+        // `class` is observed so the element can re-assert its own classes after
+        // react-dom overwrites `className` wholesale — see setHostClass.
+        return ['label', 'for', 'class']
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            this._control = this.firstElementChild
-            this._initialised = true
-        }
+        this._initialised = true
         this.render()
     }
 
-    attributeChangedCallback(name: string, _old: string | null, next: string | null): void {
+    attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        const lbl = this.querySelector<HTMLLabelElement>('.form-floating > label')
-        if (!lbl) {
-            this.render()
-            return
-        }
-        if (name === 'label') {
-            lbl.textContent = next ?? ''
-        } else if (name === 'for') {
-            if (next) lbl.setAttribute('for', next)
-            else lbl.removeAttribute('for')
-        }
+        this.render()
     }
 
     get label(): string | null {
@@ -47,28 +53,27 @@ export class FloatingLabel extends HTMLElement {
         else this.removeAttribute('for')
     }
 
-    private render(): void {
-        const control = this._control
+    /** The consumer's control, whatever they wrote it as. */
+    private _control(): Element | null {
+        return this.querySelector(CONTROL_SELECTOR)
+    }
 
-        // Bootstrap's float animation requires the control to have a placeholder.
+    private render(): void {
+        // Bootstrap's float animation is driven by :placeholder-shown, so a control
+        // with no placeholder of its own gets an empty one. Set on the consumer's
+        // node, which is an attribute write and not a move.
+        const control = this._control()
         if (control && !control.hasAttribute('placeholder')) {
             control.setAttribute('placeholder', ' ')
         }
 
-        const wrapper = document.createElement('div')
-        wrapper.className = 'form-floating'
+        setHostClass(this, 'form-floating')
 
-        // Move (not clone) the projected control into the wrapper.
-        if (control) wrapper.appendChild(control)
-
-        const labelEl = document.createElement('label')
         const forAttr = this.getAttribute('for')
-        if (forAttr) labelEl.setAttribute('for', forAttr)
-        labelEl.textContent = this.label ?? ''
-        wrapper.appendChild(labelEl)
-
-        this.innerHTML = ''
-        this.appendChild(wrapper)
+        const forHtml = forAttr ? ` for="${esc(forAttr)}"` : ''
+        // `at: 'end'` — the label has to FOLLOW the control for
+        // `> .form-control:focus ~ label` to reach it.
+        patchHtml(this, `<label${forHtml}>${esc(this.label ?? '')}</label>`, { at: 'end' })
     }
 }
 

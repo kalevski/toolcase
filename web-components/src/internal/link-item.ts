@@ -1,36 +1,31 @@
-// Shared scaffold for light-DOM, slot-wrapping link rows (tc-breadcrumb-item,
-// tc-dropdown-item). Both capture their child nodes on first connect, render an
-// `<a>` / `<span>` / `<button>` shell, then re-append the captured nodes into an
-// inner content element — and repeat that capture→render→re-append dance on
-// attribute changes. They also share the `href` / `active` accessors. The shell
-// markup (Bootstrap class prefix, `<li>` wrapper, divider/disabled branches) is
-// the only real difference and stays in each subclass's render().
+// Shared scaffold for light-DOM link rows (tc-breadcrumb-item, tc-dropdown-item).
+//
+// Until 5.1 both captured their child nodes on first connect, rendered an `<a>` /
+// `<span>` / `<button>` shell and re-appended the captured nodes inside it — which
+// re-parents children react-dom believes belong to the host and makes its next
+// `removeChild` throw NotFoundError. The shell is now rendered BESIDE the
+// consumer's children as a stretched hit area (see each subclass's render), so
+// this base only owns the lifecycle and the shared `href` / `active` accessors.
+import { observeContent } from './content-observer'
 
 export abstract class LinkItemBase extends HTMLElement {
     protected _initialised = false
 
-    /** Render the shell markup (without the slotted content, which is re-appended). */
+    /** Render the element's own markup. Must not wrap or move consumer children. */
     protected abstract render(): void
-    /** The inner element slotted content lives in. Return null when there is none (e.g. a divider). */
-    protected abstract getContentEl(): HTMLElement | null
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            const inner = this.getContentEl()
-            if (inner) slotContent.forEach(n => inner.appendChild(n))
-            this._initialised = true
-        }
+        this._initialised = true
+        this.render()
+        // Every subclass renders a hit area whose accessible name is copied from
+        // the consumer's own text, so the copy has to follow it when React
+        // rewrites the children — see content-observer.ts.
+        observeContent(this, () => this.render())
     }
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        const inner = this.getContentEl()
-        const slotContent = inner ? Array.from(inner.childNodes) : []
         this.render()
-        const newInner = this.getContentEl()
-        if (newInner) slotContent.forEach(n => newInner.appendChild(n))
     }
 
     get href(): string | null {

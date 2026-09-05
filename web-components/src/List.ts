@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -156,7 +157,7 @@ export class List extends HTMLElement {
             })
             .join('')
 
-        this.innerHTML = `<div class="tc-list">${itemsHtml}</div>`
+        patchHtml(this, `<div class="tc-list">${itemsHtml}</div>`)
     }
 }
 

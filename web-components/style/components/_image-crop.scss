@@ -30,7 +30,10 @@ tc-image-crop {
     --bs-image-crop-btn-hover-bg: var(--tc-surface-muted);
     --bs-image-crop-btn-primary-bg: var(--tc-app-accent-gradient);
     --bs-image-crop-btn-primary-color: var(--tc-app-accent-contrast);
-    --bs-image-crop-btn-primary-lift: 0 4px 15px rgba(30, 41, 59, 0.3);
+    // Themed hover glow, not a hardcoded slate shadow — the same fix already
+    // applied to _crafting-panel.scss / _github-stars-card.scss. dungeon/blueprint
+    // still win via their own higher-specificity overrides of this var.
+    --bs-image-crop-btn-primary-lift: var(--tc-shadow-hover);
 
     --bs-image-crop-error-color: var(--tc-danger);
 
@@ -152,6 +155,11 @@ tc-image-crop {
         outline-offset: 4px;
     }
 
+    // Coarse pointers get a 44px hit area without changing the visual track.
+    @media (pointer: coarse) {
+        min-height: 44px;
+    }
+
     &::-webkit-slider-runnable-track {
         width: 100%;
         height: 6px;
@@ -219,6 +227,12 @@ tc-image-crop {
     &:focus-visible {
         outline: var(--bs-image-crop-focus-outline);
         outline-offset: 2px;
+    }
+
+    // Coarse pointers get a 44px touch target without enlarging the visual button.
+    @media (pointer: coarse) {
+        min-width: 44px;
+        min-height: 44px;
     }
 
     &--ghost {

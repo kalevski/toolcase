@@ -17,6 +17,11 @@ tc-theme[name='dungeon'],
 
         // Deeper ink command block — slightly warmer than pure ink.
         --bs-phase-grid-command-bg: var(--fg-ink-2);
+
+        // Legibility fix: base's --bs-phase-grid-command-color resolves to
+        // --tc-text-inverse, which dungeon remaps to --fg-ink (dark) — nearly
+        // invisible on the ink-2 command background. Repoint to parchment.
+        --bs-phase-grid-command-color: var(--fg-parch);
     }
 
     // Gilded bevel wraps the whole card grid in the signature shadow stack.

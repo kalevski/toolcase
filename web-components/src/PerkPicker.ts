@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -137,7 +138,7 @@ export class PerkPicker extends HTMLElement {
             })
             .join('')
 
-        this.innerHTML = `<div class="tc-perk-picker-grid">${cardsMarkup}</div>`
+        patchHtml(this, `<div class="tc-perk-picker-grid">${cardsMarkup}</div>`)
     }
 }
 

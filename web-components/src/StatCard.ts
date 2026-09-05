@@ -1,6 +1,9 @@
+import { patchHtml } from './internal/patch-html'
+import { setHostClass } from './internal/host-class'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 import { icon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-stat-card'
 
@@ -35,7 +38,6 @@ function resolveIcon(name: string): string {
 
 export class StatCard extends HTMLElement {
     private _initialised = false
-    private _valueSlotNodes: Node[] = []
 
     static get observedAttributes(): string[] {
         return [
@@ -52,37 +54,13 @@ export class StatCard extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            this._valueSlotNodes = !this.hasAttribute('value') ? Array.from(this.childNodes) : []
-
-            this.render()
-
-            if (!this.hasAttribute('value')) {
-                const valueEl = this.querySelector('.tc-stat-card-value')
-                if (valueEl) this._valueSlotNodes.forEach((n) => valueEl.appendChild(n))
-            }
-
-            this._initialised = true
-        }
+        this._initialised = true
+        this.render()
     }
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-
-        // Re-capture value slot nodes from their current inner container.
-        if (!this.hasAttribute('value')) {
-            const valueEl = this.querySelector('.tc-stat-card-value')
-            if (valueEl) {
-                this._valueSlotNodes = Array.from(valueEl.childNodes)
-            }
-        }
-
         this.render()
-
-        if (!this.hasAttribute('value')) {
-            const newValueEl = this.querySelector('.tc-stat-card-value')
-            if (newValueEl) this._valueSlotNodes.forEach((n) => newValueEl.appendChild(n))
-        }
     }
 
     // Note: 'icon' getter/setter is safe — HTMLElement does not expose an 'icon' property.
@@ -98,7 +76,7 @@ export class StatCard extends HTMLElement {
         return this.getAttribute('label') ?? ''
     }
     set label(v: string) {
-        this.setAttribute('label', v)
+        setAttr(this, 'label', v)
     }
 
     get value(): string | null {
@@ -130,7 +108,7 @@ export class StatCard extends HTMLElement {
         return DELTA_KINDS.includes(v) ? v : 'neutral'
     }
     set deltaKind(v: StatCardDeltaKind) {
-        this.setAttribute('delta-kind', v)
+        setAttr(this, 'delta-kind', v)
     }
 
     get helper(): string | null {
@@ -163,16 +141,16 @@ export class StatCard extends HTMLElement {
         if (loading) {
             this.setAttribute('role', 'status')
             this.setAttribute('aria-busy', 'true')
-            this.innerHTML = [
-                '<div class="card tc-stat-card" aria-hidden="true">',
-                '<div class="card-body tc-stat-card-body">',
-                '<div class="tc-stat-card-skeleton tc-stat-card-skeleton--label"></div>',
-                '<div class="tc-stat-card-skeleton tc-stat-card-skeleton--value"></div>',
-                '<div class="tc-stat-card-skeleton tc-stat-card-skeleton--delta"></div>',
-                '</div>',
-                '<span class="visually-hidden">Loading…</span>',
-                '</div>',
-            ].join('')
+            setHostClass(this, 'card tc-stat-card tc-stat-card-body')
+            patchHtml(
+                this,
+                [
+                    '<div class="tc-stat-card-skeleton tc-stat-card-skeleton--label"></div>',
+                    '<div class="tc-stat-card-skeleton tc-stat-card-skeleton--value"></div>',
+                    '<div class="tc-stat-card-skeleton tc-stat-card-skeleton--delta"></div>',
+                    '<span class="visually-hidden">Loading…</span>',
+                ].join(''),
+            )
             return
         }
 
@@ -219,20 +197,24 @@ export class StatCard extends HTMLElement {
         // Footer
         const footerHtml = footer ? `<div class="tc-stat-card-footer">${esc(footer)}</div>` : ''
 
-        this.innerHTML = [
-            '<div class="card tc-stat-card">',
-            '<div class="card-body tc-stat-card-body">',
-            '<div class="tc-stat-card-header">',
-            iconHtml,
-            `<span class="tc-stat-card-label">${esc(label)}</span>`,
-            '</div>',
-            valueHtml,
-            deltaHtml ? `<div class="tc-stat-card-delta-row">${deltaHtml}</div>` : '',
-            helperHtml,
-            '</div>',
-            footerHtml ? `<div class="tc-stat-card-footer-row">${footerHtml}</div>` : '',
-            '</div>',
-        ].join('')
+        // THE HOST IS THE CARD. Every region below is element-owned; the consumer's
+        // own children — the rich value they slotted instead of the `value`
+        // attribute — stay where they are and CSS `order` puts them in the value
+        // row's place (rule 1: ordering is CSS, never a move).
+        setHostClass(this, 'card tc-stat-card tc-stat-card-body')
+        patchHtml(
+            this,
+            [
+                '<div class="tc-stat-card-header">',
+                iconHtml,
+                `<span class="tc-stat-card-label">${esc(label)}</span>`,
+                '</div>',
+                value !== null ? valueHtml : '',
+                deltaHtml ? `<div class="tc-stat-card-delta-row">${deltaHtml}</div>` : '',
+                helperHtml,
+                footerHtml ? `<div class="tc-stat-card-footer-row">${footerHtml}</div>` : '',
+            ].join(''),
+        )
     }
 }
 

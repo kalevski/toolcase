@@ -2,17 +2,22 @@
 // The base --bs-navbar-bg is a hardcoded light `rgba(255,255,255,0.85)` that the
 // token remap does not reach; repoint it to a translucent deep-slate fill so the
 // blur reads as dark glass, and tint the brand dot with the mint glow ring.
-
+// The toggler hamburger is a literal `%23334155` (slate) stroke baked into the
+// SVG data-uri in the base component — the --tc-* remap can't reach a literal,
+// so on this near-black glass it was rendering an invisible dark-on-dark icon
+// below the expand breakpoint. Repoint it to the theme's light text colour,
+// same fix already applied for dungeon/redline.
 tc-theme[name='aurora'],
 [data-tc-theme='aurora'] {
     tc-navbar,
     .navbar {
-        --bs-navbar-bg: rgba(7, 9, 13, 0.72);
+        --bs-navbar-bg: rgba(6, 12, 16, 0.72);
         --bs-navbar-backdrop-filter: saturate(1.4) blur(14px);
         --bs-navbar-border-color: var(--ah-border);
         --bs-navbar-divider-color: var(--ah-border);
         --bs-navbar-active-color: var(--ah-accent-bright);
         --bs-navbar-brand-dot-bg: var(--ah-accent);
         --bs-navbar-brand-dot-glow: var(--ah-accent-soft);
+        --bs-navbar-toggler-icon-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath stroke='%23e9eef4' stroke-linecap='round' stroke-width='1.5' d='M2 4h12M2 8h12M2 12h12'/%3e%3c/svg%3e");
     }
 }

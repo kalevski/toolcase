@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -63,14 +64,16 @@ export class SimpleFile extends HTMLElement {
         const extVal = esc(this.getAttribute('extension') ?? '')
         const iconHtml = FORMAT_ICONS[fmt] ?? FORMAT_ICONS.unknown
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-simple-file tc-simple-file-${fmt}">` +
-            `<span class="tc-simple-file-icon" aria-hidden="true">${iconHtml}</span>` +
-            `<div class="tc-simple-file-text">` +
-            `<span class="tc-simple-file-name">${nameVal}</span>` +
-            `<span class="tc-simple-file-ext">${extVal}</span>` +
-            `</div>` +
-            `</div>`
+                `<span class="tc-simple-file-icon" aria-hidden="true">${iconHtml}</span>` +
+                `<div class="tc-simple-file-text">` +
+                `<span class="tc-simple-file-name">${nameVal}</span>` +
+                `<span class="tc-simple-file-ext">${extVal}</span>` +
+                `</div>` +
+                `</div>`,
+        )
     }
 }
 

@@ -1,3 +1,5 @@
+import { setHostClass } from './internal/host-class'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-title'
 
 export type TitleAlign = 'left' | 'center' | 'right'
@@ -11,22 +13,13 @@ export class Title extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            const inner = this.querySelector('.tc-title-content')
-            if (inner) slotContent.forEach((n) => inner.appendChild(n))
-            this._initialised = true
-        }
+        this._initialised = true
+        this.render()
     }
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        const inner = this.querySelector('.tc-title-content')
-        const slotContent = inner ? Array.from(inner.childNodes) : []
         this.render()
-        const newInner = this.querySelector('.tc-title-content')
-        if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
     }
 
     // NOTE: HTMLElement.title is a native reflected attribute — getter/setter
@@ -48,18 +41,17 @@ export class Title extends HTMLElement {
         return ALIGNS.includes(raw) ? raw : 'left'
     }
     set align(value: TitleAlign) {
-        this.setAttribute('align', value)
+        setAttr(this, 'align', value)
     }
 
     private render(): void {
-        this.classList.add('tc-title')
+        // THE HOST IS THE TITLE — no content wrapper to move children into.
+        setHostClass(this, 'tc-title')
         this.dataset.align = this.align
 
         const sz = this.size
         if (sz != null) this.style.setProperty('--bs-title-font-size', `${sz}px`)
         else this.style.removeProperty('--bs-title-font-size')
-
-        this.innerHTML = `<div class="tc-title-content"></div>`
     }
 }
 

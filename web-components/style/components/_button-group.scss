@@ -65,22 +65,18 @@
             margin-top: calc(-1 * var(--bs-border-width));
         }
     }
-
-    > tc-button > .btn {
-        width: 100%;
-    }
 }
 
-// Size modifiers cascade the .btn-sm/.btn-lg metrics to children.
-.btn-group-sm > .btn,
-.btn-group-sm > tc-button > .btn {
+// Size modifiers cascade the .btn-sm/.btn-lg metrics to children. A `tc-button`
+// host carries `.btn` itself (see "Host layout" in _button.scss), so the plain
+// `> .btn` selector already reaches it.
+.btn-group-sm > .btn {
     --bs-btn-padding-y: 0.375rem;
     --bs-btn-padding-x: 0.75rem;
     --bs-btn-font-size: 0.8125rem;
 }
 
-.btn-group-lg > .btn,
-.btn-group-lg > tc-button > .btn {
+.btn-group-lg > .btn {
     --bs-btn-padding-y: 0.75rem;
     --bs-btn-padding-x: 1.5rem;
     --bs-btn-font-size: 1.04rem;

@@ -1,4 +1,6 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-rating'
 
@@ -79,14 +81,14 @@ export class Rating extends HTMLElement {
         return SIZES.includes(raw) ? raw : 'default'
     }
     set size(v: RatingSize) {
-        this.setAttribute('size', v)
+        setAttr(this, 'size', v)
     }
 
     get icon(): string {
         return this.getAttribute('icon') ?? 'star'
     }
     set icon(v: string) {
-        this.setAttribute('icon', v)
+        setAttr(this, 'icon', v)
     }
 
     // ── Painting ────────────────────────────────────────────────────────────────
@@ -246,7 +248,7 @@ export class Rating extends HTMLElement {
             readOnly ? `aria-readonly="true"` : `tabindex="0"`,
         ].join(' ')
 
-        this.innerHTML = `<div ${sliderAttrs}>${stars.join('')}</div>`
+        patchHtml(this, `<div ${sliderAttrs}>${stars.join('')}</div>`)
     }
 }
 

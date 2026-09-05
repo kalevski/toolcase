@@ -122,7 +122,7 @@ tc-theme[name='blueprint'],
     .list-group-item-info {
         --bs-list-group-bg: var(--bp-violet-soft);
         --bs-list-group-color: var(--bp-violet-fg);
-        --bs-list-group-action-hover-bg: rgba(var(--bp-violet), 0.14);
+        --bs-list-group-action-hover-bg: rgba(91, 61, 242, 0.14); // --bp-violet at lower alpha
         --bs-list-group-active-bg: var(--bp-violet);
         --bs-list-group-active-color: var(--bp-violet-ink);
         --bs-list-group-active-border-color: var(--bp-violet);
@@ -131,7 +131,7 @@ tc-theme[name='blueprint'],
     .list-group-item-warning {
         --bs-list-group-bg: var(--bp-amber-soft);
         --bs-list-group-color: var(--bp-amber-fg);
-        --bs-list-group-action-hover-bg: rgba(var(--bp-amber), 0.14);
+        --bs-list-group-action-hover-bg: rgba(217, 138, 20, 0.14); // --bp-amber at lower alpha
         --bs-list-group-active-bg: var(--bp-amber);
         --bs-list-group-active-color: var(--bp-amber-ink);
         --bs-list-group-active-border-color: var(--bp-amber);

@@ -19,6 +19,7 @@ tc-cool-nav {
     --bs-cool-nav-link-active-color: var(--tc-text);
     --bs-cool-nav-link-active-line: var(--tc-app-accent);
     --bs-cool-nav-toggler-color: var(--tc-text);
+    --bs-cool-nav-toggler-hover-bg: var(--tc-surface-muted);
     --bs-cool-nav-collapse-bg: var(--tc-surface);
     --bs-cool-nav-scrolled-shadow: 0 1px 8px 0 rgba(0, 0, 0, 0.06);
     --bs-cool-nav-py: 0.75rem;
@@ -36,6 +37,7 @@ tc-cool-nav.tc-cool-nav--dark {
     --bs-cool-nav-link-hover-color: var(--tc-accent);
     --bs-cool-nav-link-active-color: var(--tc-text-inverse);
     --bs-cool-nav-toggler-color: var(--tc-text-inverse);
+    --bs-cool-nav-toggler-hover-bg: rgba(255, 255, 255, 0.08);
     --bs-cool-nav-collapse-bg: var(--tc-ink-2);
     --bs-cool-nav-scrolled-shadow: 0 1px 10px 0 rgba(0, 0, 0, 0.3);
 }
@@ -140,7 +142,7 @@ tc-cool-nav.tc-cool-nav-scrolled .tc-cool-nav-inner {
     }
 
     &:hover {
-        background: rgba(128, 128, 128, 0.08);
+        background: var(--bs-cool-nav-toggler-hover-bg);
     }
 
     &:focus-visible {

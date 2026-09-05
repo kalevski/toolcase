@@ -206,4 +206,20 @@ tc-theme[name='dungeon'],
             }
         }
     }
+
+    // Reduced motion — this theme's .tc-lobby-btn re-declares `transition` and adds
+    // hover/active translateY bevel-press motion; both load after the base
+    // component partial, so its `transition: none` reduced-motion rule alone can't
+    // reach here. Neutralise the transform explicitly (filter/opacity fades are
+    // left, matching the base component's own reduced-motion scope).
+    @media (prefers-reduced-motion: reduce) {
+        .tc-lobby-btn {
+            transition: none;
+
+            &:hover:not(:disabled),
+            &:active:not(:disabled) {
+                transform: none;
+            }
+        }
+    }
 }

@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-logo-cloud'
 
@@ -91,7 +92,7 @@ export class LogoCloud extends HTMLElement {
             })
             .join('')
 
-        this.innerHTML = `${titleHtml}` + `<div class="tc-logo-cloud-grid">${logosHtml}</div>`
+        patchHtml(this, `${titleHtml}` + `<div class="tc-logo-cloud-grid">${logosHtml}</div>`)
     }
 }
 

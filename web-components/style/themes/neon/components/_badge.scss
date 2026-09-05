@@ -3,6 +3,13 @@
 // reads better as a soft magenta pill (dark text on bright magenta is heavy at
 // chip size), and .text-bg-secondary hardcodes a slate fill that must be beaten
 // with an equally-specific !important.
+//
+// Fill is --nd-surface-2 (the theme's own --bs-secondary-bg), NOT --nd-surface-3:
+// tc-table's striped/hover rows read --tc-surface-hover, which resolves to
+// --nd-surface-3 in this theme — a secondary badge filled with that same value
+// turns invisible the moment it lands on a striped row (background-on-background,
+// no pill outline at all). solid-fill.scss excludes .badge from its own generic
+// secondary re-skin so this rule is the only one touching badge secondary fill.
 
 tc-theme[name='neon'],
 [data-tc-theme='neon'] {
@@ -12,7 +19,7 @@ tc-theme[name='neon'],
     }
 
     .badge.text-bg-secondary {
-        background-color: var(--nd-surface-3) !important;
+        background-color: var(--nd-surface-2) !important;
         color: var(--nd-text-2) !important;
     }
 

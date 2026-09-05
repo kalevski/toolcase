@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -69,6 +70,16 @@ export class TabBar extends HTMLElement {
     set tabs(v: TabBarItem[]) {
         this._tabs = Array.isArray(v) ? v : []
         if (this._initialised) this.render()
+    }
+
+    /** Alias of {@link tabs}. The rest of the library spells a data-driven list
+     *  `items`, and all three consuming apps reached for that name first — `tabs`
+     *  stays because it is the published one. */
+    get items(): TabBarItem[] {
+        return this.tabs
+    }
+    set items(v: TabBarItem[]) {
+        this.tabs = v
     }
 
     get activeId(): string {
@@ -173,24 +184,27 @@ export class TabBar extends HTMLElement {
         SIZES.forEach((s) => this.classList.remove(`tc-tab-bar--${s}`))
         this.classList.add('tc-tab-bar', `tc-tab-bar--${size}`)
 
-        this.innerHTML = this._tabs
-            .map((tab) => {
-                const isActive = tab.id === activeId
-                const disabled = !!tab.disabled
-                const iconHtml = tab.icon ? lucideByName(tab.icon) : ''
-                return (
-                    `<button` +
-                    ` type="button"` +
-                    ` role="tab"` +
-                    ` class="tc-tab-bar-tab${isActive ? ' tc-tab-bar-tab--active' : ''}"` +
-                    ` data-id="${esc(tab.id)}"` +
-                    ` aria-selected="${isActive}"` +
-                    ` tabindex="${tab.id === tabbableId ? '0' : '-1'}"` +
-                    (disabled ? ' disabled aria-disabled="true"' : '') +
-                    `>${iconHtml}<span class="tc-tab-bar-tab-label">${esc(tab.label)}</span></button>`
-                )
-            })
-            .join('')
+        patchHtml(
+            this,
+            this._tabs
+                .map((tab) => {
+                    const isActive = tab.id === activeId
+                    const disabled = !!tab.disabled
+                    const iconHtml = tab.icon ? lucideByName(tab.icon, 'tc-tab-bar-tab-icon') : ''
+                    return (
+                        `<button` +
+                        ` type="button"` +
+                        ` role="tab"` +
+                        ` class="tc-tab-bar-tab${isActive ? ' tc-tab-bar-tab--active' : ''}"` +
+                        ` data-id="${esc(tab.id)}"` +
+                        ` aria-selected="${isActive}"` +
+                        ` tabindex="${tab.id === tabbableId ? '0' : '-1'}"` +
+                        (disabled ? ' disabled aria-disabled="true"' : '') +
+                        `>${iconHtml}<span class="tc-tab-bar-tab-label">${esc(tab.label)}</span></button>`
+                    )
+                })
+                .join(''),
+        )
     }
 }
 

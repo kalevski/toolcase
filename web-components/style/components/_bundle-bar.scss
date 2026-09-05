@@ -84,7 +84,10 @@ tc-bundle-bar {
     transition: background-color var(--tc-transition-fast);
 
     &.is-filled {
-        background-color: var(--bs-bundle-bar-segment-filled-bg);
+        // `background` (not `background-color`) so theme overrides can set a
+        // gradient here (e.g. dungeon's gilded fill) — background-color only
+        // accepts <color> and silently drops a gradient value.
+        background: var(--bs-bundle-bar-segment-filled-bg);
     }
 }
 

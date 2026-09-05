@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-bundle-bar'
 
@@ -139,7 +140,7 @@ export class BundleBar extends HTMLElement {
             chipsHtml = `<div class="tc-bundle-bar__chips">${chipItems}</div>`
         }
 
-        this.innerHTML = `<div class="tc-bundle-bar">${headerHtml}${trackHtml}${chipsHtml}</div>`
+        patchHtml(this, `<div class="tc-bundle-bar">${headerHtml}${trackHtml}${chipsHtml}</div>`)
     }
 }
 

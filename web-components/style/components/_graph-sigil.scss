@@ -1,0 +1,54 @@
+// tc-graph-sigil — a miniature of a tree's own first ring, as its identity mark.
+//
+// Drawn FROM THE DATA: the ring count is the depth, the satellite count is the
+// root's children, the angle is seeded from the id. Two trees look alike exactly
+// when they are alike, and a tree's mark changes as it grows.
+
+tc-graph-sigil {
+    --bs-graph-sigil-size: 2.5rem;
+    --bs-graph-sigil-ring-color: var(--tc-border);
+    --bs-graph-sigil-ring-full-color: var(--tc-border-strong, var(--tc-text-faint));
+    --bs-graph-sigil-spoke-color: var(--tc-border);
+    --bs-graph-sigil-satellite-color: var(--tc-text-faint);
+    --bs-graph-sigil-core-color: var(--tc-app-accent, var(--tc-primary));
+}
+
+.tc-graph-sigil {
+    display: inline-flex;
+    flex-shrink: 0;
+    width: var(--bs-graph-sigil-size);
+    height: var(--bs-graph-sigil-size);
+}
+
+.tc-graph-sigil__svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    overflow: visible;
+}
+
+.tc-graph-sigil__ring {
+    fill: none;
+    stroke: var(--bs-graph-sigil-ring-color);
+    stroke-width: 1;
+}
+
+// Past the satellite cap the ring is DRAWN as full rather than the extra dots
+// being dropped silently — "more than nine" in the same glance.
+.tc-graph-sigil__ring--full {
+    stroke: var(--bs-graph-sigil-ring-full-color);
+    stroke-dasharray: 2 3;
+}
+
+.tc-graph-sigil__spoke {
+    stroke: var(--bs-graph-sigil-spoke-color);
+    stroke-width: 1;
+}
+
+.tc-graph-sigil__satellite {
+    fill: var(--bs-graph-sigil-satellite-color);
+}
+
+.tc-graph-sigil__core {
+    fill: var(--bs-graph-sigil-core-color);
+}

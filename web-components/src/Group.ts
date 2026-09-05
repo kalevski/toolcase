@@ -1,6 +1,9 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
+import { setHostClass } from './internal/host-class'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 import { chevronDownIcon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-group'
 
@@ -26,29 +29,22 @@ export class Group extends HTMLElement {
     connectedCallback(): void {
         if (!this._initialised) {
             this._collapsed = this.hasAttribute('default-collapsed')
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            const body = this.querySelector('.tc-group-body')
-            if (body) slotContent.forEach((n) => body.appendChild(n))
             this._initialised = true
         }
+        this.render()
     }
 
     attributeChangedCallback(name: string): void {
         if (!this.isConnected || !this._initialised) return
         if (name === 'default-collapsed') return // only seeds initial state
-        const body = this.querySelector('.tc-group-body')
-        const slotContent = body ? Array.from(body.childNodes) : []
         this.render()
-        const newBody = this.querySelector('.tc-group-body')
-        if (newBody) slotContent.forEach((n) => newBody.appendChild(n))
     }
 
     get label(): string {
         return this.getAttribute('label') ?? ''
     }
     set label(v: string) {
-        this.setAttribute('label', v)
+        setAttr(this, 'label', v)
     }
 
     get badge(): string | null {
@@ -103,12 +99,8 @@ export class Group extends HTMLElement {
 
     private _applyCollapsedState(): void {
         const toggle = this.querySelector<HTMLButtonElement>('.tc-group-toggle')
-        const body = this.querySelector<HTMLElement>('.tc-group-body')
         if (toggle) toggle.setAttribute('aria-expanded', String(!this._collapsed))
-        if (body) {
-            if (this._collapsed) body.setAttribute('hidden', '')
-            else body.removeAttribute('hidden')
-        }
+        this.classList.toggle('tc-group--collapsed', this._collapsed)
         const chevron = this.querySelector('.tc-group-chevron')
         if (chevron) {
             if (this._collapsed) {
@@ -167,18 +159,23 @@ export class Group extends HTMLElement {
             actionHtml = `<button type="button" class="tc-group-action"${ariaLabel}>${iconHtml}${labelHtml}</button>`
         }
 
-        this.innerHTML = `<div class="tc-group">
-<div class="tc-group-header" id="${headerId}">
-<button type="button" class="tc-group-toggle" aria-expanded="${!collapsed}" aria-controls="${bodyId}">${chevronHtml}<span class="tc-group-label">${esc(label)}</span>${badgeHtml}</button>${actionHtml}
-</div>
-<div class="tc-group-body" id="${bodyId}" role="region" aria-labelledby="${headerId}"${collapsed ? ' hidden' : ''}></div>
-</div>`
+        // THE HOST IS THE GROUP: the header is element-owned and prepended, and the
+        // body is the consumer's own children — hidden by CSS when collapsed rather
+        // than moved into a body wrapper (rule 1).
+        setHostClass(this, `tc-group${collapsed ? ' tc-group--collapsed' : ''}`)
+        this.setAttribute('id', this.id || bodyId)
+        patchHtml(
+            this,
+            `<div class="tc-group-header" id="${headerId}">` +
+                `<button type="button" class="tc-group-toggle" aria-expanded="${!collapsed}" aria-controls="${esc(this.id)}">${chevronHtml}<span class="tc-group-label">${esc(label)}</span>${badgeHtml}</button>${actionHtml}` +
+                `</div>`,
+        )
 
         const toggleBtn = this.querySelector<HTMLButtonElement>('.tc-group-toggle')
-        if (toggleBtn) toggleBtn.addEventListener('click', this._onToggleClick)
+        if (toggleBtn) bindOnce(toggleBtn, 'click', this._onToggleClick)
 
         const actionBtn = this.querySelector<HTMLButtonElement>('.tc-group-action')
-        if (actionBtn) actionBtn.addEventListener('click', this._onActionClick)
+        if (actionBtn) bindOnce(actionBtn, 'click', this._onActionClick)
     }
 }
 

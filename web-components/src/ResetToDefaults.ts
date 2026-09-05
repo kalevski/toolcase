@@ -1,4 +1,5 @@
 import { SettingRowBase } from './SettingRowBase'
+import { bindOnce } from './internal/patch-html'
 
 const TAG_NAME = 'tc-reset-to-defaults'
 
@@ -67,7 +68,15 @@ export class ResetToDefaults extends SettingRowBase {
         const actions = this.querySelector('.tc-reset-to-defaults__actions')
         if (!actions) return
 
-        actions.addEventListener('click', (e: Event) => {
+        // bindOnce — not addEventListener — because this control re-renders
+        // itself mid-lifecycle (reset → confirming → idle), and patchHtml
+        // REUSES the `.tc-reset-to-defaults__actions` div across those
+        // renders (same tag at the same position). A raw addEventListener
+        // here would stack a new listener on every renderRow() call, so a
+        // single confirm click would fire tc-reset (and onReset) once per
+        // accumulated listener — and each of those renderRow() calls would
+        // itself re-run bindControl(), compounding the stack further.
+        bindOnce(actions, 'click', (e: Event) => {
             const btn = (e.target as Element).closest<HTMLButtonElement>(
                 '.tc-reset-to-defaults__btn',
             )

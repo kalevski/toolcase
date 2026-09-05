@@ -1,6 +1,9 @@
+import { patchHtml } from './internal/patch-html'
+import { adoptChildren } from './internal/adopt-children'
 import { DialogBase, esc } from './internal/dialog-base'
 import { msg } from './messages'
 import { closeIcon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-drawer'
 
@@ -16,9 +19,18 @@ const SIZES: DrawerSize[] = ['small', 'default', 'large']
  * Drawer specifics: slotted body content, the side/size options, a close
  * button, and a `pinned` non-modal mode that keeps page scroll and drops the
  * backdrop.
+ *
+ * The panel is a real descendant of the host, not the host itself: DialogBase's
+ * shared scaffold (focus trap, Tab cycling, open/close aria-hidden + hidden
+ * toggling) locates it via `this.querySelector('.tc-drawer__panel')`, which can
+ * only ever match a descendant — never the host `this` is called on.
  */
 export class Drawer extends DialogBase {
-    private _bodyNodes: Node[] = []
+    // Consumer children captured before the first render (patchHtml never moves
+    // unowned nodes — rule 1); adoptChildren re-homes them into .tc-drawer__body
+    // afterwards and keeps react-dom's mutation calls against the host working
+    // once they live one level deeper (see internal/adopt-children.ts).
+    private _capturedNodes: Node[] | null = null
 
     onClose: (() => void) | null = null
 
@@ -26,13 +38,17 @@ export class Drawer extends DialogBase {
         return ['open', 'side', 'size', 'title', 'pinned']
     }
 
-    // Capture slotted children before DialogBase's first render() wipes them;
-    // render() re-appends them into .tc-drawer__body (and again on re-render).
     connectedCallback(): void {
         if (!this._initialised) {
-            this._bodyNodes = Array.from(this.childNodes)
+            this._capturedNodes = Array.from(this.childNodes)
         }
         super.connectedCallback()
+        if (this._capturedNodes) {
+            const nodes = this._capturedNodes
+            this._capturedNodes = null
+            const body = this.querySelector('.tc-drawer__body')
+            if (body) adoptChildren(this, () => body, nodes)
+        }
     }
 
     get side(): DrawerSide {
@@ -40,7 +56,7 @@ export class Drawer extends DialogBase {
         return SIDES.includes(v) ? v : 'right'
     }
     set side(v: DrawerSide) {
-        this.setAttribute('side', v)
+        setAttr(this, 'side', v)
     }
 
     get size(): DrawerSize {
@@ -48,7 +64,7 @@ export class Drawer extends DialogBase {
         return SIZES.includes(v) ? v : 'default'
     }
     set size(v: DrawerSize) {
-        this.setAttribute('size', v)
+        setAttr(this, 'size', v)
     }
 
     // `title` is natively reflected by HTMLElement; no getter/setter defined.
@@ -109,20 +125,19 @@ export class Drawer extends DialogBase {
             ? ''
             : `<div class="tc-drawer__backdrop" aria-hidden="true"${hiddenAttr}></div>`
 
-        this.innerHTML =
+        patchHtml(
+            this,
             backdropHtml +
-            `<div class="tc-drawer__panel tc-drawer__panel--${side} tc-drawer__panel--${size}"` +
-            ` role="dialog" aria-modal="${ariaModal}" aria-labelledby="${labelId}"` +
-            ` tabindex="-1" aria-hidden="${panelAriaHidden}"${hiddenAttr}>` +
-            `<div class="tc-drawer__header">` +
-            `<span class="tc-drawer__title" id="${labelId}">${titleText}</span>` +
-            `<button type="button" class="tc-drawer__close" aria-label="${esc(msg('close'))}">${closeIcon}</button>` +
-            `</div>` +
-            `<div class="tc-drawer__body"></div>` +
-            `</div>`
-
-        const body = this.querySelector('.tc-drawer__body')
-        if (body) this._bodyNodes.forEach((n) => body.appendChild(n))
+                `<div class="tc-drawer__panel tc-drawer__panel--${side} tc-drawer__panel--${size}"` +
+                ` role="dialog" aria-modal="${ariaModal}" aria-labelledby="${labelId}"` +
+                ` tabindex="-1" aria-hidden="${panelAriaHidden}"${hiddenAttr}>` +
+                `<div class="tc-drawer__header">` +
+                `<span class="tc-drawer__title" id="${labelId}">${titleText}</span>` +
+                `<button type="button" class="tc-drawer__close" aria-label="${esc(msg('close'))}">${closeIcon}</button>` +
+                `</div>` +
+                `<div class="tc-drawer__body"></div>` +
+                `</div>`,
+        )
 
         if (isOpen) {
             this.classList.add('tc-drawer--open')

@@ -8,6 +8,9 @@ tc-theme[name='redline'],
 
     .nav-pills .nav-link.active {
         background: var(--rl-accent);
-        color: #ffffff;
+        // Token, not a literal: variants (ember, mint, royal, …) repoint
+        // --rl-accent-ink to a DARK ink because their accent hue is light —
+        // a hardcoded #ffffff here would go unreadable on those pills.
+        color: var(--rl-accent-ink);
     }
 }

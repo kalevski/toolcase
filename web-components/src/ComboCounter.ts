@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-combo-counter'
 
@@ -73,7 +74,7 @@ export class ComboCounter extends HTMLElement {
         this.style.setProperty('--bs-combo-counter-value-size', `${this.fontSize}px`)
 
         if (!visible) {
-            this.innerHTML = ''
+            patchHtml(this, '')
             return
         }
 
@@ -85,13 +86,16 @@ export class ComboCounter extends HTMLElement {
             ? `<span class="tc-combo-counter-bar" aria-hidden="true"><span class="tc-combo-counter-bar-fill" style="width:${pct}%"></span></span>`
             : ''
 
-        this.innerHTML = [
-            '<div class="tc-combo-counter">',
-            `<span class="tc-combo-counter-eyebrow">${esc(this.label)}</span>`,
-            `<span class="tc-combo-counter-value">x${combo}</span>`,
-            barNode,
-            '</div>',
-        ].join('')
+        patchHtml(
+            this,
+            [
+                '<div class="tc-combo-counter">',
+                `<span class="tc-combo-counter-eyebrow">${esc(this.label)}</span>`,
+                `<span class="tc-combo-counter-value">x${combo}</span>`,
+                barNode,
+                '</div>',
+            ].join(''),
+        )
     }
 }
 

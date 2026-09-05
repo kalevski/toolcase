@@ -1,33 +1,32 @@
+import { setHostClass } from './internal/host-class'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-visually-hidden'
 
 export type VisuallyHiddenAs = 'span' | 'div'
 
 const AS_TAGS: VisuallyHiddenAs[] = ['span', 'div']
 
+/**
+ * tc-visually-hidden — THE HOST IS THE HIDDEN BOX.
+ *
+ * It used to render an inner `<span>`/`<div>` carrying `.visually-hidden` and move
+ * the consumer's children into it. react-dom recorded `tc-visually-hidden` as the
+ * parent of those children, so removing one threw NotFoundError. The utility class
+ * now lands on the host and nothing is created or re-parented; `as` still selects
+ * the layout the inner element used to provide, through `_reset.scss`.
+ */
 export class VisuallyHidden extends HTMLElement {
-    private _initialised = false
-
     static get observedAttributes(): string[] {
-        return ['as']
+        return ['as', 'class']
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            const inner = this.querySelector('.tc-visually-hidden-content')
-            if (inner) slotContent.forEach((n) => inner.appendChild(n))
-            this._initialised = true
-        }
+        this.render()
     }
 
     attributeChangedCallback(): void {
-        if (!this.isConnected || !this._initialised) return
-        const inner = this.querySelector('.tc-visually-hidden-content')
-        const slotContent = inner ? Array.from(inner.childNodes) : []
+        if (!this.isConnected) return
         this.render()
-        const newInner = this.querySelector('.tc-visually-hidden-content')
-        if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
     }
 
     get as(): VisuallyHiddenAs {
@@ -35,12 +34,11 @@ export class VisuallyHidden extends HTMLElement {
         return AS_TAGS.includes(v) ? v : 'span'
     }
     set as(v: VisuallyHiddenAs) {
-        this.setAttribute('as', v)
+        setAttr(this, 'as', v)
     }
 
     private render(): void {
-        const tag = this.as
-        this.innerHTML = `<${tag} class="visually-hidden"><span class="tc-visually-hidden-content"></span></${tag}>`
+        setHostClass(this, 'visually-hidden')
     }
 }
 

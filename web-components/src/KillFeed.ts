@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-kill-feed'
 
@@ -65,11 +66,14 @@ export class KillFeed extends HTMLElement {
                 const headshotHtml = e.headshot
                     ? `<span class="tc-kill-feed-headshot" aria-label="headshot">✦</span>`
                     : ''
-                return `<div class="tc-kill-feed-row" data-id="${esc(e.id)}"><span class="tc-kill-feed-killer"${killerStyle}>${esc(e.killerName)}</span>${weaponHtml}${headshotHtml}<span class="tc-kill-feed-victim"${victimStyle}>${esc(e.victimName)}</span></div>`
+                const rowClass = e.headshot
+                    ? 'tc-kill-feed-row tc-kill-feed-row--headshot'
+                    : 'tc-kill-feed-row'
+                return `<div class="${rowClass}" data-id="${esc(e.id)}"><span class="tc-kill-feed-killer"${killerStyle}>${esc(e.killerName)}</span>${weaponHtml}${headshotHtml}<span class="tc-kill-feed-victim"${victimStyle}>${esc(e.victimName)}</span></div>`
             })
             .join('')
 
-        this.innerHTML = `<div class="tc-kill-feed">${rowsHtml}</div>`
+        patchHtml(this, `<div class="tc-kill-feed">${rowsHtml}</div>`)
     }
 }
 

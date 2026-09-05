@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 
 // tc-add-slot — the dashed „there could be something here" tap target: an icon and a
@@ -118,11 +119,13 @@ export class AddSlot extends HTMLElement {
         // `!button` covers the other way the DOM can go missing: a React move/remount
         // hands back a host whose children were replaced wholesale.
         if (!button || this.icon !== this._builtFor) {
-            this.innerHTML =
+            patchHtml(
+                this,
                 `<button type="button" class="tc-add-slot-button tc-no-tap-highlight">` +
-                lucideByName(this.icon, 'tc-add-slot-glyph') +
-                `<span class="tc-add-slot-label"></span>` +
-                `</button>`
+                    lucideByName(this.icon, 'tc-add-slot-glyph') +
+                    `<span class="tc-add-slot-label"></span>` +
+                    `</button>`,
+            )
             this._builtFor = this.icon
         }
         this._patch()

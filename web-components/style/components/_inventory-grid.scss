@@ -27,7 +27,10 @@ tc-inventory-grid {
     --bs-inventory-grid-empty-color: var(--tc-text-faint);
 
     --bs-inventory-grid-selected-border: var(--tc-app-accent);
-    --bs-inventory-grid-selected-ring: rgba(30, 41, 59, 0.12);
+    // A complete box-shadow recipe (not a bare color) so every theme can supply
+    // its own accent glow without a ring-width wrapper mangling it (see the
+    // consuming rule below) — every theme foundation defines --tc-focus-ring.
+    --bs-inventory-grid-selected-ring: var(--tc-focus-ring);
 
     --bs-inventory-grid-qty-bg: var(--tc-app-accent);
     --bs-inventory-grid-qty-color: var(--tc-app-accent-contrast);
@@ -86,9 +89,13 @@ tc-inventory-grid {
 }
 
 // Active = solid-ink border + focus-ring halo (the standard active state).
+// --bs-inventory-grid-selected-ring is consumed as a complete box-shadow value
+// (not prefixed with a hardcoded ring-width) so a theme supplying a multi-part
+// shadow recipe (e.g. blueprint's offset+blur glow) composes correctly instead
+// of concatenating into an invalid box-shadow.
 .tc-inventory-grid__slot--selected:not(:defined) {
     border-color: var(--bs-inventory-grid-selected-border);
-    box-shadow: 0 0 0 0.2rem var(--bs-inventory-grid-selected-ring);
+    box-shadow: var(--bs-inventory-grid-selected-ring);
 }
 
 // Item glyph — an <img> source or a short initials/glyph label.

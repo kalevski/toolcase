@@ -1,3 +1,4 @@
+import { bindOnce } from './internal/patch-html'
 import { SettingRowBase } from './SettingRowBase'
 
 const TAG_NAME = 'tc-toggle-row'
@@ -74,7 +75,14 @@ export class ToggleRow extends SettingRowBase {
     protected bindControl(): void {
         const btn = this.querySelector<HTMLButtonElement>('.tc-toggle-row__switch')
         if (!btn) return
-        btn.addEventListener('click', () => {
+        // bindOnce — not addEventListener — because a row-label/description
+        // attribute change re-runs renderRow(), and patchHtml REUSES this same
+        // `.tc-toggle-row__switch` button across those renders (same tag at
+        // the same position). A raw addEventListener here would stack a new
+        // listener on every renderRow() call, so a single click would toggle
+        // `checked` back and forth once per accumulated listener (net no-op)
+        // while firing tc-change/onChange that many times.
+        bindOnce(btn, 'click', () => {
             if (this.disabled) return
             const next = !this.checked
             this.checked = next

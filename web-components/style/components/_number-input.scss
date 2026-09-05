@@ -15,6 +15,11 @@ tc-number-input {
     --bs-number-input-error-color: var(--tc-danger);
     --bs-number-input-error-border-color: var(--tc-danger);
     --bs-number-input-focus-ring: var(--tc-focus-ring);
+    // Derived from --tc-danger (not a fixed literal) so themes with a
+    // different danger hue (aurora, sunshine, neon, marker, redline) that
+    // ship no override file still get a correctly-tinted error glow.
+    --bs-number-input-error-focus-ring: 0 0 0 0.2rem
+        color-mix(in srgb, var(--tc-danger) 15%, transparent);
 }
 
 // Disabled field: dim + lock, matching the shared input disabled pattern.
@@ -54,7 +59,7 @@ tc-number-input[disabled] {
         border-color: var(--bs-number-input-error-border-color);
 
         .tc-number-input__input:focus {
-            box-shadow: 0 0 0 0.2rem rgba(239, 68, 68, 0.15);
+            box-shadow: var(--bs-number-input-error-focus-ring);
         }
     }
 
@@ -199,7 +204,22 @@ tc-number-input[disabled] {
         min-height: 2.75rem;
     }
 
+    // Stacked half-height buttons would land at ~22 px each here (half of the
+    // 2.75rem/44px group floor) — well under the 44 px minimum. On coarse
+    // pointers the stepper switches to a side-by-side row instead, so each
+    // button spans the full 44 px group height with a 44 px-wide hit area.
     .tc-number-input__stepper {
+        flex-direction: row;
+        width: auto;
+        min-width: 5.5rem;
+
+        .tc-number-input__step-btn + .tc-number-input__step-btn {
+            border-top: 0;
+            border-left: 1px solid var(--bs-number-input-border-color);
+        }
+    }
+
+    .tc-number-input__step-btn {
         min-width: 2.75rem;
     }
 }

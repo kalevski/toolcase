@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-ping-display'
 
@@ -48,10 +49,13 @@ export class PingDisplay extends HTMLElement {
 
         const text = value == null ? '—' : `${Math.round(value)} ms`
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <span class="tc-ping-display-pip" aria-hidden="true"></span>
             <span class="tc-ping-display-value">${esc(text)}</span>
-        `
+        `,
+        )
     }
 }
 

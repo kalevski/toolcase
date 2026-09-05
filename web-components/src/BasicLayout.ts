@@ -1,65 +1,23 @@
+import { patchHtml } from './internal/patch-html'
+import { setHostClass } from './internal/host-class'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-basic-layout'
 
 export class BasicLayout extends HTMLElement {
     private _initialised = false
-    private _brandSlotNodes: Node[] = []
 
     static get observedAttributes(): string[] {
         return ['brand']
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            // Capture named brand-slot children before render() wipes innerHTML
-            this._brandSlotNodes = Array.from(this.querySelectorAll('[slot="brand"]'))
-            const mainNodes = Array.from(this.childNodes).filter(
-                (n) => !(n instanceof Element && n.getAttribute('slot') === 'brand'),
-            )
-
-            this.render()
-
-            // Distribute brand slots into the header (only when brand attribute absent)
-            if (!this.hasAttribute('brand')) {
-                const brandEl = this.querySelector('.tc-basic-layout-brand')
-                if (brandEl) this._brandSlotNodes.forEach((n) => brandEl.appendChild(n))
-            }
-
-            // Distribute default children into main
-            const mainEl = this.querySelector('.tc-basic-layout-main')
-            if (mainEl) mainNodes.forEach((n) => mainEl.appendChild(n))
-
-            this._initialised = true
-        }
+        this._initialised = true
+        this.render()
     }
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-
-        // Re-capture brand slot nodes from the header if they were distributed there.
-        // When brand attribute was absent before this change, slots lived in
-        // .tc-basic-layout-brand; re-capture so they survive the innerHTML wipe.
-        const brandEl = this.querySelector('.tc-basic-layout-brand')
-        if (brandEl) {
-            const inHeader = Array.from(brandEl.querySelectorAll('[slot="brand"]'))
-            if (inHeader.length > 0) this._brandSlotNodes = inHeader
-        }
-
-        // Re-capture main content before render wipes it
-        const mainEl = this.querySelector('.tc-basic-layout-main')
-        const mainNodes = mainEl ? Array.from(mainEl.childNodes) : []
-
         this.render()
-
-        // Re-distribute brand slots (only when brand attribute is absent)
-        if (!this.hasAttribute('brand')) {
-            const newBrandEl = this.querySelector('.tc-basic-layout-brand')
-            if (newBrandEl) this._brandSlotNodes.forEach((n) => newBrandEl.appendChild(n))
-        }
-
-        // Re-distribute main content
-        const newMainEl = this.querySelector('.tc-basic-layout-main')
-        if (newMainEl) mainNodes.forEach((n) => newMainEl.appendChild(n))
     }
 
     get brand(): string | null {
@@ -72,15 +30,15 @@ export class BasicLayout extends HTMLElement {
 
     private render(): void {
         const brand = this.getAttribute('brand')
-        const hasBrand = brand !== null || this._brandSlotNodes.length > 0
 
-        let headerHtml = ''
-        if (hasBrand) {
-            const brandContent = brand !== null ? esc(brand) : ''
-            headerHtml = `<header class="tc-basic-layout-brand">${brandContent}</header>`
-        }
-
-        this.innerHTML = `<div class="tc-basic-layout">${headerHtml}<main class="tc-basic-layout-main"></main></div>`
+        // THE HOST IS THE LAYOUT: only an attribute brand is element-owned. A
+        // `slot="brand"` child and the page content stay the consumer's own
+        // children and are ordered by CSS (rule 1).
+        setHostClass(this, 'tc-basic-layout')
+        patchHtml(
+            this,
+            brand !== null ? `<header class="tc-basic-layout-brand">${esc(brand)}</header>` : '',
+        )
     }
 }
 

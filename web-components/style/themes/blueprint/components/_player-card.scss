@@ -64,7 +64,7 @@ tc-theme[name='blueprint'],
         // Danger variant → real danger red (not pink — pink is primary CTA).
         --bs-player-card-btn-danger-color: var(--bp-danger);
         --bs-player-card-btn-danger-hover-bg: var(--bp-danger);
-        --bs-player-card-btn-danger-hover-color: #fff;
+        --bs-player-card-btn-danger-hover-color: var(--tc-app-accent-contrast);
     }
 
     // ── Card shell ────────────────────────────────────────────────────────────

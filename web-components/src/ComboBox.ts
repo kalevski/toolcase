@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { msg } from './messages'
 import { chevronDownIcon } from './icons'
@@ -505,28 +506,30 @@ export class ComboBox extends HTMLElement {
             validText: 'Looks good!',
         })
 
-        this.innerHTML =
+        patchHtml(
+            this,
             labelHtml +
-            `<button type="button" class="tc-combo-box__trigger${placeholderCls}${invalidCls}"` +
-            ` aria-haspopup="listbox" aria-expanded="${this._isOpen && !this.disabled}"` +
-            `${describe}${requiredAttr}` +
-            ` ${this.disabled ? 'disabled' : ''}>` +
-            `<span class="tc-combo-box__trigger-label">${esc(triggerLabel)}</span>` +
-            `<span class="tc-combo-box__caret">${chevronDownIcon}</span>` +
-            `</button>` +
-            popoverHtml +
-            messageHtml
+                `<button type="button" class="tc-combo-box__trigger${placeholderCls}${invalidCls}"` +
+                ` aria-haspopup="listbox" aria-expanded="${this._isOpen && !this.disabled}"` +
+                `${describe}${requiredAttr}` +
+                ` ${this.disabled ? 'disabled' : ''}>` +
+                `<span class="tc-combo-box__trigger-label">${esc(triggerLabel)}</span>` +
+                `<span class="tc-combo-box__caret">${chevronDownIcon}</span>` +
+                `</button>` +
+                popoverHtml +
+                messageHtml,
+        )
 
         const trigger = this.querySelector<HTMLButtonElement>('.tc-combo-box__trigger')
-        trigger?.addEventListener('click', () => this._toggleOpen())
+        bindOnce(trigger, 'click', () => this._toggleOpen())
 
         const input = this.querySelector<HTMLInputElement>('.tc-combo-box__search-input')
         if (input) {
-            input.addEventListener('input', () => {
+            bindOnce(input, 'input', () => {
                 this._query = input.value
                 this._renderListOnly()
             })
-            input.addEventListener('keydown', (e: KeyboardEvent) => {
+            bindOnce(input, 'keydown', (e: KeyboardEvent) => {
                 if (e.key === 'Enter') {
                     e.preventDefault()
                     const first = this.querySelector<HTMLElement>('.tc-combo-box__option')
@@ -551,8 +554,8 @@ export class ComboBox extends HTMLElement {
     private _wireOptions(): void {
         this.querySelectorAll<HTMLElement>('.tc-combo-box__option').forEach((el) => {
             const handle = () => this._select(el.dataset.value ?? '')
-            el.addEventListener('click', handle)
-            el.addEventListener('keydown', (e: KeyboardEvent) => {
+            bindOnce(el, 'click', handle)
+            bindOnce(el, 'keydown', (e: KeyboardEvent) => {
                 if (e.key !== 'Enter' && e.key !== ' ') return
                 e.preventDefault()
                 handle()

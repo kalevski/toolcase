@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { fieldMessageHtml } from './internal/field-message'
 import {
@@ -6,6 +7,7 @@ import {
     reflectFieldValidity,
     dispatchFieldChange,
 } from './internal/form-field'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-range'
 
 let _idCounter = 0
@@ -133,14 +135,14 @@ export class Range extends HTMLElement {
         return this.getAttribute('min') ?? '0'
     }
     set min(v: string) {
-        this.setAttribute('min', v)
+        setAttr(this, 'min', v)
     }
 
     get max(): string {
         return this.getAttribute('max') ?? '100'
     }
     set max(v: string) {
-        this.setAttribute('max', v)
+        setAttr(this, 'max', v)
     }
 
     get step(): string | null {
@@ -259,12 +261,15 @@ export class Range extends HTMLElement {
             validText: 'Looks good!',
         })
 
-        this.innerHTML = [
-            labelHtml,
-            `<input id="${this._inputId}" type="range" class="form-range${stateClass}"`,
-            ` min="${esc(min)}" max="${esc(max)}"${stepAttr}${valueAttr}${requiredAttr}${disabledAttr}${describe}>`,
-            messageHtml,
-        ].join('')
+        patchHtml(
+            this,
+            [
+                labelHtml,
+                `<input id="${this._inputId}" type="range" class="form-range${stateClass}"`,
+                ` min="${esc(min)}" max="${esc(max)}"${stepAttr}${valueAttr}${requiredAttr}${disabledAttr}${describe}>`,
+                messageHtml,
+            ].join(''),
+        )
     }
 }
 

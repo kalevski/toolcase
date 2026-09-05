@@ -1,0 +1,243 @@
+// Marker theme — foundation token layer.
+//
+// PROVENANCE. This is polovni.mk's own skin, lifted into the library. That app
+// consumes `@toolcase/web-components` and retints it with a `--sun-*` override
+// block of its own; carrying the same 140 lines in every consumer is the thing a
+// theme layer exists to stop.
+//
+// It is called `marker` and not after the app, for the same reason none of the
+// other six themes is named after a product: what the skin IS, is a page of paper
+// with one highlighter on it. Every theme in this library is named for its mood
+// (aurora, dungeon, neon, blueprint, redline, sunshine) and this one earns the
+// same treatment.
+//
+// AESTHETIC, and why each half of it moved. The yellow is unchanged — it is the
+// brand. What changed is the ground it stands on:
+//
+//   - **Paper, not cream.** Yellow on a warm cream canvas read as DUSTY, because
+//     both were warm and neither could lead. On a cool paper white the same
+//     yellow reads as a marker: it marks the few things that matter on a screen
+//     and leaves the rest alone. That is the whole idea the name is taken from.
+//   - **Graphite, not brown.** Ink that is warm on a warm page is a low-contrast
+//     page. Graphite against paper is the pairing every printed thing uses.
+//   - **Cool shadows.** The warm ones read as a yellow haze under every card once
+//     the canvas stopped being cream.
+//   - **A hairline that is a line.** `rgba(ink, 0.13)` on paper is a rule; the
+//     same alpha of brown on cream was a smudge.
+//   - **The yellow is a FILL, never small text.** Yellow on white cannot carry
+//     12px type, so the warning WORD is the deep yellow (`#7a5a00`) and the
+//     yellow itself only ever fills something.
+//   - **One cool note.** Plate blue marks a REFERENCE figure — what the catalog
+//     says, what the market says — and is the only place blue appears as a fill.
+//
+// Activate by wrapping content in the theme root:
+//   <tc-theme name="marker"> … your tc-* components … </tc-theme>
+// (or any element with [data-tc-theme="marker"]).
+//
+// FONTS are not bundled — load them on the host page (Archivo for display,
+// Hanken Grotesk for body, JetBrains Mono for figures). All three degrade to the
+// system stack.
+//
+// SHARP corners are kept, per the toolcase mandate: circles via 50% and pills via
+// 999px only, exactly as the other light themes do.
+
+@use '../../foundation/tokens' as *;
+
+tc-theme[name='marker'],
+[data-tc-theme='marker'] {
+    color-scheme: light;
+
+    // `tc-theme` is display:contents (no box), so `background` would not paint —
+    // for the paper canvas, wrap content in `tc-artboard-backdrop` or set the
+    // glow field on your own container. `color` / `font-family` / the custom
+    // properties below all inherit through the contents box to descendants.
+    color: var(--mk-ink-1);
+    font-family: var(--mk-body);
+
+    // ── The palette (--mk-*) ─────────────────────────────────────────────────
+    // Paper and ink.
+    --mk-bg: #f4f6f5; // the page
+    --mk-bg-2: #eef1f0; // recessed
+    --mk-surface: #ffffff; // a card
+    --mk-surface-hi: #ffffff;
+    --mk-well: #e6eae8; // inputs, wells, image plates
+    --mk-well-2: #dde3e1;
+
+    // Hairlines — graphite over paper. A LINE, not a smudge.
+    --mk-line-faint: rgba(16, 23, 26, 0.07);
+    --mk-line: rgba(16, 23, 26, 0.13);
+    --mk-line-strong: rgba(16, 23, 26, 0.3);
+
+    // Ink — graphite ramp.
+    --mk-ink-1: #10171a;
+    --mk-ink-2: #39433f;
+    --mk-ink-3: #626d68;
+    --mk-ink-4: #949e99;
+    --mk-emphasis: #05100d;
+
+    // The lead — the marker itself. A FILL, never small text.
+    --mk-lead: #f2b705;
+    --mk-lead-hi: #ffc93a;
+    --mk-lead-lo: #c79403;
+    --mk-lead-deep: #7a5a00; // the yellow as a WORD, where one is needed
+    // 8% and not 16%: on cream a weak yellow was a shade of the background; on
+    // paper it is a highlighter, and 8% is plenty.
+    --mk-lead-tint: rgba(242, 183, 5, 0.08);
+    --mk-lead-line: rgba(199, 148, 3, 0.5);
+    --mk-lead-glow: rgba(242, 183, 5, 0.32);
+    --mk-on-lead: #241a00; // ink on a yellow fill
+
+    // Working — an instrument green, a STATE rather than a second brand colour.
+    --mk-leaf: #12775a;
+    --mk-leaf-hi: #159a72;
+    --mk-leaf-lo: #0d6349;
+    --mk-leaf-deep: #06382a;
+    --mk-leaf-tint: rgba(18, 119, 90, 0.12);
+
+    // Stop.
+    --mk-coral: #c7362b;
+    --mk-coral-tint: rgba(199, 54, 43, 0.1);
+
+    // The band — plate blue. The one cool note; it edges and marks, never fills
+    // anything decorative.
+    --mk-plum: #16359e;
+    --mk-plum-tint: rgba(22, 53, 158, 0.1);
+
+    // Typography.
+    --mk-display: 'Archivo Variable', 'Archivo', system-ui, sans-serif;
+    --mk-body: 'Hanken Grotesk Variable', 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --mk-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+    --mk-ease: cubic-bezier(0.2, 0.9, 0.25, 1);
+    --mk-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+    // ── Signature recipes ────────────────────────────────────────────────────
+    --mk-lead-grad: linear-gradient(135deg, var(--mk-lead-hi), var(--mk-lead));
+    --mk-surface-grad: linear-gradient(180deg, #ffffff, var(--mk-surface));
+    --mk-lead-shadow: 0 0 0 1px rgba(199, 148, 3, 0.35), 0 10px 30px -18px rgba(199, 148, 3, 0.45);
+    --mk-lead-shadow-strong:
+        0 0 0 1px rgba(199, 148, 3, 0.45), 0 16px 40px -20px rgba(199, 148, 3, 0.5);
+    --mk-bevel-top: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    // The paper's own light. Far weaker than a cream theme's, because paper is
+    // already bright and a wash over it reads as a stain.
+    --mk-glow-field:
+        radial-gradient(56% 36% at 90% -8%, rgba(242, 183, 5, 0.14), transparent 70%),
+        radial-gradient(44% 32% at -6% 4%, rgba(22, 53, 158, 0.06), transparent 72%);
+    --mk-overlay-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(244, 246, 245, 0.96));
+    --mk-overlay-blur: blur(14px) saturate(120%);
+
+    // ── Remap toolcase tokens (--tc-*) ───────────────────────────────────────
+    // This block alone flips every component, because the --bs-<component>-*
+    // defaults all resolve through these.
+    --tc-font-sans: var(--mk-body);
+    --tc-font-mono: var(--mk-mono);
+    --tc-font-display: var(--mk-display);
+
+    --tc-white: #ffffff;
+    --tc-black: #000000;
+
+    --tc-surface: var(--mk-surface);
+    --tc-surface-muted: var(--mk-well);
+    --tc-surface-hover: var(--mk-bg-2);
+    --tc-surface-dark: var(--mk-emphasis);
+    --tc-border: var(--mk-line);
+    --tc-border-faint: var(--mk-line-faint);
+    --tc-border-strong: var(--mk-line-strong);
+    --tc-text: var(--mk-ink-1);
+    --tc-text-muted: var(--mk-ink-3);
+    --tc-text-faint: var(--mk-ink-4);
+    --tc-text-inverse: var(--mk-bg);
+    --tc-emphasis: var(--mk-emphasis);
+
+    --tc-ink: #0e1417;
+    --tc-ink-2: #182126;
+
+    // Primary actions are the MARKER: yellow fill, dark ink on it. That pairing
+    // is 11:1 and is the only way yellow carries a label.
+    --tc-app-accent: var(--mk-lead);
+    --tc-app-accent-hover: var(--mk-lead-hi);
+    --tc-app-accent-contrast: var(--mk-on-lead);
+    --tc-app-accent-gradient: var(--mk-lead-grad);
+
+    // Links, focus and accent TEXT take the instrument green: the lead as text on
+    // paper is ~1.6:1 and unreadable at any size.
+    --tc-accent: var(--mk-leaf);
+    --tc-accent-fg: var(--mk-leaf-lo);
+    --tc-accent-soft: var(--mk-leaf-tint);
+    --tc-accent-hex: #12775a;
+    --tc-cyan: #1a7f8c;
+
+    --tc-success: var(--mk-leaf);
+    --tc-success-bg: var(--mk-leaf-tint);
+    --tc-info: var(--mk-plum);
+    --tc-info-bg: var(--mk-plum-tint);
+    // The warning WORD is the deep yellow; the yellow itself stays a fill.
+    --tc-warning: var(--mk-lead-deep);
+    --tc-warning-bg: rgba(242, 183, 5, 0.16);
+    --tc-danger: var(--mk-coral);
+    --tc-danger-bg: var(--mk-coral-tint);
+
+    // Cool shadows. The warm ones read as a yellow haze under every card once the
+    // canvas stopped being cream.
+    --tc-shadow-sm: 0 1px 2px rgba(16, 23, 26, 0.04), 0 2px 6px rgba(16, 23, 26, 0.05);
+    --tc-shadow-md: 0 6px 18px -8px rgba(16, 23, 26, 0.16);
+    --tc-shadow-lg: 0 26px 60px -20px rgba(16, 23, 26, 0.3);
+    --tc-shadow-hover: 0 14px 32px -12px rgba(16, 23, 26, 0.22);
+
+    --tc-transition-fast: 0.14s var(--mk-ease);
+    --tc-transition-base: 0.22s var(--mk-ease);
+
+    // The focus ring is the LEAD's darker step, not the lead: a yellow ring on
+    // white is a ring nobody sees.
+    --tc-focus-ring: 0 0 0 3px rgba(199, 148, 3, 0.45);
+
+    // ── Bootstrap-compatible contract (--bs-*) ───────────────────────────────
+    // The base sheet hardcodes these triplets against its own hexes, so an alpha
+    // variant would still paint the old palette if they were left alone.
+    --bs-primary: var(--mk-lead);
+    --bs-primary-rgb: 242, 183, 5;
+    --bs-secondary: var(--mk-ink-3);
+    --bs-secondary-rgb: 98, 109, 104;
+    --bs-success: var(--mk-leaf);
+    --bs-success-rgb: 18, 119, 90;
+    --bs-danger: var(--mk-coral);
+    --bs-danger-rgb: 199, 54, 43;
+    --bs-warning: var(--mk-lead);
+    --bs-warning-rgb: 242, 183, 5;
+    // White text on this yellow is ~1.9:1. The dark ink is the only legible label.
+    --bs-warning-contrast: var(--mk-on-lead);
+    --bs-info: var(--mk-plum);
+    --bs-info-rgb: 22, 53, 158;
+    --bs-light: var(--mk-bg-2);
+    --bs-light-rgb: 238, 241, 240;
+    --bs-dark: var(--mk-emphasis);
+    --bs-dark-rgb: 5, 16, 13;
+
+    --bs-font-sans-serif: var(--mk-body);
+    --bs-font-monospace: var(--mk-mono);
+    --bs-body-font-family: var(--mk-body);
+    --bs-body-bg: var(--mk-bg-2);
+    --bs-body-bg-rgb: 238, 241, 240;
+    --bs-body-color: var(--mk-ink-1);
+    --bs-body-color-rgb: 16, 23, 26;
+    --bs-emphasis-color: var(--mk-emphasis);
+    --bs-emphasis-color-rgb: 5, 16, 13;
+
+    --bs-secondary-color: var(--mk-ink-3);
+    --bs-secondary-bg: var(--mk-well);
+    --bs-tertiary-color: var(--mk-ink-4);
+    --bs-tertiary-bg: var(--mk-bg);
+
+    --bs-border-color: var(--mk-line);
+    --bs-border-color-translucent: rgba(16, 23, 26, 0.12);
+    --bs-border-radius: 0; // sharp by mandate — circles only via 50%
+
+    --bs-link-color: var(--mk-leaf);
+    --bs-link-hover-color: var(--mk-leaf-lo);
+
+    --bs-box-shadow-sm: var(--tc-shadow-sm);
+    --bs-box-shadow: var(--tc-shadow-md);
+    --bs-box-shadow-lg: var(--tc-shadow-lg);
+
+    --bs-focus-ring-color: rgba(199, 148, 3, 0.45);
+}

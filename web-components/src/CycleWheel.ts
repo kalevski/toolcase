@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-cycle-wheel'
 
@@ -159,7 +160,9 @@ export class CycleWheel extends HTMLElement {
             : ''
         const subEl = sub ? `<div class="tc-cycle-wheel__core-sub">${esc(sub)}</div>` : ''
 
-        this.innerHTML = `<div class="tc-cycle-wheel__inner">
+        patchHtml(
+            this,
+            `<div class="tc-cycle-wheel__inner">
     <svg class="tc-cycle-wheel__ring" viewBox="0 0 400 400" aria-hidden="true" style="animation-duration:${spin}s">
         <circle class="tc-cycle-wheel__track tc-cycle-wheel__track--outer" cx="200" cy="200" r="196" fill="none" stroke-dasharray="3 4" />
         <circle class="tc-cycle-wheel__track tc-cycle-wheel__track--inner" cx="200" cy="200" r="174" fill="none" stroke-dasharray="2 5" />
@@ -173,7 +176,8 @@ export class CycleWheel extends HTMLElement {
         </g>
     </svg>
     <div class="tc-cycle-wheel__core">${labelEl}${valueEl}${pillEl}${subEl}</div>
-</div>`
+</div>`,
+        )
     }
 }
 

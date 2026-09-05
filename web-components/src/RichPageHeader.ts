@@ -1,17 +1,12 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-rich-page-header'
 
 export type RichPageHeaderIconColor =
-    | 'violet'
-    | 'cyan'
-    | 'emerald'
-    | 'amber'
-    | 'pink'
-    | 'blue'
-    | 'slate'
-    | 'rose'
+    'violet' | 'cyan' | 'emerald' | 'amber' | 'pink' | 'blue' | 'slate' | 'rose'
 
 const ICON_COLORS: RichPageHeaderIconColor[] = [
     'violet',
@@ -102,7 +97,7 @@ export class RichPageHeader extends HTMLElement {
         return ICON_COLORS.includes(v) ? v : 'slate'
     }
     set iconColor(v: RichPageHeaderIconColor) {
-        this.setAttribute('icon-color', v)
+        setAttr(this, 'icon-color', v)
     }
 
     private render(): void {
@@ -123,7 +118,10 @@ export class RichPageHeader extends HTMLElement {
                 ? `<p class="tc-rich-page-header-description">${esc(description)}</p>`
                 : ''
 
-        this.innerHTML = `<header class="tc-rich-page-header"><div class="tc-rich-page-header-main">${iconHtml}<div class="tc-rich-page-header-body"><div class="tc-rich-page-header-chips"></div><h1 class="tc-rich-page-header-title">${esc(titleText)}</h1>${subHtml}${descriptionHtml}</div></div><div class="tc-rich-page-header-actions"></div></header>`
+        patchHtml(
+            this,
+            `<header class="tc-rich-page-header"><div class="tc-rich-page-header-main">${iconHtml}<div class="tc-rich-page-header-body"><div class="tc-rich-page-header-chips"></div><h1 class="tc-rich-page-header-title">${esc(titleText)}</h1>${subHtml}${descriptionHtml}</div></div><div class="tc-rich-page-header-actions"></div></header>`,
+        )
     }
 }
 

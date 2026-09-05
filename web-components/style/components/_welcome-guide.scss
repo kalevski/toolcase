@@ -26,7 +26,14 @@ tc-welcome-guide {
     --bs-welcome-guide-title-font-family: var(--tc-font-sans, 'Inter', sans-serif);
 
     --bs-welcome-guide-message-font-size: 0.88rem;
-    --bs-welcome-guide-message-color: var(--tc-border-strong);
+    // Muted copy on the always-dark hero. NOT --tc-border-strong: that token is
+    // tuned as a translucent border color for each theme's OWN surface, and on
+    // several bundled themes (aurora/sunshine/marker) it resolves to a dark or
+    // near-transparent value that is nearly invisible against this fixed black
+    // panel — --tc-text-inverse is the token every theme guarantees is legible
+    // on a dark surface (it already lights the title above), so mix it down for
+    // the muted-message look instead of reusing a border token as text color.
+    --bs-welcome-guide-message-color: color-mix(in srgb, var(--tc-text-inverse) 65%, transparent);
     --bs-welcome-guide-message-line-height: 1.55;
     --bs-welcome-guide-message-gap: 0.5rem;
 

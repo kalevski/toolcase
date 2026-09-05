@@ -1,7 +1,9 @@
+import { patchHtml } from './patch-html'
 import { esc as escShared } from './esc'
 import { fieldMessageHtml } from './field-message'
 import { requiredMark, dispatchFieldChange } from './form-field'
 import { msg } from '../messages'
+import { setAttr } from './tc-element'
 // Shared scaffold for tc-input and tc-textarea. Both render the same
 // label + form-control + validation-feedback + help-text frame and share an
 // identical accessor set (value/placeholder/label/name/size/disabled/readonly/
@@ -251,7 +253,7 @@ export abstract class TextFieldBase extends HTMLElement {
         return this.getAttribute('placeholder') ?? ''
     }
     set placeholder(v: string) {
-        this.setAttribute('placeholder', v)
+        setAttr(this, 'placeholder', v)
     }
 
     get label(): string | null {
@@ -387,6 +389,6 @@ export abstract class TextFieldBase extends HTMLElement {
             commonAttrs: `${ariaDescribedBy}${disabledAttr}${readonlyAttr}${requiredAttr}${constraintAttrs}`,
         })
 
-        this.innerHTML = [labelHtml, control, messageHtml].join('')
+        patchHtml(this, [labelHtml, control, messageHtml].join(''))
     }
 }

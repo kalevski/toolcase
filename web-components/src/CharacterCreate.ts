@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-character-create'
 
@@ -147,7 +148,9 @@ export class CharacterCreate extends HTMLElement {
 
         const fieldsMarkup = this._fields.map((f) => this.fieldMarkup(f)).join('')
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <div class="tc-character-create-header">
                 <span class="tc-character-create-eyebrow">${esc(this.heading)}</span>
                 <input class="form-control tc-character-create-name" type="text" data-control="name" value="${esc(this.name)}" placeholder="${esc(this.namePlaceholder)}" />
@@ -156,11 +159,12 @@ export class CharacterCreate extends HTMLElement {
             <div class="tc-character-create-footer">
                 <button type="button" class="btn btn-primary tc-character-create-confirm">${esc(this.confirmLabel)}</button>
             </div>
-        `
+        `,
+        )
 
         const nameInput = this.querySelector<HTMLInputElement>('.tc-character-create-name')
-        nameInput?.addEventListener('input', () => {
-            const v = nameInput.value
+        bindOnce(nameInput, 'input', () => {
+            const v = nameInput?.value ?? ''
             this._suppressRender = true
             if (v) this.setAttribute('name', v)
             else this.removeAttribute('name')
@@ -173,9 +177,7 @@ export class CharacterCreate extends HTMLElement {
             const id = wrapper.dataset.id || ''
             if (!id) return
             const control = wrapper.querySelector('[data-control]') as
-                | HTMLInputElement
-                | HTMLSelectElement
-                | null
+                HTMLInputElement | HTMLSelectElement | null
             if (!control) return
             const valueDisplay = wrapper.querySelector(
                 '.tc-character-create-range-value',
@@ -192,12 +194,12 @@ export class CharacterCreate extends HTMLElement {
                 this.emit('tc-change', { id, value })
                 if (typeof this.onChange === 'function') this.onChange(id, value)
             }
-            control.addEventListener('input', handle)
-            control.addEventListener('change', handle)
+            bindOnce(control, 'input', handle)
+            bindOnce(control, 'change', handle)
         })
 
         const confirm = this.querySelector('.tc-character-create-confirm') as HTMLElement | null
-        confirm?.addEventListener('click', () => {
+        bindOnce(confirm, 'click', () => {
             this.emit('tc-confirm', { name: this.name, values: { ...this._values } })
             if (typeof this.onConfirm === 'function') this.onConfirm(this.name, { ...this._values })
         })

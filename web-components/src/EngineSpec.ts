@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 
 const TAG_NAME = 'tc-engine-spec'
@@ -155,7 +156,12 @@ export class EngineSpec extends HTMLElement {
     private _cells(): Cell[] {
         const attr = (name: string) => this.getAttribute(name)
         const cells: Cell[] = []
-        const push = (raw: string | null, cellLabel: string, value: (raw: string) => string, unit?: string) => {
+        const push = (
+            raw: string | null,
+            cellLabel: string,
+            value: (raw: string) => string,
+            unit?: string,
+        ) => {
             if (raw != null && raw !== '') cells.push({ label: cellLabel, value: value(raw), unit })
         }
 
@@ -187,7 +193,9 @@ export class EngineSpec extends HTMLElement {
                 ? `<header class="tc-engine-spec-head">` +
                   `<div class="tc-engine-spec-id">` +
                   (code ? `<span class="tc-engine-spec-code">${esc(code)}</span>` : '') +
-                  (manufacturer ? `<span class="tc-engine-spec-manufacturer">${esc(manufacturer)}</span>` : '') +
+                  (manufacturer
+                      ? `<span class="tc-engine-spec-manufacturer">${esc(manufacturer)}</span>`
+                      : '') +
                   `</div>` +
                   (config ? `<span class="tc-engine-spec-config">${esc(config)}</span>` : '') +
                   `</header>`
@@ -199,17 +207,21 @@ export class EngineSpec extends HTMLElement {
                     `<div class="tc-engine-spec-cell">` +
                     `<span class="tc-engine-spec-cell-label">${esc(cell.label)}</span>` +
                     `<span class="tc-engine-spec-cell-value">${esc(cell.value)}` +
-                    (cell.unit ? ` <span class="tc-engine-spec-cell-unit">${esc(cell.unit)}</span>` : '') +
+                    (cell.unit
+                        ? ` <span class="tc-engine-spec-cell-unit">${esc(cell.unit)}</span>`
+                        : '') +
                     `</span>` +
                     `</div>`,
             )
             .join('')
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-engine-spec${this.compact ? ' tc-engine-spec--compact' : ''}">` +
-            headHtml +
-            (cellsHtml ? `<div class="tc-engine-spec-grid">${cellsHtml}</div>` : '') +
-            `</div>`
+                headHtml +
+                (cellsHtml ? `<div class="tc-engine-spec-grid">${cellsHtml}</div>` : '') +
+                `</div>`,
+        )
     }
 }
 

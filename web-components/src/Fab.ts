@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 
 // tc-fab — the floating action button: one primary action parked in the thumb
@@ -278,7 +279,7 @@ export class Fab extends HTMLElement {
         // `!button` covers the other way the DOM can go missing: a React
         // move/remount hands back a host whose children were replaced wholesale.
         if (!button || shape !== this._builtFor) {
-            this.innerHTML = this._shape()
+            patchHtml(this, this._shape())
             this._builtFor = shape
         }
         this._patchText()

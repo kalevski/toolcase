@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { msg } from './messages'
 import { fixedOriginOffset } from './internal/containingBlock'
@@ -143,20 +144,22 @@ export class Heatmap extends HTMLElement {
             const skelCells = Array.from({ length: skelCols * skelRows })
                 .map(() => `<div class="tc-heatmap-skeleton-cell"></div>`)
                 .join('')
-            this.innerHTML =
+            patchHtml(
+                this,
                 `<div class="tc-heatmap" aria-hidden="true">` +
-                (title || subtitle
-                    ? `<div class="tc-heatmap-header">` +
-                      (title
-                          ? `<div class="tc-heatmap-skeleton tc-heatmap-skeleton--title"></div>`
-                          : '') +
-                      `</div>`
-                    : '') +
-                `<div class="tc-heatmap-skeleton-grid" style="grid-template-columns: repeat(${skelCols}, ${cellSize}px); --bs-heatmap-cell-size: ${cellSize}px;">` +
-                skelCells +
-                `</div>` +
-                `</div>` +
-                `<span class="visually-hidden">${esc(msg('loading'))}</span>`
+                    (title || subtitle
+                        ? `<div class="tc-heatmap-header">` +
+                          (title
+                              ? `<div class="tc-heatmap-skeleton tc-heatmap-skeleton--title"></div>`
+                              : '') +
+                          `</div>`
+                        : '') +
+                    `<div class="tc-heatmap-skeleton-grid" style="grid-template-columns: repeat(${skelCols}, ${cellSize}px); --bs-heatmap-cell-size: ${cellSize}px;">` +
+                    skelCells +
+                    `</div>` +
+                    `</div>` +
+                    `<span class="visually-hidden">${esc(msg('loading'))}</span>`,
+            )
             return
         }
 
@@ -211,7 +214,11 @@ export class Heatmap extends HTMLElement {
                             )
                         }
                         const t = (cell.value - minVal) / range
-                        const fill = interpolateColor(scale, t)
+                        // interpolateColor's fallback branches can return a raw entry
+                        // straight from the (consumer-suppliable) colorScale array
+                        // verbatim, so escape it before it lands in the style attribute
+                        // — same treatment BarChart gives an explicit per-item color.
+                        const fill = esc(interpolateColor(scale, t))
                         const labelPart = cell.label ? `, ${esc(cell.label)}` : ''
                         const aria = `${esc(String(row))}, ${esc(String(col))}: ${esc(String(cell.value))}${labelPart}`
                         return (
@@ -243,7 +250,9 @@ export class Heatmap extends HTMLElement {
         // ── Legend ─────────────────────────────────────────────────────────
         let legendHtml = ''
         if (vals.length) {
-            const gradient = `linear-gradient(to right, ${scale.join(', ')})`
+            // Same escaping as the per-cell fill above: scale entries can come
+            // straight from the consumer-suppliable colorScale property.
+            const gradient = esc(`linear-gradient(to right, ${scale.join(', ')})`)
             legendHtml =
                 `<div class="tc-heatmap-legend" aria-hidden="true">` +
                 `<span class="tc-heatmap-legend-label">${esc(String(minVal))}</span>` +
@@ -252,15 +261,17 @@ export class Heatmap extends HTMLElement {
                 `</div>`
         }
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-heatmap">` +
-            headerHtml +
-            `<div class="tc-heatmap-scroll">` +
-            gridHtml +
-            `<div class="tc-heatmap-tooltip" role="tooltip" hidden></div>` +
-            `</div>` +
-            legendHtml +
-            `</div>`
+                headerHtml +
+                `<div class="tc-heatmap-scroll">` +
+                gridHtml +
+                `<div class="tc-heatmap-tooltip" role="tooltip" hidden></div>` +
+                `</div>` +
+                legendHtml +
+                `</div>`,
+        )
 
         this._attachGridListeners()
     }
@@ -271,7 +282,10 @@ export class Heatmap extends HTMLElement {
         const tooltip = this.querySelector<HTMLElement>('.tc-heatmap-tooltip')
         if (!grid || !scroll || !tooltip) return
 
-        grid.addEventListener('mouseover', (e: MouseEvent) => {
+        // Pointer events (not mouseover/mouseout) so hover-tooltip delegation
+        // also works for touch/pen input, matching BarChart/AreaChart/LineChart/
+        // PieChart, which all bind pointer* rather than legacy mouse* events.
+        bindOnce(grid, 'pointerover', (e: PointerEvent) => {
             const cell = (e.target as HTMLElement).closest<HTMLElement>('.tc-heatmap-cell')
             if (!cell || cell.classList.contains('tc-heatmap-cell--empty')) return
             const row = cell.dataset.row ?? ''
@@ -306,7 +320,7 @@ export class Heatmap extends HTMLElement {
             )
         })
 
-        grid.addEventListener('mouseout', (e: MouseEvent) => {
+        bindOnce(grid, 'pointerout', (e: PointerEvent) => {
             const cell = (e.target as HTMLElement).closest<HTMLElement>('.tc-heatmap-cell')
             if (cell) cell.classList.remove('tc-heatmap-cell--active')
             const related = e.relatedTarget as Node | null

@@ -207,3 +207,9 @@ tc-group {
         transition: none;
     }
 }
+
+// The group body is the consumer's own children: collapsing hides them where they
+// stand instead of moving them into `.tc-group-body` (rule 1).
+.tc-group--collapsed > :not(.tc-group-header) {
+    display: none;
+}

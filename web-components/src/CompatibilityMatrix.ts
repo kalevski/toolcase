@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -197,17 +198,19 @@ export class CompatibilityMatrix extends HTMLElement {
         const legendHtml =
             `<div class="tc-compatibility-matrix__legend">` + legendEntriesHtml + `</div>`
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-compatibility-matrix">` +
-            headerHtml +
-            `<div class="tc-compatibility-matrix-table">` +
-            `<table class="tc-compatibility-matrix__table">` +
-            theadHtml +
-            `<tbody>${tbodyHtml}</tbody>` +
-            `</table>` +
-            `</div>` +
-            legendHtml +
-            `</div>`
+                headerHtml +
+                `<div class="tc-compatibility-matrix-table">` +
+                `<table class="tc-compatibility-matrix__table">` +
+                theadHtml +
+                `<tbody>${tbodyHtml}</tbody>` +
+                `</table>` +
+                `</div>` +
+                legendHtml +
+                `</div>`,
+        )
     }
 }
 

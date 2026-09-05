@@ -1,5 +1,7 @@
 import { esc } from './internal/esc'
 import { lucideByName } from './internal/lucide'
+import { setHostClass } from './internal/host-class'
+import { syncOwnedNodes } from './internal/tc-element'
 
 const TAG_NAME = 'tc-empty-state'
 
@@ -10,39 +12,43 @@ const TAG_NAME = 'tc-empty-state'
  *   - `icon` attribute — lucide glyph in the tile bubble
  *   - `heading` attribute — short bold line ("No recipes yet")
  *   - `description` attribute — muted explanation under the heading
- *   - default slot — free-form body content (kept for back-compat)
- *   - `slot="action"` children — CTA row (e.g. a tc-button) under the text
+ *   - default children — free-form body content
+ *   - `slot="action"` child — the CTA row under the text
+ *
+ * THE HOST IS THE LAYOUT. It renders no wrapper and never moves your children.
+ * Before 5.1 it captured its child nodes, split them into `.tc-empty-state__body`
+ * and `.tc-empty-state__action`, and re-appended them there — so react-dom, which
+ * records `tc-empty-state` as the parent of the children it created, threw
+ * `NotFoundError` from `parentInstance.removeChild(child)` the moment it removed
+ * one of them individually. At 71 call sites in one consuming app that is not a
+ * hypothetical.
+ *
+ * What the element creates — the icon tile, the heading and the description — is
+ * PREPENDED, in that order, and never wraps anything. Ordering is CSS: the action
+ * region is `order: 1` and everything else falls where the consumer put it.
+ *
+ * The one contract change that follows: `slot="action"` is now a REGION, not a
+ * collector. The CTA row is a single element you supply (it is styled as the row),
+ * because a second `slot="action"` child can no longer be folded into the first
+ * without moving a node.
  */
 export class EmptyState extends HTMLElement {
-    private _initialised = false
+    private _built = false
 
     static get observedAttributes(): string[] {
-        return ['icon', 'heading', 'description']
+        // `class` is observed so the element can re-assert its own classes after
+        // react-dom overwrites `className` wholesale — see setHostClass.
+        return ['icon', 'heading', 'description', 'class']
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            const children = Array.from(this.childNodes)
-            const actionNodes = children.filter(
-                (n) => n instanceof Element && n.getAttribute('slot') === 'action',
-            )
-            const bodyNodes = children.filter(
-                (n) => !(n instanceof Element && n.getAttribute('slot') === 'action'),
-            )
-            this.render()
-            this._distribute(bodyNodes, actionNodes)
-            this._initialised = true
-        }
+        this._built = true
+        this.patch()
     }
 
     attributeChangedCallback(): void {
-        if (!this.isConnected || !this._initialised) return
-        const body = this.querySelector('.tc-empty-state__body')
-        const action = this.querySelector('.tc-empty-state__action')
-        const bodyNodes = body ? Array.from(body.childNodes) : []
-        const actionNodes = action ? Array.from(action.childNodes) : []
-        this.render()
-        this._distribute(bodyNodes, actionNodes)
+        if (!this.isConnected || !this._built) return
+        this.patch()
     }
 
     get icon(): string | null {
@@ -69,39 +75,22 @@ export class EmptyState extends HTMLElement {
         else this.removeAttribute('description')
     }
 
-    private _distribute(bodyNodes: Node[], actionNodes: Node[]): void {
-        const body = this.querySelector('.tc-empty-state__body')
-        if (body) bodyNodes.forEach((n) => body.appendChild(n))
-        const action = this.querySelector('.tc-empty-state__action')
-        if (action && actionNodes.length > 0) actionNodes.forEach((n) => action.appendChild(n))
-    }
-
-    private render(): void {
+    private patch(): void {
+        setHostClass(this, 'tc-empty-state')
         const iconName = this.getAttribute('icon')
-        let iconHtml = ''
-        if (iconName) {
-            // lucideByName resolves kebab-case ("folder-git-2") AND PascalCase names.
-            const svg = lucideByName(iconName)
-            if (svg) {
-                iconHtml = `<div class="tc-empty-state__icon">${svg}</div>`
-            }
-        }
-        const heading = this.heading
-        const description = this.description
-        const headingHtml = heading
-            ? `<div class="tc-empty-state__heading">${esc(heading)}</div>`
-            : ''
-        const descriptionHtml = description
-            ? `<div class="tc-empty-state__description">${esc(description)}</div>`
-            : ''
-        this.innerHTML =
-            `<div class="tc-empty-state">` +
-            iconHtml +
-            headingHtml +
-            descriptionHtml +
-            `<div class="tc-empty-state__body"></div>` +
-            `<div class="tc-empty-state__action"></div>` +
-            `</div>`
+        // lucideByName resolves kebab-case ("folder-git-2") AND PascalCase names.
+        const svg = iconName ? lucideByName(iconName) : null
+        syncOwnedNodes(this, [
+            { cls: 'tc-empty-state__icon', html: svg || null },
+            {
+                cls: 'tc-empty-state__heading',
+                html: this.heading ? esc(this.heading) : null,
+            },
+            {
+                cls: 'tc-empty-state__description',
+                html: this.description ? esc(this.description) : null,
+            },
+        ])
     }
 }
 

@@ -1,0 +1,86 @@
+// tc-bead-trail — a breadcrumb that shows DEPTH as beads and the path as names.
+//
+// The beads answer "how far down does this live" before a single name is read,
+// which is the fact a chevron breadcrumb loses the moment it has to elide.
+
+tc-bead-trail {
+    --bs-bead-trail-gap: 0.375rem;
+    --bs-bead-trail-bead-size: 4px;
+    --bs-bead-trail-bead-gap: 3px;
+    --bs-bead-trail-bead-color: var(--tc-border-strong, var(--tc-text-faint));
+    --bs-bead-trail-here-color: var(--tc-app-accent, var(--tc-primary));
+    --bs-bead-trail-font-size: 0.6875rem;
+    --bs-bead-trail-color: var(--tc-text-faint);
+}
+
+.tc-bead-trail {
+    display: flex;
+    align-items: center;
+    gap: var(--bs-bead-trail-gap);
+    min-width: 0;
+    font-size: var(--bs-bead-trail-font-size);
+    color: var(--bs-bead-trail-color);
+}
+
+.tc-bead-trail__beads {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-bead-trail-bead-gap);
+    flex-shrink: 0;
+}
+
+// A bead is a dot, so it is one of the circles this library allows itself.
+.tc-bead-trail__bead {
+    width: var(--bs-bead-trail-bead-size);
+    height: var(--bs-bead-trail-bead-size);
+    border-radius: 50%;
+    background: var(--bs-bead-trail-bead-color);
+}
+
+// The last bead is the thing itself, which is what makes the row read as "here,
+// at this depth" rather than as a count of ancestors.
+.tc-bead-trail__bead--here {
+    background: var(--bs-bead-trail-here-color);
+}
+
+// Past the bead cap the row ends in an ellipsis rather than growing: a trail of
+// twelve dots is a dotted line, not a depth.
+.tc-bead-trail__beads--deeper::after {
+    content: '…';
+    line-height: 1;
+    color: var(--bs-bead-trail-bead-color);
+}
+
+.tc-bead-trail__path {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.tc-bead-trail__crumb {
+    // A flex item's default min-width is auto (its content size), so without an
+    // explicit 0 floor it never actually shrinks below the text's own width and
+    // the ellipsis above never gets a chance to fire — same fix as app-bar/action-bar.
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+a.tc-bead-trail__crumb:hover {
+    text-decoration: underline;
+}
+
+.tc-bead-trail__sep,
+.tc-bead-trail__gap {
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.tc-bead-trail__root {
+    font-style: italic;
+}

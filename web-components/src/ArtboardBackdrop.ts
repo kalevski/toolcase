@@ -1,3 +1,4 @@
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-artboard-backdrop'
 
 export type ArtboardBackdropKind = 'dark' | 'scene' | 'parch'
@@ -32,7 +33,7 @@ export class ArtboardBackdrop extends HTMLElement {
         return KINDS.includes(v) ? v : 'dark'
     }
     set kind(value: ArtboardBackdropKind) {
-        this.setAttribute('kind', value)
+        setAttr(this, 'kind', value)
     }
 
     get padding(): ArtboardBackdropPadding {
@@ -40,7 +41,7 @@ export class ArtboardBackdrop extends HTMLElement {
         return PADDINGS.includes(v) ? v : 'md'
     }
     set padding(value: ArtboardBackdropPadding) {
-        this.setAttribute('padding', value)
+        setAttr(this, 'padding', value)
     }
 
     private render(): void {

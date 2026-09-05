@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-guild-panel'
 
@@ -141,32 +142,34 @@ export class GuildPanel extends HTMLElement {
                       .join('')
                 : `<li class="tc-guild-panel-empty">No members</li>`
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-guild-panel">` +
-            `<div class="tc-guild-panel-header">` +
-            `<span class="tc-guild-panel-eyebrow">Guild</span>` +
-            `<div class="tc-guild-panel-name">` +
-            `<span class="tc-guild-panel-name-text">${esc(this.guildName)}</span>` +
-            tagMarkup +
-            `</div>` +
-            mottoMarkup +
-            `</div>` +
-            `<div class="tc-guild-panel-stats">` +
-            levelStat +
-            `<div class="tc-guild-panel-stat">` +
-            `<span class="tc-guild-panel-stat-label">Members</span>` +
-            `<span class="tc-guild-panel-stat-value">${esc(headcountText)}</span>` +
-            `</div>` +
-            `<div class="tc-guild-panel-stat">` +
-            `<span class="tc-guild-panel-stat-label">Online</span>` +
-            `<span class="tc-guild-panel-stat-value">${esc(String(onlineCount))}</span>` +
-            `</div>` +
-            `</div>` +
-            `<div class="tc-guild-panel-roster">` +
-            `<span class="tc-guild-panel-eyebrow">Roster</span>` +
-            `<ul class="tc-guild-panel-members" role="list">${membersMarkup}</ul>` +
-            `</div>` +
-            `</div>`
+                `<div class="tc-guild-panel-header">` +
+                `<span class="tc-guild-panel-eyebrow">Guild</span>` +
+                `<div class="tc-guild-panel-name">` +
+                `<span class="tc-guild-panel-name-text">${esc(this.guildName)}</span>` +
+                tagMarkup +
+                `</div>` +
+                mottoMarkup +
+                `</div>` +
+                `<div class="tc-guild-panel-stats">` +
+                levelStat +
+                `<div class="tc-guild-panel-stat">` +
+                `<span class="tc-guild-panel-stat-label">Members</span>` +
+                `<span class="tc-guild-panel-stat-value">${esc(headcountText)}</span>` +
+                `</div>` +
+                `<div class="tc-guild-panel-stat">` +
+                `<span class="tc-guild-panel-stat-label">Online</span>` +
+                `<span class="tc-guild-panel-stat-value">${esc(String(onlineCount))}</span>` +
+                `</div>` +
+                `</div>` +
+                `<div class="tc-guild-panel-roster">` +
+                `<span class="tc-guild-panel-eyebrow">Roster</span>` +
+                `<ul class="tc-guild-panel-members" role="list">${membersMarkup}</ul>` +
+                `</div>` +
+                `</div>`,
+        )
     }
 }
 

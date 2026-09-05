@@ -212,6 +212,12 @@ tc-dashboard-layout {
     overflow-y: auto;
     background: var(--bs-dashboard-layout-content-bg);
     border-radius: 0;
+    // Load-bearing: the content column is `1fr` (here and at ≥lg), and a grid
+    // item's implicit min-width is `auto` — without this a wide unbreakable
+    // child (a table, a long line) grows the track past its share of the row
+    // and pushes the whole shell wider than its container instead of
+    // scrolling internally. Mirrors min-height: 0 on the same element.
+    min-width: 0;
     min-height: 0;
     -webkit-overflow-scrolling: touch;
 }

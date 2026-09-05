@@ -1,3 +1,5 @@
+import { patchHtml } from './internal/patch-html'
+import { adoptChildren } from './internal/adopt-children'
 import { esc } from './internal/esc'
 import { icon } from './icons'
 import { msg, msgFormat } from './messages'
@@ -5,6 +7,10 @@ import { wireScrollEdges } from './internal/scroll-edges'
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-static'
 
 const TAG_NAME = 'tc-advanced-table'
+
+/** patchHtml region for the `rows` prop, so it reconciles against its own rows
+ *  and steps over any the consumer wrote as children. */
+const ROWS = 'rows'
 
 // Sort affordance icons: a faint chevrons-up-down on every sortable header,
 // resolving to a single up/down chevron (in --tc-text) on the active column.
@@ -91,8 +97,10 @@ export class AdvancedTable extends HTMLElement {
             this.render()
             const body = this.querySelector('.tc-advanced-table-body')
             if (body) {
-                if (this._rowsHtml != null) body.innerHTML = this._rowsHtml
-                else slotContent.forEach((n) => body.appendChild(n))
+                // A <tr> is only legal inside the tbody, so consumer rows written
+                // as children have to move there — see adopt-children.ts.
+                adoptChildren(this, () => body, slotContent)
+                this._patchRows(body)
             }
             this._initialised = true
         } else if (!this._unbindEdges) {
@@ -230,6 +238,18 @@ export class AdvancedTable extends HTMLElement {
         if (this._initialised) this._rerenderWithSlots()
     }
 
+    /**
+     * Render the `rows` prop into the tbody as its own region. Reconciling rather
+     * than assigning innerHTML is what lets `rows` and consumer children coexist
+     * — the walk steps over anything it did not create (rule 1) — and it keeps
+     * the caret in an editable cell across a rows update.
+     */
+    private _patchRows(body: Element): void {
+        // `?? ''` so clearing the prop clears the rows it rendered, and so a table
+        // that never sets it patches an empty region — a no-op.
+        patchHtml(body, this._rowsHtml ?? '', { region: ROWS })
+    }
+
     // ── Event delegation ──────────────────────────────────────────────────────
 
     private _onInput = (e: Event): void => {
@@ -340,15 +360,15 @@ export class AdvancedTable extends HTMLElement {
         const focusKey = active?.dataset.filterKey ?? null
         const caret = active instanceof HTMLInputElement ? active.selectionStart : null
 
-        const body = this.querySelector('.tc-advanced-table-body')
-        const rows = this._rowsHtml == null && body ? Array.from(body.childNodes) : []
-
         this.render()
 
+        // patchHtml reuses the tbody across renders and the consumer's own rows
+        // were adopted into it, so nothing has to be captured and put back —
+        // only the `rows` region is reconciled against the new markup.
         const newBody = this.querySelector('.tc-advanced-table-body')
         if (newBody) {
-            if (this._rowsHtml != null) newBody.innerHTML = this._rowsHtml
-            else rows.forEach((n) => newBody.appendChild(n))
+            adoptChildren(this, () => newBody)
+            this._patchRows(newBody)
         }
 
         if (focusKey) {
@@ -520,21 +540,23 @@ export class AdvancedTable extends HTMLElement {
             .join(' ')
 
         this._unbindEdges?.()
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-advanced-table${loading ? ' tc-advanced-table--loading' : ''}">` +
-            this._renderColumnStyles() +
-            this._renderToolbar() +
-            `<div class="${wrapCls}">` +
-            `<div class="tc-advanced-table-scroll">` +
-            `<table class="table tc-advanced-table-table">` +
-            this._renderHead() +
-            `<tbody class="tc-advanced-table-body"></tbody>` +
-            `</table>` +
-            `</div>` +
-            (loading ? this._renderOverlay() : '') +
-            `</div>` +
-            this._renderPagination() +
-            `</div>`
+                this._renderColumnStyles() +
+                this._renderToolbar() +
+                `<div class="${wrapCls}">` +
+                `<div class="tc-advanced-table-scroll">` +
+                `<table class="table tc-advanced-table-table">` +
+                this._renderHead() +
+                `<tbody class="tc-advanced-table-body"></tbody>` +
+                `</table>` +
+                `</div>` +
+                (loading ? this._renderOverlay() : '') +
+                `</div>` +
+                this._renderPagination() +
+                `</div>`,
+        )
 
         this._wireEdges()
     }

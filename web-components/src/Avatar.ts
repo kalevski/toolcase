@@ -1,9 +1,11 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { VARIANTS_CORE } from './internal/variants'
 import { setHostClass } from './internal/host-class'
 import { deriveInitials } from './internal/initials'
 import { esc as escapeAttr } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-avatar'
 
@@ -68,7 +70,7 @@ export class Avatar extends HTMLElement {
         return SIZES.includes(v) ? v : 'default'
     }
     set size(v: AvatarSize) {
-        this.setAttribute('size', v)
+        setAttr(this, 'size', v)
     }
 
     get status(): AvatarStatus | null {
@@ -85,7 +87,7 @@ export class Avatar extends HTMLElement {
         return VARIANTS.includes(v) ? v : 'secondary'
     }
     set variant(v: AvatarVariant) {
-        this.setAttribute('variant', v)
+        setAttr(this, 'variant', v)
     }
 
     private _contentHtml(): string {
@@ -119,13 +121,13 @@ export class Avatar extends HTMLElement {
             ? `<span class="tc-avatar-status tc-avatar-status-${status}" role="img" aria-label="${status}"></span>`
             : ''
 
-        this.innerHTML = this._contentHtml() + statusHtml
+        patchHtml(this, this._contentHtml() + statusHtml)
 
         // Wire up image-load-error fallback after the img is in the DOM.
         if (this.src) {
             const img = this.querySelector<HTMLImageElement>('.tc-avatar-img')
             if (img) {
-                img.addEventListener('error', () => this._handleImageError(), { once: true })
+                bindOnce(img, 'error', () => this._handleImageError(), { once: true })
             }
         }
     }
@@ -142,7 +144,7 @@ export class Avatar extends HTMLElement {
         } else {
             content = `<span class="tc-avatar-placeholder" aria-hidden="true">${userPlaceholderIcon}</span>`
         }
-        this.innerHTML = content + statusHtml
+        patchHtml(this, content + statusHtml)
     }
 }
 

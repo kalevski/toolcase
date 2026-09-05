@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { Play, VolumeX, Headphones, Plus, Trash2, Scissors } from 'lucide-static'
 import { icon } from './icons'
@@ -519,7 +520,7 @@ export class AudioMixer extends HTMLElement {
     private render(): void {
         if (this.loading) {
             this.setAttribute('aria-busy', 'true')
-            this.innerHTML = this._renderSkeleton()
+            patchHtml(this, this._renderSkeleton())
             return
         }
         this.removeAttribute('aria-busy')
@@ -580,14 +581,16 @@ export class AudioMixer extends HTMLElement {
 
         const inspector = this._renderInspector(sel, disabled)
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-audio-mixer">` +
-            toolbar +
-            `<div class="tc-audio-mixer-main">` +
-            `<div class="tc-audio-mixer-stage">${headers}${timeline}</div>` +
-            inspector +
-            `</div>` +
-            `</div>`
+                toolbar +
+                `<div class="tc-audio-mixer-main">` +
+                `<div class="tc-audio-mixer-stage">${headers}${timeline}</div>` +
+                inspector +
+                `</div>` +
+                `</div>`,
+        )
 
         if (focusSel) this.querySelector<HTMLElement>(focusSel)?.focus()
     }

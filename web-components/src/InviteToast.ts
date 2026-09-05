@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-invite-toast'
 
@@ -169,20 +170,22 @@ export class InviteToast extends HTMLElement {
         const body = this.body || 'Wants to invite you to a party.'
         const initial = `${Math.max(0, Math.ceil(this.timeoutSeconds))}s`
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-invite-toast__panel">` +
-            `<div class="tc-invite-toast__header">` +
-            `<span class="tc-invite-toast__eyebrow">Invite</span>` +
-            `<span class="tc-invite-toast__countdown" aria-hidden="true">${initial}</span>` +
-            `</div>` +
-            `<div class="tc-invite-toast__inviter">${esc(inviter)}</div>` +
-            `<p class="tc-invite-toast__body">${esc(body)}</p>` +
-            `<div class="tc-invite-toast__bar" aria-hidden="true"><div class="tc-invite-toast__bar-fill"></div></div>` +
-            `<div class="tc-invite-toast__actions">` +
-            `<button type="button" class="btn btn-outline-secondary btn-sm tc-invite-toast__decline">Decline</button>` +
-            `<button type="button" class="btn btn-primary btn-sm tc-invite-toast__accept">Accept</button>` +
-            `</div>` +
-            `</div>`
+                `<div class="tc-invite-toast__header">` +
+                `<span class="tc-invite-toast__eyebrow">Invite</span>` +
+                `<span class="tc-invite-toast__countdown" aria-hidden="true">${initial}</span>` +
+                `</div>` +
+                `<div class="tc-invite-toast__inviter">${esc(inviter)}</div>` +
+                `<p class="tc-invite-toast__body">${esc(body)}</p>` +
+                `<div class="tc-invite-toast__bar" aria-hidden="true"><div class="tc-invite-toast__bar-fill"></div></div>` +
+                `<div class="tc-invite-toast__actions">` +
+                `<button type="button" class="btn btn-outline-secondary btn-sm tc-invite-toast__decline">Decline</button>` +
+                `<button type="button" class="btn btn-primary btn-sm tc-invite-toast__accept">Accept</button>` +
+                `</div>` +
+                `</div>`,
+        )
 
         this._updateCountdown()
     }

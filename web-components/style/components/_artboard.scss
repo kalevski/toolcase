@@ -1,0 +1,59 @@
+// tc-artboard — a fixed-size surface on a `tc-design-canvas`.
+//
+// IT SCALES ITSELF, from the canvas's published `--tc-canvas-scale`. A transform
+// on the host and not a wrapper: a wrapper means moving your children into it,
+// and moving a node react-dom created is what makes `removeChild` throw.
+
+tc-artboard {
+    // Deliberately a literal, not `var(--tc-surface)`: this is the design's own
+    // "paper", not app chrome. Content drawn onto it (see the demo) is authored
+    // against a white page and must not go dark just because the *app* is in a
+    // dark theme — that's what `tc-artboard-backdrop` (the surrounding chrome)
+    // is for. Themes may still re-skin it via this var if a given design system
+    // genuinely wants a tinted page.
+    --bs-artboard-bg: #ffffff;
+    --bs-artboard-border-color: var(--tc-border);
+    --bs-artboard-shadow: var(--tc-shadow-md);
+    --bs-artboard-label-color: var(--tc-text-muted);
+    --bs-artboard-label-size: 11px;
+    --bs-artboard-selected-color: var(--tc-app-accent, var(--tc-primary));
+}
+
+.tc-artboard {
+    position: relative;
+    display: block;
+    flex: 0 0 auto;
+    background: var(--bs-artboard-bg);
+    border: 1px solid var(--bs-artboard-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-artboard-shadow);
+    // `0 0` so the scale grows down-and-right from the artboard's own origin,
+    // which is what keeps the design's coordinates meaning what they say.
+    transform-origin: 0 0;
+    transform: translate(var(--tc-canvas-x, 0px), var(--tc-canvas-y, 0px))
+        scale(var(--tc-canvas-scale, 1));
+}
+
+.tc-artboard[selected] {
+    outline: 2px solid var(--bs-artboard-selected-color);
+    // `outline-offset` in the artboard's own px, so the ring stays one hairline
+    // wide however far the canvas is zoomed out.
+    outline-offset: 2px;
+}
+
+// The name, drawn by a pseudo-element rather than a node: a NODE would be inside
+// the scaled box and would shrink with it, which is the one thing a label must
+// not do. The counter-scale keeps it legible at any zoom.
+.tc-artboard[data-label]::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0;
+    bottom: 100%;
+    margin-bottom: 6px;
+    font-size: var(--bs-artboard-label-size);
+    line-height: 1.2;
+    white-space: nowrap;
+    color: var(--bs-artboard-label-color);
+    transform-origin: 0 100%;
+    transform: scale(calc(1 / var(--tc-canvas-scale, 1)));
+}

@@ -4,6 +4,7 @@ import {
     esc,
     type ControlRenderContext,
 } from './internal/text-field-base'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-input'
 
@@ -24,7 +25,7 @@ export class Input extends TextFieldBase {
         return this.getAttribute('type') ?? 'text'
     }
     set type(v: string) {
-        this.setAttribute('type', v)
+        setAttr(this, 'type', v)
     }
 
     protected get controlSelector(): string {

@@ -1,4 +1,6 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-sparkline'
 
 export type SparklineType = 'line' | 'bar'
@@ -68,7 +70,7 @@ export class Sparkline extends HTMLElement {
         return TYPES.includes(v) ? v : 'line'
     }
     set type(v: SparklineType) {
-        this.setAttribute('type', v)
+        setAttr(this, 'type', v)
     }
 
     get color(): string | null {
@@ -114,7 +116,10 @@ export class Sparkline extends HTMLElement {
                   ? this._buildBars(data, width, height)
                   : this._buildLine(data, width, height)
 
-        this.innerHTML = `<svg class="tc-sparkline tc-sparkline--${type}" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${esc(ariaLabel)}">${inner}</svg>`
+        patchHtml(
+            this,
+            `<svg class="tc-sparkline tc-sparkline--${type}" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${esc(ariaLabel)}">${inner}</svg>`,
+        )
     }
 
     private _ariaLabel(data: number[]): string {

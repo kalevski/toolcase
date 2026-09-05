@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-chip-group'
 
@@ -185,7 +186,10 @@ export class ChipGroup extends HTMLElement {
             })
             .join('')
 
-        this.innerHTML = `<div class="tc-chip-group${borderClass}" role="group"${ariaAttr}>${headerHtml}<div class="tc-chip-group-items${railClass}">${chipsHtml}</div></div>`
+        patchHtml(
+            this,
+            `<div class="tc-chip-group${borderClass}" role="group"${ariaAttr}>${headerHtml}<div class="tc-chip-group-items${railClass}">${chipsHtml}</div></div>`,
+        )
 
         // Populate title with Node or attribute text
         if (hasTitle) {

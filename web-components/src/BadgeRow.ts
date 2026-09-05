@@ -1,17 +1,12 @@
+import { patchHtml } from './internal/patch-html'
 import { VARIANTS_FULL } from './internal/variants'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-badge-row'
 
 export type BadgeRowSize = 'sm' | 'md'
 export type BadgeRowVariant =
-    | 'primary'
-    | 'secondary'
-    | 'success'
-    | 'danger'
-    | 'warning'
-    | 'info'
-    | 'light'
-    | 'dark'
+    'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
 
 const SIZES: BadgeRowSize[] = ['sm', 'md']
 const VARIANTS: BadgeRowVariant[] = [...VARIANTS_FULL]
@@ -56,7 +51,7 @@ export class BadgeRow extends HTMLElement {
         return SIZES.includes(v) ? v : 'md'
     }
     set size(v: BadgeRowSize) {
-        this.setAttribute('size', v)
+        setAttr(this, 'size', v)
     }
 
     private render(): void {
@@ -68,23 +63,26 @@ export class BadgeRow extends HTMLElement {
         this.classList.add(`tc-badge-row--${size}`)
         this.setAttribute('role', 'list')
 
-        this.innerHTML = this._badges
-            .map((badge) => {
-                const variant =
-                    badge.variant && (VARIANTS as string[]).includes(badge.variant)
-                        ? badge.variant
-                        : null
-                const variantClass = variant ? ` tc-badge-row-item--${variant}` : ''
-                const colorStyle = badge.color
-                    ? ` style="--bs-badge-row-color: ${esc(badge.color)}"`
-                    : ''
-                const valueHtml =
-                    badge.value != null
-                        ? `<span class="tc-badge-row-value">${esc(String(badge.value))}</span>`
+        patchHtml(
+            this,
+            this._badges
+                .map((badge) => {
+                    const variant =
+                        badge.variant && (VARIANTS as string[]).includes(badge.variant)
+                            ? badge.variant
+                            : null
+                    const variantClass = variant ? ` tc-badge-row-item--${variant}` : ''
+                    const colorStyle = badge.color
+                        ? ` style="--bs-badge-row-color: ${esc(badge.color)}"`
                         : ''
-                return `<span class="tc-badge-row-item${variantClass}" role="listitem"${colorStyle}><span class="tc-badge-row-label">${esc(badge.label)}</span>${valueHtml}</span>`
-            })
-            .join('')
+                    const valueHtml =
+                        badge.value != null
+                            ? `<span class="tc-badge-row-value">${esc(String(badge.value))}</span>`
+                            : ''
+                    return `<span class="tc-badge-row-item${variantClass}" role="listitem"${colorStyle}><span class="tc-badge-row-label">${esc(badge.label)}</span>${valueHtml}</span>`
+                })
+                .join(''),
+        )
     }
 }
 

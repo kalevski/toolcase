@@ -1,3 +1,4 @@
+import { setHostClass } from './internal/host-class'
 const TAG_NAME = 'tc-dashboard-content'
 
 export class DashboardContent extends HTMLElement {
@@ -8,17 +9,15 @@ export class DashboardContent extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            const inner = this.querySelector('.tc-dashboard-content-inner')
-            if (inner) slotContent.forEach((n) => inner.appendChild(n))
-            this._initialised = true
-        }
+        this._initialised = true
+        this.render()
     }
 
+    /** THE HOST IS THE MAIN REGION — `role="main"` rather than a `<main>` wrapper,
+     *  because wrapping is what re-parents the consumer's children (rule 1). */
     private render(): void {
-        this.innerHTML = `<main class="tc-dashboard-content"><div class="tc-dashboard-content-inner"></div></main>`
+        setHostClass(this, 'tc-dashboard-content tc-dashboard-content-inner')
+        this.setAttribute('role', 'main')
     }
 }
 

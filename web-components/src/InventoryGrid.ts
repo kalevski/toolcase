@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { isImageSrc } from './internal/image'
 import { esc } from './internal/esc'
 // Re-uses the canonical InventoryItem owned by tc-item-slot so the same data
@@ -173,7 +174,7 @@ export class InventoryGrid extends HTMLElement {
                 data-index="${index}"
                 role="gridcell"
                 tabindex="0"
-                aria-pressed="${isSelected ? 'true' : 'false'}"
+                aria-selected="${isSelected ? 'true' : 'false'}"
                 aria-label="${esc(label)}"
                 size="${size}"
                 ${isSelected ? 'selected' : ''}
@@ -181,7 +182,7 @@ export class InventoryGrid extends HTMLElement {
             })
             .join('')
 
-        this.innerHTML = `<div class="tc-inventory-grid__cells">${cellsHTML}</div>`
+        patchHtml(this, `<div class="tc-inventory-grid__cells">${cellsHTML}</div>`)
 
         // Forward each item to its composed tc-item-slot, so the primitive can
         // render the rich interior once it is registered (mirrors gc-inventory-grid).

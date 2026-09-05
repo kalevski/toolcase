@@ -49,3 +49,9 @@
 //       the car-web-template automotive marketplace site. Scoped under
 //       `tc-theme[name="redline"]`, inert until a wrapper opts in.
 @use './themes/redline';
+
+// Marker — a page of paper with one highlighter on it. Lifted from polovni.mk,
+// which consumes this library and had been carrying the skin as a local override.
+// Cool paper white, graphite ink, and the brand yellow spent on a closed list of
+// marked things rather than on every surface.
+@use './themes/marker';

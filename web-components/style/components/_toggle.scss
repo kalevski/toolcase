@@ -50,8 +50,12 @@ tc-toggle {
     }
 }
 
-// Hover lifts the off-track to the stronger slate well.
-.tc-toggle:not(.tc-toggle--disabled):hover .tc-toggle-track {
+// Hover lifts the off-track to the stronger slate well. Excludes the checked
+// state explicitly — `.tc-toggle:hover .tc-toggle-track` (0,4,0 incl. :not/:hover)
+// otherwise outranks `.tc-toggle--on .tc-toggle-track` (0,2,0) regardless of
+// source order, so hovering a checked toggle would wrongly flash the neutral
+// off-hover colour over the accent instead of staying visibly "on".
+.tc-toggle:not(.tc-toggle--disabled):not(.tc-toggle--on):hover .tc-toggle-track {
     background-color: var(--bs-toggle-track-hover-bg);
 }
 

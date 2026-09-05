@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 const TAG_NAME = 'tc-toggle'
 
 export class Toggle extends HTMLElement {
@@ -101,7 +102,10 @@ export class Toggle extends HTMLElement {
         this.classList.toggle('tc-toggle--on', on)
         this.classList.toggle('tc-toggle--disabled', disabled)
 
-        this.innerHTML = `<span class="tc-toggle-track" aria-hidden="true"><span class="tc-toggle-knob"></span></span>`
+        patchHtml(
+            this,
+            `<span class="tc-toggle-track" aria-hidden="true"><span class="tc-toggle-knob"></span></span>`,
+        )
     }
 }
 

@@ -1,6 +1,8 @@
+import { patchHtml } from './internal/patch-html'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 import { escapeHtml } from './internal/resourceBar'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-buff-icon'
 
@@ -56,7 +58,7 @@ export class BuffIcon extends HTMLElement {
         return this.getAttribute('kind') === 'debuff' ? 'debuff' : 'buff'
     }
     set kind(v: BuffIconKind) {
-        this.setAttribute('kind', v)
+        setAttr(this, 'kind', v)
     }
 
     get color(): string {
@@ -95,9 +97,11 @@ export class BuffIcon extends HTMLElement {
         const time = this.time
         const timeMarkup = time ? `<span class="tc-buff-icon__time">${escapeHtml(time)}</span>` : ''
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<span class="tc-buff-icon__glyph" aria-hidden="true">${glyphMarkup}</span>` +
-            timeMarkup
+                timeMarkup,
+        )
     }
 }
 

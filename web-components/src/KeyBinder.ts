@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-key-binder'
 
@@ -150,7 +151,7 @@ export class KeyBinder extends HTMLElement {
 
         const displayText = capturing ? 'Press any key…' : hasValue ? this.value : this.placeholder
 
-        this.innerHTML = `<span class="tc-key-binder__label">${esc(displayText)}</span>`
+        patchHtml(this, `<span class="tc-key-binder__label">${esc(displayText)}</span>`)
     }
 }
 

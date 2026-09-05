@@ -22,6 +22,9 @@
     vertical-align: baseline;
 }
 
+// Without the `keys` property the consumer's own children are the legend, so the
+// host wears the keycap chrome itself instead of wrapping them in one.
+.tc-kbd--bare,
 .tc-kbd-key {
     display: inline-flex;
     align-items: center;

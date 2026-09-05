@@ -11,7 +11,16 @@ tc-minimap {
     --bs-minimap-border-color: var(--tc-border);
     --bs-minimap-bg-image: none;
     --bs-minimap-bg-color: var(--tc-slate-900);
-    --bs-minimap-grid-color: var(--tc-border);
+    // Canvas grid — NOT var(--tc-border): the canvas background is forced dark in
+    // every theme (a game HUD element, not a card surface), but --tc-border is
+    // themed for --tc-surface, which is often light. In "light" themes whose
+    // --tc-border is a translucent DARK tint (meant to read on a light card —
+    // e.g. sunshine's rgba(34,48,26,.14), marker's rgba(16,23,26,.13)), that
+    // color is nearly invisible against the dark canvas. A fixed light hairline
+    // is safe on the dark canvas regardless of the active theme; themes with
+    // their own HUD palette (blueprint violet, dungeon gold) override this var
+    // explicitly in their own component partial.
+    --bs-minimap-grid-color: rgba(255, 255, 255, 0.14);
     --bs-minimap-grid-size: 20px;
     --bs-minimap-marker-color: var(--tc-accent);
     --bs-minimap-marker-size: 8px;

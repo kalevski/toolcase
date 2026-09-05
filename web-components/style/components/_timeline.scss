@@ -70,7 +70,10 @@ tc-timeline {
     --bs-timeline-elevated-shadow: var(--tc-shadow-sm);
 
     // ── Glass variant surface ─────────────────────────────────────────────────
-    --bs-timeline-glass-bg: rgba(255, 255, 255, 0.72);
+    // Derived from --tc-surface (not a hardcoded white) so dark themes with no
+    // per-theme override (aurora, neon) get a correctly dark translucent card
+    // instead of a near-white one that collides with their light --tc-text.
+    --bs-timeline-glass-bg: color-mix(in srgb, var(--tc-surface) 72%, transparent);
 
     // ── Skeleton ─────────────────────────────────────────────────────────────
     --bs-timeline-skeleton-bg: var(--tc-surface-muted);

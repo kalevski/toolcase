@@ -1,3 +1,5 @@
+import { patchHtml } from './internal/patch-html'
+import { setHostClass } from './internal/host-class'
 import { esc } from './internal/esc'
 import { chevronDownIcon } from './icons'
 
@@ -16,7 +18,6 @@ export class FAQList extends HTMLElement {
     private _defaultOpen: number[] = []
     private _openSet: Set<number> = new Set()
     private _idPrefix: string
-    private _titleSlotNodes: Node[] = []
 
     onToggle: ((index: number, open: boolean) => void) | null = null
 
@@ -33,13 +34,9 @@ export class FAQList extends HTMLElement {
 
     connectedCallback(): void {
         if (!this._initialised) {
-            if (!this.hasAttribute('title')) {
-                this._titleSlotNodes = Array.from(this.childNodes)
-            }
             this._openSet = new Set(this._defaultOpen)
-            this.render()
-            this._distributeSlots()
             this._initialised = true
+            this.render()
         }
         this.addEventListener('click', this._onClick)
     }
@@ -48,20 +45,9 @@ export class FAQList extends HTMLElement {
         this.removeEventListener('click', this._onClick)
     }
 
-    attributeChangedCallback(name: string): void {
+    attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        if (name === 'title') {
-            if (!this.hasAttribute('title')) {
-                const container = this.querySelector('.tc-faq-list-title-slot')
-                if (container) {
-                    this._titleSlotNodes = Array.from(container.childNodes)
-                }
-            } else {
-                this._titleSlotNodes = []
-            }
-        }
         this.render()
-        this._distributeSlots()
     }
 
     get items(): FAQItem[] {
@@ -71,7 +57,6 @@ export class FAQList extends HTMLElement {
         this._items = Array.isArray(v) ? v : []
         if (this._initialised) {
             this.render()
-            this._distributeSlots()
         }
     }
 
@@ -83,7 +68,6 @@ export class FAQList extends HTMLElement {
         if (this._initialised) {
             this._openSet = new Set(this._defaultOpen)
             this.render()
-            this._distributeSlots()
         }
     }
 
@@ -139,12 +123,6 @@ export class FAQList extends HTMLElement {
         if (typeof this.onToggle === 'function') this.onToggle(idx, open)
     }
 
-    private _distributeSlots(): void {
-        if (this._titleSlotNodes.length === 0) return
-        const container = this.querySelector('.tc-faq-list-title-slot')
-        if (container) this._titleSlotNodes.forEach((n) => container.appendChild(n))
-    }
-
     private render(): void {
         const titleAttr = this.getAttribute('title')
         const hasSchema = this.hasAttribute('schema')
@@ -153,9 +131,9 @@ export class FAQList extends HTMLElement {
         let titleHtml = ''
         if (titleAttr) {
             titleHtml = `<div class="tc-faq-list-title-row"><h2 class="tc-faq-list-title">${esc(titleAttr)}</h2></div>`
-        } else if (this._titleSlotNodes.length > 0) {
-            titleHtml = `<div class="tc-faq-list-title-row"><div class="tc-faq-list-title tc-faq-list-title-slot"></div></div>`
         }
+        // A slotted title stays the consumer's own first child and is dressed by
+        // CSS — only the attribute title is element-owned (rule 1).
 
         const itemsHtml = items
             .map((item, idx) => {
@@ -194,7 +172,10 @@ export class FAQList extends HTMLElement {
             schemaHtml = `<script type="application/ld+json">${JSON.stringify(schemaObj).replace(/<\//g, '<\\/')}</script>`
         }
 
-        this.innerHTML = `<div class="tc-faq-list">${titleHtml}${itemsHtml}</div>${schemaHtml}`
+        // THE HOST IS THE LIST: a slotted title stays the consumer's own first
+        // child, and the questions are appended after it (rule 1).
+        setHostClass(this, 'tc-faq-list')
+        patchHtml(this, `${titleHtml}${itemsHtml}${schemaHtml}`, { at: 'end' })
     }
 }
 

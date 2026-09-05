@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-cookbook-grid'
 
@@ -154,9 +155,11 @@ export class CookbookGrid extends HTMLElement {
 
         const itemsHtml = this._recipes.map((r) => this._recipeHtml(r)).join('')
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `${headerHtml}` +
-            `<div class="tc-cookbook-grid-grid" style="--tc-cg-cols:${cols}">${itemsHtml}</div>`
+                `<div class="tc-cookbook-grid-grid" style="--tc-cg-cols:${cols}">${itemsHtml}</div>`,
+        )
     }
 }
 

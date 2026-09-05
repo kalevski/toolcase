@@ -1,0 +1,18 @@
+// Aurora › tc-welcome-guide — fix invisible completed-check tick.
+// The base partial fills the completed check with --tc-text and ties the tick
+// to --tc-text-inverse, assuming that pair is opposite-brightness (true on
+// light themes). Aurora's --tc-text-inverse (--ah-emphasis, #f4fbff) is a
+// BRIGHT "emphasis on dark surface" token, not a dark ink — so it lands right
+// next to --tc-text (--ah-text, #e8f1f6): a near-white tick on a near-white
+// fill, effectively invisible. Route the completed check through the mint
+// accent + its dedicated dark-ink contrast token instead, matching the
+// gold/ink (dungeon) and teal/success-ink (blueprint) precedent.
+
+tc-theme[name='aurora'],
+[data-tc-theme='aurora'] {
+    tc-welcome-guide {
+        --bs-welcome-guide-check-completed-bg: var(--tc-app-accent);
+        --bs-welcome-guide-check-completed-border: var(--tc-app-accent);
+        --bs-welcome-guide-check-completed-color: var(--tc-app-accent-contrast);
+    }
+}

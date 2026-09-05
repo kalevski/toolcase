@@ -1,15 +1,9 @@
+import { patchHtml } from './internal/patch-html'
 import { VARIANTS_FULL } from './internal/variants'
 const TAG_NAME = 'tc-progress'
 
 export type ProgressVariant =
-    | 'primary'
-    | 'secondary'
-    | 'success'
-    | 'danger'
-    | 'warning'
-    | 'info'
-    | 'light'
-    | 'dark'
+    'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
 
 const VARIANTS: ProgressVariant[] = [...VARIANTS_FULL]
 
@@ -100,7 +94,7 @@ export class Progress extends HTMLElement {
 
     private _render(barChildren: Element[]): void {
         if (barChildren.length > 0) {
-            this.innerHTML = `<div class="progress-stacked"></div>`
+            patchHtml(this, `<div class="progress-stacked"></div>`)
             const stacked = this.querySelector('.progress-stacked')!
             barChildren.forEach((bar) => stacked.appendChild(bar))
         } else {
@@ -120,7 +114,10 @@ export class Progress extends HTMLElement {
             const animatedClass = animated ? ' progress-bar-animated' : ''
             const labelText = showLabel ? `${Math.round(pct)}%` : ''
 
-            this.innerHTML = `<div class="progress" role="progressbar" aria-valuenow="${value}" aria-valuemin="${min}" aria-valuemax="${max}"><div class="progress-bar${variantClass}${stripedClass}${animatedClass}" style="width:${pct}%">${labelText}</div></div>`
+            patchHtml(
+                this,
+                `<div class="progress" role="progressbar" aria-valuenow="${value}" aria-valuemin="${min}" aria-valuemax="${max}"><div class="progress-bar${variantClass}${stripedClass}${animatedClass}" style="width:${pct}%">${labelText}</div></div>`,
+            )
         }
     }
 }

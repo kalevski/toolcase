@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-chat-window'
 
@@ -175,13 +176,16 @@ export class ChatWindow extends HTMLElement {
             })
             .join('')
 
-        this.innerHTML = `<div class="tc-chat-window">${tabsBlock}<div class="tc-chat-window-messages" role="log" aria-live="polite">${messagesMarkup}</div><div class="tc-chat-window-compose"><input type="text" class="tc-chat-window-input" placeholder="${esc(this.placeholder)}" aria-label="Message" /><button type="button" class="tc-chat-window-send">Send</button></div></div>`
+        patchHtml(
+            this,
+            `<div class="tc-chat-window">${tabsBlock}<div class="tc-chat-window-messages" role="log" aria-live="polite">${messagesMarkup}</div><div class="tc-chat-window-compose"><input type="text" class="tc-chat-window-input" placeholder="${esc(this.placeholder)}" aria-label="Message" /><button type="button" class="tc-chat-window-send">Send</button></div></div>`,
+        )
 
         // innerHTML was just replaced, so the previous listeners (and their
         // elements) are gone — wire the fresh DOM here, no leaks.
         const tabsEl = this.querySelector('.tc-chat-window-tabs')
         if (tabsEl) {
-            tabsEl.addEventListener('click', (event) => {
+            bindOnce(tabsEl, 'click', (event) => {
                 const tab = (event.target as Element).closest<HTMLElement>('.tc-chat-window-tab')
                 if (!tab) return
                 const id = tab.dataset.id || ''
@@ -203,14 +207,14 @@ export class ChatWindow extends HTMLElement {
             input.value = ''
         }
         if (input) {
-            input.addEventListener('keydown', (event) => {
+            bindOnce(input, 'keydown', (event: KeyboardEvent) => {
                 if (event.key === 'Enter') {
                     event.preventDefault()
                     submit()
                 }
             })
         }
-        if (sendBtn) sendBtn.addEventListener('click', submit)
+        if (sendBtn) bindOnce(sendBtn, 'click', submit)
     }
 }
 

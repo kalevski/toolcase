@@ -1,0 +1,134 @@
+// tc-range-field — a from–to numeric pair with optional one-tap spans above it.
+//
+// Every part is element-owned; the inputs are uncontrolled and written only when
+// a value arrives from outside, so typing is never rewritten mid-keystroke.
+
+@use '../foundation/tokens' as *;
+
+tc-range-field {
+    --bs-range-field-gap: 0.5rem;
+    --bs-range-field-heading-size: 0.75rem;
+    --bs-range-field-heading-color: var(--tc-text-muted);
+    --bs-range-field-input-height: 2.5rem;
+    --bs-range-field-input-bg: var(--tc-surface);
+    --bs-range-field-input-border-color: var(--tc-border);
+    --bs-range-field-note-size: 0.75rem;
+    --bs-range-field-preset-font-size: 0.75rem;
+}
+
+.tc-range-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-range-field-gap);
+    min-width: 0;
+}
+
+.tc-range-field__heading {
+    font-size: var(--bs-range-field-heading-size);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--bs-range-field-heading-color);
+}
+
+.tc-range-field__presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+}
+
+.tc-range-field__preset {
+    padding: 0.25rem 0.5rem;
+    font: inherit;
+    font-size: var(--bs-range-field-preset-font-size);
+    font-weight: 500;
+    line-height: 1.3;
+    white-space: nowrap;
+    color: var(--tc-text);
+    background: var(--tc-surface);
+    border: 1px solid var(--tc-border);
+    border-radius: 0;
+    cursor: pointer;
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent, var(--tc-primary));
+        outline-offset: 2px;
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+        pointer-events: none;
+    }
+
+    @include coarse-pointer {
+        position: relative;
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: var(--tc-min-touch-target, 44px);
+            transform: translateY(-50%);
+        }
+    }
+}
+
+.tc-range-field__preset--active {
+    color: var(--tc-text-inverse, #fff);
+    background: var(--tc-app-accent, var(--tc-primary));
+    border-color: var(--tc-app-accent, var(--tc-primary));
+}
+
+.tc-range-field__pair {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tc-range-field__dash {
+    flex: 0 0 auto;
+    color: var(--tc-text-faint);
+}
+
+.tc-range-field__input {
+    flex: 1 1 0;
+    min-width: 0;
+    height: var(--bs-range-field-input-height);
+    padding: 0 0.625rem;
+    font: inherit;
+    // Tabular, because these are figures a reader compares against the
+    // placeholder bounds beside them.
+    font-variant-numeric: tabular-nums;
+    color: var(--tc-text);
+    background: var(--bs-range-field-input-bg);
+    border: 1px solid var(--bs-range-field-input-border-color);
+    border-radius: 0;
+
+    &::placeholder {
+        color: var(--tc-text-faint);
+    }
+
+    &:focus {
+        outline: none;
+        border-color: var(--tc-app-accent, var(--tc-primary));
+    }
+
+    &:disabled {
+        opacity: 0.55;
+    }
+
+    // 16px floor: below it iOS Safari zooms the viewport on focus and never
+    // zooms back.
+    @include coarse-pointer {
+        font-size: max(16px, 1em);
+        height: var(--tc-min-touch-target, 44px);
+    }
+}
+
+.tc-range-field__note {
+    font-size: var(--bs-range-field-note-size);
+    line-height: 1.4;
+    color: var(--tc-text-faint);
+}

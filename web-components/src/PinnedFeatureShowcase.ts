@@ -1,5 +1,7 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-pinned-feature-showcase'
 
@@ -56,14 +58,14 @@ export class PinnedFeatureShowcase extends HTMLElement {
         return this.getAttribute('title') ?? ''
     }
     set title(v: string) {
-        this.setAttribute('title', v)
+        setAttr(this, 'title', v)
     }
 
     get description(): string {
         return this.getAttribute('description') ?? ''
     }
     set description(v: string) {
-        this.setAttribute('description', v)
+        setAttr(this, 'description', v)
     }
 
     get eyebrow(): string | null {
@@ -86,7 +88,7 @@ export class PinnedFeatureShowcase extends HTMLElement {
         return this.getAttribute('image-alt') ?? ''
     }
     set imageAlt(v: string) {
-        this.setAttribute('image-alt', v)
+        setAttr(this, 'image-alt', v)
     }
 
     get items(): PinnedFeatureShowcaseItem[] {
@@ -118,9 +120,14 @@ export class PinnedFeatureShowcase extends HTMLElement {
         const { top } = panel.getBoundingClientRect()
         const contentHeight = panel.scrollHeight
         const viewportHeight = window.innerHeight
-        const offsetTrigger = 56
-        const canCenter = contentHeight + offsetTrigger * 2 <= viewportHeight
-        const shouldCenter = top <= offsetTrigger && canCenter
+        // Once stuck, rect.top settles at the resolved --bs-pinned-feature-showcase-sticky-top
+        // value (4rem = 64px by default) and never goes lower during a normal mid-scroll — a
+        // hardcoded trigger smaller than that (the previous 56) could never be reached, so
+        // "centered" would never engage. Read the panel's own computed offset instead: it
+        // resolves the CSS var to px and stays correct if a theme overrides the token.
+        const stickyTop = parseFloat(window.getComputedStyle(panel).top) || 0
+        const canCenter = contentHeight + stickyTop * 2 <= viewportHeight
+        const shouldCenter = top <= stickyTop && canCenter
         panel.classList.toggle('tc-pinned-feature-showcase-panel--centered', shouldCenter)
     }
 
@@ -147,7 +154,7 @@ export class PinnedFeatureShowcase extends HTMLElement {
             }
         }
         this._mqSync = sync
-        this._mq.addEventListener('change', sync)
+        bindOnce(this._mq, 'change', sync)
         sync()
     }
 
@@ -201,21 +208,23 @@ export class PinnedFeatureShowcase extends HTMLElement {
             })
             .join('')
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<section class="tc-pinned-feature-showcase" aria-labelledby="${this._titleId}">` +
-            `<div class="tc-pinned-feature-showcase-inner">` +
-            `<aside class="tc-pinned-feature-showcase-panel">` +
-            `<div class="tc-pinned-feature-showcase-lead">` +
-            eyebrowHtml +
-            `<h2 id="${this._titleId}" class="tc-pinned-feature-showcase-title">${esc(title)}</h2>` +
-            `<p class="tc-pinned-feature-showcase-description">${esc(description)}</p>` +
-            `<div class="tc-pinned-feature-showcase-ctas"></div>` +
-            `</div>` +
-            `<div class="tc-pinned-feature-showcase-media">${mediaInnerHtml}</div>` +
-            `</aside>` +
-            `<ul class="tc-pinned-feature-showcase-list" aria-label="${esc(title)} features">${itemsHtml}</ul>` +
-            `</div>` +
-            `</section>`
+                `<div class="tc-pinned-feature-showcase-inner">` +
+                `<aside class="tc-pinned-feature-showcase-panel">` +
+                `<div class="tc-pinned-feature-showcase-lead">` +
+                eyebrowHtml +
+                `<h2 id="${this._titleId}" class="tc-pinned-feature-showcase-title">${esc(title)}</h2>` +
+                `<p class="tc-pinned-feature-showcase-description">${esc(description)}</p>` +
+                `<div class="tc-pinned-feature-showcase-ctas"></div>` +
+                `</div>` +
+                `<div class="tc-pinned-feature-showcase-media">${mediaInnerHtml}</div>` +
+                `</aside>` +
+                `<ul class="tc-pinned-feature-showcase-list" aria-label="${esc(title)} features">${itemsHtml}</ul>` +
+                `</div>` +
+                `</section>`,
+        )
     }
 }
 

@@ -1,0 +1,41 @@
+// Marker Rose variant — rose marker, pink secondary.
+//
+// Swaps ONLY the marker's own hue family (--mk-lead*) and the secondary
+// highlight (--tc-accent*). The paper canvas, the graphite ink ramp, the
+// hairlines, the cool shadows and the type are the theme and are untouched —
+// this is the standard eleven-variant set shared by every bundled theme.
+//
+// `--mk-on-lead` is the label ON the fill, and it is chosen per variant rather
+// than fixed: #ffffff is what clears AA against #e11d48. A theme whose whole idea
+// is one marked colour cannot afford an unreadable label on the marked thing.
+//
+// Use with: <tc-theme name="marker" variant="rose"> … </tc-theme>
+
+tc-theme[name='marker'][variant='rose'],
+[data-tc-theme='marker'][data-tc-variant='rose'] {
+    // ── The marker ───────────────────────────────────────────────────────────
+    --mk-lead: #e11d48;
+    --mk-lead-hi: #f0355e;
+    --mk-lead-lo: #be123c;
+    // The hue as a WORD — the step that carries text on paper.
+    --mk-lead-deep: #be123c;
+    --mk-lead-tint: rgba(225, 29, 72, 0.08);
+    --mk-lead-line: rgba(190, 18, 60, 0.5);
+    --mk-lead-glow: rgba(225, 29, 72, 0.32);
+    --mk-on-lead: #ffffff;
+    --mk-lead-grad: linear-gradient(135deg, #f0355e, #e11d48);
+
+    // ── Secondary highlight — links, focus, accent text ──────────────────────
+    --tc-accent: #db2777;
+    --tc-accent-fg: #9d174d;
+    --tc-accent-soft: rgba(219, 39, 119, 0.12);
+    --tc-accent-hex: #db2777;
+
+    // ── Foundation literals baked against the old hex ────────────────────────
+    --bs-primary-rgb: 225, 29, 72;
+    // --bs-warning-rgb intentionally left alone (falls back to the foundation's
+    // real amber) -- see variants/_forest.scss for why copying primary's new rgb
+    // here made warning indistinguishable from primary/success.
+    --tc-focus-ring: 0 0 0 3px rgba(190, 18, 60, 0.45);
+    --bs-focus-ring-color: rgba(190, 18, 60, 0.45);
+}

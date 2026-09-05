@@ -1,4 +1,6 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-benchmark-chart'
 
 export type BenchmarkScale = 'linear' | 'log'
@@ -76,7 +78,7 @@ export class BenchmarkChart extends HTMLElement {
         return SCALES.includes(v) ? v : 'linear'
     }
     set scale(v: BenchmarkScale) {
-        this.setAttribute('scale', v)
+        setAttr(this, 'scale', v)
     }
 
     get lowerIsBetter(): boolean {
@@ -165,7 +167,14 @@ export class BenchmarkChart extends HTMLElement {
         if (bars.length === 0) {
             bodyHtml = `<div class="tc-benchmark-chart__empty">No benchmark data</div>`
         } else {
-            const rowH = 40
+            // --bs-benchmark-chart-row-height is part of the public token contract
+            // (see styles) — read it back so a consumer override actually reaches
+            // the SVG geometry instead of silently doing nothing.
+            const rawRowH = getComputedStyle(this)
+                .getPropertyValue('--bs-benchmark-chart-row-height')
+                .trim()
+            const parsedRowH = Number.parseFloat(rawRowH)
+            const rowH = Number.isFinite(parsedRowH) && parsedRowH > 0 ? parsedRowH : 40
             const barH = 12
             const trackX = 28 // %
             const trackW = 52 // %
@@ -250,13 +259,16 @@ export class BenchmarkChart extends HTMLElement {
             ? `<div class="tc-benchmark-chart__caption">${lowerIsBetter ? 'Lower is better' : 'Higher is better'}</div>`
             : ''
 
-        this.innerHTML = `<div class="tc-benchmark-chart__inner">${headerHtml}${bodyHtml}${captionHtml}</div>`
+        patchHtml(
+            this,
+            `<div class="tc-benchmark-chart__inner">${headerHtml}${bodyHtml}${captionHtml}</div>`,
+        )
 
         if (this._bars.length && this._isInteractive) {
             const svg = this.querySelector<SVGElement>('.tc-benchmark-chart__svg')
             if (svg) {
-                svg.addEventListener('click', this._onRowActivate)
-                svg.addEventListener('keydown', this._onRowKeydown)
+                bindOnce(svg, 'click', this._onRowActivate)
+                bindOnce(svg, 'keydown', this._onRowKeydown)
             }
         }
     }

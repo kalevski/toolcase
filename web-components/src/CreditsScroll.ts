@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { Pause } from 'lucide-static'
 import { icon } from './icons'
@@ -176,15 +177,25 @@ export class CreditsScroll extends HTMLElement {
             })
             .join('')
 
-        this.innerHTML = `
+        // The transform is also written imperatively every animation frame (see
+        // `startLoop`'s `tick`), onto this same track element. patchHtml reconciles
+        // attributes against this template, so if the template omitted `style` it
+        // would strip that imperative transform on every re-render triggered by an
+        // unrelated attribute change (e.g. `speed`) or by `scrollTitle` while
+        // paused — snapping the credits back to the top without resetting
+        // `_offset`. Embedding the current offset here keeps the two in sync.
+        patchHtml(
+            this,
+            `
             <div class="tc-credits-scroll-viewport">
-                <div class="tc-credits-scroll-track">
+                <div class="tc-credits-scroll-track" style="transform: translateY(${(-this._offset).toFixed(2)}px)">
                     ${titleMarkup}
                     ${sectionsMarkup}
                 </div>
             </div>
             <span class="tc-credits-scroll-indicator" aria-hidden="true">${pauseIconHtml}</span>
-        `
+        `,
+        )
     }
 }
 

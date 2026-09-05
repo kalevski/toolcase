@@ -1,5 +1,7 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-migration-guide'
 
@@ -37,14 +39,14 @@ export class MigrationGuide extends HTMLElement {
         return this.getAttribute('from') ?? ''
     }
     set from(v: string) {
-        this.setAttribute('from', v)
+        setAttr(this, 'from', v)
     }
 
     get to(): string {
         return this.getAttribute('to') ?? ''
     }
     set to(v: string) {
-        this.setAttribute('to', v)
+        setAttr(this, 'to', v)
     }
 
     get title(): string {
@@ -88,9 +90,13 @@ export class MigrationGuide extends HTMLElement {
                                   ? `<div class="tc-migration-diff-after"><pre><code>${esc(step.after)}</code></pre></div>`
                                   : ''
 
+                          const langHtml = step.language
+                              ? `<div class="tc-migration-diff__header"><span class="tc-migration-diff__language">${esc(step.language)}</span></div>`
+                              : ''
+
                           const diffHtml =
                               step.before != null || step.after != null
-                                  ? `<div class="tc-migration-diff">${beforeHtml}${afterHtml}</div>`
+                                  ? `<div class="tc-migration-diff">${langHtml}${beforeHtml}${afterHtml}</div>`
                                   : ''
 
                           return (
@@ -107,18 +113,20 @@ export class MigrationGuide extends HTMLElement {
                       .join('')}</ol>`
                 : ''
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-migration-guide">` +
-            `<div class="tc-migration-guide__header">` +
-            `<div class="tc-migration-guide__versions">` +
-            `<span class="tc-migration-guide__version">${esc(from)}</span>` +
-            `<span class="tc-migration-guide__arrow">${arrowRightIconHtml}</span>` +
-            `<span class="tc-migration-guide__version">${esc(to)}</span>` +
-            `</div>` +
-            `<p class="tc-migration-guide__title">${esc(title)}</p>` +
-            `</div>` +
-            stepsHtml +
-            `</div>`
+                `<div class="tc-migration-guide__header">` +
+                `<div class="tc-migration-guide__versions">` +
+                `<span class="tc-migration-guide__version">${esc(from)}</span>` +
+                `<span class="tc-migration-guide__arrow">${arrowRightIconHtml}</span>` +
+                `<span class="tc-migration-guide__version">${esc(to)}</span>` +
+                `</div>` +
+                `<p class="tc-migration-guide__title">${esc(title)}</p>` +
+                `</div>` +
+                stepsHtml +
+                `</div>`,
+        )
     }
 }
 

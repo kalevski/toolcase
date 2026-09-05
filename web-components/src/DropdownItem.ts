@@ -1,3 +1,7 @@
+import { patchHtml } from './internal/patch-html'
+import { consumerText } from './internal/content-observer'
+import { esc } from './internal/esc'
+import { setHostClass } from './internal/host-class'
 import { LinkItemBase } from './internal/link-item'
 
 const TAG_NAME = 'tc-dropdown-item'
@@ -29,14 +33,18 @@ export class DropdownItem extends LinkItemBase {
         else this.removeAttribute('divider')
     }
 
-    protected getContentEl(): HTMLElement | null {
+    protected _unusedGetContentEl(): HTMLElement | null {
         if (this.hasAttribute('divider')) return null
         return this.querySelector<HTMLElement>('a, button')
     }
 
     protected render(): void {
         if (this.hasAttribute('divider')) {
-            this.innerHTML = `<li><hr class="dropdown-divider"></li>`
+            // Clear any `dropdown-item …` classes a previous (non-divider) render
+            // left on the host — otherwise toggling `divider` on at runtime leaves
+            // the flex/padding/colour treatment applied to the <hr>.
+            setHostClass(this, '')
+            patchHtml(this, `<hr class="dropdown-divider">`)
             return
         }
 
@@ -47,13 +55,31 @@ export class DropdownItem extends LinkItemBase {
         const disabledClass = isDisabled ? ' disabled' : ''
         const classes = `dropdown-item${activeClass}${disabledClass}`
 
+        // The control is stretched over the row instead of wrapped around the
+        // consumer's label (rule 1); the host itself is the row, so the real
+        // `.dropdown-item` (flex layout, padding, colour, hover/active/disabled
+        // states, the 44px coarse-pointer touch target) goes on the HOST, not on
+        // the overlay — the overlay has no visible content of its own, and giving
+        // it the same class would paint its hover/active background OVER the
+        // label, since an absolutely-positioned box always paints after in-flow
+        // content regardless of DOM order (matches tc-list-group-item /
+        // tc-nav-item, which put their real Bootstrap class on the host too).
+        const label = consumerText(this)
+        const nameAttr = label ? ` aria-label="${esc(label)}"` : ''
+        setHostClass(this, classes)
         if (href != null) {
             const ariaDisabled = isDisabled ? ' aria-disabled="true" tabindex="-1"' : ''
             const ariaCurrent = isActive ? ' aria-current="true"' : ''
-            this.innerHTML = `<li><a href="${href}" class="${classes}"${ariaDisabled}${ariaCurrent}></a></li>`
+            patchHtml(
+                this,
+                `<a href="${esc(href)}" class="tc-hit-overlay"${ariaDisabled}${ariaCurrent}${nameAttr}></a>`,
+            )
         } else {
             const disabledAttr = isDisabled ? ' disabled' : ''
-            this.innerHTML = `<li><button type="button" class="${classes}"${disabledAttr}></button></li>`
+            patchHtml(
+                this,
+                `<button type="button" class="tc-hit-overlay"${disabledAttr}${nameAttr}></button>`,
+            )
         }
     }
 }

@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { fieldMessageHtml } from './internal/field-message'
 import {
@@ -531,7 +532,7 @@ export class RangeSlider extends HTMLElement {
             messageHtml,
         ].join('')
 
-        this.innerHTML = html
+        patchHtml(this, html)
 
         if (disabled) {
             this.setAttribute('aria-disabled', 'true')

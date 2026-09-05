@@ -19,3 +19,8 @@ export type { TcProps, ToolcaseIntrinsicElements } from './react-types'
 // Runtime hooks — wire tc-* events and JS-only instance properties.
 export { useTc, useTcEvents, detailValue } from './useTc'
 export type { TcEventHandler, TcEventMap, TcRef } from './useTc'
+
+// Hooks three consuming apps wrote independently, about the browser or about this
+// library's own surface. App-shaped hooks (auth, entitlements) stay in the apps.
+export { useVisiblePoll, useKeyboardReveal, useEditorShortcuts, useFeatureGate } from './hooks'
+export type { ShortcutMap, FeatureGate } from './hooks'

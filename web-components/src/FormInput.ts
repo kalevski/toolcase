@@ -1,7 +1,9 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { fieldMessageHtml } from './internal/field-message'
 import { setFieldFormValue, reflectFieldValidity, dispatchFieldChange } from './internal/form-field'
 import { msg } from './messages'
+import { setAttr } from './internal/tc-element'
 // tc-form-input — universal form-input dispatcher (port of react-components
 // FormInput). A single light-DOM custom element whose `type` attribute selects
 // which native control to render, with built-in validation, helper/error lines,
@@ -200,12 +202,94 @@ export class FormInput extends HTMLElement {
         this.disabled = disabled
     }
 
-    attributeChangedCallback(): void {
+    /**
+     * THE CONTROLLED-INPUT CONTRACT.
+     *
+     * Nothing here rebuilds the control unless the control itself has to change.
+     * A full `render()` replaces the inner `<input>`, and replacing a focused
+     * input drops the caret to the end of the text — so a host that showed a
+     * validation message while someone typed, or flipped `disabled` on submit,
+     * used to yank the field out from under them. That is why consumers ended up
+     * writing the field as UNCONTROLLED with a `key` remount.
+     *
+     * Only two attributes genuinely need new markup: `type` (a different native
+     * control) and `loading` (the skeleton replaces the control outright).
+     * Everything else patches the existing nodes.
+     */
+    attributeChangedCallback(name: string): void {
         if (!this.isConnected || !this._initialised) return
-        // Keep the current value across structural re-renders.
-        this._currentValue = this._getValue()
-        this.render()
+
+        // Purely a CSS hook on the host (see the reserve-message note above) —
+        // the message slot is always rendered, so there is nothing to update.
+        if (name === 'reserve-message') return
+
+        // Only these two change which control exists.
+        if (name === 'type' || name === 'loading') {
+            this._syncCurrentFromControl()
+            this.render()
+            this._runValidation(false)
+            return
+        }
+
+        switch (name) {
+            case 'error':
+            case 'help':
+            case 'helper':
+            case 'validate-on':
+            case 'required-message':
+            case 'name':
+            case 'id':
+                // Message slot / validity only — _runValidation patches both in place.
+                break
+            case 'disabled':
+                this._patchDisabled()
+                break
+            case 'required':
+                this._patchRequired()
+                break
+            case 'label':
+                if (!this._patchLabelText()) {
+                    // A label appearing or disappearing adds or removes a node, so
+                    // this one case does need the markup back. It cannot happen
+                    // mid-keystroke the way `error` can.
+                    this._syncCurrentFromControl()
+                    this.render()
+                }
+                break
+            case 'placeholder':
+                if (!this._patchPlaceholder()) {
+                    this._syncCurrentFromControl()
+                    this.render()
+                }
+                break
+            case 'min':
+            case 'max':
+            case 'step':
+                this._patchConstraints()
+                break
+            case 'rows':
+                this._patchRows()
+                break
+            case 'inputmode':
+            case 'enterkeyhint':
+            case 'autocomplete':
+                this._patchKeyboardAttrs()
+                break
+            default:
+                this._syncCurrentFromControl()
+                this.render()
+                break
+        }
+
+        this._syncCurrentFromControl()
         this._runValidation(false)
+    }
+
+    /** Re-read the live control into `_currentValue`. Guarded on the control
+     *  actually existing: while `loading` renders the skeleton there is nothing
+     *  to read, and reading anyway would silently reset the field to ''. */
+    private _syncCurrentFromControl(): void {
+        if (this.querySelector('input, textarea, select')) this._currentValue = this._getValue()
     }
 
     // ── Attribute-backed props ──────────────────────────────────────────────
@@ -215,7 +299,7 @@ export class FormInput extends HTMLElement {
         return TYPES.includes(v) ? v : 'text'
     }
     set type(v: FormInputType) {
-        this.setAttribute('type', v)
+        setAttr(this, 'type', v)
     }
 
     get label(): string | null {
@@ -262,7 +346,7 @@ export class FormInput extends HTMLElement {
         return this.getAttribute('placeholder') ?? ''
     }
     set placeholder(v: string) {
-        this.setAttribute('placeholder', v)
+        setAttr(this, 'placeholder', v)
     }
 
     get disabled(): boolean {
@@ -296,7 +380,7 @@ export class FormInput extends HTMLElement {
         return VALIDATE_ON.includes(v) ? v : 'blur'
     }
     set validateOn(v: FormInputValidateOn) {
-        this.setAttribute('validate-on', v)
+        setAttr(this, 'validate-on', v)
     }
 
     /** Per-instance override of the registry's `fieldRequired` message. */
@@ -370,15 +454,24 @@ export class FormInput extends HTMLElement {
     // ── JS-property props ───────────────────────────────────────────────────
 
     get value(): unknown {
-        return this._initialised ? this._getValue() : this._valueExplicit
+        if (!this._initialised) return this._valueExplicit
+        // While `loading` is on there is no control to read; the last known value
+        // is the honest answer, not the '' an absent control would report.
+        return this.querySelector('input, textarea, select') ? this._getValue() : this._currentValue
     }
+    /**
+     * Assigning `value` never re-renders. The inner control is written directly
+     * and only when it differs, so the caret and selection survive — which is
+     * what makes `<tc-form-input value={state} ontc-change={…} />` work as a
+     * controlled React input. A programmatic write also never emits `tc-change`
+     * (only user input does), or a controlled field would feed back into itself.
+     */
     set value(v: unknown) {
         this._valueExplicit = v
         this._currentValue = v
-        if (this._initialised) {
-            this.render()
-            this._runValidation(false)
-        }
+        if (!this._initialised) return
+        if (!this._writeControlValue(v)) this.render()
+        this._runValidation(false)
     }
 
     get defaultValue(): unknown {
@@ -386,13 +479,11 @@ export class FormInput extends HTMLElement {
     }
     set defaultValue(v: unknown) {
         this._defaultValue = v
-        if (this._valueExplicit === undefined) {
-            this._currentValue = v
-            if (this._initialised) {
-                this.render()
-                this._runValidation(false)
-            }
-        }
+        if (this._valueExplicit !== undefined) return
+        this._currentValue = v
+        if (!this._initialised) return
+        if (!this._writeControlValue(v)) this.render()
+        this._runValidation(false)
     }
 
     get options(): FormInputOption[] {
@@ -425,10 +516,10 @@ export class FormInput extends HTMLElement {
     // ── Slotted <option> capture ────────────────────────────────────────────
 
     private _captureSlotOptions(): void {
-        const children = Array.from(this.children).filter((c) => {
-            const t = c.tagName.toLowerCase()
-            return t === 'option' || t === 'tc-option'
-        })
+        // querySelectorAll, not a childNodes snapshot: these nodes are READ for
+        // their value/label and never moved — a capture list would read like the
+        // re-parenting rule 1 forbids.
+        const children = Array.from(this.querySelectorAll(':scope > option, :scope > tc-option'))
         if (children.length === 0) return
         this._slotOptions = children.map((c) => ({
             value: c.getAttribute('value') ?? c.textContent?.trim() ?? '',
@@ -661,7 +752,7 @@ export class FormInput extends HTMLElement {
 
         if (this.loading) {
             this.setAttribute('aria-busy', 'true')
-            this.innerHTML = this._renderLoading()
+            patchHtml(this, this._renderLoading())
             return
         }
         this.removeAttribute('aria-busy')
@@ -677,9 +768,9 @@ export class FormInput extends HTMLElement {
         const messageHtml = fieldMessageHtml({ id: this._helpId, hint: this.help })
 
         if (inline) {
-            this.innerHTML = [this._renderInlineControl(), messageHtml].join('')
+            patchHtml(this, [this._renderInlineControl(), messageHtml].join(''))
         } else {
-            this.innerHTML = [this._renderLabel(), this._renderControl(), messageHtml].join('')
+            patchHtml(this, [this._renderLabel(), this._renderControl(), messageHtml].join(''))
         }
 
         // Restore current value into freshly-built controls where needed.
@@ -729,8 +820,15 @@ export class FormInput extends HTMLElement {
      * this is, so guessing here would be worse than omitting it.
      */
     private _keyboardAttrs(): string {
+        const parts = this._keyboardAttrEntries().map(([k, v]) => `${k}="${esc(v)}"`)
+        return parts.length ? ` ${parts.join(' ')}` : ''
+    }
+
+    /** The resolved `inputmode` / `enterkeyhint` / `autocomplete` pairs. Shared by
+     *  the render path (which stringifies them) and the in-place patch path. */
+    private _keyboardAttrEntries(): Array<[string, string]> {
         const type = this.type
-        const parts: string[] = []
+        const parts: Array<[string, string]> = []
 
         const explicitMode = this.getAttribute('inputmode')
         // `decimal` and not `numeric` for numbers: `numeric` is the PIN pad, with no
@@ -748,13 +846,13 @@ export class FormInput extends HTMLElement {
                         ? 'search'
                         : null
         const mode = explicitMode ?? impliedMode
-        if (mode) parts.push(`inputmode="${esc(mode)}"`)
+        if (mode) parts.push(['inputmode', mode])
 
         // The Enter key's LABEL, not its behaviour: a search field whose Enter key
         // reads „go" instead of a newline glyph is the affordance that tells someone
         // the field submits.
         const hint = this.getAttribute('enterkeyhint') ?? (type === 'search' ? 'search' : null)
-        if (hint) parts.push(`enterkeyhint="${esc(hint)}"`)
+        if (hint) parts.push(['enterkeyhint', hint])
 
         const explicitAuto = this.getAttribute('autocomplete')
         const impliedAuto =
@@ -770,9 +868,9 @@ export class FormInput extends HTMLElement {
                       ? 'off'
                       : null
         const auto = explicitAuto ?? impliedAuto
-        if (auto) parts.push(`autocomplete="${esc(auto)}"`)
+        if (auto) parts.push(['autocomplete', auto])
 
-        return parts.length ? ` ${parts.join(' ')}` : ''
+        return parts
     }
 
     private _minMaxStep(): string {
@@ -886,6 +984,186 @@ export class FormInput extends HTMLElement {
             labelHtml,
             `</div>`,
         ].join('')
+    }
+
+    // ── In-place patching (the controlled-input contract) ───────────────────
+    //
+    // Each of these updates the already-rendered control instead of rebuilding
+    // it. Returning `false` means "this change needs new markup" and the caller
+    // falls back to render() — which is the exception, not the rule.
+
+    /** Every rendered native control inside the field, in document order. */
+    private _controls(): HTMLInputElement[] {
+        return Array.from(
+            this.querySelectorAll<HTMLInputElement>(
+                '.form-control, .form-select, .form-range, .form-check-input',
+            ),
+        )
+    }
+
+    /** The control the field's own `value` lives in, if one is rendered. */
+    private _valueControl(): HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null {
+        return this.querySelector<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(
+            'input, textarea, select',
+        )
+    }
+
+    /**
+     * Write `v` into the rendered control without touching any other node.
+     * Returns false when the value cannot be expressed against the current
+     * markup — an unrendered control, or a select whose option list does not
+     * contain the value — in which case the caller re-renders.
+     */
+    private _writeControlValue(v: unknown): boolean {
+        const type = this.type
+        // The skeleton has no control; _currentValue already holds the value and
+        // the next render (when `loading` clears) seeds it.
+        if (this.loading) return true
+
+        if (type === 'checkbox' || type === 'switch' || (type === 'radio' && !this._hasOptions())) {
+            const input = this.querySelector<HTMLInputElement>('input.form-check-input')
+            if (!input) return false
+            const next = !isEmpty(v)
+            if (input.checked !== next) input.checked = next
+            return true
+        }
+
+        if (type === 'radio') {
+            const inputs = this.querySelectorAll<HTMLInputElement>('input.form-check-input')
+            if (inputs.length === 0) return false
+            const next = v == null ? '' : String(v)
+            inputs.forEach((input) => {
+                const on = input.value === next
+                if (input.checked !== on) input.checked = on
+            })
+            return true
+        }
+
+        if (type === 'dropdown' || type === 'select') {
+            const select = this.querySelector<HTMLSelectElement>('select')
+            if (!select) return false
+            const next = v == null ? '' : String(v)
+            if (select.value === next) return true
+            if (!Array.from(select.options).some((o) => o.value === next)) return false
+            select.value = next
+            return true
+        }
+
+        const control = this.querySelector<HTMLInputElement | HTMLTextAreaElement>(
+            'input, textarea',
+        )
+        if (!control) return false
+        // A colour input rejects '' and silently becomes #000000, so the same
+        // fallback the render path uses applies here.
+        const next = v == null || v === '' ? (type === 'color' ? '#1e293b' : '') : String(v)
+        if (control.value !== next) control.value = next
+        return true
+    }
+
+    /** The controls that carry `required` in the render path. A radio GROUP does
+     *  not — the group element carries aria-required and the inputs stay clean. */
+    private _requireableControls(): HTMLInputElement[] {
+        if (this.type === 'radio' && this._hasOptions()) return []
+        return this._controls()
+    }
+
+    private _patchDisabled(): void {
+        const disabled = this.disabled
+        const radioGroup = this.type === 'radio' && this._hasOptions()
+        const options = radioGroup ? this._optionList() : []
+        this._controls().forEach((control, index) => {
+            control.disabled = radioGroup ? disabled || !!options[index]?.disabled : disabled
+        })
+    }
+
+    private _patchRequired(): void {
+        const required = this.required
+        this._requireableControls().forEach((control) => {
+            control.required = required
+            if (required) control.setAttribute('aria-required', 'true')
+            else control.removeAttribute('aria-required')
+        })
+
+        const group = this.querySelector('.tc-form-input-radio-group')
+        if (group) {
+            if (required) group.setAttribute('aria-required', 'true')
+            else group.removeAttribute('aria-required')
+        }
+
+        // The asterisk lives inside the label, which may not exist.
+        const label = this._labelEl()
+        if (!label) return
+        const mark = label.querySelector('.tc-form-input-required')
+        if (required && !mark) {
+            label.insertAdjacentHTML(
+                'beforeend',
+                `<span class="tc-form-input-required" aria-hidden="true">*</span>`,
+            )
+        } else if (!required && mark) {
+            mark.remove()
+        }
+    }
+
+    /** The field's OWN label. `.tc-form-input-label` (block layouts, always first
+     *  in document order) or the single `.form-check-label` of an inline control —
+     *  never one of a radio group's per-option labels. */
+    private _labelEl(): HTMLElement | null {
+        return this.querySelector<HTMLElement>('.tc-form-input-label, .form-check-label')
+    }
+
+    /** Returns false when the label is appearing or disappearing, which adds or
+     *  removes a node and therefore needs the render path. */
+    private _patchLabelText(): boolean {
+        const label = this._labelEl()
+        const next = this.label
+        if (!label || !next) return false
+        const mark = label.querySelector('.tc-form-input-required')
+        label.textContent = next
+        if (mark) label.appendChild(mark)
+        return true
+    }
+
+    /** Returns false for select, where the placeholder is an `<option>` node. */
+    private _patchPlaceholder(): boolean {
+        const type = this.type
+        if (type === 'dropdown' || type === 'select') return false
+        const control = this.querySelector<HTMLInputElement | HTMLTextAreaElement>(
+            'input, textarea',
+        )
+        if (!control) return false
+        control.placeholder = this.placeholder
+        return true
+    }
+
+    private _patchConstraints(): void {
+        const control = this._valueControl()
+        if (!control) return
+        for (const name of ['min', 'max', 'step']) {
+            const value = this.getAttribute(name)
+            if (value != null) control.setAttribute(name, value)
+            else control.removeAttribute(name)
+        }
+    }
+
+    private _patchRows(): void {
+        const textarea = this.querySelector<HTMLTextAreaElement>('textarea')
+        if (!textarea) return
+        const rows = this.getAttribute('rows')
+        if (rows != null) textarea.setAttribute('rows', rows)
+        else textarea.removeAttribute('rows')
+    }
+
+    private _patchKeyboardAttrs(): void {
+        const control = this._valueControl()
+        if (!control) return
+        const resolved = new Map(this._keyboardAttrEntries())
+        // Removing the host attribute falls back to whatever `type` implies, so
+        // both directions go through the same resolver.
+        for (const name of ['inputmode', 'enterkeyhint', 'autocomplete']) {
+            const value = resolved.get(name)
+            if (value != null) control.setAttribute(name, value)
+            else control.removeAttribute(name)
+        }
     }
 
     private _seedControlValue(): void {

@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-main-menu'
 
@@ -190,7 +191,10 @@ export class MainMenu extends HTMLElement {
             })
             .join('')
 
-        this.innerHTML = `${headerHtml}<div class="tc-main-menu-list">${itemsHtml}</div>`
+        patchHtml(
+            this,
+            `<div class="tc-main-menu">${headerHtml}<div class="tc-main-menu-list">${itemsHtml}</div></div>`,
+        )
     }
 }
 

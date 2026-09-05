@@ -1,4 +1,6 @@
+import { setHostClass } from './internal/host-class'
 import { SlotWrapBase } from './internal/slot-wrap'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-heading'
 
@@ -19,7 +21,7 @@ export class Heading extends SlotWrapBase {
         return LEVELS.includes(v) ? v : 'h2'
     }
     set as(v: HeadingLevel) {
-        this.setAttribute('as', v)
+        setAttr(this, 'as', v)
     }
 
     get gradient(): boolean {
@@ -30,14 +32,15 @@ export class Heading extends SlotWrapBase {
         else this.removeAttribute('gradient')
     }
 
-    protected getContentEl(): Element | null {
-        return this.querySelector('.tc-heading-content')
-    }
-
+    /** THE HOST IS THE HEADING: `as` becomes `role="heading"` + `aria-level` on the
+     *  consumer's own tag rather than an `<h1>`–`<h6>` their children are moved
+     *  into (rule 1). The `.tc-heading` styling is unchanged. */
     protected render(): void {
         const level = this.as
         const gradientClass = this.gradient ? ' tc-heading--gradient' : ''
-        this.innerHTML = `<${level} class="tc-heading${gradientClass}"><span class="tc-heading-content"></span></${level}>`
+        setHostClass(this, `tc-heading tc-heading--${level}${gradientClass}`)
+        this.setAttribute('role', 'heading')
+        this.setAttribute('aria-level', level.slice(1))
     }
 }
 

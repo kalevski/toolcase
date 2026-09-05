@@ -56,6 +56,7 @@ tc-skill-tree {
     // Rank counter
     --bs-skill-tree-rank-font-size:          0.625rem;
     --bs-skill-tree-rank-color:              var(--tc-text-faint);
+    --bs-skill-tree-rank-selected-color:     color-mix(in srgb, var(--tc-app-accent-contrast) 75%, transparent);
 
     // Points strip
     --bs-skill-tree-points-bg:               var(--tc-surface-muted);
@@ -207,7 +208,11 @@ tc-skill-tree {
     letter-spacing: 0.04em;
 
     .tc-skill-tree__node--selected & {
-        color: rgba(255, 255, 255, 0.75);
+        // Token-driven (not a baked white literal): the selected fill is
+        // --tc-app-accent, whose readable ink is --tc-app-accent-contrast — on
+        // themes with a bright/light accent (aurora, sunshine, marker, neon) that
+        // contrast ink is dark, so a hardcoded white here would render invisible.
+        color: var(--bs-skill-tree-rank-selected-color);
     }
 }
 

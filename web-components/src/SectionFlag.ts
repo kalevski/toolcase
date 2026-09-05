@@ -1,4 +1,6 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-section-flag'
 
 export type SectionFlagAlign = 'left' | 'center'
@@ -27,7 +29,7 @@ export class SectionFlag extends HTMLElement {
         return this.getAttribute('title') ?? ''
     }
     set title(v: string) {
-        this.setAttribute('title', v)
+        setAttr(this, 'title', v)
     }
 
     get subtitle(): string | null {
@@ -43,7 +45,7 @@ export class SectionFlag extends HTMLElement {
         return ALIGNS.includes(v) ? v : 'left'
     }
     set align(v: SectionFlagAlign) {
-        this.setAttribute('align', v)
+        setAttr(this, 'align', v)
     }
 
     private render(): void {
@@ -56,7 +58,9 @@ export class SectionFlag extends HTMLElement {
                 ? `<div class="tc-section-flag-subtitle">${esc(subtitle)}</div>`
                 : ''
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <div class="tc-section-flag tc-section-flag--${esc(align)}">
                 <span class="tc-section-flag-marker" aria-hidden="true"></span>
                 <div class="tc-section-flag-text">
@@ -64,7 +68,8 @@ export class SectionFlag extends HTMLElement {
                     ${subtitleHtml}
                 </div>
             </div>
-        `
+        `,
+        )
     }
 }
 

@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-journal'
 
@@ -99,21 +100,24 @@ export class Journal extends HTMLElement {
             ? this.renderDetail(active)
             : `<p class="tc-journal-detail-empty">Select a journal entry.</p>`
 
-        this.innerHTML = `<div class="tc-journal">
+        patchHtml(
+            this,
+            `<div class="tc-journal">
             ${listHtml}
             <div class="tc-journal-detail">${detailHtml}</div>
-        </div>`
+        </div>`,
+        )
 
         const list = this.querySelector<HTMLElement>('.tc-journal-list')
         if (!list) return
 
-        list.addEventListener('click', (event: Event) => {
+        bindOnce(list, 'click', (event: Event) => {
             const row = (event.target as Element).closest<HTMLElement>('.tc-journal-row')
             if (!row) return
             this._selectRow(row.dataset.id ?? '')
         })
 
-        list.addEventListener('keydown', (event: KeyboardEvent) => {
+        bindOnce(list, 'keydown', (event: KeyboardEvent) => {
             if (event.key !== 'Enter' && event.key !== ' ') return
             const row = (event.target as Element).closest<HTMLElement>('.tc-journal-row')
             if (!row) return

@@ -1,6 +1,8 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { msg } from './messages'
 import { chevronLeftIcon, closeIcon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-nav-button'
 
@@ -31,7 +33,7 @@ export class NavButton extends HTMLElement {
         return KINDS.includes(v) ? v : 'back'
     }
     set kind(v: NavButtonKind) {
-        this.setAttribute('kind', v)
+        setAttr(this, 'kind', v)
     }
 
     get label(): string {
@@ -77,7 +79,10 @@ export class NavButton extends HTMLElement {
         const disabledAttr = disabled ? ' disabled' : ''
         const glyph = kind === 'close' ? closeIcon : chevronLeftIcon
 
-        this.innerHTML = `<button type="button" class="tc-nav-button__btn${kindClass}" aria-label="${esc(ariaLabel)}"${disabledAttr}>${glyph}</button>`
+        patchHtml(
+            this,
+            `<button type="button" class="tc-nav-button__btn${kindClass}" aria-label="${esc(ariaLabel)}"${disabledAttr}>${glyph}</button>`,
+        )
     }
 }
 

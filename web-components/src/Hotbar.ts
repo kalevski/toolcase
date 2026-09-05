@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { isImageSrc } from './internal/image'
 import { esc } from './internal/esc'
 // Re-uses the canonical InventoryItem owned by tc-item-slot so the same data
@@ -181,7 +182,7 @@ export class Hotbar extends HTMLElement {
             })
             .join('')
 
-        this.innerHTML = `<div class="tc-hotbar__row">${cellsHTML}</div>`
+        patchHtml(this, `<div class="tc-hotbar__row">${cellsHTML}</div>`)
 
         // Forward each item to its composed tc-item-slot, so the primitive can
         // render the rich interior once it is registered (mirrors gc-hotbar).

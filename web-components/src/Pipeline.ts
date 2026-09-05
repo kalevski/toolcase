@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { Check } from 'lucide-static'
 import { icon } from './icons'
@@ -75,7 +76,7 @@ export class Pipeline extends HTMLElement {
             })
             .join('')
 
-        this.innerHTML = `<ol class="tc-pipeline">${items}</ol>`
+        patchHtml(this, `<ol class="tc-pipeline">${items}</ol>`)
     }
 }
 

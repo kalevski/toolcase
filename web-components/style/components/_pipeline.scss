@@ -38,11 +38,18 @@ tc-pipeline {
     // State: complete
     --bs-pipeline-complete-color: var(--tc-success);
     --bs-pipeline-complete-title-color: var(--tc-text);
+    // Ink drawn on top of --bs-pipeline-complete-color — reads the same
+    // theme-provided contrast token badges/utilities use so a bright success
+    // hue (aurora, neon, redline...) doesn't wash out a flat white checkmark.
+    --bs-pipeline-complete-ink: var(--bs-success-contrast, #fff);
 
     // State: live
     --bs-pipeline-live-color: var(--tc-app-accent);
     --bs-pipeline-live-title-color: var(--tc-text);
     --bs-pipeline-live-title-font-weight: 600;
+    // Ink drawn on top of --bs-pipeline-live-color — see --tc-app-accent-contrast,
+    // the same on-accent ink every other component reads.
+    --bs-pipeline-live-ink: var(--tc-app-accent-contrast, #fff);
 
     // Check icon size
     --bs-pipeline-check-icon-size: 1rem;
@@ -146,7 +153,7 @@ tc-pipeline {
     .tc-pipeline-marker {
         border-color: var(--bs-pipeline-complete-color);
         background: var(--bs-pipeline-complete-color);
-        color: #fff;
+        color: var(--bs-pipeline-complete-ink);
     }
 
     .tc-pipeline-title {
@@ -159,7 +166,7 @@ tc-pipeline {
     .tc-pipeline-marker {
         border-color: var(--bs-pipeline-live-color);
         background: var(--bs-pipeline-live-color);
-        color: #fff;
+        color: var(--bs-pipeline-live-ink);
 
         // Expanding ring pulse via ::after (50% border-radius = circle, sanctioned)
         &::after {

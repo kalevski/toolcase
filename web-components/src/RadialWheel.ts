@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-radial-wheel'
 
@@ -220,21 +221,23 @@ export class RadialWheel extends HTMLElement {
                 ? `<tc-page-indicator class="tc-radial-wheel-pager" count="${pageCount}" index="${this._page}" aria-label="Wheel pages"></tc-page-indicator>`
                 : ''
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-radial-wheel-backdrop" aria-hidden="true"></div>` +
-            `<div class="tc-radial-wheel-stack">` +
-            `<div class="tc-radial-wheel-disc">` +
-            centerHtml +
-            optionsHtml +
-            `</div>` +
-            pagerHtml +
-            `</div>`
+                `<div class="tc-radial-wheel-stack">` +
+                `<div class="tc-radial-wheel-disc">` +
+                centerHtml +
+                optionsHtml +
+                `</div>` +
+                pagerHtml +
+                `</div>`,
+        )
 
         // Wire the page indicator's tc-select to page changes. The indicator is
         // recreated each render, so the listener is re-attached every time.
         const pager = this.querySelector<HTMLElement>('.tc-radial-wheel-pager')
         if (pager) {
-            pager.addEventListener('tc-select', (e: Event) => {
+            bindOnce(pager, 'tc-select', (e: Event) => {
                 const idx = (e as CustomEvent<{ index: number }>).detail?.index
                 if (typeof idx === 'number') this._setPage(idx)
             })
@@ -247,19 +250,19 @@ export class RadialWheel extends HTMLElement {
             const opt = this._options.find((o) => o.id === id)
             if (!opt) return
 
-            btn.addEventListener('mouseenter', () => {
+            bindOnce(btn, 'mouseenter', () => {
                 if (this._hoverId === id) return
                 this._hoverId = id
                 this.render()
             })
-            btn.addEventListener('mouseleave', () => {
+            bindOnce(btn, 'mouseleave', () => {
                 if (this._hoverId !== id) return
                 this._hoverId = null
                 this.render()
             })
 
             if (!opt.disabled) {
-                btn.addEventListener('click', (e) => {
+                bindOnce(btn, 'click', (e) => {
                     e.stopPropagation()
                     this.dispatchEvent(
                         new CustomEvent('tc-select', {

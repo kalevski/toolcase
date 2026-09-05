@@ -1,4 +1,6 @@
 import { esc } from './internal/esc'
+import { setHostClass } from './internal/host-class'
+import { syncOwnedNodes } from './internal/tc-element'
 const TAG_NAME = 'tc-scroll-text'
 
 function resolveLength(raw: string | null): string | null {
@@ -14,22 +16,25 @@ export class ScrollText extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            const body = this.querySelector('.tc-scroll-text__body')
-            if (body) slotContent.forEach((n) => body.appendChild(n))
-            this._initialised = true
-        }
+        this._initialised = true
+        this.render()
+        this._syncScrollability()
     }
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        const body = this.querySelector('.tc-scroll-text__body')
-        const slotContent = body ? Array.from(body.childNodes) : []
         this.render()
-        const newBody = this.querySelector('.tc-scroll-text__body')
-        if (newBody) slotContent.forEach((n) => newBody.appendChild(n))
+        this._syncScrollability()
+    }
+
+    // Keyboard-scrollable only when the content actually overflows — an empty
+    // focus stop on a non-scrolling panel is noise. Mirrors tc-scroll-area's
+    // _syncScrollability so this sibling "host-is-the-scroller" component gets
+    // the same keyboard/focus-visible affordance.
+    private _syncScrollability(): void {
+        const overflows = this.scrollHeight > this.clientHeight
+        if (overflows) this.setAttribute('tabindex', '0')
+        else this.removeAttribute('tabindex')
     }
 
     get scrollTitle(): string {
@@ -48,8 +53,11 @@ export class ScrollText extends HTMLElement {
         else this.removeAttribute('max-height')
     }
 
+    /** THE HOST IS THE SCROLL BOX: it carries `max-height` and `overflow-y`, and
+     *  the header is a sticky owned node prepended above the consumer's own
+     *  children — which are never moved into a body wrapper (rule 1). */
     private render(): void {
-        this.classList.add('tc-scroll-text')
+        setHostClass(this, 'tc-scroll-text')
 
         const maxH = resolveLength(this.getAttribute('max-height'))
         if (maxH !== null) {
@@ -59,9 +67,7 @@ export class ScrollText extends HTMLElement {
         }
 
         const title = this.scrollTitle
-        const titleMarkup = title ? `<div class="tc-scroll-text__header">${esc(title)}</div>` : ''
-
-        this.innerHTML = `${titleMarkup}<div class="tc-scroll-text__body"></div>`
+        syncOwnedNodes(this, [{ cls: 'tc-scroll-text__header', html: title ? esc(title) : null }])
     }
 }
 

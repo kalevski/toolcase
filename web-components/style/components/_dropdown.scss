@@ -78,7 +78,13 @@ tc-dropdown {
         --bs-dropdown-divider-margin-y: 0.25rem;
         --bs-dropdown-item-padding-x: 0.625rem;
         --bs-dropdown-item-padding-y: 0.4375rem;
-        --bs-dropdown-link-color: var(--tc-slate-700);
+        // NOTE: was `var(--tc-slate-700)` — a raw slate-ramp literal that no
+        // theme remaps (see themes/aurora/components/_build.scss for the same
+        // trap elsewhere). That pinned every un-overridden theme's dropdown
+        // item text to a dark, light-theme-only ink, which is illegible in
+        // aurora/neon's dark menus. `--tc-text` is the token every bundled
+        // theme does redefine, so route there instead.
+        --bs-dropdown-link-color: var(--tc-text);
         --bs-dropdown-link-hover-color: var(--tc-text);
         --bs-dropdown-link-hover-bg: var(--tc-surface-muted);
         --bs-dropdown-link-active-color: var(--tc-app-accent-contrast);
@@ -171,6 +177,19 @@ tc-dropdown {
             &.active kbd,
             &:active kbd {
                 color: rgba(255, 255, 255, 0.6);
+            }
+
+            // Coarse pointer: 44px touch target — matches tc-menu-item /
+            // tc-list-row / .list-group-item-action, which all size their rows
+            // the same way; this row was missing it.
+            @media (pointer: coarse) {
+                min-height: 44px;
+            }
+
+            // Reduced motion — freeze the hover/active colour transition,
+            // matching tc-menu-item / tc-list-row.
+            @media (prefers-reduced-motion: reduce) {
+                transition: none;
             }
         }
     }

@@ -65,42 +65,47 @@ tc-rich-page-header {
     }
 }
 
-// Icon color variants — soft tint bg + emphasis foreground
-// Each maps --bs-rich-page-header-icon-* on the tile; other elements unchanged.
+// Icon color variants — soft tint bg + emphasis foreground.
+// Each anchors on one brand hue, blended with the live --tc-surface/-text/-border
+// tokens via color-mix() rather than baked light-theme pastel literals, so every
+// theme (including the five with no dedicated override file) gets a bg/fg/border
+// triad that stays proportionate to its own surface/text contrast instead of
+// pasting a fixed light-mode pastel onto a dark canvas. dungeon/blueprint's own
+// per-theme overrides still win outright (higher specificity), unaffected.
 .tc-rich-page-header-icon--violet {
-    --bs-rich-page-header-icon-bg: #f5f3ff;
-    --bs-rich-page-header-icon-color: #6d28d9;
-    --bs-rich-page-header-icon-border-color: #c7d2fe;
+    --bs-rich-page-header-icon-bg: color-mix(in srgb, #6d28d9 14%, var(--tc-surface));
+    --bs-rich-page-header-icon-color: color-mix(in srgb, #6d28d9 62%, var(--tc-text));
+    --bs-rich-page-header-icon-border-color: color-mix(in srgb, #6d28d9 38%, var(--tc-border));
 }
 
 .tc-rich-page-header-icon--cyan {
-    --bs-rich-page-header-icon-bg: #ecfeff;
-    --bs-rich-page-header-icon-color: #0e7490;
-    --bs-rich-page-header-icon-border-color: #a5f3fc;
+    --bs-rich-page-header-icon-bg: color-mix(in srgb, #0e7490 14%, var(--tc-surface));
+    --bs-rich-page-header-icon-color: color-mix(in srgb, #0e7490 62%, var(--tc-text));
+    --bs-rich-page-header-icon-border-color: color-mix(in srgb, #0e7490 38%, var(--tc-border));
 }
 
 .tc-rich-page-header-icon--emerald {
-    --bs-rich-page-header-icon-bg: #ecfdf5;
-    --bs-rich-page-header-icon-color: #166534;
-    --bs-rich-page-header-icon-border-color: #a7f3d0;
+    --bs-rich-page-header-icon-bg: color-mix(in srgb, #166534 14%, var(--tc-surface));
+    --bs-rich-page-header-icon-color: color-mix(in srgb, #166534 62%, var(--tc-text));
+    --bs-rich-page-header-icon-border-color: color-mix(in srgb, #166534 38%, var(--tc-border));
 }
 
 .tc-rich-page-header-icon--amber {
-    --bs-rich-page-header-icon-bg: #fef3c7;
-    --bs-rich-page-header-icon-color: #92400e;
-    --bs-rich-page-header-icon-border-color: #fde68a;
+    --bs-rich-page-header-icon-bg: color-mix(in srgb, #92400e 14%, var(--tc-surface));
+    --bs-rich-page-header-icon-color: color-mix(in srgb, #92400e 62%, var(--tc-text));
+    --bs-rich-page-header-icon-border-color: color-mix(in srgb, #92400e 38%, var(--tc-border));
 }
 
 .tc-rich-page-header-icon--pink {
-    --bs-rich-page-header-icon-bg: #fdf2f8;
-    --bs-rich-page-header-icon-color: #be185d;
-    --bs-rich-page-header-icon-border-color: #fbcfe8;
+    --bs-rich-page-header-icon-bg: color-mix(in srgb, #be185d 14%, var(--tc-surface));
+    --bs-rich-page-header-icon-color: color-mix(in srgb, #be185d 62%, var(--tc-text));
+    --bs-rich-page-header-icon-border-color: color-mix(in srgb, #be185d 38%, var(--tc-border));
 }
 
 .tc-rich-page-header-icon--blue {
-    --bs-rich-page-header-icon-bg: #e0f2fe;
-    --bs-rich-page-header-icon-color: #075985;
-    --bs-rich-page-header-icon-border-color: #bae6fd;
+    --bs-rich-page-header-icon-bg: color-mix(in srgb, #075985 14%, var(--tc-surface));
+    --bs-rich-page-header-icon-color: color-mix(in srgb, #075985 62%, var(--tc-text));
+    --bs-rich-page-header-icon-border-color: color-mix(in srgb, #075985 38%, var(--tc-border));
 }
 
 .tc-rich-page-header-icon--slate {
@@ -110,9 +115,9 @@ tc-rich-page-header {
 }
 
 .tc-rich-page-header-icon--rose {
-    --bs-rich-page-header-icon-bg: #fff1f2;
-    --bs-rich-page-header-icon-color: #be123c;
-    --bs-rich-page-header-icon-border-color: #fecdd3;
+    --bs-rich-page-header-icon-bg: color-mix(in srgb, #be123c 14%, var(--tc-surface));
+    --bs-rich-page-header-icon-color: color-mix(in srgb, #be123c 62%, var(--tc-text));
+    --bs-rich-page-header-icon-border-color: color-mix(in srgb, #be123c 38%, var(--tc-border));
 }
 
 .tc-rich-page-header-body {

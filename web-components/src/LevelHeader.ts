@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-level-header'
 
@@ -71,7 +72,9 @@ export class LevelHeader extends HTMLElement {
         this.setAttribute('role', 'region')
         this.setAttribute(
             'aria-label',
-            titleText ? `${esc(titleText)} — Level ${level}` : `Level ${level}`,
+            // setAttribute assigns the raw DOM value directly (no HTML parsing), so this
+            // uses titleText as-is — esc() is reserved for the innerHTML strings below.
+            titleText ? `${titleText} — Level ${level}` : `Level ${level}`,
         )
 
         const titleHtml = titleText
@@ -82,7 +85,9 @@ export class LevelHeader extends HTMLElement {
             ? `<span class="tc-level-header__next">Next: ${esc(nextLabel)}</span>`
             : ''
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <div class="tc-level-header__badge" aria-hidden="true">
                 <span class="tc-level-header__badge-label">LVL</span>
                 <span class="tc-level-header__badge-value">${level}</span>
@@ -102,7 +107,8 @@ export class LevelHeader extends HTMLElement {
                     ${nextHtml}
                 </div>
             </div>
-        `
+        `,
+        )
     }
 }
 

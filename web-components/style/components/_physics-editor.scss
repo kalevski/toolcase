@@ -24,10 +24,15 @@ tc-physics-editor {
     --bs-physics-editor-padding: 0.75rem;
 
     // Canvas-drawn shape colours (read back via getComputedStyle in JS).
+    // The fills are translucent tints of the *same* token as their matching
+    // stroke (color-mix, same pattern as _page-indicator.scss) rather than a
+    // fixed slate literal — a light-theme rgba(30, 41, 59, *) selected-fill
+    // reads as a visible dark tint on a light stage, but is nearly invisible
+    // on aurora/neon's dark stage-bg with no override file to catch it.
     --bs-physics-editor-shape-stroke: var(--tc-border-strong);
-    --bs-physics-editor-shape-fill: rgba(148, 163, 184, 0.16);
+    --bs-physics-editor-shape-fill: color-mix(in srgb, var(--tc-border-strong) 16%, transparent);
     --bs-physics-editor-selected-stroke: var(--tc-app-accent);
-    --bs-physics-editor-selected-fill: rgba(30, 41, 59, 0.16);
+    --bs-physics-editor-selected-fill: color-mix(in srgb, var(--tc-app-accent) 16%, transparent);
     --bs-physics-editor-handle-bg: var(--tc-surface);
     --bs-physics-editor-handle-border: var(--tc-app-accent);
     --bs-physics-editor-preview-stroke: var(--tc-accent);

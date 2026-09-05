@@ -1,3 +1,5 @@
+import { setHostClass } from './internal/host-class'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-scroll-area'
 
 export type ScrollAreaAxis = 'x' | 'y' | 'both'
@@ -22,10 +24,7 @@ export class ScrollArea extends HTMLElement {
 
     connectedCallback(): void {
         if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
             this.render()
-            const inner = this.querySelector('.tc-scroll-area-content')
-            if (inner) slotContent.forEach((n) => inner.appendChild(n))
             this._initialised = true
             this._syncScrollability()
         }
@@ -33,11 +32,7 @@ export class ScrollArea extends HTMLElement {
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        const inner = this.querySelector('.tc-scroll-area-content')
-        const slotContent = inner ? Array.from(inner.childNodes) : []
         this.render()
-        const newInner = this.querySelector('.tc-scroll-area-content')
-        if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
         this._syncScrollability()
     }
 
@@ -45,12 +40,10 @@ export class ScrollArea extends HTMLElement {
     // overflows — an empty focus stop on a non-scrolling region is noise. Measure
     // after children are (re)appended and toggle tabindex accordingly.
     private _syncScrollability(): void {
-        const area = this.querySelector<HTMLElement>('.tc-scroll-area')
-        if (!area) return
         const overflows =
-            area.scrollHeight > area.clientHeight || area.scrollWidth > area.clientWidth
-        if (overflows) area.setAttribute('tabindex', '0')
-        else area.removeAttribute('tabindex')
+            this.scrollHeight > this.clientHeight || this.scrollWidth > this.clientWidth
+        if (overflows) this.setAttribute('tabindex', '0')
+        else this.removeAttribute('tabindex')
     }
 
     get maxHeight(): string | null {
@@ -74,7 +67,7 @@ export class ScrollArea extends HTMLElement {
         return AXES.includes(v) ? v : 'y'
     }
     set axis(v: ScrollAreaAxis) {
-        this.setAttribute('axis', v)
+        setAttr(this, 'axis', v)
     }
 
     private render(): void {
@@ -89,7 +82,13 @@ export class ScrollArea extends HTMLElement {
         if (maxHeight) styles.push(`max-height:${maxHeight}`)
         if (maxWidth) styles.push(`max-width:${maxWidth}`)
 
-        this.innerHTML = `<div class="tc-scroll-area tc-scroll-area--axis-${axis}" style="${styles.join(';')}"><div class="tc-scroll-area-content"></div></div>`
+        // THE HOST IS THE SCROLLER: the content it scrolls is the consumer's own
+        // children, still direct children of their tag (rule 1).
+        setHostClass(this, `tc-scroll-area tc-scroll-area--axis-${axis}`)
+        this.style.overflowX = overflowX
+        this.style.overflowY = overflowY
+        this.style.maxHeight = maxHeight ?? ''
+        this.style.maxWidth = maxWidth ?? ''
     }
 }
 

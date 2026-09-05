@@ -12,7 +12,10 @@ tc-theme[name='dungeon'],
         // Wood gradient card surface.
         --bs-game-showcase-card-bg: var(--fg-panel-bg);
 
-        // Gilt wax-seal text on the ink stamp (base hardcodes #fff).
+        // Gilt wax-seal text on the ink stamp. Base now tokenizes this as
+        // --tc-text-inverse, but dungeon's --tc-text-inverse maps to --fg-ink
+        // (dark, for light gilded surfaces elsewhere) — wrong on this dark
+        // ink-colored stamp, so it's overridden here with the bright gold ink.
         --bs-game-showcase-card-stamp-color: var(--fg-gold-bright);
     }
 

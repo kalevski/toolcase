@@ -1,0 +1,17 @@
+// Marker theme — a page of paper with one highlighter on it.
+//
+// Lifted from polovni.mk, which consumes this library and had been carrying the
+// whole skin as a local override block. See ./_foundation.scss for the palette
+// and for why each half of it is what it is.
+//
+// Activate by wrapping content in the theme root:
+//   <tc-theme name="marker"> … your tc-* components … </tc-theme>
+// (or any element with [data-tc-theme="marker"]).
+//
+// Load order matches every other theme: foundation (the token remap) first, then
+// variants (a token-only layer that swaps the marker's hue), then the component
+// partials on top of whichever tokens are in force.
+
+@use 'foundation';
+@use 'variants';
+@use 'components';

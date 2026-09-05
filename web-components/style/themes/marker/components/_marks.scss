@@ -1,0 +1,59 @@
+// Marker › the marked things — where the highlighter is allowed to appear.
+//
+// A theme whose whole idea is "one highlighter on a page of paper" has to say out
+// loud which surfaces get it, or it becomes a yellow theme.
+//
+// THE LIST, and nothing else: a primary action, a lock (a "not yet" is a marked
+// thing), a selected chip, and the marker under an active tab.
+
+[data-tc-theme='marker'],
+tc-theme[name='marker'] {
+    // A lock is a marked row: the tint is the 8% highlighter, the ink is the deep
+    // yellow — the yellow itself cannot carry 11px type.
+    .tc-lock-chip--warning {
+        --bs-lock-chip-color: var(--mk-lead-deep);
+        --bs-lock-chip-bg: var(--mk-lead-tint);
+        --bs-lock-chip-border-color: var(--mk-lead-line);
+    }
+
+    .tc-upgrade-nudge {
+        --bs-upgrade-nudge-bg: var(--mk-lead-tint);
+        --bs-upgrade-nudge-border-color: var(--mk-lead-line);
+        --bs-upgrade-nudge-chip-color: var(--mk-lead-deep);
+        --bs-upgrade-nudge-cta-bg: var(--mk-lead);
+        --bs-upgrade-nudge-cta-color: var(--mk-on-lead);
+    }
+
+    // A picked chip is marked, and the label flips to the dark on-lead ink for
+    // the same contrast reason every yellow fill in this theme does.
+    .tc-facet-picker__chip--active,
+    .tc-range-field__preset--active {
+        color: var(--mk-on-lead);
+        background: var(--mk-lead);
+        border-color: var(--mk-lead);
+    }
+
+    // The active tab's underline. The one decorative use of the lead, and it is
+    // 2px of it — a rule, not a fill.
+    //
+    // tc-page-tabs reads --bs-page-tabs-underline-color (see
+    // style/components/_page-tabs.scss) — this used to set a differently spelled
+    // --bs-page-tabs-active-underline that nothing ever read, so the marker theme
+    // silently fell back to the default accent underline instead of the lead.
+    .tc-page-tabs-tab--active {
+        --bs-page-tabs-underline-color: var(--mk-lead);
+    }
+
+    .nav-link.active {
+        --bs-page-tabs-active-underline: var(--mk-lead);
+    }
+
+    // The filter trigger, once something is set. Border only: a filled trigger
+    // beside a filled primary action is two marks competing.
+    .tc-filter-trigger[data-active] {
+        --bs-filter-trigger-active-color: var(--mk-lead-deep);
+        --bs-filter-trigger-active-border-color: var(--mk-lead-lo);
+        --bs-filter-trigger-count-bg: var(--mk-lead);
+        --bs-filter-trigger-count-color: var(--mk-on-lead);
+    }
+}

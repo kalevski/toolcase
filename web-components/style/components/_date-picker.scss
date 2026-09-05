@@ -7,6 +7,18 @@ tc-date-picker {
     --bs-date-picker-label-color: var(--tc-text);
     --bs-date-picker-label-size: 13px;
     --bs-date-picker-disabled-opacity: 0.55;
+    // Native UA chrome (calendar indicator + popup) for the light default theme.
+    // Themed as a knob, not a literal `light` on the input below, so a dark theme
+    // can re-skin it by redeclaring one custom property instead of out-specifying
+    // the selector on the input itself.
+    --bs-date-picker-color-scheme: light;
+    // Focus ring — kept as its own --bs-date-picker-* pair (rather than reusing
+    // the shared --tc-focus-ring/border-color for .form-control:focus verbatim)
+    // because this selector nests deeper than the generic `.form-control:focus`
+    // rule and would otherwise out-specify a theme's plain `.form-control:focus`
+    // override; exposing it here lets a theme re-skin via the var alone.
+    --bs-date-picker-focus-border-color: rgba(30, 41, 59, 0.5);
+    --bs-date-picker-focus-box-shadow: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
 }
 
 .tc-date-picker {
@@ -27,7 +39,7 @@ tc-date-picker {
         // control height and breaks row alignment.
         height: var(--tc-control-height, 2.625rem);
         border-radius: 0;
-        color-scheme: light;
+        color-scheme: var(--bs-date-picker-color-scheme);
 
         &::-webkit-calendar-picker-indicator {
             cursor: pointer;
@@ -39,8 +51,8 @@ tc-date-picker {
         }
 
         &:focus {
-            border-color: rgba(30, 41, 59, 0.5);
-            box-shadow: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
+            border-color: var(--bs-date-picker-focus-border-color);
+            box-shadow: var(--bs-date-picker-focus-box-shadow);
         }
 
         // Keep the invalid border visible on focus: the local :focus rule above

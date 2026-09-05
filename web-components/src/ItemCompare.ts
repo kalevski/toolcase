@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { ArrowDown, ArrowUp } from 'lucide-static'
 import { icon } from './icons'
@@ -173,10 +174,13 @@ export class ItemCompare extends HTMLElement {
 
     private render(): void {
         const deltas = this.computeDeltas()
-        this.innerHTML = `<div class="tc-item-compare__grid">
+        patchHtml(
+            this,
+            `<div class="tc-item-compare__grid">
             ${this.renderColumn(this._current, 'Equipped', null)}
             ${this.renderColumn(this._candidate, 'Candidate', deltas)}
-        </div>`
+        </div>`,
+        )
     }
 }
 

@@ -1,4 +1,6 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { fixedOriginOffset } from './internal/containingBlock'
 import { Plus, X } from 'lucide-static'
 import { icon } from './icons'
 // Re-uses the canonical FileTag shape owned by tc-file so both file ports agree.
@@ -18,6 +20,7 @@ export class FileTags extends HTMLElement {
     private _activeOptionIdx = -1
     private _menuOutsideHandler: ((e: MouseEvent) => void) | null = null
     private _menuKeyHandler: ((e: KeyboardEvent) => void) | null = null
+    private _repositionHandler: (() => void) | null = null
 
     onChange: ((selectedIds: string[]) => void) | null = null
 
@@ -112,6 +115,51 @@ export class FileTags extends HTMLElement {
 
         this._menuKeyHandler = this._onMenuKeydown
         document.addEventListener('keydown', this._menuKeyHandler)
+
+        // Anchor the fixed-positioned menu to the trigger (escapes overflow
+        // clipping from ancestor scroll containers), then keep it anchored
+        // while the page or an ancestor scrolls/resizes underneath it.
+        this._positionMenu()
+        this._repositionHandler = () => this._positionMenu()
+        window.addEventListener('scroll', this._repositionHandler, true)
+        window.addEventListener('resize', this._repositionHandler)
+    }
+
+    /**
+     * Position the fixed menu against the add-button wrap in viewport
+     * coordinates. Opens below by default and flips above when there isn't
+     * room beneath it; left is clamped so the panel never spills off-screen.
+     */
+    private _positionMenu(): void {
+        const menu = this.querySelector<HTMLElement>('.tc-file-tags-menu')
+        const anchor = this.querySelector<HTMLElement>('.tc-file-tags-add-wrap')
+        if (!menu || !anchor) return
+
+        const gap = 2
+        const margin = 4
+        const r = anchor.getBoundingClientRect()
+        const vw = window.innerWidth
+        const vh = window.innerHeight
+
+        const menuW = menu.offsetWidth
+        const menuH = menu.offsetHeight
+        const spaceBelow = vh - r.bottom
+        const flipUp = spaceBelow < menuH + gap && r.top > spaceBelow
+
+        let top = flipUp
+            ? Math.max(margin, r.top - menuH - gap)
+            : Math.min(r.bottom + gap, vh - menuH - margin)
+        let left = Math.max(margin, Math.min(r.left, vw - menuW - margin))
+        top = Math.max(margin, top)
+
+        // Re-base onto the containing block when a transformed/filtered ancestor
+        // has hijacked `position: fixed` (see fixedOriginOffset).
+        const o = fixedOriginOffset(this)
+        top -= o.y
+        left -= o.x
+
+        menu.style.top = `${top}px`
+        menu.style.left = `${left}px`
     }
 
     private _closeMenu(refocus = true): void {
@@ -143,6 +191,11 @@ export class FileTags extends HTMLElement {
             document.removeEventListener('keydown', this._menuKeyHandler)
             this._menuKeyHandler = null
         }
+        if (this._repositionHandler) {
+            window.removeEventListener('scroll', this._repositionHandler, true)
+            window.removeEventListener('resize', this._repositionHandler)
+            this._repositionHandler = null
+        }
     }
 
     private _buildOptionsHtml(filter: string): string {
@@ -165,6 +218,9 @@ export class FileTags extends HTMLElement {
     private _renderMenuOptions(filter: string): void {
         const listEl = this.querySelector<HTMLElement>('.tc-file-tags-options')
         if (listEl) listEl.innerHTML = this._buildOptionsHtml(filter)
+        // Filtering/selecting changes the menu's height — re-anchor so a
+        // flipped-up menu stays attached to the control instead of drifting.
+        if (this._isMenuOpen) this._positionMenu()
     }
 
     private _highlightOption(): void {
@@ -290,16 +346,18 @@ export class FileTags extends HTMLElement {
               `</div></div>`
             : ''
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-file-tags">` +
-            `<div class="tc-file-tags-chips">${chipsHtml}</div>` +
-            addControlHtml +
-            `</div>`
+                `<div class="tc-file-tags-chips">${chipsHtml}</div>` +
+                addControlHtml +
+                `</div>`,
+        )
 
         // ── Chip remove: delegated on chips container ───────────────────────
         const chipsEl = this.querySelector<HTMLElement>('.tc-file-tags-chips')
         if (chipsEl) {
-            chipsEl.addEventListener('click', (e: MouseEvent) => {
+            bindOnce(chipsEl, 'click', (e: MouseEvent) => {
                 const btn = (e.target as Element).closest<HTMLButtonElement>(
                     '.tc-file-tags-chip-remove',
                 )
@@ -314,11 +372,11 @@ export class FileTags extends HTMLElement {
             // ── Add button ────────────────────────────────────────────────────
             const addBtn = this.querySelector<HTMLButtonElement>('.tc-file-tags-add')
             if (addBtn) {
-                addBtn.addEventListener('click', () => {
+                bindOnce(addBtn, 'click', () => {
                     if (this._isMenuOpen) this._closeMenu()
                     else this._openMenu()
                 })
-                addBtn.addEventListener('keydown', (e: KeyboardEvent) => {
+                bindOnce(addBtn, 'keydown', (e: KeyboardEvent) => {
                     if (e.key === 'ArrowDown') {
                         e.preventDefault()
                         if (!this._isMenuOpen) this._openMenu()
@@ -329,7 +387,7 @@ export class FileTags extends HTMLElement {
             // ── Search input ──────────────────────────────────────────────────
             const searchInput = this.querySelector<HTMLInputElement>('.tc-file-tags-search')
             if (searchInput) {
-                searchInput.addEventListener('input', () => {
+                bindOnce(searchInput, 'input', () => {
                     this._activeOptionIdx = -1
                     this._renderMenuOptions(searchInput.value)
                 })
@@ -338,7 +396,7 @@ export class FileTags extends HTMLElement {
             // ── Options click: delegated on options container ─────────────────
             const optionsEl = this.querySelector<HTMLElement>('.tc-file-tags-options')
             if (optionsEl) {
-                optionsEl.addEventListener('click', (e: MouseEvent) => {
+                bindOnce(optionsEl, 'click', (e: MouseEvent) => {
                     const option = (e.target as Element).closest<HTMLElement>(
                         '.tc-file-tags-option',
                     )

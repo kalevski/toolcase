@@ -1,0 +1,41 @@
+// Marker Sunset variant — GRADIENT marker (coral → orange), amber secondary.
+//
+// Swaps ONLY the marker's own hue family (--mk-lead*) and the secondary
+// highlight (--tc-accent*). The paper canvas, the graphite ink ramp, the
+// hairlines, the cool shadows and the type are the theme and are untouched —
+// this is the standard eleven-variant set shared by every bundled theme.
+//
+// `--mk-on-lead` is the label ON the fill, and it is chosen per variant rather
+// than fixed: #1a0a00 is what clears AA against #f97316. A theme whose whole idea
+// is one marked colour cannot afford an unreadable label on the marked thing.
+//
+// Use with: <tc-theme name="marker" variant="sunset"> … </tc-theme>
+
+tc-theme[name='marker'][variant='sunset'],
+[data-tc-theme='marker'][data-tc-variant='sunset'] {
+    // ── The marker ───────────────────────────────────────────────────────────
+    --mk-lead: #f97316;
+    --mk-lead-hi: #fb923c;
+    --mk-lead-lo: #c2410c;
+    // The hue as a WORD — the step that carries text on paper.
+    --mk-lead-deep: #9a3412;
+    --mk-lead-tint: rgba(249, 115, 22, 0.08);
+    --mk-lead-line: rgba(194, 65, 12, 0.5);
+    --mk-lead-glow: rgba(249, 115, 22, 0.32);
+    --mk-on-lead: #1a0a00;
+    --mk-lead-grad: linear-gradient(135deg, #fb7185, #f97316);
+
+    // ── Secondary highlight — links, focus, accent text ──────────────────────
+    --tc-accent: #b45309;
+    --tc-accent-fg: #92400e;
+    --tc-accent-soft: rgba(180, 83, 9, 0.12);
+    --tc-accent-hex: #b45309;
+
+    // ── Foundation literals baked against the old hex ────────────────────────
+    --bs-primary-rgb: 249, 115, 22;
+    // --bs-warning-rgb intentionally left alone (falls back to the foundation's
+    // real amber) -- see variants/_forest.scss for why copying primary's new rgb
+    // here made warning indistinguishable from primary/success.
+    --tc-focus-ring: 0 0 0 3px rgba(194, 65, 12, 0.45);
+    --bs-focus-ring-color: rgba(194, 65, 12, 0.45);
+}

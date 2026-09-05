@@ -1,3 +1,5 @@
+import { patchHtml } from './internal/patch-html'
+import { setHostClass } from './internal/host-class'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -22,29 +24,19 @@ export class ApiReferenceTable extends HTMLElement {
     private _initialised = false
     private _groups: ApiReferenceGroup[] = []
     private _items: ApiItem[] = []
-    private _titleNodes: Node[] = []
 
     static get observedAttributes(): string[] {
         return ['title']
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            if (!this.hasAttribute('title')) {
-                this._titleNodes = Array.from(this.childNodes)
-            }
-            this.render()
-            if (!this.hasAttribute('title')) {
-                const titleEl = this.querySelector('.tc-api-reference-table-title')
-                if (titleEl) this._titleNodes.forEach((n) => titleEl.appendChild(n))
-            }
-            this._initialised = true
-        }
+        this._initialised = true
+        this.render()
     }
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        this._rerenderWithSlots()
+        this.render()
     }
 
     get groups(): ApiReferenceGroup[] {
@@ -72,15 +64,7 @@ export class ApiReferenceTable extends HTMLElement {
     }
 
     private _rerenderWithSlots(): void {
-        if (!this.hasAttribute('title')) {
-            const titleEl = this.querySelector('.tc-api-reference-table-title')
-            if (titleEl) this._titleNodes = Array.from(titleEl.childNodes)
-        }
         this.render()
-        if (!this.hasAttribute('title')) {
-            const newTitleEl = this.querySelector('.tc-api-reference-table-title')
-            if (newTitleEl) this._titleNodes.forEach((n) => newTitleEl.appendChild(n))
-        }
     }
 
     private _renderItem(item: ApiItem): string {
@@ -136,8 +120,12 @@ export class ApiReferenceTable extends HTMLElement {
 
     private render(): void {
         const titleAttr = this.getAttribute('title')
-        const titleInner = titleAttr != null ? esc(titleAttr) : ''
-        const titleHtml = `<div class="tc-api-reference-table-title">${titleInner}</div>`
+        // A slotted title stays the consumer's own child at the top of the host and
+        // is dressed by CSS; only an attribute title is element-owned (rule 1).
+        const titleHtml =
+            titleAttr != null
+                ? `<div class="tc-api-reference-table-title">${esc(titleAttr)}</div>`
+                : ''
 
         let groupsToRender: ApiReferenceGroup[]
         let showHeadings: boolean
@@ -155,7 +143,8 @@ export class ApiReferenceTable extends HTMLElement {
 
         const groupsHtml = groupsToRender.map((g) => this._renderGroup(g, showHeadings)).join('')
 
-        this.innerHTML = `<div class="tc-api-reference-table">${titleHtml}${groupsHtml}</div>`
+        setHostClass(this, 'tc-api-reference-table')
+        patchHtml(this, `${titleHtml}${groupsHtml}`, { at: 'end' })
     }
 }
 

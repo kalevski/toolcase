@@ -1,7 +1,10 @@
+import { patchHtml } from './internal/patch-html'
+import { observeContent } from './internal/content-observer'
 import { esc } from './internal/esc'
 import { msg } from './messages'
 import { fieldMessageHtml } from './internal/field-message'
 import { requiredMark, reflectFieldValidity, dispatchFieldChange } from './internal/form-field'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-select'
 
 let _idCounter = 0
@@ -59,6 +62,11 @@ export class Select extends HTMLElement {
             this._defaultValue = this.getAttribute('value') ?? ''
         }
         this.addEventListener('change', this._onNativeChange)
+        // tc-option notifies on its own attributes, which covers a value or a
+        // `selected` flag changing. It cannot cover the option's LABEL: that is a
+        // text child, and React rewrites it without touching an attribute — so the
+        // option list is watched here as well (see content-observer.ts).
+        observeContent(this, () => this._scheduleRender())
         this._scheduleRender()
     }
 
@@ -175,7 +183,7 @@ export class Select extends HTMLElement {
         return this.getAttribute('placeholder') ?? ''
     }
     set placeholder(v: string) {
-        this.setAttribute('placeholder', v)
+        setAttr(this, 'placeholder', v)
     }
 
     get state(): SelectState | null {
@@ -274,8 +282,10 @@ export class Select extends HTMLElement {
               ? [this.getAttribute('value')!]
               : []
 
-        // Snapshot tc-option / native option direct-children whenever they are present.
-        // After this render they will be destroyed by innerHTML; _optionData persists.
+        // Snapshot tc-option / native option direct-children whenever they are
+        // present. patchHtml steps over them (they are the consumer's, rule 1) so
+        // they stay in the light DOM as inert data; _optionData is what the real
+        // <select> is built from, and is re-read on every render.
         const hasOptionChildren = Array.from(this.children).some((c) => {
             const t = c.tagName.toLowerCase()
             return t === 'tc-option' || t === 'option'
@@ -342,14 +352,17 @@ export class Select extends HTMLElement {
         })
         const describe = this.help || state ? ` aria-describedby="${this._helpId}"` : ''
 
-        this.innerHTML = [
-            labelHtml,
-            `<select id="${this._selectId}" class="form-select${sizeClass}${stateClass}"${multipleAttr}${disabledAttr}${requiredAttr}${describe}>`,
-            placeholderHtml,
-            optionsHtml,
-            `</select>`,
-            messageHtml,
-        ].join('')
+        patchHtml(
+            this,
+            [
+                labelHtml,
+                `<select id="${this._selectId}" class="form-select${sizeClass}${stateClass}"${multipleAttr}${disabledAttr}${requiredAttr}${describe}>`,
+                placeholderHtml,
+                optionsHtml,
+                `</select>`,
+                messageHtml,
+            ].join(''),
+        )
 
         // Restore the selected values from before the re-render.
         const sel = this.querySelector<HTMLSelectElement>('select')

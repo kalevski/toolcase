@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 import { chevronRightIcon } from './icons'
@@ -283,7 +284,10 @@ export class TreeView extends HTMLElement {
         }
 
         // Checkbox → toggle membership (state is driven by render, not the native toggle).
-        const checkbox = target.closest('.tc-tree-view-checkbox')
+        // Matched against the wrapping hit-area span (not the bare input) so the
+        // click-catching region can be widened under pointer:coarse without
+        // resizing the visible glyph — see .tc-tree-view-checkbox-hit in the SCSS.
+        const checkbox = target.closest('.tc-tree-view-checkbox-hit')
         if (checkbox && this.contains(checkbox)) {
             const row = checkbox.closest<HTMLElement>('.tc-tree-view-row')
             const key = row?.dataset.key
@@ -493,11 +497,18 @@ export class TreeView extends HTMLElement {
                 let checkboxHtml = ''
                 if (this.checkboxMode) {
                     const { checked, indeterminate } = this._checkboxState(node)
+                    // Wrapped in a hit-area span: the visible box stays a small
+                    // 0.95rem glyph, but the span widens to a 44px tap target
+                    // under pointer:coarse (parent rows have no other click path
+                    // to this control — clicking elsewhere on the row expands
+                    // instead of selecting, unlike leaf rows).
                     checkboxHtml =
+                        `<span class="tc-tree-view-checkbox-hit">` +
                         `<input type="checkbox" class="form-check-input tc-tree-view-checkbox"` +
                         ` ${checked ? 'checked' : ''}${disabled ? ' disabled' : ''}` +
                         `${indeterminate ? ' data-indeterminate="true"' : ''}` +
-                        ` tabindex="-1" aria-label="${esc(node.label ?? '')}" />`
+                        ` tabindex="-1" aria-label="${esc(node.label ?? '')}" />` +
+                        `</span>`
                 }
 
                 // Pass the class so the .tc-tree-view-icon sizing rule applies —
@@ -535,10 +546,12 @@ export class TreeView extends HTMLElement {
         const rootClass = this.checkboxMode ? 'tc-tree-view tc-tree-view--checkbox' : 'tc-tree-view'
         const multiselect = this.checkboxMode ? ' aria-multiselectable="true"' : ''
         const body = this._renderNodes(this._nodes, 0, null)
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="${rootClass}">` +
-            `<ul class="tc-tree-view-group tc-tree-view-root" role="tree"${multiselect}>${body}</ul>` +
-            `</div>`
+                `<ul class="tc-tree-view-group tc-tree-view-root" role="tree"${multiselect}>${body}</ul>` +
+                `</div>`,
+        )
 
         this._applyRovingTabindex()
         this._applyIndeterminate()

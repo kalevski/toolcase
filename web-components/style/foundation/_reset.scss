@@ -196,7 +196,10 @@ button {
 // block-level; unregistered/unstyled custom elements default to inline.
 tc-announcement-bar,
 tc-aspect-ratio-box,
+tc-preview-frame,
+tc-artboard,
 tc-artboard-backdrop,
+tc-container,
 tc-dialogue-box,
 tc-data-list,
 tc-battle-pass,
@@ -207,6 +210,7 @@ tc-badge-row,
 tc-area-chart,
 tc-bar-chart,
 tc-benchmark-chart,
+tc-graph-canvas,
 tc-bitmap-font-generator,
 tc-normal-map-generator,
 tc-physics-editor,
@@ -222,6 +226,7 @@ tc-input,
 tc-markdown-editor,
 tc-textarea,
 tc-select,
+tc-combo-box,
 tc-range,
 tc-form,
 tc-form-input,
@@ -231,6 +236,7 @@ tc-radio,
 tc-radio-group,
 tc-switch,
 tc-input-group,
+tc-search-bar,
 tc-floating-label,
 tc-progress,
 tc-progress-bar,
@@ -387,6 +393,7 @@ tc-marquee,
 tc-testimonial-carousel,
 tc-multi-card-select,
 tc-newsletter-signup,
+tc-sign-in-gate,
 tc-node-editor,
 tc-number-input,
 tc-otp-input,
@@ -404,6 +411,7 @@ tc-audio-mixer,
 tc-tag-input,
 tc-terminal-window,
 tc-toggle-card,
+tc-tree-picker,
 tc-tree-view,
 tc-user-panel,
 tc-vertical-item-list,
@@ -508,6 +516,13 @@ tc-swipe-pager {
     display: flex;
 }
 
+// tc-floating-action-bar IS the fixed selection bar — the prepended count line
+// and the consumer's action buttons are the host's own direct children, laid out
+// as a flex row by the partial, so the host cannot default to inline.
+tc-floating-action-bar {
+    display: flex;
+}
+
 // tc-step-pager IS the full-screen step surface's flex column (top row, progress
 // rule, pager, caption, controls). Every one of those is a child it renders itself,
 // laid out in source order by the partial.
@@ -539,6 +554,24 @@ tc-notice {
 // control are the host's own children in a flex row, and the host itself carries the
 // surface, the border and the padding.
 tc-stat-tile {
+    display: flex;
+}
+
+// tc-facet-picker renders no wrapper — the host itself is `.tc-facet-picker`
+// (display: flex, flex-direction: column) — but that class is only applied once
+// the element upgrades and calls setHostClass. Without an explicit default the
+// host falls back to `display: inline`, so its label/hint/options children would
+// flow inline instead of stacking, before JS runs.
+tc-facet-picker {
+    display: flex;
+}
+
+// tc-filter-bar renders no wrapper — the host itself is `.tc-filter-bar` (display:
+// flex, flex-direction: column) — but that class is only applied once the element
+// upgrades and calls setHostClass. Without an explicit default the host falls back
+// to `display: inline`, so its rows/foot children would flow inline instead of
+// stacking, before JS runs.
+tc-filter-bar {
     display: flex;
 }
 
@@ -614,9 +647,26 @@ tc-bottom-sheet {
     display: flex;
 }
 
+// tc-qr-scan-sheet mirrors tc-bottom-sheet's own registration above: the
+// component's partial (components/_qr-scan-sheet.scss) narrows this to
+// `display: none` while closed and restores `flex` via [data-sheet-state] —
+// this is the value that state rule restores, not the value the closed
+// element renders with. The partial is already fully self-sufficient (it
+// declares none/flex itself at the same specificity/source-order as
+// tc-bottom-sheet), so this entry exists for cross-file coverage parity with
+// every other registered tag, not because it's required for correctness.
+tc-qr-scan-sheet {
+    display: flex;
+}
+
 // tc-grid is a CSS-grid layout primitive; the partial owns the track/gap
 // details but the host must lay out as a grid, not default to inline.
 tc-grid {
+    display: grid;
+}
+
+// tc-design-canvas IS the pan/zoom viewport grid — it centres the slotted tc-artboard via place-items:center, so the host cannot default to inline.
+tc-design-canvas {
     display: grid;
 }
 
@@ -754,6 +804,47 @@ tc-vignette-overlay {
     display: block;
 }
 
+// tc-alert renders no wrapper — the host itself is `.alert` (display: flex) —
+// but that class is only applied once the element upgrades. Without an
+// explicit default the host falls back to `display: inline`, so its message
+// (and, briefly, an unstyled dismiss button) flow inline with surrounding
+// text instead of sitting in its own bordered/padded block before JS runs.
+tc-alert {
+    display: block;
+}
+
+// tc-condition-builder inserts its `__root` wrapper and applies its own host class
+// (carrying `display: block` in the component partial) on connect — but that class
+// only lands once JS runs, so without an explicit default here the host sits as
+// `display: inline` until upgrade, same gap as tc-alert above.
+tc-condition-builder {
+    display: block;
+}
+
+// tc-accordion-item renders no wrapper — the host itself is `.accordion-item`
+// (display: block) — but that class is only applied once the element upgrades.
+// Without an explicit default the host falls back to `display: inline`, so its
+// header button and panel body flow inline before JS runs, same gap as tc-alert above.
+tc-accordion-item {
+    display: block;
+}
+
+tc-list-group-item {
+    display: block;
+} // host renders the item's own display (block), matching .list-group-item's own rule — without this it defaults to display:inline pre-hydration/without JS
+
+tc-nav-item {
+    display: block;
+} // host takes on the Bootstrap .nav-item role (a block-level flex child of .nav, styled in _nav.scss) and gets position:relative from _utilities.scss's hit-overlay pattern — it must not default to inline before hydration/without JS
+
+// BreadcrumbItem hosts render their crumb content (label text + stretched <a>
+// hit overlay) as direct children laid out inline-with-gap by .breadcrumb-item
+// (display: flex; align-items: center) — the tag must default to flex before
+// hydration or the trail collapses to inline text pre-JS.
+tc-breadcrumb-item {
+    display: flex;
+}
+
 tc-editable-text,
 tc-chip,
 tc-rarity-chip,
@@ -789,7 +880,6 @@ tc-leaderboard-trend,
 tc-rank-cell,
 tc-simple-file,
 tc-color-picker,
-tc-combo-box,
 tc-version-picker,
 tc-debug-overlay,
 tc-hotbar,
@@ -807,17 +897,32 @@ tc-text {
     display: inline;
 }
 
-// tc-visually-hidden uses display: contents so the host adds no layout box.
-// The inner <span>/<div> (with .visually-hidden) is absolutely positioned and
-// invisible to sighted users but remains in the accessibility tree.
+// tc-visually-hidden carries `.visually-hidden` on the host itself — it is
+// absolutely positioned and invisible to sighted users but remains in the
+// accessibility tree. `as` picks the inline/block layout the inner element used
+// to provide, for the rare case a consumer positions it themselves.
 tc-visually-hidden {
-    display: contents;
+    display: inline;
 }
 
+tc-visually-hidden[as='div'] {
+    display: block;
+}
+
+// tc-filter-trigger renders no wrapper — the host itself is `.tc-filter-trigger`
+// (display: inline-flex) — but that class is only applied once the element
+// upgrades. Without an explicit default the host falls back to `display:
+// inline`, so its icon/label/count children would flow inline instead of
+// sitting in the row the class lays out, before JS runs.
+tc-filter-trigger,
+tc-graph-sigil,
+tc-segmented-toggle,
 tc-toggle,
 tc-icon,
 tc-icon-badge,
 tc-icon-button,
+tc-locked-action,
+tc-lock-chip,
 tc-kbd,
 tc-key,
 tc-key-binder,
@@ -844,6 +949,11 @@ tc-equipment-tag {
 // (handled in _stack.scss). Register the flex default here so layout is correct
 // before JS runs.
 tc-stack {
+    display: flex;
+}
+
+// tc-bead-trail IS the depth-and-path row — its beads span and path span are the host's own direct children, laid out as a flex row by the partial, so the host cannot default to inline.
+tc-bead-trail {
     display: flex;
 }
 

@@ -1,4 +1,6 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-subtitle'
 
 export type SubtitleAlign = 'left' | 'right' | 'center'
@@ -52,7 +54,7 @@ export class Subtitle extends HTMLElement {
         return ALIGNS.includes(raw) ? raw : 'center'
     }
     set align(value: SubtitleAlign) {
-        this.setAttribute('align', value)
+        setAttr(this, 'align', value)
     }
 
     get fontSize(): number | null {
@@ -98,7 +100,7 @@ export class Subtitle extends HTMLElement {
             ? `<span class="tc-subtitle__speaker">${esc(this.speaker)}</span>`
             : ''
 
-        this.innerHTML = `${speakerHtml}<span class="tc-subtitle__text">${esc(this.text)}</span>`
+        patchHtml(this, `${speakerHtml}<span class="tc-subtitle__text">${esc(this.text)}</span>`)
     }
 }
 

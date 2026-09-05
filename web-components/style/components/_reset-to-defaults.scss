@@ -105,7 +105,11 @@ tc-reset-to-defaults {
             background-color: var(--bs-reset-to-defaults-confirm-hover-bg);
             border: var(--bs-reset-to-defaults-confirm-hover-border);
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+            // Derived from --tc-danger (not a fixed literal) so themes with a
+            // different danger hue (aurora, sunshine, neon, marker, redline —
+            // none of which override this component) get a hover glow that
+            // actually matches their own danger accent, same fix as _otp-input.scss.
+            box-shadow: 0 4px 12px color-mix(in srgb, var(--tc-danger) 25%, transparent);
         }
     }
 

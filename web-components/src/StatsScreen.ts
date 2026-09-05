@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-stats-screen'
 
@@ -87,7 +88,9 @@ export class StatsScreen extends HTMLElement {
             })
             .join('')
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <div class="tc-stats-screen">
                 <header class="tc-stats-screen-header">
                     <div class="tc-stats-screen-eyebrow">Statistics</div>
@@ -97,7 +100,8 @@ export class StatsScreen extends HTMLElement {
                 </header>
                 ${sectionsMarkup ? `<div class="tc-stats-screen-sections">${sectionsMarkup}</div>` : ''}
             </div>
-        `
+        `,
+        )
     }
 }
 

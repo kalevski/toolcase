@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-sponsor-wall'
 
@@ -94,7 +95,7 @@ export class SponsorWall extends HTMLElement {
 
         const tiersHtml = this._tiers.map((t) => this._tierHtml(t)).join('')
 
-        this.innerHTML = `${titleHtml}${tiersHtml}`
+        patchHtml(this, `${titleHtml}${tiersHtml}`)
     }
 }
 

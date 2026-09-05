@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-diff-viewer'
 
@@ -148,7 +149,10 @@ export class DiffViewer extends HTMLElement {
         const bodyHtml =
             mode === 'unified' ? this._renderUnified(diffLines) : this._renderSplit(diffLines)
 
-        this.innerHTML = `<div class="tc-diff-viewer tc-diff-viewer--${mode}">${headerHtml}${bodyHtml}</div>`
+        patchHtml(
+            this,
+            `<div class="tc-diff-viewer tc-diff-viewer--${mode}">${headerHtml}${bodyHtml}</div>`,
+        )
 
         this.dispatchEvent(new CustomEvent('tc-render', { bubbles: true, composed: true }))
     }

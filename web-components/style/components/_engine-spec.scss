@@ -17,7 +17,7 @@ tc-engine-spec {
     --bs-engine-spec-code-color: var(--tc-text);
     --bs-engine-spec-manufacturer-color: var(--tc-text-muted);
     --bs-engine-spec-config-bg: var(--tc-app-accent);
-    --bs-engine-spec-config-color: #fff;
+    --bs-engine-spec-config-color: var(--tc-app-accent-contrast);
     --bs-engine-spec-cell-bg: var(--tc-surface);
     --bs-engine-spec-label-color: var(--tc-text-faint);
     --bs-engine-spec-value-color: var(--tc-text);

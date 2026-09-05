@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 import { msg } from './messages'
@@ -201,7 +202,10 @@ export class SingleCardSelect extends HTMLElement {
                 () =>
                     `<div class="tc-single-card-select-option tc-single-card-select-option--skeleton" aria-hidden="true"></div>`,
             ).join('')
-            this.innerHTML = `<span class="visually-hidden">${esc(msg('loading'))}</span>${skeletons}`
+            patchHtml(
+                this,
+                `<span class="visually-hidden">${esc(msg('loading'))}</span>${skeletons}`,
+            )
             return
         }
 
@@ -238,7 +242,7 @@ export class SingleCardSelect extends HTMLElement {
             ? `<input type="hidden" name="${esc(name)}" value="${esc(value ?? '')}">`
             : ''
 
-        this.innerHTML = cardsHtml + hiddenInputHtml
+        patchHtml(this, cardsHtml + hiddenInputHtml)
     }
 }
 

@@ -112,6 +112,14 @@ tc-community-links {
     flex-shrink: 0;
     stroke: currentColor;
     fill: none;
+
+    // Brand glyphs (GitHub, Discord, X, etc.) are fill-based (Bootstrap Icons),
+    // not stroke-based like lucide's generic icons — see BRAND_ICONS in
+    // CommunityLinks.ts and the matching rule in _social-links.scss.
+    &--brand {
+        stroke: none;
+        fill: currentColor;
+    }
 }
 
 // Body: label + optional description stacked

@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-controls-rebind-list'
 
@@ -99,7 +100,7 @@ export class ControlsRebindList extends HTMLElement {
                 )
             })
             .join('')
-        this.innerHTML = `<div class="tc-controls-rebind-list">${rowsHTML}</div>`
+        patchHtml(this, `<div class="tc-controls-rebind-list">${rowsHTML}</div>`)
     }
 }
 

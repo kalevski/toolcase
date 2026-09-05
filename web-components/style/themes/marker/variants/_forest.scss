@@ -1,0 +1,46 @@
+// Marker Forest variant — emerald marker, lime secondary.
+//
+// Swaps ONLY the marker's own hue family (--mk-lead*) and the secondary
+// highlight (--tc-accent*). The paper canvas, the graphite ink ramp, the
+// hairlines, the cool shadows and the type are the theme and are untouched —
+// this is the standard eleven-variant set shared by every bundled theme.
+//
+// `--mk-on-lead` is the label ON the fill, and it is chosen per variant rather
+// than fixed: #ffffff is what clears AA against #1f8f4d. A theme whose whole idea
+// is one marked colour cannot afford an unreadable label on the marked thing.
+//
+// Use with: <tc-theme name="marker" variant="forest"> … </tc-theme>
+
+tc-theme[name='marker'][variant='forest'],
+[data-tc-theme='marker'][data-tc-variant='forest'] {
+    // ── The marker ───────────────────────────────────────────────────────────
+    --mk-lead: #1f8f4d;
+    --mk-lead-hi: #27a95d;
+    --mk-lead-lo: #17703c;
+    // The hue as a WORD — the step that carries text on paper.
+    --mk-lead-deep: #166534;
+    --mk-lead-tint: rgba(31, 143, 77, 0.08);
+    --mk-lead-line: rgba(23, 112, 60, 0.5);
+    --mk-lead-glow: rgba(31, 143, 77, 0.32);
+    --mk-on-lead: #ffffff;
+    --mk-lead-grad: linear-gradient(135deg, #27a95d, #1f8f4d);
+
+    // ── Secondary highlight — links, focus, accent text ──────────────────────
+    --tc-accent: #4d7c0f;
+    --tc-accent-fg: #3f6212;
+    --tc-accent-soft: rgba(77, 124, 15, 0.12);
+    --tc-accent-hex: #4d7c0f;
+
+    // ── Foundation literals baked against the old hex ────────────────────────
+    --bs-primary-rgb: 31, 143, 77;
+    // NOT --bs-warning-rgb: warning is a status colour, not the swappable
+    // marker/primary hue, even though the base foundation happens to alias
+    // --bs-warning to --mk-lead too (one highlighter ink doubling as both).
+    // Copying primary's new rgb onto warning here made every tinted
+    // .list-group-item-warning (and anything else reading --bs-warning-rgb)
+    // render pixel-identical to .list-group-item-primary in this variant —
+    // undistinguishable caution vs. default. Leaving this token alone falls
+    // back to the foundation's real amber (242, 183, 5).
+    --tc-focus-ring: 0 0 0 3px rgba(23, 112, 60, 0.45);
+    --bs-focus-ring-color: rgba(23, 112, 60, 0.45);
+}

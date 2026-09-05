@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { fieldMessageHtml } from './internal/field-message'
 import {
@@ -6,6 +7,7 @@ import {
     reflectFieldValidity,
     dispatchFieldChange,
 } from './internal/form-field'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-check'
 
 let _idCounter = 0
@@ -125,7 +127,7 @@ export class Check extends HTMLElement {
         return this.getAttribute('value') ?? ''
     }
     set value(v: string) {
-        this.setAttribute('value', v)
+        setAttr(this, 'value', v)
     }
 
     get name(): string | null {
@@ -279,13 +281,16 @@ export class Check extends HTMLElement {
             : ''
         const describe = hasField && (help || state) ? ` aria-describedby="${this._helpId}"` : ''
 
-        this.innerHTML = [
-            `<div class="form-check${inlineClass}${reverseClass}">`,
-            `<input id="${this._inputId}" class="form-check-input${stateClass}" type="checkbox"${valueAttr}${checkedAttr}${disabledAttr}${requiredAttr}${describe}>`,
-            labelHtml,
-            `</div>`,
-            messageHtml,
-        ].join('')
+        patchHtml(
+            this,
+            [
+                `<div class="form-check${inlineClass}${reverseClass}">`,
+                `<input id="${this._inputId}" class="form-check-input${stateClass}" type="checkbox"${valueAttr}${checkedAttr}${disabledAttr}${requiredAttr}${describe}>`,
+                labelHtml,
+                `</div>`,
+                messageHtml,
+            ].join(''),
+        )
 
         // indeterminate cannot be set via HTML attribute — must be applied imperatively.
         const input = this.querySelector<HTMLInputElement>('input')

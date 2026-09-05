@@ -58,10 +58,14 @@ tc-radial-wheel:not([open]) {
 tc-radial-wheel[open] {
     position: fixed;
     inset: 0;
-    z-index: var(--bs-radial-wheel-z-disc);
     display: flex;
     align-items: center;
     justify-content: center;
+    // No z-index here — the backdrop and stack below each carry their own
+    // z-index from the shared modal scale, matching every other overlay
+    // component (confirm-dialog, drawer, lightbox, command-palette, …). That
+    // keeps --bs-radial-wheel-z-backdrop/--z-disc real, overridable custom
+    // properties instead of being shadowed by a host-level stacking context.
 }
 
 // ── Backdrop ────────────────────────────────────────────────────────────────
@@ -69,7 +73,7 @@ tc-radial-wheel[open] {
 .tc-radial-wheel-backdrop {
     position: fixed;
     inset: 0;
-    z-index: -1;
+    z-index: var(--bs-radial-wheel-z-backdrop);
     background: var(--bs-radial-wheel-backdrop-bg);
     opacity: var(--bs-radial-wheel-backdrop-opacity);
 }
@@ -80,6 +84,7 @@ tc-radial-wheel[open] {
 
 .tc-radial-wheel-stack {
     position: relative;
+    z-index: var(--bs-radial-wheel-z-disc);
     display: flex;
     flex-direction: column;
     align-items: center;

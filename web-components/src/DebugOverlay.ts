@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { formatNumber } from './internal/format'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-debug-overlay'
@@ -118,7 +119,10 @@ export class DebugOverlay extends HTMLElement {
             })
             .join('')
 
-        this.innerHTML = `<div class="tc-debug-overlay-panel">${builtInRows.join('')}${customRows}</div>`
+        patchHtml(
+            this,
+            `<div class="tc-debug-overlay-panel">${builtInRows.join('')}${customRows}</div>`,
+        )
     }
 }
 

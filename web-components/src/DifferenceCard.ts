@@ -1,6 +1,8 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-difference-card'
 
@@ -49,7 +51,7 @@ export class DifferenceCard extends HTMLElement {
         return this.getAttribute('title') ?? ''
     }
     set title(v: string) {
-        this.setAttribute('title', v)
+        setAttr(this, 'title', v)
     }
 
     get value(): number {
@@ -93,17 +95,20 @@ export class DifferenceCard extends HTMLElement {
     private render(): void {
         if (this.loading) {
             this.setAttribute('aria-busy', 'true')
-            this.innerHTML = [
-                '<div class="card tc-difference-card">',
-                '<div class="card-body tc-difference-card-body">',
-                '<div class="tc-difference-card-skeleton tc-difference-card-skeleton--title"></div>',
-                '<div class="tc-difference-card-skeleton tc-difference-card-skeleton--value"></div>',
-                '<div class="tc-difference-card-skeleton tc-difference-card-skeleton--delta"></div>',
-                '<div class="tc-difference-card-skeleton tc-difference-card-skeleton--period"></div>',
-                '<span class="visually-hidden" role="status">Loading…</span>',
-                '</div>',
-                '</div>',
-            ].join('')
+            patchHtml(
+                this,
+                [
+                    '<div class="card tc-difference-card">',
+                    '<div class="card-body tc-difference-card-body">',
+                    '<div class="tc-difference-card-skeleton tc-difference-card-skeleton--title"></div>',
+                    '<div class="tc-difference-card-skeleton tc-difference-card-skeleton--value"></div>',
+                    '<div class="tc-difference-card-skeleton tc-difference-card-skeleton--delta"></div>',
+                    '<div class="tc-difference-card-skeleton tc-difference-card-skeleton--period"></div>',
+                    '<span class="visually-hidden" role="status">Loading…</span>',
+                    '</div>',
+                    '</div>',
+                ].join(''),
+            )
             return
         }
 
@@ -141,20 +146,23 @@ export class DifferenceCard extends HTMLElement {
             ? `<span class="tc-difference-card-period">${esc(period)}</span>`
             : ''
 
-        this.innerHTML = [
-            '<div class="card tc-difference-card">',
-            '<div class="card-body tc-difference-card-body">',
-            `<span class="tc-difference-card-title">${esc(this.title)}</span>`,
-            '<div class="tc-difference-card-metric">',
-            `<span class="tc-difference-card-value">${formattedValue}</span>`,
-            `<span class="tc-difference-card-delta tc-difference-card-delta--${direction}">`,
-            `${deltaIcon}<span class="tc-difference-card-delta-text">${esc(deltaText)}</span>`,
-            '</span>',
-            '</div>',
-            periodHtml,
-            '</div>',
-            '</div>',
-        ].join('')
+        patchHtml(
+            this,
+            [
+                '<div class="card tc-difference-card">',
+                '<div class="card-body tc-difference-card-body">',
+                `<span class="tc-difference-card-title">${esc(this.title)}</span>`,
+                '<div class="tc-difference-card-metric">',
+                `<span class="tc-difference-card-value">${formattedValue}</span>`,
+                `<span class="tc-difference-card-delta tc-difference-card-delta--${direction}">`,
+                `${deltaIcon}<span class="tc-difference-card-delta-text">${esc(deltaText)}</span>`,
+                '</span>',
+                '</div>',
+                periodHtml,
+                '</div>',
+                '</div>',
+            ].join(''),
+        )
     }
 }
 

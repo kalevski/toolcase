@@ -33,8 +33,11 @@ tc-theme[name='blueprint'],
         opacity: 0.75;
     }
 
-    // Pause-on-hover: dim the whole strip slightly so the pause is perceptible
-    tc-marquee[pause-on-hover]:hover .tc-marquee-track {
+    // Pause-on-hover: dim the whole strip slightly so the pause is perceptible.
+    // Targets the host directly — there is no `.tc-marquee-track` wrapper
+    // element in the rendered markup (the host's own children animate
+    // individually; see _marquee.scss), so dimming the host dims all of them.
+    tc-marquee[pause-on-hover]:hover {
         opacity: 0.6;
         transition: opacity 0.2s var(--bp-ease);
     }

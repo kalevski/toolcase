@@ -41,7 +41,7 @@ tc-theme[name='aurora'],
     // dashboard-layout — top bar is a light frosted glass (rgba white 0.85);
     // the breadcrumb sits on it. Make it dark glass like the aurora navbar.
     tc-dashboard-layout {
-        --bs-dashboard-layout-navbar-bg: rgba(7, 9, 13, 0.72);
+        --bs-dashboard-layout-navbar-bg: rgba(6, 12, 16, 0.72);
     }
 
     // resource-bar — track + ghost ride slate literals (light) beneath the
@@ -87,7 +87,7 @@ tc-theme[name='aurora'],
     // timeline — the card uses a light frosted-glass fill (rgba white .72);
     // its date / title / description text sits on it. Make it dark glass.
     tc-timeline {
-        --bs-timeline-glass-bg: rgba(19, 26, 36, 0.72);
+        --bs-timeline-glass-bg: rgba(18, 30, 40, 0.72);
     }
 
     // shop-panel discount pill — light-green literal fill (#dcfce7). Use the
@@ -185,17 +185,17 @@ tc-theme[name='aurora'],
     // scrim laid over the whole component; on the dark canvas it flashes a
     // bright sheet instead of dimming to a busy/disabled state.
     tc-advanced-table {
-        --bs-advanced-table-overlay-scrim: rgba(7, 9, 13, 0.72);
+        --bs-advanced-table-overlay-scrim: rgba(6, 12, 16, 0.72);
     }
     tc-audio-mixer {
-        --bs-audio-mixer-scrim-bg: rgba(7, 9, 13, 0.72);
+        --bs-audio-mixer-scrim-bg: rgba(6, 12, 16, 0.72);
     }
 
     // navbar — default (non `variant="dark"`) glass fill is a light frosted
     // rgba(255,255,255,.85); same defect already fixed for dashboard-layout's
     // navbar above. Match the same dark glass recipe.
     .navbar {
-        --bs-navbar-bg: rgba(7, 9, 13, 0.72);
+        --bs-navbar-bg: rgba(6, 12, 16, 0.72);
     }
 
     // entity-cell — default tile + colour variants are plain `background-color`/

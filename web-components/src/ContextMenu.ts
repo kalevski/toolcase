@@ -1,3 +1,5 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
+import { adoptChildren } from './internal/adopt-children'
 import { esc } from './internal/esc'
 import { fixedOriginOffset } from './internal/containingBlock'
 import * as LucideIcons from 'lucide-static'
@@ -38,8 +40,10 @@ export class ContextMenu extends HTMLElement {
         if (!this._initialised) {
             const slotContent = Array.from(this.childNodes)
             this.render()
+            // The consumer's children are the trigger's content — see
+            // adopt-children.ts.
             const inner = this.querySelector('.tc-context-menu-trigger')
-            if (inner) slotContent.forEach((n) => inner.appendChild(n))
+            if (inner) adoptChildren(this, () => inner, slotContent)
             this._initialised = true
         }
     }
@@ -115,21 +119,24 @@ export class ContextMenu extends HTMLElement {
     }
 
     private render(): void {
-        this.innerHTML = `<div class="tc-context-menu-trigger"></div><ul class="tc-context-menu-list" role="menu" aria-label="Context menu"></ul>`
+        patchHtml(
+            this,
+            `<div class="tc-context-menu-trigger"></div><ul class="tc-context-menu-list" role="menu" aria-label="Context menu"></ul>`,
+        )
         this._renderMenu()
 
         const trigger = this._getTrigger()
         if (trigger) {
-            trigger.addEventListener('contextmenu', this._onContextMenu)
-            trigger.addEventListener('pointerdown', this._onPointerDown)
-            trigger.addEventListener('pointerup', this._onPointerUp)
-            trigger.addEventListener('pointercancel', this._cancelLongPress)
+            bindOnce(trigger, 'contextmenu', this._onContextMenu)
+            bindOnce(trigger, 'pointerdown', this._onPointerDown)
+            bindOnce(trigger, 'pointerup', this._onPointerUp)
+            bindOnce(trigger, 'pointercancel', this._cancelLongPress)
         }
 
         const menu = this._getMenu()
         if (menu) {
-            menu.addEventListener('click', this._onMenuClick)
-            menu.addEventListener('mouseover', this._onMenuMouseOver)
+            bindOnce(menu, 'click', this._onMenuClick)
+            bindOnce(menu, 'mouseover', this._onMenuMouseOver)
         }
     }
 

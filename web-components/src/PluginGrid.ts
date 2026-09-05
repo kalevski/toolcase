@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -145,7 +146,10 @@ export class PluginGrid extends HTMLElement {
 
         const cardsHtml = this._items.map((item) => this._renderCard(item)).join('')
 
-        this.innerHTML = `${headerHtml}<div class="tc-plugin-grid" data-columns="${cols}">${cardsHtml}</div>`
+        patchHtml(
+            this,
+            `${headerHtml}<div class="tc-plugin-grid" data-columns="${cols}">${cardsHtml}</div>`,
+        )
     }
 }
 

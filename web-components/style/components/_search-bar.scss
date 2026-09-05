@@ -1,0 +1,126 @@
+// tc-search-bar — a leading region, one field, and the button that submits it.
+//
+// THE HOST IS THE FIELD BOX. The input and the submit button are the element's
+// own, prepended in that order; `[slot="leading"]` is a region you fill and CSS
+// orders it first — nothing is moved.
+
+@use '../foundation/tokens' as *;
+
+tc-search-bar {
+    --bs-search-bar-height: 3rem;
+    --bs-search-bar-padding-x: 0.75rem;
+    --bs-search-bar-gap: 0.5rem;
+    --bs-search-bar-bg: var(--tc-surface);
+    --bs-search-bar-color: var(--tc-text);
+    --bs-search-bar-border-color: var(--tc-border);
+    --bs-search-bar-placeholder-color: var(--tc-text-faint);
+    --bs-search-bar-font-size: 0.9375rem;
+    --bs-search-bar-submit-size: 2.25rem;
+    --bs-search-bar-submit-bg: var(--tc-app-accent, var(--tc-primary));
+    --bs-search-bar-submit-color: var(--tc-text-inverse, #fff);
+    --bs-search-bar-icon-size: 1.125rem;
+}
+
+.tc-search-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--bs-search-bar-gap);
+    min-height: var(--bs-search-bar-height);
+    padding-inline: var(--bs-search-bar-padding-x);
+    background: var(--bs-search-bar-bg);
+    border: 1px solid var(--bs-search-bar-border-color);
+    border-radius: 0;
+
+    &:focus-within {
+        border-color: var(--tc-app-accent, var(--tc-primary));
+    }
+}
+
+// The leading region comes first, whatever the consumer's DOM order — the
+// element no longer moves it there.
+.tc-search-bar > [slot='leading'] {
+    order: -1;
+    flex-shrink: 0;
+}
+
+.tc-search-bar__input {
+    flex: 1 1 0;
+    min-width: 0;
+    border: 0;
+    background: none;
+    padding: 0;
+    // 16px is the FLOOR under a coarse pointer and not a style choice: below it
+    // iOS Safari zooms the viewport on focus and never zooms back. See the touch
+    // floors note in style/foundation/README.md.
+    font-size: var(--bs-search-bar-font-size);
+    line-height: 1.4;
+    color: var(--bs-search-bar-color);
+    -webkit-appearance: none;
+    appearance: none;
+
+    &::placeholder {
+        color: var(--bs-search-bar-placeholder-color);
+    }
+
+    &:focus {
+        outline: none;
+    }
+
+    // The UA's own clear button is a second control the element does not own and
+    // cannot style; the app's clear is the empty field.
+    &::-webkit-search-cancel-button {
+        -webkit-appearance: none;
+        appearance: none;
+    }
+
+    @include coarse-pointer {
+        font-size: max(16px, var(--bs-search-bar-font-size));
+    }
+}
+
+.tc-search-bar__submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: var(--bs-search-bar-submit-size);
+    height: var(--bs-search-bar-submit-size);
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    color: var(--bs-search-bar-submit-color);
+    background: var(--bs-search-bar-submit-bg);
+    cursor: pointer;
+
+    svg {
+        width: var(--bs-search-bar-icon-size);
+        height: var(--bs-search-bar-icon-size);
+        display: block;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent, var(--tc-primary));
+        outline-offset: 2px;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    @include coarse-pointer {
+        // The target is extended past the ink so the field's height is a density
+        // decision and 44px stays a floor.
+        position: relative;
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: var(--tc-min-touch-target, 44px);
+            height: var(--tc-min-touch-target, 44px);
+            transform: translate(-50%, -50%);
+        }
+    }
+}

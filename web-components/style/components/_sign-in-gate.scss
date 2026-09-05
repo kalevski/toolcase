@@ -1,0 +1,107 @@
+// tc-sign-in-gate — the member wall, as a page body.
+//
+// A BODY, not an overlay: there is no scrim and no z-index here, because it
+// renders INSTEAD of the data rather than over it. A blurred-out answer is still
+// an answer to anyone who reads the DOM.
+//
+// THE HOST IS THE SECTION. Every part it draws is an owned node, prepended in
+// reading order; anything you add follows them.
+
+@use '../foundation/tokens' as *;
+
+tc-sign-in-gate {
+    --bs-sign-in-gate-padding-y: 2.5rem;
+    --bs-sign-in-gate-padding-x: 1.25rem;
+    --bs-sign-in-gate-gap: 0.75rem;
+    --bs-sign-in-gate-bg: transparent;
+    --bs-sign-in-gate-border-color: transparent;
+    --bs-sign-in-gate-mark-size: 1.5rem;
+    --bs-sign-in-gate-mark-color: var(--tc-text-faint);
+    --bs-sign-in-gate-heading-size: 1.125rem;
+    --bs-sign-in-gate-lead-size: 0.875rem;
+    --bs-sign-in-gate-lead-color: var(--tc-text-muted);
+    --bs-sign-in-gate-footnote-size: 0.75rem;
+    --bs-sign-in-gate-button-bg: var(--tc-app-accent, var(--tc-primary));
+    --bs-sign-in-gate-button-color: var(--tc-text-inverse, #fff);
+}
+
+.tc-sign-in-gate {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: var(--bs-sign-in-gate-gap);
+    padding: var(--bs-sign-in-gate-padding-y) var(--bs-sign-in-gate-padding-x);
+    background: var(--bs-sign-in-gate-bg);
+    border: 1px solid var(--bs-sign-in-gate-border-color);
+    border-radius: 0;
+}
+
+.tc-sign-in-gate__mark {
+    display: inline-flex;
+    color: var(--bs-sign-in-gate-mark-color);
+
+    svg {
+        width: var(--bs-sign-in-gate-mark-size);
+        height: var(--bs-sign-in-gate-mark-size);
+        display: block;
+    }
+}
+
+.tc-sign-in-gate__heading {
+    margin: 0;
+    font-size: var(--bs-sign-in-gate-heading-size);
+    font-weight: 650;
+    line-height: 1.3;
+    color: var(--tc-text);
+}
+
+.tc-sign-in-gate__lead {
+    margin: 0;
+    // A measure is a count of characters, so the same value is a wider column at a
+    // larger size. 42ch is the reading width for one explanatory sentence.
+    max-width: 42ch;
+    font-size: var(--bs-sign-in-gate-lead-size);
+    line-height: 1.5;
+    color: var(--bs-sign-in-gate-lead-color);
+}
+
+.tc-sign-in-gate__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+.tc-sign-in-gate__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.625rem 1.25rem;
+    font: inherit;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--bs-sign-in-gate-button-color);
+    background: var(--bs-sign-in-gate-button-bg);
+    border: 0;
+    border-radius: 0;
+    cursor: pointer;
+    min-height: var(--tc-touch-target-dense, 40px);
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent, var(--tc-primary));
+        outline-offset: 2px;
+    }
+
+    @include coarse-pointer {
+        min-height: var(--tc-min-touch-target, 44px);
+    }
+}
+
+.tc-sign-in-gate__footnote {
+    margin: 0;
+    font-size: var(--bs-sign-in-gate-footnote-size);
+    line-height: 1.4;
+    color: var(--tc-text-faint);
+}

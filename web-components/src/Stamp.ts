@@ -1,5 +1,7 @@
 import { VARIANTS_CORE } from './internal/variants'
 import { esc } from './internal/esc'
+import { setHostClass } from './internal/host-class'
+import { setAttr, syncOwnedNodes } from './internal/tc-element'
 const TAG_NAME = 'tc-stamp'
 
 // A bare number is treated as degrees; anything with a CSS angle unit is left as-is.
@@ -26,26 +28,13 @@ export class Stamp extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            if (!this.hasAttribute('label')) {
-                const inner = this.querySelector('.tc-stamp-content')
-                if (inner) slotContent.forEach((n) => inner.appendChild(n))
-            }
-            this._initialised = true
-        }
+        this._initialised = true
+        this.render()
     }
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        const inner = this.querySelector('.tc-stamp-content')
-        const slotContent = !this.hasAttribute('label') && inner ? Array.from(inner.childNodes) : []
         this.render()
-        if (!this.hasAttribute('label')) {
-            const newInner = this.querySelector('.tc-stamp-content')
-            if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
-        }
     }
 
     get label(): string | null {
@@ -61,7 +50,7 @@ export class Stamp extends HTMLElement {
         return COLORS.includes(v) ? v : 'primary'
     }
     set color(v: StampColor) {
-        this.setAttribute('color', v)
+        setAttr(this, 'color', v)
     }
 
     get position(): StampPosition {
@@ -69,7 +58,7 @@ export class Stamp extends HTMLElement {
         return POSITIONS.includes(v) ? v : 'top-right'
     }
     set position(v: StampPosition) {
-        this.setAttribute('position', v)
+        setAttr(this, 'position', v)
     }
 
     // Optional per-instance tilt override. A bare number is read as degrees;
@@ -83,17 +72,23 @@ export class Stamp extends HTMLElement {
         else this.removeAttribute('angle')
     }
 
+    /** THE HOST IS THE STAMP. The `.tc-stamp` classes are re-asserted on the
+     *  consumer's own tag and the only node the element creates is the `label`
+     *  text — which is prepended, never wrapped around slotted content (rule 1). */
     private render(): void {
         const label = this.getAttribute('label')
-        const color = this.color
-        const position = this.position
         const angle = this.angle
 
-        const contentHtml = label != null ? esc(label) : ''
-        const styleAttr =
-            angle != null ? ` style="--bs-stamp-rotation:${esc(normalizeAngle(angle))}"` : ''
+        setHostClass(this, `tc-stamp tc-stamp-${this.color} tc-stamp-${this.position}`)
 
-        this.innerHTML = `<span class="tc-stamp tc-stamp-${color} tc-stamp-${position}"${styleAttr}><span class="tc-stamp-content">${contentHtml}</span></span>`
+        if (angle != null) this.style.setProperty('--bs-stamp-rotation', normalizeAngle(angle))
+        else this.style.removeProperty('--bs-stamp-rotation')
+
+        // `label` supersedes slotted content; without it the consumer's children
+        // are the stamp text and no owned node exists at all.
+        syncOwnedNodes(this, [
+            { cls: 'tc-stamp-content', tag: 'span', html: label != null ? esc(label) : null },
+        ])
     }
 }
 

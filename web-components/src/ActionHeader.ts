@@ -1,3 +1,5 @@
+import { patchHtml } from './internal/patch-html'
+import { setHostClass } from './internal/host-class'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
@@ -29,11 +31,8 @@ export class ActionHeader extends HTMLElement {
     connectedCallback(): void {
         this.addEventListener('click', this._boundHandleClick)
         if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            const inner = this.querySelector('.tc-action-header-content')
-            if (inner) slotContent.forEach((n) => inner.appendChild(n))
             this._initialised = true
+            this.render()
         }
     }
 
@@ -119,7 +118,15 @@ export class ActionHeader extends HTMLElement {
             })
             .join('')
 
-        this.innerHTML = `<div class="tc-action-header d-flex align-items-center justify-content-between${extraClass}"><span class="tc-action-header-content"></span><div class="tc-action-header-actions d-flex gap-2">${actionsHtml}</div></div>`
+        // THE HOST IS THE HEADER ROW: the title the consumer wrote stays their
+        // child on the left, and the action buttons are appended after it (rule 1).
+        setHostClass(
+            this,
+            `tc-action-header d-flex align-items-center justify-content-between${extraClass}`,
+        )
+        patchHtml(this, `<div class="tc-action-header-actions d-flex gap-2">${actionsHtml}</div>`, {
+            at: 'end',
+        })
     }
 }
 

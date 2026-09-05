@@ -29,14 +29,14 @@ function createCallbackRef<E extends HTMLElement>(
     attachedRef: { current: Array<[string, EventListener]> },
     appliedRef: { current: Record<string, unknown> },
     onRef: { current: TcEventMap },
-    applyProps: () => void
+    applyProps: () => void,
 ): TcRef<E> {
     const fn = ((el: E | null) => {
         if (elRef.current === el) return
         // Detach from the previous node.
         if (elRef.current) {
             attachedRef.current.forEach(([event, listener]) =>
-                elRef.current?.removeEventListener(event, listener)
+                elRef.current?.removeEventListener(event, listener),
             )
         }
         attachedRef.current = []
@@ -82,11 +82,15 @@ function createCallbackRef<E extends HTMLElement>(
  *    lost after a remount. This hook uses a callback ref: it re-attaches
  *    listeners and re-applies props whenever the element is (re)mounted.
  *
- * Field errors: pass a `validate` function as an instance prop, never an
- * `error` JSX attribute. Flipping the `error` attribute goes through the
- * component's attributeChangedCallback, which rebuilds its innerHTML and
- * destroys the focused `<input>` mid-typing; `validate` swaps only the message
- * slot and is gated by `validate-on`.
+ * Field errors: the `error` JSX attribute is now safe on `tc-form-input`,
+ * `tc-input` and `tc-textarea` — those three patch the message slot in place and
+ * never rebuild the control, so it cannot disturb a focused field. On any element
+ * that still rebuilds on an attribute change (run `check:react-safety` for the
+ * list), pass a `validate` function as an instance prop instead.
+ *
+ * Pre-upgrade writes need no handling here: `register()` replays own properties
+ * through the real setter on an element's first connect, so a prop assigned before
+ * `customElements.define` ran is no longer permanently shadowed.
  *
  * @param instanceProps - JS properties set directly on the element after mount
  *   and whenever a value changes (reference-compared). Use for arrays, objects,
@@ -105,7 +109,7 @@ function createCallbackRef<E extends HTMLElement>(
  */
 export function useTc<E extends HTMLElement = HTMLElement>(
     instanceProps: Record<string, unknown>,
-    on: TcEventMap = {}
+    on: TcEventMap = {},
 ): TcRef<E> {
     const elRef = useRef<E | null>(null)
     // Values last written to the element, keyed by prop name. Used to skip
@@ -139,9 +143,7 @@ export function useTc<E extends HTMLElement = HTMLElement>(
                 if (!stableFnsRef.current[key]) {
                     stableFnsRef.current[key] = (...args: unknown[]) =>
                         (
-                            propsRef.current[key] as
-                                | ((...fnArgs: unknown[]) => unknown)
-                                | undefined
+                            propsRef.current[key] as ((...fnArgs: unknown[]) => unknown) | undefined
                         )?.(...args)
                 }
                 next = stableFnsRef.current[key]
@@ -178,9 +180,7 @@ export function useTc<E extends HTMLElement = HTMLElement>(
  * const ref = useTcEvents<HTMLElement>({ 'tc-change': (e) => setValue(detailValue(e)) })
  * return <tc-switch ref={ref} />
  */
-export function useTcEvents<E extends HTMLElement = HTMLElement>(
-    on: TcEventMap
-): TcRef<E> {
+export function useTcEvents<E extends HTMLElement = HTMLElement>(on: TcEventMap): TcRef<E> {
     return useTc<E>({}, on)
 }
 

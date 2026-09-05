@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { lucideByName } from './internal/lucide'
 
@@ -118,18 +119,20 @@ export class ModelFamilyCard extends HTMLElement {
             ? `<div class="tc-model-family-card-meta">${metaParts.join('')}</div>`
             : ''
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<article class="tc-model-family-card">` +
-            mediaHtml +
-            `<div class="tc-model-family-card-body">` +
-            (manufacturer
-                ? `<span class="tc-model-family-card-eyebrow">${esc(manufacturer)}</span>`
-                : '') +
-            titleHtml +
-            this._lineageHtml(range, series, generation) +
-            metaHtml +
-            `</div>` +
-            `</article>`
+                mediaHtml +
+                `<div class="tc-model-family-card-body">` +
+                (manufacturer
+                    ? `<span class="tc-model-family-card-eyebrow">${esc(manufacturer)}</span>`
+                    : '') +
+                titleHtml +
+                this._lineageHtml(range, series, generation) +
+                metaHtml +
+                `</div>` +
+                `</article>`,
+        )
     }
 }
 

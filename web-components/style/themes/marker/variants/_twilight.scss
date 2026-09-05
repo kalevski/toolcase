@@ -1,0 +1,41 @@
+// Marker Twilight variant — GRADIENT marker (violet → blue), sky-blue secondary.
+//
+// Swaps ONLY the marker's own hue family (--mk-lead*) and the secondary
+// highlight (--tc-accent*). The paper canvas, the graphite ink ramp, the
+// hairlines, the cool shadows and the type are the theme and are untouched —
+// this is the standard eleven-variant set shared by every bundled theme.
+//
+// `--mk-on-lead` is the label ON the fill, and it is chosen per variant rather
+// than fixed: #ffffff is what clears AA against #7c3aed. A theme whose whole idea
+// is one marked colour cannot afford an unreadable label on the marked thing.
+//
+// Use with: <tc-theme name="marker" variant="twilight"> … </tc-theme>
+
+tc-theme[name='marker'][variant='twilight'],
+[data-tc-theme='marker'][data-tc-variant='twilight'] {
+    // ── The marker ───────────────────────────────────────────────────────────
+    --mk-lead: #7c3aed;
+    --mk-lead-hi: #9563f2;
+    --mk-lead-lo: #6d28d9;
+    // The hue as a WORD — the step that carries text on paper.
+    --mk-lead-deep: #5b21b6;
+    --mk-lead-tint: rgba(124, 58, 237, 0.08);
+    --mk-lead-line: rgba(109, 40, 217, 0.5);
+    --mk-lead-glow: rgba(124, 58, 237, 0.32);
+    --mk-on-lead: #ffffff;
+    --mk-lead-grad: linear-gradient(135deg, #7c3aed, #2f6fe0);
+
+    // ── Secondary highlight — links, focus, accent text ──────────────────────
+    --tc-accent: #0284c7;
+    --tc-accent-fg: #075985;
+    --tc-accent-soft: rgba(2, 132, 199, 0.12);
+    --tc-accent-hex: #0284c7;
+
+    // ── Foundation literals baked against the old hex ────────────────────────
+    --bs-primary-rgb: 124, 58, 237;
+    // --bs-warning-rgb intentionally left alone (falls back to the foundation's
+    // real amber) -- see variants/_forest.scss for why copying primary's new rgb
+    // here made warning indistinguishable from primary/success.
+    --tc-focus-ring: 0 0 0 3px rgba(109, 40, 217, 0.45);
+    --bs-focus-ring-color: rgba(109, 40, 217, 0.45);
+}

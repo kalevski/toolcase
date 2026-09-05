@@ -1,3 +1,5 @@
+import { patchHtml } from './internal/patch-html'
+import { setHostClass } from './internal/host-class'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -34,11 +36,8 @@ export class VerticalItemList extends HTMLElement {
 
     connectedCallback(): void {
         if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            const inner = this.querySelector('.tc-vertical-item-list-content')
-            if (inner) slotContent.forEach((n) => inner.appendChild(n))
             this._initialised = true
+            this.render()
         }
         // Arrow-function references are stable, so re-adding on reconnect is a no-op.
         this.addEventListener('click', this._onClick)
@@ -197,11 +196,11 @@ export class VerticalItemList extends HTMLElement {
             btn.classList.toggle('tc-vertical-item-list-item--active', isActive)
         })
 
-        const panel = this.querySelector('.tc-vertical-item-list-content')
-        if (panel) {
-            if (activeId) panel.setAttribute('aria-labelledby', activeId)
-            else panel.removeAttribute('aria-labelledby')
-        }
+        // The host IS the panel (rule 1 — see render()), so the association lives
+        // on `this`, not on a child `.tc-vertical-item-list-content` element (which
+        // is never present in the rendered markup).
+        if (activeId) this.setAttribute('aria-labelledby', activeId)
+        else this.removeAttribute('aria-labelledby')
 
         if (focus) this._focusItem(activeKey)
     }
@@ -249,16 +248,17 @@ export class VerticalItemList extends HTMLElement {
     // ── Render ─────────────────────────────────────────────────────────────────────
 
     private _rerenderWithSlots(): void {
-        const inner = this.querySelector('.tc-vertical-item-list-content')
-        const slotContent = inner ? Array.from(inner.childNodes) : []
         this.render()
-        const newInner = this.querySelector('.tc-vertical-item-list-content')
-        if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
     }
 
     private render(): void {
         const disabled = this.disabled
         const loading = this.loading
+
+        // The host doubles as the tabpanel for the currently active item — its own
+        // children ARE the panel content (rule 1), so the role lives here rather
+        // than on a wrapper that's never created.
+        this.setAttribute('role', 'tabpanel')
 
         if (disabled) this.setAttribute('aria-disabled', 'true')
         else this.removeAttribute('aria-disabled')
@@ -320,12 +320,13 @@ export class VerticalItemList extends HTMLElement {
             menuHtml = `<div class="tc-vertical-item-list-menu" role="tablist" aria-orientation="vertical">${itemsHtml}</div>`
         }
 
-        const labelledby = activeId ? ` aria-labelledby="${activeId}"` : ''
-        this.innerHTML =
-            `<div class="tc-vertical-item-list">` +
-            menuHtml +
-            `<div class="tc-vertical-item-list-content" role="tabpanel" tabindex="0"${labelledby}></div>` +
-            `</div>`
+        // THE HOST IS THE LIST. The menu is element-owned and prepended; the panel
+        // content is the consumer's own children, which keep the tabpanel role on
+        // the host rather than being moved into a content div (rule 1).
+        setHostClass(this, 'tc-vertical-item-list')
+        if (activeId) this.setAttribute('aria-labelledby', activeId)
+        else this.removeAttribute('aria-labelledby')
+        patchHtml(this, menuHtml)
     }
 }
 

@@ -3,6 +3,14 @@
 // reads better as a soft mint pill (dark text on bright mint is heavy at chip
 // size), and .text-bg-secondary hardcodes a slate fill that must be beaten with
 // an equally-specific !important.
+//
+// Fill is --ah-surface-2 (the theme's own --bs-secondary-bg), NOT --ah-surface-3:
+// tc-table's striped/hover rows read --tc-surface-hover, which resolves to
+// --ah-surface-3 in this theme — a secondary badge filled with that same value
+// turns invisible the moment it lands on a striped row (background-on-background,
+// no pill outline at all, confirmed via tc-table's default demo). solid-fill.scss
+// excludes .badge from its own generic secondary re-skin so this rule is the only
+// one touching badge secondary fill.
 
 tc-theme[name='aurora'],
 [data-tc-theme='aurora'] {
@@ -12,7 +20,7 @@ tc-theme[name='aurora'],
     }
 
     .badge.text-bg-secondary {
-        background-color: var(--ah-surface-3) !important;
+        background-color: var(--ah-surface-2) !important;
         color: var(--ah-text-2) !important;
     }
 

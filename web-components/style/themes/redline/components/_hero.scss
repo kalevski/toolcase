@@ -31,6 +31,16 @@ tc-theme[name='redline'],
         --bs-hero-grid-line-color: rgba(255, 255, 255, 0.08);
         --bs-hero-corner-color: var(--rl-accent);
 
+        // The blueprint backdrop (opt-in via backdrop="grid") otherwise inherits
+        // --tc-border-faint / --tc-surface-muted, which are light-theme literals
+        // in this theme (redline is globally light) — on this component's own
+        // dark ink background they render as a stark white grid and a light-gray
+        // glow patch overlapping the title/description text. Re-pin to dark-safe
+        // translucent whites so the backdrop stays a faint accent, not a wash.
+        --bs-hero-backdrop-line: rgba(255, 255, 255, 0.05);
+        --bs-hero-backdrop-glow-1: var(--rl-accent-soft);
+        --bs-hero-backdrop-glow-2: rgba(255, 255, 255, 0.03);
+
         --bs-hero-stat-card-bg: rgba(255, 255, 255, 0.05);
         --bs-hero-stat-card-border: rgba(255, 255, 255, 0.12);
         --bs-hero-stat-value-color: #ffffff;

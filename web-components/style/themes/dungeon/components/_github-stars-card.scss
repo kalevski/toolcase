@@ -11,7 +11,7 @@ tc-theme[name='dungeon'],
 
     tc-github-stars-card {
         --bs-github-stars-card-cta-bg: var(--fg-button-bg);
-        --bs-github-stars-card-cta-color: var(--fg-ink);
+        --bs-github-stars-card-cta-color: var(--fg-gold-bright);
         --bs-github-stars-card-cta-hover-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
         --bs-github-stars-card-skeleton-shimmer: rgba(232, 200, 120, 0.35);
     }
@@ -34,15 +34,15 @@ tc-theme[name='dungeon'],
         text-transform: uppercase;
         letter-spacing: 0.14em;
         font-weight: 600;
-        color: var(--fg-ink);
+        color: var(--fg-gold-bright);
         border-top: 1px solid var(--fg-gold-deep);
 
         &:hover {
-            color: var(--fg-ink);
+            color: var(--fg-gold-bright);
         }
 
         &:focus-visible {
-            color: var(--fg-ink);
+            color: var(--fg-gold-bright);
         }
     }
 

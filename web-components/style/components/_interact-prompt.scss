@@ -35,11 +35,13 @@ tc-interact-prompt {
     --bs-interact-prompt-key-padding-y: 0.2em;
     --bs-interact-prompt-key-min-width: 1.5em;
 
-    // Hold-to-interact progress bar — slate track, ink-accent fill.
+    // Hold-to-interact progress bar — slate track, ink-accent fill. Uses the
+    // shared --tc-app-accent-gradient token (not a hand-rolled gradient) so
+    // every theme's remap of that token applies here automatically.
     --bs-interact-prompt-hold-height: 3px;
     --bs-interact-prompt-hold-track-bg: var(--tc-surface-muted);
     --bs-interact-prompt-hold-track-border-color: var(--tc-border);
-    --bs-interact-prompt-hold-fill-bg: linear-gradient(90deg, var(--tc-app-accent), #2b3a51);
+    --bs-interact-prompt-hold-fill-bg: var(--tc-app-accent-gradient);
     --bs-interact-prompt-hold-transition: width 0.08s linear;
 
     box-sizing: border-box;

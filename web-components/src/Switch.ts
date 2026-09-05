@@ -1,6 +1,8 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { fieldMessageHtml } from './internal/field-message'
 import { requiredMark, reflectFieldValidity, dispatchFieldChange } from './internal/form-field'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-switch'
 
 let _idCounter = 0
@@ -150,7 +152,7 @@ export class Switch extends HTMLElement {
         return this.getAttribute('value') ?? ''
     }
     set value(v: string) {
-        this.setAttribute('value', v)
+        setAttr(this, 'value', v)
     }
 
     get label(): string | null {
@@ -274,20 +276,23 @@ export class Switch extends HTMLElement {
                 ? `<label class="tc-switch__label" id="${this._labelId}" for="${this._inputId}">${esc(label)}${requiredMark(required)}</label>`
                 : ''
 
-        this.innerHTML = [
-            `<div class="tc-switch__row${reverseClass}${disabledClass}">`,
-            `<button type="button" id="${this._inputId}" class="tc-switch__track${stateClass}" role="switch" aria-checked="${checked}" data-checked="${checked}"${labelledBy}${disabledAttr}${requiredAttr}${describe}>`,
-            `<span class="tc-switch__knob"></span>`,
-            `</button>`,
-            labelHtml,
-            `</div>`,
-            messageHtml,
-        ].join('')
+        patchHtml(
+            this,
+            [
+                `<div class="tc-switch__row${reverseClass}${disabledClass}">`,
+                `<button type="button" id="${this._inputId}" class="tc-switch__track${stateClass}" role="switch" aria-checked="${checked}" data-checked="${checked}"${labelledBy}${disabledAttr}${requiredAttr}${describe}>`,
+                `<span class="tc-switch__knob"></span>`,
+                `</button>`,
+                labelHtml,
+                `</div>`,
+                messageHtml,
+            ].join(''),
+        )
 
         this._btnEl = this.querySelector<HTMLButtonElement>('.tc-switch__track')
-        if (this._btnEl) this._btnEl.addEventListener('click', this._onToggle)
+        if (this._btnEl) bindOnce(this._btnEl, 'click', this._onToggle)
         this._labelEl = this.querySelector<HTMLLabelElement>('.tc-switch__label')
-        if (this._labelEl) this._labelEl.addEventListener('click', this._onToggle)
+        if (this._labelEl) bindOnce(this._labelEl, 'click', this._onToggle)
     }
 
     private _onToggle = (): void => {

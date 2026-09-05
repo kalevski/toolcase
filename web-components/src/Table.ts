@@ -1,8 +1,10 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { icon } from './icons'
 import { msg } from './messages'
 import { wireScrollEdges } from './internal/scroll-edges'
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-static'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-table'
 
@@ -137,7 +139,7 @@ export class Table extends HTMLElement {
         return this.getAttribute('empty-message') ?? msg('noData')
     }
     set emptyMessage(v: string) {
-        this.setAttribute('empty-message', v)
+        setAttr(this, 'empty-message', v)
     }
 
     get striped(): boolean {
@@ -214,7 +216,7 @@ export class Table extends HTMLElement {
         return BREAKPOINTS.includes(v) ? v : 'md'
     }
     set collapseBelow(v: TableBreakpoint) {
-        this.setAttribute('collapse-below', v)
+        setAttr(this, 'collapse-below', v)
     }
 
     get loading(): boolean {
@@ -385,15 +387,17 @@ export class Table extends HTMLElement {
             .join(' ')
 
         this._unbindEdges?.()
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-table-shell tc-scroll-shadow">` +
-            `<div class="${wrapCls}">` +
-            `<table class="${tableCls}">` +
-            `<thead class="tc-table-head"><tr>${theadCells}</tr></thead>` +
-            `<tbody class="tc-table-body">${tbodyRows}</tbody>` +
-            `</table>` +
-            `</div>` +
-            `</div>`
+                `<div class="${wrapCls}">` +
+                `<table class="${tableCls}">` +
+                `<thead class="tc-table-head"><tr>${theadCells}</tr></thead>` +
+                `<tbody class="tc-table-body">${tbodyRows}</tbody>` +
+                `</table>` +
+                `</div>` +
+                `</div>`,
+        )
 
         this._wireEdges()
 
@@ -403,7 +407,7 @@ export class Table extends HTMLElement {
     private _wireEvents(): void {
         const thead = this.querySelector<HTMLElement>('.tc-table-head')
         if (thead) {
-            thead.addEventListener('click', (e: Event) => {
+            bindOnce(thead, 'click', (e: Event) => {
                 const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-sort-key]')
                 if (!btn) return
                 const key = btn.dataset.sortKey
@@ -431,8 +435,8 @@ export class Table extends HTMLElement {
             if (typeof this.onrowclick === 'function') this.onrowclick(row, idx)
         }
 
-        tbody.addEventListener('click', (e: Event) => activate(e.target as HTMLElement))
-        tbody.addEventListener('keydown', (e: Event) => {
+        bindOnce(tbody, 'click', (e: Event) => activate(e.target as HTMLElement))
+        bindOnce(tbody, 'keydown', (e: Event) => {
             const ke = e as KeyboardEvent
             if (ke.key !== 'Enter' && ke.key !== ' ') return
             ke.preventDefault()

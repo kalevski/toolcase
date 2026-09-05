@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-shop-panel'
 
@@ -131,17 +132,20 @@ export class ShopPanel extends HTMLElement {
 
         const modeLabel = sellMode ? 'Sell Items' : 'Buy Items'
 
-        this.innerHTML = `<div class="tc-shop-panel">
+        patchHtml(
+            this,
+            `<div class="tc-shop-panel">
             <div class="tc-shop-panel-header">
                 <span class="tc-shop-panel-mode-label">${esc(modeLabel)}</span>
                 ${currencyHtml}
             </div>
             <div class="tc-shop-panel-rows">${rowsHtml}${emptyHtml}</div>
-        </div>`
+        </div>`,
+        )
 
         const container = this.querySelector<HTMLElement>('.tc-shop-panel')
         if (container) {
-            container.addEventListener('click', (e: Event) => {
+            bindOnce(container, 'click', (e: Event) => {
                 const btn = (e.target as Element).closest<HTMLButtonElement>('[data-action]')
                 if (!btn || btn.disabled) return
                 const row = btn.closest<HTMLElement>('.tc-shop-panel-row')

@@ -302,3 +302,75 @@ tc-mobile-shell > [slot='overlay'] {
         padding-left: var(--bs-mobile-shell-rail-width);
     }
 }
+
+// ── Pull to refresh ──────────────────────────────────────────────────────────
+//
+// Off unless `pull-to-refresh` is set. The element publishes the resisted pull
+// distance as `--tc-pull-distance` and marks the gesture as `pulling` or `ready`;
+// everything visible is here.
+//
+// The indicator is a pseudo-element on the HOST, not a node: an extra child would
+// be a child of the shell, which resolves its pane by "the one child with no
+// slot" — and a second slotless child would break that resolution outright.
+
+tc-mobile-shell[pull-to-refresh] {
+    --bs-mobile-shell-pull-size: 20px;
+    --bs-mobile-shell-pull-color: var(--tc-text-muted);
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: calc(var(--tc-safe-top, 0px) + 8px);
+        left: 50%;
+        width: var(--bs-mobile-shell-pull-size);
+        height: var(--bs-mobile-shell-pull-size);
+        margin-left: calc(var(--bs-mobile-shell-pull-size) / -2);
+        // A spinner ring is a circle, which is one of the shapes the sharp-corner
+        // mandate allows.
+        border: 2px solid var(--tc-border);
+        border-top-color: var(--bs-mobile-shell-pull-color);
+        border-radius: 50%;
+        // Follows the finger, and turns as it comes: the rotation is the feedback
+        // that says the gesture is being tracked at all.
+        transform: translateY(calc(var(--tc-pull-distance, 0px) - var(--bs-mobile-shell-pull-size)))
+            rotate(calc(var(--tc-pull-distance, 0px) * 3));
+        opacity: 0;
+        pointer-events: none;
+        z-index: 1;
+    }
+}
+
+tc-mobile-shell[pull-to-refresh][data-pull] > :not([slot]) {
+    // The pane follows the finger too. `translate` and not `padding`, so nothing
+    // in the list relayouts during the gesture.
+    transform: translateY(var(--tc-pull-distance, 0px));
+}
+
+tc-mobile-shell[pull-to-refresh][data-pull='pulling']::after {
+    opacity: 0.6;
+}
+
+// Ready to fire: full opacity is the only signal, because a colour change at the
+// threshold is invisible under a thumb.
+tc-mobile-shell[pull-to-refresh][data-pull='ready']::after {
+    opacity: 1;
+}
+
+// While the app is refreshing the indicator parks at the threshold and spins.
+tc-mobile-shell[pull-to-refresh][refreshing]::after {
+    opacity: 1;
+    transform: translateY(8px);
+    animation: tc-mobile-shell-pull-spin 0.7s linear infinite;
+}
+
+@keyframes tc-mobile-shell-pull-spin {
+    to {
+        transform: translateY(8px) rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    tc-mobile-shell[pull-to-refresh][refreshing]::after {
+        animation-duration: 1.6s;
+    }
+}

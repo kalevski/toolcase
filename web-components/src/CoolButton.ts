@@ -1,5 +1,9 @@
+import { patchHtml } from './internal/patch-html'
+import { consumerText, observeContent } from './internal/content-observer'
+import { setHostClass } from './internal/host-class'
 import { VARIANTS_CORE } from './internal/variants'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-cool-button'
 
 export type CoolButtonVariant = 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info'
@@ -12,8 +16,6 @@ const ADDON_POSITIONS: CoolButtonAddonPosition[] = ['left', 'right']
 
 export class CoolButton extends HTMLElement {
     private _initialised = false
-    private _mainNodes: Node[] = []
-    private _addonNodes: Node[] = []
 
     onClick: (() => void) | null = null
 
@@ -35,73 +37,16 @@ export class CoolButton extends HTMLElement {
     }
 
     connectedCallback(): void {
-        this.addEventListener('click', this._handleClick)
-        if (!this._initialised) {
-            // Capture named addon-slot nodes and default slot nodes separately.
-            this._addonNodes = this.hasAttribute('addon')
-                ? []
-                : Array.from(this.querySelectorAll('[slot="addon"]'))
-            if (!this.hasAttribute('label')) {
-                this._mainNodes = Array.from(this.childNodes).filter(
-                    (n) =>
-                        !(n instanceof Element && (n as Element).getAttribute('slot') === 'addon'),
-                )
-            }
-            this.render()
-            this._distributeSlots()
-            this._initialised = true
-        }
-    }
-
-    disconnectedCallback(): void {
-        this.removeEventListener('click', this._handleClick)
+        this._initialised = true
+        this.render()
+        // The accessible name is a copy of the consumer's label text, so it has to
+        // follow that text when React rewrites it — see content-observer.ts.
+        observeContent(this, () => this.render())
     }
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        // Re-capture slot nodes from their current DOM containers before re-render.
-        if (!this.hasAttribute('label')) {
-            const contentEl = this.querySelector('.tc-cool-button-content')
-            if (contentEl)
-                this._mainNodes = Array.from(contentEl.childNodes).filter(
-                    (n) => !this._isSpinner(n),
-                )
-        }
-        if (!this.hasAttribute('addon')) {
-            const addonEl = this.querySelector('.tc-cool-button-addon')
-            if (addonEl)
-                this._addonNodes = Array.from(addonEl.childNodes).filter((n) => !this._isSpinner(n))
-        }
         this.render()
-        this._distributeSlots()
-    }
-
-    private _isSpinner(n: Node): boolean {
-        return n instanceof Element && n.classList.contains('tc-cool-button-spinner')
-    }
-
-    private _handleClick = () => {
-        const btn = this.querySelector<HTMLButtonElement>('button')
-        if (btn && btn.disabled) return
-        this.dispatchEvent(
-            new CustomEvent('tc-click', {
-                bubbles: true,
-                composed: true,
-                detail: {},
-            }),
-        )
-        if (typeof this.onClick === 'function') this.onClick()
-    }
-
-    private _distributeSlots(): void {
-        if (!this.hasAttribute('label')) {
-            const contentEl = this.querySelector('.tc-cool-button-content')
-            if (contentEl) this._mainNodes.forEach((n) => contentEl.appendChild(n))
-        }
-        if (!this.hasAttribute('addon')) {
-            const addonEl = this.querySelector('.tc-cool-button-addon')
-            if (addonEl) this._addonNodes.forEach((n) => addonEl.appendChild(n))
-        }
     }
 
     get variant(): CoolButtonVariant {
@@ -109,7 +54,7 @@ export class CoolButton extends HTMLElement {
         return VARIANTS.includes(v) ? v : 'primary'
     }
     set variant(v: CoolButtonVariant) {
-        this.setAttribute('variant', v)
+        setAttr(this, 'variant', v)
     }
 
     get size(): CoolButtonSize {
@@ -117,7 +62,7 @@ export class CoolButton extends HTMLElement {
         return SIZES.includes(v) ? v : 'default'
     }
     set size(v: CoolButtonSize) {
-        this.setAttribute('size', v)
+        setAttr(this, 'size', v)
     }
 
     get outline(): boolean {
@@ -165,7 +110,7 @@ export class CoolButton extends HTMLElement {
         return ADDON_POSITIONS.includes(v) ? v : 'right'
     }
     set addonPosition(v: CoolButtonAddonPosition) {
-        this.setAttribute('addon-position', v)
+        setAttr(this, 'addon-position', v)
     }
 
     private render(): void {
@@ -186,7 +131,8 @@ export class CoolButton extends HTMLElement {
         const sizeClass = sizeClassMap[size] ? ` ${sizeClassMap[size]}` : ''
         const loadingClass = loading ? ' tc-cool-button--loading' : ''
 
-        const hasAddon = this.hasAttribute('addon') || this._addonNodes.length > 0
+        const hasAddon =
+            this.hasAttribute('addon') || this.querySelector(':scope > [slot="addon"]') != null
 
         // When loading, the spinner is centred over the content region (or over the
         // addon when the addon is the leading slot). The label/glyph it covers is
@@ -224,7 +170,23 @@ export class CoolButton extends HTMLElement {
         }
 
         const disabledAttr = isDisabled ? ' disabled' : ''
-        this.innerHTML = `<button type="button" class="btn ${variantClass}${sizeClass} tc-cool-button${loadingClass}"${disabledAttr}>${innerHtml}${liveRegion}</button>`
+        const disabledClass = isDisabled ? ' disabled' : ''
+        // THE HOST IS THE BUTTON BOX and the control is stretched over it as a hit
+        // overlay — the same shape tc-button uses — so the inner regions and any
+        // slotted `slot="addon"` element lay out in the host's own flow and nothing
+        // the consumer wrote is ever moved into the button (rule 1).
+        const label = consumerText(this)
+        const nameAttr = label ? ` aria-label="${esc(label)}"` : ''
+        setHostClass(
+            this,
+            `tc-button-host tc-cool-button-host btn ${variantClass}${sizeClass} tc-cool-button${loadingClass}${disabledClass}`,
+        )
+        patchHtml(
+            this,
+            `<button type="button" class="tc-button-hit tc-hit-overlay"${disabledAttr}${nameAttr}></button>`,
+            { region: 'control' },
+        )
+        patchHtml(this, `${innerHtml}${liveRegion}`, { region: 'label' })
     }
 }
 

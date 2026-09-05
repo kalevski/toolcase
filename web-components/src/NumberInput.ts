@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { msg } from './messages'
 import { fieldMessageHtml } from './internal/field-message'
@@ -9,6 +10,7 @@ import {
 } from './internal/form-field'
 import { ChevronUp, ChevronDown } from 'lucide-static'
 import { icon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-number-input'
 
@@ -175,7 +177,7 @@ export class NumberInput extends HTMLElement {
         return this.getAttribute('placeholder') ?? ''
     }
     set placeholder(v: string) {
-        this.setAttribute('placeholder', v)
+        setAttr(this, 'placeholder', v)
     }
 
     // ── disabled ─────────────────────────────────────────────────────────────
@@ -307,11 +309,18 @@ export class NumberInput extends HTMLElement {
 
     private _commit(newValue: number | ''): void {
         const prev = this.value
-        if (prev === newValue) return
-        if (newValue === '') {
-            this.removeAttribute('value')
-        } else {
-            this.setAttribute('value', this._formatValue(newValue))
+        const changed = prev !== newValue
+        // Always re-sync the visible text/aria to the canonical format, even
+        // when the numeric value itself didn't change — e.g. blurring after
+        // typing "5.0" or "05" over an existing value of 5 must still snap
+        // the field back to "5" (or the configured precision), not leave the
+        // user's raw, unformatted text sitting in the input.
+        if (changed) {
+            if (newValue === '') {
+                this.removeAttribute('value')
+            } else {
+                this.setAttribute('value', this._formatValue(newValue))
+            }
         }
         const input = this.querySelector<HTMLInputElement>('input')
         if (input) {
@@ -320,6 +329,7 @@ export class NumberInput extends HTMLElement {
             else input.setAttribute('aria-valuenow', String(newValue))
         }
         this._updateStepperState()
+        if (!changed) return
         this._syncForm()
         dispatchFieldChange(this, newValue)
         if (typeof this.onChange === 'function') this.onChange(newValue)
@@ -380,11 +390,11 @@ export class NumberInput extends HTMLElement {
         const decBtn = this.querySelector<HTMLButtonElement>('.tc-number-input__dec')
 
         if (input) {
-            input.addEventListener('keydown', this._onInputKeydown)
-            input.addEventListener('blur', this._onInputBlur)
+            bindOnce(input, 'keydown', this._onInputKeydown)
+            bindOnce(input, 'blur', this._onInputBlur)
         }
-        if (incBtn) incBtn.addEventListener('click', this._onIncrement)
-        if (decBtn) decBtn.addEventListener('click', this._onDecrement)
+        if (incBtn) bindOnce(incBtn, 'click', this._onIncrement)
+        if (decBtn) bindOnce(decBtn, 'click', this._onDecrement)
     }
 
     private _detachListeners(): void {
@@ -504,31 +514,34 @@ export class NumberInput extends HTMLElement {
             validText: 'Looks good!',
         })
 
-        this.innerHTML = [
-            labelHtml,
-            `<div class="${inputGroupClass}">`,
-            prefixHtml,
-            `<input`,
-            ` id="${this._inputId}"`,
-            ` class="tc-number-input__input form-control"`,
-            ` type="text"`,
-            ` inputmode="decimal"`,
-            ` role="spinbutton"`,
-            placeholderAttr,
-            disabledAttr,
-            ariaInvalidAttr,
-            ariaRequiredAttr,
-            ariaDescribedBy,
-            ariaValueMin,
-            ariaValueMax,
-            ariaValueNow,
-            currentStr !== '' ? ` value="${esc(currentStr)}"` : '',
-            `>`,
-            stepperHtml,
-            suffixHtml,
-            `</div>`,
-            messageHtml,
-        ].join('')
+        patchHtml(
+            this,
+            [
+                labelHtml,
+                `<div class="${inputGroupClass}">`,
+                prefixHtml,
+                `<input`,
+                ` id="${this._inputId}"`,
+                ` class="tc-number-input__input form-control"`,
+                ` type="text"`,
+                ` inputmode="decimal"`,
+                ` role="spinbutton"`,
+                placeholderAttr,
+                disabledAttr,
+                ariaInvalidAttr,
+                ariaRequiredAttr,
+                ariaDescribedBy,
+                ariaValueMin,
+                ariaValueMax,
+                ariaValueNow,
+                currentStr !== '' ? ` value="${esc(currentStr)}"` : '',
+                `>`,
+                stepperHtml,
+                suffixHtml,
+                `</div>`,
+                messageHtml,
+            ].join(''),
+        )
     }
 }
 

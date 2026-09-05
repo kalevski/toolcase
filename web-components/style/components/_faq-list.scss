@@ -111,3 +111,17 @@ tc-faq-list {
         transition: none;
     }
 }
+
+// A slotted title is the consumer's own child now (rule 1), so it is dressed here
+// rather than being moved into `.tc-faq-list-title-slot`. Scoped to :first-child:
+// the element also appends an unclassed `<script type="application/ld+json">` tag
+// after the items when `schema` is set, and without :first-child that trailing,
+// class-less script matched this selector too — `display: block` on a <script>
+// beats the UA stylesheet's `script { display: none }` (an ordinary, overridable
+// rule, not `!important`), so the raw JSON-LD text rendered visibly on the page.
+.tc-faq-list > :first-child:not([class^='tc-faq-list']) {
+    display: block;
+    font-size: var(--bs-faq-list-title-font-size, 1.05rem);
+    font-weight: 600;
+    color: var(--bs-faq-list-title-color, var(--tc-text));
+}

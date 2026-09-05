@@ -294,3 +294,15 @@ tc-command-reference {
     color: var(--bs-command-reference-empty-color);
     text-align: center;
 }
+
+// A slotted title is no longer moved into `.tc-command-reference-title` (rule 1): it stays the
+// consumer's own first child and is dressed here.
+.tc-command-reference > :not([class^='tc-command-reference']) {
+    padding: var(--bs-command-reference-title-padding-y) var(--bs-command-reference-title-padding-x);
+    background: var(--bs-command-reference-title-bg);
+    border-bottom: var(--bs-command-reference-title-border);
+    font-size: var(--bs-command-reference-title-font-size);
+    font-weight: var(--bs-command-reference-title-font-weight);
+    color: var(--bs-command-reference-title-color);
+    line-height: 1.4;
+}

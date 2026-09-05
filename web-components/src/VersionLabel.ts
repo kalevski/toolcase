@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-version-label'
 
@@ -62,8 +63,9 @@ export class VersionLabel extends HTMLElement {
             parts.push(`<span class="tc-version-label-branch">${esc(branch)}</span>`)
         }
 
-        this.innerHTML = parts.join(
-            '<span class="tc-version-label-sep" aria-hidden="true">·</span>',
+        patchHtml(
+            this,
+            parts.join('<span class="tc-version-label-sep" aria-hidden="true">·</span>'),
         )
     }
 }

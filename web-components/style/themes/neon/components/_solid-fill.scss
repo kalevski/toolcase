@@ -18,8 +18,15 @@ tc-theme[name='neon'],
         color: var(--nd-accent-ink) !important;
     }
 
-    .text-bg-secondary:not(.toast),
-    .bg-secondary {
+    // .badge is excluded: it carries its own secondary re-skin (./badge.scss)
+    // pointed at --nd-surface-2 specifically so it never matches the
+    // --nd-surface-3 that tc-table's striped/hover rows use. This selector and
+    // that one land at equal specificity ([data-tc-theme] + 2 classes each), so
+    // without the exclusion, source order — not "higher specificity" as the
+    // comment above claims — decided the winner and silently clobbered the
+    // badge override.
+    .text-bg-secondary:not(.toast):not(.badge),
+    .bg-secondary:not(.badge) {
         background-color: var(--nd-surface-3) !important;
         color: var(--nd-text) !important;
     }

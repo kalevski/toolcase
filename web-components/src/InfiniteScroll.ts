@@ -1,3 +1,6 @@
+import { patchHtml } from './internal/patch-html'
+import { rootMargin as cssRootMargin } from './internal/safe-dom'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-infinite-scroll'
 
 export class InfiniteScroll extends HTMLElement {
@@ -5,10 +8,6 @@ export class InfiniteScroll extends HTMLElement {
     private _observer: IntersectionObserver | null = null
     private _intersecting = false
     private _fired = false
-
-    private _contentNodes: Node[] = []
-    private _loadingNodes: Node[] = []
-    private _endNodes: Node[] = []
 
     onLoadMore: (() => void) | null = null
 
@@ -40,31 +39,21 @@ export class InfiniteScroll extends HTMLElement {
         this.setAttribute('threshold', String(v))
     }
 
+    /** Coerced on read, not on write: a margin without units — `100` where the
+     *  author meant `100px` — makes the IntersectionObserver constructor throw,
+     *  and it would throw from inside connectedCallback where no consumer can
+     *  catch it. An unusable value simply means "no margin". */
     get rootMargin(): string {
-        return this.getAttribute('root-margin') ?? '0px'
+        return cssRootMargin(this.getAttribute('root-margin'), '0px')
     }
     set rootMargin(v: string) {
-        this.setAttribute('root-margin', v)
+        setAttr(this, 'root-margin', v)
     }
 
     connectedCallback(): void {
         if (!this._initialised) {
-            const all = Array.from(this.childNodes)
-            this._contentNodes = all.filter((n) => {
-                if (!(n instanceof Element)) return true
-                const slot = n.getAttribute('data-slot')
-                return slot !== 'loading' && slot !== 'end'
-            })
-            this._loadingNodes = all.filter(
-                (n) =>
-                    n instanceof Element && (n as Element).getAttribute('data-slot') === 'loading',
-            )
-            this._endNodes = all.filter(
-                (n) => n instanceof Element && (n as Element).getAttribute('data-slot') === 'end',
-            )
-            this.render()
-            this._distributeSlots()
             this._initialised = true
+            this.render()
         }
         this._buildObserver()
     }
@@ -72,23 +61,7 @@ export class InfiniteScroll extends HTMLElement {
     attributeChangedCallback(name: string, _old: string | null, next: string | null): void {
         if (!this.isConnected || !this._initialised) return
 
-        // Re-capture slot content from within their containers
-        const contentEl = this.querySelector('.tc-infinite-scroll-content')
-        const loadingEl = this.querySelector('.tc-infinite-scroll-loading')
-        const endEl = this.querySelector('.tc-infinite-scroll-end')
-
-        if (contentEl) this._contentNodes = Array.from(contentEl.childNodes)
-        if (loadingEl) {
-            const custom = Array.from(loadingEl.querySelectorAll('[data-slot="loading"]'))
-            if (custom.length > 0) this._loadingNodes = custom
-        }
-        if (endEl) {
-            const custom = Array.from(endEl.querySelectorAll('[data-slot="end"]'))
-            if (custom.length > 0) this._endNodes = custom
-        }
-
         this.render()
-        this._distributeSlots()
 
         if (name === 'loading' && next === null) {
             // loading ended — reset fired so we can fire again if sentinel is in view
@@ -107,15 +80,6 @@ export class InfiniteScroll extends HTMLElement {
     disconnectedCallback(): void {
         this._observer?.disconnect()
         this._observer = null
-    }
-
-    private _distributeSlots(): void {
-        const contentEl = this.querySelector('.tc-infinite-scroll-content')
-        const loadingEl = this.querySelector('.tc-infinite-scroll-loading')
-        const endEl = this.querySelector('.tc-infinite-scroll-end')
-        if (contentEl) this._contentNodes.forEach((n) => contentEl.appendChild(n))
-        if (loadingEl) this._loadingNodes.forEach((n) => loadingEl.appendChild(n))
-        if (endEl) this._endNodes.forEach((n) => endEl.appendChild(n))
     }
 
     private _buildObserver(): void {
@@ -156,8 +120,8 @@ export class InfiniteScroll extends HTMLElement {
     private render(): void {
         const hasMore = this.hasMore
         const loading = this.loading
-        const hasCustomLoading = this._loadingNodes.length > 0
-        const hasCustomEnd = this._endNodes.length > 0
+        const hasCustomLoading = this.querySelector(':scope > [data-slot="loading"]') != null
+        const hasCustomEnd = this.querySelector(':scope > [data-slot="end"]') != null
 
         const defaultSpinner = hasCustomLoading
             ? ''
@@ -171,15 +135,16 @@ export class InfiniteScroll extends HTMLElement {
         const loadingVisible = loading ? ' tc-infinite-scroll-loading--visible' : ''
         const endVisible = !hasMore ? ' tc-infinite-scroll-end--visible' : ''
 
-        this.innerHTML =
-            `<div class="tc-infinite-scroll-content"></div>` +
+        patchHtml(
+            this,
             `<div class="tc-infinite-scroll-sentinel" aria-hidden="true"></div>` +
-            `<div class="tc-infinite-scroll-loading${loadingVisible}" role="status" aria-live="polite">` +
-            defaultSpinner +
-            `</div>` +
-            `<div class="tc-infinite-scroll-end${endVisible}">` +
-            defaultEnd +
-            `</div>`
+                `<div class="tc-infinite-scroll-loading${loadingVisible}" role="status" aria-live="polite">` +
+                defaultSpinner +
+                `</div>` +
+                `<div class="tc-infinite-scroll-end${endVisible}">` +
+                defaultEnd +
+                `</div>`,
+        )
     }
 }
 

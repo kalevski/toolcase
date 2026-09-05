@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-cdn-map'
 
@@ -81,7 +82,7 @@ export class CdnMap extends HTMLElement {
         this.setAttribute('aria-label', ariaLabel)
         this.style.height = heightCss
 
-        this.innerHTML = `<div class="tc-cdn-map__grid" aria-hidden="true"></div>${nodeHtml}`
+        patchHtml(this, `<div class="tc-cdn-map__grid" aria-hidden="true"></div>${nodeHtml}`)
     }
 }
 

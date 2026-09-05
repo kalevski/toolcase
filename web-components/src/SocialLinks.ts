@@ -1,5 +1,7 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { icon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-social-links'
 
@@ -80,7 +82,7 @@ export class SocialLinks extends HTMLElement {
         return SIZES.includes(v) ? v : 'md'
     }
     set size(v: SocialLinksSize) {
-        this.setAttribute('size', v)
+        setAttr(this, 'size', v)
     }
 
     get variant(): SocialLinksVariant {
@@ -88,7 +90,7 @@ export class SocialLinks extends HTMLElement {
         return VARIANTS.includes(v) ? v : 'ghost'
     }
     set variant(v: SocialLinksVariant) {
-        this.setAttribute('variant', v)
+        setAttr(this, 'variant', v)
     }
 
     private _resolveIcon(kind: SocialKind): string {
@@ -108,14 +110,17 @@ export class SocialLinks extends HTMLElement {
         this.classList.add(`tc-social-links-${variant}`)
         this.setAttribute('role', 'list')
 
-        this.innerHTML = this._links
-            .map((link) => {
-                const label = esc(link.label ?? link.kind)
-                const href = esc(link.href)
-                const svgHtml = this._resolveIcon(link.kind)
-                return `<a class="tc-social-link" href="${href}" role="listitem" target="_blank" rel="noopener noreferrer" aria-label="${label}">${svgHtml}</a>`
-            })
-            .join('')
+        patchHtml(
+            this,
+            this._links
+                .map((link) => {
+                    const label = esc(link.label ?? link.kind)
+                    const href = esc(link.href)
+                    const svgHtml = this._resolveIcon(link.kind)
+                    return `<a class="tc-social-link" href="${href}" role="listitem" target="_blank" rel="noopener noreferrer" aria-label="${label}">${svgHtml}</a>`
+                })
+                .join(''),
+        )
     }
 }
 

@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { icon } from './icons'
 import { Plus, ChevronUp, ChevronDown, Trash2 } from 'lucide-static'
@@ -13,13 +14,7 @@ const chevronDownIconHtml = icon(ChevronDown)
 const removeIconHtml = icon(Trash2)
 
 export type SchemaPropertyType =
-    | 'string'
-    | 'number'
-    | 'integer'
-    | 'boolean'
-    | 'object'
-    | 'array'
-    | 'ref'
+    'string' | 'number' | 'integer' | 'boolean' | 'object' | 'array' | 'ref'
 
 const PROPERTY_TYPES: SchemaPropertyType[] = [
     'string',
@@ -461,7 +456,10 @@ export class JSONSchemaDef extends HTMLElement {
                         `<div class="tc-json-schema-def-skeleton-row" aria-hidden="true"><span class="tc-json-schema-def-skeleton-key"></span><span class="tc-json-schema-def-skeleton-field"></span><span class="tc-json-schema-def-skeleton-actions"></span></div>`,
                 )
                 .join('')
-            this.innerHTML = `<div class="tc-json-schema-def tc-json-schema-def--loading">${rows}<span class="visually-hidden">Loading…</span></div>`
+            patchHtml(
+                this,
+                `<div class="tc-json-schema-def tc-json-schema-def--loading">${rows}<span class="visually-hidden">Loading…</span></div>`,
+            )
             return
         }
         this.removeAttribute('role')
@@ -483,12 +481,14 @@ export class JSONSchemaDef extends HTMLElement {
 
         const addHtml = `<button type="button" class="tc-json-schema-def-add" data-action="add"${disabledAttr}>${plusIconHtml}<span>Add property</span></button>`
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-json-schema-def${disabledClass}">` +
-            headerHtml +
-            `<div class="tc-json-schema-def-properties" role="list">${rowsHtml}</div>` +
-            addHtml +
-            `</div>`
+                headerHtml +
+                `<div class="tc-json-schema-def-properties" role="list">${rowsHtml}</div>` +
+                addHtml +
+                `</div>`,
+        )
 
         if (focus) this._restoreFocus(focus)
     }

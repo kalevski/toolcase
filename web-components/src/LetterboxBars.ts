@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 const TAG_NAME = 'tc-letterbox-bars'
 
 /**
@@ -23,9 +24,11 @@ export class LetterboxBars extends HTMLElement {
 
     connectedCallback(): void {
         if (!this._initialised) {
-            this.innerHTML =
+            patchHtml(
+                this,
                 '<span class="tc-letterbox-bar tc-letterbox-bar--top"></span>' +
-                '<span class="tc-letterbox-bar tc-letterbox-bar--bottom"></span>'
+                    '<span class="tc-letterbox-bar tc-letterbox-bar--bottom"></span>',
+            )
             this._initialised = true
         }
         this._applyTokens()

@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -42,24 +43,27 @@ export class ScoringRules extends HTMLElement {
         this.classList.add('tc-scoring-rules')
         this.setAttribute('role', 'list')
 
-        this.innerHTML = this._rules
-            .map((rule) => {
-                const accentClass =
-                    rule.accent && (ACCENTS as string[]).includes(rule.accent)
-                        ? ` tc-accent-${rule.accent}`
+        patchHtml(
+            this,
+            this._rules
+                .map((rule) => {
+                    const accentClass =
+                        rule.accent && (ACCENTS as string[]).includes(rule.accent)
+                            ? ` tc-accent-${rule.accent}`
+                            : ''
+
+                    const iconHtml = rule.icon
+                        ? `<span class="tc-scoring-rule-icon" aria-hidden="true">${lucideByName(rule.icon)}</span>`
                         : ''
 
-                const iconHtml = rule.icon
-                    ? `<span class="tc-scoring-rule-icon" aria-hidden="true">${lucideByName(rule.icon)}</span>`
-                    : ''
+                    const suffixHtml = rule.suffix
+                        ? `<span class="tc-scoring-rule-suffix">${esc(rule.suffix)}</span>`
+                        : ''
 
-                const suffixHtml = rule.suffix
-                    ? `<span class="tc-scoring-rule-suffix">${esc(rule.suffix)}</span>`
-                    : ''
-
-                return `<div class="tc-scoring-rule${accentClass}" role="listitem">${iconHtml}<div class="tc-scoring-rule-body"><div class="tc-scoring-rule-title">${esc(rule.title)}</div><div class="tc-scoring-rule-desc">${esc(rule.description)}</div></div><div class="tc-scoring-rule-points">${esc(rule.points)}${suffixHtml}</div></div>`
-            })
-            .join('')
+                    return `<div class="tc-scoring-rule${accentClass}" role="listitem">${iconHtml}<div class="tc-scoring-rule-body"><div class="tc-scoring-rule-title">${esc(rule.title)}</div><div class="tc-scoring-rule-desc">${esc(rule.description)}</div></div><div class="tc-scoring-rule-points">${esc(rule.points)}${suffixHtml}</div></div>`
+                })
+                .join(''),
+        )
     }
 }
 

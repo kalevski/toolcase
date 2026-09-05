@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 // Re-uses the canonical ItemRarity union owned by tc-item-slot so every rarity-
 // aware port shares one source of truth.
@@ -50,7 +51,7 @@ export class RarityChip extends HTMLElement {
     private render(): void {
         const rarity = this.rarity
         const label = esc(RARITY_LABEL[rarity])
-        this.innerHTML = `<span class="tc-rarity-chip tc-rarity-chip--${rarity}">${label}</span>`
+        patchHtml(this, `<span class="tc-rarity-chip tc-rarity-chip--${rarity}">${label}</span>`)
     }
 }
 

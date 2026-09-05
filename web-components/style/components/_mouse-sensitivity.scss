@@ -15,7 +15,7 @@ tc-mouse-sensitivity {
     --bs-mouse-sensitivity-thumb-border: var(--tc-app-accent);
     --bs-mouse-sensitivity-thumb-active-bg: var(--tc-surface-muted);
     --bs-mouse-sensitivity-thumb-shadow: var(--tc-shadow-sm);
-    --bs-mouse-sensitivity-focus-ring: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
+    --bs-mouse-sensitivity-focus-ring: var(--tc-focus-ring);
     --bs-mouse-sensitivity-disabled-color: var(--tc-text-faint);
     --bs-mouse-sensitivity-key-color: var(--tc-text-muted);
     --bs-mouse-sensitivity-key-size: 0.6875rem;

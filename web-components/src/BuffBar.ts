@@ -1,4 +1,6 @@
+import { patchHtml } from './internal/patch-html'
 import { escapeHtml } from './internal/resourceBar'
+import { setAttr } from './internal/tc-element'
 
 // Each entry composes a <tc-buff-icon>; both elements are registered together
 // in register.ts (tc-buff-icon is defined first).
@@ -59,7 +61,7 @@ export class BuffBar extends HTMLElement {
         return this.getAttribute('gap') ?? '6px'
     }
     set gap(v: string) {
-        this.setAttribute('gap', v)
+        setAttr(this, 'gap', v)
     }
 
     private formatTime(remaining: number): string {
@@ -107,7 +109,7 @@ export class BuffBar extends HTMLElement {
             })
             .join('')
 
-        this.innerHTML = `<div class="tc-buff-bar__row" role="list">${items}</div>`
+        patchHtml(this, `<div class="tc-buff-bar__row" role="list">${items}</div>`)
     }
 }
 

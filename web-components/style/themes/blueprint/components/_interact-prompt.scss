@@ -23,7 +23,7 @@ tc-theme[name='blueprint'],
         // Hold-to-interact bar track — faint recessed well; fill is the pink CTA gradient.
         --bs-interact-prompt-hold-track-bg: var(--bp-bg-2);
         --bs-interact-prompt-hold-track-border-color: var(--bp-border-faint);
-        // Replace the baked #2b3a51 dark-slate stop with the pink brand gradient.
+        // Explicit for clarity — matches --tc-app-accent-gradient's blueprint remap already.
         --bs-interact-prompt-hold-fill-bg: var(--bp-pink-grad);
     }
 }

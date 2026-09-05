@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-video-embed'
 
@@ -228,7 +229,10 @@ export class VideoEmbed extends HTMLElement {
             }
         }
 
-        this.innerHTML = `<div class="tc-video-embed" style="${rootStyle}"><div class="tc-video-embed-frame">${media}</div></div>`
+        patchHtml(
+            this,
+            `<div class="tc-video-embed" style="${rootStyle}"><div class="tc-video-embed-frame">${media}</div></div>`,
+        )
 
         // Reflect the muted state onto the <video> property — the HTML attribute
         // alone is not always honoured for the initial muted state.

@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 const TAG_NAME = 'tc-network-status-icon'
 
 export type NetworkStatusTier = 'offline' | 'bad' | 'warning' | 'ok' | 'good'
@@ -80,10 +81,19 @@ export class NetworkStatusIcon extends HTMLElement {
         if (!this.connected) return 0
         const ping = this.ping
         const loss = this.loss
-        const p = ping == null ? 999 : ping
-        if (p >= 200 || loss >= 5) return 1
-        if (p >= 120 || loss >= 3) return 2
-        if (p >= 60 || loss >= 1) return 3
+        // With no ping reading, latency can't veto the tier — fall back to
+        // loss alone instead of assuming worst-case latency, which previously
+        // forced tier "bad" (and silently ignored a healthy `loss` reading)
+        // any time `ping` was unset.
+        if (ping == null) {
+            if (loss >= 5) return 1
+            if (loss >= 3) return 2
+            if (loss >= 1) return 3
+            return 4
+        }
+        if (ping >= 200 || loss >= 5) return 1
+        if (ping >= 120 || loss >= 3) return 2
+        if (ping >= 60 || loss >= 1) return 3
         return 4
     }
 
@@ -98,7 +108,10 @@ export class NetworkStatusIcon extends HTMLElement {
     private _computeLabelText(tier: NetworkStatusTier): string {
         if (tier === 'offline') return 'OFFLINE'
         const ping = this.ping
-        if (ping == null) return 'ONLINE'
+        // No ping reading to print — fall back to the tier name itself (e.g.
+        // "BAD", "GOOD") rather than a blanket "ONLINE" that would contradict
+        // a loss-driven "bad"/"warning" tier rendered right next to it.
+        if (ping == null) return tier.toUpperCase()
         return `${Math.round(ping)} ms`
     }
 
@@ -123,7 +136,10 @@ export class NetworkStatusIcon extends HTMLElement {
             ? `<span class="tc-network-status-icon-label" aria-hidden="true">${this._computeLabelText(tier)}</span>`
             : ''
 
-        this.innerHTML = `<span class="tc-network-status-icon" role="img" aria-label="${ariaLabel}"><span class="tc-network-status-icon-bars">${barsHtml}</span>${labelHtml}</span>`
+        patchHtml(
+            this,
+            `<span class="tc-network-status-icon" role="img" aria-label="${ariaLabel}"><span class="tc-network-status-icon-bars">${barsHtml}</span>${labelHtml}</span>`,
+        )
     }
 }
 

@@ -47,6 +47,7 @@ tc-asset-bundle {
     --bs-asset-bundle-control-hover-color: var(--tc-text);
     --bs-asset-bundle-control-active-bg: var(--tc-app-accent);
     --bs-asset-bundle-control-active-color: var(--tc-app-accent-contrast);
+    --bs-asset-bundle-menu-item-color: var(--tc-text);
 
     --bs-asset-bundle-skeleton-bg: var(--tc-surface-muted);
     --bs-asset-bundle-skeleton-shimmer: rgba(255, 255, 255, 0.6);
@@ -473,7 +474,6 @@ tc-asset-bundle {
 
 .tc-asset-bundle-menu {
     --bs-asset-bundle-menu-min-width: 170px;
-    --bs-asset-bundle-menu-item-color: #{$slate-700};
 
     position: absolute;
     top: 100%;

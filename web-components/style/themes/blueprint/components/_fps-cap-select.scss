@@ -23,4 +23,16 @@ tc-theme[name='blueprint'],
         --bs-fps-cap-select-disabled-bg: var(--bp-bg-2);
         --bs-fps-cap-select-disabled-color: var(--bp-text-faint);
     }
+
+    // The two focus tokens above are dead on their own: this partial loads
+    // before ../input.scss, whose generic `.form-select:focus` rule shares the
+    // same tc-theme-scoped specificity and therefore wins the tie by loading
+    // later, painting the theme's default pink instead of this control's teal.
+    // Out-specify it with the compound class so the intended teal action ring
+    // (this control's "everyday-action" accent, matching select-row/
+    // mouse-sensitivity) actually reaches the rendered focus state.
+    .tc-fps-cap-select__select.form-select:focus {
+        border-color: var(--bs-fps-cap-select-focus-border-color);
+        box-shadow: var(--bs-fps-cap-select-focus-ring);
+    }
 }

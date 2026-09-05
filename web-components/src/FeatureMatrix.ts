@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -179,16 +180,18 @@ export class FeatureMatrix extends HTMLElement {
             })
             .join('')
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-feature-matrix">` +
-            headerHtml +
-            `<div class="tc-feature-matrix__scroll">` +
-            `<table class="tc-feature-matrix__table">` +
-            theadHtml +
-            `<tbody>${tbodyHtml}</tbody>` +
-            `</table>` +
-            `</div>` +
-            `</div>`
+                headerHtml +
+                `<div class="tc-feature-matrix__scroll">` +
+                `<table class="tc-feature-matrix__table">` +
+                theadHtml +
+                `<tbody>${tbodyHtml}</tbody>` +
+                `</table>` +
+                `</div>` +
+                `</div>`,
+        )
     }
 }
 

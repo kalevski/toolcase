@@ -1,17 +1,12 @@
+import { isOwned, patchHtml } from './internal/patch-html'
+import { setHostClass } from './internal/host-class'
 import { VARIANTS_FULL } from './internal/variants'
 const TAG_NAME = 'tc-placeholder'
 
 export type PlaceholderSize = 'xs' | 'sm' | 'lg'
 export type PlaceholderAnimation = 'glow' | 'wave'
 export type PlaceholderVariant =
-    | 'primary'
-    | 'secondary'
-    | 'success'
-    | 'danger'
-    | 'warning'
-    | 'info'
-    | 'light'
-    | 'dark'
+    'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
 
 const SIZES: PlaceholderSize[] = ['xs', 'sm', 'lg']
 const ANIMATIONS: PlaceholderAnimation[] = ['glow', 'wave']
@@ -29,23 +24,13 @@ export class Placeholder extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this._render(slotContent)
-            this._initialised = true
-        }
+        this._initialised = true
+        this._render()
     }
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        const inner = this.querySelector('.tc-placeholder-content')
-        const isUserContent = inner?.hasAttribute('data-tc-user') ?? false
-        if (isUserContent && inner) {
-            const slotContent = Array.from(inner.childNodes)
-            this._render(slotContent)
-        } else {
-            this._render([])
-        }
+        this._render()
     }
 
     get width(): string | null {
@@ -83,14 +68,17 @@ export class Placeholder extends HTMLElement {
         else this.removeAttribute('variant')
     }
 
-    private _render(slotContent: Node[]): void {
+    private _render(): void {
         const animation = this.animation
         const animClass = animation ? ` placeholder-${animation}` : ''
 
-        if (slotContent.length > 0) {
-            this.innerHTML = `<div class="tc-placeholder-content${animClass}" data-tc-user></div>`
-            const wrapper = this.querySelector('.tc-placeholder-content')!
-            slotContent.forEach((n) => wrapper.appendChild(n))
+        // THE HOST IS THE PLACEHOLDER. With children of their own, the consumer's
+        // markup IS the shimmering block — the animation class goes on the host and
+        // nothing is wrapped (rule 1). Otherwise the element draws its own bar.
+        setHostClass(this, `tc-placeholder-content${animClass}`)
+
+        if (this.firstChild && !isOwned(this.firstChild)) {
+            patchHtml(this, '')
         } else {
             const rawWidth = this.getAttribute('width')
             const size = this.size
@@ -110,7 +98,10 @@ export class Placeholder extends HTMLElement {
             const sizeClass = size ? ` placeholder-${size}` : ''
             const variantClass = variant ? ` bg-${variant}` : ''
 
-            this.innerHTML = `<div class="tc-placeholder-content${animClass}"><span class="placeholder${colClass}${sizeClass}${variantClass}"${styleAttr}></span></div>`
+            patchHtml(
+                this,
+                `<span class="placeholder${colClass}${sizeClass}${variantClass}"${styleAttr}></span>`,
+            )
         }
     }
 }

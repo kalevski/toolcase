@@ -1,11 +1,18 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-module-access'
 
 export interface ModuleAccessRole {
     id: string
     name: string
-    /** Built-in roles get a lock note in the read-only head. */
+    /**
+     * Host-side metadata only (e.g. to block deletion in the host's own role
+     * list) — ModuleAccess itself never reads this flag. Its own readonly gate
+     * is solely `role.id === ownerRoleId`, which locks that one role's head
+     * and hides the permission/limit editors entirely.
+     */
     builtin?: boolean
     /** Full permission keys granted to this role, e.g. `"project.create"`. */
     permissions: string[]
@@ -72,7 +79,7 @@ export class ModuleAccess extends HTMLElement {
         return this.getAttribute('owner-role-id') ?? 'owner'
     }
     set ownerRoleId(v: string) {
-        this.setAttribute('owner-role-id', v)
+        setAttr(this, 'owner-role-id', v)
     }
 
     get roleData(): ModuleAccessRole | null {
@@ -261,7 +268,10 @@ export class ModuleAccess extends HTMLElement {
 
     private render(): void {
         if (!this._role) {
-            this.innerHTML = `<div class="module-access"><tc-empty-state icon="shield" heading="No role selected" description="Pick a role to view or edit its access."></tc-empty-state></div>`
+            patchHtml(
+                this,
+                `<div class="module-access"><tc-empty-state icon="shield" heading="No role selected" description="Pick a role to view or edit its access."></tc-empty-state></div>`,
+            )
             return
         }
 
@@ -269,12 +279,14 @@ export class ModuleAccess extends HTMLElement {
         const isOwner = role.id === this.ownerRoleId
 
         if (isOwner) {
-            this.innerHTML =
+            patchHtml(
+                this,
                 `<div class="module-access module-access--readonly">` +
-                `<div class="module-access__head"><h3 class="module-access__name">${esc(role.name)}</h3>` +
-                `<code class="module-access__id">${esc(role.id)}</code></div>` +
-                `<p class="module-access__owner-note">The owner role always holds every permission — there's nothing a form could change.</p>` +
-                `</div>`
+                    `<div class="module-access__head"><h3 class="module-access__name">${esc(role.name)}</h3>` +
+                    `<code class="module-access__id">${esc(role.id)}</code></div>` +
+                    `<p class="module-access__owner-note">The owner role always holds every permission — there's nothing a form could change.</p>` +
+                    `</div>`,
+            )
             return
         }
 
@@ -295,15 +307,17 @@ export class ModuleAccess extends HTMLElement {
                       .join('') +
                   `</div>`
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="module-access">` +
-            `<div class="module-access__head">` +
-            `<input type="text" class="form-control" data-role-name value="${esc(role.name)}" placeholder="Role name" aria-label="Role name">` +
-            `<code class="module-access__id">${esc(role.id)}</code>` +
-            `</div>` +
-            limitsHtml +
-            `<div class="module-access__groups">${this._renderGroups(new Set(role.permissions))}</div>` +
-            `</div>`
+                `<div class="module-access__head">` +
+                `<input type="text" class="form-control" data-role-name value="${esc(role.name)}" placeholder="Role name" aria-label="Role name">` +
+                `<code class="module-access__id">${esc(role.id)}</code>` +
+                `</div>` +
+                limitsHtml +
+                `<div class="module-access__groups">${this._renderGroups(new Set(role.permissions))}</div>` +
+                `</div>`,
+        )
     }
 }
 

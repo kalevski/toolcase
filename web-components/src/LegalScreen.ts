@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { msg } from './messages'
 import { closeIcon } from './icons'
@@ -154,21 +155,23 @@ export class LegalScreen extends HTMLElement {
                </footer>`
             : ''
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-legal-screen">` +
-            `<header class="tc-legal-screen__header">` +
-            `<div class="tc-legal-screen__header-meta">` +
-            `<span class="tc-legal-screen__eyebrow">Legal</span>` +
-            `<span class="tc-legal-screen__title">${esc(this.screenTitle)}</span>` +
-            `</div>` +
-            `<button type="button" class="tc-legal-screen__close" aria-label="${esc(msg('close'))}">${closeIcon}</button>` +
-            `</header>` +
-            `<div class="tc-legal-screen__grid">` +
-            `<nav class="tc-legal-screen__nav" aria-label="Legal sections">${navHtml}</nav>` +
-            `<div class="tc-legal-screen__body">${bodyHtml}</div>` +
-            `</div>` +
-            footerHtml +
-            `</div>`
+                `<header class="tc-legal-screen__header">` +
+                `<div class="tc-legal-screen__header-meta">` +
+                `<span class="tc-legal-screen__eyebrow">Legal</span>` +
+                `<span class="tc-legal-screen__title">${esc(this.screenTitle)}</span>` +
+                `</div>` +
+                `<button type="button" class="tc-legal-screen__close" aria-label="${esc(msg('close'))}">${closeIcon}</button>` +
+                `</header>` +
+                `<div class="tc-legal-screen__grid">` +
+                `<nav class="tc-legal-screen__nav" aria-label="Legal sections">${navHtml}</nav>` +
+                `<div class="tc-legal-screen__body">${bodyHtml}</div>` +
+                `</div>` +
+                footerHtml +
+                `</div>`,
+        )
     }
 }
 

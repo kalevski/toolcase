@@ -1,3 +1,5 @@
+import { patchHtml } from './internal/patch-html'
+import { adoptChildren } from './internal/adopt-children'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -23,7 +25,9 @@ export class SettingsCategoryList extends HTMLElement {
 
     connectedCallback(): void {
         if (!this._initialised) {
+            const slotContent = Array.from(this.childNodes)
             this._ensureSkeleton()
+            this._adopt(slotContent)
             this._initialised = true
         }
         this._renderNav()
@@ -61,21 +65,31 @@ export class SettingsCategoryList extends HTMLElement {
         else this.removeAttribute('selected-id')
     }
 
-    /** Build the permanent two-column skeleton once and redistribute existing children into the body. */
+    /**
+     * Build the permanent nav column + an (initially empty) body column once.
+     * The body column has to be a single real element — not the consumer's raw
+     * children left as direct siblings of nav — because CSS grid places each
+     * direct child in its OWN cell: with more than one body child, odd-indexed
+     * ones would land back in the narrow nav column on a new row instead of
+     * flowing under the wide column. `adoptChildren` (see adopt-children.ts) is
+     * what makes moving them into that div safe for react-dom (rule 1's one
+     * sanctioned exception) — a raw `body.appendChild(child)` here is what used
+     * to make `removeChild` throw.
+     */
     private _ensureSkeleton(): void {
-        if (this.querySelector('[data-tc-settings-nav]')) return
-        const bodyChildren = Array.from(this.childNodes)
-        const nav = document.createElement('nav')
-        nav.setAttribute('data-tc-settings-nav', '')
-        nav.setAttribute('role', 'tablist')
-        nav.setAttribute('aria-label', 'Settings categories')
-        nav.className = 'tc-settings-category-list-nav'
-        const body = document.createElement('div')
-        body.setAttribute('data-tc-settings-body', '')
-        body.setAttribute('role', 'tabpanel')
-        body.className = 'tc-settings-category-list-body'
-        bodyChildren.forEach((n) => body.appendChild(n))
-        this.replaceChildren(nav, body)
+        this.setAttribute('role', 'tabpanel')
+        patchHtml(
+            this,
+            '<nav data-tc-settings-nav role="tablist" aria-label="Settings categories"' +
+                ' class="tc-settings-category-list-nav"></nav>' +
+                '<div class="tc-settings-category-list-body" data-tc-settings-body></div>',
+        )
+    }
+
+    /** The consumer's own children are the body content — see adopt-children.ts. */
+    private _adopt(nodes?: Node[]): void {
+        const body = this.querySelector<HTMLElement>('[data-tc-settings-body]')
+        if (body) adoptChildren(this, () => body, nodes)
     }
 
     /** Rebuild the full nav list from `categories` (called on initial render and when categories change). */

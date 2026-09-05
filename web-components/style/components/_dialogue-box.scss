@@ -58,6 +58,14 @@ tc-dialogue-box:has(.tc-dialogue-box-choices) {
     cursor: default;
 }
 
+// The host is focusable (tabindex managed in JS) whenever there's still
+// something for Enter/Space to do — fast-forward mid-type, or advance once
+// revealed when there are no choices. Same treatment as the choice buttons below.
+tc-dialogue-box:focus-visible {
+    outline: 2px solid var(--tc-app-accent);
+    outline-offset: 2px;
+}
+
 .tc-dialogue-box-speaker {
     margin-bottom: var(--bs-dialogue-box-gap);
     padding-bottom: var(--bs-dialogue-box-speaker-pad);

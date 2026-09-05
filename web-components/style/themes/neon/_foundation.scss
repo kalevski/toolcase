@@ -26,7 +26,10 @@
 //   and the cyan family for "signature" lit details.
 //
 // AESTHETIC: deep navy-purple void (#05030f → #1d1444), magenta + cyan neon
-// accents, faint violet hairlines, layered translucent surfaces, magenta glow.
+// accents bridged by an electric violet (#c94dff) — the CTA fill sweeps
+// magenta→violet and the display text runs magenta→violet→cyan, so the two
+// signature hues read as the ends of ONE spectrum instead of two unrelated
+// stickers; violet-tinted hairlines, layered translucent surfaces, magenta glow.
 // SHARP corners are kept (border-radius: 0; circles only) — consistent with the
 // toolcase mandate and the aurora/dungeon themes; neon's identity is the dual
 // palette + glow, not rounded (or clipped) corners.
@@ -56,11 +59,12 @@ tc-theme[name='neon'],
     --nd-surface-2: #140d31;
     --nd-surface-3: #1d1444;
 
-    // Hairlines — translucent BLACK so resting edges read as subtle dark grooves
-    // (not bright violet-white lines) on any surface depth; the strong tier stays
+    // Hairlines — translucent LILAC rather than flat white: identical luminance
+    // lift, but a resting edge picks up the void's violet cast instead of
+    // reading as a grey line ruled over a purple surface. The strong tier stays
     // magenta so hover/emphasis edges still light up neon.
-    --nd-border-faint: rgba(255, 255, 255, 0.07);
-    --nd-border: rgba(255, 255, 255, 0.14);
+    --nd-border-faint: rgba(214, 186, 255, 0.08);
+    --nd-border: rgba(214, 186, 255, 0.15);
     --nd-border-strong: rgba(255, 43, 214, 0.34);
 
     // Text ramp — lilac-white down to muted violet-grey.
@@ -74,9 +78,12 @@ tc-theme[name='neon'],
     // Magenta accent — the PRIMARY signature hue (buttons, CTAs, links).
     --nd-accent: #ff2bd6;
     --nd-accent-hover: #ff5ee0;
-    // Pink second stop for the primary FILL gradient — keeps the dark-ink label
-    // legible across the whole magenta→pink sweep.
-    --nd-accent-2: #ff5fb8;
+    // VIOLET second stop for the primary FILL gradient. The old #ff5fb8 was a
+    // pink 13° from the magenta — the gradient read as one flat fill. Violet is
+    // ~26° the other way and lands on the cyan side of the wheel, so the sweep
+    // is visible AND it ties the magenta primary to the cyan signature. Bright
+    // enough that the dark-ink label still clears AA (~5.4:1) at the far stop.
+    --nd-accent-2: #c94dff;
     --nd-accent-bright: #ff86e4; // accent-coloured TEXT on the dark surfaces
     --nd-accent-ink: #0b0218; // dark-ink label ON a bright accent fill
     --nd-accent-soft: rgba(255, 43, 214, 0.14);
@@ -94,11 +101,15 @@ tc-theme[name='neon'],
     // Violet — the tertiary glow accent for the ambient field.
     --nd-violet: #8a4bff;
 
-    // Semantic element colours — bright tones legible on the dark void.
-    --nd-success: #3ce88f;
-    --nd-info: #5b9dff;
-    --nd-warn: #ffb454;
-    --nd-danger: #ff5d6c;
+    // Semantic element colours — bright tones legible on the dark void, each
+    // held clear of the two signature hues: success moves to a true green (145°)
+    // so it is not read as a dim cyan, info becomes a periwinkle (230°) that
+    // belongs to the violet family instead of a stock Bootstrap blue sitting
+    // between magenta and cyan, and danger swings red-ward off the magenta.
+    --nd-success: #3df58d;
+    --nd-info: #6f86ff;
+    --nd-warn: #ffbe3d;
+    --nd-danger: #ff3b5c;
 
     // Typography families.
     --nd-display: 'Orbitron', 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -108,7 +119,7 @@ tc-theme[name='neon'],
     --nd-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
 
     // ── Reusable signature recipes (referenced by component partials) ────────
-    // The magenta→pink gradient — primary action / CTA FILLS that carry a
+    // The magenta→violet gradient — primary action / CTA FILLS that carry a
     // dark-ink label, so contrast holds across the whole sweep.
     --nd-accent-grad: linear-gradient(135deg, var(--nd-accent), var(--nd-accent-2));
     // The DUAL magenta→cyan gradient — for clipped neon display TEXT only
@@ -116,7 +127,7 @@ tc-theme[name='neon'],
     --nd-accent-grad-text: linear-gradient(
         120deg,
         var(--nd-accent) 0%,
-        #ff88e6 45%,
+        var(--nd-accent-2) 48%,
         var(--nd-cyan) 100%
     );
     // Soft top-down surface gradient for cards / panels.
@@ -125,7 +136,7 @@ tc-theme[name='neon'],
     --nd-glow: 0 0 22px -2px var(--nd-accent-shadow), 0 8px 26px -8px rgba(0, 0, 0, 0.6);
     --nd-glow-strong: 0 0 38px -2px var(--nd-accent-shadow), 0 14px 34px -8px rgba(0, 0, 0, 0.7);
     // Hairline top highlight — "light catches the top edge".
-    --nd-bevel-top: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    --nd-bevel-top: inset 0 1px 0 rgba(214, 186, 255, 0.08);
     // Ambient neon glow field for full-bleed backdrops (magenta + cyan + violet).
     --nd-glow-field:
         radial-gradient(820px 520px at 78% -8%, var(--nd-accent-glow), transparent 60%),
@@ -169,7 +180,7 @@ tc-theme[name='neon'],
     --tc-app-accent: var(--nd-accent);
     --tc-app-accent-hover: var(--nd-accent-hover);
     --tc-app-accent-contrast: var(--nd-accent-ink);
-    // Primary-action gradient → full magenta→pink (no slate stop), so the dark-ink
+    // Primary-action gradient → full magenta→violet (no slate stop), so the dark-ink
     // on-fill text stays legible across the whole sweep. Mirrors the .btn-primary
     // override; pointing the shared token here fixes every CTA that used the base
     // `var(--tc-app-accent), #2b3a51` gradient (it became magenta→slate here).
@@ -184,13 +195,13 @@ tc-theme[name='neon'],
     --tc-cyan: var(--nd-cyan);
 
     --tc-success: var(--nd-success);
-    --tc-success-bg: rgba(60, 232, 143, 0.16);
+    --tc-success-bg: rgba(61, 245, 141, 0.16);
     --tc-info: var(--nd-info);
-    --tc-info-bg: rgba(91, 157, 255, 0.16);
+    --tc-info-bg: rgba(111, 134, 255, 0.16);
     --tc-warning: var(--nd-warn);
-    --tc-warning-bg: rgba(255, 180, 84, 0.16);
+    --tc-warning-bg: rgba(255, 190, 61, 0.16);
     --tc-danger: var(--nd-danger);
-    --tc-danger-bg: rgba(255, 93, 108, 0.16);
+    --tc-danger-bg: rgba(255, 59, 92, 0.16);
 
     // Shadows lean dark + deep; surfaces lean on hairlines + neon glow accents.
     --tc-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
@@ -210,17 +221,17 @@ tc-theme[name='neon'],
     --bs-secondary: var(--nd-text-2);
     --bs-secondary-rgb: 192, 180, 228;
     --bs-success: var(--nd-success);
-    --bs-success-rgb: 60, 232, 143;
-    --bs-success-contrast: var(--nd-accent-ink); // bright mint — white text fails (~1.6:1)
+    --bs-success-rgb: 61, 245, 141;
+    --bs-success-contrast: var(--nd-accent-ink); // bright green — white text fails (~1.5:1)
     --bs-danger: var(--nd-danger);
-    --bs-danger-rgb: 255, 93, 108;
-    --bs-danger-contrast: var(--nd-accent-ink); // light coral-pink — white text fails (~3:1)
+    --bs-danger-rgb: 255, 59, 92;
+    --bs-danger-contrast: var(--nd-accent-ink); // hot red — white text fails (~3.4:1)
     --bs-warning: var(--nd-warn);
-    --bs-warning-rgb: 255, 180, 84;
+    --bs-warning-rgb: 255, 190, 61;
     --bs-warning-contrast: var(--nd-accent-ink); // light amber — white text fails (~1.8:1)
     --bs-info: var(--nd-info);
-    --bs-info-rgb: 91, 157, 255;
-    --bs-info-contrast: var(--nd-accent-ink); // mid-bright blue — white text fails (~2.7:1)
+    --bs-info-rgb: 111, 134, 255;
+    --bs-info-contrast: var(--nd-accent-ink); // periwinkle — white text fails (~2.9:1)
     --bs-light: var(--nd-text);
     --bs-light-rgb: 243, 233, 255;
     --bs-dark: var(--nd-bg);

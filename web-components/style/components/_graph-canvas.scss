@@ -1,0 +1,56 @@
+// tc-graph-canvas — a radial tidy tree.
+//
+// The element draws the guides and PUBLISHES a position per node as
+// `--tc-node-x/y/scale`; your node boxes are direct children carrying
+// `data-node-id` and are placed by the rules here. Nothing is moved into a
+// wrapper, so a conditionally-rendered node is safe.
+
+tc-graph-canvas {
+    --bs-graph-canvas-bg: transparent;
+    --bs-graph-canvas-spoke-color: var(--tc-border);
+    --bs-graph-canvas-spoke-width: 1.5;
+}
+
+.tc-graph-canvas {
+    position: relative;
+    display: block;
+    // Sized from the layout's own reach, so the drawing is never clipped and the
+    // scroll container around it knows how much there is.
+    width: var(--tc-graph-extent, 100%);
+    height: var(--tc-graph-extent, 100%);
+    margin: 0 auto;
+    background: var(--bs-graph-canvas-bg);
+}
+
+.tc-graph-canvas__guides {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    // Behind every node box, and never in the way of a pointer.
+    pointer-events: none;
+}
+
+.tc-graph-canvas__spoke {
+    stroke: var(--bs-graph-canvas-spoke-color);
+    stroke-width: var(--bs-graph-canvas-spoke-width);
+}
+
+// A placed node. Centred on its own point — `translate(-50%, -50%)` before the
+// offset, so a card's CENTRE lands on the layout's coordinate rather than its
+// top-left corner, which is what makes the spokes meet the cards.
+.tc-graph-canvas > [data-node-id][data-placed] {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) translate(var(--tc-node-x, 0px), var(--tc-node-y, 0px))
+        scale(var(--tc-node-scale, 1));
+}
+
+// A node the layout does not know about is left where it is rather than hidden:
+// a consumer may be animating one out, and a canvas that deletes state it does
+// not understand is a canvas nobody trusts.
+.tc-graph-canvas > [data-node-id]:not([data-placed]) {
+    position: absolute;
+    visibility: hidden;
+}

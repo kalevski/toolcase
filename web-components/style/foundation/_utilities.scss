@@ -514,3 +514,28 @@ body.modal-open {
     line-clamp: 2;
     -webkit-box-orient: vertical;
 }
+
+// ── Stretched controls ───────────────────────────────────────────────────────
+//
+// A control that covers its host instead of wrapping its host's children. This is
+// how tc-link, tc-nav-item, tc-breadcrumb-item, tc-dropdown-item and
+// tc-list-group-item keep a real <a>/<button> — focus, middle-click, "copy link
+// address", form submission — while the label they were given stays exactly where
+// the consumer (and react-dom) put it. Rule 1: never move a node you did not make.
+.tc-hit-overlay {
+    position: absolute;
+    inset: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    text-decoration: none;
+    color: inherit;
+}
+
+tc-nav-item,
+tc-breadcrumb-item,
+tc-dropdown-item,
+tc-list-group-item,
+tc-link {
+    position: relative;
+}

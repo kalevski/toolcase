@@ -1,0 +1,126 @@
+// tc-value-in-range — where one figure sits inside a distribution.
+//
+// Not a chart: no axes, no legend, no series. A track, the ticks of the things
+// being compared against, and one marker. Every part is element-owned.
+
+tc-value-in-range {
+    --bs-value-in-range-track-height: 6px;
+    --bs-value-in-range-track-bg: var(--tc-surface-muted);
+    --bs-value-in-range-fill-bg: var(--tc-surface-hover, var(--tc-surface-muted));
+    --bs-value-in-range-tick-color: var(--tc-border-strong, var(--tc-border));
+    --bs-value-in-range-marker-size: 12px;
+    --bs-value-in-range-marker-color: var(--tc-app-accent, var(--tc-primary));
+    --bs-value-in-range-label-size: 0.8125rem;
+    --bs-value-in-range-value-size: 0.8125rem;
+    --bs-value-in-range-end-size: 0.6875rem;
+    --bs-value-in-range-caption-size: 0.75rem;
+}
+
+.tc-value-in-range {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    min-width: 0;
+}
+
+.tc-value-in-range__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.tc-value-in-range__label {
+    font-size: var(--bs-value-in-range-label-size);
+    font-weight: 600;
+    color: var(--tc-text);
+}
+
+// The raw figure, beside the label and never on the track — the position IS the
+// answer; this is the same fact in the units the anchors translate away from.
+.tc-value-in-range__value {
+    font-size: var(--bs-value-in-range-value-size);
+    font-variant-numeric: tabular-nums;
+    color: var(--tc-text-muted);
+}
+
+.tc-value-in-range__track {
+    position: relative;
+    height: var(--bs-value-in-range-track-height);
+    background: var(--bs-value-in-range-track-bg);
+    border-radius: 0;
+}
+
+.tc-value-in-range__fill {
+    position: absolute;
+    inset: 0;
+    background: var(--bs-value-in-range-fill-bg);
+}
+
+.tc-value-in-range__ticks {
+    position: absolute;
+    inset: 0;
+}
+
+.tc-value-in-range__tick {
+    position: absolute;
+    top: -2px;
+    bottom: -2px;
+    width: 1px;
+    background: var(--bs-value-in-range-tick-color);
+    transform: translateX(-0.5px);
+}
+
+// The marker is the one circle this library allows itself: it is a POINT on a
+// line, and a square point reads as a segment.
+.tc-value-in-range__marker {
+    position: absolute;
+    top: 50%;
+    width: var(--bs-value-in-range-marker-size);
+    height: var(--bs-value-in-range-marker-size);
+    margin-left: calc(var(--bs-value-in-range-marker-size) / -2);
+    margin-top: calc(var(--bs-value-in-range-marker-size) / -2);
+    background: var(--bs-value-in-range-marker-color);
+    border: 2px solid var(--tc-surface);
+    border-radius: 50%;
+}
+
+.tc-value-in-range__ends {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: var(--bs-value-in-range-end-size);
+    color: var(--tc-text-faint);
+}
+
+.tc-value-in-range__end--high {
+    text-align: end;
+}
+
+.tc-value-in-range__caption {
+    font-size: var(--bs-value-in-range-caption-size);
+    line-height: 1.45;
+    color: var(--tc-text-muted);
+}
+
+// Two rows instead of three: the caption moves out to whatever expander the
+// surface already has.
+.tc-value-in-range--compact .tc-value-in-range__caption {
+    display: none;
+}
+
+.tc-value-in-range--success {
+    --bs-value-in-range-marker-color: var(--tc-success);
+}
+.tc-value-in-range--warning {
+    --bs-value-in-range-marker-color: var(--tc-warning);
+}
+.tc-value-in-range--danger {
+    --bs-value-in-range-marker-color: var(--tc-danger);
+}
+.tc-value-in-range--info {
+    --bs-value-in-range-marker-color: var(--tc-info);
+}
+.tc-value-in-range--neutral {
+    --bs-value-in-range-marker-color: var(--tc-text-muted);
+}

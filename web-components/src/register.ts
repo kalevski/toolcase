@@ -371,9 +371,44 @@ import { SkillBar } from './SkillBar'
 import { SkillTree } from './SkillTree'
 import { Stack } from './Stack'
 import { StatsScreen } from './StatsScreen'
+import { LockChip } from './LockChip'
+import { LockedAction } from './LockedAction'
+import { UpgradeNudge } from './UpgradeNudge'
+import { FloatingActionBar } from './FloatingActionBar'
+import { HintTip } from './HintTip'
+import { FilterTrigger } from './FilterTrigger'
+import { ResultsHeader } from './ResultsHeader'
+import { SignInGate } from './SignInGate'
+import { SearchBar } from './SearchBar'
+import { SegmentedToggle } from './SegmentedToggle'
+import { ConfirmSheet } from './ConfirmSheet'
+import { FacetPicker } from './FacetPicker'
+import { RangeField } from './RangeField'
+import { ValueInRange } from './ValueInRange'
+import { TreePicker } from './TreePicker'
+import { ConditionBuilder } from './ConditionBuilder'
+import { QrScanSheet } from './QrScanSheet'
+import { EditorShell } from './EditorShell'
+import { DesignCanvas } from './DesignCanvas'
+import { Artboard } from './Artboard'
+import { ZoomControl } from './ZoomControl'
+import { FilterBar } from './FilterBar'
+import { PreviewFrame } from './PreviewFrame'
+import { GraphSigil } from './GraphSigil'
+import { BeadTrail } from './BeadTrail'
+import { GraphCanvas } from './GraphCanvas'
+import { installPropertyReplay } from './internal/tc-element'
 
 function define(tag: string, ctor: CustomElementConstructor): void {
-    if (!customElements.get(tag)) customElements.define(tag, ctor)
+    if (customElements.get(tag)) return
+    // Rule 3, applied to every element in one place: a property written to a
+    // tc-* element BEFORE this call became an own data property that would
+    // permanently shadow the accessor installed here. installPropertyReplay
+    // wraps connectedCallback so the shadow is dropped and the value replayed
+    // through the real setter. Registering from a dynamic import — what the
+    // README recommends for Next.js — is exactly the case that needs it.
+    installPropertyReplay(ctor)
+    customElements.define(tag, ctor)
 }
 
 export function register(): void {
@@ -788,4 +823,44 @@ export function register(): void {
     define('tc-stats-screen', StatsScreen)
     define('tc-version-label', VersionLabel)
     define('tc-module-access', ModuleAccess)
+
+    // ── Entitlement surfaces ────────────────────────────────────────────────
+    // Written identically in polovni.mk, webgame.cloud and mindmap — an existing
+    // shared library that nobody had extracted.
+    define('tc-lock-chip', LockChip)
+    define('tc-locked-action', LockedAction)
+    define('tc-upgrade-nudge', UpgradeNudge)
+    define('tc-floating-action-bar', FloatingActionBar)
+
+    // ── Browse and filter surfaces ──────────────────────────────────────────
+    define('tc-hint-tip', HintTip)
+    define('tc-filter-trigger', FilterTrigger)
+    define('tc-results-header', ResultsHeader)
+    define('tc-sign-in-gate', SignInGate)
+    define('tc-search-bar', SearchBar)
+    define('tc-segmented-toggle', SegmentedToggle)
+    define('tc-confirm-sheet', ConfirmSheet)
+
+    // ── Narrowing, ranges and rules ─────────────────────────────────────────
+    define('tc-facet-picker', FacetPicker)
+    define('tc-range-field', RangeField)
+    define('tc-value-in-range', ValueInRange)
+    define('tc-tree-picker', TreePicker)
+    define('tc-condition-builder', ConditionBuilder)
+    define('tc-filter-bar', FilterBar)
+    define('tc-qr-scan-sheet', QrScanSheet)
+
+    // ── The editor family ───────────────────────────────────────────────────
+    // tc-editor-shell also covers webgame.cloud's ToolShell/ToolWorkspace —
+    // the same grid under a different vocabulary.
+    define('tc-editor-shell', EditorShell)
+    define('tc-design-canvas', DesignCanvas)
+    define('tc-artboard', Artboard)
+    define('tc-zoom-control', ZoomControl)
+    define('tc-preview-frame', PreviewFrame)
+
+    // ── Tree identity and place ─────────────────────────────────────────────
+    define('tc-graph-sigil', GraphSigil)
+    define('tc-bead-trail', BeadTrail)
+    define('tc-graph-canvas', GraphCanvas)
 }

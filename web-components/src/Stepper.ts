@@ -1,6 +1,8 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { Check } from 'lucide-static'
 import { icon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-stepper'
 
@@ -79,7 +81,7 @@ export class Stepper extends HTMLElement {
         return ORIENTATIONS.includes(v) ? v : 'horizontal'
     }
     set orientation(v: StepperOrientation) {
-        this.setAttribute('orientation', v)
+        setAttr(this, 'orientation', v)
     }
 
     get clickable(): boolean {
@@ -161,7 +163,10 @@ export class Stepper extends HTMLElement {
             })
             .join('')
 
-        this.innerHTML = `<div class="tc-stepper tc-stepper-${orientation}" role="list">${stepsHtml}</div>`
+        patchHtml(
+            this,
+            `<div class="tc-stepper tc-stepper-${orientation}" role="list">${stepsHtml}</div>`,
+        )
     }
 }
 

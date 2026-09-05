@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -138,7 +139,7 @@ export class MenuItem extends HTMLElement {
             parts.push(`<kbd class="tc-menu-item-hotkey">${esc(hotkey)}</kbd>`)
         }
 
-        this.innerHTML = parts.join('')
+        patchHtml(this, parts.join(''))
     }
 }
 

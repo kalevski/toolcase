@@ -1,3 +1,4 @@
+import { markOwned, patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 import { chevronLeftIcon, chevronRightIcon } from './icons'
@@ -280,6 +281,12 @@ export class TestimonialCarousel extends HTMLElement {
 
     // Surgically swap only the active slide so focus on the controls is kept and
     // the CSS enter animation re-runs (replacing the node restarts the keyframes).
+    //
+    // The new node is hand-built (not run through patchHtml), so it has to be
+    // markOwned'd into the same default region full renders use — otherwise the
+    // next full render() (e.g. a new `items` assignment) doesn't recognise it as
+    // its own, can't reconcile it, and leaves it orphaned in the DOM as a second,
+    // stale `.tc-testimonial-carousel-slide` alongside the freshly patched one.
     private _renderSlide(): void {
         const slide = this.querySelector('.tc-testimonial-carousel-slide')
         const item = this._items[this._active]
@@ -287,7 +294,10 @@ export class TestimonialCarousel extends HTMLElement {
         const tmp = document.createElement('div')
         tmp.innerHTML = this._slideHtml(item)
         const next = tmp.firstElementChild
-        if (next) slide.replaceWith(next)
+        if (next) {
+            markOwned(next, this)
+            slide.replaceWith(next)
+        }
     }
 
     private _updateDots(): void {
@@ -306,9 +316,11 @@ export class TestimonialCarousel extends HTMLElement {
         const label = esc(this._ariaLabel())
 
         if (items.length === 0) {
-            this.innerHTML =
+            patchHtml(
+                this,
                 `<div class="tc-testimonial-carousel" role="region" ` +
-                `aria-roledescription="carousel" aria-label="${label}"></div>`
+                    `aria-roledescription="carousel" aria-label="${label}"></div>`,
+            )
             return
         }
 
@@ -321,15 +333,17 @@ export class TestimonialCarousel extends HTMLElement {
             : ''
         const dots = multi ? this._dotsHtml() : ''
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-testimonial-carousel" role="region" aria-roledescription="carousel" aria-label="${label}">` +
-            `<div class="tc-testimonial-carousel-track">` +
-            prevBtn +
-            this._slideHtml(items[this._active]) +
-            nextBtn +
-            `</div>` +
-            dots +
-            `</div>`
+                `<div class="tc-testimonial-carousel-track">` +
+                prevBtn +
+                this._slideHtml(items[this._active]) +
+                nextBtn +
+                `</div>` +
+                dots +
+                `</div>`,
+        )
     }
 }
 

@@ -1,8 +1,10 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { VARIANTS_CORE } from './internal/variants'
 import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 import { ActionItem } from './ActionItems'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-build'
 
@@ -119,7 +121,7 @@ export class Build extends HTMLElement {
         return STATUSES.includes(v) ? v : 'queued'
     }
     set status(v: BuildStatus) {
-        this.setAttribute('status', v)
+        setAttr(this, 'status', v)
     }
 
     get badge(): string | null {
@@ -135,7 +137,7 @@ export class Build extends HTMLElement {
         return BADGE_VARIANTS.includes(v) ? v : 'secondary'
     }
     set badgeVariant(v: BuildBadgeVariant) {
-        this.setAttribute('badge-variant', v)
+        setAttr(this, 'badge-variant', v)
     }
 
     get loading(): boolean {
@@ -223,17 +225,19 @@ export class Build extends HTMLElement {
 
     private render(): void {
         if (this.loading) {
-            this.innerHTML = [
-                '<div class="tc-build tc-build--loading" aria-busy="true">',
-                '<span class="tc-build-status-icon-wrap tc-build-skeleton tc-build-skeleton--icon" aria-hidden="true">',
-                '<span class="visually-hidden" role="status">Loading…</span>',
-                '</span>',
-                '<div class="tc-build-body">',
-                '<div class="tc-build-skeleton tc-build-skeleton--name" aria-hidden="true"></div>',
-                '<div class="tc-build-skeleton tc-build-skeleton--meta" aria-hidden="true"></div>',
-                '</div>',
-                '</div>',
-            ].join('')
+            patchHtml(
+                this,
+                [
+                    '<div class="tc-build tc-build--loading" aria-busy="true">',
+                    '<span class="tc-build-status-icon-wrap tc-build-skeleton tc-build-skeleton--icon" aria-hidden="true"></span>',
+                    '<div class="tc-build-body">',
+                    '<div class="tc-build-skeleton tc-build-skeleton--name" aria-hidden="true"></div>',
+                    '<div class="tc-build-skeleton tc-build-skeleton--meta" aria-hidden="true"></div>',
+                    '</div>',
+                    '<span class="visually-hidden" role="status">Loading…</span>',
+                    '</div>',
+                ].join(''),
+            )
             return
         }
 
@@ -288,19 +292,22 @@ export class Build extends HTMLElement {
               ].join('')
             : ''
 
-        this.innerHTML = [
-            `<div class="tc-build tc-build--status-${status}${clickableClass}${menuClass}"${tabindexAttr}>`,
-            `<span class="tc-build-status-icon-wrap" role="img" aria-label="${esc(ariaLabel)}">`,
-            statusIconHtml,
-            '</span>',
-            '<div class="tc-build-body">',
-            nameVal != null ? `<div class="tc-build-name">${esc(nameVal)}</div>` : '',
-            metaHtml,
-            badgeHtml,
-            '</div>',
-            menuHtml,
-            '</div>',
-        ].join('')
+        patchHtml(
+            this,
+            [
+                `<div class="tc-build tc-build--status-${status}${clickableClass}${menuClass}"${tabindexAttr}>`,
+                `<span class="tc-build-status-icon-wrap" role="img" aria-label="${esc(ariaLabel)}">`,
+                statusIconHtml,
+                '</span>',
+                '<div class="tc-build-body">',
+                nameVal != null ? `<div class="tc-build-name">${esc(nameVal)}</div>` : '',
+                metaHtml,
+                badgeHtml,
+                '</div>',
+                menuHtml,
+                '</div>',
+            ].join(''),
+        )
     }
 
     private _bindListeners(): void {
@@ -308,14 +315,14 @@ export class Build extends HTMLElement {
         if (!inner) return
 
         // Whole-card click (ignore clicks inside the menu wrapper)
-        inner.addEventListener('click', (e: Event) => {
+        bindOnce(inner, 'click', (e: Event) => {
             if ((e.target as HTMLElement).closest('.tc-build-menu-wrapper')) return
             this.dispatchEvent(new CustomEvent('tc-click', { bubbles: true, composed: true }))
             if (typeof this._onClick === 'function') this._onClick()
         })
 
         // Keyboard activation on the card div when acting as a button
-        inner.addEventListener('keydown', (e: Event) => {
+        bindOnce(inner, 'keydown', (e: Event) => {
             const ke = e as KeyboardEvent
             if (ke.key === 'Enter' || ke.key === ' ') {
                 if ((ke.target as HTMLElement).closest('.tc-build-menu-wrapper')) return
@@ -328,27 +335,25 @@ export class Build extends HTMLElement {
         // Menu trigger
         const trigger = this._getTrigger()
         if (trigger) {
-            trigger.addEventListener('click', (e: Event) => {
+            bindOnce(trigger, 'click', (e: Event) => {
                 e.stopPropagation()
                 if (this._isMenuOpen) this._closeMenu()
                 else this._openMenu()
             })
-            trigger.addEventListener('keydown', (e: Event) =>
-                this._onTriggerKeydown(e as KeyboardEvent),
-            )
+            bindOnce(trigger, 'keydown', (e: Event) => this._onTriggerKeydown(e as KeyboardEvent))
         }
 
         // Menu keyboard navigation
         const menu = this._getMenu()
         if (menu) {
-            menu.addEventListener('keydown', (e: Event) => this._onMenuKeydown(e as KeyboardEvent))
+            bindOnce(menu, 'keydown', (e: Event) => this._onMenuKeydown(e as KeyboardEvent))
         }
 
         // Menu item clicks
         Array.from(
             this.querySelectorAll<HTMLButtonElement>('.tc-build-menu-item:not([disabled])'),
         ).forEach((btn) => {
-            btn.addEventListener('click', () => {
+            bindOnce(btn, 'click', () => {
                 const idx = parseInt(btn.dataset.idx ?? '-1', 10)
                 if (idx >= 0 && idx < this._menuItems.length) {
                     this._selectItem(this._menuItems[idx].key)

@@ -1,4 +1,6 @@
+import { patchHtml } from './internal/patch-html'
 import { escapeHtml, renderResourceBarTrack } from './internal/resourceBar'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-boss-bar'
 
@@ -26,14 +28,14 @@ export class BossBar extends HTMLElement {
         return this.getAttribute('name') ?? ''
     }
     set name(v: string) {
-        this.setAttribute('name', v)
+        setAttr(this, 'name', v)
     }
 
     get epithet(): string {
         return this.getAttribute('epithet') ?? ''
     }
     set epithet(v: string) {
-        this.setAttribute('epithet', v)
+        setAttr(this, 'epithet', v)
     }
 
     get phase(): number {
@@ -96,14 +98,16 @@ export class BossBar extends HTMLElement {
             label: name || 'Boss health',
         })
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-boss-bar__header">` +
-            `<span class="tc-boss-bar__name">${escapeHtml(name)}</span>` +
-            epithetMarkup +
-            `<span class="tc-boss-bar__phase">Phase ${phase}</span>` +
-            `</div>` +
-            track +
-            `<div class="tc-boss-bar__numeric">${Math.round(hp)} / ${Math.round(hpMax)}</div>`
+                `<span class="tc-boss-bar__name">${escapeHtml(name)}</span>` +
+                epithetMarkup +
+                `<span class="tc-boss-bar__phase">Phase ${phase}</span>` +
+                `</div>` +
+                track +
+                `<div class="tc-boss-bar__numeric">${Math.round(hp)} / ${Math.round(hpMax)}</div>`,
+        )
     }
 }
 

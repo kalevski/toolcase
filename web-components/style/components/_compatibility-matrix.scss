@@ -115,7 +115,14 @@ tc-compatibility-matrix {
 }
 
 .tc-compatibility-matrix__corner {
-    // Top-left corner cell — no label, background matches header.
+    // Top-left corner cell — no label. Pinned in lockstep with the sticky version
+    // column below it (same left/z-index/background/border-right) so the two stay
+    // aligned instead of the corner scrolling away while the version column stays put.
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--bs-compatibility-matrix-head-bg);
+    border-right: var(--bs-compatibility-matrix-border);
 }
 
 .tc-compatibility-matrix__platform-head {

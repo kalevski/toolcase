@@ -1,3 +1,5 @@
+import { patchHtml } from './internal/patch-html'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-controller-layout-preview'
 
 export type ControllerLayout = 'xbox' | 'playstation' | 'nintendo' | 'generic'
@@ -46,7 +48,7 @@ export class ControllerLayoutPreview extends HTMLElement {
         return LAYOUTS.includes(raw) ? raw : 'generic'
     }
     set layout(value: ControllerLayout) {
-        this.setAttribute('layout', value)
+        setAttr(this, 'layout', value)
     }
 
     // The glyph each face button carries for the active layout. These are the
@@ -123,7 +125,9 @@ export class ControllerLayoutPreview extends HTMLElement {
                 <text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="central" class="tc-controller-layout-preview__glyph">${this.glyph(layout, pos)}</text>`
         }
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <svg class="tc-controller-layout-preview__body" viewBox="0 0 240 140" aria-hidden="true">
                 <path d="M40 30 Q60 18 100 22 L140 22 Q180 18 200 30 Q220 56 218 86 Q210 122 180 124 Q160 118 140 100 L100 100 Q80 118 60 124 Q30 122 22 86 Q20 56 40 30 Z" class="tc-controller-layout-preview__shell" />
                 <!-- D-pad cross (left) — rectangular, stays sharp -->
@@ -141,7 +145,8 @@ export class ControllerLayoutPreview extends HTMLElement {
                 ${button('left')}
             </svg>
             <div class="tc-controller-layout-preview__label">${LABELS[layout]}</div>
-        `
+        `,
+        )
     }
 }
 

@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-lobby'
 
@@ -162,7 +163,9 @@ export class Lobby extends HTMLElement {
             ? `<button type="button" class="tc-lobby-btn tc-lobby-btn--start" data-action="start"${this.canStart ? '' : ' disabled'}>Start Match</button>`
             : ''
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <div class="tc-lobby">
                 <div class="tc-lobby-header">
                     <span class="tc-lobby-eyebrow">Lobby</span>
@@ -172,16 +175,17 @@ export class Lobby extends HTMLElement {
                 <div class="tc-lobby-slots">${slots}</div>
                 <div class="tc-lobby-actions">
                     <button type="button" class="tc-lobby-btn tc-lobby-btn--leave" data-action="leave">Leave</button>
-                    <button type="button" class="${readyBtnCls}" data-action="ready">${readyBtnLabel}</button>
+                    <button type="button" class="${readyBtnCls}" data-action="ready" aria-pressed="${this.isReady}">${readyBtnLabel}</button>
                     ${startBtnHtml}
                 </div>
             </div>
-        `
+        `,
+        )
 
         // Delegate clicks on the fresh actions bar — old container + its
         // listener are garbage-collected together so no leak occurs.
         const actions = this.querySelector<HTMLElement>('.tc-lobby-actions')
-        actions?.addEventListener('click', (e: MouseEvent) => {
+        bindOnce(actions, 'click', (e: MouseEvent) => {
             const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-action]')
             if (!btn || btn.disabled) return
             const action = btn.dataset.action

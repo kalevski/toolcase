@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -237,15 +238,17 @@ export class PageFooter extends HTMLElement {
               `</div>`
             : ''
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<footer class="tc-page-footer" role="contentinfo">` +
-            ctaHtml +
-            `<div class="tc-page-footer-main">` +
-            brandCol +
-            menusHtml +
-            `</div>` +
-            legalHtml +
-            `</footer>`
+                ctaHtml +
+                `<div class="tc-page-footer-main">` +
+                brandCol +
+                menusHtml +
+                `</div>` +
+                legalHtml +
+                `</footer>`,
+        )
     }
 }
 

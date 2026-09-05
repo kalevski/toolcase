@@ -4,411 +4,5617 @@
 // Import via the package's ./react entry point (src/react.ts), which also
 // exports the useTc / useTcEvents runtime hooks.
 //
+// Event props are hyphenated — 'ontc-change', not onTcChange. React turns an
+// unrecognised on* prop on a custom element into addEventListener(key.slice(2))
+// with no case conversion, so only the hyphenated form reaches the real event.
+// The wrapper components in ./react/components take camelCase handlers instead.
+//
 // Regenerate after adding/removing a component or attribute:
-//     npm -w @toolcase/web-components run gen:react-types
+//     npm -w @toolcase/web-components run gen:react
 
 import type * as React from 'react'
+import type {
+    AbilityCard as __AbilityCard$AbilityCard,
+    AbilityCardRarity as __AbilityCard$AbilityCardRarity,
+} from './AbilityCard'
+import type { Accordion as __Accordion$Accordion } from './Accordion'
+import type { AccordionItem as __AccordionItem$AccordionItem } from './AccordionItem'
+import type { ActionBar as __ActionBar$ActionBar } from './ActionBar'
+import type {
+    ActionHeader as __ActionHeader$ActionHeader,
+    ActionHeaderAction as __ActionHeader$ActionHeaderAction,
+} from './ActionHeader'
+import type {
+    ActionItem as __ActionItems$ActionItem,
+    ActionItems as __ActionItems$ActionItems,
+} from './ActionItems'
+import type {
+    ActionRow as __ActionRowList$ActionRow,
+    ActionRowList as __ActionRowList$ActionRowList,
+} from './ActionRowList'
+import type {
+    ActivityCard as __ActivityCard$ActivityCard,
+    ActivityItem as __ActivityCard$ActivityItem,
+} from './ActivityCard'
+import type { AddSlot as __AddSlot$AddSlot, AddSlotTone as __AddSlot$AddSlotTone } from './AddSlot'
+import type {
+    AdvancedTable as __AdvancedTable$AdvancedTable,
+    AdvancedTableColumn as __AdvancedTable$AdvancedTableColumn,
+    AdvancedTableFilter as __AdvancedTable$AdvancedTableFilter,
+    AdvancedTableSort as __AdvancedTable$AdvancedTableSort,
+} from './AdvancedTable'
+import type { Alert as __Alert$Alert, AlertVariant as __Alert$AlertVariant } from './Alert'
+import type { AmmoCounter as __AmmoCounter$AmmoCounter } from './AmmoCounter'
+import type { Anchor as __Anchor$Anchor, AnchorPosition as __Anchor$AnchorPosition } from './Anchor'
+import type {
+    ApiItem as __ApiReferenceTable$ApiItem,
+    ApiReferenceGroup as __ApiReferenceTable$ApiReferenceGroup,
+    ApiReferenceTable as __ApiReferenceTable$ApiReferenceTable,
+} from './ApiReferenceTable'
+import type { AppBar as __AppBar$AppBar, AppBarVariant as __AppBar$AppBarVariant } from './AppBar'
+import type {
+    AreaChart as __AreaChart$AreaChart,
+    AreaChartSeries as __AreaChart$AreaChartSeries,
+} from './AreaChart'
+import type { Artboard as __Artboard$Artboard } from './Artboard'
+import type {
+    ArtboardBackdrop as __ArtboardBackdrop$ArtboardBackdrop,
+    ArtboardBackdropKind as __ArtboardBackdrop$ArtboardBackdropKind,
+    ArtboardBackdropPadding as __ArtboardBackdrop$ArtboardBackdropPadding,
+} from './ArtboardBackdrop'
+import type { AspectRatioBox as __AspectRatioBox$AspectRatioBox } from './AspectRatioBox'
+import type {
+    AssetBundle as __AssetBundle$AssetBundle,
+    AssetBundleAdvancedOptions as __AssetBundle$AssetBundleAdvancedOptions,
+} from './AssetBundle'
+import type { AssetRow as __AssetRow$AssetRow } from './AssetRow'
+import type { AssetRowList as __AssetRowList$AssetRowList } from './AssetRowList'
+import type {
+    AudioMixer as __AudioMixer$AudioMixer,
+    AudioMixerActions as __AudioMixer$AudioMixerActions,
+    AudioMixerDocument as __AudioMixer$AudioMixerDocument,
+    AudioMixerSelectionState as __AudioMixer$AudioMixerSelectionState,
+} from './AudioMixer'
+import type {
+    Avatar as __Avatar$Avatar,
+    AvatarSize as __Avatar$AvatarSize,
+    AvatarStatus as __Avatar$AvatarStatus,
+    AvatarVariant as __Avatar$AvatarVariant,
+} from './Avatar'
+import type {
+    Badge as __Badge$Badge,
+    BadgeSize as __Badge$BadgeSize,
+    BadgeTone as __Badge$BadgeTone,
+    BadgeVariant as __Badge$BadgeVariant,
+} from './Badge'
+import type {
+    BadgeRow as __BadgeRow$BadgeRow,
+    BadgeRowItem as __BadgeRow$BadgeRowItem,
+    BadgeRowSize as __BadgeRow$BadgeRowSize,
+} from './BadgeRow'
+import type { Banner as __Banner$Banner, BannerVariant as __Banner$BannerVariant } from './Banner'
+import type {
+    BarChart as __BarChart$BarChart,
+    BarChartDataItem as __BarChart$BarChartDataItem,
+    BarChartOrientation as __BarChart$BarChartOrientation,
+} from './BarChart'
+import type { BasicCard as __BasicCard$BasicCard } from './BasicCard'
+import type { BasicLayout as __BasicLayout$BasicLayout } from './BasicLayout'
+import type {
+    BattlePass as __BattlePass$BattlePass,
+    BattlePassTier as __BattlePass$BattlePassTier,
+} from './BattlePass'
+import type {
+    BeadTrail as __BeadTrail$BeadTrail,
+    BeadTrailCrumb as __BeadTrail$BeadTrailCrumb,
+} from './BeadTrail'
+import type {
+    BenchmarkBar as __BenchmarkChart$BenchmarkBar,
+    BenchmarkChart as __BenchmarkChart$BenchmarkChart,
+    BenchmarkScale as __BenchmarkChart$BenchmarkScale,
+} from './BenchmarkChart'
+import type {
+    BitmapFontBorder as __BitmapFontGenerator$BitmapFontBorder,
+    BitmapFontDropShadow as __BitmapFontGenerator$BitmapFontDropShadow,
+    BitmapFontExportFormat as __BitmapFontGenerator$BitmapFontExportFormat,
+    BitmapFontFill as __BitmapFontGenerator$BitmapFontFill,
+    BitmapFontGenerator as __BitmapFontGenerator$BitmapFontGenerator,
+    BitmapFontGlow as __BitmapFontGenerator$BitmapFontGlow,
+    BitmapFontOutput as __BitmapFontGenerator$BitmapFontOutput,
+    BitmapFontPreviewAlign as __BitmapFontGenerator$BitmapFontPreviewAlign,
+} from './BitmapFontGenerator'
+import type { BlurOverlay as __BlurOverlay$BlurOverlay } from './BlurOverlay'
+import type { BossBar as __BossBar$BossBar } from './BossBar'
+import type {
+    BottomSheet as __BottomSheet$BottomSheet,
+    BottomSheetCloseDetail as __BottomSheet$BottomSheetCloseDetail,
+    BottomSheetScrim as __BottomSheet$BottomSheetScrim,
+    BottomSheetSnapDetail as __BottomSheet$BottomSheetSnapDetail,
+} from './BottomSheet'
+import type { Brand as __Brand$Brand } from './Brand'
+import type { Breadcrumb as __Breadcrumb$Breadcrumb } from './Breadcrumb'
+import type { BreadcrumbItem as __BreadcrumbItem$BreadcrumbItem } from './BreadcrumbItem'
+import type {
+    BriefCard as __BriefCard$BriefCard,
+    BriefCardDifficulty as __BriefCard$BriefCardDifficulty,
+} from './BriefCard'
+import type { BrightnessCalibration as __BrightnessCalibration$BrightnessCalibration } from './BrightnessCalibration'
+import type { BuffBar as __BuffBar$BuffBar, BuffEntry as __BuffBar$BuffEntry } from './BuffBar'
+import type {
+    BuffIcon as __BuffIcon$BuffIcon,
+    BuffIconKind as __BuffIcon$BuffIconKind,
+} from './BuffIcon'
+import type {
+    Build as __Build$Build,
+    BuildBadgeVariant as __Build$BuildBadgeVariant,
+    BuildStatus as __Build$BuildStatus,
+} from './Build'
+import type {
+    BundleBar as __BundleBar$BundleBar,
+    BundleBarChip as __BundleBar$BundleBarChip,
+} from './BundleBar'
+import type {
+    Button as __Button$Button,
+    ButtonSize as __Button$ButtonSize,
+    ButtonType as __Button$ButtonType,
+    ButtonVariant as __Button$ButtonVariant,
+} from './Button'
+import type {
+    ButtonGroup as __ButtonGroup$ButtonGroup,
+    ButtonGroupSize as __ButtonGroup$ButtonGroupSize,
+} from './ButtonGroup'
+import type { CalloutQuote as __CalloutQuote$CalloutQuote } from './CalloutQuote'
+import type {
+    Card as __Card$Card,
+    CardImgPosition as __Card$CardImgPosition,
+    CardVariant as __Card$CardVariant,
+} from './Card'
+import type {
+    CardOption as __CardOptions$CardOption,
+    CardOptions as __CardOptions$CardOptions,
+} from './CardOptions'
+import type {
+    CarListingCard as __CarListingCard$CarListingCard,
+    CarListingSpec as __CarListingCard$CarListingSpec,
+} from './CarListingCard'
+import type { Carousel as __Carousel$Carousel } from './Carousel'
+import type { CdnMap as __CdnMap$CdnMap, CdnMapNode as __CdnMap$CdnMapNode } from './CdnMap'
+import type {
+    Changelog as __Changelog$Changelog,
+    ChangelogEntry as __Changelog$ChangelogEntry,
+} from './Changelog'
+import type {
+    CharacterCreate as __CharacterCreate$CharacterCreate,
+    CharacterCreateField as __CharacterCreate$CharacterCreateField,
+} from './CharacterCreate'
+import type {
+    CharacterEntry as __CharacterSelect$CharacterEntry,
+    CharacterSelect as __CharacterSelect$CharacterSelect,
+} from './CharacterSelect'
+import type { ChartContainer as __ChartContainer$ChartContainer } from './ChartContainer'
+import type {
+    ChatChannel as __ChatWindow$ChatChannel,
+    ChatMessage as __ChatWindow$ChatMessage,
+    ChatWindow as __ChatWindow$ChatWindow,
+} from './ChatWindow'
+import type { Check as __Check$Check, CheckState as __Check$CheckState } from './Check'
+import type {
+    CheckboxGroup as __CheckboxGroup$CheckboxGroup,
+    CheckboxGroupOption as __CheckboxGroup$CheckboxGroupOption,
+    CheckboxGroupState as __CheckboxGroup$CheckboxGroupState,
+} from './CheckboxGroup'
+import type {
+    CheckRow as __CheckRow$CheckRow,
+    CheckRowChangeDetail as __CheckRow$CheckRowChangeDetail,
+    CheckRowDivider as __CheckRow$CheckRowDivider,
+    CheckRowShape as __CheckRow$CheckRowShape,
+    CheckRowTone as __CheckRow$CheckRowTone,
+} from './CheckRow'
+import type {
+    Chip as __Chip$Chip,
+    ChipSize as __Chip$ChipSize,
+    ChipVariant as __Chip$ChipVariant,
+} from './Chip'
+import type {
+    ChipGroup as __ChipGroup$ChipGroup,
+    ChipGroupItem as __ChipGroup$ChipGroupItem,
+} from './ChipGroup'
+import type { CircularProgress as __CircularProgress$CircularProgress } from './CircularProgress'
+import type { CloseButton as __CloseButton$CloseButton } from './CloseButton'
+import type { CodeLabelCell as __CodeLabelCell$CodeLabelCell } from './CodeLabelCell'
+import type {
+    CodeSnippet as __CodeSnippet$CodeSnippet,
+    CodeSnippetLanguage as __CodeSnippet$CodeSnippetLanguage,
+} from './CodeSnippet'
+import type {
+    CodeWithOutput as __CodeWithOutput$CodeWithOutput,
+    CodeWithOutputLanguage as __CodeWithOutput$CodeWithOutputLanguage,
+    CodeWithOutputLayout as __CodeWithOutput$CodeWithOutputLayout,
+} from './CodeWithOutput'
+import type { Codex as __Codex$Codex, CodexEntry as __Codex$CodexEntry } from './Codex'
+import type { Col as __Col$Col } from './Col'
+import type { Collapse as __Collapse$Collapse } from './Collapse'
+import type {
+    ColorOption as __ColorPicker$ColorOption,
+    ColorPicker as __ColorPicker$ColorPicker,
+    ColorPickerState as __ColorPicker$ColorPickerState,
+} from './ColorPicker'
+import type {
+    ComboBox as __ComboBox$ComboBox,
+    ComboBoxState as __ComboBox$ComboBoxState,
+    ComboOption as __ComboBox$ComboOption,
+} from './ComboBox'
+import type { ComboCounter as __ComboCounter$ComboCounter } from './ComboCounter'
+import type {
+    CommandPalette as __CommandPalette$CommandPalette,
+    CommandPaletteItem as __CommandPalette$CommandPaletteItem,
+} from './CommandPalette'
+import type {
+    CommandItem as __CommandReference$CommandItem,
+    CommandReference as __CommandReference$CommandReference,
+} from './CommandReference'
+import type {
+    CommunityLink as __CommunityLinks$CommunityLink,
+    CommunityLinks as __CommunityLinks$CommunityLinks,
+} from './CommunityLinks'
+import type {
+    Comparator as __Comparator$Comparator,
+    ComparatorFeature as __Comparator$ComparatorFeature,
+    ComparatorTechnology as __Comparator$ComparatorTechnology,
+} from './Comparator'
+import type {
+    CompassBar as __CompassBar$CompassBar,
+    CompassMarker as __CompassBar$CompassMarker,
+} from './CompassBar'
+import type { CompassRose as __CompassRose$CompassRose } from './CompassRose'
+import type {
+    CompatibilityMatrix as __CompatibilityMatrix$CompatibilityMatrix,
+    CompatStatus as __CompatibilityMatrix$CompatStatus,
+} from './CompatibilityMatrix'
+import type {
+    ConditionBuilder as __ConditionBuilder$ConditionBuilder,
+    ConditionField as __ConditionBuilder$ConditionField,
+    ConditionGroup as __ConditionBuilder$ConditionGroup,
+} from './ConditionBuilder'
+import type {
+    ConfigPreview as __ConfigPreview$ConfigPreview,
+    ConfigPreviewEntry as __ConfigPreview$ConfigPreviewEntry,
+} from './ConfigPreview'
+import type { ConfirmDialog as __ConfirmDialog$ConfirmDialog } from './ConfirmDialog'
+import type { ConfirmSheet as __ConfirmSheet$ConfirmSheet } from './ConfirmSheet'
+import type { Container as __Container$Container } from './Container'
+import type {
+    ContextMenu as __ContextMenu$ContextMenu,
+    ContextMenuItem as __ContextMenu$ContextMenuItem,
+} from './ContextMenu'
+import type {
+    Contributor as __ContributorWall$Contributor,
+    ContributorWall as __ContributorWall$ContributorWall,
+} from './ContributorWall'
+import type {
+    ControllerLayout as __ControllerLayoutPreview$ControllerLayout,
+    ControllerLayoutPreview as __ControllerLayoutPreview$ControllerLayoutPreview,
+} from './ControllerLayoutPreview'
+import type {
+    ControlBinding as __ControlsRebindList$ControlBinding,
+    ControlsRebindList as __ControlsRebindList$ControlsRebindList,
+} from './ControlsRebindList'
+import type {
+    CookbookGrid as __CookbookGrid$CookbookGrid,
+    Recipe as __CookbookGrid$Recipe,
+} from './CookbookGrid'
+import type {
+    CoolButton as __CoolButton$CoolButton,
+    CoolButtonAddonPosition as __CoolButton$CoolButtonAddonPosition,
+    CoolButtonSize as __CoolButton$CoolButtonSize,
+    CoolButtonVariant as __CoolButton$CoolButtonVariant,
+} from './CoolButton'
+import type { CooldownBadge as __CooldownBadge$CooldownBadge } from './CooldownBadge'
+import type {
+    CoolNav as __CoolNav$CoolNav,
+    CoolNavItem as __CoolNav$CoolNavItem,
+    CoolNavTheme as __CoolNav$CoolNavTheme,
+} from './CoolNav'
+import type { CountdownTimer as __CountdownTimer$CountdownTimer } from './CountdownTimer'
+import type {
+    CraftingPanel as __CraftingPanel$CraftingPanel,
+    CraftingRecipe as __CraftingPanel$CraftingRecipe,
+} from './CraftingPanel'
+import type {
+    CreditsScroll as __CreditsScroll$CreditsScroll,
+    CreditsScrollSection as __CreditsScroll$CreditsScrollSection,
+} from './CreditsScroll'
+import type {
+    Crosshair as __Crosshair$Crosshair,
+    CrosshairVariant as __Crosshair$CrosshairVariant,
+} from './Crosshair'
+import type { CurrencyChip as __CurrencyChip$CurrencyChip } from './CurrencyChip'
+import type { CurrencyDisplay as __CurrencyDisplay$CurrencyDisplay } from './CurrencyDisplay'
+import type { CycleWheel as __CycleWheel$CycleWheel } from './CycleWheel'
+import type { DamageNumber as __DamageNumber$DamageNumber } from './DamageNumber'
+import type {
+    DangerZoneAction as __DangerZoneActions$DangerZoneAction,
+    DangerZoneActions as __DangerZoneActions$DangerZoneActions,
+} from './DangerZoneActions'
+import type { DashboardContent as __DashboardContent$DashboardContent } from './DashboardContent'
+import type { DashboardLayout as __DashboardLayout$DashboardLayout } from './DashboardLayout'
+import type { DashboardSidebar as __DashboardSidebar$DashboardSidebar } from './DashboardSidebar'
+import type {
+    DataList as __DataList$DataList,
+    DataListRenderRow as __DataList$DataListRenderRow,
+} from './DataList'
+import type {
+    DatePicker as __DatePicker$DatePicker,
+    DatePickerState as __DatePicker$DatePickerState,
+} from './DatePicker'
+import type {
+    DayStrip as __DayStrip$DayStrip,
+    DayStripEventDetail as __DayStrip$DayStripEventDetail,
+    DayStripItem as __DayStrip$DayStripItem,
+} from './DayStrip'
+import type {
+    DebugOverlay as __DebugOverlay$DebugOverlay,
+    DebugRow as __DebugOverlay$DebugRow,
+} from './DebugOverlay'
+import type { DesignCanvas as __DesignCanvas$DesignCanvas } from './DesignCanvas'
+import type {
+    DialogueBox as __DialogueBox$DialogueBox,
+    DialogueChoice as __DialogueBox$DialogueChoice,
+} from './DialogueBox'
+import type { DifferenceCard as __DifferenceCard$DifferenceCard } from './DifferenceCard'
+import type {
+    DiffViewer as __DiffViewer$DiffViewer,
+    DiffViewerMode as __DiffViewer$DiffViewerMode,
+} from './DiffViewer'
+import type { Divider as __Divider$Divider } from './Divider'
+import type {
+    DownloadStats as __DownloadStats$DownloadStats,
+    DownloadStatsRegistry as __DownloadStats$DownloadStatsRegistry,
+} from './DownloadStats'
+import type {
+    Drawer as __Drawer$Drawer,
+    DrawerSide as __Drawer$DrawerSide,
+    DrawerSize as __Drawer$DrawerSize,
+} from './Drawer'
+import type {
+    Dropdown as __Dropdown$Dropdown,
+    DropdownAutoClose as __Dropdown$DropdownAutoClose,
+    DropdownDirection as __Dropdown$DropdownDirection,
+    DropdownVariant as __Dropdown$DropdownVariant,
+} from './Dropdown'
+import type { DropdownItem as __DropdownItem$DropdownItem } from './DropdownItem'
+import type {
+    EarlySignupForm as __EarlySignupForm$EarlySignupForm,
+    EarlySignupFormVariant as __EarlySignupForm$EarlySignupFormVariant,
+} from './EarlySignupForm'
+import type {
+    EcosystemCore as __EcosystemMap$EcosystemCore,
+    EcosystemMap as __EcosystemMap$EcosystemMap,
+    EcosystemRing as __EcosystemMap$EcosystemRing,
+} from './EcosystemMap'
+import type { EditableText as __EditableText$EditableText } from './EditableText'
+import type { EditorShell as __EditorShell$EditorShell } from './EditorShell'
+import type { EmissionBadge as __EmissionBadge$EmissionBadge } from './EmissionBadge'
+import type { EmptyState as __EmptyState$EmptyState } from './EmptyState'
+import type { EngineSpec as __EngineSpec$EngineSpec } from './EngineSpec'
+import type {
+    EntityCell as __EntityCell$EntityCell,
+    EntityCellColor as __EntityCell$EntityCellColor,
+    EntityCellSize as __EntityCell$EntityCellSize,
+} from './EntityCell'
+import type {
+    EntityProfileCard as __EntityProfileCard$EntityProfileCard,
+    EntityProfileCardMetaItem as __EntityProfileCard$EntityProfileCardMetaItem,
+} from './EntityProfileCard'
+import type {
+    EquipmentDoll as __EquipmentDoll$EquipmentDoll,
+    EquipmentSlotConfig as __EquipmentDoll$EquipmentSlotConfig,
+} from './EquipmentDoll'
+import type {
+    EquipmentMatrix as __EquipmentMatrix$EquipmentMatrix,
+    EquipmentMatrixItem as __EquipmentMatrix$EquipmentMatrixItem,
+} from './EquipmentMatrix'
+import type {
+    EquipmentFlag as __EquipmentTag$EquipmentFlag,
+    EquipmentTag as __EquipmentTag$EquipmentTag,
+} from './EquipmentTag'
+import type {
+    ExtendedSelect as __ExtendedSelect$ExtendedSelect,
+    ExtendedSelectItem as __ExtendedSelect$ExtendedSelectItem,
+    ExtendedSelectMobile as __ExtendedSelect$ExtendedSelectMobile,
+    ExtendedSelectState as __ExtendedSelect$ExtendedSelectState,
+} from './ExtendedSelect'
+import type { Eyebrow as __Eyebrow$Eyebrow } from './Eyebrow'
+import type {
+    Fab as __Fab$Fab,
+    FabPosition as __Fab$FabPosition,
+    FabVariant as __Fab$FabVariant,
+} from './Fab'
+import type {
+    FacetPicker as __FacetPicker$FacetPicker,
+    FacetPickerLayout as __FacetPicker$FacetPickerLayout,
+    FacetPickerOption as __FacetPicker$FacetPickerOption,
+    FacetPickerSize as __FacetPicker$FacetPickerSize,
+} from './FacetPicker'
+import type { FAQItem as __FAQList$FAQItem, FAQList as __FAQList$FAQList } from './FAQList'
+import type {
+    FeatureCard as __FeatureCard$FeatureCard,
+    FeatureCardSize as __FeatureCard$FeatureCardSize,
+} from './FeatureCard'
+import type {
+    FeatureMatrix as __FeatureMatrix$FeatureMatrix,
+    MatrixColumn as __FeatureMatrix$MatrixColumn,
+    MatrixRow as __FeatureMatrix$MatrixRow,
+} from './FeatureMatrix'
+import type { File as __File$File, FileTag as __File$FileTag } from './File'
+import type {
+    DropzoneFileFormat as __FileDropzone$DropzoneFileFormat,
+    FileDropzone as __FileDropzone$FileDropzone,
+} from './FileDropzone'
+import type { FileTags as __FileTags$FileTags } from './FileTags'
+import type {
+    FilterBar as __FilterBar$FilterBar,
+    FilterBarRow as __FilterBar$FilterBarRow,
+} from './FilterBar'
+import type { FilterTrigger as __FilterTrigger$FilterTrigger } from './FilterTrigger'
+import type {
+    FloatingActionBar as __FloatingActionBar$FloatingActionBar,
+    FloatingActionBarAlign as __FloatingActionBar$FloatingActionBarAlign,
+} from './FloatingActionBar'
+import type { FloatingLabel as __FloatingLabel$FloatingLabel } from './FloatingLabel'
+import type { Form as __Form$Form } from './Form'
+import type {
+    FormInput as __FormInput$FormInput,
+    FormInputOption as __FormInput$FormInputOption,
+    FormInputType as __FormInput$FormInputType,
+    FormInputValidateOn as __FormInput$FormInputValidateOn,
+    FormInputValidator as __FormInput$FormInputValidator,
+} from './FormInput'
+import type {
+    FormWizard as __FormWizard$FormWizard,
+    FormWizardStep as __FormWizard$FormWizardStep,
+} from './FormWizard'
+import type {
+    FPSCapOption as __FPSCapSelect$FPSCapOption,
+    FPSCapSelect as __FPSCapSelect$FPSCapSelect,
+} from './FPSCapSelect'
+import type { FullscreenToggle as __FullscreenToggle$FullscreenToggle } from './FullscreenToggle'
+import type {
+    FunnelChart as __FunnelChart$FunnelChart,
+    FunnelStep as __FunnelChart$FunnelStep,
+} from './FunnelChart'
+import type { GamepadButtonPrompt as __GamepadButtonPrompt$GamepadButtonPrompt } from './GamepadButtonPrompt'
+import type {
+    ComplianceState as __GameShowcaseCard$ComplianceState,
+    GameShowcaseCard as __GameShowcaseCard$GameShowcaseCard,
+    GameStamp as __GameShowcaseCard$GameStamp,
+} from './GameShowcaseCard'
+import type {
+    GanttChart as __GanttChart$GanttChart,
+    GanttTask as __GanttChart$GanttTask,
+} from './GanttChart'
+import type {
+    GildedFrame as __GildedFrame$GildedFrame,
+    GildedFramePadding as __GildedFrame$GildedFramePadding,
+    GildedFrameTone as __GildedFrame$GildedFrameTone,
+} from './GildedFrame'
+import type {
+    GithubStarsCard as __GithubStarsCard$GithubStarsCard,
+    GithubStatsData as __GithubStarsCard$GithubStatsData,
+} from './GithubStarsCard'
+import type {
+    GoodFirstIssue as __GoodFirstIssues$GoodFirstIssue,
+    GoodFirstIssues as __GoodFirstIssues$GoodFirstIssues,
+} from './GoodFirstIssues'
+import type {
+    GraphCanvas as __GraphCanvas$GraphCanvas,
+    GraphCanvasNode as __GraphCanvas$GraphCanvasNode,
+} from './GraphCanvas'
+import type { GraphicsPresetPicker as __GraphicsPresetPicker$GraphicsPresetPicker } from './GraphicsPresetPicker'
+import type { GraphSigil as __GraphSigil$GraphSigil } from './GraphSigil'
+import type { Grid as __Grid$Grid } from './Grid'
+import type { Group as __Group$Group } from './Group'
+import type {
+    GuildMember as __GuildPanel$GuildMember,
+    GuildPanel as __GuildPanel$GuildPanel,
+} from './GuildPanel'
+import type {
+    Heading as __Heading$Heading,
+    HeadingLevel as __Heading$HeadingLevel,
+} from './Heading'
+import type { Heatmap as __Heatmap$Heatmap, HeatmapCell as __Heatmap$HeatmapCell } from './Heatmap'
+import type {
+    HelperText as __HelperText$HelperText,
+    HelperTextVariant as __HelperText$HelperTextVariant,
+} from './HelperText'
+import type {
+    Hero as __Hero$Hero,
+    HeroAction as __Hero$HeroAction,
+    HeroMetric as __Hero$HeroMetric,
+    HeroStatCard as __Hero$HeroStatCard,
+} from './Hero'
+import type {
+    HeroStat as __HeroStatsBar$HeroStat,
+    HeroStatsBar as __HeroStatsBar$HeroStatsBar,
+} from './HeroStatsBar'
+import type {
+    HintTip as __HintTip$HintTip,
+    HintTipPlacement as __HintTip$HintTipPlacement,
+} from './HintTip'
+import type { HitMarker as __HitMarker$HitMarker } from './HitMarker'
+import type { Hotbar as __Hotbar$Hotbar, HotbarSlot as __Hotbar$HotbarSlot } from './Hotbar'
+import type { Icon as __Icon$Icon, IconSet as __Icon$IconSet } from './Icon'
+import type { IconBadge as __IconBadge$IconBadge } from './IconBadge'
+import type {
+    IconButton as __IconButton$IconButton,
+    IconButtonShowLabel as __IconButton$IconButtonShowLabel,
+    IconButtonSize as __IconButton$IconButtonSize,
+    IconButtonVariant as __IconButton$IconButtonVariant,
+} from './IconButton'
+import type {
+    IconOption as __IconPicker$IconOption,
+    IconPicker as __IconPicker$IconPicker,
+    IconPickerState as __IconPicker$IconPickerState,
+} from './IconPicker'
+import type { Image as __Image$Image, ImageObjectFit as __Image$ImageObjectFit } from './Image'
+import type { ImageCrop as __ImageCrop$ImageCrop } from './ImageCrop'
+import type { InfiniteScroll as __InfiniteScroll$InfiniteScroll } from './InfiniteScroll'
+import type { Input as __Input$Input } from './Input'
+import type {
+    InputGroup as __InputGroup$InputGroup,
+    InputGroupSize as __InputGroup$InputGroupSize,
+} from './InputGroup'
+import type { InputGroupText as __InputGroupText$InputGroupText } from './InputGroupText'
+import type {
+    InstallManager as __InstallTabs$InstallManager,
+    InstallTabs as __InstallTabs$InstallTabs,
+} from './InstallTabs'
+import type { InteractPrompt as __InteractPrompt$InteractPrompt } from './InteractPrompt'
+import type { FieldMessageState as __internal_field_message$FieldMessageState } from './internal/field-message'
+import type {
+    FieldSize as __internal_text_field_base$FieldSize,
+    FieldState as __internal_text_field_base$FieldState,
+} from './internal/text-field-base'
+import type { InventoryGrid as __InventoryGrid$InventoryGrid } from './InventoryGrid'
+import type { InviteToast as __InviteToast$InviteToast } from './InviteToast'
+import type {
+    CompareItem as __ItemCompare$CompareItem,
+    ItemCompare as __ItemCompare$ItemCompare,
+} from './ItemCompare'
+import type {
+    InventoryItem as __ItemSlot$InventoryItem,
+    ItemSlot as __ItemSlot$ItemSlot,
+} from './ItemSlot'
+import type {
+    ItemTooltip as __ItemTooltip$ItemTooltip,
+    TooltipItem as __ItemTooltip$TooltipItem,
+} from './ItemTooltip'
+import type {
+    Journal as __Journal$Journal,
+    JournalEntry as __Journal$JournalEntry,
+} from './Journal'
+import type { JSONEditor as __JSONEditor$JSONEditor } from './JSONEditor'
+import type {
+    JSONSchemaDef as __JSONSchemaDef$JSONSchemaDef,
+    SchemaRefItem as __JSONSchemaDef$SchemaRefItem,
+} from './JSONSchemaDef'
+import type { Kbd as __Kbd$Kbd } from './Kbd'
+import type {
+    Key as __Key$Key,
+    KeySize as __Key$KeySize,
+    KeyVariant as __Key$KeyVariant,
+} from './Key'
+import type { KeyBinder as __KeyBinder$KeyBinder } from './KeyBinder'
+import type {
+    KillFeed as __KillFeed$KillFeed,
+    KillFeedEntry as __KillFeed$KillFeedEntry,
+} from './KillFeed'
+import type { Label as __Label$Label, LabelSize as __Label$LabelSize } from './Label'
+import type {
+    Leaderboard as __Leaderboard$Leaderboard,
+    LeaderboardColumns as __Leaderboard$LeaderboardColumns,
+    LeaderboardEntry as __Leaderboard$LeaderboardEntry,
+} from './Leaderboard'
+import type {
+    LegalScreen as __LegalScreen$LegalScreen,
+    LegalSection as __LegalScreen$LegalSection,
+} from './LegalScreen'
+import type { LetterboxBars as __LetterboxBars$LetterboxBars } from './LetterboxBars'
+import type { LevelHeader as __LevelHeader$LevelHeader } from './LevelHeader'
+import type {
+    LevelEdge as __LevelSelect$LevelEdge,
+    LevelNode as __LevelSelect$LevelNode,
+    LevelSelect as __LevelSelect$LevelSelect,
+} from './LevelSelect'
+import type {
+    Lightbox as __Lightbox$Lightbox,
+    LightboxImage as __Lightbox$LightboxImage,
+} from './Lightbox'
+import type {
+    LineChart as __LineChart$LineChart,
+    LineChartSeries as __LineChart$LineChartSeries,
+} from './LineChart'
+import type {
+    Link as __Link$Link,
+    LinkUnderline as __Link$LinkUnderline,
+    LinkVariant as __Link$LinkVariant,
+} from './Link'
+import type {
+    LinkedProvider as __LinkedProvidersCard$LinkedProvider,
+    LinkedProvidersCard as __LinkedProvidersCard$LinkedProvidersCard,
+} from './LinkedProvidersCard'
+import type { List as __List$List, ListItem as __List$ListItem } from './List'
+import type {
+    ListCard as __ListCard$ListCard,
+    ListCardItem as __ListCard$ListCardItem,
+} from './ListCard'
+import type { ListGroup as __ListGroup$ListGroup } from './ListGroup'
+import type {
+    ListGroupItem as __ListGroupItem$ListGroupItem,
+    ListGroupItemVariant as __ListGroupItem$ListGroupItemVariant,
+} from './ListGroupItem'
+import type { ListRow as __ListRow$ListRow } from './ListRow'
+import type { ListSection as __ListSection$ListSection } from './ListSection'
+import type { FeedEvent as __LiveFeed$FeedEvent, LiveFeed as __LiveFeed$LiveFeed } from './LiveFeed'
+import type { LoadingOverlay as __LoadingOverlay$LoadingOverlay } from './LoadingOverlay'
+import type { LoadingScreen as __LoadingScreen$LoadingScreen } from './LoadingScreen'
+import type {
+    LoadMore as __LoadMore$LoadMore,
+    LoadMoreState as __LoadMore$LoadMoreState,
+} from './LoadMore'
+import type { Lobby as __Lobby$Lobby, LobbyPlayer as __Lobby$LobbyPlayer } from './Lobby'
+import type {
+    LockChip as __LockChip$LockChip,
+    LockChipTone as __LockChip$LockChipTone,
+} from './LockChip'
+import type { LockedAction as __LockedAction$LockedAction } from './LockedAction'
+import type {
+    Login as __Login$Login,
+    LoginConnectOption as __Login$LoginConnectOption,
+} from './Login'
+import type {
+    LogoCloud as __LogoCloud$LogoCloud,
+    LogoCloudLogo as __LogoCloud$LogoCloudLogo,
+} from './LogoCloud'
+import type { LootEntry as __LootList$LootEntry, LootList as __LootList$LootList } from './LootList'
+import type { LootPopup as __LootPopup$LootPopup } from './LootPopup'
+import type { LoreText as __LoreText$LoreText } from './LoreText'
+import type {
+    MacroGrid as __MacroGrid$MacroGrid,
+    MacroGridVariant as __MacroGrid$MacroGridVariant,
+} from './MacroGrid'
+import type {
+    MainMenu as __MainMenu$MainMenu,
+    MainMenuItem as __MainMenu$MainMenuItem,
+} from './MainMenu'
+import type {
+    MaintainerCard as __MaintainerCard$MaintainerCard,
+    MaintainerLink as __MaintainerCard$MaintainerLink,
+} from './MaintainerCard'
+import type { ManufacturerTile as __ManufacturerTile$ManufacturerTile } from './ManufacturerTile'
+import type { MarkdownEditor as __MarkdownEditor$MarkdownEditor } from './MarkdownEditor'
+import type {
+    Marquee as __Marquee$Marquee,
+    MarqueeDirection as __Marquee$MarqueeDirection,
+} from './Marquee'
+import type {
+    MatchmakingScreen as __MatchmakingScreen$MatchmakingScreen,
+    MatchmakingScreenState as __MatchmakingScreen$MatchmakingScreenState,
+} from './MatchmakingScreen'
+import type { MenuItem as __MenuItem$MenuItem } from './MenuItem'
+import type { MetricCard as __MetricCard$MetricCard } from './MetricCard'
+import type {
+    MetricGrid as __MetricGrid$MetricGrid,
+    MetricGridItem as __MetricGrid$MetricGridItem,
+} from './MetricGrid'
+import type { MetricTile as __MetricTile$MetricTile } from './MetricTile'
+import type {
+    MigrationGuide as __MigrationGuide$MigrationGuide,
+    MigrationStep as __MigrationGuide$MigrationStep,
+} from './MigrationGuide'
+import type {
+    Minimap as __Minimap$Minimap,
+    MinimapMarker as __Minimap$MinimapMarker,
+} from './Minimap'
+import type {
+    MobileShell as __MobileShell$MobileShell,
+    MobileShellScrollDetail as __MobileShell$MobileShellScrollDetail,
+    MobileShellScrollRestore as __MobileShell$MobileShellScrollRestore,
+} from './MobileShell'
+import type { Modal as __Modal$Modal } from './Modal'
+import type { ModelFamilyCard as __ModelFamilyCard$ModelFamilyCard } from './ModelFamilyCard'
+import type {
+    ModuleAccess as __ModuleAccess$ModuleAccess,
+    ModuleAccessLimitableResource as __ModuleAccess$ModuleAccessLimitableResource,
+    ModuleAccessRole as __ModuleAccess$ModuleAccessRole,
+} from './ModuleAccess'
+import type { MouseSensitivity as __MouseSensitivity$MouseSensitivity } from './MouseSensitivity'
+import type {
+    MultiCardSelect as __MultiCardSelect$MultiCardSelect,
+    MultiCardSelectOption as __MultiCardSelect$MultiCardSelectOption,
+} from './MultiCardSelect'
+import type { Nav as __Nav$Nav } from './Nav'
+import type { Navbar as __Navbar$Navbar } from './Navbar'
+import type {
+    NavButton as __NavButton$NavButton,
+    NavButtonKind as __NavButton$NavButtonKind,
+} from './NavButton'
+import type { NavItem as __NavItem$NavItem } from './NavItem'
+import type { NetworkStatusIcon as __NetworkStatusIcon$NetworkStatusIcon } from './NetworkStatusIcon'
+import type { NewsletterSignup as __NewsletterSignup$NewsletterSignup } from './NewsletterSignup'
+import type {
+    GraphData as __NodeEditor$GraphData,
+    NodeEditor as __NodeEditor$NodeEditor,
+    Pos as __NodeEditor$Pos,
+} from './NodeEditor'
+import type {
+    EditorTool as __NormalMapGenerator$EditorTool,
+    LightTracking as __NormalMapGenerator$LightTracking,
+    NormalMapGenerator as __NormalMapGenerator$NormalMapGenerator,
+    NormalMapOutput as __NormalMapGenerator$NormalMapOutput,
+    PreviewMode as __NormalMapGenerator$PreviewMode,
+} from './NormalMapGenerator'
+import type {
+    Notice as __Notice$Notice,
+    NoticeSize as __Notice$NoticeSize,
+    NoticeTone as __Notice$NoticeTone,
+    NoticeVariant as __Notice$NoticeVariant,
+} from './Notice'
+import type {
+    NumberInput as __NumberInput$NumberInput,
+    NumberInputState as __NumberInput$NumberInputState,
+} from './NumberInput'
+import type { ObjectiveMarker as __ObjectiveMarker$ObjectiveMarker } from './ObjectiveMarker'
+import type { Offcanvas as __Offcanvas$Offcanvas } from './Offcanvas'
+import type { Option as __Option$Option } from './Option'
+import type {
+    OTPInput as __OTPInput$OTPInput,
+    OTPInputMode as __OTPInput$OTPInputMode,
+    OTPInputState as __OTPInput$OTPInputState,
+} from './OTPInput'
+import type {
+    PageFooter as __PageFooter$PageFooter,
+    PageFooterCta as __PageFooter$PageFooterCta,
+    PageFooterLink as __PageFooter$PageFooterLink,
+    PageFooterMenu as __PageFooter$PageFooterMenu,
+    PageFooterSocialLink as __PageFooter$PageFooterSocialLink,
+} from './PageFooter'
+import type { PageIndicator as __PageIndicator$PageIndicator } from './PageIndicator'
+import type {
+    PageTabs as __PageTabs$PageTabs,
+    PageTabsItem as __PageTabs$PageTabsItem,
+} from './PageTabs'
+import type {
+    Pagination as __Pagination$Pagination,
+    PaginationAlign as __Pagination$PaginationAlign,
+    PaginationSize as __Pagination$PaginationSize,
+} from './Pagination'
+import type { Panel as __Panel$Panel, PanelHeader as __Panel$PanelHeader } from './Panel'
+import type { ParticleEmitter as __ParticleEmitter$ParticleEmitter } from './ParticleEmitter'
+import type {
+    PartyMember as __PartyPanel$PartyMember,
+    PartyPanel as __PartyPanel$PartyPanel,
+} from './PartyPanel'
+import type {
+    PauseMenu as __PauseMenu$PauseMenu,
+    PauseMenuItem as __PauseMenu$PauseMenuItem,
+} from './PauseMenu'
+import type { Perk as __PerkPicker$Perk, PerkPicker as __PerkPicker$PerkPicker } from './PerkPicker'
+import type {
+    PhaseGrid as __PhaseGrid$PhaseGrid,
+    PhaseItem as __PhaseGrid$PhaseItem,
+} from './PhaseGrid'
+import type {
+    PhoneInput as __PhoneInput$PhoneInput,
+    PhoneInputState as __PhoneInput$PhoneInputState,
+} from './PhoneInput'
+import type {
+    PhysicsEditor as __PhysicsEditor$PhysicsEditor,
+    PhysicsTool as __PhysicsEditor$PhysicsTool,
+} from './PhysicsEditor'
+import type {
+    PieChart as __PieChart$PieChart,
+    PieChartSlice as __PieChart$PieChartSlice,
+} from './PieChart'
+import type { PingDisplay as __PingDisplay$PingDisplay } from './PingDisplay'
+import type {
+    PinnedFeatureShowcase as __PinnedFeatureShowcase$PinnedFeatureShowcase,
+    PinnedFeatureShowcaseItem as __PinnedFeatureShowcase$PinnedFeatureShowcaseItem,
+} from './PinnedFeatureShowcase'
+import type {
+    Pipeline as __Pipeline$Pipeline,
+    PipelineStep as __Pipeline$PipelineStep,
+} from './Pipeline'
+import type {
+    Placeholder as __Placeholder$Placeholder,
+    PlaceholderAnimation as __Placeholder$PlaceholderAnimation,
+    PlaceholderSize as __Placeholder$PlaceholderSize,
+    PlaceholderVariant as __Placeholder$PlaceholderVariant,
+} from './Placeholder'
+import type {
+    Platform as __PlatformIcon$Platform,
+    PlatformIcon as __PlatformIcon$PlatformIcon,
+} from './PlatformIcon'
+import type {
+    PlayerCard as __PlayerCard$PlayerCard,
+    PlayerCardAction as __PlayerCard$PlayerCardAction,
+    PlayerCardStat as __PlayerCard$PlayerCardStat,
+    PresenceStatus as __PlayerCard$PresenceStatus,
+} from './PlayerCard'
+import type { PlayerFrame as __PlayerFrame$PlayerFrame } from './PlayerFrame'
+import type {
+    PluginGrid as __PluginGrid$PluginGrid,
+    PluginItem as __PluginGrid$PluginItem,
+} from './PluginGrid'
+import type { Popover as __Popover$Popover } from './Popover'
+import type { Portrait as __Portrait$Portrait } from './Portrait'
+import type { PressAnyKey as __PressAnyKey$PressAnyKey } from './PressAnyKey'
+import type { PreviewFrame as __PreviewFrame$PreviewFrame } from './PreviewFrame'
+import type {
+    PricingCard as __PricingCard$PricingCard,
+    PricingCardAction as __PricingCard$PricingCardAction,
+    PricingCardFeature as __PricingCard$PricingCardFeature,
+} from './PricingCard'
+import type {
+    Progress as __Progress$Progress,
+    ProgressVariant as __Progress$ProgressVariant,
+} from './Progress'
+import type {
+    ProgressBar as __ProgressBar$ProgressBar,
+    ProgressBarVariant as __ProgressBar$ProgressBarVariant,
+} from './ProgressBar'
+import type { PulseIndicator as __PulseIndicator$PulseIndicator } from './PulseIndicator'
+import type { QrScanSheet as __QrScanSheet$QrScanSheet } from './QrScanSheet'
+import type {
+    QuestEntry as __QuestTracker$QuestEntry,
+    QuestTracker as __QuestTracker$QuestTracker,
+} from './QuestTracker'
+import type { QueuedFile as __QueuedFile$QueuedFile } from './QueuedFile'
+import type {
+    QuickStart as __QuickStart$QuickStart,
+    QuickStartStep as __QuickStart$QuickStartStep,
+} from './QuickStart'
+import type {
+    QuotaMeter as __QuotaMeter$QuotaMeter,
+    QuotaMeterLabelFormat as __QuotaMeter$QuotaMeterLabelFormat,
+    QuotaMeterTone as __QuotaMeter$QuotaMeterTone,
+    QuotaMeterVariant as __QuotaMeter$QuotaMeterVariant,
+} from './QuotaMeter'
+import type {
+    RadialOption as __RadialWheel$RadialOption,
+    RadialWheel as __RadialWheel$RadialWheel,
+} from './RadialWheel'
+import type { Radio as __Radio$Radio, RadioState as __Radio$RadioState } from './Radio'
+import type {
+    RadioGroup as __RadioGroup$RadioGroup,
+    RadioGroupOption as __RadioGroup$RadioGroupOption,
+    RadioGroupState as __RadioGroup$RadioGroupState,
+} from './RadioGroup'
+import type { Range as __Range$Range, RangeState as __Range$RangeState } from './Range'
+import type {
+    RangeField as __RangeField$RangeField,
+    RangeFieldPreset as __RangeField$RangeFieldPreset,
+} from './RangeField'
+import type {
+    RangeSlider as __RangeSlider$RangeSlider,
+    RangeSliderState as __RangeSlider$RangeSliderState,
+} from './RangeSlider'
+import type { RankCell as __RankCell$RankCell } from './RankCell'
+import type { RarityChip as __RarityChip$RarityChip } from './RarityChip'
+import type { Rating as __Rating$Rating, RatingSize as __Rating$RatingSize } from './Rating'
+import type { ReportDialog as __ReportDialog$ReportDialog } from './ReportDialog'
+import type { ResetToDefaults as __ResetToDefaults$ResetToDefaults } from './ResetToDefaults'
+import type {
+    ResizablePanel as __ResizablePanel$ResizablePanel,
+    ResizablePanelDirection as __ResizablePanel$ResizablePanelDirection,
+} from './ResizablePanel'
+import type { ResourceBar as __ResourceBar$ResourceBar } from './ResourceBar'
+import type {
+    ResultAction as __ResultScreen$ResultAction,
+    ResultReward as __ResultScreen$ResultReward,
+    ResultScreen as __ResultScreen$ResultScreen,
+    ResultScreenTitleColor as __ResultScreen$ResultScreenTitleColor,
+    ResultScreenVariant as __ResultScreen$ResultScreenVariant,
+    ResultStat as __ResultScreen$ResultStat,
+} from './ResultScreen'
+import type { ResultsHeader as __ResultsHeader$ResultsHeader } from './ResultsHeader'
+import type {
+    RichPageHeader as __RichPageHeader$RichPageHeader,
+    RichPageHeaderIconColor as __RichPageHeader$RichPageHeaderIconColor,
+} from './RichPageHeader'
+import type {
+    Roadmap as __Roadmap$Roadmap,
+    RoadmapColumn as __Roadmap$RoadmapColumn,
+    RoadmapLayout as __Roadmap$RoadmapLayout,
+} from './Roadmap'
+import type { Row as __Row$Row } from './Row'
+import type {
+    RuneCorner as __RuneCorner$RuneCorner,
+    RuneCornerPosition as __RuneCorner$RuneCornerPosition,
+} from './RuneCorner'
+import type { SafeArea as __SafeArea$SafeArea } from './SafeArea'
+import type {
+    ScoreDisplay as __ScoreDisplay$ScoreDisplay,
+    ScoreDisplayAlign as __ScoreDisplay$ScoreDisplayAlign,
+} from './ScoreDisplay'
+import type {
+    ScoringRule as __ScoringRules$ScoringRule,
+    ScoringRules as __ScoringRules$ScoringRules,
+} from './ScoringRules'
+import type { ScreenFlash as __ScreenFlash$ScreenFlash } from './ScreenFlash'
+import type {
+    ScrollArea as __ScrollArea$ScrollArea,
+    ScrollAreaAxis as __ScrollArea$ScrollAreaAxis,
+} from './ScrollArea'
+import type { Scrollspy as __Scrollspy$Scrollspy } from './Scrollspy'
+import type { ScrollText as __ScrollText$ScrollText } from './ScrollText'
+import type { SearchBar as __SearchBar$SearchBar } from './SearchBar'
+import type {
+    SectionCard as __SectionCard$SectionCard,
+    SectionCardVariant as __SectionCard$SectionCardVariant,
+} from './SectionCard'
+import type {
+    SectionFlag as __SectionFlag$SectionFlag,
+    SectionFlagAlign as __SectionFlag$SectionFlagAlign,
+} from './SectionFlag'
+import type {
+    SegmentedToggle as __SegmentedToggle$SegmentedToggle,
+    SegmentedToggleOption as __SegmentedToggle$SegmentedToggleOption,
+    SegmentedToggleSize as __SegmentedToggle$SegmentedToggleSize,
+} from './SegmentedToggle'
+import type {
+    Select as __Select$Select,
+    SelectSize as __Select$SelectSize,
+    SelectState as __Select$SelectState,
+} from './Select'
+import type {
+    SelectOption as __SelectRow$SelectOption,
+    SelectRow as __SelectRow$SelectRow,
+} from './SelectRow'
+import type {
+    SettingsCategory as __SettingsCategoryList$SettingsCategory,
+    SettingsCategoryList as __SettingsCategoryList$SettingsCategoryList,
+} from './SettingsCategoryList'
+import type { SettingSlider as __SettingSlider$SettingSlider } from './SettingSlider'
+import type { ShakeContainer as __ShakeContainer$ShakeContainer } from './ShakeContainer'
+import type {
+    ShopItem as __ShopPanel$ShopItem,
+    ShopPanel as __ShopPanel$ShopPanel,
+} from './ShopPanel'
+import type {
+    SideNav as __SideNav$SideNav,
+    SideNavSection as __SideNav$SideNavSection,
+} from './SideNav'
+import type { SignInGate as __SignInGate$SignInGate } from './SignInGate'
+import type {
+    SimpleFile as __SimpleFile$SimpleFile,
+    SimpleFileFormat as __SimpleFile$SimpleFileFormat,
+} from './SimpleFile'
+import type {
+    SingleCardSelect as __SingleCardSelect$SingleCardSelect,
+    SingleCardSelectOption as __SingleCardSelect$SingleCardSelectOption,
+} from './SingleCardSelect'
+import type {
+    Skeleton as __Skeleton$Skeleton,
+    SkeletonPreset as __Skeleton$SkeletonPreset,
+    SkeletonVariant as __Skeleton$SkeletonVariant,
+} from './Skeleton'
+import type { SkillBar as __SkillBar$SkillBar, SkillSlot as __SkillBar$SkillSlot } from './SkillBar'
+import type {
+    SkillNode as __SkillTree$SkillNode,
+    SkillTree as __SkillTree$SkillTree,
+    SkillTreeEdge as __SkillTree$SkillTreeEdge,
+} from './SkillTree'
+import type {
+    SliceItem as __SlicesCard$SliceItem,
+    SlicesCard as __SlicesCard$SlicesCard,
+} from './SlicesCard'
+import type { Slider as __Slider$Slider, SliderState as __Slider$SliderState } from './Slider'
+import type {
+    SocialLink as __SocialLinks$SocialLink,
+    SocialLinks as __SocialLinks$SocialLinks,
+    SocialLinksSize as __SocialLinks$SocialLinksSize,
+    SocialLinksVariant as __SocialLinks$SocialLinksVariant,
+} from './SocialLinks'
+import type { Spacer as __Spacer$Spacer, SpacerAxis as __Spacer$SpacerAxis } from './Spacer'
+import type {
+    Sparkline as __Sparkline$Sparkline,
+    SparklineType as __Sparkline$SparklineType,
+} from './Sparkline'
+import type {
+    Spinner as __Spinner$Spinner,
+    SpinnerLayout as __Spinner$SpinnerLayout,
+    SpinnerType as __Spinner$SpinnerType,
+    SpinnerVariant as __Spinner$SpinnerVariant,
+} from './Spinner'
+import type {
+    SponsorTier as __SponsorWall$SponsorTier,
+    SponsorWall as __SponsorWall$SponsorWall,
+} from './SponsorWall'
+import type {
+    SprintChain as __SprintChain$SprintChain,
+    SprintChainItem as __SprintChain$SprintChainItem,
+} from './SprintChain'
+import type { Stack as __Stack$Stack, StackDirection as __Stack$StackDirection } from './Stack'
+import type {
+    Stamp as __Stamp$Stamp,
+    StampColor as __Stamp$StampColor,
+    StampPosition as __Stamp$StampPosition,
+} from './Stamp'
+import type {
+    StatCard as __StatCard$StatCard,
+    StatCardDeltaKind as __StatCard$StatCardDeltaKind,
+} from './StatCard'
+import type {
+    StateMachine as __StateMachine$StateMachine,
+    StateMachineItem as __StateMachine$StateMachineItem,
+} from './StateMachine'
+import type { StatRow as __StatRow$StatRow } from './StatRow'
+import type {
+    StatsScreen as __StatsScreen$StatsScreen,
+    StatsSection as __StatsScreen$StatsSection,
+} from './StatsScreen'
+import type {
+    StatTile as __StatTile$StatTile,
+    StatTileAlign as __StatTile$StatTileAlign,
+    StatTileSize as __StatTile$StatTileSize,
+    StatTileTone as __StatTile$StatTileTone,
+    StatTileVariant as __StatTile$StatTileVariant,
+} from './StatTile'
+import type {
+    StatusCard as __StatusCard$StatusCard,
+    StatusItem as __StatusCard$StatusItem,
+} from './StatusCard'
+import type {
+    StatusDot as __StatusDot$StatusDot,
+    StatusDotSize as __StatusDot$StatusDotSize,
+    StatusDotStatus as __StatusDot$StatusDotStatus,
+} from './StatusDot'
+import type {
+    StepPager as __StepPager$StepPager,
+    StepPagerChangeDetail as __StepPager$StepPagerChangeDetail,
+    StepPagerStepInput as __StepPager$StepPagerStepInput,
+} from './StepPager'
+import type {
+    StepItem as __Stepper$StepItem,
+    Stepper as __Stepper$Stepper,
+    StepperOrientation as __Stepper$StepperOrientation,
+} from './Stepper'
+import type {
+    Subtitle as __Subtitle$Subtitle,
+    SubtitleAlign as __Subtitle$SubtitleAlign,
+} from './Subtitle'
+import type {
+    SwipePager as __SwipePager$SwipePager,
+    SwipePagerChangeDetail as __SwipePager$SwipePagerChangeDetail,
+    SwipePagerGesture as __SwipePager$SwipePagerGesture,
+} from './SwipePager'
+import type { Switch as __Switch$Switch, SwitchState as __Switch$SwitchState } from './Switch'
+import type {
+    TabBar as __TabBar$TabBar,
+    TabBarItem as __TabBar$TabBarItem,
+    TabBarSize as __TabBar$TabBarSize,
+} from './TabBar'
+import type {
+    TabDock as __TabDock$TabDock,
+    TabDockEventDetail as __TabDock$TabDockEventDetail,
+    TabDockItem as __TabDock$TabDockItem,
+} from './TabDock'
+import type {
+    Table as __Table$Table,
+    TableBreakpoint as __Table$TableBreakpoint,
+    TableColumn as __Table$TableColumn,
+} from './Table'
+import type {
+    TabSectionItem as __TabSections$TabSectionItem,
+    TabSections as __TabSections$TabSections,
+} from './TabSections'
+import type {
+    TagInput as __TagInput$TagInput,
+    TagInputState as __TagInput$TagInputState,
+} from './TagInput'
+import type {
+    TaxonomyCard as __TaxonomyCard$TaxonomyCard,
+    TaxonomyCardActivateDetail as __TaxonomyCard$TaxonomyCardActivateDetail,
+} from './TaxonomyCard'
+import type {
+    TeamList as __TeamList$TeamList,
+    TeamMember as __TeamList$TeamMember,
+} from './TeamList'
+import type {
+    TerminalLine as __TerminalWindow$TerminalLine,
+    TerminalWindow as __TerminalWindow$TerminalWindow,
+} from './TerminalWindow'
+import type {
+    Testimonial as __TestimonialCarousel$Testimonial,
+    TestimonialCarousel as __TestimonialCarousel$TestimonialCarousel,
+} from './TestimonialCarousel'
+import type {
+    Text as __Text$Text,
+    TextAs as __Text$TextAs,
+    TextSize as __Text$TextSize,
+    TextVariant as __Text$TextVariant,
+} from './Text'
+import type { Textarea as __Textarea$Textarea } from './Textarea'
+import type { Theme as __Theme$Theme } from './Theme'
+import type {
+    TierItem as __TierLadder$TierItem,
+    TierLadder as __TierLadder$TierLadder,
+} from './TierLadder'
+import type {
+    Timeline as __Timeline$Timeline,
+    TimelineConnector as __Timeline$TimelineConnector,
+    TimelineItem as __Timeline$TimelineItem,
+    TimelineVariant as __Timeline$TimelineVariant,
+} from './Timeline'
+import type {
+    TimePicker as __TimePicker$TimePicker,
+    TimePickerFormat as __TimePicker$TimePickerFormat,
+    TimePickerState as __TimePicker$TimePickerState,
+} from './TimePicker'
+import type { Title as __Title$Title, TitleAlign as __Title$TitleAlign } from './Title'
+import type { TitleScreen as __TitleScreen$TitleScreen } from './TitleScreen'
+import type { Toast as __Toast$Toast } from './Toast'
+import type { Toggle as __Toggle$Toggle } from './Toggle'
+import type { ToggleCard as __ToggleCard$ToggleCard } from './ToggleCard'
+import type { ToggleRow as __ToggleRow$ToggleRow } from './ToggleRow'
+import type { Tooltip as __Tooltip$Tooltip } from './Tooltip'
+import type {
+    TransitionWipe as __TransitionWipe$TransitionWipe,
+    TransitionWipeDirection as __TransitionWipe$TransitionWipeDirection,
+} from './TransitionWipe'
+import type {
+    TreePicker as __TreePicker$TreePicker,
+    TreePickerNode as __TreePicker$TreePickerNode,
+} from './TreePicker'
+import type { TreeNode as __TreeView$TreeNode, TreeView as __TreeView$TreeView } from './TreeView'
+import type {
+    TrendDirection as __TrendIndicator$TrendDirection,
+    TrendIndicator as __TrendIndicator$TrendIndicator,
+    TrendSize as __TrendIndicator$TrendSize,
+} from './TrendIndicator'
+import type {
+    TrendSpark as __TrendSpark$TrendSpark,
+    TrendSparkTone as __TrendSpark$TrendSparkTone,
+} from './TrendSpark'
+import type { TyreSpec as __TyreSpec$TyreSpec } from './TyreSpec'
+import type { UpgradeNudge as __UpgradeNudge$UpgradeNudge } from './UpgradeNudge'
+import type {
+    UsageConfig as __UsageSummaryPanel$UsageConfig,
+    UsageSummaryPanel as __UsageSummaryPanel$UsageSummaryPanel,
+} from './UsageSummaryPanel'
+import type {
+    UserPanel as __UserPanel$UserPanel,
+    UserPanelMenuItem as __UserPanel$UserPanelMenuItem,
+} from './UserPanel'
+import type {
+    ValueInRange as __ValueInRange$ValueInRange,
+    ValueInRangeAnchor as __ValueInRange$ValueInRangeAnchor,
+    ValueInRangeTone as __ValueInRange$ValueInRangeTone,
+    ValueInRangeVariant as __ValueInRange$ValueInRangeVariant,
+} from './ValueInRange'
+import type {
+    VariantSpec as __VariantSpecSheet$VariantSpec,
+    VariantSpecSheet as __VariantSpecSheet$VariantSpecSheet,
+} from './VariantSpecSheet'
+import type { VersionLabel as __VersionLabel$VersionLabel } from './VersionLabel'
+import type {
+    VersionOption as __VersionPicker$VersionOption,
+    VersionPicker as __VersionPicker$VersionPicker,
+    VersionPickerVariant as __VersionPicker$VersionPickerVariant,
+} from './VersionPicker'
+import type {
+    VerticalItemList as __VerticalItemList$VerticalItemList,
+    VerticalItemListItem as __VerticalItemList$VerticalItemListItem,
+} from './VerticalItemList'
+import type { VideoEmbed as __VideoEmbed$VideoEmbed } from './VideoEmbed'
+import type { VignetteOverlay as __VignetteOverlay$VignetteOverlay } from './VignetteOverlay'
+import type {
+    VirtualList as __VirtualList$VirtualList,
+    VirtualListItemHeight as __VirtualList$VirtualListItemHeight,
+    VirtualListRenderItem as __VirtualList$VirtualListRenderItem,
+} from './VirtualList'
+import type {
+    VisuallyHidden as __VisuallyHidden$VisuallyHidden,
+    VisuallyHiddenAs as __VisuallyHidden$VisuallyHiddenAs,
+} from './VisuallyHidden'
+import type { WaypointMarker as __WaypointMarker$WaypointMarker } from './WaypointMarker'
+import type {
+    WelcomeGuide as __WelcomeGuide$WelcomeGuide,
+    WelcomeGuideStep as __WelcomeGuide$WelcomeGuideStep,
+} from './WelcomeGuide'
+import type { ZoomControl as __ZoomControl$ZoomControl } from './ZoomControl'
 
 /**
  * Props for a toolcase custom element: standard HTML attributes (className,
  * style, ref, event handlers, …) plus the element's own kebab-case attributes
- * in `T` for autocomplete. Typos in attribute names are now a TypeScript error.
- * Use useTc() to wire the on* event handler props at runtime.
+ * and `'ontc-*'` event props in `T`. Typos in attribute names are a TypeScript
+ * error.
+ *
+ * `ref` accepts EITHER a ref typed with the element's own class `E` — so
+ * `ref.current?.show()` needs no cast on the overlay elements — or a plain
+ * `HTMLElement` ref, which is what `useTc<HTMLElement>()` and a hand-written
+ * `useRef<HTMLElement>(null)` produce. Narrowing it to `E` alone would have made
+ * every existing `useRef<HTMLElement>` a compile error for no gain.
  */
-export type TcProps<T = {}> = React.DetailedHTMLProps<
-    React.HTMLAttributes<HTMLElement> & T,
-    HTMLElement
->
+export type TcProps<T = {}, E = HTMLElement> = Omit<
+    React.DetailedHTMLProps<React.HTMLAttributes<E>, E>,
+    'ref' | keyof T
+> &
+    T & {
+        ref?: React.Ref<E> | React.RefObject<HTMLElement | null>
+    }
 
 export interface ToolcaseIntrinsicElements {
-    'tc-ability-card': TcProps<{ 'ability-name'?: string | number; 'cooldown'?: string | number; 'cost'?: string | number; 'description'?: string | number; 'icon'?: string | number; 'keybind'?: string | number; 'range'?: string | number; 'rarity'?: string | number }>
-    'tc-accordion': TcProps<{ 'always-open'?: boolean; 'flush'?: boolean }>
-    'tc-accordion-item': TcProps<{ 'header'?: string | number; 'open'?: boolean; onTcHidden?: (e: CustomEvent) => void; onTcHide?: (e: CustomEvent) => void; onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void }>
-    'tc-action-bar': TcProps<{ 'elevate-on-scroll'?: boolean; 'elevated'?: boolean; 'flat'?: boolean; 'stack'?: boolean }>
-    'tc-action-header': TcProps<{ 'disabled'?: boolean; onTcExec?: (e: CustomEvent) => void }>
-    'tc-action-items': TcProps<{ 'label'?: string | number; onTcActionClick?: (e: CustomEvent) => void }>
-    'tc-action-row-list': TcProps<{ 'outline'?: boolean; 'trailing-icon'?: string | number; onTcActionClick?: (e: CustomEvent) => void }>
-    'tc-activity-card': TcProps<{ 'loading'?: boolean; 'loading-count'?: string | number; 'title'?: string | number }>
-    'tc-add-slot': TcProps<{ 'disabled'?: boolean; 'icon'?: string | number; 'label'?: string | number; 'tone'?: string | number }>
-    'tc-advanced-table': TcProps<{ 'limit'?: string | number; 'loading'?: boolean; 'offset'?: string | number; 'sticky-first-column'?: boolean; 'sticky-last-column'?: boolean; 'total'?: string | number; onTcFilterChange?: (e: CustomEvent) => void; onTcPageChange?: (e: CustomEvent) => void; onTcSortChange?: (e: CustomEvent) => void }>
-    'tc-alert': TcProps<{ 'dismissible'?: boolean; 'variant'?: string | number; onTcClosed?: (e: CustomEvent) => void }>
-    'tc-ammo-counter': TcProps<{ 'mag'?: string | number; 'mag-max'?: string | number; 'reloading'?: boolean; 'reserve'?: string | number; 'weapon-name'?: string | number }>
-    'tc-anchor': TcProps<{ 'inset'?: string | number; 'position'?: string | number }>
-    'tc-announcement-bar': TcProps<{ 'cta-href'?: string | number; 'cta-label'?: string | number; 'dismissible'?: boolean; 'icon'?: string | number; 'icon-name'?: string | number; 'persist-dismiss-key'?: string | number; 'storage-key'?: string | number; 'variant'?: string | number; onTcDismiss?: (e: CustomEvent) => void }>
-    'tc-api-reference-table': TcProps<{ 'title'?: string | number }>
-    'tc-app-bar': TcProps<{ 'back-label'?: string | number; 'elevate-on-scroll'?: boolean; 'elevated'?: boolean; 'heading'?: string | number; 'heading-level'?: string | number; 'subheading'?: string | number; 'truncate'?: boolean; 'variant'?: string | number; onTcAppBarBack?: (e: CustomEvent) => void }>
-    'tc-area-chart': TcProps<{ 'height'?: string | number; 'loading'?: boolean; 'show-grid'?: string | number; 'show-legend'?: string | number; 'stacked'?: boolean; 'subtitle'?: string | number; 'title'?: string | number; onTcPointHover?: (e: CustomEvent) => void }>
-    'tc-artboard-backdrop': TcProps<{ 'kind'?: string | number; 'padding'?: string | number }>
-    'tc-aspect-ratio-box': TcProps<{ 'ratio'?: string | number }>
-    'tc-asset-bundle': TcProps<{ 'build-tag'?: string | number; 'category'?: string | number; 'default-build-tag'?: string | number; 'latest-build-ref'?: string | number; 'loading'?: boolean; 'name'?: string | number; 'target'?: string | number; 'target-icon'?: string | number; onTcAdvancedToggle?: (e: CustomEvent) => void; onTcBuildTagChange?: (e: CustomEvent) => void; onTcMenuClick?: (e: CustomEvent) => void }>
-    'tc-asset-row': TcProps<{ 'icon'?: string | number; 'name'?: string | number; 'size'?: string | number }>
-    'tc-asset-row-list': TcProps
-    'tc-audio-mixer': TcProps<{ 'current-ms'?: string | number; 'disabled'?: boolean; 'loading'?: boolean }>
-    'tc-avatar': TcProps<{ 'alt'?: string | number; 'name'?: string | number; 'size'?: string | number; 'src'?: string | number; 'status'?: string | number; 'variant'?: string | number }>
-    'tc-badge': TcProps<{ 'pill'?: boolean; 'size'?: string | number; 'text'?: string | number; 'tone'?: string | number; 'variant'?: string | number }>
-    'tc-badge-row': TcProps<{ 'size'?: string | number }>
-    'tc-banner': TcProps<{ 'cta-href'?: string | number; 'cta-label'?: string | number; 'dismissible'?: boolean; 'icon'?: string | number; 'icon-name'?: string | number; 'persist-dismiss-key'?: string | number; 'storage-key'?: string | number; 'variant'?: string | number; onTcDismiss?: (e: CustomEvent) => void }>
-    'tc-bar-chart': TcProps<{ 'height'?: string | number; 'loading'?: boolean; 'orientation'?: string | number; 'show-values'?: boolean; 'subtitle'?: string | number; 'title'?: string | number; onTcBarClick?: (e: CustomEvent) => void }>
-    'tc-basic-card': TcProps<{ 'color'?: string | number; 'icon'?: string | number; 'loading'?: boolean; 'text'?: string | number; 'text-a'?: string | number; 'text-b'?: string | number; 'value'?: string | number }>
-    'tc-basic-layout': TcProps<{ 'brand'?: string | number }>
-    'tc-battle-pass': TcProps<{ 'current-level'?: string | number; 'current-xp'?: string | number; 'has-premium'?: boolean; 'season-end'?: string | number; 'season-name'?: string | number; onTcClaim?: (e: CustomEvent) => void }>
-    'tc-benchmark-chart': TcProps<{ 'interactive'?: boolean; 'lower-is-better'?: boolean; 'scale'?: string | number; 'title'?: string | number; onTcBarClick?: (e: CustomEvent) => void }>
-    'tc-bitmap-font-generator': TcProps<{ 'auto-generate'?: boolean; 'background'?: string | number; 'border-align'?: string | number; 'border-color'?: string | number; 'border-thickness'?: string | number; 'borders'?: string | number; 'canvas-height'?: string | number; 'canvas-width'?: string | number; 'disabled'?: boolean; 'export-format'?: string | number; 'fill-color'?: string | number; 'fill-type'?: string | number; 'fit-parent'?: boolean; 'font-family'?: string | number; 'font-size'?: string | number; 'glow-color'?: string | number; 'glow-size'?: string | number; 'glyphs'?: string | number; 'glyphs-per-row'?: string | number; 'gradient-angle'?: string | number; 'gradient-colors'?: string | number; 'gradient-type'?: string | number; 'letter-spacing'?: string | number; 'line-height'?: string | number; 'padding'?: string | number; 'power-of-two'?: boolean; 'preview-align'?: string | number; 'preview-background'?: string | number; 'preview-line-gap'?: string | number; 'preview-padding'?: string | number; 'preview-scale'?: string | number; 'scale'?: string | number; 'shadow-blur'?: string | number; 'shadow-color'?: string | number; 'shadow-offset-x'?: string | number; 'shadow-offset-y'?: string | number; 'shadow-size'?: string | number; 'text'?: string | number; onTcGenerate?: (e: CustomEvent) => void }>
-    'tc-blur-overlay': TcProps<{ 'background'?: string | number; 'blur-amount'?: string | number }>
-    'tc-boss-bar': TcProps<{ 'epithet'?: string | number; 'hp'?: string | number; 'hp-max'?: string | number; 'name'?: string | number; 'phase'?: string | number }>
-    'tc-bottom-sheet': TcProps<{ 'blur-behind'?: string | number; 'dismissible'?: string | number; 'handle'?: string | number; 'heading'?: string | number; 'initial-snap'?: string | number; 'open'?: boolean; 'scrim'?: string | number; 'snap'?: string | number; onTcSheetClose?: (e: CustomEvent) => void; onTcSheetOpen?: (e: CustomEvent) => void; onTcSheetSnap?: (e: CustomEvent) => void }>
-    'tc-brand': TcProps<{ 'color'?: string | number; 'label'?: string | number; 'primary-text'?: string | number; 'secondary-text'?: string | number; 'xlarge'?: boolean }>
-    'tc-breadcrumb': TcProps<{ 'divider'?: string | number }>
-    'tc-breadcrumb-item': TcProps<{ 'active'?: boolean; 'href'?: string | number }>
-    'tc-brief-card': TcProps<{ 'body'?: string | number; 'brief-id'?: string | number; 'clickable'?: boolean; 'difficulty'?: string | number; 'icon'?: string | number; 'meta-left'?: string | number; 'meta-right'?: string | number; 'title'?: string | number; onTcClick?: (e: CustomEvent) => void }>
-    'tc-brightness-calibration': TcProps<{ 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-buff-bar': TcProps<{ 'gap'?: string | number; 'icon-size'?: string | number }>
-    'tc-buff-icon': TcProps<{ 'color'?: string | number; 'glyph'?: string | number; 'kind'?: string | number; 'size'?: string | number; 'time'?: string | number }>
-    'tc-build': TcProps<{ 'badge'?: string | number; 'badge-variant'?: string | number; 'date'?: string | number; 'duration'?: string | number; 'loading'?: boolean; 'name'?: string | number; 'size'?: string | number; 'status'?: string | number; onTcClick?: (e: CustomEvent) => void; onTcMenuSelect?: (e: CustomEvent) => void }>
-    'tc-bundle-bar': TcProps<{ 'filled-segments'?: string | number; 'meta'?: string | number; 'name'?: string | number; 'segments'?: string | number }>
-    'tc-button': TcProps<{ 'block'?: boolean; 'disabled'?: boolean; 'error'?: string | number; 'field'?: boolean; 'help'?: string | number; 'href'?: string | number; 'loading'?: boolean; 'outline'?: boolean; 'size'?: string | number; 'skin'?: string | number; 'state'?: string | number; 'type'?: string | number; 'variant'?: string | number }>
-    'tc-button-group': TcProps<{ 'aria-label'?: string | number; 'size'?: string | number; 'vertical'?: boolean }>
-    'tc-callout-quote': TcProps<{ 'attribution'?: string | number; 'quote'?: boolean; 'source'?: string | number; 'source-href'?: string | number }>
-    'tc-car-listing-card': TcProps<{ 'category'?: string | number; 'href'?: string | number; 'image-alt'?: string | number; 'image-src'?: string | number; 'layout'?: string | number; 'price-old-text'?: string | number; 'price-text'?: string | number; 'rating'?: string | number; 'rating-count-text'?: string | number; 'seller-avatar-src'?: string | number; 'seller-name'?: string | number; 'title-text'?: string | number; 'wishlisted'?: boolean; onTcWishlistToggle?: (e: CustomEvent) => void }>
-    'tc-card': TcProps<{ 'img'?: string | number; 'img-position'?: string | number; 'subtitle'?: string | number; 'title'?: string | number; 'variant'?: string | number }>
-    'tc-card-options': TcProps<{ 'columns'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-carousel': TcProps<{ 'controls'?: boolean; 'fade'?: boolean; 'indicators'?: boolean; 'interval'?: string | number; 'pause'?: string | number; 'ride'?: string | number; onTcSlid?: (e: CustomEvent) => void; onTcSlide?: (e: CustomEvent) => void }>
-    'tc-cdn-map': TcProps<{ 'height'?: string | number }>
-    'tc-changelog': TcProps<{ 'loading'?: boolean; 'max-visible'?: string | number; 'read-more-href'?: string | number; 'read-more-label'?: string | number }>
-    'tc-character-create': TcProps<{ 'confirm-label'?: string | number; 'heading'?: string | number; 'name'?: string | number; 'name-placeholder'?: string | number; onTcChange?: (e: CustomEvent) => void; onTcConfirm?: (e: CustomEvent) => void; onTcName?: (e: CustomEvent) => void }>
-    'tc-character-select': TcProps<{ 'selected-id'?: string | number; onTcConfirm?: (e: CustomEvent) => void; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-chart-container': TcProps<{ 'empty'?: boolean; 'loading'?: boolean; 'subtitle'?: string | number; 'title'?: string | number }>
-    'tc-chat-window': TcProps<{ 'active-channel'?: string | number; 'height'?: string | number; 'placeholder'?: string | number; 'width'?: string | number; onTcChannelChange?: (e: CustomEvent) => void; onTcSend?: (e: CustomEvent) => void }>
-    'tc-check': TcProps<{ 'checked'?: boolean; 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'indeterminate'?: boolean; 'inline'?: boolean; 'label'?: string | number; 'name'?: string | number; 'required'?: boolean; 'reverse'?: boolean; 'state'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-check-row': TcProps<{ 'checked'?: boolean; 'disabled'?: boolean; 'divider'?: string | number; 'hint'?: string | number; 'label'?: string | number; 'name'?: string | number; 'no-dim'?: boolean; 'no-strike'?: boolean; 'shape'?: string | number; 'tone'?: string | number; 'trailing'?: string | number; 'value'?: string | number; onTcCheckRowChange?: (e: CustomEvent) => void }>
-    'tc-checkbox-group': TcProps<{ 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'inline'?: boolean; 'label'?: string | number; 'name'?: string | number; 'required'?: boolean; 'state'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-chip': TcProps<{ 'count'?: string | number; 'disabled'?: boolean; 'icon'?: string | number; 'removable'?: boolean; 'selected'?: boolean; 'size'?: string | number; 'static'?: boolean; 'variant'?: string | number; onTcClick?: (e: CustomEvent) => void; onTcRemove?: (e: CustomEvent) => void }>
-    'tc-chip-group': TcProps<{ 'border'?: boolean; 'layout'?: string | number; 'size'?: string | number; 'subtitle'?: string | number; 'title'?: string | number; onTcToggle?: (e: CustomEvent) => void }>
-    'tc-circular-progress': TcProps<{ 'background'?: string | number; 'color'?: string | number; 'max'?: string | number; 'reverse'?: boolean; 'show-text'?: boolean; 'size'?: string | number; 'thickness'?: string | number; 'value'?: string | number }>
-    'tc-close-button': TcProps<{ 'aria-label'?: string | number; 'disabled'?: boolean }>
-    'tc-code-label-cell': TcProps<{ 'code'?: string | number; 'name'?: string | number }>
-    'tc-code-snippet': TcProps<{ 'code'?: string | number; 'language'?: string | number; 'loading'?: boolean; 'show-copy-button'?: string | number; 'title'?: string | number; onTcCopy?: (e: CustomEvent) => void }>
-    'tc-code-with-output': TcProps<{ 'code'?: string | number; 'language'?: string | number; 'layout'?: string | number; 'title'?: string | number }>
-    'tc-codex': TcProps<{ 'selected-id'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-col': TcProps<{ 'lg'?: string | number; 'md'?: string | number; 'order'?: string | number; 'sm'?: string | number; 'span'?: string | number; 'xl'?: string | number; 'xxl'?: string | number }>
-    'tc-collapse': TcProps<{ 'horizontal'?: boolean; 'open'?: boolean; onTcHidden?: (e: CustomEvent) => void; onTcHide?: (e: CustomEvent) => void; onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void }>
-    'tc-color-picker': TcProps<{ 'columns'?: string | number; 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'label'?: string | number; 'loading'?: boolean; 'name'?: string | number; 'required'?: boolean; 'state'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-colored-card': TcProps<{ 'color'?: string | number; 'icon'?: string | number; 'loading'?: boolean; 'text'?: string | number; 'text-a'?: string | number; 'text-b'?: string | number; 'value'?: string | number }>
-    'tc-combo-box': TcProps<{ 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'label'?: string | number; 'max-height'?: string | number; 'name'?: string | number; 'placeholder'?: string | number; 'required'?: boolean; 'state'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-combo-counter': TcProps<{ 'combo'?: string | number; 'font-size'?: string | number; 'label'?: string | number; 'timer'?: string | number }>
-    'tc-command-palette': TcProps<{ 'loading'?: boolean; 'open'?: boolean; 'placeholder'?: string | number; onTcClose?: (e: CustomEvent) => void; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-command-reference': TcProps<{ 'search-placeholder'?: string | number; 'searchable'?: string | number; 'title'?: string | number; onTcSearch?: (e: CustomEvent) => void }>
-    'tc-community-links': TcProps<{ 'title'?: boolean }>
-    'tc-comparator': TcProps<{ 'description'?: string | number; 'loading'?: boolean; 'loading-count'?: string | number; 'show-summary'?: string | number; 'title'?: string | number }>
-    'tc-compass-bar': TcProps<{ 'fov'?: string | number; 'heading'?: string | number; 'height'?: string | number; 'show-cardinals'?: boolean; 'width'?: string | number }>
-    'tc-compass-rose': TcProps<{ 'heading'?: string | number; 'size'?: string | number }>
-    'tc-compatibility-matrix': TcProps<{ 'title'?: string | number }>
-    'tc-config-preview': TcProps<{ 'live-label'?: string | number }>
-    'tc-confirm-dialog': TcProps<{ 'cancel-label'?: string | number; 'confirm-label'?: string | number; 'danger'?: boolean; 'dialog-title'?: string | number; 'eyebrow'?: string | number; 'message'?: string | number; 'open'?: boolean; onTcCancel?: (e: CustomEvent) => void; onTcConfirm?: (e: CustomEvent) => void }>
-    'tc-container': TcProps<{ 'breakpoint'?: string | number; 'fluid'?: boolean }>
-    'tc-context-menu': TcProps<{ onTcSelect?: (e: CustomEvent) => void }>
-    'tc-contributor-wall': TcProps<{ 'max-visible'?: string | number; 'title'?: string | number }>
-    'tc-controller-layout-preview': TcProps<{ 'layout'?: string | number }>
-    'tc-controls-rebind-list': TcProps<{ onTcRebind?: (e: CustomEvent) => void }>
-    'tc-cookbook-grid': TcProps<{ 'columns'?: string | number; 'title'?: string | number }>
-    'tc-cool-button': TcProps<{ 'addon'?: string | number; 'addon-position'?: string | number; 'disabled'?: boolean; 'label'?: string | number; 'loading'?: boolean; 'outline'?: boolean; 'size'?: string | number; 'variant'?: string | number; onTcClick?: (e: CustomEvent) => void }>
-    'tc-cool-nav': TcProps<{ 'brand'?: string | number; 'expand-breakpoint'?: string | number; 'login-href'?: string | number; 'login-label'?: string | number; 'login-variant'?: string | number; 'scroll-offset'?: string | number; 'sticky'?: boolean; 'theme'?: string | number; onTcLogin?: (e: CustomEvent) => void; onTcNavToggle?: (e: CustomEvent) => void }>
-    'tc-cooldown-badge': TcProps<{ 'label'?: string | number; 'max'?: string | number; 'show-label'?: boolean; 'size'?: string | number; 'value'?: string | number }>
-    'tc-countdown-timer': TcProps<{ 'compact'?: boolean; 'label'?: string | number; 'sub-label'?: string | number; 'target'?: string | number; 'units'?: string | number; onTcExpire?: (e: CustomEvent) => void }>
-    'tc-crafting-panel': TcProps<{ 'crafting'?: boolean; 'selected-id'?: string | number; onTcCraft?: (e: CustomEvent) => void; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-credits-scroll': TcProps<{ 'scroll-title'?: string | number; 'speed'?: string | number; onTcComplete?: (e: CustomEvent) => void }>
-    'tc-crosshair': TcProps<{ 'color'?: string | number; 'gap'?: string | number; 'size'?: string | number; 'spread'?: string | number; 'thickness'?: string | number; 'variant'?: string | number }>
-    'tc-currency-chip': TcProps<{ 'amount'?: string | number; 'color'?: string | number; 'glyph'?: string | number }>
-    'tc-currency-display': TcProps<{ 'amount'?: string | number; 'color'?: string | number; 'currency-icon'?: string | number; 'font-size'?: string | number; 'label'?: string | number }>
-    'tc-cycle-wheel': TcProps<{ 'center-label'?: string | number; 'center-pill'?: string | number; 'center-sub'?: string | number; 'center-value'?: string | number; 'current-index'?: string | number; 'paused'?: boolean; 'spin-seconds'?: string | number }>
-    'tc-damage-number': TcProps<{ 'crit'?: boolean; 'duration'?: string | number; 'heal'?: boolean; 'miss'?: boolean; 'value'?: string | number; onTcDone?: (e: CustomEvent) => void }>
-    'tc-danger-zone-actions': TcProps<{ 'class-name'?: string | number; onTcActionClick?: (e: CustomEvent) => void }>
-    'tc-dashboard-content': TcProps
-    'tc-dashboard-layout': TcProps<{ 'sidebar-open'?: boolean; onTcToggleSidebar?: (e: CustomEvent) => void }>
-    'tc-dashboard-sidebar': TcProps
-    'tc-data-list': TcProps<{ 'empty-text'?: string | number; 'list-title'?: string | number; 'selectable'?: boolean; 'selected-id'?: string | number; onTcAction?: (e: CustomEvent) => void; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-date-picker': TcProps<{ 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'label'?: string | number; 'max'?: string | number; 'min'?: string | number; 'name'?: string | number; 'required'?: boolean; 'state'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-day-strip': TcProps<{ 'active-id'?: string | number; 'columns'?: string | number; onTcDayStripChange?: (e: CustomEvent) => void }>
-    'tc-deadzone-slider': TcProps<{ 'disabled'?: boolean; 'format'?: string | number; 'max'?: string | number; 'min'?: string | number; 'muted'?: boolean; 'step'?: string | number; 'unit'?: string | number; 'value'?: string | number; 'with-mute'?: boolean; onTcChange?: (e: CustomEvent) => void; onTcToggleMute?: (e: CustomEvent) => void }>
-    'tc-debug-overlay': TcProps<{ 'draw-calls'?: string | number; 'fps'?: string | number; 'mem-mb'?: string | number; 'triangles'?: string | number }>
-    'tc-dialogue-box': TcProps<{ 'speaker'?: string | number; 'text'?: string | number; 'typing-speed'?: string | number }>
-    'tc-diff-viewer': TcProps<{ 'after'?: string | number; 'before'?: string | number; 'filename'?: string | number; 'language'?: string | number; 'mode'?: string | number; onTcRender?: (e: CustomEvent) => void }>
-    'tc-difference-card': TcProps<{ 'loading'?: boolean; 'period'?: string | number; 'previous-value'?: string | number; 'title'?: string | number; 'value'?: string | number }>
-    'tc-divider': TcProps<{ 'label'?: string | number; 'vertical'?: boolean }>
-    'tc-download-stats': TcProps<{ 'monthly'?: string | number; 'package-name'?: string | number; 'registry'?: string | number; 'total'?: string | number; 'weekly'?: string | number }>
-    'tc-drawer': TcProps<{ 'open'?: boolean; 'pinned'?: boolean; 'side'?: string | number; 'size'?: string | number; 'title'?: string | number; onTcClose?: (e: CustomEvent) => void }>
-    'tc-dropdown': TcProps<{ 'auto-close'?: string | number; 'direction'?: string | number; 'label'?: string | number; 'split'?: boolean; 'variant'?: string | number; onTcHidden?: (e: CustomEvent) => void; onTcHide?: (e: CustomEvent) => void; onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void }>
-    'tc-dropdown-item': TcProps<{ 'active'?: boolean; 'disabled'?: boolean; 'divider'?: boolean; 'href'?: string | number }>
-    'tc-early-signup-form': TcProps<{ 'cta-label'?: string | number; 'eyebrow'?: string | number; 'field-label'?: string | number; 'helper-text'?: string | number; 'loading'?: boolean; 'placeholder'?: string | number; 'stat'?: string | number; 'subtitle'?: string | number; 'success-message'?: string | number; 'success-title'?: string | number; 'title'?: string | number; 'variant'?: string | number; onTcSubmit?: (e: CustomEvent) => void }>
-    'tc-ecosystem-map': TcProps<{ 'size'?: string | number; 'title'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-editable-text': TcProps<{ 'aria-label'?: string | number; 'default-value'?: string | number; 'disabled'?: boolean; 'placeholder'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-emission-badge': TcProps<{ 'co2-text'?: string | number; 'label'?: string | number; 'standard'?: string | number; 'tier'?: string | number }>
-    'tc-empty-state': TcProps<{ 'description'?: string | number; 'heading'?: string | number; 'icon'?: string | number }>
-    'tc-engine-spec': TcProps<{ 'code'?: string | number; 'compact'?: boolean; 'cylinders'?: string | number; 'displacement-cc'?: string | number; 'emission-control'?: string | number; 'fuel-injection'?: string | number; 'layout'?: string | number; 'manufacturer'?: string | number; 'position'?: string | number; 'power-at-rpm'?: string | number; 'supercharger'?: string | number; 'torque-at-rpm'?: string | number; 'torque-nm'?: string | number; 'valves'?: string | number }>
-    'tc-entity-cell': TcProps<{ 'clickable'?: boolean; 'color'?: string | number; 'initial'?: string | number; 'name'?: string | number; 'size'?: string | number; 'sub-label'?: string | number; onTcClick?: (e: CustomEvent) => void }>
-    'tc-entity-profile-card': TcProps<{ 'loading'?: boolean; 'title'?: string | number }>
-    'tc-equipment-doll': TcProps<{ 'height'?: string | number; 'selected-id'?: string | number; 'silhouette'?: string | number; 'slot-size'?: string | number; 'width'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-equipment-matrix': TcProps<{ 'collapsible'?: boolean; 'columns'?: string | number }>
-    'tc-equipment-tag': TcProps<{ 'flag'?: string | number; 'icon'?: string | number; 'label'?: string | number }>
-    'tc-extended-select': TcProps<{ 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'label'?: string | number; 'loading'?: boolean; 'max-height'?: string | number; 'mobile'?: string | number; 'multiple'?: boolean; 'name'?: string | number; 'no-results-text'?: string | number; 'placeholder'?: string | number; 'required'?: boolean; 'search-placeholder'?: string | number; 'state'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-eyebrow': TcProps
-    'tc-fab': TcProps<{ 'auto-hide'?: boolean; 'icon'?: string | number; 'label'?: string | number; 'offset'?: string | number; 'position'?: string | number; 'variant'?: string | number }>
-    'tc-faq-list': TcProps<{ 'schema'?: boolean; 'title'?: string | number; onTcToggle?: (e: CustomEvent) => void }>
-    'tc-feature-card': TcProps<{ 'description'?: string | number; 'eyebrow'?: string | number; 'icon'?: string | number; 'inline'?: boolean; 'size'?: string | number; 'title'?: string | number }>
-    'tc-feature-matrix': TcProps<{ 'title'?: string | number }>
-    'tc-file': TcProps<{ 'action-icon'?: string | number; 'action-label'?: string | number; 'category'?: string | number; 'category-placeholder'?: string | number; 'editable-tags'?: boolean; 'extension'?: string | number; 'format'?: string | number; 'icon'?: string | number; 'items'?: string | number; 'loading'?: boolean; 'name'?: string | number; 'readonly'?: boolean; 'size'?: string | number; onTcAction?: (e: CustomEvent) => void; onTcCategoryChange?: (e: CustomEvent) => void; onTcItemsClick?: (e: CustomEvent) => void; onTcMenuItemClick?: (e: CustomEvent) => void; onTcNameChange?: (e: CustomEvent) => void; onTcTagsChange?: (e: CustomEvent) => void }>
-    'tc-file-dropzone': TcProps<{ onTcFiles?: (e: CustomEvent) => void }>
-    'tc-file-tags': TcProps<{ 'readonly'?: boolean; onTcChange?: (e: CustomEvent) => void }>
-    'tc-floating-label': TcProps<{ 'for'?: string | number; 'label'?: string | number }>
-    'tc-form': TcProps<{ 'novalidate'?: boolean; 'validated'?: boolean }>
-    'tc-form-input': TcProps<{ 'autocomplete'?: string | number; 'disabled'?: boolean; 'enterkeyhint'?: string | number; 'error'?: string | number; 'help'?: string | number; 'helper'?: string | number; 'id'?: string | number; 'inputmode'?: string | number; 'label'?: string | number; 'loading'?: boolean; 'max'?: string | number; 'min'?: string | number; 'name'?: string | number; 'placeholder'?: string | number; 'required'?: boolean; 'required-message'?: string | number; 'reserve-message'?: boolean; 'rows'?: string | number; 'step'?: string | number; 'type'?: string | number; 'validate-on'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-form-wizard': TcProps<{ 'complete-icon'?: string | number; 'complete-label'?: string | number; 'loading'?: boolean; onTcComplete?: (e: CustomEvent) => void; onTcStepChange?: (e: CustomEvent) => void }>
-    'tc-fov-slider': TcProps<{ 'disabled'?: boolean; 'format'?: string | number; 'max'?: string | number; 'min'?: string | number; 'muted'?: boolean; 'step'?: string | number; 'unit'?: string | number; 'value'?: string | number; 'with-mute'?: boolean; onTcChange?: (e: CustomEvent) => void; onTcToggleMute?: (e: CustomEvent) => void }>
-    'tc-fps-cap-select': TcProps<{ 'disabled'?: boolean; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-fullscreen-toggle': TcProps<{ 'checked'?: boolean; 'disabled'?: boolean; onTcChange?: (e: CustomEvent) => void }>
-    'tc-funnel-chart': TcProps<{ 'height'?: string | number; 'loading'?: boolean; 'show-labels'?: string | number; 'subtitle'?: string | number; 'title'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-game-over-screen': TcProps<{ 'eyebrow'?: string | number; 'subtitle'?: string | number; 'title-color'?: string | number; 'title-text'?: string | number; 'variant'?: string | number; onTcAction?: (e: CustomEvent) => void }>
-    'tc-game-showcase-card': TcProps<{ 'pitch'?: string | number; 'title'?: string | number; onTcClick?: (e: CustomEvent) => void }>
-    'tc-gamepad-button-prompt': TcProps<{ 'glyph'?: string | number; 'label'?: string | number; 'size'?: string | number }>
-    'tc-gantt-chart': TcProps<{ 'end-date'?: string | number; 'loading'?: boolean; 'start-date'?: string | number; 'subtitle'?: string | number; 'title'?: string | number; onTcTaskClick?: (e: CustomEvent) => void }>
-    'tc-gilded-frame': TcProps<{ 'padding'?: string | number; 'tone'?: string | number }>
-    'tc-github-stars-card': TcProps<{ 'cta-label'?: string | number; 'fetch-live'?: boolean; 'owner'?: string | number; 'repo'?: string | number; onTcCtaClick?: (e: CustomEvent) => void; onTcStats?: (e: CustomEvent) => void }>
-    'tc-good-first-issues': TcProps<{ 'title'?: string | number; onTcIssueClick?: (e: CustomEvent) => void }>
-    'tc-graphics-preset-picker': TcProps<{ 'disabled'?: boolean; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-grid': TcProps<{ 'cell-size'?: string | number; 'cell-size-lg'?: string | number; 'cell-size-md'?: string | number; 'cell-size-sm'?: string | number; 'cell-size-xl'?: string | number; 'cell-size-xxl'?: string | number; 'columns'?: string | number; 'columns-lg'?: string | number; 'columns-md'?: string | number; 'columns-sm'?: string | number; 'columns-xl'?: string | number; 'columns-xxl'?: string | number; 'gap'?: string | number; 'gap-lg'?: string | number; 'gap-md'?: string | number; 'gap-sm'?: string | number; 'gap-xl'?: string | number; 'gap-xxl'?: string | number; 'rows'?: string | number; 'rows-lg'?: string | number; 'rows-md'?: string | number; 'rows-sm'?: string | number; 'rows-xl'?: string | number; 'rows-xxl'?: string | number }>
-    'tc-group': TcProps<{ 'action-icon'?: string | number; 'action-label'?: string | number; 'badge'?: string | number; 'default-collapsed'?: boolean; 'label'?: string | number; onTcActionClick?: (e: CustomEvent) => void; onTcToggle?: (e: CustomEvent) => void }>
-    'tc-guild-panel': TcProps<{ 'guild-name'?: string | number; 'level'?: string | number; 'member-cap'?: string | number; 'motto'?: string | number; 'tag'?: string | number }>
-    'tc-heading': TcProps<{ 'as'?: string | number; 'gradient'?: boolean }>
-    'tc-health-bar': TcProps<{ 'ghost'?: string | number; 'label'?: string | number; 'max'?: string | number; 'segments'?: string | number; 'show-text'?: boolean; 'value'?: string | number; 'variant'?: string | number }>
-    'tc-heatmap': TcProps<{ 'cell-size'?: string | number; 'loading'?: boolean; 'subtitle'?: string | number; 'title'?: string | number; onTcCellHover?: (e: CustomEvent) => void }>
-    'tc-helper-text': TcProps<{ 'class-name'?: string | number; 'icon'?: string | number; 'id'?: string | number; 'text'?: string | number; 'variant'?: string | number }>
-    'tc-hero': TcProps<{ 'backdrop'?: string | number; 'background-pattern-src'?: string | number; 'description'?: string | number; 'eyebrow'?: string | number; 'media-alt'?: string | number; 'media-caption'?: string | number; 'media-label'?: string | number; 'media-src'?: string | number; 'note'?: string | number; 'preview'?: boolean; 'title'?: string | number; 'title-as'?: string | number; onTcAction?: (e: CustomEvent) => void }>
-    'tc-hero-stats-bar': TcProps<{ 'class-name'?: string | number }>
-    'tc-hit-marker': TcProps<{ 'crit'?: boolean; 'duration'?: string | number; 'kill'?: boolean; 'show'?: boolean; 'size'?: string | number; onTcDone?: (e: CustomEvent) => void }>
-    'tc-hotbar': TcProps<{ 'selected-id'?: string | number; 'slot-size'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-icon': TcProps<{ 'as'?: string | number; 'color'?: string | number; 'decorative'?: boolean; 'label'?: string | number; 'name'?: string | number; 'set'?: string | number; 'size'?: string | number }>
-    'tc-icon-badge': TcProps<{ 'bg'?: string | number; 'color'?: string | number; 'glyph'?: string | number; 'size'?: string | number }>
-    'tc-icon-button': TcProps<{ 'disabled'?: boolean; 'icon'?: string | number; 'label'?: string | number; 'outline'?: boolean; 'show-label'?: string | number; 'size'?: string | number; 'variant'?: string | number; onTcClick?: (e: CustomEvent) => void }>
-    'tc-icon-picker': TcProps<{ 'columns'?: string | number; 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'label'?: string | number; 'loading'?: boolean; 'max-height'?: string | number; 'name'?: string | number; 'required'?: boolean; 'state'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-image': TcProps<{ 'alt'?: string | number; 'aspect-ratio'?: string | number; 'object-fit'?: string | number; 'src'?: string | number; onTcError?: (e: CustomEvent) => void; onTcLoad?: (e: CustomEvent) => void }>
-    'tc-image-crop': TcProps<{ 'aspect-ratio'?: string | number; 'circular'?: boolean; 'src'?: string | number; onTcCrop?: (e: CustomEvent) => void; onTcError?: (e: CustomEvent) => void }>
-    'tc-infinite-scroll': TcProps<{ 'has-more'?: boolean; 'loading'?: boolean; 'root-margin'?: string | number; 'threshold'?: string | number; onTcLoadMore?: (e: CustomEvent) => void }>
-    'tc-input': TcProps<{ 'autocomplete'?: string | number; 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'inputmode'?: string | number; 'label'?: string | number; 'max'?: string | number; 'maxlength'?: string | number; 'min'?: string | number; 'minlength'?: string | number; 'name'?: string | number; 'pattern'?: string | number; 'placeholder'?: string | number; 'readonly'?: boolean; 'required'?: boolean; 'size'?: string | number; 'state'?: string | number; 'step'?: string | number; 'type'?: string | number; 'value'?: string | number }>
-    'tc-input-group': TcProps<{ 'size'?: string | number }>
-    'tc-input-group-text': TcProps
-    'tc-install-tabs': TcProps<{ 'default-manager'?: string | number; 'dev'?: boolean; 'global'?: boolean; 'package'?: string | number; onTcChange?: (e: CustomEvent) => void; onTcCopy?: (e: CustomEvent) => void }>
-    'tc-interact-prompt': TcProps<{ 'hold-progress'?: string | number; 'key-label'?: string | number; 'show'?: boolean; 'text'?: string | number }>
-    'tc-inventory-grid': TcProps<{ 'columns'?: string | number; 'selected-id'?: string | number; 'slot-size'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-invite-toast': TcProps<{ 'body'?: string | number; 'inviter'?: string | number; 'open'?: boolean; 'timeout-seconds'?: string | number; onTcAccept?: (e: CustomEvent) => void; onTcDecline?: (e: CustomEvent) => void }>
-    'tc-item-compare': TcProps
-    'tc-item-slot': TcProps<{ 'hotkey'?: string | number; 'selected'?: boolean; 'size'?: string | number; onTcClick?: (e: CustomEvent) => void }>
-    'tc-item-tooltip': TcProps
-    'tc-journal': TcProps<{ 'selected-id'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-json-editor': TcProps<{ 'disabled'?: boolean; 'loading'?: boolean; 'schema'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-json-schema-def': TcProps<{ 'default-value'?: string | number; 'disabled'?: boolean; 'label'?: string | number; 'loading'?: boolean; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void; onTcLabelChange?: (e: CustomEvent) => void }>
-    'tc-kbd': TcProps<{ 'class-name'?: string | number; 'separator'?: string | number }>
-    'tc-key': TcProps<{ 'size'?: string | number; 'variant'?: string | number }>
-    'tc-key-binder': TcProps<{ 'disabled'?: boolean; 'placeholder'?: string | number; 'value'?: string | number; onTcCancel?: (e: CustomEvent) => void; onTcChange?: (e: CustomEvent) => void }>
-    'tc-kill-feed': TcProps<{ 'max-visible'?: string | number }>
-    'tc-label': TcProps<{ 'required'?: boolean; 'size'?: string | number; 'tooltip'?: string | number }>
-    'tc-leaderboard': TcProps<{ onTcSelect?: (e: CustomEvent) => void }>
-    'tc-leaderboard-trend': TcProps<{ 'direction'?: string | number; 'size'?: string | number; 'value'?: string | number }>
-    'tc-legal-screen': TcProps<{ 'initial-section'?: string | number; 'screen-title'?: string | number; 'show-accept'?: boolean; onTcAccept?: (e: CustomEvent) => void; onTcClose?: (e: CustomEvent) => void }>
-    'tc-letterbox-bars': TcProps<{ 'bar-color'?: string | number; 'bar-height'?: string | number; 'duration'?: string | number; 'show'?: boolean }>
-    'tc-level-header': TcProps<{ 'level'?: string | number; 'next-label'?: string | number; 'title'?: string | number; 'xp'?: string | number; 'xp-max'?: string | number }>
-    'tc-level-select': TcProps<{ 'height'?: string | number; 'selected-id'?: string | number; 'width'?: string | number; onTcConfirm?: (e: CustomEvent) => void; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-lightbox': TcProps<{ 'initial-index'?: string | number; 'open'?: boolean; onTcChange?: (e: CustomEvent) => void; onTcClose?: (e: CustomEvent) => void }>
-    'tc-line-chart': TcProps<{ 'height'?: string | number; 'loading'?: boolean; 'show-grid'?: string | number; 'show-legend'?: string | number; 'subtitle'?: string | number; 'title'?: string | number; onTcPointHover?: (e: CustomEvent) => void }>
-    'tc-link': TcProps<{ 'external'?: boolean; 'href'?: string | number; 'underline'?: string | number; 'variant'?: string | number }>
-    'tc-linked-providers-card': TcProps<{ 'empty-label'?: string | number; 'title'?: string | number; onTcToggle?: (e: CustomEvent) => void }>
-    'tc-list': TcProps<{ 'selected-id'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-list-card': TcProps<{ 'loading'?: boolean; 'loading-count'?: string | number; 'ordered'?: boolean; 'title'?: string | number }>
-    'tc-list-group': TcProps<{ 'flush'?: boolean; 'horizontal'?: string | number; 'numbered'?: boolean }>
-    'tc-list-group-item': TcProps<{ 'action'?: boolean; 'active'?: boolean; 'disabled'?: boolean; 'href'?: string | number; 'variant'?: string | number }>
-    'tc-list-row': TcProps<{ 'accent'?: string | number; 'disabled'?: boolean; 'selected'?: boolean; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-list-section': TcProps<{ 'heading'?: string | number; 'icon'?: string | number; 'meta'?: string | number }>
-    'tc-live-feed': TcProps<{ 'auto-scroll'?: boolean; 'header'?: string | number; 'max-rows'?: string | number; 'recording'?: boolean; onTcRowClick?: (e: CustomEvent) => void }>
-    'tc-load-more': TcProps<{ 'count'?: string | number; 'disabled'?: boolean; 'exhausted-label'?: string | number; 'label'?: string | number; 'loading-label'?: string | number; 'state'?: string | number; onTcLoadMore?: (e: CustomEvent) => void }>
-    'tc-loading-overlay': TcProps<{ 'label'?: string | number; 'open'?: boolean; 'progress'?: string | number; 'tip'?: string | number }>
-    'tc-loading-screen': TcProps<{ 'eyebrow'?: string | number; 'label'?: string | number; 'progress'?: string | number; 'tip-interval'?: string | number; 'tip-title'?: string | number; 'title-text'?: string | number }>
-    'tc-lobby': TcProps<{ 'can-start'?: boolean; 'capacity'?: string | number; 'is-ready'?: boolean; 'lobby-mode'?: string | number; 'map-name'?: string | number }>
-    'tc-login': TcProps<{ 'background-pattern-src'?: string | number; 'description'?: string | number; 'loading'?: boolean; 'title'?: string | number; onTcConnect?: (e: CustomEvent) => void }>
-    'tc-logo-cloud': TcProps<{ 'columns'?: string | number; 'grayscale'?: boolean; 'title'?: string | number }>
-    'tc-loot-list': TcProps<{ 'list-title'?: string | number; onTcTake?: (e: CustomEvent) => void; onTcTakeAll?: (e: CustomEvent) => void }>
-    'tc-loot-popup': TcProps<{ 'auto-fade-ms'?: string | number; 'discard-label'?: string | number; 'eyebrow'?: string | number; 'open'?: boolean; 'popup-title'?: string | number; onTcClose?: (e: CustomEvent) => void; onTcDiscard?: (e: CustomEvent) => void; onTcTake?: (e: CustomEvent) => void; onTcTakeAll?: (e: CustomEvent) => void }>
-    'tc-lore-text': TcProps
-    'tc-macro-grid': TcProps<{ 'columns'?: string | number; 'variant'?: string | number }>
-    'tc-main-menu': TcProps<{ 'menu-title'?: string | number; 'selected-id'?: string | number; 'subtitle'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-maintainer-card': TcProps<{ 'avatar-url'?: string | number; 'bio'?: string | number; 'location'?: string | number; 'name'?: string | number; 'role'?: string | number; 'sponsor-href'?: string | number; 'sponsor-label'?: string | number }>
-    'tc-mana-bar': TcProps<{ 'ghost'?: string | number; 'label'?: string | number; 'max'?: string | number; 'segments'?: string | number; 'show-text'?: boolean; 'value'?: string | number; 'variant'?: string | number }>
-    'tc-manufacturer-tile': TcProps<{ 'active'?: boolean; 'count-text'?: string | number; 'eyebrow'?: string | number; 'href'?: string | number; 'logo-src'?: string | number; 'name'?: string | number }>
-    'tc-markdown-editor': TcProps<{ 'disabled'?: boolean; 'height'?: string | number; 'label'?: string | number; 'placeholder'?: string | number; 'toolbar'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-marquee': TcProps<{ 'direction'?: string | number; 'pause-on-hover'?: boolean; 'separator'?: string | number; 'speed'?: string | number }>
-    'tc-matchmaking-screen': TcProps<{ 'elapsed'?: string | number; 'estimated'?: string | number; 'found-label'?: string | number; 'mode'?: string | number; 'region'?: string | number; 'state'?: string | number }>
-    'tc-menu-item': TcProps<{ 'disabled'?: boolean; 'hotkey'?: string | number; 'icon'?: string | number; 'label'?: string | number; 'selected'?: boolean; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-metal-button': TcProps<{ 'block'?: boolean; 'disabled'?: boolean; 'error'?: string | number; 'field'?: boolean; 'help'?: string | number; 'href'?: string | number; 'loading'?: boolean; 'outline'?: boolean; 'size'?: string | number; 'skin'?: string | number; 'state'?: string | number; 'type'?: string | number; 'variant'?: string | number }>
-    'tc-metric-card': TcProps<{ 'icon'?: string | number; 'loading'?: boolean; 'subtitle'?: string | number; 'title'?: string | number; 'trend-color'?: string | number; 'value'?: string | number }>
-    'tc-metric-grid': TcProps<{ 'columns'?: string | number }>
-    'tc-metric-tile': TcProps<{ 'hint'?: string | number; 'icon'?: string | number; 'label'?: string | number; 'unit'?: string | number; 'value'?: string | number }>
-    'tc-migration-guide': TcProps<{ 'from'?: string | number; 'title'?: string | number; 'to'?: string | number }>
-    'tc-minimap': TcProps<{ 'background-image'?: string | number; 'rotation'?: string | number; 'size'?: string | number; 'world-height'?: string | number; 'world-width'?: string | number; 'world-x'?: string | number; 'world-y'?: string | number }>
-    'tc-mobile-shell': TcProps<{ 'data-key'?: string | number; 'desktop'?: boolean; 'edge'?: string | number; 'pane-bg'?: string | number; 'scroll-restore'?: string | number; onTcShellScroll?: (e: CustomEvent) => void }>
-    'tc-modal': TcProps<{ 'centered'?: boolean; 'fullscreen'?: string | number; 'lazy'?: boolean; 'open'?: boolean; 'scrollable'?: boolean; 'size'?: string | number; 'static-backdrop'?: boolean; 'title'?: string | number; onTcHidden?: (e: CustomEvent) => void; onTcHide?: (e: CustomEvent) => void; onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void }>
-    'tc-model-family-card': TcProps<{ 'body-type'?: string | number; 'generation'?: string | number; 'href'?: string | number; 'image-alt'?: string | number; 'image-src'?: string | number; 'manufacturer'?: string | number; 'range'?: string | number; 'series'?: string | number; 'variant-count-text'?: string | number; 'years-text'?: string | number }>
-    'tc-module-access': TcProps<{ 'owner-role-id'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-mouse-sensitivity': TcProps<{ 'ads'?: string | number; 'disabled'?: boolean; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-multi-card-select': TcProps<{ 'columns'?: string | number; 'loading'?: boolean; 'loading-count'?: string | number; 'name'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-nav': TcProps<{ 'fill'?: boolean; 'justified'?: boolean; 'variant'?: string | number; 'vertical'?: boolean }>
-    'tc-nav-button': TcProps<{ 'disabled'?: boolean; 'kind'?: string | number; 'label'?: string | number; 'size'?: string | number }>
-    'tc-nav-item': TcProps<{ 'active'?: boolean; 'disabled'?: boolean; 'href'?: string | number; 'target'?: string | number; onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void }>
-    'tc-navbar': TcProps<{ 'bg'?: string | number; 'brand'?: string | number; 'expand'?: string | number; 'fixed'?: string | number; 'sticky'?: string | number; 'variant'?: string | number }>
-    'tc-network-status-icon': TcProps<{ 'connected'?: boolean; 'loss'?: string | number; 'ping'?: string | number; 'show-label'?: boolean; 'size'?: string | number }>
-    'tc-newsletter-signup': TcProps<{ 'cta-label'?: string | number; 'description'?: string | number; 'placeholder'?: string | number; 'privacy-href'?: string | number; 'success-message'?: string | number; 'title'?: string | number; onTcSubmit?: (e: CustomEvent) => void }>
-    'tc-node-editor': TcProps<{ 'disabled'?: boolean; 'selected-id'?: string | number; onTcConnect?: (e: CustomEvent) => void; onTcMoveNode?: (e: CustomEvent) => void; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-normal-map-generator': TcProps<{ 'ambient'?: string | number; 'bevel-width'?: string | number; 'blur-radius'?: string | number; 'brush-falloff'?: string | number; 'brush-size'?: string | number; 'brush-strength'?: string | number; 'canvas-height'?: string | number; 'canvas-width'?: string | number; 'disabled'?: boolean; 'editable'?: boolean; 'emboss-height'?: string | number; 'fit-parent'?: boolean; 'invert-x'?: boolean; 'invert-y'?: boolean; 'light-tracking'?: string | number; 'light-x'?: string | number; 'light-y'?: string | number; 'light-z'?: string | number; 'mask-color'?: string | number; 'mask-opacity'?: string | number; 'max-dim'?: string | number; 'pan-x'?: string | number; 'pan-y'?: string | number; 'placeholder'?: string | number; 'preview-mode'?: string | number; 'source'?: string | number; 'strength'?: string | number; 'tool'?: string | number; 'zoom'?: string | number; onTcGenerate?: (e: CustomEvent) => void }>
-    'tc-notice': TcProps<{ 'icon'?: string | number; 'label'?: string | number; 'live'?: boolean; 'size'?: string | number; 'text'?: string | number; 'tone'?: string | number; 'variant'?: string | number }>
-    'tc-number-input': TcProps<{ 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'label'?: string | number; 'max'?: string | number; 'min'?: string | number; 'name'?: string | number; 'placeholder'?: string | number; 'precision'?: string | number; 'prefix'?: string | number; 'required'?: boolean; 'state'?: string | number; 'step'?: string | number; 'suffix'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-objective-marker': TcProps<{ 'color'?: string | number; 'distance'?: string | number; 'label'?: string | number; 'pulse'?: boolean; 'size'?: string | number; 'x'?: string | number; 'y'?: string | number }>
-    'tc-offcanvas': TcProps<{ 'backdrop'?: string | number; 'open'?: boolean; 'placement'?: string | number; 'scroll'?: boolean; 'title'?: string | number; onTcHidden?: (e: CustomEvent) => void; onTcHide?: (e: CustomEvent) => void; onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void }>
-    'tc-option': TcProps<{ 'disabled'?: boolean; 'selected'?: boolean; 'value'?: string | number }>
-    'tc-otp-input': TcProps<{ 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'label'?: string | number; 'length'?: string | number; 'masked'?: boolean; 'mode'?: string | number; 'name'?: string | number; 'placeholder'?: string | number; 'required'?: boolean; 'state'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void; onTcComplete?: (e: CustomEvent) => void }>
-    'tc-page-footer': TcProps<{ 'brand'?: string | number; 'description'?: string | number; 'legal-text'?: string | number; 'tagline'?: string | number }>
-    'tc-page-indicator': TcProps<{ 'active-color'?: string | number; 'color'?: string | number; 'count'?: string | number; 'gap'?: string | number; 'index'?: string | number; 'size'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-page-tabs': TcProps<{ 'active-id'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-pagination': TcProps<{ 'align'?: string | number; 'current'?: string | number; 'max-visible'?: string | number; 'size'?: string | number; 'total'?: string | number; onTcPageChange?: (e: CustomEvent) => void }>
-    'tc-panel': TcProps<{ 'bordered'?: boolean }>
-    'tc-panel-header': TcProps<{ 'heading'?: string | number; 'icon'?: string | number }>
-    'tc-particle-emitter': TcProps<{ 'burst'?: string | number; 'count'?: string | number; 'gravity'?: string | number; 'height'?: string | number; 'lifetime'?: string | number; 'particle-size'?: string | number; 'speed'?: string | number; 'width'?: string | number; onTcBurst?: (e: CustomEvent) => void }>
-    'tc-party-panel': TcProps<{ 'capacity'?: string | number }>
-    'tc-pause-menu': TcProps<{ 'default-items'?: boolean; 'menu-title'?: string | number; 'open'?: boolean; 'resume-footer'?: boolean; 'screen-title'?: string | number; onTcClose?: (e: CustomEvent) => void; onTcQuit?: (e: CustomEvent) => void; onTcRestart?: (e: CustomEvent) => void; onTcResume?: (e: CustomEvent) => void; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-pause-screen': TcProps<{ 'default-items'?: boolean; 'menu-title'?: string | number; 'open'?: boolean; 'resume-footer'?: boolean; 'screen-title'?: string | number; onTcClose?: (e: CustomEvent) => void; onTcQuit?: (e: CustomEvent) => void; onTcRestart?: (e: CustomEvent) => void; onTcResume?: (e: CustomEvent) => void; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-perk-picker': TcProps<{ 'columns'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-phase-grid': TcProps<{ 'columns'?: string | number }>
-    'tc-phone-input': TcProps<{ 'default-country'?: string | number; 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'label'?: string | number; 'max-height'?: string | number; 'name'?: string | number; 'placeholder'?: string | number; 'required'?: boolean; 'state'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-physics-editor': TcProps<{ 'alpha-threshold'?: string | number; 'auto-fit'?: boolean; 'canvas-height'?: string | number; 'canvas-width'?: string | number; 'disabled'?: boolean; 'fit-parent'?: boolean; 'handle-hit'?: string | number; 'handle-size'?: string | number; 'handles'?: string | number; 'history-limit'?: string | number; 'max-alpha-dim'?: string | number; 'min-size'?: string | number; 'readonly'?: boolean; 'shapes'?: string | number; 'shortcuts'?: string | number; 'simplify-tolerance'?: string | number; 'snap'?: string | number; 'source'?: string | number; 'tool'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-pie-chart': TcProps<{ 'center-label'?: string | number; 'donut'?: boolean; 'height'?: string | number; 'loading'?: boolean; 'show-legend'?: string | number; 'subtitle'?: string | number; 'title'?: string | number; onTcSliceSelect?: (e: CustomEvent) => void }>
-    'tc-ping-display': TcProps<{ 'ping'?: string | number }>
-    'tc-pinned-feature-showcase': TcProps<{ 'description'?: string | number; 'eyebrow'?: string | number; 'image-alt'?: string | number; 'image-src'?: string | number; 'title'?: string | number }>
-    'tc-pipeline': TcProps
-    'tc-placeholder': TcProps<{ 'animation'?: string | number; 'size'?: string | number; 'variant'?: string | number; 'width'?: string | number }>
-    'tc-platform-icon': TcProps<{ 'label'?: boolean; 'platform'?: string | number; 'size'?: string | number }>
-    'tc-player-card': TcProps<{ 'card-title'?: string | number; 'level'?: string | number; 'online-status'?: string | number; 'player-name'?: string | number; 'rank'?: string | number; onTcAction?: (e: CustomEvent) => void }>
-    'tc-player-frame': TcProps<{ 'class-name'?: string | number; 'glyph'?: string | number; 'hp'?: string | number; 'hp-max'?: string | number; 'level'?: string | number; 'mp'?: string | number; 'mp-max'?: string | number; 'name'?: string | number; 'show-mp'?: boolean; 'show-stamina'?: boolean; 'stamina'?: string | number; 'stamina-max'?: string | number }>
-    'tc-plugin-grid': TcProps<{ 'columns'?: string | number; 'title-text'?: string | number; onTcCopy?: (e: CustomEvent) => void }>
-    'tc-popover': TcProps<{ onTcHidden?: (e: CustomEvent) => void; onTcHide?: (e: CustomEvent) => void; onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void }>
-    'tc-portrait': TcProps<{ 'circle'?: boolean; 'glyph'?: string | number; 'level'?: string | number; 'ring'?: string | number; 'size'?: string | number }>
-    'tc-press-any-key': TcProps<{ 'disabled'?: boolean; 'text'?: string | number; onTcContinue?: (e: CustomEvent) => void }>
-    'tc-pricing-card': TcProps<{ 'badge-text'?: string | number; 'description'?: string | number; 'highlight'?: boolean; 'name'?: string | number; 'period'?: string | number; 'price'?: string | number; onTcAction?: (e: CustomEvent) => void }>
-    'tc-progress': TcProps<{ 'animated'?: boolean; 'label'?: boolean; 'max'?: string | number; 'min'?: string | number; 'striped'?: boolean; 'value'?: string | number; 'variant'?: string | number }>
-    'tc-progress-bar': TcProps<{ 'animated'?: boolean; 'label'?: boolean; 'striped'?: boolean; 'value'?: string | number; 'variant'?: string | number }>
-    'tc-pulse-indicator': TcProps<{ 'color'?: string | number; 'label'?: string | number; 'paused'?: boolean }>
-    'tc-quest-tracker': TcProps<{ 'tracker-title'?: string | number }>
-    'tc-queued-file': TcProps<{ 'extension'?: string | number; 'format'?: string | number; 'name'?: string | number; 'size'?: string | number; onTcDismiss?: (e: CustomEvent) => void }>
-    'tc-quick-start': TcProps<{ 'title-text'?: string | number; onTcCopy?: (e: CustomEvent) => void }>
-    'tc-quota-meter': TcProps<{ 'label-format'?: string | number; 'spoken'?: string | number; 'suffix'?: string | number; 'tone'?: string | number; 'total'?: string | number; 'used'?: string | number; 'variant'?: string | number; 'warn-at'?: string | number; 'width'?: string | number }>
-    'tc-radial-wheel': TcProps<{ 'center-label'?: string | number; 'open'?: boolean; 'option-size'?: string | number; 'per-page'?: string | number; 'radius'?: string | number; onTcClose?: (e: CustomEvent) => void; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-radio': TcProps<{ 'checked'?: boolean; 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'inline'?: boolean; 'label'?: string | number; 'name'?: string | number; 'required'?: boolean; 'reverse'?: boolean; 'state'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-radio-group': TcProps<{ 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'inline'?: boolean; 'label'?: string | number; 'name'?: string | number; 'required'?: boolean; 'state'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-range': TcProps<{ 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'label'?: string | number; 'max'?: string | number; 'min'?: string | number; 'name'?: string | number; 'required'?: boolean; 'state'?: string | number; 'step'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-range-slider': TcProps<{ 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'label'?: string | number; 'max'?: string | number; 'min'?: string | number; 'name'?: string | number; 'required'?: boolean; 'show-tooltip'?: boolean; 'state'?: string | number; 'step'?: string | number; 'ticks'?: boolean; onTcChange?: (e: CustomEvent) => void }>
-    'tc-rank-cell': TcProps<{ 'pad'?: string | number; 'rank'?: string | number }>
-    'tc-rarity-chip': TcProps<{ 'rarity'?: string | number }>
-    'tc-rating': TcProps<{ 'allow-half'?: boolean; 'count'?: string | number; 'icon'?: string | number; 'read-only'?: boolean; 'size'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-report-dialog': TcProps<{ 'open'?: boolean; 'player-name'?: string | number; onTcCancel?: (e: CustomEvent) => void; onTcSubmit?: (e: CustomEvent) => void }>
-    'tc-reset-to-defaults': TcProps<{ 'disabled'?: boolean; onTcReset?: (e: CustomEvent) => void }>
-    'tc-resizable-panel': TcProps<{ 'direction'?: string | number; 'min-size'?: string | number; 'storage-key'?: string | number; onTcResize?: (e: CustomEvent) => void }>
-    'tc-resource-bar': TcProps<{ 'ghost'?: string | number; 'label'?: string | number; 'max'?: string | number; 'segments'?: string | number; 'show-text'?: boolean; 'value'?: string | number; 'variant'?: string | number }>
-    'tc-result-screen': TcProps<{ 'eyebrow'?: string | number; 'subtitle'?: string | number; 'title-color'?: string | number; 'title-text'?: string | number; 'variant'?: string | number; onTcAction?: (e: CustomEvent) => void }>
-    'tc-rich-page-header': TcProps<{ 'description'?: string | number; 'icon-color'?: string | number; 'icon-name'?: string | number; 'sub'?: string | number; 'title-text'?: string | number }>
-    'tc-roadmap': TcProps<{ 'layout'?: string | number; 'title-text'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-row': TcProps<{ 'align'?: string | number; 'cols'?: string | number; 'cols-lg'?: string | number; 'cols-md'?: string | number; 'cols-sm'?: string | number; 'cols-xl'?: string | number; 'cols-xxl'?: string | number; 'g'?: string | number; 'gutter'?: string | number; 'justify'?: string | number }>
-    'tc-rune-corner': TcProps<{ 'at'?: string | number; 'size'?: string | number }>
-    'tc-safe-area': TcProps<{ 'extra'?: string | number }>
-    'tc-score-display': TcProps<{ 'align'?: string | number; 'font-size'?: string | number; 'label'?: string | number; 'multiplier'?: string | number; 'score'?: string | number }>
-    'tc-scoring-rules': TcProps
-    'tc-screen-flash': TcProps<{ 'duration'?: string | number; 'flash-color'?: string | number; 'flash-opacity'?: string | number; 'trigger'?: string | number; onTcDone?: (e: CustomEvent) => void }>
-    'tc-scroll-area': TcProps<{ 'axis'?: string | number; 'max-height'?: string | number; 'max-width'?: string | number }>
-    'tc-scroll-text': TcProps<{ 'max-height'?: string | number; 'scroll-title'?: string | number }>
-    'tc-scrollspy': TcProps<{ 'offset'?: string | number; 'smooth-scroll'?: boolean; 'target'?: string | number; onTcActivate?: (e: CustomEvent) => void }>
-    'tc-section-card': TcProps<{ 'icon'?: string | number; 'title'?: string | number; 'variant'?: string | number }>
-    'tc-section-flag': TcProps<{ 'align'?: string | number; 'subtitle'?: string | number; 'title'?: string | number }>
-    'tc-select': TcProps<{ 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'label'?: string | number; 'multiple'?: boolean; 'name'?: string | number; 'placeholder'?: string | number; 'required'?: boolean; 'size'?: string | number; 'state'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-select-row': TcProps<{ 'disabled'?: boolean; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-setting-slider': TcProps<{ 'disabled'?: boolean; 'format'?: string | number; 'max'?: string | number; 'min'?: string | number; 'muted'?: boolean; 'step'?: string | number; 'unit'?: string | number; 'value'?: string | number; 'with-mute'?: boolean; onTcChange?: (e: CustomEvent) => void; onTcToggleMute?: (e: CustomEvent) => void }>
-    'tc-settings-category-list': TcProps<{ 'selected-id'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-shake-container': TcProps<{ 'duration'?: string | number; 'intensity'?: string | number; 'trigger'?: string | number }>
-    'tc-shop-panel': TcProps<{ 'currency'?: string | number; 'currency-icon'?: string | number; 'sell-mode'?: boolean }>
-    'tc-side-nav': TcProps<{ 'loading'?: boolean; 'loading-count'?: string | number; onTcItemClick?: (e: CustomEvent) => void }>
-    'tc-simple-file': TcProps<{ 'extension'?: string | number; 'format'?: string | number; 'name'?: string | number }>
-    'tc-single-card-select': TcProps<{ 'columns'?: string | number; 'loading'?: boolean; 'loading-count'?: string | number; 'name'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-skeleton': TcProps<{ 'count'?: string | number; 'height'?: string | number; 'preset'?: string | number; 'variant'?: string | number; 'width'?: string | number }>
-    'tc-skill-bar': TcProps<{ 'gap'?: string | number; 'slot-size'?: string | number; onTcActivate?: (e: CustomEvent) => void }>
-    'tc-skill-tree': TcProps<{ 'height'?: string | number; 'points'?: string | number; 'selected-id'?: string | number; 'width'?: string | number; onTcSelect?: (e: CustomEvent) => void; onTcUnlock?: (e: CustomEvent) => void }>
-    'tc-slices-card': TcProps<{ 'loading'?: boolean; 'size'?: string | number; 'stroke-width'?: string | number; 'title'?: string | number }>
-    'tc-slider': TcProps<{ 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'label'?: string | number; 'max'?: string | number; 'min'?: string | number; 'name'?: string | number; 'required'?: boolean; 'show-tooltip'?: boolean; 'state'?: string | number; 'step'?: string | number; 'ticks'?: boolean; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-social-links': TcProps<{ 'size'?: string | number; 'variant'?: string | number }>
-    'tc-spacer': TcProps<{ 'axis'?: string | number; 'size'?: string | number }>
-    'tc-sparkline': TcProps<{ 'color'?: string | number; 'data'?: string | number; 'height'?: string | number; 'type'?: string | number; 'width'?: string | number }>
-    'tc-spinner': TcProps<{ 'label'?: string | number; 'size'?: string | number; 'type'?: string | number; 'variant'?: string | number }>
-    'tc-sponsor-wall': TcProps<{ 'title'?: string | number }>
-    'tc-sprint-chain': TcProps<{ 'columns'?: string | number; 'current-id'?: string | number }>
-    'tc-stack': TcProps<{ 'align'?: string | number; 'direction'?: string | number; 'gap'?: string | number; 'inline'?: boolean; 'justify'?: string | number; 'wrap'?: boolean }>
-    'tc-stamina-bar': TcProps<{ 'ghost'?: string | number; 'label'?: string | number; 'max'?: string | number; 'segments'?: string | number; 'show-text'?: boolean; 'value'?: string | number; 'variant'?: string | number }>
-    'tc-stamp': TcProps<{ 'angle'?: string | number; 'color'?: string | number; 'label'?: string | number; 'position'?: string | number }>
-    'tc-stat-card': TcProps<{ 'delta'?: string | number; 'delta-kind'?: string | number; 'footer'?: string | number; 'helper'?: string | number; 'icon'?: string | number; 'label'?: string | number; 'loading'?: boolean; 'unit'?: string | number; 'value'?: string | number }>
-    'tc-stat-row': TcProps<{ 'accent'?: string | number; 'label'?: string | number; 'trend'?: string | number; 'value'?: string | number }>
-    'tc-stat-tile': TcProps<{ 'align'?: string | number; 'color'?: string | number; 'hint'?: string | number; 'label'?: string | number; 'size'?: string | number; 'spoken'?: string | number; 'tone'?: string | number; 'unit'?: string | number; 'value'?: string | number; 'variant'?: string | number }>
-    'tc-state-machine': TcProps<{ 'compact'?: boolean }>
-    'tc-stats-screen': TcProps<{ 'screen-title'?: string | number; 'summary'?: string | number }>
-    'tc-status-card': TcProps<{ 'loading'?: boolean; 'loading-count'?: string | number; 'title'?: string | number }>
-    'tc-status-dot': TcProps<{ 'label'?: string | number; 'pulse'?: boolean; 'size'?: string | number; 'status'?: string | number }>
-    'tc-step-pager': TcProps<{ 'back-label'?: string | number; 'close-label'?: string | number; 'done-label'?: string | number; 'heading'?: string | number; 'heading-action'?: boolean; 'hint-label'?: string | number; 'index'?: string | number; 'keep-awake'?: boolean; 'max-segments'?: string | number; 'next-label'?: string | number; 'swipe-hint'?: string | number; 'wake-label'?: string | number; onTcStepPagerChange?: (e: CustomEvent) => void; onTcStepPagerClose?: (e: CustomEvent) => void; onTcStepPagerDone?: (e: CustomEvent) => void; onTcStepPagerHeading?: (e: CustomEvent) => void }>
-    'tc-stepper': TcProps<{ 'active-step'?: string | number; 'clickable'?: boolean; 'orientation'?: string | number; onTcStepClick?: (e: CustomEvent) => void }>
-    'tc-subtitle': TcProps<{ 'align'?: string | number; 'boxed'?: boolean; 'font-size'?: string | number; 'max-width'?: string | number; 'speaker'?: string | number; 'text'?: string | number }>
-    'tc-swipe-pager': TcProps<{ 'gesture'?: string | number; 'index'?: string | number; 'lazy'?: boolean; 'loop'?: boolean; onTcPagerChange?: (e: CustomEvent) => void }>
-    'tc-switch': TcProps<{ 'checked'?: boolean; 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'label'?: string | number; 'name'?: string | number; 'required'?: boolean; 'reverse'?: boolean; 'state'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-tab-bar': TcProps<{ 'active-id'?: string | number; 'size'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-tab-dock': TcProps<{ 'active-id'?: string | number; 'auto-hide'?: boolean; onTcTabDockChange?: (e: CustomEvent) => void; onTcTabDockReselect?: (e: CustomEvent) => void }>
-    'tc-tab-sections': TcProps<{ 'active-key'?: boolean; 'default-active-key'?: string | number; 'loading'?: boolean; onTcChange?: (e: CustomEvent) => void }>
-    'tc-table': TcProps<{ 'borderless'?: boolean; 'collapse'?: string | number; 'collapse-below'?: string | number; 'compact'?: boolean; 'empty-message'?: string | number; 'hoverable'?: boolean; 'loading'?: boolean; 'loading-rows'?: string | number; 'sticky-first-column'?: boolean; 'sticky-header'?: boolean; 'sticky-last-column'?: boolean; 'striped'?: boolean; onTcRowClick?: (e: CustomEvent) => void }>
-    'tc-tag': TcProps<{ 'count'?: string | number; 'disabled'?: boolean; 'icon'?: string | number; 'removable'?: boolean; 'selected'?: boolean; 'size'?: string | number; 'static'?: boolean; 'variant'?: string | number; onTcClick?: (e: CustomEvent) => void; onTcRemove?: (e: CustomEvent) => void }>
-    'tc-tag-input': TcProps<{ 'allow-create'?: boolean; 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'label'?: string | number; 'loading'?: boolean; 'max-height'?: string | number; 'max-tags'?: string | number; 'name'?: string | number; 'placeholder'?: string | number; 'required'?: boolean; 'state'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-taxonomy-card': TcProps<{ 'accent'?: string | number; 'clamp'?: string | number; 'description'?: string | number; 'eyebrow'?: string | number; 'heading'?: string | number; 'heading-level'?: string | number; 'href'?: string | number; 'metric-spoken'?: string | number; 'metric-unit'?: string | number; 'metric-value'?: string | number; 'spoken'?: string | number; 'static'?: boolean; 'subheading'?: string | number; onTcTaxonomyCardActivate?: (e: CustomEvent) => void }>
-    'tc-team-list': TcProps
-    'tc-terminal-window': TcProps<{ 'animate-typing'?: boolean; 'prompt'?: string | number; 'speed'?: string | number; 'title'?: string | number }>
-    'tc-testimonial-carousel': TcProps<{ 'autoplay'?: boolean; 'interval'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-text': TcProps<{ 'as'?: string | number; 'size'?: string | number; 'variant'?: string | number }>
-    'tc-textarea': TcProps<{ 'autocomplete'?: string | number; 'disabled'?: boolean; 'error'?: string | number; 'help'?: string | number; 'inputmode'?: string | number; 'label'?: string | number; 'max'?: string | number; 'maxlength'?: string | number; 'min'?: string | number; 'minlength'?: string | number; 'name'?: string | number; 'pattern'?: string | number; 'placeholder'?: string | number; 'readonly'?: boolean; 'required'?: boolean; 'rows'?: string | number; 'size'?: string | number; 'state'?: string | number; 'step'?: string | number; 'value'?: string | number }>
-    'tc-theme': TcProps<{ 'name'?: string | number; 'variant'?: string | number }>
-    'tc-tier-ladder': TcProps<{ 'current-tier-id'?: string | number; 'summary'?: string | number; 'title'?: string | number }>
-    'tc-time-picker': TcProps<{ 'clearable'?: boolean; 'disabled'?: boolean; 'error'?: string | number; 'format'?: string | number; 'help'?: string | number; 'label'?: string | number; 'minute-step'?: string | number; 'name'?: string | number; 'placeholder'?: string | number; 'required'?: boolean; 'show-seconds'?: boolean; 'state'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-timeline': TcProps<{ 'connector'?: string | number; 'loading'?: boolean; 'loading-count'?: string | number; 'overlap'?: string | number; 'variant'?: string | number }>
-    'tc-title': TcProps<{ 'align'?: string | number; 'size'?: string | number }>
-    'tc-title-screen': TcProps<{ 'eyebrow'?: string | number; 'subtitle'?: string | number; 'title-text'?: string | number }>
-    'tc-toast': TcProps<{ 'autohide'?: string | number; 'delay'?: string | number; 'open'?: boolean; 'title'?: string | number; 'variant'?: string | number; onTcHidden?: (e: CustomEvent) => void; onTcHide?: (e: CustomEvent) => void; onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void }>
-    'tc-toggle': TcProps<{ 'disabled'?: boolean; 'label'?: string | number; 'on'?: boolean; onTcChange?: (e: CustomEvent) => void }>
-    'tc-toggle-card': TcProps<{ 'badge'?: string | number; 'checked'?: boolean; 'disabled'?: boolean; 'hint'?: string | number; 'icon'?: string | number; 'label'?: string | number; 'loading'?: boolean; 'name'?: string | number; 'value'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-toggle-row': TcProps<{ 'checked'?: boolean; 'disabled'?: boolean; onTcChange?: (e: CustomEvent) => void }>
-    'tc-tooltip': TcProps<{ onTcHidden?: (e: CustomEvent) => void; onTcHide?: (e: CustomEvent) => void; onTcShow?: (e: CustomEvent) => void; onTcShown?: (e: CustomEvent) => void }>
-    'tc-transition-wipe': TcProps<{ 'direction'?: string | number; 'duration'?: string | number; 'show'?: boolean; 'wipe-color'?: string | number; onTcComplete?: (e: CustomEvent) => void }>
-    'tc-tree-view': TcProps<{ 'checkbox-mode'?: boolean; onTcExpandChange?: (e: CustomEvent) => void; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-trend-indicator': TcProps<{ 'direction'?: string | number; 'size'?: string | number; 'value'?: string | number }>
-    'tc-trend-spark': TcProps<{ 'max'?: string | number; 'min'?: string | number; 'no-dot'?: boolean; 'no-fill'?: boolean; 'points'?: string | number; 'spoken'?: string | number; 'tone'?: string | number }>
-    'tc-tyre-spec': TcProps<{ 'front-spec'?: string | number; 'rear-spec'?: string | number; 'spec'?: string | number }>
-    'tc-usage-summary-panel': TcProps<{ 'loading'?: boolean; 'loading-count'?: string | number; 'title'?: string | number }>
-    'tc-user-panel': TcProps<{ 'avatar-src'?: string | number; 'icon'?: string | number; 'icon-highlighted'?: boolean; 'icon-label'?: string | number; 'initials'?: string | number; 'loading'?: boolean; 'plan'?: string | number; 'username'?: string | number; onTcIconClick?: (e: CustomEvent) => void; onTcMenuClick?: (e: CustomEvent) => void }>
-    'tc-variant-spec-sheet': TcProps<{ 'dense'?: boolean; 'name'?: string | number; 'slug'?: string | number; 'version'?: string | number; 'years-text'?: string | number }>
-    'tc-version-label': TcProps<{ 'branch'?: string | number; 'build'?: string | number; 'version'?: string | number }>
-    'tc-version-picker': TcProps<{ 'name'?: string | number; 'value'?: string | number; 'variant'?: string | number; onTcChange?: (e: CustomEvent) => void }>
-    'tc-vertical-item-list': TcProps<{ 'active-key'?: boolean; 'default-active-key'?: string | number; 'disabled'?: boolean; 'loading'?: boolean; 'loading-count'?: string | number; onTcSelect?: (e: CustomEvent) => void }>
-    'tc-victory-screen': TcProps<{ 'eyebrow'?: string | number; 'subtitle'?: string | number; 'title-color'?: string | number; 'title-text'?: string | number; 'variant'?: string | number; onTcAction?: (e: CustomEvent) => void }>
-    'tc-video-embed': TcProps<{ 'aspect-ratio'?: string | number; 'autoplay'?: boolean; 'controls'?: string | number; 'loop'?: boolean; 'muted'?: boolean; 'poster'?: string | number; 'src'?: string | number; 'title'?: string | number }>
-    'tc-vignette-overlay': TcProps<{ 'intensity'?: string | number; 'vignette-color'?: string | number }>
-    'tc-virtual-list': TcProps<{ 'end-reached-threshold'?: string | number; 'height'?: string | number; 'overscan'?: string | number; onTcEndReached?: (e: CustomEvent) => void }>
-    'tc-visually-hidden': TcProps<{ 'as'?: string | number }>
-    'tc-volume-slider': TcProps<{ 'disabled'?: boolean; 'format'?: string | number; 'max'?: string | number; 'min'?: string | number; 'muted'?: boolean; 'step'?: string | number; 'unit'?: string | number; 'value'?: string | number; 'with-mute'?: boolean; onTcChange?: (e: CustomEvent) => void; onTcToggleMute?: (e: CustomEvent) => void }>
-    'tc-waypoint-marker': TcProps<{ 'color'?: string | number; 'distance'?: string | number; 'icon'?: string | number; 'label'?: string | number; 'size'?: string | number; 'x'?: string | number; 'y'?: string | number }>
-    'tc-welcome-guide': TcProps<{ 'background-pattern-alt'?: string | number; 'background-pattern-src'?: string | number; 'loading'?: boolean; 'title'?: string | number; onTcStepClick?: (e: CustomEvent) => void }>
+    'tc-ability-card': TcProps<
+        {
+            'ability-name'?: string | number
+            cooldown?: string | number
+            cost?: string | number
+            description?: string | number
+            icon?: string | number
+            keybind?: string | number
+            range?: string | number
+            rarity?: __AbilityCard$AbilityCardRarity
+        },
+        __AbilityCard$AbilityCard
+    >
+    'tc-accordion': TcProps<{ 'always-open'?: boolean; flush?: boolean }, __Accordion$Accordion>
+    'tc-accordion-item': TcProps<
+        {
+            header?: string | number
+            open?: boolean
+            'ontc-hidden'?: (e: CustomEvent) => void
+            'ontc-hide'?: (e: CustomEvent) => void
+            'ontc-show'?: (e: CustomEvent) => void
+            'ontc-shown'?: (e: CustomEvent) => void
+        },
+        __AccordionItem$AccordionItem
+    >
+    'tc-action-bar': TcProps<
+        { 'elevate-on-scroll'?: boolean; elevated?: boolean; flat?: boolean; stack?: boolean },
+        __ActionBar$ActionBar
+    >
+    'tc-action-header': TcProps<
+        {
+            disabled?: boolean
+            actions?: __ActionHeader$ActionHeaderAction[]
+            'ontc-exec'?: (e: CustomEvent<{ key: any }>) => void
+        },
+        __ActionHeader$ActionHeader
+    >
+    'tc-action-items': TcProps<
+        {
+            label?: string | number
+            items?: __ActionItems$ActionItem[]
+            'ontc-action-click'?: (e: CustomEvent<{ key: any }>) => void
+        },
+        __ActionItems$ActionItems
+    >
+    'tc-action-row-list': TcProps<
+        {
+            outline?: boolean
+            'trailing-icon'?: string | number
+            actions?: __ActionRowList$ActionRow[]
+            'ontc-action-click'?: (e: CustomEvent<{ key: any }>) => void
+        },
+        __ActionRowList$ActionRowList
+    >
+    'tc-activity-card': TcProps<
+        {
+            loading?: boolean
+            'loading-count'?: string | number
+            title?: string | number
+            activities?: __ActivityCard$ActivityItem[]
+        },
+        __ActivityCard$ActivityCard
+    >
+    'tc-add-slot': TcProps<
+        {
+            disabled?: boolean
+            icon?: string | number
+            label?: string | number
+            tone?: __AddSlot$AddSlotTone
+        },
+        __AddSlot$AddSlot
+    >
+    'tc-advanced-table': TcProps<
+        {
+            limit?: string | number
+            loading?: boolean
+            offset?: string | number
+            'sticky-first-column'?: boolean
+            'sticky-last-column'?: boolean
+            total?: string | number
+            columns?: __AdvancedTable$AdvancedTableColumn[]
+            filters?: __AdvancedTable$AdvancedTableFilter[]
+            filterValues?: Record<string, any>
+            rows?: string | null
+            sort?: __AdvancedTable$AdvancedTableSort | null
+            sortableColumns?: string[]
+            'ontc-filter-change'?: (e: CustomEvent<{ key: any; value: any }>) => void
+            'ontc-page-change'?: (e: CustomEvent<{ offset: any }>) => void
+            'ontc-sort-change'?: (e: CustomEvent<{ column: any; direction: any }>) => void
+        },
+        __AdvancedTable$AdvancedTable
+    >
+    'tc-alert': TcProps<
+        {
+            dismissible?: boolean
+            variant?: __Alert$AlertVariant
+            'ontc-closed'?: (e: CustomEvent) => void
+        },
+        __Alert$Alert
+    >
+    'tc-ammo-counter': TcProps<
+        {
+            mag?: string | number
+            'mag-max'?: string | number
+            reloading?: boolean
+            reserve?: string | number
+            'weapon-name'?: string | number
+        },
+        __AmmoCounter$AmmoCounter
+    >
+    'tc-anchor': TcProps<
+        { inset?: string | number; position?: __Anchor$AnchorPosition },
+        __Anchor$Anchor
+    >
+    'tc-announcement-bar': TcProps<
+        {
+            'cta-href'?: string | number
+            'cta-label'?: string | number
+            dismissible?: boolean
+            icon?: string | number
+            'icon-name'?: string | number
+            'persist-dismiss-key'?: string | number
+            'storage-key'?: string | number
+            variant?: __Banner$BannerVariant
+            'ontc-dismiss'?: (e: CustomEvent) => void
+        },
+        __Banner$Banner
+    >
+    'tc-api-reference-table': TcProps<
+        {
+            title?: string | number
+            groups?: __ApiReferenceTable$ApiReferenceGroup[]
+            items?: __ApiReferenceTable$ApiItem[]
+        },
+        __ApiReferenceTable$ApiReferenceTable
+    >
+    'tc-app-bar': TcProps<
+        {
+            'back-label'?: string | number
+            'elevate-on-scroll'?: boolean
+            elevated?: boolean
+            heading?: string | number
+            'heading-level'?: string | number
+            subheading?: string | number
+            truncate?: boolean
+            variant?: __AppBar$AppBarVariant
+            'ontc-app-bar-back'?: (e: CustomEvent) => void
+        },
+        __AppBar$AppBar
+    >
+    'tc-area-chart': TcProps<
+        {
+            height?: string | number
+            loading?: boolean
+            'show-grid'?: boolean | 'true' | 'false'
+            'show-legend'?: boolean | 'true' | 'false'
+            stacked?: boolean
+            subtitle?: string | number
+            title?: string | number
+            cb?: HTMLElement | null
+            series?: __AreaChart$AreaChartSeries[]
+            xFormatter?: (v: string | number) => string
+            yFormatter?: (v: number) => string
+            'ontc-point-hover'?: (e: CustomEvent) => void
+        },
+        __AreaChart$AreaChart
+    >
+    'tc-artboard': TcProps<
+        {
+            height?: string | number
+            label?: string | number
+            selected?: boolean
+            width?: string | number
+        },
+        __Artboard$Artboard
+    >
+    'tc-artboard-backdrop': TcProps<
+        {
+            kind?: __ArtboardBackdrop$ArtboardBackdropKind
+            padding?: __ArtboardBackdrop$ArtboardBackdropPadding
+        },
+        __ArtboardBackdrop$ArtboardBackdrop
+    >
+    'tc-aspect-ratio-box': TcProps<{ ratio?: string | number }, __AspectRatioBox$AspectRatioBox>
+    'tc-asset-bundle': TcProps<
+        {
+            'build-tag'?: string | number
+            category?: string | number
+            'default-build-tag'?: string | number
+            'latest-build-ref'?: string | number
+            loading?: boolean
+            name?: string | number
+            target?: string | number
+            'target-icon'?: string | number
+            advanced?: __AssetBundle$AssetBundleAdvancedOptions
+            counts?: Record<string, number>
+            excludedTags?: string[]
+            includedTags?: string[]
+            menuItems?: any
+            'ontc-advanced-toggle'?: (e: CustomEvent<{ open: any }>) => void
+            'ontc-build-tag-change'?: (e: CustomEvent<{ tag: any }>) => void
+            'ontc-menu-click'?: (e: CustomEvent<{ key: any }>) => void
+        },
+        __AssetBundle$AssetBundle
+    >
+    'tc-asset-row': TcProps<
+        { icon?: string | number; name?: string | number; size?: string | number; tags?: string[] },
+        __AssetRow$AssetRow
+    >
+    'tc-asset-row-list': TcProps<{}, __AssetRowList$AssetRowList>
+    'tc-audio-mixer': TcProps<
+        {
+            'current-ms'?: string | number
+            disabled?: boolean
+            loading?: boolean
+            actions?: __AudioMixer$AudioMixerActions
+            doc?: __AudioMixer$AudioMixerDocument
+            selection?: __AudioMixer$AudioMixerSelectionState
+        },
+        __AudioMixer$AudioMixer
+    >
+    'tc-avatar': TcProps<
+        {
+            alt?: string | number
+            name?: string | number
+            size?: __Avatar$AvatarSize
+            src?: string | number
+            status?: __Avatar$AvatarStatus
+            variant?: __Avatar$AvatarVariant
+        },
+        __Avatar$Avatar
+    >
+    'tc-badge': TcProps<
+        {
+            pill?: boolean
+            size?: __Badge$BadgeSize
+            text?: string | number
+            tone?: __Badge$BadgeTone
+            variant?: __Badge$BadgeVariant
+        },
+        __Badge$Badge
+    >
+    'tc-badge-row': TcProps<
+        { size?: __BadgeRow$BadgeRowSize; badges?: __BadgeRow$BadgeRowItem[] },
+        __BadgeRow$BadgeRow
+    >
+    'tc-banner': TcProps<
+        {
+            'cta-href'?: string | number
+            'cta-label'?: string | number
+            dismissible?: boolean
+            icon?: string | number
+            'icon-name'?: string | number
+            'persist-dismiss-key'?: string | number
+            'storage-key'?: string | number
+            variant?: __Banner$BannerVariant
+            'ontc-dismiss'?: (e: CustomEvent) => void
+        },
+        __Banner$Banner
+    >
+    'tc-bar-chart': TcProps<
+        {
+            height?: string | number
+            loading?: boolean
+            orientation?: __BarChart$BarChartOrientation
+            'show-values'?: boolean
+            subtitle?: string | number
+            title?: string | number
+            cb?: HTMLElement | null
+            data?: __BarChart$BarChartDataItem[]
+            yFormatter?: (v: number) => string
+            'ontc-bar-click'?: (e: CustomEvent<{ item: any; index: any }>) => void
+        },
+        __BarChart$BarChart
+    >
+    'tc-basic-card': TcProps<
+        {
+            color?: string | number
+            icon?: string | number
+            loading?: boolean
+            text?: string | number
+            'text-a'?: string | number
+            'text-b'?: string | number
+            value?: string | number
+        },
+        __BasicCard$BasicCard
+    >
+    'tc-basic-layout': TcProps<{ brand?: string | number }, __BasicLayout$BasicLayout>
+    'tc-battle-pass': TcProps<
+        {
+            'current-level'?: string | number
+            'current-xp'?: string | number
+            'has-premium'?: boolean
+            'season-end'?: string | number
+            'season-name'?: string | number
+            tiers?: __BattlePass$BattlePassTier[]
+            'ontc-claim'?: (e: CustomEvent) => void
+        },
+        __BattlePass$BattlePass
+    >
+    'tc-bead-trail': TcProps<
+        {
+            'max-beads'?: string | number
+            'max-crumbs'?: string | number
+            'root-label'?: string | number
+            separator?: string | number
+            crumbs?: __BeadTrail$BeadTrailCrumb[]
+        },
+        __BeadTrail$BeadTrail
+    >
+    'tc-benchmark-chart': TcProps<
+        {
+            interactive?: boolean
+            'lower-is-better'?: boolean
+            scale?: __BenchmarkChart$BenchmarkScale
+            title?: string | number
+            bars?: __BenchmarkChart$BenchmarkBar[]
+            'ontc-bar-click'?: (e: CustomEvent<{ bar: any; index: any }>) => void
+        },
+        __BenchmarkChart$BenchmarkChart
+    >
+    'tc-bitmap-font-generator': TcProps<
+        {
+            'auto-generate'?: boolean
+            background?: string | number
+            'border-align'?: string | number
+            'border-color'?: string | number
+            'border-thickness'?: string | number
+            borders?: string | number
+            'canvas-height'?: string | number
+            'canvas-width'?: string | number
+            disabled?: boolean
+            'export-format'?: __BitmapFontGenerator$BitmapFontExportFormat
+            'fill-color'?: string | number
+            'fill-type'?: string | number
+            'fit-parent'?: boolean
+            'font-family'?: string | number
+            'font-size'?: string | number
+            'glow-color'?: string | number
+            'glow-size'?: string | number
+            glyphs?: string | number
+            'glyphs-per-row'?: string | number
+            'gradient-angle'?: string | number
+            'gradient-colors'?: string | number
+            'gradient-type'?: string | number
+            'letter-spacing'?: string | number
+            'line-height'?: string | number
+            padding?: string | number
+            'power-of-two'?: boolean
+            'preview-align'?: __BitmapFontGenerator$BitmapFontPreviewAlign
+            'preview-background'?: string | number
+            'preview-line-gap'?: string | number
+            'preview-padding'?: string | number
+            'preview-scale'?: string | number
+            scale?: string | number
+            'shadow-blur'?: string | number
+            'shadow-color'?: string | number
+            'shadow-offset-x'?: string | number
+            'shadow-offset-y'?: string | number
+            'shadow-size'?: string | number
+            text?: string | number
+            border?: __BitmapFontGenerator$BitmapFontBorder | null
+            dropShadow?: __BitmapFontGenerator$BitmapFontDropShadow | null
+            fill?: __BitmapFontGenerator$BitmapFontFill | null
+            glow?: __BitmapFontGenerator$BitmapFontGlow | null
+            'ontc-generate'?: (e: CustomEvent<__BitmapFontGenerator$BitmapFontOutput>) => void
+        },
+        __BitmapFontGenerator$BitmapFontGenerator
+    >
+    'tc-blur-overlay': TcProps<
+        { background?: string | number; 'blur-amount'?: string | number },
+        __BlurOverlay$BlurOverlay
+    >
+    'tc-boss-bar': TcProps<
+        {
+            epithet?: string | number
+            hp?: string | number
+            'hp-max'?: string | number
+            name?: string | number
+            phase?: string | number
+            phaseTicks?: number[]
+        },
+        __BossBar$BossBar
+    >
+    'tc-bottom-sheet': TcProps<
+        {
+            'blur-behind'?: boolean | 'true' | 'false'
+            dismissible?: boolean | 'true' | 'false'
+            handle?: boolean | 'true' | 'false'
+            heading?: string | number
+            'initial-snap'?: string | number
+            open?: boolean
+            scrim?: __BottomSheet$BottomSheetScrim
+            snap?: string | number
+            'ontc-sheet-close'?: (e: CustomEvent<__BottomSheet$BottomSheetCloseDetail>) => void
+            'ontc-sheet-open'?: (e: CustomEvent) => void
+            'ontc-sheet-snap'?: (e: CustomEvent<__BottomSheet$BottomSheetSnapDetail>) => void
+        },
+        __BottomSheet$BottomSheet
+    >
+    'tc-brand': TcProps<
+        {
+            color?: string | number
+            label?: string | number
+            'primary-text'?: string | number
+            'secondary-text'?: string | number
+            xlarge?: boolean
+        },
+        __Brand$Brand
+    >
+    'tc-breadcrumb': TcProps<{ divider?: string | number }, __Breadcrumb$Breadcrumb>
+    'tc-breadcrumb-item': TcProps<
+        { active?: boolean; href?: string | number },
+        __BreadcrumbItem$BreadcrumbItem
+    >
+    'tc-brief-card': TcProps<
+        {
+            body?: string | number
+            'brief-id'?: string | number
+            clickable?: boolean
+            difficulty?: __BriefCard$BriefCardDifficulty
+            icon?: string | number
+            'meta-left'?: string | number
+            'meta-right'?: string | number
+            title?: string | number
+            'ontc-click'?: (e: CustomEvent<{ id: any }>) => void
+        },
+        __BriefCard$BriefCard
+    >
+    'tc-brightness-calibration': TcProps<
+        { value?: string | number; 'ontc-change'?: (e: CustomEvent<{ value: any }>) => void },
+        __BrightnessCalibration$BrightnessCalibration
+    >
+    'tc-buff-bar': TcProps<
+        { gap?: string | number; 'icon-size'?: string | number; buffs?: __BuffBar$BuffEntry[] },
+        __BuffBar$BuffBar
+    >
+    'tc-buff-icon': TcProps<
+        {
+            color?: string | number
+            glyph?: string | number
+            kind?: __BuffIcon$BuffIconKind
+            size?: string | number
+            time?: string | number
+        },
+        __BuffIcon$BuffIcon
+    >
+    'tc-build': TcProps<
+        {
+            badge?: string | number
+            'badge-variant'?: __Build$BuildBadgeVariant
+            date?: string | number
+            duration?: string | number
+            loading?: boolean
+            name?: string | number
+            size?: string | number
+            status?: __Build$BuildStatus
+            menuItems?: any
+            'ontc-click'?: (e: CustomEvent) => void
+            'ontc-menu-select'?: (e: CustomEvent<{ key: any }>) => void
+        },
+        __Build$Build
+    >
+    'tc-bundle-bar': TcProps<
+        {
+            'filled-segments'?: string | number
+            meta?: string | number
+            name?: string | number
+            segments?: string | number
+            chips?: __BundleBar$BundleBarChip[]
+        },
+        __BundleBar$BundleBar
+    >
+    'tc-button': TcProps<
+        {
+            block?: boolean
+            disabled?: boolean
+            error?: string | number
+            field?: boolean
+            help?: string | number
+            href?: string | number
+            loading?: boolean
+            outline?: boolean
+            size?: __Button$ButtonSize
+            skin?: string | number
+            state?: __internal_field_message$FieldMessageState
+            type?: __Button$ButtonType
+            variant?: __Button$ButtonVariant
+        },
+        __Button$Button
+    >
+    'tc-button-group': TcProps<
+        {
+            'aria-label'?: string | number
+            size?: __ButtonGroup$ButtonGroupSize
+            vertical?: boolean
+        },
+        __ButtonGroup$ButtonGroup
+    >
+    'tc-callout-quote': TcProps<
+        {
+            attribution?: string | number
+            quote?: boolean
+            source?: string | number
+            'source-href'?: string | number
+        },
+        __CalloutQuote$CalloutQuote
+    >
+    'tc-car-listing-card': TcProps<
+        {
+            category?: string | number
+            href?: string | number
+            'image-alt'?: string | number
+            'image-src'?: string | number
+            layout?: string | number
+            'price-old-text'?: string | number
+            'price-text'?: string | number
+            rating?: string | number
+            'rating-count-text'?: string | number
+            'seller-avatar-src'?: string | number
+            'seller-name'?: string | number
+            'title-text'?: string | number
+            wishlisted?: boolean
+            specs?: __CarListingCard$CarListingSpec[]
+            'ontc-wishlist-toggle'?: (e: CustomEvent<{ wishlisted: any }>) => void
+        },
+        __CarListingCard$CarListingCard
+    >
+    'tc-card': TcProps<
+        {
+            img?: string | number
+            'img-position'?: __Card$CardImgPosition
+            subtitle?: string | number
+            title?: string | number
+            variant?: __Card$CardVariant
+        },
+        __Card$Card
+    >
+    'tc-card-options': TcProps<
+        {
+            columns?: string | number
+            value?: string | number
+            options?: __CardOptions$CardOption[]
+            'ontc-change'?: (e: CustomEvent<{ key: any }>) => void
+        },
+        __CardOptions$CardOptions
+    >
+    'tc-carousel': TcProps<
+        {
+            controls?: boolean
+            fade?: boolean
+            indicators?: boolean
+            interval?: string | number
+            pause?: string | number
+            ride?: string | number
+            pauseMode?: string
+            'ontc-slid'?: (e: CustomEvent<{ from: any; to: any; direction: any }>) => void
+            'ontc-slide'?: (e: CustomEvent<{ from: any; to: any; direction: any }>) => void
+        },
+        __Carousel$Carousel
+    >
+    'tc-cdn-map': TcProps<
+        { height?: string | number; nodes?: __CdnMap$CdnMapNode[] },
+        __CdnMap$CdnMap
+    >
+    'tc-changelog': TcProps<
+        {
+            loading?: boolean
+            'max-visible'?: string | number
+            'read-more-href'?: string | number
+            'read-more-label'?: string | number
+            entries?: __Changelog$ChangelogEntry[]
+        },
+        __Changelog$Changelog
+    >
+    'tc-character-create': TcProps<
+        {
+            'confirm-label'?: string | number
+            heading?: string | number
+            name?: string | number
+            'name-placeholder'?: string | number
+            fields?: __CharacterCreate$CharacterCreateField[]
+            values?: Record<string, string | number>
+            'ontc-change'?: (e: CustomEvent) => void
+            'ontc-confirm'?: (e: CustomEvent) => void
+            'ontc-name'?: (e: CustomEvent) => void
+        },
+        __CharacterCreate$CharacterCreate
+    >
+    'tc-character-select': TcProps<
+        {
+            'selected-id'?: string | number
+            characters?: __CharacterSelect$CharacterEntry[]
+            'ontc-confirm'?: (e: CustomEvent) => void
+            'ontc-select'?: (e: CustomEvent) => void
+        },
+        __CharacterSelect$CharacterSelect
+    >
+    'tc-chart-container': TcProps<
+        {
+            empty?: boolean
+            loading?: boolean
+            subtitle?: string | number
+            title?: string | number
+            actions?: string | Node | null
+            emptySlot?: string | Node | null
+            legend?: string | Node | null
+        },
+        __ChartContainer$ChartContainer
+    >
+    'tc-chat-window': TcProps<
+        {
+            'active-channel'?: string | number
+            height?: string | number
+            placeholder?: string | number
+            width?: string | number
+            channels?: __ChatWindow$ChatChannel[]
+            messages?: __ChatWindow$ChatMessage[]
+            'ontc-channel-change'?: (e: CustomEvent) => void
+            'ontc-send'?: (e: CustomEvent) => void
+        },
+        __ChatWindow$ChatWindow
+    >
+    'tc-check': TcProps<
+        {
+            checked?: boolean
+            disabled?: boolean
+            error?: string | number
+            help?: string | number
+            indeterminate?: boolean
+            inline?: boolean
+            label?: string | number
+            name?: string | number
+            required?: boolean
+            reverse?: boolean
+            state?: __Check$CheckState
+            value?: string | number
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __Check$Check
+    >
+    'tc-check-row': TcProps<
+        {
+            checked?: boolean
+            disabled?: boolean
+            divider?: __CheckRow$CheckRowDivider
+            hint?: string | number
+            label?: string | number
+            name?: string | number
+            'no-dim'?: boolean
+            'no-strike'?: boolean
+            shape?: __CheckRow$CheckRowShape
+            tone?: __CheckRow$CheckRowTone
+            trailing?: string | number
+            value?: string | number
+            'ontc-check-row-change'?: (e: CustomEvent<__CheckRow$CheckRowChangeDetail>) => void
+        },
+        __CheckRow$CheckRow
+    >
+    'tc-checkbox-group': TcProps<
+        {
+            disabled?: boolean
+            error?: string | number
+            help?: string | number
+            inline?: boolean
+            label?: string | number
+            name?: string | number
+            required?: boolean
+            state?: __CheckboxGroup$CheckboxGroupState
+            options?: __CheckboxGroup$CheckboxGroupOption[]
+            value?: string[]
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __CheckboxGroup$CheckboxGroup
+    >
+    'tc-chip': TcProps<
+        {
+            count?: string | number
+            disabled?: boolean
+            icon?: string | number
+            removable?: boolean
+            selected?: boolean
+            size?: __Chip$ChipSize
+            static?: boolean
+            variant?: __Chip$ChipVariant
+            'ontc-click'?: (e: CustomEvent) => void
+            'ontc-remove'?: (e: CustomEvent) => void
+        },
+        __Chip$Chip
+    >
+    'tc-chip-group': TcProps<
+        {
+            border?: boolean
+            layout?: string | number
+            size?: string | number
+            subtitle?: string | number
+            title?: string | number
+            items?: __ChipGroup$ChipGroupItem[]
+            'ontc-toggle'?: (e: CustomEvent<{ id: any }>) => void
+        },
+        __ChipGroup$ChipGroup
+    >
+    'tc-circular-progress': TcProps<
+        {
+            background?: string | number
+            color?: string | number
+            max?: string | number
+            reverse?: boolean
+            'show-text'?: boolean
+            size?: string | number
+            thickness?: string | number
+            value?: string | number
+        },
+        __CircularProgress$CircularProgress
+    >
+    'tc-close-button': TcProps<
+        { 'aria-label'?: string | number; disabled?: boolean },
+        __CloseButton$CloseButton
+    >
+    'tc-code-label-cell': TcProps<
+        { code?: string | number; name?: string | number },
+        __CodeLabelCell$CodeLabelCell
+    >
+    'tc-code-snippet': TcProps<
+        {
+            code?: string | number
+            language?: __CodeSnippet$CodeSnippetLanguage
+            loading?: boolean
+            'show-copy-button'?: string | number
+            title?: string | number
+            'ontc-copy'?: (e: CustomEvent<{ code: any }>) => void
+        },
+        __CodeSnippet$CodeSnippet
+    >
+    'tc-code-with-output': TcProps<
+        {
+            code?: string | number
+            language?: __CodeWithOutput$CodeWithOutputLanguage
+            layout?: __CodeWithOutput$CodeWithOutputLayout
+            title?: string | number
+            error?: string
+            output?: string
+        },
+        __CodeWithOutput$CodeWithOutput
+    >
+    'tc-codex': TcProps<
+        {
+            'selected-id'?: string | number
+            entries?: __Codex$CodexEntry[]
+            'ontc-select'?: (e: CustomEvent<{ id: any }>) => void
+        },
+        __Codex$Codex
+    >
+    'tc-col': TcProps<{ order?: string | number; span?: string | number }, __Col$Col>
+    'tc-collapse': TcProps<
+        {
+            horizontal?: boolean
+            open?: boolean
+            'ontc-hidden'?: (e: CustomEvent) => void
+            'ontc-hide'?: (e: CustomEvent) => void
+            'ontc-show'?: (e: CustomEvent) => void
+            'ontc-shown'?: (e: CustomEvent) => void
+        },
+        __Collapse$Collapse
+    >
+    'tc-color-picker': TcProps<
+        {
+            columns?: string | number
+            disabled?: boolean
+            error?: string | number
+            help?: string | number
+            label?: string | number
+            loading?: boolean
+            name?: string | number
+            required?: boolean
+            state?: __ColorPicker$ColorPickerState
+            value?: string | number
+            cb?: HTMLElement | null
+            colors?: Array<__ColorPicker$ColorOption | string>
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __ColorPicker$ColorPicker
+    >
+    'tc-colored-card': TcProps<
+        {
+            color?: string | number
+            icon?: string | number
+            loading?: boolean
+            text?: string | number
+            'text-a'?: string | number
+            'text-b'?: string | number
+            value?: string | number
+        },
+        __BasicCard$BasicCard
+    >
+    'tc-combo-box': TcProps<
+        {
+            disabled?: boolean
+            error?: string | number
+            help?: string | number
+            label?: string | number
+            'max-height'?: string | number
+            name?: string | number
+            placeholder?: string | number
+            required?: boolean
+            state?: __ComboBox$ComboBoxState
+            value?: string | number
+            cb?: HTMLElement | null
+            options?: __ComboBox$ComboOption[]
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __ComboBox$ComboBox
+    >
+    'tc-combo-counter': TcProps<
+        {
+            combo?: string | number
+            'font-size'?: string | number
+            label?: string | number
+            timer?: string | number
+        },
+        __ComboCounter$ComboCounter
+    >
+    'tc-command-palette': TcProps<
+        {
+            loading?: boolean
+            open?: boolean
+            placeholder?: string | number
+            items?: __CommandPalette$CommandPaletteItem[]
+            'ontc-close'?: (e: CustomEvent) => void
+            'ontc-select'?: (e: CustomEvent<{ item: any }>) => void
+        },
+        __CommandPalette$CommandPalette
+    >
+    'tc-command-reference': TcProps<
+        {
+            'search-placeholder'?: string | number
+            searchable?: boolean | 'true' | 'false'
+            title?: string | number
+            commands?: __CommandReference$CommandItem[]
+            'ontc-search'?: (e: CustomEvent<{ query: any }>) => void
+        },
+        __CommandReference$CommandReference
+    >
+    'tc-community-links': TcProps<
+        { title?: boolean; links?: __CommunityLinks$CommunityLink[] },
+        __CommunityLinks$CommunityLinks
+    >
+    'tc-comparator': TcProps<
+        {
+            description?: string | number
+            loading?: boolean
+            'loading-count'?: string | number
+            'show-summary'?: boolean | 'true' | 'false'
+            title?: string | number
+            features?: __Comparator$ComparatorFeature[]
+            left?: __Comparator$ComparatorTechnology | null
+            right?: __Comparator$ComparatorTechnology | null
+        },
+        __Comparator$Comparator
+    >
+    'tc-compass-bar': TcProps<
+        {
+            fov?: string | number
+            heading?: string | number
+            height?: string | number
+            'show-cardinals'?: boolean
+            width?: string | number
+            markers?: __CompassBar$CompassMarker[]
+        },
+        __CompassBar$CompassBar
+    >
+    'tc-compass-rose': TcProps<
+        { heading?: string | number; size?: string | number },
+        __CompassRose$CompassRose
+    >
+    'tc-compatibility-matrix': TcProps<
+        {
+            title?: string | number
+            platforms?: string[]
+            support?: Record<string, Record<string, __CompatibilityMatrix$CompatStatus>>
+            versions?: string[]
+        },
+        __CompatibilityMatrix$CompatibilityMatrix
+    >
+    'tc-condition-builder': TcProps<
+        {
+            disabled?: boolean
+            'max-depth'?: string | number
+            fields?: __ConditionBuilder$ConditionField[]
+            operatorLabels?: Record<string, string>
+            value?: __ConditionBuilder$ConditionGroup
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __ConditionBuilder$ConditionBuilder
+    >
+    'tc-config-preview': TcProps<
+        { 'live-label'?: string | number; entries?: __ConfigPreview$ConfigPreviewEntry[] },
+        __ConfigPreview$ConfigPreview
+    >
+    'tc-confirm-dialog': TcProps<
+        {
+            'cancel-label'?: string | number
+            'confirm-label'?: string | number
+            danger?: boolean
+            'dialog-title'?: string | number
+            eyebrow?: string | number
+            message?: string | number
+            open?: boolean
+            'ontc-cancel'?: (e: CustomEvent) => void
+            'ontc-confirm'?: (e: CustomEvent) => void
+        },
+        __ConfirmDialog$ConfirmDialog
+    >
+    'tc-confirm-sheet': TcProps<
+        {
+            'blur-behind'?: boolean | 'true' | 'false'
+            'cancel-label'?: string | number
+            'confirm-label'?: string | number
+            danger?: boolean
+            dismissible?: boolean | 'true' | 'false'
+            handle?: boolean | 'true' | 'false'
+            heading?: string | number
+            'initial-snap'?: string | number
+            message?: string | number
+            open?: boolean
+            scrim?: string | number
+            snap?: string | number
+            'ontc-cancel'?: (e: CustomEvent) => void
+            'ontc-confirm'?: (e: CustomEvent) => void
+        },
+        __ConfirmSheet$ConfirmSheet
+    >
+    'tc-container': TcProps<
+        { breakpoint?: string | number; fluid?: boolean },
+        __Container$Container
+    >
+    'tc-context-menu': TcProps<
+        {
+            cb?: HTMLElement | null
+            items?: __ContextMenu$ContextMenuItem[]
+            'ontc-select'?: (e: CustomEvent<{ key: any }>) => void
+        },
+        __ContextMenu$ContextMenu
+    >
+    'tc-contributor-wall': TcProps<
+        {
+            'max-visible'?: string | number
+            title?: string | number
+            contributors?: __ContributorWall$Contributor[]
+        },
+        __ContributorWall$ContributorWall
+    >
+    'tc-controller-layout-preview': TcProps<
+        { layout?: __ControllerLayoutPreview$ControllerLayout },
+        __ControllerLayoutPreview$ControllerLayoutPreview
+    >
+    'tc-controls-rebind-list': TcProps<
+        {
+            bindings?: __ControlsRebindList$ControlBinding[]
+            'ontc-rebind'?: (e: CustomEvent<{ id: any }>) => void
+        },
+        __ControlsRebindList$ControlsRebindList
+    >
+    'tc-cookbook-grid': TcProps<
+        { columns?: string | number; title?: string | number; recipes?: __CookbookGrid$Recipe[] },
+        __CookbookGrid$CookbookGrid
+    >
+    'tc-cool-button': TcProps<
+        {
+            addon?: string | number
+            'addon-position'?: __CoolButton$CoolButtonAddonPosition
+            disabled?: boolean
+            label?: string | number
+            loading?: boolean
+            outline?: boolean
+            size?: __CoolButton$CoolButtonSize
+            variant?: __CoolButton$CoolButtonVariant
+            'ontc-click'?: (e: CustomEvent) => void
+        },
+        __CoolButton$CoolButton
+    >
+    'tc-cool-nav': TcProps<
+        {
+            brand?: string | number
+            'expand-breakpoint'?: string | number
+            'login-href'?: string | number
+            'login-label'?: string | number
+            'login-variant'?: string | number
+            'scroll-offset'?: string | number
+            sticky?: boolean
+            theme?: __CoolNav$CoolNavTheme
+            items?: __CoolNav$CoolNavItem[]
+            'ontc-login'?: (e: CustomEvent) => void
+            'ontc-nav-toggle'?: (e: CustomEvent<{ open: any }>) => void
+        },
+        __CoolNav$CoolNav
+    >
+    'tc-cooldown-badge': TcProps<
+        {
+            label?: string | number
+            max?: string | number
+            'show-label'?: boolean
+            size?: string | number
+            value?: string | number
+        },
+        __CooldownBadge$CooldownBadge
+    >
+    'tc-countdown-timer': TcProps<
+        {
+            compact?: boolean
+            label?: string | number
+            'sub-label'?: string | number
+            target?: string | number
+            units?: string | number
+            onexpire?: (() => void) | null
+            'ontc-expire'?: (e: CustomEvent) => void
+        },
+        __CountdownTimer$CountdownTimer
+    >
+    'tc-crafting-panel': TcProps<
+        {
+            crafting?: boolean
+            'selected-id'?: string | number
+            recipes?: __CraftingPanel$CraftingRecipe[]
+            'ontc-craft'?: (e: CustomEvent) => void
+            'ontc-select'?: (e: CustomEvent) => void
+        },
+        __CraftingPanel$CraftingPanel
+    >
+    'tc-credits-scroll': TcProps<
+        {
+            'scroll-title'?: string | number
+            speed?: string | number
+            sections?: __CreditsScroll$CreditsScrollSection[]
+            'ontc-complete'?: (e: CustomEvent) => void
+        },
+        __CreditsScroll$CreditsScroll
+    >
+    'tc-crosshair': TcProps<
+        {
+            color?: string | number
+            gap?: string | number
+            size?: string | number
+            spread?: string | number
+            thickness?: string | number
+            variant?: __Crosshair$CrosshairVariant
+        },
+        __Crosshair$Crosshair
+    >
+    'tc-currency-chip': TcProps<
+        { amount?: string | number; color?: string | number; glyph?: string | number },
+        __CurrencyChip$CurrencyChip
+    >
+    'tc-currency-display': TcProps<
+        {
+            amount?: string | number
+            color?: string | number
+            'currency-icon'?: string | number
+            'font-size'?: string | number
+            label?: string | number
+        },
+        __CurrencyDisplay$CurrencyDisplay
+    >
+    'tc-cycle-wheel': TcProps<
+        {
+            'center-label'?: string | number
+            'center-pill'?: string | number
+            'center-sub'?: string | number
+            'center-value'?: string | number
+            'current-index'?: string | number
+            paused?: boolean
+            'spin-seconds'?: string | number
+            phases?: string[]
+        },
+        __CycleWheel$CycleWheel
+    >
+    'tc-damage-number': TcProps<
+        {
+            crit?: boolean
+            duration?: string | number
+            heal?: boolean
+            miss?: boolean
+            value?: string | number
+            ondone?: (() => void) | null
+            'ontc-done'?: (e: CustomEvent) => void
+        },
+        __DamageNumber$DamageNumber
+    >
+    'tc-danger-zone-actions': TcProps<
+        {
+            'class-name'?: string | number
+            actions?: __DangerZoneActions$DangerZoneAction[]
+            onactionclick?: ((key: string) => void) | null
+            'ontc-action-click'?: (e: CustomEvent<{ key: any }>) => void
+        },
+        __DangerZoneActions$DangerZoneActions
+    >
+    'tc-dashboard-content': TcProps<{}, __DashboardContent$DashboardContent>
+    'tc-dashboard-layout': TcProps<
+        {
+            'sidebar-open'?: boolean
+            'ontc-toggle-sidebar'?: (e: CustomEvent<{ open: any }>) => void
+        },
+        __DashboardLayout$DashboardLayout
+    >
+    'tc-dashboard-sidebar': TcProps<{}, __DashboardSidebar$DashboardSidebar>
+    'tc-data-list': TcProps<
+        {
+            'empty-text'?: string | number
+            'list-title'?: string | number
+            selectable?: boolean
+            'selected-id'?: string | number
+            items?: any[]
+            renderRow?: __DataList$DataListRenderRow | null
+            'ontc-action'?: (e: CustomEvent<{ action: any; id: any }>) => void
+            'ontc-select'?: (e: CustomEvent<{ id: any }>) => void
+        },
+        __DataList$DataList
+    >
+    'tc-date-picker': TcProps<
+        {
+            disabled?: boolean
+            error?: string | number
+            help?: string | number
+            label?: string | number
+            max?: string | number
+            min?: string | number
+            name?: string | number
+            required?: boolean
+            state?: __DatePicker$DatePickerState
+            value?: string | number
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __DatePicker$DatePicker
+    >
+    'tc-day-strip': TcProps<
+        {
+            'active-id'?: string | number
+            columns?: string | number
+            days?: __DayStrip$DayStripItem[]
+            'ontc-day-strip-change'?: (e: CustomEvent<__DayStrip$DayStripEventDetail>) => void
+        },
+        __DayStrip$DayStrip
+    >
+    'tc-deadzone-slider': TcProps<
+        {
+            disabled?: boolean
+            format?: string | number
+            max?: string | number
+            min?: string | number
+            muted?: boolean
+            step?: string | number
+            unit?: string | number
+            value?: string | number
+            'with-mute'?: boolean
+            'ontc-change'?: (e: CustomEvent) => void
+            'ontc-toggle-mute'?: (e: CustomEvent) => void
+        },
+        __SettingSlider$SettingSlider
+    >
+    'tc-debug-overlay': TcProps<
+        {
+            'draw-calls'?: string | number
+            fps?: string | number
+            'mem-mb'?: string | number
+            triangles?: string | number
+            rows?: __DebugOverlay$DebugRow[]
+        },
+        __DebugOverlay$DebugOverlay
+    >
+    'tc-design-canvas': TcProps<
+        {
+            'content-height'?: string | number
+            'content-width'?: string | number
+            'max-zoom'?: string | number
+            'min-zoom'?: string | number
+            'pan-x'?: string | number
+            'pan-y'?: string | number
+            zoom?: string | number
+            'ontc-zoom'?: (e: CustomEvent<{ zoom: any; fit: any; scale: any }>) => void
+        },
+        __DesignCanvas$DesignCanvas
+    >
+    'tc-dialogue-box': TcProps<
+        {
+            speaker?: string | number
+            text?: string | number
+            'typing-speed'?: string | number
+            choices?: __DialogueBox$DialogueChoice[]
+        },
+        __DialogueBox$DialogueBox
+    >
+    'tc-diff-viewer': TcProps<
+        {
+            after?: string | number
+            before?: string | number
+            filename?: string | number
+            language?: string | number
+            mode?: __DiffViewer$DiffViewerMode
+            'ontc-render'?: (e: CustomEvent) => void
+        },
+        __DiffViewer$DiffViewer
+    >
+    'tc-difference-card': TcProps<
+        {
+            loading?: boolean
+            period?: string | number
+            'previous-value'?: string | number
+            title?: string | number
+            value?: string | number
+            formatValue?: ((v: number) => string) | null
+        },
+        __DifferenceCard$DifferenceCard
+    >
+    'tc-divider': TcProps<{ label?: string | number; vertical?: boolean }, __Divider$Divider>
+    'tc-download-stats': TcProps<
+        {
+            monthly?: string | number
+            'package-name'?: string | number
+            registry?: __DownloadStats$DownloadStatsRegistry
+            total?: string | number
+            weekly?: string | number
+            sparkline?: number[]
+        },
+        __DownloadStats$DownloadStats
+    >
+    'tc-drawer': TcProps<
+        {
+            open?: boolean
+            pinned?: boolean
+            side?: __Drawer$DrawerSide
+            size?: __Drawer$DrawerSize
+            title?: string | number
+            'ontc-close'?: (e: CustomEvent) => void
+        },
+        __Drawer$Drawer
+    >
+    'tc-dropdown': TcProps<
+        {
+            'auto-close'?: __Dropdown$DropdownAutoClose
+            direction?: __Dropdown$DropdownDirection
+            label?: string | number
+            split?: boolean
+            variant?: __Dropdown$DropdownVariant
+            'ontc-hidden'?: (e: CustomEvent) => void
+            'ontc-hide'?: (e: CustomEvent) => void
+            'ontc-show'?: (e: CustomEvent) => void
+            'ontc-shown'?: (e: CustomEvent) => void
+        },
+        __Dropdown$Dropdown
+    >
+    'tc-dropdown-item': TcProps<
+        { active?: boolean; disabled?: boolean; divider?: boolean; href?: string | number },
+        __DropdownItem$DropdownItem
+    >
+    'tc-early-signup-form': TcProps<
+        {
+            'cta-label'?: string | number
+            eyebrow?: string | number
+            'field-label'?: string | number
+            'helper-text'?: string | number
+            loading?: boolean
+            placeholder?: string | number
+            stat?: string | number
+            subtitle?: string | number
+            'success-message'?: string | number
+            'success-title'?: string | number
+            title?: string | number
+            variant?: __EarlySignupForm$EarlySignupFormVariant
+            benefits?: string[]
+            'ontc-submit'?: (e: CustomEvent<{ email: any }>) => void
+        },
+        __EarlySignupForm$EarlySignupForm
+    >
+    'tc-ecosystem-map': TcProps<
+        {
+            size?: string | number
+            title?: string | number
+            core?: __EcosystemMap$EcosystemCore
+            rings?: __EcosystemMap$EcosystemRing[]
+            'ontc-select'?: (e: CustomEvent<{ id: any }>) => void
+        },
+        __EcosystemMap$EcosystemMap
+    >
+    'tc-editable-text': TcProps<
+        {
+            'aria-label'?: string | number
+            'default-value'?: string | number
+            disabled?: boolean
+            placeholder?: string | number
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __EditableText$EditableText
+    >
+    'tc-editor-shell': TcProps<
+        {
+            compact?: boolean
+            'inspector-label'?: string | number
+            'inspector-open'?: boolean | 'true' | 'false'
+            'rail-open'?: boolean | 'true' | 'false'
+            'ontc-inspector-toggle'?: (e: CustomEvent<{ open: any }>) => void
+        },
+        __EditorShell$EditorShell
+    >
+    'tc-emission-badge': TcProps<
+        {
+            'co2-text'?: string | number
+            label?: string | number
+            standard?: string | number
+            tier?: string | number
+        },
+        __EmissionBadge$EmissionBadge
+    >
+    'tc-empty-state': TcProps<
+        { description?: string | number; heading?: string | number; icon?: string | number },
+        __EmptyState$EmptyState
+    >
+    'tc-engine-spec': TcProps<
+        {
+            code?: string | number
+            compact?: boolean
+            cylinders?: string | number
+            'displacement-cc'?: string | number
+            'emission-control'?: string | number
+            'fuel-injection'?: string | number
+            layout?: string | number
+            manufacturer?: string | number
+            position?: string | number
+            'power-at-rpm'?: string | number
+            supercharger?: string | number
+            'torque-at-rpm'?: string | number
+            'torque-nm'?: string | number
+            valves?: string | number
+        },
+        __EngineSpec$EngineSpec
+    >
+    'tc-entity-cell': TcProps<
+        {
+            clickable?: boolean
+            color?: __EntityCell$EntityCellColor
+            initial?: string | number
+            name?: string | number
+            size?: __EntityCell$EntityCellSize
+            'sub-label'?: string | number
+            'ontc-click'?: (e: CustomEvent<{ name: any }>) => void
+        },
+        __EntityCell$EntityCell
+    >
+    'tc-entity-profile-card': TcProps<
+        {
+            loading?: boolean
+            title?: string | number
+            meta?: __EntityProfileCard$EntityProfileCardMetaItem[]
+        },
+        __EntityProfileCard$EntityProfileCard
+    >
+    'tc-equipment-doll': TcProps<
+        {
+            height?: string | number
+            'selected-id'?: string | number
+            silhouette?: string | number
+            'slot-size'?: string | number
+            width?: string | number
+            slots?: __EquipmentDoll$EquipmentSlotConfig[]
+            'ontc-select'?: (e: CustomEvent<{ id: any }>) => void
+        },
+        __EquipmentDoll$EquipmentDoll
+    >
+    'tc-equipment-matrix': TcProps<
+        {
+            collapsible?: boolean
+            columns?: string | number
+            items?: __EquipmentMatrix$EquipmentMatrixItem[]
+        },
+        __EquipmentMatrix$EquipmentMatrix
+    >
+    'tc-equipment-tag': TcProps<
+        { flag?: __EquipmentTag$EquipmentFlag; icon?: string | number; label?: string | number },
+        __EquipmentTag$EquipmentTag
+    >
+    'tc-extended-select': TcProps<
+        {
+            disabled?: boolean
+            error?: string | number
+            help?: string | number
+            label?: string | number
+            loading?: boolean
+            'max-height'?: string | number
+            mobile?: __ExtendedSelect$ExtendedSelectMobile
+            multiple?: boolean
+            name?: string | number
+            'no-results-text'?: string | number
+            placeholder?: string | number
+            required?: boolean
+            'search-placeholder'?: string | number
+            state?: __ExtendedSelect$ExtendedSelectState
+            value?: string | number
+            cb?: HTMLElement | null
+            items?: __ExtendedSelect$ExtendedSelectItem[]
+            values?: string[]
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __ExtendedSelect$ExtendedSelect
+    >
+    'tc-eyebrow': TcProps<{}, __Eyebrow$Eyebrow>
+    'tc-fab': TcProps<
+        {
+            'auto-hide'?: boolean
+            icon?: string | number
+            label?: string | number
+            offset?: string | number
+            position?: __Fab$FabPosition
+            variant?: __Fab$FabVariant
+        },
+        __Fab$Fab
+    >
+    'tc-facet-picker': TcProps<
+        {
+            hint?: string | number
+            label?: string | number
+            'label-hidden'?: boolean
+            layout?: __FacetPicker$FacetPickerLayout
+            size?: __FacetPicker$FacetPickerSize
+            value?: string | number
+            options?: __FacetPicker$FacetPickerOption[]
+            'ontc-pick'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __FacetPicker$FacetPicker
+    >
+    'tc-faq-list': TcProps<
+        {
+            schema?: boolean
+            title?: string | number
+            defaultOpen?: number[]
+            items?: __FAQList$FAQItem[]
+            'ontc-toggle'?: (e: CustomEvent<{ index: any; open: any }>) => void
+        },
+        __FAQList$FAQList
+    >
+    'tc-feature-card': TcProps<
+        {
+            description?: string | number
+            eyebrow?: string | number
+            icon?: string | number
+            inline?: boolean
+            size?: __FeatureCard$FeatureCardSize
+            title?: string | number
+        },
+        __FeatureCard$FeatureCard
+    >
+    'tc-feature-matrix': TcProps<
+        {
+            title?: string | number
+            columns?: __FeatureMatrix$MatrixColumn[]
+            rows?: __FeatureMatrix$MatrixRow[]
+        },
+        __FeatureMatrix$FeatureMatrix
+    >
+    'tc-file': TcProps<
+        {
+            'action-icon'?: string | number
+            'action-label'?: string | number
+            category?: string | number
+            'category-placeholder'?: string | number
+            'editable-tags'?: boolean
+            extension?: string | number
+            format?: string | number
+            icon?: string | number
+            items?: string | number
+            loading?: boolean
+            name?: string | number
+            readonly?: boolean
+            size?: string | number
+            categories?: any
+            menuItems?: any
+            tagIds?: string[]
+            tags?: __File$FileTag[]
+            'ontc-action'?: (e: CustomEvent) => void
+            'ontc-category-change'?: (e: CustomEvent<{ category: any }>) => void
+            'ontc-items-click'?: (e: CustomEvent<{ items: any }>) => void
+            'ontc-menu-item-click'?: (e: CustomEvent<{ key: any }>) => void
+            'ontc-name-change'?: (e: CustomEvent<{ name: any }>) => void
+            'ontc-tags-change'?: (e: CustomEvent<{ tagIds: any }>) => void
+        },
+        __File$File
+    >
+    'tc-file-dropzone': TcProps<
+        {
+            supported?: __FileDropzone$DropzoneFileFormat[]
+            'ontc-files'?: (e: CustomEvent<{ files: any }>) => void
+        },
+        __FileDropzone$FileDropzone
+    >
+    'tc-file-tags': TcProps<
+        {
+            readonly?: boolean
+            selectedIds?: string[]
+            tags?: any
+            'ontc-change'?: (e: CustomEvent<{ selectedIds: any }>) => void
+        },
+        __FileTags$FileTags
+    >
+    'tc-filter-bar': TcProps<
+        {
+            active?: boolean
+            'clear-label'?: string | number
+            matches?: string | number
+            total?: string | number
+            unit?: string | number
+            matchCount?: number
+            rows?: __FilterBar$FilterBarRow[]
+            'ontc-change'?: (e: CustomEvent<{ key: any; value: any }>) => void
+            'ontc-clear'?: (e: CustomEvent) => void
+        },
+        __FilterBar$FilterBar
+    >
+    'tc-filter-trigger': TcProps<
+        {
+            count?: string | number
+            disabled?: boolean
+            icon?: string | number
+            label?: string | number
+            'ontc-open'?: (e: CustomEvent) => void
+        },
+        __FilterTrigger$FilterTrigger
+    >
+    'tc-floating-action-bar': TcProps<
+        {
+            align?: __FloatingActionBar$FloatingActionBarAlign
+            clearance?: string | number
+            label?: string | number
+            open?: boolean
+        },
+        __FloatingActionBar$FloatingActionBar
+    >
+    'tc-floating-label': TcProps<
+        { for?: string | number; label?: string | number; htmlFor?: string | null },
+        __FloatingLabel$FloatingLabel
+    >
+    'tc-form': TcProps<{ novalidate?: boolean; validated?: boolean }, __Form$Form>
+    'tc-form-input': TcProps<
+        {
+            autocomplete?: string | number
+            disabled?: boolean
+            enterkeyhint?: string | number
+            error?: string | number
+            help?: string | number
+            helper?: string | number
+            id?: string | number
+            inputmode?: string | number
+            label?: string | number
+            loading?: boolean
+            max?: string | number
+            min?: string | number
+            name?: string | number
+            placeholder?: string | number
+            required?: boolean
+            'required-message'?: string | number
+            'reserve-message'?: boolean
+            rows?: string | number
+            step?: string | number
+            type?: __FormInput$FormInputType
+            'validate-on'?: __FormInput$FormInputValidateOn
+            defaultValue?: unknown
+            options?: __FormInput$FormInputOption[]
+            validate?: __FormInput$FormInputValidator | __FormInput$FormInputValidator[] | null
+            value?: unknown
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __FormInput$FormInput
+    >
+    'tc-form-wizard': TcProps<
+        {
+            'complete-icon'?: string | number
+            'complete-label'?: string | number
+            loading?: boolean
+            steps?: __FormWizard$FormWizardStep[]
+            'ontc-complete'?: (e: CustomEvent) => void
+            'ontc-step-change'?: (e: CustomEvent<{ index: any }>) => void
+        },
+        __FormWizard$FormWizard
+    >
+    'tc-fov-slider': TcProps<
+        {
+            disabled?: boolean
+            format?: string | number
+            max?: string | number
+            min?: string | number
+            muted?: boolean
+            step?: string | number
+            unit?: string | number
+            value?: string | number
+            'with-mute'?: boolean
+            'ontc-change'?: (e: CustomEvent) => void
+            'ontc-toggle-mute'?: (e: CustomEvent) => void
+        },
+        __SettingSlider$SettingSlider
+    >
+    'tc-fps-cap-select': TcProps<
+        {
+            disabled?: boolean
+            value?: string | number
+            options?: __FPSCapSelect$FPSCapOption[]
+            'ontc-change'?: (e: CustomEvent) => void
+        },
+        __FPSCapSelect$FPSCapSelect
+    >
+    'tc-fullscreen-toggle': TcProps<
+        { checked?: boolean; disabled?: boolean; 'ontc-change'?: (e: CustomEvent) => void },
+        __FullscreenToggle$FullscreenToggle
+    >
+    'tc-funnel-chart': TcProps<
+        {
+            height?: string | number
+            loading?: boolean
+            'show-labels'?: string | number
+            subtitle?: string | number
+            title?: string | number
+            cb?: HTMLElement | null
+            data?: __FunnelChart$FunnelStep[]
+            'ontc-select'?: (e: CustomEvent<{ step: any; index: any }>) => void
+        },
+        __FunnelChart$FunnelChart
+    >
+    'tc-game-over-screen': TcProps<
+        {
+            eyebrow?: string | number
+            subtitle?: string | number
+            'title-color'?: __ResultScreen$ResultScreenTitleColor
+            'title-text'?: string | number
+            variant?: __ResultScreen$ResultScreenVariant
+            actions?: __ResultScreen$ResultAction[]
+            rewards?: __ResultScreen$ResultReward[]
+            stats?: __ResultScreen$ResultStat[]
+            'ontc-action'?: (e: CustomEvent<{ id: any }>) => void
+        },
+        __ResultScreen$ResultScreen
+    >
+    'tc-game-showcase-card': TcProps<
+        {
+            pitch?: string | number
+            title?: string | number
+            compliance?: __GameShowcaseCard$ComplianceState[]
+            stamps?: __GameShowcaseCard$GameStamp[]
+            tags?: string[]
+            'ontc-click'?: (e: CustomEvent) => void
+        },
+        __GameShowcaseCard$GameShowcaseCard
+    >
+    'tc-gamepad-button-prompt': TcProps<
+        { glyph?: string | number; label?: string | number; size?: string | number },
+        __GamepadButtonPrompt$GamepadButtonPrompt
+    >
+    'tc-gantt-chart': TcProps<
+        {
+            'end-date'?: string | number
+            loading?: boolean
+            'start-date'?: string | number
+            subtitle?: string | number
+            title?: string | number
+            cb?: HTMLElement | null
+            tasks?: __GanttChart$GanttTask[]
+            'ontc-task-click'?: (e: CustomEvent<{ task: any }>) => void
+        },
+        __GanttChart$GanttChart
+    >
+    'tc-gilded-frame': TcProps<
+        { padding?: __GildedFrame$GildedFramePadding; tone?: __GildedFrame$GildedFrameTone },
+        __GildedFrame$GildedFrame
+    >
+    'tc-github-stars-card': TcProps<
+        {
+            'cta-label'?: string | number
+            'fetch-live'?: boolean
+            owner?: string | number
+            repo?: string | number
+            stats?: __GithubStarsCard$GithubStatsData
+            'ontc-cta-click'?: (e: CustomEvent<{ owner: any; repo: any }>) => void
+            'ontc-stats'?: (e: CustomEvent<{ stats: any }>) => void
+        },
+        __GithubStarsCard$GithubStarsCard
+    >
+    'tc-good-first-issues': TcProps<
+        {
+            title?: string | number
+            issues?: __GoodFirstIssues$GoodFirstIssue[]
+            'ontc-issue-click'?: (e: CustomEvent<{ issue: any }>) => void
+        },
+        __GoodFirstIssues$GoodFirstIssues
+    >
+    'tc-graph-canvas': TcProps<
+        {
+            'node-height'?: string | number
+            'node-width'?: string | number
+            'ring-gap'?: string | number
+            'start-angle'?: string | number
+            nodes?: __GraphCanvas$GraphCanvasNode[]
+        },
+        __GraphCanvas$GraphCanvas
+    >
+    'tc-graph-sigil': TcProps<
+        {
+            depth?: string | number
+            ring?: string | number
+            seed?: string | number
+            size?: string | number
+            tone?: string | number
+        },
+        __GraphSigil$GraphSigil
+    >
+    'tc-graphics-preset-picker': TcProps<
+        { disabled?: boolean; value?: string | number; 'ontc-change'?: (e: CustomEvent) => void },
+        __GraphicsPresetPicker$GraphicsPresetPicker
+    >
+    'tc-grid': TcProps<
+        {
+            'cell-size'?: string | number
+            'cell-size-lg'?: string | number
+            'cell-size-md'?: string | number
+            'cell-size-sm'?: string | number
+            'cell-size-xl'?: string | number
+            'cell-size-xxl'?: string | number
+            columns?: string | number
+            'columns-lg'?: string | number
+            'columns-md'?: string | number
+            'columns-sm'?: string | number
+            'columns-xl'?: string | number
+            'columns-xxl'?: string | number
+            gap?: string | number
+            'gap-lg'?: string | number
+            'gap-md'?: string | number
+            'gap-sm'?: string | number
+            'gap-xl'?: string | number
+            'gap-xxl'?: string | number
+            rows?: string | number
+            'rows-lg'?: string | number
+            'rows-md'?: string | number
+            'rows-sm'?: string | number
+            'rows-xl'?: string | number
+            'rows-xxl'?: string | number
+        },
+        __Grid$Grid
+    >
+    'tc-group': TcProps<
+        {
+            'action-icon'?: string | number
+            'action-label'?: string | number
+            badge?: string | number
+            'default-collapsed'?: boolean
+            label?: string | number
+            collapsed?: boolean
+            'ontc-action-click'?: (e: CustomEvent) => void
+            'ontc-toggle'?: (e: CustomEvent<{ collapsed: any }>) => void
+        },
+        __Group$Group
+    >
+    'tc-guild-panel': TcProps<
+        {
+            'guild-name'?: string | number
+            level?: string | number
+            'member-cap'?: string | number
+            motto?: string | number
+            tag?: string | number
+            members?: __GuildPanel$GuildMember[]
+        },
+        __GuildPanel$GuildPanel
+    >
+    'tc-heading': TcProps<{ as?: __Heading$HeadingLevel; gradient?: boolean }, __Heading$Heading>
+    'tc-health-bar': TcProps<
+        {
+            ghost?: string | number
+            label?: string | number
+            max?: string | number
+            segments?: string | number
+            'show-text'?: boolean
+            value?: string | number
+            variant?: string | number
+        },
+        __ResourceBar$ResourceBar
+    >
+    'tc-heatmap': TcProps<
+        {
+            'cell-size'?: string | number
+            loading?: boolean
+            subtitle?: string | number
+            title?: string | number
+            cb?: HTMLElement | null
+            colorScale?: string[] | null
+            cols?: (string | number)[]
+            data?: __Heatmap$HeatmapCell[]
+            rows?: (string | number)[]
+            'ontc-cell-hover'?: (
+                e: CustomEvent<{ cell: any; row: any; col: any; value: any }>,
+            ) => void
+        },
+        __Heatmap$Heatmap
+    >
+    'tc-helper-text': TcProps<
+        {
+            'class-name'?: string | number
+            icon?: string | number
+            id?: string | number
+            text?: string | number
+            variant?: __HelperText$HelperTextVariant
+            extraClass?: string
+        },
+        __HelperText$HelperText
+    >
+    'tc-hero': TcProps<
+        {
+            backdrop?: string | number
+            'background-pattern-src'?: string | number
+            description?: string | number
+            eyebrow?: string | number
+            'media-alt'?: string | number
+            'media-caption'?: string | number
+            'media-label'?: string | number
+            'media-src'?: string | number
+            note?: string | number
+            preview?: boolean
+            title?: string | number
+            'title-as'?: string | number
+            bgIcons?: string[]
+            metrics?: __Hero$HeroMetric[]
+            primaryAction?: __Hero$HeroAction | null
+            secondaryAction?: __Hero$HeroAction | null
+            statCards?: __Hero$HeroStatCard[]
+            'ontc-action'?: (e: CustomEvent<{ which: any }>) => void
+        },
+        __Hero$Hero
+    >
+    'tc-hero-stats-bar': TcProps<
+        { 'class-name'?: string | number; stats?: __HeroStatsBar$HeroStat[] },
+        __HeroStatsBar$HeroStatsBar
+    >
+    'tc-hint-tip': TcProps<
+        {
+            icon?: string | number
+            label?: string | number
+            placement?: __HintTip$HintTipPlacement
+            size?: string | number
+            text?: string | number
+        },
+        __HintTip$HintTip
+    >
+    'tc-hit-marker': TcProps<
+        {
+            crit?: boolean
+            duration?: string | number
+            kill?: boolean
+            show?: boolean
+            size?: string | number
+            ondone?: (() => void) | null
+            'ontc-done'?: (e: CustomEvent) => void
+        },
+        __HitMarker$HitMarker
+    >
+    'tc-hotbar': TcProps<
+        {
+            'selected-id'?: string | number
+            'slot-size'?: string | number
+            slots?: __Hotbar$HotbarSlot[]
+            'ontc-select'?: (e: CustomEvent<{ item: any; index: any }>) => void
+        },
+        __Hotbar$Hotbar
+    >
+    'tc-icon': TcProps<
+        {
+            as?: string | number
+            color?: string | number
+            decorative?: boolean
+            label?: string | number
+            name?: string | number
+            set?: __Icon$IconSet
+            size?: string | number
+        },
+        __Icon$Icon
+    >
+    'tc-icon-badge': TcProps<
+        {
+            bg?: string | number
+            color?: string | number
+            glyph?: string | number
+            size?: string | number
+        },
+        __IconBadge$IconBadge
+    >
+    'tc-icon-button': TcProps<
+        {
+            disabled?: boolean
+            icon?: string | number
+            label?: string | number
+            outline?: boolean
+            'show-label'?: __IconButton$IconButtonShowLabel
+            size?: __IconButton$IconButtonSize
+            variant?: __IconButton$IconButtonVariant
+            'ontc-click'?: (e: CustomEvent) => void
+        },
+        __IconButton$IconButton
+    >
+    'tc-icon-picker': TcProps<
+        {
+            columns?: string | number
+            disabled?: boolean
+            error?: string | number
+            help?: string | number
+            label?: string | number
+            loading?: boolean
+            'max-height'?: string | number
+            name?: string | number
+            required?: boolean
+            state?: __IconPicker$IconPickerState
+            value?: string | number
+            cb?: HTMLElement | null
+            icons?: __IconPicker$IconOption[]
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __IconPicker$IconPicker
+    >
+    'tc-image': TcProps<
+        {
+            alt?: string | number
+            'aspect-ratio'?: string | number
+            'object-fit'?: __Image$ImageObjectFit
+            src?: string | number
+            'ontc-error'?: (e: CustomEvent) => void
+            'ontc-load'?: (e: CustomEvent) => void
+        },
+        __Image$Image
+    >
+    'tc-image-crop': TcProps<
+        {
+            'aspect-ratio'?: string | number
+            circular?: boolean
+            src?: string | number
+            'ontc-crop'?: (e: CustomEvent<{ blob: any }>) => void
+            'ontc-error'?: (e: CustomEvent<{ error: any }>) => void
+        },
+        __ImageCrop$ImageCrop
+    >
+    'tc-infinite-scroll': TcProps<
+        {
+            'has-more'?: boolean
+            loading?: boolean
+            'root-margin'?: string | number
+            threshold?: string | number
+            'ontc-load-more'?: (e: CustomEvent) => void
+        },
+        __InfiniteScroll$InfiniteScroll
+    >
+    'tc-input': TcProps<
+        {
+            autocomplete?: string | number
+            disabled?: boolean
+            error?: string | number
+            help?: string | number
+            inputmode?: string | number
+            label?: string | number
+            max?: string | number
+            maxlength?: string | number
+            min?: string | number
+            minlength?: string | number
+            name?: string | number
+            pattern?: string | number
+            placeholder?: string | number
+            readonly?: boolean
+            required?: boolean
+            size?: __internal_text_field_base$FieldSize
+            state?: __internal_text_field_base$FieldState
+            step?: string | number
+            type?: string | number
+            value?: string | number
+        },
+        __Input$Input
+    >
+    'tc-input-group': TcProps<{ size?: __InputGroup$InputGroupSize }, __InputGroup$InputGroup>
+    'tc-input-group-text': TcProps<{}, __InputGroupText$InputGroupText>
+    'tc-install-tabs': TcProps<
+        {
+            'default-manager'?: __InstallTabs$InstallManager
+            dev?: boolean
+            global?: boolean
+            package?: string | number
+            managers?: __InstallTabs$InstallManager[]
+            'ontc-change'?: (e: CustomEvent<{ manager: any }>) => void
+            'ontc-copy'?: (e: CustomEvent<{ manager: any; command: any }>) => void
+        },
+        __InstallTabs$InstallTabs
+    >
+    'tc-interact-prompt': TcProps<
+        {
+            'hold-progress'?: string | number
+            'key-label'?: string | number
+            show?: boolean
+            text?: string | number
+        },
+        __InteractPrompt$InteractPrompt
+    >
+    'tc-inventory-grid': TcProps<
+        {
+            columns?: string | number
+            'selected-id'?: string | number
+            'slot-size'?: string | number
+            items?: any
+            'ontc-select'?: (e: CustomEvent<{ item: any; index: any }>) => void
+        },
+        __InventoryGrid$InventoryGrid
+    >
+    'tc-invite-toast': TcProps<
+        {
+            body?: string | number
+            inviter?: string | number
+            open?: boolean
+            'timeout-seconds'?: string | number
+            'ontc-accept'?: (e: CustomEvent) => void
+            'ontc-decline'?: (e: CustomEvent) => void
+        },
+        __InviteToast$InviteToast
+    >
+    'tc-item-compare': TcProps<
+        {
+            candidate?: __ItemCompare$CompareItem | null
+            current?: __ItemCompare$CompareItem | null
+        },
+        __ItemCompare$ItemCompare
+    >
+    'tc-item-slot': TcProps<
+        {
+            hotkey?: string | number
+            selected?: boolean
+            size?: string | number
+            item?: __ItemSlot$InventoryItem | null
+            'ontc-click'?: (e: CustomEvent<{ item: any }>) => void
+        },
+        __ItemSlot$ItemSlot
+    >
+    'tc-item-tooltip': TcProps<
+        { item?: __ItemTooltip$TooltipItem | null },
+        __ItemTooltip$ItemTooltip
+    >
+    'tc-journal': TcProps<
+        {
+            'selected-id'?: string | number
+            entries?: __Journal$JournalEntry[]
+            'ontc-select'?: (e: CustomEvent<{ id: any }>) => void
+        },
+        __Journal$Journal
+    >
+    'tc-json-editor': TcProps<
+        {
+            disabled?: boolean
+            loading?: boolean
+            schema?: string | number
+            defaultValue?: Record<string, unknown> | undefined
+            value?: Record<string, unknown>
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __JSONEditor$JSONEditor
+    >
+    'tc-json-schema-def': TcProps<
+        {
+            'default-value'?: string | number
+            disabled?: boolean
+            label?: string | number
+            loading?: boolean
+            value?: string | number
+            arrayRefList?: __JSONSchemaDef$SchemaRefItem[]
+            objectRefList?: __JSONSchemaDef$SchemaRefItem[]
+            refList?: __JSONSchemaDef$SchemaRefItem[]
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+            'ontc-label-change'?: (e: CustomEvent<{ label: any }>) => void
+        },
+        __JSONSchemaDef$JSONSchemaDef
+    >
+    'tc-kbd': TcProps<
+        {
+            'class-name'?: string | number
+            separator?: string | number
+            extraClass?: string
+            keys?: string[]
+        },
+        __Kbd$Kbd
+    >
+    'tc-key': TcProps<{ size?: __Key$KeySize; variant?: __Key$KeyVariant }, __Key$Key>
+    'tc-key-binder': TcProps<
+        {
+            disabled?: boolean
+            placeholder?: string | number
+            value?: string | number
+            'ontc-cancel'?: (e: CustomEvent) => void
+            'ontc-change'?: (e: CustomEvent) => void
+        },
+        __KeyBinder$KeyBinder
+    >
+    'tc-kill-feed': TcProps<
+        { 'max-visible'?: string | number; entries?: __KillFeed$KillFeedEntry[] },
+        __KillFeed$KillFeed
+    >
+    'tc-label': TcProps<
+        {
+            for?: string | number
+            required?: boolean
+            size?: __Label$LabelSize
+            tooltip?: string | number
+            htmlFor?: string | null
+        },
+        __Label$Label
+    >
+    'tc-leaderboard': TcProps<
+        {
+            columns?: __Leaderboard$LeaderboardColumns
+            entries?: __Leaderboard$LeaderboardEntry[]
+            'ontc-select'?: (e: CustomEvent<{ id: any; entry: any }>) => void
+        },
+        __Leaderboard$Leaderboard
+    >
+    'tc-leaderboard-trend': TcProps<
+        {
+            direction?: __TrendIndicator$TrendDirection
+            size?: __TrendIndicator$TrendSize
+            value?: string | number
+        },
+        __TrendIndicator$TrendIndicator
+    >
+    'tc-legal-screen': TcProps<
+        {
+            'initial-section'?: string | number
+            'screen-title'?: string | number
+            'show-accept'?: boolean
+            sections?: __LegalScreen$LegalSection[]
+            'ontc-accept'?: (e: CustomEvent) => void
+            'ontc-close'?: (e: CustomEvent) => void
+        },
+        __LegalScreen$LegalScreen
+    >
+    'tc-letterbox-bars': TcProps<
+        {
+            'bar-color'?: string | number
+            'bar-height'?: string | number
+            duration?: string | number
+            show?: boolean
+        },
+        __LetterboxBars$LetterboxBars
+    >
+    'tc-level-header': TcProps<
+        {
+            level?: string | number
+            'next-label'?: string | number
+            title?: string | number
+            xp?: string | number
+            'xp-max'?: string | number
+        },
+        __LevelHeader$LevelHeader
+    >
+    'tc-level-select': TcProps<
+        {
+            height?: string | number
+            'selected-id'?: string | number
+            width?: string | number
+            edges?: __LevelSelect$LevelEdge[]
+            nodes?: __LevelSelect$LevelNode[]
+            'ontc-confirm'?: (e: CustomEvent) => void
+            'ontc-select'?: (e: CustomEvent) => void
+        },
+        __LevelSelect$LevelSelect
+    >
+    'tc-lightbox': TcProps<
+        {
+            'initial-index'?: string | number
+            open?: boolean
+            images?: __Lightbox$LightboxImage[]
+            onclose?: (() => void) | null
+            'ontc-change'?: (e: CustomEvent<{ index: any }>) => void
+            'ontc-close'?: (e: CustomEvent) => void
+        },
+        __Lightbox$Lightbox
+    >
+    'tc-line-chart': TcProps<
+        {
+            height?: string | number
+            loading?: boolean
+            'show-grid'?: boolean | 'true' | 'false'
+            'show-legend'?: boolean | 'true' | 'false'
+            subtitle?: string | number
+            title?: string | number
+            cb?: HTMLElement | null
+            series?: __LineChart$LineChartSeries[]
+            xFormatter?: ((v: number | string) => string) | null
+            yFormatter?: ((v: number) => string) | null
+            'ontc-point-hover'?: (e: CustomEvent<{ series: any; point: any }>) => void
+        },
+        __LineChart$LineChart
+    >
+    'tc-link': TcProps<
+        {
+            external?: boolean
+            href?: string | number
+            underline?: __Link$LinkUnderline
+            variant?: __Link$LinkVariant
+        },
+        __Link$Link
+    >
+    'tc-linked-providers-card': TcProps<
+        {
+            'empty-label'?: string | number
+            title?: string | number
+            brandColors?: Record<string, string>
+            iconForProvider?: ((key: string) => string) | null
+            providers?: __LinkedProvidersCard$LinkedProvider[]
+            'ontc-toggle'?: (e: CustomEvent<{ key: any; connected: any }>) => void
+        },
+        __LinkedProvidersCard$LinkedProvidersCard
+    >
+    'tc-list': TcProps<
+        {
+            'selected-id'?: string | number
+            items?: __List$ListItem[]
+            'ontc-select'?: (e: CustomEvent<{ id: any }>) => void
+        },
+        __List$List
+    >
+    'tc-list-card': TcProps<
+        {
+            loading?: boolean
+            'loading-count'?: string | number
+            ordered?: boolean
+            title?: string | number
+            items?: __ListCard$ListCardItem[]
+        },
+        __ListCard$ListCard
+    >
+    'tc-list-group': TcProps<
+        { flush?: boolean; horizontal?: string | number; numbered?: boolean },
+        __ListGroup$ListGroup
+    >
+    'tc-list-group-item': TcProps<
+        {
+            action?: boolean
+            active?: boolean
+            disabled?: boolean
+            href?: string | number
+            variant?: __ListGroupItem$ListGroupItemVariant
+        },
+        __ListGroupItem$ListGroupItem
+    >
+    'tc-list-row': TcProps<
+        {
+            accent?: string | number
+            disabled?: boolean
+            selected?: boolean
+            'ontc-select'?: (e: CustomEvent) => void
+        },
+        __ListRow$ListRow
+    >
+    'tc-list-section': TcProps<
+        { heading?: string | number; icon?: string | number; meta?: string | number },
+        __ListSection$ListSection
+    >
+    'tc-live-feed': TcProps<
+        {
+            'auto-scroll'?: boolean
+            header?: string | number
+            'max-rows'?: string | number
+            recording?: boolean
+            events?: __LiveFeed$FeedEvent[]
+            onrowclick?: ((detail: { id?: string; event: __LiveFeed$FeedEvent }) => void) | null
+            'ontc-row-click'?: (e: CustomEvent<{ id: any; event: any }>) => void
+        },
+        __LiveFeed$LiveFeed
+    >
+    'tc-load-more': TcProps<
+        {
+            count?: string | number
+            disabled?: boolean
+            'exhausted-label'?: string | number
+            label?: string | number
+            'loading-label'?: string | number
+            state?: __LoadMore$LoadMoreState
+            'ontc-load-more'?: (e: CustomEvent) => void
+        },
+        __LoadMore$LoadMore
+    >
+    'tc-loading-overlay': TcProps<
+        {
+            label?: string | number
+            open?: boolean
+            progress?: string | number
+            tip?: string | number
+        },
+        __LoadingOverlay$LoadingOverlay
+    >
+    'tc-loading-screen': TcProps<
+        {
+            eyebrow?: string | number
+            label?: string | number
+            progress?: string | number
+            'tip-interval'?: string | number
+            'tip-title'?: string | number
+            'title-text'?: string | number
+            tips?: string[]
+        },
+        __LoadingScreen$LoadingScreen
+    >
+    'tc-lobby': TcProps<
+        {
+            'can-start'?: boolean
+            capacity?: string | number
+            'is-ready'?: boolean
+            'lobby-mode'?: string | number
+            'map-name'?: string | number
+            players?: __Lobby$LobbyPlayer[]
+        },
+        __Lobby$Lobby
+    >
+    'tc-lock-chip': TcProps<
+        { icon?: string | number; 'role-name'?: string | number; tone?: __LockChip$LockChipTone },
+        __LockChip$LockChip
+    >
+    'tc-locked-action': TcProps<
+        {
+            disabled?: boolean
+            icon?: string | number
+            locked?: boolean
+            'role-name'?: string | number
+            'ontc-activate'?: (e: CustomEvent) => void
+        },
+        __LockedAction$LockedAction
+    >
+    'tc-login': TcProps<
+        {
+            'background-pattern-src'?: string | number
+            description?: string | number
+            loading?: boolean
+            title?: string | number
+            connect?: __Login$LoginConnectOption[]
+            onconnect?: ((key: string) => void) | null
+            'ontc-connect'?: (e: CustomEvent<{ key: any }>) => void
+        },
+        __Login$Login
+    >
+    'tc-logo-cloud': TcProps<
+        {
+            columns?: string | number
+            grayscale?: boolean
+            title?: string | number
+            logos?: __LogoCloud$LogoCloudLogo[]
+        },
+        __LogoCloud$LogoCloud
+    >
+    'tc-loot-list': TcProps<
+        {
+            'list-title'?: string | number
+            items?: __LootList$LootEntry[]
+            'ontc-take'?: (e: CustomEvent<{ id: any }>) => void
+            'ontc-take-all'?: (e: CustomEvent) => void
+        },
+        __LootList$LootList
+    >
+    'tc-loot-popup': TcProps<
+        {
+            'auto-fade-ms'?: string | number
+            'discard-label'?: string | number
+            eyebrow?: string | number
+            open?: boolean
+            'popup-title'?: string | number
+            items?: any
+            'ontc-close'?: (e: CustomEvent) => void
+            'ontc-discard'?: (e: CustomEvent) => void
+            'ontc-take'?: (e: CustomEvent<{ id: any }>) => void
+            'ontc-take-all'?: (e: CustomEvent) => void
+        },
+        __LootPopup$LootPopup
+    >
+    'tc-lore-text': TcProps<{}, __LoreText$LoreText>
+    'tc-macro-grid': TcProps<
+        { columns?: string | number; variant?: __MacroGrid$MacroGridVariant },
+        __MacroGrid$MacroGrid
+    >
+    'tc-main-menu': TcProps<
+        {
+            'menu-title'?: string | number
+            'selected-id'?: string | number
+            subtitle?: string | number
+            items?: __MainMenu$MainMenuItem[]
+            'ontc-select'?: (e: CustomEvent<{ id: any }>) => void
+        },
+        __MainMenu$MainMenu
+    >
+    'tc-maintainer-card': TcProps<
+        {
+            'avatar-url'?: string | number
+            bio?: string | number
+            location?: string | number
+            name?: string | number
+            role?: string | number
+            'sponsor-href'?: string | number
+            'sponsor-label'?: string | number
+            links?: __MaintainerCard$MaintainerLink[]
+        },
+        __MaintainerCard$MaintainerCard
+    >
+    'tc-mana-bar': TcProps<
+        {
+            ghost?: string | number
+            label?: string | number
+            max?: string | number
+            segments?: string | number
+            'show-text'?: boolean
+            value?: string | number
+            variant?: string | number
+        },
+        __ResourceBar$ResourceBar
+    >
+    'tc-manufacturer-tile': TcProps<
+        {
+            active?: boolean
+            'count-text'?: string | number
+            eyebrow?: string | number
+            href?: string | number
+            'logo-src'?: string | number
+            name?: string | number
+        },
+        __ManufacturerTile$ManufacturerTile
+    >
+    'tc-markdown-editor': TcProps<
+        {
+            disabled?: boolean
+            height?: string | number
+            label?: string | number
+            placeholder?: string | number
+            toolbar?: boolean | 'true' | 'false'
+            value?: string | number
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __MarkdownEditor$MarkdownEditor
+    >
+    'tc-marquee': TcProps<
+        {
+            direction?: __Marquee$MarqueeDirection
+            'pause-on-hover'?: boolean
+            separator?: string | number
+            speed?: string | number
+            items?: string[]
+        },
+        __Marquee$Marquee
+    >
+    'tc-matchmaking-screen': TcProps<
+        {
+            elapsed?: string | number
+            estimated?: string | number
+            'found-label'?: string | number
+            mode?: string | number
+            region?: string | number
+            state?: __MatchmakingScreen$MatchmakingScreenState
+        },
+        __MatchmakingScreen$MatchmakingScreen
+    >
+    'tc-menu-item': TcProps<
+        {
+            disabled?: boolean
+            hotkey?: string | number
+            icon?: string | number
+            label?: string | number
+            selected?: boolean
+            'ontc-select'?: (e: CustomEvent<{ label: any }>) => void
+        },
+        __MenuItem$MenuItem
+    >
+    'tc-metal-button': TcProps<
+        {
+            block?: boolean
+            disabled?: boolean
+            error?: string | number
+            field?: boolean
+            help?: string | number
+            href?: string | number
+            loading?: boolean
+            outline?: boolean
+            size?: __Button$ButtonSize
+            skin?: string | number
+            state?: __internal_field_message$FieldMessageState
+            type?: __Button$ButtonType
+            variant?: __Button$ButtonVariant
+        },
+        __Button$Button
+    >
+    'tc-metric-card': TcProps<
+        {
+            icon?: string | number
+            loading?: boolean
+            subtitle?: string | number
+            title?: string | number
+            'trend-color'?: string | number
+            value?: string | number
+            trend?: number[]
+        },
+        __MetricCard$MetricCard
+    >
+    'tc-metric-grid': TcProps<
+        { columns?: string | number; items?: __MetricGrid$MetricGridItem[] },
+        __MetricGrid$MetricGrid
+    >
+    'tc-metric-tile': TcProps<
+        {
+            hint?: string | number
+            icon?: string | number
+            label?: string | number
+            unit?: string | number
+            value?: string | number
+        },
+        __MetricTile$MetricTile
+    >
+    'tc-migration-guide': TcProps<
+        {
+            from?: string | number
+            title?: string | number
+            to?: string | number
+            steps?: __MigrationGuide$MigrationStep[]
+        },
+        __MigrationGuide$MigrationGuide
+    >
+    'tc-minimap': TcProps<
+        {
+            'background-image'?: string | number
+            rotation?: string | number
+            size?: string | number
+            'world-height'?: string | number
+            'world-width'?: string | number
+            'world-x'?: string | number
+            'world-y'?: string | number
+            markers?: __Minimap$MinimapMarker[]
+        },
+        __Minimap$Minimap
+    >
+    'tc-mobile-shell': TcProps<
+        {
+            'data-key'?: string | number
+            desktop?: boolean
+            edge?: string | number
+            'pane-bg'?: string | number
+            'pull-to-refresh'?: boolean
+            refreshing?: boolean
+            'scroll-restore'?: __MobileShell$MobileShellScrollRestore
+            'ontc-refresh'?: (e: CustomEvent) => void
+            'ontc-shell-scroll'?: (e: CustomEvent<__MobileShell$MobileShellScrollDetail>) => void
+        },
+        __MobileShell$MobileShell
+    >
+    'tc-modal': TcProps<
+        {
+            centered?: boolean
+            fullscreen?: string | number
+            lazy?: boolean
+            open?: boolean
+            scrollable?: boolean
+            size?: string | number
+            'static-backdrop'?: boolean
+            title?: string | number
+            'ontc-hidden'?: (e: CustomEvent) => void
+            'ontc-hide'?: (e: CustomEvent) => void
+            'ontc-show'?: (e: CustomEvent) => void
+            'ontc-shown'?: (e: CustomEvent) => void
+        },
+        __Modal$Modal
+    >
+    'tc-model-family-card': TcProps<
+        {
+            'body-type'?: string | number
+            generation?: string | number
+            href?: string | number
+            'image-alt'?: string | number
+            'image-src'?: string | number
+            manufacturer?: string | number
+            range?: string | number
+            series?: string | number
+            'variant-count-text'?: string | number
+            'years-text'?: string | number
+        },
+        __ModelFamilyCard$ModelFamilyCard
+    >
+    'tc-module-access': TcProps<
+        {
+            'owner-role-id'?: string | number
+            limitableResources?: __ModuleAccess$ModuleAccessLimitableResource[]
+            permissionGroupLabels?: Record<string, string>
+            permissions?: string[]
+            roleData?: __ModuleAccess$ModuleAccessRole | null
+            'ontc-change'?: (e: CustomEvent<{ role: any }>) => void
+        },
+        __ModuleAccess$ModuleAccess
+    >
+    'tc-mouse-sensitivity': TcProps<
+        {
+            ads?: string | number
+            disabled?: boolean
+            value?: string | number
+            'ontc-change'?: (e: CustomEvent) => void
+        },
+        __MouseSensitivity$MouseSensitivity
+    >
+    'tc-multi-card-select': TcProps<
+        {
+            columns?: string | number
+            loading?: boolean
+            'loading-count'?: string | number
+            name?: string | number
+            options?: __MultiCardSelect$MultiCardSelectOption[]
+            value?: string[]
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __MultiCardSelect$MultiCardSelect
+    >
+    'tc-nav': TcProps<
+        { fill?: boolean; justified?: boolean; variant?: string | number; vertical?: boolean },
+        __Nav$Nav
+    >
+    'tc-nav-button': TcProps<
+        {
+            disabled?: boolean
+            kind?: __NavButton$NavButtonKind
+            label?: string | number
+            size?: string | number
+        },
+        __NavButton$NavButton
+    >
+    'tc-nav-item': TcProps<
+        {
+            active?: boolean
+            disabled?: boolean
+            href?: string | number
+            target?: string | number
+            'ontc-show'?: (e: CustomEvent) => void
+            'ontc-shown'?: (e: CustomEvent) => void
+        },
+        __NavItem$NavItem
+    >
+    'tc-navbar': TcProps<
+        {
+            bg?: string | number
+            brand?: string | number
+            expand?: string | number
+            fixed?: string | number
+            sticky?: string | number
+            variant?: string | number
+        },
+        __Navbar$Navbar
+    >
+    'tc-network-status-icon': TcProps<
+        {
+            connected?: boolean
+            loss?: string | number
+            ping?: string | number
+            'show-label'?: boolean
+            size?: string | number
+        },
+        __NetworkStatusIcon$NetworkStatusIcon
+    >
+    'tc-newsletter-signup': TcProps<
+        {
+            'cta-label'?: string | number
+            description?: string | number
+            placeholder?: string | number
+            'privacy-href'?: string | number
+            'success-message'?: string | number
+            title?: string | number
+            'ontc-submit'?: (e: CustomEvent<{ email: any }>) => void
+        },
+        __NewsletterSignup$NewsletterSignup
+    >
+    'tc-node-editor': TcProps<
+        {
+            disabled?: boolean
+            'selected-id'?: string | number
+            graph?: __NodeEditor$GraphData
+            positions?: Record<string, __NodeEditor$Pos>
+            'ontc-connect'?: (e: CustomEvent<{ from: any; to: any }>) => void
+            'ontc-move-node'?: (e: CustomEvent<{ id: any; pos: any }>) => void
+            'ontc-select'?: (e: CustomEvent<{ id: any }>) => void
+        },
+        __NodeEditor$NodeEditor
+    >
+    'tc-normal-map-generator': TcProps<
+        {
+            ambient?: string | number
+            'bevel-width'?: string | number
+            'blur-radius'?: string | number
+            'brush-falloff'?: string | number
+            'brush-size'?: string | number
+            'brush-strength'?: string | number
+            'canvas-height'?: string | number
+            'canvas-width'?: string | number
+            disabled?: boolean
+            editable?: boolean
+            'emboss-height'?: string | number
+            'fit-parent'?: boolean
+            'invert-x'?: boolean
+            'invert-y'?: boolean
+            'light-tracking'?: __NormalMapGenerator$LightTracking
+            'light-x'?: string | number
+            'light-y'?: string | number
+            'light-z'?: string | number
+            'mask-color'?: string | number
+            'mask-opacity'?: string | number
+            'max-dim'?: string | number
+            'pan-x'?: string | number
+            'pan-y'?: string | number
+            placeholder?: string | number
+            'preview-mode'?: __NormalMapGenerator$PreviewMode
+            source?: string | number
+            strength?: string | number
+            tool?: __NormalMapGenerator$EditorTool
+            zoom?: string | number
+            light?: { x?: number; y?: number; z?: number }
+            'ontc-generate'?: (e: CustomEvent<__NormalMapGenerator$NormalMapOutput>) => void
+        },
+        __NormalMapGenerator$NormalMapGenerator
+    >
+    'tc-notice': TcProps<
+        {
+            icon?: string | number
+            label?: string | number
+            live?: boolean
+            size?: __Notice$NoticeSize
+            text?: string | number
+            tone?: __Notice$NoticeTone
+            variant?: __Notice$NoticeVariant
+        },
+        __Notice$Notice
+    >
+    'tc-number-input': TcProps<
+        {
+            disabled?: boolean
+            error?: string | number
+            help?: string | number
+            label?: string | number
+            max?: string | number
+            min?: string | number
+            name?: string | number
+            placeholder?: string | number
+            precision?: string | number
+            prefix?: string | number
+            required?: boolean
+            state?: __NumberInput$NumberInputState
+            step?: string | number
+            suffix?: string | number
+            value?: string | number
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __NumberInput$NumberInput
+    >
+    'tc-objective-marker': TcProps<
+        {
+            color?: string | number
+            distance?: string | number
+            label?: string | number
+            pulse?: boolean
+            size?: string | number
+            x?: string | number
+            y?: string | number
+        },
+        __ObjectiveMarker$ObjectiveMarker
+    >
+    'tc-offcanvas': TcProps<
+        {
+            backdrop?: string | number
+            open?: boolean
+            placement?: string | number
+            scroll?: boolean
+            title?: string | number
+            'ontc-hidden'?: (e: CustomEvent) => void
+            'ontc-hide'?: (e: CustomEvent) => void
+            'ontc-show'?: (e: CustomEvent) => void
+            'ontc-shown'?: (e: CustomEvent) => void
+        },
+        __Offcanvas$Offcanvas
+    >
+    'tc-option': TcProps<
+        { disabled?: boolean; selected?: boolean; value?: string | number },
+        __Option$Option
+    >
+    'tc-otp-input': TcProps<
+        {
+            disabled?: boolean
+            error?: string | number
+            help?: string | number
+            label?: string | number
+            length?: string | number
+            masked?: boolean
+            mode?: __OTPInput$OTPInputMode
+            name?: string | number
+            placeholder?: string | number
+            required?: boolean
+            state?: __OTPInput$OTPInputState
+            value?: string | number
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+            'ontc-complete'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __OTPInput$OTPInput
+    >
+    'tc-page-footer': TcProps<
+        {
+            brand?: string | number
+            description?: string | number
+            'legal-text'?: string | number
+            tagline?: string | number
+            cta?: __PageFooter$PageFooterCta | null
+            legalLinks?: __PageFooter$PageFooterLink[]
+            menus?: __PageFooter$PageFooterMenu[]
+            socialLinks?: __PageFooter$PageFooterSocialLink[]
+        },
+        __PageFooter$PageFooter
+    >
+    'tc-page-indicator': TcProps<
+        {
+            'active-color'?: string | number
+            color?: string | number
+            count?: string | number
+            gap?: string | number
+            index?: string | number
+            size?: string | number
+            'ontc-select'?: (e: CustomEvent<{ index: any }>) => void
+        },
+        __PageIndicator$PageIndicator
+    >
+    'tc-page-tabs': TcProps<
+        {
+            'active-id'?: string | number
+            items?: __PageTabs$PageTabsItem[]
+            tabs?: __PageTabs$PageTabsItem[]
+            'ontc-change'?: (e: CustomEvent<{ id: any; href: any }>) => void
+        },
+        __PageTabs$PageTabs
+    >
+    'tc-pagination': TcProps<
+        {
+            align?: __Pagination$PaginationAlign
+            current?: string | number
+            'max-visible'?: string | number
+            size?: __Pagination$PaginationSize
+            total?: string | number
+            'ontc-page-change'?: (e: CustomEvent<{ page: any }>) => void
+        },
+        __Pagination$Pagination
+    >
+    'tc-panel': TcProps<{ bordered?: boolean }, __Panel$Panel>
+    'tc-panel-header': TcProps<
+        { heading?: string | number; icon?: string | number },
+        __Panel$PanelHeader
+    >
+    'tc-particle-emitter': TcProps<
+        {
+            burst?: string | number
+            count?: string | number
+            gravity?: string | number
+            height?: string | number
+            lifetime?: string | number
+            'particle-size'?: string | number
+            speed?: string | number
+            width?: string | number
+            colors?: string[]
+            'ontc-burst'?: (e: CustomEvent<{ count: any }>) => void
+        },
+        __ParticleEmitter$ParticleEmitter
+    >
+    'tc-party-panel': TcProps<
+        { capacity?: string | number; members?: __PartyPanel$PartyMember[] },
+        __PartyPanel$PartyPanel
+    >
+    'tc-pause-menu': TcProps<
+        {
+            'default-items'?: boolean
+            'menu-title'?: string | number
+            open?: boolean
+            'resume-footer'?: boolean
+            'screen-title'?: string | number
+            items?: __PauseMenu$PauseMenuItem[]
+            'ontc-close'?: (e: CustomEvent) => void
+            'ontc-quit'?: (e: CustomEvent) => void
+            'ontc-restart'?: (e: CustomEvent) => void
+            'ontc-resume'?: (e: CustomEvent) => void
+            'ontc-select'?: (e: CustomEvent<{ id: any }>) => void
+        },
+        __PauseMenu$PauseMenu
+    >
+    'tc-pause-screen': TcProps<
+        {
+            'default-items'?: boolean
+            'menu-title'?: string | number
+            open?: boolean
+            'resume-footer'?: boolean
+            'screen-title'?: string | number
+            items?: __PauseMenu$PauseMenuItem[]
+            'ontc-close'?: (e: CustomEvent) => void
+            'ontc-quit'?: (e: CustomEvent) => void
+            'ontc-restart'?: (e: CustomEvent) => void
+            'ontc-resume'?: (e: CustomEvent) => void
+            'ontc-select'?: (e: CustomEvent<{ id: any }>) => void
+        },
+        __PauseMenu$PauseMenu
+    >
+    'tc-perk-picker': TcProps<
+        {
+            columns?: string | number
+            perks?: __PerkPicker$Perk[]
+            'ontc-select'?: (e: CustomEvent<{ id: any }>) => void
+        },
+        __PerkPicker$PerkPicker
+    >
+    'tc-phase-grid': TcProps<
+        { columns?: string | number; phases?: __PhaseGrid$PhaseItem[] },
+        __PhaseGrid$PhaseGrid
+    >
+    'tc-phone-input': TcProps<
+        {
+            'default-country'?: string | number
+            disabled?: boolean
+            error?: string | number
+            help?: string | number
+            label?: string | number
+            'max-height'?: string | number
+            name?: string | number
+            placeholder?: string | number
+            required?: boolean
+            state?: __PhoneInput$PhoneInputState
+            value?: string | number
+            cb?: HTMLElement | null
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __PhoneInput$PhoneInput
+    >
+    'tc-physics-editor': TcProps<
+        {
+            'alpha-threshold'?: string | number
+            'auto-fit'?: boolean
+            'canvas-height'?: string | number
+            'canvas-width'?: string | number
+            disabled?: boolean
+            'fit-parent'?: boolean
+            'handle-hit'?: string | number
+            'handle-size'?: string | number
+            handles?: string | number
+            'history-limit'?: string | number
+            'max-alpha-dim'?: string | number
+            'min-size'?: string | number
+            readonly?: boolean
+            shapes?: string | number
+            shortcuts?: string | number
+            'simplify-tolerance'?: string | number
+            snap?: string | number
+            source?: string | number
+            tool?: __PhysicsEditor$PhysicsTool
+            autoFitOnLoad?: boolean
+            selectedIndex?: number
+            'ontc-change'?: (e: CustomEvent) => void
+        },
+        __PhysicsEditor$PhysicsEditor
+    >
+    'tc-pie-chart': TcProps<
+        {
+            'center-label'?: string | number
+            donut?: boolean
+            height?: string | number
+            loading?: boolean
+            'show-legend'?: boolean | 'true' | 'false'
+            subtitle?: string | number
+            title?: string | number
+            cb?: HTMLElement | null
+            data?: __PieChart$PieChartSlice[]
+            'ontc-slice-select'?: (e: CustomEvent<{ slice: any; index: any }>) => void
+        },
+        __PieChart$PieChart
+    >
+    'tc-ping-display': TcProps<{ ping?: string | number }, __PingDisplay$PingDisplay>
+    'tc-pinned-feature-showcase': TcProps<
+        {
+            description?: string | number
+            eyebrow?: string | number
+            'image-alt'?: string | number
+            'image-src'?: string | number
+            title?: string | number
+            items?: __PinnedFeatureShowcase$PinnedFeatureShowcaseItem[]
+        },
+        __PinnedFeatureShowcase$PinnedFeatureShowcase
+    >
+    'tc-pipeline': TcProps<{ steps?: __Pipeline$PipelineStep[] }, __Pipeline$Pipeline>
+    'tc-placeholder': TcProps<
+        {
+            animation?: __Placeholder$PlaceholderAnimation
+            size?: __Placeholder$PlaceholderSize
+            variant?: __Placeholder$PlaceholderVariant
+            width?: string | number
+        },
+        __Placeholder$Placeholder
+    >
+    'tc-platform-icon': TcProps<
+        { label?: boolean; platform?: __PlatformIcon$Platform; size?: string | number },
+        __PlatformIcon$PlatformIcon
+    >
+    'tc-player-card': TcProps<
+        {
+            'card-title'?: string | number
+            level?: string | number
+            'online-status'?: __PlayerCard$PresenceStatus
+            'player-name'?: string | number
+            rank?: string | number
+            actions?: __PlayerCard$PlayerCardAction[]
+            stats?: __PlayerCard$PlayerCardStat[]
+            'ontc-action'?: (e: CustomEvent<{ id: any }>) => void
+        },
+        __PlayerCard$PlayerCard
+    >
+    'tc-player-frame': TcProps<
+        {
+            'class-name'?: string | number
+            glyph?: string | number
+            hp?: string | number
+            'hp-max'?: string | number
+            level?: string | number
+            mp?: string | number
+            'mp-max'?: string | number
+            name?: string | number
+            'show-mp'?: boolean
+            'show-stamina'?: boolean
+            stamina?: string | number
+            'stamina-max'?: string | number
+            classLabel?: string
+        },
+        __PlayerFrame$PlayerFrame
+    >
+    'tc-plugin-grid': TcProps<
+        {
+            columns?: string | number
+            'title-text'?: string | number
+            items?: __PluginGrid$PluginItem[]
+            'ontc-copy'?: (e: CustomEvent<{ install: any }>) => void
+        },
+        __PluginGrid$PluginGrid
+    >
+    'tc-popover': TcProps<
+        {
+            content?: string
+            html?: boolean
+            placement?: string
+            title?: string
+            trigger?: string
+            'ontc-hidden'?: (e: CustomEvent) => void
+            'ontc-hide'?: (e: CustomEvent) => void
+            'ontc-show'?: (e: CustomEvent) => void
+            'ontc-shown'?: (e: CustomEvent) => void
+        },
+        __Popover$Popover
+    >
+    'tc-portrait': TcProps<
+        {
+            circle?: boolean
+            glyph?: string | number
+            level?: string | number
+            ring?: string | number
+            size?: string | number
+        },
+        __Portrait$Portrait
+    >
+    'tc-press-any-key': TcProps<
+        {
+            disabled?: boolean
+            text?: string | number
+            'ontc-continue'?: (e: CustomEvent<void>) => void
+        },
+        __PressAnyKey$PressAnyKey
+    >
+    'tc-preview-frame': TcProps<
+        {
+            'error-label'?: string | number
+            'loading-label'?: string | number
+            ratio?: string | number
+            sandbox?: string | number
+            src?: string | number
+            'title-text'?: string | number
+            'ontc-state'?: (e: CustomEvent<{ state: any }>) => void
+        },
+        __PreviewFrame$PreviewFrame
+    >
+    'tc-pricing-card': TcProps<
+        {
+            'badge-text'?: string | number
+            description?: string | number
+            highlight?: boolean
+            name?: string | number
+            period?: string | number
+            price?: string | number
+            action?: __PricingCard$PricingCardAction
+            features?: Array<string | __PricingCard$PricingCardFeature>
+            'ontc-action'?: (e: CustomEvent) => void
+        },
+        __PricingCard$PricingCard
+    >
+    'tc-progress': TcProps<
+        {
+            animated?: boolean
+            label?: boolean
+            max?: string | number
+            min?: string | number
+            striped?: boolean
+            value?: string | number
+            variant?: __Progress$ProgressVariant
+        },
+        __Progress$Progress
+    >
+    'tc-progress-bar': TcProps<
+        {
+            animated?: boolean
+            label?: boolean
+            striped?: boolean
+            value?: string | number
+            variant?: __ProgressBar$ProgressBarVariant
+        },
+        __ProgressBar$ProgressBar
+    >
+    'tc-pulse-indicator': TcProps<
+        { color?: string | number; label?: string | number; paused?: boolean },
+        __PulseIndicator$PulseIndicator
+    >
+    'tc-qr-scan-sheet': TcProps<
+        {
+            'blur-behind'?: boolean | 'true' | 'false'
+            dismissible?: boolean | 'true' | 'false'
+            facing?: string | number
+            handle?: boolean | 'true' | 'false'
+            heading?: string | number
+            hint?: string | number
+            'initial-snap'?: string | number
+            'manual-label'?: string | number
+            open?: boolean
+            scrim?: string | number
+            snap?: string | number
+            state?: string | number
+            'ontc-frame'?: (e: CustomEvent) => void
+            'ontc-manual'?: (e: CustomEvent) => void
+            'ontc-scan'?: (e: CustomEvent<{ value: any }>) => void
+            'ontc-unsupported'?: (e: CustomEvent) => void
+        },
+        __QrScanSheet$QrScanSheet
+    >
+    'tc-quest-tracker': TcProps<
+        { 'tracker-title'?: string | number; quests?: __QuestTracker$QuestEntry[] },
+        __QuestTracker$QuestTracker
+    >
+    'tc-queued-file': TcProps<
+        {
+            extension?: string | number
+            format?: string | number
+            name?: string | number
+            size?: string | number
+            'ontc-dismiss'?: (e: CustomEvent) => void
+        },
+        __QueuedFile$QueuedFile
+    >
+    'tc-quick-start': TcProps<
+        {
+            'title-text'?: string | number
+            steps?: __QuickStart$QuickStartStep[]
+            'ontc-copy'?: (e: CustomEvent<{ code: any }>) => void
+        },
+        __QuickStart$QuickStart
+    >
+    'tc-quota-meter': TcProps<
+        {
+            'label-format'?: __QuotaMeter$QuotaMeterLabelFormat
+            spoken?: string | number
+            suffix?: string | number
+            tone?: __QuotaMeter$QuotaMeterTone
+            total?: string | number
+            used?: string | number
+            variant?: __QuotaMeter$QuotaMeterVariant
+            'warn-at'?: string | number
+            width?: string | number
+        },
+        __QuotaMeter$QuotaMeter
+    >
+    'tc-radial-wheel': TcProps<
+        {
+            'center-label'?: string | number
+            open?: boolean
+            'option-size'?: string | number
+            'per-page'?: string | number
+            radius?: string | number
+            options?: __RadialWheel$RadialOption[]
+            'ontc-close'?: (e: CustomEvent) => void
+            'ontc-select'?: (e: CustomEvent<{ id: any }>) => void
+        },
+        __RadialWheel$RadialWheel
+    >
+    'tc-radio': TcProps<
+        {
+            checked?: boolean
+            disabled?: boolean
+            error?: string | number
+            help?: string | number
+            inline?: boolean
+            label?: string | number
+            name?: string | number
+            required?: boolean
+            reverse?: boolean
+            state?: __Radio$RadioState
+            value?: string | number
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __Radio$Radio
+    >
+    'tc-radio-group': TcProps<
+        {
+            disabled?: boolean
+            error?: string | number
+            help?: string | number
+            inline?: boolean
+            label?: string | number
+            name?: string | number
+            required?: boolean
+            state?: __RadioGroup$RadioGroupState
+            value?: string | number
+            options?: __RadioGroup$RadioGroupOption[]
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __RadioGroup$RadioGroup
+    >
+    'tc-range': TcProps<
+        {
+            disabled?: boolean
+            error?: string | number
+            help?: string | number
+            label?: string | number
+            max?: string | number
+            min?: string | number
+            name?: string | number
+            required?: boolean
+            state?: __Range$RangeState
+            step?: string | number
+            value?: string | number
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __Range$Range
+    >
+    'tc-range-field': TcProps<
+        {
+            'bounds-max'?: string | number
+            'bounds-min'?: string | number
+            disabled?: boolean
+            from?: string | number
+            'from-label'?: string | number
+            heading?: string | number
+            note?: string | number
+            to?: string | number
+            'to-label'?: string | number
+            presets?: __RangeField$RangeFieldPreset[]
+            'ontc-change'?: (e: CustomEvent) => void
+        },
+        __RangeField$RangeField
+    >
+    'tc-range-slider': TcProps<
+        {
+            disabled?: boolean
+            error?: string | number
+            help?: string | number
+            label?: string | number
+            max?: string | number
+            min?: string | number
+            name?: string | number
+            required?: boolean
+            'show-tooltip'?: boolean
+            state?: __RangeSlider$RangeSliderState
+            step?: string | number
+            ticks?: boolean
+            value?: [number, number]
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __RangeSlider$RangeSlider
+    >
+    'tc-rank-cell': TcProps<{ pad?: string | number; rank?: string | number }, __RankCell$RankCell>
+    'tc-rarity-chip': TcProps<{ rarity?: string | number }, __RarityChip$RarityChip>
+    'tc-rating': TcProps<
+        {
+            'allow-half'?: boolean
+            count?: string | number
+            icon?: string | number
+            'read-only'?: boolean
+            size?: __Rating$RatingSize
+            value?: string | number
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __Rating$Rating
+    >
+    'tc-report-dialog': TcProps<
+        {
+            open?: boolean
+            'player-name'?: string | number
+            reasons?: string[]
+            'ontc-cancel'?: (e: CustomEvent) => void
+            'ontc-submit'?: (e: CustomEvent<{ reason: any; comment: any }>) => void
+        },
+        __ReportDialog$ReportDialog
+    >
+    'tc-reset-to-defaults': TcProps<
+        { disabled?: boolean; 'ontc-reset'?: (e: CustomEvent) => void },
+        __ResetToDefaults$ResetToDefaults
+    >
+    'tc-resizable-panel': TcProps<
+        {
+            direction?: __ResizablePanel$ResizablePanelDirection
+            'min-size'?: string | number
+            'storage-key'?: string | number
+            defaultSizes?: [number, number]
+            sizes?: [number, number]
+            'ontc-resize'?: (e: CustomEvent<{ sizes: any }>) => void
+        },
+        __ResizablePanel$ResizablePanel
+    >
+    'tc-resource-bar': TcProps<
+        {
+            ghost?: string | number
+            label?: string | number
+            max?: string | number
+            segments?: string | number
+            'show-text'?: boolean
+            value?: string | number
+            variant?: string | number
+        },
+        __ResourceBar$ResourceBar
+    >
+    'tc-result-screen': TcProps<
+        {
+            eyebrow?: string | number
+            subtitle?: string | number
+            'title-color'?: __ResultScreen$ResultScreenTitleColor
+            'title-text'?: string | number
+            variant?: __ResultScreen$ResultScreenVariant
+            actions?: __ResultScreen$ResultAction[]
+            rewards?: __ResultScreen$ResultReward[]
+            stats?: __ResultScreen$ResultStat[]
+            'ontc-action'?: (e: CustomEvent<{ id: any }>) => void
+        },
+        __ResultScreen$ResultScreen
+    >
+    'tc-results-header': TcProps<
+        {
+            align?: string | number
+            heading?: string | number
+            'heading-level'?: string | number
+            lead?: string | number
+        },
+        __ResultsHeader$ResultsHeader
+    >
+    'tc-rich-page-header': TcProps<
+        {
+            description?: string | number
+            'icon-color'?: __RichPageHeader$RichPageHeaderIconColor
+            'icon-name'?: string | number
+            sub?: string | number
+            'title-text'?: string | number
+        },
+        __RichPageHeader$RichPageHeader
+    >
+    'tc-roadmap': TcProps<
+        {
+            layout?: __Roadmap$RoadmapLayout
+            'title-text'?: string | number
+            columns?: __Roadmap$RoadmapColumn[]
+            'ontc-select'?: (e: CustomEvent) => void
+        },
+        __Roadmap$Roadmap
+    >
+    'tc-row': TcProps<
+        {
+            align?: string | number
+            cols?: string | number
+            'cols-lg'?: string | number
+            'cols-md'?: string | number
+            'cols-sm'?: string | number
+            'cols-xl'?: string | number
+            'cols-xxl'?: string | number
+            g?: string | number
+            gutter?: string | number
+            justify?: string | number
+        },
+        __Row$Row
+    >
+    'tc-rune-corner': TcProps<
+        { at?: __RuneCorner$RuneCornerPosition; size?: string | number },
+        __RuneCorner$RuneCorner
+    >
+    'tc-safe-area': TcProps<{ extra?: string | number }, __SafeArea$SafeArea>
+    'tc-score-display': TcProps<
+        {
+            align?: __ScoreDisplay$ScoreDisplayAlign
+            'font-size'?: string | number
+            label?: string | number
+            multiplier?: string | number
+            score?: string | number
+        },
+        __ScoreDisplay$ScoreDisplay
+    >
+    'tc-scoring-rules': TcProps<
+        { rules?: __ScoringRules$ScoringRule[] },
+        __ScoringRules$ScoringRules
+    >
+    'tc-screen-flash': TcProps<
+        {
+            duration?: string | number
+            'flash-color'?: string | number
+            'flash-opacity'?: string | number
+            trigger?: string | number
+            'ontc-done'?: (e: CustomEvent) => void
+        },
+        __ScreenFlash$ScreenFlash
+    >
+    'tc-scroll-area': TcProps<
+        {
+            axis?: __ScrollArea$ScrollAreaAxis
+            'max-height'?: string | number
+            'max-width'?: string | number
+        },
+        __ScrollArea$ScrollArea
+    >
+    'tc-scroll-text': TcProps<
+        { 'max-height'?: string | number; 'scroll-title'?: string | number },
+        __ScrollText$ScrollText
+    >
+    'tc-scrollspy': TcProps<
+        {
+            offset?: string | number
+            'smooth-scroll'?: boolean
+            target?: string | number
+            'ontc-activate'?: (e: CustomEvent<{ relatedTarget: any }>) => void
+        },
+        __Scrollspy$Scrollspy
+    >
+    'tc-search-bar': TcProps<
+        {
+            disabled?: boolean
+            icon?: string | number
+            label?: string | number
+            name?: string | number
+            placeholder?: string | number
+            value?: string | number
+            'ontc-input'?: (e: CustomEvent<{ value: any }>) => void
+            'ontc-search'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __SearchBar$SearchBar
+    >
+    'tc-section-card': TcProps<
+        {
+            icon?: string | number
+            title?: string | number
+            variant?: __SectionCard$SectionCardVariant
+        },
+        __SectionCard$SectionCard
+    >
+    'tc-section-flag': TcProps<
+        {
+            align?: __SectionFlag$SectionFlagAlign
+            subtitle?: string | number
+            title?: string | number
+        },
+        __SectionFlag$SectionFlag
+    >
+    'tc-segmented-toggle': TcProps<
+        {
+            disabled?: boolean
+            label?: string | number
+            size?: __SegmentedToggle$SegmentedToggleSize
+            value?: string | number
+            options?: __SegmentedToggle$SegmentedToggleOption[]
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __SegmentedToggle$SegmentedToggle
+    >
+    'tc-select': TcProps<
+        {
+            disabled?: boolean
+            error?: string | number
+            help?: string | number
+            label?: string | number
+            multiple?: boolean
+            name?: string | number
+            placeholder?: string | number
+            required?: boolean
+            size?: __Select$SelectSize
+            state?: __Select$SelectState
+            value?: string | number
+            values?: string[]
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __Select$Select
+    >
+    'tc-select-row': TcProps<
+        {
+            disabled?: boolean
+            value?: string | number
+            options?: __SelectRow$SelectOption[]
+            'ontc-change'?: (e: CustomEvent) => void
+        },
+        __SelectRow$SelectRow
+    >
+    'tc-setting-slider': TcProps<
+        {
+            disabled?: boolean
+            format?: string | number
+            max?: string | number
+            min?: string | number
+            muted?: boolean
+            step?: string | number
+            unit?: string | number
+            value?: string | number
+            'with-mute'?: boolean
+            'ontc-change'?: (e: CustomEvent) => void
+            'ontc-toggle-mute'?: (e: CustomEvent) => void
+        },
+        __SettingSlider$SettingSlider
+    >
+    'tc-settings-category-list': TcProps<
+        {
+            'selected-id'?: string | number
+            categories?: __SettingsCategoryList$SettingsCategory[]
+            'ontc-select'?: (e: CustomEvent<{ id: any }>) => void
+        },
+        __SettingsCategoryList$SettingsCategoryList
+    >
+    'tc-shake-container': TcProps<
+        { duration?: string | number; intensity?: string | number; trigger?: string | number },
+        __ShakeContainer$ShakeContainer
+    >
+    'tc-shop-panel': TcProps<
+        {
+            currency?: string | number
+            'currency-icon'?: string | number
+            'sell-mode'?: boolean
+            items?: __ShopPanel$ShopItem[]
+        },
+        __ShopPanel$ShopPanel
+    >
+    'tc-side-nav': TcProps<
+        {
+            loading?: boolean
+            'loading-count'?: string | number
+            sections?: __SideNav$SideNavSection[]
+            'ontc-item-click'?: (e: CustomEvent<{ item: any; key: any }>) => void
+        },
+        __SideNav$SideNav
+    >
+    'tc-sign-in-gate': TcProps<
+        {
+            'action-label'?: string | number
+            footnote?: string | number
+            heading?: string | number
+            href?: string | number
+            icon?: string | number
+            lead?: string | number
+            'ontc-sign-in'?: (e: CustomEvent) => void
+        },
+        __SignInGate$SignInGate
+    >
+    'tc-simple-file': TcProps<
+        {
+            extension?: string | number
+            format?: __SimpleFile$SimpleFileFormat
+            name?: string | number
+        },
+        __SimpleFile$SimpleFile
+    >
+    'tc-single-card-select': TcProps<
+        {
+            columns?: string | number
+            loading?: boolean
+            'loading-count'?: string | number
+            name?: string | number
+            value?: string | number
+            options?: __SingleCardSelect$SingleCardSelectOption[]
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __SingleCardSelect$SingleCardSelect
+    >
+    'tc-skeleton': TcProps<
+        {
+            count?: string | number
+            height?: string | number
+            preset?: __Skeleton$SkeletonPreset
+            variant?: __Skeleton$SkeletonVariant
+            width?: string | number
+        },
+        __Skeleton$Skeleton
+    >
+    'tc-skill-bar': TcProps<
+        {
+            gap?: string | number
+            'slot-size'?: string | number
+            slots?: __SkillBar$SkillSlot[]
+            'ontc-activate'?: (e: CustomEvent<{ id: any }>) => void
+        },
+        __SkillBar$SkillBar
+    >
+    'tc-skill-tree': TcProps<
+        {
+            height?: string | number
+            points?: string | number
+            'selected-id'?: string | number
+            width?: string | number
+            edges?: __SkillTree$SkillTreeEdge[]
+            nodes?: __SkillTree$SkillNode[]
+            'ontc-select'?: (e: CustomEvent) => void
+            'ontc-unlock'?: (e: CustomEvent) => void
+        },
+        __SkillTree$SkillTree
+    >
+    'tc-slices-card': TcProps<
+        {
+            loading?: boolean
+            size?: string | number
+            'stroke-width'?: string | number
+            title?: string | number
+            slices?: __SlicesCard$SliceItem[]
+        },
+        __SlicesCard$SlicesCard
+    >
+    'tc-slider': TcProps<
+        {
+            disabled?: boolean
+            error?: string | number
+            help?: string | number
+            label?: string | number
+            max?: string | number
+            min?: string | number
+            name?: string | number
+            required?: boolean
+            'show-tooltip'?: boolean
+            state?: __Slider$SliderState
+            step?: string | number
+            ticks?: boolean
+            value?: string | number
+            formatValue?: ((value: number) => string) | null
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __Slider$Slider
+    >
+    'tc-social-links': TcProps<
+        {
+            size?: __SocialLinks$SocialLinksSize
+            variant?: __SocialLinks$SocialLinksVariant
+            links?: __SocialLinks$SocialLink[]
+        },
+        __SocialLinks$SocialLinks
+    >
+    'tc-spacer': TcProps<{ axis?: __Spacer$SpacerAxis; size?: string | number }, __Spacer$Spacer>
+    'tc-sparkline': TcProps<
+        {
+            color?: string | number
+            data?: string | number
+            height?: string | number
+            type?: __Sparkline$SparklineType
+            width?: string | number
+        },
+        __Sparkline$Sparkline
+    >
+    'tc-spinner': TcProps<
+        {
+            caption?: boolean
+            label?: string | number
+            layout?: __Spinner$SpinnerLayout
+            size?: string | number
+            type?: __Spinner$SpinnerType
+            variant?: __Spinner$SpinnerVariant
+        },
+        __Spinner$Spinner
+    >
+    'tc-sponsor-wall': TcProps<
+        { title?: string | number; tiers?: __SponsorWall$SponsorTier[] },
+        __SponsorWall$SponsorWall
+    >
+    'tc-sprint-chain': TcProps<
+        {
+            columns?: string | number
+            'current-id'?: string | number
+            items?: __SprintChain$SprintChainItem[]
+        },
+        __SprintChain$SprintChain
+    >
+    'tc-stack': TcProps<
+        {
+            align?: string | number
+            direction?: __Stack$StackDirection
+            gap?: string | number
+            inline?: boolean
+            justify?: string | number
+            wrap?: boolean
+        },
+        __Stack$Stack
+    >
+    'tc-stamina-bar': TcProps<
+        {
+            ghost?: string | number
+            label?: string | number
+            max?: string | number
+            segments?: string | number
+            'show-text'?: boolean
+            value?: string | number
+            variant?: string | number
+        },
+        __ResourceBar$ResourceBar
+    >
+    'tc-stamp': TcProps<
+        {
+            angle?: string | number
+            color?: __Stamp$StampColor
+            label?: string | number
+            position?: __Stamp$StampPosition
+        },
+        __Stamp$Stamp
+    >
+    'tc-stat-card': TcProps<
+        {
+            delta?: string | number
+            'delta-kind'?: __StatCard$StatCardDeltaKind
+            footer?: string | number
+            helper?: string | number
+            icon?: string | number
+            label?: string | number
+            loading?: boolean
+            unit?: string | number
+            value?: string | number
+        },
+        __StatCard$StatCard
+    >
+    'tc-stat-row': TcProps<
+        {
+            accent?: string | number
+            label?: string | number
+            trend?: string | number
+            value?: string | number
+        },
+        __StatRow$StatRow
+    >
+    'tc-stat-tile': TcProps<
+        {
+            align?: __StatTile$StatTileAlign
+            color?: string | number
+            hint?: string | number
+            label?: string | number
+            size?: __StatTile$StatTileSize
+            spoken?: string | number
+            tone?: __StatTile$StatTileTone
+            unit?: string | number
+            value?: string | number
+            variant?: __StatTile$StatTileVariant
+        },
+        __StatTile$StatTile
+    >
+    'tc-state-machine': TcProps<
+        { compact?: boolean; states?: __StateMachine$StateMachineItem[] },
+        __StateMachine$StateMachine
+    >
+    'tc-stats-screen': TcProps<
+        {
+            'screen-title'?: string | number
+            summary?: string | number
+            sections?: __StatsScreen$StatsSection[]
+        },
+        __StatsScreen$StatsScreen
+    >
+    'tc-status-card': TcProps<
+        {
+            loading?: boolean
+            'loading-count'?: string | number
+            title?: string | number
+            items?: __StatusCard$StatusItem[]
+        },
+        __StatusCard$StatusCard
+    >
+    'tc-status-dot': TcProps<
+        {
+            label?: string | number
+            pulse?: boolean
+            size?: __StatusDot$StatusDotSize
+            status?: __StatusDot$StatusDotStatus
+        },
+        __StatusDot$StatusDot
+    >
+    'tc-step-pager': TcProps<
+        {
+            'back-label'?: string | number
+            'close-label'?: string | number
+            'done-label'?: string | number
+            heading?: string | number
+            'heading-action'?: boolean
+            'hint-label'?: string | number
+            index?: string | number
+            'keep-awake'?: boolean
+            'max-segments'?: string | number
+            'next-label'?: string | number
+            'swipe-hint'?: string | number
+            'wake-label'?: string | number
+            steps?: __StepPager$StepPagerStepInput[]
+            'ontc-step-pager-change'?: (e: CustomEvent<__StepPager$StepPagerChangeDetail>) => void
+            'ontc-step-pager-close'?: (e: CustomEvent) => void
+            'ontc-step-pager-done'?: (e: CustomEvent) => void
+            'ontc-step-pager-heading'?: (e: CustomEvent) => void
+        },
+        __StepPager$StepPager
+    >
+    'tc-stepper': TcProps<
+        {
+            'active-step'?: string | number
+            clickable?: boolean
+            orientation?: __Stepper$StepperOrientation
+            onstepclick?: ((key: string) => void) | null
+            steps?: __Stepper$StepItem[]
+            'ontc-step-click'?: (e: CustomEvent<{ key: any }>) => void
+        },
+        __Stepper$Stepper
+    >
+    'tc-subtitle': TcProps<
+        {
+            align?: __Subtitle$SubtitleAlign
+            boxed?: boolean
+            'font-size'?: string | number
+            'max-width'?: string | number
+            speaker?: string | number
+            text?: string | number
+        },
+        __Subtitle$Subtitle
+    >
+    'tc-swipe-pager': TcProps<
+        {
+            gesture?: __SwipePager$SwipePagerGesture
+            index?: string | number
+            lazy?: boolean
+            loop?: boolean
+            'ontc-pager-change'?: (e: CustomEvent<__SwipePager$SwipePagerChangeDetail>) => void
+        },
+        __SwipePager$SwipePager
+    >
+    'tc-switch': TcProps<
+        {
+            checked?: boolean
+            disabled?: boolean
+            error?: string | number
+            help?: string | number
+            label?: string | number
+            name?: string | number
+            required?: boolean
+            reverse?: boolean
+            state?: __Switch$SwitchState
+            value?: string | number
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __Switch$Switch
+    >
+    'tc-tab-bar': TcProps<
+        {
+            'active-id'?: string | number
+            size?: __TabBar$TabBarSize
+            items?: __TabBar$TabBarItem[]
+            tabs?: __TabBar$TabBarItem[]
+            'ontc-change'?: (e: CustomEvent<{ id: any }>) => void
+        },
+        __TabBar$TabBar
+    >
+    'tc-tab-dock': TcProps<
+        {
+            'active-id'?: string | number
+            'auto-hide'?: boolean
+            tabs?: __TabDock$TabDockItem[]
+            'ontc-tab-dock-change'?: (e: CustomEvent<__TabDock$TabDockEventDetail>) => void
+            'ontc-tab-dock-reselect'?: (e: CustomEvent<__TabDock$TabDockEventDetail>) => void
+        },
+        __TabDock$TabDock
+    >
+    'tc-tab-sections': TcProps<
+        {
+            'active-key'?: boolean
+            'default-active-key'?: string | number
+            loading?: boolean
+            items?: __TabSections$TabSectionItem[]
+            onchangetab?: ((key: string) => void) | null
+            'ontc-change'?: (e: CustomEvent<{ key: any }>) => void
+        },
+        __TabSections$TabSections
+    >
+    'tc-table': TcProps<
+        {
+            borderless?: boolean
+            collapse?: string | number
+            'collapse-below'?: __Table$TableBreakpoint
+            compact?: boolean
+            'empty-message'?: string | number
+            hoverable?: boolean
+            loading?: boolean
+            'loading-rows'?: string | number
+            'sticky-first-column'?: boolean
+            'sticky-header'?: boolean
+            'sticky-last-column'?: boolean
+            striped?: boolean
+            columns?: __Table$TableColumn[]
+            data?: Record<string, unknown>[]
+            onrowclick?: ((row: any, index: number) => void) | null
+            rowKey?: ((row: any, index: number) => string | number) | null
+            'ontc-row-click'?: (e: CustomEvent<{ row: any; index: any }>) => void
+        },
+        __Table$Table
+    >
+    'tc-tag': TcProps<
+        {
+            count?: string | number
+            disabled?: boolean
+            icon?: string | number
+            removable?: boolean
+            selected?: boolean
+            size?: __Chip$ChipSize
+            static?: boolean
+            variant?: __Chip$ChipVariant
+            'ontc-click'?: (e: CustomEvent) => void
+            'ontc-remove'?: (e: CustomEvent) => void
+        },
+        __Chip$Chip
+    >
+    'tc-tag-input': TcProps<
+        {
+            'allow-create'?: boolean
+            disabled?: boolean
+            error?: string | number
+            help?: string | number
+            label?: string | number
+            loading?: boolean
+            'max-height'?: string | number
+            'max-tags'?: string | number
+            name?: string | number
+            placeholder?: string | number
+            required?: boolean
+            state?: __TagInput$TagInputState
+            cb?: HTMLElement | null
+            defaultValue?: string[]
+            onchangetags?: ((tags: string[]) => void) | null
+            recommendations?: string[]
+            value?: string[] | undefined
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __TagInput$TagInput
+    >
+    'tc-taxonomy-card': TcProps<
+        {
+            accent?: string | number
+            clamp?: string | number
+            description?: string | number
+            eyebrow?: string | number
+            heading?: string | number
+            'heading-level'?: string | number
+            href?: string | number
+            'metric-spoken'?: string | number
+            'metric-unit'?: string | number
+            'metric-value'?: string | number
+            spoken?: string | number
+            static?: boolean
+            subheading?: string | number
+            interactive?: boolean
+            isStatic?: boolean
+            'ontc-taxonomy-card-activate'?: (
+                e: CustomEvent<__TaxonomyCard$TaxonomyCardActivateDetail>,
+            ) => void
+        },
+        __TaxonomyCard$TaxonomyCard
+    >
+    'tc-team-list': TcProps<{ members?: __TeamList$TeamMember[] }, __TeamList$TeamList>
+    'tc-terminal-window': TcProps<
+        {
+            'animate-typing'?: boolean
+            prompt?: string | number
+            speed?: string | number
+            title?: string | number
+            lines?: __TerminalWindow$TerminalLine[]
+        },
+        __TerminalWindow$TerminalWindow
+    >
+    'tc-testimonial-carousel': TcProps<
+        {
+            autoplay?: boolean
+            interval?: string | number
+            items?: __TestimonialCarousel$Testimonial[]
+            'ontc-change'?: (e: CustomEvent<{ index: any; id: any }>) => void
+        },
+        __TestimonialCarousel$TestimonialCarousel
+    >
+    'tc-text': TcProps<
+        { as?: __Text$TextAs; size?: __Text$TextSize; variant?: __Text$TextVariant },
+        __Text$Text
+    >
+    'tc-textarea': TcProps<
+        {
+            autocomplete?: string | number
+            disabled?: boolean
+            error?: string | number
+            help?: string | number
+            inputmode?: string | number
+            label?: string | number
+            max?: string | number
+            maxlength?: string | number
+            min?: string | number
+            minlength?: string | number
+            name?: string | number
+            pattern?: string | number
+            placeholder?: string | number
+            readonly?: boolean
+            required?: boolean
+            rows?: string | number
+            size?: __internal_text_field_base$FieldSize
+            state?: __internal_text_field_base$FieldState
+            step?: string | number
+            value?: string | number
+        },
+        __Textarea$Textarea
+    >
+    'tc-theme': TcProps<{ name?: string | number; variant?: string | number }, __Theme$Theme>
+    'tc-tier-ladder': TcProps<
+        {
+            'current-tier-id'?: string | number
+            summary?: string | number
+            title?: string | number
+            tiers?: __TierLadder$TierItem[]
+        },
+        __TierLadder$TierLadder
+    >
+    'tc-time-picker': TcProps<
+        {
+            clearable?: boolean
+            disabled?: boolean
+            error?: string | number
+            format?: __TimePicker$TimePickerFormat
+            help?: string | number
+            label?: string | number
+            'minute-step'?: string | number
+            name?: string | number
+            placeholder?: string | number
+            required?: boolean
+            'show-seconds'?: boolean
+            state?: __TimePicker$TimePickerState
+            value?: string | number
+            cb?: HTMLElement | null
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __TimePicker$TimePicker
+    >
+    'tc-timeline': TcProps<
+        {
+            connector?: __Timeline$TimelineConnector
+            loading?: boolean
+            'loading-count'?: string | number
+            overlap?: string | number
+            variant?: __Timeline$TimelineVariant
+            items?: __Timeline$TimelineItem[]
+        },
+        __Timeline$Timeline
+    >
+    'tc-title': TcProps<{ align?: __Title$TitleAlign; size?: string | number }, __Title$Title>
+    'tc-title-screen': TcProps<
+        { eyebrow?: string | number; subtitle?: string | number; 'title-text'?: string | number },
+        __TitleScreen$TitleScreen
+    >
+    'tc-toast': TcProps<
+        {
+            autohide?: boolean | 'true' | 'false'
+            delay?: string | number
+            open?: boolean
+            title?: string | number
+            variant?: string | number
+            'ontc-hidden'?: (e: CustomEvent) => void
+            'ontc-hide'?: (e: CustomEvent) => void
+            'ontc-show'?: (e: CustomEvent) => void
+            'ontc-shown'?: (e: CustomEvent) => void
+        },
+        __Toast$Toast
+    >
+    'tc-toggle': TcProps<
+        {
+            disabled?: boolean
+            label?: string | number
+            on?: boolean
+            'ontc-change'?: (e: CustomEvent<{ on: any }>) => void
+        },
+        __Toggle$Toggle
+    >
+    'tc-toggle-card': TcProps<
+        {
+            badge?: string | number
+            checked?: boolean
+            disabled?: boolean
+            hint?: string | number
+            icon?: string | number
+            label?: string | number
+            loading?: boolean
+            name?: string | number
+            value?: string | number
+            'ontc-change'?: (e: CustomEvent<{ checked: any }>) => void
+        },
+        __ToggleCard$ToggleCard
+    >
+    'tc-toggle-row': TcProps<
+        { checked?: boolean; disabled?: boolean; 'ontc-change'?: (e: CustomEvent) => void },
+        __ToggleRow$ToggleRow
+    >
+    'tc-tooltip': TcProps<
+        {
+            content?: string
+            html?: boolean
+            placement?: string
+            title?: string
+            trigger?: string
+            'ontc-hidden'?: (e: CustomEvent) => void
+            'ontc-hide'?: (e: CustomEvent) => void
+            'ontc-show'?: (e: CustomEvent) => void
+            'ontc-shown'?: (e: CustomEvent) => void
+        },
+        __Tooltip$Tooltip
+    >
+    'tc-transition-wipe': TcProps<
+        {
+            direction?: __TransitionWipe$TransitionWipeDirection
+            duration?: string | number
+            show?: boolean
+            'wipe-color'?: string | number
+            'ontc-complete'?: (e: CustomEvent) => void
+        },
+        __TransitionWipe$TransitionWipe
+    >
+    'tc-tree-picker': TcProps<
+        {
+            'empty-message'?: string | number
+            multiple?: boolean
+            placeholder?: string | number
+            'search-placeholder'?: string | number
+            nodes?: __TreePicker$TreePickerNode[]
+            value?: string[]
+            'ontc-change'?: (e: CustomEvent) => void
+        },
+        __TreePicker$TreePicker
+    >
+    'tc-tree-view': TcProps<
+        {
+            'checkbox-mode'?: boolean
+            expanded?: string[]
+            nodes?: __TreeView$TreeNode[]
+            selected?: string[]
+            'ontc-expand-change'?: (e: CustomEvent<{ keys: any }>) => void
+            'ontc-select'?: (e: CustomEvent<{ keys: any }>) => void
+        },
+        __TreeView$TreeView
+    >
+    'tc-trend-indicator': TcProps<
+        {
+            direction?: __TrendIndicator$TrendDirection
+            size?: __TrendIndicator$TrendSize
+            value?: string | number
+        },
+        __TrendIndicator$TrendIndicator
+    >
+    'tc-trend-spark': TcProps<
+        {
+            max?: string | number
+            min?: string | number
+            'no-dot'?: boolean
+            'no-fill'?: boolean
+            points?: string | number
+            spoken?: string | number
+            tone?: __TrendSpark$TrendSparkTone
+        },
+        __TrendSpark$TrendSpark
+    >
+    'tc-tyre-spec': TcProps<
+        { 'front-spec'?: string | number; 'rear-spec'?: string | number; spec?: string | number },
+        __TyreSpec$TyreSpec
+    >
+    'tc-upgrade-nudge': TcProps<
+        {
+            blurb?: string | number
+            'cta-label'?: string | number
+            icon?: string | number
+            locked?: boolean | 'true' | 'false'
+            'role-name'?: string | number
+            variant?: string | number
+            'ontc-upgrade'?: (e: CustomEvent) => void
+        },
+        __UpgradeNudge$UpgradeNudge
+    >
+    'tc-usage-summary-panel': TcProps<
+        {
+            loading?: boolean
+            'loading-count'?: string | number
+            title?: string | number
+            usage?: __UsageSummaryPanel$UsageConfig[]
+        },
+        __UsageSummaryPanel$UsageSummaryPanel
+    >
+    'tc-user-panel': TcProps<
+        {
+            'avatar-src'?: string | number
+            icon?: string | number
+            'icon-highlighted'?: boolean
+            'icon-label'?: string | number
+            initials?: string | number
+            loading?: boolean
+            plan?: string | number
+            username?: string | number
+            menuItems?: __UserPanel$UserPanelMenuItem[]
+            'ontc-icon-click'?: (e: CustomEvent) => void
+            'ontc-menu-click'?: (e: CustomEvent<{ key: any }>) => void
+        },
+        __UserPanel$UserPanel
+    >
+    'tc-value-in-range': TcProps<
+        {
+            at?: string | number
+            caption?: string | number
+            compact?: boolean
+            'high-label'?: string | number
+            label?: string | number
+            'low-label'?: string | number
+            max?: string | number
+            median?: string | number
+            min?: string | number
+            tone?: __ValueInRange$ValueInRangeTone
+            value?: string | number
+            variant?: __ValueInRange$ValueInRangeVariant
+            anchors?: __ValueInRange$ValueInRangeAnchor[]
+        },
+        __ValueInRange$ValueInRange
+    >
+    'tc-variant-spec-sheet': TcProps<
+        {
+            dense?: boolean
+            name?: string | number
+            slug?: string | number
+            version?: string | number
+            'years-text'?: string | number
+            variant?: __VariantSpecSheet$VariantSpec
+        },
+        __VariantSpecSheet$VariantSpecSheet
+    >
+    'tc-version-label': TcProps<
+        { branch?: string | number; build?: string | number; version?: string | number },
+        __VersionLabel$VersionLabel
+    >
+    'tc-version-picker': TcProps<
+        {
+            name?: string | number
+            value?: string | number
+            variant?: __VersionPicker$VersionPickerVariant
+            versions?: __VersionPicker$VersionOption[]
+            'ontc-change'?: (e: CustomEvent<{ value: any }>) => void
+        },
+        __VersionPicker$VersionPicker
+    >
+    'tc-vertical-item-list': TcProps<
+        {
+            'active-key'?: boolean
+            'default-active-key'?: string | number
+            disabled?: boolean
+            loading?: boolean
+            'loading-count'?: string | number
+            items?: __VerticalItemList$VerticalItemListItem[]
+            'ontc-select'?: (e: CustomEvent<{ key: any }>) => void
+        },
+        __VerticalItemList$VerticalItemList
+    >
+    'tc-victory-screen': TcProps<
+        {
+            eyebrow?: string | number
+            subtitle?: string | number
+            'title-color'?: __ResultScreen$ResultScreenTitleColor
+            'title-text'?: string | number
+            variant?: __ResultScreen$ResultScreenVariant
+            actions?: __ResultScreen$ResultAction[]
+            rewards?: __ResultScreen$ResultReward[]
+            stats?: __ResultScreen$ResultStat[]
+            'ontc-action'?: (e: CustomEvent<{ id: any }>) => void
+        },
+        __ResultScreen$ResultScreen
+    >
+    'tc-video-embed': TcProps<
+        {
+            'aspect-ratio'?: string | number
+            autoplay?: boolean
+            controls?: boolean | 'true' | 'false'
+            loop?: boolean
+            muted?: boolean
+            poster?: string | number
+            src?: string | number
+            title?: string | number
+        },
+        __VideoEmbed$VideoEmbed
+    >
+    'tc-vignette-overlay': TcProps<
+        { intensity?: string | number; 'vignette-color'?: string | number },
+        __VignetteOverlay$VignetteOverlay
+    >
+    'tc-virtual-list': TcProps<
+        {
+            'end-reached-threshold'?: string | number
+            height?: string | number
+            overscan?: string | number
+            itemHeight?: __VirtualList$VirtualListItemHeight
+            items?: any[]
+            renderItem?: __VirtualList$VirtualListRenderItem | null
+            'ontc-end-reached'?: (e: CustomEvent) => void
+        },
+        __VirtualList$VirtualList
+    >
+    'tc-visually-hidden': TcProps<
+        { as?: __VisuallyHidden$VisuallyHiddenAs },
+        __VisuallyHidden$VisuallyHidden
+    >
+    'tc-volume-slider': TcProps<
+        {
+            disabled?: boolean
+            format?: string | number
+            max?: string | number
+            min?: string | number
+            muted?: boolean
+            step?: string | number
+            unit?: string | number
+            value?: string | number
+            'with-mute'?: boolean
+            'ontc-change'?: (e: CustomEvent) => void
+            'ontc-toggle-mute'?: (e: CustomEvent) => void
+        },
+        __SettingSlider$SettingSlider
+    >
+    'tc-waypoint-marker': TcProps<
+        {
+            color?: string | number
+            distance?: string | number
+            icon?: string | number
+            label?: string | number
+            size?: string | number
+            x?: string | number
+            y?: string | number
+        },
+        __WaypointMarker$WaypointMarker
+    >
+    'tc-welcome-guide': TcProps<
+        {
+            'background-pattern-alt'?: string | number
+            'background-pattern-src'?: string | number
+            loading?: boolean
+            title?: string | number
+            messages?: string[]
+            onstepclick?: ((e: CustomEvent<{ key: string }>, stepKey: string) => void) | null
+            steps?: __WelcomeGuide$WelcomeGuideStep[]
+            'ontc-step-click'?: (e: CustomEvent<{ key: string }>) => void
+        },
+        __WelcomeGuide$WelcomeGuide
+    >
+    'tc-zoom-control': TcProps<
+        {
+            fit?: string | number
+            'fit-label'?: string | number
+            for?: string | number
+            zoom?: string | number
+            'zoom-in-label'?: string | number
+            'zoom-out-label'?: string | number
+            htmlFor?: string | null
+            'ontc-zoom-action'?: (e: CustomEvent<{ action: any }>) => void
+        },
+        __ZoomControl$ZoomControl
+    >
 }
 
 // React 17+ automatic runtime / React 19 — IntrinsicElements lives on React.JSX.

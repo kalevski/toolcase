@@ -38,6 +38,10 @@ tc-hit-marker {
     height: var(--bs-hit-marker-size);
     color: var(--bs-hit-marker-color);
     border-radius: 0;
+    // `position: relative` makes z-index apply directly, stacking the marker
+    // above sibling HUD overlays sharing the tooltip layer instead of sitting
+    // dead on the host's custom prop (was declared but never consumed).
+    z-index: var(--bs-hit-marker-z-index);
     // Hidden until shown; the `show` attribute plays the pop animation.
     opacity: 0;
 }

@@ -27,12 +27,12 @@ tc-theme[name='blueprint'],
     }
 
     // Title in the display face; column labels as mono HUD captions.
-    .tc-feature-matrix-title {
+    .tc-feature-matrix__title {
         font-family: var(--bp-display);
         letter-spacing: -0.01em;
     }
 
-    .tc-feature-matrix-col-label {
+    .tc-feature-matrix__col-label {
         font-family: var(--bp-mono);
         text-transform: uppercase;
     }

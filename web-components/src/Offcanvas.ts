@@ -1,8 +1,10 @@
+import { patchHtml } from './internal/patch-html'
 import { Offcanvas as BsOffcanvas } from './internal/Offcanvas'
 import { setHostClass } from './internal/host-class'
 import { BsOverlay, escapeHtml, type OverlayPlugin } from './internal/bs-overlay'
 import { msg } from './messages'
 import { closeIcon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-offcanvas'
 
@@ -15,7 +17,6 @@ type BackdropValue = boolean | 'static'
  * `.bs.offcanvas` event namespace.
  */
 export class Offcanvas extends BsOverlay {
-    private _bodyNodes: Node[] = []
 
     static get observedAttributes(): string[] {
         return ['open', 'placement', 'title', 'backdrop', 'scroll']
@@ -29,14 +30,14 @@ export class Offcanvas extends BsOverlay {
         return this.getAttribute('placement') ?? 'start'
     }
     set placement(v: string) {
-        this.setAttribute('placement', v)
+        setAttr(this, 'placement', v)
     }
 
     get title(): string {
         return this.getAttribute('title') ?? ''
     }
     set title(v: string) {
-        this.setAttribute('title', v)
+        setAttr(this, 'title', v)
     }
 
     get backdrop(): string {
@@ -66,10 +67,6 @@ export class Offcanvas extends BsOverlay {
         return true
     }
 
-    protected captureSlots(): void {
-        this._bodyNodes = Array.from(this.childNodes)
-    }
-
     protected createPlugin(): OverlayPlugin {
         return new BsOffcanvas(this as unknown as Element, {
             backdrop: this._resolveBackdrop(),
@@ -87,15 +84,15 @@ export class Offcanvas extends BsOverlay {
 
         const titleText = escapeHtml(this.getAttribute('title') ?? '')
 
-        this.innerHTML =
+        // The header is the element's own; the body is the consumer's children,
+        // padded where they stand rather than moved into `.offcanvas-body` (rule 1).
+        patchHtml(
+            this,
             `<div class="offcanvas-header">` +
-            `<h5 class="offcanvas-title">${titleText}</h5>` +
-            `<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="${escapeHtml(msg('close'))}">${closeIcon}</button>` +
-            `</div>` +
-            `<div class="offcanvas-body"></div>`
-
-        const body = this.querySelector('.offcanvas-body')
-        if (body) this._bodyNodes.forEach((n) => body.appendChild(n))
+                `<h5 class="offcanvas-title">${titleText}</h5>` +
+                `<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="${escapeHtml(msg('close'))}">${closeIcon}</button>` +
+                `</div>`,
+        )
     }
 }
 

@@ -1,4 +1,6 @@
+import { patchHtml } from './internal/patch-html'
 import { escapeHtml, renderResourceBarTrack } from './internal/resourceBar'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-resource-bar'
 
@@ -108,14 +110,14 @@ export class ResourceBar extends HTMLElement {
         return this.getAttribute('label') ?? ''
     }
     set label(v: string) {
-        this.setAttribute('label', v)
+        setAttr(this, 'label', v)
     }
 
     get variant(): string {
         return this.getAttribute('variant') ?? TAG_VARIANTS[this.localName] ?? ''
     }
     set variant(v: string) {
-        this.setAttribute('variant', v)
+        setAttr(this, 'variant', v)
     }
 
     private render(): void {
@@ -156,7 +158,7 @@ export class ResourceBar extends HTMLElement {
             inlineText: showText && !label ? numericText : null,
         })
 
-        this.innerHTML = labelRow + track
+        patchHtml(this, labelRow + track)
     }
 }
 

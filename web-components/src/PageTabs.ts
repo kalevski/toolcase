@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 
 // tc-page-tabs — the phone page rail: a horizontal, SCROLLING, underline tab strip.
@@ -85,6 +86,16 @@ export class PageTabs extends HTMLElement {
             this._render()
             this._scrollActiveIntoView(false)
         }
+    }
+
+    /** Alias of {@link tabs}. The rest of the library spells a data-driven
+     *  list `items`, and all three consuming apps reached for that name first —
+     *  `tabs` stays because it is the published one. */
+    get items(): PageTabsItem[] {
+        return this.tabs
+    }
+    set items(v: PageTabsItem[]) {
+        this.tabs = v
     }
 
     get activeId(): string {
@@ -230,31 +241,34 @@ export class PageTabs extends HTMLElement {
         const activeId = this.activeId
         const tabbableId = this._tabbableId()
 
-        this.innerHTML = this._tabs
-            .map((tab) => {
-                const isActive = tab.id === activeId
-                const cls = `tc-page-tabs-tab${isActive ? ' tc-page-tabs-tab--active' : ''}`
-                const common =
-                    ` role="tab" class="${cls}" data-id="${esc(tab.id)}"` +
-                    ` aria-selected="${isActive}"` +
-                    ` tabindex="${tab.id === tabbableId ? '0' : '-1'}"`
-                // The count is a parenthesised suffix inside the label rather than a
-                // badge — the design writes `Филтри (2)`, and a badge here would
-                // compete with the amber underline for the same 2px of attention.
-                const label =
-                    esc(tab.label) + (tab.count != null ? ` (${esc(String(tab.count))})` : '')
-                const inner = `<span class="tc-page-tabs-tab-label">${label}</span>`
-                if (tab.disabled) {
-                    // <a> has no `disabled`, so a disabled tab is never a link —
-                    // an inert <span> cannot be clicked or focused into.
-                    return `<span${common} aria-disabled="true">${inner}</span>`
-                }
-                if (tab.href) {
-                    return `<a href="${esc(tab.href)}"${common}>${inner}</a>`
-                }
-                return `<button type="button"${common}>${inner}</button>`
-            })
-            .join('')
+        patchHtml(
+            this,
+            this._tabs
+                .map((tab) => {
+                    const isActive = tab.id === activeId
+                    const cls = `tc-page-tabs-tab${isActive ? ' tc-page-tabs-tab--active' : ''}`
+                    const common =
+                        ` role="tab" class="${cls}" data-id="${esc(tab.id)}"` +
+                        ` aria-selected="${isActive}"` +
+                        ` tabindex="${tab.id === tabbableId ? '0' : '-1'}"`
+                    // The count is a parenthesised suffix inside the label rather than a
+                    // badge — the design writes `Филтри (2)`, and a badge here would
+                    // compete with the amber underline for the same 2px of attention.
+                    const label =
+                        esc(tab.label) + (tab.count != null ? ` (${esc(String(tab.count))})` : '')
+                    const inner = `<span class="tc-page-tabs-tab-label">${label}</span>`
+                    if (tab.disabled) {
+                        // <a> has no `disabled`, so a disabled tab is never a link —
+                        // an inert <span> cannot be clicked or focused into.
+                        return `<span${common} aria-disabled="true">${inner}</span>`
+                    }
+                    if (tab.href) {
+                        return `<a href="${esc(tab.href)}"${common}>${inner}</a>`
+                    }
+                    return `<button type="button"${common}>${inner}</button>`
+                })
+                .join(''),
+        )
     }
 }
 

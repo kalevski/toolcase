@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
@@ -163,10 +164,14 @@ export class LevelSelect extends HTMLElement {
                 const a = nodeMap.get(e.from)
                 const b = nodeMap.get(e.to)
                 if (!a || !b) return ''
+                // completed beats locked when a level is replayed after the far
+                // node has since been unlocked and cleared.
                 const cls =
                     a.completed && b.completed
                         ? 'tc-level-select__edge tc-level-select__edge--completed'
-                        : 'tc-level-select__edge'
+                        : a.locked || b.locked
+                          ? 'tc-level-select__edge tc-level-select__edge--locked'
+                          : 'tc-level-select__edge'
                 return `<line class="${cls}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" />`
             })
             .join('')
@@ -211,7 +216,9 @@ export class LevelSelect extends HTMLElement {
         if (!this.hasAttribute('role')) this.setAttribute('role', 'listbox')
         if (!this.hasAttribute('aria-label')) this.setAttribute('aria-label', 'Level select')
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <div class="tc-level-select__canvas" style="width:${w}px;height:${h}px;">
                 <svg class="tc-level-select__edges"
                      viewBox="0 0 ${w} ${h}"
@@ -220,13 +227,14 @@ export class LevelSelect extends HTMLElement {
                      aria-hidden="true">${edgesMarkup}</svg>
                 ${nodesMarkup}
             </div>
-        `
+        `,
+        )
 
         // Delegate events on the canvas to avoid per-node listener leaks across re-renders.
         const canvas = this.querySelector<HTMLElement>('.tc-level-select__canvas')
         if (!canvas) return
 
-        canvas.addEventListener('click', (e: Event) => {
+        bindOnce(canvas, 'click', (e: Event) => {
             const node = (e.target as Element).closest<HTMLElement>('.tc-level-select__node')
             if (!node || node.getAttribute('aria-disabled') === 'true') return
             const id = node.dataset.id ?? ''
@@ -235,7 +243,7 @@ export class LevelSelect extends HTMLElement {
             this._fireSelect(id)
         })
 
-        canvas.addEventListener('dblclick', (e: Event) => {
+        bindOnce(canvas, 'dblclick', (e: Event) => {
             const node = (e.target as Element).closest<HTMLElement>('.tc-level-select__node')
             if (!node || node.getAttribute('aria-disabled') === 'true') return
             const id = node.dataset.id ?? ''
@@ -243,7 +251,7 @@ export class LevelSelect extends HTMLElement {
             this._fireConfirm(id)
         })
 
-        canvas.addEventListener('keydown', (e: KeyboardEvent) => {
+        bindOnce(canvas, 'keydown', (e: KeyboardEvent) => {
             const node = (e.target as Element).closest<HTMLElement>('.tc-level-select__node')
             if (!node || node.getAttribute('aria-disabled') === 'true') return
             if (e.key === 'Enter' || e.key === ' ') {

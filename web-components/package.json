@@ -1,6 +1,6 @@
 {
     "name": "@toolcase/web-components",
-    "version": "5.0.21",
+    "version": "6.0.0",
     "description": "Framework-free HTML5 Web Components (tc-*) with their own from-scratch toolcase styling and a Bootstrap-compatible class/grid API — drop into any stack without React, Vue, or Angular.",
     "main": "lib/index.main.js",
     "module": "lib/index.module.js",
@@ -17,6 +17,11 @@
             "import": "./lib/react.module.js",
             "require": "./lib/react.main.js"
         },
+        "./react/components": {
+            "types": "./lib/react-components.d.ts",
+            "import": "./lib/react-components.module.js",
+            "require": "./lib/react-components.main.js"
+        },
         "./style.css": "./lib/index.css"
     },
     "sideEffects": [
@@ -28,7 +33,10 @@
         "dev": "tsup --watch",
         "build": "tsup && sass style/index.scss:lib/index.css --no-source-map --no-charset --style=compressed",
         "build:css": "sass style/index.scss:lib/index.css --no-source-map --no-charset --style=compressed",
-        "gen:react-types": "node scripts/gen-react-types.mjs"
+        "gen:react-types": "node scripts/gen-react-types.mjs",
+        "gen:react-components": "node scripts/gen-react-components.mjs",
+        "gen:react": "npm run gen:react-types && npm run gen:react-components",
+        "check:react-safety": "node scripts/check-react-safety.mjs --check"
     },
     "peerDependencies": {
         "@toolcase/base": "5.x.x",

@@ -39,7 +39,7 @@
     font-weight: 600;
     color: var(--bs-card-cap-color);
     background: var(--bs-card-cap-bg);
-    border-bottom: var(--bs-card-border-width) solid rgba(30, 41, 59, 0.1);
+    border-bottom: var(--bs-card-border-width) solid var(--bs-card-border-color);
 }
 
 .card-body {
@@ -52,7 +52,7 @@
     padding: var(--bs-card-cap-padding-y) var(--bs-card-cap-padding-x);
     color: var(--bs-card-cap-color);
     background: var(--bs-card-cap-bg);
-    border-top: var(--bs-card-border-width) solid rgba(30, 41, 59, 0.1);
+    border-top: var(--bs-card-border-width) solid var(--bs-card-border-color);
 }
 
 .card-title {
@@ -88,4 +88,58 @@
         color: currentcolor !important;
         opacity: 0.75;
     }
+}
+
+// ── Slot placement: the card is the host ─────────────────────────────────────
+//
+// `tc-card` no longer moves `slot="header"` / `slot="footer"` / default children
+// into header, body and footer wrappers (rule 1). They stay direct children and
+// CSS orders and dresses them where they stand.
+.card {
+    display: flex;
+    flex-direction: column;
+}
+
+.card > [slot='header'] {
+    order: 1;
+    padding: var(--bs-card-cap-padding-y, 0.5rem) var(--bs-card-cap-padding-x, 1rem);
+    background-color: var(--bs-card-cap-bg, rgba(0, 0, 0, 0.03));
+    border-bottom: var(--bs-card-border-width, 1px) solid var(--bs-card-border-color);
+}
+
+.card > .card-img-top,
+.card.tc-card--img-top > img {
+    order: 2;
+}
+
+.card > .card-title,
+.card > .card-subtitle {
+    order: 3;
+    padding-inline: var(--bs-card-spacer-x, 1rem);
+}
+
+.card > :not([slot='header']):not([slot='footer']):not(img):not(.card-title):not(.card-subtitle) {
+    order: 4;
+    padding-inline: var(--bs-card-spacer-x, 1rem);
+}
+
+.card.tc-card--img-bottom > img {
+    order: 5;
+}
+
+.card > [slot='footer'] {
+    order: 6;
+    padding: var(--bs-card-cap-padding-y, 0.5rem) var(--bs-card-cap-padding-x, 1rem);
+    background-color: var(--bs-card-cap-bg, rgba(0, 0, 0, 0.03));
+    border-top: var(--bs-card-border-width, 1px) solid var(--bs-card-border-color);
+}
+
+// First and last content rows keep the card's vertical padding.
+.card > .card-title:first-of-type,
+.card > [slot='header'] + :not([slot='footer']) {
+    padding-top: var(--bs-card-spacer-y, 1rem);
+}
+
+.card > :last-child:not([slot='footer']):not(img) {
+    padding-bottom: var(--bs-card-spacer-y, 1rem);
 }

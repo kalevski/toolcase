@@ -1,10 +1,15 @@
 // tc-placeholder — flat slate-200 skeleton bars; glow pulses opacity, wave is
 // the 400px slate-200/slate-100 shimmer gradient.
 
+// THE HOST IS THE PLACEHOLDER (see src/Placeholder.ts): `tc-placeholder-content`
+// is a class the component puts on the host itself, not on a descendant, so it
+// must be matched directly — nesting it here compiled to
+// `tc-placeholder .tc-placeholder-content`, a descendant selector that can never
+// match and left the rule permanently dead.
 tc-placeholder {
     display: block;
 
-    .tc-placeholder-content {
+    &.tc-placeholder-content {
         display: block;
     }
 }

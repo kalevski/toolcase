@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-usage-summary-panel'
 
@@ -83,14 +84,17 @@ export class UsageSummaryPanel extends HTMLElement {
                 </div>`,
             ).join('')
 
-            this.innerHTML = `
+            patchHtml(
+                this,
+                `
                 <div class="tc-usage-summary-panel" role="status" aria-busy="true" aria-label="Loading usage data">
                     ${titleHtml}
                     <div class="tc-usage-summary-panel-body" aria-hidden="true">
                         ${skeletonRows}
                     </div>
                     <span class="tc-usage-summary-panel-sr-only">Loading…</span>
-                </div>`
+                </div>`,
+            )
             return
         }
 
@@ -117,13 +121,16 @@ export class UsageSummaryPanel extends HTMLElement {
             })
             .join('')
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <div class="tc-usage-summary-panel">
                 ${titleHtml}
                 <div class="tc-usage-summary-panel-body">
                     ${rowsHtml}
                 </div>
-            </div>`
+            </div>`,
+        )
     }
 }
 

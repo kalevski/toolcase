@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-ecosystem-map'
 
@@ -134,7 +135,7 @@ export class EcosystemMap extends HTMLElement {
 
         const totalNodes = rings.reduce((sum, r) => sum + r.items.length, 0)
         const ariaLabel = core.name
-            ? `Ecosystem map: ${core.name}${rings.length > 0 ? `, ${rings.length} ring${rings.length !== 1 ? 's' : ''}, ${totalNodes} node${totalNodes !== 1 ? 's' : ''}` : ''}`
+            ? `Ecosystem map: ${esc(core.name)}${rings.length > 0 ? `, ${rings.length} ring${rings.length !== 1 ? 's' : ''}, ${totalNodes} node${totalNodes !== 1 ? 's' : ''}` : ''}`
             : 'Ecosystem map'
 
         let titleHtml = ''
@@ -181,10 +182,16 @@ export class EcosystemMap extends HTMLElement {
                         ? ` style="--em-node-accent:${esc(node.accent)}"`
                         : ''
 
+                    // Invisible hit-circle sits under the visible 10px dot so the tappable
+                    // area can grow under (pointer: coarse) without resizing/overlapping
+                    // the visible dot or its label — same non-visual touch-target-extension
+                    // technique as the carousel indicator dots' ::after inset trick.
+                    const hitCircle = `<circle class="tc-ecosystem-map__node-hit" cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="${nodeRadius}" />`
+
                     if (node.href) {
-                        nodesSvg += `<a class="tc-ecosystem-map__node-link" href="${esc(node.href)}" target="_blank" rel="noopener noreferrer" data-em-id="${nodeId}"${accentStyle}><circle class="tc-ecosystem-map__node-dot" cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="${nodeRadius}" /><text class="tc-ecosystem-map__node-label" x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${textAnchor}" dominant-baseline="middle">${esc(node.name)}</text></a>`
+                        nodesSvg += `<a class="tc-ecosystem-map__node-link" href="${esc(node.href)}" target="_blank" rel="noopener noreferrer" data-em-id="${nodeId}"${accentStyle}>${hitCircle}<circle class="tc-ecosystem-map__node-dot" cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="${nodeRadius}" /><text class="tc-ecosystem-map__node-label" x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${textAnchor}" dominant-baseline="middle">${esc(node.name)}</text></a>`
                     } else {
-                        nodesSvg += `<g class="tc-ecosystem-map__node-group" role="button" tabindex="0" aria-label="${esc(node.name)}" data-em-id="${nodeId}"${accentStyle}><circle class="tc-ecosystem-map__node-dot" cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="${nodeRadius}" /><text class="tc-ecosystem-map__node-label" x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${textAnchor}" dominant-baseline="middle">${esc(node.name)}</text></g>`
+                        nodesSvg += `<g class="tc-ecosystem-map__node-group" role="button" tabindex="0" aria-label="${esc(node.name)}" data-em-id="${nodeId}"${accentStyle}>${hitCircle}<circle class="tc-ecosystem-map__node-dot" cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="${nodeRadius}" /><text class="tc-ecosystem-map__node-label" x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${textAnchor}" dominant-baseline="middle">${esc(node.name)}</text></g>`
                     }
                 })
             })
@@ -220,11 +227,14 @@ export class EcosystemMap extends HTMLElement {
 
         this.classList.add('tc-ecosystem-map')
 
-        this.innerHTML = [
-            titleHtml,
-            `<svg class="tc-ecosystem-map__svg" role="img" aria-label="${ariaLabel}" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg"><title>${ariaLabel}</title>${ringsSvg}${connectorsSvg}${coreDisc}${nodesSvg}</svg>`,
-            listHtml,
-        ].join('')
+        patchHtml(
+            this,
+            [
+                titleHtml,
+                `<svg class="tc-ecosystem-map__svg" role="img" aria-label="${ariaLabel}" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg"><title>${ariaLabel}</title>${ringsSvg}${connectorsSvg}${coreDisc}${nodesSvg}</svg>`,
+                listHtml,
+            ].join(''),
+        )
     }
 }
 

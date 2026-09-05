@@ -93,6 +93,19 @@ tc-theme[name='blueprint'],
         color: var(--bs-level-select-label-color);
     }
 
+    // Restore the base rule's "selected node inherits ink" behaviour. Written as
+    // its own rule (not nested inside `.tc-level-select__label` above) so `&`
+    // expands to `.tc-level-select__node--selected` in front of the theme
+    // wrapper, not behind it — nesting it inside the label block instead
+    // compiled to `.tc-level-select__node--selected tc-theme[...] .tc-level-select__label`,
+    // a selector that can never match. Without this, the label kept the fixed
+    // muted --bp-text-muted colour even against the pink/teal selected fill —
+    // ~1.3:1 contrast, effectively invisible — instead of the --bp-pink-ink the
+    // filled star already picks up below.
+    .tc-level-select__node--selected .tc-level-select__label {
+        color: inherit;
+    }
+
     // Star: filled star on selected node — keep white (pink-ink) rather than base rgba(255,255,255,.9)
     .tc-level-select__star--filled {
         .tc-level-select__node--selected & {

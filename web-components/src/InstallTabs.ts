@@ -1,5 +1,7 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-install-tabs'
 
@@ -99,7 +101,7 @@ export class InstallTabs extends HTMLElement {
         return this.getAttribute('package') ?? ''
     }
     set package(v: string) {
-        this.setAttribute('package', v)
+        setAttr(this, 'package', v)
     }
 
     get dev(): boolean {
@@ -337,14 +339,16 @@ export class InstallTabs extends HTMLElement {
             })
             .join('')
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-install-tabs">` +
-            `<div class="tc-install-tabs-tablist" role="tablist" aria-label="Package manager">` +
-            tabsHtml +
-            `</div>` +
-            panelsHtml +
-            `<div class="tc-install-tabs-status" role="status" aria-live="polite" aria-atomic="true"></div>` +
-            `</div>`
+                `<div class="tc-install-tabs-tablist" role="tablist" aria-label="Package manager">` +
+                tabsHtml +
+                `</div>` +
+                panelsHtml +
+                `<div class="tc-install-tabs-status" role="status" aria-live="polite" aria-atomic="true"></div>` +
+                `</div>`,
+        )
     }
 }
 

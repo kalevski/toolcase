@@ -1,6 +1,8 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 import { closeIcon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-banner'
 
@@ -59,9 +61,6 @@ const DEFAULT_CONFIG = TAG_CONFIG['tc-banner']
  */
 export class Banner extends HTMLElement {
     private _initialised = false
-    private _contentNodes: Node[] = []
-    private _actionNodes: Node[] = []
-    private _iconSlotNodes: Node[] = []
 
     onDismiss: (() => void) | null = null
 
@@ -79,44 +78,21 @@ export class Banner extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            const key = this._resolvedStorageKey()
-            if (key && this._isStored(key)) {
-                this.hidden = true
-                this._initialised = true
-                return
-            }
-
-            // Capture named slot nodes (icon / action), keep the rest as content.
-            this._iconSlotNodes = Array.from(this.querySelectorAll('[slot="icon"]'))
-            this._actionNodes = Array.from(this.querySelectorAll('[slot="action"]'))
-            this._contentNodes = Array.from(this.childNodes).filter((n) => {
-                if (!(n instanceof Element)) return true
-                const slot = n.getAttribute('slot')
-                return slot !== 'icon' && slot !== 'action'
-            })
-
-            this.render()
-            this._redistributeSlots()
-            this._attachCloseHandler()
-            this._initialised = true
-        }
+        this._initialised = true
+        // Apply persisted dismissal before the first paint — `_isStored` was
+        // written but never consulted, so a banner with a `storage-key` /
+        // `persist-dismiss-key` came back on every reload instead of staying
+        // dismissed as documented (and as the demo tells the user it will).
+        const key = this._resolvedStorageKey()
+        if (key && this._isStored(key)) this.hidden = true
+        this.render()
+        this._attachCloseHandler()
     }
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised || this.hidden) return
-        // Re-capture from their containers (nodes have already moved).
-        this._iconSlotNodes = Array.from(this.querySelectorAll('.tc-banner-icon [slot="icon"]'))
-        this._actionNodes = Array.from(this.querySelectorAll('.tc-banner-action [slot="action"]'))
-        const contentEl = this.querySelector('.tc-banner-content')
-        this._contentNodes = contentEl ? Array.from(contentEl.childNodes) : []
         this.render()
-        this._redistributeSlots()
         this._attachCloseHandler()
-    }
-
-    private get _config(): BannerTagConfig {
-        return TAG_CONFIG[this.localName] ?? DEFAULT_CONFIG
     }
 
     get variant(): BannerVariant {
@@ -124,7 +100,7 @@ export class Banner extends HTMLElement {
         return VARIANTS.includes(v) ? v : 'info'
     }
     set variant(v: BannerVariant) {
-        this.setAttribute('variant', v)
+        setAttr(this, 'variant', v)
     }
 
     get dismissible(): boolean {
@@ -184,7 +160,9 @@ export class Banner extends HTMLElement {
         if (key) {
             try {
                 localStorage.setItem(key, 'dismissed')
-            } catch { /* storage unavailable */ }
+            } catch {
+                /* storage unavailable */
+            }
         }
         this.hidden = true
         this.dispatchEvent(new CustomEvent('tc-dismiss', { bubbles: true, composed: true }))
@@ -194,25 +172,12 @@ export class Banner extends HTMLElement {
     private _attachCloseHandler(): void {
         const btn = this.querySelector('.tc-banner-close')
         if (btn) {
-            btn.addEventListener('click', this._handleDismiss, { once: true })
+            bindOnce(btn, 'click', this._handleDismiss, { once: true })
         }
     }
 
-    private _redistributeSlots(): void {
-        const iconEl = this.querySelector('.tc-banner-icon')
-        if (iconEl && this._iconSlotNodes.length > 0) {
-            // Slotted icon nodes take priority over the lucide fallback.
-            iconEl.innerHTML = ''
-            this._iconSlotNodes.forEach((n) => iconEl.appendChild(n))
-        }
-        const contentEl = this.querySelector('.tc-banner-content')
-        if (contentEl) {
-            this._contentNodes.forEach((n) => contentEl.appendChild(n))
-        }
-        const actionEl = this.querySelector('.tc-banner-action')
-        if (actionEl) {
-            this._actionNodes.forEach((n) => actionEl.appendChild(n))
-        }
+    private get _config(): BannerTagConfig {
+        return TAG_CONFIG[this.localName] ?? DEFAULT_CONFIG
     }
 
     private render(): void {
@@ -220,8 +185,7 @@ export class Banner extends HTMLElement {
         const variant = this.variant
         const dismissible = this.dismissible
         const iconAttr = this.getAttribute(config.iconAttr)
-        const hasAction = this._actionNodes.length > 0
-        const hasIconSlot = this._iconSlotNodes.length > 0
+        const hasIconSlot = this.querySelector(':scope > [slot="icon"]') != null
         const ctaLabel = this.ctaLabel
         const ctaHref = this.ctaHref
 
@@ -246,8 +210,6 @@ export class Banner extends HTMLElement {
             ? `<span class="tc-banner-icon" aria-hidden="true">${iconSvg}</span>`
             : ''
 
-        const actionHtml = hasAction ? `<span class="tc-banner-action"></span>` : ''
-
         const ctaHtml =
             ctaLabel && ctaHref
                 ? `<a class="tc-banner-cta" href="${esc(ctaHref)}">${esc(ctaLabel)}</a>`
@@ -257,7 +219,11 @@ export class Banner extends HTMLElement {
             ? `<button type="button" class="tc-banner-close" aria-label="Dismiss">${closeIcon}</button>`
             : ''
 
-        this.innerHTML = `${iconHtml}<span class="tc-banner-content"></span>${actionHtml}${ctaHtml}${closeHtml}`
+        // The icon is prepended and the CTA / close button appended; the message and
+        // any `slot="icon"` / `slot="action"` element the consumer wrote stay their
+        // children and are placed by CSS `order` (rule 1).
+        patchHtml(this, iconHtml, { region: 'icon' })
+        patchHtml(this, `${ctaHtml}${closeHtml}`, { region: 'trailing', at: 'end' })
     }
 }
 

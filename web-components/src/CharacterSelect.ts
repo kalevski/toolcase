@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { isImageSrc } from './internal/image'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
@@ -214,9 +215,11 @@ export class CharacterSelect extends HTMLElement {
             ? this._detailMarkup(active)
             : `<p class="tc-character-select-detail-empty">Select a character.</p>`
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-character-select-grid">${tilesMarkup}</div>` +
-            `<div class="tc-character-select-detail">${detailMarkup}</div>`
+                `<div class="tc-character-select-detail">${detailMarkup}</div>`,
+        )
     }
 }
 

@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 // tc-node-editor — framework-free canvas node/graph editor. Positioned HTML
 // node boxes live inside a transformable viewport (CSS transform = pan + zoom);
@@ -238,14 +239,16 @@ export class NodeEditor extends HTMLElement {
             })
             .join('')
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-node-editor" role="application" aria-label="Node editor canvas"` +
-            `${disabled ? ' aria-disabled="true"' : ''}>` +
-            `<div class="tc-node-editor-viewport">` +
-            `<svg class="tc-node-editor-edges" aria-hidden="true"></svg>` +
-            nodesHtml +
-            `</div>` +
-            `</div>`
+                `${disabled ? ' aria-disabled="true"' : ''}>` +
+                `<div class="tc-node-editor-viewport">` +
+                `<svg class="tc-node-editor-edges" aria-hidden="true"></svg>` +
+                nodesHtml +
+                `</div>` +
+                `</div>`,
+        )
 
         this._applyTransform()
         this._renderEdges()

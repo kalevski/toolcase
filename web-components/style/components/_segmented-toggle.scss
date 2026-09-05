@@ -1,0 +1,107 @@
+// tc-segmented-toggle — a binary (or short) preference, as segments.
+//
+// A radio GROUP whose options are all visible, not a tab bar: the selection is a
+// value, not a view. The segments live in a container the element owns, so
+// nothing a consumer puts in the tag is ever touched.
+
+@use '../foundation/tokens' as *;
+
+tc-segmented-toggle {
+    --bs-segmented-toggle-bg: var(--tc-surface-muted);
+    --bs-segmented-toggle-border-color: var(--tc-border);
+    --bs-segmented-toggle-color: var(--tc-text-muted);
+    --bs-segmented-toggle-active-bg: var(--tc-surface);
+    --bs-segmented-toggle-active-color: var(--tc-text);
+    --bs-segmented-toggle-padding: 2px;
+    --bs-segmented-toggle-option-padding-y: 0.375rem;
+    --bs-segmented-toggle-option-padding-x: 0.625rem;
+    --bs-segmented-toggle-font-size: 0.8125rem;
+}
+
+.tc-segmented-toggle {
+    display: inline-flex;
+    vertical-align: middle;
+}
+
+.tc-segmented-toggle__list {
+    display: inline-flex;
+    padding: var(--bs-segmented-toggle-padding);
+    background: var(--bs-segmented-toggle-bg);
+    border: 1px solid var(--bs-segmented-toggle-border-color);
+    border-radius: 0;
+}
+
+.tc-segmented-toggle__option {
+    padding: var(--bs-segmented-toggle-option-padding-y) var(--bs-segmented-toggle-option-padding-x);
+    font: inherit;
+    font-size: var(--bs-segmented-toggle-font-size);
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--bs-segmented-toggle-color);
+    background: none;
+    border: 0;
+    border-radius: 0;
+    cursor: pointer;
+    white-space: nowrap;
+    min-height: var(--tc-touch-target-dense, 40px);
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease;
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent, var(--tc-primary));
+        outline-offset: -2px;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    @include coarse-pointer {
+        min-height: var(--tc-min-touch-target, 44px);
+    }
+}
+
+// The picked segment is a raised plate on the well, which is the one treatment
+// that reads as "this one" without a second colour.
+.tc-segmented-toggle__option--active {
+    color: var(--bs-segmented-toggle-active-color);
+    background: var(--bs-segmented-toggle-active-bg);
+    box-shadow: var(--tc-shadow-sm);
+}
+
+// The dense scale — a band control rather than a form control.
+.tc-segmented-toggle--sm {
+    --bs-segmented-toggle-option-padding-y: 0.25rem;
+    --bs-segmented-toggle-option-padding-x: 0.5rem;
+    --bs-segmented-toggle-font-size: 0.75rem;
+
+    .tc-segmented-toggle__option {
+        min-height: 0;
+    }
+
+    // The 44px floor is not lost, it is hung off the ink by a pseudo-element —
+    // the same mechanism the rest of the dense controls use.
+    @include coarse-pointer {
+        .tc-segmented-toggle__option {
+            position: relative;
+
+            &::after {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 0;
+                right: 0;
+                height: var(--tc-min-touch-target, 44px);
+                transform: translateY(-50%);
+            }
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-segmented-toggle__option {
+        transition: none;
+    }
+}

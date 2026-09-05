@@ -1,6 +1,8 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { msg } from './messages'
 import { fixedOriginOffset } from './internal/containingBlock'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-line-chart'
 
 // One series = a name, an ordered list of {x, y} points, and an optional explicit
@@ -74,6 +76,11 @@ export class LineChart extends HTMLElement {
     private _anchors: PointAnchor[] = []
     private _vw = 0
     private _vh = 0
+    // resize tracking — keeps the viewBox width equal to the actual rendered
+    // plot width so 1 user unit == 1 px (see _measurePlot)
+    private _resizeObserver: ResizeObserver | null = null
+    private _lastHostWidth = 0
+    private _reconciling = false
 
     static get observedAttributes(): string[] {
         // `title` is a natively-reflected HTMLElement property — listed so
@@ -87,6 +94,11 @@ export class LineChart extends HTMLElement {
             this.render()
             this._initialised = true
         }
+        this._attachResizeObserver()
+    }
+
+    disconnectedCallback(): void {
+        this._detachResizeObserver()
     }
 
     attributeChangedCallback(): void {
@@ -128,7 +140,7 @@ export class LineChart extends HTMLElement {
         return this.getAttribute('subtitle') ?? ''
     }
     set subtitle(v: string) {
-        this.setAttribute('subtitle', v)
+        setAttr(this, 'subtitle', v)
     }
 
     get height(): number {
@@ -179,6 +191,40 @@ export class LineChart extends HTMLElement {
         return this._xFormatter ? this._xFormatter(v) : String(v)
     }
 
+    // ---- resize handling ----
+
+    // Width the SVG should use for its viewBox: prefer the actual rendered SVG
+    // box (so 1 user unit == 1 px and nothing is stretched/letterboxed), falling
+    // back to the host width, then to 560 before the element has been laid out.
+    private _measurePlot(): number {
+        const svg = this.querySelector<SVGSVGElement>('.tc-line-chart-svg')
+        if (svg) {
+            const w = Math.round(svg.getBoundingClientRect().width)
+            if (w > 0) return w
+        }
+        const hostW = Math.round(this.getBoundingClientRect().width)
+        return hostW > 0 ? hostW : 560
+    }
+
+    private _attachResizeObserver(): void {
+        if (this._resizeObserver) return
+        this._resizeObserver = new ResizeObserver(() => {
+            const w = Math.round(this.getBoundingClientRect().width)
+            if (w > 0 && w !== this._lastHostWidth) {
+                this._lastHostWidth = w
+                if (this._initialised) this.render()
+            }
+        })
+        this._resizeObserver.observe(this)
+    }
+
+    private _detachResizeObserver(): void {
+        if (this._resizeObserver) {
+            this._resizeObserver.disconnect()
+            this._resizeObserver = null
+        }
+    }
+
     // ---- render ----
 
     private render(): void {
@@ -201,13 +247,16 @@ export class LineChart extends HTMLElement {
 
         const series = this._series
         if (!series.length) {
-            this.innerHTML = `<div class="tc-line-chart-inner">${headerHtml}<div class="tc-line-chart-empty">${esc(msg('noData'))}</div></div>`
+            patchHtml(
+                this,
+                `<div class="tc-line-chart-inner">${headerHtml}<div class="tc-line-chart-empty">${esc(msg('noData'))}</div></div>`,
+            )
             this._anchors = []
             return
         }
 
         const VH = this.height
-        const VW = 560
+        const VW = this._measurePlot()
         const PL = 52,
             PR = 20,
             PT = 18,
@@ -352,20 +401,32 @@ export class LineChart extends HTMLElement {
             legendHtml += `</div>`
         }
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-line-chart-inner">` +
-            headerHtml +
-            `<div class="tc-line-chart-plot">${svgHtml}${tooltipHtml}</div>` +
-            legendHtml +
-            `</div>`
+                headerHtml +
+                `<div class="tc-line-chart-plot">${svgHtml}${tooltipHtml}</div>` +
+                legendHtml +
+                `</div>`,
+        )
 
         const svg = this.querySelector<SVGSVGElement>('.tc-line-chart-svg')
         if (svg) {
-            svg.addEventListener('pointermove', this._onPointerMove)
-            svg.addEventListener('pointerleave', this._onPointerLeave)
+            // If the freshly laid-out SVG is a different width than the value we
+            // computed the viewBox from, re-render once so geometry maps 1:1 to
+            // pixels (keeps axis fonts undistorted and tooltip mapping exact).
+            const realW = Math.round(svg.getBoundingClientRect().width)
+            if (!this._reconciling && realW > 0 && realW !== VW) {
+                this._reconciling = true
+                this.render()
+                this._reconciling = false
+                return
+            }
+            bindOnce(svg, 'pointermove', this._onPointerMove)
+            bindOnce(svg, 'pointerleave', this._onPointerLeave)
         }
         const legend = this.querySelector<HTMLElement>('.tc-line-chart-legend')
-        if (legend) legend.addEventListener('click', this._onLegendClick)
+        if (legend) bindOnce(legend, 'click', this._onLegendClick)
     }
 
     private _renderLoading(): void {
@@ -375,12 +436,14 @@ export class LineChart extends HTMLElement {
         const headHtml = titleAttr
             ? `<div class="tc-line-chart-header"><div class="tc-line-chart-skeleton tc-line-chart-skeleton--title" aria-hidden="true"></div></div>`
             : ''
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-line-chart-inner">` +
-            headHtml +
-            `<div class="tc-line-chart-skeleton tc-line-chart-skeleton--plot" aria-hidden="true" style="height:${this.height}px"></div>` +
-            `<span class="visually-hidden">${esc(msg('loading'))}</span>` +
-            `</div>`
+                headHtml +
+                `<div class="tc-line-chart-skeleton tc-line-chart-skeleton--plot" aria-hidden="true" style="height:${this.height}px"></div>` +
+                `<span class="visually-hidden">${esc(msg('loading'))}</span>` +
+                `</div>`,
+        )
     }
 
     private _summary(series: LineChartSeries[], xCount: number): string {

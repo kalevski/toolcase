@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-currency-display'
 
@@ -96,15 +97,18 @@ export class CurrencyDisplay extends HTMLElement {
 
         const amountHtml = `<span class="tc-currency-display-amount">${esc(this.amount.toLocaleString())}</span>`
 
-        this.innerHTML = [
-            '<span class="tc-currency-display">',
-            labelHtml,
-            '<span class="tc-currency-display-readout">',
-            iconHtml,
-            amountHtml,
-            '</span>',
-            '</span>',
-        ].join('')
+        patchHtml(
+            this,
+            [
+                '<span class="tc-currency-display">',
+                labelHtml,
+                '<span class="tc-currency-display-readout">',
+                iconHtml,
+                amountHtml,
+                '</span>',
+                '</span>',
+            ].join(''),
+        )
     }
 }
 

@@ -1,6 +1,8 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-roadmap'
 
@@ -92,7 +94,7 @@ export class Roadmap extends HTMLElement {
         return LAYOUTS.includes(v) ? v : 'kanban'
     }
     set layout(v: RoadmapLayout) {
-        this.setAttribute('layout', v)
+        setAttr(this, 'layout', v)
     }
 
     // `title-text` (not the native `title` attribute, which HTMLElement reflects
@@ -148,6 +150,9 @@ export class Roadmap extends HTMLElement {
         const status: RoadmapStatus = STATUSES.includes(column.status) ? column.status : 'planned'
         const statusLabel = STATUS_LABELS[status]
         const items = Array.isArray(column.items) ? column.items : []
+        // Escaped once here; reused as-is below (in the span content and the
+        // aria-label attribute) — do not esc() it again, that would double-escape
+        // any title containing `&`, `<`, `>`, `"` or `'`.
         const heading = column.title ? esc(column.title) : statusLabel
 
         // The visible heading carries the (optional) custom title; the status word
@@ -174,7 +179,7 @@ export class Roadmap extends HTMLElement {
             `</div>`
 
         return (
-            `<section class="tc-roadmap-column tc-roadmap-column--${status}" aria-label="${esc(heading)}">` +
+            `<section class="tc-roadmap-column tc-roadmap-column--${status}" aria-label="${heading}">` +
             headerHtml +
             bodyHtml +
             `</section>`
@@ -189,12 +194,14 @@ export class Roadmap extends HTMLElement {
 
         const columnsHtml = this._columns.map((col, idx) => this._renderColumn(col, idx)).join('')
 
-        this.innerHTML =
-            titleHtml + `<div class="tc-roadmap tc-roadmap--${layout}">${columnsHtml}</div>`
+        patchHtml(
+            this,
+            titleHtml + `<div class="tc-roadmap tc-roadmap--${layout}">${columnsHtml}</div>`,
+        )
 
         const board = this.querySelector<HTMLElement>('.tc-roadmap')
         if (board) {
-            board.addEventListener('click', (e: Event) => {
+            bindOnce(board, 'click', (e: Event) => {
                 const btn = (e.target as HTMLElement).closest<HTMLElement>('.tc-roadmap-item')
                 if (!btn) return
                 const colIdx = parseInt(btn.dataset.col ?? '-1', 10)

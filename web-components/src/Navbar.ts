@@ -1,6 +1,9 @@
+import { patchHtml } from './internal/patch-html'
+import { adoptChildren } from './internal/adopt-children'
 import { esc } from './internal/esc'
 import { setHostClass } from './internal/host-class'
 import { Collapse as BsCollapse } from './internal/Collapse'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-navbar'
 
@@ -46,14 +49,14 @@ export class Navbar extends HTMLElement {
         return this.getAttribute('brand') ?? ''
     }
     set brand(v: string) {
-        this.setAttribute('brand', v)
+        setAttr(this, 'brand', v)
     }
 
     get expand(): string {
         return this.getAttribute('expand') ?? 'lg'
     }
     set expand(v: string) {
-        this.setAttribute('expand', v)
+        setAttr(this, 'expand', v)
     }
 
     get variant(): string {
@@ -115,22 +118,25 @@ export class Navbar extends HTMLElement {
             : ''
         const id = this._collapseId
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="container-fluid">` +
-            brandHtml +
-            `<button class="navbar-toggler" type="button" data-bs-toggle="collapse"` +
-            ` data-bs-target="#${id}" aria-controls="${id}"` +
-            ` aria-expanded="false" aria-label="Toggle navigation">` +
-            `<span class="navbar-toggler-icon"></span>` +
-            `</button>` +
-            `<div class="collapse navbar-collapse" id="${id}"></div>` +
-            `</div>`
+                brandHtml +
+                `<button class="navbar-toggler" type="button" data-bs-toggle="collapse"` +
+                ` data-bs-target="#${id}" aria-controls="${id}"` +
+                ` aria-expanded="false" aria-label="Toggle navigation">` +
+                `<span class="navbar-toggler-icon"></span>` +
+                `</button>` +
+                `<div class="collapse navbar-collapse" id="${id}"></div>` +
+                `</div>`,
+        )
 
         const collapseEl = this.querySelector<HTMLElement>(`#${id}`)
         this._collapseEl = collapseEl
-        if (collapseEl) {
-            this._navContent.forEach((n) => collapseEl.appendChild(n))
-        }
+        // The consumer's children are the collapsible nav — see adopt-children.ts.
+        // patchHtml reuses the collapse div across renders, so on every render
+        // after the first this only re-points the route.
+        if (collapseEl) adoptChildren(this, () => collapseEl, this._navContent)
     }
 
     private _initPlugin(): void {

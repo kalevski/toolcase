@@ -36,19 +36,18 @@ tc-heading {
     border-radius: 0;
 }
 
-// Per-level sizes driven by --bs-heading-* to expose the theming surface.
-h1.tc-heading { font-size: var(--bs-heading-h1-font-size); }
-h2.tc-heading { font-size: var(--bs-heading-h2-font-size); }
-h3.tc-heading { font-size: var(--bs-heading-h3-font-size); }
-h4.tc-heading { font-size: var(--bs-heading-h4-font-size); }
-h5.tc-heading { font-size: var(--bs-heading-h5-font-size); }
-h6.tc-heading { font-size: var(--bs-heading-h6-font-size); }
-
-.tc-heading-content {
-    display: inline;
-}
+// Per-level sizes driven by --bs-heading-* to expose the theming surface. The
+// level is a class now: `tc-heading` puts `role="heading"` + `aria-level` on the
+// host instead of moving the consumer's text into an <h1>–<h6> (rule 1).
+h1.tc-heading, .tc-heading--h1 { font-size: var(--bs-heading-h1-font-size); }
+h2.tc-heading, .tc-heading--h2 { font-size: var(--bs-heading-h2-font-size); }
+h3.tc-heading, .tc-heading--h3 { font-size: var(--bs-heading-h3-font-size); }
+h4.tc-heading, .tc-heading--h4 { font-size: var(--bs-heading-h4-font-size); }
+h5.tc-heading, .tc-heading--h5 { font-size: var(--bs-heading-h5-font-size); }
+h6.tc-heading, .tc-heading--h6 { font-size: var(--bs-heading-h6-font-size); }
 
 // Gradient variant — background-clip: text with a solid-color fallback.
+.tc-heading--gradient,
 .tc-heading--gradient > .tc-heading-content {
     // Solid fallback for browsers without background-clip: text support.
     color: var(--bs-heading-color);

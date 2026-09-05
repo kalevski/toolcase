@@ -78,4 +78,17 @@ tc-theme[name='blueprint'],
             background-color: var(--bp-paper-tint-2);
         }
     }
+
+    // Reduced motion: the base component's freeze only stops the tab-label
+    // color transition — it has no knowledge of this theme's skeleton pulse
+    // keyframe, so the animation must be stopped here too (static mid-tone fill).
+    @media (prefers-reduced-motion: reduce) {
+        .tc-tab-sections--loading {
+            .tc-tab-sections-tab-skeleton,
+            .tc-tab-sections-line {
+                animation: none;
+                background-color: var(--bp-paper-tint-2);
+            }
+        }
+    }
 }

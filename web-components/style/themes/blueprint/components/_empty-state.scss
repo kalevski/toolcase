@@ -31,7 +31,10 @@ tc-theme[name='blueprint'],
 
     // Body: headline inside adopts display font; kicker / eyebrow-like labels
     // inherit the mono voice when wrapped in a .tc-eyebrow or [data-eyebrow].
-    .tc-empty-state__body {
+    //
+    // The `__body` wrapper is gone — tc-empty-state no longer re-parents its
+    // children (see src/EmptyState.ts) — so this reaches through the host itself.
+    .tc-empty-state {
         // First direct heading-like child (h1–h6, .tc-heading, or .tc-title) →
         // display font with tightest tracking. Not forced uppercase so body-copy
         // paragraph siblings stay readable.

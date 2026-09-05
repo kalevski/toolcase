@@ -22,7 +22,6 @@ tc-tyre-spec {
 // ── Shell ─────────────────────────────────────────────────────────────────────
 
 .tc-tyre-spec {
-    position: relative;
     display: inline-flex;
     flex-direction: column;
     min-width: 0;
@@ -31,11 +30,15 @@ tc-tyre-spec {
     border-radius: 0;
 }
 
-// Corner fitment flag — machine-facing, so mono + uppercase via CSS.
+// Corner fitment flag — machine-facing, so mono + uppercase via CSS. Rendered
+// as the container's first flex child (see TyreSpec.ts) and right-aligned in
+// the column via align-self, NOT position:absolute — the container sizes to
+// its content (inline-flex, no fixed width), so an absolutely-positioned
+// top-right flag would float over the first row's own top-right corner
+// instead of reserving space above it, covering the top of that row's
+// rightmost segment value.
 .tc-tyre-spec-flag {
-    position: absolute;
-    top: 0;
-    right: 0;
+    align-self: flex-end;
     padding: 0.125rem 0.4375rem;
     font-family: var(--tc-font-mono);
     font-size: 9.5px;

@@ -17,12 +17,17 @@
     cursor: pointer;
     transition: color var(--tc-transition-fast);
 
+    // The host is never focused directly — the real `<a>` (`.tc-link-hit`) is what
+    // receives keyboard focus, so `&:focus-visible` here can never match (same
+    // shape as `.tc-button-host:has(> .tc-button-hit:focus-visible)` in
+    // _button.scss). The ring and hover-color both follow the overlay's focus via
+    // :has(); the overlay's own outline is dropped so there is one ring, not two.
     &:hover,
-    &:focus-visible {
+    &:has(> .tc-link-hit:focus-visible) {
         color: var(--bs-link-hover-color);
     }
 
-    &:focus-visible {
+    &:has(> .tc-link-hit:focus-visible) {
         outline: 2px solid var(--tc-app-accent);
         outline-offset: 2px;
     }
@@ -42,8 +47,10 @@
 .tc-link-underline-hover {
     text-decoration: none;
 
+    // Same host-is-never-focused reasoning as above: the real focus target is the
+    // `.tc-link-hit` overlay, not this host.
     &:hover,
-    &:focus-visible {
+    &:has(> .tc-link-hit:focus-visible) {
         text-decoration: underline;
     }
 }
@@ -81,4 +88,22 @@
 .tc-link-danger {
     --bs-link-color: var(--tc-danger);
     --bs-link-hover-color: var(--tc-danger);
+}
+
+// The anchor is a stretched hit area over the host, not a wrapper around the
+// consumer's children (rule 1) — it keeps real link behaviour (middle-click,
+// "copy link address", focus) while the text stays where the consumer wrote it.
+tc-link {
+    position: relative;
+}
+
+.tc-link-hit {
+    position: absolute;
+    inset: 0;
+    text-decoration: none;
+    color: inherit;
+
+    &:focus-visible {
+        outline: none;
+    }
 }

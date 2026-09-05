@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-press-any-key'
 
@@ -28,7 +29,6 @@ export class PressAnyKey extends HTMLElement {
     connectedCallback(): void {
         if (!this._initialised) {
             if (!this.hasAttribute('role')) this.setAttribute('role', 'button')
-            if (!this.hasAttribute('tabindex')) this.setAttribute('tabindex', '0')
             this.render()
             this._initialised = true
         }
@@ -71,7 +71,15 @@ export class PressAnyKey extends HTMLElement {
 
     private render(): void {
         this.classList.add('tc-press-any-key')
-        this.innerHTML = `<span class="tc-press-any-key__text">${esc(this.text)}</span>`
+        // A real `disabled` attribute would remove the host from the accessibility
+        // tree entirely, and this element has no separate focusable child to fall
+        // back on — so, like FilterTrigger/LockedAction, disabled state is conveyed
+        // via `aria-disabled` + `tabindex="-1"` instead, keeping the host reachable
+        // by assistive tech while pulling it out of the tab order.
+        this.setAttribute('tabindex', this.disabled ? '-1' : '0')
+        if (this.disabled) this.setAttribute('aria-disabled', 'true')
+        else this.removeAttribute('aria-disabled')
+        patchHtml(this, `<span class="tc-press-any-key__text">${esc(this.text)}</span>`)
     }
 }
 

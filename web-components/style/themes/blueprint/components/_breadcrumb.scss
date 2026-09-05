@@ -34,14 +34,23 @@ tc-theme[name='blueprint'],
             vertical-align: middle;
         }
 
-        a {
+        // The `<a>` is a stretched hit overlay beside the visible label, not
+        // wrapped around it (BreadcrumbItem.ts) — it never contains the text it
+        // links, so colouring the `<a>` itself is invisible. `:has()` scopes the
+        // muted/teal-hover treatment to the host of a linked (non-active) crumb,
+        // where the label actually lives and inherits color from.
+        &:has(> .tc-breadcrumb-item-content) {
             color: var(--bp-text-muted);
-            text-decoration: none;
             transition: color 0.15s var(--bp-ease, ease);
 
-            &:hover {
+            &:hover,
+            &:focus-within {
                 color: var(--bp-teal-fg); // AA-safe teal on --bp-paper / --bp-bg
             }
+        }
+
+        a {
+            text-decoration: none;
 
             &:focus-visible {
                 outline: 2px solid var(--bp-teal);

@@ -22,23 +22,23 @@ tc-lore-text {
 
 .tc-lore-text {
     box-sizing:   border-box;
+    display:      block;
     padding:      var(--bs-lore-text-padding-y) var(--bs-lore-text-padding-x);
     padding-left: calc(var(--bs-lore-text-padding-x) + var(--bs-lore-text-border-width));
     background:   var(--bs-lore-text-bg);
     border-left:  var(--bs-lore-text-border-width) solid var(--bs-lore-text-border-color);
     border-radius: 0;
-}
 
-.tc-lore-text__content {
-    margin: 0;
-    padding: 0;
+    // Prose styling sits on the host: there is no inner content wrapper any more,
+    // because wrapping the consumer's children in one is what rule 1 forbids.
     color:       var(--bs-lore-text-color);
     font-size:   var(--bs-lore-text-font-size);
     font-weight: var(--bs-lore-text-font-weight);
     font-style:  var(--bs-lore-text-font-style);
     line-height: var(--bs-lore-text-line-height);
+    margin: 0;
 
-    // Let multi-paragraph slot content retain spacing.
+    // Multi-paragraph slot content keeps its spacing.
     p {
         margin: 0 0 0.5em;
 

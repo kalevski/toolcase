@@ -1,5 +1,7 @@
+import { patchHtml, bindOnce } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-maintainer-card'
 
@@ -37,14 +39,14 @@ export class MaintainerCard extends HTMLElement {
         return this.getAttribute('name') ?? ''
     }
     set name(v: string) {
-        this.setAttribute('name', v)
+        setAttr(this, 'name', v)
     }
 
     get avatarUrl(): string {
         return this.getAttribute('avatar-url') ?? ''
     }
     set avatarUrl(v: string) {
-        this.setAttribute('avatar-url', v)
+        setAttr(this, 'avatar-url', v)
     }
 
     // 'role' conflicts with ARIAMixin.role; no JS getter/setter defined.
@@ -78,7 +80,7 @@ export class MaintainerCard extends HTMLElement {
         return this.getAttribute('sponsor-label') ?? 'Sponsor'
     }
     set sponsorLabel(v: string) {
-        this.setAttribute('sponsor-label', v)
+        setAttr(this, 'sponsor-label', v)
     }
 
     get location(): string | null {
@@ -140,18 +142,36 @@ export class MaintainerCard extends HTMLElement {
               `target="_blank" rel="noopener noreferrer">${sponsorInner}</a>`
             : `<button class="tc-maintainer-card__sponsor" type="button">${sponsorInner}</button>`
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="card tc-maintainer-card">` +
-            `<div class="card-body tc-maintainer-card__body">` +
-            avatarHtml +
-            nameHtml +
-            roleHtml +
-            locationHtml +
-            bioHtml +
-            linksHtml +
-            sponsorHtml +
-            `</div>` +
-            `</div>`
+                `<div class="card-body tc-maintainer-card__body">` +
+                avatarHtml +
+                nameHtml +
+                roleHtml +
+                locationHtml +
+                bioHtml +
+                linksHtml +
+                sponsorHtml +
+                `</div>` +
+                `</div>`,
+        )
+
+        // Sponsor CTA: a real `<a>` when sponsor-href is set (browser handles the
+        // navigation itself), but a plain `<button>` otherwise — the button has
+        // no href to act on, so without this it was a dead element that did
+        // nothing on click. Fire an event either way (bindOnce so re-renders
+        // don't stack listeners) so the host can react to the click — e.g. open
+        // its own sponsor flow when no href was given, or just track the click.
+        bindOnce(this.querySelector('.tc-maintainer-card__sponsor'), 'click', () => {
+            this.dispatchEvent(
+                new CustomEvent('tc-sponsor-click', {
+                    bubbles: true,
+                    composed: true,
+                    detail: { href: sponsorHref },
+                }),
+            )
+        })
     }
 }
 

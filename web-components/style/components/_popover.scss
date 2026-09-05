@@ -2,7 +2,7 @@
 // header cap. Arrow keys off Popper's [data-popper-placement].
 
 .popover {
-    --bs-popover-zindex: 1080;
+    --bs-popover-zindex: var(--tc-z-tooltip);
     --bs-popover-max-width: 280px;
     --bs-popover-font-size: 0.78125rem;
     --bs-popover-bg: var(--tc-surface);

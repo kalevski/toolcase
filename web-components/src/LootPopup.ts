@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { DialogBase, esc } from './internal/dialog-base'
 import { msg } from './messages'
 import { closeIcon } from './icons'
@@ -137,7 +138,7 @@ export class LootPopup extends DialogBase {
     private _wireInner(): void {
         const list = this.querySelector('.tc-loot-popup__list')
         if (list) {
-            list.addEventListener('tc-take', (e: Event) => {
+            bindOnce(list, 'tc-take', (e: Event) => {
                 e.stopPropagation()
                 const id = (e as CustomEvent<{ id: string }>).detail.id
                 this.dispatchEvent(
@@ -150,7 +151,7 @@ export class LootPopup extends DialogBase {
                 if (typeof this.onTake === 'function') this.onTake(id)
                 this._scheduleAutoFade()
             })
-            list.addEventListener('tc-take-all', (e: Event) => {
+            bindOnce(list, 'tc-take-all', (e: Event) => {
                 e.stopPropagation()
                 this.dispatchEvent(
                     new CustomEvent('tc-take-all', {
@@ -164,7 +165,7 @@ export class LootPopup extends DialogBase {
         }
 
         const discard = this.querySelector<HTMLButtonElement>('.tc-loot-popup__discard')
-        discard?.addEventListener('click', () => {
+        bindOnce(discard, 'click', () => {
             this.dispatchEvent(
                 new CustomEvent('tc-discard', {
                     bubbles: true,
@@ -176,7 +177,7 @@ export class LootPopup extends DialogBase {
         })
 
         const takeAll = this.querySelector<HTMLButtonElement>('.tc-loot-popup__take-all')
-        takeAll?.addEventListener('click', () => {
+        bindOnce(takeAll, 'click', () => {
             this.dispatchEvent(
                 new CustomEvent('tc-take-all', {
                     bubbles: true,
@@ -202,22 +203,24 @@ export class LootPopup extends DialogBase {
             ? `<span class="tc-loot-popup__eyebrow">${esc(eyebrowText)}</span>`
             : ''
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-loot-popup__backdrop" aria-hidden="true"${hiddenAttr}></div>` +
-            `<div class="tc-loot-popup__panel" role="dialog" aria-modal="true"` +
-            ` aria-labelledby="${labelId}" tabindex="-1"` +
-            ` aria-hidden="${isOpen ? 'false' : 'true'}"${hiddenAttr}>` +
-            `<div class="tc-loot-popup__header">` +
-            eyebrowHtml +
-            `<h2 class="tc-loot-popup__title" id="${labelId}">${esc(titleText)}</h2>` +
-            `<button type="button" class="tc-loot-popup__close" aria-label="${esc(msg('close'))}">${closeIcon}</button>` +
-            `</div>` +
-            `<tc-loot-list class="tc-loot-popup__list"></tc-loot-list>` +
-            `<div class="tc-loot-popup__actions">` +
-            `<button type="button" class="tc-loot-popup__btn tc-loot-popup__discard">${esc(discardText)}</button>` +
-            `<button type="button" class="tc-loot-popup__btn tc-loot-popup__take-all">Take All</button>` +
-            `</div>` +
-            `</div>`
+                `<div class="tc-loot-popup__panel" role="dialog" aria-modal="true"` +
+                ` aria-labelledby="${labelId}" tabindex="-1"` +
+                ` aria-hidden="${isOpen ? 'false' : 'true'}"${hiddenAttr}>` +
+                `<div class="tc-loot-popup__header">` +
+                eyebrowHtml +
+                `<h2 class="tc-loot-popup__title" id="${labelId}">${esc(titleText)}</h2>` +
+                `<button type="button" class="tc-loot-popup__close" aria-label="${esc(msg('close'))}">${closeIcon}</button>` +
+                `</div>` +
+                `<tc-loot-list class="tc-loot-popup__list"></tc-loot-list>` +
+                `<div class="tc-loot-popup__actions">` +
+                `<button type="button" class="tc-loot-popup__btn tc-loot-popup__discard">${esc(discardText)}</button>` +
+                `<button type="button" class="tc-loot-popup__btn tc-loot-popup__take-all">Take All</button>` +
+                `</div>` +
+                `</div>`,
+        )
 
         if (isOpen) {
             this.classList.add('tc-loot-popup--open')

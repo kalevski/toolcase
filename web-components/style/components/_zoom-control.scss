@@ -1,0 +1,72 @@
+// tc-zoom-control — minus, the percentage, plus, and "fit".
+//
+// Every part is element-owned. The figure is `fit × zoom` rounded to whole
+// percent, so "100%" means "as large as this window allows" — which is what a
+// reader expects from a design tool and never what a raw CSS scale gives.
+
+tc-zoom-control {
+    --bs-zoom-control-gap: 0.125rem;
+    --bs-zoom-control-button-size: 1.75rem;
+    --bs-zoom-control-color: var(--tc-text-muted);
+    --bs-zoom-control-value-size: 0.6875rem;
+    --bs-zoom-control-value-width: 3.25rem;
+}
+
+.tc-zoom-control {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-zoom-control-gap);
+    color: var(--bs-zoom-control-color);
+}
+
+.tc-zoom-control__out,
+.tc-zoom-control__in,
+.tc-zoom-control__fit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--bs-zoom-control-button-size);
+    height: var(--bs-zoom-control-button-size);
+    padding: 0 0.375rem;
+    font: inherit;
+    font-size: var(--bs-zoom-control-value-size);
+    font-weight: 600;
+    color: inherit;
+    background: none;
+    border: 0;
+    border-radius: 0;
+    cursor: pointer;
+
+    svg {
+        width: 0.8125rem;
+        height: 0.8125rem;
+        display: block;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent, var(--tc-primary));
+        outline-offset: 2px;
+    }
+}
+
+// Fixed width and tabular figures: the value sits between two buttons, and a
+// percentage that changes width moves both of them on every step.
+.tc-zoom-control__value {
+    min-width: var(--bs-zoom-control-value-width);
+    text-align: center;
+    font-size: var(--bs-zoom-control-value-size);
+    font-variant-numeric: tabular-nums;
+}
+
+// Touch target — WCAG 2.5.5. The 1.75rem (28px) button box is well under the
+// 44px floor; `min-*` beats the `min-width`/`height` above so the hit area
+// grows while the glyph/label keep their compact size, same recipe as
+// .btn-close and .tc-icon-button.
+@media (pointer: coarse) {
+    .tc-zoom-control__out,
+    .tc-zoom-control__in,
+    .tc-zoom-control__fit {
+        min-width: var(--tc-min-touch-target, 44px);
+        min-height: var(--tc-min-touch-target, 44px);
+    }
+}

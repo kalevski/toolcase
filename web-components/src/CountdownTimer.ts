@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-countdown-timer'
 
@@ -152,7 +153,12 @@ export class CountdownTimer extends HTMLElement {
         }
         document.addEventListener('visibilitychange', this._visibilityHandler)
         if (!document.hidden && !this._expired) {
-            this._startInterval()
+            // Re-sync the displayed value immediately: a reconnect (e.g. a DOM
+            // move/remount) may follow a disconnect that lasted longer than the
+            // 1s tick interval, and without this the stale digits would linger
+            // until the first setInterval fire.
+            this._tick()
+            if (!this._expired) this._startInterval()
         }
     }
 
@@ -244,12 +250,14 @@ export class CountdownTimer extends HTMLElement {
         }
 
         const compactClass = compact ? ' tc-countdown--compact' : ''
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-countdown${compactClass}" aria-live="polite" role="timer">` +
-            labelHtml +
-            unitsHtml +
-            subHtml +
-            `</div>`
+                labelHtml +
+                unitsHtml +
+                subHtml +
+                `</div>`,
+        )
     }
 }
 

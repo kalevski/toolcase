@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon, closeIcon } from './icons'
@@ -97,20 +98,22 @@ export class QueuedFile extends HTMLElement {
             ? `<span class="tc-queued-file-format">${formatText}</span>`
             : ''
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-queued-file">` +
-            `<span class="tc-queued-file-leading" aria-hidden="true">${fileIconHtml}</span>` +
-            `<div class="tc-queued-file-body">` +
-            `<span class="tc-queued-file-name">${fullName}</span>` +
-            `<div class="tc-queued-file-meta">${formatBadgeHtml}` +
-            `<span class="tc-queued-file-size">${sizeText}</span>` +
-            `</div>` +
-            `</div>` +
-            `<button type="button" class="tc-queued-file-dismiss" aria-label="Dismiss">${closeIcon}</button>` +
-            `</div>`
+                `<span class="tc-queued-file-leading" aria-hidden="true">${fileIconHtml}</span>` +
+                `<div class="tc-queued-file-body">` +
+                `<span class="tc-queued-file-name">${fullName}</span>` +
+                `<div class="tc-queued-file-meta">${formatBadgeHtml}` +
+                `<span class="tc-queued-file-size">${sizeText}</span>` +
+                `</div>` +
+                `</div>` +
+                `<button type="button" class="tc-queued-file-dismiss" aria-label="Dismiss">${closeIcon}</button>` +
+                `</div>`,
+        )
 
         const btn = this.querySelector('.tc-queued-file-dismiss')
-        if (btn) btn.addEventListener('click', this._handleDismiss)
+        if (btn) bindOnce(btn, 'click', this._handleDismiss)
     }
 }
 

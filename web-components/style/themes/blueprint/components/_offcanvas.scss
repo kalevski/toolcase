@@ -66,8 +66,12 @@ tc-theme[name='blueprint'],
     // White paper ground with Space Grotesk prose type.
     // Faint blueprint grid lines echo the canvas aesthetic — same cross-hatch
     // used on tc-drawer so both sliding surfaces feel family-related.
+    //
+    // Targets the consumer's own children directly: the component never wraps
+    // them in a `.offcanvas-body` element (rule 1, see base _offcanvas.scss),
+    // so that class never matches anything rendered here.
 
-    .offcanvas-body {
+    .offcanvas > :not(.offcanvas-header) {
         background: var(--bp-paper);
         color: var(--bp-text-muted);
         font-family: var(--bp-body);

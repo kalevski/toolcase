@@ -3,8 +3,9 @@ const TAG_NAME = 'tc-shake-container'
 /**
  * tc-shake-container — rAF-driven camera-shake wrapper that translates its
  * slotted content with a decaying random offset. Ported from `gc-shake-container`
- * but voiced for the web-components design system: no Shadow DOM, no game chrome,
- * light DOM with a single `.tc-shake-container-inner` wrap element.
+ * but voiced for the web-components design system: no Shadow DOM, no game chrome
+ * and — since 5.1 — no wrap element at all: the transform is applied to the HOST,
+ * so the consumer's children are never re-parented (rule 1).
  *
  * A new shake is triggered whenever the `trigger` attribute is set to a value
  * that differs from the last-seen value. The shake amplitude decays linearly
@@ -29,13 +30,7 @@ export class ShakeContainer extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            const inner = this.querySelector('.tc-shake-container-inner')
-            if (inner) slotContent.forEach((n) => inner.appendChild(n))
-            this._initialised = true
-        }
+        this._initialised = true
         this._lastTrigger = this.getAttribute('trigger')
     }
 
@@ -89,17 +84,12 @@ export class ShakeContainer extends HTMLElement {
         this._startShake()
     }
 
-    private render(): void {
-        this.innerHTML = '<div class="tc-shake-container-inner"></div>'
-    }
-
     private _stopShake(): void {
         if (this._rafHandle != null) {
             cancelAnimationFrame(this._rafHandle)
             this._rafHandle = null
         }
-        const inner = this.querySelector<HTMLElement>('.tc-shake-container-inner')
-        if (inner) inner.style.transform = ''
+        this.style.transform = ''
     }
 
     private _startShake(): void {
@@ -107,14 +97,12 @@ export class ShakeContainer extends HTMLElement {
 
         this._stopShake()
         this._startedAt = performance.now()
-        const inner = this.querySelector<HTMLElement>('.tc-shake-container-inner')
-        if (!inner) return
 
         const tick = (now: number) => {
             const elapsed = now - this._startedAt
             const total = this.duration
             if (elapsed >= total) {
-                inner.style.transform = ''
+                this.style.transform = ''
                 this._rafHandle = null
                 return
             }
@@ -122,7 +110,7 @@ export class ShakeContainer extends HTMLElement {
             const range = this.intensity * decay
             const x = (Math.random() * 2 - 1) * range
             const y = (Math.random() * 2 - 1) * range
-            inner.style.transform = `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px)`
+            this.style.transform = `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px)`
             this._rafHandle = requestAnimationFrame(tick)
         }
         this._rafHandle = requestAnimationFrame(tick)

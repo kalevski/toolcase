@@ -1,4 +1,4 @@
-import { esc } from "./esc"
+import { esc } from './esc'
 // Shared scaffold for tc-modal and tc-offcanvas. Both wrap a Bootstrap overlay
 // plugin around the host element: capture their light-DOM children once, render
 // the BS markup, init the plugin, and bridge the plugin's show/shown/hide/hidden
@@ -25,22 +25,19 @@ export abstract class BsOverlay extends HTMLElement {
 
     /** Bootstrap event namespace (`modal` / `offcanvas`). */
     protected abstract get eventNs(): string
-    /** Render the overlay markup and re-append captured slotted nodes. */
+    /** Render the overlay's OWN markup. It must not wrap or move consumer
+     *  children — the body of an overlay is whatever the consumer wrote, left
+     *  where they wrote it and placed by CSS (rule 1). */
     protected abstract render(): void
     /** Instantiate the underlying Bootstrap plugin bound to this element. */
     protected abstract createPlugin(): OverlayPlugin
-    /** Capture light-DOM slotted nodes on first connect, before the first render. */
-    protected abstract captureSlots(): void
 
     static get observedAttributes(): string[] {
         return ['open']
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            this.captureSlots()
-            this._initialised = true
-        }
+        this._initialised = true
         this.render()
         this._initPlugin()
         if (this.open) this._plugin?.show()

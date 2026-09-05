@@ -1,0 +1,122 @@
+// tc-facet-picker — one dimension of a narrowing pick, as a row of chips.
+//
+// The chips live in a container the element owns, so nothing a consumer puts in
+// the tag is ever touched. `rail` is one scrolling line (the phone default);
+// `wrap` is the block, for dimensions whose options are sentences.
+
+@use '../foundation/tokens' as *;
+
+tc-facet-picker {
+    --bs-facet-picker-gap: 0.375rem;
+    --bs-facet-picker-label-size: 0.75rem;
+    --bs-facet-picker-label-color: var(--tc-text-muted);
+    --bs-facet-picker-hint-size: 0.75rem;
+    --bs-facet-picker-chip-padding-y: 0.25rem;
+    --bs-facet-picker-chip-padding-x: 0.5rem;
+    --bs-facet-picker-chip-font-size: 0.75rem;
+    --bs-facet-picker-chip-color: var(--tc-text);
+    --bs-facet-picker-chip-bg: var(--tc-surface);
+    --bs-facet-picker-chip-border-color: var(--tc-border);
+    --bs-facet-picker-chip-active-color: var(--tc-text-inverse, #fff);
+    --bs-facet-picker-chip-active-bg: var(--tc-app-accent, var(--tc-primary));
+}
+
+.tc-facet-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+}
+
+.tc-facet-picker__label {
+    font-size: var(--bs-facet-picker-label-size);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--bs-facet-picker-label-color);
+}
+
+.tc-facet-picker__hint {
+    font-size: var(--bs-facet-picker-hint-size);
+    line-height: 1.4;
+    color: var(--tc-text-faint);
+}
+
+.tc-facet-picker__options {
+    display: flex;
+    gap: var(--bs-facet-picker-gap);
+    min-width: 0;
+}
+
+// One scrolling line. A wrapping row of eight year chips is three lines of chrome
+// for ONE dimension at 320px, which is the whole reason this is the default.
+.tc-facet-picker--rail .tc-facet-picker__options {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    // The rail is scrolled, so its chips must not be squeezed to fit.
+    > * {
+        flex: 0 0 auto;
+    }
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.tc-facet-picker--wrap .tc-facet-picker__options {
+    flex-wrap: wrap;
+}
+
+.tc-facet-picker__chip {
+    padding: var(--bs-facet-picker-chip-padding-y) var(--bs-facet-picker-chip-padding-x);
+    font: inherit;
+    font-size: var(--bs-facet-picker-chip-font-size);
+    font-weight: 500;
+    line-height: 1.3;
+    white-space: nowrap;
+    color: var(--bs-facet-picker-chip-color);
+    background: var(--bs-facet-picker-chip-bg);
+    border: 1px solid var(--bs-facet-picker-chip-border-color);
+    border-radius: 0;
+    cursor: pointer;
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent, var(--tc-primary));
+        outline-offset: 2px;
+    }
+
+    &:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+
+    // The ink stays compact — six of these groups plus a long option list have to
+    // fit one screen — and the 44px floor is hung off it by a pseudo-element
+    // instead. Growing the chip turns a „2012" into a circle.
+    @include coarse-pointer {
+        position: relative;
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: var(--tc-min-touch-target, 44px);
+            transform: translateY(-50%);
+        }
+    }
+}
+
+.tc-facet-picker__chip--active {
+    color: var(--bs-facet-picker-chip-active-color);
+    background: var(--bs-facet-picker-chip-active-bg);
+    border-color: var(--bs-facet-picker-chip-active-bg);
+}
+
+.tc-facet-picker--md {
+    --bs-facet-picker-chip-padding-y: 0.4375rem;
+    --bs-facet-picker-chip-padding-x: 0.75rem;
+    --bs-facet-picker-chip-font-size: 0.8125rem;
+}

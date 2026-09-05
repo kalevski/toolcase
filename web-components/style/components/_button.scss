@@ -290,13 +290,28 @@
 // (the `field` attribute, or `help`/`error`/`state`), it renders an always-present
 // `.tc-field-message` gutter below the control so it lines up with adjacent
 // tc-input/tc-select in a form row — no margin hack needed. Default buttons (no
-// slot) are unaffected and stay plain inline-block.
+// slot) are unaffected.
+//
+// The gutter is TAKEN OUT OF FLOW and the host reserves its height as margin,
+// because the host is now the button box itself (see "Host layout" at the bottom
+// of this file): left in flow it would render inside the button's fill. The
+// reserve restates the slot's own metrics from _field-message.scss — its
+// `margin-top` plus one line of its `font-size` × `line-height` — since those
+// custom properties are declared on the slot and do not reach the host.
 tc-button:has(> .tc-field-message),
 tc-metal-button:has(> .tc-field-message) {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: stretch;
+    --bs-btn-field-reserve: calc(0.35rem + 0.8rem * 1.45);
+
+    margin-bottom: var(--bs-btn-field-reserve);
     vertical-align: top;
+}
+
+tc-button > .tc-field-message,
+tc-metal-button > .tc-field-message {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
 }
 
 // ── Block (full-width) ────────────────────────────────────────────────────────
@@ -321,17 +336,60 @@ tc-metal-button[block] {
     flex: 1 1 0;
     width: 100%;
     min-width: 0;
-
-    > .btn,
-    > .tc-metal-button__btn {
-        flex: 1 1 auto;
-        width: 100%;
-        min-width: 0;
-    }
 }
 
-tc-button[block]:has(> .tc-field-message),
-tc-metal-button[block]:has(> .tc-field-message) {
-    flex-direction: column;
-    align-items: stretch;
+// ── Host layout: the host IS the button box ──────────────────────────────────
+//
+// `tc-button` renders a real `<button>`/`<a>` and stretches it OVER the host as a
+// hit overlay (`.tc-hit-overlay`, foundation/_utilities.scss) rather than wrapping
+// the consumer's children in it — the same shape tc-link, tc-nav-item and
+// tc-list-group-item use. The host carries the `.btn` chrome, so the label lays out
+// in the host's own flow and stays exactly where the consumer put it (rule 1 — an
+// element never re-parents what it did not create).
+//
+// WHY NOT TWO ITEMS SHARING ONE GRID CELL, which is the obvious way to keep the
+// chrome on the control: `<tc-button>Save</tc-button>` — most of them — gives the
+// host a BARE TEXT child, and a text run inside a grid container becomes an
+// ANONYMOUS grid item. No selector can reach it, so it cannot be given the
+// control's `grid-area`, and auto-placement drops it into the next free cell: the
+// label renders in a row of its own, outside the button. An overlay has no such
+// hole — content in normal flow needs no placement at all.
+.tc-button-host {
+    position: relative;
+}
+
+// `.tc-hit-overlay` does the stretching and strips padding, border and background;
+// these are the parts a <button> element needs on top of it.
+.tc-button-host > .tc-button-hit {
+    font: inherit;
+    cursor: inherit;
+    appearance: none;
+}
+
+// The host is not focusable, so `.btn:focus-visible` can never fire on it. The ring
+// follows the overlay's focus instead, and the overlay's own outline is dropped so
+// there is one ring rather than two.
+.tc-button-host:has(> .tc-button-hit:focus-visible) {
+    box-shadow: 0 0 0 var(--bs-focus-ring-width) rgba(var(--bs-btn-focus-shadow-rgb), 0.25);
+}
+
+.tc-button-host > .tc-button-hit:focus-visible {
+    outline: none;
+}
+
+// The metal skin's inner-button rule carries `width: 100%` for the wrapper shape it
+// used to have; on the host that would stretch every metal button to its container.
+.tc-button-host.tc-metal-button__btn {
+    width: auto;
+}
+
+// The metal skin's focus ring and disabled state, same relocation as above.
+.tc-button-host.tc-metal-button__btn:has(> .tc-button-hit:focus-visible) {
+    box-shadow: 0 0 0 var(--bs-focus-ring-width, 0.25rem) var(--bs-metal-button-focus-ring-color);
+}
+
+.tc-button-host.tc-metal-button__btn.disabled {
+    opacity: var(--bs-metal-button-disabled-opacity);
+    pointer-events: none;
+    transform: none;
 }

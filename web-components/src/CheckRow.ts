@@ -1,4 +1,5 @@
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 
 // tc-check-row — the tick-off list row: a drawn checkbox, a name, an optional hint
 // and an optional right-aligned trailing figure, where THE WHOLE ROW is the target.
@@ -255,7 +256,7 @@ export class CheckRow extends HTMLElement {
         return this.getAttribute('value') ?? 'on'
     }
     set value(v: string) {
-        this.setAttribute('value', v)
+        setAttr(this, 'value', v)
     }
 
     /** Flip the row and notify, as a tap would. */

@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { isImageSrc } from './internal/image'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-equipment-doll'
@@ -227,7 +228,7 @@ export class EquipmentDoll extends HTMLElement {
         this.setAttribute('role', 'group')
         if (!this.hasAttribute('aria-label')) this.setAttribute('aria-label', 'Equipment')
 
-        this.innerHTML = `<div class="tc-equipment-doll__canvas">${figureMarkup}${slotsHTML}</div>`
+        patchHtml(this, `<div class="tc-equipment-doll__canvas">${figureMarkup}${slotsHTML}</div>`)
     }
 }
 

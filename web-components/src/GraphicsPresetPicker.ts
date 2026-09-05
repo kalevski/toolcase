@@ -1,4 +1,5 @@
 import { SettingRowBase } from './SettingRowBase'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-graphics-preset-picker'
 
@@ -59,7 +60,7 @@ export class GraphicsPresetPicker extends SettingRowBase {
         return this.getAttribute('value') ?? 'medium'
     }
     set value(v: string) {
-        this.setAttribute('value', v)
+        setAttr(this, 'value', v)
     }
 
     get disabled(): boolean {

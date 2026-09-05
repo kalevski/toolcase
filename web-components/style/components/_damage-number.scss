@@ -40,6 +40,10 @@ tc-damage-number {
     letter-spacing: var(--bs-damage-number-letter-spacing);
     color: var(--bs-damage-number-color);
     border-radius: 0;
+    // Flex items take z-index without a `position` declaration (it applies as if
+    // `relative`), so this actually stacks the number above sibling HUD overlays
+    // sharing the tooltip layer instead of sitting dead on the host's custom prop.
+    z-index: var(--bs-damage-number-z-index);
     animation: tc-damage-number-rise var(--bs-damage-number-duration) ease-out forwards;
     will-change: transform, opacity;
 }

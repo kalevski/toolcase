@@ -4,7 +4,15 @@
 
 tc-theme[name='blueprint'],
 [data-tc-theme='blueprint'] {
-    tc-cool-nav {
+    // :not(.tc-cool-nav--dark) is required, not cosmetic: this selector's extra
+    // type selector (tc-theme[name=...] tc-cool-nav) out-specifies the base
+    // component's `tc-cool-nav.tc-cool-nav--dark` rule ((0,1,2) beats (0,1,1)),
+    // so without the guard these light-paper values would win over the dark
+    // variant's tokens regardless of source order and render the "dark" navbar
+    // as a light bar. Excluding --dark here lets the base dark-mode block (which
+    // already resolves correctly via this theme's --tc-ink/--tc-text-inverse/
+    // --tc-accent remaps) apply untouched.
+    tc-cool-nav:not(.tc-cool-nav--dark) {
         // Surface — translucent lavender-paper (matches bp-bg tinted slightly white)
         --bs-cool-nav-bg: rgba(244, 243, 251, 0.88); // --bp-paper-tint at ~88% opacity
         --bs-cool-nav-color: var(--bp-text);
@@ -25,19 +33,6 @@ tc-theme[name='blueprint'],
         --bs-cool-nav-collapse-bg: var(--bp-paper); // solid white when expanded mobile
 
         // Scrolled state — use the pre-baked violet-tinted shadow token
-        --bs-cool-nav-scrolled-shadow: var(--tc-shadow-sm);
-    }
-
-    // Dark variant of cool-nav repointed for blueprint light palette
-    tc-cool-nav.tc-cool-nav--dark {
-        --bs-cool-nav-bg: var(--bp-paper);
-        --bs-cool-nav-color: var(--bp-text);
-        --bs-cool-nav-border: var(--bp-border);
-        --bs-cool-nav-brand-color: var(--bp-emphasis);
-        --bs-cool-nav-link-color: var(--bp-text-muted);
-        --bs-cool-nav-link-hover-color: var(--bp-teal-fg);
-        --bs-cool-nav-link-active-color: var(--bp-text);
-        --bs-cool-nav-collapse-bg: var(--bp-bg-2);
         --bs-cool-nav-scrolled-shadow: var(--tc-shadow-sm);
     }
 
@@ -76,8 +71,11 @@ tc-theme[name='blueprint'],
     }
 
     // ── Toggler — teal-tinted hover state ─────────────────────────────────────
+    // Scoped to :not(--dark) so the dark variant keeps the base component's
+    // dark-mode toggler color/border (light-on-dark) instead of bp-text/bp-border
+    // (dark-on-light literals), which would otherwise render the icon invisible.
 
-    .tc-cool-nav-toggler {
+    tc-cool-nav:not(.tc-cool-nav--dark) .tc-cool-nav-toggler {
         border-color: var(--bp-border);
         color: var(--bp-text);
 
@@ -118,8 +116,10 @@ tc-theme[name='blueprint'],
 
     // ── Collapse panel (mobile) — solid paper with top hairline ──────────────
     // Already driven via --bs-cool-nav-collapse-bg; add subtle left-edge accent.
+    // :not(--dark) so the dark variant keeps its own subtle light-on-dark hairline
+    // (--bs-cool-nav-border) instead of this light-theme literal.
 
-    .tc-cool-nav-collapse {
+    tc-cool-nav:not(.tc-cool-nav--dark) .tc-cool-nav-collapse {
         border-top-color: var(--bp-border);
     }
 }

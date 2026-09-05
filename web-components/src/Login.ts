@@ -1,6 +1,6 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
-import { icon } from './icons'
 
 const TAG_NAME = 'tc-login'
 
@@ -121,23 +121,25 @@ export class Login extends HTMLElement {
 
         if (loading) {
             this.setAttribute('aria-busy', 'true')
-            this.innerHTML =
+            patchHtml(
+                this,
                 `<div class="tc-login">` +
-                asideHtml +
-                `<div class="tc-login-form">` +
-                `<div class="tc-login-form-inner">` +
-                `<div class="tc-login-logo"></div>` +
-                `<span class="visually-hidden">Loading…</span>` +
-                `<div aria-hidden="true">` +
-                `<div class="tc-login-skel tc-login-skel--title"></div>` +
-                `<div class="tc-login-skel tc-login-skel--desc"></div>` +
-                `<div class="tc-login-skel tc-login-skel--btn"></div>` +
-                `<div class="tc-login-skel tc-login-skel--btn"></div>` +
-                `<div class="tc-login-skel tc-login-skel--btn"></div>` +
-                `</div>` +
-                `</div>` +
-                `</div>` +
-                `</div>`
+                    asideHtml +
+                    `<div class="tc-login-form">` +
+                    `<div class="tc-login-form-inner">` +
+                    `<div class="tc-login-logo"></div>` +
+                    `<span class="visually-hidden">Loading…</span>` +
+                    `<div aria-hidden="true">` +
+                    `<div class="tc-login-skel tc-login-skel--title"></div>` +
+                    `<div class="tc-login-skel tc-login-skel--desc"></div>` +
+                    `<div class="tc-login-skel tc-login-skel--btn"></div>` +
+                    `<div class="tc-login-skel tc-login-skel--btn"></div>` +
+                    `<div class="tc-login-skel tc-login-skel--btn"></div>` +
+                    `</div>` +
+                    `</div>` +
+                    `</div>` +
+                    `</div>`,
+            )
             return
         }
 
@@ -154,9 +156,9 @@ export class Login extends HTMLElement {
             .map((opt, idx) => {
                 const v = opt.variant
                 const variant: ConnectVariant = v && CONNECT_VARIANTS.includes(v) ? v : 'primary'
-                const svg = opt.icon ? lucideByName(opt.icon) : ''
+                const svg = opt.icon ? lucideByName(opt.icon, 'tc-login-connect-btn-svg') : ''
                 const iconHtml = svg
-                    ? `<span class="tc-login-connect-btn-icon" aria-hidden="true">${icon(svg, 'tc-login-connect-btn-svg')}</span>`
+                    ? `<span class="tc-login-connect-btn-icon" aria-hidden="true">${svg}</span>`
                     : ''
                 return (
                     `<button class="tc-login-connect-btn btn btn-outline-${variant}" type="button" data-idx="${idx}">` +
@@ -171,22 +173,24 @@ export class Login extends HTMLElement {
             ? `<div class="tc-login-connect" role="group" aria-label="Sign in options">${buttons}</div>`
             : ''
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-login">` +
-            asideHtml +
-            `<div class="tc-login-form">` +
-            `<div class="tc-login-form-inner">` +
-            `<div class="tc-login-logo"></div>` +
-            `<h2 class="tc-login-title">${esc(titleText)}</h2>` +
-            descHtml +
-            connectHtml +
-            `</div>` +
-            `</div>` +
-            `</div>`
+                asideHtml +
+                `<div class="tc-login-form">` +
+                `<div class="tc-login-form-inner">` +
+                `<div class="tc-login-logo"></div>` +
+                `<h2 class="tc-login-title">${esc(titleText)}</h2>` +
+                descHtml +
+                connectHtml +
+                `</div>` +
+                `</div>` +
+                `</div>`,
+        )
 
         const connectEl = this.querySelector('.tc-login-connect')
         if (connectEl) {
-            connectEl.addEventListener('click', (e: Event) => {
+            bindOnce(connectEl, 'click', (e: Event) => {
                 const btn = (e.target as Element).closest<HTMLButtonElement>(
                     '.tc-login-connect-btn',
                 )

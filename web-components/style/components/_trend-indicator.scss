@@ -67,7 +67,10 @@ tc-leaderboard-trend {
     fill: none;
 }
 
-.tc-trend-indicator-value {
+// The owned value span, and — when the consumer supplies rich markup instead of
+// the `value` attribute — their own children, now direct children of the host.
+.tc-trend-indicator-value,
+.tc-trend-indicator > :not(svg) {
     line-height: 1;
 }
 

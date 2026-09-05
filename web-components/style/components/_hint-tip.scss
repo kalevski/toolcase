@@ -1,0 +1,75 @@
+// tc-hint-tip — a sentence a heading can carry without spending a line on it.
+//
+// The whole element is a 13px info glyph with a 44px touch target hung off it by
+// a pseudo-element. The ink stays small because it sits beside a heading and a
+// hint that competes with the heading is a hint nobody asked for; the target
+// stays 44px because it is still a control.
+
+@use '../foundation/tokens' as *;
+
+tc-hint-tip {
+    --bs-hint-tip-size: 0.8125rem; // 13px glyph
+    --bs-hint-tip-color: var(--tc-text-muted);
+    --bs-hint-tip-hover-bg: var(--tc-surface-muted);
+    --bs-hint-tip-padding: 0.125rem;
+}
+
+.tc-hint-tip {
+    display: inline-flex;
+    vertical-align: middle;
+    line-height: 0;
+}
+
+.tc-hint-tip__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--bs-hint-tip-padding);
+    border: 0;
+    background: none;
+    border-radius: 0;
+    color: var(--bs-hint-tip-color);
+    cursor: pointer;
+    line-height: 1;
+    transition: background-color 0.15s ease;
+
+    svg {
+        width: var(--bs-hint-tip-size);
+        height: var(--bs-hint-tip-size);
+        flex-shrink: 0;
+        display: block;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent, var(--tc-primary));
+        outline-offset: 2px;
+    }
+
+    @include fine-pointer {
+        &:hover {
+            background-color: var(--bs-hint-tip-hover-bg);
+        }
+    }
+
+    // The target is extended past the ink rather than the ink being grown: the
+    // 13px glyph is a density decision, 44px is a floor.
+    @include coarse-pointer {
+        position: relative;
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: var(--tc-min-touch-target, 44px);
+            height: var(--tc-min-touch-target, 44px);
+            transform: translate(-50%, -50%);
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-hint-tip__button {
+        transition: none;
+    }
+}

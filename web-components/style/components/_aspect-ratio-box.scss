@@ -19,7 +19,8 @@
     overflow: hidden;
 }
 
-.tc-aspect-ratio-box__content {
+// No content wrapper — the consumer's children fill the host directly.
+.tc-aspect-ratio-box > * {
     display: block;
     width: 100%;
     height: 100%;
@@ -32,7 +33,7 @@
         padding-bottom: var(--bs-aspect-ratio-box-fallback);
     }
 
-    .tc-aspect-ratio-box__content {
+    .tc-aspect-ratio-box > * {
         position: absolute;
         inset: 0;
     }

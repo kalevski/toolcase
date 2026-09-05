@@ -28,15 +28,6 @@ tc-page-indicator {
     cursor: pointer;
     transition: background-color var(--tc-transition-fast), border-color var(--tc-transition-fast);
 
-    // Expand the hit area to 44 px without growing the visual dot.
-    &::after {
-        content: '';
-        position: absolute;
-        inset: -18px;
-        min-width: 44px;
-        min-height: 44px;
-    }
-
     &:hover {
         background: color-mix(in srgb, var(--bs-page-indicator-color) 20%, transparent);
     }
@@ -60,5 +51,21 @@ tc-page-indicator {
 @media (prefers-reduced-motion: reduce) {
     .tc-page-indicator-dot {
         transition: none;
+    }
+}
+
+// ── Coarse-pointer hit target (44px per dot, interactive only) ──────────────────
+// Gated to coarse pointers only (matches Rating/Carousel): on a fine pointer an
+// unconditional 44px hit area would span past a neighbouring dot whenever the
+// gap is smaller than ~36px, so hovering between two dots would resolve to
+// whichever one sits later in paint order instead of the one under the cursor.
+
+@media (pointer: coarse) {
+    .tc-page-indicator-dot::after {
+        content: '';
+        position: absolute;
+        inset: -18px;
+        min-width: 44px;
+        min-height: 44px;
     }
 }

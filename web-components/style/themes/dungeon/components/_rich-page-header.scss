@@ -1,9 +1,10 @@
 // Dungeon › tc-rich-page-header — realm/section banner header.
 // Token swap remaps the bg to wood panel fill and default icon tile to gold-
 // framed sigil slot. Structural overrides add display caps on the title, a
-// gilded bevel on the icon tile, and remap all eight pastel icon variants
-// to fantasy element/metal colours (the base hardcodes pastel hex that
-// clashes on dark wood and bypasses the semantic remap entirely).
+// gilded bevel on the icon tile, and remap all eight icon variants to
+// fantasy element/metal colours (the base only derives its bg/fg/border
+// triad via color-mix() off --tc-surface/-text/-border — a fine neutral
+// fallback, but still the wrong hue family for this theme's palette).
 
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {

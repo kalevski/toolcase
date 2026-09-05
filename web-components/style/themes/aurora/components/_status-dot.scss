@@ -5,6 +5,6 @@
 tc-theme[name='aurora'],
 [data-tc-theme='aurora'] {
     .tc-status-dot-marker {
-        box-shadow: 0 0 6px currentcolor;
+        box-shadow: 0 0 6px var(--bs-status-dot-color);
     }
 }

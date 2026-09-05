@@ -1,3 +1,5 @@
+import { patchHtml } from './internal/patch-html'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-crosshair'
 
 export type CrosshairVariant = 'cross' | 'dot' | 'circle' | 'tShape' | 'classic' | 'rune'
@@ -34,7 +36,7 @@ export class Crosshair extends HTMLElement {
         return VARIANTS.includes(raw) ? raw : 'cross'
     }
     set variant(v: CrosshairVariant) {
-        this.setAttribute('variant', v)
+        setAttr(this, 'variant', v)
     }
 
     get size(): number {
@@ -71,7 +73,7 @@ export class Crosshair extends HTMLElement {
         return this.getAttribute('color') ?? 'var(--tc-app-accent)'
     }
     set color(v: string) {
-        this.setAttribute('color', v)
+        setAttr(this, 'color', v)
     }
 
     get spread(): number {
@@ -139,7 +141,7 @@ export class Crosshair extends HTMLElement {
                 break
         }
 
-        this.innerHTML = inner
+        patchHtml(this, inner)
     }
 }
 

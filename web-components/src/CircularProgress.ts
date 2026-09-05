@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 const TAG_NAME = 'tc-circular-progress'
 
 export class CircularProgress extends HTMLElement {
@@ -129,7 +130,9 @@ export class CircularProgress extends HTMLElement {
             ? `<span class="tc-circular-progress__text" aria-hidden="true">${percent}%</span>`
             : ''
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <span class="tc-circular-progress${reverseClass}">
                 <svg class="tc-circular-progress__svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" aria-hidden="true" focusable="false">
                     <circle class="tc-circular-progress__track" cx="${cx}" cy="${cy}" r="${r}" stroke-width="${thickness}" fill="none"></circle>
@@ -137,7 +140,8 @@ export class CircularProgress extends HTMLElement {
                 </svg>
                 ${textHtml}
             </span>
-        `
+        `,
+        )
     }
 }
 

@@ -178,6 +178,16 @@ tc-loot-popup {
     margin-bottom: 0;
 }
 
+// The popup already renders the title (in its own header) and a Take All
+// action (in its own footer, alongside Discard), so the nested <tc-loot-list>'s
+// own header bar — a second "Loot" title plus a duplicate Take All button —
+// would just be a redundant echo directly above the rows. Hide it here, scoped
+// to the popup composition only; tc-loot-list still renders its header when
+// used standalone elsewhere.
+.tc-loot-popup__list .tc-loot-list-header {
+    display: none;
+}
+
 // ── Actions ───────────────────────────────────────────────────────────────────
 
 .tc-loot-popup__actions {

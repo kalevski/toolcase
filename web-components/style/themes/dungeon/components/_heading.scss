@@ -23,8 +23,11 @@ tc-theme[name='dungeon'],
     }
 
     // Scale tracking back slightly for the largest level so big titles aren't
-    // over-spaced when rendered at 2.25rem.
-    h1.tc-heading {
+    // over-spaced when rendered at 2.25rem. The host is the heading (rule 1) —
+    // there is no real <h1> element, only the `tc-heading--h1` modifier class —
+    // so this must match the class, not a `h1.tc-heading` tag selector (which
+    // never matches anything the component renders and silently no-ops).
+    .tc-heading--h1 {
         letter-spacing: 0.03em;
     }
 }

@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-player-card'
 
@@ -176,7 +177,9 @@ export class PlayerCard extends HTMLElement {
                   .join('')}</div>`
             : ''
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <div class="tc-player-card">
                 <div class="tc-player-card-header">
                     <div class="tc-player-card-identity">
@@ -192,12 +195,13 @@ export class PlayerCard extends HTMLElement {
                 ${statsHtml}
                 ${actionsHtml}
             </div>
-        `
+        `,
+        )
 
         // Delegate clicks on the fresh actions container — old container + its
         // listener are garbage-collected together so no leak occurs.
         const actionsEl = this.querySelector<HTMLElement>('.tc-player-card-actions')
-        actionsEl?.addEventListener('click', (e: MouseEvent) => {
+        bindOnce(actionsEl, 'click', (e: MouseEvent) => {
             const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-id]')
             if (!btn || btn.disabled) return
             const id = btn.dataset.id ?? ''

@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 const TAG_NAME = 'tc-dashboard-sidebar'
 
 export class DashboardSidebar extends HTMLElement {
@@ -29,7 +30,10 @@ export class DashboardSidebar extends HTMLElement {
     }
 
     private render(): void {
-        this.innerHTML = `<aside class="tc-dashboard-sidebar" role="complementary"><div class="tc-dashboard-sidebar-brand"></div><nav class="tc-dashboard-sidebar-menu"></nav><div class="tc-dashboard-sidebar-panel"></div></aside>`
+        patchHtml(
+            this,
+            `<aside class="tc-dashboard-sidebar" role="complementary"><div class="tc-dashboard-sidebar-brand"></div><nav class="tc-dashboard-sidebar-menu"></nav><div class="tc-dashboard-sidebar-panel"></div></aside>`,
+        )
     }
 }
 

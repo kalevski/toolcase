@@ -29,10 +29,11 @@ tc-theme[name='blueprint'],
         // Hover: step to the light paper-tint rather than a full surface-muted jump.
         --bs-node-editor-node-hover-bg: var(--bp-paper-tint);
 
-        // Node header — blueprint frame gradient cap (deep violet-navy → mid canvas).
-        // This gives the node a "printed circuit board component" cap feeling.
+        // Node header — blueprint frame gradient cap (faint paper-tint sweep, same
+        // family as the art-frame surface). Dark ink text — the cap is light, not
+        // a dark navy fill, so it needs the same ink as every other card header.
         --bs-node-editor-header-bg: var(--bp-frame-grad);
-        --bs-node-editor-header-text: #fff; // white ink on the dark gradient cap
+        --bs-node-editor-header-text: var(--bp-text);
         --bs-node-editor-header-border: var(--bp-border-strong);
 
         // Selected = pink primary (pink = primary/CTA in the blueprint accent rotation).

@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 import { escapeHtml } from './internal/resourceBar'
@@ -92,7 +93,10 @@ export class IconBadge extends HTMLElement {
         const iconSvg = glyph ? resolveIcon(glyph) : ''
         const glyphMarkup = iconSvg || (glyph ? escapeHtml(glyph) : '')
 
-        this.innerHTML = `<span class="tc-icon-badge__glyph" aria-hidden="true">${glyphMarkup}</span>`
+        patchHtml(
+            this,
+            `<span class="tc-icon-badge__glyph" aria-hidden="true">${glyphMarkup}</span>`,
+        )
     }
 }
 

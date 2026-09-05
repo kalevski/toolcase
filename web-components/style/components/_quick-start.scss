@@ -77,7 +77,7 @@ tc-quick-start {
 .tc-quick-start-step {
     display: flex;
     align-items: flex-start;
-    gap: 0;
+    gap: var(--bs-quick-start-gap);
     position: relative;
     padding-bottom: var(--bs-quick-start-step-padding-bottom);
 
@@ -235,6 +235,12 @@ tc-quick-start {
 
     &:focus:not(:focus-visible) {
         outline: none;
+    }
+
+    // 44px coarse target — bump the floor without disturbing the desktop size.
+    @media (pointer: coarse) {
+        min-width: 44px;
+        min-height: 44px;
     }
 }
 

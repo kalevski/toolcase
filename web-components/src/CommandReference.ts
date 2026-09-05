@@ -1,5 +1,8 @@
+import { patchHtml } from './internal/patch-html'
+import { setHostClass } from './internal/host-class'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-command-reference'
 
@@ -24,7 +27,6 @@ export class CommandReference extends HTMLElement {
     private _initialised = false
     private _commands: CommandItem[] = []
     private _query = ''
-    private _titleNodes: Node[] = []
     private _idPrefix: string
 
     constructor() {
@@ -38,15 +40,8 @@ export class CommandReference extends HTMLElement {
 
     connectedCallback(): void {
         if (!this._initialised) {
-            if (!this.hasAttribute('title')) {
-                this._titleNodes = Array.from(this.childNodes)
-            }
-            this.render()
-            if (!this.hasAttribute('title')) {
-                const titleEl = this.querySelector('.tc-command-reference-title')
-                if (titleEl) this._titleNodes.forEach((n) => titleEl.appendChild(n))
-            }
             this._initialised = true
+            this.render()
         }
         // Listeners are (re)attached on every connect — disconnectedCallback removes
         // them, and a move/remount (React reconciliation) disconnects then reconnects
@@ -84,7 +79,7 @@ export class CommandReference extends HTMLElement {
         return this.getAttribute('search-placeholder') ?? 'Search commands…'
     }
     set searchPlaceholder(v: string) {
-        this.setAttribute('search-placeholder', v)
+        setAttr(this, 'search-placeholder', v)
     }
 
     get title(): string {
@@ -116,15 +111,7 @@ export class CommandReference extends HTMLElement {
     }
 
     private _rerenderWithSlots(): void {
-        if (!this.hasAttribute('title')) {
-            const titleEl = this.querySelector('.tc-command-reference-title')
-            if (titleEl) this._titleNodes = Array.from(titleEl.childNodes)
-        }
         this.render()
-        if (!this.hasAttribute('title')) {
-            const newTitleEl = this.querySelector('.tc-command-reference-title')
-            if (newTitleEl) this._titleNodes.forEach((n) => newTitleEl.appendChild(n))
-        }
     }
 
     private _filterCommands(): CommandItem[] {
@@ -199,8 +186,12 @@ export class CommandReference extends HTMLElement {
 
     private render(): void {
         const titleAttr = this.getAttribute('title')
-        const titleInner = titleAttr != null ? esc(titleAttr) : ''
-        const titleHtml = `<div class="tc-command-reference-title">${titleInner}</div>`
+        // Only an attribute title is element-owned; a slotted one stays the
+        // consumer's child at the top of the host and is dressed by CSS (rule 1).
+        const titleHtml =
+            titleAttr != null
+                ? `<div class="tc-command-reference-title">${esc(titleAttr)}</div>`
+                : ''
 
         let searchHtml = ''
         if (this.searchable) {
@@ -237,8 +228,8 @@ export class CommandReference extends HTMLElement {
             bodyHtml +
             `</div>`
 
-        this.innerHTML =
-            `<div class="tc-command-reference">` + titleHtml + searchHtml + listHtml + `</div>`
+        setHostClass(this, 'tc-command-reference')
+        patchHtml(this, titleHtml + searchHtml + listHtml, { at: 'end' })
     }
 }
 

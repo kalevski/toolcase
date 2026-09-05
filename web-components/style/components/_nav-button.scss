@@ -83,8 +83,17 @@ tc-nav-button {
 // ── Touch target — 44 px minimum per WCAG 2.5.5 ──────────────────────────────
 
 @media (pointer: coarse) {
-    tc-nav-button {
-        --bs-nav-button-size: 44px;
+    // Floor the RENDERED box, not the --bs-nav-button-size var: NavButton.ts sets
+    // that var as an inline style whenever the `size` attribute is present
+    // (`this.style.setProperty(...)`), and an inline style beats any stylesheet
+    // rule targeting the same custom property on the same element regardless of
+    // this media query — so a `size="24"` on a touch device would otherwise
+    // render at 24px with no floor ever applying. min-width/min-height on the
+    // element that actually reads the var can't be out-specificity'd this way;
+    // max() also means a caller-requested size bigger than 44px still wins.
+    .tc-nav-button__btn {
+        min-width: max(var(--tc-min-touch-target, 44px), var(--bs-nav-button-size));
+        min-height: max(var(--tc-min-touch-target, 44px), var(--bs-nav-button-size));
     }
 }
 

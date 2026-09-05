@@ -1,5 +1,7 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-timeline'
 
@@ -59,7 +61,7 @@ export class Timeline extends HTMLElement {
         return VARIANTS.includes(v) ? v : 'default'
     }
     set variant(v: TimelineVariant) {
-        this.setAttribute('variant', v)
+        setAttr(this, 'variant', v)
     }
 
     get connector(): TimelineConnector {
@@ -67,7 +69,7 @@ export class Timeline extends HTMLElement {
         return CONNECTORS.includes(v) ? v : 'gradient'
     }
     set connector(v: TimelineConnector) {
-        this.setAttribute('connector', v)
+        setAttr(this, 'connector', v)
     }
 
     get overlap(): number {
@@ -96,7 +98,7 @@ export class Timeline extends HTMLElement {
         if (item.icon) {
             return (
                 `<div class="tc-timeline-node tc-timeline-node--icon" aria-hidden="true">` +
-                lucideByName(item.icon) +
+                lucideByName(item.icon, 'tc-timeline-icon-svg') +
                 `</div>`
             )
         }
@@ -211,8 +213,10 @@ export class Timeline extends HTMLElement {
             itemsHtml = `<ol class="tc-timeline-items">${items}</ol>`
         }
 
-        this.innerHTML =
-            `<div class="tc-timeline tc-timeline--${variant}">` + lineHtml + itemsHtml + `</div>`
+        patchHtml(
+            this,
+            `<div class="tc-timeline tc-timeline--${variant}">` + lineHtml + itemsHtml + `</div>`,
+        )
     }
 }
 

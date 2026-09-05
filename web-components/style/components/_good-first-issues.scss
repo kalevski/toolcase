@@ -5,7 +5,7 @@
 tc-good-first-issues {
     --bs-good-first-issues-border: var(--tc-border);
     --bs-good-first-issues-bg: var(--tc-surface);
-    --bs-good-first-issues-separator: var(--tc-slate-100, #f1f5f9);
+    --bs-good-first-issues-separator: var(--tc-border-faint);
     --bs-good-first-issues-row-bg: var(--tc-surface);
     --bs-good-first-issues-row-hover-bg: var(--tc-surface-hover);
     --bs-good-first-issues-header-color: var(--tc-text);
@@ -175,6 +175,20 @@ tc-good-first-issues {
 
 .tc-good-first-issues-empty-text {
     font-size: 0.875rem;
+}
+
+// ── Touch targets ───────────────────────────────────────────────────────────
+// The title link is the component's only interactive element (and its primary
+// action — opening the issue) but is naturally only as tall as one line of
+// text; widen its tappable box on coarse pointers without disturbing the
+// row's baseline-aligned layout.
+
+@media (pointer: coarse) {
+    .tc-good-first-issues-item-link {
+        display: inline-flex;
+        align-items: center;
+        min-height: 2.75rem;
+    }
 }
 
 // ── Reduced motion ──────────────────────────────────────────────────────────

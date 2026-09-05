@@ -1,5 +1,7 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-github-stars-card'
 
@@ -40,14 +42,14 @@ export class GithubStarsCard extends HTMLElement {
         return this.getAttribute('owner') ?? ''
     }
     set owner(v: string) {
-        this.setAttribute('owner', v)
+        setAttr(this, 'owner', v)
     }
 
     get repo(): string {
         return this.getAttribute('repo') ?? ''
     }
     set repo(v: string) {
-        this.setAttribute('repo', v)
+        setAttr(this, 'repo', v)
     }
 
     get fetchLive(): boolean {
@@ -62,7 +64,7 @@ export class GithubStarsCard extends HTMLElement {
         return this.getAttribute('cta-label') ?? 'View on GitHub'
     }
     set ctaLabel(v: string) {
-        this.setAttribute('cta-label', v)
+        setAttr(this, 'cta-label', v)
     }
 
     get stats(): GithubStatsData {
@@ -201,21 +203,24 @@ export class GithubStarsCard extends HTMLElement {
             this.setAttribute('role', 'status')
             this.setAttribute('aria-busy', 'true')
             const slugLabel = owner && repo ? `${esc(owner)}/${esc(repo)}` : ''
-            this.innerHTML = [
-                '<div class="tc-github-stars-card" aria-hidden="true">',
-                '<div class="tc-github-stars-card-head">',
-                githubIconHtml,
-                slugLabel
-                    ? `<span class="tc-github-stars-card-slug">${slugLabel}</span>`
-                    : '<span class="tc-github-stars-card-slug tc-github-stars-card-skeleton tc-github-stars-card-skeleton--slug"></span>',
-                '</div>',
-                '<div class="tc-github-stars-card-stats">',
-                '<div class="tc-github-stars-card-stat tc-github-stars-card-skeleton tc-github-stars-card-skeleton--stat"></div>',
-                '<div class="tc-github-stars-card-stat tc-github-stars-card-skeleton tc-github-stars-card-skeleton--stat"></div>',
-                '</div>',
-                '</div>',
-                '<span class="visually-hidden">Loading GitHub stats…</span>',
-            ].join('')
+            patchHtml(
+                this,
+                [
+                    '<div class="tc-github-stars-card" aria-hidden="true">',
+                    '<div class="tc-github-stars-card-head">',
+                    githubIconHtml,
+                    slugLabel
+                        ? `<span class="tc-github-stars-card-slug">${slugLabel}</span>`
+                        : '<span class="tc-github-stars-card-slug tc-github-stars-card-skeleton tc-github-stars-card-skeleton--slug"></span>',
+                    '</div>',
+                    '<div class="tc-github-stars-card-stats">',
+                    '<div class="tc-github-stars-card-stat tc-github-stars-card-skeleton tc-github-stars-card-skeleton--stat"></div>',
+                    '<div class="tc-github-stars-card-stat tc-github-stars-card-skeleton tc-github-stars-card-skeleton--stat"></div>',
+                    '</div>',
+                    '</div>',
+                    '<span class="visually-hidden">Loading GitHub stats…</span>',
+                ].join(''),
+            )
             return
         }
 
@@ -290,25 +295,28 @@ export class GithubStarsCard extends HTMLElement {
             '</a>',
         ].join('')
 
-        this.innerHTML = [
-            '<div class="tc-github-stars-card">',
-            '<div class="tc-github-stars-card-head">',
-            githubIconHtml,
-            slugHtml,
-            '</div>',
-            statCells.length
-                ? `<div class="tc-github-stars-card-stats">${statCells.join('')}</div>`
-                : '',
-            errorHtml,
-            '<div class="tc-github-stars-card-footer">',
-            ctaHtml,
-            '</div>',
-            '</div>',
-        ].join('')
+        patchHtml(
+            this,
+            [
+                '<div class="tc-github-stars-card">',
+                '<div class="tc-github-stars-card-head">',
+                githubIconHtml,
+                slugHtml,
+                '</div>',
+                statCells.length
+                    ? `<div class="tc-github-stars-card-stats">${statCells.join('')}</div>`
+                    : '',
+                errorHtml,
+                '<div class="tc-github-stars-card-footer">',
+                ctaHtml,
+                '</div>',
+                '</div>',
+            ].join(''),
+        )
 
         const ctaEl = this.querySelector<HTMLAnchorElement>('.tc-github-stars-card-cta')
         if (ctaEl) {
-            ctaEl.addEventListener('click', () => {
+            bindOnce(ctaEl, 'click', () => {
                 this.dispatchEvent(
                     new CustomEvent('tc-cta-click', {
                         bubbles: true,

@@ -1,4 +1,6 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-entity-cell'
 
 export type EntityCellColor = 'slate' | 'blue' | 'green' | 'red' | 'yellow' | 'purple' | 'orange'
@@ -31,7 +33,7 @@ export class EntityCell extends HTMLElement {
         return this.getAttribute('name') ?? ''
     }
     set name(v: string) {
-        this.setAttribute('name', v)
+        setAttr(this, 'name', v)
     }
 
     get subLabel(): string | null {
@@ -46,7 +48,7 @@ export class EntityCell extends HTMLElement {
         return this.getAttribute('initial') ?? ''
     }
     set initial(v: string) {
-        this.setAttribute('initial', v)
+        setAttr(this, 'initial', v)
     }
 
     get color(): EntityCellColor {
@@ -54,7 +56,7 @@ export class EntityCell extends HTMLElement {
         return COLORS.includes(v) ? v : 'slate'
     }
     set color(v: EntityCellColor) {
-        this.setAttribute('color', v)
+        setAttr(this, 'color', v)
     }
 
     get size(): EntityCellSize {
@@ -62,7 +64,7 @@ export class EntityCell extends HTMLElement {
         return SIZES.includes(v) ? v : 'md'
     }
     set size(v: EntityCellSize) {
-        this.setAttribute('size', v)
+        setAttr(this, 'size', v)
     }
 
     get clickable(): boolean {
@@ -111,12 +113,15 @@ export class EntityCell extends HTMLElement {
                 ? `<span class="tc-entity-cell__sublabel">${esc(subLabelAttr)}</span>`
                 : ''
 
-        this.innerHTML = `<${tag}${typeAttr} class="tc-entity-cell tc-entity-cell--${size}${interactiveClass}"${ariaLabel}><span class="tc-entity-cell__tile tc-entity-cell__tile--${color}" aria-hidden="true">${esc(initial)}</span><div class="tc-entity-cell__body"><span class="tc-entity-cell__name">${esc(name)}</span>${subLabelHtml}</div></${tag}>`
+        patchHtml(
+            this,
+            `<${tag}${typeAttr} class="tc-entity-cell tc-entity-cell--${size}${interactiveClass}"${ariaLabel}><span class="tc-entity-cell__tile tc-entity-cell__tile--${color}" aria-hidden="true">${esc(initial)}</span><div class="tc-entity-cell__body"><span class="tc-entity-cell__name">${esc(name)}</span>${subLabelHtml}</div></${tag}>`,
+        )
 
         if (isClickable) {
             const inner = this.querySelector('.tc-entity-cell')
             if (inner) {
-                inner.addEventListener('click', () => this._handleClick())
+                bindOnce(inner, 'click', () => this._handleClick())
             }
         }
     }

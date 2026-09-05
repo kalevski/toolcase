@@ -1,8 +1,12 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
+import { setHostClass } from './internal/host-class'
+let _formCounter = 0
+
 const TAG_NAME = 'tc-form'
 
 export class Form extends HTMLElement {
     private _initialised = false
-    private _bodyNodes: Node[] = []
+    private _formId = ''
 
     static get observedAttributes(): string[] {
         return ['validated', 'novalidate']
@@ -13,29 +17,18 @@ export class Form extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            this._bodyNodes = Array.from(this.childNodes)
-            this._initialised = true
-        }
+        this._initialised = true
         this._render()
-        this._reattach()
-        this._form()?.addEventListener('submit', this._onSubmit)
+        bindOnce(this, 'submit', this._onSubmit)
     }
 
     disconnectedCallback(): void {
-        this._form()?.removeEventListener('submit', this._onSubmit)
+        this.removeEventListener('submit', this._onSubmit)
     }
 
-    attributeChangedCallback(name: string): void {
+    attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        const form = this._form()
-        if (!form) return
-        if (name === 'validated') {
-            form.classList.toggle('was-validated', this.validated)
-        } else if (name === 'novalidate') {
-            if (this.novalidate) form.setAttribute('novalidate', '')
-            else form.removeAttribute('novalidate')
-        }
+        this._render()
     }
 
     get validated(): boolean {
@@ -60,7 +53,7 @@ export class Form extends HTMLElement {
      *  inline errors render), toggles the `was-validated` chrome, and returns
      *  overall validity. */
     validate(): boolean {
-        const form = this._form()
+        const form = this._adoptFields()
         if (!form) return true
         const valid = form.reportValidity()
         if (!valid) {
@@ -74,7 +67,7 @@ export class Form extends HTMLElement {
      *  touching values — the counterpart of `validate()` for reopening a
      *  dialog or after a successful submit. */
     resetValidity(): void {
-        const form = this._form()
+        const form = this._adoptFields()
         form?.classList.remove('was-validated')
         this.removeAttribute('validated')
         if (!form) return
@@ -85,26 +78,44 @@ export class Form extends HTMLElement {
     }
 
     private _form(): HTMLFormElement | null {
-        return this.querySelector('form')
+        return this.querySelector<HTMLFormElement>(':scope > form.tc-form-owner')
     }
 
+    /**
+     * Give every control under the host this element's `<form>` as its form owner.
+     *
+     * The `<form>` is a sibling of the consumer's fields, not a wrapper around them
+     * (rule 1) — so ownership is established the way HTML already allows it to be:
+     * the `form` content attribute. `form.elements`, `reportValidity()`, `submit`
+     * and reset all then behave exactly as they did when the fields were nested.
+     */
+    private _adoptFields(): HTMLFormElement | null {
+        const form = this._form()
+        if (!form) return null
+        const selector = 'input, select, textarea, button, fieldset, output, [tc-field]'
+        for (const el of Array.from(this.querySelectorAll(selector))) {
+            if (el.closest('form') !== form) el.setAttribute('form', form.id)
+        }
+        return form
+    }
+
+    /** The `<form>` element stays — it is what gives constraint validation, submit
+     *  and reset their behaviour — but it sits BESIDE the consumer's fields and
+     *  owns them through the `form` attribute instead of wrapping them (rule 1). */
     private _render(): void {
-        const classAttr = this.validated ? ' class="was-validated"' : ''
+        setHostClass(this, `tc-form${this.validated ? ' was-validated' : ''}`)
+        if (!this._formId) this._formId = `tc-form-${++_formCounter}`
         const novalidateAttr = this.novalidate ? ' novalidate' : ''
-        this.innerHTML = `<form${classAttr}${novalidateAttr}><div class="tc-form-body"></div></form>`
-    }
-
-    private _reattach(): void {
-        const body = this.querySelector('.tc-form-body')
-        this._bodyNodes.forEach((n) => body?.appendChild(n))
+        patchHtml(this, `<form class="tc-form-owner" id="${this._formId}"${novalidateAttr}></form>`)
+        this._adoptFields()
     }
 
     private _onSubmit = (event: Event): void => {
-        const form = event.currentTarget as HTMLFormElement
-        if (!form.checkValidity()) {
+        const form = (event.target as HTMLElement)?.closest('form')
+        if (form && !form.checkValidity()) {
             event.preventDefault()
             event.stopPropagation()
-            form.classList.add('was-validated')
+            this.classList.add('was-validated')
             if (!this.validated) this.setAttribute('validated', '')
         }
     }

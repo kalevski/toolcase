@@ -1,3 +1,5 @@
+import { patchHtml } from './internal/patch-html'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-screen-flash'
 
 /**
@@ -31,7 +33,7 @@ export class ScreenFlash extends HTMLElement {
 
     connectedCallback(): void {
         if (!this._initialised) {
-            this.innerHTML = '<div class="tc-screen-flash-fill"></div>'
+            patchHtml(this, '<div class="tc-screen-flash-fill"></div>')
             this._initialised = true
         }
         this._applyColor()
@@ -63,7 +65,7 @@ export class ScreenFlash extends HTMLElement {
         return this.getAttribute('flash-color') ?? '#ffffff'
     }
     set flashColor(v: string) {
-        this.setAttribute('flash-color', v)
+        setAttr(this, 'flash-color', v)
     }
 
     get flashOpacity(): number {

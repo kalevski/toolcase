@@ -1,0 +1,20 @@
+// Neon › tc-diff-viewer — navy-void code surface with dark-compatible diff tints.
+// The foundation token remap already covers the outer shell (surface/border/mono
+// font). Defect fixes replace three hardcoded light-theme literals the base
+// partial bakes for its gutter tints + row separator — opaque pastel hexes and a
+// near-invisible black hairline that don't survive onto Neon's dark surfaces.
+
+tc-theme[name='neon'],
+[data-tc-theme='neon'] {
+    tc-diff-viewer {
+        // ── Defect fix: pastel gutter tints → dark-compatible mint/coral tints ──
+        // Base hardcodes #bbf7d0 / #fecaca — light-theme pastels that read as
+        // near-white blocks on Neon's near-black gutter column.
+        --bs-diff-viewer-added-gutter-bg: rgba(61, 245, 141, 0.26);
+        --bs-diff-viewer-removed-gutter-bg: rgba(255, 59, 92, 0.26);
+
+        // ── Defect fix: row separator → the theme's own faint hairline ─────────
+        // Base hardcodes rgba(0,0,0,0.04) — invisible on Neon's dark rows.
+        --bs-diff-viewer-row-separator: 1px solid var(--nd-border-faint);
+    }
+}

@@ -1,6 +1,8 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-ability-card'
 
@@ -104,7 +106,7 @@ export class AbilityCard extends HTMLElement {
         return RARITIES.includes(v) ? v : 'common'
     }
     set rarity(v: AbilityCardRarity) {
-        this.setAttribute('rarity', v)
+        setAttr(this, 'rarity', v)
     }
 
     private render(): void {
@@ -147,18 +149,21 @@ export class AbilityCard extends HTMLElement {
                   .join('')}</div>`
             : ''
 
-        this.innerHTML = [
-            '<div class="tc-ability-card-head">',
-            iconMarkup,
-            '<div class="tc-ability-card-headtext">',
-            `<div class="tc-ability-card-rarity">${esc(rarity)}</div>`,
-            `<div class="tc-ability-card-name">${esc(this.abilityName)}</div>`,
-            '</div>',
-            keybindMarkup,
-            '</div>',
-            descMarkup,
-            metaMarkup,
-        ].join('')
+        patchHtml(
+            this,
+            [
+                '<div class="tc-ability-card-head">',
+                iconMarkup,
+                '<div class="tc-ability-card-headtext">',
+                `<div class="tc-ability-card-rarity">${esc(rarity)}</div>`,
+                `<div class="tc-ability-card-name">${esc(this.abilityName)}</div>`,
+                '</div>',
+                keybindMarkup,
+                '</div>',
+                descMarkup,
+                metaMarkup,
+            ].join(''),
+        )
     }
 }
 

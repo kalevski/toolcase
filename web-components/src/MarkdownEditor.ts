@@ -1,5 +1,7 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-markdown-editor'
 
@@ -185,7 +187,7 @@ export class MarkdownEditor extends HTMLElement {
         return this.getAttribute('placeholder') ?? DEFAULT_PLACEHOLDER
     }
     set placeholder(v: string) {
-        this.setAttribute('placeholder', v)
+        setAttr(this, 'placeholder', v)
     }
 
     get height(): string | null {
@@ -410,19 +412,21 @@ export class MarkdownEditor extends HTMLElement {
 
         const activeTabId = isWrite ? this._writeTabId : this._previewTabId
 
-        this.innerHTML =
+        patchHtml(
+            this,
             labelHtml +
-            `<div class="tc-markdown-editor-shell" style="height:${esc(height)}">` +
-            `<div class="tc-markdown-editor-tabs">` +
-            `<div class="tc-markdown-editor-tablist" role="tablist" aria-label="Editor mode">` +
-            tabBtn(this._writeTabId, 'write', 'Write') +
-            tabBtn(this._previewTabId, 'preview', 'Preview') +
-            `</div>` +
-            toolbarHtml +
-            `</div>` +
-            `<div id="${this._bodyId}" class="tc-markdown-editor-body" role="tabpanel"` +
-            ` aria-labelledby="${activeTabId}">${bodyHtml}</div>` +
-            `</div>`
+                `<div class="tc-markdown-editor-shell" style="height:${esc(height)}">` +
+                `<div class="tc-markdown-editor-tabs">` +
+                `<div class="tc-markdown-editor-tablist" role="tablist" aria-label="Editor mode">` +
+                tabBtn(this._writeTabId, 'write', 'Write') +
+                tabBtn(this._previewTabId, 'preview', 'Preview') +
+                `</div>` +
+                toolbarHtml +
+                `</div>` +
+                `<div id="${this._bodyId}" class="tc-markdown-editor-body" role="tabpanel"` +
+                ` aria-labelledby="${activeTabId}">${bodyHtml}</div>` +
+                `</div>`,
+        )
     }
 }
 

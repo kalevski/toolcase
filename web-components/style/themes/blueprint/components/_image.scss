@@ -22,7 +22,12 @@ tc-theme[name='blueprint'],
 
     // Fallback panel: paint the surface explicitly so it stays on the
     // blueprint lavender ground even if --bs-image-bg is overridden locally.
-    .tc-image-fallback {
+    // Targets the nodes the base partial actually renders/selects — the default
+    // broken-image icon wrapper and any consumer-slotted fallback content are
+    // direct host children, not descendants carrying a `.tc-image-fallback`
+    // class, so styling that class alone never matched real markup.
+    .tc-image-fallback-default,
+    .tc-image > :not(.tc-image-skeleton):not(.tc-image-img) {
         background-color: var(--bp-bg-2);
         color: var(--bp-text-faint);
 

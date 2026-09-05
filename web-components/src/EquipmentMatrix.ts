@@ -1,8 +1,10 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { lucideByName } from './internal/lucide'
 import { icon } from './icons'
 import { ChevronDown } from 'lucide-static'
 import { EQUIPMENT_FLAG_ICONS, EQUIPMENT_FLAG_SUFFIX, type EquipmentFlag } from './EquipmentTag'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-equipment-matrix'
 
@@ -69,7 +71,7 @@ export class EquipmentMatrix extends HTMLElement {
         return this.getAttribute('columns') === 'list' ? 'list' : 'chips'
     }
     set columns(v: 'chips' | 'list') {
-        this.setAttribute('columns', v)
+        setAttr(this, 'columns', v)
     }
 
     get collapsible(): boolean {
@@ -83,7 +85,9 @@ export class EquipmentMatrix extends HTMLElement {
     // ── Handlers ─────────────────────────────────────────────────────────────
 
     private _onClick = (e: MouseEvent): void => {
-        const toggle = (e.target as Element | null)?.closest<HTMLElement>('.tc-equipment-matrix-toggle')
+        const toggle = (e.target as Element | null)?.closest<HTMLElement>(
+            '.tc-equipment-matrix-toggle',
+        )
         if (!toggle || !this.contains(toggle)) return
         const section = toggle.closest('.tc-equipment-matrix-section')
         const body = section?.querySelector<HTMLElement>('.tc-equipment-matrix-body')
@@ -118,13 +122,18 @@ export class EquipmentMatrix extends HTMLElement {
         const rows = items
             .map((item) => {
                 const flag = this._normalisedFlag(item)
-                const iconHtml = lucideByName(item.icon ?? EQUIPMENT_FLAG_ICONS[flag], 'tc-equipment-matrix-row-icon-svg')
+                const iconHtml = lucideByName(
+                    item.icon ?? EQUIPMENT_FLAG_ICONS[flag],
+                    'tc-equipment-matrix-row-icon-svg',
+                )
                 const suffix = item.flag ? EQUIPMENT_FLAG_SUFFIX[flag] : undefined
                 return (
                     `<li class="tc-equipment-matrix-row tc-equipment-matrix-row--${flag}">` +
                     `<span class="tc-equipment-matrix-row-icon" aria-hidden="true">${iconHtml}</span>` +
                     `<span class="tc-equipment-matrix-row-label">${esc(item.label)}</span>` +
-                    (suffix ? `<span class="tc-equipment-matrix-row-suffix">${suffix}</span>` : '') +
+                    (suffix
+                        ? `<span class="tc-equipment-matrix-row-suffix">${suffix}</span>`
+                        : '') +
                     `</li>`
                 )
             })
@@ -157,7 +166,9 @@ export class EquipmentMatrix extends HTMLElement {
                     : `<div class="tc-equipment-matrix-header">${headerInner}</div>`
                 const bodyHtml =
                     `<div class="tc-equipment-matrix-body"${collapsed ? ' hidden' : ''}>` +
-                    (columns === 'list' ? this._listHtml(section.items) : this._chipsHtml(section.items)) +
+                    (columns === 'list'
+                        ? this._listHtml(section.items)
+                        : this._chipsHtml(section.items)) +
                     `</div>`
                 return (
                     `<section class="tc-equipment-matrix-section` +
@@ -169,7 +180,7 @@ export class EquipmentMatrix extends HTMLElement {
             })
             .join('')
 
-        this.innerHTML = `<div class="tc-equipment-matrix">${html}</div>`
+        patchHtml(this, `<div class="tc-equipment-matrix">${html}</div>`)
     }
 }
 

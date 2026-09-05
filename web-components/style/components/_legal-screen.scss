@@ -3,6 +3,14 @@
 // All cosmetics flow through --bs-legal-screen-* vars backed by --tc-* tokens.
 
 tc-legal-screen {
+    // Host itself must carry the height, not just the inner .tc-legal-screen
+    // panel: the panel's `height: 100%` resolves against *this* box, and if
+    // the host is left at its default auto height, a consumer's fixed-height
+    // wrapper (see the demo) never reaches the nav/body scroll panes.
+    display: block;
+    width: 100%;
+    height: 100%;
+
     // Surface.
     --bs-legal-screen-bg:           var(--tc-surface);
     --bs-legal-screen-border-color: var(--tc-border);

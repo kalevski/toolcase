@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 import type { ActionItem } from './ActionItems'
@@ -460,7 +461,7 @@ class TcFile extends HTMLElement {
     private _wireChipRemoves(chipList: HTMLElement): void {
         Array.from(chipList.querySelectorAll<HTMLButtonElement>('.tc-file-chip-remove')).forEach(
             (btn) => {
-                btn.addEventListener('click', () => {
+                bindOnce(btn, 'click', () => {
                     const id = btn.dataset.tagId
                     if (id) this._commitTags(this._tagIds.filter((t) => t !== id))
                 })
@@ -548,7 +549,7 @@ class TcFile extends HTMLElement {
         Array.from(
             menuEl.querySelectorAll<HTMLButtonElement>('.tc-file-menu-item:not([disabled])'),
         ).forEach((btn) => {
-            btn.addEventListener('click', () => {
+            bindOnce(btn, 'click', () => {
                 const idx = parseInt(btn.dataset.idx ?? '-1', 10)
                 if (idx >= 0 && idx < this._menuItems.length) {
                     this._selectMenuItem(this._menuItems[idx].key)
@@ -688,14 +689,17 @@ class TcFile extends HTMLElement {
         if (this.loading) {
             this.setAttribute('role', 'status')
             this.setAttribute('aria-busy', 'true')
-            this.innerHTML = [
-                '<div class="tc-file" aria-hidden="true">',
-                '<div class="tc-file-skeleton tc-file-skeleton--icon"></div>',
-                '<div class="tc-file-skeleton tc-file-skeleton--name"></div>',
-                '<div class="tc-file-skeleton tc-file-skeleton--meta"></div>',
-                '</div>',
-                '<span class="visually-hidden">Loading…</span>',
-            ].join('')
+            patchHtml(
+                this,
+                [
+                    '<div class="tc-file" aria-hidden="true">',
+                    '<div class="tc-file-skeleton tc-file-skeleton--icon"></div>',
+                    '<div class="tc-file-skeleton tc-file-skeleton--name"></div>',
+                    '<div class="tc-file-skeleton tc-file-skeleton--meta"></div>',
+                    '</div>',
+                    '<span class="visually-hidden">Loading…</span>',
+                ].join(''),
+            )
             return
         }
 
@@ -779,21 +783,23 @@ class TcFile extends HTMLElement {
             `</div>` +
             `</div>`
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="${rowClass}">` +
-            `<span class="tc-file-icon" aria-hidden="true">${this._leadingIconHtml()}</span>` +
-            mainHtml +
-            metaHtml +
-            menuHtml +
-            actionHtml +
-            `</div>`
+                `<span class="tc-file-icon" aria-hidden="true">${this._leadingIconHtml()}</span>` +
+                mainHtml +
+                metaHtml +
+                menuHtml +
+                actionHtml +
+                `</div>`,
+        )
 
         this._syncCategorySelect()
 
         // Items count button — clickable in every mode.
         const itemsBtn = this.querySelector<HTMLButtonElement>('.tc-file-items')
         if (itemsBtn) {
-            itemsBtn.addEventListener('click', () => {
+            bindOnce(itemsBtn, 'click', () => {
                 const count = this.items
                 this.dispatchEvent(
                     new CustomEvent('tc-items-click', {
@@ -810,7 +816,7 @@ class TcFile extends HTMLElement {
         // a view-level action (download, open, …), not an edit affordance.
         const actionBtn = this.querySelector<HTMLButtonElement>('.tc-file-action')
         if (actionBtn) {
-            actionBtn.addEventListener('click', () => {
+            bindOnce(actionBtn, 'click', () => {
                 this.dispatchEvent(
                     new CustomEvent('tc-action', { bubbles: true, composed: true, detail: {} }),
                 )
@@ -822,8 +828,8 @@ class TcFile extends HTMLElement {
         if (!readonly) {
             const nameInput = this.querySelector<HTMLInputElement>('input.tc-file-name')
             if (nameInput) {
-                nameInput.addEventListener('keydown', this._onNameKeydown)
-                nameInput.addEventListener('blur', this._onNameBlur)
+                bindOnce(nameInput, 'keydown', this._onNameKeydown)
+                bindOnce(nameInput, 'blur', this._onNameBlur)
             }
 
             const tagsEl = this.querySelector<HTMLElement>('.tc-file-tags')
@@ -831,17 +837,17 @@ class TcFile extends HTMLElement {
 
             const menuTrigger = this.querySelector<HTMLButtonElement>('.tc-file-menu')
             if (menuTrigger) {
-                menuTrigger.addEventListener('click', () => {
+                bindOnce(menuTrigger, 'click', () => {
                     if (this._isMenuOpen) this._closeMenu(false)
                     else this._openMenu()
                 })
-                menuTrigger.addEventListener('keydown', this._onMenuTriggerKeydown)
+                bindOnce(menuTrigger, 'keydown', this._onMenuTriggerKeydown)
             }
 
             const menuEl = this.querySelector<HTMLElement>('.tc-file-menu-dropdown')
             if (menuEl) {
                 this._wireMenuItemClicks(menuEl)
-                menuEl.addEventListener('keydown', this._onMenuKeydown)
+                bindOnce(menuEl, 'keydown', this._onMenuKeydown)
             }
         }
     }

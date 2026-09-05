@@ -1,0 +1,41 @@
+// Marker Indigo variant — indigo marker, periwinkle secondary.
+//
+// Swaps ONLY the marker's own hue family (--mk-lead*) and the secondary
+// highlight (--tc-accent*). The paper canvas, the graphite ink ramp, the
+// hairlines, the cool shadows and the type are the theme and are untouched —
+// this is the standard eleven-variant set shared by every bundled theme.
+//
+// `--mk-on-lead` is the label ON the fill, and it is chosen per variant rather
+// than fixed: #ffffff is what clears AA against #4338ca. A theme whose whole idea
+// is one marked colour cannot afford an unreadable label on the marked thing.
+//
+// Use with: <tc-theme name="marker" variant="indigo"> … </tc-theme>
+
+tc-theme[name='marker'][variant='indigo'],
+[data-tc-theme='marker'][data-tc-variant='indigo'] {
+    // ── The marker ───────────────────────────────────────────────────────────
+    --mk-lead: #4338ca;
+    --mk-lead-hi: #5b50e0;
+    --mk-lead-lo: #3730a3;
+    // The hue as a WORD — the step that carries text on paper.
+    --mk-lead-deep: #3730a3;
+    --mk-lead-tint: rgba(67, 56, 202, 0.08);
+    --mk-lead-line: rgba(55, 48, 163, 0.5);
+    --mk-lead-glow: rgba(67, 56, 202, 0.32);
+    --mk-on-lead: #ffffff;
+    --mk-lead-grad: linear-gradient(135deg, #5b50e0, #4338ca);
+
+    // ── Secondary highlight — links, focus, accent text ──────────────────────
+    --tc-accent: #6366f1;
+    --tc-accent-fg: #4338ca;
+    --tc-accent-soft: rgba(99, 102, 241, 0.12);
+    --tc-accent-hex: #6366f1;
+
+    // ── Foundation literals baked against the old hex ────────────────────────
+    --bs-primary-rgb: 67, 56, 202;
+    // --bs-warning-rgb intentionally left alone (falls back to the foundation's
+    // real amber) -- see variants/_forest.scss for why copying primary's new rgb
+    // here made warning indistinguishable from primary/success.
+    --tc-focus-ring: 0 0 0 3px rgba(55, 48, 163, 0.45);
+    --bs-focus-ring-color: rgba(55, 48, 163, 0.45);
+}

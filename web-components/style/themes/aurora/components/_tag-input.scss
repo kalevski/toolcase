@@ -1,0 +1,16 @@
+// Aurora › tc-tag-input — dark field, mint focus ring.
+// Foundation already remaps border/bg/label for free via the --tc-* token
+// cascade. This partial fixes the one defect that swap can't reach because
+// _tag-input.scss carries its own value instead of inheriting the ambient
+// one: the slate-navy rgba focus border/ring the component ships as its
+// default, which is a translucent dark-on-dark cue that all but disappears
+// against the near-black --ah-surface control — a real focus-visibility gap.
+// Mirrors the aurora fix already applied to tc-date-picker.
+
+tc-theme[name='aurora'],
+[data-tc-theme='aurora'] {
+    tc-tag-input {
+        --bs-tag-input-focus-border: var(--ah-accent);
+        --bs-tag-input-focus-ring: var(--tc-focus-ring);
+    }
+}

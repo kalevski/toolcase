@@ -130,6 +130,12 @@ tc-page-footer {
     &:focus:not(:focus-visible) {
         outline: none;
     }
+
+    // 44px coarse touch target — matches the identical hover-lift CTA button in
+    // early-signup-form/legal-screen.
+    @media (pointer: coarse) {
+        min-height: 44px;
+    }
 }
 
 // ── Main grid ─────────────────────────────────────────────────────────────────

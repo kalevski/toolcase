@@ -1,3 +1,6 @@
+import { patchHtml } from './internal/patch-html'
+import { setHostClass } from './internal/host-class'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-resizable-panel'
 
 export type ResizablePanelDirection = 'horizontal' | 'vertical'
@@ -45,15 +48,11 @@ export class ResizablePanel extends HTMLElement {
 
     connectedCallback(): void {
         if (!this._initialised) {
-            // The first two element children become pane A and pane B.
-            const kids = Array.from(this.children)
+            // The consumer's first two element children ARE the panes — they are
+            // sized in place rather than moved into pane wrappers (rule 1).
             this._sizes = this._clamp(readSizes(this.storageKey, this._defaultSizes)[0])
-            this.render()
-            const paneA = this.querySelector('.tc-resizable-panel-pane--first')
-            const paneB = this.querySelector('.tc-resizable-panel-pane--second')
-            if (paneA && kids[0]) paneA.appendChild(kids[0])
-            if (paneB && kids[1]) paneB.appendChild(kids[1])
             this._initialised = true
+            this.render()
         }
         this._attachHandlers()
     }
@@ -82,7 +81,7 @@ export class ResizablePanel extends HTMLElement {
         return DIRECTIONS.includes(v) ? v : 'horizontal'
     }
     set direction(v: ResizablePanelDirection) {
-        this.setAttribute('direction', v)
+        setAttr(this, 'direction', v)
     }
 
     get minSize(): number {
@@ -151,13 +150,13 @@ export class ResizablePanel extends HTMLElement {
         }
     }
 
+    /** Sizes are custom properties on the host; the panes are the consumer's own
+     *  children and read them through CSS, so no node has to be touched. */
     private _patchSizes(): void {
         const [a, b] = this._sizes
-        const paneA = this.querySelector<HTMLElement>('.tc-resizable-panel-pane--first')
-        const paneB = this.querySelector<HTMLElement>('.tc-resizable-panel-pane--second')
+        this.style.setProperty('--tc-resizable-panel-first', `${a}%`)
+        this.style.setProperty('--tc-resizable-panel-second', `${b}%`)
         const divider = this.querySelector('.tc-resizable-panel-divider')
-        if (paneA) paneA.style.flexBasis = `${a}%`
-        if (paneB) paneB.style.flexBasis = `${b}%`
         if (divider) divider.setAttribute('aria-valuenow', String(Math.round(a)))
     }
 
@@ -196,9 +195,7 @@ export class ResizablePanel extends HTMLElement {
     private _startDrag(): void {
         this._dragMoveHandler = (e: PointerEvent) => {
             if (!this._dragging) return
-            const container = this.querySelector('.tc-resizable-panel')
-            if (!container) return
-            const rect = container.getBoundingClientRect()
+            const rect = this.getBoundingClientRect()
             const total = this._isHorizontal() ? rect.width : rect.height
             if (total === 0) return
             const pos = this._isHorizontal() ? e.clientX : e.clientY
@@ -310,15 +307,7 @@ export class ResizablePanel extends HTMLElement {
     // ── Render ──────────────────────────────────────────────────────────────────
 
     private _rerenderWithPanes(): void {
-        const paneAEl = this.querySelector('.tc-resizable-panel-pane--first')
-        const paneBEl = this.querySelector('.tc-resizable-panel-pane--second')
-        const aNodes = paneAEl ? Array.from(paneAEl.childNodes) : []
-        const bNodes = paneBEl ? Array.from(paneBEl.childNodes) : []
         this.render()
-        const newA = this.querySelector('.tc-resizable-panel-pane--first')
-        const newB = this.querySelector('.tc-resizable-panel-pane--second')
-        if (newA) aNodes.forEach((n) => newA.appendChild(n))
-        if (newB) bNodes.forEach((n) => newB.appendChild(n))
     }
 
     private render(): void {
@@ -327,23 +316,36 @@ export class ResizablePanel extends HTMLElement {
         const [a, b] = this._sizes
         const min = this.minSize
 
-        this.innerHTML = [
-            `<div class="tc-resizable-panel tc-resizable-panel--${direction}">`,
-            `<div class="tc-resizable-panel-pane tc-resizable-panel-pane--first" style="flex-basis:${a}%"></div>`,
-            `<div class="tc-resizable-panel-divider"`,
-            ` role="separator"`,
-            ` aria-orientation="${horizontal ? 'vertical' : 'horizontal'}"`,
-            ` aria-valuemin="${Math.round(min)}"`,
-            ` aria-valuemax="${Math.round(100 - min)}"`,
-            ` aria-valuenow="${Math.round(a)}"`,
-            ` aria-label="Resize panels. Double-click to reset."`,
-            ` tabindex="0"`,
-            `>`,
-            `<span class="tc-resizable-panel-grip" aria-hidden="true"></span>`,
-            `</div>`,
-            `<div class="tc-resizable-panel-pane tc-resizable-panel-pane--second" style="flex-basis:${b}%"></div>`,
-            `</div>`,
-        ].join('')
+        // THE HOST IS THE SPLIT: the consumer's first two children are the panes and
+        // are sized where they stand; only the divider is element-owned, and CSS
+        // `order` puts it between them (rule 1).
+        setHostClass(this, `tc-resizable-panel tc-resizable-panel--${direction}`)
+        this.style.setProperty('--tc-resizable-panel-first', `${a}%`)
+        this.style.setProperty('--tc-resizable-panel-second', `${b}%`)
+        // `at: 'end'`: the divider must land AFTER the consumer's two panes in the
+        // DOM (visual placement is CSS `order`, not source order). If it were
+        // prepended (patchHtml's default), it would itself be the first same-tag
+        // sibling whenever the panes share the divider's tag (e.g. two <div>
+        // panes) — pushing the CSS `:first-of-type`/`:nth-of-type(2)` selectors
+        // that pick out "first pane"/"second pane" off by one and swapping which
+        // pane gets which size/order.
+        patchHtml(
+            this,
+            [
+                `<div class="tc-resizable-panel-divider"`,
+                ` role="separator"`,
+                ` aria-orientation="${horizontal ? 'vertical' : 'horizontal'}"`,
+                ` aria-valuemin="${Math.round(min)}"`,
+                ` aria-valuemax="${Math.round(100 - min)}"`,
+                ` aria-valuenow="${Math.round(a)}"`,
+                ` aria-label="Resize panels. Double-click to reset."`,
+                ` tabindex="0"`,
+                `>`,
+                `<span class="tc-resizable-panel-grip" aria-hidden="true"></span>`,
+                `</div>`,
+            ].join(''),
+            { at: 'end' },
+        )
     }
 }
 

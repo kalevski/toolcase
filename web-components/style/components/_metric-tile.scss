@@ -31,9 +31,17 @@ tc-metric-tile,
 }
 
 .tc-metric-tile {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--bs-metric-tile-gap);
+    // A grid rather than nested flex boxes: the icon holds column 1 and every
+    // other region — including the consumer's own children — sits in column 2,
+    // ordered by CSS instead of being moved into a body wrapper (rule 1).
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: start;
+    // Row-gap of 0.25rem matches the breathing room .tc-metric-tile-body (the
+    // tc-metric-grid nested-tile variant) gives label/value/hint via its own
+    // flex gap — without it the flattened element-owned rows (label, value
+    // row, hint) sit flush against each other with no vertical spacing.
+    gap: 0.25rem var(--bs-metric-tile-gap);
     padding: var(--bs-metric-tile-padding-y) var(--bs-metric-tile-padding-x);
     background: var(--bs-metric-tile-bg);
     border: 1px solid var(--bs-metric-tile-border-color);
@@ -123,4 +131,25 @@ tc-metric-tile,
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+// Region placement for the flattened tile.
+.tc-metric-tile > * {
+    grid-column: 2;
+    order: 2; // the value slot
+}
+
+.tc-metric-tile > .tc-metric-tile-icon {
+    grid-column: 1;
+    grid-row: 1 / span 4;
+    order: 0;
+}
+
+.tc-metric-tile > .tc-metric-tile-label {
+    order: 1;
+}
+
+.tc-metric-tile > .tc-metric-tile-hint,
+.tc-metric-tile > [slot='hint'] {
+    order: 3;
 }

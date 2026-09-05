@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon, chevronDownIcon } from './icons'
@@ -239,20 +240,23 @@ export class AssetBundle extends HTMLElement {
     private render(): void {
         if (this.loading) {
             this.setAttribute('aria-busy', 'true')
-            this.innerHTML = [
-                '<div class="tc-asset-bundle card tc-asset-bundle--loading" aria-hidden="true">',
-                '<div class="tc-asset-bundle-header card-header">',
-                '<div class="tc-asset-bundle-skeleton tc-asset-bundle-skeleton--name"></div>',
-                '<div class="tc-asset-bundle-skeleton tc-asset-bundle-skeleton--target"></div>',
-                '</div>',
-                '<div class="tc-asset-bundle-body card-body">',
-                '<div class="tc-asset-bundle-skeleton tc-asset-bundle-skeleton--bar"></div>',
-                '<div class="tc-asset-bundle-skeleton tc-asset-bundle-skeleton--bar"></div>',
-                '<div class="tc-asset-bundle-skeleton tc-asset-bundle-skeleton--bar tc-asset-bundle-skeleton--short"></div>',
-                '</div>',
-                '</div>',
-                '<span class="visually-hidden" role="status">Loading…</span>',
-            ].join('')
+            patchHtml(
+                this,
+                [
+                    '<div class="tc-asset-bundle card tc-asset-bundle--loading" aria-hidden="true">',
+                    '<div class="tc-asset-bundle-header card-header">',
+                    '<div class="tc-asset-bundle-skeleton tc-asset-bundle-skeleton--name"></div>',
+                    '<div class="tc-asset-bundle-skeleton tc-asset-bundle-skeleton--target"></div>',
+                    '</div>',
+                    '<div class="tc-asset-bundle-body card-body">',
+                    '<div class="tc-asset-bundle-skeleton tc-asset-bundle-skeleton--bar"></div>',
+                    '<div class="tc-asset-bundle-skeleton tc-asset-bundle-skeleton--bar"></div>',
+                    '<div class="tc-asset-bundle-skeleton tc-asset-bundle-skeleton--bar tc-asset-bundle-skeleton--short"></div>',
+                    '</div>',
+                    '</div>',
+                    '<span class="visually-hidden" role="status">Loading…</span>',
+                ].join(''),
+            )
             return
         }
 
@@ -435,7 +439,10 @@ export class AssetBundle extends HTMLElement {
             ? ` tc-asset-bundle--${esc(target.toLowerCase().replace(/[^a-z0-9]+/g, '-'))}`
             : ''
 
-        this.innerHTML = `<div class="tc-asset-bundle card${targetMod}">${headerHtml}${bodyHtml}</div>`
+        patchHtml(
+            this,
+            `<div class="tc-asset-bundle card${targetMod}">${headerHtml}${bodyHtml}</div>`,
+        )
     }
 
     private _renderMenuItems(): string {
@@ -465,14 +472,14 @@ export class AssetBundle extends HTMLElement {
         // Advanced toggle
         const toggle = this.querySelector<HTMLButtonElement>('.tc-asset-bundle-advanced-toggle')
         if (toggle) {
-            toggle.addEventListener('click', () => this._toggleAdvanced())
+            bindOnce(toggle, 'click', () => this._toggleAdvanced())
         }
 
         // Interactive build-tag chips
         Array.from(
             this.querySelectorAll<HTMLButtonElement>('.tc-asset-bundle-build-tag[data-tag]'),
         ).forEach((btn) => {
-            btn.addEventListener('click', () => {
+            bindOnce(btn, 'click', () => {
                 const tag = btn.dataset.tag ?? ''
                 if (tag && tag !== this._activeBuildTag()) this._setActiveBuildTag(tag)
             })
@@ -481,25 +488,23 @@ export class AssetBundle extends HTMLElement {
         // Menu trigger
         const trigger = this._getTrigger()
         if (trigger) {
-            trigger.addEventListener('click', (e: Event) => {
+            bindOnce(trigger, 'click', (e: Event) => {
                 e.stopPropagation()
                 if (this._isMenuOpen) this._closeMenu()
                 else this._openMenu()
             })
-            trigger.addEventListener('keydown', (e: Event) =>
-                this._onTriggerKeydown(e as KeyboardEvent),
-            )
+            bindOnce(trigger, 'keydown', (e: Event) => this._onTriggerKeydown(e as KeyboardEvent))
         }
 
         const menu = this._getMenu()
         if (menu) {
-            menu.addEventListener('keydown', (e: Event) => this._onMenuKeydown(e as KeyboardEvent))
+            bindOnce(menu, 'keydown', (e: Event) => this._onMenuKeydown(e as KeyboardEvent))
         }
 
         Array.from(
             this.querySelectorAll<HTMLButtonElement>('.tc-asset-bundle-menu-item:not([disabled])'),
         ).forEach((btn) => {
-            btn.addEventListener('click', () => {
+            bindOnce(btn, 'click', () => {
                 const idx = parseInt(btn.dataset.idx ?? '-1', 10)
                 if (idx >= 0 && idx < this._menuItems.length)
                     this._selectItem(this._menuItems[idx].key)

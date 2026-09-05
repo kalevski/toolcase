@@ -1,6 +1,8 @@
+import { patchHtml } from './internal/patch-html'
 import { closeIcon } from './icons'
 import { esc } from './internal/esc'
 import { msg } from './messages'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-close-button'
 
@@ -33,13 +35,16 @@ export class CloseButton extends HTMLElement {
         return this.getAttribute('aria-label') ?? msg('close')
     }
     set ariaLabel(v: string) {
-        this.setAttribute('aria-label', v)
+        setAttr(this, 'aria-label', v)
     }
 
     private render(): void {
         const label = this.ariaLabel
         const disabledAttr = this.disabled ? ' disabled' : ''
-        this.innerHTML = `<button type="button" class="btn-close" aria-label="${esc(label)}"${disabledAttr}>${closeIcon}</button>`
+        patchHtml(
+            this,
+            `<button type="button" class="btn-close" aria-label="${esc(label)}"${disabledAttr}>${closeIcon}</button>`,
+        )
     }
 }
 

@@ -23,7 +23,11 @@ tc-item-slot {
     --bs-item-slot-empty-color: var(--tc-text-faint);
 
     --bs-item-slot-selected-border: var(--tc-app-accent);
-    --bs-item-slot-selected-ring: rgba(30, 41, 59, 0.12);
+    // Full box-shadow recipe (offsets + color), not a bare color — every theme
+    // foundation defines --tc-focus-ring this way (see e.g. aurora/neon's
+    // accent-soft halo, sunshine's leaf-green ring) so themes with no item-slot
+    // override still get an on-theme selected ring instead of a baked slate one.
+    --bs-item-slot-selected-ring: var(--tc-focus-ring);
 
     --bs-item-slot-qty-bg: var(--tc-app-accent);
     --bs-item-slot-qty-color: var(--tc-app-accent-contrast);
@@ -89,9 +93,12 @@ tc-item-slot[data-rarity='mythic'] {
 
 // Active = solid-ink border + focus-ring halo (the standard active state). Wins
 // over the rarity accent so selection stays legible at any tier.
+// --bs-item-slot-selected-ring already carries its own offsets (see above), so
+// it is used as the whole box-shadow value rather than composed with a literal
+// spread — composing it would double up the offsets and produce invalid CSS.
 tc-item-slot[selected] {
     --bs-item-slot-border-color: var(--bs-item-slot-selected-border);
-    box-shadow: 0 0 0 0.2rem var(--bs-item-slot-selected-ring);
+    box-shadow: var(--bs-item-slot-selected-ring);
 }
 
 // Empty socket: dashed hairline, muted, non-interactive cursor.

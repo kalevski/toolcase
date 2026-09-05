@@ -1,4 +1,6 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { setHostClass } from './internal/host-class'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 
@@ -30,18 +32,13 @@ export class MetricGrid extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            const grid = this.querySelector('.tc-metric-grid')
-            if (grid) slotContent.forEach((n) => grid.appendChild(n))
-            this._initialised = true
-        }
+        this._initialised = true
+        this.render()
     }
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        this._rerenderWithSlots()
+        this.render()
     }
 
     get columns(): MetricGridColumns {
@@ -57,21 +54,7 @@ export class MetricGrid extends HTMLElement {
     }
     set items(v: MetricGridItem[]) {
         this._items = Array.isArray(v) ? v : []
-        if (this._initialised) this._rerenderWithSlots()
-    }
-
-    private _isGenerated(node: Node): boolean {
-        return node instanceof Element && node.hasAttribute('data-mg-gen')
-    }
-
-    private _rerenderWithSlots(): void {
-        const grid = this.querySelector('.tc-metric-grid')
-        const slotContent = grid
-            ? Array.from(grid.childNodes).filter((n) => !this._isGenerated(n))
-            : []
-        this.render()
-        const newGrid = this.querySelector('.tc-metric-grid')
-        if (newGrid) slotContent.forEach((n) => newGrid.appendChild(n))
+        if (this._initialised) this.render()
     }
 
     private _renderTile(item: MetricGridItem): string {
@@ -96,7 +79,7 @@ export class MetricGrid extends HTMLElement {
             : ''
 
         return [
-            '<div class="tc-metric-tile" data-mg-gen>',
+            '<div class="tc-metric-tile">',
             iconHtml,
             '<div class="tc-metric-tile-body">',
             `<span class="tc-metric-tile-label">${esc(item.label)}</span>`,
@@ -107,10 +90,12 @@ export class MetricGrid extends HTMLElement {
         ].join('')
     }
 
+    /** THE HOST IS THE GRID. Tiles built from `items` are element-owned and are
+     *  patched in place ahead of whatever the consumer slotted in — which stays a
+     *  direct child of the host, exactly where they wrote it (rule 1). */
     private render(): void {
-        const cols = this.columns
-        const tilesHtml = this._items.map((item) => this._renderTile(item)).join('')
-        this.innerHTML = `<div class="tc-metric-grid tc-metric-grid--cols-${cols}">${tilesHtml}</div>`
+        setHostClass(this, `tc-metric-grid tc-metric-grid--cols-${this.columns}`)
+        patchHtml(this, this._items.map((item) => this._renderTile(item)).join(''))
     }
 }
 

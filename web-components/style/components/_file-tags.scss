@@ -179,9 +179,10 @@ tc-file-tags {
 // ── Dropdown menu ──────────────────────────────────────────────────────────
 
 .tc-file-tags-menu {
-    position: absolute;
-    top: calc(100% + 2px);
-    left: 0;
+    // Fixed to the viewport with top/left set by JS (anchored to the add
+    // button) — escapes overflow:hidden/auto clipping inside modal/scroll
+    // containers. Mirrors the tc-tag-input-menu pattern.
+    position: fixed;
     z-index: var(--bs-file-tags-menu-z-index);
     display: none;
     min-width: var(--bs-file-tags-menu-min-width);

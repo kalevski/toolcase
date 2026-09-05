@@ -1,7 +1,9 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 import { Check, ChevronLeft, ChevronRight } from 'lucide-static'
 import { icon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-form-wizard'
 
@@ -16,15 +18,25 @@ const checkIconHtml = icon(Check, 'tc-form-wizard-check-icon')
 const backIconHtml = icon(ChevronLeft, 'tc-form-wizard-chevron')
 const nextIconHtml = icon(ChevronRight, 'tc-form-wizard-chevron')
 
+// Unique per-instance id prefix so multiple wizards on one page never collide
+// on the tab/panel ids used to wire the ARIA tablist relationship (matches the
+// tc-tab-sections convention: tab gets aria-controls, panel gets aria-labelledby).
+let _idCounter = 0
+
 export class FormWizard extends HTMLElement {
     private _initialised = false
     private _steps: FormWizardStep[] = []
     private _activeIndex = 0
-    private _stepSlotNodes: Node[][] = []
     private _visitedIndices = new Set<number>([0])
+    private _idPrefix: string
 
     onComplete: (() => void) | null = null
     onStepChange: ((detail: { index: number }) => void) | null = null
+
+    constructor() {
+        super()
+        this._idPrefix = `tc-form-wizard-${++_idCounter}`
+    }
 
     static get observedAttributes(): string[] {
         return ['complete-label', 'complete-icon', 'loading']
@@ -32,7 +44,6 @@ export class FormWizard extends HTMLElement {
 
     connectedCallback(): void {
         if (!this._initialised) {
-            this._captureSlotNodes()
             this.render()
             this._distributeActiveStepContent()
             this._initialised = true
@@ -50,7 +61,6 @@ export class FormWizard extends HTMLElement {
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        this._rescueActiveSlotNodes()
         this.render()
         this._distributeActiveStepContent()
     }
@@ -66,7 +76,6 @@ export class FormWizard extends HTMLElement {
             this._activeIndex = 0
         }
         if (this._initialised) {
-            this._rescueActiveSlotNodes()
             this.render()
             this._distributeActiveStepContent()
         }
@@ -76,7 +85,7 @@ export class FormWizard extends HTMLElement {
         return this.getAttribute('complete-label') ?? 'Complete'
     }
     set completeLabel(v: string) {
-        this.setAttribute('complete-label', v)
+        setAttr(this, 'complete-label', v)
     }
 
     get completeIcon(): string | null {
@@ -97,61 +106,40 @@ export class FormWizard extends HTMLElement {
 
     // ── Slot capture ──────────────────────────────────────────────────────────
 
-    private _captureSlotNodes(): void {
-        this._stepSlotNodes = []
-        Array.from(this.childNodes).forEach((node) => {
-            if (!(node instanceof Element)) return
-            const slotAttr = node.getAttribute('slot')
-            const dataStep = node.getAttribute('data-step')
-            let idx = -1
-            if (slotAttr !== null && slotAttr.startsWith('step-')) {
-                const n = parseInt(slotAttr.slice(5), 10)
-                if (!isNaN(n) && n >= 0) idx = n
-            } else if (dataStep !== null) {
-                const n = parseInt(dataStep, 10)
-                if (!isNaN(n) && n >= 0) idx = n
-            }
-            if (idx >= 0) {
-                if (!this._stepSlotNodes[idx]) this._stepSlotNodes[idx] = []
-                this._stepSlotNodes[idx].push(node)
-            }
-        })
-    }
-
-    // Rescue the active step's slot nodes from the body before a re-render
-    // overwrites innerHTML. Slot nodes moved into the body are kept alive in
-    // _stepSlotNodes so they can be re-appended after the next render.
-    private _rescueActiveSlotNodes(): void {
-        const step = this._steps[this._activeIndex]
-        if (step?.content != null) return // JS property — nothing to rescue
-        const body = this.querySelector('.tc-form-wizard-body')
-        if (!body) return
-        const nodes = Array.from(body.childNodes)
-        if (nodes.length > 0) {
-            this._stepSlotNodes[this._activeIndex] = nodes
-        }
-    }
-
+    /**
+     * Show the active step.
+     *
+     * A step the consumer wrote (`slot="step-N"` / `data-step="N"`) stays exactly
+     * where they wrote it — only its visibility changes (rule 1). A step supplied
+     * through the `steps` property is the element's own content and still goes
+     * into the element-owned body.
+     */
     private _distributeActiveStepContent(): void {
+        const stepNodes = this.querySelectorAll(':scope > [slot^="step-"], :scope > [data-step]')
+        for (const node of stepNodes) {
+            const slot = node.getAttribute('slot') ?? ''
+            const dataStep = node.getAttribute('data-step')
+            const idx = slot.startsWith('step-')
+                ? parseInt(slot.slice(5), 10)
+                : dataStep !== null
+                  ? parseInt(dataStep, 10)
+                  : NaN
+            if (Number.isNaN(idx)) continue
+            node.toggleAttribute('hidden', idx !== this._activeIndex)
+        }
+
         const body = this.querySelector('.tc-form-wizard-body')
         if (!body) return
         const step = this._steps[this._activeIndex]
-        if (!step) return
-        body.innerHTML = ''
-        if (step.content != null) {
-            if (typeof step.content === 'string') {
-                body.innerHTML = step.content
-            } else if (typeof step.content === 'function') {
-                body.appendChild(step.content())
-            } else {
-                body.appendChild(step.content)
-            }
-        } else {
-            const slotNodes = this._stepSlotNodes[this._activeIndex]
-            if (slotNodes) {
-                slotNodes.forEach((n) => body.appendChild(n))
-            }
+        const content = step?.content
+        if (content == null) {
+            body.innerHTML = ''
+            return
         }
+        body.innerHTML = ''
+        if (typeof content === 'string') body.innerHTML = content
+        else if (typeof content === 'function') body.appendChild(content())
+        else body.appendChild(content)
     }
 
     // ── Step navigation ───────────────────────────────────────────────────────
@@ -159,7 +147,6 @@ export class FormWizard extends HTMLElement {
     private _changeStep(newIdx: number): void {
         if (newIdx === this._activeIndex) return
         if (newIdx < 0 || newIdx >= this._steps.length) return
-        this._rescueActiveSlotNodes()
         this._activeIndex = newIdx
         this._visitedIndices.add(newIdx)
         this.render()
@@ -230,8 +217,10 @@ export class FormWizard extends HTMLElement {
         const completeIconHtml = completeIconName ? lucideByName(completeIconName) : ''
 
         // ── Stepper header ───────────────────────────────────────────────────
+        const panelId = `${this._idPrefix}-panel`
         const tabsHtml = steps
             .map((step, i) => {
+                const tabId = `${this._idPrefix}-tab-${i}`
                 const isDone = i < activeIdx
                 const isCurrent = i === activeIdx
                 const state: 'done' | 'current' | 'upcoming' = isDone
@@ -260,9 +249,9 @@ export class FormWizard extends HTMLElement {
                         : ''
 
                 return (
-                    `<button type="button" class="tc-form-wizard-tab tc-form-wizard-tab--${state}"` +
+                    `<button type="button" id="${tabId}" class="tc-form-wizard-tab tc-form-wizard-tab--${state}"` +
                     ` role="tab" aria-selected="${ariaSelected}"${ariaCurrent}${ariaDisabled}` +
-                    ` tabindex="${tabIndex}" data-step-index="${i}"` +
+                    ` aria-controls="${panelId}" tabindex="${tabIndex}" data-step-index="${i}"` +
                     `>` +
                     `<span class="tc-form-wizard-tab-marker" aria-hidden="true">${markerContent}</span>` +
                     `<span class="tc-form-wizard-tab-label">${esc(step.label)}</span>` +
@@ -301,24 +290,30 @@ export class FormWizard extends HTMLElement {
               nextIconHtml +
               `</button>`
 
-        const activeLabel = steps[activeIdx]?.label ?? 'Step content'
+        // No dangling aria-labelledby when there are no steps to point at yet.
+        const bodyLabelAttr =
+            total > 0
+                ? ` aria-labelledby="${this._idPrefix}-tab-${activeIdx}"`
+                : ` aria-label="Step content"`
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-form-wizard-steps" role="tablist" aria-label="Form steps">` +
-            tabsHtml +
-            `</div>` +
-            `<div class="tc-form-wizard-body" role="tabpanel" aria-label="${esc(activeLabel)}">` +
-            `</div>` +
-            `<div class="tc-form-wizard-footer">` +
-            backHtml +
-            actionHtml +
-            `</div>`
+                tabsHtml +
+                `</div>` +
+                `<div class="tc-form-wizard-body" id="${panelId}" role="tabpanel" tabindex="0"${bodyLabelAttr}>` +
+                `</div>` +
+                `<div class="tc-form-wizard-footer">` +
+                backHtml +
+                actionHtml +
+                `</div>`,
+        )
 
         // Arrow-key tablist navigation — listener lives on the header div which
         // is recreated on every render, so no manual cleanup is needed.
         const header = this.querySelector<HTMLElement>('.tc-form-wizard-steps')
         if (header) {
-            header.addEventListener('keydown', (e: KeyboardEvent) => {
+            bindOnce(header, 'keydown', (e: KeyboardEvent) => {
                 if (!['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(e.key)) return
                 e.preventDefault()
                 const tabs = Array.from(this.querySelectorAll<HTMLElement>('.tc-form-wizard-tab'))

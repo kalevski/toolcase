@@ -80,6 +80,20 @@ tc-theme[name='blueprint'],
         .tc-command-palette-item-icon {
             color: var(--bp-pink-ink);
         }
+
+        // On the pink active row invert the kbd chip to a translucent white chip.
+        // NB: this must live here (as a plain descendant selector) rather than as
+        // `.tc-command-palette-item--active &` nested under `.tc-command-palette-key`
+        // below — Sass `&` there resolves against the FULL compound selector
+        // (including the `[data-tc-theme='blueprint']` ancestor prefix), which
+        // compiles to `.tc-command-palette-item--active [data-tc-theme='blueprint'] .tc-command-palette-key`
+        // — backwards, and never matches — leaving the chip on the default
+        // teal-soft/teal-fg colors, which are illegible against the pink fill.
+        .tc-command-palette-key {
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.35);
+            color: var(--bp-pink-ink);
+        }
     }
 
     // ── kbd shortcut chips ────────────────────────────────────────────────────
@@ -91,13 +105,6 @@ tc-theme[name='blueprint'],
         color: var(--bp-teal-fg);
         letter-spacing: 0.06em;
         text-transform: uppercase;
-
-        // On the pink active row invert to a translucent white chip
-        .tc-command-palette-item--active & {
-            background: rgba(255, 255, 255, 0.18);
-            border-color: rgba(255, 255, 255, 0.35);
-            color: var(--bp-pink-ink);
-        }
     }
 
     // ── Skeleton / loading shimmer ────────────────────────────────────────────

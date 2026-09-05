@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-gamepad-button-prompt'
 
@@ -73,11 +74,13 @@ export class GamepadButtonPrompt extends HTMLElement {
         const labelHtml = labelText
             ? `<span class="tc-gamepad-button-prompt__label">${esc(labelText)}</span>`
             : ''
-        this.innerHTML =
+        patchHtml(
+            this,
             `<span class="tc-gamepad-button-prompt">` +
-            `<span class="tc-gamepad-button-prompt__glyph">${esc(this.glyph)}</span>` +
-            labelHtml +
-            `</span>`
+                `<span class="tc-gamepad-button-prompt__glyph">${esc(this.glyph)}</span>` +
+                labelHtml +
+                `</span>`,
+        )
     }
 }
 

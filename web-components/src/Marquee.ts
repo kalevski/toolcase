@@ -1,17 +1,12 @@
+import { patchHtml } from './internal/patch-html'
+import { setHostClass } from './internal/host-class'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-marquee'
 
 export type MarqueeDirection = 'left' | 'right'
 
 const DIRECTIONS: MarqueeDirection[] = ['left', 'right']
 const DEFAULT_SPEED = 60
-
-function escAttr(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/"/g, '&quot;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-}
 
 function escHtml(s: string): string {
     return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -20,7 +15,6 @@ function escHtml(s: string): string {
 export class Marquee extends HTMLElement {
     private _initialised = false
     private _items: string[] = []
-    private _slotNodes: Node[] = []
     private _resizeObserver: ResizeObserver | null = null
 
     static get observedAttributes(): string[] {
@@ -29,14 +23,8 @@ export class Marquee extends HTMLElement {
 
     connectedCallback(): void {
         if (!this._initialised) {
-            if (this._items.length === 0) {
-                this._slotNodes = Array.from(this.childNodes).filter((n) => n instanceof Element)
-            }
-            this.render()
-            if (this._items.length === 0 && this._slotNodes.length > 0) {
-                this._distributeSlotNodes()
-            }
             this._initialised = true
+            this.render()
         }
         this._attachHandlers()
     }
@@ -47,13 +35,7 @@ export class Marquee extends HTMLElement {
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        if (this._items.length === 0 && this._slotNodes.length > 0) {
-            this._recaptureSlotNodes()
-        }
         this.render()
-        if (this._items.length === 0 && this._slotNodes.length > 0) {
-            this._distributeSlotNodes()
-        }
         this._updateDuration()
     }
 
@@ -89,7 +71,7 @@ export class Marquee extends HTMLElement {
         return DIRECTIONS.includes(v) ? v : 'left'
     }
     set direction(v: MarqueeDirection) {
-        this.setAttribute('direction', v)
+        setAttr(this, 'direction', v)
     }
 
     get pauseOnHover(): boolean {
@@ -112,63 +94,22 @@ export class Marquee extends HTMLElement {
         this._resizeObserver = null
     }
 
-    private _recaptureSlotNodes(): void {
-        const copy1 = this.querySelector('.tc-marquee-copy-1')
-        if (!copy1) return
-        const itemWrappers = Array.from(copy1.querySelectorAll(':scope > .tc-marquee-item'))
-        this._slotNodes = itemWrappers
-            .map((w) => w.firstChild)
-            .filter((n): n is ChildNode => n !== null)
-    }
-
-    private _distributeSlotNodes(): void {
-        const copy1 = this.querySelector<HTMLElement>('.tc-marquee-copy-1')
-        const copy2 = this.querySelector<HTMLElement>('.tc-marquee-copy-2')
-        if (!copy1 || !copy2) return
-
-        const sep = this.separator
-
-        const appendItems = (container: HTMLElement, nodes: Node[], hidden: boolean): void => {
-            nodes.forEach((node, idx) => {
-                if (idx > 0 && sep) {
-                    const sepEl = document.createElement('span')
-                    sepEl.className = 'tc-marquee-sep'
-                    sepEl.setAttribute('aria-hidden', 'true')
-                    sepEl.textContent = sep
-                    container.appendChild(sepEl)
-                }
-                const wrapper = document.createElement('span')
-                wrapper.className = 'tc-marquee-item'
-                if (hidden) wrapper.setAttribute('aria-hidden', 'true')
-                wrapper.appendChild(node)
-                container.appendChild(wrapper)
-            })
-            // Trailing separator ensures seamless visual junction between copies
-            if (sep && nodes.length > 0) {
-                const junctionSep = document.createElement('span')
-                junctionSep.className = 'tc-marquee-sep tc-marquee-sep--junction'
-                junctionSep.setAttribute('aria-hidden', 'true')
-                junctionSep.textContent = sep
-                container.appendChild(junctionSep)
-            }
-        }
-
-        appendItems(copy1, this._slotNodes, false)
-        appendItems(
-            copy2,
-            this._slotNodes.map((n) => n.cloneNode(true)),
-            true,
-        )
-    }
-
     private _updateDuration(): void {
-        const inner = this.querySelector<HTMLElement>('.tc-marquee')
-        const copy1 = this.querySelector<HTMLElement>('.tc-marquee-copy-1')
-        if (!inner || !copy1) return
-        const w = copy1.offsetWidth
+        // Width of a single copy — measured off the always-present second copy
+        // rather than `.tc-marquee-copy-1`, which only exists when the `items`
+        // property is used: with slotted children the first copy is left as the
+        // consumer's own unwrapped nodes (rule 1), so it has no single element to
+        // measure. The second copy is always a faithful clone of the first
+        // (whichever source it came from), so its rendered width is the correct
+        // one-copy travel distance in both cases; the host's own offsetWidth would
+        // just be the clipped viewport width (host is `overflow: hidden`), not the
+        // content width.
+        const copy2 = this.querySelector<HTMLElement>('.tc-marquee-copy-2')
+        const w = (copy2 ?? this).offsetWidth
         const duration = w > 0 && this.speed > 0 ? w / this.speed : 10
-        inner.style.setProperty('--bs-marquee-duration', `${duration}s`)
-        inner.style.setProperty(
+        this.style.setProperty('--bs-marquee-duration', `${duration}s`)
+        this.style.setProperty('--bs-marquee-distance', `${w}px`)
+        this.style.setProperty(
             '--bs-marquee-direction-value',
             this.direction === 'right' ? 'reverse' : 'normal',
         )
@@ -177,7 +118,11 @@ export class Marquee extends HTMLElement {
     private render(): void {
         const hasItems = this._items.length > 0
         const separator = this.separator
-        const ariaLabel = escAttr(this.getAttribute('aria-label') || 'Scrolling content')
+        // Passed straight to setAttribute below, which takes a literal value and
+        // never parses entities — HTML-escaping it here would corrupt the
+        // accessible name into literal "&amp;"-style text instead of preventing
+        // any injection (setAttribute can't be injected into).
+        const ariaLabel = this.getAttribute('aria-label') || 'Scrolling content'
 
         let copy1Html = ''
         let copy2Html = ''
@@ -187,7 +132,35 @@ export class Marquee extends HTMLElement {
             copy2Html = this._buildItemsHtml(this._items, separator, true)
         }
 
-        this.innerHTML = `<div class="tc-marquee" role="region" aria-label="${ariaLabel}"><div class="tc-marquee-track"><span class="tc-marquee-copy-1">${copy1Html}</span><span class="tc-marquee-copy-2" aria-hidden="true">${copy2Html}</span></div></div>`
+        // THE HOST IS THE MARQUEE. The first copy is whatever the consumer wrote —
+        // left exactly where they wrote it (rule 1) — and the seamless second copy
+        // is a CLONE of it, which is the element's own node to create and discard.
+        setHostClass(this, 'tc-marquee')
+        this.setAttribute('role', 'region')
+        this.setAttribute('aria-label', ariaLabel)
+        patchHtml(this, hasItems ? `<span class="tc-marquee-copy-1">${copy1Html}</span>` : '', {
+            region: 'copy1',
+        })
+        patchHtml(this, `<span class="tc-marquee-copy-2" aria-hidden="true">${copy2Html}</span>`, {
+            region: 'copy2',
+            at: 'end',
+        })
+        if (!hasItems) this._mirrorSlottedContent()
+    }
+
+    /** Fill the second copy with clones of the consumer's own children. Cloning is
+     *  the point: the originals stay put, and only nodes this element created are
+     *  ever inserted or removed. */
+    private _mirrorSlottedContent(): void {
+        const copy2 = this.querySelector<HTMLElement>(':scope > .tc-marquee-copy-2')
+        if (!copy2) return
+        copy2.replaceChildren()
+        // querySelectorAll of the consumer's own children, cloned — the originals
+        // are read, never captured and re-homed (rule 1).
+        const sources = this.querySelectorAll(
+            ':scope > *:not(.tc-marquee-copy-1):not(.tc-marquee-copy-2)',
+        )
+        for (const child of sources) copy2.appendChild(child.cloneNode(true))
     }
 
     private _buildItemsHtml(items: string[], separator: string, ariaHidden: boolean): string {
@@ -197,7 +170,7 @@ export class Marquee extends HTMLElement {
             if (i > 0 && separator) {
                 html += `<span class="tc-marquee-sep" aria-hidden="true">${escHtml(separator)}</span>`
             }
-            html += `<span class="tc-marquee-item"${hiddenAttr}>${items[i]}</span>`
+            html += `<span class="tc-marquee-item"${hiddenAttr}>${escHtml(items[i])}</span>`
         }
         // Trailing separator for seamless visual junction between copies
         if (separator && items.length > 0) {

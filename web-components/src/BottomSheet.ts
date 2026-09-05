@@ -1,5 +1,6 @@
 import { reflow, executeAfterTransition } from './internal/transition'
 import { overlayStack } from './internal/overlay-stack'
+import { setAttr } from './internal/tc-element'
 
 // tc-bottom-sheet — the phone-native modal surface: content enters from the thumb
 // side, a grab handle is the dismiss affordance, and a drag beats a small target.
@@ -459,7 +460,7 @@ export class BottomSheet extends HTMLElement {
         return this.getAttribute('snap') ?? 'auto'
     }
     set snap(v: string) {
-        this.setAttribute('snap', v)
+        setAttr(this, 'snap', v)
     }
 
     get initialSnap(): number {
@@ -485,7 +486,7 @@ export class BottomSheet extends HTMLElement {
         return v === 'dark' || v === 'none' ? v : 'warm'
     }
     set scrim(v: BottomSheetScrim) {
-        this.setAttribute('scrim', v)
+        setAttr(this, 'scrim', v)
     }
 
     /** Default TRUE. `false` is the escape hatch for a low-end device — see the SKILL entry. */

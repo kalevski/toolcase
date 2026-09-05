@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-brand'
 
@@ -109,7 +110,10 @@ export class Brand extends HTMLElement {
         const secondaryHtml = secondaryText != null ? esc(secondaryText) : ''
         const labelHtml = label != null ? esc(label) : ''
 
-        this.innerHTML = `<span class="tc-brand${xlClass}"><span class="tc-brand__text-group"${colorStyle}><span class="tc-brand__primary">${primaryHtml}</span><span class="tc-brand__secondary">${secondaryHtml}</span><span class="tc-brand__underline"></span></span><span class="tc-brand__label-content">${labelHtml}</span></span>`
+        patchHtml(
+            this,
+            `<span class="tc-brand${xlClass}"><span class="tc-brand__text-group"${colorStyle}><span class="tc-brand__primary">${primaryHtml}</span><span class="tc-brand__secondary">${secondaryHtml}</span><span class="tc-brand__underline"></span></span><span class="tc-brand__label-content">${labelHtml}</span></span>`,
+        )
     }
 }
 

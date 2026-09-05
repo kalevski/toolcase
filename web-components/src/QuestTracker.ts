@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-quest-tracker'
 
@@ -119,12 +120,15 @@ export class QuestTracker extends HTMLElement {
                 ? `<p class="tc-quest-tracker-empty">No active quests</p>`
                 : ''
 
-        this.innerHTML = `<div class="tc-quest-tracker">
+        patchHtml(
+            this,
+            `<div class="tc-quest-tracker">
             <div class="tc-quest-tracker-header">
                 <span class="tc-quest-tracker-title">${esc(this.trackerTitle)}</span>
             </div>
             <div class="tc-quest-tracker-quests">${questsHtml}${emptyHtml}</div>
-        </div>`
+        </div>`,
+        )
     }
 }
 

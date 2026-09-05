@@ -19,7 +19,7 @@ tc-fov-slider {
     --bs-setting-slider-thumb-border: var(--tc-app-accent);
     --bs-setting-slider-thumb-active-bg: var(--tc-surface-muted);
     --bs-setting-slider-thumb-shadow: var(--tc-shadow-sm);
-    --bs-setting-slider-focus-ring: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
+    --bs-setting-slider-focus-ring: var(--tc-focus-ring);
     --bs-setting-slider-disabled-color: var(--tc-text-faint);
     --bs-setting-slider-value-color: var(--tc-text-muted);
     --bs-setting-slider-value-size: 0.6875rem;
@@ -34,7 +34,7 @@ tc-fov-slider {
     --bs-setting-slider-mute-active-color: var(--tc-surface);
     --bs-setting-slider-mute-active-border: var(--tc-app-accent);
     --bs-setting-slider-mute-hover-bg: var(--tc-surface-muted);
-    --bs-setting-slider-mute-focus-ring: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
+    --bs-setting-slider-mute-focus-ring: var(--tc-focus-ring);
 }
 
 .tc-setting-slider__control {

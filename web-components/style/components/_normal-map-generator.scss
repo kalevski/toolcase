@@ -23,6 +23,10 @@ tc-normal-map-generator {
 
     --bs-normal-map-generator-focus-ring: var(--tc-app-accent);
     --bs-normal-map-generator-disabled-opacity: 0.55;
+
+    // Empty-state "No source image" canvas text (drawn, not painted via CSS —
+    // resolved to a concrete colour at runtime so every theme re-skins it).
+    --bs-normal-map-generator-placeholder-color: var(--tc-text-muted);
 }
 
 tc-normal-map-generator[disabled] {

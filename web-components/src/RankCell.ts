@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 const TAG_NAME = 'tc-rank-cell'
 
 type RankCellTier = 'gold' | 'silver' | 'bronze' | 'default'
@@ -49,7 +50,10 @@ export class RankCell extends HTMLElement {
         const pad = this.pad
         const tier = resolveTier(rank)
         const numText = String(rank).padStart(pad, '0')
-        this.innerHTML = `<span class="tc-rank-cell tc-rank-cell--${tier}"><span class="tc-rank-cell-number">${numText}</span></span>`
+        patchHtml(
+            this,
+            `<span class="tc-rank-cell tc-rank-cell--${tier}"><span class="tc-rank-cell-number">${numText}</span></span>`,
+        )
     }
 }
 

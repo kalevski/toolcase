@@ -319,6 +319,12 @@ tc-json-schema-def[disabled] .tc-json-schema-def,
         min-width: 44px;
         min-height: 44px;
     }
+
+    // Text+icon CTA — width already clears 44px from its padded label, only
+    // height needed (same pattern as .tc-audio-mixer-fx-add / .tc-json-editor-toggle).
+    .tc-json-schema-def-add {
+        min-height: 44px;
+    }
 }
 
 // ── Reduced motion ───────────────────────────────────────────────────────────

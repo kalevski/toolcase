@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 const TAG_NAME = 'tc-compass-rose'
 
 /**
@@ -71,7 +72,9 @@ export class CompassRose extends HTMLElement {
         this.setAttribute('role', 'img')
         this.setAttribute('aria-label', `Compass rose — heading ${readout}°`)
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <svg class="tc-compass-rose__face" viewBox="0 0 100 100" aria-hidden="true">
                 <circle cx="50" cy="50" r="47" class="tc-compass-rose__ring" />
                 <line x1="50" y1="6" x2="50" y2="14" class="tc-compass-rose__tick" />
@@ -88,7 +91,8 @@ export class CompassRose extends HTMLElement {
                 <text x="50" y="78" text-anchor="middle" dominant-baseline="middle" class="tc-compass-rose__label">S</text>
                 <text x="23" y="51" text-anchor="middle" dominant-baseline="middle" class="tc-compass-rose__label">W</text>
             </svg>
-        `
+        `,
+        )
     }
 }
 

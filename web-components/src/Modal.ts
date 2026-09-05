@@ -1,8 +1,10 @@
+import { patchHtml } from './internal/patch-html'
 import { Modal as BsModal } from './internal/Modal'
 import { BsOverlay, escapeHtml, type OverlayPlugin } from './internal/bs-overlay'
 import { closeIcon } from './icons'
 import { msg } from './messages'
 import { setHostClass } from './internal/host-class'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-modal'
 
@@ -18,8 +20,6 @@ const TAG_NAME = 'tc-modal'
  * its content never sits in the tab order or accessibility tree while hidden.
  */
 export class Modal extends BsOverlay {
-    private _bodyNodes: Node[] = []
-    private _footerNodes: Node[] = []
     // With `lazy`, flips true on first show; content stays mounted afterwards
     // so open → close → open keeps form state.
     private _contentMounted = false
@@ -78,14 +78,14 @@ export class Modal extends BsOverlay {
         return this.getAttribute('title') ?? ''
     }
     set title(v: string) {
-        this.setAttribute('title', v)
+        setAttr(this, 'title', v)
     }
 
     get size(): string {
         return this.getAttribute('size') ?? ''
     }
     set size(v: string) {
-        this.setAttribute('size', v)
+        setAttr(this, 'size', v)
     }
 
     get centered(): boolean {
@@ -116,16 +116,7 @@ export class Modal extends BsOverlay {
         return this.getAttribute('fullscreen') ?? ''
     }
     set fullscreen(v: string) {
-        this.setAttribute('fullscreen', v)
-    }
-
-    protected captureSlots(): void {
-        this._bodyNodes = Array.from(this.childNodes).filter(
-            (n) => !(n instanceof Element && n.getAttribute('slot') === 'footer'),
-        )
-        this._footerNodes = Array.from(this.childNodes).filter(
-            (n) => n instanceof Element && n.getAttribute('slot') === 'footer',
-        )
+        setAttr(this, 'fullscreen', v)
     }
 
     protected createPlugin(): OverlayPlugin {
@@ -151,7 +142,6 @@ export class Modal extends BsOverlay {
             dialogClasses.push(`modal-fullscreen-${fs}-down`)
         }
 
-        setHostClass(this, 'modal fade')
         this.setAttribute('tabindex', '-1')
         if (this.staticBackdrop) {
             this.setAttribute('data-bs-backdrop', 'static')
@@ -159,32 +149,33 @@ export class Modal extends BsOverlay {
             this.removeAttribute('data-bs-backdrop')
         }
 
-        const hasFooter = this._footerNodes.length > 0
-        const footerHtml = hasFooter ? '<div class="modal-footer"></div>' : ''
         const titleText = escapeHtml(this.getAttribute('title') ?? '')
 
-        this.innerHTML =
-            `<div class="${dialogClasses.join(' ')}">` +
-            `<div class="modal-content">` +
-            `<div class="modal-header">` +
-            `<h5 class="modal-title">${titleText}</h5>` +
-            `<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="${escapeHtml(msg('close'))}">${closeIcon}</button>` +
-            `</div>` +
-            `<div class="modal-body"></div>` +
-            footerHtml +
-            `</div>` +
-            `</div>`
+        // THE HOST IS THE DIALOG. `.modal-dialog` / `.modal-content` used to be two
+        // wrappers the consumer's children were moved into; the sheet they drew is
+        // now painted by the host's own `::before` and every region — the owned
+        // header, the consumer's children, their `slot="footer"` — is placed on the
+        // host's grid (rule 1: order with CSS, never move a node you did not make).
+        setHostClass(this, `modal fade ${dialogClasses.join(' ')}`)
 
-        // Lazy + never opened: keep the captured content out of the DOM until
-        // the first show.bs.modal (see _onShowMount).
-        if (!this.lazy || this._contentMounted) this._mountContent()
+        patchHtml(
+            this,
+            `<div class="modal-header">` +
+                `<h5 class="modal-title">${titleText}</h5>` +
+                `<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="${escapeHtml(msg('close'))}">${closeIcon}</button>` +
+                `</div>`,
+        )
+
+        // Lazy + never opened: the consumer's content is theirs to keep in the DOM,
+        // so laziness is a paint optimisation (`content-visibility`) rather than a
+        // detach — detaching a node react-dom created is the very bug rule 1 exists
+        // to stop.
+        this.classList.toggle('tc-modal--deferred', this.lazy && !this._contentMounted)
     }
 
     private _mountContent(): void {
-        const body = this.querySelector('.modal-body')
-        if (body) this._bodyNodes.forEach((n) => body.appendChild(n))
-        const footer = this.querySelector('.modal-footer')
-        if (footer) this._footerNodes.forEach((n) => footer.appendChild(n))
+        this._contentMounted = true
+        this.classList.remove('tc-modal--deferred')
     }
 }
 

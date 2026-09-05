@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-slices-card'
 
@@ -127,27 +128,30 @@ export class SlicesCard extends HTMLElement {
             const strokeWidth = this.strokeWidth
             const radius = (size - strokeWidth) / 2
 
-            this.innerHTML = [
-                '<div class="card tc-slices-card" aria-hidden="true">',
-                '<div class="card-body tc-slices-card-body">',
-                '<div class="tc-slices-card-skeleton tc-slices-card-skeleton--title"></div>',
-                '<div class="tc-slices-card-chart">',
-                `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" aria-hidden="true">`,
-                `<circle cx="${half}" cy="${half}" r="${radius}" fill="none"`,
-                ` stroke="currentColor" stroke-width="${strokeWidth}"`,
-                ` class="tc-slices-card-skeleton-ring"`,
-                `/>`,
-                '</svg>',
-                '</div>',
-                '<ul class="tc-slices-card-legend" aria-hidden="true">',
-                '<li class="tc-slices-card-legend-item"><div class="tc-slices-card-skeleton tc-slices-card-skeleton--legend"></div></li>',
-                '<li class="tc-slices-card-legend-item"><div class="tc-slices-card-skeleton tc-slices-card-skeleton--legend"></div></li>',
-                '<li class="tc-slices-card-legend-item"><div class="tc-slices-card-skeleton tc-slices-card-skeleton--legend"></div></li>',
-                '</ul>',
-                '</div>',
-                '</div>',
-                '<span class="visually-hidden">Loading…</span>',
-            ].join('')
+            patchHtml(
+                this,
+                [
+                    '<div class="card tc-slices-card" aria-hidden="true">',
+                    '<div class="card-body tc-slices-card-body">',
+                    '<div class="tc-slices-card-skeleton tc-slices-card-skeleton--title"></div>',
+                    '<div class="tc-slices-card-chart">',
+                    `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" aria-hidden="true">`,
+                    `<circle cx="${half}" cy="${half}" r="${radius}" fill="none"`,
+                    ` stroke="currentColor" stroke-width="${strokeWidth}"`,
+                    ` class="tc-slices-card-skeleton-ring"`,
+                    `/>`,
+                    '</svg>',
+                    '</div>',
+                    '<ul class="tc-slices-card-legend" aria-hidden="true">',
+                    '<li class="tc-slices-card-legend-item"><div class="tc-slices-card-skeleton tc-slices-card-skeleton--legend"></div></li>',
+                    '<li class="tc-slices-card-legend-item"><div class="tc-slices-card-skeleton tc-slices-card-skeleton--legend"></div></li>',
+                    '<li class="tc-slices-card-legend-item"><div class="tc-slices-card-skeleton tc-slices-card-skeleton--legend"></div></li>',
+                    '</ul>',
+                    '</div>',
+                    '</div>',
+                    '<span class="visually-hidden">Loading…</span>',
+                ].join(''),
+            )
             return
         }
 
@@ -215,15 +219,18 @@ export class SlicesCard extends HTMLElement {
 
         const legendHtml = `<ul class="tc-slices-card-legend" role="list" aria-label="Slice breakdown">${legendItemsHtml}</ul>`
 
-        this.innerHTML = [
-            '<div class="card tc-slices-card">',
-            headerHtml,
-            '<div class="card-body tc-slices-card-body">',
-            svgHtml,
-            legendHtml,
-            '</div>',
-            '</div>',
-        ].join('')
+        patchHtml(
+            this,
+            [
+                '<div class="card tc-slices-card">',
+                headerHtml,
+                '<div class="card-body tc-slices-card-body">',
+                svgHtml,
+                legendHtml,
+                '</div>',
+                '</div>',
+            ].join(''),
+        )
     }
 }
 

@@ -1,3 +1,4 @@
+import { setHostClass } from './internal/host-class'
 const TAG_NAME = 'tc-breadcrumb'
 
 export class Breadcrumb extends HTMLElement {
@@ -12,43 +13,33 @@ export class Breadcrumb extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            const ol = this.querySelector('ol.breadcrumb')
-            if (ol) slotContent.forEach((n) => ol.appendChild(n))
-            this._updateDivider()
-            this._initialised = true
-        }
+        this._initialised = true
+        this.render()
+        this._updateDivider()
     }
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
+        this.render()
         this._updateDivider()
     }
 
-    get divider(): string | null {
-        return this.getAttribute('divider')
-    }
-    set divider(v: string | null) {
-        if (v != null) this.setAttribute('divider', v)
-        else this.removeAttribute('divider')
-    }
-
     private _updateDivider(): void {
-        const nav = this.querySelector<HTMLElement>('nav')
-        if (!nav) return
         const d = this.getAttribute('divider')
         if (d != null) {
             const escaped = d.replace(/'/g, "\\'")
-            nav.style.setProperty('--bs-breadcrumb-divider', `'${escaped}'`)
+            this.style.setProperty('--bs-breadcrumb-divider', `'${escaped}'`)
         } else {
-            nav.style.removeProperty('--bs-breadcrumb-divider')
+            this.style.removeProperty('--bs-breadcrumb-divider')
         }
     }
 
+    /** THE HOST IS THE TRAIL: `.breadcrumb` and the navigation semantics land on
+     *  the consumer's own tag, so their crumbs are never re-parented (rule 1). */
     private render(): void {
-        this.innerHTML = `<nav aria-label="breadcrumb"><ol class="breadcrumb"></ol></nav>`
+        setHostClass(this, 'breadcrumb')
+        this.setAttribute('role', 'navigation')
+        this.setAttribute('aria-label', 'breadcrumb')
     }
 }
 

@@ -11,7 +11,7 @@
 // are re-issued here.
 //
 // NOTE: the gold secondary sits near the semantic warning amber (--ah-warn:
-// #f0b35e); warning badges/alerts keep their own hue but read as cousins here.
+// #f5b342); warning badges/alerts keep their own hue but read as cousins here.
 // Use with: <tc-theme name="aurora" variant="ember"> … </tc-theme>
 
 @use '../../../foundation/tokens' as *;

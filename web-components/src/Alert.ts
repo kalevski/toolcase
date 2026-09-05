@@ -2,8 +2,8 @@ import { VARIANTS_FULL } from './internal/variants'
 import { setHostClass } from './internal/host-class'
 import { Alert as BsAlert } from './internal/Alert'
 import { closeIcon } from './icons'
-import { esc } from './internal/esc'
 import { msg } from './messages'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-alert'
 
@@ -12,26 +12,29 @@ export type AlertVariant =
 
 const VARIANTS: AlertVariant[] = [...VARIANTS_FULL]
 
+/**
+ * tc-alert — THE HOST IS THE ALERT.
+ *
+ * It renders no wrapper and never moves your children. Before 5.1 it captured its
+ * child nodes and re-appended them inside a `.tc-alert-content` span — a span with
+ * no styling attached to it at all, whose only effect was to make react-dom throw
+ * `NotFoundError` from `parentInstance.removeChild(child)` when it removed one of
+ * those children individually. The only node this element creates is the dismiss
+ * button, and it is APPENDED.
+ */
 export class Alert extends HTMLElement {
     private _bsAlert: BsAlert | null = null
-    private _initialised = false
+    private _built = false
 
     static get observedAttributes(): string[] {
-        return ['variant', 'dismissible']
-    }
-
-    constructor() {
-        super()
+        // `class` is observed so the element can re-assert its own classes after
+        // react-dom overwrites `className` wholesale — see setHostClass.
+        return ['variant', 'dismissible', 'class']
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            const inner = this.querySelector('.tc-alert-content')
-            if (inner) slotContent.forEach((n) => inner.appendChild(n))
-            this._initialised = true
-        }
+        this._built = true
+        this.patch()
         this._initBsAlert()
     }
 
@@ -39,14 +42,18 @@ export class Alert extends HTMLElement {
         this._teardown()
     }
 
-    attributeChangedCallback(): void {
-        if (!this.isConnected || !this._initialised) return
+    attributeChangedCallback(name: string): void {
+        if (!this.isConnected || !this._built) return
+        // A `class` change is either the element's own write settling or react-dom
+        // overwriting `className`; re-asserting the classes is all it needs, and
+        // tearing the Bootstrap behaviour down and back up for it would churn on
+        // every render.
+        if (name === 'class') {
+            this.patch()
+            return
+        }
         this._teardown()
-        const inner = this.querySelector('.tc-alert-content')
-        const slotContent = inner ? Array.from(inner.childNodes) : []
-        this.render()
-        const newInner = this.querySelector('.tc-alert-content')
-        if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
+        this.patch()
         this._initBsAlert()
     }
 
@@ -55,7 +62,7 @@ export class Alert extends HTMLElement {
         return VARIANTS.includes(v) ? v : 'primary'
     }
     set variant(v: AlertVariant) {
-        this.setAttribute('variant', v)
+        setAttr(this, 'variant', v)
     }
 
     get dismissible(): boolean {
@@ -78,15 +85,30 @@ export class Alert extends HTMLElement {
         this.dispatchEvent(new CustomEvent('tc-closed', { bubbles: true, composed: true }))
     }
 
-    private render(): void {
-        const variant = this.variant
+    /** In place: host classes, plus the one node the element owns. */
+    private patch(): void {
         const dismissible = this.dismissible
         this.setAttribute('role', 'alert')
         setHostClass(
             this,
-            `alert alert-${variant}${dismissible ? ' alert-dismissible fade show' : ''}`,
+            `alert alert-${this.variant}${dismissible ? ' alert-dismissible fade show' : ''}`,
         )
-        this.innerHTML = `<span class="tc-alert-content"></span>${dismissible ? `<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="${esc(msg('close'))}">${closeIcon}</button>` : ''}`
+
+        const existing = this.querySelector<HTMLButtonElement>(':scope > .btn-close')
+        if (!dismissible) {
+            existing?.remove()
+            return
+        }
+        if (existing) return
+        // Appended, not wrapped around anything. `.alert-dismissible` positions it
+        // absolutely, so its place in the child list is not a layout decision.
+        const button = document.createElement('button')
+        button.type = 'button'
+        button.className = 'btn-close'
+        button.setAttribute('data-bs-dismiss', 'alert')
+        button.setAttribute('aria-label', msg('close'))
+        button.innerHTML = closeIcon
+        this.append(button)
     }
 
     private _initBsAlert(): void {

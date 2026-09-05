@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { msg } from './messages'
 import { fieldMessageHtml } from './internal/field-message'
@@ -10,6 +11,7 @@ import {
 import { fixedOriginOffset } from './internal/containingBlock'
 import { X, Clock } from 'lucide-static'
 import { icon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-time-picker'
 
@@ -166,7 +168,7 @@ export class TimePicker extends HTMLElement {
         return v && FORMATS.includes(v) ? v : '24h'
     }
     set format(v: TimePickerFormat) {
-        this.setAttribute('format', v)
+        setAttr(this, 'format', v)
     }
 
     get minuteStep(): number {
@@ -687,20 +689,23 @@ export class TimePicker extends HTMLElement {
             validText: 'Looks good!',
         })
 
-        this.innerHTML = [
-            `<div class="tc-time-picker">`,
-            labelHtml,
-            `<div class="tc-time-picker-control">`,
-            `<button class="${triggerClass}" type="button" aria-haspopup="dialog" aria-expanded="false"${labelledBy}${describedBy}${requiredAttr}${disabledAttr}>`,
-            `<span class="${valueClass}">${esc(hasValue ? (display as string) : placeholder)}</span>`,
-            `</button>`,
-            `<span class="tc-time-picker-icon" aria-hidden="true"${showClear ? ' hidden' : ''}>${clockIconHtml}</span>`,
-            clearHtml,
-            `<div class="tc-time-picker-panel" role="dialog" aria-label="Choose time">${columnsHtml}</div>`,
-            `</div>`,
-            messageHtml,
-            `</div>`,
-        ].join('')
+        patchHtml(
+            this,
+            [
+                `<div class="tc-time-picker">`,
+                labelHtml,
+                `<div class="tc-time-picker-control">`,
+                `<button class="${triggerClass}" type="button" aria-haspopup="dialog" aria-expanded="false"${labelledBy}${describedBy}${requiredAttr}${disabledAttr}>`,
+                `<span class="${valueClass}">${esc(hasValue ? (display as string) : placeholder)}</span>`,
+                `</button>`,
+                `<span class="tc-time-picker-icon" aria-hidden="true"${showClear ? ' hidden' : ''}>${clockIconHtml}</span>`,
+                clearHtml,
+                `<div class="tc-time-picker-panel" role="dialog" aria-label="Choose time">${columnsHtml}</div>`,
+                `</div>`,
+                messageHtml,
+                `</div>`,
+            ].join(''),
+        )
 
         this._paintOptions()
         this._wireEvents()
@@ -709,7 +714,7 @@ export class TimePicker extends HTMLElement {
     private _wireEvents(): void {
         const trigger = this._trigger()
         if (trigger) {
-            trigger.addEventListener('click', () => {
+            bindOnce(trigger, 'click', () => {
                 if (this._isOpen) this._close(false)
                 else this._open()
             })
@@ -717,7 +722,7 @@ export class TimePicker extends HTMLElement {
 
         const panel = this._panel()
         if (panel) {
-            panel.addEventListener('click', (e: Event) => {
+            bindOnce(panel, 'click', (e: Event) => {
                 const opt = (e.target as HTMLElement).closest<HTMLButtonElement>(
                     '.tc-time-picker-option',
                 )
@@ -727,7 +732,7 @@ export class TimePicker extends HTMLElement {
 
         const clearBtn = this.querySelector<HTMLButtonElement>('.tc-time-picker-clear')
         if (clearBtn) {
-            clearBtn.addEventListener('click', (e: Event) => {
+            bindOnce(clearBtn, 'click', (e: Event) => {
                 e.stopPropagation()
                 this._clear()
             })

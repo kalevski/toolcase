@@ -12,3 +12,9 @@ tc-form {
         display: block;
     }
 }
+
+// tc-form keeps a real <form>, but beside the consumer's fields rather than around
+// them (rule 1): it owns them through the `form` attribute. It paints nothing.
+.tc-form-owner {
+    display: none;
+}

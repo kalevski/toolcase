@@ -1,37 +1,45 @@
 // Host-class merge for components that own their host `class` attribute.
 //
-// Several components (tc-modal, tc-alert, tc-card, …) assign `this.className`
-// wholesale during render, which silently wipes any classes the consumer
-// authored on the tag — the classic React gotcha where `className` on a tc-*
-// element "does nothing" because the first render clobbers it. This helper
-// snapshots the consumer-authored classes on first use (before the component
-// has added anything) and re-merges them into every subsequent assignment.
+// Several components (tc-badge, tc-alert, tc-card, tc-modal, …) own the host's
+// `class` attribute, which means assigning `this.className` wholesale would wipe
+// whatever the consumer authored on the tag — the classic React gotcha where
+// `className` on a tc-* element "does nothing" because the first render clobbers
+// it. This helper keeps the two sets apart: it remembers what the COMPONENT wrote
+// and treats everything else currently on the host as the consumer's, so the merge
+// is correct in both directions and stays correct when react-dom later rewrites
+// `className` behind the element's back.
 
 // Structural host type: Offcanvas overrides `scroll` with a boolean attribute
 // prop, so it is not assignable to Element/HTMLElement — className + classList
 // are all this helper needs.
 type ClassHost = { className: string; classList: DOMTokenList }
 
-const AUTHORED = new WeakMap<ClassHost, string[]>()
+// What the COMPONENT last wrote. Everything else on the host is the consumer's,
+// re-read on every call rather than snapshotted once — React rewrites `className`
+// wholesale whenever its value changes, so a one-time snapshot would keep
+// resurrecting the class the consumer had at mount and lose the one they have now.
+const APPLIED = new WeakMap<ClassHost, string[]>()
 
-/** Replace the host's class list with `classes` + the consumer-authored
- *  classes captured on first call. Use instead of `this.className = …`. */
+/**
+ * Replace the host's class list with `classes`, preserving whatever the consumer
+ * authored on the tag. Use instead of `this.className = …`.
+ *
+ * Re-running it after React has overwritten `className` restores the component's
+ * classes and keeps React's new ones, which is why the elements that own their
+ * host class observe `class` and call this from their patch: react-dom writes the
+ * attribute directly and never asks the element first.
+ *
+ * The write is guarded on the value actually changing, so calling this from an
+ * `attributeChangedCallback` for `class` settles after one pass instead of looping.
+ */
 export function setHostClass(host: ClassHost, classes: string): void {
-    let authored = AUTHORED.get(host)
-    if (!authored) {
-        // First call happens during the first render, before the component has
-        // written any classes — everything present was authored by the consumer.
-        authored = Array.from(host.classList)
-        AUTHORED.set(host, authored)
-    }
+    const applied = APPLIED.get(host) ?? []
+    const authored = Array.from(host.classList).filter((c) => !applied.includes(c))
+    const own = classes.split(/\s+/).filter(Boolean)
     // Set dedupes while preserving insertion order: component classes first,
     // then any consumer-authored classes not already present.
-    const merged = new Set<string>()
-    for (const c of classes.split(/\s+/)) {
-        if (c) merged.add(c)
-    }
-    for (const c of authored) {
-        merged.add(c)
-    }
-    host.className = [...merged].join(' ')
+    const merged = [...new Set([...own, ...authored])]
+    APPLIED.set(host, own)
+    const value = merged.join(' ')
+    if (host.className !== value) host.className = value
 }

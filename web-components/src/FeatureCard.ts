@@ -1,6 +1,8 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-feature-card'
 
@@ -114,7 +116,7 @@ export class FeatureCard extends HTMLElement {
         return SIZES.includes(v) ? v : 'default'
     }
     set size(v: FeatureCardSize) {
-        this.setAttribute('size', v)
+        setAttr(this, 'size', v)
     }
 
     get inline(): boolean {
@@ -152,19 +154,22 @@ export class FeatureCard extends HTMLElement {
         const descAttr = this.getAttribute('description')
         const descInner = hasDescSlot ? '' : descAttr ? esc(descAttr) : ''
 
-        this.innerHTML = [
-            `<div class="tc-feature-card${sizeClass}${inlineClass}">`,
-            '<div class="tc-feature-card-head">',
-            `<div class="tc-feature-card-icon" aria-hidden="true">${iconInner}</div>`,
-            '<div class="tc-feature-card-copy">',
-            `<div class="tc-feature-card-eyebrow">${eyebrowInner}</div>`,
-            `<div class="tc-feature-card-title">${titleInner}</div>`,
-            `<div class="tc-feature-card-description">${descInner}</div>`,
-            '</div>',
-            '</div>',
-            '<div class="tc-feature-card-visual"></div>',
-            '</div>',
-        ].join('')
+        patchHtml(
+            this,
+            [
+                `<div class="tc-feature-card${sizeClass}${inlineClass}">`,
+                '<div class="tc-feature-card-head">',
+                `<div class="tc-feature-card-icon" aria-hidden="true">${iconInner}</div>`,
+                '<div class="tc-feature-card-copy">',
+                `<div class="tc-feature-card-eyebrow">${eyebrowInner}</div>`,
+                `<div class="tc-feature-card-title">${titleInner}</div>`,
+                `<div class="tc-feature-card-description">${descInner}</div>`,
+                '</div>',
+                '</div>',
+                '<div class="tc-feature-card-visual"></div>',
+                '</div>',
+            ].join(''),
+        )
     }
 }
 

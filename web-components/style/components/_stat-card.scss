@@ -46,10 +46,67 @@ tc-stat-card {
     --bs-card-spacer-x: var(--bs-stat-card-padding-x);
 }
 
+// The card body is the host itself. Every region is placed by `order`, including
+// the consumer's own children, which take the value row's slot — rule 1 orders
+// with CSS rather than moving anything.
 .tc-stat-card-body {
     display: flex;
     flex-direction: column;
     gap: 0.375rem;
+}
+
+// !important: the host also carries the Bootstrap `card` class (for the
+// --bs-card-* chrome vars — background/border/shadow live on `.card`, not
+// here), and `.card`'s own generic content selector
+// (`.card > :not([slot='header'])...`) is a `:not()` chain that out-specifies
+// a plain `.tc-stat-card > .tc-stat-card-*` rule (0,5,1) vs (0,2,0)) and would
+// otherwise flatten every region here to its own `order: 4`. That coincidence
+// only looks harmless when DOM order already matches: a slotted value (no
+// `value` attribute) combined with `delta`/`helper`/`footer` gets its owned
+// regions inserted ahead of the pre-existing slotted node (patchHtml always
+// anchors freshly-created siblings at the last matched position), so without
+// a hard win here the delta/footer rows render above the slotted value.
+.tc-stat-card > * {
+    order: 3 !important;
+}
+
+.tc-stat-card > .tc-stat-card-header {
+    order: 1 !important;
+}
+
+.tc-stat-card > .tc-stat-card-value-row {
+    order: 2 !important;
+}
+
+.tc-stat-card > .tc-stat-card-delta-row {
+    order: 4 !important;
+}
+
+.tc-stat-card > .tc-stat-card-helper {
+    order: 5 !important;
+}
+
+.tc-stat-card > .tc-stat-card-footer-row {
+    order: 6 !important;
+}
+
+// A slotted value reads like an attribute one.
+.tc-stat-card > :not([class^='tc-stat-card']):not(.visually-hidden) {
+    font-family: 'JetBrains Mono', var(--bs-font-monospace, monospace);
+    font-size: var(--bs-stat-card-value-font-size);
+    font-weight: var(--bs-stat-card-value-font-weight);
+    line-height: 1.1;
+    color: var(--bs-stat-card-value-color);
+}
+
+// The shared `.card` partial only grants a content row top padding when it is
+// `.card-title:first-of-type` or follows a literal `[slot='header']` element
+// (tc-card's own slot API) — neither ever matches here (this component has no
+// slots), so without this the card's first row — the header normally, the
+// label skeleton while loading — would sit flush against the top border with
+// no inner padding at all.
+.tc-stat-card > :first-child {
+    padding-top: var(--bs-stat-card-padding-y);
 }
 
 // Header row: icon tile + label (on the same baseline row).
@@ -201,8 +258,14 @@ tc-stat-card {
 }
 
 // Footer row — sits below the card-body, separated by the card hairline.
+// !important on padding: the shared `.card > :last-child:not([slot='footer'])
+// ...` rule (higher specificity than a bare class here) grants the card's
+// last content row a full `--bs-card-spacer-y` bottom padding — which this
+// row always is when a footer is rendered — and would otherwise stretch its
+// intentionally-tighter 0.75x footer padding back out on the bottom edge only,
+// breaking the strip's top/bottom symmetry.
 .tc-stat-card-footer-row {
-    padding: calc(var(--bs-stat-card-padding-y) * 0.75) var(--bs-stat-card-padding-x);
+    padding: calc(var(--bs-stat-card-padding-y) * 0.75) var(--bs-stat-card-padding-x) !important;
     border-top: 1px solid var(--bs-stat-card-footer-border-color);
     background: var(--bs-stat-card-footer-bg);
 }

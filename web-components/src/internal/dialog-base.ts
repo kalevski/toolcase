@@ -1,4 +1,4 @@
-import { esc as escShared } from "./esc"
+import { esc as escShared } from './esc'
 import { lockBody, unlockBody } from './scroll-lock'
 import { overlayStack } from './overlay-stack'
 // Shared scaffold for centered modal dialogs (tc-confirm-dialog,
@@ -20,7 +20,7 @@ function getFocusable(root: Element): HTMLElement[] {
         root.querySelectorAll<HTMLElement>(
             'a[href],area[href],button:not([disabled]),details>summary,[tabindex]:not([tabindex="-1"]),input:not([disabled]),select:not([disabled]),textarea:not([disabled])',
         ),
-    ).filter(el => !el.closest('[hidden]') && el.tabIndex >= 0)
+    ).filter((el) => !el.closest('[hidden]') && el.tabIndex >= 0)
 }
 
 export abstract class DialogBase extends HTMLElement {

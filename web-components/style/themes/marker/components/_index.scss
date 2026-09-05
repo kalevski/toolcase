@@ -1,0 +1,16 @@
+// Marker theme — component override partials.
+//
+// The foundation token remap (../_foundation.scss) already re-skins every tc-*
+// component's colours, borders, type and shadows. These four partials carry only
+// what a flat token swap cannot:
+//
+//   type     the display face and its tracking, plus tabular figures
+//   button   the yellow fill's dark ink — white on it is ~1.9:1
+//   surface  paper cards held by a hairline rather than a shadow
+//   marks    the closed list of surfaces the highlighter is allowed on
+
+@forward 'type';
+@forward 'button';
+@forward 'surface';
+@forward 'marks';
+@forward 'rarity-chip';

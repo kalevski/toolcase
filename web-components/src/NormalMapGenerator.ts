@@ -1,4 +1,7 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { cssLength } from './internal/cssLength'
+import { sourceUrl } from './internal/safe-dom'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-normal-map-generator'
 
@@ -378,6 +381,7 @@ export class NormalMapGenerator extends HTMLElement {
     private _panStart: { x: number; y: number; px: number; py: number } | null = null
     private _moveHandler: ((e: PointerEvent) => void) | null = null
     private _upHandler: (() => void) | null = null
+    private _placeholderColorCache: string | null = null
 
     /** Optional callback mirroring the `tc-generate` event. */
     onGenerate: ((output: NormalMapOutput) => void) | null = null
@@ -619,7 +623,7 @@ export class NormalMapGenerator extends HTMLElement {
         return TOOLS.includes(v) ? v : 'brush'
     }
     set tool(v: EditorTool) {
-        this.setAttribute('tool', v)
+        setAttr(this, 'tool', v)
     }
 
     /** Brush radius in source px. */
@@ -649,7 +653,7 @@ export class NormalMapGenerator extends HTMLElement {
         return this.getAttribute('mask-color') ?? DEFAULT_MASK_COLOR
     }
     set maskColor(v: string) {
-        this.setAttribute('mask-color', v)
+        setAttr(this, 'mask-color', v)
     }
 
     get maskOpacity(): number {
@@ -666,7 +670,7 @@ export class NormalMapGenerator extends HTMLElement {
         return PREVIEW_MODES.includes(v) ? v : 'normal'
     }
     set previewMode(v: PreviewMode) {
-        this.setAttribute('preview-mode', v)
+        setAttr(this, 'preview-mode', v)
     }
 
     /** Lambert light position (x/y normalised over the sprite, z in front of it). */
@@ -687,7 +691,7 @@ export class NormalMapGenerator extends HTMLElement {
         return LIGHT_TRACKINGS.includes(v) ? v : 'pointer'
     }
     set lightTracking(v: LightTracking) {
-        this.setAttribute('light-tracking', v)
+        setAttr(this, 'light-tracking', v)
     }
 
     get ambient(): number {
@@ -725,7 +729,7 @@ export class NormalMapGenerator extends HTMLElement {
         return this.getAttribute('placeholder') ?? DEFAULT_PLACEHOLDER
     }
     set placeholder(v: string) {
-        this.setAttribute('placeholder', v)
+        setAttr(this, 'placeholder', v)
     }
 
     get disabled(): boolean {
@@ -787,22 +791,19 @@ export class NormalMapGenerator extends HTMLElement {
     // ── Image loading + ingest ───────────────────────────────────────────────────
 
     private _loadSource(src: string | File | Blob | null): void {
-        if (src == null || src === '') {
+        // Anything that is not a URL string or a Blob is not a source. React hands
+        // a prop through as-is, and URL.createObjectURL throws a TypeError on a
+        // number, a boolean or a plain object — from inside this setter, where the
+        // consumer has no way to catch it.
+        const resolved = sourceUrl(src)
+        if (resolved === null) {
             this._img = null
             this._albedo = null
             this._normal = null
             this._renderPreview()
             return
         }
-        let url: string
-        let revoke = false
-        if (typeof src === 'string') {
-            url = src
-        } else {
-            // oxlint-disable-next-line react-doctor/no-create-object-url-without-revoke -- revoked in both onload and onerror below; static analysis cannot prove callback-based disposal
-            url = URL.createObjectURL(src)
-            revoke = true
-        }
+        const { url, revoke } = resolved
         const img = new Image()
         img.crossOrigin = 'anonymous'
         img.onload = () => {
@@ -914,6 +915,26 @@ export class NormalMapGenerator extends HTMLElement {
 
     // ── Preview rendering ────────────────────────────────────────────────────────
 
+    // Resolves --bs-normal-map-generator-placeholder-color to a concrete CSS
+    // colour for the canvas-drawn empty-state text. getComputedStyle returns
+    // custom properties *unresolved* (the raw `var(...)` token), so a hidden
+    // probe element forces var() substitution via the real `color` property —
+    // same pattern as PhysicsEditor's `_palette()`. Cached; invalidated in
+    // `render()` (the only place the theme context could have changed under it).
+    private _placeholderColor(): string {
+        if (this._placeholderColorCache) return this._placeholderColorCache
+        const probe = document.createElement('span')
+        probe.style.position = 'absolute'
+        probe.style.visibility = 'hidden'
+        probe.style.pointerEvents = 'none'
+        probe.style.color = 'var(--bs-normal-map-generator-placeholder-color, #64748b)'
+        this.appendChild(probe)
+        const resolved = getComputedStyle(probe).color || '#64748b'
+        this.removeChild(probe)
+        this._placeholderColorCache = resolved
+        return resolved
+    }
+
     private _syncLightFromAttributes(): void {
         this._light = {
             x: numAttr(this, 'light-x', DEFAULT_LIGHT.x),
@@ -980,11 +1001,13 @@ export class NormalMapGenerator extends HTMLElement {
         ctx.clearRect(0, 0, displayW, displayH)
 
         if (!this._albedo || this._width === 0) {
-            ctx.fillStyle = 'rgba(100, 116, 139, 0.8)'
+            ctx.fillStyle = this._placeholderColor()
+            ctx.globalAlpha = 0.8
             ctx.font = '13px system-ui, sans-serif'
             ctx.textAlign = 'center'
             ctx.textBaseline = 'middle'
             ctx.fillText(this.placeholder, displayW / 2, displayH / 2)
+            ctx.globalAlpha = 1
             return
         }
 
@@ -1173,14 +1196,17 @@ export class NormalMapGenerator extends HTMLElement {
     // ── Markup ───────────────────────────────────────────────────────────────────
 
     private render(): void {
+        this._placeholderColorCache = null
         const disabled = this.disabled
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-normal-map-generator${disabled ? ' tc-normal-map-generator--disabled' : ''}"${disabled ? ' aria-disabled="true"' : ''}>` +
-            `<div class="tc-nmg-stage">` +
-            `<canvas class="tc-nmg-canvas" aria-label="Normal map preview and editing canvas"></canvas>` +
-            `</div>` +
-            `</div>`
+                `<div class="tc-nmg-stage">` +
+                `<canvas class="tc-nmg-canvas" aria-label="Normal map preview and editing canvas"></canvas>` +
+                `</div>` +
+                `</div>`,
+        )
 
         this._previewCanvas = this.querySelector<HTMLCanvasElement>('.tc-nmg-canvas')
 
@@ -1189,8 +1215,8 @@ export class NormalMapGenerator extends HTMLElement {
         if (!this._normalCanvas) this._normalCanvas = document.createElement('canvas')
 
         if (this._previewCanvas) {
-            this._previewCanvas.addEventListener('pointerdown', this._onPointerDown)
-            this._previewCanvas.addEventListener('pointermove', this._onPointerHover)
+            bindOnce(this._previewCanvas, 'pointerdown', this._onPointerDown)
+            bindOnce(this._previewCanvas, 'pointermove', this._onPointerHover)
         }
     }
 }

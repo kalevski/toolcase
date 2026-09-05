@@ -161,27 +161,19 @@ tc-theme[name='blueprint'],
     }
 
     // ── Stat pulse dot — teal circle + teal halo ─────────────────────────────
-    // Replace the hardcoded rgba(22,163,74,*) keyframe (green) with blueprint
-    // teal tokens. The animation name is the same (tc-esf-pulse); we override
-    // the static box-shadow so the resting state matches.
+    // --bs-early-signup-form-success-color is already set to --bp-success
+    // (== --bp-teal) above, so the base partial's tc-esf-pulse keyframe
+    // (which now animates through that token, not a hardcoded green) already
+    // pulses teal with no keyframe redeclaration here — @keyframes can't be
+    // selector-scoped (Sass hoists any nested @keyframes to the stylesheet's
+    // top level), so a theme-scoped redeclaration would only clobber every
+    // other theme's pulse color rather than override just this one. Only the
+    // resting halo's softer alpha needs its own override:
 
     .tc-early-signup-form__stat-pulse {
         background: var(--bp-teal);
         // Resting halo uses teal-soft so it complements rather than glows cold.
         box-shadow: 0 0 0 0 var(--bp-teal-soft);
-    }
-
-    // Re-declare the keyframe within the theme scope so the teal color is used.
-    @keyframes tc-esf-pulse {
-        0% {
-            box-shadow: 0 0 0 0 var(--bp-teal-soft);
-        }
-        70% {
-            box-shadow: 0 0 0 6px transparent;
-        }
-        100% {
-            box-shadow: 0 0 0 0 transparent;
-        }
     }
 
     // ── Helper footnote — blueprint mono ─────────────────────────────────────

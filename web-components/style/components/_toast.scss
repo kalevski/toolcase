@@ -24,6 +24,12 @@
     width: max-content;
     min-width: 230px;
     max-width: min(var(--bs-toast-max-width), 100%);
+    // The body is the consumer's own children (rule 1 — never wrapped in a
+    // `.toast-body` element), and per the docs that's typically a bare text run,
+    // which no CSS selector can target. Padding lives on the container itself so
+    // it reaches text nodes too; `.toast-header` bleeds back out to the edges
+    // below.
+    padding: var(--bs-toast-padding-y) var(--bs-toast-padding-x);
     font-size: var(--bs-toast-font-size);
     color: var(--bs-toast-color);
     pointer-events: auto;
@@ -45,6 +51,12 @@
 .toast-header {
     display: flex;
     align-items: center;
+    // Cancel the container's own padding on three sides so the header still
+    // spans full-bleed to the border (its border-bottom needs to touch both
+    // edges); the container's padding-top comes back as margin-bottom so the
+    // body content that follows keeps the same gap it always had.
+    margin: calc(-1 * var(--bs-toast-padding-y)) calc(-1 * var(--bs-toast-padding-x))
+        var(--bs-toast-padding-y);
     padding: var(--bs-toast-padding-y) var(--bs-toast-padding-x);
     font-weight: 600;
     color: var(--bs-toast-header-color);
@@ -69,11 +81,6 @@
             background-color: rgba(255, 255, 255, 0.15);
         }
     }
-}
-
-.toast-body {
-    padding: var(--bs-toast-padding-y) var(--bs-toast-padding-x);
-    word-wrap: break-word;
 }
 
 // Variant toasts (text-bg-*) — stay on the ink; status is a 3px left stripe,

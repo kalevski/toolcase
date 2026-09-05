@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 
 // tc-notice — the inline aside: a 3px coloured rule down the left edge, a wash of the
@@ -169,7 +170,7 @@ export class Notice extends HTMLElement {
         const label = this.label
         const shape = `${iconName ?? ''}/${label == null ? '' : 'label'}`
         if (shape !== this._builtFor || !this.firstElementChild) {
-            this.innerHTML = this._skeleton(iconName, label != null)
+            patchHtml(this, this._skeleton(iconName, label != null))
             this._builtFor = shape
         }
         this._patch()

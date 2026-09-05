@@ -1,6 +1,8 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-linked-providers-card'
 
@@ -53,14 +55,14 @@ export class LinkedProvidersCard extends HTMLElement {
         return this.getAttribute('title') ?? DEFAULT_TITLE
     }
     set title(v: string) {
-        this.setAttribute('title', v)
+        setAttr(this, 'title', v)
     }
 
     get emptyLabel(): string {
         return this.getAttribute('empty-label') ?? DEFAULT_EMPTY_LABEL
     }
     set emptyLabel(v: string) {
-        this.setAttribute('empty-label', v)
+        setAttr(this, 'empty-label', v)
     }
 
     get providers(): LinkedProvider[] {
@@ -106,7 +108,7 @@ export class LinkedProvidersCard extends HTMLElement {
     }
 
     private _resolveActionIcon(connected: boolean): string {
-        const candidates = connected ? ['Unlink', 'LinkOff', 'Link'] : ['Link', 'LinkIcon']
+        const candidates = connected ? ['Unlink', 'Link2Off', 'Link'] : ['Link', 'Link2']
         for (const name of candidates) {
             const svgStr = (LucideIcons as Record<string, string>)[name]
             if (svgStr) return icon(svgStr, 'tc-linked-providers-card__action-icon')
@@ -174,7 +176,10 @@ export class LinkedProvidersCard extends HTMLElement {
             contentHtml = `<ul class="tc-linked-providers-card__list" role="list">${rows}</ul>`
         }
 
-        this.innerHTML = `<div class="card tc-linked-providers-card">${headerHtml}${contentHtml}</div>`
+        patchHtml(
+            this,
+            `<div class="card tc-linked-providers-card">${headerHtml}${contentHtml}</div>`,
+        )
     }
 }
 

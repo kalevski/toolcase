@@ -1,0 +1,41 @@
+// Marker Crimson variant — electric red marker, coral secondary.
+//
+// Swaps ONLY the marker's own hue family (--mk-lead*) and the secondary
+// highlight (--tc-accent*). The paper canvas, the graphite ink ramp, the
+// hairlines, the cool shadows and the type are the theme and are untouched —
+// this is the standard eleven-variant set shared by every bundled theme.
+//
+// `--mk-on-lead` is the label ON the fill, and it is chosen per variant rather
+// than fixed: #ffffff is what clears AA against #dc2626. A theme whose whole idea
+// is one marked colour cannot afford an unreadable label on the marked thing.
+//
+// Use with: <tc-theme name="marker" variant="crimson"> … </tc-theme>
+
+tc-theme[name='marker'][variant='crimson'],
+[data-tc-theme='marker'][data-tc-variant='crimson'] {
+    // ── The marker ───────────────────────────────────────────────────────────
+    --mk-lead: #dc2626;
+    --mk-lead-hi: #ef4444;
+    --mk-lead-lo: #b91c1c;
+    // The hue as a WORD — the step that carries text on paper.
+    --mk-lead-deep: #b91c1c;
+    --mk-lead-tint: rgba(220, 38, 38, 0.08);
+    --mk-lead-line: rgba(185, 28, 28, 0.5);
+    --mk-lead-glow: rgba(220, 38, 38, 0.32);
+    --mk-on-lead: #ffffff;
+    --mk-lead-grad: linear-gradient(135deg, #ef4444, #dc2626);
+
+    // ── Secondary highlight — links, focus, accent text ──────────────────────
+    --tc-accent: #e11d48;
+    --tc-accent-fg: #9f1239;
+    --tc-accent-soft: rgba(225, 29, 72, 0.12);
+    --tc-accent-hex: #e11d48;
+
+    // ── Foundation literals baked against the old hex ────────────────────────
+    --bs-primary-rgb: 220, 38, 38;
+    // --bs-warning-rgb intentionally left alone (falls back to the foundation's
+    // real amber) -- see variants/_forest.scss for why copying primary's new rgb
+    // here made warning indistinguishable from primary/success.
+    --tc-focus-ring: 0 0 0 3px rgba(185, 28, 28, 0.45);
+    --bs-focus-ring-color: rgba(185, 28, 28, 0.45);
+}

@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -112,14 +113,17 @@ export class SideNav extends HTMLElement {
                     '<span class="tc-side-nav-skeleton"></span>' +
                     '</li>',
             ).join('')
-            this.innerHTML = [
-                '<nav class="tc-side-nav" aria-label="Loading navigation">',
-                '<div class="tc-side-nav-section">',
-                '<span class="visually-hidden" role="status">Loading navigation…</span>',
-                `<ul class="tc-side-nav-list" aria-hidden="true">${rows}</ul>`,
-                '</div>',
-                '</nav>',
-            ].join('')
+            patchHtml(
+                this,
+                [
+                    '<nav class="tc-side-nav" aria-label="Loading navigation">',
+                    '<div class="tc-side-nav-section">',
+                    '<span class="visually-hidden" role="status">Loading navigation…</span>',
+                    `<ul class="tc-side-nav-list" aria-hidden="true">${rows}</ul>`,
+                    '</div>',
+                    '</nav>',
+                ].join(''),
+            )
             return
         }
 
@@ -178,7 +182,7 @@ export class SideNav extends HTMLElement {
             })
             .join('')
 
-        this.innerHTML = `<nav class="tc-side-nav">${sectionsHtml}</nav>`
+        patchHtml(this, `<nav class="tc-side-nav">${sectionsHtml}</nav>`)
     }
 }
 

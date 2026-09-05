@@ -38,8 +38,13 @@ tc-section-card {
 // ── Card shell ────────────────────────────────────────────────────────────────
 
 .tc-section-card {
-    display: flex;
-    flex-direction: column;
+    // A grid, not a flex column: the header and any `slot="action"` child share
+    // row 1, and the consumer's remaining children each take a full-width row —
+    // all placed by CSS, because moving them into a body wrapper is what rule 1
+    // forbids.
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-content: start;
     background: var(--bs-section-card-bg);
     border: 1px solid var(--bs-section-card-border-color);
     border-radius: 0;
@@ -70,6 +75,7 @@ tc-section-card {
 // ── Header ────────────────────────────────────────────────────────────────────
 
 .tc-section-card-header {
+    grid-column: 1;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -129,7 +135,13 @@ tc-section-card {
 
 // ── Action slot ───────────────────────────────────────────────────────────────
 
-.tc-section-card-action {
+.tc-section-card-action,
+.tc-section-card > [slot='action'] {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    justify-self: end;
+    padding-right: var(--bs-section-card-header-padding-x);
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -138,8 +150,25 @@ tc-section-card {
 
 // ── Body ──────────────────────────────────────────────────────────────────────
 
-.tc-section-card-body {
-    padding: var(--bs-section-card-body-padding);
+// The body is the consumer's own children, so the body padding is applied to them
+// where they stand rather than to a wrapper around them.
+.tc-section-card-body,
+.tc-section-card > :not(.tc-section-card-header):not([slot='action']) {
+    grid-column: 1 / -1;
+    padding-inline: var(--bs-section-card-body-padding);
+}
+
+// General sibling combinator, not adjacent (`+`): when the consumer's markup
+// puts a `slot="action"` element right after the header (the documented,
+// demoed order), the *first real body row* is two siblings away from the
+// header, not one — `+` would silently miss it and the body text would sit
+// flush against the header's bottom border with no gap.
+.tc-section-card > .tc-section-card-header ~ :not([slot='action']) {
+    padding-top: var(--bs-section-card-body-padding);
+}
+
+.tc-section-card > :last-child:not(.tc-section-card-header):not([slot='action']) {
+    padding-bottom: var(--bs-section-card-body-padding);
 }
 
 // Honour prefers-reduced-motion: freeze icon chip transition.

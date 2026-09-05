@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { msg } from './messages'
 import { fieldMessageHtml } from './internal/field-message'
@@ -335,15 +336,18 @@ export class CheckboxGroup extends HTMLElement {
         // Group has no single input — describe the fieldset itself.
         const describe = help || state ? ` aria-describedby="${this._helpId}"` : ''
 
-        this.innerHTML = [
-            `<fieldset class="tc-checkbox-group"${ariaRequiredAttr}${ariaInvalidAttr}${describe}>`,
-            legendHtml,
-            `<div class="${optionsClass}">`,
-            optionsHtml,
-            `</div>`,
-            messageHtml,
-            `</fieldset>`,
-        ].join('')
+        patchHtml(
+            this,
+            [
+                `<fieldset class="tc-checkbox-group"${ariaRequiredAttr}${ariaInvalidAttr}${describe}>`,
+                legendHtml,
+                `<div class="${optionsClass}">`,
+                optionsHtml,
+                `</div>`,
+                messageHtml,
+                `</fieldset>`,
+            ].join(''),
+        )
 
         if (focusedValue !== null) {
             const inputs = this.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')

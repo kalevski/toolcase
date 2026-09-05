@@ -201,8 +201,12 @@ tc-level-select {
 .tc-level-select__star--filled {
     color: var(--bs-level-select-star-filled-color);
 
+    // Inherit the selected node's ink (--bs-level-select-node-selected-color, which
+    // itself routes to --tc-app-accent-contrast) instead of a hardcoded white — themes
+    // whose accent contrast ink is dark (aurora, sunshine, redline, neon, marker) would
+    // otherwise render a near-invisible light star on their light selected-node fill.
     .tc-level-select__node--selected & {
-        color: rgba(255, 255, 255, 0.9);
+        color: inherit;
     }
 }
 

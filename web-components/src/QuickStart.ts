@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -114,7 +115,7 @@ export class QuickStart extends HTMLElement {
                       .join('')}</ol>`
                 : '<ol class="tc-quick-start"></ol>'
 
-        this.innerHTML = titleHtml + stepsHtml
+        patchHtml(this, titleHtml + stepsHtml)
     }
 }
 

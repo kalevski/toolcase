@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { msg } from './messages'
 import { fieldMessageHtml } from './internal/field-message'
@@ -7,6 +8,7 @@ import {
     reflectFieldValidity,
     dispatchFieldChange,
 } from './internal/form-field'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-otp-input'
 
 let _idCounter = 0
@@ -82,8 +84,6 @@ export class OTPInput extends HTMLElement {
         else this.removeAttribute('value')
         if (this._initialised) {
             this._patchCellValues()
-            const hidden = this.querySelector<HTMLInputElement>('input[type="hidden"]')
-            if (hidden) hidden.value = str
         }
     }
 
@@ -102,7 +102,7 @@ export class OTPInput extends HTMLElement {
         return MODES.includes(v) ? v : 'numeric'
     }
     set mode(v: OTPInputMode) {
-        this.setAttribute('mode', v)
+        setAttr(this, 'mode', v)
     }
 
     // ── masked ─────────────────────────────────────────────────────────────
@@ -156,7 +156,7 @@ export class OTPInput extends HTMLElement {
         return this.getAttribute('placeholder') ?? ''
     }
     set placeholder(v: string) {
-        this.setAttribute('placeholder', v)
+        setAttr(this, 'placeholder', v)
     }
 
     // ── disabled ─────────────────────────────────────────────────────────────
@@ -242,8 +242,6 @@ export class OTPInput extends HTMLElement {
             const len = this.length
             this._cells = Array.from({ length: len }, (_, i) => str[i] ?? '')
             this._patchCellValues()
-            const hidden = this.querySelector<HTMLInputElement>('input[type="hidden"]')
-            if (hidden) hidden.value = str
             this._syncForm()
             return
         }
@@ -410,9 +408,6 @@ export class OTPInput extends HTMLElement {
     private _syncValue(): void {
         const combined = this._cells.join('')
 
-        const hidden = this.querySelector<HTMLInputElement>('input[type="hidden"]')
-        if (hidden) hidden.value = combined
-
         // Reflect the new value into the form before notifying listeners.
         this._syncForm()
         dispatchFieldChange(this, combined)
@@ -503,19 +498,22 @@ export class OTPInput extends HTMLElement {
             validText: 'Looks good!',
         })
 
-        this.innerHTML = [
-            `<div class="tc-otp-input"`,
-            ` role="group"`,
-            ariaLabelledBy,
-            ariaInvalid,
-            `>`,
-            labelHtml,
-            `<div class="tc-otp-input__cells">`,
-            cellsHtml,
-            `</div>`,
-            messageHtml,
-            `</div>`,
-        ].join('')
+        patchHtml(
+            this,
+            [
+                `<div class="tc-otp-input"`,
+                ` role="group"`,
+                ariaLabelledBy,
+                ariaInvalid,
+                `>`,
+                labelHtml,
+                `<div class="tc-otp-input__cells">`,
+                cellsHtml,
+                `</div>`,
+                messageHtml,
+                `</div>`,
+            ].join(''),
+        )
     }
 }
 

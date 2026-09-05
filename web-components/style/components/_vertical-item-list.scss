@@ -164,8 +164,12 @@ tc-vertical-item-list[disabled] .tc-vertical-item-list {
 }
 
 // ── Content — plain surface panel split from the menu by a 1px hairline ─────────────
+// The panel is the consumer's own children, never a `.tc-vertical-item-list-content`
+// wrapper (rule 1 — the host adopts them directly, see render()), so this must target
+// the actual structural position (any direct child that isn't the menu) rather than a
+// class that's never present in the rendered markup.
 
-.tc-vertical-item-list-content {
+.tc-vertical-item-list > :not(.tc-vertical-item-list-menu) {
     flex: 1 1 auto;
     min-width: 0;
     padding: var(--bs-vertical-item-list-content-padding);

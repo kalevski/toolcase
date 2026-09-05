@@ -1,16 +1,19 @@
-// tc-text — flexible text element with semantic HTML tags and style variants.
+// tc-text — flexible text element with style variants.
 //
-// Display strategy: the host tc-text is display:inline (registered in _reset.scss)
-// so it acts as a transparent wrapper. Block layout for as="p" and as="div" comes
-// from p.tc-text / div.tc-text { display: block } below. Inline tags (span, small)
-// already default to inline, so no explicit rule is needed. For variant="truncate",
-// .tc-text-truncate { display: block } overrides the browser default (specificity
-// 0-1-0 > element default 0-0-1), making truncation work even with inline as tags.
+// THE HOST IS THE TEXT: `.tc-text` is on `tc-text` itself, not on an inner tag, so
+// the element never moves your children into a wrapper — see the note in
+// src/Text.ts.
+//
+// Display strategy: `as` is an ATTRIBUTE SELECTOR here, because a custom element
+// cannot be a `<p>`. `.tc-text` is block (the `as="p"` default and `as="div"`), and
+// `[as='span']` / `[as='small']` switch it to inline. Those two carry a class +
+// attribute (0-2-0), so `.tc-text-truncate`'s `display: block` is written as
+// `.tc-text.tc-text-truncate` to match their weight and win on source order.
 //
 // Class naming: tc-text-<variant> and tc-text-<size> are separate namespaces.
-// The "default" variant and "default" size both produce class tc-text-default on
-// the inner element, but since the base .tc-text already sets both default color
-// and default font-size, .tc-text-default is a no-op class — no conflict.
+// The "default" variant and "default" size both produce class tc-text-default,
+// but since the base .tc-text already sets both default color and default
+// font-size, .tc-text-default is a no-op class — no conflict.
 
 tc-text {
     --bs-text-color: var(--tc-text);
@@ -23,8 +26,9 @@ tc-text {
     --bs-text-line-height: 1.6;
 }
 
-// Base inner element — default color and size from tokens.
+// The host — default color and size from tokens.
 .tc-text {
+    display: block;
     margin: 0;
     font-family: var(--tc-font-sans);
     font-size: var(--bs-text-font-size-default);
@@ -32,24 +36,18 @@ tc-text {
     color: var(--bs-text-color);
 }
 
-// Block-level inner elements. Inline elements (span, small) default to inline
-// and need no explicit rule.
-p.tc-text,
-div.tc-text {
-    display: block;
-}
-
-// display:contents collapses the .tc-text-content span so the outer element's
-// text-overflow / overflow rules apply directly to the text nodes.
-.tc-text-content {
-    display: contents;
+// `as` picks the box, since the host cannot change its tag name.
+.tc-text[as='span'],
+.tc-text[as='small'] {
+    display: inline;
 }
 
 // ── Variants ─────────────────────────────────────────────────────────────────
 
 // default: inherits from .tc-text — no override needed.
 // .tc-text-default is intentionally a no-op class.
-.tc-text-default {}
+.tc-text-default {
+}
 
 // muted: secondary text color.
 .tc-text-muted {
@@ -71,12 +69,13 @@ div.tc-text {
     border-radius: 0;
 }
 
-// truncate: single-line ellipsis. display:block ensures the rule applies even
-// when the inner element is an inline tag (specificity 0-1-0 > browser default).
+// truncate: single-line ellipsis. The forced `display: block` has to out-weigh
+// `.tc-text[as='span']` above (0-2-0), hence the doubled class — an ellipsis on an
+// inline box does nothing.
 //
 // `.tc-truncate-1` (style/foundation/_utilities.scss) is the same rule without the
 // forced `display`, for elements that are not a tc-text. Keep the two in step.
-.tc-text-truncate {
+.tc-text.tc-text-truncate {
     display: block;
     overflow: hidden;
     white-space: nowrap;

@@ -1,4 +1,7 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { cssLength } from './internal/cssLength'
+import { sourceUrl } from './internal/safe-dom'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-physics-editor'
 
@@ -281,7 +284,7 @@ export class PhysicsEditor extends HTMLElement {
         return TOOLS.includes(v) ? v : 'select'
     }
     set tool(v: PhysicsTool) {
-        this.setAttribute('tool', v)
+        setAttr(this, 'tool', v)
     }
 
     // ── Canvas box ────────────────────────────────────────────────────────────
@@ -728,7 +731,12 @@ export class PhysicsEditor extends HTMLElement {
     // ── Image loading + alpha extraction ─────────────────────────────────────────
 
     private _loadSource(src: string | File | Blob | null): void {
-        if (src == null || src === '') {
+        // Anything that is not a URL string or a Blob is not a source. React hands
+        // a prop through as-is, and URL.createObjectURL throws a TypeError on a
+        // number, a boolean or a plain object — from inside this setter, where the
+        // consumer has no way to catch it.
+        const resolved = sourceUrl(src)
+        if (resolved === null) {
             this._img = null
             this._natW = 0
             this._natH = 0
@@ -736,15 +744,7 @@ export class PhysicsEditor extends HTMLElement {
             this._scheduleDraw()
             return
         }
-        let url: string
-        let revoke = false
-        if (typeof src === 'string') {
-            url = src
-        } else {
-            // oxlint-disable-next-line react-doctor/no-create-object-url-without-revoke -- revoked in both onload and onerror below; static analysis cannot prove callback-based disposal
-            url = URL.createObjectURL(src)
-            revoke = true
-        }
+        const { url, revoke } = resolved
         const img = new Image()
         img.crossOrigin = 'anonymous'
         img.onload = () => {
@@ -1479,23 +1479,25 @@ export class PhysicsEditor extends HTMLElement {
         this._paletteCache = null
         const disabled = this.disabled
         const canvasId = `${this._idPrefix}-canvas`
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-physics-editor${disabled ? ' tc-physics-editor--disabled' : ''}"${disabled ? ' aria-disabled="true"' : ''}>` +
-            `<div class="tc-physics-editor-stage" role="application"` +
-            ` aria-label="Shape canvas. Set the active tool from outside the component, then draw or edit shapes. Keyboard: Ctrl/Cmd+Z undo, Ctrl/Cmd+Shift+Z redo, Delete removes the selected shape, Enter closes a polygon, Escape cancels.">` +
-            `<canvas class="tc-physics-editor-canvas" id="${canvasId}" tabindex="0"` +
-            ` aria-label="Physics shape drawing canvas"></canvas>` +
-            `</div>` +
-            `<span class="tc-physics-editor-status visually-hidden" role="status" aria-live="polite"></span>` +
-            `</div>`
+                `<div class="tc-physics-editor-stage" role="application"` +
+                ` aria-label="Shape canvas. Set the active tool from outside the component, then draw or edit shapes. Keyboard: Ctrl/Cmd+Z undo, Ctrl/Cmd+Shift+Z redo, Delete removes the selected shape, Enter closes a polygon, Escape cancels.">` +
+                `<canvas class="tc-physics-editor-canvas" id="${canvasId}" tabindex="0"` +
+                ` aria-label="Physics shape drawing canvas"></canvas>` +
+                `</div>` +
+                `<span class="tc-physics-editor-status visually-hidden" role="status" aria-live="polite"></span>` +
+                `</div>`,
+        )
 
         const canvas = this._canvas()
         if (canvas) {
-            canvas.addEventListener('pointerdown', this._onPointerDown)
-            canvas.addEventListener('pointermove', this._onCanvasHover)
-            canvas.addEventListener('click', this._onCanvasClick)
-            canvas.addEventListener('dblclick', this._onCanvasDblClick)
-            canvas.addEventListener('keydown', this._onKeyDown)
+            bindOnce(canvas, 'pointerdown', this._onPointerDown)
+            bindOnce(canvas, 'pointermove', this._onCanvasHover)
+            bindOnce(canvas, 'click', this._onCanvasClick)
+            bindOnce(canvas, 'dblclick', this._onCanvasDblClick)
+            bindOnce(canvas, 'keydown', this._onKeyDown)
         }
     }
 }

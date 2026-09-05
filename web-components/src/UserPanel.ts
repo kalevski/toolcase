@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -286,16 +287,19 @@ export class UserPanel extends HTMLElement {
         if (this.loading) {
             this.setAttribute('role', 'status')
             this.setAttribute('aria-busy', 'true')
-            this.innerHTML = [
-                '<div class="tc-user-panel tc-user-panel--loading" aria-hidden="true">',
-                '<div class="tc-user-panel-skeleton tc-user-panel-skeleton--avatar"></div>',
-                '<div class="tc-user-panel-info">',
-                '<div class="tc-user-panel-skeleton tc-user-panel-skeleton--name"></div>',
-                '<div class="tc-user-panel-skeleton tc-user-panel-skeleton--plan"></div>',
-                '</div>',
-                '</div>',
-                '<span class="visually-hidden">Loading…</span>',
-            ].join('')
+            patchHtml(
+                this,
+                [
+                    '<div class="tc-user-panel tc-user-panel--loading" aria-hidden="true">',
+                    '<div class="tc-user-panel-skeleton tc-user-panel-skeleton--avatar"></div>',
+                    '<div class="tc-user-panel-info">',
+                    '<div class="tc-user-panel-skeleton tc-user-panel-skeleton--name"></div>',
+                    '<div class="tc-user-panel-skeleton tc-user-panel-skeleton--plan"></div>',
+                    '</div>',
+                    '</div>',
+                    '<span class="visually-hidden">Loading…</span>',
+                ].join(''),
+            )
             return
         }
 
@@ -333,13 +337,15 @@ export class UserPanel extends HTMLElement {
             ? `<div class="tc-user-panel-menu" role="menu">${this._buildMenuItemsHtml()}</div>`
             : ''
 
-        this.innerHTML =
-            `<div class="tc-user-panel">` + avatarHtml + infoHtml + iconHtml + `</div>` + menuHtml
+        patchHtml(
+            this,
+            `<div class="tc-user-panel">` + avatarHtml + infoHtml + iconHtml + `</div>` + menuHtml,
+        )
 
         // Wire listeners after the innerHTML write.
         const iconBtn = this.querySelector<HTMLButtonElement>('.tc-user-panel-icon')
         if (iconBtn) {
-            iconBtn.addEventListener('click', () => {
+            bindOnce(iconBtn, 'click', () => {
                 this.dispatchEvent(
                     new CustomEvent('tc-icon-click', {
                         bubbles: true,
@@ -354,22 +360,22 @@ export class UserPanel extends HTMLElement {
         if (hasMenu) {
             const trigger = this.querySelector<HTMLElement>('.tc-user-panel-info')
             if (trigger) {
-                trigger.addEventListener('click', () => this._toggleMenu())
-                trigger.addEventListener('keydown', this._onTriggerKeydown)
+                bindOnce(trigger, 'click', () => this._toggleMenu())
+                bindOnce(trigger, 'keydown', this._onTriggerKeydown)
             }
             const menuEl = this.querySelector<HTMLElement>('.tc-user-panel-menu')
             if (menuEl) {
                 Array.from(
                     menuEl.querySelectorAll<HTMLButtonElement>('.tc-user-panel-menu-item'),
                 ).forEach((btn) => {
-                    btn.addEventListener('click', () => {
+                    bindOnce(btn, 'click', () => {
                         const idx = parseInt(btn.dataset.idx ?? '-1', 10)
                         if (idx >= 0 && idx < this._menuItems.length) {
                             this._selectMenuItem(this._menuItems[idx].key)
                         }
                     })
                 })
-                menuEl.addEventListener('keydown', this._onMenuKeydown)
+                bindOnce(menuEl, 'keydown', this._onMenuKeydown)
             }
         }
     }

@@ -67,13 +67,16 @@ tc-metric-grid {
     align-items: flex-start;
 }
 
-// Mixed icon / no-icon grids misaligned the label/value column: an icon-less
-// tile started flush-left while its neighbours were indented by the icon chip.
-// When the grid carries any icon, reserve the same leading gutter on the bodies
-// of the icon-less tiles so every label and value lines up on one left edge.
+// Mixed icon / no-icon grids misaligned the label/value column: each
+// .tc-metric-tile lays itself out as its own `auto 1fr` grid, so an icon-less
+// tile's column 1 collapses to 0 while a neighbour's icon holds it open —
+// tiles built from `items` (label/value/hint wrapped in .tc-metric-tile-body)
+// and real slotted <tc-metric-tile> markup (label/value/hint as direct
+// children, no wrapper) both do this. Reserving column 1's width on the
+// icon-less tile itself — rather than margin-pushing one particular wrapper —
+// fixes both shapes at once and lines every label/value up on one left edge.
 // Fully icon-less grids are left untouched (no phantom gutter).
 .tc-metric-grid:has(.tc-metric-tile-icon)
-    > .tc-metric-tile:not(:has(.tc-metric-tile-icon))
-    .tc-metric-tile-body {
-    margin-left: calc(var(--bs-metric-tile-icon-size, 1.25rem) + var(--bs-metric-tile-gap, 0.75rem));
+    > .tc-metric-tile:not(:has(.tc-metric-tile-icon)) {
+    grid-template-columns: var(--bs-metric-tile-icon-size, 1.25rem) 1fr;
 }

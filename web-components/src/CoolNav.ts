@@ -1,6 +1,8 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { Menu } from 'lucide-static'
 import { icon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-cool-nav'
 
@@ -94,7 +96,7 @@ export class CoolNav extends HTMLElement {
         return this.getAttribute('login-label') ?? 'Log in'
     }
     set loginLabel(v: string) {
-        this.setAttribute('login-label', v)
+        setAttr(this, 'login-label', v)
     }
 
     get loginHref(): string | null {
@@ -109,7 +111,7 @@ export class CoolNav extends HTMLElement {
         return this.getAttribute('login-variant') ?? 'primary'
     }
     set loginVariant(v: string) {
-        this.setAttribute('login-variant', v)
+        setAttr(this, 'login-variant', v)
     }
 
     get scrollOffset(): number {
@@ -124,7 +126,7 @@ export class CoolNav extends HTMLElement {
         return BREAKPOINTS.includes(v) ? v : 'lg'
     }
     set expandBreakpoint(v: string) {
-        this.setAttribute('expand-breakpoint', v)
+        setAttr(this, 'expand-breakpoint', v)
     }
 
     get theme(): CoolNavTheme {
@@ -132,7 +134,7 @@ export class CoolNav extends HTMLElement {
         return THEMES.includes(v) ? v : 'light'
     }
     set theme(v: CoolNavTheme) {
-        this.setAttribute('theme', v)
+        setAttr(this, 'theme', v)
     }
 
     get sticky(): boolean {
@@ -342,14 +344,16 @@ export class CoolNav extends HTMLElement {
             `<div class="tc-cool-nav-end">${rightHtml}${loginHtml}</div>` +
             `</div>`
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<nav class="tc-cool-nav-inner" aria-label="Main navigation">` +
-            `<div class="tc-cool-nav-container">` +
-            brandHtml +
-            togglerHtml +
-            collapseHtml +
-            `</div>` +
-            `</nav>`
+                `<div class="tc-cool-nav-container">` +
+                brandHtml +
+                togglerHtml +
+                collapseHtml +
+                `</div>` +
+                `</nav>`,
+        )
     }
 }
 

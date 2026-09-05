@@ -11,9 +11,14 @@ tc-theme[name='blueprint'],
         --bs-damage-number-letter-spacing: 0.08em;
 
         // Crit: pink primary, display face, larger, glowing — the big moment.
+        // Deliberately a PINNED literal (matching blueprint's default --bp-pink hex),
+        // not var(--bp-pink): accent variants (forest/royal/slate/…) repoint
+        // --bp-pink to the theme's chosen primary hue (e.g. forest → green), which
+        // would make crit collide with the pinned --bp-success-fg used for heal —
+        // the two need to stay visually distinct regardless of the active variant.
         --bs-damage-number-crit-font-size: 1.75rem;
         --bs-damage-number-crit-font-weight: 700;
-        --bs-damage-number-crit-color: var(--bp-pink);
+        --bs-damage-number-crit-color: #e01172;
 
         // Heal: teal success register — matches status convention.
         --bs-damage-number-heal-color: var(--bp-success-fg);
@@ -41,7 +46,9 @@ tc-theme[name='blueprint'],
         letter-spacing: 0.04em;
         text-transform: uppercase;
         // Pink glow — the one theatrical flourish; kept to this single variant.
-        text-shadow: var(--bp-glow-pink);
+        // Pinned to match the crit color above (not var(--bp-glow-pink), which
+        // resolves through the variant-swappable --bp-pink-glow).
+        text-shadow: 0 6px 20px rgba(224, 17, 114, 0.3);
     }
 
     .tc-damage-number-text[data-variant='heal'] {

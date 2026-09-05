@@ -1,5 +1,7 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-toggle-card'
 
@@ -115,7 +117,7 @@ export class ToggleCard extends HTMLElement {
         return this.getAttribute('value') ?? 'on'
     }
     set value(v: string) {
-        this.setAttribute('value', v)
+        setAttr(this, 'value', v)
     }
 
     private _onClick = (): void => {
@@ -213,7 +215,7 @@ export class ToggleCard extends HTMLElement {
                 ? `<input type="hidden" name="${esc(name)}" value="${esc(value)}">`
                 : ''
 
-        this.innerHTML = [hiddenInput, iconHtml, bodyHtml, controlHtml].join('')
+        patchHtml(this, [hiddenInput, iconHtml, bodyHtml, controlHtml].join(''))
     }
 }
 

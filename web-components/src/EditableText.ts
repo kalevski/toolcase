@@ -1,4 +1,6 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-editable-text'
 
 export class EditableText extends HTMLElement {
@@ -52,7 +54,7 @@ export class EditableText extends HTMLElement {
         return this.getAttribute('default-value') ?? ''
     }
     set defaultValue(v: string) {
-        this.setAttribute('default-value', v)
+        setAttr(this, 'default-value', v)
     }
 
     get value(): string {
@@ -71,7 +73,7 @@ export class EditableText extends HTMLElement {
         return this.getAttribute('placeholder') ?? ''
     }
     set placeholder(v: string) {
-        this.setAttribute('placeholder', v)
+        setAttr(this, 'placeholder', v)
     }
 
     private _onKeyDown = (e: KeyboardEvent): void => {
@@ -121,7 +123,10 @@ export class EditableText extends HTMLElement {
         const placeholderAttr = placeholder ? ` placeholder="${esc(placeholder)}"` : ''
         const ariaAttr = ariaLabel ? ` aria-label="${esc(ariaLabel)}"` : ''
 
-        this.innerHTML = `<input type="text" class="form-control tc-editable-text__input"${disabledAttr}${placeholderAttr}${ariaAttr} value="${esc(this._committedValue)}">`
+        patchHtml(
+            this,
+            `<input type="text" class="form-control tc-editable-text__input"${disabledAttr}${placeholderAttr}${ariaAttr} value="${esc(this._committedValue)}">`,
+        )
     }
 }
 

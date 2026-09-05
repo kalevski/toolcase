@@ -90,7 +90,13 @@ tc-compass-bar {
 
 .tc-compass-bar__cardinal {
     position: absolute;
-    top: 50%;
+    // Sits in the upper band of the track (not dead-centre) so a cardinal
+    // letter never shares a text row with a marker's micro-label below it —
+    // see .tc-compass-bar__marker for the matching lower-band placement.
+    // Without this split, a marker positioned near a cardinal's heading (a
+    // routine occurrence — cardinals sit every 45°) renders its label flush
+    // against the cardinal letter with zero gap (e.g. "OBJECTIVENE").
+    top: 32%;
     transform: translate(-50%, -50%);
     font-family: var(--tc-font-mono);
     font-size: var(--bs-compass-bar-cardinal-size);
@@ -107,7 +113,10 @@ tc-compass-bar {
 // inside the track height rather than hanging below it).
 .tc-compass-bar__marker {
     position: absolute;
-    top: 50%;
+    // Lower band, mirroring .tc-compass-bar__cardinal's upper-band placement
+    // above — keeps the marker's own label clear of any cardinal letter that
+    // lands at the same horizontal position (see the note on .tc-compass-bar__cardinal).
+    top: 64%;
     left: 0;
     transform: translate(-50%, -50%);
     display: flex;

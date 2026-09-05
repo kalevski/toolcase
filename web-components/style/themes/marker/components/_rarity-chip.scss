@@ -1,0 +1,24 @@
+// Marker › tc-rarity-chip — epic hue-mismatch fix.
+//
+// The base `.tc-rarity-chip--epic` pairs `--bs-rarity-chip-color`/`border-color`
+// (from `--tc-app-accent`, the lead/amber brand hue) with `--bs-rarity-chip-bg`
+// from `--tc-accent-soft` — a DIFFERENT hue in this theme (`--tc-accent` is the
+// leaf/green secondary, not app-accent). Every other bundled theme either has
+// `--tc-app-accent == --tc-accent` (aurora) or a dedicated per-rarity override
+// (dungeon, blueprint) or its own dark-surface pass (neon); marker had none, so
+// epic rendered amber text/border on a green-tinted fill (~1.5:1, and visually
+// the wrong colour family entirely).
+//
+// Fix: point the fill at the lead family's own soft tint (`--mk-lead-tint`) so
+// bg/border/text all read as one amber-branded chip. The raw --tc-app-accent
+// (#f2b705) is too light for text at this size against any light tint, so the
+// text specifically darkens toward it (matching how the theme's own warning/
+// legendary tier resolves its readable text tone from the same lead ramp)
+// while the border stays the brighter true accent for tier identity.
+tc-theme[name='marker'],
+[data-tc-theme='marker'] {
+    .tc-rarity-chip--epic {
+        --bs-rarity-chip-bg: var(--mk-lead-tint);
+        --bs-rarity-chip-color: color-mix(in srgb, var(--tc-app-accent) 60%, black);
+    }
+}

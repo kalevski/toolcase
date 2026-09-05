@@ -1,3 +1,4 @@
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-grid'
 
 // Mobile-first breakpoints, ascending. Mirror tc-col's convention: a bare
@@ -77,28 +78,28 @@ export class Grid extends HTMLElement {
         return this.getAttribute('columns') ?? ''
     }
     set columns(value: string) {
-        this.setAttribute('columns', value)
+        setAttr(this, 'columns', value)
     }
 
     get rows(): string {
         return this.getAttribute('rows') ?? ''
     }
     set rows(value: string) {
-        this.setAttribute('rows', value)
+        setAttr(this, 'rows', value)
     }
 
     get gap(): string {
         return this.getAttribute('gap') ?? ''
     }
     set gap(value: string) {
-        this.setAttribute('gap', value)
+        setAttr(this, 'gap', value)
     }
 
     get cellSize(): string {
         return this.getAttribute('cell-size') ?? ''
     }
     set cellSize(value: string) {
-        this.setAttribute('cell-size', value)
+        setAttr(this, 'cell-size', value)
     }
 
     // Mobile-first value of an attribute at a level: the base attribute,
@@ -146,7 +147,8 @@ export class Grid extends HTMLElement {
 
             // cell-size feeds both the column and row tracks, so a `cell-size-{bp}`
             // override owns the columns/rows families at that breakpoint too.
-            const ownsColumns = bp === '' || this._owns('columns', bp) || this._owns('cell-size', bp)
+            const ownsColumns =
+                bp === '' || this._owns('columns', bp) || this._owns('cell-size', bp)
             const ownsRows = bp === '' || this._owns('rows', bp) || this._owns('cell-size', bp)
             const ownsGap = bp === '' || this._owns('gap', bp)
 

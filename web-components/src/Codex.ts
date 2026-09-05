@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -179,9 +180,11 @@ export class Codex extends HTMLElement {
             ? this._detailMarkup(active)
             : `<p class="tc-codex-detail-empty">Select an entry.</p>`
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-codex-list" role="list">${rowsMarkup}</div>` +
-            `<div class="tc-codex-detail">${detailMarkup}</div>`
+                `<div class="tc-codex-detail">${detailMarkup}</div>`,
+        )
 
         if (focusedId != null) {
             this.querySelector<HTMLElement>(

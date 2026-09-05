@@ -1,6 +1,11 @@
 // tc-badge — .badge authored from scratch. Sharp chip, medium weight, solid
 // fill via the .text-bg-* utilities; .rounded-pill is the one sanctioned
 // rounded rectangle (pill counters).
+//
+// THE HOST IS THE BADGE. `tc-badge` puts these classes on itself rather than
+// rendering an inner `<span class="badge">`, so it never has to move your children
+// into a wrapper — see the note in src/Badge.ts. Every selector below is the class,
+// not the tag, so nothing here had to change when the markup did.
 
 .badge {
     --bs-badge-padding-x: 0.75rem;
@@ -97,3 +102,10 @@
 // Warning text color is NOT hardcoded here — .text-bg-warning already reads
 // the theme-aware --bs-warning-contrast var (see foundation/_utilities.scss);
 // a badge-local override here would win on specificity and re-break it.
+
+// `text="…"` supersedes slotted content: the element owns the label and prepends
+// it, and anything else left inside the tag is hidden rather than deleted —
+// deleting a node React created is exactly the NotFoundError this element avoids.
+.tc-badge--text > :not(.tc-badge-text) {
+    display: none;
+}

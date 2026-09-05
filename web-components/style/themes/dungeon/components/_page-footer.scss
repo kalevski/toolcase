@@ -34,7 +34,7 @@ tc-theme[name='dungeon'],
 
     .tc-page-footer-cta-btn {
         background: var(--fg-button-bg);
-        color: var(--fg-ink);
+        color: var(--fg-gold-bright);
         border: 1px solid var(--fg-gold-deep);
         box-shadow: var(--fg-bevel-top);
         font-family: var(--fg-display);
@@ -43,7 +43,7 @@ tc-theme[name='dungeon'],
         font-weight: 600;
 
         &:hover {
-            color: var(--fg-ink);
+            color: var(--fg-gold-bright);
             box-shadow:
                 0 0 10px rgba(232, 200, 120, 0.35),
                 var(--fg-bevel-top);

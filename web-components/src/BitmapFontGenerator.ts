@@ -1,4 +1,6 @@
+import { patchHtml } from './internal/patch-html'
 import { cssLength } from './internal/cssLength'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-bitmap-font-generator'
 
@@ -643,7 +645,7 @@ export class BitmapFontGenerator extends HTMLElement {
         return this.getAttribute('font-family') ?? DEFAULT_FONT
     }
     set fontFamily(v: string) {
-        this.setAttribute('font-family', v)
+        setAttr(this, 'font-family', v)
     }
 
     get fontSize(): number {
@@ -657,7 +659,7 @@ export class BitmapFontGenerator extends HTMLElement {
         return this.getAttribute('glyphs') ?? DEFAULT_GLYPHS
     }
     set glyphs(v: string) {
-        this.setAttribute('glyphs', v)
+        setAttr(this, 'glyphs', v)
     }
 
     /** Preview-only text; the atlas always rasterises `glyphs`. */
@@ -665,7 +667,7 @@ export class BitmapFontGenerator extends HTMLElement {
         return this.getAttribute('text') ?? DEFAULT_TEXT
     }
     set text(v: string) {
-        this.setAttribute('text', v)
+        setAttr(this, 'text', v)
     }
 
     // ── Atlas layout / export ──────────────────────────────────────────────────
@@ -728,7 +730,7 @@ export class BitmapFontGenerator extends HTMLElement {
         return EXPORT_FORMATS.includes(v) ? v : 'xml'
     }
     set exportFormat(v: BitmapFontExportFormat) {
-        this.setAttribute('export-format', v)
+        setAttr(this, 'export-format', v)
     }
 
     /** Regenerate (and fire `tc-generate`) automatically on every config change. */
@@ -830,7 +832,7 @@ export class BitmapFontGenerator extends HTMLElement {
         return PREVIEW_ALIGNS.includes(v) ? v : 'start'
     }
     set previewAlign(v: BitmapFontPreviewAlign) {
-        this.setAttribute('preview-align', v)
+        setAttr(this, 'preview-align', v)
     }
 
     // ── Structured effect properties (attribute-backed, property-overridable) ───
@@ -1192,10 +1194,12 @@ export class BitmapFontGenerator extends HTMLElement {
 
     private render(): void {
         const disabled = this.disabled
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-bfg${disabled ? ' tc-bfg--disabled' : ''}"${disabled ? ' aria-disabled="true"' : ''}>` +
-            `<canvas class="tc-bfg-canvas" aria-label="Bitmap font live preview"></canvas>` +
-            `</div>`
+                `<canvas class="tc-bfg-canvas" aria-label="Bitmap font live preview"></canvas>` +
+                `</div>`,
+        )
         this._canvas = this.querySelector<HTMLCanvasElement>('.tc-bfg-canvas')
     }
 }

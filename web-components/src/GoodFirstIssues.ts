@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { MessageSquare, Clock } from 'lucide-static'
 import { icon } from './icons'
@@ -110,7 +111,7 @@ export class GoodFirstIssues extends HTMLElement {
             '.tc-good-first-issues-item-link[data-issue-index]',
         )
         links.forEach((link) => {
-            link.addEventListener('click', () => {
+            bindOnce(link, 'click', () => {
                 const idx = parseInt(link.getAttribute('data-issue-index') ?? '', 10)
                 const issue = this._issues[idx]
                 if (!issue) return
@@ -195,7 +196,7 @@ export class GoodFirstIssues extends HTMLElement {
             bodyHtml = `<ul class="tc-good-first-issues-list" role="list" aria-label="${listLabel}">${items}</ul>`
         }
 
-        this.innerHTML = `<div class="tc-good-first-issues">${headerHtml}${bodyHtml}</div>`
+        patchHtml(this, `<div class="tc-good-first-issues">${headerHtml}${bodyHtml}</div>`)
     }
 }
 

@@ -45,6 +45,10 @@ tc-theme[name='dungeon'],
         --bs-journal-reward-value-color: var(--fg-gold-bright);
 
         // Radial wood fill + full gilded bevel stack (base ships flat).
+        // position: relative anchors the corner-notch ornament below — without
+        // it the ::before pseudo-element positions against the nearest
+        // positioned ancestor instead of the journal frame itself.
+        position: relative;
         background:
             linear-gradient(180deg, rgba(232, 220, 196, 0.04), rgba(0, 0, 0, 0.18)),
             radial-gradient(120% 80% at 50% 0%, #2e2418 0%, #1a130c 70%);

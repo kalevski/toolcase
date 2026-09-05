@@ -1,0 +1,91 @@
+// tc-filter-trigger — the one control that opens a filter sheet.
+//
+// THE HOST IS THE BUTTON, so a label passed as children stays a direct child. The
+// icon is prepended, the count appended, and both are the element's own.
+//
+// `[data-active]` is the marked state: a filter button that does not say how many
+// filters are set makes the reader open the sheet to find out, which is the one
+// thing the trigger exists to save them.
+
+@use '../foundation/tokens' as *;
+
+tc-filter-trigger {
+    --bs-filter-trigger-gap: 0.375rem;
+    --bs-filter-trigger-padding-y: 0.5rem;
+    --bs-filter-trigger-padding-x: 0.75rem;
+    --bs-filter-trigger-font-size: 0.8125rem;
+    --bs-filter-trigger-color: var(--tc-text);
+    --bs-filter-trigger-bg: var(--tc-surface);
+    --bs-filter-trigger-border-color: var(--tc-border);
+    --bs-filter-trigger-active-color: var(--tc-app-accent, var(--tc-primary));
+    --bs-filter-trigger-active-border-color: currentColor;
+    --bs-filter-trigger-count-color: var(--tc-text-inverse, #fff);
+    --bs-filter-trigger-count-bg: var(--tc-app-accent, var(--tc-primary));
+    --bs-filter-trigger-icon-size: 0.875rem;
+}
+
+.tc-filter-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-filter-trigger-gap);
+    padding: var(--bs-filter-trigger-padding-y) var(--bs-filter-trigger-padding-x);
+    font-size: var(--bs-filter-trigger-font-size);
+    font-weight: 500;
+    line-height: 1.2;
+    white-space: nowrap;
+    color: var(--bs-filter-trigger-color);
+    background: var(--bs-filter-trigger-bg);
+    border: 1px solid var(--bs-filter-trigger-border-color);
+    border-radius: 0;
+    cursor: pointer;
+    min-height: var(--tc-touch-target-dense, 40px);
+    -webkit-tap-highlight-color: transparent;
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent, var(--tc-primary));
+        outline-offset: 2px;
+    }
+
+    @include coarse-pointer {
+        min-height: var(--tc-min-touch-target, 44px);
+    }
+}
+
+.tc-filter-trigger[data-active] {
+    color: var(--bs-filter-trigger-active-color);
+    border-color: var(--bs-filter-trigger-active-border-color);
+}
+
+.tc-filter-trigger[aria-disabled='true'] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.tc-filter-trigger__icon {
+    display: inline-flex;
+    flex-shrink: 0;
+
+    svg {
+        width: var(--bs-filter-trigger-icon-size);
+        height: var(--bs-filter-trigger-icon-size);
+        display: block;
+    }
+}
+
+// A count, not a badge: it is the number of set filters, so it reads as a figure
+// on the control rather than as a notification over it.
+.tc-filter-trigger__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.125rem;
+    height: 1.125rem;
+    padding: 0 0.25rem;
+    font-size: max(var(--tc-font-size-min, 10px), 0.625rem);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    color: var(--bs-filter-trigger-count-color);
+    background: var(--bs-filter-trigger-count-bg);
+    border-radius: 0;
+}

@@ -45,12 +45,30 @@
         color: var(--bs-breadcrumb-item-active-color);
     }
 
-    a {
+    // The crumb's link is a stretched hit overlay beside the visible label, not
+    // wrapped around it (BreadcrumbItem.ts, rule 1) — it never contains the text
+    // it links, so colouring the `<a>` itself is invisible. `:has()` scopes the
+    // muted/hover-accent treatment to the host of a linked (non-active) crumb,
+    // where the label actually lives and inherits color from.
+    &:has(> .tc-breadcrumb-item-content) {
         color: var(--tc-text-muted);
-        text-decoration: none;
 
-        &:hover {
+        &:hover,
+        &:focus-within {
             color: var(--tc-accent);
         }
+
+        // Coarse pointer: 44px touch target — matches tc-dropdown-item /
+        // .list-group-item-action / .page-link, which all float their tap
+        // area the same way; the stretched hit overlay was sized to the
+        // compact mono trail text (well under the floor) with nothing to
+        // grow it on touch.
+        @media (pointer: coarse) {
+            min-height: 44px;
+        }
+    }
+
+    a {
+        text-decoration: none;
     }
 }

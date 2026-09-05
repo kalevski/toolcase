@@ -1,21 +1,12 @@
+import { setHostClass } from './internal/host-class'
 const TAG_NAME = 'tc-lore-text'
 
+// Flavour / lore body-copy block. THE HOST IS THE BLOCK: the class goes on the
+// consumer's own tag, so their children are never re-parented into an
+// element-owned wrapper (rule 1) and react-dom's `removeChild` keeps working.
 export class LoreText extends HTMLElement {
-    private _initialised = false
-
     connectedCallback(): void {
-        if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            const inner = this.querySelector('.tc-lore-text__content')
-            if (inner) slotContent.forEach((n) => inner.appendChild(n))
-            this._initialised = true
-        }
-    }
-
-    private render(): void {
-        this.classList.add('tc-lore-text')
-        this.innerHTML = `<div class="tc-lore-text__content"></div>`
+        setHostClass(this, 'tc-lore-text')
     }
 }
 

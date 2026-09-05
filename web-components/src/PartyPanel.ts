@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-party-panel'
 
@@ -101,7 +102,9 @@ export class PartyPanel extends HTMLElement {
             '',
         )
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <div class="tc-party-panel">
                 <div class="tc-party-panel-header">
                     <span class="tc-party-panel-eyebrow">Party</span>
@@ -112,12 +115,13 @@ export class PartyPanel extends HTMLElement {
                     <button type="button" class="tc-party-panel-btn tc-party-panel-btn--leave" data-action="leave">Leave Party</button>
                 </div>
             </div>
-        `
+        `,
+        )
 
         const actions = this.querySelector<HTMLElement>('.tc-party-panel-actions')
         const slots_el = this.querySelector<HTMLElement>('.tc-party-panel-slots')
 
-        slots_el?.addEventListener('click', (e: MouseEvent) => {
+        bindOnce(slots_el, 'click', (e: MouseEvent) => {
             const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(
                 '[data-action="invite"]',
             )
@@ -125,7 +129,7 @@ export class PartyPanel extends HTMLElement {
             this._emit('tc-invite')
         })
 
-        actions?.addEventListener('click', (e: MouseEvent) => {
+        bindOnce(actions, 'click', (e: MouseEvent) => {
             const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-action]')
             if (!btn || btn.disabled) return
             if (btn.dataset.action === 'leave') this._emit('tc-leave')

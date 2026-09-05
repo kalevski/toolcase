@@ -1,0 +1,63 @@
+// tc-filter-bar — a filter toolbar: labelled facet rows, a result count, a clear.
+//
+// The desktop sibling of `tc-filter-trigger` + a sheet: a bar keeps every
+// dimension on screen, which is worth the vertical space on a wide viewport and
+// exactly wrong on a phone.
+
+tc-filter-bar {
+    --bs-filter-bar-gap: 0.75rem;
+    --bs-filter-bar-padding: 0.875rem;
+    --bs-filter-bar-bg: var(--tc-surface);
+    --bs-filter-bar-border-color: var(--tc-border);
+    --bs-filter-bar-count-size: 0.8125rem;
+}
+
+.tc-filter-bar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-filter-bar-gap);
+    padding: var(--bs-filter-bar-padding);
+    background: var(--bs-filter-bar-bg);
+    border: 1px solid var(--bs-filter-bar-border-color);
+    border-radius: 0;
+}
+
+.tc-filter-bar__rows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-filter-bar-gap);
+}
+
+.tc-filter-bar__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--bs-filter-bar-border-color);
+}
+
+// The answer to "did that filter do anything". Tabular so the figure does not
+// twitch as it changes under the reader's tap.
+.tc-filter-bar__count {
+    font-size: var(--bs-filter-bar-count-size);
+    font-variant-numeric: tabular-nums;
+    color: var(--tc-text-muted);
+}
+
+.tc-filter-bar__clear {
+    padding: 0.25rem 0.5rem;
+    font: inherit;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--tc-app-accent, var(--tc-primary));
+    background: none;
+    border: 0;
+    border-radius: 0;
+    cursor: pointer;
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent, var(--tc-primary));
+        outline-offset: 2px;
+    }
+}

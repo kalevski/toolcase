@@ -1,4 +1,5 @@
 import { triggerEvent } from './transition'
+import { queryOne, rootMargin } from './safe-dom'
 
 // Drop-in replacement for Bootstrap's ScrollSpy plugin (5.3 IntersectionObserver
 // flavour). The spied element is the scroll container; `target` selects the nav
@@ -24,16 +25,16 @@ export class ScrollSpy {
 
     constructor(element: HTMLElement, options: ScrollSpyOptions) {
         this._element = element
-        this._targetNav = options.target
-            ? document.querySelector<HTMLElement>(options.target)
-            : null
+        // `target` is a selector the consumer wrote: a typo has to mean "matches
+        // nothing", not a SyntaxError thrown out of the element's connect.
+        this._targetNav = queryOne<HTMLElement>(document, options.target)
         this._smoothScroll = options.smoothScroll ?? false
 
         const sections = this._collectSections()
         if (sections.length > 0) {
             this._observer = new IntersectionObserver(this._onIntersect, {
                 root: this._element,
-                rootMargin: options.rootMargin ?? '0px 0px -25%',
+                rootMargin: rootMargin(options.rootMargin, '0px 0px -25%'),
                 threshold: [0.1, 0.5, 1],
             })
             for (const section of sections) this._observer.observe(section)
@@ -112,13 +113,19 @@ export class ScrollSpy {
         if (!href || href.length < 2) return
         // href fragments are not guaranteed to be valid CSS selectors —
         // querySelector throws a DOMException on e.g. `#1numeric` or `#a:b`.
-        const section = this._element.querySelector<HTMLElement>(
-            `#${CSS.escape(href.slice(1))}`
-        )
+        const section = this._element.querySelector<HTMLElement>(`#${CSS.escape(href.slice(1))}`)
         if (!section) return
         event.preventDefault()
+        // offsetTop is relative to *each element's own* offsetParent, not a
+        // shared origin, so `section.offsetTop - this._element.offsetTop` only
+        // cancels out when both share an offsetParent — it doesn't when the
+        // container itself is nested inside other positioned ancestors (the
+        // common case), landing the scroll far from the section. getBoundingClientRect
+        // gives both elements the same (viewport) origin, so the delta between
+        // them is the container-relative offset regardless of the offsetParent chain.
+        const delta = section.getBoundingClientRect().top - this._element.getBoundingClientRect().top
         this._element.scrollTo({
-            top: section.offsetTop - this._element.offsetTop,
+            top: this._element.scrollTop + delta,
             behavior: 'smooth',
         })
     }

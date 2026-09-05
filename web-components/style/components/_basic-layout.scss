@@ -28,3 +28,29 @@ tc-basic-layout {
     background: var(--bs-basic-layout-main-bg);
     color: var(--bs-basic-layout-main-color);
 }
+
+// `tc-basic-layout` no longer moves the page content into `.tc-basic-layout-main`
+// or a `slot="brand"` element into the header (rule 1): they stay direct children
+// and are ordered here.
+.tc-basic-layout {
+    display: flex;
+    flex-direction: column;
+}
+
+.tc-basic-layout > .tc-basic-layout-brand,
+.tc-basic-layout > [slot='brand'] {
+    order: 1;
+}
+
+.tc-basic-layout > :not([slot='brand']):not(.tc-basic-layout-brand) {
+    order: 2;
+    flex: 1 1 auto;
+    min-height: 0;
+    // The consumer's main content is no longer wrapped in `.tc-basic-layout-main`
+    // (see the note above), so the main-area tokens have to be applied here, on
+    // the selector that actually matches the rendered content — otherwise
+    // `--bs-basic-layout-main-bg`/`-main-color` (and any theme override of them,
+    // e.g. blueprint) are silently dead.
+    background: var(--bs-basic-layout-main-bg);
+    color: var(--bs-basic-layout-main-color);
+}

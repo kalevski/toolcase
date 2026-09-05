@@ -46,14 +46,12 @@ tc-theme[name='blueprint'],
     }
 
     // Size overrides — preserve mono font at each scale.
-    .btn-group-sm > .btn,
-    .btn-group-sm > tc-button > .btn {
+    .btn-group-sm > .btn {
         font-size: 10px;
         letter-spacing: 0.08em;
     }
 
-    .btn-group-lg > .btn,
-    .btn-group-lg > tc-button > .btn {
+    .btn-group-lg > .btn {
         font-size: 12.5px;
         letter-spacing: 0.06em;
     }

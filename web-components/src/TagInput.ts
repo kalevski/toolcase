@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { msg } from './messages'
 import { fixedOriginOffset } from './internal/containingBlock'
@@ -613,17 +614,19 @@ export class TagInput extends HTMLElement {
         if (this.loading) {
             this.setAttribute('role', 'status')
             this.setAttribute('aria-busy', 'true')
-            this.innerHTML =
+            patchHtml(
+                this,
                 `<div class="tc-tag-input tc-tag-input--loading">` +
-                labelHtml +
-                `<div class="tc-tag-input-wrap">` +
-                `<div class="tc-tag-input-control tc-tag-input-skeleton" aria-hidden="true"></div>` +
-                `</div>` +
-                // Reserve the message line even while loading so the field's
-                // height does not jump when the skeleton resolves.
-                this._messageHtml() +
-                `<span class="visually-hidden">${esc(msg('loading'))}</span>` +
-                `</div>`
+                    labelHtml +
+                    `<div class="tc-tag-input-wrap">` +
+                    `<div class="tc-tag-input-control tc-tag-input-skeleton" aria-hidden="true"></div>` +
+                    `</div>` +
+                    // Reserve the message line even while loading so the field's
+                    // height does not jump when the skeleton resolves.
+                    this._messageHtml() +
+                    `<span class="visually-hidden">${esc(msg('loading'))}</span>` +
+                    `</div>`,
+            )
             return
         }
         this.removeAttribute('role')
@@ -663,22 +666,24 @@ export class TagInput extends HTMLElement {
 
         const menuLabel = label ? `aria-labelledby="${p}-label"` : `aria-label="Tag suggestions"`
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-tag-input${disabled ? ' tc-tag-input--disabled' : ''}">` +
-            labelHtml +
-            `<div class="tc-tag-input-wrap">` +
-            `<div class="tc-tag-input-control${invalidCls}">${this._buildChipsHtml()}${fieldHtml}</div>` +
-            `<ul class="tc-tag-input-menu" id="${p}-menu" role="listbox" ${menuLabel}></ul>` +
-            `</div>` +
-            (counterHtml || hintHtml
-                ? `<div class="tc-tag-input-meta">${counterHtml}${hintHtml}</div>`
-                : '') +
-            // Reserved message slot — LAST child of the host, after the control,
-            // the (fixed-positioned) menu, and the counter/hint meta row. Plain
-            // block flow, never inside the menu, so it stays visible and reserves
-            // its line of height regardless of the menu's open/anchored state.
-            this._messageHtml() +
-            `</div>`
+                labelHtml +
+                `<div class="tc-tag-input-wrap">` +
+                `<div class="tc-tag-input-control${invalidCls}">${this._buildChipsHtml()}${fieldHtml}</div>` +
+                `<ul class="tc-tag-input-menu" id="${p}-menu" role="listbox" ${menuLabel}></ul>` +
+                `</div>` +
+                (counterHtml || hintHtml
+                    ? `<div class="tc-tag-input-meta">${counterHtml}${hintHtml}</div>`
+                    : '') +
+                // Reserved message slot — LAST child of the host, after the control,
+                // the (fixed-positioned) menu, and the counter/hint meta row. Plain
+                // block flow, never inside the menu, so it stays visible and reserves
+                // its line of height regardless of the menu's open/anchored state.
+                this._messageHtml() +
+                `</div>`,
+        )
 
         this._wireListeners()
         this._renderMenu()
@@ -715,7 +720,7 @@ export class TagInput extends HTMLElement {
         // Click on the control: focus the field and open the menu. Remove-button
         // clicks are intercepted first and do not bubble to an open.
         if (control) {
-            control.addEventListener('click', (e: MouseEvent) => {
+            bindOnce(control, 'click', (e: MouseEvent) => {
                 const removeBtn = (e.target as Element).closest<HTMLButtonElement>(
                     '.tc-tag-input-remove',
                 )
@@ -732,19 +737,19 @@ export class TagInput extends HTMLElement {
         }
 
         if (field) {
-            field.addEventListener('input', () => {
+            bindOnce(field, 'input', () => {
                 this._input = field.value
                 this._highlightIdx = -1
                 this._open = true
                 this._renderMenu()
             })
 
-            field.addEventListener('focus', () => {
+            bindOnce(field, 'focus', () => {
                 this._open = true
                 this._renderMenu()
             })
 
-            field.addEventListener('keydown', (e: KeyboardEvent) => {
+            bindOnce(field, 'keydown', (e: KeyboardEvent) => {
                 if (this.disabled) return
                 const filtered = this._filtered()
                 const showCreate = this._showCreate()
@@ -783,7 +788,7 @@ export class TagInput extends HTMLElement {
                 }
             })
 
-            field.addEventListener('paste', (e: ClipboardEvent) => {
+            bindOnce(field, 'paste', (e: ClipboardEvent) => {
                 const text = e.clipboardData?.getData('text') ?? ''
                 if (!text.includes(',')) return
                 e.preventDefault()
@@ -812,7 +817,7 @@ export class TagInput extends HTMLElement {
 
         if (menu) {
             // mousedown (not click) so the field keeps focus while selecting.
-            menu.addEventListener('mousedown', (e: MouseEvent) => {
+            bindOnce(menu, 'mousedown', (e: MouseEvent) => {
                 const li = (e.target as Element).closest<HTMLElement>('.tc-tag-input-menu-item')
                 if (!li) return
                 e.preventDefault()
@@ -820,7 +825,7 @@ export class TagInput extends HTMLElement {
                 else if (li.dataset.value != null) this._addTag(li.dataset.value)
             })
 
-            menu.addEventListener('mouseover', (e: MouseEvent) => {
+            bindOnce(menu, 'mouseover', (e: MouseEvent) => {
                 const li = (e.target as Element).closest<HTMLElement>('.tc-tag-input-menu-item')
                 if (!li) return
                 const idx = parseInt(li.dataset.idx ?? '', 10)

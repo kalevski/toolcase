@@ -1,12 +1,11 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
-import { icon } from './icons'
 
 const TAG_NAME = 'tc-metric-card'
 
 function resolveIcon(name: string): string {
-    const svg = lucideByName(name)
-    return svg ? icon(svg, 'tc-metric-card-icon-svg') : ''
+    return lucideByName(name, 'tc-metric-card-icon-svg')
 }
 
 function buildSparklinePath(data: number[]): string {
@@ -100,18 +99,21 @@ export class MetricCard extends HTMLElement {
         if (loading) {
             this.setAttribute('role', 'status')
             this.setAttribute('aria-busy', 'true')
-            this.innerHTML = [
-                '<div class="card tc-metric-card" aria-hidden="true">',
-                '<div class="card-body tc-metric-card-body">',
-                '<div class="tc-metric-card-head">',
-                '<div class="tc-metric-card-skeleton tc-metric-card-skeleton--title"></div>',
-                '</div>',
-                '<div class="tc-metric-card-skeleton tc-metric-card-skeleton--value"></div>',
-                '<div class="tc-metric-card-skeleton tc-metric-card-skeleton--spark"></div>',
-                '</div>',
-                '</div>',
-                '<span class="visually-hidden">Loading…</span>',
-            ].join('')
+            patchHtml(
+                this,
+                [
+                    '<div class="card tc-metric-card" aria-hidden="true">',
+                    '<div class="card-body tc-metric-card-body">',
+                    '<div class="tc-metric-card-head">',
+                    '<div class="tc-metric-card-skeleton tc-metric-card-skeleton--title"></div>',
+                    '</div>',
+                    '<div class="tc-metric-card-skeleton tc-metric-card-skeleton--value"></div>',
+                    '<div class="tc-metric-card-skeleton tc-metric-card-skeleton--spark"></div>',
+                    '</div>',
+                    '</div>',
+                    '<span class="visually-hidden">Loading…</span>',
+                ].join(''),
+            )
             return
         }
 
@@ -161,16 +163,19 @@ export class MetricCard extends HTMLElement {
             ].join('')
         }
 
-        this.innerHTML = [
-            '<div class="card tc-metric-card">',
-            '<div class="card-body tc-metric-card-body">',
-            headHtml,
-            valueHtml,
-            subtitleHtml,
-            sparkHtml,
-            '</div>',
-            '</div>',
-        ].join('')
+        patchHtml(
+            this,
+            [
+                '<div class="card tc-metric-card">',
+                '<div class="card-body tc-metric-card-body">',
+                headHtml,
+                valueHtml,
+                subtitleHtml,
+                sparkHtml,
+                '</div>',
+                '</div>',
+            ].join(''),
+        )
     }
 }
 

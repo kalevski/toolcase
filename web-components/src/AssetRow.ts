@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
@@ -115,11 +116,13 @@ export class AssetRow extends HTMLElement {
         // Size: attribute → escaped text; otherwise slot content appended after
         const sizeHtml = sizeAttr != null ? esc(sizeAttr) : ''
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<span class="tc-asset-row-icon" aria-hidden="true">${iconHtml}</span>` +
-            `<span class="tc-asset-row-name">${nameHtml}</span>` +
-            tagsHtml +
-            `<span class="tc-asset-row-size">${sizeHtml}</span>`
+                `<span class="tc-asset-row-name">${nameHtml}</span>` +
+                tagsHtml +
+                `<span class="tc-asset-row-size">${sizeHtml}</span>`,
+        )
     }
 }
 

@@ -1,0 +1,35 @@
+// Marker › type — the display face, and figures that line up.
+//
+// Two rules, both from the originating app, and both the kind of thing a token
+// swap cannot carry.
+
+// The display face on headings, set TIGHTER than Archivo's default: at 390px a
+// title is two lines, and the tracking is what buys the second one back.
+[data-tc-theme='marker'],
+tc-theme[name='marker'] {
+    :is(h1, h2, h3),
+    .tc-heading,
+    .tc-title,
+    tc-heading,
+    tc-title {
+        font-family: var(--mk-display);
+        letter-spacing: -0.015em;
+    }
+
+    // Figures are READ, not spelled: prices, counts and years line up in one
+    // width so a column of them can be compared without moving the eye. This is
+    // declared AFTER any `font` shorthand a component sets, because the shorthand
+    // resets font-variant-numeric to normal.
+    .tc-stat-tile-value,
+    .tc-metric-tile-value,
+    .tc-stat-card-value,
+    .tc-quota-meter-label,
+    .tc-results-header__lead,
+    .tc-filter-bar__count,
+    .tc-value-in-range__value,
+    .tc-range-field__input,
+    .tc-zoom-control__value {
+        font-variant-numeric: tabular-nums;
+        font-feature-settings: 'tnum' 1;
+    }
+}

@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 import { msg } from './messages'
@@ -148,6 +149,13 @@ export class MultiCardSelect extends HTMLElement {
         const card = (e.target as HTMLElement).closest<HTMLElement>('[role="checkbox"]')
         if (!card || !this.contains(card)) return
         if (card.getAttribute('aria-disabled') === 'true') return
+        // Move the roving tab stop to the clicked card (mirrors the arrow-key
+        // handler below) so a later Tab/Shift+Tab returns focus here instead of
+        // a stale earlier stop from the initial render.
+        Array.from(this.querySelectorAll<HTMLElement>('[role="checkbox"]')).forEach((c) =>
+            c.setAttribute('tabindex', '-1'),
+        )
+        card.setAttribute('tabindex', '0')
         const val = card.dataset.value
         if (val != null) this._toggle(val)
     }
@@ -198,7 +206,10 @@ export class MultiCardSelect extends HTMLElement {
                 () =>
                     `<div class="tc-multi-card-select-card tc-multi-card-select-card--skeleton" aria-hidden="true"></div>`,
             ).join('')
-            this.innerHTML = `<span class="visually-hidden">${esc(msg('loading'))}</span>${skeletons}`
+            patchHtml(
+                this,
+                `<span class="visually-hidden">${esc(msg('loading'))}</span>${skeletons}`,
+            )
             return
         }
 
@@ -267,7 +278,7 @@ export class MultiCardSelect extends HTMLElement {
                 .join('')
         }
 
-        this.innerHTML = cardsHtml + hiddenInputsHtml
+        patchHtml(this, cardsHtml + hiddenInputsHtml)
     }
 }
 

@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -75,26 +76,29 @@ export class StateMachine extends HTMLElement {
         else this.classList.remove('tc-state-machine--compact')
         this.setAttribute('role', 'list')
 
-        this.innerHTML = states
-            .map((state, i) => {
-                const status: StateMachineStatus = STATUSES.includes(
-                    state.status as StateMachineStatus,
-                )
-                    ? (state.status as StateMachineStatus)
-                    : 'pending'
-                const isLast = i === states.length - 1
-                const marker = this._markerHtml(status)
-                const connectorHtml = !isLast
-                    ? `<div class="tc-state-machine-connector" aria-hidden="true"></div>`
-                    : ''
-                const labelHtml = `<span class="tc-state-machine-label">${esc(state.label)}</span>`
-                const descHtml =
-                    state.description && !compact
-                        ? `<span class="tc-state-machine-description">${esc(state.description)}</span>`
+        patchHtml(
+            this,
+            states
+                .map((state, i) => {
+                    const status: StateMachineStatus = STATUSES.includes(
+                        state.status as StateMachineStatus,
+                    )
+                        ? (state.status as StateMachineStatus)
+                        : 'pending'
+                    const isLast = i === states.length - 1
+                    const marker = this._markerHtml(status)
+                    const connectorHtml = !isLast
+                        ? `<div class="tc-state-machine-connector" aria-hidden="true"></div>`
                         : ''
-                return `<div class="tc-state-machine-state tc-state-machine-state-${status}" role="listitem"><div class="tc-state-machine-track">${marker}${connectorHtml}</div><div class="tc-state-machine-body">${labelHtml}${descHtml}</div></div>`
-            })
-            .join('')
+                    const labelHtml = `<span class="tc-state-machine-label">${esc(state.label)}</span>`
+                    const descHtml =
+                        state.description && !compact
+                            ? `<span class="tc-state-machine-description">${esc(state.description)}</span>`
+                            : ''
+                    return `<div class="tc-state-machine-state tc-state-machine-state-${status}" role="listitem"><div class="tc-state-machine-track">${marker}${connectorHtml}</div><div class="tc-state-machine-body">${labelHtml}${descHtml}</div></div>`
+                })
+                .join(''),
+        )
     }
 }
 

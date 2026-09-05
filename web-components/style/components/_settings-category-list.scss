@@ -137,6 +137,7 @@ tc-settings-category-list {
 .tc-settings-category-list-body {
     padding: var(--bs-settings-category-list-body-padding);
     min-width: 0;
+    min-height: 0;
     overflow: auto;
 }
 
@@ -155,3 +156,4 @@ tc-settings-category-list {
         transition: none;
     }
 }
+

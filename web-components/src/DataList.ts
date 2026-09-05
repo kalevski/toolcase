@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-data-list'
 
@@ -163,8 +164,10 @@ export class DataList extends HTMLElement {
         }
 
         const bodyRole = this.selectable ? 'listbox' : 'list'
-        this.innerHTML =
-            headerHtml + `<ul class="tc-data-list__body" role="${bodyRole}">${bodyInner}</ul>`
+        patchHtml(
+            this,
+            headerHtml + `<ul class="tc-data-list__body" role="${bodyRole}">${bodyInner}</ul>`,
+        )
 
         this._wire()
         this._syncSelection()
@@ -190,13 +193,14 @@ export class DataList extends HTMLElement {
         if (typeof this.onSelect === 'function') this.onSelect({ id })
     }
 
-    // Delegated listeners on the freshly-rendered body — the previous body and
-    // its listeners are garbage-collected together on every render, so no leak.
+    // Delegated listeners on `.tc-data-list__body` — patchHtml reuses that <ul>
+    // across renders (rather than recreating it), so `bindOnce` replaces the
+    // previous closure instead of stacking a second listener on top of it.
     private _wire(): void {
         const body = this.querySelector<HTMLElement>('.tc-data-list__body')
         if (!body) return
 
-        body.addEventListener('click', (e: Event) => {
+        bindOnce(body, 'click', (e: Event) => {
             const target = e.target as Element
             const btn = target.closest<HTMLButtonElement>('[data-action]')
             const row = target.closest<HTMLElement>('.tc-data-list__row[data-id]')
@@ -219,17 +223,22 @@ export class DataList extends HTMLElement {
             if (this.selectable && row) this._emitSelect(id)
         })
 
-        if (this.selectable) {
-            body.addEventListener('keydown', (e: KeyboardEvent) => {
-                if (e.key !== 'Enter' && e.key !== ' ') return
-                const target = e.target as Element
-                if (target.closest('button')) return
-                const row = target.closest<HTMLElement>('.tc-data-list__row[data-id]')
-                if (!row) return
-                e.preventDefault()
-                this._emitSelect(row.dataset.id ?? '')
-            })
-        }
+        // Bound unconditionally (state checked inside the handler, not at bind
+        // time): `body` is reused across renders (patchHtml), so a listener only
+        // bound while `selectable` happened to be true would otherwise keep
+        // firing forever after `selectable` is later removed — a custom
+        // `renderRow` has no way to know the current `selectable` value and may
+        // keep marking rows `tabindex="0"` regardless.
+        bindOnce(body, 'keydown', (e: KeyboardEvent) => {
+            if (!this.selectable) return
+            if (e.key !== 'Enter' && e.key !== ' ') return
+            const target = e.target as Element
+            if (target.closest('button')) return
+            const row = target.closest<HTMLElement>('.tc-data-list__row[data-id]')
+            if (!row) return
+            e.preventDefault()
+            this._emitSelect(row.dataset.id ?? '')
+        })
     }
 }
 

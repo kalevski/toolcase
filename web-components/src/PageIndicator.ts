@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 const TAG_NAME = 'tc-page-indicator'
 
 export class PageIndicator extends HTMLElement {
@@ -149,7 +150,7 @@ export class PageIndicator extends HTMLElement {
                 `<button type="button" class="${cls}" data-pi="${i}" aria-label="Page ${i + 1}" aria-current="${isActive ? 'page' : 'false'}"></button>`,
             )
         }
-        this.innerHTML = dots.join('')
+        patchHtml(this, dots.join(''))
     }
 }
 

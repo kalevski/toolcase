@@ -23,7 +23,11 @@ tc-theme[name='dungeon'],
     }
 
     // Promote the title/content area to gilded display caps.
-    .tc-action-header-content {
+    // The base partial matches both a legacy `.tc-action-header-content` wrapper
+    // and the consumer's own direct child (rule 1) — mirror both here, or this
+    // override never reaches the title in the current (unwrapped) markup.
+    .tc-action-header-content,
+    .tc-action-header > :not(.tc-action-header-actions) {
         font-family: var(--fg-display);
         text-transform: uppercase;
         letter-spacing: 0.16em;

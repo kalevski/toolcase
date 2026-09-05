@@ -1,3 +1,4 @@
+import { setHostClass } from './internal/host-class'
 const TAG_NAME = 'tc-asset-row-list'
 
 export class AssetRowList extends HTMLElement {
@@ -8,13 +9,8 @@ export class AssetRowList extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            const body = this.querySelector('.tc-asset-row-list-body')
-            if (body) slotContent.forEach((n) => body.appendChild(n))
-            this._initialised = true
-        }
+        this._initialised = true
+        this.render()
     }
 
     attributeChangedCallback(): void {
@@ -26,11 +22,11 @@ export class AssetRowList extends HTMLElement {
         if (newBody) slotContent.forEach((n) => newBody.appendChild(n))
     }
 
+    /** THE HOST IS THE LIST: the rows the consumer wrote stay direct children of
+     *  their own tag rather than being moved into a body wrapper (rule 1). */
     private render(): void {
-        this.innerHTML =
-            `<div class="tc-asset-row-list">` +
-            `<div class="tc-asset-row-list-body" role="list"></div>` +
-            `</div>`
+        setHostClass(this, 'tc-asset-row-list tc-asset-row-list-body')
+        this.setAttribute('role', 'list')
     }
 }
 

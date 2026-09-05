@@ -1,5 +1,7 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-pricing-card'
 
@@ -61,14 +63,14 @@ export class PricingCard extends HTMLElement {
         return this.getAttribute('name') ?? ''
     }
     set name(v: string) {
-        this.setAttribute('name', v)
+        setAttr(this, 'name', v)
     }
 
     get price(): string {
         return this.getAttribute('price') ?? ''
     }
     set price(v: string) {
-        this.setAttribute('price', v)
+        setAttr(this, 'price', v)
     }
 
     get period(): string | null {
@@ -198,22 +200,24 @@ export class PricingCard extends HTMLElement {
                 ? `<a class="${btnClass}${disabledClass}" href="${esc(action.href)}"${disabledAttr}>${actionLabel}</a>`
                 : `<button class="${btnClass}${disabledClass}" type="button"${disabledAttr}>${actionLabel}</button>`
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<article class="${articleClass}">` +
-            badgeHtml +
-            `<div class="tc-pricing-card-header">` +
-            `<h3 class="tc-pricing-card-name">${esc(name)}</h3>` +
-            `<div class="tc-pricing-card-price-line">` +
-            `<span class="tc-pricing-card-price">${esc(price)}</span>` +
-            periodHtml +
-            `</div>` +
-            descHtml +
-            `</div>` +
-            featuresHtml +
-            `<div class="tc-pricing-card-footer">` +
-            actionHtml +
-            `</div>` +
-            `</article>`
+                badgeHtml +
+                `<div class="tc-pricing-card-header">` +
+                `<h3 class="tc-pricing-card-name">${esc(name)}</h3>` +
+                `<div class="tc-pricing-card-price-line">` +
+                `<span class="tc-pricing-card-price">${esc(price)}</span>` +
+                periodHtml +
+                `</div>` +
+                descHtml +
+                `</div>` +
+                featuresHtml +
+                `<div class="tc-pricing-card-footer">` +
+                actionHtml +
+                `</div>` +
+                `</article>`,
+        )
     }
 }
 

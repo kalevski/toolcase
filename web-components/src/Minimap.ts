@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-minimap'
 
@@ -142,13 +143,16 @@ export class Minimap extends HTMLElement {
         this.setAttribute('role', 'img')
         this.setAttribute('aria-label', ariaLabel)
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <div class="tc-minimap__surface" style="transform:rotate(${(-rotation).toFixed(2)}deg);">
                 <div class="tc-minimap__bg" aria-hidden="true"></div>
                 ${markersMarkup}
             </div>
             <div class="tc-minimap__player" aria-hidden="true"></div>
-        `
+        `,
+        )
     }
 }
 

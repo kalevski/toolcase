@@ -240,3 +240,17 @@ tc-api-reference-table {
     line-height: 1.5;
     font-style: italic;
 }
+
+// A slotted title is no longer moved into `.tc-api-reference-table-title` (rule 1): it stays the
+// consumer's own first child and is dressed here. Both element-owned top-level children are
+// named explicitly — `tc-api-reference-group` does not share the `tc-api-reference-table` prefix,
+// so a `[class^='tc-api-reference-table']` guard let this rule leak onto every group wrapper.
+.tc-api-reference-table > :not(.tc-api-reference-table-title):not(.tc-api-reference-group) {
+    padding: var(--bs-api-reference-table-title-padding-y) var(--bs-api-reference-table-title-padding-x);
+    background: var(--bs-api-reference-table-title-bg);
+    border-bottom: var(--bs-api-reference-table-title-border);
+    font-size: var(--bs-api-reference-table-title-font-size);
+    font-weight: var(--bs-api-reference-table-title-font-weight);
+    color: var(--bs-api-reference-table-title-color);
+    line-height: 1.4;
+}

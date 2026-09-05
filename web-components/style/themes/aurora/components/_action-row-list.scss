@@ -1,0 +1,15 @@
+// Aurora › tc-action-row-list — token-only fix.
+//
+// The base partial bakes --bs-action-row-list-separator-color to the raw Sass
+// $slate-100 literal (#f1f5f9), which never flows through the --tc-* remap.
+// On Aurora's near-black surface that renders as a bright, near-white hairline
+// between rows instead of the subtle rgba(255,255,255,.06-.12) dividers used
+// everywhere else in this theme. Route it to --tc-border-faint like the rest
+// of the surface family.
+
+tc-theme[name='aurora'],
+[data-tc-theme='aurora'] {
+    .tc-action-row-list {
+        --bs-action-row-list-separator-color: var(--tc-border-faint);
+    }
+}

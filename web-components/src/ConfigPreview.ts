@@ -1,3 +1,5 @@
+import { patchHtml } from './internal/patch-html'
+import { setHostClass } from './internal/host-class'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-config-preview'
 
@@ -16,31 +18,13 @@ export class ConfigPreview extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            // Capture named-slot "live-label" nodes (direct children only)
-            const liveLabelNodes = Array.from(this.children).filter(
-                (el) => el.getAttribute('slot') === 'live-label',
-            ) as Element[]
-            // Capture default nodes (excluding named-slot nodes)
-            const defaultNodes = Array.from(this.childNodes).filter(
-                (n) => !(n instanceof Element && n.getAttribute('slot') === 'live-label'),
-            )
-            this.render()
-            // Re-append live-label slot children when no attribute overrides them
-            if (!this.hasAttribute('live-label')) {
-                const liveLabelEl = this.querySelector('.tc-config-preview-live-label')
-                if (liveLabelEl) liveLabelNodes.forEach((n) => liveLabelEl.appendChild(n))
-            }
-            // Re-append default slot children
-            const contentEl = this.querySelector('.tc-config-preview-content')
-            if (contentEl) defaultNodes.forEach((n) => contentEl.appendChild(n))
-            this._initialised = true
-        }
+        this._initialised = true
+        this.render()
     }
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        this._rerenderWithSlots()
+        this.render()
     }
 
     get liveLabel(): string | null {
@@ -117,10 +101,22 @@ export class ConfigPreview extends HTMLElement {
         // Live-label text (attribute takes precedence over slot)
         const liveLabelText = liveLabel != null ? esc(liveLabel) : ''
 
-        const header = `<div class="tc-config-preview-header"><span class="tc-config-preview-live-badge"><span class="tc-config-preview-live-dot" aria-hidden="true"></span><span class="tc-config-preview-live-label">${liveLabelText}</span></span></div>`
-        const body = `<pre class="tc-config-preview-body">${entriesHtml}<span class="tc-config-preview-content"></span></pre>`
-
-        this.innerHTML = `<div class="tc-config-preview">${header}${body}</div>`
+        // THE HOST IS THE PREVIEW. The header and the entry lines are
+        // element-owned; a `slot="live-label"` element and the extra lines the
+        // consumer wrote stay their children and are placed by CSS (rule 1).
+        const liveLabelHtml =
+            liveLabel != null
+                ? `<span class="tc-config-preview-live-label">${liveLabelText}</span>`
+                : ''
+        setHostClass(this, 'tc-config-preview')
+        patchHtml(
+            this,
+            `<div class="tc-config-preview-header"><span class="tc-config-preview-live-badge">` +
+                `<span class="tc-config-preview-live-dot" aria-hidden="true"></span>${liveLabelHtml}` +
+                `</span></div>` +
+                `<pre class="tc-config-preview-body">${entriesHtml}</pre>`,
+            { region: 'chrome' },
+        )
     }
 }
 

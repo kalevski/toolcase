@@ -1,0 +1,79 @@
+// tc-preview-frame — an aspect-locked embed with a loading and a failure state.
+//
+// The states are the point: an iframe pointed at something being built fails as a
+// blank rectangle, and a blank rectangle is indistinguishable from a slow one.
+
+tc-preview-frame {
+    --bs-preview-frame-ratio: 16 / 9;
+    --bs-preview-frame-bg: var(--tc-surface-muted);
+    --bs-preview-frame-border-color: var(--tc-border);
+    --bs-preview-frame-status-color: var(--tc-text-muted);
+    --bs-preview-frame-error-color: var(--tc-danger);
+}
+
+.tc-preview-frame {
+    position: relative;
+    display: block;
+    // The ASPECT is locked, never the height: a preview sized in px letterboxes on
+    // one screen and crops on another.
+    aspect-ratio: var(--bs-preview-frame-ratio);
+    width: 100%;
+    overflow: hidden;
+    background: var(--bs-preview-frame-bg);
+    border: 1px solid var(--bs-preview-frame-border-color);
+    border-radius: 0;
+}
+
+.tc-preview-frame__frame {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+    // Hidden until it has actually loaded, so a half-painted document never shows
+    // through the loading state.
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.tc-preview-frame[data-state='ready'] .tc-preview-frame__frame {
+    opacity: 1;
+}
+
+.tc-preview-frame__status {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    font-size: 0.8125rem;
+    text-align: center;
+    color: var(--bs-preview-frame-status-color);
+    pointer-events: none;
+}
+
+.tc-preview-frame__status-loading,
+.tc-preview-frame__status-error {
+    display: none;
+}
+
+.tc-preview-frame[data-state='loading'] .tc-preview-frame__status-loading {
+    display: inline;
+}
+
+.tc-preview-frame[data-state='error'] .tc-preview-frame__status-error {
+    display: inline;
+    color: var(--bs-preview-frame-error-color);
+}
+
+// Ready and idle both show nothing: a ready frame is the document, and an idle
+// one has been given no document to fail at.
+.tc-preview-frame:is([data-state='ready'], [data-state='idle']) .tc-preview-frame__status {
+    display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-preview-frame__frame {
+        transition: none;
+    }
+}

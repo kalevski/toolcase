@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 import { msg } from './messages'
@@ -61,36 +62,39 @@ export class FileDropzone extends HTMLElement {
                 ? `<p class="tc-file-dropzone__formats">${fmts.map((f) => `<span class="tc-file-dropzone__format-chip">${esc(f.label)}</span>`).join('')}</p>`
                 : ''
 
-        this.innerHTML = `<div class="tc-file-dropzone__area" role="button" tabindex="0" aria-label="${esc(msg('fileDropLabel'))}"><span class="tc-file-dropzone__icon" aria-hidden="true">${uploadIconHtml}</span><p class="tc-file-dropzone__prompt">${esc(msg('fileDropPrompt'))}</p>${formatsHtml}</div><input type="file" multiple class="tc-file-dropzone__input" aria-label="${esc(msg('fileSelectLabel'))}" tabindex="-1"${accept ? ` accept="${esc(accept)}"` : ''} />`
+        patchHtml(
+            this,
+            `<div class="tc-file-dropzone__area" role="button" tabindex="0" aria-label="${esc(msg('fileDropLabel'))}"><span class="tc-file-dropzone__icon" aria-hidden="true">${uploadIconHtml}</span><p class="tc-file-dropzone__prompt">${esc(msg('fileDropPrompt'))}</p>${formatsHtml}</div><input type="file" multiple class="tc-file-dropzone__input" aria-label="${esc(msg('fileSelectLabel'))}" tabindex="-1"${accept ? ` accept="${esc(accept)}"` : ''} />`,
+        )
 
         const area = this.querySelector<HTMLElement>('.tc-file-dropzone__area')
         const input = this.querySelector<HTMLInputElement>('.tc-file-dropzone__input')
 
         if (!area || !input) return
 
-        area.addEventListener('click', () => input.click())
+        bindOnce(area, 'click', () => input.click())
 
-        area.addEventListener('keydown', (e: KeyboardEvent) => {
+        bindOnce(area, 'keydown', (e: KeyboardEvent) => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault()
                 input.click()
             }
         })
 
-        area.addEventListener('dragover', (e: DragEvent) => {
+        bindOnce(area, 'dragover', (e: DragEvent) => {
             e.preventDefault()
             e.stopPropagation()
             this.classList.add('tc-file-dropzone--active')
         })
 
-        area.addEventListener('dragleave', (e: DragEvent) => {
+        bindOnce(area, 'dragleave', (e: DragEvent) => {
             const related = e.relatedTarget as Node | null
             if (!related || !area.contains(related)) {
                 this.classList.remove('tc-file-dropzone--active')
             }
         })
 
-        area.addEventListener('drop', (e: DragEvent) => {
+        bindOnce(area, 'drop', (e: DragEvent) => {
             e.preventDefault()
             e.stopPropagation()
             this.classList.remove('tc-file-dropzone--active')
@@ -98,7 +102,7 @@ export class FileDropzone extends HTMLElement {
             if (files.length > 0) this._dispatch(files)
         })
 
-        input.addEventListener('change', () => {
+        bindOnce(input, 'change', () => {
             const files = input.files ? Array.from(input.files) : []
             if (files.length > 0) this._dispatch(files)
             input.value = ''

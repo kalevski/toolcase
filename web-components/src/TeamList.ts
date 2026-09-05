@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 
 const TAG_NAME = 'tc-team-list'
@@ -53,7 +54,9 @@ export class TeamList extends HTMLElement {
         if (member.avatarUrl) {
             avatar = `<img class="tc-team-list-avatar tc-team-list-avatar--img" src="${esc(member.avatarUrl)}" alt="${name}">`
         } else {
-            const initials = esc(member.initials ? member.initials : deriveInitials(member.name ?? ''))
+            const initials = esc(
+                member.initials ? member.initials : deriveInitials(member.name ?? ''),
+            )
             const gradientClass = member.gradient !== false ? ' tc-team-list-avatar--gradient' : ''
             avatar = `<span class="tc-team-list-avatar${gradientClass}" aria-hidden="true">${initials}</span>`
         }
@@ -79,7 +82,7 @@ export class TeamList extends HTMLElement {
 
     private render(): void {
         const items = this._members.map((m) => this._renderMember(m)).join('')
-        this.innerHTML = `<ul class="tc-team-list" role="list">${items}</ul>`
+        patchHtml(this, `<ul class="tc-team-list" role="list">${items}</ul>`)
     }
 }
 

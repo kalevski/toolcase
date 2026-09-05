@@ -223,3 +223,46 @@
         animation-duration: 3.2s;
     }
 }
+
+// ── The host ─────────────────────────────────────────────────────────────────
+//
+// THE HOST IS THE LAYOUT, and the glyph is one owned child. Before 5.1 the
+// element rewrote its whole subtree on every attribute change, which interrupted
+// a screen reader mid-announcement of the `role="status"` it carries — the one
+// element in the set where that is guaranteed to be happening.
+//
+// `caption` is what absorbs the three consuming apps' own `Loading`: a centred
+// spinner with a sentence under it. The caption node is ALWAYS rendered (it is
+// the wait's accessible name); `caption` only decides whether it is also seen.
+
+tc-spinner {
+    --bs-spinner-caption-gap: 0.625rem;
+    --bs-spinner-caption-font-size: 0.8125rem;
+    --bs-spinner-caption-color: var(--tc-text-muted);
+    --bs-spinner-block-padding: 2rem;
+}
+
+.tc-spinner {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--bs-spinner-caption-gap);
+    vertical-align: middle;
+}
+
+// The centred wait: a column in the middle of whatever box it was given.
+.tc-spinner--block {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: var(--bs-spinner-caption-gap);
+    padding: var(--bs-spinner-block-padding) 1rem;
+    width: 100%;
+    text-align: center;
+}
+
+.tc-spinner__caption {
+    font-size: var(--bs-spinner-caption-font-size);
+    line-height: 1.45;
+    color: var(--bs-spinner-caption-color);
+}

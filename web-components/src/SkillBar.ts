@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-skill-bar'
 
@@ -165,7 +166,7 @@ export class SkillBar extends HTMLElement {
             })
             .join('')
 
-        this.innerHTML = `<div class="tc-skill-bar__row">${slotsHTML}</div>`
+        patchHtml(this, `<div class="tc-skill-bar__row">${slotsHTML}</div>`)
     }
 }
 

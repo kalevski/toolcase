@@ -2,7 +2,11 @@
 // The base --bs-navbar-bg is a hardcoded light `rgba(255,255,255,0.85)` that the
 // token remap does not reach; repoint it to a translucent deep void fill so the
 // blur reads as dark glass, and tint the brand dot with the cyan glow ring.
-
+// The toggler hamburger is a literal `%23334155` (slate) stroke baked into the
+// SVG data-uri in the base component — the --tc-* remap can't reach a literal,
+// so on this near-black glass it was rendering an invisible dark-on-dark icon
+// below the expand breakpoint. Repoint it to the theme's light text colour,
+// same fix already applied for dungeon/redline.
 tc-theme[name='neon'],
 [data-tc-theme='neon'] {
     tc-navbar,
@@ -14,5 +18,6 @@ tc-theme[name='neon'],
         --bs-navbar-active-color: var(--nd-accent-bright);
         --bs-navbar-brand-dot-bg: var(--nd-cyan);
         --bs-navbar-brand-dot-glow: var(--nd-cyan-soft);
+        --bs-navbar-toggler-icon-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath stroke='%23f3e9ff' stroke-linecap='round' stroke-width='1.5' d='M2 4h12M2 8h12M2 12h12'/%3e%3c/svg%3e");
     }
 }

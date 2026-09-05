@@ -1,6 +1,9 @@
+import { setHostClass } from './internal/host-class'
+import { patchHtml } from './internal/patch-html'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-helper-text'
 
@@ -33,15 +36,8 @@ export class HelperText extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            if (!this.hasAttribute('text')) {
-                const inner = this.querySelector('.tc-helper-text-content')
-                if (inner) slotContent.forEach((n) => inner.appendChild(n))
-            }
-            this._initialised = true
-        }
+        this._initialised = true
+        this.render()
     }
 
     attributeChangedCallback(): void {
@@ -60,7 +56,7 @@ export class HelperText extends HTMLElement {
         return VARIANTS.includes(v) ? v : 'default'
     }
     set variant(v: HelperTextVariant) {
-        this.setAttribute('variant', v)
+        setAttr(this, 'variant', v)
     }
 
     get text(): string | null {
@@ -100,13 +96,16 @@ export class HelperText extends HTMLElement {
         const classes = ['tc-helper-text', `tc-helper-text--${variant}`, extraClass]
             .filter(Boolean)
             .join(' ')
-        const idAttr = id ? ` id="${id}"` : ''
-        const content =
+        setHostClass(this, classes)
+        if (id) this.setAttribute('id', id)
+        // Icon first, then the `text` attribute when there is one; without it the
+        // consumer's children are the message, left where they were written.
+        patchHtml(
+            this,
             text != null
-                ? `<span class="tc-helper-text-content">${esc(text)}</span>`
-                : `<span class="tc-helper-text-content"></span>`
-
-        this.innerHTML = `<div class="${classes}"${idAttr}>${iconHtml}${content}</div>`
+                ? `${iconHtml}<span class="tc-helper-text-content">${esc(text)}</span>`
+                : iconHtml,
+        )
     }
 }
 

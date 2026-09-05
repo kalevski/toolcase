@@ -1,0 +1,35 @@
+// tc-confirm-sheet — "are you sure", as a bottom sheet.
+//
+// The surface is `tc-bottom-sheet`'s, inherited whole. Everything here is the two
+// parts this element adds: the consequence line in the body region, and the
+// action row in the footer region.
+
+@use '../foundation/tokens' as *;
+
+tc-confirm-sheet {
+    --bs-confirm-sheet-lead-size: 0.9375rem;
+    --bs-confirm-sheet-lead-color: var(--tc-text-muted);
+    --bs-confirm-sheet-actions-gap: 0.5rem;
+}
+
+.tc-confirm-sheet__lead {
+    margin: 0 0 0.5rem;
+    font-size: var(--bs-confirm-sheet-lead-size);
+    line-height: 1.5;
+    color: var(--bs-confirm-sheet-lead-color);
+}
+
+// The split action row: two equal halves, destructive on the RIGHT where the
+// thumb rests. `1 1 0` and not `flex-grow: 1` — a zero basis is what makes each
+// action take an equal share of the row instead of a share proportional to its
+// label, which is the difference between „Cancel / Delete this car" splitting
+// evenly and the long one taking two thirds.
+.tc-confirm-sheet__actions {
+    display: flex;
+    gap: var(--bs-confirm-sheet-actions-gap);
+
+    > .btn {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+}

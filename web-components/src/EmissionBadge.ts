@@ -1,4 +1,6 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-emission-badge'
 
@@ -37,7 +39,7 @@ export class EmissionBadge extends HTMLElement {
         return this.getAttribute('label') ?? ''
     }
     set label(v: string) {
-        this.setAttribute('label', v)
+        setAttr(this, 'label', v)
     }
 
     get tier(): number | null {
@@ -70,15 +72,15 @@ export class EmissionBadge extends HTMLElement {
             standard && standard !== 'NA'
                 ? `<span class="tc-emission-badge-standard">${esc(standard)}</span>`
                 : ''
-        const co2Html = co2Text
-            ? `<span class="tc-emission-badge-co2">${esc(co2Text)}</span>`
-            : ''
-        this.innerHTML =
+        const co2Html = co2Text ? `<span class="tc-emission-badge-co2">${esc(co2Text)}</span>` : ''
+        patchHtml(
+            this,
             `<span class="tc-emission-badge${this._tierClass()}">` +
-            `<span class="tc-emission-badge-label">${esc(this.label)}</span>` +
-            standardHtml +
-            co2Html +
-            `</span>`
+                `<span class="tc-emission-badge-label">${esc(this.label)}</span>` +
+                standardHtml +
+                co2Html +
+                `</span>`,
+        )
     }
 }
 

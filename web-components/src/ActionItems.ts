@@ -1,6 +1,8 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import * as LucideIcons from 'lucide-static'
 import { icon, chevronDownIcon } from './icons'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-action-items'
 
@@ -59,7 +61,7 @@ export class ActionItems extends HTMLElement {
         return this.getAttribute('label') ?? 'Actions'
     }
     set label(v: string) {
-        this.setAttribute('label', v)
+        setAttr(this, 'label', v)
     }
 
     get items(): ActionItem[] {
@@ -91,21 +93,24 @@ export class ActionItems extends HTMLElement {
     }
 
     private render(): void {
-        this.innerHTML = `<button class="btn btn-sm btn-secondary tc-action-items-trigger" type="button" aria-haspopup="menu" aria-expanded="false"><span class="tc-action-items-label">${esc(this.label)}</span><span class="tc-action-items-caret" aria-hidden="true">${chevronDownIcon}</span></button><div class="tc-action-items-menu" role="menu"></div>`
+        patchHtml(
+            this,
+            `<button class="btn btn-sm btn-secondary tc-action-items-trigger" type="button" aria-haspopup="menu" aria-expanded="false"><span class="tc-action-items-label">${esc(this.label)}</span><span class="tc-action-items-caret" aria-hidden="true">${chevronDownIcon}</span></button><div class="tc-action-items-menu" role="menu"></div>`,
+        )
         this._renderMenu()
 
         const trigger = this._getTrigger()
         if (trigger) {
-            trigger.addEventListener('click', () => {
+            bindOnce(trigger, 'click', () => {
                 if (this._isOpen) this._closeMenu(false)
                 else this._openMenu()
             })
-            trigger.addEventListener('keydown', (e: KeyboardEvent) => this._onTriggerKeydown(e))
+            bindOnce(trigger, 'keydown', (e: KeyboardEvent) => this._onTriggerKeydown(e))
         }
 
         const menu = this._getMenu()
         if (menu) {
-            menu.addEventListener('keydown', (e: KeyboardEvent) => this._onMenuKeydown(e))
+            bindOnce(menu, 'keydown', (e: KeyboardEvent) => this._onMenuKeydown(e))
         }
     }
 
@@ -122,7 +127,7 @@ export class ActionItems extends HTMLElement {
                 const dangerCls = item.danger ? ' tc-action-items-item--danger' : ''
                 const disabledAttr = disabled ? ' disabled aria-disabled="true"' : ''
                 const iconHtml = item.icon ? this._resolveIcon(item.icon) : ''
-                return `<button class="tc-action-items-item dropdown-item${dangerCls}" role="menuitem" type="button" tabindex="-1" data-idx="${idx}"${disabledAttr}>${iconHtml}<span>${item.label}</span></button>`
+                return `<button class="tc-action-items-item dropdown-item${dangerCls}" role="menuitem" type="button" tabindex="-1" data-idx="${idx}"${disabledAttr}>${iconHtml}<span>${esc(item.label)}</span></button>`
             })
             .join('')
 
@@ -130,7 +135,7 @@ export class ActionItems extends HTMLElement {
         Array.from(
             menu.querySelectorAll<HTMLButtonElement>('.tc-action-items-item:not([disabled])'),
         ).forEach((btn) => {
-            btn.addEventListener('click', () => {
+            bindOnce(btn, 'click', () => {
                 const idx = parseInt(btn.dataset.idx ?? '-1', 10)
                 if (idx >= 0 && idx < this._items.length) {
                     this._selectItem(this._items[idx].key)

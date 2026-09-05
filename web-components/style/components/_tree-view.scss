@@ -201,6 +201,28 @@ tc-tree-view {
 
 // ── Checkbox — grandfathered form-check glyph ──────────────────────────────────────
 
+// Hit-area wrapper: for a parent (has-children) row the checkbox is the ONLY
+// way to toggle selection — clicking elsewhere on the row expands/collapses
+// instead (that click path also covers the disclosure toggle, which is why
+// the toggle itself needs no separate widening). So unlike the toggle, this
+// control's tap target must be grown explicitly under pointer:coarse. Real
+// padding (not a negative-margin overlap trick) so the extra hit area is
+// this element's own box — an overlap onto the icon/label siblings would
+// paint under them (later in DOM order) and lose the click, not gain it.
+// The row already grows to 44px tall under coarse pointer, so only the
+// inline axis needs padding; the visible glyph stays 0.95rem, centred.
+.tc-tree-view-checkbox-hit {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    @media (pointer: coarse) {
+        padding-inline: calc((var(--tc-min-touch-target, 44px) - 0.95rem) / 2);
+        min-height: var(--tc-min-touch-target, 44px);
+    }
+}
+
 .tc-tree-view-checkbox.form-check-input {
     // The form-check fill/border tokens are normally provided by a `.form-check`
     // wrapper; this checkbox is bare, so set them here or the appearance:none box

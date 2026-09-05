@@ -1,7 +1,9 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { lucideByName } from './internal/lucide'
 import { icon } from './icons'
 import { Heart } from 'lucide-static'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-car-listing-card'
 
@@ -11,7 +13,10 @@ export interface CarListingSpec {
 }
 
 const heartOutlineIconHtml = icon(Heart, 'tc-car-listing-card-wishlist-icon')
-const heartFilledIconHtml = icon(Heart, 'tc-car-listing-card-wishlist-icon tc-car-listing-card-wishlist-icon--filled')
+const heartFilledIconHtml = icon(
+    Heart,
+    'tc-car-listing-card-wishlist-icon tc-car-listing-card-wishlist-icon--filled',
+)
 
 // tc-car-listing-card — a vehicle listing card (image, category chip, wishlist
 // toggle, title, optional rating, an icon spec row for mileage/fuel/
@@ -87,7 +92,7 @@ export class CarListingCard extends HTMLElement {
         return this.getAttribute('layout') === 'list' ? 'list' : 'grid'
     }
     set layout(v: 'grid' | 'list') {
-        this.setAttribute('layout', v)
+        setAttr(this, 'layout', v)
     }
 
     get wishlisted(): boolean {
@@ -220,26 +225,30 @@ export class CarListingCard extends HTMLElement {
         const priceHtml =
             priceText || priceOldText
                 ? `<div class="tc-car-listing-card-price-block">` +
-                  (priceText ? `<span class="tc-car-listing-card-price">${esc(priceText)}</span>` : '') +
+                  (priceText
+                      ? `<span class="tc-car-listing-card-price">${esc(priceText)}</span>`
+                      : '') +
                   (priceOldText
                       ? `<span class="tc-car-listing-card-price-old">${esc(priceOldText)}</span>`
                       : '') +
                   `</div>`
                 : ''
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<article class="tc-car-listing-card tc-car-listing-card--${layout}">` +
-            mediaHtml +
-            `<div class="tc-car-listing-card-body">` +
-            titleHtml +
-            this._ratingHtml() +
-            this._specsHtml() +
-            `<div class="tc-car-listing-card-footer">` +
-            priceHtml +
-            this._sellerHtml() +
-            `</div>` +
-            `</div>` +
-            `</article>`
+                mediaHtml +
+                `<div class="tc-car-listing-card-body">` +
+                titleHtml +
+                this._ratingHtml() +
+                this._specsHtml() +
+                `<div class="tc-car-listing-card-footer">` +
+                priceHtml +
+                this._sellerHtml() +
+                `</div>` +
+                `</div>` +
+                `</article>`,
+        )
     }
 }
 

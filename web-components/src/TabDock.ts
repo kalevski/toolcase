@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { lucideByName } from './internal/lucide'
 
@@ -382,44 +383,47 @@ export class TabDock extends HTMLElement {
         const activeId = this.activeId
         const tabbableId = this._tabbableId()
 
-        this.innerHTML = this._tabs
-            .map((tab) => {
-                const isActive = tab.id === activeId
-                const badge = badgeText(tab.badge)
-                const cls = `tc-tab-dock-tab${isActive ? ' tc-tab-dock-tab--active' : ''}`
-                // The badge has to be part of the accessible NAME rather than a
-                // sibling text node: read on its own a screen reader announces
-                // „Рецепти 12", and 12 of what is anyone's guess. With a name the
-                // visible label is still a prefix of it, so WCAG 2.5.3 (Label in
-                // Name) holds and voice control still finds the tab by „Рецепти".
-                const spoken = badge ? `${tab.label}, ${tab.badgeLabel || badge}` : ''
-                const common =
-                    ` role="tab" class="${cls}" data-id="${esc(tab.id)}"` +
-                    ` aria-selected="${isActive}"` +
-                    ` tabindex="${tab.id === tabbableId ? '0' : '-1'}"` +
-                    (spoken ? ` aria-label="${esc(spoken)}"` : '')
+        patchHtml(
+            this,
+            this._tabs
+                .map((tab) => {
+                    const isActive = tab.id === activeId
+                    const badge = badgeText(tab.badge)
+                    const cls = `tc-tab-dock-tab${isActive ? ' tc-tab-dock-tab--active' : ''}`
+                    // The badge has to be part of the accessible NAME rather than a
+                    // sibling text node: read on its own a screen reader announces
+                    // „Рецепти 12", and 12 of what is anyone's guess. With a name the
+                    // visible label is still a prefix of it, so WCAG 2.5.3 (Label in
+                    // Name) holds and voice control still finds the tab by „Рецепти".
+                    const spoken = badge ? `${tab.label}, ${tab.badgeLabel || badge}` : ''
+                    const common =
+                        ` role="tab" class="${cls}" data-id="${esc(tab.id)}"` +
+                        ` aria-selected="${isActive}"` +
+                        ` tabindex="${tab.id === tabbableId ? '0' : '-1'}"` +
+                        (spoken ? ` aria-label="${esc(spoken)}"` : '')
 
-                const inner =
-                    `<span class="tc-tab-dock-icon">` +
-                    lucideByName(tab.icon, 'tc-tab-dock-glyph') +
-                    // aria-hidden: the count is already in the item's name above.
-                    (badge
-                        ? `<span class="tc-tab-dock-badge" aria-hidden="true">${esc(badge)}</span>`
-                        : '') +
-                    `</span>` +
-                    `<span class="tc-tab-dock-label">${esc(tab.label)}</span>`
+                    const inner =
+                        `<span class="tc-tab-dock-icon">` +
+                        lucideByName(tab.icon, 'tc-tab-dock-glyph') +
+                        // aria-hidden: the count is already in the item's name above.
+                        (badge
+                            ? `<span class="tc-tab-dock-badge" aria-hidden="true">${esc(badge)}</span>`
+                            : '') +
+                        `</span>` +
+                        `<span class="tc-tab-dock-label">${esc(tab.label)}</span>`
 
-                if (tab.disabled) {
-                    // <a> has no `disabled`, so a disabled tab is never a link — an
-                    // inert <span> cannot be clicked or focused into.
-                    return `<span${common} aria-disabled="true">${inner}</span>`
-                }
-                if (tab.href) {
-                    return `<a href="${esc(tab.href)}"${common}>${inner}</a>`
-                }
-                return `<button type="button"${common}>${inner}</button>`
-            })
-            .join('')
+                    if (tab.disabled) {
+                        // <a> has no `disabled`, so a disabled tab is never a link — an
+                        // inert <span> cannot be clicked or focused into.
+                        return `<span${common} aria-disabled="true">${inner}</span>`
+                    }
+                    if (tab.href) {
+                        return `<a href="${esc(tab.href)}"${common}>${inner}</a>`
+                    }
+                    return `<button type="button"${common}>${inner}</button>`
+                })
+                .join(''),
+        )
     }
 }
 

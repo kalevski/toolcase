@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 import { icon } from './icons'
@@ -99,15 +100,18 @@ export class StatRow extends HTMLElement {
             ].join('')
         }
 
-        this.innerHTML = [
-            '<div class="tc-stat-row">',
-            `<span class="tc-stat-row-label">${esc(this.label)}</span>`,
-            '<span class="tc-stat-row-right">',
-            `<span class="tc-stat-row-value">${esc(displayValue)}</span>`,
-            trendHtml,
-            '</span>',
-            '</div>',
-        ].join('')
+        patchHtml(
+            this,
+            [
+                '<div class="tc-stat-row">',
+                `<span class="tc-stat-row-label">${esc(this.label)}</span>`,
+                '<span class="tc-stat-row-right">',
+                `<span class="tc-stat-row-value">${esc(displayValue)}</span>`,
+                trendHtml,
+                '</span>',
+                '</div>',
+            ].join(''),
+        )
     }
 }
 

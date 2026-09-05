@@ -1,16 +1,12 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
+import { adoptChildren } from './internal/adopt-children'
 import { Dropdown as BsDropdown } from './internal/Dropdown'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-dropdown'
 
 export type DropdownVariant =
-    | 'primary'
-    | 'secondary'
-    | 'success'
-    | 'danger'
-    | 'warning'
-    | 'info'
-    | 'light'
-    | 'dark'
+    'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
 export type DropdownDirection = 'down' | 'up' | 'start' | 'end'
 export type DropdownAutoClose = 'true' | 'inside' | 'outside' | 'false'
 
@@ -38,8 +34,7 @@ export class Dropdown extends HTMLElement {
         if (!this._initialised) {
             const slotContent = Array.from(this.childNodes)
             this.render()
-            const menu = this.querySelector('.dropdown-menu')
-            if (menu) slotContent.forEach((n) => menu.appendChild(n))
+            this._adopt(slotContent)
             this._initialised = true
         }
         this._initPlugin()
@@ -51,27 +46,32 @@ export class Dropdown extends HTMLElement {
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        const menu = this.querySelector('.dropdown-menu')
-        const slotContent = menu ? Array.from(menu.childNodes) : []
         this._teardown()
+        // patchHtml reuses the <ul> across renders, so the menu items are already
+        // where they belong; re-pointing the route is all that is left to do.
         this.render()
-        const newMenu = this.querySelector('.dropdown-menu')
-        if (newMenu) slotContent.forEach((n) => newMenu.appendChild(n))
+        this._adopt()
         this._initPlugin()
+    }
+
+    /** The consumer's children are the menu's items — see adopt-children.ts. */
+    private _adopt(nodes?: Node[]): void {
+        const menu = this.querySelector('.dropdown-menu')
+        if (menu) adoptChildren(this, () => menu, nodes)
     }
 
     get label(): string {
         return this.getAttribute('label') ?? ''
     }
     set label(v: string) {
-        this.setAttribute('label', v)
+        setAttr(this, 'label', v)
     }
 
     get variant(): DropdownVariant {
         return (this.getAttribute('variant') as DropdownVariant) ?? 'primary'
     }
     set variant(v: DropdownVariant) {
-        this.setAttribute('variant', v)
+        setAttr(this, 'variant', v)
     }
 
     get split(): boolean {
@@ -87,7 +87,7 @@ export class Dropdown extends HTMLElement {
         return v in DIRECTION_CLASS ? v : 'down'
     }
     set direction(v: DropdownDirection) {
-        this.setAttribute('direction', v)
+        setAttr(this, 'direction', v)
     }
 
     get autoClose(): DropdownAutoClose {
@@ -149,7 +149,10 @@ export class Dropdown extends HTMLElement {
                 `${label}</button>`
         }
 
-        this.innerHTML = `<div class="${outerClass}">${toggleHtml}<ul class="dropdown-menu"></ul></div>`
+        patchHtml(
+            this,
+            `<div class="${outerClass}">${toggleHtml}<ul class="dropdown-menu"></ul></div>`,
+        )
     }
 
     private _initPlugin(): void {
@@ -157,10 +160,10 @@ export class Dropdown extends HTMLElement {
         if (!toggle) return
         this._toggleEl = toggle
         this._bsDropdown = new BsDropdown(toggle)
-        toggle.addEventListener('show.bs.dropdown', this._onShow)
-        toggle.addEventListener('shown.bs.dropdown', this._onShown)
-        toggle.addEventListener('hide.bs.dropdown', this._onHide)
-        toggle.addEventListener('hidden.bs.dropdown', this._onHidden)
+        bindOnce(toggle, 'show.bs.dropdown', this._onShow)
+        bindOnce(toggle, 'shown.bs.dropdown', this._onShown)
+        bindOnce(toggle, 'hide.bs.dropdown', this._onHide)
+        bindOnce(toggle, 'hidden.bs.dropdown', this._onHidden)
     }
 
     private _teardown(): void {

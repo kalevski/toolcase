@@ -60,7 +60,9 @@ tc-crafting-panel {
     --bs-crafting-panel-craft-padding-y: 0.5rem;
     --bs-crafting-panel-craft-padding-x: 1rem;
     --bs-crafting-panel-craft-font-size: 0.925rem;
-    --bs-crafting-panel-craft-hover-shadow: 0 4px 15px rgba(30, 41, 59, 0.3);
+    // Theme-aware hover glow (some themes route an accent-colored glow through
+    // this token, e.g. neon/redline) — not a hardcoded slate literal.
+    --bs-crafting-panel-craft-hover-shadow: var(--tc-shadow-hover);
 
     display: grid;
     grid-template-columns: 1fr;

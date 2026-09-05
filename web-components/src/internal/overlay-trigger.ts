@@ -1,3 +1,4 @@
+import { setAttr } from './tc-element'
 // Shared scaffold for tc-tooltip and tc-popover. Both are thin wrappers over a
 // Bootstrap overlay plugin (internal/Tooltip, internal/Popover) bound to the
 // element's first child: same observed attributes, accessors, show/hide/toggle,
@@ -58,28 +59,28 @@ export abstract class OverlayTrigger extends HTMLElement {
         return this.getAttribute('title') ?? ''
     }
     set title(v: string) {
-        this.setAttribute('title', v)
+        setAttr(this, 'title', v)
     }
 
     get content(): string {
         return this.getAttribute('content') ?? ''
     }
     set content(v: string) {
-        this.setAttribute('content', v)
+        setAttr(this, 'content', v)
     }
 
     get placement(): string {
         return this.getAttribute('placement') ?? 'auto'
     }
     set placement(v: string) {
-        this.setAttribute('placement', v)
+        setAttr(this, 'placement', v)
     }
 
     get trigger(): string {
         return this.getAttribute('trigger') ?? this.defaultTrigger
     }
     set trigger(v: string) {
-        this.setAttribute('trigger', v)
+        setAttr(this, 'trigger', v)
     }
 
     get html(): boolean {

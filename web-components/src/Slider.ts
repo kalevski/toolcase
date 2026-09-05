@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { fieldMessageHtml } from './internal/field-message'
 import {
@@ -491,17 +492,20 @@ export class Slider extends HTMLElement {
             invalidText: msg('invalidChoice'),
         })
 
-        this.innerHTML = [
-            labelHtml,
-            `<div class="tc-slider-track">`,
-            `<div class="tc-slider-fill" style="width:${pct}%"></div>`,
-            `<div ${thumbAttrs}>`,
-            tooltipHtml,
-            `</div>`,
-            ticksHtml,
-            `</div>`,
-            messageHtml,
-        ].join('')
+        patchHtml(
+            this,
+            [
+                labelHtml,
+                `<div class="tc-slider-track">`,
+                `<div class="tc-slider-fill" style="width:${pct}%"></div>`,
+                `<div ${thumbAttrs}>`,
+                tooltipHtml,
+                `</div>`,
+                ticksHtml,
+                `</div>`,
+                messageHtml,
+            ].join(''),
+        )
 
         // The danger track-border recolor is keyed off the invalid state.
         if (isInvalid) this.classList.add('tc-slider--error')

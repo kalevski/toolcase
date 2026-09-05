@@ -1,4 +1,6 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-ammo-counter'
 
 export type AmmoCounterState = 'normal' | 'low' | 'reloading'
@@ -56,7 +58,7 @@ export class AmmoCounter extends HTMLElement {
         return this.getAttribute('weapon-name') ?? ''
     }
     set weaponName(v: string) {
-        this.setAttribute('weapon-name', v)
+        setAttr(this, 'weapon-name', v)
     }
 
     get reloading(): boolean {
@@ -89,16 +91,19 @@ export class AmmoCounter extends HTMLElement {
             ? `<div class="tc-ammo-counter-state" role="status">Reloading…</div>`
             : ''
 
-        this.innerHTML = [
-            weaponRow,
-            '<div class="tc-ammo-counter-row">',
-            `<span class="tc-ammo-counter-mag">${mag}</span>`,
-            '<span class="tc-ammo-counter-sep" aria-hidden="true">/</span>',
-            `<span class="tc-ammo-counter-max">${magMax}</span>`,
-            `<span class="tc-ammo-counter-reserve">+${reserve}</span>`,
-            '</div>',
-            stateRow,
-        ].join('')
+        patchHtml(
+            this,
+            [
+                weaponRow,
+                '<div class="tc-ammo-counter-row">',
+                `<span class="tc-ammo-counter-mag">${mag}</span>`,
+                '<span class="tc-ammo-counter-sep" aria-hidden="true">/</span>',
+                `<span class="tc-ammo-counter-max">${magMax}</span>`,
+                `<span class="tc-ammo-counter-reserve">+${reserve}</span>`,
+                '</div>',
+                stateRow,
+            ].join(''),
+        )
     }
 }
 

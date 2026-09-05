@@ -1,4 +1,6 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { bool, setAttr } from './internal/tc-element'
 import { setHostClass } from './internal/host-class'
 import { msg } from './messages'
 import { Toast as BsToast } from './internal/Toast'
@@ -8,7 +10,6 @@ const TAG_NAME = 'tc-toast'
 
 export class Toast extends HTMLElement {
     private _bsToast: BsToast | null = null
-    private _bodyNodes: Node[] = []
     private _initialised = false
     private _syncing = false
 
@@ -21,10 +22,7 @@ export class Toast extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            this._bodyNodes = Array.from(this.childNodes)
-            this._initialised = true
-        }
+        this._initialised = true
         this.render()
         this._initPlugin()
         if (this.open) this._bsToast?.show()
@@ -58,11 +56,15 @@ export class Toast extends HTMLElement {
         else this.removeAttribute('open')
     }
 
+    /** Tri-state: default ON, so the attribute carries `"false"` to turn it off
+     *  rather than being presence-based. `bool()` is what makes `autohide={false}`,
+     *  `autohide="false"`, `autohide={0}` and `autohide=""` all mean the same thing
+     *  — React writes any of them depending on how the prop was spelled. */
     get autohide(): boolean {
         return this.getAttribute('autohide') !== 'false'
     }
     set autohide(v: boolean) {
-        this.setAttribute('autohide', String(v))
+        this.setAttribute('autohide', bool(v) ? 'true' : 'false')
     }
 
     get delay(): number {
@@ -85,7 +87,7 @@ export class Toast extends HTMLElement {
         return this.getAttribute('title') ?? ''
     }
     set title(v: string) {
-        this.setAttribute('title', v)
+        setAttr(this, 'title', v)
     }
 
     show(): void {
@@ -139,10 +141,9 @@ export class Toast extends HTMLElement {
               `</div>`
             : ''
 
-        this.innerHTML = headerHtml + `<div class="toast-body"></div>`
-
-        const body = this.querySelector('.toast-body')
-        if (body) this._bodyNodes.forEach((n) => body.appendChild(n))
+        // The header is the element's own; the body is whatever the consumer wrote,
+        // left where they wrote it and given the body padding by CSS (rule 1).
+        patchHtml(this, headerHtml)
     }
 
     private _initPlugin(): void {

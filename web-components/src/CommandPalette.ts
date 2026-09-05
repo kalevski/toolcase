@@ -1,7 +1,9 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 import { lockBody, unlockBody } from './internal/scroll-lock'
 import { overlayStack } from './internal/overlay-stack'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-command-palette'
 
@@ -99,7 +101,7 @@ export class CommandPalette extends HTMLElement {
         return this.getAttribute('placeholder') ?? DEFAULT_PLACEHOLDER
     }
     set placeholder(v: string) {
-        this.setAttribute('placeholder', v)
+        setAttr(this, 'placeholder', v)
     }
 
     get loading(): boolean {
@@ -385,7 +387,7 @@ export class CommandPalette extends HTMLElement {
 
     private render(): void {
         if (!this.open) {
-            this.innerHTML = ''
+            patchHtml(this, '')
             return
         }
 
@@ -394,28 +396,31 @@ export class CommandPalette extends HTMLElement {
         const inputId = `${this._idPrefix}-input`
         const busyAttr = this.loading ? ' aria-busy="true"' : ''
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-command-palette-backdrop">` +
-            `<div class="tc-command-palette" role="dialog" aria-modal="true" aria-label="Command palette">` +
-            `<div class="tc-command-palette-search">` +
-            `<span class="tc-command-palette-search-icon" aria-hidden="true">${searchIconHtml}</span>` +
-            `<input id="${inputId}" type="text" class="tc-command-palette-input"` +
-            ` role="combobox" aria-autocomplete="list" aria-expanded="true" aria-controls="${listId}"` +
-            ` aria-label="Search commands" placeholder="${placeholder}"` +
-            ` autocomplete="off" spellcheck="false" value="${esc(this._query)}">` +
-            `</div>` +
-            `<ul id="${listId}" class="tc-command-palette-list" role="listbox" aria-label="Results"${busyAttr}>` +
-            this._renderListInner() +
-            `</ul>` +
-            `<div class="tc-command-palette-footer" aria-hidden="true">` +
-            `<span><kbd class="tc-command-palette-key">↑</kbd><kbd class="tc-command-palette-key">↓</kbd> navigate</span>` +
-            `<span><kbd class="tc-command-palette-key">↵</kbd> select</span>` +
-            `<span><kbd class="tc-command-palette-key">Esc</kbd> close</span>` +
-            `</div>` +
-            `</div>` +
-            `</div>`
+                `<div class="tc-command-palette" role="dialog" aria-modal="true" aria-label="Command palette">` +
+                `<div class="tc-command-palette-search">` +
+                `<span class="tc-command-palette-search-icon" aria-hidden="true">${searchIconHtml}</span>` +
+                `<input id="${inputId}" type="text" class="tc-command-palette-input"` +
+                ` role="combobox" aria-autocomplete="list" aria-expanded="true" aria-controls="${listId}"` +
+                ` aria-label="Search commands" placeholder="${placeholder}"` +
+                ` autocomplete="off" spellcheck="false" value="${esc(this._query)}">` +
+                `</div>` +
+                `<ul id="${listId}" class="tc-command-palette-list" role="listbox" aria-label="Results"${busyAttr}>` +
+                this._renderListInner() +
+                `</ul>` +
+                `<div class="tc-command-palette-footer" aria-hidden="true">` +
+                `<span><kbd class="tc-command-palette-key">↑</kbd><kbd class="tc-command-palette-key">↓</kbd> navigate</span>` +
+                `<span><kbd class="tc-command-palette-key">↵</kbd> select</span>` +
+                `<span><kbd class="tc-command-palette-key">Esc</kbd> close</span>` +
+                `</div>` +
+                `</div>` +
+                `</div>`,
+        )
 
-        this.querySelector<HTMLInputElement>('.tc-command-palette-input')?.addEventListener(
+        bindOnce(
+            this.querySelector<HTMLInputElement>('.tc-command-palette-input'),
             'input',
             this._onInput,
         )

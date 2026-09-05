@@ -1,0 +1,42 @@
+// Marker › surfaces — paper cards on a paper page.
+//
+// The whole theme rests on a hairline rather than on a shadow: paper on paper is
+// only legible as a surface if its EDGE is legible, and a drop shadow on a
+// bright ground is a grey blur. Shadows here are for things that genuinely
+// float — overlays, the raised action — and not for a card sitting in a list.
+
+[data-tc-theme='marker'],
+tc-theme[name='marker'] {
+    .card,
+    .tc-section-card,
+    .tc-panel,
+    tc-card,
+    tc-section-card,
+    tc-panel {
+        box-shadow: none;
+        border-color: var(--mk-line);
+    }
+
+    // The header cap is a cool tint rather than the base theme's warm one — a
+    // warm cap on a cool paper reads as a stain.
+    .tc-section-card-header {
+        background: linear-gradient(135deg, rgba(16, 23, 26, 0.03), rgba(16, 23, 26, 0.01));
+    }
+
+    // An empty state's icon plate is the WELL, not a tinted brand colour: the
+    // library's default paints it in 10% accent, and on a grid of empty cards
+    // that made every placeholder look like a promoted one.
+    .tc-empty-state__icon {
+        background: rgba(16, 23, 26, 0.04);
+    }
+
+    // Overlays are frosted paper. `backdrop-filter` is progressive — the solid
+    // gradient underneath is what the fallback renders.
+    .tc-bottom-sheet,
+    .tc-modal__panel,
+    .dropdown-menu,
+    .popover {
+        background: var(--mk-overlay-bg);
+        backdrop-filter: var(--mk-overlay-blur);
+    }
+}

@@ -40,6 +40,10 @@ tc-pricing-card {
     border-radius: 0;
     box-shadow: var(--bs-pricing-card-shadow);
     position: relative;
+    // Fill the stretched flex-item host (tiers laid out side by side with
+    // align-items: stretch, per the demo) so the footer's margin-top: auto
+    // actually has spare height to push against and every tier reads equal-height.
+    height: 100%;
 
     // Highlight variant: ink-accent top cap + stronger border + elevated shadow
     &--highlight {

@@ -223,3 +223,108 @@
         }
     }
 }
+
+// ── Host-as-dialog layout ────────────────────────────────────────────────────
+//
+// `tc-modal` renders no `.modal-dialog` / `.modal-content` wrappers any more: the
+// consumer's children ARE the modal body and stay direct children of the host
+// (rule 1). The host is the scroll container; its `::before` paints the sheet
+// behind the rows, and each region is placed on the host's grid.
+tc-modal.modal {
+    // `render()` in Modal.ts always adds `modal-dialog` to this same host
+    // (so `.modal-dialog-centered` / `-scrollable` / `.modal-sm|lg|xl` below
+    // keep working), but the plain `.modal-dialog` rule above was written for
+    // a *separate* inner wrapper: at equal (0,1,0) specificity its
+    // `position: relative`, `width: auto` and `pointer-events: none` land
+    // after `.modal`'s in the cascade and silently win, turning the host from
+    // a fixed full-viewport overlay into an inline, shrink-to-fit box that
+    // no longer receives pointer events. That also breaks the outside-click
+    // dismiss in `internal/Modal.ts` (`_onElementMouseDown` only fires when
+    // `event.target === this._element`). Re-assert the box model here at
+    // tag+class specificity so it can't be shadowed again.
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    // Neutralise `.modal-dialog`'s sm+ `max-width: var(--bs-modal-width)`, which
+    // would otherwise cap this full-viewport box down to the dialog's own width.
+    max-width: none;
+    margin: 0;
+    pointer-events: auto;
+    display: grid;
+    grid-template-columns: minmax(0, var(--bs-modal-width));
+    grid-auto-rows: min-content;
+    justify-content: center;
+    align-content: start;
+    padding: var(--bs-modal-margin) 0.5rem;
+    overflow-y: auto;
+}
+
+tc-modal.modal.modal-dialog-centered {
+    align-content: center;
+}
+
+tc-modal.modal.modal-sm {
+    grid-template-columns: minmax(0, 300px);
+}
+
+tc-modal.modal.modal-lg {
+    grid-template-columns: minmax(0, 800px);
+}
+
+tc-modal.modal.modal-xl {
+    grid-template-columns: minmax(0, 1140px);
+}
+
+tc-modal.modal[class*='modal-fullscreen'] {
+    grid-template-columns: minmax(0, 100%);
+    padding: 0;
+}
+
+// The sheet itself — one painted cell spanning every row.
+tc-modal.modal::before {
+    content: '';
+    grid-column: 1;
+    grid-row: 1 / -1;
+    background-color: var(--bs-modal-bg);
+    border: var(--bs-modal-border-width, 1px) solid var(--bs-modal-border-color, var(--tc-border));
+    border-radius: 0;
+    box-shadow: var(--bs-modal-box-shadow, var(--tc-shadow-lg));
+    pointer-events: none;
+}
+
+tc-modal.modal > * {
+    grid-column: 1;
+    position: relative;
+    z-index: 1;
+    pointer-events: auto;
+}
+
+tc-modal.modal > .modal-header {
+    grid-row: 2;
+}
+
+tc-modal.modal > :not(.modal-header):not([slot='footer']) {
+    grid-row: auto;
+    padding: var(--bs-modal-padding);
+    font-size: 0.8125rem;
+    color: var(--tc-text-muted);
+}
+
+tc-modal.modal > [slot='footer'] {
+    grid-row: 999;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: calc(var(--bs-modal-padding) - 0.25rem);
+    border-top: var(--bs-modal-border-width, 1px) solid
+        var(--bs-modal-border-color, var(--tc-border));
+}
+
+// `lazy` is a paint deferral now, not a detach: the consumer's nodes stay in the
+// DOM (removing one is a move, and rule 1 forbids moving what you did not create).
+tc-modal.tc-modal--deferred > :not(.modal-header) {
+    content-visibility: hidden;
+}

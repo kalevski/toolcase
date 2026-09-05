@@ -1,3 +1,5 @@
+import { setHostClass } from './internal/host-class'
+import { bindOnce } from './internal/patch-html'
 import { Collapse as BsCollapse } from './internal/Collapse'
 
 const TAG_NAME = 'tc-collapse'
@@ -17,13 +19,8 @@ export class Collapse extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            const inner = this._collapseEl
-            if (inner) slotContent.forEach((n) => inner.appendChild(n))
-            this._initialised = true
-        }
+        this._initialised = true
+        this.render()
         this._initPlugin()
     }
 
@@ -34,12 +31,8 @@ export class Collapse extends HTMLElement {
     attributeChangedCallback(name: string): void {
         if (!this.isConnected || !this._initialised || this._syncing) return
         if (name === 'horizontal') {
-            const inner = this._collapseEl
-            const slotContent = inner ? Array.from(inner.childNodes) : []
             this._teardown()
             this.render()
-            const newInner = this._collapseEl
-            if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
             this._initPlugin()
         } else if (name === 'open') {
             if (this.open) {
@@ -110,21 +103,21 @@ export class Collapse extends HTMLElement {
         ]
             .filter(Boolean)
             .join(' ')
-        const div = document.createElement('div')
-        div.className = classes
-        this.innerHTML = ''
-        this.appendChild(div)
-        this._collapseEl = div
+        // THE HOST IS THE COLLAPSIBLE REGION — the Bootstrap plugin animates the
+        // host itself, so the content it hides is the consumer's own children,
+        // still where they wrote them (rule 1).
+        setHostClass(this, classes)
+        this._collapseEl = this
     }
 
     private _initPlugin(): void {
         const el = this._collapseEl
         if (!el) return
         this._bsCollapse = new BsCollapse(el, { toggle: false })
-        el.addEventListener('show.bs.collapse', this._onShow)
-        el.addEventListener('shown.bs.collapse', this._onShown)
-        el.addEventListener('hide.bs.collapse', this._onHide)
-        el.addEventListener('hidden.bs.collapse', this._onHidden)
+        bindOnce(el, 'show.bs.collapse', this._onShow)
+        bindOnce(el, 'shown.bs.collapse', this._onShown)
+        bindOnce(el, 'hide.bs.collapse', this._onHide)
+        bindOnce(el, 'hidden.bs.collapse', this._onHidden)
     }
 
     private _teardown(): void {

@@ -23,12 +23,17 @@ tc-range[disabled] {
     }
 
     &:focus-visible {
+        // Themed via --tc-focus-ring (every theme/variant defines this token) so
+        // dark/vivid themes with no _range.scss override of their own (aurora,
+        // neon, marker, redline, sunshine) still get their own accent glow here,
+        // instead of the base theme's slate ring — matching how .form-control /
+        // .form-select resolve focus in _input.scss.
         &::-webkit-slider-thumb {
-            box-shadow: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
+            box-shadow: var(--tc-focus-ring);
         }
 
         &::-moz-range-thumb {
-            box-shadow: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
+            box-shadow: var(--tc-focus-ring);
         }
     }
 

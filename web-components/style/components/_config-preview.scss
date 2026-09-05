@@ -53,10 +53,18 @@ tc-config-preview {
     background: var(--bs-config-preview-header-bg);
     border-bottom: var(--bs-config-preview-header-border);
 
-    // Revealed when the live-label container has content (attribute text or slot child)
+    // Revealed when the live-label container has content (attribute text)
     &:has(.tc-config-preview-live-label:not(:empty)) {
         display: flex;
     }
+}
+
+// Revealed when a `slot="live-label"` child is supplied instead of the attribute.
+// That node is a consumer element (rule 1: never moved into the header), so it
+// sits as a sibling grid item — the header's own :has() above can't see it and
+// needs this host-level check instead.
+.tc-config-preview:has(> [slot='live-label']:not(:empty)) > .tc-config-preview-header {
+    display: flex;
 }
 
 // ── Live badge ───────────────────────────────────────────────────────────────
@@ -159,4 +167,34 @@ tc-config-preview {
         // Freeze the decorative pulse; leave the dot visible (state-conveying color retained)
         animation: none;
     }
+}
+
+// A `slot="live-label"` element sits in the header badge, and any extra lines the
+// consumer wrote follow the entry block — both placed here rather than moved
+// (rule 1).
+.tc-config-preview {
+    display: grid;
+    grid-template-columns: auto 1fr;
+}
+
+.tc-config-preview > .tc-config-preview-header {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.tc-config-preview > [slot='live-label'] {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    justify-self: start;
+}
+
+.tc-config-preview > .tc-config-preview-body {
+    grid-column: 1 / -1;
+}
+
+.tc-config-preview > :not([slot='live-label']):not([class^='tc-config-preview']) {
+    grid-column: 1 / -1;
+    font-family: var(--tc-font-mono);
+    white-space: pre;
 }

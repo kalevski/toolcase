@@ -1,0 +1,153 @@
+// tc-editor-shell — toolbar, tool rail, stage, inspector, status.
+//
+// THE GRID IS THE ELEMENT. Every region is your own child, placed by `grid-area`
+// off its `slot` — nothing is moved, which is what lets two apps that agree on
+// the layout and on nothing else share it.
+//
+// The stage is the DEFAULT region (no `slot`), because it is the one region that
+// always exists and the one a consumer forgets to name.
+
+@use '../foundation/tokens' as *;
+
+tc-editor-shell {
+    --bs-editor-shell-rail-width: 3.5rem;
+    --bs-editor-shell-inspector-width: 17rem;
+    --bs-editor-shell-toolbar-height: 3rem;
+    --bs-editor-shell-status-height: 2rem;
+    --bs-editor-shell-bg: var(--tc-surface-muted);
+    --bs-editor-shell-panel-bg: var(--tc-surface);
+    --bs-editor-shell-border-color: var(--tc-border);
+}
+
+.tc-editor-shell {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas:
+        'toolbar toolbar toolbar'
+        'rail    stage   inspector'
+        'status  status  status';
+    // `100%` and not `100dvh`: the shell fills whatever box it is given, so it
+    // works both as a page and inside a panel. A consumer who wants the viewport
+    // sets it on the container.
+    height: 100%;
+    min-height: 0;
+    background: var(--bs-editor-shell-bg);
+}
+
+.tc-editor-shell > [slot='toolbar'] {
+    grid-area: toolbar;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: var(--bs-editor-shell-toolbar-height);
+    padding: 0 0.75rem;
+    background: var(--bs-editor-shell-panel-bg);
+    border-bottom: 1px solid var(--bs-editor-shell-border-color);
+}
+
+.tc-editor-shell > [slot='rail'] {
+    grid-area: rail;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    width: var(--bs-editor-shell-rail-width);
+    padding: 0.5rem 0;
+    overflow-y: auto;
+    background: var(--bs-editor-shell-panel-bg);
+    border-right: 1px solid var(--bs-editor-shell-border-color);
+}
+
+.tc-editor-shell > [slot='inspector'] {
+    grid-area: inspector;
+    width: var(--bs-editor-shell-inspector-width);
+    padding: 0.75rem;
+    overflow-y: auto;
+    background: var(--bs-editor-shell-panel-bg);
+    border-left: 1px solid var(--bs-editor-shell-border-color);
+}
+
+.tc-editor-shell > [slot='status'] {
+    grid-area: status;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: var(--bs-editor-shell-status-height);
+    padding: 0 0.75rem;
+    font-size: 0.75rem;
+    color: var(--tc-text-muted);
+    background: var(--bs-editor-shell-panel-bg);
+    border-top: 1px solid var(--bs-editor-shell-border-color);
+}
+
+// The stage: everything with no slot. `min-height: 0` is load-bearing — without
+// it a grid row refuses to shrink below its content and a scrolling stage grows
+// the whole shell instead of scrolling.
+.tc-editor-shell > :not([slot]):not(.tc-editor-shell__inspector-toggle) {
+    grid-area: stage;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.tc-editor-shell[data-rail='closed'] > [slot='rail'],
+.tc-editor-shell[data-inspector='closed'] > [slot='inspector'] {
+    display: none;
+}
+
+// The toggle rides in the toolbar row, at the inspector's edge — the one place a
+// reader looks for the control that opens it.
+.tc-editor-shell__inspector-toggle {
+    grid-area: toolbar;
+    justify-self: end;
+    align-self: center;
+    margin-inline-end: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    font: inherit;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--tc-text-muted);
+    background: none;
+    border: 1px solid var(--bs-editor-shell-border-color);
+    border-radius: 0;
+    cursor: pointer;
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent, var(--tc-primary));
+        outline-offset: 2px;
+    }
+
+    // WCAG 2.5.5 — 44px hit area on coarse-pointer devices; the only interactive
+    // control this element renders itself.
+    @media (pointer: coarse) {
+        min-height: 44px;
+    }
+}
+
+// One column. A three-column editor at 390px is three columns of nothing, so the
+// regions stack and the panels become full-width bands.
+.tc-editor-shell--compact {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr auto auto;
+    grid-template-areas:
+        'toolbar'
+        'rail'
+        'stage'
+        'inspector'
+        'status';
+
+    > [slot='rail'] {
+        flex-direction: row;
+        width: auto;
+        overflow-x: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--bs-editor-shell-border-color);
+    }
+
+    > [slot='inspector'] {
+        width: auto;
+        border-left: 0;
+        border-top: 1px solid var(--bs-editor-shell-border-color);
+    }
+}

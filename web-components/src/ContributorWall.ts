@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { deriveInitials } from './internal/initials'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-contributor-wall'
@@ -151,10 +152,12 @@ export class ContributorWall extends HTMLElement {
                   `title="${overflowCount} more contributors">+${overflowCount}</span>`
                 : ''
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `${headerHtml}` +
-            `<div class="tc-contributor-wall-grid" role="list">` +
-            `${itemsHtml}${moreHtml}</div>`
+                `<div class="tc-contributor-wall-grid" role="list">` +
+                `${itemsHtml}${moreHtml}</div>`,
+        )
     }
 }
 

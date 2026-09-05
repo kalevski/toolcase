@@ -1,5 +1,7 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-hero'
 
@@ -119,7 +121,7 @@ export class Hero extends HTMLElement {
         return HEADING_LEVELS.includes(v) ? v : 'h1'
     }
     set titleAs(v: string) {
-        this.setAttribute('title-as', v)
+        setAttr(this, 'title-as', v)
     }
 
     get description(): string | null {
@@ -258,9 +260,7 @@ export class Hero extends HTMLElement {
         variant: 'primary' | 'secondary',
     ): string {
         const label = esc(action.label)
-        const iconHtml = action.icon
-            ? lucideByName(action.icon, `tc-hero-btn-icon`)
-            : ''
+        const iconHtml = action.icon ? lucideByName(action.icon, `tc-hero-btn-icon`) : ''
         const cls =
             variant === 'primary'
                 ? 'btn btn-primary tc-hero-btn-primary'
@@ -415,31 +415,34 @@ export class Hero extends HTMLElement {
         // Grid switches to a two-column split whenever there is a media column.
         const gridClass = showMedia ? 'tc-hero-grid tc-hero-grid--split' : 'tc-hero-grid'
 
-        this.innerHTML = [
-            '<section class="tc-hero">',
-            backdropHtml,
-            backgroundHtml,
-            '<div class="tc-hero-main">',
-            `<div class="${gridClass}">`,
-            '<div class="tc-hero-body">',
-            eyebrowHtml,
-            titleHtml,
-            descriptionHtml,
-            actionsHtml,
-            noteHtml,
-            statCardsHtml,
-            '</div>',
-            mediaHtml,
-            '</div>',
-            '</div>',
-            metricsHtml,
-            '</section>',
-        ].join('')
+        patchHtml(
+            this,
+            [
+                '<section class="tc-hero">',
+                backdropHtml,
+                backgroundHtml,
+                '<div class="tc-hero-main">',
+                `<div class="${gridClass}">`,
+                '<div class="tc-hero-body">',
+                eyebrowHtml,
+                titleHtml,
+                descriptionHtml,
+                actionsHtml,
+                noteHtml,
+                statCardsHtml,
+                '</div>',
+                mediaHtml,
+                '</div>',
+                '</div>',
+                metricsHtml,
+                '</section>',
+            ].join(''),
+        )
 
         // Delegate action clicks on the inner actions container (re-wired every render).
         const actionsEl = this.querySelector('.tc-hero-actions')
         if (actionsEl) {
-            actionsEl.addEventListener('click', (e: Event) => {
+            bindOnce(actionsEl, 'click', (e: Event) => {
                 const btn = (e.target as Element).closest('[data-which]') as HTMLElement | null
                 if (!btn) return
                 const which = btn.dataset.which as 'primary' | 'secondary'

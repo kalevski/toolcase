@@ -1,0 +1,177 @@
+// tc-tree-picker — pick leaves out of a hierarchy, by searching or by drilling in.
+//
+// One level at a time with a breadcrumb back out, because a phone screen cannot
+// show a four-deep tree. Typing switches the list to every matching node with its
+// own path, which is the only way a deep tree is usable on a phone.
+
+@use '../foundation/tokens' as *;
+
+tc-tree-picker {
+    --bs-tree-picker-gap: 0.5rem;
+    --bs-tree-picker-row-height: 2.75rem;
+    --bs-tree-picker-row-hover-bg: var(--tc-surface-hover);
+    --bs-tree-picker-row-selected-bg: var(--tc-surface-muted);
+    --bs-tree-picker-where-size: 0.6875rem;
+    --bs-tree-picker-max-height: 18rem;
+}
+
+.tc-tree-picker {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-tree-picker-gap);
+    min-width: 0;
+}
+
+.tc-tree-picker__search {
+    display: flex;
+}
+
+.tc-tree-picker__input {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 2.5rem;
+    padding: 0 0.625rem;
+    font: inherit;
+    color: var(--tc-text);
+    background: var(--tc-surface);
+    border: 1px solid var(--tc-border);
+    border-radius: 0;
+
+    &:focus {
+        outline: none;
+        border-color: var(--tc-app-accent, var(--tc-primary));
+    }
+
+    @include coarse-pointer {
+        font-size: max(16px, 1em);
+        height: var(--tc-min-touch-target, 44px);
+    }
+}
+
+.tc-tree-picker__trail {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.tc-tree-picker__crumb {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.375rem;
+    font: inherit;
+    font-size: 0.75rem;
+    color: var(--tc-text-muted);
+    background: none;
+    border: 0;
+    border-radius: 0;
+    cursor: pointer;
+
+    svg {
+        width: 0.875rem;
+        height: 0.875rem;
+        display: block;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent, var(--tc-primary));
+        outline-offset: 2px;
+    }
+}
+
+.tc-tree-picker__list {
+    display: flex;
+    flex-direction: column;
+    max-height: var(--bs-tree-picker-max-height);
+    overflow-y: auto;
+    // The one place this element has a border: the list is the thing being
+    // scrolled, so it is the thing that needs an edge.
+    border: 1px solid var(--tc-border);
+}
+
+.tc-tree-picker__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    min-height: var(--bs-tree-picker-row-height);
+    padding: 0.375rem 0.625rem;
+    font: inherit;
+    text-align: start;
+    color: var(--tc-text);
+    background: none;
+    border: 0;
+    border-bottom: 1px solid var(--tc-border-faint, var(--tc-border));
+    border-radius: 0;
+    cursor: pointer;
+
+    &:last-child {
+        border-bottom: 0;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent, var(--tc-primary));
+        outline-offset: -2px;
+    }
+
+    &:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+
+    @include fine-pointer {
+        &:hover {
+            background: var(--bs-tree-picker-row-hover-bg);
+        }
+    }
+
+    @include coarse-pointer {
+        min-height: var(--tc-min-touch-target, 44px);
+    }
+}
+
+.tc-tree-picker__row[aria-selected='true'] {
+    background: var(--bs-tree-picker-row-selected-bg);
+    font-weight: 600;
+}
+
+.tc-tree-picker__labels {
+    display: flex;
+    flex-direction: column;
+    gap: 0.0625rem;
+    min-width: 0;
+}
+
+// Only drawn while searching, when a row is no longer explained by the level it
+// is in.
+.tc-tree-picker__where {
+    font-size: var(--bs-tree-picker-where-size);
+    color: var(--tc-text-faint);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tc-tree-picker__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tc-tree-picker__chevron {
+    display: inline-flex;
+    flex-shrink: 0;
+    color: var(--tc-text-faint);
+
+    svg {
+        width: 1rem;
+        height: 1rem;
+        display: block;
+    }
+}
+
+.tc-tree-picker__empty {
+    margin: 0;
+    padding: 0.75rem 0.625rem;
+    font-size: 0.8125rem;
+    color: var(--tc-text-faint);
+}

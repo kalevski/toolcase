@@ -97,14 +97,23 @@
     overflow-y: auto;
 }
 
+// Self-contained tokens (not read off `.offcanvas`): the plugin appends this
+// div straight to `document.body` (see internal/backdrop.ts), so it is a
+// SIBLING of `.offcanvas`, never its descendant — a custom property set on
+// `.offcanvas` does not inherit down to it. `.modal-backdrop` (same shared
+// Backdrop helper) follows the identical self-contained pattern.
 .offcanvas-backdrop {
+    --bs-offcanvas-backdrop-zindex: 1040;
+    --bs-offcanvas-backdrop-bg: #0f172a;
+    --bs-offcanvas-backdrop-opacity: 0.5;
+
     position: fixed;
     top: 0;
     left: 0;
-    z-index: calc(var(--bs-offcanvas-zindex) - 5);
+    z-index: var(--bs-offcanvas-backdrop-zindex);
     width: 100vw;
     height: var(--tc-vh);
-    background-color: #0f172a;
+    background-color: var(--bs-offcanvas-backdrop-bg);
 
     &.fade {
         transition: opacity 0.15s linear;
@@ -115,6 +124,15 @@
     }
 
     &.show {
-        opacity: 0.5;
+        opacity: var(--bs-offcanvas-backdrop-opacity);
     }
+}
+
+// The offcanvas body is the consumer's own children — no `.offcanvas-body` wrapper
+// to move them into (rule 1), so the padding lands on them where they are.
+.offcanvas > :not(.offcanvas-header) {
+    display: block;
+    flex: 1 1 auto;
+    padding: var(--bs-offcanvas-padding-y, 1rem) var(--bs-offcanvas-padding-x, 1rem);
+    overflow-y: auto;
 }

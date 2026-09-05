@@ -267,6 +267,14 @@ tc-form-wizard {
     // entrance ends, so the menu anchors to the viewport and stacks above the
     // footer again.
     animation: tc-form-wizard-fade-in 0.18s ease;
+
+    // tabindex="0" on the panel (tc-tab-sections-panel convention) — a step
+    // whose content has no focusable element of its own still needs to be
+    // keyboard-reachable, so it must show its own focus ring when tabbed to.
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent);
+        outline-offset: 2px;
+    }
 }
 
 @keyframes tc-form-wizard-fade-in {
@@ -321,4 +329,11 @@ tc-form-wizard {
     .tc-form-wizard-tab::after {
         transition: none;
     }
+}
+
+// Steps the consumer wrote stay their own children and are toggled with `hidden`
+// where they stand, rather than moved into `.tc-form-wizard-body` (rule 1).
+tc-form-wizard > [slot^='step-'],
+tc-form-wizard > [data-step] {
+    display: block;
 }

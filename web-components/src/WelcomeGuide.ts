@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-welcome-guide'
 
@@ -153,11 +154,13 @@ export class WelcomeGuide extends HTMLElement {
         // Right (light checklist) panel — progress + steps.
         const rightHtml = loading ? this._renderLoadingRight() : this._renderRight()
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="component component-welcome-guide tc-welcome-guide"${loading ? ' aria-busy="true"' : ''}>` +
-            leftHtml +
-            rightHtml +
-            `</div>`
+                leftHtml +
+                rightHtml +
+                `</div>`,
+        )
     }
 
     private _renderRight(): string {

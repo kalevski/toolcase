@@ -1,6 +1,7 @@
 import { SettingRowBase } from './SettingRowBase'
 import { icon } from './icons'
 import { Volume2, VolumeX } from 'lucide-static'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-setting-slider'
 
@@ -104,6 +105,7 @@ export class SettingSlider extends SettingRowBase {
             const v = this.value
             if (input && input.value !== String(v)) input.value = String(v)
             if (display) display.textContent = this.formatValue(v)
+            this.updateFillPct(v)
             return
         }
 
@@ -174,14 +176,14 @@ export class SettingSlider extends SettingRowBase {
         return this.getAttribute('unit') ?? this.defaults.unit ?? ''
     }
     set unit(v: string) {
-        this.setAttribute('unit', v)
+        setAttr(this, 'unit', v)
     }
 
     get format(): SliderFormat {
         return (this.getAttribute('format') as SliderFormat) ?? this.defaults.format ?? 'int'
     }
     set format(v: SliderFormat) {
-        this.setAttribute('format', v)
+        setAttr(this, 'format', v)
     }
 
     get withMute(): boolean {
@@ -206,6 +208,18 @@ export class SettingSlider extends SettingRowBase {
     set disabled(v: boolean) {
         if (v) this.setAttribute('disabled', '')
         else this.removeAttribute('disabled')
+    }
+
+    // Mirrors the current value as a 0–100% custom property on the host so a
+    // theme can paint the filled portion of the track on browsers that expose
+    // no `::-webkit-slider-fill`/progress pseudo-element (WebKit/Blink) — see
+    // themes/blueprint/components/_setting-slider.scss, which reads `--_pct`
+    // to composite a two-stop gradient over the runnable track. Themes that
+    // don't opt in simply never reference the property.
+    private updateFillPct(v: number): void {
+        const { min, max } = this
+        const pct = max > min ? ((v - min) / (max - min)) * 100 : 0
+        this.style.setProperty('--_pct', `${Math.max(0, Math.min(100, pct))}%`)
     }
 
     private formatValue(v: number): string {
@@ -249,7 +263,7 @@ export class SettingSlider extends SettingRowBase {
                     value="${value}"
                     aria-label="${this.escape(this.rowLabel)}"${inputDisabledAttr}
                 />
-                <span class="tc-setting-slider__value">${this.formatValue(value)}</span>
+                <span class="tc-setting-slider__value">${this.escape(this.formatValue(value))}</span>
             </div>
         `
     }
@@ -259,10 +273,17 @@ export class SettingSlider extends SettingRowBase {
         const display = this.querySelector<HTMLElement>('.tc-setting-slider__value')
         const muteBtn = this.querySelector<HTMLButtonElement>('.tc-setting-slider__mute-btn')
 
+        // Full re-renders (structural attribute changes, or first connect) need
+        // the fill custom property seeded too — the fast `value`-only path in
+        // attributeChangedCallback keeps it in sync afterwards.
+        this.updateFillPct(this.value)
+
         if (input) {
             input.addEventListener('input', () => {
                 const v = parseFloat(input.value)
                 if (display) display.textContent = this.formatValue(v)
+                // setAttribute re-enters attributeChangedCallback synchronously,
+                // whose 'value' branch keeps --_pct (see updateFillPct) in sync.
                 this.setAttribute('value', String(v))
                 this.emit('tc-change', { value: v })
                 if (typeof this.onChange === 'function') this.onChange(v)

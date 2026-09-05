@@ -59,11 +59,17 @@ tc-image {
     transition: opacity var(--bs-image-transition-duration);
 }
 
-// Fallback — centered content on a muted surface; hidden by default, shown on error.
-.tc-image-fallback {
+// Fallback — centered content on a muted surface; hidden by default, shown on
+// error. It is no longer a wrapper the consumer's fallback markup is moved into
+// (rule 1): the default glyph and any slotted fallback are direct host children,
+// selected together here.
+.tc-image-fallback,
+.tc-image-fallback-default,
+.tc-image > :not(.tc-image-skeleton):not(.tc-image-img) {
     position: absolute;
     inset: 0;
     display: none;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     background-color: var(--bs-image-bg);
@@ -81,19 +87,19 @@ tc-image {
 .tc-image--loading {
     .tc-image-skeleton { display: block; }
     .tc-image-img      { opacity: 0; }
-    .tc-image-fallback { display: none; }
+    > :not(.tc-image-skeleton):not(.tc-image-img) { display: none; }
 }
 
 .tc-image--loaded {
     .tc-image-skeleton { display: none; }
     .tc-image-img      { opacity: 1; }
-    .tc-image-fallback { display: none; }
+    > :not(.tc-image-skeleton):not(.tc-image-img) { display: none; }
 }
 
 .tc-image--error {
     .tc-image-skeleton { display: none; }
     .tc-image-img      { display: none; }
-    .tc-image-fallback { display: flex; }
+    > :not(.tc-image-skeleton):not(.tc-image-img) { display: flex; }
 }
 
 // Honour prefers-reduced-motion: freeze shimmer to static fill rather than hiding it.

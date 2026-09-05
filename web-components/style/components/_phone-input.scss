@@ -21,10 +21,18 @@ tc-phone-input {
     --bs-phone-input-dropdown-shadow: var(--tc-shadow-lg);
     --bs-phone-input-dropdown-z: var(--tc-z-dropdown);
     --bs-phone-input-dropdown-max-height: 280px; // cap before the dropdown scrolls; override via the `max-height` attribute
+    --bs-phone-input-search-height: 2.75rem; // measured height of the search row; subtracted from the max-height cap so the list gets a real (non-zero) scroll box
     --bs-phone-input-option-hover-bg: var(--tc-surface-muted);
     --bs-phone-input-option-active-bg: var(--tc-app-accent);
     --bs-phone-input-option-active-text: var(--tc-app-accent-contrast);
     --bs-phone-input-error-color: var(--tc-danger);
+    // Themed via --tc-focus-ring/--tc-danger (every theme/variant defines these)
+    // so a theme with a different accent/danger hue (aurora, sunshine, neon,
+    // marker, redline) that ships no phone-input override file still gets a
+    // correctly-tinted search-field focus ring and error glow.
+    --bs-phone-input-search-focus-shadow: var(--tc-focus-ring);
+    --bs-phone-input-error-focus-ring: 0 0 0 0.2rem
+        color-mix(in srgb, var(--tc-danger) 15%, transparent);
 }
 
 // ── Label ─────────────────────────────────────────────────────────────────────
@@ -66,7 +74,7 @@ tc-phone-input {
 
         &:focus-within {
             border-color: var(--bs-phone-input-error-color);
-            box-shadow: 0 0 0 0.2rem rgba(220, 38, 38, 0.15);
+            box-shadow: var(--bs-phone-input-error-focus-ring);
         }
     }
 }
@@ -206,7 +214,7 @@ tc-phone-input {
 
     &:focus {
         border-color: rgba(30, 41, 59, 0.4);
-        box-shadow: 0 0 0 0.15rem rgba(30, 41, 59, 0.1);
+        box-shadow: var(--bs-phone-input-search-focus-shadow);
         outline: none;
     }
 
@@ -219,9 +227,15 @@ tc-phone-input {
 // ── Country list ──────────────────────────────────────────────────────────────
 
 .tc-phone-input-list {
+    // NOTE: this cannot be `flex: 1 1 0` + `min-height: 0` — the dropdown panel
+    // only sets `max-height` (no definite `height`), so it sizes to content.
+    // A flex item with a zero basis then has no free space to grow into and
+    // collapses to 0, making the whole option list invisible (search box
+    // renders, but no countries show). Sizing the list itself via `max-height`
+    // (content height, capped) fixes it instead of relying on flex-grow.
     overflow-y: auto;
-    flex: 1 1 0;
-    min-height: 0;
+    flex: 0 1 auto;
+    max-height: calc(var(--bs-phone-input-dropdown-max-height) - var(--bs-phone-input-search-height));
 }
 
 // ── Country option ────────────────────────────────────────────────────────────

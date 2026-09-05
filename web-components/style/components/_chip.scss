@@ -31,9 +31,11 @@ tc-tag {
     --bs-chip-remove-icon-size: 0.875rem;
 }
 
+// This class lands on the HOST (`tc-chip`/`tc-tag` itself, see "Host layout" at
+// the bottom of this file) rather than on the rendered control — the pill's paint
+// has to live on an element with the consumer's label in its own normal flow, and
+// only the host has that.
 .tc-chip {
-    display: inline-flex;
-    align-items: center;
     gap: var(--bs-chip-gap);
     padding: var(--bs-chip-padding-y) var(--bs-chip-padding-x);
     font-family: inherit;
@@ -57,15 +59,8 @@ tc-tag {
     // fill specifically). Applying the neutral hover well on top would keep
     // that same text color over a surface it was never tuned against —
     // e.g. white-on-white or dark-ink-on-dark in every theme.
-    &:hover:not([disabled]):not(.is-selected) {
+    &:hover:not(.is-selected) {
         background-color: var(--bs-chip-bg-hover);
-    }
-
-    &:focus-visible {
-        outline: 2px solid var(--tc-app-accent);
-        outline-offset: 2px;
-        position: relative;
-        z-index: 1;
     }
 
     &.is-selected {
@@ -73,16 +68,25 @@ tc-tag {
         color: var(--bs-chip-selected-color);
         border-color: var(--bs-chip-selected-bg);
     }
+}
 
-    &[disabled] {
-        pointer-events: none;
-        cursor: default;
-    }
+// The real focus target is `.tc-chip-hit` (see "Host layout"), not this element —
+// so the ring is drawn here via :has() and the hit target's own outline dropped,
+// the same relocation _button.scss uses for `.tc-button-host`.
+.tc-chip:has(> .tc-chip-hit:focus-visible) {
+    outline: 2px solid var(--tc-app-accent);
+    outline-offset: 2px;
+    position: relative;
+    z-index: 1;
+}
+
+.tc-chip-host > .tc-chip-hit:focus-visible {
+    outline: none;
 }
 
 // Static chips (tc-tag, or tc-chip[static]) render a non-interactive <span> root.
-tc-tag .tc-chip,
-tc-chip[static] .tc-chip {
+tc-tag.tc-chip,
+tc-chip[static].tc-chip {
     cursor: default;
 }
 
@@ -214,7 +218,7 @@ tc-chip[static] .tc-chip {
 
 // Disabled: reduce opacity and block pointer events on the host so both
 // inner buttons are inert together.
-tc-chip:has(.tc-chip[disabled]) {
+tc-chip:has(.tc-chip-hit[disabled]) {
     opacity: 0.5;
     pointer-events: none;
 }
@@ -253,4 +257,35 @@ tc-chip:has(.tc-chip[disabled]) {
     .tc-chip-remove {
         transition: none;
     }
+}
+
+// ── Host layout: the host IS the chip box ──────────────────────────────────────
+//
+// `.tc-chip-host` is `tc-chip`/`tc-tag` itself (see `setHostClass` in Chip.ts) and
+// carries the pill's own classes (`.tc-chip`, its variant, `.is-selected`, …), so
+// the paint above applies directly to it. The rendered control is reduced to
+// `.tc-chip-hit` — an invisible, absolutely-positioned overlay that only takes the
+// click/focus (`.tc-hit-overlay`, foundation/_utilities.scss) — laid over icon,
+// label and count, which stay in the host's own normal flow.
+//
+// WHY NOT ONE SHARED GRID CELL, which is the previous shape of this file: a bare
+// text child — `<tc-tag>primary</tc-tag>`, the common case — makes an ANONYMOUS
+// grid item once the host is `display: grid`. No selector can reach it to give it
+// the control's `grid-area`, so auto-placement drops it into the next free cell:
+// the label rendered on a row of its own, outside the pill. An overlay has no such
+// hole — normal-flow content needs no placement at all (see `_button.scss`, same
+// problem, same fix, `.tc-button-host`).
+.tc-chip-host {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+}
+
+// The remove button is a second, independent hit target beside the label — not
+// under the overlay like everything else — so it has to sit above that full-bleed
+// `.tc-chip-hit` to keep receiving its own clicks.
+.tc-chip-host > .tc-chip-remove {
+    position: relative;
+    z-index: 1;
 }

@@ -1,4 +1,6 @@
 import { esc } from './internal/esc'
+import { setHostClass } from './internal/host-class'
+import { syncOwnedNodes } from './internal/tc-element'
 const TAG_NAME = 'tc-divider'
 
 export class Divider extends HTMLElement {
@@ -13,28 +15,14 @@ export class Divider extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            if (!this.hasAttribute('label')) {
-                const inner = this.querySelector('.tc-divider__label')
-                if (inner) slotContent.forEach((n) => inner.appendChild(n))
-            }
-            this._initialised = true
-        }
+        this._initialised = true
+        this.render()
     }
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        const inner = this.querySelector('.tc-divider__label')
-        const slotContent = inner ? Array.from(inner.childNodes) : []
         this.render()
-        if (!this.hasAttribute('label')) {
-            const newInner = this.querySelector('.tc-divider__label')
-            if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
-        }
     }
-
     get vertical(): boolean {
         return this.hasAttribute('vertical')
     }
@@ -51,23 +39,25 @@ export class Divider extends HTMLElement {
         else this.removeAttribute('label')
     }
 
+    /** THE HOST IS THE SEPARATOR. The rules are `::before`/`::after` on the host,
+     *  so the label — the attribute's, or the consumer's own children — sits
+     *  between them without anything being wrapped or moved (rule 1). */
     private render(): void {
         const vertical = this.vertical
         const label = this.getAttribute('label')
-        const orientation = vertical ? 'vertical' : 'horizontal'
         const dirClass = vertical ? 'tc-divider--vertical' : 'tc-divider--horizontal'
 
-        if (label != null) {
-            // aria-label makes the separator name accessible when using the attribute
-            this.innerHTML = `<div class="tc-divider ${dirClass}" role="separator" aria-orientation="${orientation}" aria-label="${esc(label)}"><span class="tc-divider__label">${esc(label)}</span></div>`
-        } else {
-            // Empty label span is hidden via CSS :empty; slotted children are
-            // appended to it by connectedCallback / attributeChangedCallback.
-            this.innerHTML = `<div class="tc-divider ${dirClass}" role="separator" aria-orientation="${orientation}"><span class="tc-divider__label"></span></div>`
-        }
-    }
+        setHostClass(this, `tc-divider ${dirClass}`)
+        this.setAttribute('role', 'separator')
+        this.setAttribute('aria-orientation', vertical ? 'vertical' : 'horizontal')
+        // aria-label names the separator when the label came in as an attribute.
+        if (label != null) this.setAttribute('aria-label', label)
+        else this.removeAttribute('aria-label')
 
-    // Minimal HTML escape so dynamic label values don't inject markup.
+        syncOwnedNodes(this, [
+            { cls: 'tc-divider__label', tag: 'span', html: label != null ? esc(label) : null },
+        ])
+    }
 }
 
 declare global {

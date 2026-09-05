@@ -35,7 +35,7 @@ tc-title[data-align='left'] {
     text-align: left;
 }
 
-.tc-title-content {
+.tc-title {
     font-size:      var(--bs-title-font-size);
     font-weight:    var(--bs-title-font-weight);
     line-height:    var(--bs-title-line-height);
@@ -44,7 +44,7 @@ tc-title[data-align='left'] {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .tc-title-content {
+    .tc-title {
         transition: none;
     }
 }

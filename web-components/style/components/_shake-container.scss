@@ -30,15 +30,14 @@ tc-shake-container {
     overflow: visible;
 }
 
-// ── Inner wrapper ───────────────────────────────────────────────────────────────
-// JS writes inline `transform: translate(x, y)` here during the shake; it
-// resets to '' when the animation ends. display: block gives it a real layout
-// box so the transform takes effect. will-change hints the compositor to keep
-// this element on its own layer, preventing per-frame layout/paint on the host.
-// No border-radius — sharp by mandate.
+// ── Transform target ────────────────────────────────────────────────────────────
+// No inner wrapper: JS writes inline `transform: translate(x, y)` directly on
+// the HOST during the shake and resets it to '' when the animation ends, so
+// nothing the consumer wrote is ever re-parented. will-change hints the
+// compositor to keep the host on its own layer, preventing per-frame
+// layout/paint on the rest of the page.
 
-.tc-shake-container-inner {
-    display: block;
+tc-shake-container {
     will-change: transform;
 }
 
@@ -47,7 +46,7 @@ tc-shake-container {
 // This rule is a belt-and-suspenders guard in case an inline transform leaks.
 
 @media (prefers-reduced-motion: reduce) {
-    .tc-shake-container-inner {
+    tc-shake-container {
         transform: none !important;
     }
 }

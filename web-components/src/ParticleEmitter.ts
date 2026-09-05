@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 const TAG_NAME = 'tc-particle-emitter'
 
 interface Particle {
@@ -20,7 +21,9 @@ export class ParticleEmitter extends HTMLElement {
     private _particles: Particle[] = []
     private _rafHandle: number | null = null
     private _lastBurst: string | null = null
-    private _colors: string[] = DEFAULT_COLORS.slice()
+    // null = no explicit override — derive from the themeable
+    // --bs-particle-emitter-color-* custom properties at burst time.
+    private _colors: string[] | null = null
 
     onBurst: ((count: number) => void) | null = null
 
@@ -67,10 +70,25 @@ export class ParticleEmitter extends HTMLElement {
     }
 
     get colors(): string[] {
-        return this._colors.slice()
+        return (this._colors ?? this.resolveThemeColors()).slice()
     }
     set colors(values: string[]) {
-        if (Array.isArray(values) && values.length > 0) this._colors = values.slice()
+        this._colors = Array.isArray(values) && values.length > 0 ? values.slice() : null
+    }
+
+    // Reads the --bs-particle-emitter-color-1..4 tokens off the host so themes
+    // can re-skin the particle palette purely via CSS (these were previously
+    // documentation-only anchors that this component never actually read).
+    // Falls back to the JS-level defaults when unconnected or unset.
+    private resolveThemeColors(): string[] {
+        if (!this.isConnected) return DEFAULT_COLORS
+        const style = getComputedStyle(this)
+        const resolved: string[] = []
+        for (let i = 1; i <= 4; i++) {
+            const v = style.getPropertyValue(`--bs-particle-emitter-color-${i}`).trim()
+            if (v) resolved.push(v)
+        }
+        return resolved.length > 0 ? resolved : DEFAULT_COLORS
     }
 
     get particleSize(): number {
@@ -141,34 +159,45 @@ export class ParticleEmitter extends HTMLElement {
     private render(): void {
         const w = this.width
         const h = this.height
-        this.innerHTML = `<canvas class="tc-particle-emitter__canvas" width="${w}" height="${h}" aria-hidden="true"></canvas>`
+        patchHtml(
+            this,
+            `<canvas class="tc-particle-emitter__canvas" width="${w}" height="${h}" aria-hidden="true"></canvas>`,
+        )
         this._canvas = this.querySelector('canvas')
         this._ctx = this._canvas?.getContext('2d') ?? null
     }
 
     private spawnBurst(): void {
         if (!this._canvas) this.render()
-        const w = this.width
-        const h = this.height
-        const cx = w / 2
-        const cy = h / 2
         const count = this.count
-        const speed = this.speed
-        const lifetime = this.lifetime
-        const colors = this._colors
-        for (let i = 0; i < count; i++) {
-            const angle = (i / count) * Math.PI * 2 + Math.random() * 0.3
-            const v = speed * (0.7 + Math.random() * 0.6)
-            this._particles.push({
-                x: cx,
-                y: cy,
-                vx: Math.cos(angle) * v,
-                vy: Math.sin(angle) * v,
-                life: 0,
-                maxLife: lifetime * (0.8 + Math.random() * 0.4),
-                color: colors[Math.floor(Math.random() * colors.length)],
-                size: this.particleSize * (0.7 + Math.random() * 0.6),
-            })
+        // Skip spawning particles entirely when the user has requested reduced
+        // motion (matches the ShakeContainer/PieChart convention of skipping the
+        // effect outright). Only suppressing the animation loop while still
+        // pushing particles into `_particles` would leak memory on repeat
+        // bursts, since nothing would ever be left to drain the array.
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        if (!reduced) {
+            const w = this.width
+            const h = this.height
+            const cx = w / 2
+            const cy = h / 2
+            const speed = this.speed
+            const lifetime = this.lifetime
+            const colors = this._colors ?? this.resolveThemeColors()
+            for (let i = 0; i < count; i++) {
+                const angle = (i / count) * Math.PI * 2 + Math.random() * 0.3
+                const v = speed * (0.7 + Math.random() * 0.6)
+                this._particles.push({
+                    x: cx,
+                    y: cy,
+                    vx: Math.cos(angle) * v,
+                    vy: Math.sin(angle) * v,
+                    life: 0,
+                    maxLife: lifetime * (0.8 + Math.random() * 0.4),
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    size: this.particleSize * (0.7 + Math.random() * 0.6),
+                })
+            }
         }
         this.dispatchEvent(
             new CustomEvent('tc-burst', {
@@ -178,10 +207,7 @@ export class ParticleEmitter extends HTMLElement {
             }),
         )
         if (typeof this.onBurst === 'function') this.onBurst(count)
-        // Skip the animation loop when the user has requested reduced motion
-        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            this.startLoop()
-        }
+        if (!reduced) this.startLoop()
     }
 
     private startLoop(): void {

@@ -1,3 +1,5 @@
+import { setHostClass } from './internal/host-class'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-key'
 
 export type KeySize = 'sm' | 'md' | 'lg'
@@ -14,22 +16,13 @@ export class Key extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            const inner = this.querySelector('.tc-key-content')
-            if (inner) slotContent.forEach((n) => inner.appendChild(n))
-            this._initialised = true
-        }
+        this._initialised = true
+        this.render()
     }
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        const inner = this.querySelector('.tc-key-content')
-        const slotContent = inner ? Array.from(inner.childNodes) : []
         this.render()
-        const newInner = this.querySelector('.tc-key-content')
-        if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
     }
 
     get size(): KeySize {
@@ -37,7 +30,7 @@ export class Key extends HTMLElement {
         return SIZES.includes(v) ? v : 'md'
     }
     set size(v: KeySize) {
-        this.setAttribute('size', v)
+        setAttr(this, 'size', v)
     }
 
     get variant(): KeyVariant {
@@ -45,14 +38,15 @@ export class Key extends HTMLElement {
         return VARIANTS.includes(v) ? v : 'default'
     }
     set variant(v: KeyVariant) {
-        this.setAttribute('variant', v)
+        setAttr(this, 'variant', v)
     }
 
     private render(): void {
         const size = this.size
         const variant = this.variant
         const variantClass = variant === 'active' ? ' tc-key--active' : ''
-        this.innerHTML = `<kbd class="tc-key tc-key--${size}${variantClass}"><span class="tc-key-content"></span></kbd>`
+        // THE HOST IS THE KEYCAP: the legend the consumer wrote stays their child.
+        setHostClass(this, `tc-key tc-key--${size}${variantClass}`)
     }
 }
 

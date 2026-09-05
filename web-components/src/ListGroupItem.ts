@@ -1,3 +1,5 @@
+import { patchHtml } from './internal/patch-html'
+import { esc } from './internal/esc'
 import { VARIANTS_FULL } from './internal/variants'
 import { setHostClass } from './internal/host-class'
 const TAG_NAME = 'tc-list-group-item'
@@ -19,22 +21,13 @@ export class ListGroupItem extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            const inner = this.querySelector('.tc-lgi-content')
-            if (inner) slotContent.forEach((n) => inner.appendChild(n))
-            this._initialised = true
-        }
+        this._initialised = true
+        this.render()
     }
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        const inner = this.querySelector('.tc-lgi-content')
-        const slotContent = inner ? Array.from(inner.childNodes) : []
         this.render()
-        const newInner = this.querySelector('.tc-lgi-content')
-        if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
     }
 
     get active(): boolean {
@@ -106,14 +99,26 @@ export class ListGroupItem extends HTMLElement {
             this.removeAttribute('aria-disabled')
         }
 
+        // The interactive affordance is a stretched overlay rather than a wrapper:
+        // the consumer's children stay direct children of the host (rule 1) and the
+        // real <a>/<button> still owns keyboard focus, middle-click and the context
+        // menu. Its accessible name comes from the content it covers.
+        const label = (this.textContent ?? '').trim()
+        const nameAttr = label ? ` aria-label="${esc(label)}"` : ''
         if (href != null) {
             const disabledAttr = disabled ? ' tabindex="-1"' : ''
-            this.innerHTML = `<a href="${href}" class="tc-lgi-content"${disabledAttr}></a>`
+            patchHtml(
+                this,
+                `<a href="${esc(href)}" class="tc-lgi-content tc-lgi-hit"${disabledAttr}${nameAttr}></a>`,
+            )
         } else if (action) {
             const disabledAttr = disabled ? ' disabled' : ''
-            this.innerHTML = `<button type="button" class="tc-lgi-content"${disabledAttr}></button>`
+            patchHtml(
+                this,
+                `<button type="button" class="tc-lgi-content tc-lgi-hit"${disabledAttr}${nameAttr}></button>`,
+            )
         } else {
-            this.innerHTML = `<span class="tc-lgi-content"></span>`
+            patchHtml(this, '')
         }
     }
 }

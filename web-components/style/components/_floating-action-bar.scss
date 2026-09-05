@@ -1,0 +1,93 @@
+// tc-floating-action-bar — the selection bar that floats over a list and stays
+// lined up with the column it belongs to.
+//
+// THE HOST IS THE BAR. It is `position: fixed` so it clears the app's own bottom
+// chrome, and the element writes `left` / `width` from its PARENT's padding box —
+// that pair is what ties a fixed box back to the column it belongs to. Your
+// actions are direct children of the host and are laid out by the flex row here;
+// nothing is ever moved into a wrapper. The count line is the only node the
+// element creates, and it is prepended.
+
+@use '../foundation/tokens' as *;
+
+tc-floating-action-bar {
+    --bs-floating-action-bar-bg: var(--tc-surface);
+    --bs-floating-action-bar-color: var(--tc-text);
+    --bs-floating-action-bar-border-color: var(--tc-border);
+    --bs-floating-action-bar-shadow: var(--tc-shadow-lg);
+    --bs-floating-action-bar-padding-y: 0.625rem;
+    --bs-floating-action-bar-padding-x: 0.875rem;
+    --bs-floating-action-bar-gap: 0.5rem;
+    --bs-floating-action-bar-bottom: 1rem;
+    --bs-floating-action-bar-label-font-size: 0.8125rem;
+    // Above the shell's own sticky action bar, below every overlay the library
+    // owns (backdrop 1050) — see the z ledger in foundation/_tokens.scss.
+    --bs-floating-action-bar-z: 1040;
+}
+
+.tc-floating-action-bar {
+    position: fixed;
+    left: 0;
+    bottom: calc(var(--bs-floating-action-bar-bottom) + var(--tc-safe-bottom, 0px));
+    z-index: var(--bs-floating-action-bar-z);
+    display: flex;
+    align-items: center;
+    gap: var(--bs-floating-action-bar-gap);
+    padding: var(--bs-floating-action-bar-padding-y) var(--bs-floating-action-bar-padding-x);
+    color: var(--bs-floating-action-bar-color);
+    background: var(--bs-floating-action-bar-bg);
+    border: 1px solid var(--bs-floating-action-bar-border-color);
+    border-radius: 0;
+    box-shadow: var(--bs-floating-action-bar-shadow);
+    // Never `display: none`: the bar's height is measured the moment it opens, and
+    // a box with no layout has none. Hidden by opacity + visibility instead, which
+    // also gives the exit transition something to animate.
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(0.5rem);
+    transition:
+        opacity 0.18s ease,
+        transform 0.18s ease,
+        visibility 0s linear 0.18s;
+    pointer-events: none;
+}
+
+.tc-floating-action-bar[data-open='true'] {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition-delay: 0s;
+    pointer-events: auto;
+}
+
+// Viewport-wide: the element stops writing `left` / `width`, so the gutters come
+// from here.
+.tc-floating-action-bar[align='viewport'] {
+    left: var(--bs-floating-action-bar-padding-x);
+    right: var(--bs-floating-action-bar-padding-x);
+}
+
+.tc-floating-action-bar__label {
+    // `0 1 auto` and not `1 1 0`: the count line is the SHORT half of this row and
+    // the actions are the point. It shrinks and ellipses before they do.
+    flex: 0 1 auto;
+    min-width: 0;
+    font-size: var(--bs-floating-action-bar-label-font-size);
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+// The actions sit at the trailing end, which is where a thumb is. `margin-left:
+// auto` on the FIRST action and not `justify-content: space-between`, so two
+// actions stay together instead of splitting to opposite ends.
+.tc-floating-action-bar > .tc-floating-action-bar__label + * {
+    margin-inline-start: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-floating-action-bar {
+        transition: none;
+    }
+}

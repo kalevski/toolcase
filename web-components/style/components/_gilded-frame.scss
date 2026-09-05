@@ -11,7 +11,7 @@ tc-gilded-frame {
     // Base contract — defaults to the `dark` tone so the host reads sensibly
     // even before a tone modifier class is applied.
     --bs-gilded-frame-bg: var(--tc-ink);
-    --bs-gilded-frame-color: rgba(248, 250, 252, 0.92);
+    --bs-gilded-frame-color: var(--tc-text-inverse);
     --bs-gilded-frame-border-color: rgba(255, 255, 255, 0.1);
     --bs-gilded-frame-border-width: 1px;
     --bs-gilded-frame-padding: 1rem;
@@ -26,9 +26,8 @@ tc-gilded-frame {
     border-radius: 0;
 }
 
-.tc-gilded-frame-content {
-    display: block;
-}
+// No content wrapper: `.tc-gilded-frame` is on the host and its children are the
+// consumer's own.
 
 // Headings carry the global emphasis color by default, which is dark and turns
 // invisible on the dark/ink tone. Slotted headings should take the frame's own
@@ -41,7 +40,7 @@ tc-gilded-frame {
 
 .tc-gilded-frame--tone-dark {
     --bs-gilded-frame-bg: var(--tc-ink);
-    --bs-gilded-frame-color: rgba(248, 250, 252, 0.92);
+    --bs-gilded-frame-color: var(--tc-text-inverse);
     --bs-gilded-frame-border-color: rgba(255, 255, 255, 0.1);
 }
 

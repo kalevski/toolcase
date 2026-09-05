@@ -44,41 +44,50 @@ tc-plugin-grid {
 }
 
 // Grid wrapper — 1 column mobile-first; column count via data-columns
+//
+// NOTE: tracks use `minmax(0, 1fr)`, not plain `1fr`. A bare `1fr` track's
+// implicit minimum is `auto` (the max-content of its items); the install
+// command chip is `white-space: nowrap`, so its min-content contribution is
+// its full unwrapped width. That forces the grid tracks — and the whole
+// grid, since it isn't clipped — wider than the container, overflowing the
+// page horizontally instead of letting the chip's own
+// `overflow:hidden/text-overflow:ellipsis` truncate it. `minmax(0, 1fr)`
+// lets tracks shrink below that content minimum.
 .tc-plugin-grid {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--bs-plugin-grid-gap);
 
     @include media-up(sm) {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     // 2-column: stays at 2 above sm
     &[data-columns='2'] {
         @include media-up(sm) {
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(2, minmax(0, 1fr));
         }
     }
 
     // 3-column: 2 at sm, 3 at md
     &[data-columns='3'] {
         @include media-up(sm) {
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
         @include media-up(md) {
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(3, minmax(0, 1fr));
         }
     }
 
     // 4-column: 2 at sm, 4 at lg
     &[data-columns='4'] {
         @include media-up(sm) {
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
         @include media-up(lg) {
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(4, minmax(0, 1fr));
         }
     }
 }
@@ -224,10 +233,13 @@ tc-plugin-grid {
     }
 }
 
-// 44px coarse touch targets on cards
+// 44px coarse touch target on the copy button — it's the only interactive
+// element in the card (the card itself is not clickable), so the target
+// floor belongs on the button, not the card wrapper.
 @media (pointer: coarse) {
-    .tc-plugin-card {
-        min-height: 2.75rem;
+    .tc-plugin-card-copy {
+        min-width: 44px;
+        min-height: 44px;
     }
 }
 

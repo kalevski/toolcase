@@ -89,21 +89,12 @@ tc-theme[name='dungeon'],
         box-shadow: 0 0 12px rgba(240, 210, 122, 0.35);
     }
 
-    // ── Pulse dot: replace the hardcoded green keyframe with stamina gold ─────
-    //
-    // The base animation name tc-esf-pulse is declared globally; we redefine
-    // it inside the dungeon scope so the color tokens resolve to --fg-stamina-bright
-    // (the allowed element-green) instead of the hardcoded rgba(22,163,74,*).
-
-    @keyframes tc-esf-pulse {
-        0% {
-            box-shadow: 0 0 0 0 var(--fg-stamina-bright, rgba(22, 163, 74, 0.4));
-        }
-        70% {
-            box-shadow: 0 0 0 6px transparent;
-        }
-        100% {
-            box-shadow: 0 0 0 0 transparent;
-        }
-    }
+    // ── Pulse dot ──────────────────────────────────────────────────────────────
+    // NOTE: the base partial's tc-esf-pulse keyframe now animates through
+    // --bs-early-signup-form-success-color (not a hardcoded green), so it
+    // already renders in --fg-stamina-bright for the dark variant here (set
+    // above) with no theme-scoped keyframe redeclaration needed — @keyframes
+    // can't be selector-scoped in the first place (Sass hoists it to the
+    // stylesheet's top level, so a per-theme redeclaration would only clobber
+    // every other theme's pulse color, not override this one alone).
 }

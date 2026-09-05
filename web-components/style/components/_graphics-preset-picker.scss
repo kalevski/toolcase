@@ -21,7 +21,10 @@ tc-graphics-preset-picker {
     --bs-graphics-preset-picker-hover-bg: var(--tc-surface-muted);
     --bs-graphics-preset-picker-active-color: var(--tc-app-accent-contrast);
     --bs-graphics-preset-picker-active-bg: var(--tc-app-accent);
-    --bs-graphics-preset-picker-focus-ring: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
+    // Themed via --tc-focus-ring (every theme/variant defines this token) so
+    // aurora/sunshine/neon/redline/marker (no override file) get their own
+    // accent-appropriate ring instead of a baked slate literal.
+    --bs-graphics-preset-picker-focus-ring: var(--tc-focus-ring);
     --bs-graphics-preset-picker-disabled-opacity: 0.55;
 }
 

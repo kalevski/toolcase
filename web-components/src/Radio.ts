@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { fieldMessageHtml } from './internal/field-message'
 import {
@@ -6,6 +7,7 @@ import {
     reflectFieldValidity,
     dispatchFieldChange,
 } from './internal/form-field'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-radio'
 
 let _idCounter = 0
@@ -123,14 +125,14 @@ export class Radio extends HTMLElement {
         return this.getAttribute('value') ?? ''
     }
     set value(v: string) {
-        this.setAttribute('value', v)
+        setAttr(this, 'value', v)
     }
 
     get name(): string {
         return this.getAttribute('name') ?? ''
     }
     set name(v: string) {
-        this.setAttribute('name', v)
+        setAttr(this, 'name', v)
     }
 
     get label(): string | null {
@@ -211,6 +213,26 @@ export class Radio extends HTMLElement {
             }
             // Unified change event alongside the native one: detail.value is the boolean.
             dispatchFieldChange(this, this.checked)
+            // Native <input type="radio"> grouping (same `name`) unchecks every
+            // other same-named radio in the group at the browser level — but it
+            // does that silently, without firing `change` on them. Left alone,
+            // those siblings' host `checked` attribute (and the ElementInternals
+            // form value it drives) stays stale at "checked", so a shared-name
+            // group of standalone tc-radio (no tc-radio-group) would submit more
+            // than one value for the same field name. Sync them explicitly,
+            // scoped like native grouping is: the owning form, or the document
+            // when standalone.
+            if (isChecked && this.name) {
+                const root: ParentNode = this._internals.form ?? this.ownerDocument
+                const name = this.name
+                for (const sibling of root.querySelectorAll<Radio>('tc-radio')) {
+                    if (sibling !== this && sibling.name === name && sibling.hasAttribute('checked')) {
+                        // Triggers attributeChangedCallback('checked') → resyncs the
+                        // sibling's own form value/validity.
+                        sibling.removeAttribute('checked')
+                    }
+                }
+            }
         }
     }
 
@@ -266,13 +288,16 @@ export class Radio extends HTMLElement {
             : ''
         const describe = hasField && (help || state) ? ` aria-describedby="${this._helpId}"` : ''
 
-        this.innerHTML = [
-            `<div class="form-check${inlineClass}${reverseClass}">`,
-            `<input id="${this._inputId}" class="form-check-input${stateClass}" type="radio"${nameAttr}${valueAttr}${checkedAttr}${disabledAttr}${requiredAttr}${describe}>`,
-            labelHtml,
-            `</div>`,
-            messageHtml,
-        ].join('')
+        patchHtml(
+            this,
+            [
+                `<div class="form-check${inlineClass}${reverseClass}">`,
+                `<input id="${this._inputId}" class="form-check-input${stateClass}" type="radio"${nameAttr}${valueAttr}${checkedAttr}${disabledAttr}${requiredAttr}${describe}>`,
+                labelHtml,
+                `</div>`,
+                messageHtml,
+            ].join(''),
+        )
     }
 }
 

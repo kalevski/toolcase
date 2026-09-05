@@ -1,5 +1,7 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-early-signup-form'
 
@@ -104,7 +106,7 @@ export class EarlySignupForm extends HTMLElement {
         return this.getAttribute('cta-label') ?? 'Notify me'
     }
     set ctaLabel(v: string) {
-        this.setAttribute('cta-label', v)
+        setAttr(this, 'cta-label', v)
     }
 
     /** Optional mono micro-label rendered above the email field. */
@@ -112,7 +114,7 @@ export class EarlySignupForm extends HTMLElement {
         return this.getAttribute('field-label') ?? 'Email address'
     }
     set fieldLabel(v: string) {
-        this.setAttribute('field-label', v)
+        setAttr(this, 'field-label', v)
     }
 
     /** Optional social-proof micro-stat, e.g. "2,400+ developers already joined". */
@@ -128,14 +130,14 @@ export class EarlySignupForm extends HTMLElement {
         return this.getAttribute('placeholder') ?? 'you@email.com'
     }
     set placeholder(v: string) {
-        this.setAttribute('placeholder', v)
+        setAttr(this, 'placeholder', v)
     }
 
     get successTitle(): string {
         return this.getAttribute('success-title') ?? "You're on the list."
     }
     set successTitle(v: string) {
-        this.setAttribute('success-title', v)
+        setAttr(this, 'success-title', v)
     }
 
     get successMessage(): string | null {
@@ -151,7 +153,7 @@ export class EarlySignupForm extends HTMLElement {
         return VARIANTS.includes(v) ? v : 'light'
     }
     set variant(v: EarlySignupFormVariant) {
-        this.setAttribute('variant', v)
+        setAttr(this, 'variant', v)
     }
 
     get loading(): boolean {
@@ -358,7 +360,9 @@ export class EarlySignupForm extends HTMLElement {
                 </form>`
         }
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <div class="tc-early-signup-form__inner">
                 <div class="tc-early-signup-form__intro">
                     ${eyebrowHtml}
@@ -370,7 +374,8 @@ export class EarlySignupForm extends HTMLElement {
                 <div class="tc-early-signup-form__form-area">
                     ${formAreaHtml}
                 </div>
-            </div>`
+            </div>`,
+        )
     }
 }
 

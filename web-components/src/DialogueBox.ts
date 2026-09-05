@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { chevronDownIcon, chevronRightIcon } from './icons'
 
@@ -36,16 +37,23 @@ export class DialogueBox extends HTMLElement {
     onAdvance: (() => void) | null = null
 
     private _clickHandler = (event: Event): void => this._handleClick(event)
+    private _keydownHandler = (event: Event): void => this._handleKeydown(event as KeyboardEvent)
+    // Whether we own the `role` attribute (false the moment a consumer sets one
+    // explicitly) — mirrors the same guard already used for the default value.
+    private _roleIsManaged = true
 
     connectedCallback(): void {
-        if (!this.hasAttribute('role')) this.setAttribute('role', 'group')
+        this._roleIsManaged = !this.hasAttribute('role')
+        if (this._roleIsManaged) this.setAttribute('role', 'group')
         this.addEventListener('click', this._clickHandler)
+        this.addEventListener('keydown', this._keydownHandler)
         this.render()
         this._startTyping()
     }
 
     disconnectedCallback(): void {
         this.removeEventListener('click', this._clickHandler)
+        this.removeEventListener('keydown', this._keydownHandler)
         this._stopTyping()
     }
 
@@ -134,17 +142,23 @@ export class DialogueBox extends HTMLElement {
         if (!textEl) return
         const full = this.text
         textEl.textContent = full.slice(0, this._typedLength)
+        // Length-based, not _isTyping()-based: _startTyping() calls this once
+        // synchronously BEFORE it assigns _typingTimer, so _isTyping() would read
+        // false for that one frame and briefly reveal the choices/indicator a tick
+        // before typing has actually finished.
+        const stillRevealing = this._typedLength < full.length
         const choicesEl = this.querySelector('.tc-dialogue-box-choices') as HTMLElement | null
         if (choicesEl) {
-            choicesEl.classList.toggle('is-visible', !this._isTyping() && this._choices.length > 0)
+            choicesEl.classList.toggle('is-visible', !stillRevealing && this._choices.length > 0)
         }
         const indicator = this.querySelector('.tc-dialogue-box-indicator') as HTMLElement | null
         if (indicator) {
-            indicator.classList.toggle(
-                'is-visible',
-                !this._isTyping() && this._choices.length === 0,
-            )
+            indicator.classList.toggle('is-visible', !stillRevealing && this._choices.length === 0)
         }
+        // Keyboard parity for the click affordance: focusable while there is
+        // something for Enter/Space to do (fast-forward mid-type, or advance once
+        // revealed when there are no choices to shift focus to instead).
+        this.tabIndex = stillRevealing || this._choices.length === 0 ? 0 : -1
     }
 
     private _handleClick(event: Event): void {
@@ -165,7 +179,25 @@ export class DialogueBox extends HTMLElement {
         }
     }
 
+    // Enter/Space parity for the click affordance above — the host itself isn't a
+    // native control, so it needs its own key handling (matching e.g. tc-build's
+    // clickable-card pattern). Choice buttons are real <button>s and handle their
+    // own Enter/Space; this only has to stay out of their way.
+    private _handleKeydown(event: KeyboardEvent): void {
+        if (event.key !== 'Enter' && event.key !== ' ') return
+        const target = event.target as HTMLElement
+        if (target.closest('.tc-dialogue-box-choice')) return
+        event.preventDefault()
+        this._handleClick(event)
+    }
+
     private render(): void {
+        // Advance-by-click only ever applies once no choices are configured —
+        // reflect that as role="button" (falling back to "group" once choices
+        // take over, since those are their own focusable buttons).
+        if (this._roleIsManaged) {
+            this.setAttribute('role', this._choices.length === 0 ? 'button' : 'group')
+        }
         const speaker = this.speaker
         const speakerMarkup = speaker
             ? `<div class="tc-dialogue-box-speaker"><span class="tc-dialogue-box-speaker-name">${esc(speaker)}</span></div>`
@@ -181,14 +213,17 @@ export class DialogueBox extends HTMLElement {
                   })
                   .join('')}</div>`
             : ''
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             ${speakerMarkup}
             <div class="tc-dialogue-box-body">
                 <span class="tc-dialogue-box-text"></span>
                 <span class="tc-dialogue-box-indicator" aria-hidden="true">${chevronDownIcon}</span>
             </div>
             ${choicesMarkup}
-        `
+        `,
+        )
         this._updateTyped()
 
         this.querySelectorAll<HTMLButtonElement>('.tc-dialogue-box-choice').forEach((el) => {
@@ -201,7 +236,7 @@ export class DialogueBox extends HTMLElement {
                 if (typeof this.onChoice === 'function') this.onChoice(id)
             }
             // Native <button> already maps Enter/Space to click — one listener is enough.
-            el.addEventListener('click', handle)
+            bindOnce(el, 'click', handle)
         })
     }
 }

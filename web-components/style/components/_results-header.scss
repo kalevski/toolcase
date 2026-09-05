@@ -1,0 +1,56 @@
+// tc-results-header — title, count line, and whatever the surface puts beside them.
+//
+// THE HOST IS THE HEADER. The text block is one owned node prepended at the
+// front; your trailing children (a sort control, a queue link) stay direct
+// children and sit after it.
+
+tc-results-header {
+    --bs-results-header-gap: 0.75rem;
+    --bs-results-header-title-size: 1.0625rem;
+    --bs-results-header-title-weight: 650;
+    --bs-results-header-lead-size: 0.8125rem;
+    --bs-results-header-lead-color: var(--tc-text-muted);
+}
+
+.tc-results-header {
+    display: flex;
+    align-items: center;
+    gap: var(--bs-results-header-gap);
+    width: 100%;
+}
+
+.tc-results-header__text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    // `1 1 0` and not `flex: 1`: a zero basis makes the text take the leftover
+    // width rather than a share proportional to its own length, which is what
+    // keeps a long title from pushing the sort control off a 320px row.
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.tc-results-header__title {
+    font-size: var(--bs-results-header-title-size);
+    font-weight: var(--bs-results-header-title-weight);
+    line-height: 1.25;
+    color: var(--tc-text);
+}
+
+// The count line. Tabular, because it is read as a figure and a column of
+// results pages should not twitch as the number changes.
+.tc-results-header__lead {
+    font-size: var(--bs-results-header-lead-size);
+    line-height: 1.4;
+    color: var(--bs-results-header-lead-color);
+    font-variant-numeric: tabular-nums;
+}
+
+// Phone shape: the trailing controls drop under the text instead of squeezing it.
+.tc-results-header--stack {
+    flex-wrap: wrap;
+
+    > :not(.tc-results-header__text) {
+        flex: 1 1 100%;
+    }
+}

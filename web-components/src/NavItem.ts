@@ -1,3 +1,7 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
+import { consumerText, observeContent } from './internal/content-observer'
+import { setHostClass } from './internal/host-class'
+import { esc } from './internal/esc'
 import { Tab as BsTab } from './internal/Tab'
 
 const TAG_NAME = 'tc-nav-item'
@@ -5,7 +9,6 @@ const TAG_NAME = 'tc-nav-item'
 export class NavItem extends HTMLElement {
     private _bsTab: BsTab | null = null
     private _anchorEl: HTMLAnchorElement | null = null
-    private _slotContent: Node[] = []
     private _initialised = false
 
     static get observedAttributes(): string[] {
@@ -17,14 +20,11 @@ export class NavItem extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            this._slotContent = Array.from(this.childNodes)
-            this._initialised = true
-        } else {
-            const existing = this.querySelector<HTMLAnchorElement>('a.nav-link')
-            if (existing) this._slotContent = Array.from(existing.childNodes)
-        }
+        this._initialised = true
         this.render()
+        // The accessible name is a copy of the consumer's label text, so it has to
+        // follow that text when React rewrites it — see content-observer.ts.
+        observeContent(this, () => this.render())
         this._initPlugin()
     }
 
@@ -34,8 +34,6 @@ export class NavItem extends HTMLElement {
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        const existing = this.querySelector<HTMLAnchorElement>('a.nav-link')
-        if (existing) this._slotContent = Array.from(existing.childNodes)
         this._teardown()
         this.render()
         this._initPlugin()
@@ -43,8 +41,6 @@ export class NavItem extends HTMLElement {
 
     _parentVariantChanged(): void {
         if (!this.isConnected || !this._initialised) return
-        const existing = this.querySelector<HTMLAnchorElement>('a.nav-link')
-        if (existing) this._slotContent = Array.from(existing.childNodes)
         this._teardown()
         this.render()
         this._initPlugin()
@@ -106,28 +102,30 @@ export class NavItem extends HTMLElement {
         const target = this.getAttribute('target')
         const toggleType = this._getToggleType()
 
-        this.classList.add('nav-item')
-
         const linkClasses = ['nav-link']
         if (active) linkClasses.push('active')
         if (disabled) linkClasses.push('disabled')
 
-        const a = document.createElement('a')
-        a.className = linkClasses.join(' ')
-        a.setAttribute('href', href)
-        if (target) a.target = target
-        if (toggleType) {
-            a.setAttribute('data-bs-toggle', toggleType)
-            if (active) a.setAttribute('aria-selected', 'true')
-        } else if (active) {
-            a.setAttribute('aria-current', 'page')
-        }
-        if (disabled) a.setAttribute('aria-disabled', 'true')
+        // THE HOST IS THE ITEM. The anchor keeps every link behaviour and the tab
+        // plugin's hook, but it is stretched over the host rather than wrapped
+        // around the label the consumer wrote (rule 1).
+        setHostClass(this, `nav-item ${linkClasses.join(' ')}`)
 
-        this.innerHTML = ''
-        this.appendChild(a)
-        this._slotContent.forEach((n) => a.appendChild(n))
-        this._anchorEl = a
+        const label = consumerText(this)
+        const attrs = [
+            `href="${esc(href)}"`,
+            'class="nav-link tc-hit-overlay"',
+            target ? `target="${esc(target)}"` : '',
+            toggleType ? `data-bs-toggle="${toggleType}"` : '',
+            toggleType && active ? 'aria-selected="true"' : '',
+            !toggleType && active ? 'aria-current="page"' : '',
+            disabled ? 'aria-disabled="true"' : '',
+            label ? `aria-label="${esc(label)}"` : '',
+        ]
+            .filter(Boolean)
+            .join(' ')
+        patchHtml(this, `<a ${attrs}></a>`)
+        this._anchorEl = this.querySelector<HTMLAnchorElement>(':scope > a.nav-link')
     }
 
     private _initPlugin(): void {
@@ -136,8 +134,8 @@ export class NavItem extends HTMLElement {
         const toggle = a.getAttribute('data-bs-toggle')
         if (toggle !== 'tab' && toggle !== 'pill') return
         this._bsTab = new BsTab(a)
-        a.addEventListener('show.bs.tab', this._onShow)
-        a.addEventListener('shown.bs.tab', this._onShown)
+        bindOnce(a, 'show.bs.tab', this._onShow)
+        bindOnce(a, 'shown.bs.tab', this._onShown)
     }
 
     private _teardown(): void {

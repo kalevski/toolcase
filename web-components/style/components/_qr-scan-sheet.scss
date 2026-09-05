@@ -1,0 +1,237 @@
+// tc-qr-scan-sheet — a camera QR scan in a sheet, with every permission state drawn.
+//
+// The surface is `tc-bottom-sheet`'s shape, restated under this element's own tag
+// (see the "Sheet chrome" section below for why a restatement, rather than actual
+// inheritance, is what a CSS type selector gives a JS subclass). Everything past
+// that is the viewfinder, the reticle and the state machine's visible half — which
+// is most of what a reader of this element ever sees, because a camera can be
+// refused, absent, in use, or unavailable on an insecure origin.
+
+tc-qr-scan-sheet {
+    --bs-qr-scan-sheet-stage-bg: #0b0f14;
+    --bs-qr-scan-sheet-reticle-color: rgba(255, 255, 255, 0.9);
+    --bs-qr-scan-sheet-reticle-size: 62%;
+    --bs-qr-scan-sheet-hint-size: 0.8125rem;
+}
+
+// ── Sheet chrome ──────────────────────────────────────────────────────────────
+//
+// `QrScanSheet` (src/QrScanSheet.ts) `extends BottomSheet` in JS, but it is
+// registered as its OWN custom-element tag (`tc-qr-scan-sheet`, see
+// src/register.ts), and a CSS type selector matches by tag name only — the JS
+// prototype chain is invisible to the cascade. `_bottom-sheet.scss`'s rules are
+// every one of them scoped to the literal selector `tc-bottom-sheet`, so NONE
+// of them — the display:none/flex toggle, the fixed positioning, the slide
+// transform, the grab handle, the header/body regions — ever match a
+// `<tc-qr-scan-sheet>` element. Measured before this block existed: the host
+// rendered `display:block; position:static`, i.e. an always-visible inline
+// block sitting in the page's normal flow whether `open` was true or false,
+// instead of a bottom-anchored sheet. Restated here, verbatim off
+// `_bottom-sheet.scss`'s own values, because that file is a different
+// component's (out of this component's edit scope) and a change there would
+// need to special-case a tag it does not own.
+tc-qr-scan-sheet {
+    --bs-qr-scan-sheet-y: 0px;
+    --bs-qr-scan-sheet-body-gap: var(--m-gap-sheet, 18px);
+
+    display: none;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: var(--tc-z-modal, 1055);
+    flex-direction: column;
+    max-height: calc(var(--tc-vh, 100dvh) - 32px);
+    padding-bottom: max(9px, var(--tc-safe-bottom, 0px), var(--tc-keyboard-inset, 0px));
+    border-radius: var(--m-radius-sheet, 18px 18px 0 0);
+    background-color: var(--tc-surface);
+    box-shadow: var(--m-shadow-sheet, 0 -28px 64px -16px rgba(0, 0, 0, 0.32));
+    // Translate only, through a custom property, exactly like tc-bottom-sheet:
+    // the entry/exit position is the element's own height (100%), which CSS
+    // knows and JS would otherwise have to measure.
+    transform: translate3d(0, var(--bs-qr-scan-sheet-y), 0);
+    transition: transform var(--m-dur-sheet, 0.22s) var(--m-ease, ease);
+    // `pan-x pinch-zoom`, not `none`: a vertical drag has to reach the element
+    // (that IS the dismiss gesture), but pinch-zoom must keep working over a
+    // sheet. The body region below opts vertical panning back in.
+    touch-action: pan-x pinch-zoom;
+    -webkit-tap-highlight-color: transparent;
+
+    // The sheet is focused on open; a ring around the whole panel is a
+    // distracting way to say "the dialog opened". Its children keep their own.
+    &:focus {
+        outline: none;
+    }
+}
+
+// Inside a shell's overlay layer, position against the frame rather than the
+// window — same rule tc-bottom-sheet states for itself, restated for this tag.
+:where(tc-mobile-shell > [slot='overlay']) tc-qr-scan-sheet {
+    position: absolute;
+}
+
+// Written by BottomSheet's shared JS: entering → open → exiting, absent when
+// closed. Closed is `display:none` (set above); this restores flex.
+tc-qr-scan-sheet[data-sheet-state] {
+    display: flex;
+}
+
+tc-qr-scan-sheet[data-sheet-state='entering'],
+tc-qr-scan-sheet[data-sheet-state='exiting'] {
+    --bs-qr-scan-sheet-y: 100%;
+}
+
+// Follow the finger 1:1 while dragging — no transition lag.
+tc-qr-scan-sheet[data-sheet-dragging] {
+    transition: none;
+}
+
+// The grab handle: a pseudo-element, not a node, so it costs no DOM and can
+// never end up in the accessibility tree (this element's own real dismiss
+// affordances are Escape, the scrim, and the sheet's `tc-manual`/close paths).
+tc-qr-scan-sheet::before {
+    content: '';
+    display: block;
+    flex: none;
+    width: var(--m-grabber-w, 40px);
+    height: var(--m-grabber-h, 4px);
+    margin: 9px auto 4px;
+    border-radius: var(--m-radius-pill, 999px);
+    background-color: var(--m-grabber-bg, rgba(0, 0, 0, 0.2));
+}
+
+tc-qr-scan-sheet[handle='false']::before {
+    display: none;
+}
+
+// The optional `heading` region BottomSheet renders into `[slot="header"]`.
+tc-qr-scan-sheet > [slot='header'] {
+    order: 1;
+    flex: none;
+}
+
+:where(tc-qr-scan-sheet > [slot='header']) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--m-gap-inline, 8px);
+    padding: 8px var(--m-pad-page-wide, 18px) 0;
+}
+
+// THE BODY: the one direct child with no `slot` attribute — here, the single
+// `.tc-qr-scan-sheet__body` wrapper QrScanSheet.ts creates (see its
+// `_renderBody` comment for why the stage/hint/fallback are nested inside one
+// owned node rather than being three separate unslotted children). `min-height:
+// 0` is load-bearing: a flex child's automatic minimum size is its content, so
+// without it a tall body pushes past the sheet's max-height instead of
+// scrolling.
+tc-qr-scan-sheet > :not([slot]) {
+    order: 2;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y pinch-zoom;
+}
+
+:where(tc-qr-scan-sheet > :not([slot])) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--bs-qr-scan-sheet-body-gap);
+    padding: 16px var(--m-pad-page-wide, 18px) 0;
+}
+
+.tc-qr-scan-sheet__stage {
+    position: relative;
+    // 1:1 rather than 16/9: a QR code is square and a reader lines it up inside
+    // the reticle, so the wasted width of a landscape frame is width the reticle
+    // could have used.
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    overflow: hidden;
+    background: var(--bs-qr-scan-sheet-stage-bg);
+}
+
+.tc-qr-scan-sheet__video {
+    width: 100%;
+    height: 100%;
+    // `cover`: a viewfinder that letterboxes shows the reader black bars and a
+    // smaller code, which is the opposite of what a scan needs.
+    object-fit: cover;
+    display: block;
+}
+
+.tc-qr-scan-sheet__reticle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--bs-qr-scan-sheet-reticle-size);
+    aspect-ratio: 1 / 1;
+    transform: translate(-50%, -50%);
+    border: 2px solid var(--bs-qr-scan-sheet-reticle-color);
+    border-radius: 0;
+    // Only visible while the camera is actually live — a reticle over a
+    // permission prompt is an instruction to aim at nothing.
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+tc-qr-scan-sheet[state='scanning'] .tc-qr-scan-sheet__reticle {
+    opacity: 1;
+}
+
+.tc-qr-scan-sheet__hint {
+    // No top margin: `.tc-qr-scan-sheet__body` is the sheet's one body-region node
+    // (see QrScanSheet.ts `_renderBody`), and its own `--bs-qr-scan-sheet-body-gap`
+    // already spaces the stage/hint/fallback stack — an added margin here would
+    // double up on top of that gap.
+    margin: 0;
+    font-size: var(--bs-qr-scan-sheet-hint-size);
+    line-height: 1.45;
+    color: var(--tc-text-muted);
+    text-align: center;
+}
+
+.tc-qr-scan-sheet__fallback {
+    display: flex;
+    justify-content: center;
+    // No top margin — see the comment on `.tc-qr-scan-sheet__hint`: the body
+    // wrapper's own gap already spaces this from what precedes it.
+}
+
+.tc-qr-scan-sheet__manual {
+    padding: 0.5rem 0.875rem;
+    font: inherit;
+    font-weight: 600;
+    color: var(--tc-app-accent, var(--tc-primary));
+    background: none;
+    border: 1px solid var(--tc-border);
+    border-radius: 0;
+    cursor: pointer;
+    min-height: var(--tc-min-touch-target, 44px);
+}
+
+// The states that are not "scanning" hide the video entirely: a black rectangle
+// is what an unexplained failure looks like, and naming the state is the point.
+tc-qr-scan-sheet:is([state='denied'], [state='unsupported'], [state='error'])
+    .tc-qr-scan-sheet__video {
+    visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tc-qr-scan-sheet__reticle {
+        transition: none;
+    }
+
+    // foundation/_reset.scss already flattens every transition-duration under
+    // `reduce`, so the slide lands instantly on its own; what that cannot do is
+    // remove the TRANSLATE, which would otherwise still jump the sheet from
+    // 100% to 0 in one frame — exactly the vestibular trigger the query exists
+    // to avoid. Enter/exit become a plain appearance instead, mirroring
+    // tc-bottom-sheet's own reduced-motion block.
+    tc-qr-scan-sheet[data-sheet-state='entering'],
+    tc-qr-scan-sheet[data-sheet-state='exiting'] {
+        --bs-qr-scan-sheet-y: 0px;
+    }
+}

@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { fieldMessageHtml } from './internal/field-message'
 import { requiredMark, reflectFieldValidity, dispatchFieldChange } from './internal/form-field'
@@ -378,15 +379,18 @@ export class RadioGroup extends HTMLElement {
         const describe = help || state ? ` aria-describedby="${this._helpId}"` : ''
         const requiredAttr = required ? ' aria-required="true"' : ''
 
-        this.innerHTML = [
-            `<fieldset class="tc-radio-group"${requiredAttr}${describe}>`,
-            legendHtml,
-            `<div class="${optionsClass}">`,
-            optionsHtml,
-            `</div>`,
-            messageHtml,
-            `</fieldset>`,
-        ].join('')
+        patchHtml(
+            this,
+            [
+                `<fieldset class="tc-radio-group"${requiredAttr}${describe}>`,
+                legendHtml,
+                `<div class="${optionsClass}">`,
+                optionsHtml,
+                `</div>`,
+                messageHtml,
+                `</fieldset>`,
+            ].join(''),
+        )
     }
 }
 

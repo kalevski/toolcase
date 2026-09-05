@@ -83,5 +83,5 @@ tc-equipment-tag[flag='package' i] {
     --bs-equipment-tag-color: #{map.get($theme-colors-emphasis, 'info')};
     --bs-equipment-tag-icon-color: var(--tc-info);
     --bs-equipment-tag-suffix-color: #{map.get($theme-colors-emphasis, 'info')};
-    --bs-equipment-tag-suffix-border-color: rgba(2, 132, 199, 0.35);
+    --bs-equipment-tag-suffix-border-color: color-mix(in srgb, var(--tc-info) 35%, transparent);
 }

@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-cooldown-badge'
 
@@ -121,7 +122,9 @@ export class CooldownBadge extends HTMLElement {
 
         const readyClass = ready ? ' tc-cooldown-badge--ready' : ''
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <span class="tc-cooldown-badge${readyClass}" role="img" aria-label="${esc(aria)}">
                 <svg class="tc-cooldown-badge__svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" aria-hidden="true" focusable="false">
                     <circle class="tc-cooldown-badge__track" cx="${cx}" cy="${cy}" r="${r}" stroke-width="${thickness}" fill="none"></circle>
@@ -129,7 +132,8 @@ export class CooldownBadge extends HTMLElement {
                 </svg>
                 ${labelHtml}
             </span>
-        `
+        `,
+        )
     }
 }
 

@@ -16,7 +16,11 @@ tc-equipment-doll {
     --bs-equipment-doll-grid-color: var(--tc-border);
     --bs-equipment-doll-grid-size: 28px;
 
-    --bs-equipment-doll-figure-color: var(--tc-slate-300);
+    // --tc-text-faint (not --tc-slate-300 -- that raw ramp step is only ever
+    // defined by the default theme's foundation, so any theme without its own
+    // equipment-doll override, e.g. aurora/neon, would silently inherit the
+    // fixed light-slate value instead of a per-theme-remapped faint tone).
+    --bs-equipment-doll-figure-color: var(--tc-text-faint);
     --bs-equipment-doll-figure-opacity: 0.45;
 
     --bs-equipment-doll-slot-bg: var(--tc-surface);
@@ -78,7 +82,15 @@ tc-equipment-doll {
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: clamp(2rem, 30%, 6rem);
+        // Scale with the doll's own box (the `%` this replaced was resolved
+        // against the inherited body font-size, not the canvas — at the default
+        // 0.925rem body size that's ~4px, always under the 2rem floor, so the
+        // glyph was silently pinned to 2rem no matter how large width/height were).
+        font-size: clamp(
+            2rem,
+            calc(min(var(--bs-equipment-doll-width), var(--bs-equipment-doll-height)) * 0.15),
+            6rem
+        );
         line-height: 1;
         color: var(--bs-equipment-doll-figure-color);
         opacity: var(--bs-equipment-doll-figure-opacity);

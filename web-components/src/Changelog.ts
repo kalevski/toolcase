@@ -1,4 +1,6 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-changelog'
 
 export interface ChangelogEntry {
@@ -51,14 +53,14 @@ export class Changelog extends HTMLElement {
         return this.getAttribute('read-more-href') ?? ''
     }
     set readMoreHref(v: string) {
-        this.setAttribute('read-more-href', v)
+        setAttr(this, 'read-more-href', v)
     }
 
     get readMoreLabel(): string {
         return this.getAttribute('read-more-label') ?? 'Read more'
     }
     set readMoreLabel(v: string) {
-        this.setAttribute('read-more-label', v)
+        setAttr(this, 'read-more-label', v)
     }
 
     get loading(): boolean {
@@ -101,15 +103,17 @@ export class Changelog extends HTMLElement {
                 `</article>` +
                 `</li>`
 
-            this.innerHTML =
+            patchHtml(
+                this,
                 `<div class="tc-changelog" aria-busy="true">` +
-                `<ol class="tc-changelog-list">` +
-                `<li class="visually-hidden" role="status">Loading changelog…</li>` +
-                skeletonRow() +
-                skeletonRow() +
-                skeletonRow() +
-                `</ol>` +
-                `</div>`
+                    `<ol class="tc-changelog-list">` +
+                    `<li class="visually-hidden" role="status">Loading changelog…</li>` +
+                    skeletonRow() +
+                    skeletonRow() +
+                    skeletonRow() +
+                    `</ol>` +
+                    `</div>`,
+            )
             return
         }
 
@@ -126,13 +130,15 @@ export class Changelog extends HTMLElement {
                 ? `<a class="tc-changelog-more" href="${esc(href)}">${esc(label)}</a>`
                 : ''
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-changelog">` +
-            `<ol class="tc-changelog-list">` +
-            itemsHtml +
-            `</ol>` +
-            moreHtml +
-            `</div>`
+                `<ol class="tc-changelog-list">` +
+                itemsHtml +
+                `</ol>` +
+                moreHtml +
+                `</div>`,
+        )
     }
 }
 

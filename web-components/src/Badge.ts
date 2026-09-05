@@ -1,16 +1,10 @@
 import { VARIANTS_FULL } from './internal/variants'
-import { esc } from './internal/esc'
+import { setHostClass } from './internal/host-class'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-badge'
 
 export type BadgeVariant =
-    | 'primary'
-    | 'secondary'
-    | 'success'
-    | 'danger'
-    | 'warning'
-    | 'info'
-    | 'light'
-    | 'dark'
+    'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
 
 const VARIANTS: BadgeVariant[] = [...VARIANTS_FULL]
 
@@ -27,38 +21,38 @@ const SIZES: BadgeSize[] = ['xs']
 export type BadgeTone = 'neutral'
 const TONES: BadgeTone[] = ['neutral']
 
+/**
+ * tc-badge — THE HOST IS THE BADGE.
+ *
+ * It renders no wrapper and never moves your children. Before 5.1 it captured its
+ * child nodes, rendered `<span class="badge"><span class="tc-badge-content">` and
+ * re-appended them inside — which meant react-dom, which believes it owns those
+ * children and that `tc-badge` is their parent, threw `NotFoundError` from
+ * `parentInstance.removeChild(child)` the moment it removed one of them
+ * individually. `{label}{n > 0 ? ` (${n})` : ''}` is two text children and `''` is
+ * *no child*, so a count falling to zero was enough to blank the page.
+ *
+ * The `.badge` classes now live on the host itself (identical class names, so the
+ * stylesheet did not move), and the only node the element ever creates is the
+ * `text` label, which is PREPENDED.
+ */
 export class Badge extends HTMLElement {
-    private _initialised = false
+    private _built = false
 
     static get observedAttributes(): string[] {
-        return ['variant', 'pill', 'text', 'size', 'tone']
-    }
-
-    constructor() {
-        super()
+        // `class` is observed so the element can re-assert its own classes after
+        // react-dom overwrites `className` wholesale — see setHostClass.
+        return ['variant', 'pill', 'text', 'size', 'tone', 'class']
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            if (!this.hasAttribute('text')) {
-                const inner = this.querySelector('.tc-badge-content')
-                if (inner) slotContent.forEach((n) => inner.appendChild(n))
-            }
-            this._initialised = true
-        }
+        this._built = true
+        this.patch()
     }
 
     attributeChangedCallback(): void {
-        if (!this.isConnected || !this._initialised) return
-        const inner = this.querySelector('.tc-badge-content')
-        const slotContent = inner ? Array.from(inner.childNodes) : []
-        this.render()
-        if (!this.hasAttribute('text')) {
-            const newInner = this.querySelector('.tc-badge-content')
-            if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
-        }
+        if (!this.isConnected || !this._built) return
+        this.patch()
     }
 
     get variant(): BadgeVariant {
@@ -66,7 +60,7 @@ export class Badge extends HTMLElement {
         return VARIANTS.includes(v) ? v : 'primary'
     }
     set variant(v: BadgeVariant) {
-        this.setAttribute('variant', v)
+        setAttr(this, 'variant', v)
     }
 
     get pill(): boolean {
@@ -103,25 +97,40 @@ export class Badge extends HTMLElement {
         else this.removeAttribute('tone')
     }
 
-    private render(): void {
-        const variant = this.variant
-        const pill = this.pill
-        const text = this.getAttribute('text')
-        const pillClass = pill ? ' rounded-pill' : ''
-        const size = this.size
-        const sizeClass = size ? ` badge-${size}` : ''
+    /** In-place: class list on the host, plus the one owned text node. Nothing is
+     *  rebuilt, so a change of `variant` cannot disturb consumer children. */
+    private patch(): void {
         const tone = this.tone
+        const size = this.size
         // The neutral tone drops `text-bg-*` entirely rather than layering over it:
         // that utility carries `!important` on both colour and background (see
         // foundation/_utilities.scss), so a tone class could never win against it.
         const toneClass = tone ? ` badge-${tone}` : ''
-        const variantClass = tone ? '' : ` text-bg-${variant}`
-        const cls = `badge${variantClass}${toneClass}${sizeClass}${pillClass}`
-        if (text != null) {
-            this.innerHTML = `<span class="${cls}">${esc(text)}</span>`
-        } else {
-            this.innerHTML = `<span class="${cls}"><span class="tc-badge-content"></span></span>`
+        const variantClass = tone ? '' : ` text-bg-${this.variant}`
+        const sizeClass = size ? ` badge-${size}` : ''
+        const pillClass = this.pill ? ' rounded-pill' : ''
+        const text = this.getAttribute('text')
+        // `text` supersedes slotted content, and the leftovers are hidden in CSS
+        // rather than removed — removing a node React created is what starts the
+        // NotFoundError this element was rewritten to avoid.
+        const textClass = text != null ? ' tc-badge--text' : ''
+        // setHostClass, not `className =`: the host is the consumer's tag, so any
+        // class they authored on it has to survive every patch — including the ones
+        // react-dom writes after this element has already claimed the attribute.
+        setHostClass(this, `badge${variantClass}${toneClass}${sizeClass}${pillClass}${textClass}`)
+
+        let label = this.querySelector<HTMLElement>(':scope > .tc-badge-text')
+        if (text == null) {
+            label?.remove()
+            return
         }
+        if (!label) {
+            label = document.createElement('span')
+            label.className = 'tc-badge-text'
+            // Prepended, never wrapped around anything: rule 1.
+            this.prepend(label)
+        }
+        if (label.textContent !== text) label.textContent = text
     }
 }
 

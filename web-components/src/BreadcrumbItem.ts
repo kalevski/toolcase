@@ -1,3 +1,5 @@
+import { patchHtml } from './internal/patch-html'
+import { esc } from './internal/esc'
 import { LinkItemBase } from './internal/link-item'
 
 const TAG_NAME = 'tc-breadcrumb-item'
@@ -5,16 +7,13 @@ const TAG_NAME = 'tc-breadcrumb-item'
 /**
  * tc-breadcrumb-item — a single breadcrumb crumb on the shared
  * {@link LinkItemBase} slot-wrapping scaffold. Renders a linked crumb (`<a>`)
- * unless it is `active` (or has no `href`), in which case it becomes a plain
- * `<span>` marked `aria-current="page"`.
+ * unless it is `active` (or has no `href`), in which case no overlay is
+ * rendered at all and the label stays plain text on the host, which itself
+ * carries `aria-current="page"` when active.
  */
 export class BreadcrumbItem extends LinkItemBase {
     static get observedAttributes(): string[] {
         return ['href', 'active']
-    }
-
-    protected getContentEl(): HTMLElement | null {
-        return this.querySelector<HTMLElement>('.tc-breadcrumb-item-content')
     }
 
     protected render(): void {
@@ -30,11 +29,16 @@ export class BreadcrumbItem extends LinkItemBase {
             this.removeAttribute('aria-current')
         }
 
-        if (!active && href != null) {
-            this.innerHTML = `<a href="${href}" class="tc-breadcrumb-item-content"></a>`
-        } else {
-            this.innerHTML = `<span class="tc-breadcrumb-item-content"></span>`
-        }
+        // The crumb's own text stays a child of the host; a linked crumb gets a real
+        // <a> stretched over it rather than wrapped around it (rule 1).
+        const label = (this.textContent ?? '').trim()
+        const nameAttr = label ? ` aria-label="${esc(label)}"` : ''
+        patchHtml(
+            this,
+            !active && href != null
+                ? `<a href="${esc(href)}" class="tc-breadcrumb-item-content tc-hit-overlay"${nameAttr}></a>`
+                : '',
+        )
     }
 }
 

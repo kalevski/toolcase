@@ -11,11 +11,7 @@
     --bs-accordion-btn-padding-y: 0.6875rem;
     --bs-accordion-btn-color: var(--bs-body-color);
     --bs-accordion-btn-bg: var(--bs-accordion-bg);
-    --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%231e293b'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
     --bs-accordion-btn-icon-width: 1.1rem;
-    --bs-accordion-btn-icon-transform: rotate(-180deg);
-    --bs-accordion-btn-icon-transition: transform 0.2s ease-in-out;
-    --bs-accordion-btn-active-icon: var(--bs-accordion-btn-icon);
     --bs-accordion-btn-focus-box-shadow: var(--tc-focus-ring);
     --bs-accordion-body-padding-x: 0.875rem;
     --bs-accordion-body-padding-y: 0.75rem;
@@ -58,25 +54,12 @@
         background-color var(--tc-transition-fast),
         color var(--tc-transition-fast);
 
-    &::after {
-        flex-shrink: 0;
-        width: var(--bs-accordion-btn-icon-width);
-        height: var(--bs-accordion-btn-icon-width);
-        margin-left: auto;
-        content: '';
-        background-image: var(--bs-accordion-btn-icon);
-        background-repeat: no-repeat;
-        background-size: var(--bs-accordion-btn-icon-width);
-        transition: var(--bs-accordion-btn-icon-transition);
-    }
-
     &:not(.collapsed) {
         color: var(--bs-accordion-active-color);
         background-color: var(--bs-accordion-active-bg);
 
-        &::after {
-            background-image: var(--bs-accordion-btn-active-icon);
-            transform: var(--bs-accordion-btn-icon-transform);
+        .accordion-button-icon {
+            transform: rotate(-180deg);
         }
     }
 
@@ -88,6 +71,28 @@
         z-index: 3;
         outline: 0;
         box-shadow: var(--bs-accordion-btn-focus-box-shadow);
+    }
+}
+
+.accordion-button-text {
+    flex: 1;
+    min-width: 0;
+}
+
+// Inline SVG (icons.ts, stroke="currentColor") — color always tracks the
+// button's own `color`, so it stays legible across every theme without a
+// per-theme icon override.
+.accordion-button-icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    margin-left: auto;
+    color: currentColor;
+    transition: transform var(--tc-transition-fast);
+
+    svg {
+        width: var(--bs-accordion-btn-icon-width);
+        height: var(--bs-accordion-btn-icon-width);
     }
 }
 
@@ -115,5 +120,11 @@
 @media (pointer: coarse) {
     .accordion-button {
         min-height: 44px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .accordion-button-icon {
+        transition: none;
     }
 }

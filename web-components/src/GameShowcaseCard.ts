@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -254,35 +255,38 @@ export class GameShowcaseCard extends HTMLElement {
 
         const hasArtClass = hasArt ? ' tc-game-showcase-card--has-art' : ''
 
-        this.innerHTML = [
-            `<div class="tc-game-showcase-card${hasArtClass}">`,
-            // Art region: always render both containers; CSS hides placeholder when art present
-            `<div class="tc-game-showcase-card-art">`,
-            `<div class="tc-game-showcase-card-art-main"></div>`,
-            `<div class="tc-game-showcase-card-art-placeholder"></div>`,
-            `</div>`,
-            // Stamps overlay (omit region when empty)
-            this._stamps.length > 0
-                ? `<div class="tc-game-showcase-card-stamps">${stampsHtml}</div>`
-                : '',
-            // Meta row: always render for layout consistency
-            `<div class="tc-game-showcase-card-meta">`,
-            `<div class="tc-game-showcase-card-meta-left"></div>`,
-            `<div class="tc-game-showcase-card-meta-right"></div>`,
-            `</div>`,
-            // Title + pitch
-            `<div class="tc-game-showcase-card-title">${titleInner}</div>`,
-            `<div class="tc-game-showcase-card-pitch">${pitchInner}</div>`,
-            // Tags (omit region when empty)
-            this._tags.length > 0
-                ? `<div class="tc-game-showcase-card-tags">${tagsHtml}</div>`
-                : '',
-            // Compliance (omit region when empty)
-            this._compliance.length > 0
-                ? `<div class="tc-game-showcase-card-compliance">${complianceHtml}</div>`
-                : '',
-            `</div>`,
-        ].join('')
+        patchHtml(
+            this,
+            [
+                `<div class="tc-game-showcase-card${hasArtClass}">`,
+                // Art region: always render both containers; CSS hides placeholder when art present
+                `<div class="tc-game-showcase-card-art">`,
+                `<div class="tc-game-showcase-card-art-main"></div>`,
+                `<div class="tc-game-showcase-card-art-placeholder"></div>`,
+                `</div>`,
+                // Stamps overlay (omit region when empty)
+                this._stamps.length > 0
+                    ? `<div class="tc-game-showcase-card-stamps">${stampsHtml}</div>`
+                    : '',
+                // Meta row: always render for layout consistency
+                `<div class="tc-game-showcase-card-meta">`,
+                `<div class="tc-game-showcase-card-meta-left"></div>`,
+                `<div class="tc-game-showcase-card-meta-right"></div>`,
+                `</div>`,
+                // Title + pitch
+                `<div class="tc-game-showcase-card-title">${titleInner}</div>`,
+                `<div class="tc-game-showcase-card-pitch">${pitchInner}</div>`,
+                // Tags (omit region when empty)
+                this._tags.length > 0
+                    ? `<div class="tc-game-showcase-card-tags">${tagsHtml}</div>`
+                    : '',
+                // Compliance (omit region when empty)
+                this._compliance.length > 0
+                    ? `<div class="tc-game-showcase-card-compliance">${complianceHtml}</div>`
+                    : '',
+                `</div>`,
+            ].join(''),
+        )
     }
 }
 

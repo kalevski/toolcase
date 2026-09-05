@@ -1,0 +1,104 @@
+// tc-upgrade-nudge — the inline paywall pitch: lock chip, one sentence, CTA.
+//
+// THE HOST IS THE ROW. Element-owned nodes (chip, text, button) are prepended in
+// that order; anything the consumer adds is a direct child that falls after them
+// and wraps onto its own line in the panel variant.
+
+@use '../foundation/tokens' as *;
+
+tc-upgrade-nudge {
+    --bs-upgrade-nudge-gap: 0.625rem;
+    --bs-upgrade-nudge-padding-y: 0.625rem;
+    --bs-upgrade-nudge-padding-x: 0.875rem;
+    --bs-upgrade-nudge-bg: var(--tc-warning-bg, rgba(242, 183, 5, 0.12));
+    --bs-upgrade-nudge-border-color: transparent;
+    --bs-upgrade-nudge-color: var(--tc-text);
+    --bs-upgrade-nudge-font-size: 0.8125rem;
+    --bs-upgrade-nudge-chip-color: var(--tc-warning, #b45309);
+    --bs-upgrade-nudge-cta-bg: var(--tc-warning, #f2b705);
+    --bs-upgrade-nudge-cta-color: var(--bs-warning-contrast, #241a00);
+}
+
+.tc-upgrade-nudge {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--bs-upgrade-nudge-gap);
+    padding: var(--bs-upgrade-nudge-padding-y) var(--bs-upgrade-nudge-padding-x);
+    font-size: var(--bs-upgrade-nudge-font-size);
+    line-height: 1.45;
+    color: var(--bs-upgrade-nudge-color);
+    background: var(--bs-upgrade-nudge-bg);
+    border: 1px solid var(--bs-upgrade-nudge-border-color);
+    border-radius: 0;
+}
+
+// The boxed pitch: the sentence gets its own line, the CTA sits under it.
+.tc-upgrade-nudge--panel {
+    --bs-upgrade-nudge-padding-y: 1rem;
+    --bs-upgrade-nudge-padding-x: 1rem;
+    --bs-upgrade-nudge-border-color: var(--tc-border);
+
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.tc-upgrade-nudge__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
+    font-size: max(var(--tc-font-size-min, 11px), 0.6875rem);
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--bs-upgrade-nudge-chip-color);
+
+    svg {
+        width: 0.75rem;
+        height: 0.75rem;
+        display: block;
+    }
+}
+
+.tc-upgrade-nudge__chip-icon {
+    display: inline-flex;
+}
+
+// `1 1 0` and not `flex: 1`: a zero basis is what makes the sentence take the
+// row's leftover width instead of a share proportional to its own length, which
+// is what pushes the CTA to a second line at a phone width.
+.tc-upgrade-nudge__text {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.tc-upgrade-nudge__cta {
+    flex-shrink: 0;
+    padding: 0.5rem 0.875rem;
+    font: inherit;
+    font-weight: 600;
+    color: var(--bs-upgrade-nudge-cta-color);
+    background: var(--bs-upgrade-nudge-cta-bg);
+    border: 0;
+    border-radius: 0;
+    cursor: pointer;
+    min-height: var(--tc-touch-target-dense, 40px);
+
+    &:focus-visible {
+        outline: 2px solid var(--tc-app-accent, var(--tc-primary));
+        outline-offset: 2px;
+    }
+
+    @include coarse-pointer {
+        min-height: var(--tc-min-touch-target, 44px);
+    }
+}
+
+// A nudge on its own line at phone width: the CTA stretches, because a button
+// that is the only thing on a row and is not full width reads as unfinished.
+@media (max-width: 575.98px) {
+    .tc-upgrade-nudge--panel .tc-upgrade-nudge__cta {
+        align-self: stretch;
+        width: 100%;
+    }
+}

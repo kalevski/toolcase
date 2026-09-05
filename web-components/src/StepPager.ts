@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { lucideByName } from './internal/lucide'
 import { msg, msgFormat } from './messages'
@@ -401,7 +402,7 @@ export class StepPager extends HTMLElement {
                 return
             }
             this._lock = lock
-            lock.addEventListener('release', this._onLockRelease)
+            bindOnce(lock, 'release', this._onLockRelease)
             this._setWake(true)
         } catch {
             // Unsupported engine, insecure context, hidden document, a permissions
@@ -529,7 +530,7 @@ export class StepPager extends HTMLElement {
         // `firstElementChild` also covers the other way the DOM can go missing: a
         // React move/remount, or a consumer who wrote children of their own.
         if (!this.querySelector(':scope > .tc-step-pager-top')) {
-            this.innerHTML = SHELL
+            patchHtml(this, SHELL)
             this._syncHeadingTag()
             this._buildPages()
         }

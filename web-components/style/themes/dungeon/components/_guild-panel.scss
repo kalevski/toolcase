@@ -91,10 +91,14 @@ tc-theme[name='dungeon'],
     }
 
     // Member names read as display caps; ranks as gold-bordered caps chips.
+    // Letter-spacing kept modest (unlike the header name/rank chip) — this column
+    // already truncates with ellipsis at a fixed flex width, and the heavier
+    // 0.16em spacing used elsewhere pushed ordinary names (e.g. "Vesper Holt")
+    // into truncation that never happens in the default theme.
     .tc-guild-panel-member-name {
         font-family: var(--fg-display);
         text-transform: uppercase;
-        letter-spacing: 0.16em;
+        letter-spacing: 0.02em;
     }
     .tc-guild-panel-member-rank {
         font-family: var(--fg-display);

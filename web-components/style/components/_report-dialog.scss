@@ -54,6 +54,11 @@ tc-report-dialog {
     --bs-report-dialog-textarea-color:       var(--tc-text);
     --bs-report-dialog-textarea-size:        0.8125rem;
     --bs-report-dialog-textarea-min-height:  5rem;
+    // Themed via --tc-focus-ring (every theme/variant defines this token) so
+    // aurora/sunshine/neon/redline/marker — which ship no override file for
+    // this component — still get a correctly-tinted glow instead of the
+    // generic slate one below.
+    --bs-report-dialog-textarea-focus-ring:  var(--tc-focus-ring);
 
     // Action buttons
     --bs-report-dialog-btn-font-size:            0.8125rem;
@@ -112,8 +117,11 @@ tc-report-dialog {
     transition: var(--bs-report-dialog-transition);
 
     // Closed: shifted up, scaled down, hidden.
+    // (Keep the -50% vertical centering term alongside the -20px offset —
+    // dropping it, as a prior version did, put the closed panel nowhere near
+    // its resting position and caused a large jump on open/close.)
     opacity: 0;
-    transform: translateY(-20px) translateX(-50%) scale(0.97);
+    transform: translateY(calc(-50% - 20px)) translateX(-50%) scale(0.97);
 
     // Open: centered, full size.
     tc-report-dialog.tc-report-dialog--open & {
@@ -337,7 +345,7 @@ tc-report-dialog {
 
     &:focus {
         border-color: rgba(30, 41, 59, 0.5);
-        box-shadow: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
+        box-shadow: var(--bs-report-dialog-textarea-focus-ring);
     }
 
     // >= 16px on touch — iOS zoom on focus (see style/foundation/_reset.scss).

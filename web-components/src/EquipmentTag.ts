@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { lucideByName } from './internal/lucide'
 
@@ -62,12 +63,16 @@ export class EquipmentTag extends HTMLElement {
         const iconHtml = iconName ? lucideByName(iconName, 'tc-equipment-tag-icon-svg') : ''
         const suffix = flag ? EQUIPMENT_FLAG_SUFFIX[flag] : undefined
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<span class="tc-equipment-tag${flag ? ` tc-equipment-tag--${flag}` : ''}">` +
-            (iconHtml ? `<span class="tc-equipment-tag-icon" aria-hidden="true">${iconHtml}</span>` : '') +
-            `<span class="tc-equipment-tag-label">${esc(label)}</span>` +
-            (suffix ? `<span class="tc-equipment-tag-suffix">${suffix}</span>` : '') +
-            `</span>`
+                (iconHtml
+                    ? `<span class="tc-equipment-tag-icon" aria-hidden="true">${iconHtml}</span>`
+                    : '') +
+                `<span class="tc-equipment-tag-label">${esc(label)}</span>` +
+                (suffix ? `<span class="tc-equipment-tag-suffix">${suffix}</span>` : '') +
+                `</span>`,
+        )
     }
 }
 

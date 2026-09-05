@@ -1,6 +1,8 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-icon-button'
 
@@ -73,7 +75,7 @@ export class IconButton extends HTMLElement {
         return this.getAttribute('icon') ?? ''
     }
     set icon(v: string) {
-        this.setAttribute('icon', v)
+        setAttr(this, 'icon', v)
     }
 
     get size(): IconButtonSize {
@@ -81,7 +83,7 @@ export class IconButton extends HTMLElement {
         return SIZES.includes(v) ? v : 'default'
     }
     set size(v: IconButtonSize) {
-        this.setAttribute('size', v)
+        setAttr(this, 'size', v)
     }
 
     get variant(): IconButtonVariant {
@@ -89,7 +91,7 @@ export class IconButton extends HTMLElement {
         return VARIANTS.includes(v) ? v : 'secondary'
     }
     set variant(v: IconButtonVariant) {
-        this.setAttribute('variant', v)
+        setAttr(this, 'variant', v)
     }
 
     get outline(): boolean {
@@ -104,7 +106,7 @@ export class IconButton extends HTMLElement {
         return this.getAttribute('label') ?? ''
     }
     set label(v: string) {
-        this.setAttribute('label', v)
+        setAttr(this, 'label', v)
     }
 
     get disabled(): boolean {
@@ -196,7 +198,10 @@ export class IconButton extends HTMLElement {
                 : ' tc-icon-button--labeled'
             : ''
 
-        this.innerHTML = `<button type="button" class="tc-icon-button tc-icon-button--${size}${labeledClass} btn ${variantClass}"${labelAttr}${disabledAttr}>${iconHtml}${labelHtml}</button>`
+        patchHtml(
+            this,
+            `<button type="button" class="tc-icon-button tc-icon-button--${size}${labeledClass} btn ${variantClass}"${labelAttr}${disabledAttr}>${iconHtml}${labelHtml}</button>`,
+        )
     }
 }
 

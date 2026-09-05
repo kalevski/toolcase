@@ -1,4 +1,7 @@
+import { patchHtml } from './internal/patch-html'
+import { setHostClass } from './internal/host-class'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-kbd'
 
 export class Kbd extends HTMLElement {
@@ -10,22 +13,13 @@ export class Kbd extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            const inner = this.querySelector('.tc-kbd-content')
-            if (inner) slotContent.forEach((n) => inner.appendChild(n))
-            this._initialised = true
-        }
+        this._initialised = true
+        this.render()
     }
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        const inner = this.querySelector('.tc-kbd-content')
-        const slotContent = inner ? Array.from(inner.childNodes) : []
         this.render()
-        const newInner = this.querySelector('.tc-kbd-content')
-        if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
     }
 
     get keys(): string[] {
@@ -40,7 +34,7 @@ export class Kbd extends HTMLElement {
         return this.getAttribute('separator') ?? '+'
     }
     set separator(v: string) {
-        this.setAttribute('separator', v)
+        setAttr(this, 'separator', v)
     }
 
     // class-name attribute — getter/setter named to avoid conflict with native className
@@ -57,6 +51,11 @@ export class Kbd extends HTMLElement {
         const wrapperClass = extraClass ? `tc-kbd ${extraClass}` : 'tc-kbd'
         const sep = this.getAttribute('separator') ?? '+'
 
+        // THE HOST IS THE KEY ROW. With `keys` the chips are element-owned; without
+        // it the consumer's own children are the key and `--bare` dresses the host
+        // as one, so nothing is ever wrapped or moved (rule 1).
+        setHostClass(this, this._keys.length > 0 ? wrapperClass : `${wrapperClass} tc-kbd--bare`)
+
         if (this._keys.length > 0) {
             const parts = this._keys
                 .map((k, i) => {
@@ -70,9 +69,9 @@ export class Kbd extends HTMLElement {
                     return keyHtml
                 })
                 .join('')
-            this.innerHTML = `<span class="${wrapperClass}">${parts}</span>`
+            patchHtml(this, parts)
         } else {
-            this.innerHTML = `<span class="${wrapperClass}"><kbd class="tc-kbd-key"><span class="tc-kbd-content"></span></kbd></span>`
+            patchHtml(this, '')
         }
     }
 }

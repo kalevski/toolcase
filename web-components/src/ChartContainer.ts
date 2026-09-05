@@ -1,3 +1,5 @@
+import { patchHtml } from './internal/patch-html'
+import { setHostClass } from './internal/host-class'
 import { esc } from './internal/esc'
 import { msg } from './messages'
 const TAG_NAME = 'tc-chart-container'
@@ -12,7 +14,6 @@ function fillRegion(el: Element, val: string | Node | null | undefined): void {
 
 export class ChartContainer extends HTMLElement {
     private _initialised = false
-    private _bodyNodes: Node[] = []
     private _legend: string | Node | null = null
     private _actions: string | Node | null = null
     private _emptySlot: string | Node | null = null
@@ -22,10 +23,7 @@ export class ChartContainer extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            this._bodyNodes = Array.from(this.childNodes)
-            this._initialised = true
-        }
+        this._initialised = true
         this.render()
         this._reattach()
     }
@@ -106,8 +104,6 @@ export class ChartContainer extends HTMLElement {
         const hasActions = this._actions != null
         const hasHeader = !!(titleVal || subtitle || hasActions)
 
-        const labelAttr = titleVal ? ` aria-label="${esc(titleVal)}"` : ''
-
         let headerHtml = ''
         if (hasHeader) {
             const titleHtml = titleVal
@@ -142,7 +138,15 @@ export class ChartContainer extends HTMLElement {
 
         const legendHtml = '<div class="tc-chart-container-legend"></div>'
 
-        this.innerHTML = `<div class="tc-chart-container card" role="group"${labelAttr}>${headerHtml}${bodyHtml}${legendHtml}</div>`
+        // THE HOST IS THE CARD: the header, the loading/empty body and the legend
+        // are element-owned; the chart itself is the consumer's own children, left
+        // where they wrote them and ordered by CSS (rule 1).
+        setHostClass(this, 'tc-chart-container card')
+        this.setAttribute('role', 'group')
+        if (titleVal) this.setAttribute('aria-label', titleVal)
+        else this.removeAttribute('aria-label')
+        patchHtml(this, headerHtml, { region: 'header' })
+        patchHtml(this, `${bodyHtml}${legendHtml}`, { region: 'chrome', at: 'end' })
     }
 
     private _reattach(): void {
@@ -178,7 +182,8 @@ export class ChartContainer extends HTMLElement {
             return
         }
 
-        this._bodyNodes.forEach((n) => bodyEl.appendChild(n))
+        // Nothing to re-append: the chart is the consumer's own children and has
+        // never left the host (rule 1).
     }
 }
 

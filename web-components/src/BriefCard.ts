@@ -1,6 +1,8 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-brief-card'
 
@@ -107,8 +109,8 @@ export class BriefCard extends HTMLElement {
     private _attachInnerListener(): void {
         const inner = this.querySelector('.tc-brief-card')
         if (!inner) return
-        inner.addEventListener('click', () => this._handleClick())
-        inner.addEventListener('keydown', (e: Event) => {
+        bindOnce(inner, 'click', () => this._handleClick())
+        bindOnce(inner, 'keydown', (e: Event) => {
             const ke = e as KeyboardEvent
             if (ke.key === 'Enter' || ke.key === ' ') {
                 ke.preventDefault()
@@ -135,13 +137,9 @@ export class BriefCard extends HTMLElement {
     }
     set onClick(v: (() => void) | null) {
         this._onClickProp = v
-        // Toggle interactive class without full re-render (unless clickable attr also drives it)
-        const inner = this.querySelector('.tc-brief-card')
-        if (inner) {
-            const isInteractive = v !== null || this.hasAttribute('clickable')
-            if (isInteractive) inner.classList.add('tc-brief-card--interactive')
-            else inner.classList.remove('tc-brief-card--interactive')
-        }
+        // Full re-render: interactivity flips the root element between <div> and
+        // <button> (see render()), which a class toggle alone cannot express.
+        if (this._initialised) this._rerenderWithSlots()
     }
 
     get briefId(): string | null {
@@ -157,7 +155,7 @@ export class BriefCard extends HTMLElement {
         return DIFFICULTIES.includes(v) ? v : 'easy'
     }
     set difficulty(v: BriefCardDifficulty) {
-        this.setAttribute('difficulty', v)
+        setAttr(this, 'difficulty', v)
     }
 
     // Override HTMLElement.title (string, not string|null) to reflect the attribute.
@@ -250,7 +248,16 @@ export class BriefCard extends HTMLElement {
         const metaRightHtml = metaRightAttr != null ? esc(metaRightAttr) : ''
         const metaRegion = `<div class="tc-brief-card__meta"><span class="tc-brief-card__meta-left-slot">${metaLeftHtml}</span><span class="tc-brief-card__meta-right-slot">${metaRightHtml}</span></div>`
 
-        this.innerHTML = `<button type="button" class="tc-brief-card tc-brief-card--${difficulty}${interactiveClass}"${ariaLabelAttr}>${idHtml}${headerHtml}${diffHtml}${bodyRegion}${metaRegion}</button>`
+        // Root element: a real <button> only when interactive, so a static brief
+        // card is never a keyboard-focusable, screen-reader-announced "button"
+        // with no action (matches the tc-entity-cell / tc-taxonomy-card convention).
+        const tag = interactive ? 'button' : 'div'
+        const typeAttr = interactive ? ' type="button"' : ''
+
+        patchHtml(
+            this,
+            `<${tag}${typeAttr} class="tc-brief-card tc-brief-card--${difficulty}${interactiveClass}"${ariaLabelAttr}>${idHtml}${headerHtml}${diffHtml}${bodyRegion}${metaRegion}</${tag}>`,
+        )
     }
 }
 

@@ -1,0 +1,14 @@
+{
+    "total": 414,
+    "conforming": 414,
+    "failing": [],
+    "adopting": [
+        "tc-accordion-item",
+        "tc-advanced-table",
+        "tc-carousel",
+        "tc-context-menu",
+        "tc-dashboard-layout",
+        "tc-dropdown",
+        "tc-navbar"
+    ]
+}

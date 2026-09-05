@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import * as LucideIcons from 'lucide-static'
 import { icon } from './icons'
@@ -134,7 +135,10 @@ export class PhaseGrid extends HTMLElement {
     private render(): void {
         const cols = this.columns
         const itemsHtml = this._phases.map((item) => this._renderItem(item)).join('')
-        this.innerHTML = `<div class="tc-phase-grid" style="--tc-pg-cols:${cols}">${itemsHtml}</div>`
+        patchHtml(
+            this,
+            `<div class="tc-phase-grid" style="--tc-pg-cols:${cols}">${itemsHtml}</div>`,
+        )
     }
 }
 

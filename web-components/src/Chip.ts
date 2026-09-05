@@ -1,6 +1,10 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
+import { consumerText, observeContent } from './internal/content-observer'
+import { setHostClass } from './internal/host-class'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 import { closeIcon } from './icons'
+import { setAttr } from './internal/tc-element'
 
 const TAG_NAME = 'tc-chip'
 
@@ -38,22 +42,16 @@ export class Chip extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            const inner = this.querySelector('.tc-chip-content')
-            if (inner) slotContent.forEach((n) => inner.appendChild(n))
-            this._initialised = true
-        }
+        this._initialised = true
+        this.render()
+        // The accessible name is a copy of the consumer's label text, so it has to
+        // follow that text when React rewrites it — see content-observer.ts.
+        observeContent(this, () => this.render())
     }
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        const inner = this.querySelector('.tc-chip-content')
-        const slotContent = inner ? Array.from(inner.childNodes) : []
         this.render()
-        const newInner = this.querySelector('.tc-chip-content')
-        if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
     }
 
     get selected(): boolean {
@@ -69,7 +67,7 @@ export class Chip extends HTMLElement {
         return VARIANTS.includes(v) ? v : 'secondary'
     }
     set variant(v: ChipVariant) {
-        this.setAttribute('variant', v)
+        setAttr(this, 'variant', v)
     }
 
     get icon(): string | null {
@@ -109,13 +107,7 @@ export class Chip extends HTMLElement {
     }
     set onRemove(v: (() => void) | null) {
         this._onRemove = v
-        if (this._initialised) {
-            const inner = this.querySelector('.tc-chip-content')
-            const slotContent = inner ? Array.from(inner.childNodes) : []
-            this.render()
-            const newInner = this.querySelector('.tc-chip-content')
-            if (newInner) slotContent.forEach((n) => newInner.appendChild(n))
-        }
+        if (this._initialised) this.render()
     }
 
     private _handleClick = (): void => {
@@ -181,16 +173,35 @@ export class Chip extends HTMLElement {
             ? `<button type="button" class="tc-chip-remove" aria-label="Remove"${disabledAttr}>${closeIcon}</button>`
             : ''
 
-        this.innerHTML = `<${rootTag} class="tc-chip tc-chip--${variant}${sizeClass}${staticClass}${selectedClass}"${typeAttr}${ariaPressedAttr}${disabledAttr}>${iconHtml}<span class="tc-chip-content"></span>${countHtml}</${rootTag}>${removeHtml}`
+        // THE HOST IS THE CHIP BOX. The pill's own classes go on the host itself,
+        // where the consumer's label already lives in normal flow (see "Host
+        // layout" in _chip.scss for why sharing a grid cell with a bare text child
+        // does not work); the rendered control is reduced to an invisible overlay
+        // that only takes the click/focus. Nothing the consumer wrote is moved
+        // (rule 1).
+        const label = consumerText(this)
+        const nameAttr = isStatic || !label ? '' : ` aria-label="${esc(label)}"`
+        setHostClass(
+            this,
+            `tc-chip-host tc-chip tc-chip--${variant}${sizeClass}${staticClass}${selectedClass}`,
+        )
+        patchHtml(
+            this,
+            `<${rootTag} class="tc-chip-hit tc-hit-overlay"${typeAttr}${ariaPressedAttr}${disabledAttr}${nameAttr}></${rootTag}>`,
+            { region: 'control' },
+        )
+        patchHtml(this, iconHtml, { region: 'icon' })
+        patchHtml(this, countHtml, { region: 'count', at: 'end' })
+        patchHtml(this, removeHtml, { region: 'remove', at: 'end' })
 
         if (!isStatic) {
-            const chipBtn = this.querySelector<HTMLButtonElement>('.tc-chip')
-            if (chipBtn) chipBtn.addEventListener('click', this._handleClick)
+            const chipBtn = this.querySelector<HTMLButtonElement>(':scope > .tc-chip-hit')
+            if (chipBtn) bindOnce(chipBtn, 'click', this._handleClick)
         }
 
         if (isRemovable) {
-            const removeBtn = this.querySelector('.tc-chip-remove')
-            if (removeBtn) removeBtn.addEventListener('click', this._handleRemove)
+            const removeBtn = this.querySelector(':scope > .tc-chip-remove')
+            if (removeBtn) bindOnce(removeBtn, 'click', this._handleRemove)
         }
     }
 }

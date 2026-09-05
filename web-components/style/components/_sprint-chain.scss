@@ -113,13 +113,18 @@ tc-sprint-chain {
         border-radius: 0;
     }
 
-    // No left connector on first item
-    &:first-child::before {
+    // No left connector at the start of a row — the true first item, or (once
+    // `columns` wraps the grid onto multiple rows) the first item of any row.
+    // `:first-child` alone only catches the former: every other row-start item
+    // would otherwise draw a hairline to a "previous" item that in a wrapped
+    // grid actually sits at the end of the row above, not beside it.
+    &.tc-sprint-chain-item-row-start::before {
         content: none;
     }
 
-    // No right connector on last item
-    &:last-child::after {
+    // No right connector at the end of a row — the true last item, or the last
+    // item of any wrapped row; same reasoning as above, mirrored.
+    &.tc-sprint-chain-item-row-end::after {
         content: none;
     }
 }

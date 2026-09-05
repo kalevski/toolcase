@@ -14,10 +14,13 @@ tc-theme[name='blueprint'],
         box-shadow: var(--tc-shadow-sm);
     }
 
-    // ── Row defaults ──────────────────────────────────────────────────────────
-    // Route separator and hover tokens to blueprint equivalents; the base partial
-    // uses --tc-border / --tc-surface-hover which inherit the global neutral ramp.
-    tc-asset-row {
+    // ── Row defaults (rows inside this list only) ──────────────────────────────
+    // Scoped to `tc-asset-row-list tc-asset-row`, NOT bare `tc-asset-row` — the
+    // latter also matches standalone rows (see AssetRowDemo), and since this file
+    // loads after ./asset-row in _index.scss it would silently win the cascade on
+    // the identical selector, clobbering that file's --bs-asset-row-tag-*/-icon
+    // teal-chip treatment with this list's neutral mono-chip tokens everywhere.
+    tc-asset-row-list tc-asset-row {
         --bs-asset-row-name-color: var(--bp-text);
         --bs-asset-row-size-color: var(--bp-text-muted);
         --bs-asset-row-tag-bg: var(--bp-paper-tint-2);
@@ -41,7 +44,7 @@ tc-theme[name='blueprint'],
 
     // ── Asset name — display typeface (Chakra Petch) ──────────────────────────
     // Named assets live in the display register: tight tracking, primary ink.
-    .tc-asset-row-name {
+    tc-asset-row-list .tc-asset-row-name {
         font-family: var(--bp-display);
         font-weight: 500;
         letter-spacing: -0.01em;
@@ -49,14 +52,14 @@ tc-theme[name='blueprint'],
     }
 
     // ── Leading icon — teal for directional / action affordance ───────────────
-    .tc-asset-row-icon {
+    tc-asset-row-list .tc-asset-row-icon {
         color: var(--bp-teal-fg); // teal-fg clears AA on white paper
     }
 
     // ── Tags — mono micro-label treatment ────────────────────────────────────
     // Tags sit in the HUD / kicker register: mono, uppercase, loose tracking.
     // The chip border and soft tint distinguish them without heavyweight color.
-    .tc-asset-row-tag {
+    tc-asset-row-list .tc-asset-row-tag {
         font-family: var(--bp-mono);
         text-transform: uppercase;
         letter-spacing: 0.06em;
@@ -65,7 +68,7 @@ tc-theme[name='blueprint'],
 
     // ── Size label — mono HUD readout ─────────────────────────────────────────
     // Size is a numeric readout; mono keeps it aligned and HUD-coded.
-    .tc-asset-row-size {
+    tc-asset-row-list .tc-asset-row-size {
         font-family: var(--bp-mono);
         letter-spacing: 0.04em;
         color: var(--bp-text-faint); // one step lighter than muted — de-emphasised

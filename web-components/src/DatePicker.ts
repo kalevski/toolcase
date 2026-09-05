@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { msg } from './messages'
 import { fieldMessageHtml } from './internal/field-message'
@@ -249,13 +250,16 @@ export class DatePicker extends HTMLElement {
             validText: 'Looks good!',
         })
 
-        this.innerHTML = [
-            `<div class="tc-date-picker">`,
-            labelHtml,
-            `<input id="${this._inputId}" type="date" class="form-control${stateClass}"${minAttr}${maxAttr}${valueAttr}${requiredAttr}${disabledAttr}${describe}>`,
-            messageHtml,
-            `</div>`,
-        ].join('')
+        patchHtml(
+            this,
+            [
+                `<div class="tc-date-picker">`,
+                labelHtml,
+                `<input id="${this._inputId}" type="date" class="form-control${stateClass}"${minAttr}${maxAttr}${valueAttr}${requiredAttr}${disabledAttr}${describe}>`,
+                messageHtml,
+                `</div>`,
+            ].join(''),
+        )
     }
 }
 

@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { DialogBase, esc } from './internal/dialog-base'
 import { msg } from './messages'
 import { closeIcon } from './icons'
@@ -144,26 +145,28 @@ export class ReportDialog extends DialogBase {
             })
             .join('')
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-report-dialog__backdrop" aria-hidden="true"${hiddenAttr}></div>` +
-            `<div class="tc-report-dialog__panel" role="dialog" aria-modal="true"` +
-            ` aria-labelledby="${labelId}" tabindex="-1"` +
-            ` aria-hidden="${isOpen ? 'false' : 'true'}"${hiddenAttr}>` +
-            `<div class="tc-report-dialog__header">` +
-            `<span class="tc-report-dialog__eyebrow">Report Player</span>` +
-            `<h2 class="tc-report-dialog__title" id="${labelId}">${playerNameText}</h2>` +
-            `<button type="button" class="tc-report-dialog__close" aria-label="${esc(msg('close'))}">${closeIcon}</button>` +
-            `</div>` +
-            `<div class="tc-report-dialog__body">` +
-            `<p class="tc-report-dialog__message">Select the reason this player should be reported. Your report stays anonymous.</p>` +
-            `<div class="tc-report-dialog__reasons" role="radiogroup" aria-label="Report reason">${reasonsHtml}</div>` +
-            `<textarea class="tc-report-dialog__comment" placeholder="Additional details (optional)">${esc(this._comment)}</textarea>` +
-            `</div>` +
-            `<div class="tc-report-dialog__actions">` +
-            `<button type="button" class="tc-report-dialog__btn tc-report-dialog__cancel">Cancel</button>` +
-            `<button type="button" class="tc-report-dialog__btn tc-report-dialog__submit"${this._selectedReason ? '' : ' disabled'}>Submit Report</button>` +
-            `</div>` +
-            `</div>`
+                `<div class="tc-report-dialog__panel" role="dialog" aria-modal="true"` +
+                ` aria-labelledby="${labelId}" tabindex="-1"` +
+                ` aria-hidden="${isOpen ? 'false' : 'true'}"${hiddenAttr}>` +
+                `<div class="tc-report-dialog__header">` +
+                `<span class="tc-report-dialog__eyebrow">Report Player</span>` +
+                `<h2 class="tc-report-dialog__title" id="${labelId}">${playerNameText}</h2>` +
+                `<button type="button" class="tc-report-dialog__close" aria-label="${esc(msg('close'))}">${closeIcon}</button>` +
+                `</div>` +
+                `<div class="tc-report-dialog__body">` +
+                `<p class="tc-report-dialog__message">Select the reason this player should be reported. Your report stays anonymous.</p>` +
+                `<div class="tc-report-dialog__reasons" role="radiogroup" aria-label="Report reason">${reasonsHtml}</div>` +
+                `<textarea class="tc-report-dialog__comment" placeholder="Additional details (optional)">${esc(this._comment)}</textarea>` +
+                `</div>` +
+                `<div class="tc-report-dialog__actions">` +
+                `<button type="button" class="tc-report-dialog__btn tc-report-dialog__cancel">Cancel</button>` +
+                `<button type="button" class="tc-report-dialog__btn tc-report-dialog__submit"${this._selectedReason ? '' : ' disabled'}>Submit Report</button>` +
+                `</div>` +
+                `</div>`,
+        )
 
         if (isOpen) {
             this.classList.add('tc-report-dialog--open')

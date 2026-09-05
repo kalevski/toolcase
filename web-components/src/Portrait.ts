@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { setHostClass } from './internal/host-class'
 const TAG_NAME = 'tc-portrait'
@@ -107,7 +108,7 @@ export class Portrait extends HTMLElement {
                 ? `<span class="tc-portrait__level">${esc(String(Math.floor(level)))}</span>`
                 : ''
 
-        this.innerHTML = bodyContent + levelHtml
+        patchHtml(this, bodyContent + levelHtml)
     }
 }
 

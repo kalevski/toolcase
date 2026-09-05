@@ -37,7 +37,7 @@ tc-node-editor {
     // Selected = ink emphasis.
     --bs-node-editor-selected-border: var(--tc-app-accent);
     --bs-node-editor-selected-header-bg: var(--tc-app-accent-gradient);
-    --bs-node-editor-selected-header-text: #fff;
+    --bs-node-editor-selected-header-text: var(--tc-app-accent-contrast);
 
     // Ports — sanctioned circles.
     --bs-node-editor-port-bg: var(--tc-surface);
@@ -196,6 +196,7 @@ tc-node-editor {
 
 // Ports — small sanctioned circles straddling the node edge.
 .tc-node-editor-port {
+    position: relative;
     flex: 0 0 auto;
     width: var(--bs-node-editor-port-size);
     height: var(--bs-node-editor-port-size);
@@ -203,6 +204,17 @@ tc-node-editor {
     border: 1px solid var(--bs-node-editor-port-border);
     background: var(--bs-node-editor-port-bg);
     transition: background-color var(--tc-transition-fast), border-color var(--tc-transition-fast);
+}
+
+// Coarse-pointer grab area — the 10px visual dot stays put; an invisible
+// ::before pads the hit target out to 44px so a connection drag can be
+// started reliably with a fingertip.
+@media (pointer: coarse) {
+    .tc-node-editor-port::before {
+        content: '';
+        position: absolute;
+        inset: -17px;
+    }
 }
 
 .tc-node-editor-port--in {

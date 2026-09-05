@@ -1,3 +1,5 @@
+import { patchHtml } from './internal/patch-html'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-skeleton'
 
 export type SkeletonVariant = 'text' | 'circle' | 'rect'
@@ -53,7 +55,7 @@ export class Skeleton extends HTMLElement {
         return VARIANTS.includes(v) ? v : 'text'
     }
     set variant(v: SkeletonVariant) {
-        this.setAttribute('variant', v)
+        setAttr(this, 'variant', v)
     }
 
     get width(): string | null {
@@ -126,8 +128,10 @@ export class Skeleton extends HTMLElement {
             const height = resolveLength(this.getAttribute('height'))
             const count = this.count
             const one = this._renderPreset(preset, height)
-            this.innerHTML =
-                count > 1 ? `<div class="tc-skeleton__group">${one.repeat(count)}</div>` : one
+            patchHtml(
+                this,
+                count > 1 ? `<div class="tc-skeleton__group">${one.repeat(count)}</div>` : one,
+            )
             return
         }
 
@@ -161,9 +165,9 @@ export class Skeleton extends HTMLElement {
                 const isLastText = variant === 'text' && rawWidth === null && i === count - 1
                 return makeSpan(isLastText ? '80%' : resolvedWidth, resolvedHeight)
             }).join('')
-            this.innerHTML = `<div class="tc-skeleton__group">${spans}</div>`
+            patchHtml(this, `<div class="tc-skeleton__group">${spans}</div>`)
         } else {
-            this.innerHTML = makeSpan(resolvedWidth, resolvedHeight)
+            patchHtml(this, makeSpan(resolvedWidth, resolvedHeight))
         }
     }
 }

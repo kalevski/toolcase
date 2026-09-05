@@ -1,15 +1,9 @@
+import { patchHtml } from './internal/patch-html'
 import { VARIANTS_FULL } from './internal/variants'
 const TAG_NAME = 'tc-progress-bar'
 
 export type ProgressBarVariant =
-    | 'primary'
-    | 'secondary'
-    | 'success'
-    | 'danger'
-    | 'warning'
-    | 'info'
-    | 'light'
-    | 'dark'
+    'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' | 'light' | 'dark'
 
 const VARIANTS: ProgressBarVariant[] = [...VARIANTS_FULL]
 
@@ -95,7 +89,10 @@ export class ProgressBar extends HTMLElement {
         // (Setting width on the inner `.progress` made it resolve against a
         // zero-width host, collapsing every segment.)
         this.style.width = `${pct}%`
-        this.innerHTML = `<div class="progress" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar${variantClass}${stripedClass}${animatedClass}" style="width:100%">${labelText}</div></div>`
+        patchHtml(
+            this,
+            `<div class="progress" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar${variantClass}${stripedClass}${animatedClass}" style="width:100%">${labelText}</div></div>`,
+        )
     }
 }
 

@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-result-screen'
 
@@ -253,7 +254,9 @@ export class ResultScreen extends HTMLElement {
             ? `<div class="tc-result-screen-actions">${actionMarkup}</div>`
             : ''
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <div class="tc-result-screen-root" data-title-color="${this.titleColor}">
                 <span class="tc-result-screen-eyebrow">${esc(this.eyebrow)}</span>
                 <h2 class="tc-result-screen-title">${esc(this.titleText)}</h2>
@@ -263,7 +266,8 @@ export class ResultScreen extends HTMLElement {
                 ${rewardsBlock}
                 ${actionsBlock}
             </div>
-        `
+        `,
+        )
     }
 }
 

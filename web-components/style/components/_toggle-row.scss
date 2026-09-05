@@ -18,7 +18,13 @@ tc-toggle-row {
     --bs-toggle-row-knob-bg: #ffffff;
     --bs-toggle-row-knob-border: rgba(15, 23, 42, 0.08);
     --bs-toggle-row-knob-shadow: 0 1px 2px rgba(15, 23, 42, 0.18);
-    --bs-toggle-row-focus-ring: 0 0 0 0.2rem rgba(30, 41, 59, 0.12);
+    // Routed through --tc-focus-ring (not a hardcoded slate literal) so every
+    // theme without its own override (aurora/sunshine/neon/redline/marker)
+    // gets its own accent-colored ring instead of a generic slate glow —
+    // same fix already applied to _range.scss/_date-picker.scss/
+    // _graphics-preset-picker.scss. dungeon/blueprint keep their own themed
+    // override below/in their theme dirs, unaffected by this default.
+    --bs-toggle-row-focus-ring: var(--tc-focus-ring);
     --bs-toggle-row-disabled-opacity: 0.6;
 }
 

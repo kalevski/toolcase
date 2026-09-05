@@ -62,14 +62,24 @@ tc-divider[vertical] {
     }
 
     // Labels in vertical orientation are not rendered — ignore the label span.
-    .tc-divider__label {
+    // The owned label span, and — when the consumer slots their own label instead of
+    // passing the attribute — their children, which are now direct host children.
+    // `&` here is load-bearing: without it, Sass nests `.tc-divider > *` as a
+    // descendant of `.tc-divider.tc-divider--vertical`, which requires a NESTED
+    // `.tc-divider` element that never exists (the host is flat, light DOM) — so
+    // the rule silently matched nothing and slotted children stayed visible.
+    .tc-divider__label,
+    & > * {
         display: none !important;
     }
 }
 
 // ── Label ────────────────────────────────────────────────────────────────────
 
-.tc-divider__label {
+// The owned label span, and — when the consumer slots their own label instead of
+// passing the attribute — their children, which are now direct host children.
+.tc-divider__label,
+.tc-divider > * {
     // Mono micro-label: uppercase, mono face, tight spacing, muted ink.
     font-family: var(--bs-font-monospace);
     font-size: var(--bs-divider-label-font-size);

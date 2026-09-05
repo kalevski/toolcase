@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import * as LucideIcons from 'lucide-static'
 import { icon, chevronRightIcon } from './icons'
 
@@ -123,12 +124,12 @@ export class ActionRowList extends HTMLElement {
             })
             .join('')
 
-        this.innerHTML = `<div class="tc-action-row-list list-group">${rows}</div>`
+        patchHtml(this, `<div class="tc-action-row-list list-group">${rows}</div>`)
 
         // Single delegated click listener on the list container.
         const list = this.querySelector<HTMLElement>('.tc-action-row-list')
         if (list) {
-            list.addEventListener('click', (e: Event) => {
+            bindOnce(list, 'click', (e: Event) => {
                 const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(
                     '.tc-action-row-cta',
                 )

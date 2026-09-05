@@ -1,5 +1,7 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { msg } from './messages'
+import { setAttr } from './internal/tc-element'
 
 // tc-load-more — the phone's answer to a numbered pager: one full-width control at
 // the end of a list that APPENDS the next page in place.
@@ -64,7 +66,7 @@ export class LoadMore extends HTMLElement {
         return STATES.includes(v) ? v : 'idle'
     }
     set state(v: LoadMoreState) {
-        this.setAttribute('state', v)
+        setAttr(this, 'state', v)
     }
 
     /** Idle label. Defaults to the registry's `loadMore`. */
@@ -138,7 +140,10 @@ export class LoadMore extends HTMLElement {
             // reader has already been handed the appended items, and announcing the
             // ending as an interruption on top of that is noise. It is read when
             // reached.
-            this.innerHTML = `<p class="tc-load-more__done" role="status">${esc(this.exhaustedLabel)}</p>`
+            patchHtml(
+                this,
+                `<p class="tc-load-more__done" role="status">${esc(this.exhaustedLabel)}</p>`,
+            )
             return
         }
 
@@ -155,11 +160,13 @@ export class LoadMore extends HTMLElement {
         // `aria-busy` on the button rather than a swapped-in live region: the label
         // itself changes to „Loading…", so AT already has the words; aria-busy is what
         // tells it the control is mid-operation and its own state is not final.
-        this.innerHTML =
+        patchHtml(
+            this,
             `<button type="button" class="btn tc-load-more__btn"` +
-            `${disabled ? ' disabled' : ''}${loading ? ' aria-busy="true"' : ''}>` +
-            `${spinner}<span class="tc-load-more__label">${esc(label)}</span>${countHtml}` +
-            `</button>`
+                `${disabled ? ' disabled' : ''}${loading ? ' aria-busy="true"' : ''}>` +
+                `${spinner}<span class="tc-load-more__label">${esc(label)}</span>${countHtml}` +
+                `</button>`,
+        )
     }
 }
 

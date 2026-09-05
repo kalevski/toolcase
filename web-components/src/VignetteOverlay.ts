@@ -4,7 +4,9 @@ const TAG_NAME = 'tc-vignette-overlay'
  * tc-vignette-overlay — edge vignette overlay for low-health / damage feedback.
  * Ported from `gc-vignette-overlay` but voiced for the web-components design
  * system: no shadow DOM, no game chrome — a `::after` radial-gradient pseudo-
- * element painted on top of slotted content with `pointer-events: none`.
+ * element painted on top of slotted content with `pointer-events: none`. The
+ * pseudo-element is on the HOST, so the element creates no node and moves none of
+ * the consumer's children (rule 1).
  *
  * All cosmetics flow through `--bs-vignette-overlay-*` custom properties.
  * `intensity` (0–1) and `vignette-color` (any CSS color) are reflected as
@@ -20,13 +22,7 @@ export class VignetteOverlay extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            const inner = this.querySelector('.tc-vignette-overlay-content')
-            if (inner) slotContent.forEach((n) => inner.appendChild(n))
-            this._initialised = true
-        }
+        this._initialised = true
         this._applyTokens()
     }
 
@@ -65,10 +61,6 @@ export class VignetteOverlay extends HTMLElement {
         } else {
             this.style.removeProperty('--bs-vignette-overlay-color')
         }
-    }
-
-    private render(): void {
-        this.innerHTML = '<div class="tc-vignette-overlay-content"></div>'
     }
 }
 

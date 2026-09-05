@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 
 const TAG_NAME = 'tc-manufacturer-tile'
@@ -77,12 +78,17 @@ export class ManufacturerTile extends HTMLElement {
             (countText ? `<span class="tc-manufacturer-tile-count">${esc(countText)}</span>` : '') +
             `</span>`
 
-        const cls = active ? 'tc-manufacturer-tile tc-manufacturer-tile--active' : 'tc-manufacturer-tile'
-        this.innerHTML = href
-            ? `<a class="${cls}" href="${esc(href)}"` +
-              (active ? ' aria-current="true"' : '') +
-              `>${markHtml}${bodyHtml}</a>`
-            : `<span class="${cls}">${markHtml}${bodyHtml}</span>`
+        const cls = active
+            ? 'tc-manufacturer-tile tc-manufacturer-tile--active'
+            : 'tc-manufacturer-tile'
+        patchHtml(
+            this,
+            href
+                ? `<a class="${cls}" href="${esc(href)}"` +
+                      (active ? ' aria-current="true"' : '') +
+                      `>${markHtml}${bodyHtml}</a>`
+                : `<span class="${cls}">${markHtml}${bodyHtml}</span>`,
+        )
     }
 }
 

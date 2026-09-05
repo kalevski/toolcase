@@ -15,8 +15,8 @@ tc-team-list {
     --bs-team-list-role-color: var(--tc-text-muted);
     --bs-team-list-avatar-size: 2.25rem;
     --bs-team-list-avatar-font-size: 0.75rem;
-    --bs-team-list-avatar-gradient: linear-gradient(135deg, var(--tc-app-accent), #2b3a51);
-    --bs-team-list-avatar-color: #fff;
+    --bs-team-list-avatar-gradient: var(--tc-app-accent-gradient);
+    --bs-team-list-avatar-color: var(--tc-app-accent-contrast, #fff);
 }
 
 .tc-team-list {

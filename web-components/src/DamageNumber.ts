@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-damage-number'
 
@@ -112,10 +113,12 @@ export class DamageNumber extends HTMLElement {
         // `done` timer so the visual and the event end together.
         this.style.setProperty('--bs-damage-number-duration', `${this.duration}ms`)
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<span class="tc-damage-number-text" data-variant="${variant}" role="status">` +
-            `${prefix}${esc(text)}` +
-            `</span>`
+                `${prefix}${esc(text)}` +
+                `</span>`,
+        )
     }
 }
 

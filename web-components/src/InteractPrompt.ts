@@ -1,4 +1,6 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
+import { setAttr } from './internal/tc-element'
 const TAG_NAME = 'tc-interact-prompt'
 
 export class InteractPrompt extends HTMLElement {
@@ -35,14 +37,14 @@ export class InteractPrompt extends HTMLElement {
         return this.getAttribute('key-label') ?? ''
     }
     set keyLabel(value: string) {
-        this.setAttribute('key-label', value)
+        setAttr(this, 'key-label', value)
     }
 
     get text(): string {
         return this.getAttribute('text') ?? ''
     }
     set text(value: string) {
-        this.setAttribute('text', value)
+        setAttr(this, 'text', value)
     }
 
     get holdProgress(): number | null {
@@ -72,13 +74,16 @@ export class InteractPrompt extends HTMLElement {
             </div>`
                 : ''
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <div class="tc-interact-prompt-row">
                 ${keyMarkup}
                 <span class="tc-interact-prompt-text">${esc(text)}</span>
             </div>
             ${holdMarkup}
-        `
+        `,
+        )
     }
 }
 

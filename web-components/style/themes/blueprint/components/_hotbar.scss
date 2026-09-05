@@ -19,6 +19,9 @@ tc-theme[name='blueprint'],
 
         // Active selection → pink (primary/CTA accent in blueprint).
         // Replaces the dark-slate ring (rgba(30,41,59,…)) from the base partial.
+        // bp-glow-pink is a full box-shadow recipe (offset+blur+color); the base
+        // partial's box-shadow now uses this token as-is (not composed with a
+        // literal 0 0 0 0.2rem prefix), so this renders correctly.
         --bs-hotbar-selected-border: var(--bp-pink);
         --bs-hotbar-selected-ring: var(--bp-glow-pink);
 

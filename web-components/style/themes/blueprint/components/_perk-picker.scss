@@ -106,35 +106,42 @@ tc-theme[name='blueprint'],
             letter-spacing: 0.08em;
             text-transform: uppercase;
             color: var(--bp-teal-fg);
-
-            .is-selected & {
-                color: var(--bs-perk-picker-icon-selected-color);
-                letter-spacing: 0.08em; // keep tracking on pink fill
-            }
         }
     }
 
     // ── Perk name — display font, tight tracking ──────────────────────────────
+    // Colour is intentionally omitted here — it flows from --bs-perk-picker-name-color
+    // (unselected) / --bs-perk-picker-selected-color (selected, set below) so the two
+    // states never fight over the same property at equal specificity.
     .tc-perk-picker-card-name {
         font-family: var(--bp-display);
         font-size: 0.875rem;
         font-weight: 600;
         letter-spacing: -0.01em;
-        color: var(--bs-perk-picker-name-color);
         text-transform: uppercase; // display font reads best in uppercase for short labels
-
-        .is-selected & {
-            color: var(--bs-perk-picker-selected-color);
-        }
     }
 
     // ── Description — body font, muted ───────────────────────────────────────
     .tc-perk-picker-card-description {
         font-family: var(--bp-body);
-        color: var(--bs-perk-picker-description-color);
+    }
 
-        .is-selected & {
+    // ── Selected state — nested under the card so the theme wrapper stays the
+    // outermost ancestor (fixes a selector-order bug where `.is-selected &`
+    // compiled to `.is-selected [data-tc-theme=blueprint] ...`, which can never
+    // match since the theme root is never a descendant of the card).
+    .tc-perk-picker-card.is-selected {
+        .tc-perk-picker-card-name {
+            color: var(--bs-perk-picker-selected-color);
+        }
+
+        .tc-perk-picker-card-description {
             color: var(--bs-perk-picker-selected-desc-color);
+        }
+
+        .tc-perk-picker-card-icon--text {
+            color: var(--bs-perk-picker-icon-selected-color);
+            letter-spacing: 0.08em; // keep tracking on pink fill
         }
     }
 

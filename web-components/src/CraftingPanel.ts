@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { isImageSrc } from './internal/image'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-crafting-panel'
@@ -224,9 +225,11 @@ export class CraftingPanel extends HTMLElement {
             ? this._detailMarkup(active, crafting)
             : `<p class="tc-crafting-panel-detail-empty">Select a recipe.</p>`
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-crafting-panel-list" role="list">${rowsMarkup}</div>` +
-            `<div class="tc-crafting-panel-detail">${detailMarkup}</div>`
+                `<div class="tc-crafting-panel-detail">${detailMarkup}</div>`,
+        )
     }
 }
 

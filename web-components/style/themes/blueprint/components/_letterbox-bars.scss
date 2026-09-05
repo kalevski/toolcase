@@ -13,10 +13,16 @@ tc-theme[name='blueprint'],
     // Each bar grows a 2px teal reticle line on its inward-facing edge via ::after,
     // suggesting a blueprint HUD scan boundary rather than a plain matte bar.
     // pointer-events: none is inherited from the host; these are purely decorative.
+    // The base rule's `position: absolute` is already a valid containing block for
+    // the ::after below — do not downgrade it to `relative` here. `.tc-letterbox-bar`
+    // is a plain <span> (default `display: inline`) that only becomes a sized block
+    // box because `position: absolute` forces the UA to blockify it; swapping in
+    // `relative` used to undo that blockification with no `display` override to
+    // replace it, so the bar (and this whole accent line) collapsed to 0×0 and
+    // never rendered.
 
     .tc-letterbox-bar {
-        overflow: visible; // allow ::after to sit at the inner edge without clipping
-        position: relative;
+        overflow: visible; // allow ::after's glow to bleed past the bar's own edge
     }
 
     .tc-letterbox-bar--top::after {

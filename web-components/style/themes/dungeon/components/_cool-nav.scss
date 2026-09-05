@@ -5,8 +5,13 @@
 tc-theme[name='dungeon'],
 [data-tc-theme='dungeon'] {
     // ── Host token swap ───────────────────────────────────────────────────────
+    // :not(.tc-cool-nav--dark) is required, not cosmetic: this selector's extra
+    // type selector (tc-theme[name=...] tc-cool-nav) out-specifies the base
+    // component's `tc-cool-nav.tc-cool-nav--dark` rule ((0,1,2) beats (0,1,1)),
+    // so without the guard these values would always win over the --dark
+    // override below regardless of source order, making that override dead code.
 
-    tc-cool-nav {
+    tc-cool-nav:not(.tc-cool-nav--dark) {
         --bs-cool-nav-bg: var(--fg-leather);
         --bs-cool-nav-color: var(--fg-parch);
         --bs-cool-nav-border: var(--fg-gold-deep);

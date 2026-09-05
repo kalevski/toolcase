@@ -59,6 +59,12 @@ tc-status-card {
     text-overflow: ellipsis;
 }
 
+// Body wrapper — reads the --bs-status-card-body-padding-* contract (both 0 by
+// default; themes/consumers can override to inset the list from the card edge).
+.tc-status-card-body {
+    padding: var(--bs-status-card-body-padding-y) var(--bs-status-card-body-padding-x);
+}
+
 // ── Status list ───────────────────────────────────────────────────────────────
 
 .tc-status-card-list {

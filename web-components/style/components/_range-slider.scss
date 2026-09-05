@@ -111,11 +111,13 @@ tc-range-slider[disabled] {
         transform: translate(-50%, -50%) scale(1.1);
     }
 
-    // 44px coarse-pointer hit area
+    // Invisible extended hit area up to the touch-target floor (matches the
+    // tc-slider sibling's token-driven approach so a future handle-size change
+    // via --bs-range-slider-handle-size keeps the hit area at the floor).
     &::after {
         content: '';
         position: absolute;
-        inset: -14px;
+        inset: calc((var(--bs-range-slider-handle-size) - var(--tc-min-touch-target, 44px)) / 2);
         border-radius: 50%;
     }
 }

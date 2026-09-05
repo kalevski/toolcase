@@ -14,7 +14,7 @@ tc-manufacturer-tile {
     --bs-manufacturer-tile-border-color: var(--tc-border);
     --bs-manufacturer-tile-hover-border-color: var(--tc-border-strong);
     --bs-manufacturer-tile-active-bg: var(--tc-app-accent);
-    --bs-manufacturer-tile-active-color: #fff;
+    --bs-manufacturer-tile-active-color: var(--tc-app-accent-contrast);
     --bs-manufacturer-tile-mark-size: 2.5rem;
     --bs-manufacturer-tile-mark-bg: var(--tc-surface-muted);
     --bs-manufacturer-tile-mark-color: var(--tc-text-muted);
@@ -145,7 +145,7 @@ a.tc-manufacturer-tile {
     }
 
     .tc-manufacturer-tile-mark {
-        background: rgba(255, 255, 255, 0.12);
+        background: color-mix(in srgb, var(--bs-manufacturer-tile-active-color) 12%, transparent);
     }
 
     &:hover .tc-manufacturer-tile-name {

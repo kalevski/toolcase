@@ -11,7 +11,10 @@ tc-usage-summary-panel {
     --bs-usage-summary-panel-padding-y: 0.875rem;
     --bs-usage-summary-panel-padding-x: 1rem;
     --bs-usage-summary-panel-title-bg: var(--tc-app-accent-gradient);
-    --bs-usage-summary-panel-title-color: rgba(255, 255, 255, 0.9);
+    // Ink text on the gradient is --tc-app-accent-contrast, not a hardcoded
+    // white — aurora/sunshine/neon/marker resolve this dark since their accent
+    // gradient is itself bright, and a literal white would fail contrast there.
+    --bs-usage-summary-panel-title-color: var(--tc-app-accent-contrast);
     --bs-usage-summary-panel-title-font-size: 0.6875rem;
     --bs-usage-summary-panel-title-letter-spacing: 0.08em;
     --bs-usage-summary-panel-label-color: var(--tc-text);
@@ -51,7 +54,7 @@ tc-usage-summary-panel {
     text-transform: uppercase;
     letter-spacing: var(--bs-usage-summary-panel-title-letter-spacing);
     line-height: 1.4;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid color-mix(in srgb, var(--tc-app-accent-contrast) 8%, transparent);
     border-radius: 0;
 }
 
@@ -122,8 +125,14 @@ tc-usage-summary-panel {
 }
 
 // ── Warn row — status colour on fill + value text ────────────────────────────
+// Prefixed with the panel class (not just the row class) so this beats the
+// bright-accent themes (aurora/dungeon/neon/sunshine), which blanket-override
+// `.progress`'s --bs-progress-bar-bg at equal (0,2,0) specificity from their
+// own theme stylesheet — without the extra class here, cascade order (theme
+// CSS loads after component CSS) let the theme's accent fill win and the
+// warn/over-limit state became visually indistinguishable from normal rows.
 
-.tc-usage-summary-panel-row--warn {
+.tc-usage-summary-panel .tc-usage-summary-panel-row--warn {
     .tc-usage-summary-panel-value {
         color: var(--bs-usage-summary-panel-warn-value-color);
         font-weight: 600;

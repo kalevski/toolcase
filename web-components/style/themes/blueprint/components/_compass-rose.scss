@@ -31,4 +31,16 @@ tc-theme[name='blueprint'],
         // North label: full primary ink + pink fill for emphasis (matches needle).
         --bs-compass-rose-label-n-color: var(--bp-pink);
     }
+
+    // The "N" label sits directly over the needle's north polygon at heading 0
+    // (both are --bp-pink) and would otherwise vanish into it — a paper-tinted
+    // halo keeps the glyph's outline legible against the solid pink fill while
+    // staying invisible (matching the paper backdrop) whenever the label sits
+    // on the plain face instead.
+    .tc-compass-rose__label--n {
+        paint-order: stroke fill;
+        stroke: var(--bp-paper);
+        stroke-width: 3px;
+        stroke-linejoin: round;
+    }
 }

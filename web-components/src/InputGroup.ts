@@ -1,3 +1,4 @@
+import { setHostClass } from './internal/host-class'
 const TAG_NAME = 'tc-input-group'
 
 export type InputGroupSize = 'sm' | 'lg'
@@ -16,18 +17,13 @@ export class InputGroup extends HTMLElement {
     }
 
     connectedCallback(): void {
-        if (!this._initialised) {
-            const slotContent = Array.from(this.childNodes)
-            this.render()
-            const inner = this.querySelector<HTMLElement>('.input-group')
-            if (inner) slotContent.forEach((n) => inner.appendChild(n))
-            this._initialised = true
-        }
+        this._initialised = true
+        this.render()
     }
 
     attributeChangedCallback(): void {
         if (!this.isConnected || !this._initialised) return
-        this._updateGroup()
+        this.render()
     }
 
     get size(): InputGroupSize | null {
@@ -42,7 +38,8 @@ export class InputGroup extends HTMLElement {
     private render(): void {
         const size = this.size
         const sizeClass = size ? ` input-group-${size}` : ''
-        this.innerHTML = `<div class="input-group${sizeClass}"></div>`
+        // THE HOST IS THE GROUP — the controls stay the consumer's own children.
+        setHostClass(this, `input-group${sizeClass}`)
     }
 
     private _updateGroup(): void {

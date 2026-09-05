@@ -1,3 +1,4 @@
+import { bindOnce, patchHtml } from './internal/patch-html'
 import { lucideByName } from './internal/lucide'
 import { esc } from './internal/esc'
 
@@ -180,7 +181,9 @@ export class BattlePass extends HTMLElement {
 
         const xpPctRounded = Math.round(xpPct)
 
-        this.innerHTML = `
+        patchHtml(
+            this,
+            `
             <div class="tc-battle-pass">
                 <div class="tc-battle-pass-header">
                     <span class="tc-battle-pass-eyebrow">Battle Pass</span>
@@ -202,15 +205,15 @@ export class BattlePass extends HTMLElement {
                     <div class="tc-battle-pass-tiers">${tiersMarkup}</div>
                 </div>
             </div>
-        `
+        `,
+        )
 
         this.querySelectorAll<HTMLButtonElement>('.tc-battle-pass-cell.is-claimable').forEach(
             (el) => {
-                el.addEventListener('click', () => {
+                bindOnce(el, 'click', () => {
                     const level = parseInt(el.dataset.level || '0', 10)
                     const track = (el.dataset.track === 'premium' ? 'premium' : 'free') as
-                        | 'free'
-                        | 'premium'
+                        'free' | 'premium'
                     this.emitClaim(level, track)
                 })
             },

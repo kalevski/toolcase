@@ -1,3 +1,4 @@
+import { patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 const TAG_NAME = 'tc-title-screen'
 
@@ -46,7 +47,8 @@ export class TitleScreen extends HTMLElement {
         return this.getAttribute('eyebrow') ?? 'Press Start'
     }
     set eyebrow(v: string) {
-        this.setAttribute('eyebrow', v)
+        if (v) this.setAttribute('eyebrow', v)
+        else this.removeAttribute('eyebrow')
     }
 
     private render(): void {
@@ -62,13 +64,15 @@ export class TitleScreen extends HTMLElement {
             ? `<p class="tc-title-screen__subtitle">${esc(subtitle)}</p>`
             : ''
 
-        this.innerHTML =
+        patchHtml(
+            this,
             `<div class="tc-title-screen__panel">` +
-            `<div class="tc-title-screen__eyebrow">${esc(eyebrow)}</div>` +
-            titleMarkup +
-            `<div class="tc-title-screen__divider" aria-hidden="true"></div>` +
-            subtitleMarkup +
-            `</div>`
+                `<div class="tc-title-screen__eyebrow">${esc(eyebrow)}</div>` +
+                titleMarkup +
+                `<div class="tc-title-screen__divider" aria-hidden="true"></div>` +
+                subtitleMarkup +
+                `</div>`,
+        )
     }
 }
 
