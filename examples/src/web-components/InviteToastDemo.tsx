@@ -55,7 +55,7 @@ const InviteToastDemo: React.FC = () => {
                         {/* @ts-ignore */}
                         <tc-invite-toast
                             ref={ref}
-                            open={open || undefined}
+                            open={open}
                             inviter="Ada Lovelace"
                             body="Wants to invite you to the Analytical Engine party."
                             timeout-seconds="8"

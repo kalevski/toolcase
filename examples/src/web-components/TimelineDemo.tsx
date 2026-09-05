@@ -78,7 +78,7 @@ const ITEMS_STATUS = [
         date: '2026-05-08',
         status: 'active',
         subtitle: 'Sprint 1 of 4',
-        accentColor: 'var(--tc-accent)',
+        accentColor: 'var(--tc-info)',
     },
     {
         title: 'Code freeze',

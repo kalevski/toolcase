@@ -12,7 +12,7 @@ const LoginDemo: React.FC = () => {
                 {
                     key: 'github',
                     label: 'Continue with GitHub',
-                    icon: 'github',
+                    icon: 'git-branch',
                     variant: 'primary',
                 },
                 {
@@ -36,7 +36,7 @@ const LoginDemo: React.FC = () => {
                 {
                     key: 'github',
                     label: 'Continue with GitHub',
-                    icon: 'github',
+                    icon: 'git-branch',
                     variant: 'primary',
                 },
                 {
@@ -60,7 +60,7 @@ const LoginDemo: React.FC = () => {
             {
                 key: 'github',
                 label: 'Continue with GitHub',
-                icon: 'github',
+                icon: 'git-branch',
                 variant: 'primary',
             },
             { key: 'google', label: 'Continue with Google', variant: 'secondary' },
@@ -73,7 +73,7 @@ const LoginDemo: React.FC = () => {
                 {
                     key: 'github',
                     label: 'Continue with GitHub',
-                    icon: 'github',
+                    icon: 'git-branch',
                     variant: 'primary',
                 },
                 {
@@ -152,7 +152,7 @@ const LoginDemo: React.FC = () => {
                                 </tc-login>
                             </tc-section-card>
 
-                            <tc-section-card title="No aside — no background-pattern-src">
+                            <tc-section-card title="Plain aside — no background-pattern-src, no logo slot">
                                 {/* @ts-ignore */}
                                 <tc-login
                                     ref={noAsideRef}

@@ -61,22 +61,19 @@ const ConfirmVariantSection: React.FC<{
     return (
         <tc-section-card title={v.sectionTitle}>
             <p className="text-muted mb-3">{v.description}</p>
-            <button
-                className={`btn ${v.danger ? 'btn-danger' : 'btn-primary'}`}
-                onClick={onOpen}
-            >
+            <button className={`btn ${v.danger ? 'btn-danger' : 'btn-primary'}`} onClick={onOpen}>
                 {v.confirmLabel ?? 'Confirm'}…
             </button>
             {/* @ts-ignore */}
             <tc-confirm-dialog
                 ref={dialogRef}
-                open={open || undefined}
+                open={open}
                 dialog-title={v.dialogTitle}
                 eyebrow={v.eyebrow}
                 message={v.message}
                 confirm-label={v.confirmLabel}
                 cancel-label={v.cancelLabel}
-                danger={v.danger || undefined}
+                danger={v.danger}
             />
         </tc-section-card>
     )

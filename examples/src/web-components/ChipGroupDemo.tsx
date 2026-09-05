@@ -17,7 +17,7 @@ const ChipGroupDemo: React.FC = () => {
             'tc-toggle': (e: CustomEvent) => {
                 console.log('[tc-toggle] id:', e.detail.id)
             },
-        }
+        },
     )
     const borderedRef = useTc<HTMLElement>({
         items: [
@@ -95,7 +95,7 @@ const ChipGroupDemo: React.FC = () => {
                                 />
                             </tc-section-card>
 
-                            <tc-section-card title="Rail layout (layout=&quot;rail&quot;)">
+                            <tc-section-card title='Rail layout (layout="rail")'>
                                 <p className="text-muted small mb-3">
                                     One horizontally scrolling line instead of a wrapping block —
                                     screen <code>1f</code>'s filter rail. A phone fits two or three

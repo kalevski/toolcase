@@ -27,7 +27,7 @@ const CycleWheelDemo: React.FC = () => {
 
                         <div className="d-flex flex-column gap-4 mt-4">
                             <tc-section-card title="Default — five-phase loop (interactive)">
-                                <div style={{ maxWidth: 420, margin: '0 auto' }}>
+                                <div style={{ width: '100%', maxWidth: 420, margin: '0 auto' }}>
                                     {/* @ts-ignore */}
                                     <tc-cycle-wheel
                                         ref={mainRef}
@@ -56,7 +56,7 @@ const CycleWheelDemo: React.FC = () => {
                             </tc-section-card>
 
                             <tc-section-card title="Three-phase variant — faster spin (spin-seconds=12)">
-                                <div style={{ maxWidth: 320, margin: '0 auto' }}>
+                                <div style={{ width: '100%', maxWidth: 320, margin: '0 auto' }}>
                                     {/* @ts-ignore */}
                                     <tc-cycle-wheel
                                         ref={threeRef}
@@ -69,7 +69,7 @@ const CycleWheelDemo: React.FC = () => {
                             </tc-section-card>
 
                             <tc-section-card title="Paused — the spin is stopped via the paused attribute">
-                                <div style={{ maxWidth: 420, margin: '0 auto' }}>
+                                <div style={{ width: '100%', maxWidth: 420, margin: '0 auto' }}>
                                     {/* @ts-ignore */}
                                     <tc-cycle-wheel
                                         ref={pausedRef}

@@ -238,7 +238,7 @@ const FeedExample: React.FC = () => {
                         <tc-button
                             className="ms-auto"
                             variant="primary"
-                            size="small"
+                            size="sm"
                             onClick={() => push('button → Додади')}
                         >
                             Додади
@@ -268,7 +268,7 @@ const FeedExample: React.FC = () => {
                             className="ms-auto"
                             variant="secondary"
                             outline
-                            size="small"
+                            size="sm"
                             disabled
                         >
                             Додадено
@@ -412,10 +412,10 @@ const SurfaceExample: React.FC = () => {
                     metric-spoken="98 килокалории по порција"
                 >
                     <div slot="actions" style={{ display: 'flex', gap: 'var(--m-gap-tight, 5px)' }}>
-                        <tc-button variant="primary" size="small">
+                        <tc-button variant="primary" size="sm">
                             Отвори
                         </tc-button>
-                        <tc-button variant="danger" outline size="small">
+                        <tc-button variant="danger" outline size="sm">
                             Избриши
                         </tc-button>
                     </div>

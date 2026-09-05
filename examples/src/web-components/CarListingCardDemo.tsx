@@ -58,7 +58,7 @@ const CarListingCardDemo: React.FC = () => {
                                         seller-name="Redline Motors"
                                         seller-avatar-src="https://i.pravatar.cc/40?img=13"
                                         // @ts-ignore
-                                        wishlisted={wishlisted || undefined}
+                                        wishlisted={wishlisted}
                                     />
                                 </div>
                             </tc-section-card>

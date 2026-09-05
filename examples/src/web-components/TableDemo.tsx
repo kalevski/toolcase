@@ -93,7 +93,7 @@ const TableDemo: React.FC = () => {
                             </tc-section-card>
 
                             <tc-section-card title="Sticky header (height-constrained, scroll the box)">
-                                <div style={{ maxHeight: 220 }}>
+                                <div style={{ maxHeight: 220, overflowY: 'auto' }}>
                                     {/* @ts-ignore */}
                                     <tc-table
                                         ref={stickyRef}

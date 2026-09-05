@@ -94,11 +94,11 @@ const LiveExample: React.FC = () => {
                     loading-label="Се вчитува…"
                     exhausted-label="Го видовте целиот тефтер"
                     count={remaining > 0 ? `+${Math.min(PAGE, remaining)}` : undefined}
-                    onTcLoadMore={load}
+                    ontc-load-more={load}
                 />
             </div>
             <div style={note}>
-                <code>onTcLoadMore</code> fires once per tap and never while loading — the element
+                <code>ontc-load-more</code> fires once per tap and never while loading — the element
                 guards its own state, so a slow connection cannot stack requests. The count is „how
                 many the next tap brings", not a total: it answers „is this worth a tap" without
                 bringing the pager's arithmetic back.

@@ -1,4 +1,5 @@
 import React, { useRef } from 'react'
+import type { DropdownVariant } from '@toolcase/web-components'
 
 const DropdownDemo: React.FC = () => {
     const dropdownRef = useRef<any>(null)
@@ -29,16 +30,18 @@ const DropdownDemo: React.FC = () => {
 
                             <tc-section-card title="Variants">
                                 <div className="d-flex flex-wrap gap-2">
-                                    {[
-                                        'primary',
-                                        'secondary',
-                                        'success',
-                                        'danger',
-                                        'warning',
-                                        'info',
-                                        'light',
-                                        'dark',
-                                    ].map((v) => (
+                                    {(
+                                        [
+                                            'primary',
+                                            'secondary',
+                                            'success',
+                                            'danger',
+                                            'warning',
+                                            'info',
+                                            'light',
+                                            'dark',
+                                        ] as DropdownVariant[]
+                                    ).map((v) => (
                                         <tc-dropdown key={v} label={v} variant={v}>
                                             <tc-dropdown-item>Option one</tc-dropdown-item>
                                             <tc-dropdown-item>Option two</tc-dropdown-item>

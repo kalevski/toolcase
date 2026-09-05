@@ -1,4 +1,5 @@
 import { useState, ReactNode } from 'react'
+import type { CodeSnippetLanguage } from '@toolcase/web-components'
 
 export type LogEntry = { time: string; text: string; level?: string }
 
@@ -13,10 +14,15 @@ export const captureConsole = (fn: () => void): LogEntry[] => {
     }
     const stringify = (a: unknown) =>
         typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)
-    console.log = (...args: unknown[]) => logs.push({ time: ts(), text: args.map(stringify).join(' '), level: 'info' })
-    console.warn = (...args: unknown[]) => logs.push({ time: ts(), text: args.map(stringify).join(' '), level: 'warning' })
-    console.error = (...args: unknown[]) => logs.push({ time: ts(), text: args.map(stringify).join(' '), level: 'error' })
-    try { fn() } finally {
+    console.log = (...args: unknown[]) =>
+        logs.push({ time: ts(), text: args.map(stringify).join(' '), level: 'info' })
+    console.warn = (...args: unknown[]) =>
+        logs.push({ time: ts(), text: args.map(stringify).join(' '), level: 'warning' })
+    console.error = (...args: unknown[]) =>
+        logs.push({ time: ts(), text: args.map(stringify).join(' '), level: 'error' })
+    try {
+        fn()
+    } finally {
         console.log = orig.log
         console.warn = orig.warn
         console.error = orig.error
@@ -26,7 +32,7 @@ export const captureConsole = (fn: () => void): LogEntry[] => {
 
 export const captureConsoleAsync = async (
     fn: (push: () => void) => Promise<void> | void,
-    onUpdate: (entries: LogEntry[]) => void
+    onUpdate: (entries: LogEntry[]) => void,
 ) => {
     const entries: LogEntry[] = []
     const orig = {
@@ -36,10 +42,12 @@ export const captureConsoleAsync = async (
     }
     const stringify = (a: unknown) =>
         typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)
-    const push = (level: string) => (...args: unknown[]) => {
-        entries.push({ time: ts(), text: args.map(stringify).join(' '), level })
-        onUpdate([...entries])
-    }
+    const push =
+        (level: string) =>
+        (...args: unknown[]) => {
+            entries.push({ time: ts(), text: args.map(stringify).join(' '), level })
+            onUpdate([...entries])
+        }
     console.log = push('info')
     console.warn = push('warning')
     console.error = push('error')
@@ -67,7 +75,7 @@ export type DemoSectionProps = {
     title: string
     description: ReactNode
     code: string
-    language?: string
+    language?: CodeSnippetLanguage
     onRun: () => void
     logs: LogEntry[]
     running?: boolean

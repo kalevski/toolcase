@@ -46,7 +46,7 @@ const GamepadButtonPromptDemo: React.FC = () => (
                                 {/* @ts-ignore */}
                                 <tc-gamepad-button-prompt glyph="LB" label="Aim" />
                                 {/* @ts-ignore */}
-                                <tc-gamepad-button-prompt glyph="⮝" label="Up" />
+                                <tc-gamepad-button-prompt glyph="▲" label="Up" />
                             </div>
                         </tc-section-card>
 

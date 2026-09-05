@@ -47,13 +47,19 @@ const VersionLabelDemo: React.FC = () => (
                             >
                                 {/* On a dark surface, re-skin the label through its
                                     public --bs-version-label-* contract so the
-                                    segments keep contrast. */}
+                                    segments keep contrast. --bg must be included:
+                                    blueprint's theme stylesheet hardcodes
+                                    --bs-version-label-bg to its opaque paper
+                                    token, which (without this override) painted
+                                    over this dark wrapper and made every
+                                    light-on-dark segment color above invisible. */}
                                 <tc-version-label
                                     version="0.9.1"
                                     build="7b3a8c2"
                                     branch="release"
                                     style={
                                         {
+                                            '--bs-version-label-bg': 'transparent',
                                             '--bs-version-label-color': 'rgba(248,250,252,0.75)',
                                             '--bs-version-label-version-color': '#f8fafc',
                                             '--bs-version-label-build-color':

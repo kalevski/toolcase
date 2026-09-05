@@ -1,5 +1,9 @@
 **/lib/
 **/dist/
 **/node_modules/
-# Generated — see web-components/scripts/gen-react-types.mjs
+# Generated — see web-components/scripts/gen-react-types.mjs and
+# web-components/scripts/gen-react-components.mjs. Formatting them would make
+# every regeneration a diff against the formatter rather than against the source.
 web-components/src/react.ts
+web-components/src/react-types.ts
+web-components/src/react-components.ts

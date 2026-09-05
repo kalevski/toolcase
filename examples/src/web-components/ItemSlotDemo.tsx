@@ -45,7 +45,7 @@ const ItemSlotDemo: React.FC = () => {
                 const item = (e as CustomEvent<{ item: { name?: string } | null }>).detail.item
                 setLastClicked(item?.name ?? 'empty')
             },
-        }
+        },
     )
 
     useEffect(() => {

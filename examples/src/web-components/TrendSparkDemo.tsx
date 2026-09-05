@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import type { TrendSparkTone } from '@toolcase/web-components'
 
 // Screen `1i` („Исхрана — цели и мерки") of the JADI.mk phone design, at the width it
 // was composed: 390px.
@@ -164,8 +165,8 @@ const EdgeExample: React.FC = () => (
 )
 
 const ToneExample: React.FC = () => {
-    const [tone, setTone] = useState('accent')
-    const tones = ['accent', 'lead', 'success', 'info', 'danger', 'ink']
+    const [tone, setTone] = useState<TrendSparkTone>('accent')
+    const tones: TrendSparkTone[] = ['accent', 'lead', 'success', 'info', 'danger', 'ink']
 
     return (
         <div>

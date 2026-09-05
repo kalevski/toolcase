@@ -99,6 +99,7 @@ const THEME_NAMES = [
     'neon',
     'blueprint',
     'redline',
+    'marker',
 ] as const
 const THEME_VARIANTS = [
     'ocean',

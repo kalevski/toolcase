@@ -5,6 +5,7 @@ const MAX_PAGES = 5
 
 function createItemEl(text: string): HTMLDivElement {
     const el = document.createElement('div')
+    el.dataset.demoItem = 'true'
     el.style.cssText =
         'padding:0.6rem 1rem;border-bottom:1px solid var(--tc-border);font-size:0.875rem;font-family:var(--tc-font-mono)'
     el.textContent = text
@@ -21,11 +22,13 @@ const InfiniteScrollDemo: React.FC = () => {
         const el = scrollRef.current
         if (!el) return
 
-        // Seed first page of items into the content container
-        const content = el.querySelector('.tc-infinite-scroll-content')
-        if (content && content.children.length === 0) {
+        // Seed the first page of items as direct children of the element itself —
+        // tc-infinite-scroll no longer wraps consumer content in a container; the
+        // sentinel/loading/end rows order themselves after these via CSS `order`.
+        const alreadySeeded = el.querySelector('[data-demo-item]') != null
+        if (!alreadySeeded) {
             for (let i = 1; i <= PAGE_SIZE; i++) {
-                content.appendChild(createItemEl(`Item ${i}`))
+                el.appendChild(createItemEl(`Item ${i}`))
             }
         }
 
@@ -38,11 +41,8 @@ const InfiniteScrollDemo: React.FC = () => {
                 const nextPage = pageRef.current + 1
                 pageRef.current = nextPage
                 const base = nextPage * PAGE_SIZE
-                const ct = el.querySelector('.tc-infinite-scroll-content')
-                if (ct) {
-                    for (let i = 1; i <= PAGE_SIZE; i++) {
-                        ct.appendChild(createItemEl(`Item ${base + i}`))
-                    }
+                for (let i = 1; i <= PAGE_SIZE; i++) {
+                    el.appendChild(createItemEl(`Item ${base + i}`))
                 }
                 if (nextPage >= MAX_PAGES - 1) {
                     el.removeAttribute('has-more')

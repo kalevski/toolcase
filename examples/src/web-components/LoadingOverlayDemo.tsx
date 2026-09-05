@@ -71,7 +71,7 @@ const LoadingOverlayDemo: React.FC = () => {
                                     {openBasic ? 'Close overlay' : 'Open overlay'}
                                 </button>
                                 {/* @ts-ignore */}
-                                <tc-loading-overlay {...(openBasic ? { open: '' } : {})} />
+                                <tc-loading-overlay open={openBasic} />
                             </tc-section-card>
 
                             <tc-section-card title="Determinate with label + tip">
@@ -108,7 +108,7 @@ const LoadingOverlayDemo: React.FC = () => {
                                 {/* @ts-ignore */}
                                 <tc-loading-overlay
                                     label="Connecting to server…"
-                                    {...(openLabel ? { open: '' } : {})}
+                                    open={openLabel}
                                 />
                             </tc-section-card>
                         </div>

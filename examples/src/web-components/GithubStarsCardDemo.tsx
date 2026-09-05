@@ -10,6 +10,12 @@ const GithubStarsCardDemo: React.FC = () => {
             version: 'v3.2.1',
         },
     })
+    const partialRef = useTc<HTMLElement>({
+        stats: {
+            stars: 1250,
+            version: 'v1.4.0',
+        },
+    })
     const liveRef = useTc<HTMLElement>({
         onStats: (stats: unknown) => {
             console.log('[GithubStarsCard] onStats callback', stats)
@@ -65,6 +71,7 @@ const GithubStarsCardDemo: React.FC = () => {
                                 <div style={{ maxWidth: 360 }}>
                                     {/* @ts-ignore */}
                                     <tc-github-stars-card
+                                        ref={partialRef}
                                         owner="kalevski"
                                         repo="toolcase"
                                         cta-label="View repository"

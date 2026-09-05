@@ -149,6 +149,31 @@ import DayStripDemo from './DayStripDemo'
 import AddSlotDemo from './AddSlotDemo'
 import DownloadStatsDemo from './DownloadStatsDemo'
 import EmptyStateDemo from './EmptyStateDemo'
+import LockChipDemo from './LockChipDemo'
+import LockedActionDemo from './LockedActionDemo'
+import UpgradeNudgeDemo from './UpgradeNudgeDemo'
+import FloatingActionBarDemo from './FloatingActionBarDemo'
+import HintTipDemo from './HintTipDemo'
+import FilterTriggerDemo from './FilterTriggerDemo'
+import ResultsHeaderDemo from './ResultsHeaderDemo'
+import SignInGateDemo from './SignInGateDemo'
+import SearchBarDemo from './SearchBarDemo'
+import SegmentedToggleDemo from './SegmentedToggleDemo'
+import ConfirmSheetDemo from './ConfirmSheetDemo'
+import FacetPickerDemo from './FacetPickerDemo'
+import RangeFieldDemo from './RangeFieldDemo'
+import ValueInRangeDemo from './ValueInRangeDemo'
+import TreePickerDemo from './TreePickerDemo'
+import ConditionBuilderDemo from './ConditionBuilderDemo'
+import FilterBarDemo from './FilterBarDemo'
+import QrScanSheetDemo from './QrScanSheetDemo'
+import EditorShellDemo from './EditorShellDemo'
+import DesignCanvasDemo from './DesignCanvasDemo'
+import ZoomControlDemo from './ZoomControlDemo'
+import PreviewFrameDemo from './PreviewFrameDemo'
+import GraphSigilDemo from './GraphSigilDemo'
+import BeadTrailDemo from './BeadTrailDemo'
+import GraphCanvasDemo from './GraphCanvasDemo'
 import EyebrowDemo from './EyebrowDemo'
 import EntityCellDemo from './EntityCellDemo'
 import EquipmentDollDemo from './EquipmentDollDemo'
@@ -547,6 +572,31 @@ const demos: WebComponentDef[] = [
     { key: 'tab-dock', complexity: 'Mobile', element: <TabDockDemo /> },
     { key: 'download-stats', complexity: 'Composite', element: <DownloadStatsDemo /> },
     { key: 'empty-state', complexity: 'Primitives', element: <EmptyStateDemo /> },
+    { key: 'lock-chip', complexity: 'Simple', element: <LockChipDemo /> },
+    { key: 'locked-action', complexity: 'Simple', element: <LockedActionDemo /> },
+    { key: 'upgrade-nudge', complexity: 'Simple', element: <UpgradeNudgeDemo /> },
+    { key: 'floating-action-bar', complexity: 'Composite', element: <FloatingActionBarDemo /> },
+    { key: 'hint-tip', complexity: 'Primitives', element: <HintTipDemo /> },
+    { key: 'filter-trigger', complexity: 'Simple', element: <FilterTriggerDemo /> },
+    { key: 'results-header', complexity: 'Simple', element: <ResultsHeaderDemo /> },
+    { key: 'sign-in-gate', complexity: 'Simple', element: <SignInGateDemo /> },
+    { key: 'search-bar', complexity: 'Simple', element: <SearchBarDemo /> },
+    { key: 'segmented-toggle', complexity: 'Simple', element: <SegmentedToggleDemo /> },
+    { key: 'confirm-sheet', complexity: 'Composite', element: <ConfirmSheetDemo /> },
+    { key: 'facet-picker', complexity: 'Composite', element: <FacetPickerDemo /> },
+    { key: 'range-field', complexity: 'Composite', element: <RangeFieldDemo /> },
+    { key: 'value-in-range', complexity: 'Composite', element: <ValueInRangeDemo /> },
+    { key: 'tree-picker', complexity: 'Advanced', element: <TreePickerDemo /> },
+    { key: 'condition-builder', complexity: 'Advanced', element: <ConditionBuilderDemo /> },
+    { key: 'filter-bar', complexity: 'Composite', element: <FilterBarDemo /> },
+    { key: 'qr-scan-sheet', complexity: 'Advanced', element: <QrScanSheetDemo /> },
+    { key: 'editor-shell', complexity: 'Advanced', element: <EditorShellDemo /> },
+    { key: 'design-canvas', complexity: 'Advanced', element: <DesignCanvasDemo /> },
+    { key: 'zoom-control', complexity: 'Simple', element: <ZoomControlDemo /> },
+    { key: 'preview-frame', complexity: 'Simple', element: <PreviewFrameDemo /> },
+    { key: 'graph-sigil', complexity: 'Simple', element: <GraphSigilDemo /> },
+    { key: 'bead-trail', complexity: 'Simple', element: <BeadTrailDemo /> },
+    { key: 'graph-canvas', complexity: 'Advanced', element: <GraphCanvasDemo /> },
     { key: 'entity-cell', complexity: 'Simple', element: <EntityCellDemo /> },
     { key: 'team-list', complexity: 'Simple', element: <TeamListDemo /> },
     { key: 'equipment-doll', complexity: 'Composite', element: <EquipmentDollDemo /> },

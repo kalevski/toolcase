@@ -23,7 +23,7 @@ const TagInputDemo: React.FC = () => {
         { recommendations: LANGUAGES, defaultValue: ['TypeScript'] },
         {
             'tc-change': (e: Event) => {
-                const next = (e as CustomEvent<{ tags: string[] }>).detail.tags
+                const next = (e as CustomEvent<{ value: string[] }>).detail.value
                 setTags(next)
                 console.log('tc-change:', next)
             },

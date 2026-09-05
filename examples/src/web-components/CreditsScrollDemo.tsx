@@ -49,7 +49,15 @@ const CreditsScrollDemo: React.FC = () => {
                             <tc-section-card title="Faster scroll, no title">
                                 <div style={{ height: 280, maxWidth: 480 }}>
                                     {/* @ts-ignore */}
-                                    <tc-credits-scroll ref={fastRef} speed="90" />
+                                    <tc-credits-scroll
+                                        ref={fastRef}
+                                        speed="90"
+                                        style={
+                                            {
+                                                '--bs-credits-scroll-min-height': '280px',
+                                            } as React.CSSProperties
+                                        }
+                                    />
                                 </div>
                             </tc-section-card>
                         </div>

@@ -28,7 +28,9 @@ const EmptyStateDemo: React.FC = () => (
                             <tc-empty-state icon="FolderOpen">
                                 No files found
                                 {/* @ts-ignore */}
-                                <tc-button variant="secondary">Upload a file</tc-button>
+                                <tc-button slot="action" variant="secondary">
+                                    Upload a file
+                                </tc-button>
                                 {/* @ts-ignore */}
                             </tc-empty-state>
                         </tc-section-card>

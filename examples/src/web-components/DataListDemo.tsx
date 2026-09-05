@@ -122,7 +122,7 @@ const renderMuted = (p: any) =>
 const renderMember = (m: any) => {
     const avatar = m.avatarUrl
         ? `<img src="${esc(m.avatarUrl)}" alt="${esc(m.name)}" style="width:2.25rem;height:2.25rem;border-radius:50%;object-fit:cover;flex-shrink:0;" />`
-        : `<span aria-hidden="true" style="width:2.25rem;height:2.25rem;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:600;color:#fff;background:linear-gradient(135deg,var(--tc-app-accent),#2b3a51);flex-shrink:0;">${esc(m.initials ?? deriveInitials(m.name))}</span>`
+        : `<span aria-hidden="true" style="width:2.25rem;height:2.25rem;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:600;color:var(--tc-app-accent-contrast);background:var(--tc-app-accent);flex-shrink:0;">${esc(m.initials ?? deriveInitials(m.name))}</span>`
     return (
         `<li class="tc-data-list__row" data-id="${esc(m.id)}" role="listitem">` +
         avatar +

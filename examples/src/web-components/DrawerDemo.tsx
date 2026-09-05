@@ -1,8 +1,9 @@
 import React, { useRef, useState, useEffect } from 'react'
+import type { DrawerSide, DrawerSize } from '@toolcase/web-components'
 
 type DrawerVariant = {
-    side: string
-    size?: string
+    side: DrawerSide
+    size?: DrawerSize
     pinned?: boolean
     title: string
     description: string
@@ -100,8 +101,8 @@ const DrawerDemo: React.FC = () => {
                                             title={v.title}
                                             side={v.side}
                                             size={v.size}
-                                            open={openIdx === idx || undefined}
-                                            pinned={v.pinned || undefined}
+                                            open={openIdx === idx}
+                                            pinned={v.pinned}
                                         >
                                             <p>{v.description}</p>
                                             {/* @ts-ignore */}

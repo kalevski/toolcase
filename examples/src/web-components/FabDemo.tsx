@@ -68,12 +68,7 @@ const ShellExample: React.FC<{ autoHide?: boolean; offset?: string }> = ({ autoH
             />
             <div slot="overlay">
                 {/* @ts-ignore */}
-                <tc-fab
-                    icon="plus"
-                    label="Нов рецепт"
-                    auto-hide={autoHide || undefined}
-                    offset={offset}
-                />
+                <tc-fab icon="plus" label="Нов рецепт" auto-hide={autoHide} offset={offset} />
             </div>
         </tc-mobile-shell>
     </div>

@@ -83,7 +83,7 @@ const ShoppingExample: React.FC = () => {
                             label={item.name}
                             hint={item.hint || (done[i] ? 'купено' : 'останува')}
                             trailing={item.amount || '—'}
-                            checked={done[i] || undefined}
+                            checked={done[i]}
                         />
                     ))}
                 </div>
@@ -157,8 +157,8 @@ const OnboardingExample: React.FC = () => (
                     tone="success"
                     divider="none"
                     label={step.label}
-                    checked={step.done || undefined}
-                    disabled={step.done || undefined}
+                    checked={step.done}
+                    disabled={step.done}
                     style={
                         {
                             // 1b's ticks are 22px with a 12px glyph, and its rows are a

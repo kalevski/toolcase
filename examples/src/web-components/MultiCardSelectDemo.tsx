@@ -21,7 +21,7 @@ const MultiCardSelectDemo: React.FC = () => {
     const loadingRef = useRef<any>(null)
 
     const [selected, setSelected] = useState<string[]>([])
-    const [controlledValue, setControlledValue] = useState<string[]>(['react', 'vue'])
+    const [controlledValue, setControlledValue] = useState<string[]>(['auth', 'db'])
 
     const basicRef = useTc<HTMLElement>(
         { options: FRAMEWORK_OPTIONS },

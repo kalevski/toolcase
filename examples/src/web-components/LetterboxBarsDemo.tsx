@@ -49,7 +49,7 @@ const LetterboxBarsDemo: React.FC = () => {
                                 <div style={stageStyle}>
                                     <span style={sceneLabelStyle}>Scene viewport</span>
                                     {/* @ts-ignore */}
-                                    <tc-letterbox-bars {...(show ? { show: '' } : {})} />
+                                    <tc-letterbox-bars show={show} />
                                 </div>
                                 <div className="mt-3">
                                     <button
@@ -69,10 +69,7 @@ const LetterboxBarsDemo: React.FC = () => {
                                 <div style={stageStyle}>
                                     <span style={sceneLabelStyle}>Scene viewport</span>
                                     {/* @ts-ignore */}
-                                    <tc-letterbox-bars
-                                        bar-height="140px"
-                                        {...(showTall ? { show: '' } : {})}
-                                    />
+                                    <tc-letterbox-bars bar-height="140px" show={showTall} />
                                 </div>
                                 <div className="mt-3">
                                     <button
@@ -96,7 +93,7 @@ const LetterboxBarsDemo: React.FC = () => {
                                     <tc-letterbox-bars
                                         bar-color="var(--tc-app-accent)"
                                         duration="0.2s"
-                                        {...(showCustom ? { show: '' } : {})}
+                                        show={showCustom}
                                     />
                                 </div>
                                 <div className="mt-3">

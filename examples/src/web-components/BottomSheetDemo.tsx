@@ -182,7 +182,7 @@ const Main: React.FC = () => {
                     <div slot="overlay">
                         {/* ── 1g, verbatim ──────────────────────────────────────── */}
                         {/* @ts-ignore */}
-                        <tc-bottom-sheet ref={filters} open={sheet === 'filters' || undefined}>
+                        <tc-bottom-sheet ref={filters} open={sheet === 'filters'}>
                             <div slot="header">
                                 <h2 className="tc-sheet-title">Филтри</h2>
                                 <button
@@ -280,11 +280,7 @@ const Main: React.FC = () => {
 
                         {/* ── The sub-sheet: depth 1, one scrim, Escape closes this one ── */}
                         {/* @ts-ignore */}
-                        <tc-bottom-sheet
-                            ref={sortSheet}
-                            heading="Подреди"
-                            open={sortOpen || undefined}
-                        >
+                        <tc-bottom-sheet ref={sortSheet} heading="Подреди" open={sortOpen}>
                             <div>
                                 {[
                                     'Најнови прво',
@@ -314,7 +310,7 @@ const Main: React.FC = () => {
                             ref={tall}
                             heading="Состојки"
                             snap="70"
-                            open={sheet === 'tall' || undefined}
+                            open={sheet === 'tall'}
                         >
                             <div>
                                 {Array.from({ length: 30 }, (_, i) => (
@@ -341,11 +337,7 @@ const Main: React.FC = () => {
 
                         {/* ── Keyboard-aware footer ─────────────────────────────── */}
                         {/* @ts-ignore */}
-                        <tc-bottom-sheet
-                            ref={input}
-                            heading="Нова листа"
-                            open={sheet === 'input' || undefined}
-                        >
+                        <tc-bottom-sheet ref={input} heading="Нова листа" open={sheet === 'input'}>
                             <div>
                                 <div className="tc-sheet-section">
                                     <span className="tc-sheet-section-label">Име на листата</span>
@@ -386,7 +378,7 @@ const Main: React.FC = () => {
                             ref={snaps}
                             heading="Планер"
                             snap="40,90"
-                            open={sheet === 'snaps' || undefined}
+                            open={sheet === 'snaps'}
                         >
                             <div>
                                 <p
@@ -413,7 +405,7 @@ const Main: React.FC = () => {
                             ref={locked}
                             heading="Потврдете"
                             dismissible="false"
-                            open={sheet === 'locked' || undefined}
+                            open={sheet === 'locked'}
                         >
                             <div>
                                 <p
@@ -485,7 +477,7 @@ const NoShell: React.FC = () => {
                     Отвори лист
                 </button>
                 {/* @ts-ignore */}
-                <tc-bottom-sheet ref={sheet} heading="Без школка" open={open || undefined}>
+                <tc-bottom-sheet ref={sheet} heading="Без школка" open={open}>
                     <div>
                         <p
                             style={{

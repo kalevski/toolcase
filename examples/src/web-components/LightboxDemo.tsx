@@ -47,7 +47,10 @@ const LightboxDemo: React.FC = () => {
 
     // Feed the array via the JS `images` property (arrays can't be set as attributes).
     // Controlled — the host fires tc-close; the consumer flips `open` to false.
-    const lightboxRef = useTc<HTMLElement>({ images: GALLERY }, { 'tc-close': () => setOpen(false) })
+    const lightboxRef = useTc<HTMLElement>(
+        { images: GALLERY },
+        { 'tc-close': () => setOpen(false) },
+    )
 
     const openAt = (i: number) => {
         setInitial(i)
@@ -99,11 +102,7 @@ const LightboxDemo: React.FC = () => {
                             </tc-section-card>
 
                             {/* @ts-ignore */}
-                            <tc-lightbox
-                                ref={lightboxRef}
-                                initial-index={initial}
-                                open={open || undefined}
-                            />
+                            <tc-lightbox ref={lightboxRef} initial-index={initial} open={open} />
                         </div>
                     </div>
                 </div>

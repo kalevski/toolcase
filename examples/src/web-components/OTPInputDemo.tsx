@@ -116,7 +116,7 @@ const OTPInputDemo: React.FC = () => {
                                 />
                             </tc-section-card>
 
-                            <tc-section-card title="With form name (hidden input for submission)">
+                            <tc-section-card title="With form name (form-associated submission)">
                                 {/* @ts-ignore */}
                                 <tc-otp-input
                                     label="One-time code"
@@ -124,8 +124,9 @@ const OTPInputDemo: React.FC = () => {
                                     name="otp_code"
                                 />
                                 <div className="form-text mt-2">
-                                    A hidden <code>&lt;input name="otp_code"&gt;</code> tracks the
-                                    combined value for form submission.
+                                    Form-associated via <code>ElementInternals</code> — the
+                                    combined value submits under <code>name="otp_code"</code> with
+                                    no mirror input needed.
                                 </div>
                             </tc-section-card>
                         </div>

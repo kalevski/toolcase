@@ -158,7 +158,7 @@ const MobileShellDemo: React.FC = () => {
                                             <tc-button variant="primary" style={{ flex: 1 }}>
                                                 Готви
                                             </tc-button>
-                                            <tc-button variant="outline-secondary">
+                                            <tc-button variant="secondary" outline>
                                                 Сподели
                                             </tc-button>
                                         </div>

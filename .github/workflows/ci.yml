@@ -26,6 +26,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: React-safety conformance (ratchet)
+        run: npm -w @toolcase/web-components run check:react-safety
+
       - name: Build all packages
         run: npm run build
 

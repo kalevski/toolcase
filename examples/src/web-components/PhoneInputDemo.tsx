@@ -81,9 +81,9 @@ const PhoneInputDemo: React.FC = () => {
                                     placeholder="(555) 000-0000"
                                 />
                                 <div className="form-text mt-2">
-                                    A hidden <code>&lt;input name=&quot;phone&quot;&gt;</code>{' '}
-                                    carries the full value (dial code + number) for native form
-                                    submission.
+                                    Form-associated via <code>ElementInternals</code> — the
+                                    combined value (dial code + number) submits under{' '}
+                                    <code>name="phone"</code> with no mirror input needed.
                                 </div>
                             </tc-section-card>
                         </div>

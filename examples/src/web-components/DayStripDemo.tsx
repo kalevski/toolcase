@@ -321,7 +321,7 @@ const ScreenExample: React.FC = () => {
                                     no-dim
                                     label={row.name}
                                     hint={row.hint}
-                                    checked={row.done || undefined}
+                                    checked={row.done}
                                     style={mealRowStyle}
                                 />
                             ))}

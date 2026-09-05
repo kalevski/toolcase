@@ -72,7 +72,7 @@ const CommandPaletteDemo: React.FC = () => {
                 setOpen(false)
             },
             'tc-close': () => setOpen(false),
-        }
+        },
     )
 
     return (
@@ -124,8 +124,8 @@ const CommandPaletteDemo: React.FC = () => {
                                 {/* @ts-ignore */}
                                 <tc-command-palette
                                     ref={paletteRef}
-                                    open={open || undefined}
-                                    loading={loading || undefined}
+                                    open={open}
+                                    loading={loading}
                                     placeholder="Type a command or search…"
                                 />
                             </tc-section-card>

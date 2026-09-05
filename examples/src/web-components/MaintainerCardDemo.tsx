@@ -1,5 +1,5 @@
 import React, { useRef } from 'react'
-import { useTc } from '@toolcase/web-components/react'
+import { useTc, useTcEvents } from '@toolcase/web-components/react'
 
 // Icons resolve through lucide-static by name (kebab → PascalCase). Brand
 // glyphs (Github/Twitter/…) were dropped from lucide-static, so use generic
@@ -14,7 +14,12 @@ const LINKS_FULL = [
 
 const MaintainerCardDemo: React.FC = () => {
     const fullRef = useTc<HTMLElement>({ links: LINKS_FULL })
-    const noLinksRef = useRef<any>(null)
+    // No sponsor-href here — the sponsor CTA always renders (there's no way to
+    // hide it), just as a plain <button> instead of a link. Wired to
+    // tc-sponsor-click to demonstrate the host-side hook for that case.
+    const noLinksRef = useTcEvents<HTMLElement>({
+        'tc-sponsor-click': () => console.log('[tc-maintainer-card] tc-sponsor-click (no href)'),
+    })
     const minimalRef = useRef<any>(null)
 
     return (
@@ -48,7 +53,7 @@ const MaintainerCardDemo: React.FC = () => {
                                 </div>
                             </tc-section-card>
 
-                            <tc-section-card title="No social links, no sponsor button">
+                            <tc-section-card title="No social links, sponsor as a button (no href — logs tc-sponsor-click)">
                                 <div style={{ maxWidth: '320px' }}>
                                     {/* @ts-ignore */}
                                     <tc-maintainer-card
