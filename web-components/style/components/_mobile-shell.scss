@@ -14,7 +14,7 @@
 //       ├─ :not([slot])      order 2, flex:1      THE scroll pane
 //       ├─ [slot="action"]   order 3, flex:none   sticky action bar
 //       ├─ [slot="dock"]     order 4, flex:none   5-tab bottom dock
-//       └─ [slot="overlay"]  absolute             sheets, FAB, toasts
+//       └─ [slot="overlay"]  order 5, absolute    sheets, FAB, toasts
 //
 // DOM order matches paint order for the four in-flow regions, so the action bar's
 // shadow falls over the pane and the dock's over the action bar — which is what
@@ -231,10 +231,25 @@ tc-mobile-shell > [slot='dock'] {
 //
 // `overflow: hidden` on the host clips at the same edge, so nothing in here can
 // escape the frame (verified: a child at `bottom: -60px` is not hit-testable).
+// `order: 5` is load-bearing, not decoration. Painting inside a flex container
+// follows order-modified document order, and this region had no `order` at all —
+// so it defaulted to 0 and painted BEFORE the pane (order 2). `z-index: 1` still
+// lifted it over the pane's non-positioned content, but any positioned descendant
+// of the pane that TIED on z-index won the tie on order: a `position: sticky`
+// table cell at `z-index: 1` painted straight over a FAB sitting in here. The
+// four in-flow regions were ordered 1–4 and the overlay was left out of the model
+// the comment at the top of this file describes; it is region five.
+//
+// The z-index moves off `1` for the same reason at the other end of the range:
+// page content is allowed to use the documented sticky layer, and a sheet must
+// still cover it. Reusing `--tc-z-sticky` adds no layer to the fixed ledger — it
+// puts this region ON that layer, above the pane by order, below the modal layer
+// its own children (scrim 1050, sheet 1055) use.
 tc-mobile-shell > [slot='overlay'] {
     position: absolute;
     inset: 0;
-    z-index: 1;
+    order: 5;
+    z-index: var(--tc-z-sticky, 1020);
     // Transparent to taps, so the pane behind it stays scrollable. Each child
     // opts back in; a scrim that wants to swallow taps sets its own
     // `pointer-events: auto` and is a child like any other.

@@ -5,6 +5,19 @@
 // (border-radius: 0). Mono (JetBrains) for the pagination summary. Colour is never
 // used decoratively — the chrome is pure slate; status colour only ever arrives
 // from caller-projected row cells.
+//
+// Authored at phone width and widened with `up()`. On a phone the three parts
+// the desktop layout takes for granted each change shape:
+//
+//   toolbar   two-up grid of selects, a text filter takes the whole row
+//   body      tighter cell gutters, the scroller contains its own overscroll so
+//             a horizontal swipe never becomes browser back-navigation
+//   footer    the range summary sits on its own line above a full-width pager
+//             reduced to « prev · n-1 · [n] · n+1 · next » — the numbered
+//             ladder is a desktop control (see _pagination.scss), and the
+//             summary already says where you are
+
+@use '../foundation/tokens' as *;
 
 tc-advanced-table {
     --bs-advanced-table-bg: var(--tc-surface);
@@ -19,7 +32,10 @@ tc-advanced-table {
     --bs-advanced-table-td-color: var(--tc-text);
     --bs-advanced-table-td-font-size: 0.875rem;
     --bs-advanced-table-cell-padding-y: 0.625rem;
-    --bs-advanced-table-cell-padding-x: 0.75rem;
+    // Phone gutter; widened to 0.75rem at md (below). On a 360px screen the
+    // quarter-rem saved per side across five columns is a whole extra column
+    // before the body has to scroll.
+    --bs-advanced-table-cell-padding-x: 0.5rem;
 
     --bs-advanced-table-toolbar-gap: 0.75rem;
     --bs-advanced-table-filter-label-color: var(--tc-text-muted);
@@ -33,6 +49,12 @@ tc-advanced-table {
     --bs-advanced-table-tap-target: var(--tc-min-touch-target, 44px);
 }
 
+@include up(md) {
+    tc-advanced-table {
+        --bs-advanced-table-cell-padding-x: 0.75rem;
+    }
+}
+
 .tc-advanced-table {
     display: flex;
     flex-direction: column;
@@ -41,11 +63,15 @@ tc-advanced-table {
 }
 
 // ── Filter toolbar ────────────────────────────────────────────────────────────
+// Phone: a two-column grid, so a pair of selects share a row instead of stacking
+// one label-plus-control per line. A text filter is a search box and gets the
+// whole row — typing into a half-width field is where phones lose characters.
+// From sm the toolbar is the wrapping flex row it always was.
 
 .tc-advanced-table-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: end;
     gap: var(--bs-advanced-table-toolbar-gap);
 }
 
@@ -53,8 +79,24 @@ tc-advanced-table {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
-    min-width: 12rem;
-    flex: 1 1 12rem;
+    min-width: 0;
+
+    &:has(.form-control) {
+        grid-column: 1 / -1;
+    }
+}
+
+@include up(sm) {
+    .tc-advanced-table-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+    }
+
+    .tc-advanced-table-filter {
+        min-width: 12rem;
+        flex: 1 1 12rem;
+    }
 }
 
 .tc-advanced-table-filter-label {
@@ -64,10 +106,20 @@ tc-advanced-table {
     letter-spacing: 0.05em;
     text-transform: uppercase;
     color: var(--bs-advanced-table-filter-label-color);
+    // The label is an eyebrow, never a paragraph: in a half-width phone cell a
+    // long label clips rather than pushing its control down out of line with
+    // the neighbour's.
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .tc-advanced-table-filter-control {
     border-radius: 0;
+    // Grid items default to min-width:auto, which lets a select's longest
+    // option label widen the column past its half. The control fits the cell.
+    width: 100%;
+    min-width: 0;
 }
 
 // ── Body wrap (overlay + edge-shadow anchor) ─────────────────────────────────
@@ -86,6 +138,12 @@ tc-advanced-table {
     width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    // A horizontal swipe that reaches the end of the rows stops here. Without
+    // this the gesture carries on into the page and, on iOS and Android
+    // Chrome, becomes back-navigation — the one thing nobody scrolling a table
+    // asked for.
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
 }
 
 .tc-advanced-table-table {
@@ -263,15 +321,53 @@ tc-advanced-table {
 // ── Pagination footer ─────────────────────────────────────────────────────────
 //
 // The pager itself is the canonical <tc-pagination> (joined border, mono numerals,
-// solid-ink active page) — styled by _pagination.scss. Here we only lay out the
-// footer row: the mono summary on the left, the pager pushed to the right.
+// solid-ink active page) — styled by _pagination.scss. Here we lay out the footer
+// and, on a phone, reshape the pager.
+//
+// Phone: the summary takes its own line, centred, and the pager stretches to the
+// full width beneath it with every remaining link sharing that width equally —
+// a thumb bar, ‹ prev · n-1 · [n] · n+1 · next ›, 44px tall under a coarse
+// pointer. The first/last page and the ellipses are hidden: a seven-slot ladder
+// plus two arrows is nine 44px targets, which is wider than most phones, and the
+// summary line already answers "where am I". From sm everything is restored:
+// summary left, the full inline pager right.
 
 .tc-advanced-table-pagination {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+
+    tc-pagination {
+        display: block;
+        min-width: 0;
+    }
+
+    .pagination {
+        display: flex;
+        width: 100%;
+    }
+
+    .page-item {
+        display: none;
+        flex: 1 1 0;
+        min-width: 0;
+
+        // Prev / next, the active page and its two neighbours. The ladder is
+        // generated with at least one real page either side of the active one,
+        // so a neighbour is never an ellipsis.
+        &:first-child,
+        &:last-child,
+        &.active,
+        &.active + .page-item,
+        &:has(+ .page-item.active) {
+            display: block;
+        }
+    }
+
+    .page-link {
+        width: 100%;
+    }
 }
 
 .tc-advanced-table-page-summary {
@@ -279,6 +375,39 @@ tc-advanced-table {
     font-size: 0.75rem;
     letter-spacing: 0.02em;
     color: var(--bs-advanced-table-summary-color);
+    text-align: center;
+}
+
+@include up(sm) {
+    .tc-advanced-table-pagination {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+
+        tc-pagination {
+            display: inline-block;
+        }
+
+        .pagination {
+            display: inline-flex;
+            width: auto;
+        }
+
+        .page-item {
+            display: block;
+            flex: 0 0 auto;
+        }
+
+        .page-link {
+            width: auto;
+        }
+    }
+
+    .tc-advanced-table-page-summary {
+        text-align: left;
+    }
 }
 
 // While data refreshes, fade and lock the pager so it matches the disabled
@@ -290,15 +419,23 @@ tc-advanced-table {
 
 // ── Coarse pointer: ≥44px touch targets ───────────────────────────────────────
 
-@media (pointer: coarse) {
+@include coarse-pointer {
     .tc-advanced-table-sort {
         min-height: var(--bs-advanced-table-tap-target);
+    }
+
+    // The button already fills the touch floor; keeping the cell's vertical
+    // padding on top of it made a sortable header 64px tall on a phone. The
+    // cell's height now IS the target.
+    .tc-advanced-table-th:has(.tc-advanced-table-sort) {
+        padding-top: 0;
+        padding-bottom: 0;
     }
 }
 
 // ── Reduced motion ────────────────────────────────────────────────────────────
 
-@media (prefers-reduced-motion: reduce) {
+@include reduced-motion {
     .tc-advanced-table-sort {
         transition: none;
     }

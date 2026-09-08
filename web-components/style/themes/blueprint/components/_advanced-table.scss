@@ -26,9 +26,9 @@ tc-theme[name='blueprint'],
         --bs-advanced-table-td-color: var(--bp-text);
         --bs-advanced-table-td-font-size: 0.875rem;
 
-        // Generous cell padding so the blueprint grid breathes
-        --bs-advanced-table-cell-padding-y: 0.625rem;
-        --bs-advanced-table-cell-padding-x: 0.75rem;
+        // Cell padding is inherited from the base partial, which sets the phone
+        // gutter and widens it at md; restating it here would pin one value at
+        // every width.
 
         // Toolbar
         --bs-advanced-table-toolbar-gap: 0.75rem;

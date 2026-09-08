@@ -23,7 +23,7 @@
 // Nodes the element created itself are left on the native path (patchHtml marks
 // them), so an element's own render is untouched — which is what keeps this
 // separate from rule 2 rather than a hole in it.
-import { isOwned } from './patch-html'
+import { isOwned, markAdopted } from './patch-html'
 
 /**
  * Where a consumer node belongs. Called with the node — so an element with more
@@ -55,12 +55,14 @@ function isAdopted(host: Node, node: Node): boolean {
 
 function appendChild<T extends Node>(this: Node, node: T): T {
     const target = routeFor(this, node)
+    if (target) markAdopted(node)
     return Node.prototype.appendChild.call(target ?? this, node) as T
 }
 
 function insertBefore<T extends Node>(this: Node, node: T, ref: Node | null): T {
     const target = routeFor(this, node, ref)
     if (target) {
+        markAdopted(node)
         // The anchor positions the node only when the two end up in the same
         // container: an element that gives each child its own box has already
         // placed that box, so appending into it is the correct answer there.
@@ -70,8 +72,10 @@ function insertBefore<T extends Node>(this: Node, node: T, ref: Node | null): T 
     }
     // The route declined, but the anchor has been adopted — the native call would
     // throw where the node plainly belongs beside the sibling it was given.
-    if (ref && !isOwned(node) && isAdopted(this, ref))
+    if (ref && !isOwned(node) && isAdopted(this, ref)) {
+        markAdopted(node)
         return Node.prototype.insertBefore.call(ref.parentNode!, node, ref) as T
+    }
     return Node.prototype.insertBefore.call(this, node, ref) as T
 }
 
@@ -105,7 +109,9 @@ export function adoptChildren(host: Element, route: AdoptRoute, nodes?: Iterable
     }
     for (const node of nodes ?? Array.from(host.childNodes)) {
         const target = routeFor(host, node)
-        if (target && node.parentNode !== target) Node.prototype.appendChild.call(target, node)
+        if (!target) continue
+        markAdopted(node)
+        if (node.parentNode !== target) Node.prototype.appendChild.call(target, node)
     }
 }
 

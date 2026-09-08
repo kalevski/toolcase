@@ -6,6 +6,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/kalevski/toolcase/nginxpilot/internal/logship"
 	"log/slog"
 	"os"
 	"strings"
@@ -94,6 +95,10 @@ func parseWithPositional(fs *flag.FlagSet, args []string, usage string) (string,
 // newLogger builds the slog logger: JSON (JSONHandler) by default so every
 // nginxpilot log line is machine-parseable (spec Q25); logfmt (TextHandler)
 // remains available via --log-format for interactive terminal use.
+// daemonSink is the process-wide handle the manager attaches the shipper to
+// once configuration is read; until then it is an inert pass-through.
+var daemonSink *logship.DaemonSink
+
 func newLogger(format, level string) *slog.Logger {
 	var lvl slog.Level
 	switch level {
@@ -113,5 +118,7 @@ func newLogger(format, level string) *slog.Logger {
 	} else {
 		handler = slog.NewTextHandler(os.Stdout, opts)
 	}
-	return slog.New(handler)
+	daemonSink = logship.NewDaemonSink(handler, lvl)
+	logship.SetDaemonSink(daemonSink)
+	return slog.New(daemonSink)
 }

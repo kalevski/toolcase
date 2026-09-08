@@ -84,6 +84,12 @@ tc-timeline {
 
 .tc-timeline {
     position: relative;
+    // Named containment so the narrow layout at the bottom of this file can ask
+    // how wide THE TIMELINE is. See that block for why the viewport is the wrong
+    // question. `inline-size` only — `size` would need a known block size, and
+    // the height here is the sum of the items.
+    container-type: inline-size;
+    container-name: tc-timeline;
 }
 
 // ── Connector spine ──────────────────────────────────────────────────────────
@@ -433,6 +439,59 @@ tc-timeline {
 }
 
 // Honour prefers-reduced-motion: freeze shimmer, keep flat fill visible
+// ── Narrow layout — one column, spine on the left ────────────────────────────
+//
+// The default is a CENTRED ALTERNATING timeline: three columns
+// (`1fr <node> 1fr`), the spine at 50%, cards left and right of it. That needs
+// room for two card columns, and it had no narrow treatment at all — the only
+// media query in this file was `prefers-reduced-motion` — so on a phone every
+// card was squeezed into ~45% of the screen and the component was unusable.
+//
+// The switch is a CONTAINER query, not a media query, because the question is
+// how much room the timeline has, not how big the window is: a timeline in a
+// sidebar or a modal on a 1440px display has exactly the same problem, and a
+// media query would leave it broken while "fixing" a full-width timeline on a
+// phone that never needed it.
+//
+// 34rem is derived, not picked: two cards at a ~15rem readable minimum, plus the
+// 2.5rem node column and two 0.875rem gutters, is ~34.25rem. Below that there is
+// no honest way to show two columns.
+@container tc-timeline (max-width: 34rem) {
+    // Spine moves from the middle of the timeline to the middle of the node
+    // column, so it still runs through the centre of every dot.
+    .tc-timeline-line {
+        left: calc(var(--bs-timeline-node-col-width) / 2 - var(--bs-timeline-line-width) / 2);
+    }
+
+    .tc-timeline-line--solid {
+        left: calc(var(--bs-timeline-node-col-width) / 2 - var(--bs-timeline-line-solid-width) / 2);
+    }
+
+    .tc-timeline-line--dashed {
+        left: calc(var(--bs-timeline-node-col-width) / 2);
+    }
+
+    // Two columns: node, then card. `minmax(0, 1fr)` rather than `1fr` so a long
+    // unbroken word in a card cannot push the track past the timeline's width.
+    .tc-timeline-item {
+        grid-template-columns: var(--bs-timeline-node-col-width) minmax(0, 1fr);
+    }
+
+    // Both sides land in the same place — the alternation is what we are dropping,
+    // so `--left` and `--right` stop meaning anything here. Written as one rule on
+    // the children rather than two on the modifiers, because a per-item `side`
+    // from the consumer must collapse the same way an alternated one does.
+    .tc-timeline-item > .tc-timeline-node {
+        grid-column: 1;
+    }
+
+    .tc-timeline-item > .tc-timeline-card {
+        grid-column: 2;
+        grid-row: 1;
+        min-width: 0;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .tc-timeline-skeleton {
         animation: none;

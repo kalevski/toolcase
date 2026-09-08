@@ -2,8 +2,10 @@ package logship
 
 import (
 	"encoding/json"
+	"math"
 	"net/netip"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -102,6 +104,7 @@ func (o ParseOptions) redactParams() []string {
 // accessLine mirrors the nginxpilot_json log_format (nginxconf.LogFormatInclude).
 type accessLine struct {
 	TS           string `json:"ts"`
+	Msec         string `json:"msec"`
 	Host         string `json:"host"`
 	ServerName   string `json:"server_name"`
 	RemoteAddr   string `json:"remote_addr"`
@@ -145,6 +148,12 @@ func ParseAccessLine(raw []byte, opts ParseOptions) Entry {
 	}
 	if ts, err := time.Parse(time.RFC3339, line.TS); err == nil {
 		e.TS = ts
+	}
+	// $msec is epoch seconds with milliseconds. It is the same instant as ts with
+	// more resolution, so it wins when present: whole-second timestamps make
+	// identical requests in one second collide, and Loki drops the duplicates.
+	if secs, err := strconv.ParseFloat(line.Msec, 64); err == nil && secs > 0 {
+		e.TS = time.Unix(int64(secs), int64((secs-math.Floor(secs))*1e9)).UTC()
 	}
 
 	updates := map[string]string{}

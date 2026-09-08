@@ -9909,6 +9909,7 @@ A single role's live permission editor: name, quota limits, and the permission c
 | `permissions`           | `string[]`                        | Full permission-key catalog, e.g. `"project.create"`. Grouped into cards by the text before the first `.` (the "domain").                                                                                                    |
 | `limitableResources`    | `ModuleAccessLimitableResource[]` | `{ key, label }[]` — one numeric quota input per entry.                                                                                                                                                                      |
 | `permissionGroupLabels` | `Record<string, string>`          | Optional override for a domain's display label (defaults to the capitalised prefix, e.g. `admin` → `Admin`).                                                                                                                 |
+| `permissionLabels`      | `Record<string, string>`          | Optional per-chip label, keyed by the FULL permission key. Without it a chip is labelled with the raw remainder (`private_repo`, `admin.read`) — an identifier, on a screen a person administers. Anything absent keeps the remainder.                                                                                                                 |
 
 **Events**
 
@@ -12062,15 +12063,17 @@ separator — wrong for every weight, price and portion. `password` deliberately
 autocomplete default: `current-password` and `new-password` are opposite instructions to
 a password manager and only the form knows which it is.
 
-**The reserved message gutter is OFF by default** (`reserve-message` turns it back on).
-It cost ~19px of invisible height under every field — a third of a control on a phone —
-and it is why a toolbar containing a `tc-form-input` had to use `align-items: start`:
-centring a field that carries a phantom row below it lifts the field above its
-neighbours. The slot is still always RENDERED (the validation code patches it in place);
-the attribute only controls whether an EMPTY slot keeps its line of height, via
-`.tc-form-input:not([reserve-message]) > .tc-field-message:empty`. Scoped to this
-component — `tc-input`, `tc-select`, `tc-textarea` and the pickers keep the shared
-reservation, since they are the ones that appear in labelled form grids.
+**The reserved message gutter is OFF by default** (`reserve-message` turns it back on),
+and as of 6.0.2 that is true for EVERY field, not just this one. It cost ~19px of
+invisible height under each field — a third of a control on a phone — and it is why a
+toolbar containing a `tc-form-input` had to use `align-items: start`: centring a field
+that carries a phantom row below it lifts the field above its neighbours. While the
+opt-out was scoped to `tc-form-input`, a `tc-extended-select` beside one in a single
+column form stood 24px taller for a message neither of them had — which defeated the
+alignment the reservation exists for. The slot is still always RENDERED (the validation
+code patches it in place); `reserve-message` on the host controls whether an EMPTY slot
+keeps its line, via `[reserve-message] > .tc-field-message:empty`. A labelled grid that
+wants its fields aligned regardless asks for it.
 
 **JS Properties**
 

@@ -71,10 +71,7 @@ export class Switch extends HTMLElement {
             this._btnEl.removeEventListener('click', this._onToggle)
             this._btnEl = null
         }
-        if (this._labelEl) {
-            this._labelEl.removeEventListener('click', this._onToggle)
-            this._labelEl = null
-        }
+        this._labelEl = null
     }
 
     formResetCallback(): void {
@@ -225,10 +222,7 @@ export class Switch extends HTMLElement {
             this._btnEl.removeEventListener('click', this._onToggle)
             this._btnEl = null
         }
-        if (this._labelEl) {
-            this._labelEl.removeEventListener('click', this._onToggle)
-            this._labelEl = null
-        }
+        this._labelEl = null
 
         const label = this.label
         const checked = this.checked
@@ -291,8 +285,14 @@ export class Switch extends HTMLElement {
 
         this._btnEl = this.querySelector<HTMLButtonElement>('.tc-switch__track')
         if (this._btnEl) bindOnce(this._btnEl, 'click', this._onToggle)
+
+        // NO click listener on the label. The track is a <button>, which is a
+        // labelable element, so `<label for>` already forwards a click to it and
+        // `_onToggle` runs — binding the label as well ran it a SECOND time, and
+        // two flips of a boolean is none: clicking the label of a labelled switch
+        // did nothing at all. The `for` stays because it is also what names the
+        // control for assistive tech.
         this._labelEl = this.querySelector<HTMLLabelElement>('.tc-switch__label')
-        if (this._labelEl) bindOnce(this._labelEl, 'click', this._onToggle)
     }
 
     private _onToggle = (): void => {

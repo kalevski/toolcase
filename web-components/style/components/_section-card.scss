@@ -74,22 +74,29 @@ tc-section-card {
 
 // ── Header ────────────────────────────────────────────────────────────────────
 
+// The icon chip belongs BESIDE the title at every width. It is a fixed 1.75rem
+// that never shrinks and the title ellipsises (below), so a row always fits —
+// there is no width at which stacking them buys anything. A `min-width: 576px`
+// media query used to switch this from a column to a row, which put the icon on
+// its own line under 576px, and was wrong twice over: a card is not the
+// viewport, so a narrow card in a wide layout stayed a row while a full-width
+// card on a phone stacked. Judge the card by the card, or not at all.
+//
+// `min-width: 0` is what makes the title's own `text-overflow: ellipsis` work.
+// The card is a grid and this is its column-1 item, whose default `min-width:
+// auto` refuses to shrink below min-content — so a title longer than the card
+// pushed straight through the right border instead of truncating, at every
+// width and in both the old column layout and this row.
 .tc-section-card-header {
     grid-column: 1;
+    min-width: 0;
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
     gap: 0.625rem;
     padding: var(--bs-section-card-header-padding-y) var(--bs-section-card-header-padding-x);
     background: var(--bs-section-card-header-bg);
     border-bottom: 1px solid var(--bs-section-card-header-border-color);
-}
-
-@media (min-width: 576px) {
-    .tc-section-card-header {
-        flex-direction: row;
-        align-items: center;
-    }
 }
 
 // ── Icon chip ────────────────────────────────────────────────────────────────

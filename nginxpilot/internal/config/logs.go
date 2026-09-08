@@ -32,7 +32,27 @@ const MaxExtraLogLabels = 5
 // redaction policy shared by every destination.
 type Logs struct {
 	Access AccessLogs `yaml:"access"`
+	// Daemon ships nginxpilot's OWN log records (syncs, reloads, quarantines,
+	// certificate renewals) to the same destinations as the access logs. Access
+	// logs say what visitors asked for; these say what the daemon did about it.
+	Daemon DaemonLogs `yaml:"daemon"`
 	Redact LogRedact  `yaml:"redact"`
+}
+
+// DaemonLogs configures shipping of the daemon's own structured log.
+type DaemonLogs struct {
+	Enabled bool `yaml:"enabled"`
+	// Level is the minimum level shipped: debug | info | warning | error
+	// (default info). Stdout still receives everything the process logger allows.
+	Level string `yaml:"level"`
+}
+
+// LevelOrDefault returns the effective minimum shipped level.
+func (d DaemonLogs) LevelOrDefault() string {
+	if d.Level == "" {
+		return "info"
+	}
+	return d.Level
 }
 
 // AccessLogs configures JSON access-log emission (log_ides.md §1): a managed

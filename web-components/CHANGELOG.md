@@ -120,6 +120,142 @@ Ships the standard eleven accent variants. `--mk-on-lead` — the label on the
 fill — is chosen per variant rather than fixed, since a marked thing with an
 unreadable label is the one failure this theme cannot afford.
 
+### Fixed — six defects a consuming app had been patching around
+
+All six were found in Quaykeeper's stylesheet, where each one had a local
+workaround reaching into this library's internals. Every workaround has been
+deleted and the app re-verified against these fixes; the app's own overrides now
+contain nothing but theming.
+
+**`.tc-hit-overlay` had no positioned host on `tc-button` or `tc-chip`**
+(`foundation/_utilities.scss`). The tag-level `position: relative` list named five
+elements; buttons and chips got theirs from `.tc-button-host` / `.tc-chip-host`,
+classes the element adds **when it upgrades**. Between parse and upgrade — and
+permanently wherever registration never ran — an overlay with no positioned
+ancestor stretched to the nearest one it could find and swallowed every click over
+that area. One button could make a screen unclickable. `tc-button`, `tc-chip` and
+`tc-tag` are now in the tag list.
+
+**An empty field message reserved a line on five of six fields**
+(`components/_field-message.scss`). `.tc-field-message` took a one-line
+`min-height` unconditionally and only `tc-form-input` opted out — so
+`tc-extended-select`, `tc-combo-box`, `tc-checkbox-group`, `tc-tag-input` and
+`tc-button` each carried ~19px of invisible height, and a select beside a text
+input in one column form stood 24px taller for a message neither of them had. The
+split defeated the alignment the reservation exists for. Collapsing when empty is
+now the default for all of them, and `reserve-message` on the host is the opt-in
+for a labelled grid that wants the line regardless. **Changed default** — a form
+that relied on the phantom row for alignment adds `reserve-message`.
+
+**`tc-switch` did nothing when you clicked its label** (`src/Switch.ts`). The
+track is a `<button>` — a labelable element — so `<label for>` already forwarded a
+click to it, and `_onToggle` was _also_ bound to the label. Two flips of a boolean
+is none. The label's listener is gone; the `for` stays, since it is what names the
+control for assistive tech.
+
+**`tc-timeline` had no narrow layout at all** (`components/_timeline.scss`). The
+default is a centred alternating timeline — `1fr <node> 1fr`, spine at 50%, cards
+either side — and the only media query in the file was `prefers-reduced-motion`.
+On a phone every card was squeezed into ~45% of the screen. Below 34rem it is now
+one column with the spine on the left, through a **container query** rather than a
+media query: the question is how much room the timeline has, not how big the
+window is, so a timeline in a sidebar or a sheet on a 1440px display collapses too.
+34rem is derived — two cards at a ~15rem readable minimum plus the node column and
+two gutters. This is the library's first `@container`; `container-type: inline-size`
+sits on the component's own root.
+
+**The mobile shell's overlay slot was left out of its own paint order**
+(`components/_mobile-shell.scss`). The four in-flow regions are ordered 1–4 and
+`[slot="overlay"]` had no `order`, so it defaulted to 0 and painted _before_ the
+pane (order 2). `z-index: 1` still lifted it over the pane's non-positioned
+content, but anything positioned in there that TIED on z-index won on
+order-modified document order: a `position: sticky` table cell painted straight
+over a FAB. It is `order: 5` now, and on `--tc-z-sticky` rather than `1` so page
+content using the documented sticky layer cannot cover a sheet either. No new
+layer — the ledger is unchanged.
+
+**`tc-module-access` labelled its chips with raw permission keys**
+(`src/ModuleAccess.ts`). A chip read `private_repo`, `admin.read`,
+`defaults.write` — identifiers, on a screen a person administers — and a consumer
+had no way to supply anything better than rewriting the text in the DOM after
+every render. New optional `permissionLabels` prop, keyed by the full permission
+key; anything absent keeps the derived remainder. Additive.
+
+### Fixed — two patchHtml bugs, one of them structural
+
+**A child list that changed LENGTH mis-nested the whole subtree, permanently.**
+`compatible()` matched by tag name, and the walk is positional — so an element
+whose markup is `[header, limits?, groups]` rendered `[header, groups]` while its
+limits were empty and `[header, limits, groups]` on the next pass, all three
+`<div>`. The second pass offered the live `groups` div as the match for the
+template's `limits`, re-dressed it, patched the limits children into it and built
+a fresh empty `groups` after it. The groups' real children ended up one level
+deep inside the limits box; every selector scoped to `.…__groups` stopped
+matching and a handler written `closest('.…__groups tc-chip')` went dead. Every
+later render found the same wrong shape and kept it. In Quaykeeper this made
+**every permission chip in the product unclickable** — roles could not be edited
+at all — and the trigger was nothing more than the order of a `useTc` prop object.
+
+Identity is now the tag _and_ the block class — the first class the template
+authored. Modifier re-dressing — `tc-timeline-line--solid` to `--dashed`, a state
+class appended or dropped — shares the block and still reuses the node, which is
+what keeps focus, caret and scroll position alive.
+
+The block is read **off the live node**, with the creation-time `BLOCK` stamp kept
+only as a fallback for a node carrying no class at all. A first attempt trusted the
+stamp alone and did not fix the bug: a stamp is a side map, and a node that reaches
+the walk without one — re-homed by `adopt-children`, rebuilt by another region, or
+simply created before the rule existed — took the "unstamped, allow reuse" escape
+and mis-nested exactly as before. `patchNode` re-syncs attributes from the template
+on every pass, so the class the node carries now is by construction the last one a
+template declared: reading the DOM needs no bookkeeping to survive.
+
+**A node containing another component could never be swept.**
+`holdsConsumerContent` asked "is any descendant unowned", and ownership is a claim
+each component has to remember to make: of the twenty-two components that build a
+node with `document.createElement`, two called `markOwned`. So `tc-badge` prepends
+an unmarked `<span class="tc-badge-text">`, and any row, cell or panel that
+interpolated a badge became undeletable. A `tc-advanced-table` filtered from four
+rows to one kept showing four — `rows` held one `<tr>`, the summary read
+`1–1 of 1`, three stale rows stayed on screen. Every table in a consuming app with
+row-action buttons or a status badge was affected on every narrowing filter. The
+same guard fired for a nested tc-* element whose internals belong to another
+region.
+
+Neither is the consumer's. A consumer node only gets inside an element's chrome
+one way — the element moved it there — so `adopt-children.ts` now marks what it
+adopts and the guard tests for that. Precise, and immune to the twenty components
+that never mark their own nodes.
+
+### Fixed — `tc-section-card`'s icon fell under its title on a phone
+
+`.tc-section-card-header` shipped as `flex-direction: column` with a
+`@media (min-width: 576px)` block switching it to `row`, so under 576px the icon
+chip rendered on its own line above the title instead of beside it — every card
+on every phone-width screen. Quaykeeper reported it; measured at a 560px
+viewport the chip sat at `y: 219` and the title at `y: 257`.
+
+The header is now a row at every width. The stacking bought nothing: the chip is
+a fixed `1.75rem` with `flex-shrink: 0` and the title already carries
+`white-space: nowrap` + `text-overflow: ellipsis`, so a row fits at any card
+width and the title simply truncates — which is the behaviour its own rules ask
+for. The media query was also the wrong instrument regardless of direction: a
+card is not the viewport, so a narrow card inside a wide layout stayed a row
+while a full-width card on a phone stacked. `_hero.scss` keeps its 576px query,
+where the element really is the page.
+
+Measuring the row also surfaced a second, pre-existing bug in the same rule: the
+title's `text-overflow: ellipsis` never fired. The card is a grid and the header
+is its column-1 item, whose default `min-width: auto` refuses to shrink below
+min-content — so a title longer than the card pushed through the right border
+instead of truncating, in the old column layout as well as the new row. The
+header now carries `min-width: 0`; verified at 320px and 200px card widths, the
+title clips and the card no longer overflows.
+
+Pure CSS (`style/components/_section-card.scss`); no theme overrode
+`flex-direction` or `min-width`, so `blueprint`, `dungeon` and `marker` all
+inherit both fixes.
+
 ### Fixed — two gaps in the JSX type generator
 
 Both found by the new elements, both affecting existing ones:
@@ -413,6 +549,44 @@ changes an API.
 > resolves the registry tarball, which drops the symlink to this checkout, so the
 > app must work without them — and was verified to. Anything the app genuinely
 > needs from here has to be published first, not re-linked.
+
+### Fixed — `tc-advanced-table` on a phone
+
+The stylesheet was written at desktop width and shrunk. Three things broke below
+576px and one wasted height on every touch screen:
+
+- **The pager overflowed the screen.** Seven page slots plus two arrows is nine
+  links; under a coarse pointer each is a 44px target, so the row was ~400px wide
+  on a 360px phone and pushed the whole footer (and the page) sideways. The pager
+  is now a full-width bar of « prev · n−1 · [n] · n+1 · next », every link sharing
+  the width equally, with the `41–50 of 240` summary centred on its own line above
+  it. First/last page and the ellipses are hidden below `sm` — the summary already
+  says where you are, and `_pagination.scss` has long documented the numbered
+  ladder as a desktop control. From `sm` the footer is unchanged: summary left,
+  full inline pager right.
+- **Filters stacked one per line.** Each filter carried `min-width: 12rem`, so on a
+  phone three filters were three rows of eyebrow-plus-control. The toolbar is now
+  a two-column grid below `sm`; a text filter (`:has(.form-control)`) takes the
+  whole row because it is a search box, selects sit two-up. Labels clip with an
+  ellipsis rather than pushing their control out of line with the neighbour's,
+  and controls are `width: 100%; min-width: 0` so a long option label cannot widen
+  its grid column.
+- **A horizontal swipe became back-navigation.** The body scroller now sets
+  `overscroll-behavior-x: contain`, so reaching the end of the rows stops the
+  gesture instead of handing it to the browser.
+- **Sortable headers were 64px tall on touch.** The sort button already floors at
+  the 44px touch target; the cell kept its 10px vertical padding on top. The
+  padding now drops to zero on a sortable cell under a coarse pointer, so the
+  cell's height is the target and nothing more.
+
+Also: the cell gutter (`--bs-advanced-table-cell-padding-x`) is `0.5rem` below
+`md` and `0.75rem` from it — on a 360px screen that is roughly one more column
+before the body has to scroll. The blueprint theme no longer restates the padding
+tokens (it had pinned `0.75rem` at every width); every other value it set was
+already identical to the base. Authored with the foundation's `up()` /
+`coarse-pointer` / `reduced-motion` mixins, no `max-width` queries — the
+per-instance `hideBelow` rules the element generates are the only ones left,
+and they are generated, not authored.
 
 ### Known gaps — the scope of 5.0.20
 

@@ -47,9 +47,26 @@ function namespacedKey(host: Node, region: string): string {
     return `${ns}:${region}`
 }
 
+// The first class token the element's own template gave a node — its STRUCTURAL
+// IDENTITY, as opposed to the modifier classes that follow it (`--solid`) and any
+// class JS adds later (`.tc-chip-host`). Stored at creation instead of read off
+// the live node so a runtime class change cannot make a node unrecognisable to
+// the next render. `compatible()` is what consumes it; see the note there for the
+// mis-nesting this exists to stop.
+const BLOCK = new WeakMap<Node, string>()
+
+/** The identity half of a `class` attribute: everything before the first space. */
+function blockOf(el: Element): string {
+    const cls = el.getAttribute('class')
+    if (!cls) return ''
+    const end = cls.indexOf(' ')
+    return end === -1 ? cls : cls.slice(0, end)
+}
+
 /** Recursively stamp `node` and its whole subtree with an already-namespaced key. */
 function setOwned(node: Node, key: string): void {
     OWNED.set(node, key)
+    if (node.nodeType === Node.ELEMENT_NODE) BLOCK.set(node, blockOf(node as Element))
     for (let child = node.firstChild; child; child = child.nextSibling) setOwned(child, key)
 }
 
@@ -63,6 +80,19 @@ export function markOwned(node: Node, host: Node, region = ''): void {
 /** Did an element create this node, or did the consumer? */
 export function isOwned(node: Node): boolean {
     return OWNED.has(node)
+}
+
+// Consumer nodes an element MOVED into its own chrome (adopt-children.ts). They
+// are the only way a node the consumer authored ends up nested inside a node the
+// element owns, which makes this set the exact answer to the only question
+// `holdsConsumerContent` has to ask. Marking at the moment of adoption beats
+// inferring it from ownership, because ownership is a claim each component has to
+// remember to make and most of the ones that build a node by hand do not.
+const ADOPTED = new WeakSet<Node>()
+
+/** Record that `node` — the consumer's — was re-homed inside an element's chrome. */
+export function markAdopted(node: Node): void {
+    ADOPTED.add(node)
 }
 
 export interface PatchOptions {
@@ -138,7 +168,7 @@ function patchChildren(parent: Node, source: Node, region: string, at: 'start' |
             // outranks the element's own tidiness (rule 1).
             for (let scan = owned; match && scan && scan !== match;) {
                 const after = scan.nextSibling
-                if (reusable(scan) && !holdsConsumerContent(scan, region)) parent.removeChild(scan)
+                if (reusable(scan) && !holdsConsumerContent(scan)) parent.removeChild(scan)
                 scan = after
             }
         }
@@ -159,7 +189,7 @@ function patchChildren(parent: Node, source: Node, region: string, at: 'start' |
     // Anything of this region's past the end of the template is gone from the design.
     while (node) {
         const after = node.nextSibling
-        if (reusable(node) && !holdsConsumerContent(node, region)) parent.removeChild(node)
+        if (reusable(node) && !holdsConsumerContent(node)) parent.removeChild(node)
         node = after
     }
     // A node that was reused after a sibling had to be created sits behind it —
@@ -183,26 +213,76 @@ function patchChildren(parent: Node, source: Node, region: string, at: 'start' |
  * chrome would delete them too. Rule 1 is not just about the nodes a walk steps
  * over directly: a consumer node is off-limits at any depth.
  *
- * A node from ANOTHER region counts as foreign here as well — it belongs to a
- * different half of the element's markup and this pass has no say over it.
+ * ADOPTION IS THE TEST — not "is any descendant unowned", which is what this used
+ * to ask and what made a whole class of markup permanently undeletable.
+ *
+ * The trap: ownership is a claim each component has to remember to make, and of
+ * the twenty-two components that build a node with `document.createElement`, two
+ * called `markOwned`. So `tc-badge` prepends an unmarked `<span class=
+ * "tc-badge-text">`, and any row, cell or panel that interpolates a badge
+ * suddenly "held consumer content" and could never be swept. A
+ * `tc-advanced-table` filtered from four rows to one kept showing all four: the
+ * `rows` property held one `<tr>`, the pagination summary read `1–1 of 1`, and
+ * three stale rows stayed on screen because one badge inside each of them looked
+ * like the consumer's property. The same guard fired for a nested tc-* element
+ * whose internals belong to another REGION, which the old test also counted as
+ * foreign.
+ *
+ * Neither is the consumer's. A consumer node only ever gets INSIDE an element's
+ * own chrome one way — the element moved it there (adopt-children.ts) — and that
+ * path now marks what it moves. Everything else nested in a node this region
+ * built was either built by this region or built by a component this region
+ * planted, and both go when their container goes, exactly as `innerHTML =` would
+ * have taken them.
+ *
+ * The region-foreignness that DID matter is still enforced, one level up:
+ * `reusable()` in `patchChildren` only ever considers nodes of the region being
+ * patched, so another region's siblings are never candidates for removal at all.
  */
-function holdsConsumerContent(node: Node, region: string): boolean {
+function holdsConsumerContent(node: Node): boolean {
     for (let child = node.firstChild; child; child = child.nextSibling) {
-        const owner = OWNED.get(child)
-        if (owner === undefined || owner !== region) return true
-        if (holdsConsumerContent(child, region)) return true
+        if (ADOPTED.has(child)) return true
+        if (holdsConsumerContent(child)) return true
     }
     return false
 }
 
-/** Reusable means "same kind of node in the same namespace" — a `<span>` may be
- *  re-dressed into another `<span>`, never into a `<div>`. */
+/**
+ * Reusable means "the same node, re-dressed" — a `<span>` may become another
+ * `<span>`, never a `<div>`.
+ *
+ * TAG NAME IS NOT ENOUGH, because a template's child list can change LENGTH
+ * between renders and this walk is positional. An element whose markup is
+ * `[header, limits?, groups]` — `limits` omitted while its data is empty — renders
+ * `[header, groups]` first and `[header, limits, groups]` next, and every one of
+ * them is a `<div>`. The second pass then offered the live `groups` div as the
+ * match for the template's `limits`, re-dressed it into `limits`, patched the
+ * limits children into it, and created a fresh empty `groups` after it: the
+ * groups' real children ended up nested one level deep inside the limits box,
+ * every selector scoped to `.…__groups` stopped matching, and a click handler
+ * written `closest('.…__groups tc-chip')` went dead. Every render after that
+ * found the same wrong shape and kept it.
+ *
+ * So identity is the tag AND the block class the template authored (`BLOCK`).
+ * Modifier re-dressing — `tc-timeline-line--solid` to `--dashed`, a state class
+ * appended or dropped — shares the block and still reuses the node, which is what
+ * keeps focus, caret and scroll position alive. A different block is a different
+ * node and gets built fresh.
+ */
 function compatible(a: Node, b: Node): boolean {
     if (a.nodeType !== b.nodeType) return false
     if (a.nodeType !== Node.ELEMENT_NODE) return true
     const ea = a as Element
     const eb = b as Element
-    return ea.tagName === eb.tagName && ea.namespaceURI === eb.namespaceURI
+    if (ea.tagName !== eb.tagName || ea.namespaceURI !== eb.namespaceURI) return false
+    // The live node's own class is its authored identity: `patchNode` re-syncs
+    // attributes from the template on every pass, so what it carries now is what
+    // some template last declared. Reading the DOM rather than a side map is what
+    // makes this hold for a node whose stamp never landed — a subtree re-homed by
+    // `adopt-children`, or one built before this rule existed. The map is kept only
+    // as the fallback for a node with no class at all to compare.
+    const liveBlock = blockOf(ea) || BLOCK.get(a) || ''
+    return liveBlock === blockOf(eb)
 }
 
 function patchNode(node: Node, source: Node, region: string): void {
@@ -213,6 +293,9 @@ function patchNode(node: Node, source: Node, region: string): void {
     const el = node as Element
     const src = source as Element
     syncAttributes(el, src)
+    // The template just re-declared this node's classes, so its authored identity
+    // is whatever it says now — a modifier swap must not leave a stale block key.
+    BLOCK.set(el, blockOf(src))
     if (el.tagName === 'TEXTAREA') {
         syncFormState(el, src)
         return
@@ -300,4 +383,26 @@ export function bindOnce<E extends Event = Event>(
     if (previous) node.removeEventListener(type, previous, options)
     bound.set(slot, handler)
     node.addEventListener(type, handler, options)
+}
+
+/**
+ * Write text into a node this module may own, WITHOUT replacing it.
+ *
+ * `el.textContent = x` (and `el.innerHTML = x`) drop the existing child and build a
+ * fresh one, and a fresh node carries no ownership stamp. The next render then finds
+ * nothing it owns in that slot and inserts its own node beside the orphan, so the
+ * element renders both — a permission count that had been nudged imperatively read
+ * "6/94/9", a bulk button "AllAll", a select trigger "site.createsite.create".
+ * Mutating `nodeValue` keeps the node, and with it the stamp.
+ *
+ * Use this from any component that updates text outside a `patchHtml` pass.
+ */
+export function setText(el: Element | null | undefined, text: string): void {
+    if (!el) return
+    const only = el.firstChild
+    if (only && only.nodeType === Node.TEXT_NODE && !only.nextSibling) {
+        if (only.nodeValue !== text) only.nodeValue = text
+        return
+    }
+    el.textContent = text
 }

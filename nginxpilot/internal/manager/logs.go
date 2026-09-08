@@ -38,6 +38,17 @@ func (m *Manager) reconfigureLogship(ctx context.Context, cfg *config.Config) {
 	}
 	m.shipper.Configure(buildShipDestinations(cfg, m.log))
 
+	// The daemon's own records ride the same destinations. Attaching is a
+	// pointer swap, so turning it off in config stops shipping on the next
+	// reload without restarting anything.
+	if sink := logship.ProcessDaemonSink(); sink != nil {
+		if cfg.Logs.Daemon.Enabled {
+			sink.AttachShipper(m.shipper)
+		} else {
+			sink.AttachShipper(nil)
+		}
+	}
+
 	wantAddr := ""
 	if cfg.Logs.Access.Enabled {
 		wantAddr = cfg.Logs.Access.ListenOrDefault()

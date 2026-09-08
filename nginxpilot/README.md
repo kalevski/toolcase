@@ -492,9 +492,20 @@ logs:
   access:
     enabled: true                  # render the log_format include + per-vhost access_log (managed mode)
     syslog_listen: 127.0.0.1:5514  # loopback UDP intake (default)
+  daemon:
+    enabled: true                  # ALSO ship nginxpilot's own log records to the destinations below
+    level: info                    # minimum level shipped: debug | info | warning | error (stdout is unaffected)
   redact:
     # query_params: [token, code]  # override the default deny-list (token, code, secret, password, key, …)
     anonymize_ip: false            # zero the last IPv4 octet / last 80 IPv6 bits of remote_addr
+
+
+**Two streams, one pipeline.** `logs.access` ships what visitors asked for (one JSON entry per HTTP
+request). `logs.daemon` ships what the daemon did about it — syncs, nginx applies, quarantines,
+certificate renewals — as the same kind of entry, carrying `"source":"nginxpilot"` and
+`"stream":"daemon"`. Both go to every enabled destination below, so a control plane that attaches one
+Loki endpoint to a host gets the request log and the operational log together. Split them downstream
+with `| json | source="nginxpilot"` (or exclude them with `!=`).
 
 log_destinations:
   - name: main-loki

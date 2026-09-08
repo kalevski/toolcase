@@ -532,10 +532,21 @@ body.modal-open {
     color: inherit;
 }
 
+// Every tag that renders a `.tc-hit-overlay` needs a positioned host, and the
+// rule has to key off the TAG, not the `-host` class the element adds when it
+// upgrades: an absolutely positioned overlay with no positioned ancestor
+// stretches to the nearest one it can find — the page — and swallows every
+// click over that area. `tc-button` and `tc-chip` used to be covered only by
+// `.tc-button-host` / `.tc-chip-host` in their own partials, so between parse
+// and upgrade (and permanently, wherever registration never ran) a single
+// button could make a whole screen unclickable.
 tc-nav-item,
 tc-breadcrumb-item,
 tc-dropdown-item,
 tc-list-group-item,
-tc-link {
+tc-link,
+tc-button,
+tc-chip,
+tc-tag {
     position: relative;
 }

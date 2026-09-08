@@ -1,4 +1,4 @@
-import { patchHtml } from './internal/patch-html'
+import { setText, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { setAttr } from './internal/tc-element'
 
@@ -47,6 +47,7 @@ export class ModuleAccess extends HTMLElement {
     private _permissions: string[] = []
     private _limitableResources: ModuleAccessLimitableResource[] = []
     private _permissionGroupLabels: Record<string, string> = {}
+    private _permissionLabels: Record<string, string> = {}
 
     onChange: ((draft: ModuleAccessRoleDraft) => void) | null = null
 
@@ -112,6 +113,24 @@ export class ModuleAccess extends HTMLElement {
     }
     set permissionGroupLabels(v: Record<string, string>) {
         this._permissionGroupLabels = v && typeof v === 'object' ? v : {}
+        if (this._initialised) this.render()
+    }
+
+    /**
+     * Optional per-permission chip label, keyed by the FULL permission key.
+     *
+     * Without it a chip is labelled with the raw remainder of its key, which is an
+     * identifier and reads like one: `private_repo`, `admin.read`,
+     * `defaults.write`. That is fine for a key the reader already knows and wrong
+     * for a screen a person administers, and until now a consumer's only recourse
+     * was to rewrite the chip text in the DOM after every render. Supply the
+     * labels; anything absent from the map keeps the derived remainder.
+     */
+    get permissionLabels(): Record<string, string> {
+        return this._permissionLabels
+    }
+    set permissionLabels(v: Record<string, string>) {
+        this._permissionLabels = v && typeof v === 'object' ? v : {}
         if (this._initialised) this.render()
     }
 
@@ -225,10 +244,8 @@ export class ModuleAccess extends HTMLElement {
     private _syncGroupCount(groupEl: HTMLElement): void {
         const chips = Array.from(groupEl.querySelectorAll<HTMLElement>('tc-chip[data-perm-key]'))
         const on = chips.filter((c) => c.hasAttribute('selected')).length
-        const countEl = groupEl.querySelector('.module-access__group-count')
-        if (countEl) countEl.textContent = `${on}/${chips.length}`
-        const bulkEl = groupEl.querySelector('.module-access__group-bulk')
-        if (bulkEl) bulkEl.textContent = on === chips.length ? 'None' : 'All'
+        setText(groupEl.querySelector('.module-access__group-count'), `${on}/${chips.length}`)
+        setText(groupEl.querySelector('.module-access__group-bulk'), on === chips.length ? 'None' : 'All')
     }
 
     // ── Render ───────────────────────────────────────────────────────────────
@@ -241,7 +258,7 @@ export class ModuleAccess extends HTMLElement {
                 const on = keys.filter((k) => selected.has(k)).length
                 const chips = keys
                     .map((k) => {
-                        const label = k.slice(group.length + 1) || k
+                        const label = this._permissionLabels[k] ?? (k.slice(group.length + 1) || k)
                         const isSelected = selected.has(k) ? ' selected' : ''
                         return `<tc-chip class="module-access__perm-chip" data-perm-key="${esc(k)}"${isSelected}>${esc(label)}</tc-chip>`
                     })

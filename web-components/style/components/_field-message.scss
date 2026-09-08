@@ -18,12 +18,34 @@
     align-items: flex-start;
     gap: var(--bs-field-message-gap);
     margin-top: var(--bs-field-message-margin-top);
-    // Reserve exactly one line: an empty slot keeps this height, a one-line
-    // message fills it without growing, so the field's footprint is constant.
+    // One line tall so a message fills it without growing the field. An EMPTY
+    // slot collapses (below) — the reservation is opt-in via `reserve-message`.
     min-height: calc(var(--bs-field-message-size) * var(--bs-field-message-line-height));
     font-size: var(--bs-field-message-size);
     line-height: var(--bs-field-message-line-height);
     color: var(--bs-field-message-color);
+}
+
+// ── Empty slot ───────────────────────────────────────────────────────────────
+//
+// An empty message reserves nothing. It used to reserve one line on every field
+// EXCEPT tc-form-input, which opted out — and that split defeated the very thing
+// the reservation exists for: a `tc-extended-select` beside a `tc-form-input` in
+// one column form stood ~24px taller for a message neither of them had. One
+// contract for all of them: collapse when empty, and let a labelled grid that
+// wants the fields aligned regardless ask for the line back with
+// `reserve-message` on the host.
+//
+// `:empty` is what makes it safe — the moment the slot holds a hint or an error
+// it has children, stops matching, and gets its height back.
+.tc-field-message:empty {
+    min-height: 0;
+    margin-top: 0;
+}
+
+[reserve-message] > .tc-field-message:empty {
+    min-height: calc(var(--bs-field-message-size) * var(--bs-field-message-line-height));
+    margin-top: var(--bs-field-message-margin-top);
 }
 
 // Status tints — color is the information (styleguide §1).

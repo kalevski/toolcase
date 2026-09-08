@@ -183,6 +183,7 @@ type lokiStream struct {
 func (s *lokiSink) Send(ctx context.Context, batch []Entry, _ string) error {
 	byLabels := map[string]*lokiStream{}
 	var order []string
+	lastNS := map[string]int64{}
 	for i := range batch {
 		e := &batch[i]
 		labels := s.resolveLabels(e)
@@ -193,7 +194,16 @@ func (s *lokiSink) Send(ctx context.Context, batch []Entry, _ string) error {
 			byLabels[key] = st
 			order = append(order, key)
 		}
-		st.Values = append(st.Values, [2]string{strconv.FormatInt(e.TS.UnixNano(), 10), string(e.Raw)})
+		// Loki drops an entry whose (stream, timestamp, line) already exists, so
+		// two identical requests in the same millisecond would silently vanish.
+		// Nudge each collision forward by a nanosecond — the order within a
+		// millisecond is arbitrary anyway, and nothing is lost.
+		ns := e.TS.UnixNano()
+		if last, seen := lastNS[key]; seen && ns <= last {
+			ns = last + 1
+		}
+		lastNS[key] = ns
+		st.Values = append(st.Values, [2]string{strconv.FormatInt(ns, 10), string(e.Raw)})
 	}
 	push := lokiPush{Streams: make([]lokiStream, 0, len(order))}
 	for _, key := range order {

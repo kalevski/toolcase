@@ -249,6 +249,29 @@ export abstract class TextFieldBase extends HTMLElement {
         this.setAttribute('value', v)
     }
 
+    /**
+     * The uncontrolled seed, mirroring `tc-form-input`. React assigns a property
+     * when the element declares one and falls back to an attribute when it does
+     * not — and `defaultvalue` is an attribute nothing here reads, so without this
+     * accessor `<tc-textarea defaultValue={script}>` rendered an empty box while
+     * the value sat on the tag. Seeding only while the control is untouched keeps
+     * it a *default*: it never fights a value the user has typed.
+     */
+    get defaultValue(): string {
+        return this._defaultValue
+    }
+    set defaultValue(v: string) {
+        const next = v ?? ''
+        this._defaultValue = next
+        const control = this.querySelector<HTMLInputElement | HTMLTextAreaElement>(
+            this.controlSelector,
+        )
+        if (!control || control.value === next) return
+        if (this.ownerDocument.activeElement === control) return
+        control.value = next
+        this._syncFormValue()
+    }
+
     get placeholder(): string {
         return this.getAttribute('placeholder') ?? ''
     }

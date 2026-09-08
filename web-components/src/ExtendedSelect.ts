@@ -1,4 +1,4 @@
-import { bindOnce, patchHtml } from './internal/patch-html'
+import { setText, bindOnce, patchHtml } from './internal/patch-html'
 import { esc } from './internal/esc'
 import { msg, msgFormat } from './messages'
 import { Search, Check } from 'lucide-static'
@@ -635,9 +635,17 @@ export class ExtendedSelect extends HTMLElement {
         return sel ? esc(sel.label) : esc(this.placeholder)
     }
 
+    private _triggerLabelText(): string {
+        const sel = this._selectedItem()
+        return sel ? sel.label : this.placeholder
+    }
+
     private _updateTriggerLabel(): void {
         const el = this.querySelector('.tc-extended-select__trigger-label')
-        if (el) el.innerHTML = this._triggerLabelHtml()
+        // Plain text, so set it as text and keep the node: `innerHTML =` replaced it
+        // with an unowned one and the next render appended a second copy beside it
+        // ("AllAll"). See setText in internal/patch-html.
+        if (el) setText(el, this._triggerLabelText())
         const trigger = this.querySelector('.tc-extended-select__trigger')
         if (trigger) {
             const empty = this.multiple ? this.values.length === 0 : !this.value

@@ -46,6 +46,10 @@ func LogFormatInclude(cfg *config.Config) string {
 	b.WriteString("log_format " + LogFormatName + " escape=json '{'\n")
 	fields := []string{
 		`"ts":"$time_iso8601",`,
+		// $time_iso8601 has whole-second resolution, so two identical requests in the
+		// same second produce byte-identical entries that Loki drops as duplicates.
+		// $msec carries milliseconds; shippers prefer it and fall back to ts.
+		`"msec":"$msec",`,
 		`"host":"$host",`,
 		`"server_name":"$server_name",`,
 		`"remote_addr":"$remote_addr",`,
